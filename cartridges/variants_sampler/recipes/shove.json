@@ -1,0 +1,45 @@
+{
+  "label": "actions.shove",
+  "aliases": [
+    "shove"
+  ],
+  "target": {
+    "kind": "detail",
+    "room": "tavern",
+    "detail": "cellar_door"
+  },
+  "priority": 5,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "npc_present",
+      "npc": "guard"
+    }
+  },
+  "check": {
+    "key": "shove",
+    "kind": "opposed",
+    "attribute": "str",
+    "npc": "guard"
+  },
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "shoved",
+          "value": true
+        }
+      ],
+      "narration": {
+        "actor": "narration.shove.success"
+      }
+    },
+    "failure": {
+      "sequence": [],
+      "narration": {
+        "actor": "narration.shove.failure"
+      }
+    }
+  }
+}

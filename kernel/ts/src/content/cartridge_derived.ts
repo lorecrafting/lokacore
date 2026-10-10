@@ -1,7 +1,8 @@
-// Toolbox row 2 derived-stat tables (hp_max: loka-kgd.8) and row 3 item affects in the loaded
-// artifact; twin of Loka.Content.Derived.
+// Toolbox row 2 derived-stat tables (hp_max: loka-kgd.8), row 3 item affects and row G3 NPC
+// attributes in the loaded artifact; twin of Loka.Content.Derived.
 import { diag, step, type Checks, type Obj } from './cartridge_refs.ts';
 import { apiCmp } from './cartridge_installed.ts';
+import { refString } from '../runtime/decision.ts';
 import type { Diagnostic } from '../contracts.gen.ts';
 
 // hp_max needs no setting: every compiled cartridge has the hp pool (and without one it moves nothing).
@@ -13,14 +14,35 @@ const OWNER = ['UNDECLARED_CAPABILITY', { capability: 'attributes' }, ['attribut
 export function derived(c: Obj, named: Checks['named']): Diagnostic[] {
   const table = c.world?.derived as Obj | undefined;
   const items = Object.entries((c.items ?? {}) as Obj) as [string, Obj][];
-  // Finger slots and affects are row 3 (API 1.41); hp_max 1.40; the other tables 1.39.
+  const npcs = Object.entries((c.npcs ?? {}) as Obj) as [string, Obj][];
+  // NPC attributes are row G3 (API 1.46, with an opposed check naming an NPC); finger slots and
+  // affects row 3 (1.41); hp_max 1.40; the other tables 1.39.
+  const g3 =
+    npcs.some(([, n]) => n.attributes) ||
+    Object.values((c.recipes ?? {}) as Obj).some((r) => r.check?.npc);
   const row3 = items.some(([, i]) => i.affects || i.slot === 'finger');
-  const floor = row3 ? '1.41' : table?.hp_max ? '1.40' : table && '1.39';
+  const floor = g3 ? '1.46' : row3 ? '1.41' : table?.hp_max ? '1.40' : table && '1.39';
   const out: Diagnostic[] = [];
   if (floor && apiCmp(c.manifest.requires.kernel_api.at_least, floor) < 0)
     out.push(diag('KERNEL_API_RANGE_INVALID', API));
   if (table) out.push(...tables(c, table, named));
   for (const [ref, item] of items) if (item.affects) out.push(...affects(c, ref, item, named));
+  for (const [ref, npc] of npcs) if (npc.attributes) out.push(...npcAttributes(c, ref, npc, named));
+  return out;
+}
+
+// Row G3: an NPC's attributes each name a distinct real attribute (an attributes section already
+// needs attributes@1).
+function npcAttributes(c: Obj, ref: string, npc: Obj, named: Checks['named']): Diagnostic[] {
+  const at = `.cartridge.npcs${step(ref)}.attributes`;
+  const out: Diagnostic[] = [];
+  const seen = new Set<string>();
+  for (const [i, a] of (npc.attributes as Obj[]).entries()) {
+    named(a.attribute, 'attribute', `${at}[${i}].attribute`);
+    if (seen.has(refString(a.attribute)))
+      out.push(diag('SCHEMA_VIOLATION', `${at}[${i}].attribute`, { error: 'invalid_value' }));
+    seen.add(refString(a.attribute));
+  }
   return out;
 }
 

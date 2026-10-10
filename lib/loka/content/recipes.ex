@@ -6,6 +6,7 @@ defmodule Loka.Content.Recipes do
   """
   import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2]
   import Loka.Content.Refs, only: [commands: 0, owners: 2, owned: 3, reference: 6, resolve: 4]
+  alias Loka.Content.RecipeTips
 
   # A step uses its op through the event it produces, a check through check@1's events.
   @step_event %{"fact.assign" => "fact_changed", "event.emit" => "custom_event"}
@@ -49,31 +50,34 @@ defmodule Loka.Content.Recipes do
     Enum.flat_map(all(defs), &recipe(&1, ctx)) ++ contributions(defs, actions)
   end
 
-  defp reserved?(key, m) do
-    api =
+  defp api(m),
+    do:
       m["requires"]["kernel_api"]["at_least"]
       |> String.split(".")
       |> Enum.map(&String.to_integer/1)
 
-    key in commands() and (key not in ~w(where knock) or api >= [1, 37])
+  defp reserved?(key, m),
+    do: key in commands() and (key not in ~w(where knock) or api(m) >= [1, 37])
+
+  defp duplicate(rel, r, ctx) do
+    taken = r["key"] in ctx.actions or reserved?(r["key"], ctx.m)
+    if taken, do: [diag("DUPLICATE_DEFINITION", at(rel, []))], else: []
   end
 
   defp recipe({rel, r}, ctx) do
-    taken = r["key"] in ctx.actions or reserved?(r["key"], ctx.m)
-    duplicate = if taken, do: [diag("DUPLICATE_DEFINITION", at(rel, []))], else: []
-
     Enum.concat([
       owners(rel, r, ctx),
       refs(rel, r, ctx),
-      texts(rel, r, ctx.text),
-      duplicate,
+      texts(rel, r, ctx),
+      duplicate(rel, r, ctx),
       mismatch(rel, r),
-      duration(rel, r, ctx.m),
+      duration(rel, r, ctx),
+      RecipeTips.check(rel, r, ctx, api(ctx.m) < [1, 46]),
       shared(rel, r, ctx.shared)
     ])
   end
 
-  defp duration(rel, r, m) do
+  defp duration(rel, r, %{m: m}) do
     if m["time_policy"] != nil and r["duration"] != nil,
       do: [diag("INVALID_TIME_POLICY", at(rel, ["duration"]))],
       else: []
@@ -90,6 +94,24 @@ defmodule Loka.Content.Recipes do
   end
 
   defp shared(_, _, _), do: []
+
+  # Toolbox row G3: an opposed check naming an NPC needs no rating; the NPC is an instance of this
+  # cartridge that declares the check's attribute.
+  defp opposed(rel, %{"check" => %{"npc" => n} = c}, m, defs) do
+    reference(rel, ["check"], "attribute", c, m, defs) ++
+      case resolve(n, "npc", m, defs) do
+        {_, _, npc} ->
+          if npc["spawn_template"] ||
+               !Enum.any?(npc["attributes"] || [], &(&1["attribute"] == c["attribute"])),
+             do: [
+               diag("SCHEMA_VIOLATION", at(rel, ["check", "npc"]), %{"error" => "invalid_value"})
+             ],
+             else: []
+
+        _ ->
+          reference(rel, ["check"], "npc", c, m, defs)
+      end
+  end
 
   # Toolbox rows 5 and G5: an opposed check names a skill or attribute of this cartridge and its
   # target detail declares a rating.
@@ -195,9 +217,9 @@ defmodule Loka.Content.Recipes do
     end
   end
 
-  defp texts(_, _, :unknown), do: []
+  defp texts(_, _, %{text: :unknown}), do: []
 
-  defp texts(rel, r, text) do
+  defp texts(rel, r, %{text: text}) do
     for {steps, key} <- [
           {["label"], r["label"]}
           | for(

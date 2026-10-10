@@ -368,6 +368,23 @@
           "additionalProperties": false
         },
         {
+          "description": "The actor's body wears an item whose definition declares tag (toolbox row W25): an item in one of the body's slot holders (equipment@1). False without a body. Needs kernel_api at least 1.46. Owned by equipment@1.",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "wearing"
+            },
+            "tag": {
+              "$ref": "entity.schema.json#/$defs/Tag"
+            }
+          },
+          "required": [
+            "op",
+            "tag"
+          ],
+          "additionalProperties": false
+        },
+        {
           "description": "The actor's count of accepted body entries into the room, the current one included, is at least at_least (toolbox row W7): a new character's start room counts once, any other room 0 until entered. Counted only while variety@1 is locked (VisitedRoom.count). Needs kernel_api at least 1.45. Owned by variety@1.",
           "type": "object",
           "properties": {
@@ -386,6 +403,46 @@
             "op",
             "room",
             "at_least"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "The subject holds an active status of this definition (status@1 row; toolbox row W6). subject target: the action's target, or, in an entity's own variant (TextVariants), the entity described; false without a target or for a detail. Needs kernel_api at least 1.46. Owned by status@1.",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "status_active"
+            },
+            "subject": {
+              "enum": [
+                "target"
+              ]
+            },
+            "status": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            }
+          },
+          "required": [
+            "op",
+            "subject",
+            "status"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "The NPC of this definition is present: in the actor's current room and alive (hp above 0 when it has hp); false without a body. Presence, not posture (the player's posture is the position fact). Toolbox row W6. Needs kernel_api at least 1.46. Owned by target_resolution@1.",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "npc_present"
+            },
+            "npc": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            }
+          },
+          "required": [
+            "op",
+            "npc"
           ],
           "additionalProperties": false
         }

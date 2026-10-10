@@ -21,6 +21,7 @@ import type { Mint, QuestRow, Steps, World } from '../../runtime/decision.ts';
 import { holds } from '../policy.ts';
 import { ready } from '../dialogue/exchange.ts';
 import { cmp } from '../../foundation/validate.ts';
+import { add } from '../../foundation/int.ts';
 
 /** The cartridge's definition of `quest` (the loader resolves every quest reference). */
 const definition = (world: World, quest: DefinitionRef): QuestDefinition =>
@@ -39,7 +40,69 @@ export function activation(mint: Mint, actor: CharacterId, quest: DefinitionRef)
   return { ops: [op], payload: { type: 'quest_activated', quest, instance_id } as const };
 }
 
-/** A bound dialogue acceptance schedules the quest's one authored absolute deadline. */
+/**
+ * Toolbox row W23: `ops` with started_at `at` (the logical time of the sequence's cause) on each
+ * quest.activate and quest.transition of a quest whose journal declares hints; other quests' ops
+ * are unchanged, so their deltas and saves keep their bytes. An instance activated by an earlier
+ * writer group of the same proposal needs no lookup: its transition there faults conflicting_write
+ * (foundation/compose.ts), so only `ops` itself is searched.
+ */
+export function stamp(world: World, ops: readonly DeltaOp[], at: number) {
+  const quests = world.cartridge.quests;
+  const touched = ops.some((o) => o.op === 'quest.activate' || o.op === 'quest.transition');
+  if (!touched || !quests || !Object.values(quests).some((q) => q.journal?.hints)) return ops;
+  type Activate = Extract<DeltaOp, { op: 'quest.activate' }>;
+  const refOf = (id: string) =>
+    world.state.quests?.[id]?.quest ??
+    ops.find((o): o is Activate => o.op === 'quest.activate' && o.instance_id === id)?.quest;
+  return ops.map((o) => {
+    if (o.op !== 'quest.activate' && o.op !== 'quest.transition') return o;
+    const ref = o.op === 'quest.activate' ? o.quest : refOf(o.instance_id);
+    return ref && quests[refString(ref)]?.journal?.hints ? { ...o, started_at: at } : o;
+  });
+}
+
+/**
+ * Toolbox row W24: `ops` stamped (W23), then one job.schedule per quest.activate of a quest with a
+ * generic deadline, in the activate's writer group: due at `at` (the sequence cause's time, never
+ * started_at) plus after, or at its authored at, and never before the proposal's horizon + 1 (its
+ * last time.advance target in `prior` or `ops`, else the clock; compose_job.ts nonfuture_job), so
+ * a deadline already past expires on the next advance.
+ */
+export function begun(
+  world: World,
+  ops: readonly DeltaOp[],
+  at: number,
+  prior: readonly DeltaOp[],
+  mint: Mint,
+): readonly DeltaOp[] {
+  if (!ops.some((o) => o.op === 'quest.activate')) return stamp(world, ops, at);
+  let horizon = world.state.clock;
+  for (const o of [...prior, ...ops]) if (o.op === 'time.advance') horizon = o.to;
+  const jobs = ops.flatMap((o) => {
+    if (o.op !== 'quest.activate' || o.scope.kind !== 'player') return [];
+    const d = definition(world, o.quest).deadline;
+    if (!d || d.fact) return [];
+    const due_time = Math.max(d.at ?? add(at, d.after!), horizon + 1);
+    const job_id = mint() as JobId;
+    const actor_id = o.scope.character_id;
+    const { writer_group, quest: job, instance_id: quest_instance_id } = o;
+    return [
+      {
+        op: 'job.schedule' as const,
+        writer_group,
+        job_id,
+        job,
+        due_time,
+        quest_instance_id,
+        actor_id,
+      },
+    ];
+  });
+  return [...stamp(world, ops, at), ...jobs];
+}
+
+/** A bound dialogue acceptance schedules the quest's one authored legacy absolute deadline. */
 // size: allow 45, exact retirement joins bound activation and optional deadline scheduling
 export function boundActivation(
   world: World,
@@ -68,14 +131,14 @@ export function boundActivation(
     ops: [
       ...retired,
       { ...activated.ops[0], bindings },
-      ...(deadline
+      ...(deadline?.fact
         ? [
             {
               op: 'job.schedule' as const,
               writer_group: 0,
               job_id: mint() as JobId,
               job: quest,
-              due_time: deadline.at,
+              due_time: deadline.at!,
               quest_instance_id: activated.payload.instance_id,
               actor_id: actor,
             },

@@ -1,0 +1,9 @@
+{
+  "title": "room.track.title",
+  "description": "room.track.description",
+  "exits": {
+    "west": {
+      "to": "inn"
+    }
+  }
+}

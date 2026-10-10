@@ -1,0 +1,13 @@
+{
+  "keywords": [
+    "door"
+  ],
+  "short": "item.door.short",
+  "room_line": "item.door.room",
+  "description": "item.door.description",
+  "mass_grams": 200000,
+  "location": {
+    "in": "room",
+    "room": "gate"
+  }
+}

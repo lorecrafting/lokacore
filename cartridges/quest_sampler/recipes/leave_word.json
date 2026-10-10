@@ -1,0 +1,34 @@
+{
+  "label": "actions.leave_word",
+  "aliases": [
+    "chalk"
+  ],
+  "target": {
+    "kind": "detail",
+    "room": "hall",
+    "detail": "hook"
+  },
+  "priority": 10,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "quest_state",
+      "quest": "find_key",
+      "state": "objectives_complete"
+    }
+  },
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "word_left",
+          "value": true
+        }
+      ],
+      "narration": {
+        "actor": "narration.leave_word"
+      }
+    }
+  }
+}

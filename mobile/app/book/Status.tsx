@@ -89,7 +89,7 @@ export function StatusLine(p: StatusProps) {
         <Text
           key={`${x.label}-${i}`}
           numberOfLines={1}
-          style={{ ...type.small, color: x.per_tick < 0 ? c.danger : c.dim }}
+          style={{ ...type.small, color: (x.per_tick ?? 0) < 0 ? c.danger : c.dim }}
           accessibilityLabel={line.replaceAll(' · ', ', ')}
         >
           {line}

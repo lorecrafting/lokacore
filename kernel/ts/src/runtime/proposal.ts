@@ -16,7 +16,7 @@ import {
 import { allocator, event, type Mint, type Steps, type World } from './decision.ts';
 import { factChanged, type Base } from '../mechanics/fact.ts';
 import { jobCommandId } from '../foundation/id_source.ts';
-import { earned } from '../mechanics/quest/lifecycle.ts';
+import { begun, earned, stamp } from '../mechanics/quest/lifecycle.ts';
 import { sequence, triggered } from '../mechanics/reaction.ts';
 import { levelUp, oneWrite } from '../mechanics/levelling/shared.ts';
 import * as schedule from '../mechanics/schedule/rule.ts';
@@ -24,6 +24,7 @@ import { cmp } from '../foundation/validate.ts';
 import { currentRound } from '../mechanics/combat/round.ts';
 import { handoffGroup, sightHandoff } from './proposal_sight.ts';
 import { bleedRoundPair } from './proposal_bleed.ts';
+import { statusGroup } from '../mechanics/status/job.ts';
 import { anyPending as pending, parted } from '../mechanics/dialogue/selection.ts';
 import { admit, type Admitted } from './proposal_admit.ts';
 export { admit, ownerOf, type Admitted } from './proposal_admit.ts';
@@ -53,6 +54,7 @@ type P = {
   applied: number;
   rng: World['state']['rng'];
   narration: Text[];
+  holders: Map<string, number>; // each status holder's writer group in this advance (row G3)
   limit?: Limit | undefined; // set only just before a budget fault returns
 };
 export const BUDGET = { kind: 'fault', code: 'budget_exceeded' } as Admitted;
@@ -82,6 +84,7 @@ export function propose(
     applied: 0,
     rng: root.rng,
     narration: [...(root.narration ?? [])],
+    holders: new Map(),
   };
   const base = { ...cause(p, world.state.clock, command.id), actor_id: command.payload.actor_id };
   const failed =
@@ -120,10 +123,14 @@ function farewell(p: P): Admitted | undefined {
 }
 
 // The proposal so far, composed lazily (only a job, a delivery or an acquisition's quests read
-// it), or its fault.
+// it), or its fault. After the advance, the rest composes from the base clock with the advance
+// replayed, so a job's op `at` its due time lies inside the advance; a write conflicting with an
+// earlier slice still faults only in adopt.
 function now(p: P): World | Admitted {
   if (p.applied < p.ops.length) {
-    const r = apply(p.at, p.ops.slice(p.applied), false);
+    const done = p.ops.slice(0, p.applied).find((o) => o.op === 'time.advance');
+    const from = done ? { ...p.at, state: { ...p.at.state, clock: p.world.state.clock } } : p.at;
+    const r = apply(from, [...(done ? [done] : []), ...p.ops.slice(p.applied)], false);
     if ('fault' in r) {
       p.limit = r.limit;
       return r.fault as Admitted;
@@ -150,7 +157,7 @@ function join(
   const earns = p.world.cartridge.quests && evs.some((e) => e.payload.type === 'item_acquired');
   const before = earns ? now(p) : p.world;
   if (!('cartridge' in before)) return before;
-  p.ops.push(...own);
+  p.ops.push(...begun(p.world, own, base.logical_time, p.ops, m));
   const actors = enteredActors(p.world, own);
   if (actors.size) {
     const at = now(p);
@@ -197,8 +204,20 @@ function creditDelivery(p: P, next: Queued): Admitted | undefined {
     );
 }
 
+// A quest's earned exit to objectives_complete, stamped for W23 hints.
+function earnedExit(p: P, instance_id: QuestInstanceId, at: Parameters<typeof stamp>[2]) {
+  const op = 'quest.transition';
+  const step = {
+    op,
+    writer_group: ++p.group,
+    instance_id,
+    from: 'active',
+    to: 'objectives_complete',
+  } as const;
+  return stamp(p.world, [step], at);
+}
+
 // The queue's deliveries to quiescence, or the fault that ends them.
-// size: allow 45, one existing FIFO loop admits typed quest reaction deliveries
 function react(p: P): Admitted | undefined {
   for (let next; (next = p.queue.shift());) {
     const credited = creditDelivery(p, next);
@@ -208,14 +227,7 @@ function react(p: P): Admitted | undefined {
       const at = now(p);
       if (!('cartridge' in at)) return at;
       if (at.state.quests![instance_id]!.state !== 'active') continue;
-      const writer_group = ++p.group;
-      p.ops.push({
-        op: 'quest.transition',
-        writer_group,
-        instance_id,
-        from: 'active',
-        to: 'objectives_complete',
-      });
+      p.ops.push(...earnedExit(p, instance_id, next.cause.logical_time));
     }
     const crow = crowDelivery(p, next);
     if (crow) return crow;
@@ -230,6 +242,7 @@ function react(p: P): Admitted | undefined {
         p.group + 1,
         p.steps,
         next.mint,
+        p.holders,
       );
       const depth = next.depth + 1;
       p.limit = over({ deliveries: ++p.deliveries, reaction_depth: depth, query_steps: p.steps.n });
@@ -248,11 +261,8 @@ function react(p: P): Admitted | undefined {
 // Each due job of the root's explicit advance, then its reactions, or the result that ends them.
 // size: allow 45, due job delivery joins population and bleed group pairing before causal reactions
 function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined {
-  const advance = root.delta.ops.find((o) => o.op === 'time.advance');
-  const due = Object.entries(advance ? (p.world.state.jobs ?? {}) : {})
-    .filter(([, j]) => j.status === 'pending' && j.due_time <= advance!.to)
-    .sort(([a, x], [b, y]) => x.due_time - y.due_time || cmp(a, b));
-  const populationPairs = populationDeadlinePairs(p.world, advance?.to ?? -1);
+  const { due, to } = dueJobs(p.world, root);
+  const populationPairs = populationDeadlinePairs(p.world, to);
   const groups = new Map<string, number>();
   const bleedPairs = new Map<string, number>();
   for (const [job_id, { due_time }] of due) {
@@ -277,7 +287,10 @@ function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined
     p.narration.push(...(ran.narration ?? []));
     const partner = populationPairs.get(job_id);
     const group =
-      (partner ? groups.get(partner) : undefined) ?? bleedPairs.get(job_id) ?? p.group + 1;
+      (partner ? groups.get(partner) : undefined) ??
+      bleedPairs.get(job_id) ??
+      statusGroup(at, job_id as JobId, current, p.holders, p.group + 1) ??
+      p.group + 1;
     groups.set(job_id, group);
     const bleedPair = bleedRoundPair(at, job_id as JobId, current);
     if (bleedPair) bleedPairs.set(bleedPair, group);
@@ -290,6 +303,16 @@ function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined
     const failed = join(p, own, ran.events, cause(p, due_time, run.id), 0, m) ?? react(p);
     if (failed) return failed;
   }
+}
+
+// The root's explicit advance target (-1 without one) and its pending jobs due by then, in
+// (due_time, job_id) order.
+function dueJobs(world: World, root: Admitted & { kind: 'accepted' }) {
+  const advance = root.delta.ops.find((o) => o.op === 'time.advance');
+  const due = Object.entries(advance ? (world.state.jobs ?? {}) : {})
+    .filter(([, j]) => j.status === 'pending' && j.due_time <= advance!.to)
+    .sort(([a, x], [b, y]) => x.due_time - y.due_time || cmp(a, b));
+  return { due, to: advance?.to ?? -1 };
 }
 
 function crowDelivery(p: P, next: Queued): Admitted | undefined {

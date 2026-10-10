@@ -1,6 +1,6 @@
 {
   "room.hall.title": "Training Hall",
-  "room.hall.description": "A bare hall of grey stone. A doorway opens east.",
+  "room.hall.description": "A bare hall of grey stone. Doorways open east and north.",
   "room.yard.title": "Practice Yard",
   "room.yard.description": "A packed-earth yard. Straw lies scattered about.",
   "item.anvil.short": "an iron anvil",
@@ -32,5 +32,11 @@
   "band.dying": "dying",
   "band.mv_ready": "rested",
   "band.tired": "tired",
-  "band.exhausted": "exhausted"
+  "band.exhausted": "exhausted",
+  "room.shrine.title": "Shrine of Might",
+  "room.shrine.description": "A small shrine. Warmth fills your arms. A doorway opens south.",
+  "condition.mighty": "mighty",
+  "narration.might.applied": "Strength floods your arms.",
+  "narration.might.tick": "Your arms still burn with strength.",
+  "narration.might.expired": "The strength drains from your arms."
 }

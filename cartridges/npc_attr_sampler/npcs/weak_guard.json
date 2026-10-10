@@ -1,0 +1,16 @@
+{
+  "keywords": [
+    "weak",
+    "guard"
+  ],
+  "short": "npc.weak_guard.short",
+  "room_line": "npc.weak_guard.room",
+  "description": "npc.weak_guard.description",
+  "room": "gate_room",
+  "attributes": [
+    {
+      "attribute": "str",
+      "value": 5
+    }
+  ]
+}

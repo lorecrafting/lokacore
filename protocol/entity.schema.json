@@ -122,7 +122,7 @@
       ]
     },
     "ItemAffect": {
-      "description": "One attribute modifier an item grants its wearer while worn (docs/system/mechanics.md item slots and affects, toolbox row 3; the shape of an ancestry's attribute modifier): attribute, an attribute of this cartridge; modifier, the signed amount added to the value attributes@1 reads. The number is the cartridge's.",
+      "description": "One attribute modifier an item grants its wearer while worn (docs/system/mechanics.md item slots and affects, toolbox row 3), or an active status grants its holder (StatusDefinition.modifies, row 2c; the shape of an ancestry's attribute modifier): attribute, an attribute of this cartridge; modifier, the signed amount added to the value attributes@1 reads. The number is the cartridge's.",
       "type": "object",
       "properties": {
         "attribute": {
@@ -150,7 +150,7 @@
       ]
     },
     "ItemDefinition": {
-      "description": "A portable thing (21 §8): its key; keywords, the Alias words a player names it by (target resolution); short, the text key of its short description (\"a brass lantern\"); room_line, the text key of the line a room shows while it lies there (\"A brass lantern sits here.\"), with room_line_variants (DescriptionVariant, first match wins, as for a room's description); description, the text key examine shows; location, where a fresh world puts it; and optionally container: true, making it a receptacle; only receptacles may declare capacity, the most items held directly (without capacity a receptacle has no limit); optionally slot, the SlotKey it is worn in (equipment@1), with optional affects (ItemAffect), each added to the wearer's attribute while the item is worn (toolbox row 3; needs slot and attributes@1, kernel_api at least 1.41); and optionally barrier, the barrier on it (a container's lid, barrier@1, c1-locks): a barrier of this cartridge that no exit and no other item names (BARRIER_MISMATCH), whose state the door verbs change with the item as target_id; while it is closed or locked, what the item holds is out of reach (containment@1 custody). Optional mass_grams is the shell mass, required for every item when world.carry is authored. Optional tags are its property tags (Tag, toolbox row G1).",
+      "description": "A portable thing (21 §8): its key; keywords, the Alias words a player names it by (target resolution); short, the text key of its short description (\"a brass lantern\"); room_line, the text key of the line a room shows while it lies there (\"A brass lantern sits here.\"), with room_line_variants (DescriptionVariant, first match wins, as for a room's description); description, the text key examine shows; location, where a fresh world puts it; and optionally container: true, making it a receptacle; only receptacles may declare capacity, the most items held directly (without capacity a receptacle has no limit); optionally slot, the SlotKey it is worn in (equipment@1), with optional affects (ItemAffect), each added to the wearer's attribute while the item is worn (toolbox row 3; needs slot and attributes@1, kernel_api at least 1.41); and optionally barrier, the barrier on it (a container's lid, barrier@1, c1-locks): a barrier of this cartridge that no exit and no other item names (BARRIER_MISMATCH), whose state the door verbs change with the item as target_id; while it is closed or locked, what the item holds is out of reach (containment@1 custody). Optional mass_grams is the shell mass, required for every item when world.carry is authored. Optional tags are its property tags (Tag, toolbox row G1). Optional short_variants and description_variants vary its short and description (TextVariants, toolbox row W6).",
       "type": "object",
       "properties": {
         "key": {
@@ -167,19 +167,20 @@
         "short": {
           "$ref": "text.schema.json#/$defs/TextKey"
         },
+        "short_variants": {
+          "$ref": "#/$defs/TextVariants"
+        },
         "room_line": {
           "$ref": "text.schema.json#/$defs/TextKey"
         },
         "room_line_variants": {
-          "type": "array",
-          "items": {
-            "$ref": "room.schema.json#/$defs/DescriptionVariant"
-          },
-          "minItems": 1,
-          "maxItems": 16
+          "$ref": "#/$defs/TextVariants"
         },
         "description": {
           "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "description_variants": {
+          "$ref": "#/$defs/TextVariants"
         },
         "location": {
           "$ref": "#/$defs/ItemLocation"
@@ -247,6 +248,15 @@
           "maxItems": 16,
           "items": {
             "$ref": "entity.schema.json#/$defs/Tag"
+          }
+        },
+        "immune": {
+          "description": "Toolbox row G3: statuses that status.apply skips on this item's instance; each names a declared status (kernel_api 1.46).",
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "items": {
+            "$ref": "identity.schema.json#/$defs/DefinitionRef"
           }
         }
       },
@@ -323,12 +333,16 @@
       "description": "A property tag (toolbox row G1): a closed engine vocabulary, so every mechanic that gives a tag meaning and every cartridge that declares one share its spelling. Item, barrier and room definitions declare tags; the has_tag policy leaf (tags@1) reads them. A row whose mechanic needs a new tag adds it here.",
       "enum": [
         "burnable",
+        "cool",
         "exposed",
         "fragile",
         "liquid_holding",
         "metal",
         "sharp",
         "silver",
+        "warm",
+        "waterproof",
+        "windproof",
         "wooden"
       ],
       "examples": [
@@ -378,6 +392,9 @@
         "burnable": {
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
+        "cool": {
+          "$ref": "entity.schema.json#/$defs/ResistancePercent"
+        },
         "exposed": {
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
@@ -396,6 +413,15 @@
         "silver": {
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
+        "warm": {
+          "$ref": "entity.schema.json#/$defs/ResistancePercent"
+        },
+        "waterproof": {
+          "$ref": "entity.schema.json#/$defs/ResistancePercent"
+        },
+        "windproof": {
+          "$ref": "entity.schema.json#/$defs/ResistancePercent"
+        },
         "wooden": {
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         }
@@ -410,7 +436,7 @@
       ]
     },
     "NpcDefinition": {
-      "description": "A non-player character (00a §4), as a holder of items so far: its key, keywords, short, room_line and description as for an item, the room a fresh world puts it in, and optionally capacity, the most items it holds. Optionally daily_schedule, its daily location schedule (behavior@1); dialogue joins with its capability as an optional field. Optional hp opts into entity-specific HP under kernel API 1.4 (docs/system/cartridge.md NPC HP overrides).",
+      "description": "A non-player character (00a §4), as a holder of items so far: its key, keywords, short, room_line and description as for an item, the room a fresh world puts it in, and optionally capacity, the most items it holds. Optionally daily_schedule, its daily location schedule (behavior@1); dialogue joins with its capability as an optional field. Optional hp opts into entity-specific HP under kernel API 1.4 (docs/system/cartridge.md NPC HP overrides). Optional short_variants, room_line_variants and description_variants vary its texts (TextVariants, toolbox row W6).",
       "type": "object",
       "properties": {
         "key": {
@@ -427,11 +453,20 @@
         "short": {
           "$ref": "text.schema.json#/$defs/TextKey"
         },
+        "short_variants": {
+          "$ref": "#/$defs/TextVariants"
+        },
         "room_line": {
           "$ref": "text.schema.json#/$defs/TextKey"
         },
+        "room_line_variants": {
+          "$ref": "#/$defs/TextVariants"
+        },
         "description": {
           "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "description_variants": {
+          "$ref": "#/$defs/TextVariants"
         },
         "room": {
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
@@ -518,6 +553,37 @@
         },
         "resistances": {
           "$ref": "entity.schema.json#/$defs/Resistances"
+        },
+        "immune": {
+          "description": "Toolbox row G3: statuses that status.apply skips on this NPC's instance; each names a declared status (kernel_api 1.46).",
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "items": {
+            "$ref": "identity.schema.json#/$defs/DefinitionRef"
+          }
+        },
+        "attributes": {
+          "description": "Toolbox row G3: this NPC's base attribute values (attributes@1, kernel_api 1.46), read at use by an opposed check naming the NPC and by its derived attack; each names a distinct attribute of this cartridge. An attribute it does not list reads its definition start.",
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "items": {
+            "type": "object",
+            "properties": {
+              "attribute": {
+                "$ref": "identity.schema.json#/$defs/DefinitionRef"
+              },
+              "value": {
+                "$ref": "resource.schema.json#/$defs/ResourceInt"
+              }
+            },
+            "required": [
+              "attribute",
+              "value"
+            ],
+            "additionalProperties": false
+          }
         }
       },
       "required": [
@@ -547,6 +613,35 @@
           },
           "capacity": 1
         }
+      ]
+    },
+    "TextVariants": {
+      "description": "Toolbox row W6: variants of one entity text (short, room_line or description), the first whose condition holds replacing it (DescriptionVariant, as for a room's description); the base text stays mandatory. Each condition reads with the entity itself as the target (status_active subject target). An item's room_line_variants predate the row; every other entity variant needs kernel_api at least 1.46.",
+      "type": "array",
+      "items": {
+        "$ref": "room.schema.json#/$defs/DescriptionVariant"
+      },
+      "minItems": 1,
+      "maxItems": 16,
+      "examples": [
+        [
+          {
+            "when": {
+              "policy_version": 1,
+              "root": {
+                "op": "status_active",
+                "subject": "target",
+                "status": {
+                  "cartridge_id": "variants_sampler",
+                  "cartridge_version": "0.0.1",
+                  "kind": "status",
+                  "key": "bruised"
+                }
+              }
+            },
+            "description": "npc.maud.description_bruised"
+          }
+        ]
       ]
     },
     "AttackProfile": {

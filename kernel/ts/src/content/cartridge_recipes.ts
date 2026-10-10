@@ -5,6 +5,15 @@ import { apiCmp } from './cartridge_installed.ts';
 import { refString } from '../runtime/decision.ts';
 import { diag, step, type Checks, type Obj } from './cartridge_refs.ts';
 
+/** Toolbox row W23: the FactSpec the compiler adds for a recipe's tip (recipes.ex tip_spec). */
+export const tipSpec = (key: string) => ({
+  key: `seen_tip_${key}`,
+  version: 1,
+  value_type: { type: 'bool', default: false },
+  scopes: ['player'],
+  meaning: `Recipe ${key}'s tip was shown (action_recipe@1): only that recipe writes it.`,
+});
+
 // Each recipe's key is no action's and no registered command's (DUPLICATE_DEFINITION: one key is
 // one ActionSet identity) and its check's key no other recipe's check's (one check DefinitionRef),
 // its target names a room of this cartridge and a detail of that room,
@@ -15,7 +24,7 @@ import { diag, step, type Checks, type Obj } from './cartridge_refs.ts';
 // a room's action contribution names an engine verb (a registered command), an action or a
 // recipe of this cartridge (UNRESOLVED_REFERENCE, data {target}: the detail or action key).
 export function recipes(c: Obj, { named, typedValue, text }: Checks): Diagnostic[] {
-  const out: Diagnostic[] = [];
+  const out: Diagnostic[] = tips(c, text);
   const taken = new Set([
     ...reservedCommands(c),
     ...Object.values(c.actions as Obj).map((a) => a.key),
@@ -90,9 +99,18 @@ function attributes(c: Obj, { named }: Checks) {
 }
 
 // Toolbox rows 5 and G5: an opposed check names a skill of this cartridge (its attribute is
-// checked with attribute_threshold's) and its target detail declares a rating.
+// checked with attribute_threshold's) and its target detail declares a rating, unless (row G3) it
+// names an NPC instance of this cartridge that declares the check's attribute.
 function opposed(c: Obj, r: Obj, at: string, named: Checks['named']): Diagnostic[] {
   if (r.check.skill) named(r.check.skill, 'skill', `${at}.check.skill`);
+  const npc = r.check.npc && c.npcs?.[refString(r.check.npc)];
+  if (r.check.npc) named(r.check.npc, 'npc', `${at}.check.npc`);
+  if (r.check.npc)
+    return npc &&
+      (npc.spawn_template ||
+        !npc.attributes?.some((a: Obj) => refString(a.attribute) === refString(r.check.attribute)))
+      ? [diag('SCHEMA_VIOLATION', `${at}.check.npc`, { error: 'invalid_value' })]
+      : [];
   const detail = c.rooms[refString(r.target.room)]?.details?.[r.target.detail];
   return detail && detail.rating === undefined
     ? [diag('SCHEMA_VIOLATION', `${at}.check`, { error: 'invalid_value' })]
@@ -106,3 +124,24 @@ function reservedCommands(c: Obj): string[] {
       apiCmp(c.manifest.requires.kernel_api.at_least, '1.37') >= 0,
   );
 }
+
+// Toolbox row W23: a recipe's tip resolves and needs kernel_api 1.46 (a tipped key over 55
+// characters fails the schema at its seen_tip_ FactSpec).
+function tips(c: Obj, text: Checks['text']): Diagnostic[] {
+  const tipped = Object.entries((c.recipes ?? {}) as Obj).filter(([, r]) => r.tip);
+  const out: Diagnostic[] = [];
+  for (const [ref, r] of tipped) text(r, ['tip'], `.cartridge.recipes${step(ref)}`);
+  if (tipped.length && apiCmp(c.manifest.requires.kernel_api.at_least, '1.46') < 0)
+    out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
+  return out;
+}
+
+/** A tip's seen_tip_<key> assignment uses fact_changed (the lock stage, content/cartridge.ts). */
+export const tipUses = (c: Obj) =>
+  Object.entries((c.recipes ?? {}) as Obj)
+    .filter(([, r]) => r.tip)
+    .map(([ref]) => ['event', 'fact_changed', `.cartridge.recipes${step(ref)}.tip`]) as [
+    'event',
+    string,
+    string,
+  ][];

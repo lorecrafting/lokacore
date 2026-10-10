@@ -10,6 +10,17 @@ of closed work are deleted once their lesson is folded, and linked by permalink
 Reviews before R2 live in the [legacy repository](https://github.com/lorecrafting/lokacore-v2-legacy)
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
+- [Review: toolbox row W24 second half, Journal countdown, sampler, mobile proof (loka-kgd.46, batch M5)](2026-10-10-toolbox-m5-w24b-review.md): **APPROVE WITH NOTES**
+- [Review: toolbox row W6, entity description variants and two leaves (loka-kgd.37, batch M5)](2026-10-10-toolbox-m5-variants-review.md): **APPROVE WITH NOTES**
+- [Review: toolbox row G3, statuses on NPCs and things (loka-kgd.33)](2026-10-10-toolbox-m5-status-review.md): **APPROVE**
+- [Review: toolbox row G3 second half, attributes on NPCs (loka-kgd.42)](2026-10-10-toolbox-m5-npc-attr-review.md): **APPROVE WITH NOTES**
+- [Review: toolbox row 2c, status modifiers on attributes (loka-kgd.34, batch M5)](2026-10-10-toolbox-m5-modifiers-review.md): **APPROVE WITH NOTES**
+- [Item review: toolbox row W23 quest stage hints, part 1 (loka-kgd.38, batch M5)](2026-10-10-toolbox-m5-hints-review.md): **APPROVE WITH NOTES**
+- [Item review: toolbox row W25, exposure (loka-kgd.39, batch M5)](2026-10-10-toolbox-m5-exposure-review.md): **APPROVE WITH NOTES**
+- [Review: hunger and thirst drains, toolbox row G13, and W25 `dry` (loka-kgd.36, loka-kgd.44)](2026-10-10-toolbox-m5-drains-review.md): **APPROVE**
+- [Review: toolbox row W24 engine half, quest deadlines (loka-kgd.45, batch M5)](2026-10-10-toolbox-m5-deadlines-review.md): **APPROVE WITH NOTES**
+- [Review: potions and song buff, toolbox rows 18 and 42 (loka-kgd.36)](2026-10-10-toolbox-m5-buffs-review.md): **APPROVE WITH NOTES**
+- [Item review: toolbox rows 13 + G12, pick and force a barrier (loka-kgd.35, batch M5)](2026-10-10-toolbox-m5-barrier-review.md): **APPROVE WITH NOTES**
 - [Review: narration variety and visit tiers, toolbox row W7 (loka-kgd.29)](2026-10-10-toolbox-m4-variety-review.md): **APPROVE**
 - [Review: time windows, hour and moon gates, toolbox row 10 (loka-kgd.27)](2026-10-10-toolbox-m4-time-review.md): **APPROVE**
 - [Review: derived sky (weather, season, tide), toolbox row 31 + W5 (loka-kgd.30)](2026-10-10-toolbox-m4-sky-review.md): **APPROVE**
@@ -19,6 +30,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: damage kinds, resistances and critical hits, toolbox row G2 (loka-kgd.18)](2026-10-10-toolbox-g2-damage-review.md): **APPROVE**
 - [Review: property tags and the policy leaf set, toolbox row G1 (loka-kgd.17)](2026-10-10-toolbox-g1-review.md): **APPROVE**
 - [Mechanics review 3: the player's seat](2026-10-10-mechanics-review-3.md)
+- [Review: mechanics batch M5, Fable batch review (PR #359, loka-kgd)](2026-10-10-batch-m5-fable-review.md): **APPROVE WITH NOTES**
 - [Review: mechanics batch M4 (PR #358, epic loka-kgd), Fable batch review](2026-10-10-batch-m4-fable-review.md): **APPROVE WITH NOTES**
 - [Batch review: mechanics toolbox M3, G1 tags, loot, W1, skills, damage (loka-kgd, PR #351)](2026-10-10-batch-m3-review.md): **APPROVE WITH NOTES**
 - [Book UI architecture audit (read-only, main @ 84b32e74, 2026-10-10)](2026-10-09-ui-architecture-audit.md)

@@ -4,7 +4,7 @@
   "description": "ReactionRule (21 \u00a73.4, \u00a711; 06 \u00a714; 04 \u00a75.2-\u00a75.4), owned by reaction@1.",
   "$defs": {
     "ReactionRule": {
-      "description": "Typed reaction owned by reaction@1. Every registered event kind can trigger; each optional filter must equal its payload field (W1). Every delivery runs for the command actor; quest resolution verifies the source instance; a status.apply hits only the event's subject body (docs/system/mechanics.md reaction@1). Apply may assign facts or activate a quest on quest_resolved. API1.12 adds typed quest.resolve and quest.fail on fact_changed. Deliveries use one writer group and the existing FIFO budgets; faults commit nothing.",
+      "description": "Typed reaction owned by reaction@1. Every registered event kind can trigger; each optional filter must equal its payload field (W1). Every delivery runs for the command actor; quest resolution verifies the source instance; a status.apply hits the event's subject or its named item (docs/system/mechanics.md reaction@1). Apply may assign facts or activate a quest on quest_resolved. API1.12 adds typed quest.resolve and quest.fail on fact_changed. Deliveries use one writer group and the existing FIFO budgets; faults commit nothing.",
       "type": "object",
       "properties": {
         "key": {
@@ -361,6 +361,47 @@
                 "event"
               ],
               "additionalProperties": false
+            },
+            {
+              "description": "The world's hourly calendar event (toolbox row W25; schedule@1): no filters; a status lands on the actor's body. Needs kernel_api at least 1.46.",
+              "type": "object",
+              "properties": {
+                "event": {
+                  "const": "clock_hour"
+                }
+              },
+              "required": [
+                "event"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "event": { "const": "status_ticked" },
+                "status": { "$ref": "identity.schema.json#/$defs/DefinitionRef" }
+              },
+              "required": ["event"],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "event": { "const": "status_expired" },
+                "status": { "$ref": "identity.schema.json#/$defs/DefinitionRef" }
+              },
+              "required": ["event"],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "event": { "const": "quest_failed" },
+                "quest": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
+                "outcome": { "$ref": "action.schema.json#/$defs/Key" }
+              },
+              "required": ["event"],
+              "additionalProperties": false
             }
           ]
         },
@@ -459,11 +500,13 @@
                 "additionalProperties": false
               },
               {
-                "description": "Apply one authored status (toolbox row 1) to the acting character's body at the cause's time; an active one is refreshed.",
+                "description": "Apply one authored status (toolbox row 1) at the cause's time to the event's subject (a body, NPC or thing, row G3), or to the named item's or (row 42, never with item; not a spawn template) NPC's authored instance; an active one is refreshed; an NPC or item that declares the status immune takes nothing.",
                 "type": "object",
                 "properties": {
                   "op": { "const": "status.apply" },
-                  "status": { "$ref": "identity.schema.json#/$defs/DefinitionRef" }
+                  "status": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
+                  "item": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
+                  "npc": { "$ref": "identity.schema.json#/$defs/DefinitionRef" }
                 },
                 "required": ["op", "status"],
                 "additionalProperties": false

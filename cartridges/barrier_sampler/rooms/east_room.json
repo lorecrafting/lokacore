@@ -1,0 +1,10 @@
+{
+  "title": "room.east_room.title",
+  "description": "room.east_room.description",
+  "exits": {
+    "west": {
+      "to": "storeroom",
+      "barrier": "iron_door"
+    }
+  }
+}

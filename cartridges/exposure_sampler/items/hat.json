@@ -1,0 +1,17 @@
+{
+  "keywords": [
+    "hat"
+  ],
+  "short": "item.hat.short",
+  "room_line": "item.hat.room",
+  "description": "item.hat.description",
+  "location": {
+    "in": "room",
+    "room": "inn"
+  },
+  "mass_grams": 500,
+  "slot": "head",
+  "tags": [
+    "cool"
+  ]
+}

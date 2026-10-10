@@ -818,7 +818,7 @@
       ]
     },
     "QuestView": {
-      "description": "A journal entry (04 §15 'quest journal state'; 00 §4.10 Journal). Optional journal is the selected TextKey iff its definition declares journal (mechanics.md quest@1).",
+      "description": "A journal entry (04 §15 'quest journal state'; 00 §4.10 Journal). Optional journal is the selected TextKey iff its definition declares journal (mechanics.md quest@1). Optional hint (toolbox row W23): the stage hint whose time has passed, while the instance is open and its row has started_at. Optional remaining (toolbox row W24): logical time until a generic deadline's pending job is due, while the instance is open; absent for legacy deadlines.",
       "type": "object",
       "properties": {
         "quest": {
@@ -933,6 +933,13 @@
             "status"
           ],
           "additionalProperties": false
+        },
+        "hint": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "remaining": {
+          "type": "integer",
+          "minimum": 0
         }
       },
       "required": [
@@ -2582,7 +2589,7 @@
       "additionalProperties": false
     },
     "ConditionView": {
-      "description": "One active body status: its authored label, end, next tick and per-tick resource change.",
+      "description": "One active body status: its authored label, end, next tick and per-tick resource change (absent for a status that never ticks, row 2c).",
       "examples": [
         {
           "label": "condition.poisoned",
@@ -2623,7 +2630,6 @@
         "ends_at",
         "next_tick_at",
         "resource",
-        "per_tick",
         "tick_every"
       ],
       "additionalProperties": false

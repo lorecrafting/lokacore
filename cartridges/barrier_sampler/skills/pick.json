@@ -1,0 +1,14 @@
+{
+  "label": "skill.pick.label",
+  "requirement": "skill.pick.requirement",
+  "qualification": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": []
+    }
+  },
+  "growth": [
+    1
+  ]
+}

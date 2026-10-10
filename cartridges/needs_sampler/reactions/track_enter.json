@@ -1,0 +1,16 @@
+{
+  "on": {
+    "event": "entity_entered_room",
+    "room": "track"
+  },
+  "apply": [
+    {
+      "op": "status.apply",
+      "status": "hungry"
+    },
+    {
+      "op": "status.apply",
+      "status": "thirsty"
+    }
+  ]
+}

@@ -9,6 +9,7 @@ import {
   cap,
   expeditionLine,
   plain,
+  timeLeft,
   toneOf,
   why,
   type group,
@@ -127,6 +128,8 @@ export function JournalPage(p: { view: GameView; text: Say; world: () => void })
             </Text>
           )}
           {q.journal && <Text style={prose(c)}>{plain(text(q.journal))}</Text>}
+          {q.hint && <Text style={note(c)}>Hint: {plain(text(q.hint))}</Text>}
+          {q.remaining !== undefined && <Text style={note(c)}>{timeLeft(q.remaining)}</Text>}
         </View>
       ))}
     </Page>

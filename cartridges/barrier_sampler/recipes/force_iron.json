@@ -1,0 +1,55 @@
+{
+  "label": "actions.force_iron",
+  "aliases": [
+    "force"
+  ],
+  "target": {
+    "kind": "detail",
+    "room": "storeroom",
+    "detail": "iron_door"
+  },
+  "priority": 5,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": [
+        {
+          "op": "fact_compare",
+          "fact": "iron_forced",
+          "equals": false
+        },
+        {
+          "op": "has_tag",
+          "barrier": "iron_door",
+          "tag": "fragile"
+        }
+      ]
+    }
+  },
+  "check": {
+    "key": "force_iron",
+    "kind": "opposed",
+    "attribute": "str"
+  },
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "iron_forced",
+          "value": true
+        }
+      ],
+      "narration": {
+        "actor": "narration.force_iron.success"
+      }
+    },
+    "failure": {
+      "sequence": [],
+      "narration": {
+        "actor": "narration.force_iron.failure"
+      }
+    }
+  }
+}

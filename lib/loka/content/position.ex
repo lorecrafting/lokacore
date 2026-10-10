@@ -5,7 +5,7 @@ defmodule Loka.Content.Position do
   fact_changed its rule's fact.assign logs, and content may read the fact but never write it:
   an authored fact named position, or a fact.assign of it in a recipe outcome, a reaction's
   apply, dialogue choice or scene ending, is RESERVED_FACT. The same write-site walk also
-  reserves scene_<key>, story-point markers and skill_<key> facts.
+  reserves scene_<key>, story-point markers, skill_<key> and seen_tip_<key> facts.
   Twin of kernel/ts/src/content/cartridge_position.ts.
   """
   import Loka.Content.Source, only: [diag: 2, at: 2]
@@ -92,7 +92,8 @@ defmodule Loka.Content.Position do
         do: s["benefit"]["fact"]["key"]
       ),
       Enum.map(Map.keys(defs["skill"]), &("skill_" <> &1)),
-      for({key, {_, _, %{"growth" => _}}} <- defs["skill"], do: "uses_" <> key)
+      for({key, {_, _, %{"growth" => _}}} <- defs["skill"], do: "uses_" <> key),
+      for({key, {_, _, %{"tip" => _}}} <- defs["recipe"], do: "seen_tip_" <> key)
     ])
   end
 

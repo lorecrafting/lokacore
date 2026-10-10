@@ -17,12 +17,18 @@ export const bleedingLine = (b: NonNullable<GameView['bleeding']>, time: number,
   `${text(b.label)} · ${Math.max(0, b.ends_at - time)}s remaining · ${b.hp_loss} HP each ${b.tick_every}s`;
 // Book UI Conditions details: seconds under two minutes, whole minutes from there.
 const dur = (s: number) => (s >= 120 ? `${Math.round(s / 60)}m` : `${s}s`);
+// Toolbox row W24 Journal countdown (wording proposed; designer to approve).
+export const timeLeft = (remaining: number) => `Time left: ${dur(remaining)}`;
 export const conditionLine = (
   c: NonNullable<GameView['conditions']>[number],
   time: number,
   text: Say,
 ) =>
-  `${text(c.label)} · ${dur(Math.max(0, c.ends_at - time))} remaining · ${c.per_tick > 0 ? '+' : ''}${c.per_tick} ${c.resource.toUpperCase()} each ${dur(c.tick_every)}`;
+  `${text(c.label)} · ${dur(Math.max(0, c.ends_at - time))} remaining` +
+  // A status that never ticks (row 2c) shows no tick part.
+  (c.per_tick === undefined
+    ? ''
+    : ` · ${c.per_tick > 0 ? '+' : ''}${c.per_tick} ${c.resource.toUpperCase()} each ${dur(c.tick_every)}`);
 export const expeditionLine = (
   e: NonNullable<GameView['journal'][number]['expedition']>,
   text: Say,

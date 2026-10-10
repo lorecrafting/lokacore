@@ -22,6 +22,7 @@ import {
 import { living } from '../death/shared.ts';
 import { opened } from '../lookups.ts';
 import { carryingAdded } from '../containment/shared.ts';
+import { cureOps } from '../status/shared.ts';
 
 type Payload = Extract<CommandPayload, { type: 'fill' | 'pour' | 'drink' }>;
 export function initialLiquids(cartridge: Cartridge, entities: Readonly<Record<string, Entity>>) {
@@ -79,7 +80,12 @@ export function transition(world: World, p: Payload, steps: Steps = { n: 0 }) {
     if (!liquidRowValid(world.state.liquids?.[id], world.liquidSpecs[id]))
       return 'precondition_failed' as const;
   }
-  return p.type === 'fill' ? fillPlan(world, p, body, steps) : consumePlan(world, p);
+  if (p.type === 'fill') return fillPlan(world, p, body, steps);
+  const plan = consumePlan(world, p);
+  if (typeof plan === 'string' || p.type !== 'drink') return plan;
+  // Row G13: a Drink ends each active status the liquid's `cures` lists.
+  const cured = cureOps(world, body, world.cartridge.liquids?.[refString(plan.kind)]?.cures);
+  return { ...plan, ops: [...plan.ops, ...cured] };
 }
 
 function change(world: World, id: EntityId, kind: DefinitionRef, quantity: number): DeltaOp {

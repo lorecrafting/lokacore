@@ -1,0 +1,46 @@
+{
+  "title": "quest.find_key.title",
+  "offer": {
+    "label": "quest.find_key.accept",
+    "policy": {
+      "policy_version": 1,
+      "root": {
+        "op": "all",
+        "items": []
+      }
+    }
+  },
+  "objective": {
+    "evidence": "post_activation_event",
+    "item_acquired": "key"
+  },
+  "deadline": {
+    "after": 120000,
+    "outcome": "late"
+  },
+  "journal": {
+    "active": "quest.find_key.active",
+    "objectives_met": "quest.find_key.found",
+    "resolved": "quest.find_key.done",
+    "failed": "quest.find_key.failed",
+    "abandoned": "quest.find_key.abandoned",
+    "hints": {
+      "active": [
+        {
+          "after": 10,
+          "text": "quest.find_key.hint_look"
+        },
+        {
+          "after": 20,
+          "text": "quest.find_key.hint_take"
+        }
+      ],
+      "objectives_met": [
+        {
+          "after": 10,
+          "text": "quest.find_key.hint_return"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "label": "actions.play_song",
+  "aliases": [
+    "play"
+  ],
+  "target": {
+    "kind": "detail",
+    "room": "hall",
+    "detail": "hearth"
+  },
+  "priority": 5,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "has_item",
+      "item": "lute"
+    }
+  },
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "event.emit",
+          "event": "song"
+        }
+      ],
+      "narration": {
+        "actor": "narration.play_song.actor"
+      }
+    }
+  }
+}

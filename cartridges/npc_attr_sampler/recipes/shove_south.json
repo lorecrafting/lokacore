@@ -1,0 +1,46 @@
+{
+  "label": "actions.shove_south",
+  "aliases": [
+    "shove"
+  ],
+  "target": {
+    "kind": "detail",
+    "room": "gate_room",
+    "detail": "south"
+  },
+  "priority": 5,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "fact_compare",
+      "fact": "south_open",
+      "equals": false
+    }
+  },
+  "check": {
+    "key": "shove_south",
+    "kind": "opposed",
+    "attribute": "str",
+    "npc": "weak_guard"
+  },
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "south_open",
+          "value": true
+        }
+      ],
+      "narration": {
+        "actor": "narration.shove_south.success"
+      }
+    },
+    "failure": {
+      "sequence": [],
+      "narration": {
+        "actor": "narration.shove_south.failure"
+      }
+    }
+  }
+}

@@ -18,12 +18,15 @@ import {
   type Obj,
 } from './cartridge_refs.ts';
 import { uses as dialogueUses } from './cartridge_dialogues.ts';
+import { tipUses as tips } from './cartridge_recipes.ts';
 import { scenes } from './cartridge_scenes.ts';
 import { uses } from './cartridge_reactions.ts';
 import { fromUtf8 } from '../foundation/sha256.ts';
 import { cmp, validate } from '../foundation/validate.ts';
 import { calendarStage } from './cartridge_calendar.ts';
 import { variety } from './cartridge_variety.ts';
+import { exposure } from './cartridge_exposure.ts';
+import { variants } from './cartridge_variants.ts';
 import { transports } from './cartridge_transports.ts';
 import { services } from './cartridge_services.ts';
 import { food } from './cartridge_food.ts';
@@ -233,7 +236,7 @@ function lockStage(c: Obj): Diagnostic[] {
       use('definition', kind, `.cartridge.${kind}s${step(ref)}`);
   for (const ref of Object.keys((c.quests ?? {}) as Obj))
     use('event', 'quest_activated', `.cartridge.quests${step(ref)}`);
-  for (const [kind, name, at] of [...uses(c), ...dialogueUses(c)]) use(kind, name, at);
+  for (const [kind, name, at] of [...uses(c), ...dialogueUses(c), ...tips(c)]) use(kind, name, at);
   return out;
 }
 
@@ -278,5 +281,7 @@ function declarations(c: Obj): Diagnostic[] {
     ...population(c),
     ...transports(c),
     ...variety(c),
+    ...exposure(c),
+    ...variants(c),
   ];
 }

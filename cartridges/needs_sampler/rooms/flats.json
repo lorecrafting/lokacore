@@ -1,0 +1,24 @@
+{
+  "title": "room.flats.title",
+  "description": "room.flats.description",
+  "tags": [
+    "exposed"
+  ],
+  "exits": {
+    "south": {
+      "to": "inn"
+    }
+  },
+  "variants": [
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "sky",
+          "weather": "drought"
+        }
+      },
+      "description": "room.flats.drought"
+    }
+  ]
+}

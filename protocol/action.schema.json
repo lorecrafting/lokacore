@@ -680,7 +680,7 @@
       ]
     },
     "ActionRecipe": {
-      "description": "A cartridge-local action composed only of registered operations (06 §20 Composed actions / ActionRecipe; 21 §7; 05 §28), invoked by the perform command: its stable key (its ActionSet identity), label, the aliases a player types as its verb (the first words of the command), its target, presentation priority, availability policy (evaluated for the actor; while it fails the action is shown unavailable and perform is rejected), and its outcomes. success is one explicit sequence of at most 16 steps, run in order as one logical decision (04 §5.2) and followed by the engine's action_completed event, and the narration its actor reads; observers is the line others in the room would read, kept for the first host with a second viewer. Optional (R5 S6): a check (RecipeCheck; check@1), whose result selects the outcome: success when it passes, failure when it fails; a recipe has a failure outcome exactly when it has a check (OUTCOME_MISMATCH). A failed check is an accepted perform with outcome failure whose RNG draw and time commit like success (04 §5.0); a recipe without a check has outcome performed. failure's sequence may be empty. duration, a whole number of LogicalTime units, advances the clock by that much on every accepted perform, success or failure (21 §7 Cost, time; 04 §5.4: one time.advance after the outcome's steps); events keep the time the perform was admitted at. action_completed follows the outcome's steps when the outcome is performed or success, never failure. Optional (R5 S6b): costs (RecipeCost, resource@1), paid in order by the actor's body on every admitted perform, failure included; one it cannot pay rejects the perform insufficient_resource before any check or draw. cooldown, a whole number of LogicalTime units: a perform by the same actor before the last admitted attempt's time plus cooldown is rejected cooldown; an admitted attempt, failure included, starts it at its admission time (delta cooldown.start), and at exactly that time plus cooldown the recipe is available again. Admission order: target, cooldown, costs, then the check. Result bands join later.",
+      "description": "A cartridge-local action composed only of registered operations (06 §20 Composed actions / ActionRecipe; 21 §7; 05 §28), invoked by the perform command: its stable key (its ActionSet identity), label, the aliases a player types as its verb (the first words of the command), its target, presentation priority, availability policy (evaluated for the actor; while it fails the action is shown unavailable and perform is rejected), and its outcomes. success is one explicit sequence of at most 16 steps, run in order as one logical decision (04 §5.2) and followed by the engine's action_completed event, and the narration its actor reads; observers is the line others in the room would read, kept for the first host with a second viewer. Optional (R5 S6): a check (RecipeCheck; check@1), whose result selects the outcome: success when it passes, failure when it fails; a recipe has a failure outcome exactly when it has a check (OUTCOME_MISMATCH). A failed check is an accepted perform with outcome failure whose RNG draw and time commit like success (04 §5.0); a recipe without a check has outcome performed. failure's sequence may be empty. duration, a whole number of LogicalTime units, advances the clock by that much on every accepted perform, success or failure (21 §7 Cost, time; 04 §5.4: one time.advance after the outcome's steps); events keep the time the perform was admitted at. action_completed follows the outcome's steps when the outcome is performed or success, never failure. Optional (R5 S6b): costs (RecipeCost, resource@1), paid in order by the actor's body on every admitted perform, failure included; one it cannot pay rejects the perform insufficient_resource before any check or draw. cooldown, a whole number of LogicalTime units: a perform by the same actor before the last admitted attempt's time plus cooldown is rejected cooldown; an admitted attempt, failure included, starts it at its admission time (delta cooldown.start), and at exactly that time plus cooldown the recipe is available again. Admission order: target, cooldown, costs, then the check. Optional (toolbox row W23, kernel_api 1.46, fact@1): tip, a text the actor reads once, after the outcome's narration, on the first accepted perform (success, failure or performed); that perform also assigns the engine-owned player fact seen_tip_<key> (bool, default false) true, which the compiler adds, so a recipe with a tip has a key of at most 55 characters and no definition writes that fact (RESERVED_FACT). Result bands join later.",
       "type": "object",
       "properties": {
         "key": {
@@ -832,7 +832,7 @@
               "additionalProperties": false
             },
             {
-              "description": "An opposed check (toolbox rows 5 and G5, docs/system/mechanics.md; kernel_api at least 1.44): passes when the actor's level of skill, or value of attribute, at admission is at least the target detail's rating; draws no RNG. A skill with growth gains one use per perform.",
+              "description": "An opposed check (toolbox rows 5 and G5, docs/system/mechanics.md; kernel_api at least 1.44): passes when the actor's level of skill, or value of attribute, at admission is at least the target detail's rating, or, when npc names an NPC of this cartridge (attribute only, toolbox row G3, kernel_api 1.46), that NPC's value of the attribute; draws no RNG. A skill with growth gains one use per perform.",
               "type": "object",
               "properties": {
                 "key": {
@@ -846,6 +846,9 @@
                 },
                 "attribute": {
                   "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                },
+                "npc": {
+                  "$ref": "identity.schema.json#/$defs/DefinitionRef"
                 }
               },
               "required": [
@@ -856,6 +859,11 @@
                 "skill",
                 "attribute"
               ],
+              "dependentRequired": {
+                "npc": [
+                  "attribute"
+                ]
+              },
               "additionalProperties": false
             }
           ]
@@ -875,6 +883,9 @@
         "cooldown": {
           "type": "integer",
           "minimum": 1
+        },
+        "tip": {
+          "$ref": "text.schema.json#/$defs/TextKey"
         }
       },
       "required": [

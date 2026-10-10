@@ -69,6 +69,14 @@ export function assigned<R extends Assigned>(
   return { ...r, ops: [...r.ops, op], position, facts: { ...r.facts, [at]: s.value } };
 }
 
+/** Toolbox row W23: the engine-owned fact a recipe's tip sets once shown (compiler-added). */
+export const seenTip = (world: World, recipe: string): DefinitionRef => ({
+  cartridge_id: world.cartridge.manifest.id,
+  cartridge_version: world.cartridge.manifest.version,
+  kind: 'fact',
+  key: `seen_tip_${recipe}` as DefinitionRef['key'],
+});
+
 function ownership(
   world: World,
   ref: DefinitionRef,

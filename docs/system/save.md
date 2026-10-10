@@ -20,7 +20,7 @@ re-decide differently: such a save opens `save_corrupt` with Start over, not a p
 ([dialogue hub decision](../decisions/owner-decision-dialogue-hub-2026-10-09.md)).
 
 Saved quest rows require valid `DefinitionRef` quest and `StateScope` scope fields before
-receipt recovery. Malformed fields are `save_corrupt`; no quest is silently skipped.
+receipt recovery. Malformed fields are `save_corrupt`; no quest is silently skipped. An optional `started_at` (toolbox row W23) must be a LogicalTime not after the saved clock, else `save_corrupt`; a row without it (an older save) loads and shows no hint.
 
 Refusals, nothing written:
 
@@ -1068,7 +1068,11 @@ Cold reopen accepts each complete intermediate: dropped before acquisition with 
 
 ## Status recovery
 
-Persist the `statuses` row, the resource, the job and the receipt with the normal changed-row transaction before adoption and reply; the row key is the canonical status target text. Cold reopen re-decides the accepted application, ticks, expiry, cure and fatal return like any other receipt. A pending status job after a cure or death is lawful and completes without change on delivery.
+Persist the `statuses` row, the resource, the job and the receipt with the normal changed-row transaction before adoption and reply; the row key is the canonical status target text. Since [row G3](mechanics.md#statuses-on-npcs-and-things-toolbox-row-g3) the holder in that key may be an NPC or item; the row and job shapes are unchanged, so an older save's rows load as before, and the due job finds its row, and so its holder, by job id on reopen as in play. Cold reopen re-decides the accepted application, ticks, expiry, cure and fatal return like any other receipt. A pending status job after a cure or death is lawful and completes without change on delivery.
+
+## Quest deadline recovery
+
+A [generic quest deadline](mechanics.md#quest-deadlines-toolbox-row-w24-engine-half) persists its job row, the instance row and the receipt with the normal changed-row transaction before adoption and reply; the countdown is derived from the job on reopen, nothing else is stored. Load checks each job row with a quest instance (`mobile/authority/local-story/deadline-save.ts`): its quest must declare a deadline; a generic deadline's row must belong to the save's character and, while its instance row exists, to that instance's quest and player scope (the row may outlive a retired instance). Any other row is typed `save_corrupt` (Start over), not a load whose next elapsed run faults. A failed expiry COMMIT adopts nothing; a lost acknowledgement replays the committed failure once (`mobile/authority/local-story/quest_deadline.test.ts`). Legacy (S2) deadlines keep their bound reconciliation.
 
 ## Levelling recovery
 

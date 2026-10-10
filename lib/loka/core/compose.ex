@@ -6,13 +6,6 @@ defmodule Loka.Core.Compose do
   @external_resource @profile_path
   @profile File.read!(@profile_path)
   @limits @profile |> JSON.decode!() |> Map.fetch!("limits")
-  @legal %{
-    "active" => ~w(objectives_complete failed abandoned),
-    "objectives_complete" => ~w(resolved failed abandoned),
-    "failed" => ["active"],
-    "abandoned" => ["active"]
-  }
-
   @door %{"closed" => ~w(open locked), "open" => ["closed"], "locked" => ["closed"]}
   @spec compose(map(), map()) :: %{String.t() => term()}
   def compose(state, %{"ops" => ops}, final \\ true) do
@@ -154,43 +147,19 @@ defmodule Loka.Core.Compose do
     end
   end
 
-  defp apply_op(%{"op" => "quest.retire", "quest" => q, "scope" => s}, t, ctx) do
-    row = read(t, ctx)
+  defp apply_op(%{"op" => "quest.retire"} = op, t, ctx),
+    do: Loka.Core.ComposeQuest.retire(op, read(t, ctx))
 
-    check(
-      row != nil and row["state"] == "resolved" and row["quest"] == q and row["scope"] == s,
-      nil
-    )
-  end
+  defp apply_op(%{"op" => "quest.activate"} = op, t, ctx),
+    do:
+      Loka.Core.ComposeQuest.activate(
+        op,
+        read(t, ctx),
+        rows("quest", "quests", "instance_id", ctx)
+      )
 
-  defp apply_op(%{"op" => "quest.activate", "quest" => q, "scope" => s} = op, t, ctx) do
-    open? = fn {_, r} ->
-      r["quest"] == q and r["scope"] == s and r["state"] in ~w(active objectives_complete)
-    end
-
-    taken = Enum.any?(rows("quest", "quests", "instance_id", ctx), open?)
-
-    row =
-      Map.merge(%{"quest" => q, "scope" => s, "state" => "active"}, Map.take(op, ["bindings"]))
-
-    check(read(t, ctx) == nil and not taken, row)
-  end
-
-  defp apply_op(%{"op" => "quest.transition", "from" => from, "to" => to} = op, t, ctx) do
-    row = read(t, ctx)
-    outcome = op["outcome"]
-    outcome_ok = if to == "resolved", do: outcome != nil, else: to == "failed" or outcome == nil
-
-    next =
-      if outcome,
-        do: Map.put(row || %{}, "outcome", outcome),
-        else: Map.delete(row || %{}, "outcome")
-
-    check(
-      row["state"] == from and to in Map.get(@legal, from, []) and outcome_ok,
-      Map.put(next, "state", to)
-    )
-  end
+  defp apply_op(%{"op" => "quest.transition"} = op, t, ctx),
+    do: Loka.Core.ComposeQuest.transition(op, read(t, ctx))
 
   defp apply_op(%{"op" => "choice." <> _} = op, t, ctx) do
     initial = get_in(elem(ctx, 0), ["choices", op["continuation_id"]])

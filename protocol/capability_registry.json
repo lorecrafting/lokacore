@@ -73,6 +73,9 @@
     ],
     "definitions": [
       "slot"
+    ],
+    "policies": [
+      "wearing"
     ]
   },
   {
@@ -102,7 +105,8 @@
     "portability": "portable",
     "residency": "portable_capability",
     "policies": [
-      "target_present"
+      "target_present",
+      "npc_present"
     ]
   },
   {
@@ -185,6 +189,13 @@
     "residency": "portable_capability",
     "definitions": [
       "status"
+    ],
+    "policies": [
+      "status_active"
+    ],
+    "events": [
+      "status_ticked",
+      "status_expired"
     ]
   },
   {
@@ -229,7 +240,8 @@
     ],
     "events": [
       "quest_activated",
-      "quest_resolved"
+      "quest_resolved",
+      "quest_failed"
     ],
     "policies": [
       "quest_state"
@@ -315,6 +327,9 @@
     ],
     "policies": [
       "time_window"
+    ],
+    "events": [
+      "clock_hour"
     ]
   },
   {

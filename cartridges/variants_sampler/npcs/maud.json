@@ -1,0 +1,40 @@
+{
+  "keywords": [
+    "maud"
+  ],
+  "short": "npc.maud.short",
+  "room_line": "npc.maud.room",
+  "room_line_variants": [
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "status_active",
+          "subject": "target",
+          "status": "bruised"
+        }
+      },
+      "description": "npc.maud.room_bruised"
+    }
+  ],
+  "description": "npc.maud.description",
+  "description_variants": [
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "status_active",
+          "subject": "target",
+          "status": "bruised"
+        }
+      },
+      "description": "npc.maud.description_bruised"
+    }
+  ],
+  "room": "tavern",
+  "daily_schedule": {
+    "6": "tavern",
+    "7": "yard",
+    "8": "tavern"
+  }
+}

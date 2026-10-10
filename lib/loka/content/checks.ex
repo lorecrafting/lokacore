@@ -11,7 +11,7 @@ defmodule Loka.Content.Checks do
                 "fact.adjust" => %{"fact" => "fact"},
                 "skill.acquire" => %{"skill" => "skill"},
                 "topic.grant" => %{"topic" => "topic"},
-                "status.apply" => %{"status" => "status"},
+                "status.apply" => %{"status" => "status", "item" => "item", "npc" => "npc"},
                 "quest.activate" => %{"quest" => "quest"},
                 "quest.resolve" => %{"quest" => "quest"},
                 "quest.fail" => %{"quest" => "quest"}
@@ -118,8 +118,6 @@ defmodule Loka.Content.Checks do
     do: item |> Map.delete("barrier") |> expand(m) |> Map.put("barrier", ref(k, "barrier", m))
 
   def expand(%{"room" => _, "room_line" => t} = npc, m) when is_binary(t) do
-    schedule = Map.get(npc, "daily_schedule", %{})
-
     npc
     |> Loka.Content.Death.npc(m)
     |> Map.delete("shop")
@@ -129,7 +127,7 @@ defmodule Loka.Content.Checks do
     |> Map.merge(
       if npc["perception"], do: %{"perception" => expand(npc["perception"], m)}, else: %{}
     )
-    |> Map.merge(if schedule == %{}, do: %{}, else: %{"daily_schedule" => scheduled(schedule, m)})
+    |> Loka.Content.NpcFields.expand(m, &expand/2)
   end
 
   # A recipe's target (RecipeTarget): its detail a key, so a details map never matches.
@@ -167,7 +165,11 @@ defmodule Loka.Content.Checks do
 
   # Recipe costs and thresholds expand only their owned reference fields.
   def expand(%{"kind" => k, "attribute" => a} = n, m) when k in ~w(attribute_threshold opposed),
-    do: Map.put(n, "attribute", ref(a, "attribute", m))
+    do:
+      Map.merge(
+        Map.put(n, "attribute", ref(a, "attribute", m)),
+        if(n["npc"], do: %{"npc" => ref(n["npc"], "npc", m)}, else: %{})
+      )
 
   def expand(%{"discovered" => f} = n, m), do: Map.put(n, "discovered", ref(f, "fact", m))
 
@@ -183,10 +185,17 @@ defmodule Loka.Content.Checks do
   def expand(%{"cures" => c} = e, m) when is_list(c),
     do: Map.put(expand(Map.delete(e, "cures"), m), "cures", Enum.map(c, &ref(&1, "status", m)))
 
+  def expand(%{"immune" => c} = e, m) when is_list(c),
+    do: Map.put(expand(Map.delete(e, "immune"), m), "immune", Enum.map(c, &ref(&1, "status", m)))
+
+  # A status's modifiers (row 2c) are ancestry-shaped {attribute, modifier}.
+  def expand(%{"modifies" => l} = s, m) when is_list(l),
+    do: Map.put(expand(Map.delete(s, "modifies"), m), "modifies", expand(l, m))
+
   def expand(%{"resource" => r} = n, m) when is_binary(r),
     do: Map.put(n, "resource", ref(r, "resource", m))
 
-  def expand(%{"at" => _, "trust_fact" => _} = deadline, m),
+  def expand(%{"at" => _, "fact" => _, "trust_fact" => _} = deadline, m),
     do:
       deadline
       |> Map.update!("fact", &ref(&1, "fact", m))
@@ -268,8 +277,6 @@ defmodule Loka.Content.Checks do
 
   def expand(v, m) when is_list(v), do: Enum.map(v, &expand(&1, m))
   def expand(v, _), do: v
-
-  defp scheduled(schedule, m), do: Map.new(schedule, fn {h, r} -> {h, ref(r, "room", m)} end)
 
   @doc """
   Diagnostics across the schema-valid definitions (`kind => key => {rel, steps, value}`):

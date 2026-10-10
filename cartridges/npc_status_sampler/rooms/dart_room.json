@@ -1,0 +1,9 @@
+{
+  "title": "room.dart_room.title",
+  "description": "room.dart_room.description",
+  "exits": {
+    "west": {
+      "to": "hall"
+    }
+  }
+}
