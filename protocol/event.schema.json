@@ -724,6 +724,18 @@
           "required": ["type", "body_id", "status"],
           "additionalProperties": false,
           "description": "Toolbox row G3: an active status on a body, NPC or thing (body_id) reached its end; a cure or death emits none."
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": { "const": "quest_failed" },
+            "quest": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
+            "instance_id": { "$ref": "delta.schema.json#/$defs/QuestInstanceId" },
+            "outcome": { "$ref": "action.schema.json#/$defs/Key" }
+          },
+          "required": ["type", "quest", "instance_id", "outcome"],
+          "additionalProperties": false,
+          "description": "Toolbox row W24: a generic quest deadline expired and failed the open instance with its authored outcome; a legacy deadline or a quest.fail reaction emits none."
         }
       ],
       "examples": [

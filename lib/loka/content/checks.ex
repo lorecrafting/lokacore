@@ -192,7 +192,7 @@ defmodule Loka.Content.Checks do
   def expand(%{"resource" => r} = n, m) when is_binary(r),
     do: Map.put(n, "resource", ref(r, "resource", m))
 
-  def expand(%{"at" => _, "trust_fact" => _} = deadline, m),
+  def expand(%{"at" => _, "fact" => _, "trust_fact" => _} = deadline, m),
     do:
       deadline
       |> Map.update!("fact", &ref(&1, "fact", m))

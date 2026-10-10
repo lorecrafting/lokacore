@@ -114,7 +114,7 @@ export function expiryReceipt(
   scope: string,
   instance: string,
   job: string,
-  deadline: NonNullable<QuestDefinition['deadline']>,
+  deadline: Required<Omit<NonNullable<QuestDefinition['deadline']>, 'after'>>,
 ) {
   const rows = db.getAllSync<ReceiptRow>(
     'SELECT command_id,actor_id,command,response FROM receipt WHERE scope=?',
@@ -131,7 +131,7 @@ export function expiryReceipt(
 function dueElapsed(
   world: World,
   r: ReceiptRow,
-  deadline: NonNullable<QuestDefinition['deadline']>,
+  deadline: Required<Omit<NonNullable<QuestDefinition['deadline']>, 'after'>>,
 ): Accepted | undefined {
   const command: Command = JSON.parse(r.command),
     decision: DecisionResult = JSON.parse(r.response);
@@ -182,7 +182,7 @@ function expires(
   decision: Accepted,
   instance: string,
   job: string,
-  deadline: NonNullable<QuestDefinition['deadline']>,
+  deadline: Required<Omit<NonNullable<QuestDefinition['deadline']>, 'after'>>,
 ) {
   const ops: readonly DeltaOp[] = decision.delta.ops;
   const fact = ops.filter((o) => o.op === 'fact.assign' && same(o.fact, deadline.fact));

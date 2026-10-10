@@ -62,13 +62,30 @@ defmodule Loka.Content.Quests do
         Loka.Content.Expedition.quest(rel, q, ctx) ++
         hints(rel, q, ctx.m)
 
+  # Toolbox row W24: a deadline is legacy (S2: at, fact, trust_fact and trust_amount, no after) or
+  # generic (exactly one of after or at, no legacy field, kernel_api 1.46); any other shape is
+  # SCHEMA_VIOLATION invalid_value at the deadline. Twin of cartridge_quests.ts deadline.
   defp deadline(_, nil, _), do: []
 
   defp deadline(rel, d, ctx) do
-    for field <- ~w(fact trust_fact) do
-      reference(rel, ["deadline"], {field, "fact"}, d, ctx.m, ctx.defs)
+    legacy = Enum.count(~w(fact trust_fact trust_amount), &is_map_key(d, &1))
+
+    cond do
+      legacy == 3 and is_map_key(d, "at") and not is_map_key(d, "after") ->
+        Enum.flat_map(
+          ~w(fact trust_fact),
+          &reference(rel, ["deadline"], {&1, "fact"}, d, ctx.m, ctx.defs)
+        )
+
+      legacy > 0 or is_map_key(d, "after") == is_map_key(d, "at") ->
+        [diag("SCHEMA_VIOLATION", at(rel, ["deadline"]), %{"error" => "invalid_value"})]
+
+      api(ctx.m) < [1, 46] ->
+        [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")]
+
+      true ->
+        []
     end
-    |> Enum.concat()
   end
 
   defp texts(_, _, :unknown), do: []

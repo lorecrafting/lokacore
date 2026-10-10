@@ -16,7 +16,7 @@ import {
 import { allocator, event, type Mint, type Steps, type World } from './decision.ts';
 import { factChanged, type Base } from '../mechanics/fact.ts';
 import { jobCommandId } from '../foundation/id_source.ts';
-import { earned, stamp } from '../mechanics/quest/lifecycle.ts';
+import { begun, earned, stamp } from '../mechanics/quest/lifecycle.ts';
 import { sequence, triggered } from '../mechanics/reaction.ts';
 import { levelUp, oneWrite } from '../mechanics/levelling/shared.ts';
 import * as schedule from '../mechanics/schedule/rule.ts';
@@ -153,7 +153,7 @@ function join(
   const earns = p.world.cartridge.quests && evs.some((e) => e.payload.type === 'item_acquired');
   const before = earns ? now(p) : p.world;
   if (!('cartridge' in before)) return before;
-  p.ops.push(...stamp(p.world, own, base.logical_time));
+  p.ops.push(...begun(p.world, own, base.logical_time, p.ops, m));
   const actors = enteredActors(p.world, own);
   if (actors.size) {
     const at = now(p);

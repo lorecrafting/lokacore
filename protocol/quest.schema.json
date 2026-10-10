@@ -33,8 +33,13 @@
           "$ref": "#/$defs/QuestObjective"
         },
         "deadline": {
+          "description": "A quest deadline, one object (validate.ts oneOf needs a const discriminator). Legacy (S2): at, fact, trust_fact and trust_amount, no after. Generic (toolbox row W24, kernel_api 1.46): exactly one of after (logical units from activation) or at (absolute logical time), no legacy field; activation schedules one engine job and expiry fails the instance with outcome and emits quest_failed. The loader refuses any other shape (SCHEMA_VIOLATION).",
           "type": "object",
           "properties": {
+            "after": {
+              "type": "integer",
+              "minimum": 1
+            },
             "at": {
               "$ref": "command.schema.json#/$defs/LogicalTime"
             },
@@ -52,11 +57,7 @@
             }
           },
           "required": [
-            "at",
-            "outcome",
-            "fact",
-            "trust_fact",
-            "trust_amount"
+            "outcome"
           ],
           "additionalProperties": false
         },

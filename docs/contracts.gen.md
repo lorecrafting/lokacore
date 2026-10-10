@@ -441,6 +441,7 @@ The DomainEvent envelope and registry, proposed versus committed (04 §1, §5.1,
   - `rested`: An accepted actor-owned Rest after prior-rate settlement, at its actual body/room.
   - `status_ticked`: Toolbox row G3: one due tick of an active status on a body, NPC or thing (body_id), after its resource change, if any.
   - `status_expired`: Toolbox row G3: an active status on a body, NPC or thing (body_id) reached its end; a cure or death emits none.
+  - `quest_failed`: Toolbox row W24: a generic quest deadline expired and failed the open instance with its authored outcome; a legacy deadline or a quest.fail reaction emits none.
 
 ## Fact contracts (`protocol/fact.schema.json`)
 

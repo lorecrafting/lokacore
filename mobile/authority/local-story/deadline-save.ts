@@ -19,7 +19,8 @@ import type { Db, Meta } from './store.ts';
 
 const rowFor = (world: World, ref: DefinitionRef, entity_id: string) =>
   world.state.resources?.[key({ kind: 'resource', resource: ref, entity_id })];
-type Deadline = NonNullable<QuestDefinition['deadline']>;
+// A legacy (S2) deadline: the loader guarantees all four fields when fact is present.
+type Deadline = Required<Omit<NonNullable<QuestDefinition['deadline']>, 'after'>>;
 type Choices = [string, ChoiceRow][];
 
 export function deadlineSave(world: World, db: Db, meta: Meta, exchanges = false) {
@@ -35,8 +36,9 @@ export function deadlineSave(world: World, db: Db, meta: Meta, exchanges = false
     )
       invalid();
   for (const [questRef, definition] of Object.entries(world.cartridge.quests ?? {})) {
-    if (!definition.deadline) continue;
-    const d = setting(world, choices, questRef, definition.deadline);
+    // Toolbox row W24: a generic deadline has no fact and no bound offer to reconcile.
+    if (!definition.deadline?.fact) continue;
+    const d = setting(world, choices, questRef, definition.deadline as Deadline);
     if (d.q) bound(world, db, scope, choices, d, exchanges);
     else unbound(world, d);
   }

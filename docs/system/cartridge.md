@@ -1521,6 +1521,10 @@ Compiler/loader validate resolved item/nest/population/corpse/room refs, a nonem
 
 [Pick and force a barrier](mechanics.md#pick-and-force-a-barrier-toolbox-rows-13-and-g12) adds no field: a barrier source file declares `initial: "closed"` (a keyless `locked` barrier in reach is BARRIER_UNREACHABLE_KEY) and an `opens_when` reading an instance bool fact; the pick or force is a recipe on a room detail with a `rating` and an `opposed` check, as the [time gate](#time-gate-declarations), [skill growth and rating](#skill-growth-and-rating-declarations) and [tag](#tag-declarations) declarations already check. `kernel_api` at least **1.45** (for `opens_when`). Sampler: `cartridges/barrier_sampler`.
 
+## Quest deadlines
+
+Toolbox row W24 ([rules](mechanics.md#quest-deadlines-toolbox-row-w24-engine-half)). `deadline` is one object; only `outcome` is required by the schema. The loader accepts two shapes: legacy (S2) with `at`, `fact`, `trust_fact` and `trust_amount` and no `after`; generic with exactly one of `after` (logical units from activation, at least 1) or `at`, and none of the legacy fields, needing `requires.kernel_api.at_least >= 1.46` (`KERNEL_API_RANGE_INVALID`). Any other shape is `SCHEMA_VIOLATION` `invalid_value` at the `deadline` member. Compiler (`lib/loka/content/quests.ex`) and loader (`kernel/ts/src/content/cartridge_quests.ts`) agree. The legacy debt floor (1.14) applies to legacy deadlines only.
+
 ## Quest stage hints
 
 Toolbox row W23 ([rules](mechanics.md#quest-stage-hints-toolbox-row-w23)). A quest journal may declare `hints {active?, objectives_met?}`, each 1 to 8 `{after, text}` with `after` whole real minutes (1 to 1440) strictly ascending (else `SCHEMA_VIOLATION` `invalid_value` at the stage list) and `text` a catalog key (`UNRESOLVED_REFERENCE`). Hints need `time_policy.profile = real_elapsed` (`INVALID_TIME_POLICY` at the `hints` member) and `requires.kernel_api.at_least >= 1.46` (`KERNEL_API_RANGE_INVALID`). Compiler (`lib/loka/content/quests.ex`) and loader (`kernel/ts/src/content/cartridge_quests.ts`) agree.

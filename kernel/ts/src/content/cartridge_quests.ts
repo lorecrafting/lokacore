@@ -37,12 +37,26 @@ export function quests(c: Obj, { named, text }: Checks): Diagnostic[] {
     }
     if (q.objective.item_acquired)
       named(q.objective.item_acquired, 'item', `${at}.objective.item_acquired`);
-    if (q.deadline) {
-      named(q.deadline.fact, 'fact', `${at}.deadline.fact`);
-      named(q.deadline.trust_fact, 'fact', `${at}.deadline.trust_fact`);
-    }
+    if (q.deadline) out.push(...deadline(c, q.deadline, `${at}.deadline`, named));
   }
   return out;
+}
+
+// Toolbox row W24: a deadline is legacy (S2: at, fact, trust_fact and trust_amount, no after) or
+// generic (exactly one of after or at, no legacy field, kernel_api 1.46); any other shape is
+// SCHEMA_VIOLATION invalid_value at the deadline.
+function deadline(c: Obj, d: Obj, at: string, named: Checks['named']): Diagnostic[] {
+  const legacy = ['fact', 'trust_fact', 'trust_amount'].filter((f) => f in d).length;
+  if (legacy === 3 && 'at' in d && !('after' in d)) {
+    named(d.fact, 'fact', `${at}.fact`);
+    named(d.trust_fact, 'fact', `${at}.trust_fact`);
+    return [];
+  }
+  if (legacy || 'after' in d === 'at' in d)
+    return [diag('SCHEMA_VIOLATION', at, { error: 'invalid_value' })];
+  return apiCmp(c.manifest.requires.kernel_api.at_least, '1.46') < 0
+    ? [diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least')]
+    : [];
 }
 
 // Toolbox row W23: each stage's hints resolve, their minutes strictly ascend, real minutes need the
@@ -81,7 +95,7 @@ export function questPolicies(c: Obj): [Obj, string][] {
 
 export function featureApi(c: Obj): Diagnostic[] {
   const debt =
-    Object.values((c.quests ?? {}) as Obj).some((q) => q.deadline) ||
+    Object.values((c.quests ?? {}) as Obj).some((q) => q.deadline?.fact) ||
     Object.values((c.npcs ?? {}) as Obj).some((n) => n.resource_starts) ||
     Object.values((c.dialogues ?? {}) as Obj).some((d) =>
       Object.values(d.choices as Obj).some(
