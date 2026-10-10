@@ -1,0 +1,9 @@
+{
+  "keywords": [
+    "listener"
+  ],
+  "short": "npc.listener.short",
+  "room_line": "npc.listener.room",
+  "description": "npc.listener.description",
+  "room": "hall"
+}

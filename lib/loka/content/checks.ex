@@ -11,7 +11,7 @@ defmodule Loka.Content.Checks do
                 "fact.adjust" => %{"fact" => "fact"},
                 "skill.acquire" => %{"skill" => "skill"},
                 "topic.grant" => %{"topic" => "topic"},
-                "status.apply" => %{"status" => "status", "item" => "item"},
+                "status.apply" => %{"status" => "status", "item" => "item", "npc" => "npc"},
                 "quest.activate" => %{"quest" => "quest"},
                 "quest.resolve" => %{"quest" => "quest"},
                 "quest.fail" => %{"quest" => "quest"}

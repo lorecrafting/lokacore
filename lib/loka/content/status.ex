@@ -22,9 +22,9 @@ defmodule Loka.Content.Status do
       else: gate(m, g3) ++ values(statuses, m, defs, text) ++ foods(cures ++ later, m, defs)
   end
 
-  # The fields needing kernel_api 1.46: row G3's immune lists, steps naming an item and tick or
-  # expiry triggers; row 2c's status modifiers; row G13's liquid cures (ended by Drink). Returns
-  # the lists naming statuses and whether any field is used.
+  # The fields needing kernel_api 1.46: row G3's immune lists, steps naming an item (or, row 42, an
+  # NPC) and tick or expiry triggers; row 2c's status modifiers; row G13's liquid cures (ended by
+  # Drink). Returns the lists naming statuses and whether any field is used.
   defp api_146(defs) do
     immune =
       for kind <- ~w(npc item),
@@ -44,7 +44,7 @@ defmodule Loka.Content.Status do
   defp trigger?({_, {_, _, %{} = r}}),
     do:
       String.starts_with?(r["on"]["event"], "status_") or
-        Enum.any?(r["apply"], &(&1["op"] == "status.apply" and &1["item"] != nil))
+        Enum.any?(r["apply"], &(&1["op"] == "status.apply" and (&1["item"] || &1["npc"])))
 
   defp trigger?(_), do: false
 

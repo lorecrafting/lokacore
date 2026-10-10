@@ -7,8 +7,8 @@ defmodule Loka.Content.Reactions do
   and each fact.assign a fact with a value of its type. Its `when` tree is checked with every
   other (`conditions/1`, `Loka.Content.Checks`).
   """
-  import Loka.Content.Source, only: [at: 2, diag: 2]
-  import Loka.Content.Refs, only: [owners: 2, owned: 3, reference: 6]
+  import Loka.Content.Source, only: [at: 2, diag: 2, diag: 3]
+  import Loka.Content.Refs, only: [owners: 2, owned: 3, reference: 6, resolve: 4]
 
   @doc "Each schema-valid reaction's `when` root, as `{rel, steps, root}`."
   @spec conditions(map()) :: [{String.t(), list(), map()}]
@@ -122,10 +122,28 @@ defmodule Loka.Content.Reactions do
   defp consequence(rel, {%{"op" => "status.apply"} = s, i}, _, ctx),
     do:
       reference(rel, ["apply", i], "status", s, ctx.m, ctx.defs) ++
-        if(s["item"], do: reference(rel, ["apply", i], "item", s, ctx.m, ctx.defs), else: [])
+        if(s["item"], do: reference(rel, ["apply", i], "item", s, ctx.m, ctx.defs), else: []) ++
+        listener(rel, s, i, ctx)
 
   defp consequence(rel, {s, i}, _, ctx),
     do:
       owned(at(rel, ["apply", i, "op"]), "fact_changed", ctx.events) ++
         reference(rel, ["apply", i], "fact", s, ctx.m, ctx.defs)
+
+  # Row 42: a step names one holder, and a spawn template has no instance to take it.
+  defp listener(rel, %{"npc" => n} = s, i, ctx) do
+    case resolve(n, "npc", ctx.m, ctx.defs) do
+      {_, _, npc} ->
+        if npc["spawn_template"] || s["item"],
+          do: [
+            diag("SCHEMA_VIOLATION", at(rel, ["apply", i, "npc"]), %{"error" => "invalid_value"})
+          ],
+          else: []
+
+      _ ->
+        reference(rel, ["apply", i], "npc", s, ctx.m, ctx.defs)
+    end
+  end
+
+  defp listener(_, _, _, _), do: []
 end

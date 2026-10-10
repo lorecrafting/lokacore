@@ -1,0 +1,13 @@
+{
+  "keywords": [
+    "lute"
+  ],
+  "short": "item.lute.short",
+  "room_line": "item.lute.room",
+  "description": "item.lute.description",
+  "location": {
+    "in": "room",
+    "room": "hall"
+  },
+  "mass_grams": 1000
+}

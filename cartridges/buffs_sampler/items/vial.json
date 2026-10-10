@@ -1,0 +1,21 @@
+{
+  "keywords": [
+    "vial"
+  ],
+  "short": "item.vial.short",
+  "room_line": "item.vial.room",
+  "description": "item.vial.description",
+  "location": {
+    "in": "room",
+    "room": "hall"
+  },
+  "vessel": {
+    "capacity": 2,
+    "unit_label": "liquid.doses",
+    "initial": {
+      "kind": "potion",
+      "quantity": 2
+    }
+  },
+  "mass_grams": 100
+}
