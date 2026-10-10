@@ -1,0 +1,9 @@
+{
+  "keywords": [
+    "innkeeper"
+  ],
+  "short": "npc.innkeeper.short",
+  "room_line": "npc.innkeeper.room",
+  "description": "npc.innkeeper.description",
+  "room": "inn"
+}

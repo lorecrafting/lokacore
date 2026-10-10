@@ -1,0 +1,12 @@
+{
+  "title": "room.square.title",
+  "description": "room.square.description",
+  "exits": {
+    "east": {
+      "to": "mill"
+    },
+    "west": {
+      "to": "inn"
+    }
+  }
+}

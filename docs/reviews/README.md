@@ -11,6 +11,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
 - [Review: toolbox row W10, conditional schedules (loka-kgd.56, batch M6)](2026-10-10-toolbox-m6-schedules-review.md): **APPROVE WITH NOTES**
+- [Review: toolbox row W3, rumour by co-presence (loka-kgd.57, batch M6)](2026-10-10-toolbox-m6-rumour-review.md): **APPROVE WITH NOTES**
 - [Review: toolbox row 14, dialogue skill checks (loka-kgd.55, batch M6)](2026-10-10-toolbox-m6-persuade-review.md): **APPROVE WITH NOTES**
 - [Review: M6h, reaction step narration reaches the receipt (loka-kgd.13, batch M6)](2026-10-10-toolbox-m6-narration-review.md): **APPROVE WITH NOTES**
 - [Review: toolbox row W2, entity and pair facts (loka-kgd.53, batch M6)](2026-10-10-toolbox-m6-facts-review.md): **APPROVE WITH NOTES**
