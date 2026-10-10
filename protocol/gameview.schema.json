@@ -818,7 +818,7 @@
       ]
     },
     "QuestView": {
-      "description": "A journal entry (04 §15 'quest journal state'; 00 §4.10 Journal). Optional journal is the selected TextKey iff its definition declares journal (mechanics.md quest@1).",
+      "description": "A journal entry (04 §15 'quest journal state'; 00 §4.10 Journal). Optional journal is the selected TextKey iff its definition declares journal (mechanics.md quest@1). Optional hint (toolbox row W23): the stage hint whose time has passed, while the instance is open and its row has started_at.",
       "type": "object",
       "properties": {
         "quest": {
@@ -933,6 +933,9 @@
             "status"
           ],
           "additionalProperties": false
+        },
+        "hint": {
+          "$ref": "text.schema.json#/$defs/TextKey"
         }
       },
       "required": [

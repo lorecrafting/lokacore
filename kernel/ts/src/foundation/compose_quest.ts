@@ -33,6 +33,7 @@ export function quest(
       scope: op.scope,
       state: 'active',
       ...(op.bindings && { bindings: op.bindings }),
+      ...(op.started_at !== undefined && { started_at: op.started_at }),
     };
     return check(row === undefined && !taken, created as unknown as Json);
   }
@@ -40,8 +41,10 @@ export function quest(
     op.to === 'resolved'
       ? op.outcome !== undefined
       : op.to === 'failed' || op.outcome === undefined;
-  const { outcome: _, ...rest } = (row ?? {}) as Obj;
-  const next = op.outcome === undefined ? rest : { ...rest, outcome: op.outcome };
+  // Toolbox row W23: the stage's start time, replaced or removed by each transition.
+  const { outcome: _, started_at: __, ...rest } = (row ?? {}) as Obj;
+  const at = op.started_at === undefined ? rest : { ...rest, started_at: op.started_at };
+  const next = op.outcome === undefined ? at : { ...at, outcome: op.outcome };
   const legal = (LEGAL[op.from] ?? []).includes(op.to);
   return check(get(row, 'state') === op.from && legal && outcomeOk, { ...next, state: op.to });
 }

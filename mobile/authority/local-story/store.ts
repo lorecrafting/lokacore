@@ -145,7 +145,12 @@ const restorable = (world: World) =>
   encountersValid(world) &&
   sightsValid(world) &&
   !Object.values(world.state.quests ?? {}).some(
-    (q) => validate('DefinitionRef', q?.quest).length || validate('StateScope', q?.scope).length,
+    (q) =>
+      validate('DefinitionRef', q?.quest).length ||
+      validate('StateScope', q?.scope).length ||
+      // toolbox row W23: absent (an older save) means no hint; present must be a past LogicalTime
+      (q.started_at !== undefined &&
+        (validate('LogicalTime', q.started_at).length || q.started_at > world.state.clock)),
   ) &&
   !recoveryFault(world) &&
   Object.entries(world.entityResourceSpecs).every(([target, spec]) =>

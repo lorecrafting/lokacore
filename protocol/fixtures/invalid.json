@@ -20615,5 +20615,78 @@
         "code": "missing_property"
       }
     ]
+  },
+  {
+    "contract": "QuestJournal",
+    "value": {
+      "active": "q.a",
+      "objectives_met": "q.m",
+      "resolved": "q.r",
+      "failed": "q.f",
+      "abandoned": "q.x",
+      "hints": {
+        "active": [
+          {
+            "after": 0,
+            "text": "q.h"
+          }
+        ],
+        "done": []
+      }
+    },
+    "errors": [
+      {
+        "path": "/hints/active/0/after",
+        "code": "below_minimum"
+      },
+      {
+        "path": "/hints/done",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "QuestJournal",
+    "value": {
+      "active": "q.a",
+      "objectives_met": "q.m",
+      "resolved": "q.r",
+      "failed": "q.f",
+      "abandoned": "q.x",
+      "hints": {
+        "objectives_met": []
+      }
+    },
+    "errors": [
+      {
+        "path": "/hints/objectives_met",
+        "code": "too_few_items"
+      }
+    ]
+  },
+  {
+    "contract": "DeltaOp",
+    "value": {
+      "op": "quest.activate",
+      "writer_group": 0,
+      "quest": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "quest",
+        "key": "q"
+      },
+      "scope": {
+        "kind": "player",
+        "character_id": "10000000-0000-4000-8000-000000000001"
+      },
+      "instance_id": "30000000-0000-4000-8000-000000000001",
+      "started_at": -1
+    },
+    "errors": [
+      {
+        "path": "/started_at",
+        "code": "below_minimum"
+      }
+    ]
   }
 ]

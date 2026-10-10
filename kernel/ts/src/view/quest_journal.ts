@@ -1,6 +1,6 @@
 // Current chapter and player quest journal projections.
 import type { ChapterView, QuestView, Key } from '../contracts.gen.ts';
-import { refString, type World, type Steps } from '../runtime/decision.ts';
+import { refString, type QuestRow, type World, type Steps } from '../runtime/decision.ts';
 import * as patrol from '../mechanics/patrol/shared.ts';
 import { definition } from '../mechanics/dialogue/shared.ts';
 import { questOf } from '../mechanics/lookups.ts';
@@ -62,10 +62,21 @@ export function journal(world: World, steps: Steps): QuestView[] {
             : q.state === 'objectives_complete'
               ? j.objectives_met
               : ((q.outcome && j.outcomes?.[q.outcome]) ?? j[q.state]);
-      return { ...shown, journal };
+      const h = hint(world, q, journal === j.objectives_met ? 'objectives_met' : 'active');
+      return { ...shown, journal, ...(h && { hint: h }) };
     })
     .sort((a, b) => cmp(refString(a.quest), refString(b.quest)));
 }
+
+// Toolbox row W23: the last hint of the shown stage whose real minutes since started_at have passed
+// (after x 60 x the time policy's rate in logical time); none once closed or without started_at.
+function hint(world: World, q: QuestRow, stage: 'active' | 'objectives_met') {
+  const rate = world.cartridge.manifest.time_policy?.rate;
+  const hints = world.cartridge.quests![refString(q.quest)].journal?.hints?.[stage];
+  if (q.started_at === undefined || !rate || !hints || !OPEN.includes(q.state)) return;
+  return hints.filter((x) => x.after * 60 * rate <= world.state.clock - q.started_at!).pop()?.text;
+}
+const OPEN = ['active', 'objectives_complete'];
 
 function expeditionProgress(world: World, id: string) {
   const row = world.state.expeditions?.[id];

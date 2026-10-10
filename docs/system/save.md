@@ -20,7 +20,7 @@ re-decide differently: such a save opens `save_corrupt` with Start over, not a p
 ([dialogue hub decision](../decisions/owner-decision-dialogue-hub-2026-10-09.md)).
 
 Saved quest rows require valid `DefinitionRef` quest and `StateScope` scope fields before
-receipt recovery. Malformed fields are `save_corrupt`; no quest is silently skipped.
+receipt recovery. Malformed fields are `save_corrupt`; no quest is silently skipped. An optional `started_at` (toolbox row W23) must be a LogicalTime not after the saved clock, else `save_corrupt`; a row without it (an older save) loads and shows no hint.
 
 Refusals, nothing written:
 

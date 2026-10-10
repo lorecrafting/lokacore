@@ -115,6 +115,7 @@ export type QuestRow = {
   readonly state: QuestState;
   readonly outcome?: Key;
   readonly bindings?: readonly RoleBinding[];
+  readonly started_at?: number; // toolbox row W23: when the current stage began
 };
 
 /** The runtime world: immutable definitions and ids, shared between steps, plus State. */

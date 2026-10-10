@@ -1,0 +1,12 @@
+{
+  "keywords": [
+    "key"
+  ],
+  "short": "item.key.short",
+  "room_line": "item.key.room",
+  "description": "item.key.description",
+  "location": {
+    "in": "room",
+    "room": "hall"
+  }
+}

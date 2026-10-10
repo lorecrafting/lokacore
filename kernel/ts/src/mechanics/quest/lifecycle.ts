@@ -39,6 +39,32 @@ export function activation(mint: Mint, actor: CharacterId, quest: DefinitionRef)
   return { ops: [op], payload: { type: 'quest_activated', quest, instance_id } as const };
 }
 
+/**
+ * Toolbox row W23: `ops` with started_at `at` (the logical time of the sequence's cause) on each
+ * quest.activate and quest.transition of a quest whose journal declares hints; other quests' ops
+ * are unchanged, so their deltas and saves keep their bytes. `prior` are the proposal's earlier
+ * ops, for an instance activated in the same proposal.
+ */
+export function stamp(
+  world: World,
+  ops: readonly DeltaOp[],
+  at: number,
+  prior: readonly DeltaOp[],
+) {
+  const quests = world.cartridge.quests;
+  if (!quests || !Object.values(quests).some((q) => q.journal?.hints)) return ops;
+  type Activate = Extract<DeltaOp, { op: 'quest.activate' }>;
+  const refOf = (id: string) =>
+    world.state.quests?.[id]?.quest ??
+    [...prior, ...ops].find((o): o is Activate => o.op === 'quest.activate' && o.instance_id === id)
+      ?.quest;
+  return ops.map((o) => {
+    if (o.op !== 'quest.activate' && o.op !== 'quest.transition') return o;
+    const ref = o.op === 'quest.activate' ? o.quest : refOf(o.instance_id);
+    return ref && quests[refString(ref)]?.journal?.hints ? { ...o, started_at: at } : o;
+  });
+}
+
 /** A bound dialogue acceptance schedules the quest's one authored absolute deadline. */
 // size: allow 45, exact retirement joins bound activation and optional deadline scheduling
 export function boundActivation(

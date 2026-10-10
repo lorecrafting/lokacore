@@ -16,7 +16,7 @@ import {
 import { allocator, event, type Mint, type Steps, type World } from './decision.ts';
 import { factChanged, type Base } from '../mechanics/fact.ts';
 import { jobCommandId } from '../foundation/id_source.ts';
-import { earned } from '../mechanics/quest/lifecycle.ts';
+import { earned, stamp } from '../mechanics/quest/lifecycle.ts';
 import { sequence, triggered } from '../mechanics/reaction.ts';
 import { levelUp, oneWrite } from '../mechanics/levelling/shared.ts';
 import * as schedule from '../mechanics/schedule/rule.ts';
@@ -150,7 +150,7 @@ function join(
   const earns = p.world.cartridge.quests && evs.some((e) => e.payload.type === 'item_acquired');
   const before = earns ? now(p) : p.world;
   if (!('cartridge' in before)) return before;
-  p.ops.push(...own);
+  p.ops.push(...stamp(p.world, own, base.logical_time, p.ops));
   const actors = enteredActors(p.world, own);
   if (actors.size) {
     const at = now(p);
@@ -209,13 +209,14 @@ function react(p: P): Admitted | undefined {
       if (!('cartridge' in at)) return at;
       if (at.state.quests![instance_id]!.state !== 'active') continue;
       const writer_group = ++p.group;
-      p.ops.push({
+      const exit = {
         op: 'quest.transition',
         writer_group,
         instance_id,
         from: 'active',
         to: 'objectives_complete',
-      });
+      } as const;
+      p.ops.push(...stamp(p.world, [exit], next.cause.logical_time, p.ops));
     }
     const crow = crowDelivery(p, next);
     if (crow) return crow;

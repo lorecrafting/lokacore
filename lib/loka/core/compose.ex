@@ -171,7 +171,10 @@ defmodule Loka.Core.Compose do
     taken = Enum.any?(rows("quest", "quests", "instance_id", ctx), open?)
 
     row =
-      Map.merge(%{"quest" => q, "scope" => s, "state" => "active"}, Map.take(op, ["bindings"]))
+      Map.merge(
+        %{"quest" => q, "scope" => s, "state" => "active"},
+        Map.take(op, ["bindings", "started_at"])
+      )
 
     check(read(t, ctx) == nil and not taken, row)
   end
@@ -185,6 +188,9 @@ defmodule Loka.Core.Compose do
       if outcome,
         do: Map.put(row || %{}, "outcome", outcome),
         else: Map.delete(row || %{}, "outcome")
+
+    # Toolbox row W23: the stage's start time, replaced or removed by each transition.
+    next = Map.merge(Map.delete(next, "started_at"), Map.take(op, ["started_at"]))
 
     check(
       row["state"] == from and to in Map.get(@legal, from, []) and outcome_ok,
