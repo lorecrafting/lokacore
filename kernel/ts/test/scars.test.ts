@@ -14,7 +14,7 @@ import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { sequence } from '../src/mechanics/reaction.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
-import { statusKey } from '../src/mechanics/status/shared.ts';
+import { currentStatus, statusKey } from '../src/mechanics/status/shared.ts';
 import { key } from '../src/foundation/compose.ts';
 import { artifact as derived, MIGHT } from './derived_fixture.ts';
 
@@ -35,18 +35,13 @@ assert.ok(loaded.ok, JSON.stringify(loaded));
 const content = loaded.cartridge as Cartridge;
 const SCAR = 'scars_sampler@0.0.1:status/scar';
 const WOLF = 'scars_sampler@0.0.1:npc/wolf';
-const scarRow = (w: World, body: string) =>
-  w.state.statuses?.[
-    statusKey(
-      body as never,
-      {
-        cartridge_id: 'scars_sampler',
-        cartridge_version: '0.0.1',
-        kind: 'status',
-        key: 'scar',
-      } as never,
-    )
-  ];
+const SCAR_REF = {
+  cartridge_id: 'scars_sampler',
+  cartridge_version: '0.0.1',
+  kind: 'status',
+  key: 'scar',
+} as never;
+const scarRow = (w: World, body: string) => w.state.statuses?.[statusKey(body as never, SCAR_REF)];
 
 let n = 0;
 function accepted(r: ReturnType<typeof step>) {
@@ -183,4 +178,5 @@ test("the wolf's death clears its scar", () => {
   w = round(w); // the player's strike takes the wolf from 1 to 0
   assert.equal(level(w, wolf, resourceRef(w, 'hp')), 0);
   assert.deepEqual(scarRow(w, wolf), { active: false, generation: 1 });
+  assert.equal(currentStatus(w, wolf, SCAR_REF), undefined); // W6's status_active reads this
 });
