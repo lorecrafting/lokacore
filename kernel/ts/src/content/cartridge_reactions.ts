@@ -15,12 +15,21 @@ const NAMED: Record<string, string> = {
   fact: 'fact',
   item: 'item',
   kind: 'liquid',
+  npc: 'npc',
   quest: 'quest',
   room: 'room',
   scene: 'scene',
   status: 'status',
   story_point: 'story_point',
   victim: 'npc',
+};
+
+// The kernel_api minor each consequence op needs (major 1).
+const FLOORS: Record<string, number> = {
+  'quest.activate': 8,
+  'quest.resolve': 12,
+  'quest.fail': 12,
+  'population.suppress': 35,
 };
 
 const each = (c: Obj): [Obj, string][] =>
@@ -56,24 +65,12 @@ export function reactions(c: Obj, { named, typedValue }: Checks): Diagnostic[] {
   const out: Diagnostic[] = [];
   const [major, minor] = c.manifest.requires.kernel_api.at_least.split('.').map(Number);
   for (const [r, at] of each(c)) {
-    if (
-      (r.on.event === 'quest_resolved' || r.apply.some((s: Obj) => s.op === 'quest.activate')) &&
-      (major < 1 || (major === 1 && minor < 8))
-    )
-      out.push(
-        diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'),
-      );
-    if (
-      r.apply.some((s: Obj) => s.op === 'quest.resolve' || s.op === 'quest.fail') &&
-      (major < 1 || (major === 1 && minor < 12))
-    )
-      out.push(
-        diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'),
-      );
-    if (
-      r.apply.some((s: Obj) => s.op === 'population.suppress') &&
-      (major < 1 || (major === 1 && minor < 35))
-    )
+    const floor = Math.max(
+      r.on.event === 'quest_resolved' ? 8 : 0,
+      r.on.npc ? 47 : 0, // the entrant filter (row W3)
+      ...r.apply.map((s: Obj) => FLOORS[s.op] ?? 0),
+    );
+    if (floor && (major < 1 || (major === 1 && minor < floor)))
       out.push(
         diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'),
       );

@@ -1,0 +1,17 @@
+{
+  "room.square.title": "Square",
+  "room.square.description": "The village square. The mill lies east, the inn west.",
+  "room.mill.title": "Mill",
+  "room.mill.description": "The mill wheel hangs still, its axle split.",
+  "room.inn.title": "Inn",
+  "room.inn.description": "A low room with a long table and a fire.",
+  "npc.ada.short": "Ada",
+  "npc.ada.room": "[Ada](ada) is here.",
+  "npc.ada.description": "Ada, who walks the village every afternoon.",
+  "npc.innkeeper.short": "the innkeeper",
+  "npc.innkeeper.room": "[The innkeeper](innkeeper) is here.",
+  "npc.innkeeper.description": "The innkeeper, who hears everything sooner or later.",
+  "dialogue.mill.prompt": "\"Heard the mill wheel broke. Ada said so.\"",
+  "dialogue.mill.ask": "Ask about the mill",
+  "narration.mill.ask": "\"Split axle. No flour till the wright comes.\""
+}

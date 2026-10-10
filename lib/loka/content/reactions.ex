@@ -38,7 +38,8 @@ defmodule Loka.Content.Reactions do
     "barrier" => "barrier",
     "scene" => "scene",
     "status" => "status",
-    "kind" => "liquid"
+    "kind" => "liquid",
+    "npc" => "npc"
   }
   @doc "Each trigger filter that names a definition (W1), with that definition's kind."
   @spec filters() :: %{String.t() => String.t()}
@@ -46,6 +47,7 @@ defmodule Loka.Content.Reactions do
 
   defp rule({rel, %{"on" => %{"event" => event} = on} = r}, ctx) do
     api(r, ctx.m) ++
+      entrant(r, ctx.m) ++
       owned(at(rel, []), "reaction", ctx.kinds) ++
       owned(at(rel, ["on", "event"]), event, ctx.events) ++
       named(rel, on, ctx) ++
@@ -77,6 +79,15 @@ defmodule Loka.Content.Reactions do
        do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
        else: []
   end
+
+  # The entrant filter (toolbox row W3) needs kernel_api 1.47.
+  defp entrant(%{"on" => %{"npc" => _}}, %{"requires" => %{"kernel_api" => %{"at_least" => v}}}) do
+    if Enum.map(String.split(v, "."), &String.to_integer/1) < [1, 47],
+      do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
+      else: []
+  end
+
+  defp entrant(_, _), do: []
 
   defp consequence(rel, {%{"op" => "quest.activate"} = s, i}, on, ctx) do
     path = at(rel, ["apply", i, "op"])

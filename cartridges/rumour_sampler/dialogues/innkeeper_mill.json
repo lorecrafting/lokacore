@@ -1,0 +1,26 @@
+{
+  "npc": "innkeeper",
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "fact_compare",
+      "fact": "knows_mill",
+      "subject": "target",
+      "equals": true
+    }
+  },
+  "prompt": "dialogue.mill.prompt",
+  "roles": {
+    "innkeeper": {
+      "role": "npc",
+      "npc": "innkeeper"
+    }
+  },
+  "choices": {
+    "ask": {
+      "label": "dialogue.mill.ask",
+      "narration": "narration.mill.ask",
+      "sequence": []
+    }
+  }
+}
