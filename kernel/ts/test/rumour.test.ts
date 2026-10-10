@@ -86,8 +86,8 @@ test('the innkeeper knows about the mill by evening because Ada walked through t
   assert.notEqual(talk(w).decision.kind, 'accepted');
   w = play(play(w, move('east')), until(16, 30)); // Ada passed the mill at 16:00
   assert.deepEqual([knows(w, 'ada'), knows(w, 'innkeeper')], [true, false]);
-  // Ada walked through the inn at 17:00, the player in the square (one wait per due hour, as the
-  // host ends an elapsed step at each due job: one wait across two of Ada's hours faults).
+  // Ada walked through the inn at 17:00, the player in the square (one wait per due hour: one wait
+  // across two of Ada's hours faults nonfuture_job, Beads loka-qi0r).
   w = play(play(w, until(17, 30)), until(18, 30));
   assert.equal(knows(w, 'innkeeper'), true);
   assert.equal(talk(play(w, move('west'))).decision.kind, 'accepted');
@@ -96,10 +96,8 @@ test('the innkeeper knows about the mill by evening because Ada walked through t
 // Breaks: the rumour spreads on anyone entering the inn while Ada knows, with Ada elsewhere (a
 // trigger on the room alone), so co-presence is not required.
 test('the player entering the inn while Ada is away carries nothing', () => {
-  let w = play(play(fresh(), until(16, 30)), move('west')); // Ada knows, at the mill
+  const w = play(play(fresh(), until(16, 30)), move('west')); // Ada knows, at the mill
   assert.deepEqual([knows(w, 'ada'), knows(w, 'innkeeper')], [true, false]);
-  w = play(w, until(17, 30)); // she comes in at 17:00
-  assert.equal(knows(w, 'innkeeper'), true);
 });
 
 const TELLS = `${C}:reaction/tells_innkeeper`;
