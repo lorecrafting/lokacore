@@ -5,12 +5,11 @@
 #   policy-op owners of protocol/capability_registry.json;
 # - kernel/ts/test/subset.gen.ts: the same for the test-only probe
 #   protocol/fixtures/subset.schema.json;
-# - docs/contracts.gen.md (capability and schema docs), docs/residency.gen.json (the
-#   capability/residency matrix) and docs/system-graph.gen.json (bin/system_graph.exs).
-# It first fails on an Elixir host adapter without a differential (ADR-074). `--check`
-# regenerates in memory and exits 1 if a committed file differs; `--check REGISTRY` reads a
-# capability registry copy instead (the red control plants one). A schema outside the
-# subset fails here as it fails `mix compile`.
+# - docs/contracts.gen.md, docs/residency.gen.json (capability/residency matrix) and the System
+#   pages' docs/system-graph.gen.json, checks.gen.json, toolbox.gen.json (bin/system_graph.exs).
+# It first fails on an Elixir host adapter without a differential (ADR-074). `--check` regenerates
+# in memory and exits 1 if a committed file differs; `--check REGISTRY` reads a capability registry
+# copy instead (the red control plants one). A schema outside the subset fails as in `mix compile`.
 #
 #   elixir bin/contracts.exs [--check [REGISTRY]]
 root = Path.expand("..", __DIR__)
@@ -123,8 +122,7 @@ effects = read.("protocol/effect_registry.json")
 pin = &"#{&1["key"]}@#{&1["version"]}"
 
 # ---- ADR-074 trigger ----
-# An Elixir host adapter on a portable_capability needs a cross-kernel differential,
-# declared and present.
+# An Elixir host adapter on a portable_capability needs a cross-kernel differential, declared and present.
 trigger =
   for e <- registry,
       e["residency"] == "portable_capability",
@@ -285,6 +283,8 @@ targets = %{
       "protocol/fixtures/subset.schema.json"
     )
 }
+
+targets = Map.merge(targets, SystemGraph.Pages.targets(root))
 
 case System.argv() do
   [] ->

@@ -6,7 +6,9 @@
 # schema still reaches the stale-file check. Fails on a registry command, event or policy op no
 # schema declares, and on a missing save-table block. Save holds no schema: its column is the
 # save tables. A definition kind with no CompiledCartridge map keyed `:kind/` takes the key-name
-# rule (by_name/3), else node null.
+# rule (by_name/3), else node null. State sections, saved and authored: bin/system_graph_homes.exs.
+Code.require_file("system_graph_homes.exs", __DIR__)
+
 defmodule SystemGraph do
   @layer_order ~w(Content Capabilities Change State Save View)
   @layers %{
@@ -29,7 +31,8 @@ defmodule SystemGraph do
   defp build(root, registry, defs) do
     docs = Enum.map(Enum.sort(Path.wildcard(Path.join(root, "protocol/*.schema.json"))), &doc/1)
     kinds = by_name(registry, definition_kinds(defs), content_defs(docs))
-    nodes = nodes(docs, defs, definition_owners(registry, kinds), spec_files(root))
+    sections = JSON.decode!(File.read!(Path.join(root, "docs/state-sections.gen.json")))
+    nodes = nodes(docs, defs, context(root, registry, defs, kinds, sections))
 
     %{
       "layers" => @layer_order,
@@ -37,14 +40,25 @@ defmodule SystemGraph do
       "capabilities" => Enum.map(registry, &capability(&1, kinds, defs)),
       "nodes" => nodes,
       "edges" => Enum.flat_map(nodes, &edges(&1["name"], defs)),
-      "saveTables" => save_tables(root, state_sections(root))
+      "saveTables" => save_tables(root, SystemGraph.Homes.state_sections(sections["kinds"]))
     }
   end
 
-  defp nodes(docs, defs, owner, specs) do
+  # What a node reads beyond its schema: owners, cited spec files, saved sections, authored files.
+  defp context(root, registry, defs, kinds, sections) do
+    %{
+      owner: definition_owners(registry, kinds),
+      specs: spec_files(root),
+      saved:
+        SystemGraph.Homes.saved(defs, sections["ops"], &(kind(defs[&1]) in ~w(object union enum))),
+      authored: SystemGraph.Homes.authored(root, defs)
+    }
+  end
+
+  defp nodes(docs, defs, ctx) do
     for d <- docs,
         {name, s} <- Enum.sort(d["defs"]),
-        do: node(d, name, s, defs, owner, specs)
+        do: node(d, name, s, defs, ctx)
   end
 
   defp doc(path) do
@@ -62,7 +76,7 @@ defmodule SystemGraph do
     }
   end
 
-  defp node(d, name, s, defs, owner, specs) do
+  defp node(d, name, s, defs, ctx) do
     line =
       case Regex.run(~r/^    "#{name}": /m, d["raw"], return: :index) do
         [{at, _}] -> 1 + length(:binary.matches(binary_part(d["raw"], 0, at), "\n"))
@@ -75,12 +89,14 @@ defmodule SystemGraph do
       "line" => line,
       "layer" => d["layer"],
       "kind" => kind(defs[name]),
-      "owner" => owner[name],
+      "owner" => ctx.owner[name],
       "description" => s["description"],
       "fields" => fields(defs[name]),
       "enum" => values(defs[name]),
       "examples" => s["examples"],
-      "spec" => cited(s["description"] || "", specs)
+      "spec" => cited(s["description"] || "", ctx.specs),
+      "saved" => ctx.saved[name],
+      "authored" => ctx.authored[name]
     }
   end
 
@@ -158,16 +174,17 @@ defmodule SystemGraph do
 
   defp anchor(md, [sec]) do
     case Regex.run(~r/^#+ (#{Regex.escape(sec)}\.?\s.*)$/m, md) do
-      # GitHub's heading slug: lower case, punctuation dropped, each space a hyphen.
-      [_, h] ->
-        "#" <> String.replace(Regex.replace(~r/[^\w\- ]/u, String.downcase(h), ""), " ", "-")
-
-      nil ->
-        ""
+      [_, h] -> slug(h)
+      nil -> ""
     end
   end
 
   defp anchor(_, _), do: ""
+
+  # GitHub's heading slug: lower case, punctuation dropped, each space a hyphen.
+  @spec slug(String.t()) :: String.t()
+  def slug(h),
+    do: "#" <> String.replace(Regex.replace(~r/[^\w\- ]/u, String.downcase(h), ""), " ", "-")
 
   # Definition kind => contract, from CompiledCartridge's maps (key pattern `:kind/`).
   defp definition_kinds(defs) do
@@ -254,17 +271,6 @@ defmodule SystemGraph do
            for([_, f] <- Regex.scan(~r/`([\w.]+\.json)`/, fixtures), do: f)}
   end
 
-  # docs/state-sections.gen.json (kernel/ts/test/state_sections.test.ts): MutationTarget kind =>
-  # State section, turned into the sections a state_row holds and the kinds kept in each.
-  defp state_sections(root) do
-    Path.join(root, "docs/state-sections.gen.json")
-    |> File.read!()
-    |> JSON.decode!()
-    |> Enum.group_by(&elem(&1, 1), &elem(&1, 0))
-    |> Enum.map(fn {section, kinds} -> %{"section" => section, "targets" => Enum.sort(kinds)} end)
-    |> Enum.sort_by(& &1["section"])
-  end
-
   # The `| Table | Rows |` block under "## The save file" in docs/system/save.md.
   defp save_tables(root, sections) do
     text = File.read!(Path.join(root, "docs/system/save.md"))
@@ -287,3 +293,6 @@ defmodule SystemGraph do
     end
   end
 end
+
+# The other System pages (Checks, Toolbox) reuse slug/1.
+Code.require_file("system_pages.exs", __DIR__)

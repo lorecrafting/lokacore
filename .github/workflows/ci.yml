@@ -76,6 +76,7 @@ jobs:
       - run: elixir bin/check_docs.exs
       - run: bin/docs_red_controls.sh
       - run: python3 bin/check_beads_export.py && sh bin/beads_red_controls.sh
+      - run: sh bin/graph_diff_red_controls.sh
 
   # The 10,000 fresh sequences (CI is set), in parallel with the kernel job, which skips sim.test.ts.
   sim:

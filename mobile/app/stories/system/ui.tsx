@@ -52,3 +52,48 @@ export function Link({
     </a>
   );
 }
+
+// A filter: "(any)" or one of the options.
+export const Choose = ({
+  label,
+  options,
+  set,
+}: {
+  label: string;
+  options: string[];
+  set: (value: string) => void;
+}) => (
+  <label style={{ marginInlineEnd: space.md }}>
+    {label}{' '}
+    <select onChange={(e) => set(e.target.value)} defaultValue="">
+      <option value="">(any)</option>
+      {options.map((o) => (
+        <option key={o}>{o}</option>
+      ))}
+    </select>
+  </label>
+);
+
+// A table under a header row; the caller's rows go in the body.
+export const Table = ({
+  label,
+  heads,
+  children,
+}: {
+  label?: string;
+  heads: string[];
+  children: ReactNode;
+}) => (
+  <table aria-label={label} style={{ borderCollapse: 'collapse' }}>
+    <thead>
+      <tr>
+        {heads.map((h) => (
+          <th key={h} style={cell}>
+            {h}
+          </th>
+        ))}
+      </tr>
+    </thead>
+    <tbody>{children}</tbody>
+  </table>
+);

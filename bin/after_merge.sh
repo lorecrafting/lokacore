@@ -11,6 +11,7 @@
 # (including an unmerged branch or review-<PR>, or a dirty PR worktree) happens before any change, except that a stale script copy first fast-forwards main.
 # review-<PR> counts as merged when `git cherry` finds each of its commits' patches in origin/main.
 # A checkout whose copy of this script is behind origin/main fast-forwards and re-runs the new copy.
+# A rerun after a failed Beads commit works: br close is skipped for an issue already closed.
 # An export dirtied again after the commit (a concurrent br write) gets its own Beads commit before the push.
 set -u
 GH=${GH:-gh}
@@ -62,7 +63,9 @@ if ! git pull -q --ff-only origin main; then
 fi
 [ ! -f "$tmp/export" ] || cp "$tmp/export" $j
 br sync --flush-only > /dev/null || die 'br sync --flush-only failed'
-br close "$id" --reason "Merged #$pr" > /dev/null || die "br close $id failed"
+# A rerun after a failed Beads commit finds the issue closed already.
+[ "$(br show "$id" --json | python3 -c 'import json,sys; print(json.load(sys.stdin)[0]["status"])')" = closed ] \
+  || br close "$id" --reason "Merged #$pr" > /dev/null || die "br close $id failed"
 [ -z "$wt" ] || git worktree remove "$wt" || die "worktree for $branch not removed (uncommitted work?)"
 ! git rev-parse -q --verify "refs/heads/$branch" > /dev/null || git branch -q -d "$branch" || die "$branch is not merged; not deleted"
 [ -z "$review" ] || git update-ref -d "refs/heads/review-$pr" "$review" || die "review-$pr moved or not deleted"

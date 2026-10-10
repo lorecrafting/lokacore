@@ -175,6 +175,39 @@ defmodule Loka.SystemGraphTest do
     assert %{"section" => "created", "targets" => ["entity"]} in state_row["sections"]
   end
 
+  # Breaks: an op mapped to its own name rather than its target's section (population.control is a
+  # population_plan), a payload field missed (fuel.set writes `from`/`to`), or a scalar kept in many
+  # rows (cooldown.start's LogicalTime) labelled saved.
+  test "a DeltaOp's row contract is saved in that op's State section" do
+    assert contract("StatusRow")["saved"] == ["statuses"]
+    assert contract("PopulationControl")["saved"] == ["population_plans"]
+    assert contract("FuelRow")["saved"] == ["fuel"]
+    assert contract("LogicalTime")["saved"] == nil
+  end
+
+  # Breaks: a payload saved with a row missed (entity.create's identity, choice.open's attempts) or
+  # an array payload (choice.open's roles, quest.activate's bindings) skipped.
+  test "a payload saved with a row is saved in that op's State section" do
+    assert contract("EntityIdentity")["saved"] == ["created"]
+    assert contract("ChoiceAttempts")["saved"] == ["choices"]
+    assert contract("RoleBinding")["saved"] == ["choices", "quests"]
+  end
+
+  # Breaks: a CompiledCartridge map's files listed under another map's contract, the map dropped,
+  # or a map authored as one file (`facts.json`) missed.
+  test "a cartridge map's contract lists the authored files of that map" do
+    assert "cartridges/ashmere_rooms/rooms/boathouse.json" in contract("RoomDefinition")[
+             "authored"
+           ]
+
+    refute "cartridges/ashmere_rooms/rooms/boathouse.json" in contract("ItemDefinition")[
+             "authored"
+           ]
+
+    assert "cartridges/ashmere_facts/facts.json" in contract("FactSpec")["authored"]
+    assert contract("StateDelta")["authored"] == nil
+  end
+
   # Breaks: protocol/README.md's fixture column misread (another column, a row's second file).
   test "each schema file lists the fixtures protocol/README.md gives it" do
     fixtures = Map.new(@graph["files"], &{&1["file"], &1["fixtures"]})

@@ -49,13 +49,16 @@ their rules and red controls remain available for resumption.
   an existing one is never raised. Test files keep the escape hatch.
 - `mix credo --strict`: cyclomatic complexity 9, nesting 2, ABC size 30, arity 6; nothing else.
   Any `credo:disable` comment gives its reason on the same line; the reviewer checks it.
-- `elixir bin/contracts.exs --check`: `kernel/ts/src/contracts.gen.ts`, the
+- `elixir bin/contracts.exs --check` (also in pre-commit when `docs/MECHANICS-TOOLBOX.md`, `docs/CHECKS.md`, `docs/system/mechanics.md` or `protocol/` is staged, as a push to `main` runs no hosted CI): `kernel/ts/src/contracts.gen.ts`, the
   [capability/schema docs](contracts.gen.md) and the capability/residency matrix
   (`docs/residency.gen.json`) and the System pages' graph (`docs/system-graph.gen.json`, also
-  from `docs/system/save.md`'s table block, `protocol/README.md`'s fixture column and
+  from `docs/system/save.md`'s table block, `protocol/README.md`'s fixture column,
+  the authored file names under `cartridges/*/<map>/` and `cartridges/*/<map>.json` and
   `docs/state-sections.gen.json`, which `kernel/ts/test/state_sections.test.ts` keeps current:
-  `LOKA_WRITE_GEN=1` rewrites it, then rerun contracts.exs) match `protocol/` (run without
-  `--check` to regenerate); an
+  `LOKA_WRITE_GEN=1` rewrites it, then rerun contracts.exs) match `protocol/`, and the System
+  Checks and Toolbox pages' `docs/checks.gen.json` and `docs/toolbox.gen.json` match this page's
+  bullets and the [toolbox](MECHANICS-TOOLBOX.md) table with its `docs/system/mechanics.md` rules
+  (run without `--check` to regenerate, also after editing any of the three); an
   Elixir host adapter on a `portable_capability` without a differential fails (ADR-074), and so
   does a registry command, event or policy op that no schema declares.
 - `elixir bin/features.exs --check`: the [feature map](features.gen.md) matches the
@@ -97,9 +100,10 @@ their rules and red controls remain available for resumption.
   It also runs `bin/after_merge.sh` (stub `gh`/`br`; bare origin): an unmerged PR, a stray file, a dirty
   PR worktree, an unmerged `review-<N>`, a remote PR branch ahead of main or an export changed on both sides is refused with nothing changed; a dirty Beads export survives the pull; the worktree,
   branch and `review-<N>` are removed and main is pushed with the ROADMAP edit; a script copy behind main is replaced and re-run, and an export dirtied after the commit gets its own commit before the push.
+  It also runs `.githooks/pre-commit` (stub `mise`): a staged `docs/MECHANICS-TOOLBOX.md`, `docs/CHECKS.md`, `docs/system/mechanics.md` or `protocol/` file runs `contracts.exs --check` and a failure blocks the commit; an unrelated file does not. A rerun of `bin/after_merge.sh` for an issue already closed skips `br close`.
   It also runs `bin/preview_update.sh` and `bin/polish_session.sh` (stub `mise` servers on ports 7006 and up, stub `gh`):
   a decoy server found only by name survives, a second run restarts nothing, `npm ci` runs only for a
-  changed lockfile, a dirty preview, a served or closed session is refused; close pushes, opens the PR and serves
+  changed lockfile, a dirty preview, a served or closed session is refused; `update` merges `origin/main` into the session and restarts Storybook only when the pull adds or renames a `*.stories.tsx` or `*.mdx` file and the session is served, and refuses a closed session; close pushes, opens the PR and serves
   the preview again, leaving the web preview and Expo running.
   It also runs `bin/br_create.sh` with a stub `br` (the new id's `source_repo_path` is cleared; a local path in the new row warns but still creates).
   It also runs `bin/mutate.sh` (mutant sweep with restore: an apply that does nothing, a restore that
@@ -111,7 +115,11 @@ their rules and red controls remain available for resumption.
   listing worktrees with uncommitted changes.
 - CI (`.github/workflows/`): `ci.yml` and `book-e2e.yml` run on every push to a branch other than
   `main`, nightly on `main` (10:00 UTC) and by `workflow_dispatch` (`gh workflow run <wf> --ref <branch>`),
-  a superseded head's run cancelled; no pull request trigger ([two-lane CI](decisions/owner-decision-two-lane-ci-2026-10-09.md)). `book-e2e.yml` runs two jobs in parallel: `e2e`, the local Book browser save/reload path with tester.army e2e
+  a superseded head's run cancelled; no pull request trigger ([two-lane CI](decisions/owner-decision-two-lane-ci-2026-10-09.md)).
+  `graph-diff.yml` alone runs on a pull request (never a push): it posts or updates one PR comment
+  listing the System graph's node and edge changes against the base (`bin/graph_diff.py`, its
+  control `bin/graph_diff_red_controls.sh` in `ci.yml`'s `lint` job); it never fails on a diff and
+  is not a merge gate. `book-e2e.yml` runs two jobs in parallel: `e2e`, the local Book browser save/reload path with tester.army e2e
   (see [preview command](web-preview.md)), and `storybook`: `npm run storybook:smoke` (every story renders, its play
   passes, axe at `test: 'error'`, every button's name starts with its shown text; one story file at a time; one run in the default light palette, [Storybook](web-preview.md#storybook)), then `npm run storybook:live` (every Live story and its click-through on the dev server), then `npm run storybook:picker` (one pick reaches the [polish queue](web-preview.md#polish-queue), a status line shows, Close batch waits for a working item); `mobile.yml` and `mobile-bundle.yml` are disabled
   in GitHub and retain only manual triggers in source for eventual resumption. Each workflow has
