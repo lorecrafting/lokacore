@@ -24,8 +24,10 @@ defmodule Loka.Core.ComposeKnowledge do
     end
   end
 
+  # A first visit has no from and no count; a later one (variety@1) names the current row in from
+  # and counts it plus one.
   defp valid?(%{"op" => "visit.record"} = op, before, _),
-    do: before == :missing and op["value"]["room_id"] == op["room_id"]
+    do: op["value"]["room_id"] == op["room_id"] and counted?(op, before)
 
   defp valid?(%{"op" => "observation.record"} = op, before, horizon),
     do:
@@ -33,4 +35,10 @@ defmodule Loka.Core.ComposeKnowledge do
         op["value"]["npc_id"] == op["npc_id"] and
         op["value"]["at"] <= horizon and
         (before == :missing or op["value"]["at"] >= before["at"])
+
+  defp counted?(op, :missing),
+    do: not is_map_key(op, "from") and not is_map_key(op["value"], "count")
+
+  defp counted?(op, before),
+    do: op["from"] == before and op["value"]["count"] == Map.get(before, "count", 1) + 1
 end

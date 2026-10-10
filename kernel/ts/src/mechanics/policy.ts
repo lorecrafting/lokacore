@@ -1,9 +1,9 @@
 import { illuminated } from './light/shared.ts';
 // The policy evaluator (policy@1, fact@1's fact_compare, containment@1's has_item, schedule@1's
 // time_window, barrier@1's barrier_state, quest@1's quest_state, target_resolution@1's
-// target_present, attributes@1's stat_compare and resource_compare, tags@1's has_tag, calendar@1's sky; 21 §3.2,
-// §4 Policy; 06 §20-21): pure, over committed state, for one actor and the target of the action
-// evaluated, if any.
+// target_present, attributes@1's stat_compare and resource_compare, tags@1's has_tag, calendar@1's sky,
+// variety@1's visited_count; 21 §3.2, §4 Policy; 06 §20-21): pure, over committed state, for one
+// actor and the target of the action evaluated, if any.
 import type { CharacterId, EntityId, Policy, Tag } from '../contracts.gen.ts';
 import { bodyOf, refString, type World } from '../runtime/decision.ts';
 import { barrierState, questOf } from './lookups.ts';
@@ -13,6 +13,7 @@ import { level } from './resource.ts';
 import { stateIs } from './escort/shared.ts';
 import { present } from '../commands/target.ts';
 import { hourOf, lunarPhase } from './calendar.ts';
+import { visits } from './knowledge/shared.ts';
 import { value as attributeValue } from './attributes/shared.ts';
 
 /**
@@ -53,6 +54,8 @@ export function holds(
     }
     case 'sky':
       return lunarPhase(world.cartridge, world.state.clock) === p.lunar;
+    case 'visited_count':
+      return visits(world, actor, world.roomIds[refString(p.room)]!) >= p.at_least;
     case 'target_present':
       return ctx.target !== undefined && present(world, actor, ctx.target, ctx.steps);
     case 'light_off':

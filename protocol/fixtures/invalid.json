@@ -20200,5 +20200,82 @@
         "code": "missing_property"
       }
     ]
+  },
+  {
+    "contract": "Policy",
+    "value": {
+      "op": "visited_count"
+    },
+    "errors": [
+      {
+        "path": "/at_least",
+        "code": "missing_property"
+      },
+      {
+        "path": "/room",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "Policy",
+    "value": {
+      "op": "visited_count",
+      "room": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "garden"
+      },
+      "at_least": 0,
+      "x": 1
+    },
+    "errors": [
+      {
+        "path": "/at_least",
+        "code": "below_minimum"
+      },
+      {
+        "path": "/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "VisitedRoom",
+    "value": {
+      "actor_id": "10000000-0000-4000-8000-000000000001",
+      "room_id": "20000000-0000-4000-8000-000000000001",
+      "count": 1
+    },
+    "errors": [
+      {
+        "path": "/count",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "contract": "DeltaOp",
+    "value": {
+      "op": "visit.record",
+      "writer_group": 0,
+      "actor_id": "10000000-0000-4000-8000-000000000001",
+      "room_id": "20000000-0000-4000-8000-000000000001",
+      "from": {
+        "actor_id": "10000000-0000-4000-8000-000000000001"
+      },
+      "value": {
+        "actor_id": "10000000-0000-4000-8000-000000000001",
+        "room_id": "20000000-0000-4000-8000-000000000001",
+        "count": 2
+      }
+    },
+    "errors": [
+      {
+        "path": "/from/room_id",
+        "code": "missing_property"
+      }
+    ]
   }
 ]

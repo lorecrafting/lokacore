@@ -60,6 +60,7 @@ defmodule Loka.Content.Compiler do
   defp checks(manifest, defs, v2, located, registry) do
     Enum.concat([
       Loka.Content.Calendar.check(elem(located, 1)["calendar"] || %{}, defs, manifest),
+      Loka.Content.Variety.check(manifest, defs, located, {v2, registry}),
       Resources.check(manifest, defs, v2, located, registry),
       Entities.carry(manifest, defs, located),
       Loka.Content.Fuel.check(manifest, defs),
@@ -133,7 +134,7 @@ defmodule Loka.Content.Compiler do
 
     case validated(rel, [], "ManifestFile", m, Map.put(defs, "ManifestFile", file)) do
       [] ->
-        {extra, manifest} = Map.split(m, ["entry", "calendar", "world", "chapters", "ancestries"])
+        {extra, manifest} = Map.split(m, ~w(entry calendar world chapters ancestries alternates))
         located = {ref(extra["entry"], "room", m), settings(extra, m)}
         diags = Requires.check(rel, manifest, registry)
         manifest = manifest |> Position.requires() |> Scenes.requires()
@@ -145,27 +146,24 @@ defmodule Loka.Content.Compiler do
   end
 
   defp manifest_file(defs) do
+    v2 = get_in(defs, ["CompiledCartridge", "oneOf", Access.at(1), "properties"])
+
     defs["CartridgeManifest"]
     |> put_in(["properties", "entry"], %{"$ref" => "DefinitionRef"})
     |> put_in(["properties", "calendar"], %{"$ref" => "Calendar"})
     |> put_in(["properties", "world"], %{"$ref" => "WorldSettings"})
-    |> put_in(
-      ["properties", "chapters"],
-      get_in(defs, ["CompiledCartridge", "oneOf", Access.at(1), "properties", "chapters"])
-    )
-    |> put_in(
-      ["properties", "ancestries"],
-      get_in(defs, ["CompiledCartridge", "oneOf", Access.at(1), "properties", "ancestries"])
-    )
+    |> Map.update!("properties", &Map.merge(&1, Map.take(v2, ~w(chapters ancestries alternates))))
   end
 
+  # alternates holds text keys, not references: kept out of expand, whose clauses match keys.
   defp settings(extra, m),
     do:
-      Map.delete(extra, "entry")
+      Map.drop(extra, ["entry", "alternates"])
       |> Water.settings(m)
       |> Derived.settings(m)
       |> Levelling.settings(m)
       |> Checks.expand(m)
+      |> Map.merge(Map.take(extra, ["alternates"]))
 
   # text.json is the TextCatalog; nil when absent, :unknown when rejected (text keys are then
   # not resolved against it).

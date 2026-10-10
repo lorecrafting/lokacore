@@ -35,7 +35,7 @@ defmodule Loka.Core.InvariantsKnowledge do
 
   defp valid?(%{"op" => "visit.record"} = op, before, _),
     do:
-      before == :missing and op["value"]["actor_id"] == op["actor_id"] and
+      next_visit?(op, before) and op["value"]["actor_id"] == op["actor_id"] and
         op["value"]["room_id"] == op["room_id"] and
         Contracts.validate("VisitedRoom", op["value"]) == :ok
 
@@ -46,4 +46,11 @@ defmodule Loka.Core.InvariantsKnowledge do
         op["value"]["npc_id"] == op["npc_id"] and op["value"]["at"] <= horizon and
         (before == :missing or before["at"] <= op["value"]["at"]) and
         Contracts.validate("ObservedNpc", op["value"]) == :ok
+
+  # The first visit has neither from nor count; each later one (variety@1) is the row plus one.
+  defp next_visit?(op, :missing),
+    do: not is_map_key(op, "from") and not is_map_key(op["value"], "count")
+
+  defp next_visit?(op, before),
+    do: before == op["from"] and op["value"]["count"] == (before["count"] || 1) + 1
 end

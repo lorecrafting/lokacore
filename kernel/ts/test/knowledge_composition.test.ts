@@ -30,3 +30,21 @@ test('knowledge invariant refuses forged success over null visit and observation
     );
   }
 });
+
+// Break: the invariant accepts a counterfeit write of a skipped, stale-based or first-visit count.
+test('knowledge invariant refuses forged counted visits', () => {
+  const cases = read('protocol/fixtures/knowledge_composition.json').cases;
+  for (const bad of [
+    'visit-count-cannot-skip',
+    'stale-visit-from-refuses',
+    'first-visit-has-no-count',
+  ]) {
+    const c = cases.find((c: any) => c.id === bad);
+    const result = { changes: [{ target: c.expected.fault.target, value: c.ops[0].value }] };
+    assert.equal(
+      check('delta_preconditions_hold', { state: c.state, delta: { ops: c.ops }, result }),
+      false,
+      bad,
+    );
+  }
+});
