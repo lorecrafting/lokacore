@@ -4,8 +4,10 @@ import { over } from '../foundation/compose.ts';
 import { cmp } from '../foundation/validate.ts';
 
 /**
- * Queues a run's crossed next hour (its `next`) in the drain's (due_time, job_id) order; the
- * drain's steps past due_jobs_per_advance are that limit.
+ * Queues a run's crossed next hour (its `next`) as a sub-step in the drain's (due_time, job_id)
+ * order; the drain's steps past due_jobs_per_advance are that limit.
+ * ponytail: `due.length` also counts due jobs the drain skips, so it can fault early; count run
+ * steps if a cartridge ever nears 1024.
  */
 export function queueHour(due: [string, { due_time: number }][], job_id: string, ran: object) {
   const next = (ran as { next?: number }).next;

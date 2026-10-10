@@ -167,6 +167,14 @@ test('one wait across two or three listed hours runs each hour in order', () => 
   assert.equal(three.world.state.containers[BRAM_ID], GREEN);
   assert.deepEqual(pending(three.world), [H(54)]);
   assert.equal(three.world.state.jobs?.[J0]?.status, 'completed');
+  // Each sub-step runs under the job CommandId of (J0, its hour), Python hashlib over
+  // ["loka-job-command-v1", J0, hour]; one CommandId for all would repeat event ids.
+  const events = three.decision.kind === 'accepted' ? three.decision.events : [];
+  assert.deepEqual(
+    events.map((e) => e.causation_id),
+    [RUN_J0, 'e81a8c5c-15b7-83f6-809a-b21a31b09054', '05b69dc4-9af0-8572-9359-cf2d9d85615f'],
+  );
+  assert.equal(new Set(events.map((e) => e.id)).size, 3);
   assert.deepEqual(wait(w, H(43)), three);
   // Ada (landing from 06:00, green from 20:00; her job id sorts first): 06:00 ties go to her.
   const wa = withAda({ '6': landing, '20': green });
@@ -186,8 +194,28 @@ test('one wait across two or three listed hours runs each hour in order', () => 
       [H(30), 'bram'],
     ],
   );
-  // Each crossed hour is a drain step under due_jobs_per_advance (1024): 513 days is 1026.
-  const long = wait(w, H(6 + 24 * 513));
+  // Ada listed only at 06:00: her original job due at 06:00 next day ties Bram's crossed 06:00
+  // hour, and her id sorts first.
+  const tie = withAda({ '6': green });
+  const tied = wait(tie, H(30)).decision;
+  assert.deepEqual(
+    tied.kind === 'accepted' &&
+      tied.events.map((e) => [
+        e.logical_time,
+        (e.payload as { entity_id: string }).entity_id === tie.entityIds[`${F}:npc/bram`]
+          ? 'bram'
+          : 'ada',
+      ]),
+    [
+      [H(19), 'bram'],
+      [H(30), 'ada'],
+      [H(30), 'bram'],
+    ],
+  );
+  // Each crossed hour is a drain step under due_jobs_per_advance (1024), two a day: 512 days is
+  // 1024 steps and commits; 19:00 after that is 1025.
+  assert.equal(wait(w, H(6 + 24 * 512)).decision.kind, 'accepted');
+  const long = wait(w, H(19 + 24 * 512));
   assert.deepEqual(
     [long.decision, long.limit],
     [{ kind: 'fault', code: 'budget_exceeded' }, 'due_jobs_per_advance'],
