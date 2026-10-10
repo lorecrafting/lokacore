@@ -54,18 +54,23 @@ export const endStatus = (
 });
 
 /**
- * A status whose `modifies` (row 2c) starts or ends on the player's body moves its attributes, so a
- * derived hp maximum settles first, at the world's clock (resource@1, as wear and remove do).
+ * A status whose `modifies` (row 2c) names an hp_max term and starts or ends on the player's body
+ * moves that maximum, so hp settles first, at the world's clock (resource@1, as wear and remove do).
  */
 export const settleFor = (
   world: World,
   body: EntityId,
   status: DefinitionRef,
   writer_group: number,
-): DeltaOp[] =>
-  body === world.body && specOf(world, status)?.modifies
+): DeltaOp[] => {
+  const terms = world.cartridge.world?.derived?.hp_max?.terms ?? [];
+  const moves = specOf(world, status)?.modifies?.some(({ attribute }) =>
+    terms.some((t) => refString(t.attribute) === refString(attribute)),
+  );
+  return body === world.body && moves
     ? settleMaxima(world).map((op) => ({ ...op, writer_group, at: world.state.clock }))
     : [];
+};
 
 /** End an active status by expiry or cure, settling a derived hp maximum first (row 2c). */
 export const expire = (

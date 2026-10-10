@@ -348,6 +348,18 @@ test('a tickless might with con -6, refreshed at +1800, expires at +5400 with hp
   );
 });
 
+// Breaks (row 2c): a status whose modifiers name no hp_max term still writes the hp settle, so its
+// expiry and the dummy's round on the player's hp in one advance fault (precondition_failed).
+test('might (str only) expiring during a fight at +3600 lets the wait to +3700 pass', () => {
+  const c = structuredClone(content) as any;
+  c.npcs['derived_sampler@0.0.1:npc/dummy'].attack.chance = 100;
+  let w = play(play(chosen('strong', c), north), { type: 'move', direction: 'south' });
+  w = play(wait(w, 3500 - w.state.clock), { type: 'move', direction: 'east' });
+  w = wait(play(w, { type: 'attack', target_id: dummy(w) }), 200);
+  assert.equal(gameView(w).conditions, undefined);
+  assert.ok(level(w, w.body, resourceRef(w, 'hp'))! < 10); // the dummy's rounds landed
+});
+
 // Breaks (row 2c): a cure ends a con-lowering status without the hp settle (an edible eaten at
 // full hp, so it restores nothing), and the hour of regen banked at the cap pays out.
 test('a tonic cures a refreshed might with con -6 after 4000 s at 10 of 10: hp reads 10 of 16', () => {

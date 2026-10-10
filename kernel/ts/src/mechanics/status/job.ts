@@ -63,8 +63,7 @@ export function runStatus(
     const ended = [happened(visit, command, mint, 'status_expired', body, status)];
     return accepted(world, 'job_ran', ops, ended, say(spec.narration.expired));
   }
-  // A due tick on an unreadable pool is skipped, never re-due at the same clock; a status that
-  // never ticks (row 2c) follows a refreshed end.
+  // A due tick on an unreadable pool is skipped, never re-due at the same clock.
   const next_tick_at = due ? add(row.next_tick_at, spec.tick_every) : untick(spec, row);
   ops.push(...successor(body, status, row, next_tick_at, mint() as JobId));
   return accepted(world, 'job_ran', ops, events, by ? say(spec.narration.tick) : []);
@@ -140,6 +139,7 @@ const happened = (
   payload: { type, body_id, status },
 });
 
+// A status that never ticks (row 2c) follows a refreshed end.
 const untick = (spec: StatusDefinition, row: Active) =>
   spec.per_tick === undefined ? row.ends_at : row.next_tick_at;
 

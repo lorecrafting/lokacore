@@ -3,7 +3,10 @@ import { refString } from '../runtime/decision.ts';
 import { apiCmp } from './cartridge_installed.ts';
 import type { Diagnostic } from '../contracts.gen.ts';
 
-/** Checked toolbox row 1 and G3 declarations in the loaded artifact, independent of source compilation. */
+/**
+ * Checked toolbox row 1, G3 and 2c declarations in the loaded artifact, independent of source
+ * compilation; only a status with `modifies` (row 2c) may omit `per_tick`.
+ */
 export function status(c: Obj): Diagnostic[] {
   const out: Diagnostic[] = [];
   const defs = (c.statuses ?? {}) as Record<string, Obj>;
@@ -32,7 +35,6 @@ export function status(c: Obj): Diagnostic[] {
     if (!c.resources?.[refString(s.resource)])
       out.push(diag('UNRESOLVED_REFERENCE', `${at}.resource`));
     if (s.tick_every >= s.duration) out.push(diag('SCHEMA_VIOLATION', `${at}.tick_every`));
-    // Only a modifying status (row 2c) may omit its tick.
     if (s.per_tick === 0 || (s.per_tick === undefined && !s.modifies))
       out.push(diag('SCHEMA_VIOLATION', `${at}.per_tick`));
     if (!c.text?.[s.label]) out.push(diag('SCHEMA_VIOLATION', `${at}.label`));
