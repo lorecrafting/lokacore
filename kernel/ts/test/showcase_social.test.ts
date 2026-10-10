@@ -15,7 +15,6 @@ import { disposition } from '../src/mechanics/disposition.ts';
 import { describeEntity } from '../src/mechanics/description_variant/rule.ts';
 import { level } from '../src/mechanics/skills.ts';
 import {
-  act,
   detail,
   fresh,
   go,
