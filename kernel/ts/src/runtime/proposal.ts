@@ -1,6 +1,6 @@
 import { enteredActors, knowledgeLast, record } from '../mechanics/knowledge/shared.ts';
 import { vary } from '../mechanics/variety.ts';
-// size: allow 340, typed quest reactions and same-plan deadline pairing share FIFO admission
+// size: allow 342, typed quest reactions, deadline pairing and group merging share FIFO admission
 // Proposal admission, FIFO composition and adoption (04 §5.1-§5.4); runtime/world.ts routes commands here.
 import { populationDeadlinePairs } from './proposal_deadlines.ts';
 import { apply } from './apply.ts';
@@ -289,10 +289,13 @@ function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined
     p.narration.push(...(ran.narration ?? []));
     const partner = populationPairs.get(job_id);
     const paired = bleedPairs.get(job_id);
-    const joined = statusGroup(at, job_id as JobId, current, p.holders, p.group + 1, paired);
+    const prior = groups.get(partner ?? job_id); // a partner's, or an earlier crossed hour's
+    const joined =
+      prior === undefined
+        ? statusGroup(at, job_id as JobId, current, p.holders, p.group + 1, paired)
+        : undefined;
     if (joined) merge(p.ops, joined.merged, joined.group, [p.holders, groups, bleedPairs]);
-    // a partner's, or a schedule job's earlier crossed hour's; else its holders' and bleed pair's
-    const group = groups.get(partner ?? job_id) ?? joined?.group ?? paired ?? p.group + 1;
+    const group = prior ?? joined?.group ?? paired ?? p.group + 1;
     groups.set(job_id, group);
     const bleedPair = bleedRoundPair(at, job_id as JobId, current);
     if (bleedPair) bleedPairs.set(bleedPair, group);

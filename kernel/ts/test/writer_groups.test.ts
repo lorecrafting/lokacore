@@ -45,11 +45,13 @@ function poisoned(
   return out.world;
 }
 
-// loka-x2gv (a). Breaks: a round paired with an equal-due bleed tick takes the bleed's group and
-// never joins (or registers) its opponent's status group, so the opponent's poison tick due at
-// the same clock writes the hound's HP in another group: the wait faults conflicting_write.
+// loka-x2gv (a), both job orders. Breaks: a round paired with an equal-due bleed tick (bleed first)
+// takes the bleed's group and never joins (or registers) its opponent's status group, so the
+// opponent's poison tick at the same clock writes the hound's HP in another group: the wait
+// faults conflicting_write.
 test('a bleed-paired round and the hound poison tick at one clock commit in one wait', () => {
-  for (let n = 4; n < 20; n++) {
+  const orders = new Set<string>();
+  for (let n = 4; n < 20 && orders.size < 2; n++) {
     const { world, target, room } = fixture();
     const first = elapsed(
       command(world, 1, { type: 'attack', target_id: target }, 1).world,
@@ -71,7 +73,8 @@ test('a bleed-paired round and the hound poison tick at one clock commit in one 
     const tick = elapsed(back.world, 65050, 7).world;
     const row = Object.values(tick.state.encounters ?? {}).find((e) => e.status === 'open')!;
     const bleed = tick.state.bleeds![world.body]!;
-    if (!bleed.active || row.job_id < bleed.job_id) continue; // bleed first wanted
+    assert.ok(bleed.active);
+    orders.add(row.job_id < bleed.job_id ? 'round_first' : 'bleed_first');
     const combat = tick.cartridge.world!.combat!;
     const sure = {
       ...tick,
@@ -92,9 +95,8 @@ test('a bleed-paired round and the hound poison tick at one clock commit in one 
     assert.equal(hp(r.world), 6);
     // The player's sure blow takes 1 and the poison 1.
     assert.equal(level(r.world, target, resourceRef(r.world, 'hp')), hounds - 2);
-    return;
   }
-  assert.fail('no bleed-first ordering found');
+  assert.deepEqual([...orders].sort(), ['bleed_first', 'round_first']);
 });
 
 // loka-kgd.43. Breaks: a sight job completes between two writes that share an older writer group
@@ -168,4 +170,23 @@ test('a sight flight between two status or fact-row joins commits as step-by-ste
     assert.equal(value(one.world, one.world.character, fact), counted ? 2 : 0);
     assert.deepEqual(one.world.state, three.state);
   }
+});
+
+// loka-x2gv. Breaks: a bleed tick with no round to pair registers no holder group, so a status
+// tick on the same body later in the wait writes its HP in another group: conflicting_write.
+test('a lone bleed tick and a later poison tick on one body commit in one wait', () => {
+  const { world, target } = fixture();
+  const first = elapsed(
+    command(world, 1, { type: 'attack', target_id: target }, 1).world,
+    64950,
+    2,
+  );
+  const waited = elapsed(command(first.world, 2, { type: 'flee' }, 3).world, 65000, 4).world;
+  const bleed = waited.state.bleeds![world.body]!;
+  assert.ok(bleed.active && bleed.next_tick_at === 65050);
+  // The poison ticks at 65060, after the bleed's 65050 tick.
+  const ready = poisoned(waited, waited.body, 'cccccccc-0000-4000-8000-000000000001', 60, 300);
+  const r = elapsed(ready, 65100, 5);
+  assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
+  assert.equal(hp(r.world), hp(ready)! - 2);
 });

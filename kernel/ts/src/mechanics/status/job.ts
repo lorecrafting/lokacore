@@ -174,8 +174,8 @@ const successor = (
 // in sequence; a reaction's status.apply on that holder, before or after, shares it (reaction.ts
 // statusStep, row G3); so does a combat round on its body or opponent, whose hp a status's tick or
 // hp settle (row 2c) also writes; every roster member counts, as the player's or an ally's blow
-// falls on another member when the primary is gone (row 6b). A round joins all of those groups and
-// its paired bleed's (`paired`): the lowest is kept and the others are returned for the caller to
+// falls on another member when the primary is gone (row 6b); a bleed tick on its body joins too. A
+// round joins all of those groups and its paired bleed's (`paired`): the lowest is kept and the others are returned for the caller to
 // merge into it (loka-x2gv).
 export function statusGroup(
   at: World,
@@ -188,7 +188,7 @@ export function statusGroup(
   const round = currentRound(at, id, job);
   const held = round
     ? [round.body_id, ...(round.active_ids ?? [round.npc_id])]
-    : [job.job.kind === 'status' ? statusHolder(at, id)?.body : undefined];
+    : [job.job.kind === 'status' ? statusHolder(at, id)?.body : job.bleed_body_id];
   const bodies = held.filter((b) => b !== undefined);
   if (!bodies.length) return undefined;
   const found = new Set([paired, ...bodies.map((b) => holders.get(b))]);

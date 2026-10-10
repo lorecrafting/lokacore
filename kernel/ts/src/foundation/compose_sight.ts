@@ -10,16 +10,17 @@ const section = (state: State, name: string): Obj => (state[name] ?? {}) as Obj;
  * completes, a write to its member's encounter in an older group is the handoff pair or refused.
  * Other older-group joins (status holders, fact rows; loka-kgd.43) follow ordinary conflicts. */
 export function sightHandoffValid(state: State, ops: readonly DeltaOp[]): boolean {
+  const jobs = section(state, 'jobs');
+  const sights = [...ops.entries()].flatMap(([at, o]) =>
+    o.op === 'job.complete' && jobs[o.job_id]?.sight
+      ? [{ at, group: o.writer_group, member: jobs[o.job_id].sight.member_id }]
+      : [],
+  );
+  if (!sights.length) return true;
   const back: { op: DeltaOp; at: number }[] = [];
-  for (const [at, op] of ops.entries()) {
-    const id = 'encounter_id' in op ? op.encounter_id : undefined;
-    const npc = id && section(state, 'encounters')[id]?.npc_id;
-    const sighted = (o: DeltaOp, i: number) =>
-      i < at && o.op === 'job.complete' && o.writer_group > op.writer_group;
-    const member = (o: DeltaOp) => 'job_id' in o && section(state, 'jobs')[o.job_id]?.sight;
-    if (npc && ops.some((o, i) => sighted(o, i) && member(o)?.member_id === npc))
+  for (const [at, op] of ops.entries())
+    if (sights.some((s) => s.at < at && s.group > op.writer_group && on(state, ops, op, s.member)))
       back.push({ op, at });
-  }
   if (!back.length) return true;
   if (back.length !== 2) return false;
   const [{ op: close, at: closeAt }, { op: cancel, at: cancelAt }] = back;
@@ -245,4 +246,15 @@ function sightScheduleValid(
       )) &&
     entered
   );
+}
+
+// Whether the member is in a write's encounter (prior or opened here); a sighted member's transfer and slot
+// writes are bound to the sight group by sightClosureValid and sightScheduleValid.
+function on(state: State, ops: readonly DeltaOp[], op: DeltaOp, member: string): boolean {
+  if (!('encounter_id' in op) || !op.encounter_id) return false;
+  const id = op.encounter_id;
+  const row =
+    section(state, 'encounters')[id] ??
+    ops.find((o) => o.op === 'encounter.open' && o.encounter_id === id);
+  return !!row && (row.npc_id === member || (row.active_ids ?? []).includes(member));
 }
