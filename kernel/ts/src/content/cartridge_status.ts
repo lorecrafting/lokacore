@@ -26,42 +26,47 @@ export function status(c: Obj): Diagnostic[] {
   ) as [string, Obj][];
   const { immune, named, drinks, lone, g3 } = api146(c);
   if (!Object.keys(defs).length && !applies.length && !cures.length && !g3) return out;
-  const lasting = (s: Obj) => s.duration === 'permanent'; // row W8: never ticks, so no per_tick
   const floor = Object.values(defs).some(lasting) ? '1.48' : g3 ? '1.46' : '1.38';
-  const hp = new Set(
-    ((c.world?.derived?.hp_max?.terms ?? []) as Obj[]).map((t) => refString(t.attribute)),
-  );
   if (
     apiCmp(c.manifest.requires.kernel_api.at_least, floor) < 0 ||
     ['status', 'death'].some((k) => c.lock.capabilities[k] !== 1) // a fatal hp tick needs death
   )
     out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
-  for (const [ref, s] of Object.entries(defs)) {
-    const at = `.cartridge.statuses${step(ref)}`;
-    if (!c.resources?.[refString(s.resource)])
-      out.push(diag('UNRESOLVED_REFERENCE', `${at}.resource`));
-    if (!lasting(s) && s.tick_every >= s.duration)
-      out.push(diag('SCHEMA_VIOLATION', `${at}.tick_every`));
-    if (
-      s.per_tick === 0 ||
-      (lasting(s) ? s.per_tick !== undefined : s.per_tick === undefined && !s.modifies)
-    )
-      out.push(diag('SCHEMA_VIOLATION', `${at}.per_tick`));
-    // loka-kgd.50: a permanent status never modifies an attribute the derived hp maximum reads.
-    if (lasting(s))
-      s.modifies?.forEach((m: Obj, n: number) => {
-        if (hp.has(refString(m.attribute)))
-          out.push(diag('SCHEMA_VIOLATION', `${at}.modifies[${n}].attribute`));
-      });
-    if (!c.text?.[s.label]) out.push(diag('SCHEMA_VIOLATION', `${at}.label`));
-    if (Object.values(s.narration as Obj).some((k) => !c.text?.[k as string]))
-      out.push(diag('SCHEMA_VIOLATION', `${at}.narration`));
-  }
+  for (const [ref, s] of Object.entries(defs)) out.push(...definition(c, ref, s));
   for (const [at, ref] of [...applies, ...cures, ...drinks, ...immune])
     if (!defs[refString(ref as never)]) out.push(diag('UNRESOLVED_REFERENCE', at));
   for (const [at, ref, table] of named)
     if (!c[table]?.[refString(ref as never)]) out.push(diag('UNRESOLVED_REFERENCE', at));
   return [...out, ...lone.map((at) => diag('SCHEMA_VIOLATION', at, { error: 'invalid_value' }))];
+}
+
+// Row W8: a permanent status never ticks, so it declares no per_tick.
+const lasting = (s: Obj) => s.duration === 'permanent';
+
+// One status definition's own fields.
+function definition(c: Obj, ref: string, s: Obj): Diagnostic[] {
+  const out: Diagnostic[] = [];
+  const at = `.cartridge.statuses${step(ref)}`;
+  if (!c.resources?.[refString(s.resource)])
+    out.push(diag('UNRESOLVED_REFERENCE', `${at}.resource`));
+  if (!lasting(s) && s.tick_every >= s.duration)
+    out.push(diag('SCHEMA_VIOLATION', `${at}.tick_every`));
+  if (
+    s.per_tick === 0 ||
+    (lasting(s) ? s.per_tick !== undefined : s.per_tick === undefined && !s.modifies)
+  )
+    out.push(diag('SCHEMA_VIOLATION', `${at}.per_tick`));
+  // loka-kgd.50: a permanent status never modifies an attribute the derived hp maximum reads.
+  const hp = ((c.world?.derived?.hp_max?.terms ?? []) as Obj[]).map((t) => refString(t.attribute));
+  if (lasting(s))
+    s.modifies?.forEach((m: Obj, n: number) => {
+      if (hp.includes(refString(m.attribute)))
+        out.push(diag('SCHEMA_VIOLATION', `${at}.modifies[${n}].attribute`));
+    });
+  if (!c.text?.[s.label]) out.push(diag('SCHEMA_VIOLATION', `${at}.label`));
+  if (Object.values(s.narration as Obj).some((k) => !c.text?.[k as string]))
+    out.push(diag('SCHEMA_VIOLATION', `${at}.narration`));
+  return out;
 }
 
 // The fields needing kernel_api 1.46: row G3's immune list entries, steps naming an item and tick or
