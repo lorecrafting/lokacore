@@ -60,7 +60,7 @@ defmodule Loka.Content.Checks do
     room
     |> Map.delete("exits")
     |> expand(m)
-    |> Map.put("exits", Exits.expand(exits, m))
+    |> Map.put("exits", Exits.expand(exits, m, &expand/2))
   end
 
   def expand(%{"fact" => f, "equals" => _} = gate, m) when is_binary(f),
