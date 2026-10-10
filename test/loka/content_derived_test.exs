@@ -32,4 +32,27 @@ defmodule Loka.ContentDerivedTest do
       assert {code, path} in Enum.map(diags, &{&1["code"], &1["path"]}), inspect(diags)
     end
   end
+
+  # Breaks: an item affect on an unworn item, naming no attribute, lacking attributes@1 or under
+  # API 1.41 compiles (toolbox row 3).
+  test "item affects keep their slot, references, owner and API floor" do
+    dir = Loka.ContentSource.copy("cartridges/affects_sampler")
+    assert {:ok, _, _} = Loka.ContentSource.compile(dir, [])
+    drop = fn key -> &Map.delete(&1, key) end
+
+    cases = [
+      {"items/belt.json", drop.("slot"), {"SCHEMA_VIOLATION", "items/belt.affects"}},
+      {"items/belt.json", &put_in(&1, ["affects", Access.at(1), "attribute"], "luck"),
+       {"UNRESOLVED_REFERENCE", "items/belt.affects[1].attribute"}},
+      {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.40"),
+       {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"}},
+      {"cartridge.json", &update_in(&1, ["requires", "capabilities"], drop.("attributes")),
+       {"UNDECLARED_CAPABILITY", "items/belt.affects"}}
+    ]
+
+    for {file, change, {code, path}} <- cases do
+      assert {:error, diags} = Loka.ContentSource.compile(dir, [{file, change}])
+      assert {code, path} in Enum.map(diags, &{&1["code"], &1["path"]}), inspect(diags)
+    end
+  end
 end

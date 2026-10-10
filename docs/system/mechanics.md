@@ -21,7 +21,7 @@ then one slot holder per distinct `slot` some item declares, in slot-key order (
 [equipment@1](#equipment1-kerneltssrcmechanicsequipmentrulets)). NPCs marked `spawn_template`
 and items at `location.in: template` are definitions only at this stage; they receive no
 ordinary instance or placement. A slot holder is an entity inside the body with capacity1;
-it is not in `entities`, so no command targets it and no view lists it. A food-enabled world
+it is not in `entities`, so no command targets it and no view lists it; the `finger` holder has capacity 2. A food-enabled world
 then mints its single roomless terminal [consumed holder](#d4-homes-finite-apples-and-eat-selected-contract).
 Bounded population initialization follows using the same mint sequence: each authored plan
 creates its admitted initial slots/members and optional held loot, then its control job.
@@ -152,19 +152,19 @@ Projection and admission share this pair legality query.
 ## equipment@1 (`kernel/ts/src/mechanics/equipment/rule.ts`)
 
 An item may declare one `slot` (`SlotKey`: `head`, `neck`, `body`, `cloak`, `arms`, `hands`,
-`waist`, `legs`, `feet`, `wield`, `off_hand`, `light`). Worn means inside the body's holder for
+`finger`, `waist`, `legs`, `feet`, `wield`, `off_hand`, `light`). Worn means inside the body's holder for
 that slot ([A fresh world](#a-fresh-world)); wearing and removing reuse `entity.transfer`, with
 no new op and no event. The actor's holders are those whose container is its body.
 `wear {item_id}`: no entity `not_found`, not an item `invalid_target`, already in one of the
 actor's holders `invalid_state`, not directly in the body `not_owned`, no `slot` or no holder
-for it `invalid_target`, the holder occupied `invalid_state`; accepted `worn`, one transfer
+for it `invalid_target`, the holder full (two items for `finger`, one otherwise) `invalid_state`; accepted `worn`, one transfer
 body → holder. `remove {item_id}`: no entity `not_found`, not an item `invalid_target`, directly
 in the body `invalid_state` (not worn), anywhere but one of the actor's holders `not_owned`;
 accepted `removed`, one transfer holder → body. These checks are one read-only function the
 rule and the GameView share. Composition re-checks custody, cycles and the holder's capacity.
-`has_item` climbs containers, so a worn item still counts. Finger slots, slot compatibility
-and dual wield, granted modifiers and affects, curses and no-remove items are LATER
-([ROADMAP](../ROADMAP.md)).
+`has_item` climbs containers, so a worn item still counts. A worn item's affects move its
+wearer's attributes ([toolbox row 3](#item-slots-and-affects-toolbox-row-3)). Slot compatibility
+and dual wield, curses and no-remove items are LATER ([ROADMAP](../ROADMAP.md)).
 
 <a id="position1-kerneltssrcrulespositionts"></a>
 
@@ -296,8 +296,9 @@ the engine declares no world stats. The installed [D11 writer](#d11-character-ch
 commits `character.select` with the chosen ancestry and complete attribute values in
 `state.characters[CharacterId]`. These values belong to the character, never its replaceable
 body. `attributeValue` reads that character row when present, otherwise the definition start;
-policy, recipe thresholds and skill qualification share this lookup. Actors and cartridges
-without a selected row retain definition starts. No training/equipment attribute writer is installed.
+policy, recipe thresholds and skill qualification share this lookup, which adds the affects of the
+actor's worn items ([row 3](#item-slots-and-affects-toolbox-row-3)). Actors and cartridges
+without a selected row retain definition starts. No training attribute writer is installed.
 `attributes@1` owns two 06 §21 leaves, each `{<ref>, at_least}` (a ResourceInt; "below" is
 `not`, a range `all`): `stat_compare {attribute, at_least}` holds when the actor's value is at
 least `at_least`; `resource_compare {resource, at_least}` when the current value of the pool
@@ -1708,3 +1709,7 @@ At a due job strictly before `ends_at` and not before `next_tick_at`, add `per_t
 - `hp_max`: the hp pool's `maximum` for the player's body, clamped at the pool's `minimum` ([resource@1](#resource1-kerneltssrcmechanicsresourcets); Beads `loka-kgd.8`).
 
 Nothing is stored: the stats are read at use, so a later attribute writer changes them at once. NPCs have no attributes; their attack profiles, hit points and any other body's carrying are unchanged. A cartridge without `world.derived` behaves as before. The sampler's ancestries give strength 15 (strong), 5 (nimble) and constitution 16 (hardy): with the base chance 75, damage 4, carry 10000 g and hp maximum 10, the strong character hits at 100 for 6 and lifts the 8000 g anvil; the nimble one hits at 50 for 1 and cannot lift it; the hardy one starts at hp 10 of 16 and regenerates to 16. The player sees no new Book line: the Character page already shows the attributes and each pool's current and maximum.
+
+## Item slots and affects (toolbox row 3)
+
+[Toolbox row 3](../MECHANICS-TOOLBOX.md#ranked-toolbox); [declarations](cartridge.md#item-affect-declarations) and [Book](book-ui.md#worn-item-affects) govern it; the PM decision is in Beads `loka-kgd.10` (2026-10-09). The `finger` slot holds two items; every other slot holds one ([equipment@1](#equipment1-kerneltssrcmechanicsequipmentrulets)). An item with a slot may declare `affects`, each `{attribute, by}`: while the item is worn by the player's body, [attributes@1](#attributes1-kerneltssrcmechanicspolicyts60) reads the attribute as its selected (else starting) value plus the sum of `by` over the worn affects naming it (checked integer arithmetic; an overflow faults the action atomically). Nothing is stored: the D11 selection row stays immutable, the value is derived on each read, and removing the item restores it at once. Every reader sees it: `stat_compare`, recipe `attribute_threshold`, skill qualification and the [derived stats](#stats-derived-from-attributes-toolbox-row-2), including the hp maximum, whose fall on removal follows [resource@1](#resource1-kerneltssrcmechanicsresourcets). The engine owns the mechanic and the two fingers; the cartridge owns every amount. Items worn by NPCs, carried but unworn, or inside a worn container grant nothing. The sampler's copper, silver and tin rings each give PER +2, so two worn rings read PER 14 and reveal the hall's `stat_compare` variant, a third is refused, and its belt gives STR +2 and CON +4: with carry 1000 g at STR 10 and 1000 g per point, the 2500 g stone lifts only while it is worn, and the hp maximum reads 14 instead of 10.

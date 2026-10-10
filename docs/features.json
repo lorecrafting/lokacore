@@ -471,7 +471,7 @@
       "containment_acyclic",
       "gameview_agrees_with_admission"
     ],
-    "implemented_in": "C1 c1-equipment (#134) twelve slots as holders in the body; wear and remove"
+    "implemented_in": "C1 c1-equipment (#134) twelve slots as holders in the body; wear and remove; toolbox row 3 finger slot (two) and item affects (loka-kgd.10)"
   },
   "position": {
     "spec": "21 §28 position@1 (amendment 2026-10-03); 00 §4.3 Positions (amendment 2026-10-03)",

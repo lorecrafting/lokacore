@@ -16,6 +16,7 @@ export function SkillDetails(p: { view?: GameView; text: (key: string) => string
       {p.view?.attributes?.map((a) => (
         <Text key={a.attribute.key} style={prose(c)}>
           {a.attribute.key.toUpperCase()} {a.value}
+          {a.worn ? ` (${a.worn > 0 ? '+' : ''}${a.worn} worn)` : ''}
         </Text>
       ))}
       {p.view?.skills

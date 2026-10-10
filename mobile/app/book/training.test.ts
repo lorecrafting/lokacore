@@ -96,6 +96,22 @@ test('Character draws projected attributes and acquired qualification with autho
   ]);
 });
 
+// Breaks: the Character line hides what worn items grant, or drops the sign of a loss (book-ui.md worn item affects).
+test('Character appends the signed worn affect to an attribute line', () => {
+  const view: any = {
+    attributes: [
+      { attribute: { key: 'per' }, value: 14, worn: 4 },
+      { attribute: { key: 'str' }, value: 8, worn: -2 },
+      { attribute: { key: 'con' }, value: 10 },
+    ],
+  };
+  assert.deepEqual(words(SkillDetails({ view, text })), [
+    'PER 14 (+4 worn)',
+    'STR 8 (-2 worn)',
+    'CON 10',
+  ]);
+});
+
 // Breaks: item detail invents a profile from its name, drops skill requirements, or hides actual shield chance.
 test('item equipment detail copies current typed slot/profile/requirement and block chance', () => {
   const thing: any = {

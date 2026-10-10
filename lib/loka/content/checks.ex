@@ -165,8 +165,8 @@ defmodule Loka.Content.Checks do
       |> Map.update!("items", &Enum.map(&1, fn i -> ref(i, "item", m) end))
       |> Map.merge(if h["careful"], do: %{"careful" => expand(h["careful"], m)}, else: %{})
 
-  # Recipe costs and thresholds expand only their owned reference fields.
-  def expand(%{"kind" => "attribute_threshold", "attribute" => a} = n, m),
+  # Recipe thresholds and item affects (ItemAffect) expand their short attribute.
+  def expand(%{"attribute" => a} = n, m) when is_binary(a),
     do: Map.put(n, "attribute", ref(a, "attribute", m))
 
   def expand(%{"discovered" => f} = n, m), do: Map.put(n, "discovered", ref(f, "fact", m))

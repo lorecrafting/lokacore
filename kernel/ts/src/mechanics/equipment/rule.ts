@@ -1,6 +1,6 @@
 // equipment@1 (capability_registry.json; 21 §8 Equipment and 00 §4.4 as amended by c1-equipment):
 // wear and remove an item by its id. A worn item is inside the actor's body's holder for its slot
-// (a fresh world makes one per declared slot, capacity 1; runtime/fresh.ts), so both are one
+// (a fresh world makes one per declared slot, capacity 1, finger 2; runtime/fresh.ts), so both are one
 // entity.transfer, whose custody, cycle and capacity preconditions foundation/compose.ts re-checks, and no
 // event. Checks and codes: mechanics.md equipment@1.
 import type { CharacterId, EntityId, ErrorCode } from '../../contracts.gen.ts';
@@ -55,5 +55,6 @@ export function transfer(
   if (at !== body) return 'not_owned';
   const holder = e.slot === undefined ? undefined : world.slots[e.slot];
   if (holder === undefined || world.state.containers[holder] !== body) return 'invalid_target';
-  return values(world.state.containers).includes(holder) ? 'invalid_state' : [body, holder];
+  const held = values(world.state.containers).filter((c) => c === holder).length;
+  return held >= world.capacities[holder] ? 'invalid_state' : [body, holder];
 }

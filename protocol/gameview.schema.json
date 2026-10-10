@@ -2259,6 +2259,9 @@
         },
         "value": {
           "type": "integer"
+        },
+        "worn": {
+          "type": "integer"
         }
       },
       "required": [
@@ -2266,7 +2269,7 @@
         "value"
       ],
       "additionalProperties": false,
-      "description": "An authored attribute reference and the actor's current value.",
+      "description": "An authored attribute reference and the actor's current value, which includes worn, the nonzero sum its worn items grant (item affects, toolbox row 3; absent when zero).",
       "examples": [
         {
           "attribute": {
