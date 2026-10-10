@@ -3,20 +3,6 @@ defmodule Loka.Content.Policies do
   import Loka.Content.Source, only: [diag: 2, at: 2]
   import Loka.Content.Refs, only: [owned: 3, reference: 6]
 
-  # Each leaf's reference field, named for its definition kind, or the list of a leaf's
-  # alternative subject fields (mechanics.md policy leaf set); short refs expand to that kind.
-  @leaf_refs %{
-    "fact_compare" => "fact",
-    "has_item" => "item",
-    "quest_state" => "quest",
-    "escort_state" => "quest",
-    "barrier_state" => "barrier",
-    "stat_compare" => "attribute",
-    "resource_compare" => "resource",
-    "has_tag" => ~w(item barrier room)
-  }
-  def leaf_refs, do: @leaf_refs
-
   def tree({rel, steps, root}, ctx),
     do: for({node, at} <- nodes(root, steps), d <- node(rel, at, node, ctx), do: d)
 
@@ -37,7 +23,7 @@ defmodule Loka.Content.Policies do
   defp node(rel, steps, %{"op" => op} = n, {m, defs, required}) do
     owned(at(rel, steps ++ ["op"]), op, required) ++
       empty_window(rel, steps, n) ++
-      for field <- List.wrap(@leaf_refs[op]),
+      for field <- List.wrap(Loka.Content.LeafRefs.all()[op]),
           is_map_key(n, field),
           d <- reference(rel, steps, field, n, m, defs),
           do: d

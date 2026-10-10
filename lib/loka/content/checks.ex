@@ -6,7 +6,7 @@ defmodule Loka.Content.Checks do
   alias Loka.Content.{Barriers, Dialogues, Entities, Quests, Reactions, Recipes, RoomParts}
   alias Loka.Core.Canonical
 
-  @ref_fields Map.merge(Loka.Content.Policies.leaf_refs(), %{
+  @ref_fields Map.merge(Loka.Content.LeafRefs.all(), %{
                 "fact.assign" => "fact",
                 "fact.adjust" => "fact",
                 "skill.acquire" => "skill",

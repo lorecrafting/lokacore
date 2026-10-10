@@ -164,7 +164,7 @@ export function checkers(c: Obj, out: Diagnostic[]) {
 }
 
 // Each policy leaf's reference fields, each named for its definition kind; twin of
-// Loka.Content.Policies @leaf_refs (mechanics.md policy leaf set).
+// Loka.Content.LeafRefs (mechanics.md policy leaf set).
 const LEAF_REFS: Readonly<Record<string, readonly string[]>> = {
   fact_compare: ['fact'],
   has_item: ['item'],

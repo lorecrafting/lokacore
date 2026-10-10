@@ -1039,7 +1039,8 @@
       "kernel/ts/src/mechanics/policy.ts",
       "kernel/ts/src/content/cartridge_refs.ts",
       "lib/loka/content/checks.ex",
-      "lib/loka/content/policies.ex"
+      "lib/loka/content/policies.ex",
+      "lib/loka/content/leaf_refs.ex"
     ],
     "fixtures": [
       "protocol/fixtures/invalid.json"
