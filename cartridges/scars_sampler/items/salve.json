@@ -1,0 +1,23 @@
+{
+  "keywords": [
+    "salve",
+    "jar"
+  ],
+  "short": "item.salve.short",
+  "room_line": "item.salve.room",
+  "description": "item.salve.description",
+  "mass_grams": 50,
+  "location": {
+    "in": "room",
+    "room": "hall"
+  },
+  "edible": {
+    "resource": "mv",
+    "amount": 1,
+    "label": "action.eat",
+    "narration": "narration.eat_salve",
+    "cures": [
+      "scar"
+    ]
+  }
+}

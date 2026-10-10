@@ -24,7 +24,9 @@ export const conditionLine = (
   time: number,
   text: Say,
 ) =>
-  `${text(c.label)} · ${dur(Math.max(0, c.ends_at - time))} remaining` +
+  text(c.label) +
+  // A permanent status (row W8) has no end, so no time part.
+  (c.ends_at === undefined ? '' : ` · ${dur(Math.max(0, c.ends_at - time))} remaining`) +
   // A status that never ticks (row 2c) shows no tick part.
   (c.per_tick === undefined
     ? ''

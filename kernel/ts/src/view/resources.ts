@@ -45,12 +45,11 @@ export function resources(world: World): ResourceView[] {
     .sort((a, b) => cmp(refString(a.resource), refString(b.resource)));
 }
 
-// Active timed statuses on the body (toolbox row 1), absent when none.
+// Active statuses on the body (toolbox rows 1, W8), absent when none.
 export function conditionViews(world: World) {
   const conditions = activeStatuses(world, world.body).map(({ spec, row }) => ({
     label: spec.label,
-    ends_at: row.ends_at,
-    next_tick_at: row.next_tick_at,
+    ...(row.job_id && { ends_at: row.ends_at, next_tick_at: row.next_tick_at }), // none: row W8
     resource: spec.resource.key as Key,
     ...(spec.per_tick !== undefined && { per_tick: spec.per_tick }),
     tick_every: spec.tick_every,

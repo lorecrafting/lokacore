@@ -2329,9 +2329,18 @@
           "$ref": "action.schema.json#/$defs/Key"
         },
         "duration": {
-          "type": "integer",
-          "minimum": 1,
-          "maximum": 2147483647
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            },
+            {
+              "type": "string",
+              "const": "permanent"
+            }
+          ],
+          "description": "Logical seconds, or permanent (toolbox row W8, kernel_api at least 1.48): no expiry and no job, kept by the same-body return, ended only by a cure; a permanent status never ticks, so it declares no per_tick (compiler and loader SCHEMA_VIOLATION)."
         },
         "tick_every": {
           "type": "integer",
@@ -2345,7 +2354,7 @@
           "type": "integer",
           "minimum": -2147483647,
           "maximum": 2147483647,
-          "description": "Signed; never 0, and required unless modifies is present (compiler and loader SCHEMA_VIOLATION)."
+          "description": "Signed; never 0, required unless modifies is present or duration is permanent, and absent when duration is permanent (compiler and loader SCHEMA_VIOLATION)."
         },
         "label": {
           "$ref": "text.schema.json#/$defs/TextKey"

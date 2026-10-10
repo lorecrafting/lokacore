@@ -33,7 +33,8 @@ export type Fatal = {
 /**
  * `world` includes the fatal HP loss and producer's encounter closure at the fatal clock. `rng`
  * is the combat round's state; an NPC victim with drops needs it (toolbox row 8). A player's
- * statuses end in its return; a dead NPC's end here, so no tick lands on it (row G3).
+ * statuses but permanent ones (row W8) end in its return; a dead NPC's all end here, so no tick
+ * lands on it (row G3).
  */
 // size: allow 42, drop rolls (toolbox row 8) thread the combat round's RNG through custody
 export function deathSequence(
@@ -201,7 +202,7 @@ function returnBody(world: World, fatal: Fatal): DeltaOp[] {
   const room_id = world.state.containers[victim_id];
   const ops: DeltaOp[] = [
     ...clearBleed(world, victim_id).map((op) => ({ ...op, writer_group })),
-    ...clearStatuses(world, victim_id, writer_group),
+    ...clearStatuses(world, victim_id, writer_group, true),
     ...leave(world, owner_id, writer_group),
     ...separate(world, owner_id, writer_group),
     ...fail(world, owner_id, writer_group),

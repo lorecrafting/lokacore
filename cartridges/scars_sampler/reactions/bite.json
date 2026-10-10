@@ -1,0 +1,12 @@
+{
+  "on": {
+    "event": "attack_result",
+    "hit": true
+  },
+  "apply": [
+    {
+      "op": "status.apply",
+      "status": "scar"
+    }
+  ]
+}

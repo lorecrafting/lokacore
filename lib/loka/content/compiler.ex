@@ -69,7 +69,7 @@ defmodule Loka.Content.Compiler do
       Loka.Content.Liquids.check(manifest, defs, v2),
       Loka.Content.Population.check(manifest, defs, v2, located),
       Loka.Content.Services.check(manifest, defs, v2),
-      timed_checks(manifest, defs, v2),
+      timed_checks(manifest, defs, v2, located),
       Loka.Content.Transports.check(manifest, defs, v2),
       Water.check(manifest, defs, located, v2),
       Loka.Content.Skills.check(manifest, defs, located, if(v2, do: elem(v2, 1), else: %{})),
@@ -87,11 +87,11 @@ defmodule Loka.Content.Compiler do
   end
 
   # Food, bleed and status in their original order, one call to keep `checks` within ABC.
-  defp timed_checks(manifest, defs, v2),
+  defp timed_checks(manifest, defs, v2, {_, settings}),
     do:
       Loka.Content.Food.check(manifest, defs, v2) ++
         Loka.Content.Bleed.check(manifest, defs, v2) ++
-        Loka.Content.Status.check(manifest, defs, v2)
+        Loka.Content.Status.check(manifest, defs, v2, settings)
 
   defp final_checks(manifest, defs, v2, located, registry),
     do:

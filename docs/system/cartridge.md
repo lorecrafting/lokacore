@@ -1478,6 +1478,8 @@ Compiler/loader validate resolved item/nest/population/corpse/room refs, a nonem
 
 [Rows 18 and 42](mechanics.md#potions-and-songs-toolbox-rows-18-and-42) add a `status.apply` step's optional `npc: <key>` (`kernel_api` at least **1.46**): an NPC of this cartridge, whose authored instance takes the status. Both kernels refuse an unresolved NPC (UNRESOLVED_REFERENCE at the step's `npc`), a spawn template or a step that also names `item` (SCHEMA_VIOLATION at `npc`) and the lower floor (KERNEL_API_RANGE_INVALID). A potion is content: a liquid kind, a vessel holding it and a reaction on `{event: "drank", kind: <key>}`. `cartridges/buffs_sampler` is the sampler.
 
+[Row W8](mechanics.md#permanent-statuses-toolbox-row-w8) allows `duration: "permanent"` (`kernel_api` at least **1.48**): such a status declares no `per_tick` and is exempt from `tick_every < duration`; its `modifies` may not name an attribute the derived hp maximum reads. Both kernels refuse each violation (SCHEMA_VIOLATION at `per_tick` or at `modifies[i].attribute`) and the lower floor (KERNEL_API_RANGE_INVALID). `cartridges/scars_sampler` is the sampler.
+
 *Not supported yet:* a status whose `modifies` names an attribute the derived hp maximum reads (`con`): one that ends before a later hp write in the same wait faults (Beads `loka-kgd.50`); author such buffs on other attributes until it lands.
 
 ## Derived stat declarations

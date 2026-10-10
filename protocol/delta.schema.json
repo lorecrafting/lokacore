@@ -2506,7 +2506,7 @@
       ]
     },
     "StatusRow": {
-      "description": "One body status generation, retained inactive after removal. The body and status are the row's target; an active row owns its pending tick job.",
+      "description": "One body status generation, retained inactive after removal. The body and status are the row's target; an active timed row owns its pending tick job; a permanent one (toolbox row W8) has no ends_at, next_tick_at or job_id.",
       "examples": [
         {
           "generation": 1,
@@ -2537,11 +2537,22 @@
           },
           "required": [
             "generation",
-            "active",
-            "ends_at",
-            "next_tick_at",
-            "job_id"
+            "active"
           ],
+          "dependentRequired": {
+            "ends_at": [
+              "next_tick_at",
+              "job_id"
+            ],
+            "next_tick_at": [
+              "ends_at",
+              "job_id"
+            ],
+            "job_id": [
+              "ends_at",
+              "next_tick_at"
+            ]
+          },
           "additionalProperties": false
         },
         {
