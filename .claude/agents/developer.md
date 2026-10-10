@@ -28,8 +28,8 @@ Before handing off:
    the touched layer's type/compile checks and the focused tests your diff touches, under `nice -n 10`; never the full
    `npm test`, the Storybook smoke, `test:e2e` or `bin/check_all.sh` on the M1 ([two-lane CI](../../docs/decisions/owner-decision-two-lane-ci-2026-10-09.md)).
    Hosted CI on the pushed head is the final run (it includes the full `npm test` of each package):
-   after a push, check `gh run list --branch <branch> --commit "$(git rev-parse HEAD)"` (the full sha; a short one matches nothing) every few minutes, never `gh run watch` (rate limits, timeouts);
-   wait up to ~2 minutes for both workflows' push runs (still none: report it, do not dispatch), and never dispatch one by hand when a push run exists (the dispatch cancels it, loka-thz);
+   after a push, check `gh run list --branch <branch> --commit "$(git rev-parse HEAD)"` (the full sha; a short one matches nothing) every ~2 minutes, never `gh run watch` (rate limits, timeouts);
+   a push run can start late: give up to ~2 minutes before concluding there is none (then report it, do not dispatch), and never dispatch one by hand when a push run exists (the dispatch cancels it, loka-thz);
    quote each verdict (job names, durations) in the handoff; fix a red run before handing off. Every new check has a
    planted violation that fails; a planted break or red control stops only the PIDs it started, never a process by name ([Git hygiene](../../docs/WORKFLOW.md#git-hygiene)).
 2. Commit first, then self-review the diff once: `/code-review medium` on the branch (the review never runs checkout, stash or reset in your worktree)
@@ -50,7 +50,7 @@ Before handing off:
    a timebox, stop at it and return what you have. Under 250 words, rules-shaped: paths with `file:line`, decisions with a
    reason, open items, no narrative.
 
-Run long commands (checks, tests, mutant runs) with `run_in_background` and wait for the completion notice; no sleep or poll loops. A full-suite mutant run or the 10,000-sequence simulator (over ~10 minutes): stop and ask the PM first ([mutants](../../docs/WORKFLOW.md#token-hygiene)). Hand off near 180k tokens (about 220k at the latest), hand the remaining work back to the PM for a fresh agent.
+Run long commands (checks, tests, mutant runs) with `run_in_background` and wait for the completion notice; no sleep or poll loops. A full-suite mutant run or the 10,000-sequence simulator (over ~10 minutes): stop and ask the PM first ([mutants](../../docs/WORKFLOW.md#token-hygiene)). Near 180k tokens (220k at the latest), hand the remaining work back to the PM for a fresh agent.
 
 Never use `--no-verify` or force-push (including `--force-with-lease`) without the owner's OK; fix the cause, and if a hook blocks wrongly, report it.
 
