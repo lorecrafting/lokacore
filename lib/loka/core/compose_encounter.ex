@@ -124,10 +124,7 @@ defmodule Loka.Core.ComposeEncounter do
          )}
 
       op["op"] == "encounter.target" ->
-        if row["active_ids"] != nil and op["npc_id"] in row["active_ids"] and
-             op["npc_id"] != row["npc_id"] and present?.(op["npc_id"], row["room_id"]),
-           do: {:ok, Map.put(row, "npc_id", op["npc_id"])},
-           else: {:error, "precondition_failed"}
+        target(op, row, present?)
 
       row["round"] != op["round"] or op["job_id"] == op["next_job_id"] ->
         {:error, "precondition_failed"}
@@ -135,6 +132,14 @@ defmodule Loka.Core.ComposeEncounter do
       true ->
         advance(op, row, present?, initially_present?)
     end
+  end
+
+  # Toolbox row 6a: another present active member becomes the primary.
+  defp target(op, row, present?) do
+    if row["active_ids"] != nil and op["npc_id"] in row["active_ids"] and
+         op["npc_id"] != row["npc_id"] and present?.(op["npc_id"], row["room_id"]),
+       do: {:ok, Map.put(row, "npc_id", op["npc_id"])},
+       else: {:error, "precondition_failed"}
   end
 
   defp current_encounter?(op, row),
