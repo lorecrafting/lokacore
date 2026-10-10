@@ -351,7 +351,7 @@
           "additionalProperties": false
         },
         {
-          "description": "The actor's count of accepted body entries into the room, the current one included, is at least at_least (toolbox row W7): 0 before the first entry (a new character's start is not an entry), 1 after it. Counted only while variety@1 is locked (VisitedRoom.count). Needs kernel_api at least 1.45. Owned by variety@1.",
+          "description": "The actor's count of accepted body entries into the room, the current one included, is at least at_least (toolbox row W7): a new character's start room counts once, any other room 0 until entered. Counted only while variety@1 is locked (VisitedRoom.count). Needs kernel_api at least 1.45. Owned by variety@1.",
           "type": "object",
           "properties": {
             "op": {

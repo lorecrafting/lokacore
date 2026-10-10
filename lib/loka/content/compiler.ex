@@ -155,13 +155,15 @@ defmodule Loka.Content.Compiler do
     |> Map.update!("properties", &Map.merge(&1, Map.take(v2, ~w(chapters ancestries alternates))))
   end
 
+  # alternates holds text keys, not references: kept out of expand, whose clauses match keys.
   defp settings(extra, m),
     do:
-      Map.delete(extra, "entry")
+      Map.drop(extra, ["entry", "alternates"])
       |> Water.settings(m)
       |> Derived.settings(m)
       |> Levelling.settings(m)
       |> Checks.expand(m)
+      |> Map.merge(Map.take(extra, ["alternates"]))
 
   # text.json is the TextCatalog; nil when absent, :unknown when rejected (text keys are then
   # not resolved against it).

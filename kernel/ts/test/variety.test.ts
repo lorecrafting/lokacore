@@ -12,6 +12,7 @@ import { test } from 'node:test';
 import { gameView, INSTALLED, loadCartridge, newWorld, step } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { encode } from '../src/foundation/canonical.ts';
+import { visits } from '../src/mechanics/knowledge/shared.ts';
 import type { Obj } from '../src/content/cartridge_refs.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-variety-sampler-'));
@@ -78,7 +79,8 @@ test('three equal walk lines rotate by command id and replay the same', () => {
 });
 
 // Breaks: the count not written after the first entry, written on a refused or non-entry
-// command, compared strictly, or read from another room; the leaf true before any entry.
+// command, compared strictly, or read from another room; the leaf true before any entry; the
+// start room's creation visit not counted.
 test('the garden shows its long description until the tenth visit, then one line', () => {
   let w = fresh(content);
   const garden: string[] = [];
@@ -93,6 +95,8 @@ test('the garden shows its long description until the tenth visit, then one line
       direction: 'south',
     }).world;
   }
+  // The start room counts its creation visit: ten returns make eleven.
+  assert.equal(visits(w, w.character, w.roomIds['variety_sampler@0.0.1:room/hall']!), 11);
   assert.deepEqual(garden, [...Array(9).fill('room.garden.description'), 'room.garden.familiar']);
 });
 

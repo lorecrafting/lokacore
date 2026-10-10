@@ -15,7 +15,8 @@ defmodule Loka.Content.Variety do
     text = if is_tuple(v2), do: elem(v2, 1), else: :unknown
 
     owner(m, alternates, registry) ++
-      keys(alternates || %{}, text) ++ floor(m, alternates != nil or leaf?(defs))
+      keys(alternates || %{}, text) ++
+      floor(m, alternates != nil or leaf?(defs) or leaf?(settings))
   end
 
   defp owner(_, nil, _), do: []

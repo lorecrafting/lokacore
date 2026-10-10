@@ -48,7 +48,8 @@ defmodule Loka.Core.InvariantsKnowledge do
         Contracts.validate("ObservedNpc", op["value"]) == :ok
 
   # The first visit has neither from nor count; each later one (variety@1) is the row plus one.
-  defp next_visit?(op, :missing), do: op["from"] == nil and op["value"]["count"] == nil
+  defp next_visit?(op, :missing),
+    do: not is_map_key(op, "from") and not is_map_key(op["value"], "count")
 
   defp next_visit?(op, before),
     do: before == op["from"] and op["value"]["count"] == (before["count"] || 1) + 1

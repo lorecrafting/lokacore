@@ -36,4 +36,19 @@ defmodule Loka.ContentVarietyTest do
       assert {code, path} in Enum.map(diags, &{&1["code"], &1["path"]}), inspect(diags)
     end
   end
+
+  # Break: alternates pass through short-reference expansion, whose clauses match a map by key, so
+  # a text key named like a declaration member (rest, transport) is rewritten or crashes.
+  test "alternates keyed like declaration members compile unchanged" do
+    dir = Loka.ContentSource.copy("cartridges/variety_sampler")
+    alts = %{"rest" => ["narration.walk_b"], "transport" => ["narration.walk_c"]}
+
+    changes = [
+      {"cartridge.json", &put_in(&1, ["alternates"], alts)},
+      {"text.json", &Map.merge(&1, %{"rest" => "Rest.", "transport" => "Ride."})}
+    ]
+
+    assert {:ok, artifact, _} = Loka.ContentSource.compile(dir, changes)
+    assert JSON.decode!(artifact)["cartridge"]["alternates"] == alts
+  end
 end

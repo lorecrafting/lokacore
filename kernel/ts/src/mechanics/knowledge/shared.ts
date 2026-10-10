@@ -37,7 +37,7 @@ export function record(
 
 // A first entry records the room; with variety@1 each later one counts it (VisitedRoom.count).
 function visit(world: World, actor_id: CharacterId, room_id: EntityId): DeltaOp[] {
-  const from = world.state.visited_rooms?.[key({ kind: 'visit', actor_id, room_id })];
+  const from = visitRow(world, actor_id, room_id);
   const op = { op: 'visit.record', writer_group: 0, actor_id, room_id } as const;
   if (!from) return [{ ...op, value: { actor_id, room_id } }];
   if (!world.cartridge.lock.capabilities.variety) return [];
@@ -69,9 +69,12 @@ export function enteredActors(world: World, ops: readonly DeltaOp[]): Set<Charac
 
 /** The actor's accepted entries into `room` (0 before the first; a row without count is 1). */
 export const visits = (world: World, actor_id: CharacterId, room_id: EntityId): number => {
-  const row = world.state.visited_rooms?.[key({ kind: 'visit', actor_id, room_id })];
+  const row = visitRow(world, actor_id, room_id);
   return row ? (row.count ?? 1) : 0;
 };
+
+const visitRow = (world: World, actor_id: CharacterId, room_id: EntityId) =>
+  world.state.visited_rooms?.[key({ kind: 'visit', actor_id, room_id })];
 
 export const observation = (world: World, actor: CharacterId, npc: EntityId) =>
   world.state.observed_npcs?.[key({ kind: 'observation', actor_id: actor, npc_id: npc })];
