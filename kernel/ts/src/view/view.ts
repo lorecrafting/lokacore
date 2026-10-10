@@ -3,7 +3,7 @@ import { movementPlan } from '../mechanics/movement/sequence.ts';
 import { edge } from '../mechanics/water/shared.ts';
 import { waterViews } from './water.ts';
 import { chapter, journal } from './quest_journal.ts';
-import { knownTopics } from '../mechanics/topics/shared.ts';
+import { lore } from '../mechanics/topics/shared.ts';
 import { services } from './services.ts';
 import { liquidView } from './liquid.ts';
 import { resources } from './resources.ts';
@@ -89,7 +89,7 @@ export function gameView(world: World): GameView {
     ...knowledgeView(world, steps),
     ...waterViews(world, steps),
     ...skillViews(world, steps),
-    ...(world.cartridge.topics && { topics: knownTopics(world, world.character) }),
+    ...(world.cartridge.topics && lore(world, world.character)),
     ...(fight && { combat: combatView(world, fight) }),
     ...(bleed && { bleeding: bleedingView(world, bleed) }),
     ...(conditions.length > 0 && { conditions }),

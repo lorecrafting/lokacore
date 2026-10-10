@@ -1,0 +1,48 @@
+{
+  "facts": {
+    "topic_mill_known": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The player knows about the mill."
+    },
+    "topic_missing_cart_known": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The player knows a cart went missing."
+    },
+    "topic_smugglers_known": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The player has worked out the smugglers."
+    },
+    "topic_wanderer_known": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "Badge: the player has visited all five rooms."
+    }
+  }
+}

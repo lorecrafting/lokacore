@@ -25,4 +25,6 @@ export const LABEL = {
   held: 'Held',
   worn: 'Worn',
   where: 'Where',
+  lore: 'Lore',
+  notHere: 'Not here',
 } as const;

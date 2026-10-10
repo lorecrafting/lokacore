@@ -1310,6 +1310,35 @@
             "additionalProperties": false
           }
         },
+        "deductions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "action": {
+                "$ref": "action.schema.json#/$defs/Key"
+              },
+              "label": {
+                "$ref": "text.schema.json#/$defs/TextKey"
+              },
+              "from": {
+                "type": "array",
+                "items": {
+                  "$ref": "text.schema.json#/$defs/TextKey"
+                },
+                "minItems": 2
+              }
+            },
+            "required": [
+              "action",
+              "label",
+              "from"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1,
+          "description": "Lore deductions (toolbox row 46, kernel_api at least 1.47): each recipe, in key order, whose policy is an all that requires at least two topics' facts true and whose success assigns another topic's fact true, while the actor knows those topics and not that one; action is the recipe's key, label its label, from the known topics' labels. Absent when none."
+        },
         "bleeding": {
           "$ref": "gameview.schema.json#/$defs/BleedingView"
         },

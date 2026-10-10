@@ -2,13 +2,8 @@
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { ContentsPage } from '../book/Menu.tsx';
 import { RaiseCards, SkillDetails } from '../book/skills.tsx';
-import {
-  AncestryPage,
-  CarryingPage,
-  CharacterPage,
-  JournalPage,
-  SettingsPage,
-} from '../book/sections.tsx';
+import { AncestryPage, CarryingPage, CharacterPage, SettingsPage } from '../book/sections.tsx';
+import { JournalPage } from '../book/journal.tsx';
 import { pageStory } from './screen.tsx';
 import JournalView from './views/journal.json';
 import CarryingEmptyView from './views/carrying-empty.json';
@@ -62,3 +57,48 @@ export const CharacterPointsToSpend: StoryObj = {
 export const Contents: StoryObj = { ...pageStory(ContentsView), name: 'Contents' };
 export const Settings: StoryObj = { ...pageStory(SettingsView), name: 'Settings' };
 export const Ancestry: StoryObj = { ...pageStory(AncestryView), name: 'Ancestry' };
+// Toolbox row 46: the codex sampler's lore (kernel/ts/test/codex.test.ts) on the Journal page, its
+// words given here because Chapter 1 authors no deduction. Away from the study the card is refused.
+const lore = {
+  topics: [
+    { topic: { kind: 'topic', key: 'mill' }, label: 'topic.mill' },
+    { topic: { kind: 'topic', key: 'missing_cart' }, label: 'topic.missing_cart' },
+  ],
+  deductions: [
+    {
+      action: 'deduce_smugglers',
+      label: 'actions.deduce_smugglers',
+      from: ['topic.mill', 'topic.missing_cart'],
+    },
+  ],
+};
+const loreWords = {
+  'topic.mill': 'The mill',
+  'topic.missing_cart': 'The missing cart',
+  'actions.deduce_smugglers': 'Think it through',
+};
+const deduce = {
+  action_key: 'deduce_smugglers',
+  label: 'actions.deduce_smugglers',
+  available: true,
+  target: { kind: 'none' },
+  input: [],
+};
+const loreStory = (actions: object[], name: string): StoryObj => {
+  const story = pageStory({ ...JournalView, view: { ...JournalView.view, ...lore, actions } });
+  return { ...story, args: { words: loreWords }, name };
+};
+export const JournalLore: StoryObj = {
+  ...loreStory([...JournalView.view.actions, deduce], 'Journal lore with a deduction here'),
+  play: async ({ canvas }) => {
+    await canvas.findByText('Lore');
+    await canvas.findByText('The mill + The missing cart');
+    await canvas.findByRole('button', { name: 'Think it through' });
+  },
+};
+export const JournalLoreAway: StoryObj = {
+  ...loreStory(JournalView.view.actions, 'Journal lore, deduction elsewhere'),
+  play: async ({ canvas }) => {
+    await canvas.findByText('Think it through: Not here');
+  },
+};

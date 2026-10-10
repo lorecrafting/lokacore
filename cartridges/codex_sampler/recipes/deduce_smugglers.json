@@ -1,0 +1,52 @@
+{
+  "label": "actions.deduce_smugglers",
+  "aliases": [
+    "think"
+  ],
+  "target": {
+    "kind": "detail",
+    "room": "study",
+    "detail": "desk"
+  },
+  "priority": 5,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": [
+        {
+          "op": "fact_compare",
+          "fact": "topic_mill_known",
+          "equals": true
+        },
+        {
+          "op": "fact_compare",
+          "fact": "topic_missing_cart_known",
+          "equals": true
+        },
+        {
+          "op": "not",
+          "item": {
+            "op": "fact_compare",
+            "fact": "topic_smugglers_known",
+            "equals": true
+          }
+        }
+      ]
+    }
+  },
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "topic_smugglers_known",
+          "value": true
+        }
+      ],
+      "narration": {
+        "actor": "narration.deduce_smugglers"
+      }
+    }
+  }
+}

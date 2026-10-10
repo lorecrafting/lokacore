@@ -37,3 +37,34 @@ export function knownTopics(world: World, actor: CharacterId) {
         : [],
     );
 }
+
+// Toolbox row 46: the topics plus each deduction (a recipe whose policy is an all requiring two or
+// more topics' facts true and whose success assigns another topic's fact true) the actor can make
+// now: it knows those topics and not that one. Absent when none, so a cartridge opts in by content.
+export function lore(world: World, actor: CharacterId) {
+  const topics = Object.values(world.cartridge.topics ?? {});
+  const topicOf = (fact: DefinitionRef) =>
+    topics.find((t) => refString(t.fact) === refString(fact));
+  const known = (fact: DefinitionRef) => value(world, actor, fact) === true;
+  const deductions = Object.values(world.cartridge.recipes ?? {})
+    .sort((a, b) => cmp(a.key, b.key))
+    .flatMap((r) => {
+      const root = r.policy.root;
+      const from = (root.op === 'all' ? root.items : []).flatMap((p) =>
+        p.op === 'fact_compare' && p.equals === true ? (topicOf(p.fact) ?? []) : [],
+      );
+      const grants = r.outcomes.success.sequence.find(
+        (s) => s.op === 'fact.assign' && s.value === true && topicOf(s.fact),
+      );
+      return from.length >= 2 &&
+        grants?.op === 'fact.assign' &&
+        from.every((t) => known(t.fact)) &&
+        !known(grants.fact)
+        ? [{ action: r.key, label: r.label, from: from.map((t) => t.label) }]
+        : [];
+    });
+  return {
+    topics: knownTopics(world, actor),
+    ...(deductions.length > 0 && { deductions }),
+  };
+}
