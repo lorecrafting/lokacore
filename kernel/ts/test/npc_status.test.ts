@@ -166,7 +166,7 @@ test('a fatal tick kills the guard and ends its other status', () => {
 
 // Breaks: a reaction's status.apply on a ticking or expiring holder written in its own writer
 // group, so the elapsed command faults conflicting_write and time cannot advance (mechanics.md G3).
-test('a tick re-poisons the guard and an expiry re-sets the door burning', () => {
+test('a tick re-poisons the guard', () => {
   const poison = { op: 'status.apply', status: ref('status', 'poison') };
   let w = wait(fresh(plus('groan', poison)), 3600 + 60);
   assert.equal(hp(w, 'guard'), 9);
@@ -177,6 +177,10 @@ test('a tick re-poisons the guard and an expiry re-sets the door burning', () =>
   w = wait(w, 240); // the first application would have expired here
   assert.equal(hp(w, 'guard'), 5);
   assert.equal(row(w, 'npc', 'guard', 'poison')?.active, true);
+});
+
+// Breaks: as above, on an expiry: the reaction re-setting the door's status faults.
+test('an expiry re-sets the door burning', () => {
   let d = fresh(plus('charred', { op: 'status.apply', status: ref('status', 'burning') }));
   d = play(d, { type: 'take', item_id: id(d, 'item', 'torch') });
   d = play(d, { type: 'move', direction: 'north' });
