@@ -1,14 +1,12 @@
 import { chosen } from '../scene/sequence.ts';
 import * as patrol from '../patrol/sequence.ts';
-import { grant } from '../topics/shared.ts';
 import { hub, wrongAnswer } from './behavior.ts';
-import { acquire } from '../skills.ts';
-import { exchangeRoles, contribution, exchangeDefinition, exchangeTransfers } from './exchange.ts';
+import { exchangeRoles, exchangeTransfers } from './exchange.ts';
 import { questOf } from '../lookups.ts';
 // Dialogue lowers bound choices, quest transitions and facts in one writer group.
 import type {
   CharacterId,
-  DefinitionRef,
+  ContinuationId,
   DialogueChoice,
   DialogueDefinition,
   EntityId,
@@ -44,9 +42,9 @@ import {
   spokenBy,
   talking,
 } from './shared.ts';
-import { assigned, adjusted, type Assigned } from '../fact.ts';
 import { acceptRefused, activation, boundActivation, resolution } from '../quest/lifecycle.ts';
 import { choicePayment } from './payment.ts';
+import { checked, sequence } from './sequence.ts';
 
 type Command<T> = Omit<Parameters<Rule<'dialogue'>>[1], 'payload'> & {
   readonly payload: Extract<Parameters<Rule<'dialogue'>>[1]['payload'], { type: T }>;
@@ -122,47 +120,10 @@ function choose(world: World, command: Command<'choose'>, mint: Mint, row: Choic
     return rejected('invalid_state');
   if (riddle && answer!.toLowerCase() !== riddle.answer)
     return wrongAnswer(world, command, row, riddle, participants);
-  return hub(
-    world,
-    command,
-    mint,
-    row,
-    d,
-    option,
-    applyChoice(world, command, mint, row, used, participants),
-  );
-}
-
-function sequence(
-  world: World,
-  actor: CharacterId,
-  option: DialogueChoice,
-  boundReceive: boolean,
-  quest?: DefinitionRef,
-) {
-  let run: Assigned = {
-    ops: [],
-    position: boundReceive ? 2 : option.receive || option.hand_over ? 1 : 0,
-    facts: {},
-  };
-  for (const step of option.sequence ?? []) {
-    const next =
-      step.op === 'topic.grant'
-        ? grant(world, actor, run, step.topic)
-        : step.op === 'skill.acquire'
-          ? acquire(world, actor, run, step.skill)
-          : step.op === 'fact.adjust'
-            ? adjusted(world, actor, run, step)
-            : assigned(world, actor, run, step);
-    if (!next) return undefined;
-    run = next;
-  }
-  return option.exchange && quest
-    ? contribution(world, actor, quest, {
-        ...run,
-        position: exchangeDefinition(world, quest)!.quantity * 2,
-      })
-    : run;
+  const start = option.check && checked(world, command, mint, row, d, participants);
+  if (start && 'kind' in start) return start;
+  const decided = applyChoice(world, command, mint, row, used, participants, start);
+  return hub(world, command, mint, row, d, option, decided);
 }
 
 // size: allow 60, one choice lowers its bound quest, custody, payment and events atomically
@@ -173,6 +134,7 @@ function applyChoice(
   row: ChoiceRow,
   used: Steps,
   participants: Record<string, EntityId>,
+  start?: Exclude<ReturnType<typeof checked>, { kind: string }>,
 ) {
   const { actor_id, choice_id, continuation_id } = command.payload;
   const d = definition(world, row.source);
@@ -181,7 +143,7 @@ function applyChoice(
   if (typeof q === 'string') return rejected(q);
   const body = bodyOf(world, actor_id)!;
   const boundReceive = !!(option.accept && option.receive);
-  const run = sequence(world, actor_id, option, boundReceive, d.quest);
+  const run = sequence(world, actor_id, option, boundReceive, d.quest, start?.run);
   if (!run) return { kind: 'fault' as const, code: 'precondition_failed' as const };
   const given =
     option.exchange && d.quest
@@ -193,13 +155,7 @@ function applyChoice(
   const paid = choicePayment(world, row, option, body);
   if ((option.payment || option.lesson_payment) && !paid) return rejected('insufficient_resource');
   const watched = patrol.choice(world, command, row, q?.payload, mint, used);
-  const op = {
-    op: 'choice.resolve',
-    writer_group: 0,
-    continuation_id,
-    choice_id,
-    expected_revision: row.opened_revision,
-  } as const;
+  const op = resolveOp(row, continuation_id, choice_id);
   const chosen = { type: 'choice_resolved', continuation_id, choice_id } as const;
   const at = run.position + quests.length + watched.events.length + 1;
   const resolvedChoice = event(world, command, mint, at, chosen);
@@ -217,6 +173,7 @@ function applyChoice(
       op,
     ],
     [
+      ...(start?.events ?? []),
       ...(boundReceive ? quests : given.events),
       ...(boundReceive ? given.events : quests),
       ...watched.events,
@@ -226,6 +183,15 @@ function applyChoice(
     [{ key: option.narration, participants }],
   );
 }
+
+const resolveOp = (row: ChoiceRow, continuation_id: ContinuationId, choice_id: Key) =>
+  ({
+    op: 'choice.resolve',
+    writer_group: 0,
+    continuation_id,
+    choice_id,
+    expected_revision: row.opened_revision,
+  }) as const;
 
 // The dialogue's quest resolving with outcome `choice_id`, or the option's accept activating its
 // quest: invalid_state when accept_quest would refuse it (mechanics/quest/lifecycle.ts acceptRefused; the talk-time

@@ -1,0 +1,29 @@
+{
+  "api_version": "loka/v3",
+  "id": "persuade_sampler",
+  "version": "0.0.1",
+  "title": "Persuasion Sampler",
+  "requires": {
+    "kernel_api": {
+      "at_least": "1.47",
+      "below": "2.0"
+    },
+    "content_schema": 1,
+    "rule_ir": 1,
+    "capabilities": {
+      "movement": 1,
+      "containment": 1,
+      "fact": 1,
+      "policy": 1,
+      "dialogue": 1,
+      "check": 1,
+      "attributes": 1,
+      "skills": 1
+    },
+    "client_features": []
+  },
+  "supported_profiles": [
+    "offline_private"
+  ],
+  "entry": "gate_room"
+}

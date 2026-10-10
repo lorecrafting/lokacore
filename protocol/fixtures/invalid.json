@@ -21803,5 +21803,110 @@
         "code": "too_few_items"
       }
     ]
+  },
+  {
+    "name": "dialogue_check_no_side_kind_key_failure",
+    "contract": "DialogueChoice",
+    "value": {
+      "label": "dialogue.guard.persuade",
+      "narration": "narration.guard.persuade",
+      "check": {
+        "rating": 1
+      }
+    },
+    "errors": [
+      {
+        "path": "/check",
+        "code": "exclusive_properties"
+      },
+      {
+        "path": "/check/failure",
+        "code": "missing_property"
+      },
+      {
+        "path": "/check/key",
+        "code": "missing_property"
+      },
+      {
+        "path": "/check/kind",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "dialogue_check_both_sides_luck_extra",
+    "contract": "DialogueChoice",
+    "value": {
+      "label": "dialogue.guard.persuade",
+      "narration": "narration.guard.persuade",
+      "check": {
+        "key": "persuade_guard",
+        "kind": "luck",
+        "skill": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "skill",
+          "key": "talk"
+        },
+        "attribute": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "attribute",
+          "key": "cha"
+        },
+        "rating": "3",
+        "failure": "narration.guard.failed",
+        "x": 1
+      }
+    },
+    "errors": [
+      {
+        "path": "/check",
+        "code": "exclusive_properties"
+      },
+      {
+        "path": "/check/kind",
+        "code": "const_mismatch"
+      },
+      {
+        "path": "/check/rating",
+        "code": "invalid_type"
+      },
+      {
+        "path": "/check/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "dialogue_check_npc_on_skill",
+    "contract": "DialogueChoice",
+    "value": {
+      "label": "dialogue.guard.persuade",
+      "narration": "narration.guard.persuade",
+      "check": {
+        "key": "persuade_guard",
+        "kind": "opposed",
+        "skill": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "skill",
+          "key": "talk"
+        },
+        "npc": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "npc",
+          "key": "guard"
+        },
+        "failure": "narration.guard.failed"
+      }
+    },
+    "errors": [
+      {
+        "path": "/check/attribute",
+        "code": "missing_property"
+      }
+    ]
   }
 ]

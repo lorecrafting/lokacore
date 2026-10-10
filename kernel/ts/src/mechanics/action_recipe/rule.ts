@@ -48,9 +48,9 @@ import {
 import { assigned, seenTip, value } from '../fact.ts';
 import { add } from '../../foundation/int.ts';
 import { adjust, level, type Levels } from '../resource.ts';
-import { npcValue, value as attributeValue } from '../attributes/shared.ts';
+import { value as attributeValue } from '../attributes/shared.ts';
 import { uniform } from '../../foundation/rng.ts';
-import { level as skillLevel, practised } from '../skills.ts';
+import { opposed, practised } from '../skills.ts';
 
 export const decide: Rule<'action_recipe'> = (world, command, mint) => {
   const { actor_id, action, target_id } = command.payload;
@@ -146,9 +146,7 @@ function resolve(
       : check.kind === 'attribute_threshold'
         ? attributeValue(world, actor, check.attribute) >= check.difficulty
         : check.kind === 'opposed'
-          ? (check.skill
-              ? skillLevel(world, actor, check.skill)
-              : attributeValue(world, actor, check.attribute!)) >= rating(world, check, subject_id)
+          ? opposed(world, actor, check, world.details[subject_id].rating!)
           : level(world, body, check.resource)! >= check.difficulty;
   const { id: cartridge_id, version: cartridge_version } = world.cartridge.manifest;
   const payload: CheckEvent = {
@@ -159,17 +157,6 @@ function resolve(
   const outcome = passed ? ('success' as const) : ('failure' as const);
   return { outcome, rng, event: event(world, command, mint, 1, payload) };
 }
-
-// An opposed check's rating: the named NPC's value of the attribute, read at use wherever the NPC
-// is (row G3; no leaf gates its presence yet), else the target detail's rating.
-const rating = (
-  world: World,
-  check: { npc?: DefinitionRef; attribute?: DefinitionRef },
-  at: EntityId,
-) =>
-  check.npc
-    ? npcValue(world, world.entityIds[refString(check.npc)]!, check.attribute!)!
-    : world.details[at].rating!;
 
 type Command = Parameters<Rule<'action_recipe'>>[1];
 type Run = {

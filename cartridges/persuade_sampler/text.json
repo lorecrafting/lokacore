@@ -1,0 +1,18 @@
+{
+  "room.gate_room.title": "Gatehouse",
+  "room.gate_room.description": "A gatehouse with a barred gate.",
+  "npc.guard.short": "a guard",
+  "npc.guard.room": "A [guard](guard) leans on the gate.",
+  "npc.guard.description": "A bored guard with a ready tongue.",
+  "skill.intimidate.label": "Intimidate",
+  "skill.intimidate.requirement": "Anyone can try to frighten someone.",
+  "dialogue.guard.prompt": "\"Gate's shut,\" says the guard.",
+  "dialogue.guard.persuade": "Talk the guard round",
+  "narration.guard.persuade": "The guard laughs and lifts the bar.",
+  "narration.guard.persuade_failed": "The guard shakes his head.",
+  "dialogue.guard.intimidate": "Lean on the guard",
+  "narration.guard.intimidate": "The guard flinches and lifts the bar.",
+  "narration.guard.intimidate_failed": "The guard looks you up and down and turns away.",
+  "dialogue.guard.leave": "Leave",
+  "narration.guard.leave": "You step back from the gate."
+}

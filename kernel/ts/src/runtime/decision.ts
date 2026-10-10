@@ -208,7 +208,7 @@ export const COMPOSES = {
   action_recipe: ['check'],
   schedule: ['movement', 'combat', 'death', 'quest', 'containment', 'status'],
   combat: ['movement', 'quest'],
-  dialogue: ['quest', 'containment', 'movement'],
+  dialogue: ['quest', 'containment', 'movement', 'check'],
   movement: ['quest'],
   commerce: ['containment'],
   scene: ['dialogue', 'quest'],
