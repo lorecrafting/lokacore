@@ -10,6 +10,7 @@ import { fail } from '../patrol/sequence.ts';
 import { fail as failExpedition } from '../expedition/sequence.ts';
 import { separate } from '../escort/shared.ts';
 import { cmp } from '../../foundation/validate.ts';
+import { uniform, type RngState } from '../../foundation/rng.ts';
 import { key } from '../../foundation/compose.ts';
 
 import { leave } from '../water/shared.ts';
@@ -29,12 +30,17 @@ export type Fatal = {
   credited_character_id: CharacterId | null;
 };
 
-/** `world` includes the fatal HP loss and producer's encounter closure at the fatal clock. */
+/**
+ * `world` includes the fatal HP loss and producer's encounter closure at the fatal clock. `rng`
+ * is the combat round's state; an NPC victim with drops needs it (toolbox row 8).
+ */
+// size: allow 42, drop rolls (toolbox row 8) thread the combat round's RNG through custody
 export function deathSequence(
   world: World,
   command: Pick<Command, 'id'>,
   fatal: Fatal,
   mint: Mint,
+  rng?: RngState,
 ) {
   validateFatal(world, fatal);
   const { loss, owner_id } = fatal;
@@ -63,12 +69,27 @@ export function deathSequence(
       destination_id: room_id,
     },
   ];
-  ops.push(...transferRoots(world, victim_id, corpse_id, player, writer_group));
+  const drops = rollDrops(world, victim_id, rng);
+  ops.push(...transferRoots(world, victim_id, corpse_id, player, writer_group, drops.kept));
   ops.push(...crowDied(world, victim_id, writer_group));
   ops.push(...populationLoss(world, loss));
   if (player) ops.push(...returnBody(world, fatal));
   const died = deathEvent(world, command, fatal, id, corpse_id, player);
-  return { ops, events: [died], corpse_id };
+  return { ops, events: [died], corpse_id, rng: drops.rng };
+}
+
+/** One uniform(100) per drop entry in table order; a failed entry's held item stays (row 8). */
+function rollDrops(world: World, victim_id: EntityId, rng: RngState | undefined) {
+  const kept = new Set<string>();
+  const npc = world.entities[victim_id];
+  if (npc?.kind !== 'npc' || !npc.drops) return { kept, rng };
+  if (!rng) throw new KernelError('precondition_failed');
+  for (const { item, chance } of npc.drops) {
+    const [roll, after] = uniform(rng, 100, 8);
+    rng = after;
+    if (roll >= chance) kept.add(world.entityIds[refString(item)]);
+  }
+  return { kept, rng };
 }
 
 function corpseDefinition(world: World, victim_id: EntityId, player: boolean) {
@@ -150,11 +171,13 @@ function transferRoots(
   corpse_id: EntityId,
   player: boolean,
   writer_group: number,
+  kept: Set<string>,
 ): DeltaOp[] {
   const ops: DeltaOp[] = [];
   const roots = Object.keys(world.entities).filter(
     (item) =>
       world.entities[item].kind === 'item' &&
+      !kept.has(item) &&
       (world.state.containers[item] === victim_id ||
         (player && wornIn(world, world.state.containers[item], victim_id))),
   );

@@ -416,6 +416,30 @@
           },
           "minItems": 1,
           "maxItems": 8
+        },
+        "drops": {
+          "description": "Toolbox row 8 loot table (docs/system/mechanics.md loot tables; kernel_api at least 1.43, world.death): in order, an item this NPC holds at genesis and its percent chance of passing to the corpse when combat kills the NPC; a failed item stays with the dead NPC.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "item": {
+                "$ref": "identity.schema.json#/$defs/DefinitionRef"
+              },
+              "chance": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100
+              }
+            },
+            "required": [
+              "item",
+              "chance"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1,
+          "maxItems": 8
         }
       },
       "required": [
