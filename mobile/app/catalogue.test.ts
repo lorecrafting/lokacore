@@ -48,3 +48,29 @@ test('every exported component has a story that imports it', () => {
   );
   assert.deepEqual(missing, []);
 });
+
+// Breaks: a token no component reads (a dead value the catalogue still describes). Palette roles and
+// fonts are read through usePalette and `type`, so the groups checked are the named-value ones.
+const NO_BOOK_CONSUMER: Record<string, string> = {
+  'space.hair': 'read only by dev chrome (the picker overlay, the System dashboard)',
+  'size.speechBar': 'the Log line row: waits until the log projects a speaker',
+  'type.speaker': 'the Log line row: waits until the log projects a speaker',
+};
+test('every token has a consumer outside tokens.ts', async () => {
+  const tokens: Record<string, object> = await import('./book/tokens.ts');
+  const book = readdirSync(new URL('book/', app)).filter(
+    (f) => /\.tsx?$/.test(f) && f !== 'tokens.ts' && !f.endsWith('.test.ts'),
+  );
+  const code = [...book.map((f) => `book/${f}`), 'App.tsx', 'SaveError.tsx'].map(read).join('\n');
+  const groups = ['type', 'space', 'size', 'radius', 'opacity', 'motion', 'sound', 'nightSky'];
+  const dead = groups.flatMap((g) =>
+    Object.keys(tokens[g])
+      .map((k) => `${g}.${k}`)
+      .filter(
+        (name) =>
+          !(name in NO_BOOK_CONSUMER) &&
+          !new RegExp(`\\b${name.replace('.', '\\.')}\\b`).test(code),
+      ),
+  );
+  assert.deepEqual(dead, []);
+});

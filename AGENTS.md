@@ -138,6 +138,7 @@ or `bin/check_all.sh`; hosted CI on the pushed head is the gate ([two-lane CI](d
 
 - Follow [the delivery workflow](docs/WORKFLOW.md) for slice reviews and the
   [Beads Rust](docs/WORKFLOW.md#beads-rust) for PM task status.
+- Book UI code follows the [agent rules](docs/BOOK-UI-COMPONENTS.md#agent-rules-for-book-ui-code).
 - Update [Book UI](docs/system/book-ui.md) per mechanic ([designer](docs/decisions/owner-decision-designer-role-2026-10-07.md)-approved); fix UI defects now ([workflow](docs/WORKFLOW.md#book-interaction-delivery)).
 - Toolchain: pinned in `mise.toml`; run `mise exec -- <cmd>`.
 - After cloning, run `git config core.hooksPath .githooks`; `--no-verify` only with the owner's OK; fix the cause instead.

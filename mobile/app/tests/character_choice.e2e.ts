@@ -1,6 +1,7 @@
 import { beforeEach, test } from '@e2e-dev/web';
 import { expect } from 'e2e';
 import { go, reopen, type Screen, reducedMotion } from './steps.ts';
+import { LABEL } from '../book/labels.ts';
 
 // Long walks: the pages cross-fade (steps.ts reducedMotion).
 beforeEach(({ browser }) => reducedMotion(browser));
@@ -48,7 +49,7 @@ async function ancestryRoute(screen: Screen, choice: string) {
     await expect(
       screen.getByText('Peg takes your pennies and hands you the purchase.'),
     ).toBeVisible();
-    await screen.getByRole('button', 'Leave').tap();
+    await screen.getByRole('button', LABEL.leave).tap();
   } else if (choice === 'Hill-folk') {
     await go(screen, 'west', 'Boathouse');
     await go(screen, 'south', 'Old Mill');

@@ -6,6 +6,7 @@ import { expect, type TestFixtures } from 'e2e';
 // @ts-expect-error the app has no Node types; the e2e runner is Node
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { go } from '../tests/steps.ts';
+import { LABEL } from '../book/labels.ts';
 
 type Fixtures = Pick<TestFixtures, 'app' | 'screen'> & { browser: Browser };
 export type Screen = Fixtures['screen'];
@@ -42,7 +43,7 @@ const spellOn = (walked: Screen, browser: Browser) => async (word: string) => {
     tiles.splice(tiles.indexOf(tile), 1);
     await walked.getByRole('button', tile).tap();
   }
-  await walked.getByRole('button', 'Submit').tap();
+  await walked.getByRole('button', LABEL.submit).tap();
 };
 
 type Locator = ReturnType<Screen['getByRole']>;
@@ -107,9 +108,9 @@ export const talk = async (screen: Screen, npc: string, ...choices: string[]) =>
   for (const choice of choices) {
     await screen.getByRole('button', `Talk to ${npc}`).last().tap();
     await screen.getByRole('button', choice).tap();
-    await screen.getByRole('button', 'Leave the conversation').tap();
+    await screen.getByRole('button', LABEL.leaveConversation).tap();
   }
-  await screen.getByRole('button', 'Leave').tap();
+  await screen.getByRole('button', LABEL.leave).tap();
 };
 export const moves = async (screen: Screen, ...directions: string[]) => {
   for (const d of directions) await go(screen, d);

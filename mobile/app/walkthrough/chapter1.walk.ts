@@ -3,6 +3,7 @@
 // keys to the Book's button labels.
 import { begin } from '../tests/steps.ts';
 import { moves, scene, talk, walk, type Screen, type Walk } from './walk.ts';
+import { LABEL } from '../book/labels.ts';
 
 // e1_paths.ts ending(child, allegiance) for each of its ENDINGS (copied: that module needs Node
 // types this app's tsconfig lacks): search, childReturn (unless lost), bell, epilogue.
@@ -25,7 +26,7 @@ const search = async (screen: Screen) => {
   await moves(screen, 'south', 'south');
   await screen.getByRole('button', 'Tracks, open').tap();
   await screen.getByRole('button', 'Study tracks').tap();
-  await screen.getByRole('button', 'Leave').tap();
+  await screen.getByRole('button', LABEL.leave).tap();
 };
 
 const childReturn = async (r: Walk, child: Child) => {
@@ -35,8 +36,8 @@ const childReturn = async (r: Walk, child: Child) => {
   await screen.getByRole('button', /^Vesper is here\./).tap();
   await screen.getByRole('button', 'Talk to Vesper').last().tap();
   await r.spell('LANTERN');
-  await screen.getByRole('button', 'Leave the conversation').tap();
-  await screen.getByRole('button', 'Leave').tap();
+  await screen.getByRole('button', LABEL.leaveConversation).tap();
+  await screen.getByRole('button', LABEL.leave).tap();
   if (child === 'stays')
     await talk(screen, 'Vesper', '“I’ll take your message to Elspeth. Wren can stay.”');
   else await talk(screen, 'Wren', '“Come with me. I’ll take you back to Elspeth.”');
@@ -58,7 +59,7 @@ const bell = async (screen: Screen, child: Child, allegiance: string) => {
     .tap();
   await scene(screen);
   // The bell's scene ends back on the Chapel bell page.
-  await screen.getByRole('button', 'Leave').tap();
+  await screen.getByRole('button', LABEL.leave).tap();
   await moves(screen, 'down', 'down', 'south', 'south', 'south');
 };
 
@@ -95,7 +96,7 @@ walk('3-lantern-dream', 'Side quest: a room at the Lantern, follow the fox', asy
   await moves(screen, 'north', 'east');
   await screen.getByRole('button', /^Widow Maud is here\./).tap();
   await screen.getByRole('button', 'Rent room — 3p').tap();
-  await screen.getByRole('button', 'Leave').tap();
+  await screen.getByRole('button', LABEL.leave).tap();
   await moves(screen, 'up');
   await screen.getByRole('button', 'Bed, open').tap();
   await screen.getByRole('button', 'Rest').tap();
@@ -111,24 +112,24 @@ walk('4-wisp-ward', 'Side quest: the wisp ward', async (r) => {
   await begin({ app: r.app, screen }, 'Road-born');
   await moves(screen, 'south', 'south', 'south', 'east');
   await screen.getByRole('button', 'Marsh glow, open').tap(); // opening the glow seeks the wisp
-  await screen.getByRole('button', 'Leave').tap();
+  await screen.getByRole('button', LABEL.leave).tap();
   await screen.getByRole('button', /^Wisp is here\./).tap();
   await screen.getByRole('button', 'Speak to Wisp Wisp').tap();
   await screen.getByRole('button', 'Accept the riddle').tap();
-  await screen.getByRole('button', 'Leave the conversation').tap();
-  await screen.getByRole('button', 'Leave').tap();
+  await screen.getByRole('button', LABEL.leaveConversation).tap();
+  await screen.getByRole('button', LABEL.leave).tap();
   await screen.getByRole('button', /^Wisp is here\./).tap();
   await screen.getByRole('button', 'Ask Wisp again Wisp').tap();
   for (const wrong of ['EDIT', 'DIET', 'TIED']) await r.spell(wrong);
-  await screen.getByRole('button', 'Leave the conversation').tap();
+  await screen.getByRole('button', LABEL.leaveConversation).tap();
   await screen.getByRole('button', 'Ask Wisp again Wisp').tap();
   await r.spell('TIDE');
-  await screen.getByRole('button', 'Leave the conversation').tap();
-  await screen.getByRole('button', 'Leave').tap();
+  await screen.getByRole('button', LABEL.leaveConversation).tap();
+  await screen.getByRole('button', LABEL.leave).tap();
   await moves(screen, 'west', ...Array(8).fill('north'));
   await screen.getByRole('button', /^Prior Aldric is here\./).tap();
   await screen.getByRole('button', 'Ask about ward Prior Aldric').tap();
   await screen.getByRole('button', 'Discuss the ward').tap();
-  await screen.getByRole('button', 'Leave the conversation').tap();
-  await screen.getByRole('button', 'Leave').tap();
+  await screen.getByRole('button', LABEL.leaveConversation).tap();
+  await screen.getByRole('button', LABEL.leave).tap();
 });

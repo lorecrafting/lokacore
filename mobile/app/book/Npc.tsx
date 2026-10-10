@@ -4,11 +4,12 @@ import type { GameView } from '../../packages/game-view/session.ts';
 import { absent, cap, plain, why, type group, type Page as Route } from './model.ts';
 import type { Button, DetailLine, presenter } from './presenter.ts';
 import { ActionCard, Cards } from './actions.tsx';
-import { LogLines } from './lines.tsx';
+import { LogLines, Note } from './lines.tsx';
 import { Control, Page, type Thing } from './pages.tsx';
 import { note, prose, usePalette, type Palette } from './palette.ts';
 import { Riddle } from './Riddle.tsx';
 import { space } from './tokens.ts';
+import { LABEL } from './labels.ts';
 type Say = (key: string) => string;
 type Grouped = ReturnType<typeof group>;
 type Screen = ReturnType<ReturnType<typeof presenter>['screen']>;
@@ -47,9 +48,7 @@ function Choice(p: {
             />
           );
         if (b) return <ActionCard key={o.choice_id} b={b} press={p.press} />;
-        return (
-          <Text key={o.choice_id} style={note(c)}>{`${p.text(o.label)}: ${why(o, p.text)}`}</Text>
-        );
+        return <ActionCard key={o.choice_id} label={p.text(o.label)} reason={why(o, p.text)} />;
       })}
     </View>
   );
@@ -89,7 +88,7 @@ export function NpcPage(p: NpcProps) {
       )}
       <LogLines lines={log} />
       {npcSkills(c, p)}
-      {!talk && !actions.length && !log.length && <Text style={note(c)}>Nothing to do here.</Text>}
+      {!talk && !actions.length && !log.length && <Note>Nothing to do here.</Note>}
       {!talk && <ShopOptions {...p} />}
       {choice && <Choice {...p} press={answer} choice={choice} />}
       {!talk && (
@@ -115,14 +114,14 @@ const conversation = (p: NpcProps, choice?: NonNullable<GameView['choice']>) => 
   };
   const stop = () => {
     p.talk?.(false);
-    if (close) p.press({ ...close, label: 'Leave the conversation' });
+    if (close) p.press({ ...close, label: LABEL.leaveConversation });
     else if (!p.npc) p.leave();
   };
   const foot =
     talk && (close || !choice) ? (
-      <Control label="Leave the conversation" onPress={stop} />
+      <Control label={LABEL.leaveConversation} onPress={stop} />
     ) : (
-      <Control label="Leave" onPress={p.leave} />
+      <Control label={LABEL.leave} onPress={p.leave} />
     );
   return { talk, answer, foot };
 };
@@ -170,18 +169,19 @@ function ShopOptions(p: NpcProps) {
 }
 
 function ServiceOptions(p: NpcProps & { actions: Button[] }) {
-  const c = usePalette();
   const offers = p.npc && 'services' in p.npc ? p.npc.services : undefined;
   return offers?.map((s) => {
     const b = p.actions.find((b) => b.action_key === s.action.action_key);
     return b ? (
       <ActionCard key={s.service.key} b={b} press={p.press} />
     ) : (
-      <Text key={s.service.key} style={note(c)}>
-        {p.text(s.label)}: {s.price}p
-        {s.benefit.kind === 'entitlement' ? '' : `; up to +${s.benefit.amount} MV, capped`}
-        {!s.action.available && ` (${why(s.action, p.text)})`}
-      </Text>
+      <ActionCard
+        key={s.service.key}
+        label={`${p.text(s.label)} (${s.price}p${
+          s.benefit.kind === 'entitlement' ? '' : `; up to +${s.benefit.amount} MV, capped`
+        })`}
+        reason={s.action.available ? undefined : why(s.action, p.text)}
+      />
     );
   });
 }

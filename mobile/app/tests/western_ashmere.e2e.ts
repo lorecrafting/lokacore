@@ -2,6 +2,7 @@ import { beforeEach, test } from '@e2e-dev/web';
 import { expect } from 'e2e';
 import type { TestFixtures } from 'e2e';
 import { go, litTorch, reopen, type Screen, reducedMotion } from './steps.ts';
+import { LABEL } from '../book/labels.ts';
 
 // Long walks: the pages cross-fade (steps.ts reducedMotion).
 beforeEach(({ browser }) => reducedMotion(browser));
@@ -69,8 +70,8 @@ test('Hob can be met at both scheduled destinations using an isolated controlled
   await go(screen, 'south', 'Old Mill');
   await go(screen, 'up', 'Mill Loft');
   await meetHob(screen);
-  await screen.getByRole('button', 'Leave the conversation').tap();
-  await screen.getByRole('button', 'Leave').tap();
+  await screen.getByRole('button', LABEL.leaveConversation).tap();
+  await screen.getByRole('button', LABEL.leave).tap();
   await go(screen, 'down', 'Old Mill');
   await browser.evaluate(() => {
     localStorage.setItem('d3-clock-offset', String(864_000));
@@ -81,8 +82,8 @@ test('Hob can be met at both scheduled destinations using an isolated controlled
   await reopen({ app, screen });
   await screen.getByRole('button', /^Hob is here\./).tap();
   await heardHob(screen);
-  await screen.getByRole('button', 'Leave the conversation').tap();
-  await screen.getByRole('button', 'Leave').tap();
+  await screen.getByRole('button', LABEL.leaveConversation).tap();
+  await screen.getByRole('button', LABEL.leave).tap();
 });
 
 // A standalone Read shows its text, returns, and shows the same text after a reopen.
@@ -93,10 +94,10 @@ async function readTwice(
 ) {
   await screen.getByRole('button', `${label}, open`).tap();
   await expect(screen.getByText(text)).toBeVisible();
-  await screen.getByRole('button', 'Leave').tap();
+  await screen.getByRole('button', LABEL.leave).tap();
   await reopen({ app, screen });
   await expect(screen.getByText(text)).toBeVisible();
-  await screen.getByRole('button', 'Leave').tap();
+  await screen.getByRole('button', LABEL.leave).tap();
 }
 
 async function meetHob(screen: Screen) {

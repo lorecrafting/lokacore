@@ -1,6 +1,6 @@
 // The Contents sections (Character, Ancestry, Journal, Carrying, Map, Settings) and the chapter
 // and scene pages. Each is only drawing; what a tap does is passed in by Book.tsx.
-// size: allow 325, conditions and the chapter card join its chapter and scene pages here (design-input-batch-6 §1: no new file); row 4 level, xp and Raise lines
+// size: allow 326, conditions and the chapter card join its chapter and scene pages here (design-input-batch-6 §1: no new file); row 4 level, xp and Raise lines; the LABEL import (loka-x6t.11)
 import { useState } from 'react';
 import { Text, View } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
@@ -20,10 +20,11 @@ import { DiscoveredMap } from './DiscoveredMap.tsx';
 import { levelLine, RaiseCards, SkillDetails, xpLine } from './skills.tsx';
 import { size, space, type } from './tokens.ts';
 import { ActionCard, Cards, ContinueButton } from './actions.tsx';
-import { EntityLine, LogLines } from './lines.tsx';
+import { EntityLine, LogLines, Note } from './lines.tsx';
 import { band, Control, Page, SectionTitle, useTitleFocus } from './pages.tsx';
+import { LABEL } from './labels.ts';
 
-const home = (world: () => void) => <Control label="Back to World" onPress={world} />;
+const home = (world: () => void) => <Control label={LABEL.backToWorld} onPress={world} />;
 
 type Say = (key: string) => string;
 type Grouped = ReturnType<typeof group>;
@@ -41,7 +42,7 @@ export function CharacterPage(
     resources.length || p.view?.attributes?.length || p.view?.skills?.some((s) => s.acquired);
   return (
     <Page title="Character" foot={home(p.world)}>
-      {!known && <Text style={note(c)}>Nothing is known about you yet.</Text>}
+      {!known && <Note>Nothing is known about you yet.</Note>}
       {position && <Text style={prose(c)}>{cap(position)}</Text>}
       {p.view?.ancestry && (
         <Text style={prose(c)}>{cap(p.view.ancestry.replaceAll('_', '-'))}</Text>
@@ -89,7 +90,7 @@ export function AncestryPage(p: {
           </View>
         );
       })}
-      {p.pending && <Text style={note(c)}>save not confirmed</Text>}
+      {p.pending && <Note>save not confirmed</Note>}
     </Page>
   );
 }
@@ -99,7 +100,7 @@ export function JournalPage(p: { view: GameView; text: Say; world: () => void })
   const c = usePalette();
   return (
     <Page title="Journal" foot={home(p.world)}>
-      {view.journal.length === 0 && <Text style={note(c)}>Nothing written yet.</Text>}
+      {view.journal.length === 0 && <Note>Nothing written yet.</Note>}
       {view.journal.map((q) => (
         <View key={`${q.quest.cartridge_id}@${q.quest.cartridge_version}:${q.quest.key}`}>
           <Text style={prose(c)}>{text(q.title)}</Text>
@@ -142,8 +143,8 @@ export function CarryingPage(p: {
   const c = usePalette();
   return (
     <Page title="Equipment & Inventory" foot={home(p.world)}>
-      <SectionTitle>Held</SectionTitle>
-      {p.items.length === 0 && <Text style={note(c)}>You are carrying nothing.</Text>}
+      <SectionTitle>{LABEL.held}</SectionTitle>
+      {p.items.length === 0 && <Note>You are carrying nothing.</Note>}
       {p.items.length > 0 && (
         <View>
           {p.items.map((e) => (
@@ -153,7 +154,7 @@ export function CarryingPage(p: {
       )}
       {(p.equipment?.length ?? 0) > 0 && (
         <>
-          <SectionTitle>Worn</SectionTitle>
+          <SectionTitle>{LABEL.worn}</SectionTitle>
           <View>
             {p.equipment!.map(({ slot, item }, i) => (
               <View key={`${slot}-${i}`}>
@@ -161,7 +162,7 @@ export function CarryingPage(p: {
                 {item ? (
                   <EntityLine name={p.text(item.name)} onPress={() => p.open(item.id)} />
                 ) : (
-                  <Text style={note(c)}>Empty</Text>
+                  <Note>Empty</Note>
                 )}
               </View>
             ))}
@@ -182,10 +183,7 @@ function Ways(p: { view: GameView; text: Say; g: Grouped; press: (b: Button) => 
         {move ? (
           <ActionCard b={move} press={p.press} />
         ) : (
-          <Text style={note(c)}>
-            {cap(e.direction)}
-            {!e.available && `: ${why(e, p.text)}`}
-          </Text>
+          <ActionCard label={cap(e.direction)} reason={e.available ? undefined : why(e, p.text)} />
         )}
         {e.door && (
           <Text style={prose(c)}>
@@ -226,8 +224,8 @@ export function MapPage(p: {
       title="Map"
       foot={
         <>
-          {chosen && <Control label="Back to map" onPress={() => select(null)} />}
-          <Control label="Back to World" onPress={p.world} />
+          {chosen && <Control label={LABEL.backToMap} onPress={() => select(null)} />}
+          <Control label={LABEL.backToWorld} onPress={p.world} />
         </>
       }
     >
@@ -236,7 +234,7 @@ export function MapPage(p: {
         <DiscoveredMap view={p.view} text={p.text} selected={selected} select={select} />
       )}
       <Text style={prose(c)}>Current place: {p.text(p.view.place.title.key)}</Text>
-      {p.view.exits.length === 0 && <Text style={note(c)}>No way out is known.</Text>}
+      {p.view.exits.length === 0 && <Note>No way out is known.</Note>}
       <Ways
         {...p}
         view={p.view.map ? { ...p.view, exits: p.view.exits.map(({ sight, ...e }) => e) } : p.view}
@@ -254,7 +252,7 @@ export function MapPage(p: {
 // Where each known NPC is: its offered Where action.
 const where = (p: { view: GameView; g: Grouped; press: (b: Button) => void }) => (
   <>
-    {p.view.known_npcs?.length ? <SectionTitle>Where</SectionTitle> : null}
+    {p.view.known_npcs?.length ? <SectionTitle>{LABEL.where}</SectionTitle> : null}
     <Cards>
       {(p.view.known_npcs ?? []).map((n) =>
         p.g
@@ -270,7 +268,7 @@ const where = (p: { view: GameView; g: Grouped; press: (b: Button) => void }) =>
 export function SettingsPage(p: { startOver: () => void; world: () => void }) {
   return (
     <Page title="Settings" foot={home(p.world)}>
-      <Control label="Start over" onPress={p.startOver} />
+      <Control label={LABEL.startOver} onPress={p.startOver} />
     </Page>
   );
 }

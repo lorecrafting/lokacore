@@ -2,6 +2,7 @@
 // names them (walkthrough/chapter1.walk.ts), replayed by scenarios.ts.
 import type { book } from '../book/__tests__/polish-book.test.ts';
 import { refused } from '../book/model.ts';
+import { LABEL } from '../book/labels.ts';
 
 type Step = string | RegExp | ((b: Harness) => void);
 export type Harness = ReturnType<typeof book> & { steps: Step[] };
@@ -13,8 +14,8 @@ const go =
   };
 const talk = (npc: string, ...choices: string[]): Step[] => [
   `${npc} is here.`,
-  ...choices.flatMap((c) => [`Talk to ${npc}`, c, 'Leave the conversation']),
-  'Leave',
+  ...choices.flatMap((c) => [`Talk to ${npc}`, c, LABEL.leaveConversation]),
+  LABEL.leave,
 ];
 // The n-th of several controls that start alike (four hounds).
 const nth =
@@ -36,7 +37,7 @@ const search: Step[] = [
   go('south', 'south'),
   'Tracks, open',
   'Study tracks',
-  'Leave',
+  LABEL.leave,
 ];
 
 const vesper = [
@@ -50,12 +51,12 @@ const wisp = [
   ...road,
   go('south', 'south', 'south', 'east'),
   'Marsh glow, open',
-  'Leave',
+  LABEL.leave,
   'Wisp is here.',
   'Speak to Wisp Wisp',
   'Accept the riddle',
-  'Leave the conversation',
-  'Leave',
+  LABEL.leaveConversation,
+  LABEL.leave,
   'Wisp is here.',
   'Ask Wisp again Wisp',
 ];
@@ -81,7 +82,7 @@ const spell =
       tiles.splice(tiles.indexOf(tile), 1);
       b.tap(tile);
     }
-    b.tap('Submit');
+    b.tap(LABEL.submit);
   };
 // A scene: Continue until its pages end.
 const scene: Step = (b) => {
@@ -92,7 +93,7 @@ const bed = [
   ...inn,
   'Widow Maud is here.',
   'Rent room — 3p',
-  'Leave',
+  LABEL.leave,
   go('up'),
   'Bed, open',
   'Rest',
@@ -134,7 +135,7 @@ const satchel = [
   'Peg Harrow is here.',
   'Buy a torch — 2p',
   'Buy a small satchel — 4p',
-  'Leave',
+  LABEL.leave,
   ...contents('Equipment & Inventory'),
   'a torch, open',
 ];
@@ -165,7 +166,7 @@ export const routes: Record<string, Step[]> = {
   'room-npcs-items': [...fen, ...talk('Elspeth', ask), go('north', 'north')],
   'room-notices': inn,
   'room-long-log': [...search, ...boot, ...again, ...again, ...again],
-  'room-refusal': [...shut, 'Back to World', drag],
+  'room-refusal': [...shut, LABEL.backToWorld, drag],
   'room-at-night': [...fen, wait(180_000), 'Ferry Landing, look'],
   'npc-choice': [...fen, 'Elspeth is here.', 'Talk to Elspeth'],
   'npc-riddle': vesper,
@@ -180,10 +181,10 @@ export const routes: Record<string, Step[]> = {
   'item-container': [
     ...satchel,
     'Put a torch in a small satchel',
-    'Back to container',
+    LABEL.backToContainer,
     'a small satchel, open',
   ],
-  'notice-bed-resume': [...dream, 'Close'],
+  'notice-bed-resume': [...dream, LABEL.close],
   'item-too-heavy': [
     ...inn,
     go('up'),
@@ -224,7 +225,7 @@ export const checkpoints: Record<string, Step[]> = {
   'elspeth-asked': [...fen, 'Elspeth is here.', 'Talk to Elspeth', ask],
   'vesper-riddle': vesper,
   'peg-shop': peg,
-  'maud-paid-bed': [...inn, 'Widow Maud is here.', 'Rent room — 3p', 'Leave'],
+  'maud-paid-bed': [...inn, 'Widow Maud is here.', 'Rent room — 3p', LABEL.leave],
   'hound-combat': hounds,
   'chapel-map': [...chapel, go('up', 'up')],
   'corpse-contents': deer,

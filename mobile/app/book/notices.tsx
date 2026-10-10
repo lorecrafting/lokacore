@@ -8,6 +8,7 @@ import { EntityLine, LogLines } from './lines.tsx';
 import { Control, Page } from './pages.tsx';
 import type { Button, presenter } from './presenter.ts';
 import { note, prose, usePalette, type Palette } from './palette.ts';
+import { LABEL } from './labels.ts';
 
 type Screen = ReturnType<ReturnType<typeof presenter>['screen']>;
 type Notice = NonNullable<GameView['notices']>[number];
@@ -66,7 +67,6 @@ function control(screen: Screen, id: string) {
 }
 
 function NoticeLink(p: Props & { notice: Notice }) {
-  const c = usePalette();
   const { notice, screen } = p;
   const title = screen.text(notice.title),
     b = control(screen, notice.id);
@@ -88,10 +88,10 @@ function NoticeLink(p: Props & { notice: Notice }) {
       }}
     />
   ) : (
-    <Text style={note(c)}>
-      {title}
-      {offer && !offer.available ? `: ${why(offer, screen.text)}` : ''}
-    </Text>
+    <ActionCard
+      label={title}
+      reason={offer && !offer.available ? why(offer, screen.text) : undefined}
+    />
   );
 }
 
@@ -154,7 +154,7 @@ export function NoticePage(
       )}
       <Cards>
         {('actions' in detail ? (detail.actions ?? []) : []).map((o) =>
-          offerControl(c, p, detail.id, o),
+          offerControl(p, detail.id, o),
         )}
       </Cards>
       {'dream' in detail && <DreamResume detail={detail} open={p.open} />}
@@ -164,14 +164,14 @@ export function NoticePage(
 
 // A board returns to World, a standalone notice leaves to it, a board's notice returns to its board.
 function foot(p: Props & { world: () => void; back: () => void }, board: boolean, id: string) {
-  if (board) return <Control label="Back to World" onPress={p.world} />;
+  if (board) return <Control label={LABEL.backToWorld} onPress={p.world} />;
   if (p.screen.view.notices?.some((n) => n.id === id))
-    return <Control label="Leave" onPress={p.world} />;
-  return <Control label="Back to board" onPress={p.back} />;
+    return <Control label={LABEL.leave} onPress={p.world} />;
+  return <Control label={LABEL.backToBoard} onPress={p.back} />;
 }
 
 // A notice's offered action: its live button, or why it is unavailable.
-function offerControl(c: Palette, p: Props, id: string, offer: Offer) {
+function offerControl(p: Props, id: string, offer: Offer) {
   const button = p.screen.buttons.find(
     (b) =>
       b.detail_id === id &&
@@ -185,8 +185,10 @@ function offerControl(c: Palette, p: Props, id: string, offer: Offer) {
       press={(b) => p.press(b, id)}
     />
   ) : !offer.available ? (
-    <Text key={`${offer.action_key}:${offer.target_ids?.join(':')}`} style={note(c)}>
-      {p.screen.label(offer.label)}: {why(offer, p.screen.text)}
-    </Text>
+    <ActionCard
+      key={`${offer.action_key}:${offer.target_ids?.join(':')}`}
+      label={p.screen.label(offer.label)}
+      reason={why(offer, p.screen.text)}
+    />
   ) : null;
 }

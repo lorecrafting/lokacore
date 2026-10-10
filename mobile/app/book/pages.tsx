@@ -11,6 +11,7 @@ import { opacity, size, space, type } from './tokens.ts';
 import { VerbLine } from './actions.tsx';
 import { EntityLine, LogLines } from './lines.tsx';
 import { useTitleFocus } from './title.ts';
+import { LABEL } from './labels.ts';
 export { useTitleFocus };
 
 type Say = (key: string) => string;
@@ -66,7 +67,7 @@ export function RunningHead({ view, text }: { view: GameView; text: Say }) {
 // Local navigation that is not an offered action (BOOK-UI-COMPONENTS.md, Control).
 // `onInk`: the label in `bg`, for a Control on an `fg` fill (the tip's Got it).
 export function Control(p: {
-  label: string;
+  label: (typeof LABEL)[keyof typeof LABEL];
   onPress: () => void;
   disabled?: boolean;
   onInk?: true;
@@ -129,7 +130,7 @@ export function RoomPage(p: {
       {warnings(c, p.view, p.text)}
       <Here view={p.view} text={p.text} open={p.open} />
       {p.view.choice && !p.view.entities.some((e) => e.id === p.view.choice!.speaker_id) && (
-        <Control label="Continue conversation" onPress={p.openChoice} />
+        <Control label={LABEL.continueConversation} onPress={p.openChoice} />
       )}
       {p.details}
       {actions.length > 0 && <View>{actions}</View>}

@@ -157,7 +157,10 @@ function Column({
       {tables.length > 0 && <Chips names={tables} style={{ padding: 0 }} {...p} />}
       {[...groups].map(([g, ns]) => (
         <div key={g}>
-          <h3 style={{ ...small, fontWeight: 'bold', marginBottom: 0, marginTop: space.md }}>
+          <h3
+            // ast-grep-ignore: mobile-book-raw-values -- dashboard chrome, not Book UI
+            style={{ ...small, fontWeight: 'bold', marginBottom: 0, marginTop: space.md }}
+          >
             {g}
           </h3>
           <Chips names={ns} style={{ padding: 0, margin: 0 }} {...p} />
@@ -172,7 +175,9 @@ function Lines({ lines }: { lines: Line[] }) {
   const style: CSSProperties = {
     position: 'absolute',
     inset: 0,
+    // ast-grep-ignore: mobile-book-raw-values -- the svg overlay fills its section (dashboard chrome)
     width: '100%',
+    // ast-grep-ignore: mobile-book-raw-values
     height: '100%',
     pointerEvents: 'none',
   };

@@ -6,6 +6,8 @@ valid:
   - "const s = { padding: space.page, gap: space.md, fontFamily: font.body };"
   - "const s = { width: 0, height: 0, flex: 1, top: 4 };"
   - "const s = { opacity: used ? opacity.disabled : 1, width: 1 - progress.value };"
+  - "const s = { ...type.body, ...type.italic, transformOrigin: '0% 50%' };"
+  - "const s = { flex: 1, textAlign: 'center' };"
 invalid:
   - "const s = { color: '#7b2d20' };"
   - "<View style={{ backgroundColor: \"#fff\" }} />"
@@ -16,3 +18,6 @@ invalid:
   - "const s = { marginTop: -4 };"
   - "const s = { gap: n ? 8 : 4 };"
   - "const s = { opacity: used ? 0.4 : 1 };"
+  - "const named = { fontWeight: '500', textDecorationLine: 'underline' };"
+  - "<Text style={{ ...prose(c), fontStyle: 'italic' }} />"
+  - "<Text style={{ ...label, width: '40%' }} />"

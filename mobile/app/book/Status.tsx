@@ -93,9 +93,9 @@ export function StatusLine(p: StatusProps) {
       <View style={statusRow}>
         {items.map((item, i) => (i ? joined(c, item as ReactElement) : item))}
       </View>
-      {p.pending && (
-        <Text style={{ ...type.small, color: c.dim, textAlign: 'center' }}>save not confirmed</Text>
-      )}
+      <View style={{ alignItems: 'center' }}>
+        {p.pending && <Text style={{ ...type.small, color: c.dim }}>save not confirmed</Text>}
+      </View>
     </View>
   );
 }

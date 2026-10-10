@@ -1,13 +1,13 @@
 // The thing and Contents views use the existing book controls (the NPC page: Npc.tsx).
-import { Text, View } from 'react-native';
+import { View } from 'react-native';
 import { cap, things, type group, type Page as Route } from './model.ts';
 import type { Button, DetailLine, presenter } from './presenter.ts';
 import { ActionCard, Cards } from './actions.tsx';
-import { EntityLine, LogLines } from './lines.tsx';
+import { EntityLine, LogLines, Note } from './lines.tsx';
 import { Control, Page, SectionTitle, type Thing } from './pages.tsx';
 import { ItemDetails } from './skills.tsx';
 import { reason } from './words.ts';
-import { note, usePalette, type Palette } from './palette.ts';
+import { LABEL } from './labels.ts';
 type Say = (key: string) => string;
 
 export type Section = 'character' | 'carrying' | 'map' | 'journal' | 'settings';
@@ -20,7 +20,7 @@ const SECTIONS: [Section, string][] = [
 ];
 export function ContentsPage(p: { open: (section: Section) => void; world: () => void }) {
   return (
-    <Page title="Contents" foot={<Control label="Back to World" onPress={p.world} />}>
+    <Page title="Contents" foot={<Control label={LABEL.backToWorld} onPress={p.world} />}>
       <View>
         {SECTIONS.map(([kind, label]) => (
           <EntityLine key={kind} name={label} onPress={() => p.open(kind)} />
@@ -33,15 +33,13 @@ export function ContentsPage(p: { open: (section: Section) => void; world: () =>
 type Screen = ReturnType<ReturnType<typeof presenter>['screen']>;
 
 // The too-heavy notes are one block (BOOK-UI-COMPONENTS.md, Page: a run of rows of one kind).
-const tooHeavy = (c: Palette, thing: Thing | undefined, text: Say) => {
+const tooHeavy = (thing: Thing | undefined, text: Say) => {
   const heavy = thing?.actions.filter((a) => !a.available && a.reason.code === 'too_heavy') ?? [];
   return (
     heavy.length > 0 && (
       <View>
         {heavy.map((a) => (
-          <Text key={a.action_key} style={note(c)}>
-            {text(a.label)}: {reason('too_heavy')}.
-          </Text>
+          <ActionCard key={a.action_key} label={text(a.label)} reason={`${reason('too_heavy')}.`} />
         ))}
       </View>
     )
@@ -52,7 +50,7 @@ const tooHeavy = (c: Palette, thing: Thing | undefined, text: Say) => {
 const inside = (p: { contents: Thing[]; text: Say; open: (id: string) => void }) =>
   p.contents.length > 0 && (
     <>
-      <SectionTitle>Inside</SectionTitle>
+      <SectionTitle>{LABEL.inside}</SectionTitle>
       <View>
         {p.contents.map((e) => (
           <EntityLine key={e.id} name={cap(p.text(e.name))} onPress={() => p.open(e.id)} />
@@ -72,21 +70,20 @@ export function ThingPage(p: {
   leave: () => void;
   back?: () => void;
 }) {
-  const c = usePalette();
   return (
     <Page
       title={p.thing ? cap(p.text(p.thing.name)) : 'Item'}
       foot={
         <>
-          {p.back && <Control label="Back to container" onPress={p.back} />}
-          <Control label="Leave" onPress={p.leave} />
+          {p.back && <Control label={LABEL.backToContainer} onPress={p.back} />}
+          <Control label={LABEL.leave} onPress={p.leave} />
         </>
       }
     >
       <ItemDetails thing={p.thing} text={p.text} />
       <LogLines lines={p.log} />
-      {tooHeavy(c, p.thing, p.text)}
-      {!p.actions.length && !p.contents.length && <Text style={note(c)}>Nothing to do here.</Text>}
+      {tooHeavy(p.thing, p.text)}
+      {!p.actions.length && !p.contents.length && <Note>Nothing to do here.</Note>}
       <Cards>
         {p.actions.map((b) => (
           <ActionCard key={`${b.label}:${b.target_ids.join(',')}`} b={b} press={p.press} />

@@ -1,6 +1,7 @@
 import { beforeEach, test } from '@e2e-dev/web';
 import { expect } from 'e2e';
 import { begin, go, reopen, type Screen, reducedMotion } from './steps.ts';
+import { LABEL } from '../book/labels.ts';
 
 // Long walks: the pages cross-fade (steps.ts reducedMotion).
 beforeEach(({ browser }) => reducedMotion(browser));
@@ -33,12 +34,12 @@ test('paid Lantern Rest resumes its captured dream choice after browser reload',
   await expect(screen.getByRole('button', 'The Drowned Lantern, look')).toBeVisible();
   await screen.getByRole('button', /^Widow Maud is here\./).tap();
   await screen.getByRole('button', 'Rent room — 3p').tap();
-  await screen.getByRole('button', 'Leave').tap();
+  await screen.getByRole('button', LABEL.leave).tap();
   await screen.getByRole('button', 'Map').tap();
   await screen.getByRole('button', 'Go up').tap();
   await screen.getByRole('button', 'Bed, open').tap();
   await screen.getByRole('button', 'Rest').tap();
-  await expect(screen.getByRole('button', 'Close')).toBeVisible();
+  await expect(screen.getByRole('button', LABEL.close)).toBeVisible();
   await screen.getByRole('button', 'Continue').tap();
   await screen.getByRole('button', 'Continue').tap();
   await screen.getByRole('button', 'Continue').tap();
@@ -47,7 +48,7 @@ test('paid Lantern Rest resumes its captured dream choice after browser reload',
 
   await reopen({ app, screen });
   await screen.getByRole('button', 'Bed, open').tap();
-  await screen.getByRole('button', 'Resume dream').tap();
+  await screen.getByRole('button', LABEL.resumeDream).tap();
   await expect(screen.getByRole('button', 'Follow the fox')).toBeVisible();
   await screen.getByRole('button', 'Wake').tap();
   await screen.getByRole('button', 'Acknowledge').tap();
@@ -86,7 +87,7 @@ test('paid ferry and free Sedge lesson survive isle exploration, return and brow
   await screen.getByRole('button', /; opens Contents$/).tap();
   await screen.getByRole('button', 'Character, open').tap();
   await expect(screen.getByText(/^Swim — /)).toBeVisible();
-  await screen.getByRole('button', 'Back to World').tap();
+  await screen.getByRole('button', LABEL.backToWorld).tap();
   await isleTour(screen);
   await screen.getByRole('button', 'Rope ferry, open').tap();
   await screen.getByRole('button', 'Return — free').tap();
@@ -103,7 +104,7 @@ async function money(screen: Screen) {
   await screen.getByRole('button', /; opens Contents$/).tap();
   await screen.getByRole('button', 'Character, open').tap();
   await expect(screen.getByText(/^pennies\s+18 \/ 1000$/)).toBeVisible();
-  await screen.getByRole('button', 'Back to World').tap();
+  await screen.getByRole('button', LABEL.backToWorld).tap();
 }
 
 async function isleTour(screen: Screen) {
