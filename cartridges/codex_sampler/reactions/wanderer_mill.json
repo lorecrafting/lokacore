@@ -1,0 +1,54 @@
+{
+  "on": {
+    "event": "entity_entered_room",
+    "room": "mill"
+  },
+  "when": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": [
+        {
+          "op": "visited_count",
+          "room": "hall",
+          "at_least": 1
+        },
+        {
+          "op": "visited_count",
+          "room": "mill",
+          "at_least": 1
+        },
+        {
+          "op": "visited_count",
+          "room": "yard",
+          "at_least": 1
+        },
+        {
+          "op": "visited_count",
+          "room": "road",
+          "at_least": 1
+        },
+        {
+          "op": "visited_count",
+          "room": "study",
+          "at_least": 1
+        },
+        {
+          "op": "not",
+          "item": {
+            "op": "fact_compare",
+            "fact": "topic_wanderer_known",
+            "equals": true
+          }
+        }
+      ]
+    }
+  },
+  "apply": [
+    {
+      "op": "fact.assign",
+      "fact": "topic_wanderer_known",
+      "value": true
+    }
+  ]
+}

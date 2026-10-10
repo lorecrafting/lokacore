@@ -1,5 +1,6 @@
 import { Text, View } from 'react-native';
 import { DreamPage } from './DreamPage.tsx';
+import { JournalPage } from './journal.tsx';
 // Page dispatch for the current Book view and local detail stack.
 import { group, conversation, npcPage, type Page } from './model.ts';
 import { presenter, type Button } from './presenter.ts';
@@ -16,7 +17,6 @@ import {
   CarryingPage,
   ChapterPage,
   CharacterPage,
-  JournalPage,
   MapPage,
   ScenePage,
   SettingsPage,
@@ -116,7 +116,16 @@ function sectionPage(p: BodyProps, page: Page) {
       <MapPage view={view} text={text} g={p.g} press={p.press} log={p.screen.log} world={p.world} />
     );
   if (page.kind === 'settings') return <SettingsPage startOver={p.startOver} world={p.world} />;
-  if (page.kind === 'journal') return <JournalPage view={view} text={text} world={p.world} />;
+  if (page.kind === 'journal')
+    return (
+      <JournalPage
+        view={view}
+        text={text}
+        world={p.world}
+        buttons={p.screen.buttons}
+        press={p.press}
+      />
+    );
   return (
     <CarryingPage
       items={view.inventory}
