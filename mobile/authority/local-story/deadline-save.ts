@@ -1,5 +1,4 @@
 // Reconcile a bound deadline against the original choices, due job, facts and conserved payment.
-import type { QuestDefinition } from '../../../kernel/ts/src/contracts.gen.ts';
 import type { DefinitionRef } from '../../../kernel/ts/src/contracts.gen.ts';
 import { key, same } from '../../../kernel/ts/src/foundation/compose.ts';
 import { validOverrideRow } from '../../../kernel/ts/src/foundation/resource.ts';
@@ -12,6 +11,7 @@ import {
   expiryReceipt,
   invalid,
   terminalAxis,
+  type Deadline,
   within,
 } from './deadline-receipts.ts';
 import { committedDialogue } from './dialogue-receipt.ts';
@@ -19,7 +19,6 @@ import type { Db, Meta } from './store.ts';
 
 const rowFor = (world: World, ref: DefinitionRef, entity_id: string) =>
   world.state.resources?.[key({ kind: 'resource', resource: ref, entity_id })];
-type Deadline = NonNullable<QuestDefinition['deadline']>;
 type Choices = [string, ChoiceRow][];
 
 export function deadlineSave(world: World, db: Db, meta: Meta, exchanges = false) {
@@ -35,8 +34,9 @@ export function deadlineSave(world: World, db: Db, meta: Meta, exchanges = false
     )
       invalid();
   for (const [questRef, definition] of Object.entries(world.cartridge.quests ?? {})) {
-    if (!definition.deadline) continue;
-    const d = setting(world, choices, questRef, definition.deadline);
+    // Toolbox row W24: a generic deadline has no fact and no bound offer to reconcile.
+    if (!definition.deadline?.fact) continue;
+    const d = setting(world, choices, questRef, definition.deadline as Deadline);
     if (d.q) bound(world, db, scope, choices, d, exchanges);
     else unbound(world, d);
   }

@@ -236,7 +236,8 @@
     ],
     "events": [
       "quest_activated",
-      "quest_resolved"
+      "quest_resolved",
+      "quest_failed"
     ],
     "policies": [
       "quest_state"
