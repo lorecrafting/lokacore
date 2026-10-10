@@ -70,8 +70,8 @@ const VERBS: Record<string, 'take' | 'drop' | 'give' | 'talk' | 'read' | 'where'
  * <words>, `open`/`close`/`lock`/`unlock` <a direction, its initial, or words naming a door>,
  * `scan`, `inventory`/`i`, `accept` [words of its label] (a quest offer), `talk` <words>,
  * `choose` <choice id> and `bye` (the pending choice: choose an option or close it), `journal`/`j`, a direction or its initial, `go <direction>`, `wait` [hours, 1 to 24; one when
- * omitted], `brief` (brief mode on or off), `quit`/`q`. Only the
- * six compass words become a move: any other word after `go` is a message, never a Command, so
+ * omitted], `brief` (brief mode on or off), `quit`/`q`, `say`/`shout` <1 to 32 letters>. Only the
+ * six compass words become a move, only a Word a say: any other is a message, never a Command, so
  * free text never reaches a record (ADR-075 §6 amendment). Anything else is "I don't understand
  * that."
  */
@@ -94,11 +94,8 @@ export function parse(text: string): Parsed {
       return { door, direction: known.direction };
     return normalize(rest).length ? { door, words: rest } : `${capital(door)} what?`;
   }
-  // The word is free text (ADR-075 §6 A5): only a Word-shaped token becomes a Command.
   if ((words[0] === 'say' || words[0] === 'shout') && words.length === 2)
-    return /^[a-z]{1,32}$/.test(words[1])
-      ? { type: words[0], word: words[1] }
-      : `${capital(words[0])} one word of up to 32 letters.`;
+    return /^[a-z]{1,32}$/.test(words[1]) ? { type: words[0], word: words[1] } : 'Just one word.';
   if (words[0] === 'accept') return { accept: rest.toLowerCase() };
   if (words[0] === 'choose' && words.length === 2) return { choose: words[1] };
   if (LOOK.includes(words[0])) {
