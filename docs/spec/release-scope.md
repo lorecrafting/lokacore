@@ -16,6 +16,7 @@ E1's final policy and certification remain open.
 
 Full chapter-one endings follow the [active content decision](../decisions/owner-decision-chapter-one-content-2026-10-02.md).
 R6P and the six-room C1 sampler are separate early proofs.
+Chapters 2 and 3 are out of release scope ([showcase decision](../decisions/owner-decision-showcase-2026-10-10.md)); their former feature rows (ghost-walk death, protect and race objectives, phased world events, escrow jobs, barter, NPC trade) have no assigned release and are [toolbox](../MECHANICS-TOOLBOX.md) candidates.
 This is planning applicability, not a release certificate or a frozen engine registry.
 `tide@1` has no assigned first-required release after the [no-wait opening decision](../decisions/owner-decision-no-wait-opening-2026-10-05.md); assign it only with a later actual consumer.
 
@@ -100,13 +101,7 @@ This is planning applicability, not a release certificate or a frozen engine reg
 | commerce.immediate | `commerce@1` | chapter_one | R8 | Shop, food and drink; retry/crash conservation applies now. Gates: TRANSACTION. |
 | schedule.durable | `schedule@1` | proof | R8 | Durable schedule jobs are required; these are not ServiceJob escrow. Gates: WORLD, AUTHORITY. |
 | death.shrine | `death@1` | chapter_one | R7 | Corpse and shrine respawn, without ghost-walk. Gates: RULES, AUTHORITY. |
-| death.ghost | `death@1` | chapter_two | R7 | Later chapter-two ghost-walk policy. Gates: RULES, AUTHORITY. |
-| quest.protect_race | `quest@1` | chapter_two | R7 | Later objective operators. Gates: QUEST. |
 | scene.spatial_instance | `scene@1` | realm | R7 | Explicit InstancePlan gate before use/R19; not required by chapter-one overlay. Gates: INSTANCE. |
-| world.phased_event | `reaction@1` | chapter_two | R8 | WorldEventPlan composition for Wight Night and later events. Gates: WORLD. |
-| service.escrow_jobs | `service@1` | chapter_three | R8 | Queued/timed craft jobs and custody, not immediate ferry fare. Gates: ESCROW, TRANSACTION. |
-| commerce.barter | `commerce@1` | chapter_three | R8 | Owner placed barter in chapter three. Gates: TRANSACTION. |
-| commerce.npc_trade | `commerce@1` | chapter_three | R8 | NPC stock movement, not an implicit early restock engine. Gates: TRANSACTION, WORLD. |
 
 ## Gate meanings
 
@@ -128,7 +123,7 @@ This is planning applicability, not a release certificate or a frozen engine reg
 
 ## Limits and later scope
 
-The chapter-one lock is exhaustive; later entries are feature-planning examples, not frozen chapter-two/three manifests.
+The chapter-one lock is exhaustive.
 Production certification derives used features and transitive dependencies from the frozen compiled artifact and engine-owned registry; unknown applicability blocks/widens evidence.
 Native bindings, commercial purchase/review, hostile ingestion, compatibility and multiplayer gates also apply when those host/release risks exist; this planning list cannot waive them.
 R6P uses only each capability slice it exercises; a later feature of the same capability does not become an early dependency.

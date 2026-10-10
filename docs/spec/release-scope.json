@@ -4,8 +4,6 @@
   "release_order": [
     "proof",
     "chapter_one",
-    "chapter_two",
-    "chapter_three",
     "realm"
   ],
   "chapter_one": {
@@ -201,7 +199,7 @@
       "gates": [
         "SCENE"
       ],
-      "installed_subset": "Modal current_world narrate\u00d7n, await_ack, end; story-point outcome start once, persisted line fact, continue-only admission, scene_ended. Other scene modes/steps and quest completion hooks remain later."
+      "installed_subset": "Modal current_world narrate×n, await_ack, end; story-point outcome start once, persisted line fact, continue-only admission, scene_ended. Other scene modes/steps and quest completion hooks remain later."
     },
     {
       "id": "action_recipe@1",
@@ -432,27 +430,6 @@
       "reason": "Corpse and shrine respawn, without ghost-walk."
     },
     {
-      "id": "death.ghost",
-      "capability": "death@1",
-      "first_required": "chapter_two",
-      "phase": "R7",
-      "gates": [
-        "RULES",
-        "AUTHORITY"
-      ],
-      "reason": "Later chapter-two ghost-walk policy."
-    },
-    {
-      "id": "quest.protect_race",
-      "capability": "quest@1",
-      "first_required": "chapter_two",
-      "phase": "R7",
-      "gates": [
-        "QUEST"
-      ],
-      "reason": "Later objective operators."
-    },
-    {
       "id": "scene.spatial_instance",
       "capability": "scene@1",
       "first_required": "realm",
@@ -461,48 +438,6 @@
         "INSTANCE"
       ],
       "reason": "Explicit InstancePlan gate before use/R19; not required by chapter-one overlay."
-    },
-    {
-      "id": "world.phased_event",
-      "capability": "reaction@1",
-      "first_required": "chapter_two",
-      "phase": "R8",
-      "gates": [
-        "WORLD"
-      ],
-      "reason": "WorldEventPlan composition for Wight Night and later events."
-    },
-    {
-      "id": "service.escrow_jobs",
-      "capability": "service@1",
-      "first_required": "chapter_three",
-      "phase": "R8",
-      "gates": [
-        "ESCROW",
-        "TRANSACTION"
-      ],
-      "reason": "Queued/timed craft jobs and custody, not immediate ferry fare."
-    },
-    {
-      "id": "commerce.barter",
-      "capability": "commerce@1",
-      "first_required": "chapter_three",
-      "phase": "R8",
-      "gates": [
-        "TRANSACTION"
-      ],
-      "reason": "Owner placed barter in chapter three."
-    },
-    {
-      "id": "commerce.npc_trade",
-      "capability": "commerce@1",
-      "first_required": "chapter_three",
-      "phase": "R8",
-      "gates": [
-        "TRANSACTION",
-        "WORLD"
-      ],
-      "reason": "NPC stock movement, not an implicit early restock engine."
     }
   ],
   "deferred_new_capabilities": [
@@ -523,7 +458,7 @@
     "performance"
   ],
   "notes": [
-    "The chapter-one lock is exhaustive; later entries are feature-planning examples, not frozen chapter-two/three manifests.",
+    "The chapter-one lock is exhaustive. Chapters 2 and 3 are out of release scope (owner decision 2026-10-10); later features are toolbox candidates without an assigned release.",
     "Production certification derives used features and transitive dependencies from the frozen compiled artifact and engine-owned registry; unknown applicability blocks/widens evidence.",
     "Native bindings, commercial purchase/review, hostile ingestion, compatibility and multiplayer gates also apply when those host/release risks exist; this planning list cannot waive them.",
     "R6P uses only each capability slice it exercises; a later feature of the same capability does not become an early dependency.",
@@ -533,14 +468,6 @@
   "platform_gates": {
     "proof": [],
     "chapter_one": [
-      "ACCOUNT",
-      "RUN"
-    ],
-    "chapter_two": [
-      "ACCOUNT",
-      "RUN"
-    ],
-    "chapter_three": [
       "ACCOUNT",
       "RUN"
     ],
