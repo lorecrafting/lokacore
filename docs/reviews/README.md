@@ -51,6 +51,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: one wait across several listed schedule hours (loka-qi0r)](2026-10-10-m6-waitfix-review.md): **APPROVE**
 - [Review: E1 recorder debt-elapsed recipe (loka-ssr9, PR #360)](2026-10-10-e1-recorder-ssr9-review.md): **APPROVE**
 - [Review: e1-recorder in full on batch-branch pushes (loka-b98y, PR #361)](2026-10-10-ci-e1-recorder-batch-review.md): **APPROVE WITH NOTES**
+- [Review: batch M7 final head, combat and senses (PR #366, loka-kgd), Fable batch review](2026-10-10-batch-m7-fable-review.md): **CHANGES REQUIRED**
 - [Review: batch M6, social standing and memory (PR #363, loka-kgd)](2026-10-10-batch-m6-fable-review.md): **APPROVE WITH NOTES**
 - [Review: mechanics batch M5, Fable batch review (PR #359, loka-kgd)](2026-10-10-batch-m5-fable-review.md): **APPROVE WITH NOTES**
 - [Review: mechanics batch M4 (PR #358, epic loka-kgd), Fable batch review](2026-10-10-batch-m4-fable-review.md): **APPROVE WITH NOTES**
