@@ -1,6 +1,6 @@
 // Toolbox row 11 on the compiled hidden sampler: the hall's east face to the study is hidden until
-// the player fact panel_found; searching the panel sets it. The gallery joins hall and study by
-// another route, and the study's west face back to the hall is not hidden (mechanics.md hidden
+// the player fact panel_found; searching the panel sets it. A gallery and a landing join hall and
+// study by another route, and the study's west face back to the hall is not hidden (mechanics.md hidden
 // passages).
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
@@ -60,7 +60,7 @@ test('a forged Move through the panel is not_found until the search; then the ex
   const forged = send({ type: 'move', direction: 'east' });
   assert.deepEqual([forged.kind, forged.error?.code], ['rejected', 'not_found']);
 
-  for (const direction of ['north', 'east', 'west'])
+  for (const direction of ['north', 'east', 'south', 'west'])
     assert.equal(send({ type: 'move', direction }).kind, 'accepted');
   assert.equal(w.rooms[w.state.containers[w.body]].title, 'room.hall.title');
   assert.deepEqual(links('hall'), ['north']);

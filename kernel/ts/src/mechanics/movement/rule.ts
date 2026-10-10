@@ -9,8 +9,9 @@ import { living } from '../death/shared.ts';
 // body the cartridge's world.movement.cost, else 1 mv where it declares the mv pool (resource@1;
 // 00 §4 amendments 2026-09-25, 2026-10-02), and one it cannot pay is insufficient_resource
 // ("You are too exhausted."). Accepted: that resource.adjust (none without a cost), one
-// entity.transfer of the actor's body and entity_entered_room; no resource event. D6's exact authored water edges share movementPlan for entry debit/free Surface.
-// Other exits retain the ordinary world fare. scan (00 §4.1) is accepted
+// entity.transfer of the actor's body and entity_entered_room; no resource event. D6's exact
+// authored water edges share movementPlan for entry debit/free Surface. Other exits retain the
+// ordinary world fare. scan (00 §4.1) is accepted
 // with nothing to change, no RNG and no event, like look; the host shows sight().
 import {
   accepted,

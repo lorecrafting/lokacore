@@ -49,13 +49,8 @@ defmodule Loka.Content.Barriers do
       reference(rel, path ++ ["knock"], "npc", response, m, defs) ++
         reference(rel, path ++ ["knock"], "room", response, m, defs)
 
-    api =
-      m["requires"]["kernel_api"]["at_least"]
-      |> String.split(".")
-      |> Enum.map(&String.to_integer/1)
-
     refs =
-      if api >= [1, 37],
+      if api(m) >= [1, 37],
         do: refs,
         else: [diag("KERNEL_API_RANGE_INVALID", at(rel, path ++ ["knock"])) | refs]
 
@@ -70,19 +65,13 @@ defmodule Loka.Content.Barriers do
     faces =
       for {_, {rel, [], r}} <- defs["room"],
           {dir, %{"hidden_until" => _} = e} <- r["exits"],
-          d <- hidden_face(rel, ["exits", dir, "hidden_until"], e, m, defs),
-          do: d
+          do: {rel, ["exits", dir, "hidden_until"], e}
 
-    if faces_used?(defs) and api(m) < [1, 45],
-      do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least") | faces],
-      else: faces
+    Enum.flat_map(faces, fn {rel, path, e} -> hidden_face(rel, path, e, m, defs) end) ++
+      if faces != [] and api(m) < [1, 45],
+        do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
+        else: []
   end
-
-  defp faces_used?(defs),
-    do:
-      Enum.any?(
-        for {_, {_, [], r}} <- defs["room"], e <- Map.values(r["exits"]), do: e["hidden_until"]
-      )
 
   defp hidden_face(rel, path, e, m, defs) do
     refs = reference(rel, path, "fact", e["hidden_until"], m, defs)
