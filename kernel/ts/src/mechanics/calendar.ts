@@ -1,3 +1,5 @@
+import type { CalendarCycle } from '../contracts.gen.ts';
+import { sha256, utf8 } from '../foundation/sha256.ts';
 import type { Cartridge } from '../runtime/decision.ts';
 
 // Historical cartridges retain their installed clock until their content is advanced.
@@ -39,28 +41,45 @@ function phase(cuts: readonly { at: number; phase: string }[], at: number) {
   return selected.phase;
 }
 
-/** The lunar phase at `time`, or undefined without authored lunar cuts. */
-export function lunarPhase(cartridge: Cartridge, time: number): string | undefined {
-  const lunar = cartridge.calendar?.lunar;
-  if (!lunar) return undefined;
-  return phase(
-    lunar.phases,
-    (((time - lunar.origin) % lunar.period) + lunar.period) % lunar.period,
-  );
+const cycle = (c: CalendarCycle | undefined, time: number) =>
+  c && phase(c.phases, (((time - c.origin) % c.period) + c.period) % c.period);
+
+/** The calendar day's weather entry (toolbox row 31): weighted by a hash of the world id and the
+ * day number, never the authority RNG, so the same world and day always give the same weather. */
+export function weather(cartridge: Cartridge, context: string, time: number) {
+  const table = cartridge.calendar?.weather;
+  if (!table) return undefined;
+  const day = Math.floor(time / units(cartridge).day) + 1;
+  const h = new DataView(sha256(utf8(`weather:${context}:${day}`)).buffer).getUint32(0);
+  let roll = h % table.reduce((sum, w) => sum + w.weight, 0);
+  return table.find((w) => (roll -= w.weight) < 0)!;
 }
 
-export function status(cartridge: Cartridge, time: number) {
+/** The derived sky at `time` (toolbox rows 10 and 31): each authored table's current phase, never
+ * stored or ticked. */
+export function sky(cartridge: Cartridge, context: string, time: number) {
+  const c = cartridge.calendar;
+  const [lunar, season, tide] = [c?.lunar, c?.season, c?.tide].map((x) => cycle(x, time));
+  const today = weather(cartridge, context, time)?.phase;
+  return {
+    ...(lunar && { lunar }),
+    ...(today && { weather: today }),
+    ...(season && { season }),
+    ...(tide && { tide }),
+  };
+}
+
+export function status(cartridge: Cartridge, context: string, time: number) {
   const calendar = cartridge.calendar;
   if (!calendar?.subdivisions_per_hour) return undefined;
   const { hour, day } = units(cartridge);
   const solar = calendar.solar;
-  const lunar = lunarPhase(cartridge, time);
   const dayTime = time % day;
   return {
     day: Math.floor(time / day) + 1,
     hour: Math.floor(dayTime / hour),
     subdivision: Math.floor((dayTime % hour) / (hour / calendar.subdivisions_per_hour)),
     ...(solar && { solar: phase(solar, dayTime) }),
-    ...(lunar && { lunar }),
+    ...sky(cartridge, context, time),
   };
 }

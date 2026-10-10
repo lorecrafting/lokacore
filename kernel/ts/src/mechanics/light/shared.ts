@@ -10,6 +10,7 @@ import {
 import { fuelAt, validFuel } from '../../foundation/fuel.ts';
 import { bodyOf, refString, type Steps, type World } from '../../runtime/decision.ts';
 import { darkSight } from '../attributes/shared.ts';
+import { weather } from '../calendar.ts';
 
 export const VERBS: readonly string[] = ['ignite', 'douse', 'refuel'];
 const held = (w: World, body: EntityId, item: string) =>
@@ -22,6 +23,11 @@ export function fuelView(w: World, item: string) {
   const current = fuelAt(row, spec, w.state.clock);
   return { remaining: current.remaining, capacity: spec.capacity, lit: current.lit };
 }
+
+// Toolbox row 31: a flame will not light in an exposed room while the day's weather is wet.
+const rainedOut = (w: World, body: EntityId) =>
+  !!w.rooms[w.state.containers[body]]?.tags?.includes('exposed') &&
+  !!weather(w.cartridge, w.context, w.state.clock)?.wet;
 
 /** Pure transition shared by live admission, projection and historical receipt verification. */
 export function transition(
@@ -40,7 +46,7 @@ export function transition(
   const next = { ...fuelAt(prior, spec, w.state.clock) };
   const ops: DeltaOp[] = [];
   if (verb === 'ignite') {
-    if (next.lit || next.remaining === 0) return 'invalid_state' as const;
+    if (next.lit || next.remaining === 0 || rainedOut(w, body)) return 'invalid_state' as const;
     next.lit = true;
   } else if (verb === 'douse') {
     if (!prior.lit) return 'invalid_state' as const;

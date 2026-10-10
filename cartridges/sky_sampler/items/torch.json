@@ -1,0 +1,23 @@
+{
+  "keywords": [
+    "torch"
+  ],
+  "short": "item.torch.short",
+  "room_line": "item.torch.room",
+  "description": "item.torch.description",
+  "location": {
+    "in": "room",
+    "room": "yard"
+  },
+  "fuel": {
+    "kind": "source",
+    "capacity": 100000,
+    "initial": 100000,
+    "rate": 1,
+    "unit": "oil",
+    "supply": "oil",
+    "ignited": "light.ignited",
+    "doused": "light.doused",
+    "refueled": "light.refueled"
+  }
+}

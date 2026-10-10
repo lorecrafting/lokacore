@@ -227,7 +227,7 @@ export const which = (cartridge: Cartridge, world: World, ids: readonly EntityId
 
 /** A LogicalTime as the player reads it: one unit a second, time 0 midnight of day 1. */
 export const clock = (t: number, cartridge?: Cartridge): string => {
-  const projected = cartridge && calendarStatus(cartridge, t);
+  const projected = cartridge && calendarStatus(cartridge, '', t); // reads only day and time
   if (projected)
     return `day ${projected.day}, ${String(projected.hour).padStart(2, '0')}:${String(projected.subdivision).padStart(2, '0')}`;
   const [day, hh, mm] = [
@@ -249,7 +249,7 @@ export function status(world: World): string {
     const now = level(world, world.body, r);
     return now === undefined ? [] : [`${k} ${now}/${world.resourceSpecs[key(r)].maximum}`];
   });
-  const sky = calendarStatus(world.cartridge, world.state.clock);
+  const sky = calendarStatus(world.cartridge, world.context, world.state.clock);
   const phases = [
     sky?.solar?.replaceAll('_', ' '),
     sky?.lunar && `${sky.lunar.replaceAll('_', ' ')} moon`,

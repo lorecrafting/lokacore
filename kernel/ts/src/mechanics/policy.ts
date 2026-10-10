@@ -12,7 +12,7 @@ import { value } from './fact.ts';
 import { level } from './resource.ts';
 import { stateIs } from './escort/shared.ts';
 import { present } from '../commands/target.ts';
-import { hourOf, lunarPhase } from './calendar.ts';
+import { hourOf, sky } from './calendar.ts';
 import { value as attributeValue } from './attributes/shared.ts';
 
 /**
@@ -51,8 +51,12 @@ export function holds(
       const hour = hourOf(world.cartridge, world.state.clock);
       return p.from < p.to ? p.from <= hour && hour < p.to : hour >= p.from || hour < p.to;
     }
-    case 'sky':
-      return lunarPhase(world.cartridge, world.state.clock) === p.lunar;
+    case 'sky': {
+      const now = sky(world.cartridge, world.context, world.state.clock);
+      return (['lunar', 'weather', 'season', 'tide'] as const).some(
+        (f) => p[f] !== undefined && now[f] === p[f],
+      );
+    }
     case 'target_present':
       return ctx.target !== undefined && present(world, actor, ctx.target, ctx.steps);
     case 'light_off':

@@ -43,11 +43,7 @@ export function calendarStage(c: Obj): Diagnostic[] {
   )
     invalid('.cartridge.calendar');
   cuts(cal?.solar, day, '.cartridge.calendar.solar', invalid);
-  if (cal?.lunar) {
-    if (!Number.isSafeInteger(cal.lunar.origin + cal.lunar.period))
-      invalid('.cartridge.calendar.lunar');
-    cuts(cal.lunar.phases, cal.lunar.period, '.cartridge.calendar.lunar.phases', invalid, true);
-  }
+  tables(cal, invalid);
   for (const [ref, npc] of Object.entries((c.npcs ?? {}) as Obj))
     for (const key of Object.keys(npc.daily_schedule ?? {}))
       if (Number(key) >= hours) invalid(`.cartridge.npcs${step(ref)}.daily_schedule${step(key)}`);
@@ -57,13 +53,37 @@ export function calendarStage(c: Obj): Diagnostic[] {
   return out;
 }
 
-// Toolbox row 10: each sky leaf names a lunar cut; it and a barrier's opens_when need API 1.45.
+const CYCLES = ['lunar', 'season', 'tide'] as const;
+
+// The lunar, season and tide cycles (row 31 adds the last two) and the weather table's unique phases.
+function tables(cal: Obj | undefined, invalid: (path: string) => void) {
+  for (const name of CYCLES)
+    if (cal?.[name]) {
+      const { origin, period, phases } = cal[name];
+      if (!Number.isSafeInteger(origin + period)) invalid(`.cartridge.calendar.${name}`);
+      cuts(phases, period, `.cartridge.calendar.${name}.phases`, invalid, true);
+    }
+  const weathers = new Set<string>();
+  (cal?.weather ?? []).forEach((w: Obj, i: number) => {
+    if (weathers.has(w.phase)) invalid(`.cartridge.calendar.weather[${i}]`);
+    weathers.add(w.phase);
+  });
+}
+
+// Toolbox rows 10 and 31: each sky leaf names a phase its calendar table authors; it, the row 31
+// tables and a barrier's opens_when need API 1.45.
 function sky(c: Obj, invalid: (path: string) => void): Diagnostic[] {
-  const phases = new Set((c.calendar?.lunar?.phases ?? []).map((cut: Obj) => cut.phase));
+  const cal = c.calendar;
+  const table = (f: string): Obj[] => (f === 'weather' ? cal?.weather : cal?.[f]?.phases) ?? [];
   const leaves = nodes(c).filter(([p]) => p.op === 'sky');
-  for (const [p, path] of leaves) if (!phases.has(p.lunar)) invalid(`${path}.lunar`);
+  for (const [p, path] of leaves)
+    for (const f of [...CYCLES, 'weather'])
+      if (p[f] !== undefined && !table(f).some((cut) => cut.phase === p[f]))
+        invalid(`${path}.${f}`);
   const gated =
-    leaves.length > 0 || Object.values((c.barriers ?? {}) as Obj).some((b) => b.opens_when);
+    leaves.length > 0 ||
+    ['weather', 'season', 'tide'].some((f) => cal?.[f]) ||
+    Object.values((c.barriers ?? {}) as Obj).some((b) => b.opens_when);
   return gated && apiCmp(c.manifest.requires.kernel_api.at_least, '1.45') < 0
     ? [diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least')]
     : [];

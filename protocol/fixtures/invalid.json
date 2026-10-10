@@ -20074,8 +20074,8 @@
     },
     "errors": [
       {
-        "path": "/lunar",
-        "code": "missing_property"
+        "path": "",
+        "code": "exclusive_properties"
       },
       {
         "path": "/solar",
@@ -20139,6 +20139,344 @@
       {
         "path": "/opens_when/root",
         "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "Policy",
+    "value": {
+      "op": "sky",
+      "lunar": "full",
+      "weather": "rain"
+    },
+    "errors": [
+      {
+        "path": "",
+        "code": "exclusive_properties"
+      }
+    ]
+  },
+  {
+    "contract": "Policy",
+    "value": {
+      "op": "sky",
+      "weather": "Rain"
+    },
+    "errors": [
+      {
+        "path": "/weather",
+        "code": "pattern_mismatch"
+      }
+    ]
+  },
+  {
+    "contract": "Policy",
+    "value": {
+      "op": "sky",
+      "season": "Spring"
+    },
+    "errors": [
+      {
+        "path": "/season",
+        "code": "pattern_mismatch"
+      }
+    ]
+  },
+  {
+    "contract": "Policy",
+    "value": {
+      "op": "sky",
+      "tide": "High"
+    },
+    "errors": [
+      {
+        "path": "/tide",
+        "code": "pattern_mismatch"
+      }
+    ]
+  },
+  {
+    "contract": "WeatherEntry",
+    "value": {
+      "x": 1
+    },
+    "errors": [
+      {
+        "path": "/phase",
+        "code": "missing_property"
+      },
+      {
+        "path": "/weight",
+        "code": "missing_property"
+      },
+      {
+        "path": "/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "WeatherEntry",
+    "value": {
+      "phase": "Rain",
+      "weight": 0,
+      "wet": "yes"
+    },
+    "errors": [
+      {
+        "path": "/phase",
+        "code": "pattern_mismatch"
+      },
+      {
+        "path": "/weight",
+        "code": "below_minimum"
+      },
+      {
+        "path": "/wet",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "contract": "WeatherEntry",
+    "value": {
+      "phase": "rain",
+      "weight": 1001
+    },
+    "errors": [
+      {
+        "path": "/weight",
+        "code": "above_maximum"
+      }
+    ]
+  },
+  {
+    "contract": "Calendar",
+    "value": {
+      "start": 0,
+      "weather": []
+    },
+    "errors": [
+      {
+        "path": "/weather",
+        "code": "too_few_items"
+      }
+    ]
+  },
+  {
+    "contract": "Calendar",
+    "value": {
+      "start": 0,
+      "weather": [
+        {
+          "phase": "w0",
+          "weight": 1
+        },
+        {
+          "phase": "w1",
+          "weight": 1
+        },
+        {
+          "phase": "w2",
+          "weight": 1
+        },
+        {
+          "phase": "w3",
+          "weight": 1
+        },
+        {
+          "phase": "w4",
+          "weight": 1
+        },
+        {
+          "phase": "w5",
+          "weight": 1
+        },
+        {
+          "phase": "w6",
+          "weight": 1
+        },
+        {
+          "phase": "w7",
+          "weight": 1
+        },
+        {
+          "phase": "w8",
+          "weight": 1
+        },
+        {
+          "phase": "w9",
+          "weight": 1
+        },
+        {
+          "phase": "w10",
+          "weight": 1
+        },
+        {
+          "phase": "w11",
+          "weight": 1
+        },
+        {
+          "phase": "w12",
+          "weight": 1
+        },
+        {
+          "phase": "w13",
+          "weight": 1
+        },
+        {
+          "phase": "w14",
+          "weight": 1
+        },
+        {
+          "phase": "w15",
+          "weight": 1
+        },
+        {
+          "phase": "w16",
+          "weight": 1
+        },
+        {
+          "phase": "w17",
+          "weight": 1
+        },
+        {
+          "phase": "w18",
+          "weight": 1
+        },
+        {
+          "phase": "w19",
+          "weight": 1
+        },
+        {
+          "phase": "w20",
+          "weight": 1
+        },
+        {
+          "phase": "w21",
+          "weight": 1
+        },
+        {
+          "phase": "w22",
+          "weight": 1
+        },
+        {
+          "phase": "w23",
+          "weight": 1
+        },
+        {
+          "phase": "w24",
+          "weight": 1
+        },
+        {
+          "phase": "w25",
+          "weight": 1
+        },
+        {
+          "phase": "w26",
+          "weight": 1
+        },
+        {
+          "phase": "w27",
+          "weight": 1
+        },
+        {
+          "phase": "w28",
+          "weight": 1
+        },
+        {
+          "phase": "w29",
+          "weight": 1
+        },
+        {
+          "phase": "w30",
+          "weight": 1
+        },
+        {
+          "phase": "w31",
+          "weight": 1
+        },
+        {
+          "phase": "w32",
+          "weight": 1
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/weather",
+        "code": "too_many_items"
+      }
+    ]
+  },
+  {
+    "contract": "CalendarCycle",
+    "value": {
+      "x": 1
+    },
+    "errors": [
+      {
+        "path": "/origin",
+        "code": "missing_property"
+      },
+      {
+        "path": "/period",
+        "code": "missing_property"
+      },
+      {
+        "path": "/phases",
+        "code": "missing_property"
+      },
+      {
+        "path": "/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "CalendarCycle",
+    "value": {
+      "period": 0,
+      "origin": -1,
+      "phases": []
+    },
+    "errors": [
+      {
+        "path": "/origin",
+        "code": "below_minimum"
+      },
+      {
+        "path": "/period",
+        "code": "below_minimum"
+      },
+      {
+        "path": "/phases",
+        "code": "too_few_items"
+      }
+    ]
+  },
+  {
+    "contract": "CalendarStatus",
+    "value": {
+      "day": 1,
+      "hour": 0,
+      "subdivision": 0,
+      "weather": "Rain",
+      "season": "Spring",
+      "tide": "High"
+    },
+    "errors": [
+      {
+        "path": "/season",
+        "code": "pattern_mismatch"
+      },
+      {
+        "path": "/tide",
+        "code": "pattern_mismatch"
+      },
+      {
+        "path": "/weather",
+        "code": "pattern_mismatch"
       }
     ]
   }

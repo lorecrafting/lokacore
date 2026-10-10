@@ -1,0 +1,73 @@
+{
+  "api_version": "loka/v3",
+  "id": "sky_sampler",
+  "version": "0.0.1",
+  "title": "Derived Sky Sampler",
+  "requires": {
+    "kernel_api": {
+      "at_least": "1.45",
+      "below": "2.0"
+    },
+    "content_schema": 1,
+    "rule_ir": 1,
+    "capabilities": {
+      "movement": 1,
+      "containment": 1,
+      "light": 1,
+      "policy": 1,
+      "calendar": 1,
+      "description_variant": 1,
+      "tags": 1
+    },
+    "client_features": []
+  },
+  "supported_profiles": [
+    "offline_private"
+  ],
+  "entry": "yard",
+  "calendar": {
+    "start": 0,
+    "units_per_hour": 100,
+    "hours_per_day": 10,
+    "subdivisions_per_hour": 10,
+    "weather": [
+      {
+        "phase": "clear",
+        "weight": 1
+      },
+      {
+        "phase": "rain",
+        "weight": 1,
+        "wet": true
+      }
+    ],
+    "season": {
+      "period": 4000,
+      "origin": 0,
+      "phases": [
+        {
+          "at": 0,
+          "phase": "spring"
+        },
+        {
+          "at": 2000,
+          "phase": "autumn"
+        }
+      ]
+    },
+    "tide": {
+      "period": 500,
+      "origin": 0,
+      "phases": [
+        {
+          "at": 0,
+          "phase": "low"
+        },
+        {
+          "at": 250,
+          "phase": "high"
+        }
+      ]
+    }
+  }
+}

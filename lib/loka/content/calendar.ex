@@ -2,6 +2,8 @@ defmodule Loka.Content.Calendar do
   @moduledoc "Calendar cross-field checks before a cartridge artifact is emitted."
   import Loka.Content.Source, only: [at: 2, diag: 3]
 
+  @cycles ~w(lunar season tide)
+
   def check(calendar, defs, m) do
     hour = Map.get(calendar, "units_per_hour", 3600)
     hours = Map.get(calendar, "hours_per_day", 24)
@@ -13,27 +15,35 @@ defmodule Loka.Content.Calendar do
 
     base(calendar, day, hour, subdivision, invalid) ++
       cuts(calendar["solar"], day, ["calendar", "solar"], invalid, false) ++
-      lunar(calendar["lunar"], invalid) ++
+      Enum.flat_map(@cycles, &cycle(&1, calendar[&1], invalid)) ++
+      weathers(calendar["weather"], invalid) ++
       schedules(defs["npc"], hours, invalid) ++
       windows(nodes, hours, invalid) ++
       sky(calendar, nodes, {m, defs}, invalid)
   end
 
-  # Toolbox row 10: each sky leaf names a lunar phase the calendar cuts; it and a barrier's
-  # opens_when need kernel_api 1.45.
+  # Toolbox rows 10 and 31: each sky leaf names a phase its calendar table authors; it, the row 31
+  # tables and a barrier's opens_when need kernel_api 1.45.
   defp sky(calendar, nodes, {m, defs}, invalid) do
     leaves = for {%{"op" => "sky"} = node, rel, path} <- nodes, do: {node, rel, path}
-    gated = leaves != [] or Enum.any?(defs["barrier"] || %{}, &opens_when?/1)
+
+    gated =
+      leaves != [] or Enum.any?(~w(weather season tide), &Map.has_key?(calendar, &1)) or
+        Enum.any?(defs["barrier"] || %{}, &opens_when?/1)
+
     phases(calendar, leaves, invalid) ++ floor(m, gated)
   end
 
   defp phases(calendar, leaves, invalid) do
-    phases = for cut <- get_in(calendar, ["lunar", "phases"]) || [], do: cut["phase"]
-
     for {node, rel, path} <- leaves,
-        node["lunar"] not in phases,
-        do: invalid.(at(rel, path ++ ["lunar"]))
+        field <- ["weather" | @cycles],
+        Map.has_key?(node, field),
+        node[field] not in for(cut <- table(calendar, field), do: cut["phase"]),
+        do: invalid.(at(rel, path ++ [field]))
   end
+
+  defp table(calendar, "weather"), do: calendar["weather"] || []
+  defp table(calendar, field), do: get_in(calendar, [field, "phases"]) || []
 
   defp opens_when?({_, {_, _, barrier}}), do: is_map_key(barrier, "opens_when")
 
@@ -67,15 +77,24 @@ defmodule Loka.Content.Calendar do
        else: []
   end
 
-  defp lunar(nil, _), do: []
+  defp cycle(_, nil, _), do: []
 
-  defp lunar(%{"origin" => origin, "period" => period, "phases" => phases}, invalid) do
+  defp cycle(name, %{"origin" => origin, "period" => period, "phases" => phases}, invalid) do
     span =
       if origin + period > 9_007_199_254_740_991,
-        do: [invalid.(at("cartridge.json", ["calendar", "lunar"]))],
+        do: [invalid.(at("cartridge.json", ["calendar", name]))],
         else: []
 
-    span ++ cuts(phases, period, ["calendar", "lunar", "phases"], invalid, true)
+    span ++ cuts(phases, period, ["calendar", name, "phases"], invalid, true)
+  end
+
+  # Row 31: weather phases are unique in the table.
+  defp weathers(nil, _), do: []
+
+  defp weathers(table, invalid) do
+    for {w, i} <- Enum.with_index(table),
+        Enum.any?(Enum.take(table, i), &(&1["phase"] == w["phase"])),
+        do: invalid.(at("cartridge.json", ["calendar", "weather", i]))
   end
 
   defp cuts(nil, _, _, _, _), do: []

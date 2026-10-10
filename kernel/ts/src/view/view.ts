@@ -74,7 +74,7 @@ export function gameView(world: World): GameView {
   const current = chapter(world);
   const showing = scene.running(world, world.character);
   const at = position.positionOf(world, world.character) as Key | undefined;
-  const calendar_status = calendarStatus(world.cartridge, world.state.clock);
+  const calendar_status = calendarStatus(world.cartridge, world.context, world.state.clock);
   const bleed = currentBleed(world, world.body);
   const conditions = activeStatuses(world, world.body).map(({ spec, row }) => ({
     label: spec.label,
