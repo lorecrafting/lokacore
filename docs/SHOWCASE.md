@@ -1,6 +1,7 @@
 # Toolbox showcase
 
-`cartridges/toolbox_showcase` is the composition proof for the [mechanics toolbox](MECHANICS-TOOLBOX.md):
+`cartridges/toolbox_showcase` (not yet created; its hub and first district land at the next
+batch's final review) is the composition proof for the [mechanics toolbox](MECHANICS-TOOLBOX.md):
 one playable cartridge where finished mechanics meet each other, so a pair that only works in its
 own sampler shows up here ([owner decision](decisions/owner-decision-showcase-2026-10-10.md)).
 Integration rows such as W22 Fire live in it. It replaces Chapter 1 as the regression fixture once

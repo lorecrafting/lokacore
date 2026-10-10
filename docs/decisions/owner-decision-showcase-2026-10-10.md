@@ -12,8 +12,8 @@ future stories, and drop only Chapter-1-specific pins once the showcase covers t
 ## Effect
 
 1. **Chapters 2 and 3 leave release scope.** [release-scope.json](../spec/release-scope.json)
-   drops them from `release_order`; their feature rows have no assigned release and stay
-   toolbox candidates. The later ending table and story reconciliation are
+   drops them from `release_order` and drops their feature rows, which have no assigned
+   release. The later ending table and story reconciliation are
    [archived](../archive/README.md).
 2. **Chapter 1 is a frozen regression fixture.** No further story or polish work. It is retired
    once the showcase covers its play families (combat, death, commerce, quests, scenes,

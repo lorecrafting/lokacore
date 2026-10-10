@@ -16,7 +16,7 @@ E1's final policy and certification remain open.
 
 Full chapter-one endings follow the [active content decision](../decisions/owner-decision-chapter-one-content-2026-10-02.md).
 R6P and the six-room C1 sampler are separate early proofs.
-Chapters 2 and 3 are out of release scope ([showcase decision](../decisions/owner-decision-showcase-2026-10-10.md)); their former feature rows (ghost-walk death, protect and race objectives, phased world events, escrow jobs, barter, NPC trade) have no assigned release and are [toolbox](../MECHANICS-TOOLBOX.md) candidates.
+Chapters 2 and 3 are out of release scope ([showcase decision](../decisions/owner-decision-showcase-2026-10-10.md)); their former feature rows (ghost-walk death, protect and race objectives, phased world events, escrow jobs, barter, NPC trade) have no assigned release; all but ghost-walk death and barter have [toolbox](../MECHANICS-TOOLBOX.md) rows.
 This is planning applicability, not a release certificate or a frozen engine registry.
 `tide@1` has no assigned first-required release after the [no-wait opening decision](../decisions/owner-decision-no-wait-opening-2026-10-05.md); assign it only with a later actual consumer.
 
