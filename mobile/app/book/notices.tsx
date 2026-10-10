@@ -8,6 +8,7 @@ import { EntityLine, LogLines } from './lines.tsx';
 import { Control, Page } from './pages.tsx';
 import type { Button, presenter } from './presenter.ts';
 import { note, prose, usePalette, type Palette } from './palette.ts';
+import { LABEL } from './labels.ts';
 
 type Screen = ReturnType<ReturnType<typeof presenter>['screen']>;
 type Notice = NonNullable<GameView['notices']>[number];
@@ -164,10 +165,10 @@ export function NoticePage(
 
 // A board returns to World, a standalone notice leaves to it, a board's notice returns to its board.
 function foot(p: Props & { world: () => void; back: () => void }, board: boolean, id: string) {
-  if (board) return <Control label="Back to World" onPress={p.world} />;
+  if (board) return <Control label={LABEL.backToWorld} onPress={p.world} />;
   if (p.screen.view.notices?.some((n) => n.id === id))
-    return <Control label="Leave" onPress={p.world} />;
-  return <Control label="Back to board" onPress={p.back} />;
+    return <Control label={LABEL.leave} onPress={p.world} />;
+  return <Control label={LABEL.backToBoard} onPress={p.back} />;
 }
 
 // A notice's offered action: its live button, or why it is unavailable.

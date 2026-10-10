@@ -8,6 +8,7 @@ import { ActionCard, Cards } from './actions.tsx';
 import { LogLines } from './lines.tsx';
 import { Control, Page } from './pages.tsx';
 import { note, prose, usePalette } from './palette.ts';
+import { LABEL } from './labels.ts';
 
 type Screen = ReturnType<ReturnType<typeof presenter>['screen']>;
 export function DreamPage(p: {
@@ -22,7 +23,10 @@ export function DreamPage(p: {
   if (!dream) return null;
   const buttons = p.screen.buttons.filter((b) => b.detail_id === owner);
   return (
-    <Page title={p.screen.text(dream.title)} foot={<Control label="Close" onPress={p.close} />}>
+    <Page
+      title={p.screen.text(dream.title)}
+      foot={<Control label={LABEL.close} onPress={p.close} />}
+    >
       <Text style={prose(c)}>{p.screen.text(dream.description)}</Text>
       <LogLines lines={p.screen.detail(owner)} />
       <Text style={prose(c)}>{p.screen.text(dream.line)}</Text>
@@ -46,7 +50,7 @@ export function DreamResume(p: {
   const c = usePalette();
   const d = p.detail.dream;
   return d?.available ? (
-    <Control label="Resume dream" onPress={() => p.open({ kind: 'dream', id: p.detail.id })} />
+    <Control label={LABEL.resumeDream} onPress={() => p.open({ kind: 'dream', id: p.detail.id })} />
   ) : d?.index === -1 ? (
     <Text style={note(c)}>Dream acknowledged.</Text>
   ) : null;

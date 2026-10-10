@@ -26,6 +26,7 @@ import { Body } from './Body.tsx';
 import { NightSky } from './NightSky.tsx';
 import { PageTurn } from './PageTurn.tsx';
 import { resultPages, useUpdates, type BookState, type Presenter } from './updates.ts';
+import { LABEL } from './labels.ts';
 
 /** What the phone shell injects: its confirm step and its first-run store (react-native-web has none). */
 export type Shell = {
@@ -250,7 +251,7 @@ function Fault(p: { fault: string; startOver: () => void }) {
   return (
     <View style={{ alignItems: 'center' }}>
       <Text style={{ ...type.small, color: c.dim }}>{p.fault}</Text>
-      <Control label="Start over" onPress={p.startOver} />
+      <Control label={LABEL.startOver} onPress={p.startOver} />
     </View>
   );
 }

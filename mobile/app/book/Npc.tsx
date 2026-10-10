@@ -9,6 +9,7 @@ import { Control, Page, type Thing } from './pages.tsx';
 import { note, prose, usePalette, type Palette } from './palette.ts';
 import { Riddle } from './Riddle.tsx';
 import { space } from './tokens.ts';
+import { LABEL } from './labels.ts';
 type Say = (key: string) => string;
 type Grouped = ReturnType<typeof group>;
 type Screen = ReturnType<ReturnType<typeof presenter>['screen']>;
@@ -115,14 +116,14 @@ const conversation = (p: NpcProps, choice?: NonNullable<GameView['choice']>) => 
   };
   const stop = () => {
     p.talk?.(false);
-    if (close) p.press({ ...close, label: 'Leave the conversation' });
+    if (close) p.press({ ...close, label: LABEL.leaveConversation });
     else if (!p.npc) p.leave();
   };
   const foot =
     talk && (close || !choice) ? (
-      <Control label="Leave the conversation" onPress={stop} />
+      <Control label={LABEL.leaveConversation} onPress={stop} />
     ) : (
-      <Control label="Leave" onPress={p.leave} />
+      <Control label={LABEL.leave} onPress={p.leave} />
     );
   return { talk, answer, foot };
 };

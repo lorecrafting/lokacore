@@ -2,6 +2,7 @@ import { test } from '@e2e-dev/web';
 import { expect } from 'e2e';
 // @ts-expect-error the app has no Node types; the e2e runner is Node
 import { readFileSync } from 'node:fs';
+import { LABEL } from '../book/labels.ts';
 
 // In the page: press `from` and watch until the leaving page and its curl have gone (or it faded
 // out); report whether the curl canvas drew and whether `to`, on the arriving page, received the
@@ -71,10 +72,10 @@ test('the page curl draws over a live arriving page, both ways', async ({
   await app.open('/?preview=page-turn');
   await expect(screen.getByRole('button', 'Continue')).toBeVisible({ timeout: COLD });
   await browser.evaluate(watchCurl);
-  const args = { from: 'Continue', to: 'Start over' };
+  const args = { from: 'Continue', to: LABEL.startOver };
   expect(await browser.evaluate(turn, args)).toMatchObject({ curl: true, hit: true, first: 0 });
   await app.screenshot('page-curl-forward');
-  const back = { from: 'Start over', to: 'Continue' };
+  const back = { from: LABEL.startOver, to: 'Continue' };
   expect(await browser.evaluate(turn, back)).toMatchObject({ curl: true, hit: true, first: 0 });
 });
 
@@ -91,7 +92,7 @@ test('under reduced motion the pages cross-fade with no curl', async ({ app, scr
   });
   await app.open('/?preview=page-turn');
   await expect(screen.getByRole('button', 'Continue')).toBeVisible({ timeout: COLD });
-  const args = { from: 'Continue', to: 'Start over' };
+  const args = { from: 'Continue', to: LABEL.startOver };
   expect(await browser.evaluate(turn, args)).toMatchObject({
     curl: false,
     hit: true,
@@ -99,7 +100,7 @@ test('under reduced motion the pages cross-fade with no curl', async ({ app, scr
     reachable: false,
   });
   // Timed on the way back: the first mount of a page can stall the frames past the whole fade.
-  const back = await browser.evaluate(turn, { from: 'Start over', to: 'Continue' });
+  const back = await browser.evaluate(turn, { from: LABEL.startOver, to: 'Continue' });
   expect(back).toMatchObject({ curl: false, hit: true });
   expect(back.stayed).toBeGreaterThanOrEqual(80);
 });
@@ -163,7 +164,7 @@ test('without CanvasKit the pages change with no curl', async ({ app, screen, br
   await app.open('/?preview=page-turn');
   await expect(screen.getByRole('button', 'Continue')).toBeVisible({ timeout: COLD });
   expect(await browser.evaluate(() => 'CanvasKit' in globalThis)).toBe(false);
-  const args = { from: 'Continue', to: 'Start over' };
+  const args = { from: 'Continue', to: LABEL.startOver };
   expect(await browser.evaluate(turn, args)).toMatchObject({ curl: false, hit: true });
   await app.open('/'); // the app itself, not only the preview
   await expect(screen.getByText('Choose your ancestry')).toBeVisible({ timeout: COLD });

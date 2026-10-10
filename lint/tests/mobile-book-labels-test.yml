@@ -1,0 +1,12 @@
+id: mobile-book-labels
+valid:
+  - "const f = <Control label={LABEL.leave} onPress={p.leave} />;"
+  - "const f = <SectionTitle>{LABEL.held}</SectionTitle>;"
+  - "await screen.getByRole('button', LABEL.leaveConversation).tap();"
+  - "await screen.getByRole('button', 'Leave town').tap();"
+invalid:
+  - "const f = <Control label=\"Leave\" onPress={p.leave} />;"
+  - "const f = <Control onPress={p.leave} label={'Back to World'}></Control>;"
+  - "const f = <SectionTitle>Held</SectionTitle>;"
+  - "await screen.getByRole('button', 'Leave the conversation').tap();"
+  - "const steps = [go('north'), 'Close'];"

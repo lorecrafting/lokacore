@@ -11,6 +11,7 @@ import { opacity, size, space, type } from './tokens.ts';
 import { VerbLine } from './actions.tsx';
 import { EntityLine, LogLines } from './lines.tsx';
 import { useTitleFocus } from './title.ts';
+import { LABEL } from './labels.ts';
 export { useTitleFocus };
 
 type Say = (key: string) => string;
@@ -129,7 +130,7 @@ export function RoomPage(p: {
       {warnings(c, p.view, p.text)}
       <Here view={p.view} text={p.text} open={p.open} />
       {p.view.choice && !p.view.entities.some((e) => e.id === p.view.choice!.speaker_id) && (
-        <Control label="Continue conversation" onPress={p.openChoice} />
+        <Control label={LABEL.continueConversation} onPress={p.openChoice} />
       )}
       {p.details}
       {actions.length > 0 && <View>{actions}</View>}

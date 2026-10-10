@@ -8,6 +8,7 @@ import { Control, Page, SectionTitle, type Thing } from './pages.tsx';
 import { ItemDetails } from './skills.tsx';
 import { reason } from './words.ts';
 import { note, usePalette, type Palette } from './palette.ts';
+import { LABEL } from './labels.ts';
 type Say = (key: string) => string;
 
 export type Section = 'character' | 'carrying' | 'map' | 'journal' | 'settings';
@@ -20,7 +21,7 @@ const SECTIONS: [Section, string][] = [
 ];
 export function ContentsPage(p: { open: (section: Section) => void; world: () => void }) {
   return (
-    <Page title="Contents" foot={<Control label="Back to World" onPress={p.world} />}>
+    <Page title="Contents" foot={<Control label={LABEL.backToWorld} onPress={p.world} />}>
       <View>
         {SECTIONS.map(([kind, label]) => (
           <EntityLine key={kind} name={label} onPress={() => p.open(kind)} />
@@ -52,7 +53,7 @@ const tooHeavy = (c: Palette, thing: Thing | undefined, text: Say) => {
 const inside = (p: { contents: Thing[]; text: Say; open: (id: string) => void }) =>
   p.contents.length > 0 && (
     <>
-      <SectionTitle>Inside</SectionTitle>
+      <SectionTitle>{LABEL.inside}</SectionTitle>
       <View>
         {p.contents.map((e) => (
           <EntityLine key={e.id} name={cap(p.text(e.name))} onPress={() => p.open(e.id)} />
@@ -78,8 +79,8 @@ export function ThingPage(p: {
       title={p.thing ? cap(p.text(p.thing.name)) : 'Item'}
       foot={
         <>
-          {p.back && <Control label="Back to container" onPress={p.back} />}
-          <Control label="Leave" onPress={p.leave} />
+          {p.back && <Control label={LABEL.backToContainer} onPress={p.back} />}
+          <Control label={LABEL.leave} onPress={p.leave} />
         </>
       }
     >

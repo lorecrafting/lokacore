@@ -22,8 +22,9 @@ import { size, space, type } from './tokens.ts';
 import { ActionCard, Cards, ContinueButton } from './actions.tsx';
 import { EntityLine, LogLines } from './lines.tsx';
 import { band, Control, Page, SectionTitle, useTitleFocus } from './pages.tsx';
+import { LABEL } from './labels.ts';
 
-const home = (world: () => void) => <Control label="Back to World" onPress={world} />;
+const home = (world: () => void) => <Control label={LABEL.backToWorld} onPress={world} />;
 
 type Say = (key: string) => string;
 type Grouped = ReturnType<typeof group>;
@@ -142,7 +143,7 @@ export function CarryingPage(p: {
   const c = usePalette();
   return (
     <Page title="Equipment & Inventory" foot={home(p.world)}>
-      <SectionTitle>Held</SectionTitle>
+      <SectionTitle>{LABEL.held}</SectionTitle>
       {p.items.length === 0 && <Text style={note(c)}>You are carrying nothing.</Text>}
       {p.items.length > 0 && (
         <View>
@@ -153,7 +154,7 @@ export function CarryingPage(p: {
       )}
       {(p.equipment?.length ?? 0) > 0 && (
         <>
-          <SectionTitle>Worn</SectionTitle>
+          <SectionTitle>{LABEL.worn}</SectionTitle>
           <View>
             {p.equipment!.map(({ slot, item }, i) => (
               <View key={`${slot}-${i}`}>
@@ -226,8 +227,8 @@ export function MapPage(p: {
       title="Map"
       foot={
         <>
-          {chosen && <Control label="Back to map" onPress={() => select(null)} />}
-          <Control label="Back to World" onPress={p.world} />
+          {chosen && <Control label={LABEL.backToMap} onPress={() => select(null)} />}
+          <Control label={LABEL.backToWorld} onPress={p.world} />
         </>
       }
     >
@@ -254,7 +255,7 @@ export function MapPage(p: {
 // Where each known NPC is: its offered Where action.
 const where = (p: { view: GameView; g: Grouped; press: (b: Button) => void }) => (
   <>
-    {p.view.known_npcs?.length ? <SectionTitle>Where</SectionTitle> : null}
+    {p.view.known_npcs?.length ? <SectionTitle>{LABEL.where}</SectionTitle> : null}
     <Cards>
       {(p.view.known_npcs ?? []).map((n) =>
         p.g
@@ -270,7 +271,7 @@ const where = (p: { view: GameView; g: Grouped; press: (b: Button) => void }) =>
 export function SettingsPage(p: { startOver: () => void; world: () => void }) {
   return (
     <Page title="Settings" foot={home(p.world)}>
-      <Control label="Start over" onPress={p.startOver} />
+      <Control label={LABEL.startOver} onPress={p.startOver} />
     </Page>
   );
 }

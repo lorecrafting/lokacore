@@ -1,6 +1,7 @@
 import { beforeEach, test } from '@e2e-dev/web';
 import { expect } from 'e2e';
 import { reducedMotion } from './steps.ts';
+import { LABEL } from '../book/labels.ts';
 
 // Long walks: the pages cross-fade (steps.ts reducedMotion).
 beforeEach(({ browser }) => reducedMotion(browser));
@@ -26,8 +27,8 @@ test('Sedge lesson leads to careful Harvest and survives browser reload', async 
   await screen.getByRole('button', 'Learn herbalism (2p) Mother Sedge').tap();
   await screen.getByRole('button', 'Learn herbalism (2p)').tap();
   await expect(screen.getByText('You pay 2 pennies and learn herbalism.')).toBeVisible();
-  await screen.getByRole('button', 'Leave the conversation').tap();
-  await screen.getByRole('button', 'Leave').tap();
+  await screen.getByRole('button', LABEL.leaveConversation).tap();
+  await screen.getByRole('button', LABEL.leave).tap();
   await go('west', 'Fen Isle Landing');
   await screen.getByRole('button', 'Rope ferry, open').tap();
   await screen.getByRole('button', 'Return — free').tap();
