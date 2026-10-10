@@ -38,9 +38,6 @@ const antidoteRef = 'status_sampler@0.0.1:item/antidote';
 const antidote = (w: World) => w.entityIds['status_sampler@0.0.1:item/antidote'];
 let n = 0;
 function play(w: World, p: object): World {
-  return run(w, p).world;
-}
-function run(w: World, p: object) {
   n += 1;
   const r = step(
     w,
@@ -52,7 +49,7 @@ function run(w: World, p: object) {
     n,
   );
   assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
-  return r;
+  return r.world;
 }
 // The host advances to the earliest pending job first (mobile/authority/local-story/elapsed.ts
 // boundary), so a long wait is a chain of bounded elapsed commands.
@@ -132,17 +129,6 @@ test('the dart corridor poisons for four ticks and then expires', () => {
   w = play(w, { type: 'move', direction: 'east' });
   assert.equal(gameView(w).conditions?.length, 1);
   assert.equal(hp(wait(w, 60)), 5);
-});
-
-// Breaks: the proposal drops a reaction step's line (loka-kgd.13), or a refresh while active
-// repeats it.
-test("the dart's applied line reaches the receipt on a first application only", () => {
-  const said = (r: ReturnType<typeof run>) =>
-    r.decision.kind === 'accepted' ? r.decision.narration : undefined;
-  const first = run(fresh(), { type: 'move', direction: 'east' });
-  assert.deepEqual(said(first), [{ key: 'narration.poison.applied' }]);
-  const back = play(first.world, { type: 'move', direction: 'west' });
-  assert.equal(said(run(back, { type: 'move', direction: 'east' })), undefined);
 });
 
 // Breaks: cures are ignored, the cured status keeps draining through its stale job, or the

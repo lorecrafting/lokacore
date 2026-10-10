@@ -194,6 +194,7 @@ test('a clock_hour refresh is silent; only a first application says the applied 
   assert.deepEqual(second.narration, [applied]);
   const third = elapse(second.w, 3 * HOUR);
   assert.deepEqual(labels(third.w), ['condition.chilled']);
+  assert.ok(third.events.some((e) => e.payload.type === 'clock_hour'));
   assert.ok(!third.narration?.some((l) => l.key === applied.key), JSON.stringify(third.narration));
 });
 
