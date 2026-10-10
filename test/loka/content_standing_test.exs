@@ -21,8 +21,20 @@ defmodule Loka.ContentStandingTest do
     flag = Map.merge(flag, %{"scopes" => ["instance"], "meaning" => "A flag."})
     gift = &{"reactions/gift_apple.json", fn r -> put_in(r, ["apply", Access.at(0), &1], &2) end}
 
+    # Without W2's pair fact, whose own floor would report the same diagnostic.
+    w2_free = [
+      {"facts.json",
+       &update_in(&1, ["facts", "trust"], fn f -> Map.delete(f, "per_subject") end)},
+      {"dialogues/maud_greet.json",
+       &put_in(&1, ["policy", "root"], %{"op" => "all", "items" => []})},
+      {"npcs/guard.json",
+       &update_in(&1, ["disposition", "hostile", "root"], fn r -> hd(r["items"]) end)}
+    ]
+
+    assert {:ok, _, _} = Loka.ContentSource.compile(dir, w2_free)
+
     rows = [
-      {[api], @floor},
+      {[api | w2_free], @floor},
       {[{"facts.json", &put_in(&1, ["facts", "flag"], flag)}, gift.("fact", "flag")],
        {"FACT_TYPE_MISMATCH", "reactions/gift_apple.apply[0].fact"}},
       {[{"npcs/guard.json", &Map.delete(&1, "attack")}],

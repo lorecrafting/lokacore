@@ -42,7 +42,7 @@ export function engage(
   mint: Mint,
   steps: Steps,
 ): { ops: DeltaOp[]; narration: Text[] } {
-  const npc = hostileAt(world, actor, body, there, steps);
+  const npc = hostileAt(world, actor, there, steps);
   const job = npc && npcRef(world, npc);
   if (!npc || !job) return { ops: [], narration: [] };
   const encounter_id = encounterId(mint);
@@ -75,15 +75,11 @@ export function engage(
 
 /**
  * The first NPC in `there`, in EntityId order, living, unengaged, with an attack and an engage
- * line, hostile to `actor` once the body has arrived; none in a sanctuary or without combat.
+ * line, hostile to `actor`; none in a sanctuary or without combat. ponytail: read before the
+ * body arrives, so a room- or presence-relative leaf reads the room left; move the read after
+ * the transfer when a sampler needs one.
  */
-function hostileAt(
-  world: World,
-  actor: CharacterId,
-  body: EntityId,
-  there: EntityId,
-  steps: Steps,
-) {
+function hostileAt(world: World, actor: CharacterId, there: EntityId, steps: Steps) {
   if (!world.cartridge.world?.combat || world.rooms[there]?.sanctuary) return;
   const candidates = Object.keys(world.entities)
     .filter((id) => {
@@ -97,10 +93,5 @@ function hostileAt(
       );
     })
     .sort(cmp) as EntityId[];
-  if (!candidates.length) return;
-  const arrived = {
-    ...world,
-    state: { ...world.state, containers: { ...world.state.containers, [body]: there } },
-  };
-  return candidates.find((id) => disposition(arrived, actor, id, steps) === 'hostile');
+  return candidates.find((id) => disposition(world, actor, id, steps) === 'hostile');
 }

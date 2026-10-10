@@ -110,8 +110,10 @@ test('good standing makes Peg friendly: bread at 2, not 4, and the buy at 2 is a
 
 // Breaks: hostility is never derived (Peg trades, the guard lets the player pass), it is stored
 // or read from the actor's scope instead of the guard's pair fact (an apple to the guard does not
-// calm him), or the engage line is missing.
+// calm him), the engage line is missing, or a hostile Peg still talks.
 test('low standing makes Peg refuse and the guard engage, unless he trusts the player', () => {
+  const pegTalks = (w: World) => run(w, { type: 'talk', target_id: id(w, 'npc', 'peg') });
+  assert.equal(pegTalks(fresh()).decision.kind, 'accepted');
   // Wary (no standing change): the guard lets the player walk in; an apple to him earns his trust.
   let wary = act(fresh(), { type: 'take', item_id: id(fresh(), 'item', 'apple') });
   wary = act(wary, { type: 'move', direction: 'east' });
@@ -124,6 +126,7 @@ test('low standing makes Peg refuse and the guard engage, unless he trusts the p
   const trusted = act(wary, { type: 'move', direction: 'west' });
   const low = maud(fresh(), 'wrong');
   assert.deepEqual([bread(low).available, bread(low).reason], [false, 'invalid_state']);
+  assert.equal(pegTalks(low).decision.kind, 'rejected');
   const s = run(low, { type: 'move', direction: 'east' });
   assert.equal(s.decision.kind, 'accepted');
   const fight = engaged(s.world, s.world.body);
@@ -145,7 +148,14 @@ test('rows 15 and G11 need 1.47, an int fact, an engage only with an attack, a f
   const gift = `.cartridge.reactions[${JSON.stringify(`${S}:reaction/gift_apple`)}]`;
   const rows: [(c: any) => void, string, string][] = [
     [
-      (c) => (c.manifest.requires.kernel_api.at_least = '1.46'),
+      (c) => {
+        // Without W2's pair fact, whose own floor would report the same diagnostic.
+        delete c.facts[`${S}:fact/trust`].per_subject;
+        c.dialogues[`${S}:dialogue/maud_greet`].policy.root = { op: 'all', items: [] };
+        const hostile = c.npcs[`${S}:npc/guard`].disposition.hostile;
+        hostile.root = hostile.root.items[0];
+        c.manifest.requires.kernel_api.at_least = '1.46';
+      },
       'KERNEL_API_RANGE_INVALID',
       '.cartridge.manifest.requires.kernel_api.at_least',
     ],

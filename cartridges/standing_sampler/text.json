@@ -49,5 +49,8 @@
   "band.dying": "dying",
   "band.mv_ready": "mv ready",
   "band.tired": "tired",
-  "band.exhausted": "exhausted"
+  "band.exhausted": "exhausted",
+  "dialogue.peg.prompt": "Peg dusts off her hands.",
+  "dialogue.peg.chat": "Ask about the bread.",
+  "narration.peg.chat": "Peg talks of rye and barley."
 }
