@@ -33,7 +33,11 @@ function routeChecks(c: Obj, p: Obj, at: string, checks: Checks): Diagnostic[] {
     if (
       room === next ||
       (c.rooms[room] &&
-        !Object.values(c.rooms[room].exits).some((e: any) => refString(e.to) === next))
+        !Object.values(c.rooms[room].exits).some((e: any) => refString(e.to) === next)) ||
+      // A leg with any hidden face to the next room (toolbox row 11) could walk it.
+      Object.values(c.rooms[room]?.exits ?? {}).some(
+        (e: any) => refString(e.to) === next && e.hidden_until,
+      )
     )
       bad(`route[${i}]`);
   }
