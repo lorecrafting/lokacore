@@ -58,9 +58,14 @@ function Type() {
     <View style={{ padding: space.page, gap: space.block }}>
       {Object.entries(type).map(([name, style]) => (
         <View key={name}>
-          <Text style={{ ...style, color: c.fg }}>The lantern swings over the gate</Text>
+          <Text style={{ ...('fontFamily' in style ? {} : type.body), ...style, color: c.fg }}>
+            The lantern swings over the gate
+          </Text>
           <Text style={{ ...type.small, color: c.dim }}>
-            {`type.${name}: ${style.fontFamily} ${style.fontSize}` +
+            {`type.${name}: ` +
+              ('fontFamily' in style
+                ? `${style.fontFamily} ${style.fontSize}`
+                : `over body, ${Object.values(style).join(' ')}`) +
               ('lineHeight' in style ? `/${style.lineHeight}` : '') +
               ('letterSpacing' in style ? `, spacing ${style.letterSpacing}` : '')}
           </Text>
@@ -79,7 +84,10 @@ function Measures() {
         key={group + name}
         style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}
       >
-        <Text style={{ ...label, width: '40%' }}>{`${group}.${name} ${v}`}</Text>
+        <Text
+          // ast-grep-ignore: mobile-book-raw-values -- the specimen's name column, not Book UI
+          style={{ ...label, width: '40%' }}
+        >{`${group}.${name} ${v}`}</Text>
         <View style={{ backgroundColor: c.dim, ...shape(v) }} />
       </View>
     ));

@@ -1,3 +1,5 @@
+Code.require_file("bin/system_graph.exs")
+
 defmodule Loka.SystemGraphTest do
   # docs/system-graph.gen.json (bin/system_graph.exs) against protocol/ read here directly;
   # `elixir bin/contracts.exs --check` keeps the committed file current.
@@ -49,13 +51,39 @@ defmodule Loka.SystemGraphTest do
     end
   end
 
-  # Breaks: 00a read as 00, or a cited NN linked to no file.
-  test "spec citations link the archived spec file" do
-    assert contract("ItemLocation")["spec"] == ["docs/archive/spec/00a-chapter-one-content.md"]
-
-    assert "docs/archive/spec/04-command-event-effect-protocol.md" in contract("StateDelta")[
-             "spec"
+  # Breaks: 00a read as 00, §2 linked to the `# 23 — …` title, `§2, §5` losing §5, or a
+  # slug that is not GitHub's.
+  test "spec citations link the archived spec file at the cited heading" do
+    assert contract("ItemLocation")["spec"] == [
+             %{
+               "cite" => "00a §12",
+               "path" => "docs/archive/spec/00a-chapter-one-content.md#12-hello-world-fixture"
+             }
            ]
+
+    assert %{
+             "cite" => "23 §2",
+             "path" =>
+               "docs/archive/spec/23-accounts-progress-admission.md#2-three-authorities-no-new-gameplay-scope"
+           } in contract("AccountId")["spec"]
+
+    # `23 §2, §5`: the second section keeps its own link.
+    assert %{
+             "cite" => "23 §5",
+             "path" =>
+               "docs/archive/spec/23-accounts-progress-admission.md#5-minimal-records-and-api-boundary"
+           } in contract("AccountId")["spec"]
+
+    decision = "docs/archive/spec/04-command-event-effect-protocol.md"
+
+    assert %{"cite" => "04 §5", "path" => decision <> "#5-decision-result"} in contract(
+             "DecisionResult"
+           )["spec"]
+
+    assert %{
+             "cite" => "04 §5.1",
+             "path" => decision <> "#51-proposal-state-semantics-and-statedelta-composition"
+           } in contract("StateDelta")["spec"]
   end
 
   # Breaks: every field marked required, or a union read as an object.
@@ -77,6 +105,50 @@ defmodule Loka.SystemGraphTest do
     assert contract("ResourceSpec")["owner"] == "resource@1"
   end
 
+  # Breaks: the key-name rule guesses past `<Kind>Definition`, `<Kind>`, `<Kind>Spec`, or drops one.
+  test "definition kinds no map names resolve by key name, else stay null" do
+    named =
+      for c <- @graph["capabilities"],
+          %{"kind" => k, "node" => n} <- c["definitions"],
+          k in ~w(slot detail variant status schedule shop bed calendar fuel darkness vessel
+                  liquid_source readable escort patrol edible bleed water),
+          into: %{},
+          do: {k, n}
+
+    assert Map.reject(named, fn {_, n} -> is_nil(n) end) == %{
+             "status" => "StatusDefinition",
+             "shop" => "Shop",
+             "calendar" => "Calendar",
+             "fuel" => "FuelSpec",
+             "vessel" => "VesselSpec",
+             "bleed" => "BleedDefinition"
+           }
+
+    assert map_size(named) == 18
+    assert contract("StatusDefinition")["owner"] == "status@1"
+  end
+
+  # Breaks: a kind bound by name to a contract outside the Content layer (AccountId is State).
+  test "the key-name rule binds only Content-layer contracts" do
+    registry = [%{"key" => "x", "version" => 1, "definitions" => ["account_id", "status"]}]
+    graph = JSON.decode!(SystemGraph.json(".", registry))
+    [row] = graph["capabilities"]
+
+    assert row["definitions"] == [
+             %{"kind" => "account_id", "node" => nil},
+             %{"kind" => "status", "node" => "StatusDefinition"}
+           ]
+  end
+
+  # Breaks: a slug that drifts from the heading, leaving a cited section without its anchor.
+  test "every cited section links to a heading anchor" do
+    registry = JSON.decode!(File.read!("protocol/capability_registry.json"))
+    graph = JSON.decode!(SystemGraph.json(".", registry))
+    cited = for n <- graph["nodes"], s <- n["spec"], do: s
+    assert cited != []
+    assert Enum.all?(cited, &(&1["path"] =~ "#"))
+  end
+
   # Breaks: a registry command no CommandPayload variant declares passes silently.
   test "generation fails on a registry command no schema declares" do
     registry =
@@ -94,6 +166,21 @@ defmodule Loka.SystemGraphTest do
 
     assert status != 0
     assert out =~ ~s(movement@1: commands ["teleport"] not in CommandPayload)
+  end
+
+  # Breaks: the state-sections join dropped or inverted (a section named by its target kind).
+  test "state_row lists the State sections with the target kinds kept in them" do
+    state_row = Enum.find(@graph["saveTables"], &(&1["table"] == "state_row"))
+    assert %{"section" => "statuses", "targets" => ["status"]} in state_row["sections"]
+    assert %{"section" => "created", "targets" => ["entity"]} in state_row["sections"]
+  end
+
+  # Breaks: protocol/README.md's fixture column misread (another column, a row's second file).
+  test "each schema file lists the fixtures protocol/README.md gives it" do
+    fixtures = Map.new(@graph["files"], &{&1["file"], &1["fixtures"]})
+    assert fixtures["protocol/delta.schema.json"] == ~w(composition.json resource_recovery.json)
+    assert fixtures["protocol/error.schema.json"] == []
+    assert fixtures["protocol/effect.schema.json"] == []
   end
 
   # Breaks: the save-table block misparsed (a row lost, the header taken as a row).

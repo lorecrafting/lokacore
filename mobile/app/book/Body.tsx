@@ -3,7 +3,8 @@ import { DreamPage } from './DreamPage.tsx';
 // Page dispatch for the current Book view and local detail stack.
 import { group, conversation, npcPage, type Page } from './model.ts';
 import { presenter, type Button } from './presenter.ts';
-import { ContentsPage, Item, NpcDetail, type Section } from './Menu.tsx';
+import { ContentsPage, Item, type Section } from './Menu.tsx';
+import { NpcDetail } from './Npc.tsx';
 import { NoticeEntries, NoticePage } from './notices.tsx';
 import { VerbLine } from './actions.tsx';
 import { RoomPage, RunningHead } from './pages.tsx';
@@ -33,8 +34,10 @@ type BodyProps = {
   world: () => void;
   back: () => void;
 };
+// The NPC page (this visit, by identity) in conversation; BookView holds it outside PageTurn's remount.
+type Talk = { talkingOn?: Page; talkOn: (page?: Page) => void };
 
-export function Body(p: BodyProps) {
+export function Body(p: BodyProps & Talk) {
   const c = usePalette();
   const water = p.screen.view.water;
   const surface = water && p.g.exits.find((e) => e.direction === 'up')?.button;
@@ -52,7 +55,7 @@ export function Body(p: BodyProps) {
   );
 }
 
-function PageBody(p: BodyProps) {
+function PageBody(p: BodyProps & Talk) {
   const { view, text } = p.screen;
   const { page } = p;
   if (view.ancestry_choices)
@@ -83,6 +86,7 @@ function PageBody(p: BodyProps) {
         speaker={
           page.kind === 'dialogue' ? page.speaker : page.kind === 'thing' ? page.id : undefined
         }
+        visit={page}
       />
     );
   if (page.kind === 'dream') return <DreamPage {...p} close={p.back} id={page.id} />;

@@ -1,6 +1,7 @@
 import { test } from '@e2e-dev/web';
 import { expect } from 'e2e';
 import { go, inventory, litTorch, reopen, type Screen } from './steps.ts';
+import { LABEL } from '../book/labels.ts';
 
 // Breaks: Book reload loses an active carrier, or Shoo leaves its exact coin hidden instead of reachable.
 test('a held crow coin survives browser reload and Shoo returns it once', async ({
@@ -29,7 +30,7 @@ test('a held crow coin survives browser reload and Shoo returns it once', async 
   await expect(carrier).toBeVisible();
   await app.screenshot('crow-held-after-refresh');
   await shoo(screen, carrier);
-  await screen.getByRole('button', 'Leave').tap();
+  await screen.getByRole('button', LABEL.leave).tap();
   await expect(screen.getByRole('button', 'Old coin is here., open')).toBeVisible();
   await expect(carrier).not.toBeVisible();
   await reopen({ app, screen });

@@ -2,13 +2,19 @@
 import { Children, type ReactNode } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { Tap } from './pages.tsx';
-import { prose, usePalette } from './palette.ts';
+import { note, prose, usePalette } from './palette.ts';
 import type { Button } from './presenter.ts';
 import { radius, size, space, type } from './tokens.ts';
 
-// A detail page's offered action or dialogue choice (BOOK-UI-COMPONENTS.md, Action card).
-export function ActionCard({ b, press }: { b: Button; press: (b: Button) => void }) {
+// A detail page's offered action or dialogue choice (BOOK-UI-COMPONENTS.md, Action card). With no
+// Button it is the unavailable form: a non-action note, the label then its real reason.
+export function ActionCard(
+  p: { b: Button; press: (b: Button) => void } | { label: string; reason?: string },
+) {
   const c = usePalette();
+  if (!('b' in p))
+    return <Text style={note(c)}>{p.reason ? `${p.label}: ${p.reason}` : p.label}</Text>;
+  const { b, press } = p;
   return (
     <Pressable
       accessibilityRole="button"
@@ -43,7 +49,7 @@ export function VerbLine({ b, press }: { b: Button; press: (b: Button) => void }
   const c = usePalette();
   return (
     <Tap label={b.label} onPress={() => press(b)}>
-      <Text style={{ ...prose(c), fontStyle: 'italic', color: c.action }}>{b.label}</Text>
+      <Text style={{ ...prose(c), ...type.italic, color: c.action }}>{b.label}</Text>
     </Tap>
   );
 }

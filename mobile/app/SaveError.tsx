@@ -5,6 +5,7 @@ import { note, PaletteContext, useFocusRing } from './book/palette.ts';
 import { color } from './book/tokens.ts';
 import { detail } from './book/words.ts';
 import type { Failed } from '../packages/game-view/session.ts';
+import { LABEL } from './book/labels.ts';
 
 const PLAIN: Record<string, string> = {
   save_corrupt: 'The save is damaged and cannot be read.',
@@ -23,7 +24,7 @@ export function SaveError({ failed, startOver }: { failed: Failed; startOver: ()
       <SafeAreaView style={{ flex: 1, backgroundColor: paper.bg }}>
         <Page centred title={PLAIN[failed.kind!] ?? 'The game cannot go on yet.'}>
           {why ? <Text style={note(paper)}>{why}</Text> : null}
-          {failed.startOver && <Control label="Start over" onPress={startOver} />}
+          {failed.startOver && <Control label={LABEL.startOver} onPress={startOver} />}
         </Page>
       </SafeAreaView>
     </PaletteContext>

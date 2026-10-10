@@ -442,6 +442,7 @@ test('Elspeth stays reachable all day and her Book replies direct a newcomer alo
   }
   assert.deepEqual(a.game.view().view.journal, []);
   assert.deepEqual(storyRows(a), before);
+  a.tap('Leave the conversation');
   a.tap('Leave');
   assert.deepEqual(a.stack(), []);
   assert.deepEqual(a.presenter().screen().log, []);

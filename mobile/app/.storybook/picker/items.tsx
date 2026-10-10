@@ -1,6 +1,6 @@
 // Conversation rows of the Polish panel (design input section 2): an owner item with its status,
-// a PM suggest-close card.
-import React, { useState } from 'react';
+// a PM suggest-close card, a PM log line, the activity line.
+import React, { useEffect, useState } from 'react';
 import { Button } from 'storybook/internal/components';
 import { ROUTE, type Feed, type Pick, type Picked, type Status } from './events.ts';
 import { event, pin } from './state.ts';
@@ -95,3 +95,34 @@ export const PmCard = ({ reason, close }: { reason: string; close: React.ReactNo
     </div>
   </Card>
 );
+
+// A PM progress line (bin/polish_status.sh log), muted like Claude Code's ⏺ lines.
+export const LogLine = ({ text }: { text: string }) => (
+  <Muted style={{ padding: '0 10px 8px' }}>⏺ {text}</Muted>
+);
+
+// Shown only while a pick works: a cycling glyph, the count, the newest working line's model and
+// its age.
+const glyphs = '·✢✳✶✻✽';
+export const Activity = ({ feed }: { feed: Feed }) => {
+  const [tick, setTick] = useState(0);
+  useEffect(() => {
+    const t = setInterval(() => setTick((n) => n + 1), 120);
+    return () => clearInterval(t);
+  }, []);
+  const n = working(feed);
+  const last = feed.picks
+    .map((p) => latest(feed, p.id))
+    .filter((s) => s?.state === 'working')
+    .sort((a, b) => a!.time - b!.time)
+    .at(-1);
+  if (!last) return null;
+  const s = Math.max(0, Math.round((Date.now() - last.time) / 1000));
+  const age = s < 60 ? `${s}s` : `${Math.floor(s / 60)}m ${s % 60}s`;
+  return (
+    <Muted style={{ padding: '4px 10px' }}>
+      <Mono>{glyphs[tick % glyphs.length]}</Mono>{' '}
+      {[`Working on ${n} pick${n > 1 ? 's' : ''}`, last.model, age].filter(Boolean).join(' · ')}
+    </Muted>
+  );
+};

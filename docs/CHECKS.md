@@ -52,7 +52,10 @@ their rules and red controls remain available for resumption.
 - `elixir bin/contracts.exs --check`: `kernel/ts/src/contracts.gen.ts`, the
   [capability/schema docs](contracts.gen.md) and the capability/residency matrix
   (`docs/residency.gen.json`) and the System pages' graph (`docs/system-graph.gen.json`, also
-  from `docs/system/save.md`'s table block) match `protocol/` (run without `--check` to regenerate); an
+  from `docs/system/save.md`'s table block, `protocol/README.md`'s fixture column and
+  `docs/state-sections.gen.json`, which `kernel/ts/test/state_sections.test.ts` keeps current:
+  `LOKA_WRITE_GEN=1` rewrites it, then rerun contracts.exs) match `protocol/` (run without
+  `--check` to regenerate); an
   Elixir host adapter on a `portable_capability` without a differential fails (ADR-074), and so
   does a registry command, event or policy op that no schema declares.
 - `elixir bin/features.exs --check`: the [feature map](features.gen.md) matches the
@@ -87,6 +90,7 @@ their rules and red controls remain available for resumption.
   supplemental task and refuses both path classes, a missing or duplicate slice
   and a reserved ID, and checks the session-start PR drift report
   (`bin/beads_pr_drift.py`). The check needs no `br` binary.
+- `bin/orphans_red_controls.sh` checks that `bin/orphans.sh` lists a busy, old orphan and skips a child, a young, an idle, a system and a server process. `bin/worktree_setup_red_controls.sh` checks that `bin/worktree_setup.sh` links main's `node_modules` for a matching lockfile and removes the link before `npm ci` after a lockfile change.
 - `bin/integration_red_controls.sh` runs the PM scripts in throwaway repositories with stubs.
   It runs `bin/sync_pr.sh` (merge `main` into a PR branch): a code conflict is refused, a review
   index conflict is regenerated, the merge is pushed, and a failed docs check blocks the push.

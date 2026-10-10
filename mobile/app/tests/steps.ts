@@ -1,6 +1,7 @@
 // Book routes the browser tests share: a new game, a walk by the map, the lit torch and a reopen.
 import type { Browser } from '@e2e-dev/web';
 import { expect, type TestFixtures } from 'e2e';
+import { LABEL } from '../book/labels.ts';
 
 export type Screen = TestFixtures['screen'];
 
@@ -53,11 +54,11 @@ export async function inventory(screen: Screen) {
 export async function litTorch(screen: Screen) {
   await screen.getByRole('button', /^Peg Harrow is here\./).tap();
   await screen.getByRole('button', 'Buy a torch — 3p').tap();
-  await screen.getByRole('button', 'Leave').tap();
+  await screen.getByRole('button', LABEL.leave).tap();
   await inventory(screen);
   await screen.getByRole('button', 'a torch, open').tap();
   await screen.getByRole('button', 'Ignite a torch').tap();
-  await screen.getByRole('button', 'Leave').tap();
+  await screen.getByRole('button', LABEL.leave).tap();
 }
 
 export async function reopen({ app, screen }: Pick<TestFixtures, 'app' | 'screen'>) {

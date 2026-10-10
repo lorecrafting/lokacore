@@ -11,6 +11,7 @@ import type { DetailLine } from './presenter.ts';
 import { Control } from './pages.tsx';
 import { usePalette, type Palette } from './palette.ts';
 import { motion, radius, size, space, type } from './tokens.ts';
+import { LABEL } from './labels.ts';
 
 type Props = {
   keyboardEnabled: boolean;
@@ -156,7 +157,7 @@ export function Tip({ dismiss }: { dismiss: () => void }) {
         Hold the map and drag toward a path to walk; tap it to open the map.
       </Text>
       <View style={{ alignItems: 'flex-end' }}>
-        <Control label="Got it" onPress={dismiss} onInk />
+        <Control label={LABEL.gotIt} onPress={dismiss} onInk />
       </View>
     </View>
   );

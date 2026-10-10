@@ -2,7 +2,9 @@
 // queue directory. Breaks it catches: a pick that reaches the queue without its owner chain or
 // story id; a status line bin/polish_status.sh wrote that the panel does not show; Close batch
 // enabled while an item is working; an overlay that moves a story box while Pick is on; an Esc in
-// the composer that leaves Pick on (or the first one leaving it).
+// the composer that leaves Pick on (or the first one leaving it); Shift+Enter that sends or Enter
+// that does not; a PM log line the panel does not show; a PM suggestion Tab does not take into the
+// composer (or Tab moving focus); a suggestion still offered after the owner sent a prompt.
 import { spawn } from 'node:child_process';
 import { execFileSync } from 'node:child_process';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
@@ -104,17 +106,21 @@ try {
     await layer('block', 'Pick not back on');
     await page.mouse.click(b.x + b.width / 2, b.y + b.height / 2);
     await page.waitForSelector('button[title="Remove"]');
-    await page.fill('textarea[placeholder="What should change?"]', 'quick: tighten the row');
-    await page.keyboard.press('Meta+Enter');
+    await page.fill('textarea[placeholder="What should change?"]', 'quick: tighten');
+    await page.keyboard.press('Shift+Enter');
+    await page.keyboard.type('the row');
+    await page.keyboard.press('Enter');
     await settle(page, 'received'); // the session's first status
     const [pick] = lines('picks.jsonl');
     if (lines('picks.jsonl').length !== 1) fail('want exactly one pick line');
     if (pick.story?.id !== story) fail(`pick story id ${pick.story?.id}, want ${story}`);
     if (!pick.elements?.[0]?.chain.includes('EntityLine'))
       fail(`chain ${JSON.stringify(pick.elements?.[0]?.chain)} lacks EntityLine`);
-    if (pick.note !== 'quick: tighten the row') fail(`note ${pick.note}`);
+    if (pick.note !== 'quick: tighten\nthe row') fail(`note ${JSON.stringify(pick.note)}`);
     status(pick.id, 'working', 'fable');
     status('suggest-close', 'enough for one review');
+    status('log', 'routed to Sonnet designer');
+    await settle(page, 'routed to Sonnet designer');
     await settle(page, 'suggest closing: enough for one review');
     await page.waitForSelector('[data-pick] >> text=working');
     const closeBtn = page.locator('button:has-text("Close batch")').first();
@@ -122,6 +128,18 @@ try {
     status(pick.id, 'done', 'fable', 'row tightened', 'abc1234');
     await settle(page, 'row tightened');
     if (await closeBtn.isDisabled()) fail('Close batch still disabled after done');
+    status('suggest', 'Close batch');
+    const area = page.locator('textarea[placeholder="Close batch"]'); // the ghost text
+    await area.focus();
+    await page.keyboard.press('Tab');
+    if ((await area.inputValue()) !== 'Close batch') fail('Tab did not take the suggestion');
+    if (!(await area.evaluate((el) => el === document.activeElement))) fail('Tab moved focus');
+    await page.keyboard.press('Enter');
+    await page
+      .waitForSelector('textarea[placeholder="What should change?"]', { timeout: 5_000 })
+      .catch(() => fail('the suggestion stayed after a sent prompt'));
+    const note = lines('picks.jsonl').at(-1).note;
+    if (note !== 'Close batch') fail(`sent ${JSON.stringify(note)}, want the suggestion`);
     console.log(`ok   picker: ${pick.id} ${pick.elements[0].chain.join(' › ')} in ${story}`);
   } finally {
     await browser.close();

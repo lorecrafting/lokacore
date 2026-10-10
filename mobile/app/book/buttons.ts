@@ -5,6 +5,7 @@ import { dreamButtons } from './dreams.ts';
 import { things } from './item-pages.ts';
 import { corpseButtons, serviceButtons, shopButtons, transportButtons } from './offers.ts';
 import type { Button } from './presenter.ts';
+import { LABEL } from './labels.ts';
 
 type Say = (key: string) => string;
 type Press = Omit<Button, 'token'>;
@@ -30,7 +31,7 @@ function asked(v: GameView, label: Say): Press[] {
   return [
     ...(c?.choices.filter((o) => o.available) ?? []).map(answer),
     ...(c?.closable
-      ? [{ label: 'Close', action_key: 'close_choice', target_ids: [], input: {} }]
+      ? [{ label: LABEL.close, action_key: 'close_choice', target_ids: [], input: {} }]
       : []),
   ];
 }

@@ -76,9 +76,13 @@ Settings retains Start over and its confirmation/error handling, and holds the
 **Back to World**, clear the detail stack to World, and do not pop to Character or Contents.
 
 Resource-band phrases come from cartridge text (`band.<key>`); projected tones map to the paper
-palette without presenter thresholds. Status shows the hp band phrase only on hp. Band tones
-mark only the condition pools hp, ma and mv; pennies and any other count show plain. With a cartridge calendar, status shows the confirmed day and displayed time,
-plus structured solar and lunar phase labels when authored. It updates from confirmed GameView
+palette without presenter thresholds. Status shows the hp band phrase only on hp. The status line
+shows only the condition pools hp, ma and mv, with their band tones; pennies and any other count
+stay off the status line and show plain in Character (owner, polish pick mv1j35ltxddx). With a
+cartridge calendar, status shows the sky as one glyph from the confirmed solar and lunar phase
+labels (the sun by its phase while up, the moon by its phase at night, per the catalogue's
+[Status line](../BOOK-UI-COMPONENTS.md#component-catalogue)); the confirmed day, displayed time
+and phase words are its accessible label, not shown. It updates from confirmed GameView
 time after actions, elapsed delivery and reopen, without settling elapsed on render. Historical
 cartridges without an expanded calendar retain the earthly branch under the
 [untimed Lantern decision](../decisions/owner-decision-untimed-lantern-2026-10-02.md).
@@ -213,7 +217,8 @@ no notice route; scene/combat precedence still applies. Ordinary unclassified na
 continues to follow the existing World recovery rule.
 
 A readable detail's exact-subject recipes appear only in its Notice actions. Available controls
-follow nonempty history; Leave sits in the page foot; unavailable controls show their real reason.
+follow nonempty history; Leave sits in the page foot (on a person's page in conversation, Leave the
+conversation, per the [conversation rule](#npc-dialogue-and-action-details)); unavailable controls show their real reason.
 Available controls and unavailable notes use the same catalog action-label resolver
 and its existing human-readable fallback. Never display an action TextKey as prose.
 Opening the detail always invokes Read, never Study. Detail membership stays UI-only: a
@@ -226,9 +231,16 @@ currently projected. A newer unrelated narration receipt cannot provide detail i
 ## NPC dialogue and action details
 
 Tapping an NPC opens full details using its actual projected name, authored description and
-actions. Description comes first. Talk and the other offered actions follow it initially; as
-dialogue grows, they sit immediately after the latest chronological dialogue/event entry
-**inside** the scrolling content, and Leave sits in the page foot. This supersedes the
+actions. Description comes first. Outside a conversation the page offers the person's actions as
+cards straight after the description: Talk, shop and service offers; the foot is Leave. It shows
+no past conversation log on a fresh visit to the page or after Leave the conversation (the log
+shows again inside a new conversation); lines since that visit began or that Leave are the only
+history. Answering (a `choose` press) puts that page **in conversation**, and it stays so after a one-reply
+answer closes the kernel choice: the choice's options sit immediately after the latest
+chronological dialogue/event entry **inside** the scrolling content; no Talk card and no other
+action card shows; the foot is a single **Leave the conversation**. The conversation belongs to
+that page visit (the Book's latch, not the NPC): leaving the page any other way (Contents, Map,
+Back to World) ends it, and reopening the person shows their actions again. This supersedes the
 viewport-bottom dock. The ordinary long log remains scrollable, and newly appended results keep
 current options reachable. Same-room NPC actions retain the route, mounted scroll area and
 animation token; they do not flip the book or reset scrolling for each result. There is no
@@ -240,11 +252,15 @@ authored dialogue. Preserve meaningful authored narration. Pending/refused/stale
 add no false event; rerenders and receipt retry do not duplicate it. This is local presenter
 metadata, not story prose, a new game event or transcript persistence.
 
-There is one **Leave** control and no separate Close. When a matching `close_choice` is actually
-offered, Leave invokes it under [live action freshness](#live-action-freshness) and returns to World only after confirmation.
-An unconfirmed/refused/faulted close retains the detail and honest save/error UI; a retry keeps
-its original context. Without a matching closable choice, Leave is local World navigation and
-preserves any unmatched saved choice. Routine `choice_closed` fallback narration is suppressed
+There is one foot control and no separate Close: **Leave** outside a conversation (local World
+navigation, no engine verb) and **Leave the conversation** inside one. When a matching
+`close_choice` is actually offered, Leave the conversation invokes it under
+[live action freshness](#live-action-freshness) and, only after confirmation, returns to that
+person's page with their actions offered again, never to World; an absent speaker (the targetless
+close of a departed NPC) returns to World. An unconfirmed/refused/faulted close retains the detail
+and honest save/error UI; a retry keeps its original context. Without a matching closable choice
+(the kernel already closed a one-reply answer), Leave the conversation is local: it ends the
+conversation on the page, sends no engine verb and preserves any unmatched saved choice. Routine `choice_closed` fallback narration is suppressed
 structurally; meaningful authored/quest consequences and genuine errors remain. Sections retain
 Back to World. Item Leave remains local navigation.
 
@@ -373,7 +389,8 @@ context. Compare with its settled pre-command projection. Synchronous invokes ca
 prerequisite states first; use that confirmed settled observer frame so ambient changes already
 shown are not repeated. Consume each terminal result once, without retaining a World or growing
 completion ledger. When an open thing matches the pending speaker and that NPC departs, retain
-the route as Conversation with speaker-keyed history and the real targetless Leave; unrelated
+the route as Conversation with speaker-keyed history and the real targetless Leave the
+conversation, which returns to World (the speaker is absent); unrelated
 vanished things and player movement keep ordinary route removal. No NPC is invented.
 
 The existing save-not-confirmed status reflects unknown save state, independently of a retained
@@ -483,7 +500,7 @@ Isolated browser proof selects each ancestry on its own fresh run, refreshes/con
 ## C1 teaching and defense details
 
 **API1.18 interaction contract.** Tobin's NPC page offers the current bound
-lesson, its authored price and immediate result under ordinary Talk/Choose/Leave,
+lesson, its authored price and immediate result under ordinary Talk/Choose/Leave the conversation,
 with no new trainer screen or idle-wait control. The swords lesson comes first and
 the next conversation offers dodge. Already acquired teaching is unavailable and
 cannot suggest a replacement gift. Learning and qualification are described
@@ -606,7 +623,7 @@ and together/awaiting/paused/failed/completed state. Awaiting explicitly says to
 the shown ordinary exit; it offers no second leader departure. Paused arrival says
 Rejoin is still required, while failure says return to Tobin and Restart now.
 
-Show unavailable reasons from shared kernel admission and maintain Close/Leave.
+Show unavailable reasons from shared kernel admission and maintain Leave the conversation.
 Capture the exact attempt/cursor/status with each drawn control under existing live
 action freshness. Pending, refused, stale and faulted results claim no movement,
 credit or trust. Only committed narration appears, once, including after lost reply
@@ -637,8 +654,9 @@ details keep their existing Read entry before their contextual recipes.
 Wisp detail follows description → committed history → offered controls. Explicit
 Accept leads to the existing letter-bank controls with committed attempts/limit;
 wrong lines stay with the original speaker. At the third wrong line, discard the
-old tile buffer and show Ask Wisp again immediately, with an active quest journal.
-Fresh Talk resets the sitting, never the quest or learned facts. Close remains
+old tile buffer; the page stays in conversation, and Ask Wisp again is offered on the
+Wisp's page after Leave the conversation, with an active quest journal. Fresh Talk
+resets the sitting, never the quest or learned facts. Leave the conversation remains
 available through stale light, departure, death, scenes and save recovery under
 existing precedence; stale invocations retain their sent answer for exact retry.
 
@@ -864,7 +882,7 @@ captured Read offer. Confirmed bodies belong only to their respective detail
 histories, with the existing safe Leave/Back and cold-reopen receipt recovery.
 Neither document grants a gameplay change or promises a property/ghost quest.
 
-Hob's present detail offers flavor Talk with ordinary Conversation/Leave;
+Hob's present detail offers flavor Talk with the ordinary conversation and Leave the conversation;
 scheduled departure removes present-speaker offers, and re-entry uses the same
 NPC identity. Clock jobs continue while details are open. Unlit Mill Loft and
 Mill Cellar show authored dark text, known up/down return exits and the actor's

@@ -192,6 +192,7 @@ closes with cartridge content and no engine change.
 - **Opt-in:** every new mechanic is opt-in by a cartridge field; Chapter 1 and the seeded corpus
   stay unchanged (precedent: `world.derived`).
 - **Brief:** the PM writes it in the Beads issue; no brief-drafter agent, no stage labels.
+- **Run size:** one item (or its engine and Book halves) per developer run; the developer hands off near 180k tokens (loka-e46o).
 - **Build:** own worktree, hosted PR lane, focused tests plus one red control
   ([test rules](../AGENTS.md#writing-tests-every-change-every-agent)).
 - **Review:** one fresh Opus reviewer per item, no second opinion; one Fable review of the batch on its final head; findings as PR comments ([two-lane CI](decisions/owner-decision-two-lane-ci-2026-10-09.md)). Fix rounds as in the workflow.

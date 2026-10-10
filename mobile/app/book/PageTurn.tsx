@@ -36,7 +36,7 @@ import {
 import curl from './page-curl.sksl';
 import { easing } from './easing.ts';
 import { motion } from './tokens.ts';
-import { titleContext, titleFocus } from './pages.tsx';
+import { titleContext, titleFocus } from './title.ts';
 import { snapshot, warm } from './snapshot';
 
 // Made at the first curl: without CanvasKit on web no picture is taken, so no curl is drawn.
@@ -64,7 +64,7 @@ export function PageTurn(p: Props) {
   const [leaving, setLeaving] = useLeaving(p);
   const { progress, page } = useMotion(p.turn, leaving, setLeaving, reduced);
   const fade = useAnimatedStyle(() => ({ opacity: reduced ? 1 - progress.value : 1 }));
-  // An arriving page's title takes focus only after a turn (pages.tsx titleFocus).
+  // An arriving page's title takes focus only after a turn (title.ts titleFocus).
   const titles = useRef(titleFocus()).current;
   titles.turned = p.turn > 0;
   // Both pages are the same keyed element type, so the leaving page keeps its mounted instance.

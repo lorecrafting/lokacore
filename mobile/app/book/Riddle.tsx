@@ -6,6 +6,7 @@ import { ActionCard } from './actions.tsx';
 import { Control } from './pages.tsx';
 import { prose, usePalette } from './palette.ts';
 import { opacity, radius, size, space, type } from './tokens.ts';
+import { LABEL } from './labels.ts';
 
 // Tile indices preserve multiplicity; only the bounded submitted word crosses the session boundary.
 export function Riddle(p: { bank: readonly string[]; button: Button; press: (b: Button) => void }) {
@@ -32,11 +33,11 @@ export function Riddle(p: { bank: readonly string[]; button: Button; press: (b: 
       {selected.length > 0 && (
         <View style={{ gap: space.sm }}>
           <View style={{ flexDirection: 'row' }}>
-            <Control label="Backspace" onPress={() => setSelected((s) => s.slice(0, -1))} />
-            <Control label="Clear" onPress={() => setSelected([])} />
+            <Control label={LABEL.backspace} onPress={() => setSelected((s) => s.slice(0, -1))} />
+            <Control label={LABEL.clear} onPress={() => setSelected([])} />
           </View>
           <ActionCard
-            b={{ ...p.button, label: 'Submit', input: { ...p.button.input, answer } }}
+            b={{ ...p.button, label: LABEL.submit, input: { ...p.button.input, answer } }}
             press={(b) => {
               p.press(b);
               setSelected([]);
