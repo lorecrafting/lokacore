@@ -137,19 +137,26 @@ test('wait to 19:00 moves Bram to the green through his job; 18:59 does not', ()
   assert.deepEqual(after.state.jobs, { [J0]: job(H(19), 'completed'), [J1]: job(H(30)) });
 });
 
-// Breaks: `<=` for `<` in the strictly-later-than-target rule (04 §5.4), or a fault that
-// commits part of the advance.
-test('a job its own advance would schedule at or before the target faults the whole wait', () => {
+// Breaks: the successor scheduled from the job's own hour (a wait crossing two listed hours faults
+// nonfuture_job, loka-qi0r), the NPC left in the first crossed hour's room, the loop stopping one
+// hour short or running past the target, or the arrival reported at the job's hour, not the last.
+test('one wait across two or three listed hours commits with Bram in the last hour room', () => {
   const w = world();
-  // From 06:00 to 06:00 next day: Bram's 19:00 job schedules 06:00 next day, the target itself.
-  const out = wait(w, H(30));
-  assert.deepEqual(out.decision, {
-    kind: 'fault',
-    code: 'nonfuture_job',
-    target: { kind: 'job', job_id: J1 },
-  });
-  assert.equal(out.world, w);
-  assert.equal(wait(w, H(30) - 1).decision.kind, 'accepted');
+  // 19:00 green, 06:00 landing: he ends where he started, with no move, the next job at 19:00.
+  const two = wait(w, H(30));
+  assert.equal(two.decision.kind, 'accepted');
+  assert.equal(two.world.state.containers[BRAM_ID], LANDING);
+  assert.deepEqual(two.world.state.jobs, { [J0]: job(H(19), 'completed'), [J1]: job(H(43)) });
+  // 19:00, 06:00, then 19:00 again: the green, entered at the last hour, the next job at 06:00.
+  const three = wait(w, H(43));
+  assert.equal(three.decision.kind, 'accepted');
+  assert.equal(three.world.state.containers[BRAM_ID], GREEN);
+  assert.deepEqual(three.world.state.jobs, { [J0]: job(H(19), 'completed'), [J1]: job(H(54)) });
+  assert.deepEqual(
+    three.decision.kind === 'accepted' && three.decision.events.map((e) => e.logical_time),
+    [H(43)],
+  );
+  assert.deepEqual(wait(w, H(43)), three);
 });
 
 // Breaks: the drain sorted by job id only (due time ignored) or in row order.

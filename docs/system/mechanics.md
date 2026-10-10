@@ -651,7 +651,9 @@ runs one job of an NPC's `daily_schedule` (hour of day → room): a job not pend
 `invalid_state` (`:23`); the NPC moves to the room listed for the job's hour (or the room of its
 first holding case, [row W10](#conditional-schedules-toolbox-row-w10)) unless already
 there (an `entity_entered_room` at the job's time), the job completes, and the next job is
-scheduled at the schedule's next listed hour, strictly later (`mechanics/schedule/behavior.ts:24`). One unit of
+scheduled at the schedule's next listed hour, strictly later (`mechanics/schedule/behavior.ts:24`).
+Listed hours the same advance also crosses collapse into that run: the job's time is the last
+crossed hour (room, event and next job as above), so a wait over several hours commits. One unit of
 logical time is defined by the cartridge calendar: positive exact units per hour, hours per day
 and displayed subdivisions per hour. Time 0 begins day 1 at midnight. Daily schedules and
 policy leaf `time_window {from, to}` use calendar hours, including half-open windows that wrap

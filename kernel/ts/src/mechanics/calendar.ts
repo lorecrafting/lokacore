@@ -32,6 +32,22 @@ export function nextHour(
   );
 }
 
+// The schedule's latest listed hour at or before `time`.
+export function lastHour(
+  cartridge: Cartridge,
+  schedule: Readonly<Record<string, unknown>>,
+  time: number,
+) {
+  const { hour, day } = units(cartridge);
+  const start = time - (time % day);
+  return Math.max(
+    ...Object.keys(schedule).map((h) => {
+      const at = start + Number(h) * hour;
+      return at <= time ? at : at - day;
+    }),
+  );
+}
+
 // The phase of the last cut starting at or before `at` (cuts are ordered; a first cut after 0 wraps).
 function phase(cuts: readonly { at: number; phase: string }[], at: number) {
   let selected = cuts.at(-1)!;
