@@ -5,7 +5,8 @@
 //
 // run_job is authority-internal (04 §1): only the host's drain builds it, never a client
 // invocation. It runs one pending job of an NPC's daily schedule (mechanics/schedule/behavior.ts), reading the
-// time from the job's due time: the NPC moves to the room listed for that hour unless it is
+// time from the job's due time: the NPC moves to the room listed for that hour (or its first holding
+// case, toolbox row W10: behavior.ts placeOf) unless it is
 // there already, the job completes, and the next job is scheduled at the schedule's next listed
 // hour, its id this run_job's first IdSource ordinal; a move reports the NPC's
 // entity_entered_room (mechanics/schedule/behavior.ts entered), its id the second. A job that is not pending is
@@ -20,10 +21,11 @@ import {
   refString,
   type JobRow,
   type Rule,
+  type Steps,
   type World,
 } from '../../runtime/decision.ts';
 import type { DeltaOp, JobId } from '../../contracts.gen.ts';
-import { CLOCK_JOB, entered, hourOf, jobId, nextHour, runClock, scheduleOf } from './behavior.ts';
+import { CLOCK_JOB, entered, jobId, nextHour, placeOf, runClock, scheduleOf } from './behavior.ts';
 import { assigned, adjusted } from '../fact.ts';
 import { runPopulation } from '../population/shared.ts';
 import { binding as crowBinding, runCrow } from '../crow/behavior.ts';
@@ -55,7 +57,7 @@ export const decide: Rule<'schedule'> = (world, command, mint, steps = { n: 0 })
     if (row.job.kind === CLOCK_JOB) return runClock(world, command, payload.job_id, row, mint);
     if (row.job.kind === 'population')
       return runPopulation(world, command, payload.job_id, row, mint);
-    return scheduledJob(world, command, payload.job_id, row, mint);
+    return scheduledJob(world, command, payload.job_id, row, mint, steps);
   }
   if (
     payload.type === 'elapsed' &&
@@ -79,11 +81,14 @@ function scheduledJob(
   job_id: JobId,
   row: JobRow,
   mint: Parameters<Rule<'schedule'>>[2],
+  steps: Steps,
 ) {
   const schedule = scheduleOf(world, row.job);
   const npc = world.entityIds[refString(row.job)];
-  const room = world.roomIds[refString(schedule[hourOf(world.cartridge, row.due_time)])];
+  const { room, goal } = placeOf(world, npc, row.due_time, steps);
   const from = world.state.containers[npc];
+  // A goal (toolbox row W10) is narration only when the player sees the NPC leave.
+  const seen = goal && from !== room && world.state.containers[world.body] === from;
   const transfer = { op: 'entity.transfer', writer_group: 0, entity_id: npc } as const;
   const move: DeltaOp[] =
     from === room ? [] : [{ ...transfer, source_id: from, destination_id: room }];
@@ -97,6 +102,7 @@ function scheduledJob(
       { op: 'job.schedule', writer_group: 0, job_id: jobId(mint), job: row.job, due_time },
     ],
     move.length ? [entered(world, command, mint, npc, room, row.due_time)] : [],
+    seen ? [{ key: goal }] : [],
   );
 }
 

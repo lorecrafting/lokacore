@@ -21123,6 +21123,300 @@
     ]
   },
   {
+    "name": "schedule_cases_empty",
+    "contract": "ScheduleCases",
+    "value": [],
+    "errors": [
+      {
+        "path": "",
+        "code": "too_few_items"
+      }
+    ]
+  },
+  {
+    "name": "schedule_cases_nine",
+    "contract": "ScheduleCases",
+    "value": [
+      {
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "fact_compare",
+            "fact": {
+              "cartridge_id": "c",
+              "cartridge_version": "1.0.0",
+              "kind": "fact",
+              "key": "lost"
+            },
+            "equals": true
+          }
+        },
+        "room": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "green"
+        }
+      },
+      {
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "fact_compare",
+            "fact": {
+              "cartridge_id": "c",
+              "cartridge_version": "1.0.0",
+              "kind": "fact",
+              "key": "lost"
+            },
+            "equals": true
+          }
+        },
+        "room": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "green"
+        }
+      },
+      {
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "fact_compare",
+            "fact": {
+              "cartridge_id": "c",
+              "cartridge_version": "1.0.0",
+              "kind": "fact",
+              "key": "lost"
+            },
+            "equals": true
+          }
+        },
+        "room": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "green"
+        }
+      },
+      {
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "fact_compare",
+            "fact": {
+              "cartridge_id": "c",
+              "cartridge_version": "1.0.0",
+              "kind": "fact",
+              "key": "lost"
+            },
+            "equals": true
+          }
+        },
+        "room": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "green"
+        }
+      },
+      {
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "fact_compare",
+            "fact": {
+              "cartridge_id": "c",
+              "cartridge_version": "1.0.0",
+              "kind": "fact",
+              "key": "lost"
+            },
+            "equals": true
+          }
+        },
+        "room": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "green"
+        }
+      },
+      {
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "fact_compare",
+            "fact": {
+              "cartridge_id": "c",
+              "cartridge_version": "1.0.0",
+              "kind": "fact",
+              "key": "lost"
+            },
+            "equals": true
+          }
+        },
+        "room": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "green"
+        }
+      },
+      {
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "fact_compare",
+            "fact": {
+              "cartridge_id": "c",
+              "cartridge_version": "1.0.0",
+              "kind": "fact",
+              "key": "lost"
+            },
+            "equals": true
+          }
+        },
+        "room": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "green"
+        }
+      },
+      {
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "fact_compare",
+            "fact": {
+              "cartridge_id": "c",
+              "cartridge_version": "1.0.0",
+              "kind": "fact",
+              "key": "lost"
+            },
+            "equals": true
+          }
+        },
+        "room": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "green"
+        }
+      },
+      {
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "fact_compare",
+            "fact": {
+              "cartridge_id": "c",
+              "cartridge_version": "1.0.0",
+              "kind": "fact",
+              "key": "lost"
+            },
+            "equals": true
+          }
+        },
+        "room": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "green"
+        }
+      }
+    ],
+    "errors": [
+      {
+        "path": "",
+        "code": "too_many_items"
+      }
+    ]
+  },
+  {
+    "name": "schedule_case_fields",
+    "contract": "ScheduleCases",
+    "value": [
+      {
+        "goal": "npc.maud.goal",
+        "x": 1
+      }
+    ],
+    "errors": [
+      {
+        "path": "/0/room",
+        "code": "missing_property"
+      },
+      {
+        "path": "/0/when",
+        "code": "missing_property"
+      },
+      {
+        "path": "/0/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "npc_schedule_cases_hour",
+    "contract": "NpcDefinition",
+    "value": {
+      "key": "maud",
+      "keywords": [
+        "maud"
+      ],
+      "short": "npc.maud.short",
+      "room_line": "npc.maud.room",
+      "description": "npc.maud.description",
+      "room": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "cottage"
+      },
+      "daily_schedule": {
+        "8": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "garden"
+        }
+      },
+      "schedule_cases": {
+        "08": [
+          {
+            "when": {
+              "policy_version": 1,
+              "root": {
+                "op": "fact_compare",
+                "fact": {
+                  "cartridge_id": "c",
+                  "cartridge_version": "1.0.0",
+                  "kind": "fact",
+                  "key": "lost"
+                },
+                "equals": true
+              }
+            },
+            "room": {
+              "cartridge_id": "c",
+              "cartridge_version": "1.0.0",
+              "kind": "room",
+              "key": "green"
+            }
+          }
+        ]
+      }
+    },
+    "errors": [
+      {
+        "path": "/schedule_cases/08",
+        "code": "pattern_mismatch"
+      }
+    ]
+  },
+  {
     "name": "wearing_unknown_tag",
     "contract": "Policy",
     "value": {

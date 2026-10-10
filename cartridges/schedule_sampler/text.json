@@ -1,0 +1,14 @@
+{
+  "room.cottage.title": "Cottage",
+  "room.cottage.description": "A one-room cottage. The woods lie north, the Green east and the garden south.",
+  "room.woods.title": "Woods",
+  "room.woods.description": "Dark trees. The child slips away between them.",
+  "room.green.title": "The Green",
+  "room.green.description": "The village green, where folk gather to search.",
+  "room.garden.title": "Garden",
+  "room.garden.description": "Rows of beans behind the cottage.",
+  "npc.maud.short": "Maud",
+  "npc.maud.room": "[Maud](maud) is here.",
+  "npc.maud.description": "Maud, the child's mother.",
+  "npc.maud.goal_green": "Maud hurries to the Green."
+}

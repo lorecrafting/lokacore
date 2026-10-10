@@ -12,6 +12,7 @@ import { death } from './cartridge_death.ts';
 import { derived } from './cartridge_derived.ts';
 import { levelling } from './cartridge_levelling.ts';
 import { LEAF_REFS } from './cartridge_leaf_refs.ts';
+import { cases } from './cartridge_schedules.ts';
 // The loader's reference stage and the definition walks it shares with the lock stage
 // (content/cartridge.ts; protocol/cartridge.schema.json DiagnosticCode): v2 references, text keys,
 // detail reachability, and where items and NPCs start (containment, 03 §23; 04 §5.3).
@@ -122,6 +123,7 @@ export function nodes(c: Obj): [Obj, string][] {
       k === 'variant' ? walk(v.when.root, `${at}.when.root`) : [],
     ),
     ...questPolicies(c).flatMap(([p, at]) => walk(p, at)),
+    ...cases(c).flatMap(([k, at]) => walk(k.when.root, `${at}.when.root`)),
     ...Object.entries((c.reactions ?? {}) as Obj).flatMap(([ref, r]) =>
       r.when ? walk(r.when.root, `.cartridge.reactions${step(ref)}.when.root`) : [],
     ),

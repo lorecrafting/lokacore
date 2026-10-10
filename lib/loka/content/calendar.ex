@@ -18,6 +18,7 @@ defmodule Loka.Content.Calendar do
       cuts(calendar["solar"], day, ["calendar", "solar"], invalid, false) ++
       tables(calendar, subdivision, invalid) ++
       schedules(defs["npc"], hours, invalid) ++
+      Loka.Content.Schedules.check(m, defs) ++
       windows(nodes, hours, invalid) ++
       sky(calendar, nodes, {m, defs}, invalid)
   end
