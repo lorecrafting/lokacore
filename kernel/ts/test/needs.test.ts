@@ -106,6 +106,23 @@ test('the track drains hunger and thirst an hour at a time; bread and a drink en
   assert.deepEqual([pool(w, 'hunger'), pool(w, 'thirst')], [7, 7]);
 });
 
+// Breaks: Pour applies the liquid's cures (only a Drink does), so pouring the waterskin into a cup
+// ends thirsty.
+test('pouring the water out ends no status', () => {
+  const c = structuredClone(content) as any;
+  const skin = c.items['needs_sampler@0.0.1:item/waterskin'];
+  c.items['needs_sampler@0.0.1:item/cup'] = {
+    ...skin,
+    keywords: ['cup'],
+    vessel: { ...skin.vessel, initial: { kind: null, quantity: 0 } },
+  };
+  let w = newWorld(c, CONTEXT as never, [1, 2, 3, 4]);
+  for (const item of ['waterskin', 'cup']) w = play(w, { type: 'take', item_id: id(w, item) });
+  w = play(w, { type: 'move', direction: 'east' });
+  w = play(w, { type: 'pour', source_id: id(w, 'waterskin'), receiver_id: id(w, 'cup') });
+  assert.deepEqual(labels(w), ['condition.hungry', 'condition.thirsty']);
+});
+
 // Breaks: the dry drain ignores the weather (a clear day parches) or the room tag, a Drink does not
 // end it (in the inn it would tick on to 4 before expiring at 12600), it reaches hp or kills, or
 // the need pools read the world's hp bands.

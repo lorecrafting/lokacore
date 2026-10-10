@@ -8,6 +8,7 @@ import { type Mint, refString, type World } from '../../runtime/decision.ts';
 import { cmp } from '../../foundation/validate.ts';
 import { HOLDERS } from '../../foundation/compose_status.ts';
 import { living } from '../death/shared.ts';
+import { settleMaxima } from '../resource.ts';
 
 type Active = Extract<StatusRow, { active: true }>;
 
@@ -53,6 +54,37 @@ export const endStatus = (
 });
 
 /**
+ * A status whose `modifies` (row 2c) names an hp_max term and starts or ends on the player's body
+ * moves that maximum, so hp settles first, at the world's clock (resource@1, as wear and remove do).
+ */
+export const settleFor = (
+  world: World,
+  body: EntityId,
+  status: DefinitionRef,
+  writer_group: number,
+): DeltaOp[] => {
+  const terms = world.cartridge.world?.derived?.hp_max?.terms ?? [];
+  const moves = specOf(world, status)?.modifies?.some(({ attribute }) =>
+    terms.some((t) => refString(t.attribute) === refString(attribute)),
+  );
+  return body === world.body && moves
+    ? settleMaxima(world).map((op) => ({ ...op, writer_group, at: world.state.clock }))
+    : [];
+};
+
+/** End an active status by expiry or cure, settling a derived hp maximum first (row 2c). */
+export const expire = (
+  world: World,
+  body: EntityId,
+  status: DefinitionRef,
+  row: Active,
+  writer_group: number,
+): DeltaOp[] => [
+  ...settleFor(world, body, status, writer_group),
+  endStatus(body, status, row, writer_group),
+];
+
+/**
  * The NPC or item instance `body` declares `status` immune (row G3); a created NPC or item copies
  * its template's list (runtime/created.ts).
  */
@@ -87,7 +119,7 @@ export function applyStatus(
         active: true,
         generation: (prior?.generation ?? 0) + 1,
         ends_at,
-        next_tick_at: add(now, spec.tick_every),
+        next_tick_at: spec.per_tick === undefined ? ends_at : add(now, spec.tick_every),
         job_id: mint() as JobId,
       };
   const change: DeltaOp = {
@@ -98,18 +130,16 @@ export function applyStatus(
     expected: prior ?? null,
     value,
   };
-  return active
-    ? [change]
-    : [
-        change,
-        {
-          op: 'job.schedule',
-          writer_group,
-          job_id: value.job_id,
-          job: status,
-          due_time: Math.min(value.next_tick_at, ends_at),
-        },
-      ];
+  if (active) return [change];
+  const due_time = Math.min(value.next_tick_at, ends_at);
+  const job: DeltaOp = {
+    op: 'job.schedule',
+    writer_group,
+    job_id: value.job_id,
+    job: status,
+    due_time,
+  };
+  return [...settleFor(world, body, status, writer_group), change, job];
 }
 
 /** Inactivate every active status on `body` (death, or a cure listing them). */
@@ -121,5 +151,5 @@ export function cureOps(world: World, body: EntityId, cures: readonly Definition
   const listed = new Set(cures.map(refString));
   return activeStatuses(world, body)
     .filter(({ status }) => listed.has(refString(status)))
-    .map(({ status, row }) => endStatus(body, status, row, 0));
+    .flatMap(({ status, row }) => expire(world, body, status, row, 0));
 }

@@ -9,6 +9,7 @@ import type {
 import { key } from '../../foundation/compose.ts';
 import { divide, saturate } from '../../foundation/int.ts';
 import { bodyOf, refString, values, type World } from '../../runtime/decision.ts';
+import { activeStatuses } from '../status/shared.ts';
 
 export const initialValues = (world: World, ancestry: AncestrySpec) => {
   const starts = Object.fromEntries(
@@ -22,14 +23,15 @@ export const choice = (world: World, actor: CharacterId) => world.state.characte
 
 /**
  * The actor's attribute: its selected (else starting) value plus its allocated levelling points
- * (row 4) plus what its worn items grant,
+ * (row 4) plus what its worn items and active statuses grant (rows 3, 2c),
  * saturated to the ResourceInt range so no read outside an action can fault (mechanics.md row 3).
  */
 export function value(world: World, actor: CharacterId, attribute: DefinitionRef) {
   const base =
     choice(world, actor)?.attributes[refString(attribute)] ?? world.attributes[key(attribute)];
   const allocated = world.state.levelling?.[actor]?.allocated[refString(attribute)] ?? 0;
-  const bonus = worn(world, actor, attribute);
+  const body = bodyOf(world, actor);
+  const bonus = worn(world, actor, attribute) + (body ? modifiers(world, body, attribute) : 0);
   return base === undefined ? base : saturate(base + allocated + bonus);
 }
 
@@ -60,8 +62,21 @@ export const wearing = (world: World, actor: CharacterId, tag: Tag) =>
   wornItems(world, actor).some((e) => e.tags?.includes(tag));
 
 /**
+ * The saturated sum of `attribute`'s `modifies` over the statuses active on `holder` (row 2c): one
+ * row per holder and status, so the same status never counts twice.
+ */
+export function modifiers(world: World, holder: EntityId, attribute: DefinitionRef) {
+  if (!Object.values(world.cartridge.statuses ?? {}).some((s) => s.modifies)) return 0;
+  const ref = refString(attribute);
+  let sum = 0;
+  for (const { spec } of activeStatuses(world, holder))
+    for (const m of spec.modifies ?? []) if (refString(m.attribute) === ref) sum += m.modifier;
+  return saturate(sum);
+}
+
+/**
  * The NPC instance's attribute (row G3): its definition's declared value, else the attribute's
- * start, read at use. The one NPC-side reader, so row 2c will add the holder's active modifiers here.
+ * start, plus its active statuses' modifiers (row 2c), read at use.
  */
 export function npcValue(world: World, npc: EntityId, attribute: DefinitionRef) {
   const e = world.entities[npc];
@@ -69,7 +84,7 @@ export function npcValue(world: World, npc: EntityId, attribute: DefinitionRef) 
   const declared =
     e?.kind === 'npc' ? e.attributes?.find((a) => refString(a.attribute) === ref) : undefined;
   const base = declared?.value ?? world.attributes[key(attribute)];
-  return base === undefined ? base : saturate(base);
+  return base === undefined ? base : saturate(base + modifiers(world, npc, attribute));
 }
 
 /**

@@ -5,7 +5,7 @@
   "title": "Derived Stats Sampler",
   "requires": {
     "kernel_api": {
-      "at_least": "1.40",
+      "at_least": "1.46",
       "below": "2.0"
     },
     "content_schema": 1,
@@ -16,8 +16,10 @@
       "resource": 1,
       "fact": 1,
       "policy": 1,
+      "reaction": 1,
       "attributes": 1,
       "combat": 1,
+      "status": 1,
       "schedule": 1,
       "death": 1,
       "behavior": 1,

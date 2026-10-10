@@ -2589,7 +2589,7 @@
       "additionalProperties": false
     },
     "ConditionView": {
-      "description": "One active body status: its authored label, end, next tick and per-tick resource change.",
+      "description": "One active body status: its authored label, end, next tick and per-tick resource change (absent for a status that never ticks, row 2c).",
       "examples": [
         {
           "label": "condition.poisoned",
@@ -2630,7 +2630,6 @@
         "ends_at",
         "next_tick_at",
         "resource",
-        "per_tick",
         "tick_every"
       ],
       "additionalProperties": false
