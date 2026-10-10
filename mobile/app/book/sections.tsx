@@ -1,20 +1,9 @@
-// The Contents sections (Character, Ancestry, Journal, Carrying, Map, Settings) and the chapter
-// and scene pages. Each is only drawing; what a tap does is passed in by Book.tsx.
-// size: allow 326, conditions and the chapter card join its chapter and scene pages here (design-input-batch-6 §1: no new file); row 4 level, xp and Raise lines; the LABEL import (loka-x6t.11)
+// The Contents sections (Character, Ancestry, Carrying, Map, Settings; Journal: journal.tsx) and
+// the chapter and scene pages. Each is only drawing; what a tap does is passed in by Book.tsx.
 import { useState } from 'react';
 import { Text, View } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
-import {
-  bandPhrase,
-  cap,
-  expeditionLine,
-  plain,
-  timeLeft,
-  toneOf,
-  why,
-  type group,
-  type Thing,
-} from './model.ts';
+import { bandPhrase, cap, plain, toneOf, why, type group, type Thing } from './model.ts';
 import type { Button, DetailLine } from './presenter.ts';
 import { note, prose, usePalette } from './palette.ts';
 import { DiscoveredMap } from './DiscoveredMap.tsx';
@@ -92,46 +81,6 @@ export function AncestryPage(p: {
         );
       })}
       {p.pending && <Note>save not confirmed</Note>}
-    </Page>
-  );
-}
-
-export function JournalPage(p: { view: GameView; text: Say; world: () => void }) {
-  const { view, text } = p;
-  const c = usePalette();
-  return (
-    <Page title="Journal" foot={home(p.world)}>
-      {view.journal.length === 0 && <Note>Nothing written yet.</Note>}
-      {view.journal.map((q) => (
-        <View key={`${q.quest.cartridge_id}@${q.quest.cartridge_version}:${q.quest.key}`}>
-          <Text style={prose(c)}>{text(q.title)}</Text>
-          <Text style={note(c)}>{String(q.state).replaceAll('_', ' ')}</Text>
-          {q.patrol && (
-            <Text style={prose(c)}>
-              {q.patrol.credit} of {q.patrol.required} checkpoints. {q.patrol.status}.{' '}
-              {text(q.patrol.leader_name)} is at {text(q.patrol.room_title)}.{' '}
-              {q.patrol.status === 'awaiting'
-                ? `Walk ${q.patrol.direction} to join him.`
-                : q.patrol.status === 'paused'
-                  ? `Return to ${text(q.patrol.leader_name)} and choose Rejoin.`
-                  : q.patrol.status === 'failed'
-                    ? `Return to ${text(q.patrol.leader_name)} and choose Restart now.`
-                    : q.patrol.status === 'together'
-                      ? `Next: ${text(q.patrol.next_title)}.`
-                      : ''}
-            </Text>
-          )}
-          {q.expedition && (
-            <Text style={note(c)}>
-              {q.expedition.cursor} of {q.expedition.required} entries.{' '}
-              {expeditionLine(q.expedition, text)} {q.expedition.sheltered ? 'Shelter used.' : ''}
-            </Text>
-          )}
-          {q.journal && <Text style={prose(c)}>{plain(text(q.journal))}</Text>}
-          {q.hint && <Text style={note(c)}>Hint: {plain(text(q.hint))}</Text>}
-          {q.remaining !== undefined && <Text style={note(c)}>{timeLeft(q.remaining)}</Text>}
-        </View>
-      ))}
     </Page>
   );
 }
