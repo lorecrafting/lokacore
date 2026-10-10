@@ -27,7 +27,7 @@
 
 ## Findings
 
-1. **blocker**, `kernel/ts/test/exposure.test.ts:184` and `mobile/authority/local-story/status.test.ts:81`: no test pins the order that `docs/system/mechanics.md:631` documents. Every new assertion covers a receipt with at most one line. Two order mutants at `proposal.ts:252` stay green on the focused set plus `buffs` and `liquid` (kernel) and `liquid` (mobile):
+1. **blocker**, `kernel/ts/test/exposure.test.ts:184` and `mobile/authority/local-story/status.test.ts:81`: no test pins the order that `docs/system/mechanics.md:631` documents. Every new assertion covers a receipt with at most one line. Two order mutants at `proposal.ts:252` stay green. M2 ran on the focused set; M5 ran on the focused set plus `buffs` and `liquid` (kernel) and `liquid` (mobile):
    - M2 defers reaction lines to just before the level-up line.
    - M5 is `p.narration.unshift(...)`.
 
@@ -35,7 +35,7 @@
    - at head: Drink `[liquid.drank, narration.might.applied]` and play_song `[narration.play_song.actor, narration.inspired.applied]`;
    - under M5: both reversed.
 
-   Under M5 a `choice_resolved` reaction that voices a line would also break reopen at `dialogue-receipt.ts:79` (it checks `[0]`). Fix: add one exact multi-line narration assertion, for example the buffs Drink or song receipt. If the dev finds a cheap case, also add one where a job's reaction line comes before a later job's line, which pins M2.
+   Under M5 a `choice_resolved` reaction that voices a line would also break reopen at `dialogue-receipt.ts:79` (it checks `[0]`). Fix: add one exact multi-line narration assertion, for example the buffs Drink or song receipt. The blocker closes when M5 fails a committed test. Optional, not gating: if the dev finds a cheap case, also add one where a job's reaction line comes before a later job's line, which pins M2.
 2. **nit**: there is no PR body yet, so the developer's `/code-review` result must go in the batch PR body.
 
 Checked, no finding: a 2c buff's first application now voices its authored applied line. That follows row 1 ("applied ... lines come from their receipts"). Only ticks are absent for 2c.
