@@ -24,7 +24,7 @@ defmodule Loka.Content.Standing do
   defp speakers(m, defs) do
     for {_, {rel, [], d}} <- defs["dialogue"] || %{},
         {_, _, %{"disposition" => %{"hostile" => _}}} <- [Refs.resolve(d["npc"], "npc", m, defs)],
-        Enum.any?(d["choices"], fn {_, c} ->
+        Enum.any?(d["choices"] || %{}, fn {_, c} ->
           Enum.any?(~w(accept hand_over receive), &is_map_key(c, &1))
         end),
         do: Map.put(diag("HOSTILE_QUEST_SPEAKER", at(rel, ["npc"]), %{}), "severity", "warning")
