@@ -35,9 +35,30 @@ defmodule Loka.ContentSkillGrowthTest do
        {"UNRESOLVED_REFERENCE", "recipes/pick_gate.check.skill"}},
       {"recipes/force_vault.json", &put_in(&1, ["check", "attribute"], "dex"),
        {"UNRESOLVED_REFERENCE", "recipes/force_vault.check.attribute"}},
+      {"recipes/pick_gate.json",
+       &put_in(&1, ["outcomes", "success", "sequence", Access.at(0)], %{
+         "op" => "fact.assign",
+         "fact" => "uses_pick",
+         "value" => 5
+       }), {"RESERVED_FACT", "recipes/pick_gate.outcomes.success.sequence[0].fact"}},
       {"facts.json", &put_in(&1, ["facts", "uses_pick"], uses),
        {"RESERVED_FACT", "facts.facts.uses_pick"}}
     ]
+
+    rating_only =
+      [
+        {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.43")},
+        {"skills/pick.json", &Map.delete(&1, "growth")}
+      ] ++
+        for(
+          k <- ~w(pick_chest pick_gate pick_vault force_vault),
+          do:
+            {"recipes/#{k}.json",
+             &put_in(&1, ["check"], %{"key" => k, "kind" => "luck", "chance" => 50})}
+        )
+
+    assert {:error, [%{"code" => "KERNEL_API_RANGE_INVALID"}]} =
+             Loka.ContentSource.compile(dir, rating_only)
 
     for {file, change, {code, path}} <- cases do
       assert {:error, diags} = Loka.ContentSource.compile(dir, [{file, change}])

@@ -90,18 +90,13 @@ function attributes(c: Obj, { named }: Checks) {
 }
 
 // Toolbox rows 5 and G5: an opposed check names a skill of this cartridge (its attribute is
-// checked with attribute_threshold's), its target detail declares a rating, and API 1.44.
+// checked with attribute_threshold's) and its target detail declares a rating.
 function opposed(c: Obj, r: Obj, at: string, named: Checks['named']): Diagnostic[] {
   if (r.check.skill) named(r.check.skill, 'skill', `${at}.check.skill`);
   const detail = c.rooms[refString(r.target.room)]?.details?.[r.target.detail];
-  return [
-    ...(detail && detail.rating === undefined
-      ? [diag('SCHEMA_VIOLATION', `${at}.check`, { error: 'invalid_value' })]
-      : []),
-    ...(apiCmp(c.manifest.requires.kernel_api.at_least, '1.44') < 0
-      ? [diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least')]
-      : []),
-  ];
+  return detail && detail.rating === undefined
+    ? [diag('SCHEMA_VIOLATION', `${at}.check`, { error: 'invalid_value' })]
+    : [];
 }
 
 function reservedCommands(c: Obj): string[] {

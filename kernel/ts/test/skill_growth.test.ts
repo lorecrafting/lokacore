@@ -86,6 +86,16 @@ test('the loader refuses each unsound growth or opposed declaration', () => {
   const room = (c: any) => c.rooms[`${P}:room/vault_room`];
   const rows: [(c: any) => void, string, string][] = [
     [(c) => (c.manifest.requires.kernel_api.at_least = '1.43'), 'KERNEL_API_RANGE_INVALID', api],
+    [
+      (c) => {
+        c.manifest.requires.kernel_api.at_least = '1.43'; // a rating alone still needs 1.44
+        delete c.skills[`${P}:skill/pick`].growth;
+        delete c.facts[`${P}:fact/uses_pick`];
+        c.recipes = {};
+      },
+      'KERNEL_API_RANGE_INVALID',
+      api,
+    ],
     [(c) => (c.skills[`${P}:skill/pick`].growth[2] = 2), 'SCHEMA_VIOLATION', `${skill}.growth`],
     [(c) => delete room(c).details.gate.rating, 'SCHEMA_VIOLATION', `${gate}.check`],
     [

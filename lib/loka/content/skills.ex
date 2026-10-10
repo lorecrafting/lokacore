@@ -59,7 +59,8 @@ defmodule Loka.Content.Skills do
     caps = m["requires"]["capabilities"]
 
     Enum.flat_map(defs["skill"], &definition(&1, caps, text)) ++
-      Enum.flat_map(defs["skill"], &growth(&1, m)) ++
+      Enum.flat_map(defs["skill"], &growth/1) ++
+      floor(m, defs) ++
       equipment(m, defs) ++ dodge(m, defs, settings) ++ defense_narration(defs, settings)
   end
 
@@ -75,17 +76,37 @@ defmodule Loka.Content.Skills do
 
   defp definition(_, _, _), do: []
 
-  # Toolbox row 5: growth thresholds strictly increase and need API 1.44.
-  defp growth({_, {rel, _, %{"growth" => g}}}, m) do
+  # Toolbox row 5: growth thresholds strictly increase.
+  defp growth({_, {rel, _, %{"growth" => g}}}) do
     increasing = g |> Enum.chunk_every(2, 1, :discard) |> Enum.all?(fn [a, b] -> a < b end)
-
-    if(increasing, do: [], else: [bad(at(rel, ["growth"]))]) ++
-      if Loka.Content.Recipes.api(m) >= [1, 44],
-        do: [],
-        else: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")]
+    if increasing, do: [], else: [bad(at(rel, ["growth"]))]
   end
 
-  defp growth(_, _), do: []
+  defp growth(_), do: []
+
+  # Toolbox rows 5 and G5: skill growth, an opposed check or a detail rating needs API 1.44.
+  defp floor(m, defs) do
+    used =
+      Enum.any?(defs["skill"], &match?({_, {_, _, %{"growth" => _}}}, &1)) or
+        Enum.any?(defs["recipe"], &match?({_, {_, _, %{"check" => %{"kind" => "opposed"}}}}, &1)) or
+        Enum.any?(defs["room"], fn
+          {_, {_, _, %{"details" => %{} = ds}}} ->
+            Enum.any?(Map.values(ds), &is_map_key(&1, "rating"))
+
+          _ ->
+            false
+        end)
+
+    if used and version(m) < [1, 44],
+      do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
+      else: []
+  end
+
+  defp version(m),
+    do:
+      m["requires"]["kernel_api"]["at_least"]
+      |> String.split(".")
+      |> Enum.map(&String.to_integer/1)
 
   defp capability(rel, caps),
     do:

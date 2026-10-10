@@ -27,7 +27,6 @@ export function skills(c: Obj, checks: Checks): Diagnostic[] {
     const at = `.cartridge.skills${step(ref)}`;
     checks.text(s, ['label', 'requirement'], at);
     if (s.key.length > 58) bad(`${at}.key`);
-    if (s.growth) out.push(...growth(c, s.growth, at));
     for (const capability of ['skills', 'policy', 'fact'])
       if (c.lock.capabilities[capability] !== 1)
         out.push(diag('UNDECLARED_CAPABILITY', at, { capability }, [`${capability}@1`]));
@@ -58,19 +57,30 @@ export function skills(c: Obj, checks: Checks): Diagnostic[] {
         diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'),
       );
   }
-  return out;
+  return [...out, ...growth(c)];
 }
 
-// Toolbox row 5: growth thresholds strictly increase and need API 1.44.
-function growth(c: Obj, g: number[], at: string): Diagnostic[] {
-  return [
-    ...(g.some((t, i) => i > 0 && t <= g[i - 1]!)
-      ? [diag('SCHEMA_VIOLATION', `${at}.growth`, { error: 'invalid_value' })]
-      : []),
-    ...(apiCmp(c.manifest.requires.kernel_api.at_least, '1.44') < 0
-      ? [diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least')]
-      : []),
-  ];
+// Toolbox rows 5 and G5: growth thresholds strictly increase; skill growth, an opposed check or
+// a detail rating needs API 1.44.
+function growth(c: Obj): Diagnostic[] {
+  const out = Object.entries((c.skills ?? {}) as Obj).flatMap(([ref, s]) =>
+    s.growth?.some((t: number, i: number) => i > 0 && t <= s.growth[i - 1])
+      ? [
+          diag('SCHEMA_VIOLATION', `.cartridge.skills${step(ref)}.growth`, {
+            error: 'invalid_value',
+          }),
+        ]
+      : [],
+  );
+  const used =
+    Object.values((c.skills ?? {}) as Obj).some((s) => s.growth) ||
+    Object.values((c.recipes ?? {}) as Obj).some((r) => r.check?.kind === 'opposed') ||
+    Object.values(c.rooms as Obj).some((r) =>
+      Object.values((r.details ?? {}) as Obj).some((d) => d.rating !== undefined),
+    );
+  if (used && apiCmp(c.manifest.requires.kernel_api.at_least, '1.44') < 0)
+    out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
+  return out;
 }
 
 export function lesson(o: Obj, d: Obj, at: string, c: Obj, checks: Checks): Diagnostic[] {
