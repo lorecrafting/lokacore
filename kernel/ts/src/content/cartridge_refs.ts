@@ -1,4 +1,4 @@
-// size: allow 330, ancestry, bell area and Study edge join shared reference admission
+// size: allow 336, ancestry, bell area, Study edge and the policy leaf reference table join shared reference admission
 import { water } from './cartridge_water.ts';
 import { topics } from './cartridge_topics.ts';
 import { pools } from './cartridge_pools.ts';
@@ -62,6 +62,7 @@ export function parts(c: Obj): [string, Obj, string][] {
   const out: [string, Obj, string][] = [];
   const add = (kind: string, d: Obj, at: string, field = 'variants') => {
     out.push([kind, d, at]);
+    if (d.tags) out.push(['tags', d.tags, `${at}.tags`]);
     if (kind === 'detail')
       for (const field of ['readable', 'notice_board'])
         if (d[field]) out.push(['readable', d[field], `${at}.${field}`]);
@@ -162,6 +163,19 @@ export function checkers(c: Obj, out: Diagnostic[]) {
   return { named, typedValue, text };
 }
 
+// Each policy leaf's reference fields, each named for its definition kind; twin of
+// Loka.Content.Policies @leaf_refs (mechanics.md policy leaf set).
+const LEAF_REFS: Readonly<Record<string, readonly string[]>> = {
+  fact_compare: ['fact'],
+  has_item: ['item'],
+  quest_state: ['quest'],
+  escort_state: ['quest'],
+  barrier_state: ['barrier'],
+  stat_compare: ['attribute'],
+  resource_compare: ['resource'],
+  has_tag: ['item', 'barrier', 'room'],
+};
+
 // In both formats, validate fact defaults and policy references, typed comparisons and windows.
 // In v2 also validate entry, exits, NPC and item locations, text and touch links, barriers,
 // action contributions, quests, reactions, dialogues, resource bounds and movement cost.
@@ -171,17 +185,9 @@ export function refStage(c: Obj): Diagnostic[] {
   const check = checkers(c, out);
   const { named, typedValue, text } = check;
   for (const [n, at] of nodes(c)) {
-    if (n.op === 'fact_compare') {
-      named(n.fact, 'fact', `${at}.fact`);
-      typedValue(n.fact, n.equals, `${at}.equals`);
-    }
-    if (n.op === 'has_item') named(n.item, 'item', `${at}.item`);
-    if (n.op === 'barrier_state') named(n.barrier, 'barrier', `${at}.barrier`);
-    if (n.op === 'quest_state' || n.op === 'escort_state') named(n.quest, 'quest', `${at}.quest`);
-    if (n.op === 'stat_compare') named(n.attribute, 'attribute', `${at}.attribute`);
-    if (n.op === 'resource_compare') named(n.resource, 'resource', `${at}.resource`);
-    if (n.op === 'has_tag')
-      for (const k of ['item', 'barrier', 'room'] as const) if (n[k]) named(n[k], k, `${at}.${k}`);
+    for (const field of LEAF_REFS[n.op as string] ?? [])
+      if (n[field]) named(n[field], field, `${at}.${field}`);
+    if (n.op === 'fact_compare') typedValue(n.fact, n.equals, `${at}.equals`);
     if (n.op === 'time_window' && n.from === n.to) out.push(diag('EMPTY_TIME_WINDOW', at));
   }
   out.push(...reserved(c), ...featureApi(c));

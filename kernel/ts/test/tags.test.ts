@@ -13,6 +13,7 @@ import { holds } from '../src/mechanics/policy.ts';
 import type { Cartridge } from '../src/runtime/decision.ts';
 import type { Policy } from '../src/contracts.gen.ts';
 import { encode } from '../src/foundation/canonical.ts';
+import type { Obj } from '../src/content/cartridge_refs.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-tags-sampler-'));
 let artifact: Uint8Array;
@@ -56,25 +57,46 @@ test('a burnable check passes only on the wooden door, stick and the wooden hall
     assert.equal(check({ op: 'has_tag', ...p }, target), expected, JSON.stringify(p));
 });
 
-// Breaks: the loader skips has_tag's reference fields, so a policy naming no barrier loads.
-test('the loader refuses a has_tag naming no definition of its kind', () => {
-  const c = structuredClone(content) as unknown as {
-    rooms: Record<string, { details: Record<string, { variants: { when: { root: Policy } }[] }> }>;
+// Breaks: the loader skips one of has_tag's reference fields, so a policy naming no definition
+// loads, or loads tags without tags@1.
+test('the loader refuses a has_tag naming no definition and tags without tags@1', () => {
+  const hall = 'tags_sampler@0.0.1:room/hall';
+  const variant = `.cartridge.rooms["${hall}"].details.iron_door.variants[0].when.root`;
+  const leaf = (subject: object) => (c: Obj) => {
+    c.rooms[hall].details.iron_door.variants[0].when.root = {
+      op: 'has_tag',
+      tag: 'metal',
+      ...subject,
+    };
   };
-  const at = 'tags_sampler@0.0.1:room/hall';
-  c.rooms[at]!.details.iron_door!.variants[0]!.when.root = {
-    op: 'has_tag',
-    barrier: ref('barrier', 'oak_door'),
-    tag: 'burnable',
-  };
-  const canonical = encode(c);
-  const sha256 = createHash('sha256').update(canonical).digest('hex');
-  const r = loadCartridge(
-    new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-    INSTALLED,
-  );
-  assert.deepEqual(r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path], [
-    'UNRESOLVED_REFERENCE',
-    `.cartridge.rooms["${at}"].details.iron_door.variants[0].when.root.barrier`,
-  ]);
+  const rows: [(c: Obj) => void, string, string][] = [
+    [leaf({ barrier: ref('barrier', 'oak_door') }), 'UNRESOLVED_REFERENCE', `${variant}.barrier`],
+    [leaf({ item: ref('item', 'plank') }), 'UNRESOLVED_REFERENCE', `${variant}.item`],
+    [leaf({ room: ref('room', 'attic') }), 'UNRESOLVED_REFERENCE', `${variant}.room`],
+    [
+      (c) => {
+        // Only the stick's tags remain, so the one owner diagnostic is at its tags.
+        delete c.manifest.requires.capabilities.tags;
+        delete c.lock.capabilities.tags;
+        for (const b of Object.values(c.barriers as Obj)) delete b.tags;
+        delete c.items['tags_sampler@0.0.1:item/rod'].tags;
+        delete c.rooms[hall].tags;
+        delete c.rooms[hall].variants;
+        for (const d of Object.values(c.rooms[hall].details as Obj)) delete d.variants;
+      },
+      'UNDECLARED_CAPABILITY',
+      '.cartridge.items["tags_sampler@0.0.1:item/stick"].tags',
+    ],
+  ];
+  for (const [change, code, path] of rows) {
+    const c = structuredClone(content) as unknown as Obj;
+    change(c);
+    const canonical = encode(c);
+    const sha256 = createHash('sha256').update(canonical).digest('hex');
+    const r = loadCartridge(
+      new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
+      INSTALLED,
+    );
+    assert.deepEqual(r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path], [code, path]);
+  }
 });

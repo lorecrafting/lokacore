@@ -554,7 +554,9 @@
     "portability": "portable",
     "residency": "portable_capability",
     "commands": [],
-    "definitions": [],
+    "definitions": [
+      "tags"
+    ],
     "events": [],
     "policies": [
       "has_tag"
