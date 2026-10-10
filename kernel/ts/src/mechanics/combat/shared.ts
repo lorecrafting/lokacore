@@ -44,11 +44,21 @@ export function attackRefused(world: World, actor: CharacterId, target: EntityId
     !living(world, target) ||
     !standing(world, actor) ||
     world.rooms[room].sanctuary ||
-    engaged(world, body) ||
-    engaged(world, target) ||
+    (!retarget(world, body, target) && (engaged(world, body) || engaged(world, target))) ||
     running(world, actor)
   )
     return 'invalid_state' as const;
+}
+
+/** Toolbox row 6a: the player's open roster encounter when `target` is another active member
+ * and the cartridge opts in; Attack then writes encounter.target instead of opening. */
+export function retarget(world: World, body: EntityId, target: EntityId) {
+  // Also gated by the ActionSet (commands/actions.ts resolved); kept so no caller of
+  // attackRefused sees a relaxed admission in a cartridge without the opt-in.
+  const fight = world.cartridge.world?.combat?.target_choice && engaged(world, body);
+  return fight && fight.row.npc_id !== target && fight.row.active_ids?.includes(target)
+    ? fight
+    : undefined;
 }
 
 export function closeEncounter(world: World, body: EntityId): DeltaOp[] {

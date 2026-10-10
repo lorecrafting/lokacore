@@ -158,6 +158,7 @@ export function changeEncounter(
     return {
       value: { ...row, status: 'closed', ...(pack && { active_ids: [], next_opponent_id: null }) },
     };
+  if (op.op === 'encounter.target') return retarget(op, row, pack, present);
   if (row.round !== op.round || op.next_job_id === op.job_id) return failed;
   if (pack && !packAdvanceValid(op, row, present, initiallyPresent)) return failed;
   try {
@@ -177,6 +178,20 @@ export function changeEncounter(
     if (error instanceof KernelError && error.code === 'integer_overflow') return failed;
     throw error;
   }
+}
+
+function retarget(
+  op: Extract<DeltaOp, { op: 'encounter.target' }>,
+  row: Row,
+  pack: boolean,
+  present: (id: string, room: string) => boolean,
+): Outcome {
+  return pack &&
+    op.npc_id !== row.npc_id &&
+    (row.active_ids as string[]).includes(op.npc_id) &&
+    present(op.npc_id, row.room_id as string)
+    ? { value: { ...row, npc_id: op.npc_id } }
+    : failed;
 }
 
 function packAdvanceValid(

@@ -1,0 +1,12 @@
+{
+  "keywords": [
+    "ear"
+  ],
+  "short": "item.ear.short",
+  "room_line": "item.ear.room",
+  "description": "item.ear.description",
+  "mass_grams": 10,
+  "location": {
+    "in": "template"
+  }
+}

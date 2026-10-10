@@ -892,6 +892,12 @@ assist/damage verb or a player-forgeable behavior intent. Ordinary non-pack NPC
 admission remains one opponent. Generic state/delta/precondition changes require
 both portable twins, independent literal fixtures, then differential proof.
 
+[Target choice](mechanics.md#target-choice-in-the-same-room-toolbox-row-6a) (toolbox row 6a) adds
+`encounter.target {encounter_id, job_id, expected, npc_id}`, written by Attack only: it composes
+when the row is open, its job is current, `expected` equals the complete row, and `npc_id` is a
+present active member other than the current primary; it changes only `npc_id`. Both kernels
+answer the `target-*` cases of `protocol/fixtures/c4_pack_composition.json`.
+
 For this actual scheduler seam, extend each separately targeted C3 slot with
 nullable `last_flight_at`, initially null and reset to null only on a new generation.
 A successful selected flight sets it to this occurrence's logical clock, checking

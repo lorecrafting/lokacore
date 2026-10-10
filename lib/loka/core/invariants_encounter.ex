@@ -113,6 +113,16 @@ defmodule Loka.Core.InvariantsEncounter do
          |> Map.merge(%{"status" => "open", "round" => 1})
   end
 
+  # Toolbox row 6a: another present active member becomes the primary.
+  defp encounter(%{"op" => "encounter.target"} = op, encounters, %{state: state}) do
+    row = encounters[op["encounter_id"]]
+
+    if current_encounter?(op, row) and op["npc_id"] in (row["active_ids"] || []) and
+         op["npc_id"] != row["npc_id"] and
+         InvariantsPack.member_initially_present?(op["npc_id"], row["room_id"], state),
+       do: Map.put(row, "npc_id", op["npc_id"])
+  end
+
   defp encounter(op, encounters, ctx) do
     row = encounters[op["encounter_id"]]
 
