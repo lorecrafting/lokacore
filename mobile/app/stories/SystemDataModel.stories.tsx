@@ -2,7 +2,7 @@
 // selection and the layer filter in the URL (preview.tsx globalTypes).
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { useGlobals } from 'storybook/preview-api';
-import { expect, userEvent, within } from 'storybook/test';
+import { expect, userEvent, waitFor, within } from 'storybook/test';
 import { PaletteContext } from '../book/palette.ts';
 import { color } from '../book/tokens.ts';
 import { DataModel } from './system/DataModel.tsx';
@@ -165,6 +165,55 @@ export const Impact: Story = {
       'cartridge_lantern_hash.json',
       'cartridge_loader.json',
     ]);
+  },
+};
+
+// Path finding (hand-read: StateDelta.ops is DeltaOp, status.transition's value is StatusRow; nothing
+// StateDelta reaches references Command). Breaks: an edge walked backwards, the chain reversed or
+// cut short, or a missing path shown as a chain.
+export const PathTo: Story = {
+  globals: { node: 'StateDelta' },
+  play: async ({ canvas }) => {
+    const panel = within(canvas.getByRole('complementary', { name: 'Detail' }));
+    const to = panel.getByRole('combobox', { name: 'Path to' });
+    await userEvent.type(to, 'StatusRow');
+    const chain = within(panel.getByLabelText('Path')).getAllByRole('button');
+    await expect(chain.map((b) => b.textContent)).toEqual(['StateDelta', 'DeltaOp', 'StatusRow']);
+    await userEvent.clear(to);
+    await userEvent.type(to, 'Command');
+    await expect(panel.getByText('No reference path from StateDelta to Command.')).toBeVisible();
+  },
+};
+
+// Saved in (status.transition writes StatusRow into the statuses section) and the authored files of
+// the cartridge map holding RoomDefinition. Breaks: the line or the list dropped from the panel.
+export const Homes: Story = {
+  globals: { node: 'StatusRow' },
+  play: async ({ canvas }) => {
+    const panel = () => within(canvas.getByRole('complementary', { name: 'Detail' }));
+    await expect(panel().getByText(/^Saved in:/)).toHaveTextContent(
+      'Saved in: state_row › statuses',
+    );
+    await userEvent.click(canvas.getByRole('button', { name: 'RoomDefinition' }));
+    await userEvent.click(panel().getByText(/^Authored in cartridges \(\d+\)$/));
+    await expect(
+      panel().getByRole('link', { name: 'cartridges/ashmere_rooms/rooms/boathouse.json' }),
+    ).toBeVisible();
+  },
+};
+
+// Browser history: Back after a pick reselects the contract before it. Breaks: a pick that adds no
+// history entry, or a popstate that leaves the selection where it was.
+export const History: Story = {
+  globals: { node: 'StateDelta' },
+  play: async ({ canvas }) => {
+    const panel = within(canvas.getByRole('complementary', { name: 'Detail' }));
+    await userEvent.click(panel.getAllByRole('button', { name: 'DeltaOp' })[0]);
+    const pressed = (name: string) =>
+      expect(canvas.getByRole('button', { name, pressed: true })).toBeVisible();
+    await waitFor(() => pressed('DeltaOp'));
+    history.back();
+    await waitFor(() => pressed('StateDelta'));
   },
 };
 

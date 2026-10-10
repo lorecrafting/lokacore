@@ -37,7 +37,7 @@ const preview: Preview = {
       storySort: {
         order: [
           'System',
-          ['Overview', 'Data model', 'Capabilities', 'Save'],
+          ['Overview', 'Data model', 'Command lifecycle', 'Capabilities', 'Save'],
           'Docs',
           'Book',
           'Pages',

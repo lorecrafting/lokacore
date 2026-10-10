@@ -112,7 +112,11 @@ their rules and red controls remain available for resumption.
   listing worktrees with uncommitted changes.
 - CI (`.github/workflows/`): `ci.yml` and `book-e2e.yml` run on every push to a branch other than
   `main`, nightly on `main` (10:00 UTC) and by `workflow_dispatch` (`gh workflow run <wf> --ref <branch>`),
-  a superseded head's run cancelled; no pull request trigger ([two-lane CI](decisions/owner-decision-two-lane-ci-2026-10-09.md)). `book-e2e.yml` runs two jobs in parallel: `e2e`, the local Book browser save/reload path with tester.army e2e
+  a superseded head's run cancelled; no pull request trigger ([two-lane CI](decisions/owner-decision-two-lane-ci-2026-10-09.md)).
+  `graph-diff.yml` alone runs on a pull request (never a push): it posts or updates one PR comment
+  listing the System graph's node and edge changes against the base (`bin/graph_diff.py`, its
+  control `bin/graph_diff_red_controls.sh` in `ci.yml`'s `lint` job); it never fails on a diff and
+  is not a merge gate. `book-e2e.yml` runs two jobs in parallel: `e2e`, the local Book browser save/reload path with tester.army e2e
   (see [preview command](web-preview.md)), and `storybook`: `npm run storybook:smoke` (every story renders, its play
   passes, axe at `test: 'error'`, every button's name starts with its shown text; one story file at a time; one run in the default light palette, [Storybook](web-preview.md#storybook)), then `npm run storybook:live` (every Live story and its click-through on the dev server), then `npm run storybook:picker` (one pick reaches the [polish queue](web-preview.md#polish-queue), a status line shows, Close batch waits for a working item); `mobile.yml` and `mobile-bundle.yml` are disabled
   in GitHub and retain only manual triggers in source for eventual resumption. Each workflow has

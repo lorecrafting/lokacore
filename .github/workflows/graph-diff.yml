@@ -1,0 +1,45 @@
+name: graph-diff
+
+# One PR comment (found again by its marker and updated) listing the System graph's node and edge
+# changes against the base (bin/graph_diff.py, its control in ci.yml's lint job). Pull requests
+# only, never a push, and never fails on a diff; not a merge gate. ci.yml's contracts.exs --check
+# keeps the committed graph current, so it is read here, not regenerated. Its own workflow so a PR
+# event adds no second `ci` run on the head (the gate is the push run's ci-green).
+on:
+  pull_request:
+
+concurrency:
+  group: graph-diff-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  graph-diff:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          graph=docs/system-graph.gen.json
+          base="$RUNNER_TEMP/base.json"
+          gh api -H 'Accept: application/vnd.github.raw' "repos/$GITHUB_REPOSITORY/contents/$graph?ref=$BASE" > "$base" ||
+            echo '{"nodes":[],"edges":[]}' > "$base"
+          python3 bin/graph_diff.py "$base" "$graph" > "$RUNNER_TEMP/body.md"
+          id=$(gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$PR/comments" \
+            --jq '.[] | select(.body | startswith("<!-- system-graph-diff -->")) | .id' | head -n 1)
+          if [ -n "$id" ]; then
+            gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$id" -F "body=@$RUNNER_TEMP/body.md" > /dev/null
+          else
+            gh pr comment "$PR" --repo "$GITHUB_REPOSITORY" --body-file "$RUNNER_TEMP/body.md"
+          fi

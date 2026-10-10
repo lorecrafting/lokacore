@@ -15,6 +15,8 @@ export type Contract = {
   enum: unknown[] | null;
   examples: unknown[] | null;
   spec: { cite: string; path: string }[]; // path#heading of the archived spec
+  saved: string[] | null; // the state_row sections a DeltaOp writes it into
+  authored: string[] | null; // cartridges/*/<map>/*.json of the CompiledCartridge map holding it
 };
 export type Capability = {
   id: string;
@@ -42,6 +44,19 @@ export type Graph = {
 export const graph: Graph = JSON.parse(raw);
 export const contracts = new Map(graph.nodes.map((n) => [n.name, n]));
 export const capabilities = new Map(graph.capabilities.map((c) => [c.id, c]));
+
+// The shortest chain of references from one contract to another (breadth first), or null.
+export function path(from: string, to: string) {
+  const prev = new Map([[from, '']]);
+  for (const at of prev.keys()) {
+    if (at === to) break;
+    for (const e of graph.edges) if (e.from === at && !prev.has(e.to)) prev.set(e.to, at);
+  }
+  if (!prev.has(to)) return null;
+  const chain = [to];
+  while (chain[0] !== from) chain.unshift(prev.get(chain[0])!);
+  return chain;
+}
 
 // A repository file on GitHub: relative links open nothing inside Storybook (Catalogue.mdx).
 export const repo = (path: string, line?: number) =>

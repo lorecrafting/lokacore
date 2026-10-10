@@ -8,6 +8,21 @@ import { Panel } from './Panel.tsx';
 import { Toolbar } from './Toolbar.tsx';
 import { Link, Sheet } from './ui.tsx';
 
+// Browser history per selection: each pick is an entry in this frame (the manager replaces its URL
+// on a globals change), and Back or Forward reselects that entry's contract.
+function useHistory(node: string, select: (name: string) => void) {
+  useEffect(() => {
+    history.replaceState({ ...history.state, node }, '');
+    const back = (e: PopStateEvent) => e.state && 'node' in e.state && select(e.state.node);
+    addEventListener('popstate', back);
+    return () => removeEventListener('popstate', back);
+  }, []);
+  return (name: string) => {
+    history.pushState({ ...history.state, node: name }, '');
+    select(name);
+  };
+}
+
 type Props = {
   node?: string;
   layer?: string;
@@ -31,6 +46,7 @@ export function DataModel({ node = '', layer = '', onSelect }: Props) {
     setSelected(name);
     onSelect?.({ node: name });
   };
+  const pick = useHistory(node, select);
   const change = (f: Partial<Filter>) => {
     setFilter({ ...filter, ...f });
     if (f.layer !== undefined) onSelect?.({ layer: f.layer });
@@ -47,8 +63,8 @@ export function DataModel({ node = '', layer = '', onSelect }: Props) {
         {graph.saveTables.some((t) => t.table === selected) && ` › Save › ${selected}`}
       </nav>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: space.xl, alignItems: 'flex-start' }}>
-        <Grid filter={filter} selected={selected} select={select} />
-        {selected && <Panel name={selected} onSelect={select} />}
+        <Grid filter={filter} selected={selected} select={pick} />
+        {selected && <Panel name={selected} onSelect={pick} />}
       </div>
     </Sheet>
   );
