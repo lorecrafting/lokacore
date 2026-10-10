@@ -36,11 +36,20 @@ district and room that shows the pair, and the pin (test or recorder) that holds
 
 ## How a batch adds a district
 
-The batch's Fable final-head review stays a review only. After the batch head is approved, a
-separate Fable run in the author role writes that batch's district (or extends an existing one) on
-its own branch: the guided loop, the signpost readable and the sandbox room, using only installed
-mechanics. An Opus reviewer reviews it like any slice, and the next batch's Fable review also looks
-at it (PM ruling, 2026-10-10). The district adds matrix rows for the new pairs the batch makes possible and fills in the rows
+The batch's Fable final-head review stays a review only. After the batch head is approved, each
+district goes through four steps (owner input and PM ruling, 2026-10-10):
+
+1. **Plan (Fable).** A separate Fable run writes a short district brief in `docs/showcase/`: the
+   rooms, the guided loop and sandbox room, which matrix cells it exercises, the signpost text
+   and the expected outcome of each step.
+2. **Build (Opus developer).** An ordinary slice implements the brief: cartridge content, hash
+   fixture, simulator seeds, walkthrough or recorder recipe and tests, using only installed
+   mechanics.
+3. **Review (Opus reviewer).** Reviewed against the brief like any slice.
+4. **Recheck (Fable).** The next batch's Fable final review checks the district still matches
+   its brief.
+
+The brief adds matrix rows for the new pairs the batch makes possible and fills in the rows
 it covers. A pair that needs engine code to work means the toolbox rows are not finished; that
 goes back to the batch as a finding, not into the showcase.
 

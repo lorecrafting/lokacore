@@ -25,10 +25,12 @@ future stories, and drop only Chapter-1-specific pins once the showcase covers t
 
 ## PM rulings and clarifications (2026-10-10)
 
-1. **Reviewer independence.** The batch's Fable final review stays a review only. A district is
-   written after the batch head is approved, by a separate Fable run in the author role, on its
-   own branch, and reviewed by an Opus reviewer like any slice; the next batch's Fable review
-   also looks at it.
+1. **Who writes a district.** The batch's Fable final review stays a review only. The owner
+   added (paraphrased: Fable should write the plan). PM ruling: after the batch head is approved,
+   a separate Fable run writes a short district brief in `docs/showcase/`; an Opus developer
+   implements it as an ordinary slice; an Opus reviewer reviews it against the brief; the next
+   batch's Fable final review checks the district still matches its brief
+   ([steps](../SHOWCASE.md#how-a-batch-adds-a-district)).
 2. **Polish (PM clarification).** "No further polish on Chapter 1" means no Chapter 1 story or
    content work. Book UI polish (components, design system, Storybook) continues and may keep
    using Chapter 1 views until showcase views replace them.

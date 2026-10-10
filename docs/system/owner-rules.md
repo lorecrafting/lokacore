@@ -35,7 +35,7 @@ and not repeated here.
 
 - After each chapter, close the deterministic browser route/UI walk, exploratory E2E pass, visible headed run or video, isolated polish fixes and reruns, and exact-head independent review before calling that chapter closed ([record](../decisions/owner-decision-chapter-closure-e2e-loop-2026-10-05.md)).
 
-- Chapters 2 and 3 are out of release scope; Chapter 1 is a frozen regression fixture until the [toolbox showcase](../SHOWCASE.md) covers its play families, and the showcase grows one Fable-authored district per toolbox batch ([record](../decisions/owner-decision-showcase-2026-10-10.md)).
+- Chapters 2 and 3 are out of release scope; Chapter 1 is a frozen regression fixture until the [toolbox showcase](../SHOWCASE.md) covers its play families, and the showcase grows one Fable-planned, Opus-built district per toolbox batch ([record](../decisions/owner-decision-showcase-2026-10-10.md)).
 
 - One shared game difficulty; no selectable difficulty modes or separate hard/ironman death policies
   ([record](../decisions/owner-decision-single-difficulty-2026-10-03.md)).
