@@ -240,7 +240,7 @@ their description why the door is shut (a `sky` variant).
 World tests run on clear days (the test's world id gives days 1 to 4 `clear`), so no drain or
 variant from the weather disturbs the hp and description outcomes above.
 
-Sandbox `tide_pools`: the pool cleft searches at any hour; the spare rope; every door reachable
+Sandbox `tide_pools`: the pool cleft searches at any hour; every door reachable
 without a gate; three details carry the weather, tide and season variants one phase each, so the
 dev clock shows every phase without one list hiding another.
 
