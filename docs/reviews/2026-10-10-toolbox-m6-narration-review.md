@@ -39,3 +39,14 @@
 2. **nit**: there is no PR body yet, so the developer's `/code-review` result must go in the batch PR body.
 
 Checked, no finding: a 2c buff's first application now voices its authored applied line. That follows row 1 ("applied ... lines come from their receipts"). Only ticks are absent for 2c.
+
+## Fix round 1 re-check (head `b841f80749c6dbc733830df6e19c4c2e5faff844`)
+
+Scope: commit `b841f807` (`kernel/ts/test/buffs.test.ts` only). Verdict: **APPROVE WITH NOTES**.
+
+- F1 **fixed.** The song test now asserts the exact receipt keys `['narration.play_song.actor', 'narration.inspired.applied']` (`kernel/ts/test/buffs.test.ts:108-111`).
+  - The test is green at head.
+  - With M5 (`unshift` at `proposal.ts:252`), it fails (nice 10 run of `buffs.test.ts`).
+  - The optional M2 job-order test was skipped. That is accepted: it does not gate this fix.
+- F2 (nit) is open until the batch PR body carries the developer's `/code-review` result.
+- Hosted `ci` and `book-e2e` on `b841f807`: both success.
