@@ -40,24 +40,17 @@ export const levelLine = (l: Levelling) => `Level ${l.level}${points(l.unspent)}
 export const xpLine = (l: Levelling) =>
   `xp  ${l.experience}${l.next === undefined ? '' : ` / ${l.next}`}`;
 
-/** The Raise cards, the Character page's last block, while raise_attribute is offered. */
-export function RaiseCards(p: {
-  buttons?: Button[];
-  pending?: boolean;
-  press?: (b: Button) => void;
-}) {
-  const c = usePalette();
+/** The Raise cards, the Character page's last block, while raise_attribute is offered; a pending
+ * save shows on the status line (Book.tsx), as on every page but the ancestry picker. */
+export function RaiseCards(p: { buttons?: Button[]; press?: (b: Button) => void }) {
   return (
-    <>
-      <Cards>
-        {p.buttons
-          ?.filter((b) => b.action_key === 'raise_attribute')
-          .map((b) => (
-            <ActionCard key={b.label} b={b} press={p.press!} />
-          ))}
-      </Cards>
-      {p.pending && <Text style={note(c)}>save not confirmed</Text>}
-    </>
+    <Cards>
+      {p.buttons
+        ?.filter((b) => b.action_key === 'raise_attribute')
+        .map((b) => (
+          <ActionCard key={b.label} b={b} press={p.press!} />
+        ))}
+    </Cards>
   );
 }
 

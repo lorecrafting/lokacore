@@ -104,7 +104,6 @@ function sectionPage(p: BodyProps, page: Page) {
         text={text}
         world={p.world}
         buttons={p.screen.buttons}
-        pending={p.screen.pending}
         press={p.press}
       />
     );
