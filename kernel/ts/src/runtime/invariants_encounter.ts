@@ -1,6 +1,6 @@
 // Independent encounter/job replay: prove both guards and final rows without composing.
 import { key, same } from '../foundation/compose.ts';
-import { advancePack, packMembers } from './invariants_pack.ts';
+import { advancePack, memberInitiallyPresent, packMembers } from './invariants_pack.ts';
 
 type Any = any;
 export function encountersHold(state: Any, ops: Any[], result: Any): boolean {
@@ -110,6 +110,12 @@ function changeEncounter(
       status: 'closed',
       ...(row.active_ids !== undefined && { active_ids: [], next_opponent_id: null }),
     };
+  if (op.op === 'encounter.target')
+    return row.active_ids?.includes(op.npc_id) &&
+      op.npc_id !== row.npc_id &&
+      memberInitiallyPresent(op.npc_id, row.room_id, state)
+      ? { ...row, npc_id: op.npc_id }
+      : undefined;
   if (
     row.round !== op.round ||
     op.job_id === op.next_job_id ||

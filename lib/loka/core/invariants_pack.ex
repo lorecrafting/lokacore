@@ -30,7 +30,7 @@ defmodule Loka.Core.InvariantsPack do
       op["next_opponent_id"] == (Enum.find(ids, &(&1 > selected)) || hd(ids))
   end
 
-  defp member_initially_present?(id, room, state) do
+  def member_initially_present?(id, room, state) do
     origin = get_in(state, ["created", id, "origin"])
 
     slot =

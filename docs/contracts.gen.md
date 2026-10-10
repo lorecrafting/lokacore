@@ -287,6 +287,7 @@ The StateDelta algebra: typed operations, their mutation targets and preconditio
   - `encounter.open`
   - `encounter.advance`
   - `encounter.close`
+  - `encounter.target`: Toolbox row 6a: the player's chosen target in an open roster encounter becomes its primary; the row must equal expected and npc_id must be a present active member other than the current primary.
   - `job.cancel`
   - `escort.transition`: Compares the complete prior row (null at start), preserves actor/body/NPC/quest/start-choice identity and permits only null→following, following→separated, separated→following, following→completed.
   - `quest.retire`: API1.17 explicit repeat: exact resolved prior instance only, removed atomically with a fresh activation. Target quest(instance_id); writes null, which means removal for this operation only.

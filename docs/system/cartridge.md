@@ -468,6 +468,11 @@ makes it attackable and supplies its own chance/damage bounds; it requires expli
 Chances are integers 0..100, damage bounds positive and ordered, multipliers positive.
 Room `sanctuary: true` forbids admission. All new objects reject unknown fields.
 
+Optional `world.combat.target_choice: true` opts into [target choice](mechanics.md#target-choice-in-the-same-room-toolbox-row-6a)
+(toolbox row 6a): it needs `kernel_api` at least **1.48**, or the compiler
+(`lib/loka/content/combat.ex`) and the loader (`kernel/ts/src/content/cartridge_combat.ts`)
+report KERNEL_API_RANGE_INVALID at the manifest's `at_least`. `cartridges/targets_sampler` is the sampler.
+
 Optional `world.death_credit` is a list of `{npc, room, fact}` DefinitionRefs, expanded
 from normal short references. Each NPC/fact appears once; NPC is an authored attackable
 NPC, room its authored room, fact a player Boolean with false default. Runtime binds the

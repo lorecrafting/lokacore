@@ -40,7 +40,9 @@ function damageApi(c: Obj): Diagnostic[] {
   const items = Object.values((c.items ?? {}) as Obj).map((i) => i.weapon?.attack);
   const profiles = [c.world?.combat?.player_attack, ...npcs.map((n) => n.attack), ...items];
   const used = profiles.some((p) => p?.kind || p?.crit) || npcs.some((n) => n.resistances);
-  return used && apiCmp(c.manifest.requires.kernel_api.at_least, '1.44') < 0
+  // Toolbox row 6a: target choice needs kernel_api 1.48.
+  const floor = c.world?.combat?.target_choice ? '1.48' : used && '1.44';
+  return floor && apiCmp(c.manifest.requires.kernel_api.at_least, floor) < 0
     ? [diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least')]
     : [];
 }

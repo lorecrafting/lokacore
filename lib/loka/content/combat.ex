@@ -27,7 +27,12 @@ defmodule Loka.Content.Combat do
     if(get_in(settings, ["world", "death"]), do: [], else: [bad("cartridge.world.death")]) ++
       requirements(m) ++
       profile(combat["player_attack"], "cartridge.world.combat.player_attack") ++
-      narration(combat, text)
+      narration(combat, text) ++
+      if(combat["target_choice"] && version(m) < [1, 48],
+        # Toolbox row 6a: target choice needs kernel_api 1.48.
+        do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
+        else: []
+      )
   end
 
   defp npc_profiles(defs, combat) do

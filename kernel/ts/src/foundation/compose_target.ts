@@ -1,4 +1,7 @@
 import type { DeltaOp, MutationTarget } from '../contracts.gen.ts';
+
+type EncounterOp = Extract<DeltaOp, { op: `encounter.${string}` }>;
+const encounterOp = (op: DeltaOp): op is EncounterOp => op.op.startsWith('encounter.');
 /**
  * The MutationTarget an op writes (04 §5.1).
  * Patrol uses the exact quest instance; escort retains its actor target.
@@ -17,6 +20,7 @@ export function target(op: DeltaOp): MutationTarget {
     return { kind: 'status', body_id: op.body_id, status: op.status };
   if (op.op === 'levelling.set') return { kind: 'levelling', character_id: op.character_id };
   if (op.op === 'time.advance') return { kind: 'clock' };
+  if (encounterOp(op)) return { kind: 'encounter', encounter_id: op.encounter_id };
   switch (op.op) {
     case 'visit.record':
       return { kind: 'visit', actor_id: op.actor_id, room_id: op.room_id };
@@ -34,10 +38,6 @@ export function target(op: DeltaOp): MutationTarget {
     case 'job.complete':
     case 'job.cancel':
       return { kind: 'job', job_id: op.job_id };
-    case 'encounter.open':
-    case 'encounter.advance':
-    case 'encounter.close':
-      return { kind: 'encounter', encounter_id: op.encounter_id };
     case 'patrol.transition':
     case 'expedition.transition':
       return {
