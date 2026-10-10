@@ -5,9 +5,9 @@ import { Text } from 'react-native';
 import type { Button, presenter } from './presenter.ts';
 import { dreamAt, dreamOwner } from './dreams.ts';
 import { ActionCard, Cards } from './actions.tsx';
-import { LogLines } from './lines.tsx';
+import { LogLines, Note } from './lines.tsx';
 import { Control, Page } from './pages.tsx';
-import { note, prose, usePalette } from './palette.ts';
+import { prose, usePalette } from './palette.ts';
 import { LABEL } from './labels.ts';
 
 type Screen = ReturnType<ReturnType<typeof presenter>['screen']>;
@@ -47,11 +47,10 @@ export function DreamResume(p: {
   detail: NonNullable<GameView['notices']>[number];
   open: (page: Route) => void;
 }) {
-  const c = usePalette();
   const d = p.detail.dream;
   return d?.available ? (
     <Control label={LABEL.resumeDream} onPress={() => p.open({ kind: 'dream', id: p.detail.id })} />
   ) : d?.index === -1 ? (
-    <Text style={note(c)}>Dream acknowledged.</Text>
+    <Note>Dream acknowledged.</Note>
   ) : null;
 }

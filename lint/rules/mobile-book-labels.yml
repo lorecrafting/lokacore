@@ -7,6 +7,7 @@ files:
     mobile/app/book/*.ts,
     mobile/app/book/*.tsx,
     mobile/app/SaveError.tsx,
+    mobile/app/App.tsx,
     mobile/app/tests/*.ts,
     mobile/app/walkthrough/*.ts,
     mobile/app/stories/routes.ts,
@@ -32,4 +33,4 @@ rule:
     # One of the table's words as a string (a tap, a getByRole name, a story route step).
     # Keep this list equal to LABEL's values.
     - kind: string
-      regex: "^['\"](Leave|Leave the conversation|Back to World|Back to board|Back to container|Back to map|Close|Resume dream|Continue conversation|Got it|Start over|Backspace|Clear|Inside|Held|Worn|Where)['\"]$"
+      regex: "^['\"](Leave|Leave the conversation|Back to World|Back to board|Back to container|Back to map|Close|Resume dream|Continue conversation|Got it|Start over|Backspace|Clear|Submit|Start over\\?|Your saved game will be lost\\.|Cancel|Inside|Held|Worn|Where)['\"]$"

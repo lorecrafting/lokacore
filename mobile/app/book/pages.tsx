@@ -67,7 +67,7 @@ export function RunningHead({ view, text }: { view: GameView; text: Say }) {
 // Local navigation that is not an offered action (BOOK-UI-COMPONENTS.md, Control).
 // `onInk`: the label in `bg`, for a Control on an `fg` fill (the tip's Got it).
 export function Control(p: {
-  label: string;
+  label: (typeof LABEL)[keyof typeof LABEL];
   onPress: () => void;
   disabled?: boolean;
   onInk?: true;

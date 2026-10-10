@@ -82,7 +82,7 @@ const spell =
       tiles.splice(tiles.indexOf(tile), 1);
       b.tap(tile);
     }
-    b.tap('Submit');
+    b.tap(LABEL.submit);
   };
 // A scene: Continue until its pages end.
 const scene: Step = (b) => {

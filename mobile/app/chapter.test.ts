@@ -12,6 +12,7 @@ import { runInNewContext } from 'node:vm';
 import { checkpoint, elapsedHost } from '../authority/local-story/__tests__/elapsed-host.test.ts';
 import { localSession, openGame } from '../authority/local-story/session.ts';
 import type { Db } from '../authority/local-story/store.ts';
+import { LABEL } from './book/labels.ts';
 import { webDb } from './sqlite-web.ts';
 
 const require = createRequire(import.meta.url);
@@ -90,6 +91,7 @@ test('the app opens and replaces only its chapter save, preserving existing Lant
     './sqlite-web.ts': { webDb },
     './book/Book.tsx': {},
     './book/model.ts': { hint: () => ({}) },
+    './book/labels.ts': { LABEL },
     './SaveError': {},
   };
   const globals: { loka_session?: ReturnType<typeof localSession> } = {};
@@ -273,6 +275,7 @@ function appHost() {
     './sqlite-web.ts': { webDb },
     './book/Book.tsx': { default: 'Book' },
     './book/model.ts': { hint: () => ({}) },
+    './book/labels.ts': { LABEL },
     './SaveError': {},
   };
   const globals: { loka_session?: ReturnType<typeof localSession> } = {},

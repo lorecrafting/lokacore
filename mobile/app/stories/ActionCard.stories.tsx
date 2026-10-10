@@ -1,16 +1,18 @@
 // ActionCard: a detail page's offered action or dialogue choice (BOOK-UI-COMPONENTS.md, Action card).
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
-import { Text, View } from 'react-native';
+import type { ComponentProps, ReactElement } from 'react';
 import { expect, fn } from 'storybook/test';
 import { ActionCard, Cards } from '../book/actions.tsx';
-import { note, usePalette } from '../book/palette.ts';
 import { button } from './fixtures.ts';
+
+// The args are the offered form's; the unavailable form (label, reason) is drawn by its own story.
+type Offered = Extract<ComponentProps<typeof ActionCard>, { b: unknown }>;
 
 const meta = {
   title: 'Book/ActionCard',
-  component: ActionCard,
+  component: ActionCard as (p: Offered) => ReactElement,
   args: { b: button('Ask about the ferry'), press: fn() },
-} satisfies Meta<typeof ActionCard>;
+} satisfies Meta<Offered>;
 export default meta;
 type Story = StoryObj<typeof meta>;
 
@@ -39,13 +41,16 @@ export const ListOfSix: Story = {
   ),
 };
 
+// Breaks: the unavailable form is pressable, or loses its label or reason.
 export const WithUnavailableNote: Story = {
-  render: function Render(args) {
-    return (
-      <View>
-        <ActionCard {...args} />
-        <Text style={note(usePalette())}>Buy a lantern: sold out</Text>
-      </View>
-    );
+  render: (args) => (
+    <Cards>
+      <ActionCard {...args} />
+      <ActionCard label="Buy a lantern" reason="sold out" />
+    </Cards>
+  ),
+  play: async ({ canvas }) => {
+    await expect(canvas.getByText('Buy a lantern: sold out')).toBeVisible();
+    await expect(canvas.queryByRole('button', { name: /Buy a lantern/ })).toBeNull();
   },
 };

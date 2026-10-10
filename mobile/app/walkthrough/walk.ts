@@ -43,7 +43,7 @@ const spellOn = (walked: Screen, browser: Browser) => async (word: string) => {
     tiles.splice(tiles.indexOf(tile), 1);
     await walked.getByRole('button', tile).tap();
   }
-  await walked.getByRole('button', 'Submit').tap();
+  await walked.getByRole('button', LABEL.submit).tap();
 };
 
 type Locator = ReturnType<Screen['getByRole']>;

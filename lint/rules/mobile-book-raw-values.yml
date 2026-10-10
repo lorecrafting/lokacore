@@ -1,7 +1,7 @@
 id: mobile-book-raw-values
 language: tsx
 severity: error
-message: 'A Book value comes from tokens.ts (docs/BOOK-UI-COMPONENTS.md#design-tokens): use a palette role (usePalette), a `type` style or a `space`/`size`/`radius`/`opacity` token, never a raw hex colour, font family or numeric size.'
+message: 'A Book value comes from tokens.ts (docs/BOOK-UI-COMPONENTS.md#design-tokens): use a palette role (usePalette), a `type` style or a `space`/`size`/`radius`/`opacity` token, never a raw hex colour, font family, text decoration or numeric or percentage size.'
 files: [mobile/app/book/*.tsx, mobile/app/SaveError.tsx, mobile/app/App*.tsx, mobile/app/stories/*.tsx, mobile/app/.storybook/*.tsx]
 # Drawings place their own geometry (joystick.ts, the drag geometry, is .ts and outside this glob).
 # The Loka picker is tool chrome, not Book UI; its own colour rules: mobile-picker-*.yml.
@@ -24,6 +24,15 @@ rule:
     - kind: number
       not: { regex: '^0$' }
       inside: { matches: raw-size-pair, stopBy: { not: { matches: raw-sign-or-branch } } }
+    # A text decoration (weight, italic, underline) is a `type` style (type.named, type.italic).
+    - kind: string
+      inside:
+        kind: pair
+        has: { field: key, regex: '^(fontWeight|fontStyle|textDecorationLine|textDecorationStyle)$' }
+    # A percentage size is layout a component sets with flex, not a value.
+    - kind: string_fragment
+      regex: '^\d+%$'
+      inside: { kind: string, inside: { matches: raw-size-pair } }
     - kind: number
       not: { regex: '^[01]$' }
       inside: { matches: raw-opacity-pair, stopBy: { not: { matches: raw-sign-or-branch } } }

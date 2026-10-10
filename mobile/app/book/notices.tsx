@@ -67,7 +67,6 @@ function control(screen: Screen, id: string) {
 }
 
 function NoticeLink(p: Props & { notice: Notice }) {
-  const c = usePalette();
   const { notice, screen } = p;
   const title = screen.text(notice.title),
     b = control(screen, notice.id);
@@ -89,10 +88,10 @@ function NoticeLink(p: Props & { notice: Notice }) {
       }}
     />
   ) : (
-    <Text style={note(c)}>
-      {title}
-      {offer && !offer.available ? `: ${why(offer, screen.text)}` : ''}
-    </Text>
+    <ActionCard
+      label={title}
+      reason={offer && !offer.available ? why(offer, screen.text) : undefined}
+    />
   );
 }
 
@@ -186,8 +185,10 @@ function offerControl(c: Palette, p: Props, id: string, offer: Offer) {
       press={(b) => p.press(b, id)}
     />
   ) : !offer.available ? (
-    <Text key={`${offer.action_key}:${offer.target_ids?.join(':')}`} style={note(c)}>
-      {p.screen.label(offer.label)}: {why(offer, p.screen.text)}
-    </Text>
+    <ActionCard
+      key={`${offer.action_key}:${offer.target_ids?.join(':')}`}
+      label={p.screen.label(offer.label)}
+      reason={why(offer, p.screen.text)}
+    />
   ) : null;
 }

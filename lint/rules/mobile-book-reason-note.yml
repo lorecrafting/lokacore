@@ -1,0 +1,12 @@
+id: mobile-book-reason-note
+language: tsx
+severity: error
+message: "An unavailable action's reason note is ActionCard's unavailable form (`<ActionCard label reason />`, docs/BOOK-UI-COMPONENTS.md, Action card), never a Text the page draws."
+files: [mobile/app/book/*.tsx]
+rule:
+  kind: call_expression
+  has: { field: function, regex: '^(why|reason)$' }
+  inside:
+    kind: jsx_element
+    has: { field: open_tag, has: { field: name, regex: '^Text$' } }
+    stopBy: end

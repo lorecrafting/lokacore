@@ -13,6 +13,7 @@ import {
   type Pool,
 } from './model.ts';
 import { band, Tap } from './pages.tsx';
+import { Note } from './lines.tsx';
 import { usePalette, type Palette } from './palette.ts';
 import { size, space, type } from './tokens.ts';
 
@@ -56,7 +57,6 @@ const calendarLine = (calendar: StatusProps['calendar']) =>
     .filter(Boolean)
     .join(', ');
 
-// size: allow 42, each condition item carries its own accessible name beside its text
 export function StatusLine(p: StatusProps) {
   const c = usePalette();
   const items = [
@@ -93,9 +93,7 @@ export function StatusLine(p: StatusProps) {
       <View style={statusRow}>
         {items.map((item, i) => (i ? joined(c, item as ReactElement) : item))}
       </View>
-      {p.pending && (
-        <Text style={{ ...type.small, color: c.dim, textAlign: 'center' }}>save not confirmed</Text>
-      )}
+      <View style={{ alignItems: 'center' }}>{p.pending && <Note>save not confirmed</Note>}</View>
     </View>
   );
 }

@@ -37,7 +37,7 @@ export function Riddle(p: { bank: readonly string[]; button: Button; press: (b: 
             <Control label={LABEL.clear} onPress={() => setSelected([])} />
           </View>
           <ActionCard
-            b={{ ...p.button, label: 'Submit', input: { ...p.button.input, answer } }}
+            b={{ ...p.button, label: LABEL.submit, input: { ...p.button.input, answer } }}
             press={(b) => {
               p.press(b);
               setSelected([]);

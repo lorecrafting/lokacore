@@ -16,6 +16,11 @@ export const LABEL = {
   startOver: 'Start over',
   backspace: 'Backspace',
   clear: 'Clear',
+  submit: 'Submit',
+  // The Start over confirmation (App.tsx).
+  startOverAsk: 'Start over?',
+  startOverLoses: 'Your saved game will be lost.',
+  cancel: 'Cancel',
   inside: 'Inside',
   held: 'Held',
   worn: 'Worn',

@@ -20,7 +20,7 @@ import { DiscoveredMap } from './DiscoveredMap.tsx';
 import { levelLine, RaiseCards, SkillDetails, xpLine } from './skills.tsx';
 import { size, space, type } from './tokens.ts';
 import { ActionCard, Cards, ContinueButton } from './actions.tsx';
-import { EntityLine, LogLines } from './lines.tsx';
+import { EntityLine, LogLines, Note } from './lines.tsx';
 import { band, Control, Page, SectionTitle, useTitleFocus } from './pages.tsx';
 import { LABEL } from './labels.ts';
 
@@ -42,7 +42,7 @@ export function CharacterPage(
     resources.length || p.view?.attributes?.length || p.view?.skills?.some((s) => s.acquired);
   return (
     <Page title="Character" foot={home(p.world)}>
-      {!known && <Text style={note(c)}>Nothing is known about you yet.</Text>}
+      {!known && <Note>Nothing is known about you yet.</Note>}
       {position && <Text style={prose(c)}>{cap(position)}</Text>}
       {p.view?.ancestry && (
         <Text style={prose(c)}>{cap(p.view.ancestry.replaceAll('_', '-'))}</Text>
@@ -90,7 +90,7 @@ export function AncestryPage(p: {
           </View>
         );
       })}
-      {p.pending && <Text style={note(c)}>save not confirmed</Text>}
+      {p.pending && <Note>save not confirmed</Note>}
     </Page>
   );
 }
@@ -100,7 +100,7 @@ export function JournalPage(p: { view: GameView; text: Say; world: () => void })
   const c = usePalette();
   return (
     <Page title="Journal" foot={home(p.world)}>
-      {view.journal.length === 0 && <Text style={note(c)}>Nothing written yet.</Text>}
+      {view.journal.length === 0 && <Note>Nothing written yet.</Note>}
       {view.journal.map((q) => (
         <View key={`${q.quest.cartridge_id}@${q.quest.cartridge_version}:${q.quest.key}`}>
           <Text style={prose(c)}>{text(q.title)}</Text>
@@ -144,7 +144,7 @@ export function CarryingPage(p: {
   return (
     <Page title="Equipment & Inventory" foot={home(p.world)}>
       <SectionTitle>{LABEL.held}</SectionTitle>
-      {p.items.length === 0 && <Text style={note(c)}>You are carrying nothing.</Text>}
+      {p.items.length === 0 && <Note>You are carrying nothing.</Note>}
       {p.items.length > 0 && (
         <View>
           {p.items.map((e) => (
@@ -183,10 +183,7 @@ function Ways(p: { view: GameView; text: Say; g: Grouped; press: (b: Button) => 
         {move ? (
           <ActionCard b={move} press={p.press} />
         ) : (
-          <Text style={note(c)}>
-            {cap(e.direction)}
-            {!e.available && `: ${why(e, p.text)}`}
-          </Text>
+          <ActionCard label={cap(e.direction)} reason={e.available ? undefined : why(e, p.text)} />
         )}
         {e.door && (
           <Text style={prose(c)}>
@@ -237,7 +234,7 @@ export function MapPage(p: {
         <DiscoveredMap view={p.view} text={p.text} selected={selected} select={select} />
       )}
       <Text style={prose(c)}>Current place: {p.text(p.view.place.title.key)}</Text>
-      {p.view.exits.length === 0 && <Text style={note(c)}>No way out is known.</Text>}
+      {p.view.exits.length === 0 && <Note>No way out is known.</Note>}
       <Ways
         {...p}
         view={p.view.map ? { ...p.view, exits: p.view.exits.map(({ sight, ...e }) => e) } : p.view}

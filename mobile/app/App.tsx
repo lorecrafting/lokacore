@@ -18,6 +18,7 @@ import type { Db } from '../authority/local-story/store.ts';
 import { webDb } from './sqlite-web.ts';
 import Book, { type Shell } from './book/Book.tsx';
 import { hint } from './book/model.ts';
+import { LABEL } from './book/labels.ts';
 import chapter from '../../protocol/fixtures/missing_child_v042_hash.json';
 import { SaveError } from './SaveError';
 
@@ -92,11 +93,11 @@ if (Platform.OS !== 'web') session ??= createSession(() => (db = openDatabaseSyn
 const shell: Shell = {
   confirm: (go) => {
     if (Platform.OS === 'web') {
-      if (window.confirm('Start over? Your saved game will be lost.')) go();
+      if (window.confirm(`${LABEL.startOverAsk} ${LABEL.startOverLoses}`)) go();
     } else
-      Alert.alert('Start over?', 'Your saved game will be lost.', [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Start over', style: 'destructive', onPress: go },
+      Alert.alert(LABEL.startOverAsk, LABEL.startOverLoses, [
+        { text: LABEL.cancel, style: 'cancel' },
+        { text: LABEL.startOver, style: 'destructive', onPress: go },
       ]);
   },
   learned: hint(Storage, 'hint.learned'),
