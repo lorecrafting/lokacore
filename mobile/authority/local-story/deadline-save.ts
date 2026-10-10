@@ -15,6 +15,7 @@ import {
   within,
 } from './deadline-receipts.ts';
 import { committedDialogue } from './dialogue-receipt.ts';
+import { foreignDeadlineJob } from './deadline-jobs.ts';
 import type { Db, Meta } from './store.ts';
 
 const rowFor = (world: World, ref: DefinitionRef, entity_id: string) =>
@@ -24,30 +25,16 @@ type Choices = [string, ChoiceRow][];
 export function deadlineSave(world: World, db: Db, meta: Meta, exchanges = false) {
   const scope = `story/${meta.lineage_id}/${world.character}`;
   const choices = Object.entries(world.state.choices ?? {});
-  for (const job of Object.values(world.state.jobs ?? {})) {
+  for (const job of Object.values(world.state.jobs ?? {}))
     if (
       !job ||
       validate('DefinitionRef', job.job).length ||
       (job.quest_instance_id !== undefined &&
         (validate('QuestInstanceId', job.quest_instance_id).length ||
-          validate('CharacterId', job.actor_id).length))
+          validate('CharacterId', job.actor_id).length ||
+          foreignDeadlineJob(world, job)))
     )
       invalid();
-    if (job.quest_instance_id === undefined) continue;
-    // Toolbox row W24: a deadline job names a quest with a deadline; a generic one belongs to this
-    // actor and, while its instance row exists (gone only after retirement), to that quest and actor.
-    const deadline = world.cartridge.quests?.[refString(job.job)]?.deadline ?? invalid();
-    const q = world.state.quests?.[job.quest_instance_id];
-    if (
-      !deadline.fact &&
-      (job.actor_id !== world.character ||
-        (q &&
-          (refString(q.quest) !== refString(job.job) ||
-            q.scope.kind !== 'player' ||
-            q.scope.character_id !== job.actor_id)))
-    )
-      invalid();
-  }
   for (const [questRef, definition] of Object.entries(world.cartridge.quests ?? {})) {
     // Toolbox row W24: a generic deadline has no fact and no bound offer to reconcile.
     if (!definition.deadline?.fact) continue;
