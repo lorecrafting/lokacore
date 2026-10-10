@@ -1,0 +1,10 @@
+{
+  "title": "room.north_room.title",
+  "description": "room.north_room.description",
+  "exits": {
+    "south": {
+      "to": "storeroom",
+      "barrier": "wooden_door"
+    }
+  }
+}
