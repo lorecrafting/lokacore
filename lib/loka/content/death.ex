@@ -28,9 +28,9 @@ defmodule Loka.Content.Death do
       drops(m, defs, death) ++ if(death, do: settings(m, defs, death), else: [])
   end
 
-  # Toolbox row 8: each drop names a distinct item its NPC holds at genesis; drops need world.death.
+  # Toolbox row 8: each drop names a distinct item its NPC holds at genesis.
   defp drops(m, defs, death) do
-    tables = for {key, {rel, _, %{"drops" => list}}} <- defs["npc"] || %{}, do: {key, rel, list}
+    tables = for {key, {rel, _, %{"drops" => _} = npc}} <- defs["npc"] || %{}, do: {key, rel, npc}
 
     api =
       if tables == [] or version(m) >= [1, 43],
@@ -40,9 +40,13 @@ defmodule Loka.Content.Death do
     api ++ Enum.flat_map(tables, &drop_table(&1, m, defs, death))
   end
 
-  defp drop_table({key, rel, list}, m, defs, death) do
+  defp drop_table({key, rel, %{"drops" => list} = npc}, m, defs, death) do
     table = {rel, %{"in" => "npc", "npc" => ref(key, "npc", m)}, Enum.map(list, & &1["item"])}
-    owner = if death, do: [], else: [bad(at(rel, ["drops"]))]
+
+    # Only combat kills an NPC: a table needs world.death, hp and a genesis (not template) NPC.
+    owner =
+      if death && npc["hp"] && !npc["spawn_template"], do: [], else: [bad(at(rel, ["drops"]))]
+
     owner ++ Enum.flat_map(Enum.with_index(list), &drop(&1, table, m, defs))
   end
 

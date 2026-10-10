@@ -97,8 +97,8 @@ test('seeded rat deaths drop the hand-computed items and commit the drawn RNG', 
   }
 });
 
-// Breaks: the loader drops a drops check, so an artifact whose drop item the NPC does not hold,
-// a repeated item, an unknown item or an old API floor loads and fails or misplaces loot in play.
+// Breaks: the loader drops a drops check, so an artifact whose drop item the NPC does not hold, a
+// repeated item, an unknown item, a missing hp or an old API floor loads and misplaces loot in play.
 test('the loader refuses each unsound drops declaration', () => {
   const source = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
   const at = `.cartridge.npcs["${RAT}"].drops`;
@@ -114,6 +114,7 @@ test('the loader refuses each unsound drops declaration', () => {
       'SCHEMA_VIOLATION',
       at,
     ],
+    [(c) => delete c.npcs[RAT].hp, 'SCHEMA_VIOLATION', at],
     [(c) => (c.npcs[RAT].drops[1].item.key = 'tail'), 'SCHEMA_VIOLATION', `${at}[1]`],
     [(c) => (c.npcs[RAT].drops[1].item.key = 'bone'), 'UNRESOLVED_REFERENCE', `${at}[1].item`],
     [

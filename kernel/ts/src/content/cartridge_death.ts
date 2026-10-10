@@ -61,7 +61,7 @@ function requirements(c: Obj): Diagnostic[] {
   return out;
 }
 
-// Toolbox row 8: each drop names a distinct item its NPC holds at genesis; drops need world.death.
+// Toolbox row 8: each drop names a distinct item its NPC holds at genesis.
 function drops(c: Obj, named: Checks['named']): Diagnostic[] {
   const out: Diagnostic[] = [];
   const tables = Object.entries((c.npcs ?? {}) as Obj).filter(([, n]) => n.drops);
@@ -69,7 +69,9 @@ function drops(c: Obj, named: Checks['named']): Diagnostic[] {
     out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
   for (const [ref, npc] of tables) {
     const at = `.cartridge.npcs${step(ref)}.drops`;
-    if (!c.world?.death) out.push(diag('SCHEMA_VIOLATION', at, { error: 'invalid_value' }));
+    // Only combat kills an NPC: a table needs world.death, hp and a genesis (not template) NPC.
+    if (!c.world?.death || !npc.hp || npc.spawn_template)
+      out.push(diag('SCHEMA_VIOLATION', at, { error: 'invalid_value' }));
     const seen = new Set<string>();
     for (const [i, { item }] of (npc.drops as Obj[]).entries()) {
       named(item, 'item', `${at}[${i}].item`);
