@@ -1,0 +1,26 @@
+{
+  "facts": {
+    "groaned": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "instance"
+      ],
+      "meaning": "A poisoned body has taken a tick of poison."
+    },
+    "charred": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "instance"
+      ],
+      "meaning": "A fire on a thing has burnt out."
+    }
+  }
+}

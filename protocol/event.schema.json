@@ -702,6 +702,28 @@
           ],
           "additionalProperties": false,
           "description": "An accepted actor-owned Rest after prior-rate settlement, at its actual body/room."
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": { "const": "status_ticked" },
+            "body_id": { "$ref": "identity.schema.json#/$defs/EntityId" },
+            "status": { "$ref": "identity.schema.json#/$defs/DefinitionRef" }
+          },
+          "required": ["type", "body_id", "status"],
+          "additionalProperties": false,
+          "description": "Toolbox row G3: one due tick of an active status on a body, NPC or thing (body_id), after its resource change, if any."
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": { "const": "status_expired" },
+            "body_id": { "$ref": "identity.schema.json#/$defs/EntityId" },
+            "status": { "$ref": "identity.schema.json#/$defs/DefinitionRef" }
+          },
+          "required": ["type", "body_id", "status"],
+          "additionalProperties": false,
+          "description": "Toolbox row G3: an active status on a body, NPC or thing (body_id) reached its end; a cure or death emits none."
         }
       ],
       "examples": [

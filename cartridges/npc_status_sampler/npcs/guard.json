@@ -1,0 +1,19 @@
+{
+  "keywords": [
+    "guard"
+  ],
+  "short": "npc.guard.short",
+  "room_line": "npc.guard.room",
+  "description": "npc.guard.description",
+  "room": "hall",
+  "hp": {
+    "minimum": 0,
+    "maximum": 10,
+    "start": 10,
+    "gain": 0
+  },
+  "daily_schedule": {
+    "6": "hall",
+    "7": "dart_room"
+  }
+}

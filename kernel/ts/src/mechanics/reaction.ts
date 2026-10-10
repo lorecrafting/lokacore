@@ -64,6 +64,7 @@ const FILTERS: Record<string, Match> = {
   action: equal('action'),
   to: equal('to'),
   hit: equal('hit'),
+  status: ref('status'),
 };
 
 /**
@@ -100,6 +101,7 @@ export function sequence(
   group: number,
   steps: { n: number },
   mint: Mint,
+  holders: Map<string, number> = new Map(),
 ): Decision<EventPayload['type']> | undefined {
   const source = resolvedActor(world, cause, actor);
   if (!source) return { kind: 'fault', code: 'precondition_failed' };
@@ -135,11 +137,9 @@ export function sequence(
     } else if (step.op === 'status.apply') {
       const body = bodyOf(then, actor);
       if (!body) return { kind: 'fault', code: 'precondition_failed' };
-      if (!applies(cause, body) || applied.has(refString(step.status))) continue;
-      applied.add(refString(step.status)); // one row write per status per rule
-      ops.push(...applyStatus(then, body, step.status, group, mint));
-      const label = specOf(then, step.status)?.narration.applied;
-      if (label) narration.push({ key: label });
+      const applying = statusStep(then, step, cause, body, group, { holders, applied }, mint);
+      ops.push(...applying.ops);
+      narration.push(...applying.narration);
     } else if (step.op === 'experience.grant') {
       gained = saturate(gained + step.amount);
     } else {
@@ -154,8 +154,8 @@ export function sequence(
 
 // The payload field naming each event's subject (docs/system/mechanics.md reaction@1 table); any
 // other event's subject, or a fact_changed without subject_id, is the actor's own body. A status
-// applies only to its subject body: a scheduled NPC walking in, or a hound's death, poisons no
-// one. A check, action or custom event's subject_id is its target; its status lands on the doer.
+// lands on the subject when it is a body, NPC or item (row G3): a scheduled NPC walking in is
+// poisoned. A check, action or custom event's subject_id is its target; its status lands on the doer.
 const SUBJECT: Partial<Record<On['event'], string>> = {
   entity_entered_room: 'entity_id',
   item_acquired: 'holder_id',
@@ -163,12 +163,37 @@ const SUBJECT: Partial<Record<On['event'], string>> = {
   attack_result: 'target_id',
   rested: 'body_id',
   fact_changed: 'subject_id',
+  status_ticked: 'body_id',
+  status_expired: 'body_id',
 };
-const applies = (cause: DomainEvent, body: EntityId) => {
+const subject = (cause: DomainEvent, body: EntityId) => {
   const field = SUBJECT[cause.payload.type as On['event']];
-  const subject = field && (cause.payload as Record<string, unknown>)[field];
-  return subject === undefined || subject === body;
+  const id = field && ((cause.payload as Record<string, unknown>)[field] as EntityId | undefined);
+  return id ?? body;
 };
+
+// A status.apply on its holder: the step's named item's instance, else the event's subject (row
+// G3), once per holder and status in a rule, in the one writer group the holder's status writes
+// share in this advance (status/job.ts statusGroup); only the player's own body hears the applied line.
+function statusStep(
+  world: World,
+  step: Extract<ReactionRule['apply'][number], { op: 'status.apply' }>,
+  cause: DomainEvent,
+  body: EntityId,
+  group: number,
+  { holders, applied }: { holders: Map<string, number>; applied: Set<string> },
+  mint: Mint,
+) {
+  const holder = step.item ? world.entityIds[refString(step.item)] : subject(cause, body);
+  const once = `${holder}|${refString(step.status)}`;
+  if (!holder || applied.has(once)) return { ops: [], narration: [] };
+  applied.add(once);
+  const joined = holders.get(holder) ?? group;
+  const ops = applyStatus(world, holder, step.status, joined, mint);
+  if (ops.length) holders.set(holder, joined); // a later status job on the holder joins it too
+  const label = specOf(world, step.status)?.narration.applied;
+  return { ops, narration: label && ops.length && holder === body ? [{ key: label }] : [] };
+}
 
 function assignment(
   world: World,

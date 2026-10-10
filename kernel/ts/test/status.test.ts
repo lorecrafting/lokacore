@@ -223,8 +223,9 @@ test('a cure listed twice ends the status once', () => {
   assert.equal(gameView(w).conditions, undefined);
 });
 
-// Breaks: an entry rule poisons the player when another entity (a scheduled NPC) enters the room.
-test("a status reaction applies only to its event's subject body", () => {
+// Breaks: an entry rule poisons the player when another entity (a scheduled NPC) enters the room,
+// or (row G3) the status not landing on that subject.
+test("a status reaction applies to its event's subject", () => {
   const w = fresh();
   const r = step(
     w,
@@ -239,7 +240,8 @@ test("a status reaction applies only to its event's subject body", () => {
   if (r.decision.kind !== 'accepted') return;
   const entry = r.decision.events.find((e) => e.payload.type === 'entity_entered_room')!;
   const rule = Object.values(content.reactions!).find((x) => x.key === 'dart')!;
-  const transitions = (payload: object) => {
+  // The holders of the rule's status transitions.
+  const holders = (payload: object) => {
     const d = sequence(
       r.world,
       w.character,
@@ -251,26 +253,40 @@ test("a status reaction applies only to its event's subject body", () => {
     );
     assert.equal(d?.kind, 'accepted');
     return d!.kind === 'accepted'
-      ? d!.delta.ops.filter((o) => o.op === 'status.transition').length
-      : -1;
+      ? d!.delta.ops.flatMap((o) => (o.op === 'status.transition' ? [o.body_id] : []))
+      : [];
   };
   // W1 subjects (docs/system/mechanics.md reaction@1): the entrant, an attack's target, a death's
-  // victim. Breaks: a hit on, or the death of, an NPC poisoning the player.
+  // victim. Breaks: a hit on, or the death of, a thing poisoning the player instead.
   for (const [type, field] of [
     ['entity_entered_room', 'entity_id'],
     ['attack_result', 'target_id'],
     ['entity_died', 'victim_id'],
   ]) {
-    assert.equal(transitions({ ...entry.payload, type, [field]: w.body }), 1, type);
-    assert.equal(transitions({ ...entry.payload, type, [field]: antidote(w) }), 0, type);
+    assert.deepEqual(holders({ ...entry.payload, type, [field]: w.body }), [w.body], type);
+    assert.deepEqual(
+      holders({ ...entry.payload, type, [field]: antidote(w) }),
+      [antidote(w)],
+      type,
+    );
   }
   // Breaks: a failed check's status landing on its target (the thing) instead of the doer, or a
   // fact_changed about another entity poisoning the player.
   const doer = { ...entry.payload, type: 'check_failed', subject_id: antidote(w) };
-  assert.equal(transitions(doer), 1, 'check_failed');
+  assert.deepEqual(holders(doer), [w.body], 'check_failed');
   const fact = { ...entry.payload, type: 'fact_changed' };
-  assert.equal(transitions(fact), 1, 'fact_changed');
-  assert.equal(transitions({ ...fact, subject_id: antidote(w) }), 0, 'fact_changed subject');
+  assert.deepEqual(holders(fact), [w.body], 'fact_changed');
+  assert.deepEqual(
+    holders({ ...fact, subject_id: antidote(w) }),
+    [antidote(w)],
+    'fact_changed subject',
+  );
+  // Breaks: a subject that is no body, NPC or item (a room) faulting the delivery.
+  assert.deepEqual(
+    holders({ ...fact, subject_id: (entry.payload as { room_id: string }).room_id }),
+    [],
+    'room subject',
+  );
 });
 
 // Breaks: the loader drops one of its status checks, so the artifact loads and fails in play.

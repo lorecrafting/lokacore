@@ -196,7 +196,8 @@ export type Mint = () => string;
  * The capabilities whose events a capability's rule also emits, because it runs them inside its
  * own decision: a recipe resolves its check (check@1) in the perform decision (21 §7: costs,
  * checks and outcomes join one proposal); a scheduled NPC's run_job moves it and reports its
- * entity_entered_room (movement@1's) as a move does; reactions activate quest-owned instances;
+ * entity_entered_room (movement@1's) as a move does, and a status job its tick and expiry (status@1's);
+ * reactions activate quest-owned instances;
  * a choice resolves its dialogue's quest
  * (quest@1's quest_resolved) and hands a bound item over (containment@1's item_acquired, as give).
  */
@@ -204,7 +205,7 @@ export const COMPOSES = {
   expedition: ['quest'],
   transport: ['movement'],
   action_recipe: ['check'],
-  schedule: ['movement', 'combat', 'death', 'quest', 'containment'],
+  schedule: ['movement', 'combat', 'death', 'quest', 'containment', 'status'],
   combat: ['movement', 'quest'],
   dialogue: ['quest', 'containment', 'movement'],
   movement: ['quest'],

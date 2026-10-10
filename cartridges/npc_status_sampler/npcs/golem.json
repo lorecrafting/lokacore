@@ -1,0 +1,22 @@
+{
+  "keywords": [
+    "golem"
+  ],
+  "short": "npc.golem.short",
+  "room_line": "npc.golem.room",
+  "description": "npc.golem.description",
+  "room": "hall",
+  "hp": {
+    "minimum": 0,
+    "maximum": 10,
+    "start": 10,
+    "gain": 0
+  },
+  "daily_schedule": {
+    "6": "hall",
+    "7": "dart_room"
+  },
+  "immune": [
+    "poison"
+  ]
+}
