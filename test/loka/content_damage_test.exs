@@ -2,8 +2,8 @@ defmodule Loka.ContentDamageTest do
   use ExUnit.Case, async: true
   setup_all do: %{dir: Loka.ContentSource.copy("cartridges/damage_sampler")}
 
-  # Breaks: the compiler skips the kernel_api 1.44 floor at one G2 site (a player or NPC attack's
-  # kind or crit, an NPC's resistances), so an older-API cartridge with them compiles (toolbox row
+  # Breaks: the compiler skips the kernel_api 1.44 floor at one G2 site (a player, NPC or weapon
+  # attack's kind or crit, an NPC's resistances), so an older-API cartridge with them compiles (toolbox row
   # G2; twin of the loader rows in kernel/ts/test/damage.test.ts).
   test "damage kinds, crits and resistances need kernel_api 1.44", %{dir: dir} do
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, [])
@@ -28,6 +28,16 @@ defmodule Loka.ContentDamageTest do
         {"cartridge.json", plain},
         {"npcs/wight.json",
          &(&1 |> Map.delete("resistances") |> put_in(["attack", "kind"], "cold"))}
+      ],
+      # The weapon's skill does not resolve (another diagnostic); the floor still reports.
+      [
+        {"cartridge.json", plain},
+        no_resist,
+        {"items/iron_sword.json",
+         &Map.put(&1, "weapon", %{
+           "skill" => "swords",
+           "attack" => %{"chance" => 50, "damage_min" => 1, "damage_max" => 1, "kind" => "cold"}
+         })}
       ]
     ]
 

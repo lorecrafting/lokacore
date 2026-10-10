@@ -14,6 +14,7 @@ import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
+import { DEFS } from '../src/contracts.gen.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-damage-sampler-'));
 let artifact: Uint8Array;
@@ -144,6 +145,11 @@ test('a seeded silver fight has exactly one doubled hit', () => {
 test('the loader refuses G2 fields below kernel_api 1.44', () => {
   const api = '.cartridge.manifest.requires.kernel_api.at_least';
   const old = (c: any) => (c.manifest.requires.kernel_api.at_least = '1.43');
+  const bare = (c: any) => {
+    delete c.world.combat.player_attack.kind;
+    delete c.world.combat.player_attack.crit;
+    delete c.npcs[WIGHT].resistances;
+  };
   const rows: [string, (c: any) => void][] = [
     ['player kind', (c) => delete c.world.combat.player_attack.crit],
     ['player crit', (c) => delete c.world.combat.player_attack.kind],
@@ -157,9 +163,7 @@ test('the loader refuses G2 fields below kernel_api 1.44', () => {
     [
       'npc attack kind',
       (c) => {
-        delete c.world.combat.player_attack.kind;
-        delete c.world.combat.player_attack.crit;
-        delete c.npcs[WIGHT].resistances;
+        bare(c);
         c.npcs[WIGHT].attack.kind = 'cold';
       },
     ],
@@ -172,11 +176,14 @@ test('the loader refuses G2 fields below kernel_api 1.44', () => {
       name,
     );
   }
-  const none = load((c) => {
-    old(c);
-    delete c.world.combat.player_attack.kind;
-    delete c.world.combat.player_attack.crit;
-    delete c.npcs[WIGHT].resistances;
-  });
+  const none = load((c) => (bare(c), old(c)));
   assert.ok(none.ok, 'without G2 fields 1.43 still loads');
+});
+
+// Breaks: a later row adds a DamageKind or Tag without its Resistances member, so no NPC can
+// resist the new kind or material (mechanics.md damage model: the members are exactly both sets).
+test('Resistances names exactly the damage kinds and tags', () => {
+  const defs = DEFS as Record<string, any>;
+  const names = [...defs.DamageKind.enum, ...defs.Tag.enum].sort();
+  assert.deepEqual(Object.keys(defs.Resistances.properties).sort(), names);
 });

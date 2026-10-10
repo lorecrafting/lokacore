@@ -96,7 +96,7 @@ function dealt(world: World, target: EntityId, profile: Profile, roll: number, d
   const resists = npc?.kind === 'npc' ? npc.resistances : undefined;
   if (!resists) return crit;
   const sum = [profile.kind, ...(profile.tags ?? [])].reduce(
-    (s, k) => s + ((k && resists[k]) || 0),
+    (s, k) => add(s, (k && resists[k]) || 0),
     0,
   );
   return divide(mul(crit, 100 - Math.min(100, Math.max(-100, sum))), 100)[0];

@@ -348,64 +348,52 @@
         "fire"
       ]
     },
+    "ResistancePercent": {
+      "description": "A resistance percent (toolbox row G2): negative is a weakness.",
+      "type": "integer",
+      "minimum": -100,
+      "maximum": 100,
+      "examples": [
+        50,
+        -50
+      ]
+    },
     "Resistances": {
       "description": "Toolbox row G2 (docs/system/mechanics.md damage model; kernel_api at least 1.44): an NPC's percent resistance per damage kind (DamageKind) and per material tag of the wielded item (Tag); negative is a weakness. An attack sums the entries for its kind and each tag of the attacker's wielded item, clamps the sum to -100..100 and scales its damage by (100 - sum) / 100, rounded down. Its members are exactly the DamageKind and Tag values.",
       "type": "object",
       "properties": {
         "cold": {
-          "type": "integer",
-          "minimum": -100,
-          "maximum": 100
+          "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
         "fire": {
-          "type": "integer",
-          "minimum": -100,
-          "maximum": 100
+          "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
         "physical": {
-          "type": "integer",
-          "minimum": -100,
-          "maximum": 100
+          "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
         "poison": {
-          "type": "integer",
-          "minimum": -100,
-          "maximum": 100
+          "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
         "burnable": {
-          "type": "integer",
-          "minimum": -100,
-          "maximum": 100
+          "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
         "fragile": {
-          "type": "integer",
-          "minimum": -100,
-          "maximum": 100
+          "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
         "liquid_holding": {
-          "type": "integer",
-          "minimum": -100,
-          "maximum": 100
+          "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
         "metal": {
-          "type": "integer",
-          "minimum": -100,
-          "maximum": 100
+          "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
         "sharp": {
-          "type": "integer",
-          "minimum": -100,
-          "maximum": 100
+          "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
         "silver": {
-          "type": "integer",
-          "minimum": -100,
-          "maximum": 100
+          "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
         "wooden": {
-          "type": "integer",
-          "minimum": -100,
-          "maximum": 100
+          "$ref": "entity.schema.json#/$defs/ResistancePercent"
         }
       },
       "additionalProperties": false,
