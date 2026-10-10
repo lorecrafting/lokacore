@@ -8,6 +8,7 @@ import { type Mint, refString, type World } from '../../runtime/decision.ts';
 import { cmp } from '../../foundation/validate.ts';
 import { HOLDERS } from '../../foundation/compose_status.ts';
 import { living } from '../death/shared.ts';
+import { settleMaxima } from '../resource.ts';
 
 type Active = Extract<StatusRow, { active: true }>;
 
@@ -51,6 +52,32 @@ export const endStatus = (
   expected: row,
   value: { active: false, generation: row.generation },
 });
+
+/**
+ * A status whose `modifies` (row 2c) starts or ends on the player's body moves its attributes, so a
+ * derived hp maximum settles first, at the world's clock (resource@1, as wear and remove do).
+ */
+export const settleFor = (
+  world: World,
+  body: EntityId,
+  status: DefinitionRef,
+  writer_group: number,
+): DeltaOp[] =>
+  body === world.body && specOf(world, status)?.modifies
+    ? settleMaxima(world).map((op) => ({ ...op, writer_group, at: world.state.clock }))
+    : [];
+
+/** End an active status by expiry or cure, settling a derived hp maximum first (row 2c). */
+export const expire = (
+  world: World,
+  body: EntityId,
+  status: DefinitionRef,
+  row: Active,
+  writer_group: number,
+): DeltaOp[] => [
+  ...settleFor(world, body, status, writer_group),
+  endStatus(body, status, row, writer_group),
+];
 
 /**
  * The NPC or item instance `body` declares `status` immune (row G3); a created NPC or item copies
@@ -98,18 +125,16 @@ export function applyStatus(
     expected: prior ?? null,
     value,
   };
-  return active
-    ? [change]
-    : [
-        change,
-        {
-          op: 'job.schedule',
-          writer_group,
-          job_id: value.job_id,
-          job: status,
-          due_time: Math.min(value.next_tick_at, ends_at),
-        },
-      ];
+  if (active) return [change];
+  const due_time = Math.min(value.next_tick_at, ends_at);
+  const job: DeltaOp = {
+    op: 'job.schedule',
+    writer_group,
+    job_id: value.job_id,
+    job: status,
+    due_time,
+  };
+  return [...settleFor(world, body, status, writer_group), change, job];
 }
 
 /** Inactivate every active status on `body` (death, or a cure listing them). */

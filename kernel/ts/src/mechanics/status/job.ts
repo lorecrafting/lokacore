@@ -15,7 +15,7 @@ import { prefix } from '../combat/round_attack.ts';
 import { closeEncounter, engaged } from '../combat/shared.ts';
 import { deathSequence } from '../death/sequence.ts';
 import { adjust, level, resourceSpec } from '../resource.ts';
-import { endStatus, specOf } from './shared.ts';
+import { endStatus, expire, specOf } from './shared.ts';
 
 type Active = StatusRow & { active: true };
 
@@ -50,7 +50,8 @@ export function runStatus(
   const fight = fatal ? engaged(visit, body) : undefined;
   if (fight && (player || (fight.row.active_ids?.length ?? 1) === 1))
     ops.push(...closeEncounter(visit, body));
-  if (expired || fatal) ops.push(endStatus(body, status, row, 0));
+  if (expired) ops.push(...expire(visit, body, status, row, 0));
+  else if (fatal) ops.push(endStatus(body, status, row, 0));
   const say = (key: TextKey) => (player ? [{ key }] : []);
   const events = due ? [happened(visit, command, mint, 'status_ticked', body, status)] : [];
   if (fatal) {

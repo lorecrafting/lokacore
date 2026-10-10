@@ -285,6 +285,25 @@ test("the shrine's might (+3 str for an hour) lifts the strong hit from 6 to 8; 
   assert.equal(hp(strike(w)), 14);
 });
 
+// Breaks (row 2c, as loka-kgd.10 for wear): applying a con-modifying status does not settle hp
+// first, so 4 h idle at the cap banks credit the raised maximum grants at once (16/16).
+test('a status lifting con after 4 h idle at full hp keeps hp 10 of 16, then regenerates', () => {
+  const tough = structuredClone(content) as any; // might also gives con +6: hp maximum 16
+  tough.statuses['derived_sampler@0.0.1:status/might'].modifies.push({
+    attribute: {
+      ...tough.statuses['derived_sampler@0.0.1:status/might'].modifies[0].attribute,
+      key: 'con',
+    },
+    modifier: 6,
+  });
+  let w = wait(chosen('strong', tough), 4 * 3600);
+  assert.deepEqual(hpView(w), [10, 10]);
+  w = play(w, { type: 'move', direction: 'north' });
+  assert.deepEqual(hpView(w), [10, 16]);
+  for (let tick = 0; tick < 6; tick += 1) w = wait(w, 600); // to the expiry at +3600
+  assert.deepEqual(hpView(w), [10, 10]);
+});
+
 // Breaks: the loader drops a derived-table check, so an artifact with a dangling attribute,
 // a missing owner or an old API floor loads and fails in play.
 test('the loader refuses each unsound derived table', () => {

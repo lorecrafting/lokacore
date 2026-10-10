@@ -12,7 +12,7 @@ import { refusal } from '../../commands/actions.ts';
 import { bodyOf, refString, type Steps, type World } from '../../runtime/decision.ts';
 import { engaged } from '../combat/shared.ts';
 import { adjust, level, resourceRef, resourceSpec } from '../resource.ts';
-import { activeStatuses, endStatus } from '../status/shared.ts';
+import { activeStatuses, expire } from '../status/shared.ts';
 
 type Payload = Extract<CommandPayload, { type: 'eat' }>;
 export function availability(world: World, p: Payload, steps: Steps, action: Key) {
@@ -41,7 +41,7 @@ export function transition(
   const cures = new Set((edible.cures ?? []).map(refString));
   const cured = activeStatuses(world, body)
     .filter(({ status }) => cures.has(refString(status)))
-    .map(({ status, row }) => endStatus(body, status, row, 0));
+    .flatMap(({ status, row }) => expire(world, body, status, row, 0));
   const by = Math.min(edible.amount, spec.maximum - current);
   if (by <= 0 && cured.length === 0) return { code: 'invalid_state' };
   return {

@@ -281,8 +281,6 @@ test('a fatal tick ends a lone fight but not a pack fight', () => {
   assert.equal(closes([g, id(w, 'npc', 'golem')].sort()), false);
 });
 
-// Breaks: the loader drops a G3 check, so an artifact naming no status or item, or a G3 field
-// under an older kernel_api, loads and fails in play.
 // Breaks (row 2c): npcValue ignores modifies, counts any active status (poison) or its per_tick, or
 // keeps fury after expiry. Fury comes with each poison tick (+60 to +240), so it ends at +840.
 test('poison leaves the guard at str 12; the fury its tick brings reads 15 until it expires', () => {
@@ -298,6 +296,8 @@ test('poison leaves the guard at str 12; the fury its tick brings reads 15 until
   assert.equal(str(w), 12);
 });
 
+// Breaks: the loader drops a G3 check, so an artifact naming no status or item, or a G3 field
+// under an older kernel_api, loads and fails in play.
 test('the loader refuses each unsound G3 declaration', () => {
   const source = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
   const golem = `${C}:npc/golem`;
