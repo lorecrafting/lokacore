@@ -92,7 +92,7 @@ test('two fresh ranges and regression seeds retain all sequence counts and cover
   assert.deepEqual(lengths, [1, 1, 0, 1, 0, 0, 1, 4]);
   assert.deepEqual([...codes].sort(), [
     'accepted',
-    'fault evaluator_error',
+    'fault budget_exceeded',
     'insufficient_resource',
     'invalid_state',
     'invalid_target',

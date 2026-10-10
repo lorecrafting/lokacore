@@ -137,26 +137,42 @@ test('wait to 19:00 moves Bram to the green through his job; 18:59 does not', ()
   assert.deepEqual(after.state.jobs, { [J0]: job(H(19), 'completed'), [J1]: job(H(30)) });
 });
 
-// Breaks: the successor scheduled from the job's own hour (a wait crossing two listed hours faults
-// nonfuture_job, loka-qi0r), the NPC left in the first crossed hour's room, the last crossed hour
-// missed when it is the target itself, or the arrival stamped off the job's time (its run's cause).
-test('one wait across two or three listed hours commits with Bram in the last hour room', () => {
+// Breaks: the successor scheduled inside the advance (the wait faults nonfuture_job, loka-qi0r),
+// crossed hours collapsed into one move (Bram never seen at the green), the steps out of hour
+// order, an hour run twice or skipped, or the last step not scheduling the job after the target.
+test('one wait across two or three listed hours runs each hour in order', () => {
   const w = world();
-  // 19:00 green, 06:00 landing: he ends where he started, with no move, the next job at 19:00.
+  const arrivals = (d: ReturnType<typeof wait>['decision']) =>
+    d.kind === 'accepted'
+      ? d.events.map((e) => [e.logical_time, (e.payload as { room_id: string }).room_id])
+      : d;
+  const pending = (x: World) =>
+    Object.values(x.state.jobs ?? {}).flatMap((j) => (j.status === 'pending' ? [j.due_time] : []));
+  // 19:00 the green, 06:00 back at the landing, the next job at 19:00.
   const two = wait(w, H(30));
-  assert.equal(two.decision.kind, 'accepted');
+  assert.deepEqual(arrivals(two.decision), [
+    [H(19), GREEN],
+    [H(30), LANDING],
+  ]);
   assert.equal(two.world.state.containers[BRAM_ID], LANDING);
-  assert.deepEqual(two.world.state.jobs, { [J0]: job(H(19), 'completed'), [J1]: job(H(43)) });
-  // 19:00, 06:00, then 19:00 again: the green, entered at the job's 19:00, the next job at 06:00.
+  assert.deepEqual(pending(two.world), [H(43)]);
+  // Then 19:00 again (the target itself): the green, the next job at 06:00.
   const three = wait(w, H(43));
-  assert.equal(three.decision.kind, 'accepted');
+  assert.deepEqual(arrivals(three.decision), [
+    [H(19), GREEN],
+    [H(30), LANDING],
+    [H(43), GREEN],
+  ]);
   assert.equal(three.world.state.containers[BRAM_ID], GREEN);
-  assert.deepEqual(three.world.state.jobs, { [J0]: job(H(19), 'completed'), [J1]: job(H(54)) });
-  assert.deepEqual(
-    three.decision.kind === 'accepted' && three.decision.events.map((e) => e.logical_time),
-    [H(19)],
-  );
+  assert.deepEqual(pending(three.world), [H(54)]);
+  assert.equal(three.world.state.jobs?.[J0]?.status, 'completed');
   assert.deepEqual(wait(w, H(43)), three);
+  // Each crossed hour is a drain step under due_jobs_per_advance (1024): 513 days is 1026.
+  const long = wait(w, H(6 + 24 * 513));
+  assert.deepEqual(
+    [long.decision, long.limit],
+    [{ kind: 'fault', code: 'budget_exceeded' }, 'due_jobs_per_advance'],
+  );
 });
 
 // Breaks: the drain sorted by job id only (due time ignored) or in row order.

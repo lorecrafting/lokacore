@@ -652,8 +652,12 @@ runs one job of an NPC's `daily_schedule` (hour of day → room): a job not pend
 first holding case, [row W10](#conditional-schedules-toolbox-row-w10)) unless already
 there (an `entity_entered_room` at the job's time), the job completes, and the next job is
 scheduled at the schedule's next listed hour, strictly later (`mechanics/schedule/behavior.ts:24`).
-Listed hours the same advance also crosses collapse into that run: the room and the next job
-follow the last crossed hour, the arrival stays at the job's time, so a wait over several hours commits. One unit of
+A next listed hour the same advance also crosses (loka-qi0r) runs as its own drain step instead, in
+`(due_time, job_id)` order among the other due jobs, in the job's writer group, under the CommandId
+of the job and that hour: the move, the `entity_entered_room` at that hour and its reactions, as
+hour-by-hour play gives them; only the last step schedules the next job, after the target. Job rows
+and ids differ from hour-by-hour play (one row completes, no row per crossed hour). Every drain step
+counts toward `due_jobs_per_advance`; a wait crossing more steps faults `budget_exceeded`. One unit of
 logical time is defined by the cartridge calendar: positive exact units per hour, hours per day
 and displayed subdivisions per hour. Time 0 begins day 1 at midnight. Daily schedules and
 policy leaf `time_window {from, to}` use calendar hours, including half-open windows that wrap

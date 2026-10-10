@@ -20,8 +20,8 @@ import {
 } from '../../runtime/decision.ts';
 import { holds } from '../policy.ts';
 import { cmp } from '../../foundation/validate.ts';
-import { hourOf, lastHour, nextHour, units } from '../calendar.ts';
-export { hourOf, lastHour, nextHour };
+import { hourOf, nextHour, units } from '../calendar.ts';
+export { hourOf, nextHour };
 
 /** The daily schedule of the NPC `npc` names: hour of day to room; empty when it has none. */
 export function scheduleOf(
