@@ -7,7 +7,7 @@ defmodule Loka.Content.Checks do
   alias Loka.Core.Canonical
 
   @ref_fields Map.merge(Loka.Content.LeafRefs.all(), %{
-                "fact.assign" => %{"fact" => "fact"},
+                "fact.assign" => %{"fact" => "fact", "item" => "item", "npc" => "npc"},
                 "fact.adjust" => %{"fact" => "fact"},
                 "skill.acquire" => %{"skill" => "skill"},
                 "topic.grant" => %{"topic" => "topic"},

@@ -1,0 +1,9 @@
+{
+  "keywords": [
+    "miller"
+  ],
+  "short": "npc.miller.short",
+  "room_line": "npc.miller.room",
+  "description": "npc.miller.description",
+  "room": "square"
+}

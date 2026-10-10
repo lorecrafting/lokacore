@@ -1,0 +1,41 @@
+{
+  "npc": "stranger",
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": []
+    }
+  },
+  "prompt": "dialogue.talk.prompt",
+  "roles": {
+    "stranger": {
+      "role": "npc",
+      "npc": "stranger"
+    }
+  },
+  "choices": {
+    "greet": {
+      "label": "dialogue.talk.greet",
+      "narration": "narration.talk.greet",
+      "sequence": [
+        {
+          "op": "fact.adjust",
+          "fact": "times_met",
+          "amount": 1
+        }
+      ]
+    },
+    "help": {
+      "label": "dialogue.talk.help",
+      "narration": "narration.talk.help",
+      "sequence": [
+        {
+          "op": "fact.adjust",
+          "fact": "trust",
+          "amount": 1
+        }
+      ]
+    }
+  }
+}

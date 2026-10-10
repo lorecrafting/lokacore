@@ -8,6 +8,7 @@ import type {
   DomainEvent,
   DialogueDefinition,
   DialogueChoice,
+  EntityId,
 } from '../../../kernel/ts/src/contracts.gen.ts';
 import { validate } from '../../../kernel/ts/src/foundation/validate.ts';
 import { same } from '../../../kernel/ts/src/foundation/compose.ts';
@@ -78,7 +79,7 @@ export function dialogueDetail(
   const key = wrong ? riddle.wrong : option.narration;
   if (!detail || !same(d.narration?.[0], { key, participants })) return invalid();
   if (!evidence(d, { ...command, payload: p }, row, !!wrong)) return invalid();
-  if (!wrong && !consequences(s, command, d, row, source, option)) return invalid();
+  if (!wrong && !consequences(s, command, d, row, source, option, detail)) return invalid();
   return detail;
 }
 function evidence(
@@ -130,12 +131,13 @@ function consequences(
   row: ChoiceRow,
   source: DialogueDefinition,
   option: DialogueChoice,
+  speaker: EntityId,
 ) {
   const actor = row.actor_id;
   const ops = d.delta.ops.filter((o) => o.writer_group === 0);
   const events = d.events.filter((e) => e.causation_id === (command.id as string));
   if (!transferEvidence(s, command, row, option, ops, events)) return false;
-  if (!assignmentEvidence(s, row, option, ops, events)) return false;
+  if (!assignmentEvidence(s, row, option, ops, events, speaker)) return false;
   if (!paymentEvidence(s, row, option, ops)) return false;
   if (!escortEvidence(s, command, row, option, ops)) return false;
   if (!source.quest) return true;

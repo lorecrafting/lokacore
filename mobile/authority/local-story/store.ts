@@ -1,5 +1,6 @@
 import { waterValid } from '../../../kernel/ts/src/mechanics/water/saved.ts';
 import { receiptRecovery } from './receipt-save.ts';
+import { factsValid } from './facts-save.ts';
 import { encountersValid } from '../../../kernel/ts/src/mechanics/combat/saved.ts';
 import { sightsValid } from '../../../kernel/ts/src/mechanics/population/saved.ts';
 import { hydrate } from '../../../kernel/ts/src/runtime/created.ts';
@@ -144,6 +145,7 @@ const restorable = (world: World) =>
   waterValid(world) &&
   encountersValid(world) &&
   sightsValid(world) &&
+  factsValid(world) &&
   !Object.values(world.state.quests ?? {}).some(
     (q) =>
       validate('DefinitionRef', q?.quest).length ||

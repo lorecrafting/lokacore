@@ -93,10 +93,7 @@ export function blocked(
   const d = definition(world, row.source);
   if (!d || row.beat !== d.key || !boundSitting(world, row, d, option))
     return 'invalid_state' as const;
-  const target = row.roles.find((r) => {
-    const role = d.roles[r.role];
-    return role?.role === 'npc' && same(role.npc, d.npc);
-  })?.entity_id;
+  const target = speakerOf(d, row);
   if (!holds(world, row.actor_id, d.policy.root, { target, steps }))
     return 'invalid_state' as const;
   const window = option.availability;
@@ -278,3 +275,10 @@ export function modal(world: World, actor: CharacterId): ActionSet {
     ...(open && { close_choice: { ...answer('close_choice', []), continuation: open[0] } }),
   };
 }
+
+/** The speaker's bound EntityId: the row's binding of the npc role that is the dialogue's npc. */
+export const speakerOf = (d: DialogueDefinition, row: ChoiceRow) =>
+  row.roles.find((r) => {
+    const role = d.roles[r.role];
+    return role?.role === 'npc' && same(role.npc, d.npc);
+  })?.entity_id;

@@ -128,7 +128,13 @@ defmodule Loka.Content.Reactions do
   defp consequence(rel, {s, i}, _, ctx),
     do:
       owned(at(rel, ["apply", i, "op"]), "fact_changed", ctx.events) ++
-        reference(rel, ["apply", i], "fact", s, ctx.m, ctx.defs)
+        reference(rel, ["apply", i], "fact", s, ctx.m, ctx.defs) ++
+        for(
+          f <- ~w(npc item),
+          s[f],
+          d <- reference(rel, ["apply", i], f, s, ctx.m, ctx.defs),
+          do: d
+        )
 
   # Row 42: a step names one holder, and a spawn template has no instance to take it.
   defp listener(rel, %{"npc" => n} = s, i, ctx) do

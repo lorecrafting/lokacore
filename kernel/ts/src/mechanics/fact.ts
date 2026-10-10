@@ -10,6 +10,7 @@ import type {
   DefinitionRef,
   DeltaOp,
   DomainEvent,
+  EntityId,
   FactType,
   FactValue,
   StateScope,
@@ -27,10 +28,35 @@ export function scopeOf(world: World, actor: CharacterId, fact: DefinitionRef): 
     : { kind: 'instance', world_context_id: world.context };
 }
 
-/** The fact's value for `actor`: its record at the actor's scope (scopeOf), else its default. */
-export function value(world: World, actor: CharacterId, fact: DefinitionRef): FactValue {
+/** Toolbox row W2: true for a per_subject fact (entity or pair), one value per subject. */
+export const subjective = (world: World, fact: DefinitionRef): boolean =>
+  world.cartridge.facts[refString(fact)].per_subject === true;
+
+/**
+ * The fact MutationTarget `actor` reads and sets `fact` at: its scope (scopeOf) and, for a
+ * per_subject fact, `subject` (row W2), which such a fact cannot be read or set without.
+ */
+export function targetOf(
+  world: World,
+  actor: CharacterId,
+  fact: DefinitionRef,
+  subject?: EntityId,
+): { kind: 'fact'; fact: DefinitionRef; scope: StateScope; subject_id?: EntityId } {
   const scope = scopeOf(world, actor, fact);
-  return world.state.facts?.[key({ kind: 'fact', fact, scope })] ?? world.factDefaults[key(fact)];
+  if (!subjective(world, fact)) return { kind: 'fact', fact, scope };
+  if (subject === undefined) throw new KernelError('precondition_failed');
+  return { kind: 'fact', fact, scope, subject_id: subject };
+}
+
+/** The fact's value for `actor` (and `subject`): its record at targetOf, else its default. */
+export function value(
+  world: World,
+  actor: CharacterId,
+  fact: DefinitionRef,
+  subject?: EntityId,
+): FactValue {
+  const at = key(targetOf(world, actor, fact, subject));
+  return world.state.facts?.[at] ?? world.factDefaults[key(fact)];
 }
 
 /** A sequence run so far: its ops, last causal position and facts as set so far (by target text). */
@@ -50,21 +76,16 @@ export function assigned<R extends Assigned>(
   world: World,
   actor: CharacterId,
   r: R,
-  s: { readonly fact: DefinitionRef; readonly value: FactValue },
+  s: { readonly fact: DefinitionRef; readonly value: FactValue; readonly subject?: EntityId },
   owner?: 'skills' | 'patrol' | 'service' | 'scene',
 ): R {
   ownership(world, s.fact, owner);
-  const scope = scopeOf(world, actor, s.fact);
-  const at = key({ kind: 'fact', fact: s.fact, scope });
-  const expected = Object.hasOwn(r.facts, at) ? r.facts[at]! : value(world, actor, s.fact);
-  const op = {
-    op: 'fact.assign',
-    writer_group: 0,
-    fact: s.fact,
-    scope,
-    expected,
-    value: s.value,
-  } as const;
+  const { kind: _, ...target } = targetOf(world, actor, s.fact, s.subject);
+  const at = key({ kind: 'fact', ...target });
+  const expected = Object.hasOwn(r.facts, at)
+    ? r.facts[at]!
+    : value(world, actor, s.fact, s.subject);
+  const op = { op: 'fact.assign', writer_group: 0, ...target, expected, value: s.value } as const;
   const position = r.position + (same(expected, s.value) ? 0 : 1);
   return { ...r, ops: [...r.ops, op], position, facts: { ...r.facts, [at]: s.value } };
 }
@@ -120,7 +141,7 @@ export function adjusted<R extends Assigned>(
   world: World,
   actor: CharacterId,
   run: R,
-  step: { readonly fact: DefinitionRef; readonly amount: number },
+  step: { readonly fact: DefinitionRef; readonly amount: number; readonly subject?: EntityId },
 ): R | undefined {
   const spec = world.cartridge.facts[refString(step.fact)];
   const type = spec?.value_type;
@@ -139,7 +160,7 @@ export function adjusted<R extends Assigned>(
     !Number.isSafeInteger(step.amount)
   )
     return;
-  const at = key({ kind: 'fact', fact: step.fact, scope: scopeOf(world, actor, step.fact) });
+  const at = key(targetOf(world, actor, step.fact, step.subject));
   const current = Object.hasOwn(run.facts, at)
     ? run.facts[at]
     : Object.hasOwn(world.state.facts ?? {}, at)
@@ -150,7 +171,7 @@ export function adjusted<R extends Assigned>(
     type.maximum!,
     Math.max(type.minimum!, add(current as number, step.amount)),
   );
-  return assigned(world, actor, run, { fact: step.fact, value: next });
+  return assigned(world, actor, run, { fact: step.fact, value: next, subject: step.subject });
 }
 
 /** True when `v` is of FactType `t` (the loader checks authored values with it too). */
@@ -163,18 +184,43 @@ export const typed = (v: FactValue, t: FactType): boolean =>
         (v as number) >= (t.minimum ?? -Infinity) &&
         (v as number) <= (t.maximum ?? Infinity);
 
-/** True when the cartridge declares `fact`, allows scope kind `scope` and `v` is of its type. */
-export function typedFact(world: World, fact: DefinitionRef, scope: string, v: FactValue): boolean {
-  const spec = world.cartridge.facts[refString(fact)];
-  return spec !== undefined && spec.scopes.includes(scope as never) && typed(v, spec.value_type);
+/**
+ * True when the cartridge declares the fact at target `t` (a fact.assign or a decoded saved key),
+ * allows `t`'s scope kind, `t` names a subject exactly when the fact is per_subject (row W2), and
+ * `v` is of its type.
+ */
+export function typedFact(
+  world: World,
+  t: {
+    readonly fact: DefinitionRef;
+    readonly scope: { kind: string };
+    readonly subject_id?: unknown;
+  },
+  v: FactValue,
+): boolean {
+  const spec = world.cartridge.facts[refString(t.fact)];
+  return (
+    spec !== undefined &&
+    spec.scopes.includes(t.scope.kind as never) &&
+    (spec.per_subject === true) === (t.subject_id !== undefined) &&
+    typed(v, spec.value_type)
+  );
 }
 
 /** Registered invariants of facts (protocol/invariants.json), pure checks of a world. */
 export const invariants: Readonly<Record<string, (world: World) => boolean>> = {
   facts_typed: (world) =>
     Object.entries(world.state.facts ?? {}).every(([text, v]) => {
-      const { fact, scope } = decode(text) as { fact: DefinitionRef; scope: { kind: string } };
-      return typedFact(world, fact, scope.kind, v);
+      const t = decode(text) as {
+        fact: DefinitionRef;
+        scope: { kind: string };
+        subject_id?: string;
+      };
+      const s = t.subject_id;
+      // A subject is an NPC, item or detail of this world (row W2); nothing removes one.
+      const known =
+        s === undefined || Object.hasOwn(world.entities, s) || Object.hasOwn(world.details, s);
+      return known && typedFact(world, t, v);
     }),
 };
 

@@ -31,6 +31,7 @@ export function sequence(
   boundReceive: boolean,
   quest?: DefinitionRef,
   start?: Assigned,
+  speaker?: EntityId,
 ) {
   let run: Assigned = start ?? {
     ops: [],
@@ -43,9 +44,9 @@ export function sequence(
         ? grant(world, actor, run, step.topic)
         : step.op === 'skill.acquire'
           ? acquire(world, actor, run, step.skill)
-          : step.op === 'fact.adjust'
-            ? adjusted(world, actor, run, step)
-            : assigned(world, actor, run, step);
+          : step.op === 'fact.adjust' // an entity or pair fact's subject is the speaker (row W2)
+            ? adjusted(world, actor, run, { ...step, subject: speaker })
+            : assigned(world, actor, run, { ...step, subject: speaker });
     if (!next) return undefined;
     run = next;
   }

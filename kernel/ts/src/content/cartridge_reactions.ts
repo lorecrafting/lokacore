@@ -99,6 +99,7 @@ export function reactions(c: Obj, { named, typedValue }: Checks): Diagnostic[] {
         // status.apply and experience.grant are checked with their declarations (status, levelling).
         named(s.fact, 'fact', `${at}.apply[${i}].fact`);
         typedValue(s.fact, s.value, `${at}.apply[${i}].value`);
+        for (const f of ['npc', 'item']) if (s[f]) named(s[f], f, `${at}.apply[${i}].${f}`);
       }
     });
   }
