@@ -277,17 +277,17 @@ test('experience saturates at the ResourceInt maximum', () => {
 // Breaks (#344 batch review, finding 1): the kill grant (fatal group) and the quest reward
 // (reaction group) each write the levelling row, so the killing step faults conflicting_write.
 test('a kill that also resolves a rewarding quest writes experience once and levels up once', () => {
-  const c = structuredClone(content);
+  const c: any = structuredClone(content);
   const ref = (kind: string, key: string) => ({ ...attr(key), kind });
-  c.world!.death_credit = [
+  c.world.death_credit = [
     { npc: ref('npc', 'rat_a'), room: ref('room', 'pit'), fact: ref('fact', 'den_found') },
-  ] as never;
+  ];
   let w = play(fresh(c), { type: 'accept_quest', quest: ref('quest', 'cull') }, 'cull').world;
   w = play(w, { type: 'move', direction: 'east' }).world;
   const r = kill(w, 'rat_a');
-  const ops = (r.decision as { delta: { ops: { op: string }[] } }).delta.ops;
+  assert.ok(r.decision.kind === 'accepted');
   assert.deepEqual(
-    ops.filter((o) => o.op === 'levelling.set').map((o) => [(o as any).expected, (o as any).value]),
+    r.decision.delta.ops.flatMap((o) => (o.op === 'levelling.set' ? [[o.expected, o.value]] : [])),
     [[null, { experience: 30, allocated: {} }]],
   );
   assert.deepEqual(gameView(r.world).levelling, {
