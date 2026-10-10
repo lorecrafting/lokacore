@@ -1,0 +1,21 @@
+{
+  "title": "room.tavern.title",
+  "description": "room.tavern.description",
+  "exits": {
+    "east": {
+      "to": "yard"
+    },
+    "north": {
+      "to": "bunkroom"
+    }
+  },
+  "details": {
+    "cellar_door": {
+      "aliases": [
+        "cellar",
+        "door"
+      ],
+      "description": "detail.cellar_door"
+    }
+  }
+}

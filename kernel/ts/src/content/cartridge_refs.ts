@@ -58,18 +58,22 @@ export const diag = (
 export const step = (name: string) =>
   /^[a-z0-9_]+$/.test(name) ? `.${name}` : `[${encode(name)}]`;
 
+// An item's or NPC's text variant lists (TextVariants; toolbox row W6).
+export const ENTITY_VARIANTS = ['short_variants', 'room_line_variants', 'description_variants'];
+
 // Definition parts with their registry kind and diagnostic path.
 export function parts(c: Obj): [string, Obj, string][] {
   const out: [string, Obj, string][] = [];
-  const add = (kind: string, d: Obj, at: string, field = 'variants') => {
+  const add = (kind: string, d: Obj, at: string, fields = ['variants']) => {
     out.push([kind, d, at]);
     if (d.tags) out.push(['tags', d.tags, `${at}.tags`]);
     if (kind === 'detail')
       for (const field of ['readable', 'notice_board'])
         if (d[field]) out.push(['readable', d[field], `${at}.${field}`]);
-    (d[field] ?? []).forEach((v: Obj, i: number) =>
-      out.push(['variant', v, `${at}.${field}[${i}]`]),
-    );
+    for (const field of fields)
+      (d[field] ?? []).forEach((v: Obj, i: number) =>
+        out.push(['variant', v, `${at}.${field}[${i}]`]),
+      );
   };
   for (const [ref, r] of Object.entries((c.rooms ?? {}) as Obj)) {
     add('room', r, `.cartridge.rooms${step(ref)}`);
@@ -79,7 +83,7 @@ export function parts(c: Obj): [string, Obj, string][] {
       add('detail', d, `.cartridge.rooms${step(ref)}.details${step(key)}`);
   }
   for (const [ref, n] of Object.entries((c.npcs ?? {}) as Obj)) {
-    add('npc', n, `.cartridge.npcs${step(ref)}`);
+    add('npc', n, `.cartridge.npcs${step(ref)}`, ENTITY_VARIANTS);
     if (n.shop) out.push(['shop', n.shop, `.cartridge.npcs${step(ref)}.shop`]);
     if (n.daily_schedule)
       out.push(['schedule', n.daily_schedule, `.cartridge.npcs${step(ref)}.daily_schedule`]);
@@ -88,7 +92,7 @@ export function parts(c: Obj): [string, Obj, string][] {
     if (i.edible) out.push(['edible', i.edible, `.cartridge.items${step(ref)}.edible`]);
     if (i.readable) out.push(['readable', i.readable, `.cartridge.items${step(ref)}.readable`]);
     if (i.fuel) out.push(['fuel', i.fuel, `.cartridge.items${step(ref)}.fuel`]);
-    add('item', i, `.cartridge.items${step(ref)}`, 'room_line_variants');
+    add('item', i, `.cartridge.items${step(ref)}`, ENTITY_VARIANTS);
     if (i.slot) out.push(['slot', i.slot, `.cartridge.items${step(ref)}.slot`]);
   }
   for (const [ref, b] of Object.entries((c.barriers ?? {}) as Obj))

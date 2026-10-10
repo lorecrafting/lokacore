@@ -405,6 +405,46 @@
             "at_least"
           ],
           "additionalProperties": false
+        },
+        {
+          "description": "The subject holds an active status of this definition (status@1 row; toolbox row W6). subject target: the action's target, or, in an entity's own variant (TextVariants), the entity described; false without a target or for a detail. Needs kernel_api at least 1.46. Owned by status@1.",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "status_active"
+            },
+            "subject": {
+              "enum": [
+                "target"
+              ]
+            },
+            "status": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            }
+          },
+          "required": [
+            "op",
+            "subject",
+            "status"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "The NPC of this definition is present: in the actor's current room and alive (hp above 0 when it has hp); false without a body. Presence, not posture (the player's posture is the position fact). Toolbox row W6. Needs kernel_api at least 1.46. Owned by target_resolution@1.",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "npc_present"
+            },
+            "npc": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            }
+          },
+          "required": [
+            "op",
+            "npc"
+          ],
+          "additionalProperties": false
         }
       ],
       "examples": [

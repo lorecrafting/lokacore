@@ -21269,5 +21269,246 @@
         "code": "below_minimum"
       }
     ]
+  },
+  {
+    "name": "status_active_actor_subject_no_status",
+    "contract": "Policy",
+    "value": {
+      "op": "status_active",
+      "subject": "actor"
+    },
+    "errors": [
+      {
+        "path": "/status",
+        "code": "missing_property"
+      },
+      {
+        "path": "/subject",
+        "code": "not_in_enum"
+      }
+    ]
+  },
+  {
+    "name": "status_active_named_npc_no_subject",
+    "contract": "Policy",
+    "value": {
+      "op": "status_active",
+      "status": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "status",
+        "key": "bruised"
+      },
+      "npc": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "npc",
+        "key": "guard"
+      }
+    },
+    "errors": [
+      {
+        "path": "/npc",
+        "code": "unknown_property"
+      },
+      {
+        "path": "/subject",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "npc_present_target_subject_no_npc",
+    "contract": "Policy",
+    "value": {
+      "op": "npc_present",
+      "subject": "target"
+    },
+    "errors": [
+      {
+        "path": "/npc",
+        "code": "missing_property"
+      },
+      {
+        "path": "/subject",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "text_variants_empty",
+    "contract": "TextVariants",
+    "value": [],
+    "errors": [
+      {
+        "path": "",
+        "code": "too_few_items"
+      }
+    ]
+  },
+  {
+    "name": "text_variants_seventeen",
+    "contract": "TextVariants",
+    "value": [
+      {
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "target_present"
+          }
+        },
+        "description": "t.k"
+      },
+      {
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "target_present"
+          }
+        },
+        "description": "t.k"
+      },
+      {
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "target_present"
+          }
+        },
+        "description": "t.k"
+      },
+      {
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "target_present"
+          }
+        },
+        "description": "t.k"
+      },
+      {
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "target_present"
+          }
+        },
+        "description": "t.k"
+      },
+      {
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "target_present"
+          }
+        },
+        "description": "t.k"
+      },
+      {
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "target_present"
+          }
+        },
+        "description": "t.k"
+      },
+      {
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "target_present"
+          }
+        },
+        "description": "t.k"
+      },
+      {
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "target_present"
+          }
+        },
+        "description": "t.k"
+      },
+      {
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "target_present"
+          }
+        },
+        "description": "t.k"
+      },
+      {
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "target_present"
+          }
+        },
+        "description": "t.k"
+      },
+      {
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "target_present"
+          }
+        },
+        "description": "t.k"
+      },
+      {
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "target_present"
+          }
+        },
+        "description": "t.k"
+      },
+      {
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "target_present"
+          }
+        },
+        "description": "t.k"
+      },
+      {
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "target_present"
+          }
+        },
+        "description": "t.k"
+      },
+      {
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "target_present"
+          }
+        },
+        "description": "t.k"
+      },
+      {
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "target_present"
+          }
+        },
+        "description": "t.k"
+      }
+    ],
+    "errors": [
+      {
+        "path": "",
+        "code": "too_many_items"
+      }
+    ]
   }
 ]

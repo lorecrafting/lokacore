@@ -6,7 +6,7 @@ import { living } from '../death/shared.ts';
 // §14, §18). Accepted Look records visible NPC observations under knowledge@1; the host shows the GameView or the thing, each
 // described by describe(). A target_id is re-validated here, whatever resolved it: no detail or
 // entity by that id is not_found, one elsewhere not_present.
-import type { CharacterId, DescriptionVariant, TextKey } from '../../contracts.gen.ts';
+import type { CharacterId, DescriptionVariant, EntityId, TextKey } from '../../contracts.gen.ts';
 import {
   accepted,
   bodyOf,
@@ -33,8 +33,9 @@ export const decide: Rule<'description_variant'> = (world, command, _mint, steps
 };
 
 /**
- * The description `actor` sees of a room or detail (21 §6 DescriptionVariant; room.schema.json):
- * the first variant whose condition holds, else the base description.
+ * The description `actor` sees of a room, detail or entity text (21 §6 DescriptionVariant;
+ * room.schema.json): the first variant whose condition, read with `target` as the target,
+ * holds, else the base description.
  */
 export const describe = (
   world: World,
@@ -45,8 +46,22 @@ export const describe = (
     readonly variants?: readonly DescriptionVariant[];
   },
   steps: Steps = { n: 0 },
+  target?: EntityId,
 ): TextKey =>
   of.dark_description && dark(world, actor, steps)
     ? of.dark_description
-    : (of.variants?.find((v) => holds(world, actor, v.when.root, { steps }))?.description ??
+    : (of.variants?.find((v) => holds(world, actor, v.when.root, { target, steps }))?.description ??
       of.description);
+
+/** An entity's `field` text as `actor` sees it: its `<field>_variants`, the entity the target (toolbox row W6). */
+export const describeEntity = (
+  world: World,
+  actor: CharacterId,
+  id: EntityId,
+  field: 'short' | 'room_line' | 'description',
+  steps: Steps = { n: 0 },
+): TextKey => {
+  const e = world.entities[id];
+  const of = { description: e[field], variants: e[`${field}_variants`] };
+  return describe(world, actor, of, steps, id);
+};

@@ -105,7 +105,8 @@
     "portability": "portable",
     "residency": "portable_capability",
     "policies": [
-      "target_present"
+      "target_present",
+      "npc_present"
     ]
   },
   {
@@ -188,6 +189,9 @@
     "residency": "portable_capability",
     "definitions": [
       "status"
+    ],
+    "policies": [
+      "status_active"
     ],
     "events": [
       "status_ticked",

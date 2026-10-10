@@ -1,0 +1,15 @@
+{
+  "facts": {
+    "shoved": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "instance"
+      ],
+      "meaning": "The player has shoved past the guard."
+    }
+  }
+}

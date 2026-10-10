@@ -3,7 +3,7 @@
 // compiler's TOUCH_LINK_MISSING is a warning, and the loader reports only errors, so it stays
 // compiler-only.
 import type { Diagnostic } from '../contracts.gen.ts';
-import { diag, step, type Obj } from './cartridge_refs.ts';
+import { diag, ENTITY_VARIANTS, step, type Obj } from './cartridge_refs.ts';
 
 const LINK = /\[([^[\]]+)\](?:\(([^()]*)\))?/g;
 
@@ -40,9 +40,10 @@ export function links(c: Obj): Diagnostic[] {
       const at = `.cartridge.${map}${step(ref)}`;
       for (const f of ['short', 'room_line', 'description'])
         uses.push([`${at}.${f}`, e[f], e.key, entities]);
-      (e.room_line_variants ?? []).forEach((v: Obj, i: number) =>
-        uses.push([`${at}.room_line_variants[${i}].description`, v.description, e.key, entities]),
-      );
+      for (const f of ENTITY_VARIANTS)
+        (e[f] ?? []).forEach((v: Obj, i: number) =>
+          uses.push([`${at}.${f}[${i}].description`, v.description, e.key, entities]),
+        );
     }
   return uses.flatMap(([at, key, self, targets]) =>
     [...(Object.hasOwn(c.text, key) ? (c.text[key] as string) : '').matchAll(LINK)].flatMap(
