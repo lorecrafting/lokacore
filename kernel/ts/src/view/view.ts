@@ -90,7 +90,7 @@ export function gameView(world: World): GameView {
     ...waterViews(world, steps),
     ...skillViews(world, steps),
     ...(world.cartridge.topics && { topics: knownTopics(world, world.character) }),
-    ...(fight && { combat: combatView(world, fight, steps) }),
+    ...(fight && { combat: combatView(world, fight) }),
     ...(bleed && { bleeding: bleedingView(world, bleed) }),
     ...(conditions.length > 0 && { conditions }),
     place: placeView(world, here, steps),
@@ -280,16 +280,15 @@ function equipmentViews(world: World, actions: Lists, steps: Steps) {
   });
 }
 
-function combatView(world: World, fight: NonNullable<ReturnType<typeof engaged>>, steps: Steps) {
-  const name = (id: EntityId) => describeEntity(world, world.character, id, 'short', steps);
+function combatView(world: World, fight: NonNullable<ReturnType<typeof engaged>>) {
   return {
     encounter_id: fight.id,
     opponent_id: fight.row.npc_id,
-    name: name(fight.row.npc_id),
+    name: world.entities[fight.row.npc_id].short,
     ...(fight.row.active_ids && {
       active_opponents: fight.row.active_ids.map((id) => ({
         id,
-        name: name(id),
+        name: world.entities[id].short,
       })),
     }),
   };

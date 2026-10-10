@@ -14,7 +14,7 @@ import type { EntityId } from '../src/contracts.gen.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { key } from '../src/foundation/compose.ts';
 import { encode } from '../src/foundation/canonical.ts';
-import { describeEntity } from '../src/mechanics/description_variant/rule.ts';
+import { detail, room } from '../play/text.ts';
 import { resourceRef } from '../src/mechanics/resource.ts';
 import { variants } from '../src/content/cartridge_variants.ts';
 
@@ -93,9 +93,10 @@ test('Maud is bruised and the sword notched after the 07:00 raid; the guard slee
   assert.deepEqual(shown(w, 'npc', 'guard'), ['npc.guard.short', 'npc.guard.description']);
   w = wait(w, 7200); // 07:00 Maud walks into the raided yard, 08:00 back at the counter
   assert.deepEqual(shown(w, 'npc', 'maud'), ['npc.maud.short', 'npc.maud.description_bruised']);
+  assert.match(room(content, w), /\nMaud, bruised, wipes the counter\.\n/);
   assert.equal(
-    describeEntity(w, w.character, id(w, 'npc', 'maud') as EntityId, 'room_line'),
-    'npc.maud.room_bruised',
+    detail(content, w, id(w, 'npc', 'maud') as EntityId),
+    'Maud, bruised, wipes the counter.\n',
   );
   assert.deepEqual(shown(w, 'item', 'sword'), [
     'item.sword.short_notched',

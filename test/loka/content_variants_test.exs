@@ -39,9 +39,11 @@ defmodule Loka.ContentVariantsTest do
   end
 
   # Breaks: the compiler stops walking an NPC's or item's new variant lists, so a variant naming
-  # an undeclared status or text key compiles and fails at load or in play.
+  # an undeclared status or text key compiles and fails at load or in play, or it refuses the
+  # sound sampler (its status_active and position leaves at 1.46).
   test "a new variant list's references and text keys are checked" do
     dir = Loka.ContentSource.copy("cartridges/variants_sampler")
+    assert {:ok, _, _} = Loka.ContentSource.compile(dir, [])
     ghost = &put_in(&1, ["description_variants", Access.at(0), "when", "root", "status"], "ghost")
     no_text = &put_in(&1, ["short_variants", Access.at(0), "description"], "item.sword.gone")
 
