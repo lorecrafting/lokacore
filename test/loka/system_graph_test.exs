@@ -185,6 +185,14 @@ defmodule Loka.SystemGraphTest do
     assert contract("LogicalTime")["saved"] == nil
   end
 
+  # Breaks: a payload saved with a row missed (entity.create's identity, choice.open's attempts) or
+  # an array payload (choice.open's roles, quest.activate's bindings) skipped.
+  test "a payload saved with a row is saved in that op's State section" do
+    assert contract("EntityIdentity")["saved"] == ["created"]
+    assert contract("ChoiceAttempts")["saved"] == ["choices"]
+    assert contract("RoleBinding")["saved"] == ["choices", "quests"]
+  end
+
   # Breaks: a CompiledCartridge map's files listed under another map's contract, the map dropped,
   # or a map authored as one file (`facts.json`) missed.
   test "a cartridge map's contract lists the authored files of that map" do

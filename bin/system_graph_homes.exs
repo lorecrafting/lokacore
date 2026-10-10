@@ -2,10 +2,11 @@
 # sections a DeltaOp writes it into as a row, and the authored cartridge files of the
 # CompiledCartridge map that holds it.
 defmodule SystemGraph.Homes do
-  @rows ~w(value expected from to)
+  # A row, and the payloads saved with it: an entity's identity, a choice's attempts and role bindings.
+  @rows ~w(value expected from to identity attempts roles bindings)
 
   # Contract => the State sections (`ops`: DeltaOp => section, docs/state-sections.gen.json) whose
-  # ops write it as their row (value, expected, from, to). `row?` drops scalars (ids, times,
+  # ops write it as their row or a payload saved with it (@rows). `row?` drops scalars (ids, times,
   # counts), which sit in many rows.
   @spec saved(map(), map(), (String.t() -> boolean())) :: %{String.t() => [String.t()]}
   def saved(defs, ops, row?) do
@@ -22,8 +23,9 @@ defmodule SystemGraph.Homes do
 
   defp rows(properties), do: Enum.flat_map(Map.take(properties, @rows), fn {_, s} -> ref(s) end)
 
-  # A row field is a $ref, or anyOf null and a $ref (`expected`).
+  # A row field is a $ref, anyOf null and a $ref (`expected`) or an array of them (`roles`).
   defp ref(%{"$ref" => r}), do: [r]
+  defp ref(%{"items" => i}), do: ref(i)
   defp ref(%{"anyOf" => bs}), do: Enum.flat_map(bs, &ref/1)
   defp ref(_), do: []
 

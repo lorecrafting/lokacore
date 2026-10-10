@@ -174,16 +174,17 @@ defmodule SystemGraph do
 
   defp anchor(md, [sec]) do
     case Regex.run(~r/^#+ (#{Regex.escape(sec)}\.?\s.*)$/m, md) do
-      # GitHub's heading slug: lower case, punctuation dropped, each space a hyphen.
-      [_, h] ->
-        "#" <> String.replace(Regex.replace(~r/[^\w\- ]/u, String.downcase(h), ""), " ", "-")
-
-      nil ->
-        ""
+      [_, h] -> slug(h)
+      nil -> ""
     end
   end
 
   defp anchor(_, _), do: ""
+
+  # GitHub's heading slug: lower case, punctuation dropped, each space a hyphen.
+  @spec slug(String.t()) :: String.t()
+  def slug(h),
+    do: "#" <> String.replace(Regex.replace(~r/[^\w\- ]/u, String.downcase(h), ""), " ", "-")
 
   # Definition kind => contract, from CompiledCartridge's maps (key pattern `:kind/`).
   defp definition_kinds(defs) do
@@ -292,3 +293,6 @@ defmodule SystemGraph do
     end
   end
 end
+
+# The other System pages (Checks, Toolbox) reuse slug/1.
+Code.require_file("system_pages.exs", __DIR__)
