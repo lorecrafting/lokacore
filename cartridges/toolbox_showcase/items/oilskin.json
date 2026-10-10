@@ -1,0 +1,17 @@
+{
+  "keywords": [
+    "oilskin"
+  ],
+  "short": "item.oilskin.short",
+  "room_line": "item.oilskin.room",
+  "description": "item.oilskin.description",
+  "location": {
+    "in": "room",
+    "room": "fell_gate"
+  },
+  "mass_grams": 500,
+  "slot": "body",
+  "tags": [
+    "waterproof"
+  ]
+}

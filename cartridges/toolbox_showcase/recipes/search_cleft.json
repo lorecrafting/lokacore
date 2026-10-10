@@ -1,0 +1,35 @@
+{
+  "label": "actions.search_cleft",
+  "aliases": [
+    "search"
+  ],
+  "target": {
+    "kind": "detail",
+    "room": "sea_cave",
+    "detail": "cleft"
+  },
+  "priority": 10,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "time_window",
+      "from": 20,
+      "to": 5
+    }
+  },
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "stair_found",
+          "value": true
+        }
+      ],
+      "narration": {
+        "actor": "narration.search_cleft"
+      }
+    }
+  },
+  "tip": "tip.search_cleft"
+}

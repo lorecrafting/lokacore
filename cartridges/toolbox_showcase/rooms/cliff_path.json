@@ -1,0 +1,12 @@
+{
+  "title": "room.cliff_path.title",
+  "description": "room.cliff_path.description",
+  "exits": {
+    "south": {
+      "to": "shore_steps"
+    },
+    "north": {
+      "to": "cliff_top"
+    }
+  }
+}

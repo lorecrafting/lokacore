@@ -1,0 +1,38 @@
+{
+  "title": "room.sea_cave.title",
+  "description": "room.sea_cave.description",
+  "exits": {
+    "west": {
+      "to": "shore_steps",
+      "barrier": "tidegate"
+    },
+    "up": {
+      "to": "smugglers_stair",
+      "hidden_until": {
+        "fact": "stair_found",
+        "equals": true
+      }
+    }
+  },
+  "details": {
+    "cleft": {
+      "aliases": [
+        "cleft",
+        "crack"
+      ],
+      "description": "detail.cleft"
+    }
+  },
+  "variants": [
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "sky",
+          "tide": "high"
+        }
+      },
+      "description": "room.sea_cave.high_tide"
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "keywords": [
+    "hat"
+  ],
+  "short": "item.fold_hat.short",
+  "room_line": "item.fold_hat.room",
+  "description": "item.fold_hat.description",
+  "location": {
+    "in": "room",
+    "room": "the_fold"
+  },
+  "mass_grams": 500,
+  "slot": "head",
+  "tags": [
+    "cool"
+  ]
+}

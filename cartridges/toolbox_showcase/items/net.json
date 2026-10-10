@@ -1,0 +1,25 @@
+{
+  "keywords": [
+    "net"
+  ],
+  "short": "item.net.short",
+  "room_line": "item.net.room",
+  "description": "item.net.description",
+  "location": {
+    "in": "room",
+    "room": "shore_steps"
+  },
+  "mass_grams": 1000,
+  "description_variants": [
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "sky",
+          "weather": "rain"
+        }
+      },
+      "description": "item.net.description_rain"
+    }
+  ]
+}

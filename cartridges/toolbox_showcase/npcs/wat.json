@@ -1,0 +1,59 @@
+{
+  "keywords": [
+    "wat",
+    "shepherd"
+  ],
+  "short": "npc.wat.short",
+  "room_line": "npc.wat.room",
+  "description": "npc.wat.description",
+  "room": "shepherd_hut",
+  "hp": {
+    "minimum": 1,
+    "maximum": 10,
+    "start": 10,
+    "gain": 0
+  },
+  "attributes": [
+    {
+      "attribute": "str",
+      "value": 12
+    }
+  ],
+  "daily_schedule": {
+    "8": "fell_top",
+    "9": "shepherd_hut"
+  },
+  "immune": [
+    "hungry",
+    "thirsty",
+    "parched",
+    "windburnt",
+    "overheated"
+  ],
+  "room_line_variants": [
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "status_active",
+          "subject": "target",
+          "status": "chilled"
+        }
+      },
+      "description": "npc.wat.room_chilled"
+    }
+  ],
+  "description_variants": [
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "status_active",
+          "subject": "target",
+          "status": "chilled"
+        }
+      },
+      "description": "npc.wat.description_chilled"
+    }
+  ]
+}

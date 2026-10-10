@@ -1,0 +1,113 @@
+{
+  "title": "room.shore_steps.title",
+  "description": "room.shore_steps.description",
+  "exits": {
+    "west": {
+      "to": "crossroads_inn"
+    },
+    "north": {
+      "to": "cliff_path"
+    },
+    "east": {
+      "to": "sea_cave",
+      "barrier": "tidegate"
+    },
+    "south": {
+      "to": "tide_pools"
+    }
+  },
+  "details": {
+    "horizon": {
+      "aliases": [
+        "horizon",
+        "sea"
+      ],
+      "description": "detail.horizon"
+    },
+    "sign_world": {
+      "aliases": [
+        "sign",
+        "signpost"
+      ],
+      "description": "detail.sign_world.description",
+      "readable": {
+        "label": "actions.read_sign",
+        "text": "readable.sign_world",
+        "title": "detail.sign_world.title"
+      }
+    }
+  },
+  "variants": [
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "visited_count",
+          "room": "shore_steps",
+          "at_least": 3
+        }
+      },
+      "description": "room.shore_steps.familiar"
+    },
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "sky",
+          "tide": "high"
+        }
+      },
+      "description": "room.shore_steps.high_tide"
+    },
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "sky",
+          "weather": "rain"
+        }
+      },
+      "description": "room.shore_steps.rain"
+    },
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "sky",
+          "season": "spring"
+        }
+      },
+      "description": "room.shore_steps.spring"
+    },
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "sky",
+          "season": "summer"
+        }
+      },
+      "description": "room.shore_steps.summer"
+    },
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "sky",
+          "season": "autumn"
+        }
+      },
+      "description": "room.shore_steps.autumn"
+    },
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "sky",
+          "season": "winter"
+        }
+      },
+      "description": "room.shore_steps.winter"
+    }
+  ]
+}

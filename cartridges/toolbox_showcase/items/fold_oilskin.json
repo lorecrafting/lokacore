@@ -1,0 +1,17 @@
+{
+  "keywords": [
+    "oilskin"
+  ],
+  "short": "item.fold_oilskin.short",
+  "room_line": "item.fold_oilskin.room",
+  "description": "item.fold_oilskin.description",
+  "location": {
+    "in": "room",
+    "room": "the_fold"
+  },
+  "mass_grams": 500,
+  "slot": "body",
+  "tags": [
+    "waterproof"
+  ]
+}

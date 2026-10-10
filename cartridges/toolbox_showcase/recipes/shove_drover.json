@@ -1,0 +1,44 @@
+{
+  "label": "actions.shove_drover",
+  "aliases": [
+    "shove"
+  ],
+  "target": {
+    "kind": "detail",
+    "room": "the_fold",
+    "detail": "fold_post"
+  },
+  "priority": 10,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "npc_present",
+      "npc": "drover"
+    }
+  },
+  "check": {
+    "key": "shove_drover",
+    "kind": "opposed",
+    "attribute": "str",
+    "npc": "drover"
+  },
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "event.emit",
+          "event": "shoved"
+        }
+      ],
+      "narration": {
+        "actor": "narration.shove_drover.success"
+      }
+    },
+    "failure": {
+      "sequence": [],
+      "narration": {
+        "actor": "narration.shove_drover.failure"
+      }
+    }
+  }
+}

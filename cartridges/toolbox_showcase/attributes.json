@@ -1,0 +1,13 @@
+{
+  "attributes": {
+    "str": {
+      "start": 10
+    },
+    "dex": {
+      "start": 10
+    },
+    "cha": {
+      "start": 6
+    }
+  }
+}

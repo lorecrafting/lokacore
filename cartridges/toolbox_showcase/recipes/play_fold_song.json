@@ -1,0 +1,41 @@
+{
+  "label": "actions.play_fold_song",
+  "aliases": [
+    "play"
+  ],
+  "target": {
+    "kind": "detail",
+    "room": "the_fold",
+    "detail": "fold_hearth"
+  },
+  "priority": 10,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "any",
+      "items": [
+        {
+          "op": "has_item",
+          "item": "lute"
+        },
+        {
+          "op": "has_item",
+          "item": "fold_lute"
+        }
+      ]
+    }
+  },
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "event.emit",
+          "event": "song"
+        }
+      ],
+      "narration": {
+        "actor": "narration.play_song"
+      }
+    }
+  }
+}

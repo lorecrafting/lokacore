@@ -1,0 +1,70 @@
+{
+  "title": "room.fell_top.title",
+  "description": "room.fell_top.description",
+  "tags": [
+    "exposed"
+  ],
+  "exits": {
+    "south": {
+      "to": "fell_gate"
+    },
+    "east": {
+      "to": "shepherd_hut"
+    },
+    "west": {
+      "to": "still_room"
+    }
+  },
+  "variants": [
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "sky",
+          "weather": "frost"
+        }
+      },
+      "description": "room.fell_top.frost"
+    },
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "sky",
+          "weather": "rain"
+        }
+      },
+      "description": "room.fell_top.rain"
+    },
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "sky",
+          "weather": "gale"
+        }
+      },
+      "description": "room.fell_top.gale"
+    },
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "sky",
+          "weather": "heat"
+        }
+      },
+      "description": "room.fell_top.heat"
+    },
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "sky",
+          "weather": "drought"
+        }
+      },
+      "description": "room.fell_top.drought"
+    }
+  ]
+}

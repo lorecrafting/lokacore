@@ -1,0 +1,15 @@
+{
+  "keywords": [
+    "moon_door",
+    "door"
+  ],
+  "short": "barrier.moon_door.short",
+  "initial": "closed",
+  "opens_when": {
+    "policy_version": 1,
+    "root": {
+      "op": "sky",
+      "lunar": "full"
+    }
+  }
+}

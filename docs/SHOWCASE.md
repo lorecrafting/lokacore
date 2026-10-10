@@ -1,7 +1,8 @@
 # Toolbox showcase
 
-`cartridges/toolbox_showcase` (not yet created; its hub and first district are planned by a
-separate Fable run after the next approved batch, see below) is the composition proof for the [mechanics toolbox](MECHANICS-TOOLBOX.md):
+`cartridges/toolbox_showcase` (the hub and the body and world districts are built; the social district
+is planned in [showcase plan 1](showcase/hub-and-first-districts.md); compiled answer
+`protocol/fixtures/toolbox_showcase_hash.json`, held by `test/loka/content_showcase_test.exs`) is the composition proof for the [mechanics toolbox](MECHANICS-TOOLBOX.md):
 one playable cartridge where finished mechanics meet each other, so a pair that only works in its
 own sampler shows up here ([owner decision](decisions/owner-decision-showcase-2026-10-10.md)).
 Integration rows such as W22 Fire live in it. It replaces Chapter 1 as the regression fixture once
@@ -23,16 +24,27 @@ it covers Chapter 1's play families (see [Retiring Chapter 1](#retiring-chapter-
 Each row is a set of mechanics that must work together in one room or loop. A batch fills in the
 district and room that shows the pair, and the pin (test or recorder) that holds it.
 
+Status `planned (plan 1)` means [showcase plan 1](showcase/hub-and-first-districts.md) names the
+rooms and steps and the build slice is still to come; `built` means the pin walks the plan's steps; `later` means no brief covers it yet.
+
 | Mechanics | District | Rooms | Pin | Status |
 |---|---|---|---|---|
-| statuses x reactions | | | | todo |
-| sky x exposure x equipment | | | | todo |
-| disposition x commerce x dialogue | | | | todo |
-| deadlines x schedules x away recap | | | | todo |
-| combat x loot x levelling x death | | | | todo |
-| hidden exits x senses x traps | | | | todo |
-| quests x deadlines x hints | | | | todo |
-| scenes x dialogue x reactions | | | | todo |
+| statuses x reactions | body | `fell_top` (exposure by weather), `still_room` (draught, song) | `kernel/ts/test/showcase_body.test.ts` (body 2, 3, 8, 12) | built |
+| sky x exposure x equipment | body | `fell_gate` garments, `fell_top` | `showcase_body.test.ts` (body 2, 5, 6, 13) | built |
+| disposition x commerce x dialogue | social | `village_green` (Nell's shop and prices, the Reeve's `help`/`wrong`, the apple), `warden_gate` (engage) | `kernel/ts/test/showcase_social.test.ts` | planned (plan 1) |
+| deadlines x schedules x away recap | social | the letter quest, Tam's day, the recap block on return | an app test beside `mobile/app/book/recap.test.ts` (the block is Book-side); `showcase_social.test.ts` for the facts | planned (plan 1) |
+| combat x loot x levelling x death | | | | later (combat district) |
+| hidden exits x senses x traps | world (hidden exits only) | `sea_cave` night search | `kernel/ts/test/showcase_world.test.ts` (world 5, 7) | hidden exits built; senses and traps later |
+| quests x deadlines x hints | social | `carry_letter` from the Reeve to Wat | `showcase_social.test.ts` | planned (plan 1) |
+| scenes x dialogue x reactions | social | Wat's `deliver`/`burn`, story point `letter_fate`, scenes `letter_read`/`letter_ash`, standing on scene end | `showcase_social.test.ts` | planned (plan 1) |
+| rumour x dialogue check x codex | social | `mill`, `village_green` (Tam tells Nell; `press` grants "The fire") | `showcase_social.test.ts` | planned (plan 1) |
+| visit tiers x codex badge | social | five rooms grant "Wardle walker" | `showcase_social.test.ts` | planned (plan 1) |
+| tide gate x hidden exit x time window x climb | world | `shore_steps` to `sea_cave` loop | `showcase_world.test.ts` (world 2 to 7, 9) | built |
+| potion x derived carry | body | `still_room` (the quern lifts only under `might`) | `showcase_body.test.ts` (body 9-10) | built |
+| NPC status x variants x schedule | body and world | Wat on `fell_top` at 08:00; Idony's dozing and winter variants | `showcase_body.test.ts` (body 7); `showcase_world.test.ts` (world 8) | built |
+| deadline x exposure | social and body | the letter run across `fell_top` | `showcase_social.test.ts` | planned (plan 1) |
+| pick x force x skill growth | social | `tollhouse` (strongbox, fragile and iron doors) | `showcase_social.test.ts` | planned (plan 1) |
+| schedule cases x sky | social | Tam's 11:00 case (rain sends him to the church) | `showcase_social.test.ts` | planned (plan 1) |
 
 ## How a batch adds a district
 

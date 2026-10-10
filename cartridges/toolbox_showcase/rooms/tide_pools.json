@@ -1,0 +1,168 @@
+{
+  "title": "room.tide_pools.title",
+  "description": "room.tide_pools.description",
+  "exits": {
+    "north": {
+      "to": "shore_steps"
+    },
+    "west": {
+      "to": "cliff_top",
+      "barrier": "moon_door"
+    },
+    "east": {
+      "to": "sea_cave"
+    }
+  },
+  "details": {
+    "pool_cleft": {
+      "aliases": [
+        "cleft"
+      ],
+      "description": "detail.pool_cleft"
+    },
+    "pool_sky": {
+      "aliases": [
+        "sky"
+      ],
+      "description": "detail.pool_sky",
+      "variants": [
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "sky",
+              "weather": "clear"
+            }
+          },
+          "description": "detail.pool_sky.clear"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "sky",
+              "weather": "frost"
+            }
+          },
+          "description": "detail.pool_sky.frost"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "sky",
+              "weather": "rain"
+            }
+          },
+          "description": "detail.pool_sky.rain"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "sky",
+              "weather": "gale"
+            }
+          },
+          "description": "detail.pool_sky.gale"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "sky",
+              "weather": "heat"
+            }
+          },
+          "description": "detail.pool_sky.heat"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "sky",
+              "weather": "drought"
+            }
+          },
+          "description": "detail.pool_sky.drought"
+        }
+      ]
+    },
+    "pool_water": {
+      "aliases": [
+        "water"
+      ],
+      "description": "detail.pool_water",
+      "variants": [
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "sky",
+              "tide": "low"
+            }
+          },
+          "description": "detail.pool_water.low"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "sky",
+              "tide": "high"
+            }
+          },
+          "description": "detail.pool_water.high"
+        }
+      ]
+    },
+    "pool_shore": {
+      "aliases": [
+        "shore"
+      ],
+      "description": "detail.pool_shore",
+      "variants": [
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "sky",
+              "season": "spring"
+            }
+          },
+          "description": "detail.pool_shore.spring"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "sky",
+              "season": "summer"
+            }
+          },
+          "description": "detail.pool_shore.summer"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "sky",
+              "season": "autumn"
+            }
+          },
+          "description": "detail.pool_shore.autumn"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "sky",
+              "season": "winter"
+            }
+          },
+          "description": "detail.pool_shore.winter"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "label": "actions.look_about",
+  "aliases": [
+    "gaze"
+  ],
+  "target": {
+    "kind": "detail",
+    "room": "shore_steps",
+    "detail": "horizon"
+  },
+  "priority": 10,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": []
+    }
+  },
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "event.emit",
+          "event": "looked"
+        }
+      ],
+      "narration": {
+        "actor": "narration.look_about"
+      }
+    }
+  }
+}
