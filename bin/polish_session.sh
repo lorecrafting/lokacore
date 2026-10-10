@@ -4,6 +4,8 @@
 #   start: new worktree on polish/session-<date>[-n] from origin/main (or the open one), npm ci
 #          only on a lockfile change, the owner's Storybook served from it. Twice: no harm.
 #          A pushed (closed) session is refused until its PR merges and after_merge removes it.
+#   update: fetch and fast-forward the session worktree to origin/main; when the pull adds or renames
+#          a *.stories.tsx or *.mdx file, restart the session's Storybook (its index goes stale).
 #   close: refuses uncommitted or untracked files; pushes (hosted CI runs on the head), opens the PR
 #          (or reuses the open one), then serves the preview checkout again (bin/preview_update.sh).
 set -eu
@@ -36,6 +38,22 @@ start)
     echo "$me: serving $(git -C "$wt" branch --show-current)"
   fi
   urls ;;
+update)
+  [ -d "$wt" ] || die "no session worktree at $wt"
+  wt=$(cd "$wt" && pwd -P)
+  git -C "$wt" fetch -q origin main || die 'fetch failed'
+  old=$(git -C "$wt" rev-parse HEAD)
+  git -C "$wt" merge -q --ff-only origin/main || die "not a fast-forward of origin/main (or uncommitted work in the way): nothing restarted"
+  new=$(git -C "$wt" diff -M --name-only --diff-filter=AR "$old" HEAD | grep -E '\.(stories\.tsx|mdx)$' || true)
+  if [ -n "$new" ] && [ "$(served_from "$SB_PORT")" = "$wt/mobile/app" ]; then
+    npm_ci "$wt"
+    stop_port "$SB_PORT"
+    serve_storybook "$wt"
+    echo "$me: updated; Storybook restarted for new story or MDX files"
+  else
+    echo "$me: updated; Storybook left running"
+  fi
+  urls ;;
 close)
   [ -d "$wt" ] || die "no session worktree at $wt"
   [ -z "$(git -C "$wt" status --porcelain)" ] || die "uncommitted changes in $wt: commit or drop them; nothing changed"
@@ -50,5 +68,5 @@ close)
     echo "$me: PR $url"
   fi
   "$bin/preview_update.sh" --end-session ;;
-*) echo "usage: $0 start|close" >&2; exit 2 ;;
+*) echo "usage: $0 start|update|close" >&2; exit 2 ;;
 esac

@@ -338,7 +338,10 @@ an expected saving; at most 5 per retro ([owner decision](decisions/owner-decisi
 - Every developer and concurrent planner works in a distinct worktree and branch.
   Keep a single integration worktree for local `main`; keep the owner's checkout
   out of slice work ([owner decision](archive/decisions/owner-decision-review-rules-2026-10-01.md)).
-  Place worktrees outside paths the checks scan, and preserve unfinished ones.
+  Place worktrees outside paths the checks scan, and preserve unfinished ones. Create worktrees
+  and scratch worktrees in a sibling folder named `worktrees.noindex` next to the repo checkout
+  (`git worktree add -b <branch> ../worktrees.noindex/<name> origin/main`): Spotlight never indexes
+  a `.noindex` folder, and each indexed worktree kept `mds_stores` at 150-230% CPU for minutes.
   A reviewer uses a separate detached worktree (`git worktree add --detach`).
 - `.gitattributes` merges `docs/decisions/README.md` (an append-only list) with
   `merge=union`, so two branches that each add a line merge with no hand edit. GitHub's mergeability

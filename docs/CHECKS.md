@@ -49,7 +49,7 @@ their rules and red controls remain available for resumption.
   an existing one is never raised. Test files keep the escape hatch.
 - `mix credo --strict`: cyclomatic complexity 9, nesting 2, ABC size 30, arity 6; nothing else.
   Any `credo:disable` comment gives its reason on the same line; the reviewer checks it.
-- `elixir bin/contracts.exs --check`: `kernel/ts/src/contracts.gen.ts`, the
+- `elixir bin/contracts.exs --check` (also in pre-commit when `docs/MECHANICS-TOOLBOX.md`, `docs/CHECKS.md` or `protocol/` is staged, as a push to `main` runs no hosted CI): `kernel/ts/src/contracts.gen.ts`, the
   [capability/schema docs](contracts.gen.md) and the capability/residency matrix
   (`docs/residency.gen.json`) and the System pages' graph (`docs/system-graph.gen.json`, also
   from `docs/system/save.md`'s table block, `protocol/README.md`'s fixture column,
@@ -100,9 +100,10 @@ their rules and red controls remain available for resumption.
   It also runs `bin/after_merge.sh` (stub `gh`/`br`; bare origin): an unmerged PR, a stray file, a dirty
   PR worktree, an unmerged `review-<N>`, a remote PR branch ahead of main or an export changed on both sides is refused with nothing changed; a dirty Beads export survives the pull; the worktree,
   branch and `review-<N>` are removed and main is pushed with the ROADMAP edit; a script copy behind main is replaced and re-run, and an export dirtied after the commit gets its own commit before the push.
+  It also runs `.githooks/pre-commit` (stub `mise`): a staged `docs/MECHANICS-TOOLBOX.md`, `docs/CHECKS.md` or `protocol/` file runs `contracts.exs --check` and a failure blocks the commit; an unrelated file does not. A rerun of `bin/after_merge.sh` for an issue already closed skips `br close`.
   It also runs `bin/preview_update.sh` and `bin/polish_session.sh` (stub `mise` servers on ports 7006 and up, stub `gh`):
   a decoy server found only by name survives, a second run restarts nothing, `npm ci` runs only for a
-  changed lockfile, a dirty preview, a served or closed session is refused; close pushes, opens the PR and serves
+  changed lockfile, a dirty preview, a served or closed session is refused; `update` restarts Storybook only when the pull adds or renames a `*.stories.tsx` or `*.mdx` file; close pushes, opens the PR and serves
   the preview again, leaving the web preview and Expo running.
   It also runs `bin/br_create.sh` with a stub `br` (the new id's `source_repo_path` is cleared; a local path in the new row warns but still creates).
   It also runs `bin/mutate.sh` (mutant sweep with restore: an apply that does nothing, a restore that

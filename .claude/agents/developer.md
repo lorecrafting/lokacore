@@ -17,7 +17,7 @@ you will mirror. The advisor re-reads the whole conversation at full price: put 
 question in one call, as early as possible, and never ask it to confirm what the brief
 decided.
 
-Work in your own worktree (docs/WORKFLOW.md, Git hygiene). In a new worktree, run [`bin/worktree_setup.sh`](../../bin/worktree_setup.sh) first; it links the main checkout's `node_modules` when `package-lock.json` matches (never run `npm ci` in a linked tree). In a shared worktree, commit with `git commit -- <your own paths>`. Scope: exactly the brief.
+Work in your own worktree, under `worktrees.noindex` next to the repo checkout (docs/WORKFLOW.md, Git hygiene). In a new worktree, run [`bin/worktree_setup.sh`](../../bin/worktree_setup.sh) first; it links the main checkout's `node_modules` when `package-lock.json` matches (never run `npm ci` in a linked tree). In a shared worktree, commit with `git commit -- <your own paths>`. Scope: exactly the brief. Create Beads issues only with `bin/br_create.sh`, never plain `br create` (it leaves a local `source_repo_path` that blocks the Beads commit).
 Anything outside it, or any spec ambiguity, goes back to the PM as a question; two
 normative documents disagreeing means stop and ask. Never edit
 `docs/spec/conformance/*.json` or an expected answer to make a test pass. Propose Book UI
