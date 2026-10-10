@@ -66,17 +66,21 @@ defmodule Loka.Core.C4PackCompositionTest do
         %{"state" => state(c["state"]), "delta" => %{"ops" => ops}}
       end
 
+    ids =
+      ~w(one_container_per_item containment_acyclic no_last_writer_wins
+             delta_preconditions_hold fault_discards_whole_proposal fault_codes_are_evaluation_faults)
+
     ours =
       for input <- cases do
         result = Compose.compose(input["state"], input["delta"])
-        assert Invariants.check("delta_preconditions_hold", Map.put(input, "result", result))
-        %{"result" => result, "invariants" => [true]}
+        assert Enum.all?(ids, &Invariants.check(&1, Map.put(input, "result", result)))
+        %{"result" => result, "invariants" => List.duplicate(true, length(ids))}
       end
 
     path = Path.join(System.tmp_dir!(), "loka-pack-#{System.unique_integer([:positive])}.json")
 
     try do
-      File.write!(path, JSON.encode!(%{"ids" => ~w(delta_preconditions_hold), "cases" => cases}))
+      File.write!(path, JSON.encode!(%{"ids" => ids, "cases" => cases}))
       {theirs, 0} = System.cmd("node", ["kernel/ts/test/differential_peer.ts", path])
       assert theirs == elem(Canonical.encode(ours), 1)
     after

@@ -163,8 +163,9 @@ export function resolved(world: World, actor: CharacterId): ActionSet {
   const fight = fighting(world, actor);
   // Toolbox row 6a: an opted-in roster fight keeps Attack to choose among the members still here
   // (the row's roster is pruned only at round end, rows 6a/6c).
-  const here = fight?.row.active_ids?.filter((id) => eligible(world, fight.row, id));
-  const choosing = !!world.cartridge.world?.combat?.target_choice && (here?.length ?? 0) > 1;
+  const choosing =
+    !!world.cartridge.world?.combat?.target_choice &&
+    (fight?.row.active_ids?.filter((id) => eligible(world, fight.row, id)).length ?? 0) > 1;
   return fight
     ? Object.fromEntries(
         Object.entries(set).filter(
