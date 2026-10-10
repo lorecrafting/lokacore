@@ -2,7 +2,7 @@
 
 - PR #344, branch `toolbox/batch-m2`, head `05a960e5` (kgd.11 commits `4f7ff6f7`..`60a713d6`; the main merge is not reviewed). Save and protocol change, so this record is kept ([two-lane CI](../decisions/owner-decision-two-lane-ci-2026-10-09.md) item 5).
 - Governing: [mechanics.md row 4](../system/mechanics.md#experience-and-levelling-toolbox-row-4), [resource@1](../system/mechanics.md#resource1-kerneltssrcmechanicsresourcets), PM rulings in `loka-kgd.11`.
-- Verdict: **CHANGES REQUIRED** (four mutants survive the focused suite).
+- Verdict: **APPROVE** after fix round 1 (`3f4f0619`); first round CHANGES REQUIRED (four mutants survived the focused suite).
 
 ## Must be true
 
@@ -35,3 +35,11 @@
 ## Open
 
 - `book-ui.md` row 4 text is the designer's to write before the PR is marked ready.
+
+## Re-check: fix round 1 (`3f4f0619`)
+
+Verdict: **APPROVE**. Hosted ci 38018436028 and book-e2e 38018436013 reported green by the coordinator (not re-read: GitHub API rate limit).
+
+- Findings 1-4: the same four mutants rerun against `kernel/ts/test/levelling.test.ts` (baseline green). Each now fails exactly its new test. M2 fails "killing an NPC that kills does not list". M3 fails "points_per_level 2". M1 fails "forged Raise of an unknown attribute". M4 fails "experience saturates". Expected values are literals. The saturation test covers the kill grant only; the reaction `gained` sum is untested, which is accepted as the same `saturate` idiom.
+- Finding 5: `cartridge.md`, `protocol.md` and `save.md` "Levelling recovery" each add one row 4 paragraph that links mechanics.md and matches the code (loader diagnostics, `levelling.set` refusals, fixture, changed-row persistence).
+- Designer text: book-ui.md "Levelling details" matches what shipped (`skills.tsx` `levelLine`, `xpLine`, `RaiseCards`; `buttons.ts` `raiseButtons`; no page note, the status line carries pending). "Worn affects details" retitles the section, and no `worn-item-affects` anchor is left. The BOOK-UI-COMPONENTS.md Action card row names the Raise cards.
