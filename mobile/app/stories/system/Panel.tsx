@@ -1,8 +1,10 @@
 // The Data model detail panel: one contract (or save table) with its fields, owner, sources and
-// 1-hop references and impact; every named contract is a button that selects it.
+// 1-hop references, where it is saved or authored, its impact and a path to another contract; every
+// named contract is a button that selects it.
 import { usePalette } from '../../book/palette.ts';
 import { space } from '../../book/tokens.ts';
-import { contracts, graph, repo, type Contract } from './graph.ts';
+import { useId, useState } from 'react';
+import { contracts, graph, path, repo, type Contract } from './graph.ts';
 import { Sections } from './Save.tsx';
 import { cell, Link, Prose } from './ui.tsx';
 
@@ -120,6 +122,72 @@ function Impact({ name, onSelect }: { name: string; onSelect: Select }) {
   );
 }
 
+// Path finding: the reference chain from the selection to a contract typed or picked here.
+function PathTo({ from, onSelect }: { from: string; onSelect: Select }) {
+  const [to, setTo] = useState('');
+  const list = useId();
+  const chain = contracts.has(to) ? path(from, to) : undefined;
+  return (
+    <div>
+      <label>
+        Path to <input list={list} value={to} onChange={(e) => setTo(e.target.value)} />
+      </label>
+      <datalist id={list}>
+        {graph.nodes.map((n) => (
+          <option key={n.name} value={n.name} />
+        ))}
+      </datalist>
+      {chain === null && (
+        <p>
+          No reference path from {from} to {to}.
+        </p>
+      )}
+      {chain && (
+        <p aria-label="Path">
+          {chain.map((s, i) => (
+            <span key={s}>
+              {i ? ' → ' : ''}
+              <Go to={s} onSelect={onSelect} />
+            </span>
+          ))}
+        </p>
+      )}
+    </div>
+  );
+}
+
+// Where the contract lives outside protocol/: its save sections and authored cartridge files.
+const Homes = ({ n, onSelect }: { n: Contract; onSelect: Select }) => (
+  <>
+    {n.saved && (
+      <p>
+        Saved in: <Go to="state_row" onSelect={onSelect} /> › {n.saved.join(', ')}
+      </p>
+    )}
+    {n.authored && n.authored.length > 0 && (
+      <details>
+        <summary>Authored in cartridges ({n.authored.length})</summary>
+        <ul>
+          {n.authored.map((f) => (
+            <li key={f}>
+              <Link href={repo(f)}>{f}</Link>
+            </li>
+          ))}
+        </ul>
+      </details>
+    )}
+  </>
+);
+
+// Where the contract is kept, what a change to it reaches, and a path to another one.
+const Reach = ({ n, onSelect }: { n: Contract; onSelect: Select }) => (
+  <>
+    <Homes n={n} onSelect={onSelect} />
+    <Impact name={n.name} onSelect={onSelect} />
+    <PathTo from={n.name} onSelect={onSelect} />
+  </>
+);
+
 const Examples = ({ examples }: { examples: unknown[] }) => (
   <details>
     <summary>Examples ({examples.length})</summary>
@@ -164,7 +232,7 @@ export function Panel({ name, onSelect }: { name: string; onSelect: Select }) {
         names={graph.edges.filter((e) => e.to === name).map((e) => e.from)}
         onSelect={onSelect}
       />
-      <Impact name={name} onSelect={onSelect} />
+      <Reach n={n} onSelect={onSelect} />
       {n.examples && <Examples examples={n.examples} />}
     </aside>
   );
