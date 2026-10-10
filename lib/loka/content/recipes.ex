@@ -76,13 +76,13 @@ defmodule Loka.Content.Recipes do
         do: (acc -> reserve(acc, key))
   end
 
+  def tip_facts(skipped, _), do: skipped
+
   defp reserve({facts, ds}, key) do
     name = "seen_tip_" <> key
     authored = for {rel, steps, _} <- [facts[name]], do: diag("RESERVED_FACT", at(rel, steps))
     {Map.put(facts, name, {"cartridge.json", [], tip_spec(key)}), ds ++ authored}
   end
-
-  def tip_facts(skipped, _), do: skipped
 
   # A tip resolves, needs fact@1 (its fact_changed), kernel_api 1.46 and a key that leaves room
   # for seen_tip_ in a 64-character Key.

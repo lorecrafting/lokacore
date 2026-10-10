@@ -23,10 +23,8 @@ export const tipSpec = (key: string) => ({
 // actor names an NPC or item of it, as its role says; each key of
 // a room's action contribution names an engine verb (a registered command), an action or a
 // recipe of this cartridge (UNRESOLVED_REFERENCE, data {target}: the detail or action key).
-// Toolbox row W23: a tip resolves and needs kernel_api 1.46 (a tipped key over 55 characters
-// fails the schema at its seen_tip_ FactSpec).
 export function recipes(c: Obj, { named, typedValue, text }: Checks): Diagnostic[] {
-  const out: Diagnostic[] = [];
+  const out: Diagnostic[] = tips(c, text);
   const taken = new Set([
     ...reservedCommands(c),
     ...Object.values(c.actions as Obj).map((a) => a.key),
@@ -61,11 +59,7 @@ export function recipes(c: Obj, { named, typedValue, text }: Checks): Diagnostic
         if (p.role !== 'actor')
           named(p[p.role], p.role, `${path}.narration.participants${step(n)}.${p.role}`);
     }
-    text(r, ['label', 'tip'], at);
-    if (r.tip && apiCmp(c.manifest.requires.kernel_api.at_least, '1.46') < 0)
-      out.push(
-        diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'),
-      );
+    text(r, ['label'], at);
   }
   return [...out, ...contributions(c), ...attributes(c, { named, text, typedValue })];
 }
@@ -121,3 +115,24 @@ function reservedCommands(c: Obj): string[] {
       apiCmp(c.manifest.requires.kernel_api.at_least, '1.37') >= 0,
   );
 }
+
+// Toolbox row W23: a recipe's tip resolves and needs kernel_api 1.46 (a tipped key over 55
+// characters fails the schema at its seen_tip_ FactSpec).
+function tips(c: Obj, text: Checks['text']): Diagnostic[] {
+  const tipped = Object.entries((c.recipes ?? {}) as Obj).filter(([, r]) => r.tip);
+  const out: Diagnostic[] = [];
+  for (const [ref, r] of tipped) text(r, ['tip'], `.cartridge.recipes${step(ref)}`);
+  if (tipped.length && apiCmp(c.manifest.requires.kernel_api.at_least, '1.46') < 0)
+    out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
+  return out;
+}
+
+/** A tip's seen_tip_<key> assignment uses fact_changed (the lock stage, content/cartridge.ts). */
+export const tipUses = (c: Obj) =>
+  Object.entries((c.recipes ?? {}) as Obj)
+    .filter(([, r]) => r.tip)
+    .map(([ref]) => ['event', 'fact_changed', `.cartridge.recipes${step(ref)}.tip`]) as [
+    'event',
+    string,
+    string,
+  ][];
