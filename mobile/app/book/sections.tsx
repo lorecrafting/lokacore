@@ -162,7 +162,7 @@ export function CarryingPage(p: {
                 {item ? (
                   <EntityLine name={p.text(item.name)} onPress={() => p.open(item.id)} />
                 ) : (
-                  <Text style={note(c)}>Empty</Text>
+                  <Note>Empty</Note>
                 )}
               </View>
             ))}

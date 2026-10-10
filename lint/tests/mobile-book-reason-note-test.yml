@@ -1,8 +1,9 @@
 id: mobile-book-reason-note
 valid:
-  - "const f = <ActionCard label={p.text(o.label)} reason={why(o, p.text)} />;"
-  - "const said = `${e.direction} · ${why(e, p.text)}`;"
+  - 'const f = <ActionCard label={p.text(o.label)} reason={why(o, p.text)} />;'
+  - 'const said = `${e.direction} · ${why(e, p.text)}`;'
 invalid:
-  - "const f = <Text style={note(c)}>{`${p.text(o.label)}: ${why(o, p.text)}`}</Text>;"
-  - "const f = <Text style={note(c)}>{cap(e.direction)}{!e.available && `: ${why(e, p.text)}`}</Text>;"
+  - 'const f = <Note>{`${label}: ${why(o, text)}`}</Note>;'
+  - 'const f = <Text style={note(c)}>{`${p.text(o.label)}: ${why(o, p.text)}`}</Text>;'
+  - 'const f = <Text style={note(c)}>{cap(e.direction)}{!e.available && `: ${why(e, p.text)}`}</Text>;'
   - "const f = <Text style={note(c)}>{text(a.label)}: {reason('too_heavy')}.</Text>;"

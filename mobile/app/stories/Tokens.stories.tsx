@@ -58,7 +58,7 @@ function Type() {
     <View style={{ padding: space.page, gap: space.block }}>
       {Object.entries(type).map(([name, style]) => (
         <View key={name}>
-          <Text style={{ ...type.body, ...style, color: c.fg }}>
+          <Text style={{ ...('fontFamily' in style ? {} : type.body), ...style, color: c.fg }}>
             The lantern swings over the gate
           </Text>
           <Text style={{ ...type.small, color: c.dim }}>

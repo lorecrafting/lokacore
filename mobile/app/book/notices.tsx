@@ -154,7 +154,7 @@ export function NoticePage(
       )}
       <Cards>
         {('actions' in detail ? (detail.actions ?? []) : []).map((o) =>
-          offerControl(c, p, detail.id, o),
+          offerControl(p, detail.id, o),
         )}
       </Cards>
       {'dream' in detail && <DreamResume detail={detail} open={p.open} />}
@@ -171,7 +171,7 @@ function foot(p: Props & { world: () => void; back: () => void }, board: boolean
 }
 
 // A notice's offered action: its live button, or why it is unavailable.
-function offerControl(c: Palette, p: Props, id: string, offer: Offer) {
+function offerControl(p: Props, id: string, offer: Offer) {
   const button = p.screen.buttons.find(
     (b) =>
       b.detail_id === id &&

@@ -8,5 +8,5 @@ rule:
   has: { field: function, regex: '^(why|reason)$' }
   inside:
     kind: jsx_element
-    has: { field: open_tag, has: { field: name, regex: '^Text$' } }
+    has: { field: open_tag, has: { field: name, regex: '^(Text|Note)$' } }
     stopBy: end
