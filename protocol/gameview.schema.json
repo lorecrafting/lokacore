@@ -818,7 +818,7 @@
       ]
     },
     "QuestView": {
-      "description": "A journal entry (04 §15 'quest journal state'; 00 §4.10 Journal). Optional journal is the selected TextKey iff its definition declares journal (mechanics.md quest@1). Optional hint (toolbox row W23): the stage hint whose time has passed, while the instance is open and its row has started_at.",
+      "description": "A journal entry (04 §15 'quest journal state'; 00 §4.10 Journal). Optional journal is the selected TextKey iff its definition declares journal (mechanics.md quest@1). Optional hint (toolbox row W23): the stage hint whose time has passed, while the instance is open and its row has started_at. Optional remaining (toolbox row W24): logical time until a generic deadline's pending job is due, while the instance is open; absent for legacy deadlines.",
       "type": "object",
       "properties": {
         "quest": {
@@ -936,6 +936,10 @@
         },
         "hint": {
           "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "remaining": {
+          "type": "integer",
+          "minimum": 1
         }
       },
       "required": [

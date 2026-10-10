@@ -46,7 +46,15 @@ export function journal(world: World, steps: Steps): QuestView[] {
       const progress = patrolProgress(world, id, steps);
       const expedition = expeditionProgress(world, id);
       const d = world.cartridge.quests![refString(q.quest)];
-      const shown = { ...progress, ...expedition, quest: q.quest, state: q.state, title: d.title };
+      const left = remaining(world, id, q);
+      const shown = {
+        ...progress,
+        ...expedition,
+        quest: q.quest,
+        state: q.state,
+        title: d.title,
+        ...(left !== undefined && { remaining: left }),
+      };
       const j = d.journal;
       if (!j) return shown;
       const variant =
@@ -83,6 +91,17 @@ function hint(world: World, q: QuestRow, hints: NonNullable<QuestJournal['hints'
   return hints.filter((x) => x.after * 60 * rate <= world.state.clock - q.started_at!).pop()?.text;
 }
 const OPEN = ['active', 'objectives_complete'];
+
+// Toolbox row W24: logical time until the open instance's pending generic deadline job is due
+// (legacy deadlines show none, so Chapter 1 views keep their bytes).
+function remaining(world: World, id: string, q: QuestRow) {
+  const d = world.cartridge.quests![refString(q.quest)].deadline;
+  if (!d || d.fact || !OPEN.includes(q.state)) return;
+  const job = Object.values(world.state.jobs ?? {}).find(
+    (j) => j.quest_instance_id === id && j.status === 'pending',
+  );
+  return job && job.due_time - world.state.clock;
+}
 
 function expeditionProgress(world: World, id: string) {
   const row = world.state.expeditions?.[id];

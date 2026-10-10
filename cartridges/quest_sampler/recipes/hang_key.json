@@ -1,0 +1,34 @@
+{
+  "label": "actions.hang_key",
+  "aliases": [
+    "hang"
+  ],
+  "target": {
+    "kind": "detail",
+    "room": "hall",
+    "detail": "hook"
+  },
+  "priority": 10,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "quest_state",
+      "quest": "find_key",
+      "state": "objectives_complete"
+    }
+  },
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "key_hung",
+          "value": true
+        }
+      ],
+      "narration": {
+        "actor": "narration.hang_key"
+      }
+    }
+  }
+}

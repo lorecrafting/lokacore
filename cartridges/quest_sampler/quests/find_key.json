@@ -14,6 +14,10 @@
     "evidence": "post_activation_event",
     "item_acquired": "key"
   },
+  "deadline": {
+    "after": 120000,
+    "outcome": "late"
+  },
   "journal": {
     "active": "quest.find_key.active",
     "objectives_met": "quest.find_key.found",

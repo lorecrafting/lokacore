@@ -1,55 +1,31 @@
-// Toolbox row W24 on a compiled quest_sampler copy (one real minute is 3000 logical units): find_key
-// gets a generic deadline of ten minutes, a quest_failed reaction that notes the lateness and a
-// fact_changed reaction that resolves the quest when the floor is searched.
+// Toolbox row W24 on the compiled quest_sampler (one real minute is 3000 logical units): find_key
+// fails `late` forty minutes after acceptance; reactions/late.json lowers keeper_trust to 0 and
+// reactions/hung.json resolves the quest when recipes/hang_key.json assigns key_hung.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
-import { INSTALLED, loadCartridge, newWorld, step, stepElapsed } from '../src/index.ts';
+import { gameView, INSTALLED, loadCartridge, newWorld, step, stepElapsed } from '../src/index.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { begun } from '../src/mechanics/quest/lifecycle.ts';
+import { value } from '../src/mechanics/fact.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import type { Obj } from '../src/content/cartridge_refs.ts';
 
 const MINUTE = 3000;
-const root = fileURLToPath(new URL('../../../', import.meta.url));
 const scratch = mkdtempSync(join(tmpdir(), 'loka-quest-deadline-'));
 let compiled: Obj;
 try {
-  const dir = join(scratch, 'quest_sampler');
-  cpSync(join(root, 'cartridges/quest_sampler'), dir, { recursive: true });
-  const edit = (file: string, change: (j: Obj) => void) => {
-    const j = JSON.parse(readFileSync(join(dir, file), 'utf8'));
-    change(j);
-    writeFileSync(join(dir, file), JSON.stringify(j));
-  };
-  edit('cartridge.json', (j) => (j.requires.capabilities.reaction = 1));
-  edit('facts.json', (j) => {
-    j.facts.late_noted = { ...j.facts.floor_searched, meaning: 'The key came too late.' };
-  });
-  edit('quests/find_key.json', (j) => (j.deadline = { after: 10 * MINUTE, outcome: 'late' }));
-  const reactions = join(dir, 'reactions');
-  mkdirSync(reactions);
-  const late = { event: 'quest_failed', quest: 'find_key', outcome: 'late' };
-  const resolve = { event: 'fact_changed', fact: 'floor_searched' };
-  writeFileSync(
-    join(reactions, 'late.json'),
-    JSON.stringify({ on: late, apply: [{ op: 'fact.assign', fact: 'late_noted', value: true }] }),
-  );
-  writeFileSync(
-    join(reactions, 'searched.json'),
-    JSON.stringify({
-      on: resolve,
-      apply: [{ op: 'quest.resolve', quest: 'find_key', outcome: 'done' }],
-    }),
-  );
   const file = join(scratch, 'artifact.json');
-  execFileSync('mix', ['loka.compile', dir, file], { cwd: root, stdio: 'pipe' });
+  execFileSync('mix', ['loka.compile', 'cartridges/quest_sampler', file], {
+    cwd: fileURLToPath(new URL('../../../', import.meta.url)),
+    stdio: 'pipe',
+  });
   compiled = JSON.parse(readFileSync(file, 'utf8')).cartridge;
 } finally {
   rmSync(scratch, { recursive: true });
@@ -107,39 +83,55 @@ function wait(w: World, minutes: number, kind = 'accepted') {
   return { w: r.world, events: all.map((e) => e.payload), all };
 }
 const row = (w: World) => Object.values(w.state.quests ?? {})[0]!;
-const lateNoted = (w: World) =>
-  Object.entries(w.state.facts ?? {}).some(([k, v]) => k.includes('late_noted') && v === true);
+// keeper_trust (facts.json default 2), lowered to 0 by reactions/late.json.
+const trust = (w: World) =>
+  value(w, w.character, { ...quest, kind: 'fact', key: 'keeper_trust' } as never);
 const failedEvents = (events: readonly { type: string }[]) =>
   events.filter((e) => e.type === 'quest_failed');
 
 // Breaks: the job due from started_at (taking the key at five re-stamps it, so it would fail at
-// fifteen), no job scheduled, the instance not failed or failed without its outcome, no
-// quest_failed event or one the reaction trigger does not match (no late_noted).
+// forty-five), no job scheduled, the instance not failed or failed without its outcome, no
+// quest_failed event or one the reaction trigger does not match (trust stays 2).
 test('a generic deadline fails the open quest at activation plus after, and a reaction penalises', () => {
   let w = wait(play(fresh(), { type: 'accept_quest', quest }), 5).w;
   w = play(w, { type: 'take', item_id: w.entityIds['quest_sampler@0.0.1:item/key'] });
   assert.equal(row(w).state, 'objectives_complete');
-  let r = wait(w, 4);
+  let r = wait(w, 34);
   assert.equal(row(r.w).state, 'objectives_complete');
   assert.deepEqual(failedEvents(r.events), []);
   r = wait(r.w, 1);
   assert.deepEqual([row(r.w).state, row(r.w).outcome], ['failed', 'late']);
   const [failed] = failedEvents(r.events) as unknown as [{ quest: Obj; outcome: string }];
   assert.deepEqual([failed.quest.key, failed.outcome], ['find_key', 'late']);
-  assert.ok(lateNoted(r.w));
+  assert.equal(trust(r.w), 0);
+});
+
+// Breaks: the countdown read from started_at (taking the key re-stamps it: 40 minutes again), from
+// a stale job once the quest is resolved, or shown for a legacy deadline (Chapter 1 view bytes).
+test('the Journal counts down to the generic deadline job while the quest is open', () => {
+  const left = (w: World) => gameView(w).journal[0]!.remaining;
+  let w = play(fresh(), { type: 'accept_quest', quest });
+  assert.equal(left(w), 40 * MINUTE);
+  w = wait(w, 5).w;
+  w = play(w, { type: 'take', item_id: w.entityIds['quest_sampler@0.0.1:item/key'] });
+  assert.equal(left(w), 35 * MINUTE);
+  assert.equal(left(play(w, { type: 'perform', action: 'hang_key' })), undefined);
+  // The same pending job under a legacy deadline (it has a fact).
+  const def = w.cartridge.quests![QUEST]!;
+  const fact = { ...quest, kind: 'fact', key: 'key_hung' };
+  const legacy = { ...def, deadline: { ...def.deadline!, fact } };
+  const quests = { ...w.cartridge.quests, [QUEST]: legacy };
+  assert.equal(left({ ...w, cartridge: { ...w.cartridge, quests } } as World), undefined);
 });
 
 // Break: a missing or closed instance faults the job (precondition_failed) or fails it anyway.
 test('a deadline job of a quest resolved earlier only completes', () => {
   let w = play(fresh(), { type: 'accept_quest', quest });
   w = play(w, { type: 'take', item_id: w.entityIds['quest_sampler@0.0.1:item/key'] });
-  w = play(w, { type: 'perform', action: 'search_floor' });
+  w = play(w, { type: 'perform', action: 'hang_key' });
   assert.equal(row(w).state, 'resolved');
-  const r = wait(w, 11);
-  assert.deepEqual(
-    [row(r.w).state, failedEvents(r.events), lateNoted(r.w)],
-    ['resolved', [], false],
-  );
+  const r = wait(w, 41);
+  assert.deepEqual([row(r.w).state, failedEvents(r.events), trust(r.w)], ['resolved', [], 2]);
   assert.deepEqual(
     Object.values(r.w.state.jobs ?? {})
       .filter((j) => j.quest_instance_id)
@@ -169,7 +161,7 @@ test('a deadline job whose instance is gone only completes', () => {
   const [id, job] = Object.entries(w.state.jobs ?? {}).find(([, j]) => j.quest_instance_id)!;
   const quests = { ...w.state.quests };
   delete quests[job.quest_instance_id!];
-  const r = wait({ ...w, state: { ...w.state, quests } } as World, 11);
+  const r = wait({ ...w, state: { ...w.state, quests } } as World, 41);
   assert.deepEqual([r.w.state.jobs?.[id]?.status, failedEvents(r.events)], ['completed', []]);
 });
 
@@ -182,32 +174,40 @@ test('a deadline job bound to another actor faults', () => {
     ...w,
     state: { ...w.state, jobs: { ...w.state.jobs, [id]: { ...job, actor_id: other } } },
   };
-  wait(forged as World, 11, 'fault');
+  wait(forged as World, 41, 'fault');
 });
 
-// Break: the horizon read from the clock alone, so an activation inside an advance schedules a job
-// at or before the advance target (nonfuture_job faults the proposal).
-test('a deadline due inside the proposal advance is scheduled one past its target', () => {
-  const w = fresh((c) => (c.quests[QUEST].deadline = { after: 1, outcome: 'late' }));
-  const activate = {
-    op: 'quest.activate',
-    writer_group: 3,
-    quest,
-    scope: { kind: 'player', character_id: w.character },
-    instance_id: 'q1',
-  } as const;
+// Breaks: the horizon read from the clock alone, so an activation inside an advance schedules a job
+// at or before the advance target (nonfuture_job faults the proposal); the due time counted from
+// the clock instead of the cause time (a reaction activating at t > clock expires early).
+test('a deadline is due at cause time plus after, never inside the proposal advance', () => {
   const advance = { op: 'time.advance', writer_group: 0, from: 0, to: 500 } as const;
-  let k = 0;
-  const ops = begun(w, [activate as never], 10, [advance], () => `j${k++}`);
-  assert.deepEqual(ops[1], {
-    op: 'job.schedule',
-    writer_group: 3,
-    job_id: 'j0',
-    job: quest,
-    due_time: 501,
-    quest_instance_id: 'q1',
-    actor_id: w.character,
-  });
+  const rows = [
+    [1, [advance], 501],
+    [100, [], 110],
+  ] as const;
+  for (const [after, prior, due_time] of rows) {
+    const w = fresh((c) => (c.quests[QUEST].deadline = { after, outcome: 'late' }));
+    const activate = {
+      op: 'quest.activate',
+      writer_group: 3,
+      quest,
+      scope: { kind: 'player', character_id: w.character },
+      instance_id: 'q1',
+    } as const;
+    let k = 0;
+    const ops = begun(w, [activate as never], 10, prior, () => `j${k++}`);
+    assert.equal(w.state.clock, 0);
+    assert.deepEqual(ops[1], {
+      op: 'job.schedule',
+      writer_group: 3,
+      job_id: 'j0',
+      job: quest,
+      due_time,
+      quest_instance_id: 'q1',
+      actor_id: w.character,
+    });
+  }
 });
 
 // Breaks (loader twin of test/loka/content_quest_deadline_test.exs): a mixed legacy and generic
