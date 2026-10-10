@@ -702,6 +702,19 @@
           ],
           "additionalProperties": false,
           "description": "An accepted actor-owned Rest after prior-rate settlement, at its actual body/room."
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "clock_hour"
+            }
+          },
+          "required": [
+            "type"
+          ],
+          "additionalProperties": false,
+          "description": "The world's calendar job crossed one or more game-hour boundaries in one settlement (toolbox row W25): one event at the committed clock, never one per elapsed hour."
         }
       ],
       "examples": [

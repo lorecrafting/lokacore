@@ -20615,5 +20615,74 @@
         "code": "missing_property"
       }
     ]
+  },
+  {
+    "name": "wearing_unknown_tag",
+    "contract": "Policy",
+    "value": {
+      "op": "wearing",
+      "tag": "wool"
+    },
+    "errors": [
+      {
+        "path": "/tag",
+        "code": "not_in_enum"
+      }
+    ]
+  },
+  {
+    "name": "wearing_no_tag_extra",
+    "contract": "Policy",
+    "value": {
+      "op": "wearing",
+      "subject": "room"
+    },
+    "errors": [
+      {
+        "path": "/subject",
+        "code": "unknown_property"
+      },
+      {
+        "path": "/tag",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "trigger_clock_hour_filter",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "clock_hour",
+        "room": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "fell"
+        }
+      },
+      "apply": []
+    },
+    "errors": [
+      {
+        "path": "/on/room",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "clock_hour_payload_extra",
+    "contract": "EventPayload",
+    "value": {
+      "type": "clock_hour",
+      "hour": 3
+    },
+    "errors": [
+      {
+        "path": "/hour",
+        "code": "unknown_property"
+      }
+    ]
   }
 ]

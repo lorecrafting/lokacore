@@ -12,6 +12,7 @@ import {
   natural,
 } from './elapsed-store.ts';
 import { needsAncestry } from '../../../kernel/ts/src/commands/actions.ts';
+import { CLOCK_JOB } from '../../../kernel/ts/src/mechanics/schedule/behavior.ts';
 import { adopt, type Story } from './save.ts';
 import { identityOf, persistElapsed, reconcile, transaction } from './store.ts';
 
@@ -62,7 +63,8 @@ function boundary(s: Story, target: number): number {
   for (const job of Object.values(s.world.state.jobs ?? {})) {
     if (job.status !== 'pending') continue;
     if (job.due_time <= s.world.state.clock) throw new Error('already-due job; recovery required');
-    until = Math.min(until, job.due_time);
+    // The calendar job (toolbox row W25) runs in whichever step passes it, once: never a stop.
+    if (job.job.kind !== CLOCK_JOB) until = Math.min(until, job.due_time);
   }
   return until;
 }

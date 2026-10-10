@@ -22,7 +22,7 @@ import {
   type World,
 } from '../../runtime/decision.ts';
 import type { DeltaOp, JobId } from '../../contracts.gen.ts';
-import { entered, hourOf, jobId, nextHour, scheduleOf } from './behavior.ts';
+import { CLOCK_JOB, entered, hourOf, jobId, nextHour, runClock, scheduleOf } from './behavior.ts';
 import { assigned, adjusted } from '../fact.ts';
 import { runPopulation } from '../population/shared.ts';
 import { binding as crowBinding, runCrow } from '../crow/behavior.ts';
@@ -46,6 +46,7 @@ export const decide: Rule<'schedule'> = (world, command, mint, steps = { n: 0 })
       return runCrow(world, command, payload.job_id, row, crowBinding(world, payload.job_id), mint);
     if (row.sight) return runSight(world, payload.job_id, row, steps);
 
+    if (row.job.kind === CLOCK_JOB) return runClock(world, command, payload.job_id, row, mint);
     if (row.job.kind === 'population')
       return runPopulation(world, command, payload.job_id, row, mint);
     return scheduledJob(world, command, payload.job_id, row, mint);

@@ -3,10 +3,10 @@
 import type { CharacterId, DeltaOp, LevellingRow, Text } from '../../contracts.gen.ts';
 import { saturate } from '../../foundation/int.ts';
 import type { World } from '../../runtime/decision.ts';
+import { statusKey } from '../status/shared.ts';
 
 const NONE: LevellingRow = { experience: 0, allocated: {} };
 
-type Set = Extract<DeltaOp, { op: 'levelling.set' }>;
 type Spec = NonNullable<NonNullable<World['cartridge']['world']>['levelling']>;
 /** How many thresholds `experience` has reached (the level minus 1). */
 const reached = (spec: Spec, experience: number) =>
@@ -38,24 +38,37 @@ export function levelUp(world: World, ops: readonly DeltaOp[]): Text[] {
   return reached(spec, last.value.experience) > reached(spec, from) ? [{ key: spec.level_up }] : [];
 }
 
+// The rows a proposal writes at most once (compose faults a row written by two groups): a
+// character's levelling (row 4) and a body's status (row 1: a due tick and a clock_hour refresh,
+// row W25, can land in one settlement).
+const merged = (o: DeltaOp) =>
+  o.op === 'levelling.set'
+    ? `levelling:${o.character_id}`
+    : o.op === 'status.transition'
+      ? statusKey(o.body_id, o.status)
+      : undefined;
+type Merged = Extract<DeltaOp, { op: 'levelling.set' | 'status.transition' }>;
+
 /**
- * One levelling write per character per proposal (row 4; compose faults a row written by two
- * groups): each character's last write, which already holds every earlier grant, expecting the
- * row before the first. A single write is returned unchanged.
+ * One write per merged row per proposal: each row's last write, which already holds every
+ * earlier one (each sequence reads the proposal so far), expecting the row before the first.
+ * A single write is returned unchanged.
  */
 export function oneWrite(ops: readonly DeltaOp[]): DeltaOp[] {
-  const first = new Map<CharacterId, Set>();
-  const last = new Map<CharacterId, Set>();
-  for (const o of ops)
-    if (o.op === 'levelling.set') {
-      if (!first.has(o.character_id)) first.set(o.character_id, o);
-      last.set(o.character_id, o);
-    }
+  const first = new Map<string, Merged>();
+  const last = new Map<string, Merged>();
+  for (const o of ops) {
+    const k = merged(o);
+    if (!k) continue;
+    if (!first.has(k)) first.set(k, o as Merged);
+    last.set(k, o as Merged);
+  }
   return ops.flatMap((o): DeltaOp[] => {
-    if (o.op !== 'levelling.set') return [o];
-    if (last.get(o.character_id) !== o) return [];
-    const { expected } = first.get(o.character_id)!;
-    return [expected === o.expected ? o : { ...o, expected }];
+    const k = merged(o);
+    if (!k) return [o];
+    if (last.get(k) !== o) return [];
+    const { expected } = first.get(k)!;
+    return [expected === (o as Merged).expected ? o : ({ ...o, expected } as DeltaOp)];
   });
 }
 

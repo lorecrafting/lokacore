@@ -1,0 +1,36 @@
+{
+  "on": {
+    "event": "entity_entered_room",
+    "room": "fell"
+  },
+  "when": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": [
+        {
+          "op": "sky",
+          "weather": "heat"
+        },
+        {
+          "op": "has_tag",
+          "subject": "room",
+          "tag": "exposed"
+        },
+        {
+          "op": "not",
+          "item": {
+            "op": "wearing",
+            "tag": "cool"
+          }
+        }
+      ]
+    }
+  },
+  "apply": [
+    {
+      "op": "status.apply",
+      "status": "overheated"
+    }
+  ]
+}

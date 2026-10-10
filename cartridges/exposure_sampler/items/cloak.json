@@ -1,0 +1,17 @@
+{
+  "keywords": [
+    "cloak"
+  ],
+  "short": "item.cloak.short",
+  "room_line": "item.cloak.room",
+  "description": "item.cloak.description",
+  "location": {
+    "in": "room",
+    "room": "inn"
+  },
+  "mass_grams": 500,
+  "slot": "cloak",
+  "tags": [
+    "warm"
+  ]
+}

@@ -1520,3 +1520,7 @@ Compiler/loader validate resolved item/nest/population/corpse/room refs, a nonem
 ## Pick and force declarations
 
 [Pick and force a barrier](mechanics.md#pick-and-force-a-barrier-toolbox-rows-13-and-g12) adds no field: a barrier source file declares `initial: "closed"` (a keyless `locked` barrier in reach is BARRIER_UNREACHABLE_KEY) and an `opens_when` reading an instance bool fact; the pick or force is a recipe on a room detail with a `rating` and an `opposed` check, as the [time gate](#time-gate-declarations), [skill growth and rating](#skill-growth-and-rating-declarations) and [tag](#tag-declarations) declarations already check. `kernel_api` at least **1.45** (for `opens_when`). Sampler: `cartridges/barrier_sampler`.
+
+## Exposure declarations
+
+[Exposure](mechanics.md#exposure-cold-hot-damp-and-windy-toolbox-row-w25) adds no definition field: an item declares `warm`, `cool`, `waterproof` or `windproof` in its `tags` ([tag declarations](#tag-declarations)), a reaction's `on` may be `{"event": "clock_hour"}` (no filters; its owner schedule@1 must be required), and a policy may use `wearing {tag}` (owner equipment@1). Either needs `kernel_api` at least **1.46** (KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least`) in the compiler (`lib/loka/content/exposure.ex`) and the loader (`kernel/ts/src/content/cartridge_exposure.ts`). Sampler: `cartridges/exposure_sampler`.

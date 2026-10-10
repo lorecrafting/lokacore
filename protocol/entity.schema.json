@@ -323,12 +323,16 @@
       "description": "A property tag (toolbox row G1): a closed engine vocabulary, so every mechanic that gives a tag meaning and every cartridge that declares one share its spelling. Item, barrier and room definitions declare tags; the has_tag policy leaf (tags@1) reads them. A row whose mechanic needs a new tag adds it here.",
       "enum": [
         "burnable",
+        "cool",
         "exposed",
         "fragile",
         "liquid_holding",
         "metal",
         "sharp",
         "silver",
+        "warm",
+        "waterproof",
+        "windproof",
         "wooden"
       ],
       "examples": [
@@ -378,6 +382,9 @@
         "burnable": {
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
+        "cool": {
+          "$ref": "entity.schema.json#/$defs/ResistancePercent"
+        },
         "exposed": {
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
@@ -394,6 +401,15 @@
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
         "silver": {
+          "$ref": "entity.schema.json#/$defs/ResistancePercent"
+        },
+        "warm": {
+          "$ref": "entity.schema.json#/$defs/ResistancePercent"
+        },
+        "waterproof": {
+          "$ref": "entity.schema.json#/$defs/ResistancePercent"
+        },
+        "windproof": {
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
         "wooden": {
