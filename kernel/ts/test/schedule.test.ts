@@ -139,7 +139,8 @@ test('wait to 19:00 moves Bram to the green through his job; 18:59 does not', ()
 
 // Breaks: the successor scheduled inside the advance (the wait faults nonfuture_job, loka-qi0r),
 // crossed hours collapsed into one move (Bram never seen at the green), the steps out of hour
-// order, an hour run twice or skipped, or the last step not scheduling the job after the target.
+// order, an hour run twice or skipped, the last step not scheduling the job after the target, or a
+// crossed hour queued after later or equal-time jobs instead of in (due_time, job_id) order.
 test('one wait across two or three listed hours runs each hour in order', () => {
   const w = world();
   const arrivals = (d: ReturnType<typeof wait>['decision']) =>
@@ -167,6 +168,24 @@ test('one wait across two or three listed hours runs each hour in order', () => 
   assert.deepEqual(pending(three.world), [H(54)]);
   assert.equal(three.world.state.jobs?.[J0]?.status, 'completed');
   assert.deepEqual(wait(w, H(43)), three);
+  // Ada (landing from 06:00, green from 20:00; her job id sorts first): 06:00 ties go to her.
+  const wa = withAda({ '6': landing, '20': green });
+  const both = wait(wa, H(30)).decision;
+  assert.deepEqual(
+    both.kind === 'accepted' &&
+      both.events.map((e) => [
+        e.logical_time,
+        (e.payload as { entity_id: string }).entity_id === wa.entityIds[`${F}:npc/bram`]
+          ? 'bram'
+          : 'ada',
+      ]),
+    [
+      [H(19), 'bram'],
+      [H(20), 'ada'],
+      [H(30), 'ada'],
+      [H(30), 'bram'],
+    ],
+  );
   // Each crossed hour is a drain step under due_jobs_per_advance (1024): 513 days is 1026.
   const long = wait(w, H(6 + 24 * 513));
   assert.deepEqual(
