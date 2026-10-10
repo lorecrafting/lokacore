@@ -45,17 +45,20 @@ defmodule Loka.Content.Levelling do
 
   @path ["world", "levelling"]
 
-  defp owner(%{"requires" => %{"capabilities" => %{"attributes" => 1}}}), do: []
-
-  defp owner(_),
-    do: [
-      diag(
-        "UNDECLARED_CAPABILITY",
-        at("cartridge.json", @path),
-        %{"capability" => "attributes"},
-        ["attributes@1"]
-      )
-    ]
+  defp owner(m) do
+    if m["requires"]["capabilities"]["attributes"] == 1,
+      do: [],
+      else: [
+        diag(
+          "UNDECLARED_CAPABILITY",
+          at("cartridge.json", @path),
+          %{"capability" => "attributes"},
+          [
+            "attributes@1"
+          ]
+        )
+      ]
+  end
 
   defp rising(thresholds) do
     for {[a, b], i} <- Enum.with_index(Enum.chunk_every(thresholds, 2, 1, :discard), 1),

@@ -24,16 +24,17 @@ export function levelling(world: World, actor: CharacterId) {
 }
 
 /**
- * The cartridge's level_up line when `ops` (a whole proposal) raise the player character's level:
- * the first write's expected row against the last write's value (mechanics.md row 4).
+ * The cartridge's level_up line when `ops` (a whole proposal from `world`) raise the player
+ * character's level: the stored row against the last write's value (mechanics.md row 4).
  */
 export function levelUp(world: World, ops: readonly DeltaOp[]): Text[] {
   const spec = world.cartridge.world?.levelling;
-  const sets = ops.filter((o) => o.op === 'levelling.set' && o.character_id === world.character);
-  const [first, last] = [sets[0], sets.at(-1)] as Extract<DeltaOp, { op: 'levelling.set' }>[];
-  if (!spec || !first || !last) return [];
-  const up = reached(spec, last.value.experience) > reached(spec, first.expected?.experience ?? 0);
-  return up ? [{ key: spec.level_up }] : [];
+  const last = ops
+    .filter((o) => o.op === 'levelling.set' && o.character_id === world.character)
+    .at(-1);
+  if (!spec || last?.op !== 'levelling.set') return [];
+  const from = world.state.levelling?.[world.character]?.experience ?? 0;
+  return reached(spec, last.value.experience) > reached(spec, from) ? [{ key: spec.level_up }] : [];
 }
 
 /** The checked write of the actor's row to `value`, expecting the row `world` holds. */
