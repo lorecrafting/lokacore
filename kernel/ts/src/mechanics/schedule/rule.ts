@@ -10,7 +10,8 @@
 // there already, the job completes, and the next job is scheduled at the schedule's next listed
 // hour, its id this run_job's first IdSource ordinal; a move reports the NPC's
 // entity_entered_room (mechanics/schedule/behavior.ts entered), its id the second. A job that is not pending is
-// invalid_state.
+// invalid_state, except a crossed-hour sub-step (decideAt `at` later than its due time), which
+// schedules no job when its next hour is crossed too (so its arrival takes the first ordinal).
 // Daily schedules retain their DefinitionRef dispatch; bound encounter jobs use the current occurrence.
 import { expiry } from '../water/expiry.ts';
 import { expire } from '../quest/job.ts';
@@ -46,7 +47,8 @@ export const decideAt = (
   const { payload } = command;
   if (payload.type === 'run_job') {
     const row = world.state.jobs?.[payload.job_id];
-    if (row?.status !== 'pending' && !(row && at! > row.due_time)) return rejected('invalid_state');
+    if (row?.status !== 'pending' && !(row && at !== undefined && at > row.due_time))
+      return rejected('invalid_state');
     if (row.water_generation !== undefined)
       return expiry(world, command, payload.job_id, row, mint);
     if (row.encounter_id) return roundSequence(world, command, payload.job_id, row, mint, steps);

@@ -176,42 +176,24 @@ test('one wait across two or three listed hours runs each hour in order', () => 
   );
   assert.equal(new Set(events.map((e) => e.id)).size, 3);
   assert.deepEqual(wait(w, H(43)), three);
-  // Ada (landing from 06:00, green from 20:00; her job id sorts first): 06:00 ties go to her.
-  const wa = withAda({ '6': landing, '20': green });
-  const both = wait(wa, H(30)).decision;
-  assert.deepEqual(
-    both.kind === 'accepted' &&
-      both.events.map((e) => [
-        e.logical_time,
-        (e.payload as { entity_id: string }).entity_id === wa.entityIds[`${F}:npc/bram`]
-          ? 'bram'
-          : 'ada',
-      ]),
-    [
-      [H(19), 'bram'],
-      [H(20), 'ada'],
-      [H(30), 'ada'],
-      [H(30), 'bram'],
-    ],
-  );
-  // Ada listed only at 06:00: her original job due at 06:00 next day ties Bram's crossed 06:00
-  // hour, and her id sorts first.
-  const tie = withAda({ '6': green });
-  const tied = wait(tie, H(30)).decision;
-  assert.deepEqual(
-    tied.kind === 'accepted' &&
-      tied.events.map((e) => [
-        e.logical_time,
-        (e.payload as { entity_id: string }).entity_id === tie.entityIds[`${F}:npc/bram`]
-          ? 'bram'
-          : 'ada',
-      ]),
-    [
-      [H(19), 'bram'],
-      [H(30), 'ada'],
-      [H(30), 'bram'],
-    ],
-  );
+  // Arrivals of a wait to 06:00 next day with Ada (her job id sorts first), as `hour npc`.
+  const order = (schedule: object) => {
+    const wa = withAda(schedule);
+    const d = wait(wa, H(30)).decision;
+    const bram = wa.entityIds[`${F}:npc/bram`];
+    const npc = (e: { payload: object }) =>
+      (e.payload as { entity_id: string }).entity_id === bram ? 'bram' : 'ada';
+    return d.kind === 'accepted' ? d.events.map((e) => `${e.logical_time / 3600} ${npc(e)}`) : d;
+  };
+  // Ada landing from 06:00, green from 20:00: two crossed 06:00 hours tie, hers first.
+  assert.deepEqual(order({ '6': landing, '20': green }), [
+    '19 bram',
+    '20 ada',
+    '30 ada',
+    '30 bram',
+  ]);
+  // Ada listed only at 06:00: her original job ties Bram's crossed 06:00 hour, hers first.
+  assert.deepEqual(order({ '6': green }), ['19 bram', '30 ada', '30 bram']);
   // Each crossed hour is a drain step under due_jobs_per_advance (1024), two a day: 512 days is
   // 1024 steps and commits; 19:00 after that is 1025.
   assert.equal(wait(w, H(6 + 24 * 512)).decision.kind, 'accepted');
@@ -220,6 +202,7 @@ test('one wait across two or three listed hours runs each hour in order', () => 
     [long.decision, long.limit],
     [{ kind: 'fault', code: 'budget_exceeded' }, 'due_jobs_per_advance'],
   );
+  assert.equal(long.world, w);
 });
 
 // Breaks: the drain sorted by job id only (due time ignored) or in row order.
