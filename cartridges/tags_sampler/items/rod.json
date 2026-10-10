@@ -1,0 +1,15 @@
+{
+  "keywords": [
+    "rod"
+  ],
+  "short": "item.rod.short",
+  "room_line": "item.rod.room",
+  "description": "item.rod.description",
+  "location": {
+    "in": "room",
+    "room": "hall"
+  },
+  "tags": [
+    "metal"
+  ]
+}
