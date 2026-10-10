@@ -18,7 +18,7 @@ const kats = [
   'protocol/fixtures/cartridge_*hash.json',
   'protocol/fixtures/containers_*hash.json',
   'protocol/fixtures/missing_child_*hash.json',
-  'protocol/fixtures/speech_sampler_hash.json', // outside the simulator's cartridge_* catalog
+  'protocol/fixtures/*_sampler_hash.json', // samplers kept outside the simulator's catalog
 ].flatMap((p) => globSync(p, { cwd: ROOT }).map((rel) => readFileSync(ROOT + rel, 'utf8')));
 const transcripts = globSync('cartridges/*/transcripts/*.jsonl', { cwd: ROOT });
 
