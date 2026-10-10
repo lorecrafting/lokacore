@@ -37,3 +37,13 @@
    - Fix: give these four kinds the actor's body as the subject, or the PM rules that the target-subject behaviour is intended and the table says so.
 2. **nit**, `docs/system/mechanics.md:600`: the table gives `fact_changed` the actor's body as its subject. The payload can carry `subject_id` (`fact.ts:196`), so an entity fact change on an NPC applies the status to the player. Name this in the table.
 3. **nit**, `kernel/ts/test/reactions_sampler.test.ts:64-89`: the test does not assert `limit`, so it survives the reaction_depth and deliveries mutants. The query_steps limit still faults the loop. The existing tests in `reactions.test.ts` carry the budget, so this test adds little; assert the limit it reaches or drop the budget claim.
+
+## Fix round 1 re-check (head `ed3a6c2aa1bd5e9c7999d9a328e52d14b5efa8f7`)
+
+Scope: commit `ed3a6c2a` only, plus the code it touches (`applies()` in `reaction.ts`, called only from `sequence()`'s `status.apply`). Hosted `ci` and `book-e2e` are green, as the PM reports.
+
+1. Resolved. `custom_event`, `action_completed`, `check_passed` and `check_failed` are gone from `SUBJECT`, so their status lands on the doer, and the table and sentence in `mechanics.md` say so. Red control: mapping `check_failed` back to `subject_id` turns the `status.test.ts` subject test red.
+2. Resolved. For `fact_changed`, a `subject_id` other than the player's body skips the status, and an absent one means the actor. The `undefined` fallback reaches only `fact_changed`, because every other mapped field is required in `event.schema.json`. Both cases are asserted in `status.test.ts`.
+3. Deviation accepted. The test now asserts the `deliveries` limit. The reaction_depth limit is still covered: in round 1, removing the depth check turned three `reactions.test.ts` tests red (belfry cycle, 32/33 chain, Bram's wait).
+
+The `reactions`, `reactions_sampler` and `status` tests pass at the head. Verdict: **APPROVED**.
