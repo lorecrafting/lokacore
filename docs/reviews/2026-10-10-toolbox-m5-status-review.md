@@ -40,3 +40,15 @@
 - Disputed self-review finding 5 (status.apply needs the actor's body): the developer is right. A Story actor always has a body.
 - loka-pyez (an item's status outlives a consumed item): a reasonable deferral. The ticks and the expiry are harmless and add no pool writes.
 - Ungated events change `status_sampler` receipts (a `status_ticked` at every player tick). The spec says so, and the pre-production rule allows it.
+
+## Fix round 1 re-check (head `2ef129f263a4c9bde54799b9d23e105804333088`)
+
+Scope: commits `c88b88c7..2ef129f2`, the code they touch (`reaction.ts` `sequence`/`statusStep`, `proposal.ts` `P.holders`/`react`/`jobs`/`statusGroup`, `status/shared.ts` comment) and the one caller of reaction `sequence` (`proposal.ts:228`). Verdict: **CHANGES REQUIRED** (size allowances only; every finding's behaviour is fixed).
+
+- F1 **fixed.** `statusStep` joins `holders.get(holder) ?? group` and records the group it used. `statusGroup` reads the same per-proposal map, so the order of job and reaction does not matter. My two repros are now tests: "a tick re-poisons the guard" and "an expiry re-sets the door burning" (generation 2, job pending). Both pass. Mutants: always use the reaction's own group, which faults `conflicting_write` in the re-poison test; never record the group, which faults `conflicting_write` in "a re-entry refresh and a tick at one clock both commit". Elixir unchanged: correct, because `lib/` has no reaction runtime.
+- F2 **fixed.** "a fatal tick ends a lone fight but not a pack fight". Mutants `true` and `player` at `status/job.ts:51` now both fail it.
+- F3 **fixed.** The dedupe key is `holder|status`, and `mechanics.md:1774` is amended. Mutant: key by status only, which fails "one rule burns the door and the torch".
+- N4 **fixed.** The comment and the mechanics.md Immune bullet now cover created NPCs and items (`created.ts:87`).
+- (a) **should-fix, must split.** `proposal.ts` `react` goes from "size: allow 45" to 46. [CHECKS.md](../CHECKS.md) Size says that in source files "no new `size: allow` is added ... and an existing one is never raised". There is no exemption for function allowances, and W7's raise was reverted by a split in its own fix round (`2899b8a8`). The same rule covers raises from the first round that I missed: `jobs` 45→48 (`proposal.ts`), `applyStatus` 43→45 (`status/shared.ts`), `deathSequence` 42→43 (`death/sequence.ts`). Split, or trim each back to its base allowance.
+- (b) loka-kgd.43 **does not block.** `compose_sight.ts:10-22` refuses any out-of-order writer group except the sight handoff pair when a sight job completes, so an older status group in that same advance would fault. It is unreachable today: both reuse paths need a status row or a `status.apply`, and the only cartridges with statuses (`status_sampler`, `npc_status_sampler`) have no sight packs. Chapter 1 declares no status. It must land, with loka-x2gv, before any row composes statuses with combat or sight packs (12, 29b, W21).
+- Focused runs at `2ef129f2`: npc_status, status, reactions, reactions_sampler and death are green. Hosted ci and book-e2e green (PM).
