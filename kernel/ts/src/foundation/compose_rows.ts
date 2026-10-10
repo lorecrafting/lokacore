@@ -19,6 +19,7 @@ export function read(t: MutationTarget, ctx: Ctx): Json | undefined {
   if (t.kind === 'population_plan' || t.kind === 'population_slot') return populationRow(t, s);
   if (t.kind === 'clock') return s.clock;
   if (t.kind === 'character') return get(section(s, 'characters'), t.character_id);
+  if (t.kind === 'levelling') return get(section(s, 'levelling'), t.character_id);
   if (t.kind === 'fact') return get(section(s, 'facts'), key(t));
   if (t.kind === 'crow') return get(section(s, 'crows'), key(t));
   switch (t.kind) {

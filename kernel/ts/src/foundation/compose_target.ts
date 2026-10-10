@@ -15,6 +15,7 @@ export function target(op: DeltaOp): MutationTarget {
   if (op.op === 'bleed.transition') return { kind: 'bleed', body_id: op.body_id };
   if (op.op === 'status.transition')
     return { kind: 'status', body_id: op.body_id, status: op.status };
+  if (op.op === 'levelling.set') return { kind: 'levelling', character_id: op.character_id };
   if (op.op === 'time.advance') return { kind: 'clock' };
   switch (op.op) {
     case 'visit.record':

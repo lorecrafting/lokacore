@@ -295,6 +295,7 @@ The StateDelta algebra: typed operations, their mutation targets and preconditio
   - `resource.initialize`: Initialize a newly created spawned hound's exact HP row in its birth group.
   - `bleed.transition`: Checked transition of one body bleed generation.
   - `status.transition`: Checked transition of one body status generation (toolbox row 1); the target is the body and status pair.
+  - `levelling.set`: Checked write of one character's levelling row (toolbox row 4): composes only when the stored row equals expected (null when absent) and neither the experience nor any allocated count falls.
   - `water.transition`
   - `expedition.transition`
   - `visit.record`
@@ -303,6 +304,7 @@ The StateDelta algebra: typed operations, their mutation targets and preconditio
 - **EncounterRow**: Durable finite encounter linking its character, body, opponent, room, status, round and scheduled job.
 - **FactValue**: The value of a fact, in fact.assign, fact_compare and fact_changed: a Key, a safe integer or a boolean, the value types FactSpec declares (fact.schema.json; 03 §7). Which one a fact takes is its FactType, which the compiler checks.
 - **JobId**: A same-authority scheduled job (03 §13; 04 §5.4), created from IdSource. Lowercase hyphenated UUID, any version.
+- **LevellingRow**: One character's experience and the attribute points spent, by attribute DefinitionRefString (toolbox row 4); level and unspent points are derived on read from the cartridge's thresholds.
 - **MutationTarget**: Canonical mutation-target identity (04 §5.1): two ops conflict when their targets are equal as canonical JSON and they come from different writer groups without a registered composition rule. Also the target a conflict fault reports (04 §5.5).
   - `character`: One character's immutable choice.
   - `fact`: A scoped fact.
@@ -329,6 +331,7 @@ The StateDelta algebra: typed operations, their mutation targets and preconditio
   - `expedition`
   - `visit`
   - `observation`
+  - `levelling`: One character's levelling row (toolbox row 4).
 - **ObservedNpc**: One actor’s latest committed visible observation of an exact NPC, room and logical time.
 - **QuestInstanceId**: A QuestInstance (03 §12; 06 §1), created at activation from IdSource. Lowercase hyphenated UUID, any version.
 - **RoleBinding**: One role a continuation bound when it opened (04 §5.3 'bound roles'), for example the NPC the choice is made with.

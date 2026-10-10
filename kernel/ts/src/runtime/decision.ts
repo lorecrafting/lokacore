@@ -49,6 +49,7 @@ import {
   type Text,
   type WorldContextId,
   type StatusRow,
+  type LevellingRow,
   type WaterOccupancy,
 } from '../contracts.gen.ts';
 import { key, type Stored } from '../foundation/compose.ts';
@@ -61,6 +62,7 @@ export type State = {
   readonly observed_npcs?: Readonly<Record<string, ObservedNpc>>;
   readonly bleeds?: Readonly<Record<string, BleedRow>>;
   readonly statuses?: Readonly<Record<string, StatusRow>>; // by body/status target
+  readonly levelling?: Readonly<Record<string, LevellingRow>>; // by character id
   readonly water?: Readonly<Record<string, WaterOccupancy>>;
   readonly liquids?: Readonly<Record<string, LiquidRow>>;
   readonly fuel?: Readonly<Record<string, FuelRow>>;

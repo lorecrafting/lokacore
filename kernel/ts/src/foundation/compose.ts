@@ -3,6 +3,7 @@ import { choice, pendingAtLimit } from './compose_choice.ts';
 import { composeLiquid } from './compose_liquid.ts';
 import { transitionBleed } from './compose_bleed.ts';
 import { transitionStatus } from './compose_status.ts';
+import { setLevelling } from './compose_levelling.ts';
 import { quest, repeatPair } from './compose_quest.ts';
 import { composeFuel } from './fuel.ts';
 import { transitionPatrol } from './compose_patrol.ts';
@@ -114,6 +115,7 @@ function apply(op: DeltaOp, row: Json | undefined, ctx: Ctx): Outcome {
   if (op.op === 'bleed.transition')
     return transitionBleed(op, row, ctx.state, ctx.horizon, ctx.overlay);
   if (op.op === 'status.transition') return transitionStatus(op, row, ctx.state, ctx.horizon);
+  if (op.op === 'levelling.set') return setLevelling(op, row);
   switch (op.op) {
     case 'visit.record':
     case 'observation.record':
