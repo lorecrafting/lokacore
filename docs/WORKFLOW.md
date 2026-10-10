@@ -261,7 +261,7 @@ item or too much complexity. Mechanics, save, protocol or engine items leave the
   and check runs; any agent sends a check, test or push run to a scratchpad file named for the
   slice and reads only the exit status, the failing lines and the tail. Diffs a developer or
   reviewer must read are read per file or hunk, never by tail. Batch independent tool calls.
-- The PM spawns a new agent only while `uptime`, run in its own call and never batched with the spawn, shows load under 8, up to three or four at once; no agent
+- The PM spawns a new agent only while `uptime`, run in its own call (the one exception to batching), shows load under 8, up to three or four at once; no agent
   runs the full `npm test`, the Storybook smoke, `test:e2e` or `bin/check_all.sh` on the M1: hosted
   CI does ([two-lane CI](decisions/owner-decision-two-lane-ci-2026-10-09.md); load average 30-70 with five agents failed smokes and blocked pushes 20-60 minutes, loka-jjq).
 - Long commands (checks, tests, mutant runs) run with `run_in_background`; wait for the completion

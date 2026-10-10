@@ -5,7 +5,7 @@
 if [ $# -gt 0 ]; then cat "$1"; else ps -axo pid=,ppid=,etime=,pcpu=,args=; fi | awk '
   $2 == 1 && $4 + 0 > 20 && ($3 ~ /-/ || ($3 ~ /:.*:/ && $3 !~ /^00:/)) &&
   $5 !~ /^\/(System|usr|sbin|bin|Library|Applications|opt\/homebrew\/Cellar)\// &&
-  $0 !~ /storybook|expo|metro|vite|beam\.smp|phx\.server/ {
+  $0 !~ /(storybook dev|expo start|metro|vite |beam\.smp|phx\.server)/ {
     c = $5; for (i = 6; i <= NF; i++) c = c " " $i
     print $1, $3, $4 "%", substr(c, 1, 100)
   }'

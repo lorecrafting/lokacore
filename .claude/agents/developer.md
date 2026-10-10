@@ -17,7 +17,7 @@ you will mirror. The advisor re-reads the whole conversation at full price: put 
 question in one call, as early as possible, and never ask it to confirm what the brief
 decided.
 
-Work in your own worktree (docs/WORKFLOW.md, Git hygiene). In a new worktree, run [`bin/worktree_setup.sh`](../../bin/worktree_setup.sh) first; when `package-lock.json` matches the main checkout's, symlink its `node_modules` instead of `npm ci`. In a shared worktree, commit with `git commit -- <your own paths>`. Scope: exactly the brief.
+Work in your own worktree (docs/WORKFLOW.md, Git hygiene). In a new worktree, run [`bin/worktree_setup.sh`](../../bin/worktree_setup.sh) first; it links the main checkout's `node_modules` when `package-lock.json` matches (never run `npm ci` in a linked tree). In a shared worktree, commit with `git commit -- <your own paths>`. Scope: exactly the brief.
 Anything outside it, or any spec ambiguity, goes back to the PM as a question; two
 normative documents disagreeing means stop and ask. Never edit
 `docs/spec/conformance/*.json` or an expected answer to make a test pass. Propose Book UI
@@ -29,7 +29,7 @@ Before handing off:
    `npm test`, the Storybook smoke, `test:e2e` or `bin/check_all.sh` on the M1 ([two-lane CI](../../docs/decisions/owner-decision-two-lane-ci-2026-10-09.md)).
    Hosted CI on the pushed head is the final run (it includes the full `npm test` of each package):
    after a push, check `gh run list --branch <branch> --commit "$(git rev-parse HEAD)"` (the full sha; a short one matches nothing) every few minutes, never `gh run watch` (rate limits, timeouts);
-   wait up to ~2 minutes for both workflows' push runs, and never dispatch one by hand when a push run exists (the dispatch cancels it, loka-thz);
+   wait up to ~2 minutes for both workflows' push runs (still none: report it, do not dispatch), and never dispatch one by hand when a push run exists (the dispatch cancels it, loka-thz);
    quote each verdict (job names, durations) in the handoff; fix a red run before handing off. Every new check has a
    planted violation that fails; a planted break or red control stops only the PIDs it started, never a process by name ([Git hygiene](../../docs/WORKFLOW.md#git-hygiene)).
 2. Commit first, then self-review the diff once: `/code-review medium` on the branch (the review never runs checkout, stash or reset in your worktree)
@@ -45,14 +45,12 @@ Before handing off:
    the same turn; the PR body lists those runs. A slice that adds or changes a mechanic
    includes the [composition record](../../docs/system/architecture.md#building-mechanics-by-composition).
    Do not merge.
-4. Reply with: what changed, branch and head SHA, the commands you actually ran (exit status, failing lines), self-review
+4. Remove your own scratch worktrees and stop your own background watchers (by PID). Reply with: what changed, branch and head SHA, the commands you actually ran (exit status, failing lines), self-review
    findings with dispositions, deviations from the brief, open questions. If the brief gave
    a timebox, stop at it and return what you have. Under 250 words, rules-shaped: paths with `file:line`, decisions with a
    reason, open items, no narrative.
 
-At the end remove your own scratch worktrees and stop your own background watchers, by PID.
-
-Run long commands (checks, tests, mutant runs) with `run_in_background` and wait for the completion notice; no sleep or poll loops. A full-suite mutant run or the 10,000-sequence simulator (over ~10 minutes): stop and ask the PM first ([mutants](../../docs/WORKFLOW.md#token-hygiene)). Past about 220k tokens, hand the remaining work back to the PM for a fresh agent.
+Run long commands (checks, tests, mutant runs) with `run_in_background` and wait for the completion notice; no sleep or poll loops. A full-suite mutant run or the 10,000-sequence simulator (over ~10 minutes): stop and ask the PM first ([mutants](../../docs/WORKFLOW.md#token-hygiene)). Hand off near 180k tokens (about 220k at the latest), hand the remaining work back to the PM for a fresh agent.
 
 Never use `--no-verify` or force-push (including `--force-with-lease`) without the owner's OK; fix the cause, and if a hook blocks wrongly, report it.
 

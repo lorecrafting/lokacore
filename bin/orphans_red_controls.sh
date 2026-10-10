@@ -11,6 +11,7 @@ cat > "$f" <<'PS'
 105 1 05:00:00 3.0 python idle.py
 106 1 05:00:00 90.0 /usr/libexec/daemond
 107 1 05:00:00 90.0 node storybook dev
+108 1 05:00:00 90.0 node mobile/app/node_modules/expo/jest.js
 PS
-got=$(sh bin/orphans.sh "$f" | cut -d' ' -f1 | tr '\n' ' ')
-[ "$got" = "101 102 " ] || { echo "orphans control failed: listed '$got', expected '101 102 '" >&2; exit 1; }
+got=$(sh "$(dirname "$0")/orphans.sh" "$f" | cut -d' ' -f1 | tr '\n' ' ')
+[ "$got" = "101 102 108 " ] || { echo "orphans control failed: listed '$got', expected '101 102 108 '" >&2; exit 1; }
