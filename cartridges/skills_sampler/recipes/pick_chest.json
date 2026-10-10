@@ -1,0 +1,45 @@
+{
+  "label": "actions.pick_chest",
+  "aliases": [
+    "pick"
+  ],
+  "target": {
+    "kind": "detail",
+    "room": "vault_room",
+    "detail": "chest"
+  },
+  "priority": 5,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "fact_compare",
+      "fact": "chest_open",
+      "equals": false
+    }
+  },
+  "check": {
+    "key": "pick_chest",
+    "kind": "opposed",
+    "skill": "pick"
+  },
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "chest_open",
+          "value": true
+        }
+      ],
+      "narration": {
+        "actor": "narration.pick_chest.success"
+      }
+    },
+    "failure": {
+      "sequence": [],
+      "narration": {
+        "actor": "narration.pick_chest.failure"
+      }
+    }
+  }
+}

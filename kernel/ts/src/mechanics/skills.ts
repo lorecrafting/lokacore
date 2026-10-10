@@ -1,8 +1,8 @@
 import { key } from '../foundation/compose.ts';
-import type { CharacterId, DefinitionRef } from '../contracts.gen.ts';
+import type { ActionRecipe, CharacterId, DefinitionRef } from '../contracts.gen.ts';
 import { KernelError } from '../foundation/error.ts';
 import { refString, type Steps, type World } from '../runtime/decision.ts';
-import { assigned, scopeOf, type Assigned } from './fact.ts';
+import { assigned, scopeOf, value, type Assigned } from './fact.ts';
 import { holds } from './policy.ts';
 
 export const acquisition = (skill: DefinitionRef): DefinitionRef => ({
@@ -10,6 +10,38 @@ export const acquisition = (skill: DefinitionRef): DefinitionRef => ({
   kind: 'fact',
   key: `skill_${skill.key}` as DefinitionRef['key'],
 });
+
+/** Toolbox row 5: the reserved count fact of a skill with growth (mechanics.md skill growth). */
+export const practice = (skill: DefinitionRef): DefinitionRef => ({
+  ...skill,
+  kind: 'fact',
+  key: `uses_${skill.key}` as DefinitionRef['key'],
+});
+
+/** The actor's level: 1 when acquired, plus the growth thresholds its count has reached. */
+export function level(world: World, actor: CharacterId, skill: DefinitionRef) {
+  const growth = world.cartridge.skills![refString(skill)]!.growth ?? [];
+  const uses = growth.length ? (value(world, actor, practice(skill)) as number) : 0;
+  return Number(membership(world, actor, skill)) + growth.filter((t) => t <= uses).length;
+}
+
+/**
+ * `run` with one use of the skill a recipe's opposed check names (toolbox row 5), unless the check
+ * names none, the skill has no growth or its count is at the last threshold.
+ */
+export function practised<R extends Assigned>(
+  world: World,
+  actor: CharacterId,
+  run: R,
+  check: ActionRecipe['check'],
+) {
+  const skill = check?.kind === 'opposed' ? check.skill : undefined;
+  const growth = skill && world.cartridge.skills![refString(skill)]!.growth;
+  if (!growth) return run;
+  const uses = value(world, actor, practice(skill!)) as number;
+  if (uses >= growth.at(-1)!) return run;
+  return assigned(world, actor, run, { fact: practice(skill!), value: uses + 1 }, 'skills');
+}
 
 export function status(world: World, actor: CharacterId, skill: DefinitionRef, steps: Steps) {
   const definition = world.cartridge.skills?.[refString(skill)];

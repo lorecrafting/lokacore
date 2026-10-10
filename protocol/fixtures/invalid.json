@@ -8215,7 +8215,7 @@
         },
         "north": {}
       },
-      "tags": []
+      "labels": []
     },
     "errors": [
       {
@@ -8231,7 +8231,7 @@
         "code": "pattern_mismatch"
       },
       {
-        "path": "/tags",
+        "path": "/labels",
         "code": "unknown_property"
       },
       {
@@ -12505,6 +12505,310 @@
     ]
   },
   {
+    "contract": "NpcDefinition",
+    "value": {
+      "key": "rat",
+      "keywords": [
+        "rat"
+      ],
+      "short": "npc.rat.short",
+      "room_line": "npc.rat.room",
+      "description": "npc.rat.description",
+      "room": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "pit"
+      },
+      "drops": []
+    },
+    "errors": [
+      {
+        "path": "/drops",
+        "code": "too_few_items"
+      }
+    ]
+  },
+  {
+    "contract": "NpcDefinition",
+    "value": {
+      "key": "rat",
+      "keywords": [
+        "rat"
+      ],
+      "short": "npc.rat.short",
+      "room_line": "npc.rat.room",
+      "description": "npc.rat.description",
+      "room": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "pit"
+      },
+      "drops": [
+        {
+          "item": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "tail"
+          },
+          "chance": 50
+        },
+        {
+          "item": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "tail"
+          },
+          "chance": 50
+        },
+        {
+          "item": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "tail"
+          },
+          "chance": 50
+        },
+        {
+          "item": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "tail"
+          },
+          "chance": 50
+        },
+        {
+          "item": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "tail"
+          },
+          "chance": 50
+        },
+        {
+          "item": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "tail"
+          },
+          "chance": 50
+        },
+        {
+          "item": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "tail"
+          },
+          "chance": 50
+        },
+        {
+          "item": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "tail"
+          },
+          "chance": 50
+        },
+        {
+          "item": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "tail"
+          },
+          "chance": 50
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/drops",
+        "code": "too_many_items"
+      }
+    ]
+  },
+  {
+    "contract": "NpcDefinition",
+    "value": {
+      "key": "rat",
+      "keywords": [
+        "rat"
+      ],
+      "short": "npc.rat.short",
+      "room_line": "npc.rat.room",
+      "description": "npc.rat.description",
+      "room": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "pit"
+      },
+      "drops": [
+        {}
+      ]
+    },
+    "errors": [
+      {
+        "path": "/drops/0/chance",
+        "code": "missing_property"
+      },
+      {
+        "path": "/drops/0/item",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "NpcDefinition",
+    "value": {
+      "key": "rat",
+      "keywords": [
+        "rat"
+      ],
+      "short": "npc.rat.short",
+      "room_line": "npc.rat.room",
+      "description": "npc.rat.description",
+      "room": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "pit"
+      },
+      "drops": [
+        {
+          "item": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "tail"
+          },
+          "chance": 0
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/drops/0/chance",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "contract": "NpcDefinition",
+    "value": {
+      "key": "rat",
+      "keywords": [
+        "rat"
+      ],
+      "short": "npc.rat.short",
+      "room_line": "npc.rat.room",
+      "description": "npc.rat.description",
+      "room": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "pit"
+      },
+      "drops": [
+        {
+          "item": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "tail"
+          },
+          "chance": 101
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/drops/0/chance",
+        "code": "above_maximum"
+      }
+    ]
+  },
+  {
+    "contract": "NpcDefinition",
+    "value": {
+      "key": "rat",
+      "keywords": [
+        "rat"
+      ],
+      "short": "npc.rat.short",
+      "room_line": "npc.rat.room",
+      "description": "npc.rat.description",
+      "room": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "pit"
+      },
+      "drops": [
+        {
+          "item": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "tail"
+          },
+          "chance": "50"
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/drops/0/chance",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "contract": "NpcDefinition",
+    "value": {
+      "key": "rat",
+      "keywords": [
+        "rat"
+      ],
+      "short": "npc.rat.short",
+      "room_line": "npc.rat.room",
+      "description": "npc.rat.description",
+      "room": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "pit"
+      },
+      "drops": [
+        {
+          "item": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "tail"
+          },
+          "chance": 50,
+          "weight": 1
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/drops/0/weight",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
     "contract": "Calendar",
     "value": {
       "x": 1
@@ -12663,7 +12967,7 @@
     "value": {
       "key": "k",
       "on": {
-        "event": "item_dropped",
+        "event": "status_ticked",
         "fact": {
           "cartridge_id": "c",
           "cartridge_version": "1.0.0",
@@ -12688,6 +12992,440 @@
       {
         "path": "/on/event",
         "code": "unknown_variant"
+      }
+    ]
+  },
+  {
+    "name": "trigger_item_acquired_mistyped",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "item_acquired",
+        "item": 1,
+        "x": 1
+      },
+      "apply": []
+    },
+    "errors": [
+      {
+        "path": "/on/item",
+        "code": "invalid_type"
+      },
+      {
+        "path": "/on/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "trigger_item_dropped_mistyped",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "item_dropped",
+        "item": 1,
+        "room": 1,
+        "x": 1
+      },
+      "apply": []
+    },
+    "errors": [
+      {
+        "path": "/on/item",
+        "code": "invalid_type"
+      },
+      {
+        "path": "/on/room",
+        "code": "invalid_type"
+      },
+      {
+        "path": "/on/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "trigger_shooed_mistyped",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "shooed",
+        "item": 1,
+        "room": 1,
+        "x": 1
+      },
+      "apply": []
+    },
+    "errors": [
+      {
+        "path": "/on/item",
+        "code": "invalid_type"
+      },
+      {
+        "path": "/on/room",
+        "code": "invalid_type"
+      },
+      {
+        "path": "/on/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "trigger_quest_activated_mistyped",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "quest_activated",
+        "quest": 1,
+        "x": 1
+      },
+      "apply": []
+    },
+    "errors": [
+      {
+        "path": "/on/quest",
+        "code": "invalid_type"
+      },
+      {
+        "path": "/on/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "trigger_choice_opened_mistyped",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "choice_opened",
+        "x": 1
+      },
+      "apply": []
+    },
+    "errors": [
+      {
+        "path": "/on/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "trigger_choice_resolved_mistyped",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "choice_resolved",
+        "choice": 1,
+        "x": 1
+      },
+      "apply": []
+    },
+    "errors": [
+      {
+        "path": "/on/choice",
+        "code": "invalid_type"
+      },
+      {
+        "path": "/on/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "trigger_story_point_reached_mistyped",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "story_point_reached",
+        "outcome": 1,
+        "story_point": 1,
+        "x": 1
+      },
+      "apply": []
+    },
+    "errors": [
+      {
+        "path": "/on/outcome",
+        "code": "invalid_type"
+      },
+      {
+        "path": "/on/story_point",
+        "code": "invalid_type"
+      },
+      {
+        "path": "/on/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "trigger_custom_event_mistyped",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "custom_event",
+        "custom": 1,
+        "x": 1
+      },
+      "apply": []
+    },
+    "errors": [
+      {
+        "path": "/on/custom",
+        "code": "invalid_type"
+      },
+      {
+        "path": "/on/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "trigger_action_completed_mistyped",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "action_completed",
+        "action": 1,
+        "x": 1
+      },
+      "apply": []
+    },
+    "errors": [
+      {
+        "path": "/on/action",
+        "code": "invalid_type"
+      },
+      {
+        "path": "/on/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "trigger_check_passed_mistyped",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "check_passed",
+        "check": 1,
+        "x": 1
+      },
+      "apply": []
+    },
+    "errors": [
+      {
+        "path": "/on/check",
+        "code": "invalid_type"
+      },
+      {
+        "path": "/on/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "trigger_check_failed_mistyped",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "check_failed",
+        "check": 1,
+        "x": 1
+      },
+      "apply": []
+    },
+    "errors": [
+      {
+        "path": "/on/check",
+        "code": "invalid_type"
+      },
+      {
+        "path": "/on/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "trigger_barrier_changed_mistyped",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "barrier_changed",
+        "barrier": 1,
+        "to": 1,
+        "x": 1
+      },
+      "apply": []
+    },
+    "errors": [
+      {
+        "path": "/on/barrier",
+        "code": "invalid_type"
+      },
+      {
+        "path": "/on/to",
+        "code": "not_in_enum"
+      },
+      {
+        "path": "/on/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "trigger_scene_ended_mistyped",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "scene_ended",
+        "scene": 1,
+        "x": 1
+      },
+      "apply": []
+    },
+    "errors": [
+      {
+        "path": "/on/scene",
+        "code": "invalid_type"
+      },
+      {
+        "path": "/on/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "trigger_entity_died_mistyped",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "entity_died",
+        "room": 1,
+        "victim": 1,
+        "x": 1
+      },
+      "apply": []
+    },
+    "errors": [
+      {
+        "path": "/on/room",
+        "code": "invalid_type"
+      },
+      {
+        "path": "/on/victim",
+        "code": "invalid_type"
+      },
+      {
+        "path": "/on/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "trigger_attack_result_mistyped",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "attack_result",
+        "hit": 1,
+        "x": 1
+      },
+      "apply": []
+    },
+    "errors": [
+      {
+        "path": "/on/hit",
+        "code": "invalid_type"
+      },
+      {
+        "path": "/on/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "trigger_filled_mistyped",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "filled",
+        "kind": 1,
+        "x": 1
+      },
+      "apply": []
+    },
+    "errors": [
+      {
+        "path": "/on/kind",
+        "code": "invalid_type"
+      },
+      {
+        "path": "/on/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "trigger_poured_mistyped",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "poured",
+        "kind": 1,
+        "x": 1
+      },
+      "apply": []
+    },
+    "errors": [
+      {
+        "path": "/on/kind",
+        "code": "invalid_type"
+      },
+      {
+        "path": "/on/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "trigger_drank_mistyped",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "drank",
+        "kind": 1,
+        "x": 1
+      },
+      "apply": []
+    },
+    "errors": [
+      {
+        "path": "/on/kind",
+        "code": "invalid_type"
+      },
+      {
+        "path": "/on/x",
+        "code": "unknown_property"
       }
     ]
   },
@@ -18529,6 +19267,774 @@
       {
         "path": "/levelling/unspent",
         "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "has_tag_unknown_tag",
+    "contract": "Policy",
+    "value": {
+      "op": "has_tag",
+      "subject": "target",
+      "tag": "gold"
+    },
+    "errors": [
+      {
+        "path": "/tag",
+        "code": "not_in_enum"
+      }
+    ]
+  },
+  {
+    "name": "has_tag_actor_subject",
+    "contract": "Policy",
+    "value": {
+      "op": "has_tag",
+      "subject": "actor",
+      "tag": "metal"
+    },
+    "errors": [
+      {
+        "path": "/subject",
+        "code": "not_in_enum"
+      }
+    ]
+  },
+  {
+    "name": "has_tag_two_subjects",
+    "contract": "Policy",
+    "value": {
+      "op": "has_tag",
+      "subject": "room",
+      "barrier": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "barrier",
+        "key": "door"
+      },
+      "tag": "metal"
+    },
+    "errors": [
+      {
+        "path": "",
+        "code": "exclusive_properties"
+      }
+    ]
+  },
+  {
+    "name": "has_tag_no_subject_no_tag",
+    "contract": "Policy",
+    "value": {
+      "op": "has_tag"
+    },
+    "errors": [
+      {
+        "path": "",
+        "code": "exclusive_properties"
+      },
+      {
+        "path": "/tag",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "item_tags_not_a_list",
+    "contract": "ItemDefinition",
+    "value": {
+      "key": "stick",
+      "keywords": [
+        "stick"
+      ],
+      "short": "item.stick.short",
+      "room_line": "item.stick.room",
+      "description": "item.stick.description",
+      "location": {
+        "in": "template"
+      },
+      "tags": "burnable"
+    },
+    "errors": [
+      {
+        "path": "/tags",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "name": "item_tags_empty",
+    "contract": "ItemDefinition",
+    "value": {
+      "key": "stick",
+      "keywords": [
+        "stick"
+      ],
+      "short": "item.stick.short",
+      "room_line": "item.stick.room",
+      "description": "item.stick.description",
+      "location": {
+        "in": "template"
+      },
+      "tags": []
+    },
+    "errors": [
+      {
+        "path": "/tags",
+        "code": "too_few_items"
+      }
+    ]
+  },
+  {
+    "name": "item_tag_unknown",
+    "contract": "ItemDefinition",
+    "value": {
+      "key": "stick",
+      "keywords": [
+        "stick"
+      ],
+      "short": "item.stick.short",
+      "room_line": "item.stick.room",
+      "description": "item.stick.description",
+      "location": {
+        "in": "template"
+      },
+      "tags": [
+        "gold"
+      ]
+    },
+    "errors": [
+      {
+        "path": "/tags/0",
+        "code": "not_in_enum"
+      }
+    ]
+  },
+  {
+    "name": "room_tags_not_a_list",
+    "contract": "RoomDefinition",
+    "value": {
+      "key": "hall",
+      "title": "room.hall.title",
+      "description": "room.hall.description",
+      "exits": {},
+      "tags": "wooden"
+    },
+    "errors": [
+      {
+        "path": "/tags",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "name": "room_tag_unknown",
+    "contract": "RoomDefinition",
+    "value": {
+      "key": "hall",
+      "title": "room.hall.title",
+      "description": "room.hall.description",
+      "exits": {},
+      "tags": [
+        "gold"
+      ]
+    },
+    "errors": [
+      {
+        "path": "/tags/0",
+        "code": "not_in_enum"
+      }
+    ]
+  },
+  {
+    "name": "barrier_tags_not_a_list",
+    "contract": "BarrierDefinition",
+    "value": {
+      "key": "door",
+      "keywords": [
+        "door"
+      ],
+      "short": "barrier.door.short",
+      "initial": "closed",
+      "tags": "metal"
+    },
+    "errors": [
+      {
+        "path": "/tags",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "name": "barrier_tag_unknown",
+    "contract": "BarrierDefinition",
+    "value": {
+      "key": "door",
+      "keywords": [
+        "door"
+      ],
+      "short": "barrier.door.short",
+      "initial": "closed",
+      "tags": [
+        "gold"
+      ]
+    },
+    "errors": [
+      {
+        "path": "/tags/0",
+        "code": "not_in_enum"
+      }
+    ]
+  },
+  {
+    "name": "skill_growth_empty",
+    "contract": "SkillDefinition",
+    "value": {
+      "key": "pick",
+      "label": "skill.pick.label",
+      "requirement": "skill.pick.requirement",
+      "qualification": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": []
+        }
+      },
+      "growth": []
+    },
+    "errors": [
+      {
+        "path": "/growth",
+        "code": "too_few_items"
+      }
+    ]
+  },
+  {
+    "name": "skill_growth_nine",
+    "contract": "SkillDefinition",
+    "value": {
+      "key": "pick",
+      "label": "skill.pick.label",
+      "requirement": "skill.pick.requirement",
+      "qualification": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": []
+        }
+      },
+      "growth": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    "errors": [
+      {
+        "path": "/growth",
+        "code": "too_many_items"
+      }
+    ]
+  },
+  {
+    "name": "skill_growth_zero",
+    "contract": "SkillDefinition",
+    "value": {
+      "key": "pick",
+      "label": "skill.pick.label",
+      "requirement": "skill.pick.requirement",
+      "qualification": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": []
+        }
+      },
+      "growth": [
+        0
+      ]
+    },
+    "errors": [
+      {
+        "path": "/growth/0",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "name": "skill_growth_not_integer",
+    "contract": "SkillDefinition",
+    "value": {
+      "key": "pick",
+      "label": "skill.pick.label",
+      "requirement": "skill.pick.requirement",
+      "qualification": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": []
+        }
+      },
+      "growth": [
+        "1"
+      ]
+    },
+    "errors": [
+      {
+        "path": "/growth/0",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "name": "detail_rating_not_integer",
+    "contract": "InspectableDetail",
+    "value": {
+      "aliases": [
+        "gate"
+      ],
+      "description": "detail.gate",
+      "rating": "high"
+    },
+    "errors": [
+      {
+        "path": "/rating",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "name": "opposed_check_no_side",
+    "contract": "ActionRecipe",
+    "value": {
+      "key": "pick_gate",
+      "label": "actions.pick_gate",
+      "aliases": [
+        "pick"
+      ],
+      "target": {
+        "kind": "detail",
+        "room": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "hall"
+        },
+        "detail": "gate"
+      },
+      "priority": 5,
+      "policy": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": []
+        }
+      },
+      "check": {
+        "key": "pick_gate",
+        "kind": "opposed"
+      },
+      "outcomes": {
+        "success": {
+          "sequence": [
+            {
+              "op": "fact.assign",
+              "fact": {
+                "cartridge_id": "c",
+                "cartridge_version": "1.0.0",
+                "kind": "fact",
+                "key": "gate_open"
+              },
+              "value": true
+            }
+          ],
+          "narration": {
+            "actor": "narration.pick.success"
+          }
+        },
+        "failure": {
+          "sequence": [],
+          "narration": {
+            "actor": "narration.pick.failure"
+          }
+        }
+      }
+    },
+    "errors": [
+      {
+        "path": "/check",
+        "code": "exclusive_properties"
+      }
+    ]
+  },
+  {
+    "name": "opposed_check_both_sides",
+    "contract": "ActionRecipe",
+    "value": {
+      "key": "pick_gate",
+      "label": "actions.pick_gate",
+      "aliases": [
+        "pick"
+      ],
+      "target": {
+        "kind": "detail",
+        "room": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "hall"
+        },
+        "detail": "gate"
+      },
+      "priority": 5,
+      "policy": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": []
+        }
+      },
+      "check": {
+        "key": "pick_gate",
+        "kind": "opposed",
+        "skill": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "skill",
+          "key": "pick"
+        },
+        "attribute": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "attribute",
+          "key": "str"
+        }
+      },
+      "outcomes": {
+        "success": {
+          "sequence": [
+            {
+              "op": "fact.assign",
+              "fact": {
+                "cartridge_id": "c",
+                "cartridge_version": "1.0.0",
+                "kind": "fact",
+                "key": "gate_open"
+              },
+              "value": true
+            }
+          ],
+          "narration": {
+            "actor": "narration.pick.success"
+          }
+        },
+        "failure": {
+          "sequence": [],
+          "narration": {
+            "actor": "narration.pick.failure"
+          }
+        }
+      }
+    },
+    "errors": [
+      {
+        "path": "/check",
+        "code": "exclusive_properties"
+      }
+    ]
+  },
+  {
+    "name": "opposed_check_no_key_extra",
+    "contract": "ActionRecipe",
+    "value": {
+      "key": "pick_gate",
+      "label": "actions.pick_gate",
+      "aliases": [
+        "pick"
+      ],
+      "target": {
+        "kind": "detail",
+        "room": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "hall"
+        },
+        "detail": "gate"
+      },
+      "priority": 5,
+      "policy": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": []
+        }
+      },
+      "check": {
+        "kind": "opposed",
+        "skill": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "skill",
+          "key": "pick"
+        },
+        "difficulty": 3
+      },
+      "outcomes": {
+        "success": {
+          "sequence": [
+            {
+              "op": "fact.assign",
+              "fact": {
+                "cartridge_id": "c",
+                "cartridge_version": "1.0.0",
+                "kind": "fact",
+                "key": "gate_open"
+              },
+              "value": true
+            }
+          ],
+          "narration": {
+            "actor": "narration.pick.success"
+          }
+        },
+        "failure": {
+          "sequence": [],
+          "narration": {
+            "actor": "narration.pick.failure"
+          }
+        }
+      }
+    },
+    "errors": [
+      {
+        "path": "/check/difficulty",
+        "code": "unknown_property"
+      },
+      {
+        "path": "/check/key",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "AttackProfile",
+    "value": {
+      "chance": 75,
+      "damage_min": 1,
+      "damage_max": 2,
+      "kind": "acid"
+    },
+    "errors": [
+      {
+        "path": "/kind",
+        "code": "not_in_enum"
+      }
+    ]
+  },
+  {
+    "contract": "AttackProfile",
+    "value": {
+      "chance": 75,
+      "damage_min": 1,
+      "damage_max": 2,
+      "crit": {
+        "chance": 0,
+        "multiplier": 2
+      }
+    },
+    "errors": [
+      {
+        "path": "/crit/chance",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "contract": "AttackProfile",
+    "value": {
+      "chance": 75,
+      "damage_min": 1,
+      "damage_max": 2,
+      "crit": {
+        "chance": 101,
+        "multiplier": 2
+      }
+    },
+    "errors": [
+      {
+        "path": "/crit/chance",
+        "code": "above_maximum"
+      }
+    ]
+  },
+  {
+    "contract": "AttackProfile",
+    "value": {
+      "chance": 75,
+      "damage_min": 1,
+      "damage_max": 2,
+      "crit": {
+        "chance": 10,
+        "multiplier": 1
+      }
+    },
+    "errors": [
+      {
+        "path": "/crit/multiplier",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "contract": "AttackProfile",
+    "value": {
+      "chance": 75,
+      "damage_min": 1,
+      "damage_max": 2,
+      "crit": {
+        "chance": 10,
+        "multiplier": 11
+      }
+    },
+    "errors": [
+      {
+        "path": "/crit/multiplier",
+        "code": "above_maximum"
+      }
+    ]
+  },
+  {
+    "contract": "AttackProfile",
+    "value": {
+      "chance": 75,
+      "damage_min": 1,
+      "damage_max": 2,
+      "crit": {
+        "chance": 10
+      }
+    },
+    "errors": [
+      {
+        "path": "/crit/multiplier",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "AttackProfile",
+    "value": {
+      "chance": 75,
+      "damage_min": 1,
+      "damage_max": 2,
+      "crit": {
+        "multiplier": 2
+      }
+    },
+    "errors": [
+      {
+        "path": "/crit/chance",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "AttackProfile",
+    "value": {
+      "chance": 75,
+      "damage_min": 1,
+      "damage_max": 2,
+      "crit": {
+        "chance": 10,
+        "multiplier": 2,
+        "extra": 1
+      }
+    },
+    "errors": [
+      {
+        "path": "/crit/extra",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "AttackProfile",
+    "value": {
+      "chance": 75,
+      "damage_min": 1,
+      "damage_max": 2,
+      "crit": {
+        "chance": 1.5,
+        "multiplier": 2
+      }
+    },
+    "errors": [
+      {
+        "path": "/crit/chance",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "contract": "Resistances",
+    "value": {
+      "fire": -101
+    },
+    "errors": [
+      {
+        "path": "/fire",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "contract": "Resistances",
+    "value": {
+      "silver": 101
+    },
+    "errors": [
+      {
+        "path": "/silver",
+        "code": "above_maximum"
+      }
+    ]
+  },
+  {
+    "contract": "Resistances",
+    "value": {
+      "fire": 1.5
+    },
+    "errors": [
+      {
+        "path": "/fire",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "contract": "Resistances",
+    "value": {
+      "acid": 10
+    },
+    "errors": [
+      {
+        "path": "/acid",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "DamageKind",
+    "value": "silver",
+    "errors": [
+      {
+        "path": "",
+        "code": "not_in_enum"
       }
     ]
   }

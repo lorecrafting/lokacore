@@ -76,7 +76,10 @@ function ownership(
 ) {
   if (
     owner !== 'skills' &&
-    Object.values(world.cartridge.skills ?? {}).some((skill) => ref.key === `skill_${skill.key}`)
+    Object.values(world.cartridge.skills ?? {}).some(
+      (skill) =>
+        ref.key === `skill_${skill.key}` || (skill.growth && ref.key === `uses_${skill.key}`),
+    )
   )
     throw new KernelError('precondition_failed');
   if (

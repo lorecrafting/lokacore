@@ -1,5 +1,6 @@
 import { diag, step, type Checks, type Obj } from './cartridge_refs.ts';
 import { refString } from '../runtime/decision.ts';
+import { apiCmp } from './cartridge_installed.ts';
 import type { Diagnostic } from '../contracts.gen.ts';
 
 export const skillSpec = (key: string) => ({
@@ -8,6 +9,15 @@ export const skillSpec = (key: string) => ({
   value_type: { type: 'bool', default: false },
   scopes: ['player'],
   meaning: `Skill ${key}'s acquisition (skills@1): only skills@1 writes it.`,
+});
+
+/** Toolbox row 5: the reserved use count of a skill with growth (mechanics.md skill growth). */
+export const usesSpec = (key: string, growth: number[]) => ({
+  key: `uses_${key}`,
+  version: 1,
+  value_type: { type: 'int', default: 0, minimum: 0, maximum: growth.at(-1) },
+  scopes: ['player'],
+  meaning: `Skill ${key}'s use count (skills@1): only skills@1 writes it.`,
 });
 
 export function skills(c: Obj, checks: Checks): Diagnostic[] {
@@ -47,6 +57,29 @@ export function skills(c: Obj, checks: Checks): Diagnostic[] {
         diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'),
       );
   }
+  return [...out, ...growth(c)];
+}
+
+// Toolbox rows 5 and G5: growth thresholds strictly increase; skill growth, an opposed check or
+// a detail rating needs API 1.44.
+function growth(c: Obj): Diagnostic[] {
+  const out = Object.entries((c.skills ?? {}) as Obj).flatMap(([ref, s]) =>
+    s.growth?.some((t: number, i: number) => i > 0 && t <= s.growth[i - 1])
+      ? [
+          diag('SCHEMA_VIOLATION', `.cartridge.skills${step(ref)}.growth`, {
+            error: 'invalid_value',
+          }),
+        ]
+      : [],
+  );
+  const used =
+    Object.values((c.skills ?? {}) as Obj).some((s) => s.growth) ||
+    Object.values((c.recipes ?? {}) as Obj).some((r) => r.check?.kind === 'opposed') ||
+    Object.values(c.rooms as Obj).some((r) =>
+      Object.values((r.details ?? {}) as Obj).some((d) => d.rating !== undefined),
+    );
+  if (used && apiCmp(c.manifest.requires.kernel_api.at_least, '1.44') < 0)
+    out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
   return out;
 }
 

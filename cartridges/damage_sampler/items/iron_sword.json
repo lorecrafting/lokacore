@@ -1,0 +1,32 @@
+{
+  "keywords": [
+    "iron_sword",
+    "sword"
+  ],
+  "short": "item.iron_sword.short",
+  "room_line": "item.iron_sword.room",
+  "description": "item.iron_sword.description",
+  "location": {
+    "in": "room",
+    "room": "hall"
+  },
+  "mass_grams": 600,
+  "slot": "wield",
+  "weapon": {
+    "skill": "swords",
+    "attack": {
+      "chance": 100,
+      "damage_min": 5,
+      "damage_max": 5,
+      "kind": "physical",
+      "crit": {
+        "chance": 10,
+        "multiplier": 2
+      }
+    }
+  },
+  "tags": [
+    "metal",
+    "sharp"
+  ]
+}

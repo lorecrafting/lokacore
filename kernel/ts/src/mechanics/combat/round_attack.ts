@@ -1,6 +1,7 @@
 import { status } from '../skills.ts';
 import type {
   AttackProfile,
+  Tag,
   Command,
   DeltaOp,
   DomainEvent,
@@ -10,7 +11,7 @@ import type {
 } from '../../contracts.gen.ts';
 import { refString, type Mint, type World } from '../../runtime/decision.ts';
 import { apply } from '../../runtime/apply.ts';
-import { add, mul, saturate } from '../../foundation/int.ts';
+import { add, divide, mul, saturate } from '../../foundation/int.ts';
 import { KernelError } from '../../foundation/error.ts';
 import { uniformCounted } from '../../foundation/rng.ts';
 import { adjust, level, recoveryAdjustments, resourceRef } from '../resource.ts';
@@ -50,11 +51,12 @@ export function attack(
   const target_id = player ? row.npc_id : row.body_id;
   const settings = world.cartridge.world!.combat!;
   const profile = attackProfile(world, row, attacker_id, player, r);
-  const accurate = draw(r, 100) < profile.chance;
+  const roll = draw(r, 100);
+  const accurate = roll < profile.chance;
   const prevented_by = accurate && !player ? defend(world, row, r) : undefined;
   const hit = accurate && !prevented_by;
   const sleeping = !player && positionOf(world, row.character_id) === 'sleeping';
-  const damage = hit ? damageRoll(r, profile) : 0;
+  const damage = hit ? dealt(world, target_id, profile, roll, damageRoll(r, profile)) : 0;
   const hp = resourceRef(world, 'hp');
   const loss = Math.min(
     level(world, target_id, hp)!,
@@ -84,6 +86,22 @@ function damageRoll(r: Round, profile: AttackProfile) {
   );
 }
 
+// Toolbox row G2: a critical hit is the hit draw below crit.chance (no extra draw: an NPC attack
+// may already spend hit, dodge, block and damage of the round's 8). Order: the crit multiplier,
+// then the target's resistances; attack() then applies the sleep multiplier and the HP cap.
+function dealt(world: World, target: EntityId, profile: Profile, roll: number, damage: number) {
+  const crit =
+    profile.crit && roll < profile.crit.chance ? mul(damage, profile.crit.multiplier) : damage;
+  const npc = world.entities[target];
+  const resists = npc?.kind === 'npc' ? npc.resistances : undefined;
+  if (!resists) return crit;
+  const sum = [profile.kind, ...(profile.tags ?? [])].reduce(
+    (s, k) => add(s, (k && resists[k]) || 0),
+    0,
+  );
+  return divide(mul(crit, 100 - Math.min(100, Math.max(-100, sum))), 100)[0];
+}
+
 function attackEvent(
   world: World,
   command: Pick<Command, 'id'>,
@@ -103,6 +121,7 @@ function attackEvent(
   };
 }
 
+// size: allow 42, the fatal branch passes the round's RNG to drop rolls and takes it back
 function injure(
   world: World,
   command: Pick<Command, 'id'>,
@@ -135,7 +154,9 @@ function injure(
         credited_character_id: player ? row.character_id : null,
       },
       mint,
+      r.rng,
     );
+    r.rng = died.rng!;
     r.ops.push(...died.ops);
     r.events.push(...died.events.map((e) => ({ ...e, position: ++r.position })));
   } else {
@@ -181,20 +202,24 @@ function equipped(world: World, body: EntityId, slot: string) {
   return item && item.kind === 'item' ? item : undefined;
 }
 
+type Profile = AttackProfile & { tags?: readonly Tag[] };
+
 function attackProfile(
   world: World,
   row: EncounterRow,
   attacker_id: EntityId,
   player: boolean,
   r: Round,
-) {
+): Profile {
   const npc = world.entities[player ? row.npc_id : attacker_id];
   if (npc.kind !== 'npc' || !npc.attack) throw new KernelError('precondition_failed');
   if (!player) return npc.attack;
-  const weapon = equipped(world, row.body_id, 'wield')?.weapon;
-  const base =
+  const wielded = equipped(world, row.body_id, 'wield');
+  const weapon = wielded?.weapon;
+  // Only the weapon's own attack carries its material tags (toolbox row G2, PM ruling).
+  const base: Profile =
     weapon && status(world, row.character_id, weapon.skill, r.steps).usable
-      ? weapon.attack
+      ? { ...weapon.attack, tags: wielded.tags }
       : world.cartridge.world!.combat!.player_attack;
   const table = world.cartridge.world?.derived;
   if (!table) return base;

@@ -1,0 +1,45 @@
+{
+  "label": "actions.pick_gate",
+  "aliases": [
+    "pick"
+  ],
+  "target": {
+    "kind": "detail",
+    "room": "vault_room",
+    "detail": "gate"
+  },
+  "priority": 5,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "fact_compare",
+      "fact": "gate_open",
+      "equals": false
+    }
+  },
+  "check": {
+    "key": "pick_gate",
+    "kind": "opposed",
+    "skill": "pick"
+  },
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "gate_open",
+          "value": true
+        }
+      ],
+      "narration": {
+        "actor": "narration.pick_gate.success"
+      }
+    },
+    "failure": {
+      "sequence": [],
+      "narration": {
+        "actor": "narration.pick_gate.failure"
+      }
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "on": {
+    "event": "item_dropped",
+    "item": "bone",
+    "room": "yard"
+  },
+  "apply": [
+    {
+      "op": "fact.assign",
+      "fact": "crow_drawn",
+      "value": true
+    }
+  ]
+}

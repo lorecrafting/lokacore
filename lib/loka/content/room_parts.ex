@@ -56,10 +56,14 @@ defmodule Loka.Content.RoomParts do
           do: {["details", k, field], if(field == "bed", do: "bed", else: "readable")}
 
     [{[], "room"} | details] ++
-      if(r["dark_description"], do: [{["dark_description"], "darkness"}], else: []) ++
+      optional(r) ++
       readables ++
       for {steps, _} <- variants(r), do: {steps, "variant"}
   end
+
+  # A room's darkness (light@1) and tags (tags@1), each owned by its capability.
+  defp optional(r),
+    do: for({f, k} <- [{"dark_description", "darkness"}, {"tags", "tags"}], r[f], do: {[f], k})
 
   @doc "Each variant's condition in the schema-valid rooms, as `{rel, steps, root}`."
   @spec conditions(map()) :: [{String.t(), list(), map()}]

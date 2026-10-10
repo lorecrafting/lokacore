@@ -237,6 +237,7 @@ bounds, use checked safe addition, then clamp to the authored bounds. Lower to t
 `fact.assign` in writer group 0; unchanged values emit no event. Corrupt values, unsafe sums
 and reserved engine-fact writes fault, never repair. This adds no foundation delta operation.
 The leaves `stat_compare` and `resource_compare` are [attributes@1](#attributes1-kerneltssrcmechanicspolicyts60)'s.
+How a leaf is named, dispatched and checked by both kernels: [the policy leaf set](#property-tags-and-the-policy-leaf-set-toolbox-row-g1).
 
 ## resource@1 (`kernel/ts/src/mechanics/resource.ts`)
 
@@ -338,7 +339,7 @@ the world's RNG (at most 8 draws, `:103`) and passes below `chance`; a `threshol
 nothing and passes when the body's value of `resource` at admission (before costs) is at least
 `difficulty`. B6's `attribute_threshold` arm also draws nothing and compares the commanded
 actor's attribute to its authored difficulty; D11 selects the saved character value as its
-source after creation. It emits `check_passed` or `check_failed` at position 1 and selects the
+source after creation. An `opposed` check compares the actor's skill level or attribute with the target detail's rating ([rows 5 and G5](#skill-growth-and-opposed-checks-toolbox-rows-5-and-g5)). It emits `check_passed` or `check_failed` at position 1 and selects the
 `success` or `failure` outcome. A rejected command draws no RNG.
 
 ## action_recipe@1 (`mechanics/action_recipe/rule.ts:49`)
@@ -574,11 +575,44 @@ starts a scene or writes its consequences.
 ## reaction@1 (`kernel/ts/src/mechanics/reaction.ts`)
 
 Ruleless, run by the proposal: a ReactionRule triggers on `fact_changed` of its fact,
-`entity_entered_room` into its room, or exact `quest_resolved {quest, outcome}`, in rule-key order.
+`entity_entered_room` into its room, exact `quest_resolved {quest, outcome}`, `rested` in its
+room, or (toolbox row W1) any other registered event kind with optional filters, in rule-key order.
+Every filter present must equal its payload field; a filter means the same field in every kind:
+
+| Trigger `on.event` | Optional filters (payload field) | Subject (status.apply target) |
+|---|---|---|
+| `item_acquired` | `item` (item_id) | holder_id |
+| `item_dropped`, `shooed` | `item` (item_id), `room` (room_id) | the actor's body |
+| `quest_activated` | `quest` | the actor's body |
+| `choice_opened` | none | the actor's body |
+| `choice_resolved` | `choice` (choice_id) | the actor's body |
+| `story_point_reached` | `story_point`, `outcome` | the actor's body |
+| `custom_event` | `custom` (the event's key) | the actor's body |
+| `action_completed` | `action` | the actor's body |
+| `check_passed`, `check_failed` | `check` (the check's key) | the actor's body (subject_id is the target) |
+| `barrier_changed` | `barrier`, `to` | the actor's body |
+| `scene_ended` | `scene` | the actor's body |
+| `entity_died` | `victim` (victim_definition), `room` (room_id) | victim_id |
+| `attack_result` | `hit` | target_id |
+| `filled`, `poured`, `drank` | `kind` | the actor's body |
+| `entity_entered_room` | `room` (required) | entity_id |
+| `rested` | `room` (required) | body_id |
+| `fact_changed` | `fact` (required) | subject_id when present, else the actor's body |
+| `quest_resolved` | `quest`, `outcome` (both required) | the actor's body |
+
+Attribution: every delivery runs for the command actor (the quest-resolution exception below),
+so an event whose subject is an NPC or a thing (a hound's death, a hit on a guard, a crow
+taking an item) still reads the actor's `when` and writes the actor's facts, quests and
+experience; only `status.apply` follows the subject and skips when the subject is not the
+actor's body (statuses on NPCs and things wait for row G3). A check, action or custom event's subject_id
+names its target, so its status lands on the doer: a failed disarm poisons the actor. A filter naming a definition (`item`,
+`room`, `quest`, `story_point`, `barrier`, `scene`, `kind`, `victim` as an NPC) must name one of
+this cartridge (`item` matches its authored instance only, never a created one such as a
+harvested pelt); key filters (`custom`, `check`, `choice`, `action`, `outcome`) are not resolved
+and a key no event carries never matches.
 For quest resolution, the source instance must exist at player scope, be resolved with the
 event's quest/outcome, and agree with its actor and scope; inconsistent evidence faults
-`precondition_failed`. The instance's actor owns the delivery. Legacy fact/room triggers retain
-the command actor. Its `when` is read on the proposal so far at the event's logical time.
+`precondition_failed`. The instance's actor owns the delivery. Its `when` is read on the proposal so far at the event's logical time.
 `apply` assigns facts at that actor's scope, activates a declared quest through
 `quest.activate {quest}`, or requests typed `quest.resolve {quest, outcome}` and
 `quest.fail {quest, outcome}` transitions. Resolve and fail are legal only on a
@@ -646,7 +680,8 @@ when empty and have no decay.
 
 `entity_died` names victim, optional victim definition (none for a player body), death
 room, killer and credited character where known, and corpse. The producer allocates
-attack-result EventId before death EventId before corpse EntityId, with no death RNG.
+attack-result EventId before death EventId before corpse EntityId, with no death RNG
+unless the victim declares [drops](#loot-tables-and-random-drops-toolbox-row-8).
 The actual M6 producer owns lethal loss and encounter/job closure in the same writer
 group before this sequence; no public death/damage command or test-only engine verb
 exists. The installed combat producer below provides live Attack/round/death/escape integration.
@@ -1765,3 +1800,52 @@ Nothing is stored: the stats are read at use, so a later attribute writer change
 - **Spending.** One `raise_attribute` action with an `attribute` input (an authored attribute's DefinitionRef) is offered while unspent points remain; the Book shows one Raise card per authored attribute. It first settles a derived hp maximum ([resource@1](#resource1-kerneltssrcmechanicsresourcets)), then adds one allocated point; with none left nothing is offered, and a forged invocation is refused by keyed admission (the rule also refuses it, `invalid_state`). Replay returns the original receipt.
 - **Reading.** [attributes@1](#attributes1-kerneltssrcmechanicspolicyts60) reads selected (else starting) value plus allocated points plus worn affects (row 3), saturated as in row 2, so every derived stat follows. The GameView carries `{level, experience, next, unspent}` (`next` absent at the top level); reaching a level adds one receipt narration line, the `level_up` text: *completion:* after the whole proposal (root, reactions and jobs) is composed, the last `levelling.set` of the player character in it is compared with the stored row before the step, and the line is appended once at the end of the narration when its level is higher, so a step that crosses two thresholds still adds one line.
 - **Sampler.** `cartridges/levelling_sampler`: three rats grant 10 experience each, thresholds 30 and 100, one point per level; three kills reach level 2 with one point; resolving the den quest grants 20 by `experience.grant`; Raise STR moves the derived damage (STR, divisor 1) and Raise CON the derived hp maximum (CON, hp regenerating 1 per hour) by the cartridge's tables.
+
+## Property tags and the policy leaf set (toolbox row G1)
+
+[Toolbox row G1](../MECHANICS-TOOLBOX.md#ranked-toolbox); [declarations](cartridge.md#tag-declarations) govern it; the brief and its decisions are in Beads `loka-kgd.17` (2026-10-10).
+
+- **Tags.** Item, barrier and room definitions may declare `tags`, a list of `Tag` (`protocol/entity.schema.json`): `burnable`, `fragile`, `liquid_holding`, `metal`, `sharp`, `silver` (added by [row G2](#damage-kinds-resistances-and-critical-hits-toolbox-row-g2)), `wooden`. The vocabulary is a closed engine set, not a cartridge declaration: the later rows that give a tag meaning (G2 material damage, G12 force, W22 fire, row 31 `exposed`) key engine code on its name, so the engine must know every name anyway, and a schema enum gives both kernels the same closed check with no twin code. A row whose mechanic needs a new tag adds it to the enum; a world-only label no mechanic reads is a fact. Tags are definition data: nothing writes them and nothing is saved. A cartridge that declares tags needs `tags@1` (UNDECLARED_CAPABILITY at the `tags` member otherwise); one without tags behaves as before.
+- **`has_tag {tag, subject}`** (owned by the ruleless `tags@1`): exactly one subject. `subject: "target"` holds when the action's target is an item whose definition declares the tag (false without a target, for a detail or for an NPC; it does not check reach, so a condition that needs the target in reach adds `target_present`); `subject: "room"` reads the actor's current room; `item`, `barrier` or `room` names a definition of this cartridge, a constant of the cartridge (barriers have no EntityId, so a door is never an action target and is named this way). No actor carries tags in this row, so there is no `actor` subject.
+- **Leaf naming.** A leaf is a snake_case predicate named for what it reads: `has_<x>` for possession or membership (`has_item`, `has_tag`), `<x>_state` for equality with a lifecycle state (`quest_state`, `barrier_state`, `escort_state`), `<x>_compare` for an at-least comparison of a named quantity's current value (`stat_compare`, `resource_compare`), `<x>_count` for an at-least count of things or events (`visited_count`, `population_count`), and an adjective or participle for a boolean (`target_present`, `light_off`); an at-least threshold is the field `at_least`. A context-relative subject (the target, the actor's room, a body) is always the field `subject` (`target` or `room` for `has_tag`), never a field named `body` or `actor`. A field naming a definition is usually named for its kind (`item`, `barrier`, `quest`) but may differ (`population_count.plan` names a `population`): the reference tables map each field to its kind explicitly, and the compiler expands a short reference to that kind. Alternative subjects are exclusive (`exactlyOneRequired`). Each leaf belongs to exactly one capability's `policies` in `protocol/capability_registry.json`; both kernels refuse an op whose owner the cartridge does not require (UNDECLARED_CAPABILITY).
+- **Dispatch.** `holds()` (`kernel/ts/src/mechanics/policy.ts:24`) evaluates `all`, `any` and `not`, then adds one query step per leaf (04 §5.4) and dispatches one `case` per leaf to a pure read over committed state; a read longer than a line is a helper beside it or in the leaf's capability module. The `default` is exhaustive (`never`), so a schema leaf without its case fails the TypeScript build.
+- **Two-kernel parity.** The Elixir compiler does not evaluate policies (story rules are TypeScript-only, ADR-074); its parity is the shared schema, the registry ownership check and the reference fields. `Loka.Content.LeafRefs` (`lib/loka/content/leaf_refs.ex`, dependency-free so the checks read it at compile time) maps each leaf's reference fields to their definition kinds (`{field => kind}`); short-reference expansion (`Loka.Content.Checks.expand/2`) and the compiler's reference checks read it, and the loader's twin is the `LEAF_REFS` table read by `refStage` (`kernel/ts/src/content/cartridge_refs.ts`); `kernel/ts/test/tags.test.ts` asserts the two tables are equal and name exactly each leaf's DefinitionRef fields in `protocol/policy.schema.json`. A leaf-specific check (EMPTY_TIME_WINDOW) is one clause in each. A later leaf (`status_active`, `position`, `visited`, `skill_compare`, `owner`, `role`, ...) adds its schema branch and invalid fixtures, its registry entry, its `holds()` case, its `LeafRefs` and `LEAF_REFS` entries when it names a definition, and its tests.
+- **Sampler.** `cartridges/tags_sampler`: a wooden hall (`wooden`) with a wooden door north (`wooden`, `burnable`) and an iron door east (`metal`), a stick (`wooden`, `burnable`) and an iron rod (`metal`). Examining the wooden door shows its burnable variant; the iron door's identical `has_tag burnable` variant never shows; the hall's description reads its own tag through `subject: "room"`. The player sees no new Book element: tags show only through authored variants and later mechanics.
+- **Composition record.** Consumer: description variants now, the G2, G12, W22 and row 31 mechanics later. Reads: definition data only; writes, events, jobs and save rows: none. Reused: the policy evaluator and its step budget, description variants, short-reference expansion, schema validation and capability ownership. New: the `Tag` vocabulary, the `tags` field and one leaf; no foundation change.
+
+## Loot tables and random drops (toolbox row 8)
+
+[Toolbox row 8](../MECHANICS-TOOLBOX.md#ranked-toolbox); [declarations](cartridge.md#drop-declarations) govern it; the PM brief is in Beads `loka-kgd.20` (2026-10-10). The table lives on the creature, not the population: an NPC definition may declare `drops`, an ordered list of `{item, chance}`, each item an authored item the NPC holds at genesis and `chance` an integer percentage 1 to 100. Authored creatures (rats) are not population members, so a population plan could not carry their table; populations keep their fixed `loot_role` pelt or hide. Drops create no entity: they decide the custody of items that already exist.
+
+- **Roll.** When combat's fatal producer runs the [death sequence](#death1--corpse-custody-and-same-body-return-m5-b-foundation) for an NPC with `drops`, the sequence draws one uniform integer in [0, 100) per entry, in table order, from the world RNG after the round's attack draws; an entry passes when roll < chance. Each entry draws even when its item is no longer held, so later entries keep their draw. Each draw has its own eight-raw-draw budget and does not count against the round's budget. A death without `drops` draws nothing, as before.
+- **Custody.** Death custody transfers the victim's sorted held item roots to the corpse, except a held drop item whose entry failed: it stays held by the dead NPC, which nothing reaches: a table requires the NPC's `hp.gain` to be 0, so the dead NPC never regenerates, revives or re-rolls (the compiler and loader refuse a table on a regenerating NPC). Items the NPC holds that no entry names always transfer. Only combat kills an NPC; the bleed, status and water deaths are the player's body and draw nothing.
+- **Replay.** The rolls are part of the committed proposal and its RNG state, so a replay returns the same receipt and state.
+- **Book.** A dropped item appears in the corpse's Contents, where existing loot appears; the player sees no new line.
+- **Sampler.** `cartridges/loot_sampler`: a rat holds a tail (chance 50) and a coin (chance 10); one player attack kills it. From seed `[1, 1, 1, 1]` the hit draw is followed by rolls 60 and 20 (nothing drops); from `[1, 2, 3, 4]` by 0 and 40 (the tail drops); from `[9, 10, 11, 12]` by 80 and 0 (the coin drops); from `[5, 6, 7, 8]` by 40 and 0 (both drop).
+
+## Damage kinds, resistances and critical hits (toolbox row G2)
+
+[Toolbox row G2](../MECHANICS-TOOLBOX.md#ranked-toolbox) (merges rows 7 and 40); [declarations](cartridge.md#damage-declarations) govern it; the PM brief is in Beads `loka-kgd.18` (2026-10-10). It refines the [combat@1](#combat1--first-live-encounter-m6-a) attack; a cartridge without its fields keeps its bytes, hash, draws and damage.
+
+- **Variance.** The existing inclusive `damage_min`..`damage_max` roll is the hit variance; this row adds no second variance field.
+- **Critical hit.** An attack profile's optional `crit {chance, multiplier}` makes a hit critical when its accuracy roll (the one uniform(100) every attack already draws) is below `crit.chance`; a critical hit's rolled damage is multiplied by `multiplier`. Deriving it from the hit draw costs no draw: one NPC attack can already spend hit, dodge, block and damage draws of the round's eight-raw-draw budget, so a fifth draw could exhaust it, and a cartridge that opts in keeps every later draw of the round in place. `crit.chance` is a percentage of attack rolls, so it is a share of hits only up to the profile's `chance`; a miss or a prevented attack is never critical. This is outcome randomness, not variety ([trap 5](../MECHANICS-TOOLBOX.md#traps) does not apply).
+- **Kind.** An attack profile's optional `kind` is a `DamageKind` (`protocol/entity.schema.json`: `cold`, `fire`, `physical`, `poison`), a closed engine set like `Tag`; a profile without one matches no kind resistance. The player's kind is that of the profile that strikes (the usable wielded weapon's, else `world.combat.player_attack`).
+- **Material.** When the wielded item's own `weapon.attack` strikes, the item's tags are the attack's materials; an unarmed strike (`world.combat.player_attack`, also while a weapon is held whose skill is not usable) and an NPC's attack carry none (PM ruling, `loka-kgd.18`).
+- **Resistance.** An NPC definition's optional `resistances` maps a `DamageKind` or a `Tag` to a percent, -100 to 100 (negative is a weakness). An attack on that NPC sums the entries for its kind and each of its materials, clamps the sum to -100..100 and multiplies its damage by (100 - sum) / 100, rounded down. At 100 a hit deals 0 loss (`attack_result` keeps `hit: true`, `loss: 0`, narrated as a hit). The player carries no resistances.
+- **Order.** Rolled damage, then the crit multiplier, then resistance, then the sleep multiplier, then the target's HP cap.
+- **Book.** No new line: a critical or resisted hit shows only as its HP change.
+- **Sampler.** `cartridges/damage_sampler`: the player's unarmed attack and both swords' `weapon.attack` (skill `swords`) are chance 100, damage 5, `physical`, crit 10 x2; the `fighter` ancestry knows `swords`, the `farmer` does not; a wight (HP 20) resists `physical` 50 and `fire` 75 and takes `silver` -50; an iron sword (`metal`, `sharp`) and a silver sword (`metal`, `sharp`, `silver`) lie in the hall. One round from a hit roll of 60 leaves the wight 18 with the iron sword (5 at 50%: 2) and 15 with the silver one (50 - 50 = 0%: 5), and 18 for a farmer holding the silver sword (an unarmed strike: no silver); from a roll of 0 (critical) 15 and 10; with `fire` swords 19 (75%: 1.25, so 1) and 17 (25%: 3.75, so 3). From seed `[2229621088, 1003500358, 2750031949, 1263371380]` the silver fight leaves 15, 5, 0: the second round's player roll 6 is the one doubled hit.
+- **Composition record.** Consumer: combat's attack (`kernel/ts/src/mechanics/combat/round_attack.ts`, `dealt`). Reads: the attack profile, the hit draw, the striking weapon's G1 tags and the target NPC's definition; writes, events, jobs and save rows: none new. Reused: the hit draw, the equipment slot lookup, G1 tags, checked integer arithmetic and the `KERNEL_API_RANGE_INVALID` floor. New: `DamageKind`, `Resistances`, `AttackProfile.kind` and `.crit`, `NpcDefinition.resistances` and the `silver` tag; no foundation change.
+
+## Skill growth and opposed checks (toolbox rows 5 and G5)
+
+[Toolbox rows 5 and G5](../MECHANICS-TOOLBOX.md#ranked-toolbox); [declarations](cartridge.md#skill-growth-and-rating-declarations) govern it; the PM brief is in Beads `loka-kgd.19` (2026-10-10).
+
+- **Growth.** A skill may declare `growth`, 1 to 8 strictly increasing positive use counts: the counts at which the level rises by one: for a taught skill they reach levels 2, 3 and so on, for an untaught one levels 1, 2 and so on. The count is a reserved player fact `uses_<key>` (int, default 0, minimum 0, maximum the last `growth` entry), synthesized beside `skill_<key>` only for a skill with growth and written only by skills@1. *Why a fact, not a row like levelling's:* fact@1 already gives the op, composition, save, replay and the typed-value invariant in both kernels, and the count is one bounded integer per character and skill; a new row would need a new delta op and its compose twins for no added rule.
+- **Level.** Derived on read, never stored: 1 when the skill is acquired (`skill_<key>`), else 0, plus the number of `growth` entries at or below the count. A skill without growth reads 1 acquired, 0 not. Qualification does not enter: it gates actions through their policies, as before.
+- **Opposed check.** A recipe check `{kind: "opposed", key}` names exactly one of `skill` or `attribute`. It draws no RNG and passes when the commanded actor's value, read at admission, is at least the `rating` of the recipe's target detail: the skill's level, or the attribute's value as [attributes@1](#attributes1-kerneltssrcmechanicspolicyts60) reads it. The detail of a recipe with an opposed check must declare `rating` (an integer); NPC-side ratings join with G3.
+- **Use.** Each accepted perform of a recipe whose opposed check names a skill with growth is one use, passed or failed: after the check event (position 1) the count gains 1, as a `fact.assign` whose `fact_changed` takes position 2; the outcome's sequence follows. The check reads the level before this use. At the maximum nothing is written, so practice stops at the last authored threshold and no gate exists beyond the authored ratings (trap 6). A rejected command uses nothing.
+- **No leaf.** Neither acceptance needs a policy to read a level, so `skill_compare` waits for its first gating consumer, under the [leaf-set rule](#property-tags-and-the-policy-leaf-set-toolbox-row-g1).
+- **Book.** Nothing new yet: the level reaches the player only through check outcomes; showing it on the Character page is a separate designer-approved Book change.
+- **Sampler.** `cartridges/skills_sampler`: `pick` with growth `[1, 2, 3, 4, 5]`, not taught, and STR 8; in one room a chest rated 3, a gate rated 5 and a vault rated 7. Picking the gate fails five times (levels 0 to 4) and opens on the sixth (level 5); then picking the chest passes (5 ≥ 3) and the vault fails (5 < 7), and the count stays 5; forcing the vault by STR passes (8 ≥ 7).
+- **Composition record.** Consumer: action recipes. Reads: the skill acquisition fact, the count fact, attributes@1 values and the target detail's definition. Writes: the count by `fact.assign`; events: the existing `check_passed`/`check_failed` and `fact_changed`; jobs and save rows: none new. Reused: check@1, fact@1 reserved facts and their ownership, attributes@1 `value`. New: the `growth` and `rating` fields and the `opposed` check kind; no foundation change.
