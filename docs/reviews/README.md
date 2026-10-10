@@ -21,6 +21,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: Loka picker + polish panel; remove Tidewave (PR #339)](2026-10-09-picker-339-review.md): **APPROVE WITH NOTES**
 - [Mechanics toolbox review: gaps, merges, order, risks](2026-10-09-mechanics-roadmap-review.md)
 - [Mechanics review 2: what makes the world feel alive](2026-10-09-mechanics-review-2.md)
+- [Review: loot tables and random drops, toolbox row 8 (loka-kgd.20)](2026-10-09-loot-kgd20-review.md): **CHANGES REQUIRED**
 - [Review: Live stories survive a sidebar switch (PR #335)](2026-10-09-live-switch-335-review.md): **APPROVE WITH NOTES**
 - [Review: experience and levelling, toolbox row 4 (PR #344, loka-kgd.11)](2026-10-09-levelling-kgd11-344-review.md): **APPROVE**
 - [Review: Housekeeping, red controls by PID, after_merge pulls (PR #338)](2026-10-09-housekeeping-338-review.md): **APPROVE WITH NOTES**
