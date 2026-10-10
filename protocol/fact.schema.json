@@ -124,6 +124,10 @@
           },
           "minItems": 1
         },
+        "per_subject": {
+          "description": "Toolbox row W2 (kernel_api at least 1.47): the fact has one value per subject, an NPC, item or detail, stored with its subject_id (ScopedFact): an entity fact at scope instance, a pair fact (the subject and the character) at scope player. Absent: one value per scope.",
+          "const": true
+        },
         "meaning": {
           "type": "string",
           "minLength": 1

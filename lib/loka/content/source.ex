@@ -217,6 +217,7 @@ defmodule Loka.Content.Source do
 
     defs
     |> Map.update!("DefinitionRef", &%{"anyOf" => [%{"$ref" => "Key"}, &1]})
+    |> schedule(defs)
     |> Map.update!(
       "LiquidRow",
       &put_in(&1, ["properties", "kind", "anyOf"], [
@@ -225,5 +226,26 @@ defmodule Loka.Content.Source do
         defs["DefinitionRef"]
       ])
     )
+  end
+
+  # Toolbox row W10: a daily_schedule hour may be [case, ..., room key]; schedule_cases is
+  # compiler output only (Loka.Content.Schedules).
+  defp schedule(contracts, defs) do
+    hour = [
+      %{"$ref" => "Key"},
+      defs["DefinitionRef"],
+      %{
+        "type" => "array",
+        "items" => %{"anyOf" => [%{"$ref" => "Key"}, defs["ScheduleCases"]["items"]]},
+        "minItems" => 2,
+        "maxItems" => 9
+      }
+    ]
+
+    contracts
+    |> put_in(["NpcDefinition", "properties", "daily_schedule", "additionalProperties"], %{
+      "anyOf" => hour
+    })
+    |> update_in(["NpcDefinition", "properties"], &Map.delete(&1, "schedule_cases"))
   end
 end

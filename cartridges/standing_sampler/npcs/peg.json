@@ -1,0 +1,58 @@
+{
+  "keywords": [
+    "peg"
+  ],
+  "short": "npc.peg.short",
+  "room_line": "npc.peg.room",
+  "description": "npc.peg.description",
+  "room": "square",
+  "resource_starts": {
+    "pennies": 0
+  },
+  "shop": {
+    "resource": "pennies",
+    "offers": [
+      {
+        "item": "bread",
+        "buy": 4,
+        "sell": 1
+      }
+    ],
+    "bought": "shop.bought",
+    "sold": "shop.sold",
+    "buy_discount": {
+      "friendly": true,
+      "numerator": 1,
+      "denominator": 2,
+      "minimum": 1
+    }
+  },
+  "disposition": {
+    "hostile": {
+      "policy_version": 1,
+      "root": {
+        "op": "fact_compare",
+        "fact": "village_standing",
+        "equals": -2
+      }
+    },
+    "friendly": {
+      "policy_version": 1,
+      "root": {
+        "op": "any",
+        "items": [
+          {
+            "op": "fact_compare",
+            "fact": "village_standing",
+            "equals": 1
+          },
+          {
+            "op": "fact_compare",
+            "fact": "village_standing",
+            "equals": 2
+          }
+        ]
+      }
+    }
+  }
+}

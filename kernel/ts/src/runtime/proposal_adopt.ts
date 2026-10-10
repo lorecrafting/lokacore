@@ -25,7 +25,7 @@ export function adopt(
   const { decision: out, limit } = propose(world, decision, command, mint, steps);
   if (out.kind !== 'accepted') return faulted(out, world, limit);
   const assigns = out.delta.ops.filter((o) => o.op === 'fact.assign') as Assign[];
-  const bad = assigns.find((o) => !typedFact(world, o.fact, o.scope.kind, o.value));
+  const bad = assigns.find((o) => !typedFact(world, o, o.value));
   if (bad)
     return { decision: { kind: 'fault', code: 'precondition_failed', target: target(bad) }, world };
   // Every limit of the whole proposal in one call, so a tie names the first in 04 §5.4 order.

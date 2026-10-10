@@ -7,8 +7,8 @@ defmodule Loka.Content.Checks do
   alias Loka.Core.Canonical
 
   @ref_fields Map.merge(Loka.Content.LeafRefs.all(), %{
-                "fact.assign" => %{"fact" => "fact"},
-                "fact.adjust" => %{"fact" => "fact"},
+                "fact.assign" => %{"fact" => "fact", "item" => "item", "npc" => "npc"},
+                "fact.adjust" => %{"fact" => "fact", "item" => "item", "npc" => "npc"},
                 "skill.acquire" => %{"skill" => "skill"},
                 "topic.grant" => %{"topic" => "topic"},
                 "status.apply" => %{"status" => "status", "item" => "item", "npc" => "npc"},
@@ -351,7 +351,8 @@ defmodule Loka.Content.Checks do
     schedule = Map.get(npc, "daily_schedule", %{})
 
     reference(rel, [], {"room", "room"}, npc, m, defs) ++
-      for {h, _} <- schedule,
+      for {h, r} <- schedule,
+          is_map(r),
           d <- reference(rel, ["daily_schedule"], {h, "room"}, schedule, m, defs),
           do: d
   end

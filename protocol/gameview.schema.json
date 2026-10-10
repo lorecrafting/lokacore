@@ -1165,6 +1165,10 @@
         "time": {
           "$ref": "command.schema.json#/$defs/LogicalTime"
         },
+        "recap_after": {
+          "description": "Toolbox row W27: the authored away recap threshold in logical seconds (recap_after_minutes x 60 x rate); present exactly when the cartridge authors it.",
+          "$ref": "command.schema.json#/$defs/LogicalTime"
+        },
         "calendar_status": {
           "$ref": "#/$defs/CalendarStatus"
         },
@@ -1309,6 +1313,35 @@
             ],
             "additionalProperties": false
           }
+        },
+        "deductions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "action": {
+                "$ref": "action.schema.json#/$defs/Key"
+              },
+              "label": {
+                "$ref": "text.schema.json#/$defs/TextKey"
+              },
+              "from": {
+                "type": "array",
+                "items": {
+                  "$ref": "text.schema.json#/$defs/TextKey"
+                },
+                "minItems": 2
+              }
+            },
+            "required": [
+              "action",
+              "label",
+              "from"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1,
+          "description": "Lore deductions (toolbox row 46, kernel_api at least 1.47): each recipe, in key order, whose policy is an all that requires at least two topics' facts true and whose success assigns another topic's fact true, while the actor knows those topics and not that one; action is the recipe's key, label its label, from the known topics' labels. Absent when none."
         },
         "bleeding": {
           "$ref": "gameview.schema.json#/$defs/BleedingView"

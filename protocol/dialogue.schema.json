@@ -188,7 +188,7 @@
       ]
     },
     "DialogueChoice": {
-      "description": "One option of a dialogue (06 §17, §43): label and narration its text keys; sequence, its fact.assign consequences in order (a declared fact of the cartridge at the one scope it allows, a value of its type, as a recipe's: fact@1 emits fact_changed when the value changes); hand_over, the item role the actor's body gives to the npc role (an item_acquired with that NPC as holder, as give); accept, a quest of this cartridge the choice activates as quest@1's activation does (quest.activate at player scope and quest_activated; the choose is invalid_state when accept_quest would be: the actor already has an instance of it, or its offer, if declared, has a policy that fails), never with a hand_over (activation and acquisition in one decision conflict: OUTCOME_MISMATCH). The choose that selects it applies all of them, resolves the dialogue's quest or activates the accepted one, and resolves the choice in one decision; its outcome is the choice_id. API1.7 receive {item, from} transfers the selected bound NPC-held item into the actor body, only while resolving a quest before API1.10; API1.10 also permits nonterminal receive. Receive is never combined with accept/hand_over. API1.7 fact.adjust applies a safe integer amount to a declared bounded integer fact using checked addition then authored bounds, lowered to fact.assign.",
+      "description": "One option of a dialogue (06 §17, §43): label and narration its text keys; sequence, its fact.assign consequences in order (a declared fact of the cartridge at the one scope it allows, a value of its type, as a recipe's: fact@1 emits fact_changed when the value changes); hand_over, the item role the actor's body gives to the npc role (an item_acquired with that NPC as holder, as give); accept, a quest of this cartridge the choice activates as quest@1's activation does (quest.activate at player scope and quest_activated; the choose is invalid_state when accept_quest would be: the actor already has an instance of it, or its offer, if declared, has a policy that fails), never with a hand_over (activation and acquisition in one decision conflict: OUTCOME_MISMATCH). The choose that selects it applies all of them, resolves the dialogue's quest or activates the accepted one, and resolves the choice in one decision; its outcome is the choice_id. API1.7 receive {item, from} transfers the selected bound NPC-held item into the actor body, only while resolving a quest before API1.10; API1.10 also permits nonterminal receive. Receive is never combined with accept/hand_over. API1.7 fact.adjust applies a safe integer amount to a declared bounded integer fact using checked addition then authored bounds, lowered to fact.assign. Optional (toolbox row 14, kernel_api 1.47): check (DialogueCheck), an opposed check made when the choice is chosen; a checked choice carries only label, narration, sequence, availability and check, in a dialogue with no quest and no riddle, and its sequence grants no skill (else OUTCOME_MISMATCH at its check).",
       "type": "object",
       "properties": {
         "label": {
@@ -419,6 +419,9 @@
             "transition"
           ],
           "additionalProperties": false
+        },
+        "check": {
+          "$ref": "#/$defs/DialogueCheck"
         }
       },
       "required": [
@@ -452,6 +455,62 @@
             "kind": "quest",
             "key": "lantern"
           }
+        }
+      ]
+    },
+    "DialogueCheck": {
+      "description": "A dialogue choice's check (toolbox row 14, docs/system/mechanics.md dialogue skill checks; check@1; kernel_api at least 1.47): an opposed check as a recipe's (action.schema.json ActionRecipe check, kind opposed) made when the choice is chosen, drawing no RNG: it passes when the actor's level of skill, or value of attribute, is at least rating, or, when npc names an NPC instance of this cartridge that declares the attribute, that NPC's value of it; exactly one of rating and npc (else SCHEMA_VIOLATION invalid_value at the check). key names it in its check_passed or check_failed event (a DefinitionRef of kind check, whose subject is the speaker), shared with no recipe's or other choice's check (DUPLICATE_DEFINITION). On a pass the choice applies as unchecked; on a failure the actor reads failure instead, nothing else of the choice applies and the conversation closes. A skill with growth gains one use per check, passed or failed.",
+      "type": "object",
+      "properties": {
+        "key": {
+          "$ref": "action.schema.json#/$defs/Key"
+        },
+        "kind": {
+          "const": "opposed"
+        },
+        "skill": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
+        "attribute": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
+        "npc": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
+        "rating": {
+          "type": "integer"
+        },
+        "failure": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        }
+      },
+      "required": [
+        "key",
+        "kind",
+        "failure"
+      ],
+      "exactlyOneRequired": [
+        "skill",
+        "attribute"
+      ],
+      "dependentRequired": {
+        "npc": [
+          "attribute"
+        ]
+      },
+      "additionalProperties": false,
+      "examples": [
+        {
+          "key": "persuade_guard",
+          "kind": "opposed",
+          "attribute": {
+            "cartridge_id": "persuade_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "attribute",
+            "key": "cha"
+          },
+          "rating": 5,
+          "failure": "narration.guard.persuade_failed"
         }
       ]
     }

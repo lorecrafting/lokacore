@@ -95,14 +95,21 @@ test('a potion gives str +3 for an hour; a second dose refreshes it, never stack
 });
 
 // Breaks (row 42): the song plays without the lute, the step's `npc` is ignored (the listener
-// stays 10) or skips presence (the traveller in the yard reads 12), or the song moves str.
+// stays 10) or skips presence (the traveller in the yard reads 12), the song moves str, or its
+// reaction's applied line comes before the song's own line.
 test('a song with the lute gives dex +2 to the player and the listener present only', () => {
   let w = fresh();
   assert.equal(act(w, { type: 'perform', action: 'play_song' }).decision.kind, 'rejected');
-  w = play(play(w, { type: 'take', item_id: id(w, 'item', 'lute') }), {
+  const song = act(play(w, { type: 'take', item_id: id(w, 'item', 'lute') }), {
     type: 'perform',
     action: 'play_song',
   });
+  // mechanics.md, reaction@1: the command's own line first, then its reactions' lines (loka-kgd.13).
+  assert.deepEqual(
+    (song.decision as { narration?: { key: string }[] }).narration?.map((l) => l.key),
+    ['narration.play_song.actor', 'narration.inspired.applied'],
+  );
+  w = song.world;
   const dex = (x: World) => [
     mine(x, 'dex'),
     theirs(x, 'listener', 'dex'),

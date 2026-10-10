@@ -31,10 +31,14 @@ defmodule Loka.Content.Dialogues do
       proven: Loka.Content.Hub.proven(defs)
     }
 
-    Enum.flat_map(all(defs), &dialogue(&1, ctx)) ++
-      story_points(defs, ctx) ++
-      chapters(Map.get(settings, "chapters", []), ctx)
+    Enum.flat_map(all(defs), &dialogue(&1, ctx)) ++ wide(defs, settings, ctx)
   end
+
+  # The cartridge-wide checks: the choice-check floor (row 14), story points and chapters.
+  defp wide(defs, settings, ctx),
+    do:
+      Loka.Content.ChoiceChecks.floor(ctx.m, defs) ++
+        story_points(defs, ctx) ++ chapters(Map.get(settings, "chapters", []), ctx)
 
   # Chapters derive only from unambiguous quest-resolving dialogue choices (mechanics.md).
   defp chapters(chapters, ctx) do
@@ -275,6 +279,7 @@ defmodule Loka.Content.Dialogues do
       receive_item(rel, steps, o, d, ctx) ++
       payment(rel, steps, o, d, ctx) ++
       Loka.Content.Skills.choice(rel, steps, o, d, ctx) ++
+      Loka.Content.ChoiceChecks.choice(rel, steps, o, d, ctx) ++
       Loka.Content.Hub.choice(rel, steps, o, d, ctx.proven)
   end
 

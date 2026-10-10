@@ -1,0 +1,9 @@
+{
+  "keywords": ["carters_note", "book"],
+  "short": "item.carters_note.short",
+  "room_line": "item.carters_note.room",
+  "description": "item.carters_note.description",
+  "location": { "in": "room", "room": "road" },
+  "mass_grams": 100,
+  "readable": { "label": "actions.read_book", "text": "readable.carters_note", "topic": "missing_cart" }
+}

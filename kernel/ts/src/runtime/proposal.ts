@@ -24,6 +24,7 @@ import { cmp } from '../foundation/validate.ts';
 import { currentRound } from '../mechanics/combat/round.ts';
 import { handoffGroup, sightHandoff } from './proposal_sight.ts';
 import { bleedRoundPair } from './proposal_bleed.ts';
+import { queueHour } from './proposal_hours.ts';
 import { statusGroup } from '../mechanics/status/job.ts';
 import { anyPending as pending, parted } from '../mechanics/dialogue/selection.ts';
 import { admit, type Admitted } from './proposal_admit.ts';
@@ -32,8 +33,7 @@ import { deathCredit } from '../mechanics/combat/credit.ts';
 import { dropped as crowDrop, taken as crowTake } from '../mechanics/crow/behavior.ts';
 
 // limit: a budget_exceeded fault's exhausted limit, a side value never in the result (04 §5.4).
-export { adopt } from './proposal_adopt.ts';
-export type { Stepped } from './proposal_adopt.ts';
+export { adopt, type Stepped } from './proposal_adopt.ts';
 export type Actor = Parameters<typeof event>[1];
 type Assign = Extract<DeltaOp, { op: 'fact.assign' }>;
 type Corr = DomainEvent['correlation_id'];
@@ -250,6 +250,7 @@ function react(p: P): Admitted | undefined {
       if (!own) continue;
       const delivered = admit('reaction', own);
       if (delivered.kind !== 'accepted') return delivered;
+      p.narration.push(...(delivered.narration ?? []));
       p.group++;
       const base = cause(p, next.cause.logical_time, next.cause.id);
       const failed = join(p, delivered.delta.ops, delivered.events, base, depth, next.mint);
@@ -271,7 +272,7 @@ function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined
     const current = at.state.jobs?.[job_id];
     if (
       !current ||
-      current.status !== 'pending' ||
+      (current.status !== 'pending' && current.due_time === due_time) ||
       (current.encounter_id && !currentRound(at, job_id as JobId, current))
     )
       continue;
@@ -281,13 +282,14 @@ function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined
       payload: { type: 'run_job', job_id: job_id as JobId },
     } as const;
     const m = allocator(at, run);
-    const ran = admit('schedule', schedule.decide(at, run, m));
+    const ran = admit('schedule', schedule.decideAt(at, run, m, undefined, due_time));
     if (ran.kind !== 'accepted') return ran;
+    if ((p.limit = queueHour(due, job_id, ran))) return BUDGET;
     p.rng = ran.rng;
     p.narration.push(...(ran.narration ?? []));
     const partner = populationPairs.get(job_id);
     const group =
-      (partner ? groups.get(partner) : undefined) ??
+      groups.get(partner ?? job_id) ?? // a partner's, or a schedule job's earlier crossed hour's
       bleedPairs.get(job_id) ??
       statusGroup(at, job_id as JobId, current, p.holders, p.group + 1) ??
       p.group + 1;
@@ -295,10 +297,7 @@ function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined
     const bleedPair = bleedRoundPair(at, job_id as JobId, current);
     if (bleedPair) bleedPairs.set(bleedPair, group);
     const handoff = sightHandoff(p.world, p.ops, at, job_id as JobId, due_time, ran.delta.ops);
-    const own = ran.delta.ops.map((o) => ({
-      ...o,
-      writer_group: handoffGroup(o, handoff, group),
-    }));
+    const own = ran.delta.ops.map((o) => ({ ...o, writer_group: handoffGroup(o, handoff, group) }));
     p.group++;
     const failed = join(p, own, ran.events, cause(p, due_time, run.id), 0, m) ?? react(p);
     if (failed) return failed;

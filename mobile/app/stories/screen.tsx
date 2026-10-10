@@ -45,6 +45,7 @@ export const screenFrom = (
     returnWorld: undefined,
     returnDetail: undefined,
     confirmedRead: undefined,
+    recap: undefined,
     ...shell,
   };
 };

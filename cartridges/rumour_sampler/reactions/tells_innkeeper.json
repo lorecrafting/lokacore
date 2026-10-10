@@ -1,0 +1,24 @@
+{
+  "on": {
+    "event": "entity_entered_room",
+    "room": "inn",
+    "npc": "ada"
+  },
+  "when": {
+    "policy_version": 1,
+    "root": {
+      "op": "fact_compare",
+      "fact": "knows_mill",
+      "npc": "ada",
+      "equals": true
+    }
+  },
+  "apply": [
+    {
+      "op": "fact.assign",
+      "fact": "knows_mill",
+      "npc": "innkeeper",
+      "value": true
+    }
+  ]
+}

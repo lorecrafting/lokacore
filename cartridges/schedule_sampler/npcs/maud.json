@@ -1,0 +1,27 @@
+{
+  "keywords": [
+    "maud"
+  ],
+  "short": "npc.maud.short",
+  "room_line": "npc.maud.room",
+  "description": "npc.maud.description",
+  "room": "cottage",
+  "daily_schedule": {
+    "8": [
+      {
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "fact_compare",
+            "fact": "child_lost",
+            "equals": true
+          }
+        },
+        "room": "green",
+        "goal": "npc.maud.goal_green"
+      },
+      "garden"
+    ],
+    "12": "cottage"
+  }
+}

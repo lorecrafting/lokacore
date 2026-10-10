@@ -10,6 +10,14 @@ of closed work are deleted once their lesson is folded, and linked by permalink
 Reviews before R2 live in the [legacy repository](https://github.com/lorecrafting/lokacore-v2-legacy)
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
+- [Review: standing and disposition, toolbox rows 15 and G11 (loka-kgd.54)](2026-10-10-toolbox-m6-standing-review.md): **APPROVE**
+- [Review: toolbox row W10, conditional schedules (loka-kgd.56, batch M6)](2026-10-10-toolbox-m6-schedules-review.md): **APPROVE WITH NOTES**
+- [Review: toolbox row W3, rumour by co-presence (loka-kgd.57, batch M6)](2026-10-10-toolbox-m6-rumour-review.md): **APPROVE WITH NOTES**
+- [Item review: toolbox row W27, away recap (loka-kgd.59)](2026-10-10-toolbox-m6-recap-review.md): **APPROVE WITH NOTES**
+- [Review: toolbox row 14, dialogue skill checks (loka-kgd.55, batch M6)](2026-10-10-toolbox-m6-persuade-review.md): **APPROVE WITH NOTES**
+- [Review: M6h, reaction step narration reaches the receipt (loka-kgd.13, batch M6)](2026-10-10-toolbox-m6-narration-review.md): **APPROVE WITH NOTES**
+- [Review: toolbox row W2, entity and pair facts (loka-kgd.53, batch M6)](2026-10-10-toolbox-m6-facts-review.md): **APPROVE WITH NOTES**
+- [Review: lore codex and deduction, toolbox row 46 (loka-kgd.58)](2026-10-10-toolbox-m6-codex-review.md): **APPROVE WITH NOTES**
 - [Review: toolbox row W24 second half, Journal countdown, sampler, mobile proof (loka-kgd.46, batch M5)](2026-10-10-toolbox-m5-w24b-review.md): **APPROVE WITH NOTES**
 - [Review: toolbox row W6, entity description variants and two leaves (loka-kgd.37, batch M5)](2026-10-10-toolbox-m5-variants-review.md): **APPROVE WITH NOTES**
 - [Review: toolbox row G3, statuses on NPCs and things (loka-kgd.33)](2026-10-10-toolbox-m5-status-review.md): **APPROVE**
@@ -31,8 +39,10 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: property tags and the policy leaf set, toolbox row G1 (loka-kgd.17)](2026-10-10-toolbox-g1-review.md): **APPROVE**
 - [Docs review: showcase decision, Chapters 2-3 out of release scope (loka-exbe, PR #362)](2026-10-10-showcase-decision-review.md): **APPROVE WITH NOTES**
 - [Mechanics review 3: the player's seat](2026-10-10-mechanics-review-3.md)
+- [Review: one wait across several listed schedule hours (loka-qi0r)](2026-10-10-m6-waitfix-review.md): **APPROVE**
 - [Review: E1 recorder debt-elapsed recipe (loka-ssr9, PR #360)](2026-10-10-e1-recorder-ssr9-review.md): **APPROVE**
 - [Review: e1-recorder in full on batch-branch pushes (loka-b98y, PR #361)](2026-10-10-ci-e1-recorder-batch-review.md): **APPROVE WITH NOTES**
+- [Review: batch M6, social standing and memory (PR #363, loka-kgd)](2026-10-10-batch-m6-fable-review.md): **APPROVE WITH NOTES**
 - [Review: mechanics batch M5, Fable batch review (PR #359, loka-kgd)](2026-10-10-batch-m5-fable-review.md): **APPROVE WITH NOTES**
 - [Review: mechanics batch M4 (PR #358, epic loka-kgd), Fable batch review](2026-10-10-batch-m4-fable-review.md): **APPROVE WITH NOTES**
 - [Batch review: mechanics toolbox M3, G1 tags, loot, W1, skills, damage (loka-kgd, PR #351)](2026-10-10-batch-m3-review.md): **APPROVE WITH NOTES**

@@ -15,7 +15,8 @@ export const tipSpec = (key: string) => ({
 });
 
 // Each recipe's key is no action's and no registered command's (DUPLICATE_DEFINITION: one key is
-// one ActionSet identity) and its check's key no other recipe's check's (one check DefinitionRef),
+// one ActionSet identity) and its check's key no other recipe's or dialogue choice's check's (one
+// check DefinitionRef),
 // its target names a room of this cartridge and a detail of that room,
 // it has a failure outcome exactly when it has a check (OUTCOME_MISMATCH), its threshold check,
 // costs and resource.adjust steps name resources of it, each outcome's fact.assign names a fact
@@ -29,7 +30,7 @@ export function recipes(c: Obj, { named, typedValue, text }: Checks): Diagnostic
     ...reservedCommands(c),
     ...Object.values(c.actions as Obj).map((a) => a.key),
   ]);
-  const checks = Object.values((c.recipes ?? {}) as Obj).map((r) => r.check?.key);
+  const checks = checkKeys(c);
   for (const [ref, r] of Object.entries((c.recipes ?? {}) as Obj)) {
     const at = `.cartridge.recipes${step(ref)}`;
     if (taken.has(r.key)) out.push(diag('DUPLICATE_DEFINITION', at));
@@ -103,19 +104,31 @@ function attributes(c: Obj, { named }: Checks) {
 // names an NPC instance of this cartridge that declares the check's attribute.
 function opposed(c: Obj, r: Obj, at: string, named: Checks['named']): Diagnostic[] {
   if (r.check.skill) named(r.check.skill, 'skill', `${at}.check.skill`);
-  const npc = r.check.npc && c.npcs?.[refString(r.check.npc)];
-  if (r.check.npc) named(r.check.npc, 'npc', `${at}.check.npc`);
-  if (r.check.npc)
-    return npc &&
-      (npc.spawn_template ||
-        !npc.attributes?.some((a: Obj) => refString(a.attribute) === refString(r.check.attribute)))
-      ? [diag('SCHEMA_VIOLATION', `${at}.check.npc`, { error: 'invalid_value' })]
-      : [];
+  if (r.check.npc) return rater(c, r.check, `${at}.check`, named);
   const detail = c.rooms[refString(r.target.room)]?.details?.[r.target.detail];
   return detail && detail.rating === undefined
     ? [diag('SCHEMA_VIOLATION', `${at}.check`, { error: 'invalid_value' })]
     : [];
 }
+
+/** Row G3: an opposed check's npc names an NPC instance of this cartridge declaring its attribute. */
+export function rater(c: Obj, check: Obj, at: string, named: Checks['named']): Diagnostic[] {
+  const npc = c.npcs?.[refString(check.npc)];
+  named(check.npc, 'npc', `${at}.npc`);
+  return npc &&
+    (npc.spawn_template ||
+      !npc.attributes?.some((a: Obj) => refString(a.attribute) === refString(check.attribute)))
+    ? [diag('SCHEMA_VIOLATION', `${at}.npc`, { error: 'invalid_value' })]
+    : [];
+}
+
+/** Every check key of the cartridge: each recipe's and each dialogue choice's, with repeats. */
+export const checkKeys = (c: Obj): string[] => [
+  ...Object.values((c.recipes ?? {}) as Obj).flatMap((r) => (r.check ? [r.check.key] : [])),
+  ...Object.values((c.dialogues ?? {}) as Obj).flatMap((d) =>
+    Object.values(d.choices as Obj).flatMap((o) => (o.check ? [o.check.key] : [])),
+  ),
+];
 
 function reservedCommands(c: Obj): string[] {
   return Object.keys(CAPABILITY_OWNERS.command).filter(

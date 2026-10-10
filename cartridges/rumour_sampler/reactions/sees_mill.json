@@ -1,0 +1,13 @@
+{
+  "on": {
+    "event": "entity_entered_room",
+    "room": "mill"
+  },
+  "apply": [
+    {
+      "op": "fact.assign",
+      "fact": "knows_mill",
+      "value": true
+    }
+  ]
+}

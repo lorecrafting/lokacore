@@ -1,0 +1,42 @@
+{
+  "keywords": [
+    "guard"
+  ],
+  "short": "npc.guard.short",
+  "room_line": "npc.guard.room",
+  "description": "npc.guard.description",
+  "room": "gate",
+  "hp": {
+    "minimum": 0,
+    "maximum": 5,
+    "start": 5,
+    "gain": 0
+  },
+  "attack": {
+    "chance": 0,
+    "damage_min": 1,
+    "damage_max": 1
+  },
+  "disposition": {
+    "hostile": {
+      "policy_version": 1,
+      "root": {
+        "op": "all",
+        "items": [
+          {
+            "op": "fact_compare",
+            "fact": "village_standing",
+            "equals": -2
+          },
+          {
+            "op": "fact_compare",
+            "fact": "trust",
+            "equals": 0,
+            "subject": "target"
+          }
+        ]
+      }
+    },
+    "engage": "npc.guard.engage"
+  }
+}

@@ -5,11 +5,11 @@ import { illuminated } from './light/shared.ts';
 // variety@1's visited_count, equipment@1's wearing, status@1's status_active, target_resolution@1's
 // npc_present; 21 §3.2, §4 Policy; 06 §20-21): pure, over committed state, for one
 // actor and the target of the action evaluated, if any.
-import type { CharacterId, EntityId, Policy, Tag } from '../contracts.gen.ts';
+import type { CharacterId, EntityId, Policy, Tag, VersionedPolicy } from '../contracts.gen.ts';
 import { bodyOf, refString, type World } from '../runtime/decision.ts';
 import { barrierState, questOf } from './lookups.ts';
 import { key } from '../foundation/compose.ts';
-import { value } from './fact.ts';
+import { subjective, value } from './fact.ts';
 import { level } from './resource.ts';
 import { stateIs } from './escort/shared.ts';
 import { present } from '../commands/target.ts';
@@ -18,6 +18,10 @@ import { visits } from './knowledge/shared.ts';
 import { value as attributeValue, wearing } from './attributes/shared.ts';
 import { currentStatus } from './status/shared.ts';
 import { living } from './death/shared.ts';
+
+// The policy that always holds; here, not in dialogue/shared.ts, so scene/shared.ts (and
+// disposition.ts through it) imports no dialogue module: the Metro bundle threw on that cycle.
+export const ALWAYS: VersionedPolicy = { policy_version: 1, root: { op: 'all', items: [] } };
 
 /**
  * True when the condition tree holds for `actor` in `world`, `ctx.target` the action's target
@@ -42,7 +46,7 @@ export function holds(
   ctx.steps.n++;
   switch (p.op) {
     case 'fact_compare':
-      return value(world, actor, p.fact) === p.equals;
+      return compared(world, actor, p, ctx.target);
     case 'has_item':
       return held(world, world.entityIds[refString(p.item)], bodyOf(world, actor));
     case 'barrier_state':
@@ -80,6 +84,20 @@ export function holds(
       throw new Error(`policy op ${(leaf as Policy).op} is not installed`);
     }
   }
+}
+
+// fact@1's read: an entity or pair fact (toolbox row W2) at its named NPC or item, or with subject
+// target at the action's target (false without one); any other fact at its one scope.
+function compared(
+  world: World,
+  actor: CharacterId,
+  p: Extract<Policy, { op: 'fact_compare' }>,
+  target: EntityId | undefined,
+): boolean {
+  const named = p.npc ?? p.item;
+  const subject = named ? world.entityIds[refString(named)] : p.subject && target;
+  if (subjective(world, p.fact) && subject === undefined) return false;
+  return value(world, actor, p.fact, subject) === p.equals;
 }
 
 // attributes@1's leaves: the actor's saved value or definition start, or the current body pool.

@@ -1,0 +1,24 @@
+{
+  "npc": "peg",
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": []
+    }
+  },
+  "prompt": "dialogue.peg.prompt",
+  "roles": {
+    "peg": {
+      "role": "npc",
+      "npc": "peg"
+    }
+  },
+  "choices": {
+    "chat": {
+      "label": "dialogue.peg.chat",
+      "narration": "narration.peg.chat",
+      "sequence": []
+    }
+  }
+}

@@ -47,6 +47,6 @@ defmodule Loka.Content.Artifact do
   defp keyed(m, kind, defs),
     do:
       Map.new(defs[kind], fn {key, {_, _, v}} ->
-        {"#{m["id"]}@#{m["version"]}:#{kind}/#{key}", v}
+        {"#{m["id"]}@#{m["version"]}:#{kind}/#{key}", Loka.Content.Schedules.split(v)}
       end)
 end

@@ -17551,6 +17551,48 @@
     "contract": "TimePolicy",
     "value": {
       "profile": "real_elapsed",
+      "rate": 50,
+      "recap_after_minutes": 10081
+    },
+    "errors": [
+      {
+        "path": "/recap_after_minutes",
+        "code": "above_maximum"
+      }
+    ]
+  },
+  {
+    "contract": "TimePolicy",
+    "value": {
+      "profile": "real_elapsed",
+      "rate": 50,
+      "recap_after_minutes": 0
+    },
+    "errors": [
+      {
+        "path": "/recap_after_minutes",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "contract": "TimePolicy",
+    "value": {
+      "profile": "real_elapsed",
+      "rate": 50,
+      "recap_after_minutes": 1.5
+    },
+    "errors": [
+      {
+        "path": "/recap_after_minutes",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "contract": "TimePolicy",
+    "value": {
+      "profile": "real_elapsed",
       "rate": 1.5
     },
     "errors": [
@@ -21123,6 +21165,300 @@
     ]
   },
   {
+    "name": "schedule_cases_empty",
+    "contract": "ScheduleCases",
+    "value": [],
+    "errors": [
+      {
+        "path": "",
+        "code": "too_few_items"
+      }
+    ]
+  },
+  {
+    "name": "schedule_cases_nine",
+    "contract": "ScheduleCases",
+    "value": [
+      {
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "fact_compare",
+            "fact": {
+              "cartridge_id": "c",
+              "cartridge_version": "1.0.0",
+              "kind": "fact",
+              "key": "lost"
+            },
+            "equals": true
+          }
+        },
+        "room": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "green"
+        }
+      },
+      {
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "fact_compare",
+            "fact": {
+              "cartridge_id": "c",
+              "cartridge_version": "1.0.0",
+              "kind": "fact",
+              "key": "lost"
+            },
+            "equals": true
+          }
+        },
+        "room": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "green"
+        }
+      },
+      {
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "fact_compare",
+            "fact": {
+              "cartridge_id": "c",
+              "cartridge_version": "1.0.0",
+              "kind": "fact",
+              "key": "lost"
+            },
+            "equals": true
+          }
+        },
+        "room": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "green"
+        }
+      },
+      {
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "fact_compare",
+            "fact": {
+              "cartridge_id": "c",
+              "cartridge_version": "1.0.0",
+              "kind": "fact",
+              "key": "lost"
+            },
+            "equals": true
+          }
+        },
+        "room": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "green"
+        }
+      },
+      {
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "fact_compare",
+            "fact": {
+              "cartridge_id": "c",
+              "cartridge_version": "1.0.0",
+              "kind": "fact",
+              "key": "lost"
+            },
+            "equals": true
+          }
+        },
+        "room": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "green"
+        }
+      },
+      {
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "fact_compare",
+            "fact": {
+              "cartridge_id": "c",
+              "cartridge_version": "1.0.0",
+              "kind": "fact",
+              "key": "lost"
+            },
+            "equals": true
+          }
+        },
+        "room": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "green"
+        }
+      },
+      {
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "fact_compare",
+            "fact": {
+              "cartridge_id": "c",
+              "cartridge_version": "1.0.0",
+              "kind": "fact",
+              "key": "lost"
+            },
+            "equals": true
+          }
+        },
+        "room": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "green"
+        }
+      },
+      {
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "fact_compare",
+            "fact": {
+              "cartridge_id": "c",
+              "cartridge_version": "1.0.0",
+              "kind": "fact",
+              "key": "lost"
+            },
+            "equals": true
+          }
+        },
+        "room": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "green"
+        }
+      },
+      {
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "fact_compare",
+            "fact": {
+              "cartridge_id": "c",
+              "cartridge_version": "1.0.0",
+              "kind": "fact",
+              "key": "lost"
+            },
+            "equals": true
+          }
+        },
+        "room": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "green"
+        }
+      }
+    ],
+    "errors": [
+      {
+        "path": "",
+        "code": "too_many_items"
+      }
+    ]
+  },
+  {
+    "name": "schedule_case_fields",
+    "contract": "ScheduleCases",
+    "value": [
+      {
+        "goal": "npc.maud.goal",
+        "x": 1
+      }
+    ],
+    "errors": [
+      {
+        "path": "/0/room",
+        "code": "missing_property"
+      },
+      {
+        "path": "/0/when",
+        "code": "missing_property"
+      },
+      {
+        "path": "/0/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "npc_schedule_cases_hour",
+    "contract": "NpcDefinition",
+    "value": {
+      "key": "maud",
+      "keywords": [
+        "maud"
+      ],
+      "short": "npc.maud.short",
+      "room_line": "npc.maud.room",
+      "description": "npc.maud.description",
+      "room": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "cottage"
+      },
+      "daily_schedule": {
+        "8": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "garden"
+        }
+      },
+      "schedule_cases": {
+        "08": [
+          {
+            "when": {
+              "policy_version": 1,
+              "root": {
+                "op": "fact_compare",
+                "fact": {
+                  "cartridge_id": "c",
+                  "cartridge_version": "1.0.0",
+                  "kind": "fact",
+                  "key": "lost"
+                },
+                "equals": true
+              }
+            },
+            "room": {
+              "cartridge_id": "c",
+              "cartridge_version": "1.0.0",
+              "kind": "room",
+              "key": "green"
+            }
+          }
+        ]
+      }
+    },
+    "errors": [
+      {
+        "path": "/schedule_cases/08",
+        "code": "pattern_mismatch"
+      }
+    ]
+  },
+  {
     "name": "wearing_unknown_tag",
     "contract": "Policy",
     "value": {
@@ -21801,6 +22137,360 @@
       {
         "path": "/cures",
         "code": "too_few_items"
+      }
+    ]
+  },
+  {
+    "name": "dialogue_check_no_side_kind_key_failure",
+    "contract": "DialogueChoice",
+    "value": {
+      "label": "dialogue.guard.persuade",
+      "narration": "narration.guard.persuade",
+      "check": {
+        "rating": 1
+      }
+    },
+    "errors": [
+      {
+        "path": "/check",
+        "code": "exclusive_properties"
+      },
+      {
+        "path": "/check/failure",
+        "code": "missing_property"
+      },
+      {
+        "path": "/check/key",
+        "code": "missing_property"
+      },
+      {
+        "path": "/check/kind",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "dialogue_check_both_sides_luck_extra",
+    "contract": "DialogueChoice",
+    "value": {
+      "label": "dialogue.guard.persuade",
+      "narration": "narration.guard.persuade",
+      "check": {
+        "key": "persuade_guard",
+        "kind": "luck",
+        "skill": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "skill",
+          "key": "talk"
+        },
+        "attribute": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "attribute",
+          "key": "cha"
+        },
+        "rating": "3",
+        "failure": "narration.guard.failed",
+        "x": 1
+      }
+    },
+    "errors": [
+      {
+        "path": "/check",
+        "code": "exclusive_properties"
+      },
+      {
+        "path": "/check/kind",
+        "code": "const_mismatch"
+      },
+      {
+        "path": "/check/rating",
+        "code": "invalid_type"
+      },
+      {
+        "path": "/check/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "dialogue_check_npc_on_skill",
+    "contract": "DialogueChoice",
+    "value": {
+      "label": "dialogue.guard.persuade",
+      "narration": "narration.guard.persuade",
+      "check": {
+        "key": "persuade_guard",
+        "kind": "opposed",
+        "skill": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "skill",
+          "key": "talk"
+        },
+        "npc": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "npc",
+          "key": "guard"
+        },
+        "failure": "narration.guard.failed"
+      }
+    },
+    "errors": [
+      {
+        "path": "/check/attribute",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "fact_compare_actor_subject",
+    "contract": "Policy",
+    "value": {
+      "op": "fact_compare",
+      "fact": {
+        "cartridge_id": "scoped_facts_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "fact",
+        "key": "times_met"
+      },
+      "equals": 0,
+      "subject": "actor"
+    },
+    "errors": [
+      {
+        "path": "/subject",
+        "code": "not_in_enum"
+      }
+    ]
+  },
+  {
+    "name": "fact_spec_per_subject_false",
+    "contract": "FactSpec",
+    "value": {
+      "key": "times_met",
+      "version": 1,
+      "value_type": {
+        "type": "int",
+        "default": 0
+      },
+      "scopes": [
+        "player"
+      ],
+      "per_subject": false,
+      "meaning": "How often this NPC and the character have greeted each other."
+    },
+    "errors": [
+      {
+        "path": "/per_subject",
+        "code": "const_mismatch"
+      }
+    ]
+  },
+  {
+    "name": "shop_buy_discount_friendly_false",
+    "contract": "Shop",
+    "value": {
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "pennies"
+      },
+      "offers": [
+        {
+          "item": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "bread"
+          },
+          "buy": 4,
+          "sell": 1
+        }
+      ],
+      "bought": "shop.bought",
+      "sold": "shop.sold",
+      "buy_discount": {
+        "friendly": false,
+        "numerator": 1,
+        "denominator": 2,
+        "minimum": 1
+      }
+    },
+    "errors": [
+      {
+        "path": "/buy_discount/friendly",
+        "code": "const_mismatch"
+      }
+    ]
+  },
+  {
+    "name": "npc_disposition_unknown",
+    "contract": "NpcDefinition",
+    "value": {
+      "key": "guard",
+      "keywords": [
+        "guard"
+      ],
+      "short": "npc.guard.short",
+      "room_line": "npc.guard.room",
+      "description": "npc.guard.description",
+      "room": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "gate"
+      },
+      "disposition": {
+        "angry": {
+          "policy_version": 1,
+          "root": {
+            "op": "all",
+            "items": []
+          }
+        }
+      }
+    },
+    "errors": [
+      {
+        "path": "/disposition/angry",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "reaction_fact_adjust_amount",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "item_acquired"
+      },
+      "apply": [
+        {
+          "op": "fact.adjust",
+          "fact": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "fact",
+            "key": "trust"
+          }
+        },
+        {
+          "op": "fact.adjust",
+          "amount": 1
+        },
+        {
+          "op": "fact.adjust",
+          "fact": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "fact",
+            "key": "trust"
+          },
+          "amount": 1,
+          "value": 1
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/apply/0/amount",
+        "code": "missing_property"
+      },
+      {
+        "path": "/apply/1/fact",
+        "code": "missing_property"
+      },
+      {
+        "path": "/apply/2/value",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "GameView",
+    "value": {
+      "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+      "place": {
+        "id": "11111111-2222-4333-8444-555555555555",
+        "title": {
+          "key": "room.t"
+        },
+        "description": {
+          "key": "room.d"
+        }
+      },
+      "exits": [],
+      "actions": [],
+      "entities": [],
+      "inventory": [],
+      "journal": [],
+      "time": 0,
+      "deductions": []
+    },
+    "errors": [
+      {
+        "path": "/deductions",
+        "code": "too_few_items"
+      }
+    ]
+  },
+  {
+    "contract": "GameView",
+    "value": {
+      "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+      "place": {
+        "id": "11111111-2222-4333-8444-555555555555",
+        "title": {
+          "key": "room.t"
+        },
+        "description": {
+          "key": "room.d"
+        }
+      },
+      "exits": [],
+      "actions": [],
+      "entities": [],
+      "inventory": [],
+      "journal": [],
+      "time": 0,
+      "deductions": [
+        {
+          "from": [
+            "topic.a"
+          ],
+          "extra": true
+        },
+        {
+          "action": "a",
+          "label": "l"
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/deductions/0/action",
+        "code": "missing_property"
+      },
+      {
+        "path": "/deductions/0/extra",
+        "code": "unknown_property"
+      },
+      {
+        "path": "/deductions/0/from",
+        "code": "too_few_items"
+      },
+      {
+        "path": "/deductions/0/label",
+        "code": "missing_property"
+      },
+      {
+        "path": "/deductions/1/from",
+        "code": "missing_property"
       }
     ]
   }

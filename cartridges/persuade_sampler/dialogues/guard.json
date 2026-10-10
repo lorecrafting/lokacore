@@ -1,0 +1,59 @@
+{
+  "npc": "guard",
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": []
+    }
+  },
+  "prompt": "dialogue.guard.prompt",
+  "roles": {
+    "guard": {
+      "role": "npc",
+      "npc": "guard"
+    }
+  },
+  "choices": {
+    "persuade": {
+      "label": "dialogue.guard.persuade",
+      "narration": "narration.guard.persuade",
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "gate_open",
+          "value": true
+        }
+      ],
+      "check": {
+        "key": "persuade_guard",
+        "kind": "opposed",
+        "attribute": "cha",
+        "npc": "guard",
+        "failure": "narration.guard.persuade_failed"
+      }
+    },
+    "intimidate": {
+      "label": "dialogue.guard.intimidate",
+      "narration": "narration.guard.intimidate",
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "gate_open",
+          "value": true
+        }
+      ],
+      "check": {
+        "key": "intimidate_guard",
+        "kind": "opposed",
+        "skill": "intimidate",
+        "rating": 1,
+        "failure": "narration.guard.intimidate_failed"
+      }
+    },
+    "leave": {
+      "label": "dialogue.guard.leave",
+      "narration": "narration.guard.leave"
+    }
+  }
+}
