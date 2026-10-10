@@ -12,7 +12,7 @@ import type {
   ResourceRegen,
 } from '../contracts.gen.ts';
 import type { World } from '../runtime/decision.ts';
-import { add } from '../foundation/int.ts';
+import { add, saturate } from '../foundation/int.ts';
 import { fact, positionOf } from './position/shared.ts';
 import { cmp } from '../foundation/validate.ts';
 import { derived } from './attributes/shared.ts';
@@ -39,7 +39,7 @@ export function maxima(world: World): Readonly<Record<string, number>> {
   const at = key({ kind: 'resource', resource: hp, entity_id: world.body });
   const spec = world.resourceSpecs[key(hp)];
   if (!table || !spec || world.entityResourceSpecs[at]) return {};
-  const maximum = add(spec.maximum, derived(world, world.character, table));
+  const maximum = saturate(spec.maximum + derived(world, world.character, table));
   return { [at]: Math.max(spec.minimum, maximum) };
 }
 

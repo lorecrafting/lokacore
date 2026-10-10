@@ -12,6 +12,7 @@ import { INSTALLED, loadCartridge, newWorld, step } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { validate } from '../src/foundation/validate.ts';
+import { apply } from '../src/runtime/apply.ts';
 import { gameView } from '../src/view/view.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-affects-sampler-'));
@@ -104,6 +105,33 @@ test('a belt of +2 STR and +4 CON lifts the stone and raises the hp maximum unti
   w = play(w, { type: 'remove', item_id: id(w, 'belt') });
   assert.deepEqual([hp().current, hp().maximum], [10, 10]);
   assert.deepEqual(stat(w, 'str'), [10, 0]);
+});
+
+// Breaks: checked arithmetic in an attribute, derived or maximum read (loka-kgd.8 ruling), so an
+// extreme authored amount throws from base() and the GameView instead of saturating to ResourceInt.
+test('extreme affects saturate the attribute, the worn sum and the hp maximum; reads never throw', () => {
+  const read = (c: Cartridge) => {
+    const t = taken(newWorld(c, '2e5f9b6d-4a2c-4d3b-8f8e-7c6b5d4e3f20' as never, [4]), 'belt');
+    const w = play(t, { type: 'wear', item_id: id(t, 'belt') });
+    const hp = gameView(w).resources!.find((r) => r.resource.key === 'hp')!;
+    return [stat(w, 'str'), stat(w, 'con'), hp.maximum, 'world' in apply(w, [])];
+  };
+  const high = structuredClone(content) as any;
+  const belt = high.items['affects_sampler@0.0.1:item/belt'];
+  belt.affects[0].modifier = 2147483647;
+  belt.affects.push({ ...belt.affects[0] }); // STR worn sum 2^32-2 saturates at 2^31-1
+  belt.affects[1].modifier = 2147483647; // CON 10 + 2^31-1 saturates at 2^31-1
+  high.world.derived.hp_max.terms[0].per_point = 2147483647; // term near 2^62; max 10 + 2^31-1
+  assert.deepEqual(read(high), [
+    [2147483647, 2147483647],
+    [2147483647, 2147483647],
+    2147483647,
+    true,
+  ]);
+  const low = structuredClone(content) as any;
+  low.items['affects_sampler@0.0.1:item/belt'].affects[1].modifier = -2147483648; // CON 10 - 2^31, in range
+  low.world.derived.hp_max.terms[0].per_point = 2147483647;
+  assert.deepEqual(read(low).slice(1), [[-2147483638, -2147483648], 0, true]); // term saturates at -2^31; max floored at 0
 });
 
 // Breaks: the loader drops an affects check, so an affect on an unworn item, a dangling

@@ -166,6 +166,28 @@ test('constitution 16 raises the hp maximum to 16; the body regenerates to it an
   assert.equal(level(spent.world, later.body, hp), 15);
 });
 
+// Breaks: a combat write checks the hit against the authored maximum 10 (the round faults from 16)
+// or commits hp clamped to it, so the stored row after one 1-point hit is not 15.
+test('a real attack round commits hp 15 above the authored maximum 10', () => {
+  const struck = structuredClone(content) as any;
+  struck.npcs['derived_sampler@0.0.1:npc/dummy'].attack = {
+    chance: 100,
+    damage_min: 1,
+    damage_max: 1,
+  };
+  const w = wait(chosen('hardy', struck), 3 * 3600);
+  const hp = resourceRef(w, 'hp');
+  const at = encode({ kind: 'resource', resource: hp, entity_id: w.body } as never);
+  const fought = wait(
+    play(play(w, { type: 'move', direction: 'east' }), {
+      type: 'attack',
+      target_id: dummy(w),
+    }),
+    150,
+  );
+  assert.equal(fought.state.resources?.[at]?.value, 15);
+});
+
 // Breaks: the death sequence restores the authored 10 above a derived maximum of 4, so the killing
 // round faults composition and the player never returns; or the maximum loses its floor at the
 // pool minimum 0 (constitution 16 at -3 per point would read -8).
