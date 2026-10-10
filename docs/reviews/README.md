@@ -10,6 +10,7 @@ of closed work are deleted once their lesson is folded, and linked by permalink
 Reviews before R2 live in the [legacy repository](https://github.com/lorecrafting/lokacore-v2-legacy)
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
+- [Review: standing and disposition, toolbox rows 15 and G11 (loka-kgd.54)](2026-10-10-toolbox-m6-standing-review.md): **APPROVE**
 - [Review: toolbox row W10, conditional schedules (loka-kgd.56, batch M6)](2026-10-10-toolbox-m6-schedules-review.md): **APPROVE WITH NOTES**
 - [Review: toolbox row W3, rumour by co-presence (loka-kgd.57, batch M6)](2026-10-10-toolbox-m6-rumour-review.md): **APPROVE WITH NOTES**
 - [Item review: toolbox row W27, away recap (loka-kgd.59)](2026-10-10-toolbox-m6-recap-review.md): **APPROVE WITH NOTES**

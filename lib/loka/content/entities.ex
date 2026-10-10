@@ -81,9 +81,16 @@ defmodule Loka.Content.Entities do
   @doc "Each text variant's condition, as `{rel, steps, root}`."
   @spec conditions(map()) :: [{String.t(), list(), map()}]
   def conditions(defs) do
-    for {_, rel, e} <- all(defs),
-        {steps, v} <- variants(e) ++ cases(e),
-        do: {rel, steps ++ ["when", "root"], v["when"]["root"]}
+    for {_, rel, e} <- all(defs), {steps, root} <- roots(e), do: {rel, steps, root}
+  end
+
+  # Variant and (row W10) schedule case conditions, and (row G11) disposition conditions.
+  defp roots(e) do
+    for({steps, v} <- variants(e) ++ cases(e), do: {steps ++ ["when", "root"], v["when"]["root"]}) ++
+      for f <- ~w(hostile friendly),
+          p = get_in(e, ["disposition", f]),
+          p != nil,
+          do: {["disposition", f, "root"], p["root"]}
   end
 
   # Toolbox row W10: each case of a source daily_schedule hour list (Loka.Content.Schedules).
@@ -118,6 +125,12 @@ defmodule Loka.Content.Entities do
 
   defp goal_texts(e), do: for({s, %{"goal" => g}} <- cases(e), do: {s ++ ["goal"], g})
 
+  # Toolbox row G11: a hostile NPC's engage line.
+  defp disposition_texts(%{"disposition" => %{"engage" => t}}),
+    do: [{["disposition", "engage"], t}]
+
+  defp disposition_texts(_), do: []
+
   defp variant_texts(e),
     do: for({s, v} <- variants(e), do: {s ++ ["description"], v["description"]})
 
@@ -135,7 +148,12 @@ defmodule Loka.Content.Entities do
   defp definition_texts(e),
     do:
       for(f <- @text, do: {[f], e[f]}) ++
-        variant_texts(e) ++ shop_texts(e) ++ fuel_texts(e) ++ readable_texts(e) ++ goal_texts(e)
+        variant_texts(e) ++
+        shop_texts(e) ++
+        fuel_texts(e) ++
+        readable_texts(e) ++
+        goal_texts(e) ++
+        disposition_texts(e)
 
   @doc """
   CONTAINMENT_CYCLE at each item whose location leads back to it through items, and

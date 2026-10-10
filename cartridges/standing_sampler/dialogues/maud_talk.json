@@ -1,0 +1,41 @@
+{
+  "npc": "maud",
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": []
+    }
+  },
+  "prompt": "dialogue.maud.prompt",
+  "roles": {
+    "maud": {
+      "role": "npc",
+      "npc": "maud"
+    }
+  },
+  "choices": {
+    "help": {
+      "label": "dialogue.maud.help",
+      "narration": "narration.maud.help",
+      "sequence": [
+        {
+          "op": "fact.adjust",
+          "fact": "village_standing",
+          "amount": 1
+        }
+      ]
+    },
+    "wrong": {
+      "label": "dialogue.maud.wrong",
+      "narration": "narration.maud.wrong",
+      "sequence": [
+        {
+          "op": "fact.adjust",
+          "fact": "village_standing",
+          "amount": -2
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "facts": {
+    "village_standing": {
+      "version": 1,
+      "value_type": {
+        "type": "int",
+        "default": 0,
+        "minimum": -2,
+        "maximum": 2
+      },
+      "scopes": [
+        "instance"
+      ],
+      "meaning": "How the village stands toward the player: one faction's standing."
+    },
+    "trust": {
+      "version": 1,
+      "value_type": {
+        "type": "int",
+        "default": 0,
+        "minimum": 0,
+        "maximum": 2
+      },
+      "scopes": [
+        "player"
+      ],
+      "per_subject": true,
+      "meaning": "How far an NPC trusts the player."
+    }
+  }
+}

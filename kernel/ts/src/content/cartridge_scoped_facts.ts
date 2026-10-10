@@ -9,6 +9,7 @@ import { diag, step, type Obj } from './cartridge_refs.ts';
 import { apiCmp } from './cartridge_installed.ts';
 
 const SITES = ['fact_compare', 'fact.assign', 'fact.adjust', 'fact_changed'];
+const OPS = SITES.slice(0, 3); // the sites that are ops and may name a subject
 const SUBJECTS = ['subject', 'npc', 'item'];
 // Choices whose facts save recovery reconciles by fact alone, with no subject: escort, receive
 // and hand_over (mobile dialogue-save), a riddle answer with a wrong_limit (topics-save) and a
@@ -37,7 +38,7 @@ function nodes(c: Obj, visit: (o: Obj, at: string, parent?: Obj, field?: string)
 export function scopedFacts(c: Obj): Diagnostic[] {
   let used = Object.values((c.facts ?? {}) as Record<string, Obj>).some(scoped);
   nodes(c, (o) => {
-    if ((o.op === 'fact_compare' || o.op === 'fact.assign') && fieldsOf(o).length) used = true;
+    if (OPS.includes(o.op) && fieldsOf(o).length) used = true;
   });
   return used && apiCmp(c.manifest.requires.kernel_api.at_least, '1.47') < 0
     ? [diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least')]
@@ -51,7 +52,7 @@ export function scopeSites(c: Obj): Diagnostic[] {
   nodes(c, (o, at, parent, field) => {
     if (o.kind === 'fact' && subjective(o))
       if (field !== 'fact' || !SITES.includes(parent?.op ?? parent?.event)) out.push(at);
-    if ((o.op !== 'fact_compare' && o.op !== 'fact.assign') || !o.fact) return;
+    if (!OPS.includes(o.op) || !o.fact) return;
     const fields = fieldsOf(o);
     if (fields.length > 1 || (o.npc && c.npcs?.[refString(o.npc)]?.spawn_template))
       out.push(`${at}.${fields.at(-1)}`);

@@ -29,6 +29,7 @@ import { variety } from './cartridge_variety.ts';
 import { exposure } from './cartridge_exposure.ts';
 import { variants } from './cartridge_variants.ts';
 import { schedules } from './cartridge_schedules.ts';
+import { standing } from './cartridge_standing.ts';
 import { transports } from './cartridge_transports.ts';
 import { services } from './cartridge_services.ts';
 import { food } from './cartridge_food.ts';
@@ -289,5 +290,6 @@ function declarations(c: Obj): Diagnostic[] {
     ...variants(c),
     ...scopedFacts(c),
     ...schedules(c),
+    ...standing(c),
   ];
 }
