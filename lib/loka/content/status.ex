@@ -15,11 +15,17 @@ defmodule Loka.Content.Status do
           cures,
           do: {rel, ["edible", "cures"], cures}
 
+    # Row G13: a liquid's cures, ended by Drink, need kernel_api 1.46 like row G3's fields.
+    drinks =
+      for {_, {rel, _, l}} <- defs["liquid"] || %{}, l["cures"], do: {rel, ["cures"], l["cures"]}
+
     {immune, g3} = row_g3(defs)
 
-    if statuses == %{} and cures == [] and not g3,
+    if statuses == %{} and cures == [] and drinks == [] and not g3,
       do: [],
-      else: gate(m, g3) ++ values(statuses, m, defs, text) ++ foods(cures ++ immune, m, defs)
+      else:
+        gate(m, g3 or drinks != []) ++
+          values(statuses, m, defs, text) ++ foods(cures ++ drinks ++ immune, m, defs)
   end
 
   # Row G3: each NPC's or item's immune list, and whether any G3 field (those, a step naming an

@@ -20,7 +20,7 @@ export function status(c: Obj): Diagnostic[] {
       s,
     ]),
   ) as [string, Obj][];
-  const { immune, items, g3 } = rowG3(c);
+  const { immune, items, drinks, g3 } = api146(c);
   if (!Object.keys(defs).length && !applies.length && !cures.length && !g3) return out;
   if (
     apiCmp(c.manifest.requires.kernel_api.at_least, g3 ? '1.46' : '1.38') < 0 ||
@@ -37,16 +37,16 @@ export function status(c: Obj): Diagnostic[] {
     if (Object.values(s.narration as Obj).some((k) => !c.text?.[k as string]))
       out.push(diag('SCHEMA_VIOLATION', `${at}.narration`));
   }
-  for (const [at, ref] of [...applies, ...cures, ...immune])
+  for (const [at, ref] of [...applies, ...cures, ...drinks, ...immune])
     if (!defs[refString(ref as never)]) out.push(diag('UNRESOLVED_REFERENCE', at));
   for (const [at, ref] of items)
     if (!c.items?.[refString(ref as never)]) out.push(diag('UNRESOLVED_REFERENCE', at));
   return out;
 }
 
-// Row G3: each NPC's or item's immune list entry, each step naming an item, and whether any G3
-// field (those two or a tick or expiry trigger) is used.
-function rowG3(c: Obj) {
+// The fields needing kernel_api 1.46: row G3's immune list entries, steps naming an item and tick or
+// expiry triggers; row G13's liquid cures (ended by Drink). `g3` says whether any is used.
+function api146(c: Obj) {
   const immune = (['npcs', 'items'] as const).flatMap((kind) =>
     Object.entries(c[kind] ?? {}).flatMap(([ref, e]: [string, any]) =>
       ((e.immune ?? []) as Obj[]).map((s, n) => [`.cartridge.${kind}${step(ref)}.immune[${n}]`, s]),
@@ -59,9 +59,13 @@ function rowG3(c: Obj) {
         : [],
     ),
   ) as [string, Obj][];
+  const drinks = Object.entries(c.liquids ?? {}).flatMap(([ref, l]: [string, any]) =>
+    ((l.cures ?? []) as Obj[]).map((s, n) => [`.cartridge.liquids${step(ref)}.cures[${n}]`, s]),
+  ) as [string, Obj][];
   const g3 =
     immune.length ||
+    drinks.length ||
     items.length ||
     Object.values(c.reactions ?? {}).some((r: any) => r.on.event.startsWith('status_'));
-  return { immune, items, g3 };
+  return { immune, items, drinks, g3 };
 }

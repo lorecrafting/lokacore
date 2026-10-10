@@ -1,0 +1,83 @@
+{
+  "api_version": "loka/v3",
+  "id": "needs_sampler",
+  "version": "0.0.1",
+  "title": "Needs Sampler",
+  "requires": {
+    "kernel_api": {
+      "at_least": "1.46",
+      "below": "2.0"
+    },
+    "content_schema": 1,
+    "rule_ir": 1,
+    "capabilities": {
+      "movement": 1,
+      "containment": 1,
+      "resource": 1,
+      "policy": 1,
+      "reaction": 1,
+      "status": 1,
+      "schedule": 1,
+      "calendar": 1,
+      "tags": 1,
+      "description_variant": 1,
+      "death": 1,
+      "position": 1,
+      "food": 1,
+      "liquid": 1
+    },
+    "client_features": []
+  },
+  "supported_profiles": [
+    "offline_private"
+  ],
+  "entry": "inn",
+  "time_policy": {
+    "profile": "real_elapsed",
+    "rate": 50
+  },
+  "calendar": {
+    "start": 0,
+    "units_per_hour": 3600,
+    "hours_per_day": 24,
+    "subdivisions_per_hour": 4,
+    "weather": [
+      {
+        "phase": "clear",
+        "weight": 1
+      },
+      {
+        "phase": "drought",
+        "weight": 1
+      }
+    ]
+  },
+  "world": {
+    "bands": [
+      {
+        "at_percent": 100,
+        "key": "ready",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 50,
+        "key": "hurt",
+        "tone": "warning"
+      },
+      {
+        "at_percent": 0,
+        "key": "dying",
+        "tone": "danger"
+      }
+    ],
+    "death": {
+      "player_corpse": "player_corpse",
+      "npc_corpse": "npc_corpse",
+      "shrine": "inn",
+      "restore": {
+        "hp": 10,
+        "mv": 100
+      }
+    }
+  }
+}

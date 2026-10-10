@@ -1,0 +1,54 @@
+{
+  "resources": {
+    "mv": {
+      "minimum": 0,
+      "maximum": 100,
+      "start": 100,
+      "gain": 18,
+      "regen": {
+        "every": 3600,
+        "by_position": {
+          "standing": 18,
+          "sitting": 18,
+          "resting": 36,
+          "sleeping": 36
+        }
+      },
+      "bands": [
+        {
+          "at_percent": 100,
+          "key": "mv_ready",
+          "tone": "normal"
+        },
+        {
+          "at_percent": 25,
+          "key": "tired",
+          "tone": "warning"
+        },
+        {
+          "at_percent": 0,
+          "key": "exhausted",
+          "tone": "danger"
+        }
+      ]
+    },
+    "hp": {
+      "minimum": 1,
+      "maximum": 10,
+      "start": 10,
+      "gain": 0
+    },
+    "hunger": {
+      "minimum": 0,
+      "maximum": 10,
+      "start": 10,
+      "gain": 0
+    },
+    "thirst": {
+      "minimum": 0,
+      "maximum": 10,
+      "start": 10,
+      "gain": 0
+    }
+  }
+}

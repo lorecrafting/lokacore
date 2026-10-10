@@ -98,6 +98,14 @@
           "type": "integer",
           "minimum": 1,
           "maximum": 2147483647
+        },
+        "cures": {
+          "description": "Statuses (toolbox rows 1 and G13) a Drink of this liquid ends; a service serving does not. Needs kernel_api at least 1.46.",
+          "type": "array",
+          "items": {
+            "$ref": "identity.schema.json#/$defs/DefinitionRef"
+          },
+          "minItems": 1
         }
       },
       "required": [

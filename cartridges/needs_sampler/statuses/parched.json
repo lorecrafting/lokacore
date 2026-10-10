@@ -1,0 +1,12 @@
+{
+  "duration": 5400,
+  "tick_every": 1800,
+  "resource": "thirst",
+  "per_tick": -1,
+  "label": "condition.parched",
+  "narration": {
+    "applied": "narration.parched.applied",
+    "tick": "narration.parched.tick",
+    "expired": "narration.parched.expired"
+  }
+}

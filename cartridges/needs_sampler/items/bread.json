@@ -1,0 +1,23 @@
+{
+  "keywords": [
+    "bread",
+    "loaf"
+  ],
+  "short": "item.bread.short",
+  "room_line": "item.bread.room",
+  "description": "item.bread.description",
+  "mass_grams": 200,
+  "location": {
+    "in": "room",
+    "room": "inn"
+  },
+  "edible": {
+    "resource": "mv",
+    "amount": 5,
+    "label": "action.eat",
+    "narration": "narration.eat_bread",
+    "cures": [
+      "hungry"
+    ]
+  }
+}
