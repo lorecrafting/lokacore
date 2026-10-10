@@ -232,7 +232,9 @@ currently projected. A newer unrelated narration receipt cannot provide detail i
 
 Tapping an NPC opens full details using its actual projected name, authored description and
 actions. Description comes first. Outside a conversation the page offers the person's actions as
-cards after the description and the history: Talk, shop and service offers; the foot is Leave.
+cards straight after the description: Talk, shop and service offers; the foot is Leave. It shows
+no past conversation log once a conversation has ended with Leave the conversation (the log shows
+again inside a new conversation); lines from this visit since that Leave are the only history.
 Answering (a `choose` press) puts that page **in conversation**, and it stays so after a one-reply
 answer closes the kernel choice: the choice's options sit immediately after the latest
 chronological dialogue/event entry **inside** the scrolling content; no Talk card and no other
@@ -498,7 +500,7 @@ Isolated browser proof selects each ancestry on its own fresh run, refreshes/con
 ## C1 teaching and defense details
 
 **API1.18 interaction contract.** Tobin's NPC page offers the current bound
-lesson, its authored price and immediate result under ordinary Talk/Choose/Leave,
+lesson, its authored price and immediate result under ordinary Talk/Choose/Leave the conversation,
 with no new trainer screen or idle-wait control. The swords lesson comes first and
 the next conversation offers dodge. Already acquired teaching is unavailable and
 cannot suggest a replacement gift. Learning and qualification are described
@@ -621,7 +623,7 @@ and together/awaiting/paused/failed/completed state. Awaiting explicitly says to
 the shown ordinary exit; it offers no second leader departure. Paused arrival says
 Rejoin is still required, while failure says return to Tobin and Restart now.
 
-Show unavailable reasons from shared kernel admission and maintain Close/Leave.
+Show unavailable reasons from shared kernel admission and maintain Leave the conversation.
 Capture the exact attempt/cursor/status with each drawn control under existing live
 action freshness. Pending, refused, stale and faulted results claim no movement,
 credit or trust. Only committed narration appears, once, including after lost reply
