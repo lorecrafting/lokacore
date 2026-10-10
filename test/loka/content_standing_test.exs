@@ -81,11 +81,28 @@ defmodule Loka.ContentStandingTest do
              Loka.ContentSource.compile(dir, [{"dialogues/peg_talk.json", receives}])
 
     assert warning in codes.(warnings), inspect(warnings)
+
     assert {:ok, _, warnings} = Loka.ContentSource.compile(dir, [])
     refute warning in codes.(warnings)
 
     changes = [{"dialogues/peg_talk.json", receives}, {"npcs/peg.json", &peg.(&1, "hostile")}]
     assert {:ok, _, warnings} = Loka.ContentSource.compile(dir, changes)
     refute warning in codes.(warnings)
+  end
+
+  # Breaks (PM ruling on loka-kgd.54): an escort choice (Chapter 1's Wren, given a hostile
+  # condition) is not a quest step the warning covers, though a hostile Wren refuses it too.
+  test "a hostile-capable escort speaker warns" do
+    dir = Loka.ContentSource.copy("cartridges/ashmere_missing_child")
+    always = %{"policy_version" => 1, "root" => %{"op" => "all", "items" => []}}
+
+    changes = [
+      {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.47")},
+      {"npcs/wren.json", &Map.put(&1, "disposition", %{"hostile" => always})}
+    ]
+
+    assert {:ok, _, warnings} = Loka.ContentSource.compile(dir, changes)
+    paths = for %{"code" => "HOSTILE_QUEST_SPEAKER", "path" => p} <- warnings, do: p
+    assert "dialogues/a_wren_escort.npc" in paths, inspect(warnings)
   end
 end

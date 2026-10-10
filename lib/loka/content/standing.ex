@@ -5,7 +5,8 @@ defmodule Loka.Content.Standing do
   has an attack (SCHEMA_VIOLATION); either, or a friendly buy_discount, needs kernel_api 1.47.
   Twin of kernel/ts/src/content/cartridge_standing.ts; the conditions and the engage text are
   checked with every entity's (Loka.Content.Entities). A hostile-capable NPC speaking a dialogue
-  that accepts, hands over or receives (refused while hostile): HOSTILE_QUEST_SPEAKER, a warning.
+  that accepts, hands over, receives or escorts (refused while hostile): HOSTILE_QUEST_SPEAKER, a
+  warning.
   """
   import Loka.Content.Source, only: [diag: 3, at: 2]
   alias Loka.Content.Refs
@@ -25,7 +26,7 @@ defmodule Loka.Content.Standing do
     for {_, {rel, [], d}} <- defs["dialogue"] || %{},
         {_, _, %{"disposition" => %{"hostile" => _}}} <- [Refs.resolve(d["npc"], "npc", m, defs)],
         Enum.any?(d["choices"] || %{}, fn {_, c} ->
-          Enum.any?(~w(accept hand_over receive), &is_map_key(c, &1))
+          Enum.any?(~w(accept hand_over receive escort), &is_map_key(c, &1))
         end),
         do: Map.put(diag("HOSTILE_QUEST_SPEAKER", at(rel, ["npc"]), %{}), "severity", "warning")
   end
