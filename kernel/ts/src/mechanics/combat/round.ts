@@ -22,7 +22,7 @@ import { deathSequence } from '../death/sequence.ts';
 import { living } from '../death/shared.ts';
 import { fact, positionOf, standing } from '../position/shared.ts';
 import { assigned } from '../fact.ts';
-import { npcRef, participantsPresent } from './shared.ts';
+import { allyOf, npcRef, participantsPresent } from './shared.ts';
 import { eligible, flight, next, packPlan } from './behavior.ts';
 import { attack, prefix } from './round_attack.ts';
 import { packRound, successor, narrate } from './round_flow.ts';
@@ -109,8 +109,9 @@ function ordinaryRound(
 ) {
   if (!participantsPresent(world, row)) r.ops.push(close);
   else {
+    const helper = allyOf(world, row);
     const order = row.round % 2 ? [row.body_id, row.npc_id] : [row.npc_id, row.body_id];
-    for (const attacker of order) {
+    for (const attacker of helper ? [...order, helper] : order) {
       const at = prefix(world, r.ops, r.due_time);
       if (!participantsPresent(at, row) || at.state.encounters![encounter_id].status !== 'open')
         break;

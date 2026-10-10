@@ -473,6 +473,13 @@ Optional `world.combat.target_choice: true` opts into [target choice](mechanics.
 (`lib/loka/content/combat.ex`) and the loader (`kernel/ts/src/content/cartridge_combat.ts`)
 report KERNEL_API_RANGE_INVALID at the manifest's `at_least`. `cartridges/targets_sampler` is the sampler.
 
+Optional `world.combat.allies` lists NPC DefinitionRefs (short keys in source, at least one) that
+fight [beside the player](mechanics.md#npc-vs-npc-damage-allies-and-kill-credit-toolbox-row-6b)
+(toolbox row 6b). Each must resolve to an authored NPC (not a `spawn_template`) with an `attack`,
+and the combat narration must name `ally_hit` and `ally_miss`; otherwise SCHEMA_VIOLATION (or
+UNRESOLVED_REFERENCE) at the entry. Allies need `kernel_api` at least **1.48**, under the same
+diagnostic as target choice. `cartridges/targets_sampler`'s yard is the sampler.
+
 Optional `world.death_credit` is a list of `{npc, room, fact}` DefinitionRefs, expanded
 from normal short references. Each NPC/fact appears once; NPC is an authored attackable
 NPC, room its authored room, fact a player Boolean with false default. Runtime binds the

@@ -1661,6 +1661,12 @@
             "npc_miss": {
               "$ref": "text.schema.json#/$defs/TextKey"
             },
+            "ally_hit": {
+              "$ref": "text.schema.json#/$defs/TextKey"
+            },
+            "ally_miss": {
+              "$ref": "text.schema.json#/$defs/TextKey"
+            },
             "player_died": {
               "$ref": "text.schema.json#/$defs/TextKey"
             },
@@ -1705,6 +1711,14 @@
         "target_choice": {
           "description": "Opts into target choice (docs/system/mechanics.md, toolbox row 6a; kernel_api at least 1.48): during a roster encounter the player's attack on another present active member makes it the primary the player strikes.",
           "const": true
+        },
+        "allies": {
+          "description": "Authored NPCs that fight beside the player (docs/system/mechanics.md, toolbox row 6b; kernel_api at least 1.48, narration ally_hit and ally_miss): the first listed one living in the encounter room strikes the player's target each round, is never an attack target, and its kill credits the player.",
+          "type": "array",
+          "items": {
+            "$ref": "identity.schema.json#/$defs/DefinitionRef"
+          },
+          "minItems": 1
         }
       },
       "required": [

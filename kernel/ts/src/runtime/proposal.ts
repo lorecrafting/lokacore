@@ -54,7 +54,7 @@ type P = {
   applied: number;
   rng: World['state']['rng'];
   narration: Text[];
-  holders: Map<string, number>; // each status holder's writer group in this advance (row G3)
+  holders: Map<string, number>; // each status holder's, reaction fact row's writer group (G3)
   limit?: Limit | undefined; // set only just before a budget fault returns
 };
 export const BUDGET = { kind: 'fault', code: 'budget_exceeded' } as Admitted;

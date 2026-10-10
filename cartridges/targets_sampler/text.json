@@ -1,6 +1,6 @@
 {
   "room.hall.title": "Hall",
-  "room.hall.description": "A bare hall. A den lies east.",
+  "room.hall.description": "A bare hall. A den lies east, a yard south.",
   "item.player_corpse.short": "your corpse",
   "item.player_corpse.room": "A [player corpse] lies here.",
   "item.player_corpse.description": "Your own body, cold.",
@@ -31,5 +31,15 @@
   "combat.goblin_fled_west": "A goblin flees west.",
   "item.ear.short": "a goblin ear",
   "item.ear.room": "A [goblin ear] lies here.",
-  "item.ear.description": "A pointed, grimy ear."
+  "item.ear.description": "A pointed, grimy ear.",
+  "room.yard.title": "Yard",
+  "room.yard.description": "A trampled yard by the gate.",
+  "npc.guard.short": "a guard",
+  "npc.guard.room": "A [[guard|guard]] stands at the gate.",
+  "npc.guard.description": "A guard in a dented helm, on your side.",
+  "npc.raider.short": "a goblin raider",
+  "npc.raider.room": "A [[goblin raider|raider]] creeps along the wall.",
+  "npc.raider.description": "A goblin with a stolen knife.",
+  "combat.ally_hit": "The guard strikes your foe.",
+  "combat.ally_miss": "The guard's blow goes wide."
 }
