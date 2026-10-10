@@ -9,19 +9,21 @@ defmodule Loka.Content.Hub do
 
   @spec choice(String.t(), list(), map(), map()) :: [map()]
   def choice(rel, steps, o, %{"choices" => choices} = d) when map_size(choices) > 1 do
-    if Enum.any?([d["quest"], d["riddle"], o["accept"], o["patrol"]]) do
-      []
-    else
-      receive = if is_map_key(o, "receive"), do: [["receive"]], else: []
-      escort = if match?(%{"escort" => %{"transition" => "start"}}, o), do: [["escort"]], else: []
-
-      topics =
-        for {%{"op" => "topic.grant"}, i} <- Enum.with_index(Map.get(o, "sequence", [])),
-            do: ["sequence", i, "op"]
-
-      for f <- receive ++ escort ++ topics, do: diag("OUTCOME_MISMATCH", at(rel, steps ++ f))
-    end
+    if Enum.any?([d["quest"], d["riddle"], o["accept"], o["patrol"]]),
+      do: [],
+      else: for(f <- repeatable(o), do: diag("OUTCOME_MISMATCH", at(rel, steps ++ f)))
   end
 
   def choice(_, _, _, _), do: []
+
+  defp repeatable(o) do
+    receive = if is_map_key(o, "receive"), do: [["receive"]], else: []
+    escort = if match?(%{"escort" => %{"transition" => "start"}}, o), do: [["escort"]], else: []
+
+    topics =
+      for {%{"op" => "topic.grant"}, i} <- Enum.with_index(Map.get(o, "sequence", [])),
+          do: ["sequence", i, "op"]
+
+    receive ++ escort ++ topics
+  end
 end
