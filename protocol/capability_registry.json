@@ -106,7 +106,7 @@
     "residency": "portable_capability",
     "policies": [
       "target_present",
-      "position"
+      "npc_present"
     ]
   },
   {

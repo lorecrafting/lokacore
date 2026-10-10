@@ -3,7 +3,7 @@ import { illuminated } from './light/shared.ts';
 // time_window, barrier@1's barrier_state, quest@1's quest_state, target_resolution@1's
 // target_present, attributes@1's stat_compare and resource_compare, tags@1's has_tag, calendar@1's sky,
 // variety@1's visited_count, equipment@1's wearing, status@1's status_active, target_resolution@1's
-// position; 21 §3.2, §4 Policy; 06 §20-21): pure, over committed state, for one
+// npc_present; 21 §3.2, §4 Policy; 06 §20-21): pure, over committed state, for one
 // actor and the target of the action evaluated, if any.
 import type { CharacterId, EntityId, Policy, Tag } from '../contracts.gen.ts';
 import { bodyOf, refString, type World } from '../runtime/decision.ts';
@@ -73,7 +73,7 @@ export function holds(
       return wearing(world, actor, p.tag);
     case 'status_active':
       return ctx.target !== undefined && !!currentStatus(world, ctx.target, p.status);
-    case 'position':
+    case 'npc_present':
       return here(world, actor, world.entityIds[refString(p.npc)]);
     default: {
       const leaf: never = p; // a schema leaf without its case here fails tsc
@@ -113,7 +113,7 @@ function tagsOf(
   return entity?.kind === 'item' ? entity.tags : undefined;
 }
 
-// position's presence (toolbox row W6): the entity is in the actor's room and living; no light
+// npc_present's presence (toolbox row W6): the entity is in the actor's room and living; no light
 // or reach test, unlike target_present. An NPC that never existed or a spawned copy reads false.
 function here(world: World, actor: CharacterId, id: string | undefined): boolean {
   const body = bodyOf(world, actor);

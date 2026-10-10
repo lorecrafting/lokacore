@@ -1,5 +1,5 @@
 // Toolbox row W6 on the compiled variants sampler: entity text variants (status_active on the
-// thing described, an hour window) and the position leaf gating an opposed check on its NPC.
+// thing described, an hour window) and the npc_present leaf gating an opposed check on its NPC.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
@@ -104,7 +104,7 @@ test('Maud is bruised and the sword notched after the 07:00 raid; the guard slee
   ]);
 });
 
-// Breaks: position ignoring the NPC's room (absent guard), its life (dead guard) or the actor's
+// Breaks: npc_present ignoring the NPC's room (absent guard), its life (dead guard) or the actor's
 // room, or the leaf reading the target detail instead of the named NPC.
 test('the shove at the guard is offered only while the guard is in the taproom and alive', () => {
   let w = fresh(); // 05:00: the guard keeps the cellar door
@@ -144,7 +144,7 @@ test('row W6 fields and leaves need kernel_api 1.46; an item room-line variant d
     [{ items: { a: { description_variants: v } } }, true],
     [{ items: { a: { room_line_variants: v } } }, false],
     [leaf({ op: 'not', item: { op: 'status_active', subject: 'target', status: {} } }), true],
-    [leaf({ op: 'position', npc: {} }), true],
+    [leaf({ op: 'npc_present', npc: {} }), true],
   ];
   for (const [part, refused] of rows) {
     const c = (api: string) => ({

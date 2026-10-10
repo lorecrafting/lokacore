@@ -21318,10 +21318,10 @@
     ]
   },
   {
-    "name": "position_target_subject_no_npc",
+    "name": "npc_present_target_subject_no_npc",
     "contract": "Policy",
     "value": {
-      "op": "position",
+      "op": "npc_present",
       "subject": "target"
     },
     "errors": [

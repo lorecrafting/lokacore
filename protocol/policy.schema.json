@@ -434,7 +434,7 @@
           "type": "object",
           "properties": {
             "op": {
-              "const": "position"
+              "const": "npc_present"
             },
             "npc": {
               "$ref": "identity.schema.json#/$defs/DefinitionRef"

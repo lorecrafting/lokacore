@@ -12,7 +12,7 @@
   "policy": {
     "policy_version": 1,
     "root": {
-      "op": "position",
+      "op": "npc_present",
       "npc": "guard"
     }
   },

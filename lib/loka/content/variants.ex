@@ -1,7 +1,7 @@
 defmodule Loka.Content.Variants do
   @moduledoc """
   Toolbox row W6: an entity text variant (all but an item's older `room_line_variants`) or a
-  `status_active` or `position` leaf needs kernel_api 1.46. Twin of
+  `status_active` or `npc_present` leaf needs kernel_api 1.46. Twin of
   kernel/ts/src/content/cartridge_variants.ts.
   """
   import Loka.Content.Source, only: [diag: 3]
@@ -27,7 +27,7 @@ defmodule Loka.Content.Variants do
       Map.has_key?(e, "short_variants") or Map.has_key?(e, "description_variants") or
         (kind == "npc" and Map.has_key?(e, "room_line_variants"))
 
-  defp leaf?(%{"op" => op}) when op in ["status_active", "position"], do: true
+  defp leaf?(%{"op" => op}) when op in ["status_active", "npc_present"], do: true
   defp leaf?(v) when is_map(v), do: Enum.any?(Map.values(v), &leaf?/1)
   defp leaf?(v) when is_list(v), do: Enum.any?(v, &leaf?/1)
   defp leaf?(v) when is_tuple(v), do: leaf?(Tuple.to_list(v))

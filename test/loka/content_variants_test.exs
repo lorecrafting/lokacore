@@ -24,7 +24,7 @@ defmodule Loka.ContentVariantsTest do
       {"npcs/bram.json", &Map.put(&1, "short_variants", @variant)},
       {"npcs/bram.json", &Map.put(&1, "room_line_variants", @variant)},
       {"npcs/bram.json", &Map.put(&1, "description_variants", @variant)},
-      {"items/lantern.json", leaf.(%{"op" => "position", "npc" => "bram"})},
+      {"items/lantern.json", leaf.(%{"op" => "npc_present", "npc" => "bram"})},
       {"items/lantern.json",
        leaf.(%{"op" => "status_active", "subject" => "target", "status" => "x"})}
     ]
@@ -40,7 +40,7 @@ defmodule Loka.ContentVariantsTest do
 
   # Breaks: the compiler stops walking an NPC's or item's new variant lists, so a variant naming
   # an undeclared status or text key compiles and fails at load or in play, or it refuses the
-  # sound sampler (its status_active and position leaves at 1.46).
+  # sound sampler (its status_active and npc_present leaves at 1.46).
   test "a new variant list's references and text keys are checked" do
     dir = Loka.ContentSource.copy("cartridges/variants_sampler")
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, [])
