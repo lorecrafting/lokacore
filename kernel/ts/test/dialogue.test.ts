@@ -459,7 +459,10 @@ test('a hub conversation ends as Leave would once the speaker or the player leav
   const hp = key({ kind: 'resource', entity_id: BRAM, resource: resourceRef(w, 'hp') } as never);
   const dead = {
     ...w,
-    entities: { ...w.entities, [BRAM]: { ...w.entities[BRAM]!, hp: true } },
+    entities: {
+      ...w.entities,
+      [BRAM]: { ...w.entities[BRAM]!, hp: w.cartridge.resources![`${F}:resource/hp`]! },
+    },
     state: {
       ...w.state,
       resources: { ...w.state.resources, [hp]: { value: 0, at: w.state.clock } },

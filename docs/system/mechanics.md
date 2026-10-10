@@ -422,8 +422,9 @@ dialogue's policy holds. The loader rejects an `accept` in a dialogue that has a
 (accepting would resolve it) or on a choice with a `hand_over` (activation and acquisition in one
 decision conflict), both `OUTCOME_MISMATCH`. In a dialogue that returns to its hub, an answer
 that could repeat must not reach a once-per-lineage save proof: the loader and the compiler
-reject, `OUTCOME_MISMATCH` at the field, a `receive`, a `topic.grant` step or an escort `start`
-on a choice with neither an `accept` (refused once accepted) nor a `patrol` (which ends the
+reject, `OUTCOME_MISMATCH` at the field, a `receive`, a `topic.grant` step, a `fact.assign` step
+of a fact the save proves by one receipt (a topic's fact, a perception `discovered` fact or a
+bounded riddle's answer fact; [save](save.md)) or an escort `start` on a choice with neither an `accept` (refused once accepted) nor a `patrol` (which ends the
 conversation) (`kernel/ts/src/content/cartridge_dialogues.ts:247`, twin
 `lib/loka/content/hub.ex`). A `hand_over` cannot repeat: the bound NPC keeps the item.
 
