@@ -1,3 +1,4 @@
+// size: allow 520, the polish picks share one real session and Book renderer harness
 // Real book components and session; native hosts are leaves, so this is no device/layout proof.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';

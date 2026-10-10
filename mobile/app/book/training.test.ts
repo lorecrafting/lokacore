@@ -43,7 +43,7 @@ registerHooks({
 });
 const { SkillDetails, ItemDetails } = await import('./skills.tsx');
 const { CharacterPage } = await import('./sections.tsx');
-const { NpcDetail } = await import('./Menu.tsx');
+const { NpcDetail } = await import('./Npc.tsx');
 function words(element: any): string[] {
   if (Array.isArray(element)) return element.flatMap(words);
   if (!element || typeof element !== 'object') return [];

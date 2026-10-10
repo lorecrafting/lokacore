@@ -3,7 +3,8 @@ import { DreamPage } from './DreamPage.tsx';
 // Page dispatch for the current Book view and local detail stack.
 import { group, conversation, npcPage, type Page } from './model.ts';
 import { presenter, type Button } from './presenter.ts';
-import { ContentsPage, Item, NpcDetail, type Section } from './Menu.tsx';
+import { ContentsPage, Item, type Section } from './Menu.tsx';
+import { NpcDetail } from './Npc.tsx';
 import { NoticeEntries, NoticePage } from './notices.tsx';
 import { VerbLine } from './actions.tsx';
 import { RoomPage, RunningHead } from './pages.tsx';
@@ -85,8 +86,6 @@ function PageBody(p: BodyProps & Talk) {
         speaker={
           page.kind === 'dialogue' ? page.speaker : page.kind === 'thing' ? page.id : undefined
         }
-        talking={p.talkingOn === page}
-        talk={(on) => p.talkOn(on ? page : undefined)}
         visit={page}
       />
     );

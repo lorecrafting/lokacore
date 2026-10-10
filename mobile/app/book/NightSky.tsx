@@ -35,31 +35,53 @@ const field = (() => {
 
 type Streak = { x: number; y: number; k: Animated.Value }; // one shooting star: its start and progress
 
+// Shows a shooting star now and then until the returned stop (the effect's cleanup: dawn's
+// unmount or a new size), which also keeps the one in flight from scheduling the next.
+export function meteors(box: { width: number; height: number }, show: (s: Streak) => void) {
+  let live = true;
+  let timer: ReturnType<typeof setTimeout>;
+  const later = () => (timer = setTimeout(fall, -streak.every * Math.log(1 - Math.random())));
+  const fall = () => {
+    const k = new Animated.Value(0);
+    show({ x: (0.2 + 0.9 * Math.random()) * box.width, y: 0.3 * Math.random() * box.height, k });
+    Animated.timing(k, {
+      toValue: 1,
+      duration: motion.meteor.duration,
+      easing: Easing.linear,
+      useNativeDriver: true,
+    }).start(() => live && later());
+  };
+  later();
+  return () => {
+    live = false;
+    clearTimeout(timer);
+  };
+}
+
+const starViews = field.map((s, i) => (
+  <View
+    key={i}
+    style={{
+      position: 'absolute',
+      left: `${s.x * 100}%`,
+      top: `${s.y * 100}%`,
+      width: s.size,
+      height: s.size,
+      borderRadius: s.size / 2,
+      backgroundColor: nightSky.star,
+      opacity: s.opacity,
+    }}
+  />
+));
+
 export function NightSky() {
   const reduced = useReducedMotion();
   const [box, setBox] = useState({ width: 0, height: 0 });
   const [falling, setFalling] = useState<Streak>();
-  useEffect(() => {
-    if (reduced || !box.width) return;
-    let timer: ReturnType<typeof setTimeout>;
-    const later = () => (timer = setTimeout(fall, -streak.every * Math.log(1 - Math.random())));
-    const fall = () => {
-      const k = new Animated.Value(0);
-      setFalling({
-        x: (0.2 + 0.9 * Math.random()) * box.width,
-        y: 0.3 * Math.random() * box.height,
-        k,
-      });
-      Animated.timing(k, {
-        toValue: 1,
-        duration: motion.meteor.duration,
-        easing: Easing.linear,
-        useNativeDriver: true,
-      }).start(later);
-    };
-    later();
-    return () => clearTimeout(timer);
-  }, [reduced, box.width, box.height]);
+  useEffect(
+    () => (reduced || !box.width ? undefined : meteors(box, setFalling)),
+    [reduced, box.width, box.height],
+  );
   const along = (from: number, by: number) =>
     falling!.k.interpolate({ inputRange: [0, 1], outputRange: [from, from + by] });
   return (
@@ -67,21 +89,7 @@ export function NightSky() {
       {...over}
       onLayout={({ nativeEvent: { layout: l } }) => setBox({ width: l.width, height: l.height })}
     >
-      {field.map((s, i) => (
-        <View
-          key={i}
-          style={{
-            position: 'absolute',
-            left: `${s.x * 100}%`,
-            top: `${s.y * 100}%`,
-            width: s.size,
-            height: s.size,
-            borderRadius: s.size / 2,
-            backgroundColor: nightSky.star,
-            opacity: s.opacity,
-          }}
-        />
-      ))}
+      {starViews}
       {falling && !reduced && (
         <Animated.View
           style={{

@@ -78,13 +78,15 @@ function pressBook(p: BookProps, pr: Presenter, s: BookState, b: Button, detail?
   }
 }
 
+const firstPages = (s: ReturnType<Presenter['screen']>): Page[] => [
+  ...restoredNoticePages(s),
+  ...restoredItemPages(s.view, s.detail),
+  ...initialPages(s.view),
+];
+
 export default function Book(p: BookProps) {
   const [pr] = useState(() => presenter(p.game));
-  const [stack, setStack] = useState<Page[]>(() => [
-    ...restoredNoticePages(pr.screen()),
-    ...restoredItemPages(pr.screen().view, pr.screen().detail),
-    ...initialPages(pr.screen().view),
-  ]);
+  const [stack, setStack] = useState(() => firstPages(pr.screen()));
   const [flip, setFlip] = useState({ turn: 0, dir: 1 as 1 | -1 });
   const [, redraw] = useState(0);
   const [talkingOn, talkOn] = useState<Page>();

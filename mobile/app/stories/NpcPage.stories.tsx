@@ -1,7 +1,7 @@
 // C row Pages, NPC (design-input-batch-4-2026-10-09.md 1); routes: stories/routes.ts.
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { expect } from 'storybook/test';
-import { NpcDetail, NpcPage } from '../book/Menu.tsx';
+import { NpcDetail, NpcPage } from '../book/Npc.tsx';
 import { pageStory } from './screen.tsx';
 import NpcChoiceView from './views/npc-choice.json';
 import NpcRiddleView from './views/npc-riddle.json';

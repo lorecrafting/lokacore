@@ -1,8 +1,8 @@
 // The book's page shell, the room page and their shared controls (the Contents sections:
-// sections.tsx; the thing page: Menu.tsx).
+// sections.tsx; the thing page: Menu.tsx; the title's arriving focus: title.ts).
 // Each is only drawing; what a tap does is passed in by Book.tsx.
-import { createContext, useContext, type ReactNode } from 'react';
-import { AccessibilityInfo, Pressable, ScrollView, Text, View } from 'react-native';
+import type { ReactNode } from 'react';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { cap, plain, type group, type Pool } from './model.ts';
 import type { Button, DetailLine } from './presenter.ts';
@@ -10,6 +10,8 @@ import { note, prose, usePalette, type Palette } from './palette.ts';
 import { opacity, size, space, type } from './tokens.ts';
 import { VerbLine } from './actions.tsx';
 import { EntityLine, LogLines } from './lines.tsx';
+import { useTitleFocus } from './title.ts';
+export { useTitleFocus };
 
 type Say = (key: string) => string;
 type Grouped = ReturnType<typeof group>;
@@ -18,28 +20,6 @@ export type { Thing } from './model.ts';
 // Tones are projected by the kernel from the cartridge's band table.
 export const band = (c: Palette, tone: Pool['tone']): string =>
   ({ normal: c.fg, warning: c.warning, danger: c.danger })[tone];
-
-// A page's title takes focus as its page arrives by a turn (BOOK-UI-COMPONENTS.md#page-turn):
-// keyboard focus on web (tabIndex -1: focusable, not a tab stop), the screen reader's on a device.
-// The first page (launch, a story) takes none, so no ring shows before keyboard use. One ref per
-// Book, read as each title mounts, so the page a turn leaves behind is not focused again.
-type Title = (Text & { focus?: () => void }) | null;
-export function titleFocus() {
-  const box = {
-    turned: false,
-    ref: (title: Title) => {
-      if (!title || !box.turned) return;
-      title.focus?.();
-      AccessibilityInfo.sendAccessibilityEvent?.(title, 'focus');
-    },
-  };
-  return box;
-}
-export const titleContext = createContext(titleFocus());
-export const useTitleFocus = () => ({
-  ref: useContext(titleContext).ref,
-  ...({ tabIndex: -1 } as object),
-});
 
 export function Tap(p: {
   label: string;

@@ -93,10 +93,38 @@ const Hint = ({ failed, suggestion }: { failed: string | null; suggestion?: stri
   ) : (
     <Muted style={{ fontSize: 11 }}>
       {suggestion
-        ? '⇥ accept · ↩ send · ⇧↩ newline'
+        ? '⇥ accept · ⇧↩ newline' // Enter with an empty box sends nothing
         : '↩ send · ⇧↩ newline · esc clear · ⇧click adds an element'}
     </Muted>
   );
+
+const useSend = (pending: State['pending'], suggestion?: string) => {
+  const [text, setText] = useState('');
+  const [failed, setFailed] = useState<string | null>(null);
+  const busy = useRef(false); // a held or double Enter sends once
+  const submit = async () => {
+    if (busy.current || (!text.trim() && !pending.length)) return;
+    busy.current = true;
+    const why = await send(text, pending).finally(() => (busy.current = false));
+    setFailed(why);
+    if (!why) setText('');
+  };
+  const onKey = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    // IME: Enter picks the candidate (Safari ends composition first, keyCode 229).
+    if (e.nativeEvent.isComposing || e.keyCode === 229) return;
+    if (e.key === 'Tab' && !e.shiftKey && !text && suggestion) {
+      e.preventDefault();
+      setText(suggestion); // a programmatic value leaves the cursor at the end
+    } else if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      void submit();
+    } else if (e.key === 'Escape') {
+      setText('');
+      if (!text || pending.length) escape(); // text alone: only the text goes
+    }
+  };
+  return { text, setText, failed, submit, onKey };
+};
 
 // The text and pins stay until the queue answered 200 (a failed send shows why). A PM suggestion
 // shows as the placeholder; Tab in the empty composer takes it.
@@ -105,20 +133,11 @@ const Compose = ({
   focus,
   suggestion,
 }: Pick<State, 'pending' | 'focus'> & { suggestion?: string }) => {
-  const [text, setText] = useState('');
-  const [failed, setFailed] = useState<string | null>(null);
+  const { text, setText, failed, submit, onKey } = useSend(pending, suggestion);
   const area = useRef<HTMLTextAreaElement>(null);
-  const busy = useRef(false); // a held or double Enter sends once
   useEffect(() => {
     if (focus) area.current?.focus(); // on a pick, not on mount
   }, [focus]);
-  const submit = async () => {
-    if (busy.current || (!text.trim() && !pending.length)) return;
-    busy.current = true;
-    const why = await send(text, pending).finally(() => (busy.current = false));
-    setFailed(why);
-    if (!why) setText('');
-  };
   return (
     <Composer>
       <Pending pending={pending} />
@@ -128,20 +147,7 @@ const Compose = ({
         value={text}
         placeholder={suggestion ?? 'What should change?'}
         onChange={(e) => setText(e.target.value)}
-        onKeyDown={(e) => {
-          // IME: Enter picks the candidate (Safari ends composition first, keyCode 229).
-          if (e.nativeEvent.isComposing || e.keyCode === 229) return;
-          if (e.key === 'Tab' && !e.shiftKey && !text && suggestion) {
-            e.preventDefault();
-            setText(suggestion); // a programmatic value leaves the cursor at the end
-          } else if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            void submit();
-          } else if (e.key === 'Escape') {
-            setText('');
-            if (!text || pending.length) escape(); // text alone: only the text goes
-          }
-        }}
+        onKeyDown={onKey}
       />
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Hint failed={failed} suggestion={text ? undefined : suggestion} />
@@ -151,6 +157,15 @@ const Compose = ({
       </div>
     </Composer>
   );
+};
+
+// The latest PM suggestion, until the owner sends a prompt (or Close, Keep going) after it.
+const suggested = (feed: Feed) => {
+  const sent = Math.max(0, ...feed.picks.map((p) => p.time));
+  const last = feed.status
+    .filter((s): s is Extract<Status, { type: 'suggest' }> => 'type' in s && s.type === 'suggest')
+    .at(-1);
+  return last && last.time > sent ? last.text : undefined;
 };
 
 export const Panel = () => {
@@ -177,21 +192,12 @@ export const Panel = () => {
     </Button>
   );
   const close = { button, confirm, setConfirm };
-  // The latest PM suggestion, until the owner sends a prompt (or Close, Keep going) after it.
-  const sent = Math.max(0, ...feed.picks.map((p) => p.time));
-  const suggestion = feed.status
-    .filter((s): s is Extract<Status, { type: 'suggest' }> => 'type' in s && s.type === 'suggest')
-    .at(-1);
   return (
     <Column>
       <Session feed={feed} close={close} />
       <Conversation feed={feed} close={close} />
       {working(feed) > 0 && <Activity feed={feed} />}
-      <Compose
-        pending={pending}
-        focus={focus}
-        suggestion={suggestion && suggestion.time > sent ? suggestion.text : undefined}
-      />
+      <Compose pending={pending} focus={focus} suggestion={suggested(feed)} />
     </Column>
   );
 };

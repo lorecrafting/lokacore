@@ -233,9 +233,9 @@ currently projected. A newer unrelated narration receipt cannot provide detail i
 Tapping an NPC opens full details using its actual projected name, authored description and
 actions. Description comes first. Outside a conversation the page offers the person's actions as
 cards straight after the description: Talk, shop and service offers; the foot is Leave. It shows
-no past conversation log once a conversation has ended with Leave the conversation (the log shows
-again inside a new conversation); lines from this visit since that Leave are the only history.
-Answering (a `choose` press) puts that page **in conversation**, and it stays so after a one-reply
+no past conversation log on a fresh visit to the page or after Leave the conversation (the log
+shows again inside a new conversation); lines since that visit began or that Leave are the only
+history. Answering (a `choose` press) puts that page **in conversation**, and it stays so after a one-reply
 answer closes the kernel choice: the choice's options sit immediately after the latest
 chronological dialogue/event entry **inside** the scrolling content; no Talk card and no other
 action card shows; the foot is a single **Leave the conversation**. The conversation belongs to

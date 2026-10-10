@@ -26,6 +26,7 @@ test('Sedge lesson leads to careful Harvest and survives browser reload', async 
   await screen.getByRole('button', 'Learn herbalism (2p) Mother Sedge').tap();
   await screen.getByRole('button', 'Learn herbalism (2p)').tap();
   await expect(screen.getByText('You pay 2 pennies and learn herbalism.')).toBeVisible();
+  await screen.getByRole('button', 'Leave the conversation').tap();
   await screen.getByRole('button', 'Leave').tap();
   await go('west', 'Fen Isle Landing');
   await screen.getByRole('button', 'Rope ferry, open').tap();

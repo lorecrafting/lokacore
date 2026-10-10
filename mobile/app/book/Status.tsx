@@ -59,12 +59,11 @@ const calendarLine = (calendar: StatusProps['calendar']) =>
 // size: allow 42, each condition item carries its own accessible name beside its text
 export function StatusLine(p: StatusProps) {
   const c = usePalette();
-  const time = calendarLine(p.calendar);
   const items = [
     <Text
       key="time"
       style={{ ...type.small, color: c.dim }}
-      accessibilityLabel={time ?? branch(p.time).label}
+      accessibilityLabel={calendarLine(p.calendar) ?? branch(p.time).label}
     >
       {sky(p.calendar?.solar, p.calendar?.lunar) ?? branch(p.time).glyph}
     </Text>,

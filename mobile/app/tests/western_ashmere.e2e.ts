@@ -69,7 +69,7 @@ test('Hob can be met at both scheduled destinations using an isolated controlled
   await go(screen, 'south', 'Old Mill');
   await go(screen, 'up', 'Mill Loft');
   await meetHob(screen);
-  await screen.getByRole('button', 'Leave').first().tap();
+  await screen.getByRole('button', 'Leave the conversation').tap();
   await screen.getByRole('button', 'Leave').tap();
   await go(screen, 'down', 'Old Mill');
   await browser.evaluate(() => {
@@ -81,7 +81,7 @@ test('Hob can be met at both scheduled destinations using an isolated controlled
   await reopen({ app, screen });
   await screen.getByRole('button', /^Hob is here\./).tap();
   await heardHob(screen);
-  await screen.getByRole('button', 'Leave').first().tap();
+  await screen.getByRole('button', 'Leave the conversation').tap();
   await screen.getByRole('button', 'Leave').tap();
 });
 

@@ -113,7 +113,7 @@ export const PegShop: StoryObj = {
     await tap('Leave');
     await tap(/; opens Contents$/);
     await tap('Character, open');
-    await page.findByText(/^pennies  4 \//); // paid; pennies stay off the status line
+    await page.findByText(/^pennies 4 \//); // paid; pennies stay off the status line
     await tap('Back to World');
     await tap(/; opens Contents$/);
     await tap('Equipment & Inventory, open');
