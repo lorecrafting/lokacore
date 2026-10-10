@@ -1,0 +1,54 @@
+{
+  "title": "room.fell.title",
+  "description": "room.fell.description",
+  "tags": [
+    "exposed"
+  ],
+  "exits": {
+    "south": {
+      "to": "inn"
+    }
+  },
+  "variants": [
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "sky",
+          "weather": "frost"
+        }
+      },
+      "description": "room.fell.frost"
+    },
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "sky",
+          "weather": "heat"
+        }
+      },
+      "description": "room.fell.heat"
+    },
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "sky",
+          "weather": "rain"
+        }
+      },
+      "description": "room.fell.rain"
+    },
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "sky",
+          "weather": "gale"
+        }
+      },
+      "description": "room.fell.gale"
+    }
+  ]
+}

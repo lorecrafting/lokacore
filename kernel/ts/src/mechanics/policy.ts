@@ -2,7 +2,7 @@ import { illuminated } from './light/shared.ts';
 // The policy evaluator (policy@1, fact@1's fact_compare, containment@1's has_item, schedule@1's
 // time_window, barrier@1's barrier_state, quest@1's quest_state, target_resolution@1's
 // target_present, attributes@1's stat_compare and resource_compare, tags@1's has_tag, calendar@1's sky,
-// variety@1's visited_count; 21 §3.2, §4 Policy; 06 §20-21): pure, over committed state, for one
+// variety@1's visited_count, equipment@1's wearing; 21 §3.2, §4 Policy; 06 §20-21): pure, over committed state, for one
 // actor and the target of the action evaluated, if any.
 import type { CharacterId, EntityId, Policy, Tag } from '../contracts.gen.ts';
 import { bodyOf, refString, type World } from '../runtime/decision.ts';
@@ -14,7 +14,7 @@ import { stateIs } from './escort/shared.ts';
 import { present } from '../commands/target.ts';
 import { hourOf, skyPhase } from './calendar.ts';
 import { visits } from './knowledge/shared.ts';
-import { value as attributeValue } from './attributes/shared.ts';
+import { value as attributeValue, wearing } from './attributes/shared.ts';
 
 /**
  * True when the condition tree holds for `actor` in `world`, `ctx.target` the action's target
@@ -66,6 +66,8 @@ export function holds(
       return atLeast(world, actor, p, ctx.steps);
     case 'has_tag':
       return tagsOf(world, actor, p, ctx.target)?.includes(p.tag) === true;
+    case 'wearing':
+      return wearing(world, actor, p.tag);
     default: {
       const leaf: never = p; // a schema leaf without its case here fails tsc
       throw new Error(`policy op ${(leaf as Policy).op} is not installed`);

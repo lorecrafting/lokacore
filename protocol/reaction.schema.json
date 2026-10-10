@@ -363,6 +363,19 @@
               "additionalProperties": false
             },
             {
+              "description": "The world's hourly calendar event (toolbox row W25; schedule@1): no filters; a status lands on the actor's body. Needs kernel_api at least 1.46.",
+              "type": "object",
+              "properties": {
+                "event": {
+                  "const": "clock_hour"
+                }
+              },
+              "required": [
+                "event"
+              ],
+              "additionalProperties": false
+            },
+            {
               "type": "object",
               "properties": {
                 "event": { "const": "status_ticked" },
