@@ -43,3 +43,13 @@
 ## Trial merge into `origin/toolbox/batch-m4` (`d7978157`)
 
 Conflicts: `docs/system-graph.gen.json` (regenerate), `docs/system/mechanics.md` and `docs/system/cartridge.md` (both append sections after row 10). `invalid.json`, `policy.ts` and `contracts.gen.ts` merge cleanly. W7 (`toolbox/m4-variety`, not merged) shares seven files: `contracts.gen.md`, `system-graph.gen.json`, `cartridge.md`, `mechanics.md`, `contracts.gen.ts`, `policy.ts`, `invalid.json`.
+
+## Re-check, fix round 1 (head `1d0ca3a56f2935b8baf3ccf23f415ad6aa94d412`)
+
+Scope: commit `1d0ca3a5` only (`kernel/ts/test/sky.test.ts`). Hosted book-e2e success; ci fails only at `elixir bin/check_size.exs` (base `checks.ex`, fixed on the batch).
+
+- F1 fixed: two loader rows replace the yard variant's leaf with `{op: sky, season: winter}` and `{op: sky, tide: slack}`, expecting SCHEMA_VIOLATION at `...when.root.season` and `...when.root.tide`. `sky.test.ts` passes at the head.
+- M1 (loader loop over `['lunar', 'weather']`) now fails at the season row; a tide-only variant (`['lunar', 'season', 'weather']`) fails at the tide row, so each row is independently live.
+- Nit 2 (`/code-review` result) stays open for the batch PR body.
+
+Verdict: **APPROVE**.
