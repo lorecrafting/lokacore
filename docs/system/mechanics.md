@@ -414,7 +414,7 @@ quest's `quest.activate` and `quest_activated`), `choice.resolve`
 at the continuation's `opened_revision`, `choice_resolved`, one narration line with the actor
 and every bound role as participants, and the `story_point_reached` of a story point outcome
 whose trigger is this dialogue and choice (`mechanics/dialogue/rule.ts:245`). The conversation then
-returns to its hub (owner OK 2026-10-09 in Beads loka-x6t.5, paraphrased: after every answer return
+(unless the choice is [checked](#dialogue-skill-checks-toolbox-row-14), which ends it) returns to its hub (owner OK 2026-10-09 in Beads loka-x6t.5, paraphrased: after every answer return
 to the person's topics; the conversation stays open until Leave the conversation): the same
 decision appends a `choice.open` of a fresh continuation (the next minted id) with the resolved row's
 source, beat, roles and choice ids, and its `choice_opened` after `choice_resolved`. The answer

@@ -70,7 +70,8 @@ function play(c: unknown) {
     send({ type: 'choose', continuation_id, choice_id });
   const fact = (key: string) =>
     Object.entries(w.state.facts ?? {}).find(([k]) => k.includes(`"${key}"`))?.[1];
-  return { talk, choose, fact, view: () => choiceView(w, w.character), pending };
+  const entity = (ref: string) => w.entityIds[ref];
+  return { talk, choose, fact, entity, view: () => choiceView(w, w.character), pending };
 }
 
 // Breaks: the check reads the actor's cha as the rating or the guard's start (6 vs 6 passes either
@@ -98,6 +99,17 @@ test('cha 6 talks the guard (cha 5) round; the same words fail on a guard of cha
   even.npcs[`${P}:npc/guard`].attributes[0].value = 6;
   const e = play(even);
   assert.equal(e.choose(e.talk(), 'persuade').outcome, 'persuade');
+});
+
+// Breaks: the check event names the speaker as its subject when the check names another NPC.
+test('a check naming another NPC makes that NPC its subject', () => {
+  const c = structuredClone(source);
+  const captain = `${P}:npc/captain`;
+  c.npcs[captain] = { ...c.npcs[`${P}:npc/guard`], key: 'captain' };
+  c.dialogues[`${P}:dialogue/guard`].choices.persuade.check.npc.key = 'captain';
+  const g = play(c);
+  const d = g.choose(g.talk(), 'persuade');
+  assert.equal(d.events[0].payload.subject_id, g.entity(captain));
 });
 
 // Breaks: a failure applies the choice's sequence, resolves the choice (choice_resolved), keeps
