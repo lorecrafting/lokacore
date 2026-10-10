@@ -95,6 +95,9 @@ controls = [
   {"contracts: schema changed without regenerating the docs",
    %{"protocol/red_control.schema.json" => ~s({"$defs": {"RedControl": {"type": "null"}}})},
    ~w(elixir bin/contracts.exs --check), "docs/contracts.gen.md is out of date"},
+  {"contracts: schema changed without regenerating the System graph",
+   %{"protocol/red_control.schema.json" => ~s({"$defs": {"RedControl": {"type": "null"}}})},
+   ~w(elixir bin/contracts.exs --check), "docs/system-graph.gen.json is out of date"},
   {"contracts: unsupported keyword fails compilation",
    %{
      "protocol/red_control.schema.json" =>

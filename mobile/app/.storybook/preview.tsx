@@ -26,6 +26,9 @@ const preview: Preview = {
         dynamicTitle: true,
       },
     },
+    // System/Data model's selection and layer filter, so a URL can carry them (no toolbar).
+    node: { description: 'System/Data model: the selected contract' },
+    layer: { description: 'System/Data model: the layer filter' },
   },
   initialGlobals: { palette: 'light', viewport: { value: 'iphone11', isRotated: false } },
   parameters: {
@@ -33,6 +36,7 @@ const preview: Preview = {
     options: {
       storySort: {
         order: [
+          'System',
           'Docs',
           'Book',
           'Pages',

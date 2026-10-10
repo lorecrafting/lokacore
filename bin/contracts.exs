@@ -5,8 +5,8 @@
 #   policy-op owners of protocol/capability_registry.json;
 # - kernel/ts/test/subset.gen.ts: the same for the test-only probe
 #   protocol/fixtures/subset.schema.json;
-# - docs/contracts.gen.md (capability and schema docs) and docs/residency.gen.json (the
-#   capability/residency matrix).
+# - docs/contracts.gen.md (capability and schema docs), docs/residency.gen.json (the
+#   capability/residency matrix) and docs/system-graph.gen.json (bin/system_graph.exs).
 # It first fails on an Elixir host adapter without a differential (ADR-074). `--check`
 # regenerates in memory and exits 1 if a committed file differs; `--check REGISTRY` reads a
 # capability registry copy instead (the red control plants one). A schema outside the
@@ -18,6 +18,7 @@ root = Path.expand("..", __DIR__)
 for f <- ~w(canonical.ex contracts/schema.ex contracts.ex),
     do: Code.require_file(f, Path.join(root, "lib/loka/core"))
 
+Code.require_file("system_graph.exs", __DIR__)
 # ---- TypeScript rendering ----
 
 defmodule Gen do
@@ -264,6 +265,7 @@ owned =
 targets = %{
   "docs/contracts.gen.md" => contracts_md,
   "docs/residency.gen.json" => Gen.lit(matrix) <> "\n",
+  "docs/system-graph.gen.json" => SystemGraph.json(root, registry),
   "kernel/ts/src/contracts.gen.ts" =>
     Gen.ts(Loka.Core.Contracts.defs(), "protocol/*.schema.json") <>
       Enum.join(
