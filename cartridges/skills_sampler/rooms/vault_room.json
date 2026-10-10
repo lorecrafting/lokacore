@@ -1,0 +1,28 @@
+{
+  "title": "room.vault_room.title",
+  "description": "room.vault_room.description",
+  "exits": {},
+  "details": {
+    "chest": {
+      "aliases": [
+        "chest"
+      ],
+      "description": "detail.chest",
+      "rating": 3
+    },
+    "gate": {
+      "aliases": [
+        "gate"
+      ],
+      "description": "detail.gate",
+      "rating": 5
+    },
+    "vault": {
+      "aliases": [
+        "vault"
+      ],
+      "description": "detail.vault",
+      "rating": 7
+    }
+  }
+}

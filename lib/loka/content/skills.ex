@@ -12,16 +12,39 @@ defmodule Loka.Content.Skills do
       "meaning" => "Skill #{key}'s acquisition (skills@1): only skills@1 writes it."
     }
 
+  @doc "Toolbox row 5: the reserved use count of a skill with growth (mechanics.md skill growth)."
+  def uses_spec(key, growth),
+    do: %{
+      "key" => "uses_" <> key,
+      "version" => 1,
+      "value_type" => %{
+        "type" => "int",
+        "default" => 0,
+        "minimum" => 0,
+        "maximum" => List.last(growth)
+      },
+      "scopes" => ["player"],
+      "meaning" => "Skill #{key}'s use count (skills@1): only skills@1 writes it."
+    }
+
   def facts(facts, m, defs) when is_map(facts) and m != nil do
-    Enum.reduce(defs["skill"], {facts, []}, fn {key, skill}, {acc, ds} ->
-      name = "skill_" <> key
-      authored = for {rel, steps, _} <- [acc[name]], do: diag("RESERVED_FACT", at(rel, steps))
-      value = if skill == :invalid, do: :invalid, else: {"cartridge.json", [], spec(key)}
-      {Map.put(acc, name, value), ds ++ authored}
+    Enum.reduce(defs["skill"], {facts, []}, fn {key, skill}, acc ->
+      Enum.reduce(reserved(key, skill), acc, &reserve(&1, skill, &2))
     end)
   end
 
   def facts(facts, _, _), do: {facts, []}
+
+  defp reserved(key, {_, _, %{"growth" => g}}),
+    do: [{"skill_" <> key, spec(key)}, {"uses_" <> key, uses_spec(key, g)}]
+
+  defp reserved(key, _), do: [{"skill_" <> key, spec(key)}]
+
+  defp reserve({name, s}, skill, {acc, ds}) do
+    authored = for {rel, steps, _} <- [acc[name]], do: diag("RESERVED_FACT", at(rel, steps))
+    value = if skill == :invalid, do: :invalid, else: {"cartridge.json", [], s}
+    {Map.put(acc, name, value), ds ++ authored}
+  end
 
   def conditions(defs),
     do:
@@ -36,6 +59,8 @@ defmodule Loka.Content.Skills do
     caps = m["requires"]["capabilities"]
 
     Enum.flat_map(defs["skill"], &definition(&1, caps, text)) ++
+      Enum.flat_map(defs["skill"], &growth/1) ++
+      floor(m, defs) ++
       equipment(m, defs) ++ dodge(m, defs, settings) ++ defense_narration(defs, settings)
   end
 
@@ -50,6 +75,38 @@ defmodule Loka.Content.Skills do
   end
 
   defp definition(_, _, _), do: []
+
+  # Toolbox row 5: growth thresholds strictly increase.
+  defp growth({_, {rel, _, %{"growth" => g}}}) do
+    increasing = g |> Enum.chunk_every(2, 1, :discard) |> Enum.all?(fn [a, b] -> a < b end)
+    if increasing, do: [], else: [bad(at(rel, ["growth"]))]
+  end
+
+  defp growth(_), do: []
+
+  # Toolbox rows 5 and G5: skill growth, an opposed check or a detail rating needs API 1.44.
+  defp floor(m, defs) do
+    used =
+      Enum.any?(defs["skill"], &match?({_, {_, _, %{"growth" => _}}}, &1)) or
+        Enum.any?(defs["recipe"], &match?({_, {_, _, %{"check" => %{"kind" => "opposed"}}}}, &1)) or
+        Enum.any?(defs["room"], fn
+          {_, {_, _, %{"details" => %{} = ds}}} ->
+            Enum.any?(Map.values(ds), &is_map_key(&1, "rating"))
+
+          _ ->
+            false
+        end)
+
+    if used and version(m) < [1, 44],
+      do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
+      else: []
+  end
+
+  defp version(m),
+    do:
+      m["requires"]["kernel_api"]["at_least"]
+      |> String.split(".")
+      |> Enum.map(&String.to_integer/1)
 
   defp capability(rel, caps),
     do:

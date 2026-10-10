@@ -339,7 +339,7 @@ the world's RNG (at most 8 draws, `:103`) and passes below `chance`; a `threshol
 nothing and passes when the body's value of `resource` at admission (before costs) is at least
 `difficulty`. B6's `attribute_threshold` arm also draws nothing and compares the commanded
 actor's attribute to its authored difficulty; D11 selects the saved character value as its
-source after creation. It emits `check_passed` or `check_failed` at position 1 and selects the
+source after creation. An `opposed` check compares the actor's skill level or attribute with the target detail's rating ([rows 5 and G5](#skill-growth-and-opposed-checks-toolbox-rows-5-and-g5)). It emits `check_passed` or `check_failed` at position 1 and selects the
 `success` or `failure` outcome. A rejected command draws no RNG.
 
 ## action_recipe@1 (`mechanics/action_recipe/rule.ts:49`)
@@ -1822,3 +1822,16 @@ Nothing is stored: the stats are read at use, so a later attribute writer change
 - **Replay.** The rolls are part of the committed proposal and its RNG state, so a replay returns the same receipt and state.
 - **Book.** A dropped item appears in the corpse's Contents, where existing loot appears; the player sees no new line.
 - **Sampler.** `cartridges/loot_sampler`: a rat holds a tail (chance 50) and a coin (chance 10); one player attack kills it. From seed `[1, 1, 1, 1]` the hit draw is followed by rolls 60 and 20 (nothing drops); from `[1, 2, 3, 4]` by 0 and 40 (the tail drops); from `[9, 10, 11, 12]` by 80 and 0 (the coin drops); from `[5, 6, 7, 8]` by 40 and 0 (both drop).
+
+## Skill growth and opposed checks (toolbox rows 5 and G5)
+
+[Toolbox rows 5 and G5](../MECHANICS-TOOLBOX.md#ranked-toolbox); [declarations](cartridge.md#skill-growth-and-rating-declarations) govern it; the PM brief is in Beads `loka-kgd.19` (2026-10-10).
+
+- **Growth.** A skill may declare `growth`, 1 to 8 strictly increasing positive use counts: the counts at which the level rises by one: for a taught skill they reach levels 2, 3 and so on, for an untaught one levels 1, 2 and so on. The count is a reserved player fact `uses_<key>` (int, default 0, minimum 0, maximum the last `growth` entry), synthesized beside `skill_<key>` only for a skill with growth and written only by skills@1. *Why a fact, not a row like levelling's:* fact@1 already gives the op, composition, save, replay and the typed-value invariant in both kernels, and the count is one bounded integer per character and skill; a new row would need a new delta op and its compose twins for no added rule.
+- **Level.** Derived on read, never stored: 1 when the skill is acquired (`skill_<key>`), else 0, plus the number of `growth` entries at or below the count. A skill without growth reads 1 acquired, 0 not. Qualification does not enter: it gates actions through their policies, as before.
+- **Opposed check.** A recipe check `{kind: "opposed", key}` names exactly one of `skill` or `attribute`. It draws no RNG and passes when the commanded actor's value, read at admission, is at least the `rating` of the recipe's target detail: the skill's level, or the attribute's value as [attributes@1](#attributes1-kerneltssrcmechanicspolicyts60) reads it. The detail of a recipe with an opposed check must declare `rating` (an integer); NPC-side ratings join with G3.
+- **Use.** Each accepted perform of a recipe whose opposed check names a skill with growth is one use, passed or failed: after the check event (position 1) the count gains 1, as a `fact.assign` whose `fact_changed` takes position 2; the outcome's sequence follows. The check reads the level before this use. At the maximum nothing is written, so practice stops at the last authored threshold and no gate exists beyond the authored ratings (trap 6). A rejected command uses nothing.
+- **No leaf.** Neither acceptance needs a policy to read a level, so `skill_compare` waits for its first gating consumer, under the [leaf-set rule](#property-tags-and-the-policy-leaf-set-toolbox-row-g1).
+- **Book.** Nothing new yet: the level reaches the player only through check outcomes; showing it on the Character page is a separate designer-approved Book change.
+- **Sampler.** `cartridges/skills_sampler`: `pick` with growth `[1, 2, 3, 4, 5]`, not taught, and STR 8; in one room a chest rated 3, a gate rated 5 and a vault rated 7. Picking the gate fails five times (levels 0 to 4) and opens on the sixth (level 5); then picking the chest passes (5 ≥ 3) and the vault fails (5 < 7), and the count stays 5; forcing the vault by STR passes (8 ≥ 7).
+- **Composition record.** Consumer: action recipes. Reads: the skill acquisition fact, the count fact, attributes@1 values and the target detail's definition. Writes: the count by `fact.assign`; events: the existing `check_passed`/`check_failed` and `fact_changed`; jobs and save rows: none new. Reused: check@1, fact@1 reserved facts and their ownership, attributes@1 `value`. New: the `growth` and `rating` fields and the `opposed` check kind; no foundation change.

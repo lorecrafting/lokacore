@@ -46,6 +46,7 @@ import { add } from '../../foundation/int.ts';
 import { adjust, level, type Levels } from '../resource.ts';
 import { value as attributeValue } from '../attributes/shared.ts';
 import { uniform } from '../../foundation/rng.ts';
+import { level as skillLevel, practised } from '../skills.ts';
 
 export const decide: Rule<'action_recipe'> = (world, command, mint) => {
   const { actor_id, action, target_id } = command.payload;
@@ -63,7 +64,8 @@ export const decide: Rule<'action_recipe'> = (world, command, mint) => {
   const rolled = check && resolve(world, command, mint, check, subject_id, body);
   const { sequence, narration } = recipe.outcomes[rolled?.outcome ?? 'success']!;
   const start = { ...START, ops: paid.ops, levels: paid.levels };
-  const begun = rolled ? { ...start, events: [rolled.event], position: 1 } : start;
+  const checked = rolled ? { ...start, events: [rolled.event], position: 1 } : start;
+  const begun = practised(world, actor_id, checked, check); // after the check reads the level
   const run = sequence.reduce(step(world, command, mint, subject_id, body), begun);
   const done = { type: 'action_completed', action, subject_id } as const;
   const completed =
@@ -106,7 +108,8 @@ const DRAWS = 8;
 // The check's result, its event at position 1 and the RNG after it: luck draws one uniform
 // integer in [0, 100) and passes below chance; threshold draws nothing and passes when the
 // body's value of the resource at admission (before costs) is at least difficulty
-// (action.schema.json RecipeCheck).
+// (action.schema.json RecipeCheck); opposed draws nothing and passes when the actor's skill level
+// or attribute is at least the target detail's rating (mechanics.md rows 5 and G5).
 function resolve(
   world: World,
   command: Command,
@@ -117,12 +120,17 @@ function resolve(
 ) {
   const [n, rng] =
     check.kind === 'luck' ? uniform(world.state.rng, 100, DRAWS) : [0, world.state.rng];
+  const actor = command.payload.actor_id;
   const passed =
     check.kind === 'luck'
       ? n < check.chance
       : check.kind === 'attribute_threshold'
-        ? attributeValue(world, command.payload.actor_id, check.attribute) >= check.difficulty
-        : level(world, body, check.resource)! >= check.difficulty;
+        ? attributeValue(world, actor, check.attribute) >= check.difficulty
+        : check.kind === 'opposed'
+          ? (check.skill
+              ? skillLevel(world, actor, check.skill)
+              : attributeValue(world, actor, check.attribute!)) >= world.details[subject_id].rating!
+          : level(world, body, check.resource)! >= check.difficulty;
   const { id: cartridge_id, version: cartridge_version } = world.cartridge.manifest;
   const payload: CheckEvent = {
     type: passed ? 'check_passed' : 'check_failed',

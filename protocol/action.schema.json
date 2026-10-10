@@ -830,6 +830,33 @@
                 "difficulty"
               ],
               "additionalProperties": false
+            },
+            {
+              "description": "An opposed check (toolbox rows 5 and G5, docs/system/mechanics.md; kernel_api at least 1.44): passes when the actor's level of skill, or value of attribute, at admission is at least the target detail's rating; draws no RNG. A skill with growth gains one use per perform.",
+              "type": "object",
+              "properties": {
+                "key": {
+                  "$ref": "action.schema.json#/$defs/Key"
+                },
+                "kind": {
+                  "const": "opposed"
+                },
+                "skill": {
+                  "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                },
+                "attribute": {
+                  "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                }
+              },
+              "required": [
+                "key",
+                "kind"
+              ],
+              "exactlyOneRequired": [
+                "skill",
+                "attribute"
+              ],
+              "additionalProperties": false
             }
           ]
         },

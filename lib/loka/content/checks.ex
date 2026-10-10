@@ -163,7 +163,7 @@ defmodule Loka.Content.Checks do
       |> Map.merge(if h["careful"], do: %{"careful" => expand(h["careful"], m)}, else: %{})
 
   # Recipe costs and thresholds expand only their owned reference fields.
-  def expand(%{"kind" => "attribute_threshold", "attribute" => a} = n, m),
+  def expand(%{"kind" => k, "attribute" => a} = n, m) when k in ~w(attribute_threshold opposed),
     do: Map.put(n, "attribute", ref(a, "attribute", m))
 
   def expand(%{"discovered" => f} = n, m), do: Map.put(n, "discovered", ref(f, "fact", m))
