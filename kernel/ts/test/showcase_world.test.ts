@@ -46,7 +46,7 @@ let w: World;
 test('world 1: the signpost reads; twelve looks show all three lines; a second visit', () => {
   w = go(fresh(WORLD), 'east').world;
   const read = play(w, { type: 'read', target_id: detail(w, 'sign_world') });
-  assert.ok(read.lines.includes('readable.sign_world'), JSON.stringify(read.lines));
+  assert.deepEqual(read.lines, ['readable.sign_world']);
   const seen = new Set<string>();
   for (let i = 0; i < 12; i += 1) {
     const r = perform(w, 'look_about');

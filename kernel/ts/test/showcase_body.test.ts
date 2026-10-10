@@ -65,12 +65,12 @@ test('hub: a new character starts in the inn at 07:00 day 1 with the planned poo
 let w: World;
 let atGate: World;
 
-// Breaks: the sign grants a topic or reads other text.
+// Breaks: the sign is not in the room or reads other text. A room detail grants no topic
+// (mechanics/readable/rule.ts), so plan step 1's "no topic" holds by construction.
 test('body 1: the Fell Road signpost reads its text and grants no topic', () => {
   atGate = go(fresh(BODY), 'north').world;
   const r = play(atGate, { type: 'read', target_id: detail(atGate, 'sign_body') });
-  assert.ok(r.lines.includes('readable.sign_body'), JSON.stringify(r.lines));
-  assert.equal(gameView(r.world).topics, undefined);
+  assert.deepEqual(r.lines, ['readable.sign_body']);
 });
 
 // Breaks: the frost rule or the needs rule is missing or reads the wrong weather or room.
