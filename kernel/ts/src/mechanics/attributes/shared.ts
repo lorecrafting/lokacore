@@ -21,7 +21,7 @@ export function value(world: World, actor: CharacterId, attribute: DefinitionRef
   const base =
     choice(world, actor)?.attributes[refString(attribute)] ?? world.attributes[key(attribute)];
   const bonus = worn(world, actor, attribute);
-  return bonus === 0 || base === undefined ? base : saturate(base + bonus);
+  return base === undefined ? base : saturate(base + bonus);
 }
 
 /** The saturated sum of `attribute`'s affects on the items worn by the actor's body (row 3). */

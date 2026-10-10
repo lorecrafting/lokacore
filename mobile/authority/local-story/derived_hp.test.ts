@@ -55,9 +55,12 @@ const releases = [{ fresh: initial, content_hash: bundle.sha256 }] as const;
 // 15 (constitution 16, derived maximum 16) refuses to open or reads clamped to 10.
 test('a save holding hp 15 above the authored maximum 10 reopens at 15 / 16', (t) => {
   const saves = mkdtempSync(join(tmpdir(), 'loka-derived-hp-saves-'));
-  t.after(() => rmSync(saves, { recursive: true, force: true }));
   const path = join(saves, 'hardy.db');
   let p = elapsedHost(path, undefined, bundle);
+  t.after(() => {
+    p.sql.close();
+    rmSync(saves, { recursive: true, force: true });
+  });
   const open = () => {
     const s = openStory(p.db, releases, p.host);
     if (s.kind !== 'open') throw new Error(s.kind);
@@ -95,5 +98,4 @@ test('a save holding hp 15 above the authored maximum 10 reopens at 15 / 16', (t
   p = elapsedHost(path, undefined, bundle);
   story = open();
   assert.deepEqual([hp().current, hp().maximum], [15, 16]);
-  p.sql.close();
 });
