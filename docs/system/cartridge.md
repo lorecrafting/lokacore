@@ -1570,3 +1570,8 @@ A recipe may declare `tip`, a catalog key (`UNRESOLVED_REFERENCE` at `recipes/<k
 ## Lore deduction declarations
 
 [Lore codex and deduction](mechanics.md#lore-codex-and-deduction-toolbox-row-46) adds no field: a deduction is an ordinary recipe whose `policy` is `{op: "all", items}` with at least two `fact_compare` items `equals: true` on declared topics' facts (plus, for once only, a `not` of the granted topic's fact) and whose success `sequence` has a `fact.assign` of another declared topic's fact to `true`. Its target should be a plain detail: a recipe on a readable or perception detail is listed among that detail's actions, not the place's, so the Journal cannot offer its card. GameView `deductions` is new in `kernel_api` **1.47** (the sampler requires it); no loader check is added, since no declaration changes. A badge is a declared topic whose fact `entity_entered_room` reactions assign under `visited_count` (knowledge@1, variety@1).
+
+
+## Away recap declarations
+
+The [away recap](mechanics.md#away-recap-toolbox-row-w27) reads the optional `time_policy.recap_after_minutes` in `cartridge.json` (`TimePolicy.recap_after_minutes`, an integer from 1 to 10080, real minutes, the maximum a safety bound; `kernel_api` at least **1.47**). The schema refuses a value out of range or not an integer; the compiler (`lib/loka/content/requires.ex`) and the loader (`kernel/ts/src/content/cartridge.ts` `timeStage`) refuse an older API floor (KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least`). `cartridges/recap_sampler` is the sampler. A cartridge without the field keeps its bytes, hash and behavior.

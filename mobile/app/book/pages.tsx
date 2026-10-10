@@ -9,7 +9,8 @@ import type { Button, DetailLine } from './presenter.ts';
 import { note, prose, usePalette, type Palette } from './palette.ts';
 import { opacity, size, space, type } from './tokens.ts';
 import { VerbLine } from './actions.tsx';
-import { EntityLine, LogLines } from './lines.tsx';
+import { AwayRecap, EntityLine, LogLines } from './lines.tsx';
+import type { RecapLine } from './recap.ts';
 import { useTitleFocus } from './title.ts';
 import { LABEL } from './labels.ts';
 export { useTitleFocus };
@@ -102,6 +103,7 @@ export function RoomPage(p: {
   view: GameView;
   text: Say;
   log: DetailLine[];
+  recap?: RecapLine[];
   g: Grouped;
   press: (b: Button) => void;
   open: (id: string) => void;
@@ -117,16 +119,8 @@ export function RoomPage(p: {
       fixedTitle
       onTitlePress={look && (() => p.press(look))}
     >
-      <View style={{ gap: space.lg }}>
-        {plain(p.text(p.view.place.description.key))
-          .trim()
-          .split(/\s*\n\s*\n\s*/) // a blank line in the authored text is a paragraph break
-          .map((paragraph, i) => (
-            <Text key={i} style={prose(c)}>
-              {paragraph}
-            </Text>
-          ))}
-      </View>
+      {p.recap && <AwayRecap lines={p.recap} />}
+      {paragraphs(c, p.text(p.view.place.description.key))}
       {warnings(c, p.view, p.text)}
       <Here view={p.view} text={p.text} open={p.open} />
       {p.view.choice && !p.view.entities.some((e) => e.id === p.view.choice!.speaker_id) && (
@@ -138,6 +132,20 @@ export function RoomPage(p: {
     </Page>
   );
 }
+
+// The room prose as one block; a blank line in the authored text is a paragraph break.
+const paragraphs = (c: Palette, description: string) => (
+  <View style={{ gap: space.lg }}>
+    {plain(description)
+      .trim()
+      .split(/\s*\n\s*\n\s*/)
+      .map((paragraph, i) => (
+        <Text key={i} style={prose(c)}>
+          {paragraph}
+        </Text>
+      ))}
+  </View>
+);
 
 // The exit warnings are one block of notes.
 const warnings = (c: Palette, view: GameView, text: Say) => {
