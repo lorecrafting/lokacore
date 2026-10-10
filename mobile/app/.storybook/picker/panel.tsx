@@ -47,7 +47,7 @@ const Conversation = ({ feed, close }: { feed: Feed; close: Close }) => {
   const answered = Math.max(0, ...feed.picks.filter((p) => p.type).map((p) => p.time));
   // PM log lines stay; a suggest-close card goes once answered.
   const cards = feed.status.filter(
-    (s): s is Extract<Status, { type: string }> =>
+    (s): s is Extract<Status, { type: 'log' | 'suggest-close' }> =>
       'type' in s && (s.type === 'log' || (s.type === 'suggest-close' && s.time > answered)),
   );
   const rows = [...feed.picks.filter((p) => !p.type), ...cards].sort((a, b) => a.time - b.time);
@@ -94,8 +94,13 @@ const Hint = ({ failed }: { failed: string | null }) =>
     <Muted style={{ fontSize: 11 }}>↩ send · ⇧↩ newline · esc clear · ⇧click adds an element</Muted>
   );
 
-// The text and pins stay until the queue answered 200 (a failed send shows why).
-const Compose = ({ pending, focus }: Pick<State, 'pending' | 'focus'>) => {
+// The text and pins stay until the queue answered 200 (a failed send shows why). A PM suggestion
+// shows as the placeholder; Tab in the empty composer takes it.
+const Compose = ({
+  pending,
+  focus,
+  suggestion,
+}: Pick<State, 'pending' | 'focus'> & { suggestion?: string }) => {
   const [text, setText] = useState('');
   const [failed, setFailed] = useState<string | null>(null);
   const area = useRef<HTMLTextAreaElement>(null);
@@ -117,12 +122,15 @@ const Compose = ({ pending, focus }: Pick<State, 'pending' | 'focus'>) => {
         ref={area}
         rows={Math.min(8, Math.max(3, text.split('\n').length))}
         value={text}
-        placeholder="What should change?"
+        placeholder={suggestion ?? 'What should change?'}
         onChange={(e) => setText(e.target.value)}
         onKeyDown={(e) => {
           // IME: Enter picks the candidate (Safari ends composition first, keyCode 229).
           if (e.nativeEvent.isComposing || e.keyCode === 229) return;
-          if (e.key === 'Enter' && !e.shiftKey) {
+          if (e.key === 'Tab' && !e.shiftKey && !text && suggestion) {
+            e.preventDefault();
+            setText(suggestion); // a programmatic value leaves the cursor at the end
+          } else if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             void submit();
           } else if (e.key === 'Escape') {
@@ -165,12 +173,21 @@ export const Panel = () => {
     </Button>
   );
   const close = { button, confirm, setConfirm };
+  // The latest PM suggestion, until the owner sends a prompt after it.
+  const sent = Math.max(0, ...feed.picks.filter((p) => !p.type).map((p) => p.time));
+  const suggestion = feed.status
+    .filter((s): s is Extract<Status, { type: 'suggest' }> => 'type' in s && s.type === 'suggest')
+    .at(-1);
   return (
     <Column>
       <Session feed={feed} close={close} />
       <Conversation feed={feed} close={close} />
       {working(feed) > 0 && <Activity feed={feed} />}
-      <Compose pending={pending} focus={focus} />
+      <Compose
+        pending={pending}
+        focus={focus}
+        suggestion={suggestion && suggestion.time > sent ? suggestion.text : undefined}
+      />
     </Column>
   );
 };

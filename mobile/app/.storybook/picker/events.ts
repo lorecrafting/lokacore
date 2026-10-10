@@ -50,5 +50,6 @@ export type Status =
       beads?: string | null;
     }
   | { type: 'suggest-close'; time: number; reason: string }
-  | { type: 'log'; time: number; text: string };
+  | { type: 'log'; time: number; text: string }
+  | { type: 'suggest'; time: number; text: string };
 export type Feed = { session: string | null; picks: Pick[]; status: Status[] };

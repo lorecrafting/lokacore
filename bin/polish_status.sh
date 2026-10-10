@@ -6,18 +6,19 @@
 #   bin/polish_status.sh <pick id> moved <beads id> [reason]
 #   bin/polish_status.sh suggest-close "<reason>"
 #   bin/polish_status.sh log "<text>"     a PM progress line (routed, waiting)
+#   bin/polish_status.sh suggest "<text>" the next prompt the PM suggests (composer ghost text)
 #   bin/polish_status.sh dir             prints the queue directory (for /polish-intake)
 set -eu
 me=polish_status
 . "$(dirname "$0")/lib/serve.sh"
-usage="usage: $0 <id> working|done|stopped [model] [summary] [sha] | <id> moved <beads id> [reason] | suggest-close <reason> | log <text> | dir"
+usage="usage: $0 <id> working|done|stopped [model] [summary] [sha] | <id> moved <beads id> [reason] | suggest-close <reason> | log <text> | suggest <text> | dir"
 if [ -z "${LOKA_POLISH_DIR-}" ]; then
   app=$(served_from "$SB_PORT"); [ -n "$app" ] || die "no Storybook on port $SB_PORT"
   LOKA_POLISH_DIR=$(cd "$app/../.." && pwd)/.polish
 fi
 [ "${1-}" != dir ] || { echo "$LOKA_POLISH_DIR"; exit 0; }
 case "${1-}:${2-}:${3-}" in
-  suggest-close:?*:*|log:?*:*) ;;
+  suggest-close:?*:*|log:?*:*|suggest:?*:*) ;;
   ?*:moved:?*) ;;
   ?*:working:*|?*:done:*|?*:stopped:*) ;;
   *) echo "$usage" >&2; exit 2 ;;
@@ -30,8 +31,8 @@ arg = lambda i: a[i] if len(a) > i and a[i] else None  # unknowns stay null
 line = {"time": int(time.time() * 1000)}
 if a[0] == "suggest-close":
     line.update(type="suggest-close", reason=a[1])
-elif a[0] == "log":
-    line.update(type="log", text=a[1])
+elif a[0] in ("log", "suggest"):
+    line.update(type=a[0], text=a[1])
 elif a[1] == "moved":
     line.update(id=a[0], state="moved", beads=a[2], summary=arg(3))
 else:

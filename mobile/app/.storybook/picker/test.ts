@@ -3,7 +3,8 @@
 // story id; a status line bin/polish_status.sh wrote that the panel does not show; Close batch
 // enabled while an item is working; an overlay that moves a story box while Pick is on; an Esc in
 // the composer that leaves Pick on (or the first one leaving it); Shift+Enter that sends or Enter
-// that does not; a PM log line the panel does not show.
+// that does not; a PM log line the panel does not show; a PM suggestion Tab does not take into the
+// composer (or Tab moving focus); a suggestion still offered after the owner sent a prompt.
 import { spawn } from 'node:child_process';
 import { execFileSync } from 'node:child_process';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
@@ -127,6 +128,16 @@ try {
     status(pick.id, 'done', 'fable', 'row tightened', 'abc1234');
     await settle(page, 'row tightened');
     if (await closeBtn.isDisabled()) fail('Close batch still disabled after done');
+    status('suggest', 'Close batch');
+    const area = page.locator('textarea[placeholder="Close batch"]'); // the ghost text
+    await area.focus();
+    await page.keyboard.press('Tab');
+    if ((await area.inputValue()) !== 'Close batch') fail('Tab did not take the suggestion');
+    if (!(await area.evaluate((el) => el === document.activeElement))) fail('Tab moved focus');
+    await page.keyboard.press('Enter');
+    await page
+      .waitForSelector('textarea[placeholder="What should change?"]', { timeout: 5_000 })
+      .catch(() => fail('the suggestion stayed after a sent prompt'));
     console.log(`ok   picker: ${pick.id} ${pick.elements[0].chain.join(' › ')} in ${story}`);
   } finally {
     await browser.close();
