@@ -36,5 +36,9 @@
   "condition.burning": "burning",
   "narration.burning.applied": "Flames catch on the dry wood.",
   "narration.burning.tick": "The fire crackles.",
-  "narration.burning.expired": "The fire dies to embers."
+  "narration.burning.expired": "The fire dies to embers.",
+  "condition.furious": "furious",
+  "narration.fury.applied": "Pain turns to fury.",
+  "narration.fury.tick": "Fury still knots your arms.",
+  "narration.fury.expired": "Your fury cools."
 }

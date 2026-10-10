@@ -1,0 +1,18 @@
+{
+  "duration": 3600,
+  "tick_every": 600,
+  "resource": "mv",
+  "per_tick": 1,
+  "modifies": [
+    {
+      "attribute": "str",
+      "modifier": 3
+    }
+  ],
+  "label": "condition.mighty",
+  "narration": {
+    "applied": "narration.might.applied",
+    "tick": "narration.might.tick",
+    "expired": "narration.might.expired"
+  }
+}

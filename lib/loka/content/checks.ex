@@ -188,6 +188,10 @@ defmodule Loka.Content.Checks do
   def expand(%{"immune" => c} = e, m) when is_list(c),
     do: Map.put(expand(Map.delete(e, "immune"), m), "immune", Enum.map(c, &ref(&1, "status", m)))
 
+  # A status's modifiers (row 2c) are ancestry-shaped {attribute, modifier}.
+  def expand(%{"modifies" => l} = s, m) when is_list(l),
+    do: Map.put(expand(Map.delete(s, "modifies"), m), "modifies", expand(l, m))
+
   def expand(%{"resource" => r} = n, m) when is_binary(r),
     do: Map.put(n, "resource", ref(r, "resource", m))
 

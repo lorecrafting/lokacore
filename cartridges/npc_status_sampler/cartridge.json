@@ -16,6 +16,7 @@
       "resource": 1,
       "fact": 1,
       "policy": 1,
+      "attributes": 1,
       "reaction": 1,
       "status": 1,
       "schedule": 1,

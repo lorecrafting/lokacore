@@ -264,6 +264,27 @@ test('a maximum lowered to 4 reads the start value 10 as 4 and caps the death re
   assert.deepEqual(hpView(fought), [4, 4]);
 });
 
+// Breaks (row 2c): value() ignores an active status's modifies, adds it to another attribute, or
+// keeps it after expiry.
+test("the shrine's might (+3 str for an hour) lifts the strong hit from 6 to 8; expiry restores 6", () => {
+  const hp = (w: World) => level(w, dummy(w), resourceRef(w, 'hp'));
+  const strike = (w: World) =>
+    wait(
+      play(play(w, { type: 'move', direction: 'east' }), { type: 'attack', target_id: dummy(w) }),
+      150,
+    );
+  let w = play(play(chosen('strong'), { type: 'move', direction: 'north' }), {
+    type: 'move',
+    direction: 'south',
+  });
+  assert.equal(hp(strike(w)), 12); // 20 - (4 + floor((18 - 10) / 2))
+  assert.deepEqual(hpView(w), [10, 10]); // might names str only: con 10 keeps the hp maximum
+  for (let tick = 0; tick < 5; tick += 1) w = wait(w, 600); // one might job per elapsed command
+  assert.equal(hp(strike(w)), 12);
+  w = wait(w, 600); // the expiry at application + 3600
+  assert.equal(hp(strike(w)), 14);
+});
+
 // Breaks: the loader drops a derived-table check, so an artifact with a dangling attribute,
 // a missing owner or an old API floor loads and fails in play.
 test('the loader refuses each unsound derived table', () => {
@@ -272,6 +293,11 @@ test('the loader refuses each unsound derived table', () => {
   const rows: [(c: any) => void, string, string][] = [
     [
       (c) => (c.manifest.requires.kernel_api.at_least = '1.38'),
+      'KERNEL_API_RANGE_INVALID',
+      '.cartridge.manifest.requires.kernel_api.at_least',
+    ],
+    [
+      (c) => (c.manifest.requires.kernel_api.at_least = '1.45'), // row 2c modifies: 1.46
       'KERNEL_API_RANGE_INVALID',
       '.cartridge.manifest.requires.kernel_api.at_least',
     ],
@@ -292,6 +318,7 @@ test('the loader refuses each unsound derived table', () => {
         delete c.lock.capabilities.attributes;
         delete c.attributes;
         delete c.ancestries;
+        delete c.statuses['derived_sampler@0.0.1:status/might'].modifies; // row 2c names str
       },
       'UNDECLARED_CAPABILITY',
       at,
