@@ -12,13 +12,21 @@ export const Prose = ({ text }: { text: string }) => (
 export function Sheet({ children }: { children: ReactNode }) {
   const c = usePalette();
   return (
-    <div
-      style={{ ...type.small, color: c.fg, background: c.bg, overflowX: 'auto', padding: space.xl }}
-    >
+    <div style={{ ...small, color: c.fg, background: c.bg, overflowX: 'auto', padding: space.xl }}>
       {children}
     </div>
   );
 }
+
+// tokens.ts text styles for the DOM: React leaves a numeric lineHeight unitless (a multiple).
+type Text = { fontFamily: string; fontSize: number; lineHeight: number };
+const px = ({ fontFamily, fontSize, lineHeight }: Text) => ({
+  fontFamily,
+  fontSize,
+  lineHeight: `${lineHeight}px`,
+});
+export const small = px(type.small);
+export const heading = px(type.log);
 
 export const cell: CSSProperties = {
   textAlign: 'left',
