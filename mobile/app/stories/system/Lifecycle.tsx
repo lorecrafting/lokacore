@@ -13,8 +13,7 @@ const lanes = ['Host', 'Kernel', 'Save', 'View'];
 // host commits the changed rows plus the receipt in one transaction, then replies with the view).
 const stages = [
   ['Host', 'Command', 'the input'],
-  ['Host', 'AdmissionResult', 'admission'],
-  ['Kernel', 'DecisionResult', 'decide: accepted, rejected or fault'],
+  ['Kernel', 'DecisionResult', 'admission + decide: accepted, rejected or fault'],
   ['Kernel', 'StateDelta', 'the proposal’s changes'],
   ['Kernel', 'DeltaOp', 'one change each'],
   ['Kernel', 'DomainEvent', 'proposed events'],

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """The System graph's node and edge changes between two docs/system-graph.gen.json files, as the
-Markdown body of the PR comment ci.yml's graph-diff job posts (MARK finds it again to update it).
+Markdown body of the PR comment graph-diff.yml's job posts (MARK finds it again to update it).
 Usage: graph_diff.py BASE HEAD. A changed node is one whose entry differs other than in `line`."""
 import json
 import sys

@@ -17,6 +17,8 @@ permissions:
 
 jobs:
   graph-diff:
+    # A fork PR's token is read-only: the comment would 403 and fail the PR.
+    if: github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     permissions:
@@ -38,7 +40,7 @@ jobs:
           gh api -H 'Accept: application/vnd.github.raw' "repos/$GITHUB_REPOSITORY/contents/$graph?ref=$BASE" > "$base"
           python3 bin/graph_diff.py "$base" "$graph" > "$RUNNER_TEMP/body.md"
           id=$(gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$PR/comments" \
-            --jq '.[] | select(.body | startswith("<!-- system-graph-diff -->")) | .id' | head -n 1)
+            --jq '.[] | select(.user.login == "github-actions[bot]" and (.body | startswith("<!-- system-graph-diff -->"))) | .id' | head -n 1)
           if [ -n "$id" ]; then
             gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$id" -F "body=@$RUNNER_TEMP/body.md" > /dev/null
           else
