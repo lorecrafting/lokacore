@@ -1,0 +1,24 @@
+{
+  "keywords": [
+    "sentry"
+  ],
+  "short": "npc.sentry.short",
+  "room_line": "npc.sentry.room",
+  "description": "npc.sentry.description",
+  "room": "barracks",
+  "cues": [
+    {
+      "sense": "smell",
+      "text": "cue.pipe",
+      "range": 0,
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "fact_compare",
+          "fact": "sentry_alerted",
+          "equals": false
+        }
+      }
+    }
+  ]
+}

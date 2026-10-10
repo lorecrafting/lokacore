@@ -258,6 +258,9 @@
           "items": {
             "$ref": "identity.schema.json#/$defs/DefinitionRef"
           }
+        },
+        "cues": {
+          "$ref": "entity.schema.json#/$defs/Cues"
         }
       },
       "required": [
@@ -584,6 +587,9 @@
             ],
             "additionalProperties": false
           }
+        },
+        "cues": {
+          "$ref": "entity.schema.json#/$defs/Cues"
         }
       },
       "required": [
@@ -900,6 +906,10 @@
             },
             "refueled": {
               "$ref": "text.schema.json#/$defs/TextKey"
+            },
+            "cues": {
+              "description": "Cues active only while this source is lit (toolbox row G6).",
+              "$ref": "#/$defs/Cues"
             }
           },
           "required": [
@@ -1124,6 +1134,61 @@
         "narration"
       ],
       "additionalProperties": false
+    },
+    "Cue": {
+      "description": "A sense cue (toolbox row G6): what a listener smells, hears or feels from its source. sense is sound, smell or heat; text the authored line (the sense in its words, trap 12); range the rooms it carries through exits, 0 (the source's room only) to 2; when, optional, a condition read for the listener (the player for the view, a reaction's actor for an NPC). Owned by sense_cue@1; needs kernel_api at least 1.48. Its source is the room, detail, item or NPC, lit fuel source, active status or recipe outcome that declares it.",
+      "examples": [
+        {
+          "sense": "sound",
+          "text": "cue.hammering",
+          "range": 1
+        }
+      ],
+      "type": "object",
+      "properties": {
+        "sense": {
+          "enum": [
+            "sound",
+            "smell",
+            "heat"
+          ]
+        },
+        "text": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "range": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2
+        },
+        "when": {
+          "$ref": "policy.schema.json#/$defs/VersionedPolicy"
+        }
+      },
+      "required": [
+        "sense",
+        "text",
+        "range"
+      ],
+      "additionalProperties": false
+    },
+    "Cues": {
+      "description": "A source's sense cues (Cue; toolbox row G6), in authored order.",
+      "examples": [
+        [
+          {
+            "sense": "sound",
+            "text": "cue.hammering",
+            "range": 1
+          }
+        ]
+      ],
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 4,
+      "items": {
+        "$ref": "#/$defs/Cue"
+      }
     }
   }
 }

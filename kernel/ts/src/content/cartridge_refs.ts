@@ -33,6 +33,7 @@ import { quests, questPolicies, featureApi } from './cartridge_quests.ts';
 import { reactions } from './cartridge_reactions.ts';
 import { recipes } from './cartridge_recipes.ts';
 import { reserved } from './cartridge_position.ts';
+import { cueParts } from './cartridge_senses.ts';
 
 export type Data = Record<string, string | number>;
 export type Obj = { [key: string]: any };
@@ -98,7 +99,7 @@ export function parts(c: Obj): [string, Obj, string][] {
   for (const [ref, b] of Object.entries((c.barriers ?? {}) as Obj))
     add('barrier', b, `.cartridge.barriers${step(ref)}`);
   if (c.calendar) out.push(['calendar', c.calendar, '.cartridge.calendar']);
-  return out;
+  return [...out, ...cueParts(c)];
 }
 
 // Policy nodes with diagnostic paths, across every definition that declares a condition.
@@ -119,7 +120,7 @@ export function nodes(c: Obj): [Obj, string][] {
       walk(r.policy.root, `.cartridge.recipes${step(ref)}.policy.root`),
     ),
     ...parts(c).flatMap(([k, v, at]) =>
-      k === 'variant' ? walk(v.when.root, `${at}.when.root`) : [],
+      k === 'variant' || (k === 'cue' && v.when) ? walk(v.when.root, `${at}.when.root`) : [],
     ),
     ...questPolicies(c).flatMap(([p, at]) => walk(p, at)),
     ...Object.entries((c.reactions ?? {}) as Obj).flatMap(([ref, r]) =>
@@ -145,6 +146,7 @@ const TEXT: Readonly<Record<string, string[]>> = {
   item: ['short', 'room_line', 'description'],
   barrier: ['short'],
   readable: ['label', 'text', 'title'],
+  cue: ['text'],
 };
 
 // Shared reference, fact-type and text-catalog checks append diagnostics to `out`.

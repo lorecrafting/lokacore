@@ -2,6 +2,7 @@ import type { BandTable, Key, ResourceView } from '../contracts.gen.ts';
 import { refString, type World } from '../runtime/decision.ts';
 import { level, resourceRef, resourceSpec } from '../mechanics/resource.ts';
 import { cmp } from '../foundation/validate.ts';
+import { activeStatuses } from '../mechanics/status/shared.ts';
 
 // The engine default condition bands of 04 §15 (amendments 2026-10-01, 2026-10-02), highest
 // cut first, with their tones; a pool's own bands, else the cartridge's world.bands, replace it.
@@ -42,4 +43,17 @@ export function resources(world: World): ResourceView[] {
       return { resource, current, maximum, band, tone };
     })
     .sort((a, b) => cmp(refString(a.resource), refString(b.resource)));
+}
+
+// Active timed statuses on the body (toolbox row 1), absent when none.
+export function conditionViews(world: World) {
+  const conditions = activeStatuses(world, world.body).map(({ spec, row }) => ({
+    label: spec.label,
+    ends_at: row.ends_at,
+    next_tick_at: row.next_tick_at,
+    resource: spec.resource.key as Key,
+    ...(spec.per_tick !== undefined && { per_tick: spec.per_tick }),
+    tick_every: spec.tick_every,
+  }));
+  return conditions.length > 0 ? { conditions } : {};
 }

@@ -1,0 +1,9 @@
+{
+  "title": "room.guardroom.title",
+  "description": "room.guardroom.description",
+  "exits": {
+    "north": {
+      "to": "storeroom"
+    }
+  }
+}

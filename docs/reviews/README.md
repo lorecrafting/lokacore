@@ -11,6 +11,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
 - [Review: toolbox row 6a, combat target choice in the same room (loka-kgd.63)](2026-10-10-toolbox-m7-targets-review.md): **APPROVE WITH NOTES**
+- [Review: toolbox row G6 engine half, sense cues (loka-kgd.61, batch M7)](2026-10-10-toolbox-m7-senses-review.md): **APPROVE**
 - [Review: toolbox row W24 second half, Journal countdown, sampler, mobile proof (loka-kgd.46, batch M5)](2026-10-10-toolbox-m5-w24b-review.md): **APPROVE WITH NOTES**
 - [Review: toolbox row W6, entity description variants and two leaves (loka-kgd.37, batch M5)](2026-10-10-toolbox-m5-variants-review.md): **APPROVE WITH NOTES**
 - [Review: toolbox row G3, statuses on NPCs and things (loka-kgd.33)](2026-10-10-toolbox-m5-status-review.md): **APPROVE**

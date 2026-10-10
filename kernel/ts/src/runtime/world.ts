@@ -97,6 +97,7 @@ const RULELESS = [
   'topics',
   'tags',
   'variety',
+  'sense_cue',
 ];
 
 /** What this kernel implements, for the loader (05 §3, §6): each capability above, at 1. */

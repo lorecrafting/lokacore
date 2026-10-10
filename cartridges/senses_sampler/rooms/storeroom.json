@@ -1,0 +1,21 @@
+{
+  "title": "room.storeroom.title",
+  "description": "room.storeroom.description",
+  "exits": {
+    "east": {
+      "to": "hall"
+    },
+    "south": {
+      "to": "guardroom"
+    }
+  },
+  "details": {
+    "lock": {
+      "aliases": [
+        "lock"
+      ],
+      "description": "detail.lock",
+      "rating": 5
+    }
+  }
+}
