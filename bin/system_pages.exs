@@ -56,15 +56,23 @@ defmodule SystemGraph.Pages do
             "id" => id,
             "batch" => batch,
             "title" => plain(title),
-            "depends" => if(depends == "–", do: [], else: String.split(depends, ", ")),
+            "depends" => if(depends == "–", do: [], else: String.split(depends, ~r/,\s*/)),
             "status" => plain(status),
             "state" => Enum.find(@states, &String.starts_with?(status, &1)),
-            "section" => sections[id]
+            "section" => linked(row) || sections[id]
           }
 
         _ ->
           raise "docs/MECHANICS-TOOLBOX.md: toolbox row has not 9 cells: #{row}"
       end
+    end
+  end
+
+  # The rules a row's cells link to, else the heading that names the row.
+  defp linked(row) do
+    case Regex.run(~r/\]\((system\/mechanics\.md#[^)]+)\)/, row) do
+      [_, link] -> "docs/" <> link
+      nil -> nil
     end
   end
 

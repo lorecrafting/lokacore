@@ -4,7 +4,7 @@ import { repo } from './graph.ts';
 import { distinct, issues, type Issue } from './pages.ts';
 import { cell, Choose, Link, Sheet, Table } from './ui.tsx';
 
-const heads = ['Issue', 'Title', 'Status', 'Priority', 'Type', 'Labels', 'Blocked by'];
+const heads = ['Issue', 'Title', 'Status', 'Priority', 'Type', 'Labels', 'Depends on'];
 
 const IssueRow = ({ i }: { i: Issue }) => (
   <tr>
@@ -31,7 +31,7 @@ export function Beads() {
     <Sheet>
       <p>
         The tracker export <Link href={repo('.beads/issues.jsonl')}>.beads/issues.jsonl</Link> as
-        committed at this build; <code>br show &lt;id&gt;</code> has the notes.
+        checked out at this build; <code>br show &lt;id&gt;</code> has the notes.
       </p>
       <p>
         <Choose label="Status" options={distinct(issues.map((i) => i.status))} set={setStatus} />

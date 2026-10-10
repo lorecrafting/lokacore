@@ -26,16 +26,18 @@ defmodule Loka.SystemPagesTest do
   end
 
   # Breaks: a cell read from the wrong column, depends not split ("–" is none), the status's
-  # state missed, a `toolbox rows 5 and G5` heading linked to only one row, or a short row kept.
+  # state missed, a `toolbox rows 5 and G5` heading linked to only one row, a row's own rules link
+  # (W1: its heading names no row) dropped, or a short row kept.
   test "each Ranked toolbox row keeps its batch, depends, state and mechanics.md section" do
     md = """
     ## Ranked toolbox
 
     | # | Rank | Mechanic | Today | Size | Depends on | Reuse | Sampler | Status |
     |---|---|---|---|---|---|---|---|---|
-    | 5 | M4 | Skill growth | missing | M | 2, G1 | – | – | done #351: [rules](system/mechanics.md#x) |
+    | 5 | M4 | Skill growth | missing | M | 2, G1 | – | – | done #351: [rules](reviews/x.md) |
     | G5 | M4 | Opposed checks | missing | S | – | – | – | in progress #360 |
     | 9 | M6 | Hirelings | missing | M | – | – | – | todo |
+    | W1 | M3 | Reactions | missing | S | 1,G1 | – | – | done #351: [rules](system/mechanics.md#reaction1) |
 
     ## Next
     """
@@ -70,6 +72,15 @@ defmodule Loka.SystemPagesTest do
                "status" => "todo",
                "state" => "todo",
                "section" => nil
+             },
+             %{
+               "id" => "W1",
+               "batch" => "M3",
+               "title" => "Reactions",
+               "depends" => ["1", "G1"],
+               "status" => "done #351: rules",
+               "state" => "done",
+               "section" => "docs/system/mechanics.md#reaction1"
              }
            ]
 

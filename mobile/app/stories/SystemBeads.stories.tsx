@@ -10,7 +10,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 // Breaks: the status filter ignored, or a blocking dependency not shown. In the export loka-4xk
-// (closed) is blocked by loka-hs9.
+// (closed) depends on loka-hs9.
 export const Page: Story = {
   play: async ({ canvas }) => {
     const table = within(canvas.getByRole('table', { name: 'Beads issues' }));
