@@ -1,6 +1,7 @@
 // Host compatibility is checked after artifact semantics and references.
 import type { Diagnostic } from '../contracts.gen.ts';
 import { diag, step, type Obj } from './cartridge_refs.ts';
+import { scopeSites } from './cartridge_scoped_facts.ts';
 
 /** What the installed kernel and app implement (05 §3, §6); the host supplies it. */
 export interface Installed {
@@ -35,6 +36,7 @@ export function installedStage(c: Obj, installed: Installed): Diagnostic[] {
   for (const [ref, f] of Object.entries(c.facts as Obj))
     if (new Set(f.scopes).size !== 1 || !['player', 'instance'].includes(f.scopes[0]))
       out.push(diag('FACT_SCOPE_UNSUPPORTED', `.cartridge.facts${step(ref)}.scopes`));
+  out.push(...scopeSites(c));
   const api = installed.kernel_api;
   if (apiCmp(api, req.kernel_api.at_least) < 0 || apiCmp(api, req.kernel_api.below) >= 0)
     out.push(

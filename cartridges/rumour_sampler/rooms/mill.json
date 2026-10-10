@@ -1,0 +1,9 @@
+{
+  "title": "room.mill.title",
+  "description": "room.mill.description",
+  "exits": {
+    "west": {
+      "to": "square"
+    }
+  }
+}

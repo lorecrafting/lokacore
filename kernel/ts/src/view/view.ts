@@ -3,7 +3,7 @@ import { movementPlan } from '../mechanics/movement/sequence.ts';
 import { edge } from '../mechanics/water/shared.ts';
 import { waterViews } from './water.ts';
 import { chapter, journal } from './quest_journal.ts';
-import { knownTopics } from '../mechanics/topics/shared.ts';
+import { lore } from '../mechanics/topics/shared.ts';
 import { services } from './services.ts';
 import { liquidView } from './liquid.ts';
 import { conditionViews, resources } from './resources.ts';
@@ -38,7 +38,7 @@ import { holds } from '../mechanics/policy.ts';
 import * as scene from '../mechanics/scene/shared.ts';
 import * as position from '../mechanics/position/shared.ts';
 import { shelf } from '../mechanics/commerce/shared.ts';
-import { status as calendarStatus } from '../mechanics/calendar.ts';
+import { timeView } from './time.ts';
 import { carrying } from '../mechanics/crow/behavior.ts';
 import { currentBleed } from '../mechanics/bleed/shared.ts';
 
@@ -63,7 +63,6 @@ import { currentBleed } from '../mechanics/bleed/shared.ts';
  * as amended), absent when the cartridge has none; and the player's position (position@1), absent
  * without it; and the highest reached chapter marker, absent without chapter declarations.
  */
-// size: allow 49, one projection lists every GameView section
 export function gameView(world: World): GameView {
   const fight = engaged(world, world.body);
   const here = world.state.containers[world.body];
@@ -75,14 +74,13 @@ export function gameView(world: World): GameView {
   const current = chapter(world);
   const showing = scene.running(world, world.character);
   const at = position.positionOf(world, world.character) as Key | undefined;
-  const calendar_status = calendarStatus(world.cartridge, world.context, world.state.clock);
   const bleed = currentBleed(world, world.body);
   const view: GameView = {
     actor_id: world.character,
     ...knowledgeView(world, steps),
     ...waterViews(world, steps),
     ...skillViews(world, steps),
-    ...(world.cartridge.topics && { topics: knownTopics(world, world.character) }),
+    ...(world.cartridge.topics && lore(world, world.character)),
     ...(fight && { combat: combatView(world, fight) }),
     ...(bleed && { bleeding: bleedingView(world, bleed) }),
     ...conditionViews(world),
@@ -98,8 +96,7 @@ export function gameView(world: World): GameView {
     journal: journal(world, steps),
     ...(current && { chapter: current }),
     ...(showing && { scene: showing }),
-    time: world.state.clock,
-    ...(calendar_status && { calendar_status }),
+    ...timeView(world),
     ...(choice && { choice }),
     ...(pools.length > 0 && { resources: pools }),
   };

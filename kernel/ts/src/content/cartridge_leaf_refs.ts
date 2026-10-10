@@ -1,7 +1,7 @@
 // Each policy leaf's reference fields, each mapped to its definition kind; twin of
 // Loka.Content.LeafRefs, checked in tags.test.ts (mechanics.md policy leaf set).
 export const LEAF_REFS: Readonly<Record<string, Readonly<Record<string, string>>>> = {
-  fact_compare: { fact: 'fact' },
+  fact_compare: { fact: 'fact', npc: 'npc', item: 'item' },
   has_item: { item: 'item' },
   quest_state: { quest: 'quest' },
   escort_state: { quest: 'quest' },

@@ -1,0 +1,15 @@
+{
+  "title": "room.cottage.title",
+  "description": "room.cottage.description",
+  "exits": {
+    "north": {
+      "to": "woods"
+    },
+    "east": {
+      "to": "green"
+    },
+    "south": {
+      "to": "garden"
+    }
+  }
+}

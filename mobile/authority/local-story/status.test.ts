@@ -46,7 +46,8 @@ const antidote = initial.entityIds['status_sampler@0.0.1:item/antidote']!;
 const hp = (w: World) => level(w, w.body, resourceRef(w, 'hp'));
 
 // Breaks: the statuses section is not persisted or rebuilt on reopen; a failed or uncertain tick or
-// cure COMMIT adopts half of hp, status row, job or custody; a lost acknowledgement applies twice.
+// cure COMMIT adopts half of hp, status row, job or custody; a lost acknowledgement applies twice;
+// the applied line misses the receipt or its replay (loka-kgd.13).
 test('status tick and cure survive reopen, failed and lost COMMIT, and replay once', (t) => {
   t.after(() => rmSync(saves, { recursive: true, force: true }));
   for (const action of ['tick', 'cure'] as const)
@@ -74,8 +75,20 @@ test('status tick and cure survive reopen, failed and lost COMMIT, and replay on
       });
       const t0 = story.world().state.clock;
       assert.equal(story.invoke(invoke('take', [antidote])).kind, 'saved');
-      assert.equal(story.invoke(invoke('move', [], { direction: 'east' })).kind, 'saved');
+      const dart = invoke('move', [], { direction: 'east' });
+      assert.equal(story.invoke(dart).kind, 'saved');
       story = reopen();
+      // The dart's applied line is in the receipt: reopen shows it and replay returns it.
+      const applied = [{ key: 'narration.poison.applied' }];
+      assert.deepEqual(story.narration()?.lines, applied);
+      const again = story.invoke(dart);
+      assert.deepEqual(
+        again.kind === 'saved' && [
+          again.replay,
+          (again.decision as { narration?: unknown }).narration,
+        ],
+        [true, applied],
+      );
       const row = gameView(story.world()).conditions?.[0];
       assert.deepEqual([row?.ends_at, row?.next_tick_at], [t0 + 300, t0 + 60]);
       const before = Number(receipts(p.sql));

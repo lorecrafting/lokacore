@@ -18,7 +18,8 @@ import {
 import { key, same } from '../foundation/compose.ts';
 import { bodyOf, refString, type Steps, type World } from '../runtime/decision.ts';
 import { questOf } from '../mechanics/lookups.ts';
-import { ALWAYS, modal, talks } from '../mechanics/dialogue/shared.ts';
+import { modal, talks } from '../mechanics/dialogue/shared.ts';
+import { ALWAYS } from '../mechanics/policy.ts';
 import { sub } from '../foundation/int.ts';
 import { pay } from '../mechanics/resource.ts';
 import { accepts, primaryTarget } from './action_input.ts';

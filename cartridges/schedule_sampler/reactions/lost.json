@@ -1,0 +1,13 @@
+{
+  "on": {
+    "event": "entity_entered_room",
+    "room": "woods"
+  },
+  "apply": [
+    {
+      "op": "fact.assign",
+      "fact": "child_lost",
+      "value": true
+    }
+  ]
+}

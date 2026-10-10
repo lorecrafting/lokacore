@@ -439,7 +439,7 @@
       ]
     },
     "NpcDefinition": {
-      "description": "A non-player character (00a §4), as a holder of items so far: its key, keywords, short, room_line and description as for an item, the room a fresh world puts it in, and optionally capacity, the most items it holds. Optionally daily_schedule, its daily location schedule (behavior@1); dialogue joins with its capability as an optional field. Optional hp opts into entity-specific HP under kernel API 1.4 (docs/system/cartridge.md NPC HP overrides). Optional short_variants, room_line_variants and description_variants vary its texts (TextVariants, toolbox row W6).",
+      "description": "A non-player character (00a §4), as a holder of items so far: its key, keywords, short, room_line and description as for an item, the room a fresh world puts it in, and optionally capacity, the most items it holds. Optionally daily_schedule, its daily location schedule (behavior@1), and schedule_cases, its conditional hours (toolbox row W10); dialogue joins with its capability as an optional field. Optional hp opts into entity-specific HP under kernel API 1.4 (docs/system/cartridge.md NPC HP overrides). Optional short_variants, room_line_variants and description_variants vary its texts (TextVariants, toolbox row W6).",
       "type": "object",
       "properties": {
         "key": {
@@ -487,6 +487,32 @@
           },
           "additionalProperties": {
             "$ref": "identity.schema.json#/$defs/DefinitionRef"
+          }
+        },
+        "disposition": {
+          "description": "Toolbox row G11 (kernel_api at least 1.47): how the NPC stands toward the player, derived when read, never stored: hostile while hostile holds, else friendly while friendly holds, else wary (an NPC without it is wary). Each condition is read with the player as the actor and the NPC as the target, so subject target facts are its pair facts with the player. Hostile refuses talk and trade and, with an attack, engages a player who walks in, saying engage; friendly takes a friendly buy_discount.",
+          "type": "object",
+          "properties": {
+            "hostile": {
+              "$ref": "policy.schema.json#/$defs/VersionedPolicy"
+            },
+            "friendly": {
+              "$ref": "policy.schema.json#/$defs/VersionedPolicy"
+            },
+            "engage": {
+              "$ref": "text.schema.json#/$defs/TextKey"
+            }
+          },
+          "additionalProperties": false
+        },
+        "schedule_cases": {
+          "description": "Toolbox row W10 (kernel_api at least 1.47): conditional hours of daily_schedule. Each key is an hour daily_schedule lists (checked by the compiler and the loader); when that hour's job runs, the NPC goes to the room of the first case whose condition holds, else to the hour's daily_schedule room (the fallback). The source form is a daily_schedule hour mapped to [case, ..., room], which the compiler splits into the two fields.",
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^(0|[1-9][0-9]*)$"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/ScheduleCases"
           }
         },
         "hp": {
@@ -650,6 +676,57 @@
         ]
       ]
     },
+    "ScheduleCases": {
+      "description": "Toolbox row W10: the cases of one conditional schedule hour, tried in order when the hour's job runs: the first whose when holds (read with the player as the actor, the NPC as the target and the clock at the job's due time) names the room. A case's optional goal is narration shown when the NPC leaves the player's room by that case.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "when": {
+            "$ref": "policy.schema.json#/$defs/VersionedPolicy"
+          },
+          "room": {
+            "$ref": "identity.schema.json#/$defs/DefinitionRef"
+          },
+          "goal": {
+            "$ref": "text.schema.json#/$defs/TextKey"
+          }
+        },
+        "required": [
+          "when",
+          "room"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1,
+      "maxItems": 8,
+      "examples": [
+        [
+          {
+            "when": {
+              "policy_version": 1,
+              "root": {
+                "op": "fact_compare",
+                "fact": {
+                  "cartridge_id": "schedule_sampler",
+                  "cartridge_version": "0.0.1",
+                  "kind": "fact",
+                  "key": "child_lost"
+                },
+                "equals": true
+              }
+            },
+            "room": {
+              "cartridge_id": "schedule_sampler",
+              "cartridge_version": "0.0.1",
+              "kind": "room",
+              "key": "green"
+            },
+            "goal": "npc.maud.goal_green"
+          }
+        ]
+      ]
+    },
     "AttackProfile": {
       "type": "object",
       "properties": {
@@ -801,10 +878,14 @@
           "$ref": "text.schema.json#/$defs/TextKey"
         },
         "buy_discount": {
+          "description": "A buy price of floor(buy * numerator / denominator), at least minimum, while its condition holds: exactly one of skill (the actor has the skill usable) or (toolbox row 15, kernel_api at least 1.47) friendly, the shop's NPC disposed friendly to the actor (its disposition).",
           "type": "object",
           "properties": {
             "skill": {
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "friendly": {
+              "const": true
             },
             "numerator": {
               "type": "integer",
@@ -823,10 +904,13 @@
             }
           },
           "required": [
-            "skill",
             "numerator",
             "denominator",
             "minimum"
+          ],
+          "exactlyOneRequired": [
+            "skill",
+            "friendly"
           ],
           "additionalProperties": false
         }

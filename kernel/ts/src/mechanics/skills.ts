@@ -1,9 +1,10 @@
 import { key } from '../foundation/compose.ts';
-import type { ActionRecipe, CharacterId, DefinitionRef } from '../contracts.gen.ts';
+import type { CharacterId, DefinitionRef } from '../contracts.gen.ts';
 import { KernelError } from '../foundation/error.ts';
 import { refString, type Steps, type World } from '../runtime/decision.ts';
 import { assigned, scopeOf, value, type Assigned } from './fact.ts';
 import { holds } from './policy.ts';
+import { npcValue, value as attributeValue } from './attributes/shared.ts';
 
 export const acquisition = (skill: DefinitionRef): DefinitionRef => ({
   ...skill,
@@ -26,14 +27,14 @@ export function level(world: World, actor: CharacterId, skill: DefinitionRef) {
 }
 
 /**
- * `run` with one use of the skill a recipe's opposed check names (toolbox row 5), unless the check
+ * `run` with one use of the skill an opposed check (a recipe's, row 5; a choice's, row 14) names, unless the check
  * names none, the skill has no growth or its count is at the last threshold.
  */
 export function practised<R extends Assigned>(
   world: World,
   actor: CharacterId,
   run: R,
-  check: ActionRecipe['check'],
+  check: { kind: string; skill?: DefinitionRef } | undefined,
 ) {
   const skill = check?.kind === 'opposed' ? check.skill : undefined;
   const growth = skill && world.cartridge.skills![refString(skill)]!.growth;
@@ -64,3 +65,17 @@ export function membership(world: World, actor: CharacterId, skill: DefinitionRe
   if (typeof current !== 'boolean') throw new KernelError('precondition_failed');
   return current;
 }
+
+// An opposed check (rows 5, G5, G3; dialogue choices, row 14): the actor's skill level or attribute
+// value at least the named NPC's value of the attribute, read at use wherever the NPC is (row G3;
+// no leaf gates its presence yet), else `rating` (the target detail's or the choice check's).
+export const opposed = (
+  world: World,
+  actor: CharacterId,
+  check: { skill?: DefinitionRef; attribute?: DefinitionRef; npc?: DefinitionRef },
+  rating: number,
+) =>
+  (check.skill
+    ? level(world, actor, check.skill)
+    : attributeValue(world, actor, check.attribute!)) >=
+  (check.npc ? npcValue(world, world.entityIds[refString(check.npc)]!, check.attribute!)! : rating);

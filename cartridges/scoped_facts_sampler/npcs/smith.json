@@ -1,0 +1,9 @@
+{
+  "keywords": [
+    "smith"
+  ],
+  "short": "npc.smith.short",
+  "room_line": "npc.smith.room",
+  "description": "npc.smith.description",
+  "room": "square"
+}

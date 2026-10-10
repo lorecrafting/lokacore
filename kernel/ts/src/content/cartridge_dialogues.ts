@@ -30,6 +30,7 @@ import { diag, step, type Checks, type Obj } from './cartridge_refs.ts';
 import { same } from '../foundation/compose.ts';
 import { refString } from '../runtime/decision.ts';
 import { reopens } from '../mechanics/dialogue/selection.ts';
+import { choiceCheck, choiceCheckFloor } from './cartridge_choice_checks.ts';
 
 const each = (c: Obj): [Obj, string][] =>
   Object.entries((c.dialogues ?? {}) as Obj).map(([ref, d]) => [
@@ -45,6 +46,7 @@ export const uses = (c: Obj) =>
       ...Object.entries(d.choices as Obj).flatMap(([id, o]) => [
         ...(o.escort ? [['definition', 'escort', `${at}.choices${step(id)}.escort`]] : []),
         ...(o.receive ? [['event', 'item_acquired', `${at}.choices${step(id)}.receive`]] : []),
+        ...(o.check ? [['event', 'check_passed', `${at}.choices${step(id)}.check`]] : []),
         ...(o.sequence ?? []).map((_: Obj, i: number) => [
           'event',
           'fact_changed',
@@ -88,7 +90,7 @@ export function dialogues(c: Obj, checks: Checks): Diagnostic[] {
     for (const [id, o] of Object.entries(d.choices as Obj))
       out.push(...choice(o, `${at}.choices${step(id)}`, d, checks, c));
   }
-  return [...out, ...storyPoints(c, named), ...chapters(c, checks)];
+  return [...out, ...choiceCheckFloor(c), ...storyPoints(c, named), ...chapters(c, checks)];
 }
 
 function riddle(d: Obj, at: string, { text }: Checks): Diagnostic[] {
@@ -226,7 +228,7 @@ function choice(o: Obj, path: string, d: Obj, { named, typedValue, text }: Check
     if (e.transition === 'complete' ? !same(d.quest, e.quest) : d.quest !== undefined)
       out.push(diag('OUTCOME_MISMATCH', `${path}.escort.quest`));
   }
-  out.push(...once(o, path, d, c));
+  out.push(...once(o, path, d, c), ...choiceCheck(o, path, d, c, { named, typedValue, text }));
   const h = o.hand_over;
   const wrong = (field: string, role: string) =>
     h && !(Object.hasOwn(roles, h[field]) && roles[h[field]].role === role);

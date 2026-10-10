@@ -4,12 +4,13 @@
 import type { ReactNode } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
-import { cap, cueLine, plain, type group, type Pool } from './model.ts';
+import { plain, type group, type Pool } from './model.ts';
 import type { Button, DetailLine } from './presenter.ts';
 import { note, prose, usePalette, type Palette } from './palette.ts';
 import { opacity, size, space, type } from './tokens.ts';
 import { VerbLine } from './actions.tsx';
-import { EntityLine, LogLines, Note } from './lines.tsx';
+import { AwayRecap, Here, LogLines } from './lines.tsx';
+import type { RecapLine } from './recap.ts';
 import { useTitleFocus } from './title.ts';
 import { LABEL } from './labels.ts';
 export { useTitleFocus };
@@ -102,6 +103,7 @@ export function RoomPage(p: {
   view: GameView;
   text: Say;
   log: DetailLine[];
+  recap?: RecapLine[];
   g: Grouped;
   press: (b: Button) => void;
   open: (id: string) => void;
@@ -117,16 +119,8 @@ export function RoomPage(p: {
       fixedTitle
       onTitlePress={look && (() => p.press(look))}
     >
-      <View style={{ gap: space.lg }}>
-        {plain(p.text(p.view.place.description.key))
-          .trim()
-          .split(/\s*\n\s*\n\s*/) // a blank line in the authored text is a paragraph break
-          .map((paragraph, i) => (
-            <Text key={i} style={prose(c)}>
-              {paragraph}
-            </Text>
-          ))}
-      </View>
+      {p.recap && <AwayRecap lines={p.recap} />}
+      {paragraphs(c, p.text(p.view.place.description.key))}
       {warnings(c, p.view, p.text)}
       <Here view={p.view} text={p.text} open={p.open} />
       {p.view.choice && !p.view.entities.some((e) => e.id === p.view.choice!.speaker_id) && (
@@ -138,6 +132,20 @@ export function RoomPage(p: {
     </Page>
   );
 }
+
+// The room prose as one block; a blank line in the authored text is a paragraph break.
+const paragraphs = (c: Palette, description: string) => (
+  <View style={{ gap: space.lg }}>
+    {plain(description)
+      .trim()
+      .split(/\s*\n\s*\n\s*/)
+      .map((paragraph, i) => (
+        <Text key={i} style={prose(c)}>
+          {paragraph}
+        </Text>
+      ))}
+  </View>
+);
 
 // The exit warnings are one block of notes.
 const warnings = (c: Palette, view: GameView, text: Say) => {
@@ -166,36 +174,6 @@ const placeActions = (view: GameView, g: Grouped, press: (b: Button) => void) =>
         ].some((n) => b.target_ids.includes(n.id)),
     )
     .map((b) => <VerbLine key={`${b.label}:${b.target_ids.join(',')}`} b={b} press={press} />);
-
-// NPCs, then every other entity as the room's items; no headings, an empty group omitted
-// (book-ui.md, World and status entry); then the sense cues (book-ui.md, Sense cues details).
-function Here(p: { view: GameView; text: Say; open: (id: string) => void }) {
-  const npcs = p.view.entities.filter((e) => e.kind === 'npc');
-  const items = p.view.entities.filter((e) => e.kind !== 'npc');
-  const line = (e: GameView['entities'][number]) => (
-    <EntityLine
-      key={e.id}
-      name={cap(p.text(e.name))}
-      rest=" is here."
-      note={e.carrying && p.text(e.carrying)}
-      onPress={() => p.open(e.id)}
-    />
-  );
-  return [
-    ...[npcs, items]
-      .filter((group) => group.length > 0)
-      .map((group) => (
-        <View key={group[0].kind === 'npc' ? 'npcs' : 'items'}>{group.map(line)}</View>
-      )),
-    p.view.cues && (
-      <View key="cues">
-        {p.view.cues.map((cue, i) => (
-          <Note key={i /* two equal cues are two lines */}>{cueLine(cue, p.text)}</Note>
-        ))}
-      </View>
-    ),
-  ];
-}
 
 // One shell for every page (BOOK-UI-COMPONENTS.md, Page): the title (fixed: the room's, outside
 // the scroll), the blocks, and the page foot.

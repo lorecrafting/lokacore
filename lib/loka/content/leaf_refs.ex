@@ -7,7 +7,7 @@ defmodule Loka.Content.LeafRefs do
   """
   def all,
     do: %{
-      "fact_compare" => %{"fact" => "fact"},
+      "fact_compare" => %{"fact" => "fact", "npc" => "npc", "item" => "item"},
       "has_item" => %{"item" => "item"},
       "quest_state" => %{"quest" => "quest"},
       "escort_state" => %{"quest" => "quest"},

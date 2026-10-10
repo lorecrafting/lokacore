@@ -24,7 +24,6 @@ import type {
   PatrolDraw,
   RoleBinding,
   TextKey,
-  VersionedPolicy,
 } from '../../contracts.gen.ts';
 import { same } from '../../foundation/compose.ts';
 import {
@@ -35,7 +34,7 @@ import {
   type Steps,
   type World,
 } from '../../runtime/decision.ts';
-import { holds } from '../policy.ts';
+import { ALWAYS, holds } from '../policy.ts';
 import { carrying } from '../containment/shared.ts';
 import { acceptRefused, resolution } from '../quest/lifecycle.ts';
 import { cmp } from '../../foundation/validate.ts';
@@ -93,10 +92,7 @@ export function blocked(
   const d = definition(world, row.source);
   if (!d || row.beat !== d.key || !boundSitting(world, row, d, option))
     return 'invalid_state' as const;
-  const target = row.roles.find((r) => {
-    const role = d.roles[r.role];
-    return role?.role === 'npc' && same(role.npc, d.npc);
-  })?.entity_id;
+  const target = speakerOf(d, row);
   if (!holds(world, row.actor_id, d.policy.root, { target, steps }))
     return 'invalid_state' as const;
   const window = option.availability;
@@ -252,7 +248,6 @@ export function choiceView(
 
 export { speaks, spokenBy, talkRefused, talks, pending, talking, leave } from './selection.ts';
 
-export const ALWAYS: VersionedPolicy = { policy_version: 1, root: { op: 'all', items: [] } };
 /** The commands that answer a pending choice: its view is the PendingChoice, never a list. */
 export const MODAL: readonly string[] = ['choose', 'close_choice'];
 
@@ -278,3 +273,10 @@ export function modal(world: World, actor: CharacterId): ActionSet {
     ...(open && { close_choice: { ...answer('close_choice', []), continuation: open[0] } }),
   };
 }
+
+/** The speaker's bound EntityId: the row's binding of the npc role that is the dialogue's npc. */
+export const speakerOf = (d: DialogueDefinition, row: ChoiceRow) =>
+  row.roles.find((r) => {
+    const role = d.roles[r.role];
+    return role?.role === 'npc' && same(role.npc, d.npc);
+  })?.entity_id;

@@ -7,8 +7,8 @@ defmodule Loka.Content.Checks do
   alias Loka.Core.Canonical
 
   @ref_fields Map.merge(Loka.Content.LeafRefs.all(), %{
-                "fact.assign" => %{"fact" => "fact"},
-                "fact.adjust" => %{"fact" => "fact"},
+                "fact.assign" => %{"fact" => "fact", "item" => "item", "npc" => "npc"},
+                "fact.adjust" => %{"fact" => "fact", "item" => "item", "npc" => "npc"},
                 "skill.acquire" => %{"skill" => "skill"},
                 "topic.grant" => %{"topic" => "topic"},
                 "status.apply" => %{"status" => "status", "item" => "item", "npc" => "npc"},
@@ -325,7 +325,7 @@ defmodule Loka.Content.Checks do
 
     entry(m, entry, defs) ++
       texts(defs, text) ++
-      Loka.Content.Cues.check(m, defs, text, registry, trees(defs, actions(defs))) ++
+      Loka.Content.Cues.check(m, defs, text, registry, trees(defs)) ++
       if(m,
         do:
           Enum.flat_map(rooms, &room(&1, m, defs, registry)) ++
@@ -357,7 +357,8 @@ defmodule Loka.Content.Checks do
     schedule = Map.get(npc, "daily_schedule", %{})
 
     reference(rel, [], {"room", "room"}, npc, m, defs) ++
-      for {h, _} <- schedule,
+      for {h, r} <- schedule,
+          is_map(r),
           d <- reference(rel, ["daily_schedule"], {h, "room"}, schedule, m, defs),
           do: d
   end
@@ -406,13 +407,12 @@ defmodule Loka.Content.Checks do
 
   defp uses(m, defs, owners) do
     required = {m["requires"]["capabilities"], owners}
-    actions = actions(defs)
 
-    Enum.flat_map(actions, fn {rel, a} ->
+    Enum.flat_map(actions(defs), fn {rel, a} ->
       command(rel, a["command"], required, m["time_policy"] != nil)
     end) ++
       Enum.flat_map(
-        trees(defs, actions),
+        trees(defs),
         &Loka.Content.Policies.tree(&1, {m, defs, required})
       )
   end
@@ -420,10 +420,10 @@ defmodule Loka.Content.Checks do
   defp actions(defs), do: for({_, {rel, [], a}} <- defs["action"], do: {rel, a})
 
   # Every located policy root from the source definitions (twin of the TS loader's nodes/1).
-  defp trees(defs, actions) do
+  defp trees(defs) do
     Enum.concat([
       for({_, {rel, [], p}} <- defs["policy"], do: {rel, ["root"], p["root"]}),
-      for({rel, a} <- actions, do: {rel, ["policy", "root"], a["policy"]["root"]}),
+      for({rel, a} <- actions(defs), do: {rel, ["policy", "root"], a["policy"]["root"]}),
       RoomParts.conditions(defs),
       Entities.conditions(defs),
       Recipes.conditions(defs),

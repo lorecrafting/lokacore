@@ -155,13 +155,24 @@
           "additionalProperties": false
         },
         {
-          "description": "The fact, in the actor's scope, equals this value.",
+          "description": "The fact, in the actor's scope, equals this value. An entity or pair fact (toolbox row W2, kernel_api at least 1.47) is read at exactly one subject: npc or item, that definition's authored instance, or subject target, the action's target (false without one); a player or instance fact names none.",
           "type": "object",
           "properties": {
             "op": {
               "const": "fact_compare"
             },
             "fact": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "subject": {
+              "enum": [
+                "target"
+              ]
+            },
+            "npc": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "item": {
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
             "equals": {

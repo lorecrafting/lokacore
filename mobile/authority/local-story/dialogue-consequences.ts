@@ -1,7 +1,13 @@
-import type { DialogueChoice, DeltaOp, DomainEvent } from '../../../kernel/ts/src/contracts.gen.ts';
+import type {
+  DefinitionRef,
+  DialogueChoice,
+  DeltaOp,
+  DomainEvent,
+  EntityId,
+} from '../../../kernel/ts/src/contracts.gen.ts';
 import { same } from '../../../kernel/ts/src/foundation/compose.ts';
 import { acquisition } from '../../../kernel/ts/src/mechanics/skills.ts';
-import { scopeOf } from '../../../kernel/ts/src/mechanics/fact.ts';
+import { targetOf } from '../../../kernel/ts/src/mechanics/fact.ts';
 import { bodyOf, refString, type ChoiceRow } from '../../../kernel/ts/src/runtime/decision.ts';
 import type { Story } from './save.ts';
 
@@ -38,6 +44,7 @@ export function assignmentEvidence(
   option: DialogueChoice,
   ops: readonly DeltaOp[],
   events: readonly DomainEvent[],
+  speaker: EntityId,
 ) {
   for (const step of option.sequence ?? []) {
     if (step.op === 'fact.adjust') continue;
@@ -45,16 +52,19 @@ export function assignmentEvidence(
     if (!assignment) return false;
     const matching = ops.filter((o) => o.op === 'fact.assign' && same(o.fact, assignment.fact));
     const op = matching[0];
+    // An entity or pair fact's subject is the speaker (row W2), from the definition, not the receipt.
+    const { kind: _, ...target } = targetOf(s.world, row.actor_id, assignment.fact, speaker);
     if (!matching.length && step.op === 'topic.grant') continue;
     if (
       matching.length !== 1 ||
       op.op !== 'fact.assign' ||
       !same(op.value, assignment.value) ||
       (['skill.acquire', 'topic.grant'].includes(step.op) && op.expected !== false) ||
-      !same(op.scope, scopeOf(s.world, row.actor_id, assignment.fact))
+      !same(op.scope, target.scope) ||
+      op.subject_id !== target.subject_id
     )
       return false;
-    if (!changedEvidence(s, row, op, assignment, events)) return false;
+    if (!changedEvidence(s, row, op, { ...target, value: assignment.value }, events)) return false;
   }
   return true;
 }
@@ -73,7 +83,7 @@ function changedEvidence(
   s: Story,
   row: ChoiceRow,
   op: Extract<DeltaOp, { op: 'fact.assign' }>,
-  assignment: { fact: Extract<DeltaOp, { op: 'fact.assign' }>['fact']; value: unknown },
+  assignment: { fact: DefinitionRef; subject_id?: EntityId; value: unknown },
   events: readonly DomainEvent[],
 ) {
   const changed = events.filter(
@@ -90,6 +100,7 @@ function changedEvidence(
     !same(changed[0].payload, {
       type: 'fact_changed',
       fact: assignment.fact,
+      ...(assignment.subject_id !== undefined && { subject_id: assignment.subject_id }),
       old: op.expected,
       new: assignment.value,
     })

@@ -2,7 +2,7 @@ import {
   LIMITS,
   type CharacterId,
   type EntityId,
-  type Shop,
+  type NpcDefinition,
   type ShopItemView,
 } from '../../contracts.gen.ts';
 import { bodyOf, refString, type Steps, type World } from '../../runtime/decision.ts';
@@ -11,15 +11,23 @@ import { engaged } from '../combat/shared.ts';
 import { transfer } from '../resource.ts';
 import { carrying, giveRefused } from '../containment/shared.ts';
 import { status } from '../skills.ts';
+import { disposition } from '../disposition.ts';
 
-function buyPrice(world: World, actor: CharacterId, shop: Shop, base: number, steps: Steps) {
-  const d = shop.buy_discount;
-  return d && status(world, actor, d.skill, steps).usable
+// A friendly discount (toolbox row 15) takes the NPC's disposition (row G11), a skill one the skill.
+function buyPrice(world: World, actor: CharacterId, npc: EntityId, base: number, steps: Steps) {
+  const d = (world.entities[npc] as NpcDefinition).shop!.buy_discount;
+  return d &&
+    (d.friendly
+      ? disposition(world, actor, npc, steps) === 'friendly'
+      : status(world, actor, d.skill!, steps).usable)
     ? Math.max(d.minimum, Math.floor((base * d.numerator) / d.denominator))
     : base;
 }
 
-/** One current offer query serves both the rule and Peg's page; no stock reservation. */
+/**
+ * One current offer query serves both the rule and Peg's page; no stock reservation. A hostile
+ * shopkeeper (toolbox row G11) refuses as a stale price does.
+ */
 export function exchange(
   world: World,
   actor: CharacterId,
@@ -39,10 +47,10 @@ export function exchange(
     return 'not_present' as const;
   const offer = npc.shop.offers.find((o) => world.entityIds[refString(o.item)] === item);
   if (!offer) return 'invalid_target' as const;
-  const current = verb === 'buy' ? buyPrice(world, actor, npc.shop, offer.buy, steps) : offer.sell;
-  if (price !== current) return 'invalid_state' as const;
-  const source = verb === 'buy' ? provider : body;
-  const destination = verb === 'buy' ? body : provider;
+  const current = verb === 'buy' ? buyPrice(world, actor, provider, offer.buy, steps) : offer.sell;
+  if (price !== current || disposition(world, actor, provider, steps) === 'hostile')
+    return 'invalid_state' as const;
+  const [source, destination] = verb === 'buy' ? [provider, body] : [body, provider];
   if (world.state.containers[item] !== source) return 'not_owned' as const;
   const custody =
     verb === 'buy' ? carrying(world, body, steps)(item) : giveRefused(world, item, steps);
@@ -69,7 +77,7 @@ export function shelf(world: World, provider: EntityId): ShopItemView[] | undefi
     const item_id = world.entityIds[refString(o.item)];
     const action = (verb: 'buy' | 'sell') => {
       const price =
-        verb === 'buy' ? buyPrice(world, world.character, npc.shop!, o.buy, steps) : o.sell;
+        verb === 'buy' ? buyPrice(world, world.character, provider, o.buy, steps) : o.sell;
       const result = exchange(world, world.character, provider, item_id, verb, price, steps);
       return {
         price,

@@ -19,6 +19,7 @@ import { closeEncounter } from '../combat/shared.ts';
 import { settled as crowSettled } from '../crow/behavior.ts';
 import { travel } from '../escort/shared.ts';
 import { entrySight } from '../population/behavior.ts';
+import { engage } from '../disposition.ts';
 import { fall, fare, passage } from './shared.ts';
 
 /** Shared ordinary/escape movement: admission, one payment, one transfer and closure. */
@@ -57,7 +58,7 @@ export function moveSequence(
     entity_id: body,
     room_id: there,
   });
-  const progress = routeProgress(world, command, plan, ops, mint, steps);
+  const progress = routeProgress(world, command, plan, ops, mint, steps, outcome === 'moved');
   return accepted(
     world,
     outcome,
@@ -74,6 +75,7 @@ function routeProgress(
   ops: Parameters<typeof patrol.travel>[4],
   mint: Mint,
   steps: { n: number },
+  ordinary: boolean,
 ) {
   const joined = patrol.travel(world, command, here, there, ops, mint, steps);
   const ventured = expedition.travel(
@@ -88,9 +90,18 @@ function routeProgress(
   // A climb without its item falls (toolbox row 30): after the fare, once every admission passed.
   const levels = 'levels' in paid ? paid.levels : {};
   const fell = fall(world, world.rooms[here], command.payload.direction, body, levels);
-  const narration = [...(fell ? [fell.narration] : []), ...joined.narration, ...ventured.narration];
+  // A hostile NPC engages on an ordinary move only, never a flight (toolbox row G11).
+  const met = ordinary
+    ? engage(world, command.payload.actor_id, body, there, mint, steps)
+    : undefined;
+  const narration = [
+    ...(fell ? [fell.narration] : []),
+    ...joined.narration,
+    ...ventured.narration,
+    ...(met?.narration ?? []),
+  ];
   return {
-    ops: [...(fell?.ops ?? []), ...joined.ops, ...ventured.ops],
+    ops: [...(fell?.ops ?? []), ...joined.ops, ...ventured.ops, ...(met?.ops ?? [])],
     events: [...joined.events, ...ventured.events],
     narration: narration.length ? narration : undefined,
   };

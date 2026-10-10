@@ -95,9 +95,12 @@ defmodule Loka.Content.Requires do
          Enum.any?(Map.get(d, "choices", %{}), fn {_, o} -> is_map_key(o, "receive") end))
   end
 
-  defp elapsed(rel, %{"time_policy" => _} = m) do
+  defp elapsed(rel, %{"time_policy" => policy} = m) do
+    # The away recap threshold is toolbox row W27 (API 1.47).
+    floor = if is_map_key(policy, "recap_after_minutes"), do: [1, 47], else: [1, 1]
+
     range =
-      if version(m["requires"]["kernel_api"]["at_least"]) < [1, 1],
+      if version(m["requires"]["kernel_api"]["at_least"]) < floor,
         do: [diag("KERNEL_API_RANGE_INVALID", at(rel, ["requires", "kernel_api", "at_least"]))],
         else: []
 

@@ -1,0 +1,15 @@
+{
+  "facts": {
+    "child_lost": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "instance"
+      ],
+      "meaning": "Maud's child has wandered off in the woods."
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "keywords": [
+    "apple"
+  ],
+  "short": "item.apple.short",
+  "room_line": "item.apple.room",
+  "description": "item.apple.description",
+  "location": {
+    "in": "room",
+    "room": "square"
+  }
+}

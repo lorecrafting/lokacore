@@ -137,19 +137,72 @@ test('wait to 19:00 moves Bram to the green through his job; 18:59 does not', ()
   assert.deepEqual(after.state.jobs, { [J0]: job(H(19), 'completed'), [J1]: job(H(30)) });
 });
 
-// Breaks: `<=` for `<` in the strictly-later-than-target rule (04 §5.4), or a fault that
-// commits part of the advance.
-test('a job its own advance would schedule at or before the target faults the whole wait', () => {
+// Breaks: the successor scheduled inside the advance (the wait faults nonfuture_job, loka-qi0r),
+// crossed hours collapsed into one move (Bram never seen at the green), the steps out of hour
+// order, an hour run twice or skipped, the last step not scheduling the job after the target, or a
+// crossed hour queued after later or equal-time jobs instead of in (due_time, job_id) order.
+test('one wait across two or three listed hours runs each hour in order', () => {
   const w = world();
-  // From 06:00 to 06:00 next day: Bram's 19:00 job schedules 06:00 next day, the target itself.
-  const out = wait(w, H(30));
-  assert.deepEqual(out.decision, {
-    kind: 'fault',
-    code: 'nonfuture_job',
-    target: { kind: 'job', job_id: J1 },
-  });
-  assert.equal(out.world, w);
-  assert.equal(wait(w, H(30) - 1).decision.kind, 'accepted');
+  const arrivals = (d: ReturnType<typeof wait>['decision']) =>
+    d.kind === 'accepted'
+      ? d.events.map((e) => [e.logical_time, (e.payload as { room_id: string }).room_id])
+      : d;
+  const pending = (x: World) =>
+    Object.values(x.state.jobs ?? {}).flatMap((j) => (j.status === 'pending' ? [j.due_time] : []));
+  // 19:00 the green, 06:00 back at the landing, the next job at 19:00.
+  const two = wait(w, H(30));
+  assert.deepEqual(arrivals(two.decision), [
+    [H(19), GREEN],
+    [H(30), LANDING],
+  ]);
+  assert.equal(two.world.state.containers[BRAM_ID], LANDING);
+  assert.deepEqual(pending(two.world), [H(43)]);
+  // Then 19:00 again (the target itself): the green, the next job at 06:00.
+  const three = wait(w, H(43));
+  assert.deepEqual(arrivals(three.decision), [
+    [H(19), GREEN],
+    [H(30), LANDING],
+    [H(43), GREEN],
+  ]);
+  assert.equal(three.world.state.containers[BRAM_ID], GREEN);
+  assert.deepEqual(pending(three.world), [H(54)]);
+  assert.equal(three.world.state.jobs?.[J0]?.status, 'completed');
+  // Each sub-step runs under the job CommandId of (J0, its hour), Python hashlib over
+  // ["loka-job-command-v1", J0, hour]; one CommandId for all would repeat event ids.
+  const events = three.decision.kind === 'accepted' ? three.decision.events : [];
+  assert.deepEqual(
+    events.map((e) => e.causation_id),
+    [RUN_J0, 'e81a8c5c-15b7-83f6-809a-b21a31b09054', '05b69dc4-9af0-8572-9359-cf2d9d85615f'],
+  );
+  assert.equal(new Set(events.map((e) => e.id)).size, 3);
+  assert.deepEqual(wait(w, H(43)), three);
+  // Arrivals of a wait to 06:00 next day with Ada (her job id sorts first), as `hour npc`.
+  const order = (schedule: object) => {
+    const wa = withAda(schedule);
+    const d = wait(wa, H(30)).decision;
+    const bram = wa.entityIds[`${F}:npc/bram`];
+    const npc = (e: { payload: object }) =>
+      (e.payload as { entity_id: string }).entity_id === bram ? 'bram' : 'ada';
+    return d.kind === 'accepted' ? d.events.map((e) => `${e.logical_time / 3600} ${npc(e)}`) : d;
+  };
+  // Ada landing from 06:00, green from 20:00: two crossed 06:00 hours tie, hers first.
+  assert.deepEqual(order({ '6': landing, '20': green }), [
+    '19 bram',
+    '20 ada',
+    '30 ada',
+    '30 bram',
+  ]);
+  // Ada listed only at 06:00: her original job ties Bram's crossed 06:00 hour, hers first.
+  assert.deepEqual(order({ '6': green }), ['19 bram', '30 ada', '30 bram']);
+  // Each crossed hour is a drain step under due_jobs_per_advance (1024), two a day: 512 days is
+  // 1024 steps and commits; 19:00 after that is 1025.
+  assert.equal(wait(w, H(6 + 24 * 512)).decision.kind, 'accepted');
+  const long = wait(w, H(19 + 24 * 512));
+  assert.deepEqual(
+    [long.decision, long.limit],
+    [{ kind: 'fault', code: 'budget_exceeded' }, 'due_jobs_per_advance'],
+  );
+  assert.equal(long.world, w);
 });
 
 // Breaks: the drain sorted by job id only (due time ignored) or in row order.

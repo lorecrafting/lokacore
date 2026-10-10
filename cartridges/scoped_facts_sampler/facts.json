@@ -1,0 +1,44 @@
+{
+  "facts": {
+    "times_met": {
+      "version": 1,
+      "value_type": {
+        "type": "int",
+        "minimum": 0,
+        "maximum": 1000,
+        "default": 0
+      },
+      "scopes": [
+        "player"
+      ],
+      "per_subject": true,
+      "meaning": "How often this NPC and the character have greeted each other."
+    },
+    "trust": {
+      "version": 1,
+      "value_type": {
+        "type": "int",
+        "minimum": -3,
+        "maximum": 3,
+        "default": 0
+      },
+      "scopes": [
+        "player"
+      ],
+      "per_subject": true,
+      "meaning": "How far this NPC trusts the character."
+    },
+    "fed": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "instance"
+      ],
+      "per_subject": true,
+      "meaning": "Whether someone has given this NPC food."
+    }
+  }
+}

@@ -1,5 +1,6 @@
 // Cartridge artifact loader (05 §11, §20; CAR-05, CAR-07): artifact bytes and the installed
 // kernel/app → the decoded cartridge and its hash, or the one diagnostic of the first failing
+import { scopedFacts } from './cartridge_scoped_facts.ts';
 import { decode, encode, hash, type Json } from '../foundation/canonical.ts';
 import {
   ARTIFACT_MAX_BYTES,
@@ -28,6 +29,8 @@ import { variety } from './cartridge_variety.ts';
 import { exposure } from './cartridge_exposure.ts';
 import { senses } from './cartridge_senses.ts';
 import { variants } from './cartridge_variants.ts';
+import { schedules } from './cartridge_schedules.ts';
+import { standing } from './cartridge_standing.ts';
 import { transports } from './cartridge_transports.ts';
 import { services } from './cartridge_services.ts';
 import { food } from './cartridge_food.ts';
@@ -176,7 +179,9 @@ function timeStage(c: Obj): Diagnostic[] {
           ['schedule@1'],
         ),
       );
-    if (apiCmp(c.manifest.requires.kernel_api.at_least, '1.1') < 0)
+    // The away recap threshold is toolbox row W27 (API 1.47).
+    const floor = c.manifest.time_policy.recap_after_minutes ? '1.47' : '1.1';
+    if (apiCmp(c.manifest.requires.kernel_api.at_least, floor) < 0)
       out.push(
         diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'),
       );
@@ -285,5 +290,8 @@ function declarations(c: Obj): Diagnostic[] {
     ...exposure(c),
     ...senses(c),
     ...variants(c),
+    ...scopedFacts(c),
+    ...schedules(c),
+    ...standing(c),
   ];
 }
