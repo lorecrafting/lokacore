@@ -1,0 +1,24 @@
+{
+  "on": {
+    "event": "entity_entered_room",
+    "room": "village_green",
+    "npc": "tam"
+  },
+  "when": {
+    "policy_version": 1,
+    "root": {
+      "op": "fact_compare",
+      "fact": "knows_fire",
+      "npc": "tam",
+      "equals": true
+    }
+  },
+  "apply": [
+    {
+      "op": "fact.assign",
+      "fact": "knows_fire",
+      "npc": "nell",
+      "value": true
+    }
+  ]
+}

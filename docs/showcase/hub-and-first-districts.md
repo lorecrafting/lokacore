@@ -11,9 +11,6 @@ themselves are the developer's, except the four signpost texts, given in full. T
 runs 1 to 10 with no regeneration (exposure sampler: a drain alone never kills; the combat district
 lowers the minimum to 0 when death arrives). Times are the game clock; one game hour is 3600
 logical units and 72 real seconds (`real_elapsed`, rate 50), so one real minute is 3000 units.
-Every `wait` in a test or walkthrough spans at most one day: a wait that crosses the same
-scheduled NPC entry twice fires one rumour reaction twice and faults `conflicting_write`
-(Beads `loka-j2mo`, open); longer spans are several waits.
 
 ## Build split
 
@@ -234,8 +231,8 @@ their description why the door is shut (a `sky` variant).
 | 5 | Down to `sea_cave`; `search_cleft` at 10:00. | Unavailable (outside the window); a typed `search` is refused; the cave's Exits list only west. | tide gate x hidden exit x time window x climb |
 | 6 | Wait to 12:00; open `tidegate`; west. | Opens at low tide; this is the shore's third visit, so its description is the familiar one-liner. | tide gate x hidden exit x time window x climb |
 | 7 | Wait to 20:00; east (the gate stays open at high tide); `search_cleft`. | Success line plus the tip once; Exits now list up; the map links the cave to the stair; a move up succeeds. | tide gate x hidden exit x time window x climb |
-| 8 | Reach day 4 (winter) by one-day waits; at 03:00 pass Idony. | Her name reads the dozing variant; after 06:00 the base; her description reads the winter variant. | NPC status x variants x schedule (the variant half) |
-| 9 | Reach the first full moon (172800 from the lunar origin: day 3, 00:00) by one-day waits; open `moon_door` on `cliff_top`; east. | Opens; the player is in `tide_pools`; at a new moon the Open is refused and the cliff's variant says why. | tide gate x hidden exit x time window x climb |
+| 8 | Reach day 4 (winter); at 03:00 pass Idony. | Her name reads the dozing variant; after 06:00 the base; her description reads the winter variant. | NPC status x variants x schedule (the variant half) |
+| 9 | Reach the first full moon (172800 from the lunar origin: day 3, 00:00); open `moon_door` on `cliff_top`; east. | Opens; the player is in `tide_pools`; at a new moon the Open is refused and the cliff's variant says why. | tide gate x hidden exit x time window x climb |
 
 World tests run on clear days (the test's world id gives days 1 to 4 `clear`), so no drain or
 variant from the weather disturbs the hp and description outcomes above.

@@ -1,0 +1,23 @@
+{
+  "on": {
+    "story_point": "letter_fate",
+    "outcome": "deliver"
+  },
+  "control": "modal",
+  "steps": [
+    {
+      "type": "narrate",
+      "text": "scene.letter_read.1"
+    },
+    {
+      "type": "narrate",
+      "text": "scene.letter_read.2"
+    },
+    {
+      "type": "await_ack"
+    },
+    {
+      "type": "end"
+    }
+  ]
+}

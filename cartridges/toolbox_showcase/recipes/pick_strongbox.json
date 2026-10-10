@@ -1,0 +1,45 @@
+{
+  "label": "actions.pick_strongbox",
+  "aliases": [
+    "pick"
+  ],
+  "target": {
+    "kind": "detail",
+    "room": "tollhouse",
+    "detail": "strongbox_lock"
+  },
+  "priority": 5,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "fact_compare",
+      "fact": "strongbox_picked",
+      "equals": false
+    }
+  },
+  "check": {
+    "key": "pick_strongbox",
+    "kind": "opposed",
+    "skill": "pick"
+  },
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "strongbox_picked",
+          "value": true
+        }
+      ],
+      "narration": {
+        "actor": "narration.pick_strongbox.success"
+      }
+    },
+    "failure": {
+      "sequence": [],
+      "narration": {
+        "actor": "narration.pick_strongbox.failure"
+      }
+    }
+  }
+}

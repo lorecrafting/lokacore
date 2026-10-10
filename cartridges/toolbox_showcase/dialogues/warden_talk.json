@@ -1,0 +1,59 @@
+{
+  "npc": "warden",
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": []
+    }
+  },
+  "prompt": "dialogue.warden_talk.prompt",
+  "roles": {
+    "warden": {
+      "role": "npc",
+      "npc": "warden"
+    }
+  },
+  "choices": {
+    "reason": {
+      "label": "dialogue.warden_talk.reason",
+      "narration": "narration.warden_talk.reason",
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "warden_lets_pass",
+          "value": true
+        }
+      ],
+      "check": {
+        "key": "reason_warden",
+        "kind": "opposed",
+        "attribute": "cha",
+        "npc": "warden",
+        "failure": "narration.reason_warden_failed"
+      }
+    },
+    "lean": {
+      "label": "dialogue.warden_talk.lean",
+      "narration": "narration.warden_talk.lean",
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "warden_lets_pass",
+          "value": true
+        }
+      ],
+      "check": {
+        "key": "lean_warden",
+        "kind": "opposed",
+        "skill": "intimidate",
+        "rating": 1,
+        "failure": "narration.lean_warden_failed"
+      }
+    },
+    "leave": {
+      "label": "dialogue.warden_talk.leave",
+      "narration": "narration.warden_talk.leave"
+    }
+  }
+}

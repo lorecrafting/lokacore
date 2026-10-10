@@ -70,5 +70,47 @@
     "x": 2,
     "y": 1,
     "z": 0
+  },
+  {
+    "room": "village_green",
+    "x": 0,
+    "y": 2,
+    "z": 0
+  },
+  {
+    "room": "church",
+    "x": -1,
+    "y": 2,
+    "z": 0
+  },
+  {
+    "room": "warden_gate",
+    "x": 1,
+    "y": 2,
+    "z": 0
+  },
+  {
+    "room": "tollhouse",
+    "x": 2,
+    "y": 2,
+    "z": 0
+  },
+  {
+    "room": "mill",
+    "x": 1,
+    "y": 1,
+    "z": 0
+  },
+  {
+    "room": "moot_hall",
+    "x": 0,
+    "y": 3,
+    "z": 0
+  },
+  {
+    "room": "hall_closet",
+    "x": 1,
+    "y": 3,
+    "z": 0
   }
 ]

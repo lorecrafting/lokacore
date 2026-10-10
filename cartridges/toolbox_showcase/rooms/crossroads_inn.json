@@ -7,6 +7,9 @@
     },
     "east": {
       "to": "shore_steps"
+    },
+    "south": {
+      "to": "village_green"
     }
   },
   "details": {

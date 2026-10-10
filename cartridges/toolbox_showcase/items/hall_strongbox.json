@@ -1,0 +1,16 @@
+{
+  "keywords": [
+    "strongbox",
+    "box"
+  ],
+  "short": "item.hall_strongbox.short",
+  "room_line": "item.hall_strongbox.room",
+  "description": "item.hall_strongbox.description",
+  "location": {
+    "in": "room",
+    "room": "moot_hall"
+  },
+  "mass_grams": 6000,
+  "barrier": "hall_strongbox_lid",
+  "container": true
+}

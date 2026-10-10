@@ -1,0 +1,19 @@
+{
+  "keywords": [
+    "ledger",
+    "mill_ledger"
+  ],
+  "short": "item.mill_ledger.short",
+  "room_line": "item.mill_ledger.room",
+  "description": "item.mill_ledger.description",
+  "location": {
+    "in": "item",
+    "item": "strongbox"
+  },
+  "mass_grams": 100,
+  "readable": {
+    "label": "actions.read_book",
+    "text": "readable.mill_ledger",
+    "topic": "mill"
+  }
+}

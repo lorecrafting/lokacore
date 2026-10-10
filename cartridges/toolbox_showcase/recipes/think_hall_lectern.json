@@ -1,0 +1,52 @@
+{
+  "label": "actions.think_hall_lectern",
+  "aliases": [
+    "think"
+  ],
+  "target": {
+    "kind": "detail",
+    "room": "moot_hall",
+    "detail": "hall_lectern"
+  },
+  "priority": 5,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": [
+        {
+          "op": "fact_compare",
+          "fact": "topic_parish_known",
+          "equals": true
+        },
+        {
+          "op": "fact_compare",
+          "fact": "topic_fire_known",
+          "equals": true
+        },
+        {
+          "op": "not",
+          "item": {
+            "op": "fact_compare",
+            "fact": "topic_heir_known",
+            "equals": true
+          }
+        }
+      ]
+    }
+  },
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "topic_heir_known",
+          "value": true
+        }
+      ],
+      "narration": {
+        "actor": "narration.think_hall_lectern.success"
+      }
+    }
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "label": "actions.force_hall_cupboard",
+  "aliases": [
+    "force"
+  ],
+  "target": {
+    "kind": "detail",
+    "room": "moot_hall",
+    "detail": "hall_cupboard"
+  },
+  "priority": 5,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": [
+        {
+          "op": "fact_compare",
+          "fact": "hall_cupboard_forced",
+          "equals": false
+        },
+        {
+          "op": "has_tag",
+          "barrier": "hall_cupboard",
+          "tag": "fragile"
+        }
+      ]
+    }
+  },
+  "check": {
+    "key": "force_hall_cupboard",
+    "kind": "opposed",
+    "attribute": "str"
+  },
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "hall_cupboard_forced",
+          "value": true
+        }
+      ],
+      "narration": {
+        "actor": "narration.force_hall_cupboard.success"
+      }
+    },
+    "failure": {
+      "sequence": [],
+      "narration": {
+        "actor": "narration.force_hall_cupboard.failure"
+      }
+    }
+  }
+}

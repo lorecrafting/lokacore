@@ -1,0 +1,14 @@
+{
+  "on": {
+    "event": "entity_entered_room",
+    "room": "mill",
+    "npc": "tam"
+  },
+  "apply": [
+    {
+      "op": "fact.assign",
+      "fact": "knows_fire",
+      "value": true
+    }
+  ]
+}
