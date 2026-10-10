@@ -48,6 +48,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: toolbox showcase slice A, hub, body and world districts (loka-y6yg.1)](2026-10-10-showcase-slice-a-review.md): **APPROVE WITH NOTES**
 - [Review: showcase plan 1, hub, body, world and social districts (loka-y6yg, PR #364)](2026-10-10-showcase-plan-1-review.md): **APPROVE WITH NOTES**
 - [Docs review: showcase decision, Chapters 2-3 out of release scope (loka-exbe, PR #362)](2026-10-10-showcase-decision-review.md): **APPROVE WITH NOTES**
+- [Review: showcase slice B, Low Wardle and the hub's south exit (loka-y6yg.2, PR #367)](2026-10-10-showcase-b-review.md): **CHANGES REQUIRED**
 - [Mechanics review 3: the player's seat](2026-10-10-mechanics-review-3.md)
 - [Review: one wait across several listed schedule hours (loka-qi0r)](2026-10-10-m6-waitfix-review.md): **APPROVE**
 - [Review: E1 recorder debt-elapsed recipe (loka-ssr9, PR #360)](2026-10-10-e1-recorder-ssr9-review.md): **APPROVE**
