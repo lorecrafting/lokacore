@@ -40,6 +40,7 @@ import {
   continuationId,
   definition,
   leave,
+  speakerOf,
   speaks,
   spokenBy,
   talking,
@@ -139,6 +140,7 @@ function sequence(
   option: DialogueChoice,
   boundReceive: boolean,
   quest?: DefinitionRef,
+  speaker?: EntityId,
 ) {
   let run: Assigned = {
     ops: [],
@@ -151,9 +153,9 @@ function sequence(
         ? grant(world, actor, run, step.topic)
         : step.op === 'skill.acquire'
           ? acquire(world, actor, run, step.skill)
-          : step.op === 'fact.adjust'
-            ? adjusted(world, actor, run, step)
-            : assigned(world, actor, run, step);
+          : step.op === 'fact.adjust' // an entity or pair fact's subject is the speaker (row W2)
+            ? adjusted(world, actor, run, { ...step, subject: speaker })
+            : assigned(world, actor, run, { ...step, subject: speaker });
     if (!next) return undefined;
     run = next;
   }
@@ -181,7 +183,7 @@ function applyChoice(
   if (typeof q === 'string') return rejected(q);
   const body = bodyOf(world, actor_id)!;
   const boundReceive = !!(option.accept && option.receive);
-  const run = sequence(world, actor_id, option, boundReceive, d.quest);
+  const run = sequence(world, actor_id, option, boundReceive, d.quest, speakerOf(d, row));
   if (!run) return { kind: 'fault' as const, code: 'precondition_failed' as const };
   const given =
     option.exchange && d.quest

@@ -100,7 +100,8 @@ defmodule Loka.Content.Compiler do
         Scenes.check(manifest, defs, v2, registry) ++
         Ancestries.check(manifest, defs, located, if(v2, do: elem(v2, 1), else: %{})) ++
         Loka.Content.Exposure.check(manifest, defs, located) ++
-        Loka.Content.Variants.check(manifest, defs, located)
+        Loka.Content.Variants.check(manifest, defs, located) ++
+        Loka.Content.ScopedFacts.check(manifest, defs, located)
 
   # v2 when the source declares world content, entry/settings, text, resources or attributes.
   defp v2(defs, {entry, settings}, text, files) do

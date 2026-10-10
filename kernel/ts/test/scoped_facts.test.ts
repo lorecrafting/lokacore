@@ -1,0 +1,186 @@
+// Toolbox row W2 on the compiled scoped facts sampler: pair facts (times met, trust) keyed by the
+// speaker, an entity fact set by a reaction on its event's subject, read by fact_compare at a
+// subject; and the loader's floor and site checks. Expected values are hand-counted.
+import assert from 'node:assert/strict';
+import { execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { test } from 'node:test';
+import { INSTALLED, loadCartridge, newWorld, step } from '../src/index.ts';
+import type { Cartridge, World } from '../src/runtime/decision.ts';
+import type { EntityId, Policy } from '../src/contracts.gen.ts';
+import { decode, encode } from '../src/foundation/canonical.ts';
+import { holds } from '../src/mechanics/policy.ts';
+import { scopeSites } from '../src/content/cartridge_scoped_facts.ts';
+import { pending, talking } from '../src/mechanics/dialogue/shared.ts';
+
+const scratch = mkdtempSync(join(tmpdir(), 'loka-scoped-facts-'));
+let artifact: Uint8Array;
+try {
+  const file = join(scratch, 'artifact.json');
+  execFileSync('mix', ['loka.compile', 'cartridges/scoped_facts_sampler', file], {
+    cwd: fileURLToPath(new URL('../../../', import.meta.url)),
+    stdio: 'pipe',
+  });
+  artifact = readFileSync(file);
+} finally {
+  rmSync(scratch, { recursive: true });
+}
+const loaded = loadCartridge(artifact, INSTALLED);
+assert.ok(loaded.ok, JSON.stringify(loaded));
+const content = loaded.cartridge as Cartridge;
+const source = (decode(new TextDecoder().decode(artifact)) as { cartridge: any }).cartridge;
+const S = 'scoped_facts_sampler@0.0.1';
+const CONTEXT = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f';
+const fact = (key: string) => ({
+  cartridge_id: 'scoped_facts_sampler',
+  cartridge_version: '0.0.1',
+  kind: 'fact' as const,
+  key,
+});
+const npc = (w: World, k: string) => w.entityIds[`${S}:npc/${k}`] as EntityId;
+let n = 0;
+const act = (w: World, p: object) => {
+  n += 1;
+  const id = `cccccccc-4444-4333-8444-${String(n).padStart(12, '0')}`;
+  const s = step(
+    w,
+    { id, world_context_id: w.context, payload: { actor_id: w.character, ...p } } as never,
+    n,
+  );
+  assert.equal(s.decision.kind, 'accepted', JSON.stringify(s.decision));
+  return s.world;
+};
+// Pick `choice` in the conversation with `who`, talking first unless already in it.
+const chat = (w: World, who: string, choice: string) => {
+  const open = talking(w, w.character, npc(w, who));
+  const talked = open ? w : act(w, { type: 'talk', target_id: npc(w, who) });
+  const [continuation_id] = pending(talked, talked.character)!;
+  return act(talked, { type: 'choose', choice_id: choice, continuation_id });
+};
+const compare = (w: World, key: string, equals: number | boolean, subject: object) =>
+  holds(w, w.character, { op: 'fact_compare', fact: fact(key), equals, ...subject } as Policy, {
+    target: (subject as { at?: EntityId }).at,
+    steps: { n: 0 },
+  });
+const at = (w: World, who: string, key: string, equals: number) =>
+  compare(w, key, equals, { subject: 'target', at: npc(w, who) });
+
+// Breaks: a pair fact ignores its subject (one shared row, so the smith's count reaches the miller
+// or the stranger), or a read at the target falls back to the actor's scope.
+test('two NPCs remember the player separately; a stranger does not', () => {
+  let w = newWorld(content, CONTEXT as never, [1, 2, 3, 4]);
+  w = chat(chat(chat(w, 'smith', 'greet'), 'smith', 'greet'), 'smith', 'help');
+  w = chat(w, 'miller', 'greet');
+  for (const [who, met, trust] of [
+    ['smith', 2, 1],
+    ['miller', 1, 0],
+    ['stranger', 0, 0],
+  ] as const) {
+    assert.ok(at(w, who, 'times_met', met), `${who} met ${met}`);
+    assert.ok(at(w, who, 'trust', trust), `${who} trust ${trust}`);
+  }
+  // Only changed facts have rows: two for the smith, one for the miller, none for the stranger.
+  const rows = Object.keys(w.state.facts ?? {}).map((k) => JSON.parse(JSON.stringify(decode(k))));
+  assert.deepEqual(
+    rows.map((r) => [r.fact.key, r.scope, r.subject_id]).sort(),
+    [
+      ['times_met', { kind: 'player', character_id: w.character }, npc(w, 'miller')],
+      ['times_met', { kind: 'player', character_id: w.character }, npc(w, 'smith')],
+      ['trust', { kind: 'player', character_id: w.character }, npc(w, 'smith')],
+    ].sort(),
+  );
+});
+
+// Breaks: a reaction's entity fact lands on the actor's body or a fixed row instead of the event's
+// subject (the NPC given the apple), or fact_compare ignores its named npc.
+test('an apple given to the smith marks her fed, at the instance scope, and not the miller', () => {
+  let w = newWorld(content, CONTEXT as never, [1, 2, 3, 4]);
+  const apple = w.entityIds[`${S}:item/apple`];
+  w = act(w, { type: 'take', item_id: apple });
+  w = act(w, { type: 'give', item_id: apple, recipient_id: npc(w, 'smith') });
+  const smith = { cartridge_id: 'scoped_facts_sampler', cartridge_version: '0.0.1', kind: 'npc' };
+  assert.ok(compare(w, 'fed', true, { npc: { ...smith, key: 'smith' } }));
+  assert.ok(compare(w, 'fed', false, { npc: { ...smith, key: 'miller' } }));
+  const [row] = Object.keys(w.state.facts ?? {}).map((k) => JSON.parse(JSON.stringify(decode(k))));
+  assert.deepEqual(row.scope, { kind: 'instance', world_context_id: CONTEXT });
+  assert.equal(row.subject_id, npc(w, 'smith'));
+});
+
+// Breaks: the loader admits a per_subject fact below 1.47, or one named where no subject is known
+// (it would be read or written without one), a subject on another fact, a fact_compare of one
+// fact without a subject, or a leaf naming two subjects.
+test('row W2 needs 1.47 and a known subject, at fact sites only', () => {
+  const met = `${S}:fact/times_met`;
+  const smith = `${S}:dialogue/smith_talk`;
+  const leaf = (extra: object) => (c: any) =>
+    (c.dialogues[smith].policy.root = {
+      op: 'fact_compare',
+      fact: c.facts[met] && fact('times_met'),
+      equals: 0,
+      ...extra,
+    });
+  const npcRef = { cartridge_id: 'scoped_facts_sampler', cartridge_version: '0.0.1', kind: 'npc' };
+  const root = `.cartridge.dialogues[${JSON.stringify(smith)}].policy.root`;
+  const rows: [(c: any) => void, string, string][] = [
+    [
+      (c) => (c.manifest.requires.kernel_api.at_least = '1.46'),
+      'KERNEL_API_RANGE_INVALID',
+      '.cartridge.manifest.requires.kernel_api.at_least',
+    ],
+    [leaf({}), 'FACT_SCOPE_UNSUPPORTED', root],
+    [
+      leaf({ subject: 'target', npc: { ...npcRef, key: 'miller' } }),
+      'FACT_SCOPE_UNSUPPORTED',
+      `${root}.npc`,
+    ],
+    [
+      (c) => {
+        delete c.facts[met].per_subject;
+        leaf({ subject: 'target' })(c);
+      },
+      'FACT_SCOPE_UNSUPPORTED',
+      `${root}.subject`,
+    ],
+    [
+      (c) =>
+        (c.rooms[`${S}:room/square`].exits.north = {
+          to: { ...npcRef, kind: 'room', key: 'square' },
+          hidden_until: { fact: fact('times_met'), equals: 1 },
+        }),
+      'FACT_SCOPE_UNSUPPORTED',
+      `.cartridge.rooms[${JSON.stringify(`${S}:room/square`)}].exits.north.hidden_until.fact`,
+    ],
+  ];
+  for (const [change, code, path] of rows) {
+    const c = structuredClone(source);
+    change(c);
+    const canonical = encode(c);
+    const sha256 = createHash('sha256').update(canonical).digest('hex');
+    const r = loadCartridge(
+      new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
+      INSTALLED,
+    );
+    assert.deepEqual(r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path], [code, path]);
+  }
+});
+
+// Breaks: a per_subject fact written by a choice whose save recovery reconciles its facts without
+// a subject (a payment, or a riddle's answer) loads, and that save would not reopen.
+test('a per_subject fact in a reconciled choice is FACT_SCOPE_UNSUPPORTED', () => {
+  const smith = `${S}:dialogue/smith_talk`;
+  const at = `.cartridge.dialogues[${JSON.stringify(smith)}].choices.help.sequence[0].fact`;
+  const paid = structuredClone(source);
+  paid.dialogues[smith].choices.help.payment = { from: 'smith', amount: 1 };
+  const riddle = structuredClone(source);
+  riddle.dialogues[smith].riddle = { choice_id: 'help' };
+  for (const c of [paid, riddle])
+    assert.deepEqual(
+      scopeSites(c).map((d) => d.path),
+      [at],
+    );
+  assert.deepEqual(scopeSites(source), []);
+});

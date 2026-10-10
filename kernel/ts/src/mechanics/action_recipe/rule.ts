@@ -201,5 +201,5 @@ const step =
       const e = event(world, command, mint, r.position + 1, payload);
       return { ...r, position: r.position + 1, events: [...r.events, e] };
     }
-    return assigned(world, command.payload.actor_id, r, s);
+    return assigned(world, command.payload.actor_id, r, { ...s, subject: subject_id });
   };

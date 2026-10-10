@@ -9,7 +9,7 @@ import type { CharacterId, EntityId, Policy, Tag } from '../contracts.gen.ts';
 import { bodyOf, refString, type World } from '../runtime/decision.ts';
 import { barrierState, questOf } from './lookups.ts';
 import { key } from '../foundation/compose.ts';
-import { value } from './fact.ts';
+import { subjective, value } from './fact.ts';
 import { level } from './resource.ts';
 import { stateIs } from './escort/shared.ts';
 import { present } from '../commands/target.ts';
@@ -42,7 +42,7 @@ export function holds(
   ctx.steps.n++;
   switch (p.op) {
     case 'fact_compare':
-      return value(world, actor, p.fact) === p.equals;
+      return compared(world, actor, p, ctx.target);
     case 'has_item':
       return held(world, world.entityIds[refString(p.item)], bodyOf(world, actor));
     case 'barrier_state':
@@ -80,6 +80,20 @@ export function holds(
       throw new Error(`policy op ${(leaf as Policy).op} is not installed`);
     }
   }
+}
+
+// fact@1's read: an entity or pair fact (toolbox row W2) at its named NPC or item, or with subject
+// target at the action's target (false without one); any other fact at its one scope.
+function compared(
+  world: World,
+  actor: CharacterId,
+  p: Extract<Policy, { op: 'fact_compare' }>,
+  target: EntityId | undefined,
+): boolean {
+  const named = p.npc ?? p.item;
+  const subject = named ? world.entityIds[refString(named)] : p.subject && target;
+  if (subjective(world, p.fact) && subject === undefined) return false;
+  return value(world, actor, p.fact, subject) === p.equals;
 }
 
 // attributes@1's leaves: the actor's saved value or definition start, or the current body pool.

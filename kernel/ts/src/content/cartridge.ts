@@ -1,5 +1,6 @@
 // Cartridge artifact loader (05 §11, §20; CAR-05, CAR-07): artifact bytes and the installed
 // kernel/app → the decoded cartridge and its hash, or the one diagnostic of the first failing
+import { scopedFacts } from './cartridge_scoped_facts.ts';
 import { decode, encode, hash, type Json } from '../foundation/canonical.ts';
 import {
   ARTIFACT_MAX_BYTES,
@@ -283,5 +284,6 @@ function declarations(c: Obj): Diagnostic[] {
     ...variety(c),
     ...exposure(c),
     ...variants(c),
+    ...scopedFacts(c),
   ];
 }

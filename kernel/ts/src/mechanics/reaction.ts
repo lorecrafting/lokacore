@@ -22,7 +22,7 @@ import {
   type Mint,
   type World,
 } from '../runtime/decision.ts';
-import { scopeOf, value } from './fact.ts';
+import { subjective, targetOf, value } from './fact.ts';
 import { holds } from './policy.ts';
 import { starts } from './scene/shared.ts';
 import { activation, resolution } from './quest/lifecycle.ts';
@@ -143,9 +143,9 @@ export function sequence(
     } else if (step.op === 'experience.grant') {
       gained = saturate(gained + step.amount);
     } else {
-      const assigned = assignment(world, actor, step, group, set);
-      ops.push(assigned);
-      if (assigned.expected !== step.value) position++;
+      const assigned = assignment(world, actor, step, group, set, cause);
+      if (assigned) ops.push(assigned);
+      if (assigned && assigned.expected !== step.value) position++;
     }
   }
   ops.push(...grant(then, actor, gained, group));
@@ -166,7 +166,7 @@ const SUBJECT: Partial<Record<On['event'], string>> = {
   status_ticked: 'body_id',
   status_expired: 'body_id',
 };
-const subject = (cause: DomainEvent, body: EntityId) => {
+const subject = (cause: DomainEvent, body?: EntityId) => {
   const field = SUBJECT[cause.payload.type as On['event']];
   const id = field && ((cause.payload as Record<string, unknown>)[field] as EntityId | undefined);
   return id ?? body;
@@ -199,22 +199,29 @@ function statusStep(
   return { ops, narration: label && first && holder === body ? [{ key: label }] : [] };
 }
 
+// A fact.assign; an entity or pair fact (row W2) at the step's named NPC's or item's instance,
+// else at the event's subject when that is an NPC, item or detail (never the body fallback);
+// with no such subject the step writes nothing.
 function assignment(
   world: World,
   actor: CharacterId,
   step: Extract<ReactionRule['apply'][number], { op: 'fact.assign' }>,
   group: number,
   set: Record<string, FactValue>,
+  cause: DomainEvent,
 ) {
-  const scope = scopeOf(world, actor, step.fact);
-  const at = key({ kind: 'fact', fact: step.fact, scope });
-  const expected = Object.hasOwn(set, at) ? set[at] : value(world, actor, step.fact);
+  const named = step.npc ?? step.item;
+  const who = (named ? world.entityIds[refString(named)] : subject(cause)) || undefined;
+  const thing = who !== undefined && (world.entities[who] || world.details[who]);
+  if (subjective(world, step.fact) && !thing) return undefined;
+  const { kind: _, ...target } = targetOf(world, actor, step.fact, who);
+  const at = key({ kind: 'fact', ...target });
+  const expected = Object.hasOwn(set, at) ? set[at] : value(world, actor, step.fact, who);
   set[at] = step.value;
   return {
     op: 'fact.assign' as const,
     writer_group: group,
-    fact: step.fact,
-    scope,
+    ...target,
     expected,
     value: step.value,
   };

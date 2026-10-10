@@ -21803,5 +21803,49 @@
         "code": "too_few_items"
       }
     ]
+  },
+  {
+    "name": "fact_compare_actor_subject",
+    "contract": "Policy",
+    "value": {
+      "op": "fact_compare",
+      "fact": {
+        "cartridge_id": "scoped_facts_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "fact",
+        "key": "times_met"
+      },
+      "equals": 0,
+      "subject": "actor"
+    },
+    "errors": [
+      {
+        "path": "/subject",
+        "code": "not_in_enum"
+      }
+    ]
+  },
+  {
+    "name": "fact_spec_per_subject_false",
+    "contract": "FactSpec",
+    "value": {
+      "key": "times_met",
+      "version": 1,
+      "value_type": {
+        "type": "int",
+        "default": 0
+      },
+      "scopes": [
+        "player"
+      ],
+      "per_subject": false,
+      "meaning": "How often this NPC and the character have greeted each other."
+    },
+    "errors": [
+      {
+        "path": "/per_subject",
+        "code": "const_mismatch"
+      }
+    ]
   }
 ]
