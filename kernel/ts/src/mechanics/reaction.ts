@@ -101,6 +101,7 @@ export function sequence(
   group: number,
   steps: { n: number },
   mint: Mint,
+  holders: ReadonlyMap<string, number> = new Map(),
 ): Decision<EventPayload['type']> | undefined {
   const source = resolvedActor(world, cause, actor);
   if (!source) return { kind: 'fault', code: 'precondition_failed' };
@@ -136,9 +137,11 @@ export function sequence(
     } else if (step.op === 'status.apply') {
       const body = bodyOf(then, actor);
       if (!body) return { kind: 'fault', code: 'precondition_failed' };
-      if (applied.has(refString(step.status))) continue;
-      applied.add(refString(step.status)); // one row write per status per rule
-      const applying = statusStep(then, step, cause, body, group, mint);
+      const holder = step.item ? then.entityIds[refString(step.item)] : subject(cause, body);
+      const once = `${holder}|${refString(step.status)}`; // one row write per holder and status
+      if (!holder || applied.has(once)) continue;
+      applied.add(once);
+      const applying = statusStep(then, step, holder, body, holders.get(holder) ?? group, mint);
       ops.push(...applying.ops);
       narration.push(...applying.narration);
     } else if (step.op === 'experience.grant') {
@@ -173,18 +176,18 @@ const subject = (cause: DomainEvent, body: EntityId) => {
   return id ?? body;
 };
 
-// A status.apply on its named item's instance, else on the event's subject (row G3); only the
-// player's own body hears the applied line.
+// A status.apply on its holder: the step's named item's instance, else the event's subject (row
+// G3), in the writer group of that holder's status job when one ran in this advance (proposal.ts
+// statusGroup); only the player's own body hears the applied line.
 function statusStep(
   world: World,
   step: Extract<ReactionRule['apply'][number], { op: 'status.apply' }>,
-  cause: DomainEvent,
+  holder: EntityId,
   body: EntityId,
   group: number,
   mint: Mint,
 ) {
-  const holder = step.item ? world.entityIds[refString(step.item)] : subject(cause, body);
-  const ops = holder ? applyStatus(world, holder, step.status, group, mint) : [];
+  const ops = applyStatus(world, holder, step.status, group, mint);
   const label = specOf(world, step.status)?.narration.applied;
   return { ops, narration: label && ops.length && holder === body ? [{ key: label }] : [] };
 }

@@ -54,6 +54,7 @@ type P = {
   applied: number;
   rng: World['state']['rng'];
   narration: Text[];
+  holders: Map<string, number>; // each status holder's writer group in this advance (row G3)
   limit?: Limit | undefined; // set only just before a budget fault returns
 };
 export const BUDGET = { kind: 'fault', code: 'budget_exceeded' } as Admitted;
@@ -83,6 +84,7 @@ export function propose(
     applied: 0,
     rng: root.rng,
     narration: [...(root.narration ?? [])],
+    holders: new Map(),
   };
   const base = { ...cause(p, world.state.clock, command.id), actor_id: command.payload.actor_id };
   const failed =
@@ -231,6 +233,7 @@ function react(p: P): Admitted | undefined {
         p.group + 1,
         p.steps,
         next.mint,
+        p.holders,
       );
       const depth = next.depth + 1;
       p.limit = over({ deliveries: ++p.deliveries, reaction_depth: depth, query_steps: p.steps.n });
@@ -256,7 +259,6 @@ function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined
   const populationPairs = populationDeadlinePairs(p.world, advance?.to ?? -1);
   const groups = new Map<string, number>();
   const bleedPairs = new Map<string, number>();
-  const holders = new Map<string, number>();
   for (const [job_id, { due_time }] of due) {
     const at = now(p);
     if (!('cartridge' in at)) return at;
@@ -281,7 +283,7 @@ function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined
     const group =
       (partner ? groups.get(partner) : undefined) ??
       bleedPairs.get(job_id) ??
-      statusGroup(at, job_id as JobId, current, holders, p.group + 1) ??
+      statusGroup(at, job_id as JobId, current, p.holders, p.group + 1) ??
       p.group + 1;
     groups.set(job_id, group);
     const bleedPair = bleedRoundPair(at, job_id as JobId, current);
@@ -298,7 +300,7 @@ function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined
 }
 
 // Status jobs on one holder in one advance share a writer group, so two ticks on one pool compose
-// in sequence (row G3).
+// in sequence; a reaction's status.apply on that holder joins it too (reaction.ts statusStep, row G3).
 function statusGroup(
   at: World,
   id: JobId,

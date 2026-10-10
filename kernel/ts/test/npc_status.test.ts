@@ -16,6 +16,7 @@ import { key } from '../src/foundation/compose.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { value } from '../src/mechanics/fact.ts';
 import { applyStatus } from '../src/mechanics/status/shared.ts';
+import { runStatus } from '../src/mechanics/status/job.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-npc-status-'));
@@ -45,6 +46,15 @@ const row = (w: World, kind: string, k: string, status: string) =>
     key({ kind: 'status', body_id: id(w, kind, k), status: ref('status', status) })
   ];
 const fact = (w: World, k: string) => value(w, w.character, ref('fact', k));
+// The sampler with `name`'s reaction given one more step.
+const plus = (name: string, extra: object) => {
+  const k = `${C}:reaction/${name}`;
+  const r = content.reactions![k]!;
+  return {
+    ...content,
+    reactions: { ...content.reactions, [k]: { ...r, apply: [...r.apply, extra] } },
+  } as Cartridge;
+};
 let n = 0;
 const narration: string[] = [];
 function play(w: World, p: object): World {
@@ -152,6 +162,88 @@ test('a fatal tick kills the guard and ends its other status', () => {
     applyStatus(w, id(w, 'npc', 'guard'), ref('status', 'poison'), 1, () => 'x'),
     [],
   );
+});
+
+// Breaks: a reaction's status.apply on a ticking or expiring holder written in its own writer
+// group, so the elapsed command faults conflicting_write and time cannot advance (mechanics.md G3).
+test('a tick re-poisons the guard and an expiry re-sets the door burning', () => {
+  const poison = { op: 'status.apply', status: ref('status', 'poison') };
+  let w = wait(fresh(plus('groan', poison)), 3600 + 60);
+  assert.equal(hp(w, 'guard'), 9);
+  assert.equal(
+    (row(w, 'npc', 'guard', 'poison') as { ends_at: number }).ends_at,
+    w.state.clock + 300,
+  );
+  w = wait(w, 240); // the first application would have expired here
+  assert.equal(hp(w, 'guard'), 5);
+  assert.equal(row(w, 'npc', 'guard', 'poison')?.active, true);
+  let d = fresh(plus('charred', { op: 'status.apply', status: ref('status', 'burning') }));
+  d = play(d, { type: 'take', item_id: id(d, 'item', 'torch') });
+  d = play(d, { type: 'move', direction: 'north' });
+  d = play(d, { type: 'drop', item_id: id(d, 'item', 'torch') });
+  d = wait(d, 180);
+  assert.equal(fact(d, 'charred'), true);
+  const burning = row(d, 'item', 'door', 'burning');
+  assert.deepEqual([burning?.active, burning?.generation], [true, 2]);
+  assert.equal(d.state.jobs?.[(burning as { job_id: string }).job_id]?.status, 'pending');
+});
+
+// Breaks: a rule's second status.apply of one status skipped although it names another holder.
+test('one rule burns the door and the torch', () => {
+  const torch = {
+    op: 'status.apply',
+    status: ref('status', 'burning'),
+    item: ref('item', 'torch'),
+  };
+  let w = fresh(plus('kindle', torch));
+  w = play(w, { type: 'take', item_id: id(w, 'item', 'torch') });
+  w = play(w, { type: 'move', direction: 'north' });
+  w = play(w, { type: 'drop', item_id: id(w, 'item', 'torch') });
+  assert.equal(row(w, 'item', 'door', 'burning')?.active, true);
+  assert.equal(row(w, 'item', 'torch', 'burning')?.active, true);
+});
+
+// Breaks: a status death closing a pack's fight when one member falls, or leaving a lone NPC's
+// fight open on its dead body (job.ts, as combat's fatal round).
+test('a fatal tick ends a lone fight but not a pack fight', () => {
+  const guard = content.npcs![`${C}:npc/guard`]!;
+  const frail = {
+    ...content,
+    npcs: { ...content.npcs, [`${C}:npc/guard`]: { ...guard, hp: { ...guard.hp!, start: 1 } } },
+  } as Cartridge;
+  const w = wait(fresh(frail), 3600);
+  const g = id(w, 'npc', 'guard');
+  const job_id = (row(w, 'npc', 'guard', 'poison') as { job_id: string }).job_id as never;
+  const E = 'dddddddd-0000-4000-8000-000000000001';
+  const closes = (active_ids: string[]) => {
+    const encounter = {
+      character_id: w.character,
+      body_id: w.body,
+      npc_id: g,
+      room_id: w.roomIds[`${C}:room/dart_room`],
+      job_id: 'dddddddd-0000-4000-8000-000000000004',
+      status: 'open',
+      round: 1,
+      active_ids,
+      next_opponent_id: g,
+    };
+    const fight = {
+      ...w,
+      state: {
+        ...w.state,
+        encounters: { [E]: encounter },
+        jobs: {
+          ...w.state.jobs,
+          [encounter.job_id]: { ...w.state.jobs![job_id]!, encounter_id: E },
+        },
+      },
+    } as never;
+    const r = runStatus(fight, { id: 'x' as never }, job_id, w.state.jobs![job_id]!, () => 'y');
+    assert.equal(r.kind, 'accepted');
+    return r.kind === 'accepted' && r.delta.ops.some((o) => o.op === 'encounter.close');
+  };
+  assert.equal(closes([g]), true);
+  assert.equal(closes([g, id(w, 'npc', 'golem')].sort()), false);
 });
 
 // Breaks: the loader drops a G3 check, so an artifact naming no status or item, or a G3 field

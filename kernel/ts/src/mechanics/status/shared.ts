@@ -52,8 +52,10 @@ export const endStatus = (
   value: { active: false, generation: row.generation },
 });
 
-/** The authored NPC or item instance `body` declares `status` immune (row G3). */
-// ponytail: authored instances only; read created.definition when a spawned pack needs immunity.
+/**
+ * The NPC or item instance `body` declares `status` immune (row G3); a created NPC or item copies
+ * its template's list (runtime/created.ts).
+ */
 export const immune = (world: World, body: EntityId, status: DefinitionRef) =>
   !!world.entities[body]?.immune?.some((s) => refString(s) === refString(status));
 
