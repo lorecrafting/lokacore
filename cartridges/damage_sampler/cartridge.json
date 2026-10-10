@@ -3,6 +3,21 @@
   "id": "damage_sampler",
   "version": "0.0.1",
   "title": "Damage Sampler",
+  "ancestries": {
+    "fighter": {
+      "label": "ancestry.fighter.label",
+      "description": "ancestry.fighter.description",
+      "attribute": "str",
+      "modifier": 1,
+      "skill": "swords"
+    },
+    "farmer": {
+      "label": "ancestry.farmer.label",
+      "description": "ancestry.farmer.description",
+      "attribute": "str",
+      "modifier": 1
+    }
+  },
   "requires": {
     "kernel_api": {
       "at_least": "1.44",
@@ -22,7 +37,11 @@
       "calendar": 1,
       "position": 1,
       "equipment": 1,
-      "tags": 1
+      "tags": 1,
+      "fact": 1,
+      "policy": 1,
+      "attributes": 1,
+      "skills": 1
     },
     "client_features": []
   },

@@ -216,13 +216,11 @@ function attackProfile(
   if (!player) return npc.attack;
   const wielded = equipped(world, row.body_id, 'wield');
   const weapon = wielded?.weapon;
-  // The wielded item's material tags count whichever profile strikes (toolbox row G2).
-  const base: Profile = {
-    ...(weapon && status(world, row.character_id, weapon.skill, r.steps).usable
-      ? weapon.attack
-      : world.cartridge.world!.combat!.player_attack),
-    tags: wielded?.tags,
-  };
+  // Only the weapon's own attack carries its material tags (toolbox row G2, PM ruling).
+  const base: Profile =
+    weapon && status(world, row.character_id, weapon.skill, r.steps).usable
+      ? { ...weapon.attack, tags: wielded.tags }
+      : world.cartridge.world!.combat!.player_attack;
   const table = world.cartridge.world?.derived;
   if (!table) return base;
   const hit = derived(world, row.character_id, table.hit_chance);

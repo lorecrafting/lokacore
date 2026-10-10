@@ -11,34 +11,32 @@ defmodule Loka.ContentDamageTest do
     old = &put_in(&1, ["requires", "kernel_api", "at_least"], "1.43")
     plain = &(&1 |> old.() |> update_in(player, fn p -> Map.drop(p, ~w(kind crit)) end))
     no_resist = {"npcs/wight.json", &Map.delete(&1, "resistances")}
+    # The sampler's swords carry weapon kind and crit; strip them so one site reports at a time.
+    bare =
+      &{"items/#{&1}.json",
+       fn i -> update_in(i, ~w(weapon attack), fn a -> Map.drop(a, ~w(kind crit)) end) end}
+
+    swords = [bare.("iron_sword"), bare.("silver_sword")]
 
     cases = [
       [
         {"cartridge.json",
          &(&1 |> old.() |> update_in(player, fn p -> Map.delete(p, "crit") end))},
-        no_resist
+        no_resist | swords
       ],
       [
         {"cartridge.json",
          &(&1 |> old.() |> update_in(player, fn p -> Map.delete(p, "kind") end))},
-        no_resist
+        no_resist | swords
       ],
-      [{"cartridge.json", plain}],
+      [{"cartridge.json", plain} | swords],
       [
         {"cartridge.json", plain},
         {"npcs/wight.json",
          &(&1 |> Map.delete("resistances") |> put_in(["attack", "kind"], "cold"))}
+        | swords
       ],
-      # The weapon's skill does not resolve (another diagnostic); the floor still reports.
-      [
-        {"cartridge.json", plain},
-        no_resist,
-        {"items/iron_sword.json",
-         &Map.put(&1, "weapon", %{
-           "skill" => "swords",
-           "attack" => %{"chance" => 50, "damage_min" => 1, "damage_max" => 1, "kind" => "cold"}
-         })}
-      ]
+      [{"cartridge.json", plain}, no_resist, bare.("silver_sword")]
     ]
 
     for changes <- cases do
@@ -51,6 +49,7 @@ defmodule Loka.ContentDamageTest do
              inspect(diags)
     end
 
-    assert {:ok, _, _} = Loka.ContentSource.compile(dir, [{"cartridge.json", plain}, no_resist])
+    assert {:ok, _, _} =
+             Loka.ContentSource.compile(dir, [{"cartridge.json", plain}, no_resist | swords])
   end
 end

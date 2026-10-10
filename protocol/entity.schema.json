@@ -359,7 +359,7 @@
       ]
     },
     "Resistances": {
-      "description": "Toolbox row G2 (docs/system/mechanics.md damage model; kernel_api at least 1.44): an NPC's percent resistance per damage kind (DamageKind) and per material tag of the wielded item (Tag); negative is a weakness. An attack sums the entries for its kind and each tag of the attacker's wielded item, clamps the sum to -100..100 and scales its damage by (100 - sum) / 100, rounded down. Its members are exactly the DamageKind and Tag values.",
+      "description": "Toolbox row G2 (docs/system/mechanics.md damage model; kernel_api at least 1.44): an NPC's percent resistance per damage kind (DamageKind) and per material tag (Tag) of the weapon whose own attack strikes (an unarmed or NPC attack has none); negative is a weakness. An attack sums the entries for its kind and each such tag, clamps the sum to -100..100 and scales its damage by (100 - sum) / 100, rounded down. Its members are exactly the DamageKind and Tag values.",
       "type": "object",
       "properties": {
         "cold": {

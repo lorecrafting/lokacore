@@ -48,9 +48,15 @@ function accepted(r: ReturnType<typeof step>) {
   assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
   return r.world;
 }
-/** Take and wield the sword (if any), attack the wight and run `rounds` combat rounds; returns
- * the wight's HP after each round. */
-function fight(content: Cartridge, seed: number[], sword: string | null, rounds = 1) {
+/** Choose `ancestry` (fighter knows swords), take and wield the sword (if any), attack the wight
+ * and run `rounds` combat rounds; returns the wight's HP after each round. */
+function fight(
+  content: Cartridge,
+  seed: number[],
+  sword: string | null,
+  rounds = 1,
+  ancestry = 'fighter',
+) {
   n = 0;
   let w: World = newWorld(content, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, seed);
   const play = (payload: object) =>
@@ -65,6 +71,7 @@ function fight(content: Cartridge, seed: number[], sword: string | null, rounds 
         n,
       ),
     );
+  w = play({ type: 'choose_ancestry', ancestry });
   if (sword) {
     const item_id = w.entityIds[`damage_sampler@0.0.1:item/${sword}`];
     w = play({ type: 'take', item_id });
@@ -97,15 +104,27 @@ const ROLL_9 = [3545878650, 2267147512, 3674184203, 2010695017];
 const ROLL_10 = [1049889716, 147947537, 4147507174, 3789830071];
 
 // Breaks: no crit, an extra crit draw (the round's rolls shift), crit at roll <= chance, the
-// multiplier after resistances, the wielded item's tags or the attack's kind ignored, resistances
+// multiplier after resistances, the wielded item's tags or the attack's kind ignored, the tags
+// added to an unarmed strike (PM ruling: only the weapon's own attack carries them), resistances
 // rounded instead of floored, the sum not clamped to -100..100, or resistances never applied.
 test('a seeded round leaves the wight the hand-fixed HP', () => {
   const plain = sampler();
-  const fire = sampler((c) => (c.world.combat.player_attack.kind = 'fire'));
+  const fire = sampler((c) => {
+    for (const sword of ['iron_sword', 'silver_sword'])
+      c.items[`damage_sampler@0.0.1:item/${sword}`].weapon.attack.kind = 'fire';
+  });
   const resist = (r: object) =>
     sampler((c) => (c.npcs[WIGHT].resistances = { ...c.npcs[WIGHT].resistances, ...r }));
-  const rows: [string, Cartridge, number[], string | null, number][] = [
+  const rows: [string, Cartridge, number[], string | null, number, string?][] = [
     ['unarmed: physical 50, 5 -> 2', plain, ROLL_60, null, 18],
+    [
+      'silver held, no sword skill: unarmed, no silver',
+      plain,
+      ROLL_60,
+      'silver_sword',
+      18,
+      'farmer',
+    ],
     ['iron: physical 50, 5 -> 2', plain, ROLL_60, 'iron_sword', 18],
     ['silver: 50 - 50 = 0, 5 -> 5', plain, ROLL_60, 'silver_sword', 15],
     ['iron crit: 10 then 50 -> 5', plain, ROLL_0, 'iron_sword', 15],
@@ -128,8 +147,8 @@ test('a seeded round leaves the wight the hand-fixed HP', () => {
       10,
     ],
   ];
-  for (const [name, content, seed, sword, hp] of rows)
-    assert.deepEqual(fight(content, seed, sword), [hp], name);
+  for (const [name, content, seed, sword, hp, ancestry] of rows)
+    assert.deepEqual(fight(content, seed, sword, 1, ancestry), [hp], name);
 });
 
 // Breaks: the crit is an extra draw (the wight's roll and later rounds shift) or never fires.
@@ -149,27 +168,23 @@ test('the loader refuses G2 fields below kernel_api 1.44', () => {
     delete c.world.combat.player_attack.kind;
     delete c.world.combat.player_attack.crit;
     delete c.npcs[WIGHT].resistances;
+    for (const sword of ['iron_sword', 'silver_sword']) {
+      delete c.items[`damage_sampler@0.0.1:item/${sword}`].weapon.attack.kind;
+      delete c.items[`damage_sampler@0.0.1:item/${sword}`].weapon.attack.crit;
+    }
   };
+  const sword = (c: any) => c.items['damage_sampler@0.0.1:item/iron_sword'].weapon.attack;
+  // Each row adds one G2 field to the bare sampler, so no other site can report the floor.
   const rows: [string, (c: any) => void][] = [
-    ['player kind', (c) => delete c.world.combat.player_attack.crit],
-    ['player crit', (c) => delete c.world.combat.player_attack.kind],
-    [
-      'npc resistances',
-      (c) => {
-        delete c.world.combat.player_attack.kind;
-        delete c.world.combat.player_attack.crit;
-      },
-    ],
-    [
-      'npc attack kind',
-      (c) => {
-        bare(c);
-        c.npcs[WIGHT].attack.kind = 'cold';
-      },
-    ],
+    ['player kind', (c) => (c.world.combat.player_attack.kind = 'fire')],
+    ['player crit', (c) => (c.world.combat.player_attack.crit = { chance: 10, multiplier: 2 })],
+    ['npc resistances', (c) => (c.npcs[WIGHT].resistances = { fire: 10 })],
+    ['npc attack kind', (c) => (c.npcs[WIGHT].attack.kind = 'cold')],
+    ['weapon attack kind', (c) => (sword(c).kind = 'cold')],
+    ['weapon attack crit', (c) => (sword(c).crit = { chance: 10, multiplier: 2 })],
   ];
   for (const [name, change] of rows) {
-    const r = load((c) => (change(c), old(c)));
+    const r = load((c) => (bare(c), change(c), old(c)));
     assert.deepEqual(
       r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path],
       ['KERNEL_API_RANGE_INVALID', api],

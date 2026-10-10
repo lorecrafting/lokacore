@@ -29,5 +29,11 @@
   "item.iron_sword.description": "A plain iron blade.",
   "item.silver_sword.short": "a silver sword",
   "item.silver_sword.room": "A [silver sword] lies here.",
-  "item.silver_sword.description": "A blade edged with silver."
+  "item.silver_sword.description": "A blade edged with silver.",
+  "ancestry.fighter.label": "Fighter",
+  "ancestry.fighter.description": "Trained with the sword.",
+  "ancestry.farmer.label": "Farmer",
+  "ancestry.farmer.description": "Never held a sword.",
+  "skill.swords.label": "Swords",
+  "skill.swords.requirement": "Anyone can swing a sword."
 }
