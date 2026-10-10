@@ -1,0 +1,13 @@
+{
+  "keywords": [
+    "torch"
+  ],
+  "short": "item.torch.short",
+  "room_line": "item.torch.room",
+  "description": "item.torch.description",
+  "mass_grams": 500,
+  "location": {
+    "in": "room",
+    "room": "hall"
+  }
+}

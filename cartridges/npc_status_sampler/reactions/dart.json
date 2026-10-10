@@ -1,0 +1,12 @@
+{
+  "on": {
+    "event": "entity_entered_room",
+    "room": "dart_room"
+  },
+  "apply": [
+    {
+      "op": "status.apply",
+      "status": "poison"
+    }
+  ]
+}

@@ -11,7 +11,7 @@ defmodule Loka.Content.Checks do
                 "fact.adjust" => %{"fact" => "fact"},
                 "skill.acquire" => %{"skill" => "skill"},
                 "topic.grant" => %{"topic" => "topic"},
-                "status.apply" => %{"status" => "status"},
+                "status.apply" => %{"status" => "status", "item" => "item"},
                 "quest.activate" => %{"quest" => "quest"},
                 "quest.resolve" => %{"quest" => "quest"},
                 "quest.fail" => %{"quest" => "quest"}
@@ -130,6 +130,11 @@ defmodule Loka.Content.Checks do
       if npc["perception"], do: %{"perception" => expand(npc["perception"], m)}, else: %{}
     )
     |> Map.merge(if schedule == %{}, do: %{}, else: %{"daily_schedule" => scheduled(schedule, m)})
+    |> Map.merge(
+      if npc["immune"],
+        do: %{"immune" => Enum.map(npc["immune"], &ref(&1, "status", m))},
+        else: %{}
+    )
   end
 
   # A recipe's target (RecipeTarget): its detail a key, so a details map never matches.
@@ -182,6 +187,9 @@ defmodule Loka.Content.Checks do
 
   def expand(%{"cures" => c} = e, m) when is_list(c),
     do: Map.put(expand(Map.delete(e, "cures"), m), "cures", Enum.map(c, &ref(&1, "status", m)))
+
+  def expand(%{"immune" => c} = e, m) when is_list(c),
+    do: Map.put(expand(Map.delete(e, "immune"), m), "immune", Enum.map(c, &ref(&1, "status", m)))
 
   def expand(%{"resource" => r} = n, m) when is_binary(r),
     do: Map.put(n, "resource", ref(r, "resource", m))

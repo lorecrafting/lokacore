@@ -1,6 +1,6 @@
-// status@1 (toolbox row 1): timed statuses on the player's body, one generation per body/status
-// pair; the tick job is unbound and finds its row by job id, so a stale one completes harmlessly.
-// ponytail: only world.body carries statuses (the job names no body); add a job binding for NPCs.
+// status@1 (toolbox rows 1, G3): timed statuses on the player's body, an NPC or an item, one
+// generation per holder/status pair; the tick job is unbound and finds its row by job id, so a
+// stale one completes harmlessly.
 import type { DefinitionRef, DeltaOp, EntityId, JobId, StatusRow } from '../../contracts.gen.ts';
 import { add } from '../../foundation/int.ts';
 import { key } from '../../foundation/compose.ts';
@@ -50,8 +50,17 @@ export const endStatus = (
   value: { active: false, generation: row.generation },
 });
 
-/** Apply or refresh `status` on `body` at the world's clock; unknown statuses change nothing. */
-// size: allow 43, a first application writes the row and schedules its job; a refresh writes only the end
+/** The authored NPC or item instance `body` declares `status` immune (row G3). */
+export const immune = (world: World, body: EntityId, status: DefinitionRef) =>
+  !!world.entities[body]?.immune?.some((s) => refString(s) === refString(status));
+
+const HOLDERS = new Set(['body', 'npc', 'item']); // never a room, detail or slot
+
+/**
+ * Apply or refresh `status` on `body` (a body, NPC or item) at the world's clock; an unknown or
+ * immune status, or another kind of entity, changes nothing.
+ */
+// size: allow 45, a first application writes the row and schedules its job; a refresh writes only the end
 export function applyStatus(
   world: World,
   body: EntityId,
@@ -60,7 +69,8 @@ export function applyStatus(
   mint: Mint,
 ): DeltaOp[] {
   const spec = specOf(world, status);
-  if (!spec) return [];
+  if (!spec || !HOLDERS.has(world.knownEntities[body]?.kind ?? '') || immune(world, body, status))
+    return [];
   const prior = world.state.statuses?.[statusKey(body, status)];
   const active = prior?.active ? (prior as Active) : undefined;
   const now = world.state.clock;

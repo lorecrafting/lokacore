@@ -18,6 +18,7 @@ const NAMED: Record<string, string> = {
   quest: 'quest',
   room: 'room',
   scene: 'scene',
+  status: 'status',
   story_point: 'story_point',
   victim: 'npc',
 };

@@ -37,6 +37,7 @@ defmodule Loka.Content.Reactions do
     "story_point" => "story_point",
     "barrier" => "barrier",
     "scene" => "scene",
+    "status" => "status",
     "kind" => "liquid"
   }
   @doc "Each trigger filter that names a definition (W1), with that definition's kind."
@@ -119,7 +120,9 @@ defmodule Loka.Content.Reactions do
   defp consequence(_, {%{"op" => "experience.grant"}, _}, _, _), do: []
 
   defp consequence(rel, {%{"op" => "status.apply"} = s, i}, _, ctx),
-    do: reference(rel, ["apply", i], "status", s, ctx.m, ctx.defs)
+    do:
+      reference(rel, ["apply", i], "status", s, ctx.m, ctx.defs) ++
+        if(s["item"], do: reference(rel, ["apply", i], "item", s, ctx.m, ctx.defs), else: [])
 
   defp consequence(rel, {s, i}, _, ctx),
     do:

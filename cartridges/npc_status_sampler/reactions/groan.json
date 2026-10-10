@@ -1,0 +1,13 @@
+{
+  "on": {
+    "event": "status_ticked",
+    "status": "poison"
+  },
+  "apply": [
+    {
+      "op": "fact.assign",
+      "fact": "groaned",
+      "value": true
+    }
+  ]
+}

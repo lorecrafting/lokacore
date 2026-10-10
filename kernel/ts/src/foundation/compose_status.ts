@@ -3,8 +3,9 @@ import type { Json } from './canonical.ts';
 import { same, type State } from './compose.ts';
 
 type Op = Extract<DeltaOp, { op: 'status.transition' }>;
+const HOLDERS = ['body', 'npc', 'item'];
 
-/** One checked body status generation (toolbox row 1): the body and status pair is the target. */
+/** One checked status generation on a body, NPC or item (rows 1, G3): the holder and status pair is the target. */
 export function transitionStatus(op: Op, row: Json | undefined, state: State, now: number) {
   const prior = row as Op['value'] | undefined;
   const next = op.value;
@@ -22,7 +23,7 @@ export function transitionStatus(op: Op, row: Json | undefined, state: State, no
     ? next.generation === prior.generation
     : next.generation === (prior?.generation ?? 0) + (next.active ? 1 : 0);
   if (
-    known[op.body_id]?.kind !== 'body' ||
+    !HOLDERS.includes(known[op.body_id]?.kind as string) ||
     !same(row ?? null, op.expected) ||
     !shape ||
     !generation ||
