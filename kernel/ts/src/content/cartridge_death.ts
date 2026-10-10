@@ -69,8 +69,9 @@ function drops(c: Obj, named: Checks['named']): Diagnostic[] {
     out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
   for (const [ref, npc] of tables) {
     const at = `.cartridge.npcs${step(ref)}.drops`;
-    // Only combat kills an NPC: a table needs world.death, hp and a genesis (not template) NPC.
-    if (!c.world?.death || !npc.hp || npc.spawn_template)
+    // Only combat kills an NPC: a table needs world.death and a genesis (not template) NPC whose
+    // hp has gain 0, since a regenerating NPC would revive holding its failed drops and re-roll.
+    if (!c.world?.death || npc.hp?.gain !== 0 || npc.spawn_template)
       out.push(diag('SCHEMA_VIOLATION', at, { error: 'invalid_value' }));
     const seen = new Set<string>();
     for (const [i, { item }] of (npc.drops as Obj[]).entries()) {

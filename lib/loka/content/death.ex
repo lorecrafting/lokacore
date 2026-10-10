@@ -43,9 +43,12 @@ defmodule Loka.Content.Death do
   defp drop_table({key, rel, %{"drops" => list} = npc}, m, defs, death) do
     table = {rel, %{"in" => "npc", "npc" => ref(key, "npc", m)}, Enum.map(list, & &1["item"])}
 
-    # Only combat kills an NPC: a table needs world.death, hp and a genesis (not template) NPC.
+    # Only combat kills an NPC: a table needs world.death and a genesis (not template) NPC whose
+    # hp has gain 0, since a regenerating NPC would revive holding its failed drops and re-roll.
     owner =
-      if death && npc["hp"] && !npc["spawn_template"], do: [], else: [bad(at(rel, ["drops"]))]
+      if death && get_in(npc, ["hp", "gain"]) == 0 && !npc["spawn_template"],
+        do: [],
+        else: [bad(at(rel, ["drops"]))]
 
     owner ++ Enum.flat_map(Enum.with_index(list), &drop(&1, table, m, defs))
   end
