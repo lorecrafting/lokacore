@@ -40,7 +40,7 @@ taste; the owner is the art director. Edit only the design-system docs, your rev
 [`mobile/app/book/tokens.ts`](../../mobile/app/book/tokens.ts), which you own (palettes, type, spacing, motion);
 other code belongs to developers (batch 5 only: the designer wrote its style code,
 [owner decision](../../docs/decisions/owner-decision-designer-writes-batch5-style-2026-10-09.md)).
-Never use `--no-verify` or force-push. In a shared worktree commit with `git commit -- <your own paths>`; check CI with `gh run list --commit <full sha>` every few minutes, never `gh run watch` or a manual dispatch.
+Create Beads issues only with `bin/br_create.sh`, never plain `br create`. Create scratch worktrees under `worktrees.noindex` next to the repo checkout. Never use `--no-verify` or force-push. In a shared worktree commit with `git commit -- <your own paths>`; check CI with `gh run list --commit <full sha>` every few minutes, never `gh run watch` or a manual dispatch.
 
 **Session mode** ([live polish session](../../docs/WORKFLOW.md#live-polish-session)): in the session
 worktree you may edit style code, tokens and the catalogue line, and you commit each accepted tweak;

@@ -63,7 +63,7 @@ done
 # to the export. Break: the local export write is lost in the pull, the issue is not closed, the
 # worktree or refs survive, nothing is pushed, or a refusal still changes something.
 printf '#!/bin/sh\necho "$PR_STATE pr"\n' > "$tmp/brstub/gh"
-printf '#!/bin/sh\necho "$*" >> "$BR_LOG"\ncase $1 in close) echo "closed $2" >> .beads/issues.jsonl ;; esac\n' > "$tmp/brstub/br"
+printf '#!/bin/sh\necho "$*" >> "$BR_LOG"\ncase $1 in close) echo "closed $2" >> .beads/issues.jsonl ;; show) echo "[{\\"status\\":\\"${ISSUE_STATUS:-open}\\"}]" ;; esac\n' > "$tmp/brstub/br"
 chmod +x "$tmp/brstub/gh"
 am() { # <case> <want-rc> [subject]
   rc=0; BR_LOG=$R.br PR_STATE=${PR_STATE-MERGED} PATH="$tmp/brstub:$PATH" capped sh "$bin/after_merge.sh" 7 loka-a ${3+"$3"} > "$R.out" 2>&1 || rc=$?
@@ -117,6 +117,9 @@ am merge-in-review 1; [ "$(git rev-parse HEAD)" = "$head" ] && [ ! -s "$R.br" ] 
 STALE=1 amk; unset STALE; rc=0; BR_LOG=$R.br PR_STATE=MERGED PATH="$tmp/brstub:$PATH" capped sh bin/after_merge.sh 7 loka-a > "$R.out" 2>&1 || rc=$?
 git fetch -q origin; [ "$rc" = 0 ] && grep -qx 'close loka-a --reason Merged #7' "$R.br" && [ "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)" ] \
   || { bad "after_merge stale-script: exit $rc, old copy ran or main not pulled"; sed 's/^/  /' "$R.out"; }
+# Break: a rerun (the failed first run already closed the issue) dies at br close, or closes it again.
+amk; export ISSUE_STATUS=closed; am rerun-closed 0; unset ISSUE_STATUS; git fetch -q origin
+{ [ "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)" ] && ! grep -q '^close' "$R.br"; } || bad 'after_merge rerun-closed: br close called, or main not pushed'
 # Break: a br write that dirties the export after the commit (stand-in post-commit hook) is left
 # uncommitted or unpushed.
 amk; printf '#!/bin/sh\n[ -e "%s" ] || { : > "%s"; echo concurrent >> .beads/issues.jsonl; }\n' "$R.once" "$R.once" > .git/hooks/post-commit; chmod +x .git/hooks/post-commit
@@ -209,6 +212,16 @@ grep -qx 'ci.yml failure abcdef01 u1 (red: fix first)' out && grep -qx 'book-e2e
 CI='[{"conclusion":"","status":"in_progress","headSha":"abcdef0123","url":"u1"}]' E2E='[]' \
   HK=hk.json PATH="$tmp/gh:$tmp/stub:$PATH" capped sh bin/session_status.sh > out 2>&1 || true
 grep -qx 'ci.yml in_progress abcdef01 u1' out || bad 'session_status nightly: running run misreported'
+# --- .githooks/pre-commit ----------------------------------------------------------------------
+# Stub mise runs nothing but fails `elixir bin/contracts.exs --check`. Break: a staged MECHANICS-TOOLBOX.md,
+# CHECKS.md, system/mechanics.md or protocol/ file commits though the generated JSON is stale, or an unrelated file pays for the check.
+mkdir "$tmp/hk"; printf '#!/bin/sh\ncase $* in *contracts.exs*) exit 1 ;; esac\nexit 0\n' > "$tmp/hk/mise"; chmod +x "$tmp/hk/mise"
+R=$(mktemp -d); cd "$R"; git init -q; mkdir -p docs/system protocol; : > a.txt
+for f in docs/MECHANICS-TOOLBOX.md docs/CHECKS.md docs/system/mechanics.md protocol/x.json a.txt; do
+  echo 1 >> $f; git add $f; rc=0; PATH="$tmp/hk:$PATH" sh "$bin/../.githooks/pre-commit" > /dev/null 2>&1 || rc=$?
+  case $f in a.txt) want=0 ;; *) want=1 ;; esac
+  [ "$rc" = $want ] || bad "pre-commit $f: exit $rc, want $want"; git reset -q
+done
 # --- preview_update.sh, polish_session.sh ----------------------------------------------------------
 # Bare origin with three lockfiles; the preview is a detached clone; ports 7006/7019/7020/7081, never
 # the owner's. Stub mise logs each call and turns a server command into a listener that keeps its
@@ -270,6 +283,29 @@ web=$(pid $wp); expo=$(pid $ep); run polish_session.sh start start 0; S=$(cd "$R
 sb=$(pid $sbp); run polish_session.sh start start-again 0
 [ "$(pid $sbp)" = "$sb" ] && grep -q 'already serving' "$R.out" || bad 'polish_session start-again: restarted'
 run preview_update.sh '' during-session 1; [ "$(pid $sbp)" = "$sb" ] || bad 'preview_update during-session: took the session Storybook'
+# Break: update restarts for a change that adds no story or MDX file, leaves a stale Storybook after an added
+# or a renamed one, or stops by name; or the session worktree (with or without its own commits) is not brought to origin/main.
+echo u1 > a.txt; git add a.txt; git commit -qm plain; git push -q origin main
+run polish_session.sh update update-plain 0
+[ "$(pid $sbp)" = "$sb" ] && [ "$(git -C "$S" rev-parse HEAD)" = "$(git rev-parse HEAD)" ] || bad 'polish_session update-plain: restarted, or session not at origin/main'
+echo s > mobile/app/x.stories.tsx; git add mobile/app/x.stories.tsx; git commit -qm story; git push -q origin main
+run polish_session.sh update update-story 0
+[ "$(pid $sbp)" != "$sb" ] && [ "$(cwd $sbp)" = "$S/mobile/app" ] && [ -f "$S/mobile/app/x.stories.tsx" ] || bad 'polish_session update-story: Storybook not restarted from the session'
+sb=$(pid $sbp); git mv mobile/app/x.stories.tsx mobile/app/y.stories.tsx; git commit -qm rename; git push -q origin main
+run polish_session.sh update update-rename 0
+[ "$(pid $sbp)" != "$sb" ] && [ "$(cwd $sbp)" = "$S/mobile/app" ] || bad 'polish_session update-rename: Storybook not restarted'
+sb=$(pid $sbp); git -C "$S" commit -q --allow-empty -m tweak0; echo s > mobile/app/z.mdx; git add mobile/app/z.mdx; git commit -qm mdx; git push -q origin main
+run polish_session.sh update update-diverged 0
+[ "$(pid $sbp)" != "$sb" ] && [ -f "$S/mobile/app/z.mdx" ] && git -C "$S" merge-base --is-ancestor origin/main HEAD && [ -n "$(git -C "$S" log origin/main..HEAD --format=%s | grep tweak0)" ] \
+  || bad 'polish_session update-diverged: session with its own commit not merged, or Storybook not restarted'
+# Break: update starts a Storybook for a session nobody serves. start then serves the session again.
+kill "$(pid $sbp)"; i=0; while [ -n "$(pid $sbp)" ] && [ $i -lt 20 ]; do sleep 0.5; i=$((i + 1)); done
+echo s > mobile/app/w.stories.tsx; git add mobile/app/w.stories.tsx; git commit -qm unserved; git push -q origin main
+run polish_session.sh update update-unserved 0; [ -z "$(pid $sbp)" ] || bad 'polish_session update-unserved: started a Storybook for an unserved session'
+run polish_session.sh start reserve 0
+sb=$(pid $sbp)
+# The preview moves with main (as preview_update would), so close's own refresh restarts nothing but Storybook.
+git -C "$P" fetch -q origin main; git -C "$P" checkout -q --detach origin/main
 touch "$S/new-token.ts"; run polish_session.sh close untracked 1; [ "$(pid $sbp)" = "$sb" ] && [ ! -s "$R.gh" ] || bad 'polish_session untracked: changed something'
 git -C "$S" add new-token.ts; git -C "$S" commit -qm tweak
 touch "$P/x"; run polish_session.sh close dirty-preview 1; rm "$P/x"
@@ -279,6 +315,9 @@ git ls-remote --exit-code --heads origin "$day-2" > /dev/null && grep -q '^pr cr
   || { bad 'polish_session close: not pushed, no PR, or the preview not served again'; cat "$R.gh"; }
 [ "$(pid $wp)" = "$web" ] && [ "$(pid $ep)" = "$expo" ] || bad 'polish_session close: restarted the web preview or Expo'
 run polish_session.sh start after-close 1
+# Break: update merges main into a closed session; that merge never reaches its PR and after_merge refuses the worktree.
+h=$(git -C "$S" rev-parse HEAD); echo 4 > a.txt; git add a.txt; git commit -qm after-close; git push -q origin main
+run polish_session.sh update update-after-close 1; [ "$(git -C "$S" rev-parse HEAD)" = "$h" ] || bad 'polish_session update-after-close: closed session changed'
 kill "$(pid $ep)"; i=0; while [ -n "$(pid $ep)" ] && [ $i -lt 20 ]; do sleep 0.5; i=$((i + 1)); done
 echo 3 > a.txt; git add a.txt; git commit -qm moved; git push -q origin main
 run preview_update.sh '' no-expo 0; [ -z "$(pid $ep)" ] || bad 'preview_update no-expo: started Expo that was not running'
