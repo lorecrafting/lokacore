@@ -88,8 +88,8 @@ test('the innkeeper knows about the mill by evening because Ada walked through t
   assert.notEqual(talk(w).decision.kind, 'accepted');
   w = play(play(w, move('east')), until(16, 30)); // Ada passed the mill at 16:00
   assert.deepEqual([knows(w, 'ada'), knows(w, 'innkeeper')], [true, false]);
-  // Ada walked through the inn at 17:00, the player in the square (one wait per due hour: one wait
-  // across two of Ada's hours faults nonfuture_job, Beads loka-qi0r).
+  // Ada walked through the inn at 17:00, the player in the square (two waits; one wait across both
+  // hours also runs each hour since loka-qi0r).
   w = play(play(w, until(17, 30)), until(18, 30));
   assert.equal(knows(w, 'innkeeper'), true);
   assert.equal(talk(play(w, move('west'))).decision.kind, 'accepted');

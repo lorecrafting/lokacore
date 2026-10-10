@@ -81,6 +81,14 @@ test('a two-minute absence shows no recap: its log is as without the field', () 
   ]);
 });
 
+// Breaks: the threshold compares with `>` instead of "at least", so an absence of exactly
+// recap_after_minutes (30 real minutes in the sampler) logs instead of collapsing; one second less
+// must still log.
+test('an absence of exactly the threshold shows the recap; one second less does not', () => {
+  assert.equal(count(away(30 * 60 * 1000).text(), LABEL.awayRecap), 1);
+  assert.equal(count(away(30 * 60 * 1000 - 1000).text(), LABEL.awayRecap), 0);
+});
+
 // Break: a second absence before any press replaces the first one's recap, losing its lines.
 test('a second long absence before a press adds its lines to the same recap', () => {
   const b = wait(away(HOURS3), HOURS3); // to 19:00 on day 12: thirteen evenings, twelve mornings
