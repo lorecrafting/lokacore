@@ -96,11 +96,12 @@ test('the innkeeper knows about the mill by evening because Ada walked through t
 });
 
 // Breaks: a reaction's second write to a fact row in one advance taking a new writer group
-// (conflicting_write, loka-j2mo): Ada passes the mill and the inn on two days of one wait.
-test('one wait over two days equals hour-by-hour play', () => {
+// (conflicting_write, loka-j2mo), or keeping the latest group rather than the first (faults on
+// the third write): Ada passes the mill and the inn on three days of one wait.
+test('one wait over three days equals hour-by-hour play', () => {
   const day = (w: World, d: number) => [16, 17, 18].reduce((v, h) => play(v, until(h + d, 30)), w);
-  const hourly = day(day(fresh(), 0), 24);
-  const once = play(fresh(), until(42, 30));
+  const hourly = day(day(day(fresh(), 0), 24), 48);
+  const once = play(fresh(), until(66, 30));
   assert.deepEqual([knows(once, 'ada'), knows(once, 'innkeeper')], [true, true]);
   const rows = (w: World) => [w.state.facts, w.state.containers];
   assert.deepEqual(rows(once), rows(hourly));
