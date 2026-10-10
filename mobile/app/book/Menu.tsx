@@ -64,6 +64,8 @@ type NpcProps = {
   press: (b: Button) => void;
   log: DetailLine[];
   leave: () => void;
+  talking?: boolean; // the Book's latch: answered here and not yet left (Body holds it)
+  talk?: (on: boolean) => void;
 };
 
 export function NpcPage(p: NpcProps) {
@@ -74,12 +76,29 @@ export function NpcPage(p: NpcProps) {
   const actions = p.npc ? p.g.on(p.npc.id).filter((b) => b.action_key !== 'where') : [];
   const cards = actions.filter((b) => b.command !== 'use_service');
   const close = choice && p.g.choice.find((b) => b.action_key === 'close_choice');
-  const leave = close ? () => p.press({ ...close, label: 'Leave' }) : p.leave;
+  // Answering keeps the page in conversation even after the kernel closes it; only Leave the
+  // conversation returns to the NPC's own actions (Talk, shop, services).
+  const talk = !!choice || !!p.talking;
+  const answer = (b: Button) => {
+    if (b.action_key === 'choose') p.talk?.(true);
+    p.press(b);
+  };
+  const stop = () => {
+    p.talk?.(false);
+    if (close) p.press({ ...close, label: 'Leave the conversation' });
+    else if (!p.npc) p.leave();
+  };
+  const foot =
+    talk && (close || !choice) ? (
+      <Control label="Leave the conversation" onPress={stop} />
+    ) : (
+      <Control label="Leave" onPress={p.leave} />
+    );
   return (
     <Page
       title={p.npc ? cap(p.text(p.npc.name)) : 'Conversation'}
       scrollToEnd={p.log.length > 0}
-      foot={<Control label="Leave" onPress={leave} />}
+      foot={foot}
     >
       {p.npc?.description && <Text style={prose(c)}>{plain(p.text(p.npc.description))}</Text>}
       {p.npc && 'carrying' in p.npc && p.npc.carrying && (
@@ -87,17 +106,19 @@ export function NpcPage(p: NpcProps) {
       )}
       <LogLines lines={p.log} />
       {npcSkills(c, p)}
-      {!choice && !actions.length && !p.log.length && (
+      {!talk && !actions.length && !p.log.length && (
         <Text style={note(c)}>Nothing to do here.</Text>
       )}
-      {!choice && <ShopOptions {...p} />}
-      {choice && <Choice {...p} choice={choice} />}
-      <Cards>
-        {cards.map((b) => (
-          <ActionCard key={b.label} b={b} press={p.press} />
-        ))}
-        <ServiceOptions {...p} actions={actions} />
-      </Cards>
+      {!talk && <ShopOptions {...p} />}
+      {choice && <Choice {...p} press={answer} choice={choice} />}
+      {!talk && (
+        <Cards>
+          {cards.map((b) => (
+            <ActionCard key={b.label} b={b} press={p.press} />
+          ))}
+          <ServiceOptions {...p} actions={actions} />
+        </Cards>
+      )}
     </Page>
   );
 }
@@ -280,6 +301,8 @@ export function NpcDetail(p: {
   press: (b: Button, detail?: string) => void;
   speaker?: string;
   world: () => void;
+  talkingWith?: string;
+  talkWith?: (id?: string) => void;
 }) {
   const { view, text } = p.screen;
   const npc = view.entities.find((e) => e.id === (p.speaker ?? view.choice?.speaker_id));
@@ -293,6 +316,8 @@ export function NpcDetail(p: {
       log={p.screen.detail(id)}
       press={(b) => p.press(b, id)}
       leave={p.world}
+      talking={p.talkingWith === id}
+      talk={(on) => p.talkWith?.(on ? id : undefined)}
     />
   );
 }

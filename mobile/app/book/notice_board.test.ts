@@ -438,10 +438,12 @@ test('Elspeth stays reachable all day and her Book replies direct a newcomer alo
     assert.equal(a.game.lastNarration()?.lines[0].key, key);
     assert.ok(a.text().includes(answer));
     assert.deepEqual(a.presenter().screen().log, []);
+    a.tap('Leave the conversation'); // the reply ended it: back to Elspeth's own Talk
   }
   assert.deepEqual(a.game.view().view.journal, []);
   assert.deepEqual(storyRows(a), before);
   a.tap('Talk to Elspeth');
+  a.tap('Leave the conversation');
   a.tap('Leave');
   assert.deepEqual(a.stack(), []);
   assert.deepEqual(a.presenter().screen().log, []);

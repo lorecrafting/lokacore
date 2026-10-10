@@ -53,6 +53,7 @@ export function received(game: Game, reply: Reply, was: GameView, s: Logs, text:
     retained,
     accepted,
     itemChanged,
+    now,
   );
   const lines =
     (was.combat || now.combat) && !accepted?.narration?.length
@@ -122,10 +123,14 @@ function detailRoute(
   retained: ReturnType<typeof savedNarration>,
   accepted: Accepted | undefined,
   itemChanged: boolean,
+  now: GameView,
 ) {
   const pickup = retained?.pickup_name ? retained.detail_id : undefined;
   s.returnDetail = pickup;
-  s.returnWorld = (itemChanged && !pickup) || accepted?.outcome === 'choice_closed';
+  // Leaving a present NPC's conversation returns to that NPC's page; an absent speaker's, to World.
+  const closed =
+    accepted?.outcome === 'choice_closed' && !now.entities.some((e) => e.id === attempt.detail);
+  s.returnWorld = (itemChanged && !pickup) || closed;
   const readableDetail = retained?.detail_id ?? attempt.button.detail_id;
   const detail =
     pickup ??

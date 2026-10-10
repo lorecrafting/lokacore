@@ -72,6 +72,7 @@ export const FirstRoom: StoryObj = {
     await tap('Talk to Elspeth');
     await tap('Will you look around the Green for a sign of Wren?');
     await page.findByText('Journal updated'); // the real kernel answered: the quest began
+    await tap('Leave the conversation');
     await tap('Leave');
     await page.findByText('Look for a sign of Wren on Village Green.'); // the running head
   },

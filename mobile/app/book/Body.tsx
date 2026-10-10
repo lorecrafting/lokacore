@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Text, View } from 'react-native';
 import { DreamPage } from './DreamPage.tsx';
 // Page dispatch for the current Book view and local detail stack.
@@ -33,11 +34,13 @@ type BodyProps = {
   world: () => void;
   back: () => void;
 };
+type Talk = { talkingWith?: string; talkWith?: (id?: string) => void };
 
 export function Body(p: BodyProps) {
   const c = usePalette();
   const water = p.screen.view.water;
   const surface = water && p.g.exits.find((e) => e.direction === 'up')?.button;
+  const [talkingWith, talkWith] = useState<string>(); // the NPC whose conversation the page shows
   return (
     <View style={{ flex: 1 }}>
       {p.page?.kind !== 'journal' && <RunningHead view={p.screen.view} text={p.screen.text} />}
@@ -47,12 +50,12 @@ export function Body(p: BodyProps) {
           {surface && <VerbLine b={surface} press={p.press} />}
         </View>
       )}
-      <PageBody {...p} />
+      <PageBody {...p} talkingWith={talkingWith} talkWith={talkWith} />
     </View>
   );
 }
 
-function PageBody(p: BodyProps) {
+function PageBody(p: BodyProps & Talk) {
   const { view, text } = p.screen;
   const { page } = p;
   if (view.ancestry_choices)
