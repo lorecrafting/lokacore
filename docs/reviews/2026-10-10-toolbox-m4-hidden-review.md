@@ -26,3 +26,12 @@
 
 1. **should-fix** (PM ruling): no route check in either kernel. `cartridge_expedition.ts:54` and its Elixir twin accept an expedition edge `hall -east-> study` over a hidden face; patrol routes likewise. Failure: `quest_journal.ts:88`/`:108` shows `direction: east` before the search. mechanics.md records this as an open "known limit"; the ruling requires a compile-time refusal.
 2. **should-fix** (PM ruling): NPC flight ignores `hidden`. `flightExit` (`combat/behavior.ts:112`) and population `refuge` (`population/behavior.ts:191`) can choose the hidden east face. Failure: `round_flow.ts:155` narrates `enemy_fled[east]`, and population sight narration (`population/behavior.ts:166`) narrates `narration[east]`, to the player before discovery. Fix: filter flight with `hidden(world, room, direction, world.character)`, add one test, and update the mechanics.md "Hidden face" bullet.
+
+## Fix round 1 re-check (e8aab6de08b380c117eb48ccb28c57d6cadf533d)
+
+- Hosted CI on the head: ci 38034906491 and book-e2e 38034906600, both success. Scope: commit `e8aab6de` and its direct callers only.
+- Verdict: **APPROVED**.
+- Finding 1 resolved. Both kernels refuse a route over a hidden exit with OUTCOME_MISMATCH: the expedition edge check in `cartridge_expedition.ts:54-57` and `expedition.ex` `wrong_edge?`, and the patrol leg check in `cartridge_patrol.ts:33-41` and `patrol.ex` `leg?`. Each version handles a missing exit safely, as before.
+- Finding 2 resolved. `flightExit` (`combat/behavior.ts:121`) and `refuge` (`population/behavior.ts:205`) skip any exit that declares `hidden_until`. Player Flee is now tested (`hidden_passage_npc.test.ts`).
+- NPC rule accepted: NPCs never use a hidden exit, even after the player finds it. NPCs have no value for the fact, and reading the player's value would tie NPC movement to one player. For the player, an NPC that never uses a found passage is a smaller cost than one that reveals an unfound passage. The rule is written in mechanics.md "Hidden face". Wandering NPCs and the crow remain an open known limit, which the PM ruling does not cover.
+- Tests: `hidden_passage.test.ts`, `hidden_passage_npc.test.ts` and `content_hidden_passage_test.exs` pass. Each of these mutants made them fail: dropping the check in `flightExit`, in `refuge`, in the TS expedition edge check, and in Elixir `leg?`.
