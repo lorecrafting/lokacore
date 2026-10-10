@@ -180,8 +180,8 @@ test('row W2 needs 1.47 and a known subject, at fact sites only', () => {
 // Breaks: a per_subject fact written by a choice whose save recovery reconciles its facts without
 // a subject (a hand_over, a riddle answer with a wrong_limit, a legacy deadline quest's dialogue)
 // loads, and that save would not reopen; or one whose receipt recovery checks at the speaker (a
-// payment, a riddle without a wrong_limit) is refused; or subject "target" loads in a reaction's
-// `when`, which has no target.
+// payment, a riddle without a wrong_limit) is refused; or subject "target" loads in a reaction,
+// quest, barrier or skill, which has no target.
 test('a per_subject fact in a reconciled choice is FACT_SCOPE_UNSUPPORTED', () => {
   const smith = `${S}:dialogue/smith_talk`;
   const at = (k: string) =>
@@ -213,6 +213,11 @@ test('a per_subject fact in a reconciled choice is FACT_SCOPE_UNSUPPORTED', () =
   const root = { op: 'fact_compare', fact: fact('trust'), equals: 0, subject: 'target' };
   const when = variant((_, c) => (c.reactions[fed].when = { policy_version: 1, root }));
   assert.deepEqual(when, [`.cartridge.reactions[${JSON.stringify(fed)}].when.root.subject`]);
+  for (const kind of ['quests', 'barriers', 'skills']) {
+    const k = `${S}:${kind}/x`;
+    const paths = variant((_, c) => (c[kind] = { [k]: { policy: { policy_version: 1, root } } }));
+    assert.deepEqual(paths, [`.cartridge.${kind}[${JSON.stringify(k)}].policy.root.subject`]);
+  }
   assert.deepEqual(scopeSites(source), []);
 });
 

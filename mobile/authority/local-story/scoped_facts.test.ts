@@ -225,17 +225,30 @@ test('entity-fact writes in riddle, skill and deadline-quest choices reopen', (t
 });
 
 // Breaks (dialogue-consequences.ts): recovery takes the subject from the receipt instead of the
-// dialogue's speaker, so a receipt that moved the write to another NPC loads.
+// dialogue's speaker, or skips the op's subject, so a receipt whose write moved to another NPC
+// (the op alone, or the op and its fact_changed) loads.
 test('a receipt writing at another subject than the speaker is save_corrupt', (t) => {
-  const h = save(t, 'moved', variant);
-  h.chat('stranger', 'help', 'stranger_talk', { answer: 'ab' });
-  const [from, to] = ['stranger', 'miller'].map((k) => `"subject_id":"${id(`npc/${k}`, variant)}"`);
-  const moved = h.p.sql
-    .prepare(`UPDATE receipt SET response=replace(response, ?, ?) WHERE instr(response, ?) > 0`)
-    .run(from, to, from);
-  assert.equal(moved.changes, 1);
-  assert.throws(
-    () => h.reopen(),
-    (e: any) => e.cause.kind === 'save_corrupt',
-  );
+  for (const moved of ['op', 'events']) {
+    const h = save(t, moved, variant);
+    h.chat('stranger', 'help', 'stranger_talk', { answer: 'ab' });
+    const sql = h.p.sql;
+    const rows = sql
+      .prepare("SELECT command_id, response FROM receipt WHERE response LIKE '%subject_id%'")
+      .all();
+    assert.equal(rows.length, 1);
+    const miller = id('npc/miller', variant);
+    const response = JSON.parse(String(rows[0].response));
+    response.delta.ops.find((o: any) => o.op === 'fact.assign').subject_id = miller;
+    if (moved === 'events')
+      response.events.find((e: any) => e.payload.type === 'fact_changed').payload.subject_id =
+        miller;
+    sql
+      .prepare('UPDATE receipt SET response=? WHERE command_id=?')
+      .run(JSON.stringify(response), rows[0].command_id);
+    assert.throws(
+      () => h.reopen(),
+      (e: any) => e.cause.kind === 'save_corrupt',
+      moved,
+    );
+  }
 });
