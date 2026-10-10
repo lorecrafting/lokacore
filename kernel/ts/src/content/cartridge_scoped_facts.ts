@@ -26,7 +26,7 @@ const scoped = (spec: Obj | undefined) => spec?.per_subject === true;
 const fieldsOf = (o: Obj) =>
   SUBJECTS.filter((f) => (f !== 'subject' || o.op === 'fact_compare') && Object.hasOwn(o, f));
 
-// Every fact_compare and fact.assign node with its path.
+// Visits every object of the cartridge but its facts map, with its path, parent and field name.
 function nodes(c: Obj, visit: (o: Obj, at: string, parent?: Obj, field?: string) => void) {
   const walk = (v: unknown, at: string, parent?: Obj, field?: string): void => {
     if (Array.isArray(v)) return v.forEach((x, i) => walk(x, `${at}[${i}]`, parent, field));

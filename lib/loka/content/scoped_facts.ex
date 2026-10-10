@@ -26,9 +26,11 @@ defmodule Loka.Content.ScopedFacts do
 
   defp scoped?(_), do: false
 
-  defp subject?(%{"op" => op} = n) when op in ~w(fact_compare fact.assign),
-    do:
-      Enum.any?(~w(npc item subject), &is_map_key(n, &1)) or Enum.any?(Map.values(n), &subject?/1)
+  # A subject field: npc or item, and subject on a fact_compare only (as the loader's fieldsOf).
+  defp subject?(%{"op" => op} = n) when op in ~w(fact_compare fact.assign) do
+    fields = if op == "fact_compare", do: ~w(npc item subject), else: ~w(npc item)
+    Enum.any?(fields, &is_map_key(n, &1)) or Enum.any?(Map.values(n), &subject?/1)
+  end
 
   defp subject?(v) when is_map(v), do: Enum.any?(Map.values(v), &subject?/1)
   defp subject?(v) when is_list(v), do: Enum.any?(v, &subject?/1)
