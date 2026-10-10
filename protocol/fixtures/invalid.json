@@ -18842,7 +18842,7 @@
     "value": {
       "op": "has_tag",
       "subject": "target",
-      "tag": "silver"
+      "tag": "gold"
     },
     "errors": [
       {
@@ -18965,7 +18965,7 @@
         "in": "template"
       },
       "tags": [
-        "silver"
+        "gold"
       ]
     },
     "errors": [
@@ -19001,7 +19001,7 @@
       "description": "room.hall.description",
       "exits": {},
       "tags": [
-        "silver"
+        "gold"
       ]
     },
     "errors": [
@@ -19041,12 +19041,228 @@
       "short": "barrier.door.short",
       "initial": "closed",
       "tags": [
-        "silver"
+        "gold"
       ]
     },
     "errors": [
       {
         "path": "/tags/0",
+        "code": "not_in_enum"
+      }
+    ]
+  },
+  {
+    "contract": "AttackProfile",
+    "value": {
+      "chance": 75,
+      "damage_min": 1,
+      "damage_max": 2,
+      "kind": "acid"
+    },
+    "errors": [
+      {
+        "path": "/kind",
+        "code": "not_in_enum"
+      }
+    ]
+  },
+  {
+    "contract": "AttackProfile",
+    "value": {
+      "chance": 75,
+      "damage_min": 1,
+      "damage_max": 2,
+      "crit": {
+        "chance": 0,
+        "multiplier": 2
+      }
+    },
+    "errors": [
+      {
+        "path": "/crit/chance",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "contract": "AttackProfile",
+    "value": {
+      "chance": 75,
+      "damage_min": 1,
+      "damage_max": 2,
+      "crit": {
+        "chance": 101,
+        "multiplier": 2
+      }
+    },
+    "errors": [
+      {
+        "path": "/crit/chance",
+        "code": "above_maximum"
+      }
+    ]
+  },
+  {
+    "contract": "AttackProfile",
+    "value": {
+      "chance": 75,
+      "damage_min": 1,
+      "damage_max": 2,
+      "crit": {
+        "chance": 10,
+        "multiplier": 1
+      }
+    },
+    "errors": [
+      {
+        "path": "/crit/multiplier",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "contract": "AttackProfile",
+    "value": {
+      "chance": 75,
+      "damage_min": 1,
+      "damage_max": 2,
+      "crit": {
+        "chance": 10,
+        "multiplier": 11
+      }
+    },
+    "errors": [
+      {
+        "path": "/crit/multiplier",
+        "code": "above_maximum"
+      }
+    ]
+  },
+  {
+    "contract": "AttackProfile",
+    "value": {
+      "chance": 75,
+      "damage_min": 1,
+      "damage_max": 2,
+      "crit": {
+        "chance": 10
+      }
+    },
+    "errors": [
+      {
+        "path": "/crit/multiplier",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "AttackProfile",
+    "value": {
+      "chance": 75,
+      "damage_min": 1,
+      "damage_max": 2,
+      "crit": {
+        "multiplier": 2
+      }
+    },
+    "errors": [
+      {
+        "path": "/crit/chance",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "AttackProfile",
+    "value": {
+      "chance": 75,
+      "damage_min": 1,
+      "damage_max": 2,
+      "crit": {
+        "chance": 10,
+        "multiplier": 2,
+        "extra": 1
+      }
+    },
+    "errors": [
+      {
+        "path": "/crit/extra",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "AttackProfile",
+    "value": {
+      "chance": 75,
+      "damage_min": 1,
+      "damage_max": 2,
+      "crit": {
+        "chance": 1.5,
+        "multiplier": 2
+      }
+    },
+    "errors": [
+      {
+        "path": "/crit/chance",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "contract": "Resistances",
+    "value": {
+      "fire": -101
+    },
+    "errors": [
+      {
+        "path": "/fire",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "contract": "Resistances",
+    "value": {
+      "silver": 101
+    },
+    "errors": [
+      {
+        "path": "/silver",
+        "code": "above_maximum"
+      }
+    ]
+  },
+  {
+    "contract": "Resistances",
+    "value": {
+      "fire": 1.5
+    },
+    "errors": [
+      {
+        "path": "/fire",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "contract": "Resistances",
+    "value": {
+      "acid": 10
+    },
+    "errors": [
+      {
+        "path": "/acid",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "DamageKind",
+    "value": "silver",
+    "errors": [
+      {
+        "path": "",
         "code": "not_in_enum"
       }
     ]

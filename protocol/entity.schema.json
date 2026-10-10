@@ -327,11 +327,94 @@
         "liquid_holding",
         "metal",
         "sharp",
+        "silver",
         "wooden"
       ],
       "examples": [
         "burnable",
         "metal"
+      ]
+    },
+    "DamageKind": {
+      "description": "A damage kind (toolbox row G2): a closed engine vocabulary shared by attack profiles and NPC resistances. A row that needs a new kind adds it here; a kind never shares a name with a Tag.",
+      "enum": [
+        "cold",
+        "fire",
+        "physical",
+        "poison"
+      ],
+      "examples": [
+        "physical",
+        "fire"
+      ]
+    },
+    "Resistances": {
+      "description": "Toolbox row G2 (docs/system/mechanics.md damage model; kernel_api at least 1.44): an NPC's percent resistance per damage kind (DamageKind) and per material tag of the wielded item (Tag); negative is a weakness. An attack sums the entries for its kind and each tag of the attacker's wielded item, clamps the sum to -100..100 and scales its damage by (100 - sum) / 100, rounded down. Its members are exactly the DamageKind and Tag values.",
+      "type": "object",
+      "properties": {
+        "cold": {
+          "type": "integer",
+          "minimum": -100,
+          "maximum": 100
+        },
+        "fire": {
+          "type": "integer",
+          "minimum": -100,
+          "maximum": 100
+        },
+        "physical": {
+          "type": "integer",
+          "minimum": -100,
+          "maximum": 100
+        },
+        "poison": {
+          "type": "integer",
+          "minimum": -100,
+          "maximum": 100
+        },
+        "burnable": {
+          "type": "integer",
+          "minimum": -100,
+          "maximum": 100
+        },
+        "fragile": {
+          "type": "integer",
+          "minimum": -100,
+          "maximum": 100
+        },
+        "liquid_holding": {
+          "type": "integer",
+          "minimum": -100,
+          "maximum": 100
+        },
+        "metal": {
+          "type": "integer",
+          "minimum": -100,
+          "maximum": 100
+        },
+        "sharp": {
+          "type": "integer",
+          "minimum": -100,
+          "maximum": 100
+        },
+        "silver": {
+          "type": "integer",
+          "minimum": -100,
+          "maximum": 100
+        },
+        "wooden": {
+          "type": "integer",
+          "minimum": -100,
+          "maximum": 100
+        }
+      },
+      "additionalProperties": false,
+      "examples": [
+        {
+          "physical": 50,
+          "fire": 75,
+          "silver": -50
+        }
       ]
     },
     "NpcDefinition": {
@@ -440,6 +523,9 @@
           },
           "minItems": 1,
           "maxItems": 8
+        },
+        "resistances": {
+          "$ref": "entity.schema.json#/$defs/Resistances"
         }
       },
       "required": [
@@ -496,6 +582,30 @@
           },
           "required": [
             "effect"
+          ],
+          "additionalProperties": false
+        },
+        "kind": {
+          "$ref": "entity.schema.json#/$defs/DamageKind"
+        },
+        "crit": {
+          "description": "Toolbox row G2 (kernel_api at least 1.44): a hit whose accuracy roll (the hit draw, uniform in [0, 100)) is below chance is critical and its damage is multiplied by multiplier, before resistances.",
+          "type": "object",
+          "properties": {
+            "chance": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            },
+            "multiplier": {
+              "type": "integer",
+              "minimum": 2,
+              "maximum": 10
+            }
+          },
+          "required": [
+            "chance",
+            "multiplier"
           ],
           "additionalProperties": false
         }

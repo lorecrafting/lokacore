@@ -1,0 +1,19 @@
+{
+  "keywords": [
+    "iron_sword",
+    "sword"
+  ],
+  "short": "item.iron_sword.short",
+  "room_line": "item.iron_sword.room",
+  "description": "item.iron_sword.description",
+  "location": {
+    "in": "room",
+    "room": "hall"
+  },
+  "mass_grams": 600,
+  "slot": "wield",
+  "tags": [
+    "metal",
+    "sharp"
+  ]
+}

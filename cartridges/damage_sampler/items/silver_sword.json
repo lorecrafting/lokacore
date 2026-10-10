@@ -1,0 +1,20 @@
+{
+  "keywords": [
+    "silver_sword",
+    "sword"
+  ],
+  "short": "item.silver_sword.short",
+  "room_line": "item.silver_sword.room",
+  "description": "item.silver_sword.description",
+  "location": {
+    "in": "room",
+    "room": "hall"
+  },
+  "mass_grams": 600,
+  "slot": "wield",
+  "tags": [
+    "metal",
+    "sharp",
+    "silver"
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "title": "room.crypt.title",
+  "description": "room.crypt.description",
+  "exits": {
+    "west": {
+      "to": "hall"
+    }
+  }
+}

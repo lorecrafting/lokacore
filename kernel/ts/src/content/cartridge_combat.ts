@@ -2,6 +2,7 @@
 import { diag, step, type Checks, type Obj } from './cartridge_refs.ts';
 import { refString } from '../runtime/decision.ts';
 import { same } from '../foundation/compose.ts';
+import { apiCmp } from './cartridge_installed.ts';
 import type { Diagnostic } from '../contracts.gen.ts';
 
 export function combat(c: Obj, named: Checks['named']): Diagnostic[] {
@@ -30,7 +31,18 @@ export function combat(c: Obj, named: Checks['named']): Diagnostic[] {
     if (!settings) bad(`${at}.attack`);
     if (!npc.hp) bad(`${at}.hp`);
   }
-  return [...out, ...deathCredit(c, named)];
+  return [...out, ...damageApi(c), ...deathCredit(c, named)];
+}
+
+// Toolbox row G2: damage kinds, crits and resistances need kernel_api 1.44.
+function damageApi(c: Obj): Diagnostic[] {
+  const npcs = Object.values((c.npcs ?? {}) as Obj);
+  const items = Object.values((c.items ?? {}) as Obj).map((i) => i.weapon?.attack);
+  const profiles = [c.world?.combat?.player_attack, ...npcs.map((n) => n.attack), ...items];
+  const used = profiles.some((p) => p?.kind || p?.crit) || npcs.some((n) => n.resistances);
+  return used && apiCmp(c.manifest.requires.kernel_api.at_least, '1.44') < 0
+    ? [diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least')]
+    : [];
 }
 
 function deathCredit(c: Obj, named: Checks['named']): Diagnostic[] {
