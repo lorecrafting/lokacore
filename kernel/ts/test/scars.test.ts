@@ -62,7 +62,7 @@ const hp = (w: World) => level(w, w.body, resourceRef(w, 'hp'));
 const conditions = (w: World) => gameView(w).conditions;
 const wolfName = (w: World) =>
   gameView(w).entities.find((e) => e.id === w.entityIds['scars_sampler@0.0.1:npc/wolf'])?.name;
-// The bite reaction's narration when the player is hit (proposal.ts does not yet deliver it).
+// The bite reaction's op count and narration when the player is hit (proposal.ts does not yet deliver it).
 const bitten = (w: World) => {
   const rule = Object.values(content.reactions!)[0]!;
   const cause = { payload: { type: 'attack_result', target_id: w.body, hit: true } };
@@ -75,7 +75,7 @@ const bitten = (w: World) => {
     { n: 0 },
     () => 'dddddddd-0000-4000-8000-000000000001',
   );
-  return d?.kind === 'accepted' ? d.narration : d;
+  return d?.kind === 'accepted' ? [d.delta.ops.length, d.narration] : d;
 };
 const SCARRED = [{ label: 'condition.scarred', resource: 'hp', tick_every: 60 }];
 
@@ -84,14 +84,14 @@ const SCARRED = [{ label: 'condition.scarred', resource: 'hp', tick_every: 60 }]
 // status_active, or opens silently (the applied line keyed on a job).
 test('a wolf bite leaves a scar that survives death and return, and the salve cures it', () => {
   let w = newWorld(content, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, [1, 2, 3, 4]);
-  assert.deepEqual(bitten(w), [{ key: 'narration.scar.applied' }]);
+  assert.deepEqual(bitten(w), [1, [{ key: 'narration.scar.applied' }]]);
   w = play(w, { type: 'move', direction: 'east' });
   w = play(w, { type: 'attack', target_id: w.entityIds['scars_sampler@0.0.1:npc/wolf'] });
   w = round(w);
   assert.equal(hp(w), 6);
   assert.deepEqual(conditions(w), SCARRED);
   assert.equal(wolfName(w), 'npc.wolf.short_scarred');
-  assert.equal(bitten(w), undefined); // scarred already: no write, no line
+  assert.deepEqual(bitten(w), [0, undefined]); // scarred already: no write, no line
   const pending = Object.values(w.state.jobs ?? {}).filter((j) => j.status === 'pending');
   assert.ok(!pending.some((j) => j.job.kind === 'status'), 'a permanent status schedules no job');
   w = round(w);
