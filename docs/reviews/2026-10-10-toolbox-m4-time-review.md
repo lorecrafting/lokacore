@@ -39,3 +39,15 @@
 - Opened door stays open after the window: acceptable and documented; the spec says "opens only", not "is open only".
 - `status()` unchanged: yes (M2, M3 killed; Chapter 1 bytes equal).
 - kernel_api 1.45 shared with row 11: not a finding.
+
+## Re-check, fix round 1 (head `1702cb62d80f0ced64b58b30906776a12c7c79a3`)
+
+Scope: commits `212aec88` and `1702cb62` only. Hosted ci and book-e2e both success on the head. Focused tests pass (`time_windows`, `tags`, `calendar`, `barriers`, `content_time_test.exs`).
+
+- B1 fixed: the door opens at 1000, closes at 2000 (`closed`), and is then refused (`invalid_state`). M1 (gate on every verb) now fails.
+- B2 fixed: a locked moon door at clock 0 answers `exit_locked` (`time_windows.test.ts:86-91`). M6 (gate above the state check) now fails at line 91.
+- B3 fixed: in each kernel, one row keeps only the sky variant and one keeps only `opens_when`, both at 1.44. M4 (TS) and M5 (Elixir, assertion at `content_time_test.exs:46`) now fail.
+- SF4 fixed: `LEAF_REFS` moved to `cartridge_leaf_refs.ts`. `cartridge_refs.ts` is 328 lines with its allowance back at 336 (not raised), and `check_ts_size.mjs` passes. All importers are updated (`cartridge_refs.ts:14`, `tags.test.ts:16`); `leaf_refs.ex` and `mechanics.md:1812` cite the new path.
+- SF5 fixed: `mechanics.md:1810` now names environment leaves with a noun (`sky`) whose fields name what is read.
+
+Verdict: **APPROVE**.
