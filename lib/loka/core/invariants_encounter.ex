@@ -123,6 +123,11 @@ defmodule Loka.Core.InvariantsEncounter do
       op["op"] == "encounter.close" ->
         close_row(row)
 
+      op["op"] == "encounter.target" ->
+        if op["npc_id"] in (row["active_ids"] || []) and op["npc_id"] != row["npc_id"] and
+             ctx.containers[op["npc_id"]] == row["room_id"],
+           do: Map.put(row, "npc_id", op["npc_id"])
+
       row["round"] != op["round"] or op["job_id"] == op["next_job_id"] ->
         nil
 

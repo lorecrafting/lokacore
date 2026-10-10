@@ -158,6 +158,13 @@ export function changeEncounter(
     return {
       value: { ...row, status: 'closed', ...(pack && { active_ids: [], next_opponent_id: null }) },
     };
+  if (op.op === 'encounter.target')
+    return pack &&
+      op.npc_id !== row.npc_id &&
+      (row.active_ids as string[]).includes(op.npc_id) &&
+      present(op.npc_id, row.room_id as string)
+      ? { value: { ...row, npc_id: op.npc_id } }
+      : failed;
   if (row.round !== op.round || op.next_job_id === op.job_id) return failed;
   if (pack && !packAdvanceValid(op, row, present, initiallyPresent)) return failed;
   try {

@@ -123,6 +123,12 @@ defmodule Loka.Core.ComposeEncounter do
            )
          )}
 
+      op["op"] == "encounter.target" ->
+        if row["active_ids"] != nil and op["npc_id"] in row["active_ids"] and
+             op["npc_id"] != row["npc_id"] and present?.(op["npc_id"], row["room_id"]),
+           do: {:ok, Map.put(row, "npc_id", op["npc_id"])},
+           else: {:error, "precondition_failed"}
+
       row["round"] != op["round"] or op["job_id"] == op["next_job_id"] ->
         {:error, "precondition_failed"}
 

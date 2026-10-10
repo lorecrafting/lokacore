@@ -110,6 +110,12 @@ function changeEncounter(
       status: 'closed',
       ...(row.active_ids !== undefined && { active_ids: [], next_opponent_id: null }),
     };
+  if (op.op === 'encounter.target')
+    return row.active_ids?.includes(op.npc_id) &&
+      op.npc_id !== row.npc_id &&
+      containers.get(op.npc_id) === row.room_id
+      ? { ...row, npc_id: op.npc_id }
+      : undefined;
   if (
     row.round !== op.round ||
     op.job_id === op.next_job_id ||

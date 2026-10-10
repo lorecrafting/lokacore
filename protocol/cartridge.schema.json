@@ -1700,6 +1700,10 @@
             "chance"
           ],
           "additionalProperties": false
+        },
+        "target_choice": {
+          "description": "Opts into target choice (docs/system/mechanics.md, toolbox row 6a; kernel_api at least 1.48): during a roster encounter the player's attack on another present active member makes it the primary the player strikes.",
+          "const": true
         }
       },
       "required": [

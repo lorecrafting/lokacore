@@ -159,10 +159,16 @@ const fighting = (world: World, actor: CharacterId) => {
 /** Final actor restriction; only internal escape policy reads the pre-combat composed set. */
 export function resolved(world: World, actor: CharacterId): ActionSet {
   const set = composed(world, actor);
-  return fighting(world, actor)
+  const fight = fighting(world, actor);
+  // Toolbox row 6a: an opted-in roster fight keeps Attack to choose among its members.
+  const choosing =
+    !!world.cartridge.world?.combat?.target_choice && (fight?.row.active_ids?.length ?? 0) > 1;
+  return fight
     ? Object.fromEntries(
-        Object.entries(set).filter(([, a]) =>
-          ['flee', 'stand', 'look', 'scan', 'bandage'].includes(a.command),
+        Object.entries(set).filter(
+          ([, a]) =>
+            ['flee', 'stand', 'look', 'scan', 'bandage'].includes(a.command) ||
+            (a.command === 'attack' && choosing),
         ),
       )
     : set;

@@ -900,6 +900,39 @@
           ]
         },
         {
+          "description": "Toolbox row 6a: the player's chosen target in an open roster encounter becomes its primary; the row must equal expected and npc_id must be a present active member other than the current primary.",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "encounter.target"
+            },
+            "writer_group": {
+              "$ref": "delta.schema.json#/$defs/WriterGroup"
+            },
+            "encounter_id": {
+              "$ref": "delta.schema.json#/$defs/EncounterId"
+            },
+            "job_id": {
+              "$ref": "delta.schema.json#/$defs/JobId"
+            },
+            "expected": {
+              "$ref": "#/$defs/EncounterRow"
+            },
+            "npc_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            }
+          },
+          "required": [
+            "op",
+            "writer_group",
+            "encounter_id",
+            "job_id",
+            "expected",
+            "npc_id"
+          ],
+          "additionalProperties": false
+        },
+        {
           "type": "object",
           "properties": {
             "op": {

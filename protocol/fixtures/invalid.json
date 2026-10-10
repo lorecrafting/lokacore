@@ -21803,5 +21803,61 @@
         "code": "too_few_items"
       }
     ]
+  },
+  {
+    "contract": "DeltaOp",
+    "value": {
+      "op": "encounter.target"
+    },
+    "errors": [
+      {
+        "path": "/encounter_id",
+        "code": "missing_property"
+      },
+      {
+        "path": "/expected",
+        "code": "missing_property"
+      },
+      {
+        "path": "/job_id",
+        "code": "missing_property"
+      },
+      {
+        "path": "/npc_id",
+        "code": "missing_property"
+      },
+      {
+        "path": "/writer_group",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "CombatSettings",
+    "value": {
+      "player_attack": {
+        "chance": 75,
+        "damage_min": 1,
+        "damage_max": 2
+      },
+      "interval": 150,
+      "sleep_multiplier": 2,
+      "flee_multiplier": 2,
+      "narration": {
+        "player_hit": "combat.player_hit",
+        "player_miss": "combat.player_miss",
+        "npc_hit": "combat.npc_hit",
+        "npc_miss": "combat.npc_miss",
+        "player_died": "combat.player_died",
+        "npc_died": "combat.npc_died"
+      },
+      "target_choice": false
+    },
+    "errors": [
+      {
+        "path": "/target_choice",
+        "code": "const_mismatch"
+      }
+    ]
   }
 ]
