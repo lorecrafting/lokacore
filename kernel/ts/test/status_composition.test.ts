@@ -17,12 +17,17 @@ test('literal status composition cases', () => {
 test('status rows, transitions and condition views require their complete shape', () => {
   const op = read('protocol/fixtures/status_composition.json').cases[0].ops[0];
   assert.deepEqual(validate('DeltaOp', op), []);
+  // A permanent row (row W8) has no timing at all; a timed row carries all three fields or none.
+  assert.deepEqual(validate('StatusRow', { active: true, generation: 1 }), []);
   for (const field of ['generation', 'ends_at', 'next_tick_at', 'job_id']) {
     const value = { ...op.value };
     delete value[field];
-    assert.deepEqual(validate('StatusRow', value), [
-      { path: '/' + field, code: 'missing_property' },
-    ]);
+    // Each of the other two timing fields requires it (dependentRequired), so it is missed twice.
+    const missing = { path: '/' + field, code: 'missing_property' };
+    assert.deepEqual(
+      validate('StatusRow', value),
+      field === 'generation' ? [missing] : [missing, missing],
+    );
   }
   for (const field of ['body_id', 'status', 'expected', 'value']) {
     const partial = { ...op };
@@ -44,8 +49,10 @@ test('status rows, transitions and condition views require their complete shape'
     tick_every: 60,
   };
   assert.deepEqual(validate('ConditionView', view), []);
-  // per_tick is absent for a status that never ticks (row 2c).
-  for (const field of Object.keys(view).filter((f) => f !== 'per_tick')) {
+  // per_tick is absent for a status that never ticks (row 2c), ends_at and next_tick_at for a
+  // permanent one (row W8).
+  const optional = ['per_tick', 'ends_at', 'next_tick_at'];
+  for (const field of Object.keys(view).filter((f) => !optional.includes(f))) {
     const partial: Record<string, unknown> = { ...view };
     delete partial[field];
     assert.deepEqual(validate('ConditionView', partial), [
@@ -91,4 +98,9 @@ test('a status definition requires every field and positive times', () => {
     assert.deepEqual(validate('StatusDefinition', { ...def, [field]: 0 }), [
       { path: '/' + field, code: 'below_minimum' },
     ]);
+  // Row W8: the one word a duration may be.
+  assert.deepEqual(validate('StatusDefinition', { ...def, duration: 'permanent' }), []);
+  assert.deepEqual(validate('StatusDefinition', { ...def, duration: 'forever' }), [
+    { path: '/duration', code: 'const_mismatch' },
+  ]);
 });

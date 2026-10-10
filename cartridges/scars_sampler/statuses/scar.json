@@ -1,0 +1,11 @@
+{
+  "duration": "permanent",
+  "tick_every": 60,
+  "resource": "hp",
+  "label": "condition.scarred",
+  "narration": {
+    "applied": "narration.scar.applied",
+    "tick": "narration.scar.tick",
+    "expired": "narration.scar.expired"
+  }
+}

@@ -1,12 +1,12 @@
 defmodule Loka.Content.Status do
-  @moduledoc "Checks toolbox row 1 status declarations, their appliers, the foods that cure them, (row G3) the NPCs and items immune to them and (row 2c) their attribute modifiers and (row G13) the liquids that cure them."
+  @moduledoc "Checks toolbox row 1 status declarations, their appliers, the foods that cure them, (row G3) the NPCs and items immune to them and (row 2c) their attribute modifiers and (row G13) the liquids that cure them; (row W8) permanent statuses never tick nor move the derived hp maximum."
   import Loka.Content.Source, only: [at: 2, diag: 2]
   alias Loka.Content.Refs
 
-  def check(nil, _, _), do: []
-  def check(_, _, nil), do: []
+  def check(nil, _, _, _), do: []
+  def check(_, _, nil, _), do: []
 
-  def check(m, defs, {_, text}) do
+  def check(m, defs, {_, text}, settings) do
     statuses = defs["status"] || %{}
 
     cures =
@@ -19,7 +19,9 @@ defmodule Loka.Content.Status do
 
     if statuses == %{} and cures == [] and not g3,
       do: [],
-      else: gate(m, g3) ++ values(statuses, m, defs, text) ++ foods(cures ++ later, m, defs)
+      else:
+        gate(m, floor(statuses, g3)) ++
+          values(statuses, {m, settings}, defs, text) ++ foods(cures ++ later, m, defs)
   end
 
   # The fields needing kernel_api 1.46: row G3's immune lists, steps naming an item (or, row 42, an
@@ -48,8 +50,19 @@ defmodule Loka.Content.Status do
 
   defp trigger?(_), do: false
 
+  # A permanent status (row W8) needs 1.48, the fields above 1.46.
+  defp floor(statuses, g3) do
+    cond do
+      Enum.any?(statuses, &match?({_, {_, _, %{"duration" => "permanent"}}}, &1)) -> [1, 48]
+      g3 -> [1, 46]
+      true -> [1, 38]
+    end
+  end
+
+  defp permanent?(s), do: s["duration"] == "permanent"
+
   # A fatal hp tick runs the death sequence, so death's settings must be declared too.
-  defp gate(m, g3) do
+  defp gate(m, floor) do
     caps = m["requires"]["capabilities"]
 
     version =
@@ -58,32 +71,37 @@ defmodule Loka.Content.Status do
       |> Enum.map(&String.to_integer/1)
 
     if caps["status"] == 1 and caps["death"] == 1 and
-         version >= if(g3, do: [1, 46], else: [1, 38]),
+         version >= floor,
        do: [],
        else: [diag("KERNEL_API_RANGE_INVALID", at("cartridge.json", ["requires", "kernel_api"]))]
   end
 
-  defp values(statuses, m, defs, text) do
-    for {_, {rel, _, s}} <- statuses, d <- status(rel, s, m, defs, text), do: d
+  defp values(statuses, ms, defs, text) do
+    for {_, {rel, _, s}} <- statuses, d <- status(rel, s, ms, defs, text), do: d
   end
 
-  defp status(rel, s, m, defs, text) do
+  defp status(rel, s, {m, settings}, defs, text) do
     Refs.reference(rel, [], "resource", s, m, defs) ++
-      if(s["tick_every"] >= s["duration"],
+      if(not permanent?(s) and s["tick_every"] >= s["duration"],
         do: [diag("SCHEMA_VIOLATION", at(rel, ["tick_every"]))],
         else: []
       ) ++
       per_tick(rel, s) ++
       missing_text(rel, ["label"], [s["label"]], text) ++
       missing_text(rel, ["narration"], Map.values(s["narration"] || %{}), text) ++
-      modifies(rel, s, m, defs)
+      modifies(rel, s, m, defs) ++ hp_max(rel, s, settings)
   end
 
-  # Never 0; only a modifying status (row 2c) may omit it.
+  # Never 0; only a modifying status (row 2c) may omit it, and a permanent one (row W8) never
+  # ticks, so it declares none.
   defp per_tick(rel, s) do
-    if s["per_tick"] == 0 or (s["per_tick"] == nil and s["modifies"] == nil),
-      do: [diag("SCHEMA_VIOLATION", at(rel, ["per_tick"]))],
-      else: []
+    if s["per_tick"] == 0 or
+         if(permanent?(s),
+           do: s["per_tick"] != nil,
+           else: s["per_tick"] == nil and s["modifies"] == nil
+         ),
+       do: [diag("SCHEMA_VIOLATION", at(rel, ["per_tick"]))],
+       else: []
   end
 
   # Row 2c: each status modifier names a real attribute.
@@ -91,6 +109,16 @@ defmodule Loka.Content.Status do
     for {a, i} <- Enum.with_index(s["modifies"] || []),
         d <- Refs.reference(rel, ["modifies", i], "attribute", a, m, defs),
         do: d
+  end
+
+  # loka-kgd.50: a permanent status never modifies an attribute the derived hp maximum reads.
+  defp hp_max(rel, s, settings) do
+    terms =
+      for t <- get_in(settings, ["world", "derived", "hp_max", "terms"]) || [], do: t["attribute"]
+
+    for {a, i} <- Enum.with_index(s["modifies"] || []),
+        permanent?(s) and a["attribute"] in terms,
+        do: diag("SCHEMA_VIOLATION", at(rel, ["modifies", i, "attribute"]))
   end
 
   defp missing_text(_, _, _, :unknown), do: []

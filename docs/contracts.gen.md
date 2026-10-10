@@ -342,7 +342,7 @@ The StateDelta algebra: typed operations, their mutation targets and preconditio
 - **QuestInstanceId**: A QuestInstance (03 §12; 06 §1), created at activation from IdSource. Lowercase hyphenated UUID, any version.
 - **RoleBinding**: One role a continuation bound when it opened (04 §5.3 'bound roles'), for example the NPC the choice is made with.
 - **StateDelta**: A non-committed proposal of authoritative changes (04 §1). ops are in semantic order: the root's explicit sequence, then deliveries in FIFO/registry order (04 §5.2); never map, file or arrival order. Each op names its mutation target (MutationTarget) and its precondition, checked against the proposal overlay of the ops before it; a failed precondition or two writer groups writing one target without a registered composition rule faults the whole decision (04 §5.1). There is no last-writer-wins. Canonical serialization is the canonical JSON of this value (numeric profile). Its size is bounded by the composition profile's operation budget, not by this schema.
-- **StatusRow**: One body status generation, retained inactive after removal. The body and status are the row's target; an active row owns its pending tick job.
+- **StatusRow**: One body status generation, retained inactive after removal. The body and status are the row's target; an active timed row owns its pending tick job; a permanent one (toolbox row W8) has no ends_at, next_tick_at or job_id.
   - `true`
   - `false`
 - **VisitedRoom**: One actor’s committed room visit; keyed by actor and room. Its count (variety@1) is the number of entries, absent while it is 1.
@@ -480,7 +480,7 @@ The portable GameView envelope and its freshness (04 §14-§16; 00 §4.10; pre-r
   - `true`: Offered and currently legal.
   - `false`: Shown but not legal now, with the typed reason (00 §4.10: greyed with the reason). Never a security boundary: the authority revalidates (ACT-09).
 - **CombatView**: The current encounter and visible opponent presented to the player.
-- **ConditionView**: One active body status: its authored label, end, next tick and per-tick resource change (absent for a status that never ticks, row 2c).
+- **ConditionView**: One active body status: its authored label, end and next tick (both absent for a permanent status, row W8) and per-tick resource change (absent for a status that never ticks, row 2c).
 - **ContentView**: An item inside a container of an EntityView's contents (04 §15 as amended by c1-locks): its id, short name and kind, its direct container (the EntityView's item or another item of the same contents), its state if it has a barrier, and as actions only take and, with a barrier, the container verbs admission and barrier@1 accept now. Optional description is the explicit full-description TextKey; current NPC/item projections always copy their authored definition field, including held/worn/reachable contents. Older snapshots may omit it; the format tag stays.
 - **DoorView**: The door (barrier@1) an exit passes through (04 §15 as amended by c1-doors; room-view need #12): its short name, its state, and the door verbs (open, close, lock, unlock) the actor may use on it now, only those admission and the barrier rule would accept, in presentation order. The place's actions never list them.
 - **DreamView**: Bed-local saved checkpoint; safe exact offers never replace ordinary World or dialogue.

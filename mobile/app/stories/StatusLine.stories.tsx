@@ -125,8 +125,8 @@ export const Bleeding: Story = {
   },
 };
 
-// Breaks: durations from two minutes stop reading as minutes, a gain loses its sign, or a status
-// without a tick (row 2c) shows a tick part.
+// Breaks: durations from two minutes stop reading as minutes, a gain loses its sign, a status
+// without a tick (row 2c) shows a tick part, or a permanent one (row W8) shows a time part.
 export const Conditions: Story = {
   args: {
     time: 60,
@@ -148,12 +148,14 @@ export const Conditions: Story = {
         tick_every: 600,
       },
       { label: 'mighty', ends_at: 3660, next_tick_at: 3660, resource: 'mv', tick_every: 600 },
+      { label: 'scarred', resource: 'hp', tick_every: 60 },
     ] as never,
   },
   play: async ({ canvas }) => {
     await expect(canvas.getByText('poisoned · 4m remaining · -1 HP each 60s')).toBeVisible();
     await expect(canvas.getByLabelText('blessed, 60m remaining, +5 MV each 10m')).toBeVisible();
     await expect(canvas.getByText('mighty · 60m remaining')).toBeVisible();
+    await expect(canvas.getByText('scarred')).toBeVisible();
   },
 };
 

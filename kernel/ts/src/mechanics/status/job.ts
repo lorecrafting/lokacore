@@ -18,7 +18,8 @@ import { deathSequence } from '../death/sequence.ts';
 import { adjust, level, resourceSpec } from '../resource.ts';
 import { endStatus, expire, specOf } from './shared.ts';
 
-type Active = StatusRow & { active: true };
+// A timed row: only it owns a job (a permanent one, row W8, has none).
+type Active = Required<Extract<StatusRow, { active: true }>>;
 
 /**
  * A due status tick or expiry on its holder (the player's body, an NPC or an item; rows 1, G3);

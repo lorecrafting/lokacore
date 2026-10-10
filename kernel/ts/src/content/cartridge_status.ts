@@ -5,7 +5,8 @@ import type { Diagnostic } from '../contracts.gen.ts';
 
 /**
  * Checked toolbox row 1, G3, 2c and G13 (liquid cures) declarations in the loaded artifact, independent of source
- * compilation; only a status with `modifies` (row 2c) may omit `per_tick`.
+ * compilation; only a status with `modifies` (row 2c) may omit `per_tick`, and a permanent one
+ * (row W8) has none.
  */
 export function status(c: Obj): Diagnostic[] {
   const out: Diagnostic[] = [];
@@ -25,8 +26,13 @@ export function status(c: Obj): Diagnostic[] {
   ) as [string, Obj][];
   const { immune, named, drinks, lone, g3 } = api146(c);
   if (!Object.keys(defs).length && !applies.length && !cures.length && !g3) return out;
+  const lasting = (s: Obj) => s.duration === 'permanent'; // row W8: never ticks, so no per_tick
+  const floor = Object.values(defs).some(lasting) ? '1.48' : g3 ? '1.46' : '1.38';
+  const hp = new Set(
+    ((c.world?.derived?.hp_max?.terms ?? []) as Obj[]).map((t) => refString(t.attribute)),
+  );
   if (
-    apiCmp(c.manifest.requires.kernel_api.at_least, g3 ? '1.46' : '1.38') < 0 ||
+    apiCmp(c.manifest.requires.kernel_api.at_least, floor) < 0 ||
     ['status', 'death'].some((k) => c.lock.capabilities[k] !== 1) // a fatal hp tick needs death
   )
     out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
@@ -34,9 +40,18 @@ export function status(c: Obj): Diagnostic[] {
     const at = `.cartridge.statuses${step(ref)}`;
     if (!c.resources?.[refString(s.resource)])
       out.push(diag('UNRESOLVED_REFERENCE', `${at}.resource`));
-    if (s.tick_every >= s.duration) out.push(diag('SCHEMA_VIOLATION', `${at}.tick_every`));
-    if (s.per_tick === 0 || (s.per_tick === undefined && !s.modifies))
+    if (!lasting(s) && s.tick_every >= s.duration)
+      out.push(diag('SCHEMA_VIOLATION', `${at}.tick_every`));
+    if (
+      s.per_tick === 0 ||
+      (lasting(s) ? s.per_tick !== undefined : s.per_tick === undefined && !s.modifies)
+    )
       out.push(diag('SCHEMA_VIOLATION', `${at}.per_tick`));
+    // loka-kgd.50: a permanent status never modifies an attribute the derived hp maximum reads.
+    s.modifies?.forEach((m: Obj, n: number) => {
+      if (lasting(s) && hp.has(refString(m.attribute)))
+        out.push(diag('SCHEMA_VIOLATION', `${at}.modifies[${n}].attribute`));
+    });
     if (!c.text?.[s.label]) out.push(diag('SCHEMA_VIOLATION', `${at}.label`));
     if (Object.values(s.narration as Obj).some((k) => !c.text?.[k as string]))
       out.push(diag('SCHEMA_VIOLATION', `${at}.narration`));
