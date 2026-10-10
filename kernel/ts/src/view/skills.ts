@@ -22,16 +22,8 @@ export function skillViews(world: World, steps = { n: 0 }) {
   });
   const attributes = attributeViews(world, ref);
   const selected = choice(world, world.character);
-  const l = levelling(world, world.character);
   return {
-    ...(l && {
-      levelling: {
-        level: l.level,
-        experience: l.experience,
-        ...(l.next !== undefined && { next: l.next }),
-        unspent: l.unspent,
-      },
-    }),
+    ...levellingView(world),
     ...(skills.length && { skills }),
     ...(attributes.length && { attributes }),
     ...(selected && { ancestry: selected.ancestry }),
@@ -49,6 +41,14 @@ export function skillViews(world: World, steps = { n: 0 }) {
         })),
       }),
   };
+}
+
+/** The player's level, experience, next threshold (absent at the top) and unspent points (row 4). */
+function levellingView(world: World) {
+  const l = levelling(world, world.character);
+  if (!l) return {};
+  const { level, experience, next, unspent } = l;
+  return { levelling: { level, experience, ...(next !== undefined && { next }), unspent } };
 }
 
 /** Original free-bound lessons identify the existing actor SkillViews; no second acquisition projection. */
