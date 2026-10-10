@@ -51,6 +51,7 @@ const FILTERS: Record<string, Match> = {
   room: (w, want, p) => w.roomIds[refString(want)] === p.room_id,
   // ponytail: the authored instance only; a created item (a harvested pelt) never matches.
   item: (w, want, p) => w.entityIds[refString(want)] === p.item_id,
+  npc: (w, want, p) => w.entityIds[refString(want)] === p.entity_id, // the entrant (row W3)
   victim: ref('victim_definition'),
   custom: (_, want, p) => want === p.event.key,
   check: (_, want, p) => want === p.check.key,

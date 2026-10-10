@@ -145,6 +145,7 @@ function WorldPage(p: BodyProps) {
       view={view}
       text={text}
       log={log}
+      recap={p.screen.recap}
       g={p.g}
       press={p.press}
       open={openThing}

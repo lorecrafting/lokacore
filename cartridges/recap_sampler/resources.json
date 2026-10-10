@@ -1,0 +1,14 @@
+{
+  "resources": {
+    "mv": {
+      "minimum": 0,
+      "maximum": 100,
+      "start": 100
+    },
+    "hp": {
+      "minimum": 0,
+      "maximum": 20,
+      "start": 20
+    }
+  }
+}

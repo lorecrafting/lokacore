@@ -178,7 +178,9 @@ function timeStage(c: Obj): Diagnostic[] {
           ['schedule@1'],
         ),
       );
-    if (apiCmp(c.manifest.requires.kernel_api.at_least, '1.1') < 0)
+    // The away recap threshold is toolbox row W27 (API 1.47).
+    const floor = c.manifest.time_policy.recap_after_minutes ? '1.47' : '1.1';
+    if (apiCmp(c.manifest.requires.kernel_api.at_least, floor) < 0)
       out.push(
         diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'),
       );

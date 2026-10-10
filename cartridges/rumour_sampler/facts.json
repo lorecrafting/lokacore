@@ -1,0 +1,16 @@
+{
+  "facts": {
+    "knows_mill": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "instance"
+      ],
+      "per_subject": true,
+      "meaning": "Whether this NPC has heard that the mill wheel broke."
+    }
+  }
+}

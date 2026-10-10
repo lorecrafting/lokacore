@@ -1165,6 +1165,10 @@
         "time": {
           "$ref": "command.schema.json#/$defs/LogicalTime"
         },
+        "recap_after": {
+          "description": "Toolbox row W27: the authored away recap threshold in logical seconds (recap_after_minutes x 60 x rate); present exactly when the cartridge authors it.",
+          "$ref": "command.schema.json#/$defs/LogicalTime"
+        },
         "calendar_status": {
           "$ref": "#/$defs/CalendarStatus"
         },

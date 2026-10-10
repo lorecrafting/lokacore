@@ -1,0 +1,12 @@
+{
+  "duration": 120,
+  "tick_every": 60,
+  "resource": "mv",
+  "per_tick": -1,
+  "label": "condition.chilled",
+  "narration": {
+    "applied": "narration.chill.applied",
+    "tick": "narration.chill.tick",
+    "expired": "narration.chill.expired"
+  }
+}

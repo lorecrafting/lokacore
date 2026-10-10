@@ -38,7 +38,8 @@ defmodule Loka.Content.Reactions do
     "barrier" => "barrier",
     "scene" => "scene",
     "status" => "status",
-    "kind" => "liquid"
+    "kind" => "liquid",
+    "npc" => "npc"
   }
   @doc "Each trigger filter that names a definition (W1), with that definition's kind."
   @spec filters() :: %{String.t() => String.t()}
@@ -49,6 +50,7 @@ defmodule Loka.Content.Reactions do
       owned(at(rel, []), "reaction", ctx.kinds) ++
       owned(at(rel, ["on", "event"]), event, ctx.events) ++
       named(rel, on, ctx) ++
+      entrant(rel, on, ctx) ++
       Enum.flat_map(Enum.with_index(r["apply"]), &consequence(rel, &1, on, ctx))
   end
 
@@ -58,24 +60,45 @@ defmodule Loka.Content.Reactions do
         reference(rel, ["on"], {f, kind}, on, ctx.m, ctx.defs)
       end)
 
-  # ponytail: three finite reaction API floors stay in their one declaration check. # credo:disable-for-next-line Credo.Check.Refactor.ABCSize
-  defp api(r, manifest) do
-    needed =
-      r["on"]["event"] == "quest_resolved" or
-        Enum.any?(r["apply"], &(&1["op"] == "quest.activate"))
+  # A spawn template has no instance to enter (row W3).
+  defp entrant(rel, %{"npc" => n}, ctx) do
+    case resolve(n, "npc", ctx.m, ctx.defs) do
+      {_, _, %{"spawn_template" => true}} ->
+        [diag("SCHEMA_VIOLATION", at(rel, ["on", "npc"]), %{"error" => "invalid_value"})]
 
-    terminal = Enum.any?(r["apply"], &(&1["op"] in ~w(quest.resolve quest.fail)))
-    suppression = Enum.any?(r["apply"], &(&1["op"] == "population.suppress"))
+      _ ->
+        []
+    end
+  end
+
+  defp entrant(_, _, _), do: []
+
+  # The kernel_api minor (major 1) each consequence op needs; twin of FLOORS in
+  # kernel/ts/src/content/cartridge_reactions.ts.
+  @floors %{
+    "quest.activate" => 8,
+    "quest.resolve" => 12,
+    "quest.fail" => 12,
+    "population.suppress" => 35
+  }
+
+  # One diagnostic per rule below its highest floor; the entrant filter needs 1.47 (row W3).
+  defp api(r, manifest) do
+    floor =
+      Enum.max([
+        if(r["on"]["event"] == "quest_resolved", do: 8, else: 0),
+        if(Map.has_key?(r["on"], "npc"), do: 47, else: 0)
+        | Enum.map(r["apply"], &Map.get(@floors, &1["op"], 0))
+      ])
 
     version =
       manifest["requires"]["kernel_api"]["at_least"]
       |> String.split(".")
       |> Enum.map(&String.to_integer/1)
 
-    if (needed and version < [1, 8]) or (terminal and version < [1, 12]) or
-         (suppression and version < [1, 35]),
-       do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
-       else: []
+    if floor > 0 and version < [1, floor],
+      do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
+      else: []
   end
 
   defp consequence(rel, {%{"op" => "quest.activate"} = s, i}, on, ctx) do

@@ -1569,6 +1569,15 @@ A recipe may declare `tip`, a catalog key (`UNRESOLVED_REFERENCE` at `recipes/<k
 
 Author rule: an NPC with `disposition.hostile` refuses every dialogue while hostile, so give a quest's accept, hand-over and receive to a speaker who cannot turn hostile, or make that betrayal the design. The compiler warns (HOSTILE_QUEST_SPEAKER, severity warning, at `dialogues/<key>.npc`) when such an NPC speaks a dialogue with a choice carrying `accept`, `hand_over` or `receive`; the build succeeds and the loader does not check it.
 
+## Rumour declarations
+
+[Rumour by co-presence](mechanics.md#rumour-by-co-presence-toolbox-row-w3) adds one optional reaction trigger filter, `npc` on `entity_entered_room` (a short key the compiler expands, `Loka.Content.Reactions.filters/0`). It needs `kernel_api` at least **1.47** (KERNEL_API_RANGE_INVALID; compiler `lib/loka/content/reactions.ex`, loader `kernel/ts/src/content/cartridge_reactions.ts`); an unresolved `npc` is UNRESOLVED_REFERENCE at `reactions/<key>.on.npc` in both, and a spawn template there, which has no instance to enter, is SCHEMA_VIOLATION `invalid_value`. Example (`cartridges/rumour_sampler/reactions/tells_innkeeper.json`): `{"on": {"event": "entity_entered_room", "room": "inn", "npc": "ada"}, "when": {"policy_version": 1, "root": {"op": "fact_compare", "fact": "knows_mill", "npc": "ada", "equals": true}}, "apply": [{"op": "fact.assign", "fact": "knows_mill", "npc": "innkeeper", "value": true}]}`.
+
 ## Lore deduction declarations
 
 [Lore codex and deduction](mechanics.md#lore-codex-and-deduction-toolbox-row-46) adds no field: a deduction is an ordinary recipe whose `policy` is `{op: "all", items}` with at least two `fact_compare` items `equals: true` on declared topics' facts (plus, for once only, a `not` of the granted topic's fact) and whose success `sequence` has a `fact.assign` of another declared topic's fact to `true`. Its target should be a plain detail: a recipe on a readable or perception detail is listed among that detail's actions, not the place's, so the Journal cannot offer its card. GameView `deductions` is new in `kernel_api` **1.47** (the sampler requires it); no loader check is added, since no declaration changes. A badge is a declared topic whose fact `entity_entered_room` reactions assign under `visited_count` (knowledge@1, variety@1).
+
+
+## Away recap declarations
+
+The [away recap](mechanics.md#away-recap-toolbox-row-w27) reads the optional `time_policy.recap_after_minutes` in `cartridge.json` (`TimePolicy.recap_after_minutes`, an integer from 1 to 10080, real minutes, the maximum a safety bound; `kernel_api` at least **1.47**). The schema refuses a value out of range or not an integer; the compiler (`lib/loka/content/requires.ex`) and the loader (`kernel/ts/src/content/cartridge.ts` `timeStage`) refuse an older API floor (KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least`). `cartridges/recap_sampler` is the sampler. A cartridge without the field keeps its bytes, hash and behavior.

@@ -36,6 +36,10 @@
                 },
                 "room": {
                   "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                },
+                "npc": {
+                  "$ref": "identity.schema.json#/$defs/DefinitionRef",
+                  "description": "The entrant is this NPC's authored instance (toolbox row W3). Needs kernel_api at least 1.47."
                 }
               },
               "required": [
