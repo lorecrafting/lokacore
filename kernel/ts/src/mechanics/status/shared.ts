@@ -142,7 +142,7 @@ export function applyStatus(
   return [...settleFor(world, body, status, writer_group), change, job];
 }
 
-/** Inactivate every active status on `body` (death, or a cure listing them). */
+/** Inactivate every active status on `body` at death (a cure goes through `cureOps`, which settles hp). */
 export const clearStatuses = (world: World, body: EntityId, writer_group: number): DeltaOp[] =>
   activeStatuses(world, body).map(({ status, row }) => endStatus(body, status, row, writer_group));
 

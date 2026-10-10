@@ -4,7 +4,7 @@ import { apiCmp } from './cartridge_installed.ts';
 import type { Diagnostic } from '../contracts.gen.ts';
 
 /**
- * Checked toolbox row 1, G3 and 2c declarations in the loaded artifact, independent of source
+ * Checked toolbox row 1, G3, 2c and G13 (liquid cures) declarations in the loaded artifact, independent of source
  * compilation; only a status with `modifies` (row 2c) may omit `per_tick`.
  */
 export function status(c: Obj): Diagnostic[] {
