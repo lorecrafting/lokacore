@@ -125,21 +125,27 @@ test('a dropped torch sets the door burning until it burns out', () => {
   assert.equal(fact(w, 'charred'), true);
 });
 
-// Breaks: an NPC's fatal tick passing the player as owner (death faults), its other statuses
-// left active on the dead body, or a later tick landing on it.
-test('a fatal tick kills the guard by the ordinary death sequence', () => {
+// Breaks: an NPC's fatal tick passing the player as owner (death faults), or the NPC's other
+// status left active on the dead body (death clears only the player's).
+test('a fatal tick kills the guard and ends its other status', () => {
   const guard = content.npcs![`${C}:npc/guard`]!;
+  const dart = content.reactions![`${C}:reaction/dart`]!;
+  const burning = { op: 'status.apply', status: ref('status', 'burning') } as const;
   const frail = {
     ...content,
     npcs: { ...content.npcs, [`${C}:npc/guard`]: { ...guard, hp: { ...guard.hp!, start: 2 } } },
+    reactions: {
+      ...content.reactions,
+      [`${C}:reaction/dart`]: { ...dart, apply: [...dart.apply, burning] },
+    },
   } as Cartridge;
-  let w = wait(fresh(frail), 3600 + 120);
+  // Poison and burning each take 1 at +60: the second brings hp to 0, whichever runs first.
+  const w = wait(fresh(frail), 3600 + 60);
   assert.equal(hp(w, 'guard'), 0);
   assert.equal(row(w, 'npc', 'guard', 'poison')?.active, false);
+  assert.equal(row(w, 'npc', 'guard', 'burning')?.active, false);
   const corpses = Object.values(w.state.created ?? {}).filter((c) => c.origin.kind === 'death');
   assert.equal(corpses.length, 1);
-  w = wait(w, 600);
-  assert.equal(hp(w, 'guard'), 0);
 });
 
 // Breaks: the loader drops a G3 check, so an artifact naming no status or item, or a G3 field

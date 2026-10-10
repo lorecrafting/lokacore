@@ -13,7 +13,7 @@ import {
   type QuestInstanceId,
   type Text,
 } from '../contracts.gen.ts';
-import { allocator, event, type Mint, type Steps, type World } from './decision.ts';
+import { allocator, event, type JobRow, type Mint, type Steps, type World } from './decision.ts';
 import { factChanged, type Base } from '../mechanics/fact.ts';
 import { jobCommandId } from '../foundation/id_source.ts';
 import { earned } from '../mechanics/quest/lifecycle.ts';
@@ -24,6 +24,7 @@ import { cmp } from '../foundation/validate.ts';
 import { currentRound } from '../mechanics/combat/round.ts';
 import { handoffGroup, sightHandoff } from './proposal_sight.ts';
 import { bleedRoundPair } from './proposal_bleed.ts';
+import { statusHolder } from '../mechanics/status/job.ts';
 import { anyPending as pending, parted } from '../mechanics/dialogue/selection.ts';
 import { admit, type Admitted } from './proposal_admit.ts';
 export { admit, ownerOf, type Admitted } from './proposal_admit.ts';
@@ -246,7 +247,7 @@ function react(p: P): Admitted | undefined {
 }
 
 // Each due job of the root's explicit advance, then its reactions, or the result that ends them.
-// size: allow 45, due job delivery joins population and bleed group pairing before causal reactions
+// size: allow 48, due job delivery joins population, bleed and status group pairing before causal reactions
 function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined {
   const advance = root.delta.ops.find((o) => o.op === 'time.advance');
   const due = Object.entries(advance ? (p.world.state.jobs ?? {}) : {})
@@ -255,6 +256,7 @@ function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined
   const populationPairs = populationDeadlinePairs(p.world, advance?.to ?? -1);
   const groups = new Map<string, number>();
   const bleedPairs = new Map<string, number>();
+  const holders = new Map<string, number>();
   for (const [job_id, { due_time }] of due) {
     const at = now(p);
     if (!('cartridge' in at)) return at;
@@ -277,7 +279,10 @@ function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined
     p.narration.push(...(ran.narration ?? []));
     const partner = populationPairs.get(job_id);
     const group =
-      (partner ? groups.get(partner) : undefined) ?? bleedPairs.get(job_id) ?? p.group + 1;
+      (partner ? groups.get(partner) : undefined) ??
+      bleedPairs.get(job_id) ??
+      statusGroup(at, job_id as JobId, current, holders, p.group + 1) ??
+      p.group + 1;
     groups.set(job_id, group);
     const bleedPair = bleedRoundPair(at, job_id as JobId, current);
     if (bleedPair) bleedPairs.set(bleedPair, group);
@@ -290,6 +295,20 @@ function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined
     const failed = join(p, own, ran.events, cause(p, due_time, run.id), 0, m) ?? react(p);
     if (failed) return failed;
   }
+}
+
+// Status jobs on one holder in one advance share a writer group, so two ticks on one pool compose
+// in sequence (row G3).
+function statusGroup(
+  at: World,
+  id: JobId,
+  job: JobRow,
+  holders: Map<string, number>,
+  next: number,
+) {
+  const held = job.job.kind === 'status' ? statusHolder(at, id)?.body : undefined;
+  if (held && !holders.has(held)) holders.set(held, next);
+  return held ? holders.get(held) : undefined;
 }
 
 function crowDelivery(p: P, next: Queued): Admitted | undefined {

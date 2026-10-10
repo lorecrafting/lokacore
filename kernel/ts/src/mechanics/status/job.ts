@@ -33,7 +33,7 @@ export function runStatus(
 ) {
   const done: DeltaOp = { op: 'job.complete', writer_group: 0, job_id };
   const status = job.job;
-  const held = holder(world, job_id);
+  const held = statusHolder(world, job_id);
   if (!held) return accepted<never>(world, 'job_ran', [done], []);
   const { body, row } = held;
   const spec = specOf(world, status);
@@ -112,7 +112,7 @@ function dies(
  * the canonical status target text (save.md, Status recovery).
  * ponytail: scans every status row per due job; bind the holder on the job if rows grow large.
  */
-function holder(world: World, job_id: JobId) {
+export function statusHolder(world: World, job_id: JobId) {
   for (const [at, row] of Object.entries(world.state.statuses ?? {}))
     if (row.active && row.job_id === job_id)
       return { body: (JSON.parse(at) as { body_id: EntityId }).body_id, row: row as Active };
