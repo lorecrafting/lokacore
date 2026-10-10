@@ -28,3 +28,10 @@
 2. **nit**, `kernel/ts/src/mechanics/dialogue/behavior.ts:83`: `mint() as ContinuationId` restates `continuationId(mint)` (`shared.ts:51`).
 3. **nit**, `cartridges/ashmere_missing_child/dialogues/b_aldric.json:8`: "Leave Aldric." reopens the hub; the content follow-up proposed in the PR has no Beads issue yet.
 4. **question**: a hub left pending while the player walks away refuses every other Talk and the dream's Continue (`scene/dream_shared.ts:75`) until Leave. Per spec; confirm the designer's Book UI item 6 covers it.
+
+## Second opinion (save)
+
+Fresh save-side reviewer on head `76523cc6` (code `919faaa6`), [PR comment](https://github.com/lorecrafting/lokacore/pull/345#issuecomment-6092576028). Verdict, quoted in lower case so this index keeps the primary verdict: approve with notes (no blocker, no should-fix from the save side). Checked: resolve and reopen in one commit (lost COMMIT retries settle one hub row); cold reopen re-derives the hub row (`receipt-history.ts:23`; a non-replayable mint mutant at `behavior.ts:71` fails `dialogue_hub.test.ts` with `save_corrupt`); `origin/main`'s `elspeth-asked.sql` and `vesper-riddle.sql` open `save_corrupt` (Start over), regenerated saves open; the `bell-receipt.ts:55` null-guard mutant fails `bell.test.ts`; adversarial Elspeth and Peg probes on real SQLite reopen correctly.
+
+1. **question (non-blocking)**: `dialogue-save.ts:51` (one resolved custody receive), `deadline-save.ts:61` (at most one accepted offer) and `topics-save.ts:38` (exactly one granting receipt) assume an answer resolves at most once per lineage. Current content is safe (Peg's accepts are refused after acceptance and expiry); a future hub option with receive, `topic.grant` or escort needs an availability that excludes repeats, or must end the hub.
+2. **nit**: `docs/system/save.md` does not say that a rule change under the same pin turns older receipt histories into `save_corrupt`; add one line under "Opening a story" citing the decision record.
