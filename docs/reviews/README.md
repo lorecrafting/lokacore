@@ -13,6 +13,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: skill growth by use and opposed checks, toolbox rows 5 and G5 (loka-kgd.19)](2026-10-10-toolbox-m3-skills-review.md): **APPROVE WITH NOTES**
 - [Review: damage kinds, resistances and critical hits, toolbox row G2 (loka-kgd.18)](2026-10-10-toolbox-g2-damage-review.md): **APPROVE**
 - [Review: property tags and the policy leaf set, toolbox row G1 (loka-kgd.17)](2026-10-10-toolbox-g1-review.md): **APPROVE**
+- [Batch review: mechanics toolbox M3, G1 tags, loot, W1, skills, damage (loka-kgd, PR #351)](2026-10-10-batch-m3-review.md): **APPROVE WITH NOTES**
 - [Review: Tap bleed, entity lines keep the page rhythm (PR #334)](2026-10-09-tap-bleed-334-review.md): **APPROVE**
 - [Review: Storybook current phone and tablet viewports (PR #340)](2026-10-09-storybook-viewports-340-review.md): **PASS**
 - [Review: Storybook MCP addon, Tidewave trial, smoke vitest config move (PR #333)](2026-10-09-storybook-mcp-333-review.md): **APPROVE**
