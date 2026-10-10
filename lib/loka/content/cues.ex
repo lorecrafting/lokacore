@@ -7,20 +7,28 @@ defmodule Loka.Content.Cues do
   import Loka.Content.Source, only: [diag: 3, at: 2]
   import Loka.Content.Refs, only: [owners: 2, owned: 3]
 
+  @holders [
+    {"room", [[]]},
+    {"npc", [[]]},
+    {"item", [[], ["fuel"]]},
+    {"status", [[]]},
+    {"recipe", [["outcomes", "success"], ["outcomes", "failure"]]}
+  ]
+
   @doc "Each cue as `{rel, steps, cue}`."
   @spec located(map()) :: [{String.t(), list(), map()}]
   def located(defs) do
-    for {kind, fields} <- [
-          {"room", [[]]},
-          {"npc", [[]]},
-          {"item", [[], ["fuel"]]},
-          {"status", [[]]},
-          {"recipe", [["outcomes", "success"], ["outcomes", "failure"]]}
-        ],
+    for {kind, fields} <- @holders,
         {_, {rel, steps, d}} <- defs[kind] || %{},
-        holder <- fields ++ details(kind, d),
+        {path, cue} <- cues(d, fields ++ details(kind, d)),
+        do: {rel, steps ++ path, cue}
+  end
+
+  # Each cue of definition `d` under one of its holder paths, with its path in `d`.
+  defp cues(d, holders) do
+    for holder <- holders,
         {cue, i} <- Enum.with_index(Enum.reduce(holder, d, &(&2[&1] || %{}))["cues"] || []),
-        do: {rel, steps ++ holder ++ ["cues", i], cue}
+        do: {holder ++ ["cues", i], cue}
   end
 
   defp details("room", r), do: for({k, _} <- Map.get(r, "details", %{}), do: ["details", k])

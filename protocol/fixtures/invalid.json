@@ -22111,5 +22111,45 @@
         "code": "too_few_items"
       }
     ]
+  },
+  {
+    "name": "cue_view_extra_field",
+    "contract": "CueView",
+    "value": {
+      "sense": "sound",
+      "text": "cue.x",
+      "loud": true
+    },
+    "errors": [
+      {
+        "path": "/loud",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "cue_perceived_unknown_sense_extra_field",
+    "contract": "Policy",
+    "value": {
+      "op": "cue_perceived",
+      "npc": {
+        "cartridge_id": "senses_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "npc",
+        "key": "guard"
+      },
+      "sense": "sight",
+      "extra": 1
+    },
+    "errors": [
+      {
+        "path": "/extra",
+        "code": "unknown_property"
+      },
+      {
+        "path": "/sense",
+        "code": "not_in_enum"
+      }
+    ]
   }
 ]
