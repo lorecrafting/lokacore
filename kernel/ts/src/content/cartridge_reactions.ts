@@ -56,7 +56,7 @@ export function reactions(c: Obj, { named, typedValue }: Checks): Diagnostic[] {
   const [major, minor] = c.manifest.requires.kernel_api.at_least.split('.').map(Number);
   for (const [r, at] of each(c)) {
     if (
-      (r.on.quest || r.apply.some((s: Obj) => s.op === 'quest.activate')) &&
+      (r.on.event === 'quest_resolved' || r.apply.some((s: Obj) => s.op === 'quest.activate')) &&
       (major < 1 || (major === 1 && minor < 8))
     )
       out.push(

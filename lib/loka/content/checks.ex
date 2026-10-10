@@ -72,9 +72,10 @@ defmodule Loka.Content.Checks do
   def expand(%{"event" => e} = on, m) when is_binary(e) and not is_map_key(on, "op"),
     do:
       Map.new(on, fn {f, v} ->
-        if is_binary(v) and is_map_key(Reactions.filters(), f),
-          do: {f, ref(v, Reactions.filters()[f], m)},
-          else: {f, v}
+        case Reactions.filters() do
+          %{^f => kind} when is_binary(v) -> {f, ref(v, kind, m)}
+          _ -> {f, v}
+        end
       end)
 
   # A recipe narration's participant (NarrationParticipant): the npc or item its role selects.

@@ -10,6 +10,7 @@ import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
 import { gameView, INSTALLED, loadCartridge, newWorld, step } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
+import { triggered } from '../src/mechanics/reaction.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-reactions-sampler-'));
 let artifact: Uint8Array;
@@ -85,4 +86,30 @@ test('a reaction chain from a dropped pebble stops at the budget', () => {
   const dropped = act(taken.world, { type: 'drop', item_id: item(w, 'pebble') });
   assert.deepEqual(dropped.decision, { kind: 'fault', code: 'budget_exceeded' });
   assert.equal(dropped.world, taken.world);
+});
+
+// Breaks: a victim filter reading a player's death, which has no victim_definition, throwing
+// instead of not matching.
+test('a victim filter skips a death without a victim definition', () => {
+  const c = structuredClone(content) as any;
+  const hound = {
+    cartridge_id: 'reactions_sampler',
+    cartridge_version: '0.0.1',
+    kind: 'npc',
+    key: 'hound',
+  };
+  c.reactions = {
+    [`${R}:reaction/mourn`]: {
+      key: 'mourn',
+      on: { event: 'entity_died', victim: hound },
+      apply: [],
+    },
+  };
+  const w = fresh(c);
+  const died = (more: object) =>
+    ({
+      payload: { type: 'entity_died', victim_id: w.body, room_id: w.body, cause: 'x', ...more },
+    }) as never;
+  assert.deepEqual(triggered(w, died({})), []);
+  assert.equal(triggered(w, died({ victim_definition: hound })).length, 1);
 });

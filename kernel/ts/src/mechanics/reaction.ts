@@ -12,7 +12,7 @@ import type {
   ReactionRule,
   TextKey,
 } from '../contracts.gen.ts';
-import { key } from '../foundation/compose.ts';
+import { key, same } from '../foundation/compose.ts';
 import {
   accepted,
   bodyOf,
@@ -37,27 +37,29 @@ type On = ReactionRule['on'];
 // Each trigger filter (W1; reaction.schema.json): true when the event's payload field equals it.
 // A field means the same payload field in every event kind that declares it.
 type Match = (w: World, want: any, p: any) => boolean;
-const same =
+// Null-safe: a player's entity_died carries no victim_definition.
+const ref =
   (field: string): Match =>
   (_, want, p) =>
-    refString(want) === refString(p[field]);
+    same(want, p[field]);
 const equal =
   (field: string): Match =>
   (_, want, p) =>
     want === p[field];
 const FILTERS: Record<string, Match> = {
-  fact: same('fact'),
+  fact: ref('fact'),
   room: (w, want, p) => w.roomIds[refString(want)] === p.room_id,
+  // ponytail: the authored instance only; a created item (a harvested pelt) never matches.
   item: (w, want, p) => w.entityIds[refString(want)] === p.item_id,
-  victim: same('victim_definition'),
+  victim: ref('victim_definition'),
   custom: (_, want, p) => want === p.event.key,
   check: (_, want, p) => want === p.check.key,
   choice: equal('choice_id'),
-  quest: same('quest'),
-  story_point: same('story_point'),
-  barrier: same('barrier'),
-  scene: same('scene'),
-  kind: same('kind'),
+  quest: ref('quest'),
+  story_point: ref('story_point'),
+  barrier: ref('barrier'),
+  scene: ref('scene'),
+  kind: ref('kind'),
   outcome: equal('outcome'),
   action: equal('action'),
   to: equal('to'),

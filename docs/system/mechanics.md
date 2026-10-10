@@ -606,7 +606,8 @@ taking an item) still reads the actor's `when` and writes the actor's facts, que
 experience; only `status.apply` follows the subject and skips when the subject is not the
 actor's body (statuses on NPCs and things wait for row G3). A filter naming a definition (`item`,
 `room`, `quest`, `story_point`, `barrier`, `scene`, `kind`, `victim` as an NPC) must name one of
-this cartridge; key filters (`custom`, `check`, `choice`, `action`, `outcome`) are not resolved
+this cartridge (`item` matches its authored instance only, never a created one such as a
+harvested pelt); key filters (`custom`, `check`, `choice`, `action`, `outcome`) are not resolved
 and a key no event carries never matches.
 For quest resolution, the source instance must exist at player scope, be resolved with the
 event's quest/outcome, and agree with its actor and scope; inconsistent evidence faults
