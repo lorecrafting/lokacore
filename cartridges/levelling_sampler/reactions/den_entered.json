@@ -1,0 +1,13 @@
+{
+  "on": {
+    "event": "entity_entered_room",
+    "room": "den"
+  },
+  "apply": [
+    {
+      "op": "fact.assign",
+      "fact": "den_found",
+      "value": true
+    }
+  ]
+}

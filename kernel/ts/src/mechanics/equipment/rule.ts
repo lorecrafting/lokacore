@@ -14,7 +14,7 @@ import {
   type World,
 } from '../../runtime/decision.ts';
 import { movable } from '../../runtime/created.ts';
-import { adjust, maxima, resourceRef } from '../resource.ts';
+import { settleMaxima } from '../resource.ts';
 
 /** equipment@1's commands, shared by the GameView and its invariant. */
 export const VERBS: readonly string[] = ['wear', 'remove'];
@@ -35,16 +35,9 @@ export const decide: Rule<'equipment'> = (world, command) => {
   return accepted(world, type === 'wear' ? 'worn' : 'removed', ops, []);
 };
 
-/**
- * A zero-amount hp adjust when an item with affects moves and the hp maximum is derived, so credit
- * banked under the old maximum settles there and the new one is reached by regeneration (resource@1).
- */
+/** An item with affects moves its wearer's attributes, so a derived maximum settles first (resource@1). */
 const settle = (world: World, item: EntityId) =>
-  world.entities[item].kind === 'item' &&
-  world.entities[item].affects &&
-  values(maxima(world)).length
-    ? [adjust(world, world.body, resourceRef(world, 'hp'), 0, {}).op]
-    : [];
+  world.entities[item].kind === 'item' && world.entities[item].affects ? settleMaxima(world) : [];
 
 /**
  * Why step would refuse `type` (wear or remove) of `item` by `actor` now, else the transfer's

@@ -1,21 +1,39 @@
 // Toolbox row 4 (docs/system/mechanics.md experience and levelling): one levelling row per
 // character; level and unspent points are derived on read, never stored.
-import type { CharacterId, DeltaOp, LevellingRow } from '../../contracts.gen.ts';
+import type { CharacterId, DeltaOp, LevellingRow, Text } from '../../contracts.gen.ts';
 import { saturate } from '../../foundation/int.ts';
 import type { World } from '../../runtime/decision.ts';
 
 const NONE: LevellingRow = { experience: 0, allocated: {} };
 
-/** The actor's row, level, next threshold (absent at the top) and unspent points; none undeclared. */
+type Spec = NonNullable<NonNullable<World['cartridge']['world']>['levelling']>;
+/** How many thresholds `experience` has reached (the level minus 1). */
+const reached = (spec: Spec, experience: number) =>
+  spec.thresholds.filter((t) => t <= experience).length;
+
+/** The actor's row, level, experience, next threshold (absent at the top) and unspent points. */
 export function levelling(world: World, actor: CharacterId) {
   const spec = world.cartridge.world?.levelling;
   if (!spec) return;
   const row = world.state.levelling?.[actor];
   const { experience, allocated } = row ?? NONE;
-  const reached = spec.thresholds.filter((t) => t <= experience).length;
+  const r = reached(spec, experience);
   const spent = Object.values(allocated).reduce((a, n) => a + n, 0);
-  const unspent = spec.points_per_level * reached - spent;
-  return { row, level: reached + 1, next: spec.thresholds[reached], unspent };
+  const unspent = spec.points_per_level * r - spent;
+  return { row, level: r + 1, experience, next: spec.thresholds[r], unspent };
+}
+
+/**
+ * The cartridge's level_up line when `ops` (a whole proposal) raise the player character's level:
+ * the first write's expected row against the last write's value (mechanics.md row 4).
+ */
+export function levelUp(world: World, ops: readonly DeltaOp[]): Text[] {
+  const spec = world.cartridge.world?.levelling;
+  const sets = ops.filter((o) => o.op === 'levelling.set' && o.character_id === world.character);
+  const [first, last] = [sets[0], sets.at(-1)] as Extract<DeltaOp, { op: 'levelling.set' }>[];
+  if (!spec || !first || !last) return [];
+  const up = reached(spec, last.value.experience) > reached(spec, first.expected?.experience ?? 0);
+  return up ? [{ key: spec.level_up }] : [];
 }
 
 /** The checked write of the actor's row to `value`, expecting the row `world` holds. */

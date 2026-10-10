@@ -43,6 +43,16 @@ export function maxima(world: World): Readonly<Record<string, number>> {
   return { [at]: Math.max(spec.minimum, maximum) };
 }
 
+/**
+ * A zero-amount hp adjust when the hp maximum is derived, written before an attribute change moves
+ * it, so credit banked under the old maximum settles there and the new one is reached by
+ * regeneration (resource@1).
+ */
+export const settleMaxima = (world: World) =>
+  Object.keys(maxima(world)).length
+    ? [adjust(world, world.body, resourceRef(world, 'hp'), 0, {}).op]
+    : [];
+
 /** Effective definition for this exact resource target, falling back to the pool. */
 export function resourceSpec(world: World, entity: EntityId, resource: DefinitionRef) {
   const at = key({ kind: 'resource', resource, entity_id: entity });

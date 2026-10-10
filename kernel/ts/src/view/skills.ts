@@ -2,6 +2,7 @@ import { status } from '../mechanics/skills.ts';
 import { refString, type World } from '../runtime/decision.ts';
 import type { DefinitionRef, Key } from '../contracts.gen.ts';
 import { choice, value, worn } from '../mechanics/attributes/shared.ts';
+import { levelling } from '../mechanics/levelling/shared.ts';
 
 export function skillViews(world: World, steps = { n: 0 }) {
   const ref = (kind: string, key: DefinitionRef['key']): DefinitionRef => ({
@@ -21,7 +22,16 @@ export function skillViews(world: World, steps = { n: 0 }) {
   });
   const attributes = attributeViews(world, ref);
   const selected = choice(world, world.character);
+  const l = levelling(world, world.character);
   return {
+    ...(l && {
+      levelling: {
+        level: l.level,
+        experience: l.experience,
+        ...(l.next !== undefined && { next: l.next }),
+        unspent: l.unspent,
+      },
+    }),
     ...(skills.length && { skills }),
     ...(attributes.length && { attributes }),
     ...(selected && { ancestry: selected.ancestry }),

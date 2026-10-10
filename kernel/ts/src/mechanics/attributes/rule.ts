@@ -5,6 +5,7 @@ import { acquire } from '../skills.ts';
 import { choice, initialValues } from './shared.ts';
 import { levelling, write } from '../levelling/shared.ts';
 import { refString } from '../../runtime/decision.ts';
+import { settleMaxima } from '../resource.ts';
 
 export const decide: Rule<'attributes'> = (world, command) => {
   if (command.payload.type === 'raise_attribute') {
@@ -16,7 +17,8 @@ export const decide: Rule<'attributes'> = (world, command) => {
     if (!l || l.unspent < 1) return rejected('invalid_state');
     const row = l.row ?? { experience: 0, allocated: {} };
     const allocated = { ...row.allocated, [ref]: (row.allocated[ref] ?? 0) + 1 };
-    return accepted(world, attribute.key, [write(world, actor_id, { ...row, allocated }, 0)], []);
+    const ops = [...settleMaxima(world), write(world, actor_id, { ...row, allocated }, 0)];
+    return accepted(world, attribute.key, ops, []);
   }
   const { actor_id, ancestry } = command.payload;
   const declaration = world.cartridge.ancestries?.[ancestry];

@@ -1,0 +1,9 @@
+{
+  "title": "room.den.title",
+  "description": "room.den.description",
+  "exits": {
+    "east": {
+      "to": "hall"
+    }
+  }
+}

@@ -40,35 +40,38 @@ defmodule Loka.Content.Levelling do
   end
 
   defp declared(l, m, defs, text) do
-    path = ["world", "levelling"]
+    owner(m) ++ rising(l["thresholds"]) ++ kills(l["kills"] || [], m, defs) ++ line(l, text)
+  end
 
-    owner =
-      if m["requires"]["capabilities"]["attributes"] == 1,
-        do: [],
-        else: [
-          diag(
-            "UNDECLARED_CAPABILITY",
-            at("cartridge.json", path),
-            %{"capability" => "attributes"},
-            ["attributes@1"]
-          )
-        ]
+  @path ["world", "levelling"]
 
-    rising =
-      for {[a, b], i} <- Enum.with_index(Enum.chunk_every(l["thresholds"], 2, 1, :discard), 1),
-          b <= a,
-          do: diag("SCHEMA_VIOLATION", at("cartridge.json", path ++ ["thresholds", i]))
+  defp owner(%{"requires" => %{"capabilities" => %{"attributes" => 1}}}), do: []
 
-    kills =
-      for {k, i} <- Enum.with_index(l["kills"] || []),
-          e <- Refs.reference("cartridge.json", path ++ ["kills", i], "npc", k, m, defs),
-          do: e
+  defp owner(_),
+    do: [
+      diag(
+        "UNDECLARED_CAPABILITY",
+        at("cartridge.json", @path),
+        %{"capability" => "attributes"},
+        ["attributes@1"]
+      )
+    ]
 
-    line =
-      if text == :unknown or is_map_key(text, l["level_up"]),
-        do: [],
-        else: [diag("UNRESOLVED_REFERENCE", at("cartridge.json", path ++ ["level_up"]))]
+  defp rising(thresholds) do
+    for {[a, b], i} <- Enum.with_index(Enum.chunk_every(thresholds, 2, 1, :discard), 1),
+        b <= a,
+        do: diag("SCHEMA_VIOLATION", at("cartridge.json", @path ++ ["thresholds", i]))
+  end
 
-    owner ++ rising ++ kills ++ line
+  defp kills(kills, m, defs) do
+    for {k, i} <- Enum.with_index(kills),
+        e <- Refs.reference("cartridge.json", @path ++ ["kills", i], "npc", k, m, defs),
+        do: e
+  end
+
+  defp line(l, text) do
+    if text == :unknown or is_map_key(text, l["level_up"]),
+      do: [],
+      else: [diag("UNRESOLVED_REFERENCE", at("cartridge.json", @path ++ ["level_up"]))]
   end
 end

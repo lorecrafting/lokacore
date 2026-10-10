@@ -1,0 +1,15 @@
+{
+  "facts": {
+    "den_found": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The player found the den."
+    }
+  }
+}
