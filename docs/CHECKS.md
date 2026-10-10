@@ -52,8 +52,9 @@ their rules and red controls remain available for resumption.
 - `elixir bin/contracts.exs --check`: `kernel/ts/src/contracts.gen.ts`, the
   [capability/schema docs](contracts.gen.md) and the capability/residency matrix
   (`docs/residency.gen.json`) and the System pages' graph (`docs/system-graph.gen.json`, also
-  from `docs/system/save.md`'s table block, `protocol/README.md`'s fixture column and
-  `docs/state-sections.gen.json`, which `kernel/ts/test/state_sections.test.ts` keeps current:
+  from `docs/system/save.md`'s table block, `protocol/README.md`'s fixture column,
+  the authored file names under `cartridges/*/<map>/` and `docs/state-sections.gen.json`, which
+  `kernel/ts/test/state_sections.test.ts` keeps current:
   `LOKA_WRITE_GEN=1` rewrites it, then rerun contracts.exs) match `protocol/` (run without
   `--check` to regenerate); an
   Elixir host adapter on a `portable_capability` without a differential fails (ADR-074), and so

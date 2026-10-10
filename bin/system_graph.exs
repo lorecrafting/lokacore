@@ -1,3 +1,4 @@
+# size: allow 330, one generator per System page input (saved rows and authored files joined in)
 # The data model graph behind Storybook's System pages (docs/design/system-dashboard/spec.md §5),
 # rendered by bin/contracts.exs into docs/system-graph.gen.json. Inputs: protocol/*.schema.json,
 # the capability registry, the save-table block of docs/system/save.md, protocol/README.md's
@@ -6,7 +7,9 @@
 # schema still reaches the stale-file check. Fails on a registry command, event or policy op no
 # schema declares, and on a missing save-table block. Save holds no schema: its column is the
 # save tables. A definition kind with no CompiledCartridge map keyed `:kind/` takes the key-name
-# rule (by_name/3), else node null.
+# rule (by_name/3), else node null. A contract a DeltaOp writes as its row (`value`, `expected`,
+# `from`, `to`) is "saved" in that op's State section; a CompiledCartridge map's contract lists the
+# authored cartridge files of that map (`cartridges/*/<map>/*.json`).
 defmodule SystemGraph do
   @layer_order ~w(Content Capabilities Change State Save View)
   @layers %{
@@ -29,7 +32,9 @@ defmodule SystemGraph do
   defp build(root, registry, defs) do
     docs = Enum.map(Enum.sort(Path.wildcard(Path.join(root, "protocol/*.schema.json"))), &doc/1)
     kinds = by_name(registry, definition_kinds(defs), content_defs(docs))
-    nodes = nodes(docs, defs, definition_owners(registry, kinds), spec_files(root))
+    sections = JSON.decode!(File.read!(Path.join(root, "docs/state-sections.gen.json")))
+    extra = %{saved: saved(defs, sections["ops"]), authored: authored(root, defs)}
+    nodes = nodes(docs, defs, definition_owners(registry, kinds), spec_files(root), extra)
 
     %{
       "layers" => @layer_order,
@@ -37,14 +42,14 @@ defmodule SystemGraph do
       "capabilities" => Enum.map(registry, &capability(&1, kinds, defs)),
       "nodes" => nodes,
       "edges" => Enum.flat_map(nodes, &edges(&1["name"], defs)),
-      "saveTables" => save_tables(root, state_sections(root))
+      "saveTables" => save_tables(root, state_sections(sections["kinds"]))
     }
   end
 
-  defp nodes(docs, defs, owner, specs) do
+  defp nodes(docs, defs, owner, specs, extra) do
     for d <- docs,
         {name, s} <- Enum.sort(d["defs"]),
-        do: node(d, name, s, defs, owner, specs)
+        do: node(d, name, s, defs, owner, specs, extra)
   end
 
   defp doc(path) do
@@ -62,7 +67,7 @@ defmodule SystemGraph do
     }
   end
 
-  defp node(d, name, s, defs, owner, specs) do
+  defp node(d, name, s, defs, owner, specs, extra) do
     line =
       case Regex.run(~r/^    "#{name}": /m, d["raw"], return: :index) do
         [{at, _}] -> 1 + length(:binary.matches(binary_part(d["raw"], 0, at), "\n"))
@@ -80,7 +85,9 @@ defmodule SystemGraph do
       "fields" => fields(defs[name]),
       "enum" => values(defs[name]),
       "examples" => s["examples"],
-      "spec" => cited(s["description"] || "", specs)
+      "spec" => cited(s["description"] || "", specs),
+      "saved" => extra.saved[name],
+      "authored" => extra.authored[name]
     }
   end
 
@@ -254,12 +261,39 @@ defmodule SystemGraph do
            for([_, f] <- Regex.scan(~r/`([\w.]+\.json)`/, fixtures), do: f)}
   end
 
-  # docs/state-sections.gen.json (kernel/ts/test/state_sections.test.ts): MutationTarget kind =>
-  # State section, turned into the sections a state_row holds and the kinds kept in each.
-  defp state_sections(root) do
-    Path.join(root, "docs/state-sections.gen.json")
-    |> File.read!()
-    |> JSON.decode!()
+  # Contract => the State sections DeltaOps write it into as a row. Scalars (ids, times, counts)
+  # sit in many rows, so only objects, unions and enums count.
+  defp saved(defs, ops) do
+    for %{"properties" => p} <- defs["DeltaOp"]["oneOf"],
+        section = ops[p["op"]["const"]],
+        {_, to} <- refs(%{"properties" => Map.take(p, ~w(value expected from to))}, nil),
+        kind(defs[to]) in ~w(object union enum),
+        uniq: true do
+      {to, section}
+    end
+    |> Enum.group_by(&elem(&1, 0), &elem(&1, 1))
+    |> Map.new(fn {to, sections} -> {to, Enum.sort(sections)} end)
+  end
+
+  # Contract => the authored files of the CompiledCartridge map that holds it (`rooms` => RoomDefinition).
+  defp authored(root, defs) do
+    for b <- defs["CompiledCartridge"]["oneOf"],
+        {map, %{"additionalProperties" => %{"$ref" => r}}} <- b["properties"],
+        uniq: true,
+        into: %{},
+        do: {r, authored_files(root, map)}
+  end
+
+  defp authored_files(root, map) do
+    Path.wildcard(Path.join(root, "cartridges/*/#{map}/*.json"))
+    |> Enum.map(&Path.relative_to(&1, root))
+    |> Enum.sort()
+  end
+
+  # docs/state-sections.gen.json's kinds (kernel/ts/test/state_sections.test.ts): MutationTarget kind
+  # => State section, turned into the sections a state_row holds and the kinds kept in each.
+  defp state_sections(kinds) do
+    kinds
     |> Enum.group_by(&elem(&1, 1), &elem(&1, 0))
     |> Enum.map(fn {section, kinds} -> %{"section" => section, "targets" => Enum.sort(kinds)} end)
     |> Enum.sort_by(& &1["section"])
