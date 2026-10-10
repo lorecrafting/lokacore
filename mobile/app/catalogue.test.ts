@@ -9,7 +9,10 @@ const read = (path: string) => readFileSync(new URL(path, app), 'utf8');
 const stories = readdirSync(new URL('stories/', app)).filter((f) => f.endsWith('.stories.tsx'));
 
 // Not drawn on their own: each with its reason.
-const EXEMPT: Record<string, string> = { Tap: 'shown through VerbLine and the room title' };
+const EXEMPT: Record<string, string> = {
+  Tap: 'shown through VerbLine and the room title',
+  Here: 'the room page lines, shown through the RoomPage stories',
+};
 const EXEMPT_FILES = { 'MapDrawing.tsx': 'a drawing, shown through the map pages' };
 
 test('every catalogue Story file exists', () => {
