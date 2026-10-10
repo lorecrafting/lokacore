@@ -37,7 +37,7 @@ defmodule Loka.ContentRumourTest do
   # Breaks: a consequence op's kernel_api floor dropped from @floors, so a cartridge below it
   # compiles and an older host faults at runtime (twin of rumour.test.ts). Called directly: any
   # sampler below these floors trips other features' floors first. quest.activate's 1.8 has no
-  # row: its only legal trigger, quest_resolved, carries the same 1.8 floor.
+  # row: quest_resolved, its only trigger the loader and compiler accept, has the same floor.
   test "each consequence op is refused just below its kernel_api floor" do
     registry = "protocol/capability_registry.json" |> File.read!() |> JSON.decode!()
 

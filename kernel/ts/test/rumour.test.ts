@@ -143,7 +143,7 @@ test("the loader checks the entrant filter's NPC and its 1.47 floor", () => {
 // Breaks: a consequence op's kernel_api floor dropped from FLOORS, so a cartridge below it loads
 // and an older host faults at runtime (twin of content_rumour_test.exs). Called directly: any
 // sampler below these floors trips other features' floors first. quest.activate's 1.8 has no
-// row: its only legal trigger, quest_resolved, carries the same 1.8 floor.
+// row: quest_resolved, its only trigger the loader and compiler accept, has the same floor.
 test('each consequence op is refused just below its kernel_api floor', () => {
   const refused = (op: string, at_least: string) =>
     reactions(
