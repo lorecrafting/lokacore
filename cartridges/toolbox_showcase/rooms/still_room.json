@@ -1,0 +1,25 @@
+{
+  "title": "room.still_room.title",
+  "description": "room.still_room.description",
+  "exits": {
+    "east": {
+      "to": "fell_top"
+    }
+  },
+  "details": {
+    "hearth": {
+      "aliases": [
+        "hearth"
+      ],
+      "description": "detail.hearth"
+    },
+    "knucklebones": {
+      "aliases": [
+        "knucklebones",
+        "bones"
+      ],
+      "description": "detail.knucklebones",
+      "rating": 11
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "duration": 1800,
+  "tick_every": 900,
+  "resource": "mv",
+  "modifies": [
+    {
+      "attribute": "dex",
+      "modifier": 2
+    }
+  ],
+  "label": "condition.inspired",
+  "narration": {
+    "applied": "narration.inspired.applied",
+    "tick": "narration.inspired.tick",
+    "expired": "narration.inspired.expired"
+  }
+}

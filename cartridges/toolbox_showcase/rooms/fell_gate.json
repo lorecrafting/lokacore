@@ -1,0 +1,29 @@
+{
+  "title": "room.fell_gate.title",
+  "description": "room.fell_gate.description",
+  "exits": {
+    "south": {
+      "to": "crossroads_inn"
+    },
+    "north": {
+      "to": "fell_top"
+    },
+    "east": {
+      "to": "the_fold"
+    }
+  },
+  "details": {
+    "sign_body": {
+      "aliases": [
+        "sign",
+        "signpost"
+      ],
+      "description": "detail.sign_body.description",
+      "readable": {
+        "label": "actions.read_sign",
+        "text": "readable.sign_body",
+        "title": "detail.sign_body.title"
+      }
+    }
+  }
+}

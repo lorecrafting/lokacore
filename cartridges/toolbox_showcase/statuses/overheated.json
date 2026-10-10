@@ -1,0 +1,12 @@
+{
+  "duration": 9000,
+  "tick_every": 7200,
+  "resource": "hp",
+  "per_tick": -1,
+  "label": "condition.overheated",
+  "narration": {
+    "applied": "narration.overheated.applied",
+    "tick": "narration.overheated.tick",
+    "expired": "narration.overheated.expired"
+  }
+}

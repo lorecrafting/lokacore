@@ -1,0 +1,12 @@
+{
+  "on": {
+    "event": "action_completed",
+    "action": "play_song"
+  },
+  "apply": [
+    {
+      "op": "status.apply",
+      "status": "inspired"
+    }
+  ]
+}

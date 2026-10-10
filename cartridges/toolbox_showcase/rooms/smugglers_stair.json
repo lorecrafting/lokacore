@@ -1,0 +1,12 @@
+{
+  "title": "room.smugglers_stair.title",
+  "description": "room.smugglers_stair.description",
+  "exits": {
+    "up": {
+      "to": "cliff_top"
+    },
+    "down": {
+      "to": "sea_cave"
+    }
+  }
+}

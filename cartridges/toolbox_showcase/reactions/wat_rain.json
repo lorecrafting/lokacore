@@ -1,0 +1,20 @@
+{
+  "on": {
+    "event": "entity_entered_room",
+    "room": "fell_top",
+    "npc": "wat"
+  },
+  "when": {
+    "policy_version": 1,
+    "root": {
+      "op": "sky",
+      "weather": "rain"
+    }
+  },
+  "apply": [
+    {
+      "op": "status.apply",
+      "status": "soaked"
+    }
+  ]
+}

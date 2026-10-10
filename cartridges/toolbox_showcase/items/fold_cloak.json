@@ -1,0 +1,17 @@
+{
+  "keywords": [
+    "cloak"
+  ],
+  "short": "item.fold_cloak.short",
+  "room_line": "item.fold_cloak.room",
+  "description": "item.fold_cloak.description",
+  "location": {
+    "in": "room",
+    "room": "the_fold"
+  },
+  "mass_grams": 500,
+  "slot": "cloak",
+  "tags": [
+    "warm"
+  ]
+}

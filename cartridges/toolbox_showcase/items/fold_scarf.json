@@ -1,0 +1,17 @@
+{
+  "keywords": [
+    "scarf"
+  ],
+  "short": "item.fold_scarf.short",
+  "room_line": "item.fold_scarf.room",
+  "description": "item.fold_scarf.description",
+  "location": {
+    "in": "room",
+    "room": "the_fold"
+  },
+  "mass_grams": 500,
+  "slot": "neck",
+  "tags": [
+    "windproof"
+  ]
+}

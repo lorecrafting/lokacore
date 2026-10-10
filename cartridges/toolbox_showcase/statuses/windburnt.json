@@ -1,0 +1,12 @@
+{
+  "duration": 9000,
+  "tick_every": 7200,
+  "resource": "hp",
+  "per_tick": -1,
+  "label": "condition.windburnt",
+  "narration": {
+    "applied": "narration.windburnt.applied",
+    "tick": "narration.windburnt.tick",
+    "expired": "narration.windburnt.expired"
+  }
+}

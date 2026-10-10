@@ -1,0 +1,9 @@
+{
+  "title": "room.shepherd_hut.title",
+  "description": "room.shepherd_hut.description",
+  "exits": {
+    "west": {
+      "to": "fell_top"
+    }
+  }
+}

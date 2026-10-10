@@ -1,0 +1,23 @@
+{
+  "keywords": [
+    "hob",
+    "innkeeper"
+  ],
+  "short": "npc.hob.short",
+  "room_line": "npc.hob.room",
+  "description": "npc.hob.description",
+  "room": "crossroads_inn",
+  "short_variants": [
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "time_window",
+          "from": 0,
+          "to": 6
+        }
+      },
+      "description": "npc.hob.short_asleep"
+    }
+  ]
+}
