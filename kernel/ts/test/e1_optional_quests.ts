@@ -19,6 +19,7 @@ export function chandlersDebt(a: CaseHost) {
   a.move('north', 'west');
   a.invoke('a_peg_debt', [a.entity('npc', 'peg')]);
   a.choose('accept_on_time');
+  a.invoke('close_choice'); // the hub stays open after an answer (loka-x6t.5): Leave the conversation
   a.reopen();
   assert.equal(a.flag('priory_tithe_delivered'), 'pending');
   a.move('east', 'north', 'north', 'north', 'north');

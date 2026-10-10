@@ -249,6 +249,7 @@ test('F2 family 2 final Continue: failed COMMIT, kill before and after COMMIT', 
     // The legal route to the belfry (r9c_custody_terminal.test.ts belfry()), then Ring.
     a.run('elspeth', npc('elspeth'));
     a.choose('accept');
+    a.run('close_choice', []); // the hub stays open after an answer (loka-x6t.5): Leave the conversation
     a.move('north', 'north');
     a.run('take', [ID['item/fox_drawing']!]);
     a.move('south', 'south');

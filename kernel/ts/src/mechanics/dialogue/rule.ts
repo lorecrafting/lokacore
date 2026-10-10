@@ -193,6 +193,13 @@ function applyChoice(
   const chosen = { type: 'choice_resolved', continuation_id, choice_id } as const;
   const at = run.position + quests.length + watched.events.length + 1;
   const resolvedChoice = event(world, command, mint, at, chosen);
+  const points = storyPoints(world, command, mint, row, at + 1);
+  // The hub: a fresh pending row of the same sitting re-offers the dialogue's choices, unless the
+  // answer ends the conversation: it resolves the dialogue's quest or riddle, sends the speaker on a
+  // patrol leg, or was the only choice.
+  const ends = d.quest || d.riddle || option.patrol || row.choice_ids.length < 2;
+  const hub = !ends && continuationId(mint);
+  const { source, beat, roles, choice_ids } = row;
   return accepted(
     world,
     choice_id,
@@ -205,13 +212,30 @@ function applyChoice(
       ...(!boundReceive && q ? q.ops : []),
       ...watched.ops,
       op,
+      ...(hub
+        ? [
+            {
+              op: 'choice.open',
+              writer_group: 0,
+              continuation_id: hub,
+              actor_id,
+              source,
+              beat,
+              roles,
+              choice_ids,
+            } as const,
+          ]
+        : []),
     ],
     [
       ...(boundReceive ? quests : given.events),
       ...(boundReceive ? given.events : quests),
       ...watched.events,
       resolvedChoice,
-      ...storyPoints(world, command, mint, row, at + 1),
+      ...points,
+      ...(hub
+        ? [event(world, command, mint, at + 1, { type: 'choice_opened', continuation_id: hub })]
+        : []),
     ],
     [{ key: option.narration, participants }],
   );

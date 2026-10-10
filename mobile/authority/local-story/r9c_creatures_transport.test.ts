@@ -75,9 +75,9 @@ function story(t: TestContext, seed: number[], ancestry: string) {
     return out;
   };
   // One saved invocation: reopened from disk, then replayed once with no row change.
-  const send = (action_key: string, target_ids: string[], input: object) => {
+  const send = (action_key: string, target_ids: string[], input: object, id?: string) => {
     const i = {
-      invocation_id: `cccccccc-0000-4000-8000-${String(++n).padStart(12, '0')}`,
+      invocation_id: id ?? `cccccccc-0000-4000-8000-${String(++n).padStart(12, '0')}`,
       actor_id: initial.character,
       action_key,
       target_ids,
@@ -269,6 +269,10 @@ test('family 4: a pack death separates Wren and fails the watch; Rejoin and retr
   // The v042 route to the escort (r9c_custody_terminal family 2's path).
   a.press('elspeth', [npc('elspeth')]);
   a.choose('accept');
+  // Elspeth's hub stays open after the answer (loka-x6t.5): Leave it under an id outside the
+  // counter, so later command ids, and the draws pinned below, are unchanged.
+  const hub = a.send('close_choice', [], {}, 'cccccccc-0000-4000-8000-0000000000ff');
+  assert.equal(hub.kind, 'accepted');
   a.move('north', 'north');
   a.press('take', [ID['item/fox_drawing']]);
   a.move('south', 'south');

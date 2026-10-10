@@ -239,6 +239,10 @@ test('a dormant dream choice survives the actual S2 message handoff and the Bell
   move('down', 'west', 'south');
   talk('elspeth');
   choose('accept');
+  a.invoke(
+    { type: 'close_choice', continuation_id: gameView(a.world).choice!.continuation_id },
+    'close_choice',
+  ); // the hub stays open after an answer (loka-x6t.5): Leave the conversation
   move('north', 'north');
   a.invoke({ type: 'take', item_id: entity(a.world, 'item', 'fox_drawing') });
   move('south', 'south');

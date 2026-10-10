@@ -150,6 +150,8 @@ test('original Wren follow composes independently with leader-only Continue and 
   };
   a.run({ type: 'talk', target_id: npc(a.world, 'elspeth') });
   choose('accept');
+  const hub = Object.entries(a.world.state.choices!).find(([, c]) => c.status === 'pending')!;
+  a.run({ type: 'close_choice', continuation_id: hub[0] }); // the hub stays open after an answer (loka-x6t.5): Leave the conversation
   a.move('north');
   a.move('north');
   a.run({

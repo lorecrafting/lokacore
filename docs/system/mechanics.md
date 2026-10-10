@@ -388,8 +388,20 @@ the choice's `fact.assign` steps, the quest's transitions and `quest_resolved` (
 quest's `quest.activate` and `quest_activated`), `choice.resolve`
 at the continuation's `opened_revision`, `choice_resolved`, one narration line with the actor
 and every bound role as participants, and the `story_point_reached` of a story point outcome
-whose trigger is this dialogue and choice (`mechanics/dialogue/rule.ts:177`). `close_choice {continuation_id}`: the
-actor's pending continuation closes, nothing else (`choice.close`), else `invalid_state`.
+whose trigger is this dialogue and choice (`mechanics/dialogue/rule.ts:177`). The conversation then
+returns to its hub (owner OK 2026-10-09 in Beads loka-x6t.5, paraphrased: after every answer return
+to the person's topics; the conversation stays open until Leave the conversation): the same
+decision appends a `choice.open` of a fresh continuation (the next minted id) with the resolved row's
+source, beat, roles and choice ids, and its `choice_opened` after `choice_resolved`. The answer
+ends the conversation instead, opening nothing, when its dialogue resolves a quest (story points
+and scene starts follow only such answers) or declares a riddle, when the answer has a `patrol`
+transition (the speaker sets off on a leg), or when the dialogue has a single choice (one-shot
+offers, lessons, escort starts and authored farewells such as "Take your leave"). The reopened options keep their
+declared availability: an answer whose effects make the dialogue's policy or an option fail shows
+those options unavailable with the usual codes, and Leave the conversation stays offered. A
+riddle's wrong answer keeps its row, as below. `close_choice {continuation_id}`: the
+actor's pending continuation closes, nothing else (`choice.close`), else `invalid_state`; it is
+Leave the conversation, offered while any dialogue row is pending (`modal`, `closable: true`).
 While a choice is pending, `choose` and `close_choice` are the actor's answers and no room
 contribution removes them (`kernel/ts/src/mechanics/dialogue/shared.ts:151`). Only a dialogue's speaker, present in the room,
 offers its talk (`:138`), one per dialogue under the dialogue's key, available while that

@@ -372,6 +372,96 @@ test('a choice reaches only a story point naming its own dialogue', () => {
   assert.deepEqual(events(ok(other, choose('leave'), 4).decision).at(-1), [4, 'choice_resolved']);
 });
 
+// Bram's dialogue without its quest (and the story point only a quest dialogue may reach): a hub.
+const hub = (f: (d: any, c: any) => void = () => {}) =>
+  world((c) => {
+    delete c.dialogues[`${F}:dialogue/bram`].quest;
+    delete c.story_points;
+    f(c.dialogues[`${F}:dialogue/bram`], c);
+  });
+const open = (w: World) =>
+  ok(ok(ok(w, accept, 1, ACCEPT).world, take, 2, TAKE).world, talk, 3, TALK).world;
+// Independent Python SHA-256 of ["loka-id-v1", CONTEXT, OTHER, 1]: the choose's next id after its
+// choice_resolved event (ordinal 0).
+const NEXT = '6fa10ef7-a7f3-872b-ad50-6b1193bf75d5';
+
+// Breaks (loka-x6t.5): an answer ending the conversation instead of returning to its hub, the
+// hub row rebinding or reordering roles or choices, or its choice_opened before choice_resolved.
+test('an answer returns to the hub: a fresh pending row re-offers the same choices', () => {
+  const { decision, world: w } = ok(open(hub()), choose('carry'), 4);
+  assert.deepEqual(decision.delta.ops.slice(-2), [
+    {
+      op: 'choice.resolve',
+      writer_group: 0,
+      continuation_id: C,
+      choice_id: 'carry',
+      expected_revision: 3,
+    },
+    {
+      op: 'choice.open',
+      writer_group: 0,
+      continuation_id: NEXT,
+      actor_id: ACTOR,
+      source: ref('dialogue', 'bram'),
+      beat: 'bram',
+      roles: [
+        { role: 'bram', entity_id: BRAM },
+        { role: 'lantern', entity_id: LANTERN },
+      ],
+      choice_ids: ['carry', 'leave'],
+    },
+  ]);
+  assert.deepEqual(events(decision), [
+    [1, 'fact_changed'],
+    [2, 'choice_resolved'],
+    [3, 'choice_opened'],
+  ]);
+  assert.equal(w.state.choices![C]!.status, 'resolved');
+  const view = gameView(w).choice!;
+  assert.deepEqual(
+    [view.continuation_id, view.closable, view.choices.map((o) => [o.choice_id, o.available])],
+    [
+      NEXT,
+      true,
+      [
+        ['carry', true],
+        ['leave', true],
+      ],
+    ],
+  );
+  refused(w, talk, 'invalid_state');
+  assert.equal(gameView(ok(w, close(NEXT), 5).world).choice, undefined);
+});
+
+// Breaks (loka-x6t.5): a hub reopened after an answer that ends the conversation: the dialogue's
+// only choice, or a riddle's solved answer.
+test('a single-choice or riddle dialogue ends at its answer', () => {
+  for (const [name, w, answer] of [
+    ['single', hub((d) => delete d.choices.leave), undefined],
+    [
+      'riddle',
+      hub((d, c) => {
+        c.manifest.requires.kernel_api.at_least = '1.9';
+        d.riddle = {
+          choice_id: 'carry',
+          answer: 'lamp',
+          bank: ['L', 'A', 'M', 'P'],
+          wrong: d.prompt,
+        };
+      }),
+      'lamp',
+    ],
+  ] as const) {
+    const { decision, world: after } = ok(
+      open(w),
+      { ...choose('carry'), ...(answer && { answer }) },
+      4,
+    );
+    assert.equal(decision.delta.ops.at(-1)!.op, 'choice.resolve', name);
+    assert.equal(gameView(after).choice, undefined, name);
+  }
+});
+
 // Breaks (06 §37, §43): close mutating the outcome or reaching a story point, or a re-talk
 // reusing the closed occurrence.
 test('close changes no outcome; a second talk opens another occurrence', () => {

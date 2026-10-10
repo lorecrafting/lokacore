@@ -328,6 +328,7 @@ test('the original following Wren crosses once without rescue credit; separated 
   move('east');
   talk('elspeth');
   choose('accept');
+  a.invoke('close_choice', {}, []); // the hub stays open after an answer (loka-x6t.5): Leave the conversation
   move('north', 'north');
   a.invoke('take', {}, [entity(a.initial, 'item', 'fox_drawing')]);
   move('south', 'south');

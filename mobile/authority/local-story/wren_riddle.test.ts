@@ -40,6 +40,7 @@ function setup(path = ':memory:') {
   const riddle = () => {
     ok('elspeth', [ids['npc/elspeth']]);
     choose('accept');
+    ok('close_choice'); // the hub stays open after an answer (loka-x6t.5): Leave the conversation
     move('north', 'north');
     ok('take', [ids['item/fox_drawing']]);
     move('south', 'south');
