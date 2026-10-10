@@ -46,10 +46,12 @@ export function quests(c: Obj, { named, text }: Checks): Diagnostic[] {
 }
 
 // Toolbox row W23: each stage's hints resolve, their minutes strictly ascend, real minutes need the
-// real_elapsed time policy (INVALID_TIME_POLICY) and hints need kernel_api 1.46.
+// real_elapsed time policy (INVALID_TIME_POLICY) and hints need kernel_api 1.46. An empty hints
+// object is too_few_items (the schema subset has no minProperties).
 function hints(c: Obj, h: Obj | undefined, at: string, text: Checks['text']): Diagnostic[] {
   if (!h) return [];
   const out: Diagnostic[] = [];
+  if (!Object.keys(h).length) out.push(diag('SCHEMA_VIOLATION', at, { error: 'too_few_items' }));
   for (const [stage, list] of Object.entries(h as Record<string, Obj[]>)) {
     list.forEach((x, i) => text(x, ['text'], `${at}.${stage}[${i}]`));
     if (list.some((x, i) => i > 0 && x.after <= list[i - 1]!.after))

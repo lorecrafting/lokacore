@@ -103,7 +103,11 @@ defmodule Loka.Content.Quests do
   end
 
   # Toolbox row W23: each stage's minutes strictly ascend; real minutes need the real_elapsed time
-  # policy (INVALID_TIME_POLICY); hints need kernel_api 1.46. Twin of cartridge_quests.ts hints.
+  # policy (INVALID_TIME_POLICY); hints need kernel_api 1.46; an empty hints object is
+  # too_few_items (the subset has no minProperties). Twin of cartridge_quests.ts hints.
+  defp hints(rel, %{"journal" => %{"hints" => h}}, _) when h == %{},
+    do: [diag("SCHEMA_VIOLATION", at(rel, ["journal", "hints"]), %{"error" => "too_few_items"})]
+
   defp hints(rel, %{"journal" => %{"hints" => h}}, m) do
     order =
       for {stage, list} <- h,

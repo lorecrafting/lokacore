@@ -434,7 +434,7 @@
       ]
     },
     "QuestJournal": {
-      "description": "Lifecycle journal texts, selected by quest@1 in GameView (06 §2, §41; 04 §15, c1-journal amendment). All five stage texts are required; outcomes optionally overrides terminal text by outcome key. Outcome keys need not name a dialogue choice. Reveal remains LATER. API1.9 active_variants are checked in order for active quests; the first holding policy supplies text, otherwise ordinary active/objectives_met selection applies. API1.46 hints (toolbox row W23): per stage (active, objectives_met), each after a whole number of real minutes since the stage began (the instance's started_at), strictly ascending; the Journal shows the last one whose time has passed.",
+      "description": "Lifecycle journal texts, selected by quest@1 in GameView (06 §2, §41; 04 §15, c1-journal amendment). All five stage texts are required; outcomes optionally overrides terminal text by outcome key. Outcome keys need not name a dialogue choice. Reveal remains LATER. API1.9 active_variants are checked in order for active quests; the first holding policy supplies text, otherwise ordinary active/objectives_met selection applies. API1.46 hints (toolbox row W23): per stage (active, objectives_met), each after a whole number of real minutes since the stage began (the instance's started_at), strictly ascending, and at least one stage (an empty hints object is a loader check: the subset has no minProperties); the Journal shows the last one whose time has passed.",
       "type": "object",
       "properties": {
         "active": {

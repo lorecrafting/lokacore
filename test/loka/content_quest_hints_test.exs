@@ -2,8 +2,8 @@ defmodule Loka.ContentQuestHintsTest do
   use ExUnit.Case, async: true
 
   # Breaks (toolbox row W23, twin of kernel/ts/test/quest_hints.test.ts): the compiler accepts
-  # hints out of order, hints without the real_elapsed time policy, hints below kernel_api 1.46 or a
-  # hint text with no catalog entry.
+  # hints out of order, an empty hints object, hints without the real_elapsed time policy, hints
+  # below kernel_api 1.46 or a hint text with no catalog entry.
   test "hints ascend, need real time and 1.46, and resolve their text" do
     dir = Loka.ContentSource.copy("cartridges/quest_sampler")
     hints = "quests/find_key.journal.hints"
@@ -12,6 +12,8 @@ defmodule Loka.ContentQuestHintsTest do
     cases = [
       {[{"quests/find_key.json", &put_in(&1, active ++ [Access.at(1), "after"], 10)}],
        {"SCHEMA_VIOLATION", hints <> ".active"}},
+      {[{"quests/find_key.json", &put_in(&1, ["journal", "hints"], %{})}],
+       {"SCHEMA_VIOLATION", hints}},
       {[{"cartridge.json", &Map.delete(&1, "time_policy")}], {"INVALID_TIME_POLICY", hints}},
       {[{"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.45")}],
        {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"}},

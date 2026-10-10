@@ -118,13 +118,14 @@ test('an instance row without started_at shows no hint', () => {
   assert.equal(hint({ ...w, state: { ...w.state, quests: { [i!]: old } } }), undefined);
 });
 
-// Breaks (loader twin of test/loka/content_quest_hints_test.exs): hints out of order accepted,
-// hints without real_elapsed time (real minutes undefined) or below kernel_api 1.46 accepted.
+// Breaks (loader twin of test/loka/content_quest_hints_test.exs): hints out of order or an empty
+// hints object accepted, hints without real_elapsed time (real minutes undefined) or below kernel_api 1.46 accepted.
 test('the loader refuses unordered hints, hints without real time and hints below 1.46', () => {
   const hints = `.cartridge.quests["quest_sampler@0.0.1:quest/find_key"].journal.hints`;
   const q = (c: Obj) => c.quests['quest_sampler@0.0.1:quest/find_key'];
   const rows: [(c: Obj) => void, string, string][] = [
     [(c) => (q(c).journal.hints.active[1].after = 10), 'SCHEMA_VIOLATION', `${hints}.active`],
+    [(c) => (q(c).journal.hints = {}), 'SCHEMA_VIOLATION', hints],
     [(c) => delete c.manifest.time_policy, 'INVALID_TIME_POLICY', hints],
     [
       (c) => (c.manifest.requires.kernel_api.at_least = '1.45'),
@@ -154,6 +155,28 @@ test('a recipe tip is read once, on the first perform, after its narration', () 
   assert.deepEqual(lines(first), ['narration.search_floor', 'tip.search_floor']);
   const again = run(first.world, { type: 'perform', action: 'search_floor' });
   assert.deepEqual(lines(again), ['narration.search_floor']);
+});
+
+// Break: the tip skipped (or its fact left unassigned) when a checked perform fails.
+test('a failed checked perform still shows the tip once and assigns seen_tip_', () => {
+  const checked = structuredClone(content);
+  const recipe = checked.recipes!['quest_sampler@0.0.1:recipe/search_floor']! as Obj;
+  recipe.check = { key: 'search_floor', kind: 'luck', chance: 1 };
+  recipe.outcomes.failure = { sequence: [], narration: { actor: 'narration.search_floor' } };
+  const w = newWorld(checked, '2e5f9b6d-4a2c-4d3b-8f8e-7c6b5d4e3f23' as never, [4, 3, 2, 1]);
+  const r = run(w, { type: 'perform', action: 'search_floor' });
+  assert.ok(r.decision.kind === 'accepted' && r.decision.outcome === 'failure');
+  assert.deepEqual(
+    r.decision.narration?.map((l) => l.key),
+    ['narration.search_floor', 'tip.search_floor'],
+  );
+  assert.deepEqual(
+    r.decision.events.map((e) => {
+      const p = e.payload as { type: string; fact?: { key: string } };
+      return p.fact ? `${p.type}:${p.fact.key}` : p.type;
+    }),
+    ['check_failed', 'fact_changed:seen_tip_search_floor'],
+  );
 });
 
 // Breaks (loader twin of test/loka/content_quest_hints_test.exs): an artifact whose recipe writes
