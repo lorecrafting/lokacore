@@ -94,14 +94,16 @@ test("saying a keyword in any case opens the speaker's keyed dialogue; talk neve
 });
 
 // Breaks: an unauthored word echoed into the event (free text past the trust boundary), or a
-// malformed word (a space, a non-ASCII letter, 33 letters) accepted when the host skips the schema.
-test('an unauthored word reaches no event; a malformed word is refused', () => {
+// malformed or missing word (a space, a non-ASCII letter, 33 letters, none: RegExp.test reads a
+// missing word as "undefined") accepted or thrown on when the host skips the schema.
+test('an unauthored word reaches no event; a malformed or missing word is refused', () => {
   const r = accepted(fresh(), { type: 'say', word: 'Hello' });
   assert.equal(r.decision.outcome, 'spoken');
   assert.equal(heard(r).length, 2);
   assert.ok(heard(r).every((p) => !('word' in p)));
-  for (const word of ['wa rd', 'wörd', 'a'.repeat(33)])
-    assert.deepEqual(play(fresh(), { type: 'say', word }).decision, {
+  const said = ['wa rd', 'wörd', 'a'.repeat(33)].map((word) => ({ type: 'say', word }));
+  for (const p of [...said, { type: 'say' }, { type: 'shout' }, { type: 'say', word: 7 }])
+    assert.deepEqual(play(fresh(), p).decision, {
       kind: 'rejected',
       error: { code: 'invalid_state' },
     });
@@ -183,6 +185,18 @@ test('talk opens the plain dialogue; an unnamed reaction step lands on each hear
   const said = accepted(w, { type: 'say', word: 'hello' }).world;
   const heard = (npc: string) => value(said, said.character, ref('fact', 'heard'), id(w, npc));
   assert.deepEqual([heard('elder'), heard('smith'), heard('watchman')], [true, true, false]);
+});
+
+// Breaks (loka-j2mo): a spoken reaction without an npc filter, heard by the elder and the smith,
+// writing one instance fact twice in one decision faults conflicting_write instead of committing.
+test('two hearers of one say write one shared fact and the step commits', () => {
+  const r = reload((c) => {
+    c.reactions['speech_sampler@0.0.1:reaction/elder_hears'].on = { event: 'spoken' };
+  });
+  assert.ok(r.ok, JSON.stringify(r));
+  const said = accepted(fresh(r.cartridge as Cartridge), { type: 'say', word: 'hello' });
+  assert.equal(heard(said).length, 2);
+  assert.equal(fact(said.world, 'elder_heard'), true);
 });
 
 // Breaks: speech offered or accepted while a conversation is open (a say would close it, unlike

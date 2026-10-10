@@ -7,11 +7,14 @@ import { spokenBy } from '../dialogue/shared.ts';
 import { around } from '../senses.ts';
 
 /**
- * The word case-folded, or undefined unless it is 1 to 32 ASCII letters. Free text (toolbox trap
+ * The word case-folded, or undefined unless it is a string of 1 to 32 ASCII letters. Free text (toolbox trap
  * 9): it reaches an event only as an authored keyword and never narration. ponytail: one word.
  */
-export const folded = (word: string) =>
-  /^[a-zA-Z]{1,32}$/.test(word) ? (word.toLowerCase() as SpokenKeyword) : undefined;
+export const folded = (word: unknown) =>
+  // RegExp.test coerces a missing word to "undefined", which would pass: check the type first.
+  typeof word === 'string' && /^[a-zA-Z]{1,32}$/.test(word)
+    ? (word.toLowerCase() as SpokenKeyword)
+    : undefined;
 
 /** The living NPCs directly in one of `rooms`, in EntityId order. */
 export const npcsIn = (w: World, rooms: readonly string[]) =>

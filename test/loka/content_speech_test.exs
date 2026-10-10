@@ -2,11 +2,11 @@ defmodule Loka.ContentSpeechTest do
   use ExUnit.Case, async: true
 
   @dir "cartridges/speech_sampler"
-  @kat JSON.decode!(File.read!("protocol/fixtures/cartridge_speech_hash.json"))
+  @kat JSON.decode!(File.read!("protocol/fixtures/speech_sampler_hash.json"))
   defp pairs(diags), do: Enum.map(diags, &{&1["code"], &1["path"]})
 
   # Breaks: a keyword or a spoken trigger dropped or reshaped in the artifact the speech transcript
-  # replays against (protocol/fixtures/cartridge_speech_hash.json, pinned compiler output).
+  # replays against (protocol/fixtures/speech_sampler_hash.json, pinned compiler output).
   test "speech_sampler compiles to its pinned artifact without warnings" do
     expected = ~s({"cartridge":#{@kat["canonical"]},"content_hash":"#{@kat["sha256"]}"})
     assert Loka.Content.compile(@dir) == {:ok, expected, []}

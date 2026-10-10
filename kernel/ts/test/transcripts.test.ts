@@ -1,7 +1,7 @@
 // The feature map's example transcripts (docs/features.gen.md; bin/features.exs):
 // cartridges/<cartridge>/transcripts/<capability>.jsonl, each a game_trace that must replay
 // byte for byte on this kernel against its cartridge's known-answer artifact
-// (protocol/fixtures/cartridge_*hash.json, matched by manifest id) and exercise a command its
+// (protocol/fixtures/*hash.json below, matched by manifest id) and exercise a command its
 // capability owns. Breaks: a kernel change that alters a recorded decision, or a transcript
 // filed under a capability it never uses.
 import assert from 'node:assert/strict';
@@ -18,6 +18,7 @@ const kats = [
   'protocol/fixtures/cartridge_*hash.json',
   'protocol/fixtures/containers_*hash.json',
   'protocol/fixtures/missing_child_*hash.json',
+  'protocol/fixtures/speech_sampler_hash.json', // outside the simulator's cartridge_* catalog
 ].flatMap((p) => globSync(p, { cwd: ROOT }).map((rel) => readFileSync(ROOT + rel, 'utf8')));
 const transcripts = globSync('cartridges/*/transcripts/*.jsonl', { cwd: ROOT });
 
