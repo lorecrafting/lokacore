@@ -39,3 +39,14 @@
 5. **nit**: there is no PR body yet, so there is no developer `/code-review` result to check. Report it in the PR.
 
 Not a finding: the `kernel_api` bump is deferred to the PM (1.43 at the batch merge).
+
+## Re-check, fix round 1 (head `7e5188e5`, commits `51150093`, `7e5188e5`)
+
+Hosted ci 38025762548 and book-e2e 38025762426: success. Focused `tags.test.ts` and `content_tags_test.exs` pass. Verdict: **APPROVE**.
+
+1. Blocker fixed: the `north_room` row expects `wooden` false. The M6 hall mutant now fails `tags.test.ts`.
+2. Fixed: the naming rule now covers `<x>_count`, `at_least`, a `subject` field and a field-to-kind mapping. Toolbox rows W6, W7 and W12 are edited to match.
+3. Fixed: both tables now map field to kind, and `checks.ex` and `policies.ex` follow. A parity test asserts TS == Elixir and checks the fields against `policy.schema.json`.
+   - Red controls: dropping `room` from either table fails the test.
+   - The `mix run` call is acceptable: the hosted kernel job already sets up BEAM (`MIX_ENV: test`), and the file already ran `mix loka.compile`. It costs one more BEAM start.
+4. Fixed: tag lists are now 1 to 16, with fixture `item_tags_empty`. Red controls: removing `minItems` fails `contracts_test.exs`; removing it from `contracts.gen.ts` fails `validate.test.ts`. The `uniqueItems` gap is recorded as a `ponytail:` note; I accept it.
