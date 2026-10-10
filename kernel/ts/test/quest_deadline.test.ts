@@ -118,7 +118,7 @@ test('the Journal counts down to the generic deadline job while the quest is ope
   assert.equal(left(play(w, { type: 'perform', action: 'hang_key' })), undefined);
   // The same pending job under a legacy deadline (it has a fact).
   const def = w.cartridge.quests![QUEST]!;
-  const fact = { ...quest, kind: 'fact', key: 'key_hung' };
+  const fact = { ...quest, kind: 'fact', key: 'key_hung' } as never;
   const legacy = { ...def, deadline: { ...def.deadline!, fact } };
   const quests = { ...w.cartridge.quests, [QUEST]: legacy };
   assert.equal(left({ ...w, cartridge: { ...w.cartridge, quests } } as World), undefined);
