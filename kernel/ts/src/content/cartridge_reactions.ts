@@ -8,17 +8,18 @@ import { refString } from '../runtime/decision.ts';
 import type { Diagnostic } from '../contracts.gen.ts';
 import { diag, step, type Checks, type Obj } from './cartridge_refs.ts';
 
-// Each trigger filter that names a definition (W1), with that definition's kind.
+// Each trigger filter that names a definition (W1), with that definition's kind; sorted, as the
+// compiler (lib/loka/content/reactions.ex) reports them.
 const NAMED: Record<string, string> = {
-  fact: 'fact',
-  room: 'room',
-  quest: 'quest',
-  item: 'item',
-  victim: 'npc',
-  story_point: 'story_point',
   barrier: 'barrier',
-  scene: 'scene',
+  fact: 'fact',
+  item: 'item',
   kind: 'liquid',
+  quest: 'quest',
+  room: 'room',
+  scene: 'scene',
+  story_point: 'story_point',
+  victim: 'npc',
 };
 
 const each = (c: Obj): [Obj, string][] =>

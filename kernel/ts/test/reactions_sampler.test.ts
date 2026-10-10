@@ -1,5 +1,6 @@
 // Toolbox row W1 on the compiled reactions sampler: an item_dropped trigger with item and room
-// filters (no bespoke job) draws the crow line; its delivery keeps reaction@1's budgets.
+// filters (no bespoke job) sets the fact behind the crow room variant (prose only: no NPC
+// moves); its delivery keeps reaction@1's budgets.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
@@ -48,7 +49,7 @@ const takeDrop = (w: World, k: string) => {
 };
 
 // Breaks: the item filter ignored (any drop draws the crow), or item_dropped never triggering.
-test('a dropped bone draws the crow; a dropped pebble does not', () => {
+test('a dropped bone shows the crow variant; a dropped pebble does not', () => {
   const pebble = takeDrop(fresh(), 'pebble');
   assert.equal(pebble.decision.kind, 'accepted');
   assert.equal(room(pebble.world), 'room.yard.description');
