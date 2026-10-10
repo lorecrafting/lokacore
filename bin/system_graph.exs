@@ -135,13 +135,26 @@ defmodule SystemGraph do
     end
   end
 
+  @sec "[0-9A-Z](?:[0-9A-Za-z.]*[0-9A-Za-z])?"
+
+  # `NN §a, §b` cites each section of NN.
   defp cited(text, specs) do
-    for [cite, nn | sec] <-
-          Regex.scan(~r/\b(\d\d[a-z]?) §(?:([0-9A-Z](?:[0-9A-Za-z.]*[0-9A-Za-z])?))?/, text),
+    for [run, nn] <- Regex.scan(~r/\b(\d\d[a-z]?) §(?:#{@sec})?(?:(?:, |-|–)§#{@sec})*/u, text),
         [{path, md}] <- [specs[nn] || []],
+        [sec] <- sections(run),
         uniq: true,
-        do: %{"cite" => cite, "path" => path <> anchor(md, sec)}
+        do: %{"cite" => "#{nn} §#{sec}", "path" => path <> anchor(md, [sec])}
   end
+
+  # The leading `§a, §b, …` of a citation run (`§14-§16` gives 14 and 16); a bare `§` gives "".
+  defp sections(run) do
+    case Regex.scan(~r/§(#{@sec})/u, run) do
+      [] -> [[""]]
+      found -> Enum.map(found, &tl/1)
+    end
+  end
+
+  defp anchor(_, [""]), do: ""
 
   defp anchor(md, [sec]) do
     case Regex.run(~r/^#+ (#{Regex.escape(sec)}\.?\s.*)$/m, md) do

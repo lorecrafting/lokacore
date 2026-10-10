@@ -80,7 +80,7 @@ const Source = ({ n }: { n: Contract }) => (
     {n.kind} · {n.layer} · owner {n.owner ?? 'foundation'} · source{' '}
     <Link href={repo(n.file, n.line)}>{`${n.file}:${n.line}`}</Link>
     {n.spec.map((s) => (
-      <span key={s.path}>
+      <span key={s.cite}>
         {' · spec '}
         <Link href={repo(s.path)}>{s.cite}</Link>
       </span>
