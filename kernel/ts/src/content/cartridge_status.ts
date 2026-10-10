@@ -3,7 +3,10 @@ import { refString } from '../runtime/decision.ts';
 import { apiCmp } from './cartridge_installed.ts';
 import type { Diagnostic } from '../contracts.gen.ts';
 
-/** Checked toolbox row 1 and G3 declarations in the loaded artifact, independent of source compilation. */
+/**
+ * Checked toolbox row 1, G3 and 2c declarations in the loaded artifact, independent of source
+ * compilation; only a status with `modifies` (row 2c) may omit `per_tick`.
+ */
 export function status(c: Obj): Diagnostic[] {
   const out: Diagnostic[] = [];
   const defs = (c.statuses ?? {}) as Record<string, Obj>;
@@ -20,7 +23,7 @@ export function status(c: Obj): Diagnostic[] {
       s,
     ]),
   ) as [string, Obj][];
-  const { immune, items, g3 } = rowG3(c);
+  const { immune, named, g3 } = rowG3(c);
   if (!Object.keys(defs).length && !applies.length && !cures.length && !g3) return out;
   if (
     apiCmp(c.manifest.requires.kernel_api.at_least, g3 ? '1.46' : '1.38') < 0 ||
@@ -32,20 +35,21 @@ export function status(c: Obj): Diagnostic[] {
     if (!c.resources?.[refString(s.resource)])
       out.push(diag('UNRESOLVED_REFERENCE', `${at}.resource`));
     if (s.tick_every >= s.duration) out.push(diag('SCHEMA_VIOLATION', `${at}.tick_every`));
-    if (s.per_tick === 0) out.push(diag('SCHEMA_VIOLATION', `${at}.per_tick`));
+    if (s.per_tick === 0 || (s.per_tick === undefined && !s.modifies))
+      out.push(diag('SCHEMA_VIOLATION', `${at}.per_tick`));
     if (!c.text?.[s.label]) out.push(diag('SCHEMA_VIOLATION', `${at}.label`));
     if (Object.values(s.narration as Obj).some((k) => !c.text?.[k as string]))
       out.push(diag('SCHEMA_VIOLATION', `${at}.narration`));
   }
   for (const [at, ref] of [...applies, ...cures, ...immune])
     if (!defs[refString(ref as never)]) out.push(diag('UNRESOLVED_REFERENCE', at));
-  for (const [at, ref] of items)
-    if (!c.items?.[refString(ref as never)]) out.push(diag('UNRESOLVED_REFERENCE', at));
+  for (const [at, ref, table] of named)
+    if (!c[table]?.[refString(ref as never)]) out.push(diag('UNRESOLVED_REFERENCE', at));
   return out;
 }
 
-// Row G3: each NPC's or item's immune list entry, each step naming an item, and whether any G3
-// field (those two or a tick or expiry trigger) is used.
+// Row G3: each NPC's or item's immune list entry; each step naming an item and (row 2c) each status
+// modifier's attribute, with the table it names; whether any of them or a status trigger is used.
 function rowG3(c: Obj) {
   const immune = (['npcs', 'items'] as const).flatMap((kind) =>
     Object.entries(c[kind] ?? {}).flatMap(([ref, e]: [string, any]) =>
@@ -55,13 +59,21 @@ function rowG3(c: Obj) {
   const items = Object.entries(c.reactions ?? {}).flatMap(([ref, r]: [string, any]) =>
     (r.apply as Obj[]).flatMap((s, i) =>
       s.op === 'status.apply' && s.item
-        ? [[`.cartridge.reactions${step(ref)}.apply[${i}].item`, s.item]]
+        ? [[`.cartridge.reactions${step(ref)}.apply[${i}].item`, s.item, 'items']]
         : [],
     ),
-  ) as [string, Obj][];
+  ) as [string, Obj, string][];
+  const modifies = Object.entries(c.statuses ?? {}).flatMap(([ref, s]: [string, any]) =>
+    ((s.modifies ?? []) as Obj[]).map((m, n) => [
+      `.cartridge.statuses${step(ref)}.modifies[${n}].attribute`,
+      m.attribute,
+      'attributes',
+    ]),
+  ) as [string, Obj, string][];
   const g3 =
     immune.length ||
     items.length ||
+    modifies.length ||
     Object.values(c.reactions ?? {}).some((r: any) => r.on.event.startsWith('status_'));
-  return { immune, items, g3 };
+  return { immune, named: [...items, ...modifies], g3 };
 }

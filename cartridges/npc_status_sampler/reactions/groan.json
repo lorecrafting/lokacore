@@ -8,6 +8,10 @@
       "op": "fact.assign",
       "fact": "groaned",
       "value": true
+    },
+    {
+      "op": "status.apply",
+      "status": "fury"
     }
   ]
 }

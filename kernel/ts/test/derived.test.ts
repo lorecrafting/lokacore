@@ -1,16 +1,10 @@
 // Toolbox row 2 on the compiled derived sampler: strength 5 (nimble) and 15 (strong) move the
 // player's hit chance, damage and carry ceiling by the cartridge's tables.
 import assert from 'node:assert/strict';
-import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
-import { INSTALLED, loadCartridge, newWorld, step, stepElapsed } from '../src/index.ts';
-import type { Cartridge, World } from '../src/runtime/decision.ts';
-import { elapsedCommandId } from '../src/foundation/id_source.ts';
+import { INSTALLED, loadCartridge, newWorld, step } from '../src/index.ts';
+import type { World } from '../src/runtime/decision.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { validate } from '../src/foundation/validate.ts';
 import { decide } from '../src/mechanics/attributes/rule.ts';
@@ -19,63 +13,18 @@ import { carryingAdded, carryingExchange } from '../src/mechanics/containment/sh
 import { adjust, level, resourceRef } from '../src/mechanics/resource.ts';
 import { apply } from '../src/runtime/apply.ts';
 import { gameView } from '../src/view/view.ts';
-
-const scratch = mkdtempSync(join(tmpdir(), 'loka-derived-sampler-'));
-let artifact: Uint8Array;
-try {
-  const file = join(scratch, 'artifact.json');
-  execFileSync('mix', ['loka.compile', 'cartridges/derived_sampler', file], {
-    cwd: fileURLToPath(new URL('../../../', import.meta.url)),
-    stdio: 'pipe',
-  });
-  artifact = readFileSync(file);
-} finally {
-  rmSync(scratch, { recursive: true });
-}
-const loaded = loadCartridge(artifact, INSTALLED);
-assert.ok(loaded.ok, JSON.stringify(loaded));
-const content = loaded.cartridge as Cartridge;
-const anvil = (w: World) => w.entityIds['derived_sampler@0.0.1:item/anvil'];
-const dummy = (w: World) => w.entityIds['derived_sampler@0.0.1:npc/dummy'];
-let n = 0;
-function act(w: World, p: object) {
-  n += 1;
-  return step(
-    w,
-    {
-      id: `dddddddd-5555-4333-8444-${String(n).padStart(12, '0')}` as never,
-      world_context_id: w.context,
-      payload: { actor_id: w.character, ...p } as never,
-    },
-    n,
-  );
-}
-function play(w: World, p: object): World {
-  const r = act(w, p);
-  assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
-  return r.world;
-}
-const chosen = (ancestry: string, c: Cartridge = content) =>
-  play(newWorld(c, '1d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, [1, 2, 3, 4]), {
-    type: 'choose_ancestry',
-    ancestry,
-  });
-function wait(w: World, seconds: number): World {
-  n += 1;
-  const run_id = 'aaaaaaaa-0000-4000-8000-000000000020';
-  const until = w.state.clock + seconds;
-  const r = stepElapsed(
-    w,
-    {
-      id: elapsedCommandId(run_id, w.context, w.state.clock, until) as never,
-      world_context_id: w.context,
-      payload: { type: 'elapsed', actor_id: w.character, run_id, from: w.state.clock, until },
-    } as never,
-    n,
-  );
-  assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
-  return r.world;
-}
+import {
+  MIGHT,
+  artifact,
+  content,
+  anvil,
+  dummy,
+  act,
+  play,
+  chosen,
+  wait,
+  hpView,
+} from './derived_fixture.ts';
 
 // Breaks: truncation instead of floor (nimble damage -2), a dropped divisor or pivot, or the
 // definition start read instead of the selected value (strong would match nimble).
@@ -147,11 +96,6 @@ test('strength 15 always hits the dummy for 6; a bonus below zero damage deals 0
   weak.world.derived.damage.terms[0].per_point = -10;
   assert.equal(hp(round(chosen('strong', weak))), 20);
 });
-
-const hpView = (w: World) => {
-  const { current, maximum } = gameView(w).resources!.find((r) => r.resource.key === 'hp')!;
-  return [current, maximum];
-};
 
 // Breaks: resourceSpec or the GameView keeps the authored maximum 10 (hardy shows 10/10 and never
 // regenerates past it), or base() omits resource_maxima so composition refuses a write from 16.
@@ -276,6 +220,16 @@ test('the loader refuses each unsound derived table', () => {
       '.cartridge.manifest.requires.kernel_api.at_least',
     ],
     [
+      (c) => (c.manifest.requires.kernel_api.at_least = '1.45'), // row 2c modifies: 1.46
+      'KERNEL_API_RANGE_INVALID',
+      '.cartridge.manifest.requires.kernel_api.at_least',
+    ],
+    [
+      (c) => delete c.statuses[MIGHT].modifies, // only a modifying status may omit per_tick
+      'SCHEMA_VIOLATION',
+      `.cartridge.statuses[${JSON.stringify(MIGHT)}].per_tick`,
+    ],
+    [
       (c) => (c.manifest.requires.kernel_api.at_least = '1.39'),
       'KERNEL_API_RANGE_INVALID',
       '.cartridge.manifest.requires.kernel_api.at_least',
@@ -292,6 +246,8 @@ test('the loader refuses each unsound derived table', () => {
         delete c.lock.capabilities.attributes;
         delete c.attributes;
         delete c.ancestries;
+        delete c.statuses[MIGHT].modifies; // row 2c names str; without it, might must tick
+        c.statuses[MIGHT].per_tick = 1;
       },
       'UNDECLARED_CAPABILITY',
       at,

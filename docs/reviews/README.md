@@ -14,6 +14,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: toolbox row W6, entity description variants and two leaves (loka-kgd.37, batch M5)](2026-10-10-toolbox-m5-variants-review.md): **APPROVE WITH NOTES**
 - [Review: toolbox row G3, statuses on NPCs and things (loka-kgd.33)](2026-10-10-toolbox-m5-status-review.md): **APPROVE**
 - [Review: toolbox row G3 second half, attributes on NPCs (loka-kgd.42)](2026-10-10-toolbox-m5-npc-attr-review.md): **APPROVE WITH NOTES**
+- [Review: toolbox row 2c, status modifiers on attributes (loka-kgd.34, batch M5)](2026-10-10-toolbox-m5-modifiers-review.md): **CHANGES REQUIRED**
 - [Item review: toolbox row W23 quest stage hints, part 1 (loka-kgd.38, batch M5)](2026-10-10-toolbox-m5-hints-review.md): **APPROVE WITH NOTES**
 - [Item review: toolbox row W25, exposure (loka-kgd.39, batch M5)](2026-10-10-toolbox-m5-exposure-review.md): **APPROVE WITH NOTES**
 - [Review: toolbox row W24 engine half, quest deadlines (loka-kgd.45, batch M5)](2026-10-10-toolbox-m5-deadlines-review.md): **APPROVE WITH NOTES**

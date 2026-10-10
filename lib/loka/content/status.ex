@@ -1,5 +1,5 @@
 defmodule Loka.Content.Status do
-  @moduledoc "Checks toolbox row 1 status declarations, their appliers, the foods that cure them and (row G3) the NPCs and items immune to them."
+  @moduledoc "Checks toolbox row 1 status declarations, their appliers, the foods that cure them, (row G3) the NPCs and items immune to them and (row 2c) their attribute modifiers."
   import Loka.Content.Source, only: [at: 2, diag: 2]
   alias Loka.Content.Refs
 
@@ -22,8 +22,8 @@ defmodule Loka.Content.Status do
       else: gate(m, g3) ++ values(statuses, m, defs, text) ++ foods(cures ++ immune, m, defs)
   end
 
-  # Row G3: each NPC's or item's immune list, and whether any G3 field (those, a step naming an
-  # item, or a tick or expiry trigger) is used.
+  # Row G3: each NPC's or item's immune list, and whether any API 1.46 field (those, a step naming
+  # an item, a tick or expiry trigger, or a row 2c status modifier) is used.
   defp row_g3(defs) do
     immune =
       for kind <- ~w(npc item),
@@ -31,7 +31,8 @@ defmodule Loka.Content.Status do
           e["immune"],
           do: {rel, ["immune"], e["immune"]}
 
-    {immune, immune != [] or Enum.any?(defs["reaction"] || %{}, &trigger?/1)}
+    modifies = Enum.any?(defs["status"] || %{}, &match?({_, {_, _, %{"modifies" => _}}}, &1))
+    {immune, immune != [] or modifies or Enum.any?(defs["reaction"] || %{}, &trigger?/1)}
   end
 
   defp trigger?({_, {_, _, %{} = r}}),
@@ -66,9 +67,24 @@ defmodule Loka.Content.Status do
         do: [diag("SCHEMA_VIOLATION", at(rel, ["tick_every"]))],
         else: []
       ) ++
-      if(s["per_tick"] == 0, do: [diag("SCHEMA_VIOLATION", at(rel, ["per_tick"]))], else: []) ++
+      per_tick(rel, s) ++
       missing_text(rel, ["label"], [s["label"]], text) ++
-      missing_text(rel, ["narration"], Map.values(s["narration"] || %{}), text)
+      missing_text(rel, ["narration"], Map.values(s["narration"] || %{}), text) ++
+      modifies(rel, s, m, defs)
+  end
+
+  # Never 0; only a modifying status (row 2c) may omit it.
+  defp per_tick(rel, s) do
+    if s["per_tick"] == 0 or (s["per_tick"] == nil and s["modifies"] == nil),
+      do: [diag("SCHEMA_VIOLATION", at(rel, ["per_tick"]))],
+      else: []
+  end
+
+  # Row 2c: each status modifier names a real attribute.
+  defp modifies(rel, s, m, defs) do
+    for {a, i} <- Enum.with_index(s["modifies"] || []),
+        d <- Refs.reference(rel, ["modifies", i], "attribute", a, m, defs),
+        do: d
   end
 
   defp missing_text(_, _, _, :unknown), do: []

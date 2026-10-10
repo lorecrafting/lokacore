@@ -1,0 +1,17 @@
+{
+  "duration": 600,
+  "tick_every": 300,
+  "resource": "mv",
+  "modifies": [
+    {
+      "attribute": "str",
+      "modifier": 3
+    }
+  ],
+  "label": "condition.furious",
+  "narration": {
+    "applied": "narration.fury.applied",
+    "tick": "narration.fury.tick",
+    "expired": "narration.fury.expired"
+  }
+}

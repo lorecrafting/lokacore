@@ -21510,5 +21510,252 @@
         "code": "too_many_items"
       }
     ]
+  },
+  {
+    "contract": "StatusDefinition",
+    "value": {
+      "key": "might",
+      "duration": 3600,
+      "tick_every": 600,
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "mv"
+      },
+      "per_tick": 1,
+      "label": "condition.mighty",
+      "narration": {
+        "applied": "narration.might.applied",
+        "tick": "narration.might.tick",
+        "expired": "narration.might.expired"
+      },
+      "modifies": []
+    },
+    "errors": [
+      {
+        "path": "/modifies",
+        "code": "too_few_items"
+      }
+    ]
+  },
+  {
+    "contract": "StatusDefinition",
+    "value": {
+      "key": "might",
+      "duration": 3600,
+      "tick_every": 600,
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "mv"
+      },
+      "per_tick": 1,
+      "label": "condition.mighty",
+      "narration": {
+        "applied": "narration.might.applied",
+        "tick": "narration.might.tick",
+        "expired": "narration.might.expired"
+      },
+      "modifies": [
+        {
+          "attribute": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "attribute",
+            "key": "str"
+          },
+          "modifier": 3
+        },
+        {
+          "attribute": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "attribute",
+            "key": "str"
+          },
+          "modifier": 3
+        },
+        {
+          "attribute": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "attribute",
+            "key": "str"
+          },
+          "modifier": 3
+        },
+        {
+          "attribute": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "attribute",
+            "key": "str"
+          },
+          "modifier": 3
+        },
+        {
+          "attribute": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "attribute",
+            "key": "str"
+          },
+          "modifier": 3
+        },
+        {
+          "attribute": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "attribute",
+            "key": "str"
+          },
+          "modifier": 3
+        },
+        {
+          "attribute": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "attribute",
+            "key": "str"
+          },
+          "modifier": 3
+        },
+        {
+          "attribute": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "attribute",
+            "key": "str"
+          },
+          "modifier": 3
+        },
+        {
+          "attribute": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "attribute",
+            "key": "str"
+          },
+          "modifier": 3
+        },
+        {
+          "attribute": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "attribute",
+            "key": "str"
+          },
+          "modifier": 3
+        },
+        {
+          "attribute": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "attribute",
+            "key": "str"
+          },
+          "modifier": 3
+        },
+        {
+          "attribute": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "attribute",
+            "key": "str"
+          },
+          "modifier": 3
+        },
+        {
+          "attribute": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "attribute",
+            "key": "str"
+          },
+          "modifier": 3
+        },
+        {
+          "attribute": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "attribute",
+            "key": "str"
+          },
+          "modifier": 3
+        },
+        {
+          "attribute": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "attribute",
+            "key": "str"
+          },
+          "modifier": 3
+        },
+        {
+          "attribute": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "attribute",
+            "key": "str"
+          },
+          "modifier": 3
+        },
+        {
+          "attribute": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "attribute",
+            "key": "str"
+          },
+          "modifier": 3
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/modifies",
+        "code": "too_many_items"
+      }
+    ]
+  },
+  {
+    "contract": "StatusDefinition",
+    "value": {
+      "key": "might",
+      "duration": 3600,
+      "tick_every": 600,
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "mv"
+      },
+      "per_tick": 1,
+      "label": "condition.mighty",
+      "narration": {
+        "applied": "narration.might.applied",
+        "tick": "narration.might.tick",
+        "expired": "narration.might.expired"
+      },
+      "modifies": [
+        {
+          "attribute": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "attribute",
+            "key": "str"
+          }
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/modifies/0/modifier",
+        "code": "missing_property"
+      }
+    ]
   }
 ]

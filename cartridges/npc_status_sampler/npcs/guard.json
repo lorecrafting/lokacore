@@ -15,5 +15,11 @@
   "daily_schedule": {
     "6": "hall",
     "7": "dart_room"
-  }
+  },
+  "attributes": [
+    {
+      "attribute": "str",
+      "value": 12
+    }
+  ]
 }

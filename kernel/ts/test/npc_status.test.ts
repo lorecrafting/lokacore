@@ -18,6 +18,7 @@ import { value } from '../src/mechanics/fact.ts';
 import { applyStatus } from '../src/mechanics/status/shared.ts';
 import { runStatus } from '../src/mechanics/status/job.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
+import { npcValue } from '../src/mechanics/attributes/shared.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-npc-status-'));
 let artifact: Uint8Array;
@@ -280,6 +281,21 @@ test('a fatal tick ends a lone fight but not a pack fight', () => {
   assert.equal(closes([g, id(w, 'npc', 'golem')].sort()), false);
 });
 
+// Breaks (row 2c): npcValue ignores modifies, counts any active status (poison) or its per_tick, or
+// keeps fury after expiry. Fury comes with each poison tick (+60 to +240), so it ends at +840.
+test('poison leaves the guard at str 12; the fury its tick brings reads 15 until it expires', () => {
+  const str = (w: World) => npcValue(w, id(w, 'npc', 'guard'), ref('attribute', 'str'));
+  let w = wait(fresh(), 3600);
+  assert.ok(row(w, 'npc', 'guard', 'poison')?.active);
+  assert.equal(str(w), 12);
+  w = wait(w, 60);
+  assert.equal(str(w), 15);
+  w = wait(w, 779);
+  assert.equal(str(w), 15);
+  w = wait(w, 1);
+  assert.equal(str(w), 12);
+});
+
 // Breaks: the loader drops a G3 check, so an artifact naming no status or item, or a G3 field
 // under an older kernel_api, loads and fails in play.
 test('the loader refuses each unsound G3 declaration', () => {
@@ -306,6 +322,11 @@ test('the loader refuses each unsound G3 declaration', () => {
       (c) => (c.reactions[`${C}:reaction/groan`].on.status.key = 'plague'),
       'UNRESOLVED_REFERENCE',
       `.cartridge.reactions[${JSON.stringify(`${C}:reaction/groan`)}].on.status`,
+    ],
+    [
+      (c) => (c.statuses[`${C}:status/fury`].modifies[0].attribute.key = 'dex'),
+      'UNRESOLVED_REFERENCE',
+      `.cartridge.statuses[${JSON.stringify(`${C}:status/fury`)}].modifies[0].attribute`,
     ],
     [
       (c) => (c.manifest.requires.kernel_api.at_least = '1.45'),

@@ -12,10 +12,11 @@ import type {
 import { add } from '../../foundation/int.ts';
 import { accepted, type JobRow, type Mint, type World } from '../../runtime/decision.ts';
 import { prefix } from '../combat/round_attack.ts';
+import { currentRound } from '../combat/round.ts';
 import { closeEncounter, engaged } from '../combat/shared.ts';
 import { deathSequence } from '../death/sequence.ts';
 import { adjust, level, resourceSpec } from '../resource.ts';
-import { endStatus, specOf } from './shared.ts';
+import { endStatus, expire, specOf } from './shared.ts';
 
 type Active = StatusRow & { active: true };
 
@@ -42,7 +43,7 @@ export function runStatus(
   const now = job.due_time;
   const visit = { ...world, state: { ...world.state, clock: now } };
   const expired = now >= row.ends_at;
-  const due = !expired && now >= row.next_tick_at;
+  const due = !expired && spec.per_tick !== undefined && now >= row.next_tick_at;
   const { by, fatal } = due ? amount(visit, body, spec) : { by: 0, fatal: false };
   const ops: DeltaOp[] = [done];
   if (by) ops.push({ ...adjust(visit, body, spec.resource, by, {}).op, at: now });
@@ -50,7 +51,8 @@ export function runStatus(
   const fight = fatal ? engaged(visit, body) : undefined;
   if (fight && (player || (fight.row.active_ids?.length ?? 1) === 1))
     ops.push(...closeEncounter(visit, body));
-  if (expired || fatal) ops.push(endStatus(body, status, row, 0));
+  if (expired) ops.push(...expire(visit, body, status, row, 0));
+  else if (fatal) ops.push(endStatus(body, status, row, 0));
   const say = (key: TextKey) => (player ? [{ key }] : []);
   const events = due ? [happened(visit, command, mint, 'status_ticked', body, status)] : [];
   if (fatal) {
@@ -63,7 +65,7 @@ export function runStatus(
     return accepted(world, 'job_ran', ops, ended, say(spec.narration.expired));
   }
   // A due tick on an unreadable pool is skipped, never re-due at the same clock.
-  const next_tick_at = due ? add(row.next_tick_at, spec.tick_every) : row.next_tick_at;
+  const next_tick_at = due ? add(row.next_tick_at, spec.tick_every) : untick(spec, row);
   ops.push(...successor(body, status, row, next_tick_at, mint() as JobId));
   return accepted(world, 'job_ran', ops, events, by ? say(spec.narration.tick) : []);
 }
@@ -77,7 +79,7 @@ function amount(visit: World, body: EntityId, spec: StatusDefinition) {
   const pool = resourceSpec(visit, body, spec.resource);
   if (visit.entities[body]?.kind === 'item' || current === undefined || !pool)
     return { by: 0, fatal: false };
-  const by = Math.max(pool.minimum - current, Math.min(pool.maximum - current, spec.per_tick));
+  const by = Math.max(pool.minimum - current, Math.min(pool.maximum - current, spec.per_tick!));
   return { by, fatal: by < 0 && spec.resource.key === 'hp' && current + by === 0 };
 }
 
@@ -138,6 +140,10 @@ const happened = (
   payload: { type, body_id, status },
 });
 
+// A status that never ticks (row 2c) follows a refreshed end.
+const untick = (spec: StatusDefinition, row: Active) =>
+  spec.per_tick === undefined ? row.ends_at : row.next_tick_at;
+
 // The row's next job, due at the earlier of its next tick and its end.
 const successor = (
   body: EntityId,
@@ -165,7 +171,8 @@ const successor = (
 
 // Status jobs on one holder in one advance share a writer group, so two ticks on one pool compose
 // in sequence; a reaction's status.apply on that holder, before or after, shares it (reaction.ts
-// statusStep, row G3).
+// statusStep, row G3); so does a combat round on its body or opponent, whose hp a status's tick or
+// hp settle (row 2c) also writes.
 export function statusGroup(
   at: World,
   id: JobId,
@@ -173,7 +180,14 @@ export function statusGroup(
   holders: Map<string, number>,
   next: number,
 ) {
-  const held = job.job.kind === 'status' ? statusHolder(at, id)?.body : undefined;
-  if (held && !holders.has(held)) holders.set(held, next);
-  return held ? holders.get(held) : undefined;
+  const round = currentRound(at, id, job);
+  const held = round
+    ? [round.body_id, round.npc_id]
+    : [job.job.kind === 'status' ? statusHolder(at, id)?.body : undefined];
+  const bodies = held.filter((b) => b !== undefined);
+  if (!bodies.length) return undefined;
+  // ponytail: a round whose body and opponent already hold different groups keeps the first.
+  const group = bodies.map((b) => holders.get(b)).find((g) => g !== undefined) ?? next;
+  for (const b of bodies) if (!holders.has(b)) holders.set(b, group);
+  return group;
 }
