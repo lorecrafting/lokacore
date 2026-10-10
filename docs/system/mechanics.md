@@ -587,9 +587,9 @@ Every filter present must equal its payload field; a filter means the same field
 | `choice_opened` | none | the actor's body |
 | `choice_resolved` | `choice` (choice_id) | the actor's body |
 | `story_point_reached` | `story_point`, `outcome` | the actor's body |
-| `custom_event` | `custom` (the event's key) | subject_id |
-| `action_completed` | `action` | subject_id |
-| `check_passed`, `check_failed` | `check` (the check's key) | subject_id |
+| `custom_event` | `custom` (the event's key) | the actor's body |
+| `action_completed` | `action` | the actor's body |
+| `check_passed`, `check_failed` | `check` (the check's key) | the actor's body (subject_id is the target) |
 | `barrier_changed` | `barrier`, `to` | the actor's body |
 | `scene_ended` | `scene` | the actor's body |
 | `entity_died` | `victim` (victim_definition), `room` (room_id) | victim_id |
@@ -597,14 +597,15 @@ Every filter present must equal its payload field; a filter means the same field
 | `filled`, `poured`, `drank` | `kind` | the actor's body |
 | `entity_entered_room` | `room` (required) | entity_id |
 | `rested` | `room` (required) | body_id |
-| `fact_changed` | `fact` (required) | the actor's body |
+| `fact_changed` | `fact` (required) | subject_id when present, else the actor's body |
 | `quest_resolved` | `quest`, `outcome` (both required) | the actor's body |
 
 Attribution: every delivery runs for the command actor (the quest-resolution exception below),
 so an event whose subject is an NPC or a thing (a hound's death, a hit on a guard, a crow
 taking an item) still reads the actor's `when` and writes the actor's facts, quests and
 experience; only `status.apply` follows the subject and skips when the subject is not the
-actor's body (statuses on NPCs and things wait for row G3). A filter naming a definition (`item`,
+actor's body (statuses on NPCs and things wait for row G3). A check, action or custom event's subject_id
+names its target, so its status lands on the doer: a failed disarm poisons the actor. A filter naming a definition (`item`,
 `room`, `quest`, `story_point`, `barrier`, `scene`, `kind`, `victim` as an NPC) must name one of
 this cartridge (`item` matches its authored instance only, never a created one such as a
 harvested pelt); key filters (`custom`, `check`, `choice`, `action`, `outcome`) are not resolved

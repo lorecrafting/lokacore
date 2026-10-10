@@ -85,6 +85,9 @@ test('a reaction chain from a dropped pebble stops at the budget', () => {
   const taken = act(w, { type: 'take', item_id: item(w, 'pebble') });
   const dropped = act(taken.world, { type: 'drop', item_id: item(w, 'pebble') });
   assert.deepEqual(dropped.decision, { kind: 'fault', code: 'budget_exceeded' });
+  // Each crow_drawn change delivers to both rules and one flips it back: the queue doubles per
+  // level, so 8192 deliveries run out near depth 13, long before reaction_depth 32.
+  assert.equal(dropped.limit, 'deliveries');
   assert.equal(dropped.world, taken.world);
 });
 

@@ -153,22 +153,21 @@ export function sequence(
 }
 
 // The payload field naming each event's subject (docs/system/mechanics.md reaction@1 table); any
-// other event's subject is the actor's own body. A status applies only to its subject body: a
-// scheduled NPC walking in, or a hound's death, poisons no one.
+// other event's subject, or a fact_changed without subject_id, is the actor's own body. A status
+// applies only to its subject body: a scheduled NPC walking in, or a hound's death, poisons no
+// one. A check, action or custom event's subject_id is its target; its status lands on the doer.
 const SUBJECT: Partial<Record<On['event'], string>> = {
   entity_entered_room: 'entity_id',
   item_acquired: 'holder_id',
-  custom_event: 'subject_id',
-  action_completed: 'subject_id',
-  check_passed: 'subject_id',
-  check_failed: 'subject_id',
   entity_died: 'victim_id',
   attack_result: 'target_id',
   rested: 'body_id',
+  fact_changed: 'subject_id',
 };
 const applies = (cause: DomainEvent, body: EntityId) => {
   const field = SUBJECT[cause.payload.type as On['event']];
-  return !field || (cause.payload as Record<string, unknown>)[field] === body;
+  const subject = field && (cause.payload as Record<string, unknown>)[field];
+  return subject === undefined || subject === body;
 };
 
 function assignment(

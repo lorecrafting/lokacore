@@ -264,6 +264,13 @@ test("a status reaction applies only to its event's subject body", () => {
     assert.equal(transitions({ ...entry.payload, type, [field]: w.body }), 1, type);
     assert.equal(transitions({ ...entry.payload, type, [field]: antidote(w) }), 0, type);
   }
+  // Breaks: a failed check's status landing on its target (the thing) instead of the doer, or a
+  // fact_changed about another entity poisoning the player.
+  const doer = { ...entry.payload, type: 'check_failed', subject_id: antidote(w) };
+  assert.equal(transitions(doer), 1, 'check_failed');
+  const fact = { ...entry.payload, type: 'fact_changed' };
+  assert.equal(transitions(fact), 1, 'fact_changed');
+  assert.equal(transitions({ ...fact, subject_id: antidote(w) }), 0, 'fact_changed subject');
 });
 
 // Breaks: the loader drops one of its status checks, so the artifact loads and fails in play.
