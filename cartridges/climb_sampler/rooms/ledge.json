@@ -1,0 +1,9 @@
+{
+  "title": "room.ledge.title",
+  "description": "room.ledge.description",
+  "exits": {
+    "up": {
+      "to": "clifftop"
+    }
+  }
+}

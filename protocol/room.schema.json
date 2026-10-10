@@ -58,6 +58,28 @@
           ],
           "additionalProperties": false
         },
+        "climb": {
+          "description": "Toolbox row 30 (docs/system/mechanics.md rope and climb; kernel_api at least 1.45): crossing this directed exit is a climb. A mover whose body holds item (directly or in a container) climbs down as on any exit; one without it falls: the move still happens and also costs damage HP, never below 1 (a fall never kills), narrated by fell. The cartridge declares an hp pool (RESOURCE_SPEC_INVALID otherwise). NPCs never take a climb face.",
+          "type": "object",
+          "properties": {
+            "item": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "damage": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "fell": {
+              "$ref": "text.schema.json#/$defs/TextKey"
+            }
+          },
+          "required": [
+            "item",
+            "damage",
+            "fell"
+          ],
+          "additionalProperties": false
+        },
         "knock": {
           "$ref": "room.schema.json#/$defs/KnockResponse"
         }

@@ -119,6 +119,7 @@ function flightExit(world: World, here: EntityId, area: readonly DefinitionRef[]
       there &&
       area.some((ref) => refString(ref) === refString(exit)) &&
       !exitOf(room, direction)!.hidden_until &&
+      !exitOf(room, direction)!.climb &&
       !passage(world, room, direction)
     )
       return { direction, there };

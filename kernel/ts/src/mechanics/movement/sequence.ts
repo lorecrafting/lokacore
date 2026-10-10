@@ -19,7 +19,7 @@ import { closeEncounter } from '../combat/shared.ts';
 import { settled as crowSettled } from '../crow/behavior.ts';
 import { travel } from '../escort/shared.ts';
 import { entrySight } from '../population/behavior.ts';
-import { fare, hidden, passage } from './shared.ts';
+import { fall, fare, hidden, passage } from './shared.ts';
 
 /** Shared ordinary/escape movement: admission, one payment, one transfer and closure. */
 type MoveCommand = {
@@ -37,6 +37,8 @@ export function moveSequence(
   const plan = movementPlan(world, actor_id, direction, steps, outcome === 'fled');
   if (typeof plan === 'string') return rejected(plan);
   const { body, here, there, paid } = plan;
+  // A climb without its item falls (toolbox row 30): after the fare, once every admission passed.
+  const fell = fall(world, world.rooms[here], direction, body, 'levels' in paid ? paid.levels : {});
   const transfer = {
     op: 'entity.transfer',
     writer_group: 0,
@@ -47,6 +49,7 @@ export function moveSequence(
   const ops = [
     ...paid.ops,
     transfer,
+    ...(fell?.ops ?? []),
     ...water.travel(world, actor_id, there, plan.water?.entering, mint),
     ...travel(world, actor_id, here, there),
     ...closeMovementEncounter(world, body, mint),
@@ -58,12 +61,13 @@ export function moveSequence(
     room_id: there,
   });
   const progress = routeProgress(world, command, plan, ops, mint, steps);
+  const narration = [...(fell ? [fell.narration] : []), ...(progress.narration ?? [])];
   return accepted(
     world,
     outcome,
     [...ops, ...progress.ops],
     [entered, ...progress.events],
-    progress.narration,
+    narration.length ? narration : undefined,
   );
 }
 

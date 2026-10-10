@@ -203,6 +203,7 @@ function refuge(
       !there ||
       !plan.area.some((r) => refString(r) === refString(exit)) ||
       exitOf(room, direction)!.hidden_until ||
+      exitOf(room, direction)!.climb ||
       passage(world, room, direction)
     )
       continue;

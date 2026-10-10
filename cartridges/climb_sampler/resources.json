@@ -1,0 +1,10 @@
+{
+  "resources": {
+    "hp": {
+      "minimum": 0,
+      "maximum": 10,
+      "start": 10,
+      "gain": 0
+    }
+  }
+}

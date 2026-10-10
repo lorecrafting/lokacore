@@ -1,0 +1,14 @@
+{
+  "title": "room.clifftop.title",
+  "description": "room.clifftop.description",
+  "exits": {
+    "down": {
+      "to": "ledge",
+      "climb": {
+        "item": "rope",
+        "damage": 4,
+        "fell": "narration.fell"
+      }
+    }
+  }
+}

@@ -9,6 +9,7 @@ export function knowledge(c: Obj, check: Checks): Diagnostic[] {
   const { named, text, typedValue } = check;
   let hasKnock = false;
   let hasHidden = false;
+  let hasClimb = false;
   for (const [ref, r] of Object.entries(c.rooms as Obj)) {
     const at = `.cartridge.rooms${step(ref)}`;
     for (const [dir, exit] of Object.entries(r.exits as Obj)) {
@@ -19,6 +20,14 @@ export function knowledge(c: Obj, check: Checks): Diagnostic[] {
         named(until.fact, 'fact', `${at}.exits.${dir}.hidden_until.fact`);
         typedValue(until.fact, until.equals, `${at}.exits.${dir}.hidden_until.equals`);
         if (exit.barrier) out.push(diag('BARRIER_MISMATCH', `${at}.exits.${dir}.hidden_until`));
+      }
+      if (exit.climb) {
+        // Toolbox row 30: a fall costs HP, so the cartridge needs the pool.
+        hasClimb = true;
+        named(exit.climb.item, 'item', `${at}.exits.${dir}.climb.item`);
+        text(exit.climb, ['fell'], `${at}.exits.${dir}.climb`);
+        if (!Object.values(c.resources ?? {}).some((s: any) => s.key === 'hp'))
+          out.push(diag('RESOURCE_SPEC_INVALID', `${at}.exits.${dir}.climb`));
       }
       if (exit.knock) {
         hasKnock = true;
@@ -35,7 +44,7 @@ export function knowledge(c: Obj, check: Checks): Diagnostic[] {
     apiCmp(c.manifest.requires.kernel_api.at_least, '1.37') < 0
   )
     out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
-  if (hasHidden && apiCmp(c.manifest.requires.kernel_api.at_least, '1.45') < 0)
+  if ((hasHidden || hasClimb) && apiCmp(c.manifest.requires.kernel_api.at_least, '1.45') < 0)
     out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
   mapPositions(c, named, out);
   return out;

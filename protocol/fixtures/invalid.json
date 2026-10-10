@@ -12015,6 +12015,65 @@
     ]
   },
   {
+    "contract": "Connection",
+    "value": {
+      "to": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "b"
+      },
+      "climb": {
+        "x": 1
+      }
+    },
+    "errors": [
+      {
+        "path": "/climb/damage",
+        "code": "missing_property"
+      },
+      {
+        "path": "/climb/fell",
+        "code": "missing_property"
+      },
+      {
+        "path": "/climb/item",
+        "code": "missing_property"
+      },
+      {
+        "path": "/climb/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "Connection",
+    "value": {
+      "to": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "b"
+      },
+      "climb": {
+        "item": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "item",
+          "key": "rope"
+        },
+        "damage": 0,
+        "fell": "narration.fell"
+      }
+    },
+    "errors": [
+      {
+        "path": "/climb/damage",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
     "contract": "CompiledCartridge",
     "value": {
       "format": "loka-cartridge-v2",
