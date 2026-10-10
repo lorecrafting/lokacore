@@ -71,7 +71,8 @@ function sources(w: World, steps: Steps): Source[] {
   for (const [at, row] of Object.entries(w.state.statuses ?? {})) {
     if (!row.active) continue;
     const { body_id, status } = JSON.parse(at);
-    add(roomOf(w, body_id, steps), specOf(w, status)?.cues);
+    const cues = specOf(w, status)?.cues; // a status without cues costs no step
+    if (cues) add(roomOf(w, body_id, steps), cues);
   }
   return out;
 }
@@ -141,9 +142,10 @@ export function perceived(
   ctx: { steps: Steps; cause?: DomainEvent; cue?: true },
   holds: Holds,
 ) {
+  if (ctx.cue) return false;
   const npc = w.entityIds[refString(p.npc)];
   const room = npc && living(w, npc) ? roomOf(w, npc, ctx.steps) : undefined;
-  if (ctx.cue || !room) return false;
+  if (!room) return false;
   const cues = reaching(w, actor, room, ctx.steps, holds, outcomeCues(w, actor, ctx.cause));
   return cues.some(({ cue }) => cue.sense === p.sense) && ctx.steps.n <= LIMITS.query_steps;
 }
