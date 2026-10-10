@@ -31,10 +31,11 @@ jobs:
           BASE: ${{ github.event.pull_request.base.sha }}
           PR: ${{ github.event.pull_request.number }}
         run: |
+          set -eu
           graph=docs/system-graph.gen.json
           base="$RUNNER_TEMP/base.json"
-          gh api -H 'Accept: application/vnd.github.raw' "repos/$GITHUB_REPOSITORY/contents/$graph?ref=$BASE" > "$base" ||
-            echo '{"nodes":[],"edges":[]}' > "$base"
+          # No fallback: an unreadable base fails this job (not a gate) rather than post a wrong diff.
+          gh api -H 'Accept: application/vnd.github.raw' "repos/$GITHUB_REPOSITORY/contents/$graph?ref=$BASE" > "$base"
           python3 bin/graph_diff.py "$base" "$graph" > "$RUNNER_TEMP/body.md"
           id=$(gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$PR/comments" \
             --jq '.[] | select(.body | startswith("<!-- system-graph-diff -->")) | .id' | head -n 1)

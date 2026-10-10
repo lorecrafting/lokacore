@@ -3,7 +3,7 @@
 // named contract is a button that selects it.
 import { usePalette } from '../../book/palette.ts';
 import { space } from '../../book/tokens.ts';
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { contracts, graph, path, repo, type Contract } from './graph.ts';
 import { Sections } from './Save.tsx';
 import { cell, Link, Prose } from './ui.tsx';
@@ -125,13 +125,14 @@ function Impact({ name, onSelect }: { name: string; onSelect: Select }) {
 // Path finding: the reference chain from the selection to a contract typed or picked here.
 function PathTo({ from, onSelect }: { from: string; onSelect: Select }) {
   const [to, setTo] = useState('');
+  const list = useId();
   const chain = contracts.has(to) ? path(from, to) : undefined;
   return (
     <div>
       <label>
-        Path to <input list="system-contracts" value={to} onChange={(e) => setTo(e.target.value)} />
+        Path to <input list={list} value={to} onChange={(e) => setTo(e.target.value)} />
       </label>
-      <datalist id="system-contracts">
+      <datalist id={list}>
         {graph.nodes.map((n) => (
           <option key={n.name} value={n.name} />
         ))}

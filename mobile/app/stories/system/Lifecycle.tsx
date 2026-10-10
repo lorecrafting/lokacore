@@ -61,8 +61,46 @@ function Command() {
   );
 }
 
-export function Lifecycle() {
+// One stage in its lane's column, ruled in its layer's hue (a save table's: Save).
+function Stage({
+  lane,
+  name,
+  what,
+  row,
+}: {
+  lane: string;
+  name: string;
+  what: string;
+  row: number;
+}) {
   const c = usePalette();
+  return (
+    <li
+      style={{
+        gridColumn: lanes.indexOf(lane) + 1,
+        gridRow: row,
+        borderLeft: `4px solid ${hue(contracts.get(name)?.layer ?? 'Save', c)}`,
+        paddingInline: space.sm,
+      }}
+    >
+      <Link top href={page('data-model', { node: name })}>
+        {name}
+      </Link>{' '}
+      {what}
+      {fails(name) && (
+        <span style={{ color: c.danger }}>
+          {' '}
+          → fails with{' '}
+          <Link top href={page('data-model', { node: 'GameError' })}>
+            GameError
+          </Link>
+        </span>
+      )}
+    </li>
+  );
+}
+
+export function Lifecycle() {
   return (
     <Sheet>
       <Command />
@@ -82,29 +120,7 @@ export function Lifecycle() {
           </li>
         ))}
         {stages.map(([lane, name, what], i) => (
-          <li
-            key={name}
-            style={{
-              gridColumn: lanes.indexOf(lane) + 1,
-              gridRow: i + 2,
-              borderLeft: `4px solid ${hue(contracts.get(name)?.layer ?? 'Save', c)}`,
-              paddingInline: space.sm,
-            }}
-          >
-            <Link top href={page('data-model', { node: name })}>
-              {name}
-            </Link>{' '}
-            {what}
-            {fails(name) && (
-              <span style={{ color: c.danger }}>
-                {' '}
-                → fails with{' '}
-                <Link top href={page('data-model', { node: 'GameError' })}>
-                  GameError
-                </Link>
-              </span>
-            )}
-          </li>
+          <Stage key={name} lane={lane} name={name} what={what} row={i + 2} />
         ))}
       </ol>
     </Sheet>
