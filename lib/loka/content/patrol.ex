@@ -106,10 +106,10 @@ defmodule Loka.Content.Patrol do
     end
   end
 
-  # A leg with any hidden face to the next room (toolbox row 11) could walk it.
+  # A leg with any hidden (toolbox row 11) or climb (row 30) face to the next room could walk it.
   defp leg?(r, next) do
     to = for {_, e} <- r["exits"], e["to"] == next, do: e
-    to != [] and not Enum.any?(to, & &1["hidden_until"])
+    to != [] and not Enum.any?(to, &(&1["hidden_until"] || &1["climb"]))
   end
 
   # ponytail: keep five conflict scans together; split on growth. # credo:disable-for-next-line /ABCSize|CyclomaticComplexity/

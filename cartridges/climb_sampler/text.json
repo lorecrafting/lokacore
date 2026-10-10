@@ -1,0 +1,10 @@
+{
+  "room.clifftop.title": "Clifftop",
+  "room.clifftop.description": "A windy clifftop. The rock drops sheer to a ledge below.",
+  "room.ledge.title": "Ledge",
+  "room.ledge.description": "A narrow ledge. Worn handholds lead back up.",
+  "item.rope.short": "a coil of rope",
+  "item.rope.room": "A [coil of rope] lies here.",
+  "item.rope.description": "A long hemp rope, good for climbing.",
+  "narration.fell": "You lose your grip on the rock and fall to the ledge below."
+}

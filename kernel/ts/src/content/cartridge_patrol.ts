@@ -34,9 +34,9 @@ function routeChecks(c: Obj, p: Obj, at: string, checks: Checks): Diagnostic[] {
       room === next ||
       (c.rooms[room] &&
         !Object.values(c.rooms[room].exits).some((e: any) => refString(e.to) === next)) ||
-      // A leg with any hidden face to the next room (toolbox row 11) could walk it.
+      // A leg with any hidden (toolbox row 11) or climb (row 30) face to the next room could walk it.
       Object.values(c.rooms[room]?.exits ?? {}).some(
-        (e: any) => refString(e.to) === next && e.hidden_until,
+        (e: any) => refString(e.to) === next && (e.hidden_until || e.climb),
       )
     )
       bad(`route[${i}]`);

@@ -101,7 +101,7 @@ function tagsOf(
 
 // `item` is inside `holder`, directly or through the items it is in (the loader and compose
 // keep containers acyclic, so the climb ends at a room).
-function held(world: World, item: string, holder: string | undefined): boolean {
+export function held(world: World, item: string, holder: string | undefined): boolean {
   for (let at = world.state.containers[item]; at !== undefined; at = world.state.containers[at])
     if (at === holder) return true;
   return false;

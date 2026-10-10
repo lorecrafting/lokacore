@@ -1,0 +1,13 @@
+{
+  "keywords": [
+    "rope"
+  ],
+  "short": "item.rope.short",
+  "room_line": "item.rope.room",
+  "description": "item.rope.description",
+  "location": {
+    "in": "room",
+    "room": "clifftop"
+  },
+  "mass_grams": 0
+}
