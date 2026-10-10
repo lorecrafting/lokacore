@@ -154,11 +154,11 @@ test("the loader checks the entrant filter's NPC and its 1.47 floor", () => {
 // sampler below these floors trips other features' floors first. quest.activate's 1.8 has no
 // row: quest_resolved, its only trigger the loader and compiler accept, has the same floor.
 test('each consequence op is refused just below its kernel_api floor', () => {
-  const refused = (op: string, at_least: string) =>
+  const refused = (op: string, at_least: string, event = 'fact_changed') =>
     reactions(
       {
         manifest: { requires: { kernel_api: { at_least } } },
-        reactions: { r: { on: { event: 'fact_changed' }, apply: [{ op }] } },
+        reactions: { r: { on: { event }, apply: [{ op }] } },
       },
       { named() {}, typedValue() {} } as unknown as Checks,
     ).some((d) => d.code === 'KERNEL_API_RANGE_INVALID');
@@ -168,4 +168,7 @@ test('each consequence op is refused just below its kernel_api floor', () => {
     ['population.suppress', 35],
   ] as const)
     assert.deepEqual([refused(op, `1.${floor - 1}`), refused(op, `1.${floor}`)], [true, false], op);
+  // the quest_resolved trigger's own 1.8 floor, the one quest.activate's missing row relies on
+  const trigger = (v: string) => refused('fact.assign', v, 'quest_resolved');
+  assert.deepEqual([trigger('1.7'), trigger('1.8')], [true, false], 'quest_resolved');
 });

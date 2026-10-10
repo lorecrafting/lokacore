@@ -45,9 +45,9 @@ defmodule Loka.ContentRumourTest do
   test "each consequence op is refused just below its kernel_api floor" do
     registry = "protocol/capability_registry.json" |> File.read!() |> JSON.decode!()
 
-    refused = fn op, v ->
+    refused = fn op, v, event ->
       m = %{"requires" => %{"kernel_api" => %{"at_least" => v}, "capabilities" => %{}}}
-      rule = %{"on" => %{"event" => "fact_changed"}, "apply" => [%{"op" => op}]}
+      rule = %{"on" => %{"event" => event}, "apply" => [%{"op" => op}]}
       defs = %{"reaction" => %{"r" => {"reactions/r", [], rule}}}
 
       Loka.Content.Reactions.check(m, defs, {nil, %{}}, registry)
@@ -57,8 +57,13 @@ defmodule Loka.ContentRumourTest do
     for {op, floor} <- [{"quest.resolve", 12}, {"quest.fail", 12}, {"population.suppress", 35}],
         do:
           assert(
-            {op, refused.(op, "1.#{floor - 1}"), refused.(op, "1.#{floor}")} == {op, true, false}
+            {op, refused.(op, "1.#{floor - 1}", "fact_changed"),
+             refused.(op, "1.#{floor}", "fact_changed")} == {op, true, false}
           )
+
+    # the quest_resolved trigger's own 1.8 floor, the one quest.activate's missing row relies on
+    assert {refused.("fact.assign", "1.7", "quest_resolved"),
+            refused.("fact.assign", "1.8", "quest_resolved")} == {true, false}
   end
 
   defp codes(diags), do: Enum.map(diags, &{&1["code"], &1["path"]})
