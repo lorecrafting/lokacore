@@ -1,14 +1,21 @@
 import { key, same } from '../foundation/compose.ts';
 type Any = any;
 
-/** Independent prior/result check for the sole nonmonotonic writer-group continuation. */
+/** Independent prior/result check for the sole nonmonotonic writer-group continuation: only rows
+ * written after a sight completion, in an older group, on its member's encounter count (status
+ * and fact-row joins of older groups are ordinary, loka-kgd.43). */
 export function sightHandoffHolds(state: Any, ops: Any[], result: Any): boolean {
-  if (!ops.some((op) => op.op === 'job.complete' && state.jobs?.[op.job_id]?.sight)) return true;
-  let high = -1;
-  const reused: { row: Any; at: number }[] = [];
-  ops.forEach((row, at) => {
-    if (row.writer_group < high) reused.push({ row, at });
-    high = Math.max(high, row.writer_group);
+  const reused = ops.flatMap((row, at) => {
+    const npc = row.encounter_id && state.encounters?.[row.encounter_id]?.npc_id;
+    const sighted = ops.some(
+      (done, i) =>
+        i < at &&
+        done.op === 'job.complete' &&
+        done.writer_group > row.writer_group &&
+        npc &&
+        state.jobs?.[done.job_id]?.sight?.member_id === npc,
+    );
+    return sighted ? [{ row, at }] : [];
   });
   if (!reused.length) return true;
   if (reused.length !== 2) return false;

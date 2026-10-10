@@ -25,7 +25,7 @@ import { currentRound } from '../mechanics/combat/round.ts';
 import { handoffGroup, sightHandoff } from './proposal_sight.ts';
 import { bleedRoundPair } from './proposal_bleed.ts';
 import { queueHour } from './proposal_hours.ts';
-import { statusGroup } from '../mechanics/status/job.ts';
+import { merge, statusGroup } from '../mechanics/status/job.ts';
 import { anyPending as pending, parted } from '../mechanics/dialogue/selection.ts';
 import { admit, type Admitted } from './proposal_admit.ts';
 export { admit, ownerOf, type Admitted } from './proposal_admit.ts';
@@ -288,11 +288,11 @@ function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined
     p.rng = ran.rng;
     p.narration.push(...(ran.narration ?? []));
     const partner = populationPairs.get(job_id);
-    const group =
-      groups.get(partner ?? job_id) ?? // a partner's, or a schedule job's earlier crossed hour's
-      bleedPairs.get(job_id) ??
-      statusGroup(at, job_id as JobId, current, p.holders, p.group + 1) ??
-      p.group + 1;
+    const paired = bleedPairs.get(job_id);
+    const joined = statusGroup(at, job_id as JobId, current, p.holders, p.group + 1, paired);
+    if (joined) merge(p.ops, joined.merged, joined.group, [p.holders, groups, bleedPairs]);
+    // a partner's, or a schedule job's earlier crossed hour's; else its holders' and bleed pair's
+    const group = groups.get(partner ?? job_id) ?? joined?.group ?? paired ?? p.group + 1;
     groups.set(job_id, group);
     const bleedPair = bleedRoundPair(at, job_id as JobId, current);
     if (bleedPair) bleedPairs.set(bleedPair, group);

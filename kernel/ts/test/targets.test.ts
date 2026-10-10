@@ -251,6 +251,35 @@ test('a poisoned second goblin ticks and takes the player and guard blows in one
   assert.deepEqual([hp(after, a), hp(after, b)], [6, 2]);
 });
 
+// loka-x2gv (b). Breaks: the player's body and the goblin each tick poison in their own writer
+// group before the round (their job ids sort first); the round, which writes both HP pools, keeps
+// the first group (status/job.ts statusGroup), so the goblin's HP conflicts in the wait.
+test('poison ticks on the body and on the goblin in two groups, then one round, commit', () => {
+  const [w, a] = engaged();
+  const poison = { ...C, kind: 'status', key: 'poison' } as never;
+  const spec = {
+    duration: 300,
+    tick_every: 150,
+    resource: resourceRef(w, 'hp'),
+    per_tick: -1,
+    label: 'combat.goblin_targeted',
+    narration: { applied: 'combat.npc_hit', tick: 'combat.npc_hit', expired: 'combat.npc_hit' },
+  };
+  const statuses = { 'targets_sampler@0.0.1:status/poison': spec };
+  const moved = { ...w, cartridge: { ...w.cartridge, statuses } as never } as World;
+  const job = (n: number) => () => `00000000-6666-4666-8666-00000000000${n}` as never;
+  const ops = [
+    ...applyStatus(moved, moved.body, poison, 0, job(1)),
+    ...applyStatus(moved, a as never, poison, 0, job(2)),
+  ];
+  const poisoned = apply(moved, ops, false);
+  assert.ok('world' in poisoned, JSON.stringify(poisoned));
+  const before = hp(poisoned.world, poisoned.world.body)!;
+  const after = round(poisoned.world);
+  // Each tick takes 1; the player's sure blow takes 2 and the opponent's turn (one a round) 1.
+  assert.deepEqual([hp(after, a), hp(after, after.body)], [3, before - 2]);
+});
+
 // Toolbox row 6b. Breaks: the guard's turn is lost when the player's blow kills the opponent
 // whose turn comes next (the pack loop stops instead of passing to the guard).
 test('when the player kills the striking goblin, the guard still hits the other', () => {

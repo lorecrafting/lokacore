@@ -6,15 +6,19 @@ type Obj = Record<string, any>;
 const key = (value: Json): string => encode(value);
 const section = (state: State, name: string): Obj => (state[name] ?? {}) as Obj;
 
-/** Only a surviving equal-time deer round may lend its group to sight closure. */
+/** Only a surviving equal-time deer round may lend its group to sight closure: after a sight job
+ * completes, a write to its member's encounter in an older group is the handoff pair or refused.
+ * Other older-group joins (status holders, fact rows; loka-kgd.43) follow ordinary conflicts. */
 export function sightHandoffValid(state: State, ops: readonly DeltaOp[]): boolean {
-  if (!ops.some((op) => op.op === 'job.complete' && section(state, 'jobs')[op.job_id]?.sight))
-    return true;
-  let highest = -1;
   const back: { op: DeltaOp; at: number }[] = [];
   for (const [at, op] of ops.entries()) {
-    if (op.writer_group < highest) back.push({ op, at });
-    highest = Math.max(highest, op.writer_group);
+    const id = 'encounter_id' in op ? op.encounter_id : undefined;
+    const npc = id && section(state, 'encounters')[id]?.npc_id;
+    const sighted = (o: DeltaOp, i: number) =>
+      i < at && o.op === 'job.complete' && o.writer_group > op.writer_group;
+    const member = (o: DeltaOp) => 'job_id' in o && section(state, 'jobs')[o.job_id]?.sight;
+    if (npc && ops.some((o, i) => sighted(o, i) && member(o)?.member_id === npc))
+      back.push({ op, at });
   }
   if (!back.length) return true;
   if (back.length !== 2) return false;

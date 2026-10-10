@@ -174,13 +174,16 @@ const successor = (
 // in sequence; a reaction's status.apply on that holder, before or after, shares it (reaction.ts
 // statusStep, row G3); so does a combat round on its body or opponent, whose hp a status's tick or
 // hp settle (row 2c) also writes; every roster member counts, as the player's or an ally's blow
-// falls on another member when the primary is gone (row 6b, loka-x2gv).
+// falls on another member when the primary is gone (row 6b). A round joins all of those groups and
+// its paired bleed's (`paired`): the lowest is kept and the others are returned for the caller to
+// merge into it (loka-x2gv).
 export function statusGroup(
   at: World,
   id: JobId,
   job: JobRow,
   holders: Map<string, number>,
   next: number,
+  paired?: number,
 ) {
   const round = currentRound(at, id, job);
   const held = round
@@ -188,8 +191,18 @@ export function statusGroup(
     : [job.job.kind === 'status' ? statusHolder(at, id)?.body : undefined];
   const bodies = held.filter((b) => b !== undefined);
   if (!bodies.length) return undefined;
-  // ponytail: a round whose body and opponent already hold different groups keeps the first.
-  const group = bodies.map((b) => holders.get(b)).find((g) => g !== undefined) ?? next;
-  for (const b of bodies) if (!holders.has(b)) holders.set(b, group);
-  return group;
+  const found = new Set([paired, ...bodies.map((b) => holders.get(b))]);
+  found.delete(undefined);
+  const group = found.size ? Math.min(...(found as Set<number>)) : next;
+  found.delete(group);
+  for (const b of bodies) holders.set(b, group);
+  return { group, merged: found as Set<number> };
+}
+
+// Relabel a proposal's writes so far, and each group map, from the merged groups to `to`, so the
+// rows they wrote compose in sequence with the joining job's (loka-x2gv).
+export function merge(ops: DeltaOp[], from: Set<number>, to: number, maps: Map<string, number>[]) {
+  if (!from.size) return;
+  ops.forEach((o, i) => from.has(o.writer_group) && (ops[i] = { ...o, writer_group: to }));
+  for (const m of maps) for (const [k, g] of m) if (from.has(g)) m.set(k, to);
 }
