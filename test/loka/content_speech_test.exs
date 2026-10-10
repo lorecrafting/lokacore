@@ -5,9 +5,9 @@ defmodule Loka.ContentSpeechTest do
   @kat JSON.decode!(File.read!("protocol/fixtures/cartridge_speech_hash.json"))
   defp pairs(diags), do: Enum.map(diags, &{&1["code"], &1["path"]})
 
-  # Breaks: a keyword or a spoken trigger dropped or reshaped in the artifact; the known answer
-  # (Python) is the artifact the speech transcript replays against.
-  test "speech_sampler compiles to its Python known answer without warnings" do
+  # Breaks: a keyword or a spoken trigger dropped or reshaped in the artifact the speech transcript
+  # replays against (protocol/fixtures/cartridge_speech_hash.json, pinned compiler output).
+  test "speech_sampler compiles to its pinned artifact without warnings" do
     expected = ~s({"cartridge":#{@kat["canonical"]},"content_hash":"#{@kat["sha256"]}"})
     assert Loka.Content.compile(@dir) == {:ok, expected, []}
   end

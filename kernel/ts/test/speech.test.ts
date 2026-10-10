@@ -185,13 +185,20 @@ test('talk opens the plain dialogue; an unnamed reaction step lands on each hear
   assert.deepEqual([heard('elder'), heard('smith'), heard('watchman')], [true, true, false]);
 });
 
-// Breaks: speech while a conversation is open, which would close it unlike any saved row allows.
-test('speech is refused while a conversation is open', () => {
+// Breaks: speech offered or accepted while a conversation is open (a say would close it, unlike
+// any saved row allows); the view and the step must agree.
+test('speech is neither offered nor accepted while a conversation is open', () => {
   const open = accepted(fresh(), { type: 'say', word: 'ward' }).world;
-  assert.deepEqual(play(open, { type: 'shout', word: 'help' }).decision, {
-    kind: 'rejected',
-    error: { code: 'invalid_state' },
-  });
+  const view = gameView(open);
+  const keys = [
+    ...(view.actions ?? []),
+    ...(view.entities ?? []).flatMap((e) => e.actions ?? []),
+  ].map((a) => a.action_key);
+  assert.deepEqual(
+    keys.filter((k) => ['say', 'whisper', 'shout'].includes(k)),
+    [],
+  );
+  assert.equal(play(open, { type: 'shout', word: 'help' }).decision.kind, 'rejected');
 });
 
 // Breaks: the loader accepts a keyword dialogue or a spoken reaction below kernel_api 1.48, a

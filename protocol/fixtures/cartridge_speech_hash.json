@@ -1,5 +1,5 @@
 {
-  "description": "Known answer for the loka-cartridge-v2 content hash of cartridges/speech_sampler (toolbox row G9; 05 §11): Python sorted-key compact JSON and SHA-256, independent of both kernels; the speech transcript replays against it.",
+  "description": "Pinned artifact of cartridges/speech_sampler (toolbox row G9; 05 §11), the known answer the speech transcript replays against: value is the compiler's output; canonical and sha256 were recomputed in Python (sorted compact JSON, SHA-256). Kept in sync with the compiler by test/loka/content_speech_test.exs.",
   "value": {
     "actions": {},
     "dialogues": {
