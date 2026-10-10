@@ -223,3 +223,19 @@ test('entity-fact writes in riddle, skill and deadline-quest choices reopen', (t
   assert.deepEqual(trust, [2, 2, 2]);
   h.p.sql.close();
 });
+
+// Breaks (dialogue-consequences.ts): recovery takes the subject from the receipt instead of the
+// dialogue's speaker, so a receipt that moved the write to another NPC loads.
+test('a receipt writing at another subject than the speaker is save_corrupt', (t) => {
+  const h = save(t, 'moved', variant);
+  h.chat('stranger', 'help', 'stranger_talk', { answer: 'ab' });
+  const [from, to] = ['stranger', 'miller'].map((k) => `"subject_id":"${id(`npc/${k}`, variant)}"`);
+  const moved = h.p.sql
+    .prepare(`UPDATE receipt SET response=replace(response, ?, ?) WHERE instr(response, ?) > 0`)
+    .run(from, to, from);
+  assert.equal(moved.changes, 1);
+  assert.throws(
+    () => h.reopen(),
+    (e: any) => e.cause.kind === 'save_corrupt',
+  );
+});
