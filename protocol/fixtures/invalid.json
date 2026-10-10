@@ -21805,6 +21805,354 @@
     ]
   },
   {
+    "name": "cue_missing_fields",
+    "contract": "Cue",
+    "value": {},
+    "errors": [
+      {
+        "path": "/range",
+        "code": "missing_property"
+      },
+      {
+        "path": "/sense",
+        "code": "missing_property"
+      },
+      {
+        "path": "/text",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "cue_range_three_unknown_sense",
+    "contract": "Cue",
+    "value": {
+      "sense": "taste",
+      "text": "cue.x",
+      "range": 3
+    },
+    "errors": [
+      {
+        "path": "/range",
+        "code": "above_maximum"
+      },
+      {
+        "path": "/sense",
+        "code": "not_in_enum"
+      }
+    ]
+  },
+  {
+    "name": "cue_range_negative_extra_field",
+    "contract": "Cue",
+    "value": {
+      "sense": "heat",
+      "text": "cue.x",
+      "range": -1,
+      "loud": true
+    },
+    "errors": [
+      {
+        "path": "/loud",
+        "code": "unknown_property"
+      },
+      {
+        "path": "/range",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "name": "cues_empty",
+    "contract": "Cues",
+    "value": [],
+    "errors": [
+      {
+        "path": "",
+        "code": "too_few_items"
+      }
+    ]
+  },
+  {
+    "name": "cues_five",
+    "contract": "Cues",
+    "value": [
+      {
+        "sense": "sound",
+        "text": "cue.hammering",
+        "range": 1
+      },
+      {
+        "sense": "sound",
+        "text": "cue.hammering",
+        "range": 1
+      },
+      {
+        "sense": "sound",
+        "text": "cue.hammering",
+        "range": 1
+      },
+      {
+        "sense": "sound",
+        "text": "cue.hammering",
+        "range": 1
+      },
+      {
+        "sense": "sound",
+        "text": "cue.hammering",
+        "range": 1
+      }
+    ],
+    "errors": [
+      {
+        "path": "",
+        "code": "too_many_items"
+      }
+    ]
+  },
+  {
+    "name": "cue_view_missing_fields",
+    "contract": "CueView",
+    "value": {
+      "direction": "east"
+    },
+    "errors": [
+      {
+        "path": "/sense",
+        "code": "missing_property"
+      },
+      {
+        "path": "/text",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "cue_view_unknown_sense",
+    "contract": "CueView",
+    "value": {
+      "sense": "sight",
+      "text": "cue.x"
+    },
+    "errors": [
+      {
+        "path": "/sense",
+        "code": "not_in_enum"
+      }
+    ]
+  },
+  {
+    "name": "cue_perceived_missing_fields",
+    "contract": "Policy",
+    "value": {
+      "op": "cue_perceived"
+    },
+    "errors": [
+      {
+        "path": "/npc",
+        "code": "missing_property"
+      },
+      {
+        "path": "/sense",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "game_view_cues_empty",
+    "contract": "GameView",
+    "value": {
+      "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+      "place": {
+        "id": "12121212-3434-4565-8787-909090909090",
+        "title": {
+          "key": "room.ferry_landing.title"
+        },
+        "description": {
+          "key": "room.ferry_landing.description",
+          "bindings": {
+            "time": "clock.dusk"
+          }
+        }
+      },
+      "exits": [
+        {
+          "available": true,
+          "direction": "north"
+        },
+        {
+          "available": false,
+          "direction": "west",
+          "reason": {
+            "code": "exit_locked",
+            "message": {
+              "key": "reason.causeway_flooded"
+            }
+          }
+        }
+      ],
+      "actions": [
+        {
+          "available": true,
+          "action_key": "look",
+          "label": "action.look",
+          "target": {
+            "kind": "none"
+          },
+          "input": []
+        },
+        {
+          "available": false,
+          "action_key": "wait",
+          "label": "action.wait",
+          "reason": {
+            "code": "invalid_state"
+          },
+          "target": {
+            "kind": "none"
+          },
+          "input": [
+            "until"
+          ]
+        }
+      ],
+      "entities": [
+        {
+          "id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+          "name": "npc.wren.name",
+          "kind": "npc",
+          "actions": [
+            {
+              "available": true,
+              "action_key": "talk",
+              "label": "action.talk",
+              "target": {
+                "kind": "entity",
+                "scopes": [
+                  "room_occupants"
+                ]
+              },
+              "input": []
+            }
+          ]
+        }
+      ],
+      "inventory": [
+        {
+          "id": "11111111-2222-4333-8444-555555555555",
+          "name": "item.lantern.name",
+          "kind": "item",
+          "actions": [
+            {
+              "available": true,
+              "action_key": "drop",
+              "label": "action.drop",
+              "target": {
+                "kind": "entity",
+                "scopes": [
+                  "inventory"
+                ]
+              },
+              "input": []
+            }
+          ]
+        }
+      ],
+      "position": "standing",
+      "equipment": [
+        {
+          "slot": "head",
+          "item": {
+            "id": "22222222-3333-4444-8555-666666666666",
+            "name": "item.leather_cap.short",
+            "kind": "item",
+            "actions": [
+              {
+                "available": true,
+                "action_key": "remove",
+                "label": "action.remove",
+                "target": {
+                  "kind": "entity",
+                  "scopes": [
+                    "inventory"
+                  ]
+                },
+                "input": []
+              }
+            ]
+          }
+        },
+        {
+          "slot": "light"
+        }
+      ],
+      "journal": [
+        {
+          "quest": {
+            "cartridge_id": "ferrymans_lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "quest",
+            "key": "find_the_child"
+          },
+          "state": "active",
+          "title": "quest.find_the_child.title"
+        }
+      ],
+      "time": 18,
+      "chapter": {
+        "index": 0,
+        "title": "chapter.landing"
+      },
+      "cues": []
+    },
+    "errors": [
+      {
+        "path": "/cues",
+        "code": "too_few_items"
+      }
+    ]
+  },
+  {
+    "name": "cue_view_extra_field",
+    "contract": "CueView",
+    "value": {
+      "sense": "sound",
+      "text": "cue.x",
+      "loud": true
+    },
+    "errors": [
+      {
+        "path": "/loud",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "cue_perceived_unknown_sense_extra_field",
+    "contract": "Policy",
+    "value": {
+      "op": "cue_perceived",
+      "npc": {
+        "cartridge_id": "senses_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "npc",
+        "key": "guard"
+      },
+      "sense": "sight",
+      "extra": 1
+    },
+    "errors": [
+      {
+        "path": "/extra",
+        "code": "unknown_property"
+      },
+      {
+        "path": "/sense",
+        "code": "not_in_enum"
+      }
+    ]
+  },
+  {
     "contract": "DeltaOp",
     "value": {
       "op": "encounter.target"

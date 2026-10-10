@@ -722,6 +722,10 @@
                 },
                 "narration": {
                   "$ref": "#/$defs/RecipeNarration"
+                },
+                "cues": {
+                  "description": "Transient cues of this outcome (toolbox row G6), from the actor's room: perceived only by a cue_perceived condition of a reaction this outcome's check_passed, check_failed or action_completed causes; never stored or shown.",
+                  "$ref": "entity.schema.json#/$defs/Cues"
                 }
               },
               "required": [
@@ -743,6 +747,10 @@
                 },
                 "narration": {
                   "$ref": "#/$defs/RecipeNarration"
+                },
+                "cues": {
+                  "description": "Transient cues of this outcome (toolbox row G6), from the actor's room: perceived only by a cue_perceived condition of a reaction this outcome's check_passed, check_failed or action_completed causes; never stored or shown.",
+                  "$ref": "entity.schema.json#/$defs/Cues"
                 }
               },
               "required": [

@@ -1,0 +1,12 @@
+{
+  "title": "room.barracks.title",
+  "description": "room.barracks.description",
+  "exits": {
+    "south": {
+      "to": "hall"
+    },
+    "east": {
+      "to": "tower"
+    }
+  }
+}

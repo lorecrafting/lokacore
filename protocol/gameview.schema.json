@@ -1338,6 +1338,14 @@
           "items": {
             "$ref": "gameview.schema.json#/$defs/KnownNpcView"
           }
+        },
+        "cues": {
+          "type": "array",
+          "items": {
+            "$ref": "gameview.schema.json#/$defs/CueView"
+          },
+          "minItems": 1,
+          "description": "Sense cues reaching the actor's room (toolbox row G6), nearest first, then by direction and text; absent when none."
         }
       },
       "required": [
@@ -2763,6 +2771,37 @@
         }
       ],
       "description": "The actor’s visited places and connections between visited endpoints."
+    },
+    "CueView": {
+      "description": "One sense cue reaching the actor's room (toolbox row G6): its sense, authored text and, for a cue from another room, the direction of the first exit on the shortest way to its source.",
+      "examples": [
+        {
+          "sense": "sound",
+          "text": "cue.hammering",
+          "direction": "east"
+        }
+      ],
+      "type": "object",
+      "properties": {
+        "sense": {
+          "enum": [
+            "sound",
+            "smell",
+            "heat"
+          ]
+        },
+        "text": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "direction": {
+          "$ref": "action.schema.json#/$defs/Key"
+        }
+      },
+      "required": [
+        "sense",
+        "text"
+      ],
+      "additionalProperties": false
     }
   }
 }

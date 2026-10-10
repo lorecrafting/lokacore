@@ -107,7 +107,7 @@ export function sequence(
   if (!source) return { kind: 'fault', code: 'precondition_failed' };
   actor = source;
   const then = { ...world, state: { ...world.state, clock: cause.logical_time } };
-  if (rule.when && !holds(then, actor, rule.when.root, { steps })) return undefined;
+  if (rule.when && !holds(then, actor, rule.when.root, { steps, cause })) return undefined;
   const set: Record<string, FactValue> = {};
   const activated = new Set<string>();
   const applied = new Set<string>();

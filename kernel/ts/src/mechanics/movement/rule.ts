@@ -25,9 +25,9 @@ import {
   values,
 } from '../../runtime/decision.ts';
 import type { DefinitionRef, EntityId } from '../../contracts.gen.ts';
-import { exitTo } from '../lookups.ts';
+import { exitTo, hidden } from '../lookups.ts';
 import { moveSequence } from './sequence.ts';
-import { hidden, passage } from './shared.ts';
+import { passage } from './shared.ts';
 export { passage, fare } from './shared.ts';
 
 export const decide: Rule<'movement'> = (world, command, mint, steps = { n: 0 }) =>

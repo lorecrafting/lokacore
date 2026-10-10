@@ -1,0 +1,21 @@
+{
+  "on": {
+    "event": "check_failed",
+    "check": "pick_lock"
+  },
+  "when": {
+    "policy_version": 1,
+    "root": {
+      "op": "cue_perceived",
+      "npc": "sentry",
+      "sense": "sound"
+    }
+  },
+  "apply": [
+    {
+      "op": "fact.assign",
+      "fact": "sentry_alerted",
+      "value": true
+    }
+  ]
+}

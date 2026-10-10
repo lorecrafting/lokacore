@@ -1,4 +1,22 @@
 {
+  "sense_cue": {
+    "spec": "docs/system/mechanics.md Senses (toolbox row G6)",
+    "contracts": [
+      "Cue",
+      "GameView"
+    ],
+    "modules": [
+      "kernel/ts/src/mechanics/senses.ts",
+      "lib/loka/content/cues.ex"
+    ],
+    "fixtures": [
+      "protocol/fixtures/invalid.json"
+    ],
+    "invariants": [
+      "gameview_agrees_with_admission"
+    ],
+    "implemented_in": "Toolbox row G6 senses sampler: cues in GameView with direction, cue_perceived for NPC reactions to recipe outcomes"
+  },
   "movement": {
     "spec": "21 §5 Place/Room, Connection; 05 §17; 04 §5; 00 §4.1 scan, §4.10",
     "contracts": [

@@ -1,0 +1,37 @@
+{
+  "facts": {
+    "guard_alerted": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "instance"
+      ],
+      "meaning": "The guard heard the lock rattle."
+    },
+    "sentry_alerted": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "instance"
+      ],
+      "meaning": "The sentry heard the lock rattle."
+    },
+    "lock_picked": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "instance"
+      ],
+      "meaning": "The lock is picked."
+    }
+  }
+}

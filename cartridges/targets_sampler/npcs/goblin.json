@@ -14,7 +14,7 @@
     "gain": 0
   },
   "attack": {
-    "chance": 0,
+    "chance": 100,
     "damage_min": 1,
     "damage_max": 1
   }

@@ -11,7 +11,9 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
 - [Review: toolbox row 6a, combat target choice in the same room (loka-kgd.63)](2026-10-10-toolbox-m7-targets-review.md): **APPROVE WITH NOTES**
+- [Review: toolbox row G6 engine half, sense cues (loka-kgd.61, batch M7)](2026-10-10-toolbox-m7-senses-review.md): **APPROVE**
 - [Review: toolbox row W8, permanent statuses (loka-kgd.67)](2026-10-10-toolbox-m7-scars-review.md): **CHANGES REQUIRED**
+- [Review: toolbox row 6c, several foes with a pack plan (loka-kgd.66)](2026-10-10-toolbox-m7-foes-review.md): **APPROVE WITH NOTES**
 - [Review: toolbox row W24 second half, Journal countdown, sampler, mobile proof (loka-kgd.46, batch M5)](2026-10-10-toolbox-m5-w24b-review.md): **APPROVE WITH NOTES**
 - [Review: toolbox row W6, entity description variants and two leaves (loka-kgd.37, batch M5)](2026-10-10-toolbox-m5-variants-review.md): **APPROVE WITH NOTES**
 - [Review: toolbox row G3, statuses on NPCs and things (loka-kgd.33)](2026-10-10-toolbox-m5-status-review.md): **APPROVE**
@@ -32,6 +34,8 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: damage kinds, resistances and critical hits, toolbox row G2 (loka-kgd.18)](2026-10-10-toolbox-g2-damage-review.md): **APPROVE**
 - [Review: property tags and the policy leaf set, toolbox row G1 (loka-kgd.17)](2026-10-10-toolbox-g1-review.md): **APPROVE**
 - [Mechanics review 3: the player's seat](2026-10-10-mechanics-review-3.md)
+- [Review: E1 recorder debt-elapsed recipe (loka-ssr9, PR #360)](2026-10-10-e1-recorder-ssr9-review.md): **APPROVE**
+- [Review: e1-recorder in full on batch-branch pushes (loka-b98y, PR #361)](2026-10-10-ci-e1-recorder-batch-review.md): **APPROVE WITH NOTES**
 - [Review: mechanics batch M5, Fable batch review (PR #359, loka-kgd)](2026-10-10-batch-m5-fable-review.md): **APPROVE WITH NOTES**
 - [Review: mechanics batch M4 (PR #358, epic loka-kgd), Fable batch review](2026-10-10-batch-m4-fable-review.md): **APPROVE WITH NOTES**
 - [Batch review: mechanics toolbox M3, G1 tags, loot, W1, skills, damage (loka-kgd, PR #351)](2026-10-10-batch-m3-review.md): **APPROVE WITH NOTES**

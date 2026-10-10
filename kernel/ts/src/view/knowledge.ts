@@ -1,8 +1,7 @@
 import { present } from '../commands/target.ts';
 import type { EntityId, GameView, Key } from '../contracts.gen.ts';
 import { COMPASS, refString, type Steps, type World } from '../runtime/decision.ts';
-import { exitOf } from '../mechanics/lookups.ts';
-import { hidden } from '../mechanics/movement/shared.ts';
+import { exitOf, hidden } from '../mechanics/lookups.ts';
 import { cmp } from '../foundation/validate.ts';
 import { refusal, resolved } from '../commands/actions.ts';
 
