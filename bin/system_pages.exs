@@ -48,25 +48,31 @@ defmodule SystemGraph.Pages do
         raise "docs/MECHANICS-TOOLBOX.md: no `| # | Rank |` table under ## Ranked toolbox"
 
     sections = sections(mechanics)
+    for row <- String.split(block, "\n", trim: true), do: row(row, sections)
+  end
 
-    for row <- String.split(block, "\n", trim: true) do
-      case row |> String.trim("|") |> String.split("|") |> Enum.map(&String.trim/1) do
-        [id, batch, title, _today, _size, depends, _reuse, _sampler, status] ->
-          %{
-            "id" => id,
-            "batch" => batch,
-            "title" => plain(title),
-            "depends" => if(depends == "–", do: [], else: String.split(depends, ~r/,\s*/)),
-            "status" => plain(status),
-            "state" => Enum.find(@states, &String.starts_with?(status, &1)),
-            "section" => linked(row) || sections[id]
-          }
+  defp row(row, sections) do
+    case cells(row) do
+      [id, batch, title, _today, _size, depends, _reuse, _sampler, status] ->
+        %{
+          "id" => id,
+          "batch" => batch,
+          "title" => plain(title),
+          "depends" => depends(depends),
+          "status" => plain(status),
+          "state" => Enum.find(@states, &String.starts_with?(status, &1)),
+          "section" => linked(row) || sections[id]
+        }
 
-        _ ->
-          raise "docs/MECHANICS-TOOLBOX.md: toolbox row has not 9 cells: #{row}"
-      end
+      _ ->
+        raise "docs/MECHANICS-TOOLBOX.md: toolbox row has not 9 cells: #{row}"
     end
   end
+
+  defp cells(row), do: row |> String.trim("|") |> String.split("|") |> Enum.map(&String.trim/1)
+
+  defp depends("–"), do: []
+  defp depends(ids), do: String.split(ids, ~r/,\s*/)
 
   # The rules a row's cells link to, else the heading that names the row.
   defp linked(row) do
