@@ -35,6 +35,6 @@ future stories, and drop only Chapter-1-specific pins once the showcase covers t
    content work. Book UI polish (components, design system, Storybook) continues and may keep
    using Chapter 1 views until showcase views replace them.
 3. **Dropped feature rows.** Toolbox row 47 (death penalty options) covers XP loss and item drop,
-   not ghost-walk death; no toolbox row covers barter. Both need a toolbox row (PM files them).
+   not ghost-walk death; no toolbox row covers barter. Both are filed as toolbox rows: loka-kgd.69 (ghost-walk death) and loka-kgd.70 (barter).
 
 Beads: loka-exbe.
