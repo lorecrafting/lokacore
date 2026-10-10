@@ -22339,6 +22339,10 @@
         },
         {
           "op": "fact.adjust",
+          "amount": 1
+        },
+        {
+          "op": "fact.adjust",
           "fact": {
             "cartridge_id": "c",
             "cartridge_version": "1.0.0",
@@ -22356,7 +22360,11 @@
         "code": "missing_property"
       },
       {
-        "path": "/apply/1/value",
+        "path": "/apply/1/fact",
+        "code": "missing_property"
+      },
+      {
+        "path": "/apply/2/value",
         "code": "unknown_property"
       }
     ]

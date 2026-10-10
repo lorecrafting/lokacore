@@ -141,7 +141,7 @@ test('low standing makes Peg refuse and the guard engage, unless he trusts the p
 
 // Breaks: the loader admits row 15 or G11 below 1.47, a reaction fact.adjust on a non-int fact,
 // an engage line on an NPC without an attack, or a friendly discount without a friendly
-// disposition.
+// disposition or with a skill too.
 test('rows 15 and G11 need 1.47, an int fact, an engage only with an attack, a friendly NPC', () => {
   const guard = `.cartridge.npcs[${JSON.stringify(`${S}:npc/guard`)}]`;
   const peg = `.cartridge.npcs[${JSON.stringify(`${S}:npc/peg`)}]`;
@@ -177,6 +177,17 @@ test('rows 15 and G11 need 1.47, an int fact, an engage only with an attack, a f
     [(c) => delete c.npcs[`${S}:npc/guard`].attack, 'SCHEMA_VIOLATION', `${guard}.disposition`],
     [
       (c) => delete c.npcs[`${S}:npc/peg`].disposition.friendly,
+      'RESOURCE_SPEC_INVALID',
+      `${peg}.shop.buy_discount`,
+    ],
+    [
+      (c) =>
+        (c.npcs[`${S}:npc/peg`].shop.buy_discount.skill = {
+          cartridge_id: 'standing_sampler',
+          cartridge_version: '0.0.1',
+          kind: 'skill',
+          key: 'haggle',
+        }),
       'RESOURCE_SPEC_INVALID',
       `${peg}.shop.buy_discount`,
     ],

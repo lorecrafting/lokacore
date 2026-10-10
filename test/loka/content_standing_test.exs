@@ -12,7 +12,7 @@ defmodule Loka.ContentStandingTest do
   # Breaks (toolbox rows 15 and G11), twins of the loader's in kernel/ts/test/standing.test.ts: the
   # compiler accepts a disposition, a friendly discount or a reaction fact.adjust below 1.47, a
   # fact.adjust of a non-int fact, an engage line on an NPC without an attack, or a friendly
-  # discount without a friendly disposition; or leaves a fact.adjust's npc short reference
+  # discount without a friendly disposition or with a skill too; or leaves a fact.adjust's npc short reference
   # unexpanded (the loader would reject the artifact).
   test "rows 15 and G11 need 1.47, an int fact, an engage only with an attack, a friendly NPC" do
     dir = Loka.ContentSource.copy("cartridges/standing_sampler")
@@ -41,7 +41,9 @@ defmodule Loka.ContentStandingTest do
        {"SCHEMA_VIOLATION", "npcs/guard.disposition"}},
       {[
          {"npcs/peg.json", &update_in(&1, ["disposition"], fn d -> Map.delete(d, "friendly") end)}
-       ], {"RESOURCE_SPEC_INVALID", "npcs/peg.shop"}}
+       ], {"RESOURCE_SPEC_INVALID", "npcs/peg.shop"}},
+      {[{"npcs/peg.json", &put_in(&1, ["shop", "buy_discount", "skill"], "haggle")}],
+       {"RESOURCE_SPEC_INVALID", "npcs/peg.shop"}}
     ]
 
     for {changes, want} <- rows do
