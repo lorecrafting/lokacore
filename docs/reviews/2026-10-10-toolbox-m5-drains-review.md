@@ -29,3 +29,14 @@
 1. **should-fix (merge)** `kernel/ts/src/mechanics/status/shared.ts:124`: `cureOps` maps `endStatus`. Row 2c replaced that with `expire` (settle hp, then end). `status/shared.ts` auto-merges, so resolving the `food/shared.ts` conflict with the branch's `cureOps` drops 2c's settle: `derived_status.test.ts` "a tonic cures a refreshed might ... hp reads 10 of 16" fails, and a Drink cure of a modifying status would settle nothing with no test to notice. Order: Drink adjusts no pool (B7), so appending its cures after `plan.ops` cannot misread hp; only Eat's order matters. Resolution checked: `.flatMap(({ status, row }) => expire(world, body, status, row, 0))` in `cureOps` and Eat's `...cured` before the meal's gain; then `derived_status`, `derived`, `needs`, `status_composition`, `npc_status`, `food*`, `liquid*` pass. In the same merge, combine `api_146` with 2c's `modifies` (both kernels) and add the hp settle to the composition record's writes (`docs/system/mechanics.md:2005`).
 2. **blocker** (surviving mutant) `kernel/ts/src/mechanics/liquid/shared.ts:85`: removing `|| p.type !== 'drink'` (Pour also cures) stays green on `needs`, `food`, `liquid`, `status`. Failure: a regression lets pouring the waterskin onto the ground end `thirsty`. Add one Pour assertion to `needs.test.ts`.
 3. **nit** No PR body reports the developer's `/code-review` result (commits cite "review finding 8"); the batch M5 PR body must.
+
+## Re-check at 19ea3345 (fix round)
+
+- Scope: `ffdcf1c8` (merge of batch M5 b8c45a8d, row 2c; fixes F1, F2) and `19ea3345` (doc comments only: `cartridge_status.ts`, `status/shared.ts`, `status.ex`). Hosted ci and book-e2e green per PM.
+- Verdict: **APPROVE**.
+- F1 resolved: `needs.test.ts` "pouring the water out ends no status". Red control RC1 (drop `|| p.type !== 'drink'`, `liquid/shared.ts:85`) fails it.
+- F2 resolved: `cureOps` (`status/shared.ts`) maps through `expire`; Eat keeps `...cured` before the gain (`food/shared.ts:53`); `api146` / `api_146` join drinks with 2c's `modifies` in both kernels; composition record writes name the settle (`docs/system/mechanics.md:2022`); `derived_status.test.ts` flask Drink test passes. Red control RC2 (`cureOps` back to `endStatus`) fails the flask and tonic tests.
+- Merge: `invalid.json` holds every batch entry plus `liquid_definition_empty_cures`; `elixir bin/contracts.exs --check` and `mix run bin/system_graph.exs --check` exit 0.
+- Focused baseline green: `needs`, `derived_status`, `derived`, `food`, `liquid`, `status`, `status_composition`, `npc_status` (TS); `content_needs_test.exs`, `content_npc_status_test.exs`.
+- Service-drink limit stated in the Cures bullet beside the Dry bullet (`docs/system/mechanics.md:2017`); no nit.
+- F3 (nit, `/code-review` in the batch PR body) stays with the batch PR.
