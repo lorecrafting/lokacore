@@ -1,6 +1,6 @@
 // resource@1: pure resource queries and exact adjustments. Legacy gain crosses hour
 // boundaries; opted recovery settles the old stored position rate and fractional credit.
-import { validOverrideRow } from '../foundation/resource.ts';
+import { capped, validOverrideRow } from '../foundation/resource.ts';
 import { current, key, same } from '../foundation/compose.ts';
 import type {
   DefinitionRef,
@@ -12,9 +12,10 @@ import type {
   ResourceRegen,
 } from '../contracts.gen.ts';
 import type { World } from '../runtime/decision.ts';
-import { add } from '../foundation/int.ts';
+import { add, saturate } from '../foundation/int.ts';
 import { fact, positionOf } from './position/shared.ts';
 import { cmp } from '../foundation/validate.ts';
+import { derived } from './attributes/shared.ts';
 
 type Adjust = Extract<DeltaOp, { op: 'resource.adjust' }>;
 /** A decision's resource values so far, by canonical resource target text. */
@@ -28,20 +29,48 @@ export const resourceRef = (world: World, k: string): DefinitionRef => ({
   key: k as Key,
 });
 
+/**
+ * The player body's pool maxima moved by the derived hp_max table (mechanics.md resource@1), by
+ * canonical resource target; composition reads the same map (runtime/apply.ts base).
+ */
+export function maxima(world: World): Readonly<Record<string, number>> {
+  const table = world.cartridge.world?.derived?.hp_max;
+  const hp = resourceRef(world, 'hp');
+  const at = key({ kind: 'resource', resource: hp, entity_id: world.body });
+  const spec = world.resourceSpecs[key(hp)];
+  if (!table || !spec || world.entityResourceSpecs[at]) return {};
+  const maximum = saturate(spec.maximum + derived(world, world.character, table));
+  return { [at]: Math.max(spec.minimum, maximum) };
+}
+
+/**
+ * A zero-amount hp adjust when the hp maximum is derived, written before an attribute change moves
+ * it, so credit banked under the old maximum settles there and the new one is reached by
+ * regeneration (resource@1).
+ */
+export const settleMaxima = (world: World) =>
+  Object.keys(maxima(world)).length
+    ? [adjust(world, world.body, resourceRef(world, 'hp'), 0, {}).op]
+    : [];
+
 /** Effective definition for this exact resource target, falling back to the pool. */
-export const resourceSpec = (world: World, entity: EntityId, resource: DefinitionRef) =>
-  world.entityResourceSpecs[key({ kind: 'resource', resource, entity_id: entity })] ??
-  world.resourceSpecs[key(resource)];
+export function resourceSpec(world: World, entity: EntityId, resource: DefinitionRef) {
+  const at = key({ kind: 'resource', resource, entity_id: entity });
+  const spec = world.entityResourceSpecs[at] ?? world.resourceSpecs[key(resource)];
+  const maximum = entity === world.body && spec ? maxima(world)[at] : undefined;
+  return maximum === undefined ? spec : { ...spec, maximum };
+}
 
 /** `entity`'s current value of `resource` at the world's clock; undefined if undeclared. */
 export function level(world: World, entity: EntityId, resource: DefinitionRef): number | undefined {
   const spec = resourceSpec(world, entity, resource);
   if (!spec) return undefined;
-  const row = world.state.resources?.[key({ kind: 'resource', resource, entity_id: entity })];
-  const override =
-    world.entityResourceSpecs[key({ kind: 'resource', resource, entity_id: entity })];
+  const at = key({ kind: 'resource', resource, entity_id: entity });
+  const row = world.state.resources?.[at];
+  const override = world.entityResourceSpecs[at];
   if (override && !validOverrideRow(row, override, world.state.clock)) return undefined;
-  return current(row, spec, world.state.clock);
+  const authored = override ?? world.resourceSpecs[key(resource)];
+  return current(spec === authored ? row : capped(row, spec.maximum), spec, world.state.clock);
 }
 
 /**
@@ -174,16 +203,12 @@ export function recoveryFault(world: World, ops?: readonly DeltaOp[]): MutationT
     if (ops && !positionWritten && !touched.has(key(resource))) continue;
     const target: MutationTarget = { kind: 'resource', resource, entity_id: world.body };
     const row = world.state.resources?.[key(target)];
+    const value = level(world, world.body, resource);
     const position = positionOf(world, world.character);
     const rate =
       typeof position === 'string'
         ? spec.regen.by_position[position as keyof typeof spec.regen.by_position]
         : undefined;
-    if (
-      rate === undefined ||
-      row?.rate !== rate ||
-      !Number.isFinite(current(row, spec, world.state.clock))
-    )
-      return target;
+    if (rate === undefined || row?.rate !== rate || !Number.isFinite(value)) return target;
   }
 }

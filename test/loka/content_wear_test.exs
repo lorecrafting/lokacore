@@ -30,9 +30,9 @@ defmodule Loka.ContentWearTest do
     assert Loka.Content.compile(@src) == {:ok, expected, []}
   end
 
-  # Breaks: a slot accepted without its owner equipment@1, or outside the twelve SlotKeys, so the
+  # Breaks: a slot accepted without its owner equipment@1, or outside the thirteen SlotKeys, so the
   # compiler writes an artifact the loader rejects.
-  test "a slot without equipment@1, or a finger slot, is rejected", %{dir: dir} do
+  test "a slot without equipment@1, or an unknown slot, is rejected", %{dir: dir} do
     manifest =
       update_in(src("cartridge.json"), ["requires", "capabilities"], &Map.delete(&1, "equipment"))
 
@@ -41,9 +41,9 @@ defmodule Loka.ContentWearTest do
     assert compile(dir, %{"cartridge.json" => manifest}) ==
              {:error, Enum.map(~w(lantern leather_cap straw_hat wool_cloak), undeclared)}
 
-    finger = %{src("items/lantern.json") | "slot" => "finger"}
+    tail = %{src("items/lantern.json") | "slot" => "tail"}
 
-    assert compile(dir, %{"items/lantern.json" => finger}) ==
+    assert compile(dir, %{"items/lantern.json" => tail}) ==
              {:error, [d("SCHEMA_VIOLATION", "lantern", %{"error" => "not_in_enum"})]}
   end
 end

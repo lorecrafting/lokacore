@@ -63,8 +63,9 @@ defmodule Loka.Core.InvariantsResource do
   defp safe?(n), do: is_integer(n) and n >= -9_007_199_254_740_991 and n <= 9_007_199_254_740_991
 
   @spec resource_after(map(), map(), term(), integer()) :: map() | nil
-  def resource_after(op, s, row, horizon) do
-    spec = spec(op, s)
+  def resource_after(op, s, stored, horizon) do
+    maximum = get_in(s, ["resource_maxima", Compose.key(Compose.target(op))])
+    {spec, row} = effective(spec(op, s), stored, maximum)
     now = Map.get(op, "at", s["clock"])
 
     valid =
@@ -104,6 +105,17 @@ defmodule Loka.Core.InvariantsResource do
       if value == op["from"], do: %{"value" => op["to"], "at" => now}
     end
   end
+
+  # A resource_maxima entry replaces the maximum; a row at or above it reads as it with no fraction.
+  defp effective(spec, row, maximum) when spec == nil or maximum == nil, do: {spec, row}
+  defp effective(spec, row, maximum), do: {Map.put(spec, "maximum", maximum), cap(row, maximum)}
+
+  defp cap(%{"value" => v} = row, maximum) when is_integer(v) and v >= maximum do
+    row = Map.put(row, "value", maximum)
+    if is_map_key(row, "remainder"), do: Map.put(row, "remainder", 0), else: row
+  end
+
+  defp cap(row, _), do: row
 
   defp spec(op, s),
     do:

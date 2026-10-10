@@ -66,7 +66,8 @@ export function current(row: Stored | undefined, spec: ResourceSpec, now: number
   return Math.min(spec.maximum, value + spec.gain * ticks);
 }
 
-// Omitted at retains the base clock; explicit delivery times stay inside this advance.
+// Omitted at retains the base clock; explicit delivery times stay inside this advance. An entry in
+// resource_maxima replaces the spec's maximum for that exact target.
 export function composeAdjustment(
   op: DeltaOp & { op: 'resource.adjust' },
   row: Json | undefined,
@@ -76,19 +77,29 @@ export function composeAdjustment(
   const now = op.at === undefined ? state.clock : op.at;
   const overrides = (state.entity_resource_specs ?? {}) as unknown as Record<string, ResourceSpec>;
   const specs = (state.resource_specs ?? {}) as unknown as Record<string, ResourceSpec>;
-  const override = overrides[encode(target(op) as Json)];
+  const at = encode(target(op) as Json);
+  const override = overrides[at];
   if (
     !Number.isSafeInteger(now) ||
     (op.at !== undefined && (now < state.clock || now > horizon)) ||
     (override && !validOverrideRow(row, override, now))
   )
     return { code: 'precondition_failed' };
-  return adjusted(
-    op,
-    row as Stored | undefined,
-    override ?? specs[encode(op.resource as Json)],
-    now,
-  );
+  const spec = override ?? specs[encode(op.resource as Json)];
+  const maximum = (state.resource_maxima as Record<string, number> | undefined)?.[at];
+  return maximum === undefined || !spec
+    ? adjusted(op, row as Stored | undefined, spec, now)
+    : adjusted(op, capped(row as Stored | undefined, maximum), { ...spec, maximum }, now);
+}
+
+/**
+ * A row stored at or above an effective maximum (resource@1, derived HP max) reads as that
+ * maximum with no fraction: the maximum fell since the row was written.
+ */
+export function capped(row: Stored | undefined, maximum: number): Stored | undefined {
+  if (!row || typeof row !== 'object' || !Number.isInteger(row.value) || row.value < maximum)
+    return row;
+  return 'remainder' in row ? { ...row, value: maximum, remainder: 0 } : { ...row, value: maximum };
 }
 
 // `from` is the resource's current (regenerated) value and `to` within its spec's bounds.

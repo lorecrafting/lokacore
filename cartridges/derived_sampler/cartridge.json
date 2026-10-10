@@ -5,7 +5,7 @@
   "title": "Derived Stats Sampler",
   "requires": {
     "kernel_api": {
-      "at_least": "1.39",
+      "at_least": "1.40",
       "below": "2.0"
     },
     "content_schema": 1,
@@ -47,6 +47,12 @@
       "description": "ancestry.nimble.description",
       "attribute": "dex",
       "modifier": 5
+    },
+    "hardy": {
+      "label": "ancestry.hardy.label",
+      "description": "ancestry.hardy.description",
+      "attribute": "con",
+      "modifier": 6
     }
   },
   "world": {
@@ -95,6 +101,15 @@
           {
             "attribute": "str",
             "per_point": 1000,
+            "pivot": 10
+          }
+        ]
+      },
+      "hp_max": {
+        "terms": [
+          {
+            "attribute": "con",
+            "per_point": 1,
             "pivot": 10
           }
         ]

@@ -2,7 +2,7 @@ import { pathToFileURL } from 'node:url';
 import { elapsedHost } from '../../authority/local-story/__tests__/elapsed-host.test.ts';
 import { openGame } from '../../authority/local-story/session.ts';
 import { presenter } from './presenter.ts';
-import { group } from './model.ts';
+import { buttonsOf, group } from './model.ts';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { createRequire, registerHooks } from 'node:module';
@@ -93,6 +93,69 @@ test('Character draws projected attributes and acquired qualification with autho
   assert.deepEqual(words(SkillDetails({ view, text })), [
     'STR 9',
     'Sword craft — unqualified; STR at least 10',
+  ]);
+});
+
+// Breaks: the Character line hides what worn items grant, or drops the sign of a loss (book-ui.md worn item affects).
+test('Character appends the signed worn affect to an attribute line', () => {
+  const view: any = {
+    attributes: [
+      { attribute: { key: 'per' }, value: 14, worn: 4 },
+      { attribute: { key: 'str' }, value: 8, worn: -2 },
+      { attribute: { key: 'con' }, value: 10 },
+    ],
+  };
+  assert.deepEqual(words(SkillDetails({ view, text })), [
+    'PER 14 (+4 worn)',
+    'STR 8 (-2 worn)',
+    'CON 10',
+  ]);
+});
+
+// Breaks: the level line drops the points or their plural, the xp line loses "/ next" or prints
+// one at the top level, Raise is not one card per attribute (with that attribute as input) last on
+// the page, shows while not offered, or leaks onto the room page as a place action.
+test('Character shows the level, xp and one Raise card per attribute only while offered', () => {
+  const str = { cartridge_id: 'c', cartridge_version: '0.0.1', kind: 'attribute', key: 'str' };
+  const raise = { action_key: 'raise_attribute', available: true, input: ['attribute'] };
+  const page = (levelling: object, actions: object[]) => {
+    const view: any = {
+      exits: [],
+      entities: [],
+      inventory: [],
+      actions,
+      levelling,
+      attributes: [
+        { attribute: str, value: 10 },
+        { attribute: { ...str, key: 'con' }, value: 11 },
+      ],
+    };
+    const buttons = buttonsOf(view, (k) => k, text) as never[];
+    return { buttons, words: words(CharacterPage({ view, text, world: () => {}, buttons })) };
+  };
+  const spend = page({ level: 2, experience: 30, next: 100, unspent: 1 }, [raise]);
+  assert.deepEqual(spend.words, [
+    'Character',
+    'Level 2, 1 point to spend',
+    'STR 10',
+    'CON 11',
+    'xp  30 / 100',
+    'Raise STR',
+    'Raise CON',
+    'Back to World',
+  ]);
+  assert.deepEqual((spend.buttons[0] as any).input, { attribute: str });
+  assert.deepEqual(group(spend.buttons).place, []);
+  const two = page({ level: 3, experience: 100, next: 200, unspent: 2 }, [raise]);
+  assert.equal(two.words[1], 'Level 3, 2 points to spend');
+  const top = page({ level: 3, experience: 120, unspent: 0 }, []);
+  assert.deepEqual(top.words, [
+    'Character',
+    'Level 3',
+    'STR 10',
+    'CON 11',
+    'xp  120',
+    'Back to World',
   ]);
 });
 

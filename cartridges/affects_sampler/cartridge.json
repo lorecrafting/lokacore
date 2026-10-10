@@ -1,0 +1,59 @@
+{
+  "api_version": "loka/v3",
+  "id": "affects_sampler",
+  "version": "0.0.1",
+  "title": "Item Affects Sampler",
+  "requires": {
+    "kernel_api": {
+      "at_least": "1.41",
+      "below": "2.0"
+    },
+    "content_schema": 1,
+    "rule_ir": 1,
+    "capabilities": {
+      "movement": 1,
+      "containment": 1,
+      "equipment": 1,
+      "resource": 1,
+      "fact": 1,
+      "policy": 1,
+      "attributes": 1,
+      "schedule": 1,
+      "description_variant": 1
+    },
+    "client_features": []
+  },
+  "supported_profiles": [
+    "offline_private"
+  ],
+  "entry": "hall",
+  "time_policy": {
+    "profile": "real_elapsed",
+    "rate": 50
+  },
+  "world": {
+    "carry": {
+      "max_grams": 1000
+    },
+    "derived": {
+      "carry_grams": {
+        "terms": [
+          {
+            "attribute": "str",
+            "per_point": 1000,
+            "pivot": 10
+          }
+        ]
+      },
+      "hp_max": {
+        "terms": [
+          {
+            "attribute": "con",
+            "per_point": 1,
+            "pivot": 10
+          }
+        ]
+      }
+    }
+  }
+}

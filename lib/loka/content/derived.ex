@@ -1,9 +1,18 @@
 defmodule Loka.Content.Derived do
-  @moduledoc "Checks toolbox row 2 derived-stat tables (world.derived); twin of cartridge_derived.ts."
+  @moduledoc """
+  Checks toolbox row 2 derived-stat tables (world.derived) and row 3 item affects; twin of
+  cartridge_derived.ts.
+  """
   import Loka.Content.Source, only: [at: 2, diag: 2, diag: 4, ref: 3]
   alias Loka.Content.Refs
 
-  @needs %{"hit_chance" => "combat", "damage" => "combat", "carry_grams" => "carry"}
+  # hp_max needs the hp pool, which every compiled cartridge has (Resources @defaults).
+  @needs %{
+    "hit_chance" => "combat",
+    "damage" => "combat",
+    "carry_grams" => "carry",
+    "hp_max" => nil
+  }
 
   def settings(%{"world" => %{"derived" => d}} = settings, m),
     do: put_in(settings, ["world", "derived"], Map.new(d, fn {k, s} -> {k, expand(s, m)} end))
@@ -21,45 +30,66 @@ defmodule Loka.Content.Derived do
   def check(nil, _, _), do: []
 
   def check(m, defs, {_, settings}) do
-    case get_in(settings, ["world", "derived"]) do
-      nil -> []
-      table -> gate(m) ++ Enum.flat_map(table, &stat(&1, m, defs, settings["world"]))
-    end
+    table = get_in(settings, ["world", "derived"])
+    items = for {_, {rel, _, item}} <- defs["item"] || %{}, do: {rel, item}
+
+    tables =
+      if table,
+        do:
+          owner(m, "cartridge.world.derived") ++
+            Enum.flat_map(table, &stat(&1, m, defs, settings["world"])),
+        else: []
+
+    floor(m, table, items) ++ tables ++ Enum.flat_map(items, &affects(&1, m, defs))
   end
 
-  defp gate(m) do
-    version =
+  # Finger slots and affects are row 3 (API 1.41); hp_max 1.40; the other tables 1.39.
+  defp floor(m, table, items) do
+    floor =
+      cond do
+        Enum.any?(items, fn {_, i} -> i["affects"] || i["slot"] == "finger" end) -> [1, 41]
+        table == nil -> nil
+        table["hp_max"] -> [1, 40]
+        true -> [1, 39]
+      end
+
+    if floor && api(m) < floor,
+      do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
+      else: []
+  end
+
+  # Toolbox row 3: an item's affects need its slot, attributes@1 and real attributes.
+  defp affects({rel, %{"affects" => list} = item}, m, defs) do
+    slot = if item["slot"], do: [], else: [diag("SCHEMA_VIOLATION", at(rel, ["affects"]))]
+
+    owner(m, at(rel, ["affects"])) ++
+      slot ++
+      for {a, i} <- Enum.with_index(list),
+          e <- Refs.reference(rel, ["affects", i], "attribute", a, m, defs),
+          do: e
+  end
+
+  defp affects(_, _, _), do: []
+
+  defp owner(m, path) do
+    if m["requires"]["capabilities"]["attributes"] == 1,
+      do: [],
+      else: [
+        diag("UNDECLARED_CAPABILITY", path, %{"capability" => "attributes"}, ["attributes@1"])
+      ]
+  end
+
+  defp api(m),
+    do:
       m["requires"]["kernel_api"]["at_least"]
       |> String.split(".")
       |> Enum.map(&String.to_integer/1)
-
-    api =
-      if version < [1, 39],
-        do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
-        else: []
-
-    cap =
-      if m["requires"]["capabilities"]["attributes"] == 1,
-        do: [],
-        else: [
-          diag(
-            "UNDECLARED_CAPABILITY",
-            "cartridge.world.derived",
-            %{"capability" => "attributes"},
-            [
-              "attributes@1"
-            ]
-          )
-        ]
-
-    api ++ cap
-  end
 
   defp stat({key, stat}, m, defs, world) do
     path = ["world", "derived", key]
 
     needs =
-      if is_map_key(world, @needs[key]),
+      if Map.fetch!(@needs, key) in [nil | Map.keys(world)],
         do: [],
         else: [diag("SCHEMA_VIOLATION", at("cartridge.json", path))]
 

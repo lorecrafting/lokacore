@@ -2,6 +2,7 @@ import { hydrate } from './created.ts';
 import { compose, counts, over, type Fault, type Limit } from '../foundation/compose.ts';
 import type { DeltaOp } from '../contracts.gen.ts';
 import { row, type State, type World } from './decision.ts';
+import { maxima } from '../mechanics/resource.ts';
 
 // The state after composing `ops` over the world's state, the fact defaults, the declared
 // capacities, the resource specs and the barriers' initial states, or composition's fault. Only
@@ -35,7 +36,7 @@ export function apply(
     : { fault: { kind: 'fault', code: 'precondition_failed' } };
 }
 
-/** What compose reads for `world`: its state, the fact defaults, capacities, resource specs and
+/** What compose reads for `world`: its state, the fact defaults, capacities, resource specs and maxima and
  * the barriers' initial states. */
 export const base = (world: World) =>
   ({
@@ -49,5 +50,6 @@ export const base = (world: World) =>
     liquid_specs: world.liquidSpecs,
     resource_specs: world.resourceSpecs,
     entity_resource_specs: world.entityResourceSpecs,
+    resource_maxima: maxima(world),
     barrier_initial: world.barrierInitial,
   }) as unknown as Parameters<typeof compose>[0];

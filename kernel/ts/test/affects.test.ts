@@ -1,0 +1,272 @@
+// Toolbox row 3 on the compiled affects sampler: finger slots hold two rings, and a worn item's
+// affects move the wearer's attributes and what reads them (stat_compare, derived carry and hp).
+import assert from 'node:assert/strict';
+import { execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { test } from 'node:test';
+import { INSTALLED, loadCartridge, newWorld, step, stepElapsed } from '../src/index.ts';
+import { elapsedCommandId } from '../src/foundation/id_source.ts';
+import { adjust, level, resourceRef } from '../src/mechanics/resource.ts';
+import type { Cartridge, World } from '../src/runtime/decision.ts';
+import { encode } from '../src/foundation/canonical.ts';
+import { validate } from '../src/foundation/validate.ts';
+import { apply } from '../src/runtime/apply.ts';
+import { gameView } from '../src/view/view.ts';
+
+const scratch = mkdtempSync(join(tmpdir(), 'loka-affects-sampler-'));
+let artifact: Uint8Array;
+try {
+  const file = join(scratch, 'artifact.json');
+  execFileSync('mix', ['loka.compile', 'cartridges/affects_sampler', file], {
+    cwd: fileURLToPath(new URL('../../../', import.meta.url)),
+    stdio: 'pipe',
+  });
+  artifact = readFileSync(file);
+} finally {
+  rmSync(scratch, { recursive: true });
+}
+const loaded = loadCartridge(artifact, INSTALLED);
+assert.ok(loaded.ok, JSON.stringify(loaded));
+const content = loaded.cartridge as Cartridge;
+const id = (w: World, k: string) => w.entityIds[`affects_sampler@0.0.1:item/${k}`];
+let n = 0;
+function act(w: World, p: object) {
+  n += 1;
+  return step(
+    w,
+    {
+      id: `eeeeeeee-6666-4333-8444-${String(n).padStart(12, '0')}` as never,
+      world_context_id: w.context,
+      payload: { actor_id: w.character, ...p } as never,
+    },
+    n,
+  );
+}
+function play(w: World, p: object): World {
+  const r = act(w, p);
+  assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
+  return r.world;
+}
+const fresh = () =>
+  newWorld(content, '2e5f9b6d-4a2c-4d3b-8f8e-7c6b5d4e3f20' as never, [4, 3, 2, 1]);
+const taken = (w: World, ...keys: string[]) =>
+  keys.reduce((x, k) => play(x, { type: 'take', item_id: id(x, k) }), w);
+const stat = (w: World, k: string) => {
+  const a = gameView(w).attributes!.find((x) => x.attribute.key === k)!;
+  return [a.value, a.worn ?? 0];
+};
+const room = (w: World) => gameView(w).place!.description.key;
+const fingers = (w: World) =>
+  gameView(w)
+    .equipment!.filter((e) => e.slot === 'finger')
+    .map((e) => e.item?.id ?? 'empty')
+    .sort();
+
+// Breaks: finger capacity 1 (the second ring is refused), occupancy that ignores capacity (the
+// third is worn), affects not read (PER stays 10), stat_compare reading the base value (the hall
+// keeps its plain text at 14), a removed ring still counting, or the GameView listing one finger
+// (the second ring has no Remove).
+test('a +2 PER ring counts on either finger, two stack, a third is refused and removal restores', () => {
+  let w = taken(fresh(), 'ring_left', 'ring_right', 'ring_spare');
+  assert.deepEqual(stat(w, 'per'), [10, 0]);
+  assert.deepEqual(fingers(w), ['empty', 'empty']);
+  w = play(w, { type: 'wear', item_id: id(w, 'ring_left') });
+  assert.deepEqual(stat(w, 'per'), [12, 2]);
+  assert.equal(room(w), 'room.hall.description');
+  w = play(w, { type: 'wear', item_id: id(w, 'ring_right') });
+  assert.deepEqual(stat(w, 'per'), [14, 4]);
+  assert.equal(room(w), 'room.hall.sharp');
+  assert.deepEqual(fingers(w), [id(w, 'ring_left'), id(w, 'ring_right')].sort());
+  assert.deepEqual(act(w, { type: 'wear', item_id: id(w, 'ring_spare') }).decision, {
+    kind: 'rejected',
+    error: { code: 'invalid_state' },
+  });
+  w = play(w, { type: 'remove', item_id: id(w, 'ring_left') });
+  assert.deepEqual(stat(w, 'per'), [12, 2]);
+  assert.equal(room(w), 'room.hall.description');
+  w = play(w, { type: 'wear', item_id: id(w, 'ring_spare') });
+  assert.deepEqual(stat(w, 'per'), [14, 4]);
+});
+
+// Breaks: derived tables read the base attribute (STR 10 cannot lift the 2500 g stone; the hp
+// maximum stays 10), or removing the belt leaves its bonus in place.
+test('a belt of +2 STR and +4 CON lifts the stone and raises the hp maximum until removed', () => {
+  let w = taken(fresh(), 'belt');
+  assert.deepEqual(act(w, { type: 'take', item_id: id(w, 'stone') }).decision, {
+    kind: 'rejected',
+    error: { code: 'too_heavy' },
+  });
+  w = play(w, { type: 'wear', item_id: id(w, 'belt') });
+  const hp = () => gameView(w).resources!.find((r) => r.resource.key === 'hp')!;
+  assert.deepEqual([hp().current, hp().maximum], [10, 14]);
+  w = play(w, { type: 'take', item_id: id(w, 'stone') });
+  w = play(w, { type: 'remove', item_id: id(w, 'belt') });
+  assert.deepEqual([hp().current, hp().maximum], [10, 10]);
+  assert.deepEqual(stat(w, 'str'), [10, 0]);
+});
+
+function idle(w: World, seconds: number): World {
+  const until = w.state.clock + seconds;
+  const run_id = `aaaaaaaa-0000-4000-8000-${String(++n).padStart(12, '0')}`;
+  const r = stepElapsed(
+    w,
+    {
+      id: elapsedCommandId(run_id, w.context, w.state.clock, until) as never,
+      world_context_id: w.context,
+      payload: { type: 'elapsed', actor_id: w.character, run_id, from: w.state.clock, until },
+    } as never,
+    ++n,
+  );
+  assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
+  return r.world;
+}
+
+// The belt sampler with hp regenerating `rate` an hour at every position (regen requires position@1).
+function regenerating(rate: number) {
+  const regen = structuredClone(content) as any;
+  regen.lock.capabilities.position = 1;
+  regen.facts['affects_sampler@0.0.1:fact/position'] = {
+    key: 'position',
+    version: 1,
+    value_type: {
+      type: 'enum',
+      values: ['standing', 'sitting', 'resting', 'sleeping'],
+      default: 'standing',
+    },
+    scopes: ['player'],
+    meaning: 'position@1',
+  };
+  const by_position = { standing: rate, sitting: rate, resting: rate, sleeping: rate };
+  regen.resources['affects_sampler@0.0.1:resource/hp'].gain = rate;
+  regen.resources['affects_sampler@0.0.1:resource/hp'].regen = { every: 3600, by_position };
+  return taken(
+    newWorld(regen, '2e5f9b6d-4a2c-4d3b-8f8e-7c6b5d4e3f21' as never, [4, 3, 2, 1]),
+    'belt',
+  );
+}
+
+// Breaks (PM ruling loka-kgd.10): wear and remove do not settle hp first, so 4 h idle at the cap
+// banks 4 hp that the belt's raised maximum grants at once (14/14, and again after remove and wear).
+test('wearing the belt after 4 h idle at full hp keeps hp 10 of 14, then regenerates from there', () => {
+  let w = idle(regenerating(1), 4 * 3600);
+  const hp = () => gameView(w).resources!.find((r) => r.resource.key === 'hp')!;
+  assert.deepEqual([hp().current, hp().maximum], [10, 10]);
+  w = play(w, { type: 'wear', item_id: id(w, 'belt') });
+  assert.deepEqual([hp().current, hp().maximum], [10, 14]);
+  w = idle(w, 3600);
+  assert.equal(hp().current, 11);
+  w = play(play(w, { type: 'remove', item_id: id(w, 'belt') }), {
+    type: 'wear',
+    item_id: id(w, 'belt'),
+  });
+  assert.equal(hp().current, 10);
+});
+
+// Breaks (loka-kgd.8 review): level() reads a stored hp above a lowered maximum uncapped, so
+// after a write of 13 under the belt (max 14) and its removal the GameView shows 13/10 (or the band
+// lookup throws) and the next write starts from 13.
+test('removing the belt caps a stored hp 13 at the lowered maximum 10; the next write starts there', () => {
+  let w = regenerating(4);
+  w = play(w, { type: 'wear', item_id: id(w, 'belt') });
+  const hp = resourceRef(w, 'hp');
+  const spend = (x: World) => {
+    const done = apply(x, [adjust(x, x.body, hp, -1, {}).op]);
+    assert.ok('world' in done, JSON.stringify(done));
+    return done.world;
+  };
+  w = spend(idle(w, 3600)); // 14 regenerated (10 + 4), 13 stored
+  assert.equal(level(w, w.body, hp), 13);
+  w = play(w, { type: 'remove', item_id: id(w, 'belt') });
+  const view = gameView(w).resources!.find((x) => x.resource.key === 'hp')!;
+  assert.deepEqual([view.current, view.maximum], [10, 10]);
+  assert.equal(level(spend(w), w.body, hp), 9);
+});
+
+// Breaks: checked arithmetic in an attribute, derived or maximum read (loka-kgd.8 ruling), so an
+// extreme authored amount throws from base() and the GameView instead of saturating to ResourceInt.
+test('extreme affects saturate the attribute, the worn sum and the hp maximum; reads never throw', () => {
+  const read = (c: Cartridge) => {
+    const t = taken(newWorld(c, '2e5f9b6d-4a2c-4d3b-8f8e-7c6b5d4e3f20' as never, [4]), 'belt');
+    const w = play(t, { type: 'wear', item_id: id(t, 'belt') });
+    const hp = gameView(w).resources!.find((r) => r.resource.key === 'hp')!;
+    return [stat(w, 'str'), stat(w, 'con'), hp.maximum, 'world' in apply(w, [])];
+  };
+  const high = structuredClone(content) as any;
+  const belt = high.items['affects_sampler@0.0.1:item/belt'];
+  belt.affects[0].modifier = 2147483647;
+  belt.affects.push({ ...belt.affects[0] }); // STR worn sum 2^32-2 saturates at 2^31-1
+  belt.affects[1].modifier = 2147483647; // CON 10 + 2^31-1 saturates at 2^31-1
+  high.world.derived.hp_max.terms[0].per_point = 2147483647; // term near 2^62; max 10 + 2^31-1
+  assert.deepEqual(read(high), [
+    [2147483647, 2147483647],
+    [2147483647, 2147483647],
+    2147483647,
+    true,
+  ]);
+  const low = structuredClone(content) as any;
+  low.items['affects_sampler@0.0.1:item/belt'].affects[1].modifier = -2147483648; // CON 10 - 2^31, in range
+  low.world.derived.hp_max.terms[0].per_point = 2147483647;
+  assert.deepEqual(read(low).slice(1), [[-2147483638, -2147483648], 0, true]); // term saturates at -2^31; max floored at 0
+});
+
+// Breaks: the loader drops an affects check, so an affect on an unworn item, a dangling
+// attribute, a missing attributes@1 or an old API floor (also for finger rings without affects)
+// loads and misbehaves in play.
+test('the loader refuses each unsound item affect', () => {
+  const source = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
+  const belt = 'affects_sampler@0.0.1:item/belt';
+  const at = `.cartridge.items["${belt}"].affects`;
+  const rows: [(c: any) => void, string, string][] = [
+    [
+      (c) => (c.manifest.requires.kernel_api.at_least = '1.40'),
+      'KERNEL_API_RANGE_INVALID',
+      '.cartridge.manifest.requires.kernel_api.at_least',
+    ],
+    [(c) => delete c.items[belt].slot, 'SCHEMA_VIOLATION', at],
+    [
+      (c) => {
+        c.manifest.requires.kernel_api.at_least = '1.40';
+        for (const i of Object.values(c.items) as any[]) delete i.affects;
+      },
+      'KERNEL_API_RANGE_INVALID',
+      '.cartridge.manifest.requires.kernel_api.at_least',
+    ],
+    [
+      (c) => (c.items[belt].affects[1].attribute.key = 'luck'),
+      'UNRESOLVED_REFERENCE',
+      `${at}[1].attribute`,
+    ],
+    [
+      (c) => {
+        delete c.manifest.requires.capabilities.attributes;
+        delete c.lock.capabilities.attributes;
+        delete c.attributes;
+        delete c.world.derived;
+        delete c.rooms['affects_sampler@0.0.1:room/hall'].variants;
+      },
+      'UNDECLARED_CAPABILITY',
+      at,
+    ],
+  ];
+  for (const [change, code, path] of rows) {
+    const c = structuredClone(source);
+    change(c);
+    const canonical = encode(c);
+    const sha256 = createHash('sha256').update(canonical).digest('hex');
+    const r = loadCartridge(
+      new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
+      INSTALLED,
+    );
+    assert.deepEqual(r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path], [code, path]);
+  }
+});
+
+// Breaks: finger leaves the slot keys. The ItemAffect schema rows are in
+// protocol/fixtures/invalid.json (validate.test.ts and contracts_test.exs).
+test('finger is a slot key', () => {
+  assert.deepEqual(validate('SlotKey', 'finger'), []);
+});

@@ -17,6 +17,7 @@ import { factChanged, type Base } from '../mechanics/fact.ts';
 import { jobCommandId } from '../foundation/id_source.ts';
 import { earned } from '../mechanics/quest/lifecycle.ts';
 import { sequence, triggered } from '../mechanics/reaction.ts';
+import { levelUp, oneWrite } from '../mechanics/levelling/shared.ts';
 import * as schedule from '../mechanics/schedule/rule.ts';
 import { cmp } from '../foundation/validate.ts';
 import { currentRound } from '../mechanics/combat/round.ts';
@@ -85,10 +86,12 @@ export function propose(
   const failed =
     join(p, root.delta.ops, root.events, base, 0, mint) ?? react(p) ?? jobs(p, root) ?? farewell(p);
   if (failed) return { decision: failed, ...(p.limit && { limit: p.limit }) };
+  const ops = oneWrite(p.ops);
+  p.narration.push(...levelUp(world, ops));
   return {
     decision: {
       ...root,
-      delta: { ops: knowledgeLast(p.ops) },
+      delta: { ops: knowledgeLast(ops) },
       events: p.events,
       rng: p.rng,
       ...(p.narration.length && { narration: p.narration }),

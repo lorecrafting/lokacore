@@ -81,8 +81,27 @@ defmodule Loka.Core.Resource do
       safe?(now) and (not Map.has_key?(op, "at") or (now >= state["clock"] and now <= horizon)) and
         (override == nil or valid_override_row?(row, override, now))
 
-    if valid, do: adjusted(op, row, spec, now), else: {:error, "precondition_failed"}
+    if valid do
+      {spec, row} = effective(spec, row, get_in(state, ["resource_maxima", target]))
+      adjusted(op, row, spec, now)
+    else
+      {:error, "precondition_failed"}
+    end
   end
+
+  # A resource_maxima entry replaces the maximum; a row stored at or above it reads as it with no
+  # fraction (resource@1).
+  defp effective(spec, row, maximum) when spec == nil or maximum == nil, do: {spec, row}
+
+  defp effective(spec, row, maximum),
+    do: {Map.put(spec, "maximum", maximum), capped(row, maximum)}
+
+  defp capped(%{"value" => v} = row, maximum) when is_integer(v) and v >= maximum do
+    row = Map.put(row, "value", maximum)
+    if is_map_key(row, "remainder"), do: Map.put(row, "remainder", 0), else: row
+  end
+
+  defp capped(row, _), do: row
 
   def adjusted(%{"from" => from, "to" => to} = op, row, spec, now) do
     cond do

@@ -1,0 +1,24 @@
+{
+  "keywords": [
+    "belt"
+  ],
+  "short": "item.belt.short",
+  "room_line": "item.belt.room",
+  "description": "item.belt.description",
+  "location": {
+    "in": "room",
+    "room": "hall"
+  },
+  "mass_grams": 200,
+  "slot": "waist",
+  "affects": [
+    {
+      "attribute": "str",
+      "modifier": 2
+    },
+    {
+      "attribute": "con",
+      "modifier": 4
+    }
+  ]
+}

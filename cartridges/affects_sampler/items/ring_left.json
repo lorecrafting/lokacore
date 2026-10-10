@@ -1,0 +1,20 @@
+{
+  "keywords": [
+    "ring"
+  ],
+  "short": "item.ring_left.short",
+  "room_line": "item.ring_left.room",
+  "description": "item.ring_left.description",
+  "location": {
+    "in": "room",
+    "room": "hall"
+  },
+  "mass_grams": 10,
+  "slot": "finger",
+  "affects": [
+    {
+      "attribute": "per",
+      "modifier": 2
+    }
+  ]
+}

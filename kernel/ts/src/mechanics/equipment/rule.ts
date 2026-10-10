@@ -1,8 +1,8 @@
 // equipment@1 (capability_registry.json; 21 §8 Equipment and 00 §4.4 as amended by c1-equipment):
 // wear and remove an item by its id. A worn item is inside the actor's body's holder for its slot
-// (a fresh world makes one per declared slot, capacity 1; runtime/fresh.ts), so both are one
+// (a fresh world makes one per declared slot, capacity 1, finger 2; runtime/fresh.ts), so both are one
 // entity.transfer, whose custody, cycle and capacity preconditions foundation/compose.ts re-checks, and no
-// event. Checks and codes: mechanics.md equipment@1.
+// event; an item with affects first settles hp (settle below). Checks and codes: mechanics.md equipment@1.
 import type { CharacterId, EntityId, ErrorCode } from '../../contracts.gen.ts';
 import {
   accepted,
@@ -14,6 +14,7 @@ import {
   type World,
 } from '../../runtime/decision.ts';
 import { movable } from '../../runtime/created.ts';
+import { settleMaxima } from '../resource.ts';
 
 /** equipment@1's commands, shared by the GameView and its invariant. */
 export const VERBS: readonly string[] = ['wear', 'remove'];
@@ -28,10 +29,15 @@ export const decide: Rule<'equipment'> = (world, command) => {
   if (typeof t === 'string') return rejected(t);
   const [source_id, destination_id] = t;
   const ops = [
+    ...settle(world, item_id),
     { op: 'entity.transfer', writer_group: 0, entity_id: item_id, source_id, destination_id },
   ] as const;
   return accepted(world, type === 'wear' ? 'worn' : 'removed', ops, []);
 };
+
+/** An item with affects moves its wearer's attributes, so a derived maximum settles first (resource@1). */
+const settle = (world: World, item: EntityId) =>
+  world.entities[item].kind === 'item' && world.entities[item].affects ? settleMaxima(world) : [];
 
 /**
  * Why step would refuse `type` (wear or remove) of `item` by `actor` now, else the transfer's
@@ -55,5 +61,6 @@ export function transfer(
   if (at !== body) return 'not_owned';
   const holder = e.slot === undefined ? undefined : world.slots[e.slot];
   if (holder === undefined || world.state.containers[holder] !== body) return 'invalid_target';
-  return values(world.state.containers).includes(holder) ? 'invalid_state' : [body, holder];
+  const held = values(world.state.containers).filter((c) => c === holder).length;
+  return held >= world.capacities[holder] ? 'invalid_state' : [body, holder];
 }

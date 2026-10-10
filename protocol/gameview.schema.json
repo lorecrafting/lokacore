@@ -677,7 +677,7 @@
       ]
     },
     "WornSlotView": {
-      "description": "One equipment slot holder of the actor's body (equipment@1; 04 §14 as amended by c1-equipment): its slot and, when an item is worn there, that item with the actions it accepts (only those resolving to remove). Listed in slot-key order.",
+      "description": "One equipment slot holder of the actor's body (equipment@1; 04 §14 as amended by c1-equipment): its slot and, when an item is worn there, that item with the actions it accepts (only those resolving to remove). Listed in slot-key order, one entry per place: the finger holder has two (toolbox row 3).",
       "type": "object",
       "properties": {
         "slot": {
@@ -1186,6 +1186,34 @@
           "items": {
             "$ref": "gameview.schema.json#/$defs/AttributeView"
           }
+        },
+        "levelling": {
+          "description": "The player's level, experience, the total that reaches the next level (absent at the top level) and unspent attribute points, when the cartridge declares world.levelling (toolbox row 4).",
+          "type": "object",
+          "properties": {
+            "level": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "experience": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "next": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "unspent": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "level",
+            "experience",
+            "unspent"
+          ],
+          "additionalProperties": false
         },
         "ancestry": {
           "$ref": "action.schema.json#/$defs/Key"
@@ -2259,6 +2287,9 @@
         },
         "value": {
           "type": "integer"
+        },
+        "worn": {
+          "type": "integer"
         }
       },
       "required": [
@@ -2266,7 +2297,7 @@
         "value"
       ],
       "additionalProperties": false,
-      "description": "An authored attribute reference and the actor's current value.",
+      "description": "An authored attribute reference and the actor's current value, which includes allocated levelling points (toolbox row 4) and worn, the nonzero sum its worn items grant (item affects, toolbox row 3; absent when zero).",
       "examples": [
         {
           "attribute": {

@@ -2,7 +2,7 @@
 // only for this decision/list projection; custody and pinned item definitions remain authoritative.
 import { LIMITS, type EntityId } from '../../contracts.gen.ts';
 import { liquidRowValid } from '../../foundation/compose_liquid.ts';
-import { add, mul } from '../../foundation/int.ts';
+import { add, mul, saturate } from '../../foundation/int.ts';
 import { opened, reach, barrierState } from '../lookups.ts';
 import type { Steps, World } from '../../runtime/decision.ts';
 import { refString } from '../../runtime/decision.ts';
@@ -53,7 +53,7 @@ function ceiling(world: World, body: EntityId) {
   const max = world.cartridge.world?.carry?.max_grams;
   const table = world.cartridge.world?.derived?.carry_grams;
   if (!table || body !== world.body || !Number.isSafeInteger(max) || max! < 0) return max;
-  return Math.max(0, add(max!, derived(world, world.character, table)));
+  return Math.max(0, saturate(max! + derived(world, world.character, table)));
 }
 
 export const load = (world: World, body: EntityId, steps: Steps) =>

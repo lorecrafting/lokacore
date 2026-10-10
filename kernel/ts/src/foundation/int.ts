@@ -25,3 +25,6 @@ export function divide(a: number, b: number): [number, number] {
   const r = a % b; // exact for doubles, and (a - r) / b divides evenly
   return [(a - r) / b + 0, r + 0];
 }
+
+/** `n` clamped to the ResourceInt range (protocol/resource.schema.json): derived reads saturate. */
+export const saturate = (n: number): number => Math.min(2147483647, Math.max(-2147483648, n));

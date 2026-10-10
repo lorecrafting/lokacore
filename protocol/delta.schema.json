@@ -1411,6 +1411,42 @@
           "additionalProperties": false
         },
         {
+          "description": "Checked write of one character's levelling row (toolbox row 4): composes only when the stored row equals expected (null when absent) and neither the experience nor any allocated count falls.",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "levelling.set"
+            },
+            "writer_group": {
+              "$ref": "delta.schema.json#/$defs/WriterGroup"
+            },
+            "character_id": {
+              "$ref": "identity.schema.json#/$defs/CharacterId"
+            },
+            "expected": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "$ref": "delta.schema.json#/$defs/LevellingRow"
+                }
+              ]
+            },
+            "value": {
+              "$ref": "delta.schema.json#/$defs/LevellingRow"
+            }
+          },
+          "required": [
+            "op",
+            "writer_group",
+            "character_id",
+            "expected",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
           "type": "object",
           "properties": {
             "op": {
@@ -2175,6 +2211,23 @@
             "npc_id"
           ],
           "additionalProperties": false
+        },
+        {
+          "description": "One character's levelling row (toolbox row 4).",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "levelling"
+            },
+            "character_id": {
+              "$ref": "identity.schema.json#/$defs/CharacterId"
+            }
+          },
+          "required": [
+            "kind",
+            "character_id"
+          ],
+          "additionalProperties": false
         }
       ],
       "examples": [
@@ -2523,6 +2576,41 @@
         }
       ],
       "description": "One actor’s latest committed visible observation of an exact NPC, room and logical time."
+    },
+    "LevellingRow": {
+      "description": "One character's experience and the attribute points spent, by attribute DefinitionRefString (toolbox row 4); level and unspent points are derived on read from the cartridge's thresholds.",
+      "type": "object",
+      "properties": {
+        "experience": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        },
+        "allocated": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):attribute/[a-z][a-z0-9_]{0,63}$"
+          },
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          }
+        }
+      },
+      "required": [
+        "experience",
+        "allocated"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "experience": 30,
+          "allocated": {
+            "levelling_sampler@0.0.1:attribute/str": 1
+          }
+        }
+      ]
     }
   }
 }

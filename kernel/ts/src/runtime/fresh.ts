@@ -20,7 +20,7 @@ export const NIL = '00000000-0000-0000-0000-000000000000';
  * room order and detail-key order, then each NPC, then each item, both in DefinitionRefString
  * order, then one job per NPC with a non-empty daily schedule, in the same NPC order, then one
  * slot holder per distinct item slot, in slot-key order: numeric profile, Initial world ids and
- * Slot holder ids), then one roomless consumed holder under food@1, each slot holder in the body with capacity 1 and not an entity, the body in the entry room, each NPC in its room and each item at
+ * Slot holder ids), then one roomless consumed holder under food@1, each slot holder in the body with capacity 1 (finger 2) and not an entity, the body in the entry room, each NPC in its room and each item at
  * its location, the calendar's start time (0 without one), each NPC's first job pending at its
  * schedule's first listed hour strictly after that time (mechanics/schedule/behavior.ts next; 04 §5.4: a job is
  * scheduled strictly later than now), each fact's default by its canonical DefinitionRef text
@@ -55,7 +55,7 @@ function baseWorld(
   const jobs = firstJobs(cartridge, clock, mint);
   const slots = holders(cartridge, mint);
   const consumed = cartridge.lock.capabilities.food ? mint() : undefined;
-  for (const holder of Object.values(slots)) [containers[holder], capacities[holder]] = [body, 1];
+  for (const [k, h] of Object.entries(slots)) [containers[h], capacities[h]] = [body, holds(k)];
   const { resources, entityResourceSpecs } = started(cartridge, body, clock, entities);
   const { fuelSpecs, fuel } = initialFuel(entities, clock);
   return {
@@ -267,6 +267,8 @@ function holders(cartridge: Cartridge, mint: () => EntityId) {
   const keys = [...new Set(Object.values(cartridge.items ?? {}).flatMap((i) => i.slot ?? []))];
   return Object.fromEntries(keys.sort(cmp).map((k) => [k, mint()]));
 }
+// A slot holder's capacity: two fingers (toolbox row 3), one item in every other slot.
+const holds = (slot: string) => (slot === 'finger' ? 2 : 1);
 
 function roomDetails(
   cartridge: Cartridge,

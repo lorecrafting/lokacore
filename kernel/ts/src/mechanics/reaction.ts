@@ -30,6 +30,8 @@ import { questOf } from './lookups.ts';
 import { cmp } from '../foundation/validate.ts';
 import { suppress } from './population/shared.ts';
 import { applyStatus, specOf } from './status/shared.ts';
+import { grant } from './levelling/shared.ts';
+import { saturate } from '../foundation/int.ts';
 
 type Payload<T> = Extract<EventPayload, { type: T }>;
 
@@ -86,6 +88,7 @@ export function sequence(
   const events: DomainEvent[] = [];
   const narration: { key: TextKey }[] = [];
   let position = 0;
+  let gained = 0; // one levelling write per rule, so two grants never race on one expected row
   const by = { id: cause.id as string as CommandId, payload: { actor_id: actor } };
   const emit = (payload: EventPayload) => events.push(event(then, by, mint, ++position, payload));
   for (const step of rule.apply) {
@@ -112,12 +115,15 @@ export function sequence(
       ops.push(...applyStatus(then, body, step.status, group, mint));
       const label = specOf(then, step.status)?.narration.applied;
       if (label) narration.push({ key: label });
+    } else if (step.op === 'experience.grant') {
+      gained = saturate(gained + step.amount);
     } else {
       const assigned = assignment(world, actor, step, group, set);
       ops.push(assigned);
       if (assigned.expected !== step.value) position++;
     }
   }
+  ops.push(...grant(then, actor, gained, group));
   return accepted(world, 'reacted', ops, events, narration.length ? narration : undefined);
 }
 

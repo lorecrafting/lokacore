@@ -190,6 +190,7 @@ The portable semantic Command registry (04 §1, §3, §21; 14 §R3A). Host-only 
 - **Command**: A semantic Command (04 §3): the portable, replayable input. id is derived from the idempotency scope and the InvocationId (IdSource command_id; owner decision, docs/archive/decisions/owner-decisions-r3-lanes-2026-09-24.md), never from authority placement. That derivation is for invocation-derived commands only; an authority-internal command (run_job) derives its id under a different IdSource tag over its own identity, ["loka-job-command-v1", job_id, occurrence] with the occurrence its due time (numeric-profile.md, job CommandId), so a client invocation id can never land on a job's receipt. Every host serializes an equivalent command to the same canonical bytes (04 §21). Elapsed authority commands use the separate run/world/interval domain in numeric-profile.md; normal player admission refuses them.
 - **CommandPayload**: The registered Command types; an unknown type fails before game rules (04 §3). Invocation-derived types carry the actor; run_job is authority-internal (04 §1) and is never built from a client invocation. These are the types the R6P proof uses (pre-release-proof.md).
   - `choose_ancestry`: Select one authored ancestry for this character before ordinary play (attributes@1).
+  - `raise_attribute`: Spend one unspent attribute point on an authored attribute (attributes@1; toolbox row 4).
   - `move`: Move through a connection.
   - `open`: Open the closed, unlocked barrier on the exit in `direction`, or on the item `target_id` (a container's lid; exactly one of the two, else invalid_target) (barrier@1).
   - `close`: Close the open barrier on the exit in `direction`, or on the item `target_id` (exactly one of the two, else invalid_target) (barrier@1).
@@ -295,6 +296,7 @@ The StateDelta algebra: typed operations, their mutation targets and preconditio
   - `resource.initialize`: Initialize a newly created spawned hound's exact HP row in its birth group.
   - `bleed.transition`: Checked transition of one body bleed generation.
   - `status.transition`: Checked transition of one body status generation (toolbox row 1); the target is the body and status pair.
+  - `levelling.set`: Checked write of one character's levelling row (toolbox row 4): composes only when the stored row equals expected (null when absent) and neither the experience nor any allocated count falls.
   - `water.transition`
   - `expedition.transition`
   - `visit.record`
@@ -303,6 +305,7 @@ The StateDelta algebra: typed operations, their mutation targets and preconditio
 - **EncounterRow**: Durable finite encounter linking its character, body, opponent, room, status, round and scheduled job.
 - **FactValue**: The value of a fact, in fact.assign, fact_compare and fact_changed: a Key, a safe integer or a boolean, the value types FactSpec declares (fact.schema.json; 03 §7). Which one a fact takes is its FactType, which the compiler checks.
 - **JobId**: A same-authority scheduled job (03 §13; 04 §5.4), created from IdSource. Lowercase hyphenated UUID, any version.
+- **LevellingRow**: One character's experience and the attribute points spent, by attribute DefinitionRefString (toolbox row 4); level and unspent points are derived on read from the cartridge's thresholds.
 - **MutationTarget**: Canonical mutation-target identity (04 §5.1): two ops conflict when their targets are equal as canonical JSON and they come from different writer groups without a registered composition rule. Also the target a conflict fault reports (04 §5.5).
   - `character`: One character's immutable choice.
   - `fact`: A scoped fact.
@@ -329,6 +332,7 @@ The StateDelta algebra: typed operations, their mutation targets and preconditio
   - `expedition`
   - `visit`
   - `observation`
+  - `levelling`: One character's levelling row (toolbox row 4).
 - **ObservedNpc**: One actor’s latest committed visible observation of an exact NPC, room and logical time.
 - **QuestInstanceId**: A QuestInstance (03 §12; 06 §1), created at activation from IdSource. Lowercase hyphenated UUID, any version.
 - **RoleBinding**: One role a continuation bound when it opened (04 §5.3 'bound roles'), for example the NPC the choice is made with.
@@ -371,8 +375,9 @@ Items and NPCs, the things containment moves and holds (21 §8 Containment; 03 �
 - **FuelSpec**: Immutable authored source or supply metadata; sources bind one compatible supply and their narration keys.
   - `source`
   - `supply`
+- **ItemAffect**: One attribute modifier an item grants its wearer while worn (docs/system/mechanics.md item slots and affects, toolbox row 3; the shape of an ancestry's attribute modifier): attribute, an attribute of this cartridge; modifier, the signed amount added to the value attributes@1 reads. The number is the cartridge's.
 - **ItemBandage**: A directly held item opted into exact bleed treatment.
-- **ItemDefinition**: A portable thing (21 §8): its key; keywords, the Alias words a player names it by (target resolution); short, the text key of its short description ("a brass lantern"); room_line, the text key of the line a room shows while it lies there ("A brass lantern sits here."), with room_line_variants (DescriptionVariant, first match wins, as for a room's description); description, the text key examine shows; location, where a fresh world puts it; and optionally container: true, making it a receptacle; only receptacles may declare capacity, the most items held directly (without capacity a receptacle has no limit); optionally slot, the SlotKey it is worn in (equipment@1); and optionally barrier, the barrier on it (a container's lid, barrier@1, c1-locks): a barrier of this cartridge that no exit and no other item names (BARRIER_MISMATCH), whose state the door verbs change with the item as target_id; while it is closed or locked, what the item holds is out of reach (containment@1 custody). Optional mass_grams is the shell mass, required for every item when world.carry is authored.
+- **ItemDefinition**: A portable thing (21 §8): its key; keywords, the Alias words a player names it by (target resolution); short, the text key of its short description ("a brass lantern"); room_line, the text key of the line a room shows while it lies there ("A brass lantern sits here."), with room_line_variants (DescriptionVariant, first match wins, as for a room's description); description, the text key examine shows; location, where a fresh world puts it; and optionally container: true, making it a receptacle; only receptacles may declare capacity, the most items held directly (without capacity a receptacle has no limit); optionally slot, the SlotKey it is worn in (equipment@1), with optional affects (ItemAffect), each added to the wearer's attribute while the item is worn (toolbox row 3; needs slot and attributes@1, kernel_api at least 1.41); and optionally barrier, the barrier on it (a container's lid, barrier@1, c1-locks): a barrier of this cartridge that no exit and no other item names (BARRIER_MISMATCH), whose state the door verbs change with the item as target_id; while it is closed or locked, what the item holds is out of reach (containment@1 custody). Optional mass_grams is the shell mass, required for every item when world.carry is authored.
 - **ItemEdible**: D4 held-food metadata; a complete original item grants capped recovery when Eat commits.
 - **ItemLocation**: Where an item starts (00a §12 location): in a room, held by an NPC, or inside another item of the same cartridge, named by the field its kind selects. The containers an artifact's items start in form no cycle (CONTAINMENT_CYCLE) and hold at most their capacity (CAPACITY_EXCEEDED).
   - `room`
@@ -383,7 +388,7 @@ Items and NPCs, the things containment moves and holds (21 §8 Containment; 03 �
 - **NpcDefinition**: A non-player character (00a §4), as a holder of items so far: its key, keywords, short, room_line and description as for an item, the room a fresh world puts it in, and optionally capacity, the most items it holds. Optionally daily_schedule, its daily location schedule (behavior@1); dialogue joins with its capability as an optional field. Optional hp opts into entity-specific HP under kernel API 1.4 (docs/system/cartridge.md NPC HP overrides).
 - **Shop**: A finite NPC shop: conserved resource, exact authored item offers and committed purchase/sale narration keys (B3).
 - **ShopOffer**: One exact authored shop item definition with its positive buy and sell prices; custody determines availability (B3).
-- **SlotKey**: An equipment slot (equipment@1; 00 §4.4 and 21 §8 as amended by c1-equipment): the twelve keys, finger slots LATER. A fresh world makes one holder entity inside the body per slot some item declares (numeric profile, Slot holder ids).
+- **SlotKey**: An equipment slot (equipment@1; 00 §4.4 and 21 §8 as amended by c1-equipment): the thirteen keys. A fresh world makes one holder entity inside the body per slot some item declares, capacity 2 for finger (two fingers, toolbox row 3) and 1 for every other slot (numeric profile, Slot holder ids).
 - **WeaponProfile**: An equipped weapon's required skill and authored attack profile.
 
 ## Error contracts (`protocol/error.schema.json`)
@@ -453,7 +458,7 @@ The portable GameView envelope and its freshness (04 §14-§16; 00 §4.10; pre-r
 - **AdvertisedAction**: One action of a resolved ActionSet (04 §19), for the entity or place it is listed under, with what the client needs to build its ActionInvocation (04 §2, §17) without a handwritten per-action catalog: the target spec (implicit entity targets name the entity an action is listed under; concrete target_ids name the exact targets, including Read place actions aimed at inspectable details) and the input parameters it requires, both from its ActionDefinition (action.schema.json). Lists are in presentation order, highest priority first (00 §4.10). Optional command is the resolved semantic command key for participant wording/ownership; action_key remains the invocation identity. Light item controls supply it.
   - `true`: Offered and currently legal.
   - `false`: Shown but not legal now, with the typed reason (00 §4.10: greyed with the reason). Never a security boundary: the authority revalidates (ACT-09).
-- **AttributeView**: An authored attribute reference and the actor's current value.
+- **AttributeView**: An authored attribute reference and the actor's current value, which includes allocated levelling points (toolbox row 4) and worn, the nonzero sum its worn items grant (item affects, toolbox row 3; absent when zero).
 - **BleedingView**: Current body bleed condition and exact generation for a held bandage invocation.
 - **CalendarStatus**: Confirmed cartridge calendar projection. Phase fields appear only when authored.
 - **ChapterView**: The highest reached chapter declaration, else the opening chapter (mechanics.md Chapters); derived from the player quest state, never persisted.
@@ -491,7 +496,7 @@ The portable GameView envelope and its freshness (04 §14-§16; 00 §4.10; pre-r
 - **SkillView**: A skill's permanent acquisition and current qualification as projected for the actor.
 - **TransportOffer**: Exact endpoint route and base quote, effective charge and waiver, and admitted keyed action.
 - **UnavailableReason**: Why an action, choice or exit is shown but not legal now (00 §4.10: greyed with the reason, badge when locked; P5 'clear unavailable-action feedback'): the typed code, and optionally the player-facing sentence that tells apart two reasons with one code (a locked door, a causeway under the tide). A GameView presentation field, so GameError and the error registry stay unchanged.
-- **WornSlotView**: One equipment slot holder of the actor's body (equipment@1; 04 §14 as amended by c1-equipment): its slot and, when an item is worn there, that item with the actions it accepts (only those resolving to remove). Listed in slot-key order.
+- **WornSlotView**: One equipment slot holder of the actor's body (equipment@1; 04 §14 as amended by c1-equipment): its slot and, when an item is worn there, that item with the actions it accepts (only those resolving to remove). Listed in slot-key order, one entry per place: the finger holder has two (toolbox row 3).
 
 ## Identity contracts (`protocol/identity.schema.json`)
 
