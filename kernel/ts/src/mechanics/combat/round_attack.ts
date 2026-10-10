@@ -34,7 +34,8 @@ export function prefix(world: World, ops: readonly DeltaOp[], due = world.state.
 }
 
 // Row 6b: an ally strikes the player's target, last; a round whose rejected draws left fewer
-// than two of its eight (hit, damage) skips the ally's turn rather than exhausting the budget.
+// than two of its eight (hit, damage) skips the ally's turn (two left can still exhaust the
+// budget on a rejected hit draw; mechanics.md row 6b states the limit).
 const allyFits = (r: Round) => r.draws <= 6;
 
 function draw(r: Round, bound: number) {

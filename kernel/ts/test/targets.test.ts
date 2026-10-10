@@ -18,6 +18,7 @@ import { encode } from '../src/foundation/canonical.ts';
 import { apply } from '../src/runtime/apply.ts';
 import { value } from '../src/mechanics/fact.ts';
 import { applyStatus } from '../src/mechanics/status/shared.ts';
+import { positioned } from './combat_fixture.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-targets-sampler-'));
 let artifact: Uint8Array;
@@ -294,4 +295,49 @@ test('a round with fewer than two of its eight draws left skips the guard; with 
       r.decision.kind === 'accepted' ? r.decision.narration!.map((x) => x.key as string) : [];
     assert.equal(keys.includes('combat.ally_hit'), strikes, keys.join());
   }
+});
+
+// Toolbox row 6b. Breaks: the player's defences reach the guard's blow on the raider
+// (round_attack.ts attack: only a foe's blow on the player is defended or sleep-multiplied).
+test("the player's shield and sleep touch only the raider's blow, never the guard's", () => {
+  const K = 'targets_sampler@0.0.1:';
+  const same = (w: World) => w;
+  const yard = (edit: (c: any) => void, fresh = same, fighting = same) => {
+    const c = structuredClone(content) as any;
+    edit(c);
+    n = 0;
+    let w = fresh(newWorld(c, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, [1, 2, 3, 4]));
+    const raider = w.entityIds[`${K}npc/raider`]!;
+    w = ok(play(w, { type: 'move', direction: 'south' }));
+    w = ok(play(w, { type: 'attack', target_id: raider }));
+    const r = advance(fighting(w));
+    const keys = r.decision.kind === 'accepted' ? r.decision.narration!.map((x) => x.key) : [];
+    return [hp(ok(r), raider), hp(ok(r), w.body), keys.includes('combat.ally_hit' as never)];
+  };
+  // A 100 block shield stops the raider's blow; the player's 2 and the guard's 1 kill it.
+  const shielded = yard(
+    (c) => {
+      c.items[`${K}item/shield`] = {
+        ...c.items[`${K}item/ear`],
+        key: 'shield',
+        location: { in: 'npc', npc: { ...C, kind: 'npc', key: 'guard' } },
+        slot: 'off_hand',
+        block_chance: 100,
+      };
+      c.world.combat.narration.block = 'combat.npc_miss';
+    },
+    (w) => {
+      const shield = w.entityIds[`${K}item/shield`]!;
+      const containers = { ...w.state.containers, [shield]: w.slots.off_hand! };
+      return { ...w, state: { ...w.state, containers } };
+    },
+  );
+  assert.deepEqual(shielded, [0, 10, true]);
+  // The player sleeps through the raider's miss: the guard's 1 is not doubled (raider 3 HP).
+  const asleep = yard(
+    (c) => (c.npcs[`${K}npc/raider`].attack.chance = 0),
+    same,
+    (w) => positioned(w, 'sleeping'),
+  );
+  assert.deepEqual(asleep, [2, 10, true]);
 });
