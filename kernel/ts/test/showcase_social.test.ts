@@ -82,7 +82,8 @@ test('social 1: the Low Wardle sign reads; bread from a wary Nell costs 4', () =
 });
 
 // Breaks: help or wrong adjusts the wrong fact or amount, the standing does not clamp at -2, the
-// discount or the hostile refusal ignores the village standing, or the Warden never engages.
+// discount or the hostile refusal ignores the village standing, or the Warden never engages,
+// or the player's waited-out hits kill him and lose the toll gate.
 test('social 2-3: help makes Nell friendly (bread 2); wrong twice makes her hostile and the Warden engage', () => {
   let w = green();
   w = play(w, {
@@ -106,6 +107,14 @@ test('social 2-3: help makes Nell friendly (bread 2); wrong twice makes her host
   const east = go(w, 'east');
   assert.equal(engaged(east.world, east.world.body)?.row.npc_id, npc(w, 'warden'));
   assert.ok(east.lines.includes('npc.warden.engage'), JSON.stringify(east.lines));
+  // Ten rounds of waiting: the Warden lives, so after a flee and a mended standing the talk path
+  // to the toll gate stays open.
+  const held = wait(east.world, east.world.state.clock + 1500).world;
+  assert.equal(engaged(held, held.body)?.row.npc_id, npc(w, 'warden'));
+  const mended = say(play(held, { type: 'flee' }).world, 'reeve', 'help').world;
+  const passed = say(go(mended, 'east').world, 'warden', 'reason');
+  assert.equal(outcome(passed), 'reason');
+  play(passed.world, { type: 'open', direction: 'east' });
 });
 
 // Breaks: the gift reaction writes the giver's row or a shared one, or the Warden's hostility
@@ -235,7 +244,8 @@ test('social 9: the church makes five rooms (Wardle walker); the roll and the le
       ['think_lectern', ['topic.parish', 'topic.fire']],
     ],
   );
-  // The hall twin's card shows here too, but its lectern is in the moot hall (toolbox row 46 view).
+  // The hall twin's card shows here too, but its lectern is in the moot hall (toolbox row 46 view;
+  // Beads loka-kgd.64).
   assert.equal(refused(w, { type: 'perform', action: 'think_hall_lectern' }), 'not_present');
   w = perform(w, 'think_lectern').world;
   assert.deepEqual(topics(w), [
