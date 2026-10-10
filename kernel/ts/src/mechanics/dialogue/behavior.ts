@@ -1,6 +1,20 @@
-import type { Command, DialogueDefinition, DeltaOp, EntityId } from '../../contracts.gen.ts';
+import type {
+  Command,
+  ContinuationId,
+  DialogueChoice,
+  DialogueDefinition,
+  DeltaOp,
+  EntityId,
+} from '../../contracts.gen.ts';
 import { KernelError } from '../../foundation/error.ts';
-import { accepted, type ChoiceRow, type World } from '../../runtime/decision.ts';
+import {
+  accepted,
+  event,
+  type Accepted,
+  type ChoiceRow,
+  type Mint,
+  type World,
+} from '../../runtime/decision.ts';
 
 export function wrongAnswer(
   world: World,
@@ -46,4 +60,43 @@ export function validAttempts(row: ChoiceRow, d: DialogueDefinition) {
     a.count <= a.limit &&
     (row.status !== 'pending' || a.count < a.limit)
   );
+}
+
+/**
+ * The dialogue hub (mechanics.md dialogue@1; owner OK in Beads loka-x6t.5): `decided` plus a fresh
+ * pending row of the same sitting (`choice.open` of the row's own bound fields, never rebound) and
+ * its `choice_opened` after `choice_resolved`, unless the answer ends the conversation: its
+ * dialogue resolves a quest or declares a riddle, it sets a patrol leg off, or it was the only choice.
+ */
+export function hub<T extends { kind: string }>(
+  world: World,
+  command: Parameters<typeof event>[1],
+  mint: Mint,
+  row: ChoiceRow,
+  d: DialogueDefinition,
+  option: DialogueChoice,
+  decided: T,
+): T {
+  if (decided.kind !== 'accepted' || d.quest || d.riddle || option.patrol) return decided;
+  if (row.choice_ids.length < 2) return decided;
+  const a = decided as unknown as Accepted;
+  const continuation_id = mint() as ContinuationId;
+  const { actor_id, source, beat, roles, choice_ids } = row;
+  const op = {
+    op: 'choice.open',
+    writer_group: 0,
+    continuation_id,
+    actor_id,
+    source,
+    beat,
+    roles,
+    choice_ids,
+  } as const;
+  const at = a.events.find((e) => e.payload.type === 'choice_resolved')!.position + 1;
+  const opened = event(world, command, mint, at, { type: 'choice_opened', continuation_id });
+  return {
+    ...a,
+    delta: { ops: [...a.delta.ops, op] },
+    events: [...a.events, opened],
+  } as unknown as T;
 }

@@ -1,4 +1,4 @@
-// size: allow 563, original ferry custody, death recovery and SQLite faults share one transport fixture
+// size: allow 564, original ferry custody, death recovery and SQLite faults share one transport fixture
 // D1 uses the real rollback-journal SQLite host, not browser refresh as a fault oracle.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';

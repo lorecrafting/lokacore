@@ -1,4 +1,4 @@
-// size: allow 603, dialogue@1's rule and loader checks, story points included, share the ferry harness
+// size: allow 700, dialogue@1's rule and loader checks, story points included, share the ferry harness
 // dialogue@1 (Early R7/R8 D1, D2; 06 §17, §33, §37, §43; 04 §5.3; 23 §3): talk, choose and
 // close_choice, the pending choice in the GameView, the opened_revision stamp, the story point a
 // choice reaches, and the loader's dialogue and story point checks.
