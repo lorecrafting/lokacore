@@ -107,7 +107,8 @@ test('the track drains hunger and thirst an hour at a time; bread and a drink en
 });
 
 // Breaks: the dry drain ignores the weather (a clear day parches) or the room tag, a Drink does not
-// end it (in the inn it would tick on to 4 before expiring at 12600), or it reaches hp or kills.
+// end it (in the inn it would tick on to 4 before expiring at 12600), it reaches hp or kills, or
+// the need pools read the world's hp bands.
 test('a dry day on the flats drains thirst until a drink, and never past the pool floor', () => {
   let w = play(supplied(), { type: 'move', direction: 'north' });
   assert.deepEqual(labels(w), ['condition.parched']);
@@ -126,6 +127,9 @@ test('a dry day on the flats drains thirst until a drink, and never past the poo
   const day = wait(play(fresh(), { type: 'move', direction: 'north' }), 24 * HOUR - 1);
   assert.deepEqual([pool(day, 'thirst'), pool(day, 'hp')], [0, 10]);
   assert.deepEqual(labels(day), ['condition.parched']);
+  // The empty pool reads as its own band, not the world's hp band "dying".
+  const thirst = gameView(day).resources?.find((r) => r.resource.key === 'thirst');
+  assert.deepEqual([thirst?.band, thirst?.tone], ['parched', 'danger']);
 });
 
 // Breaks: either loader accepts a liquid's cures below kernel_api 1.46 or naming no status.
@@ -148,6 +152,12 @@ test('the loader refuses a liquid cure below 1.46 or naming no status', () => {
       `.cartridge.liquids[${JSON.stringify(water)}].cures[1]`,
     ],
   ];
+  // Control: without the cures (and the clock_hour reaction) 1.45 loads.
+  const uncured = (c: Obj) => {
+    rows[0]![0](c);
+    delete c.liquids[water].cures;
+  };
+  rows.push([uncured, 'loaded', '']);
   for (const [change, code, path] of rows) {
     const c = structuredClone(content) as unknown as Obj;
     change(c);
@@ -157,6 +167,6 @@ test('the loader refuses a liquid cure below 1.46 or naming no status', () => {
       new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
       INSTALLED,
     );
-    assert.deepEqual(r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path], [code, path]);
+    assert.deepEqual(r.ok ? ['loaded', ''] : [r.diagnostic.code, r.diagnostic.path], [code, path]);
   }
 });

@@ -39,5 +39,11 @@
   "narration.thirsty.expired": "Your thirst passes.",
   "narration.parched.applied": "The dry air parches your throat.",
   "narration.parched.tick": "The drought dries you out.",
-  "narration.parched.expired": "Your throat eases."
+  "narration.parched.expired": "Your throat eases.",
+  "band.fed": "fed",
+  "band.peckish": "peckish",
+  "band.starving": "starving",
+  "band.quenched": "quenched",
+  "band.dry": "dry-mouthed",
+  "band.parched": "parched"
 }

@@ -42,13 +42,47 @@
       "minimum": 0,
       "maximum": 10,
       "start": 10,
-      "gain": 0
+      "gain": 0,
+      "bands": [
+        {
+          "at_percent": 100,
+          "key": "fed",
+          "tone": "normal"
+        },
+        {
+          "at_percent": 50,
+          "key": "peckish",
+          "tone": "warning"
+        },
+        {
+          "at_percent": 0,
+          "key": "starving",
+          "tone": "danger"
+        }
+      ]
     },
     "thirst": {
       "minimum": 0,
       "maximum": 10,
       "start": 10,
-      "gain": 0
+      "gain": 0,
+      "bands": [
+        {
+          "at_percent": 100,
+          "key": "quenched",
+          "tone": "normal"
+        },
+        {
+          "at_percent": 50,
+          "key": "dry",
+          "tone": "warning"
+        },
+        {
+          "at_percent": 0,
+          "key": "parched",
+          "tone": "danger"
+        }
+      ]
     }
   }
 }

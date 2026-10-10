@@ -22,7 +22,7 @@ import {
 import { living } from '../death/shared.ts';
 import { opened } from '../lookups.ts';
 import { carryingAdded } from '../containment/shared.ts';
-import { activeStatuses, endStatus } from '../status/shared.ts';
+import { cureOps } from '../status/shared.ts';
 
 type Payload = Extract<CommandPayload, { type: 'fill' | 'pour' | 'drink' }>;
 export function initialLiquids(cartridge: Cartridge, entities: Readonly<Record<string, Entity>>) {
@@ -83,13 +83,8 @@ export function transition(world: World, p: Payload, steps: Steps = { n: 0 }) {
   if (p.type === 'fill') return fillPlan(world, p, body, steps);
   const plan = consumePlan(world, p);
   if (typeof plan === 'string' || p.type !== 'drink') return plan;
-  // Row G13: a Drink ends each active status the liquid's `cures` lists (food/shared.ts likewise).
-  const cures = new Set(
-    (world.cartridge.liquids?.[refString(plan.kind)]?.cures ?? []).map(refString),
-  );
-  const cured = activeStatuses(world, body)
-    .filter(({ status }) => cures.has(refString(status)))
-    .map(({ status, row }) => endStatus(body, status, row, 0));
+  // Row G13: a Drink ends each active status the liquid's `cures` lists.
+  const cured = cureOps(world, body, world.cartridge.liquids?.[refString(plan.kind)]?.cures);
   return { ...plan, ops: [...plan.ops, ...cured] };
 }
 

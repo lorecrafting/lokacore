@@ -115,3 +115,11 @@ export function applyStatus(
 /** Inactivate every active status on `body` (death, or a cure listing them). */
 export const clearStatuses = (world: World, body: EntityId, writer_group: number): DeltaOp[] =>
   activeStatuses(world, body).map(({ status, row }) => endStatus(body, status, row, writer_group));
+
+/** End each active status on `body` that `cures` lists, once however often listed (Eat, Drink). */
+export function cureOps(world: World, body: EntityId, cures: readonly DefinitionRef[] = []) {
+  const listed = new Set(cures.map(refString));
+  return activeStatuses(world, body)
+    .filter(({ status }) => listed.has(refString(status)))
+    .map(({ status, row }) => endStatus(body, status, row, 0));
+}
