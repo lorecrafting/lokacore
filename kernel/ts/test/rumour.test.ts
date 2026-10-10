@@ -111,8 +111,9 @@ const plain = (c: any) => {
   c.dialogues[`${C}:dialogue/innkeeper_mill`].policy.root = { op: 'all', items: [] };
   c.manifest.requires.kernel_api.at_least = '1.46';
 };
-// Breaks: the loader skips the entrant filter's reference (a misspelt NPC loads and the rule
-// silently never fires) or loads it below kernel_api 1.47 (twin of content_rumour_test.exs).
+// Breaks: the loader skips the entrant filter's reference (a misspelt NPC or a spawn template
+// loads and the rule silently never fires) or loads it below kernel_api 1.47 (twin of
+// content_rumour_test.exs).
 test("the loader checks the entrant filter's NPC and its 1.47 floor", () => {
   const verdict = (change: (c: any) => void) => {
     const r = load(change);
@@ -124,6 +125,14 @@ test("the loader checks the entrant filter's NPC and its 1.47 floor", () => {
       'UNRESOLVED_REFERENCE',
       `.cartridge.reactions[${JSON.stringify(TELLS)}].on.npc`,
       { target: `${C}:npc/ghost` },
+    ],
+  );
+  assert.deepEqual(
+    verdict((c) => (c.npcs[`${C}:npc/ada`].spawn_template = true)),
+    [
+      'SCHEMA_VIOLATION',
+      `.cartridge.reactions[${JSON.stringify(TELLS)}].on.npc`,
+      { error: 'invalid_value' },
     ],
   );
   assert.deepEqual(verdict(plain), [

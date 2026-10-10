@@ -19,13 +19,17 @@ defmodule Loka.ContentRumourTest do
     ]
 
   # Breaks (toolbox row W3): the compiler skips the entrant filter's reference (a misspelt NPC
-  # compiles and the rule never fires) or compiles it below kernel_api 1.47 (twin of
+  # or a spawn template compiles and the rule never fires) or compiles it below kernel_api 1.47 (twin of
   # rumour.test.ts).
   test "the entrant filter's NPC and its 1.47 floor are checked" do
     dir = Loka.ContentSource.copy("cartridges/rumour_sampler")
     ghost = {@tells, &put_in(&1, ["on", "npc"], "ghost")}
     assert {:error, diags} = Loka.ContentSource.compile(dir, [ghost])
     assert {"UNRESOLVED_REFERENCE", "reactions/tells_innkeeper.on.npc"} in codes(diags)
+
+    template = {"npcs/ada.json", &Map.put(&1, "spawn_template", true)}
+    assert {:error, diags} = Loka.ContentSource.compile(dir, [template])
+    assert {"SCHEMA_VIOLATION", "reactions/tells_innkeeper.on.npc"} in codes(diags)
 
     assert {:error, diags} = Loka.ContentSource.compile(dir, plain())
     assert {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"} in codes(diags)

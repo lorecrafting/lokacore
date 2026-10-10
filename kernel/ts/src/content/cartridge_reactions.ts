@@ -76,6 +76,9 @@ export function reactions(c: Obj, { named, typedValue }: Checks): Diagnostic[] {
       );
     for (const [field, kind] of Object.entries(NAMED))
       if (r.on[field]) named(r.on[field], kind, `${at}.on.${field}`);
+    // A spawn template has no instance to enter (row W3).
+    if (r.on.npc && c.npcs?.[refString(r.on.npc)]?.spawn_template)
+      out.push(diag('SCHEMA_VIOLATION', `${at}.on.npc`, { error: 'invalid_value' }));
     r.apply.forEach((s: Obj, i: number) => {
       if (s.op === 'quest.activate') {
         named(s.quest, 'quest', `${at}.apply[${i}].quest`);

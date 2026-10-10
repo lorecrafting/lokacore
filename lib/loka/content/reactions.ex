@@ -50,6 +50,7 @@ defmodule Loka.Content.Reactions do
       owned(at(rel, []), "reaction", ctx.kinds) ++
       owned(at(rel, ["on", "event"]), event, ctx.events) ++
       named(rel, on, ctx) ++
+      entrant(rel, on, ctx) ++
       Enum.flat_map(Enum.with_index(r["apply"]), &consequence(rel, &1, on, ctx))
   end
 
@@ -58,6 +59,19 @@ defmodule Loka.Content.Reactions do
       Enum.flat_map(Map.take(@filters, Map.keys(on)), fn {f, kind} ->
         reference(rel, ["on"], {f, kind}, on, ctx.m, ctx.defs)
       end)
+
+  # A spawn template has no instance to enter (row W3).
+  defp entrant(rel, %{"npc" => n}, ctx) do
+    case resolve(n, "npc", ctx.m, ctx.defs) do
+      {_, _, %{"spawn_template" => true}} ->
+        [diag("SCHEMA_VIOLATION", at(rel, ["on", "npc"]), %{"error" => "invalid_value"})]
+
+      _ ->
+        []
+    end
+  end
+
+  defp entrant(_, _, _), do: []
 
   # The kernel_api minor (major 1) each consequence op needs; twin of FLOORS in
   # kernel/ts/src/content/cartridge_reactions.ts.
