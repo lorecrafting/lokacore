@@ -53,7 +53,7 @@ defmodule Loka.Content.Schedules do
 
   defp ordered?(list) do
     {cases, [last]} = Enum.split(list, -1)
-    Enum.all?(cases, &is_map_key(&1, "room")) and not is_map_key(last, "room")
+    Enum.all?(cases, &match?(%{"room" => _}, &1)) and not match?(%{"room" => _}, last)
   end
 
   # A case's room, at daily_schedule/<h>/<i>/room, or the fallback ref, at daily_schedule/<h>/<i>.

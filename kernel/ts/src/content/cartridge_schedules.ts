@@ -27,11 +27,12 @@ export function schedules(c: Obj): Diagnostic[] {
             error: 'invalid_value',
           }),
         );
-  for (const [k, at] of cases(c)) {
+  const all = cases(c);
+  for (const [k, at] of all) {
     named(k.room, 'room', `${at}.room`);
     text(k, ['goal'], at);
   }
-  if (cases(c).length && apiCmp(c.manifest.requires.kernel_api.at_least, '1.47') < 0)
+  if (all.length && apiCmp(c.manifest.requires.kernel_api.at_least, '1.47') < 0)
     out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
   return out;
 }
