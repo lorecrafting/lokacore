@@ -1,3 +1,4 @@
+// size: allow 305, the closed State row sections include toolbox status and levelling rows
 // What rule modules (mechanics/<capability>/rule.ts) see: the World they read, the typed Rule and
 // Decision contract that limits each capability to its own commands and events
 // (capability_registry.json, through contracts.gen.ts Owned), and pure helpers. The router,

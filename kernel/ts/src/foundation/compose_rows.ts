@@ -11,7 +11,7 @@ export const get = (o: Json | undefined, k: string): Json | undefined =>
 export const section = (s: State, name: string): Obj => (get(s, name) ?? {}) as Obj;
 export const containment = (e: string): MutationTarget =>
   ({ kind: 'containment', entity_id: e }) as MutationTarget;
-// size: allow 46, closed row-target dispatch includes actor-owned knowledge and status rows
+// size: allow 47, closed row-target dispatch includes actor-owned knowledge, status and levelling rows
 export function read(t: MutationTarget, ctx: Ctx): Json | undefined {
   const w = ctx.overlay.get(key(t));
   if (w) return w.value;
