@@ -64,7 +64,8 @@ type NpcProps = {
   press: (b: Button) => void;
   log: DetailLine[];
   leave: () => void;
-  talking?: boolean; // the Book's latch: answered here and not yet left (Body holds it)
+  since?: number; // outside a conversation, history before this line is hidden (owner 2026-10-09)
+  talking?: boolean; // the Book's latch: answered here and not yet left (Book holds it)
   talk?: (on: boolean) => void;
 };
 
@@ -79,6 +80,7 @@ export function NpcPage(p: NpcProps) {
   // Answering keeps the page in conversation even after the kernel closes it; only Leave the
   // conversation returns to the NPC's own actions (Talk, shop, services).
   const talk = !!choice || !!p.talking;
+  const log = talk ? p.log : p.log.slice(p.since ?? 0);
   const answer = (b: Button) => {
     if (b.action_key === 'choose') p.talk?.(true);
     p.press(b);
@@ -97,18 +99,16 @@ export function NpcPage(p: NpcProps) {
   return (
     <Page
       title={p.npc ? cap(p.text(p.npc.name)) : 'Conversation'}
-      scrollToEnd={p.log.length > 0}
+      scrollToEnd={log.length > 0}
       foot={foot}
     >
       {p.npc?.description && <Text style={prose(c)}>{plain(p.text(p.npc.description))}</Text>}
       {p.npc && 'carrying' in p.npc && p.npc.carrying && (
         <Text style={note(c)}>{p.text(p.npc.carrying)}</Text>
       )}
-      <LogLines lines={p.log} />
+      <LogLines lines={log} />
       {npcSkills(c, p)}
-      {!talk && !actions.length && !p.log.length && (
-        <Text style={note(c)}>Nothing to do here.</Text>
-      )}
+      {!talk && !actions.length && !log.length && <Text style={note(c)}>Nothing to do here.</Text>}
       {!talk && <ShopOptions {...p} />}
       {choice && <Choice {...p} press={answer} choice={choice} />}
       {!talk && (
@@ -295,6 +295,9 @@ function ServiceOptions(p: NpcProps & { actions: Button[] }) {
   });
 }
 
+// Per page visit: how many history lines came before it or before its last Leave the conversation.
+const past = new WeakMap<object, number>();
+
 export function NpcDetail(p: {
   screen: Screen;
   g: ReturnType<typeof group>;
@@ -303,21 +306,28 @@ export function NpcDetail(p: {
   world: () => void;
   talking?: boolean;
   talk?: (on: boolean) => void;
+  visit?: object; // this opening of the page (Body's page entry)
 }) {
   const { view, text } = p.screen;
   const npc = view.entities.find((e) => e.id === (p.speaker ?? view.choice?.speaker_id));
   const id = npc?.id ?? p.speaker ?? view.choice?.speaker_id ?? 'conversation';
+  const log = p.screen.detail(id);
+  if (p.visit && !past.has(p.visit)) past.set(p.visit, log.length);
   return (
     <NpcPage
       view={view}
       npc={npc}
       text={text}
       g={p.g}
-      log={p.screen.detail(id)}
+      log={log}
+      since={p.visit && past.get(p.visit)}
       press={(b) => p.press(b, id)}
       leave={p.world}
       talking={p.talking}
-      talk={p.talk}
+      talk={(on) => {
+        if (!on && p.visit) past.set(p.visit, log.length);
+        p.talk?.(on);
+      }}
     />
   );
 }

@@ -287,6 +287,7 @@ test('NPC history has distinct journal events and one confirmed Leave in the foo
   h.tap('Leave the conversation');
   assert.equal(h.game.view().view.choice, undefined);
   assert.ok(h.labels().includes('Talk to Old Bram')); // closing returns to Bram's page, not World
+  assert.equal(h.text().includes(prompt), false); // a clean page: the left conversation is hidden
   h.tap('Leave');
   h.tap('Old Bram');
   h.tap('Talk to Old Bram');
@@ -338,7 +339,9 @@ test('NPC history has distinct journal events and one confirmed Leave in the foo
   h.map();
   h.tap('Go south');
   h.tap('Old Bram');
+  assert.equal(h.text().includes('Journal updated'), false); // a fresh visit hides past talk
   h.tap('Talk to Old Bram');
+  assert.ok(h.text().includes('Journal updated')); // and a new conversation shows it again
   h.tap('Keep the lantern');
   assert.equal(h.game.view().view.scene!.index, 1);
   assert.deepEqual(h.labels(), ['Continue']);

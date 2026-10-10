@@ -87,6 +87,7 @@ function PageBody(p: BodyProps & Talk) {
         }
         talking={p.talkingOn === page}
         talk={(on) => p.talkOn(on ? page : undefined)}
+        visit={page}
       />
     );
   if (page.kind === 'dream') return <DreamPage {...p} close={p.back} id={page.id} />;
