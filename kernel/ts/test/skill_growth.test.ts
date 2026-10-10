@@ -11,6 +11,7 @@ import { test } from 'node:test';
 import { INSTALLED, loadCartridge, newWorld, step } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { encode } from '../src/foundation/canonical.ts';
+import { key } from '../src/foundation/compose.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-skills-sampler-'));
 let artifact: Uint8Array;
@@ -73,6 +74,38 @@ test('five pick attempts raise pick until the gate opens; level 5 beats 3, not 7
   assert.deepEqual(vault.delta.ops, []); // the count stays at its last threshold
   assert.equal(uses(w), 5);
   assert.equal(perform('force_vault').outcome, 'success');
+});
+
+// Breaks: a taught skill's level omits its base 1 (the gate opens a try late).
+test('a taught pick opens the rating 5 gate on the fifth attempt', () => {
+  let w = newWorld(content, '3c5e7a9b-1d2f-4a6b-8c0d-2e4f6a8b0c1d' as never, [1, 2, 3, 4]);
+  const taught = key({
+    kind: 'fact',
+    fact: {
+      cartridge_id: 'skills_sampler',
+      cartridge_version: '0.0.1',
+      kind: 'fact',
+      key: 'skill_pick',
+    },
+    scope: { kind: 'player', character_id: w.character },
+  });
+  w = { ...w, state: { ...w.state, facts: { ...w.state.facts, [taught]: true } } } as World;
+  const outcomes: unknown[] = [];
+  for (let i = 1; i <= 5; i++) {
+    const r = step(
+      w,
+      {
+        id: `eeeeeeee-9999-4999-8999-${String(i).padStart(12, '0')}`,
+        world_context_id: w.context,
+        payload: { actor_id: w.character, type: 'perform', action: 'pick_gate' },
+      } as never,
+      i,
+    );
+    assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
+    w = r.world;
+    outcomes.push((r.decision as { outcome?: unknown }).outcome);
+  }
+  assert.deepEqual(outcomes, ['failure', 'failure', 'failure', 'failure', 'success']);
 });
 
 // Breaks: the loader drops a rows 5/G5 check, so growth that does not increase, an opposed check
