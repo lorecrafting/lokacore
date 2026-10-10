@@ -18,11 +18,12 @@ import {
 } from './model.ts';
 import { usePaletteCurve } from './fade.ts';
 import { PaletteContext, paletteOf, useBookPalette, usePalette, type Palette } from './palette.ts';
-import { size, space, type } from './tokens.ts';
+import { color, size, space, type } from './tokens.ts';
 import { Control } from './pages.tsx';
 import { presenter, type Button, type DetailLine } from './presenter.ts';
 import { restoredNoticePages } from './notices.tsx';
 import { Body } from './Body.tsx';
+import { NightSky } from './NightSky.tsx';
 import { PageTurn } from './PageTurn.tsx';
 import { resultPages, useUpdates, type BookState, type Presenter } from './updates.ts';
 
@@ -155,6 +156,7 @@ export function BookView(p: ViewProps) {
           )}
         </PageTurn>
         <Bottom {...ctx} page={page} />
+        {c.bg === color.dark.bg && <NightSky />}
       </SafeAreaView>
     </PaletteContext>
   );

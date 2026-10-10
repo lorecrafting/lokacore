@@ -505,7 +505,7 @@ test('a dusk GameView draws the Book in the dusk palette', () => {
   const h = book(bundle('missing_child_v030_hash'));
   assert.equal(h.game.view().view.calendar_status?.solar, 'dusk');
   const drawn = h.draw();
-  assert.equal(drawn.find((n) => n.type === 'SafeAreaView').props.style.backgroundColor, '#2b1e16');
+  assert.equal(drawn.find((n) => n.type === 'SafeAreaView').props.style.backgroundColor, '#2c2846');
   const title = drawn.find((n) => n.type === 'Text' && n.props.style?.fontSize === 22); // the room title
-  assert.equal(title.props.style.color, '#f1ddc2');
+  assert.equal(title.props.style.color, '#e8e2ec');
 });

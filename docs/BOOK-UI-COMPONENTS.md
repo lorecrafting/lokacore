@@ -64,8 +64,11 @@ type styles, spacing, sizes, radius, opacity, motion and sound. Its values are t
 off, consolidated; the [Tokens story](../mobile/app/stories/Tokens.stories.tsx) renders them live.
 
 - **Colour.** Four complete palettes with the same roles: `light` (the paper by day), `dawn`
-  (a cool grey-blue paper), `dusk` (a warm umber page with lamp ink) and `dark` (the mock's unlit
-  paper, without its glow). Roles: `bg`, `fg` (ink), `dim`, `line`, `card`, `action`, `danger`,
+  (the paper under the mock's dawn tint, rose over slate, with the day's ink), `dusk` (the mock's
+  dusk tint's violet-navy bottom stop with lamp ink: dusk deepens into the night without a flip) and
+  `dark` (the mock's moonlit `.ph.moon` page, the lamp's amber as `action`, under the
+  [Night sky](#component-catalogue)). The mock's twilight is a sky gradient over the page; a flat
+  palette keeps its hue, never a brown or grey stand-in. Roles: `bg`, `fg` (ink), `dim`, `line`, `card`, `action`, `danger`,
   `warning`. Use roles, never a hex value. `action` marks what can be pressed; `danger` and
   `warning` are the projected bands, barred ways and refusal tags, never decoration. The text
   roles (`fg`, `dim`, `action`, `danger`, `warning`) are each at least 4.5:1 on `bg` and on
@@ -99,8 +102,9 @@ off, consolidated; the [Tokens story](../mobile/app/stories/Tokens.stories.tsx) 
   motion. No fade of either kind can pass a flip: ink and paper must cross in luminance.
   Shape: `useShownPalette` interpolates every role linearly per frame (no layers, no opacity)
   and calls `setShown(target)` at once when there is no curve or when
-  `lum(fg) < lum(bg)` differs between the shown palette and the target. Effects from the mock's Effects panel and its "Archive, not in
-  v1" group have no tokens and wait for their own owner decisions.
+  `lum(fg) < lum(bg)` differs between the shown palette and the target. `motion.meteor` is the
+  Night sky's one shooting star; `nightSky.star` its colour. The mock's other Effects-panel
+  effects and its "Archive, not in v1" group have no tokens and wait for their own owner decisions.
 
 ## Component catalogue
 
@@ -126,6 +130,7 @@ these; a new component needs a real consumer and its entry here in the same slic
 | Status line | One centred line in `type.small` `dim`, never wrapping, items joined by " · " (groups `space.sm` apart, each " · " belonging to the item after it): the sky glyph, position, bleeding and the condition items, then the pools. The sky glyph is the sun by solar phase while it is up (`dawn` ☼, `day` ☀, `dusk` ☉) and the moon by lunar phase at `night` (`new` ●, `waxing_crescent` ☽, `first_quarter` and `waxing_gibbous` ◐, `full` ○, `waning_gibbous` and `last_quarter` ◑, `waning_crescent` ☾; no lunar phase ☾): ink is the moon's dark side, waxing lit on the right. Any other phase, or no calendar, shows the earthly branch. The glyph's accessible label is the time in words (`day 3, 18:05, dusk, waxing crescent moon`); day and hour are not shown. Only hp, ma and mv show, separated by an en space (U+2002, the mock's `&ensp;`) as text, never a margin, so the shown words lead the button's name unchanged; pennies and any other count stay off the line ([status rule](system/book-ui.md#world-and-status-entry)); resource keys in `type.label`; band colours per the same rule. Too wide, the position and condition items end in an ellipsis, the longer giving up more (their labels stay whole); the glyph and the pools never shrink. Position and pools are controls; their names follow the [label-in-name rule](system/book-ui.md#minimap-map-and-presentation-controls) (`standing, change position`; `hp 30/30 ma 10/10 mv 60/60; hp normal; opens Contents`). | enabled; locked (scene, combat, chapter title page): `dim`, not pressable, the Contents button included; pending: "save not confirmed" under the line; resource tones: `normal` in `fg`, `warning`, `danger`; only pennies: the button says `character`; narrow (360 px with bleeding) | `stories/StatusLine.stories.tsx` |
 | Letter tile | `card` fill, `line` border, `radius.card`, `size.touch` square, `type.tile`; the bank wraps centred with `space.sm` gaps (the mock's `.bankl`) and a used tile keeps its place; the answer line, the bank and its Controls and Submit card sit `space.block` apart as one block of the NPC page. Name: the letter, then its place (`N, tile 2`). | free; used: `opacity.disabled`, not pressable | `stories/LetterTile.stories.tsx`; the bank: `stories/Riddle.stories.tsx` |
 | Page turn | See [Page turn](#page-turn). | turning, settled | `stories/PageTurn.stories.tsx` |
+| Night sky | Over the whole Book while the shown palette is `dark` (the `night` phase; it appears as the dusk cross-fade ends and goes with the dawn cut), taking no touch, focus or screen-reader node, like the page turn's leaving leaf: a fixed scatter of faint `nightSky.star` points (a drawing: 36, 1 to 2 px, opacity .2 to .65, the same sky every night) and, on average every 9 s, one shooting star, a `nightSky.star` streak falling down-left over `motion.meteor` and fading out (the mock's `.moon` meteor). Decoration, never information: nothing in the game reads from it. | night; reduced motion: the stars only, no shooting star | `stories/NightSky.stories.tsx`; over a page: `stories/RoomPage.stories.tsx` At night, palette `dark` |
 
 Not adopted from the mock (no live consumer): the text drawer and its command chips, topic
 chips, shop price rows and scene pick cards.
