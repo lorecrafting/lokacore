@@ -485,6 +485,20 @@
     ]
   },
   {
+    "key": "speech",
+    "version": 1,
+    "portability": "portable",
+    "residency": "portable_capability",
+    "commands": [
+      "say",
+      "whisper",
+      "shout"
+    ],
+    "events": [
+      "spoken"
+    ]
+  },
+  {
     "key": "escort",
     "version": 1,
     "portability": "portable",

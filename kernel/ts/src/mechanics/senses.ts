@@ -30,13 +30,14 @@ function roomOf(w: World, id: string, steps: Steps): string | undefined {
   return at;
 }
 
-// Each room within two exits of `from`, with its distance and the first exit towards it: breadth
-// first, exits in direction-key order, so a tie goes to the first direction. Exits hidden from
-// `actor` (row 11) carry nothing; closed doors do (a cue's `when` can read barrier_state).
-function around(w: World, actor: CharacterId, from: string, steps: Steps) {
+// Each room within `depth` exits of `from`, with its distance and the first exit towards it:
+// breadth first, exits in direction-key order, so a tie goes to the first direction. Exits hidden
+// from `actor` (row 11) carry nothing; closed doors do (a cue's `when` can read barrier_state).
+// Also a shout's reach (speech@1, row G9).
+export function around(w: World, actor: CharacterId, from: string, steps: Steps, depth = 2) {
   const near = new Map<string, Near>([[from, { d: 0 }]]);
   let edge = [from];
-  for (let d = 1; d <= 2; d++) {
+  for (let d = 1; d <= depth; d++) {
     const next: string[] = [];
     for (const at of edge) {
       const room = w.rooms[at]!;

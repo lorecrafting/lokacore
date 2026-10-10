@@ -51,7 +51,7 @@ const FILTERS: Record<string, Match> = {
   room: (w, want, p) => w.roomIds[refString(want)] === p.room_id,
   // ponytail: the authored instance only; a created item (a harvested pelt) never matches.
   item: (w, want, p) => w.entityIds[refString(want)] === p.item_id,
-  npc: (w, want, p) => w.entityIds[refString(want)] === p.entity_id, // the entrant (row W3)
+  npc: (w, want, p) => w.entityIds[refString(want)] === p.entity_id, // the entrant (W3), the hearer (G9)
   victim: ref('victim_definition'),
   custom: (_, want, p) => want === p.event.key,
   check: (_, want, p) => want === p.check.key,
@@ -66,6 +66,8 @@ const FILTERS: Record<string, Match> = {
   to: equal('to'),
   hit: equal('hit'),
   status: ref('status'),
+  word: equal('word'),
+  loudness: equal('loudness'),
 };
 
 /**
@@ -166,6 +168,7 @@ const SUBJECT: Partial<Record<On['event'], string>> = {
   fact_changed: 'subject_id',
   status_ticked: 'body_id',
   status_expired: 'body_id',
+  spoken: 'entity_id',
 };
 const subject = (cause: DomainEvent, body?: EntityId) => {
   const field = SUBJECT[cause.payload.type as On['event']];

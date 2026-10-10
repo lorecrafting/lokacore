@@ -46,6 +46,7 @@ machine-readable matrix is [residency.gen.json](residency.gen.json).
 | faction@1 | portable | portable_capability |  |
 | narration@1 | portable | portable_capability | client_notification |
 | sense_cue@1 | portable | portable_capability |  |
+| speech@1 | portable | portable_capability |  |
 | escort@1 | portable | portable_capability |  |
 | patrol@1 | portable | portable_capability |  |
 | transport@1 | portable | portable_capability |  |
@@ -139,6 +140,7 @@ Action definitions, ActionInvocation, TargetSpec and TargetResolution (04 §1, �
 - **TargetSpec**: The candidate scopes an action's target is resolved from (21 §7): the scopes the R6P proof resolves to an EntityId. Inspectable details use target-only EntityIds and the inspectable_details scope. equipped, connections, party and privileged global scope are added with their first use, with a target identity for non-entity targets (21 §6). Accepted kinds and capabilities are added with the capability registry.
   - `none`: The action takes no target.
   - `entity`: One entity from the listed scopes.
+- **Word**: One spoken word (speech@1; toolbox row G9): 1 to 32 ASCII letters, the riddle answer's bound. The rule case-folds it and compares it only with authored keywords; it never reaches narration.
 
 ## Capability contracts (`protocol/capability.schema.json`)
 
@@ -213,6 +215,9 @@ The portable semantic Command registry (04 §1, §3, §21; 14 §R3A). Host-only 
   - `sleep`: Sleep (position@1): the actor's position becomes sleeping; already sleeping is invalid_state. Acting while asleep and waking on damage are LATER (combat).
   - `perform`: Perform a cartridge's ActionRecipe by its action key (06 §20; action.schema.json ActionRecipe). The authority re-resolves the key in the actor's ActionSet; target_id, when given, is the id target resolution returned for the words after the verb and must be the recipe's target.
   - `talk`: Talk to a character.
+  - `say`: Say one word aloud to the NPCs in the actor's room (speech@1; toolbox row G9). The word is 1 to 32 ASCII letters, compared case-folded and only against authored keywords; it never reaches narration.
+  - `shout`: Shout one word to the NPCs in the actor's room and in the rooms one exit away (speech@1; toolbox row G9).
+  - `whisper`: Whisper one word to one NPC in the actor's room; no one else hears it (speech@1; toolbox row G9).
   - `accept_quest`: Activate an offered quest.
   - `choose`: Resolve a pending choice.
   - `close_choice`: Close a pending choice without choosing.
@@ -358,6 +363,7 @@ DialogueDefinition (06 §17, §18, §33, §37, §43; 04 §5.3 Choice/continuatio
 - **DialogueRole**: A dialogue role's participant, as action.schema.json NarrationParticipant's npc or item branch (the actor is implicit): an NPC or item of this cartridge (else UNRESOLVED_REFERENCE).
   - `npc`
   - `item`
+- **SpokenKeyword**: An authored spoken keyword (speech@1; toolbox row G9): 1 to 32 lowercase ASCII letters, compared with a case-folded say, whisper or shout word.
 
 ## Effect contracts (`protocol/effect.schema.json`)
 
@@ -449,6 +455,8 @@ The DomainEvent envelope and registry, proposed versus committed (04 §1, §5.1,
   - `status_ticked`: Toolbox row G3: one due tick of an active status on a body, NPC or thing (body_id), after its resource change, if any.
   - `status_expired`: Toolbox row G3: an active status on a body, NPC or thing (body_id) reached its end; a cure or death emits none.
   - `quest_failed`: Toolbox row W24: a generic quest deadline expired and failed the open instance with its authored outcome; a legacy deadline or a quest.fail reaction emits none.
+  - `spoken`: Toolbox row G9 (speech@1): the NPC entity_id heard the actor speak, one event per hearer. word is the case-folded word only when it is an authored keyword (a dialogue's keyword or a spoken reaction's word), else absent.
+- **Loudness**: How a word was spoken (speech@1; toolbox row G9): whisper reaches the addressee, say the speaker's room, shout the rooms one exit away too.
 
 ## Fact contracts (`protocol/fact.schema.json`)
 

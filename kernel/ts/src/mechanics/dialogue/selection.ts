@@ -38,7 +38,8 @@ export const speaks = (world: World, target: EntityId | undefined) =>
 /**
  * The dialogue `actor`'s talk to `target` opens: the first of `target`'s dialogues, in key order,
  * whose own policy holds, if any; none while `target` is hostile to `actor` (toolbox row G11).
- * Each policy leaf it evaluates adds one to `steps` (04 §5.4).
+ * A talk never opens a keyword dialogue; a say or whisper of `word` opens only one keyed by it
+ * (speech@1, row G9). Each policy leaf it evaluates adds one to `steps` (04 §5.4).
  */
 export const spokenBy = (
   world: World,
@@ -46,11 +47,13 @@ export const spokenBy = (
   target: EntityId | undefined,
   steps: Steps = { n: 0 },
   selected?: DefinitionRef,
+  word?: string,
 ) =>
   disposition(world, actor, target, steps) === 'hostile'
     ? undefined
     : spoken(world, target).find(
         (d) =>
+          d.keyword === word &&
           (!selected || world.cartridge.dialogues?.[refString(selected)] === d) &&
           holds(world, actor, d.policy.root, { target, steps }),
       );
@@ -76,37 +79,39 @@ export const talkRefused = (
  */
 export function talks(world: World, actor: CharacterId): [string, Offered][] {
   const here = world.state.containers[bodyOf(world, actor)!];
-  return Object.values(world.cartridge.dialogues ?? {}).flatMap(({ key, npc, policy, label }) => {
-    const speaker = world.entityIds[refString(npc)]!;
-    if (!living(world, speaker) || world.state.containers[speaker] !== here) return [];
-    const target = { kind: 'entity', scopes: ['room_occupants'] } as const;
-    const talk = {
-      key,
-      label: label ?? ('action.talk' as TextKey),
-      target,
-      input: [],
-      priority: 0,
-      policy,
-    };
-    return [
-      [
+  return Object.values(world.cartridge.dialogues ?? {}).flatMap(
+    ({ key, npc, policy, label, keyword }) => {
+      const speaker = world.entityIds[refString(npc)]!;
+      if (keyword || !living(world, speaker) || world.state.containers[speaker] !== here) return [];
+      const target = { kind: 'entity', scopes: ['room_occupants'] } as const;
+      const talk = {
         key,
-        {
-          ...talk,
-          command: 'talk' as Key,
-          speaker,
-          ...(label && {
-            dialogue: {
-              cartridge_id: world.cartridge.manifest.id,
-              cartridge_version: world.cartridge.manifest.version,
-              kind: 'dialogue',
-              key,
-            },
-          }),
-        },
-      ],
-    ];
-  });
+        label: label ?? ('action.talk' as TextKey),
+        target,
+        input: [],
+        priority: 0,
+        policy,
+      };
+      return [
+        [
+          key,
+          {
+            ...talk,
+            command: 'talk' as Key,
+            speaker,
+            ...(label && {
+              dialogue: {
+                cartridge_id: world.cartridge.manifest.id,
+                cartridge_version: world.cartridge.manifest.version,
+                kind: 'dialogue',
+                key,
+              },
+            }),
+          },
+        ],
+      ];
+    },
+  );
 }
 
 const open = (c: ChoiceRow) => c.source.kind === 'dialogue' && c.status === 'pending';

@@ -14,6 +14,12 @@
         "kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk"
       ]
     },
+    "Word": {
+      "description": "One spoken word (speech@1; toolbox row G9): 1 to 32 ASCII letters, the riddle answer's bound. The rule case-folds it and compares it only with authored keywords; it never reaches narration.",
+      "type": "string",
+      "pattern": "^[a-zA-Z]{1,32}$",
+      "examples": ["ward", "WARD"]
+    },
     "ActionInput": {
       "description": "The validated input of an ActionInvocation (04 §1). Closed: each field is a registered input parameter, and the ActionDefinition's `input` lists which ones the action requires (06 §20). The parameters are those the R6P proof uses (pre-release-proof.md).",
       "type": "object",
@@ -36,6 +42,7 @@
           "type": "string",
           "pattern": "^[a-zA-Z]{1,32}$"
         },
+        "word": { "$ref": "#/$defs/Word" },
         "scene": {
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
@@ -336,6 +343,7 @@
       "enum": [
         "ancestry",
         "attribute",
+        "word",
         "direction",
         "choice_id",
         "continuation_id",

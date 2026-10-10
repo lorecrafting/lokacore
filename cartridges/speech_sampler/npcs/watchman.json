@@ -1,0 +1,9 @@
+{
+  "keywords": [
+    "watchman"
+  ],
+  "short": "npc.watchman.short",
+  "room_line": "npc.watchman.room",
+  "description": "npc.watchman.description",
+  "room": "watchhouse"
+}

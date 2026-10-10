@@ -1,0 +1,9 @@
+{
+  "keywords": [
+    "elder"
+  ],
+  "short": "npc.elder.short",
+  "room_line": "npc.elder.room",
+  "description": "npc.elder.description",
+  "room": "square"
+}

@@ -12,6 +12,7 @@ import { definition as expeditionDefinition } from '../mechanics/expedition/shar
 const INPUTS: readonly string[] = [
   'ancestry',
   'attribute',
+  'word',
   'direction',
   'choice_id',
   'continuation_id',

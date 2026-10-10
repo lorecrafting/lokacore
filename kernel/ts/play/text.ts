@@ -21,6 +21,7 @@ export type Parsed =
   | { type: 'scan' }
   | { type: 'stand' | 'sit' | 'rest' | 'sleep' } // position@1
   | { type: 'move'; direction: string }
+  | { type: 'say' | 'shout'; word: string } // speech@1 (row G9): the kernel validates the word
   | { lookup: string; verb?: 'take' | 'drop' | 'give' | 'talk' | 'read' | 'where'; to?: string }
   | { choose: string }
   | 'bye'
@@ -93,6 +94,8 @@ export function parse(text: string): Parsed {
       return { door, direction: known.direction };
     return normalize(rest).length ? { door, words: rest } : `${capital(door)} what?`;
   }
+  if ((words[0] === 'say' || words[0] === 'shout') && words.length === 2)
+    return { type: words[0], word: words[1] };
   if (words[0] === 'accept') return { accept: rest.toLowerCase() };
   if (words[0] === 'choose' && words.length === 2) return { choose: words[1] };
   if (LOOK.includes(words[0])) {

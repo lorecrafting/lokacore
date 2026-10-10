@@ -22897,5 +22897,204 @@
         "code": "missing_property"
       }
     ]
+  },
+  {
+    "contract": "CommandPayload",
+    "value": {
+      "type": "say",
+      "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+      "word": "wa rd"
+    },
+    "errors": [
+      {
+        "path": "/word",
+        "code": "pattern_mismatch"
+      }
+    ]
+  },
+  {
+    "contract": "CommandPayload",
+    "value": {
+      "type": "say",
+      "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+      "word": "w0rd"
+    },
+    "errors": [
+      {
+        "path": "/word",
+        "code": "pattern_mismatch"
+      }
+    ]
+  },
+  {
+    "contract": "CommandPayload",
+    "value": {
+      "type": "shout",
+      "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+      "word": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    "errors": [
+      {
+        "path": "/word",
+        "code": "pattern_mismatch"
+      }
+    ]
+  },
+  {
+    "contract": "EventPayload",
+    "value": {
+      "type": "spoken",
+      "entity_id": "12121212-3434-4565-8787-909090909090",
+      "loudness": "say",
+      "word": "Ward"
+    },
+    "errors": [
+      {
+        "path": "/word",
+        "code": "pattern_mismatch"
+      }
+    ]
+  },
+  {
+    "contract": "EventPayload",
+    "value": {
+      "type": "spoken",
+      "entity_id": "12121212-3434-4565-8787-909090909090",
+      "loudness": "yell"
+    },
+    "errors": [
+      {
+        "path": "/loudness",
+        "code": "not_in_enum"
+      }
+    ]
+  },
+  {
+    "contract": "ReactionRule",
+    "value": {
+      "key": "hears",
+      "on": {
+        "event": "spoken",
+        "word": "HELP"
+      },
+      "apply": []
+    },
+    "errors": [
+      {
+        "path": "/on/word",
+        "code": "pattern_mismatch"
+      }
+    ]
+  },
+  {
+    "contract": "CommandPayload",
+    "value": {
+      "type": "say",
+      "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d"
+    },
+    "errors": [
+      {
+        "path": "/word",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "CommandPayload",
+    "value": {
+      "type": "whisper",
+      "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+      "word": "ward"
+    },
+    "errors": [
+      {
+        "path": "/target_id",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "CommandPayload",
+    "value": {
+      "type": "whisper",
+      "actor_id": "a7b8c9d0-e1f2-4a3b-9c4d-6e7f8a9b0c1d",
+      "target_id": "12121212-3434-4565-8787-909090909090"
+    },
+    "errors": [
+      {
+        "path": "/word",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "EventPayload",
+    "value": {
+      "type": "spoken",
+      "loudness": "say"
+    },
+    "errors": [
+      {
+        "path": "/entity_id",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "EventPayload",
+    "value": {
+      "type": "spoken",
+      "entity_id": "12121212-3434-4565-8787-909090909090"
+    },
+    "errors": [
+      {
+        "path": "/loudness",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "DialogueDefinition",
+    "value": {
+      "key": "elder_ward",
+      "npc": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "npc",
+        "key": "elder"
+      },
+      "keyword": "Ward",
+      "policy": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": []
+        }
+      },
+      "prompt": "dialogue.elder_ward.prompt",
+      "roles": {
+        "elder": {
+          "role": "npc",
+          "npc": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "npc",
+            "key": "elder"
+          }
+        }
+      },
+      "choices": {
+        "thank": {
+          "label": "dialogue.elder_ward.thank",
+          "narration": "narration.elder_ward.thank"
+        }
+      }
+    },
+    "errors": [
+      {
+        "path": "/keyword",
+        "code": "pattern_mismatch"
+      }
+    ]
   }
 ]

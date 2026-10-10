@@ -82,12 +82,13 @@ defmodule Loka.Content.Reactions do
     "population.suppress" => 35
   }
 
-  # One diagnostic per rule below its highest floor; the entrant filter needs 1.47 (row W3).
+  # One diagnostic per rule below its highest floor; the entrant filter needs 1.47 (row W3), spoken 1.48 (G9).
   defp api(r, manifest) do
     floor =
       Enum.max([
         if(r["on"]["event"] == "quest_resolved", do: 8, else: 0),
-        if(Map.has_key?(r["on"], "npc"), do: 47, else: 0)
+        if(Map.has_key?(r["on"], "npc"), do: 47, else: 0),
+        if(r["on"]["event"] == "spoken", do: 48, else: 0)
         | Enum.map(r["apply"], &Map.get(@floors, &1["op"], 0))
       ])
 

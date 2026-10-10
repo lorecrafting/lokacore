@@ -1,0 +1,13 @@
+{
+  "on": {
+    "event": "spoken",
+    "npc": "elder"
+  },
+  "apply": [
+    {
+      "op": "fact.assign",
+      "fact": "elder_heard",
+      "value": true
+    }
+  ]
+}

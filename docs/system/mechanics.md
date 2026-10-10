@@ -395,7 +395,7 @@ actor already in conversation with that speaker, `invalid_state`. A talk to anot
 while a conversation is open ends that one first, as Leave would: the same decision's
 `choice.close` of the open row precedes the new `choice.open` (owner ruling 2026-10-09 in Beads
 loka-x6t.5, paraphrased: an open conversation must not block the world;
-`mechanics/dialogue/selection.ts:144`). Accepted
+`mechanics/dialogue/selection.ts:153`). Accepted
 `choice_opened`: one `choice.open` of a new continuation (ordinal 0 of this command), the
 dialogue's roles bound to EntityIds in role-name order, the choice ids in key order, and
 `choice_opened`. `choose {continuation_id, choice_id}`: a continuation not pending, not the
@@ -413,7 +413,7 @@ the choice's `fact.assign` steps, the quest's transitions and `quest_resolved` (
 quest's `quest.activate` and `quest_activated`), `choice.resolve`
 at the continuation's `opened_revision`, `choice_resolved`, one narration line with the actor
 and every bound role as participants, and the `story_point_reached` of a story point outcome
-whose trigger is this dialogue and choice (`mechanics/dialogue/rule.ts:245`). The conversation then
+whose trigger is this dialogue and choice (`mechanics/dialogue/rule.ts:225`). The conversation then
 (unless the choice is [checked](#dialogue-skill-checks-toolbox-row-14), which ends it) returns to its hub (owner OK 2026-10-09 in Beads loka-x6t.5, paraphrased: after every answer return
 to the person's topics; the conversation stays open until Leave the conversation): the same
 decision appends a `choice.open` of a fresh continuation (the next minted id) with the resolved row's
@@ -433,12 +433,12 @@ A hub conversation (a dialogue that returns to its hub, above) also ends as Leav
 event, once its actor and speaker no longer share a room or the speaker dies: the player moves
 away or the speaker leaves. The proposal, once composed with its due jobs, appends the
 `choice.close` of each such row in id order (`kernel/ts/src/runtime/proposal.ts:102`,
-`mechanics/dialogue/selection.ts:154`). A one-shot dialogue's row stays pending when either
+`mechanics/dialogue/selection.ts:163`). A one-shot dialogue's row stays pending when either
 leaves, its options `not_present`
 ([adverse case](../spec/conformance/adverse-cases.json) `walked-away-rejects-new-choice`).
 While a choice is pending, `choose` and `close_choice` are the actor's answers and no room
 contribution removes them (`kernel/ts/src/mechanics/dialogue/shared.ts:264`). Only a dialogue's speaker, present in the room,
-offers its talk (`mechanics/dialogue/selection.ts:73`), one per dialogue under the dialogue's key, available while that
+offers its talk (`mechanics/dialogue/selection.ts:80`), one per dialogue under the dialogue's key, available while that
 dialogue's policy holds. The loader rejects an `accept` in a dialogue that has a `quest`
 (accepting would resolve it) or on a choice with a `hand_over` (activation and acquisition in one
 decision conflict), both `OUTCOME_MISMATCH`. In a dialogue that returns to its hub, an answer
@@ -446,7 +446,7 @@ that could repeat must not reach a once-per-lineage save proof: the loader and t
 reject, `OUTCOME_MISMATCH` at the field, a `receive`, a `topic.grant` step, a `fact.assign` step
 of a fact the save proves by one receipt (a topic's fact, a perception `discovered` fact or a
 bounded riddle's answer fact; [save](save.md)) or an escort `start` on a choice with neither an `accept` (refused once accepted) nor a `patrol` (which ends the
-conversation) (`kernel/ts/src/content/cartridge_dialogues.ts:248`, twin
+conversation) (`kernel/ts/src/content/cartridge_dialogues.ts:264`, twin
 `lib/loka/content/hub.ex`). A `hand_over` cannot repeat: the bound NPC keeps the item.
 
 API1.9 adds an optional authored `riddle {choice_id, answer, bank, wrong}` to a dialogue.
@@ -683,7 +683,7 @@ from the advance's base clock, as the whole proposal composes (`now` in `runtime
 - **Ids are deterministic**: every entity, event, instance, continuation and job id comes
   from the IdSource under its command, so a replay mints the same ids.
 - **Composes-with**: a choice composes quest, containment and check, a recipe composes check, a job
-  composes movement (`runtime/decision.ts:205`); facts, containment, barriers, resources and the clock
+  composes movement (`runtime/decision.ts:204`); facts, containment, barriers, resources and the clock
   are the shared vocabulary every mechanic reads through the same policy leaves.
   Scene starts read story_point_reached and write only their own facts; modal ActionSet
   replacement restricts position, equipment and door verbs without edits to those rules.
@@ -2195,3 +2195,17 @@ Nothing is stored: the stats are read at use, so a later attribute writer change
 - **Opt-in.** `recap_after_minutes` needs `kernel_api` 1.47. A cartridge without it keeps its bytes, hash and behavior; Chapter 1 authors none, so it shows no recap after any absence.
 - **Sampler.** `cartridges/recap_sampler` (threshold 30 minutes, rate 50): the dart room poisons for 720 s with a tick every 60 s (eleven ticks, then expiry) and chills for 120 s (one tick, sharing the first poison tick's receipt, and expiry with the second); Maud keeps the hall from 06:00 and her garden from 18:00; a pebble lies in the hall (a press with its own World line). Poisoned, back in the hall, three real hours away (150 game hours) opens the hall page with one collapsed block: the tick line with its count 11, the chill's tick and expiry lines, the poison's expiry line, "Maud leaves." with 6 and "Maud arrives." with 6; two real minutes away shows no block and the log as without the field (one entry per receipt, so the first two join their chill line).
 - **Composition record.** Consumer: the Book presenter's background updates (`mobile/app/book/presenter.ts` `background`, `mobile/app/book/recap.ts`). Reads: GameView `recap_after` and `time`, each update's latest receipt narration (`lastNarration`), the elapsed status. Writes, events, jobs and save rows: none. Reused: `TimePolicy`, the elapsed driver's state updates, `narrationLines`' rendering, `comings`, `KERNEL_API_RANGE_INVALID`. New: the manifest field `time_policy.recap_after_minutes`, the GameView field `recap_after`, the Book's away recap block; no foundation change.
+
+## Social verbs: say, whisper and shout (toolbox row G9, engine half)
+
+[Toolbox row G9](../MECHANICS-TOOLBOX.md#ranked-toolbox); [declarations](cartridge.md#speech-declarations) govern it; the PM brief is in Beads `loka-kgd.71` (2026-10-10). Emotes are deferred to the Realm.
+
+- **Commands.** `speech@1` owns three engine verbs, each with one input `word` (`Word`: 1 to 32 ASCII letters, the riddle answer's bound): `say {word}` and `shout {word}` (no target), `whisper {target_id, word}` (an NPC in the room). The rule case-folds the word and refuses `invalid_state` for anything else (a space, a digit, a non-ASCII letter, 33 letters), even when a host skips the schema; also without a body, or while the actor's conversation is open (Leave it first: a say that left it, as talk does, would close a riddle row no saved receipt allows). A whisper to an NPC not alive in the actor's room is `not_present`.
+- **Free text** ([trap 9](../MECHANICS-TOOLBOX.md#traps)). The word is matched only against authored keywords and never reaches narration. An event carries it only when it equals one: a dialogue's `keyword` or a `spoken` reaction's `word`; otherwise the event has no `word`. *Known limit:* one word, no sentences.
+- **Who hears.** Each hearer gets one `spoken {entity_id, loudness, word?}` event, in EntityId order: a whisper only its addressee; a say each living NPC in the actor's room; a shout each living NPC in the rooms within one exit, through [G6's walk](#sense-cues-sound-smell-and-heat-toolbox-row-g6) (`around` in `kernel/ts/src/mechanics/senses.ts`, depth 1): exits hidden from the actor carry nothing, closed doors carry it, every exit is one query step. *Why one event per hearer:* a reaction then filters the hearer with `npc` (as W3 filters the entrant), and an unnamed `fact.assign` or `status.apply` lands on the hearer (the reaction@1 subject), so a whisper can never be overheard by a reaction and no `when` has to test range.
+- **The answer.** A dialogue may declare `keyword`. A say or whisper of it opens that dialogue as talk would (`choice.open` and `choice_opened` at position 1, then the `spoken` events): for a whisper, the addressee's; for a say, the first hearer in EntityId order with a keyed dialogue whose policy holds (and who is not hostile, row G11). Its `prompt` is the answer, and its choices, [checks](#dialogue-skill-checks-toolbox-row-14) and [entity facts](#entity-and-pair-facts-toolbox-row-w2) apply as in any conversation. Talk never offers or opens a keyword dialogue, so the word is the only way in. A shout opens nothing. Accepted outcome: `choice_opened` when a dialogue opens, else `spoken`; no narration line.
+- **Reactions.** A `spoken` trigger may filter `npc` (the hearer), `word` and `loudness` (`FILTERS` in `kernel/ts/src/mechanics/reaction.ts`). The guard in the next room who hears a shout of "help" is `{event: "spoken", npc: "guard", word: "help", loudness: "shout"}`.
+- **Opt-in.** The verbs are offered only to a cartridge locking `speech@1`; a keyword or a `spoken` reaction needs `speech@1` and `kernel_api` 1.48. Chapter 1 and the corpus lock none, so their ActionSets, bytes and GameView are unchanged.
+- **Book.** Not built: the Book has no text input (the only `TextInput` is the dev time panel). The Book half is Beads `loka-kgd.72`, with the proposed text for the designer.
+- **Sampler.** `cartridges/speech_sampler`: mill, lane, square and watchhouse in a row west to east; the elder and the smith in the square, the watchman in the watchhouse, the miller in the mill. Saying "WARD" opens the elder's `elder_ward` ("The ward fails at the new moon"), heard by both; whispering "ward" to the smith opens nothing and the elder hears nothing; a shout of "help" alerts the watchman next door, not the miller two rooms away; a shout of "hello" alerts no one (`kernel/ts/test/speech.test.ts`).
+- **Composition record.** Consumer: the speech rule (`kernel/ts/src/mechanics/speech/rule.ts`) and reaction@1. Reads: containers, NPC life, exits and their hidden facts, dialogue definitions and policies, reaction triggers. Writes: dialogue@1's `choice.open` (speech composes dialogue); events: the new `spoken`, dialogue's `choice_opened`; jobs and save rows: none new. Reused: talk's opening (`opening` in `mechanics/dialogue/behavior.ts`) and selection (`spokenBy`), G6's walk, the W3 `npc` filter and the reaction subject table, the riddle answer's bound, `KERNEL_API_RANGE_INVALID`. New: `speech@1` with commands `say`, `whisper`, `shout` and event `spoken`, the input `word`, `DialogueDefinition.keyword`, the `spoken` trigger with filters `word` and `loudness`; no foundation change.

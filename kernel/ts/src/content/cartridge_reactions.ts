@@ -67,7 +67,7 @@ export function reactions(c: Obj, { named, typedValue }: Checks): Diagnostic[] {
   for (const [r, at] of each(c)) {
     const floor = Math.max(
       r.on.event === 'quest_resolved' ? 8 : 0,
-      r.on.npc ? 47 : 0, // the entrant filter (row W3)
+      r.on.event === 'spoken' ? 48 : r.on.npc ? 47 : 0, // speech (G9), the entrant filter (W3)
       ...r.apply.map((s: Obj) => FLOORS[s.op] ?? 0),
     );
     if (floor && (major < 1 || (major === 1 && minor < floor)))
