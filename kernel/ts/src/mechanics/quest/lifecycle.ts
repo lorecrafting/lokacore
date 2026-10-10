@@ -52,7 +52,8 @@ export function stamp(
   prior: readonly DeltaOp[],
 ) {
   const quests = world.cartridge.quests;
-  if (!quests || !Object.values(quests).some((q) => q.journal?.hints)) return ops;
+  const touched = ops.some((o) => o.op === 'quest.activate' || o.op === 'quest.transition');
+  if (!touched || !quests || !Object.values(quests).some((q) => q.journal?.hints)) return ops;
   type Activate = Extract<DeltaOp, { op: 'quest.activate' }>;
   const refOf = (id: string) =>
     world.state.quests?.[id]?.quest ??

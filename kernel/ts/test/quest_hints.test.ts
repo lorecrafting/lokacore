@@ -96,6 +96,19 @@ test('a stage hints at ten and twenty real minutes; the next stage counts from i
   assert.equal(hint(w), 'quest.find_key.hint_return');
 });
 
+// Break: the stage read back from the shown text, so a journal reusing one key for active and
+// objectives_met shows the objectives_met hint while the objective is still unmet.
+test('the hint stage follows the instance, not the shown text key', () => {
+  const same = structuredClone(content);
+  const j = same.quests!['quest_sampler@0.0.1:quest/find_key']!.journal!;
+  (j as { objectives_met: string }).objectives_met = j.active;
+  const w = newWorld(same, '2e5f9b6d-4a2c-4d3b-8f8e-7c6b5d4e3f23' as never, [4, 3, 2, 1]);
+  assert.equal(
+    hint(wait(play(w, { type: 'accept_quest', quest }), 10)),
+    'quest.find_key.hint_look',
+  );
+});
+
 // Break: a row without started_at (a save from before API 1.46) read as started at time 0.
 test('an instance row without started_at shows no hint', () => {
   const w = wait(play(fresh(), { type: 'accept_quest', quest }), 30);
