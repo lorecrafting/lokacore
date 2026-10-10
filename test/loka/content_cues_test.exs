@@ -4,9 +4,10 @@ defmodule Loka.ContentCuesTest do
   @dir "cartridges/senses_sampler"
   defp pairs(diags), do: Enum.map(diags, &{&1["code"], &1["path"]})
 
-  # Breaks (toolbox row G6): the compiler accepts a cue or a cue_perceived leaf below kernel_api
-  # 1.48, a cue without sense_cue@1, or a cue text key missing from the catalog; or it fails to
-  # expand a short reference in a cue's condition (the sampler's stew and rattle cues use one).
+  # Breaks (toolbox row G6): the compiler accepts a cue or a lone cue_perceived leaf below
+  # kernel_api 1.48, a cue (a room detail's included) without sense_cue@1, or a cue text key missing
+  # from the catalog; or it fails to expand a short reference in a cue's condition (the sampler's
+  # stew and rattle cues use one).
   test "cues need 1.48, sense_cue@1 and catalog text" do
     dir = Loka.ContentSource.copy(@dir)
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, [])
@@ -14,7 +15,8 @@ defmodule Loka.ContentCuesTest do
     floor = {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"}
 
     no_cues =
-      for f <- ~w(rooms/forge.json rooms/tower.json items/torch.json recipes/pick_lock.json),
+      for f <-
+            ~w(rooms/forge.json rooms/tower.json items/torch.json recipes/pick_lock.json npcs/sentry.json),
           do: {f, &drop_cues/1}
 
     assert {:error, diags} = Loka.ContentSource.compile(dir, [api])
@@ -29,6 +31,9 @@ defmodule Loka.ContentCuesTest do
 
     assert {:error, diags} = Loka.ContentSource.compile(dir, [unowned])
     assert {"UNDECLARED_CAPABILITY", "rooms/forge.cues[0]"} in pairs(diags), inspect(diags)
+    # a room detail's cue is checked too
+    assert {"UNDECLARED_CAPABILITY", "rooms/tower.details.kitchen.cues[0]"} in pairs(diags),
+           inspect(diags)
 
     untexted = {"text.json", &Map.delete(&1, "cue.rattle")}
     assert {:error, diags} = Loka.ContentSource.compile(dir, [untexted])

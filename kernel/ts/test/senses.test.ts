@@ -96,6 +96,50 @@ test('a cue whose condition fails is not listed', () => {
   assert.deepEqual(texts, ['cue.stew']);
 });
 
+// Breaks: a cue carried through an exit hidden from the player (row 11): hiding the hall's east
+// exit must drop the forge's hammering.
+test('a hidden exit carries no cue', () => {
+  const c = structuredClone(content) as unknown as Obj;
+  const hall = Object.values(c.rooms as Obj).find((r) => r.key === 'hall');
+  hall.exits.east.hidden_until = { fact: ref('fact', 'lock_picked'), equals: true };
+  const texts = gameView(fresh(c as unknown as Cartridge)).cues!.map((x) => x.text);
+  assert.deepEqual(texts, ['cue.stew']);
+});
+
+// Breaks: a closed door stops a cue: with a closed door on the hall's east exit the forge's
+// hammering is still heard.
+test('a closed door carries cues', () => {
+  const c = structuredClone(content) as unknown as Obj;
+  const door = ref('barrier', 'door');
+  c.barriers = {
+    'senses_sampler@0.0.1:barrier/door': {
+      key: 'door',
+      keywords: ['door'],
+      short: 'x',
+      initial: 'closed',
+    },
+  };
+  Object.values(c.rooms as Obj).find((r) => r.key === 'hall').exits.east.barrier = door;
+  const texts = gameView(fresh(c as unknown as Cartridge)).cues!.map((x) => x.text);
+  assert.deepEqual(texts, ['cue.hammering', 'cue.stew']);
+});
+
+// Breaks: a dead NPC's cues still given (the sentry's pipe from the barracks), or a dead NPC still
+// perceiving (the stew from the tower still reaches its room).
+test('a dead NPC gives no cue and perceives nothing', () => {
+  const c = structuredClone(content) as unknown as Obj;
+  const hp = { minimum: 0, maximum: 2, start: 0, gain: 0 };
+  c.resources = { 'senses_sampler@0.0.1:resource/hp': { key: 'hp', ...hp } };
+  Object.values(c.npcs as Obj).find((e) => e.key === 'sentry').hp = hp;
+  const leaf = { op: 'cue_perceived', npc: ref('npc', 'sentry'), sense: 'smell' } as const;
+  const look = (x: Cartridge) => {
+    const w = play(fresh(x), { type: 'move', direction: 'north' });
+    return [gameView(w).cues!.map((v) => v.text), holds(w, w.character, leaf, { steps: { n: 0 } })];
+  };
+  assert.deepEqual(look(content), [['cue.pipe', 'cue.stew'], true]);
+  assert.deepEqual(look(c as unknown as Cartridge), [['cue.stew'], false]);
+});
+
 // Breaks: a status's cues read from an inactive row, or not from the holder's room (the sentry
 // one room north of the hall).
 test('an active status gives its cues from its holder', () => {
@@ -144,6 +188,34 @@ test('in a reaction to a failed pick only the outcome cues are heard', () => {
   assert.equal(value(picked, picked.character, ref('fact', 'guard_alerted')), false);
 });
 
+// Breaks: a passed check or a completed action heard with the failure cues: given a success
+// cue of smell, the guard smells a passed pick and a completed one, and hears no rattle.
+test('a passed check or completed action carries the success cues', () => {
+  const c = structuredClone(content) as unknown as Obj;
+  Object.values(c.recipes as Obj)[0].outcomes.success.cues = [
+    { sense: 'smell', text: 'cue.stew', range: 1 },
+  ];
+  const w = play(fresh(c as unknown as Cartridge), { type: 'move', direction: 'west' });
+  const heard = (type: string, sense: 'smell' | 'sound') =>
+    holds(
+      w,
+      w.character,
+      { op: 'cue_perceived', npc: ref('npc', 'guard'), sense },
+      {
+        steps: { n: 0 },
+        cause: { payload: { type, check: { key: 'pick_lock' }, action: 'pick_lock' } } as never,
+      },
+    );
+  assert.deepEqual(
+    [heard('check_passed', 'smell'), heard('action_completed', 'smell')],
+    [true, true],
+  );
+  assert.deepEqual(
+    [heard('check_passed', 'sound'), heard('check_failed', 'smell')],
+    [false, false],
+  );
+});
+
 // Breaks: the walk not charged to query_steps. The sentry smells its own pipe; from the barracks
 // the walk crosses 6 exits, so 5 steps short of the limit it is exhausted (uncharged, 3 suffice).
 test('an exhausted query budget perceives nothing', () => {
@@ -153,8 +225,8 @@ test('an exhausted query budget perceives nothing', () => {
   assert.equal(holds(w, w.character, leaf, { steps: { n: LIMITS.query_steps - 5 } }), false);
 });
 
-// Breaks: the loader accepts a cue below kernel_api 1.48, without sense_cue@1 or with a text key
-// missing from the catalog.
+// Breaks: the loader accepts a cue or a lone cue_perceived leaf below kernel_api 1.48, a cue
+// without sense_cue@1 or with a text key missing from the catalog.
 test('the loader refuses a cue below 1.48, without sense_cue or without its text', () => {
   const load = (change: (c: Obj) => void) => {
     const c = structuredClone(content) as unknown as Obj;
@@ -169,6 +241,24 @@ test('the loader refuses a cue below 1.48, without sense_cue or without its text
   };
   assert.deepEqual(
     load((c) => (c.manifest.requires.kernel_api.at_least = '1.47')),
+    ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'],
+  );
+  const strip = (v: unknown): unknown =>
+    Array.isArray(v)
+      ? v.map(strip)
+      : v && typeof v === 'object'
+        ? Object.fromEntries(
+            Object.entries(v)
+              .filter(([k]) => k !== 'cues')
+              .map(([k, x]) => [k, strip(x)]),
+          )
+        : v;
+  // the reactions' cue_perceived leaves alone still need 1.48
+  assert.deepEqual(
+    load((c) => {
+      for (const k of ['rooms', 'npcs', 'items', 'recipes']) c[k] = strip(c[k]);
+      c.manifest.requires.kernel_api.at_least = '1.47';
+    }),
     ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'],
   );
   const [owner, at] = load((c) => {
