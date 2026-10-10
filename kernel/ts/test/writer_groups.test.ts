@@ -220,3 +220,42 @@ test('after a sight, only the sighted deer encounter is held to the handoff, in 
     assert.equal(sightHandoffHolds(state, ops(encounter), state), ok, encounter);
   }
 });
+
+// loka-x2gv (protocol.md C5 pair clause). A bleed tick joins its body's group with no pair binding
+// check; that is safe only because a stale occurrence writes nothing but its own completion. Breaks:
+// a bleed job whose generation no longer matches the body's row still ticks HP in the round's group.
+test('a stale bleed occurrence due with the round joins its group but writes no hp', () => {
+  const { world, target, room } = fixture();
+  const first = elapsed(
+    command(world, 1, { type: 'attack', target_id: target }, 1).world,
+    64950,
+    2,
+  );
+  const waited = elapsed(command(first.world, 2, { type: 'flee' }, 3).world, 65000, 4);
+  const from = waited.world.state.containers[world.body];
+  const direction = Object.entries(waited.world.rooms[from].exits).find(
+    ([, edge]) => waited.world.roomIds[refString(edge.to)] === room,
+  )![0];
+  const moved = command(waited.world, 3, { type: 'move', direction }, 5).world;
+  const back = command(moved, 4, { type: 'attack', target_id: target }, 6).world;
+  const tick = elapsed(back, 65050, 7).world;
+  const id = (tick.state.bleeds![world.body] as { job_id: string }).job_id;
+  const round = Object.values(tick.state.encounters ?? {}).find((e) => e.status === 'open')!;
+  const job = tick.state.jobs![id]!;
+  assert.equal(job.due_time, tick.state.jobs![round.job_id]!.due_time);
+  const jobs = { ...tick.state.jobs, [id]: { ...job, bleed_generation: 2 } };
+  const stale = { ...tick, state: { ...tick.state, jobs } } as World;
+  const r = elapsed(stale, job.due_time, 8);
+  assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
+  const ops = r.decision.kind === 'accepted' ? r.decision.delta.ops : [];
+  const own = ops.filter((o) => 'job_id' in o && o.job_id === id);
+  assert.deepEqual(
+    own.map((o) => o.op),
+    ['job.complete'],
+  );
+  const group = (of: string) =>
+    ops.find((o) => o.op === 'job.complete' && o.job_id === of)!.writer_group;
+  assert.equal(group(id), group(round.job_id));
+  // Only the hound's sure hit (1) lands; a live bleed tick would take another 1.
+  assert.equal(hp(r.world), hp(tick)! - 1);
+});
