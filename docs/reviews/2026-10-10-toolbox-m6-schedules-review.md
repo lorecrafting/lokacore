@@ -33,3 +33,23 @@
 5. **nit**: no PR, so no `/code-review` result is reported (the commit `867b3d9d` names the fixes). Report it in the batch PR.
 
 Question (PM): row 14 (`33f49e91`) also claims `kernel_api` 1.47. Two features at one floor is fine only if both ship in the same batch merge.
+
+## Fix re-check (c5e37f8a)
+
+- Commits reviewed: `c0e02e6f`, `c5e37f8a` (tests in `kernel/ts/test/schedule_cases.test.ts`, `docs/system/cartridge.md`, `docs/system/mechanics.md`). Focused run on the head: `schedule_cases.test.ts` green.
+- F1: done. Mutant `behavior.ts:47` `find` → `findLast` is now killed by "the first holding case wins when two hold".
+- F2: done. Mutant `rule.ts:91` dropping `from !== room` is now killed by "the goal is not narrated when the NPC is already in the case room".
+- F3: done. Mutant `behavior.ts:46` dropping `target` is now killed by "a case's target leaf reads the NPC". `target_resolution` is added through the test's `fresh(change)`; the sampler is unchanged.
+- F4: accepted. cartridge.md now states the full leaf list, including `light_off`, with an example and a "use a fact" hint. mechanics.md links to that list instead of copying it (AGENTS.md one-place rule).
+- F5: open. Carry the `/code-review` result into the batch PR.
+- Developer's out-of-brief `/code-review` findings, triaged; none blocks:
+  1. `daily_schedule` text does not name the fallback: note. The `schedule_cases` and `ScheduleCases` texts say it.
+  2. `placeOf` copies the world for an hour with no cases: note. One shallow copy per job; no behaviour effect.
+  3. The NPC is looked up twice and there is no kind guard: note. `scheduleOf` guards the kind, and `placeOf`'s only caller is `scheduledJob` on an NPC job.
+  4. `Schedules.split` runs on every kind: note. It matches only a `daily_schedule` key; all 44 existing artifacts are byte-identical.
+  5. A tenth `api()` copy: note. This follows the house pattern (`barriers.ex`, `quests.ex`, `derived.ex`, ...); consolidating them is separate housekeeping.
+  6. Schedule checks run inside `Calendar.check`: note. `compiler.ex:62` always runs it (`|| %{}`), so no check is skipped.
+  7. The goal line prints in a dark room: note. Population sight narration does not check light either (`mechanics/population/`), and the spec models the goal on it.
+  8. The job drain has no per-command step budget: note. It is a documented known limit, shared with population sight and combat rounds.
+- Hosted CI on `c5e37f8a`: ci `38069859130` and book-e2e `38069859115`, both success.
+- Re-check verdict: **APPROVE WITH NOTES**. F1-F4 closed; F5 (nit) carries to the batch PR.
