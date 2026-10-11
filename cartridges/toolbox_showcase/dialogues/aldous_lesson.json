@@ -1,0 +1,38 @@
+{
+  "npc": "aldous",
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "fact_compare",
+      "fact": "skill_blade",
+      "equals": false
+    }
+  },
+  "prompt": "dialogue.aldous_lesson.prompt",
+  "roles": {
+    "teacher": {
+      "role": "npc",
+      "npc": "aldous"
+    },
+    "sword": {
+      "role": "item",
+      "item": "training_sword"
+    }
+  },
+  "choices": {
+    "learn": {
+      "label": "dialogue.aldous_lesson.learn",
+      "narration": "narration.aldous_lesson.learn",
+      "sequence": [
+        {
+          "op": "skill.acquire",
+          "skill": "blade"
+        }
+      ],
+      "receive": {
+        "item": "sword",
+        "from": "teacher"
+      }
+    }
+  }
+}

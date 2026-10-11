@@ -1,0 +1,13 @@
+{
+  "keywords": [
+    "purse"
+  ],
+  "short": "item.tilt_purse.short",
+  "room_line": "item.tilt_purse.room",
+  "description": "item.tilt_purse.description",
+  "location": {
+    "in": "npc",
+    "npc": "tilt_boar"
+  },
+  "mass_grams": 0
+}

@@ -1,0 +1,21 @@
+{
+  "on": {
+    "event": "fact_changed",
+    "fact": "raider_slain"
+  },
+  "when": {
+    "policy_version": 1,
+    "root": {
+      "op": "quest_state",
+      "quest": "bounty",
+      "state": "active"
+    }
+  },
+  "apply": [
+    {
+      "op": "quest.resolve",
+      "quest": "bounty",
+      "outcome": "done"
+    }
+  ]
+}

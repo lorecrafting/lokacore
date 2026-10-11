@@ -1,0 +1,28 @@
+{
+  "keywords": [
+    "sword",
+    "training_sword"
+  ],
+  "short": "item.training_sword.short",
+  "room_line": "item.training_sword.room",
+  "description": "item.training_sword.description",
+  "location": {
+    "in": "npc",
+    "npc": "aldous"
+  },
+  "mass_grams": 600,
+  "slot": "wield",
+  "weapon": {
+    "skill": "blade",
+    "attack": {
+      "chance": 100,
+      "damage_min": 2,
+      "damage_max": 2,
+      "kind": "physical"
+    }
+  },
+  "tags": [
+    "metal",
+    "sharp"
+  ]
+}

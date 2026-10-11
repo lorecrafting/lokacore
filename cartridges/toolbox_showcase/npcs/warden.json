@@ -44,5 +44,8 @@
       }
     },
     "engage": "npc.warden.engage"
+  },
+  "resistances": {
+    "physical": 100
   }
 }
