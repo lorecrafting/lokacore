@@ -23,30 +23,33 @@ type Active = Required<Extract<StatusRow, { active: true }>>;
 
 /**
  * A due status tick or expiry on its holder (the player's body, an NPC or an item; rows 1, G3);
- * an obsolete job completes harmlessly. Narration is the player's only.
+ * an obsolete job completes harmlessly. Narration is the player's only. A successor the same
+ * advance also crosses runs as a sub-step at `now` (`next`, runtime/proposal_hours.ts, loka-6ztc):
+ * its job is already complete and its row unwritten, so `now` is its tick; only the last writes.
  */
-// size: allow 44, one due job saturates the tick, expires, or runs the fatal death sequence
+// size: allow 48, one due job saturates the tick, expires, or runs the fatal death sequence
 export function runStatus(
   world: World,
   command: Pick<Command, 'id'>,
   job_id: JobId,
   job: JobRow,
   mint: Mint,
+  now = job.due_time,
 ) {
-  const done: DeltaOp = { op: 'job.complete', writer_group: 0, job_id };
+  const first = job.status === 'pending';
+  const ops: DeltaOp[] = first ? [{ op: 'job.complete', writer_group: 0, job_id }] : [];
   const status = job.job;
   const held = statusHolder(world, job_id);
-  if (!held) return accepted<never>(world, 'job_ran', [done], []);
+  if (!held) return accepted<never>(world, 'job_ran', ops, []);
   const { body, row } = held;
   const spec = specOf(world, status);
   if (!spec) return { kind: 'fault', code: 'precondition_failed' } as const;
   const player = body === world.body;
-  const now = job.due_time;
+  const tick = first ? row.next_tick_at : now;
   const visit = { ...world, state: { ...world.state, clock: now } };
   const expired = now >= row.ends_at;
-  const due = !expired && spec.per_tick !== undefined && now >= row.next_tick_at;
+  const due = !expired && spec.per_tick !== undefined && now >= tick;
   const { by, fatal } = due ? amount(visit, body, spec) : { by: 0, fatal: false };
-  const ops: DeltaOp[] = [done];
   if (by) ops.push({ ...adjust(visit, body, spec.resource, by, {}).op, at: now });
   // A pack keeps fighting when one member falls, as in combat's own fatal round.
   const fight = fatal ? engaged(visit, body) : undefined;
@@ -66,9 +69,12 @@ export function runStatus(
     return accepted(world, 'job_ran', ops, ended, say(spec.narration.expired));
   }
   // A due tick on an unreadable pool is skipped, never re-due at the same clock.
-  const next_tick_at = due ? add(row.next_tick_at, spec.tick_every) : untick(spec, row);
-  ops.push(...successor(body, status, row, next_tick_at, mint() as JobId));
-  return accepted(world, 'job_ran', ops, events, by ? say(spec.narration.tick) : []);
+  const next_tick_at = due ? add(tick, spec.tick_every) : untick(spec, row);
+  const next = Math.min(next_tick_at, row.ends_at);
+  const crossed = next <= world.state.clock;
+  if (!crossed) ops.push(...successor(body, status, row, next_tick_at, mint() as JobId));
+  const ran = accepted(world, 'job_ran', ops, events, by ? say(spec.narration.tick) : []);
+  return crossed ? { ...ran, next } : ran;
 }
 
 /**

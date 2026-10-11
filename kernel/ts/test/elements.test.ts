@@ -115,6 +115,16 @@ test('lightning landing on a wet golem stuns it and ends shocked and wet', () =>
   assert.equal(hp(wait(dry, 60)), 19);
 });
 
+// Breaks (loka-6ztc): one advance misses the successor a tick schedules (precondition_failed on
+// the shocked row), or a crossed sub-step reads the row's stale next tick (the advance faults), or
+// ticks at the end it shares with the last tick. Job by job: ticks at 60 and 120, ends at 180.
+test('one advance across every tick and the end of a status matches job-by-job play', () => {
+  const statuses = structuredClone(content.statuses!) as Record<string, any>;
+  statuses[`${C}:status/shocked`].duration = 180;
+  const w = wait(drop(fresh({ ...content, statuses } as Cartridge), 'jar'), 180);
+  assert.deepEqual([hp(w), on(w, 'shocked')], [18, false]);
+});
+
 // Breaks: status_applied emitted with no reaction listening, so every cartridge applying a status
 // by reaction gains events and receipts it never opted into (the opt-in, as W25's clock_hour).
 test('with no status_applied reaction a landing emits nothing', () => {

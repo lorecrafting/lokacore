@@ -53,7 +53,7 @@ export const decideAt = (
       return expiry(world, command, payload.job_id, row, mint);
     if (row.encounter_id) return roundSequence(world, command, payload.job_id, row, mint, steps);
     if (row.bleed_body_id) return runBleed(world, command, payload.job_id, row, mint);
-    if (row.job.kind === 'status') return runStatus(world, command, payload.job_id, row, mint);
+    if (row.job.kind === 'status') return runStatus(world, command, payload.job_id, row, mint, at);
     if (row.quest_instance_id) {
       const d = world.cartridge.quests?.[refString(row.job)]?.deadline;
       return d && !d.fact

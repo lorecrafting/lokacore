@@ -94,6 +94,16 @@ test('a potion gives str +3 for an hour; a second dose refreshes it, never stack
   assert.equal(mine(w, 'str'), 10);
 });
 
+// Breaks (loka-6ztc): one advance runs only the jobs pending at its start, so the job the
+// refresh rescheduled is missed and the advance faults instead of ending the might.
+test('one advance across a refreshed dose ends the might at its new end', () => {
+  let w = play(fresh(), { type: 'take', item_id: id(fresh(), 'item', 'vial') });
+  const drink = (x: World) => play(x, { type: 'drink', vessel_id: id(x, 'item', 'vial') });
+  w = drink(wait(drink(w), 1000));
+  assert.equal(mine(w, 'str'), 13);
+  assert.equal(mine(wait(w, 4600), 'str'), 10);
+});
+
 // Breaks (row 42): the song plays without the lute, the step's `npc` is ignored (the listener
 // stays 10) or skips presence (the traveller in the yard reads 12), the song moves str, or its
 // reaction's applied line comes before the song's own line.
