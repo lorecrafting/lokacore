@@ -16,6 +16,11 @@
       "op": "fact.adjust",
       "fact": "wardle_standing",
       "amount": -2
+    },
+    {
+      "op": "fact.assign",
+      "fact": "letter_burnt",
+      "value": true
     }
   ]
 }

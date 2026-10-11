@@ -12,9 +12,19 @@
   "policy": {
     "policy_version": 1,
     "root": {
-      "op": "fact_compare",
-      "fact": "strongbox_picked",
-      "equals": false
+      "op": "all",
+      "items": [
+        {
+          "op": "fact_compare",
+          "fact": "strongbox_picked",
+          "equals": false
+        },
+        {
+          "op": "fact_compare",
+          "fact": "strongbox_forced",
+          "equals": false
+        }
+      ]
     }
   },
   "check": {

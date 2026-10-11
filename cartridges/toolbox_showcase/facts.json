@@ -203,6 +203,73 @@
         "player"
       ],
       "meaning": "Gil heard the player shout a warning."
+    },
+    "strongbox_forced": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The tollhouse strongbox lock is forced."
+    },
+    "warden_knows": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The Warden has heard who forced the tollhouse strongbox."
+    },
+    "letter_burnt": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The player burnt the Reeve's letter in Wat's fire."
+    },
+    "knows_ash": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "instance"
+      ],
+      "per_subject": true,
+      "meaning": "Whether this NPC has heard that Wat went down to the gate about the letter."
+    },
+    "topic_surety_known": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The player knows about Hal in the toll cell and the paper that never came."
+    },
+    "topic_letter_known": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The player knows what the burnt letter carried."
     }
   }
 }

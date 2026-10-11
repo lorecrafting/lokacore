@@ -29,8 +29,8 @@ a quiet twin (deliver; pick) that pays nothing back.
 Clock: 3600 units a game hour, rate 50, so one real minute is 50 game minutes, a game day 28.8 real
 minutes and the 30-minute recap threshold 25 game hours. One number differs from the owner's sketch:
 the fuse is **one** game day, not two, so the owner's playtest fits one absence of about 35 real
-minutes; it is two fields (`statuses/word_travels.json` `duration` and `tick_every`, kept equal so the
-status stays one job) to retune.
+minutes; it is two fields (`statuses/word_travels.json` `duration` and `tick_every`, `tick_every` one
+unit less, as the compiler requires it below `duration`) to retune.
 
 ## Pattern 4: the forced strongbox (a fuse)
 
@@ -40,12 +40,12 @@ status stays one job) to retune.
   false)`, success `fact.assign strongbox_forced true`, a failure outcome with its line
   (`recipes/force_tollhouse_door.json`). `pick_strongbox`'s policy adds `strongbox_forced false`;
   `barriers/strongbox_lid.json` `opens_when any(strongbox_picked, strongbox_forced)`.
-- Status `word_travels`: `duration` 86400, `tick_every` 86400, `resource` hp, `per_tick` -1, label and
+- Status `word_travels`: `duration` 86400, `tick_every` 86399 (the compiler refuses a tick at or past the end), `resource` hp, `per_tick` -1, label and
   three narration keys (required, never shown: an item's status says nothing,
   [row G3](../system/mechanics.md#statuses-on-npcs-and-things-toolbox-row-g3)). It lives on the
   **strongbox item**, not the Warden: an item has no pools, so the tick changes nothing, and the Book
-  shows no NPC status anyway. The one job at +86400 emits `status_expired` only (an expired job
-skips the tick, `kernel/ts/src/mechanics/status/job.ts`).
+  shows no NPC status anyway. A silent tick at +86399 (no pool, no line), then the job at +86400
+emits `status_expired` only (an expired job skips the tick, `kernel/ts/src/mechanics/status/job.ts`).
 - Reaction `box_forced`: `on {event: fact_changed, fact: strongbox_forced}` `apply status.apply
   {status: word_travels, item: strongbox}` (`npc_status_sampler` torch on the door). Reaction
   `word_out`: `on {event: status_expired, status: word_travels}` `apply fact.assign warden_knows true`

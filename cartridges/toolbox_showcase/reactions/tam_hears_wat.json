@@ -1,0 +1,24 @@
+{
+  "on": {
+    "event": "entity_entered_room",
+    "room": "warden_gate",
+    "npc": "tam"
+  },
+  "when": {
+    "policy_version": 1,
+    "root": {
+      "op": "fact_compare",
+      "fact": "knows_ash",
+      "npc": "wat",
+      "equals": true
+    }
+  },
+  "apply": [
+    {
+      "op": "fact.assign",
+      "fact": "knows_ash",
+      "npc": "tam",
+      "value": true
+    }
+  ]
+}

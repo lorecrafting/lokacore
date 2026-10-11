@@ -1,0 +1,52 @@
+{
+  "label": "actions.think_letter",
+  "aliases": [
+    "reckon"
+  ],
+  "target": {
+    "kind": "detail",
+    "room": "church",
+    "detail": "lectern"
+  },
+  "priority": 5,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": [
+        {
+          "op": "fact_compare",
+          "fact": "topic_parish_known",
+          "equals": true
+        },
+        {
+          "op": "fact_compare",
+          "fact": "topic_surety_known",
+          "equals": true
+        },
+        {
+          "op": "not",
+          "item": {
+            "op": "fact_compare",
+            "fact": "topic_letter_known",
+            "equals": true
+          }
+        }
+      ]
+    }
+  },
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "topic_letter_known",
+          "value": true
+        }
+      ],
+      "narration": {
+        "actor": "narration.think_letter.success"
+      }
+    }
+  }
+}
