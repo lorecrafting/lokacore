@@ -1282,6 +1282,11 @@ wander boundary, hence no later than a newly fatal member's replacement due. Dea
 writes only that slot's eligibility; it never reschedules or writes plan control.
 Existing due ordering, segmentation and shared command budgets apply; plan work
 cannot scan historical created rows to find its six current members.
+A successor the same advance also crosses (loka-6ql4) runs as a sub-step of the plan job's
+one `run_job`, as a crossed schedule hour does (loka-qi0r, [schedule@1](#schedule1-behavior1-calendar1-mechanicsschedulerulets-kerneltssrcmechanicsschedulebehaviorts)):
+births, wanders and the target read that hour, and the wander boundary is the one hour-by-hour
+play would hold; plan control is written once, by the last sub-step, which schedules the next
+plan job after the target (`kernel/ts/src/mechanics/population/shared.ts` `runPopulation`).
 
 Equal-time combat and population jobs retain canonical `(due_time, job_id)` order
 and distinct writer groups. Population dispatch changes only actual birth/replacement

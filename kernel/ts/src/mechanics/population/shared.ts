@@ -166,36 +166,49 @@ function nightBoundary(world: World, plan: World['populationSpecs'][string]['pla
   return Math.min(next(plan.night_start), next(plan.night_end));
 }
 
-/** The current plan occurrence; stale bindings never mint a replacement. */
+/**
+ * The current plan occurrence; stale bindings never mint a replacement. `at` later than the row's
+ * due time is a crossed-hour sub-step (loka-6ql4, as loka-qi0r): the row ran and completed at its
+ * own time, and plan control is written only by the last step, which schedules after the target.
+ */
 export function runPopulation(
   world: World,
   command: Pick<Command, 'id'>,
   job_id: JobId,
-  job: JobRow,
+  row: JobRow,
   mint: Mint,
+  at = row.due_time,
 ) {
-  const plan = world.cartridge.populations?.[refString(job.job)];
-  const control = world.state.population_plans?.[key(job.job)];
+  const plan = world.cartridge.populations?.[refString(row.job)];
+  const control = world.state.population_plans?.[key(row.job)];
   if (!plan || !control) throw new KernelError('precondition_failed');
   if (control.suppression?.job_id === job_id)
-    return resumePopulation(world, command, job_id, job, control, plan, mint);
+    return resumePopulation(world, command, job_id, row, control, plan, mint);
   if (control.job_id !== job_id)
     return accepted<never>(world, 'job_ran', [{ op: 'job.complete', writer_group: 0, job_id }], []);
-  const target = targetAt(world, plan, job.due_time);
+  const job = { ...row, due_time: at };
+  // Control is unwritten while hours are crossed: the wander boundary hour-by-hour play would hold.
+  const wanderDue =
+    at > control.next_wander_due
+      ? alignedAfter(at - 1, plan.wander_interval)
+      : control.next_wander_due;
+  const target = targetAt(world, plan, at);
   const slots = slotRows(world, job.job, plan.cap);
-  const quiet = suppressed(world, job.job, job.due_time);
+  const quiet = suppressed(world, job.job, at);
   const born = quiet
     ? { ops: [] as DeltaOp[], ids: new Set<string>() }
     : births(world, command.id, job, target, slots, mint);
   const ops: DeltaOp[] = [
-    { op: 'job.complete', writer_group: 0, job_id },
+    ...(row.status === 'pending' ? [{ op: 'job.complete', writer_group: 0, job_id } as const] : []),
     ...born.ops,
     ...(quiet
       ? []
-      : wanders(world, command.id, job.job, plan, job, control, slots, born.ids, mint)),
-    ...successor(world, plan, job, control, target, slots, mint),
+      : wanders(world, command.id, job.job, plan, job, wanderDue, slots, born.ids, mint)),
   ];
-  return accepted<never>(world, 'job_ran', ops, []);
+  const after = successor(world, plan, job, control, wanderDue, target, slots, mint);
+  if (typeof after !== 'number') ops.push(...after);
+  const ran = accepted<never>(world, 'job_ran', ops, []);
+  return typeof after === 'number' ? { ...ran, next: after } : ran;
 }
 
 function resumePopulation(
@@ -247,25 +260,26 @@ function slotRows(world: World, plan: DefinitionRef, cap: number): Slots {
     return { slot, row };
   });
 }
+/** The successor ops, or its due time when the advance crosses it too (a drain sub-step). */
 function successor(
   world: World,
   plan: Plan,
   job: JobRow,
   control: NonNullable<World['state']['population_plans']>[string],
+  wanderDue: number,
   target: number,
   slots: Slots,
   mint: Mint,
-): DeltaOp[] {
+): DeltaOp[] | number {
   const wander =
-    job.due_time === control.next_wander_due
-      ? alignedAfter(job.due_time, plan.wander_interval)
-      : control.next_wander_due;
+    job.due_time === wanderDue ? alignedAfter(job.due_time, plan.wander_interval) : wanderDue;
   const eligibleDue = slots.flatMap(({ slot, row }) =>
     slot <= target && row.replacement_due !== null && row.replacement_due > job.due_time
       ? [row.replacement_due]
       : [],
   );
   const next = Math.min(wander, nightBoundary(world, plan, job.due_time), ...eligibleDue);
+  if (next <= world.state.clock) return next;
   const job_id = mint() as JobId;
   return [
     { op: 'job.schedule', writer_group: 0, job_id, job: job.job, due_time: next },
