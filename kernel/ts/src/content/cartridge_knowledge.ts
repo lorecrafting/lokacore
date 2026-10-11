@@ -71,10 +71,11 @@ function mapPositions(c: Obj, named: Checks['named'], out: Diagnostic[]) {
     out.push(diag('UNDECLARED_CAPABILITY', '.cartridge.map_positions'));
 }
 
-// Status reader 7: a room tagged air, chasm or water bars moves into it (kernel_api 1.62).
+// Status reader 7: the terrain tags (air, chasm, water; a room so tagged bars moves into it) are
+// new Tag members, so a room, item or barrier declaring one needs kernel_api 1.62.
 function terrainFloor(c: Obj): Diagnostic[] {
-  const terrain = Object.values(c.rooms as Obj).some((r) =>
-    r.tags?.some((t: never) => TERRAIN.includes(t)),
+  const terrain = [c.rooms, c.items, c.barriers].some((defs) =>
+    Object.values((defs ?? {}) as Obj).some((d) => d.tags?.some((t: never) => TERRAIN.includes(t))),
   );
   return terrain && apiCmp(c.manifest.requires.kernel_api.at_least, '1.62') < 0
     ? [diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least')]

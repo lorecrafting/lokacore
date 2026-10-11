@@ -92,7 +92,8 @@ test('a terrain room admits a move only while active statuses pass each of its t
 });
 
 // Breaks: cost_percent is ignored, rounded up, summed as deltas instead of applied in turn, or
-// applied in an order other than definition order (hushed before warded). Fare 15 mv.
+// applied in an order other than definition order (hushed before warded), or a fare rounded to 0
+// still writes an mv op. Fare 15 mv.
 test('cost_percent scales the fare, each status in turn in definition order, rounded down', () => {
   const fare = { movement: { cost: { resource: MV, amount: 15 } } };
   for (const [movement, paid] of [
@@ -103,6 +104,12 @@ test('cost_percent scales the fare, each status in turn in definition order, rou
     const blessed = go(hall(edited([], movement, fare)), 'north');
     assert.equal(mv(blessed) - mv(go(blessed, 'south')), paid, JSON.stringify(movement));
   }
+  // The default 1 mv fare at 50 rounds to 0: the move is free and writes no mv op.
+  const free = go(hall(edited([], { warded: { cost_percent: 50 } })), 'north');
+  const r = send(free, 'south');
+  assert.equal(code(r), 'accepted');
+  assert.equal(mv(r.world), mv(free));
+  assert.ok(!JSON.stringify(r.decision).includes('"resource.adjust"'), JSON.stringify(r.decision));
 });
 
 /** The sampler's artifact, edited and re-hashed, loaded: its first diagnostic's code and path. */
@@ -118,8 +125,8 @@ function reload(edit: (c: any) => void) {
   return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
 }
 
-// Breaks (twin of test/loka/content_status_movement_test.exs): a status movement or a room's
-// air, chasm or water tag loads under API 1.61, or a movement status without per_tick is refused.
+// Breaks (twin of test/loka/content_status_movement_test.exs): a status movement, a room's air,
+// chasm or water tag, or an item's water tag loads under API 1.61, or a movement status without per_tick is refused.
 test('loader: movement and terrain tags need API 1.62; movement stands in for per_tick', () => {
   const api = (v: string) => (c: any) => (c.manifest.requires.kernel_api.at_least = v);
   const moving = (c: any) => {
@@ -131,7 +138,11 @@ test('loader: movement and terrain tags need API 1.62; movement stands in for pe
     c.manifest.requires.capabilities.tags = c.lock.capabilities.tags = 1;
   };
   const floor = ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'];
-  for (const edit of [moving, tagged('air'), tagged('chasm'), tagged('water')]) {
+  const item = (c: any) => {
+    c.items[Object.keys(c.items)[0]].tags = ['water'];
+    c.manifest.requires.capabilities.tags = c.lock.capabilities.tags = 1;
+  };
+  for (const edit of [moving, tagged('air'), tagged('chasm'), tagged('water'), item]) {
     assert.equal(
       reload((c) => (api('1.62')(c), edit(c))),
       'loaded',

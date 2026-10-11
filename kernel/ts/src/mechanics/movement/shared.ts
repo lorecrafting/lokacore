@@ -9,7 +9,7 @@ import { KernelError } from '../../foundation/error.ts';
 import { adjust, level, pay, resourceRef, resourceSpec, type Levels } from '../resource.ts';
 import { held } from '../policy.ts';
 import { engaged } from '../combat/shared.ts';
-import { divide, mul } from '../../foundation/int.ts';
+import { mul, saturate } from '../../foundation/int.ts';
 import { statusMovement } from '../status/shared.ts';
 
 /**
@@ -85,12 +85,13 @@ export function fare(world: World, body: EntityId) {
     (level(world, body, mv) === undefined ? undefined : { resource: mv, amount: 1 });
   const multiplier = engaged(world, body) ? world.cartridge.world!.combat!.flee_multiplier : 1;
   if (!cost) return { ops: [] };
-  // Status reader 7: each active status's cost_percent in turn, rounded down.
+  // Status reader 7: each active status's cost_percent in turn, rounded down and saturated (a
+  // fare past the pool is refused by pay, never an overflow fault); a fare of 0 writes nothing.
   const amount = statusMovement(world, body).reduce(
-    (a, m) => (m.cost_percent === undefined ? a : divide(mul(a, m.cost_percent), 100)[0]),
+    (a, m) => (m.cost_percent === undefined ? a : saturate(Math.floor((a * m.cost_percent) / 100))),
     mul(cost.amount, multiplier),
   );
-  return pay(world, body, [{ ...cost, amount }]);
+  return amount ? pay(world, body, [{ ...cost, amount }]) : { ops: [] };
 }
 
 /** Status reader 7: the room tags that bar a move into the room (status `movement.passes`). */
