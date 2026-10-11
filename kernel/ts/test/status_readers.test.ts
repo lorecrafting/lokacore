@@ -230,13 +230,13 @@ function reload(edit: (c: any) => void) {
 
 // Breaks (twin of test/loka/content_status_readers_test.exs): one reader field (each alone) loads
 // under API 1.53, a blocks or allows entry naming no command (or the authority-internal elapsed)
-// loads, or a reader status without per_tick (the sampler's three) is refused.
+// loads, or a reader status without per_tick (the sampler's four) is refused.
 test('loader: reader fields need API 1.54 and name player commands', () => {
   assert.equal(
     reload(() => {}),
     'loaded',
   );
-  const keys = ['warded', 'hushed', 'soaked'];
+  const keys = ['warded', 'hushed', 'soaked', 'stunned'];
   for (const [key, field, value] of [
     ['warded', 'resistances', { fire: 10 }],
     ['hushed', 'blocks', ['say']],

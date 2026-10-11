@@ -25,7 +25,6 @@ import { assigned } from '../fact.ts';
 import { allyOf, npcRef, participantsPresent } from './shared.ts';
 import { eligible, flight, next, packPlan } from './behavior.ts';
 import { attack, prefix } from './round_attack.ts';
-import { statusAllows } from '../status/shared.ts';
 import { packRound, successor, narrate } from './round_flow.ts';
 import { suppressed } from '../population/shared.ts';
 import { settled as crowSettled } from '../crow/behavior.ts';
@@ -117,8 +116,6 @@ function ordinaryRound(
       if (!participantsPresent(at, row) || at.state.encounters![encounter_id].status !== 'open')
         break;
       if (attacker === row.body_id && !standing(at, row.character_id)) continue;
-      // Status reader 4: an NPC whose statuses bar `attack` (a stun) skips its blow.
-      if (attacker !== row.body_id && !statusAllows(at, attacker)('attack')) continue;
       attack(at, command, mint, encounter_id, row, attacker, r, close);
     }
     if (prefix(world, r.ops, r.due_time).state.encounters![encounter_id].status === 'open')

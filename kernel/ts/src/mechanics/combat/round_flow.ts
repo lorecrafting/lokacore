@@ -132,8 +132,6 @@ function packTurns({
       continue;
     if (attacker === row.body_id && !standing(at, row.character_id)) continue;
     if (attacker === selected && maybeFlight(at, selected, job, r, settings)) continue;
-    // Status reader 4: an NPC whose statuses bar `attack` (a stun) skips its blow, after flight.
-    if (attacker !== row.body_id && !statusAllows(at, attacker)('attack')) continue;
     attack(at, command, mint, encounter_id, { ...current, npc_id: target }, attacker, r, close);
   }
 }
