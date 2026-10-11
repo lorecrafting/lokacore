@@ -6,6 +6,7 @@ import type {
   DeltaOp,
   EntityId,
   JobId,
+  Key,
   Resistances,
   StatusRow,
 } from '../../contracts.gen.ts';
@@ -189,4 +190,17 @@ export function statusResistance(world: World, body: EntityId) {
   const specs = activeStatuses(world, body).map(({ spec }) => spec);
   return (entry: string) =>
     specs.reduce((sum, s) => add(sum, s.resistances?.[entry as keyof Resistances] ?? 0), 0);
+}
+
+/**
+ * Status reader 4: whether `body`'s active statuses let it take Command type `command`: none blocks
+ * it and every `allows` list names it. The player's admission (`permits`) and NPC combat turns read it.
+ */
+export function statusAllows(world: World, body: EntityId) {
+  const bars = Object.values(world.cartridge.statuses ?? {}).some((s) => s.blocks || s.allows);
+  const specs = bars ? activeStatuses(world, body).map(({ spec }) => spec) : [];
+  return (command: string) =>
+    specs.every(
+      (s) => !s.blocks?.includes(command as Key) && (s.allows?.includes(command as Key) ?? true),
+    );
 }

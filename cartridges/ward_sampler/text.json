@@ -37,5 +37,9 @@
   "condition.soaked": "Soaked",
   "narration.soaked.applied": "Water drenches you.",
   "narration.soaked.tick": "You drip.",
-  "narration.soaked.expired": "You dry off."
+  "narration.soaked.expired": "You dry off.",
+  "condition.stunned": "Stunned",
+  "narration.stunned.applied": "Thunder cracks; the troll reels, stunned.",
+  "narration.stunned.tick": "The troll sways.",
+  "narration.stunned.expired": "The troll shakes off its daze."
 }

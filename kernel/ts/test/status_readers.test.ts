@@ -87,9 +87,9 @@ function fight(w: World, before = (v: World) => v) {
   const after = round(play(den, { type: 'attack', target_id: troll(den) }));
   return [hp(after, after.body), hp(after, troll(after))];
 }
-const fresh = () => {
+const fresh = (c = content) => {
   n = 0;
-  return newWorld(content, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e54' as never, [1, 2, 3, 4]);
+  return newWorld(c, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e54' as never, [1, 2, 3, 4]);
 };
 const south = (w: World) => play(w, { type: 'move', direction: 'south' });
 
@@ -111,6 +111,19 @@ test('status resistances join the G2 sum, for the player and for an NPC', () => 
     } as World);
   };
   assert.deepEqual(fight(fresh(), brittle), [8, 4], '-100 - 100 clamps to -100: the player hits 4');
+});
+
+// Breaks (loka-kgd.98): a combat turn ignores the NPC's statuses (the stunned troll still clubs for
+// 2), or the skip outlives the stun's 200 s.
+test('a stunned troll skips its blows until the stun ends', () => {
+  const den = play(play(fresh(), { type: 'move', direction: 'east' }), {
+    type: 'say',
+    word: 'thunder',
+  });
+  const one = round(play(den, { type: 'attack', target_id: troll(den) }));
+  assert.deepEqual([hp(one, one.body), hp(one, troll(one))], [10, 7], 'round at 150 s: no blow');
+  const two = round(one);
+  assert.deepEqual([hp(two, two.body), hp(two, troll(two))], [8, 6], 'round at 300 s: it clubs');
 });
 
 // Breaks: the action set is not filtered (a hushed say is accepted), a block is refused with

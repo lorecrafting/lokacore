@@ -109,6 +109,34 @@ test('afraid goblins flee on their next turns; without fear they fight', () => {
   );
 });
 
+// Breaks (status reader 4, loka-kgd.98): pack flight ignores a `flee` block (entangled goblins still
+// run), a pack turn ignores an `attack` bar (stunned goblins still strike), or the `attack` gate runs
+// before flight (an afraid goblin barred from attacking skips its turn instead of fleeing).
+test('pack turns read blocks and allows: rooted goblins fight, stunned ones idle, cowed ones flee', () => {
+  const barred = (fields: object) => {
+    const c = structuredClone(content) as any;
+    Object.assign(c.statuses['fear_sampler@0.0.1:status/afraid'], fields);
+    return fight((v) => play(v, { type: 'shout', word: 'begone' }), c);
+  };
+  const rooted = barred({ blocks: ['flee'] });
+  assert.deepEqual(
+    [hp(rooted.w, rooted.w.body), hp(rooted.w, rooted.a), room(rooted.w, rooted.a)],
+    [8, 2, 'room.den.title'],
+    'as without fear: each goblin strikes once',
+  );
+  const stunned = barred({ allows: ['look'] });
+  assert.deepEqual(
+    [hp(stunned.w, stunned.w.body), hp(stunned.w, stunned.a), room(stunned.w, stunned.b)],
+    [10, 2, 'room.den.title'],
+    'neither flees nor strikes; the player hits the first twice',
+  );
+  const { w, a, b } = barred({ blocks: ['attack'] });
+  assert.deepEqual(
+    [hp(w, w.body), hp(w, a), hp(w, b), room(w, a), room(w, b)],
+    [10, 4, 6, 'room.burrow.title', 'room.burrow.title'],
+  );
+});
+
 // Breaks: the leader's entity_died reaction lands on the dead victim (co_present ignored), on no
 // one, or only on the goblin the player attacks next.
 test('the chief falls: both goblins flee on their next turns; without the reaction they fight', () => {
