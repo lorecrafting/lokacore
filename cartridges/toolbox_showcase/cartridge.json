@@ -245,10 +245,6 @@
         {
           "npc": "goblin",
           "experience": 10
-        },
-        {
-          "npc": "tilt_goblin",
-          "experience": 10
         }
       ],
       "level_up": "levelling.level_up"

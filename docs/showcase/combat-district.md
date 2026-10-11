@@ -190,16 +190,17 @@ rejects that wait; the guided loop never does this.
 
 ## Built (slice C, Beads `loka-y6yg.3`; the pit, Beads `loka-y6yg.10`)
 
-Steps 1 to 10 and the sandbox pack are built and pinned by `kernel/ts/test/showcase_combat.test.ts`
-(the pit after the `loka-6ql4` fix). Differences from the text above:
+Steps 1 to 10 are built and pinned by `kernel/ts/test/showcase_combat.test.ts` (the pit after the
+`loka-6ql4` fix). Differences from the text above:
 
-- Both pack plans have `replacement_delay` 8640000, not 86400: the loader requires
+- The sandbox pack (`tilt_goblins`) is not built: it waits for an attacker filter on
+  `attack_result` (Beads `loka-kgd.79`), because `boar_gore` reads only `npc_present tilt_boar`
+  and would wound the player (bleeding and gored) on any goblin hit in `tilt_yard`. The tilt
+  signpost clause stays "has a second boar, a poultice and a draught".
+- The pit's plan has `replacement_delay` 8640000, not 86400: the loader requires
   `wander_interval <= replacement_delay`, and the wander interval keeps the pack from wandering in
-  play. A pack killed stays gone for a hundred days.
-- A spawn template's room must be its plan's home, so the sandbox pack has its own template
-  `tilt_goblin` (room `tilt_yard`, bundle `tilt_goblins`; texts and `ear` shared) and its own
-  `kills` entry of 10. `enemy_fled` names `north` and `south` (the loader wants every exit inside
-  the area, from both rooms).
+  play. A pack killed stays gone for a hundred days. `enemy_fled` names `north` and `south` (the
+  loader wants every exit inside the area, from both rooms).
 - Step 9 experience is 70 while Beads `loka-lpq6` is open (B's kill pays nothing).
 - `aldous_lesson` has `learn` only: a second choice makes it a hub that reopens, and the compiler
   refuses a repeatable `receive` (OUTCOME_MISMATCH). `aldous_talk` is a hub: after `bounty` the
