@@ -23262,5 +23262,60 @@
         "code": "unknown_property"
       }
     ]
+  },
+  {
+    "contract": "StatusDefinition",
+    "value": {
+      "key": "might",
+      "duration": 3600,
+      "tick_every": 600,
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "mv"
+      },
+      "per_tick": 1,
+      "label": "condition.mighty",
+      "narration": {
+        "applied": "narration.might.applied",
+        "tick": "narration.might.tick",
+        "expired": "narration.might.expired"
+      },
+      "fear": false
+    },
+    "errors": [
+      {
+        "path": "/fear",
+        "code": "const_mismatch"
+      }
+    ]
+  },
+  {
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "entity_died"
+      },
+      "apply": [
+        {
+          "op": "status.apply",
+          "status": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "status",
+            "key": "afraid"
+          },
+          "co_present": false
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/apply/0/co_present",
+        "code": "not_in_enum"
+      }
+    ]
   }
 ]
