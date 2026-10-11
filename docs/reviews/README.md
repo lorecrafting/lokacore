@@ -13,6 +13,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: toolbox row G4, use X on Y (loka-kgd.76)](2026-10-10-toolbox-m8-useon-review.md): **APPROVE**
 - [Review: toolbox row 12, traps (loka-kgd.73)](2026-10-10-toolbox-m8-traps-review.md): **APPROVE WITH NOTES**
 - [Review: toolbox row 29a, spell cast admission (loka-kgd.81)](2026-10-10-toolbox-m8-spells-review.md): **APPROVE WITH NOTES**
+- [Review: status readers SR1 to SR3 (loka-kgd.86, .87, .88)](2026-10-10-toolbox-m8-readers-review.md): **CHANGES REQUIRED**
 - [Item review: toolbox row 26, order and dial puzzles (loka-kgd.75, batch M8)](2026-10-10-toolbox-m8-puzzles-review.md): **APPROVE WITH NOTES**
 - [Review: population successor across a multi-hour advance (loka-6ql4)](2026-10-10-toolbox-m8-pop-review.md): **APPROVE**
 - [Review: a round joins all its rows' writer groups; sight handoff check scoped (loka-x2gv, loka-kgd.43, toolbox M8)](2026-10-10-toolbox-m8-groups-review.md): **APPROVE**
