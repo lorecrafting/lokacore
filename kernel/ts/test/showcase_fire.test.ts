@@ -194,6 +194,7 @@ test('loader: barrier.set and co_present tag need API 1.56; to locked needs a ke
   const stray = (c: any) => {
     const b = { ...c.barriers[ref('barrier', 'store_door')], key: 'stray' };
     delete b.opens_when;
+    delete b.key_item;
     c.barriers[ref('barrier', 'stray')] = b;
   };
   assert.equal(
