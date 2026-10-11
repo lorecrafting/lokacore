@@ -67,4 +67,28 @@ defmodule Loka.ContentStatusReadersTest do
              warded.(%{"perception" => %{}})
            ])
   end
+
+  # Breaks (status reader 9; twin of the loader row in kernel/ts/test/status_room.test.ts): a step
+  # naming a room compiles under API 1.64, beside an npc, or naming no room of the cartridge.
+  test "a room step needs API 1.65, stands alone and names a room", %{dir: dir} do
+    api = &{"cartridge.json", fn c -> put_in(c, ["requires", "kernel_api", "at_least"], &1) end}
+    step = &{"reactions/thunder.json", fn r -> put_in(r, ["apply"], [&1]) end}
+    room = %{"op" => "status.apply", "status" => "stunned", "room" => "den"}
+    assert {:ok, _, _} = Loka.ContentSource.compile(dir, [api.("1.65"), step.(room)])
+
+    assert {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"} in diags(dir, [
+             api.("1.64"),
+             step.(room)
+           ])
+
+    for {edit, code} <- [
+          {%{"npc" => "troll"}, "SCHEMA_VIOLATION"},
+          {%{"room" => "nowhere"}, "UNRESOLVED_REFERENCE"}
+        ] do
+      assert {code, "reactions/thunder.apply[0].room"} in diags(dir, [
+               api.("1.65"),
+               step.(Map.merge(room, edit))
+             ])
+    end
+  end
 end
