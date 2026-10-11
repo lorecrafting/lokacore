@@ -201,22 +201,77 @@ test('loader: barrier.set and co_present tag need API 1.56; to locked needs a ke
     reload((c) => (keyed(c), stray(c), door({ tag: 'burnable' })(c))),
     'ok',
   );
+  // Breaks: a barrier.set naming no barrier of the cartridge loads.
+  const gate = { barrier: { ...C, kind: 'barrier', key: 'gate' } };
+  assert.equal(
+    reload((c) => (spread(c)[1] = { op: 'barrier.set', to: 'open', ...gate })),
+    `UNRESOLVED_REFERENCE .cartridge.reactions["${ref('reaction', 'fire_spreads')}"].apply[1].barrier`,
+  );
 });
+
+/** The showcase edited, the player in the smithy carrying `carry`, the torch then dropped. */
+function light(edit: (c: any) => void, carry: string[] = []) {
+  const c = structuredClone(content) as any;
+  edit(c);
+  let x = newWorld(c as Cartridge, WORLD as never, [1, 2, 3, 4]);
+  x = go(go(go(x, 'north').world, 'east').world, 'south').world;
+  for (const item of [...carry, 'smithy_torch']) x = take(x, item);
+  return play(x, { type: 'drop', item_id: id(x, 'item', 'smithy_torch') }).world;
+}
+const storeDoor = { ...C, kind: 'barrier', key: 'store_door' };
+const spreadOf = (c: any) => c.reactions[ref('reaction', 'fire_spreads')].apply;
 
 // Breaks: a named barrier.set ignores its barrier, or moves a locked door to open in one illegal
 // transition (the composer refuses it) instead of locked, closed, open.
 test('a named barrier.set opens a locked door through closed', () => {
-  const c = structuredClone(content) as any;
-  c.barriers[ref('barrier', 'store_door')].initial = 'locked';
-  c.reactions[ref('reaction', 'fire_spreads')].apply[1] = {
-    op: 'barrier.set',
-    to: 'open',
-    barrier: { ...C, kind: 'barrier', key: 'store_door' },
-  };
-  let x = newWorld(c as Cartridge, WORLD as never, [1, 2, 3, 4]);
-  x = go(go(go(x, 'north').world, 'east').world, 'south').world;
-  x = take(x, 'smithy_torch');
-  x = play(x, { type: 'drop', item_id: id(x, 'item', 'smithy_torch') }).world;
+  const x = light((c) => {
+    c.barriers[ref('barrier', 'store_door')].initial = 'locked';
+    spreadOf(c)[1] = { op: 'barrier.set', to: 'open', barrier: storeDoor };
+  });
   assert.equal(door(x), 'locked');
   assert.equal(door(wait(x, x.state.clock + 60).world), 'open');
+});
+
+// Breaks: co_present lands on tagged items outside the event's room (in the pack, or next door).
+test('kindling carried or lying in another room does not catch', () => {
+  const x = light(
+    (c) => {
+      const k = c.items[ref('item', 'kindling')];
+      const fold = { ...C, kind: 'room', key: 'the_fold' };
+      c.items[ref('item', 'fold_kindling')] = {
+        ...k,
+        key: 'fold_kindling',
+        location: { in: 'room', room: fold },
+      };
+    },
+    ['kindling'],
+  );
+  assert.deepEqual(
+    ['bench', 'kindling', 'fold_kindling'].map((k) => burning(x, k)),
+    [true, false, false],
+  );
+});
+
+// Breaks: barrier.set by tag moves an exit barrier that lacks the tag.
+test('a door that is not burnable stays shut', () => {
+  const x = light((c) => (c.barriers[ref('barrier', 'store_door')].tags = ['wooden']));
+  assert.equal(door(wait(x, x.state.clock + 60).world), 'closed');
+});
+
+// Breaks: a later rule's write to the door the spread opened takes a new writer group (the wait
+// faults conflicting_write) instead of joining the spread's; or one rule's second barrier.set on a
+// barrier reads the committed state, not its first step's (the door stays open).
+test('a later rule, or a later step, re-closes the door the spread opened', () => {
+  const reclose = { op: 'barrier.set', to: 'closed', barrier: storeDoor };
+  const laterRule = light((c) => {
+    const spread = c.reactions[ref('reaction', 'fire_spreads')];
+    c.reactions[ref('reaction', 'zz_reclose')] = {
+      key: 'zz_reclose',
+      on: spread.on,
+      apply: [reclose],
+    };
+  });
+  assert.equal(door(wait(laterRule, laterRule.state.clock + 60).world), 'closed');
+  const laterStep = light((c) => spreadOf(c).splice(2, 0, reclose), ['kindling']); // one spread only
+  assert.equal(door(wait(laterStep, laterStep.state.clock + 60).world), 'closed');
 });
