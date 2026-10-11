@@ -73,6 +73,15 @@ test('the target reaches admission for a talk alias, a recipe and a take', () =>
     stepped(w, { type: 'perform', action: 'coil_rope', item_id: lantern }),
     'invalid_target',
   );
+  // An invocation naming two targets for a detail recipe keeps its pre-G4 code (receipts).
+  const invocation = {
+    action_key: 'coil_rope',
+    actor_id: w.character,
+    target_ids: [lantern, lantern],
+    input: {},
+  };
+  const two = resolve(w, { invocation, command_id: CID } as never);
+  assert.equal('payload' in two ? 'resolved' : two.error.code, 'unsupported_capability');
   assert.deepEqual(
     [shown(w, 'take', lantern), stepped(w, { type: 'take', item_id: lantern })],
     ['available', 'accepted'],

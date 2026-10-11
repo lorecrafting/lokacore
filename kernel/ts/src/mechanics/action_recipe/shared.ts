@@ -1,5 +1,5 @@
 // Toolbox row G4: a use recipe (RecipeTarget kind use, action.schema.json) applies a held tool to
-// another item in reach, both chosen by the invocation (perform item_id, target_id). The recipe is
+// another item on the floor or carried, both chosen by the invocation (perform item_id, target_id). The recipe is
 // keyed by the tool's properties (UseTool) and, through its policy, the target's; never by ids.
 import type {
   ActionRecipe,
@@ -16,9 +16,10 @@ export type UseTarget = Extract<RecipeTarget, { kind: 'use' }>;
 /**
  * Why `body` may not use `tool` on `target` now, before the recipe's policy, shared by the rule,
  * step's admission and the GameView: invalid_target unless both are distinct items; not_present
- * unless the tool is held (in the body, directly or in an open container) and the target in reach;
- * invalid_target when the tool lacks the UseTool's tag or liquid. A reach fault code
- * (budget_exceeded, containment_cycle) is returned as is.
+ * unless the tool is held (in the body, directly or in an open container) and the target is on the
+ * room's floor or directly in the body (the offer's target scopes, room_contents and inventory,
+ * commands/actions.ts cartridge); invalid_target when the tool lacks the UseTool's tag or liquid. A reach fault code
+ * (budget_exceeded, containment_cycle) on the tool is returned as is.
  */
 export function useRefused(
   world: World,
@@ -30,11 +31,10 @@ export function useRefused(
 ) {
   const item = (id?: EntityId) => id !== undefined && world.entities[id]?.kind === 'item';
   if (!item(tool) || !item(target) || tool === target) return 'invalid_target' as const;
-  for (const reached of [
-    reach(world, body, tool!, steps, true),
-    reach(world, body, target!, steps),
-  ])
-    if (reached !== true) return reached || ('not_present' as const);
+  const held = reach(world, body, tool!, steps, true);
+  if (held !== true) return held || ('not_present' as const);
+  const at = world.state.containers[target!];
+  if (at !== body && at !== world.state.containers[body]) return 'not_present' as const;
   return fits(world, tool!, t.tool) ? undefined : ('invalid_target' as const);
 }
 

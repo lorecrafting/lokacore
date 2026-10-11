@@ -150,6 +150,19 @@ test('an empty bucket quenches nothing', () => {
   assert.equal(code(play(x, { type: 'perform', action: 'quench', ...ids })), 'invalid_target');
 });
 
+// Breaks: the use target's scopes (room_contents, inventory) silently ignored: a burning item in
+// an open container on the floor is offered and quenched. The winch stands in for an open crate
+// (an item without a barrier keeps its contents in reach, lookups.ts opened).
+test('a burning item in an open crate is neither offered nor quenched', () => {
+  const w = start();
+  const boxed = structuredClone(w) as { state: { containers: Record<string, string> } };
+  boxed.state.containers[e(w, 'cart')] = e(w, 'winch');
+  const x = boxed as unknown as World;
+  assert.deepEqual(pairs(x, 'bucket'), []);
+  const ids = { target_id: e(w, 'cart'), item_id: e(w, 'bucket') };
+  assert.equal(code(play(x, { type: 'perform', action: 'quench', ...ids })), 'not_present');
+});
+
 // Breaks: a pair blocked by the recipe's cooldown is listed available (or dropped), or its reason
 // differs from the rule's rejection.
 test('a cooling-down oil pair is listed unavailable with the code the step returns', () => {
