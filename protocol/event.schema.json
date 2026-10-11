@@ -735,6 +735,17 @@
         {
           "type": "object",
           "properties": {
+            "type": { "const": "status_applied" },
+            "body_id": { "$ref": "identity.schema.json#/$defs/EntityId" },
+            "status": { "$ref": "identity.schema.json#/$defs/DefinitionRef" }
+          },
+          "required": ["type", "body_id", "status"],
+          "additionalProperties": false,
+          "description": "Toolbox row G3 reader 2: a reaction's status.apply started a status on a body, NPC or thing (body_id) that held it inactive or not at all; a refresh while active emits none."
+        },
+        {
+          "type": "object",
+          "properties": {
             "type": { "const": "status_expired" },
             "body_id": { "$ref": "identity.schema.json#/$defs/EntityId" },
             "status": { "$ref": "identity.schema.json#/$defs/DefinitionRef" }

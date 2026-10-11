@@ -1,0 +1,13 @@
+{
+  "on": {
+    "event": "item_dropped",
+    "item": "bucket"
+  },
+  "apply": [
+    {
+      "op": "status.apply",
+      "status": "wet",
+      "npc": "golem"
+    }
+  ]
+}

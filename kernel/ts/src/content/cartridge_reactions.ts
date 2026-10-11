@@ -30,6 +30,7 @@ const FLOORS: Record<string, number> = {
   'quest.resolve': 12,
   'quest.fail': 12,
   'population.suppress': 35,
+  'status.cure': 53, // status reader 3 (row G3)
 };
 
 const each = (c: Obj): [Obj, string][] =>
@@ -44,7 +45,7 @@ export const uses = (c: Obj) =>
     ['definition', 'reaction', at],
     ['event', r.on.event, `${at}.on.event`],
     ...r.apply.flatMap((s: Obj, i: number) =>
-      s.op === 'population.suppress' || s.op === 'experience.grant'
+      s.op === 'population.suppress' || s.op === 'experience.grant' || s.op === 'status.cure'
         ? []
         : [
             [
@@ -68,6 +69,7 @@ export function reactions(c: Obj, { named, typedValue }: Checks): Diagnostic[] {
     const floor = Math.max(
       r.on.event === 'quest_resolved' ? 8 : 0,
       r.on.event === 'spoken' ? 48 : r.on.npc ? 47 : 0, // speech (G9), the entrant filter (W3)
+      r.on.event === 'status_applied' ? 53 : 0, // status reader 2 (row G3)
       ...r.apply.map((s: Obj) => (s.co_present ? 50 : (FLOORS[s.op] ?? 0))), // co_present: row W21
     );
     if (floor && (major < 1 || (major === 1 && minor < floor)))
@@ -95,8 +97,8 @@ export function reactions(c: Obj, { named, typedValue }: Checks): Diagnostic[] {
           out.push(diag('SCHEMA_VIOLATION', `${at}.apply[${i}].plan`));
         if (r.on.event !== 'fact_changed')
           out.push(diag('OUTCOME_MISMATCH', `${at}.apply[${i}].op`));
-      } else if (s.op !== 'status.apply' && s.op !== 'experience.grant') {
-        // status.apply, experience.grant, fact.adjust's int: with their declarations (cartridge_standing.ts).
+      } else if (!['status.apply', 'status.cure', 'experience.grant'].includes(s.op)) {
+        // status steps, experience.grant, fact.adjust's int: with their declarations (cartridge_standing.ts).
         named(s.fact, 'fact', `${at}.apply[${i}].fact`);
         if (s.op !== 'fact.adjust') typedValue(s.fact, s.value, `${at}.apply[${i}].value`);
         for (const f of ['npc', 'item']) if (s[f]) named(s[f], f, `${at}.apply[${i}].${f}`);

@@ -195,6 +195,7 @@
       "status_active"
     ],
     "events": [
+      "status_applied",
       "status_ticked",
       "status_expired"
     ]

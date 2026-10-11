@@ -79,17 +79,21 @@ defmodule Loka.Content.Reactions do
     "quest.activate" => 8,
     "quest.resolve" => 12,
     "quest.fail" => 12,
-    "population.suppress" => 35
+    "population.suppress" => 35,
+    "status.cure" => 53
   }
 
-  # One diagnostic per rule below its highest floor; the entrant filter needs 1.47 (row W3), spoken
-  # 1.48 (G9), a co_present status.apply 1.50 (W21).
+  # The kernel_api minor each trigger event needs: spoken 1.48 (G9), status_applied 1.53 (status
+  # reader 2, row G3).
+  @events %{"quest_resolved" => 8, "spoken" => 48, "status_applied" => 53}
+
+  # One diagnostic per rule below its highest floor; the entrant filter needs 1.47 (row W3), a
+  # co_present status.apply 1.50 (W21).
   defp api(r, manifest) do
     floor =
       Enum.max([
-        if(r["on"]["event"] == "quest_resolved", do: 8, else: 0),
-        if(Map.has_key?(r["on"], "npc"), do: 47, else: 0),
-        if(r["on"]["event"] == "spoken", do: 48, else: 0)
+        Map.get(@events, r["on"]["event"], 0),
+        if(Map.has_key?(r["on"], "npc"), do: 47, else: 0)
         | Enum.map(r["apply"], &if(&1["co_present"], do: 50, else: Map.get(@floors, &1["op"], 0)))
       ])
 
@@ -155,6 +159,10 @@ defmodule Loka.Content.Reactions do
           else: []
         ) ++
         listener(rel, s, i, ctx)
+
+  # Status reader 3 (row G3): the subject's status.
+  defp consequence(rel, {%{"op" => "status.cure"} = s, i}, _, ctx),
+    do: reference(rel, ["apply", i], "status", s, ctx.m, ctx.defs)
 
   defp consequence(rel, {s, i}, _, ctx),
     do:

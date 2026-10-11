@@ -157,10 +157,18 @@ export const clearStatuses = (
     .filter(({ spec }) => !returning || spec.duration !== 'permanent')
     .map(({ status, row }) => endStatus(body, status, row, writer_group));
 
-/** End each active status on `body` that `cures` lists, once however often listed (Eat, Drink). */
-export function cureOps(world: World, body: EntityId, cures: readonly DefinitionRef[] = []) {
+/**
+ * End each active status on `body` that `cures` lists, once however often listed (Eat, Drink), in
+ * `writer_group` (a reaction's cure joins its holder's group, status reader 3).
+ */
+export function cureOps(
+  world: World,
+  body: EntityId,
+  cures: readonly DefinitionRef[] = [],
+  writer_group = 0,
+) {
   const listed = new Set(cures.map(refString));
   return activeStatuses(world, body)
     .filter(({ status }) => listed.has(refString(status)))
-    .flatMap(({ status, row }) => expire(world, body, status, row, 0));
+    .flatMap(({ status, row }) => expire(world, body, status, row, writer_group));
 }

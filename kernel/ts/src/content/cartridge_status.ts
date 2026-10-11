@@ -13,7 +13,7 @@ export function status(c: Obj): Diagnostic[] {
   const defs = (c.statuses ?? {}) as Record<string, Obj>;
   const applies = Object.entries(c.reactions ?? {}).flatMap(([ref, r]: [string, any]) =>
     (r.apply as Obj[]).flatMap((s, i) =>
-      s.op === 'status.apply'
+      s.op === 'status.apply' || s.op === 'status.cure'
         ? [[`.cartridge.reactions${step(ref)}.apply[${i}].status`, s.status]]
         : [],
     ),

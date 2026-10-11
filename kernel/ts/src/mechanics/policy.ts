@@ -32,19 +32,25 @@ import { levelling } from './levelling/shared.ts';
 // disposition.ts through it) imports no dialogue module: the Metro bundle threw on that cycle.
 export const ALWAYS: VersionedPolicy = { policy_version: 1, root: { op: 'all', items: [] } };
 
+type Ctx = {
+  target?: EntityId;
+  steps: { n: number };
+  cause?: DomainEvent;
+  cue?: true;
+  subject?: EntityId;
+};
+
 /**
  * True when the condition tree holds for `actor` in `world`, `ctx.target` the action's target
- * (target_present is false without one); each leaf it evaluates adds one to `ctx.steps.n`
- * (04 §5.4 query_steps).
+ * (target_present is false without one), `ctx.subject` a reaction's event subject; each leaf it
+ * evaluates adds one to `ctx.steps.n` (04 §5.4 query_steps).
  */
 // size: allow 60, one case per policy leaf (mechanics.md policy leaf set, toolbox row G1)
 export function holds(
   world: World,
   actor: CharacterId,
   p: Policy,
-  ctx: { target?: EntityId; steps: { n: number }; cause?: DomainEvent; cue?: true } = {
-    steps: { n: 0 },
-  },
+  ctx: Ctx = { steps: { n: 0 } },
 ): boolean {
   switch (p.op) {
     case 'all':
@@ -89,7 +95,7 @@ export function holds(
     case 'level_compare': // row 29a; level 1 without world.levelling
       return (levelling(world, actor)?.level ?? 1) >= p.at_least;
     case 'status_active':
-      return ctx.target !== undefined && !!currentStatus(world, ctx.target, p.status);
+      return statusActive(world, actor, p, ctx);
     case 'npc_present':
       return here(world, actor, world.entityIds[refString(p.npc)]);
     case 'cue_perceived':
@@ -146,6 +152,18 @@ function tagsOf(
     return world.rooms[world.state.containers[bodyOf(world, actor)!]!]?.tags;
   const entity = target === undefined ? undefined : world.entities[target];
   return entity?.kind === 'item' ? entity.tags : undefined;
+}
+
+// status_active's holder: the action's target, (status reader 1, row G3) the actor's body for self,
+// or a reaction's event subject for subject (reaction.ts sequence; none elsewhere).
+function statusActive(
+  world: World,
+  actor: CharacterId,
+  p: Extract<Policy, { op: 'status_active' }>,
+  ctx: Ctx,
+) {
+  const who = { self: bodyOf(world, actor), subject: ctx.subject, target: ctx.target }[p.subject];
+  return who !== undefined && !!currentStatus(world, who, p.status);
 }
 
 // npc_present's presence (toolbox row W6): the entity is in the actor's room and living; no light
