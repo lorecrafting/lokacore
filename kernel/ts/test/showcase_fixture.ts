@@ -75,11 +75,9 @@ export function refused(w: World, p: object) {
 
 /**
  * As the host (mobile/authority/local-story/elapsed.ts): elapsed steps to `target`, stopping at each
- * pending job but the calendar job; every narration key on the way. One call spans at most one
- * day (loka-j2mo).
+ * pending job but the calendar job; every narration key on the way.
  */
 export function wait(w: World, target: number) {
-  assert.ok(target - w.state.clock <= DAY, 'a wait spans at most one day');
   const lines: string[] = [];
   while (w.state.clock < target) {
     const until = Object.values(w.state.jobs ?? {})

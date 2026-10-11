@@ -53,7 +53,8 @@
   "entry": "crossroads_inn",
   "time_policy": {
     "profile": "real_elapsed",
-    "rate": 50
+    "rate": 50,
+    "recap_after_minutes": 30
   },
   "alternates": {
     "narration.look_about": [
@@ -183,6 +184,24 @@
       "restore": {
         "hp": 10,
         "mv": 100
+      }
+    },
+    "combat": {
+      "player_attack": {
+        "chance": 0,
+        "damage_min": 1,
+        "damage_max": 1
+      },
+      "interval": 150,
+      "sleep_multiplier": 2,
+      "flee_multiplier": 2,
+      "narration": {
+        "player_hit": "combat.player_hit",
+        "player_miss": "combat.player_miss",
+        "npc_hit": "combat.npc_hit",
+        "npc_miss": "combat.npc_miss",
+        "player_died": "combat.player_died",
+        "npc_died": "combat.npc_died"
       }
     }
   }

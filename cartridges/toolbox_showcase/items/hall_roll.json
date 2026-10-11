@@ -1,0 +1,19 @@
+{
+  "keywords": [
+    "roll",
+    "hall_roll"
+  ],
+  "short": "item.hall_roll.short",
+  "room_line": "item.hall_roll.room",
+  "description": "item.hall_roll.description",
+  "location": {
+    "in": "room",
+    "room": "moot_hall"
+  },
+  "mass_grams": 300,
+  "readable": {
+    "label": "actions.read_book",
+    "text": "readable.parish_roll",
+    "topic": "parish"
+  }
+}

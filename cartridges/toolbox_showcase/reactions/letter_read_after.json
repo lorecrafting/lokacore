@@ -1,0 +1,21 @@
+{
+  "on": {
+    "event": "fact_changed",
+    "fact": "scene_letter_read"
+  },
+  "when": {
+    "policy_version": 1,
+    "root": {
+      "op": "fact_compare",
+      "fact": "scene_letter_read",
+      "equals": -1
+    }
+  },
+  "apply": [
+    {
+      "op": "fact.adjust",
+      "fact": "wardle_standing",
+      "amount": 1
+    }
+  ]
+}

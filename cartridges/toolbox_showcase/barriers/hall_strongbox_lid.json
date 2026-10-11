@@ -1,0 +1,15 @@
+{
+  "keywords": [
+    "hall_strongbox_lid"
+  ],
+  "short": "barrier.hall_strongbox_lid.short",
+  "initial": "closed",
+  "opens_when": {
+    "policy_version": 1,
+    "root": {
+      "op": "fact_compare",
+      "fact": "hall_box_picked",
+      "equals": true
+    }
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "label": "actions.pick_hall_strongbox",
+  "aliases": [
+    "pick"
+  ],
+  "target": {
+    "kind": "detail",
+    "room": "moot_hall",
+    "detail": "hall_strongbox_lock"
+  },
+  "priority": 5,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "fact_compare",
+      "fact": "hall_box_picked",
+      "equals": false
+    }
+  },
+  "check": {
+    "key": "pick_hall_strongbox",
+    "kind": "opposed",
+    "skill": "pick"
+  },
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "hall_box_picked",
+          "value": true
+        }
+      ],
+      "narration": {
+        "actor": "narration.pick_hall_strongbox.success"
+      }
+    },
+    "failure": {
+      "sequence": [],
+      "narration": {
+        "actor": "narration.pick_hall_strongbox.failure"
+      }
+    }
+  }
+}

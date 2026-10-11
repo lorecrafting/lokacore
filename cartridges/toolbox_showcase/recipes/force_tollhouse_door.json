@@ -1,0 +1,55 @@
+{
+  "label": "actions.force_tollhouse_door",
+  "aliases": [
+    "force"
+  ],
+  "target": {
+    "kind": "detail",
+    "room": "tollhouse",
+    "detail": "tollhouse_door"
+  },
+  "priority": 5,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": [
+        {
+          "op": "fact_compare",
+          "fact": "tollhouse_forced",
+          "equals": false
+        },
+        {
+          "op": "has_tag",
+          "barrier": "tollhouse_door",
+          "tag": "fragile"
+        }
+      ]
+    }
+  },
+  "check": {
+    "key": "force_tollhouse_door",
+    "kind": "opposed",
+    "attribute": "str"
+  },
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "tollhouse_forced",
+          "value": true
+        }
+      ],
+      "narration": {
+        "actor": "narration.force_tollhouse_door.success"
+      }
+    },
+    "failure": {
+      "sequence": [],
+      "narration": {
+        "actor": "narration.force_tollhouse_door.failure"
+      }
+    }
+  }
+}

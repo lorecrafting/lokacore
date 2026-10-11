@@ -1,0 +1,41 @@
+{
+  "title": "room.moot_hall.title",
+  "description": "room.moot_hall.description",
+  "exits": {
+    "north": {
+      "to": "village_green"
+    },
+    "west": {
+      "to": "tollhouse",
+      "barrier": "iron_door"
+    },
+    "east": {
+      "to": "hall_closet",
+      "barrier": "hall_cupboard"
+    }
+  },
+  "details": {
+    "hall_strongbox_lock": {
+      "aliases": [
+        "lock"
+      ],
+      "description": "detail.hall_strongbox_lock",
+      "rating": 1
+    },
+    "hall_cupboard": {
+      "aliases": [
+        "cupboard",
+        "hall_cupboard"
+      ],
+      "description": "detail.hall_cupboard",
+      "rating": 5
+    },
+    "hall_lectern": {
+      "aliases": [
+        "lectern",
+        "hall_lectern"
+      ],
+      "description": "detail.hall_lectern"
+    }
+  }
+}

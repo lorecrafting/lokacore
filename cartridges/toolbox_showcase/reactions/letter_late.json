@@ -1,0 +1,19 @@
+{
+  "on": {
+    "event": "quest_failed",
+    "quest": "carry_letter",
+    "outcome": "late"
+  },
+  "apply": [
+    {
+      "op": "fact.assign",
+      "fact": "letter_late",
+      "value": true
+    },
+    {
+      "op": "fact.adjust",
+      "fact": "wardle_standing",
+      "amount": -1
+    }
+  ]
+}

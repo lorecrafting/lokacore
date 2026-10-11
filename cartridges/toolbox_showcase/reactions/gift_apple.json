@@ -1,0 +1,13 @@
+{
+  "on": {
+    "event": "item_acquired",
+    "item": "apple"
+  },
+  "apply": [
+    {
+      "op": "fact.adjust",
+      "fact": "trust",
+      "amount": 1
+    }
+  ]
+}

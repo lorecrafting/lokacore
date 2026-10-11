@@ -11,9 +11,6 @@ themselves are the developer's, except the four signpost texts, given in full. T
 runs 1 to 10 with no regeneration (exposure sampler: a drain alone never kills; the combat district
 lowers the minimum to 0 when death arrives). Times are the game clock; one game hour is 3600
 logical units and 72 real seconds (`real_elapsed`, rate 50), so one real minute is 3000 units.
-Every `wait` in a test or walkthrough spans at most one day: a wait that crosses the same
-scheduled NPC entry twice fires one rumour reaction twice and faults `conflicting_write`
-(Beads `loka-j2mo`, open); longer spans are several waits.
 
 ## Build split
 
@@ -234,8 +231,8 @@ their description why the door is shut (a `sky` variant).
 | 5 | Down to `sea_cave`; `search_cleft` at 10:00. | Unavailable (outside the window); a typed `search` is refused; the cave's Exits list only west. | tide gate x hidden exit x time window x climb |
 | 6 | Wait to 12:00; open `tidegate`; west. | Opens at low tide; this is the shore's third visit, so its description is the familiar one-liner. | tide gate x hidden exit x time window x climb |
 | 7 | Wait to 20:00; east (the gate stays open at high tide); `search_cleft`. | Success line plus the tip once; Exits now list up; the map links the cave to the stair; a move up succeeds. | tide gate x hidden exit x time window x climb |
-| 8 | Reach day 4 (winter) by one-day waits; at 03:00 pass Idony. | Her name reads the dozing variant; after 06:00 the base; her description reads the winter variant. | NPC status x variants x schedule (the variant half) |
-| 9 | Reach the first full moon (172800 from the lunar origin: day 3, 00:00) by one-day waits; open `moon_door` on `cliff_top`; east. | Opens; the player is in `tide_pools`; at a new moon the Open is refused and the cliff's variant says why. | tide gate x hidden exit x time window x climb |
+| 8 | Reach day 4 (winter); at 03:00 pass Idony. | Her name reads the dozing variant; after 06:00 the base; her description reads the winter variant. | NPC status x variants x schedule (the variant half) |
+| 9 | Reach the first full moon (172800 from the lunar origin: day 3, 00:00); open `moon_door` on `cliff_top`; east. | Opens; the player is in `tide_pools`; at a new moon the Open is refused and the cliff's variant says why. | tide gate x hidden exit x time window x climb |
 
 World tests run on clear days (the test's world id gives days 1 to 4 `clear`), so no drain or
 variant from the weather disturbs the hp and description outcomes above.
@@ -253,12 +250,15 @@ Rows: 13, 14, 15, 46, G11, G12, W2, W3, W10, W23, W24, W27 and the quest-and-sce
 
 | Room | Exits | Holds |
 |---|---|---|
-| `village_green` (sign) | north `crossroads_inn`, east `warden_gate`, west `church`, northeast `mill`, south `moot_hall` | `sign_social`; **Nell** (baker, shop); **the Reeve**; `apple`; `letter` on detail `moot_stone` (an item lying in the room) |
+| `village_green` (sign) | north `crossroads_inn`, east `warden_gate`, west `church`, up `mill`, south `moot_hall` | `sign_social`; **Nell** (baker, shop); **the Reeve**; `apple`; `letter` on detail `moot_stone` (an item lying in the room) |
 | `warden_gate` | west `village_green`, east `tollhouse` through barrier `toll_gate` | **Warden**; **Tam** at 07:00 (his cart) |
 | `tollhouse` | west `warden_gate`, north `mill` through barrier `tollhouse_door` (`wooden`, `fragile`), east `moot_hall` through barrier `iron_door` (`metal`) | `strongbox` (container whose lid `opens_when fact_compare strongbox_picked true`, holding `mill_ledger`); details `strongbox_lock` (rating 1), `tollhouse_door` (rating 5), `iron_door` (rating 5) |
-| `mill` | southwest `village_green`, south `tollhouse` through `tollhouse_door` | detail `millwheel` |
+| `mill` | down `village_green`, south `tollhouse` through `tollhouse_door` | detail `millwheel` |
 | `church` | east `village_green` | `parish_roll` (readable, topic `parish`); detail `lectern` |
 | `moot_hall` (sandbox) | north `village_green`, west `tollhouse` through `iron_door` | **Bess** (alewife); `hall_strongbox` (lock rating 1); barrier `hall_cupboard` (`wooden`, `fragile`, rating 5) to a one-detail closet room `hall_closet`; `hall_roll` (readable, topic `parish`); detail `hall_lectern` |
+
+Exits name only north, south, east, west, up and down (`protocol/room.schema.json`), so the mill
+track climbs `up` from the green. The `hall_cupboard` exit is east of `moot_hall`.
 
 ### Signpost (`sign_social`, readable in `village_green`)
 
@@ -277,7 +277,7 @@ Rows: 13, 14, 15, 46, G11, G12, W2, W3, W10, W23, W24, W27 and the quest-and-sce
 - `wardle_standing`: instance int -2..2, default 0 (the village faction).
 - `trust`: player int 0..2, `per_subject: true` (one value per NPC).
 - `knows_fire`: instance bool, `per_subject: true` (entity fact; the rumour).
-- Player bools: `warden_lets_pass`, `strongbox_picked`, `tollhouse_forced`, `hall_box_picked`,
+- Player bools: `warden_lets_pass`, `strongbox_picked`, `tollhouse_forced`, `iron_forced` (never true), `hall_box_picked`,
   `hall_cupboard_forced`, `letter_late`, `topic_parish_known`, `topic_fire_known`,
   `topic_mill_known`, `topic_heir_known`, `topic_walker_known`.
 - Topics (`topics/*.json`): `parish`, `fire`, `mill`, `heir`, `walker` ("Wardle walker").
@@ -296,12 +296,18 @@ Rows: 13, 14, 15, 46, G11, G12, W2, W3, W10, W23, W24, W27 and the quest-and-sce
 - **The Reeve**: dialogue `reeve_talk` (no quest): `accept` (`accept: carry_letter`), `help`
   (`fact.adjust wardle_standing +1`), `wrong` (`fact.adjust wardle_standing -2`), `leave`;
   `description_variants` on `fact_compare letter_late true` ("The Reeve does not look up.").
-- **Warden**: hp 5 gain 0, `attack {chance 0, 1..1}`, `attributes {cha: 5}`; `disposition`
+- **Warden**: hp 5 gain 0, `attack {chance 0, 1..1}` (an NPC attack needs the manifest's `world.combat`
+  block, `standing_sampler/cartridge.json`), `attributes {cha: 5}`; `disposition`
   hostile when all(`wardle_standing` -2, `trust` 0 at `subject: target`), `engage` line
   (`standing_sampler/npcs/guard.json`). Dialogue `warden_talk` (no quest): `reason` (`check` cha
   against `npc: warden`, sequence `fact.assign warden_lets_pass true`), `lean` (`check` skill
   `intimidate` rating 1, same sequence), `leave` (`persuade_sampler/dialogues/guard.json`).
   Barrier `toll_gate` `opens_when fact_compare warden_lets_pass true`.
+  The manifest's `world.combat.player_attack` is `chance 0`: the engagement holds and neither side
+  lands a hit, so waiting it out never kills the Warden and the talk path to `toll_gate` stays open
+  (flee, mend the standing, talk). A later weapon, `hit_chance` term or combat district that lets
+  the player hit must keep the Warden alive another way; `showcase_social.test.ts` social 2-3 fails
+  otherwise.
 - **Tam**: `room: warden_gate`; `daily_schedule` 10 `mill`, 11 `[{when: sky {weather: rain},
   room: church, goal: "Tam makes for the church porch out of the rain."}, village_green]`,
   15 `warden_gate` (`schedule_sampler/npcs/maud.json`).
@@ -331,7 +337,8 @@ Rows: 13, 14, 15, 46, G11, G12, W2, W3, W10, W23, W24, W27 and the quest-and-sce
 - Force: `force_tollhouse_door` at `tollhouse_door`, check opposed `str`, policy all(`has_tag
   {barrier: tollhouse_door, tag: fragile}`, `tollhouse_forced false`), success assigns
   `tollhouse_forced`; barrier `opens_when fact_compare tollhouse_forced true`.
-  `force_iron_door` at `iron_door` with `has_tag {barrier: iron_door, tag: fragile}` (never holds).
+  `force_iron_door` at `iron_door` with `has_tag {barrier: iron_door, tag: fragile}` (never holds),
+  success assigns `iron_forced`, which the barrier's `opens_when` reads (`barrier_sampler`).
   Sandbox twins on `hall_strongbox` and `hall_cupboard`.
 - Deduction: recipe `think_lectern` at `lectern`, policy all(`topic_parish_known`,
   `topic_fire_known`, not `topic_heir_known`), success assigns `topic_heir_known`
@@ -355,7 +362,8 @@ Rows: 13, 14, 15, 46, G11, G12, W2, W3, W10, W23, W24, W27 and the quest-and-sce
 
 ### Guided loop and expected outcomes
 
-Day 1 is a dry day with frost (the letter run crosses the fell); the rain branch is day 2.
+Day 1 is a dry day with frost (the letter run crosses the fell); the step 8 rain branch runs in a
+world whose day 1 is rain (Tam visits the mill every day, so on a later day Nell already knows).
 
 | # | Step | Expected | Matrix cells |
 |---|---|---|---|
@@ -367,9 +375,9 @@ Day 1 is a dry day with frost (the letter run crosses the fell); the rain branch
 | 6 | East; `pick_strongbox`. | First pick fails (level 0 < 1), second passes; the lid opens; take `mill_ledger`, read it: Lore lists "The mill". | pick x force x skill growth |
 | 7 | `force_iron_door`; `force_tollhouse_door`. | Iron: unavailable and refused (not fragile); wooden: passes (10 ≥ 5), the door opens north to the mill. | pick x force x skill growth |
 | 8 | Be at the mill at 10:00, the green at 11:00 (dry day). | 10:00 Tam arrives at the mill (`knows_fire` on Tam); 11:00 he arrives on the green and Nell's `knows_fire` turns true; Talk to Nell now opens `nell_rumour`; `press` passes (level 2 ≥ 2) and Lore lists "The fire". On the rain day, standing in the mill at 11:00 shows "Tam makes for the church porch out of the rain.", Nell learns nothing, and `nell_talk` opens instead. | rumour x dialogue check x codex; schedule cases x sky |
-| 9 | Church: read `parish_roll`; `think_lectern`. | Lore lists "The parish"; the Journal's Lore shows the deduction card (from "The parish" and "The fire"); performing it grants "The heir" once, then the card is gone. Having walked green, gate, tollhouse, mill and church, "Wardle walker" is already listed from the fifth room. | visit tiers x codex badge |
-| 10 | Talk to the Reeve: `accept`; wait 5 real minutes (15000 units); take the `letter`; wait 5 more, then 5 more. | Active on accept, "Time left" counting down from 60000; at +15000 the active hint ("The letter lies on the moot stone."); the take completes the objective (`objectives_complete`, Journal shows the `objectives_met` text and the countdown continues from activation, 45000 left); 5 real minutes after the take the first `objectives_met` hint, 10 after it the second. | quests x deadlines x hints |
-| 11 | North to the inn, north to the fell with no cloak (frost). | `chilled` applies and ticks while the countdown runs; the Journal shows both the condition and the time left. | deadlines x exposure |
+| 9 | Church: read `parish_roll`; `think_lectern`. | Lore lists "The parish"; the Journal's Lore shows the deduction card (from "The parish" and "The fire"), twice: the church's and its `hall_lectern` twin's, the view listing every recipe whose topics are known wherever its detail is; performing the card whose detail is present (the church's, from the church; the twin is refused `not_present`, Beads loka-kgd.64) grants "The heir" once, then both cards are gone. Having walked green, gate, tollhouse, mill and church, "Wardle walker" is already listed from the fifth room. | visit tiers x codex badge |
+| 10 | Fresh world: on the green at 07:00 day 1, talk to the Reeve: `accept`; wait 5 real minutes (15000 units, to 11:10); take the `letter`; wait 5 more (15:20), then 5 more (19:30). The accept is pinned at 07:00 so the fell run lands on day 1 (frost): from about 09:30 on, the first chill tick or the deadline (accept + 60000) falls on day 2, where rain soaks instead of chilling. | Active on accept, "Time left" counting down from 60000; at +15000 the active hint ("The letter lies on the moot stone."); the take completes the objective (`objectives_complete`, Journal shows the `objectives_met` text and the countdown continues from activation, 45000 left); 5 real minutes after the take the first `objectives_met` hint, 10 after it the second. | quests x deadlines x hints |
+| 11 | At 19:30 day 1, north to the inn, north to the fell with no cloak (frost); wait to 21:30. | `chilled` applies with 15000 left; its first tick at 21:30 puts hp at 9 with 7800 left (deadline 23:40 day 1); the Journal shows both the condition and the time left. | deadlines x exposure |
 | 12 | East to Wat before 60000: `deliver`. | The letter moves to Wat; quest resolved with outcome `deliver`; story point reached; scene `letter_read` runs (two lines, acknowledge); on its end standing +1; the Journal shows the `deliver` outcome text. `burn` instead: outcome `burn`, scene `letter_ash`, standing -2, Wat keeps nothing. | scenes x dialogue x reactions |
 | 13 | Fresh world: accept, then wait 60000. | `quest_failed late`; `letter_late` true; standing -1; the Reeve's description reads the cold variant; the Journal shows the `late` text and no time left. | quests x deadlines x hints |
 | 14 | Accept at 07:00 day 1 standing on the green, then an elapsed settlement of three real hours (150 game hours; the host settles it in steps, not one `wait`). | The next page opens with one collapsed recap block grouping the settlement's World-log lines: "Tam arrives." (11:00 each day) and "Tam leaves." (15:00 each day), each with its count; no goal line (it shows only in the room he leaves) and no deadline line (the deadline job narrates nothing; the quest's `late` text is in the Journal and `letter_late` is true). Two real minutes away shows no block. The recap is Book-side, so the pin is an app test beside `mobile/app/book/recap.test.ts`, not the kernel test; the kernel test pins only `recap_after` and the facts. | deadlines x schedules x away recap |

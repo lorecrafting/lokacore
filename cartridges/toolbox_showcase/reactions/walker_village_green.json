@@ -1,0 +1,54 @@
+{
+  "on": {
+    "event": "entity_entered_room",
+    "room": "village_green"
+  },
+  "when": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": [
+        {
+          "op": "visited_count",
+          "room": "village_green",
+          "at_least": 1
+        },
+        {
+          "op": "visited_count",
+          "room": "warden_gate",
+          "at_least": 1
+        },
+        {
+          "op": "visited_count",
+          "room": "tollhouse",
+          "at_least": 1
+        },
+        {
+          "op": "visited_count",
+          "room": "mill",
+          "at_least": 1
+        },
+        {
+          "op": "visited_count",
+          "room": "church",
+          "at_least": 1
+        },
+        {
+          "op": "not",
+          "item": {
+            "op": "fact_compare",
+            "fact": "topic_walker_known",
+            "equals": true
+          }
+        }
+      ]
+    }
+  },
+  "apply": [
+    {
+      "op": "fact.assign",
+      "fact": "topic_walker_known",
+      "value": true
+    }
+  ]
+}

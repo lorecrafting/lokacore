@@ -1,0 +1,69 @@
+{
+  "npc": "bess",
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": []
+    }
+  },
+  "prompt": "dialogue.bess_talk.prompt",
+  "roles": {
+    "bess": {
+      "role": "npc",
+      "npc": "bess"
+    }
+  },
+  "choices": {
+    "praise": {
+      "label": "dialogue.bess_talk.praise",
+      "narration": "narration.bess_talk.praise",
+      "sequence": [
+        {
+          "op": "fact.adjust",
+          "fact": "wardle_standing",
+          "amount": 1
+        }
+      ]
+    },
+    "insult": {
+      "label": "dialogue.bess_talk.insult",
+      "narration": "narration.bess_talk.insult",
+      "sequence": [
+        {
+          "op": "fact.adjust",
+          "fact": "wardle_standing",
+          "amount": -2
+        }
+      ]
+    },
+    "boast": {
+      "label": "dialogue.bess_talk.boast",
+      "narration": "narration.bess_talk.boast",
+      "sequence": [],
+      "check": {
+        "key": "boast_bess",
+        "kind": "opposed",
+        "attribute": "cha",
+        "rating": 1,
+        "failure": "narration.boast_bess_failed"
+      }
+    },
+    "lean": {
+      "label": "dialogue.bess_talk.lean",
+      "narration": "narration.bess_talk.lean",
+      "sequence": [],
+      "check": {
+        "key": "lean_bess",
+        "kind": "opposed",
+        "skill": "intimidate",
+        "rating": 3,
+        "failure": "narration.lean_bess_failed"
+      }
+    },
+    "leave": {
+      "label": "dialogue.bess_talk.leave",
+      "narration": "narration.bess_talk.leave"
+    }
+  }
+}

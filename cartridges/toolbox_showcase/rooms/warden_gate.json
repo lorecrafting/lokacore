@@ -1,0 +1,13 @@
+{
+  "title": "room.warden_gate.title",
+  "description": "room.warden_gate.description",
+  "exits": {
+    "west": {
+      "to": "village_green"
+    },
+    "east": {
+      "to": "tollhouse",
+      "barrier": "toll_gate"
+    }
+  }
+}

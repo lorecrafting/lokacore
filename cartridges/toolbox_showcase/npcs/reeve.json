@@ -1,0 +1,22 @@
+{
+  "keywords": [
+    "reeve"
+  ],
+  "short": "npc.reeve.short",
+  "room_line": "npc.reeve.room",
+  "description": "npc.reeve.description",
+  "room": "village_green",
+  "description_variants": [
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "fact_compare",
+          "fact": "letter_late",
+          "equals": true
+        }
+      },
+      "description": "npc.reeve.description_cold"
+    }
+  ]
+}

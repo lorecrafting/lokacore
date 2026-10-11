@@ -1,0 +1,19 @@
+{
+  "keywords": [
+    "roll",
+    "parish_roll"
+  ],
+  "short": "item.parish_roll.short",
+  "room_line": "item.parish_roll.room",
+  "description": "item.parish_roll.description",
+  "location": {
+    "in": "room",
+    "room": "church"
+  },
+  "mass_grams": 300,
+  "readable": {
+    "label": "actions.read_book",
+    "text": "readable.parish_roll",
+    "topic": "parish"
+  }
+}

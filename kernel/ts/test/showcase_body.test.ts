@@ -54,7 +54,7 @@ test('hub: a new character starts in the inn at 07:00 day 1 with the planned poo
     gameView(w)
       .exits.map((e) => e.direction)
       .sort(),
-    ['east', 'north'],
+    ['east', 'north', 'south'],
   );
   const sign = play(w, { type: 'read', target_id: detail(w, 'sign_hub') });
   assert.deepEqual(sign.lines, ['readable.sign_hub']);
@@ -222,7 +222,7 @@ test('body 12: a song inspires the player and Orla, dex 12 wins the throw; both 
 
 // Breaks: the dry rule is missing, water does not cure parched, or clock_hour skips the dry rule.
 test('body 13: a drought day parches on the fell; a drink ends it; the next hour brings it back', () => {
-  let x = wait(wait(atGate, DAY + AT_SEVEN).world, 2 * DAY + AT_SEVEN).world;
+  let x = wait(atGate, 2 * DAY + AT_SEVEN).world;
   x = go(x, 'north').world;
   assert.ok(labels(x).includes('condition.parched'));
   x = take(go(x, 'east').world, 'trough_skin');

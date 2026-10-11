@@ -1,0 +1,12 @@
+{
+  "outcomes": {
+    "deliver": {
+      "dialogue": "wat_letter",
+      "choice": "deliver"
+    },
+    "burn": {
+      "dialogue": "wat_letter",
+      "choice": "burn"
+    }
+  }
+}
