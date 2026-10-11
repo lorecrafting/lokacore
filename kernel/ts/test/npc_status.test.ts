@@ -358,7 +358,7 @@ test('a rooted guard keeps its room through its job and moves once the status en
     per_tick: undefined,
     tick_every: undefined,
     resource: undefined,
-    blocks: ['move'] as never,
+    blocks: ['move'],
   };
   const base = fresh();
   const w0 = {
@@ -367,7 +367,7 @@ test('a rooted guard keeps its room through its job and moves once the status en
       ...base.cartridge,
       statuses: { ...base.cartridge.statuses, [`${C}:status/poison`]: rooted },
     },
-  } as World;
+  } as unknown as World;
   const guard = id(w0, 'npc', 'guard');
   const set = apply(
     w0,
