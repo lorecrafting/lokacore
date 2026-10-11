@@ -261,6 +261,7 @@ test('a door that is not burnable stays shut', () => {
 // Breaks: a later rule's write to the door the spread opened takes a new writer group (the wait
 // faults conflicting_write) instead of joining the spread's; or one rule's second barrier.set on a
 // barrier reads the committed state, not its first step's (the door stays open).
+// Rules run in key order: zz_reclose must sort after fire_spreads to be the later rule.
 test('a later rule, or a later step, re-closes the door the spread opened', () => {
   const reclose = { op: 'barrier.set', to: 'closed', barrier: storeDoor };
   const laterRule = light((c) => {
