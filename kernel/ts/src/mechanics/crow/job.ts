@@ -69,7 +69,7 @@ export function runCrow(
   if (index < 0) throw new KernelError('precondition_failed');
   if (b.row.phase === 'acquire') return acquire(world, command, mint, job, b, done, room);
   if (b.row.phase === 'leg') return leg(world, command, mint, job, b, done, room, route, index);
-  if (moves(world, b.row.member_id))
+  if (room === b.spec.home || moves(world, b.row.member_id))
     return returning(world, command, mint, job, b, done, room, route, index);
   // A rooted crow stays put and tries again next interval.
   const again = next(b, mint, job.due_time, 'return', null);
