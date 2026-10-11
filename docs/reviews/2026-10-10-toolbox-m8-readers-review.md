@@ -58,3 +58,12 @@
   - Question: the "equivalent" mutant at `validate.ts:95` is outside the diff and was not reproduced.
 - Composition: reaction@1 composes status@1, as the spec requires. No capability code names content.
 - Tests: expected values are literals, and there are no mocks.
+
+## Re-check at e65096d9 (fix commits 86c3d126, e65096d9)
+
+- Head `e65096d9c937e2cde93add89a9be449366f504a9`. Hosted ci and book-e2e green (`gh run list --commit`). Only the two fix commits were reviewed.
+- Verdict: **APPROVE WITH NOTES** (findings 3 to 5 stand as recorded; 3 is the open bug `loka-6ztc`).
+- Finding 1, blocker: **resolved.** New test `kernel/ts/test/elements.test.ts:172` ("in one rule the first of an apply and a cure on one holder and status wins"): a wet golem, rule `[status.apply wet, status.cure wet]`, then the jar is dropped. It asserts one wet `status.transition` and wet still active. Expected values are literals.
+  - Re-planted M5 at `reaction.ts:211` (`if (!holder || (apply && applied.has(once)))`): `node --test kernel/ts/test/elements.test.ts` gives 7 pass, 1 fail. The failure is the new test. Unmutated: 8 pass. `npm run typecheck` (kernel/ts): exit 0.
+- Finding 2, should-fix: **resolved.** Reader 2 (`docs/system/mechanics.md:2300`) now says the emission sits in `statusStep`, not in `applyStatus`, so a row 29b `status.apply` emits `status_applied` itself. Row 29b (`docs/MECHANICS-TOOLBOX.md:137`) carries the same duty. Both match the code: `applyStatus` does not emit, and `statusStep` does (`reaction.ts:221`).
+- `docs/toolbox.gen.json`: the 29b entry now has the status `todo; its ...`. `bin/system_pages.exs:63` derives `state` with a prefix match, so the entry stays `todo`. The Storybook reader (`mobile/app/stories/system/pages.ts:12`) shows `status` as text. One other row already uses the `todo;` form. No consumer breaks.
