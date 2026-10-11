@@ -17,6 +17,7 @@ import { cmp } from '../../foundation/validate.ts';
 import { HOLDERS } from '../../foundation/compose_status.ts';
 import { living } from '../death/shared.ts';
 import { settleMaxima } from '../resource.ts';
+import { MODAL } from '../dialogue/shared.ts';
 
 type Active = Extract<StatusRow, { active: true }>;
 
@@ -176,20 +177,22 @@ export function cureOps(world: World, body: EntityId, cures: readonly Definition
 /**
  * Status reader 4: the Command types `body`'s active statuses let it issue: none a status blocks,
  * and, where statuses declare allows, only those every such list names. A modal answer (dialogue's
- * choose and close_choice, a scene's continue) is always admitted, so no status traps the player.
+ * choose and close_choice, a scene's continue) and wait are always admitted, so no status traps the
+ * player in a conversation or a scene, or stops time where only wait moves it.
  */
 export function permits(world: World, body: EntityId | undefined) {
-  const specs = body === undefined ? [] : activeStatuses(world, body).map(({ spec }) => spec);
+  const bars = Object.values(world.cartridge.statuses ?? {}).some((s) => s.blocks || s.allows);
+  const specs = !bars || !body ? [] : activeStatuses(world, body).map(({ spec }) => spec);
   return (command: string) =>
-    ['choose', 'close_choice', 'continue'].includes(command) ||
+    [...MODAL, 'continue', 'wait'].includes(command) ||
     specs.every(
       (s) => !s.blocks?.includes(command as Key) && (s.allows?.includes(command as Key) ?? true),
     );
 }
 
-/** Status reader 5: the resistance `entry` (a DamageKind or Tag) of `body`'s active statuses, summed. */
-export const statusResistance = (world: World, body: EntityId, entry: string) =>
-  activeStatuses(world, body).reduce(
-    (sum, { spec }) => add(sum, spec.resistances?.[entry as keyof Resistances] ?? 0),
-    0,
-  );
+/** Status reader 5: each resistance entry (a DamageKind or Tag) of `body`'s active statuses, summed. */
+export function statusResistance(world: World, body: EntityId) {
+  const specs = activeStatuses(world, body).map(({ spec }) => spec);
+  return (entry: string) =>
+    specs.reduce((sum, s) => add(sum, s.resistances?.[entry as keyof Resistances] ?? 0), 0);
+}

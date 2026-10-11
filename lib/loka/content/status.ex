@@ -100,9 +100,11 @@ defmodule Loka.Content.Status do
 
   # Status reader 4: each name is a player command type (run_job and elapsed are authority-internal).
   defp commands(rel, s) do
+    names = Refs.commands() -- ~w(run_job elapsed)
+
     for field <- ~w(blocks allows),
         {c, i} <- Enum.with_index(s[field] || []),
-        c not in Refs.commands() or c in ~w(run_job elapsed),
+        c not in names,
         do: diag("UNKNOWN_COMMAND", at(rel, [field, i]))
   end
 

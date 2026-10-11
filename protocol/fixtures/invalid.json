@@ -23395,6 +23395,370 @@
     ]
   },
   {
+    "contract": "StatusDefinition",
+    "value": {
+      "key": "might",
+      "duration": 3600,
+      "tick_every": 600,
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "mv"
+      },
+      "per_tick": 1,
+      "label": "condition.mighty",
+      "narration": {
+        "applied": "narration.might.applied",
+        "tick": "narration.might.tick",
+        "expired": "narration.might.expired"
+      },
+      "blocks": []
+    },
+    "errors": [
+      {
+        "path": "/blocks",
+        "code": "too_few_items"
+      }
+    ]
+  },
+  {
+    "contract": "StatusDefinition",
+    "value": {
+      "key": "might",
+      "duration": 3600,
+      "tick_every": 600,
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "mv"
+      },
+      "per_tick": 1,
+      "label": "condition.mighty",
+      "narration": {
+        "applied": "narration.might.applied",
+        "tick": "narration.might.tick",
+        "expired": "narration.might.expired"
+      },
+      "blocks": [
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look"
+      ]
+    },
+    "errors": [
+      {
+        "path": "/blocks",
+        "code": "too_many_items"
+      }
+    ]
+  },
+  {
+    "contract": "StatusDefinition",
+    "value": {
+      "key": "might",
+      "duration": 3600,
+      "tick_every": 600,
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "mv"
+      },
+      "per_tick": 1,
+      "label": "condition.mighty",
+      "narration": {
+        "applied": "narration.might.applied",
+        "tick": "narration.might.tick",
+        "expired": "narration.might.expired"
+      },
+      "blocks": [
+        "Look"
+      ]
+    },
+    "errors": [
+      {
+        "path": "/blocks/0",
+        "code": "pattern_mismatch"
+      }
+    ]
+  },
+  {
+    "contract": "StatusDefinition",
+    "value": {
+      "key": "might",
+      "duration": 3600,
+      "tick_every": 600,
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "mv"
+      },
+      "per_tick": 1,
+      "label": "condition.mighty",
+      "narration": {
+        "applied": "narration.might.applied",
+        "tick": "narration.might.tick",
+        "expired": "narration.might.expired"
+      },
+      "allows": []
+    },
+    "errors": [
+      {
+        "path": "/allows",
+        "code": "too_few_items"
+      }
+    ]
+  },
+  {
+    "contract": "StatusDefinition",
+    "value": {
+      "key": "might",
+      "duration": 3600,
+      "tick_every": 600,
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "mv"
+      },
+      "per_tick": 1,
+      "label": "condition.mighty",
+      "narration": {
+        "applied": "narration.might.applied",
+        "tick": "narration.might.tick",
+        "expired": "narration.might.expired"
+      },
+      "allows": [
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look"
+      ]
+    },
+    "errors": [
+      {
+        "path": "/allows",
+        "code": "too_many_items"
+      }
+    ]
+  },
+  {
+    "contract": "StatusDefinition",
+    "value": {
+      "key": "might",
+      "duration": 3600,
+      "tick_every": 600,
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "mv"
+      },
+      "per_tick": 1,
+      "label": "condition.mighty",
+      "narration": {
+        "applied": "narration.might.applied",
+        "tick": "narration.might.tick",
+        "expired": "narration.might.expired"
+      },
+      "allows": [
+        "Look"
+      ]
+    },
+    "errors": [
+      {
+        "path": "/allows/0",
+        "code": "pattern_mismatch"
+      }
+    ]
+  },
+  {
+    "contract": "StatusDefinition",
+    "value": {
+      "key": "might",
+      "duration": 3600,
+      "tick_every": 600,
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "mv"
+      },
+      "per_tick": 1,
+      "label": "condition.mighty",
+      "narration": {
+        "applied": "narration.might.applied",
+        "tick": "narration.might.tick",
+        "expired": "narration.might.expired"
+      },
+      "resistances": {
+        "physical": 101
+      }
+    },
+    "errors": [
+      {
+        "path": "/resistances/physical",
+        "code": "above_maximum"
+      }
+    ]
+  },
+  {
+    "contract": "StatusDefinition",
+    "value": {
+      "key": "might",
+      "duration": 3600,
+      "tick_every": 600,
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "mv"
+      },
+      "per_tick": 1,
+      "label": "condition.mighty",
+      "narration": {
+        "applied": "narration.might.applied",
+        "tick": "narration.might.tick",
+        "expired": "narration.might.expired"
+      },
+      "resistances": {
+        "lightning": 10
+      }
+    },
+    "errors": [
+      {
+        "path": "/resistances/lightning",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
     "contract": "ReactionRule",
     "value": {
       "key": "k",

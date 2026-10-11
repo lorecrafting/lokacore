@@ -105,8 +105,9 @@ function dealt(world: World, target: EntityId, profile: Profile, roll: number, d
     profile.crit && roll < profile.crit.chance ? mul(damage, profile.crit.multiplier) : damage;
   const npc = world.entities[target];
   const resists = (npc?.kind === 'npc' && npc.resistances) || {};
+  const held = statusResistance(world, target);
   const sum = [profile.kind, ...(profile.tags ?? [])].reduce(
-    (s, k) => (k ? add(add(s, resists[k] ?? 0), statusResistance(world, target, k)) : s),
+    (s, k) => (k ? add(add(s, resists[k] ?? 0), held(k)) : s),
     0,
   );
   if (!sum) return crit;

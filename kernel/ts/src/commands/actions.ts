@@ -167,10 +167,8 @@ export function composed(world: World, actor: CharacterId): ActionSet {
   return { ...set, ...modal(world, actor) };
 }
 
-const fighting = (world: World, actor: CharacterId) => {
-  const body = bodyOf(world, actor);
-  return body && engaged(world, body);
-};
+const fighting = (world: World, actor: CharacterId, body = bodyOf(world, actor)) =>
+  body && engaged(world, body);
 
 /** Final actor restriction; only internal escape policy reads the pre-combat composed set. */
 export function resolved(world: World, actor: CharacterId): ActionSet {
@@ -190,6 +188,11 @@ export function resolved(world: World, actor: CharacterId): ActionSet {
     Object.entries(set).filter(([, a]) => kept(a.command) && free(a.command)),
   );
 }
+
+// Status reader 4: a type the composed set offers but the actor's statuses bar.
+const barred = (world: World, actor: CharacterId, type: string) =>
+  !permits(world, bodyOf(world, actor))(type) &&
+  Object.values(composed(world, actor)).some((a) => a.command === type);
 
 /** The target id of a recipe's detail (the loader checks it exists). */
 export const detailOf = (world: World, t: Extract<RecipeTarget, { kind: 'detail' }>): EntityId =>
@@ -243,7 +246,7 @@ export function refusal(
   if (!matching.length)
     return unknown
       ? 'not_found'
-      : fighting(world, actor) || !permits(world, bodyOf(world, actor))(payload.type)
+      : fighting(world, actor) || barred(world, actor, payload.type)
         ? 'invalid_state'
         : 'unsupported_capability';
   const used =

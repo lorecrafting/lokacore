@@ -104,8 +104,9 @@ test('status resistances join the G2 sum, for the player and for an NPC', () => 
 });
 
 // Breaks: the action set is not filtered (a hushed say is accepted), a block is refused with
-// unsupported_capability rather than invalid_state, the view still lists the blocked verbs, or the
-// block outlives its status.
+// unsupported_capability rather than invalid_state, a blocked type the cartridge never offers (cast:
+// no spell) reads invalid_state, the view still lists the blocked verbs, or the block outlives its
+// status.
 test('hushed: speech is refused invalid_state and unlisted, until the status ends', () => {
   const w = shrine();
   for (const payload of [
@@ -113,13 +114,19 @@ test('hushed: speech is refused invalid_state and unlisted, until the status end
     { type: 'shout', word: 'hello' },
   ])
     assert.equal(code(send(w, payload)), 'invalid_state', payload.type);
+  const caps = { ...content.lock.capabilities, action_recipe: 1 }; // cast locked, no spell offered
+  const spellless = shrine({
+    ...content,
+    lock: { ...content.lock, capabilities: caps },
+  } as Cartridge);
+  assert.equal(code(send(spellless, { type: 'cast', word: 'lux' })), 'unsupported_capability');
   const listed = gameView(w).actions.map((a) => a.action_key);
   assert.ok(listed.includes('look' as never) && !listed.includes('say' as never), String(listed));
   assert.equal(code(send(round(w, 120), { type: 'say', word: 'hello' })), 'accepted');
 });
 
 // Breaks: allows is ignored, two allows lists are united instead of intersected, a block on move
-// leaves the exit shown available, or a blocked status traps a modal answer (choose, continue).
+// leaves the exit shown available, or a status traps a modal answer (choose, continue) or wait.
 test('allows lists intersect; a blocked move shows the exit unavailable with the same code', () => {
   const berserk = shrine(as('hushed', { allows: ['move', 'look'] }));
   assert.equal(code(send(berserk, { type: 'scan' })), 'invalid_state');
@@ -129,12 +136,10 @@ test('allows lists intersect; a blocked move shows the exit unavailable with the
   );
   assert.equal(code(send(both, { type: 'move', direction: 'south' })), 'invalid_state');
   assert.equal(code(send(both, { type: 'look' })), 'accepted');
-  assert.deepEqual(['choose', 'close_choice', 'continue', 'say'].map(permits(both, both.body)), [
-    true,
-    true,
-    true,
-    false,
-  ]);
+  assert.deepEqual(
+    ['choose', 'close_choice', 'continue', 'wait', 'say'].map(permits(both, both.body)),
+    [true, true, true, true, false],
+  );
   const rooted = shrine(as('hushed', { blocks: ['move'] }));
   assert.deepEqual(
     gameView(rooted).exits.map((e) => [e.direction, e.available, e.reason?.code]),
