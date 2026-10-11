@@ -66,16 +66,16 @@ function hourly(w: World, hours: number) {
 // crossed hour that births, wanders or retargets at the row's own time instead of that hour, plan
 // control written by a crossed step, or a wander boundary skipped while control is unwritten.
 test('one elapsed advance over 25 hours or 3 days plays the pack as hour-by-hour play', () => {
-  for (const hours of [25, 72]) {
-    const w = fixture();
+  const w = fixture();
+  const runs = [25, 72].map((hours) => {
     const one = elapse(w, w.state.clock + hours * HOUR, 1);
-    assert.deepEqual(project(one.world, one.events), hourly(w, hours), `${hours} hours`);
-  }
+    const p = project(one.world, one.events);
+    assert.deepEqual(p, hourly(w, hours), `${hours} hours`);
+    return p;
+  });
   // Hand-checked: from 18:00, 25 hours ends at 19:00 after 25 hourly wanders (H1 home → nest);
   // wander and night boundary (20:00) coincide at 158400.
-  const w = fixture();
-  const r = elapse(w, w.state.clock + 25 * HOUR, 1);
-  const day = project(r.world, r.events);
+  const day = runs[0]!;
   assert.equal(day.rooms['population/fen_hounds/slot1/member'], 'room/adder_nest');
   assert.equal(day.next_wander_due, 158400);
   assert.equal(day.plan_job_due, 158400);

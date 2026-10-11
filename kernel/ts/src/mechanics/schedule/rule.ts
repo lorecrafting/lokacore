@@ -66,7 +66,7 @@ export const decideAt = (
 
     if (row.job.kind === CLOCK_JOB) return runClock(world, command, payload.job_id, row, mint);
     if (row.job.kind === 'population')
-      return runPopulation(world, command, payload.job_id, row, mint, at ?? row.due_time);
+      return runPopulation(world, command, payload.job_id, row, mint, at);
     return scheduledJob(world, command, payload.job_id, row, mint, steps, at ?? row.due_time);
   }
   return advance(world, payload);
