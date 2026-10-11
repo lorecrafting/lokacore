@@ -20,8 +20,9 @@
     "success": {
       "sequence": [
         {
-          "op": "event.emit",
-          "event": "lever"
+          "op": "fact.assign",
+          "fact": "lever_stage",
+          "value": 1
         }
       ],
       "narration": {

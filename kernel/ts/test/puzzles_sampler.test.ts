@@ -63,21 +63,22 @@ function perform(w: World, ...actions: string[]) {
 }
 const open = (w: World, direction: string) => run(w, { type: 'open', direction }).out;
 
-// Breaks: a reset rule keyed after its step rule (A, B, C ends at 0), a missing reset (A, C, B
-// leaves stage 1, so B steps to 2 and a further C opens), or a step rule on the wrong stage.
+// Breaks: a reset rule keyed after its step rule (A, B, C ends at 0), a missing reset (A, C leaves
+// stage 1; A, B, B leaves 2), or a step rule on the wrong stage.
 test('levers A, B, C unlock the door; A, C, B resets, and the puzzle restarts', () => {
   let w = perform(fresh(), 'pull_a', 'pull_c');
   assert.equal(fact(w, 'lever_stage'), 0, 'C out of order resets');
   w = perform(w, 'pull_b');
   assert.equal(fact(w, 'lever_stage'), 0);
   assert.equal(open(w, 'north'), 'invalid_state');
+  w = perform(w, 'pull_a', 'pull_b', 'pull_b');
+  assert.equal(fact(w, 'lever_stage'), 0, 'B twice resets');
   w = perform(w, 'pull_a', 'pull_b', 'pull_c');
   assert.equal(fact(w, 'lever_stage'), 3);
   assert.equal(open(w, 'north'), 'opened');
 });
 
-// Breaks: the wrap rule missing or keyed before the turn (ten turns read 10, or 1 after the
-// wrap at 9 never fires), the door reading the wrong wheel, or a wheel's turn adjusting another.
+// Breaks: any wheel's wrap rule missing or keyed before the turn (the tenth turn reads 10), the door reading the wrong wheel, or a wheel's turn adjusting another.
 test('the dial opens on 3, 1, 2 only, and a wheel wraps 9 to 0', () => {
   const turn = (w: World, wheel: number, times: number) =>
     perform(w, ...Array<string>(times).fill(`turn_wheel_${wheel}`));
@@ -89,7 +90,15 @@ test('the dial opens on 3, 1, 2 only, and a wheel wraps 9 to 0', () => {
     [3, 1, 2],
   );
   assert.equal(open(w, 'east'), 'opened');
-  w = turn(fresh(), 2, 9);
-  assert.equal(fact(w, 'wheel_2'), 9);
-  assert.equal(fact(turn(w, 2, 1), 'wheel_2'), 0, '9 wraps to 0');
+  w = turn(turn(turn(fresh(), 1, 9), 2, 9), 3, 9);
+  assert.deepEqual(
+    [1, 2, 3].map((i) => fact(w, `wheel_${i}`)),
+    [9, 9, 9],
+  );
+  w = turn(turn(turn(w, 1, 1), 2, 1), 3, 1);
+  assert.deepEqual(
+    [1, 2, 3].map((i) => fact(w, `wheel_${i}`)),
+    [0, 0, 0],
+    '9 wraps to 0',
+  );
 });
