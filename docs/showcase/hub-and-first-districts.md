@@ -298,7 +298,9 @@ track climbs `up` from the green. The `hall_cupboard` exit is east of `moot_hall
   (`standing_sampler/npcs/guard.json`). Dialogue `warden_talk` (no quest): `reason` (`check` cha
   against `npc: warden`, sequence `fact.assign warden_lets_pass true`), `lean` (`check` skill
   `intimidate` rating 1, same sequence), `leave` (`persuade_sampler/dialogues/guard.json`).
-  Barrier `toll_gate` `opens_when fact_compare warden_lets_pass true`.
+  Barrier `toll_gate` `opens_when fact_compare warden_lets_pass true`; reaction `gate_lifted` on
+  `fact_changed warden_lets_pass` (when true) opens it with `barrier.set` (row W22), so the pass
+  opens the gate (loka-y6yg.13).
   The manifest's `world.combat.player_attack` is `chance 0`: the engagement holds and neither side
   lands a hit, so waiting it out never kills the Warden and the talk path to `toll_gate` stays open
   (flee, mend the standing, talk). A later weapon, `hit_chance` term or combat district that lets
@@ -340,11 +342,12 @@ track climbs `up` from the green. The `hall_cupboard` exit is east of `moot_hall
   `topic_fire_known`, not `topic_heir_known`), success assigns `topic_heir_known`
   (`codex_sampler/recipes/deduce_smugglers.json`); sandbox twin at `hall_lectern`.
 - Quest `carry_letter` (`quest_sampler/quests`): no `offer` (dialogue accept only); objective
-  `post_activation_event {item_acquired: letter}` (a stored `objectives_complete`, which Wat's
-  dialogue policy reads; a `current_state` objective is never stored); `deadline {after: 60000,
+  `current_state` `has_item letter`, so a letter taken before the accept counts (loka-y6yg.12);
+  Wat's dialogue policy reads all(`quest_state active`, `has_item letter`), as a current_state
+  quest stays `active` until resolved; `deadline {after: 60000,
   outcome: late}` (twenty real minutes); `journal` texts with `hints.active` after 5 ("The letter
   lies on the moot stone.") and `hints.objectives_met` after 5 ("The Fell Road runs north from the
-  inn.") and 10 ("Wat keeps the hut east of the fell top; he takes it from your hand."); `outcomes`
+  inn.") and 10, both counted from the accept (no stored met time) ("Wat keeps the hut east of the fell top; he takes it from your hand."); `outcomes`
   keyed `deliver`, `burn` and `late` (a dialogue resolves with the choice id as the outcome).
 - Story point `letter_fate`: outcomes `deliver` {`wat_letter`, `deliver`} and `burn`
   {`wat_letter`, `burn`} (`ashmere_scene/story_points`).
@@ -367,7 +370,7 @@ world whose day 1 is rain (Tam visits the mill every day, so on a later day Nell
 | 2 | Talk to the Reeve: `help`. | Standing 1; Nell friendly; bread now 2; Nell's shelf shows the price. | disposition x commerce x dialogue |
 | 3 | Talk to the Reeve: `wrong` twice. | Standing -1 then -2 (clamped); Nell refuses to trade and to talk (`invalid_state`, the shelf's reason); walking east the Warden's engage line opens an encounter (hp 5, chance 0: no damage; Flee or wait; the combat district owns the rest). | disposition x commerce x dialogue |
 | 4 | Fresh world: give the Warden the apple; `wrong` twice; walk east. | Warden trust 1, so no engagement; Nell still hostile. Give Nell the apple instead in another run: her trust 1, the gift reaction names no NPC and lands on whoever holds it. | |
-| 5 | Fresh world: Talk to the Warden: `lean`. | Failure line, conversation closes, intimidate use 1 (level 1). Talk again: `lean` passes (1 ≥ 1), use 2 (level 2), `warden_lets_pass` true; `toll_gate` opens. (`reason` passes at once: cha 6 ≥ 5.) | rumour x dialogue check x codex (the practice half) |
+| 5 | Fresh world: Talk to the Warden: `lean`. | Failure line, conversation closes, intimidate use 1 (level 1). Talk again: `lean` passes (1 ≥ 1), use 2 (level 2), `warden_lets_pass` true; `toll_gate` swings open (no Open step). (`reason` passes at once: cha 6 ≥ 5.) | rumour x dialogue check x codex (the practice half) |
 | 6 | East; `pick_strongbox`. | First pick fails (level 0 < 1), second passes; the lid opens; take `mill_ledger`, read it: Lore lists "The mill". | pick x force x skill growth |
 | 7 | `force_iron_door`; `force_tollhouse_door`. | Iron: unavailable and refused (not fragile); wooden: passes (10 ≥ 5), the door opens north to the mill. | pick x force x skill growth |
 | 8 | Be at the mill at 10:00, the green at 11:00 (dry day). | 10:00 Tam arrives at the mill (`knows_fire` on Tam); 11:00 he arrives on the green and Nell's `knows_fire` turns true; Talk to Nell now opens `nell_rumour`; `press` passes (level 2 ≥ 2) and Lore lists "The fire". On the rain day, standing in the mill at 11:00 shows "Tam makes for the church porch out of the rain.", Nell learns nothing, and `nell_talk` opens instead. | rumour x dialogue check x codex; schedule cases x sky |

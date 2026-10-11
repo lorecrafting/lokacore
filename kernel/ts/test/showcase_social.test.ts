@@ -137,7 +137,7 @@ test('social 5: lean fails once, then passes with practice; the toll gate opens'
   w = failed.world;
   assert.equal(pending(w, w.character), undefined);
   assert.deepEqual(intimidate(w), [1, 1]);
-  assert.equal(refused(w, { type: 'open', direction: 'east' }), 'invalid_state');
+  assert.equal(refused(w, { type: 'move', direction: 'east' }), 'exit_closed');
   w = say(w, 'warden', 'lean').world;
   assert.deepEqual([...intimidate(w), fact(w, 'warden_lets_pass')], [2, 2, true]);
   assert.equal(where(go(w, 'east').world, w.body), room(w, 'tollhouse'));
