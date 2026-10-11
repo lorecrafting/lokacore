@@ -1,6 +1,7 @@
 // The showcase's combat district, the Drill Yard, walked step by step (docs/showcase/combat-district.md,
 // "Guided loop and expected outcomes"). Steps 1 to 8 continue one world (step 3's inn shout is its
-// own branch); step 10 starts fresh in the social district. Step 9 (the goblin pit) waits for M8.
+// own branch); step 10 starts fresh in the social district and combat 11 in the hub. Step 9 (the
+// goblin pit) waits for M8.
 // Every attack is chance 100 or 0, so the numbers are the plan's; the purse roll alone is seeded.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
