@@ -2,6 +2,7 @@
 // of the actor's view before a command against the decision on it; `resolves` maps each action key
 // of the actor's set to the Command type it resolves to (commands/actions.ts resolved).
 import { same } from '../foundation/compose.ts';
+import { NIL } from '../runtime/fresh.ts';
 import type {
   AdvertisedAction,
   ContentView,
@@ -165,13 +166,13 @@ const entityView = (view: GameView, id: string): EntityView | ContentView | unde
     ...(view.equipment ?? []).flatMap((s) => (s.item ? [s.item] : [])),
   ].find((e) => e.id === id);
 
-const NIL = '00000000-0000-0000-0000-000000000000';
-
 function liquidAgrees(view: GameView, command: Any, decision: Any, key?: string): boolean {
-  // The envelope is refused before any offer is read, as for a service (loka-th7x).
-  if (command.id === NIL) return decision.error?.code === 'permission_denied';
+  // Step's refusals before any offer is read, in its order, as for a service (loka-th7x).
+  const code = decision.kind === 'rejected' ? decision.error.code : undefined;
+  if (view.ancestry_choices?.length) return code === 'invalid_state';
+  if (command.id === NIL) return code === 'permission_denied';
   const p = command.payload;
-  if (p.actor_id !== view.actor_id) return decision.error?.code === 'not_found';
+  if (p.actor_id !== view.actor_id) return code === 'not_found';
   const targets =
     p.type === 'fill'
       ? [p.source_id, p.vessel_id]

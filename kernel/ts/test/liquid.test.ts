@@ -479,3 +479,18 @@ test('an offered liquid action under a foreign actor or the nil CommandId agrees
       assert.ok(gameview_agrees_with_admission({ view, command, decision }), payload.type);
     }
 });
+
+// loka-th7x. Breaks: the envelope exemptions run before Step's pre-choice refusal, so a nil-id
+// liquid command in a world awaiting its ancestry expects permission_denied, not invalid_state.
+test('before the ancestry choice a nil-id liquid command agrees only with invalid_state', () => {
+  const pre = read('protocol/fixtures/missing_child_v042_hash.json').value as Cartridge;
+  const w = newWorld(pre, '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, [1, 2, 3, 4]);
+  const command = {
+    id: '00000000-0000-0000-0000-000000000000',
+    world_context_id: w.context,
+    payload: { type: 'drink', vessel_id: skin, actor_id: w.character },
+  };
+  const decision = step(w, command as never, 1).decision;
+  assert.deepEqual(decision, { kind: 'rejected', error: { code: 'invalid_state' } });
+  assert.ok(gameview_agrees_with_admission({ view: gameView(w), command, decision }));
+});
