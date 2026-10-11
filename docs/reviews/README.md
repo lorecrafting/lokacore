@@ -12,6 +12,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 
 - [Review: M9 spell XP + fatal-blow reactions (loka-kgd.101, loka-kgd.105)](2026-10-10-toolbox-m9-spellxp-review.md): **CHANGES REQUIRED**
 - [Review: status readers 6 and 8, perception and concealment (loka-kgd.91, loka-kgd.93)](2026-10-10-toolbox-m9-readers68-review.md): **APPROVE WITH NOTES**
+- [Review: M9 status reader 7, movement (loka-kgd.92)](2026-10-10-toolbox-m9-reader7-review.md): **CHANGES REQUIRED**
 - [Review: M9 pack kill credit and sim checker envelope (loka-lpq6, loka-th7x)](2026-10-10-toolbox-m9-credit-review.md): **APPROVE WITH NOTES**
 - [Review: M9 attacker filter + tilt pack (loka-kgd.79, loka-y6yg.11, loka-kgd.103)](2026-10-10-toolbox-m9-attacker-review.md): **APPROVE WITH NOTES**
 - [Review: toolbox row G4, use X on Y (loka-kgd.76)](2026-10-10-toolbox-m8-useon-review.md): **APPROVE**

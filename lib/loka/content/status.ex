@@ -50,24 +50,35 @@ defmodule Loka.Content.Status do
 
   defp trigger?(_), do: false
 
-  # A perception or concealment (status readers 6, 8) needs 1.61, a status reader (4, 5) 1.54, a fear status (row W21) 1.50, a permanent one (row W8) 1.48,
-  # the fields above 1.46.
+  # A movement status (reader 7) needs 1.62, a perception or concealment (readers 6, 8) 1.61, a status
+  # reader (4, 5) 1.54, a fear status (row W21) 1.50, a permanent one (row W8) 1.48, the fields above 1.46.
   defp floor(statuses, g3) do
+    defs = for {_, {_, _, s}} <- statuses, is_map(s), do: s
+
+    rule = Enum.find(floors(), fn {hit?, _} -> Enum.any?(defs, hit?) end)
+
     cond do
-      Enum.any?(for {_, {_, _, s}} <- statuses, do: senses?(s)) -> [1, 61]
-      Enum.any?(for {_, {_, _, s}} <- statuses, do: reader?(s)) -> [1, 54]
-      Enum.any?(statuses, &match?({_, {_, _, %{"fear" => true}}}, &1)) -> [1, 50]
-      Enum.any?(statuses, &match?({_, {_, _, %{"duration" => "permanent"}}}, &1)) -> [1, 48]
+      rule -> elem(rule, 1)
       g3 -> [1, 46]
       true -> [1, 38]
     end
   end
 
+  defp floors,
+    do: [
+      {&Map.has_key?(&1, "movement"), [1, 62]},
+      {&senses?/1, [1, 61]},
+      {&reader?/1, [1, 54]},
+      {&(&1["fear"] == true), [1, 50]},
+      {&permanent?/1, [1, 48]}
+    ]
+
   defp permanent?(s), do: s["duration"] == "permanent"
 
-  # Status readers 4, 5, 6 and 8: such a status may omit per_tick too.
+  # Status readers 4-8: blocks, allows, resistances, perception, concealment or movement; such a
+  # status may omit per_tick too.
   defp reader?(s),
-    do: senses?(s) or Enum.any?(~w(blocks allows resistances), &Map.has_key?(s, &1))
+    do: senses?(s) or Enum.any?(~w(blocks allows resistances movement), &Map.has_key?(s, &1))
 
   defp senses?(s), do: Map.has_key?(s, "perception") or Map.has_key?(s, "concealment")
 

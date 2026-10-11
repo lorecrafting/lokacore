@@ -3,6 +3,7 @@ import { apiCmp } from './cartridge_installed.ts';
 import { refString } from '../runtime/decision.ts';
 import { diag, step, type Checks, type Obj } from './cartridge_refs.ts';
 import type { Diagnostic } from '../contracts.gen.ts';
+import { TERRAIN } from '../mechanics/movement/shared.ts';
 
 export function knowledge(c: Obj, check: Checks): Diagnostic[] {
   const out: Diagnostic[] = [];
@@ -39,6 +40,7 @@ export function knowledge(c: Obj, check: Checks): Diagnostic[] {
     out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
   if ((hasHidden || hasClimb) && apiCmp(c.manifest.requires.kernel_api.at_least, '1.45') < 0)
     out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
+  out.push(...terrainFloor(c));
   mapPositions(c, named, out);
   return out;
 }
@@ -67,4 +69,15 @@ function mapPositions(c: Obj, named: Checks['named'], out: Diagnostic[]) {
     out.push(diag('SCHEMA_VIOLATION', '.cartridge.map_positions'));
   if (c.lock.capabilities.knowledge !== 1)
     out.push(diag('UNDECLARED_CAPABILITY', '.cartridge.map_positions'));
+}
+
+// Status reader 7: the terrain tags (air, chasm, water; a room so tagged bars moves into it) are
+// new Tag members, so a room, item or barrier declaring one needs kernel_api 1.62.
+function terrainFloor(c: Obj): Diagnostic[] {
+  const terrain = [c.rooms, c.items, c.barriers].some((defs) =>
+    Object.values((defs ?? {}) as Obj).some((d) => d.tags?.some((t: never) => TERRAIN.includes(t))),
+  );
+  return terrain && apiCmp(c.manifest.requires.kernel_api.at_least, '1.62') < 0
+    ? [diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least')]
+    : [];
 }

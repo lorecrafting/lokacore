@@ -333,9 +333,11 @@
       ]
     },
     "Tag": {
-      "description": "A property tag (toolbox row G1): a closed engine vocabulary, so every mechanic that gives a tag meaning and every cartridge that declares one share its spelling. Item, barrier and room definitions declare tags; the has_tag policy leaf (tags@1) reads them. A row whose mechanic needs a new tag adds it here.",
+      "description": "A property tag (toolbox row G1): a closed engine vocabulary, so every mechanic that gives a tag meaning and every cartridge that declares one share its spelling. Item, barrier and room definitions declare tags; the has_tag policy leaf (tags@1) reads them. A row whose mechanic needs a new tag adds it here. A room tagged air, chasm or water (status reader 7, kernel_api at least 1.62) admits a move into it only for a body whose active statuses pass that tag.",
       "enum": [
+        "air",
         "burnable",
+        "chasm",
         "cool",
         "exposed",
         "fragile",
@@ -344,6 +346,7 @@
         "sharp",
         "silver",
         "warm",
+        "water",
         "waterproof",
         "windproof",
         "wooden"
@@ -426,6 +429,15 @@
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
         "wooden": {
+          "$ref": "entity.schema.json#/$defs/ResistancePercent"
+        },
+        "air": {
+          "$ref": "entity.schema.json#/$defs/ResistancePercent"
+        },
+        "chasm": {
+          "$ref": "entity.schema.json#/$defs/ResistancePercent"
+        },
+        "water": {
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         }
       },

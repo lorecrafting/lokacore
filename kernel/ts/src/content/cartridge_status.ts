@@ -41,24 +41,29 @@ export function status(c: Obj): Diagnostic[] {
   return [...out, ...lone.map((at) => diag('SCHEMA_VIOLATION', at, { error: 'invalid_value' }))];
 }
 
-// The kernel_api a cartridge's status declarations need.
+// The highest floor any declaration needs: movement (SR7), perception and concealment (SR6, SR8),
+// readers (SR4, SR5), fear (W21), permanent (W8), the G3 fields.
 const floorOf = (all: Obj[], g3: unknown) =>
-  all.some((s) => s.perception || s.concealment)
-    ? '1.61'
-    : all.some(reader)
-      ? '1.54'
-      : all.some((s) => s.fear)
-        ? '1.50'
-        : all.some(lasting)
-          ? '1.48'
-          : g3
-            ? '1.46'
-            : '1.38';
+  all.some((s) => s.movement)
+    ? '1.62'
+    : all.some((s) => s.perception || s.concealment)
+      ? '1.61'
+      : all.some(reader)
+        ? '1.54'
+        : all.some((s) => s.fear)
+          ? '1.50'
+          : all.some(lasting)
+            ? '1.48'
+            : g3
+              ? '1.46'
+              : '1.38';
 
 // Row W8: a permanent status never ticks, so it declares no per_tick; a fear one (row W21) may omit it.
 const lasting = (s: Obj) => s.duration === 'permanent';
-// Status readers 4 and 5 (API 1.54), 6 and 8 (API 1.61): such a status may omit per_tick too.
-const reader = (s: Obj) => s.blocks || s.allows || s.resistances || s.perception || s.concealment;
+// Status readers 4 and 5 (API 1.54), 6 and 8 (API 1.61), 7 (movement, API 1.62): such a status may
+// omit per_tick too.
+const reader = (s: Obj) =>
+  s.blocks || s.allows || s.resistances || s.perception || s.concealment || s.movement;
 
 // One status definition's own fields.
 function definition(c: Obj, ref: string, s: Obj): Diagnostic[] {
