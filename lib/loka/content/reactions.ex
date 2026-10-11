@@ -173,18 +173,6 @@ defmodule Loka.Content.Reactions do
       lockout(rel, s, i, hit(s, ctx))
   end
 
-  defp hit(s, ctx) do
-    if s["barrier"],
-      do: for({_, _, b} <- [resolve(s["barrier"], "barrier", ctx.m, ctx.defs)], do: b),
-      else: for(b <- exit_barriers(ctx), s["tag"] in (b["tags"] || []), do: b)
-  end
-
-  defp lockout(rel, s, i, hit) do
-    if s["to"] == "locked" and Enum.any?(hit, &(!&1["key_item"])),
-      do: [diag("BARRIER_UNREACHABLE_KEY", at(rel, ["apply", i, "to"]))],
-      else: []
-  end
-
   # Status reader 3 (row G3): the subject's status.
   defp consequence(rel, {%{"op" => "status.cure"} = s, i}, _, ctx),
     do: reference(rel, ["apply", i], "status", s, ctx.m, ctx.defs)
@@ -199,6 +187,18 @@ defmodule Loka.Content.Reactions do
           d <- reference(rel, ["apply", i], f, s, ctx.m, ctx.defs),
           do: d
         )
+
+  defp hit(s, ctx) do
+    if s["barrier"],
+      do: for({_, _, b} <- [resolve(s["barrier"], "barrier", ctx.m, ctx.defs)], do: b),
+      else: for(b <- exit_barriers(ctx), s["tag"] in (b["tags"] || []), do: b)
+  end
+
+  defp lockout(rel, s, i, hit) do
+    if s["to"] == "locked" and Enum.any?(hit, &(!&1["key_item"])),
+      do: [diag("BARRIER_UNREACHABLE_KEY", at(rel, ["apply", i, "to"]))],
+      else: []
+  end
 
   # A tag reaches only barriers on exits (setBarrier), never a container's lid.
   defp exit_barriers(ctx) do
