@@ -230,6 +230,14 @@ function react(p: P): Admitted | undefined {
     }
     const crow = crowDelivery(p, next);
     if (crow) return crow;
+    // loka-kgd.105: a body that died after the cause holds none of its statuses (the player's lives on).
+    const dead = new Set(
+      p.events.flatMap((e) =>
+        e.payload.type === 'entity_died' && e.position > next.cause.position
+          ? [e.payload.victim_id]
+          : [],
+      ),
+    );
     for (const rule of triggered(p.world, next.cause)) {
       const at = now(p);
       if (!('cartridge' in at)) return at;
@@ -242,6 +250,7 @@ function react(p: P): Admitted | undefined {
         p.steps,
         next.mint,
         p.holders,
+        dead,
       );
       const depth = next.depth + 1;
       p.limit = over({ deliveries: ++p.deliveries, reaction_depth: depth, query_steps: p.steps.n });

@@ -108,6 +108,7 @@ export function sequence(
   steps: { n: number },
   mint: Mint,
   holders: Map<string, number> = new Map(),
+  dead: ReadonlySet<EntityId> = new Set(),
 ): Decision<EventPayload['type']> | undefined {
   const actor = resolvedActor(world, cause, listener); // a quest event's evidenced owner
   if (!actor) return { kind: 'fault', code: 'precondition_failed' };
@@ -142,7 +143,7 @@ export function sequence(
     } else if (step.op === 'status.apply' || step.op === 'status.cure') {
       const body = bodyOf(then, actor);
       if (!body) return { kind: 'fault', code: 'precondition_failed' };
-      const on = holdersOf(then, step, cause, body);
+      const on = holdersOf(then, step, cause, body).filter((id) => !id || !dead.has(id));
       const applying = statusStep(then, step, on, body, group, own, mint, emit);
       ops.push(...applying.ops);
       narration.push(...applying.narration);
