@@ -34,15 +34,22 @@ defmodule Loka.ContentUseTest do
     detail = %{"kind" => "detail", "room" => "yard", "detail" => "pump"}
 
     cure_only = [
-      api,
+      {"cartridge.json",
+       fn c ->
+         c
+         |> put_in(["requires", "kernel_api", "at_least"], "1.48")
+         |> put_in(["requires", "capabilities", "inspectable_detail"], 1)
+       end},
       {"recipes/oil.json", nil},
       {"recipes/quench.json", &Map.put(&1, "target", detail)},
       {"rooms/yard.json",
-       &Map.put(&1, "details", %{"pump" => %{"description" => "room.yard.title"}})}
+       &Map.put(&1, "details", %{
+         "pump" => %{"aliases" => ["pump"], "description" => "room.yard.title"}
+       })}
     ]
 
     assert {:error, diags} = Loka.ContentSource.compile(dir, cure_only)
-    assert floor in pairs(diags), inspect(diags)
+    assert pairs(diags) == [floor]
 
     opposed = %{"key" => "q", "kind" => "opposed", "attribute" => "str"}
 
