@@ -115,6 +115,18 @@ test('lightning landing on a wet golem stuns it and ends shocked and wet', () =>
   assert.equal(hp(wait(dry, 60)), 19);
 });
 
+// Breaks: status_applied emitted with no reaction listening, so every cartridge applying a status
+// by reaction gains events and receipts it never opted into (the opt-in, as W25's clock_hour).
+test('with no status_applied reaction a landing emits nothing', () => {
+  const quiet = edited((r) => {
+    delete r[rule('shock_on_wet')];
+    delete r[rule('warmth_dries')];
+  });
+  const w = drop(fresh(quiet), 'jar');
+  assert.deepEqual(applied, []);
+  assert.equal(on(w, 'shocked'), true);
+});
+
 // Breaks: status.cure ignored as a reaction step, or warm's status_applied never delivered.
 test('warmth landing dries the golem, so lightning no longer stuns', () => {
   let w = drop(drop(fresh(), 'bucket'), 'torch');

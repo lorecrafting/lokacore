@@ -84,6 +84,10 @@ export const expire = (
   endStatus(body, status, row, writer_group),
 ];
 
+/** Status reader 2 emits status_applied only while a reaction listens for it (as W25's clock_hour). */
+export const landing = (world: World) =>
+  Object.values(world.cartridge.reactions ?? {}).some((r) => r.on.event === 'status_applied');
+
 /**
  * The NPC or item instance `body` declares `status` immune (row G3); a created NPC or item copies
  * its template's list (runtime/created.ts).

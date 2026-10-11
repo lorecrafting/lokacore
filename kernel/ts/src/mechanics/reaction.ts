@@ -29,7 +29,7 @@ import { activation, resolution } from './quest/lifecycle.ts';
 import { questOf } from './lookups.ts';
 import { cmp } from '../foundation/validate.ts';
 import { suppress } from './population/shared.ts';
-import { applyStatus, cureOps, specOf } from './status/shared.ts';
+import { applyStatus, cureOps, landing, specOf } from './status/shared.ts';
 import { grant } from './levelling/shared.ts';
 import { saturate } from '../foundation/int.ts';
 import { npcsIn } from './speech/shared.ts';
@@ -219,7 +219,8 @@ function statusStep(
     // Only a first application (over no row or an inactive one) is heard and lands; a refresh while
     // active is silent (row W25), and a permanent status (row W8) opens with no job.
     const first = apply && ops.some((o) => o.op === 'status.transition' && !o.expected?.active);
-    if (first) emit({ type: 'status_applied', body_id: holder, status: step.status });
+    if (first && landing(world))
+      emit({ type: 'status_applied', body_id: holder, status: step.status });
     const label = specOf(world, step.status)?.narration.applied;
     if (label && first && holder === body) out.narration.push({ key: label });
   }
