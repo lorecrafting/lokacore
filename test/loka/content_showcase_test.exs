@@ -29,9 +29,17 @@ defmodule Loka.ContentShowcaseTest do
       do: spread(&List.replace_at(&1, 1, Map.merge(%{"op" => "barrier.set", "to" => to}, by)))
 
     test "barrier.set and co_present tag need API 1.56; to locked needs a key_item", %{dir: dir} do
+      # The boars' attacker filters (1.58) dropped too.
+      unfiltered =
+        for r <- ~w(boar_gore tilt_boar_gore),
+            do:
+              {"reactions/#{r}.json",
+               &update_in(&1, ["on"], fn on -> Map.delete(on, "attacker") end)}
+
       at155 = [
         {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.55")},
         {"reactions/kindle.json", nil}
+        | unfiltered
       ]
 
       # No tag left: the spread's tag dropped and the door named.
@@ -74,9 +82,46 @@ defmodule Loka.ContentShowcaseTest do
       assert {:ok, _, _} =
                Loka.ContentSource.compile(dir, [keyed, door("locked", %{"tag" => "burnable"})])
 
+      # loka-kgd.103: only the trigger room's exits, when it names one.
+      entering = fn room ->
+        {"reactions/fire_spreads.json",
+         &Map.put(&1, "on", %{"event" => "entity_entered_room", "room" => room})}
+      end
+
+      locked = door("locked", %{"tag" => "burnable"})
+      assert {:ok, _, _} = Loka.ContentSource.compile(dir, [entering.("the_fold"), locked])
+      assert lockout in diags(dir, [entering.("smithy"), locked])
+
       assert {"UNRESOLVED_REFERENCE", "reactions/fire_spreads.apply[1].barrier"} in diags(dir, [
                door("open", %{"barrier" => "gate"})
              ])
+    end
+  end
+
+  # loka-kgd.79, twin of the loader rows in kernel/ts/test/showcase_combat.test.ts. Breaks: an
+  # attacker filter compiles under API 1.57, names a spawn template or an NPC the cartridge lacks.
+  describe "attacker filter" do
+    setup do: %{dir: Loka.ContentSource.copy("cartridges/toolbox_showcase")}
+
+    defp gore(dir, api, npc) do
+      Loka.ContentSource.compile(dir, [
+        {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], api)},
+        {"reactions/boar_gore.json", &put_in(&1, ["on", "attacker"], npc)}
+      ])
+    end
+
+    defp codes({:error, ds}), do: Enum.map(ds, &{&1["code"], &1["path"]})
+
+    test "needs API 1.58 and an authored NPC", %{dir: dir} do
+      at = "reactions/boar_gore.on.attacker"
+      assert {:ok, _, _} = gore(dir, "1.58", "boar")
+
+      assert {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"} in codes(
+               gore(dir, "1.57", "boar")
+             )
+
+      assert {"SCHEMA_VIOLATION", at} in codes(gore(dir, "1.58", "goblin"))
+      assert {"UNRESOLVED_REFERENCE", at} in codes(gore(dir, "1.58", "wolf"))
     end
   end
 end

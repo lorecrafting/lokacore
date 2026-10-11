@@ -1,22 +1,14 @@
 {
   "on": {
     "event": "attack_result",
-    "hit": true
+    "hit": true,
+    "attacker": "boar"
   },
   "when": {
     "policy_version": 1,
     "root": {
-      "op": "any",
-      "items": [
-        {
-          "op": "npc_present",
-          "npc": "boar"
-        },
-        {
-          "op": "npc_present",
-          "npc": "tilt_boar"
-        }
-      ]
+      "op": "npc_present",
+      "npc": "boar"
     }
   },
   "apply": [

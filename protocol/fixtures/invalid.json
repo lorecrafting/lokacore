@@ -13389,11 +13389,16 @@
       "on": {
         "event": "attack_result",
         "hit": 1,
+        "attacker": 1,
         "x": 1
       },
       "apply": []
     },
     "errors": [
+      {
+        "path": "/on/attacker",
+        "code": "invalid_type"
+      },
       {
         "path": "/on/hit",
         "code": "invalid_type"

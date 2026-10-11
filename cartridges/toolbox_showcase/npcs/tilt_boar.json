@@ -17,10 +17,6 @@
     "damage_min": 2,
     "damage_max": 2
   },
-  "immune": [
-    "bleeding",
-    "gored"
-  ],
   "drops": [
     {
       "item": "tilt_tusk",

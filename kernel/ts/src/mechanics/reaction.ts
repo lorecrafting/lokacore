@@ -48,12 +48,13 @@ const equal =
   (field: string): Match =>
   (_, want, p) =>
     want === p[field];
-const FILTERS: Record<string, Match> = {
+export const FILTERS: Record<string, Match> = {
   fact: ref('fact'),
   room: (w, want, p) => w.roomIds[refString(want)] === p.room_id,
   // ponytail: the authored instance only; a created item (a harvested pelt) never matches.
   item: (w, want, p) => w.entityIds[refString(want)] === p.item_id,
   npc: (w, want, p) => w.entityIds[refString(want)] === p.entity_id, // the entrant (W3), the hearer (G9)
+  attacker: (w, want, p) => w.entityIds[refString(want)] === p.attacker_id, // loka-kgd.79
   victim: ref('victim_definition'),
   custom: (_, want, p) => want === p.event.key,
   check: (_, want, p) => want === p.check.key,

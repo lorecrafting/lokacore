@@ -1,0 +1,24 @@
+{
+  "on": {
+    "event": "attack_result",
+    "hit": true,
+    "attacker": "tilt_boar"
+  },
+  "when": {
+    "policy_version": 1,
+    "root": {
+      "op": "npc_present",
+      "npc": "tilt_boar"
+    }
+  },
+  "apply": [
+    {
+      "op": "status.apply",
+      "status": "bleeding"
+    },
+    {
+      "op": "status.apply",
+      "status": "gored"
+    }
+  ]
+}

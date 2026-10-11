@@ -5,12 +5,13 @@
 // with typed fact values and restricted quest activation. Its `when` is walked
 // with every other policy (content/cartridge_refs.ts nodes).
 import { refString } from '../runtime/decision.ts';
-import type { Diagnostic } from '../contracts.gen.ts';
+import type { DefinitionRef, Diagnostic } from '../contracts.gen.ts';
 import { diag, step, type Checks, type Obj } from './cartridge_refs.ts';
 
 // Each trigger filter that names a definition (W1), with that definition's kind; sorted, as the
 // compiler (lib/loka/content/reactions.ex) reports them.
 const NAMED: Record<string, string> = {
+  attacker: 'npc',
   barrier: 'barrier',
   fact: 'fact',
   item: 'item',
@@ -72,6 +73,7 @@ export function reactions(c: Obj, { named, typedValue }: Checks): Diagnostic[] {
     const floor = Math.max(
       r.on.event === 'quest_resolved' ? 8 : 0,
       r.on.event === 'spoken' ? 48 : r.on.npc ? 47 : 0, // speech (G9), the entrant filter (W3)
+      r.on.attacker ? 58 : 0, // loka-kgd.79
       r.on.event === 'status_applied' ? 53 : 0, // status reader 2 (row G3)
       // co_present: row W21; its tag: row W22
       ...r.apply.map((s: Obj) => (s.tag ? 56 : s.co_present ? 50 : (FLOORS[s.op] ?? 0))),
@@ -82,9 +84,10 @@ export function reactions(c: Obj, { named, typedValue }: Checks): Diagnostic[] {
       );
     for (const [field, kind] of Object.entries(NAMED))
       if (r.on[field]) named(r.on[field], kind, `${at}.on.${field}`);
-    // A spawn template has no instance to enter (row W3).
-    if (r.on.npc && c.npcs?.[refString(r.on.npc)]?.spawn_template)
-      out.push(diag('SCHEMA_VIOLATION', `${at}.on.npc`, { error: 'invalid_value' }));
+    // A spawn template has no instance to enter (row W3) or attack (loka-kgd.79).
+    for (const f of ['npc', 'attacker'])
+      if (r.on[f] && c.npcs?.[refString(r.on[f])]?.spawn_template)
+        out.push(diag('SCHEMA_VIOLATION', `${at}.on.${f}`, { error: 'invalid_value' }));
     r.apply.forEach((s: Obj, i: number) => {
       if (s.op === 'quest.activate') {
         named(s.quest, 'quest', `${at}.apply[${i}].quest`);
@@ -102,7 +105,7 @@ export function reactions(c: Obj, { named, typedValue }: Checks): Diagnostic[] {
         if (r.on.event !== 'fact_changed')
           out.push(diag('OUTCOME_MISMATCH', `${at}.apply[${i}].op`));
       } else if (s.op === 'barrier.set') {
-        out.push(...barrierSet(c, s, `${at}.apply[${i}]`, named));
+        out.push(...barrierSet(c, s, r.on.room, `${at}.apply[${i}]`, named));
       } else if (!['status.apply', 'status.cure', 'experience.grant'].includes(s.op)) {
         // status steps, experience.grant, fact.adjust's int: with their declarations (cartridge_standing.ts).
         named(s.fact, 'fact', `${at}.apply[${i}].fact`);
@@ -116,10 +119,18 @@ export function reactions(c: Obj, { named, typedValue }: Checks): Diagnostic[] {
 
 // Row W22 (loka-kgd.96): a named barrier resolves; to locked needs a key_item on the named barrier,
 // or on every barrier carrying the tag, else no key could ever unlock it (BARRIER_UNREACHABLE_KEY).
-function barrierSet(c: Obj, s: Obj, at: string, named: Checks['named']): Diagnostic[] {
+function barrierSet(
+  c: Obj,
+  s: Obj,
+  room: DefinitionRef | undefined,
+  at: string,
+  named: Checks['named'],
+): Diagnostic[] {
   if (s.barrier) named(s.barrier, 'barrier', `${at}.barrier`);
-  // A tag reaches only barriers on exits (setBarrier), never a container's lid.
-  const exits = Object.values((c.rooms ?? {}) as Obj).flatMap((r) => Object.values(r.exits as Obj));
+  // A tag reaches only barriers on exits (setBarrier), never a container's lid, and only the event
+  // room's: the trigger's room filter fixes it, else any room may be it (loka-kgd.103).
+  const rooms = room ? [c.rooms?.[refString(room)]] : Object.values((c.rooms ?? {}) as Obj);
+  const exits = rooms.flatMap((r) => Object.values((r?.exits ?? {}) as Obj));
   const hit = s.barrier
     ? [c.barriers?.[refString(s.barrier)]]
     : exits
