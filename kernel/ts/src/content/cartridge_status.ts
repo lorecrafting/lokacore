@@ -26,7 +26,14 @@ export function status(c: Obj): Diagnostic[] {
   ) as [string, Obj][];
   const { immune, named, drinks, lone, g3 } = api146(c);
   if (!Object.keys(defs).length && !applies.length && !cures.length && !g3) return out;
-  const floor = Object.values(defs).some(lasting) ? '1.48' : g3 ? '1.46' : '1.38';
+  const all = Object.values(defs);
+  const floor = all.some((s) => s.fear)
+    ? '1.49'
+    : all.some(lasting)
+      ? '1.48'
+      : g3
+        ? '1.46'
+        : '1.38';
   if (
     apiCmp(c.manifest.requires.kernel_api.at_least, floor) < 0 ||
     ['status', 'death'].some((k) => c.lock.capabilities[k] !== 1) // a fatal hp tick needs death
@@ -40,7 +47,7 @@ export function status(c: Obj): Diagnostic[] {
   return [...out, ...lone.map((at) => diag('SCHEMA_VIOLATION', at, { error: 'invalid_value' }))];
 }
 
-// Row W8: a permanent status never ticks, so it declares no per_tick.
+// Row W8: a permanent status never ticks, so it declares no per_tick; a fear one (row W21) may omit it.
 const lasting = (s: Obj) => s.duration === 'permanent';
 
 // One status definition's own fields.
@@ -53,7 +60,7 @@ function definition(c: Obj, ref: string, s: Obj): Diagnostic[] {
     out.push(diag('SCHEMA_VIOLATION', `${at}.tick_every`));
   if (
     s.per_tick === 0 ||
-    (lasting(s) ? s.per_tick !== undefined : s.per_tick === undefined && !s.modifies)
+    (lasting(s) ? s.per_tick !== undefined : s.per_tick === undefined && !s.modifies && !s.fear)
   )
     out.push(diag('SCHEMA_VIOLATION', `${at}.per_tick`));
   // loka-kgd.50: a permanent status never modifies an attribute the derived hp maximum reads.

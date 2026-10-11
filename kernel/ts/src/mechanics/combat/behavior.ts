@@ -7,6 +7,7 @@ import { exitOf, exitTo } from '../lookups.ts';
 import { passage } from '../movement/shared.ts';
 import { engaged } from './shared.ts';
 import { suppressed } from '../population/shared.ts';
+import { activeStatuses } from '../status/shared.ts';
 
 /** Exact C3 slot membership at admission; the roster never refills. */
 export function admission(world: World, target: EntityId, steps: Steps): EntityId[] | undefined {
@@ -130,3 +131,8 @@ export function packPlan(world: World, id: EntityId) {
   const origin = world.state.created?.[id]?.origin;
   return origin?.kind === 'spawned' ? world.populationSpecs[key(origin.by)]?.plan.pack : undefined;
 }
+
+/** Row W21: `id` holds an active fear status, so its C4 flight is tried whatever its hp. */
+export const afraid = (world: World, id: EntityId) =>
+  Object.values(world.cartridge.statuses ?? {}).some((s) => s.fear) && // no row reads without one
+  activeStatuses(world, id).some(({ spec }) => spec.fear);

@@ -23154,5 +23154,33 @@
         "code": "invalid_type"
       }
     ]
+  },
+  {
+    "contract": "StatusDefinition",
+    "value": {
+      "key": "might",
+      "duration": 3600,
+      "tick_every": 600,
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "mv"
+      },
+      "per_tick": 1,
+      "label": "condition.mighty",
+      "narration": {
+        "applied": "narration.might.applied",
+        "tick": "narration.might.tick",
+        "expired": "narration.might.expired"
+      },
+      "fear": false
+    },
+    "errors": [
+      {
+        "path": "/fear",
+        "code": "const_mismatch"
+      }
+    ]
   }
 ]
