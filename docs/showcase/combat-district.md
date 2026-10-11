@@ -103,7 +103,8 @@ No combat room is `exposed`, so no weather drain lands; no door is gated; rooms 
 > from this yard. It gores: a wound that bleeds for a while and a scar that stays, even past your
 > death. The poultice on the bench stops the bleeding; nothing takes the scar away. West, Gil keeps
 > the gate with a raider in it; shout "ware" from here and Gil hears you through the wall, and he
-> fights beside you once you strike. Take Aldous's bounty before you go. South is a pit with two
+> fights beside you once you strike. Aldous pays a bounty on the raider, but only to one who takes
+> it before the raider falls. South is a pit with two
 > goblins who fight as a pack: in a pack you choose which one you hit. A kill that ends a fight earns
 > experience (in a pack, the last goblin standing); thirty points make a level and a point to raise a stat, and raised strength bites harder. When you
 > fall you wake at the inn with your level, your scar and your skill; what you carried waits on your
@@ -115,8 +116,9 @@ No combat room is `exposed`, so no weather drain lands; no door is gated; rooms 
 - **Aldous** (drill-master): stays in `drill_yard`; no `attack`. Dialogues in key order, as
   Nell's: `aldous_lesson` (policy `fact_compare skill_blade false`; roles `teacher` and `sword`;
   choice `learn`: `sequence [skill.acquire blade]`, `receive {item: sword, from: teacher}`, no
-  `lesson_payment`; `leave`), then `aldous_talk` (empty policy; `bounty` with `accept: bounty`,
-  `leave`), and `aldous_steel` with `keyword: "steel"` (one `leave` choice; its prompt is the
+  `lesson_payment`; `leave`), then `aldous_talk` (policy `fact_compare raider_slain false`; `bounty`
+  with `accept: bounty`, `leave`), then `aldous_yard` (policy `fact_compare raider_slain true`; its
+  own prompt and `leave` only, so no bounty is offered once the raider is dead), and `aldous_steel` with `keyword: "steel"` (one `leave` choice; its prompt is the
   answer; Talk never lists it, [row G9](../system/mechanics.md#social-verbs-say-whisper-and-shout-toolbox-row-g9-engine-half);
   `speech_sampler`). `description_variants` none.
 - **The boar**: `room: boar_run`; hp 0..8 start 8 gain 0; `attack {chance 100, 2..2}`;
@@ -154,8 +156,10 @@ No combat room is `exposed`, so no weather drain lands; no door is gated; rooms 
   objective `current_state fact_compare raider_slain true`; journal texts; outcome `done`.
   Reactions `bounty_done` `on fact_changed raider_slain` `when quest_state {bounty, active}`
   `apply quest.resolve {bounty, done}`, and `bounty_reward` `on quest_resolved {bounty, done}`
-  `apply experience.grant 20`. A bounty accepted after the raider is dead stays active (the fact
-  never changes again); the signpost says to take it first.
+  `apply experience.grant 20`. `DialogueChoice.availability` takes only times, so the
+  gate is the two dialogue policies: once `raider_slain` is true Talk opens `aldous_yard` and the
+  bounty can no longer be accepted (it could never resolve). The `when` keeps a raider killed with
+  no bounty taken from faulting the round (`precondition_failed`; combat 11).
 
 ### Guided loop and expected outcomes
 
@@ -170,7 +174,7 @@ default) and Flee 2, so mv is below 100 from step 1 on; no step pins an mv value
 | 1 | West from the inn; read `sign_combat`. | The text above. GameView `cues` lists the boar's grunt with direction north; in the inn (two exits away) and in `gate_yard` none. | senses cues x combat |
 | 2 | Talk to Aldous: `learn`; wield the sword; `say steel`; Talk: `bounty`. | `skill_blade` true, the sword received and worn in `wield`; Talk now opens `aldous_talk` (the lesson's policy fails). `say steel` opens `aldous_steel` (`choice_opened`); Talk never lists it; the same say in `gate_yard` is `spoken` only. `bounty` activates the quest (Journal active). | lesson x weapon; say x dialogue keyword |
 | 3 | `say ware`, then `shout ware`, in the yard. In a separate branch (before any yard shout), `shout ware` from the inn. | After the say `gil_warned` is false (a say reaches the actor's room only); after the shout true, and Gil's description in `gate_yard` reads the warned variant. The inn branch: still false (two exits from Gil). The fact never resets, hence the branch. | shout x reactions x variants |
-| 4 | West; Attack the raider; round 1. | Player hits 2 (raider 1); the raider hits (hp 9); Gil hits 1 and the raider dies: `entity_died` with Gil as killer and the player credited; `raider_slain` true; `bounty` resolves `done` in the same proposal; experience 10 + 20 = 30, level 2, one `level_up` line last, 1 unspent; the raider's corpse is public and empty. (Gil's own blow emits `attack_result`; `boar_gore` does not fire: no boar here.) | allies x kill credit x quest x levelling |
+| 4 | West; Attack the raider; round 1. | Player hits 2 (raider 1); the raider hits (hp 9); Gil hits 1 and the raider dies: `entity_died` with Gil as killer and the player credited; `raider_slain` true; `bounty` resolves `done` in the same proposal; experience 10 + 20 = 30, level 2, one `level_up` line last, 1 unspent; the raider's corpse is public and empty; Talk to Aldous then opens `aldous_yard` (Leave only). (Gil's own blow emits `attack_result`; `boar_gore` does not fire: no boar here.) | allies x kill credit x quest x levelling |
 | 5 | Raise `str`. | str 11, unspent 0, no Raise offered; the sword's derived damage is 3 (2 + floor(1 x (11 - 10) / 1)). | levelling x derived damage |
 | 6 | Remove the sword (held, not wielded); east, north to the run; Attack the boar unarmed; five rounds. | In the run the cue has no direction. Round 1: the player's blow misses (chance 0); the boar hits 2: hp 7, `bleeding` and `gored` applied lines; the Character page shows Bleeding (with its tick) and Gored (no time, no tick); the bleeding's smell cue shows from the player's own room. Rounds 2 to 5: hp 5, 3, 1, 0 at +750 (the last loss clamped to 1); no bleed tick falls before it (+1050). `player_died`; the encounter closes; the body is in `crossroads_inn` at hp 10, mv 100, standing; `gored` is still active (W8) and `bleeding` is gone (the return clears every other status); experience 30, level 2, str 11 unchanged (no penalty: row 47 is later); the player corpse in the run holds the sword and the waterskin; the boar is at 8. | combat x death; scars x death; statuses x death; levelling x death |
 | 7 | Back to the run; take the sword and the waterskin from the corpse; wield the sword. | Both Takes succeed (owner's corpse); the boar is passive outside combat (no hostile disposition). The corpse stays, empty. | death x containment |

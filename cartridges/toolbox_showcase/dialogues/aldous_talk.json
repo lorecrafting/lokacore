@@ -3,8 +3,9 @@
   "policy": {
     "policy_version": 1,
     "root": {
-      "op": "all",
-      "items": []
+      "op": "fact_compare",
+      "fact": "raider_slain",
+      "equals": false
     }
   },
   "prompt": "dialogue.aldous_talk.prompt",

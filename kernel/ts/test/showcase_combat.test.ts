@@ -11,7 +11,7 @@ import { pending } from '../src/mechanics/dialogue/shared.ts';
 import { engaged } from '../src/mechanics/combat/shared.ts';
 import { describeEntity } from '../src/mechanics/description_variant/rule.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
-import { statusKey } from '../src/mechanics/status/shared.ts';
+import { activeStatuses, statusKey } from '../src/mechanics/status/shared.ts';
 import {
   attribute,
   detail,
@@ -21,6 +21,7 @@ import {
   play,
   pool,
   ref,
+  refused,
   take,
   wait,
 } from './showcase_fixture.ts';
@@ -138,7 +139,7 @@ test('combat 3: a shout of "ware" in the yard warns Gil; a say or a shout from t
 
 // Breaks: Gil does not strike or his kill is not credited to the player, the death credit fact,
 // the bounty's resolve or its reward is missing from the elapsed round, or the level-up line is
-// missing, doubled or not last.
+// missing, doubled or not last, or Aldous still offers the bounty once the raider is dead.
 test('combat 4: Gil kills the raider; the bounty resolves and the player reaches level 2', () => {
   const start = w.state.clock;
   w = attack(w, 'raider');
@@ -153,6 +154,10 @@ test('combat 4: Gil kills the raider; the bounty resolves and the player reaches
   assert.equal(r.lines.filter((k) => k === LEVEL_UP).length, 1);
   assert.equal(r.lines.at(-1), LEVEL_UP);
   assert.deepEqual(inside(w, corpseOf(w, raider)), []);
+  const after = talk(go(w, 'east').world, 'aldous');
+  assert.equal(after.opened, 'aldous_yard');
+  const [continuation_id] = pending(after.world, after.world.character)!;
+  assert.ok(refused(after.world, { type: 'choose', choice_id: 'bounty', continuation_id }));
 });
 
 // Breaks: Raise keeps the point or does not raise str (step 8's damage 3 holds the derived bonus).
@@ -216,8 +221,8 @@ test('combat 7: back at the run, the corpse gives back the sword and the watersk
   w = wield(w);
 });
 
-// Breaks: the derived damage is not added to the sword (four rounds), a permanent status is
-// re-applied, the kill gives no experience or no tusk, a dead boar is still heard, the poultice
+// Breaks: the derived damage is not added to the sword (four rounds), the boar's own statuses
+// land on it, a permanent status is re-applied, the kill gives no experience or no tusk, a dead boar is still heard, the poultice
 // does not cure the bleed or cures the scar, or the bleed's tick or expiry times are wrong.
 test('combat 8: armed, the boar falls in three rounds; the poultice stops the bleeding', () => {
   const boar = npc(w, 'boar');
@@ -227,6 +232,7 @@ test('combat 8: armed, the boar falls in three rounds; the poultice stops the bl
   assert.ok(first.lines.includes('narration.bleeding.applied'));
   assert.ok(!first.lines.includes('narration.gored.applied'));
   assert.equal(bleedRow(first.world)?.generation, 2);
+  assert.deepEqual(activeStatuses(first.world, boar), []);
   const second = wait(first.world, start + 300).world;
   assert.deepEqual([hp(second, boar), pool(second, 'hp')], [2, 6]);
   // The purse roll (chance 50): the round's rolls after the player's hit draw are the tusk's then
@@ -281,4 +287,17 @@ test('combat 10: with the sword, the Warden takes hits for no loss; Flee holds',
   assert.equal(engaged(round.world, round.world.body)?.row.npc_id, warden);
   const fled = play(round.world, { type: 'flee' }).world;
   assert.equal(where(fled, fled.body), room(fled, 'village_green'));
+});
+
+// Breaks: the bounty's resolve fires with no bounty taken (the round faults and the fight never
+// ends), or the kill credits experience it should not.
+test('combat 11: the raider falls before the bounty is taken; the fight ends normally', () => {
+  let s = play(go(fresh(CTX), 'west').world, { type: 'shout', word: 'ware' }).world;
+  s = attack(go(s, 'west').world, 'raider');
+  s = wait(s, s.state.clock + 450).world; // unarmed: Gil alone takes the raider's 3 hp
+  assert.equal(fact(s, 'raider_slain'), true);
+  assert.equal(engaged(s, s.body), undefined);
+  assert.deepEqual(gameView(s).journal, []);
+  assert.deepEqual(levelling(s), { level: 1, experience: 10, next: 30, unspent: 0 });
+  assert.equal(talk(go(s, 'east').world, 'aldous').opened, 'aldous_lesson');
 });

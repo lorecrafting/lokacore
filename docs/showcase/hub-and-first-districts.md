@@ -107,7 +107,8 @@ what to wear ([trap 12](../MECHANICS-TOOLBOX.md#traps)).
 ### Signpost (`sign_body`, readable in `fell_gate`)
 
 > The Fell Road. North of here the moor is open to the sky. Go up in frost, rain, gale or heat
-> without the right garment from these pegs and your body pays by the hour; come back under this
+> without the right garment from these pegs and your body pays by the hour, and a long enough bill
+> is paid with your life; come back under this
 > roof and it stops on its own. The climb makes you hungry and thirsty: Wat's hut, east on the
 > top, has bread and a trough. Orla's still room, west, has a draught that makes you strong for an
 > hour (try the quern), and a lute (try the knucklebones after a song). The fold, east of here,
