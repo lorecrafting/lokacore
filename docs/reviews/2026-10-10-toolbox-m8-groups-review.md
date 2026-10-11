@@ -32,3 +32,13 @@ Question: merge also relabels `encounter.*` writes, and `packMemberRemains`/`dea
 ## Disposition
 
 Mergeable into the M8 batch after finding 1. The nits can ride the fix round.
+
+## Fix re-check (head `0aeb8567735f0ec1eeca0a2fe5257ae42c8f0ddb`, commits `4c00a495`, `14a0042e`, `0aeb8567`)
+
+Hosted ci and book-e2e green on the head. Verdict: **APPROVE**.
+
+- Finding 1, closed. `invariants_sight.ts` `olderAfterSight` counts only writes to an encounter that lists the sighted member (prior state or result), after the completion, in an older group; it is independent of compose's ops-scan (`compose_sight.ts`). The new test `writer_groups.test.ts` (other-NPC round accepted by both checks, deer round refused by both) is my probe. Mutant: drop the encounter scoping: red (that test and the sight/fact-row test).
+- Finding 2, closed, wider than asked: `paired`, the `bleedPairs` map and `runtime/proposal_bleed.ts` are deleted. Pairing now comes from a round and a bleed tick each joining their body's holder group. The deleted binding checks only chose the group; each delivery still validates itself: `runBleed` (`bleed/job.ts:117-125`) checks row, job id, generation and effect and otherwise writes only `job.complete`. No other caller: no `bleedRoundPair`/`proposal_bleed` reference left in `kernel/ts`, `lib/`, `test/` or invariants; Elixir never had the pairing. Mutants: generation check removed: red (stale-bleed test); bleed tick registers no holder: red (4 tests incl. `c5_bleed` "Flee and re-engagement pair the exact same-due round and bleed tick").
+- protocol.md:1226 wording matches the code. Dropping "another body's bleed never joins" is correct under the holder rule; it is unreachable today because C5 applies bleeding only to the player body. mechanics.md:679 parses.
+- Finding 3: not verified here (no PR description on this branch); the PM checks the handoff.
+- nit, `invariants_sight.ts` `olderAfterSight` (`done.writer_group > row.writer_group`): changing it to `>=` stays green on writer_groups, targets, bleed, `deer` and `deer_contracts`. Under it, a sight-first closure written in the sight's own group after its `job.complete` would be miscounted; no test runs the invariant on that path. Optional.
