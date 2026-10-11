@@ -35,3 +35,17 @@
 Question: from 13:00 to 14:00 the hostile Warden is on the green, so under G11 a player who walks onto the green then (the save B "be on the green at 13:00" step) is engaged there. Is that intended? It is a detour, but the brief does not say it.
 
 Verdict: **CHANGES REQUIRED** (two should-fix findings; buildability, timings and the toolbox findings hold).
+
+## Re-check at d09244bc
+
+- Head `d09244bce36d9cad4c0280d84a2a82e0a405ea4e` (merge of `origin/main` plus fixes); fix diff `26fb4b8b..d09244bc` on `docs/SHOWCASE.md` and `docs/showcase/cause-and-effect.md` only. `git merge-tree` against `origin/main`: clean. `elixir bin/check_docs.exs`: 0 broken.
+- Finding 1, fixed: `SHOWCASE.md:3` keeps main's plan 2 wording ("built but for its goblin pit") and the table keeps #369's rows; `cause-and-effect.md:4-6` no longer says "rebases".
+- Finding 2, fixed: `cause-and-effect.md:20-22,195-200` make both rewrites required (Toolbox finding 4). No test pins the words: `npc.warden.engage` and `scene.letter_ash.2` appear only in `text.json:400,496`.
+- Findings 3 and 4, fixed: `:139` (combat 10: a hit for no loss, Flee); step 17 says only the Warden's chance is 0.
+- Finding 5, fixed: `:185` cites `loka-kgd.96` (open, filed).
+- Finding 6, fixed: step 21 names the `chilled` tick and expiry lines (`statuses/chilled.json` exists).
+- Finding 7, fixed: playtest return at about 18:00 day 2 with the Warden at his gate; Wat's visit is learnt from Nell.
+- Question, answered: pattern 2 (`:69-73`) states the green engage as intended; step 18c checks it. Verified: `village_green` has five exits; `crossroads_inn` south leads to the green.
+- Nothing new broken. Nit (no change needed): step 18's result column lists (a), (c), (b) out of order.
+
+Verdict: **APPROVE**.
