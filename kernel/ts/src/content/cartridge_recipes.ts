@@ -18,7 +18,8 @@ export const tipSpec = (key: string) => ({
 // one ActionSet identity) and its check's key no other recipe's or dialogue choice's check's (one
 // check DefinitionRef),
 // its target names a room of this cartridge and a detail of that room (a use target's tool liquid
-// a liquid of it; row G4; a spell's word no other spell's, row 29a), each status.cure step a status of it,
+// a liquid of it; row G4; a spell's word no other spell's, row 29a), each status.cure step a status of it
+// (and each row 29b effect step's status, npc and item one of it),
 // it has a failure outcome exactly when it has a check (OUTCOME_MISMATCH), its threshold check,
 // costs and resource.adjust steps name resources of it, each outcome's fact.assign names a fact
 // of it, its label and narrations have catalog entries and each narration participant but the
@@ -48,7 +49,9 @@ export function recipes(c: Obj, { named, typedValue, text }: Checks): Diagnostic
       o.sequence.forEach((s: Obj, i: number) => {
         if (s.op === 'resource.adjust')
           named(s.resource, 'resource', `${path}.sequence[${i}].resource`);
-        if (s.op === 'status.cure') named(s.status, 'status', `${path}.sequence[${i}].status`);
+        for (const k of ['status', 'npc', 'item'])
+          // rows G4, 29b
+          if (s[k]) named(s[k], k, `${path}.sequence[${i}].${k}`);
         if (s.op !== 'fact.assign') return;
         named(s.fact, 'fact', `${path}.sequence[${i}].fact`);
         typedValue(s.fact, s.value, `${path}.sequence[${i}].value`);
@@ -106,16 +109,32 @@ function uses(c: Obj): Diagnostic[] {
 }
 
 // Toolbox row 29a: a spell target needs kernel_api 1.51, and no two spells share a word
-// (DUPLICATE_DEFINITION at each one's word).
+// (DUPLICATE_DEFINITION at each one's word); row 29b: an effect step sits on a spell
+// (SCHEMA_VIOLATION at its op) and needs kernel_api 1.55.
 function spells(c: Obj): Diagnostic[] {
-  const all = Object.entries((c.recipes ?? {}) as Obj).filter(([, r]) => r.target.kind === 'spell');
+  const recipes = Object.entries((c.recipes ?? {}) as Obj);
+  const all = recipes.filter(([, r]) => r.target.kind === 'spell');
   const out = all
     .filter(([ref, r]) => all.some(([o, x]) => o !== ref && x.target.word === r.target.word))
     .map(([ref]) => diag('DUPLICATE_DEFINITION', `.cartridge.recipes${step(ref)}.target.word`));
-  if (all.length && apiCmp(c.manifest.requires.kernel_api.at_least, '1.51') < 0)
+  const effects = recipes.flatMap(([ref, r]) =>
+    Object.entries(r.outcomes as Obj).flatMap(([name, o]) =>
+      o.sequence.flatMap((s: Obj, i: number) =>
+        EFFECTS.includes(s.op)
+          ? [[r, `.cartridge.recipes${step(ref)}.outcomes.${name}.sequence[${i}].op`]]
+          : [],
+      ),
+    ),
+  ) as [Obj, string][];
+  for (const [r, at] of effects)
+    if (r.target.kind !== 'spell')
+      out.push(diag('SCHEMA_VIOLATION', at, { error: 'invalid_value' }));
+  const floor = effects.length ? '1.55' : '1.51';
+  if (all.length && apiCmp(c.manifest.requires.kernel_api.at_least, floor) < 0)
     out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
   return out;
 }
+const EFFECTS = ['status.apply', 'damage', 'light.ignite'];
 
 // Each key of a room's action contribution names a registered command, an action, a recipe, a
 // quest (its offer) or a dialogue (its talk). A spell is cast by word, never by key (row 29a).

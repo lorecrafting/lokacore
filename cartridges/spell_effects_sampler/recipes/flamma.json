@@ -1,0 +1,33 @@
+{
+  "label": "spell.flamma",
+  "aliases": [
+    "flamma"
+  ],
+  "target": {
+    "kind": "spell",
+    "word": "flamma"
+  },
+  "priority": 0,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": []
+    }
+  },
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "damage",
+          "npc": "wight",
+          "kind": "fire",
+          "amount": 8
+        }
+      ],
+      "narration": {
+        "actor": "narration.flamma"
+      }
+    }
+  }
+}

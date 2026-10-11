@@ -7,6 +7,7 @@ import type {
 } from '../../contracts.gen.ts';
 import { bodyOf, refString, type Mint, type World } from '../../runtime/decision.ts';
 import { living } from '../death/shared.ts';
+import { add, divide, mul } from '../../foundation/int.ts';
 import { standing } from '../position/shared.ts';
 import { running } from '../scene/shared.ts';
 import { key } from '../../foundation/compose.ts';
@@ -120,3 +121,20 @@ export function participantsPresent(world: World, row: EncounterRow) {
 }
 
 export const encounterId = (mint: Mint) => mint() as EncounterId;
+
+/**
+ * Toolbox row G2: `damage` on `target` after its resistances, the sum of its entries for each
+ * kind or material clamped to -100..100, rounded down (a combat hit; row 29b a spell's damage).
+ */
+export function resisted(
+  world: World,
+  target: EntityId,
+  kinds: readonly (string | undefined)[],
+  damage: number,
+) {
+  const npc = world.entities[target];
+  const resists = npc?.kind === 'npc' ? npc.resistances : undefined;
+  if (!resists) return damage;
+  const sum = kinds.reduce((s, k) => add(s, (k && resists[k as keyof typeof resists]) || 0), 0);
+  return divide(mul(damage, 100 - Math.min(100, Math.max(-100, sum))), 100)[0];
+}

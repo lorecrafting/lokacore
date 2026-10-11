@@ -1,0 +1,24 @@
+{
+  "keywords": [
+    "orb"
+  ],
+  "short": "item.orb.short",
+  "room_line": "item.orb.room",
+  "description": "item.orb.description",
+  "mass_grams": 100,
+  "location": {
+    "in": "room",
+    "room": "hall"
+  },
+  "fuel": {
+    "kind": "source",
+    "capacity": 600,
+    "initial": 600,
+    "rate": 1,
+    "unit": "glow",
+    "supply": "glowdust",
+    "ignited": "light.ignited",
+    "doused": "light.doused",
+    "refueled": "light.refueled"
+  }
+}

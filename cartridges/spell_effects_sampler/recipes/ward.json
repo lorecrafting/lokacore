@@ -1,0 +1,31 @@
+{
+  "label": "spell.ward",
+  "aliases": [
+    "ward"
+  ],
+  "target": {
+    "kind": "spell",
+    "word": "ward"
+  },
+  "priority": 0,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": []
+    }
+  },
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "status.apply",
+          "status": "warded"
+        }
+      ],
+      "narration": {
+        "actor": "narration.ward"
+      }
+    }
+  }
+}

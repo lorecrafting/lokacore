@@ -26,8 +26,8 @@ defmodule Loka.Content.Recipes do
   has a failure outcome exactly when it has a check (OUTCOME_MISMATCH); its target names a room
   of this cartridge and a detail of that room (a use target's tool liquid a liquid of it, and a
   use target needs kernel_api 1.49; row G4), each fact.assign a fact with a value of its type, each
-  status.cure a status and only on a use recipe (SCHEMA_VIOLATION) (a spell's floor and word:
-  `Loka.Content.Spells`),
+  status.cure a status and only on a use recipe (SCHEMA_VIOLATION) (a spell's floor, word and
+  row 29b effect steps: `Loka.Content.Spells`),
   each narration participant but the actor an npc or item of this cartridge, as its role says,
   its check's key is no other recipe's check's (DUPLICATE_DEFINITION),
   and its label and narrations have catalog entries (unless `text` is `:unknown`); no recipe's
@@ -201,11 +201,11 @@ defmodule Loka.Content.Recipes do
       attributes(rel, r, m, defs) ++ resources(rel, r, m, defs) ++ participants(rel, r, m, defs)
   end
 
-  # Each fact.assign's fact and (row G4) each status.cure's status names one of this cartridge.
+  # Each step's fact, and (rows G4, 29b) status, npc and item, names one of this cartridge.
   defp named_steps(rel, r, m, defs) do
-    for {%{"op" => op} = s, steps} <- steps(r),
-        field = %{"fact.assign" => "fact", "status.cure" => "status"}[op],
-        field != nil,
+    for {s, steps} <- steps(r),
+        field <- ~w(fact status npc item),
+        is_map_key(s, field),
         d <- reference(rel, steps, field, s, m, defs),
         do: d
   end
