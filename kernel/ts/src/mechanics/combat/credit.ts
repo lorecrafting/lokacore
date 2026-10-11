@@ -10,6 +10,7 @@ import { ally } from './shared.ts';
 type Death = DomainEvent & { payload: Extract<DomainEvent['payload'], { type: 'entity_died' }> };
 type Attack = Extract<DomainEvent['payload'], { type: 'attack_result' }>;
 type Create = Extract<DeltaOp, { op: 'entity.create' }>;
+type Ending = Extract<DeltaOp, { op: 'encounter.close' | 'encounter.advance' }>;
 
 /** A real fatal delivery consumes its newly hydrated corpse before final adoption. */
 export function deathCredit(
@@ -61,13 +62,16 @@ function fatalGroup(
   const creation = ops.find((o) => o.op === 'entity.create' && o.identity.id === p.corpse_id);
   if (!creation || creation.op !== 'entity.create' || !corpseValid(world, event, creation)) return;
   const attack = attackOf(event, events);
-  if (
-    !attack ||
-    attack.payload.type !== 'attack_result' ||
-    !occurrenceValid(world, event, attack.payload)
-  )
-    return;
+  if (!attack || attack.payload.type !== 'attack_result') return;
   const { encounter_id } = attack.payload;
+  // The round's own write names the job that ran: its close, or its advance when a pack fights on.
+  const ending = ops.find(
+    (o): o is Ending =>
+      (o.op === 'encounter.close' || o.op === 'encounter.advance') &&
+      o.writer_group === creation.writer_group &&
+      o.encounter_id === encounter_id,
+  );
+  if (!ending || !occurrenceValid(world, event, attack.payload, ending)) return;
   const fatal = ops.some(
     (o) =>
       o.op === 'resource.adjust' &&
@@ -77,34 +81,28 @@ function fatalGroup(
       o.from > 0 &&
       o.to === 0,
   );
-  const closed = ops.some(
-    (o) =>
-      o.op === 'encounter.close' &&
-      o.writer_group === creation.writer_group &&
-      o.encounter_id === encounter_id,
-  );
-  return fatal && closed ? creation.writer_group : undefined;
+  return fatal ? creation.writer_group : undefined;
 }
 
-function occurrenceValid(world: World, event: Death, attack: Attack) {
+function occurrenceValid(world: World, event: Death, attack: Attack, ending: Ending) {
   const p = event.payload;
   const encounter = world.state.encounters?.[attack.encounter_id];
-  const job = encounter && world.state.jobs?.[encounter.job_id];
+  const job = world.state.jobs?.[ending.job_id];
   return (
     !!encounter &&
-    encounter.status === 'closed' &&
     encounter.character_id === p.credited_character_id &&
     // Party credit (row 6b): the player's body or a listed ally made the kill.
     (encounter.body_id === p.killer_id || ally(world, p.killer_id)) &&
     p.credited_character_id !== null &&
     bodyOf(world, p.credited_character_id) === encounter.body_id &&
-    encounter.npc_id === p.victim_id &&
+    // The primary, or any member of the pack's roster at the round's start (loka-lpq6).
+    (encounter.npc_id === p.victim_id || !!ending.expected?.active_ids?.includes(p.victim_id)) &&
     encounter.room_id === p.room_id &&
     !!job &&
     job.status === 'completed' &&
     job.encounter_id === attack.encounter_id &&
     job.due_time === event.logical_time &&
-    jobCommandId(encounter.job_id, job.due_time) === (event.causation_id as string)
+    jobCommandId(ending.job_id, job.due_time) === (event.causation_id as string)
   );
 }
 

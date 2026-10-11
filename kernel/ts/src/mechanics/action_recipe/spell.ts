@@ -22,7 +22,7 @@ import { key } from '../../foundation/compose.ts';
 import { adjust, resourceRef, type Levels } from '../resource.ts';
 import { living } from '../death/shared.ts';
 import { deathSequence } from '../death/sequence.ts';
-import { closeEncounter, engaged, resisted } from '../combat/shared.ts';
+import { closeEncounter, engaged, lastOpponent, resisted } from '../combat/shared.ts';
 import { prefix } from '../combat/round_attack.ts';
 import { statusStep } from '../status/shared.ts';
 import { transition } from '../light/shared.ts';
@@ -99,7 +99,7 @@ function damage<R extends Effected>(
   if (op.from === op.to) return r;
   if (op.to > 0) return { ...r, ops: [...r.ops, op], levels };
   const fight = engaged(world, npc);
-  const sole = fight && (fight.row.active_ids?.length ?? 1) === 1;
+  const sole = fight && lastOpponent(fight.row);
   const ops = [...r.ops, op, ...(sole ? closeEncounter(world, npc) : [])];
   const fatal = {
     loss: op,

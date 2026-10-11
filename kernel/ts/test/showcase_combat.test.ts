@@ -276,9 +276,9 @@ test('combat 8: armed, the boar falls in three rounds; the poultice stops the bl
 });
 
 // Breaks: the pit's pack or target choice is missing (the second Attack is refused or plays a
-// round), the switch does not move the player's blow off A, the goblin kill entry is lost (no 70),
-// or a non-final pack kill pays (loka-lpq6: re-pin B's death to 70 and the end to 80 once fixed).
-test('combat 9: in the pit the player turns on the second goblin; the last kill pays', () => {
+// round), the switch does not move the player's blow off A, the goblin kill entry is lost, or a
+// non-final pack kill earns nothing (loka-lpq6: 70 at B's death, 80 at A's).
+test('combat 9: in the pit the player turns on the second goblin; each kill pays', () => {
   w = go(w, 'south').world;
   const [a, b] = goblinsIn(w, 'goblin_pit');
   assert.ok(a && b, 'two goblins in the pit');
@@ -298,13 +298,13 @@ test('combat 9: in the pit the player turns on the second goblin; the last kill 
   assert.deepEqual(hps(r1), [6, 3, 5]);
   const r2 = wait(r1, start + 300).world;
   assert.deepEqual(hps(r2), [6, 0, 4]);
-  assert.equal(levelling(r2)?.experience, 60);
+  assert.equal(levelling(r2)?.experience, 70);
   const r3 = wait(r2, start + 450).world;
   assert.deepEqual(hps(r3), [3, 0, 3]);
   w = wait(r3, start + 600).world;
   assert.deepEqual(hps(w), [0, 0, 2]);
   assert.equal(engaged(w, w.body), undefined);
-  assert.deepEqual(levelling(w), { level: 2, experience: 70, next: 100, unspent: 0 });
+  assert.deepEqual(levelling(w), { level: 2, experience: 80, next: 100, unspent: 0 });
 });
 
 // Breaks: the Warden's physical resistance is missing (the sword kills him in three rounds and
