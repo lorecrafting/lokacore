@@ -15,6 +15,7 @@ import { loadCartridge, type Cartridge, type World } from '../src/index.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { accepted, allocator } from '../src/runtime/decision.ts';
 import { admit, adopt, newWorld, step } from '../src/runtime/world.ts';
+import { FILTERS } from '../src/mechanics/reaction.ts';
 import { read } from './read.ts';
 
 const CONTEXT = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f';
@@ -460,4 +461,13 @@ test('the loader checks reaction triggers, consequences and owners', () => {
     { capability: 'fact' },
     ['fact@1'],
   );
+});
+
+// Breaks (loka-kgd.25): a trigger filter the schema admits has no FILTERS entry, so `triggered`
+// throws a TypeError instead of matching, or an entry the schema never admits lingers.
+test('FILTERS names exactly the trigger filters reaction.schema.json admits', () => {
+  const on = read('protocol/reaction.schema.json').$defs.ReactionRule.properties.on.oneOf;
+  const fields = new Set(on.flatMap((b: { properties: object }) => Object.keys(b.properties)));
+  fields.delete('event');
+  assert.deepEqual(Object.keys(FILTERS).sort(), [...fields].sort());
 });

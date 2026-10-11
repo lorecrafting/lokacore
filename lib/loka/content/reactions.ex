@@ -39,7 +39,8 @@ defmodule Loka.Content.Reactions do
     "scene" => "scene",
     "status" => "status",
     "kind" => "liquid",
-    "npc" => "npc"
+    "npc" => "npc",
+    "attacker" => "npc"
   }
   @doc "Each trigger filter that names a definition (W1), with that definition's kind."
   @spec filters() :: %{String.t() => String.t()}
@@ -50,7 +51,7 @@ defmodule Loka.Content.Reactions do
       owned(at(rel, []), "reaction", ctx.kinds) ++
       owned(at(rel, ["on", "event"]), event, ctx.events) ++
       named(rel, on, ctx) ++
-      entrant(rel, on, ctx) ++
+      instances(rel, on, ctx) ++
       Enum.flat_map(Enum.with_index(r["apply"]), &consequence(rel, &1, on, ctx))
   end
 
@@ -60,18 +61,19 @@ defmodule Loka.Content.Reactions do
         reference(rel, ["on"], {f, kind}, on, ctx.m, ctx.defs)
       end)
 
-  # A spawn template has no instance to enter (row W3).
-  defp entrant(rel, %{"npc" => n}, ctx) do
+  # A spawn template has no instance to enter (row W3) or attack (loka-kgd.79).
+  defp instances(rel, on, ctx),
+    do: Enum.flat_map(Map.take(on, ["npc", "attacker"]), &instance(rel, &1, ctx))
+
+  defp instance(rel, {f, n}, ctx) do
     case resolve(n, "npc", ctx.m, ctx.defs) do
       {_, _, %{"spawn_template" => true}} ->
-        [diag("SCHEMA_VIOLATION", at(rel, ["on", "npc"]), %{"error" => "invalid_value"})]
+        [diag("SCHEMA_VIOLATION", at(rel, ["on", f]), %{"error" => "invalid_value"})]
 
       _ ->
         []
     end
   end
-
-  defp entrant(_, _, _), do: []
 
   # The kernel_api minor (major 1) each consequence op needs; twin of FLOORS in
   # kernel/ts/src/content/cartridge_reactions.ts.
@@ -88,13 +90,14 @@ defmodule Loka.Content.Reactions do
   # reader 2, row G3).
   @events %{"quest_resolved" => 8, "spoken" => 48, "status_applied" => 53}
 
-  # One diagnostic per rule below its highest floor; the entrant filter needs 1.47 (row W3), a
-  # co_present status.apply 1.50 (W21), with a tag 1.56 (W22).
+  # One diagnostic per rule below its highest floor; the entrant filter needs 1.47 (row W3), the
+  # attacker filter 1.58 (loka-kgd.79), a co_present status.apply 1.50 (W21), with a tag 1.56 (W22).
   defp api(r, manifest) do
     floor =
       Enum.max([
         Map.get(@events, r["on"]["event"], 0),
-        if(Map.has_key?(r["on"], "npc"), do: 47, else: 0)
+        if(Map.has_key?(r["on"], "npc"), do: 47, else: 0),
+        if(Map.has_key?(r["on"], "attacker"), do: 58, else: 0)
         | Enum.map(r["apply"], &step_floor/1)
       ])
 

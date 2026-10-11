@@ -11,6 +11,7 @@ import { diag, step, type Checks, type Obj } from './cartridge_refs.ts';
 // Each trigger filter that names a definition (W1), with that definition's kind; sorted, as the
 // compiler (lib/loka/content/reactions.ex) reports them.
 const NAMED: Record<string, string> = {
+  attacker: 'npc',
   barrier: 'barrier',
   fact: 'fact',
   item: 'item',
@@ -72,6 +73,7 @@ export function reactions(c: Obj, { named, typedValue }: Checks): Diagnostic[] {
     const floor = Math.max(
       r.on.event === 'quest_resolved' ? 8 : 0,
       r.on.event === 'spoken' ? 48 : r.on.npc ? 47 : 0, // speech (G9), the entrant filter (W3)
+      r.on.attacker ? 58 : 0, // loka-kgd.79
       r.on.event === 'status_applied' ? 53 : 0, // status reader 2 (row G3)
       // co_present: row W21; its tag: row W22
       ...r.apply.map((s: Obj) => (s.tag ? 56 : s.co_present ? 50 : (FLOORS[s.op] ?? 0))),
@@ -82,9 +84,10 @@ export function reactions(c: Obj, { named, typedValue }: Checks): Diagnostic[] {
       );
     for (const [field, kind] of Object.entries(NAMED))
       if (r.on[field]) named(r.on[field], kind, `${at}.on.${field}`);
-    // A spawn template has no instance to enter (row W3).
-    if (r.on.npc && c.npcs?.[refString(r.on.npc)]?.spawn_template)
-      out.push(diag('SCHEMA_VIOLATION', `${at}.on.npc`, { error: 'invalid_value' }));
+    // A spawn template has no instance to enter (row W3) or attack (loka-kgd.79).
+    for (const f of ['npc', 'attacker'])
+      if (r.on[f] && c.npcs?.[refString(r.on[f])]?.spawn_template)
+        out.push(diag('SCHEMA_VIOLATION', `${at}.on.${f}`, { error: 'invalid_value' }));
     r.apply.forEach((s: Obj, i: number) => {
       if (s.op === 'quest.activate') {
         named(s.quest, 'quest', `${at}.apply[${i}].quest`);

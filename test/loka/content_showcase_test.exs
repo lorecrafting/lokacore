@@ -79,4 +79,31 @@ defmodule Loka.ContentShowcaseTest do
              ])
     end
   end
+
+  # loka-kgd.79, twin of the loader rows in kernel/ts/test/showcase_combat.test.ts. Breaks: an
+  # attacker filter compiles under API 1.57, names a spawn template or an NPC the cartridge lacks.
+  describe "attacker filter" do
+    setup do: %{dir: Loka.ContentSource.copy("cartridges/toolbox_showcase")}
+
+    defp gore(dir, api, npc) do
+      Loka.ContentSource.compile(dir, [
+        {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], api)},
+        {"reactions/boar_gore.json", &put_in(&1, ["on", "attacker"], npc)}
+      ])
+    end
+
+    defp codes({:error, ds}), do: Enum.map(ds, &{&1["code"], &1["path"]})
+
+    test "needs API 1.58 and an authored NPC", %{dir: dir} do
+      at = "reactions/boar_gore.on.attacker"
+      assert {:ok, _, _} = gore(dir, "1.58", "boar")
+
+      assert {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"} in codes(
+               gore(dir, "1.57", "boar")
+             )
+
+      assert {"SCHEMA_VIOLATION", at} in codes(gore(dir, "1.58", "goblin"))
+      assert {"UNRESOLVED_REFERENCE", at} in codes(gore(dir, "1.58", "wolf"))
+    end
+  end
 end

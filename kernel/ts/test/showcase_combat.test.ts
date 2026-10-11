@@ -22,6 +22,7 @@ import {
   pool,
   ref,
   refused,
+  reload,
   take,
   wait,
 } from './showcase_fixture.ts';
@@ -340,4 +341,22 @@ test('combat 11: the raider falls before the bounty is taken; the fight ends nor
   assert.deepEqual(gameView(s).journal, []);
   assert.deepEqual(levelling(s), { level: 1, experience: 10, next: 30, unspent: 0 });
   assert.equal(talk(go(s, 'east').world, 'aldous').opened, 'aldous_lesson');
+});
+
+// Twin of the compiler rows in test/loka/content_showcase_test.exs (loka-kgd.79). Breaks: an
+// attacker filter loads under API 1.57, names a spawn template (no instance ever attacks) or an
+// NPC the cartridge lacks.
+test('loader: the attacker filter needs API 1.58 and an authored NPC', () => {
+  const gore = (api: string, key: string) => (c: any) => {
+    c.manifest.requires.kernel_api.at_least = api;
+    c.reactions[ref('reaction', 'boar_gore')].on.attacker = { ...C, kind: 'npc', key };
+  };
+  const at = `.cartridge.reactions["${ref('reaction', 'boar_gore')}"].on.attacker`;
+  assert.equal(reload(gore('1.58', 'boar')), 'ok');
+  assert.equal(
+    reload(gore('1.57', 'boar')),
+    'KERNEL_API_RANGE_INVALID .cartridge.manifest.requires.kernel_api.at_least',
+  );
+  assert.equal(reload(gore('1.58', 'goblin')), `SCHEMA_VIOLATION ${at}`);
+  assert.equal(reload(gore('1.58', 'wolf')), `UNRESOLVED_REFERENCE ${at}`);
 });

@@ -5,14 +5,23 @@
 // marks it spent, so the fire burns out; water from the bucket quenches; the smoke is a smell cue
 // of the burning status, read one room away. Each test continues the world the one before it left.
 import assert from 'node:assert/strict';
-import { createHash } from 'node:crypto';
 import { test } from 'node:test';
-import { gameView, INSTALLED, loadCartridge, newWorld, step } from '../src/index.ts';
-import { encode } from '../src/foundation/canonical.ts';
+import { gameView, newWorld, step } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { key } from '../src/foundation/compose.ts';
 import { barrierState } from '../src/mechanics/lookups.ts';
-import { content, fresh, go, id, play, ref, refused, take, wait } from './showcase_fixture.ts';
+import {
+  content,
+  fresh,
+  go,
+  id,
+  play,
+  ref,
+  refused,
+  reload,
+  take,
+  wait,
+} from './showcase_fixture.ts';
 
 const WORLD = '5ca5e000-0000-4000-8000-0000000f1e22';
 const C = { cartridge_id: 'toolbox_showcase', cartridge_version: '0.0.1' };
@@ -131,19 +140,6 @@ test('budget: 64 burnables light at once, 65 fault budget_exceeded and nothing b
   assert.deepEqual(over.decision, { kind: 'fault', code: 'budget_exceeded' });
   assert.equal(over.limit, 'created_jobs');
 });
-
-/** The showcase, edited and re-hashed, loaded: its first diagnostic's code and path, or 'ok'. */
-function reload(edit: (c: any) => void) {
-  const c = structuredClone(content) as any;
-  edit(c);
-  const canonical = encode(c);
-  const sha256 = createHash('sha256').update(canonical).digest('hex');
-  const r = loadCartridge(
-    new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-    INSTALLED,
-  );
-  return r.ok ? 'ok' : `${r.diagnostic.code} ${r.diagnostic.path}`;
-}
 
 // Twin of the compiler rows in test/loka/content_showcase_test.exs. Breaks: a barrier.set step or a
 // co_present tag loads under API 1.55 (each alone); a barrier.set to locked on a barrier without
