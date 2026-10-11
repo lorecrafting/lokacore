@@ -70,6 +70,10 @@ test('fire 4: the bucket puts both out, and they stay out', () => {
       target_id: id(w, 'item', target),
       item_id: id(w, 'item', 'smithy_bucket'),
     }).world;
+  assert.deepEqual(
+    ['bench', 'kindling'].map((k) => burning(w, k)),
+    [false, false],
+  );
   w = wait(w, lit + 600).world;
   assert.deepEqual(
     ['bench', 'kindling'].map((k) => burning(w, k)),
@@ -150,7 +154,14 @@ test('loader: barrier.set and co_present tag need API 1.56; to locked needs a ke
     c.manifest.requires.kernel_api.at_least = '1.55';
     delete c.reactions[ref('reaction', 'kindle')];
   };
-  const untagged = (c: any) => delete spread(c)[0].tag;
+  const untagged = (c: any) => {
+    delete spread(c)[0].tag; // and the door named, so no tag is left
+    spread(c)[1] = {
+      op: 'barrier.set',
+      to: 'open',
+      barrier: { ...C, kind: 'barrier', key: 'store_door' },
+    };
+  };
   const noDoor = (c: any) => spread(c).splice(1, 1);
   const api = 'KERNEL_API_RANGE_INVALID .cartridge.manifest.requires.kernel_api.at_least';
   assert.equal(

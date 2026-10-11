@@ -34,7 +34,18 @@ defmodule Loka.ContentShowcaseTest do
         {"reactions/kindle.json", nil}
       ]
 
-      untagged = spread(&List.update_at(&1, 0, fn s -> Map.delete(s, "tag") end))
+      # No tag left: the spread's tag dropped and the door named.
+      untagged =
+        spread(fn a ->
+          a
+          |> List.update_at(0, &Map.delete(&1, "tag"))
+          |> List.replace_at(1, %{
+            "op" => "barrier.set",
+            "to" => "open",
+            "barrier" => "store_door"
+          })
+        end)
+
       no_door = spread(&List.delete_at(&1, 1))
       api = {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"}
       assert {:ok, _, _} = Loka.ContentSource.compile(dir, at155 ++ [untagged, no_door])
