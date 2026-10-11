@@ -67,8 +67,9 @@ export function reach(
 
 /**
  * The held-tool rule (mechanics.md#held-tools), for G4 use tools and harvest tool gates: true when
- * `id` is carried by `body` directly, worn or wielded (in one of its slot holders, equipment@1), or
- * in open containers on the way to either; the walk faults as `reach` does.
+ * `id` is carried by `body` directly or in open containers it carries, or is itself worn or wielded
+ * (in one of its slot holders, equipment@1); not inside a worn container, which the GameView does
+ * not list. The walk faults as `reach` does.
  */
 export function toolHeld(world: World, body: EntityId, id: EntityId, steps: Steps) {
   const seen = new Set<string>();
@@ -79,8 +80,8 @@ export function toolHeld(world: World, body: EntityId, id: EntityId, steps: Step
     seen.add(at);
     const parent = world.state.containers[at];
     if (parent === body) return true;
-    if (world.state.containers[parent] === body && Object.values(world.slots).includes(parent))
-      return true;
+    const worn = at === id && world.state.containers[parent] === body;
+    if (worn && Object.values(world.slots).includes(parent)) return true;
     if (!opened(world, parent, body)) return false;
     at = parent;
   }

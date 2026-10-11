@@ -14,6 +14,8 @@ import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { key } from '../src/foundation/compose.ts';
 import { acquisition } from '../src/mechanics/skills.ts';
+import { check } from '../src/runtime/invariants.ts';
+import { resolved } from '../src/commands/actions.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-harvest-sampler-'));
 let artifact: Uint8Array;
@@ -63,6 +65,19 @@ const offer = (w: World, action = 'harvest') => {
 const ore = (w: World) => ['ore_01', 'ore_02'].map((k) => w.state.containers[item(w, k)]);
 const fresh = () =>
   newWorld(content, '2c6e1a9b-7d3f-4e5a-8b1c-0f2e4d6a8c1b' as never, [1, 2, 3, 4]);
+const held = () => take(fresh(), 'pickaxe');
+const wear = (w: World, k: string) => play(w, { type: 'wear', item_id: item(w, k) }).world;
+const sacked = () => {
+  const w = take(held(), 'sack');
+  return play(w, { type: 'put', item_id: item(w, 'pickaxe'), container_id: item(w, 'sack') }).world;
+};
+const whittle = (w: World) =>
+  play(w, {
+    type: 'perform',
+    action: 'whittle',
+    item_id: item(w, 'pickaxe'),
+    target_id: item(w, 'stick'),
+  });
 
 // Breaks: the tool gate is skipped (empty hands, the stick or the pickaxe on the floor mine ore),
 // or the offer's code differs from the one step returns.
@@ -112,24 +127,37 @@ test('careful harvest of the gated seam is refused without the tool, accepted wi
 });
 
 // Breaks: the held-tool rule (lookups.ts toolHeld) refuses a wielded pickaxe (in a slot holder,
-// which reach refuses) or one in a carried or worn open sack, for the harvest gate or for the G4
-// whittle recipe (tool {tag: sharp}) on the stick; or a wielded tool lacks its whittle offer.
-test('a wielded pickaxe, or one in a carried or worn open sack, mines and whittles', () => {
-  const held = take(fresh(), 'pickaxe');
-  const wear = (w: World, k: string) => play(w, { type: 'wear', item_id: item(w, k) }).world;
-  const sacked = play(take(held, 'sack'), {
-    type: 'put',
-    item_id: item(held, 'pickaxe'),
-    container_id: item(held, 'sack'),
-  }).world;
-  const wielded = wear(held, 'pickaxe');
-  assert.equal(offer(wielded, 'whittle').available, true);
-  for (const w of [wielded, sacked, wear(sacked, 'sack')]) {
+// which reach refuses) or one in a carried open sack, for the harvest gate or for the G4 whittle
+// recipe (tool {tag: sharp}) on the stick; or a wielded tool lacks its whittle offer.
+test('a wielded pickaxe, or one in a carried open sack, mines and whittles', () => {
+  for (const w of [wear(held(), 'pickaxe'), sacked()]) {
     assert.notEqual(w.state.containers[item(w, 'pickaxe')], w.body);
     assert.equal(mine(w).decision.kind, 'accepted');
-    const whittle = { type: 'perform', action: 'whittle', item_id: item(w, 'pickaxe') };
-    assert.equal(code(play(w, { ...whittle, target_id: item(w, 'stick') })), 'accepted');
+    assert.equal(code(whittle(w)), 'accepted');
   }
+  assert.equal(offer(wear(held(), 'pickaxe'), 'whittle').available, true);
+});
+
+// Breaks: a tool in a worn sack counts as held (PM decision, loka-kgd.84): step would accept a
+// whittle the GameView never lists (worn entries list no contents), which the invariant refuses.
+test('a pickaxe in a worn sack is not held: refused, unlisted, and the view agrees', () => {
+  const w = wear(sacked(), 'sack');
+  assert.equal(code(mine(w)), 'invalid_state');
+  const r = whittle(w);
+  assert.equal(code(r), 'not_present');
+  const resolves = Object.fromEntries(
+    Object.values(resolved(w, w.character)).map((a) => [a.key, a.command]),
+  );
+  const command = {
+    payload: {
+      type: 'perform',
+      action: 'whittle',
+      item_id: item(w, 'pickaxe'),
+      target_id: item(w, 'stick'),
+    },
+  };
+  const observation = { view: gameView(w), command, decision: r.decision, resolves };
+  assert.ok(check('gameview_agrees_with_admission', observation));
 });
 
 // Breaks: the loader admits a tool gate under kernel_api 1.51 or without tags@1 (twin of
