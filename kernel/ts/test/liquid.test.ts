@@ -457,3 +457,25 @@ test('authored liquid overrides project the same availability as the exact invoc
       }
   }
 });
+
+// loka-th7x. Breaks: the checker reads the liquid offer before the envelope, so a Fill, Pour or
+// Drink the view offers, sent for a foreign actor or under the nil CommandId, trips
+// gameview_agrees_with_admission although Step's not_found or permission_denied is right.
+test('an offered liquid action under a foreign actor or the nil CommandId agrees with refusal', () => {
+  const w = owned(4, 2);
+  const view = gameView(w);
+  for (const payload of [
+    { type: 'fill', source_id: well, vessel_id: spare },
+    { type: 'pour', source_id: skin, receiver_id: spare },
+    { type: 'drink', vessel_id: skin },
+  ])
+    for (const [id, actor_id, code] of [
+      ['aaaaaaaa-0000-4000-8000-000000000001', w.body, 'not_found'],
+      ['00000000-0000-0000-0000-000000000000', w.character, 'permission_denied'],
+    ]) {
+      const command = { id, world_context_id: w.context, payload: { ...payload, actor_id } };
+      const decision = step(w, command as never, 1).decision;
+      assert.deepEqual(decision, { kind: 'rejected', error: { code } }, payload.type);
+      assert.ok(gameview_agrees_with_admission({ view, command, decision }), payload.type);
+    }
+});

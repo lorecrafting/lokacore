@@ -42,7 +42,7 @@ export const gameview_agrees_with_admission = ({
   if (type === 'continue' || (type === 'choose' && command.payload.dream))
     return dreamAgrees(view, command.payload, decision, action_key);
   if (['fill', 'pour', 'drink'].includes(type))
-    return liquidAgrees(view, command.payload, decision, action_key); // own keys only: an action may be keyed `constructor`
+    return liquidAgrees(view, command, decision, action_key); // own keys only: an action may be keyed `constructor`
   const commandOf = (a: AdvertisedAction) =>
     Object.hasOwn(resolves, a.action_key) ? resolves[a.action_key] : undefined;
   const equip = (a: AdvertisedAction) => EQUIP_VERBS.includes(commandOf(a));
@@ -165,7 +165,13 @@ const entityView = (view: GameView, id: string): EntityView | ContentView | unde
     ...(view.equipment ?? []).flatMap((s) => (s.item ? [s.item] : [])),
   ].find((e) => e.id === id);
 
-function liquidAgrees(view: GameView, p: Any, decision: Any, key?: string): boolean {
+const NIL = '00000000-0000-0000-0000-000000000000';
+
+function liquidAgrees(view: GameView, command: Any, decision: Any, key?: string): boolean {
+  // The envelope is refused before any offer is read, as for a service (loka-th7x).
+  if (command.id === NIL) return decision.error?.code === 'permission_denied';
+  const p = command.payload;
+  if (p.actor_id !== view.actor_id) return decision.error?.code === 'not_found';
   const targets =
     p.type === 'fill'
       ? [p.source_id, p.vessel_id]
@@ -200,7 +206,7 @@ function serviceAgrees(
 ) {
   const code = decision.kind === 'rejected' ? decision.error.code : undefined;
   if (view.ancestry_choices?.length) return code === 'invalid_state';
-  if (command.id === '00000000-0000-0000-0000-000000000000') return code === 'permission_denied';
+  if (command.id === NIL) return code === 'permission_denied';
   const payload = command.payload;
   if (command.world_context_id !== world_context_id || payload.actor_id !== view.actor_id)
     return code === 'not_found';
