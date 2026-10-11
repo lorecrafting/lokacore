@@ -1,0 +1,24 @@
+{
+  "npc": "aldous",
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "fact_compare",
+      "fact": "raider_slain",
+      "equals": true
+    }
+  },
+  "prompt": "dialogue.aldous_yard.prompt",
+  "roles": {
+    "aldous": {
+      "role": "npc",
+      "npc": "aldous"
+    }
+  },
+  "choices": {
+    "leave": {
+      "label": "dialogue.aldous_talk.leave",
+      "narration": "narration.aldous_talk.leave"
+    }
+  }
+}

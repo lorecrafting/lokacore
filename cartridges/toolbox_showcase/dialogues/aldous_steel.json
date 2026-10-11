@@ -1,0 +1,24 @@
+{
+  "npc": "aldous",
+  "keyword": "steel",
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": []
+    }
+  },
+  "prompt": "dialogue.aldous_steel.prompt",
+  "roles": {
+    "aldous": {
+      "role": "npc",
+      "npc": "aldous"
+    }
+  },
+  "choices": {
+    "leave": {
+      "label": "dialogue.aldous_steel.leave",
+      "narration": "narration.aldous_steel.leave"
+    }
+  }
+}

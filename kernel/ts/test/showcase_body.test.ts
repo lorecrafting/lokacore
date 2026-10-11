@@ -54,7 +54,7 @@ test('hub: a new character starts in the inn at 07:00 day 1 with the planned poo
     gameView(w)
       .exits.map((e) => e.direction)
       .sort(),
-    ['east', 'north', 'south'],
+    ['east', 'north', 'south', 'west'],
   );
   const sign = play(w, { type: 'read', target_id: detail(w, 'sign_hub') });
   assert.deepEqual(sign.lines, ['readable.sign_hub']);
