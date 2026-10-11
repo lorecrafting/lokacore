@@ -21,6 +21,7 @@
 - Probes (not committed): population area reduced to the den, shouted goblins stay and strike (player 8 HP, both in the den, still afraid): C4's no-exit rule holds. After the chief falls, the two status rows mint job ids in EntityId order (`npcsIn` sorts by `cmp`); only TypeScript runs reactions, so no cross-kernel order exists to differ.
 - Subject in a container or carried: `present` reads only a room directly holding it, so nobody (as documented). A subjectless event falls back to the actor's body (reaction@1 table, `mechanics.md:586-590`), so its room is the player's: consistent with "the event's subject".
 - Death and W8: the victim is not `living`, so it takes nothing; NPC death ends every status, permanent ones included (G3), so a permanent fear ends with its holder.
+- Chapter 1 and parity: outside `cartridges/fear_sampler`, the diff touches under `protocol/fixtures`, `mobile`, `cartridges`, `test` and `kernel/ts/test` only `invalid.json` (additions) and the two new tests; no golden, save or receipt fixture pins the installed `kernel_api` (grep for 1.48/1.49 there finds only samplers' manifests); Chapter 1 goldens (`kernel/ts/test/chapters.test.ts`) run in the green hosted ci. `reaction`, `status` and `combat` are `portable_capability` in `protocol/capability_registry.json` with no Elixir host adapter (`bin/contracts.exs:125`), so co_present order has no Elixir twin to differ from.
 - Cites rerun: `combat/behavior.ts:136` is `afraid`; `round_flow.ts:150` is its read in `maybeFlight`.
 
 ## Findings
