@@ -1,6 +1,6 @@
 # Toolbox showcase
 
-`cartridges/toolbox_showcase` (the hub and the body, world and social districts of [showcase plan 1](showcase/hub-and-first-districts.md) are built, the combat district of [showcase plan 2](showcase/combat-district.md) is built but for its goblin pit (after M8); compiled answer
+`cartridges/toolbox_showcase` (the hub and the body, world and social districts of [showcase plan 1](showcase/hub-and-first-districts.md) are built, the combat district of [showcase plan 2](showcase/combat-district.md) is built but for its goblin pit (after M8), the cause-and-effect slice of [showcase plan 3](showcase/cause-and-effect.md) is planned; compiled answer
 `protocol/fixtures/toolbox_showcase_hash.json`, held by `test/loka/content_showcase_test.exs`) is the composition proof for the [mechanics toolbox](MECHANICS-TOOLBOX.md):
 one playable cartridge where finished mechanics meet each other, so a pair that only works in its
 own sampler shows up here ([owner decision](decisions/owner-decision-showcase-2026-10-10.md)).
@@ -24,7 +24,7 @@ Each row is a set of mechanics that must work together in one room or loop. A ba
 district and room that shows the pair, and the pin (test or recorder) that holds it.
 
 Status `planned (plan N)` means that showcase plan ([plan 1](showcase/hub-and-first-districts.md),
-[plan 2](showcase/combat-district.md)) names the rooms and steps and the build slice is still to come; `built` means the pin walks the plan's steps; `later` means no brief covers it yet.
+[plan 2](showcase/combat-district.md), [plan 3](showcase/cause-and-effect.md)) names the rooms and steps and the build slice is still to come; `built` means the pin walks the plan's steps; `later` means no brief covers it yet.
 
 | Mechanics | District | Rooms | Pin | Status |
 |---|---|---|---|---|
@@ -51,6 +51,8 @@ Status `planned (plan N)` means that showcase plan ([plan 1](showcase/hub-and-fi
 | say and shout x keyword dialogue x reactions | combat | `say steel` opens Aldous's answer; `shout ware` warns Gil next door | `showcase_combat.test.ts` (combat 2, 3) | built; kernel-only until the Book input (`loka-kgd.72`) |
 | lesson x weapon x derived damage | combat | Aldous's lesson and sword; Raise str after level 2 | `showcase_combat.test.ts` (combat 2, 5, 8) | built |
 | disposition x resistances | social and combat | the Warden's mail (`physical` 100) against the sword | `showcase_combat.test.ts` (combat 10) | built |
+| fuse status x status_expired x schedule cases x disposition | social | `tollhouse` (the forced strongbox carries `word_travels`), `village_green` (the Warden's 13:00 walk), `warden_gate` (engage, the ledger mend) | `showcase_social.test.ts` (social 15-18, 21) | planned (plan 3) |
+| rumour hops x conditional schedule x dialogue check x codex deduction | social | `shepherd_hut` (burn), `warden_gate` (Wat tells Tam), `village_green` (Tam tells Nell; `press`), `church` ("What the letter carried") | `showcase_social.test.ts` (social 19-20) | planned (plan 3) |
 | traps x statuses x combat; fear x pack x shout; use-on x fire; puzzles | combat | | | later (after M8) |
 
 ## How a batch adds a district
