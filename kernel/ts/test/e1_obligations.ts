@@ -420,7 +420,7 @@ export function reactionWitnesses(before: World, after: World, decision: Decisio
           same(o.scope, scopeOf(before, actor, step.fact)) &&
           (step.op === 'fact.adjust' || o.value === step.value),
       );
-    if (step.op === 'status.apply')
+    if (step.op === 'status.apply' || step.op === 'status.cure')
       return ops.find((o) => o.op === 'status.transition' && same(o.status, step.status));
     if (step.op === 'experience.grant')
       return ops.find((o) => o.op === 'levelling.set' && o.character_id === actor);
