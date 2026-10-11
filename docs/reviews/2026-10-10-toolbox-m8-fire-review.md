@@ -44,3 +44,17 @@
 
 - Elixir and TS path formats differ by design, as for KERNEL_API.
 - The `tag` floor of 56 touches only `status.apply` and `barrier.set`: no other apply variant has a `tag` property (schema walk).
+
+## Re-check at 64e5ebc7 (fix commit only)
+
+- Commit `64e5ebc7787be554c7881ab41a4f7c822f784f20` (test-only, `kernel/ts/test/showcase_fire.test.ts`). Hosted ci and book-e2e green on it (`gh run list --commit`, reviewer). `npm run typecheck` exit 0; `showcase_fire` 11/11 on the head.
+- Verdict: **APPROVE WITH NOTES**.
+- Dispositions, each mutant re-planted alone, run on `showcase_fire.test.ts` only; each fails exactly one test, the new assertion:
+  - 1a `react.ts:34` `?? group` dropped: `not ok 11`, `showcase_fire.test.ts:274` (wait `fault`, expected `accepted`). Fixed.
+  - 1b `lookups.ts:35` room filter dropped: `not ok 9` (kindling in pack / `the_fold`). Fixed.
+  - 1c `react.ts:55` tag filter dropped: `not ok 10` (`wooden` door opens). Fixed.
+  - 2 `cartridge_reactions.ts:120` `named(s.barrier…)` deleted: `not ok 7`, `:206` (actual `ok`). Fixed.
+  - 3 `react.ts:35` `doors.get(row) ??` dropped: `not ok 11`, `:276` (laterStep `open`). Fixed.
+  - 4 `/code-review` items: PM accepted as known limits, `loka-kgd.103`. Closed.
+- `zz_reclose` ordering: renaming it to `aa_reclose` turns test 11 red at `:274` (door `open`), with or without mutant 1a. A rename cannot weaken it silently.
+- **nit**, `showcase_fire.test.ts:263`: the comment says "a later rule" but not that rule order is key order, so `zz_` is load-bearing. Failure: a rename that sorts before `fire_spreads` gives a red test whose cause is not obvious. One comment line fixes it; no re-check needed.
