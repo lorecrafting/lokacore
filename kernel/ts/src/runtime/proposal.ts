@@ -17,7 +17,7 @@ import { allocator, event, type Mint, type Steps, type World } from './decision.
 import { factChanged, type Base } from '../mechanics/fact.ts';
 import { jobCommandId } from '../foundation/id_source.ts';
 import { begun, earned, stamp } from '../mechanics/quest/lifecycle.ts';
-import { sequence, triggered } from '../mechanics/reaction.ts';
+import { diedAfter, sequence, triggered } from '../mechanics/reaction.ts';
 import { levelUp, oneWrite } from '../mechanics/levelling/shared.ts';
 import * as schedule from '../mechanics/schedule/rule.ts';
 import { cmp } from '../foundation/validate.ts';
@@ -191,7 +191,7 @@ function creditDelivery(p: P, next: Queued): Admitted | undefined {
   if (next.cause.payload.type !== 'entity_died') return;
   const at = now(p);
   if (!('cartridge' in at)) return at;
-  const credit = deathCredit(at, next.cause, p.ops, p.events);
+  const credit = deathCredit(at, next.cause, p.ops, p.events, p.command);
   if (credit.length)
     return join(
       p,
@@ -217,6 +217,7 @@ function earnedExit(p: P, instance_id: QuestInstanceId, at: Parameters<typeof st
 }
 
 // The queue's deliveries to quiescence, or the fault that ends them.
+// size: allow 41, each delivery names the bodies dead after its cause once (loka-kgd.105)
 function react(p: P): Admitted | undefined {
   for (let next; (next = p.queue.shift());) {
     const credited = creditDelivery(p, next);
@@ -230,6 +231,7 @@ function react(p: P): Admitted | undefined {
     }
     const crow = crowDelivery(p, next);
     if (crow) return crow;
+    const dead = diedAfter(p.events, next.cause); // once per delivery
     for (const rule of triggered(p.world, next.cause)) {
       const at = now(p);
       if (!('cartridge' in at)) return at;
@@ -241,7 +243,7 @@ function react(p: P): Admitted | undefined {
         p.group + 1,
         p.steps,
         next.mint,
-        p.holders,
+        { holders: p.holders, dead },
       );
       const depth = next.depth + 1;
       p.limit = over({ deliveries: ++p.deliveries, reaction_depth: depth, query_steps: p.steps.n });

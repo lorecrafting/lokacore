@@ -59,7 +59,7 @@ import { uniform } from '../../foundation/rng.ts';
 import { opposed, practised } from '../skills.ts';
 import { cureOps } from '../status/shared.ts';
 import { spellOf, useRefused } from './shared.ts';
-import { effect, type Effected } from './spell.ts';
+import { effect, fightBack, type Effected } from './spell.ts';
 
 export const decide: Rule<'action_recipe'> = (world, command, mint, steps = { n: 0 }) => {
   const p = command.payload;
@@ -80,7 +80,8 @@ export const decide: Rule<'action_recipe'> = (world, command, mint, steps = { n:
   const checked = rolled ? { ...start, events: [rolled.event], position: 1 } : start;
   const begun = practised(world, actor_id, checked, check); // after the check reads the level
   const ran = sequence.reduce(step(world, command, mint, subject_id, body), begun);
-  const run = tip(world, actor_id, recipe, ran);
+  const end = duration ? add(from, duration) : from; // a fight's first round never inside the cast
+  const run = tip(world, actor_id, recipe, fightBack(world, actor_id, body, ran, mint, end));
   const said = { key: narration.actor, ...pinned(world, narration.participants, body) };
   const done = { type: 'action_completed', action, subject_id } as const;
   const completed =
@@ -89,9 +90,7 @@ export const decide: Rule<'action_recipe'> = (world, command, mint, steps = { n:
   const cooldown: DeltaOp[] = recipe.cooldown
     ? [{ op: 'cooldown.start', writer_group: 0, actor_id, action, ...since, at: from }]
     : [];
-  const time: DeltaOp[] = duration
-    ? [{ op: 'time.advance', writer_group: 0, from, to: add(from, duration) }]
-    : [];
+  const time: DeltaOp[] = duration ? [{ op: 'time.advance', writer_group: 0, from, to: end }] : [];
   return accepted(
     world,
     rolled?.outcome ?? 'performed',

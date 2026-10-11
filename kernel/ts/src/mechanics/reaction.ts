@@ -29,7 +29,7 @@ import { activation, resolution } from './quest/lifecycle.ts';
 import { eventRooms, itemsTagged, questOf } from './lookups.ts';
 import { cmp } from '../foundation/validate.ts';
 import { suppress } from './population/shared.ts';
-import { statusStep } from './status/shared.ts';
+import { specOf, statusStep } from './status/shared.ts';
 import { grant } from './levelling/shared.ts';
 import { saturate } from '../foundation/int.ts';
 import { npcsIn } from './speech/shared.ts';
@@ -97,6 +97,8 @@ export function triggered(world: World, e: DomainEvent): ReactionRule[] {
  * the `when` evaluates adds one to `steps.n`.
  */
 const ACTIVATES = ['quest_resolved', 'rested'];
+// The advance's status holders' groups (G3), and the bodies dead after the cause (`diedAfter`).
+type Delivery = { holders?: Map<string, number>; dead?: ReadonlySet<EntityId> };
 
 // size: allow 60, one ordered delivery lowers fact assignments, quest effects and suppression
 export function sequence(
@@ -107,7 +109,7 @@ export function sequence(
   group: number,
   steps: { n: number },
   mint: Mint,
-  holders: Map<string, number> = new Map(),
+  { holders = new Map(), dead = new Set() }: Delivery = {},
 ): Decision<EventPayload['type']> | undefined {
   const actor = resolvedActor(world, cause, listener); // a quest event's evidenced owner
   if (!actor) return { kind: 'fault', code: 'precondition_failed' };
@@ -142,7 +144,7 @@ export function sequence(
     } else if (step.op === 'status.apply' || step.op === 'status.cure') {
       const body = bodyOf(then, actor);
       if (!body) return { kind: 'fault', code: 'precondition_failed' };
-      const on = holdersOf(then, step, cause, body);
+      const on = holdersOf(then, step, cause, body, dead);
       const applying = statusStep(then, step, on, body, group, own, mint, emit);
       ops.push(...applying.ops);
       narration.push(...applying.narration);
@@ -159,6 +161,15 @@ export function sequence(
   ops.push(...grant(then, actor, gained, group));
   return accepted(world, 'reacted', ops, events, narration.length ? narration : undefined);
 }
+
+/** loka-kgd.105: the bodies an `entity_died` after `cause` names; they hold none of its statuses
+ * (a dead NPC takes none anyway; the player's body lives on, returned by the death). */
+export const diedAfter = (events: readonly DomainEvent[], cause: DomainEvent) =>
+  new Set(
+    events.flatMap((e) =>
+      e.payload.type === 'entity_died' && e.position > cause.position ? [e.payload.victim_id] : [],
+    ),
+  );
 
 // The payload field naming each event's subject (docs/system/mechanics.md reaction@1 table); any
 // other event's subject, or a fact_changed without subject_id, is the actor's own body. A status
@@ -186,13 +197,21 @@ const subject = (cause: DomainEvent, body?: EntityId) => {
 
 // A status step's holders (row G3): the step's named item's or (row 42) NPC's instance, (row W21)
 // every living NPC or (row W22, with tag) every item so tagged lying in the event's room, else the
-// event's subject.
-function holdersOf(world: World, step: StatusStep, cause: DomainEvent, body: EntityId) {
+// event's subject; none a body dead after the cause (`diedAfter`) takes.
+function holdersOf(
+  world: World,
+  step: StatusStep,
+  cause: DomainEvent,
+  body: EntityId,
+  dead: ReadonlySet<EntityId>,
+) {
   const apply = step.op === 'status.apply' ? step : undefined;
   const named = apply?.item ?? apply?.npc;
   const one = named ? world.entityIds[refString(named)] : subject(cause, body);
   const rooms = apply?.co_present && eventRooms(world, cause, one);
-  if (!rooms) return [one];
+  // loka-kgd.105: but a permanent status (row W8) outlives the death, as on the body it returns.
+  const lasting = specOf(world, step.status)?.duration === 'permanent';
+  if (!rooms) return one && dead.has(one) && !lasting ? [] : [one];
   return apply.tag ? itemsTagged(world, rooms, apply.tag) : npcsIn(world, rooms);
 }
 type StatusStep = Extract<ReactionRule['apply'][number], { op: 'status.apply' | 'status.cure' }>;

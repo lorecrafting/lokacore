@@ -1,5 +1,6 @@
 import type { DeltaOp, DomainEvent } from '../../contracts.gen.ts';
 import { bodyOf, refString, type World } from '../../runtime/decision.ts';
+import type { Actor } from '../../runtime/proposal.ts';
 import { same } from '../../foundation/compose.ts';
 import { jobCommandId } from '../../foundation/id_source.ts';
 import { resourceRef } from '../resource.ts';
@@ -18,6 +19,7 @@ export function deathCredit(
   event: DomainEvent,
   ops: readonly DeltaOp[],
   events: readonly DomainEvent[],
+  root: Actor,
 ): DeltaOp[] {
   const p = event.payload;
   if (p.type !== 'entity_died' || !p.victim_definition || !p.credited_character_id) return [];
@@ -33,7 +35,7 @@ export function deathCredit(
     same(k.npc, p.victim_definition),
   );
   if (!fact && !kill) return [];
-  const group = fatalGroup(world, { ...event, payload: p }, ops, events);
+  const group = fatalGroup(world, { ...event, payload: p }, ops, events, root);
   if (group === undefined) return [];
   const credited: DeltaOp[] = fact
     ? [
@@ -57,10 +59,44 @@ function fatalGroup(
   event: Death,
   ops: readonly DeltaOp[],
   events: readonly DomainEvent[],
+  root: Actor,
 ) {
   const p = event.payload;
   const creation = ops.find((o) => o.op === 'entity.create' && o.identity.id === p.corpse_id);
   if (!creation || creation.op !== 'entity.create' || !corpseValid(world, event, creation)) return;
+  if (!spellKill(world, event, root) && !roundKill(world, event, ops, events, creation)) return;
+  const fatal = ops.some(
+    (o) =>
+      o.op === 'resource.adjust' &&
+      o.writer_group === creation.writer_group &&
+      o.entity_id === p.victim_id &&
+      same(o.resource, resourceRef(world, 'hp')) &&
+      o.from > 0 &&
+      o.to === 0,
+  );
+  return fatal ? creation.writer_group : undefined;
+}
+
+// Row 29b (loka-kgd.101): the root command is the player's cast, its body the killer.
+function spellKill(world: World, event: Death, root: Actor) {
+  const p = event.payload;
+  return (
+    'type' in root.payload &&
+    root.payload.type === 'cast' &&
+    event.causation_id === (root.id as string) &&
+    p.credited_character_id === root.payload.actor_id &&
+    p.killer_id === bodyOf(world, root.payload.actor_id)
+  );
+}
+
+// The round job that ran made the kill, through its attack_result.
+function roundKill(
+  world: World,
+  event: Death,
+  ops: readonly DeltaOp[],
+  events: readonly DomainEvent[],
+  creation: Create,
+) {
   const attack = attackOf(event, events);
   if (!attack || attack.payload.type !== 'attack_result') return;
   const { encounter_id } = attack.payload;
@@ -73,17 +109,7 @@ function fatalGroup(
       o.encounter_id === encounter_id &&
       jobCommandId(o.job_id, event.logical_time) === (event.causation_id as string),
   );
-  if (!ending || !occurrenceValid(world, event, attack.payload, ending)) return;
-  const fatal = ops.some(
-    (o) =>
-      o.op === 'resource.adjust' &&
-      o.writer_group === creation.writer_group &&
-      o.entity_id === p.victim_id &&
-      same(o.resource, resourceRef(world, 'hp')) &&
-      o.from > 0 &&
-      o.to === 0,
-  );
-  return fatal ? creation.writer_group : undefined;
+  return !!ending && occurrenceValid(world, event, attack.payload, ending);
 }
 
 function occurrenceValid(world: World, event: Death, attack: Attack, ending: Ending) {

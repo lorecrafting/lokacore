@@ -3,6 +3,7 @@
 // status_applied), damage of a G2 kind after the NPC's resistances, and light.ignite through
 // light@1's ignite transition. The holders are the named NPC's or item's instance, else the caster.
 import type {
+  CharacterId,
   DeltaOp,
   EventPayload,
   EntityId,
@@ -18,11 +19,18 @@ import {
   type Rule,
   type World,
 } from '../../runtime/decision.ts';
-import { key } from '../../foundation/compose.ts';
+import { key, same } from '../../foundation/compose.ts';
 import { adjust, resourceRef, type Levels } from '../resource.ts';
 import { living } from '../death/shared.ts';
 import { deathSequence } from '../death/sequence.ts';
-import { closeEncounter, engaged, lastOpponent, resisted } from '../combat/shared.ts';
+import {
+  attackRefused,
+  closeEncounter,
+  engaged,
+  lastOpponent,
+  resisted,
+} from '../combat/shared.ts';
+import { opened } from '../disposition.ts';
 import { prefix } from '../combat/round_attack.ts';
 import { statusStep } from '../status/shared.ts';
 import { transition } from '../light/shared.ts';
@@ -74,6 +82,28 @@ export function effect<R extends Effected>(
   return { ...r, ops: [...r.ops, ...done.ops], events, position, lines };
 }
 
+/** Row 29b (loka-kgd.101): the first NPC the spell's damage hurt and left alive fights back, as
+ * Attack would open the fight (its admission, `attackRefused`), the first round an interval after
+ * the cast's `end`; an NPC already fighting, or one Attack may not engage, does not. */
+export function fightBack<R extends Effected>(
+  world: World,
+  actor: CharacterId,
+  body: EntityId,
+  r: R,
+  mint: Mint,
+  end: number,
+): R {
+  const hurt = r.ops.find(
+    (o): o is Extract<DeltaOp, { op: 'resource.adjust' }> =>
+      o.op === 'resource.adjust' &&
+      world.entities[o.entity_id]?.kind === 'npc' &&
+      same(o.resource, resourceRef(world, 'hp')) &&
+      !slain(world, r.levels, o.entity_id),
+  )?.entity_id;
+  if (!hurt || engaged(world, body) || attackRefused(world, actor, hurt)) return r; // never a retarget
+  return { ...r, ops: [...r.ops, ...opened(world, actor, body, hurt, mint, end)] };
+}
+
 const hp = (world: World, npc: EntityId) =>
   key({ kind: 'resource', resource: resourceRef(world, 'hp'), entity_id: npc });
 // An NPC an earlier damage step of this spell brought to 0 takes no later effect.
@@ -81,8 +111,8 @@ const slain = (world: World, levels: Levels, npc: EntityId) => levels[hp(world, 
 
 // The loss after resistances, stopping at 0; a loss to 0 closes the NPC's encounter when it is the
 // only opponent (as a fatal status tick, status/job.ts) and runs the death sequence, the caster the
-// killer and named credited (no kill credit: deathCredit reads an attack_result), its drops drawn
-// after the spell's check. An NPC without an hp pool takes nothing.
+// killer and credited (deathCredit's cast path), its drops drawn after the spell's check. An NPC
+// without an hp pool takes nothing.
 function damage<R extends Effected>(
   world: World,
   command: Cast,
