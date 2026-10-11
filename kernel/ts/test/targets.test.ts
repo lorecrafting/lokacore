@@ -225,6 +225,7 @@ test('a poisoned second goblin ticks and takes the player and guard blows in one
   const poison = { ...C, kind: 'status', key: 'poison' } as never;
   const statuses = {
     'targets_sampler@0.0.1:status/poison': {
+      key: 'poison',
       duration: 300,
       tick_every: 150,
       resource: resourceRef(w, 'hp'),
@@ -258,6 +259,7 @@ test('poison ticks on the body and on the goblin in two groups, then one round, 
   const [w, a] = engaged();
   const poison = { ...C, kind: 'status', key: 'poison' } as never;
   const spec = {
+    key: 'poison',
     duration: 300,
     tick_every: 150,
     resource: resourceRef(w, 'hp'),

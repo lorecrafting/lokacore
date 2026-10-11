@@ -29,6 +29,7 @@ function poisoned(
   const poison = { cartridge_id: id, cartridge_version: version, kind: 'status', key };
   const any = Object.keys(w.cartridge.text)[0]!;
   const spec = {
+    key,
     duration,
     tick_every: every,
     resource: resourceRef(w, 'hp'),
