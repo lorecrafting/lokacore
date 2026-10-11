@@ -97,6 +97,8 @@ export function triggered(world: World, e: DomainEvent): ReactionRule[] {
  * the `when` evaluates adds one to `steps.n`.
  */
 const ACTIVATES = ['quest_resolved', 'rested'];
+// The advance's status holders' groups (G3), and the bodies dead after the cause (`diedAfter`).
+type Delivery = { holders?: Map<string, number>; dead?: ReadonlySet<EntityId> };
 
 // size: allow 60, one ordered delivery lowers fact assignments, quest effects and suppression
 export function sequence(
@@ -107,8 +109,7 @@ export function sequence(
   group: number,
   steps: { n: number },
   mint: Mint,
-  holders: Map<string, number> = new Map(),
-  dead: ReadonlySet<EntityId> = new Set(),
+  { holders = new Map(), dead = new Set() }: Delivery = {},
 ): Decision<EventPayload['type']> | undefined {
   const actor = resolvedActor(world, cause, listener); // a quest event's evidenced owner
   if (!actor) return { kind: 'fault', code: 'precondition_failed' };
@@ -160,6 +161,15 @@ export function sequence(
   ops.push(...grant(then, actor, gained, group));
   return accepted(world, 'reacted', ops, events, narration.length ? narration : undefined);
 }
+
+/** loka-kgd.105: the bodies an `entity_died` after `cause` names; they hold none of its statuses
+ * (a dead NPC takes none anyway; the player's body lives on, returned by the death). */
+export const diedAfter = (events: readonly DomainEvent[], cause: DomainEvent) =>
+  new Set(
+    events.flatMap((e) =>
+      e.payload.type === 'entity_died' && e.position > cause.position ? [e.payload.victim_id] : [],
+    ),
+  );
 
 // The payload field naming each event's subject (docs/system/mechanics.md reaction@1 table); any
 // other event's subject, or a fact_changed without subject_id, is the actor's own body. A status

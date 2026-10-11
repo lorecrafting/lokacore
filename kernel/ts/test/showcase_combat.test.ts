@@ -184,7 +184,8 @@ test('combat 5: Raise str spends the point', () => {
 // Breaks: the gore reaction or a status is missing, the boar's own statuses land on the player
 // twice, the bleed ticks early, the death keeps the bleed or loses the scar, the level or str,
 // or the held items do not move to the corpse; or (loka-kgd.105) without its npc_present `when`,
-// the killing blow's gore lands its bleed on the body returned to the inn.
+// the killing blow's gore lands its bleed on the body returned to the inn, or a reaction on the
+// death itself no longer reaches it.
 test('combat 6: unarmed, the boar gores the player to death; the scar survives the return', () => {
   const sword = id(w, 'item', 'training_sword');
   w = play(w, { type: 'remove', item_id: sword }).world;
@@ -211,6 +212,9 @@ test('combat 6: unarmed, the boar gores the player to death; the scar survives t
   const reactions = { ...w.cartridge.reactions, [gore]: bare };
   const unguarded = { ...w, cartridge: { ...w.cartridge, reactions } };
   assert.deepEqual(conditions(wait(unguarded, start + 750).world), [GORED]);
+  const onDeath = { ...reactions, [gore]: { ...bare, on: { event: 'entity_died' } } };
+  const mourned = { ...w, cartridge: { ...w.cartridge, reactions: onDeath } } as World;
+  assert.equal(conditions(wait(mourned, start + 750).world)?.length, 2); // the death's own reaction
   const last = wait(w, start + 750);
   w = last.world;
   assert.ok(last.lines.includes('combat.player_died'));
