@@ -23264,6 +23264,161 @@
     ]
   },
   {
+    "contract": "RecipeStep",
+    "value": {
+      "op": "status.apply"
+    },
+    "errors": [
+      {
+        "path": "/status",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "RecipeStep",
+    "value": {
+      "op": "status.apply",
+      "status": {
+        "cartridge_id": "spell_effects_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "status",
+        "key": "warded"
+      },
+      "co_present": true
+    },
+    "errors": [
+      {
+        "path": "/co_present",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "RecipeStep",
+    "value": {
+      "op": "damage",
+      "kind": "fire",
+      "amount": 8
+    },
+    "errors": [
+      {
+        "path": "/npc",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "RecipeStep",
+    "value": {
+      "op": "damage",
+      "npc": {
+        "cartridge_id": "spell_effects_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "npc",
+        "key": "wight"
+      },
+      "amount": 8
+    },
+    "errors": [
+      {
+        "path": "/kind",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "RecipeStep",
+    "value": {
+      "op": "damage",
+      "npc": {
+        "cartridge_id": "spell_effects_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "npc",
+        "key": "wight"
+      },
+      "kind": "fire"
+    },
+    "errors": [
+      {
+        "path": "/amount",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "RecipeStep",
+    "value": {
+      "op": "damage",
+      "npc": {
+        "cartridge_id": "spell_effects_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "npc",
+        "key": "wight"
+      },
+      "kind": "fire",
+      "amount": 0
+    },
+    "errors": [
+      {
+        "path": "/amount",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "contract": "RecipeStep",
+    "value": {
+      "op": "damage",
+      "npc": {
+        "cartridge_id": "spell_effects_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "npc",
+        "key": "wight"
+      },
+      "kind": "fire",
+      "amount": 2147483648
+    },
+    "errors": [
+      {
+        "path": "/amount",
+        "code": "above_maximum"
+      }
+    ]
+  },
+  {
+    "contract": "RecipeStep",
+    "value": {
+      "op": "damage",
+      "npc": {
+        "cartridge_id": "spell_effects_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "npc",
+        "key": "wight"
+      },
+      "kind": "lightning",
+      "amount": 8
+    },
+    "errors": [
+      {
+        "path": "/kind",
+        "code": "not_in_enum"
+      }
+    ]
+  },
+  {
+    "contract": "RecipeStep",
+    "value": {
+      "op": "light.ignite"
+    },
+    "errors": [
+      {
+        "path": "/item",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
     "contract": "RecipeTarget",
     "value": {
       "kind": "spell"

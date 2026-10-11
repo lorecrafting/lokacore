@@ -9,6 +9,7 @@ import type {
   UseTool,
 } from '../../contracts.gen.ts';
 import { bodyOf, refString, type Steps, type World } from '../../runtime/decision.ts';
+import { engaged } from '../combat/shared.ts';
 import { toolHeld } from '../lookups.ts';
 import { holds } from '../policy.ts';
 import { folded } from '../speech/shared.ts';
@@ -74,12 +75,15 @@ export const spellOf = (world: World, word: unknown) => {
 /**
  * step's admission of a cast (commands/actions.ts refusal), before the spell's costs: invalid_state
  * for an unknown word and for a spell whose policy fails alike, so a refusal never tells which
- * words are spells.
+ * words are spells; in a fight, also for a spell with a duration (row 29b: its time.advance would
+ * run the round job inside the cast).
  */
 export function castAdmission(world: World, payload: CommandPayload, steps: Steps) {
   if (payload.type !== 'cast') return undefined;
   const spell = spellOf(world, payload.word);
-  return spell && holds(world, payload.actor_id, spell.policy.root, { steps })
+  const body = bodyOf(world, payload.actor_id);
+  const busy = !!spell?.duration && !!body && !!engaged(world, body);
+  return spell && !busy && holds(world, payload.actor_id, spell.policy.root, { steps })
     ? undefined
     : ('invalid_state' as const);
 }

@@ -17,7 +17,8 @@
 // (runtime/proposal.ts adopt). Then, unless the outcome is failure, action_completed, engine-owned; the actor
 // reads the outcome's narration, each of its participants pinned here to its EntityId (an NPC's
 // or item's, the actor's body), so the committed line never resolves them again (06 §43). A cooldown adds a cooldown.start at the admission time, and a
-// duration one time.advance after the steps; events keep the admission time. A recipe with a tip
+// duration one time.advance after the steps (the host runs its due jobs in this proposal,
+// runtime/proposal.ts propose; 04 §5.4); events keep the admission time. A recipe with a tip
 // (toolbox row W23) first assigns its seen_tip_<key> after the steps, while unseen, and the actor
 // then also reads the tip after the outcome's line. Result bands join later. A use recipe
 // (toolbox row G4) acts on the invoked target with the invoked held tool (shared.ts useRefused); its
@@ -36,7 +37,6 @@ import type {
   RecipeNarration,
   RecipeStep,
   RecipeTarget,
-  TextKey,
 } from '../../contracts.gen.ts';
 import { admission, detailOf, resolved } from '../../commands/actions.ts';
 import {
@@ -53,12 +53,13 @@ import {
 } from '../../runtime/decision.ts';
 import { assigned, seenTip, value } from '../fact.ts';
 import { add } from '../../foundation/int.ts';
-import { adjust, level, type Levels } from '../resource.ts';
+import { adjust, level } from '../resource.ts';
 import { value as attributeValue } from '../attributes/shared.ts';
 import { uniform } from '../../foundation/rng.ts';
 import { opposed, practised } from '../skills.ts';
 import { cureOps } from '../status/shared.ts';
 import { spellOf, useRefused } from './shared.ts';
+import { effect, type Effected } from './spell.ts';
 
 export const decide: Rule<'action_recipe'> = (world, command, mint, steps = { n: 0 }) => {
   const p = command.payload;
@@ -75,11 +76,12 @@ export const decide: Rule<'action_recipe'> = (world, command, mint, steps = { n:
   const { check, duration } = recipe;
   const rolled = check && resolve(world, command, mint, check, subject_id, body);
   const { sequence, narration } = recipe.outcomes[rolled?.outcome ?? 'success']!;
-  const start = { ...START, ops: paid.ops, levels: paid.levels };
+  const start: Run = { ...START, ...paid, rng: rolled?.rng ?? world.state.rng }; // row 29b: a kill's drops
   const checked = rolled ? { ...start, events: [rolled.event], position: 1 } : start;
   const begun = practised(world, actor_id, checked, check); // after the check reads the level
   const ran = sequence.reduce(step(world, command, mint, subject_id, body), begun);
-  const [run, shown] = tip(world, actor_id, recipe, ran);
+  const run = tip(world, actor_id, recipe, ran);
+  const said = { key: narration.actor, ...pinned(world, narration.participants, body) };
   const done = { type: 'action_completed', action, subject_id } as const;
   const completed =
     rolled?.outcome === 'failure' ? [] : [event(world, command, mint, run.position + 1, done)];
@@ -87,7 +89,6 @@ export const decide: Rule<'action_recipe'> = (world, command, mint, steps = { n:
   const cooldown: DeltaOp[] = recipe.cooldown
     ? [{ op: 'cooldown.start', writer_group: 0, actor_id, action, ...since, at: from }]
     : [];
-  // An explicit advance: the host runs its due jobs in this proposal (runtime/proposal.ts propose; 04 §5.4).
   const time: DeltaOp[] = duration
     ? [{ op: 'time.advance', writer_group: 0, from, to: add(from, duration) }]
     : [];
@@ -96,8 +97,8 @@ export const decide: Rule<'action_recipe'> = (world, command, mint, steps = { n:
     rolled?.outcome ?? 'performed',
     [...run.ops, ...cooldown, ...time],
     [...run.events, ...completed],
-    [{ key: narration.actor, ...pinned(world, narration.participants, body) }, ...shown],
-    rolled?.rng,
+    [said, ...run.lines],
+    run.rng,
   );
 };
 
@@ -129,17 +130,13 @@ function subjectOf(
 }
 
 // Toolbox row W23: the first accepted perform of a recipe with a tip assigns its engine-owned
-// seen_tip_<key> true, and the actor reads the tip once: the run and the tip's narration line.
-function tip(
-  world: World,
-  actor: CharacterId,
-  recipe: ActionRecipe,
-  run: Run,
-): [Run, { key: TextKey }[]] {
-  if (!recipe.tip) return [run, []];
+// seen_tip_<key> true, and the actor reads the tip once, after the outcome's lines.
+function tip(world: World, actor: CharacterId, recipe: ActionRecipe, run: Run): Run {
+  if (!recipe.tip) return run;
   const fact = seenTip(world, recipe.key);
-  if (value(world, actor, fact) === true) return [run, []];
-  return [assigned(world, actor, run, { fact, value: true }), [{ key: recipe.tip }]];
+  if (value(world, actor, fact) === true) return run;
+  const tipped = assigned(world, actor, run, { fact, value: true });
+  return { ...tipped, lines: [...tipped.lines, { key: recipe.tip }] };
 }
 
 // The narration's participants as EntityIds; the loader checked each npc or item resolves.
@@ -194,16 +191,13 @@ function resolve(
 }
 
 type Command = Parameters<Rule<'action_recipe'>>[1];
-type Run = {
-  readonly ops: readonly DeltaOp[];
-  readonly events: readonly ReturnType<typeof event<CustomEvent | CheckEvent>>[];
-  readonly position: number;
+// levels: resource values as the costs and steps so far left them; lines and rng: row 29b effects.
+type Run = Effected & {
   readonly facts: Readonly<Record<string, FactValue>>; // by MutationTarget text, as set so far
-  readonly levels: Levels; // resource values as the costs and steps so far left them
 };
 type CustomEvent = Extract<EventPayload, { type: 'custom_event' }>;
 type CheckEvent = Extract<EventPayload, { type: 'check_passed' | 'check_failed' }>;
-const START: Run = { ops: [], events: [], position: 0, facts: {}, levels: {} };
+const START = { ops: [], events: [], position: 0, facts: {}, levels: {}, lines: [] };
 
 // One step of the sequence over the run so far.
 const step =
@@ -233,5 +227,7 @@ const step =
       );
       return done ? r : { ...r, ops: [...r.ops, ...cureOps(world, subject_id, [s.status])] };
     }
-    return assigned(world, command.payload.actor_id, r, { ...s, subject: subject_id });
+    if (s.op === 'fact.assign')
+      return assigned(world, command.payload.actor_id, r, { ...s, subject: subject_id });
+    return effect(world, command, mint, body, r, s);
   };

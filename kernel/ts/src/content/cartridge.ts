@@ -200,8 +200,8 @@ function timeStage(c: Obj): Diagnostic[] {
 // definition kind (room, detail, NPC, item, variant, NPC daily schedule, calendar,
 // recipe, resource, attribute, barrier), recipe check (by the events it produces, check@1's), recipe step
 // of any outcome (by the event it produces: fact_changed for fact.assign, custom_event for
-// event.emit; a resource.adjust, like a cost, through the resource it names, a status.cure through
-// its status), quest (by its
+// event.emit, row 29b entity_died for damage; light.ignite by the ignite command; a resource.adjust
+// through the resource it names, a status.cure or status.apply through its status), quest (by its
 // quest_activated), daily schedule (also by the run_job that runs it, schedule@1's), reaction
 // (also by its trigger's event and each fact.assign's fact_changed), dialogue (also by each
 // fact.assign's fact_changed) and story point (by its story_point_reached) the cartridge uses has
@@ -234,8 +234,8 @@ function lockStage(c: Obj): Diagnostic[] {
     if (r.check) use('event', 'check_passed', `${at}.check`);
     for (const [name, o] of Object.entries(r.outcomes as Obj))
       o.sequence.forEach((s: Obj, i: number) => {
-        if (s.op !== 'resource.adjust' && s.op !== 'status.cure')
-          use('event', STEP_EVENT[s.op], `${at}.outcomes.${name}.sequence[${i}].op`);
+        const [kind, owned] = STEP_USE[s.op] ?? [];
+        if (kind) use(kind, owned!, `${at}.outcomes.${name}.sequence[${i}].op`);
       });
   }
   for (const kind of ['resource', 'attribute', 'scene', 'skill', 'topic'])
@@ -272,9 +272,11 @@ function lockDiagnostics(locked: Obj, required: Obj): Diagnostic[] {
   return out;
 }
 
-const STEP_EVENT: Readonly<Record<string, string>> = {
-  'fact.assign': 'fact_changed',
-  'event.emit': 'custom_event',
+const STEP_USE: Readonly<Record<string, ['event' | 'command', string]>> = {
+  'fact.assign': ['event', 'fact_changed'],
+  'event.emit': ['event', 'custom_event'],
+  damage: ['event', 'entity_died'],
+  'light.ignite': ['command', 'ignite'],
 };
 
 function declarations(c: Obj): Diagnostic[] {

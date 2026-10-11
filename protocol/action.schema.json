@@ -728,6 +728,70 @@
           "additionalProperties": false
         },
         {
+          "description": "Toolbox row 29b (kernel_api at least 1.55; spell recipes only, compiler and loader SCHEMA_VIOLATION): start or refresh this status on the named NPC's instance, else on the caster's body, as a reaction's status.apply does (status@1: a dead NPC or an immune holder takes nothing; a first application emits status_applied while a reaction listens).",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "status.apply"
+            },
+            "status": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "npc": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            }
+          },
+          "required": [
+            "op",
+            "status"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Toolbox row 29b (kernel_api at least 1.55; spell recipes only): the named NPC's instance, when alive, loses amount hp of this damage kind after its resistances (row G2), stopping at 0; a loss to 0 runs the death sequence with the caster as killer and credited character, and closes the NPC's encounter when it is the only opponent.",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "damage"
+            },
+            "npc": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "kind": {
+              "$ref": "entity.schema.json#/$defs/DamageKind"
+            },
+            "amount": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "op",
+            "npc",
+            "kind",
+            "amount"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Toolbox row 29b (kernel_api at least 1.55; spell recipes only): ignite the named fuel source as the ignite verb does (light@1), when the caster holds it and the verb would admit it; otherwise nothing.",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "light.ignite"
+            },
+            "item": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            }
+          },
+          "required": [
+            "op",
+            "item"
+          ],
+          "additionalProperties": false
+        },
+        {
           "description": "Adjust a resource of the actor's body by `by`, stopping at its bounds.",
           "type": "object",
           "properties": {

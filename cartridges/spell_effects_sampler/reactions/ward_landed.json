@@ -1,0 +1,13 @@
+{
+  "on": {
+    "event": "status_applied",
+    "status": "warded"
+  },
+  "apply": [
+    {
+      "op": "fact.assign",
+      "fact": "ward_landed",
+      "value": true
+    }
+  ]
+}

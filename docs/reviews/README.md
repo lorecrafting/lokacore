@@ -13,6 +13,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: toolbox row G4, use X on Y (loka-kgd.76)](2026-10-10-toolbox-m8-useon-review.md): **APPROVE**
 - [Review: toolbox row 12, traps (loka-kgd.73)](2026-10-10-toolbox-m8-traps-review.md): **APPROVE WITH NOTES**
 - [Review: toolbox row 29a, spell cast admission (loka-kgd.81)](2026-10-10-toolbox-m8-spells-review.md): **APPROVE WITH NOTES**
+- [Review: toolbox row 29b, spell effects (loka-kgd.99)](2026-10-10-toolbox-m8-spell-effects-review.md): **APPROVE WITH NOTES**
 - [Review: status readers 4 and 5, blocks/allows and resistances on a status (loka-kgd.89, loka-kgd.90)](2026-10-10-toolbox-m8-readers45-review.md): **APPROVE WITH NOTES**
 - [Review: status readers SR1 to SR3 (loka-kgd.86, .87, .88)](2026-10-10-toolbox-m8-readers-review.md): **APPROVE WITH NOTES**
 - [Item review: toolbox row 26, order and dial puzzles (loka-kgd.75, batch M8)](2026-10-10-toolbox-m8-puzzles-review.md): **APPROVE WITH NOTES**

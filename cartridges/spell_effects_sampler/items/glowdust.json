@@ -1,0 +1,19 @@
+{
+  "keywords": [
+    "glowdust"
+  ],
+  "short": "item.glowdust.short",
+  "room_line": "item.glowdust.room",
+  "description": "item.glowdust.description",
+  "mass_grams": 10,
+  "location": {
+    "in": "room",
+    "room": "hall"
+  },
+  "fuel": {
+    "kind": "supply",
+    "capacity": 600,
+    "initial": 600,
+    "unit": "glow"
+  }
+}

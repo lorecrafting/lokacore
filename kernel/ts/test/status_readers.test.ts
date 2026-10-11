@@ -126,6 +126,23 @@ test('a stunned troll skips its blows until the stun ends', () => {
   assert.deepEqual([hp(two, two.body), hp(two, troll(two))], [8, 6], 'round at 300 s: it clubs');
 });
 
+// Breaks (loka-kgd.98): the player's round blow skips the attack bar (a player stunned mid-fight
+// still hits the troll for 1).
+test("a player stunned mid-fight takes no blow; the troll's still lands", () => {
+  const status = (key: string) => ({ ...C, kind: 'status', key });
+  const dazing = {
+    key: 'dazing',
+    on: { event: 'status_expired', status: status('hushed') },
+    apply: [{ op: 'status.apply', status: status('stunned') }],
+  };
+  const c = {
+    ...content,
+    reactions: { ...content.reactions, [`${S('').replace('status/', 'reaction/')}dazing`]: dazing },
+  } as unknown as Cartridge;
+  // Hushed (120 s) ends before the round at 150 s and stuns the player for 200 s.
+  assert.deepEqual(fight(south(shrine(c))), [9, 8], 'warded halves the troll hit to 1');
+});
+
 // Breaks: the action set is not filtered (a hushed say is accepted), a block is refused with
 // unsupported_capability rather than invalid_state, a blocked type the cartridge never offers (cast:
 // no spell) reads invalid_state, the view still lists the blocked verbs, or the block outlives its
