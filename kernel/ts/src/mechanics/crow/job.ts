@@ -123,7 +123,6 @@ function leg(
   index: number,
 ) {
   const item = b.row.item_id;
-
   if (!held(world, b))
     return accepted<never>(world, 'job_ran', [done, changed(b, empty(b.row))], []);
   const stuck = index < route.length - 1 && !canStep(world, b, room, route[index + 1]);
