@@ -23182,5 +23182,32 @@
         "code": "const_mismatch"
       }
     ]
+  },
+  {
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "entity_died"
+      },
+      "apply": [
+        {
+          "op": "status.apply",
+          "status": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "status",
+            "key": "afraid"
+          },
+          "co_present": false
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/apply/0/co_present",
+        "code": "not_in_enum"
+      }
+    ]
   }
 ]

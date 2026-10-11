@@ -37,5 +37,11 @@
   "narration.afraid.applied": "Fear grips you.",
   "narration.afraid.tick": "You tremble.",
   "narration.afraid.expired": "Your fear passes.",
-  "combat.goblin_fled_west": "A goblin flees west."
+  "combat.goblin_fled_west": "A goblin flees west.",
+  "npc.chief.short": "the goblin chief",
+  "npc.chief.room": "The goblin [[chief|chief]] glowers here.",
+  "npc.chief.description": "A scarred goblin with a bone crown.",
+  "npc.guard.short": "a guard",
+  "npc.guard.room": "A steady [[guard|guard]] stands by you.",
+  "npc.guard.description": "A guard who has seen worse than goblins."
 }

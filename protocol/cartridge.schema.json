@@ -2405,7 +2405,7 @@
         },
         "fear": {
           "const": true,
-          "description": "Toolbox row W21 (kernel_api at least 1.49): while active on a pack member, its C4 flight is attempted on its every opponent turn, whatever its hp; may stand in for per_tick."
+          "description": "Toolbox row W21 (kernel_api at least 1.50): while active on a pack member, its C4 flight is attempted on its every opponent turn, whatever its hp; may stand in for per_tick."
         },
         "cues": {
           "description": "Cues active while this status is active on a holder, from the holder's room (toolbox row G6).",

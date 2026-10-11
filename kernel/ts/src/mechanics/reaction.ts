@@ -32,6 +32,7 @@ import { suppress } from './population/shared.ts';
 import { applyStatus, specOf } from './status/shared.ts';
 import { grant } from './levelling/shared.ts';
 import { saturate } from '../foundation/int.ts';
+import { npcsIn } from './speech/shared.ts';
 
 type On = ReactionRule['on'];
 // Each trigger filter (W1; reaction.schema.json): true when the event's payload field equals it.
@@ -176,10 +177,10 @@ const subject = (cause: DomainEvent, body?: EntityId) => {
   return id ?? body;
 };
 
-// A status.apply on its holder: the step's named item's or (row 42) NPC's instance, else the
-// event's subject (row G3), once per holder and status in a rule, in the one writer group the
-// holder's status writes share in this advance (status/job.ts statusGroup); only the player's own
-// body hears the applied line.
+// A status.apply on its holder: the step's named item's or (row 42) NPC's instance, (row W21) every
+// living NPC in the event's room, else the event's subject (row G3), once per holder and status in
+// a rule, in the one writer group the holder's status writes share in this advance (status/job.ts
+// statusGroup); only the player's own body hears the applied line.
 function statusStep(
   world: World,
   step: Extract<ReactionRule['apply'][number], { op: 'status.apply' }>,
@@ -190,18 +191,24 @@ function statusStep(
   mint: Mint,
 ) {
   const named = step.item ?? step.npc;
-  const holder = named ? world.entityIds[refString(named)] : subject(cause, body);
-  const once = `${holder}|${refString(step.status)}`;
-  if (!holder || applied.has(once)) return { ops: [], narration: [] };
-  applied.add(once);
-  const joined = holders.get(holder) ?? group;
-  const ops = applyStatus(world, holder, step.status, joined, mint);
-  if (ops.length) holders.set(holder, joined); // a later status job on the holder joins it too
-  // Only a first application (over no row or an inactive one) is heard; a refresh while active is
-  // silent (row W25), and a permanent status (row W8) opens with no job.
-  const first = ops.some((o) => o.op === 'status.transition' && !o.expected?.active);
-  const label = specOf(world, step.status)?.narration.applied;
-  return { ops, narration: label && first && holder === body ? [{ key: label }] : [] };
+  const one = named ? world.entityIds[refString(named)] : subject(cause, body);
+  const room = (cause.payload as { room_id?: string }).room_id ?? world.state.containers[one!];
+  const out = { ops: [] as DeltaOp[], narration: [] as { key: TextKey }[] };
+  for (const holder of step.co_present ? npcsIn(world, [room!]) : [one]) {
+    const once = `${holder}|${refString(step.status)}`;
+    if (!holder || applied.has(once)) continue;
+    applied.add(once);
+    const joined = holders.get(holder) ?? group;
+    const ops = applyStatus(world, holder, step.status, joined, mint);
+    if (ops.length) holders.set(holder, joined); // a later status job on the holder joins it too
+    out.ops.push(...ops);
+    // Only a first application (over no row or an inactive one) is heard; a refresh while active is
+    // silent (row W25), and a permanent status (row W8) opens with no job.
+    const first = ops.some((o) => o.op === 'status.transition' && !o.expected?.active);
+    const label = specOf(world, step.status)?.narration.applied;
+    if (label && first && holder === body) out.narration.push({ key: label });
+  }
+  return out;
 }
 
 // A fact.assign, or (row 15) a fact.adjust lowered to one at the bounded sum (nothing when the

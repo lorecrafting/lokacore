@@ -28,7 +28,7 @@ export function status(c: Obj): Diagnostic[] {
   if (!Object.keys(defs).length && !applies.length && !cures.length && !g3) return out;
   const all = Object.values(defs);
   const floor = all.some((s) => s.fear)
-    ? '1.49'
+    ? '1.50'
     : all.some(lasting)
       ? '1.48'
       : g3
@@ -94,9 +94,12 @@ function api146(c: Obj) {
             .map((f) => [`.cartridge.reactions${step(ref)}.apply[${i}].${f}`, s[f], `${f}s`, s]),
     ),
   ) as [string, Obj, string, Obj][];
-  // Row 42: a step names one holder, and a spawn template has no instance to take it.
+  // Row 42: one holder per step, never a spawn template (no instance); row W21's co_present: none.
   const lone = items.flatMap(([at, ref, table, s]) =>
-    table === 'npcs' && (c.npcs?.[refString(ref as never)]?.spawn_template || s.item) ? [at] : [],
+    s.co_present ||
+    (table === 'npcs' && (c.npcs?.[refString(ref as never)]?.spawn_template || s.item))
+      ? [at]
+      : [],
   );
   const modifies = Object.entries(c.statuses ?? {}).flatMap(([ref, s]: [string, any]) =>
     ((s.modifies ?? []) as Obj[]).map((m, n) => [

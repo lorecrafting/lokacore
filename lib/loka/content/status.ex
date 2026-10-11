@@ -50,10 +50,10 @@ defmodule Loka.Content.Status do
 
   defp trigger?(_), do: false
 
-  # A fear status (row W21) needs 1.49, a permanent one (row W8) 1.48, the fields above 1.46.
+  # A fear status (row W21) needs 1.50, a permanent one (row W8) 1.48, the fields above 1.46.
   defp floor(statuses, g3) do
     cond do
-      Enum.any?(statuses, &match?({_, {_, _, %{"fear" => true}}}, &1)) -> [1, 49]
+      Enum.any?(statuses, &match?({_, {_, _, %{"fear" => true}}}, &1)) -> [1, 50]
       Enum.any?(statuses, &match?({_, {_, _, %{"duration" => "permanent"}}}, &1)) -> [1, 48]
       g3 -> [1, 46]
       true -> [1, 38]

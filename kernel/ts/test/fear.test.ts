@@ -10,10 +10,11 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
 import { INSTALLED, loadCartridge, newWorld, step, stepElapsed } from '../src/index.ts';
-import type { Cartridge, World } from '../src/runtime/decision.ts';
+import { refString, type Cartridge, type World } from '../src/runtime/decision.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
+import { activeStatuses } from '../src/mechanics/status/shared.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-fear-sampler-'));
 let artifact: Uint8Array;
@@ -49,30 +50,41 @@ const play = (w: World, payload: object) =>
       n,
     ),
   );
-function round(w: World) {
+function round(w: World, by = 150) {
   const run_id = `aaaaaaaa-2121-4121-8121-${String(++n).padStart(12, '0')}`;
-  const [from, until] = [w.state.clock, w.state.clock + 150];
+  const [from, until] = [w.state.clock, w.state.clock + by];
   const payload = { type: 'elapsed', actor_id: w.character, run_id, from, until };
   const command = { id: elapsedCommandId(run_id, w.context, from, until), payload };
   return ok(stepElapsed(w, { ...command, world_context_id: w.context } as never, n));
 }
 const hp = (w: World, e: string) => level(w, e as never, resourceRef(w, 'hp'));
 const room = (w: World, e: string) => w.rooms[w.state.containers[e]!]?.title;
+const npc = (w: World, key: string) => {
+  const { id: cartridge_id, version: cartridge_version } = w.cartridge.manifest;
+  return w.entityIds[refString({ cartridge_id, cartridge_version, kind: 'npc', key } as never)]!;
+};
+const fearful = (w: World, e: string) => activeStatuses(w, e as never).length > 0;
+const slay = (w: World) => round(play(w, { type: 'attack', target_id: npc(w, 'chief') }));
 
-/** Two rounds of a fight on the lower-id goblin, after `before` in the den. */
-function fight(before: (w: World) => World) {
+/** A new game, moved into the den, and its two goblins in EntityId order. */
+function den(c: Cartridge) {
   n = 0;
-  let w = play(newWorld(content, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, [1, 2, 3, 4]), {
+  const w = play(newWorld(c, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, [1, 2, 3, 4]), {
     type: 'move',
     direction: 'east',
   });
-  const den = w.state.containers[w.body];
+  const here = w.state.containers[w.body];
   const [a, b] = Object.keys(w.state.created ?? {})
-    .filter((e) => w.state.created![e].origin.kind === 'spawned' && w.state.containers[e] === den)
+    .filter((e) => w.state.created![e].origin.kind === 'spawned' && w.state.containers[e] === here)
     .sort();
   assert.ok(a && b, 'two goblins in the den');
-  w = round(round(play(before(w), { type: 'attack', target_id: a })));
-  return { w, a: a!, b: b! };
+  return { w, a, b };
+}
+
+/** Two rounds of a fight on the lower-id goblin, after `before` in the den. */
+function fight(before: (w: World) => World, c = content) {
+  const { w, a, b } = den(c);
+  return { w: round(round(play(before(w), { type: 'attack', target_id: a }))), a, b };
 }
 
 // Breaks: combat behaviour ignores the fear status (the goblins fight on), reads it only below the
@@ -96,19 +108,97 @@ test('afraid goblins flee on their next turns; without fear they fight', () => {
   );
 });
 
-// Breaks: the loader admits a fear status under API 1.48 (twin of test/loka/content_fear_test.exs).
-// The sampler's load above fails if one without per_tick is refused.
-test('a fear status needs API 1.49', () => {
+// Breaks: the leader's entity_died reaction lands on the dead victim (co_present ignored), on no
+// one, or only on the goblin the player attacks next.
+test('the chief falls: both goblins flee on their next turns; without the reaction they fight', () => {
+  const reactions = Object.entries(content.reactions!).filter(([, r]) => r.key !== 'leader_fell');
+  assert.equal(reactions.length, 1);
+  const calm = fight(slay, { ...content, reactions: Object.fromEntries(reactions) });
+  assert.deepEqual(
+    [hp(calm.w, calm.w.body), hp(calm.w, calm.a), room(calm.w, calm.a), room(calm.w, calm.b)],
+    [8, 2, 'room.den.title', 'room.den.title'],
+  );
+  const { w, a, b } = fight(slay);
+  assert.equal(hp(w, npc(w, 'chief')), 0, 'one blow fells the chief before it strikes');
+  assert.deepEqual(
+    [hp(w, w.body), hp(w, a), hp(w, b), room(w, a), room(w, b)],
+    [10, 4, 6, 'room.burrow.title', 'room.burrow.title'],
+  );
+});
+
+// Breaks: co_present reaches the player's body (any holder kind, not NPCs only) or an NPC that
+// declares the status immune (the guard: how an ally opts out).
+test('the chief falls: the player and the immune guard are not afraid', () => {
+  const { w, a, b } = fight(slay);
+  assert.deepEqual(
+    [w.body, npc(w, 'guard'), a, b].map((e) => fearful(w, e)),
+    [false, false, true, true],
+  );
+});
+
+// The writer-group edge (docs/system/mechanics.md, writer groups; writer_groups.test.ts): a shout
+// frightens the goblins at T; the chief falls in a round at T+650 in the same wait as their afraid
+// expiry at T+600, so the reaction rewrites rows that expiry wrote. Breaks: a co_present holder
+// does not join the group its status rows already hold in the advance (the wait faults
+// conflicting_write), or the one wait differs from the same play split at T+600.
+test("the chief falls in the wait that ends the goblins' fear: one wait equals two", () => {
+  const after = (split: boolean) => {
+    const { w: shouted, a, b } = den(content);
+    const T = shouted.state.clock;
+    let w = play(round(play(shouted, { type: 'shout', word: 'begone' }), 500), {
+      type: 'attack',
+      target_id: npc(shouted, 'chief'),
+    });
+    w = split ? round(round(w, 100), 50) : round(w, 150);
+    return [w.state.clock - T, ...[npc(w, 'chief'), a, b].map((e) => [hp(w, e), fearful(w, e)])];
+  };
+  assert.deepEqual(after(false), [650, [0, false], [6, true], [6, true]]);
+  assert.deepEqual(after(true), after(false));
+});
+
+/** The sampler's artifact, edited and re-hashed, loaded: its first diagnostic's code and path. */
+function reload(edit: (c: any) => void) {
   const c = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
-  c.manifest.requires.kernel_api.at_least = '1.48';
+  edit(c);
   const canonical = encode(c);
   const sha256 = createHash('sha256').update(canonical).digest('hex');
   const r = loadCartridge(
     new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
     INSTALLED,
   );
-  assert.deepEqual(r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path], [
-    'KERNEL_API_RANGE_INVALID',
-    '.cartridge.manifest.requires.kernel_api.at_least',
-  ]);
+  return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
+}
+const api = ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'];
+const afraid = (c: any) => c.statuses['fear_sampler@0.0.1:status/afraid'];
+const leader = '.cartridge.reactions["fear_sampler@0.0.1:reaction/leader_fell"]';
+const fell = (c: any) => c.reactions['fear_sampler@0.0.1:reaction/leader_fell'].apply[0];
+
+// Breaks (twin of test/loka/content_fear_test.exs): the loader admits a fear status or a
+// co_present step (each alone) under API 1.49, or a co_present step that also names its holder.
+// The sampler's load above fails if one without per_tick is refused.
+test('fear and co_present need API 1.50; co_present names no holder', () => {
+  const at149 = (c: any) => (c.manifest.requires.kernel_api.at_least = '1.49');
+  assert.deepEqual(
+    reload((c) => {
+      at149(c);
+      delete c.reactions['fear_sampler@0.0.1:reaction/leader_fell'];
+    }),
+    api,
+  );
+  assert.deepEqual(
+    reload((c) => {
+      at149(c);
+      delete afraid(c).fear;
+      afraid(c).per_tick = -1;
+    }),
+    api,
+  );
+  for (const [field, key] of [
+    ['npc', 'guard'],
+    ['item', 'ear'],
+  ])
+    assert.deepEqual(
+      reload((c) => (fell(c)[field] = { ...fell(c).status, kind: field, key })),
+      ['SCHEMA_VIOLATION', `${leader}.apply[0].${field}`],
+    );
 });

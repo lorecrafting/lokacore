@@ -560,13 +560,17 @@
                 "additionalProperties": false
               },
               {
-                "description": "Apply one authored status (toolbox row 1) at the cause's time to the event's subject (a body, NPC or thing, row G3), or to the named item's or (row 42, never with item; not a spawn template) NPC's authored instance; an active one is refreshed; an NPC or item that declares the status immune takes nothing.",
+                "description": "Apply one authored status (toolbox row 1) at the cause's time to the event's subject (a body, NPC or thing, row G3), or to the named item's or (row 42, never with item; not a spawn template) NPC's authored instance, or (row W21, co_present) to every living NPC in the event's room; an active one is refreshed; an NPC or item that declares the status immune takes nothing.",
                 "type": "object",
                 "properties": {
                   "op": { "const": "status.apply" },
                   "status": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
                   "item": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
-                  "npc": { "$ref": "identity.schema.json#/$defs/DefinitionRef" }
+                  "npc": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
+                  "co_present": {
+                    "enum": [true],
+                    "description": "Toolbox row W21 (kernel_api at least 1.50): the status lands on every living NPC in the event's room (its room_id, else the subject's room), in EntityId order, never on the player's body; an NPC declaring the status immune takes nothing. Never with item or npc (compiler and loader SCHEMA_VIOLATION)."
+                  }
                 },
                 "required": ["op", "status"],
                 "additionalProperties": false

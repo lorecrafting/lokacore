@@ -1,0 +1,20 @@
+{
+  "keywords": [
+    "chief"
+  ],
+  "short": "npc.chief.short",
+  "room_line": "npc.chief.room",
+  "description": "npc.chief.description",
+  "room": "den",
+  "hp": {
+    "minimum": 0,
+    "maximum": 2,
+    "start": 2,
+    "gain": 0
+  },
+  "attack": {
+    "chance": 100,
+    "damage_min": 1,
+    "damage_max": 1
+  }
+}
