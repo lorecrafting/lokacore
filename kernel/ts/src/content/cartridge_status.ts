@@ -5,8 +5,8 @@ import type { Diagnostic } from '../contracts.gen.ts';
 
 /**
  * Checked toolbox row 1, G3, 2c and G13 (liquid cures) declarations in the loaded artifact, independent of source
- * compilation; only a status with `modifies` (row 2c) may omit `per_tick`, and a permanent one
- * (row W8) has none.
+ * compilation; only a status with `modifies` (row 2c) or `fear` (row W21) may omit `per_tick`, and a
+ * permanent one (row W8) has none.
  */
 export function status(c: Obj): Diagnostic[] {
   const out: Diagnostic[] = [];

@@ -96,9 +96,9 @@ test('afraid goblins flee on their next turns; without fear they fight', () => {
   );
 });
 
-// Breaks: the loader admits a fear status under API 1.48, or refuses one without per_tick (twin of
-// test/loka/content_fear_test.exs).
-test('a fear status needs API 1.49 and may omit per_tick', () => {
+// Breaks: the loader admits a fear status under API 1.48 (twin of test/loka/content_fear_test.exs).
+// The sampler's load above fails if one without per_tick is refused.
+test('a fear status needs API 1.49', () => {
   const c = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
   c.manifest.requires.kernel_api.at_least = '1.48';
   const canonical = encode(c);

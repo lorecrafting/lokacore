@@ -3,7 +3,7 @@ defmodule Loka.ContentFearTest do
   setup_all do: %{dir: Loka.ContentSource.copy("cartridges/fear_sampler")}
 
   # Breaks (toolbox row W21; twin of the loader row in kernel/ts/test/fear.test.ts): a fear status
-  # compiles under API 1.48, or one without per_tick is refused.
+  # compiles under API 1.48, or one without per_tick (the sampler's afraid) is refused.
   test "a fear status keeps its API floor and may omit per_tick", %{dir: dir} do
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, [])
 
