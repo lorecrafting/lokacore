@@ -2,8 +2,7 @@
 // "Guided loop and expected outcomes" of Low Wardle). Steps 5 to 9 continue one world; the others
 // start fresh. Weather oracle, independent of the kernel: for d in 1..2 the first 4 bytes of
 // `printf 'weather:<ctx>:<d>' | shasum -a 256`, big-endian, mod 7 (clear 2, frost, rain, gale,
-// heat, drought): SOCIAL 2, 3 (day 1 frost, day 2 rain); WET 3 (day 1 rain); for d in 1..3,
-// ECHO 2, 0, 1 (frost, clear, clear).
+// heat, drought): SOCIAL 2, 3 (day 1 frost, day 2 rain); WET 3 (day 1 rain).
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { gameView } from '../src/index.ts';

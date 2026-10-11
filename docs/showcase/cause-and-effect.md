@@ -152,9 +152,9 @@ start). Close the app for 35 real minutes.
 **Save B, loud.** The same walk, but force the box, and burn the letter in Wat's fire. Look at Wat
 before you leave the hut. Back to the green before 13:00. Close the app for 35 real minutes.
 
-Each new save draws its own sky, so day 1 may be hot (overheated on the fell, not chilled). If the day
-after is a rainy one Tam shelters in the church at 11:00 and Nell hears nothing until the
-next dry day; the sky shows it on the fell, and the wait is a real half hour.
+Each new save draws its own sky, so day 1 may not be frost (no chill; a hot day overheats on the
+fell). If the day after is a rainy one Tam shelters in the church at 11:00 and Nell hears nothing
+until the next dry day; the sky shows it on the fell, and the wait is a real half hour.
 
 On return (about 18:00 day 2, the Warden back at his gate), in each save: read the recap block;
 walk east and look at the Warden; talk to Nell; read the roll in the church and open the Journal's
@@ -194,7 +194,7 @@ schedule x dialogue check x codex deduction (the letter).
    schedules coincide; the entity fact set on Wat's arrival keeps the hop honest. A `co_present
    {npc, npc}` leaf, or `loka-kgd.22`, would let the rumour follow people, not timetables.
 4. **Wording (required).** Two plan 1 lines tell what this brief wants found, and the build rewrites
-   both (`showcase_social.test.ts` pins keys, not words): the Warden's `engage`, "knows you for a
+   both (the showcase tests pin keys, not words): the Warden's `engage`, "knows you for a
    troublemaker and raises his cudgel", becomes what he does with no judgment of the player (he
    steps into the road and lifts the bar's chain); `scene.letter_ash.2`, "The village will hear of
    this.", announces the echo at the act and so answers the owner's question in advance; it becomes

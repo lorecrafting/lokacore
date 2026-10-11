@@ -31,7 +31,8 @@ import {
 } from './showcase_fixture.ts';
 
 // Cause and effect (docs/showcase/cause-and-effect.md, steps 15 to 21): ECHO's days 2 and 3 are
-// clear, so Tam reaches the green at 11:00.
+// clear, so Tam reaches the green at 11:00. Weather oracle as in showcase_social.test.ts: for d in
+// 1..3, ECHO 2, 0, 1 (frost, clear, clear).
 const ECHO = '5ca5e000-0000-4000-8000-000000000330';
 /** Active word_travels rows as [holder, ends_at]. */
 const statuses = (w: World) =>
