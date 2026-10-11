@@ -9,7 +9,7 @@ import type {
   UseTool,
 } from '../../contracts.gen.ts';
 import { bodyOf, refString, type Steps, type World } from '../../runtime/decision.ts';
-import { reach } from '../lookups.ts';
+import { toolHeld } from '../lookups.ts';
 import { holds } from '../policy.ts';
 import { folded } from '../speech/shared.ts';
 
@@ -18,7 +18,7 @@ export type UseTarget = Extract<RecipeTarget, { kind: 'use' }>;
 /**
  * Why `body` may not use `tool` on `target` now, before the recipe's policy, shared by the rule,
  * step's admission and the GameView: invalid_target unless both are distinct items; not_present
- * unless the tool is held (in the body, directly or in an open container) and the target is on the
+ * unless the tool is held (lookups.ts toolHeld, the held-tool rule) and the target is on the
  * room's floor or directly in the body (the offer's target scopes, room_contents and inventory,
  * commands/actions.ts cartridge); invalid_target when the tool lacks the UseTool's tag or liquid. A reach fault code
  * (budget_exceeded, containment_cycle) on the tool is returned as is.
@@ -33,7 +33,7 @@ export function useRefused(
 ) {
   const item = (id?: EntityId) => id !== undefined && world.entities[id]?.kind === 'item';
   if (!item(tool) || !item(target) || tool === target) return 'invalid_target' as const;
-  const held = reach(world, body, tool!, steps, true);
+  const held = toolHeld(world, body, tool!, steps);
   if (held !== true) return held || ('not_present' as const);
   const at = world.state.containers[target!];
   if (at !== body && at !== world.state.containers[body]) return 'not_present' as const;

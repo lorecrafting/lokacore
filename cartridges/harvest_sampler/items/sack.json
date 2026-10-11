@@ -10,5 +10,6 @@
     "room": "mine"
   },
   "mass_grams": 100,
-  "container": true
+  "container": true,
+  "slot": "waist"
 }

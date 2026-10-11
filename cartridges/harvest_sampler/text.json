@@ -17,5 +17,11 @@
   "item.stick.description": "A dry wooden stick.",
   "item.sack.short": "a sack",
   "item.sack.room": "An empty [sack] lies by the door.",
-  "item.sack.description": "A rough canvas sack."
+  "item.sack.description": "A rough canvas sack.",
+  "skill.mining.label": "Mining",
+  "skill.mining.requirement": "Anyone may mine carefully once taught.",
+  "action.mine_carefully": "Mine carefully (2 lumps)",
+  "narration.mine_carefully": "You work two lumps of ore loose together.",
+  "action.whittle": "Whittle",
+  "narration.whittle": "You shave curls from the wood."
 }

@@ -1,0 +1,15 @@
+{
+  "facts": {
+    "whittled": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The player has whittled something."
+    }
+  }
+}

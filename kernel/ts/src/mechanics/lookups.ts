@@ -65,6 +65,27 @@ export function reach(
   }
 }
 
+/**
+ * The held-tool rule (mechanics.md#held-tools), for G4 use tools and harvest tool gates: true when
+ * `id` is carried by `body` directly, worn or wielded (in one of its slot holders, equipment@1), or
+ * in open containers on the way to either; the walk faults as `reach` does.
+ */
+export function toolHeld(world: World, body: EntityId, id: EntityId, steps: Steps) {
+  const seen = new Set<string>();
+  let at: string = id;
+  while (true) {
+    if (seen.has(at)) return 'containment_cycle' as const;
+    if (++steps.n > LIMITS.query_steps) return 'budget_exceeded' as const;
+    seen.add(at);
+    const parent = world.state.containers[at];
+    if (parent === body) return true;
+    if (world.state.containers[parent] === body && Object.values(world.slots).includes(parent))
+      return true;
+    if (!opened(world, parent, body)) return false;
+    at = parent;
+  }
+}
+
 /** True when `id` is an item whose contents are in reach: no barrier, or an open one. */
 export function opened(world: World, id: string, body: EntityId): boolean {
   const origin = world.state.created?.[id]?.origin;

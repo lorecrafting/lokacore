@@ -1,0 +1,35 @@
+{
+  "label": "action.whittle",
+  "aliases": [
+    "whittle"
+  ],
+  "target": {
+    "kind": "use",
+    "tool": {
+      "tag": "sharp"
+    }
+  },
+  "priority": 5,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "has_tag",
+      "subject": "target",
+      "tag": "wooden"
+    }
+  },
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "whittled",
+          "value": true
+        }
+      ],
+      "narration": {
+        "actor": "narration.whittle"
+      }
+    }
+  }
+}

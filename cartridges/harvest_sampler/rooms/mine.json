@@ -18,6 +18,12 @@
         "title": "detail.seam.title",
         "tool": {
           "tag": "sharp"
+        },
+        "careful": {
+          "skill": "mining",
+          "count": 2,
+          "action": "mine_carefully",
+          "narration": "narration.mine_carefully"
         }
       }
     }

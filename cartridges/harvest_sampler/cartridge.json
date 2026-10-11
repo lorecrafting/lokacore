@@ -15,7 +15,11 @@
       "inspectable_detail": 1,
       "containment": 1,
       "tags": 1,
-      "equipment": 1
+      "equipment": 1,
+      "skills": 1,
+      "action_recipe": 1,
+      "policy": 1,
+      "fact": 1
     },
     "client_features": []
   },

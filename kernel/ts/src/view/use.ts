@@ -6,7 +6,7 @@ import { LIMITS } from '../contracts.gen.ts';
 import type { AdvertisedAction, CharacterId, EntityId, Key } from '../contracts.gen.ts';
 import { admission, refusal, type ActionSet } from '../commands/actions.ts';
 import { bodyOf, type Steps, type World } from '../runtime/decision.ts';
-import { reach } from '../mechanics/lookups.ts';
+import { toolHeld } from '../mechanics/lookups.ts';
 import { fits } from '../mechanics/action_recipe/shared.ts';
 import { cmp } from '../foundation/validate.ts';
 
@@ -18,7 +18,7 @@ export function useActions(
   steps: Steps,
 ): AdvertisedAction[] {
   const body = bodyOf(world, actor);
-  if (!body || reach(world, body, tool as EntityId, steps, true) !== true) return [];
+  if (!body || toolHeld(world, body, tool as EntityId, steps) !== true) return [];
   return Object.values(set)
     .filter(
       (a) => a.recipe?.target.kind === 'use' && fits(world, tool as EntityId, a.recipe.target.tool),

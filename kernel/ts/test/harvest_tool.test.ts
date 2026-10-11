@@ -12,6 +12,8 @@ import { test } from 'node:test';
 import { INSTALLED, gameView, loadCartridge, newWorld, step } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { encode } from '../src/foundation/canonical.ts';
+import { key } from '../src/foundation/compose.ts';
+import { acquisition } from '../src/mechanics/skills.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-harvest-sampler-'));
 let artifact: Uint8Array;
@@ -40,6 +42,7 @@ const play = (w: World, payload: object) =>
     } as never,
     n,
   );
+const C = { cartridge_id: 'harvest_sampler', cartridge_version: '0.0.1' };
 const item = (w: World, key: string) => w.entityIds[`harvest_sampler@0.0.1:item/${key}`]!;
 const seam = (w: World) => Object.keys(w.details)[0];
 const take = (w: World, key: string) => {
@@ -50,11 +53,11 @@ const take = (w: World, key: string) => {
 const mine = (w: World) => play(w, { type: 'harvest', target_id: seam(w) });
 const code = (r: ReturnType<typeof step>) =>
   r.decision.kind === 'rejected' ? r.decision.error.code : r.decision.kind;
-// The seam's Harvest entry in the GameView, wherever it is listed.
-const offer = (w: World) => {
+// The `action` entry (the seam's Harvest by default) in the GameView, wherever it is listed.
+const offer = (w: World, action = 'harvest') => {
   let found: { available: boolean; reason?: { code: string } } | undefined;
-  JSON.stringify(gameView(w), (_, v) => (v?.action_key === 'harvest' ? (found = v) : v));
-  assert.ok(found, 'harvest offered');
+  JSON.stringify(gameView(w), (_, v) => (v?.action_key === action ? (found = v) : v));
+  assert.ok(found, `${action} offered`);
   return found;
 };
 const ore = (w: World) => ['ore_01', 'ore_02'].map((k) => w.state.containers[item(w, k)]);
@@ -91,19 +94,41 @@ test('with the pickaxe held the seam yields each lump once, then is empty', () =
   assert.equal(offer(w).reason?.code, 'not_found');
 });
 
-// Breaks: a wielded pickaxe (in a slot holder, which reach refuses) or one in a carried open sack
-// does not count as held.
-test('a wielded pickaxe, or one in a carried open sack, mines', () => {
+// Breaks: careful harvest skips the gate (the mutant `!method && detail.harvest.tool`), or its
+// offer shows another code; the positive control shows the gate, not the skill, refused.
+test('careful harvest of the gated seam is refused without the tool, accepted with it', () => {
+  const learned = (w: World): World => {
+    const fact = acquisition({ ...C, kind: 'skill', key: 'mining' } as never);
+    const at = key({ kind: 'fact', fact, scope: { kind: 'player', character_id: w.character } });
+    return { ...w, state: { ...w.state, facts: { ...w.state.facts, [at]: true } } };
+  };
+  const careful = (w: World) => play(w, { type: 'harvest', target_id: seam(w), method: 'careful' });
+  const w = learned(fresh());
+  assert.equal(code(careful(w)), 'invalid_state');
+  assert.equal(offer(w, 'mine_carefully').reason?.code, 'invalid_state');
+  const r = careful(take(w, 'pickaxe'));
+  assert.equal(r.decision.kind, 'accepted');
+  assert.deepEqual(ore(r.world), [r.world.body, r.world.body]);
+});
+
+// Breaks: the held-tool rule (lookups.ts toolHeld) refuses a wielded pickaxe (in a slot holder,
+// which reach refuses) or one in a carried or worn open sack, for the harvest gate or for the G4
+// whittle recipe (tool {tag: sharp}) on the stick; or a wielded tool lacks its whittle offer.
+test('a wielded pickaxe, or one in a carried or worn open sack, mines and whittles', () => {
   const held = take(fresh(), 'pickaxe');
-  const wielded = play(held, { type: 'wear', item_id: item(held, 'pickaxe') }).world;
+  const wear = (w: World, k: string) => play(w, { type: 'wear', item_id: item(w, k) }).world;
   const sacked = play(take(held, 'sack'), {
     type: 'put',
     item_id: item(held, 'pickaxe'),
     container_id: item(held, 'sack'),
   }).world;
-  for (const w of [wielded, sacked]) {
+  const wielded = wear(held, 'pickaxe');
+  assert.equal(offer(wielded, 'whittle').available, true);
+  for (const w of [wielded, sacked, wear(sacked, 'sack')]) {
     assert.notEqual(w.state.containers[item(w, 'pickaxe')], w.body);
     assert.equal(mine(w).decision.kind, 'accepted');
+    const whittle = { type: 'perform', action: 'whittle', item_id: item(w, 'pickaxe') };
+    assert.equal(code(play(w, { ...whittle, target_id: item(w, 'stick') })), 'accepted');
   }
 });
 
@@ -131,6 +156,7 @@ test('loader: a harvest tool needs kernel_api 1.52 and tags@1', () => {
       delete c.manifest.requires.capabilities.tags;
       delete c.lock.capabilities.tags;
       for (const k of ['pickaxe', 'stick']) delete c.items[`harvest_sampler@0.0.1:item/${k}`].tags;
+      delete c.recipes['harvest_sampler@0.0.1:recipe/whittle']; // its has_tag would fault first
     }),
     ['UNDECLARED_CAPABILITY', `${at}.tool`],
   );

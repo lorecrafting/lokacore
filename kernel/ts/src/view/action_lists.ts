@@ -69,8 +69,7 @@ export function lists(world: World, actor: CharacterId, steps = { n: 0 }) {
   const listed = (fits: (a: Offered) => boolean, id?: string, scope?: string) =>
     Object.values(set)
       .filter((a) => fits(a) && here(a) && !hidden(a))
-      .filter((a) => movable(world, a, id))
-      .filter((a) => combatOffered(world, actor, body, a, id))
+      .filter((a) => movable(world, a, id) && combatOffered(world, actor, body, a, id))
       .filter((a) => a.speaker === undefined || a.speaker === id)
       .sort((a, b) => b.priority - a.priority || cmp(a.key, b.key))
       .flatMap((a) => {
@@ -109,6 +108,7 @@ export function lists(world: World, actor: CharacterId, steps = { n: 0 }) {
     worn: (id: string) =>
       listed((a) => entityOffered(world, actor, a, 'worn', id, false, steps), id).concat(
         liquid(id),
+        useActions(world, actor, id, set, steps),
       ),
     door: (direction: Key) => listed((a) => door(a) && usable(world, actor, a, { direction })),
   };
