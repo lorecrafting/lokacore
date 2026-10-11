@@ -457,3 +457,40 @@ test('authored liquid overrides project the same availability as the exact invoc
       }
   }
 });
+
+// loka-th7x. Breaks: the checker reads the liquid offer before the envelope, so a Fill, Pour or
+// Drink the view offers, sent for a foreign actor or under the nil CommandId, trips
+// gameview_agrees_with_admission although Step's not_found or permission_denied is right.
+test('an offered liquid action under a foreign actor or the nil CommandId agrees with refusal', () => {
+  const w = owned(4, 2);
+  const view = gameView(w);
+  for (const payload of [
+    { type: 'fill', source_id: well, vessel_id: spare },
+    { type: 'pour', source_id: skin, receiver_id: spare },
+    { type: 'drink', vessel_id: skin },
+  ])
+    for (const [id, actor_id, code] of [
+      ['aaaaaaaa-0000-4000-8000-000000000001', w.body, 'not_found'],
+      ['00000000-0000-0000-0000-000000000000', w.character, 'permission_denied'],
+    ]) {
+      const command = { id, world_context_id: w.context, payload: { ...payload, actor_id } };
+      const decision = step(w, command as never, 1).decision;
+      assert.deepEqual(decision, { kind: 'rejected', error: { code } }, payload.type);
+      assert.ok(gameview_agrees_with_admission({ view, command, decision }), payload.type);
+    }
+});
+
+// loka-th7x. Breaks: the envelope exemptions run before Step's pre-choice refusal, so a nil-id
+// liquid command in a world awaiting its ancestry expects permission_denied, not invalid_state.
+test('before the ancestry choice a nil-id liquid command agrees only with invalid_state', () => {
+  const pre = read('protocol/fixtures/missing_child_v042_hash.json').value as Cartridge;
+  const w = newWorld(pre, '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, [1, 2, 3, 4]);
+  const command = {
+    id: '00000000-0000-0000-0000-000000000000',
+    world_context_id: w.context,
+    payload: { type: 'drink', vessel_id: skin, actor_id: w.character },
+  };
+  const decision = step(w, command as never, 1).decision;
+  assert.deepEqual(decision, { kind: 'rejected', error: { code: 'invalid_state' } });
+  assert.ok(gameview_agrees_with_admission({ view: gameView(w), command, decision }));
+});

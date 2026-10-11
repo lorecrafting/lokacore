@@ -23,7 +23,7 @@ import { clearBleed, currentBleed, wound } from '../bleed/shared.ts';
 import { fact, positionOf, standing } from '../position/shared.ts';
 import { assigned } from '../fact.ts';
 import type { CombatEvent, Round } from './round.ts';
-import { ally, resisted } from './shared.ts';
+import { ally, lastOpponent, resisted } from './shared.ts';
 import { statusAllows } from '../status/shared.ts';
 
 export function prefix(world: World, ops: readonly DeltaOp[], due = world.state.clock): World {
@@ -142,7 +142,7 @@ function injure(
   const body = target_id === row.body_id;
   const fatalLoss = damage(world, target_id, loss, r);
   if (fatalLoss.to === 0) {
-    const closing = body || !row.active_ids || row.active_ids.length === 1;
+    const closing = body || lastOpponent(row);
     const closingOps = [
       fatalLoss,
       ...(closing ? [close] : []),

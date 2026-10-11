@@ -13,7 +13,7 @@ import { add } from '../../foundation/int.ts';
 import { accepted, type JobRow, type Mint, type World } from '../../runtime/decision.ts';
 import { prefix } from '../combat/round_attack.ts';
 import { currentRound } from '../combat/round.ts';
-import { closeEncounter, engaged } from '../combat/shared.ts';
+import { closeEncounter, engaged, lastOpponent } from '../combat/shared.ts';
 import { deathSequence } from '../death/sequence.ts';
 import { adjust, level, resourceSpec } from '../resource.ts';
 import { endStatus, expire, specOf } from './shared.ts';
@@ -50,8 +50,7 @@ export function runStatus(
   if (by) ops.push({ ...adjust(visit, body, spec.resource, by, {}).op, at: now });
   // A pack keeps fighting when one member falls, as in combat's own fatal round.
   const fight = fatal ? engaged(visit, body) : undefined;
-  if (fight && (player || (fight.row.active_ids?.length ?? 1) === 1))
-    ops.push(...closeEncounter(visit, body));
+  if (fight && (player || lastOpponent(fight.row))) ops.push(...closeEncounter(visit, body));
   if (expired) ops.push(...expire(visit, body, status, row, 0));
   else if (fatal) ops.push(endStatus(body, status, row, 0));
   const say = (key: TextKey) => (player ? [{ key }] : []);

@@ -2,6 +2,7 @@
 // of the actor's view before a command against the decision on it; `resolves` maps each action key
 // of the actor's set to the Command type it resolves to (commands/actions.ts resolved).
 import { same } from '../foundation/compose.ts';
+import { NIL } from '../runtime/fresh.ts';
 import type {
   AdvertisedAction,
   ContentView,
@@ -42,7 +43,7 @@ export const gameview_agrees_with_admission = ({
   if (type === 'continue' || (type === 'choose' && command.payload.dream))
     return dreamAgrees(view, command.payload, decision, action_key);
   if (['fill', 'pour', 'drink'].includes(type))
-    return liquidAgrees(view, command.payload, decision, action_key); // own keys only: an action may be keyed `constructor`
+    return liquidAgrees(view, command, decision, action_key); // own keys only: an action may be keyed `constructor`
   const commandOf = (a: AdvertisedAction) =>
     Object.hasOwn(resolves, a.action_key) ? resolves[a.action_key] : undefined;
   const equip = (a: AdvertisedAction) => EQUIP_VERBS.includes(commandOf(a));
@@ -165,7 +166,8 @@ const entityView = (view: GameView, id: string): EntityView | ContentView | unde
     ...(view.equipment ?? []).flatMap((s) => (s.item ? [s.item] : [])),
   ].find((e) => e.id === id);
 
-function liquidAgrees(view: GameView, p: Any, decision: Any, key?: string): boolean {
+function liquidAgrees(view: GameView, command: Any, decision: Any, key?: string): boolean {
+  const p = command.payload;
   const targets =
     p.type === 'fill'
       ? [p.source_id, p.vessel_id]
@@ -183,6 +185,10 @@ function liquidAgrees(view: GameView, p: Any, decision: Any, key?: string): bool
       JSON.stringify(a.target_ids) === JSON.stringify(targets),
   );
   if (!offers?.length) return decision.kind !== 'accepted';
+  // An offer implies the capability and no pending ancestry; Step refuses the envelope next (loka-th7x).
+  const code = decision.kind === 'rejected' ? decision.error.code : undefined;
+  if (command.id === NIL) return code === 'permission_denied';
+  if (p.actor_id !== view.actor_id) return code === 'not_found';
   if (offers.some((a) => a.available))
     return decision.kind === 'accepted' || decision.kind === 'fault';
   return (
@@ -200,7 +206,7 @@ function serviceAgrees(
 ) {
   const code = decision.kind === 'rejected' ? decision.error.code : undefined;
   if (view.ancestry_choices?.length) return code === 'invalid_state';
-  if (command.id === '00000000-0000-0000-0000-000000000000') return code === 'permission_denied';
+  if (command.id === NIL) return code === 'permission_denied';
   const payload = command.payload;
   if (command.world_context_id !== world_context_id || payload.actor_id !== view.actor_id)
     return code === 'not_found';

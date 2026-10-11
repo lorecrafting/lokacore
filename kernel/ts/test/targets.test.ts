@@ -297,6 +297,36 @@ test('when the player kills the striking goblin, the guard still hits the other'
   assert.deepEqual([hp(after, a), hp(after, b)], [0, 5]);
 });
 
+// Toolbox row 6b, loka-lpq6. Breaks: credit reads only the encounter's primary or needs the blow
+// that closes the fight, so a goblin killed while its pack fights on, or the second killed in the
+// round, pays nothing (or the round's two grants fault as two levelling writes).
+test('the player and the guard each kill a goblin in one round; both kills pay', () => {
+  const goblin = { ...C, kind: 'npc', key: 'goblin' };
+  const kills = [{ npc: goblin, experience: 10 }];
+  const levelling = { thresholds: [100], points_per_level: 1, kills, level_up: 'combat.ally_hit' };
+  const [w, a, b] = engaged({ ...content, world: { ...content.world, levelling } } as never);
+  const den = w.state.containers[w.body];
+  const moved = {
+    ...w,
+    state: { ...w.state, containers: { ...w.state.containers, [guardOf(w)]: den } },
+  };
+  const xp = (x: World) => x.state.levelling?.[x.character]?.experience;
+  // The first goblin at 2 falls to the player's blow, the pack fighting on: one kill paid.
+  const weak = apply(moved, [adjust(moved, a as never, resourceRef(w, 'hp'), -4, {}).op], false);
+  assert.ok('world' in weak);
+  const once = round(weak.world);
+  assert.deepEqual([hp(once, a), hp(once, b), xp(once)], [0, 5, 10]);
+  // With the second at 1 too, the guard's blow fells it in the same round: both paid.
+  const both = apply(
+    weak.world,
+    [adjust(weak.world, b as never, resourceRef(w, 'hp'), -5, {}).op],
+    false,
+  );
+  assert.ok('world' in both);
+  const after = round(both.world);
+  assert.deepEqual([hp(after, a), hp(after, b), xp(after)], [0, 0, 20]);
+});
+
 // Toolbox row 6b. Breaks: the guard's two draws (hit, damage 1-2) run past the round's eight,
 // faulting the wait, or the guard is skipped while two remain. The player's hit (bound 100) loses
 // its first four, three or two raw draws to rejection in these states; the player's and the
