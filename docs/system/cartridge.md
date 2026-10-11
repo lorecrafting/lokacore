@@ -1487,6 +1487,8 @@ Compiler/loader validate resolved item/nest/population/corpse/room refs, a nonem
 
 [Row W8](mechanics.md#permanent-statuses-toolbox-row-w8) allows `duration: "permanent"` (`kernel_api` at least **1.48**): such a status declares no `per_tick` and is exempt from `tick_every < duration`; its `modifies` may not name an attribute the derived hp maximum reads. Both kernels refuse each violation (SCHEMA_VIOLATION at `per_tick` or at `modifies[i].attribute`) and the lower floor (KERNEL_API_RANGE_INVALID). `cartridges/scars_sampler` is the sampler.
 
+[Row W21](mechanics.md#fear-and-morale-for-npcs-toolbox-row-w21) adds a status's optional `fear: true` and a `status.apply` step's optional `co_present: true` (each `kernel_api` at least **1.50**): such a status may omit `per_tick`, as one with `modifies` may; such a step names no holder. Both kernels refuse the lower floor (KERNEL_API_RANGE_INVALID) and a `co_present` step that also names `item` or `npc` (SCHEMA_VIOLATION at that field); the schema refuses any other value. `cartridges/fear_sampler` is the sampler.
+
 *Not supported yet:* a status whose `modifies` names an attribute the derived hp maximum reads (`con`): one that ends before a later hp write in the same wait faults (Beads `loka-kgd.50`); author such buffs on other attributes until it lands.
 
 ## Derived stat declarations
@@ -1546,6 +1548,10 @@ Compiler/loader validate resolved item/nest/population/corpse/room refs, a nonem
 ## Trap declarations
 
 [Traps](mechanics.md#traps-trigger-disarm-and-reset-toolbox-row-12) add no field: two instance bool facts, a status, reactions on `entity_entered_room`, `check_failed {check}` and a reset event, and search and disarm recipes on a room detail with a `rating`, as the [status](#status-declarations), reaction, [skill growth and rating](#skill-growth-and-rating-declarations) declarations already check. `kernel_api` at least **1.46** when the reset is on `clock_hour`. Sampler: `cartridges/traps_sampler`.
+
+## Puzzle declarations
+
+[Order and dial puzzles](mechanics.md#sequence-and-combination-puzzles-toolbox-row-26) add no field: bounded int instance facts, recipes on room details, reactions on `action_completed {action}` with `fact.assign` or `fact.adjust`, and a barrier `opens_when` of `fact_compare`s, as the fact, reaction, [standing](#standing-and-disposition-declarations) and barrier declarations already check. `kernel_api` at least **1.47** for a reaction's `fact.adjust`. Sampler: `cartridges/puzzles_sampler`.
 
 ## Quest deadlines
 

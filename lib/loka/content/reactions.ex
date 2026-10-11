@@ -82,14 +82,15 @@ defmodule Loka.Content.Reactions do
     "population.suppress" => 35
   }
 
-  # One diagnostic per rule below its highest floor; the entrant filter needs 1.47 (row W3), spoken 1.48 (G9).
+  # One diagnostic per rule below its highest floor; the entrant filter needs 1.47 (row W3), spoken
+  # 1.48 (G9), a co_present status.apply 1.50 (W21).
   defp api(r, manifest) do
     floor =
       Enum.max([
         if(r["on"]["event"] == "quest_resolved", do: 8, else: 0),
         if(Map.has_key?(r["on"], "npc"), do: 47, else: 0),
         if(r["on"]["event"] == "spoken", do: 48, else: 0)
-        | Enum.map(r["apply"], &Map.get(@floors, &1["op"], 0))
+        | Enum.map(r["apply"], &if(&1["co_present"], do: 50, else: Map.get(@floors, &1["op"], 0)))
       ])
 
     version =
@@ -147,6 +148,12 @@ defmodule Loka.Content.Reactions do
     do:
       reference(rel, ["apply", i], "status", s, ctx.m, ctx.defs) ++
         if(s["item"], do: reference(rel, ["apply", i], "item", s, ctx.m, ctx.defs), else: []) ++
+        if(s["item"] && s["co_present"],
+          do: [
+            diag("SCHEMA_VIOLATION", at(rel, ["apply", i, "item"]), %{"error" => "invalid_value"})
+          ],
+          else: []
+        ) ++
         listener(rel, s, i, ctx)
 
   defp consequence(rel, {s, i}, _, ctx),
@@ -160,11 +167,12 @@ defmodule Loka.Content.Reactions do
           do: d
         )
 
-  # Row 42: a step names one holder, and a spawn template has no instance to take it.
+  # Row 42: a step names one holder, and a spawn template has no instance to take it; a co_present
+  # step (row W21) names none.
   defp listener(rel, %{"npc" => n} = s, i, ctx) do
     case resolve(n, "npc", ctx.m, ctx.defs) do
       {_, _, npc} ->
-        if npc["spawn_template"] || s["item"],
+        if npc["spawn_template"] || s["item"] || s["co_present"],
           do: [
             diag("SCHEMA_VIOLATION", at(rel, ["apply", i, "npc"]), %{"error" => "invalid_value"})
           ],

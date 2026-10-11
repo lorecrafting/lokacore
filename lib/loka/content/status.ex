@@ -50,9 +50,10 @@ defmodule Loka.Content.Status do
 
   defp trigger?(_), do: false
 
-  # A permanent status (row W8) needs 1.48, the fields above 1.46.
+  # A fear status (row W21) needs 1.50, a permanent one (row W8) 1.48, the fields above 1.46.
   defp floor(statuses, g3) do
     cond do
+      Enum.any?(statuses, &match?({_, {_, _, %{"fear" => true}}}, &1)) -> [1, 50]
       Enum.any?(statuses, &match?({_, {_, _, %{"duration" => "permanent"}}}, &1)) -> [1, 48]
       g3 -> [1, 46]
       true -> [1, 38]
@@ -92,13 +93,13 @@ defmodule Loka.Content.Status do
       modifies(rel, s, m, defs) ++ hp_max(rel, s, settings)
   end
 
-  # Never 0; only a modifying status (row 2c) may omit it, and a permanent one (row W8) never
-  # ticks, so it declares none.
+  # Never 0; only a modifying (row 2c) or fear (row W21) status may omit it; a permanent one
+  # (row W8) never ticks, so it declares none.
   defp per_tick(rel, s) do
     if s["per_tick"] == 0 or
          if(permanent?(s),
            do: s["per_tick"] != nil,
-           else: s["per_tick"] == nil and s["modifies"] == nil
+           else: s["per_tick"] == nil and s["modifies"] == nil and s["fear"] == nil
          ),
        do: [diag("SCHEMA_VIOLATION", at(rel, ["per_tick"]))],
        else: []

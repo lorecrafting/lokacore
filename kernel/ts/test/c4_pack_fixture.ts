@@ -14,7 +14,7 @@ export const h2 = ids['population/fen_hounds/slot2/member'] as never;
 export const home = ids['room/hound_run'] as never;
 export const nest = ids['room/adder_nest'] as never;
 
-export function fixture(start?: number) {
+export function fixture(start?: number, wander_interval?: number) {
   const c = structuredClone(pin.value) as Cartridge;
   if (start !== undefined) (c.calendar as { start: number }).start = start;
   const populations = Object.fromEntries(
@@ -22,6 +22,7 @@ export function fixture(start?: number) {
       k,
       {
         ...plan,
+        ...(wander_interval && { wander_interval }),
         pack: {
           flight_below_percent: 25,
           flight_fare: 0 as const,

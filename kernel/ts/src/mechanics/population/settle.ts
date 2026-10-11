@@ -105,12 +105,12 @@ export function wanders(
   planRef: DefinitionRef,
   plan: Plan,
   job: JobRow,
-  control: NonNullable<World['state']['population_plans']>[string],
+  wanderDue: number,
   slots: Slots,
   born: Set<string>,
   mint: Mint,
 ): DeltaOp[] {
-  if (job.due_time !== control.next_wander_due) return [];
+  if (job.due_time !== wanderDue) return [];
   const [home, nest] = plan.area.map((r) => world.roomIds[refString(r)]);
   const ops: DeltaOp[] = [];
   for (const { row } of slots)

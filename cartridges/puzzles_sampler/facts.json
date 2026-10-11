@@ -1,0 +1,56 @@
+{
+  "facts": {
+    "lever_stage": {
+      "version": 1,
+      "value_type": {
+        "type": "int",
+        "default": 0,
+        "minimum": 0,
+        "maximum": 3
+      },
+      "scopes": [
+        "instance"
+      ],
+      "meaning": "How many levers of the order A, B, C are pulled in a row."
+    },
+    "wheel_1": {
+      "version": 1,
+      "value_type": {
+        "type": "int",
+        "default": 0,
+        "minimum": 0,
+        "maximum": 10
+      },
+      "scopes": [
+        "instance"
+      ],
+      "meaning": "The digit on dial wheel 1; 10 is passing and wraps to 0 in the same turn."
+    },
+    "wheel_2": {
+      "version": 1,
+      "value_type": {
+        "type": "int",
+        "default": 0,
+        "minimum": 0,
+        "maximum": 10
+      },
+      "scopes": [
+        "instance"
+      ],
+      "meaning": "The digit on dial wheel 2; 10 is passing and wraps to 0 in the same turn."
+    },
+    "wheel_3": {
+      "version": 1,
+      "value_type": {
+        "type": "int",
+        "default": 0,
+        "minimum": 0,
+        "maximum": 10
+      },
+      "scopes": [
+        "instance"
+      ],
+      "meaning": "The digit on dial wheel 3; 10 is passing and wraps to 0 in the same turn."
+    }
+  }
+}

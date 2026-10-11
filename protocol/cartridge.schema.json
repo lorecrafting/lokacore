@@ -2369,7 +2369,7 @@
           "type": "integer",
           "minimum": -2147483647,
           "maximum": 2147483647,
-          "description": "Signed; never 0, required unless modifies is present or duration is permanent, and absent when duration is permanent (compiler and loader SCHEMA_VIOLATION)."
+          "description": "Signed; never 0, required unless modifies or fear is present or duration is permanent, and absent when duration is permanent (compiler and loader SCHEMA_VIOLATION)."
         },
         "label": {
           "$ref": "text.schema.json#/$defs/TextKey"
@@ -2402,6 +2402,10 @@
             "$ref": "entity.schema.json#/$defs/ItemAffect"
           },
           "description": "Toolbox row 2c: while the status is active on a holder, each modifier is added to the holder's attribute as attributes@1 reads it (kernel_api at least 1.46)."
+        },
+        "fear": {
+          "const": true,
+          "description": "Toolbox row W21 (kernel_api at least 1.50): while active on a pack member, its C4 flight is attempted on its every opponent turn, whatever its hp; may stand in for per_tick."
         },
         "cues": {
           "description": "Cues active while this status is active on a holder, from the holder's room (toolbox row G6).",

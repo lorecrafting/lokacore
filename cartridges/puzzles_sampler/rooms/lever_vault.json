@@ -1,0 +1,10 @@
+{
+  "title": "room.lever_vault.title",
+  "description": "room.lever_vault.description",
+  "exits": {
+    "south": {
+      "to": "hall",
+      "barrier": "lever_door"
+    }
+  }
+}
