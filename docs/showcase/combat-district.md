@@ -21,7 +21,8 @@ changes this district makes, both scheduled by plan 1:
 - **Every attackable NPC's hp minimum is 0.** Only NPCs with an `attack` are attackable
   (`attackRefused`, `kernel/ts/src/mechanics/combat/shared.ts`); the Warden already has minimum
   0, and the new NPCs below declare it, so no hit reaches Beads `loka-2lvx` (an NPC at minimum 1
-  faults on a hit below 1). Wat, Nell and Bess keep minimum 1: they have no `attack`.
+  faults on a hit below 1). Wat keeps minimum 1 and Nell and Bess declare no hp: none has an
+  `attack`.
 
 ## The `world.combat` constraint
 
@@ -52,7 +53,7 @@ harder with the sword and changes nothing unarmed (chance 0 never deals the unar
   (attributes@1 is declared).
 - `world.combat` adds `target_choice: true`, `allies: ["gil"]` and the narration keys `ally_hit`
   and `ally_miss` (`targets_sampler/cartridge.json`); `player_attack` is unchanged.
-- `world.levelling`: `thresholds [30, 100]`, `points_per_level 1`, `kills` raider 10, boar 30,
+- `world.levelling`: `thresholds [30, 100]`, `points_per_level 1`, `kills` raider 10, boar 30, tilt boar 30,
   goblin 10, `level_up` text (`levelling_sampler`). A `kills` entry on the goblin spawn template
   is the first such use; experience follows the victim's definition
   ([row 4](../system/mechanics.md#experience-and-levelling-toolbox-row-4)), so it should count. If
@@ -79,17 +80,19 @@ yet." becomes:
 > West, the Drill Yard: a sword lesson, a boar that marks you, a pack that fights as one, and a fall
 > you come back from with what you learned.
 
-The hub pin's exit count rises to four.
+The hub pin's exit count rises to four. The build slice edits `text.json` `readable.sign_hub` and
+`room.crossroads_inn.description` (the "Three roads" wording) and adds the five new rooms to
+`map_positions.json`.
 
 ## Rooms and map
 
 | Room                                   | Exits                                                                            | Holds                                                                                                                                                                                                                                                                                                  |
 | -------------------------------------- | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `drill_yard` (sign)                    | east `crossroads_inn`, north `boar_run`, west `gate_yard`, south `goblin_pit`    | detail `sign_combat`; **Aldous** (holds `training_sword`); `poultice_a`, `poultice_b` on detail `bench` (edible, `mv` +1, `cures: [bleeding]`; `scars_sampler/items/salve.json`)                                                                                                                      |
+| `drill_yard` (sign)                    | east `crossroads_inn`, north `boar_run`, west `gate_yard`, south `goblin_pit`    | detail `sign_combat`; **Aldous** (holds `training_sword`); `poultice` on detail `bench` (edible, `mv` +1, `cures: [bleeding]`; `scars_sampler/items/salve.json`)                                                                                                                      |
 | `boar_run`                             | south `drill_yard` (the only exit, so Flee is deterministic: one candidate, no RNG) | **the boar**                                                                                                                                                                                                                                                                                           |
 | `gate_yard`                            | east `drill_yard`, south `tilt_yard`                                             | **Gil** (ally), **the raider**                                                                                                                                                                                                                                                                         |
 | `goblin_pit`                           | north `drill_yard`                                                               | population `goblins` (home; see [the pack](#the-pack-and-beads-loka-6ql4))                                                                                                                                                                                                                             |
-| `tilt_yard` (sandbox)                  | north `gate_yard`                                                                | **tilt boar** (as the boar, with its own tusk and purse); `tilt_cask` (vessel, 3 doses of `draught`: `might`, as the still room's); `tilt_poultice`; population `tilt_goblins` (a second pack, home here, area `[tilt_yard, gate_yard]`)                                                                 |
+| `tilt_yard` (sandbox)                  | north `gate_yard`                                                                | **tilt boar** (`tilt_boar`: its own definition with the boar's fields, its own `tilt_tusk` and `tilt_purse`, its own `kills` entry of 30, and a leaf in `boar_gore`); `tilt_cask` (vessel, 3 doses of `draught`: `might`, as the still room's); `tilt_poultice`; population `tilt_goblins` (a second pack, home here, area `[tilt_yard, gate_yard]`)                                                                 |
 
 No combat room is `exposed`, so no weather drain lands; no door is gated; rooms are not sanctuaries.
 
@@ -98,11 +101,11 @@ No combat room is `exposed`, so no weather drain lands; no door is gated; rooms 
 > The Drill Yard. Aldous teaches the blade and lends the sword that goes with it; without a sword in
 > hand your blows land nothing, here or anywhere. North, a boar is penned: you can hear it grunt
 > from this yard. It gores: a wound that bleeds for a while and a scar that stays, even past your
-> death. The poultices on the bench stop the bleeding; nothing takes the scar away. West, Gil keeps
+> death. The poultice on the bench stops the bleeding; nothing takes the scar away. West, Gil keeps
 > the gate with a raider in it; shout "ware" from here and Gil hears you through the wall, and he
 > fights beside you once you strike. Take Aldous's bounty before you go. South is a pit with two
-> goblins who fight as a pack: in a pack you choose which one you hit. Every kill earns experience;
-> thirty points make a level and a point to raise a stat, and raised strength bites harder. When you
+> goblins who fight as a pack: in a pack you choose which one you hit. A kill that ends a fight earns
+> experience (in a pack, the last goblin standing); thirty points make a level and a point to raise a stat, and raised strength bites harder. When you
 > fall you wake at the inn with your level, your scar and your skill; what you carried waits on your
 > corpse where you fell. The Warden in Low Wardle wears mail no blade gets through. The tilt yard,
 > south of the gate, has all of it and a draught.
@@ -116,7 +119,7 @@ No combat room is `exposed`, so no weather drain lands; no door is gated; rooms 
   `leave`), and `aldous_steel` with `keyword: "steel"` (one `leave` choice; its prompt is the
   answer; Talk never lists it, [row G9](../system/mechanics.md#social-verbs-say-whisper-and-shout-toolbox-row-g9-engine-half);
   `speech_sampler`). `description_variants` none.
-- **The boar**: `room: boar_run`; hp 0..8 start 8 gain 0; `attack {chance 100, 1..1}`;
+- **The boar**: `room: boar_run`; hp 0..8 start 8 gain 0; `attack {chance 100, 2..2}`;
   `immune: [bleeding, gored]` (`npc_status_sampler/npcs/golem.json`); `drops: [{tusk, 100},
   {purse, 50}]` with `tusk` and `purse` `location {in: npc, npc: boar}` (`loot_sampler/npcs/rat.json`);
   `cues: [{sense: sound, text: cue.boar, range: 1}]` (`senses_sampler/npcs/sentry.json`; a dead
@@ -138,7 +141,8 @@ No combat room is `exposed`, so no weather drain lands; no door is gated; rooms 
 - **Warden**: adds `resistances {physical: 100}`; nothing else changes.
 - `training_sword`: `slot: wield`, `weapon {skill: blade, attack {chance 100, 2..2, kind:
   physical}}`, `tags [metal, sharp]`, 600 g, `location {in: npc, npc: aldous}`.
-- Reaction `boar_gore`: `on {event: attack_result, hit: true}`, `when npc_present {npc: boar}`,
+- Reaction `boar_gore`: `on {event: attack_result, hit: true}`, `when any(npc_present {npc: boar},
+  npc_present {npc: tilt_boar})`,
   `apply [status.apply bleeding, status.apply gored]` (`scars_sampler/reactions/bite.json`). The
   status lands on the event's target: the player when the boar strikes, the boar (immune, so
   nothing) when the player or Gil strikes it. `attack_result` has no attacker filter, so
@@ -158,29 +162,27 @@ No combat room is `exposed`, so no weather drain lands; no door is gated; rooms 
 Any day: no combat room is exposed and nothing here reads the sky. Every attack is chance 100 or 0,
 so no step but the purse drop depends on the seed. The player carries the inn's `waterskin` from
 step 1. Times are relative to the Attack that opens each fight (rounds at +150, +300, ...; odd
-rounds player first, even rounds opponent first, the ally after both).
+rounds player first, even rounds opponent first, the ally after both). Moves cost 1 mv (the engine
+default) and Flee 2, so mv is below 100 from step 1 on; no step pins an mv value.
 
-| #   | Step                                                                                             | Expected                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | Matrix cells                                      |
-| --- | ------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
-| 1   | West from the inn; read `sign_combat`.                                                           | The text above. GameView `cues` lists the boar's grunt with direction north; in the inn (two exits away) and in `gate_yard` none.                                                                                                                                                                                                                                                                                                                                                                                      | senses cues x combat                              |
-| 2   | North; Attack the boar unarmed; let round 1 run (+150).                                          | In the run the cue has no direction. Round 1: the player's blow misses (chance 0); the boar hits: hp 9, `bleeding` and `gored` applied lines; the Character page shows Bleeding (with its tick) and Gored (no time, no tick); the bleeding's smell cue shows from the player's own room.                                                                                                                                                                                                                                | statuses x combat; scars x death                  |
-| 3   | Flee; eat `poultice_a`.                                                                          | Flee moves south to the yard with no RNG (one exit) and closes the encounter. Eating ends `bleeding` (no tick ever lands; hp stays 9, no mv change past 100); `gored` stays. Variant without the poultice: a tick at +1050 (hp 8), expiry at +1950 with no second tick.                                                                                                                                                                                                                                                | statuses x combat                                 |
-| 4   | Talk to Aldous: `learn`; wield the sword; `say steel`; Talk: `bounty`.                           | `skill_blade` true, the sword received and worn in `wield`; Talk now opens `aldous_talk` (the lesson's policy fails). `say steel` opens `aldous_steel` (`choice_opened`); Talk never lists it; the same say in `gate_yard` is `spoken` only. `bounty` activates the quest (Journal active).                                                                                                                                                                                                                             | lesson x weapon; say x dialogue keyword           |
-| 5   | `say ware`, then `shout ware`, in the yard.                                                      | After the say `gil_warned` is false (a say reaches the actor's room only); after the shout true, and Gil's description in `gate_yard` reads the warned variant. A shout from the inn (two exits from Gil) changes nothing.                                                                                                                                                                                                                                                                                             | shout x reactions x variants                      |
-| 6   | West; Attack the raider; round 1.                                                                | Player hits 2 (raider 1); the raider hits (hp 8); Gil hits 1 and the raider dies: `entity_died` with Gil as killer and the player credited; `raider_slain` true; `bounty` resolves `done` in the same proposal; experience 10 + 20 = 30, level 2, one `level_up` line last, 1 unspent; the raider's corpse is public and empty. (Gil's own blow emits `attack_result`; `boar_gore` does not fire: no boar here.)                                                                                                       | allies x kill credit x quest x levelling          |
-| 7   | Raise `str`.                                                                                     | str 11, unspent 0, no Raise offered; the sword's derived damage is 3 (2 + floor(1 x (11 - 10) / 1)).                                                                                                                                                                                                                                                                                                                                                                                                                  | levelling x derived damage                        |
-| 8   | Remove the sword (held, not wielded); south; Attack goblin A (the lower id); wait eight rounds.   | Attack admits both goblins (`helper_joined` line). Unarmed the player lands nothing; one goblin strikes each round in rotation: hp 8, 7, ... 0 at round 8 (+1200). `player_died` line; the encounter closes; the body is in `crossroads_inn` at hp 10, mv 100, standing; `gored` is still active (W8), no other status; experience 30, level 2, str 11 unchanged (no penalty: row 47 is later); the player corpse in the pit holds the sword and the waterskin.                                                        | combat x death; scars x death; levelling x death  |
-| 9   | Back to the pit; take the sword from the corpse; wield it.                                       | Both Takes succeed (owner's corpse); the goblins are passive outside combat. The corpse stays, empty.                                                                                                                                                                                                                                                                                                                                                                                                                 | death x containment                               |
-| 10  | North to the run; Attack the boar; three rounds.                                                 | Round 1: boar 5, boar hits (hp 9, `bleeding` applied again, generation 2; `gored` already active, nothing written, no line). Round 2 (boar first): hp 8; boar 2. Round 3: boar 0 before it strikes: `npc_died`, experience 60 (no level: 100 not reached), drops rolled after the round's draws: the corpse holds `tusk` (chance 100) and, by seed, `purse`. `cues` no longer lists the grunt. Eat `poultice_b` before +1050 or bleed to 7 at +1050 and 6 at +1950 (the round-2 refresh set the end to +2100). Take the tusk. | combat x loot x levelling; senses cues x combat   |
-| 11  | South to the pit (hp 8, sword, str 11); Attack goblin A; Attack goblin B; four rounds.           | The second Attack writes `encounter.target` (`primary_changed` line), no round. Round 1: B 3, A strikes (hp 7). Round 2: B strikes (6), B dies at the player's blow; the roster still holds A, so no credit and no experience (Beads `loka-lpq6`). Round 3: A 3, A strikes (5). Round 4: A strikes (4), A dies: the encounter closes, experience 70 (80 once `loka-lpq6` is fixed: re-pin then). Without the switch the first blow would have landed on A.                                                              | target choice x pack x kill credit                |
-| 12  | With the sword, in the social district at standing -2: walk east into the Warden's engage; wait one round; Flee. | The player's blow is a hit with loss 0 (resist 100), the Warden stays at hp 5 and the encounter holds; social 2-3 unchanged.                                                                                                                                                                                                                                                                                                                                                                                          | disposition x resistances                         |
+| # | Step | Expected | Matrix cells |
+|---|---|---|---|
+| 1 | West from the inn; read `sign_combat`. | The text above. GameView `cues` lists the boar's grunt with direction north; in the inn (two exits away) and in `gate_yard` none. | senses cues x combat |
+| 2 | Talk to Aldous: `learn`; wield the sword; `say steel`; Talk: `bounty`. | `skill_blade` true, the sword received and worn in `wield`; Talk now opens `aldous_talk` (the lesson's policy fails). `say steel` opens `aldous_steel` (`choice_opened`); Talk never lists it; the same say in `gate_yard` is `spoken` only. `bounty` activates the quest (Journal active). | lesson x weapon; say x dialogue keyword |
+| 3 | `say ware`, then `shout ware`, in the yard. In a separate branch (before any yard shout), `shout ware` from the inn. | After the say `gil_warned` is false (a say reaches the actor's room only); after the shout true, and Gil's description in `gate_yard` reads the warned variant. The inn branch: still false (two exits from Gil). The fact never resets, hence the branch. | shout x reactions x variants |
+| 4 | West; Attack the raider; round 1. | Player hits 2 (raider 1); the raider hits (hp 9); Gil hits 1 and the raider dies: `entity_died` with Gil as killer and the player credited; `raider_slain` true; `bounty` resolves `done` in the same proposal; experience 10 + 20 = 30, level 2, one `level_up` line last, 1 unspent; the raider's corpse is public and empty. (Gil's own blow emits `attack_result`; `boar_gore` does not fire: no boar here.) | allies x kill credit x quest x levelling |
+| 5 | Raise `str`. | str 11, unspent 0, no Raise offered; the sword's derived damage is 3 (2 + floor(1 x (11 - 10) / 1)). | levelling x derived damage |
+| 6 | Remove the sword (held, not wielded); east, north to the run; Attack the boar unarmed; five rounds. | In the run the cue has no direction. Round 1: the player's blow misses (chance 0); the boar hits 2: hp 7, `bleeding` and `gored` applied lines; the Character page shows Bleeding (with its tick) and Gored (no time, no tick); the bleeding's smell cue shows from the player's own room. Rounds 2 to 5: hp 5, 3, 1, 0 at +750 (the last loss clamped to 1); no bleed tick falls before it (+1050). `player_died`; the encounter closes; the body is in `crossroads_inn` at hp 10, mv 100, standing; `gored` is still active (W8) and `bleeding` is gone (the return clears every other status); experience 30, level 2, str 11 unchanged (no penalty: row 47 is later); the player corpse in the run holds the sword and the waterskin; the boar is at 8. | combat x death; scars x death; statuses x death; levelling x death |
+| 7 | Back to the run; take the sword and the waterskin from the corpse; wield the sword. | Both Takes succeed (owner's corpse); the boar is passive outside combat (no hostile disposition). The corpse stays, empty. | death x containment |
+| 8 | Attack the boar (sword, damage 3); three rounds. | Round 1: boar 5; the boar hits 2 (hp 8, `bleeding` applied again, generation 2, its line; `gored` already active, nothing written, no line). Round 2 (boar first): hp 6; boar 2. Round 3: boar 0 before it strikes: `npc_died`, experience 60 (no level: 100 not reached), drops rolled after the round's draws: the corpse holds `tusk` (chance 100) and, by seed, `purse`. `cues` no longer lists the grunt. At str 10 the same fight is four rounds and four strikes (hp 2). Eat the `poultice`: `bleeding` ends with no tick, mv +1, `gored` stays. Variant without it: ticks at +1050 (hp 5) and +1950 (hp 4), expiry at +2100 (the round-2 refresh). Take the tusk. | combat x loot x levelling; bleed status x cure x immune; senses cues x combat |
+| 9 | South to the pit (hp 6, sword, str 11); Attack goblin A (the lower id); Attack goblin B; four rounds. *Gated on Beads `loka-6ql4`, below.* | The first Attack admits both goblins (`helper_joined` line); the second writes `encounter.target` (`primary_changed` line), no round. Round 1: B 3, A strikes (hp 5). Round 2: B strikes (4), B dies at the player's blow; the roster still holds A, so no credit and no experience (Beads `loka-lpq6`). Round 3: A 3, A strikes (3). Round 4: A strikes (2), A dies: the encounter closes, experience 70 (80 once `loka-lpq6` is fixed: re-pin then). Without the switch the first blow would have landed on A. | target choice x pack x kill credit |
+| 10 | With the sword, in the social district at standing -2: walk east into the Warden's engage; wait one round; Flee. | The player's blow is a hit with loss 0 (resist 100), the Warden stays at hp 5 and the encounter holds; Flee has one candidate (the toll gate is shut), so no RNG; social 2-3 unchanged. | disposition x resistances |
 
 Sandbox `tilt_yard`: a second boar, a second pack, a poultice and a cask of draught: under `might`
 (str 11 + 3) the sword deals 2 + 4 = 6 and the boar falls in two blows; Gil is not here, so the
-pack is fought alone; die here after levelling and see the level, the scar and the skill come back
-with you. Known limit until Beads `loka-x2gv` lands: a `bleeding` tick due in the same advance as a
-combat round on the player (fighting the pack within 900 of a boar's bite) rejects that wait; the
-guided loop never does this.
+pack is fought alone. Known limit until Beads `loka-x2gv` lands: a `bleeding` tick due in the same
+advance as a combat round on the player (fighting within 900 of a boar's bite without the poultice)
+rejects that wait; the guided loop never does this.
 
 ## The pack and Beads `loka-6ql4`
 
@@ -190,27 +192,27 @@ advance that crosses that successor faults `nonfuture_job` (Beads `loka-6ql4`: "
 a pack and a player wait does"). This cartridge's pins already settle days in one elapsed command
 (`showcase_world.test.ts` world 8 to day 4, `showcase_social.test.ts` social 14 150 hours). A large
 `wander_interval` does not help: the night boundary bounds the successor regardless. So **the two
-pack populations (steps 8, 9 and 11, and the sandbox pack) wait for `loka-6ql4`**; the build slice
+pack populations (step 9 and the sandbox pack) wait for `loka-6ql4`**; the build slice
 checks the issue first and, if it is still open, builds everything else, leaves `goblin_pit` and
 `tilt_yard` without their plans, and files the pit as a follow-up slice. This is a toolbox finding
 against rows 6a and 6c for this cartridge.
 
 ## Pins the build slice writes
 
-- `kernel/ts/test/showcase_combat.test.ts` walking combat 1 to 12 and asserting each expected
+- `kernel/ts/test/showcase_combat.test.ts` walking combat 1 to 10 and asserting each expected
   outcome above, including: `cues` with and without direction and their absence after the kill;
-  the two statuses' Character page shapes; the deterministic Flee; `gil_warned` false after a say,
-  true after a shout, false after a shout from the inn; the raider's `entity_died` killer and
-  credited ids; experience 30 then 60 then 70 and exactly one `level_up` line in step 6; the corpse
-  contents in steps 8 and 10; the `primary_changed` write without a round; the Warden at hp 5
-  after a sword hit. For the purse the test fixes one seed where it drops and one where it does not
+  the two statuses' Character page shapes; `gil_warned` false after a say, true after a shout,
+  false after a shout from the inn (its own branch); the raider's `entity_died` killer and
+  credited ids; experience 30 then 60 then 70 and exactly one `level_up` line in step 4; the
+  statuses, experience and corpse contents after the death in step 6; the `primary_changed` write
+  without a round (step 9, gated); the deterministic Flee and the Warden at hp 5 after a sword hit. For the purse the test fixes one seed where it drops and one where it does not
   (as `loot_sampler`'s test), stating both; every other number is fixed by the rules.
 - The compiled answer `protocol/fixtures/toolbox_showcase_hash.json` (held by
   `test/loka/content_showcase_test.exs`).
 - `showcase_body.test.ts`'s hub pin: four exits.
 - No Book test: cues, Raise cards and condition lines are existing Book elements (cue wording and
   the Attack choice wording are pending the designer, Beads `loka-kgd.65`, `loka-x6t.14`); say and
-  shout have no Book input yet (`loka-kgd.72`), so steps 4 and 5 are kernel-only and the recorder
+  shout have no Book input yet (`loka-kgd.72`), so steps 2 and 3 are kernel-only and the recorder
   recipe skips them.
 
 ## Matrix cells this plan covers
