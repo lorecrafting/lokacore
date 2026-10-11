@@ -1,0 +1,22 @@
+{
+  "keywords": [
+    "poultice"
+  ],
+  "short": "item.tilt_poultice.short",
+  "room_line": "item.tilt_poultice.room",
+  "description": "item.tilt_poultice.description",
+  "location": {
+    "in": "room",
+    "room": "tilt_yard"
+  },
+  "mass_grams": 50,
+  "edible": {
+    "resource": "mv",
+    "amount": 1,
+    "label": "action.eat",
+    "narration": "narration.eat_poultice",
+    "cures": [
+      "bleeding"
+    ]
+  }
+}

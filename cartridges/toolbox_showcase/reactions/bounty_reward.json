@@ -1,0 +1,13 @@
+{
+  "on": {
+    "event": "quest_resolved",
+    "quest": "bounty",
+    "outcome": "done"
+  },
+  "apply": [
+    {
+      "op": "experience.grant",
+      "amount": 20
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "title": "quest.bounty.title",
+  "objective": {
+    "evidence": "current_state",
+    "policy": {
+      "policy_version": 1,
+      "root": {
+        "op": "fact_compare",
+        "fact": "raider_slain",
+        "equals": true
+      }
+    }
+  },
+  "journal": {
+    "active": "quest.bounty.active",
+    "objectives_met": "quest.bounty.objectives_met",
+    "resolved": "quest.bounty.resolved",
+    "failed": "quest.bounty.failed",
+    "abandoned": "quest.bounty.abandoned",
+    "outcomes": {
+      "done": "quest.bounty.done"
+    }
+  }
+}

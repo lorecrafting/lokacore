@@ -1,0 +1,9 @@
+{
+  "title": "room.tilt_yard.title",
+  "description": "room.tilt_yard.description",
+  "exits": {
+    "north": {
+      "to": "gate_yard"
+    }
+  }
+}

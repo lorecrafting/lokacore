@@ -1,0 +1,28 @@
+{
+  "npc": "aldous",
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": []
+    }
+  },
+  "prompt": "dialogue.aldous_talk.prompt",
+  "roles": {
+    "aldous": {
+      "role": "npc",
+      "npc": "aldous"
+    }
+  },
+  "choices": {
+    "bounty": {
+      "label": "dialogue.aldous_talk.bounty",
+      "narration": "narration.aldous_talk.bounty",
+      "accept": "bounty"
+    },
+    "leave": {
+      "label": "dialogue.aldous_talk.leave",
+      "narration": "narration.aldous_talk.leave"
+    }
+  }
+}

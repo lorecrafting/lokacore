@@ -175,7 +175,7 @@ default) and Flee 2, so mv is below 100 from step 1 on; no step pins an mv value
 | 6 | Remove the sword (held, not wielded); east, north to the run; Attack the boar unarmed; five rounds. | In the run the cue has no direction. Round 1: the player's blow misses (chance 0); the boar hits 2: hp 7, `bleeding` and `gored` applied lines; the Character page shows Bleeding (with its tick) and Gored (no time, no tick); the bleeding's smell cue shows from the player's own room. Rounds 2 to 5: hp 5, 3, 1, 0 at +750 (the last loss clamped to 1); no bleed tick falls before it (+1050). `player_died`; the encounter closes; the body is in `crossroads_inn` at hp 10, mv 100, standing; `gored` is still active (W8) and `bleeding` is gone (the return clears every other status); experience 30, level 2, str 11 unchanged (no penalty: row 47 is later); the player corpse in the run holds the sword and the waterskin; the boar is at 8. | combat x death; scars x death; statuses x death; levelling x death |
 | 7 | Back to the run; take the sword and the waterskin from the corpse; wield the sword. | Both Takes succeed (owner's corpse); the boar is passive outside combat (no hostile disposition). The corpse stays, empty. | death x containment |
 | 8 | Attack the boar (sword, damage 3); three rounds. | Round 1: boar 5; the boar hits 2 (hp 8, `bleeding` applied again, generation 2, its line; `gored` already active, nothing written, no line). Round 2 (boar first): hp 6; boar 2. Round 3: boar 0 before it strikes: `npc_died`, experience 60 (no level: 100 not reached), drops rolled after the round's draws: the corpse holds `tusk` (chance 100) and, by seed, `purse`. `cues` no longer lists the grunt. At str 10 the same fight is four rounds and four strikes (hp 2). Eat the `poultice`: `bleeding` ends with no tick, mv +1, `gored` stays. Variant without it: ticks at +1050 (hp 5) and +1950 (hp 4), expiry at +2100 (the round-2 refresh). Take the tusk. | combat x loot x levelling; bleed status x cure x immune; senses cues x combat |
-| 9 | South to the pit (hp 6, sword, str 11); Attack goblin A (the lower id); Attack goblin B; four rounds. *Gated on Beads `loka-6ql4`, below.* | The first Attack admits both goblins (`helper_joined` line); the second writes `encounter.target` (`primary_changed` line), no round. Round 1: B 3, A strikes (hp 5). Round 2: B strikes (4), B dies at the player's blow; the roster still holds A, so no credit and no experience (Beads `loka-lpq6`). Round 3: A 3, A strikes (3). Round 4: A strikes (2), A dies: the encounter closes, experience 70 (80 once `loka-lpq6` is fixed: re-pin then). Without the switch the first blow would have landed on A. | target choice x pack x kill credit |
+| 9 | South to the pit (hp 6, sword, str 11); Attack goblin A (the lower id); Attack goblin B; four rounds. **After M8** (Beads `loka-6ql4`, below; not built in slice C). | The first Attack admits both goblins (`helper_joined` line); the second writes `encounter.target` (`primary_changed` line), no round. Round 1: B 3, A strikes (hp 5). Round 2: B strikes (4), B dies at the player's blow; the roster still holds A, so no credit and no experience (Beads `loka-lpq6`). Round 3: A 3, A strikes (3). Round 4: A strikes (2), A dies: the encounter closes, experience 70 (80 once `loka-lpq6` is fixed: re-pin then). Without the switch the first blow would have landed on A. | target choice x pack x kill credit |
 | 10 | With the sword, in the social district at standing -2: walk east into the Warden's engage; wait one round; Flee. | The player's blow is a hit with loss 0 (resist 100), the Warden stays at hp 5 and the encounter holds; Flee has one candidate (the toll gate is shut), so no RNG; social 2-3 unchanged. | disposition x resistances |
 
 Sandbox `tilt_yard`: a second boar, a second pack, a poultice and a cask of draught: under `might`
@@ -183,6 +183,26 @@ Sandbox `tilt_yard`: a second boar, a second pack, a poultice and a cask of drau
 pack is fought alone. Known limit until Beads `loka-x2gv` lands: a `bleeding` tick due in the same
 advance as a combat round on the player (fighting within 900 of a boar's bite without the poultice)
 rejects that wait; the guided loop never does this.
+
+## Built (slice C, Beads `loka-y6yg.3`)
+
+Steps 1 to 8 and 10 are built and pinned by `kernel/ts/test/showcase_combat.test.ts`; step 9 and the
+sandbox pack wait for M8. Differences from the text above:
+
+- Not built until `loka-6ql4` is on `main`: the `goblin_pit` room (the yard has no south exit), the
+  goblin template and its `kills` entry, both pack plans, the `population` capability and
+  `world.combat.target_choice`. The signposts drop their pack clauses: the hub's west line reads "a
+  sword lesson, a boar that marks you, and a fall you come back from with what you learned"; in
+  `sign_combat` the pit sentences go, "A kill that ends a fight earns experience" loses its pack
+  parenthesis and the tilt yard "has a second boar, a poultice and a draught". Restore them with the pit.
+- `aldous_lesson` has `learn` only: a second choice makes it a hub that reopens, and the compiler
+  refuses a repeatable `receive` (OUTCOME_MISMATCH). `aldous_talk` is a hub: after `bounty` the
+  player leaves with Leave the conversation (`close_choice`).
+- `gored` declares `tick_every` 60 and `resource` hp (the schema requires both, as `scar`); with no
+  `per_tick` it never ticks, and the Character page row has no end and no next tick.
+- The poultice is a room item in `drill_yard` ("by the bench"); no item location names a detail.
+- `tilt_boar` has no cue: at range 1 it would be heard in `gate_yard`, against step 1.
+- `combat.npc_hit` and `combat.npc_miss` no longer name the Warden's cudgel (every foe uses them).
 
 ## The pack and Beads `loka-6ql4`
 
