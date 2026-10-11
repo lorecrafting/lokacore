@@ -216,8 +216,8 @@ test('combat 6: unarmed, the boar gores the player to death; the scar survives t
   const before = wait(unguarded, start + 600).world; // alive: the boar's next blow kills
   assert.equal(where(before, before.body), room(w, 'boar_run'));
   const { [scar]: _row, ...unscarred } = before.state.statuses!;
-  const fresh = { ...before, state: { ...before.state, statuses: unscarred } };
-  assert.deepEqual(conditions(wait(fresh, start + 750).world), [GORED]); // permanent: still lands
+  const unscarredWorld = { ...before, state: { ...before.state, statuses: unscarred } };
+  assert.deepEqual(conditions(wait(unscarredWorld, start + 750).world), [GORED]); // permanent: still lands
   const onDeath = { ...reactions, [gore]: { ...bare, on: { event: 'entity_died' } } };
   const mourned = { ...w, cartridge: { ...w.cartridge, reactions: onDeath } } as World;
   assert.equal(conditions(wait(mourned, start + 750).world)?.length, 2); // the death's own reaction

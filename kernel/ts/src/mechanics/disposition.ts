@@ -52,6 +52,30 @@ export function engage(
   };
 }
 
+/**
+ * The first NPC in `there`, in EntityId order, living, unengaged, with an attack and an engage
+ * line, hostile to `actor`; none in a sanctuary, during a scene or without combat.
+ * ponytail: read before the move's own writes (the room, an expedition's faction fact), so a room- or presence-relative
+ * leaf reads the room left; read after them when a sampler needs one.
+ */
+function hostileAt(world: World, actor: CharacterId, there: EntityId, steps: Steps) {
+  if (!world.cartridge.world?.combat || world.rooms[there]?.sanctuary || running(world, actor))
+    return;
+  const candidates = Object.keys(world.entities)
+    .filter((id) => {
+      const npc = world.entities[id] as NpcDefinition;
+      return (
+        world.state.containers[id] === there &&
+        npc.attack &&
+        npc.disposition?.engage &&
+        living(world, id) &&
+        !engaged(world, id as EntityId)
+      );
+    })
+    .sort(cmp) as EntityId[];
+  return candidates.find((id) => disposition(world, actor, id, steps) === 'hostile');
+}
+
 /** `npc`'s encounter with `actor`'s body in its room, the first round an interval after `from`
  * (row 29b, loka-kgd.101: a spell's hit, from the cast's end); none for an NPC without a round job. */
 export function opened(
@@ -87,28 +111,4 @@ export function opened(
     },
     ...attacked(world, npc, encounter_id),
   ];
-}
-
-/**
- * The first NPC in `there`, in EntityId order, living, unengaged, with an attack and an engage
- * line, hostile to `actor`; none in a sanctuary, during a scene or without combat.
- * ponytail: read before the move's own writes (the room, an expedition's faction fact), so a room- or presence-relative
- * leaf reads the room left; read after them when a sampler needs one.
- */
-function hostileAt(world: World, actor: CharacterId, there: EntityId, steps: Steps) {
-  if (!world.cartridge.world?.combat || world.rooms[there]?.sanctuary || running(world, actor))
-    return;
-  const candidates = Object.keys(world.entities)
-    .filter((id) => {
-      const npc = world.entities[id] as NpcDefinition;
-      return (
-        world.state.containers[id] === there &&
-        npc.attack &&
-        npc.disposition?.engage &&
-        living(world, id) &&
-        !engaged(world, id as EntityId)
-      );
-    })
-    .sort(cmp) as EntityId[];
-  return candidates.find((id) => disposition(world, actor, id, steps) === 'hostile');
 }
