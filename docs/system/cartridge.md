@@ -1489,6 +1489,8 @@ Compiler/loader validate resolved item/nest/population/corpse/room refs, a nonem
 
 [Row W21](mechanics.md#fear-and-morale-for-npcs-toolbox-row-w21) adds a status's optional `fear: true` and a `status.apply` step's optional `co_present: true` (each `kernel_api` at least **1.50**): such a status may omit `per_tick`, as one with `modifies` may; such a step names no holder. Both kernels refuse the lower floor (KERNEL_API_RANGE_INVALID) and a `co_present` step that also names `item` or `npc` (SCHEMA_VIOLATION at that field); the schema refuses any other value. `cartridges/fear_sampler` is the sampler.
 
+[Rows SR4 and SR5](mechanics.md#command-blocks-and-resistances-on-a-status-toolbox-rows-sr4-and-sr5) add a status's optional `blocks` and `allows` (each 1 to 64 Command type names) and `resistances` (`Resistances`, as on an NPC); any of them needs `kernel_api` at least **1.54**, and such a status may omit `per_tick`. Both kernels (`lib/loka/content/status.ex`, `kernel/ts/src/content/cartridge_status.ts`) refuse a name that is no registered command, or is `run_job` or `elapsed` (UNKNOWN_COMMAND at `blocks[i]` or `allows[i]`), and the lower floor (KERNEL_API_RANGE_INVALID). `cartridges/ward_sampler` is the sampler.
+
 *Not supported yet:* a status whose `modifies` names an attribute the derived hp maximum reads (`con`): one that ends before a later hp write in the same wait faults (Beads `loka-kgd.50`); author such buffs on other attributes until it lands.
 
 ## Derived stat declarations
