@@ -188,17 +188,19 @@ pack is fought alone. Known limit until Beads `loka-x2gv` lands: a `bleeding` ti
 advance as a combat round on the player (fighting within 900 of a boar's bite without the poultice)
 rejects that wait; the guided loop never does this.
 
-## Built (slice C, Beads `loka-y6yg.3`)
+## Built (slice C, Beads `loka-y6yg.3`; the pit, Beads `loka-y6yg.10`)
 
-Steps 1 to 8 and 10 are built and pinned by `kernel/ts/test/showcase_combat.test.ts`; step 9 and the
-sandbox pack wait for M8. Differences from the text above:
+Steps 1 to 10 and the sandbox pack are built and pinned by `kernel/ts/test/showcase_combat.test.ts`
+(the pit after the `loka-6ql4` fix). Differences from the text above:
 
-- Not built until `loka-6ql4` is on `main`: the `goblin_pit` room (the yard has no south exit), the
-  goblin template and its `kills` entry, both pack plans, the `population` capability and
-  `world.combat.target_choice`. The signposts drop their pack clauses: the hub's west line reads "a
-  sword lesson, a boar that marks you, and a fall you come back from with what you learned"; in
-  `sign_combat` the pit sentences go, "A kill that ends a fight earns experience" loses its pack
-  parenthesis and the tilt yard "has a second boar, a poultice and a draught". Restore them with the pit.
+- Both pack plans have `replacement_delay` 8640000, not 86400: the loader requires
+  `wander_interval <= replacement_delay`, and the wander interval keeps the pack from wandering in
+  play. A pack killed stays gone for a hundred days.
+- A spawn template's room must be its plan's home, so the sandbox pack has its own template
+  `tilt_goblin` (room `tilt_yard`, bundle `tilt_goblins`; texts and `ear` shared) and its own
+  `kills` entry of 10. `enemy_fled` names `north` and `south` (the loader wants every exit inside
+  the area, from both rooms).
+- Step 9 experience is 70 while Beads `loka-lpq6` is open (B's kill pays nothing).
 - `aldous_lesson` has `learn` only: a second choice makes it a hub that reopens, and the compiler
   refuses a repeatable `receive` (OUTCOME_MISMATCH). `aldous_talk` is a hub: after `bounty` the
   player leaves with Leave the conversation (`close_choice`).

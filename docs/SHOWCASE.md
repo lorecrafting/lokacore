@@ -1,6 +1,6 @@
 # Toolbox showcase
 
-`cartridges/toolbox_showcase` (the hub and the body, world and social districts of [showcase plan 1](showcase/hub-and-first-districts.md) are built, the combat district of [showcase plan 2](showcase/combat-district.md) is built but for its goblin pit (after M8), the cause-and-effect slice of [showcase plan 3](showcase/cause-and-effect.md) is built; compiled answer
+`cartridges/toolbox_showcase` (the hub and the body, world and social districts of [showcase plan 1](showcase/hub-and-first-districts.md) are built, the combat district of [showcase plan 2](showcase/combat-district.md) is built, the cause-and-effect slice of [showcase plan 3](showcase/cause-and-effect.md) is built; compiled answer
 `protocol/fixtures/toolbox_showcase_hash.json`, held by `test/loka/content_showcase_test.exs`) is the composition proof for the [mechanics toolbox](MECHANICS-TOOLBOX.md):
 one playable cartridge where finished mechanics meet each other, so a pair that only works in its
 own sampler shows up here ([owner decision](decisions/owner-decision-showcase-2026-10-10.md)).
@@ -44,7 +44,7 @@ Status `planned (plan N)` means that showcase plan ([plan 1](showcase/hub-and-fi
 | deadline x exposure | social and body | the letter run across `fell_top` | `showcase_social.test.ts` (social 11) | built |
 | pick x force x skill growth | social | `tollhouse` (strongbox, fragile and iron doors) | `showcase_social.test.ts` (social 6-7) | built |
 | schedule cases x sky | social | Tam's 11:00 case (rain sends him to the church) | `showcase_social.test.ts` (social 8, rain) | built |
-| target choice x pack x kill credit | combat | `goblin_pit` (two goblins on one pack plan; Attack the second to switch) | `showcase_combat.test.ts` (combat 9) | after M8 (Beads `loka-6ql4`; the pit room, its pack and `target_choice` are not built) |
+| target choice x pack x kill credit | combat | `goblin_pit` (two goblins on one pack plan; Attack the second to switch) | `showcase_combat.test.ts` (combat 9, tilt yard) | built (a non-final pack kill pays nothing until Beads `loka-lpq6`) |
 | allies x kill credit x quest | combat | `gate_yard` (Gil's blow kills the raider; the bounty resolves) | `showcase_combat.test.ts` (combat 4) | built |
 | scars x death x same-body return | combat | the boar's `gored` survives the unarmed death in `boar_run` | `showcase_combat.test.ts` (combat 6) | built |
 | bleed status x cure x immune | combat | `bleeding` from the boar, the poultice, the boar immune to its own wound | `showcase_combat.test.ts` (combat 6, 8) | built |

@@ -1,0 +1,9 @@
+{
+  "title": "room.goblin_pit.title",
+  "description": "room.goblin_pit.description",
+  "exits": {
+    "north": {
+      "to": "drill_yard"
+    }
+  }
+}
