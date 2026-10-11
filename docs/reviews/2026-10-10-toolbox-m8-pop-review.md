@@ -30,3 +30,11 @@
 ## loka-dto9 recommendation
 
 Widen `protocol.md:1175`; do not make a narrow code change. With an off-hour ring (66600, `ends_at` 239400) no plan sub-step lands on `ends_at`. Exact-deadline pairing, even extended to crossed sub-steps, therefore leaves that case faulting. Adding `ends_at` to the successor would change hour-by-hour save bytes. The clause needs to say that the plan's current job, including its crossed sub-steps, and that plan's resume share one writer group when one advance runs both. This is not urgent: no shipping path reaches it, so keep it at P2 until a cartridge offers an uncapped wait across a bell deadline.
+
+## Fix re-check at `5098ee4091d58c37581861336348a65e858b2abb`
+
+- Scope: `5098ee40` only (`c4_pack_elapsed.test.ts:84-93`, `c4_pack_fixture.ts:17,25`). Hosted ci and book-e2e green (PM).
+- Finding 1 (blocker): **resolved**. The new test, 3 h interval and one 27 h advance from 18:00, passes on the head. Under M1 (`shared.ts:192-193`, derived boundary replaced by `at`) it fails at the `deepEqual` with hourly play (`:91`), not only at the pin, while the first test stays green. The pin `next_wander_due` 172800 is independent of the code: the last wander is at 162000 (21:00 day 2, on the 10800 grid), so the next is 172800.
+- `fixture()` defaults are unchanged (`wander_interval` spreads only when given).
+- Finding 2 (nit): not addressed; it is in the Beads notes, not the branch, so no action is needed.
+- Verdict: **APPROVE**.
