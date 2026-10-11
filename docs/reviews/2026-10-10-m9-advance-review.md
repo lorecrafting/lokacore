@@ -35,3 +35,21 @@
   - Survived: M1 (finding 1), the `proposal.ts:289` revert (finding 3), narrow pairing (finding 2).
 - 2s48 pack-round variant probe: a pack fight (two goblins in `active_ids`) with the guard moved to the den at 1 hp. Control: the guard strikes and the goblin goes 6 → 3. Poison tick on the guard sorting before the round: the guard dies (0) and the goblin goes 6 → 4. No finding.
 - Sub-step plumbing: every sub-step gets `jobCommandId(job_id, due_time)` and its own allocator (`proposal.ts:278-282`) and is counted by `queueHour` (`:285`). Events take `logical_time` from the sub-step clock (`job.ts:145`). The last sub-step's `status.transition` uses the hydrated row as `expected`.
+
+## Re-check at `948386f440ec99e84e0fb4617ab9216841ad170a`
+
+- Fix commits only: `25ae6629`, `6f672c52`, `948386f4`. Hosted ci and book-e2e green (per brief). Verdict: **APPROVE WITH NOTES**.
+- Named files (elements, d9_suppression, writer_groups, status_composition, e1_creatures, transcripts) green; `npm run typecheck` passes. No fixture, transcript or `e1_creatures` expectation touched.
+
+| # | Disposition | Proof |
+|---|---|---|
+| 1 | Fixed | The drain carries each sub-step's next tick (`queueHour`, `proposal_hours.ts:21`; `job.ts:49`); a refresh while the row's job is completed writes its end as the tick (`status/shared.ts:164`); `Math.max` is gone. The new elements test's expected rows (hp 19/ends 150/tick 120 at 90 and 95 s; 18/210/180 at 130 s) match a hand count. Mutants, each killed by that test: stale tick (`row.next_tick_at`), now-as-tick, refresh placeholder removed (`precondition_failed`), tick not carried in `queueHour`. |
+| 2 | Fixed | `d9_suppression.test.ts` "a plan job due after the deadline pairs": narrowing to `b.due_time <= a.due_time` faults `conflicting_write` at 1800. |
+| 3 | Withdrawn by the dev, PM accepted | `proposal.ts:289` is back to `groups.get(partner ?? job_id)`. Nothing left to test. |
+| 4 | Fixed | `job.ts:30` allowance back to 44. `status/fatal.ts` keeps the old op order (adjust, close, end, death). `accepted(visit…)` differs from `accepted(world…)` only in the default rng, which is passed explicitly. |
+| 5 | Fixed | `mechanics.md:2365` cites `loka-kgd.104`. |
+| 6 | Open (nit) | The commits say "Self-review", but they do not report a `/code-review` result. Report it in the PR body when the batch PR opens. |
+
+- Import graph (value imports, resolved by a script): `status/fatal.ts` is in no cycle. Its imports (`combat/round_attack`, `combat/shared`, `death/sequence`, `status/shared`) are the ones `job.ts` already had. Only `job.ts` imports it.
+- Mid-chain assumption ("the row's job is completed" means mid-chain): the only path that leaves an active timed row on a completed job is a crossed status sub-step (`job.complete` with no successor). The last sub-step, an expiry or a fatal end rewrites that row in the same drain. A cure followed by re-application gives a new pending job, and the old sub-step then completes with no change. `now()` returns only faults, so no partial drain is committed. A permanent row has no job id. Only `runStatus` reads `next_tick_at`, and it uses the carried tick. Safe.
+- Known limit (`mechanics.md:1813`) is honest. Probe with the test's cartridge: one advance of 60 or 130 s matches job-by-job play. An advance of 150, 180, 200 or 300 s faults `precondition_failed`, where job-by-job play is accepted: the refresh at 60 writes ends 150, and the composer requires `ends_at > now` (`compose_status.ts:21`). The fault starts at "at or before the advance end", as documented. This is no regression against base, where a crossed successor faulted. Tracked in Beads `loka-kgd.104` (comment of 06:58).

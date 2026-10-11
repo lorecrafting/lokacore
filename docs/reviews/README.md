@@ -70,7 +70,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: showcase slice C, the combat district (loka-y6yg.3, PR #369)](2026-10-10-showcase-c-combat-review.md): **APPROVE**
 - [Review: showcase slice B, Low Wardle and the hub's south exit (loka-y6yg.2, PR #367)](2026-10-10-showcase-b-review.md): **APPROVE WITH NOTES**
 - [Mechanics review 3: the player's seat](2026-10-10-mechanics-review-3.md)
-- [Review: M9 advance fixes, status sub-steps and plan/resume pairing (loka-6ztc, loka-dto9, loka-2s48)](2026-10-10-m9-advance-review.md): **CHANGES REQUIRED**
+- [Review: M9 advance fixes, status sub-steps and plan/resume pairing (loka-6ztc, loka-dto9, loka-2s48)](2026-10-10-m9-advance-review.md): **APPROVE WITH NOTES**
 - [Review: one wait across several listed schedule hours (loka-qi0r)](2026-10-10-m6-waitfix-review.md): **APPROVE**
 - [Review: E1 recorder debt-elapsed recipe (loka-ssr9, PR #360)](2026-10-10-e1-recorder-ssr9-review.md): **APPROVE**
 - [Review: e1-recorder in full on batch-branch pushes (loka-b98y, PR #361)](2026-10-10-ci-e1-recorder-batch-review.md): **APPROVE WITH NOTES**
