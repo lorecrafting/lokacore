@@ -137,6 +137,38 @@ test('a fatal tick on a crossed sub-step kills the golem as job-by-job play does
   assert.deepEqual([hp(w), on(w, 'shocked'), living(w, golem(w))], [0, false, false]);
 });
 
+// Breaks (loka-6ztc): a reaction refreshing shocked on its tick inside one advance copies the row's
+// stale next tick (precondition_failed), or a sub-step at the old end ticks there. Shocked 90 s,
+// a tick each 60 s, re-applied on each tick; one advance against 10 s waits.
+test('a status refreshed on its tick inside one advance matches job-by-job play', () => {
+  const statuses = structuredClone(content.statuses!) as Record<string, any>;
+  statuses[`${C}:status/shocked`].duration = 90;
+  const refresh = edited((r) => {
+    r[rule('zz_reshock')] = {
+      key: 'zz_reshock',
+      on: { event: 'status_ticked', status: ref('status', 'shocked') },
+      apply: [{ op: 'status.apply', status: ref('status', 'shocked') }],
+    };
+  });
+  const start = drop(fresh({ ...refresh, statuses } as Cartridge), 'jar');
+  const row = (w: World) => {
+    const r = w.state.statuses![
+      key({ kind: 'status', body_id: golem(w), status: ref('status', 'shocked') })
+    ] as any;
+    return [hp(w), r.active, r.ends_at - start.state.clock, r.next_tick_at - start.state.clock];
+  };
+  for (const [seconds, expected] of [
+    [90, [19, true, 150, 120]],
+    [95, [19, true, 150, 120]],
+    [130, [18, true, 210, 180]],
+  ] as const) {
+    let stepped = start;
+    for (let t = 0; t < seconds; t += 10) stepped = wait(stepped, Math.min(10, seconds - t));
+    assert.deepEqual(row(stepped), expected);
+    assert.deepEqual(row(wait(start, seconds)), expected);
+  }
+});
+
 // Breaks: status_applied emitted with no reaction listening, so every cartridge applying a status
 // by reaction gains events and receipts it never opted into (the opt-in, as W25's clock_hour).
 test('with no status_applied reaction a landing emits nothing', () => {

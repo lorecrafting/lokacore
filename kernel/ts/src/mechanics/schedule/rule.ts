@@ -44,6 +44,7 @@ export const decideAt = (
   mint: Parameters<Rule<'schedule'>>[2],
   steps: Steps = { n: 0 },
   at?: number,
+  tick?: number,
 ): ReturnType<Rule<'schedule'>> => {
   const { payload } = command;
   if (payload.type === 'run_job') {
@@ -54,7 +55,8 @@ export const decideAt = (
       return expiry(world, command, payload.job_id, row, mint);
     if (row.encounter_id) return roundSequence(world, command, payload.job_id, row, mint, steps);
     if (row.bleed_body_id) return runBleed(world, command, payload.job_id, row, mint);
-    if (row.job.kind === 'status') return runStatus(world, command, payload.job_id, row, mint, at);
+    if (row.job.kind === 'status')
+      return runStatus(world, command, payload.job_id, row, mint, at, tick);
     if (row.quest_instance_id) {
       const d = world.cartridge.quests?.[refString(row.job)]?.deadline;
       return d && !d.fact
