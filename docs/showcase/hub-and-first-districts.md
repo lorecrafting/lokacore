@@ -304,7 +304,10 @@ track climbs `up` from the green. The `hall_cupboard` exit is east of `moot_hall
   `intimidate` rating 1, same sequence), `leave` (`persuade_sampler/dialogues/guard.json`).
   Barrier `toll_gate` `opens_when fact_compare warden_lets_pass true`.
   The manifest's `world.combat.player_attack` is `chance 0`: the engagement holds and neither side
-  lands a hit, so waiting it out never kills the Warden and the talk path to `toll_gate` stays open.
+  lands a hit, so waiting it out never kills the Warden and the talk path to `toll_gate` stays open
+  (flee, mend the standing, talk). A later weapon, `hit_chance` term or combat district that lets
+  the player hit must keep the Warden alive another way; `showcase_social.test.ts` social 2-3 fails
+  otherwise.
 - **Tam**: `room: warden_gate`; `daily_schedule` 10 `mill`, 11 `[{when: sky {weather: rain},
   room: church, goal: "Tam makes for the church porch out of the rain."}, village_green]`,
   15 `warden_gate` (`schedule_sampler/npcs/maud.json`).

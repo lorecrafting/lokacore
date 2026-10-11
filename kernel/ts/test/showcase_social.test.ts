@@ -111,10 +111,12 @@ test('social 2-3: help makes Nell friendly (bread 2); wrong twice makes her host
   // to the toll gate stays open.
   const held = wait(east.world, east.world.state.clock + 1500).world;
   assert.equal(engaged(held, held.body)?.row.npc_id, npc(w, 'warden'));
-  const mended = say(play(held, { type: 'flee' }).world, 'reeve', 'help').world;
-  const passed = say(go(mended, 'east').world, 'warden', 'reason');
+  const fled = play(held, { type: 'flee' }).world;
+  assert.equal(where(fled, fled.body), room(fled, 'village_green'));
+  const passed = say(go(say(fled, 'reeve', 'help').world, 'east').world, 'warden', 'reason');
   assert.equal(outcome(passed), 'reason');
-  play(passed.world, { type: 'open', direction: 'east' });
+  const through = go(play(passed.world, { type: 'open', direction: 'east' }).world, 'east').world;
+  assert.equal(where(through, through.body), room(through, 'tollhouse'));
 });
 
 // Breaks: the gift reaction writes the giver's row or a shared one, or the Warden's hostility
