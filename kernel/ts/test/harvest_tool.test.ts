@@ -91,17 +91,47 @@ test('with the pickaxe held the seam yields each lump once, then is empty', () =
   assert.equal(offer(w).reason?.code, 'not_found');
 });
 
-// Breaks: the loader admits a tool gate under kernel_api 1.51 (twin of
+// Breaks: a wielded pickaxe (in a slot holder, which reach refuses) or one in a carried open sack
+// does not count as held.
+test('a wielded pickaxe, or one in a carried open sack, mines', () => {
+  const held = take(fresh(), 'pickaxe');
+  const wielded = play(held, { type: 'wear', item_id: item(held, 'pickaxe') }).world;
+  const sacked = play(take(held, 'sack'), {
+    type: 'put',
+    item_id: item(held, 'pickaxe'),
+    container_id: item(held, 'sack'),
+  }).world;
+  for (const w of [wielded, sacked]) {
+    assert.notEqual(w.state.containers[item(w, 'pickaxe')], w.body);
+    assert.equal(mine(w).decision.kind, 'accepted');
+  }
+});
+
+// Breaks: the loader admits a tool gate under kernel_api 1.51 or without tags@1 (twin of
 // test/loka/content_harvest_tool_test.exs).
-test('loader: a harvest tool needs kernel_api 1.52', () => {
-  const c = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
-  c.manifest.requires.kernel_api.at_least = '1.51';
-  const canonical = encode(c);
-  const sha256 = createHash('sha256').update(canonical).digest('hex');
-  const r = loadCartridge(
-    new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-    INSTALLED,
+test('loader: a harvest tool needs kernel_api 1.52 and tags@1', () => {
+  const reload = (edit: (c: any) => void) => {
+    const c = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
+    edit(c);
+    const canonical = encode(c);
+    const sha256 = createHash('sha256').update(canonical).digest('hex');
+    const r = loadCartridge(
+      new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
+      INSTALLED,
+    );
+    return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
+  };
+  const at = '.cartridge.rooms["harvest_sampler@0.0.1:room/mine"].details.seam.harvest';
+  assert.deepEqual(
+    reload((c) => (c.manifest.requires.kernel_api.at_least = '1.51')),
+    ['KERNEL_API_RANGE_INVALID', at],
   );
-  assert.ok(!r.ok);
-  assert.equal(r.diagnostic.code, 'KERNEL_API_RANGE_INVALID');
+  assert.deepEqual(
+    reload((c) => {
+      delete c.manifest.requires.capabilities.tags;
+      delete c.lock.capabilities.tags;
+      for (const k of ['pickaxe', 'stick']) delete c.items[`harvest_sampler@0.0.1:item/${k}`].tags;
+    }),
+    ['UNDECLARED_CAPABILITY', `${at}.tool`],
+  );
 });

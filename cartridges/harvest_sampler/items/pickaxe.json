@@ -9,6 +9,8 @@
     "in": "room",
     "room": "mine"
   },
+  "mass_grams": 2000,
+  "slot": "wield",
   "tags": [
     "metal",
     "sharp"

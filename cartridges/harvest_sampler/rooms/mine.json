@@ -5,8 +5,7 @@
   "details": {
     "seam": {
       "aliases": [
-        "seam",
-        "ore"
+        "seam"
       ],
       "description": "detail.seam.description",
       "harvest": {

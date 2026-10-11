@@ -23317,5 +23317,121 @@
         "code": "not_in_enum"
       }
     ]
+  },
+  {
+    "contract": "RoomDefinition",
+    "value": {
+      "key": "r",
+      "title": "t",
+      "description": "d",
+      "exits": {},
+      "details": {
+        "seam": {
+          "aliases": [
+            "seam"
+          ],
+          "description": "d",
+          "harvest": {
+            "items": [
+              {
+                "cartridge_id": "c",
+                "cartridge_version": "1.0.0",
+                "kind": "item",
+                "key": "ore"
+              }
+            ],
+            "label": "l",
+            "narration": "n",
+            "title": "t",
+            "tool": {}
+          }
+        }
+      }
+    },
+    "errors": [
+      {
+        "path": "/details/seam/harvest/tool/tag",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "RoomDefinition",
+    "value": {
+      "key": "r",
+      "title": "t",
+      "description": "d",
+      "exits": {},
+      "details": {
+        "seam": {
+          "aliases": [
+            "seam"
+          ],
+          "description": "d",
+          "harvest": {
+            "items": [
+              {
+                "cartridge_id": "c",
+                "cartridge_version": "1.0.0",
+                "kind": "item",
+                "key": "ore"
+              }
+            ],
+            "label": "l",
+            "narration": "n",
+            "title": "t",
+            "tool": {
+              "tag": "pickaxe"
+            }
+          }
+        }
+      }
+    },
+    "errors": [
+      {
+        "path": "/details/seam/harvest/tool/tag",
+        "code": "not_in_enum"
+      }
+    ]
+  },
+  {
+    "contract": "RoomDefinition",
+    "value": {
+      "key": "r",
+      "title": "t",
+      "description": "d",
+      "exits": {},
+      "details": {
+        "seam": {
+          "aliases": [
+            "seam"
+          ],
+          "description": "d",
+          "harvest": {
+            "items": [
+              {
+                "cartridge_id": "c",
+                "cartridge_version": "1.0.0",
+                "kind": "item",
+                "key": "ore"
+              }
+            ],
+            "label": "l",
+            "narration": "n",
+            "title": "t",
+            "tool": {
+              "tag": "sharp",
+              "liquid": "water"
+            }
+          }
+        }
+      }
+    },
+    "errors": [
+      {
+        "path": "/details/seam/harvest/tool/liquid",
+        "code": "unknown_property"
+      }
+    ]
   }
 ]

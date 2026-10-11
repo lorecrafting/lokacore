@@ -14,5 +14,8 @@
   "item.pickaxe.description": "An iron pickaxe with a sharp point.",
   "item.stick.short": "a stick",
   "item.stick.room": "A [stick] lies in the dust.",
-  "item.stick.description": "A dry wooden stick."
+  "item.stick.description": "A dry wooden stick.",
+  "item.sack.short": "a sack",
+  "item.sack.room": "An empty [sack] lies by the door.",
+  "item.sack.description": "A rough canvas sack."
 }

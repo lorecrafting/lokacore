@@ -14,7 +14,8 @@
       "movement": 1,
       "inspectable_detail": 1,
       "containment": 1,
-      "tags": 1
+      "tags": 1,
+      "equipment": 1
     },
     "client_features": []
   },
