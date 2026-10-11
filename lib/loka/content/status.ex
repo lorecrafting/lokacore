@@ -50,10 +50,11 @@ defmodule Loka.Content.Status do
 
   defp trigger?(_), do: false
 
-  # A status reader (4, 5) needs 1.54, a fear status (row W21) 1.50, a permanent one (row W8) 1.48,
+  # A movement status (reader 7) needs 1.62, a status reader (4, 5) 1.54, a fear status (row W21) 1.50, a permanent one (row W8) 1.48,
   # the fields above 1.46.
   defp floor(statuses, g3) do
     cond do
+      Enum.any?(statuses, &match?({_, {_, _, %{"movement" => _}}}, &1)) -> [1, 62]
       Enum.any?(for {_, {_, _, s}} <- statuses, do: reader?(s)) -> [1, 54]
       Enum.any?(statuses, &match?({_, {_, _, %{"fear" => true}}}, &1)) -> [1, 50]
       Enum.any?(statuses, &match?({_, {_, _, %{"duration" => "permanent"}}}, &1)) -> [1, 48]
@@ -64,8 +65,9 @@ defmodule Loka.Content.Status do
 
   defp permanent?(s), do: s["duration"] == "permanent"
 
-  # Status readers 4 and 5: blocks, allows or resistances; such a status may omit per_tick too.
-  defp reader?(s), do: Enum.any?(~w(blocks allows resistances), &Map.has_key?(s, &1))
+  # Status readers 4, 5 and 7: blocks, allows, resistances or movement; such a status may omit
+  # per_tick too.
+  defp reader?(s), do: Enum.any?(~w(blocks allows resistances movement), &Map.has_key?(s, &1))
 
   # A fatal hp tick runs the death sequence, so death's settings must be declared too.
   defp gate(m, floor) do

@@ -24237,5 +24237,273 @@
         "code": "not_in_enum"
       }
     ]
+  },
+  {
+    "contract": "StatusDefinition",
+    "value": {
+      "key": "flying",
+      "duration": 600,
+      "tick_every": 60,
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "mv"
+      },
+      "label": "condition.flying",
+      "narration": {
+        "applied": "narration.flying.applied",
+        "tick": "narration.flying.tick",
+        "expired": "narration.flying.expired"
+      },
+      "movement": {
+        "cost_percent": -1
+      }
+    },
+    "errors": [
+      {
+        "path": "/movement/cost_percent",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "contract": "StatusDefinition",
+    "value": {
+      "key": "flying",
+      "duration": 600,
+      "tick_every": 60,
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "mv"
+      },
+      "label": "condition.flying",
+      "narration": {
+        "applied": "narration.flying.applied",
+        "tick": "narration.flying.tick",
+        "expired": "narration.flying.expired"
+      },
+      "movement": {
+        "cost_percent": 1001
+      }
+    },
+    "errors": [
+      {
+        "path": "/movement/cost_percent",
+        "code": "above_maximum"
+      }
+    ]
+  },
+  {
+    "contract": "StatusDefinition",
+    "value": {
+      "key": "flying",
+      "duration": 600,
+      "tick_every": 60,
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "mv"
+      },
+      "label": "condition.flying",
+      "narration": {
+        "applied": "narration.flying.applied",
+        "tick": "narration.flying.tick",
+        "expired": "narration.flying.expired"
+      },
+      "movement": {
+        "cost_percent": 50.5
+      }
+    },
+    "errors": [
+      {
+        "path": "/movement/cost_percent",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "contract": "StatusDefinition",
+    "value": {
+      "key": "flying",
+      "duration": 600,
+      "tick_every": 60,
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "mv"
+      },
+      "label": "condition.flying",
+      "narration": {
+        "applied": "narration.flying.applied",
+        "tick": "narration.flying.tick",
+        "expired": "narration.flying.expired"
+      },
+      "movement": {
+        "passes": []
+      }
+    },
+    "errors": [
+      {
+        "path": "/movement/passes",
+        "code": "too_few_items"
+      }
+    ]
+  },
+  {
+    "contract": "StatusDefinition",
+    "value": {
+      "key": "flying",
+      "duration": 600,
+      "tick_every": 60,
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "mv"
+      },
+      "label": "condition.flying",
+      "narration": {
+        "applied": "narration.flying.applied",
+        "tick": "narration.flying.tick",
+        "expired": "narration.flying.expired"
+      },
+      "movement": {
+        "passes": [
+          "water",
+          "air",
+          "chasm",
+          "water"
+        ]
+      }
+    },
+    "errors": [
+      {
+        "path": "/movement/passes",
+        "code": "too_many_items"
+      }
+    ]
+  },
+  {
+    "contract": "StatusDefinition",
+    "value": {
+      "key": "flying",
+      "duration": 600,
+      "tick_every": 60,
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "mv"
+      },
+      "label": "condition.flying",
+      "narration": {
+        "applied": "narration.flying.applied",
+        "tick": "narration.flying.tick",
+        "expired": "narration.flying.expired"
+      },
+      "movement": {
+        "passes": [
+          "wooden"
+        ]
+      }
+    },
+    "errors": [
+      {
+        "path": "/movement/passes/0",
+        "code": "not_in_enum"
+      }
+    ]
+  },
+  {
+    "contract": "StatusDefinition",
+    "value": {
+      "key": "flying",
+      "duration": 600,
+      "tick_every": 60,
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "mv"
+      },
+      "label": "condition.flying",
+      "narration": {
+        "applied": "narration.flying.applied",
+        "tick": "narration.flying.tick",
+        "expired": "narration.flying.expired"
+      },
+      "movement": {
+        "speed": 2
+      }
+    },
+    "errors": [
+      {
+        "path": "/movement/speed",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "StatusDefinition",
+    "value": {
+      "key": "flying",
+      "duration": 600,
+      "tick_every": 60,
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "mv"
+      },
+      "label": "condition.flying",
+      "narration": {
+        "applied": "narration.flying.applied",
+        "tick": "narration.flying.tick",
+        "expired": "narration.flying.expired"
+      },
+      "movement": [
+        "water"
+      ]
+    },
+    "errors": [
+      {
+        "path": "/movement",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "contract": "StatusDefinition",
+    "value": {
+      "key": "flying",
+      "duration": 600,
+      "tick_every": 60,
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "mv"
+      },
+      "label": "condition.flying",
+      "narration": {
+        "applied": "narration.flying.applied",
+        "tick": "narration.flying.tick",
+        "expired": "narration.flying.expired"
+      },
+      "movement": {
+        "passes": "water"
+      }
+    },
+    "errors": [
+      {
+        "path": "/movement/passes",
+        "code": "invalid_type"
+      }
+    ]
   }
 ]

@@ -202,6 +202,15 @@ export function statusResistance(world: World, body: EntityId) {
 }
 
 /**
+ * Status reader 7: the `movement` declarations of `body`'s active statuses, in definition order
+ * (none read while no status declares one). Read by movement's fare and terrain admission.
+ */
+export function statusMovement(world: World, body: EntityId) {
+  const declared = Object.values(world.cartridge.statuses ?? {}).some((s) => s.movement);
+  return declared ? activeStatuses(world, body).flatMap(({ spec }) => spec.movement ?? []) : [];
+}
+
+/**
  * Status reader 4: whether `body`'s active statuses let it take Command type `command`: none blocks
  * it and every `allows` list names it. The player's admission (`permits`) and NPC combat turns read it.
  */

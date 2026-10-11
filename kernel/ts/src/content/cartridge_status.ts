@@ -27,15 +27,7 @@ export function status(c: Obj): Diagnostic[] {
   const { immune, named, drinks, lone, g3 } = api146(c);
   if (!Object.keys(defs).length && !applies.length && !cures.length && !g3) return out;
   const all = Object.values(defs);
-  const floor = all.some(reader)
-    ? '1.54'
-    : all.some((s) => s.fear)
-      ? '1.50'
-      : all.some(lasting)
-        ? '1.48'
-        : g3
-          ? '1.46'
-          : '1.38';
+  const floor = floorOf(all, g3);
   if (
     apiCmp(c.manifest.requires.kernel_api.at_least, floor) < 0 ||
     ['status', 'death'].some((k) => c.lock.capabilities[k] !== 1) // a fatal hp tick needs death
@@ -49,10 +41,25 @@ export function status(c: Obj): Diagnostic[] {
   return [...out, ...lone.map((at) => diag('SCHEMA_VIOLATION', at, { error: 'invalid_value' }))];
 }
 
+// The highest floor any declaration needs: movement (SR7), readers (SR4, SR5), fear (W21),
+// permanent (W8), the G3 fields.
+const floorOf = (all: Obj[], g3: unknown) =>
+  all.some((s) => s.movement)
+    ? '1.62'
+    : all.some(reader)
+      ? '1.54'
+      : all.some((s) => s.fear)
+        ? '1.50'
+        : all.some(lasting)
+          ? '1.48'
+          : g3
+            ? '1.46'
+            : '1.38';
+
 // Row W8: a permanent status never ticks, so it declares no per_tick; a fear one (row W21) may omit it.
 const lasting = (s: Obj) => s.duration === 'permanent';
-// Status readers 4 and 5 (API 1.54): such a status may omit per_tick too.
-const reader = (s: Obj) => s.blocks || s.allows || s.resistances;
+// Status readers 4 and 5 (API 1.54) and 7 (movement, API 1.62): such a status may omit per_tick too.
+const reader = (s: Obj) => s.blocks || s.allows || s.resistances || s.movement;
 
 // One status definition's own fields.
 function definition(c: Obj, ref: string, s: Obj): Diagnostic[] {

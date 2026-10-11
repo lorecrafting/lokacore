@@ -96,7 +96,8 @@ defmodule Loka.Content.Barriers do
     Enum.flat_map(faces, fn {rel, path, c} -> reference(rel, path, "item", c, m, defs) end)
   end
 
-  # A hidden (row 11) or climb (row 30) face needs kernel_api 1.45: one diagnostic, as the loader.
+  # A hidden (row 11) or climb (row 30) face needs kernel_api 1.45: one diagnostic, as the loader;
+  # then the terrain floor.
   defp face_floor(m, defs) do
     faces =
       for {_, {_, [], r}} <- defs["room"],
@@ -104,7 +105,18 @@ defmodule Loka.Content.Barriers do
           e["hidden_until"] || e["climb"],
           do: e
 
-    if faces != [] and api(m) < [1, 45],
+    if(faces != [] and api(m) < [1, 45],
+      do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
+      else: []
+    ) ++ terrain_floor(m, defs)
+  end
+
+  # Status reader 7: a room tagged air, chasm or water bars moves into it; kernel_api 1.62.
+  defp terrain_floor(m, defs) do
+    terrain =
+      for {_, {_, [], r}} <- defs["room"], t <- r["tags"] || [], t in ~w(air chasm water), do: t
+
+    if terrain != [] and api(m) < [1, 62],
       do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
       else: []
   end

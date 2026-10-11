@@ -2369,7 +2369,7 @@
           "type": "integer",
           "minimum": -2147483647,
           "maximum": 2147483647,
-          "description": "Signed; never 0, required unless modifies, fear, blocks, allows or resistances is present or duration is permanent, and absent when duration is permanent (compiler and loader SCHEMA_VIOLATION)."
+          "description": "Signed; never 0, required unless modifies, fear, blocks, allows, resistances or movement is present or duration is permanent, and absent when duration is permanent (compiler and loader SCHEMA_VIOLATION)."
         },
         "label": {
           "$ref": "text.schema.json#/$defs/TextKey"
@@ -2432,6 +2432,32 @@
         "resistances": {
           "description": "Status reader 5 (kernel_api at least 1.54): while active on the struck body (the player's or an NPC's), each entry joins the G2 resistance sum of an attack on it, before the one -100..100 clamp; may stand in for per_tick.",
           "$ref": "entity.schema.json#/$defs/Resistances"
+        },
+        "movement": {
+          "type": "object",
+          "properties": {
+            "cost_percent": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000,
+              "description": "Percent of each move's fare (world.movement.cost or 1 mv, after the flee multiplier) the holding body pays, rounded down; several statuses apply in turn in definition order."
+            },
+            "passes": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 3,
+              "items": {
+                "enum": [
+                  "air",
+                  "chasm",
+                  "water"
+                ]
+              },
+              "description": "Terrain tags the holding body may enter: a move into a room tagged air, chasm or water is refused invalid_state unless the body's active statuses pass each such tag."
+            }
+          },
+          "additionalProperties": false,
+          "description": "Status reader 7 (kernel_api at least 1.62): the holding body's move cost and the terrain it may cross while the status is active; may stand in for per_tick."
         }
       },
       "required": [
