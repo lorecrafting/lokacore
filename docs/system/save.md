@@ -1000,8 +1000,8 @@ historical custody. D6 underwater recovery remains location-specific. Prove
 real SQLite cold reopen, failed COMMIT, both uncertain COMMIT outcomes, lost
 acknowledgement and same-invocation replay at bell suppression/resume and
 Study recovery boundaries; input/elapsed stays fenced until reconciliation. The current regular population
-job and its suppression resume job may share one writer group at their exact
-common deadline; cold-load must distinguish this bound pair from deer sight
+job and its suppression resume job may share one writer group when one advance
+runs both (Beads `loka-dto9`); cold-load must distinguish this bound pair from deer sight
 handoff reuse and continue validating all operations through receipt replay.
 
 ## D12 lesson, careful Harvest and discount recovery

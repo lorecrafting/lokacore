@@ -113,8 +113,8 @@ test('accepted bell preserves hounds and schedules one cause-bound suppression d
   );
 });
 
-// Breaks: a population tick replaces a dead hound during suppression, or the exact deadline leaves suppression active.
-test('population ticks stay quiet until the exact two-day deadline', () => {
+// From start 0, slot 1's hound dead, the bell rung at 64800 (deadline 237600).
+function rung(): World {
   const base = ready(0);
   const [hound] = Object.entries(base.state.created ?? {}).find(
     ([, row]) =>
@@ -141,15 +141,20 @@ test('population ticks stay quiet until the exact two-day deadline', () => {
   );
   const buried = apply(injured.world, death.ops);
   assert.ok('world' in buried);
-  let world = run(advance(buried.world, 64800), { type: 'perform', action: 'ring_bell' }, 1).world;
-  const generation = () =>
-    world.state.population_slots![
-      key({ kind: 'population_slot', plan: ref('population', 'fen_hounds'), slot: 1 })
-    ]!.generation;
+  return run(advance(buried.world, 64800), { type: 'perform', action: 'ring_bell' }, 1).world;
+}
+const generation = (world: World) =>
+  world.state.population_slots![
+    key({ kind: 'population_slot', plan: ref('population', 'fen_hounds'), slot: 1 })
+  ]!.generation;
+
+// Breaks: a population tick replaces a dead hound during suppression, or the exact deadline leaves suppression active.
+test('population ticks stay quiet until the exact two-day deadline', () => {
+  let world = rung();
   world = advance(world, 72000);
-  assert.equal(generation(), 1);
+  assert.equal(generation(world), 1);
   world = advance(world, 172800);
-  assert.equal(generation(), 1);
+  assert.equal(generation(world), 1);
   world = advance(world, 237599);
   const atDeadline = world.state.population_plans![key(ref('population', 'fen_hounds'))]!;
   assert.equal(atDeadline.suppression?.ends_at, 237600);
@@ -159,7 +164,7 @@ test('population ticks stay quiet until the exact two-day deadline', () => {
     world.state.population_plans![key(ref('population', 'fen_hounds'))]!.suppression?.ends_at,
     null,
   );
-  assert.equal(generation(), 2);
+  assert.equal(generation(world), 2);
   assert.equal(
     Object.values(world.state.jobs ?? {}).filter(
       (j) => j.status === 'pending' && j.job.key === 'fen_hounds',
@@ -168,6 +173,30 @@ test('population ticks stay quiet until the exact two-day deadline', () => {
   );
 });
 
+// Breaks (loka-dto9): the plan job whose crossed sub-step reaches the deadline and the resume job
+// write plan control in two writer groups, so one advance across the deadline faults
+// conflicting_write; job by job the deadline resumes once (generation 2, suppression over).
+test('one advance across the bell deadline resumes the plan as job-by-job play does', () => {
+  const world = rung();
+  const r = stepElapsed(
+    world,
+    {
+      id: elapsedCommandId('bbbbbbbb-0000-4000-8000-000000000098', world.context, 64800, 241200),
+      world_context_id: world.context,
+      payload: {
+        type: 'elapsed',
+        actor_id: world.character,
+        run_id: 'bbbbbbbb-0000-4000-8000-000000000098',
+        from: 64800,
+        until: 241200,
+      },
+    } as Command,
+    3,
+  );
+  assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
+  const plan = r.world.state.population_plans![key(ref('population', 'fen_hounds'))]!;
+  assert.deepEqual([plan.suppression?.ends_at, generation(r.world)], [null, 2]);
+});
 // Breaks: a cause-bound suppression leaves a scheduled hound round open or deletes its member.
 test('suppression closes an open hound encounter without reward or deleting the member', () => {
   const base = ready();

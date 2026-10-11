@@ -1174,7 +1174,8 @@ encounter and cancels its round in the same causal writer group; population
 jobs read the suppression and remain bounded. At deadline equality the resume
 job checks its generation and actual living count; stale jobs do nothing.
 When the current population job and its resume are both pending for the same
-plan at that exact deadline, their ordered deliveries share one writer group
+plan and one advance runs both, the current job's crossed sub-steps included
+(PM ruling, Beads `loka-dto9`), their ordered deliveries share one writer group
 for that plan's control and slots. Each delivery re-reads the hydrated prefix;
 unrelated jobs retain separate groups and ordinary conflict refusal.
 If this composes into two conflicting writers on one encounter, stop for PM

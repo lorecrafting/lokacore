@@ -675,7 +675,7 @@ lunar phase cuts classify confirmed time; absent sky data produces no sky claim.
 cartridges without the expanded calendar retain their installed fixed-hour meaning.
 Invariant `job_complete_owned_by_run`: each completion belongs to its job's own `run_job`,
 outside the root command's writer group 0, and the job is due by the advance's target.
-Equal-due combat round/bleed and population deadline pairs may share a writer group, and a
+Equal-due combat round/bleed pairs and a plan's current and resume jobs run by one advance (protocol.md, D9) may share a writer group, and a
 combat round joins the status writer group of its body and every roster member in the advance
 (row 2c; [row 6b](#npc-vs-npc-damage-allies-and-kill-credit-toolbox-row-6b)); a bleed tick joins
 its body's group too, which is how an equal-due round/bleed pair shares one. When those are
