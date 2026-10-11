@@ -6,8 +6,8 @@ defmodule Loka.ContentSpellsTest do
   defp pairs(diags), do: Enum.map(diags, &{&1["code"], &1["path"]})
 
   # Breaks (toolbox row 29a): the compiler accepts a spell or a level_compare policy leaf below
-  # kernel_api 1.51, an opposed check on a spell (no detail rating), or two spells sharing one word
-  # (the TS loader refuses them too; spells.test.ts).
+  # kernel_api 1.51, an opposed check on a spell (no detail rating), two spells sharing one word,
+  # or a room contribution naming a spell's key (the TS loader refuses them too; spells.test.ts).
   test "spells and the level_compare leaf need 1.51; spell words are unique" do
     dir = Loka.ContentSource.copy(@dir)
     assert {:ok, _, []} = Loka.ContentSource.compile(dir, [])
@@ -48,5 +48,13 @@ defmodule Loka.ContentSpellsTest do
              {"DUPLICATE_DEFINITION", "recipes/lux.target.word"},
              {"DUPLICATE_DEFINITION", "recipes/noctis.target.word"}
            ]
+
+    # A spell is cast by word, never by key: a room contribution naming one is unresolved.
+    room = [
+      {"rooms/tower.json", &Map.put(&1, "actions", [%{"op" => "union", "actions" => ["lux"]}])}
+    ]
+
+    assert {:error, diags} = Loka.ContentSource.compile(dir, room)
+    assert pairs(diags) == [{"UNRESOLVED_REFERENCE", "rooms/tower.actions[0].actions[0]"}]
   end
 end

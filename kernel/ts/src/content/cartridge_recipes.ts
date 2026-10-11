@@ -118,12 +118,12 @@ function spells(c: Obj): Diagnostic[] {
 }
 
 // Each key of a room's action contribution names a registered command, an action, a recipe, a
-// quest (its offer) or a dialogue (its talk).
+// quest (its offer) or a dialogue (its talk). A spell is cast by word, never by key (row 29a).
 function contributions(c: Obj): Diagnostic[] {
   const out: Diagnostic[] = [];
-  const defs: Obj[] = [c.actions, c.recipes ?? {}, c.quests ?? {}, c.dialogues ?? {}].flatMap(
-    Object.values,
-  );
+  const defs: Obj[] = [c.actions, c.recipes ?? {}, c.quests ?? {}, c.dialogues ?? {}]
+    .flatMap(Object.values)
+    .filter((d) => d.target?.kind !== 'spell');
   const keys = new Set([...Object.keys(CAPABILITY_OWNERS.command), ...defs.map((d) => d.key)]);
   for (const [ref, r] of Object.entries(c.rooms as Obj))
     (r.actions ?? []).forEach((a: Obj, i: number) =>

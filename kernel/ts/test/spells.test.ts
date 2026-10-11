@@ -16,18 +16,20 @@ import { identify, resolve } from '../src/commands/invocation.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { level } from '../src/mechanics/resource.ts';
 
-const scratch = mkdtempSync(join(tmpdir(), 'loka-spells-sampler-'));
-let artifact: Uint8Array;
-try {
-  const file = join(scratch, 'artifact.json');
-  execFileSync('mix', ['loka.compile', 'cartridges/spells_sampler', file], {
-    cwd: fileURLToPath(new URL('../../../', import.meta.url)),
-    stdio: 'pipe',
-  });
-  artifact = readFileSync(file);
-} finally {
-  rmSync(scratch, { recursive: true });
+function compiled(dir: string): Uint8Array {
+  const scratch = mkdtempSync(join(tmpdir(), 'loka-spells-sampler-'));
+  try {
+    const file = join(scratch, 'artifact.json');
+    execFileSync('mix', ['loka.compile', `cartridges/${dir}`, file], {
+      cwd: fileURLToPath(new URL('../../../', import.meta.url)),
+      stdio: 'pipe',
+    });
+    return readFileSync(file);
+  } finally {
+    rmSync(scratch, { recursive: true });
+  }
 }
+const artifact = compiled('spells_sampler');
 const loaded = loadCartridge(artifact, INSTALLED);
 assert.ok(loaded.ok, JSON.stringify(loaded));
 const content = loaded.cartridge as Cartridge;
@@ -73,6 +75,20 @@ function fresh(): World {
   n = 0;
   return newWorld(content, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e55' as never, [1, 2, 3, 4]);
 }
+
+// Breaks: cast is offered in a cartridge without spells: Chapter 1's GameView gains it.
+test('cast is not offered in Chapter 1, which has no spells', () => {
+  const chapter = loadCartridge(compiled('ashmere_missing_child'), INSTALLED);
+  assert.ok(chapter.ok);
+  const w = newWorld(
+    chapter.cartridge as Cartridge,
+    '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never,
+    [1],
+  );
+  const view = gameView(ok(play(w, { type: 'choose_ancestry', ancestry: 'fen_born' })));
+  assert.ok(view.actions.some((a) => a.action_key === 'look'));
+  assert.ok(!view.actions.some((a) => a.action_key === 'cast'));
+});
 
 // Breaks: cast is not offered or its offered invocation (word input, any case) does not reach the
 // spell; a spell's costs are not paid (mana 3 to 1, ash 1 to 0), or a cast its body cannot pay is
@@ -134,8 +150,8 @@ test('an unknown word and unread noctis are refused alike; noctis works once rea
 });
 
 // Breaks: the TS loader admits a spell or a level_compare leaf below kernel_api 1.51, an opposed
-// check on a spell (no detail rating), or two spells sharing one word (both kernels refuse them;
-// content_spells_test.exs).
+// check on a spell (no detail rating), two spells sharing one word, or a room contribution naming
+// a spell's key (both kernels refuse them; content_spells_test.exs).
 test('loader: spells and the level_compare leaf need 1.51; spell words are unique', () => {
   const R = (key: string) => `spells_sampler@0.0.1:recipe/${key}`;
   const api = '.cartridge.manifest.requires.kernel_api.at_least';
@@ -178,6 +194,13 @@ test('loader: spells and the level_compare leaf need 1.51; spell words are uniqu
       (c) => (c.recipes[R('noctis')].target.word = 'lux'),
       'DUPLICATE_DEFINITION',
       `.cartridge.recipes[${JSON.stringify(R('lux'))}].target.word`,
+    ],
+    [
+      // A spell is cast by word, never by key: a room contribution naming one is unresolved.
+      (c) =>
+        (c.rooms['spells_sampler@0.0.1:room/tower'].actions = [{ op: 'union', actions: ['lux'] }]),
+      'UNRESOLVED_REFERENCE',
+      `.cartridge.rooms["spells_sampler@0.0.1:room/tower"].actions[0].actions[0]`,
     ],
   ];
   for (const [change, diagnostic, path] of rows) {
