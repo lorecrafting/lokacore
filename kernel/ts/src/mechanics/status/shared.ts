@@ -6,7 +6,6 @@ import type {
   DeltaOp,
   EntityId,
   JobId,
-  Key,
   Resistances,
   StatusRow,
 } from '../../contracts.gen.ts';
@@ -17,7 +16,6 @@ import { cmp } from '../../foundation/validate.ts';
 import { HOLDERS } from '../../foundation/compose_status.ts';
 import { living } from '../death/shared.ts';
 import { settleMaxima } from '../resource.ts';
-import { MODAL } from '../dialogue/shared.ts';
 
 type Active = Extract<StatusRow, { active: true }>;
 
@@ -172,22 +170,6 @@ export function cureOps(world: World, body: EntityId, cures: readonly Definition
   return activeStatuses(world, body)
     .filter(({ status }) => listed.has(refString(status)))
     .flatMap(({ status, row }) => expire(world, body, status, row, 0));
-}
-
-/**
- * Status reader 4: the Command types `body`'s active statuses let it issue: none a status blocks,
- * and, where statuses declare allows, only those every such list names. A modal answer (dialogue's
- * choose and close_choice, a scene's continue) and wait are always admitted, so no status traps the
- * player in a conversation or a scene, or stops time where only wait moves it.
- */
-export function permits(world: World, body: EntityId | undefined) {
-  const bars = Object.values(world.cartridge.statuses ?? {}).some((s) => s.blocks || s.allows);
-  const specs = !bars || !body ? [] : activeStatuses(world, body).map(({ spec }) => spec);
-  return (command: string) =>
-    [...MODAL, 'continue', 'wait'].includes(command) ||
-    specs.every(
-      (s) => !s.blocks?.includes(command as Key) && (s.allows?.includes(command as Key) ?? true),
-    );
 }
 
 /** Status reader 5: each resistance entry (a DamageKind or Tag) of `body`'s active statuses, summed. */

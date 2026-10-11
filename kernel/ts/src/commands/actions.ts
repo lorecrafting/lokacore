@@ -19,7 +19,7 @@ import { key, same } from '../foundation/compose.ts';
 import { bodyOf, refString, type Steps, type World } from '../runtime/decision.ts';
 import { questOf } from '../mechanics/lookups.ts';
 import { modal, pending, talks } from '../mechanics/dialogue/shared.ts';
-import { permits } from '../mechanics/status/shared.ts';
+import { permits } from '../mechanics/status/permits.ts';
 import { ALWAYS } from '../mechanics/policy.ts';
 import { sub } from '../foundation/int.ts';
 import { pay } from '../mechanics/resource.ts';

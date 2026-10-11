@@ -15,7 +15,7 @@ import { refString, type Cartridge, type World } from '../src/runtime/decision.t
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
-import { permits } from '../src/mechanics/status/shared.ts';
+import { permits } from '../src/mechanics/status/permits.ts';
 import { identify, resolve } from '../src/commands/invocation.ts';
 import { resolved } from '../src/commands/actions.ts';
 import { check } from '../src/runtime/invariants.ts';
