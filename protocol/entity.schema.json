@@ -430,6 +430,15 @@
         },
         "wooden": {
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
+        },
+        "air": {
+          "$ref": "entity.schema.json#/$defs/ResistancePercent"
+        },
+        "chasm": {
+          "$ref": "entity.schema.json#/$defs/ResistancePercent"
+        },
+        "water": {
+          "$ref": "entity.schema.json#/$defs/ResistancePercent"
         }
       },
       "additionalProperties": false,
