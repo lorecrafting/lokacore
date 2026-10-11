@@ -95,12 +95,22 @@ const south = (w: World) => play(w, { type: 'move', direction: 'south' });
 
 // Breaks: dealt() reads no status for the player (warded hits for 2), or drops a status's entry from
 // the troll's sum (drench changes nothing), or takes the larger entry instead of the sum
-// (max(50, -100) = 50: the troll takes 1, not 3).
+// (max(50, -100) = 50: the troll takes 1, not 3), or adds status entries outside the one clamp
+// (a -100 troll soaked: -200 must clamp to -100, so the 2 doubles to 4, not triples to 6). A shield
+// sum past +100 cannot show here: a negative hit on a full-HP body is capped away.
 test('status resistances join the G2 sum, for the player and for an NPC', () => {
   assert.deepEqual(fight(fresh()), [8, 7], 'troll hits 2; its own 50% halves the 2 to 1');
   assert.deepEqual(fight(south(shrine())), [9, 7], 'warded 50% halves the troll hit to 1');
   const drench = (v: World) => play(v, { type: 'say', word: 'drench' });
   assert.deepEqual(fight(fresh(), drench), [8, 5], '50 - 100 = -50: the player hits for 3');
+  const brittle = (v: World) => {
+    const t = v.entities[troll(v)]!;
+    return drench({
+      ...v,
+      entities: { ...v.entities, [troll(v)]: { ...t, resistances: { physical: -100 } } },
+    } as World);
+  };
+  assert.deepEqual(fight(fresh(), brittle), [8, 4], '-100 - 100 clamps to -100: the player hits 4');
 });
 
 // Breaks: the action set is not filtered (a hushed say is accepted), a block is refused with
