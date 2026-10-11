@@ -1,7 +1,6 @@
 // The showcase's combat district, the Drill Yard, walked step by step (docs/showcase/combat-district.md,
 // "Guided loop and expected outcomes"). Steps 1 to 8 continue one world (step 3's inn shout is its
-// own branch); step 10 starts fresh in the social district and combat 11 in the hub. Step 9 (the
-// goblin pit) waits for M8.
+// own branch); step 10 starts fresh in the social district and combat 11 in the hub.
 // Every attack is chance 100 or 0, so the numbers are the plan's; the purse roll alone is seeded.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
@@ -82,7 +81,15 @@ const bleeding = (at: number) => ({
 // A permanent status shows no end and no tick (its tick_every is required by the schema; it never runs).
 const GORED = { label: 'condition.gored', resource: 'hp', tick_every: 60 };
 
-// One world through steps 1 to 8.
+/** The pack members spawned in `roomKey`, lower id first. */
+const goblinsIn = (w: World, roomKey: string) =>
+  Object.keys(w.state.created ?? {})
+    .filter(
+      (e) => w.state.created![e].origin.kind === 'spawned' && where(w, e) === room(w, roomKey),
+    )
+    .sort();
+
+// One world through steps 1 to 9.
 let w = take(fresh(CTX), 'waterskin');
 
 // Breaks: the boar's cue is missing, ignores its range (heard from the inn or the gate yard), or
@@ -266,6 +273,38 @@ test('combat 8: armed, the boar falls in three rounds; the poultice stops the bl
   const mv = pool(w, 'mv')!;
   w = play(w, { type: 'eat', item_id: id(w, 'item', 'poultice') }).world;
   assert.deepEqual([pool(w, 'hp'), pool(w, 'mv'), conditions(w)], [6, mv + 1, [GORED]]);
+});
+
+// Breaks: the pit's pack or target choice is missing (the second Attack is refused or plays a
+// round), the switch does not move the player's blow off A, the goblin kill entry is lost (no 70),
+// or a non-final pack kill pays (loka-lpq6: re-pin B's death to 70 and the end to 80 once fixed).
+test('combat 9: in the pit the player turns on the second goblin; the last kill pays', () => {
+  w = go(w, 'south').world;
+  const [a, b] = goblinsIn(w, 'goblin_pit');
+  assert.ok(a && b, 'two goblins in the pit');
+  const joined = play(w, { type: 'attack', target_id: a });
+  assert.ok(joined.lines.includes('combat.goblin_joined'));
+  const start = joined.world.state.clock;
+  const turned = play(joined.world, { type: 'attack', target_id: b });
+  assert.deepEqual(turned.lines, ['combat.goblin_targeted']);
+  assert.deepEqual(
+    [turned.world.state.clock, turned.world.state.rng],
+    [start, joined.world.state.rng],
+  );
+  const unswitched = wait(joined.world, start + 150).world;
+  assert.deepEqual([hp(unswitched, a), hp(unswitched, b)], [3, 6]);
+  const hps = (x: World) => [hp(x, a), hp(x, b), pool(x, 'hp')];
+  const r1 = wait(turned.world, start + 150).world;
+  assert.deepEqual(hps(r1), [6, 3, 5]);
+  const r2 = wait(r1, start + 300).world;
+  assert.deepEqual(hps(r2), [6, 0, 4]);
+  assert.equal(levelling(r2)?.experience, 60);
+  const r3 = wait(r2, start + 450).world;
+  assert.deepEqual(hps(r3), [3, 0, 3]);
+  w = wait(r3, start + 600).world;
+  assert.deepEqual(hps(w), [0, 0, 2]);
+  assert.equal(engaged(w, w.body), undefined);
+  assert.deepEqual(levelling(w), { level: 2, experience: 70, next: 100, unspent: 0 });
 });
 
 // Breaks: the Warden's physical resistance is missing (the sword kills him in three rounds and

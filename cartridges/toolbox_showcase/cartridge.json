@@ -45,7 +45,8 @@
       "commerce": 1,
       "combat": 1,
       "sense_cue": 1,
-      "speech": 1
+      "speech": 1,
+      "population": 1
     },
     "client_features": []
   },
@@ -219,7 +220,8 @@
       },
       "allies": [
         "gil"
-      ]
+      ],
+      "target_choice": true
     },
     "levelling": {
       "thresholds": [
@@ -239,6 +241,10 @@
         {
           "npc": "tilt_boar",
           "experience": 30
+        },
+        {
+          "npc": "goblin",
+          "experience": 10
         }
       ],
       "level_up": "levelling.level_up"

@@ -10,6 +10,9 @@
     },
     "west": {
       "to": "gate_yard"
+    },
+    "south": {
+      "to": "goblin_pit"
     }
   },
   "details": {
