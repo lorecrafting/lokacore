@@ -19,6 +19,7 @@ import { key, same } from '../foundation/compose.ts';
 import { bodyOf, refString, type Steps, type World } from '../runtime/decision.ts';
 import { questOf } from '../mechanics/lookups.ts';
 import { modal, pending, talks } from '../mechanics/dialogue/shared.ts';
+import { permits } from '../mechanics/status/shared.ts';
 import { ALWAYS } from '../mechanics/policy.ts';
 import { sub } from '../foundation/int.ts';
 import { pay } from '../mechanics/resource.ts';
@@ -180,15 +181,14 @@ export function resolved(world: World, actor: CharacterId): ActionSet {
   const choosing =
     !!world.cartridge.world?.combat?.target_choice &&
     (fight?.row.active_ids?.filter((id) => eligible(world, fight.row, id)).length ?? 0) > 1;
-  return fight
-    ? Object.fromEntries(
-        Object.entries(set).filter(
-          ([, a]) =>
-            ['flee', 'stand', 'look', 'scan', 'bandage'].includes(a.command) ||
-            (a.command === 'attack' && choosing),
-        ),
-      )
-    : set;
+  const kept = (c: string) =>
+    !fight ||
+    ['flee', 'stand', 'look', 'scan', 'bandage'].includes(c) ||
+    (c === 'attack' && choosing);
+  const free = permits(world, bodyOf(world, actor)); // status reader 4
+  return Object.fromEntries(
+    Object.entries(set).filter(([, a]) => kept(a.command) && free(a.command)),
+  );
 }
 
 /** The target id of a recipe's detail (the loader checks it exists). */
@@ -243,7 +243,7 @@ export function refusal(
   if (!matching.length)
     return unknown
       ? 'not_found'
-      : fighting(world, actor)
+      : fighting(world, actor) || !permits(world, bodyOf(world, actor))(payload.type)
         ? 'invalid_state'
         : 'unsupported_capability';
   const used =

@@ -1,7 +1,15 @@
 // status@1 (toolbox rows 1, G3): timed statuses on the player's body, an NPC or an item, one
 // generation per holder/status pair; the tick job is unbound and finds its row by job id, so a
 // stale one completes harmlessly.
-import type { DefinitionRef, DeltaOp, EntityId, JobId, StatusRow } from '../../contracts.gen.ts';
+import type {
+  DefinitionRef,
+  DeltaOp,
+  EntityId,
+  JobId,
+  Key,
+  Resistances,
+  StatusRow,
+} from '../../contracts.gen.ts';
 import { add } from '../../foundation/int.ts';
 import { key } from '../../foundation/compose.ts';
 import { type Mint, refString, type World } from '../../runtime/decision.ts';
@@ -164,3 +172,24 @@ export function cureOps(world: World, body: EntityId, cures: readonly Definition
     .filter(({ status }) => listed.has(refString(status)))
     .flatMap(({ status, row }) => expire(world, body, status, row, 0));
 }
+
+/**
+ * Status reader 4: the Command types `body`'s active statuses let it issue: none a status blocks,
+ * and, where statuses declare allows, only those every such list names. A modal answer (dialogue's
+ * choose and close_choice, a scene's continue) is always admitted, so no status traps the player.
+ */
+export function permits(world: World, body: EntityId | undefined) {
+  const specs = body === undefined ? [] : activeStatuses(world, body).map(({ spec }) => spec);
+  return (command: string) =>
+    ['choose', 'close_choice', 'continue'].includes(command) ||
+    specs.every(
+      (s) => !s.blocks?.includes(command as Key) && (s.allows?.includes(command as Key) ?? true),
+    );
+}
+
+/** Status reader 5: the resistance `entry` (a DamageKind or Tag) of `body`'s active statuses, summed. */
+export const statusResistance = (world: World, body: EntityId, entry: string) =>
+  activeStatuses(world, body).reduce(
+    (sum, { spec }) => add(sum, spec.resistances?.[entry as keyof Resistances] ?? 0),
+    0,
+  );

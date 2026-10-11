@@ -1,0 +1,12 @@
+{
+  "on": {
+    "event": "spoken",
+    "word": "drench"
+  },
+  "apply": [
+    {
+      "op": "status.apply",
+      "status": "soaked"
+    }
+  ]
+}

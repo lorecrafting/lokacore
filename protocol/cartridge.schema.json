@@ -2369,7 +2369,7 @@
           "type": "integer",
           "minimum": -2147483647,
           "maximum": 2147483647,
-          "description": "Signed; never 0, required unless modifies or fear is present or duration is permanent, and absent when duration is permanent (compiler and loader SCHEMA_VIOLATION)."
+          "description": "Signed; never 0, required unless modifies, fear, blocks, allows or resistances is present or duration is permanent, and absent when duration is permanent (compiler and loader SCHEMA_VIOLATION)."
         },
         "label": {
           "$ref": "text.schema.json#/$defs/TextKey"
@@ -2410,6 +2410,28 @@
         "cues": {
           "description": "Cues active while this status is active on a holder, from the holder's room (toolbox row G6).",
           "$ref": "entity.schema.json#/$defs/Cues"
+        },
+        "blocks": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 64,
+          "items": {
+            "$ref": "action.schema.json#/$defs/Key"
+          },
+          "description": "Status reader 4 (kernel_api at least 1.54): Command types (CommandPayload type) the holding body may not issue while the status is active; each names a registered command other than run_job and elapsed (compiler and loader UNKNOWN_COMMAND); may stand in for per_tick."
+        },
+        "allows": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 64,
+          "items": {
+            "$ref": "action.schema.json#/$defs/Key"
+          },
+          "description": "Status reader 4 (kernel_api at least 1.54): the only Command types the holding body may issue while the status is active (a modal answer aside); named as blocks; may stand in for per_tick."
+        },
+        "resistances": {
+          "description": "Status reader 5 (kernel_api at least 1.54): while active on the struck body (the player's or an NPC's), each entry joins the G2 resistance sum of an attack on it, before the one -100..100 clamp; may stand in for per_tick.",
+          "$ref": "entity.schema.json#/$defs/Resistances"
         }
       },
       "required": [

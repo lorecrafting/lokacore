@@ -50,9 +50,11 @@ defmodule Loka.Content.Status do
 
   defp trigger?(_), do: false
 
-  # A fear status (row W21) needs 1.50, a permanent one (row W8) 1.48, the fields above 1.46.
+  # A status reader (4, 5) needs 1.54, a fear status (row W21) 1.50, a permanent one (row W8) 1.48,
+  # the fields above 1.46.
   defp floor(statuses, g3) do
     cond do
+      Enum.any?(statuses, fn {_, {_, _, s}} -> reader?(s) end) -> [1, 54]
       Enum.any?(statuses, &match?({_, {_, _, %{"fear" => true}}}, &1)) -> [1, 50]
       Enum.any?(statuses, &match?({_, {_, _, %{"duration" => "permanent"}}}, &1)) -> [1, 48]
       g3 -> [1, 46]
@@ -61,6 +63,9 @@ defmodule Loka.Content.Status do
   end
 
   defp permanent?(s), do: s["duration"] == "permanent"
+
+  # Status readers 4 and 5: blocks, allows or resistances; such a status may omit per_tick too.
+  defp reader?(s), do: Enum.any?(~w(blocks allows resistances), &Map.has_key?(s, &1))
 
   # A fatal hp tick runs the death sequence, so death's settings must be declared too.
   defp gate(m, floor) do
@@ -90,16 +95,25 @@ defmodule Loka.Content.Status do
       per_tick(rel, s) ++
       missing_text(rel, ["label"], [s["label"]], text) ++
       missing_text(rel, ["narration"], Map.values(s["narration"] || %{}), text) ++
-      modifies(rel, s, m, defs) ++ hp_max(rel, s, settings)
+      modifies(rel, s, m, defs) ++ hp_max(rel, s, settings) ++ commands(rel, s)
   end
 
-  # Never 0; only a modifying (row 2c) or fear (row W21) status may omit it; a permanent one
+  # Status reader 4: each name is a player command type (run_job and elapsed are authority-internal).
+  defp commands(rel, s) do
+    for field <- ~w(blocks allows),
+        {c, i} <- Enum.with_index(s[field] || []),
+        c not in Refs.commands() or c in ~w(run_job elapsed),
+        do: diag("UNKNOWN_COMMAND", at(rel, [field, i]))
+  end
+
+  # Never 0; only a modifying (row 2c), fear (row W21) or reader (4, 5) status may omit it; a permanent one
   # (row W8) never ticks, so it declares none.
   defp per_tick(rel, s) do
     if s["per_tick"] == 0 or
          if(permanent?(s),
            do: s["per_tick"] != nil,
-           else: s["per_tick"] == nil and s["modifies"] == nil and s["fear"] == nil
+           else:
+             s["per_tick"] == nil and s["modifies"] == nil and s["fear"] == nil and not reader?(s)
          ),
        do: [diag("SCHEMA_VIOLATION", at(rel, ["per_tick"]))],
        else: []
