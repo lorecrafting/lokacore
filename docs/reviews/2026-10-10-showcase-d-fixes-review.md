@@ -36,3 +36,23 @@
 ## Disposition
 
 Fix 1 and 2 on the branch; 3 and 4 are a line or Beads; 5 is a doc line.
+
+## Re-check at c5cf4f99 (fix commits 634167ea, c5cf4f99)
+
+- Head `c5cf4f99225aa9572b765595cab7bd638ea688ac`. Hosted ci, book-e2e and graph-diff succeed.
+- Verdict: **APPROVE WITH NOTES**.
+- Runs at the head, all exit 0: `showcase_consequence.test.ts`, `showcase_social.test.ts`, `npm run typecheck`, `mix test test/loka/content_showcase_test.exs` (2 passed). Running `mix loka.compile` on the clean tree and writing the output into the fixture leaves `git diff` empty, so the fixture is the compiler's output.
+- Every mutant was recompiled and the fixture regenerated with its `{description, canonical, sha256}` shape:
+  - M1, `has_item` dropped from `wat_letter`: "letter taken first" fails (Wat opens `wat_letter`, deliver and burn). **Finding 1 closed.**
+  - M3, the `warden_passed` policy set to `equals false`: 11 fail, social 5 among them. **Finding 2 closed.**
+  - M2, `warden_talk` set back to `all([])`: all pass. This is an equivalent mutant. Neither Warden dialogue has a top-level `label`, so Talk opens the first dialogue in key order whose policy holds (`spokenBy`, `kernel/ts/src/mechanics/dialogue/selection.ts:44`), and `warden_passed` sorts first. The `not` guard is extra protection and changes no behavior. Not a finding.
+- Finding 3 closed: `text.json:525` now gives the reason for the shut door ("its latch on the far side"). Finding 5 closed: `cause-and-effect.md:26`. Q4 is tracked as loka-y6yg.16.
+- Plan-3 rules (:14-27) on the new lines ("Gate's open. Go on.", "You take your leave.", the mill line): no score, no "because", no adjective for the player. Pass.
+- Disputes:
+  - Hostile Warden: accepted. A hostile NPC opens no dialogue (`mechanics.md:2193`).
+  - Old saves: accepted. Pre-production has no save compatibility, and the cartridge hash changes anyway.
+- PR claims rerun: the round-1 red controls for items 1 and 2 match M1 and M3 above.
+
+### Findings
+
+1. **nit**, PR #377 body "## Open": it still says "The Warden's prompt still reads 'Toll gate's shut.' after the lift (left as is)" and that the mill text is outside the brief. Both are fixed in 634167ea. A reader of the merged PR gets the wrong state. Delete or update the section.
