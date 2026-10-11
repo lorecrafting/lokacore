@@ -1,0 +1,15 @@
+{
+  "facts": {
+    "ward_landed": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "A reaction heard the ward land on the player."
+    }
+  }
+}

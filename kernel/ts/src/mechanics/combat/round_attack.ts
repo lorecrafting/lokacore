@@ -13,7 +13,7 @@ import type {
 } from '../../contracts.gen.ts';
 import { refString, type Mint, type World } from '../../runtime/decision.ts';
 import { apply } from '../../runtime/apply.ts';
-import { add, divide, mul, saturate } from '../../foundation/int.ts';
+import { add, mul, saturate } from '../../foundation/int.ts';
 import { KernelError } from '../../foundation/error.ts';
 import { uniformCounted } from '../../foundation/rng.ts';
 import { adjust, level, recoveryAdjustments, resourceRef } from '../resource.ts';
@@ -23,8 +23,7 @@ import { clearBleed, currentBleed, wound } from '../bleed/shared.ts';
 import { fact, positionOf, standing } from '../position/shared.ts';
 import { assigned } from '../fact.ts';
 import type { CombatEvent, Round } from './round.ts';
-import { ally } from './shared.ts';
-import { statusResistance } from '../status/shared.ts';
+import { ally, resisted } from './shared.ts';
 
 export function prefix(world: World, ops: readonly DeltaOp[], due = world.state.clock): World {
   const during =
@@ -103,15 +102,7 @@ function damageRoll(r: Round, profile: AttackProfile) {
 function dealt(world: World, target: EntityId, profile: Profile, roll: number, damage: number) {
   const crit =
     profile.crit && roll < profile.crit.chance ? mul(damage, profile.crit.multiplier) : damage;
-  const npc = world.entities[target];
-  const resists = (npc?.kind === 'npc' && npc.resistances) || {};
-  const held = statusResistance(world, target);
-  const sum = [profile.kind, ...(profile.tags ?? [])].reduce(
-    (s, k) => (k ? add(add(s, resists[k] ?? 0), held(k)) : s),
-    0,
-  );
-  if (!sum) return crit;
-  return divide(mul(crit, 100 - Math.min(100, Math.max(-100, sum))), 100)[0];
+  return resisted(world, target, [profile.kind, ...(profile.tags ?? [])], crit);
 }
 
 function attackEvent(

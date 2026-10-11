@@ -29,7 +29,7 @@ import { activation, resolution } from './quest/lifecycle.ts';
 import { questOf } from './lookups.ts';
 import { cmp } from '../foundation/validate.ts';
 import { suppress } from './population/shared.ts';
-import { applyStatus, cureOps, landing, specOf } from './status/shared.ts';
+import { statusStep } from './status/shared.ts';
 import { grant } from './levelling/shared.ts';
 import { saturate } from '../foundation/int.ts';
 import { npcsIn } from './speech/shared.ts';
@@ -142,7 +142,8 @@ export function sequence(
     } else if (step.op === 'status.apply' || step.op === 'status.cure') {
       const body = bodyOf(then, actor);
       if (!body) return { kind: 'fault', code: 'precondition_failed' };
-      const applying = statusStep(then, step, cause, body, group, { holders, applied }, mint, emit);
+      const on = holdersOf(then, step, cause, body);
+      const applying = statusStep(then, step, on, body, group, { holders, applied }, mint, emit);
       ops.push(...applying.ops);
       narration.push(...applying.narration);
     } else if (step.op === 'experience.grant') {
@@ -187,45 +188,15 @@ const present = (world: World, cause: DomainEvent, subject?: string) => {
   return room && world.rooms[room] ? [room] : [];
 };
 
-// A status.apply on its holder: the step's named item's or (row 42) NPC's instance, (row W21) every
-// living NPC in the event's room, else the event's subject (row G3), once per holder and status in
-// a rule, in the one writer group the holder's status writes share in this advance (status/job.ts
-// statusGroup); only the player's own body hears a first application, which emits status_applied
-// (status reader 2). A status.cure (reader 3) ends the subject's active row the same way.
-function statusStep(
-  world: World,
-  step: Extract<ReactionRule['apply'][number], { op: 'status.apply' | 'status.cure' }>,
-  cause: DomainEvent,
-  body: EntityId,
-  group: number,
-  { holders, applied }: { holders: Map<string, number>; applied: Set<string> },
-  mint: Mint,
-  emit: (payload: EventPayload) => void,
-) {
+// A status step's holders (row G3): the step's named item's or (row 42) NPC's instance, (row W21)
+// every living NPC in the event's room, else the event's subject.
+function holdersOf(world: World, step: StatusStep, cause: DomainEvent, body: EntityId) {
   const apply = step.op === 'status.apply' ? step : undefined;
   const named = apply?.item ?? apply?.npc;
   const one = named ? world.entityIds[refString(named)] : subject(cause, body);
-  const out = { ops: [] as DeltaOp[], narration: [] as { key: TextKey }[] };
-  for (const holder of apply?.co_present ? npcsIn(world, present(world, cause, one)) : [one]) {
-    const once = `${holder}|${refString(step.status)}`;
-    if (!holder || applied.has(once)) continue;
-    applied.add(once);
-    const joined = holders.get(holder) ?? group;
-    const ops = apply
-      ? applyStatus(world, holder, step.status, joined, mint)
-      : cureOps(world, holder, [step.status], joined);
-    if (ops.length) holders.set(holder, joined); // a later status job on the holder joins it too
-    out.ops.push(...ops);
-    // Only a first application (over no row or an inactive one) is heard and lands; a refresh while
-    // active is silent (row W25), and a permanent status (row W8) opens with no job.
-    const first = apply && ops.some((o) => o.op === 'status.transition' && !o.expected?.active);
-    if (first && landing(world))
-      emit({ type: 'status_applied', body_id: holder, status: step.status });
-    const label = specOf(world, step.status)?.narration.applied;
-    if (label && first && holder === body) out.narration.push({ key: label });
-  }
-  return out;
+  return apply?.co_present ? npcsIn(world, present(world, cause, one)) : [one];
 }
+type StatusStep = Extract<ReactionRule['apply'][number], { op: 'status.apply' | 'status.cure' }>;
 
 // A fact.assign, or (row 15) a fact.adjust lowered to one at the bounded sum (nothing when the
 // fact cannot be adjusted); an entity or pair fact (row W2) at the step's named NPC's or item's

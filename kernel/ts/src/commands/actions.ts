@@ -175,13 +175,13 @@ export function resolved(world: World, actor: CharacterId): ActionSet {
   const set = composed(world, actor);
   const fight = fighting(world, actor);
   // Toolbox row 6a: an opted-in roster fight keeps Attack to choose among the members still here
-  // (the row's roster is pruned only at round end, rows 6a/6c).
+  // (the row's roster is pruned only at round end, rows 6a/6c); row 29b keeps cast (a fire bolt).
   const choosing =
     !!world.cartridge.world?.combat?.target_choice &&
     (fight?.row.active_ids?.filter((id) => eligible(world, fight.row, id)).length ?? 0) > 1;
   const kept = (c: string) =>
     !fight ||
-    ['flee', 'stand', 'look', 'scan', 'bandage'].includes(c) ||
+    ['flee', 'stand', 'look', 'scan', 'bandage', 'cast'].includes(c) ||
     (c === 'attack' && choosing);
   const free = permits(world, bodyOf(world, actor)); // status reader 4
   return Object.fromEntries(

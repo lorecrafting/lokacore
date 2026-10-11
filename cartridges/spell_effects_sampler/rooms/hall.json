@@ -1,0 +1,17 @@
+{
+  "title": "room.hall.title",
+  "description": "room.hall.description",
+  "exits": {
+    "east": {
+      "to": "crypt"
+    }
+  },
+  "details": {
+    "stand": {
+      "aliases": [
+        "stand"
+      ],
+      "description": "detail.stand"
+    }
+  }
+}
