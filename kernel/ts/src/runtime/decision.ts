@@ -211,7 +211,7 @@ export const COMPOSES = {
   movement: ['quest'],
   commerce: ['containment'],
   scene: ['dialogue', 'quest'],
-  reaction: ['quest', 'status'],
+  reaction: ['quest', 'status', 'barrier'], // barrier.set's barrier_changed (row W22)
   speech: ['dialogue'], // a spoken keyword opens its dialogue (choice_opened, as talk; row G9)
 } as const;
 type Composed<C> = C extends keyof typeof COMPOSES

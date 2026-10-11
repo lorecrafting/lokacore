@@ -30,6 +30,7 @@ defmodule Loka.Content.LeafRefs do
       "topic.grant" => %{"topic" => "topic"},
       "status.apply" => %{"status" => "status", "item" => "item", "npc" => "npc"},
       "status.cure" => %{"status" => "status"},
+      "barrier.set" => %{"barrier" => "barrier"},
       "quest.activate" => %{"quest" => "quest"},
       "quest.resolve" => %{"quest" => "quest"},
       "quest.fail" => %{"quest" => "quest"}

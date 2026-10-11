@@ -6,6 +6,7 @@ import type {
   CharacterId,
   Connection,
   DefinitionRef,
+  DomainEvent,
   EntityId,
   QuestInstanceId,
   RoomDefinition,
@@ -15,6 +16,26 @@ import { LIMITS } from '../contracts.gen.ts';
 import { key } from '../foundation/compose.ts';
 import { has, type QuestRow, type Steps, type World } from '../runtime/decision.ts';
 import { value } from './fact.ts';
+import { cmp } from '../foundation/validate.ts';
+
+/** Row W21: an event's room_id, else the room directly holding its subject (none if carried). */
+export const eventRooms = (world: World, cause: DomainEvent, subject?: string): string[] => {
+  const room = (cause.payload as { room_id?: string }).room_id ?? world.state.containers[subject!];
+  return room && world.rooms[room] ? [room] : [];
+};
+
+/** Row W22: the items lying directly in the rooms whose definitions carry the tag, by EntityId. */
+export const itemsTagged = (world: World, rooms: readonly string[], tag: string) =>
+  Object.keys(world.entities)
+    .filter((id) => {
+      const e = world.entities[id]!;
+      return (
+        e.kind === 'item' &&
+        !!e.tags?.includes(tag as never) &&
+        rooms.includes(world.state.containers[id]!)
+      );
+    })
+    .sort(cmp) as EntityId[];
 
 /** The room's exit in a direction, if it has one. */
 export const exitOf = (room: RoomDefinition, direction: string): Connection | undefined =>
