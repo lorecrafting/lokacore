@@ -151,7 +151,10 @@ and command/cartridge coverage before applying the existing assertions. A worker
 fails the run; invariant failures retain the simulator's reproducer and trace report.
 The [acceptance envelope §3](../archive/spec/r1-acceptance-envelope.md#3-corpus-command-mix-and-sampling)
 still governs the seed count, determinism and regression controls. The default demo
-catalogue (`cartridge_*hash.json`) preserves its curated generator16 regression seeds.
+catalogue is the explicit `CARTRIDGES` list in `kernel/ts/test/sim.ts`, so a new fixture moves
+no seed; a new entry there is a generator bump (loka-seqb). It preserves its curated
+generator16 regression seeds. The [toolbox showcase](../SHOWCASE.md) runs as its own pass on
+fixed seeds of its fixture, with the same per-step checks.
 The active [chapter release](cartridge.md#source-layout) has a separate controlled
 corpus run through the same generator and per-step invariant checks; its versioned
 release pin does not silently retarget the historical demo regression corpus.

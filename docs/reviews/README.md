@@ -46,6 +46,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: damage kinds, resistances and critical hits, toolbox row G2 (loka-kgd.18)](2026-10-10-toolbox-g2-damage-review.md): **APPROVE**
 - [Review: property tags and the policy leaf set, toolbox row G1 (loka-kgd.17)](2026-10-10-toolbox-g1-review.md): **APPROVE**
 - [Status effects survey: is the status engine general enough?](2026-10-10-status-effects-survey.md)
+- [Review: simulator plays the toolbox showcase; stable seeds (PR #373, loka-y6yg.5, loka-seqb)](2026-10-10-sim-showcase-review.md): **APPROVE WITH NOTES**
 - [Review: toolbox showcase slice A, hub, body and world districts (loka-y6yg.1)](2026-10-10-showcase-slice-a-review.md): **APPROVE WITH NOTES**
 - [Review: showcase plan 3, cause and effect in Low Wardle (PR #371, loka-y6yg.4)](2026-10-10-showcase-plan-3-review.md): **APPROVE**
 - [Review: showcase plan 2, the combat district brief (loka-y6yg, PR #368)](2026-10-10-showcase-plan-2-review.md): **APPROVE**

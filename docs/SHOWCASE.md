@@ -58,21 +58,45 @@ Status `planned (plan N)` means that showcase plan ([plan 1](showcase/hub-and-fi
 ## How a batch adds a district
 
 The batch's Fable final-head review stays a review only. After the batch head is approved, each
-district goes through four steps (owner input and PM ruling, 2026-10-10):
+district goes through five steps (owner input and PM ruling, 2026-10-10):
 
 1. **Plan (Fable).** A separate Fable run writes a short district brief in `docs/showcase/`: the
    rooms, the guided loop and sandbox room, which matrix cells it exercises, the signpost text
    and the expected outcome of each step.
 2. **Build (Opus developer).** An ordinary slice implements the brief: cartridge content, hash
-   fixture, simulator seeds, walkthrough or recorder recipe and tests, using only installed
-   mechanics.
+   fixture, the district's rooms in the simulator's showcase pass (`kernel/ts/test/sim.test.ts`),
+   walkthrough or recorder recipe and tests, using only installed mechanics, plus one Book e2e
+   playthrough of the district's happy path in the real UI (owner, loka-y6yg.6).
 3. **Review (Opus reviewer).** Reviewed against the brief like any slice.
-4. **Recheck (Fable).** The next batch's Fable final review checks the district still matches
+4. **Playtest (Fable).** Before the owner plays it, a blind Fable agent plays the district in
+   the web Book and reports ([AI playtest](#ai-playtest); owner, loka-y6yg.7).
+5. **Recheck (Fable).** The next batch's Fable final review checks the district still matches
    its brief.
 
 The brief adds matrix rows for the new pairs the batch makes possible and fills in the rows
 it covers. A pair that needs engine code to work means the toolbox rows are not finished; that
 goes back to the batch as a finding, not into the showcase.
+
+### AI playtest
+
+1. **When:** once per new district before the owner plays it, and after a big Book UI change.
+2. **Who:** a Fable agent, blind: it reads neither the district brief nor the cartridge until
+   it has played.
+3. **Start the Book on the showcase** ([web preview](web-preview.md)):
+   `bin/loka dev cartridges/toolbox_showcase`, then
+   `cd mobile/app && LOKA_PREVIEW_PORT=19116 LOKA_METRO_PORT=0 npm run author`. Ports 19006 and
+   19007 belong to the owner's `~/dev/lokacore-preview`.
+4. **Play** with the Claude in Chrome tools in a new tab, at phone width (360-390 px) first.
+   Read by page text (`get_page_text`, `find`); screenshot only on a new page type or a
+   suspected visual problem.
+5. **Stop** the servers it started, by PID.
+6. **Report:** what the district wanted and whether it got there without the brief; gameplay
+   findings with repro and severity; UI/UX findings in design-system terms with screenshot
+   references; what felt good; the top 5 fixes.
+7. **Routing:** a triage agent files gameplay causes in Beads under the label
+   `showcase-playtest`; the [designer](decisions/owner-decision-designer-role-2026-10-07.md)
+   turns UI findings into polish-lane Beads under `loka-x6t` and spec changes; fixes batch on
+   the owner's go.
 
 ## Retiring Chapter 1
 
