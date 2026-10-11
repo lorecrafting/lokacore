@@ -10420,11 +10420,19 @@
     "value": {},
     "errors": [
       {
-        "path": "/detail",
-        "code": "missing_property"
-      },
-      {
         "path": "/kind",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "RecipeTarget",
+    "value": {
+      "kind": "detail"
+    },
+    "errors": [
+      {
+        "path": "/detail",
         "code": "missing_property"
       },
       {
@@ -10436,7 +10444,19 @@
   {
     "contract": "RecipeTarget",
     "value": {
-      "kind": "item",
+      "kind": "item"
+    },
+    "errors": [
+      {
+        "path": "/kind",
+        "code": "unknown_variant"
+      }
+    ]
+  },
+  {
+    "contract": "RecipeTarget",
+    "value": {
+      "kind": "detail",
       "room": {
         "cartridge_id": "c",
         "cartridge_version": "1.0.0",
@@ -10447,10 +10467,6 @@
       "x": 1
     },
     "errors": [
-      {
-        "path": "/kind",
-        "code": "const_mismatch"
-      },
       {
         "path": "/x",
         "code": "unknown_property"
@@ -23152,6 +23168,98 @@
       {
         "path": "/allies/0",
         "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "contract": "RecipeTarget",
+    "value": {
+      "kind": "use"
+    },
+    "errors": [
+      {
+        "path": "/tool",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "RecipeTarget",
+    "value": {
+      "kind": "use",
+      "tool": {
+        "tag": "metal"
+      },
+      "detail": "pump"
+    },
+    "errors": [
+      {
+        "path": "/detail",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "UseTool",
+    "value": {},
+    "errors": [
+      {
+        "path": "/liquid",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "UseTool",
+    "value": {
+      "tag": "metal",
+      "status": {
+        "cartridge_id": "use_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "status",
+        "key": "burning"
+      }
+    },
+    "errors": [
+      {
+        "path": "/status",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "RecipeStep",
+    "value": {
+      "op": "status.cure"
+    },
+    "errors": [
+      {
+        "path": "/status",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "RecipeStep",
+    "value": {
+      "op": "status.cure",
+      "status": {
+        "cartridge_id": "use_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "status",
+        "key": "burning"
+      },
+      "item": {
+        "cartridge_id": "use_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "item",
+        "key": "cart"
+      }
+    },
+    "errors": [
+      {
+        "path": "/item",
+        "code": "unknown_property"
       }
     ]
   }

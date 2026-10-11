@@ -63,7 +63,7 @@ storage half):
    ([save.md](save.md#replies)).
 4. **Resolve** (`commands/invocation.ts:75`): the action key must be in the actor's current ActionSet,
    else `unsupported_capability`; its `target_ids` fill the Command's slots in order (`:57`:
-   look/talk/perform one `target_id`; take/drop one `item_id`; give `item_id`, `recipient_id`);
+   look/talk one `target_id`; perform `target_id`, then a use recipe's held tool as `item_id` ([row G4](mechanics.md#use-x-on-y-toolbox-row-g4)); take/drop one `item_id`; give `item_id`, `recipient_id`);
    a recipe fills its key, a quest offer its quest, `close_choice` the pending continuation; the
    result must validate as a Command.
 5. **Step** (`kernel/ts/src/runtime/world.ts:117`): the [D11 pre-choice gate](mechanics.md#d11-character-choice-selected-contract)

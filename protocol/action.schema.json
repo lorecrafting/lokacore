@@ -565,25 +565,45 @@
       ]
     },
     "RecipeTarget": {
-      "description": "What an ActionRecipe acts on (06 §20 target; 21 §7 TargetSpec): here, one inspectable detail, by its room and its key in that room's details. The recipe is offered only while the actor is in that room; other target kinds (items, entities by property) join as further variants.",
-      "type": "object",
-      "properties": {
-        "kind": {
-          "const": "detail"
+      "description": "What an ActionRecipe acts on (06 §20 target; 21 §7 TargetSpec): one inspectable detail, by its room and its key in that room's details, offered only while the actor is in that room; or (toolbox row G4, kernel_api at least 1.49) a use: a tool the actor holds, used on another item on the floor of the actor's room or carried directly, both chosen by the invocation (perform item_id and target_id), the recipe keyed by the tool's properties here and the target's through its policy (has_tag and status_active, subject target), never by item ids.",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "detail"
+            },
+            "room": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "detail": {
+              "$ref": "#/$defs/Key"
+            }
+          },
+          "required": [
+            "kind",
+            "room",
+            "detail"
+          ],
+          "additionalProperties": false
         },
-        "room": {
-          "$ref": "identity.schema.json#/$defs/DefinitionRef"
-        },
-        "detail": {
-          "$ref": "#/$defs/Key"
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "use"
+            },
+            "tool": {
+              "$ref": "#/$defs/UseTool"
+            }
+          },
+          "required": [
+            "kind",
+            "tool"
+          ],
+          "additionalProperties": false
         }
-      },
-      "required": [
-        "kind",
-        "room",
-        "detail"
       ],
-      "additionalProperties": false,
       "examples": [
         {
           "kind": "detail",
@@ -594,6 +614,41 @@
             "key": "belfry"
           },
           "detail": "bell"
+        },
+        {
+          "kind": "use",
+          "tool": {
+            "tag": "liquid_holding",
+            "liquid": {
+              "cartridge_id": "use_sampler",
+              "cartridge_version": "0.0.1",
+              "kind": "liquid",
+              "key": "water"
+            }
+          }
+        }
+      ]
+    },
+    "UseTool": {
+      "description": "Toolbox row G4: what a use recipe's tool must be, at least one property: an item whose definition declares tag, and a vessel holding some of liquid (quantity above 0).",
+      "type": "object",
+      "properties": {
+        "tag": {
+          "$ref": "entity.schema.json#/$defs/Tag"
+        },
+        "liquid": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        }
+      },
+      "requiredUnless": {
+        "tag": [
+          "liquid"
+        ]
+      },
+      "additionalProperties": false,
+      "examples": [
+        {
+          "tag": "metal"
         }
       ]
     },
@@ -635,6 +690,23 @@
           "required": [
             "op",
             "event"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Toolbox row G4 (kernel_api at least 1.49): end the recipe target's active status of this definition, as a cure does (status@1); nothing when it is not active.",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "status.cure"
+            },
+            "status": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            }
+          },
+          "required": [
+            "op",
+            "status"
           ],
           "additionalProperties": false
         },

@@ -19,7 +19,9 @@
 // or item's, the actor's body), so the committed line never resolves them again (06 §43). A cooldown adds a cooldown.start at the admission time, and a
 // duration one time.advance after the steps; events keep the admission time. A recipe with a tip
 // (toolbox row W23) first assigns its seen_tip_<key> after the steps, while unseen, and the actor
-// then also reads the tip after the outcome's line. Result bands join later.
+// then also reads the tip after the outcome's line. Result bands join later. A use recipe
+// (toolbox row G4) acts on the invoked target with the invoked held tool (shared.ts useRefused); its
+// status.cure steps end the target's active status (status/shared.ts cureOps).
 import type {
   ActionRecipe,
   CharacterId,
@@ -31,6 +33,7 @@ import type {
   NarrationParticipant,
   RecipeNarration,
   RecipeStep,
+  RecipeTarget,
   TextKey,
 } from '../../contracts.gen.ts';
 import { admission, detailOf, resolved } from '../../commands/actions.ts';
@@ -43,6 +46,7 @@ import {
   rejected,
   type Mint,
   type Rule,
+  type Steps,
   type World,
 } from '../../runtime/decision.ts';
 import { assigned, seenTip, value } from '../fact.ts';
@@ -51,16 +55,16 @@ import { adjust, level, type Levels } from '../resource.ts';
 import { value as attributeValue } from '../attributes/shared.ts';
 import { uniform } from '../../foundation/rng.ts';
 import { opposed, practised } from '../skills.ts';
+import { cureOps } from '../status/shared.ts';
+import { useRefused } from './shared.ts';
 
-export const decide: Rule<'action_recipe'> = (world, command, mint) => {
-  const { actor_id, action, target_id } = command.payload;
+export const decide: Rule<'action_recipe'> = (world, command, mint, steps = { n: 0 }) => {
+  const { actor_id, action } = command.payload;
   const recipe = resolved(world, actor_id)[action]?.recipe;
   const body = bodyOf(world, actor_id);
   if (!recipe || !body) return rejected('not_found');
-  const subject_id = detailOf(world, recipe.target);
-  if (target_id !== undefined && target_id !== subject_id) return rejected('invalid_target');
-  if (world.details[subject_id].room !== world.state.containers[body])
-    return rejected('not_present');
+  const subject_id = subjectOf(world, recipe.target, command.payload, body, steps);
+  if (typeof subject_id !== 'string') return subject_id;
   const admitted = admission(world, recipe, actor_id, body);
   if (typeof admitted === 'string') return rejected(admitted);
   const { paid, last, from } = admitted;
@@ -92,6 +96,27 @@ export const decide: Rule<'action_recipe'> = (world, command, mint) => {
     rolled?.rng,
   );
 };
+
+// The entity the recipe acts on, or the decision refusing it: its detail, in the actor's room (no
+// item_id; a target_id must be it); or (row G4) a use's invoked target (shared.ts useRefused; a reach
+// fault faults the decision).
+function subjectOf(
+  world: World,
+  target: RecipeTarget,
+  p: Command['payload'],
+  body: EntityId,
+  steps: Steps,
+) {
+  if (target.kind === 'use') {
+    const code = useRefused(world, target, body, p.item_id, p.target_id, steps);
+    if (code === 'budget_exceeded' || code === 'containment_cycle')
+      return { kind: 'fault', code } as const;
+    return code ? rejected(code) : p.target_id!;
+  }
+  const id = detailOf(world, target);
+  if (p.item_id !== undefined || (p.target_id ?? id) !== id) return rejected('invalid_target');
+  return world.details[id].room === world.state.containers[body] ? id : rejected('not_present');
+}
 
 // Toolbox row W23: the first accepted perform of a recipe with a tip assigns its engine-owned
 // seen_tip_<key> true, and the actor reads the tip once: the run and the tip's narration line.
@@ -146,7 +171,7 @@ function resolve(
       : check.kind === 'attribute_threshold'
         ? attributeValue(world, actor, check.attribute) >= check.difficulty
         : check.kind === 'opposed'
-          ? opposed(world, actor, check, world.details[subject_id].rating!)
+          ? opposed(world, actor, check, world.details[subject_id]?.rating ?? 0)
           : level(world, body, check.resource)! >= check.difficulty;
   const { id: cartridge_id, version: cartridge_version } = world.cartridge.manifest;
   const payload: CheckEvent = {
@@ -187,6 +212,16 @@ const step =
       };
       const e = event(world, command, mint, r.position + 1, payload);
       return { ...r, position: r.position + 1, events: [...r.events, e] };
+    }
+    if (s.op === 'status.cure') {
+      // A repeated cure of one status ends it once (cureOps reads committed state).
+      const done = r.ops.some(
+        (o) =>
+          o.op === 'status.transition' &&
+          o.body_id === subject_id &&
+          refString(o.status) === refString(s.status),
+      );
+      return done ? r : { ...r, ops: [...r.ops, ...cureOps(world, subject_id, [s.status])] };
     }
     return assigned(world, command.payload.actor_id, r, { ...s, subject: subject_id });
   };

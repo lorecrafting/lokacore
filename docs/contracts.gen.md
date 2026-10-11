@@ -131,8 +131,11 @@ Action definitions, ActionInvocation, TargetSpec and TargetResolution (04 §1, �
 - **RecipeStep**: One registered operation of a recipe outcome's explicit sequence (04 §5.2 step 4, §5.3; 05 §28: never a generic setter or an untyped effect). fact.assign sets a declared fact of the cartridge, at the one scope the fact allows, to a value of its type (the host emits fact_changed at this step's causal position when the value changes, fact@1). event.emit emits the cartridge's custom event of this key (EventPayload custom_event, action_recipe@1), whose subject is the recipe's target. resource.adjust adds by (negative: subtracts) to a resource of the actor's body, chained after the costs and any earlier adjust of it, stopping at the resource's bounds (DikuMUD-style: healing at full health heals nothing); this saturation is the step's declared meaning, not a silent clamp (04 §5.1): the rule computes the stopped value and proposes an exact delta resource.adjust to it, or none when the value does not change. Costs never saturate (RecipeCost).
   - `fact.assign`: Assign a fact.
   - `event.emit`: Emit a custom event.
+  - `status.cure`: Toolbox row G4 (kernel_api at least 1.49): end the recipe target's active status of this definition, as a cure does (status@1); nothing when it is not active.
   - `resource.adjust`: Adjust a resource of the actor's body by `by`, stopping at its bounds.
-- **RecipeTarget**: What an ActionRecipe acts on (06 §20 target; 21 §7 TargetSpec): here, one inspectable detail, by its room and its key in that room's details. The recipe is offered only while the actor is in that room; other target kinds (items, entities by property) join as further variants.
+- **RecipeTarget**: What an ActionRecipe acts on (06 §20 target; 21 §7 TargetSpec): one inspectable detail, by its room and its key in that room's details, offered only while the actor is in that room; or (toolbox row G4, kernel_api at least 1.49) a use: a tool the actor holds, used on another item on the floor of the actor's room or carried directly, both chosen by the invocation (perform item_id and target_id), the recipe keyed by the tool's properties here and the target's through its policy (has_tag and status_active, subject target), never by item ids.
+  - `detail`
+  - `use`
 - **TargetResolution**: The deterministic result of resolving a target (14 §R3A; 21 §7: none | unique(target) | ambiguous(candidates), no random tie-breaking; 04 §18: ambiguous search returns structured candidates). candidate_ids are 2 to 1024 distinct EntityIds (1024 is the composition profile's selector_cardinality) in ascending code-point order of the id string (owner decision: docs/archive/decisions/owner-decisions-r3-open-questions-2026-09-24.md, item 1). The subset cannot express order or distinctness, so invariant target_candidates_ordered in protocol/invariants.json carries it.
   - `none`: No candidate matched.
   - `unique`: Exactly one candidate.
@@ -140,6 +143,7 @@ Action definitions, ActionInvocation, TargetSpec and TargetResolution (04 §1, �
 - **TargetSpec**: The candidate scopes an action's target is resolved from (21 §7): the scopes the R6P proof resolves to an EntityId. Inspectable details use target-only EntityIds and the inspectable_details scope. equipped, connections, party and privileged global scope are added with their first use, with a target identity for non-entity targets (21 §6). Accepted kinds and capabilities are added with the capability registry.
   - `none`: The action takes no target.
   - `entity`: One entity from the listed scopes.
+- **UseTool**: Toolbox row G4: what a use recipe's tool must be, at least one property: an item whose definition declares tag, and a vessel holding some of liquid (quantity above 0).
 - **Word**: One spoken word (speech@1; toolbox row G9): 1 to 32 ASCII letters, the riddle answer's bound. The rule case-folds it and compares it only with authored keywords; it never reaches narration.
 
 ## Capability contracts (`protocol/capability.schema.json`)
@@ -213,7 +217,7 @@ The portable semantic Command registry (04 §1, §3, §21; 14 §R3A). Host-only 
   - `sit`: Sit down (position@1): the actor's position becomes sitting; already sitting is invalid_state. Only move needs standing.
   - `rest`: Rest (position@1): the actor's position becomes resting; already resting is invalid_state. No regeneration bonus (00 §4.2 as amended 2026-10-03).
   - `sleep`: Sleep (position@1): the actor's position becomes sleeping; already sleeping is invalid_state. Acting while asleep and waking on damage are LATER (combat).
-  - `perform`: Perform a cartridge's ActionRecipe by its action key (06 §20; action.schema.json ActionRecipe). The authority re-resolves the key in the actor's ActionSet; target_id, when given, is the id target resolution returned for the words after the verb and must be the recipe's target.
+  - `perform`: Perform a cartridge's ActionRecipe by its action key (06 §20; action.schema.json ActionRecipe). The authority re-resolves the key in the actor's ActionSet; target_id, when given, is the id target resolution returned for the words after the verb and must be the recipe's target. A use recipe (toolbox row G4) needs both target_id, the item used on, and item_id, the held tool.
   - `talk`: Talk to a character.
   - `say`: Say one word aloud to the NPCs in the actor's room (speech@1; toolbox row G9). The word is 1 to 32 ASCII letters, compared case-folded and only against authored keywords; it never reaches narration.
   - `shout`: Shout one word to the NPCs in the actor's room and in the rooms one exit away (speech@1; toolbox row G9).

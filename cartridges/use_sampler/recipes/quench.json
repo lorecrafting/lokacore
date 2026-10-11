@@ -1,0 +1,35 @@
+{
+  "label": "actions.quench",
+  "aliases": [
+    "quench"
+  ],
+  "target": {
+    "kind": "use",
+    "tool": {
+      "tag": "liquid_holding",
+      "liquid": "water"
+    }
+  },
+  "priority": 5,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "status_active",
+      "subject": "target",
+      "status": "burning"
+    }
+  },
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "status.cure",
+          "status": "burning"
+        }
+      ],
+      "narration": {
+        "actor": "narration.quench"
+      }
+    }
+  }
+}

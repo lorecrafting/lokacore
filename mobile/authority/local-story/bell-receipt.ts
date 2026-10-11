@@ -68,7 +68,7 @@ function bellCommand(
 ) {
   const action = c.payload?.type === 'perform' ? c.payload.action : undefined;
   const recipe = Object.values(world.cartridge.recipes ?? {}).find((r) => r.key === action);
-  const target = recipe && detailOf(world, recipe.target);
+  const target = recipe?.target.kind === 'detail' ? detailOf(world, recipe.target) : undefined;
   return !(
     validate('Command', c).length ||
     c.id !== command_id ||

@@ -13,7 +13,7 @@ import { gameView } from '../src/view/view.ts';
 import { units } from '../src/mechanics/calendar.ts';
 import { sha256Hex } from '../src/foundation/sha256.ts';
 import { doors, normalize } from '../src/commands/target.ts';
-import { detailOf, resolved, type Offered } from '../src/commands/actions.ts';
+import { detailAt, resolved, type Offered } from '../src/commands/actions.ts';
 import { append, kernelVersion, line, redact } from './obs.ts';
 import {
   barrierAt,
@@ -238,7 +238,9 @@ function accept(r: Run, words: string) {
 // alias (commands/actions.ts; 06 §20 aliases; two recipes may share one), and the words after it.
 function recipe(r: Run, text: string): { perform: Offered[]; rest: string } | undefined {
   const words = text.trim().toLowerCase().split(/\s+/);
-  const recipes = Object.values(resolved(r.world, r.world.character)).filter((a) => a.recipe);
+  const recipes = Object.values(resolved(r.world, r.world.character)).filter(
+    (a) => a.recipe?.target.kind === 'detail', // ponytail: no text form for a use recipe (G4) yet
+  );
   for (let n = words.length; n > 0; n--) {
     const alias = words.slice(0, n).join('_');
     const perform = recipes.filter((x) => x.recipe!.aliases.includes(alias as never));
@@ -256,7 +258,7 @@ function perform(r: Run, p: { perform: Offered[]; rest: string }) {
   const here = r.world.state.containers[r.world.body];
   const fits = p.perform
     .filter((a) => {
-      const detail = detailOf(r.world, a.recipe!.target);
+      const detail = detailAt(r.world, a)!; // a detail recipe (recipe above)
       return named ? detail === id : r.world.details[detail].room === here;
     })
     .sort((a, b) => (a.key < b.key ? -1 : 1));

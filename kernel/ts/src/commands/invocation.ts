@@ -69,7 +69,7 @@ const TARGETS: Readonly<Record<string, readonly string[]>> = {
   attack: ['target_id'],
   shoo: ['crow_id'],
   talk: ['target_id'],
-  perform: ['target_id'],
+  perform: ['target_id', 'item_id'],
   buy: ['provider_id', 'item_id'],
   sell: ['provider_id', 'item_id'],
   eat: ['item_id'],
@@ -103,8 +103,9 @@ export function resolve(
   const set = resolved(world, i.actor_id);
   const a = Object.hasOwn(set, i.action_key) ? set[i.action_key] : undefined;
   if (!a) return rejected('unsupported_capability');
-  // A target past the Command's slots lands under an unknown key, which validate rejects.
-  const slots = TARGETS[a.command] ?? [];
+  // A target past the Command's slots lands under an unknown key, which validate rejects; a detail
+  // recipe keeps perform's one slot (item_id is a use recipe's tool, row G4).
+  const slots = a.recipe?.target.kind === 'detail' ? ['target_id'] : (TARGETS[a.command] ?? []);
   const targets = Object.fromEntries(i.target_ids.map((t, n) => [slots[n], t]));
   const named = a.dialogue
     ? { dialogue: a.dialogue }

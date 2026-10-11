@@ -122,6 +122,14 @@ function advertised(
   commandOf: (a: AdvertisedAction) => string | undefined,
 ): ExitView | AdvertisedAction | undefined {
   if (p.type === 'move') return view.exits.find((e) => e.direction === p.direction);
+  // Toolbox row G4: a use recipe's perform is its [target, tool] pair on the held tool.
+  if (p.type === 'perform' && p.item_id !== undefined)
+    return entityView(view, p.item_id)?.actions.find(
+      (a) =>
+        a.action_key === p.action &&
+        a.target_ids?.[0] === p.target_id &&
+        a.target_ids?.[1] === p.item_id,
+    );
   const id = p.type === 'perform' ? undefined : (p.item_id ?? p.target_id);
   if (id === undefined) {
     const key = p.type === 'perform' ? p.action : p.type;

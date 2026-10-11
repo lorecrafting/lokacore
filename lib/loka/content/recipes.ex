@@ -24,7 +24,9 @@ defmodule Loka.Content.Recipes do
   resource.adjust has none, like a cost: resource@1 comes with the default pools) is required;
   its costs, threshold check and resource.adjust steps name resources of this cartridge; it
   has a failure outcome exactly when it has a check (OUTCOME_MISMATCH); its target names a room
-  of this cartridge and a detail of that room, each fact.assign a fact with a value of its type,
+  of this cartridge and a detail of that room (a use target's tool liquid a liquid of it, and a
+  use target needs kernel_api 1.49; row G4), each fact.assign a fact with a value of its type, each
+  status.cure a status and only on a use recipe (SCHEMA_VIOLATION),
   each narration participant but the actor an npc or item of this cartridge, as its role says,
   its check's key is no other recipe's check's (DUPLICATE_DEFINITION),
   and its label and narrations have catalog entries (unless `text` is `:unknown`); no recipe's
@@ -47,7 +49,21 @@ defmodule Loka.Content.Recipes do
       shared: shared_checks(defs)
     }
 
-    Enum.flat_map(all(defs), &recipe(&1, ctx)) ++ contributions(defs, actions)
+    Enum.flat_map(all(defs), &recipe(&1, ctx)) ++ contributions(defs, actions) ++ uses(defs, m)
+  end
+
+  # Toolbox row G4: a use target needs kernel_api 1.49 (one diagnostic), and a status.cure step
+  # sits on a use recipe (a detail holds no status).
+  defp uses(defs, m) do
+    misplaced =
+      for {rel, r} <- all(defs),
+          r["target"]["kind"] != "use",
+          {%{"op" => "status.cure"}, steps} <- steps(r),
+          do: diag("SCHEMA_VIOLATION", at(rel, steps ++ ["op"]), %{"error" => "invalid_value"})
+
+    if Enum.any?(all(defs), fn {_, r} -> r["target"]["kind"] == "use" end) and api(m) < [1, 49],
+      do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least") | misplaced],
+      else: misplaced
   end
 
   defp api(m),
@@ -134,7 +150,10 @@ defmodule Loka.Content.Recipes do
     end
   end
 
-  # An unresolved room or detail is the target's own diagnostic.
+  # An unresolved room or detail is the target's own diagnostic; a use target (row G4) has no
+  # detail and so no rating.
+  defp rated?(%{"kind" => "use"}, _, _), do: false
+
   defp rated?(t, m, defs) do
     case resolve(t["room"], "room", m, defs) do
       {_, _, room} ->
@@ -176,14 +195,18 @@ defmodule Loka.Content.Recipes do
   end
 
   defp refs(rel, r, %{m: m, defs: defs}) do
-    facts =
-      for {%{"op" => "fact.assign"} = s, steps} <- steps(r),
-          d <- reference(rel, steps, "fact", s, m, defs),
-          do: d
-
     target(rel, r["target"], m, defs) ++
-      facts ++
+      named_steps(rel, r, m, defs) ++
       attributes(rel, r, m, defs) ++ resources(rel, r, m, defs) ++ participants(rel, r, m, defs)
+  end
+
+  # Each fact.assign's fact and (row G4) each status.cure's status names one of this cartridge.
+  defp named_steps(rel, r, m, defs) do
+    for {%{"op" => op} = s, steps} <- steps(r),
+        field = %{"fact.assign" => "fact", "status.cure" => "status"}[op],
+        field != nil,
+        d <- reference(rel, steps, field, s, m, defs),
+        do: d
   end
 
   # Each narration participant but the actor names this cartridge's npc or item its role says.
@@ -213,6 +236,14 @@ defmodule Loka.Content.Recipes do
     check = for %{"kind" => "threshold"} = c <- [r["check"]], do: {c, ["check"]}
     costs ++ check ++ for({%{"op" => "resource.adjust"} = s, steps} <- steps(r), do: {s, steps})
   end
+
+  # Toolbox row G4: a use target's tool liquid names a liquid of this cartridge.
+  defp target(rel, %{"kind" => "use", "tool" => tool}, m, defs),
+    do:
+      if(is_map_key(tool, "liquid"),
+        do: reference(rel, ["target", "tool"], "liquid", tool, m, defs),
+        else: []
+      )
 
   # The room resolves (reference/6), then the detail is one of its details.
   defp target(rel, t, m, defs) do

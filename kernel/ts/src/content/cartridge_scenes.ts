@@ -64,7 +64,8 @@ function source(c: Obj, s: Obj, at: string, named: Checks['named'], out: Diagnos
     if (
       recipe &&
       room &&
-      (refString(recipe.target.room) !== refString(on.room) ||
+      (recipe.target.kind !== 'detail' ||
+        refString(recipe.target.room) !== refString(on.room) ||
         recipe.target.detail !== on.detail ||
         !Object.hasOwn(room.details ?? {}, on.detail))
     )

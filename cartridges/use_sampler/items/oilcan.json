@@ -1,0 +1,24 @@
+{
+  "keywords": [
+    "oilcan"
+  ],
+  "short": "item.oilcan.short",
+  "room_line": "item.oilcan.room",
+  "description": "item.oilcan.description",
+  "mass_grams": 500,
+  "location": {
+    "in": "room",
+    "room": "yard"
+  },
+  "tags": [
+    "liquid_holding"
+  ],
+  "vessel": {
+    "capacity": 2,
+    "unit_label": "liquid.units",
+    "initial": {
+      "kind": "oil",
+      "quantity": 2
+    }
+  }
+}

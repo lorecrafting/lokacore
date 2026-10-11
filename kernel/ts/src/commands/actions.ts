@@ -30,6 +30,7 @@ import { engaged } from '../mechanics/combat/shared.ts';
 import { eligible } from '../mechanics/combat/behavior.ts';
 import { choice as characterChoice } from '../mechanics/attributes/shared.ts';
 import { levelling } from '../mechanics/levelling/shared.ts';
+import { useAdmission } from '../mechanics/action_recipe/shared.ts';
 
 /**
  * One action of a set: what the GameView advertises, the Command type it resolves to, the
@@ -114,7 +115,11 @@ function engine(world: World): ActionSet {
 function cartridge(world: World, actor: CharacterId): ActionSet {
   const recipes = Object.values(world.cartridge.recipes ?? {}).map((recipe): [string, Offered] => {
     const { key, label, priority, policy } = recipe;
-    const target = { kind: 'none' } as const;
+    // A use recipe (row G4) is listed on the held tool, paired with each target (view/use.ts).
+    const target: TargetSpec =
+      recipe.target.kind === 'use'
+        ? { kind: 'entity', scopes: ['room_contents', 'inventory'] }
+        : { kind: 'none' };
     const command = 'perform' as Key;
     return [key, { key, label, target, input: [], priority, policy, command, recipe }];
   });
@@ -183,12 +188,16 @@ export function resolved(world: World, actor: CharacterId): ActionSet {
 }
 
 /** The target id of a recipe's detail (the loader checks it exists). */
-export const detailOf = (world: World, t: RecipeTarget): EntityId =>
+export const detailOf = (world: World, t: Extract<RecipeTarget, { kind: 'detail' }>): EntityId =>
   Object.keys(world.details).find(
     (id) =>
       world.details[id].room === world.roomIds[refString(t.room)] &&
       world.details[id].key === t.detail,
   ) as EntityId;
+
+/** The detail an offered recipe acts on; none for another action or a use recipe (row G4). */
+export const detailAt = (world: World, a: Offered) =>
+  a.recipe?.target.kind === 'detail' ? detailOf(world, a.recipe.target) : undefined;
 
 /**
  * Why `actor` may not issue `payload` now, if it may not (04 §19; ACT-09): no action of its set
@@ -233,12 +242,11 @@ export function refusal(
       : fighting(world, actor)
         ? 'invalid_state'
         : 'unsupported_capability';
-  const target = (a: Offered) =>
-    a.recipe ? detailOf(world, a.recipe.target) : primaryTarget(payload);
-  const ok = (a: Offered) =>
-    (!a.recipe || visible(world, actor, detailOf(world, a.recipe.target), steps)) &&
-    holds(world, actor, a.policy.root, { target: target(a), steps });
-  return matching.some(ok) ? undefined : 'invalid_state';
+  const used = useAdmission(world, matching[0]!.recipe, payload, steps); // row G4
+  const ok = (a: Offered, d = detailAt(world, a)) =>
+    (d === undefined || visible(world, actor, d, steps)) &&
+    holds(world, actor, a.policy.root, { target: d ?? primaryTarget(payload), steps });
+  return used || (matching.some((a) => ok(a)) ? undefined : 'invalid_state');
 }
 
 const recipeKeys = (world: World) => Object.values(world.cartridge.recipes ?? {}).map((r) => r.key);
