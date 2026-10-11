@@ -255,8 +255,9 @@ test('social 21: forced and burnt, 90000 units away: the green log carries Tam, 
     .filter((e) => e.type === 'entity_entered_room' && who.has(e.entity_id))
     .map((e) => `${who.get(e.entity_id)} ${key(e.room_id)}`);
   // On the green: Tam in (11:00 day 1), out (to the gate, 15:00), in (11:00 day 2); the Warden in
-  // (13:00 day 2) and out (14:00). Wat never enters it.
-  assert.deepEqual(moves, [
+  // (13:00 day 2) and out (14:00). Wat never enters it. The Warden's walk out and Wat's visit both
+  // fall due at 14:00 day 2; the spec orders neither (the job-id tie-break), so they are a set.
+  const ordered = [
     'tam mill',
     'tam village_green',
     'wat warden_gate',
@@ -267,9 +268,9 @@ test('social 21: forced and burnt, 90000 units away: the green log carries Tam, 
     'tam mill',
     'tam village_green',
     'warden village_green',
-    'warden warden_gate',
-    'wat warden_gate',
-  ]);
+  ];
+  const at14 = ['warden warden_gate', 'wat warden_gate'];
+  assert.deepEqual([moves.slice(0, -2), moves.slice(-2).sort()], [ordered, at14]);
   assert.deepEqual(
     r.lines.filter((l) => l.startsWith('narration.chilled')),
     ['narration.chilled.tick', 'narration.chilled.expired'],
