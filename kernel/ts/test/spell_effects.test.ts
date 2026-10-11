@@ -263,6 +263,13 @@ test('a bolt starts the fight as Attack does; a bolt that hurts then kills opens
   assert.deepEqual([wightHp(killed), engaged(killed, killed.entityIds[W]!)], [0, undefined]);
 });
 
+// Breaks (loka-kgd.101): a bolt opens a fight where Attack is refused (here a sanctuary room).
+test('a bolt that hurts the wight in a sanctuary opens no fight', () => {
+  const calm = cartridge((c) => (c.rooms[`${P}:room/crypt`].sanctuary = true));
+  const hit = ok(cast(ok(cast(crypt(true, calm), 'lux')), 'flamma'));
+  assert.deepEqual([wightHp(hit), engaged(hit, hit.entityIds[W]!)], [4, undefined]);
+});
+
 // Breaks (loka-kgd.101): a spell with a duration that hurts the wight outside a fight schedules its
 // first round inside the cast's own advance (the round never runs there: a fault, as loka-kgd.104),
 // rather than an interval after the cast ends.
