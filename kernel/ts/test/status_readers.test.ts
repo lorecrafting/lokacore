@@ -142,7 +142,11 @@ test('allows lists intersect; a blocked move shows the exit unavailable with the
   );
   const rooted = shrine(as('hushed', { blocks: ['move'] }));
   assert.deepEqual(
-    gameView(rooted).exits.map((e) => [e.direction, e.available, e.reason?.code]),
+    gameView(rooted).exits.map((e) => [
+      e.direction,
+      e.available,
+      e.available ? undefined : e.reason.code,
+    ]),
     [['south', false, 'invalid_state']],
   );
   assert.equal(code(send(rooted, { type: 'move', direction: 'south' })), 'invalid_state');

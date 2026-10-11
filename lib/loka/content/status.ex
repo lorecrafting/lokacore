@@ -54,7 +54,7 @@ defmodule Loka.Content.Status do
   # the fields above 1.46.
   defp floor(statuses, g3) do
     cond do
-      Enum.any?(statuses, fn {_, {_, _, s}} -> reader?(s) end) -> [1, 54]
+      Enum.any?(for {_, {_, _, s}} <- statuses, do: reader?(s)) -> [1, 54]
       Enum.any?(statuses, &match?({_, {_, _, %{"fear" => true}}}, &1)) -> [1, 50]
       Enum.any?(statuses, &match?({_, {_, _, %{"duration" => "permanent"}}}, &1)) -> [1, 48]
       g3 -> [1, 46]
