@@ -4,13 +4,14 @@
 import type { CharacterId, DeltaOp, EntityId, NpcDefinition, Text } from '../contracts.gen.ts';
 import { add } from '../foundation/int.ts';
 import { cmp } from '../foundation/validate.ts';
-import { type Mint, type Steps, type World } from '../runtime/decision.ts';
+import { bodyOf, type Mint, type Steps, type World } from '../runtime/decision.ts';
 import { holds } from './policy.ts';
 import { living } from './death/shared.ts';
 import { engaged, encounterId, npcRef } from './combat/shared.ts';
 import { jobId } from './schedule/behavior.ts';
 import { attacked } from './crow/behavior.ts';
 import { running } from './scene/shared.ts';
+import { concealed } from './status/shared.ts';
 
 export type Disposition = 'hostile' | 'wary' | 'friendly';
 
@@ -76,7 +77,8 @@ export function engage(
 
 /**
  * The first NPC in `there`, in EntityId order, living, unengaged, with an attack and an engage
- * line, hostile to `actor`; none in a sanctuary, during a scene or without combat.
+ * line, hostile to `actor` and seeing its body (status reader 8); none in a sanctuary, during a
+ * scene or without combat.
  * ponytail: read before the move's own writes (the room, an expedition's faction fact), so a room- or presence-relative
  * leaf reads the room left; read after them when a sampler needs one.
  */
@@ -91,7 +93,8 @@ function hostileAt(world: World, actor: CharacterId, there: EntityId, steps: Ste
         npc.attack &&
         npc.disposition?.engage &&
         living(world, id) &&
-        !engaged(world, id as EntityId)
+        !engaged(world, id as EntityId) &&
+        !concealed(world, bodyOf(world, actor)!, id as EntityId) // status reader 8
       );
     })
     .sort(cmp) as EntityId[];

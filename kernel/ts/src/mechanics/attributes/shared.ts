@@ -9,7 +9,7 @@ import type {
 import { key } from '../../foundation/compose.ts';
 import { divide, saturate } from '../../foundation/int.ts';
 import { bodyOf, refString, values, type World } from '../../runtime/decision.ts';
-import { activeStatuses } from '../status/shared.ts';
+import { activeStatuses, perceives } from '../status/shared.ts';
 
 export const initialValues = (world: World, ancestry: AncestrySpec) => {
   const starts = Object.fromEntries(
@@ -106,7 +106,11 @@ export function derived(
   return r < 0 ? q - 1 : q;
 }
 
+/** An ancestry's dark_sight, or (status reader 6) an active dark_sight status on the body. */
 export const darkSight = (world: World, actor: CharacterId) => {
   const selected = choice(world, actor)?.ancestry;
-  return selected !== undefined && world.cartridge.ancestries?.[selected]?.dark_sight === true;
+  return (
+    (selected !== undefined && world.cartridge.ancestries?.[selected]?.dark_sight === true) ||
+    perceives(world, bodyOf(world, actor), 'dark_sight')
+  );
 };

@@ -201,6 +201,30 @@ export function statusResistance(world: World, body: EntityId) {
     specs.reduce((sum, s) => add(sum, s.resistances?.[entry as keyof Resistances] ?? 0), 0);
 }
 
+// Status readers 6 and 8: `body`'s active statuses, scanned only when some status declares a sense.
+function sensed(world: World, body: EntityId | undefined) {
+  const any = Object.values(world.cartridge.statuses ?? {}).some(
+    (s) => s.perception || s.concealment,
+  );
+  return any && body !== undefined ? activeStatuses(world, body).map(({ spec }) => spec) : [];
+}
+
+/** Status reader 6: whether an active status on `body` declares the sight or hearing `sense`. */
+export const perceives = (
+  world: World,
+  body: EntityId | undefined,
+  sense: 'blind' | 'dark_sight' | 'see_invisible' | 'deaf',
+) =>
+  sensed(world, body).some((s) => s.perception?.sight === sense || s.perception?.hearing === sense);
+
+/** Status reader 8: whether `seer` fails to see `holder`: hidden, or invisible without see_invisible. */
+export const concealed = (world: World, holder: EntityId, seer: EntityId | undefined) =>
+  sensed(world, holder).some(
+    (s) =>
+      s.concealment === 'hidden' ||
+      (s.concealment === 'invisible' && !perceives(world, seer, 'see_invisible')),
+  );
+
 /**
  * Status reader 4: whether `body`'s active statuses let it take Command type `command`: none blocks
  * it and every `allows` list names it. The player's admission (`permits`) and NPC combat turns read it.
