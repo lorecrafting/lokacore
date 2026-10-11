@@ -102,8 +102,12 @@ the next currently offered legal action in standing → sitting → resting → 
 order, skipping unavailable/absent actions. If none is offered, position stays informational.
 The button follows [live action freshness](#live-action-freshness); pending/refused/stale results never advance the
 shown position optimistically. This opens no detail page or Contents and does not turn the
-ordinary World page. Position in all details is informational; modal scenes expose no position
-shortcut. Movement and position admission remain kernel-owned.
+ordinary World page. Every confirmed position change writes one line to the World log: the
+receipt's authored narration, or without one the position's own words from
+[words](../../mobile/app/book/words.ts) ("You sit down.", "You lie back to rest.", "You
+sleep.", "You stand."), so a tap is never silent and a position that bars the exits is
+announced before the player tries one. Position in all details is informational; modal scenes
+expose no position shortcut. Movement and position admission remain kernel-owned.
 
 ## Live action freshness
 
@@ -190,6 +194,26 @@ Close) sit in its page foot, below the scrolling content and above the status li
 offered actions never do. World, a scene, a chapter title, the ancestry choice and combat have no
 foot. A control that opens a child (Resume dream, Continue conversation) stays in the content.
 
+A detail's history belongs to the page visit: it starts empty when the page opens and is dropped
+when the page closes by any route (Leave, a Back control, Contents, a room change, death, a stale
+route). Reopening the same item or person after a Leave shows no earlier lines; the only history
+is the lines since this visit began. The NPC rule below is the same rule with a conversation
+latch; the combat page's retained history is the one exception, per
+[live combat response](#live-combat-response-m6-a). No detail line is ever shown twice for one
+confirmed receipt.
+
+A child detail returns to the page it was opened from, never to World by default: an item opened
+from Equipment & Inventory returns there on Leave, one opened from a container returns to that
+container, one opened from World returns to World. Only a confirmed action whose rule names
+another destination (ordinary Take/Drop, a successful Flee) overrides this; a stale route closes
+the detail to its parent.
+
+No two cards, verb lines or entity lines on one page share a label. Two identical offers (same
+action, target and input) are one card. Two distinct targets with the same projected name are
+a projection defect to fix at the source (a second corpse, a second Talk continuation): the
+Book never invents a numeral or suffix to tell them apart, and it never shows the two cards as
+if they were one choice.
+
 ## Notice-board details
 
 Every readable notice opens its own detail page. A standalone notice, including Ferry Landing’s
@@ -256,6 +280,17 @@ After a confirmed accepted NPC action changes the actual projected journal, appe
 authored dialogue. Preserve meaningful authored narration. Pending/refused/stale/fault results
 add no false event; rerenders and receipt retry do not duplicate it. This is local presenter
 metadata, not story prose, a new game event or transcript persistence.
+
+Above the cards, the person's projected teaching shows as one quiet line per lesson they offer,
+in the Note's look, worded for the player, never as a field dump: "Aldous teaches Blade." while
+it is not learned and the player qualifies; "Aldous teaches Blade; you need STR 10." (the
+authored requirement after a semicolon) while the player does not; "Blade: learned." once
+acquired. The learned/qualified pair itself stays on the Character page.
+
+A dialogue choice never duplicates a foot control: no authored choice is labelled Leave, Close
+or Leave the conversation, since the foot already leaves (Chapter 1: `loka-x6t.9`). A choice
+that ends the exchange with authored words ("Not today.") is fine; a bare Leave is a content
+defect.
 
 There is one foot control and no separate Close: **Leave** outside a conversation (local World
 navigation, no engine verb) and **Leave the conversation** inside one. When a matching
@@ -346,10 +381,30 @@ requires destructive confirmation; failure retains the existing game/retry, whil
 replacement remounts the book. Save-open errors expose only existing permitted recovery. The
 save-error screen has no GameView, so no phase; it shows a headline and at most
 one plain sentence under it, never a raw kind or code and never the headline repeated; the
-browser's save-file lock reads "Loka is already open in another tab."
+browser's save-file lock reads "Loka is already open in another tab." A cause the player can
+clear without losing the save (that lock: close the other tab) offers a **Try again** Control
+that retries opening the save in place; a cause they cannot offers only the permitted Start
+over. No save-error screen is a dead end with no control at all.
 [words](../../mobile/app/book/words.ts) owns the sentences. Those
 boundaries live in [session](../../mobile/packages/game-view/session.ts),
 [app](../../mobile/app/App.tsx) and [save error](../../mobile/app/SaveError.tsx).
+
+## Refused lines
+
+Every refusal the player causes is a refused line, wherever it lands (World, a detail, the
+combat page): the reason word as a tag, then the sentence, per the catalogue's
+[Log line](../BOOK-UI-COMPONENTS.md#component-catalogue). A compass drag toward a barred way
+and a pressed card that the kernel rejects are the same kind of line; neither is plain
+narration. The reason word names the cause the player can act on: `locked`, `closed`, `too
+heavy`, `not held`, `resting` (a move while not standing), `in combat`, `dead`; a refusal
+code with no word in [words](../../mobile/app/book/words.ts) still shows as a refused line
+with the code's words as its tag, never a bare "You can't do that: unsupported capability."
+sentence, and is a defect to fix at the source. `not now` and `not here` are the last resort
+for a code the engine cannot explain better, not a default. A confirmed accepted action is
+never followed by a refused line about itself: when a press both acted and refused in one
+advance (a tick, then the Take), the lines come in receipt order and each names its own
+cause. An action the engine offers but cannot perform (Whisper without speech input) is not
+offered at all, rather than offered and refused.
 
 ## Text clarity
 
@@ -417,7 +472,12 @@ An attackable present NPC offers deliberate Attack. An active encounter automati
 and foregrounds its own full Book page, like dialogue, including when another ordinary page
 or menu was open and when reopening a saved encounter. The page names the opponent, shows
 committed combat narration, and renders only currently available Stand, directionless Flee
-and Look actions as complete typed invocations. The shared kernel ActionSet also permits Scan;
+and Look actions as complete typed invocations. The page's first block is the opponents only
+(each active opponent's name, the current target marked); the player's bleeding and condition
+items stay on the status line beneath, as on every page, and are not repeated in the block, so
+a player condition is never read as the opponent's state. The log shows every committed round
+in order (each hit, miss, dodge, block, tick and the closing line) before the page leaves; a
+fight whose rounds resolve in one advance still shows them as its log, one line each. The shared kernel ActionSet also permits Scan;
 its existing phone presentation deferral remains. The combat restriction is applied after all
 ordinary contributions, so no blocked action or alias is exposed by a hidden ordinary page.
 Attack initiates combat from the NPC page; it is not usable again during an open encounter
@@ -429,8 +489,17 @@ while the combat page is open.
 
 Combat takes precedence over ordinary navigation until the encounter closes. Committed
 closure or opponent death returns to the World; successful Flee and player death show the
-resulting room through the existing room-change flow. A pending save keeps the confirmed
-encounter and existing retry behavior; a refusal remains visible on the combat page. The UI
+resulting room through the existing room-change flow. Proposed (pending owner approval; combat
+playtest 2026-10-10, loka-x6t): the page does not turn away on its own at closure. After the
+closing receipt (opponent dead, your death, a successful Flee) the combat page stays with its
+final lines and one centred Continue button (the scene's component), whose press performs the
+restored route locally (World, the resulting room, the recovery room), with no engine verb;
+the status line stays locked until then. A death that happens outside combat (a tick while
+looting) has no page to hold it: its fall and waking lines are the first lines of the recovery
+room's World log, never dropped by the room change they cause. Flee is offered only while the
+encounter is open; a closed encounter offers no Flee card. A pending save keeps the confirmed
+encounter and existing retry behavior; a refusal remains visible on the combat page as a
+[refused line](#refused-lines). The UI
 never presents an unconfirmed hit, death, escape or encounter end as committed. Results
 narrate once through the existing subscription and cartridge text. Combat narration belongs
 only to the combat page and its retained history, never the World room event log, including
@@ -521,8 +590,13 @@ Show their authored slot/profile or block chance, plus the skill requirement whe
 needed; carrying a sword is visibly distinct from wielding it. Read numbers and labels
 from the projected cartridge data, never renderer literals or inferred item names.
 No active Dodge button, skill percentage bar, proficiency rank or future skill appears.
-A held sword offers Wear; its worn item offers Remove. Its detail describes the declared
-wield slot, attack chance/damage and projected skill label/requirement. Shield detail
+A held sword offers Wear; its worn item offers Remove. The verb the player reads follows the
+slot: an item for a `wield` slot says **Wield a training sword** and, confirmed, "You take it
+up." (Remove: "You put it away."); any other slot keeps Wear and "You put it on." The action
+key is unchanged; only its label and outcome words differ. Likewise a held item whose use is
+a cure or a dressing, not food, says **Use a poultice**, never Eat; the cartridge marks which
+(the action catalogue's label key), the Book never guesses from the name. Its detail describes
+the declared wield slot, attack chance/damage and projected skill label/requirement. Shield detail
 shows the off-hand slot and authored block chance. These descriptions do not grant use.
 
 The existing combat page narrates committed dodge/block prevention once using the
@@ -964,7 +1038,7 @@ A true combat death exposes that deer's real public corpse and exact conserved h
 
 ## C5 bleeding and bandage details
 
-Confirmed GameView condition data shows the one active bleed and its authored remaining time/loss on Character/status and the current Combat page. Read the active generation and times from projected state; the presenter never computes or writes an effect, damage or cure. Committed hit, refresh, tick, expiry and death lines use their own confirmed receipts/causes and appear once. Pending, stale or refused actions do not claim a cure. The existing world clock continues while any Book page is open.
+Confirmed GameView condition data shows the one active bleed and its authored remaining time/loss on Character and the status line (which the current Combat page keeps beneath it; the Combat block itself lists only opponents). Read the active generation and times from projected state; the presenter never computes or writes an effect, damage or cure. Committed hit, refresh, tick, expiry and death lines use their own confirmed receipts/causes and appear once. Pending, stale or refused actions do not claim a cure. The existing world clock continues while any Book page is open.
 
 Wick's existing public detail offers one bound optional skill lesson and retains his B5 herb exchange. The Character page uses C1 acquired versus currently qualified status. A directly held opted bandage offers its exact use on item detail when a matching bleed is active; during combat the same current item and effect generation appear as one legal Bandage control on the Combat page beside Flee/Stand/Look. The control sends the typed exact-item/current-generation invocation, and the shared kernel query decides availability. A stale redraw or already-due expiry refuses without spending the item. Other item controls and recipes stay hidden/blocked in combat; Flee is never displaced.
 
@@ -986,7 +1060,7 @@ The player follows ordinary exits from Green through the authored corridor to Oa
 
 ## Conditions details
 
-GameView `conditions` lists every active [status](mechanics.md#status-effects-over-time-toolbox-row-1) on the body with its authored label, end, next tick and per-tick change; C5 `bleeding` keeps its own field and lines. A condition label is authored lowercase, like a position word (`poisoned`, `blessed`); the status line shows it as authored and the Character page capitalises it as it does the position. The status line shows one item per condition after the bleeding item (after the position when there is none): the label, the time remaining and the signed per-tick amount with its pool key, joined by " · " ("poisoned · 4m remaining · -1 HP each 60s"); the danger tone for a loss, the quiet tone for a gain, and the sign is always in the text, never carried by colour alone. A duration or cadence under two minutes shows in seconds ("40s"), otherwise in whole minutes ("60m"). Each item's accessible name is its text with the dots read as commas, like the time item. The Character page lists each capitalised label after the bleeding line; the Combat page lists the same status-line text after the bleeding line in its first block. The presenter reads projected state and never computes or writes an effect, tick or cure; applied, tick and expired lines come from their receipts' narration and appear once. No new control: a cure is the ordinary Eat of a held item whose `cures` lists the condition.
+GameView `conditions` lists every active [status](mechanics.md#status-effects-over-time-toolbox-row-1) on the body with its authored label, end, next tick and per-tick change; C5 `bleeding` keeps its own field and lines. A condition label is authored lowercase, like a position word (`poisoned`, `blessed`); the status line shows it as authored and the Character page capitalises it as it does the position. The status line shows one item per condition after the bleeding item (after the position when there is none): the label, the time remaining and the signed per-tick amount with its pool key, joined by " · " ("poisoned · 4m remaining · -1 HP each 60s"); the danger tone for a loss, the quiet tone for a gain, and the sign is always in the text, never carried by colour alone. A duration or cadence under two minutes shows in seconds ("40s"), otherwise in whole minutes ("60m"). Each item's accessible name is its text with the dots read as commas, like the time item. The Character page lists each capitalised label after the bleeding line; the Combat page shows none of them in its first block (the status line beneath it already does, per [live combat response](#live-combat-response-m6-a)). The presenter reads projected state and never computes or writes an effect, tick or cure; applied, tick and expired lines come from their receipts' narration and appear once. No new control: a cure is the ordinary Eat of a held item whose `cures` lists the condition.
 
 ## Away recap
 
