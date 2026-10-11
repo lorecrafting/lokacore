@@ -6,6 +6,7 @@ import { value } from '../fact.ts';
 import { living } from '../death/shared.ts';
 import { LIMITS } from '../../contracts.gen.ts';
 import { KernelError } from '../../foundation/error.ts';
+import { saturate } from '../../foundation/int.ts';
 import { adjust, level, pay, resourceRef, resourceSpec, type Levels } from '../resource.ts';
 import { held } from '../policy.ts';
 import { engaged } from '../combat/shared.ts';
@@ -85,10 +86,10 @@ export function fare(world: World, body: EntityId) {
     (level(world, body, mv) === undefined ? undefined : { resource: mv, amount: 1 });
   const multiplier = engaged(world, body) ? world.cartridge.world!.combat!.flee_multiplier : 1;
   if (!cost) return { ops: [] };
-  // Status reader 7: each active status's cost_percent in turn, rounded down (unchecked: a fare past
-  // the pool is refused by pay, never an overflow fault); a fare of 0 writes nothing.
+  // Status reader 7: each active status's cost_percent in turn, rounded down (each step saturated at the
+  // int32 ceiling, so an oversized fare is refused by pay, never an overflow fault); a fare of 0 writes nothing.
   const amount = statusMovement(world, body).reduce(
-    (a, m) => (m.cost_percent === undefined ? a : Math.floor((a * m.cost_percent) / 100)),
+    (a, m) => (m.cost_percent === undefined ? a : saturate(Math.floor((a * m.cost_percent) / 100))),
     mul(cost.amount, multiplier),
   );
   return amount ? pay(world, body, [{ ...cost, amount }]) : { ops: [] };

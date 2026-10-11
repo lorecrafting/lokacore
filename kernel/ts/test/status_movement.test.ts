@@ -112,6 +112,39 @@ test('cost_percent scales the fare, each status in turn in definition order, rou
   assert.ok(!JSON.stringify(r.decision).includes('"resource.adjust"'), JSON.stringify(r.decision));
 });
 
+// Breaks: percent scaling lets an oversized fare overflow, so `pay` throws integer_overflow instead of
+// refusing the move for lack of mv. Seven statuses at 1000% on a fare of 2^31 - 1 and a pool to match (about 2e16 unsaturated; the blessing applies
+// warded, hushed and five clones of warded).
+test('an oversized scaled fare is refused, not thrown', () => {
+  const fare = { movement: { cost: { resource: MV, amount: 2147483647 } } };
+  const base = edited([], { warded: { cost_percent: 1000 }, hushed: { cost_percent: 1000 } }, fare);
+  const clones = [1, 2, 3, 4, 5].map((i) => ({ ...base.statuses![S('warded')]!, key: `w${i}` }));
+  const blessing = base.reactions![`ward_sampler@0.0.1:reaction/blessing`]!;
+  const mvKey = Object.keys(base.resources!).find((k) => k.endsWith('/mv'))!;
+  const c = {
+    ...base,
+    resources: {
+      ...base.resources,
+      [mvKey]: { ...base.resources![mvKey]!, maximum: 2147483647, start: 2147483647 },
+    },
+    statuses: { ...base.statuses, ...Object.fromEntries(clones.map((s) => [S(s.key), s])) },
+    reactions: {
+      ...base.reactions,
+      [`ward_sampler@0.0.1:reaction/blessing`]: {
+        ...blessing,
+        apply: [
+          ...blessing.apply,
+          ...clones.map((s) => ({
+            op: 'status.apply',
+            status: { ...(blessing.apply[0] as any).status, key: s.key },
+          })),
+        ],
+      },
+    },
+  } as never as Cartridge;
+  assert.equal(code(send(go(hall(c), 'north'), 'south')), 'insufficient_resource');
+});
+
 /** The sampler's artifact, edited and re-hashed, loaded: its first diagnostic's code and path. */
 function reload(edit: (c: any) => void) {
   const c = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
@@ -126,7 +159,7 @@ function reload(edit: (c: any) => void) {
 }
 
 // Breaks (twin of test/loka/content_status_movement_test.exs): a status movement, a room's air,
-// chasm or water tag, or an item's water tag loads under API 1.61, or a movement status without per_tick is refused.
+// chasm or water tag, an item's water tag or a barrier's chasm tag loads under API 1.61, or a movement status without per_tick is refused.
 test('loader: movement and terrain tags need API 1.62; movement stands in for per_tick', () => {
   const api = (v: string) => (c: any) => (c.manifest.requires.kernel_api.at_least = v);
   const moving = (c: any) => {
@@ -142,7 +175,21 @@ test('loader: movement and terrain tags need API 1.62; movement stands in for pe
     c.items[Object.keys(c.items)[0]].tags = ['water'];
     c.manifest.requires.capabilities.tags = c.lock.capabilities.tags = 1;
   };
-  for (const edit of [moving, tagged('air'), tagged('chasm'), tagged('water'), item]) {
+  const barrier = (c: any) => {
+    c.barriers = {
+      ['ward_sampler@0.0.1:barrier/mist_gate']: {
+        key: 'mist_gate',
+        keywords: ['gate'],
+        short: 'barrier.mist_gate.short',
+        initial: 'open',
+        tags: ['chasm'],
+      },
+    };
+    c.manifest.requires.capabilities.tags = c.lock.capabilities.tags = 1;
+    c.text['barrier.mist_gate.short'] = 'a mist gate';
+    c.manifest.requires.capabilities.barrier = c.lock.capabilities.barrier = 1;
+  };
+  for (const edit of [moving, tagged('air'), tagged('chasm'), tagged('water'), item, barrier]) {
     assert.equal(
       reload((c) => (api('1.62')(c), edit(c))),
       'loaded',
