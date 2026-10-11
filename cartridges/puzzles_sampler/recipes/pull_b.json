@@ -1,0 +1,32 @@
+{
+  "label": "actions.pull_b",
+  "aliases": [
+    "pull"
+  ],
+  "target": {
+    "kind": "detail",
+    "room": "hall",
+    "detail": "lever_b"
+  },
+  "priority": 5,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": []
+    }
+  },
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "event.emit",
+          "event": "lever"
+        }
+      ],
+      "narration": {
+        "actor": "narration.lever"
+      }
+    }
+  }
+}
