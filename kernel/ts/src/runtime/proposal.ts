@@ -286,7 +286,7 @@ function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined
     p.rng = ran.rng;
     p.narration.push(...(ran.narration ?? []));
     const partner = populationPairs.get(job_id);
-    const prior = groups.get(job_id) ?? groups.get(partner ?? job_id); // own earlier step's, a partner's
+    const prior = groups.get(partner ?? job_id); // a partner's, or an earlier crossed hour's
     const joined =
       prior === undefined
         ? statusGroup(at, job_id as JobId, current, p.holders, p.group + 1)
