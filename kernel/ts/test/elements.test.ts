@@ -14,6 +14,7 @@ import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { key } from '../src/foundation/compose.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
+import { living } from '../src/mechanics/death/shared.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-elements-'));
 let artifact: Uint8Array;
@@ -118,11 +119,22 @@ test('lightning landing on a wet golem stuns it and ends shocked and wet', () =>
 // Breaks (loka-6ztc): one advance misses the successor a tick schedules (precondition_failed on
 // the shocked row), or a crossed sub-step reads the row's stale next tick (the advance faults), or
 // ticks at the end it shares with the last tick. Job by job: ticks at 60 and 120, ends at 180.
-test('one advance across every tick and the end of a status matches job-by-job play', () => {
+// The golem shocked for 180 s at `per_tick`, then one advance of 180 s.
+function shockedFor180(per_tick: number) {
   const statuses = structuredClone(content.statuses!) as Record<string, any>;
-  statuses[`${C}:status/shocked`].duration = 180;
-  const w = wait(drop(fresh({ ...content, statuses } as Cartridge), 'jar'), 180);
+  Object.assign(statuses[`${C}:status/shocked`], { duration: 180, per_tick });
+  return wait(drop(fresh({ ...content, statuses } as Cartridge), 'jar'), 180);
+}
+test('one advance across every tick and the end of a status matches job-by-job play', () => {
+  const w = shockedFor180(-1);
   assert.deepEqual([hp(w), on(w, 'shocked')], [18, false]);
+});
+
+// Breaks (loka-6ztc): a fatal tick on a crossed sub-step (no job.complete before its hp loss)
+// hands the death sequence the wrong op. Job by job: 20 - 10 at 60, 0 at 120, dead.
+test('a fatal tick on a crossed sub-step kills the golem as job-by-job play does', () => {
+  const w = shockedFor180(-10);
+  assert.deepEqual([hp(w), on(w, 'shocked'), living(w, golem(w))], [0, false, false]);
 });
 
 // Breaks: status_applied emitted with no reaction listening, so every cartridge applying a status

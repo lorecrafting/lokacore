@@ -20,12 +20,14 @@ import { endStatus, expire, specOf } from './shared.ts';
 
 // A timed row: only it owns a job (a permanent one, row W8, has none).
 type Active = Required<Extract<StatusRow, { active: true }>>;
+type Adjust = Extract<DeltaOp, { op: 'resource.adjust' }>;
 
 /**
  * A due status tick or expiry on its holder (the player's body, an NPC or an item; rows 1, G3);
  * an obsolete job completes harmlessly. Narration is the player's only. A successor the same
  * advance also crosses runs as a sub-step at `now` (`next`, runtime/proposal_hours.ts, loka-6ztc):
- * its job is already complete and its row unwritten, so `now` is its tick; only the last writes.
+ * its job is already complete and its row unwritten, so `now` is its tick (the row's own when a
+ * refresh moved the end it ran at); only the last sub-step writes the row.
  */
 // size: allow 48, one due job saturates the tick, expires, or runs the fatal death sequence
 export function runStatus(
@@ -45,7 +47,7 @@ export function runStatus(
   const spec = specOf(world, status);
   if (!spec) return { kind: 'fault', code: 'precondition_failed' } as const;
   const player = body === world.body;
-  const tick = first ? row.next_tick_at : now;
+  const tick = first ? row.next_tick_at : Math.max(row.next_tick_at, now);
   const visit = { ...world, state: { ...world.state, clock: now } };
   const expired = now >= row.ends_at;
   const due = !expired && spec.per_tick !== undefined && now >= tick;
@@ -90,8 +92,8 @@ function amount(visit: World, body: EntityId, spec: StatusDefinition) {
   return { by, fatal: by < 0 && spec.resource.key === 'hp' && current + by === 0 };
 }
 
-// The ordinary death sequence after a fatal tick (ops[1] is its hp loss), with no killer; an NPC's
-// drops roll from the world's RNG (row 8).
+// The ordinary death sequence after a fatal tick (its first resource.adjust is the hp loss), with
+// no killer; an NPC's drops roll from the world's RNG (row 8).
 function dies(
   visit: World,
   command: Pick<Command, 'id'>,
@@ -104,7 +106,7 @@ function dies(
     prefix(visit, ops, now),
     command,
     {
-      loss: ops[1] as Extract<DeltaOp, { op: 'resource.adjust' }>,
+      loss: ops.find((o) => o.op === 'resource.adjust') as Adjust,
       owner_id: player ? visit.character : null,
       killer_id: null,
       credited_character_id: null,

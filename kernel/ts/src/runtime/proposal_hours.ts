@@ -1,5 +1,5 @@
-// A schedule job's next listed hour inside the advance as its own drain step (runtime/proposal.ts
-// jobs; mechanics/schedule/rule.ts scheduledJob sets `next`).
+// A job's next step inside the advance as its own drain step (runtime/proposal.ts jobs; `next` is
+// set by schedule/rule.ts scheduledJob, population/shared.ts runPopulation and status/job.ts runStatus).
 import { over } from '../foundation/compose.ts';
 import { cmp } from '../foundation/validate.ts';
 
