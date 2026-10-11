@@ -1,0 +1,13 @@
+{
+  "on": {
+    "event": "fact_changed",
+    "fact": "warden_lets_pass"
+  },
+  "apply": [
+    {
+      "op": "barrier.set",
+      "barrier": "toll_gate",
+      "to": "open"
+    }
+  ]
+}

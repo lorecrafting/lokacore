@@ -263,15 +263,10 @@ track climbs `up` from the green. The `hall_cupboard` exit is east of `moot_hall
 
 ### Signpost (`sign_social`, readable in `village_green`)
 
-> Low Wardle. The village keeps one score for you and each person keeps their own: help the Reeve
-> or curse him and watch Nell's prices and the Warden's temper change; give someone the apple and
-> see who warms to you. Talk your way past the Warden, or lean on him; what fails today passes
-> with practice. Tam the carter goes to the mill at ten and comes to the green at eleven, unless
-> it rains; what he saw there he tells whoever he meets, and only then will Nell talk about it.
-> Read what you find and think at the church lectern. The Reeve has a letter for Wat on the fell;
-> he wants it there within twenty minutes of your clock, and the moor will not wait either. Come
-> back after a long absence and the page opens with what you missed. The moot hall, south, has it
-> all behind one door.
+> Low Wardle. People here remember what you do, and they talk. The Reeve has work for a stranger,
+> the Warden keeps the toll gate east, and Tam the carter reaches the green at eleven with whatever
+> he has seen. Think over what you learn at the church lectern. The moot hall, south, has a little
+> of everything behind one door.
 
 ### Facts (`standing_sampler/facts.json`, `scoped_facts_sampler`, `codex_sampler`)
 

@@ -95,7 +95,7 @@ test('social 2-3: help makes Nell friendly (bread 2); wrong twice makes her host
   assert.equal(where(fled, fled.body), room(fled, 'village_green'));
   const passed = say(go(say(fled, 'reeve', 'help').world, 'east').world, 'warden', 'reason');
   assert.equal(outcome(passed), 'reason');
-  const through = go(play(passed.world, { type: 'open', direction: 'east' }).world, 'east').world;
+  const through = go(passed.world, 'east').world;
   assert.equal(where(through, through.body), room(through, 'tollhouse'));
 });
 
@@ -140,7 +140,7 @@ test('social 5: lean fails once, then passes with practice; the toll gate opens'
   assert.equal(refused(w, { type: 'open', direction: 'east' }), 'invalid_state');
   w = say(w, 'warden', 'lean').world;
   assert.deepEqual([...intimidate(w), fact(w, 'warden_lets_pass')], [2, 2, true]);
-  w = play(w, { type: 'open', direction: 'east' }).world;
+  assert.equal(where(go(w, 'east').world, w.body), room(w, 'tollhouse'));
   const reason = say(go(green(), 'east').world, 'warden', 'reason');
   assert.equal(outcome(reason), 'reason');
 });
@@ -250,9 +250,9 @@ let letter: World;
 let atWat: World;
 
 // Breaks: the deadline counts from the take not the accept, a hint fires early or for the wrong
-// stage, or the take does not complete the post-activation objective. The accept is pinned at
+// stage, or the held letter does not meet the objective. The accept is pinned at
 // 07:00 on day 1 (frost) so the run north at 19:30 is still day 1 (day 2 is rain: soaked, not chilled).
-test('social 10: accept at 07:00, the stone hint at +5 min, the take, then two road hints', () => {
+test('social 10: accept at 07:00, the stone hint at +5 min; the take shows the road hint, the hut at +10', () => {
   letter = say(green(), 'reeve', 'accept').world;
   assert.equal(letter.state.clock, AT_SEVEN);
   assert.deepEqual(
@@ -264,10 +264,10 @@ test('social 10: accept at 07:00, the stone hint at +5 min, the take, then two r
   letter = take(letter, 'letter');
   assert.deepEqual(
     [quest(letter).state, quest(letter).journal, quest(letter).remaining, quest(letter).hint],
-    ['objectives_complete', 'quest.carry_letter.objectives_met', 45000, undefined],
+    ['active', 'quest.carry_letter.objectives_met', 45000, 'quest.carry_letter.hint_road'],
   );
   letter = wait(letter, AT_SEVEN + 30000).world;
-  assert.equal(quest(letter).hint, 'quest.carry_letter.hint_road');
+  assert.equal(quest(letter).hint, 'quest.carry_letter.hint_hut');
   letter = wait(letter, AT_SEVEN + 45000).world;
   assert.equal(quest(letter).hint, 'quest.carry_letter.hint_hut');
 });
