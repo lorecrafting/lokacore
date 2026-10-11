@@ -199,6 +199,21 @@ test('loader: barrier.set and co_present tag need API 1.56; to locked needs a ke
     reload((c) => (keyed(c), stray(c), door({ tag: 'burnable' })(c))),
     'ok',
   );
+  // loka-kgd.103. Breaks: a trigger's room filter is ignored (a keyless burnable door on another
+  // room's exit refuses), or the room's own exits go unchecked.
+  const entering = (key: string) => (c: any) =>
+    (c.reactions[ref('reaction', 'fire_spreads')].on = {
+      event: 'entity_entered_room',
+      room: { ...C, kind: 'room', key },
+    });
+  assert.equal(
+    reload((c) => (entering('the_fold')(c), door({ tag: 'burnable' })(c))),
+    'ok',
+  );
+  assert.equal(
+    reload((c) => (entering('smithy')(c), door({ tag: 'burnable' })(c))),
+    lockout,
+  );
   // Breaks: a barrier.set naming no barrier of the cartridge loads.
   const gate = { barrier: { ...C, kind: 'barrier', key: 'gate' } };
   assert.equal(

@@ -82,6 +82,16 @@ defmodule Loka.ContentShowcaseTest do
       assert {:ok, _, _} =
                Loka.ContentSource.compile(dir, [keyed, door("locked", %{"tag" => "burnable"})])
 
+      # loka-kgd.103: only the trigger room's exits, when it names one.
+      entering = fn room ->
+        {"reactions/fire_spreads.json",
+         &Map.put(&1, "on", %{"event" => "entity_entered_room", "room" => room})}
+      end
+
+      locked = door("locked", %{"tag" => "burnable"})
+      assert {:ok, _, _} = Loka.ContentSource.compile(dir, [entering.("the_fold"), locked])
+      assert lockout in diags(dir, [entering.("smithy"), locked])
+
       assert {"UNRESOLVED_REFERENCE", "reactions/fire_spreads.apply[1].barrier"} in diags(dir, [
                door("open", %{"barrier" => "gate"})
              ])

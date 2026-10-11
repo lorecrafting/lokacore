@@ -5,7 +5,7 @@
 // with typed fact values and restricted quest activation. Its `when` is walked
 // with every other policy (content/cartridge_refs.ts nodes).
 import { refString } from '../runtime/decision.ts';
-import type { Diagnostic } from '../contracts.gen.ts';
+import type { DefinitionRef, Diagnostic } from '../contracts.gen.ts';
 import { diag, step, type Checks, type Obj } from './cartridge_refs.ts';
 
 // Each trigger filter that names a definition (W1), with that definition's kind; sorted, as the
@@ -105,7 +105,7 @@ export function reactions(c: Obj, { named, typedValue }: Checks): Diagnostic[] {
         if (r.on.event !== 'fact_changed')
           out.push(diag('OUTCOME_MISMATCH', `${at}.apply[${i}].op`));
       } else if (s.op === 'barrier.set') {
-        out.push(...barrierSet(c, s, `${at}.apply[${i}]`, named));
+        out.push(...barrierSet(c, s, r.on.room, `${at}.apply[${i}]`, named));
       } else if (!['status.apply', 'status.cure', 'experience.grant'].includes(s.op)) {
         // status steps, experience.grant, fact.adjust's int: with their declarations (cartridge_standing.ts).
         named(s.fact, 'fact', `${at}.apply[${i}].fact`);
@@ -119,10 +119,18 @@ export function reactions(c: Obj, { named, typedValue }: Checks): Diagnostic[] {
 
 // Row W22 (loka-kgd.96): a named barrier resolves; to locked needs a key_item on the named barrier,
 // or on every barrier carrying the tag, else no key could ever unlock it (BARRIER_UNREACHABLE_KEY).
-function barrierSet(c: Obj, s: Obj, at: string, named: Checks['named']): Diagnostic[] {
+function barrierSet(
+  c: Obj,
+  s: Obj,
+  room: DefinitionRef | undefined,
+  at: string,
+  named: Checks['named'],
+): Diagnostic[] {
   if (s.barrier) named(s.barrier, 'barrier', `${at}.barrier`);
-  // A tag reaches only barriers on exits (setBarrier), never a container's lid.
-  const exits = Object.values((c.rooms ?? {}) as Obj).flatMap((r) => Object.values(r.exits as Obj));
+  // A tag reaches only barriers on exits (setBarrier), never a container's lid, and only the event
+  // room's: the trigger's room filter fixes it, else any room may be it (loka-kgd.103).
+  const rooms = room ? [c.rooms?.[refString(room)]] : Object.values((c.rooms ?? {}) as Obj);
+  const exits = rooms.flatMap((r) => Object.values((r?.exits ?? {}) as Obj));
   const hit = s.barrier
     ? [c.barriers?.[refString(s.barrier)]]
     : exits

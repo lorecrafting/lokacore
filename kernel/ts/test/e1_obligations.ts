@@ -1,4 +1,4 @@
-// size: allow 540, the AB brief places the reaction witness here; new witnesses get their own module
+// size: allow 542, the AB brief places the reaction witness here; new witnesses get their own module
 import { gameView, type World } from '../src/index.ts';
 import type {
   CharacterId,
@@ -17,6 +17,7 @@ import { detailOf } from '../src/commands/actions.ts';
 import { knowledgeChoiceStep } from './e1_knowledge_effects.ts';
 import { identityWitnesses } from './e1_identity.ts';
 import { creatureWitnesses } from './e1_creatures.ts';
+import { barrierGroup, barrierOp } from './e1_barrier.ts';
 import { level, resourceSpec } from '../src/mechanics/resource.ts';
 import { key, same } from '../src/foundation/compose.ts';
 import { apply } from '../src/runtime/apply.ts';
@@ -424,7 +425,7 @@ export function reactionWitnesses(before: World, after: World, decision: Decisio
       return ops.find((o) => o.op === 'status.transition' && same(o.status, step.status));
     if (step.op === 'experience.grant')
       return ops.find((o) => o.op === 'levelling.set' && o.character_id === actor);
-    if (step.op === 'barrier.set') return undefined; // row W22: no reaction witness yet
+    if (step.op === 'barrier.set') return barrierOp(ops, step);
     const prior = before.state.population_plans?.[key(step.plan)];
     const next = after.state.population_plans?.[key(step.plan)];
     return ops.find(
@@ -485,6 +486,7 @@ export function reactionWitnesses(before: World, after: World, decision: Decisio
           caused({ type: 'fact_changed', fact: step.fact, old: op.expected, new: step.value })
           ? op.writer_group
           : undefined;
+      if (step.op === 'barrier.set') return barrierGroup(after, step, op, caused);
       // The shape matched op.expected/op.value to the before/after plan rows.
       if (step.op !== 'population.suppress' || op?.op !== 'population.control') return undefined;
       return op.expected &&
