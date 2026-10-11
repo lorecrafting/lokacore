@@ -2,7 +2,7 @@ import { illuminated } from './light/shared.ts';
 // The policy evaluator (policy@1, fact@1's fact_compare, containment@1's has_item, schedule@1's
 // time_window, barrier@1's barrier_state, quest@1's quest_state, target_resolution@1's
 // target_present, attributes@1's stat_compare and resource_compare, tags@1's has_tag, calendar@1's sky,
-// variety@1's visited_count, equipment@1's wearing, status@1's status_active, target_resolution@1's
+// variety@1's visited_count, equipment@1's wearing, attributes@1's level_compare (row 29a), status@1's status_active, target_resolution@1's
 // npc_present; 21 §3.2, §4 Policy; 06 §20-21): pure, over committed state, for one
 // actor and the target of the action evaluated, if any.
 import type {
@@ -26,6 +26,7 @@ import { value as attributeValue, wearing } from './attributes/shared.ts';
 import { currentStatus } from './status/shared.ts';
 import { living } from './death/shared.ts';
 import { perceived } from './senses.ts';
+import { levelling } from './levelling/shared.ts';
 
 // The policy that always holds; here, not in dialogue/shared.ts, so scene/shared.ts (and
 // disposition.ts through it) imports no dialogue module: the Metro bundle threw on that cycle.
@@ -85,17 +86,21 @@ export function holds(
       return tagsOf(world, actor, p, ctx.target)?.includes(p.tag) === true;
     case 'wearing':
       return wearing(world, actor, p.tag);
+    case 'level_compare': // row 29a; level 1 without world.levelling
+      return (levelling(world, actor)?.level ?? 1) >= p.at_least;
     case 'status_active':
       return ctx.target !== undefined && !!currentStatus(world, ctx.target, p.status);
     case 'npc_present':
       return here(world, actor, world.entityIds[refString(p.npc)]);
     case 'cue_perceived':
       return perceived(world, actor, p, ctx, holds);
-    default: {
-      const leaf: never = p; // a schema leaf without its case here fails tsc
-      throw new Error(`policy op ${(leaf as Policy).op} is not installed`);
-    }
+    default:
+      return uninstalled(p); // a schema leaf without its case here fails tsc
   }
+}
+
+function uninstalled(leaf: never): never {
+  throw new Error(`policy op ${(leaf as Policy).op} is not installed`);
 }
 
 // fact@1's read: an entity or pair fact (toolbox row W2) at its named NPC or item, or with subject

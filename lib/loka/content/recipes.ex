@@ -26,7 +26,8 @@ defmodule Loka.Content.Recipes do
   has a failure outcome exactly when it has a check (OUTCOME_MISMATCH); its target names a room
   of this cartridge and a detail of that room (a use target's tool liquid a liquid of it, and a
   use target needs kernel_api 1.49; row G4), each fact.assign a fact with a value of its type, each
-  status.cure a status and only on a use recipe (SCHEMA_VIOLATION),
+  status.cure a status and only on a use recipe (SCHEMA_VIOLATION) (a spell's floor and word:
+  `Loka.Content.Spells`),
   each narration participant but the actor an npc or item of this cartridge, as its role says,
   its check's key is no other recipe's check's (DUPLICATE_DEFINITION),
   and its label and narrations have catalog entries (unless `text` is `:unknown`); no recipe's
@@ -150,9 +151,9 @@ defmodule Loka.Content.Recipes do
     end
   end
 
-  # An unresolved room or detail is the target's own diagnostic; a use target (row G4) has no
-  # detail and so no rating.
-  defp rated?(%{"kind" => "use"}, _, _), do: false
+  # An unresolved room or detail is the target's own diagnostic; a use or spell target (rows G4,
+  # 29a) has no detail and so no rating.
+  defp rated?(%{"kind" => kind}, _, _) when kind in ~w(use spell), do: false
 
   defp rated?(t, m, defs) do
     case resolve(t["room"], "room", m, defs) do
@@ -245,6 +246,9 @@ defmodule Loka.Content.Recipes do
         else: []
       )
 
+  # Toolbox row 29a: a spell names no definition.
+  defp target(_, %{"kind" => "spell"}, _, _), do: []
+
   # The room resolves (reference/6), then the detail is one of its details.
   defp target(rel, t, m, defs) do
     case resolve(t["room"], "room", m, defs) do
@@ -283,12 +287,11 @@ defmodule Loka.Content.Recipes do
         do: unresolved(rel, ["actions", i, "actions", j], key)
   end
 
-  # The registered commands and this cartridge's action, recipe, quest and dialogue keys.
+  # Commands and this cartridge's action, recipe (a spell is cast by word), quest, dialogue keys.
   defp known(defs, actions) do
     others = for kind <- ~w(quest dialogue), {_, {_, [], d}} <- defs[kind], do: d["key"]
-
-    MapSet.new(commands() ++ others ++ for({_, r} <- all(defs), do: r["key"]))
-    |> MapSet.union(actions)
+    recipes = for {_, r} <- all(defs), r["target"]["kind"] != "spell", do: r["key"]
+    MapSet.union(MapSet.new(commands() ++ others ++ recipes), actions)
   end
 
   defp unresolved(rel, steps, target),

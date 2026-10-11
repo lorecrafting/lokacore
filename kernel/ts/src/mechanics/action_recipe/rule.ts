@@ -21,7 +21,9 @@
 // (toolbox row W23) first assigns its seen_tip_<key> after the steps, while unseen, and the actor
 // then also reads the tip after the outcome's line. Result bands join later. A use recipe
 // (toolbox row G4) acts on the invoked target with the invoked held tool (shared.ts useRefused); its
-// status.cure steps end the target's active status (status/shared.ts cureOps).
+// status.cure steps end the target's active status (status/shared.ts cureOps). A spell (toolbox row
+// 29a) is the same run, reached by cast's word instead of perform's key (shared.ts spellOf; step's
+// castAdmission refused an unknown or barred word).
 import type {
   ActionRecipe,
   CharacterId,
@@ -56,14 +58,16 @@ import { value as attributeValue } from '../attributes/shared.ts';
 import { uniform } from '../../foundation/rng.ts';
 import { opposed, practised } from '../skills.ts';
 import { cureOps } from '../status/shared.ts';
-import { useRefused } from './shared.ts';
+import { spellOf, useRefused } from './shared.ts';
 
 export const decide: Rule<'action_recipe'> = (world, command, mint, steps = { n: 0 }) => {
-  const { actor_id, action } = command.payload;
-  const recipe = resolved(world, actor_id)[action]?.recipe;
-  const body = bodyOf(world, actor_id);
-  if (!recipe || !body) return rejected('not_found');
-  const subject_id = subjectOf(world, recipe.target, command.payload, body, steps);
+  const p = command.payload;
+  const recipe = recipeOf(world, p);
+  const body = bodyOf(world, p.actor_id);
+  if (!recipe || !body) return rejected(p.type === 'cast' ? 'invalid_state' : 'not_found');
+  const { actor_id } = p;
+  const action = recipe.key;
+  const subject_id = subjectOf(world, recipe.target, p, body, steps);
   if (typeof subject_id !== 'string') return subject_id;
   const admitted = admission(world, recipe, actor_id, body);
   if (typeof admitted === 'string') return rejected(admitted);
@@ -97,9 +101,13 @@ export const decide: Rule<'action_recipe'> = (world, command, mint, steps = { n:
   );
 };
 
+// The recipe a perform names by key in the actor's set, or (row 29a) the spell a cast names by word.
+const recipeOf = (world: World, p: Command['payload']) =>
+  p.type === 'cast' ? spellOf(world, p.word) : resolved(world, p.actor_id)[p.action]?.recipe;
+
 // The entity the recipe acts on, or the decision refusing it: its detail, in the actor's room (no
 // item_id; a target_id must be it); or (row G4) a use's invoked target (shared.ts useRefused; a reach
-// fault faults the decision).
+// fault faults the decision); or (row 29a) a spell's caster's body.
 function subjectOf(
   world: World,
   target: RecipeTarget,
@@ -107,6 +115,8 @@ function subjectOf(
   body: EntityId,
   steps: Steps,
 ) {
+  if (target.kind === 'spell') return body;
+  if (p.type === 'cast') return rejected('invalid_state'); // spellOf names only spells
   if (target.kind === 'use') {
     const code = useRefused(world, target, body, p.item_id, p.target_id, steps);
     if (code === 'budget_exceeded' || code === 'containment_cycle')

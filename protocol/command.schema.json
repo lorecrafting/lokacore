@@ -620,6 +620,23 @@
           "additionalProperties": false
         },
         {
+          "description": "Cast the spell whose word this is (action_recipe@1; toolbox row 29a): the word, case-folded, names a spell recipe (action.schema.json RecipeTarget spell), performed like a perform of it. An unknown word and a spell whose policy fails are refused alike, invalid_state; the word never reaches narration.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "cast"
+            },
+            "actor_id": {
+              "$ref": "identity.schema.json#/$defs/CharacterId"
+            },
+            "word": {
+              "$ref": "action.schema.json#/$defs/Word"
+            }
+          },
+          "required": ["type", "actor_id", "word"],
+          "additionalProperties": false
+        },
+        {
           "description": "Shout one word to the NPCs in the actor's room and in the rooms one exit away (speech@1; toolbox row G9).",
           "type": "object",
           "properties": {

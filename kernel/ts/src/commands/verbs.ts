@@ -24,6 +24,7 @@ export const VERBS: Readonly<Record<string, [TargetSpec, ActionInputParameter[]]
   drink: [entity('inventory'), []],
   look: [{ kind: 'none' }, []],
   say: [{ kind: 'none' }, ['word']],
+  cast: [{ kind: 'none' }, ['word']],
   whisper: [{ kind: 'entity', scopes: ['room_occupants'] }, ['word']],
   shout: [{ kind: 'none' }, ['word']],
   read: [{ kind: 'entity', scopes: ['inspectable_details'] }, []],

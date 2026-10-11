@@ -23264,6 +23264,109 @@
     ]
   },
   {
+    "contract": "RecipeTarget",
+    "value": {
+      "kind": "spell"
+    },
+    "errors": [
+      {
+        "path": "/word",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "RecipeTarget",
+    "value": {
+      "kind": "spell",
+      "word": "Lux",
+      "x": 1
+    },
+    "errors": [
+      {
+        "path": "/word",
+        "code": "pattern_mismatch"
+      },
+      {
+        "path": "/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "Policy",
+    "value": {
+      "op": "level_compare"
+    },
+    "errors": [
+      {
+        "path": "/at_least",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "Policy",
+    "value": {
+      "op": "level_compare",
+      "at_least": 0,
+      "x": 1
+    },
+    "errors": [
+      {
+        "path": "/at_least",
+        "code": "below_minimum"
+      },
+      {
+        "path": "/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "CommandPayload",
+    "value": {
+      "type": "cast"
+    },
+    "errors": [
+      {
+        "path": "/actor_id",
+        "code": "missing_property"
+      },
+      {
+        "path": "/word",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "CommandPayload",
+    "value": {
+      "type": "cast",
+      "actor_id": "11111111-1111-4111-8111-111111111111",
+      "word": "two words"
+    },
+    "errors": [
+      {
+        "path": "/word",
+        "code": "pattern_mismatch"
+      }
+    ]
+  },
+  {
+    "contract": "Policy",
+    "value": {
+      "op": "level_compare",
+      "at_least": 2147483648
+    },
+    "errors": [
+      {
+        "path": "/at_least",
+        "code": "above_maximum"
+      }
+    ]
+  },
+  {
     "contract": "StatusDefinition",
     "value": {
       "key": "might",
