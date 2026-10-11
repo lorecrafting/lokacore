@@ -281,12 +281,10 @@ test("a status reaction applies to its event's subject", () => {
     [antidote(w)],
     'fact_changed subject',
   );
-  // Breaks: a subject that is no body, NPC or item (a room) faulting the delivery.
-  assert.deepEqual(
-    holders({ ...fact, subject_id: (entry.payload as { room_id: string }).room_id }),
-    [],
-    'room subject',
-  );
+  // Breaks: a subject that can hold no status (an id no holder has; a room holds one since status
+  // reader 9) faulting the delivery.
+  const nobody = 'ffffffff-0000-4000-8000-000000000000';
+  assert.deepEqual(holders({ ...fact, subject_id: nobody }), [], 'no holder');
 });
 
 // Breaks: the loader drops one of its status checks, so the artifact loads and fails in play.

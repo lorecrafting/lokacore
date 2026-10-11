@@ -608,7 +608,7 @@ Attribution: every delivery runs for the command actor (the quest-resolution exc
 so an event whose subject is an NPC or a thing (a hound's death, a hit on a guard, a crow
 taking an item) still reads the actor's `when` and writes the actor's facts, quests and
 experience; only `status.apply`, ([status reader 3](#status-readers-toolbox-rows-sr1-sr2-and-sr3)) `status.cure` and `status_active {subject: "subject"}` follow the subject, which may be the actor's body, an NPC or an
-item ([row G3](#statuses-on-npcs-and-things-toolbox-row-g3)), unless the step names an `item`, ([row 42](#potions-and-songs-toolbox-rows-18-and-42)) an `npc` or ([status reader 9](#a-room-as-a-status-holder-status-reader-9)) a `room`; any other subject (a room) takes nothing; ([row W22](#fire-toolbox-row-w22)) `barrier.set` names its barrier or acts on the event's room. A check, action or custom event's subject_id
+item ([row G3](#statuses-on-npcs-and-things-toolbox-row-g3)), unless the step names an `item`, ([row 42](#potions-and-songs-toolbox-rows-18-and-42)) an `npc` or ([status reader 9](#a-room-as-a-status-holder-status-reader-9)) a `room`; any other subject (a detail) takes nothing, and since status reader 9 a room subject takes it; ([row W22](#fire-toolbox-row-w22)) `barrier.set` names its barrier or acts on the event's room. A check, action or custom event's subject_id
 names its target, so its status lands on the doer: a failed disarm poisons the actor. A filter naming a definition (`item`,
 `room`, `quest`, `story_point`, `barrier`, `scene`, `kind`, `victim`, `npc` and `attacker` as an NPC, `status`) must name one of
 this cartridge (`item` matches its authored instance only, never a created one such as a
