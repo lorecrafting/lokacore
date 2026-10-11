@@ -188,19 +188,25 @@ pack is fought alone. Known limit until Beads `loka-x2gv` lands: a `bleeding` ti
 advance as a combat round on the player (fighting within 900 of a boar's bite without the poultice)
 rejects that wait; the guided loop never does this.
 
-## Built (slice C, Beads `loka-y6yg.3`; the pit, Beads `loka-y6yg.10`)
+## Built (slice C, Beads `loka-y6yg.3`; the pit, Beads `loka-y6yg.10`; the sandbox pack, Beads `loka-y6yg.11`)
 
-Steps 1 to 10 are built and pinned by `kernel/ts/test/showcase_combat.test.ts` (the pit after the
-`loka-6ql4` fix). Differences from the text above:
+Steps 1 to 10 and the sandbox pack are built and pinned by `kernel/ts/test/showcase_combat.test.ts`
+(the pit after the `loka-6ql4` fix). Differences from the text above:
 
-- The sandbox pack (`tilt_goblins`) is not built: it waits for an attacker filter on
-  `attack_result` (Beads `loka-kgd.79`), because `boar_gore` reads only `npc_present tilt_boar`
-  and would wound the player (bleeding and gored) on any goblin hit in `tilt_yard`. The tilt
-  signpost clause stays "has a second boar, a poultice and a draught".
-- The pit's plan has `replacement_delay` 8640000, not 86400: the loader requires
+- Both pack plans have `replacement_delay` 8640000, not 86400: the loader requires
   `wander_interval <= replacement_delay`, and the wander interval keeps the pack from wandering in
-  play. A pack killed stays gone for a hundred days. `enemy_fled` names `north` and `south` (the
-  loader wants every exit inside the area, from both rooms).
+  play. A pack killed stays gone for a hundred days.
+- A spawn template's room must be its plan's home, so the sandbox pack has its own template
+  `tilt_goblin` (room `tilt_yard`, bundle `tilt_goblins`; texts and `ear` shared) and its own
+  `kills` entry of 10. `enemy_fled` names `north` and `south` (the loader wants every exit inside
+  the area, from both rooms).
+- `boar_gore` is two rules on the [attacker filter](../system/mechanics.md#attacker-filter-loka-kgd79)
+  (Beads `loka-kgd.79`, kernel_api 1.58): `boar_gore {attacker: boar}` and `tilt_boar_gore
+  {attacker: tilt_boar}`, each `on {event: attack_result, hit: true}` and `when npc_present` of
+  its own boar. Only a boar's hit wounds, so a tilt-yard goblin's blow does not (the tilt yard
+  pin). The `when` stays: a fatal blow's reaction reads after the player wakes at the inn, and
+  without it the woken body would bleed (combat 6). The boars' `immune` no longer comes into play:
+  a blow on a boar is never a boar's.
 - Step 9 experience is 70 while Beads `loka-lpq6` is open (B's kill pays nothing).
 - `aldous_lesson` has `learn` only: a second choice makes it a hub that reopens, and the compiler
   refuses a repeatable `receive` (OUTCOME_MISMATCH). `aldous_talk` is a hub: after `bounty` the
@@ -259,9 +265,9 @@ when the first falls, or at a shout); use-on x fire x doors (G4, W22); sequence 
 
 ## Mechanics wanted and not found (toolbox findings)
 
-1. `attack_result` has no attacker filter (`FILTERS`, `kernel/ts/src/mechanics/reaction.ts`), so a
-   wound that one foe inflicts is authored by `npc_present` plus `immune` on the foe; two foes
-   that share a room cannot inflict different wounds.
+1. `attack_result` had no attacker filter, so a wound that one foe inflicts was authored by
+   `npc_present` plus `immune` on the foe; two foes that share a room could not inflict different
+   wounds. Closed by the `attacker` filter (Beads `loka-kgd.79`, Built above).
 2. Pack kill credit (Beads `loka-lpq6`): only the last goblin standing earns experience.
 3. A pack population in a cartridge with long waits (Beads `loka-6ql4`, above).
 4. No reaction step moves an NPC (Beads `loka-kgd.22`): Gil cannot come when called; he stands

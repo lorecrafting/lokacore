@@ -29,9 +29,17 @@ defmodule Loka.ContentShowcaseTest do
       do: spread(&List.replace_at(&1, 1, Map.merge(%{"op" => "barrier.set", "to" => to}, by)))
 
     test "barrier.set and co_present tag need API 1.56; to locked needs a key_item", %{dir: dir} do
+      # The boars' attacker filters (1.58) dropped too.
+      unfiltered =
+        for r <- ~w(boar_gore tilt_boar_gore),
+            do:
+              {"reactions/#{r}.json",
+               &update_in(&1, ["on"], fn on -> Map.delete(on, "attacker") end)}
+
       at155 = [
         {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.55")},
         {"reactions/kindle.json", nil}
+        | unfiltered
       ]
 
       # No tag left: the spread's tag dropped and the door named.
