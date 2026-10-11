@@ -14,6 +14,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: toolbox row 12, traps (loka-kgd.73)](2026-10-10-toolbox-m8-traps-review.md): **APPROVE WITH NOTES**
 - [Item review: toolbox row 26, order and dial puzzles (loka-kgd.75, batch M8)](2026-10-10-toolbox-m8-puzzles-review.md): **APPROVE WITH NOTES**
 - [Review: population successor across a multi-hour advance (loka-6ql4)](2026-10-10-toolbox-m8-pop-review.md): **APPROVE**
+- [Review: toolbox row 19a, tool-gated harvest (loka-kgd.84)](2026-10-10-toolbox-m8-harvest-review.md): **CHANGES REQUIRED**
 - [Review: a round joins all its rows' writer groups; sight handoff check scoped (loka-x2gv, loka-kgd.43, toolbox M8)](2026-10-10-toolbox-m8-groups-review.md): **APPROVE**
 - [Review: toolbox row W21, fear and morale for NPCs (loka-kgd.74)](2026-10-10-toolbox-m8-fear-review.md): **APPROVE WITH NOTES**
 - [Review: toolbox row 6a, combat target choice in the same room (loka-kgd.63)](2026-10-10-toolbox-m7-targets-review.md): **APPROVE WITH NOTES**
