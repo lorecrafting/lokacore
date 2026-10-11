@@ -7,9 +7,19 @@
   "opens_when": {
     "policy_version": 1,
     "root": {
-      "op": "fact_compare",
-      "fact": "strongbox_picked",
-      "equals": true
+      "op": "any",
+      "items": [
+        {
+          "op": "fact_compare",
+          "fact": "strongbox_picked",
+          "equals": true
+        },
+        {
+          "op": "fact_compare",
+          "fact": "strongbox_forced",
+          "equals": true
+        }
+      ]
     }
   }
 }

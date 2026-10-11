@@ -7,60 +7,40 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { gameView } from '../src/index.ts';
 import type { World } from '../src/runtime/decision.ts';
-import { decode } from '../src/foundation/canonical.ts';
-import { pending, spokenBy } from '../src/mechanics/dialogue/shared.ts';
+import { pending } from '../src/mechanics/dialogue/shared.ts';
 import { shelf } from '../src/mechanics/commerce/shared.ts';
 import { engaged } from '../src/mechanics/combat/shared.ts';
-import { disposition } from '../src/mechanics/disposition.ts';
 import { describeEntity } from '../src/mechanics/description_variant/rule.ts';
 import { level } from '../src/mechanics/skills.ts';
 import {
+  choose,
   detail,
-  fresh,
+  fact,
   go,
+  green,
   HOUR,
   id,
   labels,
+  leave,
+  mood,
+  npc,
+  outcome,
   perform,
   play,
   pool,
   refused,
+  room,
+  say,
   take,
+  talk,
+  topics,
   wait,
+  where,
 } from './showcase_fixture.ts';
 
-const SOCIAL = '5ca5e000-0000-4000-8000-00000000032e';
 const WET = '5ca5e000-0000-4000-8000-000000000306';
 const AT_SEVEN = 7 * HOUR;
-const green = (ctx = SOCIAL) => go(fresh(ctx), 'south').world;
-/** A fact's value for `key` (and, for a pair or entity fact, `subject`'s row); undefined if unset. */
-const fact = (w: World, key: string, subject?: string) =>
-  Object.entries(w.state.facts ?? {}).find(([k]) => {
-    const t = decode(k) as { fact: { key: string }; subject_id?: string };
-    return t.fact.key === key && (subject === undefined || t.subject_id === subject);
-  })?.[1];
-const npc = (w: World, k: string) => id(w, 'npc', k);
-const where = (w: World, k: string) => w.state.containers[k];
-const room = (w: World, k: string) => w.roomIds[`toolbox_showcase@0.0.1:room/${k}`];
-/** Talk to `who`; the dialogue that opened and the world with the choice pending. */
-function talk(w: World, who: string) {
-  const r = play(w, { type: 'talk', target_id: npc(w, who) });
-  return { world: r.world, opened: spokenBy(w, w.character, npc(w, who))?.key };
-}
-function choose(w: World, choice_id: string) {
-  const [continuation_id] = pending(w, w.character)!;
-  return play(w, { type: 'choose', choice_id, continuation_id });
-}
-// An accepted decision's outcome.
-const outcome = (r: ReturnType<typeof play>) =>
-  r.decision.kind === 'accepted' ? r.decision.outcome : undefined;
-// Pick `choice` from `who`'s dialogue, talking first unless its hub is still open.
-const say = (w: World, who: string, choice: string) =>
-  choose(pending(w, w.character) ? w : talk(w, who).world, choice);
-const leave = (w: World) => choose(w, 'leave').world;
 const bread = (w: World, who = 'nell') => shelf(w, npc(w, who))![0];
-const mood = (w: World, who: string) => disposition(w, w.character, npc(w, who));
-const topics = (w: World) => (gameView(w).topics ?? []).map((t) => t.label as string);
 const quest = (w: World) => gameView(w).journal[0]!;
 // Intimidate's use count and level.
 function intimidate(w: World) {

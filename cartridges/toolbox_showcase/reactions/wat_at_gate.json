@@ -1,0 +1,14 @@
+{
+  "on": {
+    "event": "entity_entered_room",
+    "room": "warden_gate",
+    "npc": "wat"
+  },
+  "apply": [
+    {
+      "op": "fact.assign",
+      "fact": "knows_ash",
+      "value": true
+    }
+  ]
+}
