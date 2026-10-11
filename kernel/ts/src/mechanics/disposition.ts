@@ -44,34 +44,49 @@ export function engage(
   steps: Steps,
 ): { ops: DeltaOp[]; narration: Text[] } {
   const npc = hostileAt(world, actor, there, steps);
-  const job = npc && npcRef(world, npc);
-  if (!npc || !job) return { ops: [], narration: [] };
+  const ops = npc ? opened(world, actor, body, npc, mint, world.state.clock) : [];
+  if (!ops.length) return { ops: [], narration: [] };
+  return {
+    ops,
+    narration: [{ key: (world.entities[npc!] as NpcDefinition).disposition!.engage! }],
+  };
+}
+
+/** `npc`'s encounter with `actor`'s body in its room, the first round an interval after `from`
+ * (row 29b, loka-kgd.101: a spell's hit, from the cast's end); none for an NPC without a round job. */
+export function opened(
+  world: World,
+  actor: CharacterId,
+  body: EntityId,
+  npc: EntityId,
+  mint: Mint,
+  from: number,
+): DeltaOp[] {
+  const job = npcRef(world, npc);
+  if (!job) return [];
   const encounter_id = encounterId(mint);
   const job_id = jobId(mint);
-  return {
-    ops: [
-      {
-        op: 'encounter.open',
-        writer_group: 0,
-        encounter_id,
-        character_id: actor,
-        body_id: body,
-        npc_id: npc,
-        room_id: there,
-        job_id,
-      },
-      {
-        op: 'job.schedule',
-        writer_group: 0,
-        job_id,
-        job,
-        encounter_id,
-        due_time: add(world.state.clock, world.cartridge.world!.combat!.interval),
-      },
-      ...attacked(world, npc, encounter_id),
-    ],
-    narration: [{ key: (world.entities[npc] as NpcDefinition).disposition!.engage! }],
-  };
+  return [
+    {
+      op: 'encounter.open',
+      writer_group: 0,
+      encounter_id,
+      character_id: actor,
+      body_id: body,
+      npc_id: npc,
+      room_id: world.state.containers[npc]!,
+      job_id,
+    },
+    {
+      op: 'job.schedule',
+      writer_group: 0,
+      job_id,
+      job,
+      encounter_id,
+      due_time: add(from, world.cartridge.world!.combat!.interval),
+    },
+    ...attacked(world, npc, encounter_id),
+  ];
 }
 
 /**

@@ -191,7 +191,7 @@ function creditDelivery(p: P, next: Queued): Admitted | undefined {
   if (next.cause.payload.type !== 'entity_died') return;
   const at = now(p);
   if (!('cartridge' in at)) return at;
-  const credit = deathCredit(at, next.cause, p.ops, p.events);
+  const credit = deathCredit(at, next.cause, p.ops, p.events, p.command);
   if (credit.length)
     return join(
       p,

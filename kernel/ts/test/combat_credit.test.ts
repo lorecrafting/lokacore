@@ -23,7 +23,12 @@ test('credit delivery rejects counterfeit attribution and missing fatal/corpse p
     key({ kind: 'fact', fact, scope: { kind: 'player', character_id: initial.character } })
   ];
   const world = { ...result.world, state: { ...result.world.state, facts } };
-  assert.equal(deathCredit(world, event, delta.ops, events).length, 1);
+  // A root that is not a cast never takes the spell path (loka-kgd.101), even naming the death's cause.
+  const root = {
+    id: event.causation_id as never,
+    payload: { type: 'wait', actor_id: initial.character },
+  };
+  assert.equal(deathCredit(world, event, delta.ops, events, root).length, 1);
   const counterfeit = [
     { ...payload, victim_id: rat(world, 2) },
     { ...payload, room_id: room(world, 'drowned_lantern') },
@@ -34,12 +39,13 @@ test('credit delivery rejects counterfeit attribution and missing fatal/corpse p
   ];
   for (const p of counterfeit)
     assert.deepEqual(
-      deathCredit(world, { ...event, payload: p } as DomainEvent, delta.ops, events),
+      deathCredit(world, { ...event, payload: p } as DomainEvent, delta.ops, events, root),
       [],
     );
-  assert.deepEqual(deathCredit(world, event, [], events), []);
+  assert.deepEqual(deathCredit(world, event, [], events, root), []);
+  assert.deepEqual(deathCredit(world, event, delta.ops, [], root), []); // no attack_result, no cast
   const noLoss = delta.ops.map((o) => (o.op === 'resource.adjust' ? { ...o, from: 0 } : o));
-  assert.deepEqual(deathCredit(world, event, noLoss, events), []);
+  assert.deepEqual(deathCredit(world, event, noLoss, events, root), []);
   const corpse = world.state.created![payload.corpse_id];
   const changed = { ...corpse, origin: { ...corpse.origin, event_id: events[0].id } };
   const wrongOccurrence = {
@@ -49,7 +55,7 @@ test('credit delivery rejects counterfeit attribution and missing fatal/corpse p
   const matchingOps = delta.ops.map((o) =>
     o.op === 'entity.create' ? { ...o, identity: changed } : o,
   ) as DeltaOp[];
-  assert.deepEqual(deathCredit(wrongOccurrence, event, matchingOps, events), []);
+  assert.deepEqual(deathCredit(wrongOccurrence, event, matchingOps, events, root), []);
   const displaced = {
     ...world,
     state: {
@@ -57,7 +63,7 @@ test('credit delivery rejects counterfeit attribution and missing fatal/corpse p
       containers: { ...world.state.containers, [payload.corpse_id]: room(world, 'chapel_nave') },
     },
   };
-  assert.deepEqual(deathCredit(displaced, event, delta.ops, events), []);
+  assert.deepEqual(deathCredit(displaced, event, delta.ops, events, root), []);
 });
 
 // Breaks: counting repeated deaths as different rats or awarding/creating the later quest now.
