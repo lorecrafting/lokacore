@@ -128,7 +128,7 @@ Social steps continue plan 1's numbering.
 
 ## Pins the build writes
 
-- `kernel/ts/test/showcase_social.test.ts` social 15 to 21 as above, including: the strongbox's
+- `kernel/ts/test/showcase_consequence.test.ts` social 15 to 21 as above, including: the strongbox's
   status row and its `ends_at`; `warden_knows` false before and true at the expiry; no line in the
   expiry receipt; the Warden's entry at 13:00 day 2 with no encounter and the engage at 14:30; the
   empty gate at 13:00 and the ledger mend; `knows_ash` on Wat, Tam and Nell at exactly 14:00 day 1,
@@ -152,7 +152,8 @@ start). Close the app for 35 real minutes.
 **Save B, loud.** The same walk, but force the box, and burn the letter in Wat's fire. Look at Wat
 before you leave the hut. Back to the green before 13:00. Close the app for 35 real minutes.
 
-If the day after is a rainy one Tam shelters in the church at 11:00 and Nell hears nothing until the
+Each new save draws its own sky, so day 1 may be hot (overheated on the fell, not chilled). If the day
+after is a rainy one Tam shelters in the church at 11:00 and Nell hears nothing until the
 next dry day; the sky shows it on the fell, and the wait is a real half hour.
 
 On return (about 18:00 day 2, the Warden back at his gate), in each save: read the recap block;

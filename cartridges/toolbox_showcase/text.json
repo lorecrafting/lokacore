@@ -296,7 +296,7 @@
   "narration.force_iron_door.failure": "The iron door does not move.",
   "narration.force_iron_door.success": "The iron door gives.",
   "narration.force_strongbox.failure": "The lock holds.",
-  "narration.force_strongbox.success": "The lock snaps with a crack that carries into the road.",
+  "narration.force_strongbox.success": "The lock snaps and the lid jumps free.",
   "narration.force_tollhouse_door.failure": "The door holds.",
   "narration.force_tollhouse_door.success": "The boards split and the door gives.",
   "narration.gored.applied": "The tusk leaves a scar that will not fade.",
