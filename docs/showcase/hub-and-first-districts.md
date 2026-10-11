@@ -298,6 +298,8 @@ track climbs `up` from the green. The `hall_cupboard` exit is east of `moot_hall
   (`standing_sampler/npcs/guard.json`). Dialogue `warden_talk` (no quest): `reason` (`check` cha
   against `npc: warden`, sequence `fact.assign warden_lets_pass true`), `lean` (`check` skill
   `intimidate` rating 1, same sequence), `leave` (`persuade_sampler/dialogues/guard.json`).
+  Dialogue `warden_passed` (`fact_compare warden_lets_pass true`, only `leave`) sorts first, so
+  after the pass Talk opens "Gate's open. Go on." instead of "Toll gate's shut." (review 377).
   Barrier `toll_gate` `opens_when fact_compare warden_lets_pass true`; reaction `gate_lifted` on
   `fact_changed warden_lets_pass` (when true) opens it with `barrier.set` (row W22), so the pass
   opens the gate (loka-y6yg.13).

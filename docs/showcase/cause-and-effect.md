@@ -23,7 +23,8 @@ a quiet twin (deliver; pick) that pays nothing back.
 - Consequences are detours, never walls: the hostile Warden leaves the gate for an hour a day, the
   mill track still reaches the tollhouse through the forced wooden door, and a gift mends him.
 - Asymmetric: the delivered letter and the picked lock change nothing beyond what plan 1 built.
-- `sign_social` is not changed: a signpost that announced these would be the telling.
+- `sign_social` is rewritten (loka-y6yg.14) so it names no score and announces neither pattern: a
+  signpost that announced these would be the telling.
 - Words are the developer's; the lines below are gists, not pins.
 
 Clock: 3600 units a game hour, rate 50, so one real minute is 50 game minutes, a game day 28.8 real

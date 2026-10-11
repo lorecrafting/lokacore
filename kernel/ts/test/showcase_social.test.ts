@@ -140,6 +140,8 @@ test('social 5: lean fails once, then passes with practice; the toll gate opens'
   assert.equal(refused(w, { type: 'move', direction: 'east' }), 'exit_closed');
   w = say(w, 'warden', 'lean').world;
   assert.deepEqual([...intimidate(w), fact(w, 'warden_lets_pass')], [2, 2, true]);
+  // Breaks (review 377): Talk after the lift opens warden_talk, "Toll gate's shut."
+  assert.equal(talk(w, 'warden').opened, 'warden_passed');
   assert.equal(where(go(w, 'east').world, w.body), room(w, 'tollhouse'));
   const reason = say(go(green(), 'east').world, 'warden', 'reason');
   assert.equal(outcome(reason), 'reason');

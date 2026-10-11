@@ -1,0 +1,24 @@
+{
+  "npc": "warden",
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "fact_compare",
+      "fact": "warden_lets_pass",
+      "equals": true
+    }
+  },
+  "prompt": "dialogue.warden_passed.prompt",
+  "roles": {
+    "warden": {
+      "role": "npc",
+      "npc": "warden"
+    }
+  },
+  "choices": {
+    "leave": {
+      "label": "dialogue.warden_passed.leave",
+      "narration": "narration.warden_passed.leave"
+    }
+  }
+}
