@@ -1,0 +1,64 @@
+{
+  "title": "room.hall.title",
+  "description": "room.hall.description",
+  "exits": {
+    "north": {
+      "to": "lever_vault",
+      "barrier": "lever_door"
+    },
+    "east": {
+      "to": "dial_vault",
+      "barrier": "dial_door"
+    }
+  },
+  "details": {
+    "lever_a": {
+      "aliases": [
+        "lever_a",
+        "lever"
+      ],
+      "description": "detail.lever_a",
+      "rating": 1
+    },
+    "lever_b": {
+      "aliases": [
+        "lever_b",
+        "lever"
+      ],
+      "description": "detail.lever_b",
+      "rating": 1
+    },
+    "lever_c": {
+      "aliases": [
+        "lever_c",
+        "lever"
+      ],
+      "description": "detail.lever_c",
+      "rating": 1
+    },
+    "wheel_1": {
+      "aliases": [
+        "wheel_1",
+        "wheel"
+      ],
+      "description": "detail.wheel_1",
+      "rating": 1
+    },
+    "wheel_2": {
+      "aliases": [
+        "wheel_2",
+        "wheel"
+      ],
+      "description": "detail.wheel_2",
+      "rating": 1
+    },
+    "wheel_3": {
+      "aliases": [
+        "wheel_3",
+        "wheel"
+      ],
+      "description": "detail.wheel_3",
+      "rating": 1
+    }
+  }
+}

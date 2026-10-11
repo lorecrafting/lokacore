@@ -1,0 +1,32 @@
+{
+  "label": "actions.turn_wheel_2",
+  "aliases": [
+    "turn"
+  ],
+  "target": {
+    "kind": "detail",
+    "room": "hall",
+    "detail": "wheel_2"
+  },
+  "priority": 5,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": []
+    }
+  },
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "event.emit",
+          "event": "wheel"
+        }
+      ],
+      "narration": {
+        "actor": "narration.wheel"
+      }
+    }
+  }
+}
