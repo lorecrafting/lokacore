@@ -36,3 +36,20 @@
 ## Question
 
 - Step 6 runs death credit, `fact_changed`, `quest.resolve`, `quest_resolved` and `experience.grant` inside an elapsed round job. `levelling_sampler` only runs this chain from a Move. `proposal.ts:234-244` gives reactions the elapsed command's actor, so it should hold; the build pin decides.
+
+## Re-check at `cf4b731944ea6362cdd3c64577cd83a2e56bbd80` (fix commit `cf4b7319`)
+
+Verdict: **APPROVE**. Only the fix commit was reviewed. Read-only; no tests run.
+
+- Finding 1, fixed: the signpost now reads "A kill that ends a fight earns experience (in a pack, the last goblin standing)", which matches step 9 (loka-lpq6).
+- Finding 2, fixed: no step pins an mv value. Moves cost 1 mv and Flee costs 2; step 8's "mv +1" holds below the maximum.
+- Finding 3, fixed: the death moves to an unarmed boar fight (step 6), and only step 9 waits for loka-6ql4. Every matrix row's step numbers match the new steps: death 4-8, senses 1 and 8, pack 9 (gated), allies 4, scars 6, bleed 6 and 8, speech 2-3, lesson 2, 5 and 8, Warden 10.
+- Nits 4-7, fixed: the hub text and map positions, `tilt_boar` (own definition, `kills`, `boar_gore` `any` leaf), Wat, Nell and Bess, the inn-shout branch, and the PR body (lpq6 named; `/code-review` stated as not run).
+- New numbers checked against the rules:
+  - Step 4: hp 10 to 9.
+  - Step 6: the boar hits 2 for hp 7, 5, 3, 1, then 0 at +750, the last loss clamped. The bleed tick at +1050 never lands. On the return, hp is 10 and mv 100 (`world.death.restore`). The return clears every status except the permanent `gored` (W8). The levelling row (experience 30, str allocation) persists. The removed sword is a held root, so it moves to the corpse (death@1). The boar stays at 8 (gain 0).
+  - Step 7: the boar never re-engages. G11 says only a declared `hostile` with `engage` engages on an ordinary move, and the boar declares no disposition.
+  - Step 8: damage 3 gives boar 5, 2, 0 and hp 8 then 6. Bleeding opens generation 2. At str 10 the fight is four rounds and ends at hp 2. The variant ticks at +1050 and +1950 and expires at +2100.
+  - Step 9: hp 6, 5, 4, 3, 2 and experience 70.
+  - Step 10: the toll gate is closed, so Flee has one candidate (west).
+  - The stale generation-1 bleed job may fall due on a step-8 round. That job is inactive, so it writes nothing, and loka-x2gv's narrowing (status tick and round on one body share a group) covers it.
