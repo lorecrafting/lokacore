@@ -16,7 +16,13 @@ type Book = ReturnType<typeof book>;
 function away(ms: number) {
   const b = book(bundle as never);
   b.map();
-  b.tap('Go south', 'Talk to the Reeve', 'Take the letter to Wat', 'Leave');
+  for (const c of ['Go south', 'The Reeve is here., open', /^Talk/, 'Take the letter to Wat'])
+    b.tap(c);
+  b.tap('Leave the conversation');
+  b.tap('Leave');
+  // The recap's "no deadline line" only means something with the letter quest running.
+  const journal = b.game.view().view.journal;
+  assert.deepEqual([journal[0]?.quest.key, journal[0]?.state], ['carry_letter', 'active']);
   b.clock.wall += ms;
   b.clock.mono += ms;
   for (let n = 0; pulse(b).kind === 'catching_up'; n++) assert.ok(n < 100, 'never settled');
