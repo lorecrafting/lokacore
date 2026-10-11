@@ -24,10 +24,11 @@ export function status(c: Obj): Diagnostic[] {
       s,
     ]),
   ) as [string, Obj][];
-  const { immune, named, drinks, lone, g3, room } = api146(c);
+  const { immune, named, drinks, lone, g3 } = api146(c);
   if (!Object.keys(defs).length && !applies.length && !cures.length && !g3) return out;
   const all = Object.values(defs);
-  const floor = room ? '1.65' : floorOf(all, g3); // status reader 9: a step naming a room
+  const room = named.some(([, , table]) => table === 'rooms'); // status reader 9: a step naming a room
+  const floor = room ? '1.65' : floorOf(all, g3);
   if (
     apiCmp(c.manifest.requires.kernel_api.at_least, floor) < 0 ||
     ['status', 'death'].some((k) => c.lock.capabilities[k] !== 1) // a fatal hp tick needs death
@@ -139,6 +140,5 @@ function api146(c: Obj) {
     items.length ||
     modifies.length ||
     Object.values(c.reactions ?? {}).some((r: any) => r.on.event.startsWith('status_'));
-  const room = items.some(([, , table]) => table === 'rooms');
-  return { immune, named: [...items, ...modifies], drinks, lone, g3, room };
+  return { immune, named: [...items, ...modifies], drinks, lone, g3 };
 }

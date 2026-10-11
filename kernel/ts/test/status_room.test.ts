@@ -79,7 +79,7 @@ function wait(w: World, by: number) {
   const command = { id: elapsedCommandId(run_id, w.context, from, until), payload };
   const r = stepElapsed(w, { ...command, world_context_id: w.context } as never, n);
   assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
-  const types = JSON.stringify(r.decision).match(/"type":"[a-z_]+"/g) ?? [];
+  const types: string[] = JSON.stringify(r.decision).match(/"type":"[a-z_]+"/g) ?? [];
   return { world: r.world, types, decision: JSON.stringify(r.decision) };
 }
 const hall = () => {
