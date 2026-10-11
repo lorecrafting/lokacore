@@ -175,7 +175,9 @@ const SUBJECT: Partial<Record<On['event'], string>> = {
 };
 const subject = (cause: DomainEvent, body?: EntityId) => {
   const field = SUBJECT[cause.payload.type as On['event']];
-  const id = field ? ((cause.payload as Record<string, unknown>)[field] as EntityId) : undefined;
+  const id = field
+    ? ((cause.payload as Record<string, unknown>)[field] as EntityId | undefined)
+    : undefined;
   return id ?? body;
 };
 
