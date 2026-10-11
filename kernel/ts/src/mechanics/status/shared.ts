@@ -247,6 +247,9 @@ export function statusAllows(world: World, body: EntityId) {
     );
 }
 
+/** Status reader 4: whether NPC `npc` may move (its statuses bar or leave out `move`); every NPC mover reads it. */
+export const moves = (world: World, npc: EntityId) => statusAllows(world, npc)('move');
+
 /**
  * A status.apply or (status reader 3) status.cure step of a reaction or (row 29b) a spell on its
  * holders, once per holder and status in the rule or spell, in the one writer group the holder's

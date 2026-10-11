@@ -32,6 +32,7 @@ import { runPopulation } from '../population/shared.ts';
 import { binding as crowBinding, runCrow } from '../crow/behavior.ts';
 import { runBleed } from '../bleed/job.ts';
 import { runStatus } from '../status/job.ts';
+import { moves } from '../status/shared.ts';
 
 import { runSight } from '../population/behavior.ts';
 
@@ -108,10 +109,10 @@ function scheduledJob(
   const { room, goal } = placeOf(world, npc, at, steps);
   const from = world.state.containers[npc];
   // A goal (toolbox row W10) is narration only when the player sees the NPC leave.
-  const seen = goal && from !== room && world.state.containers[world.body] === from;
+  const stays = from === room || !moves(world, npc);
+  const seen = goal && !stays && world.state.containers[world.body] === from;
   const transfer = { op: 'entity.transfer', writer_group: 0, entity_id: npc } as const;
-  const move: DeltaOp[] =
-    from === room ? [] : [{ ...transfer, source_id: from, destination_id: room }];
+  const move: DeltaOp[] = stays ? [] : [{ ...transfer, source_id: from, destination_id: room }];
   const due_time = nextHour(world.cartridge, schedule, at);
   // A next hour the advance also crosses runs as its own drain step (`next`, runtime/proposal_hours.ts); only the
   // last step schedules the job after the target.

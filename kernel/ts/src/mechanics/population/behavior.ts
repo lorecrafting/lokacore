@@ -22,6 +22,7 @@ import { closeEncounter } from '../combat/shared.ts';
 import { living } from '../death/shared.ts';
 import { exitOf, exitTo } from '../lookups.ts';
 import { passage } from '../movement/shared.ts';
+import { moves } from '../status/shared.ts';
 import { planRef } from './refs.ts';
 
 /** Bind only a current deer generation observed on an actual player entry. */
@@ -143,7 +144,7 @@ export function runSight(world: World, job_id: JobId, job: JobRow, steps: Steps)
     world.state.containers[world.body] === here &&
     world.rooms[here];
   if (!present) return accepted<never>(world, 'job_ran', [done, clear], []);
-  const escape = refuge(world, plan, here, steps);
+  const escape = moves(world, sight.member_id) ? refuge(world, plan, here, steps) : undefined;
   if (escape) {
     const { direction, there } = escape;
     const transfer: DeltaOp = {

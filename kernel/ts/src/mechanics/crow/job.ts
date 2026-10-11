@@ -9,6 +9,7 @@ import type {
 import { KernelError } from '../../foundation/error.ts';
 import { accepted, refString, type JobRow, type Mint, type World } from '../../runtime/decision.ts';
 import { entered } from '../schedule/behavior.ts';
+import { moves } from '../status/shared.ts';
 import {
   changed,
   corridor,
@@ -120,7 +121,11 @@ function leg(
 
   if (!held(world, b))
     return accepted<never>(world, 'job_ran', [done, changed(b, empty(b.row))], []);
-  if (!openNest(world, b) || (index < route.length - 1 && !edge(world, room, route[index + 1]))) {
+  if (
+    !openNest(world, b) ||
+    (index < route.length - 1 &&
+      (!edge(world, room, route[index + 1]) || !moves(world, b.row.member_id)))
+  ) {
     return discharge(world, b, done, job, mint, room, 'fallback');
   }
   if (index === route.length - 1) {
@@ -162,7 +167,13 @@ function returning(
   if (room === home) return accepted<never>(world, 'job_ran', [done, changed(b, empty(b.row))], []);
   const homeIndex = route.indexOf(home);
   const toward = route[index + (index > homeIndex ? -1 : 1)];
-  if (!toward || !edge(world, room, toward)) throw new KernelError('precondition_failed');
+  if (!toward) throw new KernelError('precondition_failed');
+  if (!moves(world, b.row.member_id)) {
+    // A rooted crow stays put and tries again next interval.
+    const again = next(b, mint, job.due_time, 'return', null);
+    return accepted<never>(world, 'job_ran', [done, changed(b, again.value), again.op], []);
+  }
+  if (!edge(world, room, toward)) throw new KernelError('precondition_failed');
   const arrived = toward === home;
   const scheduled = arrived ? undefined : next(b, mint, job.due_time, 'return', null);
   return accepted(
