@@ -231,20 +231,20 @@ test('combat 8: armed, the boar falls in three rounds; the poultice stops the bl
   assert.deepEqual([hp(second, boar), pool(second, 'hp')], [2, 6]);
   // The purse roll (chance 50): the round's rolls after the player's hit draw are the tusk's then
   // the purse's, as loot.test.ts's rat (hit, tail, coin), whose hand-computed rows give from
-  // [1, 1, 1, 1] rolls 60, 20 (dropped) and from its last seed 50, 86 (kept).
+  // [1, 1, 1, 1] rolls 60, 20 (the purse drops) and from its last seed 50, 86 (the boar keeps it).
   const killed = (rng: number[]) =>
     wait({ ...second, state: { ...second.state, rng: rng as never } }, start + 450);
-  const kept = killed([170029958, 3890805239, 3345768512, 779757290]).world;
-  const k = killed([1, 1, 1, 1]);
-  w = k.world;
-  assert.ok(k.lines.includes('combat.npc_died'));
+  const noPurse = killed([170029958, 3890805239, 3345768512, 779757290]).world;
+  const withPurse = killed([1, 1, 1, 1]);
+  w = withPurse.world;
+  assert.ok(withPurse.lines.includes('combat.npc_died'));
   assert.equal(pool(w, 'hp'), 6);
   const corpse = corpseOf(w, boar);
   assert.deepEqual(
     inside(w, corpse).sort(),
     [id(w, 'item', 'tusk'), id(w, 'item', 'purse')].sort(),
   );
-  assert.deepEqual(inside(kept, corpseOf(kept, boar)), [id(w, 'item', 'tusk')]);
+  assert.deepEqual(inside(noPurse, corpseOf(noPurse, boar)), [id(w, 'item', 'tusk')]);
   assert.deepEqual(levelling(w), { level: 2, experience: 60, next: 100, unspent: 0 });
   assert.deepEqual(cues(w), [{ sense: 'smell', text: 'cue.blood' }]);
   // Without the poultice: ticks at +1050 and +1950, expiry at +2100 (the round-1 refresh at +150).
