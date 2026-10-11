@@ -56,16 +56,20 @@ Status `planned (plan N)` means that showcase plan ([plan 1](showcase/hub-and-fi
 ## How a batch adds a district
 
 The batch's Fable final-head review stays a review only. After the batch head is approved, each
-district goes through four steps (owner input and PM ruling, 2026-10-10):
+district goes through five steps (owner input and PM ruling, 2026-10-10):
 
 1. **Plan (Fable).** A separate Fable run writes a short district brief in `docs/showcase/`: the
    rooms, the guided loop and sandbox room, which matrix cells it exercises, the signpost text
    and the expected outcome of each step.
 2. **Build (Opus developer).** An ordinary slice implements the brief: cartridge content, hash
-   fixture, simulator seeds, walkthrough or recorder recipe and tests, using only installed
-   mechanics.
+   fixture, the district's rooms in the simulator's showcase pass (`kernel/ts/test/sim.test.ts`),
+   walkthrough or recorder recipe and tests, using only installed mechanics, plus one Book e2e
+   playthrough of the district's happy path in the real UI (owner, loka-y6yg.6).
 3. **Review (Opus reviewer).** Reviewed against the brief like any slice.
-4. **Recheck (Fable).** The next batch's Fable final review checks the district still matches
+4. **Playtest (Fable).** Before the owner plays it, Fable plays the district in the web Book
+   without the brief, with a screenshot per step, and reports gameplay findings (Beads) and UI/UX
+   findings (polish lane) (owner, loka-y6yg.7).
+5. **Recheck (Fable).** The next batch's Fable final review checks the district still matches
    its brief.
 
 The brief adds matrix rows for the new pairs the batch makes possible and fills in the rows

@@ -409,8 +409,8 @@ It is not bundled, has its own identity and save, and does not inherit the chapt
 or acceptance. Its content hash is `7d74fac7f9429475bdd7481fe7bf6b851acae2d0d6eaf1661892705391d17263`,
 with 26 rooms and 127 initial IDs; the [artifact oracle](../../protocol/fixtures/r9c_interactions_hash.json)
 and [allocation oracle](../../protocol/fixtures/r9c_interactions_ids.json) come from
-`test/loka/cartridge_r9c_interactions_hash.py`. The fixture names stay outside the
-simulator's default `cartridge_*hash.json` corpus.
+`test/loka/cartridge_r9c_interactions_hash.py`. The fixtures are not in the simulator's
+seed-picked corpus (`CARTRIDGES` in `kernel/ts/test/sim.ts`).
 
 The source is the v042 chapter's own definitions, short references and keys, cut to one
 shared topology: Ferry Landing, Well Lane, Village Green, North and East Gate, Watch Post,

@@ -1,8 +1,9 @@
-// size: allow 520, the --cartridge artifact runs and its reproduce line join the red controls
+// size: allow 550, the toolbox showcase pass joins the corpus run and the red controls
 // The deterministic simulation (test/sim.ts; docs/ROADMAP.md verification harness;
-// r1-acceptance-envelope §3): the committed regression seeds, then 10,000 fresh sequences in CI (500 elsewhere),
-// each step keeping every registered invariant; determinism in and across processes; and red
-// controls, each a kernel planted in this process that the simulator must catch and shrink.
+// r1-acceptance-envelope §3): the committed regression seeds, then 10,000 fresh sequences in CI
+// (500 elsewhere), and 400 fixed ones on the toolbox showcase, each step keeping every
+// registered invariant; determinism in and across processes; and red controls, each a kernel
+// planted in this process that the simulator must catch and shrink.
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { existsSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
@@ -195,6 +196,32 @@ test(`the regression seeds, then ${FRESH} fresh sequences, keep every invariant`
   );
   // budget_exceeded is among REACHED, yet no diagnostics record was written (this run's own dir).
   assert.equal(existsSync(`${OBS}/diagnostics`), false, 'recorded without a run');
+});
+
+// The toolbox showcase (docs/SHOWCASE.md) is outside the seed-picked corpus, so it moves no corpus
+// seed; it plays fixed seeds, so a seed pinned out for an open bug stays out (until a content
+// change reshuffles the sequences).
+const SHOWCASE = 'protocol/fixtures/toolbox_showcase_hash.json';
+const PINNED = [46, 348]; // loka-th7x: an offered drink refused for its envelope trips admission
+// Breaks: a showcase step that throws or breaks an invariant; a generator that stops reaching a
+// district's inner rooms or the showcase's own verbs. Not reached headless: waits across days
+// (real_elapsed refuses wait, and the generator builds no elapsed), quest accept and deliver
+// (offered through a dialogue choice, and the generator answers none), combat, death and return
+// (no combat district yet, loka-y6yg.3).
+test('400 fixed showcase sequences keep every invariant and reach each district', async (t) => {
+  const pass = { cartridge: SHOWCASE, skip: PINNED };
+  const { count, steps, codes, seen, rooms } = await fresh(1, 400, [], pass);
+  assert.equal(count, 400 - PINNED.length, 'a worker omitted sequences');
+  t.diagnostic(
+    `showcase seeds 1 to 400 but ${PINNED.join(' ')}; ${steps} steps; ends in ` +
+      `${[...rooms].sort().join(' ')}; outcomes ${[...codes].sort().join(', ')}`,
+  );
+  const inner = ['fell_top', 'the_fold', 'tide_pools', 'sea_cave', 'moot_hall', 'still_room'];
+  const verbs = ['drink', 'eat', 'read', 'sit', 'sleep', 'wear'];
+  assert.deepEqual(
+    [...inner.filter((r) => !rooms.has(r)), ...verbs.filter((v) => !seen.has(v))],
+    [],
+  );
 });
 
 // Breaks: a generator change after which a regression seed no longer issues the command type it
