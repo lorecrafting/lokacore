@@ -167,6 +167,33 @@ test('a rule re-applying the status that triggered it quiesces: a refresh does n
   assert.equal(on(w, 'shocked'), true);
 });
 
+// Breaks: a status.cure not sharing the rule's first-wins set with status.apply, so the cure ends
+// the wet the apply just refreshed and the rule writes the wet row twice.
+test('in one rule the first of an apply and a cure on one holder and status wins', () => {
+  const both = edited((r) => {
+    r[rule('shock_on_wet')] = {
+      key: 'shock_on_wet',
+      on: r[rule('shock_on_wet')].on,
+      apply: [
+        { op: 'status.apply', status: ref('status', 'wet') },
+        { op: 'status.cure', status: ref('status', 'wet') },
+      ],
+    };
+  });
+  const w = run(drop(fresh(both), 'bucket'), {
+    type: 'take',
+    item_id: id(fresh(both), 'item', 'jar'),
+  }).world;
+  const r = run(w, { type: 'drop', item_id: id(w, 'item', 'jar') });
+  assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
+  if (r.decision.kind !== 'accepted') return;
+  const wetWrites = r.decision.delta.ops.filter(
+    (o) => o.op === 'status.transition' && o.body_id === golem(w) && o.status.key === 'wet',
+  );
+  assert.equal(wetWrites.length, 1);
+  assert.equal(on(r.world, 'wet'), true);
+});
+
 // Breaks: a cure-and-reapply cycle not cut (the step never returns) or cut and committed. By the
 // existing reaction_depth budget (32, LIMITS; runtime/proposal.ts react): each landing is one level.
 test('two rules that cure and re-apply each other fault budget_exceeded at reaction_depth', () => {
