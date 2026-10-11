@@ -1,0 +1,14 @@
+{
+  "on": {
+    "event": "item_dropped",
+    "item": "torch",
+    "room": "yard"
+  },
+  "apply": [
+    {
+      "op": "status.apply",
+      "status": "burning",
+      "item": "cart"
+    }
+  ]
+}

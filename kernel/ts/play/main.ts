@@ -13,7 +13,7 @@ import { gameView } from '../src/view/view.ts';
 import { units } from '../src/mechanics/calendar.ts';
 import { sha256Hex } from '../src/foundation/sha256.ts';
 import { doors, normalize } from '../src/commands/target.ts';
-import { detailOf, resolved, type Offered } from '../src/commands/actions.ts';
+import { detailAt, resolved, type Offered } from '../src/commands/actions.ts';
 import { append, kernelVersion, line, redact } from './obs.ts';
 import {
   barrierAt,
@@ -256,7 +256,8 @@ function perform(r: Run, p: { perform: Offered[]; rest: string }) {
   const here = r.world.state.containers[r.world.body];
   const fits = p.perform
     .filter((a) => {
-      const detail = detailOf(r.world, a.recipe!.target);
+      const detail = detailAt(r.world, a); // ponytail: no text form for a use recipe (row G4) yet
+      if (detail === undefined) return false;
       return named ? detail === id : r.world.details[detail].room === here;
     })
     .sort((a, b) => (a.key < b.key ? -1 : 1));

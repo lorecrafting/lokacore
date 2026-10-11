@@ -1,0 +1,17 @@
+{
+  "keywords": [
+    "cart"
+  ],
+  "short": "item.cart.short",
+  "room_line": "item.cart.room",
+  "description": "item.cart.description",
+  "mass_grams": 200000,
+  "location": {
+    "in": "room",
+    "room": "yard"
+  },
+  "tags": [
+    "wooden",
+    "burnable"
+  ]
+}

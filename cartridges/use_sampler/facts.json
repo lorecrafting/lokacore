@@ -1,0 +1,16 @@
+{
+  "facts": {
+    "oiled": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "instance"
+      ],
+      "per_subject": true,
+      "meaning": "This thing is oiled."
+    }
+  }
+}

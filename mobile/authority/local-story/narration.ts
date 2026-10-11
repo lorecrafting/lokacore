@@ -103,7 +103,8 @@ function receiptBellCue(s: Story, r: { command_id: string; command: string }, d:
     throw new Error('malformed JSON: invalid committed bell cue');
   const recipe = Object.values(s.world.cartridge.recipes ?? {}).find((a) => a.key === action);
   if (!recipe) throw new Error('malformed JSON: missing bell cue source');
-  const room_id = s.world.roomIds[refString(recipe.target.room)];
+  const room_id =
+    recipe.target.kind === 'detail' ? s.world.roomIds[refString(recipe.target.room)] : undefined;
   if (!room_id) throw new Error('malformed JSON: missing bell cue room');
   const cues = d.events.flatMap((e) => {
     const projected = bellCue(s.world, e, c.id, actor_id, room_id);
@@ -233,7 +234,7 @@ function recipeDetail(s: Story, r: { command_id: string }, command: Command | nu
   );
   const action = command?.payload?.type === 'perform' ? command.payload.action : undefined;
   const recipe = Object.values(s.world.cartridge.recipes ?? {}).find((r) => r.key === action);
-  const subject = recipe && detailOf(s.world, recipe.target);
+  const subject = recipe?.target.kind === 'detail' ? detailOf(s.world, recipe.target) : undefined;
   const readable = subject && s.world.details[subject]?.readable;
   const readableEvidence = completed.some(
     (e) => e.payload.type === 'action_completed' && s.world.details[e.payload.subject_id]?.readable,

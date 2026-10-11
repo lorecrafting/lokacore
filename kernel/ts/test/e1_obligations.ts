@@ -287,7 +287,7 @@ export function witnessedObligations(
       p.actor_id,
       recipe.policy.root,
       `${base}/policy/root`,
-      detailOf(before, recipe.target),
+      recipe.target.kind === 'detail' ? detailOf(before, recipe.target) : p.target_id,
     ),
   ];
   const branch =

@@ -6,16 +6,7 @@ defmodule Loka.Content.Checks do
   alias Loka.Content.{Barriers, Dialogues, Entities, Exits, Quests, Reactions, Recipes, RoomParts}
   alias Loka.Core.Canonical
 
-  @ref_fields Map.merge(Loka.Content.LeafRefs.all(), %{
-                "fact.assign" => %{"fact" => "fact", "item" => "item", "npc" => "npc"},
-                "fact.adjust" => %{"fact" => "fact", "item" => "item", "npc" => "npc"},
-                "skill.acquire" => %{"skill" => "skill"},
-                "topic.grant" => %{"topic" => "topic"},
-                "status.apply" => %{"status" => "status", "item" => "item", "npc" => "npc"},
-                "quest.activate" => %{"quest" => "quest"},
-                "quest.resolve" => %{"quest" => "quest"},
-                "quest.fail" => %{"quest" => "quest"}
-              })
+  @ref_fields Map.merge(Loka.Content.LeafRefs.all(), Loka.Content.LeafRefs.steps())
   @enclosing 3
   @doc "Expands short source references to local DefinitionRefs (owner decision 2026-09-25)."
   @spec expand(term(), map()) :: term()
@@ -138,6 +129,10 @@ defmodule Loka.Content.Checks do
   # A recipe's target (RecipeTarget): its detail a key, so a details map never matches.
   def expand(%{"kind" => "detail", "room" => _, "detail" => d} = target, m) when is_binary(d),
     do: Map.update!(target, "room", &ref(&1, "room", m))
+
+  # Toolbox row G4: a use target's tool liquid.
+  def expand(%{"kind" => "use", "tool" => %{"liquid" => l}} = target, m) when is_binary(l),
+    do: put_in(target, ["tool", "liquid"], ref(l, "liquid", m))
 
   def expand(%{"offers" => offers, "resource" => r} = shop, m),
     do:
