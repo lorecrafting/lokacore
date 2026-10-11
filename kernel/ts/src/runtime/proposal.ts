@@ -23,7 +23,7 @@ import * as schedule from '../mechanics/schedule/rule.ts';
 import { cmp } from '../foundation/validate.ts';
 import { currentRound } from '../mechanics/combat/round.ts';
 import { handoffGroup, sightHandoff } from './proposal_sight.ts';
-import { queueHour } from './proposal_hours.ts';
+import { queueHour, type Due } from './proposal_hours.ts';
 import { merge, statusGroup } from '../mechanics/status/job.ts';
 import { anyPending as pending, parted } from '../mechanics/dialogue/selection.ts';
 import { admit, type Admitted } from './proposal_admit.ts';
@@ -264,7 +264,7 @@ function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined
   const { due, to } = dueJobs(p.world, root);
   const populationPairs = populationDeadlinePairs(p.world, to);
   const groups = new Map<string, number>();
-  for (const [job_id, { due_time }] of due) {
+  for (const [job_id, { due_time, tick }] of due) {
     const at = now(p);
     if (!('cartridge' in at)) return at;
     const current = at.state.jobs?.[job_id];
@@ -280,7 +280,7 @@ function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined
       payload: { type: 'run_job', job_id: job_id as JobId },
     } as const;
     const m = allocator(at, run);
-    const ran = admit('schedule', schedule.decideAt(at, run, m, undefined, due_time));
+    const ran = admit('schedule', schedule.decideAt(at, run, m, undefined, due_time, tick));
     if (ran.kind !== 'accepted') return ran;
     if ((p.limit = queueHour(due, job_id, ran))) return BUDGET;
     p.rng = ran.rng;
@@ -306,7 +306,7 @@ function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined
 // (due_time, job_id) order.
 function dueJobs(world: World, root: Admitted & { kind: 'accepted' }) {
   const advance = root.delta.ops.find((o) => o.op === 'time.advance');
-  const due = Object.entries(advance ? (world.state.jobs ?? {}) : {})
+  const due: Due = Object.entries(advance ? (world.state.jobs ?? {}) : {})
     .filter(([, j]) => j.status === 'pending' && j.due_time <= advance!.to)
     .sort(([a, x], [b, y]) => x.due_time - y.due_time || cmp(a, b));
   return { due, to: advance?.to ?? -1 };

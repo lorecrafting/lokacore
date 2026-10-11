@@ -36,13 +36,15 @@ import { runStatus } from '../status/job.ts';
 import { runSight } from '../population/behavior.ts';
 
 // `at`: the drain's hour for this run; a later listed hour the advance crosses is a sub-step of the
-// row's one run_job, which its first hour completed (scheduledJob, loka-qi0r; runPopulation, loka-6ql4).
+// row's one run_job, which its first hour completed (scheduledJob, loka-qi0r; runPopulation, loka-6ql4;
+// runStatus, loka-6ztc).
 export const decideAt = (
   world: World,
   command: Parameters<Rule<'schedule'>>[1],
   mint: Parameters<Rule<'schedule'>>[2],
   steps: Steps = { n: 0 },
   at?: number,
+  tick?: number,
 ): ReturnType<Rule<'schedule'>> => {
   const { payload } = command;
   if (payload.type === 'run_job') {
@@ -53,7 +55,8 @@ export const decideAt = (
       return expiry(world, command, payload.job_id, row, mint);
     if (row.encounter_id) return roundSequence(world, command, payload.job_id, row, mint, steps);
     if (row.bleed_body_id) return runBleed(world, command, payload.job_id, row, mint);
-    if (row.job.kind === 'status') return runStatus(world, command, payload.job_id, row, mint);
+    if (row.job.kind === 'status')
+      return runStatus(world, command, payload.job_id, row, mint, at, tick);
     if (row.quest_instance_id) {
       const d = world.cartridge.quests?.[refString(row.job)]?.deadline;
       return d && !d.fact

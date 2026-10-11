@@ -1,4 +1,5 @@
-// Same-plan population deadline pairing for due-job delivery (runtime/proposal.ts jobs).
+// Same-plan population deadline pairing for due-job delivery (runtime/proposal.ts jobs): the
+// resume job at the deadline and the plan's current job, when one advance runs both.
 import { encode } from '../foundation/canonical.ts';
 import type { World } from './decision.ts';
 
@@ -13,7 +14,7 @@ export function populationDeadlinePairs(world: World, until: number) {
       resume &&
       a?.status === 'pending' &&
       b?.status === 'pending' &&
-      a.due_time === b.due_time &&
+      b.due_time <= until && // both run in this advance, crossed sub-steps included (loka-dto9)
       a.due_time === control.suppression?.ends_at &&
       a.due_time <= until &&
       encode(a.job) === plan &&

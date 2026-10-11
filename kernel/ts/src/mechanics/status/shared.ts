@@ -138,7 +138,7 @@ export function applyStatus(
   if (spec.duration === 'permanent') return active ? [] : [change({ active: true, generation })];
   const now = world.state.clock;
   const ends_at = add(now, spec.duration);
-  if (active) return [change({ ...active, ends_at })];
+  if (active) return [change(refreshed(world, active, ends_at))];
   const next_tick_at = spec.per_tick === undefined ? ends_at : add(now, spec.tick_every);
   const value = {
     active: true as const,
@@ -156,6 +156,13 @@ export function applyStatus(
   };
   return [...settleFor(world, body, status, writer_group), change(value), job];
 }
+
+// A refresh writes only the end. Mid-advance a crossed sub-step (job.ts runStatus) has completed the
+// row's job and left its tick stale; the drain carries the true tick, so the row holds the end.
+const refreshed = (world: World, active: Active, ends_at: number): StatusRow =>
+  world.state.jobs?.[active.job_id ?? '']?.status === 'completed'
+    ? { ...active, ends_at, next_tick_at: ends_at }
+    : { ...active, ends_at };
 
 /**
  * Inactivate every active status on `body` at death, but a permanent one (row W8) on the same-body

@@ -11,19 +11,21 @@ import type {
 } from '../../contracts.gen.ts';
 import { add } from '../../foundation/int.ts';
 import { accepted, type JobRow, type Mint, type World } from '../../runtime/decision.ts';
-import { prefix } from '../combat/round_attack.ts';
 import { currentRound } from '../combat/round.ts';
-import { closeEncounter, engaged, lastOpponent } from '../combat/shared.ts';
-import { deathSequence } from '../death/sequence.ts';
 import { adjust, level, resourceSpec } from '../resource.ts';
-import { endStatus, expire, specOf } from './shared.ts';
+import { fatalTick } from './fatal.ts';
+import { expire, specOf } from './shared.ts';
 
 // A timed row: only it owns a job (a permanent one, row W8, has none).
 type Active = Required<Extract<StatusRow, { active: true }>>;
 
 /**
  * A due status tick or expiry on its holder (the player's body, an NPC or an item; rows 1, G3);
- * an obsolete job completes harmlessly. Narration is the player's only.
+ * an obsolete job completes harmlessly. Narration is the player's only. A successor the same
+ * advance also crosses runs as a sub-step at `now` (`next`, runtime/proposal_hours.ts, loka-6ztc):
+ * its job is already complete and its row's tick stale (a refresh writes the end there,
+ * status/shared.ts refreshed), so the drain carries its true tick (`carried`); only the last
+ * sub-step writes the row's successor.
  */
 // size: allow 44, one due job saturates the tick, expires, or runs the fatal death sequence
 export function runStatus(
@@ -32,42 +34,40 @@ export function runStatus(
   job_id: JobId,
   job: JobRow,
   mint: Mint,
+  now = job.due_time,
+  carried?: number,
 ) {
-  const done: DeltaOp = { op: 'job.complete', writer_group: 0, job_id };
+  const first = job.status === 'pending';
+  const ops: DeltaOp[] = first ? [{ op: 'job.complete', writer_group: 0, job_id }] : [];
   const status = job.job;
   const held = statusHolder(world, job_id);
-  if (!held) return accepted<never>(world, 'job_ran', [done], []);
+  if (!held) return accepted<never>(world, 'job_ran', ops, []);
   const { body, row } = held;
   const spec = specOf(world, status);
   if (!spec) return { kind: 'fault', code: 'precondition_failed' } as const;
   const player = body === world.body;
-  const now = job.due_time;
+  const tick = carried ?? row.next_tick_at;
   const visit = { ...world, state: { ...world.state, clock: now } };
   const expired = now >= row.ends_at;
-  const due = !expired && spec.per_tick !== undefined && now >= row.next_tick_at;
+  const due = !expired && spec.per_tick !== undefined && now >= tick;
   const { by, fatal } = due ? amount(visit, body, spec) : { by: 0, fatal: false };
-  const ops: DeltaOp[] = [done];
   if (by) ops.push({ ...adjust(visit, body, spec.resource, by, {}).op, at: now });
-  // A pack keeps fighting when one member falls, as in combat's own fatal round.
-  const fight = fatal ? engaged(visit, body) : undefined;
-  if (fight && (player || lastOpponent(fight.row))) ops.push(...closeEncounter(visit, body));
   if (expired) ops.push(...expire(visit, body, status, row, 0));
-  else if (fatal) ops.push(endStatus(body, status, row, 0));
   const say = (key: TextKey) => (player ? [{ key }] : []);
   const events = due ? [happened(visit, command, mint, 'status_ticked', body, status)] : [];
-  if (fatal) {
-    const died = dies(visit, command, ops, player, mint);
-    const all = [...events, ...died.events.map((e) => ({ ...e, position: 2 }))];
-    return accepted(world, 'job_ran', ops, all, say(spec.narration.tick), died.rng);
-  }
+  if (fatal)
+    return fatalTick(visit, command, ops, events, held, status, mint, say(spec.narration.tick));
   if (expired) {
     const ended = [happened(visit, command, mint, 'status_expired', body, status)];
     return accepted(world, 'job_ran', ops, ended, say(spec.narration.expired));
   }
   // A due tick on an unreadable pool is skipped, never re-due at the same clock.
-  const next_tick_at = due ? add(row.next_tick_at, spec.tick_every) : untick(spec, row);
-  ops.push(...successor(body, status, row, next_tick_at, mint() as JobId));
-  return accepted(world, 'job_ran', ops, events, by ? say(spec.narration.tick) : []);
+  const next_tick_at = due ? add(tick, spec.tick_every) : untick(spec, row, tick);
+  const next = Math.min(next_tick_at, row.ends_at);
+  const crossed = next <= world.state.clock;
+  if (!crossed) ops.push(...successor(body, status, row, next_tick_at, mint() as JobId));
+  const ran = accepted(world, 'job_ran', ops, events, by ? say(spec.narration.tick) : []);
+  return crossed ? { ...ran, next, tick: next_tick_at } : ran;
 }
 
 /**
@@ -81,32 +81,6 @@ function amount(visit: World, body: EntityId, spec: StatusDefinition) {
     return { by: 0, fatal: false };
   const by = Math.max(pool.minimum - current, Math.min(pool.maximum - current, spec.per_tick!));
   return { by, fatal: by < 0 && spec.resource.key === 'hp' && current + by === 0 };
-}
-
-// The ordinary death sequence after a fatal tick (ops[1] is its hp loss), with no killer; an NPC's
-// drops roll from the world's RNG (row 8).
-function dies(
-  visit: World,
-  command: Pick<Command, 'id'>,
-  ops: DeltaOp[],
-  player: boolean,
-  mint: Mint,
-) {
-  const now = visit.state.clock;
-  const died = deathSequence(
-    prefix(visit, ops, now),
-    command,
-    {
-      loss: ops[1] as Extract<DeltaOp, { op: 'resource.adjust' }>,
-      owner_id: player ? visit.character : null,
-      killer_id: null,
-      credited_character_id: null,
-    },
-    mint,
-    visit.state.rng,
-  );
-  ops.push(...died.ops.map((op) => (op.op === 'resource.adjust' ? { ...op, at: now } : op)));
-  return died;
 }
 
 /**
@@ -141,8 +115,8 @@ const happened = (
 });
 
 // A status that never ticks (row 2c) follows a refreshed end.
-const untick = (spec: StatusDefinition, row: Active) =>
-  spec.per_tick === undefined ? row.ends_at : row.next_tick_at;
+const untick = (spec: StatusDefinition, row: Active, tick: number) =>
+  spec.per_tick === undefined ? row.ends_at : tick;
 
 // The row's next job, due at the earlier of its next tick and its end.
 const successor = (

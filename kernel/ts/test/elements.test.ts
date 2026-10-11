@@ -14,6 +14,7 @@ import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { key } from '../src/foundation/compose.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
+import { living } from '../src/mechanics/death/shared.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-elements-'));
 let artifact: Uint8Array;
@@ -113,6 +114,59 @@ test('lightning landing on a wet golem stuns it and ends shocked and wet', () =>
   const dry = drop(fresh(), 'jar');
   assert.deepEqual(applied, ['golem shocked']);
   assert.equal(hp(wait(dry, 60)), 19);
+});
+
+// Breaks (loka-6ztc): one advance misses the successor a tick schedules (precondition_failed on
+// the shocked row), or a crossed sub-step reads the row's stale next tick (the advance faults), or
+// ticks at the end it shares with the last tick. Job by job: ticks at 60 and 120, ends at 180.
+// The golem shocked for 180 s at `per_tick`, then one advance of 180 s.
+function shockedFor180(per_tick: number) {
+  const statuses = structuredClone(content.statuses!) as Record<string, any>;
+  Object.assign(statuses[`${C}:status/shocked`], { duration: 180, per_tick });
+  return wait(drop(fresh({ ...content, statuses } as Cartridge), 'jar'), 180);
+}
+test('one advance across every tick and the end of a status matches job-by-job play', () => {
+  const w = shockedFor180(-1);
+  assert.deepEqual([hp(w), on(w, 'shocked')], [18, false]);
+});
+
+// Breaks (loka-6ztc): a fatal tick on a crossed sub-step (no job.complete before its hp loss)
+// hands the death sequence the wrong op. Job by job: 20 - 10 at 60, 0 at 120, dead.
+test('a fatal tick on a crossed sub-step kills the golem as job-by-job play does', () => {
+  const w = shockedFor180(-10);
+  assert.deepEqual([hp(w), on(w, 'shocked'), living(w, golem(w))], [0, false, false]);
+});
+
+// Breaks (loka-6ztc): a reaction refreshing shocked on its tick inside one advance copies the row's
+// stale next tick (precondition_failed), or a sub-step at the old end ticks there. Shocked 90 s,
+// a tick each 60 s, re-applied on each tick; one advance against 10 s waits.
+test('a status refreshed on its tick inside one advance matches job-by-job play', () => {
+  const statuses = structuredClone(content.statuses!) as Record<string, any>;
+  statuses[`${C}:status/shocked`].duration = 90;
+  const refresh = edited((r) => {
+    r[rule('zz_reshock')] = {
+      key: 'zz_reshock',
+      on: { event: 'status_ticked', status: ref('status', 'shocked') },
+      apply: [{ op: 'status.apply', status: ref('status', 'shocked') }],
+    };
+  });
+  const start = drop(fresh({ ...refresh, statuses } as Cartridge), 'jar');
+  const row = (w: World) => {
+    const r = w.state.statuses![
+      key({ kind: 'status', body_id: golem(w), status: ref('status', 'shocked') })
+    ] as any;
+    return [hp(w), r.active, r.ends_at - start.state.clock, r.next_tick_at - start.state.clock];
+  };
+  for (const [seconds, expected] of [
+    [90, [19, true, 150, 120]],
+    [95, [19, true, 150, 120]],
+    [130, [18, true, 210, 180]],
+  ] as const) {
+    let stepped = start;
+    for (let t = 0; t < seconds; t += 10) stepped = wait(stepped, Math.min(10, seconds - t));
+    assert.deepEqual(row(stepped), expected);
+    assert.deepEqual(row(wait(start, seconds)), expected);
+  }
 });
 
 // Breaks: status_applied emitted with no reaction listening, so every cartridge applying a status
