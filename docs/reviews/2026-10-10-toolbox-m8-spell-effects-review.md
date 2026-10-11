@@ -34,3 +34,15 @@
 ## Open item (exists before this slice, not a finding)
 
 - A `status.apply` followed by a recipe `duration` that is at least the status's `tick_every` gives fault `precondition_failed` on the status row. A reaction on `action_completed` does the same (reviewer control), so the spell path only inherits it. The PM decides whether to file it.
+
+## Re-check at c741e495
+
+- Fix commit `c741e49582215844b1357a087a534ec0b1ca14f9` only (`shared.ts`, `spell_effects.test.ts`, `mechanics.md:2348`). Hosted ci and book-e2e green on the head (PM brief).
+- Verdict: **APPROVE WITH NOTES**.
+- Focused run green: `spell_effects`, `spells`, `writer_groups` tests; `npm run typecheck`.
+- **B1 resolved**: with the `slain` guard removed (`spell.ts:60`), only `a spell writes nothing more to an NPC it killed…` fails (`spell_effects.test.ts:193`: `entity_died, status_applied, …` against `entity_died, action_completed`).
+- **B2 resolved**: with `!target.hp` removed (`spell.ts:96`), the same test fails at its second assertion (`:205`, `[]` against `action_completed`).
+- **S2 resolved**: with `!again` removed (`spell.ts:57`), only `two light.ignite steps on one orb light it once` fails.
+- **S1 resolved per PM decision**: `castAdmission` (`shared.ts:84-88`) returns the same `invalid_state` as a failing policy, before costs. With `!busy` removed, only `in a fight only a spell without a duration is cast` fails (`:231`, `fault` against `invalid_state`). The test asserts that the refused world is unchanged and that `flamma`, which has no duration, still lands in the fight. The spec line `mechanics.md:2348` agrees with the code.
+- **N1 open (nit)**: neither commit `c741e495` nor `loka-kgd.99` reports a `/code-review` result; the brief says it is in the developer's handoff. The reviewer did not check it.
+- Open, not a finding: a `time.advance` that runs due jobs inside a proposal may still fault on an engage (`loka-6ztc`).
