@@ -46,6 +46,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: damage kinds, resistances and critical hits, toolbox row G2 (loka-kgd.18)](2026-10-10-toolbox-g2-damage-review.md): **APPROVE**
 - [Review: property tags and the policy leaf set, toolbox row G1 (loka-kgd.17)](2026-10-10-toolbox-g1-review.md): **APPROVE**
 - [Review: toolbox showcase slice A, hub, body and world districts (loka-y6yg.1)](2026-10-10-showcase-slice-a-review.md): **APPROVE WITH NOTES**
+- [Review: showcase plan 2, the combat district brief (loka-y6yg, PR #368)](2026-10-10-showcase-plan-2-review.md): **APPROVE**
 - [Review: showcase plan 1, hub, body, world and social districts (loka-y6yg, PR #364)](2026-10-10-showcase-plan-1-review.md): **APPROVE WITH NOTES**
 - [Docs review: showcase decision, Chapters 2-3 out of release scope (loka-exbe, PR #362)](2026-10-10-showcase-decision-review.md): **APPROVE WITH NOTES**
 - [Review: showcase slice B, Low Wardle and the hub's south exit (loka-y6yg.2, PR #367)](2026-10-10-showcase-b-review.md): **APPROVE WITH NOTES**
