@@ -12,6 +12,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 
 - [Review: toolbox row 12, traps (loka-kgd.73)](2026-10-10-toolbox-m8-traps-review.md): **APPROVE WITH NOTES**
 - [Review: a round joins all its rows' writer groups; sight handoff check scoped (loka-x2gv, loka-kgd.43, toolbox M8)](2026-10-10-toolbox-m8-groups-review.md): **APPROVE**
+- [Review: toolbox row W21, fear and morale for NPCs (loka-kgd.74)](2026-10-10-toolbox-m8-fear-review.md): **APPROVE WITH NOTES**
 - [Review: toolbox row 6a, combat target choice in the same room (loka-kgd.63)](2026-10-10-toolbox-m7-targets-review.md): **APPROVE WITH NOTES**
 - [Review: toolbox row G6 engine half, sense cues (loka-kgd.61, batch M7)](2026-10-10-toolbox-m7-senses-review.md): **APPROVE**
 - [Review: toolbox row W8, permanent statuses (loka-kgd.67)](2026-10-10-toolbox-m7-scars-review.md): **APPROVE**
