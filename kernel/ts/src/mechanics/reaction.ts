@@ -29,7 +29,7 @@ import { activation, resolution } from './quest/lifecycle.ts';
 import { questOf } from './lookups.ts';
 import { cmp } from '../foundation/validate.ts';
 import { suppress } from './population/shared.ts';
-import { applyStatus, specOf } from './status/shared.ts';
+import { applyStatus, cureOps, landing, specOf } from './status/shared.ts';
 import { grant } from './levelling/shared.ts';
 import { saturate } from '../foundation/int.ts';
 import { npcsIn } from './speech/shared.ts';
@@ -111,7 +111,8 @@ export function sequence(
   if (!source) return { kind: 'fault', code: 'precondition_failed' };
   actor = source;
   const then = { ...world, state: { ...world.state, clock: cause.logical_time } };
-  if (rule.when && !holds(then, actor, rule.when.root, { steps, cause })) return undefined;
+  const about = { steps, cause, subject: subject(cause, bodyOf(then, actor)) }; // status reader 1
+  if (rule.when && !holds(then, actor, rule.when.root, about)) return undefined;
   const set: Record<string, FactValue> = {};
   const activated = new Set<string>();
   const applied = new Set<string>();
@@ -138,10 +139,10 @@ export function sequence(
       if ('payload' in result) emit(result.payload);
     } else if (step.op === 'population.suppress') {
       ops.push(...suppress(world, actor, step.plan, step.duration, cause, group, mint));
-    } else if (step.op === 'status.apply') {
+    } else if (step.op === 'status.apply' || step.op === 'status.cure') {
       const body = bodyOf(then, actor);
       if (!body) return { kind: 'fault', code: 'precondition_failed' };
-      const applying = statusStep(then, step, cause, body, group, { holders, applied }, mint);
+      const applying = statusStep(then, step, cause, body, group, { holders, applied }, mint, emit);
       ops.push(...applying.ops);
       narration.push(...applying.narration);
     } else if (step.op === 'experience.grant') {
@@ -167,13 +168,16 @@ const SUBJECT: Partial<Record<On['event'], string>> = {
   attack_result: 'target_id',
   rested: 'body_id',
   fact_changed: 'subject_id',
+  status_applied: 'body_id',
   status_ticked: 'body_id',
   status_expired: 'body_id',
   spoken: 'entity_id',
 };
 const subject = (cause: DomainEvent, body?: EntityId) => {
   const field = SUBJECT[cause.payload.type as On['event']];
-  const id = field && ((cause.payload as Record<string, unknown>)[field] as EntityId | undefined);
+  const id = field
+    ? ((cause.payload as Record<string, unknown>)[field] as EntityId | undefined)
+    : undefined;
   return id ?? body;
 };
 
@@ -186,30 +190,37 @@ const present = (world: World, cause: DomainEvent, subject?: string) => {
 // A status.apply on its holder: the step's named item's or (row 42) NPC's instance, (row W21) every
 // living NPC in the event's room, else the event's subject (row G3), once per holder and status in
 // a rule, in the one writer group the holder's status writes share in this advance (status/job.ts
-// statusGroup); only the player's own body hears the applied line.
+// statusGroup); only the player's own body hears a first application, which emits status_applied
+// (status reader 2). A status.cure (reader 3) ends the subject's active row the same way.
 function statusStep(
   world: World,
-  step: Extract<ReactionRule['apply'][number], { op: 'status.apply' }>,
+  step: Extract<ReactionRule['apply'][number], { op: 'status.apply' | 'status.cure' }>,
   cause: DomainEvent,
   body: EntityId,
   group: number,
   { holders, applied }: { holders: Map<string, number>; applied: Set<string> },
   mint: Mint,
+  emit: (payload: EventPayload) => void,
 ) {
-  const named = step.item ?? step.npc;
+  const apply = step.op === 'status.apply' ? step : undefined;
+  const named = apply?.item ?? apply?.npc;
   const one = named ? world.entityIds[refString(named)] : subject(cause, body);
   const out = { ops: [] as DeltaOp[], narration: [] as { key: TextKey }[] };
-  for (const holder of step.co_present ? npcsIn(world, present(world, cause, one)) : [one]) {
+  for (const holder of apply?.co_present ? npcsIn(world, present(world, cause, one)) : [one]) {
     const once = `${holder}|${refString(step.status)}`;
     if (!holder || applied.has(once)) continue;
     applied.add(once);
     const joined = holders.get(holder) ?? group;
-    const ops = applyStatus(world, holder, step.status, joined, mint);
+    const ops = apply
+      ? applyStatus(world, holder, step.status, joined, mint)
+      : cureOps(world, holder, [step.status], joined);
     if (ops.length) holders.set(holder, joined); // a later status job on the holder joins it too
     out.ops.push(...ops);
-    // Only a first application (over no row or an inactive one) is heard; a refresh while active is
-    // silent (row W25), and a permanent status (row W8) opens with no job.
-    const first = ops.some((o) => o.op === 'status.transition' && !o.expected?.active);
+    // Only a first application (over no row or an inactive one) is heard and lands; a refresh while
+    // active is silent (row W25), and a permanent status (row W8) opens with no job.
+    const first = apply && ops.some((o) => o.op === 'status.transition' && !o.expected?.active);
+    if (first && landing(world))
+      emit({ type: 'status_applied', body_id: holder, status: step.status });
     const label = specOf(world, step.status)?.narration.applied;
     if (label && first && holder === body) out.narration.push({ key: label });
   }

@@ -413,6 +413,16 @@
             },
             {
               "type": "object",
+              "description": "Toolbox row G3 reader 2 (kernel_api at least 1.53).",
+              "properties": {
+                "event": { "const": "status_applied" },
+                "status": { "$ref": "identity.schema.json#/$defs/DefinitionRef" }
+              },
+              "required": ["event"],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
               "properties": {
                 "event": { "const": "status_expired" },
                 "status": { "$ref": "identity.schema.json#/$defs/DefinitionRef" }
@@ -571,6 +581,16 @@
                     "enum": [true],
                     "description": "Toolbox row W21 (kernel_api at least 1.50): the status lands on every living NPC in the event's room (its room_id, else the room directly holding the subject; none for a carried or unplaced one), in EntityId order, never on the player's body; an NPC declaring the status immune takes nothing. Never with item or npc (compiler and loader SCHEMA_VIOLATION)."
                   }
+                },
+                "required": ["op", "status"],
+                "additionalProperties": false
+              },
+              {
+                "description": "Toolbox row G3 reader 3 (kernel_api at least 1.53): end this status when active on the event's subject (the holder a status.apply without item, npc or co_present lands on), as a cure does: no event, no line. Once per holder and status in a rule, shared with status.apply: the first of the two steps on a pair wins.",
+                "type": "object",
+                "properties": {
+                  "op": { "const": "status.cure" },
+                  "status": { "$ref": "identity.schema.json#/$defs/DefinitionRef" }
                 },
                 "required": ["op", "status"],
                 "additionalProperties": false

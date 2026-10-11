@@ -23536,5 +23536,99 @@
         "code": "unknown_property"
       }
     ]
+  },
+  {
+    "name": "status_applied_missing_fields",
+    "contract": "EventPayload",
+    "value": {
+      "type": "status_applied"
+    },
+    "errors": [
+      {
+        "path": "/body_id",
+        "code": "missing_property"
+      },
+      {
+        "path": "/status",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "status_applied_trigger_mistyped",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "status_applied",
+        "status": 1,
+        "x": 1
+      },
+      "apply": []
+    },
+    "errors": [
+      {
+        "path": "/on/status",
+        "code": "invalid_type"
+      },
+      {
+        "path": "/on/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "reaction_status_cure_no_status",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "status_applied"
+      },
+      "apply": [
+        {
+          "op": "status.cure"
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/apply/0/status",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "reaction_status_cure_named_npc",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "status_applied"
+      },
+      "apply": [
+        {
+          "op": "status.cure",
+          "status": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "status",
+            "key": "wet"
+          },
+          "npc": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "npc",
+            "key": "golem"
+          }
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/apply/0/npc",
+        "code": "unknown_property"
+      }
+    ]
   }
 ]

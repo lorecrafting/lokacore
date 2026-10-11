@@ -1,0 +1,13 @@
+{
+  "keywords": [
+    "bucket"
+  ],
+  "short": "item.bucket.short",
+  "room_line": "item.bucket.room",
+  "description": "item.bucket.description",
+  "mass_grams": 3000,
+  "location": {
+    "in": "room",
+    "room": "yard"
+  }
+}

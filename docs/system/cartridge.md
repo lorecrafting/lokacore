@@ -1489,6 +1489,8 @@ Compiler/loader validate resolved item/nest/population/corpse/room refs, a nonem
 
 [Row W21](mechanics.md#fear-and-morale-for-npcs-toolbox-row-w21) adds a status's optional `fear: true` and a `status.apply` step's optional `co_present: true` (each `kernel_api` at least **1.50**): such a status may omit `per_tick`, as one with `modifies` may; such a step names no holder. Both kernels refuse the lower floor (KERNEL_API_RANGE_INVALID) and a `co_present` step that also names `item` or `npc` (SCHEMA_VIOLATION at that field); the schema refuses any other value. `cartridges/fear_sampler` is the sampler.
 
+[The status readers](mechanics.md#status-readers-toolbox-rows-sr1-sr2-and-sr3) add, each needing `kernel_api` at least **1.53**: a `status_active` leaf's `subject: "self"` or `"subject"`; the trigger `{event: "status_applied"}` with an optional `status: <key>` filter; and the reaction step `{op: "status.cure", status: <key>}`, which names a declared status and no holder. Both kernels refuse an unresolved status (UNRESOLVED_REFERENCE at the step's `status`) and the lower floor (KERNEL_API_RANGE_INVALID); the schema refuses a cure step naming `item`, `npc` or `co_present`. `cartridges/elements_sampler` is the sampler.
+
 *Not supported yet:* a status whose `modifies` names an attribute the derived hp maximum reads (`con`): one that ends before a later hp write in the same wait faults (Beads `loka-kgd.50`); author such buffs on other attributes until it lands.
 
 ## Derived stat declarations

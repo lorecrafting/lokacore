@@ -1,0 +1,13 @@
+{
+  "on": {
+    "event": "item_dropped",
+    "item": "jar"
+  },
+  "apply": [
+    {
+      "op": "status.apply",
+      "status": "shocked",
+      "npc": "golem"
+    }
+  ]
+}

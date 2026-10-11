@@ -1,0 +1,12 @@
+{
+  "duration": 120,
+  "tick_every": 60,
+  "resource": "hp",
+  "per_tick": -3,
+  "label": "condition.stunned",
+  "narration": {
+    "applied": "narration.stunned.applied",
+    "tick": "narration.stunned.tick",
+    "expired": "narration.stunned.expired"
+  }
+}

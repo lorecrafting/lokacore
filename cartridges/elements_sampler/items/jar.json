@@ -1,0 +1,13 @@
+{
+  "keywords": [
+    "jar"
+  ],
+  "short": "item.jar.short",
+  "room_line": "item.jar.room",
+  "description": "item.jar.description",
+  "mass_grams": 800,
+  "location": {
+    "in": "room",
+    "room": "yard"
+  }
+}

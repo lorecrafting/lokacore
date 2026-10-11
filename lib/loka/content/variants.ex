@@ -1,7 +1,8 @@
 defmodule Loka.Content.Variants do
   @moduledoc """
   Toolbox row W6: an entity text variant (all but an item's older `room_line_variants`) or a
-  `status_active` or `npc_present` leaf needs kernel_api 1.46. Twin of
+  `status_active` or `npc_present` leaf needs kernel_api 1.46; a `status_active` leaf reading
+  `self` or `subject` (status reader 1, row G3) 1.53. Twin of
   kernel/ts/src/content/cartridge_variants.ts.
   """
   import Loka.Content.Source, only: [diag: 3]
@@ -16,8 +17,10 @@ defmodule Loka.Content.Variants do
       |> String.split(".")
       |> Enum.map(&String.to_integer/1)
 
+    floor = if reader?(defs) or reader?(settings), do: [1, 53], else: [1, 46]
+
     if (Enum.any?(Entities.all(defs), &variant?/1) or leaf?(defs) or leaf?(settings)) and
-         api < [1, 46],
+         api < floor,
        do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least", %{})],
        else: []
   end
@@ -32,4 +35,10 @@ defmodule Loka.Content.Variants do
   defp leaf?(v) when is_list(v), do: Enum.any?(v, &leaf?/1)
   defp leaf?(v) when is_tuple(v), do: leaf?(Tuple.to_list(v))
   defp leaf?(_), do: false
+
+  defp reader?(%{"op" => "status_active", "subject" => s}) when s != "target", do: true
+  defp reader?(v) when is_map(v), do: Enum.any?(Map.values(v), &reader?/1)
+  defp reader?(v) when is_list(v), do: Enum.any?(v, &reader?/1)
+  defp reader?(v) when is_tuple(v), do: reader?(Tuple.to_list(v))
+  defp reader?(_), do: false
 end
