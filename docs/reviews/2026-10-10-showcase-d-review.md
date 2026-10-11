@@ -39,3 +39,15 @@
 ## Disposition
 
 - Record not pushed by the reviewer ([Git hygiene](../WORKFLOW.md#git-hygiene)): local branch `review-374`.
+
+## Re-check at `23764d3671f54dc0147095a2fda159b15b1e83b8` (fix commits bb05b734, 23764d36)
+
+- Hosted CI at head (per PM): ci, book-e2e, graph-diff green.
+- Verdict: **APPROVE**. All three findings resolved; no new findings.
+
+1. Finding 1, resolved. Social 15-21 now in `kernel/ts/test/showcase_consequence.test.ts`; shared helpers exported from `kernel/ts/test/showcase_fixture.ts`. Pure move: the old `showcase_social.test.ts` lines 391-end diff against the new file from `const ECHO` to end differ only by the dropped local `const DAY` (now imported). Every removed helper line reappears verbatim, with `export`, in the fixture. `size: allow` gone; social file 365 lines. Focused run: 22/22 (15 social + 7 consequence, as before the split).
+   - Developer note (social 17, 18, 21 use `box`/`dawn`/`noon` from social 15 and 17): acceptable. The chain stays inside the one file, node:test runs a file's top-level tests in order, and it predates the split. Running one test alone by name would fail; not a spec requirement.
+2. Finding 2, resolved. `narration.force_strongbox.success` is "The lock snaps."; the fixture's sha256(canonical) equals its `sha256` and the canonical holds the new line; `mix test test/loka/content_showcase_test.exs` passes (source compiles to the same bytes).
+3. Finding 3, resolved. `docs/showcase/cause-and-effect.md:155-157` names the per-save sky and the hot-day case.
+- Pins: `docs/SHOWCASE.md:54-55` and plan 3 "Pins the build writes" (`cause-and-effect.md:131`) now cite `showcase_consequence.test.ts`. Remaining `showcase_social.test.ts` cites are steps 1-14 or past review records.
+- Local, head: both test files, `npm run typecheck` (kernel/ts), `mix test test/loka/content_showcase_test.exs`: all exit 0.
