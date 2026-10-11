@@ -192,8 +192,11 @@ test('a deaf listener hears no sound cue and still smells', () => {
     { sense: 'smell', text: 'cue.stew', direction: 'north' },
   ]);
   const west = play(w, { type: 'move', direction: 'west' });
-  const picked = play(on(west, id(west, 'npc', 'guard')), { type: 'perform', action: 'pick_lock' });
-  assert.equal(value(picked, picked.character, ref('fact', 'guard_alerted')), false);
+  const alerted = (x: World) => {
+    const picked = play(x, { type: 'perform', action: 'pick_lock' });
+    return value(picked, picked.character, ref('fact', 'guard_alerted'));
+  };
+  assert.deepEqual([alerted(west), alerted(on(west, id(west, 'npc', 'guard')))], [true, false]);
 });
 
 // Breaks: the outcome's transient cue never perceived (the guard misses it), range ignored or the

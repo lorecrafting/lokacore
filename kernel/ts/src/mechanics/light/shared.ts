@@ -105,7 +105,8 @@ export function visible(
     here = body && w.state.containers[body];
   const detail = w.details[id];
   const entity = w.entities[id];
-  if (entity?.kind === 'npc' && concealed(w, id as EntityId, body)) return false; // status reader 8
+  const blind = perceives(w, body, 'blind'); // status reader 6: no NPC or glow is seen
+  if (entity?.kind === 'npc' && (blind || concealed(w, id as EntityId, body))) return false;
   if (entity?.kind === 'npc' && entity.perception)
     return (
       living(w, id as EntityId) &&
@@ -113,7 +114,7 @@ export function visible(
       value(w, actor, entity.perception.discovered) === true
     );
   if (!dark(w, actor, steps)) return true;
-  if (detail?.room === here && detail.perception?.self_luminous) return true;
+  if (detail?.room === here && detail.perception?.self_luminous && !blind) return true;
   const room = here;
   let at: string | undefined = id,
     owned = false;
