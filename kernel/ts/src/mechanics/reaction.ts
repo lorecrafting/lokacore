@@ -115,7 +115,7 @@ export function sequence(
   const about = { steps, cause, subject: subject(cause, bodyOf(then, actor)) }; // status reader 1
   if (rule.when && !holds(then, actor, rule.when.root, about)) return undefined;
   const activated = new Set<string>();
-  const own = { holders, set: {}, applied: new Set<string>(), doors: new Map() }; // per-rule
+  const own = { holders, set: {}, applied: new Set<string>(), doors: new Map() }; // holders: the advance's
   const ops: DeltaOp[] = [];
   const events: DomainEvent[] = [];
   const narration: { key: TextKey }[] = [];

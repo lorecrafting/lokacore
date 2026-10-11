@@ -171,7 +171,7 @@ defmodule Loka.Content.Reactions do
     hit =
       if s["barrier"],
         do: for({_, _, b} <- [resolve(s["barrier"], "barrier", ctx.m, ctx.defs)], do: b),
-        else: for({_, {_, _, b}} <- barriers(ctx.defs), s["tag"] in (b["tags"] || []), do: b)
+        else: for(b <- exit_barriers(ctx), s["tag"] in (b["tags"] || []), do: b)
 
     lockout =
       if s["to"] == "locked" and Enum.any?(hit, &(!&1["key_item"])),
@@ -198,7 +198,16 @@ defmodule Loka.Content.Reactions do
           do: d
         )
 
-  defp barriers(defs), do: if(is_map(defs["barrier"]), do: defs["barrier"], else: %{})
+  # A tag reaches only barriers on exits (setBarrier), never a container's lid.
+  defp exit_barriers(ctx) do
+    rooms = if is_map(ctx.defs["room"]), do: ctx.defs["room"], else: %{}
+
+    for {_, {_, _, r}} <- rooms,
+        {_, e} <- r["exits"] || %{},
+        e["barrier"],
+        {_, _, b} <- [resolve(e["barrier"], "barrier", ctx.m, ctx.defs)],
+        do: b
+  end
 
   # Row 42: a step names one holder, and a spawn template has no instance to take it; a co_present
   # step (row W21) names none.

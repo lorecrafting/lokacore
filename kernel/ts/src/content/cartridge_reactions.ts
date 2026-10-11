@@ -118,10 +118,13 @@ export function reactions(c: Obj, { named, typedValue }: Checks): Diagnostic[] {
 // or on every barrier carrying the tag, else no key could ever unlock it (BARRIER_UNREACHABLE_KEY).
 function barrierSet(c: Obj, s: Obj, at: string, named: Checks['named']): Diagnostic[] {
   if (s.barrier) named(s.barrier, 'barrier', `${at}.barrier`);
-  const all = Object.values((c.barriers ?? {}) as Obj);
+  // A tag reaches only barriers on exits (setBarrier), never a container's lid.
+  const exits = Object.values((c.rooms ?? {}) as Obj).flatMap((r) => Object.values(r.exits as Obj));
   const hit = s.barrier
     ? [c.barriers?.[refString(s.barrier)]]
-    : all.filter((b) => b.tags?.includes(s.tag));
+    : exits
+        .map((e) => e.barrier && c.barriers?.[refString(e.barrier)])
+        .filter((b) => b?.tags?.includes(s.tag));
   return s.to === 'locked' && hit.some((b) => b && !b.key_item)
     ? [diag('BARRIER_UNREACHABLE_KEY', `${at}.to`)]
     : [];

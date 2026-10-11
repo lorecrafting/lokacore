@@ -60,8 +60,8 @@ test('fire 3: the first tick opens the woodstore door nobody named', () => {
   assert.equal(go(w, 'south').world.state.containers[w.body], w.roomIds[ref('room', 'woodstore')]);
 });
 
-// Breaks: the quench recipe does not cure a showcase item, or a quenched thing reignites.
-test('fire 4: the bucket puts both out, and they stay out', () => {
+// Breaks: the quench recipe does not cure a showcase item (asserted before the fire could burn out).
+test('fire 4: the bucket puts both out', () => {
   w = take(w, 'smithy_bucket');
   for (const target of ['bench', 'kindling'])
     w = play(w, {
@@ -188,6 +188,16 @@ test('loader: barrier.set and co_present tag need API 1.56; to locked needs a ke
     (c.barriers[ref('barrier', 'store_door')].key_item = { ...C, kind: 'item', key: 'anvil' });
   assert.equal(
     reload((c) => (keyed(c), door({ tag: 'burnable' })(c))),
+    'ok',
+  );
+  // A keyless burnable barrier on no exit (a lid) is out of a tag's reach.
+  const stray = (c: any) => {
+    const b = { ...c.barriers[ref('barrier', 'store_door')], key: 'stray' };
+    delete b.opens_when;
+    c.barriers[ref('barrier', 'stray')] = b;
+  };
+  assert.equal(
+    reload((c) => (keyed(c), stray(c), door({ tag: 'burnable' })(c))),
     'ok',
   );
 });

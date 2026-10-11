@@ -60,6 +60,20 @@ defmodule Loka.ContentShowcaseTest do
       assert {:ok, _, _} =
                Loka.ContentSource.compile(dir, [keyed, door("locked", %{"tag" => "burnable"})])
 
+      # A keyless burnable barrier on no exit (a lid) is out of a tag's reach.
+      File.write!(
+        Path.join(dir, "barriers/stray.json"),
+        JSON.encode!(%{
+          "keywords" => ["stray"],
+          "short" => "barrier.store_door.short",
+          "initial" => "closed",
+          "tags" => ["burnable"]
+        })
+      )
+
+      assert {:ok, _, _} =
+               Loka.ContentSource.compile(dir, [keyed, door("locked", %{"tag" => "burnable"})])
+
       assert {"UNRESOLVED_REFERENCE", "reactions/fire_spreads.apply[1].barrier"} in diags(dir, [
                door("open", %{"barrier" => "gate"})
              ])
