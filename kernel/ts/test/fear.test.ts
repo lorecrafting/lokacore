@@ -15,6 +15,7 @@ import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { activeStatuses } from '../src/mechanics/status/shared.ts';
+import { sequence } from '../src/mechanics/reaction.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-fear-sampler-'));
 let artifact: Uint8Array;
@@ -154,6 +155,33 @@ test("the chief falls in the wait that ends the goblins' fear: one wait equals t
   };
   assert.deepEqual(after(false), [650, [0, false], [6, true], [6, true]]);
   assert.deepEqual(after(true), after(false));
+});
+
+// Breaks: with no room (a status_expired on an unplaced holder) co_present matches every NPC that
+// has no container (here the chief, unplaced) instead of none, so the delivery writes its row.
+test('co_present with no room frightens no one', () => {
+  const placed = den(content).w;
+  const { [npc(placed, 'chief')]: _, ...containers } = placed.state.containers;
+  const w = { ...placed, state: { ...placed.state, containers } } as World;
+  const rule = { ...Object.values(content.reactions!).find((r) => r.key === 'leader_fell')! };
+  const status = (rule.apply[0] as unknown as { status: never }).status;
+  const on = { event: 'status_expired' } as const;
+  const payload = {
+    type: 'status_expired',
+    body_id: 'ffffffff-0000-4000-8000-000000000000',
+    status,
+  };
+  const cause = { id: 'c', logical_time: w.state.clock, payload } as never;
+  const r = sequence(
+    w,
+    w.character,
+    { ...rule, on } as never,
+    cause,
+    1,
+    { n: 0 },
+    () => 'j' as never,
+  );
+  assert.deepEqual(r && r.kind === 'accepted' ? r.delta.ops : r, []);
 });
 
 /** The sampler's artifact, edited and re-hashed, loaded: its first diagnostic's code and path. */

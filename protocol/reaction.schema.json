@@ -569,7 +569,7 @@
                   "npc": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
                   "co_present": {
                     "enum": [true],
-                    "description": "Toolbox row W21 (kernel_api at least 1.50): the status lands on every living NPC in the event's room (its room_id, else the subject's room), in EntityId order, never on the player's body; an NPC declaring the status immune takes nothing. Never with item or npc (compiler and loader SCHEMA_VIOLATION)."
+                    "description": "Toolbox row W21 (kernel_api at least 1.50): the status lands on every living NPC in the event's room (its room_id, else the room directly holding the subject; none for a carried or unplaced one), in EntityId order, never on the player's body; an NPC declaring the status immune takes nothing. Never with item or npc (compiler and loader SCHEMA_VIOLATION)."
                   }
                 },
                 "required": ["op", "status"],

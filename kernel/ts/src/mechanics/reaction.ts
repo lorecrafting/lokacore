@@ -177,6 +177,12 @@ const subject = (cause: DomainEvent, body?: EntityId) => {
   return id ?? body;
 };
 
+// Row W21: the event's room_id, else the room directly holding its subject; none for a carried one.
+const present = (world: World, cause: DomainEvent, subject?: string) => {
+  const room = (cause.payload as { room_id?: string }).room_id ?? world.state.containers[subject!];
+  return room && world.rooms[room] ? [room] : [];
+};
+
 // A status.apply on its holder: the step's named item's or (row 42) NPC's instance, (row W21) every
 // living NPC in the event's room, else the event's subject (row G3), once per holder and status in
 // a rule, in the one writer group the holder's status writes share in this advance (status/job.ts
@@ -192,9 +198,8 @@ function statusStep(
 ) {
   const named = step.item ?? step.npc;
   const one = named ? world.entityIds[refString(named)] : subject(cause, body);
-  const room = (cause.payload as { room_id?: string }).room_id ?? world.state.containers[one!];
   const out = { ops: [] as DeltaOp[], narration: [] as { key: TextKey }[] };
-  for (const holder of step.co_present ? npcsIn(world, [room!]) : [one]) {
+  for (const holder of step.co_present ? npcsIn(world, present(world, cause, one)) : [one]) {
     const once = `${holder}|${refString(step.status)}`;
     if (!holder || applied.has(once)) continue;
     applied.add(once);

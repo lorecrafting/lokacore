@@ -15,19 +15,17 @@ defmodule Loka.ContentFearTest do
   test "fear and co_present need API 1.50; co_present names no holder", %{dir: dir} do
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, [])
 
-    assert List.keymember?(
-             diags(dir, [at149(), {"reactions/leader_fell.json", nil}]),
-             "KERNEL_API_RANGE_INVALID",
-             0
-           )
+    assert {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api"} in diags(dir, [
+             at149(),
+             {"reactions/leader_fell.json", nil}
+           ])
 
     plain = &(&1 |> Map.delete("fear") |> Map.put("per_tick", -1))
 
-    assert List.keymember?(
-             diags(dir, [at149(), {"statuses/afraid.json", plain}]),
-             "KERNEL_API_RANGE_INVALID",
-             0
-           )
+    assert {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"} in diags(dir, [
+             at149(),
+             {"statuses/afraid.json", plain}
+           ])
 
     for {field, key} <- [{"npc", "guard"}, {"item", "ear"}] do
       named = &put_in(&1, ["apply", Access.at(0), field], key)
