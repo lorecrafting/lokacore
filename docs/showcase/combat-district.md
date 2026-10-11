@@ -105,8 +105,8 @@ No combat room is `exposed`, so no weather drain lands; no door is gated; rooms 
 > the gate with a raider in it; shout "ware" from here and Gil hears you through the wall, and he
 > fights beside you once you strike. Aldous pays a bounty on the raider, but only to one who takes
 > it before the raider falls. South is a pit with two
-> goblins who fight as a pack: in a pack you choose which one you hit. A kill that ends a fight earns
-> experience (in a pack, the last goblin standing); thirty points make a level and a point to raise a stat, and raised strength bites harder. When you
+> goblins who fight as a pack: in a pack you choose which one you hit. Every kill earns
+> experience, each goblin of a pack too; thirty points make a level and a point to raise a stat, and raised strength bites harder. When you
 > fall you wake at the inn with your level, your scar and your skill; what you carried waits on your
 > corpse where you fell. The Warden in Low Wardle wears mail no blade gets through. The tilt yard,
 > south of the gate, has all of it and a draught.
@@ -201,7 +201,6 @@ Steps 1 to 10 are built and pinned by `kernel/ts/test/showcase_combat.test.ts` (
   `wander_interval <= replacement_delay`, and the wander interval keeps the pack from wandering in
   play. A pack killed stays gone for a hundred days. `enemy_fled` names `north` and `south` (the
   loader wants every exit inside the area, from both rooms).
-- Step 9 experience is 70 while Beads `loka-lpq6` is open (B's kill pays nothing).
 - `aldous_lesson` has `learn` only: a second choice makes it a hub that reopens, and the compiler
   refuses a repeatable `receive` (OUTCOME_MISMATCH). `aldous_talk` is a hub: after `bounty` the
   player leaves with Leave the conversation (`close_choice`).
@@ -262,7 +261,7 @@ when the first falls, or at a shout); use-on x fire x doors (G4, W22); sequence 
 1. `attack_result` has no attacker filter (`FILTERS`, `kernel/ts/src/mechanics/reaction.ts`), so a
    wound that one foe inflicts is authored by `npc_present` plus `immune` on the foe; two foes
    that share a room cannot inflict different wounds.
-2. Pack kill credit (Beads `loka-lpq6`): only the last goblin standing earns experience.
+2. Pack kill credit (Beads `loka-lpq6`): fixed, every pack kill pays (step 9).
 3. A pack population in a cartridge with long waits (Beads `loka-6ql4`, above).
 4. No reaction step moves an NPC (Beads `loka-kgd.22`): Gil cannot come when called; he stands
    where the fight is.

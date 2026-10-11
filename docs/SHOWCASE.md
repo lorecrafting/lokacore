@@ -44,7 +44,7 @@ Status `planned (plan N)` means that showcase plan ([plan 1](showcase/hub-and-fi
 | deadline x exposure | social and body | the letter run across `fell_top` | `showcase_social.test.ts` (social 11) | built |
 | pick x force x skill growth | social | `tollhouse` (strongbox, fragile and iron doors) | `showcase_social.test.ts` (social 6-7) | built |
 | schedule cases x sky | social | Tam's 11:00 case (rain sends him to the church) | `showcase_social.test.ts` (social 8, rain) | built |
-| target choice x pack x kill credit | combat | `goblin_pit` (two goblins on one pack plan; Attack the second to switch) | `showcase_combat.test.ts` (combat 9) | built (a non-final pack kill pays nothing until Beads `loka-lpq6`) |
+| target choice x pack x kill credit | combat | `goblin_pit` (two goblins on one pack plan; Attack the second to switch) | `showcase_combat.test.ts` (combat 9) | built |
 | allies x kill credit x quest | combat | `gate_yard` (Gil's blow kills the raider; the bounty resolves) | `showcase_combat.test.ts` (combat 4) | built |
 | scars x death x same-body return | combat | the boar's `gored` survives the unarmed death in `boar_run` | `showcase_combat.test.ts` (combat 6) | built |
 | bleed status x cure x immune | combat | `bleeding` from the boar, the poultice, the boar immune to its own wound | `showcase_combat.test.ts` (combat 6, 8) | built |

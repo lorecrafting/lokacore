@@ -65,11 +65,13 @@ function fatalGroup(
   if (!attack || attack.payload.type !== 'attack_result') return;
   const { encounter_id } = attack.payload;
   // The round's own write names the job that ran: its close, or its advance when a pack fights on.
+  // Matched by the death's cause, since a merged group may hold another job's close (a status tick).
   const ending = ops.find(
     (o): o is Ending =>
       (o.op === 'encounter.close' || o.op === 'encounter.advance') &&
       o.writer_group === creation.writer_group &&
-      o.encounter_id === encounter_id,
+      o.encounter_id === encounter_id &&
+      jobCommandId(o.job_id, event.logical_time) === (event.causation_id as string),
   );
   if (!ending || !occurrenceValid(world, event, attack.payload, ending)) return;
   const fatal = ops.some(
