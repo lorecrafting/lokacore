@@ -9,7 +9,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
-import { INSTALLED, loadCartridge, newWorld, step, stepElapsed } from '../src/index.ts';
+import { INSTALLED, gameView, loadCartridge, newWorld, step, stepElapsed } from '../src/index.ts';
 import { refString, type Cartridge, type World } from '../src/runtime/decision.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { encode } from '../src/foundation/canonical.ts';
@@ -106,6 +106,12 @@ test('a named room takes the status; its tick changes nothing and it expires', (
   const expired = wait(ticked.world, 60);
   assert.ok(expired.types.includes('"type":"status_expired"'), expired.decision);
   assert.equal(row(expired.world)?.active, false);
+  // The same 120 s in one advance: the crossed successor runs as a sub-step (loka-6ztc).
+  const crossed = wait(w, 120);
+  assert.ok(crossed.types.includes('"type":"status_ticked"'), crossed.decision);
+  assert.ok(crossed.types.includes('"type":"status_expired"'), crossed.decision);
+  assert.ok(!crossed.decision.includes('"kind":"resource"'), crossed.decision);
+  assert.equal(row(crossed.world)?.active, false);
 });
 
 // Breaks: dark()/visible() read only the body's own statuses (the darkened den shows its troll), or
@@ -116,9 +122,11 @@ test('a room holding a blind status is dark, and hides its NPC, only to whoever 
   const inDen = play(w, { type: 'move', direction: 'east' });
   assert.equal(dark(inDen, inDen.character), true);
   assert.equal(visible(inDen, inDen.character, troll(inDen)), false);
+  assert.ok(!JSON.stringify(gameView(inDen)).includes(troll(inDen)), 'the view hides the troll');
   const later = play(wait(wait(w, 60).world, 60).world, { type: 'move', direction: 'east' });
   assert.equal(dark(later, later.character), false, 'expired');
   assert.equal(visible(later, later.character, troll(later)), true);
+  assert.ok(JSON.stringify(gameView(later)).includes(troll(later)));
 });
 
 // Breaks (twin of test/loka/content_status_readers_test.exs): a room step loads under API 1.64, a
