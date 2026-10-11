@@ -198,9 +198,9 @@ test('the tool must be held, distinct from the target and named', () => {
 });
 
 // Breaks: the TS loader admits a use recipe below kernel_api 1.49, a status.cure on a detail
-// recipe, or an opposed check on a use recipe, which has no detail rating (both kernels refuse
-// them; content_use_test.exs).
-test('loader: kernel_api 1.49, cures only on use recipes, no rating-opposed check', () => {
+// recipe, an opposed check on a use recipe, which has no detail rating, or a tool liquid naming no
+// liquid of the cartridge (both kernels refuse them; content_use_test.exs).
+test('loader: kernel_api 1.49, cures only on use recipes, no rating-opposed check, liquid', () => {
   const QUENCH = 'use_sampler@0.0.1:recipe/quench';
   const rows: [(c: Record<string, any>) => void, string, string][] = [
     [
@@ -233,6 +233,11 @@ test('loader: kernel_api 1.49, cures only on use recipes, no rating-opposed chec
       },
       'SCHEMA_VIOLATION',
       `.cartridge.recipes[${JSON.stringify(QUENCH)}].check`,
+    ],
+    [
+      (c) => (c.recipes[QUENCH].target.tool.liquid = { ...C, kind: 'liquid', key: 'milk' }),
+      'UNRESOLVED_REFERENCE',
+      `.cartridge.recipes[${JSON.stringify(QUENCH)}].target.tool.liquid`,
     ],
   ];
   for (const [change, code, path] of rows) {

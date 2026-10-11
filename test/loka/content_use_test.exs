@@ -5,8 +5,8 @@ defmodule Loka.ContentUseTest do
   defp pairs(diags), do: Enum.map(diags, &{&1["code"], &1["path"]})
 
   # Breaks (toolbox row G4): the compiler accepts a use recipe below kernel_api 1.49, a status.cure
-  # on a detail recipe, an opposed check on a use recipe (no detail, so no rating), or leaves a use
-  # tool's short liquid reference unexpanded.
+  # on a detail recipe, an opposed check on a use recipe (no detail, so no rating), a use tool's
+  # liquid naming no liquid of the cartridge, or leaves its short liquid reference unexpanded.
   test "use recipes need 1.49, cures only on them, no rating-opposed check, liquid expands" do
     dir = Loka.ContentSource.copy(@dir)
     assert {:ok, artifact, []} = Loka.ContentSource.compile(dir, [])
@@ -65,5 +65,9 @@ defmodule Loka.ContentUseTest do
     assert {:error, diags} = Loka.ContentSource.compile(dir, checked)
 
     assert {"SCHEMA_VIOLATION", "recipes/quench.check"} in pairs(diags), inspect(diags)
+
+    milk = [{"recipes/quench.json", &put_in(&1, ["target", "tool", "liquid"], "milk")}]
+    assert {:error, diags} = Loka.ContentSource.compile(dir, milk)
+    assert pairs(diags) == [{"UNRESOLVED_REFERENCE", "recipes/quench.target.tool.liquid"}]
   end
 end

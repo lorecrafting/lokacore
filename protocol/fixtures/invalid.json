@@ -10428,6 +10428,22 @@
   {
     "contract": "RecipeTarget",
     "value": {
+      "kind": "detail"
+    },
+    "errors": [
+      {
+        "path": "/detail",
+        "code": "missing_property"
+      },
+      {
+        "path": "/room",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "RecipeTarget",
+    "value": {
       "kind": "item"
     },
     "errors": [
