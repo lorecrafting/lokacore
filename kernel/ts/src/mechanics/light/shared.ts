@@ -82,12 +82,16 @@ export function illuminated(w: World, actor: CharacterId, steps: Steps = { n: 0 
   }
   return false;
 }
-/** Unlit for `actor`: a dark room without dark sight or a held light, or anywhere while blind (status reader 6). */
+// Blind (status reader 6), or standing in a room that holds a blind status (reader 9, magical darkness).
+const blinded = (w: World, body: EntityId | undefined) =>
+  perceives(w, body, 'blind') || (!!body && perceives(w, w.state.containers[body], 'blind'));
+
+/** Unlit for `actor`: a dark room without dark sight or a held light, or anywhere while blinded (status readers 6, 9). */
 export function dark(w: World, actor: CharacterId, steps: Steps = { n: 0 }) {
   const body = bodyOf(w, actor);
   return (
     !!body &&
-    (perceives(w, body, 'blind') ||
+    (blinded(w, body) ||
       (!!w.rooms[w.state.containers[body]]?.dark_description &&
         !darkSight(w, actor) &&
         !illuminated(w, actor, steps)))
@@ -105,7 +109,7 @@ export function visible(
     here = body && w.state.containers[body];
   const detail = w.details[id];
   const entity = w.entities[id];
-  const blind = perceives(w, body, 'blind'); // status reader 6: no NPC or glow is seen
+  const blind = blinded(w, body); // status readers 6, 9: no NPC or glow is seen
   if (entity?.kind === 'npc' && (blind || concealed(w, id as EntityId, body))) return false;
   if (entity?.kind === 'npc' && entity.perception)
     return (

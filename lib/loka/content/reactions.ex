@@ -91,7 +91,8 @@ defmodule Loka.Content.Reactions do
   @events %{"quest_resolved" => 8, "spoken" => 48, "status_applied" => 53}
 
   # One diagnostic per rule below its highest floor; the entrant filter needs 1.47 (row W3), the
-  # attacker filter 1.58 (loka-kgd.79), a co_present status.apply 1.50 (W21), with a tag 1.56 (W22).
+  # attacker filter 1.58 (loka-kgd.79), a co_present status.apply 1.50 (W21), with a tag 1.56 (W22),
+  # naming a room 1.65 (status reader 9).
   defp api(r, manifest) do
     floor =
       Enum.max([
@@ -111,6 +112,7 @@ defmodule Loka.Content.Reactions do
       else: []
   end
 
+  defp step_floor(%{"op" => "status.apply", "room" => _}), do: 65
   defp step_floor(%{"tag" => _}), do: 56
   defp step_floor(%{"co_present" => _}), do: 50
   defp step_floor(s), do: Map.get(@floors, s["op"], 0)
@@ -166,6 +168,7 @@ defmodule Loka.Content.Reactions do
           ],
           else: []
         ) ++
+        room(rel, s, i, ctx) ++
         listener(rel, s, i, ctx)
 
   # Row W22 (loka-kgd.96): a named barrier resolves; to locked needs a key_item on the named
@@ -237,4 +240,17 @@ defmodule Loka.Content.Reactions do
   end
 
   defp listener(_, _, _, _), do: []
+
+  # Status reader 9: a named room resolves and is the step's only holder.
+  defp room(rel, %{"room" => _} = s, i, ctx),
+    do:
+      reference(rel, ["apply", i], "room", s, ctx.m, ctx.defs) ++
+        if(s["item"] || s["npc"] || s["co_present"],
+          do: [
+            diag("SCHEMA_VIOLATION", at(rel, ["apply", i, "room"]), %{"error" => "invalid_value"})
+          ],
+          else: []
+        )
+
+  defp room(_, _, _, _), do: []
 end
