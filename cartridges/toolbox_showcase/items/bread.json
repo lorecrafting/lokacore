@@ -1,0 +1,13 @@
+{
+  "keywords": [
+    "bread"
+  ],
+  "short": "item.bread.short",
+  "room_line": "item.bread.room",
+  "description": "item.bread.description",
+  "location": {
+    "in": "npc",
+    "npc": "nell"
+  },
+  "mass_grams": 200
+}

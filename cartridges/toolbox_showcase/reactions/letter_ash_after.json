@@ -1,0 +1,26 @@
+{
+  "on": {
+    "event": "fact_changed",
+    "fact": "scene_letter_ash"
+  },
+  "when": {
+    "policy_version": 1,
+    "root": {
+      "op": "fact_compare",
+      "fact": "scene_letter_ash",
+      "equals": -1
+    }
+  },
+  "apply": [
+    {
+      "op": "fact.adjust",
+      "fact": "wardle_standing",
+      "amount": -2
+    },
+    {
+      "op": "fact.assign",
+      "fact": "letter_burnt",
+      "value": true
+    }
+  ]
+}

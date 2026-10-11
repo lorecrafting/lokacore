@@ -1,0 +1,35 @@
+{
+  "title": "room.drill_yard.title",
+  "description": "room.drill_yard.description",
+  "exits": {
+    "east": {
+      "to": "crossroads_inn"
+    },
+    "north": {
+      "to": "boar_run"
+    },
+    "west": {
+      "to": "gate_yard"
+    }
+  },
+  "details": {
+    "sign_combat": {
+      "aliases": [
+        "sign",
+        "signpost"
+      ],
+      "description": "detail.sign_combat.description",
+      "readable": {
+        "label": "actions.read_sign",
+        "text": "readable.sign_combat",
+        "title": "detail.sign_combat.title"
+      }
+    },
+    "bench": {
+      "aliases": [
+        "bench"
+      ],
+      "description": "detail.bench"
+    }
+  }
+}

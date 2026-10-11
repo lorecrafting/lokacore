@@ -7,6 +7,12 @@
     },
     "east": {
       "to": "shore_steps"
+    },
+    "south": {
+      "to": "village_green"
+    },
+    "west": {
+      "to": "drill_yard"
     }
   },
   "details": {

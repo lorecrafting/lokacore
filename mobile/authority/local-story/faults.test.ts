@@ -35,7 +35,7 @@ import { openStory, type Reply } from './authority.ts';
 // its quest), gate, ferry (running Bram's job), green (delivering a reaction), the proof
 // cartridge lantern_proof, wear (wearing an item), locks (opening or unlocking a container) and
 // rest (changing position), journal (quest credit and custody), and chapters (quest acceptance).
-// sim.ts picks by seed among the cartridge known answers, so a new cartridge remaps them. None emits an effect (no
+// sim.ts picks by seed among its CARTRIDGES list, so a new entry there remaps them. None emits an effect (no
 // outbox is built yet); every sequence commits several NEW commands.
 const SEEDS = [
   12, 366, 30636, 300, 622, 9633, 2841, 454, 172, 49, 211, 1595, 337982, 105497, 81, 130, 54,

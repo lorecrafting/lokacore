@@ -1,0 +1,44 @@
+{
+  "title": "room.tollhouse.title",
+  "description": "room.tollhouse.description",
+  "exits": {
+    "west": {
+      "to": "warden_gate",
+      "barrier": "toll_gate"
+    },
+    "north": {
+      "to": "mill",
+      "barrier": "tollhouse_door"
+    },
+    "east": {
+      "to": "moot_hall",
+      "barrier": "iron_door"
+    }
+  },
+  "details": {
+    "strongbox_lock": {
+      "aliases": [
+        "lock"
+      ],
+      "description": "detail.strongbox_lock",
+      "rating": 1
+    },
+    "tollhouse_door": {
+      "aliases": [
+        "tollhouse_door",
+        "wooden_door",
+        "door"
+      ],
+      "description": "detail.tollhouse_door",
+      "rating": 5
+    },
+    "iron_door": {
+      "aliases": [
+        "iron_door",
+        "door"
+      ],
+      "description": "detail.iron_door",
+      "rating": 5
+    }
+  }
+}

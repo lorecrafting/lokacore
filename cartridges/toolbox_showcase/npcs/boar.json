@@ -1,0 +1,41 @@
+{
+  "keywords": [
+    "boar"
+  ],
+  "short": "npc.boar.short",
+  "room_line": "npc.boar.room",
+  "description": "npc.boar.description",
+  "room": "boar_run",
+  "hp": {
+    "minimum": 0,
+    "maximum": 8,
+    "start": 8,
+    "gain": 0
+  },
+  "attack": {
+    "chance": 100,
+    "damage_min": 2,
+    "damage_max": 2
+  },
+  "immune": [
+    "bleeding",
+    "gored"
+  ],
+  "drops": [
+    {
+      "item": "tusk",
+      "chance": 100
+    },
+    {
+      "item": "purse",
+      "chance": 50
+    }
+  ],
+  "cues": [
+    {
+      "sense": "sound",
+      "text": "cue.boar",
+      "range": 1
+    }
+  ]
+}

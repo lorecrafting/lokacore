@@ -58,9 +58,16 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: skill growth by use and opposed checks, toolbox rows 5 and G5 (loka-kgd.19)](2026-10-10-toolbox-m3-skills-review.md): **APPROVE WITH NOTES**
 - [Review: damage kinds, resistances and critical hits, toolbox row G2 (loka-kgd.18)](2026-10-10-toolbox-g2-damage-review.md): **APPROVE**
 - [Review: property tags and the policy leaf set, toolbox row G1 (loka-kgd.17)](2026-10-10-toolbox-g1-review.md): **APPROVE**
+- [Status effects survey: is the status engine general enough?](2026-10-10-status-effects-survey.md)
+- [Review: simulator plays the toolbox showcase; stable seeds (PR #373, loka-y6yg.5, loka-seqb)](2026-10-10-sim-showcase-review.md): **APPROVE WITH NOTES**
 - [Review: toolbox showcase slice A, hub, body and world districts (loka-y6yg.1)](2026-10-10-showcase-slice-a-review.md): **APPROVE WITH NOTES**
+- [Review: showcase plan 3, cause and effect in Low Wardle (PR #371, loka-y6yg.4)](2026-10-10-showcase-plan-3-review.md): **APPROVE**
+- [Review: showcase plan 2, the combat district brief (loka-y6yg, PR #368)](2026-10-10-showcase-plan-2-review.md): **APPROVE**
 - [Review: showcase plan 1, hub, body, world and social districts (loka-y6yg, PR #364)](2026-10-10-showcase-plan-1-review.md): **APPROVE WITH NOTES**
 - [Docs review: showcase decision, Chapters 2-3 out of release scope (loka-exbe, PR #362)](2026-10-10-showcase-decision-review.md): **APPROVE WITH NOTES**
+- [Review: showcase slice D, cause and effect in Low Wardle (PR #374, loka-y6yg.4)](2026-10-10-showcase-d-review.md): **APPROVE**
+- [Review: showcase slice C, the combat district (loka-y6yg.3, PR #369)](2026-10-10-showcase-c-combat-review.md): **APPROVE**
+- [Review: showcase slice B, Low Wardle and the hub's south exit (loka-y6yg.2, PR #367)](2026-10-10-showcase-b-review.md): **APPROVE WITH NOTES**
 - [Mechanics review 3: the player's seat](2026-10-10-mechanics-review-3.md)
 - [Review: one wait across several listed schedule hours (loka-qi0r)](2026-10-10-m6-waitfix-review.md): **APPROVE**
 - [Review: E1 recorder debt-elapsed recipe (loka-ssr9, PR #360)](2026-10-10-e1-recorder-ssr9-review.md): **APPROVE**

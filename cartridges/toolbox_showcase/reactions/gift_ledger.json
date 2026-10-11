@@ -1,0 +1,13 @@
+{
+  "on": {
+    "event": "item_acquired",
+    "item": "mill_ledger"
+  },
+  "apply": [
+    {
+      "op": "fact.adjust",
+      "fact": "trust",
+      "amount": 1
+    }
+  ]
+}

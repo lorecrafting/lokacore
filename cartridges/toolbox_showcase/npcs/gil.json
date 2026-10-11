@@ -1,0 +1,33 @@
+{
+  "keywords": [
+    "gil"
+  ],
+  "short": "npc.gil.short",
+  "room_line": "npc.gil.room",
+  "description": "npc.gil.description",
+  "room": "gate_yard",
+  "hp": {
+    "minimum": 0,
+    "maximum": 10,
+    "start": 10,
+    "gain": 0
+  },
+  "attack": {
+    "chance": 100,
+    "damage_min": 1,
+    "damage_max": 1
+  },
+  "description_variants": [
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "fact_compare",
+          "fact": "gil_warned",
+          "equals": true
+        }
+      },
+      "description": "npc.gil.description_warned"
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "keywords": [
+    "strongbox",
+    "box"
+  ],
+  "short": "item.strongbox.short",
+  "room_line": "item.strongbox.room",
+  "description": "item.strongbox.description",
+  "location": {
+    "in": "room",
+    "room": "tollhouse"
+  },
+  "mass_grams": 6000,
+  "barrier": "strongbox_lid",
+  "container": true
+}

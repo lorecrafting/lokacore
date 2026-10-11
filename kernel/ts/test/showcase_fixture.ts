@@ -7,6 +7,9 @@ import { gameView, INSTALLED, loadCartridge, newWorld, step, stepElapsed } from 
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
+import { decode } from '../src/foundation/canonical.ts';
+import { pending, spokenBy } from '../src/mechanics/dialogue/shared.ts';
+import { disposition } from '../src/mechanics/disposition.ts';
 
 const kat = JSON.parse(
   readFileSync(
@@ -75,12 +78,11 @@ export function refused(w: World, p: object) {
 
 /**
  * As the host (mobile/authority/local-story/elapsed.ts): elapsed steps to `target`, stopping at each
- * pending job but the calendar job; every narration key on the way. One call spans at most one
- * day (loka-j2mo).
+ * pending job but the calendar job; every narration key and event payload on the way.
  */
 export function wait(w: World, target: number) {
-  assert.ok(target - w.state.clock <= DAY, 'a wait spans at most one day');
   const lines: string[] = [];
+  const events: { type: string; [k: string]: unknown }[] = [];
   while (w.state.clock < target) {
     const until = Object.values(w.state.jobs ?? {})
       .filter(
@@ -99,9 +101,42 @@ export function wait(w: World, target: number) {
       n,
     );
     assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
-    if (r.decision.kind === 'accepted')
+    if (r.decision.kind === 'accepted') {
       lines.push(...(r.decision.narration ?? []).map((l) => l.key as string));
+      events.push(...r.decision.events.map((e) => e.payload as never));
+    }
     w = r.world;
   }
-  return { world: w, lines };
+  return { world: w, lines, events };
 }
+
+// Low Wardle: the helpers showcase_social and showcase_consequence share.
+export const SOCIAL = '5ca5e000-0000-4000-8000-00000000032e';
+export const green = (ctx = SOCIAL) => go(fresh(ctx), 'south').world;
+/** A fact's value for `key` (and, for a pair or entity fact, `subject`'s row); undefined if unset. */
+export const fact = (w: World, key: string, subject?: string) =>
+  Object.entries(w.state.facts ?? {}).find(([k]) => {
+    const t = decode(k) as { fact: { key: string }; subject_id?: string };
+    return t.fact.key === key && (subject === undefined || t.subject_id === subject);
+  })?.[1];
+export const npc = (w: World, k: string) => id(w, 'npc', k);
+export const where = (w: World, k: string) => w.state.containers[k];
+export const room = (w: World, k: string) => w.roomIds[`toolbox_showcase@0.0.1:room/${k}`];
+/** Talk to `who`; the dialogue that opened and the world with the choice pending. */
+export function talk(w: World, who: string) {
+  const r = play(w, { type: 'talk', target_id: npc(w, who) });
+  return { world: r.world, opened: spokenBy(w, w.character, npc(w, who))?.key };
+}
+export function choose(w: World, choice_id: string) {
+  const [continuation_id] = pending(w, w.character)!;
+  return play(w, { type: 'choose', choice_id, continuation_id });
+}
+// An accepted decision's outcome.
+export const outcome = (r: ReturnType<typeof play>) =>
+  r.decision.kind === 'accepted' ? r.decision.outcome : undefined;
+// Pick `choice` from `who`'s dialogue, talking first unless its hub is still open.
+export const say = (w: World, who: string, choice: string) =>
+  choose(pending(w, w.character) ? w : talk(w, who).world, choice);
+export const leave = (w: World) => choose(w, 'leave').world;
+export const mood = (w: World, who: string) => disposition(w, w.character, npc(w, who));
+export const topics = (w: World) => (gameView(w).topics ?? []).map((t) => t.label as string);

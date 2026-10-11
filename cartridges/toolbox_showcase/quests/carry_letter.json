@@ -1,0 +1,41 @@
+{
+  "title": "quest.carry_letter.title",
+  "objective": {
+    "evidence": "post_activation_event",
+    "item_acquired": "letter"
+  },
+  "deadline": {
+    "after": 60000,
+    "outcome": "late"
+  },
+  "journal": {
+    "active": "quest.carry_letter.active",
+    "objectives_met": "quest.carry_letter.objectives_met",
+    "resolved": "quest.carry_letter.resolved",
+    "failed": "quest.carry_letter.failed",
+    "abandoned": "quest.carry_letter.abandoned",
+    "outcomes": {
+      "deliver": "quest.carry_letter.deliver",
+      "burn": "quest.carry_letter.burn",
+      "late": "quest.carry_letter.late"
+    },
+    "hints": {
+      "active": [
+        {
+          "after": 5,
+          "text": "quest.carry_letter.hint_stone"
+        }
+      ],
+      "objectives_met": [
+        {
+          "after": 5,
+          "text": "quest.carry_letter.hint_road"
+        },
+        {
+          "after": 10,
+          "text": "quest.carry_letter.hint_hut"
+        }
+      ]
+    }
+  }
+}

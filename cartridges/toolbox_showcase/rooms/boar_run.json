@@ -1,0 +1,9 @@
+{
+  "title": "room.boar_run.title",
+  "description": "room.boar_run.description",
+  "exits": {
+    "south": {
+      "to": "drill_yard"
+    }
+  }
+}

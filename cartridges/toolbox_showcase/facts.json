@@ -21,6 +21,266 @@
         "instance"
       ],
       "meaning": "The woodstore door is unbarred from inside; nothing in this world sets it, so only fire opens the door."
+    },
+    "wardle_standing": {
+      "version": 1,
+      "value_type": {
+        "type": "int",
+        "default": 0,
+        "minimum": -2,
+        "maximum": 2
+      },
+      "scopes": [
+        "instance"
+      ],
+      "meaning": "How Low Wardle stands toward the player: the village faction."
+    },
+    "trust": {
+      "version": 1,
+      "value_type": {
+        "type": "int",
+        "default": 0,
+        "minimum": 0,
+        "maximum": 2
+      },
+      "scopes": [
+        "player"
+      ],
+      "per_subject": true,
+      "meaning": "How far one NPC trusts the player."
+    },
+    "knows_fire": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "instance"
+      ],
+      "per_subject": true,
+      "meaning": "Whether this NPC has heard about the fire at the mill."
+    },
+    "warden_lets_pass": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The Warden has agreed to open the toll gate."
+    },
+    "strongbox_picked": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The tollhouse strongbox lock is picked."
+    },
+    "tollhouse_forced": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The tollhouse door is forced."
+    },
+    "iron_forced": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The iron door is forced (it never is: the door is not fragile)."
+    },
+    "hall_box_picked": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The moot hall strongbox lock is picked."
+    },
+    "hall_cupboard_forced": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The moot hall cupboard is forced."
+    },
+    "letter_late": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The Reeve's letter reached Wat too late."
+    },
+    "topic_parish_known": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The player knows the parish roll."
+    },
+    "topic_fire_known": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The player knows about the fire at the mill."
+    },
+    "topic_mill_known": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The player knows the mill's accounts."
+    },
+    "topic_heir_known": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The player has worked out who the heir is."
+    },
+    "topic_walker_known": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "Badge: the player has walked all five Low Wardle rooms."
+    },
+    "raider_slain": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The gate yard raider is dead (death credit)."
+    },
+    "gil_warned": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "Gil heard the player shout a warning."
+    },
+    "strongbox_forced": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The tollhouse strongbox lock is forced."
+    },
+    "warden_knows": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The Warden has heard who forced the tollhouse strongbox."
+    },
+    "letter_burnt": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The player burnt the Reeve's letter in Wat's fire."
+    },
+    "knows_ash": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "instance"
+      ],
+      "per_subject": true,
+      "meaning": "Whether this NPC has heard that Wat went down to the gate about the letter."
+    },
+    "topic_surety_known": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The player knows about Hal in the toll cell and the paper that never came."
+    },
+    "topic_letter_known": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The player knows what the burnt letter carried."
     }
   }
 }

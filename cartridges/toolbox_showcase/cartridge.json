@@ -44,7 +44,8 @@
       "scene": 1,
       "commerce": 1,
       "combat": 1,
-      "sense_cue": 1
+      "sense_cue": 1,
+      "speech": 1
     },
     "client_features": []
   },
@@ -54,7 +55,8 @@
   "entry": "crossroads_inn",
   "time_policy": {
     "profile": "real_elapsed",
-    "rate": 50
+    "rate": 50,
+    "recap_after_minutes": 30
   },
   "alternates": {
     "narration.look_about": [
@@ -175,6 +177,16 @@
             "pivot": 10
           }
         ]
+      },
+      "damage": {
+        "terms": [
+          {
+            "attribute": "str",
+            "per_point": 1,
+            "pivot": 10
+          }
+        ],
+        "divisor": 1
       }
     },
     "death": {
@@ -185,6 +197,58 @@
         "hp": 10,
         "mv": 100
       }
-    }
+    },
+    "combat": {
+      "player_attack": {
+        "chance": 0,
+        "damage_min": 1,
+        "damage_max": 1
+      },
+      "interval": 150,
+      "sleep_multiplier": 2,
+      "flee_multiplier": 2,
+      "narration": {
+        "player_hit": "combat.player_hit",
+        "player_miss": "combat.player_miss",
+        "npc_hit": "combat.npc_hit",
+        "npc_miss": "combat.npc_miss",
+        "player_died": "combat.player_died",
+        "npc_died": "combat.npc_died",
+        "ally_hit": "combat.ally_hit",
+        "ally_miss": "combat.ally_miss"
+      },
+      "allies": [
+        "gil"
+      ]
+    },
+    "levelling": {
+      "thresholds": [
+        30,
+        100
+      ],
+      "points_per_level": 1,
+      "kills": [
+        {
+          "npc": "raider",
+          "experience": 10
+        },
+        {
+          "npc": "boar",
+          "experience": 30
+        },
+        {
+          "npc": "tilt_boar",
+          "experience": 30
+        }
+      ],
+      "level_up": "levelling.level_up"
+    },
+    "death_credit": [
+      {
+        "npc": "raider",
+        "room": "gate_yard",
+        "fact": "raider_slain"
+      }
+    ]
   }
 }

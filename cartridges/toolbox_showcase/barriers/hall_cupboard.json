@@ -1,0 +1,19 @@
+{
+  "keywords": [
+    "hall_cupboard"
+  ],
+  "short": "barrier.hall_cupboard.short",
+  "initial": "closed",
+  "tags": [
+    "wooden",
+    "fragile"
+  ],
+  "opens_when": {
+    "policy_version": 1,
+    "root": {
+      "op": "fact_compare",
+      "fact": "hall_cupboard_forced",
+      "equals": true
+    }
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "keywords": [
+    "tam",
+    "carter"
+  ],
+  "short": "npc.tam.short",
+  "room_line": "npc.tam.room",
+  "description": "npc.tam.description",
+  "room": "warden_gate",
+  "daily_schedule": {
+    "10": "mill",
+    "11": [
+      {
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "sky",
+            "weather": "rain"
+          }
+        },
+        "room": "church",
+        "goal": "npc.tam.goal_church"
+      },
+      "village_green"
+    ],
+    "15": "warden_gate"
+  }
+}

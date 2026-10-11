@@ -1,0 +1,19 @@
+{
+  "keywords": [
+    "tollhouse_door"
+  ],
+  "short": "barrier.tollhouse_door.short",
+  "initial": "closed",
+  "tags": [
+    "wooden",
+    "fragile"
+  ],
+  "opens_when": {
+    "policy_version": 1,
+    "root": {
+      "op": "fact_compare",
+      "fact": "tollhouse_forced",
+      "equals": true
+    }
+  }
+}

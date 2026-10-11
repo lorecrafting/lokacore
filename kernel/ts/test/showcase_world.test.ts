@@ -116,7 +116,7 @@ test('world 7: at 20:00 the open gate admits; the search finds the stair, once w
 
 // Breaks: the moon door ignores the lunar cut, or the cliff's dark-moon variant is missing.
 test('world 9: the moon door refuses on day 2 at 23:00 and opens at day 3, 00:00', () => {
-  let x = wait(wait(w, DAY + 20 * HOUR).world, DAY + 23 * HOUR).world;
+  let x = wait(w, DAY + 23 * HOUR).world;
   x = go(x, 'up').world;
   assert.equal(refused(x, { type: 'open', direction: 'east' }), 'invalid_state');
   assert.equal(place(x), 'room.cliff_top.dark_moon');
@@ -128,7 +128,6 @@ test('world 9: the moon door refuses on day 2 at 23:00 and opens at day 3, 00:00
 
 // Breaks: Idony's short variant reads the wrong hours or her winter variant the wrong season.
 test('world 8: on day 4 at 03:00 Idony dozes in her winter shawls; after 06:00 she wakes', () => {
-  w = wait(wait(w, DAY + 20 * HOUR).world, 2 * DAY + 20 * HOUR).world;
   w = go(go(wait(w, 3 * DAY + 3 * HOUR).world, 'up').world, 'south').world;
   const idony = (v: World) => gameView(v).entities.find((e) => e.id === id(v, 'npc', 'idony'))!;
   assert.deepEqual(

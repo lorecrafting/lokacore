@@ -1,0 +1,23 @@
+{
+  "npc": "nell",
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": []
+    }
+  },
+  "prompt": "dialogue.nell_talk.prompt",
+  "roles": {
+    "nell": {
+      "role": "npc",
+      "npc": "nell"
+    }
+  },
+  "choices": {
+    "leave": {
+      "label": "dialogue.nell_talk.leave",
+      "narration": "narration.nell_talk.leave"
+    }
+  }
+}

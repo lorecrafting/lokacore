@@ -1,0 +1,12 @@
+{
+  "duration": 86400,
+  "tick_every": 86399,
+  "resource": "hp",
+  "per_tick": -1,
+  "label": "condition.word_travels",
+  "narration": {
+    "applied": "narration.word_travels.applied",
+    "tick": "narration.word_travels.tick",
+    "expired": "narration.word_travels.expired"
+  }
+}

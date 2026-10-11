@@ -1,0 +1,13 @@
+{
+  "keywords": [
+    "tusk"
+  ],
+  "short": "item.tusk.short",
+  "room_line": "item.tusk.room",
+  "description": "item.tusk.description",
+  "location": {
+    "in": "npc",
+    "npc": "boar"
+  },
+  "mass_grams": 200
+}

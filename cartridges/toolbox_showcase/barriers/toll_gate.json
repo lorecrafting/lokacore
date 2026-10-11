@@ -1,0 +1,15 @@
+{
+  "keywords": [
+    "toll_gate"
+  ],
+  "short": "barrier.toll_gate.short",
+  "initial": "closed",
+  "opens_when": {
+    "policy_version": 1,
+    "root": {
+      "op": "fact_compare",
+      "fact": "warden_lets_pass",
+      "equals": true
+    }
+  }
+}

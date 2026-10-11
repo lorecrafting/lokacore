@@ -1,0 +1,50 @@
+{
+  "npc": "reeve",
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": []
+    }
+  },
+  "prompt": "dialogue.reeve_talk.prompt",
+  "roles": {
+    "reeve": {
+      "role": "npc",
+      "npc": "reeve"
+    }
+  },
+  "choices": {
+    "accept": {
+      "label": "dialogue.reeve_talk.accept",
+      "narration": "narration.reeve_talk.accept",
+      "accept": "carry_letter"
+    },
+    "help": {
+      "label": "dialogue.reeve_talk.help",
+      "narration": "narration.reeve_talk.help",
+      "sequence": [
+        {
+          "op": "fact.adjust",
+          "fact": "wardle_standing",
+          "amount": 1
+        }
+      ]
+    },
+    "wrong": {
+      "label": "dialogue.reeve_talk.wrong",
+      "narration": "narration.reeve_talk.wrong",
+      "sequence": [
+        {
+          "op": "fact.adjust",
+          "fact": "wardle_standing",
+          "amount": -2
+        }
+      ]
+    },
+    "leave": {
+      "label": "dialogue.reeve_talk.leave",
+      "narration": "narration.reeve_talk.leave"
+    }
+  }
+}

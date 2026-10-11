@@ -1,0 +1,42 @@
+{
+  "title": "room.village_green.title",
+  "description": "room.village_green.description",
+  "exits": {
+    "north": {
+      "to": "crossroads_inn"
+    },
+    "east": {
+      "to": "warden_gate"
+    },
+    "west": {
+      "to": "church"
+    },
+    "up": {
+      "to": "mill"
+    },
+    "south": {
+      "to": "moot_hall"
+    }
+  },
+  "details": {
+    "sign_social": {
+      "aliases": [
+        "sign",
+        "signpost"
+      ],
+      "description": "detail.sign_social.description",
+      "readable": {
+        "label": "actions.read_sign",
+        "text": "readable.sign_social",
+        "title": "detail.sign_social.title"
+      }
+    },
+    "moot_stone": {
+      "aliases": [
+        "stone",
+        "moot_stone"
+      ],
+      "description": "detail.moot_stone"
+    }
+  }
+}

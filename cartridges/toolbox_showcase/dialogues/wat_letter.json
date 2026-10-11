@@ -1,0 +1,37 @@
+{
+  "npc": "wat",
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "quest_state",
+      "quest": "carry_letter",
+      "state": "objectives_complete"
+    }
+  },
+  "prompt": "dialogue.wat_letter.prompt",
+  "roles": {
+    "wat": {
+      "role": "npc",
+      "npc": "wat"
+    },
+    "letter": {
+      "role": "item",
+      "item": "letter"
+    }
+  },
+  "quest": "carry_letter",
+  "choices": {
+    "deliver": {
+      "label": "dialogue.wat_letter.deliver",
+      "narration": "narration.wat_letter.deliver",
+      "hand_over": {
+        "item": "letter",
+        "to": "wat"
+      }
+    },
+    "burn": {
+      "label": "dialogue.wat_letter.burn",
+      "narration": "narration.wat_letter.burn"
+    }
+  }
+}

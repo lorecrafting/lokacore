@@ -1,0 +1,116 @@
+{
+  "keywords": [
+    "warden"
+  ],
+  "short": "npc.warden.short",
+  "room_line": "npc.warden.room",
+  "description": "npc.warden.description",
+  "room": "warden_gate",
+  "daily_schedule": {
+    "13": [
+      {
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "fact_compare",
+            "fact": "warden_knows",
+            "equals": true
+          }
+        },
+        "room": "village_green",
+        "goal": "npc.warden.goal_green"
+      },
+      "warden_gate"
+    ],
+    "14": "warden_gate"
+  },
+  "hp": {
+    "minimum": 0,
+    "maximum": 5,
+    "start": 5,
+    "gain": 0
+  },
+  "attack": {
+    "chance": 0,
+    "damage_min": 1,
+    "damage_max": 1
+  },
+  "attributes": [
+    {
+      "attribute": "cha",
+      "value": 5
+    }
+  ],
+  "disposition": {
+    "hostile": {
+      "policy_version": 1,
+      "root": {
+        "op": "any",
+        "items": [
+          {
+            "op": "all",
+            "items": [
+              {
+                "op": "fact_compare",
+                "fact": "wardle_standing",
+                "equals": -2
+              },
+              {
+                "op": "fact_compare",
+                "fact": "trust",
+                "subject": "target",
+                "equals": 0
+              }
+            ]
+          },
+          {
+            "op": "all",
+            "items": [
+              {
+                "op": "fact_compare",
+                "fact": "warden_knows",
+                "equals": true
+              },
+              {
+                "op": "fact_compare",
+                "fact": "trust",
+                "subject": "target",
+                "equals": 0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "engage": "npc.warden.engage"
+  },
+  "resistances": {
+    "physical": 100
+  },
+  "room_line_variants": [
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "fact_compare",
+          "fact": "warden_knows",
+          "equals": true
+        }
+      },
+      "description": "npc.warden.room_watchful"
+    }
+  ],
+  "description_variants": [
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "fact_compare",
+          "fact": "warden_knows",
+          "equals": true
+        }
+      },
+      "description": "npc.warden.description_watchful"
+    }
+  ]
+}

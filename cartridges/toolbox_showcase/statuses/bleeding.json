@@ -1,0 +1,19 @@
+{
+  "duration": 1800,
+  "tick_every": 900,
+  "resource": "hp",
+  "per_tick": -1,
+  "label": "condition.bleeding",
+  "narration": {
+    "applied": "narration.bleeding.applied",
+    "tick": "narration.bleeding.tick",
+    "expired": "narration.bleeding.expired"
+  },
+  "cues": [
+    {
+      "sense": "smell",
+      "text": "cue.blood",
+      "range": 0
+    }
+  ]
+}
