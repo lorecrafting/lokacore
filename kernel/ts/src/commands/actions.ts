@@ -117,7 +117,9 @@ function cartridge(world: World, actor: CharacterId): ActionSet {
     const { key, label, priority, policy } = recipe;
     // A use recipe (row G4) is listed on the held tool, paired with each target (view/use.ts).
     const target: TargetSpec =
-      recipe.target.kind === 'use' ? { kind: 'entity', scopes: ['inventory'] } : { kind: 'none' };
+      recipe.target.kind === 'use'
+        ? { kind: 'entity', scopes: ['room_contents', 'inventory'] }
+        : { kind: 'none' };
     const command = 'perform' as Key;
     return [key, { key, label, target, input: [], priority, policy, command, recipe }];
   });

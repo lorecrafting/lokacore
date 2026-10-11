@@ -16,6 +16,8 @@ import { identify, resolve } from '../src/commands/invocation.ts';
 import { currentStatus } from '../src/mechanics/status/shared.ts';
 import { value } from '../src/mechanics/fact.ts';
 import { encode } from '../src/foundation/canonical.ts';
+import { check } from '../src/runtime/invariants.ts';
+import { resolved } from '../src/commands/actions.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-use-sampler-'));
 let artifact: Uint8Array;
@@ -107,6 +109,65 @@ test('water on the burning cart: offered on the bucket, invoked, and the fire is
   );
 });
 
+// Breaks: the GameView invariant cannot find a use pair on the held tool, so an accepted offered
+// pair reads as unlisted.
+test('the offered quench agrees with admission (gameview_agrees_with_admission)', () => {
+  const w = start();
+  const ids = [e(w, 'cart'), e(w, 'bucket')];
+  const r = invoke(w, 'quench', ids);
+  const command = {
+    payload: { type: 'perform', action: 'quench', target_id: ids[0], item_id: ids[1] },
+  };
+  const resolves = Object.fromEntries(
+    Object.values(resolved(w, w.character)).map((a) => [a.key, a.command]),
+  );
+  const observation = { view: gameView(w), command, decision: r.decision, resolves };
+  assert.ok(check('gameview_agrees_with_admission', observation));
+});
+
+// Breaks: a second cure of the same status in one sequence proposes a second transition from the
+// already-ended row, so the decision faults instead of curing once.
+test('curing twice in one sequence ends the status once', () => {
+  const twice = structuredClone(content) as Cartridge & { recipes: Record<string, any> };
+  const success = twice.recipes['use_sampler@0.0.1:recipe/quench'].outcomes.success;
+  success.sequence = [success.sequence[0], success.sequence[0]];
+  n = 0;
+  let w = newWorld(twice, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e44' as never, [1, 2, 3, 4]);
+  for (const k of ['bucket', 'torch']) w = ok(play(w, { type: 'take', item_id: e(w, k) }));
+  w = ok(play(w, { type: 'drop', item_id: e(w, 'torch') }));
+  const after = ok(invoke(w, 'quench', [e(w, 'cart'), e(w, 'bucket')]));
+  assert.equal(currentStatus(after, e(w, 'cart'), burning), undefined);
+});
+
+// Breaks: an empty vessel still counts as holding water.
+test('an empty bucket quenches nothing', () => {
+  const w = start();
+  const dry = structuredClone(w) as { state: { liquids: Record<string, object> } };
+  dry.state.liquids[e(w, 'bucket')] = { kind: null, quantity: 0 }; // an emptied vessel's row
+  const x = dry as unknown as World;
+  assert.deepEqual(pairs(x, 'bucket'), []);
+  const ids = { target_id: e(w, 'cart'), item_id: e(w, 'bucket') };
+  assert.equal(code(play(x, { type: 'perform', action: 'quench', ...ids })), 'invalid_target');
+});
+
+// Breaks: a pair blocked by the recipe's cooldown is listed available (or dropped), or its reason
+// differs from the rule's rejection.
+test('a cooling-down oil pair is listed unavailable with the code the step returns', () => {
+  const cooled = structuredClone(content) as Cartridge & { recipes: Record<string, any> };
+  cooled.recipes['use_sampler@0.0.1:recipe/oil'].cooldown = 600;
+  n = 0;
+  let w = newWorld(cooled, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e44' as never, [1, 2, 3, 4]);
+  w = ok(play(w, { type: 'take', item_id: e(w, 'oilcan') }));
+  const ids = [e(w, 'winch'), e(w, 'oilcan')];
+  w = ok(invoke(w, 'oil', ids));
+  const shown = gameView(w)
+    .inventory.find((i) => i.id === ids[1])!
+    .actions.find((a) => a.action_key === 'oil')!;
+  assert.deepEqual([shown.available, shown.target_ids], [false, ids]);
+  assert.equal(shown.available === false && shown.reason.code, 'cooldown');
+  assert.equal(code(invoke(w, 'oil', ids)), 'cooldown');
+});
+
 // Breaks: the tool's liquid or tag is not checked, the target's policy reads no target, or the
 // fact lands on the actor instead of the target.
 test('oil on the metal winch, never on the wooden cart; water never oils', () => {
@@ -136,10 +197,10 @@ test('the tool must be held, distinct from the target and named', () => {
   assert.equal(quench(w, { target_id: e(w, 'cart') }), 'invalid_target');
 });
 
-// Breaks: the TS loader admits a use recipe or a status.cure step below kernel_api 1.49, or an
-// opposed check on a use recipe, which has no detail rating (both kernels refuse them;
-// content_use_test.exs).
-test('loader: a use recipe needs kernel_api 1.49 and no rating-opposed check', () => {
+// Breaks: the TS loader admits a use recipe below kernel_api 1.49, a status.cure on a detail
+// recipe, or an opposed check on a use recipe, which has no detail rating (both kernels refuse
+// them; content_use_test.exs).
+test('loader: kernel_api 1.49, cures only on use recipes, no rating-opposed check', () => {
   const QUENCH = 'use_sampler@0.0.1:recipe/quench';
   const rows: [(c: Record<string, any>) => void, string, string][] = [
     [
@@ -149,9 +210,7 @@ test('loader: a use recipe needs kernel_api 1.49 and no rating-opposed check', (
     ],
     [
       (c) => {
-        // Only the cure step needs 1.49: oil dropped, quench on a detail of the yard.
-        c.manifest.requires.kernel_api.at_least = '1.48';
-        delete c.recipes['use_sampler@0.0.1:recipe/oil'];
+        // A status.cure on a detail recipe: a detail holds no status.
         const yard = { ...C, kind: 'room', key: 'yard' };
         for (const caps of [c.lock.capabilities, c.manifest.requires.capabilities])
           caps.inspectable_detail = 1;
@@ -160,8 +219,8 @@ test('loader: a use recipe needs kernel_api 1.49 and no rating-opposed check', (
         };
         c.recipes[QUENCH].target = { kind: 'detail', room: yard, detail: 'pump' };
       },
-      'KERNEL_API_RANGE_INVALID',
-      '.cartridge.manifest.requires.kernel_api.at_least',
+      'SCHEMA_VIOLATION',
+      `.cartridge.recipes[${JSON.stringify(QUENCH)}].outcomes.success.sequence[0].op`,
     ],
     [
       (c) => {

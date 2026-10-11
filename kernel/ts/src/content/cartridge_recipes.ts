@@ -78,18 +78,29 @@ function target(c: Obj, r: Obj, at: string, named: Checks['named']): Diagnostic[
   return [];
 }
 
-// Toolbox row G4: a use target or a status.cure step needs kernel_api 1.49.
+// Toolbox row G4: a use target needs kernel_api 1.49, and a status.cure step sits on a use recipe
+// (SCHEMA_VIOLATION at its op: a detail holds no status).
 function uses(c: Obj): Diagnostic[] {
-  const used = Object.values((c.recipes ?? {}) as Obj).some(
-    (r) =>
-      r.target.kind === 'use' ||
-      Object.values(r.outcomes as Obj).some((o) =>
-        o.sequence.some((s: Obj) => s.op === 'status.cure'),
+  const recipes = Object.entries((c.recipes ?? {}) as Obj);
+  const out = recipes.flatMap(([ref, r]) =>
+    Object.entries(r.outcomes as Obj).flatMap(([name, o]) =>
+      o.sequence.flatMap((s: Obj, i: number) =>
+        s.op === 'status.cure' && r.target.kind !== 'use'
+          ? [
+              diag(
+                'SCHEMA_VIOLATION',
+                `.cartridge.recipes${step(ref)}.outcomes.${name}.sequence[${i}].op`,
+                { error: 'invalid_value' },
+              ),
+            ]
+          : [],
       ),
+    ),
   );
-  return used && apiCmp(c.manifest.requires.kernel_api.at_least, '1.49') < 0
-    ? [diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least')]
-    : [];
+  return recipes.some(([, r]) => r.target.kind === 'use') &&
+    apiCmp(c.manifest.requires.kernel_api.at_least, '1.49') < 0
+    ? [...out, diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least')]
+    : out;
 }
 
 // Each key of a room's action contribution names a registered command, an action, a recipe, a

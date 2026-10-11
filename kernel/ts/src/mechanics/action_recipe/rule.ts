@@ -213,7 +213,15 @@ const step =
       const e = event(world, command, mint, r.position + 1, payload);
       return { ...r, position: r.position + 1, events: [...r.events, e] };
     }
-    if (s.op === 'status.cure')
-      return { ...r, ops: [...r.ops, ...cureOps(world, subject_id, [s.status])] };
+    if (s.op === 'status.cure') {
+      // A repeated cure of one status ends it once (cureOps reads committed state).
+      const done = r.ops.some(
+        (o) =>
+          o.op === 'status.transition' &&
+          o.body_id === subject_id &&
+          refString(o.status) === refString(s.status),
+      );
+      return done ? r : { ...r, ops: [...r.ops, ...cureOps(world, subject_id, [s.status])] };
+    }
     return assigned(world, command.payload.actor_id, r, { ...s, subject: subject_id });
   };

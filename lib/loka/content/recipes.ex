@@ -25,8 +25,8 @@ defmodule Loka.Content.Recipes do
   its costs, threshold check and resource.adjust steps name resources of this cartridge; it
   has a failure outcome exactly when it has a check (OUTCOME_MISMATCH); its target names a room
   of this cartridge and a detail of that room (a use target's tool liquid a liquid of it, and a
-  use target or a status.cure step needs kernel_api 1.49; row G4), each fact.assign a fact with a
-  value of its type, each status.cure a status,
+  use target needs kernel_api 1.49; row G4), each fact.assign a fact with a value of its type, each
+  status.cure a status and only on a use recipe (SCHEMA_VIOLATION),
   each narration participant but the actor an npc or item of this cartridge, as its role says,
   its check's key is no other recipe's check's (DUPLICATE_DEFINITION),
   and its label and narrations have catalog entries (unless `text` is `:unknown`); no recipe's
@@ -52,17 +52,18 @@ defmodule Loka.Content.Recipes do
     Enum.flat_map(all(defs), &recipe(&1, ctx)) ++ contributions(defs, actions) ++ uses(defs, m)
   end
 
-  # Toolbox row G4: a use target or a status.cure step needs kernel_api 1.49 (one diagnostic).
+  # Toolbox row G4: a use target needs kernel_api 1.49 (one diagnostic), and a status.cure step
+  # sits on a use recipe (a detail holds no status).
   defp uses(defs, m) do
-    used =
-      Enum.any?(all(defs), fn {_, r} ->
-        r["target"]["kind"] == "use" or
-          Enum.any?(steps(r), fn {s, _} -> s["op"] == "status.cure" end)
-      end)
+    misplaced =
+      for {rel, r} <- all(defs),
+          r["target"]["kind"] != "use",
+          {%{"op" => "status.cure"}, steps} <- steps(r),
+          do: diag("SCHEMA_VIOLATION", at(rel, steps ++ ["op"]), %{"error" => "invalid_value"})
 
-    if used and api(m) < [1, 49],
-      do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
-      else: []
+    if Enum.any?(all(defs), fn {_, r} -> r["target"]["kind"] == "use" end) and api(m) < [1, 49],
+      do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least") | misplaced],
+      else: misplaced
   end
 
   defp api(m),

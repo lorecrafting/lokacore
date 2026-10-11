@@ -38,12 +38,13 @@ export function useRefused(
   return fits(world, tool!, t.tool) ? undefined : ('invalid_target' as const);
 }
 
-function fits(world: World, tool: EntityId, { tag, liquid }: UseTool) {
+/** The tool has the UseTool's tag and holds some of its liquid. */
+export function fits(world: World, tool: EntityId, { tag, liquid }: UseTool) {
   const e = world.entities[tool]!;
   const row = world.state.liquids?.[tool];
   return (
     (!tag || (e.kind === 'item' && !!e.tags?.includes(tag))) &&
-    (!liquid || (!!row?.kind && refString(row.kind) === refString(liquid) && row.quantity > 0))
+    (!liquid || (!!row?.kind && refString(row.kind) === refString(liquid))) // empty: kind null
   );
 }
 

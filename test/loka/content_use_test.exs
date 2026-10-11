@@ -4,10 +4,10 @@ defmodule Loka.ContentUseTest do
   @dir "cartridges/use_sampler"
   defp pairs(diags), do: Enum.map(diags, &{&1["code"], &1["path"]})
 
-  # Breaks (toolbox row G4): the compiler accepts a use recipe or a status.cure step below
-  # kernel_api 1.49, an opposed check on a use recipe (no detail, so no rating), or leaves a use
+  # Breaks (toolbox row G4): the compiler accepts a use recipe below kernel_api 1.49, a status.cure
+  # on a detail recipe, an opposed check on a use recipe (no detail, so no rating), or leaves a use
   # tool's short liquid reference unexpanded.
-  test "use recipes need 1.49, no rating-opposed check, and expand the tool's liquid" do
+  test "use recipes need 1.49, cures only on them, no rating-opposed check, liquid expands" do
     dir = Loka.ContentSource.copy(@dir)
     assert {:ok, artifact, []} = Loka.ContentSource.compile(dir, [])
 
@@ -30,17 +30,11 @@ defmodule Loka.ContentUseTest do
     assert {:error, diags} = Loka.ContentSource.compile(dir, [api])
     assert floor in pairs(diags), inspect(diags)
 
-    # Only the cure step is left needing 1.49: the oil recipe is dropped, quench targets a detail.
+    # A status.cure on a detail recipe cures nothing (a detail holds no status): refused.
     detail = %{"kind" => "detail", "room" => "yard", "detail" => "pump"}
 
-    cure_only = [
-      {"cartridge.json",
-       fn c ->
-         c
-         |> put_in(["requires", "kernel_api", "at_least"], "1.48")
-         |> put_in(["requires", "capabilities", "inspectable_detail"], 1)
-       end},
-      {"recipes/oil.json", nil},
+    on_detail = [
+      {"cartridge.json", &put_in(&1, ["requires", "capabilities", "inspectable_detail"], 1)},
       {"recipes/quench.json", &Map.put(&1, "target", detail)},
       {"rooms/yard.json",
        &Map.put(&1, "details", %{
@@ -48,8 +42,11 @@ defmodule Loka.ContentUseTest do
        })}
     ]
 
-    assert {:error, diags} = Loka.ContentSource.compile(dir, cure_only)
-    assert pairs(diags) == [floor]
+    assert {:error, diags} = Loka.ContentSource.compile(dir, on_detail)
+
+    assert pairs(diags) == [
+             {"SCHEMA_VIOLATION", "recipes/quench.outcomes.success.sequence[0].op"}
+           ]
 
     opposed = %{"key" => "q", "kind" => "opposed", "attribute" => "str"}
 
