@@ -1,0 +1,25 @@
+{
+  "resources": {
+    "hp": {
+      "minimum": 0,
+      "maximum": 10,
+      "start": 10
+    },
+    "mv": {
+      "maximum": 100,
+      "start": 100
+    },
+    "mana": {
+      "minimum": 0,
+      "maximum": 3,
+      "start": 3,
+      "gain": 0
+    },
+    "ash": {
+      "minimum": 0,
+      "maximum": 5,
+      "start": 0,
+      "gain": 0
+    }
+  }
+}

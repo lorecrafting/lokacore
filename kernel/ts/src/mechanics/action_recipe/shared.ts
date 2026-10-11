@@ -10,6 +10,8 @@ import type {
 } from '../../contracts.gen.ts';
 import { bodyOf, refString, type Steps, type World } from '../../runtime/decision.ts';
 import { reach } from '../lookups.ts';
+import { holds } from '../policy.ts';
+import { folded } from '../speech/shared.ts';
 
 export type UseTarget = Extract<RecipeTarget, { kind: 'use' }>;
 
@@ -59,4 +61,25 @@ export function useAdmission(
   const body = bodyOf(world, payload.actor_id);
   const { item_id, target_id } = payload;
   return body ? useRefused(world, recipe.target, body, item_id, target_id, steps) : 'not_found';
+}
+
+/** Toolbox row 29a: the spell recipe whose word is `word`, case-folded (speech/shared.ts folded). */
+export const spellOf = (world: World, word: unknown) => {
+  const w = folded(word);
+  return Object.values(world.cartridge.recipes ?? {}).find(
+    (r) => r.target.kind === 'spell' && r.target.word === w,
+  );
+};
+
+/**
+ * step's admission of a cast (commands/actions.ts refusal), before the spell's costs: invalid_state
+ * for an unknown word and for a spell whose policy fails alike, so a refusal never tells which
+ * words are spells.
+ */
+export function castAdmission(world: World, payload: CommandPayload, steps: Steps) {
+  if (payload.type !== 'cast') return undefined;
+  const spell = spellOf(world, payload.word);
+  return spell && holds(world, payload.actor_id, spell.policy.root, { steps })
+    ? undefined
+    : ('invalid_state' as const);
 }

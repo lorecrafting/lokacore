@@ -1,0 +1,17 @@
+{
+  "label": "spell.lux",
+  "aliases": ["lux"],
+  "target": { "kind": "spell", "word": "lux" },
+  "priority": 0,
+  "policy": { "policy_version": 1, "root": { "op": "all", "items": [] } },
+  "costs": [
+    { "resource": "mana", "amount": 2 },
+    { "resource": "ash", "amount": 1 }
+  ],
+  "outcomes": {
+    "success": {
+      "sequence": [{ "op": "event.emit", "event": "light_cast" }],
+      "narration": { "actor": "narration.lux" }
+    }
+  }
+}

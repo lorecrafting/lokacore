@@ -30,7 +30,7 @@ import { engaged } from '../mechanics/combat/shared.ts';
 import { eligible } from '../mechanics/combat/behavior.ts';
 import { choice as characterChoice } from '../mechanics/attributes/shared.ts';
 import { levelling } from '../mechanics/levelling/shared.ts';
-import { useAdmission } from '../mechanics/action_recipe/shared.ts';
+import { castAdmission, useAdmission } from '../mechanics/action_recipe/shared.ts';
 
 /**
  * One action of a set: what the GameView advertises, the Command type it resolves to, the
@@ -96,6 +96,7 @@ function engine(world: World): ActionSet {
       )
       .filter(([verb]) => verb !== 'choose_ancestry' || needsAncestry(world, world.character))
       .filter(([verb]) => verb !== 'raise_attribute' || points(world, world.character))
+      .filter(([verb]) => verb !== 'cast' || keyed(world).length < allRecipes(world).length) // row 29a
       // Row G9: no speech while a conversation is open (the speech rule refuses it too).
       .filter(([verb]) => !SPEECH.includes(verb) || !pending(world, world.character))
       .map(([verb, [target, input]]): [string, Offered] => {
@@ -113,7 +114,7 @@ function engine(world: World): ActionSet {
 // compiler and the loader reject a recipe, quest or dialogue whose key is an action's, a recipe's,
 // a quest's or a registered command's (DUPLICATE_DEFINITION), so no key has two definitions here.
 function cartridge(world: World, actor: CharacterId): ActionSet {
-  const recipes = Object.values(world.cartridge.recipes ?? {}).map((recipe): [string, Offered] => {
+  const recipes = keyed(world).map((recipe): [string, Offered] => {
     const { key, label, priority, policy } = recipe;
     // A use recipe (row G4) is listed on the held tool, paired with each target (view/use.ts).
     const target: TargetSpec =
@@ -242,14 +243,19 @@ export function refusal(
       : fighting(world, actor)
         ? 'invalid_state'
         : 'unsupported_capability';
-  const used = useAdmission(world, matching[0]!.recipe, payload, steps); // row G4
+  const used =
+    useAdmission(world, matching[0]!.recipe, payload, steps) ?? // row G4
+    castAdmission(world, payload, steps); // row 29a
   const ok = (a: Offered, d = detailAt(world, a)) =>
     (d === undefined || visible(world, actor, d, steps)) &&
     holds(world, actor, a.policy.root, { target: d ?? primaryTarget(payload), steps });
   return used || (matching.some((a) => ok(a)) ? undefined : 'invalid_state');
 }
 
-const recipeKeys = (world: World) => Object.values(world.cartridge.recipes ?? {}).map((r) => r.key);
+// A spell (row 29a) is cast by its word, never offered or performed by its key.
+const allRecipes = (world: World) => Object.values(world.cartridge.recipes ?? {});
+const keyed = (world: World) => allRecipes(world).filter((r) => r.target.kind !== 'spell');
+const recipeKeys = (world: World) => keyed(world).map((r) => r.key);
 
 /**
  * A recipe's admission for `actor_id` acting through `body`, after its policy and target, shared

@@ -252,6 +252,25 @@
           "additionalProperties": false
         },
         {
+          "description": "Toolbox row 29a (kernel_api at least 1.51): the actor's level (toolbox row 4, derived from its experience; 1 in a cartridge without world.levelling) is at least at_least. Owned by attributes@1.",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "level_compare"
+            },
+            "at_least": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "op",
+            "at_least"
+          ],
+          "additionalProperties": false
+        },
+        {
           "description": "The current value of the resource on the actor's body (regenerated to now, before the action's costs) is at least at_least; false for an actor without a body. Owned by attributes@1.",
           "type": "object",
           "properties": {

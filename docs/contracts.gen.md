@@ -133,9 +133,10 @@ Action definitions, ActionInvocation, TargetSpec and TargetResolution (04 §1, �
   - `event.emit`: Emit a custom event.
   - `status.cure`: Toolbox row G4 (kernel_api at least 1.49): end the recipe target's active status of this definition, as a cure does (status@1); nothing when it is not active.
   - `resource.adjust`: Adjust a resource of the actor's body by `by`, stopping at its bounds.
-- **RecipeTarget**: What an ActionRecipe acts on (06 §20 target; 21 §7 TargetSpec): one inspectable detail, by its room and its key in that room's details, offered only while the actor is in that room; or (toolbox row G4, kernel_api at least 1.49) a use: a tool the actor holds, used on another item on the floor of the actor's room or carried directly, both chosen by the invocation (perform item_id and target_id), the recipe keyed by the tool's properties here and the target's through its policy (has_tag and status_active, subject target), never by item ids.
+- **RecipeTarget**: What an ActionRecipe acts on (06 §20 target; 21 §7 TargetSpec): one inspectable detail, by its room and its key in that room's details, offered only while the actor is in that room; or (toolbox row G4, kernel_api at least 1.49) a use: a tool the actor holds, used on another item on the floor of the actor's room or carried directly, both chosen by the invocation (perform item_id and target_id), the recipe keyed by the tool's properties here and the target's through its policy (has_tag and status_active, subject target), never by item ids; or (toolbox row 29a, kernel_api at least 1.51) a spell named by its word.
   - `detail`
   - `use`
+  - `spell`: Toolbox row 29a (kernel_api at least 1.51): a spell, cast only by the cast command typing its word (no other spell recipe has it), never offered by key or performed; it acts on the caster's body.
 - **TargetResolution**: The deterministic result of resolving a target (14 §R3A; 21 §7: none | unique(target) | ambiguous(candidates), no random tie-breaking; 04 §18: ambiguous search returns structured candidates). candidate_ids are 2 to 1024 distinct EntityIds (1024 is the composition profile's selector_cardinality) in ascending code-point order of the id string (owner decision: docs/archive/decisions/owner-decisions-r3-open-questions-2026-09-24.md, item 1). The subset cannot express order or distinctness, so invariant target_candidates_ordered in protocol/invariants.json carries it.
   - `none`: No candidate matched.
   - `unique`: Exactly one candidate.
@@ -220,6 +221,7 @@ The portable semantic Command registry (04 §1, §3, §21; 14 §R3A). Host-only 
   - `perform`: Perform a cartridge's ActionRecipe by its action key (06 §20; action.schema.json ActionRecipe). The authority re-resolves the key in the actor's ActionSet; target_id, when given, is the id target resolution returned for the words after the verb and must be the recipe's target. A use recipe (toolbox row G4) needs both target_id, the item used on, and item_id, the held tool.
   - `talk`: Talk to a character.
   - `say`: Say one word aloud to the NPCs in the actor's room (speech@1; toolbox row G9). The word is 1 to 32 ASCII letters, compared case-folded and only against authored keywords; it never reaches narration.
+  - `cast`: Cast the spell whose word this is (action_recipe@1; toolbox row 29a): the word, case-folded, names a spell recipe (action.schema.json RecipeTarget spell), performed like a perform of it. An unknown word and a spell whose policy fails are refused alike, invalid_state; the word never reaches narration.
   - `shout`: Shout one word to the NPCs in the actor's room and in the rooms one exit away (speech@1; toolbox row G9).
   - `whisper`: Whisper one word to one NPC in the actor's room; no one else hears it (speech@1; toolbox row G9).
   - `accept_quest`: Activate an offered quest.
@@ -648,6 +650,7 @@ The core policy AST and its version (06 §21; 21 §3.2, §4 Policy; 14 §R3A). T
   - `time_window`: 06 §21 time_window, a window of authored calendar hours: floor(time / calendar.units_per_hour) mod calendar.hours_per_day is in `from` inclusive to `to` exclusive, wrapping at day end. The compiler and loader reject endpoints outside the authored day and equal endpoints (EMPTY_TIME_WINDOW). Owned by schedule@1.
   - `barrier_state`: The barrier's current state equals `equals` (room.schema.json BarrierState; closed means closed and unlocked). Owned by barrier@1.
   - `stat_compare`: The actor's value of the attribute (cartridge.schema.json AttributeSpec: its start, while nothing writes attributes) is at least at_least. Owned by attributes@1.
+  - `level_compare`: Toolbox row 29a (kernel_api at least 1.51): the actor's level (toolbox row 4, derived from its experience; 1 in a cartridge without world.levelling) is at least at_least. Owned by attributes@1.
   - `resource_compare`: The current value of the resource on the actor's body (regenerated to now, before the action's costs) is at least at_least; false for an actor without a body. Owned by attributes@1.
   - `escort_state`: API1.11 escort@1: this actor’s typed escort for the named quest instance has this status.
   - `light_off`

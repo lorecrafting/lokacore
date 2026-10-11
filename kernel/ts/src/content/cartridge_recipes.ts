@@ -18,7 +18,7 @@ export const tipSpec = (key: string) => ({
 // one ActionSet identity) and its check's key no other recipe's or dialogue choice's check's (one
 // check DefinitionRef),
 // its target names a room of this cartridge and a detail of that room (a use target's tool liquid
-// a liquid of it; row G4), each status.cure step a status of it,
+// a liquid of it; row G4; a spell's word no other spell's, row 29a), each status.cure step a status of it,
 // it has a failure outcome exactly when it has a check (OUTCOME_MISMATCH), its threshold check,
 // costs and resource.adjust steps name resources of it, each outcome's fact.assign names a fact
 // of it, its label and narrations have catalog entries and each narration participant but the
@@ -60,13 +60,15 @@ export function recipes(c: Obj, { named, typedValue, text }: Checks): Diagnostic
     }
     text(r, ['label'], at);
   }
-  return [...out, ...contributions(c), ...attributes(c, { named, text, typedValue }), ...uses(c)];
+  const more = [...contributions(c), ...attributes(c, { named, text, typedValue }), ...uses(c)];
+  return [...out, ...more, ...spells(c)];
 }
 
 // The target's room and detail resolve, or (row G4) a use's tool liquid names a liquid of this
 // cartridge.
 function target(c: Obj, r: Obj, at: string, named: Checks['named']): Diagnostic[] {
   const { room, detail, tool } = r.target;
+  if (r.target.kind === 'spell') return [];
   if (r.target.kind === 'use') {
     if (tool.liquid) named(tool.liquid, 'liquid', `${at}.target.tool.liquid`);
     return [];
@@ -101,6 +103,18 @@ function uses(c: Obj): Diagnostic[] {
     apiCmp(c.manifest.requires.kernel_api.at_least, '1.49') < 0
     ? [...out, diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least')]
     : out;
+}
+
+// Toolbox row 29a: a spell target needs kernel_api 1.51, and no two spells share a word
+// (DUPLICATE_DEFINITION at each one's word).
+function spells(c: Obj): Diagnostic[] {
+  const all = Object.entries((c.recipes ?? {}) as Obj).filter(([, r]) => r.target.kind === 'spell');
+  const out = all
+    .filter(([ref, r]) => all.some(([o, x]) => o !== ref && x.target.word === r.target.word))
+    .map(([ref]) => diag('DUPLICATE_DEFINITION', `.cartridge.recipes${step(ref)}.target.word`));
+  if (all.length && apiCmp(c.manifest.requires.kernel_api.at_least, '1.51') < 0)
+    out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
+  return out;
 }
 
 // Each key of a room's action contribution names a registered command, an action, a recipe, a
@@ -143,9 +157,9 @@ function attributes(c: Obj, { named }: Checks) {
 function opposed(c: Obj, r: Obj, at: string, named: Checks['named']): Diagnostic[] {
   if (r.check.skill) named(r.check.skill, 'skill', `${at}.check.skill`);
   if (r.check.npc) return rater(c, r.check, `${at}.check`, named);
-  // A use target (row G4) has no detail and so no rating.
+  // A use or spell target (rows G4, 29a) has no detail and so no rating.
   const detail = r.target.room && c.rooms[refString(r.target.room)]?.details?.[r.target.detail];
-  return r.target.kind === 'use' || (detail && detail.rating === undefined)
+  return r.target.kind !== 'detail' || (detail && detail.rating === undefined)
     ? [diag('SCHEMA_VIOLATION', `${at}.check`, { error: 'invalid_value' })]
     : [];
 }

@@ -1,0 +1,17 @@
+{
+  "label": "spell.noctis",
+  "aliases": ["noctis"],
+  "target": { "kind": "spell", "word": "noctis" },
+  "priority": 0,
+  "policy": {
+    "policy_version": 1,
+    "root": { "op": "fact_compare", "fact": "noctis_known", "equals": true }
+  },
+  "costs": [{ "resource": "mana", "amount": 1 }],
+  "outcomes": {
+    "success": {
+      "sequence": [{ "op": "event.emit", "event": "noctis_cast" }],
+      "narration": { "actor": "narration.noctis" }
+    }
+  }
+}
