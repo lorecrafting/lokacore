@@ -204,7 +204,9 @@ test(`the regression seeds, then ${FRESH} fresh sequences, keep every invariant`
 // seed; it plays fixed seeds, so a seed pinned out for an open bug stays out (a content change
 // reshuffles the sequences: the pinned seeds must still fail as the bug does).
 const SHOWCASE = 'protocol/fixtures/toolbox_showcase_hash.json';
-const PINNED = [83]; // loka-th7x: an offered drink refused for its envelope trips admission
+// loka-th7x (an offered drink refused for its envelope trips admission) failed seed 83 until showcase
+// slice D (loka-y6yg.4) reshuffled the sequences; no seed in 1 to 1000 reproduces it since.
+const PINNED: number[] = [];
 // Breaks: a showcase step that throws or breaks an invariant; a generator that stops ending
 // sequences in each district's inner rooms or issuing the showcase's own verbs; a stale pin.
 // Not reached headless (loka-lmvc): combat, death and return (the offered attack is aimed with
