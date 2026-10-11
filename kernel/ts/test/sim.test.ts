@@ -217,7 +217,7 @@ test('400 fixed showcase sequences keep every invariant and end in each district
   const { count, steps, codes, seen, rooms } = await fresh(1, 400, [], pass);
   assert.equal(count, 400 - PINNED.length, 'a worker omitted sequences');
   t.diagnostic(
-    `showcase seeds 1 to 400 but ${PINNED.join(' ')}; ${steps} steps; ends in ` +
+    `showcase seeds 1 to 400${PINNED.length ? ` but ${PINNED.join(' ')}` : ''}; ${steps} steps; ends in ` +
       `${[...rooms].sort().join(' ')}; outcomes ${[...codes].sort().join(', ')}`,
   );
   const inner = ['fell_top', 'tide_pools', 'moot_hall', 'gate_yard', 'boar_run', 'tilt_yard'];

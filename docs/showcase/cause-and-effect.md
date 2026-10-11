@@ -172,7 +172,7 @@ told you; where did you first notice.
 
 ## Matrix cells this plan adds
 
-Two rows in [SHOWCASE.md](../SHOWCASE.md#pairwise-mechanic-matrix), both `planned (plan 3)`: fuse
+Two rows in [SHOWCASE.md](../SHOWCASE.md#pairwise-mechanic-matrix), both `built` (slice D): fuse
 status x status_expired x schedule cases x disposition (the Warden); rumour hops x conditional
 schedule x dialogue check x codex deduction (the letter).
 

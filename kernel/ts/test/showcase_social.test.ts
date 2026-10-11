@@ -451,8 +451,13 @@ let noon: World;
 // Breaks: the expiry reaction misses or speaks, the 13:00 case ignores warden_knows or engages on
 // his own entry, he does not go back at 14:00, or his hostility ignores warden_knows.
 test('social 17: at 08:00 day 2 the Warden knows; 13:00 he walks the green; 14:30 he engages at the gate', () => {
-  let x = wait(box, DAY + 8 * HOUR - 1).world;
-  assert.equal(fact(x, 'warden_knows'), undefined);
+  const night = wait(box, DAY + 8 * HOUR - 1);
+  let x = night.world;
+  // The fuse's tick (one unit before its end) speaks no more than its expiry.
+  assert.deepEqual(
+    [fact(x, 'warden_knows'), night.lines.filter((l) => l.includes('word_travels'))],
+    [undefined, []],
+  );
   const out = wait(x, DAY + 8 * HOUR);
   assert.deepEqual(
     [fact(out.world, 'warden_knows'), out.lines, statuses(out.world)],
