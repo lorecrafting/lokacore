@@ -168,19 +168,21 @@ defmodule Loka.Content.Reactions do
   # Row W22 (loka-kgd.96): a named barrier resolves; to locked needs a key_item on the named
   # barrier, or on every barrier carrying the tag (BARRIER_UNREACHABLE_KEY); twin of barrierSet.
   defp consequence(rel, {%{"op" => "barrier.set"} = s, i}, _, ctx) do
-    hit =
-      if s["barrier"],
-        do: for({_, _, b} <- [resolve(s["barrier"], "barrier", ctx.m, ctx.defs)], do: b),
-        else: for(b <- exit_barriers(ctx), s["tag"] in (b["tags"] || []), do: b)
-
-    lockout =
-      if s["to"] == "locked" and Enum.any?(hit, &(!&1["key_item"])),
-        do: [diag("BARRIER_UNREACHABLE_KEY", at(rel, ["apply", i, "to"]))],
-        else: []
-
     owned(at(rel, ["apply", i, "op"]), "barrier_changed", ctx.events) ++
       if(s["barrier"], do: reference(rel, ["apply", i], "barrier", s, ctx.m, ctx.defs), else: []) ++
-      lockout
+      lockout(rel, s, i, hit(s, ctx))
+  end
+
+  defp hit(s, ctx) do
+    if s["barrier"],
+      do: for({_, _, b} <- [resolve(s["barrier"], "barrier", ctx.m, ctx.defs)], do: b),
+      else: for(b <- exit_barriers(ctx), s["tag"] in (b["tags"] || []), do: b)
+  end
+
+  defp lockout(rel, s, i, hit) do
+    if s["to"] == "locked" and Enum.any?(hit, &(!&1["key_item"])),
+      do: [diag("BARRIER_UNREACHABLE_KEY", at(rel, ["apply", i, "to"]))],
+      else: []
   end
 
   # Status reader 3 (row G3): the subject's status.
