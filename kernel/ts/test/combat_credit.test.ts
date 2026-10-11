@@ -42,6 +42,15 @@ test('credit delivery rejects counterfeit attribution and missing fatal/corpse p
       deathCredit(world, { ...event, payload: p } as DomainEvent, delta.ops, events, root),
       [],
     );
+  // A cast root (loka-kgd.101), with no attack_result: credited, killer and cause still checked.
+  const cast = { ...root, payload: { ...root.payload, type: 'cast' } };
+  for (const p of counterfeit)
+    assert.deepEqual(
+      deathCredit(world, { ...event, payload: p } as DomainEvent, delta.ops, [], cast),
+      [],
+    );
+  assert.deepEqual(deathCredit(world, event, delta.ops, [], { ...cast, id: 'x' as never }), []);
+  assert.equal(deathCredit(world, event, delta.ops, [], cast).length, 1);
   assert.deepEqual(deathCredit(world, event, [], events, root), []);
   assert.deepEqual(deathCredit(world, event, delta.ops, [], root), []); // no attack_result, no cast
   const noLoss = delta.ops.map((o) => (o.op === 'resource.adjust' ? { ...o, from: 0 } : o));

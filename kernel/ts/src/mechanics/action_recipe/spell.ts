@@ -100,7 +100,7 @@ export function fightBack<R extends Effected>(
       same(o.resource, resourceRef(world, 'hp')) &&
       !slain(world, r.levels, o.entity_id),
   )?.entity_id;
-  if (!hurt || attackRefused(world, actor, hurt)) return r;
+  if (!hurt || engaged(world, body) || attackRefused(world, actor, hurt)) return r; // never a retarget
   return { ...r, ops: [...r.ops, ...opened(world, actor, body, hurt, mint, end)] };
 }
 

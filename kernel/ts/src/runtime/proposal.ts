@@ -217,6 +217,7 @@ function earnedExit(p: P, instance_id: QuestInstanceId, at: Parameters<typeof st
 }
 
 // The queue's deliveries to quiescence, or the fault that ends them.
+// size: allow 41, each delivery names the bodies dead after its cause once (loka-kgd.105)
 function react(p: P): Admitted | undefined {
   for (let next; (next = p.queue.shift());) {
     const credited = creditDelivery(p, next);
@@ -230,6 +231,7 @@ function react(p: P): Admitted | undefined {
     }
     const crow = crowDelivery(p, next);
     if (crow) return crow;
+    const dead = diedAfter(p.events, next.cause); // once per delivery
     for (const rule of triggered(p.world, next.cause)) {
       const at = now(p);
       if (!('cartridge' in at)) return at;
@@ -241,7 +243,7 @@ function react(p: P): Admitted | undefined {
         p.group + 1,
         p.steps,
         next.mint,
-        { holders: p.holders, dead: diedAfter(p.events, next.cause) },
+        { holders: p.holders, dead },
       );
       const depth = next.depth + 1;
       p.limit = over({ deliveries: ++p.deliveries, reaction_depth: depth, query_steps: p.steps.n });
