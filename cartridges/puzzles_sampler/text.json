@@ -8,9 +8,9 @@
   "detail.lever_a": "An iron lever stamped A.",
   "detail.lever_b": "An iron lever stamped B.",
   "detail.lever_c": "An iron lever stamped C.",
-  "detail.wheel_1": "A brass wheel marked 0 to 9, the first of three.",
-  "detail.wheel_2": "A brass wheel marked 0 to 9, the second of three.",
-  "detail.wheel_3": "A brass wheel marked 0 to 9, the third of three.",
+  "detail.wheel_1": "A brass wheel marked 0 to 9, the first of three. It shows 0.",
+  "detail.wheel_2": "A brass wheel marked 0 to 9, the second of three. It shows 0.",
+  "detail.wheel_3": "A brass wheel marked 0 to 9, the third of three. It shows 0.",
   "actions.pull_a": "Pull lever A",
   "actions.pull_b": "Pull lever B",
   "actions.pull_c": "Pull lever C",
@@ -20,5 +20,14 @@
   "narration.lever": "The lever clanks down and springs back.",
   "narration.wheel": "The wheel clicks round one notch.",
   "barrier.lever_door.short": "the lever door",
-  "barrier.dial_door.short": "the dial door"
+  "barrier.dial_door.short": "the dial door",
+  "detail.wheel.1": "A brass wheel marked 0 to 9. It shows 1.",
+  "detail.wheel.2": "A brass wheel marked 0 to 9. It shows 2.",
+  "detail.wheel.3": "A brass wheel marked 0 to 9. It shows 3.",
+  "detail.wheel.4": "A brass wheel marked 0 to 9. It shows 4.",
+  "detail.wheel.5": "A brass wheel marked 0 to 9. It shows 5.",
+  "detail.wheel.6": "A brass wheel marked 0 to 9. It shows 6.",
+  "detail.wheel.7": "A brass wheel marked 0 to 9. It shows 7.",
+  "detail.wheel.8": "A brass wheel marked 0 to 9. It shows 8.",
+  "detail.wheel.9": "A brass wheel marked 0 to 9. It shows 9."
 }

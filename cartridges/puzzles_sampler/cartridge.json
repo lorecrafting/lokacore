@@ -13,6 +13,7 @@
     "capabilities": {
       "movement": 1,
       "inspectable_detail": 1,
+      "description_variant": 1,
       "barrier": 1,
       "policy": 1,
       "fact": 1,
