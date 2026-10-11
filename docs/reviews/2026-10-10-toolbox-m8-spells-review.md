@@ -32,3 +32,13 @@
 4. **nit**, `kernel/ts/src/commands/actions.ts:162`: a room contribution that names a spell key compiles (`contributions` accepts any recipe key) and is silently dropped (`Object.hasOwn(all, k)`). Failure: an author's `add: ["lux"]` does nothing and gets no diagnostic.
 
 Not checked: whether TS `nodes()` (`cartridge_refs.ts:109`) and Elixir `leaf?` (`levelling.ex`) reach every policy site alike for the 1.51 floor. The walker is the shared one that the variety floor already uses.
+
+## Fix re-check at 94537eb8
+
+- Head `94537eb8bda734968e4f986ae306f2e06f031998`: fix `0de8b2da` plus the merge of `origin/toolbox/batch-m8` (W21 fear 1.50, loka-6ql4). Hosted ci and book-e2e are green. Only the fix commit, the code it touched and the merge resolution were reviewed.
+- Finding 1 (blocker), resolved: `spells.test.ts` compiles `ashmere_missing_child`, chooses an ancestry, and asserts `look` is offered and `cast` is not. Rerun mutant (filter set to `true`): red.
+- Finding 2 (PM ruling), resolved: pools are accepted. The row cell, `mechanics.md` (Admission) and `loka-kgd.83` record the ruling and the meter note.
+- Finding 4 (nit), resolved: both kernels refuse a spell key in a room contribution with UNRESOLVED_REFERENCE at the same contribution entry (`cartridge_recipes.ts` `contributions`, `recipes.ex` `known/2`). Mutants: TS filter dropped (red, `spells.test.ts`); Elixir spell guard dropped (red, `content_spells_test.exs`, `--force`).
+- Finding 3 (nit): still open; carry the `/code-review` result into the batch PR.
+- Merge: TS `INSTALLED.kernel_api` is `1.51` (`world.ts`). `invalid.json` holds exactly the union of both sides (898 base, +7 spells, +2 fear = 907; none missing, none extra, no duplicates; parsed and compared). `mechanics.md` has the fear section, then the spell section, both whole. Focused tests are green: `spells`, `fear`, `validate`; `content_spells_test.exs`, `content_fear_test.exs`, `contracts_test.exs`.
+- Verdict: **APPROVE WITH NOTES** (nit 3 open).
