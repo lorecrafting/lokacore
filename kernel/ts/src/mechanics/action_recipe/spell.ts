@@ -81,7 +81,8 @@ const slain = (world: World, levels: Levels, npc: EntityId) => levels[hp(world, 
 
 // The loss after resistances, stopping at 0; a loss to 0 closes the NPC's encounter when it is the
 // only opponent (as a fatal status tick, status/job.ts) and runs the death sequence, the caster the
-// killer and credited (row 6b), its drops drawn after the spell's check.
+// killer and named credited (no kill credit: deathCredit reads an attack_result), its drops drawn
+// after the spell's check. An NPC without an hp pool takes nothing.
 function damage<R extends Effected>(
   world: World,
   command: Cast,
@@ -91,6 +92,8 @@ function damage<R extends Effected>(
   npc: EntityId,
   s: Extract<Effect, { op: 'damage' }>,
 ): R {
+  const target = world.entities[npc];
+  if (target?.kind !== 'npc' || !target.hp) return r;
   const loss = resisted(world, npc, [s.kind], s.amount);
   const { op, levels } = adjust(world, npc, resourceRef(world, 'hp'), -loss, r.levels, true);
   if (op.from === op.to) return r;

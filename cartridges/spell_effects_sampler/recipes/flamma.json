@@ -11,8 +11,8 @@
   "policy": {
     "policy_version": 1,
     "root": {
-      "op": "all",
-      "items": []
+      "op": "npc_present",
+      "npc": "wight"
     }
   },
   "outcomes": {

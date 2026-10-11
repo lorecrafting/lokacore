@@ -48,6 +48,8 @@ function ok(r: ReturnType<typeof step>) {
   return r.world;
 }
 const cast = (w: World, word: string) => play(w, { type: 'cast', word }, 'cast');
+const code = (r: ReturnType<typeof step>) =>
+  r.decision.kind === 'rejected' ? r.decision.error.code : r.decision.kind;
 const types = (r: ReturnType<typeof step>) =>
   r.decision.kind === 'accepted' ? r.decision.events.map((e) => e.payload.type) : [];
 const lines = (r: ReturnType<typeof step>) =>
@@ -78,6 +80,8 @@ test('lux lights the dark crypt through the held orb; without the orb it stays d
 // is refused, leaves the encounter open, or kills without the death sequence (no entity_died, the
 // caster not the killer).
 test('flamma deals fire damage after resistance; in a fight a second bolt kills the wight', () => {
+  const hall = ok(play(crypt(), { type: 'move', direction: 'west' }));
+  assert.equal(code(cast(hall, 'flamma')), 'invalid_state'); // npc_present: no bolt through walls
   let w = ok(cast(crypt(), 'lux')); // the wight is seen, and so attacked, only in light
   const wight = w.entityIds[`${P}:npc/wight`]!;
   w = ok(play(w, { type: 'attack', target_id: wight }));
@@ -94,7 +98,7 @@ test('flamma deals fire damage after resistance; in a fight a second bolt kills 
     [(died as { killer_id: string }).killer_id, types(fatal)],
     [bodyOf(w, w.character), ['entity_died', 'action_completed']],
   );
-  assert.deepEqual(types(cast(fatal.world, 'flamma')), ['action_completed']); // dead: no effect
+  assert.equal(code(cast(fatal.world, 'flamma')), 'invalid_state'); // a dead wight is not present
 });
 
 // Breaks: the spell's status.apply bypasses statusStep (no status_applied, so the reaction never

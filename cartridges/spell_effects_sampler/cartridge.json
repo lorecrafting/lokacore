@@ -27,7 +27,8 @@
       "light": 1,
       "status": 1,
       "reaction": 1,
-      "inspectable_detail": 1
+      "inspectable_detail": 1,
+      "target_resolution": 1
     },
     "client_features": []
   },
