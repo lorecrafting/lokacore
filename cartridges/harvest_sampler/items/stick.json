@@ -1,0 +1,15 @@
+{
+  "keywords": [
+    "stick"
+  ],
+  "short": "item.stick.short",
+  "room_line": "item.stick.room",
+  "description": "item.stick.description",
+  "location": {
+    "in": "room",
+    "room": "mine"
+  },
+  "tags": [
+    "wooden"
+  ]
+}

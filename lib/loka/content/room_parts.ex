@@ -110,7 +110,7 @@ defmodule Loka.Content.RoomParts do
   defp harvest_text(detail),
     do:
       for(
-        {k, v} <- Map.drop(Map.get(detail, "harvest", %{}), ["items", "careful"]),
+        {k, v} <- Map.drop(Map.get(detail, "harvest", %{}), ["items", "careful", "tool"]),
         do: {["harvest", k], v}
       ) ++
         if(detail["harvest"] && detail["harvest"]["careful"],

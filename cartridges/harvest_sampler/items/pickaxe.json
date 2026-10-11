@@ -1,0 +1,16 @@
+{
+  "keywords": [
+    "pickaxe"
+  ],
+  "short": "item.pickaxe.short",
+  "room_line": "item.pickaxe.room",
+  "description": "item.pickaxe.description",
+  "location": {
+    "in": "room",
+    "room": "mine"
+  },
+  "tags": [
+    "metal",
+    "sharp"
+  ]
+}

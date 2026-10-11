@@ -1,0 +1,18 @@
+{
+  "room.mine.title": "Old Mine",
+  "room.mine.description": "A low gallery cut into the hill. An [ore seam](seam) glints in the wall.",
+  "detail.seam.title": "Ore seam",
+  "detail.seam.description": "A vein of dark ore, too hard to pry loose by hand.",
+  "action.mine": "Mine",
+  "narration.mine": "You chip a lump of ore from the seam.",
+  "item.ore.short": "a lump of ore",
+  "item.ore.description": "A heavy lump of dark ore.",
+  "item.ore_01.room": "A lump of [ore] shows in the seam.",
+  "item.ore_02.room": "A second lump of [ore] shows in the seam.",
+  "item.pickaxe.short": "a pickaxe",
+  "item.pickaxe.room": "A [pickaxe] leans against the wall.",
+  "item.pickaxe.description": "An iron pickaxe with a sharp point.",
+  "item.stick.short": "a stick",
+  "item.stick.room": "A [stick] lies in the dust.",
+  "item.stick.description": "A dry wooden stick."
+}

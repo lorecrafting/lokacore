@@ -1,0 +1,26 @@
+{
+  "title": "room.mine.title",
+  "description": "room.mine.description",
+  "exits": {},
+  "details": {
+    "seam": {
+      "aliases": [
+        "seam",
+        "ore"
+      ],
+      "description": "detail.seam.description",
+      "harvest": {
+        "items": [
+          "ore_01",
+          "ore_02"
+        ],
+        "label": "action.mine",
+        "narration": "narration.mine",
+        "title": "detail.seam.title",
+        "tool": {
+          "tag": "sharp"
+        }
+      }
+    }
+  }
+}

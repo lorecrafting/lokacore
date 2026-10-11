@@ -1,5 +1,11 @@
 // A detail selects from finite authored room-held stock; Take remains the ordinary custody path.
-import type { CharacterId, EntityId, Command } from '../../contracts.gen.ts';
+import {
+  LIMITS,
+  type CharacterId,
+  type EntityId,
+  type Command,
+  type Tag,
+} from '../../contracts.gen.ts';
 import {
   bodyOf,
   accepted,
@@ -12,6 +18,8 @@ import {
 import { selected } from './stock.ts';
 import { carryingExchange } from './shared.ts';
 import { status } from '../skills.ts';
+import { fits } from '../action_recipe/shared.ts';
+import { reach } from '../lookups.ts';
 
 export function harvest(
   world: World,
@@ -24,6 +32,9 @@ export function harvest(
     body = bodyOf(world, actor);
   if (!detail?.harvest || !body) return 'invalid_target' as const;
   if (detail.room !== world.state.containers[body]) return 'not_present' as const;
+  const tool = detail.harvest.tool && toolHeld(world, body, detail.harvest.tool, steps);
+  if (tool === false) return 'invalid_state' as const;
+  if (typeof tool === 'string') return tool;
   const careful = method && detail.harvest.careful;
   if (method && (!careful || !status(world, actor, careful.skill, steps).usable))
     return 'invalid_state' as const;
@@ -40,6 +51,18 @@ export function harvest(
       narration: careful ? careful.narration : detail.harvest.narration,
     }
   );
+}
+
+// Toolbox row 19: some item held (in the body or an open container it carries) declares the tag;
+// one query step per entity walked, as Put's pairs.
+function toolHeld(world: World, body: EntityId, tool: { tag: Tag }, steps: Steps) {
+  for (const id of Object.keys(world.entities) as EntityId[]) {
+    if (++steps.n > LIMITS.query_steps) return 'budget_exceeded' as const;
+    if (!fits(world, id, tool)) continue;
+    const held = reach(world, body, id, steps, true);
+    if (held !== false) return held;
+  }
+  return false;
 }
 
 export function decideHarvest(
