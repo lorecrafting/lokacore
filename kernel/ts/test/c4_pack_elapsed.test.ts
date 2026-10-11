@@ -80,3 +80,14 @@ test('one elapsed advance over 25 hours or 3 days plays the pack as hour-by-hour
   assert.equal(day.next_wander_due, 158400);
   assert.equal(day.plan_job_due, 158400);
 });
+
+// Breaks (loka-6ql4): a crossed sub-step off the wander grid taking its own hour as the wander
+// boundary. With a 3-hour interval the 20:00 night boundary (158400) is off the grid: hour-by-hour
+// play wanders next at 162000, not at 158400.
+test('a crossed night boundary off a 3-hour wander grid keeps the grid', () => {
+  const w = fixture(undefined, 3 * HOUR);
+  const one = elapse(w, w.state.clock + 27 * HOUR, 1);
+  const p = project(one.world, one.events);
+  assert.deepEqual(p, hourly(w, 27));
+  assert.equal(p.next_wander_due, 172800);
+});
