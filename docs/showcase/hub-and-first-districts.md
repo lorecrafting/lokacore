@@ -298,8 +298,8 @@ track climbs `up` from the green. The `hall_cupboard` exit is east of `moot_hall
   (`standing_sampler/npcs/guard.json`). Dialogue `warden_talk` (no quest): `reason` (`check` cha
   against `npc: warden`, sequence `fact.assign warden_lets_pass true`), `lean` (`check` skill
   `intimidate` rating 1, same sequence), `leave` (`persuade_sampler/dialogues/guard.json`).
-  Dialogue `warden_passed` (`fact_compare warden_lets_pass true`, only `leave`) sorts first, so
-  after the pass Talk opens "Gate's open. Go on." instead of "Toll gate's shut." (review 377).
+  `warden_talk` holds while `warden_lets_pass` is not true; dialogue `warden_passed` (`fact_compare
+  warden_lets_pass true`, only `leave`) takes over, so after the pass Talk opens "Gate's open. Go on." instead of "Toll gate's shut." (review 377).
   Barrier `toll_gate` `opens_when fact_compare warden_lets_pass true`; reaction `gate_lifted` on
   `fact_changed warden_lets_pass` (when true) opens it with `barrier.set` (row W22), so the pass
   opens the gate (loka-y6yg.13).
@@ -346,10 +346,11 @@ track climbs `up` from the green. The `hall_cupboard` exit is east of `moot_hall
 - Quest `carry_letter` (`quest_sampler/quests`): no `offer` (dialogue accept only); objective
   `current_state` `has_item letter`, so a letter taken before the accept counts (loka-y6yg.12);
   Wat's dialogue policy reads all(`quest_state active`, `has_item letter`), as a current_state
-  quest stays `active` until resolved; `deadline {after: 60000,
-  outcome: late}` (twenty real minutes); `journal` texts with `hints.active` after 5 ("The letter
-  lies on the moot stone.") and `hints.objectives_met` after 5 ("The Fell Road runs north from the
-  inn.") and 10, both counted from the accept (no stored met time) ("Wat keeps the hut east of the fell top; he takes it from your hand."); `outcomes`
+  quest stays `active` until resolved; `deadline {after: 60000, outcome: late}` (twenty real
+  minutes); `journal` texts with `hints.active` after 5 ("The letter lies on the moot stone.") and
+  `hints.objectives_met` after 5 ("The Fell Road runs north from the inn.") and 10 ("Wat keeps the
+  hut east of the fell top; he takes it from your hand."), both counted from the accept (no stored
+  met time); `outcomes`
   keyed `deliver`, `burn` and `late` (a dialogue resolves with the choice id as the outcome).
 - Story point `letter_fate`: outcomes `deliver` {`wat_letter`, `deliver`} and `burn`
   {`wat_letter`, `burn`} (`ashmere_scene/story_points`).
