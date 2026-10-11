@@ -1,0 +1,13 @@
+{
+  "keywords": [
+    "torch"
+  ],
+  "short": "item.smithy_torch.short",
+  "room_line": "item.smithy_torch.room",
+  "description": "item.smithy_torch.description",
+  "mass_grams": 500,
+  "location": {
+    "in": "room",
+    "room": "smithy"
+  }
+}

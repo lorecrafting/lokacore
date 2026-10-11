@@ -24149,5 +24149,88 @@
         "code": "unknown_property"
       }
     ]
+  },
+  {
+    "name": "reaction_status_apply_tag_without_co_present",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "status_ticked"
+      },
+      "apply": [
+        {
+          "op": "status.apply",
+          "status": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "status",
+            "key": "burning"
+          },
+          "tag": "burnable"
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/apply/0/co_present",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "reaction_barrier_set_barrier_and_tag",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "status_ticked"
+      },
+      "apply": [
+        {
+          "op": "barrier.set",
+          "to": "open",
+          "barrier": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "barrier",
+            "key": "door"
+          },
+          "tag": "burnable"
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/apply/0",
+        "code": "exclusive_properties"
+      }
+    ]
+  },
+  {
+    "name": "reaction_barrier_set_broken_no_site",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "status_ticked"
+      },
+      "apply": [
+        {
+          "op": "barrier.set",
+          "to": "broken"
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/apply/0",
+        "code": "exclusive_properties"
+      },
+      {
+        "path": "/apply/0/to",
+        "code": "not_in_enum"
+      }
+    ]
   }
 ]

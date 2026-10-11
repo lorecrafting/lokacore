@@ -45,6 +45,7 @@ rooms and steps and the build slice is still to come; `built` means the pin walk
 | deadline x exposure | social and body | the letter run across `fell_top` | `showcase_social.test.ts` | planned (plan 1) |
 | pick x force x skill growth | social | `tollhouse` (strongbox, fragile and iron doors) | `showcase_social.test.ts` | planned (plan 1) |
 | schedule cases x sky | social | Tam's 11:00 case (rain sends him to the church) | `showcase_social.test.ts` | planned (plan 1) |
+| fire: statuses on things x tags x reactions x use-on x cues x barriers (row W22) | body (sandbox off `the_fold`) | `smithy` (torch, kindling, bench, anvil, bucket), `woodstore` behind the burnable `store_door` | `kernel/ts/test/showcase_fire.test.ts` | built |
 
 ## How a batch adds a district
 

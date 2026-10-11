@@ -580,9 +580,27 @@
                   "co_present": {
                     "enum": [true],
                     "description": "Toolbox row W21 (kernel_api at least 1.50): the status lands on every living NPC in the event's room (its room_id, else the room directly holding the subject; none for a carried or unplaced one), in EntityId order, never on the player's body; an NPC declaring the status immune takes nothing. Never with item or npc (compiler and loader SCHEMA_VIOLATION)."
+                  },
+                  "tag": {
+                    "$ref": "entity.schema.json#/$defs/Tag",
+                    "description": "Toolbox row W22 (kernel_api at least 1.56; only with co_present): the status lands instead on every item lying directly in the event's room whose definition carries this tag, the event's subject included, in EntityId order; an item declaring the status immune takes nothing."
                   }
                 },
+                "dependentRequired": { "tag": ["co_present"] },
                 "required": ["op", "status"],
+                "additionalProperties": false
+              },
+              {
+                "description": "Toolbox row W22 (Beads loka-kgd.96; kernel_api at least 1.56, barrier@1): move barrier, or every barrier on an exit of the event's room (its room_id, else the room directly holding the subject) whose definition carries tag, in direction-key order, to state to, from any state and with no key, opens_when or reach check (a burnt or broken door); each legal step on the way (locked, closed, open) is one barrier.transition and one barrier_changed, and a barrier already at to takes nothing. to locked needs the barrier's key_item, every tagged barrier's for tag (compiler and loader BARRIER_UNREACHABLE_KEY at to).",
+                "type": "object",
+                "properties": {
+                  "op": { "const": "barrier.set" },
+                  "to": { "$ref": "room.schema.json#/$defs/BarrierState" },
+                  "barrier": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
+                  "tag": { "$ref": "entity.schema.json#/$defs/Tag" }
+                },
+                "exactlyOneRequired": ["barrier", "tag"],
+                "required": ["op", "to"],
                 "additionalProperties": false
               },
               {

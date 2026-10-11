@@ -424,6 +424,7 @@ export function reactionWitnesses(before: World, after: World, decision: Decisio
       return ops.find((o) => o.op === 'status.transition' && same(o.status, step.status));
     if (step.op === 'experience.grant')
       return ops.find((o) => o.op === 'levelling.set' && o.character_id === actor);
+    if (step.op === 'barrier.set') return undefined; // row W22: no reaction witness yet
     const prior = before.state.population_plans?.[key(step.plan)];
     const next = after.state.population_plans?.[key(step.plan)];
     return ops.find(
