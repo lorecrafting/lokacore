@@ -51,3 +51,36 @@ Out of scope, for the PM to file: an NPC with `hp.minimum` 1 loads, then faults 
   - Without `letter_late`, social 13 and 14 fail. Backed.
   - Without `recap_after_minutes`, social 14 fails. Backed.
 - The PR body reports `/code-review medium`.
+
+## Re-check at `331cce1660b1e0f16a64bfed16a01d7429b174e2` (fix commits `661cdcf1`, `331cce16`)
+
+- Hosted CI on the head: ci `38097116959`, book-e2e `38097116979`, graph-diff `38097120773`, all success. Focused run: `showcase_social.test.ts` 15/15. sha256(canonical) equals the pin.
+
+### Dispositions
+
+1. Finding 1 (blocker): **fixed**.
+   - `cartridge.json` now sets `player_attack.chance` 0.
+   - Social 2-3 (`showcase_social.test.ts:110-119`) waits 10 rounds and then asserts the Warden is still engaged. It then walks flee, `help`, `reason`, open east and into the tollhouse.
+   - Red control: with chance set back to 100 in the pinned canonical, social 2-3 fails at `:113`.
+   - Brief:306-310 records the rule.
+   - The flee-first path is sound: talking to a hostile Warden is `invalid_state`.
+   - Played in the Book harness: after the walk east the page offers only Look and Flee, still does after 30 real seconds, and Flee returns the player to the green.
+2. Finding 2: **fixed**. Brief:378 and test:249-250 cite loka-kgd.64; the twin is kept.
+3. Finding 3: **accepted as is** (the hint words stay; drop and take recovers).
+4. Finding 4: **fixed**. `text.json:295` now says "hold the letter to the fire".
+
+### PM's open questions
+
+- The "ash" texts (`text.json:341`, `:410`) say the letter is burnt while it stays in the pack: **accept as a known limit**. The brief makes `burn` narration only, and a held letter changes nothing once the quest is resolved.
+- The player hit and NPC-death lines can no longer be reached: **accept**. The combat block needs the keys, and the combat district will use them.
+- "Terminal player cannot wait, move or flee while engaged": not reproduced in the Book, where Flee is offered and works. I did not check the terminal client; if it has no Flee, that is a client gap, not this slice.
+
+### New finding, outside the fix commits
+
+**Should-fix, `mobile/app/book/showcase_recap.test.ts:19`.**
+- `b.tap(...)` takes a single argument (`polish-book.test.ts:178`), so this call only goes south. The Reeve's quest is never accepted.
+- Brief step 14 says to accept, and the test header says the test catches a recap that "shows the deadline".
+- Failure scenario: if the deadline job started narrating a line, the test would stay green.
+- Fix: tap each control in turn: `'The Reeve is here., open'`, `/^Talk/`, `'Take the letter to Wat'`, `'Leave the conversation'`, then `'Leave'`.
+
+Verdict: **APPROVE WITH NOTES** (one should-fix: the recap test's accept).
