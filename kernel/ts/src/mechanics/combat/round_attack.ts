@@ -24,6 +24,7 @@ import { fact, positionOf, standing } from '../position/shared.ts';
 import { assigned } from '../fact.ts';
 import type { CombatEvent, Round } from './round.ts';
 import { ally, resisted } from './shared.ts';
+import { statusAllows } from '../status/shared.ts';
 
 export function prefix(world: World, ops: readonly DeltaOp[], due = world.state.clock): World {
   const during =
@@ -57,7 +58,7 @@ export function attack(
 ) {
   const player = attacker_id === row.body_id;
   const foe = !player && !ally(world, attacker_id);
-  if (!player && !foe && !allyFits(r)) return;
+  if ((!player && !foe && !allyFits(r)) || !statusAllows(world, attacker_id)('attack')) return;
   const target_id = foe ? row.body_id : row.npc_id;
   const settings = world.cartridge.world!.combat!;
   const profile = attackProfile(world, row, attacker_id, player, r);

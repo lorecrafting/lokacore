@@ -12,7 +12,7 @@ defmodule Loka.ContentStatusReadersTest do
   # Breaks (status readers 4 and 5; twin of the loader row in kernel/ts/test/status_readers.test.ts):
   # one reader field (each alone) compiles under API 1.53, a blocks or allows entry naming no
   # command (or the authority-internal elapsed) compiles, or a reader status without per_tick (the
-  # sampler's three) is refused.
+  # sampler's four) is refused.
   test "reader fields need API 1.54 and name player commands", %{dir: dir} do
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, [])
     at153 = {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.53")}
@@ -22,7 +22,9 @@ defmodule Loka.ContentStatusReadersTest do
           {"hushed", "blocks", ["say"]},
           {"hushed", "allows", ["look"]}
         ] do
-      plains = for k <- ~w(warded hushed soaked), k != key, do: {"statuses/#{k}.json", &plain/1}
+      plains =
+        for k <- ~w(warded hushed soaked stunned), k != key, do: {"statuses/#{k}.json", &plain/1}
+
       one = {"statuses/#{key}.json", &(&1 |> plain() |> Map.put(field, value))}
 
       assert {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api"} in diags(

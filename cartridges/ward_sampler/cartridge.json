@@ -5,7 +5,7 @@
   "title": "Ward Sampler",
   "requires": {
     "kernel_api": {
-      "at_least": "1.54",
+      "at_least": "1.57",
       "below": "2.0"
     },
     "content_schema": 1,

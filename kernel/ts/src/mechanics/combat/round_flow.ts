@@ -17,6 +17,7 @@ import { standing } from '../position/shared.ts';
 import { ally, allyOf, npcRef, participantsPresent } from './shared.ts';
 import { afraid, eligible, flight, next, packPlan } from './behavior.ts';
 import { attack, prefix } from './round_attack.ts';
+import { statusAllows } from '../status/shared.ts';
 import type { CombatEvent, Round } from './round.ts';
 
 type PackContext = {
@@ -147,8 +148,9 @@ function maybeFlight(
     origin?.kind === 'spawned' ? at.populationSpecs[encode(origin.by)]?.hp.maximum : undefined;
   const current = level(at, selected, resourceRef(at, 'hp'))!;
   const leaving =
-    afraid(at, selected) ||
-    (maximum !== undefined && mul(current, 100) < mul(maximum, settings.flight_below_percent))
+    statusAllows(at, selected)('flee') && // status reader 4: entangled, it stays
+    (afraid(at, selected) ||
+      (maximum !== undefined && mul(current, 100) < mul(maximum, settings.flight_below_percent)))
       ? flight(at, selected, job.due_time, r.steps)
       : undefined;
   if (!leaving) return false;

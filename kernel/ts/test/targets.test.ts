@@ -372,3 +372,54 @@ test("the player's shield and sleep touch only the raider's blow, never the guar
   );
   assert.deepEqual(asleep, [2, 10, true]);
 });
+
+// Status reader 4 (loka-kgd.98). Breaks: the ally's blow skips the attack bar (a stunned guard still
+// hits the raider for 1 and narrates combat.ally_hit).
+test('a stunned guard takes no blow beside the player', () => {
+  const K = 'targets_sampler@0.0.1:';
+  const yard = (stunned: boolean) => {
+    const c = structuredClone(content) as any;
+    c.npcs[`${K}npc/raider`].attack.chance = 0;
+    n = 0;
+    let w = newWorld(c, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, [1, 2, 3, 4]);
+    const raider = w.entityIds[`${K}npc/raider`]!;
+    w = ok(
+      play(ok(play(w, { type: 'move', direction: 'south' })), {
+        type: 'attack',
+        target_id: raider,
+      }),
+    );
+    if (stunned) {
+      const stun = { ...C, kind: 'status', key: 'stunned' } as never;
+      const narration = {
+        applied: 'combat.npc_hit',
+        tick: 'combat.npc_hit',
+        expired: 'combat.npc_hit',
+      };
+      const spec = {
+        key: 'stunned',
+        duration: 300,
+        tick_every: 150,
+        resource: resourceRef(w, 'hp'),
+      };
+      const statuses = {
+        [`${K}status/stunned`]: { ...spec, allows: ['look'], label: 'combat.npc_hit', narration },
+      };
+      w = { ...w, cartridge: { ...w.cartridge, statuses } as never } as World;
+      const job = 'cccccccc-6666-4666-8666-000000000098' as never;
+      const at = apply(
+        w,
+        applyStatus(w, w.entityIds[`${K}npc/guard`]!, stun, 0, () => job),
+        false,
+      );
+      assert.ok('world' in at, JSON.stringify(at));
+      w = at.world;
+    }
+    const r = advance(w);
+    const keys = r.decision.kind === 'accepted' ? r.decision.narration!.map((x) => x.key) : [];
+    return [hp(ok(r), raider), keys.includes('combat.ally_hit' as never)];
+  };
+  // The raider (3 HP) takes the player's sure 2 and the guard's sure 1; stunned, the guard adds none.
+  assert.deepEqual(yard(false), [0, true]);
+  assert.deepEqual(yard(true), [1, false]);
+});
