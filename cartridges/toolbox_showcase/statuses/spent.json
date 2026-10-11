@@ -1,0 +1,12 @@
+{
+  "duration": 600,
+  "tick_every": 300,
+  "resource": "hp",
+  "per_tick": -1,
+  "label": "condition.spent",
+  "narration": {
+    "applied": "narration.spent.applied",
+    "tick": "narration.spent.tick",
+    "expired": "narration.spent.expired"
+  }
+}

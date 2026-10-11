@@ -10,6 +10,17 @@
         "player"
       ],
       "meaning": "This character has found the stair from the sea cave."
+    },
+    "store_unbarred": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "instance"
+      ],
+      "meaning": "The woodstore door is unbarred from inside; nothing in this world sets it, so only fire opens the door."
     }
   }
 }

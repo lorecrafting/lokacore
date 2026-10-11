@@ -1,0 +1,21 @@
+{
+  "title": "room.smithy.title",
+  "description": "room.smithy.description",
+  "exits": {
+    "north": {
+      "to": "the_fold"
+    },
+    "south": {
+      "to": "woodstore",
+      "barrier": "store_door"
+    }
+  },
+  "details": {
+    "forge": {
+      "aliases": [
+        "forge"
+      ],
+      "description": "detail.smithy_forge"
+    }
+  }
+}

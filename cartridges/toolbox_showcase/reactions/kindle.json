@@ -1,0 +1,14 @@
+{
+  "on": {
+    "event": "item_dropped",
+    "item": "smithy_torch"
+  },
+  "apply": [
+    {
+      "op": "status.apply",
+      "status": "burning",
+      "co_present": true,
+      "tag": "burnable"
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "title": "room.woodstore.title",
+  "description": "room.woodstore.description",
+  "exits": {
+    "north": {
+      "to": "smithy",
+      "barrier": "store_door"
+    }
+  },
+  "details": {
+    "logs": {
+      "aliases": [
+        "logs"
+      ],
+      "description": "detail.woodstore_logs"
+    }
+  }
+}

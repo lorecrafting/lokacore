@@ -5,7 +5,7 @@
   "title": "Toolbox Showcase",
   "requires": {
     "kernel_api": {
-      "at_least": "1.47",
+      "at_least": "1.56",
       "below": "2.0"
     },
     "content_schema": 1,
@@ -43,7 +43,8 @@
       "dialogue": 1,
       "scene": 1,
       "commerce": 1,
-      "combat": 1
+      "combat": 1,
+      "sense_cue": 1
     },
     "client_features": []
   },
