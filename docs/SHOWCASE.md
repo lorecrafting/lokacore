@@ -1,6 +1,6 @@
 # Toolbox showcase
 
-`cartridges/toolbox_showcase` (the hub and the body, world and social districts of [showcase plan 1](showcase/hub-and-first-districts.md) are built; compiled answer
+`cartridges/toolbox_showcase` (the hub and the body, world and social districts of [showcase plan 1](showcase/hub-and-first-districts.md) are built, the combat district of [showcase plan 2](showcase/combat-district.md) is planned; compiled answer
 `protocol/fixtures/toolbox_showcase_hash.json`, held by `test/loka/content_showcase_test.exs`) is the composition proof for the [mechanics toolbox](MECHANICS-TOOLBOX.md):
 one playable cartridge where finished mechanics meet each other, so a pair that only works in its
 own sampler shows up here ([owner decision](decisions/owner-decision-showcase-2026-10-10.md)).
@@ -23,8 +23,8 @@ it covers Chapter 1's play families (see [Retiring Chapter 1](#retiring-chapter-
 Each row is a set of mechanics that must work together in one room or loop. A batch fills in the
 district and room that shows the pair, and the pin (test or recorder) that holds it.
 
-Status `planned (plan 1)` means [showcase plan 1](showcase/hub-and-first-districts.md) names the
-rooms and steps and the build slice is still to come; `built` means the pin walks the plan's steps; `later` means no brief covers it yet.
+Status `planned (plan N)` means that showcase plan ([plan 1](showcase/hub-and-first-districts.md),
+[plan 2](showcase/combat-district.md)) names the rooms and steps and the build slice is still to come; `built` means the pin walks the plan's steps; `later` means no brief covers it yet.
 
 | Mechanics | District | Rooms | Pin | Status |
 |---|---|---|---|---|
@@ -32,8 +32,8 @@ rooms and steps and the build slice is still to come; `built` means the pin walk
 | sky x exposure x equipment | body | `fell_gate` garments, `fell_top` | `showcase_body.test.ts` (body 2, 5, 6, 13) | built |
 | disposition x commerce x dialogue | social | `village_green` (Nell's shop and prices, the Reeve's `help`/`wrong`, the apple), `warden_gate` (engage) | `kernel/ts/test/showcase_social.test.ts` (social 1-4) | built |
 | deadlines x schedules x away recap | social | the letter quest, Tam's day, the recap block on return | `mobile/app/book/showcase_recap.test.ts` (the block is Book-side); `showcase_social.test.ts` (social 14) for the facts | built |
-| combat x loot x levelling x death | | | | later (combat district) |
-| hidden exits x senses x traps | world (hidden exits only) | `sea_cave` night search | `kernel/ts/test/showcase_world.test.ts` (world 5, 7) | hidden exits built; senses and traps later |
+| combat x loot x levelling x death | combat | `boar_run` (the boar, its tusk and purse), `goblin_pit` (an unarmed death and the corpse), the Raise after the bounty | `kernel/ts/test/showcase_combat.test.ts` (combat 6-11) | planned (plan 2) |
+| hidden exits x senses x traps | world (hidden exits), combat (senses) | `sea_cave` night search; the boar's grunt heard from `drill_yard` | `kernel/ts/test/showcase_world.test.ts` (world 5, 7); `showcase_combat.test.ts` (combat 1, 10) | hidden exits built; senses planned (plan 2); traps later (after M8) |
 | quests x deadlines x hints | social | `carry_letter` from the Reeve to Wat | `showcase_social.test.ts` (social 10, 13) | built |
 | scenes x dialogue x reactions | social | Wat's `deliver`/`burn`, story point `letter_fate`, scenes `letter_read`/`letter_ash`, standing on scene end | `showcase_social.test.ts` (social 12) | built |
 | rumour x dialogue check x codex | social | `mill`, `village_green` (Tam tells Nell; `press` grants "The fire") | `showcase_social.test.ts` (social 5, 8) | built |
@@ -44,6 +44,14 @@ rooms and steps and the build slice is still to come; `built` means the pin walk
 | deadline x exposure | social and body | the letter run across `fell_top` | `showcase_social.test.ts` (social 11) | built |
 | pick x force x skill growth | social | `tollhouse` (strongbox, fragile and iron doors) | `showcase_social.test.ts` (social 6-7) | built |
 | schedule cases x sky | social | Tam's 11:00 case (rain sends him to the church) | `showcase_social.test.ts` (social 8, rain) | built |
+| target choice x pack x kill credit | combat | `goblin_pit` (two goblins on one pack plan; Attack the second to switch) | `showcase_combat.test.ts` (combat 11) | planned (plan 2), after Beads `loka-6ql4` |
+| allies x kill credit x quest | combat | `gate_yard` (Gil's blow kills the raider; the bounty resolves) | `showcase_combat.test.ts` (combat 6) | planned (plan 2) |
+| scars x death x same-body return | combat | the boar's `gored` survives the pit death | `showcase_combat.test.ts` (combat 2, 8) | planned (plan 2) |
+| bleed status x cure x immune | combat | `bleeding` from the boar, the poultice, the boar immune to its own wound | `showcase_combat.test.ts` (combat 2, 3, 10) | planned (plan 2) |
+| say and shout x keyword dialogue x reactions | combat | `say steel` opens Aldous's answer; `shout ware` warns Gil next door | `showcase_combat.test.ts` (combat 4, 5) | planned (plan 2); kernel-only until the Book input (`loka-kgd.72`) |
+| lesson x weapon x derived damage | combat | Aldous's lesson and sword; Raise str after level 2 | `showcase_combat.test.ts` (combat 4, 7, 10) | planned (plan 2) |
+| disposition x resistances | social and combat | the Warden's mail (`physical` 100) against the sword | `showcase_combat.test.ts` (combat 12) | planned (plan 2) |
+| traps x statuses x combat; fear x pack x shout; use-on x fire; puzzles | combat | | | later (after M8) |
 
 ## How a batch adds a district
 
