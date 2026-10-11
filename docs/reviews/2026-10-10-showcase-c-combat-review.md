@@ -49,3 +49,19 @@
 - Cartridge-wide hp minimum 0: **confirmed**. Every existing pin is green. Exposure can now kill an idle player (nit 3), which the brief accepts.
 - Warden `physical` 100: **confirmed** (combat 10; the mutant above).
 - Step 9 and the sandbox pack after M8: stated honestly in `combat-district.md:178,187-205,215` and in the SHOWCASE.md intro and pit row.
+
+## Re-check at `49158ac76426f8d145e5593a5f40d222d3075ccb` (fix commits `7d60a1f4`, `49158ac7`)
+
+Verdict: **APPROVE**. Only the fix commits were reviewed. Pins: exs 1/1; TS showcase combat, body, world and social 48/48; recap 2/2.
+
+- Finding 1, fixed:
+  - `showcase_combat.test.ts` combat 8 asserts that `activeStatuses` on the boar is empty.
+  - New combat 11 kills the raider (Gil's blow, no bounty taken) and asserts that the fight ends, `raider_slain` is true, the journal is empty, experience is 10 and Talk opens the lesson.
+  - Mutants rerun: the boar without `immune` fails combat 8. `bounty_done` without `when` fails combat 11 (`precondition_failed`).
+- Finding 2, fixed:
+  - `aldous_talk` has the policy `raider_slain false`.
+  - The new `aldous_yard` has the policy `raider_slain true` and offers Leave only. Its key sorts after `aldous_talk`, so Talk opens it only once the raider is dead.
+  - Combat 4 pins that Talk opens `aldous_yard`.
+  - Own mutant: `aldous_talk` with an empty policy fails combat 4.
+  - The plan (`:106-107`, `:116-121`, `:156-162`), `sign_combat` and the PR body are updated.
+- Nit 3, fixed: `sign_body` adds "a long enough bill is paid with your life". The plan 1 quote is synced, and the hash repin matches the source (exs green).
