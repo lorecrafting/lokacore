@@ -10,6 +10,7 @@ of closed work are deleted once their lesson is folded, and linked by permalink
 Reviews before R2 live in the [legacy repository](https://github.com/lorecrafting/lokacore-v2-legacy)
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
+- [Review: M9 pack kill credit and sim checker envelope (loka-lpq6, loka-th7x)](2026-10-10-toolbox-m9-credit-review.md): **APPROVE WITH NOTES**
 - [Review: toolbox row G4, use X on Y (loka-kgd.76)](2026-10-10-toolbox-m8-useon-review.md): **APPROVE**
 - [Review: toolbox row 12, traps (loka-kgd.73)](2026-10-10-toolbox-m8-traps-review.md): **APPROVE WITH NOTES**
 - [Review: toolbox row 29a, spell cast admission (loka-kgd.81)](2026-10-10-toolbox-m8-spells-review.md): **APPROVE WITH NOTES**
