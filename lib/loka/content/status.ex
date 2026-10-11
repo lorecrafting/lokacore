@@ -50,10 +50,11 @@ defmodule Loka.Content.Status do
 
   defp trigger?(_), do: false
 
-  # A status reader (4, 5) needs 1.54, a fear status (row W21) 1.50, a permanent one (row W8) 1.48,
+  # A perception or concealment (status readers 6, 8) needs 1.61, a status reader (4, 5) 1.54, a fear status (row W21) 1.50, a permanent one (row W8) 1.48,
   # the fields above 1.46.
   defp floor(statuses, g3) do
     cond do
+      Enum.any?(for {_, {_, _, s}} <- statuses, do: senses?(s)) -> [1, 61]
       Enum.any?(for {_, {_, _, s}} <- statuses, do: reader?(s)) -> [1, 54]
       Enum.any?(statuses, &match?({_, {_, _, %{"fear" => true}}}, &1)) -> [1, 50]
       Enum.any?(statuses, &match?({_, {_, _, %{"duration" => "permanent"}}}, &1)) -> [1, 48]
@@ -64,8 +65,11 @@ defmodule Loka.Content.Status do
 
   defp permanent?(s), do: s["duration"] == "permanent"
 
-  # Status readers 4 and 5: blocks, allows or resistances; such a status may omit per_tick too.
-  defp reader?(s), do: Enum.any?(~w(blocks allows resistances), &Map.has_key?(s, &1))
+  # Status readers 4, 5, 6 and 8: such a status may omit per_tick too.
+  defp reader?(s),
+    do: senses?(s) or Enum.any?(~w(blocks allows resistances), &Map.has_key?(s, &1))
+
+  defp senses?(s), do: Map.has_key?(s, "perception") or Map.has_key?(s, "concealment")
 
   # A fatal hp tick runs the death sequence, so death's settings must be declared too.
   defp gate(m, floor) do
@@ -95,8 +99,17 @@ defmodule Loka.Content.Status do
       per_tick(rel, s) ++
       missing_text(rel, ["label"], [s["label"]], text) ++
       missing_text(rel, ["narration"], Map.values(s["narration"] || %{}), text) ++
-      modifies(rel, s, m, defs) ++ hp_max(rel, s, settings) ++ commands(rel, s)
+      modifies(rel, s, m, defs) ++
+      hp_max(rel, s, settings) ++ readers(rel, s)
   end
+
+  defp readers(rel, s), do: commands(rel, s) ++ perception(rel, s)
+
+  # Status reader 6: a perception names a sense (the schema subset has no minProperties).
+  defp perception(rel, %{"perception" => p}) when map_size(p) == 0,
+    do: [diag("SCHEMA_VIOLATION", at(rel, ["perception"]))]
+
+  defp perception(_, _), do: []
 
   # Status reader 4: each name is a player command type (run_job and elapsed are authority-internal).
   defp commands(rel, s) do
@@ -108,7 +121,7 @@ defmodule Loka.Content.Status do
         do: diag("UNKNOWN_COMMAND", at(rel, [field, i]))
   end
 
-  # Never 0; only a modifying (row 2c), fear (row W21) or reader (4, 5) status may omit it; a permanent one
+  # Never 0; only a modifying (row 2c), fear (row W21) or reader (4, 5, 6, 8) status may omit it; a permanent one
   # (row W8) never ticks, so it declares none.
   defp per_tick(rel, s) do
     if s["per_tick"] == 0 or

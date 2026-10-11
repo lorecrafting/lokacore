@@ -16,7 +16,7 @@ import { living } from './death/shared.ts';
 import { fuelView } from './light/shared.ts';
 import { exitOf, hidden } from './lookups.ts';
 import type { holds } from './policy.ts';
-import { specOf } from './status/shared.ts';
+import { perceives, specOf } from './status/shared.ts';
 
 type Source = { readonly room: string; readonly cue: Cue };
 type Near = { readonly d: number; readonly direction?: string };
@@ -119,7 +119,9 @@ export function reaching(
 
 /** GameView cues: those reaching the actor's room, nearest first, then by direction and text. */
 export function cueViews(w: World, steps: Steps, holds: Holds) {
+  const deaf = perceives(w, w.body, 'deaf'); // status reader 6: no sound reaches a deaf listener
   const cues = reaching(w, w.character, w.state.containers[w.body]!, steps, holds)
+    .filter(({ cue }) => !(deaf && cue.sense === 'sound'))
     .sort(
       (a, b) =>
         a.d - b.d || cmp(a.direction ?? '', b.direction ?? '') || cmp(a.cue.text, b.cue.text),
@@ -143,8 +145,8 @@ export function perceived(
   ctx: { steps: Steps; cause?: DomainEvent; cue?: true },
   holds: Holds,
 ) {
-  if (ctx.cue) return false;
   const npc = w.entityIds[refString(p.npc)];
+  if (ctx.cue || (p.sense === 'sound' && perceives(w, npc, 'deaf'))) return false;
   const room = npc && living(w, npc) ? roomOf(w, npc, ctx.steps) : undefined;
   if (!room) return false;
   const cues = reaching(w, actor, room, ctx.steps, holds, outcomeCues(w, actor, ctx.cause));

@@ -11,6 +11,7 @@ import { fuelAt, validFuel } from '../../foundation/fuel.ts';
 import { bodyOf, refString, type Steps, type World } from '../../runtime/decision.ts';
 import { darkSight } from '../attributes/shared.ts';
 import { weather } from '../calendar.ts';
+import { concealed, perceives } from '../status/shared.ts';
 
 export const VERBS: readonly string[] = ['ignite', 'douse', 'refuel'];
 const held = (w: World, body: EntityId, item: string) =>
@@ -81,13 +82,15 @@ export function illuminated(w: World, actor: CharacterId, steps: Steps = { n: 0 
   }
   return false;
 }
+/** Unlit for `actor`: a dark room without dark sight or a held light, or anywhere while blind (status reader 6). */
 export function dark(w: World, actor: CharacterId, steps: Steps = { n: 0 }) {
   const body = bodyOf(w, actor);
   return (
     !!body &&
-    !!w.rooms[w.state.containers[body]]?.dark_description &&
-    !darkSight(w, actor) &&
-    !illuminated(w, actor, steps)
+    (perceives(w, body, 'blind') ||
+      (!!w.rooms[w.state.containers[body]]?.dark_description &&
+        !darkSight(w, actor) &&
+        !illuminated(w, actor, steps)))
   );
 }
 
@@ -102,6 +105,8 @@ export function visible(
     here = body && w.state.containers[body];
   const detail = w.details[id];
   const entity = w.entities[id];
+  const blind = perceives(w, body, 'blind'); // status reader 6: no NPC or glow is seen
+  if (entity?.kind === 'npc' && (blind || concealed(w, id as EntityId, body))) return false;
   if (entity?.kind === 'npc' && entity.perception)
     return (
       living(w, id as EntityId) &&
@@ -109,7 +114,7 @@ export function visible(
       value(w, actor, entity.perception.discovered) === true
     );
   if (!dark(w, actor, steps)) return true;
-  if (detail?.room === here && detail.perception?.self_luminous) return true;
+  if (detail?.room === here && detail.perception?.self_luminous && !blind) return true;
   const room = here;
   let at: string | undefined = id,
     owned = false;

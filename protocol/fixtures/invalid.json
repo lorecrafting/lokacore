@@ -23919,6 +23919,147 @@
     ]
   },
   {
+    "contract": "StatusDefinition",
+    "value": {
+      "key": "blind",
+      "duration": 120,
+      "tick_every": 60,
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "hp"
+      },
+      "label": "condition.blind",
+      "narration": {
+        "applied": "narration.blind.applied",
+        "tick": "narration.blind.tick",
+        "expired": "narration.blind.expired"
+      },
+      "perception": {
+        "sight": "blurred"
+      }
+    },
+    "errors": [
+      {
+        "path": "/perception/sight",
+        "code": "not_in_enum"
+      }
+    ]
+  },
+  {
+    "contract": "StatusDefinition",
+    "value": {
+      "key": "blind",
+      "duration": 120,
+      "tick_every": 60,
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "hp"
+      },
+      "label": "condition.blind",
+      "narration": {
+        "applied": "narration.blind.applied",
+        "tick": "narration.blind.tick",
+        "expired": "narration.blind.expired"
+      },
+      "perception": {
+        "hearing": "muffled"
+      }
+    },
+    "errors": [
+      {
+        "path": "/perception/hearing",
+        "code": "not_in_enum"
+      }
+    ]
+  },
+  {
+    "contract": "StatusDefinition",
+    "value": {
+      "key": "blind",
+      "duration": 120,
+      "tick_every": 60,
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "hp"
+      },
+      "label": "condition.blind",
+      "narration": {
+        "applied": "narration.blind.applied",
+        "tick": "narration.blind.tick",
+        "expired": "narration.blind.expired"
+      },
+      "perception": {
+        "smell": "anosmic"
+      }
+    },
+    "errors": [
+      {
+        "path": "/perception/smell",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "StatusDefinition",
+    "value": {
+      "key": "blind",
+      "duration": 120,
+      "tick_every": 60,
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "hp"
+      },
+      "label": "condition.blind",
+      "narration": {
+        "applied": "narration.blind.applied",
+        "tick": "narration.blind.tick",
+        "expired": "narration.blind.expired"
+      },
+      "perception": "blind"
+    },
+    "errors": [
+      {
+        "path": "/perception",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "contract": "StatusDefinition",
+    "value": {
+      "key": "blind",
+      "duration": 120,
+      "tick_every": 60,
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "hp"
+      },
+      "label": "condition.blind",
+      "narration": {
+        "applied": "narration.blind.applied",
+        "tick": "narration.blind.tick",
+        "expired": "narration.blind.expired"
+      },
+      "concealment": "camouflaged"
+    },
+    "errors": [
+      {
+        "path": "/concealment",
+        "code": "not_in_enum"
+      }
+    ]
+  },
+  {
     "contract": "ReactionRule",
     "value": {
       "key": "k",

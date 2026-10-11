@@ -1,6 +1,7 @@
 import { dark, illuminated } from '../light/shared.ts';
 import { darkSight } from '../attributes/shared.ts';
 import { living } from '../death/shared.ts';
+import { concealed } from '../status/shared.ts';
 // movement@1 (capability_registry.json): move through a room's exit (21 §5 Connection; 04 §5).
 // A direction outside the compass is invalid_target; a compass direction without an exit here,
 // or with one hidden from the actor (hidden_until, toolbox row 11), is not_found, and one through
@@ -58,7 +59,9 @@ export function sight(world: World, body: EntityId, steps: Steps = { n: 0 }) {
       return { direction };
     const at = (id: string): id is EntityId =>
       world.state.containers[id] === there && living(world, id);
-    return { direction, room: there, entities: keys(world.entities).filter(at) };
+    const shownTo = (id: EntityId) =>
+      !(world.entities[id].kind === 'npc' && concealed(world, id, body)); // status reader 8
+    return { direction, room: there, entities: keys(world.entities).filter(at).filter(shownTo) };
   });
 }
 
