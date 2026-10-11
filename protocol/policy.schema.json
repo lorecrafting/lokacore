@@ -252,6 +252,25 @@
           "additionalProperties": false
         },
         {
+          "description": "Toolbox row 29a (kernel_api at least 1.51): the actor's level (toolbox row 4, derived from its experience; 1 in a cartridge without world.levelling) is at least at_least. Owned by attributes@1.",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "level_compare"
+            },
+            "at_least": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "op",
+            "at_least"
+          ],
+          "additionalProperties": false
+        },
+        {
           "description": "The current value of the resource on the actor's body (regenerated to now, before the action's costs) is at least at_least; false for an actor without a body. Owned by attributes@1.",
           "type": "object",
           "properties": {
@@ -418,7 +437,7 @@
           "additionalProperties": false
         },
         {
-          "description": "The subject holds an active status of this definition (status@1 row; toolbox row W6). subject target: the action's target, or, in an entity's own variant (TextVariants), the entity described; false without a target or for a detail. Needs kernel_api at least 1.46. Owned by status@1.",
+          "description": "The subject holds an active status of this definition (status@1 row; toolbox row W6). subject target: the action's target, or, in an entity's own variant (TextVariants), the entity described; false without a target or for a detail. subject self (toolbox row G3 reader 1): the actor's body. subject subject (reader 1): in a reaction's when, the event's subject, the holder a status.apply without item, npc or co_present lands on; false anywhere else. Needs kernel_api at least 1.46, and 1.53 for self or subject. Owned by status@1.",
           "type": "object",
           "properties": {
             "op": {
@@ -426,7 +445,9 @@
             },
             "subject": {
               "enum": [
-                "target"
+                "target",
+                "self",
+                "subject"
               ]
             },
             "status": {

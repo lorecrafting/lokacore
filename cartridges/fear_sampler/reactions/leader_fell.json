@@ -1,0 +1,13 @@
+{
+  "on": {
+    "event": "entity_died",
+    "victim": "chief"
+  },
+  "apply": [
+    {
+      "op": "status.apply",
+      "status": "afraid",
+      "co_present": true
+    }
+  ]
+}

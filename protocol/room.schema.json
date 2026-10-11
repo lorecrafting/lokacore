@@ -239,6 +239,19 @@
                 "narration"
               ],
               "additionalProperties": false
+            },
+            "tool": {
+              "description": "Toolbox row 19: Harvest needs a held item whose definition declares tag.",
+              "type": "object",
+              "properties": {
+                "tag": {
+                  "$ref": "entity.schema.json#/$defs/Tag"
+                }
+              },
+              "required": [
+                "tag"
+              ],
+              "additionalProperties": false
             }
           },
           "required": [

@@ -1,6 +1,6 @@
 import { enteredActors, knowledgeLast, record } from '../mechanics/knowledge/shared.ts';
 import { vary } from '../mechanics/variety.ts';
-// size: allow 340, typed quest reactions and same-plan deadline pairing share FIFO admission
+// size: allow 342, typed quest reactions, deadline pairing and group merging share FIFO admission
 // Proposal admission, FIFO composition and adoption (04 §5.1-§5.4); runtime/world.ts routes commands here.
 import { populationDeadlinePairs } from './proposal_deadlines.ts';
 import { apply } from './apply.ts';
@@ -23,9 +23,8 @@ import * as schedule from '../mechanics/schedule/rule.ts';
 import { cmp } from '../foundation/validate.ts';
 import { currentRound } from '../mechanics/combat/round.ts';
 import { handoffGroup, sightHandoff } from './proposal_sight.ts';
-import { bleedRoundPair } from './proposal_bleed.ts';
 import { queueHour } from './proposal_hours.ts';
-import { statusGroup } from '../mechanics/status/job.ts';
+import { merge, statusGroup } from '../mechanics/status/job.ts';
 import { anyPending as pending, parted } from '../mechanics/dialogue/selection.ts';
 import { admit, type Admitted } from './proposal_admit.ts';
 export { admit, ownerOf, type Admitted } from './proposal_admit.ts';
@@ -260,12 +259,11 @@ function react(p: P): Admitted | undefined {
 }
 
 // Each due job of the root's explicit advance, then its reactions, or the result that ends them.
-// size: allow 45, due job delivery joins population and bleed group pairing before causal reactions
+// size: allow 45, due job delivery joins population pairing and holder groups before causal reactions
 function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined {
   const { due, to } = dueJobs(p.world, root);
   const populationPairs = populationDeadlinePairs(p.world, to);
   const groups = new Map<string, number>();
-  const bleedPairs = new Map<string, number>();
   for (const [job_id, { due_time }] of due) {
     const at = now(p);
     if (!('cartridge' in at)) return at;
@@ -288,14 +286,14 @@ function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined
     p.rng = ran.rng;
     p.narration.push(...(ran.narration ?? []));
     const partner = populationPairs.get(job_id);
-    const group =
-      groups.get(partner ?? job_id) ?? // a partner's, or a schedule job's earlier crossed hour's
-      bleedPairs.get(job_id) ??
-      statusGroup(at, job_id as JobId, current, p.holders, p.group + 1) ??
-      p.group + 1;
+    const prior = groups.get(partner ?? job_id); // a partner's, or an earlier crossed hour's
+    const joined =
+      prior === undefined
+        ? statusGroup(at, job_id as JobId, current, p.holders, p.group + 1)
+        : undefined;
+    if (joined) merge(p.ops, joined.merged, joined.group, [p.holders, groups]);
+    const group = prior ?? joined?.group ?? p.group + 1;
     groups.set(job_id, group);
-    const bleedPair = bleedRoundPair(at, job_id as JobId, current);
-    if (bleedPair) bleedPairs.set(bleedPair, group);
     const handoff = sightHandoff(p.world, p.ops, at, job_id as JobId, due_time, ran.delta.ops);
     const own = ran.delta.ops.map((o) => ({ ...o, writer_group: handoffGroup(o, handoff, group) }));
     p.group++;

@@ -26,12 +26,14 @@ import { bounded, subjective, targetOf, value } from './fact.ts';
 import { holds } from './policy.ts';
 import { starts } from './scene/shared.ts';
 import { activation, resolution } from './quest/lifecycle.ts';
-import { questOf } from './lookups.ts';
+import { eventRooms, itemsTagged, questOf } from './lookups.ts';
 import { cmp } from '../foundation/validate.ts';
 import { suppress } from './population/shared.ts';
-import { applyStatus, specOf } from './status/shared.ts';
+import { statusStep } from './status/shared.ts';
 import { grant } from './levelling/shared.ts';
 import { saturate } from '../foundation/int.ts';
+import { npcsIn } from './speech/shared.ts';
+import { setBarrier } from './barrier/react.ts';
 
 type On = ReactionRule['on'];
 // Each trigger filter (W1; reaction.schema.json): true when the event's payload field equals it.
@@ -98,7 +100,7 @@ const ACTIVATES = ['quest_resolved', 'rested'];
 // size: allow 60, one ordered delivery lowers fact assignments, quest effects and suppression
 export function sequence(
   world: World,
-  actor: CharacterId,
+  listener: CharacterId,
   rule: ReactionRule,
   cause: DomainEvent,
   group: number,
@@ -106,14 +108,13 @@ export function sequence(
   mint: Mint,
   holders: Map<string, number> = new Map(),
 ): Decision<EventPayload['type']> | undefined {
-  const source = resolvedActor(world, cause, actor);
-  if (!source) return { kind: 'fault', code: 'precondition_failed' };
-  actor = source;
+  const actor = resolvedActor(world, cause, listener); // a quest event's evidenced owner
+  if (!actor) return { kind: 'fault', code: 'precondition_failed' };
   const then = { ...world, state: { ...world.state, clock: cause.logical_time } };
-  if (rule.when && !holds(then, actor, rule.when.root, { steps, cause })) return undefined;
-  const set: Record<string, FactValue> = {};
+  const about = { steps, cause, subject: subject(cause, bodyOf(then, actor)) }; // status reader 1
+  if (rule.when && !holds(then, actor, rule.when.root, about)) return undefined;
   const activated = new Set<string>();
-  const applied = new Set<string>();
+  const own = { holders, set: {}, applied: new Set<string>(), doors: new Map() }; // holders: the advance's
   const ops: DeltaOp[] = [];
   const events: DomainEvent[] = [];
   const narration: { key: TextKey }[] = [];
@@ -137,16 +138,19 @@ export function sequence(
       if ('payload' in result) emit(result.payload);
     } else if (step.op === 'population.suppress') {
       ops.push(...suppress(world, actor, step.plan, step.duration, cause, group, mint));
-    } else if (step.op === 'status.apply') {
+    } else if (step.op === 'status.apply' || step.op === 'status.cure') {
       const body = bodyOf(then, actor);
       if (!body) return { kind: 'fault', code: 'precondition_failed' };
-      const applying = statusStep(then, step, cause, body, group, { holders, applied }, mint);
+      const on = holdersOf(then, step, cause, body);
+      const applying = statusStep(then, step, on, body, group, own, mint, emit);
       ops.push(...applying.ops);
       narration.push(...applying.narration);
+    } else if (step.op === 'barrier.set') {
+      ops.push(...setBarrier(then, step, cause, about.subject, group, own, emit)); // row W22
     } else if (step.op === 'experience.grant') {
       gained = saturate(gained + step.amount);
     } else {
-      const assigned = assignment(world, actor, step, group, { set, holders }, cause);
+      const assigned = assignment(world, actor, step, group, own, cause);
       if (assigned) ops.push(assigned);
       if (assigned && assigned.expected !== assigned.value) position++;
     }
@@ -166,43 +170,31 @@ const SUBJECT: Partial<Record<On['event'], string>> = {
   attack_result: 'target_id',
   rested: 'body_id',
   fact_changed: 'subject_id',
+  status_applied: 'body_id',
   status_ticked: 'body_id',
   status_expired: 'body_id',
   spoken: 'entity_id',
 };
 const subject = (cause: DomainEvent, body?: EntityId) => {
   const field = SUBJECT[cause.payload.type as On['event']];
-  const id = field && ((cause.payload as Record<string, unknown>)[field] as EntityId | undefined);
+  const id = field
+    ? ((cause.payload as Record<string, unknown>)[field] as EntityId | undefined)
+    : undefined;
   return id ?? body;
 };
 
-// A status.apply on its holder: the step's named item's or (row 42) NPC's instance, else the
-// event's subject (row G3), once per holder and status in a rule, in the one writer group the
-// holder's status writes share in this advance (status/job.ts statusGroup); only the player's own
-// body hears the applied line.
-function statusStep(
-  world: World,
-  step: Extract<ReactionRule['apply'][number], { op: 'status.apply' }>,
-  cause: DomainEvent,
-  body: EntityId,
-  group: number,
-  { holders, applied }: { holders: Map<string, number>; applied: Set<string> },
-  mint: Mint,
-) {
-  const named = step.item ?? step.npc;
-  const holder = named ? world.entityIds[refString(named)] : subject(cause, body);
-  const once = `${holder}|${refString(step.status)}`;
-  if (!holder || applied.has(once)) return { ops: [], narration: [] };
-  applied.add(once);
-  const joined = holders.get(holder) ?? group;
-  const ops = applyStatus(world, holder, step.status, joined, mint);
-  if (ops.length) holders.set(holder, joined); // a later status job on the holder joins it too
-  // Only a first application (over no row or an inactive one) is heard; a refresh while active is
-  // silent (row W25), and a permanent status (row W8) opens with no job.
-  const first = ops.some((o) => o.op === 'status.transition' && !o.expected?.active);
-  const label = specOf(world, step.status)?.narration.applied;
-  return { ops, narration: label && first && holder === body ? [{ key: label }] : [] };
+// A status step's holders (row G3): the step's named item's or (row 42) NPC's instance, (row W21)
+// every living NPC or (row W22, with tag) every item so tagged lying in the event's room, else the
+// event's subject.
+function holdersOf(world: World, step: StatusStep, cause: DomainEvent, body: EntityId) {
+  const apply = step.op === 'status.apply' ? step : undefined;
+  const named = apply?.item ?? apply?.npc;
+  const one = named ? world.entityIds[refString(named)] : subject(cause, body);
+  const rooms = apply?.co_present && eventRooms(world, cause, one);
+  if (!rooms) return [one];
+  return apply.tag ? itemsTagged(world, rooms, apply.tag) : npcsIn(world, rooms);
 }
+type StatusStep = Extract<ReactionRule['apply'][number], { op: 'status.apply' | 'status.cure' }>;
 
 // A fact.assign, or (row 15) a fact.adjust lowered to one at the bounded sum (nothing when the
 // fact cannot be adjusted); an entity or pair fact (row W2) at the step's named NPC's or item's

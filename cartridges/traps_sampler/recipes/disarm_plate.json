@@ -1,0 +1,55 @@
+{
+  "label": "actions.disarm_plate",
+  "aliases": [
+    "disarm"
+  ],
+  "target": {
+    "kind": "detail",
+    "room": "antechamber",
+    "detail": "flagstones"
+  },
+  "priority": 5,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": [
+        {
+          "op": "fact_compare",
+          "fact": "plate_found",
+          "equals": true
+        },
+        {
+          "op": "fact_compare",
+          "fact": "plate_disarmed",
+          "equals": false
+        }
+      ]
+    }
+  },
+  "check": {
+    "key": "disarm_plate",
+    "kind": "opposed",
+    "skill": "disarm"
+  },
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "plate_disarmed",
+          "value": true
+        }
+      ],
+      "narration": {
+        "actor": "narration.disarm_plate.success"
+      }
+    },
+    "failure": {
+      "sequence": [],
+      "narration": {
+        "actor": "narration.disarm_plate.failure"
+      }
+    }
+  }
+}

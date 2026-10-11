@@ -1,0 +1,34 @@
+{
+  "label": "actions.search_floor",
+  "aliases": [
+    "search"
+  ],
+  "target": {
+    "kind": "detail",
+    "room": "antechamber",
+    "detail": "flagstones"
+  },
+  "priority": 10,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "fact_compare",
+      "fact": "plate_found",
+      "equals": false
+    }
+  },
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "plate_found",
+          "value": true
+        }
+      ],
+      "narration": {
+        "actor": "narration.search_floor"
+      }
+    }
+  }
+}

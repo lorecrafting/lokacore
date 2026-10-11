@@ -1,0 +1,23 @@
+{
+  "keywords": [
+    "wight"
+  ],
+  "short": "npc.wight.short",
+  "room_line": "npc.wight.room",
+  "description": "npc.wight.description",
+  "room": "crypt",
+  "hp": {
+    "minimum": 0,
+    "maximum": 8,
+    "start": 8,
+    "gain": 0
+  },
+  "attack": {
+    "chance": 0,
+    "damage_min": 1,
+    "damage_max": 1
+  },
+  "resistances": {
+    "fire": 50
+  }
+}

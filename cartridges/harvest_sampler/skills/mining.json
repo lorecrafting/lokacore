@@ -1,0 +1,11 @@
+{
+  "label": "skill.mining.label",
+  "requirement": "skill.mining.requirement",
+  "qualification": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": []
+    }
+  }
+}

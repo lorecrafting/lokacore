@@ -1,0 +1,17 @@
+{
+  "duration": 600,
+  "tick_every": 300,
+  "resource": "mv",
+  "modifies": [
+    {
+      "attribute": "str",
+      "modifier": 1
+    }
+  ],
+  "label": "condition.warm",
+  "narration": {
+    "applied": "narration.warm.applied",
+    "tick": "narration.warm.tick",
+    "expired": "narration.warm.expired"
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "label": "actions.pull_a",
+  "aliases": [
+    "pull"
+  ],
+  "target": {
+    "kind": "detail",
+    "room": "hall",
+    "detail": "lever_a"
+  },
+  "priority": 5,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": []
+    }
+  },
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "lever_stage",
+          "value": 1
+        }
+      ],
+      "narration": {
+        "actor": "narration.lever"
+      }
+    }
+  }
+}

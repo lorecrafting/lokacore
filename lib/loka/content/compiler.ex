@@ -97,6 +97,7 @@ defmodule Loka.Content.Compiler do
     do:
       Loka.Content.BellCue.check(manifest, defs, located, v2) ++
         Position.check(manifest, defs) ++
+        Loka.Content.Spells.check(manifest, defs, registry) ++
         Scenes.check(manifest, defs, v2, registry) ++
         Ancestries.check(manifest, defs, located, if(v2, do: elem(v2, 1), else: %{})) ++
         Loka.Content.Floors.check(manifest, defs, located)

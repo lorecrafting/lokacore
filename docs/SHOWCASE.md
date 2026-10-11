@@ -53,6 +53,7 @@ Status `planned (plan N)` means that showcase plan ([plan 1](showcase/hub-and-fi
 | disposition x resistances | social and combat | the Warden's mail (`physical` 100) against the sword | `showcase_combat.test.ts` (combat 10) | built |
 | fuse status x status_expired x schedule cases x disposition | social | `tollhouse` (the forced strongbox carries `word_travels`), `village_green` (the Warden's 13:00 walk), `warden_gate` (engage, the ledger mend) | `showcase_consequence.test.ts` (social 15-18, 21) | built |
 | rumour hops x conditional schedule x dialogue check x codex deduction | social | `shepherd_hut` (burn), `warden_gate` (Wat tells Tam), `village_green` (Tam tells Nell; `press`), `church` ("What the letter carried") | `showcase_consequence.test.ts` (social 19-20) | built |
+| fire: statuses on things x tags x reactions x use-on x cues x barriers (row W22) | body (sandbox off `the_fold`) | `smithy` (torch, kindling, bench, anvil, bucket), `woodstore` behind the burnable `store_door` | `kernel/ts/test/showcase_fire.test.ts` | built |
 | traps x statuses x combat; fear x pack x shout; use-on x fire; puzzles | combat | | | later (after M8) |
 
 ## How a batch adds a district

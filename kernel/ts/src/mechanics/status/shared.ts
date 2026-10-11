@@ -1,7 +1,17 @@
 // status@1 (toolbox rows 1, G3): timed statuses on the player's body, an NPC or an item, one
 // generation per holder/status pair; the tick job is unbound and finds its row by job id, so a
 // stale one completes harmlessly.
-import type { DefinitionRef, DeltaOp, EntityId, JobId, StatusRow } from '../../contracts.gen.ts';
+import type {
+  DefinitionRef,
+  DeltaOp,
+  EntityId,
+  EventPayload,
+  JobId,
+  Key,
+  Resistances,
+  StatusRow,
+  TextKey,
+} from '../../contracts.gen.ts';
 import { add } from '../../foundation/int.ts';
 import { key } from '../../foundation/compose.ts';
 import { type Mint, refString, type World } from '../../runtime/decision.ts';
@@ -84,6 +94,10 @@ export const expire = (
   endStatus(body, status, row, writer_group),
 ];
 
+/** Status reader 2 emits status_applied only while a reaction listens for it (as W25's clock_hour). */
+export const landing = (world: World) =>
+  Object.values(world.cartridge.reactions ?? {}).some((r) => r.on.event === 'status_applied');
+
 /**
  * The NPC or item instance `body` declares `status` immune (row G3); a created NPC or item copies
  * its template's list (runtime/created.ts).
@@ -157,10 +171,77 @@ export const clearStatuses = (
     .filter(({ spec }) => !returning || spec.duration !== 'permanent')
     .map(({ status, row }) => endStatus(body, status, row, writer_group));
 
-/** End each active status on `body` that `cures` lists, once however often listed (Eat, Drink). */
-export function cureOps(world: World, body: EntityId, cures: readonly DefinitionRef[] = []) {
+/**
+ * End each active status on `body` that `cures` lists, once however often listed (Eat, Drink), in
+ * `writer_group` (a reaction's cure joins its holder's group, status reader 3).
+ */
+export function cureOps(
+  world: World,
+  body: EntityId,
+  cures: readonly DefinitionRef[] = [],
+  writer_group = 0,
+) {
   const listed = new Set(cures.map(refString));
   return activeStatuses(world, body)
     .filter(({ status }) => listed.has(refString(status)))
-    .flatMap(({ status, row }) => expire(world, body, status, row, 0));
+    .flatMap(({ status, row }) => expire(world, body, status, row, writer_group));
+}
+
+/** Status reader 5: each resistance entry (a DamageKind or Tag) of `body`'s active statuses, summed. */
+export function statusResistance(world: World, body: EntityId) {
+  const specs = activeStatuses(world, body).map(({ spec }) => spec);
+  return (entry: string) =>
+    specs.reduce((sum, s) => add(sum, s.resistances?.[entry as keyof Resistances] ?? 0), 0);
+}
+
+/**
+ * Status reader 4: whether `body`'s active statuses let it take Command type `command`: none blocks
+ * it and every `allows` list names it. The player's admission (`permits`) and NPC combat turns read it.
+ */
+export function statusAllows(world: World, body: EntityId) {
+  const bars = Object.values(world.cartridge.statuses ?? {}).some((s) => s.blocks || s.allows);
+  const specs = bars ? activeStatuses(world, body).map(({ spec }) => spec) : [];
+  return (command: string) =>
+    specs.every(
+      (s) => !s.blocks?.includes(command as Key) && (s.allows?.includes(command as Key) ?? true),
+    );
+}
+
+/**
+ * A status.apply or (status reader 3) status.cure step of a reaction or (row 29b) a spell on its
+ * holders, once per holder and status in the rule or spell, in the one writer group the holder's
+ * status writes share in this advance (job.ts statusGroup). Only a first application (over no row
+ * or an inactive one) is heard: it emits status_applied (status reader 2) and, on the player's own
+ * body, its applied line; a refresh while active is silent (row W25), and a permanent status (row
+ * W8) opens with no job.
+ */
+export function statusStep(
+  world: World,
+  step: { op: 'status.apply' | 'status.cure'; status: DefinitionRef },
+  on: readonly (EntityId | undefined)[],
+  body: EntityId,
+  group: number,
+  { holders, applied }: { holders: Map<string, number>; applied: Set<string> },
+  mint: Mint,
+  emit: (payload: Extract<EventPayload, { type: 'status_applied' }>) => void,
+) {
+  const apply = step.op === 'status.apply';
+  const out = { ops: [] as DeltaOp[], narration: [] as { key: TextKey }[] };
+  for (const holder of on) {
+    const once = `${holder}|${refString(step.status)}`;
+    if (!holder || applied.has(once)) continue;
+    applied.add(once);
+    const joined = holders.get(holder) ?? group;
+    const ops = apply
+      ? applyStatus(world, holder, step.status, joined, mint)
+      : cureOps(world, holder, [step.status], joined);
+    if (ops.length) holders.set(holder, joined); // a later status job on the holder joins it too
+    out.ops.push(...ops);
+    const first = apply && ops.some((o) => o.op === 'status.transition' && !o.expected?.active);
+    if (first && landing(world))
+      emit({ type: 'status_applied', body_id: holder, status: step.status });
+    const label = specOf(world, step.status)?.narration.applied;
+    if (label && first && holder === body) out.narration.push({ key: label });
+  }
+  return out;
 }

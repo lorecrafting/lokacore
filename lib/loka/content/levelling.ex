@@ -1,5 +1,8 @@
 defmodule Loka.Content.Levelling do
-  @moduledoc "Checks toolbox row 4 world.levelling and experience.grant steps; twin of cartridge_levelling.ts."
+  @moduledoc """
+  Checks toolbox row 4 world.levelling and experience.grant steps, and the kernel_api 1.51 floor
+  of a level_compare policy leaf (row 29a); twin of cartridge_levelling.ts.
+  """
   import Loka.Content.Source, only: [at: 2, diag: 2, diag: 4, ref: 3]
   alias Loka.Content.Refs
 
@@ -21,23 +24,30 @@ defmodule Loka.Content.Levelling do
           {%{"op" => "experience.grant"}, i} <- Enum.with_index(r["apply"]),
           do: at(rel, ["apply", i, "op"])
 
-    api(m, levelling != nil or grants != []) ++
+    api(m, levelling != nil or grants != [], leaf?(defs) or leaf?(settings)) ++
       if(levelling,
         do: declared(levelling, m, defs, text),
         else: Enum.map(grants, &diag("SCHEMA_VIOLATION", &1))
       )
   end
 
-  defp api(m, needed) do
+  defp api(m, needed, leveled) do
     version =
       m["requires"]["kernel_api"]["at_least"]
       |> String.split(".")
       |> Enum.map(&String.to_integer/1)
 
-    if needed and version < [1, 42],
+    if (needed and version < [1, 42]) or (leveled and version < [1, 51]),
       do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
       else: []
   end
+
+  # A level_compare leaf in any policy tree (variety.ex walks visited_count the same way).
+  defp leaf?(%{"op" => "level_compare"}), do: true
+  defp leaf?(v) when is_map(v), do: Enum.any?(Map.values(v), &leaf?/1)
+  defp leaf?(v) when is_list(v), do: Enum.any?(v, &leaf?/1)
+  defp leaf?(v) when is_tuple(v), do: leaf?(Tuple.to_list(v))
+  defp leaf?(_), do: false
 
   defp declared(l, m, defs, text) do
     owner(m) ++ rising(l["thresholds"]) ++ kills(l["kills"] || [], m, defs) ++ line(l, text)

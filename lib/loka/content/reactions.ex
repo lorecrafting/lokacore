@@ -79,17 +79,23 @@ defmodule Loka.Content.Reactions do
     "quest.activate" => 8,
     "quest.resolve" => 12,
     "quest.fail" => 12,
-    "population.suppress" => 35
+    "population.suppress" => 35,
+    "status.cure" => 53,
+    "barrier.set" => 56
   }
 
-  # One diagnostic per rule below its highest floor; the entrant filter needs 1.47 (row W3), spoken 1.48 (G9).
+  # The kernel_api minor each trigger event needs: spoken 1.48 (G9), status_applied 1.53 (status
+  # reader 2, row G3).
+  @events %{"quest_resolved" => 8, "spoken" => 48, "status_applied" => 53}
+
+  # One diagnostic per rule below its highest floor; the entrant filter needs 1.47 (row W3), a
+  # co_present status.apply 1.50 (W21), with a tag 1.56 (W22).
   defp api(r, manifest) do
     floor =
       Enum.max([
-        if(r["on"]["event"] == "quest_resolved", do: 8, else: 0),
-        if(Map.has_key?(r["on"], "npc"), do: 47, else: 0),
-        if(r["on"]["event"] == "spoken", do: 48, else: 0)
-        | Enum.map(r["apply"], &Map.get(@floors, &1["op"], 0))
+        Map.get(@events, r["on"]["event"], 0),
+        if(Map.has_key?(r["on"], "npc"), do: 47, else: 0)
+        | Enum.map(r["apply"], &step_floor/1)
       ])
 
     version =
@@ -101,6 +107,10 @@ defmodule Loka.Content.Reactions do
       do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
       else: []
   end
+
+  defp step_floor(%{"tag" => _}), do: 56
+  defp step_floor(%{"co_present" => _}), do: 50
+  defp step_floor(s), do: Map.get(@floors, s["op"], 0)
 
   defp consequence(rel, {%{"op" => "quest.activate"} = s, i}, on, ctx) do
     path = at(rel, ["apply", i, "op"])
@@ -147,7 +157,25 @@ defmodule Loka.Content.Reactions do
     do:
       reference(rel, ["apply", i], "status", s, ctx.m, ctx.defs) ++
         if(s["item"], do: reference(rel, ["apply", i], "item", s, ctx.m, ctx.defs), else: []) ++
+        if(s["item"] && s["co_present"],
+          do: [
+            diag("SCHEMA_VIOLATION", at(rel, ["apply", i, "item"]), %{"error" => "invalid_value"})
+          ],
+          else: []
+        ) ++
         listener(rel, s, i, ctx)
+
+  # Row W22 (loka-kgd.96): a named barrier resolves; to locked needs a key_item on the named
+  # barrier, or on every barrier carrying the tag (BARRIER_UNREACHABLE_KEY); twin of barrierSet.
+  defp consequence(rel, {%{"op" => "barrier.set"} = s, i}, _, ctx) do
+    owned(at(rel, ["apply", i, "op"]), "barrier_changed", ctx.events) ++
+      if(s["barrier"], do: reference(rel, ["apply", i], "barrier", s, ctx.m, ctx.defs), else: []) ++
+      lockout(rel, s, i, hit(s, ctx))
+  end
+
+  # Status reader 3 (row G3): the subject's status.
+  defp consequence(rel, {%{"op" => "status.cure"} = s, i}, _, ctx),
+    do: reference(rel, ["apply", i], "status", s, ctx.m, ctx.defs)
 
   defp consequence(rel, {s, i}, _, ctx),
     do:
@@ -160,11 +188,35 @@ defmodule Loka.Content.Reactions do
           do: d
         )
 
-  # Row 42: a step names one holder, and a spawn template has no instance to take it.
+  defp hit(s, ctx) do
+    if s["barrier"],
+      do: for({_, _, b} <- [resolve(s["barrier"], "barrier", ctx.m, ctx.defs)], do: b),
+      else: for(b <- exit_barriers(ctx), s["tag"] in (b["tags"] || []), do: b)
+  end
+
+  defp lockout(rel, s, i, hit) do
+    if s["to"] == "locked" and Enum.any?(hit, &(!&1["key_item"])),
+      do: [diag("BARRIER_UNREACHABLE_KEY", at(rel, ["apply", i, "to"]))],
+      else: []
+  end
+
+  # A tag reaches only barriers on exits (setBarrier), never a container's lid.
+  defp exit_barriers(ctx) do
+    rooms = if is_map(ctx.defs["room"]), do: ctx.defs["room"], else: %{}
+
+    for {_, {_, _, r}} <- rooms,
+        {_, e} <- r["exits"] || %{},
+        e["barrier"],
+        {_, _, b} <- [resolve(e["barrier"], "barrier", ctx.m, ctx.defs)],
+        do: b
+  end
+
+  # Row 42: a step names one holder, and a spawn template has no instance to take it; a co_present
+  # step (row W21) names none.
   defp listener(rel, %{"npc" => n} = s, i, ctx) do
     case resolve(n, "npc", ctx.m, ctx.defs) do
       {_, _, npc} ->
-        if npc["spawn_template"] || s["item"],
+        if npc["spawn_template"] || s["item"] || s["co_present"],
           do: [
             diag("SCHEMA_VIOLATION", at(rel, ["apply", i, "npc"]), %{"error" => "invalid_value"})
           ],

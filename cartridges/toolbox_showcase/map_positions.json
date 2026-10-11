@@ -72,6 +72,18 @@
     "z": 0
   },
   {
+    "room": "smithy",
+    "x": 1,
+    "y": 0,
+    "z": 0
+  },
+  {
+    "room": "woodstore",
+    "x": 1,
+    "y": 1,
+    "z": 0
+  },
+  {
     "room": "village_green",
     "x": 0,
     "y": 2,

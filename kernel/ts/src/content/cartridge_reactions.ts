@@ -30,6 +30,8 @@ const FLOORS: Record<string, number> = {
   'quest.resolve': 12,
   'quest.fail': 12,
   'population.suppress': 35,
+  'status.cure': 53, // status reader 3 (row G3)
+  'barrier.set': 56, // row W22 (loka-kgd.96)
 };
 
 const each = (c: Obj): [Obj, string][] =>
@@ -44,7 +46,7 @@ export const uses = (c: Obj) =>
     ['definition', 'reaction', at],
     ['event', r.on.event, `${at}.on.event`],
     ...r.apply.flatMap((s: Obj, i: number) =>
-      s.op === 'population.suppress' || s.op === 'experience.grant'
+      s.op === 'population.suppress' || s.op === 'experience.grant' || s.op === 'status.cure'
         ? []
         : [
             [
@@ -53,7 +55,9 @@ export const uses = (c: Obj) =>
                 ? 'quest_activated'
                 : s.op === 'quest.resolve'
                   ? 'quest_resolved'
-                  : 'fact_changed',
+                  : s.op === 'barrier.set'
+                    ? 'barrier_changed'
+                    : 'fact_changed',
               `${at}.apply[${i}].op`,
             ],
           ],
@@ -68,7 +72,9 @@ export function reactions(c: Obj, { named, typedValue }: Checks): Diagnostic[] {
     const floor = Math.max(
       r.on.event === 'quest_resolved' ? 8 : 0,
       r.on.event === 'spoken' ? 48 : r.on.npc ? 47 : 0, // speech (G9), the entrant filter (W3)
-      ...r.apply.map((s: Obj) => FLOORS[s.op] ?? 0),
+      r.on.event === 'status_applied' ? 53 : 0, // status reader 2 (row G3)
+      // co_present: row W21; its tag: row W22
+      ...r.apply.map((s: Obj) => (s.tag ? 56 : s.co_present ? 50 : (FLOORS[s.op] ?? 0))),
     );
     if (floor && (major < 1 || (major === 1 && minor < floor)))
       out.push(
@@ -95,8 +101,10 @@ export function reactions(c: Obj, { named, typedValue }: Checks): Diagnostic[] {
           out.push(diag('SCHEMA_VIOLATION', `${at}.apply[${i}].plan`));
         if (r.on.event !== 'fact_changed')
           out.push(diag('OUTCOME_MISMATCH', `${at}.apply[${i}].op`));
-      } else if (s.op !== 'status.apply' && s.op !== 'experience.grant') {
-        // status.apply, experience.grant, fact.adjust's int: with their declarations (cartridge_standing.ts).
+      } else if (s.op === 'barrier.set') {
+        out.push(...barrierSet(c, s, `${at}.apply[${i}]`, named));
+      } else if (!['status.apply', 'status.cure', 'experience.grant'].includes(s.op)) {
+        // status steps, experience.grant, fact.adjust's int: with their declarations (cartridge_standing.ts).
         named(s.fact, 'fact', `${at}.apply[${i}].fact`);
         if (s.op !== 'fact.adjust') typedValue(s.fact, s.value, `${at}.apply[${i}].value`);
         for (const f of ['npc', 'item']) if (s[f]) named(s[f], f, `${at}.apply[${i}].${f}`);
@@ -104,4 +112,20 @@ export function reactions(c: Obj, { named, typedValue }: Checks): Diagnostic[] {
     });
   }
   return out;
+}
+
+// Row W22 (loka-kgd.96): a named barrier resolves; to locked needs a key_item on the named barrier,
+// or on every barrier carrying the tag, else no key could ever unlock it (BARRIER_UNREACHABLE_KEY).
+function barrierSet(c: Obj, s: Obj, at: string, named: Checks['named']): Diagnostic[] {
+  if (s.barrier) named(s.barrier, 'barrier', `${at}.barrier`);
+  // A tag reaches only barriers on exits (setBarrier), never a container's lid.
+  const exits = Object.values((c.rooms ?? {}) as Obj).flatMap((r) => Object.values(r.exits as Obj));
+  const hit = s.barrier
+    ? [c.barriers?.[refString(s.barrier)]]
+    : exits
+        .map((e) => e.barrier && c.barriers?.[refString(e.barrier)])
+        .filter((b) => b?.tags?.includes(s.tag));
+  return s.to === 'locked' && hit.some((b) => b && !b.key_item)
+    ? [diag('BARRIER_UNREACHABLE_KEY', `${at}.to`)]
+    : [];
 }

@@ -7,10 +7,12 @@ import type {
 } from '../../contracts.gen.ts';
 import { bodyOf, refString, type Mint, type World } from '../../runtime/decision.ts';
 import { living } from '../death/shared.ts';
+import { add, divide, mul } from '../../foundation/int.ts';
 import { standing } from '../position/shared.ts';
 import { running } from '../scene/shared.ts';
 import { key } from '../../foundation/compose.ts';
 import { suppressed } from '../population/shared.ts';
+import { statusResistance } from '../status/shared.ts';
 
 /** One finite current encounter, shared by admission, escape, due jobs and projection. */
 export function engaged(world: World, body: EntityId) {
@@ -120,3 +122,25 @@ export function participantsPresent(world: World, row: EncounterRow) {
 }
 
 export const encounterId = (mint: Mint) => mint() as EncounterId;
+
+/**
+ * Toolbox row G2: `damage` on `target` after its resistances (its own and, status reader 5, its
+ * active statuses'), the sum of their entries for each kind or material clamped to -100..100,
+ * rounded down (a combat hit; row 29b a spell's damage).
+ */
+export function resisted(
+  world: World,
+  target: EntityId,
+  kinds: readonly (string | undefined)[],
+  damage: number,
+) {
+  const npc = world.entities[target];
+  const resists = (npc?.kind === 'npc' && npc.resistances) || {};
+  const held = statusResistance(world, target);
+  const sum = kinds.reduce(
+    (s, k) => (k ? add(add(s, resists[k as keyof typeof resists] ?? 0), held(k)) : s),
+    0,
+  );
+  if (!sum) return damage;
+  return divide(mul(damage, 100 - Math.min(100, Math.max(-100, sum))), 100)[0];
+}

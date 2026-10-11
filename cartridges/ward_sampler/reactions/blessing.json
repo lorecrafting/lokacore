@@ -1,0 +1,16 @@
+{
+  "on": {
+    "event": "entity_entered_room",
+    "room": "shrine"
+  },
+  "apply": [
+    {
+      "op": "status.apply",
+      "status": "warded"
+    },
+    {
+      "op": "status.apply",
+      "status": "hushed"
+    }
+  ]
+}

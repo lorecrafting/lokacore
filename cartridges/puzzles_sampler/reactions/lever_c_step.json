@@ -1,0 +1,21 @@
+{
+  "on": {
+    "event": "action_completed",
+    "action": "pull_c"
+  },
+  "when": {
+    "policy_version": 1,
+    "root": {
+      "op": "fact_compare",
+      "fact": "lever_stage",
+      "equals": 2
+    }
+  },
+  "apply": [
+    {
+      "op": "fact.assign",
+      "fact": "lever_stage",
+      "value": 3
+    }
+  ]
+}

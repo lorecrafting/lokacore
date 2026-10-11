@@ -552,7 +552,7 @@
           "additionalProperties": false
         },
         {
-          "description": "Perform a cartridge's ActionRecipe by its action key (06 §20; action.schema.json ActionRecipe). The authority re-resolves the key in the actor's ActionSet; target_id, when given, is the id target resolution returned for the words after the verb and must be the recipe's target.",
+          "description": "Perform a cartridge's ActionRecipe by its action key (06 §20; action.schema.json ActionRecipe). The authority re-resolves the key in the actor's ActionSet; target_id, when given, is the id target resolution returned for the words after the verb and must be the recipe's target. A use recipe (toolbox row G4) needs both target_id, the item used on, and item_id, the held tool.",
           "type": "object",
           "properties": {
             "type": {
@@ -565,6 +565,9 @@
               "$ref": "action.schema.json#/$defs/Key"
             },
             "target_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "item_id": {
               "$ref": "identity.schema.json#/$defs/EntityId"
             }
           },
@@ -605,6 +608,23 @@
           "properties": {
             "type": {
               "const": "say"
+            },
+            "actor_id": {
+              "$ref": "identity.schema.json#/$defs/CharacterId"
+            },
+            "word": {
+              "$ref": "action.schema.json#/$defs/Word"
+            }
+          },
+          "required": ["type", "actor_id", "word"],
+          "additionalProperties": false
+        },
+        {
+          "description": "Cast the spell whose word this is (action_recipe@1; toolbox row 29a): the word, case-folded, names a spell recipe (action.schema.json RecipeTarget spell), performed like a perform of it. An unknown word and a spell whose policy fails are refused alike, invalid_state; the word never reaches narration.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "cast"
             },
             "actor_id": {
               "$ref": "identity.schema.json#/$defs/CharacterId"

@@ -1,0 +1,24 @@
+{
+  "keywords": [
+    "bucket"
+  ],
+  "short": "item.smithy_bucket.short",
+  "room_line": "item.smithy_bucket.room",
+  "description": "item.smithy_bucket.description",
+  "mass_grams": 500,
+  "location": {
+    "in": "room",
+    "room": "smithy"
+  },
+  "tags": [
+    "liquid_holding"
+  ],
+  "vessel": {
+    "capacity": 4,
+    "unit_label": "liquid.units",
+    "initial": {
+      "kind": "water",
+      "quantity": 4
+    }
+  }
+}

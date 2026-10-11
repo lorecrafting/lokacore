@@ -1,0 +1,31 @@
+{
+  "title": "room.mine.title",
+  "description": "room.mine.description",
+  "exits": {},
+  "details": {
+    "seam": {
+      "aliases": [
+        "seam"
+      ],
+      "description": "detail.seam.description",
+      "harvest": {
+        "items": [
+          "ore_01",
+          "ore_02"
+        ],
+        "label": "action.mine",
+        "narration": "narration.mine",
+        "title": "detail.seam.title",
+        "tool": {
+          "tag": "sharp"
+        },
+        "careful": {
+          "skill": "mining",
+          "count": 2,
+          "action": "mine_carefully",
+          "narration": "narration.mine_carefully"
+        }
+      }
+    }
+  }
+}

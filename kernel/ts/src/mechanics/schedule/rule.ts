@@ -36,7 +36,7 @@ import { runStatus } from '../status/job.ts';
 import { runSight } from '../population/behavior.ts';
 
 // `at`: the drain's hour for this run; a later listed hour the advance crosses is a sub-step of the
-// row's one run_job, which its first hour completed (scheduledJob, loka-qi0r).
+// row's one run_job, which its first hour completed (scheduledJob, loka-qi0r; runPopulation, loka-6ql4).
 export const decideAt = (
   world: World,
   command: Parameters<Rule<'schedule'>>[1],
@@ -66,7 +66,7 @@ export const decideAt = (
 
     if (row.job.kind === CLOCK_JOB) return runClock(world, command, payload.job_id, row, mint);
     if (row.job.kind === 'population')
-      return runPopulation(world, command, payload.job_id, row, mint);
+      return runPopulation(world, command, payload.job_id, row, mint, at);
     return scheduledJob(world, command, payload.job_id, row, mint, steps, at ?? row.due_time);
   }
   return advance(world, payload);

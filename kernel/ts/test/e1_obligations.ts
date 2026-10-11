@@ -287,7 +287,7 @@ export function witnessedObligations(
       p.actor_id,
       recipe.policy.root,
       `${base}/policy/root`,
-      detailOf(before, recipe.target),
+      recipe.target.kind === 'detail' ? detailOf(before, recipe.target) : p.target_id,
     ),
   ];
   const branch =
@@ -420,10 +420,11 @@ export function reactionWitnesses(before: World, after: World, decision: Decisio
           same(o.scope, scopeOf(before, actor, step.fact)) &&
           (step.op === 'fact.adjust' || o.value === step.value),
       );
-    if (step.op === 'status.apply')
+    if (step.op === 'status.apply' || step.op === 'status.cure')
       return ops.find((o) => o.op === 'status.transition' && same(o.status, step.status));
     if (step.op === 'experience.grant')
       return ops.find((o) => o.op === 'levelling.set' && o.character_id === actor);
+    if (step.op === 'barrier.set') return undefined; // row W22: no reaction witness yet
     const prior = before.state.population_plans?.[key(step.plan)];
     const next = after.state.population_plans?.[key(step.plan)];
     return ops.find(

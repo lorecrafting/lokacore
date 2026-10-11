@@ -1,5 +1,5 @@
 // Toolbox row 4 experience and levelling in the loaded artifact; twin of Loka.Content.Levelling.
-import { diag, step, type Checks, type Obj } from './cartridge_refs.ts';
+import { diag, nodes, step, type Checks, type Obj } from './cartridge_refs.ts';
 import { apiCmp } from './cartridge_installed.ts';
 import type { Diagnostic } from '../contracts.gen.ts';
 
@@ -12,7 +12,12 @@ export function levelling(c: Obj, { named, text }: Checks): Diagnostic[] {
   );
   const out: Diagnostic[] = [];
   const bad = (at: string) => out.push(diag('SCHEMA_VIOLATION', at, { error: 'invalid_value' }));
-  if ((l || grants.length) && apiCmp(c.manifest.requires.kernel_api.at_least, '1.42') < 0)
+  const api = (floor: string) => apiCmp(c.manifest.requires.kernel_api.at_least, floor) < 0;
+  // Row 29a: a level_compare policy leaf needs 1.51 (one diagnostic with 1.42's).
+  if (
+    ((l || grants.length) && api('1.42')) ||
+    (nodes(c).some(([p]) => p.op === 'level_compare') && api('1.51'))
+  )
     out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
   if (!l) {
     grants.forEach(bad);

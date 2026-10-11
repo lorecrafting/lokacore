@@ -1,6 +1,7 @@
 // size: allow 330, food, water, practical skills and local Knock share the composed view list
 import { running as modalScene } from '../mechanics/scene/shared.ts';
 import { foodActions } from './food.ts';
+import { useActions } from './use.ts';
 import { bandageActions } from './bleed.ts';
 import { liquidActions } from './liquid.ts';
 import { readActions } from './read_actions.ts';
@@ -18,7 +19,7 @@ import type {
   Key,
   TargetSpec,
 } from '../contracts.gen.ts';
-import { admission, detailOf, refusal, resolved, type Offered } from '../commands/actions.ts';
+import { admission, detailAt, refusal, resolved, type Offered } from '../commands/actions.ts';
 import { bodyOf, type Steps, type World } from '../runtime/decision.ts';
 import { MODAL, speaks, talkRefused } from '../mechanics/dialogue/shared.ts';
 import { holds } from '../mechanics/policy.ts';
@@ -33,7 +34,8 @@ import { combatOffered } from './combat.ts';
 import * as expedition from '../mechanics/expedition/shared.ts';
 import { reach } from '../mechanics/lookups.ts';
 
-// Shared query context projects exact offers in priority/key order. Recipes bind their detail;
+// Shared query context projects exact offers in priority/key order. Recipes bind their detail (a
+// use recipe, row G4, lists only its pairs on the held tool, view/use.ts);
 // door/equipment/light/food helpers use the same admission as their command rules.
 // An actor's current position is not offered again.
 const HIDDEN = [
@@ -57,17 +59,17 @@ export function lists(world: World, actor: CharacterId, steps = { n: 0 }) {
   const current = Object.keys(position.VERBS).find((v) => position.VERBS[v]![0] === at);
   const body = bodyOf(world, actor);
   const take = takeAdmission(world, body, steps);
-  const here = (a: Offered) =>
+  const here = (a: Offered, d = detailAt(world, a)) =>
     !a.recipe ||
-    (world.details[detailOf(world, a.recipe.target)].room === world.state.containers[body!] &&
-      light.visible(world, actor, detailOf(world, a.recipe.target), steps));
+    (d !== undefined &&
+      world.details[d].room === world.state.containers[body!] &&
+      light.visible(world, actor, d, steps));
   const hidden = (a: Offered) =>
     HIDDEN.includes(a.command) || (a.command === 'continue' && !modalScene(world, actor));
   const listed = (fits: (a: Offered) => boolean, id?: string, scope?: string) =>
     Object.values(set)
       .filter((a) => fits(a) && here(a) && !hidden(a))
-      .filter((a) => movable(world, a, id))
-      .filter((a) => combatOffered(world, actor, body, a, id))
+      .filter((a) => movable(world, a, id) && combatOffered(world, actor, body, a, id))
       .filter((a) => a.speaker === undefined || a.speaker === id)
       .sort((a, b) => b.priority - a.priority || cmp(a.key, b.key))
       .flatMap((a) => {
@@ -99,12 +101,14 @@ export function lists(world: World, actor: CharacterId, steps = { n: 0 }) {
       listed((a) => entityOffered(world, actor, a, scope, id, nested, steps), id, scope).concat(
         liquid(id),
         foodActions(world, actor, id, set, steps),
+        useActions(world, actor, id, set, steps),
         bandageActions(world, actor, id, set, steps),
         readActions(world, actor, set, steps, id as EntityId),
       ),
     worn: (id: string) =>
       listed((a) => entityOffered(world, actor, a, 'worn', id, false, steps), id).concat(
         liquid(id),
+        useActions(world, actor, id, set, steps),
       ),
     door: (direction: Key) => listed((a) => door(a) && usable(world, actor, a, { direction })),
   };
@@ -180,7 +184,7 @@ function advertise(
     ...(patch && { target_ids: [id as EntityId] }),
   };
   const admitted = a.recipe && admission(world, a.recipe, actor, bodyOf(world, actor)!);
-  const target = (a.recipe ? detailOf(world, a.recipe.target) : id) as EntityId | undefined;
+  const target = (a.recipe ? detailAt(world, a) : id) as EntityId | undefined;
   const gathered = harvestOffered(world, actor, a, target, steps);
   const excursion = expedition.actionRefused(world, actor, a, target);
   const talk =
@@ -292,12 +296,7 @@ function noticeOffer(world: World, a: Offered, id: string) {
     (a.command === 'harvest' &&
       !!world.details[id]?.harvest &&
       (!a.input.includes('method') || world.details[id]?.harvest?.careful?.action === a.key)) ||
-    !!(
-      a.recipe &&
-      (world.details[detailOf(world, a.recipe.target)]?.readable ||
-        world.details[detailOf(world, a.recipe.target)]?.perception) &&
-      detailOf(world, a.recipe.target) === id
-    )
+    (detailAt(world, a) === id && !!(world.details[id]?.readable || world.details[id]?.perception))
   );
 }
 
@@ -323,6 +322,7 @@ function targetsFor(world: World, actor: CharacterId, a: Offered, id?: string) {
 }
 
 const detailRecipe = (world: World, a: Offered) => {
-  const detail = a.recipe && world.details[detailOf(world, a.recipe.target)];
+  const d = detailAt(world, a);
+  const detail = d !== undefined && world.details[d];
   return !!detail && !!(detail.readable || detail.perception);
 };

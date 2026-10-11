@@ -1,0 +1,9 @@
+{
+  "title": "room.tower.title",
+  "description": "room.tower.description",
+  "exits": {},
+  "details": {
+    "hearth": { "aliases": ["hearth"], "description": "detail.hearth" },
+    "sigil": { "aliases": ["sigil"], "description": "detail.sigil" }
+  }
+}

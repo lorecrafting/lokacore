@@ -1,0 +1,35 @@
+{
+  "label": "actions.oil",
+  "aliases": [
+    "oil"
+  ],
+  "target": {
+    "kind": "use",
+    "tool": {
+      "liquid": "oil"
+    }
+  },
+  "priority": 5,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "has_tag",
+      "subject": "target",
+      "tag": "metal"
+    }
+  },
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "oiled",
+          "value": true
+        }
+      ],
+      "narration": {
+        "actor": "narration.oil"
+      }
+    }
+  }
+}

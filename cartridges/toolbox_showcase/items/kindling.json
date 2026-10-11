@@ -1,0 +1,17 @@
+{
+  "keywords": [
+    "kindling"
+  ],
+  "short": "item.kindling.short",
+  "room_line": "item.kindling.room",
+  "description": "item.kindling.description",
+  "mass_grams": 1000,
+  "location": {
+    "in": "room",
+    "room": "smithy"
+  },
+  "tags": [
+    "wooden",
+    "burnable"
+  ]
+}

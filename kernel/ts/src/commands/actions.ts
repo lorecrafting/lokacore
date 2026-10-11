@@ -19,6 +19,7 @@ import { key, same } from '../foundation/compose.ts';
 import { bodyOf, refString, type Steps, type World } from '../runtime/decision.ts';
 import { questOf } from '../mechanics/lookups.ts';
 import { modal, pending, talks } from '../mechanics/dialogue/shared.ts';
+import { permits } from '../mechanics/status/permits.ts';
 import { ALWAYS } from '../mechanics/policy.ts';
 import { sub } from '../foundation/int.ts';
 import { pay } from '../mechanics/resource.ts';
@@ -30,6 +31,7 @@ import { engaged } from '../mechanics/combat/shared.ts';
 import { eligible } from '../mechanics/combat/behavior.ts';
 import { choice as characterChoice } from '../mechanics/attributes/shared.ts';
 import { levelling } from '../mechanics/levelling/shared.ts';
+import { castAdmission, useAdmission } from '../mechanics/action_recipe/shared.ts';
 
 /**
  * One action of a set: what the GameView advertises, the Command type it resolves to, the
@@ -95,6 +97,10 @@ function engine(world: World): ActionSet {
       )
       .filter(([verb]) => verb !== 'choose_ancestry' || needsAncestry(world, world.character))
       .filter(([verb]) => verb !== 'raise_attribute' || points(world, world.character))
+      // Row 29a: cast only in a cartridge with a spell.
+      .filter(
+        ([verb]) => verb !== 'cast' || allRecipes(world).some((r) => r.target.kind === 'spell'),
+      )
       // Row G9: no speech while a conversation is open (the speech rule refuses it too).
       .filter(([verb]) => !SPEECH.includes(verb) || !pending(world, world.character))
       .map(([verb, [target, input]]): [string, Offered] => {
@@ -112,9 +118,13 @@ function engine(world: World): ActionSet {
 // compiler and the loader reject a recipe, quest or dialogue whose key is an action's, a recipe's,
 // a quest's or a registered command's (DUPLICATE_DEFINITION), so no key has two definitions here.
 function cartridge(world: World, actor: CharacterId): ActionSet {
-  const recipes = Object.values(world.cartridge.recipes ?? {}).map((recipe): [string, Offered] => {
+  const recipes = keyed(world).map((recipe): [string, Offered] => {
     const { key, label, priority, policy } = recipe;
-    const target = { kind: 'none' } as const;
+    // A use recipe (row G4) is listed on the held tool, paired with each target (view/use.ts).
+    const target: TargetSpec =
+      recipe.target.kind === 'use'
+        ? { kind: 'entity', scopes: ['room_contents', 'inventory'] }
+        : { kind: 'none' };
     const command = 'perform' as Key;
     return [key, { key, label, target, input: [], priority, policy, command, recipe }];
   });
@@ -157,38 +167,44 @@ export function composed(world: World, actor: CharacterId): ActionSet {
   return { ...set, ...modal(world, actor) };
 }
 
-const fighting = (world: World, actor: CharacterId) => {
-  const body = bodyOf(world, actor);
-  return body && engaged(world, body);
-};
+const fighting = (world: World, actor: CharacterId, body = bodyOf(world, actor)) =>
+  body && engaged(world, body);
 
 /** Final actor restriction; only internal escape policy reads the pre-combat composed set. */
 export function resolved(world: World, actor: CharacterId): ActionSet {
   const set = composed(world, actor);
   const fight = fighting(world, actor);
   // Toolbox row 6a: an opted-in roster fight keeps Attack to choose among the members still here
-  // (the row's roster is pruned only at round end, rows 6a/6c).
+  // (the row's roster is pruned only at round end, rows 6a/6c); row 29b keeps cast (a fire bolt).
   const choosing =
     !!world.cartridge.world?.combat?.target_choice &&
     (fight?.row.active_ids?.filter((id) => eligible(world, fight.row, id)).length ?? 0) > 1;
-  return fight
-    ? Object.fromEntries(
-        Object.entries(set).filter(
-          ([, a]) =>
-            ['flee', 'stand', 'look', 'scan', 'bandage'].includes(a.command) ||
-            (a.command === 'attack' && choosing),
-        ),
-      )
-    : set;
+  const kept = (c: string) =>
+    !fight ||
+    ['flee', 'stand', 'look', 'scan', 'bandage', 'cast'].includes(c) ||
+    (c === 'attack' && choosing);
+  const free = permits(world, bodyOf(world, actor)); // status reader 4
+  return Object.fromEntries(
+    Object.entries(set).filter(([, a]) => kept(a.command) && free(a.command)),
+  );
 }
 
+// Status reader 4: a type the composed set offers but the actor's statuses bar.
+const barred = (world: World, actor: CharacterId, type: string) =>
+  !permits(world, bodyOf(world, actor))(type) &&
+  Object.values(composed(world, actor)).some((a) => a.command === type);
+
 /** The target id of a recipe's detail (the loader checks it exists). */
-export const detailOf = (world: World, t: RecipeTarget): EntityId =>
+export const detailOf = (world: World, t: Extract<RecipeTarget, { kind: 'detail' }>): EntityId =>
   Object.keys(world.details).find(
     (id) =>
       world.details[id].room === world.roomIds[refString(t.room)] &&
       world.details[id].key === t.detail,
   ) as EntityId;
+
+/** The detail an offered recipe acts on; none for another action or a use recipe (row G4). */
+export const detailAt = (world: World, a: Offered) =>
+  a.recipe?.target.kind === 'detail' ? detailOf(world, a.recipe.target) : undefined;
 
 /**
  * Why `actor` may not issue `payload` now, if it may not (04 §19; ACT-09): no action of its set
@@ -230,18 +246,22 @@ export function refusal(
   if (!matching.length)
     return unknown
       ? 'not_found'
-      : fighting(world, actor)
+      : fighting(world, actor) || barred(world, actor, payload.type)
         ? 'invalid_state'
         : 'unsupported_capability';
-  const target = (a: Offered) =>
-    a.recipe ? detailOf(world, a.recipe.target) : primaryTarget(payload);
-  const ok = (a: Offered) =>
-    (!a.recipe || visible(world, actor, detailOf(world, a.recipe.target), steps)) &&
-    holds(world, actor, a.policy.root, { target: target(a), steps });
-  return matching.some(ok) ? undefined : 'invalid_state';
+  const used =
+    useAdmission(world, matching[0]!.recipe, payload, steps) ?? // row G4
+    castAdmission(world, payload, steps); // row 29a
+  const ok = (a: Offered, d = detailAt(world, a)) =>
+    (d === undefined || visible(world, actor, d, steps)) &&
+    holds(world, actor, a.policy.root, { target: d ?? primaryTarget(payload), steps });
+  return used || (matching.some((a) => ok(a)) ? undefined : 'invalid_state');
 }
 
-const recipeKeys = (world: World) => Object.values(world.cartridge.recipes ?? {}).map((r) => r.key);
+// A spell (row 29a) is cast by its word, never offered or performed by its key.
+const allRecipes = (world: World) => Object.values(world.cartridge.recipes ?? {});
+const keyed = (world: World) => allRecipes(world).filter((r) => r.target.kind !== 'spell');
+const recipeKeys = (world: World) => keyed(world).map((r) => r.key);
 
 /**
  * A recipe's admission for `actor_id` acting through `body`, after its policy and target, shared

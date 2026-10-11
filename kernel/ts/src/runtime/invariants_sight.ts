@@ -1,15 +1,11 @@
 import { key, same } from '../foundation/compose.ts';
 type Any = any;
 
-/** Independent prior/result check for the sole nonmonotonic writer-group continuation. */
+/** Independent prior/result check for the sole nonmonotonic writer-group continuation: after a
+ * sight completion, a write to that member's encounter (as listed before or after) in a group older
+ * than the sight's must be the handoff pair. Other older-group joins follow ordinary conflicts. */
 export function sightHandoffHolds(state: Any, ops: Any[], result: Any): boolean {
-  if (!ops.some((op) => op.op === 'job.complete' && state.jobs?.[op.job_id]?.sight)) return true;
-  let high = -1;
-  const reused: { row: Any; at: number }[] = [];
-  ops.forEach((row, at) => {
-    if (row.writer_group < high) reused.push({ row, at });
-    high = Math.max(high, row.writer_group);
-  });
+  const reused = olderAfterSight(state, ops, result);
   if (!reused.length) return true;
   if (reused.length !== 2) return false;
   const [closing, cancelling] = reused;
@@ -36,6 +32,29 @@ export function sightHandoffHolds(state: Any, ops: Any[], result: Any): boolean 
         row.writer_group !== close.writer_group &&
         (row.encounter_id === close.encounter_id || row.job_id === close.job_id),
     );
+}
+
+/** Each write to a sighted member's encounter (listed before or after) after its sight completion,
+ * in a group older than the sight's. */
+function olderAfterSight(state: Any, ops: Any[], result: Any): { row: Any; at: number }[] {
+  const lists = (id: unknown, member: string) =>
+    [state.encounters?.[id as string], result?.encounters?.[id as string]].some(
+      (row) => row && (row.npc_id === member || (row.active_ids ?? []).includes(member)),
+    );
+  const reused: { row: Any; at: number }[] = [];
+  ops.forEach((row, at) => {
+    const older = ops
+      .slice(0, at)
+      .some(
+        (done) =>
+          done.op === 'job.complete' &&
+          done.writer_group > row.writer_group &&
+          state.jobs?.[done.job_id]?.sight &&
+          lists(row.encounter_id, state.jobs[done.job_id].sight.member_id),
+      );
+    if (older) reused.push({ row, at });
+  });
+  return reused;
 }
 
 function handoffPair(close: Any, cancel: Any, closeAt: number, cancelAt: number): boolean {

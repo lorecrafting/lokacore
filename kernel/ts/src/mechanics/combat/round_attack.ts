@@ -13,7 +13,7 @@ import type {
 } from '../../contracts.gen.ts';
 import { refString, type Mint, type World } from '../../runtime/decision.ts';
 import { apply } from '../../runtime/apply.ts';
-import { add, divide, mul, saturate } from '../../foundation/int.ts';
+import { add, mul, saturate } from '../../foundation/int.ts';
 import { KernelError } from '../../foundation/error.ts';
 import { uniformCounted } from '../../foundation/rng.ts';
 import { adjust, level, recoveryAdjustments, resourceRef } from '../resource.ts';
@@ -23,7 +23,8 @@ import { clearBleed, currentBleed, wound } from '../bleed/shared.ts';
 import { fact, positionOf, standing } from '../position/shared.ts';
 import { assigned } from '../fact.ts';
 import type { CombatEvent, Round } from './round.ts';
-import { ally } from './shared.ts';
+import { ally, resisted } from './shared.ts';
+import { statusAllows } from '../status/shared.ts';
 
 export function prefix(world: World, ops: readonly DeltaOp[], due = world.state.clock): World {
   const during =
@@ -57,7 +58,7 @@ export function attack(
 ) {
   const player = attacker_id === row.body_id;
   const foe = !player && !ally(world, attacker_id);
-  if (!player && !foe && !allyFits(r)) return;
+  if ((!player && !foe && !allyFits(r)) || !statusAllows(world, attacker_id)('attack')) return;
   const target_id = foe ? row.body_id : row.npc_id;
   const settings = world.cartridge.world!.combat!;
   const profile = attackProfile(world, row, attacker_id, player, r);
@@ -97,18 +98,12 @@ function damageRoll(r: Round, profile: AttackProfile) {
 
 // Toolbox row G2: a critical hit is the hit draw below crit.chance (no extra draw: an NPC attack
 // may already spend hit, dodge, block and damage of the round's 8). Order: the crit multiplier,
-// then the target's resistances; attack() then applies the sleep multiplier and the HP cap.
+// then the target's resistances, its NPC definition's and (status reader 5) its active statuses'
+// summed before the one clamp; attack() then applies the sleep multiplier and the HP cap.
 function dealt(world: World, target: EntityId, profile: Profile, roll: number, damage: number) {
   const crit =
     profile.crit && roll < profile.crit.chance ? mul(damage, profile.crit.multiplier) : damage;
-  const npc = world.entities[target];
-  const resists = npc?.kind === 'npc' ? npc.resistances : undefined;
-  if (!resists) return crit;
-  const sum = [profile.kind, ...(profile.tags ?? [])].reduce(
-    (s, k) => add(s, (k && resists[k]) || 0),
-    0,
-  );
-  return divide(mul(crit, 100 - Math.min(100, Math.max(-100, sum))), 100)[0];
+  return resisted(world, target, [profile.kind, ...(profile.tags ?? [])], crit);
 }
 
 function attackEvent(

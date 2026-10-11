@@ -1,0 +1,43 @@
+{
+  "title": "room.antechamber.title",
+  "description": "room.antechamber.description",
+  "exits": {
+    "north": {
+      "to": "vault"
+    }
+  },
+  "details": {
+    "flagstones": {
+      "aliases": [
+        "flagstones",
+        "plate"
+      ],
+      "description": "detail.flagstones",
+      "rating": 1,
+      "variants": [
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "fact_compare",
+              "fact": "plate_disarmed",
+              "equals": true
+            }
+          },
+          "description": "detail.flagstones.disarmed"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "fact_compare",
+              "fact": "plate_found",
+              "equals": true
+            }
+          },
+          "description": "detail.flagstones.found"
+        }
+      ]
+    }
+  }
+}

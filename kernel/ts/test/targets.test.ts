@@ -225,6 +225,7 @@ test('a poisoned second goblin ticks and takes the player and guard blows in one
   const poison = { ...C, kind: 'status', key: 'poison' } as never;
   const statuses = {
     'targets_sampler@0.0.1:status/poison': {
+      key: 'poison',
       duration: 300,
       tick_every: 150,
       resource: resourceRef(w, 'hp'),
@@ -249,6 +250,36 @@ test('a poisoned second goblin ticks and takes the player and guard blows in one
   const after = round(poisoned.world);
   // 6 HP: at +150 the tick takes 1 and the round the player's 2 and the guard's 1.
   assert.deepEqual([hp(after, a), hp(after, b)], [6, 2]);
+});
+
+// loka-x2gv (b). Breaks: the player's body and the goblin each tick poison in their own writer
+// group before the round (their job ids sort first); the round, which writes both HP pools, keeps
+// the first group (status/job.ts statusGroup), so the goblin's HP conflicts in the wait.
+test('poison ticks on the body and on the goblin in two groups, then one round, commit', () => {
+  const [w, a] = engaged();
+  const poison = { ...C, kind: 'status', key: 'poison' } as never;
+  const spec = {
+    key: 'poison',
+    duration: 300,
+    tick_every: 150,
+    resource: resourceRef(w, 'hp'),
+    per_tick: -1,
+    label: 'combat.goblin_targeted',
+    narration: { applied: 'combat.npc_hit', tick: 'combat.npc_hit', expired: 'combat.npc_hit' },
+  };
+  const statuses = { 'targets_sampler@0.0.1:status/poison': spec };
+  const moved = { ...w, cartridge: { ...w.cartridge, statuses } as never } as World;
+  const job = (n: number) => () => `00000000-6666-4666-8666-00000000000${n}` as never;
+  const ops = [
+    ...applyStatus(moved, moved.body, poison, 0, job(1)),
+    ...applyStatus(moved, a as never, poison, 0, job(2)),
+  ];
+  const poisoned = apply(moved, ops, false);
+  assert.ok('world' in poisoned, JSON.stringify(poisoned));
+  const before = hp(poisoned.world, poisoned.world.body)!;
+  const after = round(poisoned.world);
+  // Each tick takes 1; the player's sure blow takes 2 and the opponent's turn (one a round) 1.
+  assert.deepEqual([hp(after, a), hp(after, after.body)], [3, before - 2]);
 });
 
 // Toolbox row 6b. Breaks: the guard's turn is lost when the player's blow kills the opponent
@@ -340,4 +371,55 @@ test("the player's shield and sleep touch only the raider's blow, never the guar
     (w) => positioned(w, 'sleeping'),
   );
   assert.deepEqual(asleep, [2, 10, true]);
+});
+
+// Status reader 4 (loka-kgd.98). Breaks: the ally's blow skips the attack bar (a stunned guard still
+// hits the raider for 1 and narrates combat.ally_hit).
+test('a stunned guard takes no blow beside the player', () => {
+  const K = 'targets_sampler@0.0.1:';
+  const yard = (stunned: boolean) => {
+    const c = structuredClone(content) as any;
+    c.npcs[`${K}npc/raider`].attack.chance = 0;
+    n = 0;
+    let w = newWorld(c, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, [1, 2, 3, 4]);
+    const raider = w.entityIds[`${K}npc/raider`]!;
+    w = ok(
+      play(ok(play(w, { type: 'move', direction: 'south' })), {
+        type: 'attack',
+        target_id: raider,
+      }),
+    );
+    if (stunned) {
+      const stun = { ...C, kind: 'status', key: 'stunned' } as never;
+      const narration = {
+        applied: 'combat.npc_hit',
+        tick: 'combat.npc_hit',
+        expired: 'combat.npc_hit',
+      };
+      const spec = {
+        key: 'stunned',
+        duration: 300,
+        tick_every: 150,
+        resource: resourceRef(w, 'hp'),
+      };
+      const statuses = {
+        [`${K}status/stunned`]: { ...spec, allows: ['look'], label: 'combat.npc_hit', narration },
+      };
+      w = { ...w, cartridge: { ...w.cartridge, statuses } as never } as World;
+      const job = 'cccccccc-6666-4666-8666-000000000098' as never;
+      const at = apply(
+        w,
+        applyStatus(w, w.entityIds[`${K}npc/guard`]!, stun, 0, () => job),
+        false,
+      );
+      assert.ok('world' in at, JSON.stringify(at));
+      w = at.world;
+    }
+    const r = advance(w);
+    const keys = r.decision.kind === 'accepted' ? r.decision.narration!.map((x) => x.key) : [];
+    return [hp(ok(r), raider), keys.includes('combat.ally_hit' as never)];
+  };
+  // The raider (3 HP) takes the player's sure 2 and the guard's sure 1; stunned, the guard adds none.
+  assert.deepEqual(yard(false), [0, true]);
+  assert.deepEqual(yard(true), [1, false]);
 });

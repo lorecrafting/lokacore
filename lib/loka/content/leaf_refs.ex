@@ -2,8 +2,9 @@ defmodule Loka.Content.LeafRefs do
   @moduledoc """
   Each policy leaf's reference fields, each mapped to the definition kind a short ref expands
   to (mechanics.md policy leaf set). Twin of LEAF_REFS in kernel/ts/src/content/cartridge_leaf_refs.ts;
-  kernel/ts/test/tags.test.ts checks both against policy.schema.json. No dependencies: the
-  compiler's checks read it at compile time.
+  kernel/ts/test/tags.test.ts checks both against policy.schema.json. `steps/0`: the same for
+  each sequence step op (reactions, recipes, dialogue choices). No dependencies: the compiler's
+  checks read it at compile time.
   """
   def all,
     do: %{
@@ -19,5 +20,21 @@ defmodule Loka.Content.LeafRefs do
       "status_active" => %{"status" => "status"},
       "npc_present" => %{"npc" => "npc"},
       "cue_perceived" => %{"npc" => "npc"}
+    }
+
+  def steps,
+    do: %{
+      "fact.assign" => %{"fact" => "fact", "item" => "item", "npc" => "npc"},
+      "fact.adjust" => %{"fact" => "fact", "item" => "item", "npc" => "npc"},
+      "skill.acquire" => %{"skill" => "skill"},
+      "topic.grant" => %{"topic" => "topic"},
+      "status.apply" => %{"status" => "status", "item" => "item", "npc" => "npc"},
+      "status.cure" => %{"status" => "status"},
+      "damage" => %{"npc" => "npc"},
+      "light.ignite" => %{"item" => "item"},
+      "barrier.set" => %{"barrier" => "barrier"},
+      "quest.activate" => %{"quest" => "quest"},
+      "quest.resolve" => %{"quest" => "quest"},
+      "quest.fail" => %{"quest" => "quest"}
     }
 end

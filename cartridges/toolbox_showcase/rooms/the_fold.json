@@ -7,6 +7,9 @@
   "exits": {
     "west": {
       "to": "fell_gate"
+    },
+    "south": {
+      "to": "smithy"
     }
   },
   "details": {

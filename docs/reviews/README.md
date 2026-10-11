@@ -10,6 +10,19 @@ of closed work are deleted once their lesson is folded, and linked by permalink
 Reviews before R2 live in the [legacy repository](https://github.com/lorecrafting/lokacore-v2-legacy)
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
+- [Review: toolbox row G4, use X on Y (loka-kgd.76)](2026-10-10-toolbox-m8-useon-review.md): **APPROVE**
+- [Review: toolbox row 12, traps (loka-kgd.73)](2026-10-10-toolbox-m8-traps-review.md): **APPROVE WITH NOTES**
+- [Review: toolbox row 29a, spell cast admission (loka-kgd.81)](2026-10-10-toolbox-m8-spells-review.md): **APPROVE WITH NOTES**
+- [Review: toolbox row 29b, spell effects (loka-kgd.99)](2026-10-10-toolbox-m8-spell-effects-review.md): **APPROVE WITH NOTES**
+- [Review: status readers 4 and 5, blocks/allows and resistances on a status (loka-kgd.89, loka-kgd.90)](2026-10-10-toolbox-m8-readers45-review.md): **APPROVE WITH NOTES**
+- [Review: status readers SR1 to SR3 (loka-kgd.86, .87, .88)](2026-10-10-toolbox-m8-readers-review.md): **APPROVE WITH NOTES**
+- [Item review: toolbox row 26, order and dial puzzles (loka-kgd.75, batch M8)](2026-10-10-toolbox-m8-puzzles-review.md): **APPROVE WITH NOTES**
+- [Review: population successor across a multi-hour advance (loka-6ql4)](2026-10-10-toolbox-m8-pop-review.md): **APPROVE**
+- [Review: combat turns read status blocks/allows (loka-kgd.98)](2026-10-10-toolbox-m8-npc-permits-review.md): **APPROVE WITH NOTES**
+- [Review: toolbox row 19a, tool-gated harvest (loka-kgd.84)](2026-10-10-toolbox-m8-harvest-review.md): **APPROVE**
+- [Review: a round joins all its rows' writer groups; sight handoff check scoped (loka-x2gv, loka-kgd.43, toolbox M8)](2026-10-10-toolbox-m8-groups-review.md): **APPROVE**
+- [Review: toolbox row W22 fire and reaction barrier.set (loka-kgd.100, loka-kgd.96)](2026-10-10-toolbox-m8-fire-review.md): **APPROVE WITH NOTES**
+- [Review: toolbox row W21, fear and morale for NPCs (loka-kgd.74)](2026-10-10-toolbox-m8-fear-review.md): **APPROVE WITH NOTES**
 - [Review: toolbox row 6a, combat target choice in the same room (loka-kgd.63)](2026-10-10-toolbox-m7-targets-review.md): **APPROVE WITH NOTES**
 - [Review: toolbox row G6 engine half, sense cues (loka-kgd.61, batch M7)](2026-10-10-toolbox-m7-senses-review.md): **APPROVE**
 - [Review: toolbox row W8, permanent statuses (loka-kgd.67)](2026-10-10-toolbox-m7-scars-review.md): **APPROVE**
@@ -59,6 +72,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: one wait across several listed schedule hours (loka-qi0r)](2026-10-10-m6-waitfix-review.md): **APPROVE**
 - [Review: E1 recorder debt-elapsed recipe (loka-ssr9, PR #360)](2026-10-10-e1-recorder-ssr9-review.md): **APPROVE**
 - [Review: e1-recorder in full on batch-branch pushes (loka-b98y, PR #361)](2026-10-10-ci-e1-recorder-batch-review.md): **APPROVE WITH NOTES**
+- [Review: M8 mechanics batch head (PR #375, `toolbox/batch-m8`)](2026-10-10-batch-m8-head-review.md): **APPROVE WITH NOTES**
 - [Review: batch M7 final head, combat and senses (PR #366, loka-kgd), Fable batch review](2026-10-10-batch-m7-fable-review.md): **CHANGES REQUIRED**
 - [Review: batch M6, social standing and memory (PR #363, loka-kgd)](2026-10-10-batch-m6-fable-review.md): **APPROVE WITH NOTES**
 - [Review: mechanics batch M5, Fable batch review (PR #359, loka-kgd)](2026-10-10-batch-m5-fable-review.md): **APPROVE WITH NOTES**

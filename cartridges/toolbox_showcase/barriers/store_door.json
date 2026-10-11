@@ -1,0 +1,20 @@
+{
+  "keywords": [
+    "store_door",
+    "door"
+  ],
+  "short": "barrier.store_door.short",
+  "initial": "closed",
+  "tags": [
+    "wooden",
+    "burnable"
+  ],
+  "opens_when": {
+    "policy_version": 1,
+    "root": {
+      "op": "fact_compare",
+      "fact": "store_unbarred",
+      "equals": true
+    }
+  }
+}

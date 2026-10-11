@@ -1,0 +1,13 @@
+{
+  "on": {
+    "event": "item_dropped",
+    "item": "torch"
+  },
+  "apply": [
+    {
+      "op": "status.apply",
+      "status": "warm",
+      "npc": "golem"
+    }
+  ]
+}

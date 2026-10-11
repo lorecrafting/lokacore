@@ -1,0 +1,34 @@
+{
+  "on": {
+    "event": "status_ticked",
+    "status": "burning"
+  },
+  "when": {
+    "policy_version": 1,
+    "root": {
+      "op": "not",
+      "item": {
+        "op": "status_active",
+        "subject": "subject",
+        "status": "spent"
+      }
+    }
+  },
+  "apply": [
+    {
+      "op": "status.apply",
+      "status": "burning",
+      "co_present": true,
+      "tag": "burnable"
+    },
+    {
+      "op": "barrier.set",
+      "to": "open",
+      "tag": "burnable"
+    },
+    {
+      "op": "status.apply",
+      "status": "spent"
+    }
+  ]
+}

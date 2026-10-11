@@ -70,7 +70,7 @@ function seekProof(
   const p = command.payload as Extract<Command['payload'], { type: 'perform' }>;
   const recipe = Object.values(world.cartridge.recipes ?? {}).find((r) => r.key === p.action);
   const check = recipe?.check,
-    subject = recipe && detailOf(world, recipe.target);
+    subject = recipe?.target.kind === 'detail' ? detailOf(world, recipe.target) : undefined;
   if (
     !recipe ||
     check?.kind !== 'attribute_threshold' ||

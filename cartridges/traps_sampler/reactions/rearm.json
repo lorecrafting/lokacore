@@ -1,0 +1,20 @@
+{
+  "on": {
+    "event": "clock_hour"
+  },
+  "when": {
+    "policy_version": 1,
+    "root": {
+      "op": "fact_compare",
+      "fact": "plate_sprung",
+      "equals": true
+    }
+  },
+  "apply": [
+    {
+      "op": "fact.assign",
+      "fact": "plate_sprung",
+      "value": false
+    }
+  ]
+}

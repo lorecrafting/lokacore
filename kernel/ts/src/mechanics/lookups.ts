@@ -6,6 +6,7 @@ import type {
   CharacterId,
   Connection,
   DefinitionRef,
+  DomainEvent,
   EntityId,
   QuestInstanceId,
   RoomDefinition,
@@ -15,6 +16,26 @@ import { LIMITS } from '../contracts.gen.ts';
 import { key } from '../foundation/compose.ts';
 import { has, type QuestRow, type Steps, type World } from '../runtime/decision.ts';
 import { value } from './fact.ts';
+import { cmp } from '../foundation/validate.ts';
+
+/** Row W21: an event's room_id, else the room directly holding its subject (none if carried). */
+export const eventRooms = (world: World, cause: DomainEvent, subject?: string): string[] => {
+  const room = (cause.payload as { room_id?: string }).room_id ?? world.state.containers[subject!];
+  return room && world.rooms[room] ? [room] : [];
+};
+
+/** Row W22: the items lying directly in the rooms whose definitions carry the tag, by EntityId. */
+export const itemsTagged = (world: World, rooms: readonly string[], tag: string) =>
+  Object.keys(world.entities)
+    .filter((id) => {
+      const e = world.entities[id]!;
+      return (
+        e.kind === 'item' &&
+        !!e.tags?.includes(tag as never) &&
+        rooms.includes(world.state.containers[id]!)
+      );
+    })
+    .sort(cmp) as EntityId[];
 
 /** The room's exit in a direction, if it has one. */
 export const exitOf = (room: RoomDefinition, direction: string): Connection | undefined =>
@@ -60,6 +81,28 @@ export function reach(
     const parent = world.state.containers[at];
     if (parent === body) return true;
     if (parent === room) return !heldOnly;
+    if (!opened(world, parent, body)) return false;
+    at = parent;
+  }
+}
+
+/**
+ * The held-tool rule (mechanics.md#held-tools), for G4 use tools and harvest tool gates: true when
+ * `id` is carried by `body` directly or in open containers it carries, or is itself worn or wielded
+ * (in one of its slot holders, equipment@1); not inside a worn container, which the GameView does
+ * not list. The walk faults as `reach` does.
+ */
+export function toolHeld(world: World, body: EntityId, id: EntityId, steps: Steps) {
+  const seen = new Set<string>();
+  let at: string = id;
+  while (true) {
+    if (seen.has(at)) return 'containment_cycle' as const;
+    if (++steps.n > LIMITS.query_steps) return 'budget_exceeded' as const;
+    seen.add(at);
+    const parent = world.state.containers[at];
+    if (parent === body) return true;
+    const worn = at === id && world.state.containers[parent] === body;
+    if (worn && Object.values(world.slots).includes(parent)) return true;
     if (!opened(world, parent, body)) return false;
     at = parent;
   }

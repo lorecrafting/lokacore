@@ -1,0 +1,16 @@
+{
+  "keywords": [
+    "anvil"
+  ],
+  "short": "item.anvil.short",
+  "room_line": "item.anvil.room",
+  "description": "item.anvil.description",
+  "mass_grams": 200000,
+  "location": {
+    "in": "room",
+    "room": "smithy"
+  },
+  "tags": [
+    "metal"
+  ]
+}

@@ -71,6 +71,7 @@ export function parts(c: Obj): [string, Obj, string][] {
   const add = (kind: string, d: Obj, at: string, fields = ['variants']) => {
     out.push([kind, d, at]);
     if (d.tags) out.push(['tags', d.tags, `${at}.tags`]);
+    if (d.harvest?.tool) out.push(['tags', d.harvest.tool, `${at}.harvest.tool`]); // row 19
     if (kind === 'detail')
       for (const field of ['readable', 'notice_board'])
         if (d[field]) out.push(['readable', d[field], `${at}.${field}`]);

@@ -154,6 +154,7 @@
       "attribute"
     ],
     "policies": [
+      "level_compare",
       "resource_compare",
       "stat_compare"
     ]
@@ -194,6 +195,7 @@
       "status_active"
     ],
     "events": [
+      "status_applied",
       "status_ticked",
       "status_expired"
     ]
@@ -287,7 +289,8 @@
     "portability": "portable",
     "residency": "portable_capability",
     "commands": [
-      "perform"
+      "perform",
+      "cast"
     ],
     "definitions": [
       "recipe"

@@ -1,0 +1,18 @@
+{
+  "keywords": [
+    "pickaxe"
+  ],
+  "short": "item.pickaxe.short",
+  "room_line": "item.pickaxe.room",
+  "description": "item.pickaxe.description",
+  "location": {
+    "in": "room",
+    "room": "mine"
+  },
+  "mass_grams": 2000,
+  "slot": "wield",
+  "tags": [
+    "metal",
+    "sharp"
+  ]
+}

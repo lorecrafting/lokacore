@@ -22,7 +22,7 @@ const loaded = loadCartridge(
   INSTALLED,
 );
 assert.ok(loaded.ok, JSON.stringify(loaded));
-const content = loaded.cartridge as Cartridge;
+export const content = loaded.cartridge as Cartridge;
 
 export const HOUR = 3600;
 export const DAY = 24 * HOUR;

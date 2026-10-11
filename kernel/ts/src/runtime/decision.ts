@@ -184,7 +184,7 @@ export const bodyOf = (world: World, actor: CharacterId): EntityId | undefined =
   actor === world.character ? world.body : undefined;
 
 export type Accepted = Extract<DecisionResult, { kind: 'accepted' }>;
-type Event<E> = Omit<DomainEvent, 'payload'> & {
+export type Event<E> = Omit<DomainEvent, 'payload'> & {
   readonly payload: Extract<EventPayload, { type: E }>;
 };
 /** A DecisionResult whose events are only the given types. */
@@ -198,20 +198,20 @@ export type Mint = () => string;
  * decision: a recipe resolves its check (check@1) in the perform decision (21 §7: costs, checks and
  * outcomes join one proposal); a scheduled NPC's run_job moves it and reports its
  * entity_entered_room (movement@1's) as a move does, and a status job its tick and expiry
- * (status@1's); reactions activate quest-owned instances; a choice resolves its dialogue's quest
- * (quest@1's quest_resolved) and hands a bound item over (containment@1's item_acquired, as give).
- */
+ * (status@1's); reactions activate quest-owned instances and land statuses; a choice resolves its
+ * dialogue's quest (quest@1's quest_resolved) and hands a bound item over (containment@1's item_acquired, as give);
+ * a spell (row 29b) lands a status (status_applied) and kills (entity_died). */
 export const COMPOSES = {
   expedition: ['quest'],
   transport: ['movement'],
-  action_recipe: ['check'],
+  action_recipe: ['check', 'status', 'death'],
   schedule: ['movement', 'combat', 'death', 'quest', 'containment', 'status'],
   combat: ['movement', 'quest'],
   dialogue: ['quest', 'containment', 'movement', 'check'],
   movement: ['quest'],
   commerce: ['containment'],
   scene: ['dialogue', 'quest'],
-  reaction: ['quest'],
+  reaction: ['quest', 'status', 'barrier'], // barrier.set's barrier_changed (row W22)
   speech: ['dialogue'], // a spoken keyword opens its dialogue (choice_opened, as talk; row G9)
 } as const;
 type Composed<C> = C extends keyof typeof COMPOSES

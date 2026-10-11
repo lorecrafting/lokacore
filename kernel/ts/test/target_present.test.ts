@@ -41,7 +41,8 @@ test('target_present holds for a target in reach and never without one', () => {
 
 // Breaks: admission evaluating the action's policy without its target (an alias, a recipe or a
 // take whose policy is target_present refused invalid_state by step though the GameView lists
-// it), notably a Command that names its target item_id rather than target_id.
+// it), notably a Command that names its target item_id rather than target_id; or a detail recipe
+// admitting a forged item_id, which lands in the receipt (mechanics.md, Use X on Y).
 test('the target reaches admission for a talk alias, a recipe and a take', () => {
   const w = after(
     world((c) => {
@@ -68,6 +69,19 @@ test('the target reaches admission for a talk alias, a recipe and a take', () =>
     [true, 'accepted'],
   );
   const lantern = at(w, 'item/lantern');
+  assert.equal(
+    stepped(w, { type: 'perform', action: 'coil_rope', item_id: lantern }),
+    'invalid_target',
+  );
+  // An invocation naming two targets for a detail recipe keeps its pre-G4 code (receipts).
+  const invocation = {
+    action_key: 'coil_rope',
+    actor_id: w.character,
+    target_ids: [lantern, lantern],
+    input: {},
+  };
+  const two = resolve(w, { invocation, command_id: CID } as never);
+  assert.equal('payload' in two ? 'resolved' : two.error.code, 'unsupported_capability');
   assert.deepEqual(
     [shown(w, 'take', lantern), stepped(w, { type: 'take', item_id: lantern })],
     ['available', 'accepted'],

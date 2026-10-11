@@ -1,0 +1,16 @@
+{
+  "keywords": [
+    "winch"
+  ],
+  "short": "item.winch.short",
+  "room_line": "item.winch.room",
+  "description": "item.winch.description",
+  "mass_grams": 200000,
+  "location": {
+    "in": "room",
+    "room": "yard"
+  },
+  "tags": [
+    "metal"
+  ]
+}

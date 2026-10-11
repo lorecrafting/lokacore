@@ -1,0 +1,12 @@
+{
+  "duration": 60,
+  "tick_every": 30,
+  "resource": "mv",
+  "per_tick": 1,
+  "label": "condition.warded",
+  "narration": {
+    "applied": "narration.warded.applied",
+    "tick": "narration.warded.tick",
+    "expired": "narration.warded.expired"
+  }
+}

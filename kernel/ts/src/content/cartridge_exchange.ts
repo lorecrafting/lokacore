@@ -13,7 +13,7 @@ export function exchanges(c: Obj, checks: Checks): Diagnostic[] {
       if (!d.harvest) continue;
       const at = `.cartridge.rooms${step(room)}.details${step(key)}.harvest`;
       out.push(
-        ...api(c, at),
+        ...api(c, at, d.harvest.tool ? 52 : 17),
         ...stock(c, checks, d.harvest.items, { ...c.entry, key: r.key }, `${at}.items`),
       );
       checks.text(d.harvest, ['title', 'label', 'narration'], at);
@@ -56,9 +56,10 @@ function careful(c: Obj, checks: Checks, h: Obj, at: string): Diagnostic[] {
     : [];
 }
 
-function api(c: Obj, at: string): Diagnostic[] {
+// Harvest needs kernel_api 1.17, a tool gate (toolbox row 19) 1.52.
+function api(c: Obj, at: string, floor = 17): Diagnostic[] {
   const [major, minor] = c.manifest.requires.kernel_api.at_least.split('.').map(Number);
-  return major < 1 || (major === 1 && minor < 17) ? [diag('KERNEL_API_RANGE_INVALID', at)] : [];
+  return major < 1 || (major === 1 && minor < floor) ? [diag('KERNEL_API_RANGE_INVALID', at)] : [];
 }
 
 function stock(

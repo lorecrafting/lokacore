@@ -1,0 +1,13 @@
+{
+  "label": "actions.gather_ash",
+  "aliases": ["gather"],
+  "target": { "kind": "detail", "room": "tower", "detail": "hearth" },
+  "priority": 5,
+  "policy": { "policy_version": 1, "root": { "op": "all", "items": [] } },
+  "outcomes": {
+    "success": {
+      "sequence": [{ "op": "resource.adjust", "resource": "ash", "by": 1 }],
+      "narration": { "actor": "narration.gather_ash" }
+    }
+  }
+}

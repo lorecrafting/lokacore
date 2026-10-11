@@ -1,0 +1,8 @@
+{
+  "on": { "event": "fact_changed", "fact": "sigil_traced" },
+  "when": {
+    "policy_version": 1,
+    "root": { "op": "quest_state", "quest": "apprentice", "state": "active" }
+  },
+  "apply": [{ "op": "quest.resolve", "quest": "apprentice", "outcome": "done" }]
+}

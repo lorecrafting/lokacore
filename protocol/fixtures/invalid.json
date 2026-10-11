@@ -10420,11 +10420,19 @@
     "value": {},
     "errors": [
       {
-        "path": "/detail",
-        "code": "missing_property"
-      },
-      {
         "path": "/kind",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "RecipeTarget",
+    "value": {
+      "kind": "detail"
+    },
+    "errors": [
+      {
+        "path": "/detail",
         "code": "missing_property"
       },
       {
@@ -10436,7 +10444,19 @@
   {
     "contract": "RecipeTarget",
     "value": {
-      "kind": "item",
+      "kind": "item"
+    },
+    "errors": [
+      {
+        "path": "/kind",
+        "code": "unknown_variant"
+      }
+    ]
+  },
+  {
+    "contract": "RecipeTarget",
+    "value": {
+      "kind": "detail",
       "room": {
         "cartridge_id": "c",
         "cartridge_version": "1.0.0",
@@ -10447,10 +10467,6 @@
       "x": 1
     },
     "errors": [
-      {
-        "path": "/kind",
-        "code": "const_mismatch"
-      },
       {
         "path": "/x",
         "code": "unknown_property"
@@ -23152,6 +23168,1068 @@
       {
         "path": "/allies/0",
         "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "contract": "RecipeTarget",
+    "value": {
+      "kind": "use"
+    },
+    "errors": [
+      {
+        "path": "/tool",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "RecipeTarget",
+    "value": {
+      "kind": "use",
+      "tool": {
+        "tag": "metal"
+      },
+      "detail": "pump"
+    },
+    "errors": [
+      {
+        "path": "/detail",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "UseTool",
+    "value": {},
+    "errors": [
+      {
+        "path": "/liquid",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "UseTool",
+    "value": {
+      "tag": "metal",
+      "status": {
+        "cartridge_id": "use_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "status",
+        "key": "burning"
+      }
+    },
+    "errors": [
+      {
+        "path": "/status",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "RecipeStep",
+    "value": {
+      "op": "status.cure"
+    },
+    "errors": [
+      {
+        "path": "/status",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "RecipeStep",
+    "value": {
+      "op": "status.cure",
+      "status": {
+        "cartridge_id": "use_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "status",
+        "key": "burning"
+      },
+      "item": {
+        "cartridge_id": "use_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "item",
+        "key": "cart"
+      }
+    },
+    "errors": [
+      {
+        "path": "/item",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "RecipeStep",
+    "value": {
+      "op": "status.apply"
+    },
+    "errors": [
+      {
+        "path": "/status",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "RecipeStep",
+    "value": {
+      "op": "status.apply",
+      "status": {
+        "cartridge_id": "spell_effects_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "status",
+        "key": "warded"
+      },
+      "co_present": true
+    },
+    "errors": [
+      {
+        "path": "/co_present",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "RecipeStep",
+    "value": {
+      "op": "damage",
+      "kind": "fire",
+      "amount": 8
+    },
+    "errors": [
+      {
+        "path": "/npc",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "RecipeStep",
+    "value": {
+      "op": "damage",
+      "npc": {
+        "cartridge_id": "spell_effects_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "npc",
+        "key": "wight"
+      },
+      "amount": 8
+    },
+    "errors": [
+      {
+        "path": "/kind",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "RecipeStep",
+    "value": {
+      "op": "damage",
+      "npc": {
+        "cartridge_id": "spell_effects_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "npc",
+        "key": "wight"
+      },
+      "kind": "fire"
+    },
+    "errors": [
+      {
+        "path": "/amount",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "RecipeStep",
+    "value": {
+      "op": "damage",
+      "npc": {
+        "cartridge_id": "spell_effects_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "npc",
+        "key": "wight"
+      },
+      "kind": "fire",
+      "amount": 0
+    },
+    "errors": [
+      {
+        "path": "/amount",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "contract": "RecipeStep",
+    "value": {
+      "op": "damage",
+      "npc": {
+        "cartridge_id": "spell_effects_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "npc",
+        "key": "wight"
+      },
+      "kind": "fire",
+      "amount": 2147483648
+    },
+    "errors": [
+      {
+        "path": "/amount",
+        "code": "above_maximum"
+      }
+    ]
+  },
+  {
+    "contract": "RecipeStep",
+    "value": {
+      "op": "damage",
+      "npc": {
+        "cartridge_id": "spell_effects_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "npc",
+        "key": "wight"
+      },
+      "kind": "lightning",
+      "amount": 8
+    },
+    "errors": [
+      {
+        "path": "/kind",
+        "code": "not_in_enum"
+      }
+    ]
+  },
+  {
+    "contract": "RecipeStep",
+    "value": {
+      "op": "light.ignite"
+    },
+    "errors": [
+      {
+        "path": "/item",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "RecipeTarget",
+    "value": {
+      "kind": "spell"
+    },
+    "errors": [
+      {
+        "path": "/word",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "RecipeTarget",
+    "value": {
+      "kind": "spell",
+      "word": "Lux",
+      "x": 1
+    },
+    "errors": [
+      {
+        "path": "/word",
+        "code": "pattern_mismatch"
+      },
+      {
+        "path": "/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "Policy",
+    "value": {
+      "op": "level_compare"
+    },
+    "errors": [
+      {
+        "path": "/at_least",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "Policy",
+    "value": {
+      "op": "level_compare",
+      "at_least": 0,
+      "x": 1
+    },
+    "errors": [
+      {
+        "path": "/at_least",
+        "code": "below_minimum"
+      },
+      {
+        "path": "/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "CommandPayload",
+    "value": {
+      "type": "cast"
+    },
+    "errors": [
+      {
+        "path": "/actor_id",
+        "code": "missing_property"
+      },
+      {
+        "path": "/word",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "CommandPayload",
+    "value": {
+      "type": "cast",
+      "actor_id": "11111111-1111-4111-8111-111111111111",
+      "word": "two words"
+    },
+    "errors": [
+      {
+        "path": "/word",
+        "code": "pattern_mismatch"
+      }
+    ]
+  },
+  {
+    "contract": "Policy",
+    "value": {
+      "op": "level_compare",
+      "at_least": 2147483648
+    },
+    "errors": [
+      {
+        "path": "/at_least",
+        "code": "above_maximum"
+      }
+    ]
+  },
+  {
+    "contract": "StatusDefinition",
+    "value": {
+      "key": "might",
+      "duration": 3600,
+      "tick_every": 600,
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "mv"
+      },
+      "per_tick": 1,
+      "label": "condition.mighty",
+      "narration": {
+        "applied": "narration.might.applied",
+        "tick": "narration.might.tick",
+        "expired": "narration.might.expired"
+      },
+      "fear": false
+    },
+    "errors": [
+      {
+        "path": "/fear",
+        "code": "const_mismatch"
+      }
+    ]
+  },
+  {
+    "contract": "StatusDefinition",
+    "value": {
+      "key": "might",
+      "duration": 3600,
+      "tick_every": 600,
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "mv"
+      },
+      "per_tick": 1,
+      "label": "condition.mighty",
+      "narration": {
+        "applied": "narration.might.applied",
+        "tick": "narration.might.tick",
+        "expired": "narration.might.expired"
+      },
+      "blocks": []
+    },
+    "errors": [
+      {
+        "path": "/blocks",
+        "code": "too_few_items"
+      }
+    ]
+  },
+  {
+    "contract": "StatusDefinition",
+    "value": {
+      "key": "might",
+      "duration": 3600,
+      "tick_every": 600,
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "mv"
+      },
+      "per_tick": 1,
+      "label": "condition.mighty",
+      "narration": {
+        "applied": "narration.might.applied",
+        "tick": "narration.might.tick",
+        "expired": "narration.might.expired"
+      },
+      "blocks": [
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look"
+      ]
+    },
+    "errors": [
+      {
+        "path": "/blocks",
+        "code": "too_many_items"
+      }
+    ]
+  },
+  {
+    "contract": "StatusDefinition",
+    "value": {
+      "key": "might",
+      "duration": 3600,
+      "tick_every": 600,
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "mv"
+      },
+      "per_tick": 1,
+      "label": "condition.mighty",
+      "narration": {
+        "applied": "narration.might.applied",
+        "tick": "narration.might.tick",
+        "expired": "narration.might.expired"
+      },
+      "blocks": [
+        "Look"
+      ]
+    },
+    "errors": [
+      {
+        "path": "/blocks/0",
+        "code": "pattern_mismatch"
+      }
+    ]
+  },
+  {
+    "contract": "StatusDefinition",
+    "value": {
+      "key": "might",
+      "duration": 3600,
+      "tick_every": 600,
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "mv"
+      },
+      "per_tick": 1,
+      "label": "condition.mighty",
+      "narration": {
+        "applied": "narration.might.applied",
+        "tick": "narration.might.tick",
+        "expired": "narration.might.expired"
+      },
+      "allows": []
+    },
+    "errors": [
+      {
+        "path": "/allows",
+        "code": "too_few_items"
+      }
+    ]
+  },
+  {
+    "contract": "StatusDefinition",
+    "value": {
+      "key": "might",
+      "duration": 3600,
+      "tick_every": 600,
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "mv"
+      },
+      "per_tick": 1,
+      "label": "condition.mighty",
+      "narration": {
+        "applied": "narration.might.applied",
+        "tick": "narration.might.tick",
+        "expired": "narration.might.expired"
+      },
+      "allows": [
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look",
+        "look"
+      ]
+    },
+    "errors": [
+      {
+        "path": "/allows",
+        "code": "too_many_items"
+      }
+    ]
+  },
+  {
+    "contract": "StatusDefinition",
+    "value": {
+      "key": "might",
+      "duration": 3600,
+      "tick_every": 600,
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "mv"
+      },
+      "per_tick": 1,
+      "label": "condition.mighty",
+      "narration": {
+        "applied": "narration.might.applied",
+        "tick": "narration.might.tick",
+        "expired": "narration.might.expired"
+      },
+      "allows": [
+        "Look"
+      ]
+    },
+    "errors": [
+      {
+        "path": "/allows/0",
+        "code": "pattern_mismatch"
+      }
+    ]
+  },
+  {
+    "contract": "StatusDefinition",
+    "value": {
+      "key": "might",
+      "duration": 3600,
+      "tick_every": 600,
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "mv"
+      },
+      "per_tick": 1,
+      "label": "condition.mighty",
+      "narration": {
+        "applied": "narration.might.applied",
+        "tick": "narration.might.tick",
+        "expired": "narration.might.expired"
+      },
+      "resistances": {
+        "physical": 101
+      }
+    },
+    "errors": [
+      {
+        "path": "/resistances/physical",
+        "code": "above_maximum"
+      }
+    ]
+  },
+  {
+    "contract": "StatusDefinition",
+    "value": {
+      "key": "might",
+      "duration": 3600,
+      "tick_every": 600,
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "mv"
+      },
+      "per_tick": 1,
+      "label": "condition.mighty",
+      "narration": {
+        "applied": "narration.might.applied",
+        "tick": "narration.might.tick",
+        "expired": "narration.might.expired"
+      },
+      "resistances": {
+        "lightning": 10
+      }
+    },
+    "errors": [
+      {
+        "path": "/resistances/lightning",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "entity_died"
+      },
+      "apply": [
+        {
+          "op": "status.apply",
+          "status": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "status",
+            "key": "afraid"
+          },
+          "co_present": false
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/apply/0/co_present",
+        "code": "not_in_enum"
+      }
+    ]
+  },
+  {
+    "contract": "RoomDefinition",
+    "value": {
+      "key": "r",
+      "title": "t",
+      "description": "d",
+      "exits": {},
+      "details": {
+        "seam": {
+          "aliases": [
+            "seam"
+          ],
+          "description": "d",
+          "harvest": {
+            "items": [
+              {
+                "cartridge_id": "c",
+                "cartridge_version": "1.0.0",
+                "kind": "item",
+                "key": "ore"
+              }
+            ],
+            "label": "l",
+            "narration": "n",
+            "title": "t",
+            "tool": {}
+          }
+        }
+      }
+    },
+    "errors": [
+      {
+        "path": "/details/seam/harvest/tool/tag",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "RoomDefinition",
+    "value": {
+      "key": "r",
+      "title": "t",
+      "description": "d",
+      "exits": {},
+      "details": {
+        "seam": {
+          "aliases": [
+            "seam"
+          ],
+          "description": "d",
+          "harvest": {
+            "items": [
+              {
+                "cartridge_id": "c",
+                "cartridge_version": "1.0.0",
+                "kind": "item",
+                "key": "ore"
+              }
+            ],
+            "label": "l",
+            "narration": "n",
+            "title": "t",
+            "tool": {
+              "tag": "pickaxe"
+            }
+          }
+        }
+      }
+    },
+    "errors": [
+      {
+        "path": "/details/seam/harvest/tool/tag",
+        "code": "not_in_enum"
+      }
+    ]
+  },
+  {
+    "contract": "RoomDefinition",
+    "value": {
+      "key": "r",
+      "title": "t",
+      "description": "d",
+      "exits": {},
+      "details": {
+        "seam": {
+          "aliases": [
+            "seam"
+          ],
+          "description": "d",
+          "harvest": {
+            "items": [
+              {
+                "cartridge_id": "c",
+                "cartridge_version": "1.0.0",
+                "kind": "item",
+                "key": "ore"
+              }
+            ],
+            "label": "l",
+            "narration": "n",
+            "title": "t",
+            "tool": {
+              "tag": "sharp",
+              "liquid": "water"
+            }
+          }
+        }
+      }
+    },
+    "errors": [
+      {
+        "path": "/details/seam/harvest/tool/liquid",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "status_applied_missing_fields",
+    "contract": "EventPayload",
+    "value": {
+      "type": "status_applied"
+    },
+    "errors": [
+      {
+        "path": "/body_id",
+        "code": "missing_property"
+      },
+      {
+        "path": "/status",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "status_applied_trigger_mistyped",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "status_applied",
+        "status": 1,
+        "x": 1
+      },
+      "apply": []
+    },
+    "errors": [
+      {
+        "path": "/on/status",
+        "code": "invalid_type"
+      },
+      {
+        "path": "/on/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "reaction_status_cure_no_status",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "status_applied"
+      },
+      "apply": [
+        {
+          "op": "status.cure"
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/apply/0/status",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "reaction_status_cure_named_npc",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "status_applied"
+      },
+      "apply": [
+        {
+          "op": "status.cure",
+          "status": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "status",
+            "key": "wet"
+          },
+          "npc": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "npc",
+            "key": "golem"
+          }
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/apply/0/npc",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "reaction_status_apply_tag_without_co_present",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "status_ticked"
+      },
+      "apply": [
+        {
+          "op": "status.apply",
+          "status": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "status",
+            "key": "burning"
+          },
+          "tag": "burnable"
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/apply/0/co_present",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "reaction_barrier_set_barrier_and_tag",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "status_ticked"
+      },
+      "apply": [
+        {
+          "op": "barrier.set",
+          "to": "open",
+          "barrier": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "barrier",
+            "key": "door"
+          },
+          "tag": "burnable"
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/apply/0",
+        "code": "exclusive_properties"
+      }
+    ]
+  },
+  {
+    "name": "reaction_barrier_set_broken_no_site",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "status_ticked"
+      },
+      "apply": [
+        {
+          "op": "barrier.set",
+          "to": "broken"
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/apply/0",
+        "code": "exclusive_properties"
+      },
+      {
+        "path": "/apply/0/to",
+        "code": "not_in_enum"
       }
     ]
   }

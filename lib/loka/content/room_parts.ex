@@ -66,9 +66,19 @@ defmodule Loka.Content.RoomParts do
       for {steps, _} <- variants(r), do: {steps, "variant"}
   end
 
-  # A room's darkness (light@1) and tags (tags@1), each owned by its capability.
+  # A harvest tool gate (toolbox row 19) reads item tags, owned by tags@1.
+  defp tools(r),
+    do:
+      for(
+        {k, %{"harvest" => %{"tool" => _}}} <- Map.get(r, "details", %{}),
+        do: {["details", k, "harvest", "tool"], "tags"}
+      )
+
+  # A room's darkness (light@1) and tags (tags@1), each owned by its capability, and its tool gates.
   defp optional(r),
-    do: for({f, k} <- [{"dark_description", "darkness"}, {"tags", "tags"}], r[f], do: {[f], k})
+    do:
+      tools(r) ++
+        for({f, k} <- [{"dark_description", "darkness"}, {"tags", "tags"}], r[f], do: {[f], k})
 
   @doc "Each variant's condition in the schema-valid rooms, as `{rel, steps, root}`."
   @spec conditions(map()) :: [{String.t(), list(), map()}]
@@ -110,7 +120,7 @@ defmodule Loka.Content.RoomParts do
   defp harvest_text(detail),
     do:
       for(
-        {k, v} <- Map.drop(Map.get(detail, "harvest", %{}), ["items", "careful"]),
+        {k, v} <- Map.drop(Map.get(detail, "harvest", %{}), ["items", "careful", "tool"]),
         do: {["harvest", k], v}
       ) ++
         if(detail["harvest"] && detail["harvest"]["careful"],

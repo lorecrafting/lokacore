@@ -1,0 +1,9 @@
+{
+  "title": "room.shrine.title",
+  "description": "room.shrine.description",
+  "exits": {
+    "south": {
+      "to": "hall"
+    }
+  }
+}

@@ -17,7 +17,9 @@ export const tipSpec = (key: string) => ({
 // Each recipe's key is no action's and no registered command's (DUPLICATE_DEFINITION: one key is
 // one ActionSet identity) and its check's key no other recipe's or dialogue choice's check's (one
 // check DefinitionRef),
-// its target names a room of this cartridge and a detail of that room,
+// its target names a room of this cartridge and a detail of that room (a use target's tool liquid
+// a liquid of it; row G4; a spell's word no other spell's, row 29a), each status.cure step a status of it
+// (and each row 29b effect step's status, npc and item one of it),
 // it has a failure outcome exactly when it has a check (OUTCOME_MISMATCH), its threshold check,
 // costs and resource.adjust steps name resources of it, each outcome's fact.assign names a fact
 // of it, its label and narrations have catalog entries and each narration participant but the
@@ -36,11 +38,7 @@ export function recipes(c: Obj, { named, typedValue, text }: Checks): Diagnostic
     if (taken.has(r.key)) out.push(diag('DUPLICATE_DEFINITION', at));
     if (r.check && checks.filter((k) => k === r.check.key).length > 1)
       out.push(diag('DUPLICATE_DEFINITION', `${at}.check`));
-    const { room, detail } = r.target;
-    const there = c.rooms[refString(room)]; // this cartridge's room, as named() requires
-    if (!there) named(room, 'room', `${at}.target.room`);
-    else if (!Object.hasOwn(there.details ?? {}, detail))
-      out.push(diag('UNRESOLVED_REFERENCE', `${at}.target.detail`, { target: detail }));
+    out.push(...target(c, r, at, named));
     if (!r.check !== !r.outcomes.failure) out.push(diag('OUTCOME_MISMATCH', `${at}.outcomes`));
     if (r.check?.kind === 'threshold') named(r.check.resource, 'resource', `${at}.check.resource`);
     (r.costs ?? []).forEach((k: Obj, i: number) =>
@@ -51,6 +49,9 @@ export function recipes(c: Obj, { named, typedValue, text }: Checks): Diagnostic
       o.sequence.forEach((s: Obj, i: number) => {
         if (s.op === 'resource.adjust')
           named(s.resource, 'resource', `${path}.sequence[${i}].resource`);
+        for (const k of ['status', 'npc', 'item'])
+          // rows G4, 29b
+          if (s[k]) named(s[k], k, `${path}.sequence[${i}].${k}`);
         if (s.op !== 'fact.assign') return;
         named(s.fact, 'fact', `${path}.sequence[${i}].fact`);
         typedValue(s.fact, s.value, `${path}.sequence[${i}].value`);
@@ -62,16 +63,86 @@ export function recipes(c: Obj, { named, typedValue, text }: Checks): Diagnostic
     }
     text(r, ['label'], at);
   }
-  return [...out, ...contributions(c), ...attributes(c, { named, text, typedValue })];
+  const more = [...contributions(c), ...attributes(c, { named, text, typedValue }), ...uses(c)];
+  return [...out, ...more, ...spells(c)];
 }
 
+// The target's room and detail resolve, or (row G4) a use's tool liquid names a liquid of this
+// cartridge.
+function target(c: Obj, r: Obj, at: string, named: Checks['named']): Diagnostic[] {
+  const { room, detail, tool } = r.target;
+  if (r.target.kind === 'spell') return [];
+  if (r.target.kind === 'use') {
+    if (tool.liquid) named(tool.liquid, 'liquid', `${at}.target.tool.liquid`);
+    return [];
+  }
+  const there = c.rooms[refString(room)]; // this cartridge's room, as named() requires
+  if (!there) named(room, 'room', `${at}.target.room`);
+  else if (!Object.hasOwn(there.details ?? {}, detail))
+    return [diag('UNRESOLVED_REFERENCE', `${at}.target.detail`, { target: detail })];
+  return [];
+}
+
+// Toolbox row G4: a use target needs kernel_api 1.49, and a status.cure step sits on a use recipe
+// (SCHEMA_VIOLATION at its op: a detail holds no status).
+function uses(c: Obj): Diagnostic[] {
+  const recipes = Object.entries((c.recipes ?? {}) as Obj);
+  const out = recipes.flatMap(([ref, r]) =>
+    Object.entries(r.outcomes as Obj).flatMap(([name, o]) =>
+      o.sequence.flatMap((s: Obj, i: number) =>
+        s.op === 'status.cure' && r.target.kind !== 'use'
+          ? [
+              diag(
+                'SCHEMA_VIOLATION',
+                `.cartridge.recipes${step(ref)}.outcomes.${name}.sequence[${i}].op`,
+                { error: 'invalid_value' },
+              ),
+            ]
+          : [],
+      ),
+    ),
+  );
+  return recipes.some(([, r]) => r.target.kind === 'use') &&
+    apiCmp(c.manifest.requires.kernel_api.at_least, '1.49') < 0
+    ? [...out, diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least')]
+    : out;
+}
+
+// Toolbox row 29a: a spell target needs kernel_api 1.51, and no two spells share a word
+// (DUPLICATE_DEFINITION at each one's word); row 29b: an effect step sits on a spell
+// (SCHEMA_VIOLATION at its op) and needs kernel_api 1.55.
+function spells(c: Obj): Diagnostic[] {
+  const recipes = Object.entries((c.recipes ?? {}) as Obj);
+  const all = recipes.filter(([, r]) => r.target.kind === 'spell');
+  const out = all
+    .filter(([ref, r]) => all.some(([o, x]) => o !== ref && x.target.word === r.target.word))
+    .map(([ref]) => diag('DUPLICATE_DEFINITION', `.cartridge.recipes${step(ref)}.target.word`));
+  const effects = recipes.flatMap(([ref, r]) =>
+    Object.entries(r.outcomes as Obj).flatMap(([name, o]) =>
+      o.sequence.flatMap((s: Obj, i: number) =>
+        EFFECTS.includes(s.op)
+          ? [[r, `.cartridge.recipes${step(ref)}.outcomes.${name}.sequence[${i}].op`]]
+          : [],
+      ),
+    ),
+  ) as [Obj, string][];
+  for (const [r, at] of effects)
+    if (r.target.kind !== 'spell')
+      out.push(diag('SCHEMA_VIOLATION', at, { error: 'invalid_value' }));
+  const floor = effects.length ? '1.55' : '1.51';
+  if (all.length && apiCmp(c.manifest.requires.kernel_api.at_least, floor) < 0)
+    out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
+  return out;
+}
+const EFFECTS = ['status.apply', 'damage', 'light.ignite'];
+
 // Each key of a room's action contribution names a registered command, an action, a recipe, a
-// quest (its offer) or a dialogue (its talk).
+// quest (its offer) or a dialogue (its talk). A spell is cast by word, never by key (row 29a).
 function contributions(c: Obj): Diagnostic[] {
   const out: Diagnostic[] = [];
-  const defs: Obj[] = [c.actions, c.recipes ?? {}, c.quests ?? {}, c.dialogues ?? {}].flatMap(
-    Object.values,
-  );
+  const defs: Obj[] = [c.actions, c.recipes ?? {}, c.quests ?? {}, c.dialogues ?? {}]
+    .flatMap(Object.values)
+    .filter((d) => d.target?.kind !== 'spell');
   const keys = new Set([...Object.keys(CAPABILITY_OWNERS.command), ...defs.map((d) => d.key)]);
   for (const [ref, r] of Object.entries(c.rooms as Obj))
     (r.actions ?? []).forEach((a: Obj, i: number) =>
@@ -105,8 +176,9 @@ function attributes(c: Obj, { named }: Checks) {
 function opposed(c: Obj, r: Obj, at: string, named: Checks['named']): Diagnostic[] {
   if (r.check.skill) named(r.check.skill, 'skill', `${at}.check.skill`);
   if (r.check.npc) return rater(c, r.check, `${at}.check`, named);
-  const detail = c.rooms[refString(r.target.room)]?.details?.[r.target.detail];
-  return detail && detail.rating === undefined
+  // A use or spell target (rows G4, 29a) has no detail and so no rating.
+  const detail = r.target.room && c.rooms[refString(r.target.room)]?.details?.[r.target.detail];
+  return r.target.kind !== 'detail' || (detail && detail.rating === undefined)
     ? [diag('SCHEMA_VIOLATION', `${at}.check`, { error: 'invalid_value' })]
     : [];
 }
