@@ -56,10 +56,31 @@ const lines = (r: ReturnType<typeof step>) =>
   ((r.decision as { narration?: { key: string }[] }).narration ?? []).map((t) => t.key);
 const wightHp = (w: World) => level(w, w.entityIds[`${P}:npc/wight`]!, resourceRef(w, 'hp'));
 
+const R = (key: string) => `${P}:recipe/${key}`;
+const W = `${P}:npc/wight`;
+const success = (c: Record<string, any>, k: string) => c.recipes[R(k)].outcomes.success;
+
+/** The sampler's artifact changed by `change`, loaded again (the loader's result). */
+function variant(change: (c: Record<string, any>) => void) {
+  const c = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
+  change(c);
+  const canonical = encode(c);
+  const sha256 = createHash('sha256').update(canonical).digest('hex');
+  return loadCartridge(
+    new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
+    INSTALLED,
+  );
+}
+function cartridge(change: (c: Record<string, any>) => void) {
+  const r = variant(change);
+  assert.ok(r.ok, JSON.stringify(r));
+  return r.cartridge as Cartridge;
+}
+
 /** A new world with the orb taken in the hall (when `orb`), then in the dark crypt. */
-function crypt(orb = true): World {
+function crypt(orb = true, c = content): World {
   n = 0;
-  let w = newWorld(content, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e29' as never, [1, 2, 3, 4]);
+  let w = newWorld(c, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e29' as never, [1, 2, 3, 4]);
   if (orb) w = ok(play(w, { type: 'take', item_id: w.entityIds[`${P}:item/orb`] }));
   return ok(play(w, { type: 'move', direction: 'east' }));
 }
@@ -117,7 +138,6 @@ test('ward lands warded on the caster: status_applied fires the reaction once', 
 // kernel_api 1.55, a damage step naming no NPC of the cartridge, or light.ignite without light@1
 // (both kernels refuse them; content_spell_effects_test.exs).
 test('loader: effect steps sit on spells, need 1.55, resolve and declare their owner', () => {
-  const R = (key: string) => `${P}:recipe/${key}`;
   const seq = (k: string) =>
     `.cartridge.recipes[${JSON.stringify(R(k))}].outcomes.success.sequence[0]`;
   const rows: [(c: Record<string, any>) => void, string, string][] = [
@@ -155,14 +175,59 @@ test('loader: effect steps sit on spells, need 1.55, resolve and declare their o
     ],
   ];
   for (const [change, diagnostic, path] of rows) {
-    const c = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
-    change(c);
-    const canonical = encode(c);
-    const sha256 = createHash('sha256').update(canonical).digest('hex');
-    const r = loadCartridge(
-      new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-      INSTALLED,
-    );
+    const r = variant(change);
     assert.deepEqual(r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path], [diagnostic, path]);
   }
+});
+
+// Breaks: a step after a fatal damage still reaches the NPC the spell just killed (a status lands on
+// the dead wight), or damage on an NPC with no hp pool faults instead of writing nothing.
+test('a spell writes nothing more to an NPC it killed, nor damage to an NPC without hp', () => {
+  const lethal = cartridge((c) => {
+    const [bolt] = success(c, 'flamma').sequence;
+    const ward = { ...success(c, 'ward').sequence[0], npc: bolt.npc };
+    success(c, 'flamma').sequence = [{ ...bolt, amount: 16 }, bolt, ward];
+  });
+  const w = ok(cast(crypt(true, lethal), 'lux'));
+  const killed = cast(w, 'flamma');
+  assert.deepEqual(
+    [wightHp(killed.world), types(killed)],
+    [0, ['entity_died', 'action_completed']],
+  );
+  const hollow = crypt(
+    true,
+    cartridge((c) => {
+      delete c.npcs[W].hp;
+      delete c.npcs[W].attack;
+    }),
+  );
+  const bolt = cast(hollow, 'flamma');
+  assert.deepEqual(types(bolt), ['action_completed']);
+});
+
+// Breaks: a second light.ignite of the same source in one spell ignites it again from the same
+// committed fuel row (a fault) instead of writing nothing.
+test('two light.ignite steps on one orb light it once', () => {
+  const twice = cartridge((c) => {
+    const [ignite] = success(c, 'lux').sequence;
+    success(c, 'lux').sequence = [ignite, ignite];
+  });
+  const w = crypt(true, twice);
+  assert.equal(dark(ok(cast(w, 'lux')), w.character), false);
+});
+
+// Breaks: a spell with a duration is admitted in a fight (its time.advance runs the round job inside
+// the cast and faults), or the refusal also bars a spell without one.
+test('in a fight only a spell without a duration is cast', () => {
+  // A recipe duration needs a world without real-time (as standing_sampler): no time_policy, regen.
+  const slow = cartridge((c) => {
+    delete c.manifest.time_policy;
+    for (const r of Object.values<Record<string, unknown>>(c.resources)) delete r.regen;
+    c.recipes[R('ward')].duration = 150;
+  });
+  let w = ok(cast(crypt(true, slow), 'lux'));
+  w = ok(play(w, { type: 'attack', target_id: w.entityIds[W] }));
+  const refused = cast(w, 'ward');
+  assert.deepEqual([code(refused), refused.world], ['invalid_state', w]);
+  assert.equal(wightHp(ok(cast(w, 'flamma'))), 4);
 });
