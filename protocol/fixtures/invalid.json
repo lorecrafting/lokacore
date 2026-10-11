@@ -23326,10 +23326,13 @@
   {
     "contract": "CommandPayload",
     "value": {
-      "type": "cast",
-      "actor_id": "11111111-1111-4111-8111-111111111111"
+      "type": "cast"
     },
     "errors": [
+      {
+        "path": "/actor_id",
+        "code": "missing_property"
+      },
       {
         "path": "/word",
         "code": "missing_property"
@@ -23347,6 +23350,19 @@
       {
         "path": "/word",
         "code": "pattern_mismatch"
+      }
+    ]
+  },
+  {
+    "contract": "Policy",
+    "value": {
+      "op": "level_compare",
+      "at_least": 2147483648
+    },
+    "errors": [
+      {
+        "path": "/at_least",
+        "code": "above_maximum"
       }
     ]
   }

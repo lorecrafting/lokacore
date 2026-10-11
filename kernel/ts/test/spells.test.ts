@@ -133,8 +133,9 @@ test('an unknown word and unread noctis are refused alike; noctis works once rea
   assert.deepEqual(narration(cast(w, 'Noctis')), ['narration.noctis']);
 });
 
-// Breaks: the TS loader admits a spell or a level_compare leaf below kernel_api 1.51, or two spells
-// sharing one word (both kernels refuse them; content_spells_test.exs).
+// Breaks: the TS loader admits a spell or a level_compare leaf below kernel_api 1.51, an opposed
+// check on a spell (no detail rating), or two spells sharing one word (both kernels refuse them;
+// content_spells_test.exs).
 test('loader: spells and the level_compare leaf need 1.51; spell words are unique', () => {
   const R = (key: string) => `spells_sampler@0.0.1:recipe/${key}`;
   const api = '.cartridge.manifest.requires.kernel_api.at_least';
@@ -157,6 +158,21 @@ test('loader: spells and the level_compare leaf need 1.51; spell words are uniqu
       },
       'KERNEL_API_RANGE_INVALID',
       api,
+    ],
+    [
+      (c) => {
+        // An opposed check on a spell: no detail rating, and no npc named.
+        for (const caps of [c.lock.capabilities, c.manifest.requires.capabilities]) caps.check = 1;
+        const wis = { cartridge_id: 'spells_sampler', cartridge_version: '0.0.1' };
+        c.recipes[R('ward')].check = {
+          key: 'w',
+          kind: 'opposed',
+          attribute: { ...wis, kind: 'attribute', key: 'wis' },
+        };
+        c.recipes[R('ward')].outcomes.failure = c.recipes[R('ward')].outcomes.success;
+      },
+      'SCHEMA_VIOLATION',
+      `.cartridge.recipes[${JSON.stringify(R('ward'))}].check`,
     ],
     [
       (c) => (c.recipes[R('noctis')].target.word = 'lux'),

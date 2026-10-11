@@ -115,7 +115,8 @@ function subjectOf(
   body: EntityId,
   steps: Steps,
 ) {
-  if (target.kind === 'spell' || p.type === 'cast') return body; // a cast's recipe is a spell
+  if (target.kind === 'spell') return body;
+  if (p.type === 'cast') return rejected('invalid_state'); // spellOf names only spells
   if (target.kind === 'use') {
     const code = useRefused(world, target, body, p.item_id, p.target_id, steps);
     if (code === 'budget_exceeded' || code === 'containment_cycle')

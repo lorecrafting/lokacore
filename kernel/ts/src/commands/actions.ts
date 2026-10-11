@@ -96,7 +96,10 @@ function engine(world: World): ActionSet {
       )
       .filter(([verb]) => verb !== 'choose_ancestry' || needsAncestry(world, world.character))
       .filter(([verb]) => verb !== 'raise_attribute' || points(world, world.character))
-      .filter(([verb]) => verb !== 'cast' || keyed(world).length < allRecipes(world).length) // row 29a
+      // Row 29a: cast only in a cartridge with a spell.
+      .filter(
+        ([verb]) => verb !== 'cast' || allRecipes(world).some((r) => r.target.kind === 'spell'),
+      )
       // Row G9: no speech while a conversation is open (the speech rule refuses it too).
       .filter(([verb]) => !SPEECH.includes(verb) || !pending(world, world.character))
       .map(([verb, [target, input]]): [string, Offered] => {
