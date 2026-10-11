@@ -1,7 +1,7 @@
 import { diag, step, type Obj } from './cartridge_refs.ts';
 import { refString } from '../runtime/decision.ts';
 import { apiCmp } from './cartridge_installed.ts';
-import type { Diagnostic } from '../contracts.gen.ts';
+import { CAPABILITY_OWNERS, type Diagnostic } from '../contracts.gen.ts';
 
 /**
  * Checked toolbox row 1, G3, 2c and G13 (liquid cures) declarations in the loaded artifact, independent of source
@@ -27,13 +27,15 @@ export function status(c: Obj): Diagnostic[] {
   const { immune, named, drinks, lone, g3 } = api146(c);
   if (!Object.keys(defs).length && !applies.length && !cures.length && !g3) return out;
   const all = Object.values(defs);
-  const floor = all.some((s) => s.fear)
-    ? '1.50'
-    : all.some(lasting)
-      ? '1.48'
-      : g3
-        ? '1.46'
-        : '1.38';
+  const floor = all.some(reader)
+    ? '1.54'
+    : all.some((s) => s.fear)
+      ? '1.50'
+      : all.some(lasting)
+        ? '1.48'
+        : g3
+          ? '1.46'
+          : '1.38';
   if (
     apiCmp(c.manifest.requires.kernel_api.at_least, floor) < 0 ||
     ['status', 'death'].some((k) => c.lock.capabilities[k] !== 1) // a fatal hp tick needs death
@@ -49,6 +51,8 @@ export function status(c: Obj): Diagnostic[] {
 
 // Row W8: a permanent status never ticks, so it declares no per_tick; a fear one (row W21) may omit it.
 const lasting = (s: Obj) => s.duration === 'permanent';
+// Status readers 4 and 5 (API 1.54): such a status may omit per_tick too.
+const reader = (s: Obj) => s.blocks || s.allows || s.resistances;
 
 // One status definition's own fields.
 function definition(c: Obj, ref: string, s: Obj): Diagnostic[] {
@@ -60,9 +64,17 @@ function definition(c: Obj, ref: string, s: Obj): Diagnostic[] {
     out.push(diag('SCHEMA_VIOLATION', `${at}.tick_every`));
   if (
     s.per_tick === 0 ||
-    (lasting(s) ? s.per_tick !== undefined : s.per_tick === undefined && !s.modifies && !s.fear)
+    (lasting(s)
+      ? s.per_tick !== undefined
+      : s.per_tick === undefined && !s.modifies && !s.fear && !reader(s))
   )
     out.push(diag('SCHEMA_VIOLATION', `${at}.per_tick`));
+  // Status reader 4: each name is a player command type (run_job and elapsed are authority-internal).
+  for (const field of ['blocks', 'allows'])
+    (s[field] ?? []).forEach((c: string, n: number) => {
+      if (!Object.hasOwn(CAPABILITY_OWNERS.command, c) || ['run_job', 'elapsed'].includes(c))
+        out.push(diag('UNKNOWN_COMMAND', `${at}.${field}[${n}]`));
+    });
   // loka-kgd.50: a permanent status never modifies an attribute the derived hp maximum reads.
   const hp = ((c.world?.derived?.hp_max?.terms ?? []) as Obj[]).map((t) => refString(t.attribute));
   if (lasting(s))

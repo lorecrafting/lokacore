@@ -19,6 +19,7 @@ import { key, same } from '../foundation/compose.ts';
 import { bodyOf, refString, type Steps, type World } from '../runtime/decision.ts';
 import { questOf } from '../mechanics/lookups.ts';
 import { modal, pending, talks } from '../mechanics/dialogue/shared.ts';
+import { permits } from '../mechanics/status/permits.ts';
 import { ALWAYS } from '../mechanics/policy.ts';
 import { sub } from '../foundation/int.ts';
 import { pay } from '../mechanics/resource.ts';
@@ -166,10 +167,8 @@ export function composed(world: World, actor: CharacterId): ActionSet {
   return { ...set, ...modal(world, actor) };
 }
 
-const fighting = (world: World, actor: CharacterId) => {
-  const body = bodyOf(world, actor);
-  return body && engaged(world, body);
-};
+const fighting = (world: World, actor: CharacterId, body = bodyOf(world, actor)) =>
+  body && engaged(world, body);
 
 /** Final actor restriction; only internal escape policy reads the pre-combat composed set. */
 export function resolved(world: World, actor: CharacterId): ActionSet {
@@ -180,16 +179,20 @@ export function resolved(world: World, actor: CharacterId): ActionSet {
   const choosing =
     !!world.cartridge.world?.combat?.target_choice &&
     (fight?.row.active_ids?.filter((id) => eligible(world, fight.row, id)).length ?? 0) > 1;
-  return fight
-    ? Object.fromEntries(
-        Object.entries(set).filter(
-          ([, a]) =>
-            ['flee', 'stand', 'look', 'scan', 'bandage'].includes(a.command) ||
-            (a.command === 'attack' && choosing),
-        ),
-      )
-    : set;
+  const kept = (c: string) =>
+    !fight ||
+    ['flee', 'stand', 'look', 'scan', 'bandage'].includes(c) ||
+    (c === 'attack' && choosing);
+  const free = permits(world, bodyOf(world, actor)); // status reader 4
+  return Object.fromEntries(
+    Object.entries(set).filter(([, a]) => kept(a.command) && free(a.command)),
+  );
 }
+
+// Status reader 4: a type the composed set offers but the actor's statuses bar.
+const barred = (world: World, actor: CharacterId, type: string) =>
+  !permits(world, bodyOf(world, actor))(type) &&
+  Object.values(composed(world, actor)).some((a) => a.command === type);
 
 /** The target id of a recipe's detail (the loader checks it exists). */
 export const detailOf = (world: World, t: Extract<RecipeTarget, { kind: 'detail' }>): EntityId =>
@@ -243,7 +246,7 @@ export function refusal(
   if (!matching.length)
     return unknown
       ? 'not_found'
-      : fighting(world, actor)
+      : fighting(world, actor) || barred(world, actor, payload.type)
         ? 'invalid_state'
         : 'unsupported_capability';
   const used =

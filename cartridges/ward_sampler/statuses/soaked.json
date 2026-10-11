@@ -1,0 +1,14 @@
+{
+  "duration": 600,
+  "tick_every": 60,
+  "resource": "hp",
+  "label": "condition.soaked",
+  "narration": {
+    "applied": "narration.soaked.applied",
+    "tick": "narration.soaked.tick",
+    "expired": "narration.soaked.expired"
+  },
+  "resistances": {
+    "physical": -100
+  }
+}

@@ -1,7 +1,14 @@
 // status@1 (toolbox rows 1, G3): timed statuses on the player's body, an NPC or an item, one
 // generation per holder/status pair; the tick job is unbound and finds its row by job id, so a
 // stale one completes harmlessly.
-import type { DefinitionRef, DeltaOp, EntityId, JobId, StatusRow } from '../../contracts.gen.ts';
+import type {
+  DefinitionRef,
+  DeltaOp,
+  EntityId,
+  JobId,
+  Resistances,
+  StatusRow,
+} from '../../contracts.gen.ts';
 import { add } from '../../foundation/int.ts';
 import { key } from '../../foundation/compose.ts';
 import { type Mint, refString, type World } from '../../runtime/decision.ts';
@@ -175,4 +182,11 @@ export function cureOps(
   return activeStatuses(world, body)
     .filter(({ status }) => listed.has(refString(status)))
     .flatMap(({ status, row }) => expire(world, body, status, row, writer_group));
+}
+
+/** Status reader 5: each resistance entry (a DamageKind or Tag) of `body`'s active statuses, summed. */
+export function statusResistance(world: World, body: EntityId) {
+  const specs = activeStatuses(world, body).map(({ spec }) => spec);
+  return (entry: string) =>
+    specs.reduce((sum, s) => add(sum, s.resistances?.[entry as keyof Resistances] ?? 0), 0);
 }

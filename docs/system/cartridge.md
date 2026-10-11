@@ -1491,6 +1491,8 @@ Compiler/loader validate resolved item/nest/population/corpse/room refs, a nonem
 
 [The status readers](mechanics.md#status-readers-toolbox-rows-sr1-sr2-and-sr3) add, each needing `kernel_api` at least **1.53**: a `status_active` leaf's `subject: "self"` or `"subject"`; the trigger `{event: "status_applied"}` with an optional `status: <key>` filter; and the reaction step `{op: "status.cure", status: <key>}`, which names a declared status and no holder. Both kernels refuse an unresolved status (UNRESOLVED_REFERENCE at the step's `status`) and the lower floor (KERNEL_API_RANGE_INVALID); the schema refuses a cure step naming `item`, `npc` or `co_present`. `cartridges/elements_sampler` is the sampler.
 
+[Rows SR4 and SR5](mechanics.md#command-blocks-and-resistances-on-a-status-toolbox-rows-sr4-and-sr5) add a status's optional `blocks` and `allows` (each 1 to 64 Command type names) and `resistances` (`Resistances`, as on an NPC); any of them needs `kernel_api` at least **1.54**, and such a status may omit `per_tick`. Both kernels (`lib/loka/content/status.ex`, `kernel/ts/src/content/cartridge_status.ts`) refuse a name that is no registered command, or is `run_job` or `elapsed` (UNKNOWN_COMMAND at `blocks[i]` or `allows[i]`), and the lower floor (KERNEL_API_RANGE_INVALID). `cartridges/ward_sampler` is the sampler.
+
 *Not supported yet:* a status whose `modifies` names an attribute the derived hp maximum reads (`con`): one that ends before a later hp write in the same wait faults (Beads `loka-kgd.50`); author such buffs on other attributes until it lands.
 
 ## Derived stat declarations

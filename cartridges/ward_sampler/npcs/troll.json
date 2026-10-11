@@ -1,0 +1,24 @@
+{
+  "keywords": [
+    "troll"
+  ],
+  "short": "npc.troll.short",
+  "room_line": "npc.troll.room",
+  "description": "npc.troll.description",
+  "room": "den",
+  "hp": {
+    "minimum": 0,
+    "maximum": 8,
+    "start": 8,
+    "gain": 0
+  },
+  "attack": {
+    "chance": 100,
+    "damage_min": 2,
+    "damage_max": 2,
+    "kind": "physical"
+  },
+  "resistances": {
+    "physical": 50
+  }
+}
