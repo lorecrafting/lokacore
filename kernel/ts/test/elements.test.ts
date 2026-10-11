@@ -180,10 +180,8 @@ test('in one rule the first of an apply and a cure on one holder and status wins
       ],
     };
   });
-  const w = run(drop(fresh(both), 'bucket'), {
-    type: 'take',
-    item_id: id(fresh(both), 'item', 'jar'),
-  }).world;
+  const wet = drop(fresh(both), 'bucket');
+  const w = run(wet, { type: 'take', item_id: id(wet, 'item', 'jar') }).world;
   const r = run(w, { type: 'drop', item_id: id(w, 'item', 'jar') });
   assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
   if (r.decision.kind !== 'accepted') return;
