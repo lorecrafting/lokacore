@@ -1,0 +1,10 @@
+{
+  "keywords": [
+    "aldous",
+    "drillmaster"
+  ],
+  "short": "npc.aldous.short",
+  "room_line": "npc.aldous.room",
+  "description": "npc.aldous.description",
+  "room": "drill_yard"
+}

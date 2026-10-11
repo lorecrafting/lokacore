@@ -2,9 +2,8 @@
 
 Content brief for `cartridges/toolbox_showcase` ([showcase](../SHOWCASE.md), Beads `loka-y6yg.4`, idea
 `loka-lvno`), written by Fable for an Opus developer and an Opus reviewer. Base: `main` after PR #369
-(the combat district) merges: both edit `npcs/warden.json`, `facts.json`, `text.json`, the hash
-fixture and `SHOWCASE.md`, so the build rebases onto it and keeps the Warden's `resistances`. Only
-installed mechanics; every shape below has a precedent in this cartridge or a sampler, cited per item.
+(the combat district): the build keeps the Warden's `resistances` and combat 10. Only installed
+mechanics; every shape below has a precedent in this cartridge or a sampler, cited per item.
 A step that needs engine code is a [toolbox finding](#toolbox-findings), not showcase work.
 
 The experiment: the village remembers two acts and answers days later, in the world, never in a
@@ -18,7 +17,9 @@ a quiet twin (deliver; pick) that pays nothing back.
   beyond the existing Lore list and quest outcomes.
 - No line says "because you did X". A variant, a rumour or a goal line describes what is, never why.
   Nell reports what the village heard; only Wat knows who held the letter.
-- No narrator adjectives for the player (no "cruel", "guilty", "troublemaker" in new text).
+- No narrator adjectives for the player (no "cruel", "guilty", "troublemaker" in new text), and
+  two plan 1 lines are rewritten to the same rule (see [Toolbox findings](#toolbox-findings) 4):
+  the Warden's `engage` and `scene.letter_ash.2`.
 - Consequences are detours, never walls: the hostile Warden leaves the gate for an hour a day, the
   mill track still reaches the tollhouse through the forced wooden door, and a gift mends him.
 - Asymmetric: the delivered letter and the picked lock change nothing beyond what plan 1 built.
@@ -65,6 +66,11 @@ skips the tick, `kernel/ts/src/mechanics/status/job.ts`).
   trust, and the pin reads the Warden's row only). Giving
   the Warden the ledger back, or the apple, makes him wary again; the variant stays (the look is
   memory, the trust is the mend).
+- On the green from 13:00 to 14:00 he is hostile too: a player who walks onto the green then is
+  engaged there (G11: an ordinary move into his room), a player already there is not. Intended: it is
+  a found-out moment and a detour, not a wall. His attack chance is 0, so no damage lands; the
+  player unarmed lands nothing and with #369's sword hits for no loss; Flee from the green has five
+  exits (a draw), and the encounter ends once they are apart.
 
 ## Pattern 3: the burnt letter (an echo)
 
@@ -114,11 +120,11 @@ Social steps continue plan 1's numbering.
 |---|---|---|
 | 15 | Fresh world, 07:00 day 1. Reeve: `help` (no letter: an undelivered letter would fail `late` during step 17 and move the standing); Warden: `lean` twice; east; `force_strongbox` at about 08:00. | Passes (10 ≥ 1); `strongbox_forced` true; the lid opens; `pick_strongbox` unavailable; a `word_travels` row on the strongbox, `ends_at` = force time + 86400; no narration line, Character page unchanged; `warden_knows` false; the Warden's room line is the base. Take the ledger; `force_tollhouse_door`; north to the mill, down to the green. |
 | 16 | Same world, `pick_strongbox` instead (two tries). | No status row anywhere; after the whole of step 17's wait `warden_knows` is still false and the Warden is at his gate with the base line. |
-| 17 | From step 15, stand on the green; elapse to 14:30 day 2. | At force time + 86400 (about 08:00 day 2) `status_expired` and `warden_knows` true, nothing said. 13:00 day 2: the Warden enters the green (`entity_entered_room`; he walked in, so no engage, G11); his room line and description read the hands variant. 14:00: he goes back to the gate. Walk east at 14:30: `engage` opens an encounter (standing 1, trust 0, `warden_knows`); chance 0 both ways; `toll_gate` is still open (the Book cannot shut it: finding 1). |
-| 18 | Branch at 13:00 day 2 on the green. (a) East, then east again. (b) Give the Warden the ledger, then at 14:30 walk east. | (a) The gate room is empty, the tollhouse reached, no engage; his 14:00 return engages no one. (b) `trust` (Warden) 1: wary; no engage at 14:30; the hands variant still shows. |
+| 17 | From step 15, stand on the green; elapse to 14:30 day 2. | At force time + 86400 (about 08:00 day 2) `status_expired` and `warden_knows` true, nothing said. 13:00 day 2: the Warden enters the green (`entity_entered_room`; he walked in, so no engage, G11); his room line and description read the hands variant. 14:00: he goes back to the gate. Walk east at 14:30: `engage` opens an encounter (standing 1, trust 0, `warden_knows`); the Warden's chance is 0 so the player takes nothing, and the player's blow lands nothing unarmed (a hit for no loss with the sword, as combat 10); `toll_gate` is still open (the Book cannot shut it: finding 1). |
+| 18 | Branch at 13:00 day 2 on the green, the player there since before 13:00. (a) East, then east again. (b) Give the Warden the ledger, then at 14:30 walk east. (c) From the inn, south onto the green at 13:30. | (a) The gate room is empty, the tollhouse reached, no engage; his 14:00 return engages no one. (c) `engage` on the green; Flee leaves by one of five exits. (b) `trust` (Warden) 1: wary; no engage at 14:30; the hands variant still shows. |
 | 19 | Fresh world, 07:00 day 1, standing 1 after `help`; `accept`, take the letter; reach the hut after 09:00; `burn`. | Scene `letter_ash`; standing -1; `letter_burnt` true; Wat's room line and description read the variant at once; `knows_ash` false on Wat, Tam and Nell. 14:00 day 1: Wat enters the gate (`knows_ash` on Wat; the goal line only if the player is in the hut). 15:00: Tam enters the gate, `knows_ash` on Tam. 16:00: Wat home. 11:00 day 2: Tam on the green, `knows_ash` on Nell. Talk to Nell at 11:30: `nell_ash` opens (ahead of `nell_rumour`); `press` fails twice and passes the third time with intimidate 0 at the start (growth `[1, 2]`); Lore lists "The surety". Church: read the roll ("The parish"); the Journal shows the card "What the letter carried" from those two (and the heir card once "The fire" is known); `think_letter` grants it once. |
 | 20 | Fresh world, as 19 but `deliver`. | `letter_burnt` false; Wat is in the hut at 14:00 and 16:00 (no event); Tam's 15:00 arrival writes nothing; Nell on day 2 opens `nell_rumour` only; no letter card; standing 2. |
-| 21 | Kernel half of the recap: from step 15 (forced about 08:00), then `accept`, the letter, and the burn before 14:00 day 1, back on the green by about 10:00 day 1; elapse to 14:30 day 2 (over 90000 units). | The settlement's receipts carry Tam's entries (11:00 day 1 and 2) and exit (15:00 day 1) and the Warden's entry (13:00 day 2) and exit (14:00), no Wat (he visits the gate). The Book groups them in the existing recap block; no new Book test. |
+| 21 | Kernel half of the recap: from step 15 (forced about 08:00), then `accept`, the letter, and the burn before 14:00 day 1, back on the green by about 10:00 day 1; elapse to 14:30 day 2 (over 90000 units). | The settlement's receipts carry Tam's entries (11:00 day 1 and 2) and exit (15:00 day 1) and the Warden's entry (13:00 day 2) and exit (14:00), no Wat (he visits the gate); also the `chilled` tick and expiry lines from the frost crossing of `fell_top` on the way to the hut, so the pin names them rather than asserting Tam and the Warden alone. The Book groups them in the existing recap block; no new Book test. |
 
 ## Pins the build writes
 
@@ -130,7 +136,7 @@ Social steps continue plan 1's numbering.
   deduction card's `from` and its once-only grant.
 - `protocol/fixtures/toolbox_showcase_hash.json` (held by `test/loka/content_showcase_test.exs`).
 - Unchanged and re-run: body 7 (Wat's 08:00), social 5 to 8 and 14, `showcase_recap.test.ts`
-  (Tam only) and #369's combat 10 (the Warden hostile at standing -2, the gate shut).
+  (Tam only) and #369's combat 10 (the Warden hostile at standing -2: a hit for no loss, Flee).
 
 ## Owner's playtest script
 
@@ -149,15 +155,16 @@ before you leave the hut. Back to the green before 13:00. Close the app for 35 r
 If the day after is a rainy one Tam shelters in the church at 11:00 and Nell hears nothing until the
 next dry day; the sky shows it on the fell, and the wait is a real half hour.
 
-On return, in each save: read the recap block; look at the Warden from the green and walk east;
-talk to Nell; read the roll in the church and open the Journal's Lore. In save B, if there is time:
-be on the green at 13:00 the next day, give the Warden the ledger when he walks in, and go east while
-he is away from the gate.
+On return (about 18:00 day 2, the Warden back at his gate), in each save: read the recap block;
+walk east and look at the Warden; talk to Nell; read the roll in the church and open the Journal's
+Lore. In save B, if there is time: be on the green before 13:00 the next day (walk onto it after
+13:00 and he meets you there instead: flee, nothing lands), give the Warden the ledger when he
+walks in, and go east while he is away from the gate.
 
 Expected, save A: the recap names Tam only; the Warden leans on his bar and lets you by; Nell has
 the fire; the church has the heir card. Save B: the recap names the Warden walking the green; his
-line at the gate changes and he raises his cudgel; Wat stood at the gate without a word to you; Nell
-has a second thing to be pressed for; the roll and Nell together make "What the letter carried"; at
+line at the gate changes and he squares up (the rewritten engage line); Nell has a second thing to
+be pressed for, and it is from her that you learn Wat went down to the gate; the roll and Nell together make "What the letter carried"; at
 13:00 the gate stands empty; the ledger returned ends the cudgel, not the look.
 
 Then the question: **did I find out what I did, or was I told?** And two more: which line, if any,
@@ -175,8 +182,8 @@ schedule x dialogue check x codex deduction (the letter).
    experience steps only (`protocol/reaction.schema.json`), so the toll gate cannot shut when the
    Warden learns; `opens_when` gates `open`, and the gate is already open in every forced save.
    Content fallback: the Warden himself is the shut gate (engage), and his 13:00 walk the detour.
-   Kin of Beads `loka-kgd.22` (no step moves an NPC); a row is wanted for "a reaction closes or
-   locks a barrier".
+   Kin of Beads `loka-kgd.22` (no step moves an NPC); filed as Beads `loka-kgd.96` (a reaction
+   step that opens, closes or locks a barrier).
 2. **A reaction's `when` cannot read the fuse holder.** `status_active` reads the action target
    only, and `sequence` passes no target (`kernel/ts/src/mechanics/reaction.ts`; Beads
    `loka-kgd.86`, batch M8). Content fallback used here: one status, one holder, and the fact
@@ -185,5 +192,9 @@ schedule x dialogue check x codex deduction (the letter).
 3. **No leaf reads an NPC's room** (row W3's limit): Wat and Tam are co-present only because their
    schedules coincide; the entity fact set on Wat's arrival keeps the hop honest. A `co_present
    {npc, npc}` leaf, or `loka-kgd.22`, would let the rumour follow people, not timetables.
-4. **Wording.** The engage line "knows you for a troublemaker" (plan 1) comes closest to telling;
-   if no pin holds the words, the build may replace it with what he does.
+4. **Wording (required).** Two plan 1 lines tell what this brief wants found, and the build rewrites
+   both (`showcase_social.test.ts` pins keys, not words): the Warden's `engage`, "knows you for a
+   troublemaker and raises his cudgel", becomes what he does with no judgment of the player (he
+   steps into the road and lifts the bar's chain); `scene.letter_ash.2`, "The village will hear of
+   this.", announces the echo at the act and so answers the owner's question in advance; it becomes
+   what Wat does (he looks at the ash, then at the door).

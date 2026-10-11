@@ -75,10 +75,11 @@ export function refused(w: World, p: object) {
 
 /**
  * As the host (mobile/authority/local-story/elapsed.ts): elapsed steps to `target`, stopping at each
- * pending job but the calendar job; every narration key on the way.
+ * pending job but the calendar job; every narration key and event payload on the way.
  */
 export function wait(w: World, target: number) {
   const lines: string[] = [];
+  const events: { type: string; [k: string]: unknown }[] = [];
   while (w.state.clock < target) {
     const until = Object.values(w.state.jobs ?? {})
       .filter(
@@ -97,9 +98,11 @@ export function wait(w: World, target: number) {
       n,
     );
     assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
-    if (r.decision.kind === 'accepted')
+    if (r.decision.kind === 'accepted') {
       lines.push(...(r.decision.narration ?? []).map((l) => l.key as string));
+      events.push(...r.decision.events.map((e) => e.payload as never));
+    }
     w = r.world;
   }
-  return { world: w, lines };
+  return { world: w, lines, events };
 }

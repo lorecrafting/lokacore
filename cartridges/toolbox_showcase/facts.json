@@ -181,6 +181,28 @@
         "player"
       ],
       "meaning": "Badge: the player has walked all five Low Wardle rooms."
+    },
+    "raider_slain": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The gate yard raider is dead (death credit)."
+    },
+    "gil_warned": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "Gil heard the player shout a warning."
     }
   }
 }

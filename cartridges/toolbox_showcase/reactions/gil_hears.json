@@ -1,0 +1,15 @@
+{
+  "on": {
+    "event": "spoken",
+    "npc": "gil",
+    "word": "ware",
+    "loudness": "shout"
+  },
+  "apply": [
+    {
+      "op": "fact.assign",
+      "fact": "gil_warned",
+      "value": true
+    }
+  ]
+}
