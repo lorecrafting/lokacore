@@ -167,12 +167,7 @@ const entityView = (view: GameView, id: string): EntityView | ContentView | unde
   ].find((e) => e.id === id);
 
 function liquidAgrees(view: GameView, command: Any, decision: Any, key?: string): boolean {
-  // Step's refusals before any offer is read, in its order, as for a service (loka-th7x).
-  const code = decision.kind === 'rejected' ? decision.error.code : undefined;
-  if (view.ancestry_choices?.length) return code === 'invalid_state';
-  if (command.id === NIL) return code === 'permission_denied';
   const p = command.payload;
-  if (p.actor_id !== view.actor_id) return code === 'not_found';
   const targets =
     p.type === 'fill'
       ? [p.source_id, p.vessel_id]
@@ -190,6 +185,10 @@ function liquidAgrees(view: GameView, command: Any, decision: Any, key?: string)
       JSON.stringify(a.target_ids) === JSON.stringify(targets),
   );
   if (!offers?.length) return decision.kind !== 'accepted';
+  // An offer implies the capability and no pending ancestry; Step refuses the envelope next (loka-th7x).
+  const code = decision.kind === 'rejected' ? decision.error.code : undefined;
+  if (command.id === NIL) return code === 'permission_denied';
+  if (p.actor_id !== view.actor_id) return code === 'not_found';
   if (offers.some((a) => a.available))
     return decision.kind === 'accepted' || decision.kind === 'fault';
   return (
