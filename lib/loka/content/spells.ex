@@ -21,17 +21,18 @@ defmodule Loka.Content.Spells do
       for {_, {rel, [], %{"target" => %{"kind" => "spell"}} = r}} <- defs["recipe"] || %{},
           do: {rel, r["target"]["word"]}
 
-    words = Enum.frequencies_by(spells, &elem(&1, 1))
-
-    shared =
-      for {rel, w} <- spells,
-          words[w] > 1,
-          do: diag("DUPLICATE_DEFINITION", at(rel, ["target", "word"]))
-
     effects = effects(defs)
     least = if effects != [], do: [1, 55], else: [1, 51]
-    out = shared ++ placed(effects) ++ unowned(effects, m, registry)
+    out = shared(spells) ++ placed(effects) ++ unowned(effects, m, registry)
     if spells != [] and api(m) < least, do: [floor() | out], else: out
+  end
+
+  defp shared(spells) do
+    words = Enum.frequencies_by(spells, &elem(&1, 1))
+
+    for {rel, w} <- spells,
+        words[w] > 1,
+        do: diag("DUPLICATE_DEFINITION", at(rel, ["target", "word"]))
   end
 
   defp effects(defs) do
