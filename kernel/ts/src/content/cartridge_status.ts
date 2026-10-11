@@ -101,6 +101,7 @@ function definition(c: Obj, ref: string, s: Obj): Diagnostic[] {
 // The fields needing kernel_api 1.46: row G3's immune list entries, steps naming an item and tick or
 // expiry triggers; row 2c's status modifiers (each attribute, with the table it names); row G13's
 // liquid cures (ended by Drink). `g3` says whether any is used.
+// size: allow 41, the per-step holder checks (rows 42, W21, status reader 9) share the one step scan
 function api146(c: Obj) {
   const immune = (['npcs', 'items'] as const).flatMap((kind) =>
     Object.entries(c[kind] ?? {}).flatMap(([ref, e]: [string, any]) =>
