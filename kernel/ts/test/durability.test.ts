@@ -149,10 +149,34 @@ test('mend refuses a sword at full edge, one not wielded and a short purse, befo
   assert.equal(edge(mend(play(carried, { type: 'wear', item_id: sword(w) })).world), 2);
 });
 
-// Breaks: a miss wears the weapon.
-test('the wooden sword misses and keeps its edge', () => {
+// Breaks: a miss wears the weapon, or a fully resisted hit (loss 0) does not.
+test('the wooden sword misses and keeps its edge; a resisted hit still wears', () => {
   const w = round(fight(armed(sampler(), 'stick')));
   assert.deepEqual([dummy(w), edge(w, e(w, 'item', 'stick'))], [30, 2]);
+  const straw = sampler((c) => (c.npcs[`${S}:npc/dummy`].resistances = { sharp: 100 }));
+  const resisted = round(fight(armed(straw)));
+  assert.deepEqual([dummy(resisted), edge(resisted)], [30, 1]);
+});
+
+// Breaks: repair mends whatever weapon is wielded, not only one whose durability is its fact.
+test('mend refuses a wielded weapon whose durability is another fact', () => {
+  const temper = sampler((c) => {
+    const edge = c.facts[`${S}:fact/edge`];
+    c.facts[`${S}:fact/temper`] = {
+      ...edge,
+      key: 'temper',
+      value_type: { ...edge.value_type, default: 1 },
+    };
+    c.facts[`${S}:fact/edge`].value_type.default = 1;
+    c.items[`${S}:item/sword`].weapon.durability.fact = ref('fact', 'temper');
+  });
+  const r = mend(armed(temper));
+  assert.deepEqual(r.decision, { kind: 'rejected', error: { code: 'invalid_state' } });
+  const shown = offer(armed(temper));
+  assert.deepEqual(shown.available === false && shown.reason, {
+    code: 'invalid_state',
+    message: { key: 'service.nothing_to_repair' },
+  });
 });
 
 // Breaks: the durability owner check is dropped, so a recipe or a reaction writes the edge.
@@ -227,6 +251,7 @@ test('the loader keeps durability to API 1.69, a bounded entity fact and its rep
       ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'],
     ],
     [(c) => delete c.facts[`${S}:fact/edge`].per_subject, ['SCHEMA_VIOLATION', at]],
+    [(c) => (c.facts[`${S}:fact/edge`].scopes = ['player']), ['SCHEMA_VIOLATION', at]],
     [(c) => delete c.facts[`${S}:fact/edge`].value_type.maximum, ['SCHEMA_VIOLATION', at]],
     [
       (c) => (c.services[`${S}:service/mend`].benefit.fact = ref('fact', 'quality')),

@@ -17,6 +17,8 @@ defmodule Loka.ContentDurabilityTest do
            {"SCHEMA_VIOLATION", fact}},
           {{"facts.json", &(pop_in(&1, edge ++ ["value_type", "maximum"]) |> elem(1))},
            {"SCHEMA_VIOLATION", fact}},
+          {{"facts.json", &put_in(&1, edge ++ ["scopes"], ["player"])},
+           {"SCHEMA_VIOLATION", fact}},
           {{"services/mend.json", &put_in(&1, ["benefit", "fact"], "quality")},
            {"SCHEMA_VIOLATION", "services/mend.benefit.fact"}},
           {{"text.json", &Map.delete(&1, "service.nothing_to_repair")},
