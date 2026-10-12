@@ -316,6 +316,16 @@
                 "$ref": "cartridge.schema.json#/$defs/PopulationPlan"
               }
             },
+            "replenish": {
+              "description": "Replenish (toolbox row 19b, docs/system/mechanics.md Replenish): scheduled moves of conserved items from a reserve holder to a target holder up to a cap, keyed by DefinitionRefString of kind replenish. Needs kernel_api at least 1.71.",
+              "type": "object",
+              "propertyNames": {
+                "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):replenish/[a-z][a-z0-9_]{0,63}$"
+              },
+              "additionalProperties": {
+                "$ref": "cartridge.schema.json#/$defs/ReplenishPlan"
+              }
+            },
             "services": {
               "type": "object",
               "propertyNames": {
@@ -2000,6 +2010,45 @@
           }
         }
       ]
+    },
+    "ReplenishPlan": {
+      "description": "One replenish entry (docs/system/cartridge.md Replenish declarations): each due job moves up to count of items, lowest EntityId first, from the holder from to the holder to until to holds cap of them, then schedules the next at its due time plus every. The loader refuses a template location, from equal to to, duplicate items and an unresolved item or holder.",
+      "type": "object",
+      "properties": {
+        "key": {
+          "$ref": "action.schema.json#/$defs/Key"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "identity.schema.json#/$defs/DefinitionRef"
+          },
+          "minItems": 1,
+          "maxItems": 64
+        },
+        "from": {
+          "$ref": "entity.schema.json#/$defs/ItemLocation"
+        },
+        "to": {
+          "$ref": "entity.schema.json#/$defs/ItemLocation"
+        },
+        "cap": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 64
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 64
+        },
+        "every": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": ["key", "items", "from", "to", "cap", "count", "every"],
+      "additionalProperties": false
     },
     "PopulationPlan": {
       "type": "object",

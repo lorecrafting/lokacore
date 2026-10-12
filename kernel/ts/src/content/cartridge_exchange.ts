@@ -2,6 +2,7 @@
 import { same } from '../foundation/compose.ts';
 import { refString } from '../runtime/decision.ts';
 import { diag, step, type Checks, type Obj } from './cartridge_refs.ts';
+import { refilled } from './cartridge_replenish.ts';
 import type { DefinitionRef, Diagnostic } from '../contracts.gen.ts';
 type Patch = { room: string; items: DefinitionRef[] };
 
@@ -12,9 +13,10 @@ export function exchanges(c: Obj, checks: Checks): Diagnostic[] {
     for (const [key, d] of Object.entries((r.details ?? {}) as Obj)) {
       if (!d.harvest) continue;
       const at = `.cartridge.rooms${step(room)}.details${step(key)}.harvest`;
+      const holder = { ...c.entry, key: r.key };
       out.push(
         ...api(c, at, d.harvest.tool ? 52 : 17),
-        ...stock(c, checks, d.harvest.items, { ...c.entry, key: r.key }, `${at}.items`),
+        ...stock(c, checks, d.harvest.items, holder, `${at}.items`, refilled(c, holder)),
       );
       checks.text(d.harvest, ['title', 'label', 'narration'], at);
       out.push(...careful(c, checks, d.harvest, at));
@@ -68,6 +70,8 @@ function stock(
   refs: DefinitionRef[],
   holder: DefinitionRef,
   at: string,
+  // A harvest item a replenish entry refills into the room may start in any authored holder.
+  refills = new Set<string>(),
 ): Diagnostic[] {
   const out: Diagnostic[] =
     new Set(refs.map(refString)).size !== refs.length ? [diag('DUPLICATE_DEFINITION', at)] : [];
@@ -76,8 +80,9 @@ function stock(
     const item = c.items?.[refString(ref)];
     if (
       item &&
-      (!same(item.location[holder.kind], holder) ||
-        item.location.in !== holder.kind ||
+      ((refills.has(refString(ref))
+        ? item.location.in === 'template'
+        : !same(item.location[holder.kind], holder) || item.location.in !== holder.kind) ||
         !Number.isSafeInteger(item.mass_grams) ||
         item.mass_grams <= 0)
     )

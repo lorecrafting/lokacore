@@ -26,7 +26,7 @@ defmodule Loka.Content.Exchanges do
     steps = ["details", k, "harvest"]
 
     api(m, at(rel, steps), if(h["tool"], do: [1, 52], else: [1, 17])) ++
-      stock(m, defs, h["items"], ref(r["key"], "room", m), at(rel, steps ++ ["items"])) ++
+      stock(m, defs, h["items"], ref(r["key"], "room", m), at(rel, steps ++ ["items"]), true) ++
       careful(m, defs, h, at(rel, steps ++ ["careful"]))
   end
 
@@ -72,26 +72,35 @@ defmodule Loka.Content.Exchanges do
     if version < floor, do: [diag("KERNEL_API_RANGE_INVALID", path)], else: []
   end
 
-  defp stock(m, defs, items, holder, path) do
+  defp stock(m, defs, items, holder, path, harvest? \\ false) do
     duplicates =
       if length(Enum.uniq(items)) != length(items),
         do: [diag("DUPLICATE_DEFINITION", path)],
         else: []
 
+    refills = if harvest?, do: Loka.Content.Replenish.refilled(defs, holder), else: []
+
     duplicates ++
-      for i <- items, not stocked?(m, defs, i, holder), do: diag("OUTCOME_MISMATCH", path)
+      for i <- items,
+          not stocked?(m, defs, i, if(i in refills, do: :any, else: holder)),
+          do: diag("OUTCOME_MISMATCH", path)
   end
 
+  # A harvest item a replenish entry refills into the room may start in any authored holder.
   defp stocked?(m, defs, item, holder) do
     case Refs.resolve(item, "item", m, defs) do
       {_, _, i} ->
-        i["location"]["in"] == holder["kind"] and i["location"][holder["kind"]] == holder and
-          is_integer(i["mass_grams"]) and i["mass_grams"] > 0
+        held?(i["location"], holder) and is_integer(i["mass_grams"]) and i["mass_grams"] > 0
 
       _ ->
         false
     end
   end
+
+  defp held?(location, :any), do: location["in"] != "template"
+
+  defp held?(location, holder),
+    do: location["in"] == holder["kind"] and location[holder["kind"]] == holder
 
   defp quest(_, _, _, rel, %{"repeatable" => true} = q) when not is_map_key(q, "exchange"),
     do: [diag("OUTCOME_MISMATCH", at(rel, ["repeatable"]))]
