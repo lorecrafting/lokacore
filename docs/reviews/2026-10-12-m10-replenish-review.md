@@ -58,3 +58,19 @@
 - Container/listed rule on `from` as well as `to`: **accepted**. It is stricter, it only refuses harmless content, the code needs no end parameter, and docs and the schema description say so.
 - `runReplenish` split (`free()` extracted for the 40-line limit): **accepted**.
 - `containment/job.ts` plus the lint allowlist, and `compiler.ex` 338 to 340: still **accepted**. The fix changes neither.
+
+## Recheck 2: fix commit `59dfea52`
+
+- Written 2026-10-12 08:03 UTC in the Pi harness by anthropic/claude-opus-5-5 (reviewer, Pi session 01a12f1a).
+- Head `59dfea52b81845c7220da900af0e8c370e2d8a49` (one commit on `1185e67e`); delta reviewed only. Hosted CI: the PM watches it.
+- Verdict: **APPROVE**.
+
+### Dispositions
+
+- **R1 resolved.** When `to` is an item, both kernels refuse the entry if any listed item is a container: `nests` (`kernel/ts/src/content/cartridge_replenish.ts:21,41`) and `nests?/3` (`lib/loka/content/replenish.ex:64,83-85`). This replaces the listed-`to` check. The rule is complete: a non-container item holds nothing (`runtime/decision.ts:160`, capacity 0), and a room or NPC cannot sit inside an item, so only a listed container can nest an item target. The round 1 repro (`apple_01` made a container inside `crate`, `shelf {items [crate], from store, to apple_01}`) is now refused at load with SCHEMA_VIOLATION at `shelf.to`.
+- Mutants, each red: TS `nests` always false, `nests` applied to `from` too, `nests` ignored in `placed`. Elixir with `--force`: `nests?` always false, applied to `from` too, ignored in `placed?`. Focused runs pass: `replenish.test.ts`, `validate.test.ts`, `content_replenish_test.exs`; `tsc --noEmit` is clean.
+- **Docs and schema.** `docs/system/cartridge.md` Replenish declarations, `mechanics.md` Opt-in and the `ReplenishPlan` description all state the new rule and drop the listed-holder wording. The schema diff is the description line only, and the generated files follow it.
+
+### Departure
+
+- The round 1 refusal of a listed `from` item is dropped: **accepted**. A run moves only listed items directly in `from`, and `from` is never directly in itself, so a listed reserve never moves. With a room or NPC target no cycle can form. The "loads" row in each kernel pins it, and the `from`-side mutant fails it.
