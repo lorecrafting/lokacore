@@ -2048,7 +2048,18 @@
         }
       },
       "required": ["key", "items", "from", "to", "cap", "count", "every"],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "examples": [
+        {
+          "key": "shelf",
+          "items": [{ "cartridge_id": "replenish_sampler", "cartridge_version": "0.0.1", "kind": "item", "key": "apple_01" }],
+          "from": { "in": "item", "item": { "cartridge_id": "replenish_sampler", "cartridge_version": "0.0.1", "kind": "item", "key": "crate" } },
+          "to": { "in": "npc", "npc": { "cartridge_id": "replenish_sampler", "cartridge_version": "0.0.1", "kind": "npc", "key": "trader" } },
+          "cap": 1,
+          "count": 1,
+          "every": 3600
+        }
+      ]
     },
     "PopulationPlan": {
       "type": "object",
