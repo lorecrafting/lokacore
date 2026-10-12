@@ -473,8 +473,9 @@ committed or checked in CI.
   conversation cannot spend the run without passing time. In a real-elapsed world (`time_policy`,
   where Wait is refused) the wait is the authority's elapsed delivery to the same time. The run
   ends at start + D days (calendar `units`), when no candidate is accepted (the worker never
-  fights, so a fight it walks into ends its run), or at 5000 steps. Every step keeps every
-  registered invariant, as in the simulator.
+  fights, so a fight it walks into ends its run), or at 5000 steps. Steps go through the plain
+  kernel `step`, not the simulator's invariant-checked one: the simulator's own run keeps the
+  invariants, and re-checking them per candidate cost most of a run.
 - **Attribution.** At the command level: the state before and after each accepted step. Coin is
   the player body's rows of each currency `ledger` lists; items are the item entities directly in
   the body. A gain is `in`, a loss `out`, under the label `<payload type>:<definition key of its
