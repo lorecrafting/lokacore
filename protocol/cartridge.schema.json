@@ -1484,7 +1484,7 @@
           "additionalProperties": false
         },
         "group": {
-          "description": "Toolbox rows G8 and 22a: member, stay and fight each name a bool pair fact read at each NPC (docs/system/cartridge.md#group-declarations).",
+          "description": "Toolbox rows G8, 22a and 22b: member, stay and fight each name a bool pair fact read at each NPC; wage pays every member amount of a conserved resource each `every` clock units (docs/system/cartridge.md#group-declarations).",
           "type": "object",
           "properties": {
             "member": {
@@ -1495,6 +1495,28 @@
             },
             "fight": {
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "wage": {
+              "type": "object",
+              "properties": {
+                "resource": {
+                  "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                },
+                "amount": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "every": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              },
+              "required": [
+                "resource",
+                "amount",
+                "every"
+              ],
+              "additionalProperties": false
             }
           },
           "required": [

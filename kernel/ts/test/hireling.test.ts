@@ -15,6 +15,7 @@ import type { Cartridge, World } from '../src/runtime/decision.ts';
 import type { EntityId } from '../src/contracts.gen.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { encode } from '../src/foundation/canonical.ts';
+import { key } from '../src/foundation/compose.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { value } from '../src/mechanics/fact.ts';
 import { pending, talking } from '../src/mechanics/dialogue/shared.ts';
@@ -86,6 +87,27 @@ const offered = (w: World) =>
 const said = (r: ReturnType<typeof step>) =>
   r.decision.kind === 'accepted' ? (r.decision.narration ?? []).map((x) => x.key as string) : [];
 
+// The compiled sampler with `edit` applied, reloaded.
+const edited = (edit: (c: any) => void) => {
+  const c = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
+  edit(c);
+  const canonical = encode(c);
+  const sha256 = createHash('sha256').update(canonical).digest('hex');
+  return loadCartridge(
+    new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
+    INSTALLED,
+  );
+};
+const reload = (edit: (c: any) => void) => {
+  const r = edited(edit);
+  return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
+};
+// Row 22b's wage and hire fee raise the floor to 1.75; drop both to test a lower floor.
+const unpaid = (c: any) => {
+  delete c.world.group.wage;
+  delete c.dialogues[`${S}dialogue/hal_talk`].choices.hire.lesson_payment;
+};
+
 // Breaks: travel ignores the stay fact (Hal walks off after "stay") or the follow order does not
 // clear it.
 test('a hired Hal follows; stay keeps him in the yard; follow brings him along again', () => {
@@ -145,22 +167,12 @@ test('a holding hireling is still no Attack target', () => {
 // Breaks (twin of test/loka/content_group_test.exs): the loader admits stay or fight under API
 // 1.72, an unknown stay fact or a fight fact that is not a pair fact.
 test('the loader keeps stay and fight to API 1.73 and bool pair facts', () => {
-  const reload = (edit: (c: any) => void) => {
-    const c = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
-    edit(c);
-    const canonical = encode(c);
-    const sha256 = createHash('sha256').update(canonical).digest('hex');
-    const r = loadCartridge(
-      new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-      INSTALLED,
-    );
-    return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
-  };
   const api = ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'];
   const cases: [(c: any) => void, unknown][] = [
     [() => {}, 'loaded'],
     [
       (c) => {
+        unpaid(c);
         c.manifest.requires.kernel_api.at_least = '1.72';
         delete c.world.group.fight;
       },
@@ -168,6 +180,7 @@ test('the loader keeps stay and fight to API 1.73 and bool pair facts', () => {
     ],
     [
       (c) => {
+        unpaid(c);
         c.manifest.requires.kernel_api.at_least = '1.72';
         delete c.world.group.stay;
       },
@@ -180,6 +193,153 @@ test('the loader keeps stay and fight to API 1.73 and bool pair facts', () => {
     [
       (c) => (c.world.group.fight.key = 'goblin_slain'),
       ['SCHEMA_VIOLATION', '.cartridge.world.group.fight'],
+    ],
+  ];
+  for (const [edit, expected] of cases) assert.deepEqual(reload(edit), expected);
+});
+
+// Toolbox row 22b: a 3-coin hire fee and a wage of 3 coins every 86400 (player starts at 10,
+// Hal at 0).
+const coins = (w: World, e: EntityId) => level(w, e, resourceRef(w, 'coins'));
+const hired = (w: World, who = 'hal') => value(w, w.character, fact('hired'), npc(w, who));
+const elapse = (w: World, until: number) => {
+  const run_id = `aaaaaaaa-0000-4000-8000-${String(++n).padStart(12, '0')}`;
+  const from = w.state.clock;
+  const payload = { type: 'elapsed', actor_id: w.character, run_id, from, until };
+  const command = { id: elapsedCommandId(run_id, w.context, from, until), payload };
+  return ok(stepElapsed(w, { ...command, world_context_id: w.context } as never, n));
+};
+const withRow = (w: World, e: EntityId, res: string, v: number): World => {
+  const at = key({ kind: 'resource', entity_id: e, resource: resourceRef(w, res) });
+  const resources = { ...w.state.resources, [at]: { ...w.state.resources![at]!, value: v } };
+  return { ...w, state: { ...w.state, resources } };
+};
+const hireRefusal = (w: World, who = 'hal') => {
+  const talked = act(w, { type: 'talk', target_id: npc(w, who) });
+  const [continuation_id] = pending(talked, talked.character)!;
+  const r = play(talked, { type: 'choose', choice_id: 'hire', continuation_id }).decision;
+  return r.kind === 'rejected' && r.error.code;
+};
+const DAY = 86400;
+
+// Breaks: the fee is not paid, a broke player is hired anyway, or a clock-0 world births no
+// player coins row (transfer then refuses every hire).
+test('hiring Hal costs 3 coins; a player with 2 is refused', () => {
+  let w = chat(fresh(), 'hal', 'hire');
+  assert.deepEqual([coins(w, w.body), coins(w, npc(w, 'hal')), hired(w)], [7, 3, true]);
+  w = withRow(fresh(), fresh().body, 'coins', 2);
+  assert.equal(hireRefusal(w), 'insufficient_resource');
+  assert.deepEqual([coins(w, w.body), hired(w)], [2, false]);
+});
+
+// Breaks: the wage is not paid, an unpaid member keeps member true (Hal follows north), or a
+// wage runs once nobody is a member.
+test('a daily wage settles each day; unpaid, Hal leaves and stays behind', () => {
+  let w = chat(fresh(), 'hal', 'hire');
+  const C0 = fresh().state.clock;
+  const hal = npc(w, 'hal');
+  w = elapse(w, C0 + DAY);
+  assert.deepEqual([coins(w, w.body), coins(w, hal)], [4, 6], 'day 1');
+  w = elapse(w, C0 + 2 * DAY);
+  assert.deepEqual([coins(w, w.body), coins(w, hal)], [1, 9], 'day 2');
+  w = elapse(w, C0 + 3 * DAY);
+  assert.deepEqual([coins(w, w.body), coins(w, hal), hired(w)], [1, 9, false], 'day 3: unpaid');
+  w = act(w, { type: 'move', direction: 'north' });
+  assert.deepEqual(where(w, 'hal'), [room(w, 'yard')]);
+  w = elapse(w, C0 + 4 * DAY);
+  assert.deepEqual([coins(w, w.body), coins(w, hal), hired(w)], [1, 9, false], 'day 4');
+  w = act(w, { type: 'move', direction: 'south' });
+  assert.equal(hireRefusal(w), 'insufficient_resource', 're-hire with 1 coin');
+});
+
+// Breaks: the next wage is scheduled from the old due time's row rather than this run, or a due
+// the same advance crosses is skipped or paid twice.
+test('one delivery across two dues pays exactly two wages', () => {
+  const C0 = fresh().state.clock;
+  const w = elapse(chat(fresh(), 'hal', 'hire'), C0 + 2 * DAY);
+  assert.deepEqual([coins(w, w.body), coins(w, npc(w, 'hal'))], [1, 9]);
+});
+
+// Breaks: a wage is paid with no member, or the job is not rescheduled on the world's grid.
+test('never hired: two days pay nothing and the wage job stays pending', () => {
+  const C0 = fresh().state.clock;
+  const w = elapse(fresh(), C0 + 2 * DAY);
+  assert.deepEqual([coins(w, w.body), coins(w, npc(w, 'hal'))], [10, 0]);
+  const wage = Object.values(w.state.jobs!).filter(
+    (j) => j.job.kind === 'wage' && j.status === 'pending',
+  );
+  assert.deepEqual(
+    wage.map((j) => j.due_time),
+    [C0 + 3 * DAY],
+  );
+});
+
+// Breaks: a dead member is paid or dismissed.
+test('a dead hireling is skipped: not paid, still hired', () => {
+  let w = chat(fresh(), 'hal', 'hire');
+  const C0 = fresh().state.clock;
+  w = elapse(withRow(w, npc(w, 'hal'), 'hp', 0), C0 + DAY);
+  assert.deepEqual([coins(w, w.body), hired(w)], [7, true]);
+});
+
+// Breaks: two transfers from one purse (each writes from the same value), the balance is not
+// a running one, or a member whose row is full does not end the paid prefix. Ivy is a clone of Hal with a higher EntityId.
+test('two hirelings: a running balance pays an EntityId-order prefix', () => {
+  const r = edited((c) => {
+    c.npcs[`${S}npc/ivy`] = { ...c.npcs[`${S}npc/hal`], key: 'ivy' };
+    const talk = structuredClone(c.dialogues[`${S}dialogue/hal_talk`]);
+    talk.key = 'ivy_talk';
+    talk.npc.key = 'ivy';
+    talk.roles.hal.npc.key = 'ivy';
+    c.dialogues[`${S}dialogue/ivy_talk`] = talk;
+  });
+  assert.ok(r.ok, JSON.stringify(r));
+  n = 0;
+  let w = newWorld(r.cartridge as Cartridge, fresh().context, [1, 2, 3, 4]);
+  const C0 = w.state.clock;
+  const [hal, ivyId] = [npc(w, 'hal'), npc(w, 'ivy')];
+  assert.ok(hal < ivyId);
+  w = withRow(chat(chat(w, 'hal', 'hire'), 'ivy', 'hire'), w.body, 'coins', 7);
+  w = elapse(w, C0 + DAY);
+  const state = () => [coins(w, w.body), coins(w, hal), coins(w, ivyId), hired(w), hired(w, 'ivy')];
+  assert.deepEqual(state(), [1, 6, 6, true, true], '7 coins pay both');
+  w = withRow(w, w.body, 'coins', 4);
+  w = elapse(w, C0 + 2 * DAY);
+  assert.deepEqual(state(), [1, 9, 6, true, false], '4 coins pay Hal only');
+  w = withRow(chat(withRow(w, w.body, 'coins', 10), 'ivy', 'hire'), hal, 'coins', 100);
+  w = elapse(w, C0 + 3 * DAY);
+  assert.deepEqual(state(), [7, 100, 9, false, false], 'a full Hal ends the paid prefix');
+});
+
+// Breaks (twin of test/loka/content_group_test.exs): the loader admits an unknown or regenerating
+// wage resource, a wage under API 1.74, or a skill-less hire fee under API 1.74.
+test('the loader keeps the wage to API 1.75 and a conserved resource; a skill-less fee to 1.75', () => {
+  const api = ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'];
+  const at = '.cartridge.world.group.wage.resource';
+  const hire = (c: any) => c.dialogues[`${S}dialogue/hal_talk`].choices.hire;
+  const cases: [(c: any) => void, unknown][] = [
+    [(c) => (c.world.group.wage.resource.key = 'gold'), ['UNRESOLVED_REFERENCE', at]],
+    [(c) => (c.world.group.wage.resource.key = 'hp'), ['SCHEMA_VIOLATION', at]],
+    [
+      (c) => {
+        c.manifest.requires.kernel_api.at_least = '1.74';
+        delete hire(c).lesson_payment;
+      },
+      api,
+    ],
+    [
+      (c) => {
+        c.manifest.requires.kernel_api.at_least = '1.74';
+        delete c.world.group.wage;
+      },
+      api,
+    ],
+    [
+      (c) => {
+        c.manifest.requires.kernel_api.at_least = '1.74';
+        unpaid(c);
+      },
+      'loaded',
     ],
   ];
   for (const [edit, expected] of cases) assert.deepEqual(reload(edit), expected);

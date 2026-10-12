@@ -30,6 +30,7 @@ import { CLOCK_JOB, entered, jobId, nextHour, placeOf, runClock, scheduleOf } fr
 import { assigned, adjusted } from '../fact.ts';
 import { runPopulation } from '../population/shared.ts';
 import { runReplenish } from '../containment/job.ts';
+import { runWage } from '../escort/job.ts';
 import { binding as crowBinding, runCrow } from '../crow/behavior.ts';
 import { runBleed } from '../bleed/job.ts';
 import { runStatus } from '../status/job.ts';
@@ -74,6 +75,8 @@ export const decideAt = (
       return runPopulation(world, command, payload.job_id, row, mint, at);
     if (row.job.kind === 'replenish')
       return runReplenish(world, payload.job_id, row, mint, steps, at ?? row.due_time);
+    if (row.job.kind === 'wage')
+      return runWage(world, payload.job_id, row, mint, at ?? row.due_time);
     return scheduledJob(world, command, payload.job_id, row, mint, steps, at ?? row.due_time);
   }
   return advance(world, payload);

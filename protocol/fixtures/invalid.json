@@ -25877,6 +25877,106 @@
     ]
   },
   {
+    "contract": "WorldSettings",
+    "value": {
+      "group": {
+        "member": {
+          "cartridge_id": "hireling_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "fact",
+          "key": "hired"
+        },
+        "wage": {
+          "x": 1
+        }
+      }
+    },
+    "errors": [
+      {
+        "path": "/group/wage/amount",
+        "code": "missing_property"
+      },
+      {
+        "path": "/group/wage/every",
+        "code": "missing_property"
+      },
+      {
+        "path": "/group/wage/resource",
+        "code": "missing_property"
+      },
+      {
+        "path": "/group/wage/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "WorldSettings",
+    "value": {
+      "group": {
+        "member": {
+          "cartridge_id": "hireling_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "fact",
+          "key": "hired"
+        },
+        "wage": {
+          "resource": {
+            "cartridge_id": "hireling_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "resource",
+            "key": "coins"
+          },
+          "amount": 0,
+          "every": 1.5
+        }
+      }
+    },
+    "errors": [
+      {
+        "path": "/group/wage/amount",
+        "code": "below_minimum"
+      },
+      {
+        "path": "/group/wage/every",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "contract": "WorldSettings",
+    "value": {
+      "group": {
+        "member": {
+          "cartridge_id": "hireling_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "fact",
+          "key": "hired"
+        },
+        "wage": {
+          "resource": {
+            "cartridge_id": "hireling_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "resource",
+            "key": "coins"
+          },
+          "amount": 1.5,
+          "every": 0
+        }
+      }
+    },
+    "errors": [
+      {
+        "path": "/group/wage/amount",
+        "code": "invalid_type"
+      },
+      {
+        "path": "/group/wage/every",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
     "contract": "PopulationPlan",
     "value": {
       "key": "bandits",
