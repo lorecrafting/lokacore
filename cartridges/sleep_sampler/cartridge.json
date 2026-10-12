@@ -21,7 +21,8 @@
       "policy": 1,
       "reaction": 1,
       "schedule": 1,
-      "status": 1
+      "status": 1,
+      "description_variant": 1
     },
     "client_features": []
   },

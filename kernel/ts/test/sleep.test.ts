@@ -86,13 +86,16 @@ const won = () => {
 };
 
 // Breaks: the Sleep provocation (the PM's provisional answer, loka-kgd.119) is dropped, or Rest
-// and Sit provoke too. Reverting that one `engage` call fails exactly this test.
+// and Sit provoke too (reverting that one `engage` call fails this test and the double-damage
+// one, which needs it); or a sleeper in the fight loses Look or may Flee.
 test('a Sleep beside the hostile hound opens the fight with its engage line; Rest and Sit do not', () => {
   const r = play(fresh(), { type: 'sleep' });
   const w = ok(r);
   assert.ok(engaged(w, w.body), 'the encounter is open');
   assert.ok(said(r).includes('npc.hound.engage'), String(said(r)));
   assert.equal(w.state.clock, 0, 'Sleep passes no time');
+  assert.deepEqual(verbs(w), ['look', 'stand'], 'both filters: the fight and the sleeper');
+  assert.equal(code(play(w, { type: 'flee' })), 'invalid_state');
   for (const type of ['rest', 'sit']) {
     const quiet = act(fresh(), { type });
     assert.equal(engaged(quiet, quiet.body), undefined, type);
@@ -111,10 +114,10 @@ test("the provoked hound's first bite doubles on the sleeper and wakes it", () =
 
 // Breaks: the sleeper filter is missing (Take offered and accepted asleep) or drops a position
 // verb, or a sleeper's refusal is not invalid_state.
-test('a sleeper is offered only the position verbs and Move; Take and Move are invalid_state', () => {
+test('a sleeper is offered only Look, the position verbs and Move; Take and Move are invalid_state', () => {
   const asleep = act(won(), { type: 'sleep' });
   assert.equal(engaged(asleep, asleep.body), undefined, 'no living hound: no fight');
-  assert.deepEqual(verbs(asleep), ['move', 'rest', 'sit', 'stand']);
+  assert.deepEqual(verbs(asleep), ['look', 'move', 'rest', 'sit', 'stand']);
   assert.equal(code(play(asleep, { type: 'take', item_id: stone(asleep) })), 'invalid_state');
   assert.equal(code(play(asleep, { type: 'move', direction: 'east' })), 'invalid_state');
   const awake = act(asleep, { type: 'stand' });
