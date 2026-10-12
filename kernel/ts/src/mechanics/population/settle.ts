@@ -1,5 +1,7 @@
 import type { CommandId, DefinitionRef, DeltaOp, EntityId } from '../../contracts.gen.ts';
 import { key } from '../../foundation/compose.ts';
+import { KernelError } from '../../foundation/error.ts';
+import { uniform } from '../../foundation/rng.ts';
 import { refString, type JobRow, type Mint, type World } from '../../runtime/decision.ts';
 import { engaged } from '../combat/shared.ts';
 import { living } from '../death/shared.ts';
@@ -25,18 +27,46 @@ export function births(
   const ops: DeltaOp[] = [];
   const ids = new Set<string>();
   for (const { slot, row } of slots) {
-    if (
-      slot > target ||
-      (row.member_id !== null && row.replacement_due === null) ||
-      (row.replacement_due !== null && row.replacement_due > job.due_time)
-    )
-      continue;
+    if (!eligible(slot, row, target, job.due_time)) continue;
     const born = birthSlot(world, occurrence_id, job, slot, row, mint);
     ops.push(...born.ops);
     ids.add(born.member_id);
   }
   return { ops, ids };
 }
+/** A slot within the target with no living member whose replacement is due by `due`. */
+export const eligible = (slot: number, row: Slots[number]['row'], target: number, due: number) =>
+  slot <= target &&
+  (row.member_id === null || row.replacement_due !== null) &&
+  (row.replacement_due === null || row.replacement_due <= due);
+
+/**
+ * Births at one plan occurrence with the RNG after it. An encounter plan (toolbox row 9) draws one
+ * uniform(100) per wander-boundary opportunity with an eligible slot; a roll below `chance` births
+ * the first eligible slot only. An ecology plan births every eligible slot and draws nothing.
+ */
+export function encounter(
+  world: World,
+  occurrence_id: CommandId,
+  job: JobRow,
+  target: number,
+  slots: Slots,
+  mint: Mint,
+  boundary: boolean,
+) {
+  const plan = world.populationSpecs[key(job.job)]!.plan;
+  const rng = world.state.rng;
+  if (!plan.chance) return { ...births(world, occurrence_id, job, target, slots, mint), rng };
+  const first = slots.find(
+    ({ slot, row }) => boundary && eligible(slot, row, target, job.due_time),
+  );
+  if (!first) return { ops: [] as DeltaOp[], ids: new Set<string>(), rng };
+  if (!rng) throw new KernelError('precondition_failed');
+  const [roll, after] = uniform(rng, 100, 8);
+  const born = births(world, occurrence_id, job, target, roll < plan.chance ? [first] : [], mint);
+  return { ...born, rng: after };
+}
+
 function birthSlot(
   world: World,
   occurrence_id: CommandId,

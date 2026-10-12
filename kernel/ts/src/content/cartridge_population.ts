@@ -1,5 +1,6 @@
 import type { DefinitionRef, Diagnostic } from '../contracts.gen.ts';
 import { refString } from '../runtime/decision.ts';
+import { apiCmp } from './cartridge_installed.ts';
 import { diag, step, type Obj } from './cartridge_refs.ts';
 
 const ref = (r: Obj) => refString(r as DefinitionRef);
@@ -14,8 +15,13 @@ const opposite: Record<string, string> = {
 
 /** Loader twin of the compiler's narrow two-room, one-hound/one-pelt plan check. */
 export function population(c: Obj): Diagnostic[] {
-  const out: Diagnostic[] = [];
   const plans = c.populations ?? {};
+  // Toolbox row 9: an encounter plan (`chance`) needs kernel_api 1.74.
+  const out: Diagnostic[] =
+    (Object.values(plans) as Obj[]).some((p) => p.chance !== undefined) &&
+    apiCmp(c.manifest.requires.kernel_api.at_least, '1.74') < 0
+      ? [diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least')]
+      : [];
   for (const [planRef, p] of Object.entries(plans) as [string, Obj][]) {
     const at = `.cartridge.populations${step(planRef)}`;
     const bundle = c.population_bundles?.[ref(p.bundle)];

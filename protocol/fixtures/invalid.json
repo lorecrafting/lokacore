@@ -25696,5 +25696,143 @@
         "code": "unknown_property"
       }
     ]
+  },
+  {
+    "contract": "PopulationPlan",
+    "value": {
+      "key": "bandits",
+      "bundle": {
+        "cartridge_id": "encounter_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "population_bundle",
+        "key": "bandits"
+      },
+      "home": {
+        "cartridge_id": "encounter_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "room",
+        "key": "road"
+      },
+      "area": [
+        {
+          "cartridge_id": "encounter_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "road"
+        },
+        {
+          "cartridge_id": "encounter_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "crossroads"
+        }
+      ],
+      "cap": 1,
+      "day_target": 1,
+      "night_target": 1,
+      "night_start": 20,
+      "night_end": 6,
+      "replacement_delay": 3600,
+      "wander_interval": 3600,
+      "chance": 0
+    },
+    "errors": [
+      {
+        "path": "/chance",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "contract": "PopulationPlan",
+    "value": {
+      "key": "bandits",
+      "bundle": {
+        "cartridge_id": "encounter_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "population_bundle",
+        "key": "bandits"
+      },
+      "home": {
+        "cartridge_id": "encounter_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "room",
+        "key": "road"
+      },
+      "area": [
+        {
+          "cartridge_id": "encounter_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "road"
+        },
+        {
+          "cartridge_id": "encounter_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "crossroads"
+        }
+      ],
+      "cap": 1,
+      "day_target": 1,
+      "night_target": 1,
+      "night_start": 20,
+      "night_end": 6,
+      "replacement_delay": 3600,
+      "wander_interval": 3600,
+      "chance": 101
+    },
+    "errors": [
+      {
+        "path": "/chance",
+        "code": "above_maximum"
+      }
+    ]
+  },
+  {
+    "contract": "PopulationPlan",
+    "value": {
+      "key": "bandits",
+      "bundle": {
+        "cartridge_id": "encounter_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "population_bundle",
+        "key": "bandits"
+      },
+      "home": {
+        "cartridge_id": "encounter_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "room",
+        "key": "road"
+      },
+      "area": [
+        {
+          "cartridge_id": "encounter_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "road"
+        },
+        {
+          "cartridge_id": "encounter_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "crossroads"
+        }
+      ],
+      "cap": 1,
+      "day_target": 1,
+      "night_target": 1,
+      "night_start": 20,
+      "night_end": 6,
+      "replacement_delay": 3600,
+      "wander_interval": 3600,
+      "chance": "25"
+    },
+    "errors": [
+      {
+        "path": "/chance",
+        "code": "invalid_type"
+      }
+    ]
   }
 ]

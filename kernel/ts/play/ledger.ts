@@ -185,6 +185,7 @@ function populations(c: Obj) {
         day_target: p.day_target,
         night_target: p.night_target,
         replacement_delay: p.replacement_delay,
+        ...(p.chance && { chance: p.chance }),
         npc: refString(b.npc),
         ...(b.item && { item: refString(b.item) }),
         corpse: refString(b.corpse),
