@@ -1,4 +1,4 @@
-// size: allow 550, the explicit seed-picked corpus and the --cartridge fixture loader joined the generator
+// size: allow 560, seed-picked corpus, --cartridge loader and offers (reused by play/flows.ts)
 // Deterministic simulation (docs/ROADMAP.md, verification harness; r1-acceptance-envelope §3):
 // a seed picks a v2 demo cartridge (its known-answer artifact, through the loader), a start
 // world and 1 to 64 commands, generated against the world as it goes: mostly what the GameView
@@ -14,7 +14,7 @@ import { createHash } from 'node:crypto';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { encode, hash } from '../src/foundation/canonical.ts';
 import { compose, key, same } from '../src/foundation/compose.ts';
-import type { Command, DecisionResult, Key } from '../src/contracts.gen.ts';
+import type { Command, DecisionResult, GameView, Key } from '../src/contracts.gen.ts';
 import { id } from '../src/foundation/id_source.ts';
 import { INSTALLED, loadCartridge, newWorld, type Cartridge, type World } from '../src/index.ts';
 import { check } from '../src/runtime/invariants.ts';
@@ -105,8 +105,12 @@ export function loaded(artifact: string, name = 'cartridge'): Loaded {
 
 // The generator's own stream: the kernel's xoshiro128** over a state of its own (the seed's
 // SHA-256), never a world's.
-type Gen = { draw: () => number; int: (n: number) => number; pick: <T>(xs: readonly T[]) => T };
-function gen(seed: number): Gen {
+export type Gen = {
+  draw: () => number;
+  int: (n: number) => number;
+  pick: <T>(xs: readonly T[]) => T;
+};
+export function gen(seed: number): Gen {
   const b = createHash('sha256').update(`${SIM} ${seed}`).digest();
   let s: RngState = [0, 4, 8, 12].map((i) => b.readUInt32LE(i));
   const draw = () => {
@@ -315,7 +319,7 @@ function shared(world: World): string[] {
   return [...new Set(words.filter((w, i) => words.indexOf(w) !== i))];
 }
 
-type Payload = Record<string, unknown>;
+export type Payload = Record<string, unknown>;
 
 // The next command: 6 in 10 offered by the GameView, 2 stray, 1 a wait to a boundary, 1 a repeat.
 function generate(world: World, g: Gen, prev: Command | undefined, cid: Command['id']): Command {
@@ -336,9 +340,14 @@ function generate(world: World, g: Gen, prev: Command | undefined, cid: Command[
 // item), each wear and remove of the set on each held and worn item (likewise), each action on a
 // listed entity or an item inside one, and look at each detail of the room.
 function offered(world: World, g: Gen): Payload {
-  const view = gameView(world);
+  const options = offers(world, gameView(world), g);
+  return options.length ? g.pick(options) : { type: 'look' };
+}
+
+/** offered's candidates, drawing from `g` as offered does (play/flows.ts's worker reuses them). */
+export function offers(world: World, view: GameView, g: Gen): Payload[] {
   if (view.ancestry_choices?.length)
-    return { type: 'choose_ancestry', ancestry: g.pick(view.ancestry_choices).key };
+    return view.ancestry_choices.map((a) => ({ type: 'choose_ancestry', ancestry: a.key }));
   const set = resolved(world, world.character);
   const here = world.state.containers[world.body]!;
   const exits = Object.keys(world.rooms[here]!.exits);
@@ -387,7 +396,7 @@ function offered(world: World, g: Gen): Payload {
       );
   for (const [d, detail] of Object.entries(world.details))
     if (detail.room === here) options.push({ type: 'look', target_id: d });
-  return options.length ? g.pick(options) : { type: 'look' };
+  return options;
 }
 
 // A command of `type` at entity `id`, by its payload's field; give's recipient `to`.
