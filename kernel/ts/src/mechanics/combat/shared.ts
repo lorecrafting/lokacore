@@ -13,6 +13,8 @@ import { running } from '../scene/shared.ts';
 import { key } from '../../foundation/compose.ts';
 import { suppressed } from '../population/shared.ts';
 import { statusResistance } from '../status/shared.ts';
+import { member } from '../escort/shared.ts';
+import { npcsIn } from '../speech/shared.ts';
 
 /** One finite current encounter, shared by admission, escape, due jobs and projection. */
 export function engaged(world: World, body: EntityId) {
@@ -29,7 +31,12 @@ export function attackRefused(world: World, actor: CharacterId, target: EntityId
   if (!body) return 'not_found' as const;
   const npc = world.entities[target];
   if (!npc) return 'not_found' as const;
-  if (npc.kind !== 'npc' || !npc.attack || !world.cartridge.world?.combat || ally(world, target))
+  if (
+    npc.kind !== 'npc' ||
+    !npc.attack ||
+    !world.cartridge.world?.combat ||
+    ally(world, actor, target)
+  )
     return 'invalid_target' as const;
   const origin = world.state.created?.[target]?.origin;
   if (
@@ -63,18 +70,29 @@ export function retarget(world: World, body: EntityId, target: EntityId) {
     : undefined;
 }
 
-/** Toolbox row 6b: an authored NPC listed in world.combat.allies; never an attack target. */
-export function ally(world: World, id: EntityId | null) {
-  return !!world.cartridge.world?.combat?.allies?.some(
-    (ref) => world.entityIds[refString(ref)] === id,
+/** Toolbox row 6b: an authored NPC listed in world.combat.allies, or (row G8) a member of
+ * `actor`'s group; never an attack target. */
+export function ally(world: World, actor: CharacterId | null, id: EntityId | null) {
+  return (
+    !!world.cartridge.world?.combat?.allies?.some(
+      (ref) => world.entityIds[refString(ref)] === id,
+    ) ||
+    (!!actor && !!id && member(world, actor, id))
   );
 }
 
-/** The ally that strikes this round: the first listed one living in the encounter room. */
+/** The ally that strikes this round: the first listed one living in the encounter room, else
+ * the first group member there with an attack (EntityId order). */
 export function allyOf(world: World, row: EncounterRow) {
-  return world.cartridge.world?.combat?.allies
-    ?.map((ref) => world.entityIds[refString(ref)])
-    .find((id) => id && living(world, id) && world.state.containers[id] === row.room_id);
+  return (
+    world.cartridge.world?.combat?.allies
+      ?.map((ref) => world.entityIds[refString(ref)])
+      .find((id) => id && living(world, id) && world.state.containers[id] === row.room_id) ??
+    npcsIn(world, [row.room_id]).find((id) => {
+      const npc = world.entities[id];
+      return npc?.kind === 'npc' && !!npc.attack && member(world, row.character_id, id);
+    })
+  );
 }
 
 /** A kill ends the fight only on its last opponent: a pack fights on (its roster pruned at round end). */

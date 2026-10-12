@@ -13,6 +13,8 @@ import { same } from '../../foundation/compose.ts';
 import { KernelError } from '../../foundation/error.ts';
 import { living } from '../death/shared.ts';
 import { questOf } from '../lookups.ts';
+import { value } from '../fact.ts';
+import { npcsIn } from '../speech/shared.ts';
 
 /** Policy and journal selectors address this actor's exact quest instance. */
 export function stateIs(
@@ -118,25 +120,31 @@ function following(world: World, actor: CharacterId) {
   return escort;
 }
 
-/** Move and Flee use the same source, destination, writer group and admission. */
+/** Toolbox row G8: `npc` is in `actor`'s group while world.group.member is true for the pair. */
+export function member(world: World, actor: CharacterId, npc: EntityId) {
+  const fact = world.cartridge.world?.group?.member;
+  return !!fact && value(world, actor, fact, npc) === true;
+}
+
+/** Move and Flee use the same source, destination, writer group and admission; the escorted NPC
+ * and then the group's members in the source room (EntityId order) come along. */
 export function travel(
   world: World,
   actor: CharacterId,
   source_id: EntityId,
   destination_id: EntityId,
 ): DeltaOp[] {
-  const escort = following(world, actor);
-  return escort
-    ? [
-        {
-          op: 'entity.transfer',
-          writer_group: 0,
-          entity_id: escort.npc_id,
-          source_id,
-          destination_id,
-        },
-      ]
-    : [];
+  const escort = following(world, actor)?.npc_id;
+  const members = npcsIn(world, [source_id]).filter(
+    (id) => id !== escort && member(world, actor, id),
+  );
+  return [...(escort ? [escort] : []), ...members].map((entity_id) => ({
+    op: 'entity.transfer',
+    writer_group: 0,
+    entity_id,
+    source_id,
+    destination_id,
+  }));
 }
 
 /** Fatal player death returns the body alone; the bound NPC remains in the death room. */
