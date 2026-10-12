@@ -24,6 +24,8 @@ const SITES: [string, RegExp][] = [
     /^\.(expedition\.(survived_fact|faction)|exchange\.(contribution|faction)|deadline\.(fact|trust_fact))$/,
   ],
   ['ancestries', /^\.[a-z0-9_]+\.faction\.fact$/],
+  ['item', /^\.weapon\.durability\.fact$/],
+  ['service', /^\.benefit\.fact$/],
 ];
 const isWrite = (e: Edge) =>
   e.op === 'fact.assign' ||
