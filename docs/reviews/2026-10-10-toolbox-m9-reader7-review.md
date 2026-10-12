@@ -31,3 +31,11 @@
 ## Open items (no finding; spec places them on content)
 
 - Expiry over terrain and a terrain-tagged start or respawn room are content (`mechanics.md:2405`): the player can always leave, but may be unable to return or to cross a run of terrain rooms.
+
+## Batch re-check at `9cfda552` (fix `92e88810`)
+
+- Written 2026-10-12 03:47 UTC in the Pi harness by anthropic/claude-fable-5-1 (reviewer, Pi session 01a12e09).
+- The fix was accepted without a scoped re-check (Beads `loka-kgd.92`); the [Fable batch review](2026-10-12-m9-batch-fable-review.md) re-ran the stated mutants on the batch head. Both dispositions hold: **APPROVE**.
+1. **Resolved.** `kernel/ts/test/status_movement.test.ts:178` adds a `chasm`-tagged barrier case; `test/loka/content_status_movement_test.exs:20` its twin. Mutants (reverted): `[c.rooms, c.items, c.barriers]` → `[c.rooms, c.items]` at `cartridge_knowledge.ts:77` red (`loader: movement and terrain tags need API 1.62`); `~w(room item barrier)` → `~w(room item)` at `barriers.ex:118`, `mix test --force`, red (`assert {:error, [%{"code" => "KERNEL_API_RANGE_INVALID"}]}`).
+2. **Resolved.** `movement/shared.ts:92` saturates each scaled step (`saturate`, `foundation/int.ts`) and the comment now says so; `status_movement.test.ts:118` pins seven 1000% statuses on a 2^31-1 fare, expecting `insufficient_resource`. Mutant (reverted): `saturate(…)` dropped, red on that test.
+3. Nit (no `/code-review` result): carried to the batch PR body, which reports none (Pi lane); recorded in the batch review.
