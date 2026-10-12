@@ -416,6 +416,45 @@ canonical JSON document `{levels, items}`. Every bonus is the engine's
   and allocation sweeps (I3, I6, C2) are `loka-kgd.107.10`'s, the slot budget (I2)
   `loka-kgd.107.17`'s; where an item is found and its price (NPC shop stock, not the item) wait for a consumer of the graph above.
 
+### Economy and ecology ledger (balance tool 1)
+
+Balance tool 1 ([study](../rnd/balance-diagnostics-2026-10-11.md) §0, §5, §12-13; Beads
+`loka-kgd.107.1`) answers where coins and items come from and go, and what lives and regrows.
+`node kernel/ts/play/ledger.ts <artifact>` loads and refuses as `reach.ts` above, otherwise prints
+one canonical JSON document `{currencies, coins, items, ecology}` and exits 0. Nothing is
+committed or checked in CI. Refs are DefinitionRefStrings.
+
+- **Currencies.** Every resource a shop's `resource`, a service's or transport's `currency`, or a
+  dialogue choice's `payment.resource` or `lesson_payment.resource` names, each `{resource,
+  player_start, maximum, purses, supply}`: its `start` and `maximum`, `purses` each NPC's
+  `resource_starts` for it by NPC ref, and `supply` the player start plus every purse. Coins are
+  conserved transfers between the player and NPC purses (`transfer` in
+  `mechanics/resource.ts`), so a faucet is bounded by the paying NPC's purse; stated, never
+  simulated.
+- **Rows.** Each row is `{site, ref, ...}`: `ref` the definition of the site, `npc` the NPC on the
+  other side, `resource` and `amount` for coins. `coins.sinks`: `shop_buy` (ref the shop's NPC,
+  `item`, amount its `buy`, the shop's `buy_discount` as authored), `service` (`npc` its provider,
+  amount its `price`, `stock` the provider's `resource_starts` for its `benefit.stock` when
+  present), `transport` (`npc` its recipient, amount its `fare`), `lesson` (ref the dialogue,
+  `choice`, `npc` its `lesson_payment.to` role). `coins.faucets`: `shop_sell` (ref the NPC,
+  `item`, amount its `sell`), `payment` (ref the dialogue, `choice`, `npc` its `payment.from`
+  role, `through` its `availability.through` when present). `coins.unclassified`: every graph
+  edge (`contentGraph` above) to a currency at any other path, `{from, path, resource}`, so a new
+  paying mechanic shows.
+- **Items.** `items.faucets`: `receive` (ref the dialogue, `choice`, `item` and `npc` its roles),
+  `drop` (ref the NPC, `item`, `chance`). `items.sinks`: `hand_over` (ref the dialogue, `choice`,
+  `item` and `npc` its roles), `edible` (ref the item, `resource`, `amount`).
+- **Ecology.** `populations`: each plan `{ref, home, area, cap, day_target, night_target,
+  replacement_delay, npc, item?, corpse}`, the last three from its bundle; a replacement is the
+  only thing that mints an item. `seams`: each harvest detail `{room, detail, items, tool?,
+  careful?}`: the count of its items (seams never regrow), its tool's tag, its careful count.
+- Lists sort by site, then ref, then choice, then item; currencies by resource, unclassified by
+  from then path, populations by ref, seams by room then detail. ponytail: authored static sites
+  only; no per-day caps exist; replenish and decay are not built, so none is reported; death
+  moves custody with no coin penalty; per-district grouping waits for L8 tags; placed items stay
+  with `reach.ts`; corpse custody, crow scavenge, quest exchange and coin-like items are not
+  money rows.
+
 ## Installed capabilities
 
 `INSTALLED` in `kernel/ts/src/runtime/world.ts` declares the current kernel API,
