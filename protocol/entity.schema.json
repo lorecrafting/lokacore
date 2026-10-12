@@ -201,6 +201,10 @@
             "$ref": "#/$defs/ItemAffect"
           }
         },
+        "identified": {
+          "description": "Toolbox row 27: a boolean fact, not per_subject; the item is identified while it reads true for the player, and GameView worn sums identified items only (needs affects, kernel_api at least 1.68).",
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
         "barrier": {
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },

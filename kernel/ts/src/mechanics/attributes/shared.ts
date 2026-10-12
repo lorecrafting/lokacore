@@ -9,6 +9,7 @@ import type {
 import { key } from '../../foundation/compose.ts';
 import { divide, saturate } from '../../foundation/int.ts';
 import { bodyOf, refString, values, type World } from '../../runtime/decision.ts';
+import { value as factValue } from '../fact.ts';
 import { activeStatuses, perceives } from '../status/shared.ts';
 
 export const initialValues = (world: World, ancestry: AncestrySpec) => {
@@ -47,13 +48,22 @@ function wornItems(world: World, actor: CharacterId) {
   });
 }
 
-/** The saturated sum of `attribute`'s affects on the items worn by the actor's body (row 3). */
-export function worn(world: World, actor: CharacterId, attribute: DefinitionRef) {
+/**
+ * The saturated sum of `attribute`'s affects on the items worn by the actor's body (row 3); with
+ * `identifiedOnly` (the GameView worn note, row 27), only items whose `identified` fact reads true.
+ */
+export function worn(
+  world: World,
+  actor: CharacterId,
+  attribute: DefinitionRef,
+  identifiedOnly = false,
+) {
   if (!Object.values(world.cartridge.items ?? {}).some((i) => i.affects)) return 0;
   const ref = refString(attribute);
   let sum = 0; // plain sums of 32-bit amounts stay exact
   for (const e of wornItems(world, actor))
-    for (const a of e.affects ?? []) if (refString(a.attribute) === ref) sum += a.modifier;
+    if (!identifiedOnly || !e.identified || factValue(world, actor, e.identified) === true)
+      for (const a of e.affects ?? []) if (refString(a.attribute) === ref) sum += a.modifier;
   return saturate(sum);
 }
 

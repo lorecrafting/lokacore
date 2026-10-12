@@ -1,0 +1,9 @@
+{
+  "keywords": [
+    "sage"
+  ],
+  "short": "npc.sage.short",
+  "room_line": "npc.sage.room",
+  "description": "npc.sage.description",
+  "room": "hall"
+}

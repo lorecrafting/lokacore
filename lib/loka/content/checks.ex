@@ -109,6 +109,10 @@ defmodule Loka.Content.Checks do
   def expand(%{"in" => k} = loc, m) when k in ~w(room npc item) and is_map_key(loc, k),
     do: Map.update!(loc, k, &ref(&1, k, m))
 
+  # Toolbox row 27: an item's identified fact.
+  def expand(%{"identified" => k, "location" => _} = item, m) when is_binary(k),
+    do: item |> Map.delete("identified") |> expand(m) |> Map.put("identified", ref(k, "fact", m))
+
   # An item's barrier (a container's lid, c1-locks); its location expands as above.
   def expand(%{"barrier" => k, "location" => _} = item, m) when is_binary(k),
     do: item |> Map.delete("barrier") |> expand(m) |> Map.put("barrier", ref(k, "barrier", m))
