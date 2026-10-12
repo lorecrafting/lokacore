@@ -6,7 +6,7 @@ defmodule Loka.Content.Services do
   defp service_benefit(b, m) do
     fields =
       case b["kind"] do
-        "entitlement" -> [{"fact", "fact"}]
+        k when k in ~w(entitlement repair) -> [{"fact", "fact"}]
         "meal" -> [{"stock", "resource"}, {"recovery", "resource"}]
         "drink" -> [{"vessel", "item"}, {"liquid", "liquid"}, {"recovery", "resource"}]
       end
@@ -49,7 +49,10 @@ defmodule Loka.Content.Services do
       |> String.split(".")
       |> Enum.map(&String.to_integer/1)
 
-    if declared != [] and minimum < [1, 23],
+    # Toolbox row 21: a repair benefit needs API 1.69.
+    repair = Enum.any?(declared, fn {_, s} -> s["benefit"]["kind"] == "repair" end)
+
+    if (declared != [] and minimum < [1, 23]) or (repair and minimum < [1, 69]),
       do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
       else: []
   end
@@ -85,9 +88,11 @@ defmodule Loka.Content.Services do
 
   defp service_texts(s) do
     reasons =
-      if s["benefit"]["kind"] == "entitlement",
-        do: ~w(service.unaffordable service.already_paid),
-        else: ~w(service.unaffordable service.full_mv service.sold_out)
+      case s["benefit"]["kind"] do
+        "entitlement" -> ~w(service.unaffordable service.already_paid)
+        "repair" -> ~w(service.unaffordable service.nothing_to_repair service.full_durability)
+        _ -> ~w(service.unaffordable service.full_mv service.sold_out)
+      end
 
     Enum.map(reasons, &{[], &1}) ++ Enum.map(~w(label narration), &{[&1], s[&1]})
   end
@@ -95,6 +100,12 @@ defmodule Loka.Content.Services do
   defp benefit(%{"kind" => "entitlement", "fact" => r}, _, _, m, defs) do
     f = resolved(r, "fact", m, defs)
     [{player_bool?(f) and f["value_type"]["default"] == false, ["benefit", "fact"]}]
+  end
+
+  # Toolbox row 21: a repair restores a fact some weapon's durability names.
+  defp benefit(%{"kind" => "repair", "fact" => r}, _, _, _, defs) do
+    named = for {_, {_, _, %{"weapon" => %{"durability" => d}}}} <- defs["item"], do: d["fact"]
+    [{r in named, ["benefit", "fact"]}]
   end
 
   defp benefit(b, npc, s, m, defs) do

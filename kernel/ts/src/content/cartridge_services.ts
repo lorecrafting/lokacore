@@ -1,13 +1,18 @@
 import { same } from '../foundation/compose.ts';
 import { refString } from '../runtime/decision.ts';
 import { checkers, diag, step, type Checks, type Obj } from './cartridge_refs.ts';
+import { apiCmp } from './cartridge_installed.ts';
 import type { Diagnostic } from '../contracts.gen.ts';
 
 export function services(c: Obj): Diagnostic[] {
   const out: Diagnostic[] = [],
     check = checkers(c, out);
   const [major, minor] = c.manifest.requires.kernel_api.at_least.split('.').map(Number);
-  if (Object.keys(c.services ?? {}).length && (major < 1 || (major === 1 && minor < 23)))
+  const repairs = Object.values((c.services ?? {}) as Obj).some((s) => s.benefit.kind === 'repair');
+  if (
+    (Object.keys(c.services ?? {}).length && (major < 1 || (major === 1 && minor < 23))) ||
+    (repairs && apiCmp(c.manifest.requires.kernel_api.at_least, '1.69') < 0)
+  )
     out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
   for (const [ref, s] of Object.entries((c.services ?? {}) as Obj))
     definition(c, s, ref, check, out);
@@ -29,10 +34,15 @@ function definition(c: Obj, s: Obj, ref: string, check: Checks, out: Diagnostic[
   if (c.lock.capabilities.service !== 1)
     out.push(diag('UNDECLARED_CAPABILITY', at, { capability: 'service' }, ['service@1']));
   check.text(s, ['label', 'narration'], at);
+  const kind = s.benefit.kind;
   const reasons = {
     payment: 'service.unaffordable',
-    headroom: s.benefit.kind === 'entitlement' ? 'service.already_paid' : 'service.full_mv',
-    ...(s.benefit.kind !== 'entitlement' && { stock: 'service.sold_out' }),
+    headroom:
+      { entitlement: 'service.already_paid', repair: 'service.full_durability' }[kind as string] ??
+      'service.full_mv',
+    ...(kind === 'repair'
+      ? { target: 'service.nothing_to_repair' }
+      : kind !== 'entitlement' && { stock: 'service.sold_out' }),
   };
   check.text(reasons, Object.keys(reasons), at);
   const npc = get(c, check, s.provider, 'npc', `${at}.provider`);
@@ -51,6 +61,12 @@ function definition(c: Obj, s: Obj, ref: string, check: Checks, out: Diagnostic[
         fact.value_type.default !== false ||
         !same(fact.scopes, ['player']))
     )
+      bad(out, `${at}.benefit.fact`);
+  } else if (b.kind === 'repair') {
+    // Toolbox row 21: a repair restores a fact some weapon's durability names.
+    get(c, check, b.fact, 'fact', `${at}.benefit.fact`);
+    const items = Object.values((c.items ?? {}) as Obj);
+    if (!items.some((i) => i.weapon?.durability && same(i.weapon.durability.fact, b.fact)))
       bad(out, `${at}.benefit.fact`);
   } else {
     const recovery = get(c, check, b.recovery, 'resource', `${at}.benefit.recovery`);
