@@ -272,6 +272,9 @@ defmodule Loka.Content.Checks do
       |> expand(m)
       |> Map.put("liquid_source", ref(k, "liquid", m))
 
+  def expand(%{"ammo" => a} = ranged, m) when is_binary(a),
+    do: Map.put(ranged, "ammo", ref(a, "resource", m))
+
   def expand(v, m) when is_map(v),
     do: v |> Map.new(fn {k, x} -> {k, expand(x, m)} end) |> Loka.Content.Services.bed(m)
 

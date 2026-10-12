@@ -41,6 +41,8 @@ export type Round = {
   steps: { n: number };
   due_time: number;
   notes: Text[];
+  /** Toolbox row 17: the player's opportunity this round was a shot; the foe's is skipped. */
+  shot?: boolean;
 };
 
 /** Current encounter occurrence only; an obsolete callback has no gameplay result. */
@@ -91,7 +93,7 @@ export function roundSequence(
   ordinaryRound(world, command, job, row, encounter_id, r, close, mint);
   if (r.ops.some((op) => op.op === 'encounter.close'))
     r.ops.push(...crowSettled(prefix(world, r.ops, job.due_time), row.npc_id, mint));
-  const narration = [...narrate(world, row, r.events), ...r.notes];
+  const narration = [...narrate(world, row, r.events, r.shot), ...r.notes];
 
   const timed = r.ops.map((op) => (op.op === 'resource.adjust' ? { ...op, at: job.due_time } : op));
   return accepted(world, 'job_ran', timed, r.events, narration, r.rng);
@@ -116,6 +118,7 @@ function ordinaryRound(
       if (!participantsPresent(at, row) || at.state.encounters![encounter_id].status !== 'open')
         break;
       if (attacker === row.body_id && !standing(at, row.character_id)) continue;
+      if (attacker === row.npc_id && r.shot) continue;
       attack(at, command, mint, encounter_id, row, attacker, r, close);
     }
     if (prefix(world, r.ops, r.due_time).state.encounters![encounter_id].status === 'open')

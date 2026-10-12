@@ -1,6 +1,7 @@
 import { status } from '../skills.ts';
 import type {
   AttackProfile,
+  DefinitionRef,
   DerivedStat,
   Tag,
   WorldSettings,
@@ -60,8 +61,8 @@ export function attack(
   const foe = !player && !ally(world, attacker_id);
   if ((!player && !foe && !allyFits(r)) || !statusAllows(world, attacker_id)('attack')) return;
   const target_id = foe ? row.body_id : row.npc_id;
-  const settings = world.cartridge.world!.combat!;
   const profile = attackProfile(world, row, attacker_id, player, r);
+  if (profile.ammo) shoot(world, row, profile.ammo, r);
   const roll = draw(r, 100);
   const accurate = roll < profile.chance;
   const prevented_by = accurate && foe ? defend(world, row, r) : undefined;
@@ -70,7 +71,7 @@ export function attack(
   const damage = hit ? dealt(world, target_id, profile, roll, damageRoll(r, profile)) : 0;
   const loss = Math.min(
     level(world, target_id, resourceRef(world, 'hp'))!,
-    mul(damage, sleeping ? settings.sleep_multiplier : 1),
+    mul(damage, sleeping ? world.cartridge.world!.combat!.sleep_multiplier : 1),
   );
   r.events.push(
     attackEvent(world, command, mint, ++r.position, {
@@ -85,6 +86,12 @@ export function attack(
   );
   if (!loss) return;
   injure(world, command, mint, row, attacker_id, target_id, loss, sleeping, r, close);
+}
+
+// Toolbox row 17: a shot spends one of the body's ammo pool and makes the foe wait this round.
+function shoot(world: World, row: EncounterRow, ammo: DefinitionRef, r: Round) {
+  r.ops.push({ ...adjust(world, row.body_id, ammo, -1, {}).op, at: r.due_time });
+  r.shot = true;
 }
 
 function damageRoll(r: Round, profile: AttackProfile) {
@@ -207,7 +214,8 @@ function equipped(world: World, body: EntityId, slot: string) {
   return item && item.kind === 'item' ? item : undefined;
 }
 
-type Profile = AttackProfile & { tags?: readonly Tag[] };
+// `ammo`: the pool a row 17 shot spends; set only on the player's shot profile.
+type Profile = AttackProfile & { tags?: readonly Tag[]; ammo?: DefinitionRef };
 
 function attackProfile(
   world: World,
@@ -227,10 +235,14 @@ function attackProfile(
       : npc.attack;
   const wielded = equipped(world, row.body_id, 'wield');
   const weapon = wielded?.weapon;
+  const usable = weapon && status(world, row.character_id, weapon.skill, r.steps).usable;
+  // Toolbox row 17: a ranged weapon strikes only as round 1's shot, while its ammo pool holds one.
+  const ammo = weapon?.ranged?.ammo;
+  const shot = usable && ammo && row.round === 1 && level(world, row.body_id, ammo)! >= 1;
   // Only the weapon's own attack carries its material tags (toolbox row G2, PM ruling).
   const base: Profile =
-    weapon && status(world, row.character_id, weapon.skill, r.steps).usable
-      ? { ...weapon.attack, tags: wielded.tags }
+    usable && (!ammo || shot)
+      ? { ...weapon.attack, tags: wielded.tags, ...(shot && { ammo }) }
       : world.cartridge.world!.combat!.player_attack;
   return table ? bonused(base, table, (s) => derived(world, row.character_id, s)) : base;
 }

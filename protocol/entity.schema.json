@@ -1088,6 +1088,19 @@
         },
         "attack": {
           "$ref": "entity.schema.json#/$defs/AttackProfile"
+        },
+        "ranged": {
+          "type": "object",
+          "properties": {
+            "ammo": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            }
+          },
+          "required": [
+            "ammo"
+          ],
+          "additionalProperties": false,
+          "description": "Toolbox row 17: the weapon shoots in an encounter's round 1, spending one of the body's ammo resource pool; it never strikes in melee."
         }
       },
       "required": [

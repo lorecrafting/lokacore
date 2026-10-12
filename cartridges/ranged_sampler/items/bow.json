@@ -1,0 +1,26 @@
+{
+  "keywords": [
+    "bow"
+  ],
+  "short": "item.bow.short",
+  "room_line": "item.bow.room",
+  "description": "item.bow.description",
+  "location": {
+    "in": "room",
+    "room": "hall"
+  },
+  "mass_grams": 500,
+  "slot": "wield",
+  "weapon": {
+    "skill": "archery",
+    "attack": {
+      "chance": 100,
+      "damage_min": 4,
+      "damage_max": 4,
+      "kind": "physical"
+    },
+    "ranged": {
+      "ammo": "arrows"
+    }
+  }
+}
