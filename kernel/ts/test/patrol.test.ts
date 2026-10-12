@@ -4,7 +4,7 @@ import { gameView, stepElapsed } from '../src/index.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { value } from '../src/mechanics/fact.ts';
 import { journey, patrol, npc, room, ref, fresh } from './patrol_fixture.ts';
-import { hp } from './combat_fixture.ts';
+import { hp, rooted } from './combat_fixture.ts';
 
 // Breaks: leader departures earn player credit, connector repeats count twice, or success grants a skill/item/payment.
 test('original leader earns zero until real player joins four unique checkpoints', () => {
@@ -93,6 +93,36 @@ test('ordinary detour requires explicit Rejoin and fresh drawn continuation stat
   assert.deepEqual(stale.decision, { kind: 'rejected', error: { code: 'invalid_state' } });
   assert.equal(stale.world, before);
   assert.equal(gameView(a.world).choice!.closable, true);
+});
+
+// Breaks (loka-kgd.102, status reader 4): patrol Continue walks a leader whose statuses bar `move`.
+test('Continue is refused while the leader is rooted', () => {
+  const a = journey(rooted(fresh, npc(fresh)));
+  a.start();
+  a.run({
+    type: 'talk',
+    target_id: npc(a.world),
+    dialogue: ref(a.world, 'dialogue', 'tobin_watch'),
+  });
+  const continuation_id = Object.entries(a.world.state.choices!).find(
+    ([, c]) => c.status === 'pending',
+  )![0];
+  const p = patrol(a.world);
+  const refused = a.run(
+    {
+      type: 'choose',
+      continuation_id,
+      choice_id: 'continue',
+      patrol: {
+        quest_instance_id: p.quest_instance_id,
+        attempt_id: p.attempt_id,
+        cursor: p.cursor,
+        status: p.status,
+      },
+    },
+    false,
+  );
+  assert.deepEqual(refused.decision, { kind: 'rejected', error: { code: 'invalid_state' } });
 });
 
 // Breaks: actual fatal combat retains attempt credit, or leader-ahead death faults before revival.

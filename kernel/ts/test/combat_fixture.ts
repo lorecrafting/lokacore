@@ -59,6 +59,26 @@ export function combatWorld(production = false, start = 0): World {
     },
   };
 }
+/** `w` with `npc` held by a permanent status whose `blocks` bars `move` (status reader 4). */
+export function rooted(w: World, npc: EntityId): World {
+  const { id, version } = w.cartridge.manifest;
+  const status = { cartridge_id: id, cartridge_version: version, kind: 'status', key: 'rooted' };
+  const spec = { key: 'rooted', duration: 'permanent', blocks: ['move'] };
+  return {
+    ...w,
+    cartridge: {
+      ...w.cartridge,
+      statuses: { ...w.cartridge.statuses, [`${id}@${version}:status/rooted`]: spec },
+    },
+    state: {
+      ...w.state,
+      statuses: {
+        ...w.state.statuses,
+        [key({ kind: 'status', body_id: npc, status })]: { active: true, generation: 1 },
+      },
+    },
+  } as unknown as World;
+}
 export function hp(w: World, entity_id: EntityId, value: number): World {
   return {
     ...w,

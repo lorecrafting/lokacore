@@ -1,3 +1,4 @@
+// size: allow 530, every crow transport journey shares the act/advance helpers above its tests
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { bundle, fresh, ref, entity, prefix } from './transport_fixture.ts';
@@ -5,6 +6,7 @@ import { gameView, INSTALLED, loadCartridge, step, stepElapsed, type World } fro
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { key } from '../src/foundation/compose.ts';
 import { runPopulation } from '../src/mechanics/population/shared.ts';
+import { rooted } from './combat_fixture.ts';
 
 const run = 'bbbbbbbb-0000-4000-8000-000000000008' as never;
 const coinRef = `${prefix}:item/old_coin`;
@@ -86,6 +88,35 @@ test('one exact dropped coin travels through one crow to the open nest', () => {
   assert.equal(
     Object.values(world.state.crows ?? {}).find((row) => row.member_id === bound[0]!.member_id)
       ?.phase,
+    'idle',
+  );
+});
+
+// Breaks (loka-kgd.102, status reader 4): a crow rooted mid-return walks home anyway, or one rooted
+// at home reschedules its return forever instead of clearing its row.
+test('a rooted crow holds its return leg and still clears its row at home', () => {
+  let world = initial();
+  const coin = entity(world, 'item', 'old_coin');
+  world = act(world, 'take', coin, 51);
+  world = act(world, 'drop', coin, 52);
+  world = advance(world, START + 1500);
+  const crow = Object.values(world.state.crows ?? {}).find((row) => row.phase === 'return')!;
+  const nestRoom = world.state.containers[crow.member_id];
+  const held = advance(rooted(world, crow.member_id), START + 2400);
+  const row = Object.values(held.state.crows!).find((r) => r.member_id === crow.member_id)!;
+  assert.equal(held.state.containers[crow.member_id], nestRoom);
+  assert.equal(row.phase, 'return');
+  assert.equal(held.state.jobs![row.job_id!]!.status, 'pending');
+
+  const home = world.roomIds[`${prefix}:room/village_green`];
+  const carried = {
+    ...held,
+    state: { ...held.state, containers: { ...held.state.containers, [crow.member_id]: home } },
+  };
+  const cleared = advance(carried, START + 2700);
+  assert.equal(cleared.state.containers[crow.member_id], home);
+  assert.equal(
+    Object.values(cleared.state.crows!).find((r) => r.member_id === crow.member_id)!.phase,
     'idle',
   );
 });
