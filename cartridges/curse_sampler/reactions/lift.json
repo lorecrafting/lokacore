@@ -1,0 +1,12 @@
+{
+  "on": {
+    "event": "fact_changed",
+    "fact": "blessed"
+  },
+  "apply": [
+    {
+      "op": "status.cure",
+      "status": "cursed"
+    }
+  ]
+}

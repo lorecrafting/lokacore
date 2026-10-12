@@ -1,0 +1,21 @@
+{
+  "on": {
+    "event": "entity_entered_room",
+    "room": "chapel"
+  },
+  "when": {
+    "policy_version": 1,
+    "root": {
+      "op": "has_item",
+      "item": "ring"
+    }
+  },
+  "apply": [
+    {
+      "op": "fact.assign",
+      "fact": "blessed",
+      "item": "ring",
+      "value": true
+    }
+  ]
+}

@@ -1,0 +1,61 @@
+{
+  "keywords": [
+    "ring"
+  ],
+  "short": "item.ring.short",
+  "short_variants": [
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": [
+            {
+              "op": "status_active",
+              "subject": "target",
+              "status": "cursed"
+            },
+            {
+              "op": "wearing",
+              "tag": "cursed"
+            }
+          ]
+        }
+      },
+      "description": "item.ring.short_cursed"
+    }
+  ],
+  "room_line": "item.ring.room",
+  "description": "item.ring.description",
+  "description_variants": [
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": [
+            {
+              "op": "status_active",
+              "subject": "target",
+              "status": "cursed"
+            },
+            {
+              "op": "wearing",
+              "tag": "cursed"
+            }
+          ]
+        }
+      },
+      "description": "item.ring.description_cursed"
+    }
+  ],
+  "location": {
+    "in": "room",
+    "room": "market"
+  },
+  "mass_grams": 10,
+  "slot": "finger",
+  "tags": [
+    "cursed"
+  ]
+}

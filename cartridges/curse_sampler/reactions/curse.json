@@ -1,0 +1,25 @@
+{
+  "on": {
+    "event": "item_acquired",
+    "item": "ring"
+  },
+  "when": {
+    "policy_version": 1,
+    "root": {
+      "op": "not",
+      "item": {
+        "op": "fact_compare",
+        "fact": "blessed",
+        "item": "ring",
+        "equals": true
+      }
+    }
+  },
+  "apply": [
+    {
+      "op": "status.apply",
+      "status": "cursed",
+      "item": "ring"
+    }
+  ]
+}
