@@ -391,6 +391,32 @@ the loader diagnostic and exits 1 on refusal, otherwise prints one canonical JSO
   names shows unreachable), no dialogue choices or reaction chains, and engine read sites with no op are not reads (such a fact may show `write_only`); any
   other engine writer shows its fact `read_only`. A committed graph waits for a consumer (R6, L6).
 
+Balance tool 6 ([study](../rnd/balance-diagnostics-2026-10-11.md) §2 C1, §1 I1; Beads
+`loka-kgd.107.6`) answers how strong a character gets per level and what each piece of gear adds.
+`node kernel/ts/play/power.ts <artifact>` loads and refuses as `reach.ts` does and prints one
+canonical JSON document `{levels, items}`. Every bonus is the engine's
+[derived stat](mechanics.md#stats-derived-from-attributes-toolbox-row-2) formula (`derived` in
+`mechanics/attributes/shared.ts`) read with the attribute values below in place of a character's.
+
+- **Tables.** The authored `world.derived` tables whose base exists: `hit_chance` and `damage`
+  with `world.combat.player_attack`, `carry_grams` with `world.carry`, `hp_max` with the `hp` pool.
+  A final value is clamped as that section says: `hit_chance` is `chance + bonus` in 0..100;
+  `damage` is `[damage_min + bonus, damage_max + bonus]`, each at least 0; `carry_grams` is
+  `max_grams + bonus`, at least 0; `hp_max` is the pool's `maximum + bonus`, at least its `minimum`.
+- **Levels.** Levels 1 to the `thresholds` count + 1 of
+  [world.levelling](mechanics.md#experience-and-levelling-toolbox-row-4) (level 1 only without it);
+  level L grants `points_per_level × (L − 1)` points. Attributes start at their definition starts.
+  Each level is `{level, <table>: {none, focused}}`: `none` spends no point; `focused` spends every
+  point on the one attribute among the table's terms that gives the highest bonus (a tie goes to the
+  lower ref string).
+- **Items.** Every item with a slot, sorted by slot, then ref: `{ref, slot, affects, affect_total,
+  delta, mass_grams?, tags?}`. `affect_total` is the signed sum of its modifiers; `delta`, per
+  table, is the bonus with the item worn alone at the starts minus the bonus at the starts,
+  unclamped.
+- ponytail: no gear in the curve and no ancestries (C5, I5); best-in-slot, dominance and allocation
+  sweeps (I3, I6, C2) are `loka-kgd.107.10`'s, the slot budget (I2) `loka-kgd.107.17`'s; where an
+  item is found and its price (NPC shop stock, not the item) wait for a consumer of the graph above.
+
 ## Installed capabilities
 
 `INSTALLED` in `kernel/ts/src/runtime/world.ts` declares the current kernel API,
