@@ -16,7 +16,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: balance tool 6, power curve by level and item sheet (loka-kgd.107.6 part B1)](2026-10-12-m9b-power-review.md): **APPROVE**
 - [Review: balance tool 1, economy and ecology ledger (loka-kgd.107.1)](2026-10-12-m9b-ledger-review.md): **APPROVE**
 - [Review: toolbox row 21, durability, crafting quality and repair (loka-kgd.111)](2026-10-12-m9b-durability-review.md): **APPROVE WITH NOTES**
-- [Review: mechanics batch M9b, Fable batch review (PR #379)](2026-10-12-m9b-batch-fable-review.md): **APPROVE WITH NOTES**
+- [Review: mechanics batch M9b, Fable batch review (PR #379)](2026-10-12-m9b-batch-fable-review.md): **APPROVE**
 - [Review: M9 status reader 9, a room as status holder (loka-kgd.94)](2026-10-12-m9-room-status-review.md): **APPROVE**
 - [Review: toolbox row 28, cursed items and blessing (loka-kgd.97)](2026-10-12-m9-curse-review.md): **APPROVE WITH NOTES**
 - [Review: mechanics batch M9, final batch head (Fable batch review)](2026-10-12-m9-batch-fable-review.md): **APPROVE**

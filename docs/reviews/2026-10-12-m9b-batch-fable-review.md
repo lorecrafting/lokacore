@@ -35,3 +35,17 @@
 No blocker: the mechanics compose as the three spec rows say, the loaders agree across kernels, and every slice disposition is closed.
 
 APPROVE WITH NOTES
+
+## Fix re-check
+
+- Written 2026-10-12 06:52 UTC in the Pi harness by anthropic/claude-fable-5-1 (reviewer).
+- Fix commit `c34959b22f0c5a13d0721ef83f75e00718c37122` (`toolbox/m9b-batch-fixes`, parent `ab441303`, the batch head), reviewed at `c34959b2`; only that commit, its four files and `reach.ts`'s `SITES` consumer `isWrite`.
+- Verdict: **APPROVE** (no finding open). Hosted CI on `c34959b2`: `ci` success, `book-e2e` success.
+
+### Dispositions
+
+1. Finding 1 (should-fix, `kernel/ts/play/reach.ts:27-28`): **resolved**. `SITES` gains `['item', /^\.weapon\.durability\.fact$/]` and `['service', /^\.benefit\.fact$/]`; `kindOf(e.from)` yields `item` and `service` for definition-keyed sections, so both match the way `quest` and `topic` do. The spec list in [Content reports](../system/cartridge.md#content-reports) names the same two sites. `reach.ts` on the `mix loka.compile` artifact of `cartridges/durability_sampler`: `orphan_facts` all empty at the fix; the parent's `reach.ts` on the same artifact reports `read_only: ["durability_sampler@0.0.1:fact/edge"]`, so the fix and not the artifact clears it. Test `content_graph.test.ts` "engine write sites and engine-owned facts are not reported read_only" adds a template sword (`weapon.durability.fact` worn) and a repair service (`benefit.fact` mended), both read by the policy; the header names the break. Mutants (each line deleted, run, reverted): the `item` line dropped, red with `read_only: ['f@1:fact/worn']`; the `service` line dropped, red with `read_only: ['f@1:fact/mended']`; baseline 7 pass.
+2. Nit 2 (ledger limits): **resolved**. The [ledger](../system/cartridge.md#economy-and-ecology-ledger-balance-tool-1) ponytail bullet now names ammo a shot spends and durability a hit wears or a repair restores as not reported, a repair showing only as its service coin sink.
+3. Nit 3 (durability record header): **resolved**. `docs/reviews/2026-10-12-m9b-durability-review.md:6` ends "(superseded by the fix re-check below)"; the index still takes the last verdict.
+
+Nothing new raised. APPROVE.
