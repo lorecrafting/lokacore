@@ -13,6 +13,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: toolbox row 27, unidentified items (loka-kgd.112)](2026-10-12-m9b-unidentified-review.md): **APPROVE**
 - [Review: balance tool 5, content graph and reachability report (loka-kgd.107.5)](2026-10-12-m9b-reach-review.md): **APPROVE**
 - [Review: M9b toolbox row 17, ranged first strike (loka-kgd.110)](2026-10-12-m9b-ranged-review.md): **APPROVE WITH NOTES**
+- [Review: balance tool 1, economy and ecology ledger (loka-kgd.107.1)](2026-10-12-m9b-ledger-review.md): **APPROVE WITH NOTES**
 - [Review: M9 status reader 9, a room as status holder (loka-kgd.94)](2026-10-12-m9-room-status-review.md): **APPROVE**
 - [Review: toolbox row 28, cursed items and blessing (loka-kgd.97)](2026-10-12-m9-curse-review.md): **APPROVE WITH NOTES**
 - [Review: mechanics batch M9, final batch head (Fable batch review)](2026-10-12-m9-batch-fable-review.md): **APPROVE**
