@@ -33,3 +33,15 @@
 - Spec in cartridge.md Content reports, not mechanics.md: accepted. The PM asked for it, it sits beside tool 5, and it links the mechanics sections rather than restating them.
 - Tie rule dropped: accepted. `focused` reports only the maximum value, so which attribute wins a tie never changes the output.
 - Loose `Obj` input: accepted. It matches `reach.ts`, and the CLI goes through `loadCartridge`, so real input is still validated.
+
+## Re-check: fix commit `e9eb44008e451d33aef5ef279ccc5f952d12ac85`
+
+- Written 2026-10-12 06:17 UTC in the Pi harness by anthropic/claude-opus-5-5 (reviewer).
+- Scope: `d2fc6d17..e9eb4400` only (`d2fc6d17` is this record cherry-picked onto the slice).
+- Verdict: **APPROVE**. All three findings fixed; nothing new.
+
+1. should-fix, fixed: `kernel/ts/test/power.test.ts:131` adds a hand-written case. I checked its literals by hand: STR at the maximum with pivot 0 gives hit `min(100, …)` = 100; DEX 0 with pivot 2 gives damage −2 → [0, 1]; CON 0 with pivot 10 gives hp −10 → minimum 2; carry `max − 2147482647` = 1000 → 2000; no `world.carry` means the `carry_grams` table is left out. Re-run: all five mutants (drop the 100 cap, drop the damage floor, drop the hp minimum, `carry - b`, drop `base !== undefined`) now fail.
+2. nit, fixed: `kernel/ts/play/power.ts:78` now does `saturate(base + saturate(sum))`, which matches `value`/`worn` in `mechanics/attributes/shared.ts` (allocated is 0 at the starts). Re-run: the old one-at-a-time loop fails the STR max `[+1, −1]` row. Still green: dropping the inner `saturate(sum)`. That only matters when a sum goes past the ResourceInt range, so no finding.
+3. nit, fixed: `docs/system/cartridge.md:415` now says "no statuses".
+
+Runs at the head: `node --test test/power.test.ts` 5 pass; `npm run typecheck` 0. Hosted ci and book-e2e green on `e9eb4400` (`gh run list --commit`).
