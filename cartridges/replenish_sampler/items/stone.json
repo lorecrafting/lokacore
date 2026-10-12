@@ -1,0 +1,13 @@
+{
+  "keywords": [
+    "stone"
+  ],
+  "short": "item.stone.short",
+  "room_line": "item.stone.room",
+  "description": "item.stone.description",
+  "mass_grams": 500,
+  "location": {
+    "in": "room",
+    "room": "store"
+  }
+}

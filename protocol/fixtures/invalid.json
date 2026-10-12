@@ -24940,6 +24940,746 @@
     ]
   },
   {
+    "contract": "ReplenishPlan",
+    "value": {},
+    "errors": [
+      {
+        "path": "/cap",
+        "code": "missing_property"
+      },
+      {
+        "path": "/count",
+        "code": "missing_property"
+      },
+      {
+        "path": "/every",
+        "code": "missing_property"
+      },
+      {
+        "path": "/from",
+        "code": "missing_property"
+      },
+      {
+        "path": "/items",
+        "code": "missing_property"
+      },
+      {
+        "path": "/key",
+        "code": "missing_property"
+      },
+      {
+        "path": "/to",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "ReplenishPlan",
+    "value": {
+      "key": "shelf",
+      "items": [],
+      "from": {
+        "in": "item",
+        "item": {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "crate"
+        }
+      },
+      "to": {
+        "in": "npc",
+        "npc": {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "npc",
+          "key": "trader"
+        }
+      },
+      "cap": 1,
+      "count": 1,
+      "every": 3600
+    },
+    "errors": [
+      {
+        "path": "/items",
+        "code": "too_few_items"
+      }
+    ]
+  },
+  {
+    "contract": "ReplenishPlan",
+    "value": {
+      "key": "shelf",
+      "items": [
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        },
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        },
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        },
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        },
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        },
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        },
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        },
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        },
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        },
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        },
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        },
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        },
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        },
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        },
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        },
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        },
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        },
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        },
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        },
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        },
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        },
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        },
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        },
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        },
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        },
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        },
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        },
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        },
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        },
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        },
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        },
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        },
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        },
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        },
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        },
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        },
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        },
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        },
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        },
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        },
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        },
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        },
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        },
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        },
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        },
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        },
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        },
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        },
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        },
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        },
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        },
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        },
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        },
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        },
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        },
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        },
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        },
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        },
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        },
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        },
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        },
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        },
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        },
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        },
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        }
+      ],
+      "from": {
+        "in": "item",
+        "item": {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "crate"
+        }
+      },
+      "to": {
+        "in": "npc",
+        "npc": {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "npc",
+          "key": "trader"
+        }
+      },
+      "cap": 1,
+      "count": 1,
+      "every": 3600
+    },
+    "errors": [
+      {
+        "path": "/items",
+        "code": "too_many_items"
+      }
+    ]
+  },
+  {
+    "contract": "ReplenishPlan",
+    "value": {
+      "key": "shelf",
+      "items": [
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        }
+      ],
+      "from": {
+        "in": "item",
+        "item": {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "crate"
+        }
+      },
+      "to": {
+        "in": "npc",
+        "npc": {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "npc",
+          "key": "trader"
+        }
+      },
+      "cap": 0,
+      "count": 1,
+      "every": 3600
+    },
+    "errors": [
+      {
+        "path": "/cap",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "contract": "ReplenishPlan",
+    "value": {
+      "key": "shelf",
+      "items": [
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        }
+      ],
+      "from": {
+        "in": "item",
+        "item": {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "crate"
+        }
+      },
+      "to": {
+        "in": "npc",
+        "npc": {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "npc",
+          "key": "trader"
+        }
+      },
+      "cap": 65,
+      "count": 1,
+      "every": 3600
+    },
+    "errors": [
+      {
+        "path": "/cap",
+        "code": "above_maximum"
+      }
+    ]
+  },
+  {
+    "contract": "ReplenishPlan",
+    "value": {
+      "key": "shelf",
+      "items": [
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        }
+      ],
+      "from": {
+        "in": "item",
+        "item": {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "crate"
+        }
+      },
+      "to": {
+        "in": "npc",
+        "npc": {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "npc",
+          "key": "trader"
+        }
+      },
+      "cap": 1,
+      "count": 0,
+      "every": 3600
+    },
+    "errors": [
+      {
+        "path": "/count",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "contract": "ReplenishPlan",
+    "value": {
+      "key": "shelf",
+      "items": [
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        }
+      ],
+      "from": {
+        "in": "item",
+        "item": {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "crate"
+        }
+      },
+      "to": {
+        "in": "npc",
+        "npc": {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "npc",
+          "key": "trader"
+        }
+      },
+      "cap": 1,
+      "count": 65,
+      "every": 3600
+    },
+    "errors": [
+      {
+        "path": "/count",
+        "code": "above_maximum"
+      }
+    ]
+  },
+  {
+    "contract": "ReplenishPlan",
+    "value": {
+      "key": "shelf",
+      "items": [
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        }
+      ],
+      "from": {
+        "in": "item",
+        "item": {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "crate"
+        }
+      },
+      "to": {
+        "in": "npc",
+        "npc": {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "npc",
+          "key": "trader"
+        }
+      },
+      "cap": 1,
+      "count": 1,
+      "every": 0
+    },
+    "errors": [
+      {
+        "path": "/every",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "contract": "ReplenishPlan",
+    "value": {
+      "key": "shelf",
+      "items": [
+        {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "apple_01"
+        }
+      ],
+      "from": {
+        "in": "item",
+        "item": {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "crate"
+        }
+      },
+      "to": {
+        "in": "npc",
+        "npc": {
+          "cartridge_id": "replenish_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "npc",
+          "key": "trader"
+        }
+      },
+      "cap": 1,
+      "count": 1,
+      "every": 3600,
+      "x": 1
+    },
+    "errors": [
+      {
+        "path": "/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
     "contract": "WorldSettings",
     "value": {
       "group": {

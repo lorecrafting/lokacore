@@ -1,0 +1,9 @@
+{
+  "keywords": [
+    "trader"
+  ],
+  "short": "npc.trader.short",
+  "room_line": "npc.trader.room",
+  "description": "npc.trader.description",
+  "room": "mine"
+}
