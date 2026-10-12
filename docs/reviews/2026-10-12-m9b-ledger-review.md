@@ -34,3 +34,16 @@ All five hold.
 - (a) `resource` on every coin row and unclassified entry: accepted; needed to tell two currencies apart, and the spec states it.
 - (b) one row shape `{site, ref, …}` with `npc` the other side: accepted; the spec states per site where the NPC is `ref` (shop, drop).
 - (c) per-site split for the 40-line limit: accepted. The byte-identical claim is not reproducible (first draft uncommitted); the current output matches the brief on the showcase and runs on all 68 cartridges.
+
+## Fix re-check (d1a39a1c)
+
+Written 2026-10-12 06:20 UTC in the Pi harness by anthropic/claude-opus-5-5, role reviewer.
+
+Scope: fix commit `d1a39a1c` (only commit after `c6837e94`), `kernel/ts/play/ledger.ts` and `kernel/ts/test/ledger.test.ts`, plus the other `by(...)` callers in `ledger.ts`.
+
+1. Nit 1 **resolved**: shopkeep now offers torch then candle (buy 2, sell 1); the test expects candle's `shop_sell` and `shop_buy` rows before torch's. Mutant `r.item` dropped from the sort key (`kernel/ts/play/ledger.ts:40`): red on the new test (candle rows out of order), green on the `c6837e94` test, so the new rows name the break.
+2. Nit 2 **resolved**: `by` returns `ka < kb ? -1 : ka > kb ? 1 : 0`, a consistent comparator, so equal keys keep artifact order (`Array.prototype.sort` is stable). Other callers (`kernel/ts/play/ledger.ts:173,193,209`) only gain the 0 on ties.
+
+Checks: `node --test test/ledger.test.ts` at `d1a39a1c`: 1/1 pass.
+
+Verdict: **APPROVE**. No new findings.
