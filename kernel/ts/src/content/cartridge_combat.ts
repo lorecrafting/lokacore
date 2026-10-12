@@ -76,15 +76,18 @@ function allies(c: Obj, named: Checks['named']): Diagnostic[] {
   return out;
 }
 
-// Toolbox row G8: the group's member fact is a bool pair fact (per_subject, scopes ["player"]).
+// Toolbox rows G8 and 22a: the group's member, stay and fight facts are bool pair facts
+// (per_subject, scopes ["player"]).
 function group(c: Obj, named: Checks['named']): Diagnostic[] {
-  const member = c.world?.group?.member;
-  if (!member) return [];
-  const at = '.cartridge.world.group.member';
-  named(member, 'fact', at);
-  const f = c.facts?.[refString(member)];
-  const pair = f?.value_type.type === 'bool' && f.per_subject && same(f.scopes, ['player']);
-  return f && !pair ? [diag('SCHEMA_VIOLATION', at, { error: 'invalid_value' })] : [];
+  return ['member', 'stay', 'fight'].flatMap((key) => {
+    const ref = c.world?.group?.[key];
+    if (!ref) return [];
+    const at = `.cartridge.world.group.${key}`;
+    named(ref, 'fact', at);
+    const f = c.facts?.[refString(ref)];
+    const pair = f?.value_type.type === 'bool' && f.per_subject && same(f.scopes, ['player']);
+    return f && !pair ? [diag('SCHEMA_VIOLATION', at, { error: 'invalid_value' })] : [];
+  });
 }
 
 // Toolbox row G2: damage kinds, crits and resistances need kernel_api 1.44.
@@ -94,14 +97,17 @@ function damageApi(c: Obj): Diagnostic[] {
   const profiles = [c.world?.combat?.player_attack, ...npcs.map((n) => n.attack), ...items];
   const used = profiles.some((p) => p?.kind || p?.crit) || npcs.some((n) => n.resistances);
   // Toolbox rows 6a and 6b: target choice and allies need kernel_api 1.48; row 17's ranged 1.67;
-  // row G8's group 1.70.
-  const floor = c.world?.group
-    ? '1.70'
-    : ranged(c)
-      ? '1.67'
-      : c.world?.combat?.target_choice || c.world?.combat?.allies
-        ? '1.48'
-        : used && '1.44';
+  // row G8's group 1.70; row 22a's group orders 1.73.
+  const floor =
+    c.world?.group?.stay || c.world?.group?.fight
+      ? '1.73'
+      : c.world?.group
+        ? '1.70'
+        : ranged(c)
+          ? '1.67'
+          : c.world?.combat?.target_choice || c.world?.combat?.allies
+            ? '1.48'
+            : used && '1.44';
   return floor && apiCmp(c.manifest.requires.kernel_api.at_least, floor) < 0
     ? [diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least')]
     : [];
