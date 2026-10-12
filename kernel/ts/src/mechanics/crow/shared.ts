@@ -11,6 +11,7 @@ import { KernelError } from '../../foundation/error.ts';
 import { refString, type Mint, type World } from '../../runtime/decision.ts';
 import { living } from '../death/shared.ts';
 import { passage } from '../movement/shared.ts';
+import { moves } from '../status/shared.ts';
 import { barrierState } from '../lookups.ts';
 export type Plan = World['populationSpecs'][string];
 export type Binding = { plan: DefinitionRef; slot: number; row: CrowTransport; spec: Plan };
@@ -119,3 +120,6 @@ export function edge(world: World, from: EntityId, to: EntityId): boolean {
   const found = Object.entries(room.exits).find(([, x]) => world.roomIds[refString(x.to)] === to);
   return !!found && !passage(world, room, found[0] as never);
 }
+/** A move from `from` to `to` by the crow of `b`: the exit stands open and its statuses let it move. */
+export const canStep = (world: World, b: Binding, from: EntityId, to: EntityId) =>
+  edge(world, from, to) && moves(world, b.row.member_id);

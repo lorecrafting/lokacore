@@ -17,6 +17,14 @@ import {
   due,
   seated,
 } from './c4_pack_fixture.ts';
+import { rooted } from './combat_fixture.ts';
+
+// Breaks (loka-kgd.102, status reader 4): a wounded hound whose statuses bar `move` still flees.
+test('a rooted wounded hound holds its room instead of fleeing', () => {
+  const result = due(seated(begun(wounded(rooted(fixture(), h2), 1))));
+  assert.equal(result.decision.kind, 'accepted', JSON.stringify(result.decision));
+  assert.equal(result.world.state.containers[h2], home);
+});
 
 // Breaks: a wounded selected hound retaliates or leaves its original pelt in the old room.
 test('strictly wounded selected hound flies with its pelt before either attack', () => {

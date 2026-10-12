@@ -11,6 +11,7 @@ import { living } from '../death/shared.ts';
 import { standing } from '../position/shared.ts';
 import { questOf } from '../lookups.ts';
 import { passage } from '../movement/shared.ts';
+import { moves } from '../status/shared.ts';
 
 export const definition = (world: World, row: PatrolRelation) =>
   world.cartridge.quests![refString(world.state.quests![row.quest_instance_id].quest)].patrol!;
@@ -68,6 +69,9 @@ export function refused(
   if (effect.transition === 'continue') {
     const edge = route(world, row, steps);
     if (world.state.containers[npc] !== edge.here) return 'invalid_state' as const;
-    return passage(world, world.rooms[edge.here], edge.direction);
+    return (
+      passage(world, world.rooms[edge.here], edge.direction) ??
+      (moves(world, npc) ? undefined : ('invalid_state' as const))
+    );
   }
 }
