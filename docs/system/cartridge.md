@@ -501,6 +501,49 @@ committed or checked in CI.
   Medians are lower medians, so every value stays an integer. ponytail: one policy; command-level
   labels (per-job attribution is L2); direct body contents only; no shop stock curve.
 
+### Fight matrix and encounter rating (balance tool 7)
+
+Balance tool 7 ([study](../rnd/balance-diagnostics-2026-10-11.md) §4 F1, F2, §13 order 3; Beads
+`loka-kgd.107.7`) answers whether a level L player beats NPC N, from the real round code and RNG.
+`node kernel/ts/play/fight.ts <artifact> [--seeds N] [--rounds R]` (defaults 32 and 100) loads
+and refuses as `flows.ts` above, otherwise prints one canonical JSON document and exits 0. Nothing
+reads it and nothing runs it in CI.
+
+- **Targets.** Every NPC living at genesis with an `attack`, by its DefinitionRef string, and
+  every population plan, by its ref, fought through its lowest-EntityId living member. An
+  encounter plan (`chance`, [mechanics.md](mechanics.md#random-encounters-toolbox-row-9)) births
+  none at genesis: the tool elapses the world one `wander_interval` at a time, at most R times,
+  until a member lives; none counts `unborn`.
+- **Cells.** Target × level × build. Levels 1 to the `thresholds` count + 1 of `world.levelling`
+  (1 only without it), as the power report above. Builds: `none` (no point spent) and one per
+  declared attribute, by ref, with all `points_per_level × (L − 1)` points on it. The level is
+  set by overriding the player's levelling row: `{experience: thresholds[L − 2] (0 at level 1),
+  allocated}`.
+- **One fight.** A new world per seed, its RNG drawn from the seed's generator as `flows.ts` draws
+  it; the player's body moved into the target's room by state override; one Attack on the target;
+  then the authority's elapsed delivery of `world.combat.interval` per step, one combat round
+  each, until the step's `entity_died` names the target (a win) or the player's body (a death),
+  or R rounds pass (a timeout). An Attack the kernel refuses makes the cell `{level, build,
+  refused: <code>}` and plays no further seed. Seed 1 runs every step through the simulator's
+  checked step (`checked`, `kernel/ts/test/sim.ts`), so it keeps every registered invariant; the
+  other seeds take the plain step. Checking every step took 359 s for the 84 cells of
+  `toolbox_showcase` on the M1 (about 6 ms a checked step against 0.3 ms plain), the plain rest
+  30 s.
+- **Cell values** `{level, build, n, wins, deaths, timeouts, unborn (plans only), win_pct,
+  death_pct, rounds, hp_left}`: `win_pct` and `death_pct` are k × 100 / n as decimal strings with
+  two places; `rounds` (combat rounds fought) and `hp_left` (the player's hp at the win) are
+  `{min, median, max}` over the won fights, lower medians, absent with no win.
+- **Rating** (F2) per target `{target, rating, cells}`: `first_win_level` is the lowest level
+  whose `none` cell has `win_pct` at least 50.00 (null if none); `death_pct_level_1` is the
+  `none` cell's at level 1 (null if refused). A plan's rating adds `chance` (null for an ecology
+  plan) and `opportunities_per_day`, the calendar day over `wander_interval` with two places.
+- **Pinned limits.** Allies are removed: the player fights alone (`world.combat.allies` is dropped
+  from a copy of the cartridge before any fight, so a former ally with an attack is an ordinary
+  target), with no group member and no gear beyond the start. The target is fought where it
+  stands at genesis or birth; a plan is fought one member at a time (a pack's assistance is
+  whatever the round code does). ponytail: no flee, consumables, spells, statuses or gear sweeps;
+  the authored `rating` field (study L5) is not read.
+
 ## Installed capabilities
 
 `INSTALLED` in `kernel/ts/src/runtime/world.ts` declares the current kernel API,
