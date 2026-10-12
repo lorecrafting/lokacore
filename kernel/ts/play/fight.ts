@@ -17,67 +17,76 @@ import { median } from './flows.ts';
 
 type Outcome =
   | { end: 'win'; rounds: number; hp: number }
-  | { end: 'death' | 'timeout' | 'unborn' }
+  | { end: 'death' | 'timeout' | 'fled' | 'unborn' }
   | { end: 'refused'; code: string };
 type Find = (w: World) => EntityId | undefined;
 type Row = { experience: number; allocated: Record<string, number> };
+type Matrix = { c: Cartridge; worlds: World[]; rounds: number; builds: string[] };
+type Cell = ReturnType<typeof cell>;
 
 const RUN = id('loka-fights', 'run', 0);
 const ELAPSED: Kernel = { ...KERNEL, step: stepElapsed as Kernel['step'] };
+const byKey = ([a]: [string, unknown], [b]: [string, unknown]) => (a < b ? -1 : 1);
 
 /** The fight matrix and ratings (cartridge.md "Fight matrix and encounter rating"). */
 export function fights(c: Cartridge, opts: { seeds?: number; rounds?: number } = {}) {
   const { seeds = 32, rounds = 100 } = opts;
   const alone = withoutAllies(c);
   const worlds = Array.from({ length: seeds }, (_, s) => genesis(alone, s + 1));
+  const m = { c, worlds, rounds, builds: ['none', ...Object.keys(c.attributes ?? {}).sort()] };
   const w0 = worlds[0]!;
-  const spec = c.world?.levelling;
-  const builds = ['none', ...Object.keys(c.attributes ?? {}).sort()];
-  // the levelling row of `build` at level `l`: every point on that one attribute
-  const row = (l: number, build: string): Row | undefined => {
-    if (!spec) return undefined;
-    const points = spec.points_per_level * (l - 1);
-    return {
-      experience: l > 1 ? spec.thresholds[l - 2]! : 0,
-      allocated: build !== 'none' && points ? { [build]: points } : {},
-    };
-  };
-  const target = (name: string, find: Find, plan?: PopulationPlan) => {
-    const cells = [];
-    for (let l = 1; l <= (spec ? spec.thresholds.length + 1 : 1); l++)
-      for (const build of builds) {
-        const outs = [];
-        for (let s = 0; s < seeds && outs.at(-1)?.end !== 'refused'; s++)
-          outs.push(fight(worlds[s]!, s + 1, find, row(l, build), rounds, plan?.wander_interval));
-        cells.push(cell(l, build, outs, !!plan));
-      }
-    const none = cells.filter((x) => x.build === 'none');
-    const one = none[0]!;
-    const rating = {
-      first_win_level: none.find((x) => 'win_pct' in x && Number(x.win_pct) >= 50)?.level ?? null,
-      death_pct_level_1: 'death_pct' in one ? one.death_pct : null,
-      ...(plan && {
-        chance: plan.chance ?? null,
-        opportunities_per_day: (units(c).day / plan.wander_interval).toFixed(2),
-      }),
-    };
-    return { target: name, rating, cells };
-  };
   const npcs = Object.entries(w0.entityIds)
-    .filter(([, e]) => {
-      const npc = w0.entities[e];
-      return npc?.kind === 'npc' && !!npc.attack && living(w0, e);
-    })
-    .sort(([a], [b]) => (a < b ? -1 : 1))
-    .map(([ref]) => target(ref, (w) => w.entityIds[ref] as EntityId)); // ids differ per seed
+    .filter(([, e]) => w0.entities[e]?.kind === 'npc' && !!w0.entities[e].attack && living(w0, e))
+    .sort(byKey)
+    .map(([ref]) => target(m, ref, (w) => w.entityIds[ref] as EntityId)); // ids differ per seed
   const plans = Object.entries(c.populations ?? {})
-    .sort(([a], [b]) => (a < b ? -1 : 1))
-    .map(([ref, plan]) => target(ref, (w) => member(w, ref), plan));
+    .sort(byKey)
+    .map(([ref, plan]) => target(m, ref, (w) => member(w, ref), plan));
   return {
     cartridge: `${c.manifest.id}@${c.manifest.version}`,
     seeds,
     rounds,
     targets: [...npcs, ...plans],
+  };
+}
+
+// One target's cells, level by level, then build by build, and its rating.
+function target(m: Matrix, name: string, find: Find, plan?: PopulationPlan) {
+  const spec = m.c.world?.levelling;
+  const cells = [];
+  for (let l = 1; l <= (spec ? spec.thresholds.length + 1 : 1); l++)
+    for (const build of m.builds) {
+      const outs = [];
+      for (let s = 0; s < m.worlds.length && outs.at(-1)?.end !== 'refused'; s++)
+        outs.push(fight(m.worlds[s]!, s + 1, find, row(m.c, l, build), m.rounds, plan));
+      cells.push(cell(l, build, outs, !!plan));
+    }
+  return { target: name, rating: rating(m.c, cells, plan), cells };
+}
+
+// The levelling row of `build` at level `l`: every point on that one attribute.
+function row(c: Cartridge, l: number, build: string): Row | undefined {
+  const spec = c.world?.levelling;
+  if (!spec) return undefined;
+  const points = spec.points_per_level * (l - 1);
+  return {
+    experience: l > 1 ? spec.thresholds[l - 2]! : 0,
+    allocated: build !== 'none' && points ? { [build]: points } : {},
+  };
+}
+
+// The first cell in level, then build order with win_pct at least 50.00 names the level and build.
+function rating(c: Cartridge, cells: Cell[], plan?: PopulationPlan) {
+  const first = cells.find((x) => 'win_pct' in x && Number(x.win_pct) >= 50);
+  const one = cells[0]!;
+  return {
+    first_win_level: first?.level ?? null,
+    first_win_build: first?.build ?? null,
+    death_pct_level_1: 'death_pct' in one ? one.death_pct : null,
+    ...(plan && {
+      chance: plan.chance ?? null,
+      opportunities_per_day: (units(c).day / plan.wander_interval).toFixed(2),
+    }),
   };
 }
 
@@ -107,59 +116,73 @@ const member = (w: World, plan: string) =>
     )
     .sort()[0] as EntityId | undefined;
 
+// One seed's play: seed 1 keeps every invariant through the simulator's checked step; later seeds
+// take the plain step (checking every step took 359 s on the showcase, cartridge.md).
+function session(w: World, seed: number) {
+  const p = {
+    w,
+    n: 0,
+    play(kernel: Kernel, command: Command): DecisionResult {
+      if (seed > 1) {
+        const s = kernel.step(p.w, command, ++p.n);
+        p.w = s.world;
+        return s.decision;
+      }
+      const r = checked(kernel, p.w, command, ++p.n);
+      if (r.failure)
+        throw new Error(`seed ${seed} step ${p.n}: ${r.failure.id} ${r.failure.detail}`);
+      p.w = r.world;
+      return decode(r.bytes.slice(0, r.bytes.indexOf('\n'))) as unknown as DecisionResult;
+    },
+  };
+  return p;
+}
+type Session = ReturnType<typeof session>;
+
 // One fight: an unborn target is elapsed to a birth, one wander interval at a time; then the
-// player's body joins it with the level's row, attacks, and each step delivers one combat round.
+// player's body joins it with the level's row and attacks.
 function fight(
   start: World,
   seed: number,
   find: Find,
   row: Row | undefined,
   rounds: number,
-  wander = 0,
+  plan?: PopulationPlan,
 ): Outcome {
-  let [w, n] = [start, 0];
-  // Seed 1 keeps every invariant through the simulator's checked step; later seeds take the plain
-  // step (checking every step took 359 s on the showcase, cartridge.md).
-  const play = (kernel: Kernel, command: Command): DecisionResult => {
-    if (seed > 1) {
-      const s = kernel.step(w, command, ++n);
-      w = s.world;
-      return s.decision;
-    }
-    const r = checked(kernel, w, command, ++n);
-    if (r.failure) throw new Error(`seed ${seed} step ${n}: ${r.failure.id} ${r.failure.detail}`);
-    w = r.world;
-    return decode(r.bytes.slice(0, r.bytes.indexOf('\n'))) as unknown as DecisionResult;
-  };
-  let foe = find(w);
+  const p = session(start, seed);
+  let foe = find(p.w);
   for (let k = 0; !foe && k < rounds; k++) {
-    play(ELAPSED, elapsed(w, wander));
-    foe = find(w);
+    p.play(ELAPSED, elapsed(p.w, plan!.wander_interval));
+    foe = find(p.w);
   }
   if (!foe) return { end: 'unborn' };
-  const [body, character] = [w.body, w.character];
-  w = {
-    ...w,
-    state: {
-      ...w.state,
-      containers: { ...w.state.containers, [body]: w.state.containers[foe]! },
-      ...(row && { levelling: { ...w.state.levelling, [character]: row } }),
-    },
-  };
-  const payload = { type: 'attack', actor_id: character, target_id: foe };
-  const command = { id: id('loka-fights', String(seed), n + 1), world_context_id: w.context };
-  const attack = play(KERNEL, { ...command, payload } as Command);
+  const { w } = p;
+  const containers = { ...w.state.containers, [w.body]: w.state.containers[foe]! };
+  const levelling = row && { levelling: { ...w.state.levelling, [w.character]: row } };
+  p.w = { ...w, state: { ...w.state, containers, ...levelling } };
+  const payload = { type: 'attack', actor_id: w.character, target_id: foe };
+  const command = { id: id('loka-fights', String(seed), p.n + 1), world_context_id: w.context };
+  const attack = p.play(KERNEL, { ...command, payload } as Command);
   if (attack.kind === 'rejected') return { end: 'refused', code: attack.error.code };
   if (attack.kind === 'fault') return { end: 'refused', code: `fault ${attack.code}` };
+  return combat(p, foe, rounds);
+}
+
+// Each step delivers one combat round, until a death, the target out of the player's room (fled:
+// it fled, or its pack withdrew with it), or the round cap.
+function combat(p: Session, foe: EntityId, rounds: number): Outcome {
+  const body = p.w.body;
   for (let r = 1; r <= rounds; r++) {
-    const decision = play(ELAPSED, elapsed(w, w.cartridge.world!.combat!.interval));
+    const decision = p.play(ELAPSED, elapsed(p.w, p.w.cartridge.world!.combat!.interval));
     const events = decision.kind === 'accepted' ? decision.events : [];
     const died = events.flatMap((e) =>
       e.payload.type === 'entity_died' ? [e.payload.victim_id] : [],
     );
     if (died.includes(body)) return { end: 'death' };
     if (died.includes(foe))
-      return { end: 'win', rounds: r, hp: level(w, body, resourceRef(w, 'hp'))! };
+      return { end: 'win', rounds: r, hp: level(p.w, body, resourceRef(p.w, 'hp'))! };
+    const { containers } = p.w.state;
+    if (containers[foe] !== containers[body]) return { end: 'fled' };
   }
   return { end: 'timeout' };
 }
@@ -185,9 +208,11 @@ function cell(level: number, build: string, outs: Outcome[], plan: boolean) {
     wins,
     deaths,
     timeouts: count('timeout'),
+    fleds: count('fled'),
     ...(plan && { unborn: count('unborn') }),
     win_pct: pct(wins, n),
     death_pct: pct(deaths, n),
+    fled_pct: pct(count('fled'), n),
     ...(won.length && {
       rounds: spread(won.map((o) => o.rounds)),
       hp_left: spread(won.map((o) => o.hp)),

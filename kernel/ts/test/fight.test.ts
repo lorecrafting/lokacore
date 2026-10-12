@@ -79,7 +79,7 @@ type Report = ReturnType<typeof fights>;
 const of = (r: Report, key: string) =>
   r.targets.find((t) => t.target === `encounter_sampler@0.0.1:${key}`)!;
 const at = (r: Report, key: string, level: number, build = 'none') =>
-  of(r, key).cells.find((c) => c.level === level && c.build === build)!;
+  of(r, key).cells.find((c) => c.level === level && c.build === build) as Record<string, unknown>;
 const MIGHT = 'encounter_sampler@0.0.1:attribute/might';
 
 // Breaks: an encounter plan not elapsed to a birth (unborn 32, wins 0), the plan's rating fields
@@ -103,14 +103,17 @@ test('the encounter sampler: a level 1 player beats the bandit in 3 rounds every
     wins: 32,
     deaths: 0,
     timeouts: 0,
+    fleds: 0,
     unborn: 0,
     win_pct: '100.00',
     death_pct: '0.00',
+    fled_pct: '0.00',
     rounds: { min: 3, median: 3, max: 3 },
   });
   assert.ok(hp_left.min >= 8 && hp_left.max <= 10, JSON.stringify(hp_left));
   assert.deepEqual(rating, {
     first_win_level: 1,
+    first_win_build: 'none',
     death_pct_level_1: '0.00',
     chance: 25,
     opportunities_per_day: '24.00',
@@ -129,19 +132,83 @@ test('the clone: level, build, death and the removed ally, each hand-derived', (
     wins: 4,
     deaths: 0,
     timeouts: 0,
+    fleds: 0,
     win_pct: '100.00',
     death_pct: '0.00',
+    fled_pct: '0.00',
     rounds: { min: rounds, median: rounds, max: rounds },
     hp_left: { min: hp, median: hp, max: hp },
   });
-  const died = { n: 4, wins: 0, deaths: 4, timeouts: 0, win_pct: '0.00', death_pct: '100.00' };
+  const dead = {
+    ...{ n: 4, wins: 0, deaths: 4, timeouts: 0, fleds: 0 },
+    ...{ win_pct: '0.00', death_pct: '100.00', fled_pct: '0.00' },
+  };
   assert.deepEqual(at(r, 'npc/x', 1), { level: 1, build: 'none', ...won(2, 1) });
   assert.deepEqual(at(r, 'npc/x', 2), { level: 2, build: 'none', ...won(2, 1) });
   assert.deepEqual(at(r, 'npc/x', 2, MIGHT), { level: 2, build: MIGHT, ...won(1, 3) });
-  assert.deepEqual(at(r, 'npc/y', 1), { level: 1, build: 'none', ...died });
-  assert.deepEqual(at(r, 'npc/y', 2, MIGHT), { level: 2, build: MIGHT, ...died });
-  assert.deepEqual(of(r, 'npc/x').rating, { first_win_level: 1, death_pct_level_1: '0.00' });
-  assert.deepEqual(of(r, 'npc/y').rating, { first_win_level: null, death_pct_level_1: '100.00' });
+  assert.deepEqual(at(r, 'npc/y', 1), { level: 1, build: 'none', ...dead });
+  assert.deepEqual(at(r, 'npc/y', 2, MIGHT), { level: 2, build: MIGHT, ...dead });
+  const rating = (level: number | null, build: string | null, death: string) => ({
+    first_win_level: level,
+    first_win_build: build,
+    death_pct_level_1: death,
+  });
+  assert.deepEqual(of(r, 'npc/x').rating, rating(1, 'none', '0.00'));
+  assert.deepEqual(of(r, 'npc/y').rating, rating(null, null, '100.00'));
+});
+
+// The player's attack at `chance` in a copy of `c`.
+const hitting = (c: Cartridge, chance: number, more: object = {}) => {
+  const combat = c.world!.combat!;
+  const player_attack = { ...combat.player_attack, chance };
+  return {
+    ...c,
+    world: { ...c.world, ...more, combat: { ...combat, player_attack } },
+  } as Cartridge;
+};
+
+// Breaks: first_win_level read from the `none` build alone, a winning build not named, or the
+// 50.00 boundary taken as above 50. The clone at a 50% player hit: X (hp 2) is beaten with two
+// hits in the player's first three rolls; might at level 2 kills with any one. Seeds 1 to 5 at
+// level 1 (either build, no point to spend) win seeds 2 and 3 only: 2 of 4 is exactly 50.00, 2 of
+// 5 below, where level 2 might, winning 4 of 5, names the rating.
+test('the rating: the first level and build at a win_pct of at least 50.00', () => {
+  const r = fights(hitting(clone, 50), { seeds: 4 });
+  assert.equal(at(r, 'npc/x', 1).win_pct, '50.00');
+  assert.equal(at(r, 'npc/x', 2, MIGHT).win_pct, '75.00');
+  assert.deepEqual(of(r, 'npc/x').rating, {
+    first_win_level: 1,
+    first_win_build: 'none',
+    death_pct_level_1: '50.00',
+  });
+  assert.deepEqual(of(fights(hitting(clone, 50), { seeds: 5 }), 'npc/x').rating, {
+    first_win_level: 2,
+    first_win_build: MIGHT,
+    death_pct_level_1: '60.00',
+  });
+});
+
+// Breaks: a target that flees played to the round cap and counted as a timeout (finding 3 of the
+// review). The showcase goblins (hp 6, flight below 25%) against a sure player hit of 1: the
+// target flees at hp 1 in round 5, out of the player's room, while the player (hp 10, the goblin
+// a sure 1) stands; the levelling is dropped so the copy has one level.
+test('the showcase goblins with a sure player hit: the target flees every seed', () => {
+  const [, showcase] = compile('cartridges/toolbox_showcase', 'showcase.json');
+  const r = fights(hitting(showcase, 100, { levelling: undefined }), { seeds: 2 });
+  const goblins = r.targets.find((t) => t.target === 'toolbox_showcase@0.0.1:population/goblins')!;
+  assert.deepEqual(goblins.cells[0], {
+    level: 1,
+    build: 'none',
+    n: 2,
+    wins: 0,
+    deaths: 0,
+    timeouts: 0,
+    fleds: 2,
+    unborn: 0,
+    win_pct: '0.00',
+    death_pct: '0.00',
+    fled_pct: '100.00',
+  });
 });
 
 // Breaks: the round cap ignored, or a fight still going at the cap counted as a win or a death.
@@ -154,8 +221,10 @@ test('a fight still going at the round cap is a timeout', () => {
     wins: 0,
     deaths: 0,
     timeouts: 2,
+    fleds: 0,
     win_pct: '0.00',
     death_pct: '0.00',
+    fled_pct: '0.00',
   });
 });
 
