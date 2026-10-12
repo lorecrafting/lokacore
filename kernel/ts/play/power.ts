@@ -3,7 +3,7 @@
 // one canonical JSON document. A report for authors, not a check: nothing reads its output.
 import { readFileSync } from 'node:fs';
 import { INSTALLED, loadCartridge } from '../src/index.ts';
-import type { DerivedStat } from '../src/contracts.gen.ts';
+import type { DerivedStat, ItemAffect } from '../src/contracts.gen.ts';
 import type { Obj } from '../src/content/cartridge_refs.ts';
 import { encode, type Json } from '../src/foundation/canonical.ts';
 import { saturate } from '../src/foundation/int.ts';
@@ -13,7 +13,7 @@ import { refString } from '../src/runtime/decision.ts';
 type Values = Record<string, number>; // attribute DefinitionRefString -> value
 type Table = { name: string; stat: DerivedStat; final: (bonus: number) => Json };
 
-// The engine's bonus at these values; derived reads no World or actor through a `read` of its own.
+// The engine's bonus at these values: given its own `read`, derived never touches World or actor.
 const bonus = (stat: DerivedStat, values: Values) =>
   derived(undefined as never, undefined as never, stat, (a) => values[refString(a)]);
 
@@ -69,7 +69,7 @@ export function itemSheet(c: Obj) {
   return Object.entries((c.items ?? {}) as Obj)
     .filter(([, i]) => i.slot)
     .map(([ref, i]) => {
-      const affects: { attribute: never; modifier: number }[] = i.affects ?? [];
+      const affects: ItemAffect[] = i.affects ?? [];
       const worn = { ...base };
       for (const a of affects)
         worn[refString(a.attribute)] = saturate(worn[refString(a.attribute)] + a.modifier);
