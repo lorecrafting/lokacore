@@ -17,13 +17,13 @@ import { allocator, event, type Mint, type Steps, type World } from './decision.
 import { factChanged, type Base } from '../mechanics/fact.ts';
 import { jobCommandId } from '../foundation/id_source.ts';
 import { begun, earned, stamp } from '../mechanics/quest/lifecycle.ts';
-import { sequence, triggered } from '../mechanics/reaction.ts';
+import { diedAfter, sequence, triggered } from '../mechanics/reaction.ts';
 import { levelUp, oneWrite } from '../mechanics/levelling/shared.ts';
 import * as schedule from '../mechanics/schedule/rule.ts';
 import { cmp } from '../foundation/validate.ts';
 import { currentRound } from '../mechanics/combat/round.ts';
 import { handoffGroup, sightHandoff } from './proposal_sight.ts';
-import { queueHour } from './proposal_hours.ts';
+import { queueHour, type Due } from './proposal_hours.ts';
 import { merge, statusGroup } from '../mechanics/status/job.ts';
 import { anyPending as pending, parted } from '../mechanics/dialogue/selection.ts';
 import { admit, type Admitted } from './proposal_admit.ts';
@@ -191,7 +191,7 @@ function creditDelivery(p: P, next: Queued): Admitted | undefined {
   if (next.cause.payload.type !== 'entity_died') return;
   const at = now(p);
   if (!('cartridge' in at)) return at;
-  const credit = deathCredit(at, next.cause, p.ops, p.events);
+  const credit = deathCredit(at, next.cause, p.ops, p.events, p.command);
   if (credit.length)
     return join(
       p,
@@ -217,6 +217,7 @@ function earnedExit(p: P, instance_id: QuestInstanceId, at: Parameters<typeof st
 }
 
 // The queue's deliveries to quiescence, or the fault that ends them.
+// size: allow 41, each delivery names the bodies dead after its cause once (loka-kgd.105)
 function react(p: P): Admitted | undefined {
   for (let next; (next = p.queue.shift());) {
     const credited = creditDelivery(p, next);
@@ -230,6 +231,7 @@ function react(p: P): Admitted | undefined {
     }
     const crow = crowDelivery(p, next);
     if (crow) return crow;
+    const dead = diedAfter(p.events, next.cause); // once per delivery
     for (const rule of triggered(p.world, next.cause)) {
       const at = now(p);
       if (!('cartridge' in at)) return at;
@@ -241,7 +243,7 @@ function react(p: P): Admitted | undefined {
         p.group + 1,
         p.steps,
         next.mint,
-        p.holders,
+        { holders: p.holders, dead },
       );
       const depth = next.depth + 1;
       p.limit = over({ deliveries: ++p.deliveries, reaction_depth: depth, query_steps: p.steps.n });
@@ -264,7 +266,7 @@ function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined
   const { due, to } = dueJobs(p.world, root);
   const populationPairs = populationDeadlinePairs(p.world, to);
   const groups = new Map<string, number>();
-  for (const [job_id, { due_time }] of due) {
+  for (const [job_id, { due_time, tick }] of due) {
     const at = now(p);
     if (!('cartridge' in at)) return at;
     const current = at.state.jobs?.[job_id];
@@ -280,7 +282,7 @@ function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined
       payload: { type: 'run_job', job_id: job_id as JobId },
     } as const;
     const m = allocator(at, run);
-    const ran = admit('schedule', schedule.decideAt(at, run, m, undefined, due_time));
+    const ran = admit('schedule', schedule.decideAt(at, run, m, undefined, due_time, tick));
     if (ran.kind !== 'accepted') return ran;
     if ((p.limit = queueHour(due, job_id, ran))) return BUDGET;
     p.rng = ran.rng;
@@ -306,7 +308,7 @@ function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined
 // (due_time, job_id) order.
 function dueJobs(world: World, root: Admitted & { kind: 'accepted' }) {
   const advance = root.delta.ops.find((o) => o.op === 'time.advance');
-  const due = Object.entries(advance ? (world.state.jobs ?? {}) : {})
+  const due: Due = Object.entries(advance ? (world.state.jobs ?? {}) : {})
     .filter(([, j]) => j.status === 'pending' && j.due_time <= advance!.to)
     .sort(([a, x], [b, y]) => x.due_time - y.due_time || cmp(a, b));
   return { due, to: advance?.to ?? -1 };

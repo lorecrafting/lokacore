@@ -2,12 +2,13 @@
 // answer, and the play helpers its district walkthroughs share. test/loka/content_showcase_test.exs
 // holds the source to the same bytes.
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { gameView, INSTALLED, loadCartridge, newWorld, step, stepElapsed } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
-import { decode } from '../src/foundation/canonical.ts';
+import { decode, encode } from '../src/foundation/canonical.ts';
 import { pending, spokenBy } from '../src/mechanics/dialogue/shared.ts';
 import { disposition } from '../src/mechanics/disposition.ts';
 
@@ -140,3 +141,16 @@ export const say = (w: World, who: string, choice: string) =>
 export const leave = (w: World) => choose(w, 'leave').world;
 export const mood = (w: World, who: string) => disposition(w, w.character, npc(w, who));
 export const topics = (w: World) => (gameView(w).topics ?? []).map((t) => t.label as string);
+
+/** The showcase, edited and re-hashed, loaded: its first diagnostic's code and path, or 'ok'. */
+export function reload(edit: (c: any) => void) {
+  const c = structuredClone(content) as any;
+  edit(c);
+  const canonical = encode(c);
+  const sha256 = createHash('sha256').update(canonical).digest('hex');
+  const r = loadCartridge(
+    new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
+    INSTALLED,
+  );
+  return r.ok ? 'ok' : `${r.diagnostic.code} ${r.diagnostic.path}`;
+}

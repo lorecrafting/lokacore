@@ -39,7 +39,8 @@ defmodule Loka.Content.Reactions do
     "scene" => "scene",
     "status" => "status",
     "kind" => "liquid",
-    "npc" => "npc"
+    "npc" => "npc",
+    "attacker" => "npc"
   }
   @doc "Each trigger filter that names a definition (W1), with that definition's kind."
   @spec filters() :: %{String.t() => String.t()}
@@ -50,7 +51,7 @@ defmodule Loka.Content.Reactions do
       owned(at(rel, []), "reaction", ctx.kinds) ++
       owned(at(rel, ["on", "event"]), event, ctx.events) ++
       named(rel, on, ctx) ++
-      entrant(rel, on, ctx) ++
+      instances(rel, on, ctx) ++
       Enum.flat_map(Enum.with_index(r["apply"]), &consequence(rel, &1, on, ctx))
   end
 
@@ -60,18 +61,19 @@ defmodule Loka.Content.Reactions do
         reference(rel, ["on"], {f, kind}, on, ctx.m, ctx.defs)
       end)
 
-  # A spawn template has no instance to enter (row W3).
-  defp entrant(rel, %{"npc" => n}, ctx) do
+  # A spawn template has no instance to enter (row W3) or attack (loka-kgd.79).
+  defp instances(rel, on, ctx),
+    do: Enum.flat_map(Map.take(on, ["npc", "attacker"]), &instance(rel, &1, ctx))
+
+  defp instance(rel, {f, n}, ctx) do
     case resolve(n, "npc", ctx.m, ctx.defs) do
       {_, _, %{"spawn_template" => true}} ->
-        [diag("SCHEMA_VIOLATION", at(rel, ["on", "npc"]), %{"error" => "invalid_value"})]
+        [diag("SCHEMA_VIOLATION", at(rel, ["on", f]), %{"error" => "invalid_value"})]
 
       _ ->
         []
     end
   end
-
-  defp entrant(_, _, _), do: []
 
   # The kernel_api minor (major 1) each consequence op needs; twin of FLOORS in
   # kernel/ts/src/content/cartridge_reactions.ts.
@@ -88,13 +90,15 @@ defmodule Loka.Content.Reactions do
   # reader 2, row G3).
   @events %{"quest_resolved" => 8, "spoken" => 48, "status_applied" => 53}
 
-  # One diagnostic per rule below its highest floor; the entrant filter needs 1.47 (row W3), a
-  # co_present status.apply 1.50 (W21), with a tag 1.56 (W22).
+  # One diagnostic per rule below its highest floor; the entrant filter needs 1.47 (row W3), the
+  # attacker filter 1.58 (loka-kgd.79), a co_present status.apply 1.50 (W21), with a tag 1.56 (W22),
+  # naming a room 1.65 (status reader 9).
   defp api(r, manifest) do
     floor =
       Enum.max([
         Map.get(@events, r["on"]["event"], 0),
-        if(Map.has_key?(r["on"], "npc"), do: 47, else: 0)
+        if(Map.has_key?(r["on"], "npc"), do: 47, else: 0),
+        if(Map.has_key?(r["on"], "attacker"), do: 58, else: 0)
         | Enum.map(r["apply"], &step_floor/1)
       ])
 
@@ -108,6 +112,7 @@ defmodule Loka.Content.Reactions do
       else: []
   end
 
+  defp step_floor(%{"op" => "status.apply", "room" => _}), do: 65
   defp step_floor(%{"tag" => _}), do: 56
   defp step_floor(%{"co_present" => _}), do: 50
   defp step_floor(s), do: Map.get(@floors, s["op"], 0)
@@ -163,14 +168,15 @@ defmodule Loka.Content.Reactions do
           ],
           else: []
         ) ++
+        room(rel, s, i, ctx) ++
         listener(rel, s, i, ctx)
 
   # Row W22 (loka-kgd.96): a named barrier resolves; to locked needs a key_item on the named
   # barrier, or on every barrier carrying the tag (BARRIER_UNREACHABLE_KEY); twin of barrierSet.
-  defp consequence(rel, {%{"op" => "barrier.set"} = s, i}, _, ctx) do
+  defp consequence(rel, {%{"op" => "barrier.set"} = s, i}, on, ctx) do
     owned(at(rel, ["apply", i, "op"]), "barrier_changed", ctx.events) ++
       if(s["barrier"], do: reference(rel, ["apply", i], "barrier", s, ctx.m, ctx.defs), else: []) ++
-      lockout(rel, s, i, hit(s, ctx))
+      lockout(rel, s, i, hit(s, on["room"], ctx))
   end
 
   # Status reader 3 (row G3): the subject's status.
@@ -188,10 +194,10 @@ defmodule Loka.Content.Reactions do
           do: d
         )
 
-  defp hit(s, ctx) do
+  defp hit(s, room, ctx) do
     if s["barrier"],
       do: for({_, _, b} <- [resolve(s["barrier"], "barrier", ctx.m, ctx.defs)], do: b),
-      else: for(b <- exit_barriers(ctx), s["tag"] in (b["tags"] || []), do: b)
+      else: for(b <- exit_barriers(room, ctx), s["tag"] in (b["tags"] || []), do: b)
   end
 
   defp lockout(rel, s, i, hit) do
@@ -200,11 +206,17 @@ defmodule Loka.Content.Reactions do
       else: []
   end
 
-  # A tag reaches only barriers on exits (setBarrier), never a container's lid.
-  defp exit_barriers(ctx) do
-    rooms = if is_map(ctx.defs["room"]), do: ctx.defs["room"], else: %{}
+  # A tag reaches only barriers on exits (setBarrier), never a container's lid, and only the event
+  # room's: the trigger's room filter fixes it, else any room may be it (loka-kgd.103).
+  defp exit_barriers(room, ctx) do
+    rooms =
+      cond do
+        room -> [resolve(room, "room", ctx.m, ctx.defs)]
+        is_map(ctx.defs["room"]) -> Map.values(ctx.defs["room"])
+        true -> []
+      end
 
-    for {_, {_, _, r}} <- rooms,
+    for {_, _, r} <- rooms,
         {_, e} <- r["exits"] || %{},
         e["barrier"],
         {_, _, b} <- [resolve(e["barrier"], "barrier", ctx.m, ctx.defs)],
@@ -228,4 +240,17 @@ defmodule Loka.Content.Reactions do
   end
 
   defp listener(_, _, _, _), do: []
+
+  # Status reader 9: a named room resolves and is the step's only holder.
+  defp room(rel, %{"room" => _} = s, i, ctx),
+    do:
+      reference(rel, ["apply", i], "room", s, ctx.m, ctx.defs) ++
+        if(s["item"] || s["npc"] || s["co_present"],
+          do: [
+            diag("SCHEMA_VIOLATION", at(rel, ["apply", i, "room"]), %{"error" => "invalid_value"})
+          ],
+          else: []
+        )
+
+  defp room(_, _, _, _), do: []
 end

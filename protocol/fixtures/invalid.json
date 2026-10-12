@@ -13389,11 +13389,16 @@
       "on": {
         "event": "attack_result",
         "hit": 1,
+        "attacker": 1,
         "x": 1
       },
       "apply": []
     },
     "errors": [
+      {
+        "path": "/on/attacker",
+        "code": "invalid_type"
+      },
       {
         "path": "/on/hit",
         "code": "invalid_type"
@@ -23914,6 +23919,147 @@
     ]
   },
   {
+    "contract": "StatusDefinition",
+    "value": {
+      "key": "blind",
+      "duration": 120,
+      "tick_every": 60,
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "hp"
+      },
+      "label": "condition.blind",
+      "narration": {
+        "applied": "narration.blind.applied",
+        "tick": "narration.blind.tick",
+        "expired": "narration.blind.expired"
+      },
+      "perception": {
+        "sight": "blurred"
+      }
+    },
+    "errors": [
+      {
+        "path": "/perception/sight",
+        "code": "not_in_enum"
+      }
+    ]
+  },
+  {
+    "contract": "StatusDefinition",
+    "value": {
+      "key": "blind",
+      "duration": 120,
+      "tick_every": 60,
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "hp"
+      },
+      "label": "condition.blind",
+      "narration": {
+        "applied": "narration.blind.applied",
+        "tick": "narration.blind.tick",
+        "expired": "narration.blind.expired"
+      },
+      "perception": {
+        "hearing": "muffled"
+      }
+    },
+    "errors": [
+      {
+        "path": "/perception/hearing",
+        "code": "not_in_enum"
+      }
+    ]
+  },
+  {
+    "contract": "StatusDefinition",
+    "value": {
+      "key": "blind",
+      "duration": 120,
+      "tick_every": 60,
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "hp"
+      },
+      "label": "condition.blind",
+      "narration": {
+        "applied": "narration.blind.applied",
+        "tick": "narration.blind.tick",
+        "expired": "narration.blind.expired"
+      },
+      "perception": {
+        "smell": "anosmic"
+      }
+    },
+    "errors": [
+      {
+        "path": "/perception/smell",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "StatusDefinition",
+    "value": {
+      "key": "blind",
+      "duration": 120,
+      "tick_every": 60,
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "hp"
+      },
+      "label": "condition.blind",
+      "narration": {
+        "applied": "narration.blind.applied",
+        "tick": "narration.blind.tick",
+        "expired": "narration.blind.expired"
+      },
+      "perception": "blind"
+    },
+    "errors": [
+      {
+        "path": "/perception",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "contract": "StatusDefinition",
+    "value": {
+      "key": "blind",
+      "duration": 120,
+      "tick_every": 60,
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "hp"
+      },
+      "label": "condition.blind",
+      "narration": {
+        "applied": "narration.blind.applied",
+        "tick": "narration.blind.tick",
+        "expired": "narration.blind.expired"
+      },
+      "concealment": "camouflaged"
+    },
+    "errors": [
+      {
+        "path": "/concealment",
+        "code": "not_in_enum"
+      }
+    ]
+  },
+  {
     "contract": "ReactionRule",
     "value": {
       "key": "k",
@@ -24230,6 +24376,274 @@
       {
         "path": "/apply/0/to",
         "code": "not_in_enum"
+      }
+    ]
+  },
+  {
+    "contract": "StatusDefinition",
+    "value": {
+      "key": "flying",
+      "duration": 600,
+      "tick_every": 60,
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "mv"
+      },
+      "label": "condition.flying",
+      "narration": {
+        "applied": "narration.flying.applied",
+        "tick": "narration.flying.tick",
+        "expired": "narration.flying.expired"
+      },
+      "movement": {
+        "cost_percent": -1
+      }
+    },
+    "errors": [
+      {
+        "path": "/movement/cost_percent",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "contract": "StatusDefinition",
+    "value": {
+      "key": "flying",
+      "duration": 600,
+      "tick_every": 60,
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "mv"
+      },
+      "label": "condition.flying",
+      "narration": {
+        "applied": "narration.flying.applied",
+        "tick": "narration.flying.tick",
+        "expired": "narration.flying.expired"
+      },
+      "movement": {
+        "cost_percent": 1001
+      }
+    },
+    "errors": [
+      {
+        "path": "/movement/cost_percent",
+        "code": "above_maximum"
+      }
+    ]
+  },
+  {
+    "contract": "StatusDefinition",
+    "value": {
+      "key": "flying",
+      "duration": 600,
+      "tick_every": 60,
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "mv"
+      },
+      "label": "condition.flying",
+      "narration": {
+        "applied": "narration.flying.applied",
+        "tick": "narration.flying.tick",
+        "expired": "narration.flying.expired"
+      },
+      "movement": {
+        "cost_percent": 50.5
+      }
+    },
+    "errors": [
+      {
+        "path": "/movement/cost_percent",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "contract": "StatusDefinition",
+    "value": {
+      "key": "flying",
+      "duration": 600,
+      "tick_every": 60,
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "mv"
+      },
+      "label": "condition.flying",
+      "narration": {
+        "applied": "narration.flying.applied",
+        "tick": "narration.flying.tick",
+        "expired": "narration.flying.expired"
+      },
+      "movement": {
+        "passes": []
+      }
+    },
+    "errors": [
+      {
+        "path": "/movement/passes",
+        "code": "too_few_items"
+      }
+    ]
+  },
+  {
+    "contract": "StatusDefinition",
+    "value": {
+      "key": "flying",
+      "duration": 600,
+      "tick_every": 60,
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "mv"
+      },
+      "label": "condition.flying",
+      "narration": {
+        "applied": "narration.flying.applied",
+        "tick": "narration.flying.tick",
+        "expired": "narration.flying.expired"
+      },
+      "movement": {
+        "passes": [
+          "water",
+          "air",
+          "chasm",
+          "water"
+        ]
+      }
+    },
+    "errors": [
+      {
+        "path": "/movement/passes",
+        "code": "too_many_items"
+      }
+    ]
+  },
+  {
+    "contract": "StatusDefinition",
+    "value": {
+      "key": "flying",
+      "duration": 600,
+      "tick_every": 60,
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "mv"
+      },
+      "label": "condition.flying",
+      "narration": {
+        "applied": "narration.flying.applied",
+        "tick": "narration.flying.tick",
+        "expired": "narration.flying.expired"
+      },
+      "movement": {
+        "passes": [
+          "wooden"
+        ]
+      }
+    },
+    "errors": [
+      {
+        "path": "/movement/passes/0",
+        "code": "not_in_enum"
+      }
+    ]
+  },
+  {
+    "contract": "StatusDefinition",
+    "value": {
+      "key": "flying",
+      "duration": 600,
+      "tick_every": 60,
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "mv"
+      },
+      "label": "condition.flying",
+      "narration": {
+        "applied": "narration.flying.applied",
+        "tick": "narration.flying.tick",
+        "expired": "narration.flying.expired"
+      },
+      "movement": {
+        "speed": 2
+      }
+    },
+    "errors": [
+      {
+        "path": "/movement/speed",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "StatusDefinition",
+    "value": {
+      "key": "flying",
+      "duration": 600,
+      "tick_every": 60,
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "mv"
+      },
+      "label": "condition.flying",
+      "narration": {
+        "applied": "narration.flying.applied",
+        "tick": "narration.flying.tick",
+        "expired": "narration.flying.expired"
+      },
+      "movement": [
+        "water"
+      ]
+    },
+    "errors": [
+      {
+        "path": "/movement",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "contract": "StatusDefinition",
+    "value": {
+      "key": "flying",
+      "duration": 600,
+      "tick_every": 60,
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "mv"
+      },
+      "label": "condition.flying",
+      "narration": {
+        "applied": "narration.flying.applied",
+        "tick": "narration.flying.tick",
+        "expired": "narration.flying.expired"
+      },
+      "movement": {
+        "passes": "water"
+      }
+    },
+    "errors": [
+      {
+        "path": "/movement/passes",
+        "code": "invalid_type"
       }
     ]
   }

@@ -15,6 +15,7 @@ import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { key } from '../src/foundation/compose.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { value } from '../src/mechanics/fact.ts';
+import { apply } from '../src/runtime/apply.ts';
 import { applyStatus } from '../src/mechanics/status/shared.ts';
 import { runStatus } from '../src/mechanics/status/job.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
@@ -345,4 +346,45 @@ test('the loader refuses each unsound G3 declaration', () => {
     );
     assert.deepEqual(r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path], [code, path]);
   }
+});
+
+// Status reader 4 on NPC movement (loka-kgd.102). Breaks: a schedule job moving an NPC whose statuses
+// bar `move` (the guard is rooted by a 2 h status over its 07:00 job and walks on the next day's).
+test('a rooted guard keeps its room through its job and moves once the status ends', () => {
+  const poison = content.statuses![`${C}:status/poison`];
+  const rooted = {
+    ...poison,
+    duration: 7200,
+    per_tick: undefined,
+    tick_every: undefined,
+    resource: undefined,
+    blocks: ['move'],
+  };
+  const base = fresh();
+  const w0 = {
+    ...base,
+    cartridge: {
+      ...base.cartridge,
+      statuses: { ...base.cartridge.statuses, [`${C}:status/poison`]: rooted },
+    },
+  } as unknown as World;
+  const guard = id(w0, 'npc', 'guard');
+  const set = apply(
+    w0,
+    applyStatus(
+      w0,
+      guard,
+      ref('status', 'poison'),
+      0,
+      () => '00000000-6666-4666-8666-000000000001' as never,
+    ),
+    false,
+  );
+  assert.ok('world' in set, JSON.stringify(set));
+  const room = (w: World) => w.state.containers[guard];
+  const hall = w0.roomIds[`${C}:room/hall`];
+  assert.equal(room(set.world), hall);
+  const held = wait(set.world, 3600 + 60);
+  assert.equal(room(held), hall);
+  assert.equal(room(wait(held, 86400)), w0.roomIds[`${C}:room/dart_room`]);
 });

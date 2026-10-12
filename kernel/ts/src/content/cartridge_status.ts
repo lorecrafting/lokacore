@@ -27,15 +27,8 @@ export function status(c: Obj): Diagnostic[] {
   const { immune, named, drinks, lone, g3 } = api146(c);
   if (!Object.keys(defs).length && !applies.length && !cures.length && !g3) return out;
   const all = Object.values(defs);
-  const floor = all.some(reader)
-    ? '1.54'
-    : all.some((s) => s.fear)
-      ? '1.50'
-      : all.some(lasting)
-        ? '1.48'
-        : g3
-          ? '1.46'
-          : '1.38';
+  const room = named.some(([, , table]) => table === 'rooms'); // status reader 9: a step naming a room
+  const floor = room ? '1.65' : floorOf(all, g3);
   if (
     apiCmp(c.manifest.requires.kernel_api.at_least, floor) < 0 ||
     ['status', 'death'].some((k) => c.lock.capabilities[k] !== 1) // a fatal hp tick needs death
@@ -49,10 +42,29 @@ export function status(c: Obj): Diagnostic[] {
   return [...out, ...lone.map((at) => diag('SCHEMA_VIOLATION', at, { error: 'invalid_value' }))];
 }
 
+// The highest floor any declaration needs: movement (SR7), perception and concealment (SR6, SR8),
+// readers (SR4, SR5), fear (W21), permanent (W8), the G3 fields.
+const floorOf = (all: Obj[], g3: unknown) =>
+  all.some((s) => s.movement)
+    ? '1.62'
+    : all.some((s) => s.perception || s.concealment)
+      ? '1.61'
+      : all.some(reader)
+        ? '1.54'
+        : all.some((s) => s.fear)
+          ? '1.50'
+          : all.some(lasting)
+            ? '1.48'
+            : g3
+              ? '1.46'
+              : '1.38';
+
 // Row W8: a permanent status never ticks, so it declares no per_tick; a fear one (row W21) may omit it.
 const lasting = (s: Obj) => s.duration === 'permanent';
-// Status readers 4 and 5 (API 1.54): such a status may omit per_tick too.
-const reader = (s: Obj) => s.blocks || s.allows || s.resistances;
+// Status readers 4 and 5 (API 1.54), 6 and 8 (API 1.61), 7 (movement, API 1.62): such a status may
+// omit per_tick too.
+const reader = (s: Obj) =>
+  s.blocks || s.allows || s.resistances || s.perception || s.concealment || s.movement;
 
 // One status definition's own fields.
 function definition(c: Obj, ref: string, s: Obj): Diagnostic[] {
@@ -69,6 +81,9 @@ function definition(c: Obj, ref: string, s: Obj): Diagnostic[] {
       : s.per_tick === undefined && !s.modifies && !s.fear && !reader(s))
   )
     out.push(diag('SCHEMA_VIOLATION', `${at}.per_tick`));
+  // Status reader 6: a perception names a sense (the schema subset has no minProperties).
+  if (s.perception && !Object.keys(s.perception).length)
+    out.push(diag('SCHEMA_VIOLATION', `${at}.perception`));
   // Status reader 4: each name is a player command type (run_job and elapsed are authority-internal).
   for (const field of ['blocks', 'allows'])
     (s[field] ?? []).forEach((c: string, n: number) => {
@@ -91,6 +106,7 @@ function definition(c: Obj, ref: string, s: Obj): Diagnostic[] {
 // The fields needing kernel_api 1.46: row G3's immune list entries, steps naming an item and tick or
 // expiry triggers; row 2c's status modifiers (each attribute, with the table it names); row G13's
 // liquid cures (ended by Drink). `g3` says whether any is used.
+// size: allow 41, the per-step holder checks (rows 42, W21, status reader 9) share the one step scan
 function api146(c: Obj) {
   const immune = (['npcs', 'items'] as const).flatMap((kind) =>
     Object.entries(c[kind] ?? {}).flatMap(([ref, e]: [string, any]) =>
@@ -101,7 +117,7 @@ function api146(c: Obj) {
     (r.apply as Obj[]).flatMap((s, i) =>
       s.op !== 'status.apply'
         ? []
-        : (['item', 'npc'] as const)
+        : (['item', 'npc', 'room'] as const)
             .filter((f) => s[f])
             .map((f) => [`.cartridge.reactions${step(ref)}.apply[${i}].${f}`, s[f], `${f}s`, s]),
     ),
@@ -109,6 +125,7 @@ function api146(c: Obj) {
   // Row 42: one holder per step, never a spawn template (no instance); row W21's co_present: none.
   const lone = items.flatMap(([at, ref, table, s]) =>
     s.co_present ||
+    (table === 'rooms' && (s.item || s.npc)) ||
     (table === 'npcs' && (c.npcs?.[refString(ref as never)]?.spawn_template || s.item))
       ? [at]
       : [],

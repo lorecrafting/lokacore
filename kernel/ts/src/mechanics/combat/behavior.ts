@@ -7,7 +7,7 @@ import { exitOf, exitTo } from '../lookups.ts';
 import { passage } from '../movement/shared.ts';
 import { engaged } from './shared.ts';
 import { suppressed } from '../population/shared.ts';
-import { activeStatuses } from '../status/shared.ts';
+import { activeStatuses, moves } from '../status/shared.ts';
 
 /** Exact C3 slot membership at admission; the roster never refills. */
 export function admission(world: World, target: EntityId, steps: Steps): EntityId[] | undefined {
@@ -67,7 +67,7 @@ export function flight(
   if (!plan?.pack) return;
   const here = world.state.containers[id];
   if (!plan.area.some((ref) => world.roomIds[refString(ref)] === here)) return;
-  const leaving = flightExit(world, here, plan.area, steps);
+  const leaving = moves(world, id) ? flightExit(world, here, plan.area, steps) : undefined;
   return leaving && flightWrite(world, id, at, here, origin, leaving);
 }
 

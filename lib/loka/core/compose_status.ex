@@ -1,11 +1,11 @@
 defmodule Loka.Core.ComposeStatus do
-  @moduledoc "One checked status generation on a body, NPC or item (toolbox rows 1, G3); the TypeScript story rule owns its producers."
+  @moduledoc "One checked status generation on a body, NPC, item or room (toolbox rows 1, G3, status reader 9); the TypeScript story rule owns its producers."
 
   def transition(op, row, state, now) do
     next = op["value"]
     prior = row || %{}
 
-    if get_in(state, ["known_entities", op["body_id"], "kind"]) in ~w(body npc item) and
+    if get_in(state, ["known_entities", op["body_id"], "kind"]) in ~w(body npc item room) and
          row == op["expected"] and shape?(prior, next, now) and generation?(prior, next) and
          (prior["active"] == true or next["active"] == true),
        do: {:ok, next},

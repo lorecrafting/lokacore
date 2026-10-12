@@ -15,6 +15,7 @@ import {
 } from '../../runtime/decision.ts';
 import { movable } from '../../runtime/created.ts';
 import { settleMaxima } from '../resource.ts';
+import { statusAllows } from '../status/shared.ts';
 
 /** equipment@1's commands, shared by the GameView and its invariant. */
 export const VERBS: readonly string[] = ['wear', 'remove'];
@@ -56,7 +57,9 @@ export function transfer(
   if (e.kind !== 'item') return 'invalid_target';
   const at = world.state.containers[item];
   const worn = wornIn(world, at, body);
-  if (type === 'remove') return worn ? [at, body] : at === body ? 'invalid_state' : 'not_owned';
+  if (type === 'remove' && worn)
+    return statusAllows(world, item)('remove') ? [at, body] : 'invalid_state'; // row 28: a curse holds it on
+  if (type === 'remove') return at === body ? 'invalid_state' : 'not_owned';
   if (worn) return 'invalid_state';
   if (at !== body) return 'not_owned';
   const holder = e.slot === undefined ? undefined : world.slots[e.slot];

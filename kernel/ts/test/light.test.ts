@@ -300,3 +300,28 @@ test('light projection respects loaded keyed target and input admission before o
     }
   }
 });
+
+import { statusKey } from '../src/mechanics/status/shared.ts';
+import { refString } from '../src/runtime/decision.ts';
+
+// Breaks (status reader 6): a held lit torch outweighs blindness (blind read inside the unlit test).
+test('a blind player holding a lit torch sees the well shaft dark', () => {
+  const w = accept(run(small(), 'ignite', { item_id: torch }));
+  assert.equal(gameView(w).place.description.key, 'room.well_shaft.description');
+  const { id: cartridge_id, version: cartridge_version } = w.cartridge.manifest;
+  const blind = { cartridge_id, cartridge_version, kind: 'status', key: 'blind' } as never;
+  const spec = {
+    key: 'blind',
+    resource: { cartridge_id, cartridge_version, kind: 'resource', key: 'hp' },
+    perception: { sight: 'blind' },
+  };
+  const blinded = {
+    ...w,
+    cartridge: { ...w.cartridge, statuses: { [refString(blind)]: spec } },
+    state: {
+      ...w.state,
+      statuses: { [statusKey(w.body, blind)]: { generation: 1, active: true } },
+    },
+  } as World;
+  assert.equal(gameView(blinded).place.description.key, 'room.well_shaft.dark');
+});

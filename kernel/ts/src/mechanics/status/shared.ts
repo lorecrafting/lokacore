@@ -138,7 +138,7 @@ export function applyStatus(
   if (spec.duration === 'permanent') return active ? [] : [change({ active: true, generation })];
   const now = world.state.clock;
   const ends_at = add(now, spec.duration);
-  if (active) return [change({ ...active, ends_at })];
+  if (active) return [change(refreshed(world, active, ends_at))];
   const next_tick_at = spec.per_tick === undefined ? ends_at : add(now, spec.tick_every);
   const value = {
     active: true as const,
@@ -156,6 +156,13 @@ export function applyStatus(
   };
   return [...settleFor(world, body, status, writer_group), change(value), job];
 }
+
+// A refresh writes only the end. Mid-advance a crossed sub-step (job.ts runStatus) has completed the
+// row's job and left its tick stale; the drain carries the true tick, so the row holds the end.
+const refreshed = (world: World, active: Active, ends_at: number): StatusRow =>
+  world.state.jobs?.[active.job_id ?? '']?.status === 'completed'
+    ? { ...active, ends_at, next_tick_at: ends_at }
+    : { ...active, ends_at };
 
 /**
  * Inactivate every active status on `body` at death, but a permanent one (row W8) on the same-body
@@ -194,6 +201,39 @@ export function statusResistance(world: World, body: EntityId) {
     specs.reduce((sum, s) => add(sum, s.resistances?.[entry as keyof Resistances] ?? 0), 0);
 }
 
+// Status readers 6 and 8: `body`'s active statuses, scanned only when some status declares a sense.
+function sensed(world: World, body: EntityId | undefined) {
+  const any = Object.values(world.cartridge.statuses ?? {}).some(
+    (s) => s.perception || s.concealment,
+  );
+  return any && body !== undefined ? activeStatuses(world, body).map(({ spec }) => spec) : [];
+}
+
+/** Status reader 6: whether an active status on `body` declares the sight or hearing `sense`. */
+export const perceives = (
+  world: World,
+  body: EntityId | undefined,
+  sense: 'blind' | 'dark_sight' | 'see_invisible' | 'deaf',
+) =>
+  sensed(world, body).some((s) => s.perception?.sight === sense || s.perception?.hearing === sense);
+
+/** Status reader 8: whether `seer` fails to see `holder`: hidden, or invisible without see_invisible. */
+export const concealed = (world: World, holder: EntityId, seer: EntityId | undefined) =>
+  sensed(world, holder).some(
+    (s) =>
+      s.concealment === 'hidden' ||
+      (s.concealment === 'invisible' && !perceives(world, seer, 'see_invisible')),
+  );
+
+/**
+ * Status reader 7: the `movement` declarations of `body`'s active statuses, in definition order
+ * (none read while no status declares one). Read by movement's fare and terrain admission.
+ */
+export function statusMovement(world: World, body: EntityId) {
+  const declared = Object.values(world.cartridge.statuses ?? {}).some((s) => s.movement);
+  return declared ? activeStatuses(world, body).flatMap(({ spec }) => spec.movement ?? []) : [];
+}
+
 /**
  * Status reader 4: whether `body`'s active statuses let it take Command type `command`: none blocks
  * it and every `allows` list names it. The player's admission (`permits`) and NPC combat turns read it.
@@ -206,6 +246,9 @@ export function statusAllows(world: World, body: EntityId) {
       (s) => !s.blocks?.includes(command as Key) && (s.allows?.includes(command as Key) ?? true),
     );
 }
+
+/** Status reader 4: whether NPC `npc` may move (its statuses bar or leave out `move`); every NPC mover reads it. */
+export const moves = (world: World, npc: EntityId) => statusAllows(world, npc)('move');
 
 /**
  * A status.apply or (status reader 3) status.cure step of a reaction or (row 29b) a spell on its

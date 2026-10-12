@@ -167,6 +167,38 @@ test('an active status gives its cues from its holder', () => {
   assert.deepEqual([smoke(row(true) as World), smoke(row(false) as World)], [true, false]);
 });
 
+// Breaks (status reader 6): a deaf player still hears the forge's hammering, deafness drops the
+// stew's smell too, or a deaf guard is still alerted by the failed pick's rattle.
+test('a deaf listener hears no sound cue and still smells', () => {
+  const c = structuredClone(content) as unknown as Obj;
+  const deaf = ref('status', 'deaf');
+  c.statuses = {
+    'senses_sampler@0.0.1:status/deaf': {
+      key: 'deaf',
+      resource: ref('resource', 'hp'),
+      perception: { hearing: 'deaf' },
+    },
+  };
+  const on = (w: World, holder: EntityId) =>
+    ({
+      ...w,
+      state: {
+        ...w.state,
+        statuses: { [statusKey(holder, deaf)]: { generation: 1, active: true } },
+      },
+    }) as World;
+  const w = fresh(c as unknown as Cartridge);
+  assert.deepEqual(gameView(on(w, w.body)).cues, [
+    { sense: 'smell', text: 'cue.stew', direction: 'north' },
+  ]);
+  const west = play(w, { type: 'move', direction: 'west' });
+  const alerted = (x: World) => {
+    const picked = play(x, { type: 'perform', action: 'pick_lock' });
+    return value(picked, picked.character, ref('fact', 'guard_alerted'));
+  };
+  assert.deepEqual([alerted(west), alerted(on(west, id(west, 'npc', 'guard')))], [true, false]);
+});
+
 // Breaks: the outcome's transient cue never perceived (the guard misses it), range ignored or the
 // leaf always true (the sentry two rooms away hears it).
 test('a failed pick is heard by the guard next door, not the sentry two rooms away', () => {

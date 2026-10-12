@@ -1000,8 +1000,8 @@ historical custody. D6 underwater recovery remains location-specific. Prove
 real SQLite cold reopen, failed COMMIT, both uncertain COMMIT outcomes, lost
 acknowledgement and same-invocation replay at bell suppression/resume and
 Study recovery boundaries; input/elapsed stays fenced until reconciliation. The current regular population
-job and its suppression resume job may share one writer group at their exact
-common deadline; cold-load must distinguish this bound pair from deer sight
+job and its suppression resume job may share one writer group when one advance
+runs both (Beads `loka-dto9`); cold-load must distinguish this bound pair from deer sight
 handoff reuse and continue validating all operations through receipt replay.
 
 ## D12 lesson, careful Harvest and discount recovery
@@ -1068,7 +1068,7 @@ Cold reopen accepts each complete intermediate: dropped before acquisition with 
 
 ## Status recovery
 
-Persist the `statuses` row, the resource, the job and the receipt with the normal changed-row transaction before adoption and reply; the row key is the canonical status target text. Since [row G3](mechanics.md#statuses-on-npcs-and-things-toolbox-row-g3) the holder in that key may be an NPC or item; the row and job shapes are unchanged, so an older save's rows load as before, and the due job finds its row, and so its holder, by job id on reopen as in play. A [permanent](mechanics.md#permanent-statuses-toolbox-row-w8) row has no job and reopens as stored; load does not check status rows against their definitions, and the reopen test is `mobile/authority/local-story/scars.test.ts`. Cold reopen re-decides the accepted application, ticks, expiry, cure and fatal return like any other receipt. A pending status job after a cure or death is lawful and completes without change on delivery.
+Persist the `statuses` row, the resource, the job and the receipt with the normal changed-row transaction before adoption and reply; the row key is the canonical status target text. Since [row G3](mechanics.md#statuses-on-npcs-and-things-toolbox-row-g3) the holder in that key may be an NPC or item, and since [status reader 9](mechanics.md#a-room-as-a-status-holder-status-reader-9) a room; the row and job shapes are unchanged, so an older save's rows load as before, and the due job finds its row, and so its holder, by job id on reopen as in play. A [permanent](mechanics.md#permanent-statuses-toolbox-row-w8) row has no job and reopens as stored; load does not check status rows against their definitions, and the reopen test is `mobile/authority/local-story/scars.test.ts`. Cold reopen re-decides the accepted application, ticks, expiry, cure and fatal return like any other receipt. A pending status job after a cure or death is lawful and completes without change on delivery.
 
 ## Quest deadline recovery
 

@@ -1,6 +1,7 @@
 // The showcase's combat district, the Drill Yard, walked step by step (docs/showcase/combat-district.md,
 // "Guided loop and expected outcomes"). Steps 1 to 8 continue one world (step 3's inn shout is its
-// own branch); step 10 starts fresh in the social district and combat 11 in the hub.
+// own branch); step 10 starts fresh in the social district and combat 11 and the tilt yard's pack
+// in the hub.
 // Every attack is chance 100 or 0, so the numbers are the plan's; the purse roll alone is seeded.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
@@ -22,6 +23,7 @@ import {
   pool,
   ref,
   refused,
+  reload,
   take,
   wait,
 } from './showcase_fixture.ts';
@@ -181,7 +183,9 @@ test('combat 5: Raise str spends the point', () => {
 
 // Breaks: the gore reaction or a status is missing, the boar's own statuses land on the player
 // twice, the bleed ticks early, the death keeps the bleed or loses the scar, the level or str,
-// or the held items do not move to the corpse.
+// or the held items do not move to the corpse; or (loka-kgd.105) without its npc_present `when`,
+// the killing blow's gore lands its bleed on the body returned to the inn, or not its permanent
+// scar, or a reaction on the death itself no longer reaches it.
 test('combat 6: unarmed, the boar gores the player to death; the scar survives the return', () => {
   const sword = id(w, 'item', 'training_sword');
   w = play(w, { type: 'remove', item_id: sword }).world;
@@ -203,6 +207,20 @@ test('combat 6: unarmed, the boar gores the player to death; the scar survives t
     { sense: 'smell', text: 'cue.blood' },
     { sense: 'sound', text: 'cue.boar' },
   ]);
+  const gore = ref('reaction', 'boar_gore');
+  const { when: _, ...bare } = w.cartridge.reactions![gore]!;
+  const reactions = { ...w.cartridge.reactions, [gore]: bare };
+  const unguarded = { ...w, cartridge: { ...w.cartridge, reactions } };
+  assert.deepEqual(conditions(wait(unguarded, start + 750).world), [GORED]);
+  const scar = statusKey(w.body, { ...C, kind: 'status', key: 'gored' } as never);
+  const before = wait(unguarded, start + 600).world; // alive: the boar's next blow kills
+  assert.equal(where(before, before.body), room(w, 'boar_run'));
+  const { [scar]: _row, ...unscarred } = before.state.statuses!;
+  const unscarredWorld = { ...before, state: { ...before.state, statuses: unscarred } };
+  assert.deepEqual(conditions(wait(unscarredWorld, start + 750).world), [GORED]); // permanent: still lands
+  const onDeath = { ...reactions, [gore]: { ...bare, on: { event: 'entity_died' } } };
+  const mourned = { ...w, cartridge: { ...w.cartridge, reactions: onDeath } } as World;
+  assert.equal(conditions(wait(mourned, start + 750).world)?.length, 2); // the death's own reaction
   const last = wait(w, start + 750);
   w = last.world;
   assert.ok(last.lines.includes('combat.player_died'));
@@ -276,9 +294,9 @@ test('combat 8: armed, the boar falls in three rounds; the poultice stops the bl
 });
 
 // Breaks: the pit's pack or target choice is missing (the second Attack is refused or plays a
-// round), the switch does not move the player's blow off A, the goblin kill entry is lost (no 70),
-// or a non-final pack kill pays (loka-lpq6: re-pin B's death to 70 and the end to 80 once fixed).
-test('combat 9: in the pit the player turns on the second goblin; the last kill pays', () => {
+// round), the switch does not move the player's blow off A, the goblin kill entry is lost, or a
+// non-final pack kill earns nothing (loka-lpq6: 70 at B's death, 80 at A's).
+test('combat 9: in the pit the player turns on the second goblin; each kill pays', () => {
   w = go(w, 'south').world;
   const [a, b] = goblinsIn(w, 'goblin_pit');
   assert.ok(a && b, 'two goblins in the pit');
@@ -298,13 +316,13 @@ test('combat 9: in the pit the player turns on the second goblin; the last kill 
   assert.deepEqual(hps(r1), [6, 3, 5]);
   const r2 = wait(r1, start + 300).world;
   assert.deepEqual(hps(r2), [6, 0, 4]);
-  assert.equal(levelling(r2)?.experience, 60);
+  assert.equal(levelling(r2)?.experience, 70);
   const r3 = wait(r2, start + 450).world;
   assert.deepEqual(hps(r3), [3, 0, 3]);
   w = wait(r3, start + 600).world;
   assert.deepEqual(hps(w), [0, 0, 2]);
   assert.equal(engaged(w, w.body), undefined);
-  assert.deepEqual(levelling(w), { level: 2, experience: 70, next: 100, unspent: 0 });
+  assert.deepEqual(levelling(w), { level: 2, experience: 80, next: 100, unspent: 0 });
 });
 
 // Breaks: the Warden's physical resistance is missing (the sword kills him in three rounds and
@@ -340,4 +358,37 @@ test('combat 11: the raider falls before the bounty is taken; the fight ends nor
   assert.deepEqual(gameView(s).journal, []);
   assert.deepEqual(levelling(s), { level: 1, experience: 10, next: 30, unspent: 0 });
   assert.equal(talk(go(s, 'east').world, 'aldous').opened, 'aldous_lesson');
+});
+
+// Breaks: the tilt yard's pack plan is missing or homed elsewhere, or its Attack does not admit
+// the second goblin (Gil stays in the gate yard and does not join); or (loka-kgd.79) boar_gore
+// fires on a goblin's hit while the tilt boar is near, so the player bleeds and is gored.
+test('tilt yard: the sandbox pack is two goblins fought together; their hits do not gore', () => {
+  const s = go(go(go(fresh(CTX), 'west').world, 'west').world, 'south').world;
+  const pack = goblinsIn(s, 'tilt_yard');
+  assert.equal(pack.length, 2);
+  const r = play(s, { type: 'attack', target_id: pack[0] });
+  assert.ok(r.lines.includes('combat.goblin_joined'));
+  assert.deepEqual([...engaged(r.world, r.world.body)!.row.active_ids!].sort(), pack);
+  const hit = wait(r.world, r.world.state.clock + 150).world;
+  assert.ok(pool(hit, 'hp')! < pool(s, 'hp')!); // a goblin's blow landed
+  assert.deepEqual(conditions(hit), conditions(s));
+});
+
+// Twin of the compiler rows in test/loka/content_showcase_test.exs (loka-kgd.79). Breaks: an
+// attacker filter loads under API 1.57, names a spawn template (no instance ever attacks) or an
+// NPC the cartridge lacks.
+test('loader: the attacker filter needs API 1.58 and an authored NPC', () => {
+  const gore = (api: string, key: string) => (c: any) => {
+    c.manifest.requires.kernel_api.at_least = api;
+    c.reactions[ref('reaction', 'boar_gore')].on.attacker = { ...C, kind: 'npc', key };
+  };
+  const at = `.cartridge.reactions["${ref('reaction', 'boar_gore')}"].on.attacker`;
+  assert.equal(reload(gore('1.58', 'boar')), 'ok');
+  assert.equal(
+    reload(gore('1.57', 'boar')),
+    'KERNEL_API_RANGE_INVALID .cartridge.manifest.requires.kernel_api.at_least',
+  );
+  assert.equal(reload(gore('1.58', 'goblin')), `SCHEMA_VIOLATION ${at}`);
+  assert.equal(reload(gore('1.58', 'wolf')), `UNRESOLVED_REFERENCE ${at}`);
 });

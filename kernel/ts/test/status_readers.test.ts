@@ -20,6 +20,11 @@ import { identify, resolve } from '../src/commands/invocation.ts';
 import { resolved } from '../src/commands/actions.ts';
 import { check } from '../src/runtime/invariants.ts';
 import { ALWAYS } from '../src/mechanics/policy.ts';
+import { statusKey } from '../src/mechanics/status/shared.ts';
+import { sight } from '../src/mechanics/movement/rule.ts';
+import { visible } from '../src/mechanics/light/shared.ts';
+import { key } from '../src/foundation/compose.ts';
+import { fresh as wispWorld, ref as wispRef } from './wisp_fixture.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-ward-sampler-'));
 let artifact: Uint8Array;
@@ -232,6 +237,128 @@ test('an alias of a blocked command is withheld from view and invocation alike',
   assert.ok('payload' in invoke(free));
 });
 
+// Status readers 6 and 8, with fields swapped in by `as`: warded and hushed (the shrine) carry the
+// player's senses or concealment, soaked (a spoken "drench" in the den) the troll's.
+const den = (w: World) => play(w, { type: 'move', direction: 'east' });
+const drench = (w: World) => play(w, { type: 'say', word: 'drench' });
+const blessed = (c: Cartridge) => den(south(shrine(c)));
+/** `c` with the den unlit (a dark_description and no light). */
+const unlit = (c = content): Cartridge => {
+  const R = `${S('').replace('status/', 'room/')}den`;
+  const rooms = { ...c.rooms, [R]: { ...c.rooms[R], dark_description: 'room.den.description' } };
+  return { ...c, rooms } as Cartridge;
+};
+/** Whether the player sees the troll: the view names it exactly when an attack on it is admitted. */
+function sees(w: World) {
+  const listed = JSON.stringify(gameView(w)).includes(troll(w));
+  const attack = code(send(w, { type: 'attack', target_id: troll(w) }));
+  assert.equal(listed, attack === 'accepted', `view ${listed}, attack ${attack}`);
+  return listed;
+}
+
+// Breaks: blind read only in a room with a dark_description (the lit den stays seen), a dark_sight
+// status ignored (the unlit den stays dark), or dark sight beating blindness.
+test('blind darkens every room; a dark_sight status sees in the dark, unless also blind', () => {
+  const blind = { perception: { sight: 'blind' } },
+    night = { perception: { sight: 'dark_sight' } };
+  assert.deepEqual(
+    [
+      blessed(content),
+      blessed(as('warded', blind)),
+      blessed(unlit()),
+      blessed(as('warded', night, unlit())),
+      blessed(as('hushed', blind, as('warded', night, unlit()))),
+    ].map(sees),
+    [true, false, false, true, false],
+  );
+});
+
+// Breaks: blindness read only through dark(), so a discovered NPC (the wisp, by its perception
+// fact) or a self-luminous detail (the marsh glow) stays seen by a blind player.
+test('a blind player sees neither a discovered NPC nor a glowing detail', () => {
+  const w0 = wispWorld();
+  const marsh = w0.roomIds['ashmere_missing_child@0.0.23:room/marsh_light']!;
+  const wisp = w0.entityIds['ashmere_missing_child@0.0.23:npc/wisp']!;
+  const glow = Object.keys(w0.details).find(
+    (d) => w0.details[d].key === 'glow' && w0.details[d].room === marsh,
+  )!;
+  const blind = wispRef('status', 'blind');
+  const statuses = { [refString(blind)]: { key: 'blind', perception: { sight: 'blind' } } };
+  const at = (blinded: boolean) =>
+    ({
+      ...w0,
+      factDefaults: { ...w0.factDefaults, [key(wispRef('fact', 'fen_wisp_discovered'))]: true },
+      cartridge: { ...w0.cartridge, statuses: { ...w0.cartridge.statuses, ...statuses } },
+      state: {
+        ...w0.state,
+        containers: { ...w0.state.containers, [w0.body]: marsh, [wisp]: marsh },
+        statuses: blinded ? { [statusKey(w0.body, blind)]: { generation: 1, active: true } } : {},
+      },
+    }) as World;
+  assert.deepEqual(
+    [false, true].map((b) => [wisp, glow].map((id) => visible(at(b), w0.character, id))),
+    [
+      [true, true],
+      [false, false],
+    ],
+  );
+});
+
+// Breaks: concealment not read by visible() (the invisible troll is listed and attackable),
+// see_invisible ignored, see_invisible also revealing hidden, or scan from the hall still showing
+// the invisible troll in the den.
+test('an invisible troll is unseen and unlisted by scan unless the player sees invisible', () => {
+  const seer = (c: Cartridge) => as('hushed', { perception: { sight: 'see_invisible' } }, c);
+  const invisible = as('soaked', { concealment: 'invisible' });
+  const hidden = as('soaked', { concealment: 'hidden' });
+  const out = drench(den(fresh(invisible)));
+  assert.deepEqual(
+    [out, drench(blessed(seer(invisible))), drench(blessed(seer(hidden)))].map(sees),
+    [false, true, false],
+  );
+  const scan = (w: World) => sight(w, w.body).find((v) => v.direction === 'east')!.entities;
+  const hall = (w: World) => play(w, { type: 'move', direction: 'west' });
+  assert.deepEqual(scan(hall(out)), []);
+  assert.deepEqual(scan(hall(drench(blessed(seer(invisible))))), [troll(out)]);
+});
+
+// Breaks: engage ignores the player's concealment (a hostile troll fights an invisible player), or
+// ignores the troll's see_invisible, or treats hidden as yielding to see_invisible.
+test('a hostile troll does not engage a concealed player unless it sees invisible', () => {
+  const T = `${S('').replace('status/', 'npc/')}troll`;
+  const hostile = (c: Cartridge): Cartridge =>
+    ({
+      ...c,
+      npcs: {
+        ...c.npcs,
+        [T]: { ...c.npcs![T], disposition: { hostile: ALWAYS, engage: 'npc.troll.room' } },
+      },
+    }) as Cartridge;
+  const fights = (c: Cartridge, trollSees = false) => {
+    let w = south(shrine(hostile(c)));
+    if (trollSees) {
+      const row = {
+        [statusKey(troll(w), { ...C, kind: 'status', key: 'soaked' } as never)]: {
+          generation: 1,
+          active: true,
+        },
+      };
+      w = { ...w, state: { ...w.state, statuses: { ...w.state.statuses, ...row } } } as World;
+    }
+    return Object.keys(den(w).state.encounters ?? {}).length > 0;
+  };
+  const sees = as('soaked', { perception: { sight: 'see_invisible' } });
+  assert.deepEqual(
+    [
+      fights(content),
+      fights(as('warded', { concealment: 'invisible' })),
+      fights(as('warded', { concealment: 'invisible' }, sees), true),
+      fights(as('warded', { concealment: 'hidden' }, sees), true),
+    ],
+    [true, false, true, false],
+  );
+});
+
 /** The sampler's artifact, edited and re-hashed, loaded: its first diagnostic's code and path. */
 function reload(edit: (c: any) => void) {
   const c = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
@@ -279,4 +406,28 @@ test('loader: reader fields need API 1.54 and name player commands', () => {
       reload((c) => (c.statuses[S('hushed')][field] = ['say', name])),
       ['UNKNOWN_COMMAND', `.cartridge.statuses["${S('hushed')}"].${field}[1]`],
     );
+});
+
+// Breaks (twin of test/loka/content_status_readers_test.exs): a perception or a concealment (each
+// alone) loads under API 1.60, such a status without per_tick is refused, or an empty perception
+// loads.
+test('loader: perception and concealment need API 1.61 and stand in for per_tick', () => {
+  const at = (api: string, fields: object) =>
+    reload((c) => {
+      c.manifest.requires.kernel_api.at_least = api;
+      const { resistances: _, ...plain } = c.statuses[S('warded')];
+      c.statuses[S('warded')] = { ...plain, ...fields };
+    });
+  for (const fields of [{ perception: { hearing: 'deaf' } }, { concealment: 'hidden' }]) {
+    assert.deepEqual(at('1.61', fields), 'loaded');
+    assert.deepEqual(
+      at('1.60', fields),
+      ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'],
+      JSON.stringify(fields),
+    );
+  }
+  assert.deepEqual(at('1.61', { perception: {} }), [
+    'SCHEMA_VIOLATION',
+    `.cartridge.statuses["${S('warded')}"].perception`,
+  ]);
 });

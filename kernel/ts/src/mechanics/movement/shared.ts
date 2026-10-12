@@ -1,4 +1,4 @@
-import type { CharacterId, EntityId, RoomDefinition } from '../../contracts.gen.ts';
+import type { CharacterId, EntityId, RoomDefinition, Tag } from '../../contracts.gen.ts';
 import { type World } from '../../runtime/decision.ts';
 import { barrierState, exitOf } from '../lookups.ts';
 import { bodyOf, refString, type Steps } from '../../runtime/decision.ts';
@@ -6,10 +6,12 @@ import { value } from '../fact.ts';
 import { living } from '../death/shared.ts';
 import { LIMITS } from '../../contracts.gen.ts';
 import { KernelError } from '../../foundation/error.ts';
+import { saturate } from '../../foundation/int.ts';
 import { adjust, level, pay, resourceRef, resourceSpec, type Levels } from '../resource.ts';
 import { held } from '../policy.ts';
 import { engaged } from '../combat/shared.ts';
 import { mul } from '../../foundation/int.ts';
+import { statusMovement } from '../status/shared.ts';
 
 /**
  * Why the exit in `direction` bars the way while its barrier (barrier@1) is closed or locked;
@@ -83,5 +85,27 @@ export function fare(world: World, body: EntityId) {
     world.cartridge.world?.movement?.cost ??
     (level(world, body, mv) === undefined ? undefined : { resource: mv, amount: 1 });
   const multiplier = engaged(world, body) ? world.cartridge.world!.combat!.flee_multiplier : 1;
-  return cost ? pay(world, body, [{ ...cost, amount: mul(cost.amount, multiplier) }]) : { ops: [] };
+  if (!cost) return { ops: [] };
+  // Status reader 7: each active status's cost_percent in turn, rounded down (each step saturated at the
+  // int32 ceiling, so an oversized fare is refused by pay, never an overflow fault); a fare of 0 writes nothing.
+  const amount = statusMovement(world, body).reduce(
+    (a, m) => (m.cost_percent === undefined ? a : saturate(Math.floor((a * m.cost_percent) / 100))),
+    mul(cost.amount, multiplier),
+  );
+  return amount ? pay(world, body, [{ ...cost, amount }]) : { ops: [] };
+}
+
+/** Status reader 7: the room tags that bar a move into the room (status `movement.passes`). */
+export const TERRAIN: readonly Tag[] = ['air', 'chasm', 'water'];
+
+/**
+ * Status reader 7: whether `body` may enter room `there`: each terrain tag of the room is one its
+ * active statuses pass. Read-only, in movementPlan (so step, flee and the GameView's exits agree).
+ */
+export function crossable(world: World, body: EntityId, there: EntityId) {
+  const terrain = (world.rooms[there].tags ?? []).filter((t) => TERRAIN.includes(t));
+  const passes: readonly Tag[] = terrain.length
+    ? statusMovement(world, body).flatMap((m) => m.passes ?? [])
+    : [];
+  return terrain.every((t) => passes.includes(t));
 }

@@ -32,17 +32,20 @@ import { runPopulation } from '../population/shared.ts';
 import { binding as crowBinding, runCrow } from '../crow/behavior.ts';
 import { runBleed } from '../bleed/job.ts';
 import { runStatus } from '../status/job.ts';
+import { moves } from '../status/shared.ts';
 
 import { runSight } from '../population/behavior.ts';
 
 // `at`: the drain's hour for this run; a later listed hour the advance crosses is a sub-step of the
-// row's one run_job, which its first hour completed (scheduledJob, loka-qi0r; runPopulation, loka-6ql4).
+// row's one run_job, which its first hour completed (scheduledJob, loka-qi0r; runPopulation, loka-6ql4;
+// runStatus, loka-6ztc).
 export const decideAt = (
   world: World,
   command: Parameters<Rule<'schedule'>>[1],
   mint: Parameters<Rule<'schedule'>>[2],
   steps: Steps = { n: 0 },
   at?: number,
+  tick?: number,
 ): ReturnType<Rule<'schedule'>> => {
   const { payload } = command;
   if (payload.type === 'run_job') {
@@ -53,7 +56,8 @@ export const decideAt = (
       return expiry(world, command, payload.job_id, row, mint);
     if (row.encounter_id) return roundSequence(world, command, payload.job_id, row, mint, steps);
     if (row.bleed_body_id) return runBleed(world, command, payload.job_id, row, mint);
-    if (row.job.kind === 'status') return runStatus(world, command, payload.job_id, row, mint);
+    if (row.job.kind === 'status')
+      return runStatus(world, command, payload.job_id, row, mint, at, tick);
     if (row.quest_instance_id) {
       const d = world.cartridge.quests?.[refString(row.job)]?.deadline;
       return d && !d.fact
@@ -105,10 +109,10 @@ function scheduledJob(
   const { room, goal } = placeOf(world, npc, at, steps);
   const from = world.state.containers[npc];
   // A goal (toolbox row W10) is narration only when the player sees the NPC leave.
-  const seen = goal && from !== room && world.state.containers[world.body] === from;
+  const stays = from === room || !moves(world, npc);
+  const seen = goal && !stays && world.state.containers[world.body] === from;
   const transfer = { op: 'entity.transfer', writer_group: 0, entity_id: npc } as const;
-  const move: DeltaOp[] =
-    from === room ? [] : [{ ...transfer, source_id: from, destination_id: room }];
+  const move: DeltaOp[] = stays ? [] : [{ ...transfer, source_id: from, destination_id: room }];
   const due_time = nextHour(world.cartridge, schedule, at);
   // A next hour the advance also crosses runs as its own drain step (`next`, runtime/proposal_hours.ts); only the
   // last step schedules the job after the target.

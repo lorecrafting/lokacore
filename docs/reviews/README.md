@@ -10,6 +10,15 @@ of closed work are deleted once their lesson is folded, and linked by permalink
 Reviews before R2 live in the [legacy repository](https://github.com/lorecrafting/lokacore-v2-legacy)
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
+- [Review: M9 status reader 9, a room as status holder (loka-kgd.94)](2026-10-12-m9-room-status-review.md): **APPROVE**
+- [Review: toolbox row 28, cursed items and blessing (loka-kgd.97)](2026-10-12-m9-curse-review.md): **APPROVE WITH NOTES**
+- [Review: mechanics batch M9, final batch head (Fable batch review)](2026-10-12-m9-batch-fable-review.md): **APPROVE**
+- [Review: M9 spell XP + fatal-blow reactions (loka-kgd.101, loka-kgd.105)](2026-10-10-toolbox-m9-spellxp-review.md): **APPROVE**
+- [Review: status readers 6 and 8, perception and concealment (loka-kgd.91, loka-kgd.93)](2026-10-10-toolbox-m9-readers68-review.md): **APPROVE WITH NOTES**
+- [Review: M9 status reader 7, movement (loka-kgd.92)](2026-10-10-toolbox-m9-reader7-review.md): **APPROVE**
+- [Review: M9 NPC movement permits (loka-kgd.102)](2026-10-10-toolbox-m9-npc-move-review.md): **APPROVE WITH NOTES**
+- [Review: M9 pack kill credit and sim checker envelope (loka-lpq6, loka-th7x)](2026-10-10-toolbox-m9-credit-review.md): **APPROVE WITH NOTES**
+- [Review: M9 attacker filter + tilt pack (loka-kgd.79, loka-y6yg.11, loka-kgd.103)](2026-10-10-toolbox-m9-attacker-review.md): **APPROVE WITH NOTES**
 - [Review: toolbox row G4, use X on Y (loka-kgd.76)](2026-10-10-toolbox-m8-useon-review.md): **APPROVE**
 - [Review: toolbox row 12, traps (loka-kgd.73)](2026-10-10-toolbox-m8-traps-review.md): **APPROVE WITH NOTES**
 - [Review: toolbox row 29a, spell cast admission (loka-kgd.81)](2026-10-10-toolbox-m8-spells-review.md): **APPROVE WITH NOTES**
@@ -71,6 +80,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: showcase slice C, the combat district (loka-y6yg.3, PR #369)](2026-10-10-showcase-c-combat-review.md): **APPROVE**
 - [Review: showcase slice B, Low Wardle and the hub's south exit (loka-y6yg.2, PR #367)](2026-10-10-showcase-b-review.md): **APPROVE WITH NOTES**
 - [Mechanics review 3: the player's seat](2026-10-10-mechanics-review-3.md)
+- [Review: M9 advance fixes, status sub-steps and plan/resume pairing (loka-6ztc, loka-dto9, loka-2s48)](2026-10-10-m9-advance-review.md): **APPROVE WITH NOTES**
 - [Review: one wait across several listed schedule hours (loka-qi0r)](2026-10-10-m6-waitfix-review.md): **APPROVE**
 - [Review: E1 recorder debt-elapsed recipe (loka-ssr9, PR #360)](2026-10-10-e1-recorder-ssr9-review.md): **APPROVE**
 - [Review: e1-recorder in full on batch-branch pushes (loka-b98y, PR #361)](2026-10-10-ci-e1-recorder-batch-review.md): **APPROVE WITH NOTES**

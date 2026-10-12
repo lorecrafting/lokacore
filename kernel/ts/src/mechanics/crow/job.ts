@@ -9,10 +9,12 @@ import type {
 import { KernelError } from '../../foundation/error.ts';
 import { accepted, refString, type JobRow, type Mint, type World } from '../../runtime/decision.ts';
 import { entered } from '../schedule/behavior.ts';
+import { moves } from '../status/shared.ts';
 import {
   changed,
   corridor,
   current,
+  canStep,
   edge,
   empty,
   held,
@@ -67,7 +69,11 @@ export function runCrow(
   if (index < 0) throw new KernelError('precondition_failed');
   if (b.row.phase === 'acquire') return acquire(world, command, mint, job, b, done, room);
   if (b.row.phase === 'leg') return leg(world, command, mint, job, b, done, room, route, index);
-  return returning(world, command, mint, job, b, done, room, route, index);
+  if (room === b.spec.home || moves(world, b.row.member_id))
+    return returning(world, command, mint, job, b, done, room, route, index);
+  // A rooted crow stays put and tries again next interval.
+  const again = next(b, mint, job.due_time, 'return', null);
+  return accepted<never>(world, 'job_ran', [done, changed(b, again.value), again.op], []);
 }
 
 function acquire(
@@ -117,10 +123,10 @@ function leg(
   index: number,
 ) {
   const item = b.row.item_id;
-
   if (!held(world, b))
     return accepted<never>(world, 'job_ran', [done, changed(b, empty(b.row))], []);
-  if (!openNest(world, b) || (index < route.length - 1 && !edge(world, room, route[index + 1]))) {
+  const stuck = index < route.length - 1 && !canStep(world, b, room, route[index + 1]);
+  if (!openNest(world, b) || stuck) {
     return discharge(world, b, done, job, mint, room, 'fallback');
   }
   if (index === route.length - 1) {

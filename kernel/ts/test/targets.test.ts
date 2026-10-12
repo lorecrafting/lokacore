@@ -214,6 +214,35 @@ test('the guard fights beside the player; its blow kills the raider and credits 
   assert.equal(value(after, after.character, fact), true);
 });
 
+// loka-2s48. Breaks: the round reads its ally before the guard's poison tick, due at the same time
+// and sorting first in the same advance, so the dead guard still strikes and kills the raider.
+test('a guard killed by a poison tick earlier in the advance does not strike', () => {
+  n = 0;
+  let w = newWorld(content, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, [1, 2, 3, 4]);
+  w = ok(play(w, { type: 'move', direction: 'south' }));
+  const [guard, raider] = [guardOf(w), w.entityIds['targets_sampler@0.0.1:npc/raider']!];
+  w = ok(play(w, { type: 'attack', target_id: raider }));
+  const poison = { ...C, kind: 'status', key: 'poison' } as never;
+  const spec = {
+    key: 'poison',
+    duration: 300,
+    tick_every: 150,
+    resource: resourceRef(w, 'hp'),
+    per_tick: -1,
+    label: 'combat.goblin_targeted',
+    narration: { applied: 'combat.npc_hit', tick: 'combat.npc_hit', expired: 'combat.npc_hit' },
+  };
+  const statuses = { 'targets_sampler@0.0.1:status/poison': spec };
+  const moved = { ...w, cartridge: { ...w.cartridge, statuses } as never } as World;
+  const job = () => '00000000-6666-4666-8666-000000000001' as never;
+  const weak = adjust(moved, guard, resourceRef(w, 'hp'), -9, {}).op;
+  const poisoned = apply(moved, [weak, ...applyStatus(moved, guard, poison, 0, job)], false);
+  assert.ok('world' in poisoned, JSON.stringify(poisoned));
+  const after = round(poisoned.world);
+  // Raider 3 HP: the player's 2 only; the guard died at the tick before the round.
+  assert.deepEqual([hp(after, guard), hp(after, raider)], [0, 1]);
+});
+
 // Toolbox row 6b, loka-x2gv. Breaks: a round's blow on a roster member other than the job's
 // primary (the first goblin gone, the player and the guard strike the second) takes its own
 // writer group while that member's poison tick, due at the same time, holds another, so the
@@ -295,6 +324,36 @@ test('when the player kills the striking goblin, the guard still hits the other'
   assert.ok('world' in weak);
   const after = round(weak.world);
   assert.deepEqual([hp(after, a), hp(after, b)], [0, 5]);
+});
+
+// Toolbox row 6b, loka-lpq6. Breaks: credit reads only the encounter's primary or needs the blow
+// that closes the fight, so a goblin killed while its pack fights on, or the second killed in the
+// round, pays nothing (or the round's two grants fault as two levelling writes).
+test('the player and the guard each kill a goblin in one round; both kills pay', () => {
+  const goblin = { ...C, kind: 'npc', key: 'goblin' };
+  const kills = [{ npc: goblin, experience: 10 }];
+  const levelling = { thresholds: [100], points_per_level: 1, kills, level_up: 'combat.ally_hit' };
+  const [w, a, b] = engaged({ ...content, world: { ...content.world, levelling } } as never);
+  const den = w.state.containers[w.body];
+  const moved = {
+    ...w,
+    state: { ...w.state, containers: { ...w.state.containers, [guardOf(w)]: den } },
+  };
+  const xp = (x: World) => x.state.levelling?.[x.character]?.experience;
+  // The first goblin at 2 falls to the player's blow, the pack fighting on: one kill paid.
+  const weak = apply(moved, [adjust(moved, a as never, resourceRef(w, 'hp'), -4, {}).op], false);
+  assert.ok('world' in weak);
+  const once = round(weak.world);
+  assert.deepEqual([hp(once, a), hp(once, b), xp(once)], [0, 5, 10]);
+  // With the second at 1 too, the guard's blow fells it in the same round: both paid.
+  const both = apply(
+    weak.world,
+    [adjust(weak.world, b as never, resourceRef(w, 'hp'), -5, {}).op],
+    false,
+  );
+  assert.ok('world' in both);
+  const after = round(both.world);
+  assert.deepEqual([hp(after, a), hp(after, b), xp(after)], [0, 0, 20]);
 });
 
 // Toolbox row 6b. Breaks: the guard's two draws (hit, damage 1-2) run past the round's eight,

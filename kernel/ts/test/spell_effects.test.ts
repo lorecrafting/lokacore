@@ -240,3 +240,77 @@ test('in a fight only a spell without a duration is cast', () => {
   assert.deepEqual([code(refused), refused.world], ['invalid_state', w]);
   assert.equal(wightHp(ok(cast(w, 'flamma'))), 4);
 });
+
+const RA = { cartridge_id: P.split('@')[0], cartridge_version: '0.0.1' };
+const npc = (key: string) => ({ ...RA, kind: 'npc', key });
+const round = (w: World) => {
+  const fight = engaged(w, w.entityIds[W]!);
+  return fight && w.state.jobs?.[fight.row.job_id]?.due_time;
+};
+
+// Breaks (loka-kgd.101): a spell's hit leaves the wight unengaged (no fight, as melee would open),
+// or its first round is not an interval (150) after the cast; or a spell that hurts then kills the
+// wight leaves an encounter open on its corpse.
+test('a bolt starts the fight as Attack does; a bolt that hurts then kills opens none', () => {
+  const w = ok(cast(crypt(), 'lux'));
+  const hit = ok(cast(w, 'flamma'));
+  assert.deepEqual([wightHp(hit), round(hit)], [4, w.state.clock + 150]);
+  const twice = cartridge((c) => {
+    const [bolt] = success(c, 'flamma').sequence;
+    success(c, 'flamma').sequence = [bolt, bolt];
+  });
+  const killed = ok(cast(ok(cast(crypt(true, twice), 'lux')), 'flamma'));
+  assert.deepEqual([wightHp(killed), engaged(killed, killed.entityIds[W]!)], [0, undefined]);
+});
+
+// Breaks (loka-kgd.101): a bolt opens a fight where Attack is refused (here a sanctuary room).
+test('a bolt that hurts the wight in a sanctuary opens no fight', () => {
+  const calm = cartridge((c) => (c.rooms[`${P}:room/crypt`].sanctuary = true));
+  const hit = ok(cast(ok(cast(crypt(true, calm), 'lux')), 'flamma'));
+  assert.deepEqual([wightHp(hit), engaged(hit, hit.entityIds[W]!)], [4, undefined]);
+});
+
+// Breaks (M9 batch review): a bolt opens a fight with a wight the caster cannot see (the unlit crypt),
+// where Attack is refused as not present.
+test('a bolt that hurts an unseen wight opens no fight', () => {
+  const dark = crypt();
+  assert.equal(code(play(dark, { type: 'attack', target_id: dark.entityIds[W] })), 'not_present');
+  const hit = ok(cast(dark, 'flamma'));
+  assert.deepEqual([wightHp(hit), engaged(hit, hit.entityIds[W]!)], [4, undefined]);
+});
+
+// Breaks (loka-kgd.101): a spell with a duration that hurts the wight outside a fight schedules its
+// first round inside the cast's own advance (the round never runs there: a fault, as loka-kgd.104),
+// rather than an interval after the cast ends.
+test('a bolt with a duration starts the fight an interval after the cast ends', () => {
+  const slow = cartridge((c) => {
+    delete c.manifest.time_policy;
+    for (const r of Object.values<Record<string, unknown>>(c.resources)) delete r.regen;
+    c.recipes[R('flamma')].duration = 300;
+  });
+  const w = ok(cast(crypt(true, slow), 'lux'));
+  const hit = ok(cast(w, 'flamma'));
+  assert.deepEqual([hit.state.clock, round(hit)], [w.state.clock + 300, w.state.clock + 450]);
+});
+
+// Breaks (loka-kgd.101): a spell kill grants neither the kill's experience nor its death credit
+// (deathCredit only credits a round's attack_result).
+test('a spell kill grants its experience and death credit', () => {
+  const credited = cartridge((c) => {
+    for (const caps of [c.lock.capabilities, c.manifest.requires.capabilities]) caps.attributes = 1;
+    c.world.levelling = {
+      thresholds: [30],
+      points_per_level: 1,
+      kills: [{ npc: npc('wight'), experience: 10 }],
+      level_up: 'narration.lux',
+    };
+    const room = { ...RA, kind: 'room', key: 'crypt' };
+    const fact = { ...RA, kind: 'fact', key: 'ward_landed' };
+    c.world.death_credit = [{ npc: npc('wight'), room, fact }];
+    success(c, 'flamma').sequence[0].amount = 16;
+  });
+  const w = ok(cast(ok(cast(crypt(true, credited), 'lux')), 'flamma'));
+  assert.equal(wightHp(w), 0);
+  assert.equal(value(w, w.character, { ...RA, kind: 'fact', key: 'ward_landed' } as never), true);
+  assert.equal(gameView(w).levelling?.experience, 10);
+});

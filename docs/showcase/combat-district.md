@@ -105,8 +105,8 @@ No combat room is `exposed`, so no weather drain lands; no door is gated; rooms 
 > the gate with a raider in it; shout "ware" from here and Gil hears you through the wall, and he
 > fights beside you once you strike. Aldous pays a bounty on the raider, but only to one who takes
 > it before the raider falls. South is a pit with two
-> goblins who fight as a pack: in a pack you choose which one you hit. A kill that ends a fight earns
-> experience (in a pack, the last goblin standing); thirty points make a level and a point to raise a stat, and raised strength bites harder. When you
+> goblins who fight as a pack: in a pack you choose which one you hit. Every kill earns
+> experience, each goblin of a pack too; thirty points make a level and a point to raise a stat, and raised strength bites harder. When you
 > fall you wake at the inn with your level, your scar and your skill; what you carried waits on your
 > corpse where you fell. The Warden in Low Wardle wears mail no blade gets through. The tilt yard,
 > south of the gate, has all of it and a draught.
@@ -179,7 +179,7 @@ default) and Flee 2, so mv is below 100 from step 1 on; no step pins an mv value
 | 6 | Remove the sword (held, not wielded); east, north to the run; Attack the boar unarmed; five rounds. | In the run the cue has no direction. Round 1: the player's blow misses (chance 0); the boar hits 2: hp 7, `bleeding` and `gored` applied lines; the Character page shows Bleeding (with its tick) and Gored (no time, no tick); the bleeding's smell cue shows from the player's own room. Rounds 2 to 5: hp 5, 3, 1, 0 at +750 (the last loss clamped to 1); no bleed tick falls before it (+1050). `player_died`; the encounter closes; the body is in `crossroads_inn` at hp 10, mv 100, standing; `gored` is still active (W8) and `bleeding` is gone (the return clears every other status); experience 30, level 2, str 11 unchanged (no penalty: row 47 is later); the player corpse in the run holds the sword and the waterskin; the boar is at 8. | combat x death; scars x death; statuses x death; levelling x death |
 | 7 | Back to the run; take the sword and the waterskin from the corpse; wield the sword. | Both Takes succeed (owner's corpse); the boar is passive outside combat (no hostile disposition). The corpse stays, empty. | death x containment |
 | 8 | Attack the boar (sword, damage 3); three rounds. | Round 1: boar 5; the boar hits 2 (hp 8, `bleeding` applied again, generation 2, its line; `gored` already active, nothing written, no line). Round 2 (boar first): hp 6; boar 2. Round 3: boar 0 before it strikes: `npc_died`, experience 60 (no level: 100 not reached), drops rolled after the round's draws: the corpse holds `tusk` (chance 100) and, by seed, `purse`. `cues` no longer lists the grunt. At str 10 the same fight is four rounds and four strikes (hp 2). Eat the `poultice`: `bleeding` ends with no tick, mv +1, `gored` stays. Variant without it: ticks at +1050 (hp 5) and +1950 (hp 4), expiry at +2100 (the round-2 refresh). Take the tusk. | combat x loot x levelling; bleed status x cure x immune; senses cues x combat |
-| 9 | South to the pit (hp 6, sword, str 11); Attack goblin A (the lower id); Attack goblin B; four rounds. | The first Attack admits both goblins (`helper_joined` line); the second writes `encounter.target` (`primary_changed` line), no round. Round 1: B 3, A strikes (hp 5). Round 2: B strikes (4), B dies at the player's blow; the roster still holds A, so no credit and no experience (Beads `loka-lpq6`). Round 3: A 3, A strikes (3). Round 4: A strikes (2), A dies: the encounter closes, experience 70 (80 once `loka-lpq6` is fixed: re-pin then). Without the switch the first blow would have landed on A. | target choice x pack x kill credit |
+| 9 | South to the pit (hp 6, sword, str 11); Attack goblin A (the lower id); Attack goblin B; four rounds. | The first Attack admits both goblins (`helper_joined` line); the second writes `encounter.target` (`primary_changed` line), no round. Round 1: B 3, A strikes (hp 5). Round 2: B strikes (4), B dies at the player's blow: experience 70 (every pack kill pays, Beads `loka-lpq6`), the encounter holds on A. Round 3: A 3, A strikes (3). Round 4: A strikes (2), A dies: the encounter closes, experience 80. Without the switch the first blow would have landed on A. | target choice x pack x kill credit |
 | 10 | With the sword, in the social district at standing -2: walk east into the Warden's engage; wait one round; Flee. | The player's blow is a hit with loss 0 (resist 100), the Warden stays at hp 5 and the encounter holds; Flee has one candidate (the toll gate is shut), so no RNG; social 2-3 unchanged. | disposition x resistances |
 
 Sandbox `tilt_yard`: a second boar, a second pack, a poultice and a cask of draught: under `might`
@@ -188,20 +188,25 @@ pack is fought alone. Known limit until Beads `loka-x2gv` lands: a `bleeding` ti
 advance as a combat round on the player (fighting within 900 of a boar's bite without the poultice)
 rejects that wait; the guided loop never does this.
 
-## Built (slice C, Beads `loka-y6yg.3`; the pit, Beads `loka-y6yg.10`)
+## Built (slice C, Beads `loka-y6yg.3`; the pit, Beads `loka-y6yg.10`; the sandbox pack, Beads `loka-y6yg.11`)
 
-Steps 1 to 10 are built and pinned by `kernel/ts/test/showcase_combat.test.ts` (the pit after the
-`loka-6ql4` fix). Differences from the text above:
+Steps 1 to 10 and the sandbox pack are built and pinned by `kernel/ts/test/showcase_combat.test.ts`
+(the pit after the `loka-6ql4` fix). Differences from the text above:
 
-- The sandbox pack (`tilt_goblins`) is not built: it waits for an attacker filter on
-  `attack_result` (Beads `loka-kgd.79`), because `boar_gore` reads only `npc_present tilt_boar`
-  and would wound the player (bleeding and gored) on any goblin hit in `tilt_yard`. The tilt
-  signpost clause stays "has a second boar, a poultice and a draught".
-- The pit's plan has `replacement_delay` 8640000, not 86400: the loader requires
+- Both pack plans have `replacement_delay` 8640000, not 86400: the loader requires
   `wander_interval <= replacement_delay`, and the wander interval keeps the pack from wandering in
-  play. A pack killed stays gone for a hundred days. `enemy_fled` names `north` and `south` (the
-  loader wants every exit inside the area, from both rooms).
-- Step 9 experience is 70 while Beads `loka-lpq6` is open (B's kill pays nothing).
+  play. A pack killed stays gone for a hundred days.
+- A spawn template's room must be its plan's home, so the sandbox pack has its own template
+  `tilt_goblin` (room `tilt_yard`, bundle `tilt_goblins`; texts and `ear` shared) and its own
+  `kills` entry of 10. `enemy_fled` names `north` and `south` (the loader wants every exit inside
+  the area, from both rooms).
+- `boar_gore` is two rules on the [attacker filter](../system/mechanics.md#attacker-filter-loka-kgd79)
+  (Beads `loka-kgd.79`, kernel_api 1.58): `boar_gore {attacker: boar}` and `tilt_boar_gore
+  {attacker: tilt_boar}`, each `on {event: attack_result, hit: true}` and `when npc_present` of
+  its own boar. Only a boar's hit wounds, so a tilt-yard goblin's blow does not (the tilt yard
+  pin). The `when` stays: a fatal blow's reaction reads after the player wakes at the inn, and
+  without it the woken body would bleed (combat 6). The boars' `immune` no longer comes into play:
+  a blow on a boar is never a boar's.
 - `aldous_lesson` has `learn` only: a second choice makes it a hub that reopens, and the compiler
   refuses a repeatable `receive` (OUTCOME_MISMATCH). `aldous_talk` is a hub: after `bounty` the
   player leaves with Leave the conversation (`close_choice`).
@@ -259,10 +264,10 @@ when the first falls, or at a shout); use-on x fire x doors (G4, W22); sequence 
 
 ## Mechanics wanted and not found (toolbox findings)
 
-1. `attack_result` has no attacker filter (`FILTERS`, `kernel/ts/src/mechanics/reaction.ts`), so a
-   wound that one foe inflicts is authored by `npc_present` plus `immune` on the foe; two foes
-   that share a room cannot inflict different wounds.
-2. Pack kill credit (Beads `loka-lpq6`): only the last goblin standing earns experience.
+1. `attack_result` had no attacker filter, so a wound that one foe inflicts was authored by
+   `npc_present` plus `immune` on the foe; two foes that share a room could not inflict different
+   wounds. Closed by the `attacker` filter (Beads `loka-kgd.79`, Built above).
+2. Pack kill credit (Beads `loka-lpq6`): fixed, every pack kill pays (step 9).
 3. A pack population in a cartridge with long waits (Beads `loka-6ql4`, above).
 4. No reaction step moves an NPC (Beads `loka-kgd.22`): Gil cannot come when called; he stands
    where the fight is.

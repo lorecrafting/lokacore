@@ -77,6 +77,9 @@ export function allyOf(world: World, row: EncounterRow) {
     .find((id) => id && living(world, id) && world.state.containers[id] === row.room_id);
 }
 
+/** A kill ends the fight only on its last opponent: a pack fights on (its roster pruned at round end). */
+export const lastOpponent = (row: EncounterRow) => (row.active_ids?.length ?? 1) === 1;
+
 export function closeEncounter(world: World, body: EntityId): DeltaOp[] {
   const fight = engaged(world, body);
   if (!fight) return [];
