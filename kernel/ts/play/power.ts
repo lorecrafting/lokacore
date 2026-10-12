@@ -70,9 +70,12 @@ export function itemSheet(c: Obj) {
     .filter(([, i]) => i.slot)
     .map(([ref, i]) => {
       const affects: ItemAffect[] = i.affects ?? [];
-      const worn = { ...base };
+      // attributes@1 order: each attribute's modifiers summed and saturated, then added to the start
+      const sums: Values = {};
       for (const a of affects)
-        worn[refString(a.attribute)] = saturate(worn[refString(a.attribute)] + a.modifier);
+        sums[refString(a.attribute)] = (sums[refString(a.attribute)] ?? 0) + a.modifier;
+      const worn = { ...base };
+      for (const [r, sum] of Object.entries(sums)) worn[r] = saturate(base[r] + saturate(sum));
       const delta = Object.fromEntries(
         ts.map(({ name, stat }) => [name, bonus(stat, worn) - bonus(stat, base)]),
       );

@@ -93,6 +93,55 @@ test('itemSheet: slotted items in slot order, each worn alone against the starts
   ]);
 });
 
+// STR at the ResourceInt maximum, DEX and CON 0; chance 90, damage 1-3, hp 2..10, carry 1000 g.
+// hit +2147483647 -> 100; damage -2 -> [0, 1]; hp -10 -> 2 (the minimum); carry +1000 -> 2000.
+const extremes = (carry?: object) => ({
+  ...base,
+  attributes: {
+    'p@1:attribute/str': { start: 2147483647 },
+    'p@1:attribute/dex': { start: 0 },
+    'p@1:attribute/con': { start: 0 },
+  },
+  resources: { 'p@1:resource/hp': { minimum: 2, maximum: 10 } },
+  world: {
+    combat: { player_attack: { chance: 90, damage_min: 1, damage_max: 3 } },
+    carry,
+    derived: {
+      hit_chance: { terms: [term(STR, 1, 0)] },
+      damage: { terms: [term(R('attribute', 'dex'), 1, 2)] },
+      carry_grams: { terms: [term(STR, 1, 2147482647)] },
+      hp_max: { terms: [term(CON, 1, 10)] },
+    },
+  },
+  items: {
+    'p@1:item/charm': {
+      slot: 'neck',
+      affects: [
+        { attribute: STR, modifier: 1 },
+        { attribute: STR, modifier: -1 },
+      ],
+    },
+  },
+});
+
+// Breaks: hit not capped at 100 (2147483647), damage not floored at 0 ([-1, 1]), hp
+// not clamped at its minimum (0), the carry bonus subtracted (0), a table kept without its
+// authored base (carry_grams NaN), and affects saturated one by one instead of summed first as
+// attributes@1 does (STR max + 1 - 1 reads max - 1: carry delta -1, not 0).
+test('powerCurve and itemSheet: clamps, carry, a baseless table and summed affects', () => {
+  const at = <T>(v: T) => ({ none: v, focused: v }); // level 1 has no point to spend
+  assert.deepEqual(powerCurve(extremes({ max_grams: 1000 })), [
+    { level: 1, hit_chance: at(100), damage: at([0, 1]), carry_grams: at(2000), hp_max: at(2) },
+  ]);
+  assert.equal('carry_grams' in powerCurve(extremes())[0], false);
+  assert.deepEqual(itemSheet(extremes({ max_grams: 1000 }))[0].delta, {
+    hit_chance: 0,
+    damage: 0,
+    carry_grams: 0,
+    hp_max: 0,
+  });
+});
+
 // Break: a level count or table invented without world.levelling and world.derived.
 test('powerCurve: without levelling or derived tables, level 1 alone and no table', () => {
   assert.deepEqual(powerCurve(base), [{ level: 1 }]);

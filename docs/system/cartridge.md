@@ -412,9 +412,9 @@ canonical JSON document `{levels, items}`. Every bonus is the engine's
   delta, mass_grams?, tags?}`. `affect_total` is the signed sum of its modifiers; `delta`, per
   table, is the bonus with the item worn alone at the starts minus the bonus at the starts,
   unclamped.
-- ponytail: no gear in the curve and no ancestries (C5, I5); best-in-slot, dominance and allocation
-  sweeps (I3, I6, C2) are `loka-kgd.107.10`'s, the slot budget (I2) `loka-kgd.107.17`'s; where an
-  item is found and its price (NPC shop stock, not the item) wait for a consumer of the graph above.
+- ponytail: no gear in the curve, no ancestries (C5, I5) and no statuses; best-in-slot, dominance
+  and allocation sweeps (I3, I6, C2) are `loka-kgd.107.10`'s, the slot budget (I2)
+  `loka-kgd.107.17`'s; where an item is found and its price (NPC shop stock, not the item) wait for a consumer of the graph above.
 
 ## Installed capabilities
 
