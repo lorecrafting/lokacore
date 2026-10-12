@@ -17,6 +17,19 @@
     }
   ],
   "room_line": "item.ring.room",
+  "room_line_variants": [
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "fact_compare",
+          "fact": "ring_known",
+          "equals": true
+        }
+      },
+      "description": "item.ring.room_known"
+    }
+  ],
   "description": "item.ring.description",
   "description_variants": [
     {
