@@ -40,3 +40,23 @@
 4. **Nit**, `round_attack.ts:90`: wear on a fully resisted hit is untested (T6, moving the wear after `if (!loss) return`, stays green). Fix: a dummy with 100% physical resistance: hp 30, edge 1.
 5. **Nit**, `kernel/ts/src/content/cartridge_skills.ts:145`, `lib/loka/content/skills.ex:161`: the `scopes == ["instance"]` clause is untested in both kernels (T5 and E1 green; a `["player"]` durability fact loads under T5). Fix: add a scopes row to both loader tables.
 6. **Nit**, `docs/system/mechanics.md:2495`: "a later round of the same advance reads the value the earlier one wrote" describes no reachable case, because one advance holds one round. Fix: "the next round reads the committed value".
+
+## Fix re-check
+
+- Written 2026-10-12 06:05 UTC in the Pi harness by anthropic/claude-opus-5-5 (reviewer).
+- Fix commits `71a9d965` and `628bc292f1bf681514269319a816bb9ddf65147c` (`ceacdc73..628bc292`), reviewed at `628bc292`.
+- Verdict: **APPROVE WITH NOTES** (no blocker; one nit). Hosted CI on `628bc292`: `ci` and `book-e2e` in progress at writing; `ci` on `71a9d965` failed (`check_hash` module list), which `628bc292` fixes.
+- Local at `628bc292`: full `npm run typecheck` (`tsc`, `-p test`, `-p play`) exit 0; `durability`, `ranged`, `e1`, `e1_services`, `e1_obligations` tests pass (38); `mix test test/loka/content_durability_test.exs` passes.
+
+### Dispositions
+
+1. Blocker resolved: typecheck is clean and `e1.test.ts` (`check_hash covers every local module`) passes with `e1_repair.ts` in `CHECK_FILES`. The +2-line allowance (542 to 544) only covers the import and the branch, as the file header asks new witnesses to live in their own module.
+2. Resolved: `ranged.test.ts` "a hit shot wears the bow; a broken bow makes round 1 melee". Mutant `worn` dropped from shots (`!shot`) is red (string 1, expected 0).
+3. Resolved: `durability.test.ts` "mend refuses a wielded weapon whose durability is another fact". Mutant `if (!d)` is red.
+4. Resolved: the resisted-hit row in the wooden-sword test. Mutant wear moved after `if (!loss) return` is red.
+5. Resolved: TS and Elixir loader rows. Mutants (scopes clause removed in `cartridge_skills.ts:145` and in `skills.ex` `entity_int?`) are red; `mix test --force`. Claim checked: `protocol/fact.schema.json` allows `per_subject` with `["player"]` (a pair fact), so no `invalid.json` row can express it.
+6. Resolved: `mechanics.md:2495` now reads "the next round reads the committed value".
+
+### New finding
+
+7. **Nit**, `kernel/ts/test/e1_repair.ts:6-16`: the witness runs in no E1 case. E1 replays only Chapter 1, which has no repair service. Mutant `true || ops.some(...)` stays green in `e1_services`, `e1_obligations`, `e1_world_witness` and `e1`. Scenario: a wrong repair witness (for example, an `expected`/`value` swap) would credit nothing and be caught by nothing until a repair service enters an E1 cartridge. Fix: either `else if (benefit.kind !== 'repair')`, which drops the module, the `CHECK_FILES` row and the size bump, or keep the witness and test it when E1 first replays a repair. Not blocking.
