@@ -10,7 +10,7 @@ of closed work are deleted once their lesson is folded, and linked by permalink
 Reviews before R2 live in the [legacy repository](https://github.com/lorecrafting/lokacore-v2-legacy)
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
-- [Review: toolbox row 27, unidentified items (loka-kgd.112)](2026-10-12-m9b-unidentified-review.md): **APPROVE WITH NOTES**
+- [Review: toolbox row 27, unidentified items (loka-kgd.112)](2026-10-12-m9b-unidentified-review.md): **APPROVE**
 - [Review: M9 status reader 9, a room as status holder (loka-kgd.94)](2026-10-12-m9-room-status-review.md): **APPROVE**
 - [Review: toolbox row 28, cursed items and blessing (loka-kgd.97)](2026-10-12-m9-curse-review.md): **APPROVE WITH NOTES**
 - [Review: mechanics batch M9, final batch head (Fable batch review)](2026-10-12-m9-batch-fable-review.md): **APPROVE**
