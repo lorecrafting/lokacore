@@ -95,7 +95,7 @@ function packResult(world: World, row: EncounterRow, job: JobRow, r: Round) {
     'job_ran',
     timed,
     r.events,
-    [...narrate(world, row, r.events), ...r.notes],
+    [...narrate(world, row, r.events, r.shot), ...r.notes],
     r.rng,
   );
 }
@@ -131,7 +131,7 @@ function packTurns({
     )
       continue;
     if (attacker === row.body_id && !standing(at, row.character_id)) continue;
-    if (attacker === selected && maybeFlight(at, selected, job, r, settings)) continue;
+    if (attacker === selected && (r.shot || maybeFlight(at, selected, job, r, settings))) continue;
     attack(at, command, mint, encounter_id, { ...current, npc_id: target }, attacker, r, close);
   }
 }
@@ -227,26 +227,21 @@ export function successor(
   ];
 }
 
-export function narrate(world: World, row: EncounterRow, events: readonly CombatEvent[]) {
+export function narrate(
+  world: World,
+  row: EncounterRow,
+  events: readonly CombatEvent[],
+  shot = false,
+) {
   const words = world.cartridge.world!.combat!.narration;
+  const striker = (attacker: EntityId) =>
+    attacker === row.body_id ? (shot ? 'shot' : 'player') : ally(world, attacker) ? 'ally' : 'npc';
   return events.map(({ payload: e }) => ({
     key:
       e.type === 'entity_died'
         ? words[e.victim_id === row.body_id ? 'player_died' : 'npc_died']
         : 'prevented_by' in e && e.prevented_by
           ? words[e.prevented_by]!
-          : words[
-              e.attacker_id === row.body_id
-                ? e.hit
-                  ? 'player_hit'
-                  : 'player_miss'
-                : ally(world, e.attacker_id)
-                  ? e.hit
-                    ? 'ally_hit'
-                    : 'ally_miss'
-                  : e.hit
-                    ? 'npc_hit'
-                    : 'npc_miss'
-            ]!,
+          : words[`${striker(e.attacker_id)}_${e.hit ? 'hit' : 'miss'}`]!,
   }));
 }

@@ -24646,5 +24646,59 @@
         "code": "invalid_type"
       }
     ]
+  },
+  {
+    "contract": "WeaponProfile",
+    "value": {
+      "skill": {
+        "cartridge_id": "training",
+        "cartridge_version": "1.0.0",
+        "kind": "skill",
+        "key": "archery"
+      },
+      "attack": {
+        "chance": 95,
+        "damage_min": 3,
+        "damage_max": 3
+      },
+      "ranged": {
+        "ammo": {
+          "cartridge_id": "training",
+          "cartridge_version": "1.0.0",
+          "kind": "resource",
+          "key": "arrows"
+        },
+        "x": 1
+      }
+    },
+    "errors": [
+      {
+        "path": "/ranged/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "WeaponProfile",
+    "value": {
+      "skill": {
+        "cartridge_id": "training",
+        "cartridge_version": "1.0.0",
+        "kind": "skill",
+        "key": "archery"
+      },
+      "attack": {
+        "chance": 95,
+        "damage_min": 3,
+        "damage_max": 3
+      },
+      "ranged": {}
+    },
+    "errors": [
+      {
+        "path": "/ranged/ammo",
+        "code": "missing_property"
+      }
+    ]
   }
 ]

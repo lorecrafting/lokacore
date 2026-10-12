@@ -31,7 +31,30 @@ export function combat(c: Obj, named: Checks['named']): Diagnostic[] {
     if (!settings) bad(`${at}.attack`);
     if (!npc.hp) bad(`${at}.hp`);
   }
-  return [...out, ...damageApi(c), ...deathCredit(c, named), ...allies(c, named)];
+  return [
+    ...out,
+    ...damageApi(c),
+    ...deathCredit(c, named),
+    ...allies(c, named),
+    ...shots(c, named),
+  ];
+}
+
+const ranged = (c: Obj) => Object.values((c.items ?? {}) as Obj).some((i) => i.weapon?.ranged);
+
+// Toolbox row 17: a ranged weapon names a known ammo pool, and its shots need their narration.
+function shots(c: Obj, named: Checks['named']): Diagnostic[] {
+  for (const [ref, i] of Object.entries((c.items ?? {}) as Obj))
+    if (i.weapon?.ranged)
+      named(i.weapon.ranged.ammo, 'resource', `.cartridge.items${step(ref)}.weapon.ranged.ammo`);
+  if (!ranged(c)) return [];
+  return ['shot_hit', 'shot_miss']
+    .filter((field) => !c.world?.combat?.narration[field])
+    .map((field) =>
+      diag('SCHEMA_VIOLATION', `.cartridge.world.combat.narration.${field}`, {
+        error: 'invalid_value',
+      }),
+    );
 }
 
 // Toolbox row 6b: each ally is an authored NPC with an attack; allies need their narration.
@@ -57,8 +80,12 @@ function damageApi(c: Obj): Diagnostic[] {
   const items = Object.values((c.items ?? {}) as Obj).map((i) => i.weapon?.attack);
   const profiles = [c.world?.combat?.player_attack, ...npcs.map((n) => n.attack), ...items];
   const used = profiles.some((p) => p?.kind || p?.crit) || npcs.some((n) => n.resistances);
-  // Toolbox rows 6a and 6b: target choice and allies need kernel_api 1.48.
-  const floor = c.world?.combat?.target_choice || c.world?.combat?.allies ? '1.48' : used && '1.44';
+  // Toolbox rows 6a and 6b: target choice and allies need kernel_api 1.48; row 17's ranged 1.67.
+  const floor = ranged(c)
+    ? '1.67'
+    : c.world?.combat?.target_choice || c.world?.combat?.allies
+      ? '1.48'
+      : used && '1.44';
   return floor && apiCmp(c.manifest.requires.kernel_api.at_least, floor) < 0
     ? [diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least')]
     : [];

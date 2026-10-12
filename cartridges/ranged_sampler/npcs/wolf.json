@@ -1,0 +1,20 @@
+{
+  "keywords": [
+    "wolf"
+  ],
+  "short": "npc.wolf.short",
+  "room_line": "npc.wolf.room",
+  "description": "npc.wolf.description",
+  "room": "field",
+  "hp": {
+    "minimum": 0,
+    "maximum": 6,
+    "start": 6,
+    "gain": 0
+  },
+  "attack": {
+    "chance": 100,
+    "damage_min": 1,
+    "damage_max": 1
+  }
+}
