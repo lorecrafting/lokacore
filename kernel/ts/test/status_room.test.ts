@@ -15,6 +15,7 @@ import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { statusKey } from '../src/mechanics/status/shared.ts';
 import { dark, visible } from '../src/mechanics/light/shared.ts';
+import { sight } from '../src/mechanics/movement/rule.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-room-status-'));
 let artifact: Uint8Array;
@@ -115,10 +116,13 @@ test('a named room takes the status; its tick changes nothing and it expires', (
 });
 
 // Breaks: dark()/visible() read only the body's own statuses (the darkened den shows its troll), or
-// the room's darkness reaches a body in another room (the hall), or it outlives the expiry.
+// the room's darkness reaches a body in another room (the hall), or scan from the hall still sees
+// into the darkened den, or it outlives the expiry.
 test('a room holding a blind status is dark, and hides its NPC, only to whoever stands in it', () => {
   const w = hall();
+  const east = (x: World) => sight(x, x.body).find((d) => d.direction === 'east');
   assert.equal(dark(w, w.character), false, 'the hall holds nothing');
+  assert.deepEqual(east(w), { direction: 'east' }, 'scan does not see into the den');
   const inDen = play(w, { type: 'move', direction: 'east' });
   assert.equal(dark(inDen, inDen.character), true);
   assert.equal(visible(inDen, inDen.character, troll(inDen)), false);
@@ -127,6 +131,8 @@ test('a room holding a blind status is dark, and hides its NPC, only to whoever 
   assert.equal(dark(later, later.character), false, 'expired');
   assert.equal(visible(later, later.character, troll(later)), true);
   assert.ok(JSON.stringify(gameView(later)).includes(troll(later)));
+  const after = wait(wait(w, 60).world, 60).world;
+  assert.deepEqual(east(after)?.entities, [troll(after)], 'expired: scan sees the troll');
 });
 
 // Breaks (twin of test/loka/content_status_readers_test.exs): a room step loads under API 1.64, a
