@@ -1,6 +1,5 @@
 import type { CommandId, DefinitionRef, DeltaOp, EntityId } from '../../contracts.gen.ts';
 import { key } from '../../foundation/compose.ts';
-import { KernelError } from '../../foundation/error.ts';
 import { uniform } from '../../foundation/rng.ts';
 import { refString, type JobRow, type Mint, type World } from '../../runtime/decision.ts';
 import { engaged } from '../combat/shared.ts';
@@ -61,7 +60,6 @@ export function encounter(
     ({ slot, row }) => boundary && eligible(slot, row, target, job.due_time),
   );
   if (!first) return { ops: [] as DeltaOp[], ids: new Set<string>(), rng };
-  if (!rng) throw new KernelError('precondition_failed');
   const [roll, after] = uniform(rng, 100, 8);
   const born = births(world, occurrence_id, job, target, roll < plan.chance ? [first] : [], mint);
   return { ...born, rng: after };

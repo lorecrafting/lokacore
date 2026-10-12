@@ -61,7 +61,8 @@ function elapsed(w: World, until: number): World {
   assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
   return r.world;
 }
-const slot = (w: World) => Object.values(w.state.population_slots!)[0]!;
+const slot = (w: World, n = 1) =>
+  Object.entries(w.state.population_slots!).find(([k]) => JSON.parse(k).slot === n)![1];
 const bandits = (w: World) =>
   Object.keys(w.entities).filter(
     (e) => w.state.created?.[e]?.origin.kind === 'spawned' && w.entities[e]!.kind === 'npc',
@@ -120,7 +121,7 @@ test('a slot not yet due draws nothing at the boundary or at its replacement due
   assert.equal(bandits(w).length, 1);
 });
 
-// Break: a successful roll births every eligible slot.
+// Breaks: a successful roll births every eligible slot; it births the last, not the first.
 test('a roll births one slot even when the cap is two', () => {
   const w = elapsed(
     world([1, 2, 3, 4], (c) =>
@@ -129,6 +130,7 @@ test('a roll births one slot even when the cap is two', () => {
     START + HOUR,
   );
   assert.equal(bandits(w).length, 1);
+  assert.deepEqual([slot(w, 1).generation, slot(w, 2).generation], [1, 0]);
 });
 
 // Break: the suppression resume births like an ecology plan's (it is not a wander boundary).
