@@ -38,3 +38,28 @@
 - `world.combat.allies` dropped from a copy: accepted (spec line, Al in the clone test).
 - Seed 1 checked, the rest plain: accepted (brief's fallback; output identical above).
 - `experience: 0` mutant survives: accepted as equivalent for combat; it is the root of finding 2.
+
+## Recheck: fix commit `6a161f70`
+
+- Written 2026-10-12 10:02 UTC in the Pi harness by anthropic/claude-opus-5-5 (reviewer, Pi session 01a12f8c).
+- Scope: `cec404bf..6a161f70` (`kernel/ts/play/fight.ts`, `kernel/ts/test/fight.test.ts`, `docs/system/cartridge.md`) and the direct caller (the CLI in `fight.ts`, the test). Hosted CI on the head: in progress at writing (PM watches).
+- Verdict: **APPROVE**.
+
+### Dispositions
+
+1. Size (must-fix): resolved. `fights` split into `target`, `row`, `rating`; `fight` into `session`, `combat`; no size allow in `fight.ts`. `node bin/check_ts_size.mjs` from the repo root at the head exits 0. The miss is explained: the script reads `git ls-files` and `fight.ts` was untracked.
+2. Rating (PM ruling): resolved. `rating` (`fight.ts:79`) takes the first cell in level, then build order with `win_pct` >= 50 and adds `first_win_build`; spec lines `cartridge.md:537-540` amended. Departure (tie order `none`, then attributes sorted): accepted; the cell order is already the matrix order, and naming the build that spends no points when it suffices is the most useful answer.
+3. Fled (should-fix): resolved. `combat` (`fight.ts:173`) ends a fight as `fled` when the target is out of the player's room, after the death and win checks; `fleds` and `fled_pct` added, spec amended. Departure (no encounter-closed check): accepted. Within the tool's commands an encounter closes only on a kill or the player's death (both read first), the target or body out of the room (`participantsPresent`, `eligible`), a player command (`closeEncounter`: not issued) or hound suppression (begins only on an accepted bell cause: not issued; a suppressed hound is refused at the Attack). So a target that flees always ends as `fled`; nothing else can close it with the target standing in the room.
+
+### Test-expectation check (AGENTS.md "Writing tests")
+
+The developer read the 50.00 test's per-seed outcomes off the tool. Checked independently with my own scratch driver (`newWorld` with the same seed draw, the kernel's `step`/`stepElapsed`, no `play/fight.ts` import; clone rebuilt without allies, `player_attack.chance` 50): level 1 `none` wins seeds 2 and 3, dies on 1, 4 and 5; level 2 might wins 2, 3 (round 1), 4 and 5 (round 3), dies on 1. So 2/4 = 50.00, 3/4 = 75.00, 2/5 and 4/5, death 3/5 = 60.00: every literal agrees. The goblins literal is hand-derivable (both attacks sure, damage 1: hp 6 falls below 25% at hp 1 in round 5, the player at hp 6); the driver shows the target leaving the room in round 5 on seeds 1 and 2, the player standing. Accepted: the expected values now have an answer independent of the code under test.
+
+### Mutants (each under `perl -e 'alarm 300'`, `mktemp -d` backup, file restored and compared)
+
+- Fled check removed: red (goblins). `fled_pct` zeroed: red (goblins).
+- `>= 50` to `> 50`: red (rating). Rating read from `none` only: red (rating).
+- `first_win_build: null`: red (sampler, clone, rating).
+- `fight.test.ts` 7/7 at the head; prettier and `tsc --noEmit` clean.
+
+No new findings.
