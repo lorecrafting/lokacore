@@ -10,9 +10,10 @@ defmodule Loka.ContentReplenishTest do
   defp seam(f), do: [{"replenish/seam_regrowth.json", f}]
 
   # Break (toolbox row 19b; twin of the loader row in kernel/ts/test/replenish.test.ts): replenish
-  # compiles under API 1.70, with a template, spawn-template, template-item or self-move holder, a non-container
-  # or listed target item, an unresolved item or holder or a
-  # duplicate item; or the harvest allowance is dropped, so the seam's ore in the store is refused.
+  # compiles under API 1.70, with a template, spawn-template, template-item or self-move holder, a
+  # non-container item target or one beside a listed container (which may be or hold it), an
+  # unresolved item or holder or a duplicate item; or the harvest allowance is dropped, so the
+  # seam's ore in the store is refused.
   test "replenish needs API 1.71 and resolved, distinct holders and items", %{dir: dir} do
     at = "replenish/seam_regrowth"
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, [])
@@ -45,6 +46,23 @@ defmodule Loka.ContentReplenishTest do
                &item_to.(put_in(&1, ["items"], List.replace_at(&1["items"], 4, "crate")), "crate")
              )
            )
+
+    # A listed container leaves an item reserve alone (only a target can nest), but not a target
+    # it holds: the move would put it inside itself.
+    assert {:ok, _, _} =
+             Loka.ContentSource.compile(dir, [
+               {"items/apple_01.json", &Map.put(&1, "container", true)}
+             ])
+
+    assert {"SCHEMA_VIOLATION", "replenish/shelf.to"} in codes(dir, [
+             {"items/apple_01.json", &Map.put(&1, "container", true)},
+             {"replenish/shelf.json",
+              &Map.merge(&1, %{
+                "items" => ["crate"],
+                "from" => %{"in" => "room", "room" => "store"},
+                "to" => %{"in" => "item", "item" => "apple_01"}
+              })}
+           ])
 
     assert {"UNRESOLVED_REFERENCE", at <> ".to.npc"} in codes(
              dir,

@@ -61,7 +61,8 @@ defmodule Loka.Content.Replenish do
         [diag("UNRESOLVED_REFERENCE", at(rel, [end_, k]), %{"target" => l[k]})]
 
       {_, _, d} ->
-        if placed?(d, l, r), do: [], else: [diag("SCHEMA_VIOLATION", at(rel, [end_]))]
+        nests = end_ == "to" and nests?(m, defs, r["items"])
+        if placed?(d, k, nests), do: [], else: [diag("SCHEMA_VIOLATION", at(rel, [end_]))]
 
       false ->
         [diag("SCHEMA_VIOLATION", at(rel, [end_]))]
@@ -72,11 +73,16 @@ defmodule Loka.Content.Replenish do
   end
 
   # A holder needs a placed entity, and an item holder must be a container: a spawn template has
-  # none (nor a template item), a non-container takes nothing, a listed one would hold itself.
-  defp placed?(d, %{"in" => k} = l, r),
+  # none (nor a template item), a non-container takes nothing. An item target also refuses any
+  # listed container: it may be or hold the target, and the move would put it inside itself.
+  defp placed?(d, k, nests),
     do:
       d["spawn_template"] != true and d["location"]["in"] != "template" and
-        (k != "item" or (d["container"] == true and l[k] not in r["items"]))
+        (k != "item" or (d["container"] == true and not nests))
+
+  defp nests?(m, defs, items),
+    do:
+      Enum.any?(items, &match?({_, _, %{"container" => true}}, Refs.resolve(&1, "item", m, defs)))
 
   defp unresolved(m, defs, target, kind, path) do
     case Refs.resolve(target, kind, m, defs) do

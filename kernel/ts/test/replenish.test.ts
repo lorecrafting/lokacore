@@ -137,9 +137,10 @@ test('a container target full of other items takes nothing and time still advanc
 });
 
 // Breaks: the loader admits replenish under kernel_api 1.70, a template, spawn-template,
-// template-item or self-move holder, a non-container or listed target item, an unresolved item or holder, or a
-// duplicate item; or drops the harvest allowance, so the seam's
-// ore in the store is refused (twin of test/loka/content_replenish_test.exs).
+// template-item or self-move holder, a non-container item target or one beside a listed
+// container (which may be or hold it), an unresolved item or holder, or a duplicate item; or
+// drops the harvest allowance, so the seam's ore in the store is refused (twin of
+// test/loka/content_replenish_test.exs).
 test('loader: replenish needs kernel_api 1.71 and resolved, distinct holders and items', () => {
   const reload = (edit: (c: any) => void) => {
     const r = edited(edit);
@@ -181,6 +182,23 @@ test('loader: replenish needs kernel_api 1.71 and resolved, distinct holders and
       seam(c).to = { in: 'item', item: ref('item', 'crate') };
     }),
     ['SCHEMA_VIOLATION', `${at}.to`],
+  );
+  // A listed container leaves an item reserve alone (only a target can nest), but not a target
+  // it holds: the move would put it inside itself.
+  assert.equal(
+    reload((c) => (c.items[`${S}item/apple_01`].container = true)),
+    'loaded',
+  );
+  assert.deepEqual(
+    reload((c) => {
+      c.items[`${S}item/apple_01`].container = true;
+      Object.assign(c.replenish[`${S}replenish/shelf`], {
+        items: [ref('item', 'crate')],
+        from: { in: 'room', room: ref('room', 'store') },
+        to: { in: 'item', item: ref('item', 'apple_01') },
+      });
+    }),
+    ['SCHEMA_VIOLATION', `${shelf}.to`],
   );
   assert.deepEqual(
     reload((c) => (seam(c).to = { in: 'npc', npc: ref('npc', 'nobody') })),

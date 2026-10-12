@@ -18,9 +18,10 @@ export function replenish(c: Obj, { named }: Checks): Diagnostic[] {
     if (new Set(items.map(refString)).size !== items.length)
       out.push(diag('DUPLICATE_DEFINITION', `${at}.items`));
     items.forEach((i, n) => named(i, 'item', `${at}.items[${n}]`));
+    const nests = items.some((i) => c.items?.[refString(i)]?.container === true);
     for (const end of ['from', 'to']) {
       const { in: k } = r[end];
-      if (k === 'template' || !placed(c, r[end], r.items))
+      if (k === 'template' || !placed(c, r[end], end === 'to' && nests))
         out.push(diag('SCHEMA_VIOLATION', `${at}.${end}`));
       else named(r[end][k], k, `${at}.${end}.${k}`);
     }
@@ -30,13 +31,14 @@ export function replenish(c: Obj, { named }: Checks): Diagnostic[] {
 }
 
 // A holder needs a placed entity, and an item holder must be a container: a spawn template has
-// none (nor a template item), a non-container takes nothing, a listed one would hold itself.
-function placed(c: Obj, l: Obj, items: DefinitionRef[]): boolean {
+// none (nor a template item), a non-container takes nothing. An item target also refuses any
+// listed container (`nests`): it may be or hold the target, so the move would nest it in itself.
+function placed(c: Obj, l: Obj, nests: boolean): boolean {
   const { in: k, [l.in]: ref } = l;
   const d = k === 'room' ? undefined : (k === 'npc' ? c.npcs : c.items)?.[refString(ref)];
   if (!d) return true;
   if (d.spawn_template || d.location?.in === 'template') return false;
-  return k !== 'item' || (d.container === true && !items.some((i) => same(i, ref)));
+  return k !== 'item' || (d.container === true && !nests);
 }
 
 /** The items a replenish entry refills into `room` (a harvest seam's stock may start elsewhere). */
