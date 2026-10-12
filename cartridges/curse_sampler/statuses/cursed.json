@@ -1,0 +1,14 @@
+{
+  "duration": "permanent",
+  "tick_every": 86400,
+  "resource": "hp",
+  "label": "condition.cursed",
+  "narration": {
+    "applied": "narration.cursed.applied",
+    "tick": "narration.cursed.tick",
+    "expired": "narration.cursed.expired"
+  },
+  "blocks": [
+    "remove"
+  ]
+}

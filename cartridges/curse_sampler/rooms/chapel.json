@@ -1,0 +1,9 @@
+{
+  "title": "room.chapel.title",
+  "description": "room.chapel.description",
+  "exits": {
+    "south": {
+      "to": "market"
+    }
+  }
+}
