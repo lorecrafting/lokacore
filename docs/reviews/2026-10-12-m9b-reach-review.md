@@ -42,3 +42,17 @@
 1. **Partly resolved.** Quests named by a reached room, item, NPC or dialogue now count (`reach.ts:83-84`; `ashmere_errand` lantern cleared). The four still listed are not orphans. Each has its own `offer` whose policy is `{"op":"all","items":[]}` (always true). A quest starts through its offer ([mechanics.md quest@1](../system/mechanics.md#quest1-mechanicsquestrulets-kerneltssrcmechanicsquestlifecyclets)), so all four can be accepted on turn one. oar is played that way in `kernel/ts/test/journal.test.ts:69` (`invoke(world(), 'oar')`). The recipes and reactions that name find_key, cull and apprentice come later. The new limits clause (`cartridge.md:388`, "a quest only a recipe, reaction or action names shows unreachable") gives the wrong cause, and it does not say that a quest with its own offer shows unreachable. No content issue is needed for oar.
    - **should-fix**, `kernel/ts/play/reach.ts:84`: a quest that declares `offer` lists as unreachable. Scenario: an author adds an always-offered quest and is told nobody can reach it (4 of 5 checked cartridges). Fix: count a quest with an `offer` as reachable (the policy is not evaluated, just as dialogue edges are counted), or name the offer in the limits bullet.
 2. **Resolved.** The hermit holds the pearl, which is expected in `unreachable.items` (`content_graph.test.ts:38,76`). Dropping `&& npcs.has(...)` at `reach.ts:79` now fails.
+
+## Fix re-check 2 (02a4d7f6)
+
+- Written 2026-10-12 05:47 UTC in the Pi harness by anthropic/claude-opus-5-5 (reviewer).
+- Reviewed only `02a4d7f6d91e0f1b940f14169cc5a23c21d40d2a` (`kernel/ts/play/reach.ts`, `kernel/ts/test/content_graph.test.ts`, `docs/system/cartridge.md`). Hosted ci and book-e2e green on it.
+- Verdict: **APPROVE** (the remaining should-fix is resolved; no new findings).
+- Green: `content_graph` all pass.
+- Mutants (reverted), each red on `content_graph`: offer clause dropped from `quests` (`reach.ts:87`) fails 'a quest with its own offer and no dialogue is reachable'; `unheld = placed` fails the first report test.
+- `unheld` refactor (`reach.ts:80`): the same expression moved out of the return, after `npcs` and `held` are defined; behaviour unchanged.
+- Reran the 4 cartridges (compiled with `mix loka.compile` into scratch): `quest_sampler`, `levelling_sampler`, `spells_sampler`, `ashmere_journal` list no unreachable quest; with the offer clause dropped all four list one again, so real content exercises the fix.
+
+### Disposition
+
+1. **Resolved.** A quest that declares `offer` counts as reachable without evaluating its policy (`reach.ts:85-87`), matching [mechanics.md quest@1](../system/mechanics.md#quest1-mechanicsquestrulets-kerneltssrcmechanicsquestlifecyclets) (a quest starts through its offer). The unreachable bullet (`cartridge.md:374`) and the limits (`cartridge.md:389-391`) now say so and give the correct cause for quests without an offer.
