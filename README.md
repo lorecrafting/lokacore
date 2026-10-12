@@ -19,3 +19,4 @@ Agents: start with [AGENTS.md](AGENTS.md).
 - `mobile/`: the Expo app (`app/`), authorities, features and shared packages.
 - `bin/`: checks and generators; `bin/check_all.sh` runs them all.
 - [docs/design/](docs/design/README.md): the two owner-approved Book mocks (informative).
+- [docs/rnd/](docs/rnd/README.md): R&D studies for future directions (informative).

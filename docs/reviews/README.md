@@ -75,6 +75,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: showcase goblin pit, combat step 9 (PR #376, loka-y6yg.10)](2026-10-10-showcase-pit-review.md): **APPROVE WITH NOTES**
 - [Docs review: showcase decision, Chapters 2-3 out of release scope (loka-exbe, PR #362)](2026-10-10-showcase-decision-review.md): **APPROVE WITH NOTES**
 - [Review: showcase slice D, cause and effect in Low Wardle (PR #374, loka-y6yg.4)](2026-10-10-showcase-d-review.md): **APPROVE**
+- [Review: showcase slice D fixes (PR #377, loka-y6yg.12, .13, .14)](2026-10-10-showcase-d-fixes-review.md): **APPROVE WITH NOTES**
 - [Review: showcase slice C, the combat district (loka-y6yg.3, PR #369)](2026-10-10-showcase-c-combat-review.md): **APPROVE**
 - [Review: showcase slice B, Low Wardle and the hub's south exit (loka-y6yg.2, PR #367)](2026-10-10-showcase-b-review.md): **APPROVE WITH NOTES**
 - [Mechanics review 3: the player's seat](2026-10-10-mechanics-review-3.md)

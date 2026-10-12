@@ -52,7 +52,7 @@ const entered = (r: ReturnType<typeof wait>, who: string) =>
 function tollhouse() {
   let x = leave(say(green(ECHO), 'reeve', 'help').world);
   x = say(say(go(x, 'east').world, 'warden', 'lean').world, 'warden', 'lean').world;
-  return wait(go(play(x, { type: 'open', direction: 'east' }).world, 'east').world, 8 * HOUR).world;
+  return wait(go(x, 'east').world, 8 * HOUR).world;
 }
 let box: World;
 
@@ -157,10 +157,10 @@ test('social 18: from 13:00 day 2: the empty gate, the ledger mend, and the gree
   assert.equal(engaged(fled, fled.body), undefined);
 });
 
-/** 09:00 day 1 in Wat's hut with the letter (standing 1 after help); `x` is a world on the green. */
-function hut(x = green(ECHO)) {
-  x = say(say(x, 'reeve', 'help').world, 'reeve', 'accept').world;
-  x = wait(take(x, 'letter'), 9 * HOUR).world;
+/** 09:00 day 1 in Wat's hut; the letter, if `letter`, taken before the accept (standing 1 after help). */
+function hut(x = green(ECHO), letter = true) {
+  x = say(say(letter ? take(x, 'letter') : x, 'reeve', 'help').world, 'reeve', 'accept').world;
+  x = wait(x, 9 * HOUR).world;
   return go(go(go(go(x, 'north').world, 'north').world, 'north').world, 'east').world;
 }
 /** Wat's `choice` for the letter, its scene played to the end. */
@@ -172,6 +172,16 @@ function fate(w: World, choice: 'deliver' | 'burn') {
   }
   return x;
 }
+// Breaks (loka-y6yg.12): a letter taken before the accept does not count, so Wat opens only his
+// whisper talk and deliver and burn are never offered.
+test('letter taken first: the accept finds it held, and Wat opens the letter talk', () => {
+  const at = hut();
+  assert.equal(gameView(at).journal[0]?.journal, 'quest.carry_letter.objectives_met');
+  assert.equal(talk(at, 'wat').opened, 'wat_letter');
+  // Breaks: Wat's letter talk ignores has_item, so an empty hand gets deliver and burn.
+  const bare = hut(green(ECHO), false);
+  assert.equal(refused(bare, { type: 'talk', target_id: npc(bare, 'wat') }), 'invalid_state');
+});
 const knows = (w: World) => ['wat', 'tam', 'nell'].map((k) => fact(w, 'knows_ash', npc(w, k)));
 const u = undefined;
 

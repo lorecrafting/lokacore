@@ -38,7 +38,8 @@ defmodule Loka.ContentShowcaseTest do
 
       at155 = [
         {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.55")},
-        {"reactions/kindle.json", nil}
+        {"reactions/kindle.json", nil},
+        {"reactions/gate_lifted.json", nil}
         | unfiltered
       ]
 

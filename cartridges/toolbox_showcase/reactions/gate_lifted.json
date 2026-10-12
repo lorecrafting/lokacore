@@ -1,0 +1,21 @@
+{
+  "on": {
+    "event": "fact_changed",
+    "fact": "warden_lets_pass"
+  },
+  "when": {
+    "policy_version": 1,
+    "root": {
+      "op": "fact_compare",
+      "fact": "warden_lets_pass",
+      "equals": true
+    }
+  },
+  "apply": [
+    {
+      "op": "barrier.set",
+      "barrier": "toll_gate",
+      "to": "open"
+    }
+  ]
+}

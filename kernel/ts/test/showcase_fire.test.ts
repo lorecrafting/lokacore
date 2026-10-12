@@ -149,6 +149,7 @@ test('loader: barrier.set and co_present tag need API 1.56; to locked needs a ke
   const at155 = (c: any) => {
     c.manifest.requires.kernel_api.at_least = '1.55';
     delete c.reactions[ref('reaction', 'kindle')];
+    delete c.reactions[ref('reaction', 'gate_lifted')];
     for (const r of ['boar_gore', 'tilt_boar_gore'])
       delete c.reactions[ref('reaction', r)].on.attacker;
   };

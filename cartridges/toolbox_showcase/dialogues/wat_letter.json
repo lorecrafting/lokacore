@@ -3,9 +3,18 @@
   "policy": {
     "policy_version": 1,
     "root": {
-      "op": "quest_state",
-      "quest": "carry_letter",
-      "state": "objectives_complete"
+      "op": "all",
+      "items": [
+        {
+          "op": "quest_state",
+          "quest": "carry_letter",
+          "state": "active"
+        },
+        {
+          "op": "has_item",
+          "item": "letter"
+        }
+      ]
     }
   },
   "prompt": "dialogue.wat_letter.prompt",
