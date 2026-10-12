@@ -1,5 +1,5 @@
-// Toolbox row 2 derived-stat tables (hp_max: loka-kgd.8), row 3 item affects and row G3 NPC
-// attributes in the loaded artifact; twin of Loka.Content.Derived.
+// Toolbox row 2 derived-stat tables (hp_max: loka-kgd.8), row 3 item affects, row 27 identified
+// items and row G3 NPC attributes in the loaded artifact; twin of Loka.Content.Derived.
 import { diag, step, type Checks, type Obj } from './cartridge_refs.ts';
 import { apiCmp } from './cartridge_installed.ts';
 import { refString } from '../runtime/decision.ts';
@@ -15,18 +15,29 @@ export function derived(c: Obj, named: Checks['named']): Diagnostic[] {
   const table = c.world?.derived as Obj | undefined;
   const items = Object.entries((c.items ?? {}) as Obj) as [string, Obj][];
   const npcs = Object.entries((c.npcs ?? {}) as Obj) as [string, Obj][];
-  // NPC attributes are row G3 (API 1.46, with an opposed check naming an NPC); finger slots and
-  // affects row 3 (1.41); hp_max 1.40; the other tables 1.39.
+  // An identified item is row 27 (1.68); NPC attributes are row G3 (API 1.46, with an opposed
+  // check naming an NPC); finger slots and affects row 3 (1.41); hp_max 1.40; the other tables 1.39.
   const g3 =
     npcs.some(([, n]) => n.attributes) ||
     Object.values((c.recipes ?? {}) as Obj).some((r) => r.check?.npc);
   const row3 = items.some(([, i]) => i.affects || i.slot === 'finger');
-  const floor = g3 ? '1.46' : row3 ? '1.41' : table?.hp_max ? '1.40' : table && '1.39';
+  const row27 = items.some(([, i]) => i.identified);
+  const floor = row27
+    ? '1.68'
+    : g3
+      ? '1.46'
+      : row3
+        ? '1.41'
+        : table?.hp_max
+          ? '1.40'
+          : table && '1.39';
   const out: Diagnostic[] = [];
   if (floor && apiCmp(c.manifest.requires.kernel_api.at_least, floor) < 0)
     out.push(diag('KERNEL_API_RANGE_INVALID', API));
   if (table) out.push(...tables(c, table, named));
   for (const [ref, item] of items) if (item.affects) out.push(...affects(c, ref, item, named));
+  for (const [ref, item] of items)
+    if (item.identified) out.push(...identified(c, ref, item, named));
   for (const [ref, npc] of npcs) if (npc.attributes) out.push(...npcAttributes(c, ref, npc, named));
   return out;
 }
@@ -68,5 +79,17 @@ function affects(c: Obj, ref: string, item: Obj, named: Checks['named']): Diagno
   if (item.slot === undefined) out.push(diag('SCHEMA_VIOLATION', at, { error: 'invalid_value' }));
   for (const [i, a] of (item.affects as Obj[]).entries())
     named(a.attribute, 'attribute', `${at}[${i}].attribute`);
+  return out;
+}
+
+// Toolbox row 27: an item's identified names a bool fact of this cartridge and sits beside affects
+// (a per_subject fact there is FACT_SCOPE_UNSUPPORTED in the W2 site walk).
+function identified(c: Obj, ref: string, item: Obj, named: Checks['named']): Diagnostic[] {
+  const at = `.cartridge.items${step(ref)}.identified`;
+  const out: Diagnostic[] = [];
+  named(item.identified, 'fact', at);
+  const spec = c.facts[refString(item.identified)];
+  if (spec && spec.value_type.type !== 'bool') out.push(diag('FACT_TYPE_MISMATCH', at));
+  if (!item.affects) out.push(diag('SCHEMA_VIOLATION', at, { error: 'invalid_value' }));
   return out;
 }

@@ -1,0 +1,15 @@
+{
+  "room.hall.title": "Sage's Hall",
+  "room.hall.description": "A quiet hall lined with shelves of curios.",
+  "item.ring.short": "a dull ring",
+  "item.ring.short_known": "a ring of keen sight",
+  "item.ring.room": "A dull [[ring|ring]] lies on a shelf.",
+  "item.ring.description": "A plain, dull band of grey metal.",
+  "item.ring.description_known": "A ring of keen sight. The world looks sharper through it.",
+  "npc.sage.short": "a sage",
+  "npc.sage.room": "A [[sage|sage]] sits among the curios.",
+  "npc.sage.description": "An old sage who knows every trinket by its feel.",
+  "dialogue.sage.prompt": "\"Show me what you carry,\" says the sage.",
+  "dialogue.sage.ask": "Ask about the ring",
+  "narration.sage.ask": "The sage turns the ring in the light. \"A ring of keen sight,\" she says."
+}

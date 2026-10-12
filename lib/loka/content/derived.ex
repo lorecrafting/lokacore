@@ -1,7 +1,7 @@
 defmodule Loka.Content.Derived do
   @moduledoc """
-  Checks toolbox row 2 derived-stat tables (world.derived), row 3 item affects and row G3 NPC
-  attributes; twin of cartridge_derived.ts.
+  Checks toolbox row 2 derived-stat tables (world.derived), row 3 item affects, row 27 identified
+  items and row G3 NPC attributes; twin of cartridge_derived.ts.
   """
   import Loka.Content.Source, only: [at: 2, diag: 2, diag: 4, ref: 3]
   alias Loka.Content.Refs
@@ -41,7 +41,8 @@ defmodule Loka.Content.Derived do
         else: []
 
     floor(m, table, items, g3?(defs)) ++
-      tables ++ Enum.flat_map(items, &affects(&1, m, defs)) ++ npcs(m, defs)
+      tables ++
+      Enum.flat_map(items, &item(&1, m, defs)) ++ npcs(m, defs)
   end
 
   # Row G3: NPC attributes, or an opposed check naming an NPC.
@@ -50,22 +51,27 @@ defmodule Loka.Content.Derived do
       Enum.any?(defs["npc"] || %{}, &match?({_, {_, _, %{"attributes" => _}}}, &1)) or
         Enum.any?(defs["recipe"] || %{}, &match?({_, {_, _, %{"check" => %{"npc" => _}}}}, &1))
 
-  # NPC attributes are row G3 (API 1.46); finger slots and affects row 3 (1.41); hp_max 1.40;
-  # the other tables 1.39.
+  # An identified item is row 27 (API 1.68); NPC attributes are row G3 (1.46); finger slots and
+  # affects row 3 (1.41); hp_max 1.40; the other tables 1.39.
   defp floor(m, table, items, g3) do
     floor =
       cond do
+        Enum.any?(items, fn {_, i} -> i["identified"] end) -> [1, 68]
         g3 -> [1, 46]
         Enum.any?(items, fn {_, i} -> i["affects"] || i["slot"] == "finger" end) -> [1, 41]
-        table == nil -> nil
-        table["hp_max"] -> [1, 40]
-        true -> [1, 39]
+        true -> table_floor(table)
       end
 
     if floor && api(m) < floor,
       do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
       else: []
   end
+
+  defp table_floor(nil), do: nil
+  defp table_floor(%{"hp_max" => _}), do: [1, 40]
+  defp table_floor(_), do: [1, 39]
+
+  defp item(i, m, defs), do: affects(i, m, defs) ++ identified(i, m, defs)
 
   # Toolbox row 3: an item's affects need its slot, attributes@1 and real attributes.
   defp affects({rel, %{"affects" => list} = item}, m, defs) do
@@ -79,6 +85,24 @@ defmodule Loka.Content.Derived do
   end
 
   defp affects(_, _, _), do: []
+
+  # Toolbox row 27: an item's identified names a bool fact of this cartridge and sits beside
+  # affects (the loader alone refuses a per_subject fact there, FACT_SCOPE_UNSUPPORTED).
+  defp identified({rel, %{"identified" => fact} = item}, m, defs) do
+    bool =
+      case Refs.resolve(fact, "fact", m, defs) do
+        {_, _, %{"value_type" => %{"type" => t}}} when t != "bool" ->
+          [diag("FACT_TYPE_MISMATCH", at(rel, ["identified"]))]
+
+        _ ->
+          []
+      end
+
+    worn = if item["affects"], do: [], else: [diag("SCHEMA_VIOLATION", at(rel, ["identified"]))]
+    Refs.reference(rel, [], {"identified", "fact"}, item, m, defs) ++ bool ++ worn
+  end
+
+  defp identified(_, _, _), do: []
 
   # Row G3: an NPC's attributes each name a distinct real attribute (an attributes section already
   # needs attributes@1).

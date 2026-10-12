@@ -1,0 +1,30 @@
+{
+  "npc": "sage",
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "has_item",
+      "item": "ring"
+    }
+  },
+  "prompt": "dialogue.sage.prompt",
+  "roles": {
+    "sage": {
+      "role": "npc",
+      "npc": "sage"
+    }
+  },
+  "choices": {
+    "ask": {
+      "label": "dialogue.sage.ask",
+      "narration": "narration.sage.ask",
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "ring_known",
+          "value": true
+        }
+      ]
+    }
+  }
+}

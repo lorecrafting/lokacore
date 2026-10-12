@@ -64,4 +64,31 @@ defmodule Loka.ContentDerivedTest do
     assert {:error, [%{"code" => "KERNEL_API_RANGE_INVALID"}]} =
              Loka.ContentSource.compile(dir, [api | plain])
   end
+
+  # Breaks: an identified item naming no fact or a non-bool fact, lacking affects or under API
+  # 1.68 compiles (toolbox row 27).
+  test "identified items keep their fact, affects and API floor" do
+    dir = Loka.ContentSource.copy("cartridges/identify_sampler")
+    assert {:ok, _, _} = Loka.ContentSource.compile(dir, [])
+    ring = &{"items/ring.json", &1}
+    count = %{"version" => 1, "value_type" => %{"type" => "int", "default" => 0}}
+    count = Map.merge(count, %{"scopes" => ["player"], "meaning" => "A count."})
+
+    cases = [
+      {[ring.(&Map.put(&1, "identified", "nope"))],
+       {"UNRESOLVED_REFERENCE", "items/ring.identified"}},
+      {[
+         ring.(&Map.put(&1, "identified", "count")),
+         {"facts.json", &put_in(&1, ["facts", "count"], count)}
+       ], {"FACT_TYPE_MISMATCH", "items/ring.identified"}},
+      {[ring.(&Map.delete(&1, "affects"))], {"SCHEMA_VIOLATION", "items/ring.identified"}},
+      {[{"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.67")}],
+       {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"}}
+    ]
+
+    for {changes, {code, path}} <- cases do
+      assert {:error, diags} = Loka.ContentSource.compile(dir, changes)
+      assert {code, path} in Enum.map(diags, &{&1["code"], &1["path"]}), inspect(diags)
+    end
+  end
 end
