@@ -135,9 +135,9 @@ export function travel(
   destination_id: EntityId,
 ): DeltaOp[] {
   const escort = following(world, actor)?.npc_id;
-  const members = npcsIn(world, [source_id]).filter(
-    (id) => id !== escort && member(world, actor, id),
-  );
+  const members = world.cartridge.world?.group
+    ? npcsIn(world, [source_id]).filter((id) => id !== escort && member(world, actor, id))
+    : [];
   return [...(escort ? [escort] : []), ...members].map((entity_id) => ({
     op: 'entity.transfer',
     writer_group: 0,

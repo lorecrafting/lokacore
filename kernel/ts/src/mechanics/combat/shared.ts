@@ -88,10 +88,11 @@ export function allyOf(world: World, row: EncounterRow) {
     world.cartridge.world?.combat?.allies
       ?.map((ref) => world.entityIds[refString(ref)])
       .find((id) => id && living(world, id) && world.state.containers[id] === row.room_id) ??
-    npcsIn(world, [row.room_id]).find((id) => {
-      const npc = world.entities[id];
-      return npc?.kind === 'npc' && !!npc.attack && member(world, row.character_id, id);
-    })
+    (world.cartridge.world?.group &&
+      npcsIn(world, [row.room_id]).find((id) => {
+        const npc = world.entities[id];
+        return npc?.kind === 'npc' && !!npc.attack && member(world, row.character_id, id);
+      }))
   );
 }
 
