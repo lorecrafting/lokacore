@@ -32,3 +32,14 @@
 - `kernel_api` 1.70 (brief 1.71): the PM's renumbering; accepted.
 - No "follows you" line: PM ruling; accepted.
 - Unknown member fact reported UNRESOLVED_REFERENCE (brief named only SCHEMA_VIOLATION for a wrong shape): the existing reference rule; accepted.
+
+## RECHECK at `34f27f20`
+
+Written 2026-10-12 07:46 UTC in the Pi harness by anthropic/claude-opus-5-5. Role: reviewer (fresh). Fix commits `0d80cf1a`, `34f27f20`.
+
+Verdict: **APPROVE**.
+
+- Nit 1, fixed (`0d80cf1a`): `travel` (`kernel/ts/src/mechanics/escort/shared.ts:138`) and `allyOf` (`combat/shared.ts:91`) skip `npcsIn` when `world.cartridge.world?.group` is unset. Behaviour unchanged: `member` already returned false without `group.member`, and `allyOf` yields `undefined` either way. Mutant dropping both guards stays green (TS `group`, `escort`, `cartridge_escort`, `speech`, `combat*`, `reaction*`; 62 pass), as expected for a perf-only change; no test can observe it.
+- Import cycle, fixed (`34f27f20`): `npcsIn` body moved byte-for-byte into `death/shared.ts`; all five importers re-pointed, none left on `speech/shared` (grep; `npm run typecheck` green). A value-import graph walk shows `death/shared.ts` reaches none of escort, speech or dialogue, and `escort/shared.ts` is no longer on a cycle; the same walk reports the cycle at `0d80cf1a` (red control).
+- No new test: accepted. The failure needs a Metro browser bundle; hosted book-e2e on this head is the gate, and loka-g53x (import-cycle check) is the cheap guard. A Node walk of relative value imports caught this cycle, so g53x is feasible without Metro.
+- Hosted CI on `34f27f20`: ci and book-e2e in progress at recheck time.
