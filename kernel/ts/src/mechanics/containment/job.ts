@@ -79,8 +79,22 @@ export function runReplenish(
     source_id: from,
     destination_id: to,
   }));
+  return regrid(world, job_id, row, mint, at + r.every, ops);
+}
+
+/**
+ * Accept a fixed-grid job's run (replenish, row 22b's wage): complete a pending row and schedule
+ * the next at `due_time`; a `due_time` the advance also crosses is returned as `next` instead.
+ */
+export function regrid(
+  world: World,
+  job_id: JobId,
+  row: JobRow,
+  mint: Mint,
+  due_time: number,
+  ops: DeltaOp[],
+) {
   if (row.status === 'pending') ops.push({ op: 'job.complete', writer_group: 0, job_id });
-  const due_time = at + r.every;
   const crossed = due_time <= world.state.clock;
   if (!crossed)
     ops.push({

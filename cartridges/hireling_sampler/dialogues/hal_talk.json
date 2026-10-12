@@ -18,6 +18,11 @@
     "hire": {
       "label": "dialogue.hal.hire",
       "narration": "narration.hal.hire",
+      "lesson_payment": {
+        "to": "hal",
+        "resource": "coins",
+        "amount": 3
+      },
       "sequence": [
         {
           "op": "fact.assign",

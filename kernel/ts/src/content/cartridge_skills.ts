@@ -95,6 +95,7 @@ export function lesson(o: Obj, d: Obj, at: string, c: Obj, checks: Checks): Diag
     return out;
   }
   checks.named(p.resource, 'resource', `${at}.lesson_payment.resource`);
+  const grants = (o.sequence ?? []).filter((s: Obj) => s.op === 'skill.acquire').length;
   const role = d.roles[p.to];
   const teacher = role?.role === 'npc' && c.npcs?.[refString(role.npc)];
   if (
@@ -102,9 +103,12 @@ export function lesson(o: Obj, d: Obj, at: string, c: Obj, checks: Checks): Diag
     refString(role.npc) !== refString(d.npc) ||
     teacher.resource_starts?.[p.resource.key] === undefined ||
     o.payment ||
-    (o.sequence ?? []).filter((s: Obj) => s.op === 'skill.acquire').length !== 1
+    grants > 1
   )
     out.push(diag('SCHEMA_VIOLATION', `${at}.lesson_payment`, { error: 'invalid_value' }));
+  // Row 22b: a fee without a skill (a hire fee) needs kernel_api 1.75.
+  if (!grants && apiCmp(c.manifest.requires.kernel_api.at_least, '1.75') < 0)
+    out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
   return out;
 }
 

@@ -80,22 +80,40 @@ defmodule Loka.Content.Combat do
 
   # Toolbox rows G8 and 22a: the group's member, stay and fight facts are bool pair facts, from
   # kernel_api 1.70 (1.73 with stay or fight); members strike as allies, so combat needs the ally
-  # narration.
+  # narration. Row 22b: the wage resource is conserved (gain 0, no regen), from 1.75.
   defp group(%{"world" => %{"group" => %{"member" => _} = g}}, combat, m, defs) do
-    floor = if Map.has_key?(g, "stay") or Map.has_key?(g, "fight"), do: [1, 73], else: [1, 70]
-
     Enum.flat_map(~w(member stay fight), &if(g[&1], do: pair_fact(&1, g, m, defs), else: [])) ++
+      wage(g["wage"], m, defs) ++
       if(combat && !combat["allies"],
         do: ally_narration(combat["narration"], ["world", "combat"]),
         else: []
       ) ++
-      if(version(m) < floor,
+      if(version(m) < group_floor(g),
         do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
         else: []
       )
   end
 
   defp group(_, _, _, _), do: []
+
+  defp group_floor(%{"wage" => _}), do: [1, 75]
+  defp group_floor(%{"stay" => _}), do: [1, 73]
+  defp group_floor(%{"fight" => _}), do: [1, 73]
+  defp group_floor(_), do: [1, 70]
+
+  defp wage(nil, _, _), do: []
+
+  defp wage(w, m, defs) do
+    path = ["world", "group", "wage"]
+
+    reference("cartridge.json", path, {"resource", "resource"}, w, m, defs) ++
+      case resolve(w["resource"], "resource", m, defs) do
+        {_, _, %{"gain" => 0, "regen" => nil}} -> []
+        {_, _, %{"gain" => 0} = r} when not is_map_key(r, "regen") -> []
+        {_, _, _} -> [bad(at("cartridge.json", path ++ ["resource"]))]
+        _ -> []
+      end
+  end
 
   defp pair_fact(key, g, m, defs) do
     path = ["world", "group"]

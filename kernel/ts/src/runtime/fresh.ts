@@ -24,9 +24,8 @@ export const NIL = '00000000-0000-0000-0000-000000000000';
  * its location, the calendar's start time (0 without one), each NPC's first job pending at its
  * schedule's first listed hour strictly after that time (mechanics/schedule/behavior.ts next; 04 §5.4: a job is
  * scheduled strictly later than now), each fact's default by its canonical DefinitionRef text
- * and no fact set. A world that starts after 0 stores the body's resources at their start values
- * at that time, since an unset legacy resource regenerates from time 0. Opted rows also
- * exist at clock zero, with standing rate and no fractional credit.
+ * and no fact set. A world after 0 stores the body's resource rows at start (an unset legacy one
+ * regenerates from 0); at clock 0 only opted (standing rate, no remainder) and currency rows.
  */
 export function newWorld(cartridge: Cartridge, context: WorldContextId, seed: RngState): World {
   let ordinal = 0;
@@ -155,7 +154,8 @@ function started(cartridge: Cartridge, body: EntityId, clock: number, entities: 
           (clock !== 0 ||
             s.regen ||
             Object.values(cartridge.services ?? {}).some((offer) => offer.currency.key === s.key) ||
-            Object.values(cartridge.transports ?? {}).some((t) => t.currency.key === s.key)) &&
+            Object.values(cartridge.transports ?? {}).some((t) => t.currency.key === s.key) ||
+            cartridge.world?.group?.wage?.resource.key === s.key) &&
           !Object.values(cartridge.services ?? {}).some(
             (service) => service.benefit.kind === 'meal' && service.benefit.stock.key === s.key,
           ),
