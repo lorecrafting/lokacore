@@ -1,18 +1,13 @@
 import { same } from '../foundation/compose.ts';
 import { refString } from '../runtime/decision.ts';
 import { checkers, diag, step, type Checks, type Obj } from './cartridge_refs.ts';
-import { apiCmp } from './cartridge_installed.ts';
 import type { Diagnostic } from '../contracts.gen.ts';
 
 export function services(c: Obj): Diagnostic[] {
   const out: Diagnostic[] = [],
     check = checkers(c, out);
   const [major, minor] = c.manifest.requires.kernel_api.at_least.split('.').map(Number);
-  const repairs = Object.values((c.services ?? {}) as Obj).some((s) => s.benefit.kind === 'repair');
-  if (
-    (Object.keys(c.services ?? {}).length && (major < 1 || (major === 1 && minor < 23))) ||
-    (repairs && apiCmp(c.manifest.requires.kernel_api.at_least, '1.69') < 0)
-  )
+  if (Object.keys(c.services ?? {}).length && (major < 1 || (major === 1 && minor < 23)))
     out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
   for (const [ref, s] of Object.entries((c.services ?? {}) as Obj))
     definition(c, s, ref, check, out);
@@ -62,17 +57,20 @@ function definition(c: Obj, s: Obj, ref: string, check: Checks, out: Diagnostic[
         !same(fact.scopes, ['player']))
     )
       bad(out, `${at}.benefit.fact`);
-  } else if (b.kind === 'repair') {
-    // Toolbox row 21: a repair restores a fact some weapon's durability names.
-    get(c, check, b.fact, 'fact', `${at}.benefit.fact`);
-    const items = Object.values((c.items ?? {}) as Obj);
-    if (!items.some((i) => i.weapon?.durability && same(i.weapon.durability.fact, b.fact)))
-      bad(out, `${at}.benefit.fact`);
-  } else {
+  } else if (b.kind === 'repair') repair(c, b, at, check, out);
+  else {
     const recovery = get(c, check, b.recovery, 'resource', `${at}.benefit.recovery`);
     if (recovery && recovery.key !== 'mv') bad(out, `${at}.benefit.recovery`);
     stock(c, s, npc, at, check, out);
   }
+}
+
+// Toolbox row 21: a repair restores a fact some weapon's durability names.
+function repair(c: Obj, b: Obj, at: string, check: Checks, out: Diagnostic[]) {
+  get(c, check, b.fact, 'fact', `${at}.benefit.fact`);
+  const items = Object.values((c.items ?? {}) as Obj);
+  if (!items.some((i) => i.weapon?.durability && same(i.weapon.durability.fact, b.fact)))
+    bad(out, `${at}.benefit.fact`);
 }
 
 function stock(c: Obj, s: Obj, npc: Obj | undefined, at: string, check: Checks, out: Diagnostic[]) {

@@ -49,10 +49,7 @@ defmodule Loka.Content.Services do
       |> String.split(".")
       |> Enum.map(&String.to_integer/1)
 
-    # Toolbox row 21: a repair benefit needs API 1.69.
-    repair = Enum.any?(declared, fn {_, s} -> s["benefit"]["kind"] == "repair" end)
-
-    if (declared != [] and minimum < [1, 23]) or (repair and minimum < [1, 69]),
+    if declared != [] and minimum < [1, 23],
       do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
       else: []
   end

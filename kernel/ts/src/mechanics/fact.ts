@@ -101,7 +101,7 @@ export const seenTip = (world: World, recipe: string): DefinitionRef => ({
 type Owner = 'skills' | 'patrol' | 'service' | 'scene' | 'durability';
 
 /** Throws precondition_failed when only another owner's mechanic may write the fact `ref`. */
-export function ownership(world: World, ref: DefinitionRef, owner?: Owner) {
+function ownership(world: World, ref: DefinitionRef, owner?: Owner) {
   if (
     owner !== 'skills' &&
     Object.values(world.cartridge.skills ?? {}).some(
@@ -133,15 +133,14 @@ export function ownership(world: World, ref: DefinitionRef, owner?: Owner) {
     )
   )
     throw new KernelError('precondition_failed');
-  // Toolbox row 21: only combat wear and service repair write a weapon's durability fact.
-  if (
-    owner !== 'durability' &&
-    Object.values(world.cartridge.items ?? {}).some(
-      (item) => item.weapon?.durability && same(item.weapon.durability.fact, ref),
-    )
-  )
-    throw new KernelError('precondition_failed');
+  if (owner !== 'durability' && durable(world, ref)) throw new KernelError('precondition_failed');
 }
+
+/** Toolbox row 21: true for a fact some weapon's `durability` names (only `durability` writes it). */
+export const durable = (world: World, ref: DefinitionRef): boolean =>
+  Object.values(world.cartridge.items ?? {}).some(
+    (item) => item.weapon?.durability && same(item.weapon.durability.fact, ref),
+  );
 
 /** Dialogue bounded adjustment lowers to the existing assignment and sequence overlay. */
 export function adjusted<R extends Assigned>(

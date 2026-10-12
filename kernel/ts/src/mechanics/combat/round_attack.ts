@@ -1,11 +1,9 @@
 import { status } from '../skills.ts';
 import type {
   AttackProfile,
-  CharacterId,
   DefinitionRef,
   DerivedStat,
   Tag,
-  WeaponProfile,
   WorldSettings,
   Command,
   DeltaOp,
@@ -24,8 +22,9 @@ import { deathSequence } from '../death/sequence.ts';
 import { derived, npcValue } from '../attributes/shared.ts';
 import { clearBleed, currentBleed, wound } from '../bleed/shared.ts';
 import { fact, positionOf, standing } from '../position/shared.ts';
-import { assigned, bounded, value } from '../fact.ts';
+import { assigned } from '../fact.ts';
 import { equipped } from '../lookups.ts';
+import { broken, wear, type Worn } from './durability.ts';
 import type { CombatEvent, Round } from './round.ts';
 import { ally, lastOpponent, resisted } from './shared.ts';
 import { statusAllows } from '../status/shared.ts';
@@ -50,6 +49,7 @@ function draw(r: Round, bound: number) {
   return value;
 }
 
+// size: allow 41, the row 21 wear call sits between the attack event and the injury
 export function attack(
   world: World,
   command: Pick<Command, 'id'>,
@@ -210,28 +210,6 @@ function wake(at: World, row: EncounterRow, r: Round) {
   r.position = wake.position;
 }
 
-// Toolbox row 21: a hit of the wielded weapon's own attack takes `wear` off its durability fact,
-// clamped to the fact's minimum; the next causal position stays free for the host's fact_changed.
-function wear(world: World, row: EncounterRow, worn: Worn, r: Round) {
-  const current = value(world, row.character_id, worn.fact, worn.id);
-  const next = bounded(world, worn.fact, current, -worn.wear);
-  if (next === undefined) throw new KernelError('precondition_failed');
-  const start = { ops: [], position: r.position, facts: {} };
-  const step = { fact: worn.fact, value: next, subject: worn.id };
-  const done = assigned(world, row.character_id, start, step, 'durability');
-  r.ops.push(...done.ops);
-  r.position = done.position;
-}
-
-// Toolbox row 21: a weapon whose durability fact reads at or below its minimum is broken.
-function broken(world: World, actor: CharacterId, id: EntityId, weapon: WeaponProfile) {
-  const d = weapon.durability;
-  if (!d) return false;
-  const type = world.cartridge.facts[refString(d.fact)].value_type;
-  return type.type === 'int' && (value(world, actor, d.fact, id) as number) <= type.minimum!;
-}
-
-type Worn = NonNullable<WeaponProfile['durability']> & { id: EntityId };
 // `ammo`: the pool a row 17 shot spends, set only on the player's shot profile; `worn`: the
 // wielded weapon a row 21 hit wears, set only on its own durable attack.
 type Profile = AttackProfile & { tags?: readonly Tag[]; ammo?: DefinitionRef; worn?: Worn };
