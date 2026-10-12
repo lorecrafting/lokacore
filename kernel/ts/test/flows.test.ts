@@ -28,34 +28,49 @@ assert.ok(loaded.ok, JSON.stringify(loaded));
 const content = loaded.cartridge as Cartridge;
 const CLI = fileURLToPath(new URL('../play/flows.ts', import.meta.url));
 
-// Buys Peg's bread at step 1 and sells it back at step 2, then stops.
+// Buys Peg's bread at step 1, sells it back at step 2, waits one game hour, then stops.
 const trade = (): Policy => {
   let i = 0;
-  return function trade(_w, view) {
+  return function trade(w, view) {
     const peg = view.entities.find((e) => e.shop)!;
     const item_id = peg.shop![0]!.item_id;
     const steps = [
       { type: 'buy', provider_id: peg.id, item_id, quoted_price: 4 },
       { type: 'sell', provider_id: peg.id, item_id, quoted_price: 1 },
+      { type: 'wait', until: w.state.clock + 3600 },
     ];
     return steps.slice(i, ++i);
   };
 };
 
-// Breaks: in and out swapped, coin read from every body (Peg's purse moves the other way), or a
-// step labelled by its type alone.
+// Breaks: in and out swapped, coin read from every body (Peg's purse moves the other way), a step
+// labelled by its type alone, the rate over the wrong hours, or the supply's player and purses
+// mixed up. The player starts with 10 pennies (resources.json), Peg with 0 (npcs/peg.json): after
+// the trade and one hour the player holds 10 - 4 + 1 = 7 and Peg 4 - 1 = 3, a net -3 in one hour.
 test('a bought and resold bread shows as 4 out under buy and 1 in under sell', () => {
   const r = flows(content, { seeds: 1, days: 1, policy: trade() });
   assert.deepEqual(r.coin.by_source, { 'buy:bread': { out: 4 }, 'sell:bread': { in: 1 } });
   assert.deepEqual(r.items.by_source, { 'buy:bread': { in: 1 }, 'sell:bread': { out: 1 } });
+  assert.deepEqual(r.coin.per_hour, { min: '-3.00', median: '-3.00', max: '-3.00' });
+  assert.deepEqual(r.coin.supply, [
+    { hour: 0, player: 10, purses: 0 },
+    { hour: 1, player: 7, purses: 3 },
+  ]);
 });
 
 // Breaks: a command repeated within the game hour, so an always-accepted scan that passes no time
-// spends the whole step cap and the day is never reached (standing_sampler's calendar sets no units: 3600 per hour, 24 hours).
-test('a command already played this game hour is skipped, so the run passes the day', () => {
-  const idle: Policy = (w) => [{ type: 'scan' }, { type: 'wait', until: w.state.clock + 3600 }];
+// spends the whole step cap and the day is never reached; or the skip never reset at the next hour,
+// so the scan runs once per run (25 calls), not once per hour. standing_sampler's calendar sets no
+// units (3600 per hour, 24 hours): each hour is one scan and one wait, 2 calls, 48 in the day.
+test('a command already played this game hour is skipped until the next hour', () => {
+  let calls = 0;
+  const idle: Policy = (w) => {
+    calls++;
+    return [{ type: 'scan' }, { type: 'wait', until: w.state.clock + 3600 }];
+  };
   const r = flows(content, { seeds: 1, days: 1, policy: idle });
   assert.equal(r.coin.supply.at(-1)!.hour, 24);
+  assert.equal(calls, 48);
 });
 
 // Breaks: the worker's rank dropped or reordered, so a talk or a take is tried before a sale.

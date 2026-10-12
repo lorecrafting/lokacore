@@ -7,19 +7,12 @@ import type { Command, DefinitionRef, GameView } from '../src/contracts.gen.ts';
 import type { Obj } from '../src/content/cartridge_refs.ts';
 import { decode, encode, type Json } from '../src/foundation/canonical.ts';
 import { elapsedCommandId, id } from '../src/foundation/id_source.ts';
-import {
-  INSTALLED,
-  loadCartridge,
-  newWorld,
-  step,
-  type Cartridge,
-  type World,
-} from '../src/index.ts';
+import { INSTALLED, loadCartridge, newWorld, type Cartridge, type World } from '../src/index.ts';
 import { units } from '../src/mechanics/calendar.ts';
 import { living } from '../src/mechanics/death/shared.ts';
 import { refString } from '../src/runtime/decision.ts';
 import { gameView, stepElapsed } from '../src/runtime/world.ts';
-import { gen, offers, type Gen, type Payload } from '../test/sim.ts';
+import { checked, gen, KERNEL, offers, type Gen, type Kernel, type Payload } from '../test/sim.ts';
 import { ledger } from './ledger.ts';
 
 // Candidates in preference order; the first the kernel accepts is played, none ends the run.
@@ -158,14 +151,16 @@ function run(
 // a command's identity within an hour: a continuation id changes with every reply
 const same = (p: Payload) => JSON.stringify({ ...p, continuation_id: undefined });
 
-// The first candidate the kernel accepts, with its world. ponytail: plain `step`, not the
-// simulator's `checked` (its per-candidate view, invariants and state hash were 85% of a run);
-// sim.test.ts keeps the invariants.
+// The first candidate the kernel accepts, with its world. Refused candidates take the plain
+// step; the accepted one is replayed through the simulator's `checked`, so every played step keeps
+// every invariant (checking each candidate was 85% of a run).
 function first(w: World, candidates: Payload[], seed: number, n: number) {
   for (const p of candidates) {
-    const [stepFn, command] = delivered(w, p, seed, n);
-    const r = stepFn(w, command, n);
-    if (r.decision.kind === 'accepted') return [p, r.world] as const;
+    const [kernel, command] = delivered(w, p, seed, n);
+    if (kernel.step(w, command, n).decision.kind !== 'accepted') continue;
+    const r = checked(kernel, w, command, n);
+    if (r.failure) throw new Error(`seed ${seed} step ${n}: ${r.failure.id} ${r.failure.detail}`);
+    return [p, r.world] as const;
   }
   return undefined;
 }
@@ -188,19 +183,20 @@ function tally(
 }
 
 const RUN = id('loka-flows', 'run', 0);
+const ELAPSED: Kernel = { ...KERNEL, step: stepElapsed as Kernel['step'] };
 
 // The kernel and command for `p`: a wait in a real-elapsed world (which refuses Wait) is the
 // authority's elapsed delivery to the same time.
-function delivered(w: World, p: Payload, seed: number, n: number): [typeof step, Command] {
+function delivered(w: World, p: Payload, seed: number, n: number): [Kernel, Command] {
   const [world_context_id, actor_id, from] = [w.context, w.character, w.state.clock];
   if (p.type !== 'wait' || !w.cartridge.manifest.time_policy) {
     const command = { id: id('loka-flows', String(seed), n), world_context_id };
-    return [step, { ...command, payload: { actor_id, ...p } } as Command];
+    return [KERNEL, { ...command, payload: { actor_id, ...p } } as Command];
   }
   const until = p.until as number;
   const payload = { type: 'elapsed', actor_id, run_id: RUN, from, until };
   const cid = elapsedCommandId(RUN, w.context, from, until);
-  return [stepElapsed as typeof step, { id: cid, world_context_id, payload } as Command];
+  return [ELAPSED, { id: cid, world_context_id, payload } as Command];
 }
 
 // `<payload type>:<definition key of its item or target>`, else the bare type
