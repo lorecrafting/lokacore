@@ -1,4 +1,4 @@
-# size: allow 338, ancestry, static map, status source and levelling settings wiring join the existing compiler boundary
+# size: allow 340, ancestry, static map, status source, levelling settings and replenish wiring join the existing compiler boundary
 defmodule Loka.Content.Compiler do
   @moduledoc "Validates source files and builds the CompiledCartridge (05 §3–§8, 06 §20–21)."
   alias Loka.Content.{
@@ -100,12 +100,13 @@ defmodule Loka.Content.Compiler do
         Loka.Content.Spells.check(manifest, defs, registry) ++
         Scenes.check(manifest, defs, v2, registry) ++
         Ancestries.check(manifest, defs, located, if(v2, do: elem(v2, 1), else: %{})) ++
-        Loka.Content.Floors.check(manifest, defs, located)
+        Loka.Content.Floors.check(manifest, defs, located) ++
+        Loka.Content.Replenish.check(manifest, defs)
 
   # v2 when the source declares world content, entry/settings, text, resources or attributes.
   defp v2(defs, {entry, settings}, text, files) do
     if Enum.any?(
-         ~w(room item npc recipe barrier quest reaction dialogue story_point scene liquid service transport population population_bundle),
+         ~w(room item npc recipe barrier quest reaction dialogue story_point scene liquid service transport population population_bundle replenish),
          &(defs[&1] != %{})
        ) or
          entry != nil or
@@ -197,6 +198,7 @@ defmodule Loka.Content.Compiler do
     {"liquid", :liquid, "LiquidDefinition"},
     {"population", :population, "PopulationPlan"},
     {"population_bundle", :population_bundle, "PopulationBundle"},
+    {"replenish", :replenish, "ReplenishPlan"},
     {"service", :service, "ServiceDefinition"},
     {"transport", :transport, "TransportDefinition"},
     {"bleed", :bleed, "BleedDefinition"},

@@ -1,0 +1,14 @@
+{
+  "keywords": [
+    "ore",
+    "ore_03"
+  ],
+  "short": "item.ore.short",
+  "room_line": "item.ore.room",
+  "description": "item.ore.description",
+  "mass_grams": 1000,
+  "location": {
+    "in": "room",
+    "room": "store"
+  }
+}

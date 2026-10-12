@@ -38,7 +38,6 @@ import { bleed } from './cartridge_bleed.ts';
 import { status } from './cartridge_status.ts';
 import { liquids } from './cartridge_liquids.ts';
 import { population } from './cartridge_population.ts';
-
 import { apiCmp, installedStage, type Installed } from './cartridge_installed.ts';
 export type { Installed } from './cartridge_installed.ts';
 
@@ -141,6 +140,7 @@ const DEFINITION_MAPS = [
   'transports',
   'bleeds',
   'statuses',
+  'replenish',
 ];
 function keyStage(c: Obj): Diagnostic[] {
   const out: Diagnostic[] = [];

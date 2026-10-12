@@ -14,7 +14,7 @@ world's definitions and text:
 | `resources.json` | overrides of the default pools' fields, or further ResourceSpecs, each with optional condition `bands [{at_percent, key, tone}]` (`lib/loka/content/resources.ex:2`) |
 | `attributes.json` | `{"attributes": {key: {start}}}`: the cartridge's attributes (AttributeSpec without `key`; an authored `key` is `UNKNOWN_FIELD`), definition `start` supplies the fallback; [D11](mechanics.md#d11-character-choice-selected-contract) saves the selected character's values ([mechanics.md](mechanics.md#attributes1-kerneltssrcmechanicspolicyts60); `lib/loka/content/resources.ex:2`) |
 | `map_positions.json` | static drawing metadata for rooms; real room exits remain the graph (`lib/loka/content/map_positions.ex:2`) |
-| `rooms/`, `items/`, `npcs/`, `barriers/`, `recipes/`, `quests/`, `dialogues/`, `reactions/`, `story_points/`, `scenes/`, `policies/`, `actions/`, `skills/`, `topics/`, `liquids/`, `populations/`, `population_bundles/`, `services/`, `transports/`, `bleeds/` | one file per definition, `<key>.json`, the frozen shape without `key`; NPC and item files are blueprints |
+| `rooms/`, `items/`, `npcs/`, `barriers/`, `recipes/`, `quests/`, `dialogues/`, `reactions/`, `story_points/`, `scenes/`, `policies/`, `actions/`, `skills/`, `topics/`, `liquids/`, `populations/`, `population_bundles/`, `replenish/`, `services/`, `transports/`, `bleeds/` | one file per definition, `<key>.json`, the frozen shape without `key`; NPC and item files are blueprints |
 
 A reference is a full DefinitionRef naming this cartridge, or short: the key alone, of the kind
 its field takes (`Loka.Content.Checks.expand/2`, `lib/loka/content/checks.ex:37`). A `.json`
@@ -457,10 +457,10 @@ committed or checked in CI. Refs are DefinitionRefStrings.
 - **Ecology.** `populations`: each plan `{ref, home, area, cap, day_target, night_target,
   replacement_delay, npc, item?, corpse}`, the last three from its bundle; a replacement is the
   only thing that mints an item. `seams`: each harvest detail `{room, detail, items, tool?,
-  careful?}`: the count of its items (seams never regrow), its tool's tag, its careful count.
+  careful?}`: the count of its items, its tool's tag, its careful count.
 - Lists sort by site, then ref, then choice, then item; currencies by resource, unclassified by
   from then path, populations by ref, seams by room then detail. ponytail: authored static sites
-  only; no per-day caps exist; replenish and decay are not built, so none is reported; death
+  only; no per-day caps exist; replenish is not listed yet (Beads `loka-kgd.107.3`) and decay is not built; death
   moves custody with no coin penalty; per-district grouping waits for L8 tags; placed items stay
   with `reach.ts`; corpse custody, crow scavenge, quest exchange and coin-like items are not
   money rows; ammo a row 17 shot spends and durability a row 21 hit wears or a repair restores
@@ -1759,6 +1759,10 @@ The [away recap](mechanics.md#away-recap-toolbox-row-w27) reads the optional `ti
 ## Harvest tool declarations
 
 [Tool-gated harvest](mechanics.md#tool-gated-harvest-toolbox-row-19) adds one optional field to a detail's `harvest` (`protocol/room.schema.json`): `tool: {tag}`, `tag` a `Tag`. It needs `kernel_api` at least **1.52**; the compiler (`lib/loka/content/exchanges.ex`) and the loader (`kernel/ts/src/content/cartridge_exchange.ts`) refuse a lower floor (KERNEL_API_RANGE_INVALID at the detail's `harvest`), and the field needs `tags@1`, as item tags do (UNDECLARED_CAPABILITY at `harvest.tool`; `lib/loka/content/room_parts.ex`, `kernel/ts/src/content/cartridge_refs.ts`). Sampler: `cartridges/harvest_sampler`.
+
+## Replenish declarations
+
+[Replenish](mechanics.md#replenish-toolbox-row-19b) adds one top-level section (`protocol/cartridge.schema.json` `ReplenishPlan`): `replenish`, keyed `id@version:replenish/key`, one source file per entry under `replenish/` (`<key>.json`). An entry is `{items, from, to, cap, count, every}`: `items` 1 to 64 distinct item refs (short keys in source); `from` and `to` each an `ItemLocation` whose ref is a short key in source (`in` room, npc or item; `template` refused); `cap` 1 to 64, `count` 1 to 64 and `every` at least 1 (clock units). It needs `kernel_api` at least **1.71**. The compiler (`lib/loka/content/replenish.ex`) and the loader (`kernel/ts/src/content/cartridge_replenish.ts`) refuse a lower floor (KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least`), a `template` location, a holder with no placed entity (a spawn-template NPC or a template item) or an item holder that is not a container, and an item `to` when any listed item is a container, which may be or hold `to` (SCHEMA_VIOLATION at that `from` or `to`), `from` equal to `to` (SCHEMA_VIOLATION at the entry's `from`), and an item or holder that names no definition (UNRESOLVED_REFERENCE). A harvest detail's item starts in the detail's room, or in any authored holder when an entry lists it with that room as `to` (`lib/loka/content/exchanges.ex`, `kernel/ts/src/content/cartridge_exchange.ts`). Sampler: `cartridges/replenish_sampler`.
 
 ## Durability declarations
 
