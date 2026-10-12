@@ -239,3 +239,11 @@ test('ledger lists the currencies, money and item sites, populations and seams',
     },
   });
 });
+
+// Break (toolbox row 9): an encounter plan's row drops its `chance`.
+test('an encounter plan row carries its chance', () => {
+  const hounds = { ...fixture.populations[S('population', 'hounds')], chance: 25 };
+  const populations = { [S('population', 'hounds')]: hounds };
+  const [row] = ledger({ ...fixture, populations } as Obj).ecology.populations;
+  assert.equal(row!.chance, 25);
+});

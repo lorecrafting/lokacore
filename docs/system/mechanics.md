@@ -1301,7 +1301,7 @@ or cross-writer exception is permitted; see [targets](protocol.md#c3-spawned-bun
 
 At a wander boundary each living, unengaged member alternates between the two
 adjacent declared rooms through ordinary legal movement. A blocked edge leaves it
-in place; it spends no RNG or player MV. A newly spawned member stays at home for
+in place; it spends no RNG or player MV. An [encounter plan](#random-encounters-toolbox-row-9) departs from this RNG-free rule: it draws once per wander-boundary opportunity. A newly spawned member stays at home for
 that occurrence. An open encounter suppresses its voluntary wander; dead members
 never move. No hound enters the required rescue/shrine corridor. Replacement and
 wandering grant no quest, skill, kill credit or money. Immutable template metadata
@@ -2534,6 +2534,24 @@ Found by [showcase plan 2](../showcase/combat-district.md) (#368); the PM brief 
 - **Traps.** None applies: no new job, event, save row or status.
 - **Sampler.** `cartridges/group_sampler`: a yard with a road north. Ada and Bram offer the dialogues `join` (`in_group` true) and `leave` (false); Cole never joins. Bram strikes for a sure 1 (`attack` chance 100, damage 1), as does the player; a goblin in the yard has 2 HP and never hits, and its death sets `goblin_slain` (`world.death_credit`). Ada and Bram join and the player moves north: both are in the road, Cole in the yard; Ada leaves and the player moves south: Bram follows, Ada stays. With Bram a member the goblin dies in round 1 and `goblin_slain` is true; without him it is at 1. Attack on Bram is refused `invalid_target` and not offered (`kernel/ts/test/group.test.ts`).
 - **Composition record.** Consumer: `travel` (Move, Flee, transport), the ally turn, Attack admission, the GameView Attack offer, death credit. Reads: the member fact (W2 pair fact rows and default), presence, life. Writes: `entity.transfer` (existing op) for each co-located member. Events, jobs, save rows: none new. Reused: W2 pair facts and `value`, `npcsIn`, escort's `travel`, row 6b's ally turn and party credit, `KERNEL_API_RANGE_INVALID`. New: `world.group`, the `member` query, member-aware `ally` and `allyOf`, the 1.70 floor; no foundation change.
+
+## Random encounters (toolbox row 9)
+
+[Toolbox row 9](../MECHANICS-TOOLBOX.md#ranked-toolbox): random encounters, the RNG draw a per-plan option so RNG-free ecology plans and encounter plans never share a plan; its sampler: "road room spawns a bandit 1 in 4 per hour, capped at one". [Declarations](cartridge.md#encounter-declarations) govern it; the PM brief is in Beads `loka-kgd.117` (2026-10-12). An encounter is a [C3 population plan](#c3-bounded-living-hounds-selected-contract) with a chance per opportunity; the cartridge owns the chance and the rate ([owner decision](../decisions/owner-decision-world-parameters-2026-10-02.md)).
+
+- **Declaration.** A `PopulationPlan` may declare `chance`, an integer 1 to 100 (a percent, as a loot drop's `chance`). A plan with `chance` is an encounter plan; a plan without it is an ecology plan, RNG-free as before. The one field decides; no plan has both behaviors.
+- **Genesis.** An encounter plan births nothing at world creation: every slot starts at generation 0 with no member, as a slot above the genesis target does (`initialOps`, `kernel/ts/src/mechanics/population/shared.ts`). Its first plan job is scheduled as an ecology plan's.
+- **Opportunity.** A plan occurrence at a wander boundary (a crossed sub-step included, [loka-6ql4](#c3-bounded-living-hounds-selected-contract)) that is not suppressed and has at least one eligible slot (`eligible`, `kernel/ts/src/mechanics/population/settle.ts`: slot within the target, no living member, its replacement due reached). Each opportunity draws exactly one `uniform(state.rng, 100, 8)` (`encounter`, same file); a roll below `chance` births the first eligible slot only, one birth per opportunity even when `cap` is above 1. No eligible slot draws nothing. An occurrence off the wander boundary (a replacement due, a night boundary off the hour) and the suppression resume never birth and never draw.
+- **RNG.** The drawn state returns with the plan job's decision (`accepted`), so a later crossed sub-step of the same advance draws from it (`kernel/ts/src/runtime/proposal.ts`).
+- **Members.** Combat and death of an encounter member are unchanged: a dead slot keeps `replacement_delay`, then waits for a boundary draw. Wandering is unchanged.
+- **Silent.** No narration and no event beyond a birth's: the member appears in its room's list.
+- **Known limits.** No aggression: an encounter member fights only when attacked, as a hound. One bundle per plan (no weighted tables) and one chance per plan (not per room).
+- **W12 forward rule (M12).** W12's `population_count` may name an encounter plan wherever a policy is allowed, except inside a population plan's own birth or wander `when`; W12's `when`, `prey` and floor are refused on an encounter plan, which is never part of an RNG-free ecology chain. Ecology plans read only ecology plans.
+- **Opt-in.** A plan with `chance` needs `kernel_api` 1.74 (KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least`) in both kernels. A cartridge without `chance` keeps its bytes, hash, ids, receipts and behavior; Chapter 1's `fen_hounds` declares none.
+- **Book.** No new element and no line.
+- **Traps.** No new job kind, save row, op or event; the opportunity is on the logical clock.
+- **Sampler.** `cartridges/encounter_sampler`: a road and a crossroads, start hour 8; `bandits` `{home road, area [road, crossroads], cap 1, day_target 1, night_target 1, night_start 20, night_end 6, replacement_delay 3600, wander_interval 3600, chance 25}`. A fresh world holds no bandit. From RNG `[1,2,3,4]` one hour rolls 20 and births a bandit in the road (RNG `[7,0,1026,12288]`); the next hour has no eligible slot and draws nothing. From `[1,1,1,1]` one three-hour advance rolls 60, 60, 20 and births at the third boundary (RNG `[2560,513,262145,5242880]`). From `[1,7000003,1,1]` two hours roll 25, 25 and birth nothing (`kernel/ts/test/encounter.test.ts`).
+- **Composition record.** Consumer: `runPopulation` (schedule@1 `run_job`); the `.107.7` fight matrix and W12 read the plan. Reads: `plan.chance`, slot rows, the wander boundary, `state.rng`. Writes: `state.rng`; births through the existing `birthSlot` ops. Events, jobs, save rows: none new. Reused: the population plan, `births`, `wanders`, `uniform` (as row 8's `rollDrops`). New: the `chance` field, `eligible` and `encounter`, the genesis condition and the 1.74 floor; no foundation change.
 
 ## Hireling orders (toolbox row 22a)
 

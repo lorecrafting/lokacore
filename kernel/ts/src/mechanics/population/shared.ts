@@ -24,7 +24,7 @@ import { add } from '../../foundation/int.ts';
 import { birth } from './birth.ts';
 import { planRef } from './refs.ts';
 import { hourOf } from '../calendar.ts';
-import { births, wanders, type Plan, type Slots } from './settle.ts';
+import { births, encounter, wanders, type Plan, type Slots } from './settle.ts';
 
 export function suppressed(world: World, plan: DefinitionRef, at = world.state.clock) {
   const until = world.state.population_plans?.[key(plan)]?.suppression?.ends_at;
@@ -98,8 +98,11 @@ function initialOps(
   occurrence_id: CommandId,
 ): DeltaOp[] {
   const hour = hourOf(world.cartridge, world.state.clock);
-  const count =
-    hour >= plan.night_start || hour < plan.night_end ? plan.night_target : plan.day_target;
+  const count = plan.chance
+    ? 0
+    : hour >= plan.night_start || hour < plan.night_end
+      ? plan.night_target
+      : plan.day_target;
   const ops = genesisSlots(world, ref, plan.cap, count, occurrence_id, mint);
   const wander = alignedAfter(world.state.clock, plan.wander_interval);
   const job_id = mint() as JobId;
@@ -196,8 +199,8 @@ export function runPopulation(
   const slots = slotRows(world, job.job, plan.cap);
   const quiet = suppressed(world, job.job, at);
   const born = quiet
-    ? { ops: [] as DeltaOp[], ids: new Set<string>() }
-    : births(world, command.id, job, target, slots, mint);
+    ? { ops: [] as DeltaOp[], ids: new Set<string>(), rng: world.state.rng }
+    : encounter(world, command.id, job, target, slots, mint, at === wanderDue);
   const ops: DeltaOp[] = [
     ...(row.status === 'pending' ? [{ op: 'job.complete', writer_group: 0, job_id } as const] : []),
     ...born.ops,
@@ -207,7 +210,7 @@ export function runPopulation(
   ];
   const after = successor(world, plan, job, control, wanderDue, target, slots, mint);
   if (typeof after !== 'number') ops.push(...after);
-  const ran = accepted<never>(world, 'job_ran', ops, []);
+  const ran = accepted<never>(world, 'job_ran', ops, [], undefined, born.rng);
   return typeof after === 'number' ? { ...ran, next: after } : ran;
 }
 
@@ -222,11 +225,12 @@ function resumePopulation(
 ) {
   const suppression = control.suppression!;
   if (suppression.ends_at !== job.due_time) throw new KernelError('precondition_failed');
+  // An encounter plan births only on a wander-boundary draw (row 9).
   const born = births(
     world,
     command.id,
     job,
-    targetAt(world, plan, job.due_time),
+    plan.chance ? 0 : targetAt(world, plan, job.due_time),
     slotRows(world, job.job, plan.cap),
     mint,
   );

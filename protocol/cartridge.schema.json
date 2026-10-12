@@ -2159,6 +2159,12 @@
           "type": "integer",
           "minimum": 1
         },
+        "chance": {
+          "description": "Makes the plan an encounter plan (docs/system/mechanics.md Random encounters, toolbox row 9; kernel_api at least 1.74): each wander-boundary occurrence with an eligible slot draws one uniform(100) and a roll below chance births the first eligible slot. Absent: an RNG-free ecology plan.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
         "scavenge": {
           "type": "object",
           "properties": {
