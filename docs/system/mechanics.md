@@ -32,7 +32,8 @@ The body starts in `entry`, each ordinary NPC in its room, each ordinary item at
 `calendar.start` or 0; each scheduled NPC's first job is due at its schedule's first
 hour strictly after the start; facts hold their defaults, with no record until the first change
 (so the [position](#position1-kerneltssrcmechanicspositionrulets) fact adds nothing to a fresh state); a world starting after time 0 stores
-the body's legacy resources at their start values. Every opted recovery pool has a required
+the body's legacy resources at their start values, and one starting at 0 still stores the row of
+the [wage](#hireling-wages-toolbox-row-22b) resource. Every opted recovery pool has a required
 player-body row at the birth clock, including zero, with its authored start, standing rate
 and zero remainder ([resource@1](#resource1-kerneltssrcmechanicsresourcets)). One body per world;
 rules read the actor from the
@@ -2581,6 +2582,7 @@ Found by [showcase plan 2](../showcase/combat-district.md) (#368); the PM brief 
 - **Host.** Unchanged: the elapsed host stops at every pending job but the calendar job (`boundary`, `mobile/authority/local-story/elapsed.ts`). The member's `fact_changed` is the host's, as for any job's `fact.assign`.
 - **Silent.** No narration, no notice and no new event: the player sees coins drop and the hireling stop following.
 - **Known limits.** No notice when a hireling leaves. The grid is the world's, not the hire's: a hire just before a due pays a full wage at once. One wage for every member. A hireable NPC without a row for the wage resource can never be paid and leaves at its first wage (no loader check: the loader cannot know who is hireable). The balance ledger reports the wage under `coins.unclassified`. A cartridge whose shop currency is also the wage resource would fail the mobile shop-receipt reconciliation on reopen (`commerceSave`, `mobile/authority/local-story/commerce-save.ts`, knows no job payment); no cartridge does yet.
+- **Fresh row.** A world starting at clock 0 still births the player body's row of the wage resource at its start (`started`, `kernel/ts/src/runtime/fresh.ts`, beside the service and transport currencies), since `transfer` and the wage need a real row; the hireling's row is its authored `resource_starts`.
 - **Opt-in.** `world.group.wage`, or a `lesson_payment` without `skill.acquire`, needs `kernel_api` 1.75 (KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least`) in both kernels. A cartridge without them keeps its bytes, hash, ids, receipts and GameView; Chapter 1 declares none.
 - **Book.** No new element and no line.
 - **Traps.** [Trap 1](../MECHANICS-TOOLBOX.md#traps) holds: due times are on the logical clock. One new job kind; no new save section, op or event.
