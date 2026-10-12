@@ -25696,5 +25696,45 @@
         "code": "unknown_property"
       }
     ]
+  },
+  {
+    "contract": "WorldSettings",
+    "value": {
+      "group": {
+        "member": {
+          "cartridge_id": "hireling_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "fact",
+          "key": "hired"
+        },
+        "stay": "staying"
+      }
+    },
+    "errors": [
+      {
+        "path": "/group/stay",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "contract": "WorldSettings",
+    "value": {
+      "group": {
+        "member": {
+          "cartridge_id": "hireling_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "fact",
+          "key": "hired"
+        },
+        "fight": "fighting"
+      }
+    },
+    "errors": [
+      {
+        "path": "/group/fight",
+        "code": "invalid_type"
+      }
+    ]
   }
 ]

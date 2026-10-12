@@ -82,7 +82,8 @@ export function ally(world: World, actor: CharacterId | null, id: EntityId | nul
 }
 
 /** The ally that strikes this round: the first listed one living in the encounter room, else
- * the first group member there with an attack (EntityId order). */
+ * the first group member there with an attack (EntityId order) and, when world.group.fight is
+ * declared (row 22a), the attack order. */
 export function allyOf(world: World, row: EncounterRow) {
   return (
     world.cartridge.world?.combat?.allies
@@ -91,7 +92,12 @@ export function allyOf(world: World, row: EncounterRow) {
     (world.cartridge.world?.group &&
       npcsIn(world, [row.room_id]).find((id) => {
         const npc = world.entities[id];
-        return npc?.kind === 'npc' && !!npc.attack && member(world, row.character_id, id);
+        return (
+          npc?.kind === 'npc' &&
+          !!npc.attack &&
+          member(world, row.character_id, id) &&
+          (!world.cartridge.world?.group?.fight || member(world, row.character_id, id, 'fight'))
+        );
       }))
   );
 }
