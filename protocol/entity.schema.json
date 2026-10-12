@@ -201,6 +201,10 @@
             "$ref": "#/$defs/ItemAffect"
           }
         },
+        "identified": {
+          "description": "Toolbox row 27: a boolean fact, not per_subject; the item is identified while it reads true for the player, and GameView worn sums identified items only (needs affects, kernel_api at least 1.68).",
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
         "barrier": {
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
@@ -1088,6 +1092,38 @@
         },
         "attack": {
           "$ref": "entity.schema.json#/$defs/AttackProfile"
+        },
+        "ranged": {
+          "type": "object",
+          "properties": {
+            "ammo": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            }
+          },
+          "required": [
+            "ammo"
+          ],
+          "additionalProperties": false,
+          "description": "Toolbox row 17: the weapon shoots in an encounter's round 1, spending one of the body's ammo resource pool; it never strikes in melee."
+        },
+        "durability": {
+          "type": "object",
+          "properties": {
+            "fact": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "wear": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "fact",
+            "wear"
+          ],
+          "additionalProperties": false,
+          "description": "Toolbox row 21: the bounded int entity fact holding this weapon's durability (its default is a new weapon's) and the amount each hit of its own attack takes off; at the fact's minimum it is broken and strikes unarmed."
         }
       },
       "required": [

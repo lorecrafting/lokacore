@@ -24,6 +24,7 @@ defmodule Loka.Content.Combat do
       allies(combat, m, defs) ++
       npc_profiles(defs, combat) ++
       damage_api(m, defs, combat) ++
+      shots(combat, m, defs) ++
       if(credit && !combat, do: [bad("cartridge.world.death_credit")], else: []) ++
       credits(credit || [], m, defs)
   end
@@ -90,6 +91,30 @@ defmodule Loka.Content.Combat do
     npcs = for {_, {_, _, n}} <- defs["npc"] || %{}, do: n
     profiles = [combat["player_attack"] | Enum.map(npcs, & &1["attack"])] ++ weapon_attacks(defs)
     Enum.any?(profiles, &(&1["kind"] || &1["crit"])) or Enum.any?(npcs, & &1["resistances"])
+  end
+
+  # Toolbox row 17: a ranged weapon names a known ammo pool, and its shots need their narration
+  # and kernel_api 1.67.
+  defp shots(combat, m, defs) do
+    ranged =
+      for {_, {rel, _, %{"weapon" => %{"ranged" => r}}}} <- defs["item"] || %{}, do: {rel, r}
+
+    for(
+      {rel, r} <- ranged,
+      error <- reference(rel, ["weapon", "ranged"], {"ammo", "resource"}, r, m, defs),
+      do: error
+    ) ++ if(ranged == [], do: [], else: ranged_requirements(combat, m))
+  end
+
+  defp ranged_requirements(combat, m) do
+    for(
+      field <- ~w(shot_hit shot_miss),
+      !get_in(combat || %{}, ["narration", field]),
+      do: bad(at("cartridge.json", ["world", "combat", "narration", field]))
+    ) ++
+      if version(m) < [1, 67],
+        do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
+        else: []
   end
 
   defp weapon_attacks(defs),

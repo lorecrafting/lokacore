@@ -1667,6 +1667,12 @@
             "ally_miss": {
               "$ref": "text.schema.json#/$defs/TextKey"
             },
+            "shot_hit": {
+              "$ref": "text.schema.json#/$defs/TextKey"
+            },
+            "shot_miss": {
+              "$ref": "text.schema.json#/$defs/TextKey"
+            },
             "player_died": {
               "$ref": "text.schema.json#/$defs/TextKey"
             },

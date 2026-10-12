@@ -11,6 +11,7 @@ their summaries are in [this index at `15c7d41b`](https://github.com/lorecraftin
 What each rule in force says: [owner-rules.md](../system/owner-rules.md). A new record adds one
 dated line below, newest first.
 
+- 2026-10-12 [Owner decision: one lane, the mechanics toolbox; Storybook polish paused](owner-decision-one-lane-mechanics-2026-10-12.md)
 - 2026-10-10 [Owner decision: retire the later chapters, build a toolbox showcase](owner-decision-showcase-2026-10-10.md)
 - 2026-10-09 [PM decision: HP maximum derived from attributes](pm-decision-derived-pool-max-2026-10-09.md)
 - 2026-10-09 [Owner decision: dialogue hub, conversations stay open until Leave](owner-decision-dialogue-hub-2026-10-09.md)

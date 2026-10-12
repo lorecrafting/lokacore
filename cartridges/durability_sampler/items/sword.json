@@ -1,0 +1,69 @@
+{
+  "keywords": [
+    "sword",
+    "iron"
+  ],
+  "short": "item.sword.short",
+  "short_variants": [
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "fact_compare",
+          "fact": "edge",
+          "equals": 0,
+          "subject": "target"
+        }
+      },
+      "description": "item.sword.short_broken"
+    },
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "fact_compare",
+          "fact": "quality",
+          "equals": "fine",
+          "subject": "target"
+        }
+      },
+      "description": "item.sword.short_fine"
+    },
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "fact_compare",
+          "fact": "quality",
+          "equals": "crude",
+          "subject": "target"
+        }
+      },
+      "description": "item.sword.short_crude"
+    }
+  ],
+  "room_line": "item.sword.room",
+  "description": "item.sword.description",
+  "location": {
+    "in": "room",
+    "room": "yard"
+  },
+  "mass_grams": 1500,
+  "slot": "wield",
+  "tags": [
+    "metal",
+    "sharp"
+  ],
+  "weapon": {
+    "skill": "swords",
+    "attack": {
+      "chance": 100,
+      "damage_min": 5,
+      "damage_max": 5
+    },
+    "durability": {
+      "fact": "edge",
+      "wear": 1
+    }
+  }
+}

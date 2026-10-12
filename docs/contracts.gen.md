@@ -494,7 +494,7 @@ The portable GameView envelope and its freshness (04 §14-§16; 00 §4.10; pre-r
 - **AdvertisedAction**: One action of a resolved ActionSet (04 §19), for the entity or place it is listed under, with what the client needs to build its ActionInvocation (04 §2, §17) without a handwritten per-action catalog: the target spec (implicit entity targets name the entity an action is listed under; concrete target_ids name the exact targets, including Read place actions aimed at inspectable details) and the input parameters it requires, both from its ActionDefinition (action.schema.json). Lists are in presentation order, highest priority first (00 §4.10). Optional command is the resolved semantic command key for participant wording/ownership; action_key remains the invocation identity. Light item controls supply it.
   - `true`: Offered and currently legal.
   - `false`: Shown but not legal now, with the typed reason (00 §4.10: greyed with the reason). Never a security boundary: the authority revalidates (ACT-09).
-- **AttributeView**: An authored attribute reference and the actor's current value, which includes allocated levelling points (toolbox row 4) and worn, the nonzero sum its worn items grant (item affects, toolbox row 3; absent when zero).
+- **AttributeView**: An authored attribute reference and the actor's current value, which includes allocated levelling points (toolbox row 4) and worn, the nonzero sum its worn items grant (item affects, toolbox row 3; absent when zero), counting identified items only (toolbox row 27: an unidentified worn item moves value but not worn).
 - **BleedingView**: Current body bleed condition and exact generation for a held bandage invocation.
 - **CalendarStatus**: Confirmed cartridge calendar projection. Phase fields appear only when authored; weather, season and tide (toolbox row 31) are derived on read, never stored.
 - **ChapterView**: The highest reached chapter declaration, else the opening chapter (mechanics.md Chapters); derived from the player quest state, never persisted.
@@ -771,10 +771,11 @@ StateScope and AudiencePolicy (03 §6).
 
 B8 typed finite paid entitlement, meal and provider-owned serving.
 
-- **ServiceBenefit**: Closed paid entitlement, finite meal recovery or provider-owned complete liquid serving; recovery is MV only.
+- **ServiceBenefit**: Closed paid entitlement, finite meal recovery, provider-owned complete liquid serving (recovery is MV only) or, toolbox row 21, a repair adding up to amount to the wielded weapon's durability fact.
   - `entitlement`
   - `meal`
   - `drink`
+  - `repair`
 - **ServiceDefinition**: Exact original-provider action and conserved quote with one typed immediate benefit.
 
 ## Localized text contracts (`protocol/text.schema.json`)

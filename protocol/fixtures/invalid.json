@@ -24646,5 +24646,297 @@
         "code": "invalid_type"
       }
     ]
+  },
+  {
+    "contract": "WeaponProfile",
+    "value": {
+      "skill": {
+        "cartridge_id": "training",
+        "cartridge_version": "1.0.0",
+        "kind": "skill",
+        "key": "archery"
+      },
+      "attack": {
+        "chance": 95,
+        "damage_min": 3,
+        "damage_max": 3
+      },
+      "ranged": {
+        "ammo": {
+          "cartridge_id": "training",
+          "cartridge_version": "1.0.0",
+          "kind": "resource",
+          "key": "arrows"
+        },
+        "x": 1
+      }
+    },
+    "errors": [
+      {
+        "path": "/ranged/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "WeaponProfile",
+    "value": {
+      "skill": {
+        "cartridge_id": "training",
+        "cartridge_version": "1.0.0",
+        "kind": "skill",
+        "key": "archery"
+      },
+      "attack": {
+        "chance": 95,
+        "damage_min": 3,
+        "damage_max": 3
+      },
+      "ranged": {}
+    },
+    "errors": [
+      {
+        "path": "/ranged/ammo",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "WeaponProfile",
+    "value": {
+      "skill": {
+        "cartridge_id": "training",
+        "cartridge_version": "1.0.0",
+        "kind": "skill",
+        "key": "swords"
+      },
+      "attack": {
+        "chance": 95,
+        "damage_min": 3,
+        "damage_max": 3
+      },
+      "durability": {
+        "fact": {
+          "cartridge_id": "training",
+          "cartridge_version": "1.0.0",
+          "kind": "fact",
+          "key": "edge"
+        }
+      }
+    },
+    "errors": [
+      {
+        "path": "/durability/wear",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "WeaponProfile",
+    "value": {
+      "skill": {
+        "cartridge_id": "training",
+        "cartridge_version": "1.0.0",
+        "kind": "skill",
+        "key": "swords"
+      },
+      "attack": {
+        "chance": 95,
+        "damage_min": 3,
+        "damage_max": 3
+      },
+      "durability": {
+        "wear": 1
+      }
+    },
+    "errors": [
+      {
+        "path": "/durability/fact",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "WeaponProfile",
+    "value": {
+      "skill": {
+        "cartridge_id": "training",
+        "cartridge_version": "1.0.0",
+        "kind": "skill",
+        "key": "swords"
+      },
+      "attack": {
+        "chance": 95,
+        "damage_min": 3,
+        "damage_max": 3
+      },
+      "durability": {
+        "fact": {
+          "cartridge_id": "training",
+          "cartridge_version": "1.0.0",
+          "kind": "fact",
+          "key": "edge"
+        },
+        "wear": 0
+      }
+    },
+    "errors": [
+      {
+        "path": "/durability/wear",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "contract": "WeaponProfile",
+    "value": {
+      "skill": {
+        "cartridge_id": "training",
+        "cartridge_version": "1.0.0",
+        "kind": "skill",
+        "key": "swords"
+      },
+      "attack": {
+        "chance": 95,
+        "damage_min": 3,
+        "damage_max": 3
+      },
+      "durability": {
+        "fact": {
+          "cartridge_id": "training",
+          "cartridge_version": "1.0.0",
+          "kind": "fact",
+          "key": "edge"
+        },
+        "wear": 2147483648
+      }
+    },
+    "errors": [
+      {
+        "path": "/durability/wear",
+        "code": "above_maximum"
+      }
+    ]
+  },
+  {
+    "contract": "WeaponProfile",
+    "value": {
+      "skill": {
+        "cartridge_id": "training",
+        "cartridge_version": "1.0.0",
+        "kind": "skill",
+        "key": "swords"
+      },
+      "attack": {
+        "chance": 95,
+        "damage_min": 3,
+        "damage_max": 3
+      },
+      "durability": {
+        "fact": {
+          "cartridge_id": "training",
+          "cartridge_version": "1.0.0",
+          "kind": "fact",
+          "key": "edge"
+        },
+        "wear": 1,
+        "x": 1
+      }
+    },
+    "errors": [
+      {
+        "path": "/durability/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "ServiceBenefit",
+    "value": {
+      "kind": "repair",
+      "amount": 2
+    },
+    "errors": [
+      {
+        "path": "/fact",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "ServiceBenefit",
+    "value": {
+      "kind": "repair",
+      "fact": {
+        "cartridge_id": "training",
+        "cartridge_version": "1.0.0",
+        "kind": "fact",
+        "key": "edge"
+      }
+    },
+    "errors": [
+      {
+        "path": "/amount",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "ServiceBenefit",
+    "value": {
+      "kind": "repair",
+      "fact": {
+        "cartridge_id": "training",
+        "cartridge_version": "1.0.0",
+        "kind": "fact",
+        "key": "edge"
+      },
+      "amount": 0
+    },
+    "errors": [
+      {
+        "path": "/amount",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "contract": "ServiceBenefit",
+    "value": {
+      "kind": "repair",
+      "fact": {
+        "cartridge_id": "training",
+        "cartridge_version": "1.0.0",
+        "kind": "fact",
+        "key": "edge"
+      },
+      "amount": 2147483648
+    },
+    "errors": [
+      {
+        "path": "/amount",
+        "code": "above_maximum"
+      }
+    ]
+  },
+  {
+    "contract": "ServiceBenefit",
+    "value": {
+      "kind": "repair",
+      "fact": {
+        "cartridge_id": "training",
+        "cartridge_version": "1.0.0",
+        "kind": "fact",
+        "key": "edge"
+      },
+      "amount": 2,
+      "x": 1
+    },
+    "errors": [
+      {
+        "path": "/x",
+        "code": "unknown_property"
+      }
+    ]
   }
 ]

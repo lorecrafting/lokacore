@@ -1,0 +1,11 @@
+{
+  "label": "skill.archery.label",
+  "requirement": "skill.archery.requirement",
+  "qualification": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": []
+    }
+  }
+}

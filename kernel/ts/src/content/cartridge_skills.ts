@@ -57,7 +57,7 @@ export function skills(c: Obj, checks: Checks): Diagnostic[] {
         diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'),
       );
   }
-  return [...out, ...growth(c)];
+  return [...out, ...growth(c), ...durability(c, checks)];
 }
 
 // Toolbox rows 5 and G5: growth thresholds strictly increase; skill growth, an opposed check or
@@ -126,5 +126,27 @@ export function sequence(o: Obj, path: string, c: Obj, { named, typedValue, text
         out.push(diag('FACT_TYPE_MISMATCH', `${path}.sequence[${i}].fact`));
     } else typedValue(s.fact, s.value, `${path}.sequence[${i}].value`);
   });
+  return out;
+}
+
+// Toolbox row 21: a weapon's durability names a bounded int entity fact, and needs kernel_api 1.69.
+function durability(c: Obj, checks: Checks): Diagnostic[] {
+  const out: Diagnostic[] = [];
+  const durable = Object.entries((c.items ?? {}) as Obj).filter(([, i]) => i.weapon?.durability);
+  for (const [ref, i] of durable) {
+    const at = `.cartridge.items${step(ref)}.weapon.durability.fact`;
+    checks.named(i.weapon.durability.fact, 'fact', at);
+    const f = c.facts[refString(i.weapon.durability.fact)];
+    const t = f?.value_type;
+    const bounded =
+      t?.type === 'int' && Number.isSafeInteger(t.minimum) && Number.isSafeInteger(t.maximum);
+    if (
+      f &&
+      !(bounded && f.per_subject === true && f.scopes.length === 1 && f.scopes[0] === 'instance')
+    )
+      out.push(diag('SCHEMA_VIOLATION', at, { error: 'invalid_value' }));
+  }
+  if (durable.length && apiCmp(c.manifest.requires.kernel_api.at_least, '1.69') < 0)
+    out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
   return out;
 }

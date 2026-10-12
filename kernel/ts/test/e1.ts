@@ -29,6 +29,7 @@ export const CHECK_FILES = [
   'read.ts',
   'e1_case_host.ts',
   'e1_obligations.ts',
+  'e1_repair.ts',
   'e1_barrier.ts',
   'e1_knowledge_effects.ts',
   'e1_identity.ts',

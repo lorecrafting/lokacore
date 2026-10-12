@@ -1,0 +1,16 @@
+{
+  "keywords": [
+    "hammer"
+  ],
+  "short": "item.hammer.short",
+  "room_line": "item.hammer.room",
+  "description": "item.hammer.description",
+  "location": {
+    "in": "room",
+    "room": "yard"
+  },
+  "mass_grams": 1000,
+  "tags": [
+    "metal"
+  ]
+}

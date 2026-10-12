@@ -1,6 +1,7 @@
 import { status } from '../skills.ts';
 import type {
   AttackProfile,
+  DefinitionRef,
   DerivedStat,
   Tag,
   WorldSettings,
@@ -22,6 +23,8 @@ import { derived, npcValue } from '../attributes/shared.ts';
 import { clearBleed, currentBleed, wound } from '../bleed/shared.ts';
 import { fact, positionOf, standing } from '../position/shared.ts';
 import { assigned } from '../fact.ts';
+import { equipped } from '../lookups.ts';
+import { broken, wear, type Worn } from './durability.ts';
 import type { CombatEvent, Round } from './round.ts';
 import { ally, lastOpponent, resisted } from './shared.ts';
 import { statusAllows } from '../status/shared.ts';
@@ -46,6 +49,7 @@ function draw(r: Round, bound: number) {
   return value;
 }
 
+// size: allow 41, the row 21 wear call sits between the attack event and the injury
 export function attack(
   world: World,
   command: Pick<Command, 'id'>,
@@ -60,8 +64,8 @@ export function attack(
   const foe = !player && !ally(world, attacker_id);
   if ((!player && !foe && !allyFits(r)) || !statusAllows(world, attacker_id)('attack')) return;
   const target_id = foe ? row.body_id : row.npc_id;
-  const settings = world.cartridge.world!.combat!;
   const profile = attackProfile(world, row, attacker_id, player, r);
+  if (profile.ammo) shoot(world, row, profile.ammo, r);
   const roll = draw(r, 100);
   const accurate = roll < profile.chance;
   const prevented_by = accurate && foe ? defend(world, row, r) : undefined;
@@ -70,7 +74,7 @@ export function attack(
   const damage = hit ? dealt(world, target_id, profile, roll, damageRoll(r, profile)) : 0;
   const loss = Math.min(
     level(world, target_id, resourceRef(world, 'hp'))!,
-    mul(damage, sleeping ? settings.sleep_multiplier : 1),
+    mul(damage, sleeping ? world.cartridge.world!.combat!.sleep_multiplier : 1),
   );
   r.events.push(
     attackEvent(world, command, mint, ++r.position, {
@@ -83,8 +87,15 @@ export function attack(
       ...(prevented_by && { prevented_by }),
     }),
   );
+  if (hit && profile.worn) wear(world, row, profile.worn, r);
   if (!loss) return;
   injure(world, command, mint, row, attacker_id, target_id, loss, sleeping, r, close);
+}
+
+// Toolbox row 17: a shot spends one of the body's ammo pool and makes the foe wait this round.
+function shoot(world: World, row: EncounterRow, ammo: DefinitionRef, r: Round) {
+  r.ops.push({ ...adjust(world, row.body_id, ammo, -1, {}).op, at: r.due_time });
+  r.shot = true;
 }
 
 function damageRoll(r: Round, profile: AttackProfile) {
@@ -199,15 +210,9 @@ function wake(at: World, row: EncounterRow, r: Round) {
   r.position = wake.position;
 }
 
-function equipped(world: World, body: EntityId, slot: string) {
-  const holder = world.slots[slot];
-  if (!holder || world.state.containers[holder] !== body) return;
-  const id = Object.keys(world.entities).find((id) => world.state.containers[id] === holder);
-  const item = id && world.entities[id];
-  return item && item.kind === 'item' ? item : undefined;
-}
-
-type Profile = AttackProfile & { tags?: readonly Tag[] };
+// `ammo`: the pool a row 17 shot spends, set only on the player's shot profile; `worn`: the
+// wielded weapon a row 21 hit wears, set only on its own durable attack.
+type Profile = AttackProfile & { tags?: readonly Tag[]; ammo?: DefinitionRef; worn?: Worn };
 
 function attackProfile(
   world: World,
@@ -226,11 +231,23 @@ function attackProfile(
         )
       : npc.attack;
   const wielded = equipped(world, row.body_id, 'wield');
-  const weapon = wielded?.weapon;
+  const weapon = wielded?.item.weapon;
+  const usable =
+    weapon &&
+    status(world, row.character_id, weapon.skill, r.steps).usable &&
+    !broken(world, row.character_id, wielded!.id, weapon);
+  // Toolbox row 17: a ranged weapon strikes only as round 1's shot, while its ammo pool holds one.
+  const ammo = weapon?.ranged?.ammo;
+  const shot = usable && ammo && row.round === 1 && level(world, row.body_id, ammo)! >= 1;
   // Only the weapon's own attack carries its material tags (toolbox row G2, PM ruling).
   const base: Profile =
-    weapon && status(world, row.character_id, weapon.skill, r.steps).usable
-      ? { ...weapon.attack, tags: wielded.tags }
+    usable && (!ammo || shot)
+      ? {
+          ...weapon.attack,
+          tags: wielded!.item.tags,
+          ...(shot && { ammo }),
+          ...(weapon.durability && { worn: { ...weapon.durability, id: wielded!.id } }),
+        }
       : world.cartridge.world!.combat!.player_attack;
   return table ? bonused(base, table, (s) => derived(world, row.character_id, s)) : base;
 }
@@ -261,6 +278,6 @@ function defend(world: World, row: EncounterRow, r: Round): 'dodge' | 'block' | 
     draw(r, 100) < dodge.chance
   )
     return 'dodge';
-  const shield = equipped(world, row.body_id, 'off_hand');
+  const shield = equipped(world, row.body_id, 'off_hand')?.item;
   if (shield?.block_chance !== undefined && draw(r, 100) < shield.block_chance) return 'block';
 }

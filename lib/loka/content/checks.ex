@@ -100,8 +100,7 @@ defmodule Loka.Content.Checks do
   def expand(%{"transition" => t, "quest" => q, "npc" => _} = p, m)
       when t in ~w(start continue rejoin restart), do: Map.put(p, "quest", ref(q, "quest", m))
 
-  # A barrier (a details map may have a detail keyed key_item, whose value is a map).
-  # Its other members (opens_when's policy) expand as usual.
+  # A barrier (a detail keyed key_item has a map value); opens_when's policy expands as usual.
   def expand(%{"key_item" => k} = barrier, m) when is_binary(k),
     do: barrier |> Map.delete("key_item") |> expand(m) |> Map.put("key_item", ref(k, "item", m))
 
@@ -109,7 +108,10 @@ defmodule Loka.Content.Checks do
   def expand(%{"in" => k} = loc, m) when k in ~w(room npc item) and is_map_key(loc, k),
     do: Map.update!(loc, k, &ref(&1, k, m))
 
-  # An item's barrier (a container's lid, c1-locks); its location expands as above.
+  # An item's identified fact (row 27) or barrier (a lid, c1-locks); location expands as above.
+  def expand(%{"identified" => k, "location" => _} = item, m) when is_binary(k),
+    do: item |> Map.delete("identified") |> expand(m) |> Map.put("identified", ref(k, "fact", m))
+
   def expand(%{"barrier" => k, "location" => _} = item, m) when is_binary(k),
     do: item |> Map.delete("barrier") |> expand(m) |> Map.put("barrier", ref(k, "barrier", m))
 
@@ -271,6 +273,9 @@ defmodule Loka.Content.Checks do
       |> Map.delete("liquid_source")
       |> expand(m)
       |> Map.put("liquid_source", ref(k, "liquid", m))
+
+  def expand(%{"ammo" => a} = r, m) when is_binary(a), do: %{r | "ammo" => ref(a, "resource", m)}
+  def expand(%{"wear" => _, "fact" => f} = d, m), do: %{d | "fact" => ref(f, "fact", m)}
 
   def expand(v, m) when is_map(v),
     do: v |> Map.new(fn {k, x} -> {k, expand(x, m)} end) |> Loka.Content.Services.bed(m)
