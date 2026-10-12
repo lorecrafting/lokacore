@@ -12,6 +12,8 @@ defmodule Loka.Content.Combat do
       settings
       |> put_ref(["world", "combat", "allies"], &Enum.map(&1, fn r -> ref(r, "npc", m) end))
       |> put_ref(["world", "group", "member"], &ref(&1, "fact", m))
+      |> put_ref(["world", "group", "stay"], &ref(&1, "fact", m))
+      |> put_ref(["world", "group", "fight"], &ref(&1, "fact", m))
 
   defp put_ref(settings, path, f),
     do: if(get_in(settings, path), do: update_in(settings, path, f), else: settings)
@@ -76,34 +78,41 @@ defmodule Loka.Content.Combat do
   defp ally({_, _, _}, path), do: [bad(path)]
   defp ally(_, _), do: []
 
-  # Toolbox row G8: the group's member fact is a bool pair fact, from kernel_api 1.70; members
-  # strike as allies, so combat needs the ally narration.
-  defp group(%{"world" => %{"group" => %{"member" => r} = g}}, combat, m, defs) do
-    path = ["world", "group"]
+  # Toolbox rows G8 and 22a: the group's member, stay and fight facts are bool pair facts, from
+  # kernel_api 1.70 (1.73 with stay or fight); members strike as allies, so combat needs the ally
+  # narration.
+  defp group(%{"world" => %{"group" => %{"member" => _} = g}}, combat, m, defs) do
+    floor = if Map.has_key?(g, "stay") or Map.has_key?(g, "fight"), do: [1, 73], else: [1, 70]
 
-    reference("cartridge.json", path, {"member", "fact"}, g, m, defs) ++
-      case resolve(r, "fact", m, defs) do
-        {_, _,
-         %{"per_subject" => true, "scopes" => ["player"], "value_type" => %{"type" => "bool"}}} ->
-          []
-
-        {_, _, _} ->
-          [bad(at("cartridge.json", path ++ ["member"]))]
-
-        _ ->
-          []
-      end ++
+    Enum.flat_map(~w(member stay fight), &if(g[&1], do: pair_fact(&1, g, m, defs), else: [])) ++
       if(combat && !combat["allies"],
         do: ally_narration(combat["narration"], ["world", "combat"]),
         else: []
       ) ++
-      if(version(m) < [1, 70],
+      if(version(m) < floor,
         do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
         else: []
       )
   end
 
   defp group(_, _, _, _), do: []
+
+  defp pair_fact(key, g, m, defs) do
+    path = ["world", "group"]
+
+    reference("cartridge.json", path, {key, "fact"}, g, m, defs) ++
+      case resolve(g[key], "fact", m, defs) do
+        {_, _,
+         %{"per_subject" => true, "scopes" => ["player"], "value_type" => %{"type" => "bool"}}} ->
+          []
+
+        {_, _, _} ->
+          [bad(at("cartridge.json", path ++ [key]))]
+
+        _ ->
+          []
+      end
+  end
 
   defp npc_profiles(defs, combat) do
     for {_, {rel, _, %{"attack" => attack} = npc}} <- defs["npc"],

@@ -119,14 +119,20 @@ function following(world: World, actor: CharacterId) {
   return escort;
 }
 
-/** Toolbox row G8: `npc` is in `actor`'s group while world.group.member is true for the pair. */
-export function member(world: World, actor: CharacterId, npc: EntityId) {
-  const fact = world.cartridge.world?.group?.member;
+/** Toolbox row G8: `npc` is in `actor`'s group while world.group.member is true for the pair;
+ * row 22a reads the `stay` and `fight` order facts the same way. */
+export function member(
+  world: World,
+  actor: CharacterId,
+  npc: EntityId,
+  key: 'member' | 'stay' | 'fight' = 'member',
+) {
+  const fact = world.cartridge.world?.group?.[key];
   return !!fact && value(world, actor, fact, npc) === true;
 }
 
 /** Move and Flee use the same source, destination, writer group and admission; the escorted NPC
- * and then the group's members in the source room (EntityId order) come along. */
+ * and then the group's members in the source room (EntityId order) not ordered to stay come along. */
 export function travel(
   world: World,
   actor: CharacterId,
@@ -135,7 +141,9 @@ export function travel(
 ): DeltaOp[] {
   const escort = following(world, actor)?.npc_id;
   const members = world.cartridge.world?.group
-    ? npcsIn(world, [source_id]).filter((id) => id !== escort && member(world, actor, id))
+    ? npcsIn(world, [source_id]).filter(
+        (id) => id !== escort && member(world, actor, id) && !member(world, actor, id, 'stay'),
+      )
     : [];
   return [...(escort ? [escort] : []), ...members].map((entity_id) => ({
     op: 'entity.transfer',
