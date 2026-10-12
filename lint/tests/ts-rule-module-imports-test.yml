@@ -7,6 +7,7 @@ valid:
   - "import { activation } from './lifecycle.ts';"
   - "import { earned } from '../quest/lifecycle.ts';"
   - "import { pay } from '../resource.ts';"
+  - "import { engage } from '../disposition.ts';"
   - "import { entered } from './behavior.ts';"
   # Break: named pure helpers are rejected along with rule-module imports.
   - "import { moveSequence } from './sequence.ts';"

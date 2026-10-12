@@ -2,13 +2,15 @@
 // c1-position): stand, sit, rest and sleep set the actor's position, the engine fact the compiler
 // adds when the lock holds position (cartridge.md Compiler), by one fact.assign whose expected
 // value is the current position, after opted pools settle and change rate. The same position
-// is invalid_state. The host logs fact_changed.
+// is invalid_state. The host logs fact_changed. A Sleep provokes a hostile NPC in the room (toolbox
+// row W9: G11's engage, as walking in does).
 import { accepted, bodyOf, refString, rejected, event, type Rule } from '../../runtime/decision.ts';
 import { assigned } from '../fact.ts';
 import { fact, positionOf, VERBS } from './shared.ts';
 import { recoveryAdjustments } from '../resource.ts';
+import { engage } from '../disposition.ts';
 
-export const decide: Rule<'position'> = (world, command, mint) => {
+export const decide: Rule<'position'> = (world, command, mint, steps = { n: 0 }) => {
   const { type, actor_id } = command.payload;
   const verb = VERBS[type];
   if (!verb) return rejected('invalid_state');
@@ -31,5 +33,11 @@ export const decide: Rule<'position'> = (world, command, mint) => {
           }),
         ]
       : [];
-  return accepted(world, outcome, run.ops, events);
+  // PM provisional, owner question (loka-kgd.119): only a Sleep provokes; revert this call to undo it.
+  const met =
+    type === 'sleep'
+      ? engage(world, actor_id, body, world.state.containers[body]!, mint, steps)
+      : undefined;
+  const narration = met?.narration.length ? met.narration : undefined;
+  return accepted(world, outcome, [...run.ops, ...(met?.ops ?? [])], events, narration);
 };
