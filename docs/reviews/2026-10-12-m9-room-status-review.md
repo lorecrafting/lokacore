@@ -28,3 +28,13 @@
 2. **should-fix**, `test/loka/content_status_readers_test.exs:85` and `kernel/ts/test/status_room.test.ts:149`: only `room`+`npc` is tested. Dropping `s["item"]` or `s["co_present"]` from `reactions.ex:248`, or `s.item` from `cartridge_status.ts:123`, stays green. Scenario: `room`+`item` loads and the item is silently ignored (`holdersOf` prefers `room`). Add `item` (both kernels) and `co_present` (Elixir) rows to the existing tables.
 3. **nit**, `docs/system/mechanics.md` SR9 composition record and toolbox row SR9 Code column omit movement@1 `sight` as a consumer (added by `756096c9`).
 4. **nit**: no PR body, so no developer `/code-review` result is reported; run it in the fix round.
+
+## Fix round 1 re-check (`c610c92a`)
+
+- Scope: `c610c92a223ba41fd565f429cb6dd40cd501d3ab` only (tests and two doc lines; no production code touched). Verdict: **APPROVE** (all four dispositions hold).
+- Green at `c610c92a`: TS `status_room`, `light`, `status_readers` (25 pass); Elixir `content_status_readers_test` (3 pass).
+1. **Resolved.** New test `neither a held light nor dark sight sees in a darkened room` (`kernel/ts/test/status_room.test.ts:142`) asserts `darkSight`/`illuminated` true first, so it is not vacuous. Mutants (reverted) in `light/shared.ts` `dark()`: `(blinded(w, body) && !darkSight(w, actor)) ||` red (this test only); `(blinded(w, body) && !illuminated(w, actor)) ||` red (this test and light's blind-torch test); room clause only `… 'blind') && !illuminated(w, w.character)` red (this test only).
+2. **Resolved.** `item` and `co_present` rows in both loader tables. Mutants (reverted, `mix test --force`): dropping `s["item"]` and dropping `s["co_present"]` at `lib/loka/content/reactions.ex:248` each red (`a room step needs API 1.65…`); dropping `s.item` at `kernel/ts/src/content/cartridge_status.ts:123` red (the TS loader test).
+3. **Resolved.** SR9 composition record (`docs/system/mechanics.md:2385`) and toolbox SR9 Code column list movement@1 `sight`.
+4. **Accepted.** No PR yet (batch PR); PM self-review recorded in Beads `loka-kgd.94`. The batch PR body must still carry the `/code-review` result.
+- Hosted CI on `c610c92a` (`gh run list --commit`): ci and book-e2e in progress at writing.
