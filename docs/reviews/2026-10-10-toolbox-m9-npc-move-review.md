@@ -24,3 +24,17 @@
 1. **Blocker**, `kernel/ts/test/npc_status.test.ts:351` (only pin). Six guards survive their mutants. Scenario: a refactor drops `crow/job.ts:72`; a rooted crow mid-return walks home, or the `room === home` clause is dropped and a rooted crow at home reschedules forever instead of clearing; nothing fails. Required, three tests: (a) crow return rooted mid-route keeps its room with the row `return` and a job at `+interval`, and rooted at home clears the row (kills both `job.ts:72` variants); (b) patrol Continue on a rooted NPC refused `invalid_state` (`patrol/shared.ts:74`, protocol-visible); (c) one of wander (`settle.ts:141`) or pack flight (`combat/behavior.ts:70`), same shape. Refuge and crow-leg tests not required; the `allows`-omits path is already pinned on `statusAllows` (`status_readers.test.ts:176-180`).
 
 No other findings. Escort and terrain limits are documented (`mechanics.md:2352`, terrain known limit).
+
+## Re-check, fix round 1 (`f4b48016..3fc549c4`)
+
+Scope: commit `3fc549c4f9bd1c6c4341118e05b0b02d2f63e5ab` only (tests and the `rooted()` helper, `kernel/ts/test/combat_fixture.ts:62-81`); fresh detached worktree. Hosted ci and book-e2e green on it (`gh run list --commit`, reviewer).
+
+**Verdict: APPROVE WITH NOTES.** Finding 1 closed.
+
+- (a) `crow.test.ts:95-123`: rooted mid-return keeps room, row `return`, job pending; teleported home while rooted, row `idle`.
+- (b) `patrol.test.ts:98-126`: rooted leader Continue rejected `invalid_state`.
+- (c) `c4_pack_flight.test.ts:22-27`: rooted wounded hound accepted, stays `home`.
+- Mutants (reverted, worktree clean), each red on its named file only, baseline green: `crow/job.ts:72` `moves(...)` forced true (crow); `crow/job.ts:72` `room === b.spec.home ||` dropped (crow); `patrol/shared.ts:74` guard replaced by `undefined` (patrol); `combat/behavior.ts:70` `moves` forced true (pack flight). The developer's cite `status/job.ts:72` is `crow/job.ts:72`.
+- Expected values are literals (`home`, `invalid_state`, `idle`); no frozen fixture touched.
+
+Nit: `crow.test.ts:109` asserts the retry job is `pending`, not its due at `+interval` as (a) asked; the due comes from the shared `next(...)` used by the unrooted return path, so a wrong retry time is not specific to this guard.
