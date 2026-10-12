@@ -27,18 +27,13 @@ const SPEC = {
 
 export function reserved(c: Obj): Diagnostic[] {
   const expected = expectedFacts(c);
-  const patrolRefs = Object.values((c.quests ?? {}) as Obj).flatMap((q) =>
-    q.patrol ? [refString(q.patrol.trust_fact)] : [],
-  );
-  const serviceRefs = Object.values((c.services ?? {}) as Obj).flatMap((s) =>
-    s.benefit.kind === 'entitlement' ? [refString(s.benefit.fact)] : [],
-  );
   const dreamRefs = Object.values((c.scenes ?? {}) as Obj).flatMap((s) =>
     s.control === 'presentation_only'
       ? [refString(s.on.rest.credit), ...s.on_end.assign.map((a: Obj) => refString(a.fact))]
       : [],
   );
   const refs = Object.keys(expected).map((k) => `${c.manifest.id}@${c.manifest.version}:fact/${k}`);
+  const owned = [...refs, ...engineWrittenRefs(c)];
   const out: Diagnostic[] = [];
   for (const [i, ref] of refs.entries())
     if (!Object.hasOwn(c.facts, ref) || encode(c.facts[ref]) !== encode(Object.values(expected)[i]))
@@ -46,7 +41,7 @@ export function reserved(c: Obj): Diagnostic[] {
   const write = (s: Obj, at: string, allowed?: string) => {
     if (
       (s.op === 'fact.assign' || s.op === 'fact.adjust') &&
-      ([...refs, ...patrolRefs, ...serviceRefs].includes(refString(s.fact)) ||
+      (owned.includes(refString(s.fact)) ||
         (dreamRefs.includes(refString(s.fact)) && refString(s.fact) !== allowed))
     )
       out.push(diag('RESERVED_FACT', `${at}.fact`));
@@ -79,7 +74,20 @@ function writes(c: Obj, write: (s: Obj, at: string, allowed?: string) => void) {
     );
 }
 
-function expectedFacts(c: Obj): Obj {
+/**
+ * Authored facts only the engine writes: each quest patrol's trust_fact, each entitlement service's
+ * fact.
+ */
+export const engineWrittenRefs = (c: Obj): string[] => [
+  ...Object.values((c.quests ?? {}) as Obj).flatMap((q) =>
+    q.patrol ? [refString(q.patrol.trust_fact)] : [],
+  ),
+  ...Object.values((c.services ?? {}) as Obj).flatMap((s) =>
+    s.benefit.kind === 'entitlement' ? [refString(s.benefit.fact)] : [],
+  ),
+];
+
+export function expectedFacts(c: Obj): Obj {
   const expected: Obj = Object.hasOwn(c.lock.capabilities, 'position') ? { position: SPEC } : {};
   if (Object.hasOwn(c.lock.capabilities, 'scene'))
     Object.values((c.scenes ?? {}) as Obj).forEach((s) => {
