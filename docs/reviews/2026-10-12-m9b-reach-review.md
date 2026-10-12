@@ -27,3 +27,18 @@
 
 1. **should-fix**, `kernel/ts/play/reach.ts:83` and the limits bullet at `docs/system/cartridge.md:387`: quests count reachable only through a dialogue edge, so a quest offered by a reached room, a recipe or a reaction lists as unreachable. Seen on 5 of 65 cartridges (`ashmere_errand` lantern, offered in `ferry_landing`; `quest_sampler` find_key; `levelling_sampler` cull; `spells_sampler` apprentice; `ashmere_journal` oar). The limits name neither case, nor does `loka-kgd.107.18`. Fix: also count quest edges from reached rooms, or add the clause to the limits and to `loka-kgd.107.18`.
 2. **should-fix**, `kernel/ts/test/content_graph.test.ts:43`: mutant `held = location.in === 'npc'` (drops `npcs.has(...)` at `reach.ts:79`) stays green, so an item an unreachable NPC holds would vanish from `unreachable.items`. Fix: give the hermit a held item and expect it in `unreachable.items` in the first test.
+
+## Fix re-check (b8be4b41)
+
+- Written 2026-10-12 05:35 UTC in the Pi harness by anthropic/claude-opus-5-5 (reviewer).
+- Reviewed only `b8be4b41b00970193ef04e69ad7c0eb15ca1d29d` (`kernel/ts/play/reach.ts`, `kernel/ts/test/content_graph.test.ts`, `docs/system/cartridge.md`). Hosted ci and book-e2e green on it.
+- Verdict: **APPROVE WITH NOTES** (finding 2 resolved; finding 1 partly resolved, one should-fix left).
+- Green: `content_graph` 6/6, `barriers` + `locks` 17/17.
+- Mutants (reverted), each red on `content_graph`: quests from dialogues only (old line); `held` without `npcs.has(...)`; rooms dropped from `reached`.
+- Reran the 5 cartridges (compiled with `mix loka.compile` into scratch): `ashmere_errand` none; `quest_sampler` find_key, `levelling_sampler` cull, `spells_sampler` apprentice, `ashmere_journal` oar listed, as claimed.
+
+### Dispositions
+
+1. **Partly resolved.** Quests named by a reached room, item, NPC or dialogue now count (`reach.ts:83-84`; `ashmere_errand` lantern cleared). The four still listed are not orphans. Each has its own `offer` whose policy is `{"op":"all","items":[]}` (always true). A quest starts through its offer ([mechanics.md quest@1](../system/mechanics.md#quest1-mechanicsquestrulets-kerneltssrcmechanicsquestlifecyclets)), so all four can be accepted on turn one. oar is played that way in `kernel/ts/test/journal.test.ts:69` (`invoke(world(), 'oar')`). The recipes and reactions that name find_key, cull and apprentice come later. The new limits clause (`cartridge.md:388`, "a quest only a recipe, reaction or action names shows unreachable") gives the wrong cause, and it does not say that a quest with its own offer shows unreachable. No content issue is needed for oar.
+   - **should-fix**, `kernel/ts/play/reach.ts:84`: a quest that declares `offer` lists as unreachable. Scenario: an author adds an always-offered quest and is told nobody can reach it (4 of 5 checked cartridges). Fix: count a quest with an `offer` as reachable (the policy is not evaluated, just as dialogue edges are counted), or name the offer in the limits bullet.
+2. **Resolved.** The hermit holds the pearl, which is expected in `unreachable.items` (`content_graph.test.ts:38,76`). Dropping `&& npcs.has(...)` at `reach.ts:79` now fails.
