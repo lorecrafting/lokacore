@@ -371,7 +371,7 @@ the loader diagnostic and exits 1 on refusal, otherwise prints one canonical JSO
   with every locked barrier shut. `unreachable`: rooms not reached with keys; placed items (not
   templates) not in reach, an item an NPC holds counting as in reach with that NPC; NPCs none of
   whose referenced rooms (start, schedule) is reached; dialogues whose speaker is unreachable;
-  quests no reachable dialogue references. `behind_lock`: rooms and placed items reached only
+  quests no reached room, placed item, NPC or dialogue references. `behind_lock`: rooms and placed items reached only
   with keys. Template items' obtainability needs the simulator (study P rows); details stay with
   UNREACHABLE_DETAIL.
 - **Orphans.** `orphan_items`: template items with no inbound edge. `orphan_facts`: `unused` (no
@@ -385,8 +385,8 @@ the loader diagnostic and exits 1 on refusal, otherwise prints one canonical JSO
   `story_point_<key>`, `skill_<key>`, `uses_<key>`, `seen_tip_<key>`), a quest patrol's
   `trust_fact` and an entitlement service's fact, as RESERVED_FACT keeps them.
 - Each list is sorted by ref. ponytail: static initial state, rooms reached through exits only (a
-  room reached by travel, a ferry or a recipe shows unreachable), no dialogue choices or reaction
-  chains, and engine read sites with no op are not reads (such a fact may show `write_only`); any
+  room reached by travel, a ferry or a recipe shows unreachable, and a quest only a recipe,
+  reaction or action names shows unreachable), no dialogue choices or reaction chains, and engine read sites with no op are not reads (such a fact may show `write_only`); any
   other engine writer shows its fact `read_only`. A committed graph waits for a consumer (R6, L6).
 
 ## Installed capabilities

@@ -80,7 +80,8 @@ export function reachReport(c: Obj) {
   const dialogues = new Set(
     refs('dialogues').filter((d) => npcs.has(refString(c.dialogues[d].npc))),
   );
-  const quests = new Set([...dialogues].flatMap((d) => out(d, 'quest')));
+  const reached = [...keyed.rooms, ...keyed.items, ...npcs, ...dialogues];
+  const quests = new Set(reached.flatMap((r) => out(r, 'quest')));
   return {
     unreachable: {
       rooms: absent(refs('rooms'), keyed.rooms),

@@ -14,7 +14,7 @@ const base = { manifest: { id: 'f', version: '1' }, lock: { capabilities: {} } }
 
 // hall (entry) east to yard; yard north to vault through the locked door (key: the key, in the
 // yard); attic has no way in. The guard (yard) sells the arrow and holds bread; the hermit is in
-// the attic.
+// the attic and holds the pearl.
 const fixture = (keyIn = 'yard', hermit: Obj = {}) => ({
   ...base,
   entry: R('room', 'hall'),
@@ -35,6 +35,7 @@ const fixture = (keyIn = 'yard', hermit: Obj = {}) => ({
     coin: { location: { in: 'room', room: R('room', 'vault') } },
     gem: { location: { in: 'room', room: R('room', 'attic') } },
     bread: { location: { in: 'npc', npc: R('npc', 'guard') } },
+    pearl: { location: { in: 'npc', npc: R('npc', 'hermit') } },
     spare: { location: { in: 'template' } },
     arrow: { location: { in: 'template' } },
   }),
@@ -72,7 +73,7 @@ test('the report lists what the entry never reaches, what a lock holds back and 
   assert.deepEqual(reachReport(fixture()), {
     unreachable: {
       rooms: ['f@1:room/attic'],
-      items: ['f@1:item/gem'],
+      items: ['f@1:item/gem', 'f@1:item/pearl'],
       npcs: ['f@1:npc/hermit'],
       dialogues: ['f@1:dialogue/talk_hermit'],
       quests: ['f@1:quest/q2'],
@@ -96,6 +97,14 @@ test('a key behind its own lock leaves the vault unreachable, as BARRIER_UNREACH
 test('an NPC whose schedule visits a reached room is reachable', () => {
   const hermit = { daily_schedule: { '8': R('room', 'yard') } };
   assert.deepEqual(reachReport(fixture('yard', hermit)).unreachable.npcs, []);
+});
+
+test('a quest a reached room names is reachable', () => {
+  const c: Obj = fixture();
+  c.rooms['f@1:room/yard'].variants = [
+    { when: { root: { op: 'quest_state', quest: R('quest', 'q2') } } },
+  ];
+  assert.deepEqual(reachReport(c).unreachable.quests, []);
 });
 
 test('the graph holds every DefinitionRef with its path, and the op of the step holding it', () => {
