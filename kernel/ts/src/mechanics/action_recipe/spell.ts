@@ -33,7 +33,7 @@ import {
 import { opened } from '../disposition.ts';
 import { prefix } from '../combat/round_attack.ts';
 import { statusStep } from '../status/shared.ts';
-import { transition } from '../light/shared.ts';
+import { transition, visible } from '../light/shared.ts';
 
 export type Effected = {
   readonly ops: readonly DeltaOp[];
@@ -83,7 +83,7 @@ export function effect<R extends Effected>(
 }
 
 /** Row 29b (loka-kgd.101): the first NPC the spell's damage hurt and left alive fights back, as
- * Attack would open the fight (its admission, `attackRefused`), the first round an interval after
+ * Attack would open the fight (its admission: `visible` and `attackRefused`), the first round an interval after
  * the cast's `end`; an NPC already fighting, or one Attack may not engage, does not. */
 export function fightBack<R extends Effected>(
   world: World,
@@ -100,7 +100,13 @@ export function fightBack<R extends Effected>(
       same(o.resource, resourceRef(world, 'hp')) &&
       !slain(world, r.levels, o.entity_id),
   )?.entity_id;
-  if (!hurt || engaged(world, body) || attackRefused(world, actor, hurt)) return r; // never a retarget
+  if (
+    !hurt ||
+    engaged(world, body) ||
+    !visible(world, actor, hurt) ||
+    attackRefused(world, actor, hurt)
+  )
+    return r; // never a retarget; an unseen NPC is not present to Attack (hiddenTarget)
   return { ...r, ops: [...r.ops, ...opened(world, actor, body, hurt, mint, end)] };
 }
 

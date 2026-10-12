@@ -270,6 +270,15 @@ test('a bolt that hurts the wight in a sanctuary opens no fight', () => {
   assert.deepEqual([wightHp(hit), engaged(hit, hit.entityIds[W]!)], [4, undefined]);
 });
 
+// Breaks (M9 batch review): a bolt opens a fight with a wight the caster cannot see (the unlit crypt),
+// where Attack is refused as not present.
+test('a bolt that hurts an unseen wight opens no fight', () => {
+  const dark = crypt();
+  assert.equal(code(play(dark, { type: 'attack', target_id: dark.entityIds[W] })), 'not_present');
+  const hit = ok(cast(dark, 'flamma'));
+  assert.deepEqual([wightHp(hit), engaged(hit, hit.entityIds[W]!)], [4, undefined]);
+});
+
 // Breaks (loka-kgd.101): a spell with a duration that hurts the wight outside a fight schedules its
 // first round inside the cast's own advance (the round never runs there: a fault, as loka-kgd.104),
 // rather than an interval after the cast ends.
