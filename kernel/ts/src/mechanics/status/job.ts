@@ -72,12 +72,12 @@ export function runStatus(
 
 /**
  * A due tick's change, saturated at the pool bounds (the op itself stays exact), and whether it
- * takes hp to 0. An item has no pools: its tick changes nothing but still emits status_ticked.
+ * takes hp to 0. An item or room has no pools: its tick changes nothing but still emits status_ticked.
  */
 function amount(visit: World, body: EntityId, spec: StatusDefinition) {
   const current = level(visit, body, spec.resource);
   const pool = resourceSpec(visit, body, spec.resource);
-  if (visit.entities[body]?.kind === 'item' || current === undefined || !pool)
+  if (visit.entities[body]?.kind === 'item' || visit.rooms[body] || current === undefined || !pool)
     return { by: 0, fatal: false };
   const by = Math.max(pool.minimum - current, Math.min(pool.maximum - current, spec.per_tick!));
   return { by, fatal: by < 0 && spec.resource.key === 'hp' && current + by === 0 };

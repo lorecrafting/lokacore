@@ -28,7 +28,12 @@ defmodule Loka.Content.LeafRefs do
       "fact.adjust" => %{"fact" => "fact", "item" => "item", "npc" => "npc"},
       "skill.acquire" => %{"skill" => "skill"},
       "topic.grant" => %{"topic" => "topic"},
-      "status.apply" => %{"status" => "status", "item" => "item", "npc" => "npc"},
+      "status.apply" => %{
+        "status" => "status",
+        "item" => "item",
+        "npc" => "npc",
+        "room" => "room"
+      },
       "status.cure" => %{"status" => "status"},
       "damage" => %{"npc" => "npc"},
       "light.ignite" => %{"item" => "item"},

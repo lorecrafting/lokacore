@@ -3,10 +3,10 @@ import type { Json } from './canonical.ts';
 import { same, type State } from './compose.ts';
 
 type Op = Extract<DeltaOp, { op: 'status.transition' }>;
-/** The entity kinds a status row may sit on (rows 1, G3); never a room, detail or slot. */
-export const HOLDERS = ['body', 'npc', 'item'];
+/** The entity kinds a status row may sit on (rows 1, G3, status reader 9); never a detail or slot. */
+export const HOLDERS = ['body', 'npc', 'item', 'room'];
 
-/** One checked status generation on a body, NPC or item (rows 1, G3): the holder and status pair is the target. */
+/** One checked status generation on a body, NPC, item or room (rows 1, G3, reader 9): the holder and status pair is the target. */
 export function transitionStatus(op: Op, row: Json | undefined, state: State, now: number) {
   const prior = row as Op['value'] | undefined;
   const next = op.value;

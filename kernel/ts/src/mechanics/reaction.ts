@@ -195,7 +195,7 @@ const subject = (cause: DomainEvent, body?: EntityId) => {
   return id ?? body;
 };
 
-// A status step's holders (row G3): the step's named item's or (row 42) NPC's instance, (row W21)
+// A status step's holders (row G3): the step's named item's or (row 42) NPC's instance or (reader 9) room, (row W21)
 // every living NPC or (row W22, with tag) every item so tagged lying in the event's room, else the
 // event's subject; none a body dead after the cause (`diedAfter`) takes.
 function holdersOf(
@@ -207,7 +207,11 @@ function holdersOf(
 ) {
   const apply = step.op === 'status.apply' ? step : undefined;
   const named = apply?.item ?? apply?.npc;
-  const one = named ? world.entityIds[refString(named)] : subject(cause, body);
+  const one = apply?.room
+    ? world.roomIds[refString(apply.room)]
+    : named
+      ? world.entityIds[refString(named)]
+      : subject(cause, body);
   const rooms = apply?.co_present && eventRooms(world, cause, one);
   // loka-kgd.105: but a permanent status (row W8) outlives the death, as on the body it returns.
   const lasting = specOf(world, step.status)?.duration === 'permanent';

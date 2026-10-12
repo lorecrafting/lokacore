@@ -27,7 +27,8 @@ export function status(c: Obj): Diagnostic[] {
   const { immune, named, drinks, lone, g3 } = api146(c);
   if (!Object.keys(defs).length && !applies.length && !cures.length && !g3) return out;
   const all = Object.values(defs);
-  const floor = floorOf(all, g3);
+  const room = named.some(([, , table]) => table === 'rooms'); // status reader 9: a step naming a room
+  const floor = room ? '1.65' : floorOf(all, g3);
   if (
     apiCmp(c.manifest.requires.kernel_api.at_least, floor) < 0 ||
     ['status', 'death'].some((k) => c.lock.capabilities[k] !== 1) // a fatal hp tick needs death
@@ -105,6 +106,7 @@ function definition(c: Obj, ref: string, s: Obj): Diagnostic[] {
 // The fields needing kernel_api 1.46: row G3's immune list entries, steps naming an item and tick or
 // expiry triggers; row 2c's status modifiers (each attribute, with the table it names); row G13's
 // liquid cures (ended by Drink). `g3` says whether any is used.
+// size: allow 41, the per-step holder checks (rows 42, W21, status reader 9) share the one step scan
 function api146(c: Obj) {
   const immune = (['npcs', 'items'] as const).flatMap((kind) =>
     Object.entries(c[kind] ?? {}).flatMap(([ref, e]: [string, any]) =>
@@ -115,7 +117,7 @@ function api146(c: Obj) {
     (r.apply as Obj[]).flatMap((s, i) =>
       s.op !== 'status.apply'
         ? []
-        : (['item', 'npc'] as const)
+        : (['item', 'npc', 'room'] as const)
             .filter((f) => s[f])
             .map((f) => [`.cartridge.reactions${step(ref)}.apply[${i}].${f}`, s[f], `${f}s`, s]),
     ),
@@ -123,6 +125,7 @@ function api146(c: Obj) {
   // Row 42: one holder per step, never a spawn template (no instance); row W21's co_present: none.
   const lone = items.flatMap(([at, ref, table, s]) =>
     s.co_present ||
+    (table === 'rooms' && (s.item || s.npc)) ||
     (table === 'npcs' && (c.npcs?.[refString(ref as never)]?.spawn_template || s.item))
       ? [at]
       : [],
