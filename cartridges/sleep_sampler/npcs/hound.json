@@ -1,0 +1,30 @@
+{
+  "keywords": [
+    "hound"
+  ],
+  "short": "npc.hound.short",
+  "room_line": "npc.hound.room",
+  "description": "npc.hound.description",
+  "room": "fen",
+  "hp": {
+    "minimum": 0,
+    "maximum": 2,
+    "start": 2,
+    "gain": 0
+  },
+  "attack": {
+    "chance": 100,
+    "damage_min": 1,
+    "damage_max": 1
+  },
+  "disposition": {
+    "hostile": {
+      "policy_version": 1,
+      "root": {
+        "op": "all",
+        "items": []
+      }
+    },
+    "engage": "npc.hound.engage"
+  }
+}

@@ -182,7 +182,7 @@ test('allows lists intersect; a blocked move shows the exit unavailable with the
   assert.equal(code(send(both, { type: 'move', direction: 'south' })), 'invalid_state');
   assert.equal(code(send(both, { type: 'look' })), 'accepted');
   assert.deepEqual(
-    ['choose', 'close_choice', 'continue', 'wait', 'say'].map(permits(both, both.body)),
+    ['choose', 'close_choice', 'continue', 'wait', 'say'].map(permits(both, both.character)),
     [true, true, true, true, false],
   );
   const rooted = shrine(as('hushed', { blocks: ['move'] }));

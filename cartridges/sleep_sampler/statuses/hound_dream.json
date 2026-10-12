@@ -1,0 +1,11 @@
+{
+  "duration": "permanent",
+  "tick_every": 3600,
+  "resource": "hp",
+  "label": "condition.hound_dream",
+  "narration": {
+    "applied": "narration.hound_dream.applied",
+    "tick": "narration.hound_dream.tick",
+    "expired": "narration.hound_dream.expired"
+  }
+}
