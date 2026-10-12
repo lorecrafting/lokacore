@@ -20,6 +20,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: M9 status reader 9, a room as status holder (loka-kgd.94)](2026-10-12-m9-room-status-review.md): **APPROVE**
 - [Review: toolbox row 28, cursed items and blessing (loka-kgd.97)](2026-10-12-m9-curse-review.md): **APPROVE WITH NOTES**
 - [Review: mechanics batch M9, final batch head (Fable batch review)](2026-10-12-m9-batch-fable-review.md): **APPROVE**
+- [Review: toolbox row W9, sleep (loka-kgd.119)](2026-10-12-m10-sleep-review.md): **APPROVE WITH NOTES**
 - [Review: toolbox row 19b, replenish primitive (loka-kgd.85, batch M10 wave 1)](2026-10-12-m10-replenish-review.md): **APPROVE**
 - [Review: M10 toolbox row 22a, hireling orders (loka-kgd.116)](2026-10-12-m10-hireling-review.md): **APPROVE**
 - [Review: M10 toolbox row G8, group primitive (loka-kgd.115)](2026-10-12-m10-group-review.md): **APPROVE**
