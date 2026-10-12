@@ -14,7 +14,8 @@ import { refString, type Cartridge, type World } from '../src/runtime/decision.t
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { statusKey } from '../src/mechanics/status/shared.ts';
-import { dark, visible } from '../src/mechanics/light/shared.ts';
+import { dark, illuminated, visible } from '../src/mechanics/light/shared.ts';
+import { darkSight } from '../src/mechanics/attributes/shared.ts';
 import { sight } from '../src/mechanics/movement/rule.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-room-status-'));
@@ -88,6 +89,7 @@ const hall = () => {
   const w = newWorld(content, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e94' as never, [1, 2, 3, 4]);
   return play(play(w, { type: 'move', direction: 'north' }), { type: 'move', direction: 'south' });
 };
+const inDen = () => play(hall(), { type: 'move', direction: 'east' });
 const den = (w: World) => w.roomIds[refString(denRef as never)]!;
 const row = (w: World) =>
   w.state.statuses?.[statusKey(den(w), gloom)] as { active: boolean } | undefined;
@@ -135,8 +137,50 @@ test('a room holding a blind status is dark, and hides its NPC, only to whoever 
   assert.deepEqual(east(after)?.entities, [troll(after)], 'expired: scan sees the troll');
 });
 
+// Breaks: a held lit light or the player's dark sight gets through the room's darkness (the spec:
+// whatever a held light or dark sight says).
+test('neither a held light nor dark sight sees in a darkened room', () => {
+  const S2 = S('warded');
+  const night = edited((c) => {
+    c.statuses[S2] = { ...c.statuses[S2], perception: { sight: 'dark_sight' } };
+    shrine(c).apply.push({ op: 'status.apply', status: { ...C, kind: 'status', key: 'warded' } });
+  });
+  assert.ok(night.ok, JSON.stringify(night));
+  n = 0;
+  const start = newWorld(
+    night.cartridge as Cartridge,
+    '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e94' as never,
+    [1, 2, 3, 4],
+  );
+  const seer = play(
+    play(play(start, { type: 'move', direction: 'north' }), { type: 'move', direction: 'south' }),
+    {
+      type: 'move',
+      direction: 'east',
+    },
+  );
+  assert.equal(darkSight(seer, seer.character), true, 'the warded player has dark sight');
+  assert.equal(dark(seer, seer.character), true, 'dark sight');
+  const lamp = 'ffffffff-9494-4949-8949-000000000001';
+  const lit: World = {
+    ...inDen(),
+    fuelSpecs: { [lamp]: { kind: 'source', capacity: 10, initial: 10, rate: 1 } as never },
+  };
+  const held = {
+    ...lit,
+    state: {
+      ...lit.state,
+      fuel: { [lamp]: { remaining: 10, at: lit.state.clock, lit: true } },
+      containers: { ...lit.state.containers, [lamp]: lit.body },
+    },
+  } as World;
+  assert.equal(illuminated(held, held.character), true, 'the lamp is held and lit');
+  assert.equal(dark(held, held.character), true, 'held light');
+  assert.equal(visible(held, held.character, troll(held)), false);
+});
+
 // Breaks (twin of test/loka/content_status_readers_test.exs): a room step loads under API 1.64, a
-// room beside an npc loads, or an unknown room loads.
+// room beside an npc, an item or co_present loads, or an unknown room loads.
 test('loader: a room step needs API 1.65, stands alone and names a room of the cartridge', () => {
   const code = (r: ReturnType<typeof edited>) =>
     r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
@@ -150,6 +194,12 @@ test('loader: a room step needs API 1.65, stands alone and names a room of the c
     'SCHEMA_VIOLATION',
     `${at}.room`,
   ]);
+  const corpse = { ...C, kind: 'item', key: 'npc_corpse' };
+  for (const beside of [{ item: corpse }, { co_present: true }])
+    assert.deepEqual(code(edited((c) => Object.assign(shrine(c).apply[0], beside))), [
+      'SCHEMA_VIOLATION',
+      `${at}.room`,
+    ]);
   const nowhere = { ...denRef, key: 'nowhere' };
   assert.deepEqual(code(edited((c) => (shrine(c).apply[0].room = nowhere))), [
     'UNRESOLVED_REFERENCE',
