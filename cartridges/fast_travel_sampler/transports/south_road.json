@@ -1,0 +1,15 @@
+{
+  "room": "south_post",
+  "detail": "post",
+  "destination": "north_post",
+  "reverse": "north_road",
+  "recipient": "carter",
+  "currency": "coins",
+  "fare": 3,
+  "recovery_rooms": [
+    "north_post"
+  ],
+  "action": "ride_north",
+  "label": "transport.ride_north",
+  "narration": "transport.ride_north.used"
+}
