@@ -1,0 +1,64 @@
+{
+  "label": "actions.forge",
+  "aliases": [
+    "forge"
+  ],
+  "target": {
+    "kind": "use",
+    "tool": {
+      "tag": "metal"
+    }
+  },
+  "priority": 5,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": [
+        {
+          "op": "has_tag",
+          "subject": "target",
+          "tag": "sharp"
+        },
+        {
+          "op": "fact_compare",
+          "fact": "quality",
+          "equals": "unforged",
+          "subject": "target"
+        }
+      ]
+    }
+  },
+  "check": {
+    "kind": "attribute_threshold",
+    "key": "forge_strength",
+    "attribute": "str",
+    "difficulty": 12
+  },
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "quality",
+          "value": "fine"
+        }
+      ],
+      "narration": {
+        "actor": "narration.forge_fine"
+      }
+    },
+    "failure": {
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "quality",
+          "value": "crude"
+        }
+      ],
+      "narration": {
+        "actor": "narration.forge_crude"
+      }
+    }
+  }
+}

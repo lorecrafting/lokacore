@@ -1,0 +1,30 @@
+{
+  "keywords": [
+    "stick",
+    "wooden"
+  ],
+  "short": "item.stick.short",
+  "room_line": "item.stick.room",
+  "description": "item.stick.description",
+  "location": {
+    "in": "room",
+    "room": "yard"
+  },
+  "mass_grams": 500,
+  "slot": "wield",
+  "tags": [
+    "wooden"
+  ],
+  "weapon": {
+    "skill": "swords",
+    "attack": {
+      "chance": 0,
+      "damage_min": 5,
+      "damage_max": 5
+    },
+    "durability": {
+      "fact": "edge",
+      "wear": 1
+    }
+  }
+}

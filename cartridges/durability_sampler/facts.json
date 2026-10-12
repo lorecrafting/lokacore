@@ -1,0 +1,35 @@
+{
+  "facts": {
+    "edge": {
+      "version": 1,
+      "value_type": {
+        "type": "int",
+        "default": 2,
+        "minimum": 0,
+        "maximum": 2
+      },
+      "scopes": [
+        "instance"
+      ],
+      "per_subject": true,
+      "meaning": "How much edge a blade has left; at 0 it is broken."
+    },
+    "quality": {
+      "version": 1,
+      "value_type": {
+        "type": "enum",
+        "values": [
+          "unforged",
+          "fine",
+          "crude"
+        ],
+        "default": "unforged"
+      },
+      "scopes": [
+        "instance"
+      ],
+      "per_subject": true,
+      "meaning": "The quality band the forge gave a blade."
+    }
+  }
+}

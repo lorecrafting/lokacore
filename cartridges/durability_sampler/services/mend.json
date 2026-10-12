@@ -1,0 +1,13 @@
+{
+  "provider": "smith",
+  "currency": "pennies",
+  "action": "mend",
+  "label": "service.mend",
+  "narration": "service.mend.used",
+  "price": 2,
+  "benefit": {
+    "kind": "repair",
+    "fact": "edge",
+    "amount": 2
+  }
+}
