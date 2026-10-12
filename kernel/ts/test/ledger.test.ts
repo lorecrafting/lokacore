@@ -24,7 +24,11 @@ const fixture = {
       resource_starts: { pennies: 7 },
       shop: {
         resource: R('resource', 'pennies'),
-        offers: [{ item: R('item', 'torch'), buy: 3, sell: 1 }],
+        // candle is authored after torch and sorts before it
+        offers: [
+          { item: R('item', 'torch'), buy: 3, sell: 1 },
+          { item: R('item', 'candle'), buy: 2, sell: 1 },
+        ],
         buy_discount: { numerator: 9, denominator: 10, minimum: 1 },
       },
     },
@@ -106,7 +110,7 @@ const fixture = {
 
 // Breaks: supply without the player start; a role key as the NPC; the lesson as a faucet; the
 // stock read by the currency key; unclassified listing classified paths or nothing; the bundle
-// item dropped; the seam counting `careful` as its items.
+// item dropped; the seam counting `careful` as its items; rows left in artifact order (no item key).
 test('ledger lists the currencies, money and item sites, populations and seams', () => {
   const pennies = S('resource', 'pennies');
   assert.deepEqual(ledger(fixture), {
@@ -139,6 +143,13 @@ test('ledger lists the currencies, money and item sites, populations and seams',
         {
           site: 'shop_sell',
           ref: S('npc', 'shopkeep'),
+          item: S('item', 'candle'),
+          resource: pennies,
+          amount: 1,
+        },
+        {
+          site: 'shop_sell',
+          ref: S('npc', 'shopkeep'),
           item: S('item', 'torch'),
           resource: pennies,
           amount: 1,
@@ -160,6 +171,14 @@ test('ledger lists the currencies, money and item sites, populations and seams',
           resource: pennies,
           amount: 2,
           stock: 4,
+        },
+        {
+          site: 'shop_buy',
+          ref: S('npc', 'shopkeep'),
+          item: S('item', 'candle'),
+          resource: pennies,
+          amount: 2,
+          buy_discount: { numerator: 9, denominator: 10, minimum: 1 },
         },
         {
           site: 'shop_buy',

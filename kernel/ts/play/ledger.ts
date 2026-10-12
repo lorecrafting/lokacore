@@ -28,8 +28,10 @@ const LISTS = {
 // '\0' sorts before every key character, so a shorter field orders first
 const by =
   <T>(key: (x: T) => (string | undefined)[]) =>
-  (a: T, b: T) =>
-    key(a).join('\0') < key(b).join('\0') ? -1 : 1;
+  (a: T, b: T) => {
+    const [ka, kb] = [key(a).join('\0'), key(b).join('\0')];
+    return ka < kb ? -1 : ka > kb ? 1 : 0;
+  };
 const defs = (c: Obj, section: string) => Object.entries((c[section] ?? {}) as Obj);
 
 /** The static economy and ecology ledger (cartridge.md "Economy and ecology ledger"). */
