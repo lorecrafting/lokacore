@@ -22,7 +22,7 @@ import {
   type Mint,
   type World,
 } from '../runtime/decision.ts';
-import { bounded, subjective, targetOf, value } from './fact.ts';
+import { bounded, ownership, subjective, targetOf, value } from './fact.ts';
 import { holds } from './policy.ts';
 import { starts } from './scene/shared.ts';
 import { activation, resolution } from './quest/lifecycle.ts';
@@ -237,6 +237,7 @@ function assignment(
   const who = (named ? world.entityIds[refString(named)] : subject(cause)) || undefined;
   const thing = who !== undefined && (world.entities[who] || world.details[who]);
   if (subjective(world, step.fact) && !thing) return undefined;
+  ownership(world, step.fact);
   const { kind: _, ...target } = targetOf(world, actor, step.fact, who);
   const at = key({ kind: 'fact', ...target });
   const expected = Object.hasOwn(set, at) ? set[at] : value(world, actor, step.fact, who);

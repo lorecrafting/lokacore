@@ -1,9 +1,11 @@
 import { status } from '../skills.ts';
 import type {
   AttackProfile,
+  CharacterId,
   DefinitionRef,
   DerivedStat,
   Tag,
+  WeaponProfile,
   WorldSettings,
   Command,
   DeltaOp,
@@ -22,7 +24,8 @@ import { deathSequence } from '../death/sequence.ts';
 import { derived, npcValue } from '../attributes/shared.ts';
 import { clearBleed, currentBleed, wound } from '../bleed/shared.ts';
 import { fact, positionOf, standing } from '../position/shared.ts';
-import { assigned } from '../fact.ts';
+import { assigned, bounded, value } from '../fact.ts';
+import { equipped } from '../lookups.ts';
 import type { CombatEvent, Round } from './round.ts';
 import { ally, lastOpponent, resisted } from './shared.ts';
 import { statusAllows } from '../status/shared.ts';
@@ -84,6 +87,7 @@ export function attack(
       ...(prevented_by && { prevented_by }),
     }),
   );
+  if (hit && profile.worn) wear(world, row, profile.worn, r);
   if (!loss) return;
   injure(world, command, mint, row, attacker_id, target_id, loss, sleeping, r, close);
 }
@@ -206,16 +210,31 @@ function wake(at: World, row: EncounterRow, r: Round) {
   r.position = wake.position;
 }
 
-function equipped(world: World, body: EntityId, slot: string) {
-  const holder = world.slots[slot];
-  if (!holder || world.state.containers[holder] !== body) return;
-  const id = Object.keys(world.entities).find((id) => world.state.containers[id] === holder);
-  const item = id && world.entities[id];
-  return item && item.kind === 'item' ? item : undefined;
+// Toolbox row 21: a hit of the wielded weapon's own attack takes `wear` off its durability fact,
+// clamped to the fact's minimum; the next causal position stays free for the host's fact_changed.
+function wear(world: World, row: EncounterRow, worn: Worn, r: Round) {
+  const current = value(world, row.character_id, worn.fact, worn.id);
+  const next = bounded(world, worn.fact, current, -worn.wear);
+  if (next === undefined) throw new KernelError('precondition_failed');
+  const start = { ops: [], position: r.position, facts: {} };
+  const step = { fact: worn.fact, value: next, subject: worn.id };
+  const done = assigned(world, row.character_id, start, step, 'durability');
+  r.ops.push(...done.ops);
+  r.position = done.position;
 }
 
-// `ammo`: the pool a row 17 shot spends; set only on the player's shot profile.
-type Profile = AttackProfile & { tags?: readonly Tag[]; ammo?: DefinitionRef };
+// Toolbox row 21: a weapon whose durability fact reads at or below its minimum is broken.
+function broken(world: World, actor: CharacterId, id: EntityId, weapon: WeaponProfile) {
+  const d = weapon.durability;
+  if (!d) return false;
+  const type = world.cartridge.facts[refString(d.fact)].value_type;
+  return type.type === 'int' && (value(world, actor, d.fact, id) as number) <= type.minimum!;
+}
+
+type Worn = NonNullable<WeaponProfile['durability']> & { id: EntityId };
+// `ammo`: the pool a row 17 shot spends, set only on the player's shot profile; `worn`: the
+// wielded weapon a row 21 hit wears, set only on its own durable attack.
+type Profile = AttackProfile & { tags?: readonly Tag[]; ammo?: DefinitionRef; worn?: Worn };
 
 function attackProfile(
   world: World,
@@ -234,15 +253,23 @@ function attackProfile(
         )
       : npc.attack;
   const wielded = equipped(world, row.body_id, 'wield');
-  const weapon = wielded?.weapon;
-  const usable = weapon && status(world, row.character_id, weapon.skill, r.steps).usable;
+  const weapon = wielded?.item.weapon;
+  const usable =
+    weapon &&
+    status(world, row.character_id, weapon.skill, r.steps).usable &&
+    !broken(world, row.character_id, wielded!.id, weapon);
   // Toolbox row 17: a ranged weapon strikes only as round 1's shot, while its ammo pool holds one.
   const ammo = weapon?.ranged?.ammo;
   const shot = usable && ammo && row.round === 1 && level(world, row.body_id, ammo)! >= 1;
   // Only the weapon's own attack carries its material tags (toolbox row G2, PM ruling).
   const base: Profile =
     usable && (!ammo || shot)
-      ? { ...weapon.attack, tags: wielded.tags, ...(shot && { ammo }) }
+      ? {
+          ...weapon.attack,
+          tags: wielded!.item.tags,
+          ...(shot && { ammo }),
+          ...(weapon.durability && { worn: { ...weapon.durability, id: wielded!.id } }),
+        }
       : world.cartridge.world!.combat!.player_attack;
   return table ? bonused(base, table, (s) => derived(world, row.character_id, s)) : base;
 }
@@ -273,6 +300,6 @@ function defend(world: World, row: EncounterRow, r: Round): 'dodge' | 'block' | 
     draw(r, 100) < dodge.chance
   )
     return 'dodge';
-  const shield = equipped(world, row.body_id, 'off_hand');
+  const shield = equipped(world, row.body_id, 'off_hand')?.item;
   if (shield?.block_chance !== undefined && draw(r, 100) < shield.block_chance) return 'block';
 }

@@ -1101,6 +1101,25 @@
           ],
           "additionalProperties": false,
           "description": "Toolbox row 17: the weapon shoots in an encounter's round 1, spending one of the body's ammo resource pool; it never strikes in melee."
+        },
+        "durability": {
+          "type": "object",
+          "properties": {
+            "fact": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "wear": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "fact",
+            "wear"
+          ],
+          "additionalProperties": false,
+          "description": "Toolbox row 21: the bounded int entity fact holding this weapon's durability (its default is a new weapon's) and the amount each hit of its own attack takes off; at the fact's minimum it is broken and strikes unarmed."
         }
       },
       "required": [

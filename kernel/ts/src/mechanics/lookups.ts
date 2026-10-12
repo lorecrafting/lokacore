@@ -108,6 +108,15 @@ export function toolHeld(world: World, body: EntityId, id: EntityId, steps: Step
   }
 }
 
+/** The item directly in `body`'s `slot` holder (equipment@1) and its id: combat's wielded weapon, row 21's repair target. */
+export function equipped(world: World, body: EntityId, slot: string) {
+  const holder = world.slots[slot];
+  if (!holder || world.state.containers[holder] !== body) return;
+  const id = Object.keys(world.entities).find((id) => world.state.containers[id] === holder);
+  const item = id && world.entities[id];
+  return item && item.kind === 'item' ? { id: id as EntityId, item } : undefined;
+}
+
 /** True when `id` is an item whose contents are in reach: no barrier, or an open one. */
 export function opened(world: World, id: string, body: EntityId): boolean {
   const origin = world.state.created?.[id]?.origin;

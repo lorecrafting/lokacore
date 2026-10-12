@@ -77,7 +77,7 @@ export function assigned<R extends Assigned>(
   actor: CharacterId,
   r: R,
   s: { readonly fact: DefinitionRef; readonly value: FactValue; readonly subject?: EntityId },
-  owner?: 'skills' | 'patrol' | 'service' | 'scene',
+  owner?: Owner,
 ): R {
   ownership(world, s.fact, owner);
   const { kind: _, ...target } = targetOf(world, actor, s.fact, s.subject);
@@ -98,11 +98,10 @@ export const seenTip = (world: World, recipe: string): DefinitionRef => ({
   key: `seen_tip_${recipe}` as DefinitionRef['key'],
 });
 
-function ownership(
-  world: World,
-  ref: DefinitionRef,
-  owner?: 'skills' | 'patrol' | 'service' | 'scene',
-) {
+type Owner = 'skills' | 'patrol' | 'service' | 'scene' | 'durability';
+
+/** Throws precondition_failed when only another owner's mechanic may write the fact `ref`. */
+export function ownership(world: World, ref: DefinitionRef, owner?: Owner) {
   if (
     owner !== 'skills' &&
     Object.values(world.cartridge.skills ?? {}).some(
@@ -131,6 +130,14 @@ function ownership(
       (scene) =>
         scene.control === 'presentation_only' &&
         (same(scene.on.rest.credit, ref) || scene.on_end.assign.some((a) => same(a.fact, ref))),
+    )
+  )
+    throw new KernelError('precondition_failed');
+  // Toolbox row 21: only combat wear and service repair write a weapon's durability fact.
+  if (
+    owner !== 'durability' &&
+    Object.values(world.cartridge.items ?? {}).some(
+      (item) => item.weapon?.durability && same(item.weapon.durability.fact, ref),
     )
   )
     throw new KernelError('precondition_failed');
