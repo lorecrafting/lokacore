@@ -1,0 +1,20 @@
+{
+  "items": [
+    "ore_01",
+    "ore_02",
+    "ore_03",
+    "ore_04",
+    "ore_05"
+  ],
+  "from": {
+    "in": "room",
+    "room": "store"
+  },
+  "to": {
+    "in": "room",
+    "room": "mine"
+  },
+  "cap": 2,
+  "count": 1,
+  "every": 3600
+}

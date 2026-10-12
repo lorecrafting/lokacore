@@ -32,6 +32,7 @@ defmodule Loka.Content.Source do
              | :liquid
              | :population
              | :population_bundle
+             | :replenish
              | :service
              | :transport
              | :bleed
@@ -122,6 +123,7 @@ defmodule Loka.Content.Source do
     "liquids" => :liquid,
     "populations" => :population,
     "population_bundles" => :population_bundle,
+    "replenish" => :replenish,
     "services" => :service,
     "transports" => :transport,
     "bleeds" => :bleed,

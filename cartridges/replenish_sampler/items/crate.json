@@ -1,0 +1,14 @@
+{
+  "keywords": [
+    "crate"
+  ],
+  "short": "item.crate.short",
+  "room_line": "item.crate.room",
+  "description": "item.crate.description",
+  "mass_grams": 5000,
+  "container": true,
+  "location": {
+    "in": "room",
+    "room": "store"
+  }
+}

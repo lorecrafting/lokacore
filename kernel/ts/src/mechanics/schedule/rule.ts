@@ -29,6 +29,7 @@ import type { DeltaOp, JobId } from '../../contracts.gen.ts';
 import { CLOCK_JOB, entered, jobId, nextHour, placeOf, runClock, scheduleOf } from './behavior.ts';
 import { assigned, adjusted } from '../fact.ts';
 import { runPopulation } from '../population/shared.ts';
+import { runReplenish } from '../containment/job.ts';
 import { binding as crowBinding, runCrow } from '../crow/behavior.ts';
 import { runBleed } from '../bleed/job.ts';
 import { runStatus } from '../status/job.ts';
@@ -71,6 +72,8 @@ export const decideAt = (
     if (row.job.kind === CLOCK_JOB) return runClock(world, command, payload.job_id, row, mint);
     if (row.job.kind === 'population')
       return runPopulation(world, command, payload.job_id, row, mint, at);
+    if (row.job.kind === 'replenish')
+      return runReplenish(world, payload.job_id, row, mint, steps, at ?? row.due_time);
     return scheduledJob(world, command, payload.job_id, row, mint, steps, at ?? row.due_time);
   }
   return advance(world, payload);

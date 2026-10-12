@@ -1,0 +1,50 @@
+// Compiler twin (lib/loka/content/replenish.ex): replenish entries (toolbox row 19b,
+// docs/system/cartridge.md Replenish declarations).
+import { same } from '../foundation/compose.ts';
+import { refString } from '../runtime/decision.ts';
+import { apiCmp } from './cartridge_installed.ts';
+import { diag, step, type Checks, type Obj } from './cartridge_refs.ts';
+import type { DefinitionRef, Diagnostic } from '../contracts.gen.ts';
+
+export function replenish(c: Obj, { named }: Checks): Diagnostic[] {
+  const entries = Object.entries((c.replenish ?? {}) as Obj);
+  const out: Diagnostic[] =
+    entries.length && apiCmp(c.manifest.requires.kernel_api.at_least, '1.71') < 0
+      ? [diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least')]
+      : [];
+  for (const [ref, r] of entries) {
+    const at = `.cartridge.replenish${step(ref)}`;
+    const items = r.items as DefinitionRef[];
+    if (new Set(items.map(refString)).size !== items.length)
+      out.push(diag('DUPLICATE_DEFINITION', `${at}.items`));
+    items.forEach((i, n) => named(i, 'item', `${at}.items[${n}]`));
+    const nests = items.some((i) => c.items?.[refString(i)]?.container === true);
+    for (const end of ['from', 'to']) {
+      const { in: k } = r[end];
+      if (k === 'template' || !placed(c, r[end], end === 'to' && nests))
+        out.push(diag('SCHEMA_VIOLATION', `${at}.${end}`));
+      else named(r[end][k], k, `${at}.${end}.${k}`);
+    }
+    if (same(r.from, r.to)) out.push(diag('SCHEMA_VIOLATION', `${at}.from`));
+  }
+  return out;
+}
+
+// A holder needs a placed entity, and an item holder must be a container: a spawn template has
+// none (nor a template item), a non-container takes nothing. An item target also refuses any
+// listed container (`nests`): it may be or hold the target, so the move would nest it in itself.
+function placed(c: Obj, l: Obj, nests: boolean): boolean {
+  const { in: k, [l.in]: ref } = l;
+  const d = k === 'room' ? undefined : (k === 'npc' ? c.npcs : c.items)?.[refString(ref)];
+  if (!d) return true;
+  if (d.spawn_template || d.location?.in === 'template') return false;
+  return k !== 'item' || (d.container === true && !nests);
+}
+
+/** The items a replenish entry refills into `room` (a harvest seam's stock may start elsewhere). */
+export const refilled = (c: Obj, room: DefinitionRef): Set<string> =>
+  new Set(
+    Object.values((c.replenish ?? {}) as Obj)
+      .filter((r) => r.to.in === 'room' && same(r.to.room, room))
+      .flatMap((r) => r.items.map(refString)),
+  );
