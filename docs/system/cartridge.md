@@ -395,7 +395,7 @@ the loader diagnostic and exits 1 on refusal, otherwise prints one canonical JSO
 Balance tool 6 ([study](../rnd/balance-diagnostics-2026-10-11.md) §2 C1, §1 I1; Beads
 `loka-kgd.107.6`) answers how strong a character gets per level and what each piece of gear adds.
 `node kernel/ts/play/power.ts <artifact>` loads and refuses as `reach.ts` does and prints one
-canonical JSON document `{levels, items}`. Every bonus is the engine's
+canonical JSON document `{levels, items}` (`{levels, items, budget}` with a gear budget). Every bonus is the engine's
 [derived stat](mechanics.md#stats-derived-from-attributes-toolbox-row-2) formula (`derived` in
 `mechanics/attributes/shared.ts`) read with the attribute values below in place of a character's.
 
@@ -413,9 +413,18 @@ canonical JSON document `{levels, items}`. Every bonus is the engine's
   delta, mass_grams?, tags?}`. `affect_total` is the signed sum of its modifiers; `delta`, per
   table, is the bonus with the item worn alone at the starts minus the bonus at the starts,
   unclamped.
+- **Budget.** Only with [world.gear_budget](#item-affect-declarations) (without it the document
+  is `{levels, items}`, byte for byte), a third key `budget: {over, unbudgeted}`, both in the item
+  order above. Each item with affects lands in at most one list: without `intended_level` it is
+  unbudgeted `{ref, missing: "intended_level"}`; with a slot absent from `per_slot` it is
+  unbudgeted `{ref, missing: "slot"}` (never budget 0); otherwise `allowed` is `per_slot[slot] +
+  per_level × (intended_level − 1)`, saturated as the level points are, and the item is over,
+  `{ref, slot, intended_level, affect_total, allowed}`, when its signed `affect_total` exceeds
+  `allowed` (a curse offsets a bonus). Items without affects are in neither list. A report only:
+  no check fails on it.
 - ponytail: no gear in the curve, no ancestries (C5, I5) and no statuses; best-in-slot, dominance
-  and allocation sweeps (I3, I6, C2) are `loka-kgd.107.10`'s, the slot budget (I2)
-  `loka-kgd.107.17`'s; where an item is found and its price (NPC shop stock, not the item) wait for a consumer of the graph above.
+  and allocation sweeps (I3, I6, C2) are `loka-kgd.107.10`'s; no CI warning on an over-budget item
+  until a consumer asks; where an item is found and its price (NPC shop stock, not the item) wait for a consumer of the graph above.
 
 ### Economy and ecology ledger (balance tool 1)
 
@@ -1617,6 +1626,8 @@ Compiler/loader validate resolved item/nest/population/corpse/room refs, a nonem
 [Item affects](mechanics.md#item-slots-and-affects-toolbox-row-3) read an item's optional `affects` (`ItemDefinition.affects`, a list of 1 to 16 `ItemAffect {attribute, modifier}`, the shape of an ancestry's modifier; `kernel_api` at least **1.41**). `attribute` names an attribute of this cartridge (source: its short key); `modifier` is a ResourceInt. The item needs a `slot` (`finger` is the thirteenth key). The compiler (`lib/loka/content/derived.ex`) and the loader (`kernel/ts/src/content/cartridge_derived.ts`) refuse an affect without a slot (SCHEMA_VIOLATION at `affects`), an unresolved attribute (UNRESOLVED_REFERENCE at the affect's `attribute`), a missing `attributes@1` (UNDECLARED_CAPABILITY at `affects`) and an older API floor (KERNEL_API_RANGE_INVALID). `cartridges/affects_sampler` is the sampler. A cartridge without affects or finger items keeps its bytes, hash and behavior.
 
 [Unidentified items](mechanics.md#unidentified-items-toolbox-row-27) read an item's optional `identified` (`ItemDefinition.identified`, a DefinitionRef naming a fact of this cartridge, source: its short key; `kernel_api` at least **1.68**). The fact is a `bool` and not per_subject, and the item declares `affects`. The compiler (`lib/loka/content/derived.ex`) and the loader (`kernel/ts/src/content/cartridge_derived.ts`) refuse an unresolved fact (UNRESOLVED_REFERENCE at `identified`), a fact that is not a `bool` (FACT_TYPE_MISMATCH at `identified`), `identified` without `affects` (SCHEMA_VIOLATION at `identified`) and an older API floor (KERNEL_API_RANGE_INVALID); the loader also refuses a per_subject fact there (FACT_SCOPE_UNSUPPORTED at `identified`, the [entity and pair fact](#entity-and-pair-fact-declarations) site walk). `cartridges/identify_sampler` is the sampler. A cartridge without `identified` keeps its bytes, hash and behavior.
+
+Gear budget (balance tool 6b, [study](../rnd/balance-diagnostics-2026-10-11.md) §1 I2; Beads `loka-kgd.107.17`; `kernel_api` at least **1.72**) is two optional declarations the engine ignores at runtime; they stay in the compiled cartridge, and only the [power report](#content-reports) reads them. `world.gear_budget` in `cartridge.json` (`WorldSettings.gear_budget`, owned by `attributes@1`) is `{per_slot, per_level}`, both required: `per_slot` maps SlotKeys (any of the 13, possibly none) to the signed affect total an item in that slot may carry at its intended level 1, each an integer 0..2147483647; `per_level` is what each level above 1 adds, an integer 0..2147483647. An item's optional `intended_level` (`ItemDefinition.intended_level`, an integer 1..2147483647) is the level it is meant for; it needs `affects` and is valid without `world.gear_budget`; nothing checks it against `world.levelling`. The compiler (`lib/loka/content/derived.ex`) and the loader (`kernel/ts/src/content/cartridge_derived.ts`) refuse `world.gear_budget` without `attributes@1` (UNDECLARED_CAPABILITY at `world.gear_budget`), `intended_level` without `affects` (SCHEMA_VIOLATION at `intended_level`) and either field under the API floor (KERNEL_API_RANGE_INVALID). A cartridge without either keeps its bytes, hash and behavior.
 
 [Experience and levelling](mechanics.md#experience-and-levelling-toolbox-row-4) read the optional `world.levelling` in `cartridge.json` (owned by `attributes@1`, `kernel_api` at least **1.42**): `{thresholds, points_per_level, kills: [{npc, experience}, ...], level_up}`. `thresholds` are strictly increasing positive ResourceInts; `points_per_level` is at least 1; each `npc` names an NPC of this cartridge (source: its short key) and `experience` is a positive ResourceInt; `level_up` must exist in the text catalog. A reaction step `{op: "experience.grant", amount}` needs `world.levelling`. The compiler (`lib/loka/content/levelling.ex`) and the loader (`kernel/ts/src/content/cartridge_levelling.ts`) refuse thresholds that do not rise (SCHEMA_VIOLATION at the threshold), an unresolved NPC or text (UNRESOLVED_REFERENCE), a grant without `world.levelling` (SCHEMA_VIOLATION at the step), a missing `attributes@1` (UNDECLARED_CAPABILITY at `world.levelling`) and an older API floor (KERNEL_API_RANGE_INVALID). `cartridges/levelling_sampler` is the sampler. A cartridge without `world.levelling` keeps its bytes, hash and behavior.
 
