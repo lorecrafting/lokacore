@@ -14,7 +14,7 @@ world's definitions and text:
 | `resources.json` | overrides of the default pools' fields, or further ResourceSpecs, each with optional condition `bands [{at_percent, key, tone}]` (`lib/loka/content/resources.ex:2`) |
 | `attributes.json` | `{"attributes": {key: {start}}}`: the cartridge's attributes (AttributeSpec without `key`; an authored `key` is `UNKNOWN_FIELD`), definition `start` supplies the fallback; [D11](mechanics.md#d11-character-choice-selected-contract) saves the selected character's values ([mechanics.md](mechanics.md#attributes1-kerneltssrcmechanicspolicyts60); `lib/loka/content/resources.ex:2`) |
 | `map_positions.json` | static drawing metadata for rooms; real room exits remain the graph (`lib/loka/content/map_positions.ex:2`) |
-| `rooms/`, `items/`, `npcs/`, `barriers/`, `recipes/`, `quests/`, `dialogues/`, `reactions/`, `story_points/`, `scenes/`, `policies/`, `actions/`, `skills/`, `topics/`, `liquids/`, `populations/`, `population_bundles/`, `services/`, `transports/`, `bleeds/` | one file per definition, `<key>.json`, the frozen shape without `key`; NPC and item files are blueprints |
+| `rooms/`, `items/`, `npcs/`, `barriers/`, `recipes/`, `quests/`, `dialogues/`, `reactions/`, `story_points/`, `scenes/`, `policies/`, `actions/`, `skills/`, `topics/`, `liquids/`, `populations/`, `population_bundles/`, `replenish/`, `services/`, `transports/`, `bleeds/` | one file per definition, `<key>.json`, the frozen shape without `key`; NPC and item files are blueprints |
 
 A reference is a full DefinitionRef naming this cartridge, or short: the key alone, of the kind
 its field takes (`Loka.Content.Checks.expand/2`, `lib/loka/content/checks.ex:37`). A `.json`
@@ -381,7 +381,8 @@ the loader diagnostic and exits 1 on refusal, otherwise prints one canonical JSO
   with no op: `world.death_credit[n].fact`; a topic's `fact` (also a read: the codex lists known
   topics); a scene's `on_end.assign[n].fact` and `on.rest.credit`; a quest's
   `expedition.survived_fact`, `expedition.faction`, `exchange.contribution`, `exchange.faction`,
-  `deadline.fact` and `deadline.trust_fact`; an ancestry's `faction.fact`. Facts the engine owns
+  `deadline.fact` and `deadline.trust_fact`; an ancestry's `faction.fact`; an item's
+  `weapon.durability.fact` (a hit wears it); a service's `benefit.fact` (a repair restores it). Facts the engine owns
   are left out: the [Compiler](#compiler)'s reserved facts (position, `scene_<key>`,
   `story_point_<key>`, `skill_<key>`, `uses_<key>`, `seen_tip_<key>`), a quest patrol's
   `trust_fact` and an entitlement service's fact, as RESERVED_FACT keeps them.
@@ -447,13 +448,14 @@ committed or checked in CI. Refs are DefinitionRefStrings.
 - **Ecology.** `populations`: each plan `{ref, home, area, cap, day_target, night_target,
   replacement_delay, npc, item?, corpse}`, the last three from its bundle; a replacement is the
   only thing that mints an item. `seams`: each harvest detail `{room, detail, items, tool?,
-  careful?}`: the count of its items (seams never regrow), its tool's tag, its careful count.
+  careful?}`: the count of its items, its tool's tag, its careful count.
 - Lists sort by site, then ref, then choice, then item; currencies by resource, unclassified by
   from then path, populations by ref, seams by room then detail. ponytail: authored static sites
-  only; no per-day caps exist; replenish and decay are not built, so none is reported; death
+  only; no per-day caps exist; replenish is not listed yet (Beads `loka-kgd.107.3`) and decay is not built; death
   moves custody with no coin penalty; per-district grouping waits for L8 tags; placed items stay
   with `reach.ts`; corpse custody, crow scavenge, quest exchange and coin-like items are not
-  money rows.
+  money rows; ammo a row 17 shot spends and durability a row 21 hit wears or a repair restores
+  are not reported (a repair shows only as its service coin sink).
 
 ### Measured flows (balance tool 2)
 
@@ -1743,6 +1745,10 @@ A recipe may declare `tip`, a catalog key (`UNRESOLVED_REFERENCE` at `recipes/<k
 
 [Entity and pair facts](mechanics.md#entity-and-pair-facts-toolbox-row-w2) add one `FactSpec` field, `per_subject: true` (absent otherwise; `false` is a schema error), on a fact with `scopes: ["instance"]` (entity) or `["player"]` (pair); `fact_compare` gains `subject: "target"`, `npc` and `item`, and a reaction's `fact.assign` gains `npc` and `item`, each `npc` or `item` a short key the compiler expands (`Loka.Content.LeafRefs`, `Loka.Content.Checks`). Any of them needs `kernel_api` at least **1.47** (KERNEL_API_RANGE_INVALID; compiler `lib/loka/content/scoped_facts.ex`, loader `kernel/ts/src/content/cartridge_scoped_facts.ts`); a reaction step's unresolved `npc` or `item` is UNRESOLVED_REFERENCE in both. The loader alone (installed stage, as before) reports FACT_SCOPE_UNSUPPORTED at: any reference to a `per_subject` fact other than a `fact_compare`'s, `fact.assign`'s or `fact.adjust`'s `fact` or a reaction's `fact_changed` trigger; a `fact_compare` of one naming no subject; a subject field on any other fact, a second subject field, or an `npc` that is a spawn template; a `subject: "target"` in a reaction, quest, barrier or skill, which has no action target; and such a fact in the sequence of an escort, receive or hand_over choice, a riddle answer with a `wrong_limit`, or any choice of a dialogue whose quest has a legacy deadline `fact`. Sampler: `cartridges/scoped_facts_sampler`.
 
+## Group declarations
+
+[The group primitive](mechanics.md#group-primitive-toolbox-row-g8) adds one optional world setting, `world.group {member}` (`protocol/cartridge.schema.json` `WorldSettings`, no other field; `member` required): `member` is a fact DefinitionRef (a short key in source) naming a bool fact with `per_subject: true` and scopes exactly `["player"]` (a [pair fact](#entity-and-pair-fact-declarations)). An unknown fact is UNRESOLVED_REFERENCE at `.cartridge.world.group.member`; a fact of another shape is SCHEMA_VIOLATION there. With `world.combat` also declared, the combat narration must name `ally_hit` and `ally_miss`, as for `allies` (SCHEMA_VIOLATION at the missing one). `world.group` needs `kernel_api` at least **1.70**: the compiler (`lib/loka/content/combat.ex`) and the loader (`kernel/ts/src/content/cartridge_combat.ts`) report KERNEL_API_RANGE_INVALID at the manifest's `at_least` otherwise. Both kernels check these fields; the rules are TypeScript only (no server consumes them, ADR-074). `cartridges/group_sampler` is the sampler.
+
 ## Conditional schedule declarations
 
 [Conditional schedules](mechanics.md#conditional-schedules-toolbox-row-w10): in source, a `daily_schedule` hour may be a list `[case, ..., room]` of 1 to 8 cases `{when, room, goal?}` (`when` a versioned policy, `room` and its leaves' references short keys, `goal` a catalog key) ending in a short room key, the fallback. The compiler (`lib/loka/content/schedules.ex`; expansion in `npc_fields.ex`, conditions and goal texts in `entities.ex`) refuses a fallback that is not last or a case after it (SCHEMA_VIOLATION `invalid_value` at `npcs/<key>.daily_schedule.<hour>`), an unresolved room (UNRESOLVED_REFERENCE at `<hour>[<i>].room`, or `<hour>[<i>]` for the fallback), goal text or leaf reference, and a list below `kernel_api` **1.47** (KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least`); it emits the hour's fallback in `daily_schedule` and its cases in `schedule_cases`, which source may not author. The loader (`kernel/ts/src/content/cartridge_schedules.ts`) checks the artifact's `schedule_cases`: each hour one the `daily_schedule` lists (SCHEMA_VIOLATION `invalid_value`), rooms, goal texts, condition references and owners, and the 1.47 floor. A case's `when` reads with the player as the actor and the NPC as the target, so actor-relative leaves (`npc_present`, `target_present`, `has_tag {subject: "room"}`, `light_off`) read the player's room and light, usually elsewhere, not the NPC's: `npc_present child` reads "the child is with the player", not "the child is home"; use a fact for the NPC's situation. No diagnostic warns. Sampler: `cartridges/schedule_sampler`.
@@ -1777,6 +1783,10 @@ The [away recap](mechanics.md#away-recap-toolbox-row-w27) reads the optional `ti
 ## Harvest tool declarations
 
 [Tool-gated harvest](mechanics.md#tool-gated-harvest-toolbox-row-19) adds one optional field to a detail's `harvest` (`protocol/room.schema.json`): `tool: {tag}`, `tag` a `Tag`. It needs `kernel_api` at least **1.52**; the compiler (`lib/loka/content/exchanges.ex`) and the loader (`kernel/ts/src/content/cartridge_exchange.ts`) refuse a lower floor (KERNEL_API_RANGE_INVALID at the detail's `harvest`), and the field needs `tags@1`, as item tags do (UNDECLARED_CAPABILITY at `harvest.tool`; `lib/loka/content/room_parts.ex`, `kernel/ts/src/content/cartridge_refs.ts`). Sampler: `cartridges/harvest_sampler`.
+
+## Replenish declarations
+
+[Replenish](mechanics.md#replenish-toolbox-row-19b) adds one top-level section (`protocol/cartridge.schema.json` `ReplenishPlan`): `replenish`, keyed `id@version:replenish/key`, one source file per entry under `replenish/` (`<key>.json`). An entry is `{items, from, to, cap, count, every}`: `items` 1 to 64 distinct item refs (short keys in source); `from` and `to` each an `ItemLocation` whose ref is a short key in source (`in` room, npc or item; `template` refused); `cap` 1 to 64, `count` 1 to 64 and `every` at least 1 (clock units). It needs `kernel_api` at least **1.71**. The compiler (`lib/loka/content/replenish.ex`) and the loader (`kernel/ts/src/content/cartridge_replenish.ts`) refuse a lower floor (KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least`), a `template` location, a holder with no placed entity (a spawn-template NPC or a template item) or an item holder that is not a container, and an item `to` when any listed item is a container, which may be or hold `to` (SCHEMA_VIOLATION at that `from` or `to`), `from` equal to `to` (SCHEMA_VIOLATION at the entry's `from`), and an item or holder that names no definition (UNRESOLVED_REFERENCE). A harvest detail's item starts in the detail's room, or in any authored holder when an entry lists it with that room as `to` (`lib/loka/content/exchanges.ex`, `kernel/ts/src/content/cartridge_exchange.ts`). Sampler: `cartridges/replenish_sampler`.
 
 ## Durability declarations
 

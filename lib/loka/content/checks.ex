@@ -47,6 +47,7 @@ defmodule Loka.Content.Checks do
       |> Map.put("transport", Map.update!(t, "route", &ref(&1, "transport", m)))
 
   def expand(%{"rest" => r}, m), do: %{"rest" => Loka.Content.Dreams.expand(r, m)}
+  def expand(%{"every" => _, "from" => _} = r, m), do: Loka.Content.Replenish.expand(r, m)
 
   def expand(%{"label" => _, "text" => _, "topic" => topic} = readable, m),
     do: Map.put(readable, "topic", ref(topic, "topic", m))
@@ -175,8 +176,7 @@ defmodule Loka.Content.Checks do
 
   def expand(%{"discovered" => f} = n, m), do: Map.put(n, "discovered", ref(f, "fact", m))
 
-  def expand(%{"label" => _, "fact" => f} = n, m),
-    do: Map.put(n, "fact", ref(f, "fact", m))
+  def expand(%{"label" => _, "fact" => f} = n, m), do: Map.put(n, "fact", ref(f, "fact", m))
 
   def expand(%{"skill" => s} = n, m) when is_binary(s),
     do: n |> Map.delete("skill") |> expand(m) |> Map.put("skill", ref(s, "skill", m))
