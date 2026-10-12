@@ -381,7 +381,8 @@ the loader diagnostic and exits 1 on refusal, otherwise prints one canonical JSO
   with no op: `world.death_credit[n].fact`; a topic's `fact` (also a read: the codex lists known
   topics); a scene's `on_end.assign[n].fact` and `on.rest.credit`; a quest's
   `expedition.survived_fact`, `expedition.faction`, `exchange.contribution`, `exchange.faction`,
-  `deadline.fact` and `deadline.trust_fact`; an ancestry's `faction.fact`. Facts the engine owns
+  `deadline.fact` and `deadline.trust_fact`; an ancestry's `faction.fact`; an item's
+  `weapon.durability.fact` (a hit wears it); a service's `benefit.fact` (a repair restores it). Facts the engine owns
   are left out: the [Compiler](#compiler)'s reserved facts (position, `scene_<key>`,
   `story_point_<key>`, `skill_<key>`, `uses_<key>`, `seen_tip_<key>`), a quest patrol's
   `trust_fact` and an entitlement service's fact, as RESERVED_FACT keeps them.
@@ -453,7 +454,8 @@ committed or checked in CI. Refs are DefinitionRefStrings.
   only; no per-day caps exist; replenish is not listed yet (Beads `loka-kgd.107.3`) and decay is not built; death
   moves custody with no coin penalty; per-district grouping waits for L8 tags; placed items stay
   with `reach.ts`; corpse custody, crow scavenge, quest exchange and coin-like items are not
-  money rows.
+  money rows; ammo a row 17 shot spends and durability a row 21 hit wears or a repair restores
+  are not reported (a repair shows only as its service coin sink).
 
 ## Installed capabilities
 
@@ -1707,6 +1709,10 @@ A recipe may declare `tip`, a catalog key (`UNRESOLVED_REFERENCE` at `recipes/<k
 ## Entity and pair fact declarations
 
 [Entity and pair facts](mechanics.md#entity-and-pair-facts-toolbox-row-w2) add one `FactSpec` field, `per_subject: true` (absent otherwise; `false` is a schema error), on a fact with `scopes: ["instance"]` (entity) or `["player"]` (pair); `fact_compare` gains `subject: "target"`, `npc` and `item`, and a reaction's `fact.assign` gains `npc` and `item`, each `npc` or `item` a short key the compiler expands (`Loka.Content.LeafRefs`, `Loka.Content.Checks`). Any of them needs `kernel_api` at least **1.47** (KERNEL_API_RANGE_INVALID; compiler `lib/loka/content/scoped_facts.ex`, loader `kernel/ts/src/content/cartridge_scoped_facts.ts`); a reaction step's unresolved `npc` or `item` is UNRESOLVED_REFERENCE in both. The loader alone (installed stage, as before) reports FACT_SCOPE_UNSUPPORTED at: any reference to a `per_subject` fact other than a `fact_compare`'s, `fact.assign`'s or `fact.adjust`'s `fact` or a reaction's `fact_changed` trigger; a `fact_compare` of one naming no subject; a subject field on any other fact, a second subject field, or an `npc` that is a spawn template; a `subject: "target"` in a reaction, quest, barrier or skill, which has no action target; and such a fact in the sequence of an escort, receive or hand_over choice, a riddle answer with a `wrong_limit`, or any choice of a dialogue whose quest has a legacy deadline `fact`. Sampler: `cartridges/scoped_facts_sampler`.
+
+## Group declarations
+
+[The group primitive](mechanics.md#group-primitive-toolbox-row-g8) adds one optional world setting, `world.group {member}` (`protocol/cartridge.schema.json` `WorldSettings`, no other field; `member` required): `member` is a fact DefinitionRef (a short key in source) naming a bool fact with `per_subject: true` and scopes exactly `["player"]` (a [pair fact](#entity-and-pair-fact-declarations)). An unknown fact is UNRESOLVED_REFERENCE at `.cartridge.world.group.member`; a fact of another shape is SCHEMA_VIOLATION there. With `world.combat` also declared, the combat narration must name `ally_hit` and `ally_miss`, as for `allies` (SCHEMA_VIOLATION at the missing one). `world.group` needs `kernel_api` at least **1.70**: the compiler (`lib/loka/content/combat.ex`) and the loader (`kernel/ts/src/content/cartridge_combat.ts`) report KERNEL_API_RANGE_INVALID at the manifest's `at_least` otherwise. Both kernels check these fields; the rules are TypeScript only (no server consumes them, ADR-074). `cartridges/group_sampler` is the sampler.
 
 ## Conditional schedule declarations
 

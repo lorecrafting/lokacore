@@ -33,7 +33,7 @@ import { suppress } from './population/shared.ts';
 import { specOf, statusStep } from './status/shared.ts';
 import { grant } from './levelling/shared.ts';
 import { saturate } from '../foundation/int.ts';
-import { npcsIn } from './speech/shared.ts';
+import { npcsIn } from './death/shared.ts';
 import { setBarrier } from './barrier/react.ts';
 
 type On = ReactionRule['on'];

@@ -61,7 +61,7 @@ export function attack(
   close: DeltaOp,
 ) {
   const player = attacker_id === row.body_id;
-  const foe = !player && !ally(world, attacker_id);
+  const foe = !player && !ally(world, row.character_id, attacker_id);
   if ((!player && !foe && !allyFits(r)) || !statusAllows(world, attacker_id)('attack')) return;
   const target_id = foe ? row.body_id : row.npc_id;
   const profile = attackProfile(world, row, attacker_id, player, r);

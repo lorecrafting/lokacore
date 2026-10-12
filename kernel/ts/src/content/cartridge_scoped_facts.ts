@@ -11,6 +11,8 @@ import { apiCmp } from './cartridge_installed.ts';
 const SITES = ['fact_compare', 'fact.assign', 'fact.adjust', 'fact_changed'];
 const OPS = SITES.slice(0, 3); // the sites that are ops and may name a subject
 const SUBJECTS = ['subject', 'npc', 'item'];
+// Toolbox row G8: the group reads its member fact at each NPC.
+const GROUP = '.cartridge.world.group.member';
 // Choices whose facts save recovery reconciles by fact alone, with no subject: escort, receive
 // and hand_over (mobile dialogue-save), a riddle answer with a wrong_limit (topics-save) and a
 // dialogue of a legacy deadline quest (deadline-receipts); other choices' receipts are checked
@@ -54,7 +56,7 @@ export function scopeSites(c: Obj): Diagnostic[] {
   nodes(c, (o, at, parent, field) => {
     if (o.kind === 'fact' && subjective(o))
       if (field !== 'fact' || !(SITES.includes(parent?.op ?? parent?.event) || wielded(parent)))
-        out.push(at);
+        if (at !== GROUP) out.push(at);
     if (!OPS.includes(o.op) || !o.fact) return;
     const fields = fieldsOf(o);
     if (fields.length > 1 || (o.npc && c.npcs?.[refString(o.npc)]?.spawn_template))

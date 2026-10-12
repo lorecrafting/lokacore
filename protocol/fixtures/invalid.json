@@ -25678,5 +25678,23 @@
         "code": "unknown_property"
       }
     ]
+  },
+  {
+    "contract": "WorldSettings",
+    "value": {
+      "group": {
+        "x": 1
+      }
+    },
+    "errors": [
+      {
+        "path": "/group/member",
+        "code": "missing_property"
+      },
+      {
+        "path": "/group/x",
+        "code": "unknown_property"
+      }
+    ]
   }
 ]

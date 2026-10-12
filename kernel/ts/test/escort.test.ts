@@ -10,7 +10,8 @@ import {
   type World,
 } from '../src/index.ts';
 import type { Command, DefinitionRef } from '../src/contracts.gen.ts';
-import { value } from '../src/mechanics/fact.ts';
+import { targetOf, value } from '../src/mechanics/fact.ts';
+import { key } from '../src/foundation/compose.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { elapsed, hp } from './combat_fixture.ts';
 import { read } from './read.ts';
@@ -170,6 +171,35 @@ test('rescue binds the original Wren, follows each Move, and finishes beside Els
   );
   a.move('north');
   assert.equal(a.world().state.containers[ids['npc/wren']], ids['room/ferry_landing']);
+});
+
+// Toolbox row G8. Breaks: the group walk does not skip the escorted NPC, so Wren, also a member,
+// is transferred twice and the Move faults.
+test('an escorted NPC who is also a group member moves once', () => {
+  const a = setup();
+  a.ready();
+  a.choose('rescue');
+  const w = a.world();
+  const member = ref('fact', 'in_group');
+  const c = structuredClone(w.cartridge) as any;
+  c.facts[`ashmere_missing_child@0.0.12:fact/in_group`] = {
+    ...member,
+    version: 1,
+    value_type: { type: 'bool', default: false },
+    scopes: ['player'],
+    per_subject: true,
+    meaning: 'In the group.',
+  };
+  c.world.group = { member };
+  const grouped = { ...w, cartridge: c } as World;
+  const at = key(targetOf(grouped, w.character, member, ids['npc/wren']));
+  a.set({ ...grouped, state: { ...w.state, facts: { ...w.state.facts, [at]: true } } });
+  const moved = a.run({ type: 'move', direction: 'north' });
+  assert.deepEqual(
+    moved.kind === 'accepted' &&
+      moved.delta.ops.filter((op) => op.op === 'entity.transfer').map((op) => op.entity_id),
+    [ids.body, ids['npc/wren']],
+  );
 });
 
 // Breaks: combat Flee bypasses the shared follower transfer or adds a follower fare/random draw.

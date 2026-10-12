@@ -7,10 +7,14 @@ defmodule Loka.Content.Combat do
   def expand(credit, m), do: Map.new(credit, fn {k, v} -> {k, ref(v, k, m)} end)
 
   @spec settings(map(), map()) :: map()
-  def settings(%{"world" => %{"combat" => %{"allies" => allies}}} = settings, m),
-    do: put_in(settings, ["world", "combat", "allies"], Enum.map(allies, &ref(&1, "npc", m)))
+  def settings(settings, m),
+    do:
+      settings
+      |> put_ref(["world", "combat", "allies"], &Enum.map(&1, fn r -> ref(r, "npc", m) end))
+      |> put_ref(["world", "group", "member"], &ref(&1, "fact", m))
 
-  def settings(settings, _), do: settings
+  defp put_ref(settings, path, f),
+    do: if(get_in(settings, path), do: update_in(settings, path, f), else: settings)
 
   @spec check(map() | nil, map(), {term(), map()}, {term(), map() | :unknown} | nil) :: [map()]
   def check(nil, _, _, _), do: []
@@ -22,6 +26,7 @@ defmodule Loka.Content.Combat do
 
     settings_errors(combat, settings, m, text) ++
       allies(combat, m, defs) ++
+      group(settings, combat, m, defs) ++
       npc_profiles(defs, combat) ++
       damage_api(m, defs, combat) ++
       shots(combat, m, defs) ++
@@ -70,6 +75,35 @@ defmodule Loka.Content.Combat do
 
   defp ally({_, _, _}, path), do: [bad(path)]
   defp ally(_, _), do: []
+
+  # Toolbox row G8: the group's member fact is a bool pair fact, from kernel_api 1.70; members
+  # strike as allies, so combat needs the ally narration.
+  defp group(%{"world" => %{"group" => %{"member" => r} = g}}, combat, m, defs) do
+    path = ["world", "group"]
+
+    reference("cartridge.json", path, {"member", "fact"}, g, m, defs) ++
+      case resolve(r, "fact", m, defs) do
+        {_, _,
+         %{"per_subject" => true, "scopes" => ["player"], "value_type" => %{"type" => "bool"}}} ->
+          []
+
+        {_, _, _} ->
+          [bad(at("cartridge.json", path ++ ["member"]))]
+
+        _ ->
+          []
+      end ++
+      if(combat && !combat["allies"],
+        do: ally_narration(combat["narration"], ["world", "combat"]),
+        else: []
+      ) ++
+      if(version(m) < [1, 70],
+        do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
+        else: []
+      )
+  end
+
+  defp group(_, _, _, _), do: []
 
   defp npc_profiles(defs, combat) do
     for {_, {rel, _, %{"attack" => attack} = npc}} <- defs["npc"],
