@@ -38,3 +38,14 @@
 - (b) No coin on the showcase is a world fact, not a tool bug. `play/ledger.ts` lists only two faucets, `shop_sell` of `bread` (Nell) and `hall_bread` (Bess). Both breads start held by those NPCs (`items/bread.json`, `items/hall_bread.json`), both purses start at 0, and the supply is the player's 10. A worker that never buys cannot earn, so `.107.3` cannot gate showcase coin/hour above 0 without a faucet in content.
 
 Residual risks: the worker never buys, so buy-and-resell loops are not measured. On `standing_sampler` every seed ends at hour 2, because a dialogue choice starts combat; `per_hour` then covers that short span (the spec documents early ends).
+
+## Recheck: fix `69a955ff` (merge `befec775`)
+
+- Written 2026-10-12 08:33 UTC in the Pi harness by anthropic/claude-opus-5-5 (reviewer, Pi session 01a12f2b).
+- Scope: `a3d6107e..69a955ff`, the code it touches, and `first`/`delivered` callers. Merge `befec775` changes no flows file: `flows.ts`, `flows.test.ts` and `sim.ts` are unchanged, and its `cartridge.md` hunks are other slices' sections (ledger notes, group, replenish).
+- Verdict: **APPROVE WITH NOTES**.
+- F1 resolved. The literals are hand-checked: `standing_sampler/resources.json` pennies start 10, `npcs/peg.json` pennies 0, bread buy 4 / sell 1, so `{0,10,0}` then `{1,7,3}` and -3.00 over one hour. Mutants `net/(elapsed+1)` and supply player←purses each fail A (60 s alarm).
+- F2 resolved. 48 = 24 × (scan + wait). Mutant with the hourly reset removed fails the skip test.
+- F3 resolved, untested (note). Only the accepted candidate replays through `checked`, which throws on failure, and the spec line was amended. A test would need a test-only kernel hook, which AGENTS.md forbids, or a broken engine. Accepted: the wiring is 2 lines and the alternative costs more than it buys. Removing the `if (r.failure)` throw would pass the suite.
+- Cost: `flows.test.ts` 11.9 s wall (8.2 s at `a3d6107e`, compile included); showcase 3 seeds × 1 day 2.9 s. Acceptable for a dev-time report not run in CI beyond this test.
+- CI on `befec775` was in progress at writing.
