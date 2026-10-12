@@ -108,7 +108,7 @@ export function toolHeld(world: World, body: EntityId, id: EntityId, steps: Step
   }
 }
 
-/** The item directly in `body`'s `slot` holder (equipment@1) and its id: combat's wielded weapon, row 21's repair target. */
+/** The item directly in `body`'s `slot` holder (equipment@1) and its id (combat, row 21 repair). */
 export function equipped(world: World, body: EntityId, slot: string) {
   const holder = world.slots[slot];
   if (!holder || world.state.containers[holder] !== body) return;
