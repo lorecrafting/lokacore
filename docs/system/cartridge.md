@@ -455,6 +455,39 @@ committed or checked in CI. Refs are DefinitionRefStrings.
   with `reach.ts`; corpse custody, crow scavenge, quest exchange and coin-like items are not
   money rows.
 
+### Measured flows (balance tool 2)
+
+Balance tool 2 ([study](../rnd/balance-diagnostics-2026-10-11.md) §5, §12 L2-L3, §13; Beads
+`loka-kgd.107.2`) measures what a purposeful player earns and spends. `node kernel/ts/play/flows.ts
+<artifact> [--seeds N] [--days D]` (defaults 16 and 3) loads and refuses as `reach.ts` above,
+otherwise plays each seed from a new world and prints one canonical JSON document. Nothing is
+committed or checked in CI.
+
+- **Policy `worker`.** Each step it takes only the GameView's available offers: the simulator's
+  (`offers` in `kernel/ts/test/sim.ts`, the candidates its random player picks from), plus each
+  shop's available sell, each available choice and each available harvest action. It tries them
+  in rank order, ties shuffled by the seed's generator: `choose_ancestry` (nothing else is
+  accepted before it), sell, harvest, choose, accept_quest, take, talk; then moves, least-visited
+  room first; then a wait to the next game hour. The first the kernel accepts is played; a command
+  already played in the current game hour (continuation ids ignored) is skipped, so a repeatable
+  conversation cannot spend the run without passing time. In a real-elapsed world (`time_policy`,
+  where Wait is refused) the wait is the authority's elapsed delivery to the same time. The run
+  ends at start + D days (calendar `units`), when no candidate is accepted (the worker never
+  fights, so a fight it walks into ends its run), or at 5000 steps. Every step keeps every
+  registered invariant, as in the simulator.
+- **Attribution.** At the command level: the state before and after each accepted step. Coin is
+  the player body's rows of each currency `ledger` lists; items are the item entities directly in
+  the body. A gain is `in`, a loss `out`, under the label `<payload type>:<definition key of its
+  item or target>`, else the bare type; a wait's job effects are labelled `wait`.
+- **Output** `{cartridge, policy, seeds, days, coin, items, populations}`: `coin.per_hour`
+  `{min, median, max}` of each seed's net coin over its elapsed game hours, as decimal strings
+  with two places; `coin.by_source` and `items.by_source` `{label: {in?, out?}}` summed over
+  seeds; `coin.supply` per game hour from 0 `{hour, player, purses}`, the median over seeds of the
+  player's coin and of all NPC purses; `populations` per game hour `{hour, living}`, the median
+  living members of each population plan. A seed that ended early adds no sample after its end.
+  Medians are lower medians, so every value stays an integer. ponytail: one policy; command-level
+  labels (per-job attribution is L2); direct body contents only; no shop stock curve.
+
 ## Installed capabilities
 
 `INSTALLED` in `kernel/ts/src/runtime/world.ts` declares the current kernel API,
