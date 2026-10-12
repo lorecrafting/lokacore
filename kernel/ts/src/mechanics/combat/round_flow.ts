@@ -235,7 +235,13 @@ export function narrate(
 ) {
   const words = world.cartridge.world!.combat!.narration;
   const striker = (attacker: EntityId) =>
-    attacker === row.body_id ? (shot ? 'shot' : 'player') : ally(world, attacker) ? 'ally' : 'npc';
+    attacker === row.body_id
+      ? shot
+        ? 'shot'
+        : 'player'
+      : ally(world, row.character_id, attacker)
+        ? 'ally'
+        : 'npc';
   return events.map(({ payload: e }) => ({
     key:
       e.type === 'entity_died'

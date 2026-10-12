@@ -1,0 +1,27 @@
+{
+  "facts": {
+    "in_group": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "per_subject": true,
+      "meaning": "Whether this NPC is in the character's group and follows them."
+    },
+    "goblin_slain": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The goblin in the yard died to the player or the player's group."
+    }
+  }
+}
