@@ -14,6 +14,7 @@ import { test } from 'node:test';
 import { INSTALLED, loadCartridge, newWorld, step } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { encode } from '../src/foundation/canonical.ts';
+import { replenish } from '../src/content/cartridge_replenish.ts';
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));
 const scratch = mkdtempSync(join(tmpdir(), 'loka-replenish-sampler-'));
@@ -31,6 +32,24 @@ try {
 const loaded = loadCartridge(artifact, INSTALLED);
 assert.ok(loaded.ok, JSON.stringify(loaded));
 const content = loaded.cartridge as Cartridge;
+/** The sampler artifact with `edit` applied to its cartridge, rehashed and loaded. */
+function edited(edit: (c: any) => void) {
+  const c = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
+  edit(c);
+  const canonical = encode(c);
+  const sha256 = createHash('sha256').update(canonical).digest('hex');
+  return loadCartridge(
+    new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
+    INSTALLED,
+  );
+}
+const S = 'replenish_sampler@0.0.1:';
+const ref = (kind: string, key: string) => ({
+  cartridge_id: 'replenish_sampler',
+  cartridge_version: '0.0.1',
+  kind,
+  key,
+});
 
 let n = 0;
 const play = (w: World, payload: object) =>
@@ -48,8 +67,8 @@ function waitUntil(w: World, until: number): World {
   assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
   return r.world;
 }
-const fresh = () =>
-  newWorld(content, '3d7f2b0c-8e4a-4f6b-9c2d-1a3e5f7b9d2c' as never, [1, 2, 3, 4]);
+const fresh = (cartridge = content) =>
+  newWorld(cartridge, '3d7f2b0c-8e4a-4f6b-9c2d-1a3e5f7b9d2c' as never, [1, 2, 3, 4]);
 const id = (w: World, kind: string, key: string) =>
   kind === 'room'
     ? w.roomIds[`replenish_sampler@0.0.1:room/${key}`]!
@@ -100,29 +119,34 @@ test('a full mine takes nothing; the shelf fills the trader from the crate; the 
   assert.equal(w.state.containers[id(w, 'item', 'stone')], id(w, 'room', 'store'));
 });
 
-// Breaks: the loader admits replenish under kernel_api 1.70, a template or self-move holder, an
-// unresolved item or holder, or a duplicate item; or drops the harvest allowance, so the seam's
+// Breaks: the move ignores the target's capacity, which a non-listed item already fills, so
+// compose refuses the transfer (capacity_exceeded), the job faults and every wait past it fails.
+test('a container target full of other items takes nothing and time still advances', () => {
+  const r = edited((c) => {
+    c.items[`${S}item/crate`].capacity = 1;
+    Object.assign(c.replenish[`${S}replenish/shelf`], {
+      items: [ref('item', 'stone')],
+      from: { in: 'room', room: ref('room', 'store') },
+      to: { in: 'item', item: ref('item', 'crate') },
+    });
+  });
+  assert.ok(r.ok, JSON.stringify(r));
+  const w = waitUntil(waitUntil(fresh(r.cartridge as Cartridge), 3600), 7200);
+  assert.equal(w.state.containers[id(w, 'item', 'stone')], id(w, 'room', 'store'));
+  assert.equal(w.state.containers[id(w, 'item', 'apple_01')], id(w, 'item', 'crate'));
+});
+
+// Breaks: the loader admits replenish under kernel_api 1.70, a template, spawn-template,
+// template-item or self-move holder, a non-container or listed target item, an unresolved item or holder, or a
+// duplicate item; or drops the harvest allowance, so the seam's
 // ore in the store is refused (twin of test/loka/content_replenish_test.exs).
 test('loader: replenish needs kernel_api 1.71 and resolved, distinct holders and items', () => {
   const reload = (edit: (c: any) => void) => {
-    const c = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
-    edit(c);
-    const canonical = encode(c);
-    const sha256 = createHash('sha256').update(canonical).digest('hex');
-    const r = loadCartridge(
-      new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-      INSTALLED,
-    );
+    const r = edited(edit);
     return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
   };
   const at = '.cartridge.replenish["replenish_sampler@0.0.1:replenish/seam_regrowth"]';
   const seam = (c: any) => c.replenish['replenish_sampler@0.0.1:replenish/seam_regrowth'];
-  const ref = (kind: string, key: string) => ({
-    cartridge_id: 'replenish_sampler',
-    cartridge_version: '0.0.1',
-    kind,
-    key,
-  });
   assert.deepEqual(
     reload((c) => (c.manifest.requires.kernel_api.at_least = '1.70')),
     ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'],
@@ -134,6 +158,29 @@ test('loader: replenish needs kernel_api 1.71 and resolved, distinct holders and
   assert.deepEqual(
     reload((c) => (seam(c).from = seam(c).to)),
     ['SCHEMA_VIOLATION', `${at}.from`],
+  );
+  const shelf = `.cartridge.replenish["${S}replenish/shelf"]`;
+  assert.deepEqual(
+    reload((c) => (c.npcs[`${S}npc/trader`].spawn_template = true)),
+    ['SCHEMA_VIOLATION', `${shelf}.to`],
+  );
+  // A lone template item is refused first elsewhere (cartridge_death.ts); check this row alone.
+  const c = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
+  c.items[`${S}item/crate`].location = { in: 'template' };
+  assert.deepEqual(
+    replenish(c, { named: () => {} } as never).map((d) => [d.code, d.path]),
+    [['SCHEMA_VIOLATION', `${shelf}.from`]],
+  );
+  assert.deepEqual(
+    reload((c) => (seam(c).to = { in: 'item', item: ref('item', 'stone') })),
+    ['SCHEMA_VIOLATION', `${at}.to`],
+  );
+  assert.deepEqual(
+    reload((c) => {
+      seam(c).items[4] = ref('item', 'crate');
+      seam(c).to = { in: 'item', item: ref('item', 'crate') };
+    }),
+    ['SCHEMA_VIOLATION', `${at}.to`],
   );
   assert.deepEqual(
     reload((c) => (seam(c).to = { in: 'npc', npc: ref('npc', 'nobody') })),

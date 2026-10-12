@@ -10,7 +10,8 @@ defmodule Loka.ContentReplenishTest do
   defp seam(f), do: [{"replenish/seam_regrowth.json", f}]
 
   # Break (toolbox row 19b; twin of the loader row in kernel/ts/test/replenish.test.ts): replenish
-  # compiles under API 1.70, with a template or self-move holder, an unresolved item or holder or a
+  # compiles under API 1.70, with a template, spawn-template, template-item or self-move holder, a non-container
+  # or listed target item, an unresolved item or holder or a
   # duplicate item; or the harvest allowance is dropped, so the seam's ore in the store is refused.
   test "replenish needs API 1.71 and resolved, distinct holders and items", %{dir: dir} do
     at = "replenish/seam_regrowth"
@@ -26,6 +27,24 @@ defmodule Loka.ContentReplenishTest do
            )
 
     assert {"SCHEMA_VIOLATION", at <> ".from"} in codes(dir, seam(&Map.put(&1, "from", &1["to"])))
+
+    assert {"SCHEMA_VIOLATION", "replenish/shelf.to"} in codes(dir, [
+             {"npcs/trader.json", &Map.put(&1, "spawn_template", true)}
+           ])
+
+    assert {"SCHEMA_VIOLATION", "replenish/shelf.from"} in codes(dir, [
+             {"items/crate.json", &Map.put(&1, "location", %{"in" => "template"})}
+           ])
+
+    item_to = &Map.put(&1, "to", %{"in" => "item", "item" => &2})
+    assert {"SCHEMA_VIOLATION", at <> ".to"} in codes(dir, seam(&item_to.(&1, "stone")))
+
+    assert {"SCHEMA_VIOLATION", at <> ".to"} in codes(
+             dir,
+             seam(
+               &item_to.(put_in(&1, ["items"], List.replace_at(&1["items"], 4, "crate")), "crate")
+             )
+           )
 
     assert {"UNRESOLVED_REFERENCE", at <> ".to.npc"} in codes(
              dir,

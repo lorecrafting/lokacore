@@ -1,6 +1,13 @@
 // Replenish (toolbox row 19b; docs/system/mechanics.md Replenish): a due job moves authored,
 // conserved items from a reserve holder to a target holder up to a cap. Nothing is minted.
-import type { DefinitionRef, DeltaOp, EntityId, ItemLocation, JobId } from '../../contracts.gen.ts';
+import {
+  LIMITS,
+  type DefinitionRef,
+  type DeltaOp,
+  type EntityId,
+  type ItemLocation,
+  type JobId,
+} from '../../contracts.gen.ts';
 import {
   accepted,
   entries,
@@ -31,6 +38,18 @@ const holder = (world: World, at: ItemLocation): EntityId =>
     ? world.roomIds[refString(at.room)]
     : world.entityIds[refString(at.in === 'npc' ? at.npc : (at as { item: DefinitionRef }).item)];
 
+// The target's free room: its declared capacity less everything directly in it, whatever the
+// item (as commerce/shared.ts), so a move never exceeds it; unbounded without a capacity.
+function free(world: World, to: EntityId, steps: Steps): number | 'budget_exceeded' {
+  let left = world.capacities[to] ?? Infinity;
+  if (left !== Infinity)
+    for (const c of Object.values(world.state.containers)) {
+      if (++steps.n > LIMITS.query_steps) return 'budget_exceeded';
+      if (c === to) left--;
+    }
+  return left;
+}
+
 /**
  * One run at `at` (the due time, or a crossed step's): move up to `count` of the entry's items
  * from `from` to `to` until `to` holds `cap`, complete the job and schedule the next at
@@ -48,7 +67,9 @@ export function runReplenish(
   const [from, to] = [holder(world, r.from), holder(world, r.to)];
   const held = selected(world, r.items, to, Infinity, steps);
   if (typeof held === 'string') return { kind: 'fault', code: held } as const;
-  const room = Math.max(0, r.cap - held.length);
+  const space = free(world, to, steps);
+  if (typeof space === 'string') return { kind: 'fault', code: space } as const;
+  const room = Math.max(0, Math.min(r.cap - held.length, space));
   const moved = selected(world, r.items, from, Math.min(r.count, room), steps);
   if (typeof moved === 'string') return { kind: 'fault', code: moved } as const;
   const ops: DeltaOp[] = moved.map((entity_id) => ({

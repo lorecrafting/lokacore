@@ -54,11 +54,29 @@ defmodule Loka.Content.Replenish do
   end
 
   defp holder(m, defs, rel, end_, r) do
-    case r[end_] do
-      %{"in" => "template"} -> [diag("SCHEMA_VIOLATION", at(rel, [end_]))]
-      %{"in" => k} = l -> unresolved(m, defs, l[k], k, at(rel, [end_, k]))
+    %{"in" => k} = l = r[end_]
+
+    case k != "template" and Refs.resolve(l[k], k, m, defs) do
+      :unresolved ->
+        [diag("UNRESOLVED_REFERENCE", at(rel, [end_, k]), %{"target" => l[k]})]
+
+      {_, _, d} ->
+        if placed?(d, l, r), do: [], else: [diag("SCHEMA_VIOLATION", at(rel, [end_]))]
+
+      false ->
+        [diag("SCHEMA_VIOLATION", at(rel, [end_]))]
+
+      _ ->
+        []
     end
   end
+
+  # A holder needs a placed entity, and an item holder must be a container: a spawn template has
+  # none (nor a template item), a non-container takes nothing, a listed one would hold itself.
+  defp placed?(d, %{"in" => k} = l, r),
+    do:
+      d["spawn_template"] != true and d["location"]["in"] != "template" and
+        (k != "item" or (d["container"] == true and l[k] not in r["items"]))
 
   defp unresolved(m, defs, target, kind, path) do
     case Refs.resolve(target, kind, m, defs) do

@@ -20,12 +20,23 @@ export function replenish(c: Obj, { named }: Checks): Diagnostic[] {
     items.forEach((i, n) => named(i, 'item', `${at}.items[${n}]`));
     for (const end of ['from', 'to']) {
       const { in: k } = r[end];
-      if (k === 'template') out.push(diag('SCHEMA_VIOLATION', `${at}.${end}`));
+      if (k === 'template' || !placed(c, r[end], r.items))
+        out.push(diag('SCHEMA_VIOLATION', `${at}.${end}`));
       else named(r[end][k], k, `${at}.${end}.${k}`);
     }
     if (same(r.from, r.to)) out.push(diag('SCHEMA_VIOLATION', `${at}.from`));
   }
   return out;
+}
+
+// A holder needs a placed entity, and an item holder must be a container: a spawn template has
+// none (nor a template item), a non-container takes nothing, a listed one would hold itself.
+function placed(c: Obj, l: Obj, items: DefinitionRef[]): boolean {
+  const { in: k, [l.in]: ref } = l;
+  const d = k === 'room' ? undefined : (k === 'npc' ? c.npcs : c.items)?.[refString(ref)];
+  if (!d) return true;
+  if (d.spawn_template || d.location?.in === 'template') return false;
+  return k !== 'item' || (d.container === true && !items.some((i) => same(i, ref)));
 }
 
 /** The items a replenish entry refills into `room` (a harvest seam's stock may start elsewhere). */
