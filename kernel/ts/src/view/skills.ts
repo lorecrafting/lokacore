@@ -65,10 +65,13 @@ export function freeLessons(world: World, npc: string) {
   return refs.length ? { lessons: refs } : {};
 }
 
-/** Each authored attribute's value and, when nonzero, what worn items grant (toolbox row 3). */
+/**
+ * Each authored attribute's value and, when nonzero, what identified worn items grant (toolbox
+ * rows 3 and 27).
+ */
 function attributeViews(world: World, ref: (kind: string, key: Key) => DefinitionRef) {
   return Object.values(world.cartridge.attributes ?? {}).map((a) => {
-    const bonus = worn(world, world.character, ref('attribute', a.key));
+    const bonus = worn(world, world.character, ref('attribute', a.key), true);
     return {
       attribute: ref('attribute', a.key),
       value: value(world, world.character, ref('attribute', a.key)),

@@ -1,0 +1,59 @@
+{
+  "keywords": [
+    "ring"
+  ],
+  "short": "item.ring.short",
+  "short_variants": [
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "fact_compare",
+          "fact": "ring_known",
+          "equals": true
+        }
+      },
+      "description": "item.ring.short_known"
+    }
+  ],
+  "room_line": "item.ring.room",
+  "room_line_variants": [
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "fact_compare",
+          "fact": "ring_known",
+          "equals": true
+        }
+      },
+      "description": "item.ring.room_known"
+    }
+  ],
+  "description": "item.ring.description",
+  "description_variants": [
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "fact_compare",
+          "fact": "ring_known",
+          "equals": true
+        }
+      },
+      "description": "item.ring.description_known"
+    }
+  ],
+  "location": {
+    "in": "room",
+    "room": "hall"
+  },
+  "slot": "finger",
+  "affects": [
+    {
+      "attribute": "per",
+      "modifier": 2
+    }
+  ],
+  "identified": "ring_known"
+}
