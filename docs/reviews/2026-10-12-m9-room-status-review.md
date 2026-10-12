@@ -4,6 +4,7 @@
 - Governing: [A room as a status holder](../system/mechanics.md#a-room-as-a-status-holder-status-reader-9) (added here), [Blind (SR6)](../system/mechanics.md#perception-and-concealment-on-a-status-toolbox-rows-sr6-and-sr8), [row G3 holders](../system/mechanics.md#statuses-on-npcs-and-things-toolbox-row-g3), [status composition](../system/protocol.md#status-composition), toolbox row SR9, Beads `loka-kgd.94`. PM decisions not reopened: room-held blind = darkness for whoever stands there; ungated room event subjects; NPC blindness deferred (`loka-kgd.106`); room-status Book line deferred (`loka-x6t.37`).
 - Hosted book-e2e green on the head; ci was still running at writing (`gh run list --commit`, reviewer); ci and book-e2e were green at `0cebea09`.
 - Verdict: **APPROVE WITH NOTES** (no blocker; two should-fix test gaps on spec-stated behaviour).
+- Written 2026-10-12 03:06 UTC in the Pi harness by anthropic/claude-opus-5-5 (reviewer, Pi session 01a12e09; line backfilled 2026-10-12).
 
 ## Must be true
 
@@ -30,6 +31,8 @@
 4. **nit**: no PR body, so no developer `/code-review` result is reported; run it in the fix round.
 
 ## Fix round 1 re-check (`c610c92a`)
+
+Written 2026-10-12 03:11 UTC in the Pi harness by anthropic/claude-opus-5-5 (reviewer, Pi session 01a12e09; line backfilled).
 
 - Scope: `c610c92a223ba41fd565f429cb6dd40cd501d3ab` only (tests and two doc lines; no production code touched). Verdict: **APPROVE** (all four dispositions hold).
 - Green at `c610c92a`: TS `status_room`, `light`, `status_readers` (25 pass); Elixir `content_status_readers_test` (3 pass).

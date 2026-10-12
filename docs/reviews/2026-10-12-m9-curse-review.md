@@ -4,6 +4,7 @@
 - Governing: [Cursed items and blessing](../system/mechanics.md#cursed-items-and-blessing-toolbox-row-28) (added here), [equipment@1](../system/mechanics.md#equipment1-kerneltssrcmechanicsequipmentrulets), [SR4](../system/mechanics.md#command-blocks-and-resistances-on-a-status-toolbox-rows-sr4-and-sr5), [W6](../system/mechanics.md#entity-description-variants-toolbox-row-w6), toolbox row 28, Beads `loka-kgd.97`. PM ruling not reopened (2026-10-11): the curse is hidden until worn; a blessing lifts it and the player keeps the item.
 - Hosted ci and book-e2e were in progress on the head at writing (`gh run list --commit`, reviewer).
 - Verdict: **APPROVE WITH NOTES** (no blocker, no should-fix; three doc nits).
+- Written 2026-10-12 03:31 UTC in the Pi harness by anthropic/claude-opus-5-5 (reviewer, Pi session 01a12e09; line backfilled 2026-10-12).
 
 ## Must be true
 
@@ -29,6 +30,8 @@
 3. **nit**, `docs/system/mechanics.md:2398`: "designer to approve" with no Beads designer item. A worn ring that silently loses Remove (with no line on a refused try) is the kind of UX the designer should see. Fix: cite or open a `loka-x6t` item.
 
 ## PM dispositions (fix b241b914)
+
+Written 2026-10-12 03:31 UTC in the Pi harness by anthropic/claude-opus-5-5 (PM, Pi session 01a12e09; line backfilled).
 
 Doc-only nit fix, so no re-review agent ([workflow step 6](../WORKFLOW.md#loop)); the PM checked the diff touches only `docs/system/mechanics.md`, the `Tag` description in `protocol/entity.schema.json` and its generated copies.
 
