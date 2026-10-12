@@ -407,8 +407,7 @@ canonical JSON document `{levels, items}`. Every bonus is the engine's
   [world.levelling](mechanics.md#experience-and-levelling-toolbox-row-4) (level 1 only without it);
   level L grants `points_per_level × (L − 1)` points. Attributes start at their definition starts.
   Each level is `{level, <table>: {none, focused}}`: `none` spends no point; `focused` spends every
-  point on the one attribute among the table's terms that gives the highest bonus (a tie goes to the
-  lower ref string).
+  point on the one attribute among the table's terms that gives the highest bonus.
 - **Items.** Every item with a slot, sorted by slot, then ref: `{ref, slot, affects, affect_total,
   delta, mass_grams?, tags?}`. `affect_total` is the signed sum of its modifiers; `delta`, per
   table, is the bonus with the item worn alone at the starts minus the bonus at the starts,
