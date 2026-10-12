@@ -14,7 +14,7 @@ import { key } from '../../foundation/compose.ts';
 import { suppressed } from '../population/shared.ts';
 import { statusResistance } from '../status/shared.ts';
 import { member } from '../escort/shared.ts';
-import { npcsIn } from '../speech/shared.ts';
+import { npcsIn } from '../death/shared.ts';
 
 /** One finite current encounter, shared by admission, escape, due jobs and projection. */
 export function engaged(world: World, body: EntityId) {

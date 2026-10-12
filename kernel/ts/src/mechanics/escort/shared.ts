@@ -11,10 +11,9 @@ import type {
 import { bodyOf, refString, type ChoiceRow, type World } from '../../runtime/decision.ts';
 import { same } from '../../foundation/compose.ts';
 import { KernelError } from '../../foundation/error.ts';
-import { living } from '../death/shared.ts';
+import { living, npcsIn } from '../death/shared.ts';
 import { questOf } from '../lookups.ts';
 import { value } from '../fact.ts';
-import { npcsIn } from '../speech/shared.ts';
 
 /** Policy and journal selectors address this actor's exact quest instance. */
 export function stateIs(
