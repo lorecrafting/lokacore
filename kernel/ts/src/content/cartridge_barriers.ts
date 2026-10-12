@@ -50,47 +50,62 @@ export function barriers(c: Obj, named: Named): Diagnostic[] {
 
 const key = (site: Obj) => refString(site.barrier);
 
+const barrierOf = (c: Obj, r?: DefinitionRef) => (r ? c.barriers?.[refString(r)] : undefined);
+
+// A barrier passes when it does not start locked, or its key is among `keys`.
+const opens = (c: Obj, r: DefinitionRef | undefined, keys: Set<string>) => {
+  const b = barrierOf(c, r);
+  return b?.initial !== 'locked' || (b.key_item && keys.has(refString(b.key_item)));
+};
+
 /**
- * BARRIER_UNREACHABLE_KEY at each locked barrier on an exit of a room reachable from the entry, or
- * on an item in reach (c1-locks), whose key never comes within reach: rooms are reached from the
- * entry through exits without a barrier or whose barrier starts open, closed, or locked with a key
- * already in reach (`open`); an item is in reach when it starts in a reached room or inside an
- * item in reach that is open so. A barrier whose key_item names no item is left to
- * UNRESOLVED_REFERENCE. ponytail: initial states and item locations only, no recipes, facts or
- * NPCs; 05 §17 reachability and the Lab's state-space search replace it.
+ * The rooms and placed items in reach: rooms are reached from the entry through exits without a
+ * barrier or whose barrier starts open, closed, or (with `keys`) locked with a key already in
+ * reach; an item is in reach when it starts in a reached room, inside an item in reach that
+ * passes so, or is receivable from a co-located NPC. Without `keys` every locked barrier stays
+ * shut (the content reports, cartridge.md). ponytail: initial states and item locations only, no
+ * recipes, facts or NPC movement; 05 §17 reachability and the Lab's state-space search replace it.
  */
-function lockout(c: Obj): Diagnostic[] {
-  const barrier = (r?: DefinitionRef) => (r ? c.barriers?.[refString(r)] : undefined);
+export function reach(c: Obj, keys = true): { rooms: Set<string>; items: Set<string> } {
   const items = Object.entries((c.items ?? {}) as Obj);
-  const rooms = new Set([refString(c.entry)]);
-  const keys = new Set<string>();
-  const open = (r?: DefinitionRef) => {
-    const b = barrier(r);
-    return b?.initial !== 'locked' || (b.key_item && keys.has(refString(b.key_item)));
-  };
+  const rooms = new Set<string>(c.entry ? [refString(c.entry)] : []);
+  const held = new Set<string>();
+  const usable = keys ? held : new Set<string>();
+  const open = (r?: DefinitionRef) => opens(c, r, usable);
   for (let grew = true; grew;) {
     grew = false;
-    const reach = (set: Set<string>, ref: string) => !set.has(ref) && (set.add(ref), (grew = true));
+    const add = (set: Set<string>, ref: string) => !set.has(ref) && (set.add(ref), (grew = true));
     for (const [ref, i] of items) {
       if (i.location.in === 'template') continue;
       const at = refString(i.location[i.location.in]);
-      const inside = i.location.in === 'item' && keys.has(at) && open(c.items[at].barrier);
+      const inside = i.location.in === 'item' && held.has(at) && open(c.items[at].barrier);
       if ((i.location.in === 'room' && rooms.has(at)) || inside || receivable(c, ref, i, rooms))
-        reach(keys, ref);
+        add(held, ref);
     }
     for (const r of rooms)
       for (const e of Object.values((c.rooms[r]?.exits ?? {}) as Obj))
-        if (open(e.barrier) && c.rooms[refString(e.to)]) reach(rooms, refString(e.to));
+        if (open(e.barrier) && c.rooms[refString(e.to)]) add(rooms, refString(e.to));
   }
+  return { rooms, items: held };
+}
+
+/**
+ * BARRIER_UNREACHABLE_KEY at each locked barrier on an exit of a room in reach (with keys), or on
+ * an item in reach (c1-locks), whose key never comes within reach. A barrier whose key_item names
+ * no item is left to UNRESOLVED_REFERENCE.
+ */
+function lockout(c: Obj): Diagnostic[] {
+  const { rooms, items: keys } = reach(c);
+  const items = Object.entries((c.items ?? {}) as Obj);
   const sites = [
     ...[...rooms].flatMap((r) => Object.values((c.rooms[r]?.exits ?? {}) as Obj)),
     ...items.filter(([ref]) => keys.has(ref)).map(([, i]) => i),
   ];
   const stuck = new Set<string>();
   for (const s of sites) {
-    const b = barrier(s.barrier);
+    const b = barrierOf(c, s.barrier);
     const known = !b?.key_item || c.items?.[refString(b.key_item)];
-    if (b && known && !open(s.barrier)) stuck.add(refString(s.barrier));
+    if (b && known && !opens(c, s.barrier, keys)) stuck.add(refString(s.barrier));
   }
   return [...stuck].map((ref) =>
     diag('BARRIER_UNREACHABLE_KEY', `.cartridge.barriers${step(ref)}`),
