@@ -283,7 +283,8 @@ test('a dead hireling is skipped: not paid, still hired', () => {
 });
 
 // Breaks: two transfers from one purse (each writes from the same value), the balance is not
-// a running one, or a member whose row is full does not end the paid prefix. Ivy is a clone of Hal with a higher EntityId.
+// a running one, a member whose row is full does not end the paid prefix, or an exact purse
+// minimum or row maximum is refused. Ivy is a clone of Hal with a higher EntityId.
 test('two hirelings: a running balance pays an EntityId-order prefix', () => {
   const r = edited((c) => {
     c.npcs[`${S}npc/ivy`] = { ...c.npcs[`${S}npc/hal`], key: 'ivy' };
@@ -303,23 +304,31 @@ test('two hirelings: a running balance pays an EntityId-order prefix', () => {
   w = elapse(w, C0 + DAY);
   const state = () => [coins(w, w.body), coins(w, hal), coins(w, ivyId), hired(w), hired(w, 'ivy')];
   assert.deepEqual(state(), [1, 6, 6, true, true], '7 coins pay both');
-  w = withRow(w, w.body, 'coins', 4);
+  // Edges: 6 coins pay both down to the minimum 0; Hal at 97 fills to the maximum 100.
+  w = withRow(withRow(w, w.body, 'coins', 6), hal, 'coins', 97);
   w = elapse(w, C0 + 2 * DAY);
-  assert.deepEqual(state(), [1, 9, 6, true, false], '4 coins pay Hal only');
-  w = withRow(chat(withRow(w, w.body, 'coins', 10), 'ivy', 'hire'), hal, 'coins', 100);
+  assert.deepEqual(state(), [0, 100, 9, true, true], 'exactly 6 coins; Hal exactly full');
+  w = withRow(withRow(w, w.body, 'coins', 4), hal, 'coins', 6);
   w = elapse(w, C0 + 3 * DAY);
-  assert.deepEqual(state(), [7, 100, 9, false, false], 'a full Hal ends the paid prefix');
+  assert.deepEqual(state(), [1, 9, 9, true, false], '4 coins pay Hal only');
+  w = withRow(chat(withRow(w, w.body, 'coins', 10), 'ivy', 'hire'), hal, 'coins', 100);
+  w = elapse(w, C0 + 4 * DAY);
+  assert.deepEqual(state(), [7, 100, 12, false, false], 'a full Hal ends the paid prefix');
 });
 
-// Breaks (twin of test/loka/content_group_test.exs): the loader admits an unknown or regenerating
-// wage resource, a wage under API 1.74, or a skill-less hire fee under API 1.74.
+// Breaks (twin of test/loka/content_group_test.exs): the loader admits an unknown wage resource,
+// one that gains or one that regenerates, a wage under API 1.74, or a skill-less hire fee under API 1.74.
 test('the loader keeps the wage to API 1.75 and a conserved resource; a skill-less fee to 1.75', () => {
   const api = ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'];
   const at = '.cartridge.world.group.wage.resource';
   const hire = (c: any) => c.dialogues[`${S}dialogue/hal_talk`].choices.hire;
+  const by_position = { standing: 1, sitting: 1, resting: 1, sleeping: 1 };
+  const regen = { every: 3600, by_position };
   const cases: [(c: any) => void, unknown][] = [
     [(c) => (c.world.group.wage.resource.key = 'gold'), ['UNRESOLVED_REFERENCE', at]],
     [(c) => (c.world.group.wage.resource.key = 'hp'), ['SCHEMA_VIOLATION', at]],
+    [(c) => (c.resources[`${S}resource/coins`].gain = 1), ['SCHEMA_VIOLATION', at]],
+    [(c) => (c.resources[`${S}resource/coins`].regen = regen), ['SCHEMA_VIOLATION', at]],
     [
       (c) => {
         c.manifest.requires.kernel_api.at_least = '1.74';
