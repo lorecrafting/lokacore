@@ -1359,7 +1359,7 @@
           "type": "object",
           "properties": {
             "per_slot": {
-              "description": "Keyed by SlotKey (entity.schema.json); a slot it omits is unbudgeted, never 0.",
+              "description": "Keyed by SlotKey (entity.schema.json), at least one (a compiler and loader check, SCHEMA_VIOLATION too_few_items: the subset has no minProperties); a slot it omits is unbudgeted, never 0.",
               "type": "object",
               "propertyNames": {
                 "pattern": "^(head|neck|body|cloak|arms|hands|finger|waist|legs|feet|wield|off_hand|light)$"

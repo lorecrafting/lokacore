@@ -265,8 +265,9 @@ test('the loader refuses each unsound item affect', () => {
   }
 });
 
-// Breaks: the loader drops a balance 6b check, so a gear budget without attributes@1, an intended
-// level without affects, or either one under API 1.72 loads; or a sound budget is refused.
+// Breaks: the loader drops a balance 6b check, so a gear budget without attributes@1 or with an
+// empty per_slot, an intended level without affects, or either one under API 1.72 loads; or a
+// sound budget is refused.
 test('the loader refuses each unsound gear budget and intended level', () => {
   const source = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
   const item = (key: string) => `affects_sampler@0.0.1:item/${key}`;
@@ -303,6 +304,11 @@ test('the loader refuses each unsound gear budget and intended level', () => {
       all(at('1.72'), level('stone')),
       'SCHEMA_VIOLATION',
       `.cartridge.items["${item('stone')}"].intended_level`,
+    ],
+    [
+      all(at('1.72'), (c: any) => (c.world.gear_budget = { per_slot: {}, per_level: 1 })),
+      'SCHEMA_VIOLATION',
+      '.cartridge.world.gear_budget.per_slot',
     ],
     [all(at('1.71'), budget), 'KERNEL_API_RANGE_INVALID', api],
     [all(at('1.71'), level('belt')), 'KERNEL_API_RANGE_INVALID', api],

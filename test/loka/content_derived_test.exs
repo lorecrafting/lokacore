@@ -92,14 +92,17 @@ defmodule Loka.ContentDerivedTest do
     end
   end
 
-  # Breaks: a gear budget without attributes@1, an intended level without affects, or either one
-  # under API 1.72 compiles, or a sound budget is refused or dropped from the artifact (balance 6b).
+  # Breaks: a gear budget without attributes@1 or with an empty per_slot, an intended level without
+  # affects, or either one under API 1.72 compiles, or a sound budget is refused or dropped from
+  # the artifact (balance 6b).
   test "gear budget and intended level keep their owner, affects and API floor" do
     dir = Loka.ContentSource.copy("cartridges/affects_sampler")
     api = &{"cartridge.json", fn c -> put_in(c, ["requires", "kernel_api", "at_least"], &1) end}
     budget = %{"per_slot" => %{"waist" => 1}, "per_level" => 1}
     put_budget = {"cartridge.json", &put_in(&1, ["world", "gear_budget"], budget)}
     level = &{"items/#{&1}.json", fn i -> Map.put(i, "intended_level", 1) end}
+    empty = %{"per_slot" => %{}, "per_level" => 1}
+    empty_slots = {"cartridge.json", &put_in(&1, ["world", "gear_budget"], empty)}
 
     drop_owner =
       {"cartridge.json",
@@ -110,6 +113,7 @@ defmodule Loka.ContentDerivedTest do
     cases = [
       {[drop_owner], {"UNDECLARED_CAPABILITY", "cartridge.world.gear_budget"}},
       {[api.("1.72"), level.("stone")], {"SCHEMA_VIOLATION", "items/stone.intended_level"}},
+      {[api.("1.72"), empty_slots], {"SCHEMA_VIOLATION", "cartridge.world.gear_budget.per_slot"}},
       {[api.("1.71"), put_budget],
        {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"}},
       {[api.("1.71"), level.("belt")],

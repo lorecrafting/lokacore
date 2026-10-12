@@ -3,7 +3,7 @@ defmodule Loka.Content.Derived do
   Checks toolbox row 2 derived-stat tables (world.derived), row 3 item affects, row 27 identified
   items, row G3 NPC attributes and balance 6b's gear budget; twin of cartridge_derived.ts.
   """
-  import Loka.Content.Source, only: [at: 2, diag: 2, diag: 4, ref: 3]
+  import Loka.Content.Source, only: [at: 2, diag: 2, diag: 3, diag: 4, ref: 3]
   alias Loka.Content.Refs
 
   # hp_max needs the hp pool, which every compiled cartridge has (Resources @defaults).
@@ -74,7 +74,17 @@ defmodule Loka.Content.Derived do
   defp table_floor(%{"hp_max" => _}), do: [1, 40]
   defp table_floor(_), do: [1, 39]
 
-  # Balance 6b: a gear budget needs attributes@1.
+  # Balance 6b: a gear budget needs attributes@1 and budgets at least one slot (too_few_items: the
+  # subset has no minProperties).
+  defp gear_budget(m, %{"gear_budget" => %{"per_slot" => slots}}) when slots == %{},
+    do:
+      owner(m, "cartridge.world.gear_budget") ++
+        [
+          diag("SCHEMA_VIOLATION", "cartridge.world.gear_budget.per_slot", %{
+            "error" => "too_few_items"
+          })
+        ]
+
   defp gear_budget(m, %{"gear_budget" => _}), do: owner(m, "cartridge.world.gear_budget")
   defp gear_budget(_, _), do: []
 

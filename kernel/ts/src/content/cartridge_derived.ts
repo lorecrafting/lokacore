@@ -49,11 +49,17 @@ export function derived(c: Obj, named: Checks['named']): Diagnostic[] {
   return out;
 }
 
-// Balance 6b: a gear budget needs attributes@1; an intended level sits beside affects.
+// Balance 6b: a gear budget needs attributes@1 and budgets at least one slot (too_few_items: the
+// subset has no minProperties); an intended level sits beside affects.
 function gearBudget(c: Obj, items: [string, Obj][]): Diagnostic[] {
   const out: Diagnostic[] = [];
-  if (c.world?.gear_budget && c.lock.capabilities.attributes !== 1)
+  const budget = c.world?.gear_budget;
+  if (budget && c.lock.capabilities.attributes !== 1)
     out.push(diag(OWNER[0], '.cartridge.world.gear_budget', OWNER[1], [...OWNER[2]]));
+  if (budget && !Object.keys(budget.per_slot).length)
+    out.push(
+      diag('SCHEMA_VIOLATION', '.cartridge.world.gear_budget.per_slot', { error: 'too_few_items' }),
+    );
   for (const [ref, item] of items)
     if (item.intended_level !== undefined && !item.affects)
       out.push(

@@ -168,6 +168,7 @@ const budgeted = () => {
       'p@1:item/helm': worn('head', 3, [CON, 6]),
       'p@1:item/boots': worn('feet', 1, [STR, 1]),
       'p@1:item/cap': worn('head', undefined, [STR, 1]),
+      'p@1:item/gloves': worn('hands', undefined, [STR, 1]),
       'p@1:item/amulet': { slot: 'neck' },
       'p@1:item/lamp': {},
     },
@@ -176,7 +177,8 @@ const budgeted = () => {
 
 // Breaks: an absolute instead of signed sum (belt over, 2 > 0); >= instead of > (ring2 over at
 // 2 = 2); per_level x L instead of x (L - 1) (helm allowed 6, ring allowed 2: neither over); a slot
-// missing from per_slot read as 0 (boots over, not unbudgeted); items without affects listed.
+// missing from per_slot read as 0 (boots over, not unbudgeted); the slot tested before the level
+// (gloves, in neither, reported missing slot); items without affects listed.
 test('report: budget lists over-budget and unbudgeted items in sheet order', () => {
   assert.deepEqual(report(budgeted()).budget, {
     over: [
@@ -185,6 +187,7 @@ test('report: budget lists over-budget and unbudgeted items in sheet order', () 
     ],
     unbudgeted: [
       { ref: 'p@1:item/boots', missing: 'slot' },
+      { ref: 'p@1:item/gloves', missing: 'intended_level' },
       { ref: 'p@1:item/cap', missing: 'intended_level' },
     ],
   });
