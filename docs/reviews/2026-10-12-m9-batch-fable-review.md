@@ -33,3 +33,14 @@
 2. **nit**, `docs/system/mechanics.md` row 29b: "when Attack's admission (`attackRefused`) admits that NPC" should cite the whole admission or the limit above, whichever finding 1 chooses.
 
 No blocker: no reader faults on a room or item holder, the floors agree, the merge is a clean union and the two open dispositions hold.
+
+## Fix re-check: `0f8af107` (parent `9cfda552`)
+
+- Written 2026-10-12 03:57 UTC in the Pi harness by anthropic/claude-opus-5-5 (reviewer, Pi session 01a12e09).
+- Scope: only `0f8af107` (`spell.ts` `fightBack`, row 29b sentence, one test in `spell_effects.test.ts`) and its one caller (`kernel/ts/src/mechanics/action_recipe/rule.ts:84`).
+- Verdict: **APPROVE**.
+- Finding 1 (should-fix) **resolved**: `fightBack` (`kernel/ts/src/mechanics/action_recipe/spell.ts:103-109`) now returns before `opened` when `!visible(world, actor, hurt)`, the same `visible()` (`kernel/ts/src/mechanics/light/shared.ts:102`) that Attack's `hiddenTarget` (`kernel/ts/src/commands/actions.ts:287-299`) calls for `not_present`. Blind caster and concealed NPC are line 113 of that function (`blinded` / `concealed`), so they take this branch; no separate test needed. New test `a bolt that hurts an unseen wight opens no fight` asserts Attack's `not_present` first (an independent answer), then hp 4 and no encounter.
+- Mutant (scratch worktree at `0f8af107`, `nice -n 10 mise exec -- node --test test/spell_effects.test.ts`): base exit 0; dropping the `!visible(...)` clause fails exactly the new test, exit 1.
+- Finding 2 (nit) **resolved**: row 29b now names the whole admission (`visible` and `attackRefused`).
+- Finding 3 (nit, `/code-review`): commit message records the one-pass self-review; PM notes it in the PR body.
+- Hosted CI on `0f8af107`: `graph-diff` 38201765818 green; `ci` 38201759768 and `book-e2e` 38201759791 in progress at writing.
