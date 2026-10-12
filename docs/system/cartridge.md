@@ -395,7 +395,7 @@ the loader diagnostic and exits 1 on refusal, otherwise prints one canonical JSO
 Balance tool 6 ([study](../rnd/balance-diagnostics-2026-10-11.md) §2 C1, §1 I1; Beads
 `loka-kgd.107.6`) answers how strong a character gets per level and what each piece of gear adds.
 `node kernel/ts/play/power.ts <artifact>` loads and refuses as `reach.ts` does and prints one
-canonical JSON document `{levels, items}`. Every bonus is the engine's
+canonical JSON document `{levels, items}` (`{levels, items, budget}` with a gear budget). Every bonus is the engine's
 [derived stat](mechanics.md#stats-derived-from-attributes-toolbox-row-2) formula (`derived` in
 `mechanics/attributes/shared.ts`) read with the attribute values below in place of a character's.
 
@@ -413,9 +413,18 @@ canonical JSON document `{levels, items}`. Every bonus is the engine's
   delta, mass_grams?, tags?}`. `affect_total` is the signed sum of its modifiers; `delta`, per
   table, is the bonus with the item worn alone at the starts minus the bonus at the starts,
   unclamped.
+- **Budget.** Only with [world.gear_budget](#item-affect-declarations) (without it the document
+  is `{levels, items}`, byte for byte), a third key `budget: {over, unbudgeted}`, both in the item
+  order above. Each item with affects lands in at most one list: without `intended_level` it is
+  unbudgeted `{ref, missing: "intended_level"}`; with a slot absent from `per_slot` it is
+  unbudgeted `{ref, missing: "slot"}` (never budget 0); otherwise `allowed` is `per_slot[slot] +
+  per_level × (intended_level − 1)`, saturated as the level points are, and the item is over,
+  `{ref, slot, intended_level, affect_total, allowed}`, when its signed `affect_total` exceeds
+  `allowed` (a curse offsets a bonus). Items without affects are in neither list. A report only:
+  no check fails on it.
 - ponytail: no gear in the curve, no ancestries (C5, I5) and no statuses; best-in-slot, dominance
-  and allocation sweeps (I3, I6, C2) are `loka-kgd.107.10`'s, the slot budget (I2)
-  `loka-kgd.107.17`'s; where an item is found and its price (NPC shop stock, not the item) wait for a consumer of the graph above.
+  and allocation sweeps (I3, I6, C2) are `loka-kgd.107.10`'s; no CI warning on an over-budget item
+  until a consumer asks; where an item is found and its price (NPC shop stock, not the item) wait for a consumer of the graph above.
 
 ### Economy and ecology ledger (balance tool 1)
 
@@ -456,6 +465,41 @@ committed or checked in CI. Refs are DefinitionRefStrings.
   with `reach.ts`; corpse custody, crow scavenge, quest exchange and coin-like items are not
   money rows; ammo a row 17 shot spends and durability a row 21 hit wears or a repair restores
   are not reported (a repair shows only as its service coin sink).
+
+### Measured flows (balance tool 2)
+
+Balance tool 2 ([study](../rnd/balance-diagnostics-2026-10-11.md) §5, §12 L2-L3, §13; Beads
+`loka-kgd.107.2`) measures what a purposeful player earns and spends. `node kernel/ts/play/flows.ts
+<artifact> [--seeds N] [--days D]` (defaults 16 and 3) loads and refuses as `reach.ts` above,
+otherwise plays each seed from a new world and prints one canonical JSON document. Nothing is
+committed or checked in CI.
+
+- **Policy `worker`.** Each step it takes only the GameView's available offers: the simulator's
+  (`offers` in `kernel/ts/test/sim.ts`, the candidates its random player picks from), plus each
+  shop's available sell, each available choice and each available harvest action. It tries them
+  in rank order, ties shuffled by the seed's generator: `choose_ancestry` (nothing else is
+  accepted before it), sell, harvest, choose, accept_quest, take, talk; then moves, least-visited
+  room first; then a wait to the next game hour. The first the kernel accepts is played; a command
+  already played in the current game hour (continuation ids ignored) is skipped, so a repeatable
+  conversation cannot spend the run without passing time. In a real-elapsed world (`time_policy`,
+  where Wait is refused) the wait is the authority's elapsed delivery to the same time. The run
+  ends at start + D days (calendar `units`), when no candidate is accepted (the worker never
+  fights, so a fight it walks into ends its run), or at 5000 steps. A refused candidate
+  takes the plain kernel `step`; the accepted one is replayed through the simulator's checked
+  step, so every played step keeps every registered invariant (checking each candidate cost most
+  of a run).
+- **Attribution.** At the command level: the state before and after each accepted step. Coin is
+  the player body's rows of each currency `ledger` lists; items are the item entities directly in
+  the body. A gain is `in`, a loss `out`, under the label `<payload type>:<definition key of its
+  item or target>`, else the bare type; a wait's job effects are labelled `wait`.
+- **Output** `{cartridge, policy, seeds, days, coin, items, populations}`: `coin.per_hour`
+  `{min, median, max}` of each seed's net coin over its elapsed game hours, as decimal strings
+  with two places; `coin.by_source` and `items.by_source` `{label: {in?, out?}}` summed over
+  seeds; `coin.supply` per game hour from 0 `{hour, player, purses}`, the median over seeds of the
+  player's coin and of all NPC purses; `populations` per game hour `{hour, living}`, the median
+  living members of each population plan. A seed that ended early adds no sample after its end.
+  Medians are lower medians, so every value stays an integer. ponytail: one policy; command-level
+  labels (per-job attribution is L2); direct body contents only; no shop stock curve.
 
 ## Installed capabilities
 
@@ -1618,6 +1662,8 @@ Compiler/loader validate resolved item/nest/population/corpse/room refs, a nonem
 
 [Unidentified items](mechanics.md#unidentified-items-toolbox-row-27) read an item's optional `identified` (`ItemDefinition.identified`, a DefinitionRef naming a fact of this cartridge, source: its short key; `kernel_api` at least **1.68**). The fact is a `bool` and not per_subject, and the item declares `affects`. The compiler (`lib/loka/content/derived.ex`) and the loader (`kernel/ts/src/content/cartridge_derived.ts`) refuse an unresolved fact (UNRESOLVED_REFERENCE at `identified`), a fact that is not a `bool` (FACT_TYPE_MISMATCH at `identified`), `identified` without `affects` (SCHEMA_VIOLATION at `identified`) and an older API floor (KERNEL_API_RANGE_INVALID); the loader also refuses a per_subject fact there (FACT_SCOPE_UNSUPPORTED at `identified`, the [entity and pair fact](#entity-and-pair-fact-declarations) site walk). `cartridges/identify_sampler` is the sampler. A cartridge without `identified` keeps its bytes, hash and behavior.
 
+Gear budget (balance tool 6b, [study](../rnd/balance-diagnostics-2026-10-11.md) §1 I2; Beads `loka-kgd.107.17`; `kernel_api` at least **1.72**) is two optional declarations the engine ignores at runtime; they stay in the compiled cartridge, and only the [power report](#content-reports) reads them. `world.gear_budget` in `cartridge.json` (`WorldSettings.gear_budget`, owned by `attributes@1`) is `{per_slot, per_level}`, both required: `per_slot` maps SlotKeys (at least one of the 13) to the signed affect total an item in that slot may carry at its intended level 1, each an integer 0..2147483647; `per_level` is what each level above 1 adds, an integer 0..2147483647. An item's optional `intended_level` (`ItemDefinition.intended_level`, an integer 1..2147483647) is the level it is meant for; it needs `affects` and is valid without `world.gear_budget`; nothing checks it against `world.levelling`. The compiler (`lib/loka/content/derived.ex`) and the loader (`kernel/ts/src/content/cartridge_derived.ts`) refuse `world.gear_budget` without `attributes@1` (UNDECLARED_CAPABILITY at `world.gear_budget`), an empty `per_slot` (SCHEMA_VIOLATION `too_few_items` at `world.gear_budget.per_slot`: the schema subset has no minProperties), `intended_level` without `affects` (SCHEMA_VIOLATION at `intended_level`) and either field under the API floor (KERNEL_API_RANGE_INVALID). A cartridge without either keeps its bytes, hash and behavior.
+
 [Experience and levelling](mechanics.md#experience-and-levelling-toolbox-row-4) read the optional `world.levelling` in `cartridge.json` (owned by `attributes@1`, `kernel_api` at least **1.42**): `{thresholds, points_per_level, kills: [{npc, experience}, ...], level_up}`. `thresholds` are strictly increasing positive ResourceInts; `points_per_level` is at least 1; each `npc` names an NPC of this cartridge (source: its short key) and `experience` is a positive ResourceInt; `level_up` must exist in the text catalog. A reaction step `{op: "experience.grant", amount}` needs `world.levelling`. The compiler (`lib/loka/content/levelling.ex`) and the loader (`kernel/ts/src/content/cartridge_levelling.ts`) refuse thresholds that do not rise (SCHEMA_VIOLATION at the threshold), an unresolved NPC or text (UNRESOLVED_REFERENCE), a grant without `world.levelling` (SCHEMA_VIOLATION at the step), a missing `attributes@1` (UNDECLARED_CAPABILITY at `world.levelling`) and an older API floor (KERNEL_API_RANGE_INVALID). `cartridges/levelling_sampler` is the sampler. A cartridge without `world.levelling` keeps its bytes, hash and behavior.
 
 ## Tag declarations
@@ -1712,7 +1758,7 @@ A recipe may declare `tip`, a catalog key (`UNRESOLVED_REFERENCE` at `recipes/<k
 
 ## Group declarations
 
-[The group primitive](mechanics.md#group-primitive-toolbox-row-g8) adds one optional world setting, `world.group {member}` (`protocol/cartridge.schema.json` `WorldSettings`, no other field; `member` required): `member` is a fact DefinitionRef (a short key in source) naming a bool fact with `per_subject: true` and scopes exactly `["player"]` (a [pair fact](#entity-and-pair-fact-declarations)). An unknown fact is UNRESOLVED_REFERENCE at `.cartridge.world.group.member`; a fact of another shape is SCHEMA_VIOLATION there. With `world.combat` also declared, the combat narration must name `ally_hit` and `ally_miss`, as for `allies` (SCHEMA_VIOLATION at the missing one). `world.group` needs `kernel_api` at least **1.70**: the compiler (`lib/loka/content/combat.ex`) and the loader (`kernel/ts/src/content/cartridge_combat.ts`) report KERNEL_API_RANGE_INVALID at the manifest's `at_least` otherwise. Both kernels check these fields; the rules are TypeScript only (no server consumes them, ADR-074). `cartridges/group_sampler` is the sampler.
+[The group primitive](mechanics.md#group-primitive-toolbox-row-g8) adds one optional world setting, `world.group {member, stay?, fight?}` (`protocol/cartridge.schema.json` `WorldSettings`, no other field; `member` required; `stay` and `fight` from [hireling orders](mechanics.md#hireling-orders-toolbox-row-22a)): `member` is a fact DefinitionRef (a short key in source) naming a bool fact with `per_subject: true` and scopes exactly `["player"]` (a [pair fact](#entity-and-pair-fact-declarations)). An unknown fact is UNRESOLVED_REFERENCE at `.cartridge.world.group.member`; a fact of another shape is SCHEMA_VIOLATION there. With `world.combat` also declared, the combat narration must name `ally_hit` and `ally_miss`, as for `allies` (SCHEMA_VIOLATION at the missing one). `world.group` needs `kernel_api` at least **1.70**: the compiler (`lib/loka/content/combat.ex`) and the loader (`kernel/ts/src/content/cartridge_combat.ts`) report KERNEL_API_RANGE_INVALID at the manifest's `at_least` otherwise. `stay` and `fight` follow the same rules as `member` (a bool pair fact at the player; UNRESOLVED_REFERENCE or SCHEMA_VIOLATION at `.cartridge.world.group.stay` or `.fight`), and either one present raises the floor to **1.73**. Both kernels check these fields; the rules are TypeScript only (no server consumes them, ADR-074). `cartridges/group_sampler` and `cartridges/hireling_sampler` are the samplers.
 
 ## Conditional schedule declarations
 

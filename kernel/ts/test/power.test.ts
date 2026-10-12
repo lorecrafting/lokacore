@@ -3,7 +3,7 @@
 // Expected values are hand-derived from the literal with the mechanics.md derived-stat formula.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { itemSheet, powerCurve } from '../play/power.ts';
+import { itemSheet, powerCurve, report } from '../play/power.ts';
 
 const R = (kind: string, key: string) => ({ cartridge_id: 'p', cartridge_version: '1', kind, key });
 const STR = R('attribute', 'str');
@@ -145,4 +145,55 @@ test('powerCurve and itemSheet: clamps, carry, a baseless table and summed affec
 // Break: a level count or table invented without world.levelling and world.derived.
 test('powerCurve: without levelling or derived tables, level 1 alone and no table', () => {
   assert.deepEqual(powerCurve(base), [{ level: 1 }]);
+});
+
+// fixture() with a gear budget (balance 6b): finger 1, head 3, waist 0, +1 per level above 1.
+const budgeted = () => {
+  const c = fixture();
+  const worn = (slot: string, intended_level: number | undefined, ...mods: [object, number][]) => ({
+    slot,
+    affects: mods.map(([attribute, modifier]) => ({ attribute, modifier })),
+    ...(intended_level && { intended_level }),
+  });
+  return {
+    ...c,
+    world: {
+      ...c.world,
+      gear_budget: { per_slot: { finger: 1, head: 3, waist: 0 }, per_level: 1 },
+    },
+    items: {
+      'p@1:item/ring': worn('finger', 1, [STR, 2]),
+      'p@1:item/ring2': worn('finger', 2, [STR, 2]),
+      'p@1:item/belt': worn('waist', 1, [CON, 1], [STR, -1]),
+      'p@1:item/helm': worn('head', 3, [CON, 6]),
+      'p@1:item/boots': worn('feet', 1, [STR, 1]),
+      'p@1:item/cap': worn('head', undefined, [STR, 1]),
+      'p@1:item/gloves': worn('hands', undefined, [STR, 1]),
+      'p@1:item/amulet': { slot: 'neck' },
+      'p@1:item/lamp': {},
+    },
+  };
+};
+
+// Breaks: an absolute instead of signed sum (belt over, 2 > 0); >= instead of > (ring2 over at
+// 2 = 2); per_level x L instead of x (L - 1) (helm allowed 6, ring allowed 2: neither over); a slot
+// missing from per_slot read as 0 (boots over, not unbudgeted); the slot tested before the level
+// (gloves, in neither, reported missing slot); items without affects listed.
+test('report: budget lists over-budget and unbudgeted items in sheet order', () => {
+  assert.deepEqual(report(budgeted()).budget, {
+    over: [
+      { ref: 'p@1:item/ring', slot: 'finger', intended_level: 1, affect_total: 2, allowed: 1 },
+      { ref: 'p@1:item/helm', slot: 'head', intended_level: 3, affect_total: 6, allowed: 5 },
+    ],
+    unbudgeted: [
+      { ref: 'p@1:item/boots', missing: 'slot' },
+      { ref: 'p@1:item/gloves', missing: 'intended_level' },
+      { ref: 'p@1:item/cap', missing: 'intended_level' },
+    ],
+  });
+});
+
+// Break: a budget key (even an empty one) printed without world.gear_budget.
+test('report: without world.gear_budget the document is levels and items alone', () => {
+  assert.deepEqual(Object.keys(report(fixture())), ['levels', 'items']);
 });

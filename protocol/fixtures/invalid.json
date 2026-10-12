@@ -1,5 +1,144 @@
 [
   {
+    "contract": "WorldSettings",
+    "value": {
+      "gear_budget": {
+        "per_slot": {
+          "tail": 1
+        },
+        "per_level": 1
+      }
+    },
+    "errors": [
+      {
+        "path": "/gear_budget/per_slot/tail",
+        "code": "pattern_mismatch"
+      }
+    ]
+  },
+  {
+    "contract": "WorldSettings",
+    "value": {
+      "gear_budget": {
+        "per_slot": {
+          "head": -1,
+          "feet": 2147483648
+        },
+        "per_level": 1
+      }
+    },
+    "errors": [
+      {
+        "path": "/gear_budget/per_slot/feet",
+        "code": "above_maximum"
+      },
+      {
+        "path": "/gear_budget/per_slot/head",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "contract": "WorldSettings",
+    "value": {
+      "gear_budget": {
+        "per_slot": {
+          "head": 1
+        },
+        "per_level": -1
+      }
+    },
+    "errors": [
+      {
+        "path": "/gear_budget/per_level",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "contract": "WorldSettings",
+    "value": {
+      "gear_budget": {
+        "per_slot": {
+          "head": 1
+        },
+        "per_level": 2147483648
+      }
+    },
+    "errors": [
+      {
+        "path": "/gear_budget/per_level",
+        "code": "above_maximum"
+      }
+    ]
+  },
+  {
+    "contract": "WorldSettings",
+    "value": {
+      "gear_budget": {
+        "x": 1
+      }
+    },
+    "errors": [
+      {
+        "path": "/gear_budget/per_level",
+        "code": "missing_property"
+      },
+      {
+        "path": "/gear_budget/per_slot",
+        "code": "missing_property"
+      },
+      {
+        "path": "/gear_budget/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "ItemDefinition",
+    "value": {
+      "key": "ring",
+      "keywords": [
+        "ring"
+      ],
+      "short": "s",
+      "room_line": "r",
+      "description": "d",
+      "location": {
+        "in": "template"
+      },
+      "intended_level": 0
+    },
+    "errors": [
+      {
+        "path": "/intended_level",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "contract": "ItemDefinition",
+    "value": {
+      "key": "ring",
+      "keywords": [
+        "ring"
+      ],
+      "short": "s",
+      "room_line": "r",
+      "description": "d",
+      "location": {
+        "in": "template"
+      },
+      "intended_level": 2147483648
+    },
+    "errors": [
+      {
+        "path": "/intended_level",
+        "code": "above_maximum"
+      }
+    ]
+  },
+  {
     "contract": "ItemDefinition",
     "value": {
       "key": "letter",
@@ -25694,6 +25833,46 @@
       {
         "path": "/group/x",
         "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "WorldSettings",
+    "value": {
+      "group": {
+        "member": {
+          "cartridge_id": "hireling_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "fact",
+          "key": "hired"
+        },
+        "stay": "staying"
+      }
+    },
+    "errors": [
+      {
+        "path": "/group/stay",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "contract": "WorldSettings",
+    "value": {
+      "group": {
+        "member": {
+          "cartridge_id": "hireling_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "fact",
+          "key": "hired"
+        },
+        "fight": "fighting"
+      }
+    },
+    "errors": [
+      {
+        "path": "/group/fight",
+        "code": "invalid_type"
       }
     ]
   },

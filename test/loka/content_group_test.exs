@@ -36,4 +36,32 @@ defmodule Loka.ContentGroupTest do
       assert expected in Enum.map(diags, &{&1["code"], &1["path"]}), inspect(diags)
     end
   end
+
+  # Breaks (toolbox row 22a; twin of the loader rows in kernel/ts/test/hireling.test.ts):
+  # stay or fight compiles under API 1.72, stay names an unknown fact, or fight a fact that is
+  # not a pair fact.
+  test "the hireling orders keep API 1.73 and bool pair facts" do
+    dir = Loka.ContentSource.copy("cartridges/hireling_sampler")
+    assert {:ok, _, _} = Loka.ContentSource.compile(dir, [])
+    api = {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"}
+
+    for {edit, expected} <- [
+          {{"cartridge.json", &at_172(&1, "fight")}, api},
+          {{"cartridge.json", &at_172(&1, "stay")}, api},
+          {{"cartridge.json", &put_in(&1, ["world", "group", "stay"], "nobody")},
+           {"UNRESOLVED_REFERENCE", "cartridge.world.group.stay"}},
+          {{"cartridge.json", &put_in(&1, ["world", "group", "fight"], "goblin_slain")},
+           {"SCHEMA_VIOLATION", "cartridge.world.group.fight"}}
+        ] do
+      assert {:error, diags} = Loka.ContentSource.compile(dir, [edit])
+      assert expected in Enum.map(diags, &{&1["code"], &1["path"]}), inspect(diags)
+    end
+  end
+
+  # API 1.72 with only one of the two orders declared.
+  defp at_172(c, drop),
+    do:
+      put_in(c, ["requires", "kernel_api", "at_least"], "1.72")
+      |> pop_in(["world", "group", drop])
+      |> elem(1)
 end

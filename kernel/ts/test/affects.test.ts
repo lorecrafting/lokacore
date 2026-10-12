@@ -265,6 +265,58 @@ test('the loader refuses each unsound item affect', () => {
   }
 });
 
+// Breaks: the loader drops a balance 6b check, so a gear budget without attributes@1 or with an
+// empty per_slot, an intended level without affects, or either one under API 1.72 loads; or a
+// sound budget is refused.
+test('the loader refuses each unsound gear budget and intended level', () => {
+  const source = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
+  const item = (key: string) => `affects_sampler@0.0.1:item/${key}`;
+  const api = '.cartridge.manifest.requires.kernel_api.at_least';
+  const load = (change: (c: any) => void) => {
+    const c = structuredClone(source);
+    change(c);
+    const canonical = encode(c);
+    const sha256 = createHash('sha256').update(canonical).digest('hex');
+    const r = loadCartridge(
+      new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
+      INSTALLED,
+    );
+    return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
+  };
+  const at = (v: string) => (c: any) => (c.manifest.requires.kernel_api.at_least = v);
+  const budget = (c: any) => (c.world.gear_budget = { per_slot: { waist: 1 }, per_level: 1 });
+  const level = (key: string) => (c: any) => (c.items[item(key)].intended_level = 1);
+  const all =
+    (...fs: ((c: any) => void)[]) =>
+    (c: any) =>
+      fs.forEach((f) => f(c));
+  const unowned = (c: any) => {
+    delete c.manifest.requires.capabilities.attributes;
+    delete c.lock.capabilities.attributes;
+    delete c.attributes;
+    delete c.world.derived;
+    delete c.rooms['affects_sampler@0.0.1:room/hall'].variants;
+    for (const i of Object.values(c.items) as any[]) delete i.affects;
+  };
+  const rows: [(c: any) => void, string, string][] = [
+    [all(at('1.72'), budget, unowned), 'UNDECLARED_CAPABILITY', '.cartridge.world.gear_budget'],
+    [
+      all(at('1.72'), level('stone')),
+      'SCHEMA_VIOLATION',
+      `.cartridge.items["${item('stone')}"].intended_level`,
+    ],
+    [
+      all(at('1.72'), (c: any) => (c.world.gear_budget = { per_slot: {}, per_level: 1 })),
+      'SCHEMA_VIOLATION',
+      '.cartridge.world.gear_budget.per_slot',
+    ],
+    [all(at('1.71'), budget), 'KERNEL_API_RANGE_INVALID', api],
+    [all(at('1.71'), level('belt')), 'KERNEL_API_RANGE_INVALID', api],
+  ];
+  for (const [change, code, path] of rows) assert.deepEqual(load(change), [code, path]);
+  assert.equal(load(all(at('1.72'), budget, level('belt'))), 'loaded');
+});
+
 // Breaks: finger leaves the slot keys. The ItemAffect schema rows are in
 // protocol/fixtures/invalid.json (validate.test.ts and contracts_test.exs).
 test('finger is a slot key', () => {
