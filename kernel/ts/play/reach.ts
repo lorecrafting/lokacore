@@ -77,18 +77,18 @@ export function reachReport(c: Obj) {
   const npcs = new Set(refs('npcs').filter((n) => out(n, 'room').some((r) => keyed.rooms.has(r))));
   // an item an NPC holds is in reach with the NPC (bought, looted or received)
   const held = (i: string) => location(i).in === 'npc' && npcs.has(refString(location(i).npc));
+  const unheld = placed.filter((i) => !held(i));
   const dialogues = new Set(
     refs('dialogues').filter((d) => npcs.has(refString(c.dialogues[d].npc))),
   );
   const reached = [...keyed.rooms, ...keyed.items, ...npcs, ...dialogues];
-  const quests = new Set(reached.flatMap((r) => out(r, 'quest')));
+  // a quest with its own offer can start through it (quest@1); the offer's policy is not evaluated
+  const offered = refs('quests').filter((q) => c.quests[q].offer);
+  const quests = new Set([...offered, ...reached.flatMap((r) => out(r, 'quest'))]);
   return {
     unreachable: {
       rooms: absent(refs('rooms'), keyed.rooms),
-      items: absent(
-        placed.filter((i) => !held(i)),
-        keyed.items,
-      ),
+      items: absent(unheld, keyed.items),
       npcs: absent(refs('npcs'), npcs),
       dialogues: absent(refs('dialogues'), dialogues),
       quests: absent(refs('quests'), quests),

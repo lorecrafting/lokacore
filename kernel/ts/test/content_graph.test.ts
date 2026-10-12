@@ -107,6 +107,12 @@ test('a quest a reached room names is reachable', () => {
   assert.deepEqual(reachReport(c).unreachable.quests, []);
 });
 
+test('a quest with its own offer and no dialogue is reachable', () => {
+  const c: Obj = fixture();
+  c.quests['f@1:quest/q2'].offer = { policy: { root: { op: 'all', items: [] } } };
+  assert.deepEqual(reachReport(c).unreachable.quests, []);
+});
+
 test('the graph holds every DefinitionRef with its path, and the op of the step holding it', () => {
   const { nodes, edges } = contentGraph(fixture());
   assert.deepEqual(nodes[0], { ref: 'f@1:room/hall', kind: 'room' });
