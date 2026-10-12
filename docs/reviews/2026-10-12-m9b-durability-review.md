@@ -3,7 +3,7 @@
 - Branch `toolbox/m9b-durability`, head `ceacdc7352d2b3ea1dd7b6314771a06967f740e1`, diffed against `dd2addcc` (`toolbox/batch-m9b`, merged into the branch). No PR (batch model). Installed `kernel_api` 1.68 to 1.69 (provisional).
 - Governing: [Durability, crafting quality and repair](../system/mechanics.md#durability-crafting-quality-and-repair-toolbox-row-21) and [Durability declarations](../system/cartridge.md#durability-declarations) (both added here), [wield resolver](../system/mechanics.md#c1-training-and-armed-defense-selected-contract), [G2](../system/mechanics.md#damage-kinds-resistances-and-critical-hits-toolbox-row-g2), [B8 services](../system/mechanics.md#b8-mauds-immediate-services-selected-contract), [W2](../system/mechanics.md#entity-and-pair-facts-toolbox-row-w2), [row 17](../system/mechanics.md#ranged-first-strike-toolbox-row-17), Beads `loka-kgd.111` (brief, pre-decided design 1-7, PM rulings 2026-10-12).
 - Hosted CI on the head: `book-e2e` success; `ci` **failure** (run 38208631662, job `kernel`, `npm run typecheck`).
-- Verdict: **CHANGES REQUIRED** (one blocker: the typecheck).
+- Verdict: **CHANGES REQUIRED** (one blocker: the typecheck) (superseded by the fix re-check below).
 - Written 2026-10-12 05:48 UTC in the Pi harness by anthropic/claude-opus-5-5 (reviewer).
 
 ## Must be true

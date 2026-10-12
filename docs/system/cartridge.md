@@ -381,7 +381,8 @@ the loader diagnostic and exits 1 on refusal, otherwise prints one canonical JSO
   with no op: `world.death_credit[n].fact`; a topic's `fact` (also a read: the codex lists known
   topics); a scene's `on_end.assign[n].fact` and `on.rest.credit`; a quest's
   `expedition.survived_fact`, `expedition.faction`, `exchange.contribution`, `exchange.faction`,
-  `deadline.fact` and `deadline.trust_fact`; an ancestry's `faction.fact`. Facts the engine owns
+  `deadline.fact` and `deadline.trust_fact`; an ancestry's `faction.fact`; an item's
+  `weapon.durability.fact` (a hit wears it); a service's `benefit.fact` (a repair restores it). Facts the engine owns
   are left out: the [Compiler](#compiler)'s reserved facts (position, `scene_<key>`,
   `story_point_<key>`, `skill_<key>`, `uses_<key>`, `seen_tip_<key>`), a quest patrol's
   `trust_fact` and an entitlement service's fact, as RESERVED_FACT keeps them.
@@ -453,7 +454,8 @@ committed or checked in CI. Refs are DefinitionRefStrings.
   only; no per-day caps exist; replenish and decay are not built, so none is reported; death
   moves custody with no coin penalty; per-district grouping waits for L8 tags; placed items stay
   with `reach.ts`; corpse custody, crow scavenge, quest exchange and coin-like items are not
-  money rows.
+  money rows; ammo a row 17 shot spends and durability a row 21 hit wears or a repair restores
+  are not reported (a repair shows only as its service coin sink).
 
 ## Installed capabilities
 
