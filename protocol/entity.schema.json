@@ -205,6 +205,12 @@
           "description": "Toolbox row 27: a boolean fact, not per_subject; the item is identified while it reads true for the player, and GameView worn sums identified items only (needs affects, kernel_api at least 1.68).",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
+        "intended_level": {
+          "description": "Balance tool 6b: the level the item is meant for, read only by the power report's gear budget (needs affects, kernel_api at least 1.72; the engine ignores it at runtime).",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        },
         "barrier": {
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },

@@ -1364,6 +1364,34 @@
           },
           "additionalProperties": false
         },
+        "gear_budget": {
+          "description": "Balance tool 6b (docs/system/cartridge.md item affect declarations; attributes@1, kernel_api at least 1.72): the signed affect total an item in each slot may carry at intended level 1 (per_slot) and what each level above 1 adds (per_level). The engine ignores it at runtime; only the power report reads it.",
+          "type": "object",
+          "properties": {
+            "per_slot": {
+              "description": "Keyed by SlotKey (entity.schema.json), at least one (a compiler and loader check, SCHEMA_VIOLATION too_few_items: the subset has no minProperties); a slot it omits is unbudgeted, never 0.",
+              "type": "object",
+              "propertyNames": {
+                "pattern": "^(head|neck|body|cloak|arms|hands|finger|waist|legs|feet|wield|off_hand|light)$"
+              },
+              "additionalProperties": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 2147483647
+              }
+            },
+            "per_level": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "per_slot",
+            "per_level"
+          ],
+          "additionalProperties": false
+        },
         "levelling": {
           "description": "Opts into experience and levelling (docs/system/mechanics.md experience and levelling, toolbox row 4; attributes@1, kernel_api at least 1.42). thresholds are the strictly increasing experience totals that reach levels 2, 3 and so on; points_per_level the attribute points each level grants; kills the experience a credited kill of each NPC definition grants; level_up the receipt line when a decision reaches a new level. Every number is the cartridge's.",
           "type": "object",
