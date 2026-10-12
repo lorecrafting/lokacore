@@ -238,7 +238,8 @@ function sample(w: World, currencies: Set<string>) {
 }
 
 // lower medians, so every value stays an integer the canonical encoding holds
-const median = (xs: number[]) => xs.sort((a, b) => a - b)[Math.floor((xs.length - 1) / 2)] ?? 0;
+export const median = (xs: number[]) =>
+  xs.sort((a, b) => a - b)[Math.floor((xs.length - 1) / 2)] ?? 0;
 // per-hour rates as decimal strings with two places, for the same reason
 const band = (xs: number[]) => {
   const s = [...xs].sort((a, b) => a - b);

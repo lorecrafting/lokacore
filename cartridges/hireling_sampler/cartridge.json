@@ -5,7 +5,7 @@
   "title": "Hireling Sampler",
   "requires": {
     "kernel_api": {
-      "at_least": "1.73",
+      "at_least": "1.75",
       "below": "2.0"
     },
     "content_schema": 1,
@@ -89,7 +89,12 @@
     "group": {
       "member": "hired",
       "stay": "staying",
-      "fight": "fighting"
+      "fight": "fighting",
+      "wage": {
+        "resource": "coins",
+        "amount": 3,
+        "every": 86400
+      }
     }
   }
 }

@@ -22,6 +22,7 @@ import { holds } from '../policy.ts';
 import { cmp } from '../../foundation/validate.ts';
 import { hourOf, nextHour, units } from '../calendar.ts';
 import { firstReplenish } from '../containment/job.ts';
+import { firstWage } from '../escort/job.ts';
 export { hourOf, nextHour };
 
 /** The daily schedule of the NPC `npc` names: hour of day to room; empty when it has none. */
@@ -73,6 +74,7 @@ export function firstJobs(cartridge: Cartridge, clock: number, mint: Mint) {
     ...jobs,
     ...firstClock(cartridge, clock, mint),
     ...firstReplenish(cartridge, clock, mint),
+    ...firstWage(cartridge, clock, mint),
   };
 }
 

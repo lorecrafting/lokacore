@@ -501,6 +501,52 @@ committed or checked in CI.
   Medians are lower medians, so every value stays an integer. ponytail: one policy; command-level
   labels (per-job attribution is L2); direct body contents only; no shop stock curve.
 
+### Fight matrix and encounter rating (balance tool 7)
+
+Balance tool 7 ([study](../rnd/balance-diagnostics-2026-10-11.md) §4 F1, F2, §13 order 3; Beads
+`loka-kgd.107.7`) answers whether a level L player beats NPC N, from the real round code and RNG.
+`node kernel/ts/play/fight.ts <artifact> [--seeds N] [--rounds R]` (defaults 32 and 100) loads
+and refuses as `flows.ts` above, otherwise prints one canonical JSON document and exits 0. Nothing
+reads it and nothing runs it in CI.
+
+- **Targets.** Every NPC living at genesis with an `attack`, by its DefinitionRef string, and
+  every population plan, by its ref, fought through its lowest-EntityId living member. An
+  encounter plan (`chance`, [mechanics.md](mechanics.md#random-encounters-toolbox-row-9)) births
+  none at genesis: the tool elapses the world one `wander_interval` at a time, at most R times,
+  until a member lives; none counts `unborn`.
+- **Cells.** Target × level × build. Levels 1 to the `thresholds` count + 1 of `world.levelling`
+  (1 only without it), as the power report above. Builds: `none` (no point spent) and one per
+  declared attribute, by ref, with all `points_per_level × (L − 1)` points on it. The level is
+  set by overriding the player's levelling row: `{experience: thresholds[L − 2] (0 at level 1),
+  allocated}`.
+- **One fight.** A new world per seed, its RNG drawn from the seed's generator as `flows.ts` draws
+  it; the player's body moved into the target's room by state override; one Attack on the target;
+  then the authority's elapsed delivery of `world.combat.interval` per step, one combat round
+  each, until the step's `entity_died` names the target (a win) or the player's body (a death),
+  the target is out of the player's room (fled: it fled, or its pack withdrew with it), or R
+  rounds pass (a timeout). An Attack the kernel refuses makes the cell `{level, build,
+  refused: <code>}` and plays no further seed. Seed 1 runs every step through the simulator's
+  checked step (`checked`, `kernel/ts/test/sim.ts`), so it keeps every registered invariant; the
+  other seeds take the plain step. Checking every step took 359 s for the 84 cells of
+  `toolbox_showcase` on the M1 (about 6 ms a checked step against 0.3 ms plain), the plain rest
+  30 s.
+- **Cell values** `{level, build, n, wins, deaths, timeouts, fleds, unborn (plans only), win_pct,
+  death_pct, fled_pct, rounds, hp_left}`: `win_pct`, `death_pct` and `fled_pct` are k × 100 / n as decimal strings with
+  two places; `rounds` (combat rounds fought) and `hp_left` (the player's hp at the win) are
+  `{min, median, max}` over the won fights, lower medians, absent with no win.
+- **Rating** (F2) per target `{target, rating, cells}`: `first_win_level` is the lowest level
+  at which any build's cell has `win_pct` at least 50.00, and `first_win_build` that level's first
+  such build in cell order (`none`, then the attributes sorted); both null if no cell does (no
+  combat code reads the level itself, only the points a build spends); `death_pct_level_1` is the
+  `none` cell's at level 1 (null if refused). A plan's rating adds `chance` (null for an ecology
+  plan) and `opportunities_per_day`, the calendar day over `wander_interval` with two places.
+- **Pinned limits.** Allies are removed: the player fights alone (`world.combat.allies` is dropped
+  from a copy of the cartridge before any fight, so a former ally with an attack is an ordinary
+  target), with no group member and no gear beyond the start. The target is fought where it
+  stands at genesis or birth; a plan is fought one member at a time (a pack's assistance is
+  whatever the round code does). ponytail: no flee, consumables, spells, statuses or gear sweeps;
+  the authored `rating` field (study L5) is not read.
+
 ## Installed capabilities
 
 `INSTALLED` in `kernel/ts/src/runtime/world.ts` declares the current kernel API,
@@ -1758,7 +1804,7 @@ A recipe may declare `tip`, a catalog key (`UNRESOLVED_REFERENCE` at `recipes/<k
 
 ## Group declarations
 
-[The group primitive](mechanics.md#group-primitive-toolbox-row-g8) adds one optional world setting, `world.group {member, stay?, fight?}` (`protocol/cartridge.schema.json` `WorldSettings`, no other field; `member` required; `stay` and `fight` from [hireling orders](mechanics.md#hireling-orders-toolbox-row-22a)): `member` is a fact DefinitionRef (a short key in source) naming a bool fact with `per_subject: true` and scopes exactly `["player"]` (a [pair fact](#entity-and-pair-fact-declarations)). An unknown fact is UNRESOLVED_REFERENCE at `.cartridge.world.group.member`; a fact of another shape is SCHEMA_VIOLATION there. With `world.combat` also declared, the combat narration must name `ally_hit` and `ally_miss`, as for `allies` (SCHEMA_VIOLATION at the missing one). `world.group` needs `kernel_api` at least **1.70**: the compiler (`lib/loka/content/combat.ex`) and the loader (`kernel/ts/src/content/cartridge_combat.ts`) report KERNEL_API_RANGE_INVALID at the manifest's `at_least` otherwise. `stay` and `fight` follow the same rules as `member` (a bool pair fact at the player; UNRESOLVED_REFERENCE or SCHEMA_VIOLATION at `.cartridge.world.group.stay` or `.fight`), and either one present raises the floor to **1.73**. Both kernels check these fields; the rules are TypeScript only (no server consumes them, ADR-074). `cartridges/group_sampler` and `cartridges/hireling_sampler` are the samplers.
+[The group primitive](mechanics.md#group-primitive-toolbox-row-g8) adds one optional world setting, `world.group {member, stay?, fight?}` (`protocol/cartridge.schema.json` `WorldSettings`, no other field; `member` required; `stay` and `fight` from [hireling orders](mechanics.md#hireling-orders-toolbox-row-22a)): `member` is a fact DefinitionRef (a short key in source) naming a bool fact with `per_subject: true` and scopes exactly `["player"]` (a [pair fact](#entity-and-pair-fact-declarations)). An unknown fact is UNRESOLVED_REFERENCE at `.cartridge.world.group.member`; a fact of another shape is SCHEMA_VIOLATION there. With `world.combat` also declared, the combat narration must name `ally_hit` and `ally_miss`, as for `allies` (SCHEMA_VIOLATION at the missing one). `world.group` needs `kernel_api` at least **1.70**: the compiler (`lib/loka/content/combat.ex`) and the loader (`kernel/ts/src/content/cartridge_combat.ts`) report KERNEL_API_RANGE_INVALID at the manifest's `at_least` otherwise. `stay` and `fight` follow the same rules as `member` (a bool pair fact at the player; UNRESOLVED_REFERENCE or SCHEMA_VIOLATION at `.cartridge.world.group.stay` or `.fight`), and either one present raises the floor to **1.73**. [Hireling wages](mechanics.md#hireling-wages-toolbox-row-22b) add the optional `wage {resource, amount, every}` (all three required, no other field; `amount` and `every` integers of at least 1): `resource` is a resource DefinitionRef (a short key in source) naming a conserved resource (`gain` 0, no `regen`); an unknown one is UNRESOLVED_REFERENCE at `.cartridge.world.group.wage.resource`, another shape SCHEMA_VIOLATION there, and `wage` raises the floor to **1.75**. From 1.75 a dialogue choice's `lesson_payment` (a hire fee) needs no `skill.acquire` step; below 1.75 a `lesson_payment` without one is KERNEL_API_RANGE_INVALID at the manifest's `at_least` (compiler `lib/loka/content/skills.ex`, loader `kernel/ts/src/content/cartridge_skills.ts`). Two or more `skill.acquire` steps, or `lesson_payment` with `payment`, stay SCHEMA_VIOLATION at the choice's `lesson_payment`. Both kernels check these fields; the rules are TypeScript only (no server consumes them, ADR-074). `cartridges/group_sampler` and `cartridges/hireling_sampler` are the samplers.
 
 ## Conditional schedule declarations
 

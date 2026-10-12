@@ -20,11 +20,13 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: M9 status reader 9, a room as status holder (loka-kgd.94)](2026-10-12-m9-room-status-review.md): **APPROVE**
 - [Review: toolbox row 28, cursed items and blessing (loka-kgd.97)](2026-10-12-m9-curse-review.md): **APPROVE WITH NOTES**
 - [Review: mechanics batch M9, final batch head (Fable batch review)](2026-10-12-m9-batch-fable-review.md): **APPROVE**
+- [Review: toolbox row 22b, hireling wages (loka-kgd.118)](2026-10-12-m10-wages-review.md): **APPROVE WITH NOTES**
 - [Review: toolbox row 19b, replenish primitive (loka-kgd.85, batch M10 wave 1)](2026-10-12-m10-replenish-review.md): **APPROVE**
 - [Review: M10 toolbox row 22a, hireling orders (loka-kgd.116)](2026-10-12-m10-hireling-review.md): **APPROVE**
 - [Review: M10 toolbox row G8, group primitive (loka-kgd.115)](2026-10-12-m10-group-review.md): **APPROVE**
 - [Review: balance tool 6b, gear_budget and intended_level, over-budget list (loka-kgd.107.17)](2026-10-12-m10-gear-budget-review.md): **APPROVE WITH NOTES**
 - [Review: M10 balance tool 2, measured flows (loka-kgd.107.2)](2026-10-12-m10-flows-review.md): **APPROVE WITH NOTES**
+- [Review: M10 balance tool 7, fight matrix and encounter rating (loka-kgd.107.7)](2026-10-12-m10-fights-review.md): **APPROVE**
 - [Review: toolbox row 9, random encounters (loka-kgd.117)](2026-10-12-m10-encounters-review.md): **APPROVE WITH NOTES**
 - [Review: M9 spell XP + fatal-blow reactions (loka-kgd.101, loka-kgd.105)](2026-10-10-toolbox-m9-spellxp-review.md): **APPROVE**
 - [Review: status readers 6 and 8, perception and concealment (loka-kgd.91, loka-kgd.93)](2026-10-10-toolbox-m9-readers68-review.md): **APPROVE WITH NOTES**
