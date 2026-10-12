@@ -81,11 +81,6 @@ export function reachReport(c: Obj) {
     refs('dialogues').filter((d) => npcs.has(refString(c.dialogues[d].npc))),
   );
   const quests = new Set([...dialogues].flatMap((d) => out(d, 'quest')));
-  const engine = new Set([
-    ...Object.keys(expectedFacts(c)).map((k) => `${c.manifest.id}@${c.manifest.version}:fact/${k}`),
-    ...engineWrittenRefs(c),
-  ]);
-  const facts = refs('facts').filter((f) => !engine.has(f));
   return {
     unreachable: {
       rooms: absent(refs('rooms'), keyed.rooms),
@@ -101,11 +96,21 @@ export function reachReport(c: Obj) {
     orphan_items: refs('items')
       .filter((i) => template(i) && !inbound(i).length)
       .sort(),
-    orphan_facts: {
-      unused: facts.filter((f) => !inbound(f).length).sort(),
-      write_only: facts.filter((f) => inbound(f).length && !inbound(f).some(isRead)).sort(),
-      read_only: facts.filter((f) => inbound(f).length && !inbound(f).some(isWrite)).sort(),
-    },
+    orphan_facts: orphanFacts(c, inbound),
+  };
+}
+
+// N2: facts nothing names, only writes or only reads; the facts the engine owns are left out
+function orphanFacts(c: Obj, inbound: (ref: string) => Edge[]) {
+  const engine = new Set([
+    ...Object.keys(expectedFacts(c)).map((k) => `${c.manifest.id}@${c.manifest.version}:fact/${k}`),
+    ...engineWrittenRefs(c),
+  ]);
+  const facts = Object.keys((c.facts ?? {}) as Obj).filter((f) => !engine.has(f));
+  return {
+    unused: facts.filter((f) => !inbound(f).length).sort(),
+    write_only: facts.filter((f) => inbound(f).length && !inbound(f).some(isRead)).sort(),
+    read_only: facts.filter((f) => inbound(f).length && !inbound(f).some(isWrite)).sort(),
   };
 }
 
