@@ -35,3 +35,26 @@
 - Focused runs: `node --test replenish harvest_tool` 9/9, `schedule*` 22/22, `mix test test/loka/content_replenish_test.exs` 1/1.
 - Mutants, all red: cap ignored (`room = r.count`) fails 2; no drain step (`crossed = false`) fails 1; count ignored fails 1; TS template check dropped fails 1. Elixir with `--force`: from = to check dropped, template clause dropped, `refilled` always empty, floor 1.70: each fails.
 - Probes: scratch test on edited sampler artifacts (capacity, non-container, cycle, spawn-template `to`), as above; deleted afterwards.
+
+## Recheck: fix commit `1185e67e`
+
+- Written 2026-10-12 07:57 UTC in the Pi harness by anthropic/claude-opus-5-5 (reviewer, Pi session 01a12f1a).
+- Head `1185e67e45a2939d0171d47082a75b5251b29a4e` (one fix commit on `e50a20dc`). Hosted CI on the head (`gh run list --commit`): `ci` 38220264425 and `book-e2e` 38220264446 in progress at writing.
+- Verdict: **CHANGES REQUIRED** (one should-fix, R1).
+
+### Dispositions
+
+- **F1 resolved, with R1 left.** `free()` (`kernel/ts/src/mechanics/containment/job.ts:43-51`) counts everything directly in `to` against `world.capacities[to]`, one query step per row, as `commerce/shared.ts:58-64`; `room = min(cap - held, free)` (`:72`). Mutants, each red on `replenish.test.ts`: capacity ignored, no decrement, min dropped.
+- **F2 resolved.** `placed` (`kernel/ts/src/content/cartridge_replenish.ts:34-39`) and `placed?` (`lib/loka/content/replenish.ex:76-79`) refuse a spawn-template NPC, a template item, a non-container item holder and a listed item holder. Each condition dropped, red: TS 4/4, Elixir 4/4 (`mix test --force`), plus the Elixir template-location guard.
+- **F3 resolved.** 9 `ReplenishPlan` cases in `protocol/fixtures/invalid.json`. In-memory sweep over `DEFS.ReplenishPlan` against `validate`: 14/14 red (7 `required`, `minItems`, `maxItems`, `cap`/`count` min and max, `every` min). `additionalProperties` survives because `foundation/validate.ts:94` treats declared properties as closed; accepted. The 65-item case is the only one that catches the `maxItems` mutant and follows precedent (65-element cases for `StatusDefinition`, `AudiencePolicy`, `ActionContribution`): keep it.
+- **Schema diff vs `e50a20dc`:** one line, the `ReplenishPlan` description only. `contracts.gen.ts`, `contracts.gen.md` and `system-graph.gen.json` follow it.
+
+### Finding
+
+- **R1, should-fix:** `kernel/ts/src/content/cartridge_replenish.ts:39`, `lib/loka/content/replenish.ex:79`. The listed check catches only `to` itself, not a listed container that holds `to`. Probe on the sampler: `apple_01` set to `container: true, capacity: 2` (it sits in `crate`) and `shelf` set to `{items [crate], from store, to apple_01}`. It loads, then the wait to 3600 faults `containment_cycle`, so every later wait faults too (must-be-true 3). Players reach the same state with a Put of the target into a listed container. Fix: when `to` is an item, refuse any listed item that is a container, in both kernels (this covers the current listed-`to` check), with one twin row. Alternatively, skip the ancestors of `to` in the run.
+
+### Departures
+
+- Container/listed rule on `from` as well as `to`: **accepted**. It is stricter, it only refuses harmless content, the code needs no end parameter, and docs and the schema description say so.
+- `runReplenish` split (`free()` extracted for the 40-line limit): **accepted**.
+- `containment/job.ts` plus the lint allowlist, and `compiler.ex` 338 to 340: still **accepted**. The fix changes neither.
