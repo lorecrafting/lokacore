@@ -25,3 +25,10 @@
 ## Findings
 
 1. **blocker**, `kernel/ts/src/mechanics/action_recipe/spell.ts:103`: removing `attackRefused(world, actor, hurt)` leaves every named file green. Scenario: a bolt hits the wight in a sanctuary room (or from a seated caster, at an ally, during a scene) and opens a fight Attack would refuse. Reviewer probe: crypt marked `sanctuary`, `flamma` hit; real code opens no encounter, the mutant opens one (probe red). Pin one refused case in `spell_effects.test.ts`.
+
+## Batch re-check at `9cfda552` (fix `a5e501ad`)
+
+- Written 2026-10-12 03:47 UTC in the Pi harness by anthropic/claude-fable-5-1 (reviewer, Pi session 01a12e09).
+- The fix was accepted without a scoped re-check (Beads `loka-kgd.101`); the [Fable batch review](2026-10-12-m9-batch-fable-review.md) re-ran the stated mutant on the batch head. The disposition holds: **APPROVE**.
+1. **Resolved.** `kernel/ts/test/spell_effects.test.ts:266` pins a `sanctuary` crypt: `flamma` hits (hp 4) and opens no fight. Mutant (reverted): `attackRefused(world, actor, hurt)` dropped from `spell.ts:103`, red on `a bolt that hurts the wight in a sanctuary opens no fight` (the other eleven stay green, so the pin is the one that catches it).
+- Related batch finding (not reopened here): the admission reads `attackRefused` alone, so a bolt at an NPC the player cannot see still opens the fight; see the batch review, finding 1.
