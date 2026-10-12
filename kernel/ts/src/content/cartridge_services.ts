@@ -29,10 +29,15 @@ function definition(c: Obj, s: Obj, ref: string, check: Checks, out: Diagnostic[
   if (c.lock.capabilities.service !== 1)
     out.push(diag('UNDECLARED_CAPABILITY', at, { capability: 'service' }, ['service@1']));
   check.text(s, ['label', 'narration'], at);
+  const kind = s.benefit.kind;
   const reasons = {
     payment: 'service.unaffordable',
-    headroom: s.benefit.kind === 'entitlement' ? 'service.already_paid' : 'service.full_mv',
-    ...(s.benefit.kind !== 'entitlement' && { stock: 'service.sold_out' }),
+    headroom:
+      { entitlement: 'service.already_paid', repair: 'service.full_durability' }[kind as string] ??
+      'service.full_mv',
+    ...(kind === 'repair'
+      ? { target: 'service.nothing_to_repair' }
+      : kind !== 'entitlement' && { stock: 'service.sold_out' }),
   };
   check.text(reasons, Object.keys(reasons), at);
   const npc = get(c, check, s.provider, 'npc', `${at}.provider`);
@@ -52,11 +57,20 @@ function definition(c: Obj, s: Obj, ref: string, check: Checks, out: Diagnostic[
         !same(fact.scopes, ['player']))
     )
       bad(out, `${at}.benefit.fact`);
-  } else {
+  } else if (b.kind === 'repair') repair(c, b, at, check, out);
+  else {
     const recovery = get(c, check, b.recovery, 'resource', `${at}.benefit.recovery`);
     if (recovery && recovery.key !== 'mv') bad(out, `${at}.benefit.recovery`);
     stock(c, s, npc, at, check, out);
   }
+}
+
+// Toolbox row 21: a repair restores a fact some weapon's durability names.
+function repair(c: Obj, b: Obj, at: string, check: Checks, out: Diagnostic[]) {
+  get(c, check, b.fact, 'fact', `${at}.benefit.fact`);
+  const items = Object.values((c.items ?? {}) as Obj);
+  if (!items.some((i) => i.weapon?.durability && same(i.weapon.durability.fact, b.fact)))
+    bad(out, `${at}.benefit.fact`);
 }
 
 function stock(c: Obj, s: Obj, npc: Obj | undefined, at: string, check: Checks, out: Diagnostic[]) {

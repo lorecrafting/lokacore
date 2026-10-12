@@ -128,10 +128,37 @@ defmodule Loka.Content.Skills do
       if(item["slot"] == "wield" and w["attack"]["damage_min"] <= w["attack"]["damage_max"],
         do: [],
         else: [bad(at(rel, ["weapon"]))]
-      )
+      ) ++ durability(m, defs, rel, w["durability"])
   end
 
   defp weapon(_, _, _, _), do: []
+
+  # Toolbox row 21: a durability names a bounded int entity fact and needs API 1.69.
+  defp durability(_, _, _, nil), do: []
+
+  defp durability(m, defs, rel, d) do
+    steps = ["weapon", "durability"]
+
+    shape =
+      case Loka.Content.Refs.resolve(d["fact"], "fact", m, defs) do
+        {_, _, f} when is_map(f) ->
+          if entity_int?(f), do: [], else: [bad(at(rel, steps ++ ["fact"]))]
+
+        _ ->
+          []
+      end
+
+    reference(rel, steps, {"fact", "fact"}, d, m, defs) ++
+      shape ++
+      if version(m) < [1, 69],
+        do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
+        else: []
+  end
+
+  defp entity_int?(%{"value_type" => t} = f),
+    do:
+      t["type"] == "int" and is_integer(t["minimum"]) and is_integer(t["maximum"]) and
+        f["per_subject"] == true and f["scopes"] == ["instance"]
 
   defp block(rel, %{"block_chance" => _} = item),
     do: if(item["slot"] == "off_hand", do: [], else: [bad(at(rel, ["block_chance"]))])

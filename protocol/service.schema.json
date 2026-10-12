@@ -155,9 +155,31 @@
             "amount"
           ],
           "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "repair"
+            },
+            "fact": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "amount": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 2147483647
+            }
+          },
+          "required": [
+            "kind",
+            "fact",
+            "amount"
+          ],
+          "additionalProperties": false
         }
       ],
-      "description": "Closed paid entitlement, finite meal recovery or provider-owned complete liquid serving; recovery is MV only.",
+      "description": "Closed paid entitlement, finite meal recovery, provider-owned complete liquid serving (recovery is MV only) or, toolbox row 21, a repair adding up to amount to the wielded weapon's durability fact.",
       "examples": [
         {
           "kind": "entitlement",

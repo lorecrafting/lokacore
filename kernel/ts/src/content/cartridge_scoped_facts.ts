@@ -20,6 +20,8 @@ const BOUND = ['escort', 'receive', 'hand_over'];
 // and journal, barrier opens_when, skill qualification): subject "target" there never holds.
 const TARGETLESS = ['reactions', 'quests', 'barriers', 'skills'].map((k) => `.cartridge.${k}`);
 const scoped = (spec: Obj | undefined) => spec?.per_subject === true;
+// Toolbox row 21: a weapon's durability and a repair benefit read their fact at the wielded weapon.
+const wielded = (o?: Obj) => o?.wear !== undefined || o?.kind === 'repair';
 const fieldsOf = (o: Obj) =>
   SUBJECTS.filter((f) => (f !== 'subject' || o.op === 'fact_compare') && Object.hasOwn(o, f));
 
@@ -51,7 +53,8 @@ export function scopeSites(c: Obj): Diagnostic[] {
   const out: string[] = [];
   nodes(c, (o, at, parent, field) => {
     if (o.kind === 'fact' && subjective(o))
-      if (field !== 'fact' || !SITES.includes(parent?.op ?? parent?.event)) out.push(at);
+      if (field !== 'fact' || !(SITES.includes(parent?.op ?? parent?.event) || wielded(parent)))
+        out.push(at);
     if (!OPS.includes(o.op) || !o.fact) return;
     const fields = fieldsOf(o);
     if (fields.length > 1 || (o.npc && c.npcs?.[refString(o.npc)]?.spawn_template))

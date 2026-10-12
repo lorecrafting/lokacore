@@ -15,7 +15,8 @@ import { refusal } from '../../commands/actions.ts';
 import { bodyOf, refString, type Steps, type World } from '../../runtime/decision.ts';
 import { living } from '../death/shared.ts';
 import { engaged } from '../combat/shared.ts';
-import { assigned, value } from '../fact.ts';
+import { assigned, bounded, value } from '../fact.ts';
+import { equipped } from '../lookups.ts';
 import { adjust, level, resourceRef, resourceSpec, transfer } from '../resource.ts';
 import { serving } from '../liquid/shared.ts';
 
@@ -47,6 +48,10 @@ export function transition(
     const start = { ops, position: 0, facts: {} },
       grant = { fact: benefit.fact, value: true };
     ops = assigned(world, p.actor_id, start, grant, 'service').ops;
+  } else if (benefit.kind === 'repair') {
+    const repaired = repair(world, p, body, benefit, ops);
+    if ('code' in repaired) return repaired;
+    ops = repaired.ops;
   } else {
     const recovered = recovery(world, p, body, benefit, ops);
     if ('code' in recovered) return recovered;
@@ -77,11 +82,33 @@ function serviceRefusal(code: ErrorCode, message: string) {
   return { code, message: { key: message as TextKey } };
 }
 
+// Toolbox row 21: the wielded weapon whose durability is the benefit's fact gains up to `amount`,
+// capped at the fact's maximum; none wielded, or one already at the maximum, refuses.
+function repair(
+  world: World,
+  p: Payload,
+  body: EntityId,
+  benefit: Extract<ServiceDefinition['benefit'], { kind: 'repair' }>,
+  ops: readonly DeltaOp[],
+): UnavailableReason | { ops: readonly DeltaOp[] } {
+  const wielded = equipped(world, body, 'wield');
+  const d = wielded?.item.weapon?.durability;
+  if (!d || !same(d.fact, benefit.fact))
+    return serviceRefusal('invalid_state', 'service.nothing_to_repair');
+  const current = value(world, p.actor_id, d.fact, wielded!.id);
+  const next = bounded(world, d.fact, current, benefit.amount);
+  if (next === undefined) return { code: 'precondition_failed' as const };
+  if (next === current) return serviceRefusal('invalid_state', 'service.full_durability');
+  const start = { ops, position: 0, facts: {} },
+    step = { fact: d.fact, value: next, subject: wielded!.id };
+  return { ops: assigned(world, p.actor_id, start, step, 'durability').ops };
+}
+
 function recovery(
   world: World,
   p: Payload,
   body: EntityId,
-  benefit: Exclude<ServiceDefinition['benefit'], { kind: 'entitlement' }>,
+  benefit: Extract<ServiceDefinition['benefit'], { kind: 'meal' | 'drink' }>,
   ops: readonly DeltaOp[],
 ): UnavailableReason | { ops: readonly DeltaOp[] } {
   const current = level(world, body, benefit.recovery),

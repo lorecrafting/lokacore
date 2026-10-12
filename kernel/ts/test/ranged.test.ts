@@ -15,6 +15,7 @@ import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
+import { value } from '../src/mechanics/fact.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-ranged-sampler-'));
 let artifact: Uint8Array;
@@ -175,4 +176,47 @@ test('the loader keeps ranged weapons to API 1.67, their narration and a known p
     ],
   ];
   for (const [edit, expected] of cases) assert.deepEqual(diagnostic(edit), expected);
+});
+
+// Toolbox row 21 on the bow. Breaks: a hit shot does not wear the bow, or a broken bow still
+// shoots in round 1 (spending an arrow) instead of striking unarmed.
+test('a hit shot wears the bow; a broken bow makes round 1 melee', () => {
+  const strung = (edge: number) =>
+    sampler((c) => {
+      c.manifest.requires.kernel_api.at_least = '1.69';
+      c.facts[`${S}:fact/string`] = {
+        key: 'string',
+        version: 1,
+        value_type: { type: 'int', default: edge, minimum: 0, maximum: 1 },
+        scopes: ['instance'],
+        per_subject: true,
+        meaning: 'The bow string; at 0 it is broken.',
+      };
+      c.items[BOW].weapon.durability = {
+        fact: {
+          cartridge_id: 'ranged_sampler',
+          cartridge_version: '0.0.1',
+          kind: 'fact',
+          key: 'string',
+        },
+        wear: 1,
+      };
+    });
+  const string = (w: World) =>
+    value(
+      w,
+      w.character,
+      {
+        cartridge_id: 'ranged_sampler',
+        cartridge_version: '0.0.1',
+        kind: 'fact',
+        key: 'string',
+      } as never,
+      w.entityIds[BOW] as never,
+    );
+  const { w: whole, foes } = engage(strung(1), 'south');
+  const shot = round(whole);
+  assert.deepEqual([hp(shot.w, foes[0]), arrows(shot.w), string(shot.w)], [2, 1, 0]);
+  const broken = round(engage(strung(0), 'south').w);
+  assert.deepEqual([hp(broken.w, foes[0]), arrows(broken.w), string(broken.w)], [5, 2, 0]);
 });
