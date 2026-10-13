@@ -1523,6 +1523,45 @@
             "member"
           ],
           "additionalProperties": false
+        },
+        "trails": {
+          "description": "Toolbox row W13 (kernel_api at least 1.85; mechanics.md Tracks and trails): a trail is fresh while now minus its time is below fresh_for (logical seconds); a passed track check appends leads[<exit>], one per direction some room's exit uses.",
+          "type": "object",
+          "properties": {
+            "fresh_for": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "leads": {
+              "type": "object",
+              "properties": {
+                "north": {
+                  "$ref": "text.schema.json#/$defs/TextKey"
+                },
+                "south": {
+                  "$ref": "text.schema.json#/$defs/TextKey"
+                },
+                "east": {
+                  "$ref": "text.schema.json#/$defs/TextKey"
+                },
+                "west": {
+                  "$ref": "text.schema.json#/$defs/TextKey"
+                },
+                "up": {
+                  "$ref": "text.schema.json#/$defs/TextKey"
+                },
+                "down": {
+                  "$ref": "text.schema.json#/$defs/TextKey"
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "fresh_for",
+            "leads"
+          ],
+          "additionalProperties": false
         }
       },
       "additionalProperties": false,
@@ -2335,6 +2374,14 @@
         "walks": {
           "const": true,
           "description": "Toolbox row W26 (kernel_api at least 1.81; mechanics.md NPCs use doors): the wander step crosses its exit as a walking NPC does (npcPassage with walks): a closed door passes and stays closed, a locked one only for a member holding its key_item (unlocked, opened, closed and locked again); any traverse lock on the exit or enter lock on the room refuses it."
+        },
+        "trail": {
+          "const": true,
+          "description": "Toolbox row W13 (kernel_api at least 1.85; mechanics.md Tracks and trails): a member's wander step and C4 flight write the room left's trail_<key>_exit and trail_<key>_at (engine facts, per room); needs world.trails."
+        },
+        "hunts": {
+          "const": true,
+          "description": "Toolbox row W13 (kernel_api at least 1.85): each wander step takes the exit of the player's fresh trail in the member's room when npcPassage admits it, else wanders as before; the player then leaves trails (trail_exit, trail_at); needs world.trails."
         }
       },
       "required": [

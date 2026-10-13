@@ -1,4 +1,4 @@
-# size: allow 340, ancestry, static map, status source, levelling settings and replenish wiring join the existing compiler boundary
+# size: allow 345, ancestry, static map, status source, levelling settings, replenish and trail wiring join the existing compiler boundary
 defmodule Loka.Content.Compiler do
   @moduledoc "Validates source files and builds the CompiledCartridge (05 §3–§8, 06 §20–21)."
   alias Loka.Content.{
@@ -18,6 +18,7 @@ defmodule Loka.Content.Compiler do
   import Loka.Content.Source, only: [diag: 2, at: 2, schema: 4, ref: 3]
   import Loka.Content.Refs, only: [owners: 2, owned: 3]
 
+  @engine_facts [Scenes, Loka.Content.Skills, Loka.Content.Trails]
   @facts_file %{
     "type" => "object",
     "properties" => %{"facts" => %{"type" => "object", "additionalProperties" => %{}}},
@@ -97,6 +98,7 @@ defmodule Loka.Content.Compiler do
     do:
       Loka.Content.BellCue.check(manifest, defs, located, v2) ++
         Position.check(manifest, defs) ++
+        Loka.Content.Trails.check(manifest, defs, v2, located, registry) ++
         Loka.Content.Spells.check(manifest, defs, registry) ++
         Scenes.check(manifest, defs, v2, registry) ++
         Ancestries.check(manifest, defs, located, if(v2, do: elem(v2, 1), else: %{})) ++
@@ -211,11 +213,14 @@ defmodule Loka.Content.Compiler do
     {resources, d1} = Resources.load(of(files, :resources))
     {attributes, d3} = Resources.attributes(of(files, :attributes))
     {defs, d2} = kinds(files)
-    {facts, d5} = Scenes.facts(facts, m, defs)
-    {facts, d6} = Loka.Content.Skills.facts(facts, m, defs)
+    {facts, d5} = Enum.reduce(@engine_facts, {facts, []}, &engine_facts(&1, &2, m, defs))
     loaded = %{"fact" => facts, "resource" => resources, "attribute" => attributes}
-    {Map.merge(expanded(defs, m), loaded), Enum.concat([d0, d1, d2, d3, d4, d5, d6])}
+    {Map.merge(expanded(defs, m), loaded), Enum.concat([d0, d1, d2, d3, d4, d5])}
   end
+
+  # The facts a module adds for its own declarations (@engine_facts: scene, skill, trail).
+  defp engine_facts(mod, {facts, ds}, m, defs),
+    do: with({facts, d} <- mod.facts(facts, m, defs), do: {facts, ds ++ d})
 
   # The one-file-per-definition kinds (@kinds) and their diagnostics.
   defp kinds(files) do

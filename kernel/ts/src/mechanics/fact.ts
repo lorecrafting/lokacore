@@ -228,6 +228,14 @@ export function typedFact(
   );
 }
 
+// Toolbox row W13: a compiler-reserved trail fact (a plan's with trail, the player's if one hunts).
+const trailFact = (world: World, k: string) =>
+  Object.values(world.cartridge.populations ?? {}).some(
+    (p) =>
+      (p.trail && (k === `trail_${p.key}_exit` || k === `trail_${p.key}_at`)) ||
+      (p.hunts && (k === 'trail_exit' || k === 'trail_at')),
+  );
+
 /** Registered invariants of facts (protocol/invariants.json), pure checks of a world. */
 export const invariants: Readonly<Record<string, (world: World) => boolean>> = {
   facts_typed: (world) =>
@@ -238,9 +246,12 @@ export const invariants: Readonly<Record<string, (world: World) => boolean>> = {
         subject_id?: string;
       };
       const s = t.subject_id;
-      // A subject is an NPC, item or detail of this world (row W2); nothing removes one.
+      // A subject is an NPC, item, detail (row W2) or a trail fact's room (W13); none is removed.
       const known =
-        s === undefined || Object.hasOwn(world.entities, s) || Object.hasOwn(world.details, s);
+        s === undefined ||
+        Object.hasOwn(world.entities, s) ||
+        Object.hasOwn(world.details, s) ||
+        (Object.hasOwn(world.rooms, s) && trailFact(world, t.fact.key));
       return known && typedFact(world, t, v);
     }),
 };

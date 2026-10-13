@@ -8,6 +8,7 @@ import { npcPassage } from '../movement/shared.ts';
 import { engaged } from './shared.ts';
 import { suppressed } from '../population/shared.ts';
 import { activeStatuses, moves } from '../status/shared.ts';
+import { left } from '../trail.ts';
 
 /** Exact C3 slot membership at admission; the roster never refills. */
 export function admission(world: World, target: EntityId, steps: Steps): EntityId[] | undefined {
@@ -68,7 +69,10 @@ export function flight(
   const here = world.state.containers[id];
   if (!plan.area.some((ref) => world.roomIds[refString(ref)] === here)) return;
   const leaving = moves(world, id) ? flightExit(world, here, plan.area, steps) : undefined;
-  return leaving && flightWrite(world, id, at, here, origin, leaving);
+  const fled = leaving && flightWrite(world, id, at, here, origin, leaving);
+  // Toolbox row W13: a trailing plan's fleeing member leaves its trail in the room it left.
+  const trail = fled ? left(world, world.character, here, fled.direction, at, plan) : [];
+  return fled && { ...fled, ops: [...fled.ops, ...trail] };
 }
 
 function flightWrite(

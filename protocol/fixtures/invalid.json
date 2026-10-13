@@ -27917,5 +27917,376 @@
         "code": "unknown_property"
       }
     ]
+  },
+  {
+    "name": "track_check_fields",
+    "contract": "ActionRecipe",
+    "value": {
+      "key": "pick_gate",
+      "label": "actions.pick_gate",
+      "aliases": [
+        "pick"
+      ],
+      "target": {
+        "kind": "detail",
+        "room": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "hall"
+        },
+        "detail": "gate"
+      },
+      "priority": 5,
+      "policy": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": []
+        }
+      },
+      "check": {
+        "key": "k",
+        "kind": "track",
+        "plan": "Hounds",
+        "quarry": "player"
+      },
+      "outcomes": {
+        "success": {
+          "sequence": [
+            {
+              "op": "fact.assign",
+              "fact": {
+                "cartridge_id": "c",
+                "cartridge_version": "1.0.0",
+                "kind": "fact",
+                "key": "gate_open"
+              },
+              "value": true
+            }
+          ],
+          "narration": {
+            "actor": "narration.pick.success"
+          }
+        },
+        "failure": {
+          "sequence": [],
+          "narration": {
+            "actor": "narration.pick.failure"
+          }
+        }
+      }
+    },
+    "errors": [
+      {
+        "path": "/check/plan",
+        "code": "pattern_mismatch"
+      },
+      {
+        "path": "/check/quarry",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "track_check_no_plan",
+    "contract": "ActionRecipe",
+    "value": {
+      "key": "pick_gate",
+      "label": "actions.pick_gate",
+      "aliases": [
+        "pick"
+      ],
+      "target": {
+        "kind": "detail",
+        "room": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "hall"
+        },
+        "detail": "gate"
+      },
+      "priority": 5,
+      "policy": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": []
+        }
+      },
+      "check": {
+        "key": "k",
+        "kind": "track"
+      },
+      "outcomes": {
+        "success": {
+          "sequence": [
+            {
+              "op": "fact.assign",
+              "fact": {
+                "cartridge_id": "c",
+                "cartridge_version": "1.0.0",
+                "kind": "fact",
+                "key": "gate_open"
+              },
+              "value": true
+            }
+          ],
+          "narration": {
+            "actor": "narration.pick.success"
+          }
+        },
+        "failure": {
+          "sequence": [],
+          "narration": {
+            "actor": "narration.pick.failure"
+          }
+        }
+      }
+    },
+    "errors": [
+      {
+        "path": "/check/plan",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "track_check_no_key",
+    "contract": "ActionRecipe",
+    "value": {
+      "key": "pick_gate",
+      "label": "actions.pick_gate",
+      "aliases": [
+        "pick"
+      ],
+      "target": {
+        "kind": "detail",
+        "room": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "hall"
+        },
+        "detail": "gate"
+      },
+      "priority": 5,
+      "policy": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": []
+        }
+      },
+      "check": {
+        "kind": "track",
+        "plan": "hounds"
+      },
+      "outcomes": {
+        "success": {
+          "sequence": [
+            {
+              "op": "fact.assign",
+              "fact": {
+                "cartridge_id": "c",
+                "cartridge_version": "1.0.0",
+                "kind": "fact",
+                "key": "gate_open"
+              },
+              "value": true
+            }
+          ],
+          "narration": {
+            "actor": "narration.pick.success"
+          }
+        },
+        "failure": {
+          "sequence": [],
+          "narration": {
+            "actor": "narration.pick.failure"
+          }
+        }
+      }
+    },
+    "errors": [
+      {
+        "path": "/check/key",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "trails_bounds",
+    "contract": "WorldSettings",
+    "value": {
+      "trails": {
+        "fresh_for": 0,
+        "leads": {
+          "sideways": "trail.lead.east"
+        },
+        "rain": true
+      }
+    },
+    "errors": [
+      {
+        "path": "/trails/fresh_for",
+        "code": "below_minimum"
+      },
+      {
+        "path": "/trails/leads/sideways",
+        "code": "unknown_property"
+      },
+      {
+        "path": "/trails/rain",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "trails_required",
+    "contract": "WorldSettings",
+    "value": {
+      "trails": {}
+    },
+    "errors": [
+      {
+        "path": "/trails/fresh_for",
+        "code": "missing_property"
+      },
+      {
+        "path": "/trails/leads",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "trails_types",
+    "contract": "WorldSettings",
+    "value": {
+      "trails": {
+        "fresh_for": 1.5,
+        "leads": {
+          "north": "Trail East",
+          "south": "Trail East",
+          "east": "Trail East",
+          "west": "Trail East",
+          "up": "Trail East",
+          "down": "Trail East"
+        }
+      }
+    },
+    "errors": [
+      {
+        "path": "/trails/fresh_for",
+        "code": "invalid_type"
+      },
+      {
+        "path": "/trails/leads/down",
+        "code": "pattern_mismatch"
+      },
+      {
+        "path": "/trails/leads/east",
+        "code": "pattern_mismatch"
+      },
+      {
+        "path": "/trails/leads/north",
+        "code": "pattern_mismatch"
+      },
+      {
+        "path": "/trails/leads/south",
+        "code": "pattern_mismatch"
+      },
+      {
+        "path": "/trails/leads/up",
+        "code": "pattern_mismatch"
+      },
+      {
+        "path": "/trails/leads/west",
+        "code": "pattern_mismatch"
+      }
+    ]
+  },
+  {
+    "name": "trails_leads_type",
+    "contract": "WorldSettings",
+    "value": {
+      "trails": {
+        "fresh_for": 1,
+        "leads": []
+      }
+    },
+    "errors": [
+      {
+        "path": "/trails/leads",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "name": "trails_type",
+    "contract": "WorldSettings",
+    "value": {
+      "trails": true
+    },
+    "errors": [
+      {
+        "path": "/trails",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "name": "population_plan_trail_hunts_false",
+    "contract": "PopulationPlan",
+    "value": {
+      "key": "bandits",
+      "bundle": {
+        "cartridge_id": "encounter_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "population_bundle",
+        "key": "bandits"
+      },
+      "home": {
+        "cartridge_id": "encounter_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "room",
+        "key": "road"
+      },
+      "area": [
+        {
+          "cartridge_id": "encounter_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "road"
+        },
+        {
+          "cartridge_id": "encounter_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "crossroads"
+        }
+      ],
+      "cap": 1,
+      "day_target": 1,
+      "night_target": 1,
+      "night_start": 20,
+      "night_end": 6,
+      "replacement_delay": 3600,
+      "wander_interval": 3600,
+      "chance": 25,
+      "trail": false,
+      "hunts": false
+    },
+    "errors": [
+      {
+        "path": "/hunts",
+        "code": "const_mismatch"
+      },
+      {
+        "path": "/trail",
+        "code": "const_mismatch"
+      }
+    ]
   }
 ]

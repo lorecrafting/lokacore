@@ -20,6 +20,7 @@ import {
 } from './cartridge_refs.ts';
 import { uses as dialogueUses } from './cartridge_dialogues.ts';
 import { tipUses as tips } from './cartridge_recipes.ts';
+import { trailUses } from './cartridge_trails.ts';
 import { scenes } from './cartridge_scenes.ts';
 import { uses } from './cartridge_reactions.ts';
 import { fromUtf8 } from '../foundation/sha256.ts';
@@ -217,12 +218,8 @@ function lockStage(c: Obj): Diagnostic[] {
     if (!Object.hasOwn(locked, owner))
       out.push(diag('UNDECLARED_CAPABILITY', path, { capability: owner }, [owners[name]]));
   };
-  for (const [ref, a] of Object.entries(c.actions as Obj))
-    use(
-      'command',
-      a.command === 'run_job' ? '' : a.command,
-      `.cartridge.actions${step(ref)}.command`,
-    );
+  for (const [ref, { command: k }] of Object.entries(c.actions as Obj))
+    use('command', k === 'run_job' ? '' : k, `.cartridge.actions${step(ref)}.command`);
   for (const [n, at] of nodes(c)) use('policy', n.op, `${at}.op`);
   for (const [kind, , at] of parts(c)) {
     use('definition', kind, at);
@@ -243,7 +240,8 @@ function lockStage(c: Obj): Diagnostic[] {
       use('definition', kind, `.cartridge.${kind}s${step(ref)}`);
   for (const ref of Object.keys((c.quests ?? {}) as Obj))
     use('event', 'quest_activated', `.cartridge.quests${step(ref)}`);
-  for (const [kind, name, at] of [...uses(c), ...dialogueUses(c), ...tips(c)]) use(kind, name, at);
+  for (const [kind, name, at] of [...uses(c), ...dialogueUses(c), ...tips(c), ...trailUses(c)])
+    use(kind, name, at);
   return out;
 }
 
