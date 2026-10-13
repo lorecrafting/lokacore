@@ -1,0 +1,12 @@
+{
+  "duration": 86400,
+  "tick_every": 43200,
+  "resource": "hp",
+  "per_tick": -1,
+  "label": "condition.spoiling",
+  "narration": {
+    "applied": "narration.spoiling.applied",
+    "tick": "narration.spoiling.tick",
+    "expired": "narration.spoiling.expired"
+  }
+}

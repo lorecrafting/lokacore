@@ -38,6 +38,7 @@ defmodule Loka.Content.LeafRefs do
       "damage" => %{"npc" => "npc"},
       "light.ignite" => %{"item" => "item"},
       "barrier.set" => %{"barrier" => "barrier"},
+      "item.move" => %{"room" => "room"},
       "quest.activate" => %{"quest" => "quest"},
       "quest.resolve" => %{"quest" => "quest"},
       "quest.fail" => %{"quest" => "quest"}

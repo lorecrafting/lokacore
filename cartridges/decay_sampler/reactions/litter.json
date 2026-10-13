@@ -1,0 +1,13 @@
+{
+  "on": {
+    "event": "item_dropped",
+    "item": "rag"
+  },
+  "apply": [
+    {
+      "op": "status.apply",
+      "status": "rot",
+      "item": "rag"
+    }
+  ]
+}

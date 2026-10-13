@@ -1,0 +1,16 @@
+{
+  "keywords": [
+    "smoked"
+  ],
+  "short": "item.smoked_fish.short",
+  "room_line": "item.smoked_fish.room",
+  "description": "item.smoked_fish.description",
+  "mass_grams": 500,
+  "immune": [
+    "spoiling"
+  ],
+  "location": {
+    "in": "room",
+    "room": "market"
+  }
+}

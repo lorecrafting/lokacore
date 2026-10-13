@@ -1,0 +1,13 @@
+{
+  "keywords": [
+    "rag"
+  ],
+  "short": "item.rag.short",
+  "room_line": "item.rag.room",
+  "description": "item.rag.description",
+  "mass_grams": 500,
+  "location": {
+    "in": "room",
+    "room": "market"
+  }
+}

@@ -630,6 +630,16 @@
                 },
                 "required": ["op", "amount"],
                 "additionalProperties": false
+              },
+              {
+                "description": "Toolbox row 41 (decay; kernel_api at least 1.77): when the event's subject is an item not already directly in room and not consumed, transfer it from its current holder to room (one entity.transfer, no event, no line, no capacity or reach check); any other subject takes nothing.",
+                "type": "object",
+                "properties": {
+                  "op": { "const": "item.move" },
+                  "room": { "$ref": "identity.schema.json#/$defs/DefinitionRef" }
+                },
+                "required": ["op", "room"],
+                "additionalProperties": false
               }
             ]
           }

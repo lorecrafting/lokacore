@@ -24519,6 +24519,55 @@
     ]
   },
   {
+    "name": "reaction_item_move_no_room",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "status_expired"
+      },
+      "apply": [
+        {
+          "op": "item.move"
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/apply/0/room",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "reaction_item_move_extra_key",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "status_expired"
+      },
+      "apply": [
+        {
+          "op": "item.move",
+          "room": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "midden"
+          },
+          "to": "open"
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/apply/0/to",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
     "contract": "StatusDefinition",
     "value": {
       "key": "flying",
