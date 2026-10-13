@@ -37,3 +37,14 @@
 2. Acceptance c rewritten (give, not take, fires `gift_apple`): accepted (PM); the test comment states why and the M4 mutant kills it.
 3. `tally()` exported for the drift test instead of a test-only parameter: accepted; the brief allows "the exported drift function".
 4. `agrees` omits `action_key` and `world_context_id`: equivalent to `sim.ts:260-275`, which passes neither an action key nor a context other than the command's.
+
+## Fix round 1 (head `f68c90cb761783f98e6d6466ce8c44a1f8179cfd`)
+
+Scoped to `f68c90c` (`friction.ts`, `friction.test.ts`) and the callers `refusal`, `walk` and `observe`. Green: friction and flows tests 11/11, `npm run typecheck`, `check_ts_size`, prettier.
+
+1. Finding 1 **fixed**: `friction.test.ts:95-112` plants trust 1 to 2 at step 5 and expects count 1, median 5 (gap 5 − 0, hand-checked). M3 rerun is killed by exactly this test.
+2. Finding 2 **fixed**: `roomOf` is back to the room's key, with no fallback (`friction.ts:20`).
+3. Finding 3 **fixed**, with a new gap: `friction.ts:96-111` caches the view and resolves in a `WeakMap` keyed on the before-world. **should-fix** `kernel/ts/test/friction.test.ts:117-136`: mutant M7 keys the cache on one constant, so the first world's view is reused for every later refusal, and the suite stays green (11/11). The only drift test observes one world. Failure: an edit that keys the cache on the seed or the run checks each refusal against the start room's view. A refused `move west` in gate then finds no west exit in square's view, counts as agreeing, and real drift reads 0, which is the number loka-kgd.107.3 may gate on. Fix: in the drift test, first observe a refusal in square (no drift), then a world in gate refusing `move west` with `invalid_state`. Expect drift 1, room `gate`. M7 then fails it.
+4. Finding 4: the PM reports the `/code-review` result; not verified here.
+
+Verdict after round 1: **APPROVE WITH NOTES** (one should-fix, item 3).
