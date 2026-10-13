@@ -26577,5 +26577,179 @@
         "code": "unknown_property"
       }
     ]
+  },
+  {
+    "contract": "RoomDefinition",
+    "value": {
+      "key": "hut",
+      "title": "t",
+      "description": "d",
+      "exits": {},
+      "locks": {}
+    },
+    "errors": [
+      {
+        "path": "/locks/enter",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "RoomDefinition",
+    "value": {
+      "key": "hut",
+      "title": "t",
+      "description": "d",
+      "exits": {},
+      "locks": {
+        "build": {
+          "policy_version": 1,
+          "root": {
+            "op": "all",
+            "items": []
+          }
+        },
+        "enter": {
+          "policy_version": 1,
+          "root": {
+            "op": "all",
+            "items": []
+          }
+        }
+      }
+    },
+    "errors": [
+      {
+        "path": "/locks/build",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "RoomDefinition",
+    "value": {
+      "key": "hut",
+      "title": "t",
+      "description": "d",
+      "exits": {},
+      "locks": {
+        "enter": "guest"
+      }
+    },
+    "errors": [
+      {
+        "path": "/locks/enter",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "contract": "Connection",
+    "value": {
+      "to": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "b"
+      },
+      "locks": {
+        "get": {
+          "policy_version": 1,
+          "root": {
+            "op": "all",
+            "items": []
+          }
+        }
+      }
+    },
+    "errors": [
+      {
+        "path": "/locks/get",
+        "code": "unknown_property"
+      },
+      {
+        "path": "/locks/traverse",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "ItemDefinition",
+    "value": {
+      "key": "chest",
+      "keywords": [
+        "chest"
+      ],
+      "short": "s",
+      "room_line": "r",
+      "description": "d",
+      "location": {
+        "in": "template"
+      },
+      "container": true,
+      "locks": {}
+    },
+    "errors": [
+      {
+        "path": "/locks/get",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "ItemDefinition",
+    "value": {
+      "key": "chest",
+      "keywords": [
+        "chest"
+      ],
+      "short": "s",
+      "room_line": "r",
+      "description": "d",
+      "location": {
+        "in": "template"
+      },
+      "container": true,
+      "locks": {
+        "enter": {
+          "policy_version": 1,
+          "root": {
+            "op": "all",
+            "items": []
+          }
+        },
+        "put": {
+          "policy_version": 1,
+          "root": {
+            "op": "all",
+            "items": []
+          }
+        }
+      }
+    },
+    "errors": [
+      {
+        "path": "/locks/enter",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "Connection",
+    "value": {
+      "to": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "b"
+      },
+      "locks": "resident"
+    },
+    "errors": [
+      {
+        "path": "/locks",
+        "code": "invalid_type"
+      }
+    ]
   }
 ]

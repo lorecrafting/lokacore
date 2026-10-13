@@ -84,13 +84,15 @@ defmodule Loka.Content.Entities do
     for {_, rel, e} <- all(defs), {steps, root} <- roots(e), do: {rel, steps, root}
   end
 
-  # Variant and (row W10) schedule case conditions, and (row G11) disposition conditions.
+  # Variant and (row W10) schedule case conditions, (row G11) disposition conditions and (row G7)
+  # access locks.
   defp roots(e) do
     for({steps, v} <- variants(e) ++ cases(e), do: {steps ++ ["when", "root"], v["when"]["root"]}) ++
-      for f <- ~w(hostile friendly),
-          p = get_in(e, ["disposition", f]),
-          p != nil,
-          do: {["disposition", f, "root"], p["root"]}
+      policies(e, "disposition", ~w(hostile friendly)) ++ policies(e, "locks", ~w(get put))
+  end
+
+  defp policies(e, field, keys) do
+    for k <- keys, p = get_in(e, [field, k]), p != nil, do: {[field, k, "root"], p["root"]}
   end
 
   # Toolbox row W10: each case of a source daily_schedule hour list (Loka.Content.Schedules).

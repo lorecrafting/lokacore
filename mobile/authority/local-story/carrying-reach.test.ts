@@ -138,8 +138,10 @@ if (process.env.LOKA_CARRY_REACH_PROBE) {
         code: 'budget_exceeded',
       });
     }
+    // Each take offer charges at least two query steps (its reach edge and its get-walk edge, row
+    // G7), so 16384 offers spend all 32768 and the 16385th faults; ids[0]'s verdict stays cached.
     const ids = Array.from(
-      { length: 32769 },
+      { length: 16385 },
       (_, n) => `00000000-0000-4000-8000-${String(n).padStart(12, '0')}`,
     );
     const many: World = {
@@ -157,8 +159,8 @@ if (process.env.LOKA_CARRY_REACH_PROBE) {
       },
     };
     const projected = lists(many, many.character);
-    for (const id of ids.slice(0, 32768)) projected.of('room_contents', id);
-    const offer = projected.of('room_contents', ids[32768]).find((a) => a.action_key === 'take');
+    for (const id of ids.slice(0, 16384)) projected.of('room_contents', id);
+    const offer = projected.of('room_contents', ids[16384]).find((a) => a.action_key === 'take');
     assert.ok(offer && !offer.available);
     assert.deepEqual(offer.reason, { code: 'budget_exceeded' });
     assert.ok(

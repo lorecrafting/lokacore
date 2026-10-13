@@ -1,0 +1,31 @@
+{
+  "title": "room.hut.title",
+  "description": "room.hut.description",
+  "locks": {
+    "enter": {
+      "policy_version": 1,
+      "root": {
+        "op": "any",
+        "items": [
+          {
+            "op": "fact_compare",
+            "fact": "role",
+            "npc": "ada",
+            "equals": "guest"
+          },
+          {
+            "op": "fact_compare",
+            "fact": "role",
+            "npc": "ada",
+            "equals": "resident"
+          }
+        ]
+      }
+    }
+  },
+  "exits": {
+    "south": {
+      "to": "lane"
+    }
+  }
+}

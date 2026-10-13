@@ -4,6 +4,7 @@ import { LIMITS, type EntityId } from '../../contracts.gen.ts';
 import { liquidRowValid } from '../../foundation/compose_liquid.ts';
 import { add, mul, saturate } from '../../foundation/int.ts';
 import { opened, reach, barrierState } from '../lookups.ts';
+import { chainRefused } from '../locks.ts';
 import type { Steps, World } from '../../runtime/decision.ts';
 import { refString } from '../../runtime/decision.ts';
 import { movable } from '../../runtime/created.ts';
@@ -209,6 +210,9 @@ export function putRefused(
       ? ('exit_locked' as const)
       : ('exit_closed' as const);
   if (!opened(world, destination, body)) return 'not_present' as const;
+  // The one character's put locks, the destination's and its containers' (W26: NPCs ignore them).
+  const locked = chainRefused(world, world.character, destination, 'put', steps);
+  if (locked) return locked;
   const capacity = world.capacities[destination];
   if (capacity !== undefined) {
     let count = 0;

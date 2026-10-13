@@ -1,4 +1,4 @@
-// size: allow 330, food, water, practical skills and local Knock share the composed view list
+// size: allow 333, food, water, practical skills, local Knock and G7 get locks share the composed view list
 import { running as modalScene } from '../mechanics/scene/shared.ts';
 import { foodActions } from './food.ts';
 import { useActions } from './use.ts';
@@ -33,6 +33,7 @@ import { attackRefused } from '../mechanics/combat/shared.ts';
 import { combatOffered } from './combat.ts';
 import * as expedition from '../mechanics/expedition/shared.ts';
 import { reach } from '../mechanics/lookups.ts';
+import { chainRefused } from '../mechanics/locks.ts';
 
 // Shared query context projects exact offers in priority/key order. Recipes bind their detail (a
 // use recipe, row G4, lists only its pairs on the held tool, view/use.ts);
@@ -115,13 +116,17 @@ export function lists(world: World, actor: CharacterId, steps = { n: 0 }) {
 }
 
 function takeAdmission(world: World, body: EntityId | undefined, steps: { n: number }) {
-  const reachedItems = new Map<EntityId, boolean>();
+  // Each item's reach and get-walk verdict, kept so a later budget fault does not undo it.
+  const admitted = new Map<EntityId, boolean | 'permission_denied'>();
   let carry: ReturnType<typeof carrying> | undefined;
   return (item: EntityId) => {
     if (!body || world.entities[item]?.kind !== 'item') return 'invalid_target' as const;
     if (world.state.containers[item] === body) return 'invalid_state' as const;
-    const reached = reachedItems.get(item) ?? reach(world, body, item, steps);
-    if (typeof reached === 'boolean') reachedItems.set(item, reached);
+    let reached = admitted.get(item) ?? reach(world, body, item, steps);
+    if (reached === true && !admitted.has(item))
+      reached = chainRefused(world, world.character, item, 'get', steps) ?? true;
+    if (typeof reached === 'boolean' || reached === 'permission_denied')
+      admitted.set(item, reached);
     if (typeof reached === 'string') return reached;
     if (!reached) return 'not_present' as const;
     carry ??= carrying(world, body, steps);

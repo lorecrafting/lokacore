@@ -1,0 +1,21 @@
+{
+  "facts": {
+    "role": {
+      "version": 1,
+      "value_type": {
+        "type": "enum",
+        "values": [
+          "stranger",
+          "guest",
+          "resident"
+        ],
+        "default": "stranger"
+      },
+      "scopes": [
+        "player"
+      ],
+      "per_subject": true,
+      "meaning": "What Ada lets the character do at her hut: a stranger nothing, a guest enter, a resident everything."
+    }
+  }
+}
