@@ -1367,6 +1367,21 @@ Required cartridge text:
 - A cancel: `service.no_order` and `service.ready`.
 - A commission with `ready_after`: also `service.no_output`.
 
+### Property and bank declarations
+
+[Property and bank](mechanics.md#property-and-bank-toolbox-rows-24-and-25) adds two `ServiceBenefit` kinds (`protocol/service.schema.json`), `{kind: "deposit", account, vault, amount}` and `{kind: "withdraw", account, vault, amount}`, no other keys. `account` is a fact ref and `vault` an NPC ref (short keys in source); `amount` is an integer 1 to 1000000. Either needs `kernel_api` at least **1.83**. Property itself declares nothing new: an `entitlement` service and G7 `locks`.
+
+The compiler (`lib/loka/content/services.ex`) and the loader (`kernel/ts/src/content/cartridge_services.ts`) refuse:
+
+- An `account` that is not a fact, or a `vault` that is not an NPC: UNRESOLVED_REFERENCE at `.benefit.account` or `.benefit.vault`.
+- An `account` that is not a bounded int player fact (scopes `["player"]`, `minimum` 0, a `maximum`, default 0): SCHEMA_VIOLATION `invalid_value` at `.benefit.account`.
+- A `vault` without a `resource_starts` entry in the service's currency: SCHEMA_VIOLATION `invalid_value` at `.benefit.vault`.
+- Two deposit or withdraw services naming one `account` with different vaults: SCHEMA_VIOLATION `invalid_value` at the later service's `.benefit.vault`.
+
+The account is engine-written: an authored write to it (a dialogue, reaction or recipe `fact.assign` or `fact.adjust`) is RESERVED_FACT, as for an entitlement fact. Another benefit cannot name it: an entitlement needs a Boolean fact and a repair a durability fact.
+
+Required cartridge text: `service.unaffordable`, and `service.no_funds` for either kind.
+
 ## D2 public Priory and book authoring
 
 [D2](mechanics.md#d2-held-books-and-public-priory-selected-contract) adds

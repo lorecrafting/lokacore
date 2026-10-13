@@ -2753,3 +2753,42 @@ Found by [showcase plan 2](../showcase/combat-district.md) (#368); the PM brief 
 - **Traps.** None applies: no new job, event, op or save row.
 - **Sampler.** `cartridges/doors_sampler`: a lane (entry); a hut north of it behind `hut_door` (key `hut_key`, open); a yard east behind `gate` (key `gate_key`, locked); a keep east of the yard. The thief (in the lane) walks to the hut at 08:00 and jumps to the yard at 10:00; the guard (in the lane, holding `gate_key`, which his dialogue can hand over, so the key is in reach) walks to the keep at 09:00; `hut_key` lies in the lane for the player to take (a player starts holding nothing). The door open, the thief enters the hut; the player locks it first and the thief stays in the lane; the guard passes the gate, which reads locked after, with four `barrier_changed`.
 - **Composition record** ([architecture](architecture.md#building-mechanics-by-composition)). Consumer: `doors_sampler`; next row 24 (a stranger refused), 33 (theft), S3. Reads: exits, barriers, keys held, whether a G7 lock exists, W10 cases. Writes: the NPC's `entity.transfer` (as today) and `barrier.transition` with `barrier_changed` (existing op and event); jobs and save rows: none new. Reused: `passage`, the barrier transitions, W10 `placeOf`, the G6 bounded walk. New: `npcPassage`, `walks` on a case and a plan, the 1.81 floor. Missing invariant: none (the barrier ends where it began). Bounded traversal: one query step per exit tried.
+
+## Property and bank (toolbox rows 24 and 25)
+
+[Toolbox rows 24 and 25](../MECHANICS-TOOLBOX.md#ranked-toolbox); the sampler: "buy a hut; lock it; stranger refused; chest keeps items; deposit ten pennies; withdraw at a second branch". The archived seam is C3-M12 ([LATER-MECHANICS](../archive/LATER-MECHANICS.md)). The PM brief is in Beads `loka-kgd.127` (2026-10-13). [Declarations](cartridge.md#property-and-bank-declarations) govern it. Property is content on what exists; the bank is two service benefit kinds.
+
+- **Property (content).** A [B8](#b8-mauds-immediate-services-selected-contract) entitlement service sets a service-owned Boolean player fact (`owns_hut`). [G7](#access-locks-toolbox-row-g7) locks read it: the hut room's `locks.enter` and its chest's `locks.get` and `locks.put` are each `fact_compare {fact owns_hut, equals true}`. The door is a barrier with a `key_item`; "lock it" is the existing barrier lock verb with that key. No existing writer can hand an item over on purchase (a reaction's `item.move` moves only its event's subject to a room, and an entitlement writes one fact), so the key lies in the hut and the owner takes it on first entry. Before purchase the enter lock refuses the player `permission_denied`; a walking NPC ([W26](#npcs-use-doors-toolbox-row-w26)) is refused by any G7 lock, whoever owns the hut.
+- **Declaration.** Two `ServiceBenefit` kinds, `{kind: "deposit", account, vault, amount}` and `{kind: "withdraw", account, vault, amount}`. `account` names a bounded int player fact (minimum 0); `vault` names an NPC holding a pool of the service's currency; `amount` is an integer 1 to 1000000. The service `price` (minimum 1) stays the fee and is separate from `amount`.
+- **Admission.** `transition` (`kernel/ts/src/mechanics/service/shared.ts`), after the quoted-price check: a withdraw whose account value is below `amount` refuses `invalid_state`, `service.no_funds`, before payment. Then the fee, as for every service (`insufficient_resource`, `service.unaffordable`).
+- **Transition.** Each op chains on the levels the earlier ops left (one proposal).
+  - Deposit: the fee from the body to the provider, then `amount` from the body to the vault, then `fact.assign` of the account to its value + `amount`. When the body cannot pay `amount` after the fee, the vault pool would pass its maximum, or the account would pass its maximum: `insufficient_resource`, `service.unaffordable`.
+  - Withdraw: the fee, then `amount` from the vault to the body, then `fact.assign` of the account to its value − `amount`. When the vault holds less than `amount` or the body's pool would pass its maximum: `invalid_state`, `service.no_funds`.
+
+  Money is conserved: the player's pool, the vault and the providers change only by the transfers; the account mirrors what the vault holds for the player. Any branch naming the same vault and account serves the same balance.
+- **Writer.** service@1 writes the account (as an entitlement's fact: `ownership` refuses any other writer) and the transfers (B3's resource transfer).
+- **Offer.** The GameView offers call the same `transition`, so each shows the refusal its use would get.
+- **Silent.** No event beyond a service's own: outcome `service_used`, its narration and the account's `fact_changed`.
+- **Known limits.**
+  - One currency per bank (the service's); no interest, loans or fees on the balance.
+  - Item deposit is the locked chest (content), not a bank benefit.
+  - The vault NPC must not be killable or otherwise drained in content that uses it (authoring rule); a vault short of `amount` refuses `service.no_funds`.
+  - A withdraw the purse cannot hold refuses `service.no_funds`; a deposit past the account's maximum refuses `service.unaffordable`.
+  - The account shows in the Book only as any player fact does today.
+  - Mobile commerce save reconciles the deposit or withdraw pair after the fee when the currency is a shop's resource.
+- **Opt-in.** `deposit` and `withdraw` need `kernel_api` 1.83 (KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least`, both kernels). Property alone needs only G7 (1.78) and an entitlement. Chapter 1 and every other sampler declare none and keep their bytes and hash.
+- **Book.** No new element and no [Book UI](book-ui.md) change: two more service offers.
+- **Traps.** None applies: no new job, op, event, command or save section.
+- **Sampler.** `cartridges/property_sampler`: a lane (entry); a hut north behind `hut_door` (open, key `hut_key`, lying in the hut) with an enter lock on `owns_hut`; a chest in the hut with get and put locks on `owns_hut`; a market east of the lane; a sealed strongroom. The seller (lane) offers `buy_hut` for 10; clerk A (lane) and clerk B (market) each offer deposit and withdraw of 10 pennies for a fee of 1 into the vault NPC (strongroom, pennies 0) on account `savings`; the thief (lane) walks to the hut at 08:00. The player starts with 30 pennies.
+  - Before purchase, north refuses `permission_denied`. Buying leaves 20; north, then a put into and a take from the chest, are accepted.
+  - The owner takes the key, steps south, closes and locks the door; at 08:00 the thief stays in the lane. The player unlocks, opens and walks in.
+  - Deposit at A: pennies 9, `savings` 10, vault 10. Withdraw at B: pennies 18, `savings` 0, vault 0. A second withdraw refuses `service.no_funds` and nothing moves.
+- **Composition record** ([architecture](architecture.md#building-mechanics-by-composition)).
+  - Consumer: `property_sampler`. Later: S1 homes, 33 theft, showcase.
+  - Reads: the account fact, the body and vault pools, G7 locks over the entitlement fact.
+  - Writes: B3's resource transfer and `fact.assign`. Both are existing ops.
+  - Writer ownership: service@1 owns the account and the entitlement fact.
+  - Events and save rows: none new.
+  - Reused: B8 entitlement, G7 locks, the barrier lock verb and key, W26 walking, service offers, `ownership`, `bounded`.
+  - New: two benefit kinds, one message key (`service.no_funds`), the 1.83 floor.
+  - Missing invariant: none (resource bounds and composition `from` checks cover the transfers).
