@@ -547,6 +547,37 @@ reads it and nothing runs it in CI.
   whatever the round code does). ponytail: no flee, consumables, spells, statuses or gear sweeps;
   the authored `rating` field (study L5) is not read.
 
+### Refusal and friction report (balance tool 8)
+
+Balance tool 8 ([study](../rnd/balance-diagnostics-2026-10-11.md) §7 X1 and X3, §13; Beads
+`loka-kgd.107.8`) reports which commands a purposeful player is refused, where and why, whether the
+view offered what admission refused, and how much the walk backtracks. `node
+kernel/ts/play/friction.ts <artifact> [--seeds N] [--days D]` (defaults 16 and 3) loads and refuses
+as `flows.ts` above, exits 2 on a bad flag, and prints one canonical JSON document. Nothing is
+committed or checked in CI (gating is `loka-kgd.107.3`).
+
+- **The run.** Measured flows' run, policy `worker` by default, unchanged: its optional
+  `observe(before, payload, result, at)` hook sees every candidate it steps, refused or accepted,
+  with the plain step's result and `at = {command, seed, step}`. Every candidate stepped is one
+  command.
+- **Refusals (X1).** `commands`, `refused`, `per_100` (refused × 100 / commands, a decimal string
+  with two places), and refused counts `by_code` (the rejection's error code), `by_room` (the
+  definition key of the room the player stood in) and `by_command` (the payload type, with
+  `:<action key>` for a cartridge action's `perform`).
+- **Drift.** Each refused candidate is checked with `gameview_agrees_with_admission` on the
+  GameView before it and the actor's resolved actions (as the simulator builds them); accepted
+  ones are already checked by the run. `drift: {count, first}`, `first` the earliest five
+  `{seed, step, room, command, code}`.
+- **Walk (X3).** From accepted steps only: `revisits` per room key (its entries minus one; the
+  start room's first entry counts), `moves` (accepted steps that change the room), `backtracks`
+  (moves back into the room left on the previous room change), and `new_facts: {count,
+  median_steps_between}`: a new fact is an accepted step after which `state.facts` holds a key it
+  did not hold or a different value; steps between are counted from the run's start or its
+  previous new fact (lower median, null when none).
+- **Output** `{cartridge, policy, seeds, days, commands, refused, per_100, by_code, by_room,
+  by_command, drift, revisits, moves, backtracks, new_facts}`, summed over seeds. ponytail: one
+  policy; no heat map image (the by-room table is the map); no gate.
+
 ## Installed capabilities
 
 `INSTALLED` in `kernel/ts/src/runtime/world.ts` declares the current kernel API,
