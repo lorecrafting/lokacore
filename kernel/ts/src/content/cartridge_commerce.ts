@@ -12,10 +12,6 @@ export function commerce(c: Obj): Diagnostic[] {
       resource = c.resources?.[refString(s.resource)];
     const [major, minor] = c.manifest.requires.kernel_api.at_least.split('.').map(Number);
     if (major < 1 || (major === 1 && minor < 16)) out.push(diag('KERNEL_API_RANGE_INVALID', at));
-    if (s.offers.some((o: Obj) => o.stock) && (major < 1 || (major === 1 && minor < 82)))
-      out.push(
-        diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'),
-      );
     const ids = s.offers.map((o: Obj) => refString(o.item));
     if (new Set(ids).size !== ids.length) out.push(diag('DUPLICATE_DEFINITION', at));
     if (
@@ -26,10 +22,7 @@ export function commerce(c: Obj): Diagnostic[] {
       npc.resource_starts?.[s.resource.key] === undefined
     )
       out.push(diag('RESOURCE_SPEC_INVALID', at));
-    const plain = s.offers.filter((o: Obj) => !o.stock).map((o: Obj) => refString(o.item));
-    s.offers.forEach((o: Obj, i: number) =>
-      out.push(...stock(c, o, `${at}.offers[${i}].stock`, plain)),
-    );
+    out.push(...stocks(c, s.offers, at, major * 1000 + minor));
     for (const o of s.offers) {
       const item = c.items?.[refString(o.item)];
       if (
@@ -63,6 +56,16 @@ function discountValid(c: Obj, s: Obj, npc: Obj) {
         .flatMap((o: Obj) => [o.buy, ...(o.stock?.buy ?? [])])
         .every((buy: number) => d.minimum <= buy && Number.isSafeInteger(buy * d.numerator)))
   );
+}
+
+// Toolbox row W11: stock offers need kernel_api 1.82; each set is checked against the plain offers.
+function stocks(c: Obj, offers: Obj[], at: string, version: number): Diagnostic[] {
+  const out: Diagnostic[] = [];
+  if (offers.some((o) => o.stock) && version < 1082)
+    out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
+  const plain = offers.filter((o) => !o.stock).map((o) => refString(o.item));
+  offers.forEach((o, i) => out.push(...stock(c, o, `${at}.offers[${i}].stock`, plain)));
+  return out;
 }
 
 // Toolbox row W11: a price per count of a set of distinct items led by the offer's own.

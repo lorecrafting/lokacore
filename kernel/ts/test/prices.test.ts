@@ -148,8 +148,9 @@ test('a trade job moves a fish from the fisher to the fishmonger and the price f
   assert.deepEqual([held(w, fisher), held(w, monger), row(w).buy.price], [[], ['a', 'c'], 3]);
 });
 
-// e. Breaks: each declaration check dropped (a set naming a plain offer's item too), or the 1.82
-// floor lowered.
+// e. Breaks: each declaration check dropped (a set naming a plain offer's item, a flat buy other
+// than the first entry, an unresolved set item too), the discount bound skipping the table, or the
+// 1.82 floor lowered.
 test('the loader refuses a malformed stock table and a kernel_api below 1.82', () => {
   const offer = (c: any) => c.npcs[`${S}:npc/fishmonger`].shop.offers[0];
   const refused = (edit: (c: any) => void) => {
@@ -178,6 +179,27 @@ test('the loader refuses a malformed stock table and a kernel_api below 1.82', (
     }),
     ['DUPLICATE_DEFINITION', `${at}.items`, undefined],
   );
+  assert.deepEqual(
+    refused((c) => (offer(c).buy = 4)),
+    invalid,
+  );
+  assert.deepEqual(
+    refused((c) => (offer(c).stock.items[2] = ref('nowhere'))),
+    ['UNRESOLVED_REFERENCE', `${at}.items[2]`, undefined],
+  );
+  // The discount minimum must not exceed any table entry (fish_c alone costs 2).
+  const discount = (minimum: number) => (c: any) => {
+    const npc = c.npcs[`${S}:npc/fishmonger`];
+    npc.shop.buy_discount = { friendly: true, numerator: 1, denominator: 2, minimum };
+    npc.disposition = { friendly: { policy_version: 1, root: { op: 'all', items: [] } } };
+    c.manifest.requires.capabilities.policy = c.lock.capabilities.policy = 1;
+  };
+  assert.deepEqual(refused(discount(2)), 'loaded');
+  assert.deepEqual(refused(discount(3)), [
+    'RESOURCE_SPEC_INVALID',
+    `.cartridge.npcs["${S}:npc/fishmonger"].shop.buy_discount`,
+    undefined,
+  ]);
   assert.deepEqual(
     refused((c) => (c.manifest.requires.kernel_api.at_least = '1.81')),
     ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least', undefined],
