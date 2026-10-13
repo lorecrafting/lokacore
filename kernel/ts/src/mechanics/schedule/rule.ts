@@ -82,7 +82,7 @@ export const decideAt = (
 
     if (row.job.kind === CLOCK_JOB) return runClock(world, command, payload.job_id, row, mint);
     if (row.job.kind === 'population')
-      return runPopulation(world, command, payload.job_id, row, mint, at, steps);
+      return runPopulation(world, command, payload.job_id, row, mint, at);
     if (row.job.kind === 'replenish')
       return runReplenish(world, payload.job_id, row, mint, steps, at ?? row.due_time);
     if (row.job.kind === 'wage')
@@ -125,7 +125,8 @@ function scheduledJob(
   const { room, goal, walks } = placeOf(world, npc, at, steps);
   const from = world.state.containers[npc];
   // Toolbox row W26: a walking case moves only along a path, re-locking each key passage on it.
-  const path = from !== room && walks ? walkPath(world, npc, from, room, steps) : [];
+  const path =
+    from !== room && walks && moves(world, npc) ? walkPath(world, npc, from, room, steps) : [];
   // A goal (toolbox row W10) is narration only when the player sees the NPC leave.
   const stays = from === room || !moves(world, npc) || !path;
   const doors = stays ? [] : path.flatMap(relock);

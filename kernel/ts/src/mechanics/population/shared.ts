@@ -15,7 +15,6 @@ import {
   refString,
   type JobRow,
   type Mint,
-  type Steps,
   type World,
 } from '../../runtime/decision.ts';
 import { key } from '../../foundation/compose.ts';
@@ -182,7 +181,6 @@ export function runPopulation(
   row: JobRow,
   mint: Mint,
   at = row.due_time,
-  steps: Steps = { n: 0 },
 ) {
   const plan = world.cartridge.populations?.[refString(row.job)];
   const control = world.state.population_plans?.[key(row.job)];
@@ -203,7 +201,7 @@ export function runPopulation(
   const born = quiet
     ? { ops: [] as DeltaOp[], ids: new Set<string>(), rng: world.state.rng }
     : encounter(world, command.id, job, target, slots, mint, at === wanderDue);
-  const walked: Walked = { steps, events: [] };
+  const walked: Walked = [];
   const ops: DeltaOp[] = [
     ...(row.status === 'pending' ? [{ op: 'job.complete', writer_group: 0, job_id } as const] : []),
     ...born.ops,
@@ -213,7 +211,7 @@ export function runPopulation(
   ];
   const after = successor(world, plan, job, control, wanderDue, target, slots, mint);
   if (typeof after !== 'number') ops.push(...after);
-  const ran = accepted(world, 'job_ran', ops, walked.events, undefined, born.rng);
+  const ran = accepted(world, 'job_ran', ops, walked, undefined, born.rng);
   return typeof after === 'number' ? { ...ran, next: after } : ran;
 }
 

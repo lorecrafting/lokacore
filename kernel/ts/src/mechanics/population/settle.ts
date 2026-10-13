@@ -7,13 +7,7 @@ import type {
 } from '../../contracts.gen.ts';
 import { key } from '../../foundation/compose.ts';
 import { uniform } from '../../foundation/rng.ts';
-import {
-  refString,
-  type JobRow,
-  type Mint,
-  type Steps,
-  type World,
-} from '../../runtime/decision.ts';
+import { refString, type JobRow, type Mint, type World } from '../../runtime/decision.ts';
 import { engaged } from '../combat/shared.ts';
 import { living } from '../death/shared.ts';
 import { barrierState } from '../lookups.ts';
@@ -25,11 +19,8 @@ import { bindSight } from './behavior.ts';
 
 export type Plan = World['populationSpecs'][string]['plan'];
 type Changed = Extract<DomainEvent['payload'], { type: 'barrier_changed' }>;
-/** A wander job's query budget and its walking members' door events (toolbox row W26). */
-export type Walked = {
-  readonly steps: Steps;
-  readonly events: ReturnType<typeof happened<Changed>>[];
-};
+/** A wander job's walking members' door events (toolbox row W26). */
+export type Walked = ReturnType<typeof happened<Changed>>[];
 export type Slots = {
   slot: number;
   row: NonNullable<World['state']['population_slots']>[string];
@@ -180,7 +171,7 @@ function wanderOne(
   born: Set<string>,
   [home, nest]: EntityId[],
   mint: Mint,
-  { steps, events }: Walked,
+  events: Walked,
 ): DeltaOp[] {
   const member = row.member_id;
   if (!member || !wanderable(world, row, born, job)) return [];
@@ -188,7 +179,7 @@ function wanderOne(
   const to = from === home ? nest : from === nest ? home : undefined;
   const room = world.rooms[from];
   // Toolbox row W26: a walking plan crosses doors as a walking schedule step does.
-  const walker = plan.walks ? { npc: member as EntityId, steps } : undefined;
+  const walker = plan.walks ? (member as EntityId) : undefined;
   const edge =
     to &&
     Object.entries(room.exits).find(

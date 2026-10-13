@@ -15,7 +15,6 @@ import { KernelError } from '../../foundation/error.ts';
 import { saturate } from '../../foundation/int.ts';
 import { adjust, level, pay, resourceRef, resourceSpec, type Levels } from '../resource.ts';
 import { held } from '../policy.ts';
-import { lockRefused } from '../locks.ts';
 import { cmp } from '../../foundation/validate.ts';
 import { engaged } from '../combat/shared.ts';
 import { mul } from '../../foundation/int.ts';
@@ -67,19 +66,13 @@ export function passage(
  * the exit in `direction`: none there, a hidden face (whether or not the player found it) or a
  * climb face is not_found. Without a walker, then `passage`'s barrier refusal. A walker `npc`
  * (`walks`) crosses a closed barrier, a locked one only holding its key_item (the crossing
- * re-locks it: `relock`), then the exit's traverse and the destination's enter lock are read with
- * the player as actor and `npc` as target (each leaf charging `steps`). Undefined when it may.
+ * re-locks it: `relock`), and no G7 lock: any traverse lock on the exit or enter lock on the
+ * destination refuses, unread (NPCs hold no grants). Undefined when it may.
  */
-export function npcPassage(
-  world: World,
-  room: RoomDefinition,
-  direction: string,
-  walker?: { readonly npc: EntityId; readonly steps: Steps },
-) {
+export function npcPassage(world: World, room: RoomDefinition, direction: string, npc?: EntityId) {
   const exit = exitOf(room, direction);
   if (!exit || exit.hidden_until || exit.climb) return 'not_found' as const;
-  if (!walker) return passage(world, room, direction);
-  const { npc, steps } = walker;
+  if (!npc) return passage(world, room, direction);
   const key = exit.barrier && world.cartridge.barriers![refString(exit.barrier)].key_item;
   if (
     exit.barrier &&
@@ -88,10 +81,7 @@ export function npcPassage(
   )
     return 'exit_locked' as const;
   const there = world.roomIds[refString(exit.to)];
-  return (
-    lockRefused(world, world.character, exit.locks?.traverse, npc, steps) ??
-    lockRefused(world, world.character, world.rooms[there]?.locks?.enter, npc, steps)
-  );
+  if (exit.locks?.traverse || world.rooms[there]?.locks?.enter) return 'permission_denied' as const;
 }
 
 /**
@@ -114,20 +104,22 @@ export const relock = (barrier: DefinitionRef) =>
  * The locked barriers on the path a walking NPC `npc` takes from room `from` to room `to`
  * (toolbox row W26), in path order: breadth first over exits in direction-key order (the G6
  * bounded walk), crossing only exits `npcPassage` admits with walks, one query step per exit
- * tried. Undefined when no path is found within the step budget.
+ * tried, stopping at `to`. Undefined when `from` is no room or no path is found within the step
+ * budget.
  */
 export function walkPath(world: World, npc: EntityId, from: EntityId, to: EntityId, steps: Steps) {
   const via = new Map<string, { at: string; barrier?: DefinitionRef }>([[from, { at: from }]]);
+  if (!world.rooms[from]) return undefined;
   for (let edge: string[] = [from]; edge.length && !via.has(to);) {
     const next: string[] = [];
     for (const at of edge) {
       const room = world.rooms[at];
       for (const direction of Object.keys(room.exits).sort(cmp)) {
+        if (via.has(to)) break;
         if (++steps.n > LIMITS.query_steps) return undefined;
         const exit = exitOf(room, direction)!;
         const there = world.roomIds[refString(exit.to)];
-        if (!there || via.has(there) || npcPassage(world, room, direction, { npc, steps }))
-          continue;
+        if (!there || via.has(there) || npcPassage(world, room, direction, npc)) continue;
         via.set(there, { at, barrier: exit.barrier });
         next.push(there);
       }

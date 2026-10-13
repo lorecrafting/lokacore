@@ -189,11 +189,12 @@ test('a closed door before the hut answers exit_closed first', () => {
 });
 
 // Breaks: the loader's 1.78 floor is missing or 1.77, a put lock on a non-container loads, a lock
-// root is not walked for references, or subject "target" is refused in an item's lock (the item
-// is its target) or, since row W26 (a walking NPC is the target), in a room or exit lock.
+// root is not walked for references, subject "target" loads in a room or exit lock (no target) or
+// is refused in an item's lock (the item is its target).
 test('the loader checks the floor, put on a container and every lock root', () => {
   const at = (kind: string, k: string) => `.cartridge.${kind}[${JSON.stringify(`${S}:${k}`)}]`;
   const hut = `${at('rooms', 'room/hut')}.locks.enter.root`;
+  const east = `${at('rooms', 'room/lane')}.exits.east.locks.traverse.root`;
   const targeted = (r: any) => {
     delete r.npc;
     r.subject = 'target';
@@ -219,6 +220,16 @@ test('the loader checks the floor, put on a container and every lock root', () =
       'UNRESOLVED_REFERENCE',
       `${at('items', 'item/chest')}.locks.put.root.fact`,
     ],
+    [
+      (c) => targeted(c.rooms[`${S}:room/lane`].exits.east.locks.traverse.root),
+      'FACT_SCOPE_UNSUPPORTED',
+      `${east}.subject`,
+    ],
+    [
+      (c) => targeted(c.rooms[`${S}:room/hut`].locks.enter.root.items[0]),
+      'FACT_SCOPE_UNSUPPORTED',
+      `${hut}.items[0].subject`,
+    ],
   ];
   const load = (change: (c: any) => void) => {
     const c = structuredClone(source);
@@ -234,14 +245,6 @@ test('the loader checks the floor, put on a container and every lock root', () =
   for (const [change, want, path] of rows) assert.deepEqual(load(change), [want, path]);
   assert.equal(
     load((c) => targeted(c.items[`${S}:item/chest`].locks.get.root)),
-    'loaded',
-  );
-  assert.equal(
-    load((c) => targeted(c.rooms[`${S}:room/lane`].exits.east.locks.traverse.root)),
-    'loaded',
-  );
-  assert.equal(
-    load((c) => targeted(c.rooms[`${S}:room/hut`].locks.enter.root.items[0])),
     'loaded',
   );
 });

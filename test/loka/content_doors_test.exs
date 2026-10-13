@@ -17,8 +17,8 @@ defmodule Loka.ContentDoorsTest do
   end
 
   # Breaks: the compiler's 1.81 floor for walks is missing or 1.80, on a schedule case or on a
-  # population plan (twin of doors.test.ts), a walking hour's room is not resolved, or its walks
-  # is not true.
+  # population plan (twin of doors.test.ts), a walking hour's room or goal text is not resolved,
+  # or its walks is not true.
   test "walks needs kernel_api 1.81 and a walking hour's room resolves" do
     dir = Loka.ContentSource.copy("cartridges/doors_sampler")
     api = fn m -> put_in(m, ["requires", "kernel_api", "at_least"], "1.80") end
@@ -28,6 +28,10 @@ defmodule Loka.ContentDoorsTest do
     moor = &put_in(&1, ["daily_schedule", "8", "room"], "moor")
     assert {:error, diags} = Loka.ContentSource.compile(dir, [{"npcs/thief.json", moor}])
     assert {"UNRESOLVED_REFERENCE", "npcs/thief.daily_schedule.8.room"} in codes(diags)
+
+    goal = &put_in(&1, ["daily_schedule", "8", "goal"], "npc.thief.nowhere")
+    assert {:error, diags} = Loka.ContentSource.compile(dir, [{"npcs/thief.json", goal}])
+    assert {"UNRESOLVED_REFERENCE", "npcs/thief.daily_schedule.8.goal"} in codes(diags)
 
     stays = &put_in(&1, ["daily_schedule", "8", "walks"], false)
     assert {:error, diags} = Loka.ContentSource.compile(dir, [{"npcs/thief.json", stays}])

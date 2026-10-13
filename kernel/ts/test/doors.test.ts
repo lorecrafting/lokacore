@@ -142,39 +142,25 @@ test('d. the guard without the key stays in the lane; the gate stays locked, no 
   assert.deepEqual(changes, []);
 });
 
-// The hut's enter lock: the player holds hut_key, or the target (a walking NPC) is a resident.
-const resident = (value: boolean) => (c: any) => {
-  c.facts[`${C}:fact/resident`] = {
-    key: 'resident',
-    meaning: 'Whether the NPC lives in the hut.',
-    per_subject: true,
-    scopes: ['player'],
-    value_type: { type: 'bool', default: value },
-    version: 1,
-  };
-  c.rooms[room('hut')].locks = {
-    enter: {
-      policy_version: 1,
-      root: {
-        op: 'any',
-        items: [
-          { op: 'has_item', item: ref('item', 'hut_key') },
-          { op: 'fact_compare', fact: ref('fact', 'resident'), subject: 'target', equals: true },
-        ],
-      },
-    },
-  };
-};
+// An enter lock on room `at` that holds for the player holding hut_key.
+const enterLock = (at: string) => (c: any) =>
+  (c.rooms[room(at)].locks = {
+    enter: { policy_version: 1, root: { op: 'has_item', item: ref('item', 'hut_key') } },
+  });
 
-// Breaks: the lock read with the NPC as actor (the player's hut_key admits nobody else, so the
-// third case stays in the lane), or not read for a walker at all (the first enters).
-test("e. the hut's enter lock reads the player as actor and the thief as target", () => {
-  assert.equal(where(play(fresh(resident(false)), at(8.5)), 'thief'), room('lane'));
-  assert.equal(where(play(fresh(resident(true)), at(8.5)), 'thief'), room('hut'));
-  const w = fresh(resident(false));
-  const taken = play(w, { type: 'take', item_id: key(w, 'hut_key') });
-  assert.equal(where(play(taken, at(8.5)), 'thief'), room('hut'));
+// Breaks: a G7 lock read for a walking NPC (with the player as actor the lock holds, so the
+// thief enters the hut and the guard the keep) or ignored for it. Without the lock both enter (a
+// and c).
+test('e. any enter lock refuses a walking NPC, even one that holds for the player', () => {
+  const w = fresh(enterLock('hut'));
   assert.equal(code(w, { type: 'move', direction: 'north' }).code, 'permission_denied');
+  const taken = play(w, { type: 'take', item_id: key(w, 'hut_key') });
+  assert.equal(where(play(taken, at(8.5)), 'thief'), room('lane'));
+  changes = [];
+  const keep = fresh(enterLock('keep'));
+  const guard = play(play(keep, { type: 'take', item_id: key(keep, 'hut_key') }), at(9.5));
+  assert.equal(where(guard, 'guard'), room('lane'));
+  assert.deepEqual(changes, []);
 });
 
 // Breaks: walks read on a step that does not declare it (the locked hut stops the thief).
