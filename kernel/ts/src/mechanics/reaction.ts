@@ -103,7 +103,7 @@ const ACTIVATES = ['quest_resolved', 'rested'];
 // The advance's status holders' groups (G3), and the bodies dead after the cause (`diedAfter`).
 type Delivery = { holders?: Map<string, number>; dead?: ReadonlySet<EntityId> };
 
-// size: allow 60, one ordered delivery lowers fact assignments, quest effects and suppression
+// size: allow 60, one ordered delivery lowers fact assignments, quest effects, suppression and spawn
 export function sequence(
   world: World,
   listener: CharacterId,
@@ -122,8 +122,7 @@ export function sequence(
   const activated = new Set<string>();
   const own = { holders, set: {}, applied: new Set<string>(), doors: new Map() }; // holders: the advance's
   const [ops, events, narration]: [DeltaOp[], DomainEvent[], { key: TextKey }[]] = [[], [], []];
-  let position = 0;
-  let gained = 0; // one levelling write per rule, so two grants never race on one expected row
+  let [position, gained] = [0, 0]; // gained: one levelling write per rule (no row race)
   const by = { id: cause.id as string as CommandId, payload: { actor_id: actor } };
   const emit = (payload: EventPayload) => events.push(event(then, by, mint, ++position, payload));
   for (const step of rule.apply) {
@@ -135,8 +134,7 @@ export function sequence(
       ops.push(...started.ops.map((op) => ({ ...op, writer_group: group })));
       emit(started.payload);
     } else if (step.op === 'quest.resolve' || step.op === 'quest.fail') {
-      if (rule.on.event !== 'fact_changed') return { kind: 'fault', code: 'precondition_failed' };
-      const result = terminal(world, actor, step, group, steps);
+      const result = rule.on.event === 'fact_changed' && terminal(world, actor, step, group, steps);
       if (!result) return { kind: 'fault', code: 'precondition_failed' };
       ops.push(...result.ops);
       if ('payload' in result) emit(result.payload);

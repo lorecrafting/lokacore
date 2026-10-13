@@ -114,10 +114,9 @@ export function reactions(c: Obj, { named, typedValue }: Checks): Diagnostic[] {
           out.push(diag('OUTCOME_MISMATCH', `${at}.apply[${i}].op`));
       } else if (s.op === 'barrier.set') {
         out.push(...barrierSet(c, s, r.on.room, `${at}.apply[${i}]`, named));
-      } else if (s.op === 'item.move') {
-        named(s.room, 'room', `${at}.apply[${i}].room`); // row 41
-      } else if (s.op === 'population.spawn') {
-        named(s.plan, 'population', `${at}.apply[${i}].plan`); // row 37a
+      } else if (s.op === 'item.move' || s.op === 'population.spawn') {
+        const [f, kind] = s.op === 'item.move' ? ['room', 'room'] : ['plan', 'population']; // rows 41, 37a
+        named(s[f], kind, `${at}.apply[${i}].${f}`);
       } else if (!['status.apply', 'status.cure', 'experience.grant'].includes(s.op)) {
         // status steps, experience.grant, fact.adjust's int: with their declarations (cartridge_standing.ts).
         named(s.fact, 'fact', `${at}.apply[${i}].fact`);
