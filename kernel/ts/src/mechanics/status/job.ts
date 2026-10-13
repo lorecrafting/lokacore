@@ -12,6 +12,7 @@ import type {
 import { add } from '../../foundation/int.ts';
 import { accepted, type JobRow, type Mint, type World } from '../../runtime/decision.ts';
 import { currentRound } from '../combat/round.ts';
+import { replenishMovers } from '../containment/job.ts';
 import { adjust, level, resourceSpec } from '../resource.ts';
 import { fatalTick } from './fatal.ts';
 import { expire, specOf } from './shared.ts';
@@ -156,15 +157,19 @@ export function statusGroup(
   job: JobRow,
   holders: Map<string, number>,
   next: number,
+  also?: number,
 ) {
   const round = currentRound(at, id, job);
   const held = round
     ? [round.body_id, ...(round.active_ids ?? [round.npc_id])]
-    : [job.job.kind === 'status' ? statusHolder(at, id)?.body : job.bleed_body_id];
+    : job.job.kind === 'replenish'
+      ? replenishMovers(at, job) // row 41: a decay move and a restock of one item share a group
+      : [job.job.kind === 'status' ? statusHolder(at, id)?.body : job.bleed_body_id];
   const bodies = held.filter((b) => b !== undefined);
   if (!bodies.length) return undefined;
   const found = new Set(bodies.map((b) => holders.get(b)));
   found.delete(undefined);
+  if (also !== undefined && found.size) found.add(also);
   const group = found.size ? Math.min(...(found as Set<number>)) : next;
   found.delete(group);
   for (const b of bodies) holders.set(b, group);

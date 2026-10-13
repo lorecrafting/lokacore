@@ -65,12 +65,7 @@ export function runReplenish(
 ) {
   const r = world.cartridge.replenish![refString(row.job)];
   const [from, to] = [holder(world, r.from), holder(world, r.to)];
-  const held = selected(world, r.items, to, Infinity, steps);
-  if (typeof held === 'string') return { kind: 'fault', code: held } as const;
-  const space = free(world, to, steps);
-  if (typeof space === 'string') return { kind: 'fault', code: space } as const;
-  const room = Math.max(0, Math.min(r.cap - held.length, space));
-  const moved = selected(world, r.items, from, Math.min(r.count, room), steps);
+  const moved = moves(world, row, steps);
   if (typeof moved === 'string') return { kind: 'fault', code: moved } as const;
   const ops: DeltaOp[] = moved.map((entity_id) => ({
     op: 'entity.transfer',
@@ -80,6 +75,24 @@ export function runReplenish(
     destination_id: to,
   }));
   return regrid(world, job_id, row, mint, at + r.every, ops);
+}
+
+// The items one run of `row` moves now: up to `count`, until the target holds `cap`.
+function moves(world: World, row: JobRow, steps: Steps) {
+  const r = world.cartridge.replenish![refString(row.job)];
+  const [from, to] = [holder(world, r.from), holder(world, r.to)];
+  const held = selected(world, r.items, to, Infinity, steps);
+  if (typeof held === 'string') return held;
+  const space = free(world, to, steps);
+  if (typeof space === 'string') return space;
+  const room = Math.max(0, Math.min(r.cap - held.length, space));
+  return selected(world, r.items, from, Math.min(r.count, room), steps);
+}
+
+/** The items a due replenish run will move, whose earlier writer's group it joins (row 41). */
+export function replenishMovers(world: World, row: JobRow): EntityId[] {
+  const moved = moves(world, row, { n: 0 });
+  return typeof moved === 'string' ? [] : moved;
 }
 
 /**

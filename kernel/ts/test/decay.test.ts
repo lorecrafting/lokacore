@@ -107,6 +107,14 @@ test('a taken fish spoils into the midden after a day, and the midden restocks t
   assert.equal(at(w, 'fish'), 'market');
 });
 
+// Break: no writer-group join (the spoil move at 86400 and the restock at 90000 both write the
+// fish's container in different groups: conflicting_write).
+test('one wait across the spoil and the restock leaves the fish in the market', () => {
+  let w = take(fresh(), 'fish');
+  w = wait(w, w.state.clock + 90000);
+  assert.equal(at(w, 'fish'), 'market');
+});
+
 // Break: the immune smoked fish takes the spoiling status and spoils anyway.
 test('smoked fish never spoils', () => {
   let w = take(fresh(), 'smoked_fish');
@@ -143,7 +151,7 @@ test('a subject that is not an item stays where it is', () => {
   assert.equal(at(w, 'rag'), 'market');
   // An NPC subject (the sampler has none: the body poses as one) takes nothing either.
   const npc = { ...w, entities: { ...w.entities, [body(w)]: { kind: 'npc' } } } as never;
-  assert.deepEqual(moveItem(npc, move as never, body(w), 1, []), []);
+  assert.deepEqual(moveItem(npc, move as never, body(w), 1, [], new Map()), []);
 });
 
 // Break: a later step moves the item from where it was before the rule (a stale source faults).
