@@ -19,8 +19,11 @@ const GROUP = ['member', 'stay', 'fight'].map((k) => `.cartridge.world.group.${k
 // at the speaker (dialogue-consequences).
 const BOUND = ['escort', 'receive', 'hand_over'];
 // Definitions whose policies are read with no action target (reaction when, quest offer, objective
-// and journal, barrier opens_when, skill qualification): subject "target" there never holds.
+// and journal, barrier opens_when, skill qualification, a room or exit lock): subject "target"
+// there never holds.
 const TARGETLESS = ['reactions', 'quests', 'barriers', 'skills'].map((k) => `.cartridge.${k}`);
+const targetless = (at: string) =>
+  TARGETLESS.some((p) => at.startsWith(p)) || /^\.cartridge\.rooms.*\.locks\./.test(at);
 const scoped = (spec: Obj | undefined) => spec?.per_subject === true;
 // Toolbox row 21: a weapon's durability and a repair benefit read their fact at the wielded weapon.
 const wielded = (o?: Obj) => o?.wear !== undefined || o?.kind === 'repair';
@@ -62,8 +65,7 @@ export function scopeSites(c: Obj): Diagnostic[] {
     if (fields.length > 1 || (o.npc && c.npcs?.[refString(o.npc)]?.spawn_template))
       out.push(`${at}.${fields.at(-1)}`);
     else if (fields.length && !subjective(o.fact)) out.push(`${at}.${fields[0]}`);
-    else if (o.subject === 'target' && TARGETLESS.some((p) => at.startsWith(p)))
-      out.push(`${at}.subject`);
+    else if (o.subject === 'target' && targetless(at)) out.push(`${at}.subject`);
     else if (o.op === 'fact_compare' && !fields.length && subjective(o.fact)) out.push(at);
   });
   // ponytail: a per_subject fact there waits for a subject-aware reconciler.

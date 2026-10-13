@@ -33,6 +33,7 @@ import { attackRefused } from '../mechanics/combat/shared.ts';
 import { combatOffered } from './combat.ts';
 import * as expedition from '../mechanics/expedition/shared.ts';
 import { reach } from '../mechanics/lookups.ts';
+import { getRefused } from '../mechanics/locks.ts';
 
 // Shared query context projects exact offers in priority/key order. Recipes bind their detail (a
 // use recipe, row G4, lists only its pairs on the held tool, view/use.ts);
@@ -125,7 +126,7 @@ function takeAdmission(world: World, body: EntityId | undefined, steps: { n: num
     if (typeof reached === 'string') return reached;
     if (!reached) return 'not_present' as const;
     carry ??= carrying(world, body, steps);
-    return carry(item);
+    return getRefused(world, world.character, item, steps) ?? carry(item);
   };
 }
 

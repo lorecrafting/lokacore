@@ -84,8 +84,21 @@ defmodule Loka.Content.RoomParts do
   @spec conditions(map()) :: [{String.t(), list(), map()}]
   def conditions(defs) do
     for {_, {rel, [], r}} <- defs["room"],
-        {steps, v} <- variants(r),
-        do: {rel, steps ++ ["when", "root"], v["when"]["root"]}
+        {steps, root} <-
+          for({s, v} <- variants(r), do: {s ++ ["when", "root"], v["when"]["root"]}) ++ locks(r),
+        do: {rel, steps, root}
+  end
+
+  # Toolbox row G7: the room's enter lock and each exit's traverse lock.
+  defp locks(r) do
+    enter =
+      if p = get_in(r, ["locks", "enter"]),
+        do: [{["locks", "enter", "root"], p["root"]}],
+        else: []
+
+    enter ++
+      for {dir, %{"locks" => %{"traverse" => p}}} <- Map.get(r, "exits", %{}),
+          do: {["exits", dir, "locks", "traverse", "root"], p["root"]}
   end
 
   @doc """

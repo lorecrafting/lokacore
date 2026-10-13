@@ -8,7 +8,7 @@ defmodule Loka.Content.Exits do
   def expand(exits, m, expand),
     do: Map.new(exits, fn {d, e} -> {d, Map.new(e, &field(&1, m, expand))} end)
 
-  defp field({k, v}, m, expand) when k in ~w(corpse_ingress hidden_until knock),
+  defp field({k, v}, m, expand) when k in ~w(corpse_ingress hidden_until knock locks),
     do: {k, expand.(v, m)}
 
   defp field({"climb", v}, m, _), do: {"climb", Map.update!(v, "item", &ref(&1, "item", m))}
