@@ -22,3 +22,12 @@
 
 1. **blocker** `kernel/ts/src/mechanics/containment/react.ts:24`, untested. M2 passes the suite, but a legal spoil rule `[item.move midden, status.apply spoiling]` with one wait of 90000 then faults `conflicting_write` (status row in the status group, re-apply in the delivery group); head accepts it (scratch probe). Fix: one decay test with that rule edit, asserting acceptance.
 2. **nit** `docs/system/mechanics.md:686` says a replenish joins "an earlier write of the advance" to the item; it joins only `holders` groups. Scenario: a duration recipe moves an item into the reserve in group 0, then the replenish run moves it: still `conflicting_write`, correctly (joining 0 breaks `job_complete_owned_by_run`). Say "an earlier status, `item.move` or replenish write".
+
+## Fix round 1 re-check (`1f50047340552c024244ff5035a293f957ab924f`)
+
+Scope: fix commit `1f500473` only. **Verdict: APPROVE.**
+
+- Finding 1 resolved: `kernel/ts/test/decay.test.ts:120` is the respoil case. M2 (`react.ts:24` -> `group`) fails only that test (`conflicting_write`); restored.
+- Finding 2 resolved: `mechanics.md:686` now names "an earlier status, `item.move` or replenish write". The new root-write known limit (Decay) is accurate.
+- `also` removed (`status/job.ts`, `proposal.ts:292`): behavior is unchanged except group numbers. For every non-replenish kind `statusGroup` still returns `undefined` with a prior, so `group = prior`. A crossed replenish run that finds holders now keeps `min(found)` without folding its first run's group. No target is shared: the job row is completed only by the first run and scheduled only by the last, and earlier moved items are in `holders`. The deltas stay deterministic; only writer-group numbers differ from 2d8352b6.
+- Focused set plus deer, d9_suppression, showcase_combat at the fix head: 196 pass, 0 fail.
