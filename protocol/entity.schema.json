@@ -271,6 +271,24 @@
         },
         "cues": {
           "$ref": "entity.schema.json#/$defs/Cues"
+        },
+        "locks": {
+          "description": "Toolbox row G7 (kernel_api at least 1.78; mechanics.md Access locks): at least one of get, the policy an actor must hold to take this item or anything inside it, and put, the policy to put an item into it (a container only: SCHEMA_VIOLATION invalid_value at locks.put, a loader and compiler check). Each is read with this item as target; failing it refuses permission_denied.",
+          "type": "object",
+          "properties": {
+            "get": {
+              "$ref": "policy.schema.json#/$defs/VersionedPolicy"
+            },
+            "put": {
+              "$ref": "policy.schema.json#/$defs/VersionedPolicy"
+            }
+          },
+          "requiredUnless": {
+            "put": [
+              "get"
+            ]
+          },
+          "additionalProperties": false
         }
       },
       "required": [
