@@ -102,7 +102,7 @@ const ACTIVATES = ['quest_resolved', 'rested'];
 // The advance's status holders' groups (G3), and the bodies dead after the cause (`diedAfter`).
 type Delivery = { holders?: Map<string, number>; dead?: ReadonlySet<EntityId> };
 
-// size: allow 62, one ordered delivery lowers fact assignments, quest effects, suppression and moves
+// size: allow 60, one ordered delivery lowers fact assignments, quest effects and suppression
 export function sequence(
   world: World,
   listener: CharacterId,
@@ -120,9 +120,7 @@ export function sequence(
   if (rule.when && !holds(then, actor, rule.when.root, about)) return undefined;
   const activated = new Set<string>();
   const own = { holders, set: {}, applied: new Set<string>(), doors: new Map() }; // holders: the advance's
-  const ops: DeltaOp[] = [];
-  const events: DomainEvent[] = [];
-  const narration: { key: TextKey }[] = [];
+  const [ops, events, narration]: [DeltaOp[], DomainEvent[], { key: TextKey }[]] = [[], [], []];
   let position = 0;
   let gained = 0; // one levelling write per rule, so two grants never race on one expected row
   const by = { id: cause.id as string as CommandId, payload: { actor_id: actor } };
