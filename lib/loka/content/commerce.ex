@@ -1,6 +1,6 @@
 defmodule Loka.Content.Commerce do
   @moduledoc "Validates finite authored shop identities and explicit conserved funding."
-  import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2]
+  import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2, ref: 3]
   alias Loka.Content.Refs
 
   def check(nil, _), do: []
@@ -10,6 +10,15 @@ defmodule Loka.Content.Commerce do
         npc["shop"],
         d <- shop(m, defs, rel, npc) ++ stocks(m, defs, rel, npc["shop"]["offers"]),
         do: d
+  end
+
+  @doc "Expands an offer's short item references, its stock set's too (toolbox row W11)."
+  def expand_offer(o, m) do
+    o = Map.update!(o, "item", &ref(&1, "item", m))
+
+    if o["stock"],
+      do: update_in(o, ["stock", "items"], &Enum.map(&1, fn i -> ref(i, "item", m) end)),
+      else: o
   end
 
   defp shop(m, defs, rel, npc) do
