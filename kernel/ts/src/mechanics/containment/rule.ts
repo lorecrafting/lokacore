@@ -28,7 +28,7 @@ import { getRefused } from '../locks.ts';
 import { carrying, giveRefused, putRefused } from './shared.ts';
 import { movable } from '../../runtime/created.ts';
 
-// size: allow 52, finite Harvest joins the existing conserved-transfer decision
+// size: allow 54, finite Harvest and the G7 get-lock walk join the conserved-transfer decision
 export const decide: Rule<'containment'> = (world, command, mint, steps = { n: 0 }) => {
   const p = command.payload;
   if (p.type === 'recover_corpse') return recover(world, p, steps);
