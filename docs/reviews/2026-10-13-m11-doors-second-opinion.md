@@ -22,3 +22,12 @@
 
 1. **blocker** `lib/loka/content/source.ex:244`, untested. With M4 a lone hour `{"room": "ferry_landing"}` in `ashmere_ferry` (kernel_api 1.0) compiles to `schedule_cases` with no 1.47 floor (`schedules.ex` counts only lists), an artifact the loader rejects. With M5 `{"walks": true}` gives `UNRESOLVED_REFERENCE` target `"@:/"`. Fix: in `content_doors_test.exs` assert `{room}` is SCHEMA_VIOLATION at `.walks` and `{walks: true}` at `.room` (`missing_property`; head already does this, scratch probe).
 2. **nit** `contracts.ex:152` with `source.ex:240-246`: a full DefinitionRef hour with one bad field (`key` missing or `"Bad"`) now reports UNKNOWN_FIELD on `cartridge_id`, `cartridge_version`, `kind`, plus missing `room`/`walks`, instead of the base's single `.key` error. Still refused; misleading to authors.
+
+## Fix round 1 re-check (`f9ec79954b6faada0b1671930a05613410de453b`)
+
+Scope: fix commit `f9ec7995` only (`contracts.ex` anyOf, `source.ex` comment, `content_doors_test.exs`). **Verdict: APPROVE.**
+
+- Finding 1 resolved: `test/loka/content_doors_test.exs:52` pins `{room}` at `.walks` and `{walks: true}` at `.room`. M4 `~w(room)` and M5 `~w(walks)` at `source.ex:244` each fail only that test.
+- Finding 2 resolved: `contracts.ex:147` returns the matching-type branch with fewest errors (first on a tie, `Enum.min_by` is stable); a `"Yard"` reference hour gives exactly `.key pattern_mismatch` (same test).
+- Parity: `kernel/ts/src` and `protocol/` unchanged since `787116e7`; every protocol anyOf has a single branch per type, where `min_by` over one list is the old result, so `validate.ts` needs no change. The 7 probes give the same results as the TS run; `validate.test.ts` + `doors.test.ts` 19 pass; Elixir contracts, schema and content doors/ferry/schedules 99 pass (invalid.json anyOf cases in both).
+- Mutants at `contracts.ex:147`: `hd()` (old first-branch errors) red (2), `max_by` red (4), `List.last()` red (3).
