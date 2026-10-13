@@ -6,7 +6,19 @@ import { test } from 'node:test';
 import { step, stepElapsed, type World } from '../src/index.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { escapeDirections } from '../src/mechanics/combat/flee.ts';
-import { h1, h2, home, fixture, wounded, begun, due, seated, run } from './c4_pack_fixture.ts';
+import {
+  h1,
+  h2,
+  home,
+  nest,
+  fixture,
+  wounded,
+  begun,
+  due,
+  seated,
+  run,
+} from './c4_pack_fixture.ts';
+import { barrierState } from '../src/mechanics/lookups.ts';
 import { fresh } from './deer_fixture.ts';
 import { key as rowKey } from '../src/foundation/compose.ts';
 
@@ -107,3 +119,80 @@ for (const face of ['hidden', 'climb'] as const)
     assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
     assert.equal(r.world.state.containers[deer], willow);
   });
+
+// One hour of elapsed play from `w`: the fixture's first hourly wander moves slot 1 home -> nest
+// (east), as c4_pack_elapsed.test.ts hand-checks.
+function hour(w: World) {
+  const [from, until] = [w.state.clock, w.state.clock + 3600];
+  const payload = { type: 'elapsed', actor_id: w.character, run_id: run, from, until } as const;
+  const id = elapsedCommandId(run, w.context, from, until) as never;
+  const r = stepElapsed(w, { id, world_context_id: w.context, payload }, 2);
+  assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
+  return { world: r.world, events: r.decision.kind === 'accepted' ? r.decision.events : [] };
+}
+
+// Breaks: population wander crosses a hidden or climb face, or a closed door without `walks`
+// (wanderOne off npcPassage); the plain fixture is the control (the hound reaches the nest).
+test('a wandering hound crosses no hidden, climb or closed face; the plain exit it does', () => {
+  assert.equal(hour(fixture()).world.state.containers[h1], nest);
+  for (const face of ['hidden', 'climb', 'door'] as const)
+    assert.equal(hour(hide(fixture(), home, 'east', face)).world.state.containers[h1], home, face);
+});
+
+/**
+ * The fixture with its plan marked `walks` (toolbox row W26) and a door east of the run in
+ * `state`, keyed to an item hound 1 holds when `held`.
+ */
+function walking(state: 'closed' | 'locked', held: boolean) {
+  const w = hide(fixture(), home, 'east', 'door');
+  const door = w.rooms[home]!.exits.east!.barrier!;
+  const [plan] = Object.keys(w.cartridge.populations!);
+  const [item] = Object.entries(w.entityIds).find(([k]) => k.includes(':item/'))!;
+  const [, cartridge_id, cartridge_version, k] = /^(.+)@(.+):item\/(.+)$/.exec(item)!;
+  const key_item = { cartridge_id, cartridge_version, kind: 'item', key: k };
+  const def = { key: door.key, keywords: ['door'], short: 'x', initial: state, key_item };
+  const cartridge = {
+    ...w.cartridge,
+    barriers: {
+      ...w.cartridge.barriers,
+      [`${cartridge_id}@${cartridge_version}:barrier/${door.key}`]: def,
+    },
+    populations: {
+      ...w.cartridge.populations,
+      [plan!]: { ...w.cartridge.populations![plan!], walks: true },
+    },
+  };
+  const containers = { ...w.state.containers, ...(held && { [w.entityIds[item]!]: h1 }) };
+  return {
+    world: {
+      ...w,
+      cartridge,
+      barrierInitial: { ...w.barrierInitial, [rowKey(door)]: state },
+      state: { ...w.state, containers },
+    } as World,
+    door,
+  };
+}
+
+// Breaks: a walking wander refused at a closed door, let through a locked one without the key, or
+// through with it but not re-locking it (four barrier_changed, locked after).
+test('a walking hound crosses a closed door, and a locked one only with its key, re-locking it', () => {
+  const changed = (r: ReturnType<typeof hour>) =>
+    r.events.flatMap((e) =>
+      e.payload.type === 'barrier_changed' ? [[e.payload.from, e.payload.to]] : [],
+    );
+  const closed = hour(walking('closed', false).world);
+  assert.equal(closed.world.state.containers[h1], nest);
+  assert.deepEqual(changed(closed), []);
+  assert.equal(hour(walking('locked', false).world).world.state.containers[h1], home);
+  const { world, door } = walking('locked', true);
+  const keyed = hour(world);
+  assert.equal(keyed.world.state.containers[h1], nest);
+  assert.equal(barrierState(keyed.world, door), 'locked');
+  assert.deepEqual(changed(keyed), [
+    ['locked', 'closed'],
+    ['closed', 'open'],
+    ['open', 'closed'],
+    ['closed', 'locked'],
+  ]);
+});

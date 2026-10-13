@@ -1,4 +1,10 @@
-import type { CharacterId, EntityId, RoomDefinition, Tag } from '../../contracts.gen.ts';
+import type {
+  CharacterId,
+  DefinitionRef,
+  EntityId,
+  RoomDefinition,
+  Tag,
+} from '../../contracts.gen.ts';
 import { type World } from '../../runtime/decision.ts';
 import { barrierState, exitOf } from '../lookups.ts';
 import { bodyOf, refString, type Steps } from '../../runtime/decision.ts';
@@ -9,6 +15,8 @@ import { KernelError } from '../../foundation/error.ts';
 import { saturate } from '../../foundation/int.ts';
 import { adjust, level, pay, resourceRef, resourceSpec, type Levels } from '../resource.ts';
 import { held } from '../policy.ts';
+import { lockRefused } from '../locks.ts';
+import { cmp } from '../../foundation/validate.ts';
 import { engaged } from '../combat/shared.ts';
 import { mul } from '../../foundation/int.ts';
 import { statusMovement } from '../status/shared.ts';
@@ -55,15 +63,84 @@ export function passage(
 }
 
 /**
- * The one NPC exit check (toolbox row W26, Beads loka-kgd.32): why an NPC may not cross the exit
- * in `direction`: none there, a hidden face (whether or not the player found it) or a climb face
- * is not_found, then `passage`'s barrier refusal; undefined when it may. Read-only; hound flight,
- * sighted refuge, population wander and the crow share it.
+ * The one NPC exit check (toolbox row W26, Beads loka-kgd.32): why the NPC `npc` may not cross
+ * the exit in `direction`: none there, a hidden face (whether or not the player found it) or a
+ * climb face is not_found. Without a walker, then `passage`'s barrier refusal. A walker `npc`
+ * (`walks`) crosses a closed barrier, a locked one only holding its key_item (the crossing
+ * re-locks it: `relock`), then the exit's traverse and the destination's enter lock are read with
+ * the player as actor and `npc` as target (each leaf charging `steps`). Undefined when it may.
  */
-export function npcPassage(world: World, room: RoomDefinition, direction: string) {
+export function npcPassage(
+  world: World,
+  room: RoomDefinition,
+  direction: string,
+  walker?: { readonly npc: EntityId; readonly steps: Steps },
+) {
   const exit = exitOf(room, direction);
   if (!exit || exit.hidden_until || exit.climb) return 'not_found' as const;
-  return passage(world, room, direction);
+  if (!walker) return passage(world, room, direction);
+  const { npc, steps } = walker;
+  const key = exit.barrier && world.cartridge.barriers![refString(exit.barrier)].key_item;
+  if (
+    exit.barrier &&
+    barrierState(world, exit.barrier) === 'locked' &&
+    !(key && held(world, world.entityIds[refString(key)], npc))
+  )
+    return 'exit_locked' as const;
+  const there = world.roomIds[refString(exit.to)];
+  return (
+    lockRefused(world, world.character, exit.locks?.traverse, npc, steps) ??
+    lockRefused(world, world.character, world.rooms[there]?.locks?.enter, npc, steps)
+  );
+}
+
+/**
+ * A walking NPC's crossing of a locked barrier it holds the key of (toolbox row W26): unlocked,
+ * opened, closed and locked again, each a barrier.transition with its barrier_changed payload.
+ */
+const RELOCK = [
+  ['locked', 'closed'],
+  ['closed', 'open'],
+  ['open', 'closed'],
+  ['closed', 'locked'],
+] as const;
+export const relock = (barrier: DefinitionRef) =>
+  RELOCK.map(([from, to]) => ({
+    op: { op: 'barrier.transition', writer_group: 0, barrier, from, to } as const,
+    changed: { type: 'barrier_changed', barrier, from, to } as const,
+  }));
+
+/**
+ * The locked barriers on the path a walking NPC `npc` takes from room `from` to room `to`
+ * (toolbox row W26), in path order: breadth first over exits in direction-key order (the G6
+ * bounded walk), crossing only exits `npcPassage` admits with walks, one query step per exit
+ * tried. Undefined when no path is found within the step budget.
+ */
+export function walkPath(world: World, npc: EntityId, from: EntityId, to: EntityId, steps: Steps) {
+  const via = new Map<string, { at: string; barrier?: DefinitionRef }>([[from, { at: from }]]);
+  for (let edge: string[] = [from]; edge.length && !via.has(to);) {
+    const next: string[] = [];
+    for (const at of edge) {
+      const room = world.rooms[at];
+      for (const direction of Object.keys(room.exits).sort(cmp)) {
+        if (++steps.n > LIMITS.query_steps) return undefined;
+        const exit = exitOf(room, direction)!;
+        const there = world.roomIds[refString(exit.to)];
+        if (!there || via.has(there) || npcPassage(world, room, direction, { npc, steps }))
+          continue;
+        via.set(there, { at, barrier: exit.barrier });
+        next.push(there);
+      }
+    }
+    edge = next;
+  }
+  if (!via.has(to)) return undefined;
+  const locked: DefinitionRef[] = [];
+  for (let at: string = to; at !== from; at = via.get(at)!.at) {
+    const { barrier } = via.get(at)!;
+    if (barrier && barrierState(world, barrier) === 'locked') locked.unshift(barrier);
+  }
+  return locked;
 }
 
 /**

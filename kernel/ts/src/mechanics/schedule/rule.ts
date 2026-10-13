@@ -26,7 +26,17 @@ import {
   type World,
 } from '../../runtime/decision.ts';
 import type { DeltaOp, JobId } from '../../contracts.gen.ts';
-import { CLOCK_JOB, entered, jobId, nextHour, placeOf, runClock, scheduleOf } from './behavior.ts';
+import {
+  CLOCK_JOB,
+  entered,
+  happened,
+  jobId,
+  nextHour,
+  placeOf,
+  runClock,
+  scheduleOf,
+} from './behavior.ts';
+import { relock, walkPath } from '../movement/shared.ts';
 import { assigned, adjusted } from '../fact.ts';
 import { runPopulation } from '../population/shared.ts';
 import { runReplenish } from '../containment/job.ts';
@@ -72,7 +82,7 @@ export const decideAt = (
 
     if (row.job.kind === CLOCK_JOB) return runClock(world, command, payload.job_id, row, mint);
     if (row.job.kind === 'population')
-      return runPopulation(world, command, payload.job_id, row, mint, at);
+      return runPopulation(world, command, payload.job_id, row, mint, at, steps);
     if (row.job.kind === 'replenish')
       return runReplenish(world, payload.job_id, row, mint, steps, at ?? row.due_time);
     if (row.job.kind === 'wage')
@@ -112,10 +122,13 @@ function scheduledJob(
 ) {
   const schedule = scheduleOf(world, row.job);
   const npc = world.entityIds[refString(row.job)];
-  const { room, goal } = placeOf(world, npc, at, steps);
+  const { room, goal, walks } = placeOf(world, npc, at, steps);
   const from = world.state.containers[npc];
+  // Toolbox row W26: a walking case moves only along a path, re-locking each key passage on it.
+  const path = from !== room && walks ? walkPath(world, npc, from, room, steps) : [];
   // A goal (toolbox row W10) is narration only when the player sees the NPC leave.
-  const stays = from === room || !moves(world, npc);
+  const stays = from === room || !moves(world, npc) || !path;
+  const doors = stays ? [] : path.flatMap(relock);
   const seen = goal && !stays && world.state.containers[world.body] === from;
   const transfer = { op: 'entity.transfer', writer_group: 0, entity_id: npc } as const;
   const move: DeltaOp[] = stays ? [] : [{ ...transfer, source_id: from, destination_id: room }];
@@ -129,11 +142,17 @@ function scheduledJob(
     world,
     'job_ran',
     [
+      ...doors.map((d) => d.op),
       ...move,
       ...(row.status === 'pending' ? [done] : []),
       ...(crossed ? [] : [{ ...next, job_id: jobId(mint) }]),
     ],
-    move.length ? [entered(world, command, mint, npc, room, at)] : [],
+    move.length
+      ? [
+          ...doors.map((d) => happened(world, command, mint, at, d.changed)),
+          entered(world, command, mint, npc, room, at),
+        ]
+      : [],
     seen ? [{ key: goal }] : [],
   );
   return crossed ? { ...ran, next: due_time } : ran;

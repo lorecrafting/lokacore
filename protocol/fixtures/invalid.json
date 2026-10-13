@@ -22628,7 +22628,8 @@
     "value": [
       {
         "goal": "npc.maud.goal",
-        "x": 1
+        "x": 1,
+        "walks": false
       }
     ],
     "errors": [
@@ -22637,8 +22638,8 @@
         "code": "missing_property"
       },
       {
-        "path": "/0/when",
-        "code": "missing_property"
+        "path": "/0/walks",
+        "code": "const_mismatch"
       },
       {
         "path": "/0/x",
@@ -26160,6 +26161,54 @@
       {
         "path": "/chance",
         "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "name": "population_plan_walks_false",
+    "contract": "PopulationPlan",
+    "value": {
+      "key": "bandits",
+      "bundle": {
+        "cartridge_id": "encounter_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "population_bundle",
+        "key": "bandits"
+      },
+      "home": {
+        "cartridge_id": "encounter_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "room",
+        "key": "road"
+      },
+      "area": [
+        {
+          "cartridge_id": "encounter_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "road"
+        },
+        {
+          "cartridge_id": "encounter_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "crossroads"
+        }
+      ],
+      "cap": 1,
+      "day_target": 1,
+      "night_target": 1,
+      "night_start": 20,
+      "night_end": 6,
+      "replacement_delay": 3600,
+      "wander_interval": 3600,
+      "chance": 25,
+      "walks": false
+    },
+    "errors": [
+      {
+        "path": "/walks",
+        "code": "const_mismatch"
       }
     ]
   },

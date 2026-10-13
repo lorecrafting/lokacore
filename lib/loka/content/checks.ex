@@ -358,7 +358,7 @@ defmodule Loka.Content.Checks do
 
     reference(rel, [], {"room", "room"}, npc, m, defs) ++
       for {h, r} <- schedule,
-          is_map(r),
+          is_map(r) and not is_map_key(r, "room"),
           d <- reference(rel, ["daily_schedule"], {h, "room"}, schedule, m, defs),
           do: d
   end

@@ -230,15 +230,23 @@ defmodule Loka.Content.Source do
     )
   end
 
-  # Toolbox row W10: a daily_schedule hour may be [case, ..., room key]; schedule_cases is
-  # compiler output only (Loka.Content.Schedules).
+  # Toolbox row W10: a daily_schedule hour may be [case, ..., room key], or (row W26) one walking
+  # case {room, walks: true, goal?}; schedule_cases is compiler output only (Loka.Content.Schedules).
+  # The walking case precedes DefinitionRef, so a malformed walking hour reports its own errors.
   defp schedule(contracts, defs) do
+    one = defs["ScheduleCases"]["items"]
+
     hour = [
       %{"$ref" => "Key"},
+      %{
+        one
+        | "properties" => Map.delete(one["properties"], "when"),
+          "required" => ~w(room walks)
+      },
       defs["DefinitionRef"],
       %{
         "type" => "array",
-        "items" => %{"anyOf" => [%{"$ref" => "Key"}, defs["ScheduleCases"]["items"]]},
+        "items" => %{"anyOf" => [%{"$ref" => "Key"}, one]},
         "minItems" => 2,
         "maxItems" => 9
       }

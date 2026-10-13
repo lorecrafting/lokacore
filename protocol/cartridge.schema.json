@@ -2331,6 +2331,10 @@
             "narration"
           ],
           "additionalProperties": false
+        },
+        "walks": {
+          "const": true,
+          "description": "Toolbox row W26 (kernel_api at least 1.81; mechanics.md NPCs use doors): the wander step crosses its exit as a walking NPC does (npcPassage with walks): a closed door passes and stays closed, a locked one only for a member holding its key_item (unlocked, opened, closed and locked again), and the exit's traverse and the room's enter lock are read with the player as actor and the member as target."
         }
       },
       "required": [

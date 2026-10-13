@@ -1,15 +1,35 @@
-import type { CommandId, DefinitionRef, DeltaOp, EntityId } from '../../contracts.gen.ts';
+import type {
+  CommandId,
+  DefinitionRef,
+  DeltaOp,
+  DomainEvent,
+  EntityId,
+} from '../../contracts.gen.ts';
 import { key } from '../../foundation/compose.ts';
 import { uniform } from '../../foundation/rng.ts';
-import { refString, type JobRow, type Mint, type World } from '../../runtime/decision.ts';
+import {
+  refString,
+  type JobRow,
+  type Mint,
+  type Steps,
+  type World,
+} from '../../runtime/decision.ts';
 import { engaged } from '../combat/shared.ts';
 import { living } from '../death/shared.ts';
-import { npcPassage } from '../movement/shared.ts';
+import { barrierState } from '../lookups.ts';
+import { npcPassage, relock } from '../movement/shared.ts';
+import { happened } from '../schedule/behavior.ts';
 import { moves } from '../status/shared.ts';
 import { birth } from './birth.ts';
 import { bindSight } from './behavior.ts';
 
 export type Plan = World['populationSpecs'][string]['plan'];
+type Changed = Extract<DomainEvent['payload'], { type: 'barrier_changed' }>;
+/** A wander job's query budget and its walking members' door events (toolbox row W26). */
+export type Walked = {
+  readonly steps: Steps;
+  readonly events: ReturnType<typeof happened<Changed>>[];
+};
 export type Slots = {
   slot: number;
   row: NonNullable<World['state']['population_slots']>[string];
@@ -138,12 +158,15 @@ export function wanders(
   slots: Slots,
   born: Set<string>,
   mint: Mint,
+  walked: Walked,
 ): DeltaOp[] {
   if (job.due_time !== wanderDue) return [];
   const [home, nest] = plan.area.map((r) => world.roomIds[refString(r)]);
   const ops: DeltaOp[] = [];
   for (const { row } of slots)
-    ops.push(...wanderOne(world, occurrence_id, planRef, plan, job, row, born, home, nest, mint));
+    ops.push(
+      ...wanderOne(world, occurrence_id, planRef, plan, job, row, born, [home, nest], mint, walked),
+    );
   return ops;
 }
 
@@ -155,23 +178,30 @@ function wanderOne(
   job: JobRow,
   row: Slots[number]['row'],
   born: Set<string>,
-  home: EntityId,
-  nest: EntityId,
+  [home, nest]: EntityId[],
   mint: Mint,
+  { steps, events }: Walked,
 ): DeltaOp[] {
   const member = row.member_id;
   if (!member || !wanderable(world, row, born, job)) return [];
   const from = world.state.containers[member];
   const to = from === home ? nest : from === nest ? home : undefined;
   const room = world.rooms[from];
+  // Toolbox row W26: a walking plan crosses doors as a walking schedule step does.
+  const walker = plan.walks ? { npc: member as EntityId, steps } : undefined;
   const edge =
     to &&
     Object.entries(room.exits).find(
-      ([d, e]) => world.roomIds[refString(e.to)] === to && !npcPassage(world, room, d),
+      ([d, e]) => world.roomIds[refString(e.to)] === to && !npcPassage(world, room, d, walker),
     );
   if (!to || !edge || !moves(world, member)) return [];
+  const door = walker && edge[1].barrier;
+  const doors = door && barrierState(world, door) === 'locked' ? relock(door) : [];
+  for (const d of doors)
+    events.push(happened(world, { id: occurrence_id }, mint, job.due_time, d.changed));
   const transfer = moveOp(member as EntityId, from, to);
   return [
+    ...doors.map((d) => d.op),
     transfer,
     ...arrivalSight(
       world,

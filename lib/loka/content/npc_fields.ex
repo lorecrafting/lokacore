@@ -24,8 +24,10 @@ defmodule Loka.Content.NpcFields do
   # A schedule hour's room, or (toolbox row W10) its cases' rooms and conditions and its fallback.
   defp room(list, m, expand) when is_list(list), do: Enum.map(list, &room(&1, m, expand))
 
-  defp room(%{"room" => r, "when" => w} = c, m, expand),
-    do: %{c | "room" => ref(r, "room", m), "when" => expand.(w, m)}
+  defp room(%{"room" => r} = c, m, expand) do
+    c = %{c | "room" => ref(r, "room", m)}
+    if is_map_key(c, "when"), do: Map.update!(c, "when", &expand.(&1, m)), else: c
+  end
 
   defp room(r, m, _), do: ref(r, "room", m)
 
