@@ -21,7 +21,7 @@ export const decide: Rule<'commerce'> = (world, command, mint, steps) => {
   const moved = {
     op: 'entity.transfer',
     writer_group: 0,
-    entity_id: p.item_id,
+    entity_id: result.moved,
     source_id: result.source,
     destination_id: result.destination,
   } as const;
@@ -32,7 +32,7 @@ export const decide: Rule<'commerce'> = (world, command, mint, steps) => {
     [
       event(world, command, mint, 1, {
         type: 'item_acquired',
-        item_id: p.item_id,
+        item_id: result.moved,
         holder_id: result.destination,
       }),
     ],

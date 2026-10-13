@@ -1,0 +1,14 @@
+{
+  "keywords": [
+    "fish",
+    "fish_b"
+  ],
+  "short": "item.fish.short",
+  "room_line": "item.fish.room",
+  "description": "item.fish.description",
+  "mass_grams": 500,
+  "location": {
+    "in": "npc",
+    "npc": "fishmonger"
+  }
+}

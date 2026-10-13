@@ -4,17 +4,23 @@ import {
   type EntityId,
   type NpcDefinition,
   type ShopItemView,
+  type ShopOffer,
 } from '../../contracts.gen.ts';
 import { bodyOf, refString, type Steps, type World } from '../../runtime/decision.ts';
 import { living } from '../death/shared.ts';
 import { engaged } from '../combat/shared.ts';
 import { transfer } from '../resource.ts';
 import { carrying, giveRefused } from '../containment/shared.ts';
+import { selected } from '../containment/stock.ts';
 import { status } from '../skills.ts';
 import { disposition } from '../disposition.ts';
 
-// A friendly discount (toolbox row 15) takes the NPC's disposition (row G11), a skill one the skill.
-function buyPrice(world: World, actor: CharacterId, npc: EntityId, base: number, steps: Steps) {
+// A stock offer (toolbox row W11) prices by the count of its set the NPC holds; a friendly discount
+// (toolbox row 15) takes the NPC's disposition (row G11), a skill one the skill.
+function buyPrice(world: World, actor: CharacterId, npc: EntityId, o: ShopOffer, steps: Steps) {
+  const held = o.stock ? selected(world, o.stock.items, npc, o.stock.items.length, steps) : [];
+  if (typeof held === 'string') return held;
+  const base = held.length ? o.stock!.buy[held.length - 1] : o.buy;
   const d = (world.entities[npc] as NpcDefinition).shop!.buy_discount;
   return d &&
     (d.friendly
@@ -22,6 +28,17 @@ function buyPrice(world: World, actor: CharacterId, npc: EntityId, base: number,
       : status(world, actor, d.skill!, steps).usable)
     ? Math.max(d.minimum, Math.floor((base * d.numerator) / d.denominator))
     : base;
+}
+
+// A destination with a capacity refuses one more item when full.
+function room(world: World, destination: EntityId, steps: Steps) {
+  if (world.capacities[destination] === undefined) return undefined;
+  let held = 0;
+  for (const at of Object.values(world.state.containers)) {
+    if (++steps.n > LIMITS.query_steps) return 'budget_exceeded' as const;
+    if (at === destination) held++;
+  }
+  return held >= world.capacities[destination] ? ('invalid_state' as const) : undefined;
 }
 
 /**
@@ -47,25 +64,24 @@ export function exchange(
     return 'not_present' as const;
   const offer = npc.shop.offers.find((o) => world.entityIds[refString(o.item)] === item);
   if (!offer) return 'invalid_target' as const;
-  const current = verb === 'buy' ? buyPrice(world, actor, provider, offer.buy, steps) : offer.sell;
+  const current = verb === 'buy' ? buyPrice(world, actor, provider, offer, steps) : offer.sell;
+  if (typeof current === 'string') return current;
   if (price !== current || disposition(world, actor, provider, steps) === 'hostile')
     return 'invalid_state' as const;
   const [source, destination] = verb === 'buy' ? [provider, body] : [body, provider];
-  if (world.state.containers[item] !== source) return 'not_owned' as const;
+  // A stock offer moves the first instance of its set the source holds (toolbox row W11).
+  const first = offer.stock ? selected(world, offer.stock.items, source, 1, steps) : [item];
+  if (typeof first === 'string') return first;
+  const moved = first[0];
+  if (moved === undefined || world.state.containers[moved] !== source) return 'not_owned' as const;
   const custody =
-    verb === 'buy' ? carrying(world, body, steps)(item) : giveRefused(world, item, steps);
+    verb === 'buy' ? carrying(world, body, steps)(moved) : giveRefused(world, moved, steps);
   if (custody) return custody;
-  if (world.capacities[destination] !== undefined) {
-    let held = 0;
-    for (const at of Object.values(world.state.containers)) {
-      if (++steps.n > LIMITS.query_steps) return 'budget_exceeded' as const;
-      if (at === destination) held++;
-    }
-    if (held >= world.capacities[destination]) return 'invalid_state' as const;
-  }
+  const full = room(world, destination, steps);
+  if (full) return full;
   const paid = transfer(world, destination, source, npc.shop.resource, price);
   return paid
-    ? { body, source, destination, paid, shop: npc.shop }
+    ? { body, source, destination, paid, shop: npc.shop, moved }
     : ('insufficient_resource' as const);
 }
 
@@ -76,8 +92,8 @@ export function shelf(world: World, provider: EntityId): ShopItemView[] | undefi
   return npc.shop.offers.map((o) => {
     const item_id = world.entityIds[refString(o.item)];
     const action = (verb: 'buy' | 'sell') => {
-      const price =
-        verb === 'buy' ? buyPrice(world, world.character, provider, o.buy, steps) : o.sell;
+      const quoted = verb === 'buy' ? buyPrice(world, world.character, provider, o, steps) : o.sell;
+      const price = typeof quoted === 'number' ? quoted : o.buy; // past the budget exchange refuses
       const result = exchange(world, world.character, provider, item_id, verb, price, steps);
       return {
         price,

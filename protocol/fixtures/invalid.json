@@ -27033,5 +27033,603 @@
         "code": "unknown_property"
       }
     ]
+  },
+  {
+    "contract": "ShopOffer",
+    "value": {
+      "item": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "item",
+        "key": "fish_a"
+      },
+      "buy": 5,
+      "sell": 1,
+      "stock": {
+        "buy": [
+          5,
+          3
+        ]
+      }
+    },
+    "errors": [
+      {
+        "path": "/stock/items",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "ShopOffer",
+    "value": {
+      "item": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "item",
+        "key": "fish_a"
+      },
+      "buy": 5,
+      "sell": 1,
+      "stock": {
+        "items": [
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "fish_a"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "fish_b"
+          }
+        ]
+      }
+    },
+    "errors": [
+      {
+        "path": "/stock/buy",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "ShopOffer",
+    "value": {
+      "item": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "item",
+        "key": "fish_a"
+      },
+      "buy": 5,
+      "sell": 1,
+      "stock": {
+        "items": [
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "fish_a"
+          }
+        ],
+        "buy": [
+          5,
+          3
+        ]
+      }
+    },
+    "errors": [
+      {
+        "path": "/stock/items",
+        "code": "too_few_items"
+      }
+    ]
+  },
+  {
+    "contract": "ShopOffer",
+    "value": {
+      "item": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "item",
+        "key": "fish_a"
+      },
+      "buy": 5,
+      "sell": 1,
+      "stock": {
+        "items": [
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "f0"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "f1"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "f2"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "f3"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "f4"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "f5"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "f6"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "f7"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "f8"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "f9"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "f10"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "f11"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "f12"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "f13"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "f14"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "f15"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "f16"
+          }
+        ],
+        "buy": [
+          5,
+          3
+        ]
+      }
+    },
+    "errors": [
+      {
+        "path": "/stock/items",
+        "code": "too_many_items"
+      }
+    ]
+  },
+  {
+    "contract": "ShopOffer",
+    "value": {
+      "item": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "item",
+        "key": "fish_a"
+      },
+      "buy": 5,
+      "sell": 1,
+      "stock": {
+        "items": [
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "fish_a"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "fish_b"
+          }
+        ],
+        "buy": [
+          5
+        ]
+      }
+    },
+    "errors": [
+      {
+        "path": "/stock/buy",
+        "code": "too_few_items"
+      }
+    ]
+  },
+  {
+    "contract": "ShopOffer",
+    "value": {
+      "item": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "item",
+        "key": "fish_a"
+      },
+      "buy": 5,
+      "sell": 1,
+      "stock": {
+        "items": [
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "fish_a"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "fish_b"
+          }
+        ],
+        "buy": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    "errors": [
+      {
+        "path": "/stock/buy",
+        "code": "too_many_items"
+      }
+    ]
+  },
+  {
+    "contract": "ShopOffer",
+    "value": {
+      "item": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "item",
+        "key": "fish_a"
+      },
+      "buy": 5,
+      "sell": 1,
+      "stock": {
+        "items": [
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "fish_a"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "fish_b"
+          }
+        ],
+        "buy": [
+          5,
+          0
+        ]
+      }
+    },
+    "errors": [
+      {
+        "path": "/stock/buy/1",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "contract": "ShopOffer",
+    "value": {
+      "item": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "item",
+        "key": "fish_a"
+      },
+      "buy": 5,
+      "sell": 1,
+      "stock": {
+        "items": [
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "fish_a"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "fish_b"
+          }
+        ],
+        "buy": [
+          5,
+          2147483648
+        ]
+      }
+    },
+    "errors": [
+      {
+        "path": "/stock/buy/1",
+        "code": "above_maximum"
+      }
+    ]
+  },
+  {
+    "contract": "ShopOffer",
+    "value": {
+      "item": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "item",
+        "key": "fish_a"
+      },
+      "buy": 5,
+      "sell": 1,
+      "stock": {
+        "items": [
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "fish_a"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "fish_b"
+          }
+        ],
+        "buy": [
+          5,
+          3.5
+        ]
+      }
+    },
+    "errors": [
+      {
+        "path": "/stock/buy/1",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "contract": "ShopOffer",
+    "value": {
+      "item": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "item",
+        "key": "fish_a"
+      },
+      "buy": 5,
+      "sell": 1,
+      "stock": {
+        "items": [
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "fish_a"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "fish_b"
+          }
+        ],
+        "buy": [
+          5,
+          3
+        ],
+        "sell": [
+          1,
+          1
+        ]
+      }
+    },
+    "errors": [
+      {
+        "path": "/stock/sell",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "ShopOffer",
+    "value": {
+      "item": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "item",
+        "key": "fish_a"
+      },
+      "buy": 5,
+      "sell": 1,
+      "stock": {
+        "items": [
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "fish_a"
+          },
+          "fish_b"
+        ],
+        "buy": [
+          5,
+          3
+        ]
+      }
+    },
+    "errors": [
+      {
+        "path": "/stock/items/1",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "contract": "ShopOffer",
+    "value": {
+      "item": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "item",
+        "key": "fish_a"
+      },
+      "buy": 5,
+      "sell": 1,
+      "stock": [
+        5,
+        3
+      ]
+    },
+    "errors": [
+      {
+        "path": "/stock",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "contract": "ShopOffer",
+    "value": {
+      "item": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "item",
+        "key": "fish_a"
+      },
+      "buy": 5,
+      "sell": 1,
+      "stock": {
+        "items": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "item",
+          "key": "fish_a"
+        },
+        "buy": [
+          5,
+          3
+        ]
+      }
+    },
+    "errors": [
+      {
+        "path": "/stock/items",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "contract": "ShopOffer",
+    "value": {
+      "item": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "item",
+        "key": "fish_a"
+      },
+      "buy": 5,
+      "sell": 1,
+      "stock": {
+        "items": [
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "fish_a"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "fish_b"
+          }
+        ],
+        "buy": 5
+      }
+    },
+    "errors": [
+      {
+        "path": "/stock/buy",
+        "code": "invalid_type"
+      }
+    ]
   }
 ]

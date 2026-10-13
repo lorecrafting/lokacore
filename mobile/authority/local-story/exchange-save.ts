@@ -17,7 +17,9 @@ export function exchangeSave(
     !Object.values(saved.cartridge.quests ?? {}).some((q) => q.patrol) &&
     !Object.values(saved.cartridge.quests ?? {}).some((q) => q.exchange) &&
     !Object.values(saved.details).some((d) => d.harvest?.careful) &&
-    !Object.values(saved.entities).some((e) => e.kind === 'npc' && e.shop?.buy_discount) &&
+    !Object.values(saved.entities).some(
+      (e) => e.kind === 'npc' && (e.shop?.buy_discount || e.shop?.offers.some((o) => o.stock)),
+    ) &&
     !Object.keys(fresh.fuelSpecs).length &&
     saved.state.fuel === undefined
   )
