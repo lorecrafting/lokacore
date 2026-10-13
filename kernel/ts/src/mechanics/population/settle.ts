@@ -161,6 +161,7 @@ export function wanders(
   return ops;
 }
 
+// size: allow 47, a walking member (row W26) commits its key passage with its move and sight
 function wanderOne(
   world: World,
   occurrence_id: CommandId,

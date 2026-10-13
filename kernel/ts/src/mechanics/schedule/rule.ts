@@ -111,6 +111,7 @@ function advance(world: World, payload: Advance) {
   );
 }
 
+// size: allow 47, a walking step (row W26) commits its key passages, move and next hour together
 function scheduledJob(
   world: World,
   command: Parameters<Rule<'schedule'>>[1],
