@@ -17,7 +17,9 @@ type Counts = Record<string, number>;
 type Drift = { seed: number; step: number; room: string; command: string; code: string };
 
 const count = (t: Counts, k: string) => (t[k] = (t[k] ?? 0) + 1);
-const roomOf = (w: World) => w.rooms[w.state.containers[w.body]!]!.key as string;
+// the room's definition key; else (the body in a non-room container) the container's id
+const roomOf = (w: World, here = w.state.containers[w.body]!) =>
+  (w.rooms[here]?.key as string | undefined) ?? here;
 const facts = (w: World) => (w.state.facts ?? {}) as Record<string, unknown>;
 
 // The running tallies; `left` is the room left on the run's previous room change.
@@ -26,6 +28,7 @@ const blank = () => ({
   ...{ by_code: {} as Counts, by_room: {} as Counts, by_command: {} as Counts },
   ...{ revisits: {} as Counts, drift: [] as Drift[], gaps: [] as number[] },
   left: undefined as string | undefined,
+  entered: new Set<string>(), // the rooms this seed's run has entered
 });
 type T = ReturnType<typeof blank>;
 type At = Parameters<Observe>[3];
@@ -36,8 +39,7 @@ export function tally() {
   const observe: Observe = (before, p, { decision, world }, at) => {
     const room = roomOf(before);
     if (at.seed !== t.seed) {
-      [t.seed, t.lastFact, t.left] = [at.seed, 0, undefined];
-      count(t.revisits, room);
+      [t.seed, t.lastFact, t.left, t.entered] = [at.seed, 0, undefined, new Set([room])];
     }
     t.commands++;
     if (decision.kind === 'accepted') walk(t, before, world, at.step);
@@ -49,7 +51,7 @@ export function tally() {
     per_100: (t.commands ? (t.refused * 100) / t.commands : 0).toFixed(2),
     ...{ by_code: t.by_code, by_room: t.by_room, by_command: t.by_command },
     drift: { count: t.drift.length, first: t.drift.slice(0, 5) },
-    revisits: Object.fromEntries(Object.entries(t.revisits).map(([k, n]) => [k, n - 1])),
+    revisits: t.revisits,
     ...{ moves: t.moves, backtracks: t.backtracks },
     new_facts: {
       count: t.gaps.length,
@@ -80,7 +82,8 @@ function walk(t: T, before: World, after: World, step: number) {
     t.moves++;
     if (to === t.left) t.backtracks++;
     t.left = from;
-    count(t.revisits, to);
+    if (t.entered.has(to)) count(t.revisits, to);
+    t.entered.add(to);
   }
   const [was, now] = [facts(before), facts(after)];
   const changed = Object.entries(now).some(

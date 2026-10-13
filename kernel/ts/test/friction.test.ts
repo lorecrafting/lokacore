@@ -52,14 +52,16 @@ test('a refused north in each room shows by code, room and command', () => {
   assert.deepEqual(r.drift, { count: 0, first: [] });
 });
 
-// Breaks: a backtrack compared to the room the player stands in rather than the one left (0), or
-// the start room's first entry not counted. Two moves an hour, 8 in all; every move after the
-// first returns to the room the previous one left; square is entered 1 + 4 times, gate 4 times.
+// Breaks: a backtrack compared to the room the player stands in rather than the one left (0), the
+// room left not forgotten at a new seed (15), the start room's first entry not counted, or a
+// seed's first entry into a room counted as a revisit (square 9, gate 7). Per seed: two moves an
+// hour, 8 in all; every move after the first returns to the room the previous one left; square
+// is entered 1 + 4 times, gate 4 times. Two seeds.
 test('walking square to gate and back counts every later move as a backtrack', () => {
-  const r = friction(content, { seeds: 1, days: 1, policy: pace });
-  assert.equal(r.moves, 8);
-  assert.equal(r.backtracks, 7);
-  assert.deepEqual(r.revisits, { square: 4, gate: 3 });
+  const r = friction(content, { seeds: 2, days: 1, policy: pace });
+  assert.equal(r.moves, 16);
+  assert.equal(r.backtracks, 14);
+  assert.deepEqual(r.revisits, { square: 8, gate: 6 });
   assert.deepEqual(r.new_facts, { count: 0, median_steps_between: null });
 });
 

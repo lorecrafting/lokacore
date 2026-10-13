@@ -568,8 +568,8 @@ committed or checked in CI (gating is `loka-kgd.107.3`).
   GameView before it and the actor's resolved actions (as the simulator builds them); accepted
   ones are already checked by the run. `drift: {count, first}`, `first` the earliest five
   `{seed, step, room, command, code}`.
-- **Walk (X3).** From accepted steps only: `revisits` per room key (its entries minus one; the
-  start room's first entry counts), `moves` (accepted steps that change the room), `backtracks`
+- **Walk (X3).** From accepted steps only: `revisits` per room key (each seed's entries minus one,
+  the start room's first entry counting; a room never re-entered is absent), `moves` (accepted steps that change the room), `backtracks`
   (moves back into the room left on the previous room change), and `new_facts: {count,
   median_steps_between}`: a new fact is an accepted step after which `state.facts` holds a key it
   did not hold or a different value; steps between are counted from the run's start or its
