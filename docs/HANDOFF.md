@@ -19,10 +19,20 @@ Written 2026-10-13 UTC by Claude Code (Opus 5.5), from the Pi handoff of 2026-10
 3. Read [WORKFLOW.md](WORKFLOW.md) (Loop) and this file once. `bin/session_status.sh` prints the live
    board.
 
-## End of a session (do not skip in the cloud: the container is thrown away)
+## Beads sync (every checkpoint; required in the cloud: the container is thrown away)
 
-1. `br sync --flush-only`, then commit `.beads/issues.jsonl` and this file on `main` (a PM
-   status-only commit) and push.
+- `beads.db` is local only; `.beads/issues.jsonl` on `main` is the shared copy (local Claude Code and
+  Pi write it too). Do Beads writes from a `main` checkout.
+- Before Beads writes: `git pull --ff-only origin main`, then `br sync --import-only`.
+- After each checkpoint (a merge, a review verdict, issues created or closed): `br sync --flush-only`,
+  check the JSONL diff has no machine path, commit `.beads/issues.jsonl` (and this file when changed)
+  on `main`, push.
+- Push rejected: `git pull --rebase origin main`; on an `issues.jsonl` conflict run `br sync --merge`,
+  then flush and commit again. Never commit `beads.db`.
+
+## End of a session
+
+1. Do the Beads sync above, with this file rewritten.
 2. Every branch with work is pushed. Nothing may live only in the container.
 3. File the [retro](WORKFLOW.md#retro-and-housekeeping-queue) items in Beads.
 
@@ -55,7 +65,7 @@ Wave 4 (briefs are in each issue's Beads notes; coding stopped when the API cred
    review on the final head, fix, Fable recheck; green hosted CI; PR to `main`; merge with
    `--match-head-commit`; close the issues; delete the slice branches.
 5. Next batches: M11 (G7 locks, W26, 24, 20a, 20b, W11), then M12 to M15 per the toolbox table and
-   `br ready`. Balance 3 `loka-kgd.107.3` waits on owner question 2.
+   `br ready`, batch after batch without stopping, until no open `loka-kgd` row is left. Balance 3 `loka-kgd.107.3` waits on owner question 2.
 
 Per slice: brief in Beads notes, developer, CI on the head (`bin/wait_ci.sh <sha>`), fresh Opus
 reviewer, fix round by the same developer, reviewer recheck, then `bin/pm_merge.sh <batch-worktree>
