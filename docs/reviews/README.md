@@ -10,6 +10,7 @@ of closed work are deleted once their lesson is folded, and linked by permalink
 Reviews before R2 live in the [legacy repository](https://github.com/lorecrafting/lokacore-v2-legacy)
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
+- [Review: toolbox rows 24 and 25, property ownership and bank (loka-kgd.127)](2026-10-13-m11-property-review.md): **CHANGES REQUIRED**
 - [Review: toolbox row G7, access locks (loka-kgd.123)](2026-10-13-m11-locks-review.md): **APPROVE WITH NOTES**
 - [Review: toolbox row 20a, escrow custody (loka-kgd.124)](2026-10-13-m11-escrow-review.md): **APPROVE**
 - [Review: m11 doors (row W26) schema validation, second opinion](2026-10-13-m11-doors-second-opinion.md): **APPROVE**
