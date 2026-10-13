@@ -1,9 +1,9 @@
 defmodule Loka.Content.Derived do
   @moduledoc """
   Checks toolbox row 2 derived-stat tables (world.derived), row 3 item affects, row 27 identified
-  items and row G3 NPC attributes; twin of cartridge_derived.ts.
+  items, row G3 NPC attributes and balance 6b's gear budget; twin of cartridge_derived.ts.
   """
-  import Loka.Content.Source, only: [at: 2, diag: 2, diag: 4, ref: 3]
+  import Loka.Content.Source, only: [at: 2, diag: 2, diag: 3, diag: 4, ref: 3]
   alias Loka.Content.Refs
 
   # hp_max needs the hp pool, which every compiled cartridge has (Resources @defaults).
@@ -30,20 +30,20 @@ defmodule Loka.Content.Derived do
   def check(nil, _, _), do: []
 
   def check(m, defs, {_, settings}) do
-    table = get_in(settings, ["world", "derived"])
+    world = settings["world"] || %{}
+    table = world["derived"]
     items = for {_, {rel, _, item}} <- defs["item"] || %{}, do: {rel, item}
 
-    tables =
-      if table,
-        do:
-          owner(m, "cartridge.world.derived") ++
-            Enum.flat_map(table, &stat(&1, m, defs, settings["world"])),
-        else: []
-
-    floor(m, table, items, g3?(defs)) ++
-      tables ++
+    floor(m, api_floor(table, items, g3?(defs), world["gear_budget"])) ++
+      tables(m, defs, world) ++
+      gear_budget(m, world) ++
       Enum.flat_map(items, &item(&1, m, defs)) ++ npcs(m, defs)
   end
+
+  defp tables(m, defs, %{"derived" => table} = world),
+    do: owner(m, "cartridge.world.derived") ++ Enum.flat_map(table, &stat(&1, m, defs, world))
+
+  defp tables(_, _, _), do: []
 
   # Row G3: NPC attributes, or an opposed check naming an NPC.
   defp g3?(defs),
@@ -51,17 +51,20 @@ defmodule Loka.Content.Derived do
       Enum.any?(defs["npc"] || %{}, &match?({_, {_, _, %{"attributes" => _}}}, &1)) or
         Enum.any?(defs["recipe"] || %{}, &match?({_, {_, _, %{"check" => %{"npc" => _}}}}, &1))
 
-  # An identified item is row 27 (API 1.68); NPC attributes are row G3 (1.46); finger slots and
-  # affects row 3 (1.41); hp_max 1.40; the other tables 1.39.
-  defp floor(m, table, items, g3) do
-    floor =
-      cond do
-        Enum.any?(items, fn {_, i} -> i["identified"] end) -> [1, 68]
-        g3 -> [1, 46]
-        Enum.any?(items, fn {_, i} -> i["affects"] || i["slot"] == "finger" end) -> [1, 41]
-        true -> table_floor(table)
-      end
+  # A gear budget or an intended level is balance 6b (API 1.72); an identified item is row 27
+  # (1.68); NPC attributes are row G3 (1.46); finger slots and affects row 3 (1.41); hp_max 1.40;
+  # the other tables 1.39.
+  defp api_floor(table, items, g3, budget) do
+    cond do
+      budget || Enum.any?(items, fn {_, i} -> i["intended_level"] end) -> [1, 72]
+      Enum.any?(items, fn {_, i} -> i["identified"] end) -> [1, 68]
+      g3 -> [1, 46]
+      Enum.any?(items, fn {_, i} -> i["affects"] || i["slot"] == "finger" end) -> [1, 41]
+      true -> table_floor(table)
+    end
+  end
 
+  defp floor(m, floor) do
     if floor && api(m) < floor,
       do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
       else: []
@@ -71,7 +74,27 @@ defmodule Loka.Content.Derived do
   defp table_floor(%{"hp_max" => _}), do: [1, 40]
   defp table_floor(_), do: [1, 39]
 
-  defp item(i, m, defs), do: affects(i, m, defs) ++ identified(i, m, defs)
+  # Balance 6b: a gear budget needs attributes@1 and budgets at least one slot (too_few_items: the
+  # subset has no minProperties).
+  defp gear_budget(m, %{"gear_budget" => %{"per_slot" => slots}}) when slots == %{},
+    do:
+      owner(m, "cartridge.world.gear_budget") ++
+        [
+          diag("SCHEMA_VIOLATION", "cartridge.world.gear_budget.per_slot", %{
+            "error" => "too_few_items"
+          })
+        ]
+
+  defp gear_budget(m, %{"gear_budget" => _}), do: owner(m, "cartridge.world.gear_budget")
+  defp gear_budget(_, _), do: []
+
+  defp item(i, m, defs), do: intended(i) ++ affects(i, m, defs) ++ identified(i, m, defs)
+
+  # Balance 6b: an intended level sits beside affects.
+  defp intended({rel, %{"intended_level" => _} = item}) when not is_map_key(item, "affects"),
+    do: [diag("SCHEMA_VIOLATION", at(rel, ["intended_level"]))]
+
+  defp intended(_), do: []
 
   # Toolbox row 3: an item's affects need its slot, attributes@1 and real attributes.
   defp affects({rel, %{"affects" => list} = item}, m, defs) do

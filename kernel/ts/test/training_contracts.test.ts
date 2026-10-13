@@ -123,6 +123,10 @@ test('skill loader owns reserved acquisition, qualifications, teacher funding an
       (c.dialogues['ashmere_sampler@0.0.9:dialogue/learn_swords'].choices.learn.sequence = [
         { op: 'fact.assign', fact: ref('fact', 'skill_swords'), value: true },
       ]),
+    (c) => {
+      const learn = c.dialogues['ashmere_sampler@0.0.9:dialogue/learn_swords'].choices.learn;
+      learn.sequence = [...learn.sequence, ...learn.sequence];
+    },
   ];
   for (const mutate of mutants) {
     const m = structuredClone(c);

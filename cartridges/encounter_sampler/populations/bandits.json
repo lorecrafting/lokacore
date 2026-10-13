@@ -1,0 +1,16 @@
+{
+  "bundle": "bandits",
+  "home": "road",
+  "area": [
+    "road",
+    "crossroads"
+  ],
+  "cap": 1,
+  "day_target": 1,
+  "night_target": 1,
+  "night_start": 20,
+  "night_end": 6,
+  "replacement_delay": 3600,
+  "wander_interval": 3600,
+  "chance": 25
+}

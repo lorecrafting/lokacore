@@ -1,0 +1,9 @@
+{
+  "title": "room.camp.title",
+  "description": "room.camp.description",
+  "exits": {
+    "west": {
+      "to": "fen"
+    }
+  }
+}

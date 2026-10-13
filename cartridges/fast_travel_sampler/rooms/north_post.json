@@ -1,0 +1,22 @@
+{
+  "title": "room.north_post.title",
+  "description": "room.north_post.description",
+  "exits": {
+    "south": {
+      "to": "lane"
+    }
+  },
+  "details": {
+    "post": {
+      "aliases": [
+        "post",
+        "cart"
+      ],
+      "description": "detail.north_post.description",
+      "transport": {
+        "route": "north_road",
+        "title": "detail.post.title"
+      }
+    }
+  }
+}

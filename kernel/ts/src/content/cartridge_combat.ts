@@ -36,6 +36,7 @@ export function combat(c: Obj, named: Checks['named']): Diagnostic[] {
     ...damageApi(c),
     ...deathCredit(c, named),
     ...allies(c, named),
+    ...group(c, named),
     ...shots(c, named),
   ];
 }
@@ -62,10 +63,11 @@ function allies(c: Obj, named: Checks['named']): Diagnostic[] {
   const out: Diagnostic[] = [];
   const bad = (at: string) => out.push(diag('SCHEMA_VIOLATION', at, { error: 'invalid_value' }));
   const settings = c.world?.combat;
-  if (!settings?.allies) return out;
-  for (const field of ['ally_hit', 'ally_miss'])
-    if (!settings.narration[field]) bad(`.cartridge.world.combat.narration.${field}`);
-  for (const [i, ref] of settings.allies.entries()) {
+  // Row G8: group members strike as allies too.
+  if (settings && (settings.allies || c.world.group))
+    for (const field of ['ally_hit', 'ally_miss'])
+      if (!settings.narration[field]) bad(`.cartridge.world.combat.narration.${field}`);
+  for (const [i, ref] of (settings?.allies ?? []).entries()) {
     const at = `.cartridge.world.combat.allies[${i}]`;
     named(ref, 'npc', at);
     const npc = c.npcs?.[refString(ref)];
@@ -74,18 +76,50 @@ function allies(c: Obj, named: Checks['named']): Diagnostic[] {
   return out;
 }
 
+// Toolbox rows G8 and 22a: the group's member, stay and fight facts are bool pair facts
+// (per_subject, scopes ["player"]); row 22b: the wage resource is conserved (gain 0, no regen).
+function group(c: Obj, named: Checks['named']): Diagnostic[] {
+  const wage = c.world?.group?.wage?.resource;
+  const out: Diagnostic[] = [];
+  if (wage) {
+    const at = '.cartridge.world.group.wage.resource';
+    named(wage, 'resource', at);
+    const r = c.resources?.[refString(wage)];
+    if (r && (r.gain !== 0 || r.regen))
+      out.push(diag('SCHEMA_VIOLATION', at, { error: 'invalid_value' }));
+  }
+  return out.concat(
+    ['member', 'stay', 'fight'].flatMap((key) => {
+      const ref = c.world?.group?.[key];
+      if (!ref) return [];
+      const at = `.cartridge.world.group.${key}`;
+      named(ref, 'fact', at);
+      const f = c.facts?.[refString(ref)];
+      const pair = f?.value_type.type === 'bool' && f.per_subject && same(f.scopes, ['player']);
+      return f && !pair ? [diag('SCHEMA_VIOLATION', at, { error: 'invalid_value' })] : [];
+    }),
+  );
+}
+
 // Toolbox row G2: damage kinds, crits and resistances need kernel_api 1.44.
 function damageApi(c: Obj): Diagnostic[] {
   const npcs = Object.values((c.npcs ?? {}) as Obj);
   const items = Object.values((c.items ?? {}) as Obj).map((i) => i.weapon?.attack);
   const profiles = [c.world?.combat?.player_attack, ...npcs.map((n) => n.attack), ...items];
   const used = profiles.some((p) => p?.kind || p?.crit) || npcs.some((n) => n.resistances);
-  // Toolbox rows 6a and 6b: target choice and allies need kernel_api 1.48; row 17's ranged 1.67.
-  const floor = ranged(c)
-    ? '1.67'
-    : c.world?.combat?.target_choice || c.world?.combat?.allies
-      ? '1.48'
-      : used && '1.44';
+  // Toolbox rows 6a and 6b: target choice and allies need kernel_api 1.48; row 17's ranged 1.67;
+  // row G8's group 1.70; row 22a's group orders 1.73; row 22b's wage 1.75.
+  const floor = c.world?.group?.wage
+    ? '1.75'
+    : c.world?.group?.stay || c.world?.group?.fight
+      ? '1.73'
+      : c.world?.group
+        ? '1.70'
+        : ranged(c)
+          ? '1.67'
+          : c.world?.combat?.target_choice || c.world?.combat?.allies
+            ? '1.48'
+            : used && '1.44';
   return floor && apiCmp(c.manifest.requires.kernel_api.at_least, floor) < 0
     ? [diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least')]
     : [];

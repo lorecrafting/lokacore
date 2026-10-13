@@ -196,7 +196,7 @@ defmodule Loka.Content.Skills do
           e <- reference(rel, steps ++ ["sequence", i], {"skill", "skill"}, s, ctx.m, ctx.defs),
           do: e
 
-    refs ++ lesson(rel, steps, o, d, ctx)
+    refs ++ lesson(rel, steps, o, d, ctx) ++ fee_api(o, ctx.m)
   end
 
   defp lesson(rel, steps, %{"lesson_payment" => p} = o, d, ctx) do
@@ -205,19 +205,28 @@ defmodule Loka.Content.Skills do
     reference(rel, steps ++ ["lesson_payment"], {"resource", "resource"}, p, ctx.m, ctx.defs) ++
       if(
         funded?(teacher, p["resource"], ctx) and teacher["npc"] == d["npc"] and !o["payment"] and
-          Enum.count(o["sequence"] || [], &(&1["op"] == "skill.acquire")) == 1,
+          grants(o) <= 1,
         do: [],
         else: [bad(at(rel, steps ++ ["lesson_payment"]))]
       )
   end
 
   defp lesson(rel, steps, o, _, _) do
-    grants = Enum.count(o["sequence"] || [], &(&1["op"] == "skill.acquire"))
-
-    if grants > 0 and (grants != 1 or o["payment"] != nil),
+    if grants(o) > 0 and (grants(o) != 1 or o["payment"] != nil),
       do: [bad(at(rel, steps ++ ["lesson_payment"]))],
       else: []
   end
+
+  defp grants(o), do: Enum.count(o["sequence"] || [], &(&1["op"] == "skill.acquire"))
+
+  # Row 22b: a fee without a skill (a hire fee) needs kernel_api 1.75.
+  defp fee_api(%{"lesson_payment" => _} = o, m) do
+    if grants(o) == 0 and version(m) < [1, 75],
+      do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
+      else: []
+  end
+
+  defp fee_api(_, _), do: []
 
   defp funded?(%{"role" => "npc", "npc" => ref}, resource, ctx) do
     case Loka.Content.Refs.resolve(ref, "npc", ctx.m, ctx.defs) do

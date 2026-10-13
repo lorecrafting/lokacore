@@ -1,0 +1,122 @@
+// Replenish (toolbox row 19b; docs/system/mechanics.md Replenish): a due job moves authored,
+// conserved items from a reserve holder to a target holder up to a cap. Nothing is minted.
+import {
+  LIMITS,
+  type DefinitionRef,
+  type DeltaOp,
+  type EntityId,
+  type ItemLocation,
+  type JobId,
+} from '../../contracts.gen.ts';
+import {
+  accepted,
+  entries,
+  refString,
+  type Cartridge,
+  type JobRow,
+  type Mint,
+  type Steps,
+  type World,
+} from '../../runtime/decision.ts';
+import { cmp } from '../../foundation/validate.ts';
+import { selected } from './stock.ts';
+
+/** A fresh world's replenish jobs, in DefinitionRefString order, each first due at clock + every. */
+export function firstReplenish(cartridge: Cartridge, clock: number, mint: Mint) {
+  const { id: cartridge_id, version: cartridge_version } = cartridge.manifest;
+  const jobs: Record<string, JobRow> = {};
+  for (const [, r] of entries(cartridge.replenish ?? {}).sort(([a], [b]) => cmp(a, b))) {
+    const job = { cartridge_id, cartridge_version, kind: 'replenish', key: r.key };
+    jobs[mint()] = { job, due_time: clock + r.every, status: 'pending' };
+  }
+  return jobs;
+}
+
+// The loader refuses a template location, so `at` names a room, an NPC or an item.
+const holder = (world: World, at: ItemLocation): EntityId =>
+  at.in === 'room'
+    ? world.roomIds[refString(at.room)]
+    : world.entityIds[refString(at.in === 'npc' ? at.npc : (at as { item: DefinitionRef }).item)];
+
+// The target's free room: its declared capacity less everything directly in it, whatever the
+// item (as commerce/shared.ts), so a move never exceeds it; unbounded without a capacity.
+function free(world: World, to: EntityId, steps: Steps): number | 'budget_exceeded' {
+  let left = world.capacities[to] ?? Infinity;
+  if (left !== Infinity)
+    for (const c of Object.values(world.state.containers)) {
+      if (++steps.n > LIMITS.query_steps) return 'budget_exceeded';
+      if (c === to) left--;
+    }
+  return left;
+}
+
+/**
+ * One run at `at` (the due time, or a crossed step's): move up to `count` of the entry's items
+ * from `from` to `to` until `to` holds `cap`, complete the job and schedule the next at
+ * `at + every`; a next time the advance also crosses is returned as `next`, its own drain step.
+ */
+export function runReplenish(
+  world: World,
+  job_id: JobId,
+  row: JobRow,
+  mint: Mint,
+  steps: Steps,
+  at: number,
+) {
+  const r = world.cartridge.replenish![refString(row.job)];
+  const [from, to] = [holder(world, r.from), holder(world, r.to)];
+  const moved = moves(world, row, steps);
+  if (typeof moved === 'string') return { kind: 'fault', code: moved } as const;
+  const ops: DeltaOp[] = moved.map((entity_id) => ({
+    op: 'entity.transfer',
+    writer_group: 0,
+    entity_id,
+    source_id: from,
+    destination_id: to,
+  }));
+  return regrid(world, job_id, row, mint, at + r.every, ops);
+}
+
+// The items one run of `row` moves now: up to `count`, until the target holds `cap`.
+function moves(world: World, row: JobRow, steps: Steps) {
+  const r = world.cartridge.replenish![refString(row.job)];
+  const [from, to] = [holder(world, r.from), holder(world, r.to)];
+  const held = selected(world, r.items, to, Infinity, steps);
+  if (typeof held === 'string') return held;
+  const space = free(world, to, steps);
+  if (typeof space === 'string') return space;
+  const room = Math.max(0, Math.min(r.cap - held.length, space));
+  return selected(world, r.items, from, Math.min(r.count, room), steps);
+}
+
+/** The items a due replenish run will move, whose earlier writer's group it joins (row 41). */
+export function replenishMovers(world: World, row: JobRow): EntityId[] {
+  const moved = moves(world, row, { n: 0 });
+  return typeof moved === 'string' ? [] : moved;
+}
+
+/**
+ * Accept a fixed-grid job's run (replenish, row 22b's wage): complete a pending row and schedule
+ * the next at `due_time`; a `due_time` the advance also crosses is returned as `next` instead.
+ */
+export function regrid(
+  world: World,
+  job_id: JobId,
+  row: JobRow,
+  mint: Mint,
+  due_time: number,
+  ops: DeltaOp[],
+) {
+  if (row.status === 'pending') ops.push({ op: 'job.complete', writer_group: 0, job_id });
+  const crossed = due_time <= world.state.clock;
+  if (!crossed)
+    ops.push({
+      op: 'job.schedule',
+      writer_group: 0,
+      job: row.job,
+      due_time,
+      job_id: mint() as JobId,
+    });
+  const ran = accepted<never>(world, 'job_ran', ops, []);
+  return crossed ? { ...ran, next: due_time } : ran;
+}

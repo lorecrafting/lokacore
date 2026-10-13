@@ -1,0 +1,116 @@
+{
+  "npc": "hal",
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": []
+    }
+  },
+  "prompt": "dialogue.hal.prompt",
+  "roles": {
+    "hal": {
+      "role": "npc",
+      "npc": "hal"
+    }
+  },
+  "choices": {
+    "hire": {
+      "label": "dialogue.hal.hire",
+      "narration": "narration.hal.hire",
+      "lesson_payment": {
+        "to": "hal",
+        "resource": "coins",
+        "amount": 3
+      },
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "hired",
+          "value": true
+        }
+      ]
+    },
+    "dismiss": {
+      "label": "dialogue.hal.dismiss",
+      "narration": "narration.hal.dismiss",
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "hired",
+          "value": false
+        },
+        {
+          "op": "fact.assign",
+          "fact": "staying",
+          "value": false
+        },
+        {
+          "op": "fact.assign",
+          "fact": "fighting",
+          "value": false
+        }
+      ]
+    },
+    "stay": {
+      "label": "dialogue.hal.stay",
+      "narration": "narration.hal.stay",
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "staying",
+          "value": true
+        }
+      ]
+    },
+    "follow": {
+      "label": "dialogue.hal.follow",
+      "narration": "narration.hal.follow",
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "staying",
+          "value": false
+        }
+      ]
+    },
+    "attack": {
+      "label": "dialogue.hal.attack",
+      "narration": "narration.hal.attack",
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "fighting",
+          "value": true
+        }
+      ]
+    },
+    "hold": {
+      "label": "dialogue.hal.hold",
+      "narration": "narration.hal.hold",
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "fighting",
+          "value": false
+        }
+      ]
+    },
+    "guard": {
+      "label": "dialogue.hal.guard",
+      "narration": "narration.hal.guard",
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "staying",
+          "value": true
+        },
+        {
+          "op": "fact.assign",
+          "fact": "fighting",
+          "value": true
+        }
+      ]
+    }
+  }
+}

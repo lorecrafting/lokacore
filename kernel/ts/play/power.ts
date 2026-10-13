@@ -1,6 +1,7 @@
 // `node kernel/ts/play/power.ts <artifact>` (docs/system/cartridge.md#content-reports): loads a
-// `mix loka.compile` artifact and prints its derived-stat power curve by level and its item sheet as
-// one canonical JSON document. A report for authors, not a check: nothing reads its output.
+// `mix loka.compile` artifact and prints its derived-stat power curve by level, its item sheet and,
+// with world.gear_budget, the items over or outside it as one canonical JSON document. A report for
+// authors, not a check: nothing reads its output.
 import { readFileSync } from 'node:fs';
 import { INSTALLED, loadCartridge } from '../src/index.ts';
 import type { DerivedStat, ItemAffect } from '../src/contracts.gen.ts';
@@ -92,6 +93,33 @@ export function itemSheet(c: Obj) {
     .sort((a, b) => (a.slot < b.slot ? -1 : a.slot > b.slot ? 1 : a.ref < b.ref ? -1 : 1));
 }
 
+/** Balance 6b: each item with affects against world.gear_budget, in sheet order; none without it. */
+export function gearBudget(c: Obj) {
+  const budget = c.world?.gear_budget;
+  if (!budget) return undefined;
+  const over: Obj[] = [];
+  const unbudgeted: Obj[] = [];
+  for (const { ref, slot, affects, affect_total } of itemSheet(c)) {
+    if (!affects.length) continue;
+    const level: number | undefined = c.items[ref].intended_level;
+    const cap: number | undefined = budget.per_slot[slot];
+    if (level === undefined) unbudgeted.push({ ref, missing: 'intended_level' });
+    else if (cap === undefined) unbudgeted.push({ ref, missing: 'slot' });
+    else {
+      const allowed = saturate(cap + saturate(budget.per_level * (level - 1)));
+      if (affect_total > allowed)
+        over.push({ ref, slot, intended_level: level, affect_total, allowed });
+    }
+  }
+  return { over, unbudgeted };
+}
+
+/** The printed document: `budget` only with world.gear_budget. */
+export function report(c: Obj) {
+  const budget = gearBudget(c);
+  return { levels: powerCurve(c), items: itemSheet(c), ...(budget && { budget }) };
+}
+
 if (import.meta.main) {
   const [file, ...rest] = process.argv.slice(2);
   if (!file || rest.length) {
@@ -104,5 +132,5 @@ if (import.meta.main) {
     process.exit(1);
   }
   const c = loaded.cartridge as unknown as Obj;
-  console.log(encode({ levels: powerCurve(c), items: itemSheet(c) } as unknown as Json));
+  console.log(encode(report(c) as unknown as Json));
 }

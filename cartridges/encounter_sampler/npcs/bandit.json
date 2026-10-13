@@ -1,0 +1,21 @@
+{
+  "keywords": [
+    "bandit"
+  ],
+  "short": "npc.bandit.short",
+  "room_line": "npc.bandit.room",
+  "description": "npc.bandit.description",
+  "room": "road",
+  "spawn_template": true,
+  "hp": {
+    "minimum": 0,
+    "maximum": 3,
+    "start": 3,
+    "gain": 0
+  },
+  "attack": {
+    "chance": 50,
+    "damage_min": 1,
+    "damage_max": 1
+  }
+}

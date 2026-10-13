@@ -183,7 +183,7 @@ export function resolved(world: World, actor: CharacterId): ActionSet {
     !fight ||
     ['flee', 'stand', 'look', 'scan', 'bandage', 'cast'].includes(c) ||
     (c === 'attack' && choosing);
-  const free = permits(world, bodyOf(world, actor)); // status reader 4
+  const free = permits(world, actor); // status reader 4
   return Object.fromEntries(
     Object.entries(set).filter(([, a]) => kept(a.command) && free(a.command)),
   );
@@ -191,7 +191,7 @@ export function resolved(world: World, actor: CharacterId): ActionSet {
 
 // Status reader 4: a type the composed set offers but the actor's statuses bar.
 const barred = (world: World, actor: CharacterId, type: string) =>
-  !permits(world, bodyOf(world, actor))(type) &&
+  !permits(world, actor)(type) &&
   Object.values(composed(world, actor)).some((a) => a.command === type);
 
 /** The target id of a recipe's detail (the loader checks it exists). */

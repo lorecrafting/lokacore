@@ -16,6 +16,6 @@ export function combatOffered(
   const entity = id && world.entities[id];
   return (
     a.command !== 'attack' ||
-    (entity && entity.kind === 'npc' && !!entity.attack && !ally(world, id as EntityId))
+    (entity && entity.kind === 'npc' && !!entity.attack && !ally(world, actor, id as EntityId))
   );
 }

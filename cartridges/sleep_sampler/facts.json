@@ -1,0 +1,26 @@
+{
+  "facts": {
+    "hound_slain": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The hound in the fen died to the player."
+    },
+    "dreamt_of_hounds": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The player rested in the fen after the hound died and dreamt of hounds."
+    }
+  }
+}

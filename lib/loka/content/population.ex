@@ -49,10 +49,25 @@ defmodule Loka.Content.Population do
     plans = defs["population"] || %{}
     calendar = settings["calendar"]
 
-    for {_key, {rel, steps, plan}} <- plans,
-        is_map(plan),
-        error <- plan_errors(manifest, defs, calendar, if(v2, do: elem(v2, 1), else: %{}), plan),
-        do: diag("SCHEMA_VIOLATION", at(rel, steps ++ error))
+    floor(manifest, plans) ++
+      for {_key, {rel, steps, plan}} <- plans,
+          is_map(plan),
+          error <- plan_errors(manifest, defs, calendar, if(v2, do: elem(v2, 1), else: %{}), plan),
+          do: diag("SCHEMA_VIOLATION", at(rel, steps ++ error))
+  end
+
+  # Toolbox row 9: an encounter plan (`chance`) needs kernel_api 1.74.
+  defp floor(m, plans) do
+    encounter = Enum.any?(for {_, {_, _, p}} <- plans, is_map(p), do: Map.has_key?(p, "chance"))
+
+    api =
+      m["requires"]["kernel_api"]["at_least"]
+      |> String.split(".")
+      |> Enum.map(&String.to_integer/1)
+
+    if encounter and api < [1, 74],
+      do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
+      else: []
   end
 
   # ponytail: report this finite plan's linked source errors together; split on another plan shape. # credo:disable-for-next-line /ABCSize|CyclomaticComplexity/

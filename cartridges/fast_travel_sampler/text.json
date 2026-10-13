@@ -1,0 +1,19 @@
+{
+  "room.north_post.title": "North Post",
+  "room.north_post.description": "A carter's [post](post) where the north road ends. The lane runs south.",
+  "room.lane.title": "Lane",
+  "room.lane.description": "A long lane between the two posts, north and south.",
+  "room.south_post.title": "South Post",
+  "room.south_post.description": "A carter's [post](post) where the south road ends. The lane runs north.",
+  "detail.post.title": "Carter's post",
+  "detail.north_post.description": "A painted board: rides to the South Post, three coins.",
+  "detail.south_post.description": "A painted board: rides to the North Post, three coins.",
+  "npc.carter.short": "the carter",
+  "npc.carter.room": "The [[carter|carter]] waits by the post.",
+  "npc.carter.description": "A carter with a quick cart, who goes only where you have been before.",
+  "transport.ride_south": "Ride south",
+  "transport.ride_north": "Ride north",
+  "transport.unaffordable": "You need three coins for the ride.",
+  "transport.ride_south.used": "The carter whips up the horse, and the cart sets you down at the South Post.",
+  "transport.ride_north.used": "The carter whips up the horse, and the cart sets you down at the North Post."
+}

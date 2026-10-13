@@ -3,7 +3,8 @@
 import { accepted, bodyOf, event, rejected, type Rule } from '../../runtime/decision.ts';
 import { opening } from '../dialogue/behavior.ts';
 import { pending } from '../dialogue/shared.ts';
-import { answer, authored, folded, hearers, npcsIn } from './shared.ts';
+import { answer, authored, folded, hearers } from './shared.ts';
+import { npcsIn } from '../death/shared.ts';
 
 export const decide: Rule<'speech'> = (world, command, mint, steps = { n: 0 }) => {
   const p = command.payload;

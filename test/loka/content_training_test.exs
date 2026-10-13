@@ -47,7 +47,9 @@ defmodule Loka.ContentTrainingTest do
            &update_in(&1, ["world", "combat", "narration"], fn n -> Map.delete(n, "block") end)},
           {"npcs/tobin.json", &Map.delete(&1, "resource_starts")},
           {"items/rusty_sword.json", &Map.put(&1, "slot", "off_hand")},
-          {"skills/swords.json", &put_in(&1, ["qualification", "root", "attribute"], "missing")}
+          {"skills/swords.json", &put_in(&1, ["qualification", "root", "attribute"], "missing")},
+          {"dialogues/tobin_swords.json",
+           &update_in(&1, ["choices", "learn", "sequence"], fn s -> s ++ s end)}
         ] do
       original = @source |> Path.join(path) |> File.read!() |> JSON.decode!()
       target = Path.join(dir, path)

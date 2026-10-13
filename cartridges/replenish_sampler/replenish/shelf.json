@@ -1,0 +1,16 @@
+{
+  "items": [
+    "apple_01"
+  ],
+  "from": {
+    "in": "item",
+    "item": "crate"
+  },
+  "to": {
+    "in": "npc",
+    "npc": "trader"
+  },
+  "cap": 1,
+  "count": 1,
+  "every": 3600
+}

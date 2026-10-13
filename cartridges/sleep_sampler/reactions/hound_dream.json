@@ -1,0 +1,35 @@
+{
+  "on": {
+    "event": "rested",
+    "room": "fen"
+  },
+  "when": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": [
+        {
+          "op": "fact_compare",
+          "fact": "hound_slain",
+          "equals": true
+        },
+        {
+          "op": "fact_compare",
+          "fact": "dreamt_of_hounds",
+          "equals": false
+        }
+      ]
+    }
+  },
+  "apply": [
+    {
+      "op": "fact.assign",
+      "fact": "dreamt_of_hounds",
+      "value": true
+    },
+    {
+      "op": "status.apply",
+      "status": "hound_dream"
+    }
+  ]
+}

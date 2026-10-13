@@ -7,10 +7,16 @@ defmodule Loka.Content.Combat do
   def expand(credit, m), do: Map.new(credit, fn {k, v} -> {k, ref(v, k, m)} end)
 
   @spec settings(map(), map()) :: map()
-  def settings(%{"world" => %{"combat" => %{"allies" => allies}}} = settings, m),
-    do: put_in(settings, ["world", "combat", "allies"], Enum.map(allies, &ref(&1, "npc", m)))
+  def settings(settings, m),
+    do:
+      settings
+      |> put_ref(["world", "combat", "allies"], &Enum.map(&1, fn r -> ref(r, "npc", m) end))
+      |> put_ref(["world", "group", "member"], &ref(&1, "fact", m))
+      |> put_ref(["world", "group", "stay"], &ref(&1, "fact", m))
+      |> put_ref(["world", "group", "fight"], &ref(&1, "fact", m))
 
-  def settings(settings, _), do: settings
+  defp put_ref(settings, path, f),
+    do: if(get_in(settings, path), do: update_in(settings, path, f), else: settings)
 
   @spec check(map() | nil, map(), {term(), map()}, {term(), map() | :unknown} | nil) :: [map()]
   def check(nil, _, _, _), do: []
@@ -22,6 +28,7 @@ defmodule Loka.Content.Combat do
 
     settings_errors(combat, settings, m, text) ++
       allies(combat, m, defs) ++
+      group(settings, combat, m, defs) ++
       npc_profiles(defs, combat) ++
       damage_api(m, defs, combat) ++
       shots(combat, m, defs) ++
@@ -70,6 +77,60 @@ defmodule Loka.Content.Combat do
 
   defp ally({_, _, _}, path), do: [bad(path)]
   defp ally(_, _), do: []
+
+  # Toolbox rows G8 and 22a: the group's member, stay and fight facts are bool pair facts, from
+  # kernel_api 1.70 (1.73 with stay or fight); members strike as allies, so combat needs the ally
+  # narration. Row 22b: the wage resource is conserved (gain 0, no regen), from 1.75.
+  defp group(%{"world" => %{"group" => %{"member" => _} = g}}, combat, m, defs) do
+    Enum.flat_map(~w(member stay fight), &if(g[&1], do: pair_fact(&1, g, m, defs), else: [])) ++
+      wage(g["wage"], m, defs) ++
+      if(combat && !combat["allies"],
+        do: ally_narration(combat["narration"], ["world", "combat"]),
+        else: []
+      ) ++
+      if(version(m) < group_floor(g),
+        do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
+        else: []
+      )
+  end
+
+  defp group(_, _, _, _), do: []
+
+  defp group_floor(%{"wage" => _}), do: [1, 75]
+  defp group_floor(%{"stay" => _}), do: [1, 73]
+  defp group_floor(%{"fight" => _}), do: [1, 73]
+  defp group_floor(_), do: [1, 70]
+
+  defp wage(nil, _, _), do: []
+
+  defp wage(w, m, defs) do
+    path = ["world", "group", "wage"]
+
+    reference("cartridge.json", path, {"resource", "resource"}, w, m, defs) ++
+      case resolve(w["resource"], "resource", m, defs) do
+        {_, _, %{"gain" => 0, "regen" => nil}} -> []
+        {_, _, %{"gain" => 0} = r} when not is_map_key(r, "regen") -> []
+        {_, _, _} -> [bad(at("cartridge.json", path ++ ["resource"]))]
+        _ -> []
+      end
+  end
+
+  defp pair_fact(key, g, m, defs) do
+    path = ["world", "group"]
+
+    reference("cartridge.json", path, {key, "fact"}, g, m, defs) ++
+      case resolve(g[key], "fact", m, defs) do
+        {_, _,
+         %{"per_subject" => true, "scopes" => ["player"], "value_type" => %{"type" => "bool"}}} ->
+          []
+
+        {_, _, _} ->
+          [bad(at("cartridge.json", path ++ [key]))]
+
+        _ ->
+          []
+      end
+  end
 
   defp npc_profiles(defs, combat) do
     for {_, {rel, _, %{"attack" => attack} = npc}} <- defs["npc"],

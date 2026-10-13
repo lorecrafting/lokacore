@@ -2,7 +2,7 @@
 import type { CharacterId, EntityId, SpokenKeyword } from '../../contracts.gen.ts';
 import { cmp } from '../../foundation/validate.ts';
 import { refString, type Steps, type World } from '../../runtime/decision.ts';
-import { living } from '../death/shared.ts';
+import { npcsIn } from '../death/shared.ts';
 import { spokenBy } from '../dialogue/shared.ts';
 import { around } from '../senses.ts';
 
@@ -15,17 +15,6 @@ export const folded = (word: unknown) =>
   typeof word === 'string' && /^[a-zA-Z]{1,32}$/.test(word)
     ? (word.toLowerCase() as SpokenKeyword)
     : undefined;
-
-/** The living NPCs directly in one of `rooms`, in EntityId order. */
-export const npcsIn = (w: World, rooms: readonly string[]) =>
-  Object.keys(w.knownEntities)
-    .filter(
-      (id) =>
-        w.knownEntities[id]!.kind === 'npc' &&
-        rooms.includes(w.state.containers[id]!) &&
-        living(w, id),
-    )
-    .sort(cmp) as EntityId[];
 
 /** An authored keyword: a dialogue's, or the word a spoken reaction filters on. */
 export const authored = (w: World, word: string) =>

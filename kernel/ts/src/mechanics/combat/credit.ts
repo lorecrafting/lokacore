@@ -120,7 +120,7 @@ function occurrenceValid(world: World, event: Death, attack: Attack, ending: End
     !!encounter &&
     encounter.character_id === p.credited_character_id &&
     // Party credit (row 6b): the player's body or a listed ally made the kill.
-    (encounter.body_id === p.killer_id || ally(world, p.killer_id)) &&
+    (encounter.body_id === p.killer_id || ally(world, encounter.character_id, p.killer_id)) &&
     p.credited_character_id !== null &&
     bodyOf(world, p.credited_character_id) === encounter.body_id &&
     // The primary, or any member of the pack's roster at the round's start (loka-lpq6).
