@@ -30,6 +30,17 @@ function buyPrice(world: World, actor: CharacterId, npc: EntityId, o: ShopOffer,
     : base;
 }
 
+// A destination with a capacity refuses one more item when full.
+function room(world: World, destination: EntityId, steps: Steps) {
+  if (world.capacities[destination] === undefined) return undefined;
+  let held = 0;
+  for (const at of Object.values(world.state.containers)) {
+    if (++steps.n > LIMITS.query_steps) return 'budget_exceeded' as const;
+    if (at === destination) held++;
+  }
+  return held >= world.capacities[destination] ? ('invalid_state' as const) : undefined;
+}
+
 /**
  * One current offer query serves both the rule and Peg's page; no stock reservation. A hostile
  * shopkeeper (toolbox row G11) refuses as a stale price does.
@@ -66,14 +77,8 @@ export function exchange(
   const custody =
     verb === 'buy' ? carrying(world, body, steps)(moved) : giveRefused(world, moved, steps);
   if (custody) return custody;
-  if (world.capacities[destination] !== undefined) {
-    let held = 0;
-    for (const at of Object.values(world.state.containers)) {
-      if (++steps.n > LIMITS.query_steps) return 'budget_exceeded' as const;
-      if (at === destination) held++;
-    }
-    if (held >= world.capacities[destination]) return 'invalid_state' as const;
-  }
+  const full = room(world, destination, steps);
+  if (full) return full;
   const paid = transfer(world, destination, source, npc.shop.resource, price);
   return paid
     ? { body, source, destination, paid, shop: npc.shop, moved }

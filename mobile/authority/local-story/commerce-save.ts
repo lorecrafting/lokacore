@@ -7,11 +7,11 @@ import type {
   EntityId,
   Shop,
 } from '../../../kernel/ts/src/contracts.gen.ts';
-import { id } from '../../../kernel/ts/src/foundation/id_source.ts';
 import { key, same } from '../../../kernel/ts/src/foundation/compose.ts';
 import { validate } from '../../../kernel/ts/src/foundation/validate.ts';
 import { refString, type World, type Accepted } from '../../../kernel/ts/src/runtime/decision.ts';
 import type { Db, Meta } from './store.ts';
+import { acquiredOnce } from './shop-event.ts';
 type Row = {
   command_id: string;
   actor_id: string;
@@ -30,11 +30,7 @@ export function commerceSave(world: World, db: Db, meta: Meta, revision: number)
     const shop = npc.shop,
       spec = world.resourceSpecs[key(shop.resource)];
     const balances = startingBalances(world, shop.resource, spec.start);
-    const custody: Record<string, EntityId> = Object.fromEntries(
-      shop.offers
-        .filter((o) => !o.stock)
-        .map((o) => [world.entityIds[refString(o.item)], provider as EntityId]),
-    );
+    const custody = offerCustody(world, shop, provider as EntityId);
     for (const { command, decision } of receipts(world, db, meta, revision)) {
       const money = decision.delta.ops.filter(
         (o) => o.op === 'resource.adjust' && same(o.resource, shop.resource),
@@ -87,6 +83,14 @@ export function commerceSave(world: World, db: Db, meta: Meta, revision: number)
   }
 }
 
+// A stock offer's items (row W11) are not tracked: receiptHistory recomputes those exchanges, and a
+// trade job may move them.
+function offerCustody(world: World, shop: Shop, provider: EntityId): Record<string, EntityId> {
+  return Object.fromEntries(
+    shop.offers.filter((o) => !o.stock).map((o) => [world.entityIds[refString(o.item)], provider]),
+  );
+}
+
 function startingBalances(world: World, resource: DefinitionRef, start: number) {
   const balances: Record<string, number> = { [world.body]: start };
   for (const [entity, e] of Object.entries(world.entities))
@@ -124,8 +128,7 @@ function receipts(world: World, db: Db, meta: Meta, revision: number) {
 }
 
 // Opted Buy quotes and stock offers (row W11) are already recomputed at their original revision by
-// receiptHistory; a stock offer moves one item of its set.
-// size: allow 50, bind one whole exchange to its command, item, payment and acquired event
+// receiptHistory, so only the shape of a stock offer's move is checked here.
 function shopReceipt(
   world: World,
   provider: string,
@@ -140,16 +143,14 @@ function shopReceipt(
   const source = p.type === 'buy' ? provider : world.body,
     destination = p.type === 'buy' ? world.body : provider;
   const moves = d.delta.ops.filter((o) => o.op === 'entity.transfer');
-  const moved = (moves[0] as { entity_id?: EntityId } | undefined)?.entity_id;
-  const set = offer?.stock?.items.map((r) => world.entityIds[refString(r)]);
+  const moved = (moves[0] as { entity_id: EntityId } | undefined)?.entity_id as EntityId;
   if (
     p.provider_id !== provider ||
     !offer ||
     (!(p.type === 'buy' && (shop.buy_discount || offer.stock)) &&
       p.quoted_price !== offer[p.type]) ||
-    moved === undefined ||
-    (set ? !set.includes(moved) : moved !== p.item_id || custody[moved] !== source) ||
     moves.length !== 1 ||
+    (!offer.stock && (moved !== p.item_id || custody[moved] !== source)) ||
     !same(moves[0], {
       op: 'entity.transfer',
       writer_group: 0,
@@ -161,24 +162,7 @@ function shopReceipt(
     !same(d.narration, [{ key: p.type === 'buy' ? shop.bought : shop.sold }])
   )
     invalid();
-  const acquired = d.events.filter((e) => e.payload.type === 'item_acquired');
-  if (
-    acquired.length !== 1 ||
-    acquired[0].id !== id(world.context, command.id, 0) ||
-    acquired[0].world_context_id !== world.context ||
-    acquired[0].position !== 1 ||
-    acquired[0].logical_time > world.state.clock ||
-    acquired[0].causation_id !== (command.id as string) ||
-    acquired[0].correlation_id !== (command.id as string) ||
-    acquired[0].actor_id !== world.character ||
-    !same(acquired[0].scope, { kind: 'player', character_id: world.character }) ||
-    !same(acquired[0].payload, {
-      type: 'item_acquired',
-      item_id: moved,
-      holder_id: destination,
-    })
-  )
-    invalid();
+  if (!acquiredOnce(world, command, d, moved, destination)) invalid();
 }
 
 function dialoguePayment(world: World, command: Command, currency: DefinitionRef) {

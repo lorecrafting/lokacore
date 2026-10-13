@@ -40,4 +40,36 @@ defmodule Loka.ContentPricesTest do
       assert expected in Enum.map(diags, &{&1["code"], &1["path"]}), inspect(diags)
     end
   end
+
+  # Breaks: the buy_discount minimum is checked against the flat buy only, not the table (fish_c
+  # alone costs 2; twin of the discount rows in kernel/ts/test/prices.test.ts).
+  test "a buy discount minimum may not exceed any stock price", %{dir: dir} do
+    discount = fn minimum ->
+      [
+        {"cartridge.json", &put_in(&1, ["requires", "capabilities", "policy"], 1)},
+        {"npcs/fishmonger.json",
+         fn n ->
+           n
+           |> put_in(["shop", "buy_discount"], %{
+             "friendly" => true,
+             "numerator" => 1,
+             "denominator" => 2,
+             "minimum" => minimum
+           })
+           |> Map.put("disposition", %{
+             "friendly" => %{"policy_version" => 1, "root" => %{"op" => "all", "items" => []}}
+           })
+         end}
+      ]
+    end
+
+    assert {:ok, _, _} = Loka.ContentSource.compile(dir, discount.(2))
+    assert {:error, diags} = Loka.ContentSource.compile(dir, discount.(3))
+
+    assert {"RESOURCE_SPEC_INVALID", "npcs/fishmonger.shop"} in Enum.map(
+             diags,
+             &{&1["code"], &1["path"]}
+           ),
+           inspect(diags)
+  end
 end
