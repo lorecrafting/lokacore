@@ -35,3 +35,11 @@
 - `fact_changed` on accept: an entitlement emits it today (`fact.ts:255-274`), and the spec now names it.
 - `containment_cycle` as a fault in `rule.ts:7-9` and `view/services.ts:64-66`: consistent with `budget_exceeded`.
 - `kernel_api` 1.79 with G7 at 1.78: the PM resolves `world.ts` at merge.
+
+## Fix round 1 (head `3fe7445f7f997415ebfa1e92281d1ba6f89964fc`)
+
+- Scope: one commit on `891131e2`, tests only (`kernel/ts/test/escrow.test.ts`, `mobile/authority/local-story/escrow.test.ts`).
+- Finding 1 **resolved**: `escrow.test.ts:130-132` asserts the offer reason `invalid_state`/`service.order_open` and a refused use with one ore held. The open-check-after-`escrowed()` mutant now fails (`service.missing_inputs` where `service.order_open` is expected); restored.
+- Finding 2 **resolved**: `mobile/authority/local-story/escrow.test.ts:102-104` asserts `error` `{ code: 'invalid_state' }`.
+- Green at the new head: `node --test kernel/ts/test/escrow.test.ts`; mobile `escrow.test.ts`.
+- Verdict: **APPROVE**.
