@@ -35,6 +35,7 @@ import { grant } from './levelling/shared.ts';
 import { saturate } from '../foundation/int.ts';
 import { npcsIn } from './death/shared.ts';
 import { setBarrier } from './barrier/react.ts';
+import { moveItem } from './containment/react.ts';
 
 type On = ReactionRule['on'];
 // Each trigger filter (W1; reaction.schema.json): true when the event's payload field equals it.
@@ -119,9 +120,7 @@ export function sequence(
   if (rule.when && !holds(then, actor, rule.when.root, about)) return undefined;
   const activated = new Set<string>();
   const own = { holders, set: {}, applied: new Set<string>(), doors: new Map() }; // holders: the advance's
-  const ops: DeltaOp[] = [];
-  const events: DomainEvent[] = [];
-  const narration: { key: TextKey }[] = [];
+  const [ops, events, narration]: [DeltaOp[], DomainEvent[], { key: TextKey }[]] = [[], [], []];
   let position = 0;
   let gained = 0; // one levelling write per rule, so two grants never race on one expected row
   const by = { id: cause.id as string as CommandId, payload: { actor_id: actor } };
@@ -151,6 +150,8 @@ export function sequence(
       narration.push(...applying.narration);
     } else if (step.op === 'barrier.set') {
       ops.push(...setBarrier(then, step, cause, about.subject, group, own, emit)); // row W22
+    } else if (step.op === 'item.move') {
+      ops.push(...moveItem(then, step, about.subject, group, ops, holders)); // row 41
     } else if (step.op === 'experience.grant') {
       gained = saturate(gained + step.amount);
     } else {

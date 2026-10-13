@@ -261,7 +261,6 @@ function react(p: P): Admitted | undefined {
 }
 
 // Each due job of the root's explicit advance, then its reactions, or the result that ends them.
-// size: allow 45, due job delivery joins population pairing and holder groups before causal reactions
 function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined {
   const { due, to } = dueJobs(p.world, root);
   const populationPairs = populationDeadlinePairs(p.world, to);
@@ -289,12 +288,10 @@ function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined
     p.narration.push(...(ran.narration ?? []));
     const partner = populationPairs.get(job_id);
     const prior = groups.get(partner ?? job_id); // a partner's, or an earlier crossed hour's
-    const joined =
-      prior === undefined
-        ? statusGroup(at, job_id as JobId, current, p.holders, p.group + 1)
-        : undefined;
+    const fresh = prior ?? p.group + 1;
+    const joined = statusGroup(at, job_id as JobId, current, p.holders, fresh);
     if (joined) merge(p.ops, joined.merged, joined.group, [p.holders, groups]);
-    const group = prior ?? joined?.group ?? p.group + 1;
+    const group = joined?.group ?? fresh;
     groups.set(job_id, group);
     const handoff = sightHandoff(p.world, p.ops, at, job_id as JobId, due_time, ran.delta.ops);
     const own = ran.delta.ops.map((o) => ({ ...o, writer_group: handoffGroup(o, handoff, group) }));

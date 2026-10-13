@@ -1,0 +1,22 @@
+{
+  "on": {
+    "event": "status_expired",
+    "status": "rot"
+  },
+  "when": {
+    "policy_version": 1,
+    "root": {
+      "op": "not",
+      "item": {
+        "op": "has_item",
+        "item": "rag"
+      }
+    }
+  },
+  "apply": [
+    {
+      "op": "item.move",
+      "room": "midden"
+    }
+  ]
+}

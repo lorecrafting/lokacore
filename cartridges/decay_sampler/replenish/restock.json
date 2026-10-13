@@ -1,0 +1,16 @@
+{
+  "items": [
+    "fish"
+  ],
+  "from": {
+    "in": "room",
+    "room": "midden"
+  },
+  "to": {
+    "in": "room",
+    "room": "market"
+  },
+  "cap": 1,
+  "count": 1,
+  "every": 5000
+}

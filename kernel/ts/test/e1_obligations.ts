@@ -1,4 +1,4 @@
-// size: allow 544, the AB brief places the reaction witness here; new witnesses get their own module
+// size: allow 545, the AB brief places the reaction witness here; new witnesses get their own module
 import { gameView, type World } from '../src/index.ts';
 import { repaired } from './e1_repair.ts';
 import type {
@@ -428,6 +428,7 @@ export function reactionWitnesses(before: World, after: World, decision: Decisio
     if (step.op === 'experience.grant')
       return ops.find((o) => o.op === 'levelling.set' && o.character_id === actor);
     if (step.op === 'barrier.set') return barrierOp(ops, step);
+    if (step.op === 'item.move') return undefined; // row 41: no witness yet
     const prior = before.state.population_plans?.[key(step.plan)];
     const next = after.state.population_plans?.[key(step.plan)];
     return ops.find(

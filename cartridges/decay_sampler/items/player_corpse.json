@@ -1,0 +1,14 @@
+{
+  "keywords": [
+    "corpse",
+    "player_corpse"
+  ],
+  "short": "item.player_corpse.short",
+  "room_line": "item.player_corpse.room",
+  "description": "item.player_corpse.description",
+  "location": {
+    "in": "template"
+  },
+  "mass_grams": 0,
+  "container": true
+}
