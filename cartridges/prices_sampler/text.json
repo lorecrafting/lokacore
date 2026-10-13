@@ -1,0 +1,18 @@
+{
+  "room.market.title": "Fish Market",
+  "room.market.description": "Wet stones and gulls.",
+  "npc.fishmonger.short": "the fishmonger",
+  "npc.fishmonger.room": "The [fishmonger] cries her catch.",
+  "npc.fishmonger.description": "A broad woman in a salt-stiff apron.",
+  "npc.fisher.short": "a fisher",
+  "npc.fisher.room": "A [fisher] mends a net.",
+  "npc.fisher.description": "A quiet man who sells his catch to the fishmonger.",
+  "item.fish.short": "a fish",
+  "item.fish.room": "A [fish] lies here.",
+  "item.fish.description": "A silver herring.",
+  "item.basket.short": "a basket",
+  "item.basket.room": "A [basket] sits here.",
+  "item.basket.description": "A wicker basket.",
+  "shop.bought": "You buy a fish.",
+  "shop.sold": "You sell a fish."
+}

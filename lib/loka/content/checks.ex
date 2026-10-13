@@ -148,7 +148,7 @@ defmodule Loka.Content.Checks do
       |> Map.put("resource", ref(r, "resource", m))
       |> Map.put(
         "offers",
-        Enum.map(offers, &Map.update!(&1, "item", fn i -> ref(i, "item", m) end))
+        Enum.map(offers, &expand_offer(&1, m))
       )
 
   def expand(%{"quantity" => _, "outgoing" => _, "incoming" => _} = x, m) do
@@ -446,5 +446,14 @@ defmodule Loka.Content.Checks do
          not (elapsed? and name == "wait"),
        do: owned(at(rel, ["command"]), name, required),
        else: [diag("UNKNOWN_COMMAND", at(rel, ["command"]))]
+  end
+
+  # Toolbox row W11: a stock offer's set expands like its item.
+  defp expand_offer(o, m) do
+    o = Map.update!(o, "item", &ref(&1, "item", m))
+
+    if o["stock"],
+      do: update_in(o, ["stock", "items"], &Enum.map(&1, fn i -> ref(i, "item", m) end)),
+      else: o
   end
 end

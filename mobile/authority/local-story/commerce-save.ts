@@ -31,7 +31,9 @@ export function commerceSave(world: World, db: Db, meta: Meta, revision: number)
       spec = world.resourceSpecs[key(shop.resource)];
     const balances = startingBalances(world, shop.resource, spec.start);
     const custody: Record<string, EntityId> = Object.fromEntries(
-      shop.offers.map((o) => [world.entityIds[refString(o.item)], provider as EntityId]),
+      shop.offers
+        .filter((o) => !o.stock)
+        .map((o) => [world.entityIds[refString(o.item)], provider as EntityId]),
     );
     for (const { command, decision } of receipts(world, db, meta, revision)) {
       const money = decision.delta.ops.filter(
@@ -121,7 +123,8 @@ function receipts(world: World, db: Db, meta: Meta, revision: number) {
   });
 }
 
-// Opted Buy quotes are already recomputed at their original revision by receiptHistory.
+// Opted Buy quotes and stock offers (row W11) are already recomputed at their original revision by
+// receiptHistory; a stock offer moves one item of its set.
 // size: allow 50, bind one whole exchange to its command, item, payment and acquired event
 function shopReceipt(
   world: World,
@@ -137,19 +140,23 @@ function shopReceipt(
   const source = p.type === 'buy' ? provider : world.body,
     destination = p.type === 'buy' ? world.body : provider;
   const moves = d.delta.ops.filter((o) => o.op === 'entity.transfer');
+  const moved = (moves[0] as { entity_id?: EntityId } | undefined)?.entity_id;
+  const set = offer?.stock?.items.map((r) => world.entityIds[refString(r)]);
   if (
     p.provider_id !== provider ||
     !offer ||
-    (!(p.type === 'buy' && shop.buy_discount) && p.quoted_price !== offer[p.type]) ||
+    (!(p.type === 'buy' && (shop.buy_discount || offer.stock)) &&
+      p.quoted_price !== offer[p.type]) ||
+    moved === undefined ||
+    (set ? !set.includes(moved) : moved !== p.item_id || custody[moved] !== source) ||
     moves.length !== 1 ||
     !same(moves[0], {
       op: 'entity.transfer',
       writer_group: 0,
-      entity_id: p.item_id,
+      entity_id: moved,
       source_id: source,
       destination_id: destination,
     }) ||
-    custody[p.item_id] !== source ||
     d.outcome !== (p.type === 'buy' ? 'bought' : 'sold') ||
     !same(d.narration, [{ key: p.type === 'buy' ? shop.bought : shop.sold }])
   )
@@ -167,7 +174,7 @@ function shopReceipt(
     !same(acquired[0].scope, { kind: 'player', character_id: world.character }) ||
     !same(acquired[0].payload, {
       type: 'item_acquired',
-      item_id: p.item_id,
+      item_id: moved,
       holder_id: destination,
     })
   )

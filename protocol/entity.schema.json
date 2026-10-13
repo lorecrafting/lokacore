@@ -867,6 +867,35 @@
           "type": "integer",
           "minimum": 1,
           "maximum": 2147483647
+        },
+        "stock": {
+          "description": "Toolbox row W11 (kernel_api at least 1.82): sell from this identity set, items[0] the offer's item, at buy[n-1] while the shopkeeper directly holds n of it; buy has one entry per item and buy[0] equals the offer's buy.",
+          "type": "object",
+          "properties": {
+            "items": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 16,
+              "items": {
+                "$ref": "identity.schema.json#/$defs/DefinitionRef"
+              }
+            },
+            "buy": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 16,
+              "items": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 2147483647
+              }
+            }
+          },
+          "required": [
+            "items",
+            "buy"
+          ],
+          "additionalProperties": false
         }
       },
       "required": [

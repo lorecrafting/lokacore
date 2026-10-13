@@ -1,0 +1,18 @@
+{
+  "items": [
+    "fish_a",
+    "fish_b",
+    "fish_c"
+  ],
+  "from": {
+    "in": "npc",
+    "npc": "fisher"
+  },
+  "to": {
+    "in": "npc",
+    "npc": "fishmonger"
+  },
+  "cap": 3,
+  "count": 1,
+  "every": 3600
+}
