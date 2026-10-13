@@ -1,0 +1,12 @@
+{
+  "title": "room.lane.title",
+  "description": "room.lane.description",
+  "exits": {
+    "north": {
+      "to": "north_post"
+    },
+    "south": {
+      "to": "south_post"
+    }
+  }
+}

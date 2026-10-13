@@ -1412,6 +1412,37 @@ current water qualification or open D6 bottom rooms. S27 may acknowledge this
 existing lesson; it cannot gate it. No quest, discount, herbalism lesson, token,
 schedule or island enemy is part of D1.
 
+## Fast travel (toolbox row 32)
+
+Fast travel is a [D1](#d1-paid-ferry-and-sedge-lesson-selected-contract) transport
+route pair whose actions gate on the destination having been visited: each route's
+`action` declares the policy `visited_count {room: <destination>, at_least: 1}`.
+Transport admission already runs the action policy (the `use_transport` refusal),
+so an unvisited destination refuses the trip with `invalid_state` and the boarding
+detail's transport offer shows `available: false` with the same reason. The
+departure waypoint needs no gate: the player stands there, and the start room
+counts as one visit. Content declares `transport@1`, `knowledge@1` (visits are
+recorded only with it; without it the compiler warns `VISITS_UNRECORDED`) and
+`variety@1` (owns `visited_count`, kernel_api 1.45 or later). Nothing new in
+schema, loader, compiler or kernel.
+
+The trip is instant: it is the D1 transition (fare transferred to the recipient
+NPC, body transfer, `entity_entered_room`, route narration) and the clock does
+not move; it is never a clock skip. A trip as a job over real elapsed time is not
+part of row 32 and needs an engine row. Fare, currency and waypoints come from the
+cartridge; fares are per route. A stale quote refuses `invalid_target` and a short
+purse `insufficient_resource`, moving and charging nothing. The Book adds no
+element: the boarding detail shows the existing transport offer and its refusal.
+
+Known limits: an unvisited route is shown as an unavailable offer with the
+generic `invalid_state` reason, not hidden, and with no "you have not been there"
+line. There is no map travel (picking a destination on the D10 map) and no route
+list: one route pair per boarding detail. The loader still refuses a route
+between rooms joined by an exit, so waypoints are never neighbours. A trip is
+refused while engaged, not standing or at hp 0, as the ferry is. The sampler is
+`cartridges/fast_travel_sampler` (North Post and South Post, a lane between,
+3 coins a ride to the carter).
+
 ## B8 Maud's immediate services (selected contract)
 
 The [PM adoption](../decisions/pm-decision-b8-mauds-services-2026-10-05.md)

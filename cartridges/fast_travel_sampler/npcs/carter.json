@@ -1,0 +1,12 @@
+{
+  "keywords": [
+    "carter"
+  ],
+  "short": "npc.carter.short",
+  "room_line": "npc.carter.room",
+  "description": "npc.carter.description",
+  "room": "north_post",
+  "resource_starts": {
+    "coins": 0
+  }
+}
