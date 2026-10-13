@@ -28,13 +28,13 @@ direction and the [puppeting rule](../archive/decisions/owner-decision-puppeting
 
 **1. Actor attribution.**
 - Now: `World.character` is one `CharacterId` (`kernel/ts/src/runtime/decision.ts:126`) and `bodyOf` returns a body only for it (`:184`); 28 reads of `world.character` sit in 14 rule files (for example `mechanics/commerce/shared.ts:95`, `mechanics/movement/rule.ts:48-58`, `mechanics/bleed/job.ts:29`, `mechanics/escort/job.ts:26`, `commands/actions.ts:98-105`); `GameView.actor_id` is one actor (`kernel/ts/src/contracts.gen.ts:128`).
-- Rule: a new rule reads its actor from the command's `actor_id` and its body by `bodyOf(world, actor)`; a new job stores its owning character when scheduled and never reads `world.character` when it runs; a new view field takes the actor and invents no other player's rows. New `world.character` reads are allowed only in `runtime/`, `view/` and the local authority. A row that edits a function holding an old read passes the actor through when it is in scope; no row rewrites untouched sites.
+- Rule: a new rule reads its actor from the command's `actor_id` and its body by `bodyOf(world, actor)`; a new job stores its owning character when scheduled and never reads `world.character` when it runs; a new view field takes the actor and invents no other player's rows. New `world.character` reads are allowed only in `runtime/`, `view/` and the local authority. A row that edits a function holding an old read passes the actor through when it is in scope; no row rewrites untouched sites. The Realm seams batch (Beads loka-kgd.150, slices RS-1..RS-8, audit [realm-seams-audit-2026-10-13.md](../rnd/realm-seams-audit-2026-10-13.md)) is the named exception that retrofits those sites.
 - Realm: admitting a second actor replaces the single field with the admitted set and `bodyOf` becomes a lookup ([future: Online](../system/future.md#online), R14).
 
 **2. Reaction attribution.**
 - Now: `resolvedActor` gives only `quest_resolved` its evidenced owner; every other trigger keeps the root actor, the listener (`kernel/ts/src/mechanics/reaction.ts:282`); the subject table covers ten events (`:180-191`) and a status step falls back to the actor's body (`:119`).
 - Rule: a new trigger or apply step (37a `population.spawn`, 38, 39, 33's witness) names its actor from the event's declared subject (a `SUBJECT` entry plus its row in the [reaction@1 table](../system/mechanics.md#reaction1-kerneltssrcmechanicsreactionts)) or the event's `actor_id`, never the listener default or `world.character`; with no subject it writes nothing, as the fact step does (`:227-230`).
-- Before 37a merges, row W1's declared-subject rule is made total: every registered trigger has a subject or a documented "the doer is the actor".
+- Before batch M13 (row 33), because the 37a population.spawn step takes no actor (37a review, 2026-10-13), row W1's declared-subject rule is made total: every registered trigger has a subject or a documented "the doer is the actor".
 - Realm: delivery per character (player B's event reaches B's reactions), R14.
 
 **3. Party and kill credit.**
@@ -94,5 +94,5 @@ Realm seams (docs/decisions/owner-decision-realm-seams-2026-10-13.md): this row 
 ## Follow-ups (Beads, PM)
 
 - An ast-grep rule in `lint/rules/` that freezes the current `world.character` reads in `kernel/ts/src/mechanics/` and `commands/`.
-- Before 37a: W1's subject rule made total. Before 45: the G8 credit-contract paragraph. Before 48b: `result_digest`.
+- Before batch M13 (row 33): W1's subject rule made total (37a population.spawn takes no actor, per the 37a review of 2026-10-13). Row 33's brief requires a G7 get lock on the bank vault NPC (theft would drain every account); RS-8 decides NPC schedule `when` evaluation before row 33. Before 45: the G8 credit-contract paragraph. Before 48b: `result_digest`.
 - One line in [owner-rules.md](../system/owner-rules.md) under Architecture pointing here.
