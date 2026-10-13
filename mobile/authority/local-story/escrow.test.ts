@@ -99,7 +99,9 @@ test('the escrowed ore and the order survive cold reopen; a retry replays', (t) 
   if (again.kind === 'saved') assert.equal(again.replay, true);
   run(invocation('take', [ore('c')]));
   run(invocation('take', [ore('d')]));
-  run(commission(), 'rejected');
+  const later = run(commission(), 'rejected');
+  if (later.kind === 'saved')
+    assert.deepEqual((later.decision as any).error, { code: 'invalid_state' });
   assert.deepEqual(truth(story.world()), [[true, true, false, false], 7, true]);
   p.sql.close();
 });

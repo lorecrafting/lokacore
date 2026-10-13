@@ -90,7 +90,8 @@ const refused = (w: World, code: string) => {
 
 // Breaks: no input check (a use with too few ore pays and orders), the escrow transfers dropped
 // (the ore stays held), quantity ignored (all three held go), the fact not set or the open check
-// missing (a retry takes two more and pays again), an extra event.
+// missing (a retry takes two more and pays again), the inputs checked before the open order (one
+// ore held reads missing_inputs), an extra event.
 test('the smith takes two ore once; too few is refused and a retry takes none', () => {
   let w = fresh();
   assert.deepEqual([pennies(w), pennies(w, smith(w))], [10, 0]);
@@ -126,6 +127,9 @@ test('the smith takes two ore once; too few is refused and a retry takes none', 
   w = r.world;
   assert.deepEqual([count(w, vault(w)), count(w, w.body)], [2, 1]);
   assert.deepEqual([pennies(w), pennies(w, smith(w)), ordered(w)], [7, 3, true]);
+  const open = { code: 'invalid_state', message: { key: 'service.order_open' } };
+  assert.deepEqual(offer(w), { ...offer(w), available: false, reason: open });
+  refused(w, 'invalid_state');
 
   w = take(w, 'd');
   assert.equal(count(w, w.body), 2);
