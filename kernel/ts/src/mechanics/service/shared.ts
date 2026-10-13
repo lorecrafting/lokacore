@@ -53,7 +53,7 @@ export function transition(
   if (order && 'code' in order) return order;
   const paid = transfer(world, body, p.provider_id, service.currency, p.quoted_price);
   if (!paid) return serviceRefusal('insufficient_resource', 'service.unaffordable');
-  const done = granted(world, p, body, order, paid.ops, inputs.ops, steps);
+  const done = granted(world, p, body, benefit, order, paid.ops, inputs.ops, steps);
   return 'code' in done ? done : { ops: done.ops, service };
 }
 
@@ -63,12 +63,12 @@ function granted(
   world: World,
   p: Payload,
   body: EntityId,
+  benefit: ServiceDefinition['benefit'],
   order: Order | undefined,
   ops: readonly DeltaOp[],
   inputs: readonly DeltaOp[],
   steps: Steps,
 ): UnavailableReason | { ops: readonly DeltaOp[] } {
-  const benefit = world.cartridge.services![refString(p.service)]!.benefit;
   if (benefit.kind === 'entitlement') {
     const start = { ops: [...ops, ...inputs], position: 0, facts: {} },
       grant = { fact: benefit.fact, value: true };

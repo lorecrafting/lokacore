@@ -1535,8 +1535,8 @@ services are separate direct offers, not a first-eligible dialogue replacement.
 - **Known limits.**
   - Jobs carry no actor, so there is one open order per service in the world. Local story has one character.
   - A cancelled order leaves one inert job row until its due time.
-  - The output is one authored item. After a claim, a second order finds no output: its claim refuses `not_found`, `service.no_output`, and it can only be cancelled.
-  - Cancel returns `quantity` of the authored inputs lying in custody, in EntityId order. After an earlier claim, those may be the spent instances rather than the ones this order took; the items are identical.
+  - The output is one authored item. After a claim, a second order finds no output: its claim refuses `not_found`, `service.no_output`. It can be cancelled only before its due time; after it, cancel refuses `service.ready` and the order stays open for good, holding its inputs and fee.
+  - Cancel returns `quantity` of the authored inputs lying in custody, in EntityId order. After an earlier claim, those may be the spent instances rather than the ones this order took; the items are identical. If some were moved out of custody, cancel returns fewer and still refunds and closes the order.
   - No quality from a check (C3-M03 forge, later).
   - A reaction or replenish naming the custody room can still move the items (row 20a limit).
   - The output moves to the body without a carry check.
