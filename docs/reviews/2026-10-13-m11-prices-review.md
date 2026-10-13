@@ -37,3 +37,34 @@
 - Both kernels' floors and loader rules: twins match in code (paths differ by artifact vs source, as elsewhere); TS tests lack two rows (finding 2).
 - Schema sweep: `protocol/fixtures/invalid.json` covers each new keyword (required, min/max items, minimum, maximum, types, additionalProperties).
 - Mobile diff: no obvious error; plain offers keep the old custody check.
+
+## Fix round (b2344dc)
+
+- Head `b2344dcb4b5b6a0499ad67846a837de8bf3479d7` (`1df8d6f` spec, `b2344dc` fix on `14faf7bd`). Only the fix commits and their direct callers are reviewed here.
+- Local, at head: `node bin/check_ts_size.mjs` from the repo root exits 0. These are green: `node --test` prices, commerce, commerce_contracts, validate; mobile `prices.test.ts`, `commerce.test.ts`; `mix test test/loka/content_prices_test.exs`. Hosted CI runs 38474278836 (`ci`) and 38474278814 (`book-e2e`) were in progress at append time.
+- Mutants (throwaway worktree, each restored); all killed, each by the intended row:
+
+  | Mutant | Killed by |
+  | --- | --- |
+  | TS `\|\| buy[0] !== o.buy` dropped | `kernel/ts/test/prices.test.ts:183` (loaded vs `invalid_value`) |
+  | TS unresolved check made `true` | `:187` (loaded vs `UNRESOLVED_REFERENCE items[2]`) |
+  | TS discount bound over `[o.buy]` only | `:199` (loaded vs `RESOURCE_SPEC_INVALID`) |
+  | Elixir discount bound without the stock buy | `test/loka/content_prices_test.exs:46` |
+  | `exchangeSave` trigger without `\|\| e.shop?.offers.some((o) => o.stock)` | swap test, `mobile/authority/local-story/prices.test.ts:117` (no `save_corrupt`) |
+
+  The last row shows that the replay alone refuses the forged swap.
+
+Dispositions:
+
+1. **blocker (size gate)**: fixed.
+   - `stocks()` (`cartridge_commerce.ts:62`) is the old loop. Its floor diagnostic now comes after the shop's duplicate and resource-spec checks, matching Elixir's order. Encoding the version as `major*1000+minor` differs from a tuple compare only for minor ≥ 1000.
+   - `room()` (`shared.ts:34`, caller `:80`) is the inline block, unchanged, including the step charge.
+   - `offerCustody()` (`commerce-save.ts:88`) returns the same map.
+   - `acquiredOnce()` (`shop-event.ts:7`) is the exact negation of the old inline check.
+   - In `shopReceipt`, `moves.length !== 1` now precedes the use of `moved`. The explicit `moved === undefined` guard is gone. A plain offer still fails on `moved !== p.item_id`. A stock row is replayed before this point.
+   - The size marker is dropped.
+2. **should-fix (loader rows, discount bound)**: fixed (rows above, in both kernels).
+3. **nit (set check)**: fixed by deletion. `save.md` still holds through replay (the trigger mutant above).
+4. **nit (/code-review)**: the PM holds the handback (open, not blocking).
+
+Verdict: **APPROVE** at `b2344dc`, conditional on the hosted `ci` run going green. Written 2026-10-13 in Claude Code by anthropic/claude-opus-5-5 (reviewer).
