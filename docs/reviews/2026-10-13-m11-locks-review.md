@@ -48,3 +48,25 @@
 6. Containment `decide` size allowance 52 to 54: accepted.
 7. `exits.ex` expands `locks` short references: accepted; the Elixir test asserts the expanded `npc` on the exit, room and item locks.
 8. Book bullet: a refused put pair is not offered (`putPairs`, `view/action_lists.ts:273`): accepted, matches the code.
+
+## Fix round 1
+
+- Head `391e211953162556c80354c7991936df2648fd76` (one commit on `97e34d38`). Scoped recheck: each disposition, the code it touched and that code's direct callers.
+- Verdict: **APPROVE WITH NOTES** (one nit). Hosted CI on the head was in progress at review time (`gh run list --commit`); the PM watches it.
+- Green locally: `node --test` access_locks, put, containment, scoped_facts, barriers (48/48); `mobile/authority/local-story/carrying-reach.test.ts` (5/5); `mix test` content_access_locks, content_rooms (18/18).
+
+Dispositions:
+
+1. Fixed. `lib/loka/content/locks.ex:32-39`: a non-map room entry is skipped, and `content_rooms_test.exs:145` passes.
+2. Fixed. `carrying-reach.test.ts:141-163`: 16385 ids, with a stated bound of at least two steps per take offer (reach edge plus get-walk edge). `takeAdmission` (`view/action_lists.ts:118-134`) now caches each item's reach and walk verdict. The cache is built once per `lists()` call (`:62`) over one world, so its key (EntityId) cannot go stale across actions. The view and the rule run the same checks in the same order (reach, `chainRefused` 'get', carry). Mutant: dropping `!admitted.has(item)` (the walk recharged on a repeat query) fails the mobile test.
+3. Fixed. Positive TARGETLESS row (`access_locks.test.ts:246-249`). Mutant: `'items'` added to TARGETLESS now fails the loader test.
+4. Fixed. Test "the chest's lock reads the chest as its target". Mutant: target set to the taken item now fails it.
+5. Fixed. Elixir exit-only row (`content_access_locks_test.exs:22-27`). Mutant: `locked?` without the exit clause now fails (0/1).
+6. PM ruling 1 done. `chainRefused(world, actor, item, 'get' | 'put', steps)` (`mechanics/locks.ts:27`). `putRefused` walks from the destination after the lid check and after the earlier cycle check (`containment/shared.ts:196-214`), so a cycle still answers `containment_cycle` first. Mutant: the put walk stops at the destination, and the guest's put into the bag passes; the guest test fails.
+7. PM ruling 2 done. The Known limits bullet now says "Taking a container does not check its contents' `get` locks."
+
+The size allowances (`decide` 55, `action_lists.ts` 333) match the added lines.
+
+Nit:
+
+1. **nit** `kernel/ts/src/view/action_lists.ts:129`: the case where a `permission_denied` verdict survives a later budget fault is untested. Mutant: caching only booleans stays green (12/12). Scenario: in a projection that runs out of budget, a repeat query for a locked item reads `budget_exceeded` instead of `permission_denied`. This needs more than 16k items, so the impact is low.
