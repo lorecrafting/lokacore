@@ -23,3 +23,31 @@
 
 1. **should-fix** `mobile/authority/local-story/property.test.ts:59`: lawful path only; no failed/lost COMMIT, refused overdraft or forged bank receipt/row case (storage lessons). M4 and M6 survive it. If the services gate at `liquid-save.ts:21-29` is narrowed (loka-b60), a save whose `savings` row is raised from 10 to 11 reopens `open` (M6), crediting a penny the vault never received. Fix: add the forged `savings` row and one lost-ack deposit to this test.
 2. **nit** `docs/system/save.md:798` (B8): no line names the bank pair; the reconciliation rule lives only in mechanics.md.
+
+## Fix round 1 re-check (`05917bf17cba0ede76f93a55516fe3983c05622c`)
+
+Scope: bb5fa18 (test fixes, B8 sentence, withdraw fee after payout per PM ruling) and 05917bf (`shared.ts` trim); the save path and its direct callers only.
+
+- **Verdict: APPROVE WITH NOTES.**
+- Runs at 05917bf (`node --test`, real SQLite): `property`, `escrow`, `service`, `commerce` and `transport` suites plus a throwaway probe: 26/26 pass. The probe covered:
+  - lawful history (both branches, deposit and withdraw, an interleaved shop buy, a refused overdraft, reopen);
+  - failed and lost COMMIT on a deposit and on a withdraw, with the new withdraw order (bank pair, then fee): all prior on failure, all next on lost acknowledgement, the retry replays, and a second retry changes nothing;
+  - forged amount, vault, account, account row, omitted pair, fee/amount swap and pair/fee order swap: each refused `save_corrupt` with the disk unchanged.
+- Mutants against `property.test.ts`:
+  - M6 (no `receiptHistory`, `liquid-save.ts:30`): red ("a forged savings row reopens save_corrupt").
+  - M1 (`bankPayments` returns `[fee]`): red.
+  - M7 (withdraw order collapsed to `[fee, bank]`, `commerce-save.ts:256`): red.
+  - M4 (delete `commerce-save.ts:49`): green in `property`, the probe, `commerce` and `service`.
+- M4 is not equivalent. On the shop-only `missing_child` cartridge, `liquid-save.ts:20-29` skips `receiptHistory`. With line 49 deleted, a forged buy receipt carrying an appended net-zero money pair reopens `open`; at head it is refused `save_corrupt` (throwaway probe). Line 49 is the base's whole-list `ops.length !== 2` guard, so keep it.
+
+Dispositions:
+
+1. should-fix: partly fixed.
+   - The forged `savings` row (`property.test.ts:118`) kills M6: fixed.
+   - The "lost-ack deposit retry" (`property.test.ts:98-107`) re-sends invocation 2 after a successful reply. It never takes the `fault.kind='lost'` COMMIT path; the probe showed that path is correct. Left as nit A.
+2. nit (save.md B8): fixed. The new sentence names both pairs and the withdraw order.
+
+Open nits:
+
+- A. `property.test.ts:100`: the comment says "lost-ack", but the test is an in-memory exact retry. An uncertain-COMMIT regression on the bank path would stay green here; it is caught only by the generic suites.
+- B. `commerce.test.ts` "cold open refuses omitted debit..." has no extra-pair mutant, so M4 survives every suite. Adding `'extra'` (append a net-zero pair to the buy) would pin `commerce-save.ts:49`. Pre-existing gap.
