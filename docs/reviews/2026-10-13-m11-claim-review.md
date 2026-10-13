@@ -69,3 +69,13 @@ Mutants:
    Scenario: under that mutant the finding-2 `rent` service (no escrow) loads again, and its claim hands over the sword with no ore and no wait. Fix: make the planted benefit a plain `{kind: entitlement, fact: ordered}` in both tests, adding a `service.already_paid` text.
 
 Verdict, fix round 1: **APPROVE WITH NOTES** (the blocker is fixed; finding 4 is open).
+
+## Fix round 2
+
+- Reviewed head `c3566bad1f6103687455cacc02864e3a0a260577`, one commit on `cc41d7d7` that changes only the two test files. Both twins now plant a plain `{kind: entitlement, fact: ordered}` on `cancel`, plus a `service.already_paid` text.
+- Finding 4 is fixed. I reran the escrowed-only mutant in each kernel, and the twin suite now fails both:
+  - TS (`s.benefit.escrow &&` in `fact`): escrow fails, 3 fail lines.
+  - Elixir (`"escrow" => _` in the `owned` comprehension): content_escrow fails, 1/2.
+- The unmutated suites pass in both kernels.
+
+Verdict, fix round 2: **APPROVE**.
