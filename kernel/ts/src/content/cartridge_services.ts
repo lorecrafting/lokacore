@@ -31,19 +31,7 @@ function definition(c: Obj, s: Obj, ref: string, check: Checks, out: Diagnostic[
   if (c.lock.capabilities.service !== 1)
     out.push(diag('UNDECLARED_CAPABILITY', at, { capability: 'service' }, ['service@1']));
   check.text(s, ['label', 'narration'], at);
-  const kind = s.benefit.kind;
-  const reasons = {
-    payment: 'service.unaffordable',
-    headroom: s.benefit.escrow
-      ? 'service.order_open'
-      : ({ entitlement: 'service.already_paid', repair: 'service.full_durability' }[
-          kind as string
-        ] ?? 'service.full_mv'),
-    ...(kind === 'repair'
-      ? { target: 'service.nothing_to_repair' }
-      : kind !== 'entitlement' && { stock: 'service.sold_out' }),
-    ...(s.benefit.escrow && { inputs: 'service.missing_inputs' }),
-  };
+  const reasons = refusals(s.benefit);
   check.text(reasons, Object.keys(reasons), at);
   const npc = get(c, check, s.provider, 'npc', `${at}.provider`);
   const currency = get(c, check, s.currency, 'resource', `${at}.currency`);
@@ -69,6 +57,23 @@ function definition(c: Obj, s: Obj, ref: string, check: Checks, out: Diagnostic[
     if (recovery && recovery.key !== 'mv') bad(out, `${at}.benefit.recovery`);
     stock(c, s, npc, at, check, out);
   }
+}
+
+// The refusal texts a service needs, by benefit.
+function refusals(b: Obj) {
+  const kind = b.kind;
+  return {
+    payment: 'service.unaffordable',
+    headroom: b.escrow
+      ? 'service.order_open'
+      : ({ entitlement: 'service.already_paid', repair: 'service.full_durability' }[
+          kind as string
+        ] ?? 'service.full_mv'),
+    ...(kind === 'repair'
+      ? { target: 'service.nothing_to_repair' }
+      : kind !== 'entitlement' && { stock: 'service.sold_out' }),
+    ...(b.escrow && { inputs: 'service.missing_inputs' }),
+  };
 }
 
 // Toolbox row 20a: distinct items held to a room; no shop offer (commerce save reconciles offer
