@@ -19,6 +19,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: m11 doors (row W26) schema validation, second opinion](2026-10-13-m11-doors-second-opinion.md): **APPROVE**
 - [Review: toolbox row W26, NPCs use doors (loka-kgd.125)](2026-10-13-m11-doors-review.md): **APPROVE**
 - [Review: toolbox row 20b, timed job claim and cancel (loka-kgd.126)](2026-10-13-m11-claim-review.md): **APPROVE**
+- [M11 batch review (PR #381, Fable)](2026-10-13-m11-batch-fable-review.md): **APPROVE WITH NOTES**
 - [Review: balance tool 8, refusal and friction report (loka-kgd.107.8)](2026-10-13-m10-friction-review.md): **APPROVE**
 - [Review: toolbox row 32, fast travel (loka-kgd.120)](2026-10-13-m10-fast-travel-review.md): **APPROVE WITH NOTES**
 - [Review: m10 decay (row 41) writer-group join, second opinion](2026-10-13-m10-decay-second-opinion.md): **APPROVE**
