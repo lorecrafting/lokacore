@@ -1263,10 +1263,7 @@ action, or ordinary exit that bypasses the declared ferry. D1 is installed in th
 [Fast travel](mechanics.md#fast-travel-toolbox-row-32) reuses these declarations
 unchanged: a reciprocal route pair between two waypoint rooms that share no exit,
 each with its own `use_transport` action whose `policy` root is
-`{"op": "visited_count", "room": "<destination>", "at_least": 1}`. The cartridge
-requires `transport@1`, `knowledge@1` and `variety@1` (kernel_api at least 1.45).
-A positive-clock `calendar.start` keeps the player's hp row born at start, which
-the transition reads.
+`{"op": "visited_count", "room": "<destination>", "at_least": 1}`.
 
 ## B8 Maud's service declarations
 

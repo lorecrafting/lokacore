@@ -93,15 +93,15 @@ test('a route to an unvisited post is offered unavailable and refused', () => {
   const w = fresh();
   assert.equal(at(w), `${S}room/north_post`);
   assert.equal(level(w, w.body, resourceRef(w, 'hp')), 10);
-  const { available, reason } = offer(w);
-  assert.deepEqual([available, reason], [false, { code: 'invalid_state' }]);
+  const a = offer(w);
+  assert.deepEqual(!a.available && a.reason, { code: 'invalid_state' });
   assert.equal(refused(ride(w, 'north_road'), 'invalid_state'), w);
   assert.deepEqual(coins(w), [10, 0]);
   assert.equal(w.state.clock, C0);
 });
 
-// Breaks: at_least 2, a fare paid without the trip, a trip that moves the clock, or one fare for
-// both routes.
+// Breaks: at_least 2, a fare paid without the trip, a trip that moves the clock, or a fare not
+// read from its own route.
 test('visited posts ride both ways instantly for each route fare, refusing stale quotes and the broke', () => {
   let w = walk(walk(fresh(), 'south'), 'south');
   assert.equal(at(w), `${S}room/south_post`);
