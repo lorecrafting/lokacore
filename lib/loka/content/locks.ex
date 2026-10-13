@@ -29,9 +29,14 @@ defmodule Loka.Content.Locks do
 
   defp locked?(defs) do
     Enum.any?(defs["item"] || %{}, &match?({_, {_, _, %{"locks" => _}}}, &1)) or
-      Enum.any?(defs["room"] || %{}, fn {_, {_, _, r}} ->
-        is_map_key(r, "locks") or
-          Enum.any?(Map.get(r, "exits", %{}), &match?({_, %{"locks" => _}}, &1))
+      Enum.any?(defs["room"] || %{}, fn
+        {_, {_, _, %{} = r}} ->
+          is_map_key(r, "locks") or
+            Enum.any?(Map.get(r, "exits", %{}), &match?({_, %{"locks" => _}}, &1))
+
+        # A schema-invalid room has its own diagnostics.
+        _ ->
+          false
       end)
   end
 end

@@ -20,10 +20,17 @@ export function lockRefused(
 }
 
 /**
- * The get walk: from `item` up State.containers while the holder is an item, one query step per
- * edge before its `get` lock is read; a cycle or the step budget faults as `reach` does.
+ * The custody walk: from `item` up State.containers while the holder is an item, one query step
+ * per edge before its `access` lock is read (take's `get` from the taken item, put's `put` from
+ * the destination); a cycle or the step budget faults as `reach` does.
  */
-export function getRefused(world: World, actor: CharacterId, item: EntityId, steps: Steps) {
+export function chainRefused(
+  world: World,
+  actor: CharacterId,
+  item: EntityId,
+  access: 'get' | 'put',
+  steps: Steps,
+) {
   const seen = new Set<string>();
   for (let at: EntityId = item; ; at = world.state.containers[at]) {
     const held = world.entities[at];
@@ -31,7 +38,7 @@ export function getRefused(world: World, actor: CharacterId, item: EntityId, ste
     if (seen.has(at)) return 'containment_cycle' as const;
     if (++steps.n > LIMITS.query_steps) return 'budget_exceeded' as const;
     seen.add(at);
-    const refused = lockRefused(world, actor, held.locks?.get, at, steps);
+    const refused = lockRefused(world, actor, held.locks?.[access], at, steps);
     if (refused) return refused;
   }
 }

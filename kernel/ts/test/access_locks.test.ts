@@ -11,10 +11,11 @@ import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
 import { INSTALLED, gameView, loadCartridge, newWorld, step } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
-import { LIMITS, type EntityId } from '../src/contracts.gen.ts';
+import { LIMITS, type DefinitionRef, type EntityId } from '../src/contracts.gen.ts';
 import { decode, encode } from '../src/foundation/canonical.ts';
 import { key } from '../src/foundation/compose.ts';
-import { getRefused } from '../src/mechanics/locks.ts';
+import { targetOf } from '../src/mechanics/fact.ts';
+import { chainRefused } from '../src/mechanics/locks.ts';
 import { pending, talking } from '../src/mechanics/dialogue/shared.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-access-locks-'));
@@ -66,10 +67,10 @@ const play = (w: World, ...ps: object[]) =>
   }, w);
 const go = (direction: string) => ({ type: 'move', direction });
 const take = (w: World, k: string) => ({ type: 'take', item_id: id(w, 'item', k) });
-const put = (w: World) => ({
+const put = (w: World, into: string) => ({
   type: 'put',
   item_id: id(w, 'item', 'pebble'),
-  container_id: id(w, 'item', 'chest'),
+  container_id: id(w, 'item', into),
 });
 // Pick `choice` in Ada's conversation, talking first unless already in it.
 const chat = (w: World, choice: string) => {
@@ -108,14 +109,15 @@ test('a stranger is refused north and east; a missing exit stays not_found', () 
 });
 
 // Breaks: the get walk reads only the item's own lock (the chest's is skipped), the GameView's take
-// admission skips the get walk, putRefused (rule or GameView pairs) reads no put lock, or the
-// enter lock ignores `any`.
+// admission skips the get walk, putRefused (rule or GameView pairs) reads no put lock or only the
+// destination's own (the unlocked bag in the chest), or the enter lock ignores `any`.
 test('a guest enters the hut but may not take from or put in the chest; revoked, north refuses', () => {
   let w = chat(fresh(), 'invite');
   w = play(w, take(w, 'pebble'), go('north'));
   assert.equal(code(w, take(w, 'ring')), 'permission_denied');
   assert.deepEqual(ringTake(w), [false, 'permission_denied']);
-  assert.equal(code(w, put(w)), 'permission_denied');
+  assert.equal(code(w, put(w, 'chest')), 'permission_denied');
+  assert.equal(code(w, put(w, 'bag')), 'permission_denied');
   assert.deepEqual(putPairs(w), []);
   w = play(w, go('south'));
   assert.equal(code(w, go('east')), 'permission_denied');
@@ -124,13 +126,20 @@ test('a guest enters the hut but may not take from or put in the chest; revoked,
 });
 
 // Breaks: a lock that holds still refuses (a grant is not read at Ada).
-test('a resident takes the ring, puts the pebble and walks east', () => {
+test('a resident takes the ring, puts the pebble in the bag and walks east', () => {
   let w = chat(fresh(), 'settle');
   w = play(w, take(w, 'pebble'), go('north'));
   assert.deepEqual(ringTake(w), [true, false]);
-  assert.deepEqual(putPairs(w), [[id(w, 'item', 'pebble'), id(w, 'item', 'chest')]]);
-  w = play(w, take(w, 'ring'), put(w), go('south'), go('east'));
-  assert.equal(w.state.containers[id(w, 'item', 'pebble')], id(w, 'item', 'chest'));
+  const pebble = id(w, 'item', 'pebble');
+  assert.deepEqual(
+    putPairs(w).sort(),
+    [
+      [pebble, id(w, 'item', 'bag')],
+      [pebble, id(w, 'item', 'chest')],
+    ].sort(),
+  );
+  w = play(w, take(w, 'ring'), put(w, 'bag'), go('south'), go('east'));
+  assert.equal(w.state.containers[pebble], id(w, 'item', 'bag'));
 });
 
 // Breaks: the get walk skips the item's own lock and reads only its containers, or charges no
@@ -142,7 +151,26 @@ test('a lock on the ring itself refuses a guest; the walk charges the step budge
   const locked = { ...w.entities[ring], locks: { get: resident } };
   w = { ...w, entities: { ...w.entities, [chest]: unlocked, [ring]: locked } as never };
   assert.equal(code(w, take(w, 'ring')), 'permission_denied');
-  assert.equal(getRefused(w, w.character, ring, { n: LIMITS.query_steps }), 'budget_exceeded');
+  assert.equal(
+    chainRefused(w, w.character, ring, 'get', { n: LIMITS.query_steps }),
+    'budget_exceeded',
+  );
+});
+
+// Breaks: a container's lock reads the taken item, not the container, as its `subject: "target"`.
+test("the chest's lock reads the chest as its target", () => {
+  let w = play(chat(fresh(), 'invite'), go('north'));
+  const chest = id(w, 'item', 'chest');
+  const role = ref('fact', 'role') as DefinitionRef;
+  const root = { op: 'fact_compare', fact: role, subject: 'target', equals: 'resident' };
+  const locks = { get: { policy_version: 1, root } };
+  const facts = { ...w.state.facts, [key(targetOf(w, w.character, role, chest))]: 'resident' };
+  w = {
+    ...w,
+    entities: { ...w.entities, [chest]: { ...w.entities[chest], locks } },
+    state: { ...w.state, facts },
+  } as World;
+  assert.equal(code(w, take(w, 'ring')), 'accepted');
 });
 
 // Breaks: the traverse or enter lock is read before the exit's passage (permission_denied first).
@@ -161,7 +189,8 @@ test('a closed door before the hut answers exit_closed first', () => {
 });
 
 // Breaks: the loader's 1.78 floor is missing or 1.77, a put lock on a non-container loads, a lock
-// root is not walked for references, or subject "target" loads in a room or exit lock (no target).
+// root is not walked for references, subject "target" loads in a room or exit lock (no target) or
+// is refused in an item's lock (the item is its target).
 test('the loader checks the floor, put on a container and every lock root', () => {
   const at = (kind: string, k: string) => `.cartridge.${kind}[${JSON.stringify(`${S}:${k}`)}]`;
   const hut = `${at('rooms', 'room/hut')}.locks.enter.root`;
@@ -202,7 +231,7 @@ test('the loader checks the floor, put on a container and every lock root', () =
       `${hut}.items[0].subject`,
     ],
   ];
-  for (const [change, want, path] of rows) {
+  const load = (change: (c: any) => void) => {
     const c = structuredClone(source);
     change(c);
     const canonical = encode(c);
@@ -211,6 +240,11 @@ test('the loader checks the floor, put on a container and every lock root', () =
       new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
       INSTALLED,
     );
-    assert.deepEqual(r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path], [want, path]);
-  }
+    return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
+  };
+  for (const [change, want, path] of rows) assert.deepEqual(load(change), [want, path]);
+  assert.equal(
+    load((c) => targeted(c.items[`${S}:item/chest`].locks.get.root)),
+    'loaded',
+  );
 });

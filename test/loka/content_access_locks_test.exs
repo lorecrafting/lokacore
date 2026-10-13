@@ -8,9 +8,10 @@ defmodule Loka.ContentAccessLocksTest do
     "key" => "ada"
   }
 
-  # Breaks (toolbox row G7): the compiler accepts a lock below kernel_api 1.78 or a put lock on an
-  # item that is no container; a lock root is no condition (its references go unchecked) or its
-  # short references stay unexpanded (the loader would reject the artifact).
+  # Breaks (toolbox row G7): the compiler accepts a lock below kernel_api 1.78 (also an exit's
+  # alone) or a put lock on an item that is no container; a lock root is no condition (its
+  # references go unchecked) or its short references stay unexpanded (the loader would reject
+  # the artifact).
   test "access locks need 1.78 and a container for put; their roots are checked conditions" do
     dir = Loka.ContentSource.copy("cartridges/access_sampler")
     api = {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.77")}
@@ -18,8 +19,12 @@ defmodule Loka.ContentAccessLocksTest do
     bad = %{"op" => "fact_compare", "fact" => "nope", "npc" => "ada", "equals" => "guest"}
     root = &put_in(&1, &2, bad)
 
+    unlock = &{&1, fn d -> Map.delete(d, "locks") end}
+    exit_only = [api, unlock.("rooms/hut.json"), unlock.("items/chest.json")]
+
     rows = [
       {[api], "KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"},
+      {exit_only, "KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"},
       {[{"items/ring.json", &Map.put(&1, "locks", %{"put" => lock})}], "SCHEMA_VIOLATION",
        "items/ring.locks.put"},
       {[{"rooms/hut.json", &root.(&1, ["locks", "enter", "root"])}], "UNRESOLVED_REFERENCE",
