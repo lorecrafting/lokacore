@@ -1343,6 +1343,28 @@ its source and real SQLite acceptance are recorded in the
 
 [Escrow custody](mechanics.md#escrow-custody-toolbox-row-20a) adds one optional field to the `entitlement` benefit (`protocol/service.schema.json` `ServiceBenefit`): `escrow {items, quantity, custody}`, no other keys. `items` are 1 to 16 item refs and `custody` a room ref (short keys in source); `quantity` is an integer 1 to 16. It needs `kernel_api` at least **1.79**. The compiler (`lib/loka/content/services.ex`) and the loader (`kernel/ts/src/content/cartridge_services.ts`) refuse an `items` entry that is not an item and a `custody` that is not a room (UNRESOLVED_REFERENCE at each), a `quantity` above the number of `items` (SCHEMA_VIOLATION `invalid_value` at `.benefit.escrow.quantity`) and an `items` entry that is any NPC's shop offer (SCHEMA_VIOLATION `invalid_value` at `.benefit.escrow.items[i]`: commerce save reconciles offer custody by receipt), and an item named twice in `items` (DUPLICATE_DEFINITION at `.benefit.escrow.items`). The cartridge text must hold `service.order_open` and `service.missing_inputs` when `escrow` is present.
 
+### Claim and cancel declarations
+
+[Timed job claim and cancel](mechanics.md#timed-job-claim-and-cancel-toolbox-row-20b) adds three optional fields to `escrow`:
+
+- `ready_after`: an integer, 1 to 31536000.
+- `output`: an item ref.
+- `refund`: a bool.
+
+`ready_after` and `output` are required together; `refund` needs `ready_after`. It also adds two `ServiceBenefit` kinds, `{kind: "claim", service}` and `{kind: "cancel", service}` (`protocol/service.schema.json`), each naming a service ref (short keys in source). Any of them needs `kernel_api` at least **1.80**.
+
+The compiler (`lib/loka/content/services.ex`) and the loader (`kernel/ts/src/content/cartridge_services.ts`) refuse:
+
+- An `output` that is not an item: UNRESOLVED_REFERENCE at `.benefit.escrow.output`.
+- An `output` not located in the custody room: SCHEMA_VIOLATION `invalid_value` at the same path.
+- A claim or cancel `service` that is not a service: UNRESOLVED_REFERENCE at `.benefit.service`.
+- A claim or cancel `service` whose benefit is not an escrow with `ready_after`: SCHEMA_VIOLATION `invalid_value` at `.benefit.service`.
+
+Required cartridge text:
+
+- A claim: `service.no_order`, `service.not_ready` and `service.no_output`.
+- A cancel: `service.no_order` and `service.ready`.
+
 ## D2 public Priory and book authoring
 
 [D2](mechanics.md#d2-held-books-and-public-priory-selected-contract) adds
