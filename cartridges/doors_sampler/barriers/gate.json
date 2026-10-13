@@ -1,0 +1,8 @@
+{
+  "keywords": [
+    "gate"
+  ],
+  "short": "barrier.gate.short",
+  "initial": "locked",
+  "key_item": "gate_key"
+}

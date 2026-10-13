@@ -721,7 +721,7 @@
       ]
     },
     "ScheduleCases": {
-      "description": "Toolbox row W10: the cases of one conditional schedule hour, tried in order when the hour's job runs: the first whose when holds (read with the player as the actor, the NPC as the target and the clock at the job's due time) names the room. A case's optional goal is narration shown when the NPC leaves the player's room by that case.",
+      "description": "Toolbox row W10: the cases of one conditional schedule hour, tried in order when the hour's job runs: the first whose when holds (an absent when holds; read with the player as the actor, the NPC as the target and the clock at the job's due time) names the room. A walks case moves only along a path (toolbox row W26). A case's optional goal is narration shown when the NPC leaves the player's room by that case.",
       "type": "array",
       "items": {
         "type": "object",
@@ -734,10 +734,13 @@
           },
           "goal": {
             "$ref": "text.schema.json#/$defs/TextKey"
+          },
+          "walks": {
+            "const": true,
+            "description": "Toolbox row W26 (kernel_api at least 1.81; mechanics.md NPCs use doors): the step moves only when a path to room exists through exits a walking NPC may cross (breadth first, direction-key order, one query step per exit); the NPC moves in one step, each locked door on the path it holds the key of is unlocked, opened, closed and locked again; no path leaves it where it is."
           }
         },
         "required": [
-          "when",
           "room"
         ],
         "additionalProperties": false

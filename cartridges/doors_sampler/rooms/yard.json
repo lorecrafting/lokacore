@@ -1,0 +1,13 @@
+{
+  "title": "room.yard.title",
+  "description": "room.yard.description",
+  "exits": {
+    "west": {
+      "to": "lane",
+      "barrier": "gate"
+    },
+    "east": {
+      "to": "keep"
+    }
+  }
+}

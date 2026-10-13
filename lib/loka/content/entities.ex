@@ -87,7 +87,10 @@ defmodule Loka.Content.Entities do
   # Variant and (row W10) schedule case conditions, (row G11) disposition conditions and (row G7)
   # access locks.
   defp roots(e) do
-    for({steps, v} <- variants(e) ++ cases(e), do: {steps ++ ["when", "root"], v["when"]["root"]}) ++
+    for(
+      {steps, %{"when" => w}} <- variants(e) ++ cases(e),
+      do: {steps ++ ["when", "root"], w["root"]}
+    ) ++
       policies(e, "disposition", ~w(hostile friendly)) ++ policies(e, "locks", ~w(get put))
   end
 
@@ -95,12 +98,18 @@ defmodule Loka.Content.Entities do
     for k <- keys, p = get_in(e, [field, k]), p != nil, do: {[field, k, "root"], p["root"]}
   end
 
-  # Toolbox row W10: each case of a source daily_schedule hour list (Loka.Content.Schedules).
+  # Toolbox row W10: each case of a source daily_schedule hour list, and (row W26) a lone walking
+  # hour (Loka.Content.Schedules).
   defp cases(e) do
-    for {h, list} when is_list(list) <- Map.get(e, "daily_schedule", %{}),
-        {%{"when" => _} = c, i} <- Enum.with_index(list),
-        do: {["daily_schedule", h, i], c}
+    for {h, hour} <- Map.get(e, "daily_schedule", %{}),
+        {c, at} <- each_case(hour),
+        is_map(c),
+        do: {["daily_schedule", h | at], c}
   end
+
+  defp each_case(list) when is_list(list), do: for({c, i} <- Enum.with_index(list), do: {c, [i]})
+  defp each_case(%{"room" => _} = c), do: [{c, []}]
+  defp each_case(_), do: []
 
   @doc "UNRESOLVED_REFERENCE for each entity text key without a catalog entry."
   @spec texts(map(), map() | :unknown) :: [map()]

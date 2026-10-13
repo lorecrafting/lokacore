@@ -205,7 +205,7 @@ export const COMPOSES = {
   expedition: ['quest'],
   transport: ['movement'],
   action_recipe: ['check', 'status', 'death'],
-  schedule: ['movement', 'combat', 'death', 'quest', 'containment', 'status'],
+  schedule: ['movement', 'combat', 'death', 'quest', 'containment', 'status', 'barrier'], // W26 doors
   combat: ['movement', 'quest'],
   dialogue: ['quest', 'containment', 'movement', 'check'],
   movement: ['quest'],

@@ -138,11 +138,13 @@ defmodule Loka.Core.Contracts do
   defp keyword("additionalProperties", sub, v, path, defs) when is_map(sub),
     do: Enum.flat_map(v, fn {k, x} -> errors(sub, x, child(path, k), defs) end)
 
-  # The subset gives each anyOf branch a different JSON type, so the type selects it.
+  # The value's JSON type selects the anyOf branch. Two branches share a type only in the source
+  # schema's schedule hour (Loka.Content.Source): the errors of the branch with fewest (none when
+  # one accepts the value; the first on a tie), so a bad reference reports its own key.
   defp keyword("anyOf", bs, v, path, defs) do
-    case Enum.find(bs, &type?(json_type(&1, defs), v)) do
-      nil -> [%{path: path, code: :invalid_type}]
-      b -> errors(b, v, path, defs)
+    case Enum.filter(bs, &type?(json_type(&1, defs), v)) do
+      [] -> [%{path: path, code: :invalid_type}]
+      typed -> typed |> Enum.map(&errors(&1, v, path, defs)) |> Enum.min_by(&length/1)
     end
   end
 

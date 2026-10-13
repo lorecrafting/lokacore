@@ -6,18 +6,32 @@ import { test } from 'node:test';
 import { step, stepElapsed, type World } from '../src/index.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { escapeDirections } from '../src/mechanics/combat/flee.ts';
-import { h1, h2, home, fixture, wounded, begun, due, seated, run } from './c4_pack_fixture.ts';
+import {
+  h1,
+  h2,
+  home,
+  nest,
+  fixture,
+  wounded,
+  begun,
+  due,
+  seated,
+  run,
+} from './c4_pack_fixture.ts';
+import { barrierState } from '../src/mechanics/lookups.ts';
 import { fresh } from './deer_fixture.ts';
+import { key as rowKey } from '../src/foundation/compose.ts';
 
 /**
- * `world` with the exit `direction` of room `room` hidden until a false-default bool fact is true,
- * or with `climb` a climb face instead (row 30; its item is never read by an NPC).
+ * `world` with the exit `direction` of room `room` given `face`: hidden until a false-default bool
+ * fact is true, a climb face (row 30; its item is never read by an NPC), or a closed barrier door
+ * (row W26's npcPassage).
  */
 function hide<W extends World>(
   world: W,
   room: string,
   direction: 'east' | 'south',
-  climb = false,
+  face: 'hidden' | 'climb' | 'door' = 'hidden',
 ): W {
   const [id] = Object.entries(world.cartridge.facts!).find(
     ([, f]) => f.value_type.type === 'bool' && f.value_type.default === false,
@@ -25,23 +39,28 @@ function hide<W extends World>(
   const [, cartridge_id, cartridge_version, key] = /^(.+)@(.+):fact\/(.+)$/.exec(id)!;
   const fact = { cartridge_id, cartridge_version, kind: 'fact', key };
   const r = world.rooms[room]!;
+  const barrier = { ...fact, kind: 'barrier' };
   const exits = {
     ...r.exits,
     [direction]: {
       ...r.exits[direction]!,
-      ...(climb
-        ? { climb: { item: { ...fact, kind: 'item' }, damage: 1, fell: 'x' } }
-        : { hidden_until: { fact, equals: true } }),
+      ...{
+        door: { barrier },
+        climb: { climb: { item: { ...fact, kind: 'item' }, damage: 1, fell: 'x' } },
+        hidden: { hidden_until: { fact, equals: true } },
+      }[face],
     },
   };
-  return { ...world, rooms: { ...world.rooms, [room]: { ...r, exits } } } as W;
+  const barrierInitial = { ...world.barrierInitial, [rowKey(barrier)]: 'closed' };
+  return { ...world, barrierInitial, rooms: { ...world.rooms, [room]: { ...r, exits } } } as W;
 }
 
-// Breaks: a wounded hound flees through a hidden or climb face (its only area exit), naming it in
-// enemy_fled.
-for (const climb of [false, true])
-  test(`a wounded hound whose only area exit is ${climb ? 'a climb' : 'hidden'} stays in combat`, () => {
-    const result = due(hide(seated(begun(wounded(fixture(), 1))), home, 'east', climb));
+// Breaks: a wounded hound flees through a hidden or climb face or a closed door (its only area
+// exit), naming it in enemy_fled.
+const named = { hidden: 'hidden', climb: 'a climb', door: 'a closed door' };
+for (const face of ['hidden', 'climb', 'door'] as const)
+  test(`a wounded hound whose only area exit is ${named[face]} stays in combat`, () => {
+    const result = due(hide(seated(begun(wounded(fixture(), 1))), home, 'east', face));
     assert.equal(result.decision.kind, 'accepted', JSON.stringify(result.decision));
     assert.equal(result.world.state.containers[h2], home);
     const row = Object.values(result.world.state.encounters ?? {})[0]!;
@@ -56,8 +75,8 @@ test('Flee offers only the unhidden exit', () => {
 });
 
 // Breaks: a sighted deer takes refuge through a hidden or climb face (its only area exit).
-for (const climb of [false, true])
-  test(`a sighted deer whose only refuge is ${climb ? 'a climb' : 'hidden'} stays put`, () => {
+for (const face of ['hidden', 'climb'] as const)
+  test(`a sighted deer whose only refuge is ${named[face]} stays put`, () => {
     let w = fresh();
     for (const [n, direction] of [
       [1, 'south'],
@@ -81,7 +100,7 @@ for (const climb of [false, true])
         w.state.created![id]!.origin.role === 'deer',
     )!;
     assert.ok(deer);
-    const hidden = hide(w, willow, 'south', climb);
+    const hidden = hide(w, willow, 'south', face);
     const r = stepElapsed(
       hidden,
       {
@@ -100,3 +119,80 @@ for (const climb of [false, true])
     assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
     assert.equal(r.world.state.containers[deer], willow);
   });
+
+// One hour of elapsed play from `w`: the fixture's first hourly wander moves slot 1 home -> nest
+// (east), as c4_pack_elapsed.test.ts hand-checks.
+function hour(w: World) {
+  const [from, until] = [w.state.clock, w.state.clock + 3600];
+  const payload = { type: 'elapsed', actor_id: w.character, run_id: run, from, until } as const;
+  const id = elapsedCommandId(run, w.context, from, until) as never;
+  const r = stepElapsed(w, { id, world_context_id: w.context, payload }, 2);
+  assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
+  return { world: r.world, events: r.decision.kind === 'accepted' ? r.decision.events : [] };
+}
+
+// Breaks: population wander crosses a hidden or climb face, or a closed door without `walks`
+// (wanderOne off npcPassage); the plain fixture is the control (the hound reaches the nest).
+test('a wandering hound crosses no hidden, climb or closed face; the plain exit it does', () => {
+  assert.equal(hour(fixture()).world.state.containers[h1], nest);
+  for (const face of ['hidden', 'climb', 'door'] as const)
+    assert.equal(hour(hide(fixture(), home, 'east', face)).world.state.containers[h1], home, face);
+});
+
+/**
+ * The fixture with its plan marked `walks` (toolbox row W26) and a door east of the run in
+ * `state`, keyed to an item hound 1 holds when `held`.
+ */
+function walking(state: 'closed' | 'locked', held: boolean) {
+  const w = hide(fixture(), home, 'east', 'door');
+  const door = w.rooms[home]!.exits.east!.barrier!;
+  const [plan] = Object.keys(w.cartridge.populations!);
+  const [item] = Object.entries(w.entityIds).find(([k]) => k.includes(':item/'))!;
+  const [, cartridge_id, cartridge_version, k] = /^(.+)@(.+):item\/(.+)$/.exec(item)!;
+  const key_item = { cartridge_id, cartridge_version, kind: 'item', key: k };
+  const def = { key: door.key, keywords: ['door'], short: 'x', initial: state, key_item };
+  const cartridge = {
+    ...w.cartridge,
+    barriers: {
+      ...w.cartridge.barriers,
+      [`${cartridge_id}@${cartridge_version}:barrier/${door.key}`]: def,
+    },
+    populations: {
+      ...w.cartridge.populations,
+      [plan!]: { ...w.cartridge.populations![plan!], walks: true },
+    },
+  };
+  const containers = { ...w.state.containers, ...(held && { [w.entityIds[item]!]: h1 }) };
+  return {
+    world: {
+      ...w,
+      cartridge,
+      barrierInitial: { ...w.barrierInitial, [rowKey(door)]: state },
+      state: { ...w.state, containers },
+    } as World,
+    door,
+  };
+}
+
+// Breaks: a walking wander refused at a closed door, let through a locked one without the key, or
+// through with it but not re-locking it (four barrier_changed, locked after).
+test('a walking hound crosses a closed door, and a locked one only with its key, re-locking it', () => {
+  const changed = (r: ReturnType<typeof hour>) =>
+    r.events.flatMap((e) =>
+      e.payload.type === 'barrier_changed' ? [[e.payload.from, e.payload.to]] : [],
+    );
+  const closed = hour(walking('closed', false).world);
+  assert.equal(closed.world.state.containers[h1], nest);
+  assert.deepEqual(changed(closed), []);
+  assert.equal(hour(walking('locked', false).world).world.state.containers[h1], home);
+  const { world, door } = walking('locked', true);
+  const keyed = hour(world);
+  assert.equal(keyed.world.state.containers[h1], nest);
+  assert.equal(barrierState(keyed.world, door), 'locked');
+  assert.deepEqual(changed(keyed), [
+    ['locked', 'closed'],
+    ['closed', 'open'],
+    ['open', 'closed'],
+    ['closed', 'locked'],
+  ]);
+});

@@ -38,18 +38,22 @@ export const jobId = (mint: Mint) => mint() as JobId;
 
 /**
  * Where `npc` belongs from its schedule hour `due` (toolbox row W10): the first of the hour's
- * `schedule_cases` whose `when` holds, read with the player as the actor, the NPC as the target
- * and the clock at `due` (each leaf adds to `steps.n`), else the hour's daily_schedule room.
+ * `schedule_cases` whose `when` holds (absent holds), read with the player as the actor, the NPC as
+ * the target and the clock at `due` (each leaf adds to `steps.n`), else the hour's daily_schedule
+ * room; `walks` when the case walks (toolbox row W26).
  */
 export function placeOf(world: World, npc: EntityId, due: number, steps: Steps) {
   const e = world.entities[npc] as NpcDefinition;
   const hour = String(hourOf(world.cartridge, due));
   const at = { ...world, state: { ...world.state, clock: due } };
   const ctx = { target: npc, steps };
-  const pick = e.schedule_cases?.[hour]?.find((c) => holds(at, world.character, c.when.root, ctx));
+  const pick = e.schedule_cases?.[hour]?.find(
+    (c) => !c.when || holds(at, world.character, c.when.root, ctx),
+  );
   return {
     room: world.roomIds[refString(pick?.room ?? e.daily_schedule![hour])],
     goal: pick?.goal,
+    walks: pick?.walks,
   };
 }
 
@@ -91,6 +95,15 @@ export const entered = (
   npc: EntityId,
   room: EntityId,
   at: number,
+) => happened(world, run, mint, at, { type: 'entity_entered_room', entity_id: npc, room_id: room });
+
+/** An event `payload` of run_job `run`, as `entered` builds it (toolbox row W26: a door's change). */
+export const happened = <P extends DomainEvent['payload']>(
+  world: World,
+  run: Pick<Command, 'id'>,
+  mint: Mint,
+  at: number,
+  payload: P,
 ) => ({
   id: mint() as DomainEvent['id'],
   world_context_id: world.context,
@@ -99,7 +112,7 @@ export const entered = (
   position: 1,
   causation_id: run.id as string as DomainEvent['causation_id'],
   correlation_id: run.id as string as DomainEvent['correlation_id'],
-  payload: { type: 'entity_entered_room', entity_id: npc, room_id: room } as const,
+  payload,
 });
 
 // schedule@1's calendar job (toolbox row W25; docs/system/mechanics.md exposure): one pending job

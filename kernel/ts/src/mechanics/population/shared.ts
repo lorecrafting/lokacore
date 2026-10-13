@@ -24,7 +24,7 @@ import { add } from '../../foundation/int.ts';
 import { birth } from './birth.ts';
 import { planRef } from './refs.ts';
 import { hourOf } from '../calendar.ts';
-import { births, encounter, wanders, type Plan, type Slots } from './settle.ts';
+import { births, encounter, wanders, type Plan, type Slots, type Walked } from './settle.ts';
 
 export function suppressed(world: World, plan: DefinitionRef, at = world.state.clock) {
   const until = world.state.population_plans?.[key(plan)]?.suppression?.ends_at;
@@ -201,16 +201,17 @@ export function runPopulation(
   const born = quiet
     ? { ops: [] as DeltaOp[], ids: new Set<string>(), rng: world.state.rng }
     : encounter(world, command.id, job, target, slots, mint, at === wanderDue);
+  const walked: Walked = [];
   const ops: DeltaOp[] = [
     ...(row.status === 'pending' ? [{ op: 'job.complete', writer_group: 0, job_id } as const] : []),
     ...born.ops,
     ...(quiet
       ? []
-      : wanders(world, command.id, job.job, plan, job, wanderDue, slots, born.ids, mint)),
+      : wanders(world, command.id, job.job, plan, job, wanderDue, slots, born.ids, mint, walked)),
   ];
   const after = successor(world, plan, job, control, wanderDue, target, slots, mint);
   if (typeof after !== 'number') ops.push(...after);
-  const ran = accepted<never>(world, 'job_ran', ops, [], undefined, born.rng);
+  const ran = accepted(world, 'job_ran', ops, walked, undefined, born.rng);
   return typeof after === 'number' ? { ...ran, next: after } : ran;
 }
 

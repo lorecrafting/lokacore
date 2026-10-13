@@ -3,8 +3,8 @@ import { key, same } from '../../foundation/compose.ts';
 import { cmp } from '../../foundation/validate.ts';
 import { COMPASS, refString, type Steps, type World } from '../../runtime/decision.ts';
 import { living } from '../death/shared.ts';
-import { exitOf, exitTo } from '../lookups.ts';
-import { passage } from '../movement/shared.ts';
+import { exitTo } from '../lookups.ts';
+import { npcPassage } from '../movement/shared.ts';
 import { engaged } from './shared.ts';
 import { suppressed } from '../population/shared.ts';
 import { activeStatuses, moves } from '../status/shared.ts';
@@ -119,9 +119,7 @@ function flightExit(world: World, here: EntityId, area: readonly DefinitionRef[]
     if (
       there &&
       area.some((ref) => refString(ref) === refString(exit)) &&
-      !exitOf(room, direction)!.hidden_until &&
-      !exitOf(room, direction)!.climb &&
-      !passage(world, room, direction)
+      !npcPassage(world, room, direction)
     )
       return { direction, there };
   }

@@ -1,5 +1,6 @@
 // Toolbox row W10 at the cartridge trust boundary: an NPC's schedule_cases name hours its
-// daily_schedule lists, rooms and goal texts of this cartridge, and need kernel_api 1.47. Twin of
+// daily_schedule lists, rooms and goal texts of this cartridge, and need kernel_api 1.47; any
+// `walks` on a case or a population plan (toolbox row W26) needs 1.81. Twin of
 // lib/loka/content/schedules.ex.
 import type { Diagnostic } from '../contracts.gen.ts';
 import { checkers, diag, step, type Obj } from './cartridge_refs.ts';
@@ -32,7 +33,10 @@ export function schedules(c: Obj): Diagnostic[] {
     named(k.room, 'room', `${at}.room`);
     text(k, ['goal'], at);
   }
-  if (all.length && apiCmp(c.manifest.requires.kernel_api.at_least, '1.47') < 0)
+  const api = c.manifest.requires.kernel_api.at_least;
+  const walks =
+    all.some(([k]) => k.walks) || Object.values((c.populations ?? {}) as Obj).some((p) => p.walks);
+  if ((all.length && apiCmp(api, '1.47') < 0) || (walks && apiCmp(api, '1.81') < 0))
     out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
   return out;
 }

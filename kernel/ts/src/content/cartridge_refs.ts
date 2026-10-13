@@ -129,7 +129,7 @@ export function nodes(c: Obj): [Obj, string][] {
       k === 'variant' || (k === 'cue' && v.when) ? walk(v.when.root, `${at}.when.root`) : [],
     ),
     ...[...questPolicies(c), ...dispositions(c)].flatMap(([p, at]) => walk(p, at)),
-    ...cases(c).flatMap(([k, at]) => walk(k.when.root, `${at}.when.root`)),
+    ...cases(c).flatMap(([k, at]) => (k.when ? walk(k.when.root, `${at}.when.root`) : [])),
     ...Object.entries((c.reactions ?? {}) as Obj).flatMap(([ref, r]) =>
       r.when ? walk(r.when.root, `.cartridge.reactions${step(ref)}.when.root`) : [],
     ),
