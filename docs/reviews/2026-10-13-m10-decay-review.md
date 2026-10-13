@@ -32,3 +32,16 @@
 3. **should-fix** `kernel/ts/src/mechanics/status/job.ts:172`: deleting the `also` line survives 100 tests (status, status_composition, status_readers, status_room, status_movement, derived_status, exposure, npc_status, hireling, c5_bleed*, bleed_composition, encounter_bleed_jobs, encounter_composition, decay probes). A crossed replenish run writes no row an earlier run of the same job wrote except a mover's container, whose group is already in `found`, so no case seen needs it. Fix: name the case it protects and test it, or delete it (AGENTS.md Simplicity).
 4. **nit** `kernel/ts/test/decay.test.ts:236`: the skip-list check asserts `uses()` output; a load of the sampler without `fact@1` would pin the behaviour (and its Elixir twin, which has no case).
 5. **nit** `kernel/ts/src/mechanics/status/job.ts:146-152`: the `statusGroup` header still lists only statuses, rounds and bleeds; add replenish movers.
+
+## Fix round 1 (head `1f50047340552c024244ff5035a293f957ab924f`)
+
+Scoped to the one commit on `2d8352b6`: `decay.test.ts`, `status/job.ts` `statusGroup`, its only caller `proposal.ts` `jobs()`, and `mechanics.md`. Hosted CI on this head was still in progress at recheck (`gh run list --commit`); the PM watches it.
+
+1. Fixed. New test `decay.test.ts:120` ("respoils the fish it moves", one wait to 90000). Under the react.ts:24 `group` mutant it fails (17/18 pass), and my restock-before-expiry case faults `conflicting_write`. At the head, decay + replenish + my cases pass 18/18, and that case leaves the fish in the midden.
+2. Accepted (PM ruling). The Decay known limits now name root writes (`mechanics.md:2618`), with no code change. The scenario still faults as written (Take, then a `status_applied` move: `conflicting_write`), as the limit says.
+3. Fixed. `also` is removed from `statusGroup` and from the `jobs()` call; `proposal.ts:292` is the only caller. This head's code equals the round-0 M2 mutant, which passed 100 status, bleed, encounter, hireling, npc_status and decay tests.
+4. Fixed. `mechanics.md:686` matches the code: a replenish run joins the groups of the items it moves.
+5. Fixed. The `statusGroup` header comment names replenish movers.
+6. Dispute accepted. A load-based check would need `fact@1` dropped from a sampler whose position and death declarations require it, so the `uses()` assertion stays.
+
+Verdict: **APPROVE WITH NOTES** (finding 2 stays open as a recorded known limit).
