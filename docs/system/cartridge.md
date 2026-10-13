@@ -460,7 +460,7 @@ committed or checked in CI. Refs are DefinitionRefStrings.
   careful?}`: the count of its items, its tool's tag, its careful count.
 - Lists sort by site, then ref, then choice, then item; currencies by resource, unclassified by
   from then path, populations by ref, seams by room then detail. ponytail: authored static sites
-  only; no per-day caps exist; replenish is not listed yet (Beads `loka-kgd.107.3`) and decay is not built; death
+  only; no per-day caps exist; replenish is not listed yet (Beads `loka-kgd.107.3`) and the ledger does not count `item.move` sinks (decay, row 41) yet, so items can leave play that way; death
   moves custody with no coin penalty; per-district grouping waits for L8 tags; placed items stay
   with `reach.ts`; corpse custody, crow scavenge, quest exchange and coin-like items are not
   money rows; ammo a row 17 shot spends and durability a row 21 hit wears or a repair restores

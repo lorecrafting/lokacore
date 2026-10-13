@@ -23,6 +23,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: toolbox row 32, fast travel (loka-kgd.120)](2026-10-13-m10-fast-travel-review.md): **APPROVE WITH NOTES**
 - [Review: m10 decay (row 41) writer-group join, second opinion](2026-10-13-m10-decay-second-opinion.md): **APPROVE**
 - [Review: toolbox row 41, decay (loka-kgd.121)](2026-10-13-m10-decay-review.md): **APPROVE WITH NOTES**
+- [M10 batch review (PR #380, Fable)](2026-10-13-m10-batch-fable-review.md): **APPROVE WITH NOTES**
 - [Review: toolbox row 27, unidentified items (loka-kgd.112)](2026-10-12-m9b-unidentified-review.md): **APPROVE**
 - [Review: balance tool 5, content graph and reachability report (loka-kgd.107.5)](2026-10-12-m9b-reach-review.md): **APPROVE**
 - [Review: M9b toolbox row 17, ranged first strike (loka-kgd.110)](2026-10-12-m9b-ranged-review.md): **APPROVE WITH NOTES**
