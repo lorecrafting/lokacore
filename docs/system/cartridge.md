@@ -1345,13 +1345,12 @@ its source and real SQLite acceptance are recorded in the
 
 ### Claim and cancel declarations
 
-[Timed job claim and cancel](mechanics.md#timed-job-claim-and-cancel-toolbox-row-20b) adds three optional fields to `escrow`:
+[Timed job claim and cancel](mechanics.md#timed-job-claim-and-cancel-toolbox-row-20b) adds two optional fields to `escrow`:
 
 - `ready_after`: an integer, 1 to 31536000.
 - `output`: an item ref.
-- `refund`: a bool.
 
-`ready_after` and `output` are required together; `refund` needs `ready_after`. It also adds two `ServiceBenefit` kinds, `{kind: "claim", service}` and `{kind: "cancel", service}` (`protocol/service.schema.json`), each naming a service ref (short keys in source). Any of them needs `kernel_api` at least **1.80**.
+`ready_after` and `output` are required together. It also adds two `ServiceBenefit` kinds, `{kind: "claim", service}` and `{kind: "cancel", service}` (`protocol/service.schema.json`), each naming a service ref (short keys in source). Any of them needs `kernel_api` at least **1.80**.
 
 The compiler (`lib/loka/content/services.ex`) and the loader (`kernel/ts/src/content/cartridge_services.ts`) refuse:
 
@@ -1359,11 +1358,13 @@ The compiler (`lib/loka/content/services.ex`) and the loader (`kernel/ts/src/con
 - An `output` not located in the custody room: SCHEMA_VIOLATION `invalid_value` at the same path.
 - A claim or cancel `service` that is not a service: UNRESOLVED_REFERENCE at `.benefit.service`.
 - A claim or cancel `service` whose benefit is not an escrow with `ready_after`: SCHEMA_VIOLATION `invalid_value` at `.benefit.service`.
+- A `ready_after` without the `schedule` capability: UNDECLARED_CAPABILITY at `.benefit.escrow.ready_after`.
 
 Required cartridge text:
 
 - A claim: `service.no_order`, `service.not_ready` and `service.no_output`.
 - A cancel: `service.no_order` and `service.ready`.
+- A commission with `ready_after`: also `service.no_output`.
 
 ## D2 public Priory and book authoring
 

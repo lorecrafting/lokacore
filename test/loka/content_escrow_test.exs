@@ -64,6 +64,10 @@ defmodule Loka.ContentEscrowTest do
           {[
              {"services/commission.json", &put_in(&1, ["benefit", "escrow", "output"], "nowhere")}
            ], {"UNRESOLVED_REFERENCE", output}},
+          {[
+             {"cartridge.json",
+              &(pop_in(&1, ["requires", "capabilities", "schedule"]) |> elem(1))}
+           ], {"UNDECLARED_CAPABILITY", "services/commission.benefit.escrow.ready_after"}},
           {[{"text.json", &Map.delete(&1, "service.not_ready")}],
            {"UNRESOLVED_REFERENCE", claim}},
           {[{"text.json", &Map.delete(&1, "service.no_output")}],

@@ -210,7 +210,7 @@ test('the loader keeps escrow to API 1.79, item inputs, a room custody and its t
 });
 
 // Toolbox row 20b (mechanics.md "Timed job claim and cancel"): `commission` also carries
-// `ready_after 3600, output sword, refund true`; `claim` and `cancel` cost 1 penny each.
+// `ready_after 3600, output sword`; `claim` and `cancel` cost 1 penny each.
 const sword = (w: World) => w.entityIds[`${S}:item/sword`]!;
 const use = (w: World, key: string, quoted_price = 1) =>
   send(w, {
@@ -241,8 +241,8 @@ const used = (w: World, key: string, quoted_price = 1) => {
   assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
   return r.world;
 };
-const refusedUse = (w: World, key: string, code: string, reason: string) => {
-  const r = use(w, key);
+const refusedUse = (w: World, key: string, code: string, reason: string, price = 1) => {
+  const r = use(w, key, price);
   assert.deepEqual(r.decision, { kind: 'rejected', error: { code } });
   assert.equal(r.world, w);
   const at = offers(w).find((o) => o.action_key === key)!;
@@ -251,7 +251,8 @@ const refusedUse = (w: World, key: string, code: string, reason: string) => {
 const vaulted = (w: World) => [count(w, w.body), count(w, vault(w)), ordered(w)];
 
 // Breaks: no job scheduled (the claim succeeds at once), the claim leaves `ordered` true (a second
-// claim takes nothing but pays), the sword not moved, the not_ready or no_output check missing.
+// claim takes nothing but pays), the sword not moved, the not_ready or no_output check missing, a
+// re-order taken with the sword gone from custody (the order could never be claimed).
 test('the sword is ready an hour after the order and is claimed once', () => {
   let w = ordering();
   const c0 = w.state.clock;
@@ -281,27 +282,19 @@ test('the sword is ready an hour after the order and is claimed once', () => {
   assert.deepEqual([pennies(w), pennies(w, smith(w)), ...vaulted(w)], [6, 4, 0, 2, false]);
   refusedUse(w, 'claim', 'invalid_state', 'service.no_order');
   refusedUse(w, 'cancel', 'invalid_state', 'service.no_order');
+  refusedUse(w, 'commission', 'not_found', 'service.no_output', 3);
 });
 
-// Breaks: the refund ignored (7 - 1 = 6 pennies), refunded without `refund` (9), the inputs kept
-// in the vault, `ordered` left true (a second cancel pays and refunds again).
-test('a cancel before the due time returns the ore and, with refund, the price', () => {
-  for (const [refund, mine, theirs] of [
-    [true, 9, 1],
-    [false, 6, 4],
-  ] as const) {
-    const edit = (c: any) => (c.services[`${S}:service/commission`].benefit.escrow.refund = refund);
-    let w = ordering(sampler(edit));
-    w = elapse(w, w.state.clock + 1800);
-    w = used(w, 'cancel');
-    assert.deepEqual(
-      [pennies(w), pennies(w, smith(w)), ...vaulted(w)],
-      [mine, theirs, 2, 0, false],
-    );
-    assert.equal(w.state.containers[sword(w)], vault(w));
-    refusedUse(w, 'cancel', 'invalid_state', 'service.no_order');
-    refusedUse(w, 'claim', 'invalid_state', 'service.no_order');
-  }
+// Breaks: the fee returned (more than 6 pennies), the inputs kept in the vault, `ordered` left
+// true (a second cancel pays again).
+test('a cancel before the due time returns the ore, never the price', () => {
+  let w = ordering();
+  w = elapse(w, w.state.clock + 1800);
+  w = used(w, 'cancel');
+  assert.deepEqual([pennies(w), pennies(w, smith(w)), ...vaulted(w)], [6, 4, 2, 0, false]);
+  assert.equal(w.state.containers[sword(w)], vault(w));
+  refusedUse(w, 'cancel', 'invalid_state', 'service.no_order');
+  refusedUse(w, 'claim', 'invalid_state', 'service.no_order');
 });
 
 // Breaks: ready read from the marker or any completed job instead of "no pending job of that
@@ -312,7 +305,7 @@ test('a new order after a cancel waits for its own job', () => {
   w = elapse(w, c0 + 1800);
   w = used(w, 'cancel');
   w = used(w, 'commission', 3);
-  assert.deepEqual([pennies(w), ...vaulted(w)], [6, 0, 2, true]);
+  assert.deepEqual([pennies(w), ...vaulted(w)], [3, 0, 2, true]);
   w = elapse(w, c0 + 3600);
   refusedUse(w, 'claim', 'invalid_state', 'service.not_ready');
   w = elapse(w, c0 + 5399);
@@ -324,7 +317,7 @@ test('a new order after a cancel waits for its own job', () => {
 
 // Twin of test/loka/content_escrow_test.exs. Breaks: the loader admits claim, cancel or a timed
 // escrow below API 1.80, a claim naming a service with no ready_after, an output outside custody,
-// or a claim or cancel without its refusal texts.
+// a timed escrow without the schedule capability, or a claim or cancel without its refusal texts.
 test('the loader keeps claim and cancel to API 1.80, a timed commission and its texts', () => {
   const diagnostic = (edit: (c: any) => void) => {
     const r = reload(edit);
@@ -352,6 +345,14 @@ test('the loader keeps claim and cancel to API 1.80, a timed commission and its 
     [
       (c) => (svc(c, 'commission').benefit.escrow.output = ref('item', 'nowhere')),
       ['UNRESOLVED_REFERENCE', `${at('commission')}.benefit.escrow.output`],
+    ],
+    [
+      (c) => {
+        delete c.lock.capabilities.schedule;
+        delete c.manifest.requires.capabilities.schedule;
+        delete c.manifest.time_policy;
+      },
+      ['UNDECLARED_CAPABILITY', `${at('commission')}.benefit.escrow.ready_after`],
     ],
     [(c) => delete c.text['service.not_ready'], ['UNRESOLVED_REFERENCE', `${at('claim')}.wait`]],
     [(c) => delete c.text['service.no_output'], ['UNRESOLVED_REFERENCE', `${at('claim')}.output`]],

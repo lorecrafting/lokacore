@@ -84,6 +84,7 @@ function refusals(b: Obj) {
       ? { target: 'service.nothing_to_repair' }
       : kind !== 'entitlement' && { stock: 'service.sold_out' }),
     ...(b.escrow && { inputs: 'service.missing_inputs' }),
+    ...(b.escrow?.ready_after && { output: 'service.no_output' }),
   };
 }
 
@@ -105,6 +106,12 @@ function escrow(c: Obj, e: Obj, at: string, check: Checks, out: Diagnostic[]) {
   const output = e.output && get(c, check, e.output, 'item', `${at}.output`);
   if (output && (output.location.in !== 'room' || !same(output.location.room, e.custody)))
     bad(out, `${at}.output`);
+  if (e.ready_after && !Object.hasOwn(c.lock.capabilities, 'schedule'))
+    out.push(
+      diag('UNDECLARED_CAPABILITY', `${at}.ready_after`, { capability: 'schedule' }, [
+        'schedule@1',
+      ]),
+    );
 }
 
 // Toolbox row 21: a repair restores a fact some weapon's durability names.

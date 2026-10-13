@@ -1,6 +1,6 @@
 defmodule Loka.Content.Services do
   @moduledoc "Checks finite immediate service declarations and their exact provider stock."
-  import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2, ref: 3]
+  import Loka.Content.Source, only: [diag: 2, diag: 3, diag: 4, at: 2, ref: 3]
   alias Loka.Content.Refs
 
   defp service_benefit(b, m) do
@@ -113,15 +113,25 @@ defmodule Loka.Content.Services do
       for({false, d} <- shape, do: d) ++ output(path, e, m, defs)
   end
 
+  # Toolbox row 20b: the work job a timed order (output comes with ready_after) needs schedule.
+  defp schedule(path, m) do
+    owner = %{"capability" => "schedule"}
+
+    if is_map_key(m["requires"]["capabilities"], "schedule"),
+      do: [],
+      else: [diag("UNDECLARED_CAPABILITY", path.(["ready_after"]), owner, ["schedule@1"])]
+  end
+
   # Toolbox row 20b: the finished output already lies in custody.
   defp output(path, %{"output" => r, "custody" => custody}, m, defs) do
     at = path.(["output"])
 
-    case Refs.resolve(r, "item", m, defs) do
-      :unresolved -> [diag("UNRESOLVED_REFERENCE", at, %{"target" => r})]
-      {_, _, %{"location" => %{"in" => "room", "room" => ^custody}}} -> []
-      _ -> [bad(at)]
-    end
+    schedule(path, m) ++
+      case Refs.resolve(r, "item", m, defs) do
+        :unresolved -> [diag("UNRESOLVED_REFERENCE", at, %{"target" => r})]
+        {_, _, %{"location" => %{"in" => "room", "room" => ^custody}}} -> []
+        _ -> [bad(at)]
+      end
   end
 
   defp output(_, _, _, _), do: []
@@ -157,13 +167,18 @@ defmodule Loka.Content.Services do
   defp service_action?({_, [], a}), do: a["command"] == "use_service"
   defp service_action?(_), do: false
 
+  defp entitlement_texts(nil), do: ~w(service.unaffordable service.already_paid)
+
+  defp entitlement_texts(escrow),
+    do:
+      ~w(service.unaffordable service.order_open service.missing_inputs) ++
+        if(is_map_key(escrow, "ready_after"), do: ~w(service.no_output), else: [])
+
   defp service_texts(s) do
     reasons =
       case s["benefit"]["kind"] do
         "entitlement" ->
-          if s["benefit"]["escrow"],
-            do: ~w(service.unaffordable service.order_open service.missing_inputs),
-            else: ~w(service.unaffordable service.already_paid)
+          entitlement_texts(s["benefit"]["escrow"])
 
         "repair" ->
           ~w(service.unaffordable service.nothing_to_repair service.full_durability)

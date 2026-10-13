@@ -89,7 +89,7 @@
             },
             "escrow": {
               "type": "object",
-              "description": "Toolbox row 20a: the first quantity of these directly held items move to the custody room with the order. Row 20b: ready_after with output (an item lying in custody) adds a work job a claim waits for; refund returns the fee on cancel.",
+              "description": "Toolbox row 20a: the first quantity of these directly held items move to the custody room with the order. Row 20b: ready_after with output (an item lying in custody) adds a work job a claim waits for; cancel returns the inputs, never the fee.",
               "properties": {
                 "items": {
                   "type": "array",
@@ -114,9 +114,6 @@
                 },
                 "output": {
                   "$ref": "identity.schema.json#/$defs/DefinitionRef"
-                },
-                "refund": {
-                  "type": "boolean"
                 }
               },
               "required": [
@@ -130,9 +127,6 @@
                   "output"
                 ],
                 "output": [
-                  "ready_after"
-                ],
-                "refund": [
                   "ready_after"
                 ]
               }

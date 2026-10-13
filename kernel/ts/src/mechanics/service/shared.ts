@@ -12,14 +12,14 @@ import {
   type DefinitionRef,
   type JobId,
 } from '../../contracts.gen.ts';
-import { key, same } from '../../foundation/compose.ts';
+import { same } from '../../foundation/compose.ts';
 import { refusal } from '../../commands/actions.ts';
 import { bodyOf, refString, type Mint, type Steps, type World } from '../../runtime/decision.ts';
 import { living } from '../death/shared.ts';
 import { engaged } from '../combat/shared.ts';
 import { assigned, bounded, value } from '../fact.ts';
 import { equipped } from '../lookups.ts';
-import { adjust, level, resourceRef, resourceSpec, transfer, type Levels } from '../resource.ts';
+import { adjust, level, resourceRef, resourceSpec, transfer } from '../resource.ts';
 import { serving } from '../liquid/shared.ts';
 import { selected } from '../containment/stock.ts';
 import { giveRefused } from '../containment/shared.ts';
@@ -46,6 +46,8 @@ export function transition(
   const escrow = benefit.kind === 'entitlement' ? benefit.escrow : undefined;
   if (benefit.kind === 'entitlement' && value(world, p.actor_id, benefit.fact) !== false)
     return serviceRefusal('invalid_state', escrow ? 'service.order_open' : 'service.already_paid');
+  if (escrow?.output && away(world, escrow))
+    return serviceRefusal('not_found', 'service.no_output');
   const inputs = escrowed(world, body, escrow, steps);
   if ('code' in inputs) return inputs;
   const order: UnavailableReason | Order | undefined =
@@ -168,18 +170,19 @@ function open(world: World, p: Payload, benefit: Settles): UnavailableReason | O
   if (benefit.kind === 'claim' && busy) return serviceRefusal('invalid_state', 'service.not_ready');
   if (benefit.kind === 'cancel' && !busy) return serviceRefusal('invalid_state', 'service.ready');
   const escrow = b.escrow!;
-  const output = world.entityIds[refString(escrow.output!)];
-  if (
-    benefit.kind === 'claim' &&
-    world.state.containers[output] !== world.roomIds[refString(escrow.custody)]
-  )
+  if (benefit.kind === 'claim' && away(world, escrow))
     return serviceRefusal('not_found', 'service.no_output');
   return { kind: benefit.kind, commission, escrow };
 }
 
-// A claim takes the output from custody; a cancel returns the first `quantity` inputs in custody
-// and, with `refund`, the commission's price (threaded after this use's own payment). Both close
-// the order; the job stays and completes inert.
+// A timed commission's output not lying in custody: nothing to order or claim.
+function away(world: World, escrow: NonNullable<Escrow>) {
+  const output = world.entityIds[refString(escrow.output!)];
+  return world.state.containers[output] !== world.roomIds[refString(escrow.custody)];
+}
+
+// A claim takes the output from custody; a cancel returns the first `quantity` inputs in custody,
+// never the fee. Both close the order; the job stays and completes inert.
 function settle(
   world: World,
   p: Payload,
@@ -190,14 +193,10 @@ function settle(
 ): UnavailableReason | { ops: readonly DeltaOp[] } {
   const custody = world.roomIds[refString(escrow.custody)];
   let ids = [world.entityIds[refString(escrow.output!)]];
-  let refund: readonly DeltaOp[] = [];
   if (kind === 'cancel') {
     const back = selected(world, escrow.items, custody, escrow.quantity, steps);
     if (typeof back === 'string') return { code: back };
     ids = back;
-    const r = escrow.refund ? refunded(world, body, commission, paid) : [];
-    if (!r) return { code: 'insufficient_resource' as const };
-    refund = r;
   }
   const moves = ids.map((entity_id) => ({
     op: 'entity.transfer' as const,
@@ -206,26 +205,9 @@ function settle(
     source_id: custody,
     destination_id: body,
   }));
-  const start = { ops: [...paid, ...refund, ...moves], position: 0, facts: {} };
+  const start = { ops: [...paid, ...moves], position: 0, facts: {} };
   const b = commission.benefit as Extract<ServiceDefinition['benefit'], { kind: 'entitlement' }>;
   return { ops: assigned(world, p.actor_id, start, { fact: b.fact, value: false }, 'service').ops };
-}
-
-function refunded(world: World, body: EntityId, c: ServiceDefinition, paid: readonly DeltaOp[]) {
-  const provider = world.entityIds[refString(c.provider)];
-  let levels: Levels = {};
-  for (const o of paid)
-    if (o.op === 'resource.adjust')
-      levels = {
-        ...levels,
-        [key({ kind: 'resource', resource: o.resource, entity_id: o.entity_id })]: o.to,
-      };
-  const out = adjust(world, provider, c.currency, -c.price, levels);
-  const into = adjust(world, body, c.currency, c.price, out.levels);
-  return out.op.to < resourceSpec(world, provider, c.currency).minimum ||
-    into.op.to > resourceSpec(world, body, c.currency).maximum
-    ? undefined
-    : [out.op, into.op];
 }
 
 // Toolbox row 21: the wielded weapon whose durability is the benefit's fact gains up to `amount`,

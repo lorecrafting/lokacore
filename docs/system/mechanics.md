@@ -1509,10 +1509,11 @@ services are separate direct offers, not a first-eligible dialogue replacement.
 
 ## Timed job claim and cancel (toolbox row 20b)
 
-[Toolbox row 20b](../MECHANICS-TOOLBOX.md#ranked-toolbox); its sampler: "sword claimable after the job; cancel before it returns the ore". The archived seam is C3-M02 ([LATER-MECHANICS](../archive/LATER-MECHANICS.md)): one job holds the inputs, and the player never ends with both the ore and the output. [Declarations](cartridge.md#claim-and-cancel-declarations) govern it. The PM brief is in Beads `loka-kgd.126` (2026-10-13). Row 20b adds a work timer, a claim and a cancel to an [escrow](#escrow-custody-toolbox-row-20a) order. The cartridge owns every number: the duration, the output and the refund.
+[Toolbox row 20b](../MECHANICS-TOOLBOX.md#ranked-toolbox); its sampler: "sword claimable after the job; cancel before it returns the ore". The archived seam is C3-M02 ([LATER-MECHANICS](../archive/LATER-MECHANICS.md)): one job holds the inputs, and the player never ends with both the ore and the output. [Declarations](cartridge.md#claim-and-cancel-declarations) govern it. The PM brief is in Beads `loka-kgd.126` (2026-10-13). Row 20b adds a work timer, a claim and a cancel to an [escrow](#escrow-custody-toolbox-row-20a) order. The cartridge owns every number: the duration and the output.
 
-- **Declaration.** An `escrow` may declare `ready_after` (integer seconds, 1 to 31536000) together with `output` (an item authored lying in the custody room), plus an optional `refund` (bool, default false). An escrow without them behaves as row 20a. Two new benefit kinds, `{kind: "claim", service}` and `{kind: "cancel", service}`, name a commission service whose escrow declares `ready_after`. Each sits on its own service definition with its own action, provider, price and texts.
+- **Declaration.** An `escrow` may declare `ready_after` (integer seconds, 1 to 31536000) together with `output` (an item authored lying in the custody room). An escrow without them behaves as row 20a. Two new benefit kinds, `{kind: "claim", service}` and `{kind: "cancel", service}`, name a commission service whose escrow declares `ready_after`. Each sits on its own service definition with its own action, provider, price and texts.
 - **Job.** An accepted commission (row 20a's transition) whose escrow declares `ready_after` also schedules one engine job in the same proposal. The job is `job {kind: "order", key: <commission service key>}`, due at now + `ready_after`, with its id taken from the first IdSource ordinal (service@1's rule, `kernel/ts/src/mechanics/service/rule.ts`). It runs on the logical clock like every engine job: real elapsed delivery or Wait reaches it. Nothing new skips time ([owner decision](../decisions/owner-decision-background-time-2026-10-03.md)). When due, schedule@1's `run_job` completes it and writes nothing else (`kernel/ts/src/mechanics/schedule/rule.ts`).
+- **Commission.** A commission whose escrow declares `output` also refuses, after its order-open check and before its inputs, when the output is not directly in the custody room: `not_found`, `service.no_output`. No order opens that could never be claimed.
 - **Ready.** An order is open while the commission's entitlement fact is true. It is ready when it is open and no `order` job of that service is pending. There is no third marker value and no new fact.
 - **Claim.** `transition` (`kernel/ts/src/mechanics/service/shared.ts`), after the quoted-price check, checks in this order:
   1. The commission's fact is false: `invalid_state`, `service.no_order`.
@@ -1525,39 +1526,39 @@ services are separate direct offers, not a first-eligible dialogue replacement.
   1. The commission's fact is false: `invalid_state`, `service.no_order`.
   2. No `order` job of the service is pending (the order is ready): `invalid_state`, `service.ready`. Claim instead.
   3. The cancel's own payment.
-  4. When the commission declares `refund`, the commission's price goes back from the commission's provider to the payer. One `resource.adjust` per side, threaded after the cancel's payment. The provider has its minimum or the body its maximum: `insufficient_resource`.
 
-  Accepted ops: the payments, then one `entity.transfer` from the custody room to the body for each of the first `quantity` escrow `items` directly in custody, in EntityId order (`selected`), then `fact.assign` false. The job stays pending. When due it completes and writes nothing, so a re-order can never be ready before its own job: any job left by a cancelled order was scheduled earlier with the same `ready_after`, so it falls due first.
-- **Offer.** The GameView offers of claim and cancel call the same `transition`, so each shows the refusal its use would get.
+  Accepted ops: the payment, then one `entity.transfer` from the custody room to the body for each of the first `quantity` escrow `items` directly in custody, in EntityId order (`selected`), then `fact.assign` false. The commission's fee is never returned. The job stays pending. When due it completes and writes nothing, so a re-order can never be ready before its own job: any job left by a cancelled order was scheduled earlier with the same `ready_after`, so it falls due first.
+- **Offer.** The GameView offers of commission, claim and cancel call the same `transition`, so each shows the refusal its use would get.
 - **Atomicity.** One proposal each. A crash leaves all old or all new. A replayed invocation returns its stored receipt; a new claim after a claim finds the order closed (`service.no_order`).
 - **Writer.** service@1 writes the entitlement fact, the transfers and the job schedule; schedule@1 completes the job.
 - **Silent.** No event beyond a service's own: outcome `service_used`, its narration and the fact's `fact_changed`. No `item_acquired` for the output or the returned inputs.
 - **Known limits.**
   - Jobs carry no actor, so there is one open order per service in the world. Local story has one character.
   - A cancelled order leaves one inert job row until its due time.
-  - The output is one authored item. After a claim, a second order finds no output: its claim refuses `not_found`, `service.no_output`. It can be cancelled only before its due time; after it, cancel refuses `service.ready` and the order stays open for good, holding its inputs and fee.
-  - Cancel returns `quantity` of the authored inputs lying in custody, in EntityId order. After an earlier claim, those may be the spent instances rather than the ones this order took; the items are identical. If some were moved out of custody, cancel returns fewer and still refunds and closes the order.
+  - The output is one authored item. After a claim, the commission refuses `not_found`, `service.no_output` until the output lies in custody again, so the sampler's commission completes once per world.
+  - Cancel returns `quantity` of the authored inputs lying in custody, in EntityId order. After an earlier claim, those may be the spent instances rather than the ones this order took; the items are identical. If some were moved out of custody, cancel returns fewer and still closes the order.
+  - Cancel never returns the commission's fee: a refund adjusts the currency twice in one use, which commerce save's payment reconciliation does not admit.
   - No quality from a check (C3-M03 forge, later).
   - A reaction or replenish naming the custody room can still move the items (row 20a limit).
   - The output moves to the body without a carry check.
-  - Claim and cancel prices are at least 1, as for every service. A price of 0 would need command `quoted_price` and the offer price to allow 0, a protocol command change outside this row.
-- **Opt-in.** `ready_after`, `output`, `refund`, `claim` and `cancel` need `kernel_api` 1.80 (KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least`) in both kernels. A cartridge without them keeps its bytes, hash, ids, receipts and GameView. Chapter 1 declares none.
+  - Claim and cancel cost at least 1 (the service price minimum is unchanged), because a free use would need command `quoted_price` and the offer price to allow 0, a protocol change.
+- **Opt-in.** `ready_after`, `output`, `claim` and `cancel` need `kernel_api` 1.80 (KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least`) in both kernels. A cartridge without them keeps its bytes, hash, ids, receipts and GameView. Chapter 1 declares none.
 - **Book.** No new element: two more service offers.
 - **Traps.** [Trap 1](../MECHANICS-TOOLBOX.md#traps) holds: due times are on the logical clock. One new job kind; no new save section, op, event or command.
-- **Sampler.** `cartridges/escrow_sampler` gains `schedule` and `real_elapsed`, and the smith's commission gains `ready_after 3600, output sword, refund true`. The sword lies in the vault. The smith also offers `claim` and `cancel` at 1 penny each. Write C0 for the fresh clock 28800.
+- **Sampler.** `cartridges/escrow_sampler` gains `schedule` and `real_elapsed`, and the smith's commission gains `ready_after 3600, output sword`. The sword lies in the vault. The smith also offers `claim` and `cancel` at 1 penny each. Write C0 for the fresh clock 28800.
   - Commissioned at C0 (3 of 10 pennies): the ore is in the vault, `ordered` is true, and one `order` job is due at C0+3600.
   - At C0+3599, claim refuses `invalid_state`/`service.not_ready`.
-  - At C0+3600, claim pays 1: the sword is held, the ore stays in the vault, `ordered` is false. A second claim refuses `service.no_order`.
-  - In a second world, cancel at C0+1800 returns the two ore and restores the 3 pennies, less the cancel's 1 (9 held). Without `refund` it keeps them (6 held). A second cancel refuses `service.no_order`; a cancel after ready refuses `service.ready`.
+  - At C0+3600, claim pays 1: the sword is held, the ore stays in the vault, `ordered` is false. A second claim refuses `service.no_order`; a second commission refuses `not_found`/`service.no_output`.
+  - In a second world, cancel at C0+1800 returns the two ore and keeps the fee (6 held: 10 - 3 - 1). A second cancel refuses `service.no_order`; a cancel after ready refuses `service.ready`.
   - Re-ordered at once after a cancel at C0+1800, the order is not ready at C0+3600 (the cancelled job's due time) and is ready at C0+5400.
 - **Composition record** ([architecture](architecture.md#building-mechanics-by-composition)).
   - Consumer: `escrow_sampler` (one smith: commission, claim, cancel). Later: C3-M03 forge, W11 trade jobs, G10 letters.
   - Reads: the entitlement fact, pending job rows, custody contents.
-  - Writes: B3's resource transfer and threaded `resource.adjust` (refund), `entity.transfer`, `fact.assign`, `job.schedule`, `job.complete`. All are existing ops.
+  - Writes: B3's resource transfer, `entity.transfer`, `fact.assign`, `job.schedule`, `job.complete`. All are existing ops.
   - Writer ownership: service@1 owns the fact, the transfers and the schedule; schedule@1 completes the job.
   - Events and save rows: none new beyond the job row in the existing jobs section.
   - Reused: the row 20a transition and escrow, service offers, engine job scheduling and the wage job's dispatch shape, `selected`.
-  - New: the `order` job kind, two benefit kinds, three escrow fields, five message keys, the 1.80 floor.
+  - New: the `order` job kind, two benefit kinds, two escrow fields, five message keys, the 1.80 floor.
   - Missing invariant: none (`one_container_per_item` and `containment_acyclic` cover the transfers).
 
 ## D2 held books and public Priory (selected contract)
