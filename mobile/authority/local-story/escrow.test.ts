@@ -1,7 +1,8 @@
 // Toolbox row 20a through real SQLite on cartridges/escrow_sampler: the two ore the smith's
 // `commission` moved into the vault, its 3 pennies and the `ordered` fact survive cold reopen; the
 // same invocation replays its receipt and a new one is refused while the order is open
-// (docs/system/mechanics.md, Escrow custody).
+// (docs/system/mechanics.md, Escrow custody). Row 20b: the order's job survives cold reopen, and
+// the sword is claimed once after the due time (Timed job claim and cancel).
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
@@ -103,5 +104,73 @@ test('the escrowed ore and the order survive cold reopen; a retry replays', (t) 
   if (later.kind === 'saved')
     assert.deepEqual((later.decision as any).error, { code: 'invalid_state' });
   assert.deepEqual(truth(story.world()), [[true, true, false, false], 7, true]);
+  p.sql.close();
+});
+
+// Breaks: the order job lost on save (no pending row after reopen, or the claim is ready at
+// once), the job completion not saved (the claim stays not_ready after reopen), the claim receipt
+// not replayed, or the claim leaving the order open (a second claim pays again).
+test('the order job survives cold reopen and the sword is claimed once', (t) => {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-claim-saves-'));
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
+  const path = join(dir, 'claim.db');
+  let n = 0;
+  const invocation = (action_key: string, target_ids: string[], input = {}) => ({
+    invocation_id: `bbbbbbbb-2020-4020-8020-${String(++n).padStart(12, '0')}`,
+    actor_id: initial.character,
+    action_key,
+    target_ids,
+    input,
+  });
+  const reopen = () => {
+    const p = elapsedHost(path, undefined, bundle);
+    const story = openStory(p.db, releases, p.host);
+    assert.equal(story.kind, 'open', JSON.stringify(story));
+    if (story.kind !== 'open') throw new Error('not open');
+    return { p, story };
+  };
+  const run = (story: ReturnType<typeof reopen>['story'], i: object, kind = 'accepted') => {
+    const r = story.invoke(i as never);
+    assert.equal(r.kind, 'saved', JSON.stringify(r));
+    if (r.kind === 'saved') assert.equal((r.decision as any).kind, kind, JSON.stringify(r));
+    return r;
+  };
+  const sword = initial.entityIds[`${S}:item/sword`]!;
+  const pending = (w: World) => Object.values(w.state.jobs ?? {}).map((j) => j.status);
+  let { p, story } = reopen();
+  run(story, invocation('take', [ore('a')]));
+  run(story, invocation('take', [ore('b')]));
+  run(
+    story,
+    invocation('commission', [smith], { service: ref('service', 'commission'), quoted_price: 3 }),
+  );
+  const c0 = story.world().state.clock;
+  p.sql.close();
+
+  ({ p, story } = reopen());
+  assert.deepEqual(pending(story.world()), ['pending']);
+  const claim = invocation('claim', [smith], { service: ref('service', 'claim'), quoted_price: 1 });
+  run(story, claim, 'rejected');
+  assert.equal(
+    story.elapsed({ expected_run_id: story.runId(), from: c0, until: c0 + 3601 }).kind,
+    'saved',
+  );
+  p.sql.close();
+
+  ({ p, story } = reopen());
+  assert.deepEqual(pending(story.world()), ['completed']);
+  const take = invocation('claim', [smith], { service: ref('service', 'claim'), quoted_price: 1 });
+  run(story, take);
+  const again = run(story, take);
+  if (again.kind === 'saved') assert.equal(again.replay, true);
+  const later = run(
+    story,
+    invocation('claim', [smith], { service: ref('service', 'claim'), quoted_price: 1 }),
+    'rejected',
+  );
+  if (later.kind === 'saved')
+    assert.deepEqual((later.decision as any).error, { code: 'invalid_state' });
+  assert.equal(story.world().state.containers[sword], story.world().body);
+  assert.deepEqual(truth(story.world()), [[true, true, false, false], 6, false]);
   p.sql.close();
 });

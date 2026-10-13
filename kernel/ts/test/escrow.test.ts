@@ -10,9 +10,10 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
-import { INSTALLED, gameView, loadCartridge, newWorld, step } from '../src/index.ts';
+import { INSTALLED, gameView, loadCartridge, newWorld, step, stepElapsed } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { encode } from '../src/foundation/canonical.ts';
+import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { value } from '../src/mechanics/fact.ts';
 
@@ -204,6 +205,158 @@ test('the loader keeps escrow to API 1.79, item inputs, a room custody and its t
     ],
     [(c) => delete c.text['service.order_open'], ['UNRESOLVED_REFERENCE', `${at}.headroom`]],
     [(c) => delete c.text['service.missing_inputs'], ['UNRESOLVED_REFERENCE', `${at}.inputs`]],
+  ];
+  for (const [edit, expected] of cases) assert.deepEqual(diagnostic(edit), expected);
+});
+
+// Toolbox row 20b (mechanics.md "Timed job claim and cancel"): `commission` also carries
+// `ready_after 3600, output sword, refund true`; `claim` and `cancel` cost 1 penny each.
+const sword = (w: World) => w.entityIds[`${S}:item/sword`]!;
+const use = (w: World, key: string, quoted_price = 1) =>
+  send(w, {
+    type: 'use_service',
+    provider_id: smith(w),
+    service: ref('service', key),
+    quoted_price,
+  });
+const offers = (w: World) =>
+  gameView(w)
+    .entities.find((x) => x.id === smith(w))!
+    .services!.map((s) => s.action);
+const elapse = (w: World, until: number) => {
+  const run_id = `aaaaaaaa-2020-4020-8020-${String(++n).padStart(12, '0')}`;
+  const from = w.state.clock;
+  const payload = { type: 'elapsed', actor_id: w.character, run_id, from, until };
+  const command = { id: elapsedCommandId(run_id, w.context, from, until), payload };
+  const r = stepElapsed(w, { ...command, world_context_id: w.context } as never, n);
+  assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
+  return r.world;
+};
+const ordering = (content = sampler()) => {
+  const w = take(fresh(content), 'a', 'b');
+  return used(w, 'commission', 3);
+};
+const used = (w: World, key: string, quoted_price = 1) => {
+  const r = use(w, key, quoted_price);
+  assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
+  return r.world;
+};
+const refusedUse = (w: World, key: string, code: string, reason: string) => {
+  const r = use(w, key);
+  assert.deepEqual(r.decision, { kind: 'rejected', error: { code } });
+  assert.equal(r.world, w);
+  const at = offers(w).find((o) => o.action_key === key)!;
+  assert.deepEqual(at, { ...at, available: false, reason: { code, message: { key: reason } } });
+};
+const vaulted = (w: World) => [count(w, w.body), count(w, vault(w)), ordered(w)];
+
+// Breaks: no job scheduled (the claim succeeds at once), the claim leaves `ordered` true (a second
+// claim takes nothing but pays), the sword not moved, the not_ready or no_output check missing.
+test('the sword is ready an hour after the order and is claimed once', () => {
+  let w = ordering();
+  const c0 = w.state.clock;
+  assert.deepEqual([pennies(w), pennies(w, smith(w)), ...vaulted(w)], [7, 3, 0, 2, true]);
+  refusedUse(w, 'claim', 'invalid_state', 'service.not_ready');
+  w = elapse(w, c0 + 3599);
+  refusedUse(w, 'claim', 'invalid_state', 'service.not_ready');
+  w = elapse(w, c0 + 3600);
+  assert.deepEqual(
+    offers(w).map((o) => [o.action_key, o.available]),
+    [
+      ['commission', false],
+      ['claim', true],
+      ['cancel', false],
+    ],
+  );
+  refusedUse(w, 'cancel', 'invalid_state', 'service.ready');
+  const gone = { ...w.state.containers, [sword(w)]: smith(w) };
+  refusedUse(
+    { ...w, state: { ...w.state, containers: gone } },
+    'claim',
+    'not_found',
+    'service.no_output',
+  );
+  w = used(w, 'claim');
+  assert.equal(w.state.containers[sword(w)], w.body);
+  assert.deepEqual([pennies(w), pennies(w, smith(w)), ...vaulted(w)], [6, 4, 0, 2, false]);
+  refusedUse(w, 'claim', 'invalid_state', 'service.no_order');
+  refusedUse(w, 'cancel', 'invalid_state', 'service.no_order');
+});
+
+// Breaks: the refund ignored (7 - 1 = 6 pennies), refunded without `refund` (9), the inputs kept
+// in the vault, `ordered` left true (a second cancel pays and refunds again).
+test('a cancel before the due time returns the ore and, with refund, the price', () => {
+  for (const [refund, mine, theirs] of [
+    [true, 9, 1],
+    [false, 6, 4],
+  ] as const) {
+    const edit = (c: any) => (c.services[`${S}:service/commission`].benefit.escrow.refund = refund);
+    let w = ordering(sampler(edit));
+    w = elapse(w, w.state.clock + 1800);
+    w = used(w, 'cancel');
+    assert.deepEqual(
+      [pennies(w), pennies(w, smith(w)), ...vaulted(w)],
+      [mine, theirs, 2, 0, false],
+    );
+    assert.equal(w.state.containers[sword(w)], vault(w));
+    refusedUse(w, 'cancel', 'invalid_state', 'service.no_order');
+    refusedUse(w, 'claim', 'invalid_state', 'service.no_order');
+  }
+});
+
+// Breaks: ready read from the marker or any completed job instead of "no pending job of that
+// service": the cancelled order's inert job would make the new order ready at C0 + 3600.
+test('a new order after a cancel waits for its own job', () => {
+  let w = ordering();
+  const c0 = w.state.clock;
+  w = elapse(w, c0 + 1800);
+  w = used(w, 'cancel');
+  w = used(w, 'commission', 3);
+  assert.deepEqual([pennies(w), ...vaulted(w)], [6, 0, 2, true]);
+  w = elapse(w, c0 + 3600);
+  refusedUse(w, 'claim', 'invalid_state', 'service.not_ready');
+  w = elapse(w, c0 + 5399);
+  refusedUse(w, 'claim', 'invalid_state', 'service.not_ready');
+  w = elapse(w, c0 + 5400);
+  w = used(w, 'claim');
+  assert.equal(w.state.containers[sword(w)], w.body);
+});
+
+// Twin of test/loka/content_escrow_test.exs. Breaks: the loader admits claim, cancel or a timed
+// escrow below API 1.80, a claim naming a service with no ready_after, an output outside custody,
+// or a claim or cancel without its refusal texts.
+test('the loader keeps claim and cancel to API 1.80, a timed commission and its texts', () => {
+  const diagnostic = (edit: (c: any) => void) => {
+    const r = reload(edit);
+    return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
+  };
+  const at = (k: string) => `.cartridge.services["${S}:service/${k}"]`;
+  const svc = (c: any, k: string) => c.services[`${S}:service/${k}`];
+  const cases: [(c: any) => void, unknown][] = [
+    [
+      (c) => (c.manifest.requires.kernel_api.at_least = '1.79'),
+      ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'],
+    ],
+    [
+      (c) => (svc(c, 'claim').benefit.service = ref('service', 'cancel')),
+      ['SCHEMA_VIOLATION', `${at('claim')}.benefit.service`],
+    ],
+    [
+      (c) => (svc(c, 'cancel').benefit.service = ref('service', 'nowhere')),
+      ['UNRESOLVED_REFERENCE', `${at('cancel')}.benefit.service`],
+    ],
+    [
+      (c) => (c.items[`${S}:item/sword`].location.room = ref('room', 'forge')),
+      ['SCHEMA_VIOLATION', `${at('commission')}.benefit.escrow.output`],
+    ],
+    [
+      (c) => (svc(c, 'commission').benefit.escrow.output = ref('item', 'nowhere')),
+      ['UNRESOLVED_REFERENCE', `${at('commission')}.benefit.escrow.output`],
+    ],
+    [(c) => delete c.text['service.not_ready'], ['UNRESOLVED_REFERENCE', `${at('claim')}.wait`]],
+    [(c) => delete c.text['service.no_output'], ['UNRESOLVED_REFERENCE', `${at('claim')}.output`]],
+    [(c) => delete c.text['service.ready'], ['UNRESOLVED_REFERENCE', `${at('cancel')}.ready`]],
+    [(c) => delete c.text['service.no_order'], ['UNRESOLVED_REFERENCE', `${at('cancel')}.order`]],
   ];
   for (const [edit, expected] of cases) assert.deepEqual(diagnostic(edit), expected);
 });

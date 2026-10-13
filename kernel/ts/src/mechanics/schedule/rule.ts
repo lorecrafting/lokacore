@@ -69,7 +69,6 @@ export const decideAt = (
     if (row.job.kind === 'population_bundle')
       return runCrow(world, command, payload.job_id, row, crowBinding(world, payload.job_id), mint);
     if (row.sight) return runSight(world, payload.job_id, row, steps);
-
     if (row.job.kind === CLOCK_JOB) return runClock(world, command, payload.job_id, row, mint);
     if (row.job.kind === 'population')
       return runPopulation(world, command, payload.job_id, row, mint, at);
@@ -77,6 +76,7 @@ export const decideAt = (
       return runReplenish(world, payload.job_id, row, mint, steps, at ?? row.due_time);
     if (row.job.kind === 'wage')
       return runWage(world, payload.job_id, row, mint, at ?? row.due_time);
+    if (row.job.kind === 'order') return orderReady(world, payload.job_id);
     return scheduledJob(world, command, payload.job_id, row, mint, steps, at ?? row.due_time);
   }
   return advance(world, payload);
@@ -138,6 +138,10 @@ function scheduledJob(
   );
   return crossed ? { ...ran, next: due_time } : ran;
 }
+
+// Toolbox row 20b: a due order job completes and writes nothing else; the order is now ready.
+const orderReady = (world: World, job_id: JobId) =>
+  accepted<never>(world, 'job_ran', [{ op: 'job.complete', writer_group: 0, job_id }], []);
 
 // size: allow 50, one expiry checks its bound occurrence and commits status, trust and job together
 function deadlineJob(world: World, jobId: JobId, row: JobRow) {

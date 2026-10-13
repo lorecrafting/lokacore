@@ -44,4 +44,36 @@ defmodule Loka.ContentEscrowTest do
       assert expected in Enum.map(diags, &{&1["code"], &1["path"]}), inspect(diags)
     end
   end
+
+  # Breaks (toolbox row 20b; twin of the loader rows in kernel/ts/test/escrow.test.ts): claim and
+  # cancel compile under API 1.79, a claim names a service with no ready_after, the output lies
+  # outside custody or is no item, or a claim or cancel lacks its refusal texts.
+  test "claim and cancel keep their API floor, a timed commission and their texts", %{dir: dir} do
+    claim = "services/claim"
+    output = "services/commission.benefit.escrow.output"
+
+    for {edits, expected} <- [
+          {[{"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.79")}],
+           {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"}},
+          {[{"services/claim.json", &put_in(&1, ["benefit", "service"], "cancel")}],
+           {"SCHEMA_VIOLATION", "#{claim}.benefit.service"}},
+          {[{"services/cancel.json", &put_in(&1, ["benefit", "service"], "nowhere")}],
+           {"UNRESOLVED_REFERENCE", "services/cancel.benefit.service"}},
+          {[{"items/sword.json", &put_in(&1, ["location", "room"], "forge")}],
+           {"SCHEMA_VIOLATION", output}},
+          {[
+             {"services/commission.json", &put_in(&1, ["benefit", "escrow", "output"], "nowhere")}
+           ], {"UNRESOLVED_REFERENCE", output}},
+          {[{"text.json", &Map.delete(&1, "service.not_ready")}],
+           {"UNRESOLVED_REFERENCE", claim}},
+          {[{"text.json", &Map.delete(&1, "service.no_output")}],
+           {"UNRESOLVED_REFERENCE", claim}},
+          {[{"text.json", &Map.delete(&1, "service.ready")}],
+           {"UNRESOLVED_REFERENCE", "services/cancel"}},
+          {[{"text.json", &Map.delete(&1, "service.no_order")}], {"UNRESOLVED_REFERENCE", claim}}
+        ] do
+      assert {:error, diags} = Loka.ContentSource.compile(dir, edits)
+      assert expected in Enum.map(diags, &{&1["code"], &1["path"]}), inspect(diags)
+    end
+  end
 end

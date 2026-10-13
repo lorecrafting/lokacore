@@ -10,6 +10,8 @@
     "pennies": 0
   },
   "services": [
-    "commission"
+    "commission",
+    "claim",
+    "cancel"
   ]
 }
