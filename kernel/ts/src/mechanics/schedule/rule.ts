@@ -125,10 +125,10 @@ function scheduledJob(
   const { room, goal, walks } = placeOf(world, npc, at, steps);
   const from = world.state.containers[npc];
   // Toolbox row W26: a walking case moves only along a path, re-locking each key passage on it.
-  const path =
-    from !== room && walks && moves(world, npc) ? walkPath(world, npc, from, room, steps) : [];
+  const still = from === room || !moves(world, npc);
+  const path = !still && walks ? walkPath(world, npc, from, room, steps) : [];
   // A goal (toolbox row W10) is narration only when the player sees the NPC leave.
-  const stays = from === room || !moves(world, npc) || !path;
+  const stays = still || !path;
   const doors = stays ? [] : path.flatMap(relock);
   const seen = goal && !stays && world.state.containers[world.body] === from;
   const transfer = { op: 'entity.transfer', writer_group: 0, entity_id: npc } as const;

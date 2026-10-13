@@ -108,8 +108,8 @@ export const relock = (barrier: DefinitionRef) =>
  * budget.
  */
 export function walkPath(world: World, npc: EntityId, from: EntityId, to: EntityId, steps: Steps) {
-  const via = new Map<string, { at: string; barrier?: DefinitionRef }>([[from, { at: from }]]);
   if (!world.rooms[from]) return undefined;
+  const via = new Map<string, { at: string; barrier?: DefinitionRef }>([[from, { at: from }]]);
   for (let edge: string[] = [from]; edge.length && !via.has(to);) {
     const next: string[] = [];
     for (const at of edge) {
