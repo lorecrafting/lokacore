@@ -2809,3 +2809,31 @@ Found by [showcase plan 2](../showcase/combat-district.md) (#368); the PM brief 
   - Reused: B8 entitlement, G7 locks, the barrier lock verb and key, W26 walking, service offers, `ownership`, `bounded`.
   - New: two benefit kinds, one message key (`service.no_funds`), the 1.83 floor.
   - Missing invariant: none (resource bounds and composition `from` checks cover the transfers).
+
+## Tracks and trails (toolbox row W13)
+
+[Toolbox row W13](../MECHANICS-TOOLBOX.md#ranked-toolbox): "an accepted body transfer writes a decaying trail; a `track` check reveals the next exit; a `hunt` behaviour reads the same trails". The PM brief is in Beads `loka-kgd.136` (2026-10-13). [Declarations](cartridge.md#trail-declarations) govern it.
+
+- **A trail is two engine facts per room.** A leaver's trail in a room is the exit it last left that room by and when: `trail_<P>_exit` (enum `none`, `north`, `south`, `east`, `west`, `up`, `down`; default `none`) and `trail_<P>_at` (int, minimum 0, default 0), `per_subject: true` with the room left as [subject](#entity-and-pair-facts-toolbox-row-w2), for population plan `P`; the player's are `trail_exit` and `trail_at`. The compiler adds them (as `uses_<key>`), the plan's at scope `instance` (one trail per plan, whichever member left), the player's at scope `player`. They live in the `facts` section and are written with `fact.assign`, so each change emits `fact_changed`; no new op, event, job or save section. Authored content may read them and may not write them (RESERVED_FACT).
+- **Rooms as subjects.** facts_typed (`kernel/ts/src/mechanics/fact.ts`, `protocol/invariants.json`) admits a room subject for these engine facts only; any other fact naming a room subject is still a broken invariant (PM ruling 2026-10-13).
+- **Who leaves one.** A member of a plan with `trail: true` leaves one when its wander step moves it and when it flees combat ([C4](#c4-hound-response-pack-assistance-and-flight-selected-contract)): the source room's `trail_<P>_exit` becomes the exit taken and `trail_<P>_at` the step's time. The player leaves one on every accepted move or flee (`moveSequence`) when some plan has `hunts: true`. One write per room and plan in a proposal: two members leaving one room by one wander keep the first's.
+- **Fresh.** A trail is fresh while its exit is not `none` and `now - at < world.trails.fresh_for` (logical seconds). Nothing ticks: a cold row stays until the next leaver overwrites it.
+- **Track check.** A recipe check `{kind: "track", key, plan}` draws no RNG and passes when plan `plan`'s trail in the actor's room is fresh. On success the outcome's lines are followed by `world.trails.leads[<exit>]`, so the reader learns the next exit only; nothing is stored. A room never left, or left too long ago, fails.
+- **Hunt.** A plan with `hunts: true` reads the player's trail at each wander step: when the trail in the member's room is fresh and `npcPassage` ([W26](#npcs-use-doors-toolbox-row-w26), with `walks` when the plan walks) admits its exit, the member takes that exit instead of its home-and-nest step; otherwise it wanders as before. A member that hunted out of its area wanders only along fresh trails until one leads home or back to the nest.
+- **Known limits.** Rain does not age trails (row 31 follow-up). Schedules, escorts, patrols, the crow and refuge leave no trail. A plan trail is one per room for the whole plan, not per member. Only the player is hunted, and a member outside its area does not flee (C4 reads the area).
+- **Opt-in.** `world.trails`, a plan's `trail` or `hunts`, and a `track` check need `kernel_api` 1.85 (KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least`, both kernels). Without them nothing is written: Chapter 1 and every other sampler keep their bytes and hash.
+- **Book.** No new element and no [Book UI](book-ui.md) change: the lead is an authored narration line.
+- **Traps.** Bounded rows: at most two per (plan or player, room), overwritten in place. No RNG and no new job.
+- **Sampler.** `cartridges/tracks_sampler`: a clearing (entry), a thicket east of it, a burrow north of the clearing. Plan `hounds` (area clearing and thicket, `trail`, `pack`) and plan `hunters` (area clearing and thicket, `hunts`); `fresh_for` 300. A track recipe on the ground of each room reads the hounds' trail.
+  - A hound that wanders or flees east from the clearing at 100: tracking there at 399 reads "east", at 400 fails; tracking in the burrow fails.
+  - Two steps, clearing to thicket then thicket back: each room reads its own next exit.
+  - The player leaves the clearing north: a hunter in the clearing follows into the burrow on its next wander while the trail is fresh, and wanders home-and-nest after it cools.
+- **Composition record** ([architecture](architecture.md#building-mechanics-by-composition)).
+  - Consumer: `tracks_sampler`. Later: row 31 rain, the showcase's hunt.
+  - Reads: the trail facts, the clock, exits, `npcPassage`.
+  - Writes: `fact.assign` on the trail facts (existing op) with `fact_changed` (existing event); the member's `entity.transfer` as today.
+  - Writer ownership: the movement, wander and flight rules own the trail facts; authored writes are RESERVED_FACT.
+  - Jobs and save rows: none new.
+  - Reused: per_subject facts (W2), reserved engine facts (`uses_`), check@1, `npcPassage`, wander and C4 flight.
+  - New: the track check kind, `world.trails`, plan `trail` and `hunts`, room subjects for trail facts, the 1.85 floor.
+  - Missing invariant: none (facts_typed covers the rows).
