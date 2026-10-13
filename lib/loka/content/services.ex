@@ -14,7 +14,15 @@ defmodule Loka.Content.Services do
     Enum.reduce(fields, b, fn {field, kind}, result ->
       Map.update!(result, field, &ref(&1, kind, m))
     end)
+    |> escrow_refs(m)
   end
+
+  defp escrow_refs(%{"escrow" => e} = b, m) do
+    items = Enum.map(e["items"], &ref(&1, "item", m))
+    %{b | "escrow" => %{e | "items" => items, "custody" => ref(e["custody"], "room", m)}}
+  end
+
+  defp escrow_refs(b, _), do: b
 
   def expand(%{"benefit" => b, "provider" => p, "currency" => c} = s, m) do
     s
@@ -49,7 +57,10 @@ defmodule Loka.Content.Services do
       |> String.split(".")
       |> Enum.map(&String.to_integer/1)
 
-    if declared != [] and minimum < [1, 23],
+    floor =
+      if Enum.any?(declared, fn {_, s} -> s["benefit"]["escrow"] end), do: [1, 79], else: [1, 23]
+
+    if declared != [] and minimum < floor,
       do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
       else: []
   end
@@ -66,7 +77,42 @@ defmodule Loka.Content.Services do
     checks = bindings(s, npc, m, defs) ++ benefit(s["benefit"], npc, s, m, defs)
 
     texts(rel, service_texts(s), text) ++
-      for({valid, steps} <- checks, not valid, do: bad(at(rel, steps)))
+      for({valid, steps} <- checks, not valid, do: bad(at(rel, steps))) ++
+      escrow(rel, s["benefit"]["escrow"], m, defs)
+  end
+
+  # Toolbox row 20a: distinct items held to a room; no shop offer (commerce save reconciles offer
+  # custody by receipt and would refuse a service transfer of one).
+  defp escrow(_, nil, _, _), do: []
+
+  defp escrow(rel, %{"items" => items, "quantity" => quantity, "custody" => custody}, m, defs) do
+    path = &at(rel, ["benefit", "escrow" | &1])
+
+    shape = [
+      {Enum.uniq(items) == items, diag("DUPLICATE_DEFINITION", path.(["items"]))},
+      {quantity <= length(items), bad(path.(["quantity"]))}
+    ]
+
+    inputs(items, path, m, defs) ++
+      unresolved(custody, "room", path.(["custody"]), m, defs) ++
+      for({false, d} <- shape, do: d)
+  end
+
+  defp inputs(items, path, m, defs) do
+    offered =
+      for {_, {_, [], %{"shop" => shop}}} <- defs["npc"], o <- shop["offers"], do: o["item"]
+
+    for {r, i} <- Enum.with_index(items),
+        at = path.(["items", i]),
+        d <- unresolved(r, "item", at, m, defs) ++ if(r in offered, do: [bad(at)], else: []),
+        do: d
+  end
+
+  defp unresolved(r, kind, path, m, defs) do
+    case Refs.resolve(r, kind, m, defs) do
+      :unresolved -> [diag("UNRESOLVED_REFERENCE", path, %{"target" => r})]
+      _ -> []
+    end
   end
 
   defp bindings(s, npc, m, defs) do
@@ -86,9 +132,16 @@ defmodule Loka.Content.Services do
   defp service_texts(s) do
     reasons =
       case s["benefit"]["kind"] do
-        "entitlement" -> ~w(service.unaffordable service.already_paid)
-        "repair" -> ~w(service.unaffordable service.nothing_to_repair service.full_durability)
-        _ -> ~w(service.unaffordable service.full_mv service.sold_out)
+        "entitlement" ->
+          if s["benefit"]["escrow"],
+            do: ~w(service.unaffordable service.order_open service.missing_inputs),
+            else: ~w(service.unaffordable service.already_paid)
+
+        "repair" ->
+          ~w(service.unaffordable service.nothing_to_repair service.full_durability)
+
+        _ ->
+          ~w(service.unaffordable service.full_mv service.sold_out)
       end
 
     Enum.map(reasons, &{[], &1}) ++ Enum.map(~w(label narration), &{[&1], s[&1]})

@@ -61,9 +61,7 @@ function offer(
 }
 
 function assertResult(result: UnavailableReason | { ops: unknown }) {
-  if (
-    'code' in result &&
-    (result.code === 'budget_exceeded' || result.code === 'precondition_failed')
-  )
-    throw new KernelError(result.code);
+  const code = 'code' in result ? result.code : undefined;
+  if (code === 'budget_exceeded' || code === 'containment_cycle' || code === 'precondition_failed')
+    throw new KernelError(code);
 }

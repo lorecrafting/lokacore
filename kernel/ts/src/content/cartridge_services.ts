@@ -7,7 +7,9 @@ export function services(c: Obj): Diagnostic[] {
   const out: Diagnostic[] = [],
     check = checkers(c, out);
   const [major, minor] = c.manifest.requires.kernel_api.at_least.split('.').map(Number);
-  if (Object.keys(c.services ?? {}).length && (major < 1 || (major === 1 && minor < 23)))
+  const all = Object.values((c.services ?? {}) as Obj);
+  const floor = all.some((s) => s.benefit.escrow) ? 79 : 23;
+  if (all.length && (major < 1 || (major === 1 && minor < floor)))
     out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
   for (const [ref, s] of Object.entries((c.services ?? {}) as Obj))
     definition(c, s, ref, check, out);
@@ -29,16 +31,7 @@ function definition(c: Obj, s: Obj, ref: string, check: Checks, out: Diagnostic[
   if (c.lock.capabilities.service !== 1)
     out.push(diag('UNDECLARED_CAPABILITY', at, { capability: 'service' }, ['service@1']));
   check.text(s, ['label', 'narration'], at);
-  const kind = s.benefit.kind;
-  const reasons = {
-    payment: 'service.unaffordable',
-    headroom:
-      { entitlement: 'service.already_paid', repair: 'service.full_durability' }[kind as string] ??
-      'service.full_mv',
-    ...(kind === 'repair'
-      ? { target: 'service.nothing_to_repair' }
-      : kind !== 'entitlement' && { stock: 'service.sold_out' }),
-  };
+  const reasons = refusals(s.benefit);
   check.text(reasons, Object.keys(reasons), at);
   const npc = get(c, check, s.provider, 'npc', `${at}.provider`);
   const currency = get(c, check, s.currency, 'resource', `${at}.currency`);
@@ -57,12 +50,46 @@ function definition(c: Obj, s: Obj, ref: string, check: Checks, out: Diagnostic[
         !same(fact.scopes, ['player']))
     )
       bad(out, `${at}.benefit.fact`);
+    if (b.escrow) escrow(c, b.escrow, `${at}.benefit.escrow`, check, out);
   } else if (b.kind === 'repair') repair(c, b, at, check, out);
   else {
     const recovery = get(c, check, b.recovery, 'resource', `${at}.benefit.recovery`);
     if (recovery && recovery.key !== 'mv') bad(out, `${at}.benefit.recovery`);
     stock(c, s, npc, at, check, out);
   }
+}
+
+// The refusal texts a service needs, by benefit.
+function refusals(b: Obj) {
+  const kind = b.kind;
+  return {
+    payment: 'service.unaffordable',
+    headroom: b.escrow
+      ? 'service.order_open'
+      : ({ entitlement: 'service.already_paid', repair: 'service.full_durability' }[
+          kind as string
+        ] ?? 'service.full_mv'),
+    ...(kind === 'repair'
+      ? { target: 'service.nothing_to_repair' }
+      : kind !== 'entitlement' && { stock: 'service.sold_out' }),
+    ...(b.escrow && { inputs: 'service.missing_inputs' }),
+  };
+}
+
+// Toolbox row 20a: distinct items held to a room; no shop offer (commerce save reconciles offer
+// custody by receipt and would refuse a service transfer of one).
+function escrow(c: Obj, e: Obj, at: string, check: Checks, out: Diagnostic[]) {
+  const keys = e.items.map((r: Obj) => refString(r as never));
+  const offered = Object.values((c.npcs ?? {}) as Obj).flatMap((n) =>
+    (n.shop?.offers ?? []).map((o: Obj) => refString(o.item)),
+  );
+  keys.forEach((k: string, i: number) => {
+    get(c, check, e.items[i], 'item', `${at}.items[${i}]`);
+    if (offered.includes(k)) bad(out, `${at}.items[${i}]`);
+  });
+  if (new Set(keys).size !== keys.length) out.push(diag('DUPLICATE_DEFINITION', `${at}.items`));
+  get(c, check, e.custody, 'room', `${at}.custody`);
+  if (e.quantity > keys.length) bad(out, `${at}.quantity`);
 }
 
 // Toolbox row 21: a repair restores a fact some weapon's durability names.

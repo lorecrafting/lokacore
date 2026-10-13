@@ -1,0 +1,15 @@
+{
+  "facts": {
+    "ordered": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The smith holds this character's commission inputs."
+    }
+  }
+}

@@ -19,6 +19,8 @@ import { assigned, bounded, value } from '../fact.ts';
 import { equipped } from '../lookups.ts';
 import { adjust, level, resourceRef, resourceSpec, transfer } from '../resource.ts';
 import { serving } from '../liquid/shared.ts';
+import { selected } from '../containment/stock.ts';
+import { giveRefused } from '../containment/shared.ts';
 
 type Payload = Extract<CommandPayload, { type: 'use_service' }>;
 export function availability(world: World, p: Payload, steps: Steps = { n: 0 }, action?: Key) {
@@ -39,13 +41,16 @@ export function transition(
   if ('code' in service) return service;
   if (p.quoted_price !== service.price) return { code: 'invalid_state' as const };
   const benefit = service.benefit;
+  const escrow = benefit.kind === 'entitlement' ? benefit.escrow : undefined;
   if (benefit.kind === 'entitlement' && value(world, p.actor_id, benefit.fact) !== false)
-    return serviceRefusal('invalid_state', 'service.already_paid');
+    return serviceRefusal('invalid_state', escrow ? 'service.order_open' : 'service.already_paid');
+  const inputs = escrowed(world, body, escrow, steps);
+  if ('code' in inputs) return inputs;
   const paid = transfer(world, body, p.provider_id, service.currency, p.quoted_price);
   if (!paid) return serviceRefusal('insufficient_resource', 'service.unaffordable');
   let ops: readonly DeltaOp[] = paid.ops;
   if (benefit.kind === 'entitlement') {
-    const start = { ops, position: 0, facts: {} },
+    const start = { ops: [...ops, ...inputs.ops], position: 0, facts: {} },
       grant = { fact: benefit.fact, value: true };
     ops = assigned(world, p.actor_id, start, grant, 'service').ops;
   } else if (benefit.kind === 'repair') {
@@ -80,6 +85,36 @@ function boundService(world: World, p: Payload, body: EntityId) {
 
 function serviceRefusal(code: ErrorCode, message: string) {
   return { code, message: { key: message as TextKey } };
+}
+
+type Escrow = Extract<ServiceDefinition['benefit'], { kind: 'entitlement' }>['escrow'];
+
+// Toolbox row 20a: the first `quantity` escrow inputs directly in the body, each one Give would
+// let go, move to the custody room with the order; fewer held refuses before any payment.
+function escrowed(
+  world: World,
+  body: EntityId,
+  escrow: Escrow,
+  steps: Steps,
+): UnavailableReason | { ops: readonly DeltaOp[] } {
+  if (!escrow) return { ops: [] };
+  const ids = selected(world, escrow.items, body, escrow.quantity, steps);
+  if (typeof ids === 'string') return { code: ids };
+  if (ids.length < escrow.quantity) return serviceRefusal('not_owned', 'service.missing_inputs');
+  for (const id of ids) {
+    const code = giveRefused(world, id, steps);
+    if (code) return { code };
+  }
+  const destination_id = world.roomIds[refString(escrow.custody)];
+  return {
+    ops: ids.map((entity_id) => ({
+      op: 'entity.transfer' as const,
+      writer_group: 0,
+      entity_id,
+      source_id: body,
+      destination_id,
+    })),
+  };
 }
 
 // Toolbox row 21: the wielded weapon whose durability is the benefit's fact gains up to `amount`,

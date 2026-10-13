@@ -1,0 +1,22 @@
+{
+  "provider": "smith",
+  "currency": "pennies",
+  "action": "commission",
+  "label": "service.commission",
+  "narration": "service.commission.used",
+  "price": 3,
+  "benefit": {
+    "kind": "entitlement",
+    "fact": "ordered",
+    "escrow": {
+      "items": [
+        "ore_a",
+        "ore_b",
+        "ore_c",
+        "ore_d"
+      ],
+      "quantity": 2,
+      "custody": "vault"
+    }
+  }
+}

@@ -26162,5 +26162,420 @@
         "code": "invalid_type"
       }
     ]
+  },
+  {
+    "contract": "ServiceBenefit",
+    "value": {
+      "kind": "entitlement",
+      "fact": {
+        "cartridge_id": "escrow_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "fact",
+        "key": "ordered"
+      },
+      "escrow": {
+        "items": [
+          {
+            "cartridge_id": "escrow_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "ore_a"
+          },
+          {
+            "cartridge_id": "escrow_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "ore_b"
+          }
+        ],
+        "quantity": 2
+      }
+    },
+    "errors": [
+      {
+        "path": "/escrow/custody",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "ServiceBenefit",
+    "value": {
+      "kind": "entitlement",
+      "fact": {
+        "cartridge_id": "escrow_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "fact",
+        "key": "ordered"
+      },
+      "escrow": {
+        "quantity": 2,
+        "custody": {
+          "cartridge_id": "escrow_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "vault"
+        }
+      }
+    },
+    "errors": [
+      {
+        "path": "/escrow/items",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "ServiceBenefit",
+    "value": {
+      "kind": "entitlement",
+      "fact": {
+        "cartridge_id": "escrow_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "fact",
+        "key": "ordered"
+      },
+      "escrow": {
+        "items": [
+          {
+            "cartridge_id": "escrow_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "ore_a"
+          },
+          {
+            "cartridge_id": "escrow_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "ore_b"
+          }
+        ],
+        "custody": {
+          "cartridge_id": "escrow_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "vault"
+        }
+      }
+    },
+    "errors": [
+      {
+        "path": "/escrow/quantity",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "ServiceBenefit",
+    "value": {
+      "kind": "entitlement",
+      "fact": {
+        "cartridge_id": "escrow_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "fact",
+        "key": "ordered"
+      },
+      "escrow": {
+        "items": [
+          {
+            "cartridge_id": "escrow_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "ore_a"
+          },
+          {
+            "cartridge_id": "escrow_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "ore_b"
+          }
+        ],
+        "quantity": 0,
+        "custody": {
+          "cartridge_id": "escrow_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "vault"
+        }
+      }
+    },
+    "errors": [
+      {
+        "path": "/escrow/quantity",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "contract": "ServiceBenefit",
+    "value": {
+      "kind": "entitlement",
+      "fact": {
+        "cartridge_id": "escrow_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "fact",
+        "key": "ordered"
+      },
+      "escrow": {
+        "items": [
+          {
+            "cartridge_id": "escrow_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "ore_a"
+          },
+          {
+            "cartridge_id": "escrow_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "ore_b"
+          }
+        ],
+        "quantity": 17,
+        "custody": {
+          "cartridge_id": "escrow_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "vault"
+        }
+      }
+    },
+    "errors": [
+      {
+        "path": "/escrow/quantity",
+        "code": "above_maximum"
+      }
+    ]
+  },
+  {
+    "contract": "ServiceBenefit",
+    "value": {
+      "kind": "entitlement",
+      "fact": {
+        "cartridge_id": "escrow_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "fact",
+        "key": "ordered"
+      },
+      "escrow": {
+        "items": [],
+        "quantity": 2,
+        "custody": {
+          "cartridge_id": "escrow_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "vault"
+        }
+      }
+    },
+    "errors": [
+      {
+        "path": "/escrow/items",
+        "code": "too_few_items"
+      }
+    ]
+  },
+  {
+    "contract": "ServiceBenefit",
+    "value": {
+      "kind": "entitlement",
+      "fact": {
+        "cartridge_id": "escrow_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "fact",
+        "key": "ordered"
+      },
+      "escrow": {
+        "items": [
+          {
+            "cartridge_id": "escrow_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "ore_00"
+          },
+          {
+            "cartridge_id": "escrow_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "ore_01"
+          },
+          {
+            "cartridge_id": "escrow_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "ore_02"
+          },
+          {
+            "cartridge_id": "escrow_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "ore_03"
+          },
+          {
+            "cartridge_id": "escrow_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "ore_04"
+          },
+          {
+            "cartridge_id": "escrow_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "ore_05"
+          },
+          {
+            "cartridge_id": "escrow_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "ore_06"
+          },
+          {
+            "cartridge_id": "escrow_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "ore_07"
+          },
+          {
+            "cartridge_id": "escrow_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "ore_08"
+          },
+          {
+            "cartridge_id": "escrow_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "ore_09"
+          },
+          {
+            "cartridge_id": "escrow_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "ore_10"
+          },
+          {
+            "cartridge_id": "escrow_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "ore_11"
+          },
+          {
+            "cartridge_id": "escrow_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "ore_12"
+          },
+          {
+            "cartridge_id": "escrow_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "ore_13"
+          },
+          {
+            "cartridge_id": "escrow_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "ore_14"
+          },
+          {
+            "cartridge_id": "escrow_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "ore_15"
+          },
+          {
+            "cartridge_id": "escrow_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "ore_16"
+          }
+        ],
+        "quantity": 2,
+        "custody": {
+          "cartridge_id": "escrow_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "vault"
+        }
+      }
+    },
+    "errors": [
+      {
+        "path": "/escrow/items",
+        "code": "too_many_items"
+      }
+    ]
+  },
+  {
+    "contract": "ServiceBenefit",
+    "value": {
+      "kind": "entitlement",
+      "fact": {
+        "cartridge_id": "escrow_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "fact",
+        "key": "ordered"
+      },
+      "escrow": {
+        "items": [
+          "ore_a"
+        ],
+        "quantity": 2,
+        "custody": {
+          "cartridge_id": "escrow_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "vault"
+        }
+      }
+    },
+    "errors": [
+      {
+        "path": "/escrow/items/0",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "contract": "ServiceBenefit",
+    "value": {
+      "kind": "entitlement",
+      "fact": {
+        "cartridge_id": "escrow_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "fact",
+        "key": "ordered"
+      },
+      "escrow": {
+        "items": [
+          {
+            "cartridge_id": "escrow_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "ore_a"
+          },
+          {
+            "cartridge_id": "escrow_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "ore_b"
+          }
+        ],
+        "quantity": 2,
+        "custody": {
+          "cartridge_id": "escrow_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "vault"
+        },
+        "x": 1
+      }
+    },
+    "errors": [
+      {
+        "path": "/escrow/x",
+        "code": "unknown_property"
+      }
+    ]
   }
 ]

@@ -1339,6 +1339,10 @@ B8 is installed in the [current bundled chapter](#current-bundled-chapter);
 its source and real SQLite acceptance are recorded in the
 [B8 evidence](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/2026-10-05-b8-maud-services/README.md).
 
+### Escrow declarations
+
+[Escrow custody](mechanics.md#escrow-custody-toolbox-row-20a) adds one optional field to the `entitlement` benefit (`protocol/service.schema.json` `ServiceBenefit`): `escrow {items, quantity, custody}`, no other keys. `items` are 1 to 16 item refs and `custody` a room ref (short keys in source); `quantity` is an integer 1 to 16. It needs `kernel_api` at least **1.79**. The compiler (`lib/loka/content/services.ex`) and the loader (`kernel/ts/src/content/cartridge_services.ts`) refuse an `items` entry that is not an item and a `custody` that is not a room (UNRESOLVED_REFERENCE at each), a `quantity` above the number of `items` (SCHEMA_VIOLATION `invalid_value` at `.benefit.escrow.quantity`) and an `items` entry that is any NPC's shop offer (SCHEMA_VIOLATION `invalid_value` at `.benefit.escrow.items[i]`: commerce save reconciles offer custody by receipt), and an item named twice in `items` (DUPLICATE_DEFINITION at `.benefit.escrow.items`). The cartridge text must hold `service.order_open` and `service.missing_inputs` when `escrow` is present.
+
 ## D2 public Priory and book authoring
 
 [D2](mechanics.md#d2-held-books-and-public-priory-selected-contract) adds

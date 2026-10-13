@@ -1,0 +1,17 @@
+{
+  "room.forge.title": "Forge",
+  "room.forge.description": "A hot forge.",
+  "room.vault.title": "Vault",
+  "room.vault.description": "The smith's locked store.",
+  "npc.smith.short": "the smith",
+  "npc.smith.room": "The [smith] works the forge.",
+  "npc.smith.description": "A broad smith.",
+  "item.ore.short": "a lump of ore",
+  "item.ore.room": "A lump of [ore] lies here.",
+  "item.ore.description": "Iron ore.",
+  "service.commission": "Commission a blade",
+  "service.commission.used": "The smith takes two lumps of ore and your coin.",
+  "service.unaffordable": "You cannot pay.",
+  "service.order_open": "The smith already holds your order.",
+  "service.missing_inputs": "Bring two lumps of ore."
+}
