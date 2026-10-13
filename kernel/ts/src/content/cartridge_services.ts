@@ -8,7 +8,7 @@ export function services(c: Obj): Diagnostic[] {
     check = checkers(c, out);
   const [major, minor] = c.manifest.requires.kernel_api.at_least.split('.').map(Number);
   const all = Object.values((c.services ?? {}) as Obj);
-  const floor = all.some((s) => s.benefit.escrow) ? 79 : 23;
+  const floor = all.some(timed) ? 80 : all.some((s) => s.benefit.escrow) ? 79 : 23;
   if (all.length && (major < 1 || (major === 1 && minor < floor)))
     out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
   for (const [ref, s] of Object.entries((c.services ?? {}) as Obj))
@@ -23,7 +23,21 @@ export function services(c: Obj): Diagnostic[] {
     }
   }
   beds(c, check, out);
+  owned(c, out);
   return out;
+}
+
+// Toolbox row 20b: a timed order's fact belongs to its commission alone; another entitlement
+// setting it would open an order with no inputs and no job.
+function owned(c: Obj, out: Diagnostic[]) {
+  const entries = Object.entries((c.services ?? {}) as Obj),
+    fact = (s: Obj) => s.benefit.kind === 'entitlement' && refString(s.benefit.fact);
+  const owner = new Map(
+    entries.filter(([, s]) => s.benefit.escrow?.ready_after).map(([r, s]) => [fact(s), r]),
+  );
+  for (const [ref, s] of entries)
+    if (fact(s) && owner.has(fact(s)) && owner.get(fact(s)) !== ref)
+      bad(out, `.cartridge.services${step(ref)}.benefit.fact`);
 }
 
 function definition(c: Obj, s: Obj, ref: string, check: Checks, out: Diagnostic[]) {
@@ -52,7 +66,10 @@ function definition(c: Obj, s: Obj, ref: string, check: Checks, out: Diagnostic[
       bad(out, `${at}.benefit.fact`);
     if (b.escrow) escrow(c, b.escrow, `${at}.benefit.escrow`, check, out);
   } else if (b.kind === 'repair') repair(c, b, at, check, out);
-  else {
+  else if (ordered(b)) {
+    const commission = get(c, check, b.service, 'service', `${at}.benefit.service`);
+    if (commission && !commission.benefit.escrow?.ready_after) bad(out, `${at}.benefit.service`);
+  } else {
     const recovery = get(c, check, b.recovery, 'resource', `${at}.benefit.recovery`);
     if (recovery && recovery.key !== 'mv') bad(out, `${at}.benefit.recovery`);
     stock(c, s, npc, at, check, out);
@@ -62,6 +79,14 @@ function definition(c: Obj, s: Obj, ref: string, check: Checks, out: Diagnostic[
 // The refusal texts a service needs, by benefit.
 function refusals(b: Obj) {
   const kind = b.kind;
+  if (ordered(b))
+    return {
+      payment: 'service.unaffordable',
+      order: 'service.no_order',
+      ...(kind === 'claim'
+        ? { wait: 'service.not_ready', output: 'service.no_output' }
+        : { ready: 'service.ready' }),
+    };
   return {
     payment: 'service.unaffordable',
     headroom: b.escrow
@@ -73,6 +98,7 @@ function refusals(b: Obj) {
       ? { target: 'service.nothing_to_repair' }
       : kind !== 'entitlement' && { stock: 'service.sold_out' }),
     ...(b.escrow && { inputs: 'service.missing_inputs' }),
+    ...(b.escrow?.ready_after && { output: 'service.no_output' }),
   };
 }
 
@@ -90,6 +116,16 @@ function escrow(c: Obj, e: Obj, at: string, check: Checks, out: Diagnostic[]) {
   if (new Set(keys).size !== keys.length) out.push(diag('DUPLICATE_DEFINITION', `${at}.items`));
   get(c, check, e.custody, 'room', `${at}.custody`);
   if (e.quantity > keys.length) bad(out, `${at}.quantity`);
+  // Toolbox row 20b: the finished output already lies in custody.
+  const output = e.output && get(c, check, e.output, 'item', `${at}.output`);
+  if (output && (output.location.in !== 'room' || !same(output.location.room, e.custody)))
+    bad(out, `${at}.output`);
+  if (e.ready_after && !Object.hasOwn(c.lock.capabilities, 'schedule'))
+    out.push(
+      diag('UNDECLARED_CAPABILITY', `${at}.ready_after`, { capability: 'schedule' }, [
+        'schedule@1',
+      ]),
+    );
 }
 
 // Toolbox row 21: a repair restores a fact some weapon's durability names.
@@ -138,6 +174,8 @@ function beds(c: Obj, check: Checks, out: Diagnostic[]) {
         if (c.lock.capabilities.position !== 1 || c.lock.capabilities.service !== 1) bad(out, at);
       }
 }
+const ordered = (b: Obj) => b.kind === 'claim' || b.kind === 'cancel';
+const timed = (s: Obj) => ordered(s.benefit) || s.benefit.escrow?.ready_after !== undefined;
 const finite = (r: Obj | undefined): r is Obj => !!r && r.gain === 0 && !r.regen;
 const bad = (out: Diagnostic[], at: string) =>
   out.push(diag('SCHEMA_VIOLATION', at, { error: 'invalid_value' }));

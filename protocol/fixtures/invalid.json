@@ -26751,5 +26751,238 @@
         "code": "invalid_type"
       }
     ]
+  },
+  {
+    "contract": "ServiceBenefit",
+    "value": {
+      "kind": "entitlement",
+      "fact": {
+        "cartridge_id": "escrow_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "fact",
+        "key": "ordered"
+      },
+      "escrow": {
+        "items": [
+          {
+            "cartridge_id": "escrow_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "ore_a"
+          },
+          {
+            "cartridge_id": "escrow_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "ore_b"
+          }
+        ],
+        "quantity": 2,
+        "custody": {
+          "cartridge_id": "escrow_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "vault"
+        },
+        "ready_after": 0,
+        "output": {
+          "cartridge_id": "escrow_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "sword"
+        }
+      }
+    },
+    "errors": [
+      {
+        "path": "/escrow/ready_after",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "contract": "ServiceBenefit",
+    "value": {
+      "kind": "entitlement",
+      "fact": {
+        "cartridge_id": "escrow_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "fact",
+        "key": "ordered"
+      },
+      "escrow": {
+        "items": [
+          {
+            "cartridge_id": "escrow_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "ore_a"
+          },
+          {
+            "cartridge_id": "escrow_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "ore_b"
+          }
+        ],
+        "quantity": 2,
+        "custody": {
+          "cartridge_id": "escrow_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "vault"
+        },
+        "ready_after": 31536001,
+        "output": {
+          "cartridge_id": "escrow_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "sword"
+        }
+      }
+    },
+    "errors": [
+      {
+        "path": "/escrow/ready_after",
+        "code": "above_maximum"
+      }
+    ]
+  },
+  {
+    "contract": "ServiceBenefit",
+    "value": {
+      "kind": "entitlement",
+      "fact": {
+        "cartridge_id": "escrow_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "fact",
+        "key": "ordered"
+      },
+      "escrow": {
+        "items": [
+          {
+            "cartridge_id": "escrow_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "ore_a"
+          },
+          {
+            "cartridge_id": "escrow_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "ore_b"
+          }
+        ],
+        "quantity": 2,
+        "custody": {
+          "cartridge_id": "escrow_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "vault"
+        },
+        "ready_after": 3600
+      }
+    },
+    "errors": [
+      {
+        "path": "/escrow/output",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "ServiceBenefit",
+    "value": {
+      "kind": "entitlement",
+      "fact": {
+        "cartridge_id": "escrow_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "fact",
+        "key": "ordered"
+      },
+      "escrow": {
+        "items": [
+          {
+            "cartridge_id": "escrow_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "ore_a"
+          },
+          {
+            "cartridge_id": "escrow_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "ore_b"
+          }
+        ],
+        "quantity": 2,
+        "custody": {
+          "cartridge_id": "escrow_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "vault"
+        },
+        "output": {
+          "cartridge_id": "escrow_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "item",
+          "key": "sword"
+        }
+      }
+    },
+    "errors": [
+      {
+        "path": "/escrow/ready_after",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "ServiceBenefit",
+    "value": {
+      "kind": "claim"
+    },
+    "errors": [
+      {
+        "path": "/service",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "ServiceBenefit",
+    "value": {
+      "kind": "cancel"
+    },
+    "errors": [
+      {
+        "path": "/service",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "ServiceBenefit",
+    "value": {
+      "kind": "claim",
+      "service": {
+        "cartridge_id": "escrow_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "service",
+        "key": "commission"
+      },
+      "fact": {
+        "cartridge_id": "escrow_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "fact",
+        "key": "ordered"
+      }
+    },
+    "errors": [
+      {
+        "path": "/fact",
+        "code": "unknown_property"
+      }
+    ]
   }
 ]

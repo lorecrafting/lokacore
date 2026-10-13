@@ -16,7 +16,9 @@
         "ore_d"
       ],
       "quantity": 2,
-      "custody": "vault"
+      "custody": "vault",
+      "ready_after": 3600,
+      "output": "sword"
     }
   }
 }

@@ -1,0 +1,12 @@
+{
+  "keywords": [
+    "sword"
+  ],
+  "short": "item.sword.short",
+  "room_line": "item.sword.room",
+  "description": "item.sword.description",
+  "location": {
+    "in": "room",
+    "room": "vault"
+  }
+}

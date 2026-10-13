@@ -178,7 +178,7 @@ function ServiceOptions(p: NpcProps & { actions: Button[] }) {
       <ActionCard
         key={s.service.key}
         label={`${p.text(s.label)} (${s.price}p${
-          s.benefit.kind === 'entitlement' ? '' : `; up to +${s.benefit.amount} MV, capped`
+          'amount' in s.benefit ? `; up to +${s.benefit.amount} MV, capped` : ''
         })`}
         reason={s.action.available ? undefined : why(s.action, p.text)}
       />

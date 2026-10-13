@@ -27,7 +27,7 @@ export function serviceButtons(v: GameView, text: Say): Press[] {
     (e.services ?? [])
       .filter((s) => s.action.available)
       .map((s) => ({
-        label: `${text(s.label)} — ${s.price}p${s.benefit.kind === 'entitlement' ? '' : `; up to +${s.benefit.amount} MV, capped`}`,
+        label: `${text(s.label)} — ${s.price}p${'amount' in s.benefit ? `; up to +${s.benefit.amount} MV, capped` : ''}`,
         action_key: s.action.action_key,
         command: s.action.command,
         detail_id: e.id,
