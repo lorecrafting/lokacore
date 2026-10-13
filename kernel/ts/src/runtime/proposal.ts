@@ -289,7 +289,7 @@ function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined
     const partner = populationPairs.get(job_id);
     const prior = groups.get(partner ?? job_id); // a partner's, or an earlier crossed hour's
     const fresh = prior ?? p.group + 1;
-    const joined = statusGroup(at, job_id as JobId, current, p.holders, fresh, prior);
+    const joined = statusGroup(at, job_id as JobId, current, p.holders, fresh);
     if (joined) merge(p.ops, joined.merged, joined.group, [p.holders, groups]);
     const group = joined?.group ?? fresh;
     groups.set(job_id, group);

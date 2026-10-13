@@ -149,7 +149,8 @@ const successor = (
 // statusStep, row G3); so does a combat round on its body or opponent, whose hp a status's tick or
 // hp settle (row 2c) also writes; every roster member counts, as the player's or an ally's blow
 // falls on another member when the primary is gone (row 6b); a bleed tick on its body joins too, so
-// a round and its equal-due bleed (C5 pair) share one. A round joins all of those groups: the lowest
+// a round and its equal-due bleed (C5 pair) share one; a replenish run joins the groups of the items
+// it moves (replenishMovers, row 41). A round joins all of those groups: the lowest
 // is kept and the others are returned for the caller to merge into it (loka-x2gv).
 export function statusGroup(
   at: World,
@@ -157,7 +158,6 @@ export function statusGroup(
   job: JobRow,
   holders: Map<string, number>,
   next: number,
-  also?: number,
 ) {
   const round = currentRound(at, id, job);
   const held = round
@@ -169,7 +169,6 @@ export function statusGroup(
   if (!bodies.length) return undefined;
   const found = new Set(bodies.map((b) => holders.get(b)));
   found.delete(undefined);
-  if (also !== undefined && found.size) found.add(also);
   const group = found.size ? Math.min(...(found as Set<number>)) : next;
   found.delete(group);
   for (const b of bodies) holders.set(b, group);

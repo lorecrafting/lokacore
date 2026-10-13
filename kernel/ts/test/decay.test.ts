@@ -115,6 +115,18 @@ test('one wait across the spoil and the restock leaves the fish in the market', 
   assert.equal(at(w, 'fish'), 'market');
 });
 
+// Break: item.move ignores the item's earlier group (the move and the respoil's status write
+// would then hold the fish in two groups across the spoil and the restock: conflicting_write).
+test('a spoil rule that respoils the fish it moves composes in one wait', () => {
+  const edit = (c: any) => {
+    const spoil = c.reactions[`${S}reaction/spoil`];
+    spoil.apply = [spoil.apply[0], c.reactions[`${S}reaction/catch`].apply[0]];
+  };
+  let w = take(fresh(edit), 'fish');
+  w = wait(w, w.state.clock + 90000);
+  assert.equal(at(w, 'fish'), 'market');
+});
+
 // Break: the immune smoked fish takes the spoiling status and spoils anyway.
 test('smoked fish never spoils', () => {
   let w = take(fresh(), 'smoked_fish');
