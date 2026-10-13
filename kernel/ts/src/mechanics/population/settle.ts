@@ -165,8 +165,11 @@ function wanderOne(
   const to = from === home ? nest : from === nest ? home : undefined;
   const room = world.rooms[from];
   const edge =
-    to && Object.entries(room.exits).find(([, e]) => world.roomIds[refString(e.to)] === to);
-  if (!to || !edge || npcPassage(world, room, edge[0]) || !moves(world, member)) return [];
+    to &&
+    Object.entries(room.exits).find(
+      ([d, e]) => world.roomIds[refString(e.to)] === to && !npcPassage(world, room, d),
+    );
+  if (!to || !edge || !moves(world, member)) return [];
   const transfer = moveOp(member as EntityId, from, to);
   return [
     transfer,

@@ -11,15 +11,15 @@ import { fresh } from './deer_fixture.ts';
 import { key as rowKey } from '../src/foundation/compose.ts';
 
 /**
- * `world` with the exit `direction` of room `room` hidden until a false-default bool fact is true,
- * or with `climb` a climb face instead (row 30; its item is never read by an NPC), or with `door`
- * a closed barrier (row W26's npcPassage).
+ * `world` with the exit `direction` of room `room` given `face`: hidden until a false-default bool
+ * fact is true, a climb face (row 30; its item is never read by an NPC), or a closed barrier door
+ * (row W26's npcPassage).
  */
 function hide<W extends World>(
   world: W,
   room: string,
   direction: 'east' | 'south',
-  climb: boolean | 'door' = false,
+  face: 'hidden' | 'climb' | 'door' = 'hidden',
 ): W {
   const [id] = Object.entries(world.cartridge.facts!).find(
     ([, f]) => f.value_type.type === 'bool' && f.value_type.default === false,
@@ -32,11 +32,11 @@ function hide<W extends World>(
     ...r.exits,
     [direction]: {
       ...r.exits[direction]!,
-      ...(climb === 'door'
-        ? { barrier }
-        : climb
-          ? { climb: { item: { ...fact, kind: 'item' }, damage: 1, fell: 'x' } }
-          : { hidden_until: { fact, equals: true } }),
+      ...{
+        door: { barrier },
+        climb: { climb: { item: { ...fact, kind: 'item' }, damage: 1, fell: 'x' } },
+        hidden: { hidden_until: { fact, equals: true } },
+      }[face],
     },
   };
   const barrierInitial = { ...world.barrierInitial, [rowKey(barrier)]: 'closed' };
@@ -45,9 +45,10 @@ function hide<W extends World>(
 
 // Breaks: a wounded hound flees through a hidden or climb face or a closed door (its only area
 // exit), naming it in enemy_fled.
-for (const climb of [false, true, 'door'] as const)
-  test(`a wounded hound whose only area exit is ${climb === 'door' ? 'a closed door' : climb ? 'a climb' : 'hidden'} stays in combat`, () => {
-    const result = due(hide(seated(begun(wounded(fixture(), 1))), home, 'east', climb));
+const named = { hidden: 'hidden', climb: 'a climb', door: 'a closed door' };
+for (const face of ['hidden', 'climb', 'door'] as const)
+  test(`a wounded hound whose only area exit is ${named[face]} stays in combat`, () => {
+    const result = due(hide(seated(begun(wounded(fixture(), 1))), home, 'east', face));
     assert.equal(result.decision.kind, 'accepted', JSON.stringify(result.decision));
     assert.equal(result.world.state.containers[h2], home);
     const row = Object.values(result.world.state.encounters ?? {})[0]!;
@@ -62,8 +63,8 @@ test('Flee offers only the unhidden exit', () => {
 });
 
 // Breaks: a sighted deer takes refuge through a hidden or climb face (its only area exit).
-for (const climb of [false, true])
-  test(`a sighted deer whose only refuge is ${climb ? 'a climb' : 'hidden'} stays put`, () => {
+for (const face of ['hidden', 'climb'] as const)
+  test(`a sighted deer whose only refuge is ${named[face]} stays put`, () => {
     let w = fresh();
     for (const [n, direction] of [
       [1, 'south'],
@@ -87,7 +88,7 @@ for (const climb of [false, true])
         w.state.created![id]!.origin.role === 'deer',
     )!;
     assert.ok(deer);
-    const hidden = hide(w, willow, 'south', climb);
+    const hidden = hide(w, willow, 'south', face);
     const r = stepElapsed(
       hidden,
       {
