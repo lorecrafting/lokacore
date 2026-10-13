@@ -102,7 +102,7 @@ const ACTIVATES = ['quest_resolved', 'rested'];
 // The advance's status holders' groups (G3), and the bodies dead after the cause (`diedAfter`).
 type Delivery = { holders?: Map<string, number>; dead?: ReadonlySet<EntityId> };
 
-// size: allow 60, one ordered delivery lowers fact assignments, quest effects and suppression
+// size: allow 62, one ordered delivery lowers fact assignments, quest effects, suppression and moves
 export function sequence(
   world: World,
   listener: CharacterId,
