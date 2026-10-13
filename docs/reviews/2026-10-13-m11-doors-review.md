@@ -59,3 +59,13 @@ Accepted as the developer reported them:
 - the anyOf validator (second reviewer);
 - the sampler key in the lane, with the guard starting there;
 - flight, refuge and plain steps ignoring locks (spec: only `walks` reads locks or keys).
+
+## Fix re-check (head `f9ec79954b6faada0b1671930a05613410de453b`)
+
+Scope: commit f9ec799 only. The `contracts.ex` anyOf change, the `source.ex` comment and the `content_doors_test.exs` cases belong to the second reviewer.
+
+- Finding 1: **closed**. Test `e2` (`kernel/ts/test/doors.test.ts:166`) puts a traverse lock on the lane's east exit; the guard stays in the lane and the gate emits nothing. The mutant that keeps only the enter check now fails `e2`.
+- Finding 2: **closed**. Test `e3` (`doors.test.ts:181`) adds an exit from the hut east to the keep. The guard reaches the keep by the east route, and the gate emits four changes. The reversed-sort mutant now fails `e3`.
+- Finding 3: **accepted, open as a nit**. `LIMITS.query_steps` is 32768, so reaching the bound needs a map with tens of thousands of exits. The guard is one line, and the spec states it as a Known limit.
+- Hosted CI on f9ec799: `ci` and `book-e2e` were in progress at re-check time; the PM watches them.
+- Verdict: **APPROVE**.
