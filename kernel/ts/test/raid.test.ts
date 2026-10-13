@@ -9,7 +9,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
-import { INSTALLED, loadCartridge, newWorld, stepElapsed } from '../src/index.ts';
+import { INSTALLED, loadCartridge, newWorld, step, stepElapsed } from '../src/index.ts';
 import type { DeltaOp } from '../src/contracts.gen.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { apply } from '../src/runtime/apply.ts';
@@ -75,6 +75,18 @@ const raiders = (w: World) =>
   Object.keys(w.entities).filter(
     (e) => w.state.created?.[e]?.origin.kind === 'spawned' && w.entities[e]!.kind === 'npc',
   );
+function act(w: World, payload: object): World {
+  const id = `bbbbbbbb-0000-4000-8000-${String(++n).padStart(12, '0')}` as never;
+  const r = step(
+    w,
+    { id, world_context_id: w.context, payload: { actor_id: w.character, ...payload } } as never,
+    n,
+  );
+  assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
+  return r.world;
+}
+const slot = (w: World, n: number) =>
+  Object.entries(w.state.population_slots!).find(([k]) => JSON.parse(k).slot === n)![1];
 const raided = (w: World) =>
   Object.entries(w.state.facts ?? {}).find(([k]) => k.includes('raided'))?.[1] ?? false;
 
@@ -110,6 +122,17 @@ test('d, e: one raider per full moon up to cap 2, then nothing and no fault', ()
   w = elapsed(w, 5000);
   assert.equal(raiders(w).length, 2);
   assert.equal(raided(w), true);
+});
+
+// Break: the step refills a dead member's slot before its replacement_delay (100000) is due.
+test('a slain raider slot waits out its delay; the next full moon fills slot 2', () => {
+  let w = elapsed(world(), 1000);
+  const raider = raiders(w)[0]!;
+  w = act(act(w, { type: 'move', direction: 'north' }), { type: 'attack', target_id: raider });
+  w = elapsed(w, 3000);
+  assert.notEqual(slot(w, 1).replacement_due, null);
+  assert.equal(slot(w, 1).member_id, raider);
+  assert.notEqual(slot(w, 2).member_id, null);
 });
 
 // Breaks: the spawn is not in the committed delta (a world rebuilt from the receipts lacks the
