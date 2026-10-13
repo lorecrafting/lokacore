@@ -148,7 +148,7 @@ defmodule Loka.Content.Checks do
       |> Map.put("resource", ref(r, "resource", m))
       |> Map.put(
         "offers",
-        Enum.map(offers, &Map.update!(&1, "item", fn i -> ref(i, "item", m) end))
+        Enum.map(offers, &Loka.Content.Commerce.expand_offer(&1, m))
       )
 
   def expand(%{"quantity" => _, "outgoing" => _, "incoming" => _} = x, m) do
@@ -358,7 +358,7 @@ defmodule Loka.Content.Checks do
 
     reference(rel, [], {"room", "room"}, npc, m, defs) ++
       for {h, r} <- schedule,
-          is_map(r),
+          is_map(r) and not is_map_key(r, "room"),
           d <- reference(rel, ["daily_schedule"], {h, "room"}, schedule, m, defs),
           do: d
   end

@@ -37,6 +37,7 @@ import { reactions } from './cartridge_reactions.ts';
 import { recipes } from './cartridge_recipes.ts';
 import { reserved } from './cartridge_position.ts';
 import { cueParts } from './cartridge_senses.ts';
+import { lockRoots, locks } from './cartridge_locks.ts';
 import { holders } from './cartridge_holders.ts';
 
 export type Data = Record<string, string | number>;
@@ -128,7 +129,7 @@ export function nodes(c: Obj): [Obj, string][] {
       k === 'variant' || (k === 'cue' && v.when) ? walk(v.when.root, `${at}.when.root`) : [],
     ),
     ...[...questPolicies(c), ...dispositions(c)].flatMap(([p, at]) => walk(p, at)),
-    ...cases(c).flatMap(([k, at]) => walk(k.when.root, `${at}.when.root`)),
+    ...cases(c).flatMap(([k, at]) => (k.when ? walk(k.when.root, `${at}.when.root`) : [])),
     ...Object.entries((c.reactions ?? {}) as Obj).flatMap(([ref, r]) =>
       r.when ? walk(r.when.root, `.cartridge.reactions${step(ref)}.when.root`) : [],
     ),
@@ -138,6 +139,7 @@ export function nodes(c: Obj): [Obj, string][] {
     ...Object.entries((c.dialogues ?? {}) as Obj).flatMap(([ref, d]) =>
       walk(d.policy.root, `.cartridge.dialogues${step(ref)}.policy.root`),
     ),
+    ...lockRoots(c).flatMap(([p, at]) => walk(p, at)),
     ...Object.entries((c.barriers ?? {}) as Obj).flatMap(([ref, b]) =>
       b.opens_when
         ? walk(b.opens_when.root, `.cartridge.barriers${step(ref)}.opens_when.root`)
@@ -196,7 +198,7 @@ export function refStage(c: Obj): Diagnostic[] {
     if (n.op === 'fact_compare') typedValue(n.fact, n.equals, `${at}.equals`);
     if (n.op === 'time_window' && n.from === n.to) out.push(diag('EMPTY_TIME_WINDOW', at));
   }
-  out.push(...reserved(c), ...featureApi(c));
+  out.push(...reserved(c), ...featureApi(c), ...locks(c));
   if (c.format !== 'loka-cartridge-v2') return out;
   out.push(...exchanges(c, check), ...fuel(c, check), ...replenish(c, check));
   spatialRefs(c, check, out);

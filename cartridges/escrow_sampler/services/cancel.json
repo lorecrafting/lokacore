@@ -1,0 +1,12 @@
+{
+  "provider": "smith",
+  "currency": "pennies",
+  "action": "cancel",
+  "label": "service.cancel",
+  "narration": "service.cancel.used",
+  "price": 1,
+  "benefit": {
+    "kind": "cancel",
+    "service": "commission"
+  }
+}

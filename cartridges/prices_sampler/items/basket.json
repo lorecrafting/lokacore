@@ -1,0 +1,13 @@
+{
+  "keywords": [
+    "basket"
+  ],
+  "short": "item.basket.short",
+  "room_line": "item.basket.room",
+  "description": "item.basket.description",
+  "mass_grams": 300,
+  "location": {
+    "in": "npc",
+    "npc": "fishmonger"
+  }
+}

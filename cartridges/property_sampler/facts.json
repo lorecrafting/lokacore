@@ -1,0 +1,28 @@
+{
+  "facts": {
+    "owns_hut": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The character bought the hut north of the lane."
+    },
+    "savings": {
+      "version": 1,
+      "value_type": {
+        "type": "int",
+        "minimum": 0,
+        "maximum": 1000,
+        "default": 0
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "Pennies the bank's vault holds for this character."
+    }
+  }
+}

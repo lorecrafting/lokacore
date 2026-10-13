@@ -1,0 +1,41 @@
+# M11 batch review (PR #381, Fable)
+
+- Written 2026-10-13 by the batch reviewer (Fable); authored none of the work.
+- PR [#381](https://github.com/lorecrafting/lokacore/pull/381), branch `toolbox/batch-m11`, head `b80dbf71744ebc4efd83a0548627be4ce113c2c8`, base `origin/main` `7714472078dca4ea259d0922a4549e989a9d9f00`. Beads `loka-kgd` (slices `.123`–`.128`).
+- Governing: [AGENTS.md](../../AGENTS.md) "Writing tests"; [WORKFLOW Review stance](../WORKFLOW.md#review-stance), [Git hygiene](../WORKFLOW.md#git-hygiene); [mechanics.md](../system/mechanics.md) Access locks, NPCs use doors, Stock-sensitive prices, Property and bank, Escrow custody, Timed job claim and cancel, jobs writer-group paragraph; [cartridge.md](../system/cartridge.md) declarations for those rows; [save.md](../system/save.md) shop recovery and the bank pair; [lessons/mechanics.md](../lessons/mechanics.md) same-time jobs; [architecture: composition](../system/architecture.md#building-mechanics-by-composition).
+- Per-slice records (`2026-10-13-m11-*`, nine files) stand; this record covers only the batch as a whole.
+- Hosted CI at the head: `ci`, `book-e2e`, `graph-diff` all success.
+- Verdict: **APPROVE WITH NOTES** (one pre-existing should-fix for a follow-up issue, one docs nit, one question; no code change required for the merge).
+
+## Must be true at the batch head
+
+1. G7 locks compose with every other mover in the batch exactly as the G7 spec states: a walking NPC (W26) is refused by any `traverse` or `enter` lock with no policy read; replenish (19b trade jobs behind W11 stock) and the service moves of 20a/20b/24 (escrow custody, claim output, cancel return, vault pennies) read no lock, and the spec says so or is silent only where the brief allows.
+2. Bank deposit and withdraw pay fee and payout in the PM-ruled order (deposit: fee then move; withdraw: move then fee), chain `levels` so the second transfer sees the first, conserve the currency, and the mobile save reconciles one pair per transfer in that order.
+3. 20b order jobs and W26 schedule walks due in one advance write disjoint rows (an order job writes only its `job.complete`; a walk writes its NPC and the barriers on its path), so the one-proposal `jobs()` cannot fault `conflicting_write` between them.
+4. The `Loka.Core.Contracts` anyOf change (shortest error list among type-matching branches) changes a verdict only where two branches share a JSON type: the source schema's schedule hour.
+5. kernel_api floors 1.78..1.83 agree between the TS loaders, the Elixir loaders and `INSTALLED.kernel_api`; generated contracts current.
+6. One save holding a stock buy, a bank deposit and an escrow order reopens; a forged row or receipt in it is `save_corrupt`.
+7. The spec sections and the toolbox table edit (last commit) describe what is built: sampler names and anchors resolve; scope clauses match the code.
+
+## Checks
+
+- Must-be-true list written before the diff (above); diff read per hunk from a scratch file; `elixir bin/contracts.exs --check` exit 0.
+- Focused tests `doors, access_locks, locks, escrow, prices, property` (kernel, `node --test`, nice): 38 pass, 0 fail.
+- Floors: TS `cartridge_locks.ts:25` 1.78, `cartridge_services.ts:12-19` 83/80/79 by benefit kind, `cartridge_schedules.ts:39` 1.81, `cartridge_commerce.ts:64` 1082; Elixir `locks.ex:20`, `services.ex:102-105`, `schedules.ex:21`, `commerce.ex:72` match; `runtime/world.ts:107` INSTALLED `1.83`.
+- Cross-slice reading: `movement/shared.ts:84` refuses a walker on any `traverse`/`enter` lock before `policy` is read (point 1); `service/shared.ts` `transition`/`banked`/`settle` read no lock and `containment/job.ts` (replenish) reads none, which `mechanics.md:2734` names for replenish but not for service moves (finding 2). `service/shared.ts:257-261` deposit = fee then move, withdraw = move then fee, both chained through `levels`; `commerce-save.ts:247` yields `[fee, bank]`/`[bank, fee]` in the same order (point 2). `schedule/rule.ts:164` `orderReady` writes one `job.complete`; a walk's ops are its NPC transfer plus `relock` transitions (point 3). A two-walker same-barrier conflict is not constructible: a barrier has one `key_item` and an item definition is one entity. Node scan of every `protocol/*.schema.json` anyOf: all branch pairs have distinct JSON types; only `Loka.Content.Source.schedule/2` has two object branches (point 4).
+- Composition probe (scratch, not committed): property, prices and escrow sampler sources merged into one cartridge (`mix loka.compile` exit 0), mobile save: deposit at clerk A, stock buy at the fishmonger, two ores and a commission at the smith in one save; cold reopen `open` with pennies 14 / vault 30 / fishmonger 22 / smith 3, `savings` 10, `ordered` true, the ore in the vault; each of the seven step subsets reopens; a forged `savings` row (10 → 11) and swapped fish ids in the buy receipts are `save_corrupt` (point 6). First run of the probe found finding 1 (the property seller's shop plus the fishmonger's).
+- Mutants (each in the detached worktree, reverted after; test files that import the mutated module):
+  1. `movement/shared.ts:84` drop the destination's `enter` lock from `npcPassage`: `doors.test.ts` red (case e).
+  2. `commerce-save.ts:247` swap the bank pair order (`[bank, fee]` for deposit): mobile `property.test.ts` red (cold reopen case).
+  3. `service/shared.ts:258` second transfer not chained through `first.levels`: kernel `property.test.ts` red (d/e/f/h, h, h2).
+- PR-body claims rerun: "20b cancel leaves its job to complete inert" is pinned by `escrow.test.ts:290-305` (cancel then `service.no_order` for claim and cancel; a new order waits for its own job); "W11: a stock set naming a plain offer's item" is `SCHEMA_VIOLATION` at `cartridge_commerce.ts:81` and pinned by kernel `prices.test.ts:151-161`. "Withdraw charges its fee after the payout" is `service/shared.ts:257-258` and mutant 3.
+- `/code-review medium` result: reported per slice in the PR body.
+- Toolbox table (commit b80dbf7): rows G7, W26, 20a, 20b, 24, W11 done cells name samplers present in the tree (`locks_sampler`, `doors_sampler`, `escrow_sampler`, `prices_sampler`, `property_sampler`) and anchors that resolve to `mechanics.md:1493, 1510, 2725, 2741, 2757, 2773`; row 25 "merged into row 24". Row 39 (M12) also changed (finding 3).
+
+## Findings
+
+1. should-fix (pre-existing, follow-up issue; not introduced by this batch), `mobile/authority/local-story/commerce-save.ts:40`: `commerceSave` loops over every shop NPC and runs `shopReceipt(world, provider, ...)` on every `buy`/`sell` receipt, so with two shop NPCs the receipt of a buy at shop A fails `p.provider_id !== provider` (`commerce-save.ts:135`) under shop B. Scenario: the merged probe above with `property_sampler`'s seller shop kept: one fish bought, cold reopen `save_corrupt`; with the seller's shop removed, `open`. The base revision has the same call shape (`git diff 7714472..b80dbf7` keeps `shopReceipt` inside the per-shop loop), and no shipped cartridge declares two shops, so the batch may merge; W11 and row 24 widen this loop (`bankPayments`, stock offers), and a cartridge composing a shop with a bank branch that also sells (as `property_sampler`'s seller does) is one step away. Fix (follow-up): filter receipts by `p.provider_id === provider` before `shopReceipt` and the shop payment, keeping the money loop for the other shops' receipts.
+2. nit, `docs/system/mechanics.md:2734` (G7 Known limits): the no-lock movers named are followers, transport, death relocation, `item.move` and replenish; the batch's service moves (escrow custody into the vault, claim's output and cancel's return, bank pennies between body and vault) also read no lock (`service/shared.ts` `transition`, `settle`, `banked`). Scenario: an author puts a `get` lock on the escrow `output` in the custody room expecting claim to be refused until it holds; claim hands the sword over. Fix: add "service transfers (escrow, claim, cancel, bank)" to the sentence.
+3. question, `docs/MECHANICS-TOOLBOX.md:176` row 39 (M12): the batch's last commit adds a W10 lag note to an M12 row. Harmless if the PM wrote it at brief time; it is outside M11's scope.
+
+Verdict: APPROVE WITH NOTES.

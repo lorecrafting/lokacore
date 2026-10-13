@@ -9,16 +9,20 @@ import {
   type UnavailableReason,
   type ServiceDefinition,
   type EntityId,
+  type DefinitionRef,
+  type JobId,
 } from '../../contracts.gen.ts';
 import { same } from '../../foundation/compose.ts';
 import { refusal } from '../../commands/actions.ts';
-import { bodyOf, refString, type Steps, type World } from '../../runtime/decision.ts';
+import { bodyOf, refString, type Mint, type Steps, type World } from '../../runtime/decision.ts';
 import { living } from '../death/shared.ts';
 import { engaged } from '../combat/shared.ts';
 import { assigned, bounded, value } from '../fact.ts';
 import { equipped } from '../lookups.ts';
-import { adjust, level, resourceRef, resourceSpec, transfer } from '../resource.ts';
+import { adjust, level, resourceRef, resourceSpec, transfer, type Levels } from '../resource.ts';
 import { serving } from '../liquid/shared.ts';
+import { selected } from '../containment/stock.ts';
+import { giveRefused } from '../containment/shared.ts';
 
 type Payload = Extract<CommandPayload, { type: 'use_service' }>;
 export function availability(world: World, p: Payload, steps: Steps = { n: 0 }, action?: Key) {
@@ -39,25 +43,49 @@ export function transition(
   if ('code' in service) return service;
   if (p.quoted_price !== service.price) return { code: 'invalid_state' as const };
   const benefit = service.benefit;
+  const escrow = benefit.kind === 'entitlement' ? benefit.escrow : undefined;
   if (benefit.kind === 'entitlement' && value(world, p.actor_id, benefit.fact) !== false)
-    return serviceRefusal('invalid_state', 'service.already_paid');
-  const paid = transfer(world, body, p.provider_id, service.currency, p.quoted_price);
+    return serviceRefusal('invalid_state', escrow ? 'service.order_open' : 'service.already_paid');
+  if (escrow?.output && away(world, escrow))
+    return serviceRefusal('not_found', 'service.no_output');
+  const inputs = escrowed(world, body, escrow, steps);
+  if ('code' in inputs) return inputs;
+  const order: UnavailableReason | Order | undefined =
+    benefit.kind === 'claim' || benefit.kind === 'cancel' ? open(world, p, benefit) : undefined;
+  if (order && 'code' in order) return order;
+  const paid = ['deposit', 'withdraw'].includes(benefit.kind) // banked pays its own fee
+    ? { ops: [] }
+    : transfer(world, body, p.provider_id, service.currency, p.quoted_price);
   if (!paid) return serviceRefusal('insufficient_resource', 'service.unaffordable');
-  let ops: readonly DeltaOp[] = paid.ops;
+  const done = granted(world, p, body, service, order, paid, inputs.ops, steps);
+  return 'code' in done ? done : { ops: done.ops, service };
+}
+
+// The service's benefit after payment: settle an order, grant an entitlement (taking any escrow
+// inputs), bank, repair, or recover.
+function granted(
+  world: World,
+  p: Payload,
+  body: EntityId,
+  service: ServiceDefinition,
+  order: Order | undefined,
+  paid: { ops: readonly DeltaOp[] },
+  inputs: readonly DeltaOp[],
+  steps: Steps,
+): UnavailableReason | { ops: readonly DeltaOp[] } {
+  const { benefit } = service,
+    { ops } = paid;
+  if (benefit.kind === 'deposit' || benefit.kind === 'withdraw')
+    return banked(world, p, body, service.currency, benefit);
   if (benefit.kind === 'entitlement') {
-    const start = { ops, position: 0, facts: {} },
+    const start = { ops: [...ops, ...inputs], position: 0, facts: {} },
       grant = { fact: benefit.fact, value: true };
-    ops = assigned(world, p.actor_id, start, grant, 'service').ops;
-  } else if (benefit.kind === 'repair') {
-    const repaired = repair(world, p, body, benefit, ops);
-    if ('code' in repaired) return repaired;
-    ops = repaired.ops;
-  } else {
-    const recovered = recovery(world, p, body, benefit, ops);
-    if ('code' in recovered) return recovered;
-    ops = recovered.ops;
+    return assigned(world, p.actor_id, start, grant, 'service');
   }
-  return { ops, service };
+  if (benefit.kind === 'repair') return repair(world, p, body, benefit, ops);
+  if (benefit.kind === 'claim' || benefit.kind === 'cancel')
+    return settle(world, p, body, order!, ops, steps);
+  return recovery(world, p, body, benefit, ops);
 }
 
 function boundService(world: World, p: Payload, body: EntityId) {
@@ -82,6 +110,112 @@ function serviceRefusal(code: ErrorCode, message: string) {
   return { code, message: { key: message as TextKey } };
 }
 
+type Escrow = Extract<ServiceDefinition['benefit'], { kind: 'entitlement' }>['escrow'];
+
+// Toolbox row 20a: the first `quantity` escrow inputs directly in the body, each one Give would
+// let go, move to the custody room with the order; fewer held refuses before any payment.
+function escrowed(
+  world: World,
+  body: EntityId,
+  escrow: Escrow,
+  steps: Steps,
+): UnavailableReason | { ops: readonly DeltaOp[] } {
+  if (!escrow) return { ops: [] };
+  const ids = selected(world, escrow.items, body, escrow.quantity, steps);
+  if (typeof ids === 'string') return { code: ids };
+  if (ids.length < escrow.quantity) return serviceRefusal('not_owned', 'service.missing_inputs');
+  for (const id of ids) {
+    const code = giveRefused(world, id, steps);
+    if (code) return { code };
+  }
+  const destination_id = world.roomIds[refString(escrow.custody)];
+  return {
+    ops: ids.map((entity_id) => ({
+      op: 'entity.transfer' as const,
+      writer_group: 0,
+      entity_id,
+      source_id: body,
+      destination_id,
+    })),
+  };
+}
+
+/** Toolbox row 20b: the engine job a timed commission's order waits for. */
+export const orderJob = (service: DefinitionRef): DefinitionRef => ({ ...service, kind: 'order' });
+
+// Toolbox row 20b: a timed commission's order waits for one job, due ready_after from now.
+export function scheduled(world: World, p: Payload, s: ServiceDefinition, mint: Mint): DeltaOp[] {
+  const after = s.benefit.kind === 'entitlement' ? s.benefit.escrow?.ready_after : undefined;
+  if (!after) return [];
+  const due_time = world.state.clock + after;
+  return [
+    {
+      op: 'job.schedule',
+      writer_group: 0,
+      job_id: mint() as JobId,
+      job: orderJob(p.service),
+      due_time,
+    },
+  ];
+}
+
+type Settles = Extract<ServiceDefinition['benefit'], { kind: 'claim' | 'cancel' }>;
+type Order = { kind: Settles['kind']; commission: ServiceDefinition; escrow: NonNullable<Escrow> };
+
+// Toolbox row 20b: the open order a claim or cancel settles, refused before any payment. Ready is
+// the order open and its job no longer pending.
+function open(world: World, p: Payload, benefit: Settles): UnavailableReason | Order {
+  const commission = world.cartridge.services![refString(benefit.service)]!;
+  const b = commission.benefit as Extract<ServiceDefinition['benefit'], { kind: 'entitlement' }>;
+  if (value(world, p.actor_id, b.fact) !== true)
+    return serviceRefusal('invalid_state', 'service.no_order');
+  const job = refString(orderJob(benefit.service));
+  const busy = Object.values(world.state.jobs ?? {}).some(
+    (r) => r.status === 'pending' && refString(r.job) === job,
+  );
+  if (benefit.kind === 'claim' && busy) return serviceRefusal('invalid_state', 'service.not_ready');
+  if (benefit.kind === 'cancel' && !busy) return serviceRefusal('invalid_state', 'service.ready');
+  const escrow = b.escrow!;
+  if (benefit.kind === 'claim' && away(world, escrow))
+    return serviceRefusal('not_found', 'service.no_output');
+  return { kind: benefit.kind, commission, escrow };
+}
+
+// A timed commission's output not lying in custody: nothing to order or claim.
+function away(world: World, escrow: NonNullable<Escrow>) {
+  const output = world.entityIds[refString(escrow.output!)];
+  return world.state.containers[output] !== world.roomIds[refString(escrow.custody)];
+}
+
+// A claim takes the output from custody; a cancel returns the first `quantity` inputs in custody,
+// never the fee. Both close the order; the job stays and completes inert.
+function settle(
+  world: World,
+  p: Payload,
+  body: EntityId,
+  { kind, commission, escrow }: Order,
+  paid: readonly DeltaOp[],
+  steps: Steps,
+): UnavailableReason | { ops: readonly DeltaOp[] } {
+  const custody = world.roomIds[refString(escrow.custody)];
+  let ids = [world.entityIds[refString(escrow.output!)]];
+  if (kind === 'cancel') {
+    const back = selected(world, escrow.items, custody, escrow.quantity, steps);
+    if (typeof back === 'string') return { code: back };
+    ids = back;
+  }
+  const moves = ids.map((entity_id) => ({
+    op: 'entity.transfer' as const,
+    writer_group: 0,
+    entity_id,
+    source_id: custody,
+    destination_id: body,
+  }));
+  const start = { ops: [...paid, ...moves], position: 0, facts: {} };
+  const b = commission.benefit as Extract<ServiceDefinition['benefit'], { kind: 'entitlement' }>;
+  return { ops: assigned(world, p.actor_id, start, { fact: b.fact, value: false }, 'service').ops };
+}
+
 // Toolbox row 21: the wielded weapon whose durability is the benefit's fact gains up to `amount`,
 // capped at the fact's maximum; none wielded, or one already at the maximum, refuses.
 function repair(
@@ -102,6 +236,32 @@ function repair(
   const start = { ops, position: 0, facts: {} },
     step = { fact: d.fact, value: next, subject: wielded!.id };
   return { ops: assigned(world, p.actor_id, start, step, 'durability').ops };
+}
+
+// Row 25: deposit = fee, then amount to vault; withdraw = amount to body, then fee; account follows.
+function banked(
+  world: World,
+  p: Payload,
+  body: EntityId,
+  currency: DefinitionRef,
+  benefit: Extract<ServiceDefinition['benefit'], { kind: 'deposit' | 'withdraw' }>,
+): UnavailableReason | { ops: readonly DeltaOp[] } {
+  const vault = world.entityIds[refString(benefit.vault)],
+    deposit = benefit.kind === 'deposit',
+    by = deposit ? benefit.amount : -benefit.amount,
+    current = value(world, p.actor_id, benefit.account),
+    next = bounded(world, benefit.account, current, by);
+  const [from, to] = deposit ? [body, vault] : [vault, body];
+  const fee = (l?: Levels) => transfer(world, body, p.provider_id, currency, p.quoted_price, l);
+  const move = (l?: Levels) => transfer(world, from, to, currency, benefit.amount, l);
+  const first = deposit ? fee() : move(),
+    second = first && (deposit ? move(first.levels) : fee(first.levels)),
+    owed = next === undefined || next !== Number(current) + by;
+  if (!deposit && (!first || owed)) return serviceRefusal('invalid_state', 'service.no_funds');
+  if (!first || !second || owed)
+    return serviceRefusal('insufficient_resource', 'service.unaffordable');
+  const start = { ops: [...first.ops, ...second.ops], position: 0, facts: {} };
+  return assigned(world, p.actor_id, start, { fact: benefit.account, value: next }, 'service');
 }
 
 function recovery(

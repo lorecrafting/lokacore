@@ -82,6 +82,19 @@
         },
         "knock": {
           "$ref": "room.schema.json#/$defs/KnockResponse"
+        },
+        "locks": {
+          "description": "Toolbox row G7 (kernel_api at least 1.78; mechanics.md Access locks): traverse, the policy the mover must hold to cross this exit, read by movementPlan after the barrier; failing it refuses permission_denied. Read with no target.",
+          "type": "object",
+          "properties": {
+            "traverse": {
+              "$ref": "policy.schema.json#/$defs/VersionedPolicy"
+            }
+          },
+          "required": [
+            "traverse"
+          ],
+          "additionalProperties": false
         }
       },
       "required": [
@@ -468,6 +481,19 @@
         },
         "cues": {
           "$ref": "entity.schema.json#/$defs/Cues"
+        },
+        "locks": {
+          "description": "Toolbox row G7 (kernel_api at least 1.78; mechanics.md Access locks): enter, the policy the mover must hold to come into this room, read by movementPlan after the exit's traverse lock; failing it refuses permission_denied. Read with no target.",
+          "type": "object",
+          "properties": {
+            "enter": {
+              "$ref": "policy.schema.json#/$defs/VersionedPolicy"
+            }
+          },
+          "required": [
+            "enter"
+          ],
+          "additionalProperties": false
         }
       },
       "required": [

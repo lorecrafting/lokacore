@@ -1,0 +1,13 @@
+{
+  "keywords": [
+    "ring"
+  ],
+  "short": "item.ring.short",
+  "room_line": "item.ring.room",
+  "description": "item.ring.description",
+  "location": {
+    "in": "item",
+    "item": "chest"
+  },
+  "mass_grams": 10
+}

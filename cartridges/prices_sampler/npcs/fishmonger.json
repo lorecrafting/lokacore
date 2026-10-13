@@ -1,0 +1,36 @@
+{
+  "keywords": [
+    "fishmonger"
+  ],
+  "short": "npc.fishmonger.short",
+  "room_line": "npc.fishmonger.room",
+  "description": "npc.fishmonger.description",
+  "room": "market",
+  "resource_starts": {
+    "pennies": 20
+  },
+  "shop": {
+    "resource": "pennies",
+    "offers": [
+      {
+        "item": "fish_a",
+        "buy": 5,
+        "sell": 1,
+        "stock": {
+          "items": [
+            "fish_a",
+            "fish_b",
+            "fish_c"
+          ],
+          "buy": [
+            5,
+            3,
+            2
+          ]
+        }
+      }
+    ],
+    "bought": "shop.bought",
+    "sold": "shop.sold"
+  }
+}

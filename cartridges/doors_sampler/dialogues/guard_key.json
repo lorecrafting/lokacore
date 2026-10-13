@@ -1,0 +1,31 @@
+{
+  "npc": "guard",
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": []
+    }
+  },
+  "prompt": "dialogue.guard.prompt",
+  "roles": {
+    "guard": {
+      "role": "npc",
+      "npc": "guard"
+    },
+    "key": {
+      "role": "item",
+      "item": "gate_key"
+    }
+  },
+  "choices": {
+    "borrow": {
+      "label": "dialogue.guard.borrow",
+      "narration": "narration.guard.borrow",
+      "receive": {
+        "item": "key",
+        "from": "guard"
+      }
+    }
+  }
+}

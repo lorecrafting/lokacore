@@ -1,0 +1,14 @@
+{
+  "provider": "clerk_b",
+  "currency": "pennies",
+  "action": "deposit",
+  "label": "service.deposit",
+  "narration": "service.deposit.used",
+  "price": 1,
+  "benefit": {
+    "kind": "deposit",
+    "account": "savings",
+    "vault": "vault",
+    "amount": 10
+  }
+}

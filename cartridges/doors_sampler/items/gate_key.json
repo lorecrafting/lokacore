@@ -1,0 +1,13 @@
+{
+  "keywords": [
+    "key",
+    "gate_key"
+  ],
+  "short": "item.gate_key.short",
+  "room_line": "item.gate_key.room",
+  "description": "item.gate_key.description",
+  "location": {
+    "in": "npc",
+    "npc": "guard"
+  }
+}

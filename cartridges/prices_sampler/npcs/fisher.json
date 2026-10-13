@@ -1,0 +1,9 @@
+{
+  "keywords": [
+    "fisher"
+  ],
+  "short": "npc.fisher.short",
+  "room_line": "npc.fisher.room",
+  "description": "npc.fisher.description",
+  "room": "market"
+}

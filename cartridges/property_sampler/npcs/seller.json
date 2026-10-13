@@ -1,0 +1,27 @@
+{
+  "keywords": [
+    "seller"
+  ],
+  "short": "npc.seller.short",
+  "room_line": "npc.seller.room",
+  "description": "npc.seller.description",
+  "room": "lane",
+  "resource_starts": {
+    "pennies": 0
+  },
+  "services": [
+    "buy_hut"
+  ],
+  "shop": {
+    "resource": "pennies",
+    "offers": [
+      {
+        "item": "lamp",
+        "buy": 5,
+        "sell": 2
+      }
+    ],
+    "bought": "shop.bought",
+    "sold": "shop.sold"
+  }
+}

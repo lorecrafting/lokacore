@@ -1,0 +1,34 @@
+{
+  "keywords": [
+    "chest"
+  ],
+  "short": "item.chest.short",
+  "room_line": "item.chest.room",
+  "description": "item.chest.description",
+  "location": {
+    "in": "room",
+    "room": "hut"
+  },
+  "mass_grams": 20000,
+  "container": true,
+  "locks": {
+    "get": {
+      "policy_version": 1,
+      "root": {
+        "op": "fact_compare",
+        "fact": "role",
+        "npc": "ada",
+        "equals": "resident"
+      }
+    },
+    "put": {
+      "policy_version": 1,
+      "root": {
+        "op": "fact_compare",
+        "fact": "role",
+        "npc": "ada",
+        "equals": "resident"
+      }
+    }
+  }
+}

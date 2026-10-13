@@ -7,11 +7,11 @@ import type {
   EntityId,
   Shop,
 } from '../../../kernel/ts/src/contracts.gen.ts';
-import { id } from '../../../kernel/ts/src/foundation/id_source.ts';
 import { key, same } from '../../../kernel/ts/src/foundation/compose.ts';
 import { validate } from '../../../kernel/ts/src/foundation/validate.ts';
 import { refString, type World, type Accepted } from '../../../kernel/ts/src/runtime/decision.ts';
 import type { Db, Meta } from './store.ts';
+import { acquiredOnce } from './shop-event.ts';
 type Row = {
   command_id: string;
   actor_id: string;
@@ -30,39 +30,24 @@ export function commerceSave(world: World, db: Db, meta: Meta, revision: number)
     const shop = npc.shop,
       spec = world.resourceSpecs[key(shop.resource)];
     const balances = startingBalances(world, shop.resource, spec.start);
-    const custody: Record<string, EntityId> = Object.fromEntries(
-      shop.offers.map((o) => [world.entityIds[refString(o.item)], provider as EntityId]),
-    );
+    const custody = offerCustody(world, shop, provider as EntityId);
     for (const { command, decision } of receipts(world, db, meta, revision)) {
       const money = decision.delta.ops.filter(
         (o) => o.op === 'resource.adjust' && same(o.resource, shop.resource),
       );
       const p = command.payload;
-      if (p.type === 'buy' || p.type === 'sell') {
-        shopReceipt(world, provider, shop, custody, command, decision);
-        checkPayment(
-          money,
-          shop.resource,
-          p.type === 'buy' ? world.body : provider,
-          p.type === 'buy' ? provider : world.body,
-          p.quoted_price,
-          balances,
-          spec.minimum,
-          spec.maximum,
-        );
-      } else if (money.length) {
-        const payment = dialoguePayment(world, command, shop.resource);
-        checkPayment(
-          money,
-          shop.resource,
-          payment.payer,
-          payment.recipient,
-          payment.amount,
-          balances,
-          spec.minimum,
-          spec.maximum,
-        );
-      }
+      const shopped = p.type === 'buy' || p.type === 'sell';
+      if (shopped) shopReceipt(world, provider, shop, custody, command, decision);
+      const [payer, recipient] = p.type === 'buy' ? [world.body, provider] : [provider, world.body];
+      const payments = shopped
+        ? [{ payer, recipient, amount: p.quoted_price }]
+        : money.length
+          ? bankPayments(world, command, dialoguePayment(world, command, shop.resource))
+          : [];
+      if (money.length !== 2 * payments.length) invalid();
+      payments.forEach((x, i) =>
+        checkPayment(money.slice(2 * i, 2 * i + 2), shop.resource, x, balances, spec),
+      );
       for (const op of decision.delta.ops)
         if (op.op === 'entity.transfer' && Object.hasOwn(custody, op.entity_id)) {
           if (
@@ -83,6 +68,14 @@ export function commerceSave(world: World, db: Db, meta: Meta, revision: number)
     for (const [entity, holder] of Object.entries(custody))
       if (!world.entities[entity] || world.state.containers[entity] !== holder) invalid();
   }
+}
+
+// A stock offer's items (row W11) are not tracked: receiptHistory recomputes those exchanges, and a
+// trade job may move them.
+function offerCustody(world: World, shop: Shop, provider: EntityId): Record<string, EntityId> {
+  return Object.fromEntries(
+    shop.offers.filter((o) => !o.stock).map((o) => [world.entityIds[refString(o.item)], provider]),
+  );
 }
 
 function startingBalances(world: World, resource: DefinitionRef, start: number) {
@@ -121,8 +114,8 @@ function receipts(world: World, db: Db, meta: Meta, revision: number) {
   });
 }
 
-// Opted Buy quotes are already recomputed at their original revision by receiptHistory.
-// size: allow 50, bind one whole exchange to its command, item, payment and acquired event
+// Opted Buy quotes and stock offers (row W11) are already recomputed at their original revision by
+// receiptHistory, so only the shape of a stock offer's move is checked here.
 function shopReceipt(
   world: World,
   provider: string,
@@ -137,41 +130,26 @@ function shopReceipt(
   const source = p.type === 'buy' ? provider : world.body,
     destination = p.type === 'buy' ? world.body : provider;
   const moves = d.delta.ops.filter((o) => o.op === 'entity.transfer');
+  const moved = (moves[0] as { entity_id: EntityId } | undefined)?.entity_id as EntityId;
   if (
     p.provider_id !== provider ||
     !offer ||
-    (!(p.type === 'buy' && shop.buy_discount) && p.quoted_price !== offer[p.type]) ||
+    (!(p.type === 'buy' && (shop.buy_discount || offer.stock)) &&
+      p.quoted_price !== offer[p.type]) ||
     moves.length !== 1 ||
+    (!offer.stock && (moved !== p.item_id || custody[moved] !== source)) ||
     !same(moves[0], {
       op: 'entity.transfer',
       writer_group: 0,
-      entity_id: p.item_id,
+      entity_id: moved,
       source_id: source,
       destination_id: destination,
     }) ||
-    custody[p.item_id] !== source ||
     d.outcome !== (p.type === 'buy' ? 'bought' : 'sold') ||
     !same(d.narration, [{ key: p.type === 'buy' ? shop.bought : shop.sold }])
   )
     invalid();
-  const acquired = d.events.filter((e) => e.payload.type === 'item_acquired');
-  if (
-    acquired.length !== 1 ||
-    acquired[0].id !== id(world.context, command.id, 0) ||
-    acquired[0].world_context_id !== world.context ||
-    acquired[0].position !== 1 ||
-    acquired[0].logical_time > world.state.clock ||
-    acquired[0].causation_id !== (command.id as string) ||
-    acquired[0].correlation_id !== (command.id as string) ||
-    acquired[0].actor_id !== world.character ||
-    !same(acquired[0].scope, { kind: 'player', character_id: world.character }) ||
-    !same(acquired[0].payload, {
-      type: 'item_acquired',
-      item_id: p.item_id,
-      holder_id: destination,
-    })
-  )
-    invalid();
+  if (!acquiredOnce(world, command, d, moved, destination)) invalid();
 }
 
 function dialoguePayment(world: World, command: Command, currency: DefinitionRef) {
@@ -253,15 +231,30 @@ function custodyEvidence(
   );
 }
 
+/**
+ * The fee with any bank pair (toolbox row 25): `amount` moves between the body and the vault after
+ * a deposit's fee and before a withdraw's.
+ */
+function bankPayments(world: World, command: Command, fee: Payment) {
+  const p = command.payload;
+  const benefit =
+    p.type === 'use_service' && world.cartridge.services?.[refString(p.service)]?.benefit;
+  if (!benefit || (benefit.kind !== 'deposit' && benefit.kind !== 'withdraw')) return [fee];
+  const vault = world.entityIds[refString(benefit.vault)];
+  const deposit = benefit.kind === 'deposit';
+  const [payer, recipient] = deposit ? [world.body, vault] : [vault, world.body];
+  const bank = { payer, recipient, amount: benefit.amount };
+  return deposit ? [fee, bank] : [bank, fee];
+}
+
+type Payment = { payer: string; recipient: string; amount: number };
+
 function checkPayment(
   ops: readonly DeltaOp[],
   resource: DefinitionRef,
-  payer: string,
-  recipient: string,
-  amount: number,
+  { payer, recipient, amount }: Payment,
   balances: Record<string, number>,
-  minimum: number,
-  maximum: number,
+  { minimum, maximum }: { minimum: number; maximum: number },
 ) {
   if (
     balances[payer] === undefined ||

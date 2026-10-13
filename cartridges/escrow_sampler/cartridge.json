@@ -1,0 +1,95 @@
+{
+  "api_version": "loka/v3",
+  "id": "escrow_sampler",
+  "version": "0.0.1",
+  "title": "Escrow Sampler",
+  "requires": {
+    "kernel_api": {
+      "at_least": "1.80",
+      "below": "2.0"
+    },
+    "content_schema": 1,
+    "rule_ir": 1,
+    "capabilities": {
+      "movement": 1,
+      "containment": 1,
+      "resource": 1,
+      "calendar": 1,
+      "fact": 1,
+      "policy": 1,
+      "service": 1,
+      "schedule": 1
+    },
+    "client_features": []
+  },
+  "supported_profiles": [
+    "offline_private"
+  ],
+  "entry": "forge",
+  "time_policy": {
+    "profile": "real_elapsed",
+    "rate": 50
+  },
+  "calendar": {
+    "start": 28800,
+    "units_per_hour": 3600,
+    "hours_per_day": 24,
+    "subdivisions_per_hour": 60,
+    "solar": [
+      {
+        "at": 18000,
+        "phase": "dawn"
+      },
+      {
+        "at": 25200,
+        "phase": "day"
+      },
+      {
+        "at": 64800,
+        "phase": "dusk"
+      },
+      {
+        "at": 72000,
+        "phase": "night"
+      }
+    ],
+    "lunar": {
+      "period": 2419200,
+      "origin": 0,
+      "phases": [
+        {
+          "at": 0,
+          "phase": "new"
+        },
+        {
+          "at": 302400,
+          "phase": "waxing_crescent"
+        },
+        {
+          "at": 604800,
+          "phase": "first_quarter"
+        },
+        {
+          "at": 907200,
+          "phase": "waxing_gibbous"
+        },
+        {
+          "at": 1209600,
+          "phase": "full"
+        },
+        {
+          "at": 1512000,
+          "phase": "waning_gibbous"
+        },
+        {
+          "at": 1814400,
+          "phase": "last_quarter"
+        },
+        {
+          "at": 2116800,
+          "phase": "waning_crescent"
+        }
+      ]
+    }
+  }
+}

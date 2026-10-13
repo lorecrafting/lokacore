@@ -24,10 +24,11 @@ import {
 } from '../../runtime/decision.ts';
 import { check } from '../../runtime/invariants.ts';
 import { reach } from '../lookups.ts';
+import { chainRefused } from '../locks.ts';
 import { carrying, giveRefused, putRefused } from './shared.ts';
 import { movable } from '../../runtime/created.ts';
 
-// size: allow 52, finite Harvest joins the existing conserved-transfer decision
+// size: allow 55, finite Harvest and the G7 get-lock walk join the conserved-transfer decision
 export const decide: Rule<'containment'> = (world, command, mint, steps = { n: 0 }) => {
   const p = command.payload;
   if (p.type === 'recover_corpse') return recover(world, p, steps);
@@ -54,8 +55,11 @@ export const decide: Rule<'containment'> = (world, command, mint, steps = { n: 0
     const reached = reach(world, body, p.item_id, steps);
     if (typeof reached === 'string') return { kind: 'fault', code: reached };
     if (!reached) return rejected('not_present');
-    const code = carrying(world, body, steps)(p.item_id);
-    if (code) return code === 'too_heavy' ? rejected(code) : { kind: 'fault', code };
+    const code =
+      chainRefused(world, p.actor_id, p.item_id, 'get', steps) ??
+      carrying(world, body, steps)(p.item_id);
+    if (code === 'permission_denied' || code === 'too_heavy') return rejected(code);
+    if (code) return { kind: 'fault', code };
     return accepted(world, 'taken', move(body), acquired(body));
   }
   if (p.type === 'put') {

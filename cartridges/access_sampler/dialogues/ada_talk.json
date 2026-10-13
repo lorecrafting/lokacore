@@ -1,0 +1,52 @@
+{
+  "npc": "ada",
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": []
+    }
+  },
+  "prompt": "dialogue.ada.prompt",
+  "roles": {
+    "ada": {
+      "role": "npc",
+      "npc": "ada"
+    }
+  },
+  "choices": {
+    "invite": {
+      "label": "dialogue.ada.invite",
+      "narration": "narration.ada.invite",
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "role",
+          "value": "guest"
+        }
+      ]
+    },
+    "revoke": {
+      "label": "dialogue.ada.revoke",
+      "narration": "narration.ada.revoke",
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "role",
+          "value": "stranger"
+        }
+      ]
+    },
+    "settle": {
+      "label": "dialogue.ada.settle",
+      "narration": "narration.ada.settle",
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "role",
+          "value": "resident"
+        }
+      ]
+    }
+  }
+}

@@ -124,14 +124,18 @@ export function pay(
   return { ops, levels };
 }
 
-/** Exact conserved payment between two explicit, nonregenerating balance rows. */
+/**
+ * Exact conserved payment between two explicit, nonregenerating balance rows, from the values
+ * `levels` left them in this decision (toolbox row 25 chains the deposit after the fee).
+ */
 export function transfer(
   world: World,
   from: EntityId,
   to: EntityId,
   resource: DefinitionRef,
   amount: number,
-): { ops: Adjust[] } | undefined {
+  levels: Levels = {},
+): { ops: Adjust[]; levels: Levels } | undefined {
   const spec = resourceSpec(world, from, resource);
   const targetSpec = resourceSpec(world, to, resource);
   if (
@@ -147,17 +151,13 @@ export function transfer(
   const destination = world.state.resources?.[key({ kind: 'resource', resource, entity_id: to })];
   if (
     !validOverrideRow(source, spec, world.state.clock) ||
-    !validOverrideRow(destination, targetSpec, world.state.clock) ||
-    source.value - amount < spec.minimum ||
-    destination.value + amount > targetSpec.maximum
+    !validOverrideRow(destination, targetSpec, world.state.clock)
   )
     return;
-  return {
-    ops: [
-      adjust(world, from, resource, -amount, {}).op,
-      adjust(world, to, resource, amount, {}).op,
-    ],
-  };
+  const out = adjust(world, from, resource, -amount, levels),
+    into = adjust(world, to, resource, amount, out.levels);
+  if (out.op.to < spec.minimum || into.op.to > targetSpec.maximum) return;
+  return { ops: [out.op, into.op], levels: into.levels };
 }
 
 /** Zero-amount position adjustments in authored DefinitionRef order, including unchanged values. */

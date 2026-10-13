@@ -271,6 +271,24 @@
         },
         "cues": {
           "$ref": "entity.schema.json#/$defs/Cues"
+        },
+        "locks": {
+          "description": "Toolbox row G7 (kernel_api at least 1.78; mechanics.md Access locks): at least one of get, the policy an actor must hold to take this item or anything inside it, and put, the policy to put an item into it (a container only: SCHEMA_VIOLATION invalid_value at locks.put, a loader and compiler check). Each is read with this item as target; failing it refuses permission_denied.",
+          "type": "object",
+          "properties": {
+            "get": {
+              "$ref": "policy.schema.json#/$defs/VersionedPolicy"
+            },
+            "put": {
+              "$ref": "policy.schema.json#/$defs/VersionedPolicy"
+            }
+          },
+          "requiredUnless": {
+            "put": [
+              "get"
+            ]
+          },
+          "additionalProperties": false
         }
       },
       "required": [
@@ -703,7 +721,7 @@
       ]
     },
     "ScheduleCases": {
-      "description": "Toolbox row W10: the cases of one conditional schedule hour, tried in order when the hour's job runs: the first whose when holds (read with the player as the actor, the NPC as the target and the clock at the job's due time) names the room. A case's optional goal is narration shown when the NPC leaves the player's room by that case.",
+      "description": "Toolbox row W10: the cases of one conditional schedule hour, tried in order when the hour's job runs: the first whose when holds (an absent when holds; read with the player as the actor, the NPC as the target and the clock at the job's due time) names the room. A walks case moves only along a path (toolbox row W26). A case's optional goal is narration shown when the NPC leaves the player's room by that case.",
       "type": "array",
       "items": {
         "type": "object",
@@ -716,10 +734,13 @@
           },
           "goal": {
             "$ref": "text.schema.json#/$defs/TextKey"
+          },
+          "walks": {
+            "const": true,
+            "description": "Toolbox row W26 (kernel_api at least 1.81; mechanics.md NPCs use doors): the step moves only when a path to room exists through exits a walking NPC may cross (breadth first, direction-key order, one query step per exit); the NPC moves in one step, each locked door on the path it holds the key of is unlocked, opened, closed and locked again; no path leaves it where it is."
           }
         },
         "required": [
-          "when",
           "room"
         ],
         "additionalProperties": false
@@ -849,6 +870,35 @@
           "type": "integer",
           "minimum": 1,
           "maximum": 2147483647
+        },
+        "stock": {
+          "description": "Toolbox row W11 (kernel_api at least 1.82): sell from this identity set, items[0] the offer's item, at buy[n-1] while the shopkeeper directly holds n of it; buy has one entry per item and buy[0] equals the offer's buy.",
+          "type": "object",
+          "properties": {
+            "items": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 16,
+              "items": {
+                "$ref": "identity.schema.json#/$defs/DefinitionRef"
+              }
+            },
+            "buy": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 16,
+              "items": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 2147483647
+              }
+            }
+          },
+          "required": [
+            "items",
+            "buy"
+          ],
+          "additionalProperties": false
         }
       },
       "required": [

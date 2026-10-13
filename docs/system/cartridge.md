@@ -914,6 +914,10 @@ S2 ledger or an item later given to her as an offer. B4/B7 may add use metadata 
 these definitions in their own releases without changing B3's item identities or
 shop rules. The satchel has no lid and its contents count toward the ordinary load.
 
+### Stock price declarations
+
+[Stock-sensitive prices](mechanics.md#stock-sensitive-prices-toolbox-row-w11) add one optional ShopOffer field (`protocol/entity.schema.json`): `stock {items, buy}`, no other keys. `items` are 2 to 16 item refs (short keys in source) and `buy` 2 to 16 prices of at least 1, one per count held. The compiler (`lib/loka/content/commerce.ex`) and the loader (`kernel/ts/src/content/cartridge_commerce.ts`) refuse a `buy` whose length differs from `items`, an `items[0]` other than the offer's `item` or a flat `buy` other than `stock.buy[0]` (SCHEMA_VIOLATION `invalid_value` at the offer's `stock`), an item named twice or the `item` of a plain offer of the same shop (DUPLICATE_DEFINITION at `stock.items`: commerce save tracks a plain offer's item by receipt, and stock and trade jobs move set items), an entry that names no item (UNRESOLVED_REFERENCE at `stock.items[i]`) and a floor below **1.82** (KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least`). Only the offer's `item` must start with the shopkeeper; the other set items may start in any authored holder. A `buy_discount`'s bounds cover every table entry. Sampler: `cartridges/prices_sampler`.
+
 ## C1 Tobin and equipment
 
 **API1.18 source contract.** The [C1 mechanic](mechanics.md#c1-training-and-armed-defense-selected-contract)
@@ -1338,6 +1342,50 @@ known answers after the shared-source scheduling predecessors integrate.
 B8 is installed in the [current bundled chapter](#current-bundled-chapter);
 its source and real SQLite acceptance are recorded in the
 [B8 evidence](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/2026-10-05-b8-maud-services/README.md).
+
+### Escrow declarations
+
+[Escrow custody](mechanics.md#escrow-custody-toolbox-row-20a) adds one optional field to the `entitlement` benefit (`protocol/service.schema.json` `ServiceBenefit`): `escrow {items, quantity, custody}`, no other keys. `items` are 1 to 16 item refs and `custody` a room ref (short keys in source); `quantity` is an integer 1 to 16. It needs `kernel_api` at least **1.79**. The compiler (`lib/loka/content/services.ex`) and the loader (`kernel/ts/src/content/cartridge_services.ts`) refuse an `items` entry that is not an item and a `custody` that is not a room (UNRESOLVED_REFERENCE at each), a `quantity` above the number of `items` (SCHEMA_VIOLATION `invalid_value` at `.benefit.escrow.quantity`) and an `items` entry that is any NPC's shop offer (SCHEMA_VIOLATION `invalid_value` at `.benefit.escrow.items[i]`: commerce save reconciles offer custody by receipt), and an item named twice in `items` (DUPLICATE_DEFINITION at `.benefit.escrow.items`). The cartridge text must hold `service.order_open` and `service.missing_inputs` when `escrow` is present.
+
+### Claim and cancel declarations
+
+[Timed job claim and cancel](mechanics.md#timed-job-claim-and-cancel-toolbox-row-20b) adds two optional fields to `escrow`:
+
+- `ready_after`: an integer, 1 to 31536000.
+- `output`: an item ref.
+
+`ready_after` and `output` are required together. It also adds two `ServiceBenefit` kinds, `{kind: "claim", service}` and `{kind: "cancel", service}` (`protocol/service.schema.json`), each naming a service ref (short keys in source). Any of them needs `kernel_api` at least **1.80**.
+
+The compiler (`lib/loka/content/services.ex`) and the loader (`kernel/ts/src/content/cartridge_services.ts`) refuse:
+
+- An `output` that is not an item: UNRESOLVED_REFERENCE at `.benefit.escrow.output`.
+- An `output` not located in the custody room: SCHEMA_VIOLATION `invalid_value` at the same path.
+- A claim or cancel `service` that is not a service: UNRESOLVED_REFERENCE at `.benefit.service`.
+- A claim or cancel `service` whose benefit is not an escrow with `ready_after`: SCHEMA_VIOLATION `invalid_value` at `.benefit.service`.
+- Another service's `entitlement` naming the `fact` of a commission whose escrow declares `ready_after`: SCHEMA_VIOLATION `invalid_value` at that service's `.benefit.fact`. It would open an order with no inputs and no job.
+- A `ready_after` without the `schedule` capability: UNDECLARED_CAPABILITY at `.benefit.escrow.ready_after`.
+
+Required cartridge text:
+
+- A claim: `service.no_order`, `service.not_ready` and `service.no_output`.
+- A cancel: `service.no_order` and `service.ready`.
+- A commission with `ready_after`: also `service.no_output`.
+
+### Property and bank declarations
+
+[Property and bank](mechanics.md#property-and-bank-toolbox-rows-24-and-25) adds two `ServiceBenefit` kinds (`protocol/service.schema.json`), `{kind: "deposit", account, vault, amount}` and `{kind: "withdraw", account, vault, amount}`, no other keys. `account` is a fact ref and `vault` an NPC ref (short keys in source); `amount` is an integer 1 to 1000000. Either needs `kernel_api` at least **1.83**. Property itself declares nothing new: an `entitlement` service and G7 `locks`.
+
+The compiler (`lib/loka/content/services.ex`) and the loader (`kernel/ts/src/content/cartridge_services.ts`) refuse:
+
+- An `account` that is not a fact, or a `vault` that is not an NPC: UNRESOLVED_REFERENCE at `.benefit.account` or `.benefit.vault`.
+- An `account` that is not a bounded int player fact (scopes `["player"]`, `minimum` 0, a `maximum`, default 0), or that another engine writer owns (a reserved fact such as `skill_<key>`, `uses_<key>` or `scene_<key>`, a dream-owned scene fact, a patrol `trust_fact` or an entitlement fact; `foreignRefs` in `kernel/ts/src/content/cartridge_position.ts`, `foreign_names` in `lib/loka/content/position.ex`): SCHEMA_VIOLATION `invalid_value` at `.benefit.account`.
+- An `account` whose `maximum`, or a currency whose `maximum` − `minimum`, is below `amount` (no deposit could ever succeed): SCHEMA_VIOLATION `invalid_value` at `.benefit.amount`.
+- A `vault` without a `resource_starts` entry in the service's currency: SCHEMA_VIOLATION `invalid_value` at `.benefit.vault`.
+- Two deposit or withdraw services naming one `account` with different vaults or currencies: SCHEMA_VIOLATION `invalid_value` at each one's `.benefit.vault`.
+
+The account is engine-written: an authored write to it (a dialogue, reaction or recipe `fact.assign` or `fact.adjust`) is RESERVED_FACT, as for an entitlement fact. Another benefit cannot name it: an entitlement needs a Boolean fact and a repair a durability fact.
+
+Required cartridge text: `service.unaffordable`, and `service.no_funds` for either kind.
 
 ## D2 public Priory and book authoring
 
@@ -1897,3 +1945,11 @@ The [away recap](mechanics.md#away-recap-toolbox-row-w27) reads the optional `ti
 ## Encounter declarations
 
 [Random encounters](mechanics.md#random-encounters-toolbox-row-9) add one optional field to a population plan (`protocol/cartridge.schema.json` `PopulationPlan`): `chance`, an integer 1 to 100. A plan with it is an encounter plan, without it an ecology plan. It needs `kernel_api` at least **1.74**: the compiler (`lib/loka/content/population.ex`) and the loader (`kernel/ts/src/content/cartridge_population.ts`) refuse a lower floor (KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least`). Every other plan field and check is unchanged. Sampler: `cartridges/encounter_sampler`.
+
+## Access lock declarations
+
+[Access locks](mechanics.md#access-locks-toolbox-row-g7) add three optional fields, each an object of VersionedPolicy (`protocol/policy.schema.json`) with no other key: a Connection's `locks {traverse}` and a RoomDefinition's `locks {enter}` (`protocol/room.schema.json`), an ItemDefinition's `locks {get?, put?}` with at least one (`protocol/entity.schema.json`). An unknown or misplaced access type, an empty `locks` or a value that is no policy is SCHEMA_VIOLATION (UNKNOWN_FIELD for an unknown key). A `put` lock on an item without `container: true` is SCHEMA_VIOLATION `invalid_value` at its `locks.put` (`items/chest.locks.put`; in the loader `.cartridge.items["..."].locks.put`). Each lock root joins the policy roots the reference stage checks (`nodes` in `kernel/ts/src/content/cartridge_refs.ts`; `Loka.Content.RoomParts.conditions/1` and `Loka.Content.Entities.conditions/1`), so its references and fact types are checked like any condition's (UNRESOLVED_REFERENCE at the leaf's member, `rooms/hut.locks.enter.root.fact`), and short references in it expand. A room or exit lock is read with no target, so in the loader `subject: "target"` under it is FACT_SCOPE_UNSUPPORTED at that `subject`, as in the other targetless sites; an item lock may use it (the target is the item). Any `locks` needs `kernel_api` at least **1.78**: the compiler (`lib/loka/content/locks.ex`) and the loader (`kernel/ts/src/content/cartridge_locks.ts`) report KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least` otherwise. Sampler: `cartridges/access_sampler`.
+
+## NPC door declarations
+
+[NPCs use doors](mechanics.md#npcs-use-doors-toolbox-row-w26) add one optional field, `walks` (`true` only), on a schedule case (`protocol/entity.schema.json` `ScheduleCases`) and on a population plan (`protocol/cartridge.schema.json` `PopulationPlan`); a schedule case's `when` becomes optional (absent holds). In source a daily_schedule hour may also be one walking case `{room, walks: true}`, which the compiler splits into the hour's room and a one-case `schedule_cases` entry. A plain hour still names its room by key or full reference (the source validator tries the walking case, then the reference). Any `walks` needs `kernel_api` at least **1.81**: the compiler and the loader report KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least` otherwise. Sampler: `cartridges/doors_sampler`.

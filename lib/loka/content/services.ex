@@ -1,12 +1,15 @@
+# size: allow 363, row 20a/20b/25 escrow orders and bank accounts check in the same service admission pass
 defmodule Loka.Content.Services do
   @moduledoc "Checks finite immediate service declarations and their exact provider stock."
-  import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2, ref: 3]
-  alias Loka.Content.Refs
+  import Loka.Content.Source, only: [diag: 2, diag: 3, diag: 4, at: 2, ref: 3]
+  alias Loka.Content.{Position, Refs}
 
   defp service_benefit(b, m) do
     fields =
       case b["kind"] do
         k when k in ~w(entitlement repair) -> [{"fact", "fact"}]
+        k when k in ~w(claim cancel) -> [{"service", "service"}]
+        k when k in ~w(deposit withdraw) -> [{"account", "fact"}, {"vault", "npc"}]
         "meal" -> [{"stock", "resource"}, {"recovery", "resource"}]
         "drink" -> [{"vessel", "item"}, {"liquid", "liquid"}, {"recovery", "resource"}]
       end
@@ -14,7 +17,17 @@ defmodule Loka.Content.Services do
     Enum.reduce(fields, b, fn {field, kind}, result ->
       Map.update!(result, field, &ref(&1, kind, m))
     end)
+    |> escrow_refs(m)
   end
+
+  defp escrow_refs(%{"escrow" => e} = b, m) do
+    items = Enum.map(e["items"], &ref(&1, "item", m))
+    e = %{e | "items" => items, "custody" => ref(e["custody"], "room", m)}
+    e = if e["output"], do: Map.update!(e, "output", &ref(&1, "item", m)), else: e
+    %{b | "escrow" => e}
+  end
+
+  defp escrow_refs(b, _), do: b
 
   def expand(%{"benefit" => b, "provider" => p, "currency" => c} = s, m) do
     s
@@ -40,7 +53,37 @@ defmodule Loka.Content.Services do
     declared = for {_, {rel, [], s}} <- defs["service"], do: {rel, s}
 
     Enum.flat_map(declared, fn {rel, s} -> service(rel, s, m, defs, text) end) ++
-      beds(m, defs, text) ++ api(m, declared) ++ providers(m, defs)
+      beds(m, defs, text) ++
+      api(m, declared) ++
+      providers(m, defs) ++
+      owned(declared) ++
+      vaults(declared)
+  end
+
+  # Toolbox row 25: the services on one account name one vault and one currency.
+  defp vaults(declared) do
+    banks = for {rel, s} <- declared, bank?(s["benefit"]), do: {rel, s}
+
+    for {rel, s} <- banks,
+        Enum.any?(banks, fn {_, o} -> account(o) == account(s) and home(o) != home(s) end),
+        do: bad(at(rel, ["benefit", "vault"]))
+  end
+
+  defp account(s), do: s["benefit"]["account"]
+  defp home(s), do: {s["benefit"]["vault"], s["currency"]}
+
+  defp bank?(b), do: b["kind"] in ~w(deposit withdraw)
+
+  # Toolbox row 20b: a timed order's fact belongs to its commission alone; another entitlement
+  # setting it would open an order with no inputs and no job.
+  defp owned(declared) do
+    owners =
+      for {rel, %{"benefit" => %{"escrow" => %{"ready_after" => _}} = b}} <- declared,
+          do: {b["fact"], rel}
+
+    for {rel, %{"benefit" => %{"kind" => "entitlement", "fact" => f}}} <- declared,
+        Enum.any?(owners, fn {o, owner} -> o == f and owner != rel end),
+        do: bad(at(rel, ["benefit", "fact"]))
   end
 
   defp api(m, declared) do
@@ -49,10 +92,22 @@ defmodule Loka.Content.Services do
       |> String.split(".")
       |> Enum.map(&String.to_integer/1)
 
-    if declared != [] and minimum < [1, 23],
+    if declared != [] and minimum < api_floor(Enum.map(declared, fn {_, s} -> s["benefit"] end)),
       do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
       else: []
   end
+
+  defp api_floor(benefits) do
+    cond do
+      Enum.any?(benefits, &bank?/1) -> [1, 83]
+      Enum.any?(benefits, &timed?/1) -> [1, 80]
+      Enum.any?(benefits, & &1["escrow"]) -> [1, 79]
+      true -> [1, 23]
+    end
+  end
+
+  defp timed?(b),
+    do: b["kind"] in ~w(claim cancel) or is_map_key(b["escrow"] || %{}, "ready_after")
 
   defp providers(m, defs) do
     for {key, {rel, [], npc}} <- defs["npc"],
@@ -66,7 +121,75 @@ defmodule Loka.Content.Services do
     checks = bindings(s, npc, m, defs) ++ benefit(s["benefit"], npc, s, m, defs)
 
     texts(rel, service_texts(s), text) ++
-      for({valid, steps} <- checks, not valid, do: bad(at(rel, steps)))
+      for({valid, steps} <- checks, not valid, do: bad(at(rel, steps))) ++
+      escrow(rel, s["benefit"]["escrow"], m, defs) ++ benefit_refs(rel, s["benefit"], m, defs)
+  end
+
+  defp benefit_refs(rel, %{"service" => r}, m, defs),
+    do: unresolved(r, "service", at(rel, ["benefit", "service"]), m, defs)
+
+  defp benefit_refs(rel, %{"account" => a, "vault" => v}, m, defs),
+    do:
+      unresolved(a, "fact", at(rel, ["benefit", "account"]), m, defs) ++
+        unresolved(v, "npc", at(rel, ["benefit", "vault"]), m, defs)
+
+  defp benefit_refs(_, _, _, _), do: []
+
+  # Toolbox row 20a: distinct items held to a room; no shop offer (commerce save reconciles offer
+  # custody by receipt and would refuse a service transfer of one).
+  defp escrow(_, nil, _, _), do: []
+
+  defp escrow(rel, %{"items" => items, "quantity" => quantity, "custody" => custody} = e, m, defs) do
+    path = &at(rel, ["benefit", "escrow" | &1])
+
+    shape = [
+      {Enum.uniq(items) == items, diag("DUPLICATE_DEFINITION", path.(["items"]))},
+      {quantity <= length(items), bad(path.(["quantity"]))}
+    ]
+
+    inputs(items, path, m, defs) ++
+      unresolved(custody, "room", path.(["custody"]), m, defs) ++
+      for({false, d} <- shape, do: d) ++ output(path, e, m, defs)
+  end
+
+  # Toolbox row 20b: the work job a timed order (output comes with ready_after) needs schedule.
+  defp schedule(path, m) do
+    owner = %{"capability" => "schedule"}
+
+    if is_map_key(m["requires"]["capabilities"], "schedule"),
+      do: [],
+      else: [diag("UNDECLARED_CAPABILITY", path.(["ready_after"]), owner, ["schedule@1"])]
+  end
+
+  # Toolbox row 20b: the finished output already lies in custody.
+  defp output(path, %{"output" => r, "custody" => custody}, m, defs) do
+    at = path.(["output"])
+
+    schedule(path, m) ++
+      case Refs.resolve(r, "item", m, defs) do
+        :unresolved -> [diag("UNRESOLVED_REFERENCE", at, %{"target" => r})]
+        {_, _, %{"location" => %{"in" => "room", "room" => ^custody}}} -> []
+        _ -> [bad(at)]
+      end
+  end
+
+  defp output(_, _, _, _), do: []
+
+  defp inputs(items, path, m, defs) do
+    offered =
+      for {_, {_, [], %{"shop" => shop}}} <- defs["npc"], o <- shop["offers"], do: o["item"]
+
+    for {r, i} <- Enum.with_index(items),
+        at = path.(["items", i]),
+        d <- unresolved(r, "item", at, m, defs) ++ if(r in offered, do: [bad(at)], else: []),
+        do: d
+  end
+
+  defp unresolved(r, kind, path, m, defs) do
+    case Refs.resolve(r, kind, m, defs) do
+      :unresolved -> [diag("UNRESOLVED_REFERENCE", path, %{"target" => r})]
+      _ -> []
+    end
   end
 
   defp bindings(s, npc, m, defs) do
@@ -83,16 +206,32 @@ defmodule Loka.Content.Services do
   defp service_action?({_, [], a}), do: a["command"] == "use_service"
   defp service_action?(_), do: false
 
-  defp service_texts(s) do
-    reasons =
-      case s["benefit"]["kind"] do
-        "entitlement" -> ~w(service.unaffordable service.already_paid)
-        "repair" -> ~w(service.unaffordable service.nothing_to_repair service.full_durability)
-        _ -> ~w(service.unaffordable service.full_mv service.sold_out)
-      end
+  defp entitlement_texts(nil), do: ~w(service.unaffordable service.already_paid)
 
-    Enum.map(reasons, &{[], &1}) ++ Enum.map(~w(label narration), &{[&1], s[&1]})
-  end
+  defp entitlement_texts(%{"ready_after" => _}),
+    do: entitlement_texts(%{}) ++ ~w(service.no_output)
+
+  defp entitlement_texts(_),
+    do: ~w(service.unaffordable service.order_open service.missing_inputs)
+
+  defp service_texts(s),
+    do:
+      Enum.map(reasons(s["benefit"]), &{[], &1}) ++ Enum.map(~w(label narration), &{[&1], s[&1]})
+
+  defp reasons(%{"kind" => "entitlement"} = b), do: entitlement_texts(b["escrow"])
+
+  defp reasons(%{"kind" => "repair"}),
+    do: ~w(service.unaffordable service.nothing_to_repair service.full_durability)
+
+  defp reasons(%{"kind" => "claim"}),
+    do: ~w(service.unaffordable service.no_order service.not_ready service.no_output)
+
+  defp reasons(%{"kind" => "cancel"}), do: ~w(service.unaffordable service.no_order service.ready)
+
+  defp reasons(%{"kind" => k}) when k in ~w(deposit withdraw),
+    do: ~w(service.unaffordable service.no_funds)
+
+  defp reasons(_), do: ~w(service.unaffordable service.full_mv service.sold_out)
 
   defp benefit(%{"kind" => "entitlement", "fact" => r}, _, _, m, defs) do
     f = resolved(r, "fact", m, defs)
@@ -105,10 +244,47 @@ defmodule Loka.Content.Services do
     [{r in named, ["benefit", "fact"]}]
   end
 
+  # Toolbox row 20b: claim and cancel name a timed commission.
+  defp benefit(%{"kind" => k, "service" => r}, _, _, m, defs) when k in ~w(claim cancel) do
+    c = resolved(r, "service", m, defs)
+
+    [
+      {c == %{} or is_map_key(c["benefit"]["escrow"] || %{}, "ready_after"),
+       ["benefit", "service"]}
+    ]
+  end
+
+  # Toolbox row 25: the account is a bounded int player fact from 0 no other engine writer owns;
+  # the vault holds the currency; both can hold `amount`.
+  defp benefit(%{"kind" => k, "account" => a, "vault" => v, "amount" => n}, _, s, m, defs)
+       when k in ~w(deposit withdraw) do
+    f = resolved(a, "fact", m, defs)
+    vault = resolved(v, "npc", m, defs)
+
+    [
+      {f == %{} or account?(f, a, m, defs), ["benefit", "account"]},
+      {vault == %{} or (vault["resource_starts"] || %{})[s["currency"]["key"]] != nil,
+       ["benefit", "vault"]},
+      {holds?(f["value_type"], n) and holds?(resolved(s["currency"], "resource", m, defs), n),
+       ["benefit", "amount"]}
+    ]
+  end
+
   defp benefit(b, npc, s, m, defs) do
     recovery = resolved(b["recovery"], "resource", m, defs)
     [{recovery["key"] == "mv", ["benefit", "recovery"]}] ++ stock(b, npc, s, m, defs)
   end
+
+  defp account?(%{"value_type" => t} = f, a, m, defs),
+    do:
+      f["scopes"] == ["player"] and t["type"] == "int" and t["minimum"] == 0 and
+        is_integer(t["maximum"]) and t["default"] == 0 and
+        a["key"] not in Position.foreign_names(m, defs)
+
+  defp holds?(%{"minimum" => lo, "maximum" => hi}, n) when is_integer(lo) and is_integer(hi),
+    do: hi - lo >= n
+
+  defp holds?(_, _), do: true
 
   defp stock(%{"kind" => "meal"} = b, npc, s, m, defs) do
     stock = resolved(b["stock"], "resource", m, defs)

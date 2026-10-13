@@ -1,6 +1,7 @@
-// size: allow 545, the AB brief places the reaction witness here; new witnesses get their own module
+// size: allow 550, the AB brief places the reaction witness here; new witnesses get their own module
 import { gameView, type World } from '../src/index.ts';
 import { repaired } from './e1_repair.ts';
+import { closed } from './e1_order.ts';
 import type {
   CharacterId,
   Command,
@@ -107,6 +108,10 @@ export function witnessedObligations(
           op.value === true,
       );
     } else if (benefit.kind === 'repair') committed = repaired(ops, benefit);
+    else if (benefit.kind === 'claim' || benefit.kind === 'cancel')
+      committed = closed(before, ops, benefit);
+    else if (benefit.kind === 'deposit' || benefit.kind === 'withdraw')
+      committed = ops.some((op) => op.op === 'fact.assign' && same(op.fact, benefit.account));
     else {
       const old = level(before, before.body, benefit.recovery);
       const maximum = resourceSpec(before, before.body, benefit.recovery)?.maximum;

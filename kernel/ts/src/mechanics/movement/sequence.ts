@@ -13,7 +13,8 @@ import * as water from '../water/shared.ts';
 import { engaged } from '../combat/shared.ts';
 import * as patrol from '../patrol/sequence.ts';
 import * as expedition from '../expedition/sequence.ts';
-import { exitTo, hidden } from '../lookups.ts';
+import { exitOf, exitTo, hidden } from '../lookups.ts';
+import { lockRefused } from '../locks.ts';
 import { standing } from '../position/shared.ts';
 import { closeEncounter } from '../combat/shared.ts';
 import { settled as crowSettled } from '../crow/behavior.ts';
@@ -124,6 +125,11 @@ export function movementPlan(
   if (!there || hidden(world, world.rooms[here], direction, actor_id)) return 'not_found' as const;
   const barred = passage(world, world.rooms[here], direction, actor_id, steps);
   if (barred) return barred;
+  const exit = exitOf(world.rooms[here], direction)!;
+  const locked =
+    lockRefused(world, actor_id, exit.locks?.traverse, undefined, steps) ??
+    lockRefused(world, actor_id, world.rooms[there].locks?.enter, undefined, steps);
+  if (locked) return locked;
   if (!crossable(world, body, there)) return 'invalid_state' as const;
   const wet = water.edge(world, here, there, direction);
   if (wet) {

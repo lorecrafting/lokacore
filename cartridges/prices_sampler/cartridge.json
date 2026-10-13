@@ -1,0 +1,30 @@
+{
+  "api_version": "loka/v3",
+  "id": "prices_sampler",
+  "version": "0.0.1",
+  "title": "Prices Sampler",
+  "requires": {
+    "kernel_api": {
+      "at_least": "1.82",
+      "below": "2.0"
+    },
+    "content_schema": 1,
+    "rule_ir": 1,
+    "capabilities": {
+      "movement": 1,
+      "containment": 1,
+      "resource": 1,
+      "schedule": 1,
+      "commerce": 1,
+      "calendar": 1
+    },
+    "client_features": []
+  },
+  "supported_profiles": [
+    "offline_private"
+  ],
+  "entry": "market",
+  "calendar": {
+    "start": 25200
+  }
+}

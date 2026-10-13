@@ -10,6 +10,16 @@ of closed work are deleted once their lesson is folded, and linked by permalink
 Reviews before R2 live in the [legacy repository](https://github.com/lorecrafting/lokacore-v2-legacy)
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
+- [Review: m11 property and bank (rows 24/25) mobile save, second opinion](2026-10-13-m11-property-second-opinion.md): **APPROVE WITH NOTES**
+- [Review: toolbox rows 24 and 25, property ownership and bank (loka-kgd.127)](2026-10-13-m11-property-review.md): **APPROVE WITH NOTES**
+- [Review: toolbox row W11 stock-sensitive prices, save/reconciliation second opinion (loka-kgd.128)](2026-10-13-m11-prices-second-opinion.md): **APPROVE**
+- [Review: toolbox row W11, stock-sensitive prices (loka-kgd.128)](2026-10-13-m11-prices-review.md): **APPROVE**
+- [Review: toolbox row G7, access locks (loka-kgd.123)](2026-10-13-m11-locks-review.md): **APPROVE WITH NOTES**
+- [Review: toolbox row 20a, escrow custody (loka-kgd.124)](2026-10-13-m11-escrow-review.md): **APPROVE**
+- [Review: m11 doors (row W26) schema validation, second opinion](2026-10-13-m11-doors-second-opinion.md): **APPROVE**
+- [Review: toolbox row W26, NPCs use doors (loka-kgd.125)](2026-10-13-m11-doors-review.md): **APPROVE**
+- [Review: toolbox row 20b, timed job claim and cancel (loka-kgd.126)](2026-10-13-m11-claim-review.md): **APPROVE**
+- [M11 batch review (PR #381, Fable)](2026-10-13-m11-batch-fable-review.md): **APPROVE WITH NOTES**
 - [Review: balance tool 8, refusal and friction report (loka-kgd.107.8)](2026-10-13-m10-friction-review.md): **APPROVE**
 - [Review: toolbox row 32, fast travel (loka-kgd.120)](2026-10-13-m10-fast-travel-review.md): **APPROVE WITH NOTES**
 - [Review: m10 decay (row 41) writer-group join, second opinion](2026-10-13-m10-decay-second-opinion.md): **APPROVE**

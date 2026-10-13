@@ -22,6 +22,7 @@ export function commerce(c: Obj): Diagnostic[] {
       npc.resource_starts?.[s.resource.key] === undefined
     )
       out.push(diag('RESOURCE_SPEC_INVALID', at));
+    out.push(...stocks(c, s.offers, at, major * 1000 + minor));
     for (const o of s.offers) {
       const item = c.items?.[refString(o.item)];
       if (
@@ -51,6 +52,35 @@ function discountValid(c: Obj, s: Obj, npc: Obj) {
         d.skill?.kind === 'skill' &&
         c.skills?.[refString(d.skill)]) &&
       d.numerator <= d.denominator &&
-      s.offers.every((o: Obj) => d.minimum <= o.buy && Number.isSafeInteger(o.buy * d.numerator)))
+      s.offers
+        .flatMap((o: Obj) => [o.buy, ...(o.stock?.buy ?? [])])
+        .every((buy: number) => d.minimum <= buy && Number.isSafeInteger(buy * d.numerator)))
   );
+}
+
+// Toolbox row W11: stock offers need kernel_api 1.82; each set is checked against the plain offers.
+function stocks(c: Obj, offers: Obj[], at: string, version: number): Diagnostic[] {
+  const out: Diagnostic[] = [];
+  if (offers.some((o) => o.stock) && version < 1082)
+    out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
+  const plain = offers.filter((o) => !o.stock).map((o) => refString(o.item));
+  offers.forEach((o, i) => out.push(...stock(c, o, `${at}.offers[${i}].stock`, plain)));
+  return out;
+}
+
+// Toolbox row W11: a price per count of a set of distinct items led by the offer's own.
+function stock(c: Obj, o: Obj, at: string, plain: string[]): Diagnostic[] {
+  if (!o.stock) return [];
+  const { items, buy } = o.stock,
+    keys = items.map((r: Obj) => refString(r as never));
+  const out = items.flatMap((r: Obj, i: number) =>
+    r.kind === 'item' && c.items?.[keys[i]]
+      ? []
+      : [diag('UNRESOLVED_REFERENCE', `${at}.items[${i}]`)],
+  );
+  if (new Set(keys).size !== keys.length || keys.some((k: string) => plain.includes(k)))
+    out.push(diag('DUPLICATE_DEFINITION', `${at}.items`));
+  if (buy.length !== items.length || keys[0] !== refString(o.item) || buy[0] !== o.buy)
+    out.push(diag('SCHEMA_VIOLATION', at, { error: 'invalid_value' }));
+  return out;
 }

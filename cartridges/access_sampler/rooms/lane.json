@@ -1,0 +1,23 @@
+{
+  "title": "room.lane.title",
+  "description": "room.lane.description",
+  "exits": {
+    "north": {
+      "to": "hut"
+    },
+    "east": {
+      "to": "shed",
+      "locks": {
+        "traverse": {
+          "policy_version": 1,
+          "root": {
+            "op": "fact_compare",
+            "fact": "role",
+            "npc": "ada",
+            "equals": "resident"
+          }
+        }
+      }
+    }
+  }
+}

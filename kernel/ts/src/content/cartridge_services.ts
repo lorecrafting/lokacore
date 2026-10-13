@@ -2,12 +2,21 @@ import { same } from '../foundation/compose.ts';
 import { refString } from '../runtime/decision.ts';
 import { checkers, diag, step, type Checks, type Obj } from './cartridge_refs.ts';
 import type { Diagnostic } from '../contracts.gen.ts';
+import { foreignRefs } from './cartridge_position.ts';
 
 export function services(c: Obj): Diagnostic[] {
   const out: Diagnostic[] = [],
     check = checkers(c, out);
   const [major, minor] = c.manifest.requires.kernel_api.at_least.split('.').map(Number);
-  if (Object.keys(c.services ?? {}).length && (major < 1 || (major === 1 && minor < 23)))
+  const all = Object.values((c.services ?? {}) as Obj);
+  const floor = all.some((s) => banks(s.benefit))
+    ? 83
+    : all.some(timed)
+      ? 80
+      : all.some((s) => s.benefit.escrow)
+        ? 79
+        : 23;
+  if (all.length && (major < 1 || (major === 1 && minor < floor)))
     out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
   for (const [ref, s] of Object.entries((c.services ?? {}) as Obj))
     definition(c, s, ref, check, out);
@@ -21,7 +30,21 @@ export function services(c: Obj): Diagnostic[] {
     }
   }
   beds(c, check, out);
+  owned(c, out);
   return out;
+}
+
+// Toolbox row 20b: a timed order's fact belongs to its commission alone; another entitlement
+// setting it would open an order with no inputs and no job.
+function owned(c: Obj, out: Diagnostic[]) {
+  const entries = Object.entries((c.services ?? {}) as Obj),
+    fact = (s: Obj) => s.benefit.kind === 'entitlement' && refString(s.benefit.fact);
+  const owner = new Map(
+    entries.filter(([, s]) => s.benefit.escrow?.ready_after).map(([r, s]) => [fact(s), r]),
+  );
+  for (const [ref, s] of entries)
+    if (fact(s) && owner.has(fact(s)) && owner.get(fact(s)) !== ref)
+      bad(out, `.cartridge.services${step(ref)}.benefit.fact`);
 }
 
 function definition(c: Obj, s: Obj, ref: string, check: Checks, out: Diagnostic[]) {
@@ -29,16 +52,7 @@ function definition(c: Obj, s: Obj, ref: string, check: Checks, out: Diagnostic[
   if (c.lock.capabilities.service !== 1)
     out.push(diag('UNDECLARED_CAPABILITY', at, { capability: 'service' }, ['service@1']));
   check.text(s, ['label', 'narration'], at);
-  const kind = s.benefit.kind;
-  const reasons = {
-    payment: 'service.unaffordable',
-    headroom:
-      { entitlement: 'service.already_paid', repair: 'service.full_durability' }[kind as string] ??
-      'service.full_mv',
-    ...(kind === 'repair'
-      ? { target: 'service.nothing_to_repair' }
-      : kind !== 'entitlement' && { stock: 'service.sold_out' }),
-  };
+  const reasons = refusals(s.benefit);
   check.text(reasons, Object.keys(reasons), at);
   const npc = get(c, check, s.provider, 'npc', `${at}.provider`);
   const currency = get(c, check, s.currency, 'resource', `${at}.currency`);
@@ -57,12 +71,104 @@ function definition(c: Obj, s: Obj, ref: string, check: Checks, out: Diagnostic[
         !same(fact.scopes, ['player']))
     )
       bad(out, `${at}.benefit.fact`);
+    if (b.escrow) escrow(c, b.escrow, `${at}.benefit.escrow`, check, out);
   } else if (b.kind === 'repair') repair(c, b, at, check, out);
-  else {
+  else if (banks(b)) bank(c, s, at, check, out);
+  else if (ordered(b)) {
+    const commission = get(c, check, b.service, 'service', `${at}.benefit.service`);
+    if (commission && !commission.benefit.escrow?.ready_after) bad(out, `${at}.benefit.service`);
+  } else {
     const recovery = get(c, check, b.recovery, 'resource', `${at}.benefit.recovery`);
     if (recovery && recovery.key !== 'mv') bad(out, `${at}.benefit.recovery`);
     stock(c, s, npc, at, check, out);
   }
+}
+
+// The refusal texts a service needs, by benefit.
+function refusals(b: Obj) {
+  const kind = b.kind;
+  if (banks(b)) return { payment: 'service.unaffordable', funds: 'service.no_funds' };
+  if (ordered(b))
+    return {
+      payment: 'service.unaffordable',
+      order: 'service.no_order',
+      ...(kind === 'claim'
+        ? { wait: 'service.not_ready', output: 'service.no_output' }
+        : { ready: 'service.ready' }),
+    };
+  return {
+    payment: 'service.unaffordable',
+    headroom: b.escrow
+      ? 'service.order_open'
+      : ({ entitlement: 'service.already_paid', repair: 'service.full_durability' }[
+          kind as string
+        ] ?? 'service.full_mv'),
+    ...(kind === 'repair'
+      ? { target: 'service.nothing_to_repair' }
+      : kind !== 'entitlement' && { stock: 'service.sold_out' }),
+    ...(b.escrow && { inputs: 'service.missing_inputs' }),
+    ...(b.escrow?.ready_after && { output: 'service.no_output' }),
+  };
+}
+
+// Toolbox row 20a: distinct items held to a room; no shop offer (commerce save reconciles offer
+// custody by receipt and would refuse a service transfer of one).
+function escrow(c: Obj, e: Obj, at: string, check: Checks, out: Diagnostic[]) {
+  const keys = e.items.map((r: Obj) => refString(r as never));
+  const offered = Object.values((c.npcs ?? {}) as Obj).flatMap((n) =>
+    (n.shop?.offers ?? []).map((o: Obj) => refString(o.item)),
+  );
+  keys.forEach((k: string, i: number) => {
+    get(c, check, e.items[i], 'item', `${at}.items[${i}]`);
+    if (offered.includes(k)) bad(out, `${at}.items[${i}]`);
+  });
+  if (new Set(keys).size !== keys.length) out.push(diag('DUPLICATE_DEFINITION', `${at}.items`));
+  get(c, check, e.custody, 'room', `${at}.custody`);
+  if (e.quantity > keys.length) bad(out, `${at}.quantity`);
+  // Toolbox row 20b: the finished output already lies in custody.
+  const output = e.output && get(c, check, e.output, 'item', `${at}.output`);
+  if (output && (output.location.in !== 'room' || !same(output.location.room, e.custody)))
+    bad(out, `${at}.output`);
+  if (e.ready_after && !Object.hasOwn(c.lock.capabilities, 'schedule'))
+    out.push(
+      diag('UNDECLARED_CAPABILITY', `${at}.ready_after`, { capability: 'schedule' }, [
+        'schedule@1',
+      ]),
+    );
+}
+
+// Toolbox row 25: the account is a bounded int player fact from 0 that no other engine writer
+// owns, the vault an NPC holding the currency, both able to hold `amount`, and every service on one
+// account names one vault and one currency.
+function bank(c: Obj, s: Obj, at: string, check: Checks, out: Diagnostic[]) {
+  const b = s.benefit,
+    fact = get(c, check, b.account, 'fact', `${at}.benefit.account`),
+    t = fact?.value_type,
+    pool = c.resources?.[refString(s.currency)];
+  if (
+    fact &&
+    (t.type !== 'int' ||
+      t.minimum !== 0 ||
+      !Number.isSafeInteger(t.maximum) ||
+      t.default !== 0 ||
+      !same(fact.scopes, ['player']) ||
+      foreignRefs(c).includes(refString(b.account)))
+  )
+    bad(out, `${at}.benefit.account`);
+  if (
+    (fact && t.maximum - t.minimum < b.amount) ||
+    (pool && pool.maximum - pool.minimum < b.amount)
+  )
+    bad(out, `${at}.benefit.amount`);
+  const vault = get(c, check, b.vault, 'npc', `${at}.benefit.vault`);
+  const clash = Object.values(c.services as Obj).some(
+    (o) =>
+      banks(o.benefit) &&
+      same(o.benefit.account, b.account) &&
+      !same([o.benefit.vault, o.currency], [b.vault, s.currency]),
+  );
+  if (vault && (vault.resource_starts?.[s.currency.key] === undefined || clash))
+    bad(out, `${at}.benefit.vault`);
 }
 
 // Toolbox row 21: a repair restores a fact some weapon's durability names.
@@ -111,6 +217,9 @@ function beds(c: Obj, check: Checks, out: Diagnostic[]) {
         if (c.lock.capabilities.position !== 1 || c.lock.capabilities.service !== 1) bad(out, at);
       }
 }
+const ordered = (b: Obj) => b.kind === 'claim' || b.kind === 'cancel';
+const banks = (b: Obj) => b.kind === 'deposit' || b.kind === 'withdraw';
+const timed = (s: Obj) => ordered(s.benefit) || s.benefit.escrow?.ready_after !== undefined;
 const finite = (r: Obj | undefined): r is Obj => !!r && r.gain === 0 && !r.regen;
 const bad = (out: Diagnostic[], at: string) =>
   out.push(diag('SCHEMA_VIOLATION', at, { error: 'invalid_value' }));

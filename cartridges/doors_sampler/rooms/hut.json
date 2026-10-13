@@ -1,0 +1,10 @@
+{
+  "title": "room.hut.title",
+  "description": "room.hut.description",
+  "exits": {
+    "south": {
+      "to": "lane",
+      "barrier": "hut_door"
+    }
+  }
+}

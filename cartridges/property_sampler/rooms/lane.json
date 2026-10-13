@@ -1,0 +1,13 @@
+{
+  "title": "room.lane.title",
+  "description": "room.lane.description",
+  "exits": {
+    "north": {
+      "to": "hut",
+      "barrier": "hut_door"
+    },
+    "east": {
+      "to": "market"
+    }
+  }
+}

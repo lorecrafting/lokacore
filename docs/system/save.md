@@ -483,6 +483,12 @@ and changed-row trust boundary, not a second money ledger or save migration.
 Receipt replay cannot pay or move the item again; malformed current-build truth
 leaves the save intact.
 
+A [stock offer](mechanics.md#stock-sensitive-prices-toolbox-row-w11) (toolbox row W11) is
+reconciled the same way except that its Buy quote is not compared with a static price, its
+moved item must be one of the offer's set, and its set is not tracked as offer custody: a
+cartridge with any stock offer replays every accepted receipt at its original revision
+(`receiptHistory`, as an opted discount does), which recomputes each quote from the count held then.
+
 ## D11 character choice recovery
 
 The `characters[CharacterId]` row is one immutable `character.select` value holding ancestry and all six textual-ref attribute values. D11's once-only selection belongs to the character identity, not the body returned from death. The selected ancestry, six values, initial acquired skill and initial Priory/Fen value commit with one command receipt through the existing changed-row transaction. No partially selected state may be adopted or rendered. Initial no-choice is legal only before that command and admits no ordinary gameplay. Reopen and reconciliation validate the pinned declaration against the exact character and selected effects; missing/null/malformed or contradictory rows and accepted receipt evidence return typed `save_corrupt` without repair or deletion. An inherited acquired skill needs that exact creation receipt as its alternate provenance under [C1 recovery](#c1-learned-skill-and-lesson-recovery); it is not a forged teacher grant. The starting faction change likewise needs the exact creation receipt as its alternate provenance under B2's revision-ordered faction validation, not an unexplained change from zero. Later lessons and faction changes retain their existing evidence rules. The existing explicit Start over remains available. A mismatch with a release not carried still refuses by pin, never reinterprets a previous character choice.
@@ -807,6 +813,9 @@ B3/S2 payment history and B7 liquid history must recognize the new service
 producer without weakening their own checks. Merely plausible bounded stock,
 MV or paid=true is insufficient evidence. Lawful later movement, death, elapsed
 recovery and other payment producers cannot invalidate an old service receipt.
+A [bank](mechanics.md#property-and-bank-toolbox-rows-24-and-25) receipt carries
+a second money pair, body to vault for a deposit (after the fee) and vault to
+body for a withdraw (before the fee), reconciled like the fee pair.
 
 Room proof requires its unique paid transition and matching exact payment;
 meal proof requires one exact stock debit/payment and independently valid capped
