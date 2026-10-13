@@ -1,0 +1,12 @@
+{
+  "keywords": [
+    "ore"
+  ],
+  "short": "item.ore.short",
+  "room_line": "item.ore.room",
+  "description": "item.ore.description",
+  "location": {
+    "in": "room",
+    "room": "forge"
+  }
+}
