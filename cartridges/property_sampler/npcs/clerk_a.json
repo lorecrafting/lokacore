@@ -1,0 +1,16 @@
+{
+  "keywords": [
+    "clerk_a"
+  ],
+  "short": "npc.clerk_a.short",
+  "room_line": "npc.clerk_a.room",
+  "description": "npc.clerk_a.description",
+  "room": "lane",
+  "resource_starts": {
+    "pennies": 0
+  },
+  "services": [
+    "deposit_a",
+    "withdraw_a"
+  ]
+}

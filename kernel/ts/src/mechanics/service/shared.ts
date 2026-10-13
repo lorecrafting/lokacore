@@ -19,7 +19,7 @@ import { living } from '../death/shared.ts';
 import { engaged } from '../combat/shared.ts';
 import { assigned, bounded, value } from '../fact.ts';
 import { equipped } from '../lookups.ts';
-import { adjust, level, resourceRef, resourceSpec, transfer } from '../resource.ts';
+import { adjust, level, resourceRef, resourceSpec, transfer, type Levels } from '../resource.ts';
 import { serving } from '../liquid/shared.ts';
 import { selected } from '../containment/stock.ts';
 import { giveRefused } from '../containment/shared.ts';
@@ -53,24 +53,30 @@ export function transition(
   const order: UnavailableReason | Order | undefined =
     benefit.kind === 'claim' || benefit.kind === 'cancel' ? open(world, p, benefit) : undefined;
   if (order && 'code' in order) return order;
-  const paid = transfer(world, body, p.provider_id, service.currency, p.quoted_price);
+  const paid = ['deposit', 'withdraw'].includes(benefit.kind) // banked pays its own fee
+    ? { ops: [] }
+    : transfer(world, body, p.provider_id, service.currency, p.quoted_price);
   if (!paid) return serviceRefusal('insufficient_resource', 'service.unaffordable');
-  const done = granted(world, p, body, benefit, order, paid.ops, inputs.ops, steps);
+  const done = granted(world, p, body, service, order, paid, inputs.ops, steps);
   return 'code' in done ? done : { ops: done.ops, service };
 }
 
 // The service's benefit after payment: settle an order, grant an entitlement (taking any escrow
-// inputs), repair, or recover.
+// inputs), bank, repair, or recover.
 function granted(
   world: World,
   p: Payload,
   body: EntityId,
-  benefit: ServiceDefinition['benefit'],
+  service: ServiceDefinition,
   order: Order | undefined,
-  ops: readonly DeltaOp[],
+  paid: { ops: readonly DeltaOp[] },
   inputs: readonly DeltaOp[],
   steps: Steps,
 ): UnavailableReason | { ops: readonly DeltaOp[] } {
+  const { benefit } = service,
+    { ops } = paid;
+  if (benefit.kind === 'deposit' || benefit.kind === 'withdraw')
+    return banked(world, p, body, service.currency, benefit);
   if (benefit.kind === 'entitlement') {
     const start = { ops: [...ops, ...inputs], position: 0, facts: {} },
       grant = { fact: benefit.fact, value: true };
@@ -230,6 +236,32 @@ function repair(
   const start = { ops, position: 0, facts: {} },
     step = { fact: d.fact, value: next, subject: wielded!.id };
   return { ops: assigned(world, p.actor_id, start, step, 'durability').ops };
+}
+
+// Row 25: deposit = fee, then amount to vault; withdraw = amount to body, then fee; account follows.
+function banked(
+  world: World,
+  p: Payload,
+  body: EntityId,
+  currency: DefinitionRef,
+  benefit: Extract<ServiceDefinition['benefit'], { kind: 'deposit' | 'withdraw' }>,
+): UnavailableReason | { ops: readonly DeltaOp[] } {
+  const vault = world.entityIds[refString(benefit.vault)],
+    deposit = benefit.kind === 'deposit',
+    by = deposit ? benefit.amount : -benefit.amount,
+    current = value(world, p.actor_id, benefit.account),
+    next = bounded(world, benefit.account, current, by);
+  const [from, to] = deposit ? [body, vault] : [vault, body];
+  const fee = (l?: Levels) => transfer(world, body, p.provider_id, currency, p.quoted_price, l);
+  const move = (l?: Levels) => transfer(world, from, to, currency, benefit.amount, l);
+  const first = deposit ? fee() : move(),
+    second = first && (deposit ? move(first.levels) : fee(first.levels)),
+    owed = next === undefined || next !== Number(current) + by;
+  if (!deposit && (!first || owed)) return serviceRefusal('invalid_state', 'service.no_funds');
+  if (!first || !second || owed)
+    return serviceRefusal('insufficient_resource', 'service.unaffordable');
+  const start = { ops: [...first.ops, ...second.ops], position: 0, facts: {} };
+  return assigned(world, p.actor_id, start, { fact: benefit.account, value: next }, 'service');
 }
 
 function recovery(

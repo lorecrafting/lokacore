@@ -1,0 +1,9 @@
+{
+  "keywords": [
+    "door",
+    "hut_door"
+  ],
+  "short": "barrier.hut_door.short",
+  "initial": "open",
+  "key_item": "hut_key"
+}

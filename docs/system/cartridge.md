@@ -1371,6 +1371,22 @@ Required cartridge text:
 - A cancel: `service.no_order` and `service.ready`.
 - A commission with `ready_after`: also `service.no_output`.
 
+### Property and bank declarations
+
+[Property and bank](mechanics.md#property-and-bank-toolbox-rows-24-and-25) adds two `ServiceBenefit` kinds (`protocol/service.schema.json`), `{kind: "deposit", account, vault, amount}` and `{kind: "withdraw", account, vault, amount}`, no other keys. `account` is a fact ref and `vault` an NPC ref (short keys in source); `amount` is an integer 1 to 1000000. Either needs `kernel_api` at least **1.83**. Property itself declares nothing new: an `entitlement` service and G7 `locks`.
+
+The compiler (`lib/loka/content/services.ex`) and the loader (`kernel/ts/src/content/cartridge_services.ts`) refuse:
+
+- An `account` that is not a fact, or a `vault` that is not an NPC: UNRESOLVED_REFERENCE at `.benefit.account` or `.benefit.vault`.
+- An `account` that is not a bounded int player fact (scopes `["player"]`, `minimum` 0, a `maximum`, default 0), or that another engine writer owns (a reserved fact such as `skill_<key>`, `uses_<key>` or `scene_<key>`, a dream-owned scene fact, a patrol `trust_fact` or an entitlement fact; `foreignRefs` in `kernel/ts/src/content/cartridge_position.ts`, `foreign_names` in `lib/loka/content/position.ex`): SCHEMA_VIOLATION `invalid_value` at `.benefit.account`.
+- An `account` whose `maximum`, or a currency whose `maximum` − `minimum`, is below `amount` (no deposit could ever succeed): SCHEMA_VIOLATION `invalid_value` at `.benefit.amount`.
+- A `vault` without a `resource_starts` entry in the service's currency: SCHEMA_VIOLATION `invalid_value` at `.benefit.vault`.
+- Two deposit or withdraw services naming one `account` with different vaults or currencies: SCHEMA_VIOLATION `invalid_value` at each one's `.benefit.vault`.
+
+The account is engine-written: an authored write to it (a dialogue, reaction or recipe `fact.assign` or `fact.adjust`) is RESERVED_FACT, as for an entitlement fact. Another benefit cannot name it: an entitlement needs a Boolean fact and a repair a durability fact.
+
+Required cartridge text: `service.unaffordable`, and `service.no_funds` for either kind.
+
 ## D2 public Priory and book authoring
 
 [D2](mechanics.md#d2-held-books-and-public-priory-selected-contract) adds

@@ -27631,5 +27631,291 @@
         "code": "invalid_type"
       }
     ]
+  },
+  {
+    "contract": "ServiceBenefit",
+    "value": {
+      "kind": "deposit",
+      "vault": {
+        "cartridge_id": "property_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "npc",
+        "key": "vault"
+      },
+      "amount": 10
+    },
+    "errors": [
+      {
+        "path": "/account",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "ServiceBenefit",
+    "value": {
+      "kind": "withdraw",
+      "account": {
+        "cartridge_id": "property_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "fact",
+        "key": "savings"
+      },
+      "amount": 10
+    },
+    "errors": [
+      {
+        "path": "/vault",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "ServiceBenefit",
+    "value": {
+      "kind": "deposit",
+      "account": {
+        "cartridge_id": "property_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "fact",
+        "key": "savings"
+      },
+      "vault": {
+        "cartridge_id": "property_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "npc",
+        "key": "vault"
+      }
+    },
+    "errors": [
+      {
+        "path": "/amount",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "ServiceBenefit",
+    "value": {
+      "kind": "deposit",
+      "account": {
+        "cartridge_id": "property_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "fact",
+        "key": "savings"
+      },
+      "vault": {
+        "cartridge_id": "property_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "npc",
+        "key": "vault"
+      },
+      "amount": 0
+    },
+    "errors": [
+      {
+        "path": "/amount",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "contract": "ServiceBenefit",
+    "value": {
+      "kind": "withdraw",
+      "account": {
+        "cartridge_id": "property_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "fact",
+        "key": "savings"
+      },
+      "vault": {
+        "cartridge_id": "property_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "npc",
+        "key": "vault"
+      },
+      "amount": 1000001
+    },
+    "errors": [
+      {
+        "path": "/amount",
+        "code": "above_maximum"
+      }
+    ]
+  },
+  {
+    "contract": "ServiceBenefit",
+    "value": {
+      "kind": "withdraw",
+      "account": {
+        "cartridge_id": "property_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "fact",
+        "key": "savings"
+      },
+      "vault": {
+        "cartridge_id": "property_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "npc",
+        "key": "vault"
+      },
+      "amount": 10,
+      "fact": {
+        "cartridge_id": "property_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "fact",
+        "key": "savings"
+      }
+    },
+    "errors": [
+      {
+        "path": "/fact",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "ServiceBenefit",
+    "value": {
+      "kind": "withdraw",
+      "vault": {
+        "cartridge_id": "property_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "npc",
+        "key": "vault"
+      },
+      "amount": 10
+    },
+    "errors": [
+      {
+        "path": "/account",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "ServiceBenefit",
+    "value": {
+      "kind": "deposit",
+      "account": {
+        "cartridge_id": "property_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "fact",
+        "key": "savings"
+      },
+      "amount": 10
+    },
+    "errors": [
+      {
+        "path": "/vault",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "ServiceBenefit",
+    "value": {
+      "kind": "withdraw",
+      "account": {
+        "cartridge_id": "property_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "fact",
+        "key": "savings"
+      },
+      "vault": {
+        "cartridge_id": "property_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "npc",
+        "key": "vault"
+      }
+    },
+    "errors": [
+      {
+        "path": "/amount",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "ServiceBenefit",
+    "value": {
+      "kind": "withdraw",
+      "account": {
+        "cartridge_id": "property_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "fact",
+        "key": "savings"
+      },
+      "vault": {
+        "cartridge_id": "property_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "npc",
+        "key": "vault"
+      },
+      "amount": 0
+    },
+    "errors": [
+      {
+        "path": "/amount",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "contract": "ServiceBenefit",
+    "value": {
+      "kind": "deposit",
+      "account": {
+        "cartridge_id": "property_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "fact",
+        "key": "savings"
+      },
+      "vault": {
+        "cartridge_id": "property_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "npc",
+        "key": "vault"
+      },
+      "amount": 1000001
+    },
+    "errors": [
+      {
+        "path": "/amount",
+        "code": "above_maximum"
+      }
+    ]
+  },
+  {
+    "contract": "ServiceBenefit",
+    "value": {
+      "kind": "deposit",
+      "account": {
+        "cartridge_id": "property_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "fact",
+        "key": "savings"
+      },
+      "vault": {
+        "cartridge_id": "property_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "npc",
+        "key": "vault"
+      },
+      "amount": 10,
+      "fact": {
+        "cartridge_id": "property_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "fact",
+        "key": "savings"
+      }
+    },
+    "errors": [
+      {
+        "path": "/fact",
+        "code": "unknown_property"
+      }
+    ]
   }
 ]

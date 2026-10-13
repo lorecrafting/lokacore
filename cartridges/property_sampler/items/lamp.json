@@ -1,0 +1,12 @@
+{
+  "keywords": [
+    "lamp"
+  ],
+  "short": "item.lamp.short",
+  "room_line": "item.lamp.room",
+  "description": "item.lamp.description",
+  "location": {
+    "in": "npc",
+    "npc": "seller"
+  }
+}

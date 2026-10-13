@@ -22,12 +22,21 @@ export function transportButtons(v: GameView, text: Say): Press[] {
   );
 }
 
+type Offer = NonNullable<GameView['entities'][number]['services']>[number];
+
+/** A service offer's price note: a bank fee (row 25), or the MV a meal or drink restores. */
+export function priceNote({ benefit: b, price }: Offer): string {
+  if (b.kind === 'deposit' || b.kind === 'withdraw') return `fee ${price}p`;
+  const mv = b.kind === 'meal' || b.kind === 'drink' ? `; up to +${b.amount} MV, capped` : '';
+  return `${price}p${mv}`;
+}
+
 export function serviceButtons(v: GameView, text: Say): Press[] {
   return v.entities.flatMap((e) =>
     (e.services ?? [])
       .filter((s) => s.action.available)
       .map((s) => ({
-        label: `${text(s.label)} — ${s.price}p${'amount' in s.benefit ? `; up to +${s.benefit.amount} MV, capped` : ''}`,
+        label: `${text(s.label)} — ${priceNote(s)}`,
         action_key: s.action.action_key,
         command: s.action.command,
         detail_id: e.id,

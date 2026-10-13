@@ -1,0 +1,12 @@
+{
+  "provider": "seller",
+  "currency": "pennies",
+  "action": "buy_hut",
+  "label": "service.buy_hut",
+  "narration": "service.buy_hut.used",
+  "price": 10,
+  "benefit": {
+    "kind": "entitlement",
+    "fact": "owns_hut"
+  }
+}

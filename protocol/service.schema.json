@@ -253,9 +253,61 @@
             "service"
           ],
           "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "deposit"
+            },
+            "account": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "vault": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "amount": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "kind",
+            "account",
+            "vault",
+            "amount"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "withdraw"
+            },
+            "account": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "vault": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "amount": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            }
+          },
+          "required": [
+            "kind",
+            "account",
+            "vault",
+            "amount"
+          ],
+          "additionalProperties": false
         }
       ],
-      "description": "Closed paid entitlement, finite meal recovery, provider-owned complete liquid serving (recovery is MV only) or, toolbox row 21, a repair adding up to amount to the wielded weapon's durability fact; or, toolbox row 20b, a claim or cancel of the named commission service's timed escrow order.",
+      "description": "Closed paid entitlement, finite meal recovery, provider-owned complete liquid serving (recovery is MV only) or, toolbox row 21, a repair adding up to amount to the wielded weapon's durability fact; or, toolbox row 20b, a claim or cancel of the named commission service's timed escrow order; or, toolbox row 25, a deposit or withdraw of amount between the player's pool and the vault NPC's, mirrored in the account fact, the price being the fee.",
       "examples": [
         {
           "kind": "entitlement",
