@@ -38,3 +38,17 @@
 - Twins: floors, account shape, vault currency and the clash agree; both miss finding 1.
 - Schema: two new oneOf branches; `invalid.json` adds a missing account, vault and amount, amount 0 and 1000001, and an extra `fact` key, across both kinds; no frozen fixture changed.
 - Developer claims rerun: vault starts with 20 pennies (`npcs/vault.json`); e1_obligations size allow 550 with the bank branch (diff).
+
+## Fix round 1 (head `05917bf17cba0ede76f93a55516fe3983c05622c`)
+
+I reviewed only `bb5fa18` and `05917bf`, plus the code they touch and its direct callers. Hosted CI on `05917bf`: `ci` and `book-e2e` success. Focused runs green: `kernel/ts/test/property.test.ts`, `mobile/app/book/offers.test.ts`, `test/loka/content_property_test.exs`.
+
+| Item | Disposition | Proof |
+|---|---|---|
+| Finding 1 (foreign account) | fixed | `cartridge_services.ts:155` (`foreignRefs`), `services.ex:282` (`Position.foreign_names`). The round-1 `uses_pick` probe now fails compile with `SCHEMA_VIOLATION` at `services/{deposit,withdraw}_{a,b}.benefit.account`. Twin case `g` in both kernels. Both mutants that drop the check are killed (TS `g`; Elixir `not in []`). |
+| Finding 2 (Book MV label) | fixed | `offers.ts:28` `priceNote` gives `fee 1p` for deposit and withdraw. Both callers use it: `offers.ts:39` (`— fee 1p`) and `Npc.tsx:181` (`(fee 1p)`). `offers.test.ts` pins the four labels with literal expected values. |
+| Finding 3 (amount bound) | fixed | `cartridge_services.ts:159-160` and `services.ex:268` (`holds?`) are equivalent (`max - min >= amount` for the account and the currency pool). Cases cover savings max 9 and amount 101. The pool-check mutant (TS) and the `holds?`-always-true mutant (Elixir) are both killed. Carried from round 1, not new: the runtime full-account branch (`next === undefined` on deposit) is still untested. |
+| Question 1 (fee order), PM ruling | done | `service/shared.ts:257-262`: a withdraw moves the amount, then charges the fee. A short account gives `no_funds`; a fee shortfall after the payout gives `unaffordable`. `commerce-save.ts:256` orders the pairs `[bank, fee]` for a withdraw, and the spec matches. The `h2` test (purse 11 -> 9) kills the fee-first mutant. |
+| `services.ex` allowance 315 -> 363 | accepted | The header gives a reason (bank and escrow admission share one pass), and 363 is under the 450 ceiling (`bin/red_size_controls.exs:43`). An optional future split would move the bank clauses into their own module. It is not required for this slice. |
+
+Verdict after fix round 1: **APPROVE WITH NOTES**
