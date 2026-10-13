@@ -92,6 +92,25 @@ test('giving the apple is one new fact per seed, four steps from the start', () 
   assert.deepEqual(r.new_facts, { count: 2, median_steps_between: 4 });
 });
 
+// Breaks: a held fact's new value not counted as a new fact (only new keys compared). A planted
+// step from trust 1 to trust 2 at step 5 of the run: one new fact, 5 steps from the start.
+test('a held fact that changes value is a new fact', () => {
+  const w = newWorld(content, '1e5f9b6d-4a2c-4d3b-8f8e-7c6b5d4e3f2a' as never, [1, 2, 3, 4]);
+  const held = (trust: number) => ({ ...w, state: { ...w.state, facts: { trust } } }) as never;
+  const t = tally();
+  t.observe(
+    held(1),
+    { type: 'scan' },
+    { decision: { kind: 'accepted' }, world: held(2) } as never,
+    {
+      command: {} as never,
+      seed: 1,
+      step: 5,
+    },
+  );
+  assert.deepEqual(t.report().new_facts, { count: 1, median_steps_between: 5 });
+});
+
 // Breaks: drift checked on accepted candidates instead of refused ones. A fresh world's view
 // lists square's east exit as available; a refusal invalid_state (a code the view shows on an
 // exit) on that move is a disagreement.

@@ -5,7 +5,7 @@
 // for authors, not a check.
 import { readFileSync } from 'node:fs';
 import { resolved } from '../src/commands/actions.ts';
-import type { DecisionResult } from '../src/contracts.gen.ts';
+import type { DecisionResult, GameView } from '../src/contracts.gen.ts';
 import { encode, type Json } from '../src/foundation/canonical.ts';
 import { INSTALLED, loadCartridge, type Cartridge, type World } from '../src/index.ts';
 import { gameView } from '../src/runtime/world.ts';
@@ -17,9 +17,7 @@ type Counts = Record<string, number>;
 type Drift = { seed: number; step: number; room: string; command: string; code: string };
 
 const count = (t: Counts, k: string) => (t[k] = (t[k] ?? 0) + 1);
-// the room's definition key; else (the body in a non-room container) the container's id
-const roomOf = (w: World, here = w.state.containers[w.body]!) =>
-  (w.rooms[here]?.key as string | undefined) ?? here;
+const roomOf = (w: World) => w.rooms[w.state.containers[w.body]!]!.key as string;
 const facts = (w: World) => (w.state.facts ?? {}) as Record<string, unknown>;
 
 // The running tallies; `left` is the room left on the run's previous room change.
@@ -95,12 +93,20 @@ function walk(t: T, before: World, after: World, step: number) {
   }
 }
 
-// The view invariant on a refused step, with the actor's resolved actions as the simulator builds them.
+// The view invariant on a refused step, with the actor's resolved actions as the simulator builds
+// them; built once per world, as a step's refused candidates share it.
+const seen = new WeakMap<World, { view: GameView; resolves: Record<string, string> }>();
 function agrees(before: World, command: At['command'], decision: DecisionResult) {
-  const resolves = Object.fromEntries(
-    Object.values(resolved(before, before.character)).map((a) => [a.key, a.command]),
-  );
-  return gameview_agrees_with_admission({ view: gameView(before), command, decision, resolves });
+  let obs = seen.get(before);
+  if (!obs) {
+    const actions = Object.values(resolved(before, before.character));
+    obs = {
+      view: gameView(before),
+      resolves: Object.fromEntries(actions.map((a) => [a.key, a.command])),
+    };
+    seen.set(before, obs);
+  }
+  return gameview_agrees_with_admission({ ...obs, command, decision });
 }
 
 /** The refusal and friction report (cartridge.md "Refusal and friction report (balance tool 8)"). */
