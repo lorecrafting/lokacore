@@ -4,7 +4,7 @@ import { uniform } from '../../foundation/rng.ts';
 import { refString, type JobRow, type Mint, type World } from '../../runtime/decision.ts';
 import { engaged } from '../combat/shared.ts';
 import { living } from '../death/shared.ts';
-import { passage } from '../movement/shared.ts';
+import { npcPassage } from '../movement/shared.ts';
 import { moves } from '../status/shared.ts';
 import { birth } from './birth.ts';
 import { bindSight } from './behavior.ts';
@@ -166,7 +166,7 @@ function wanderOne(
   const room = world.rooms[from];
   const edge =
     to && Object.entries(room.exits).find(([, e]) => world.roomIds[refString(e.to)] === to);
-  if (!to || !edge || passage(world, room, edge[0] as never) || !moves(world, member)) return [];
+  if (!to || !edge || npcPassage(world, room, edge[0]) || !moves(world, member)) return [];
   const transfer = moveOp(member as EntityId, from, to);
   return [
     transfer,

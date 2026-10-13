@@ -55,6 +55,18 @@ export function passage(
 }
 
 /**
+ * The one NPC exit check (toolbox row W26, Beads loka-kgd.32): why an NPC may not cross the exit
+ * in `direction`: none there, a hidden face (whether or not the player found it) or a climb face
+ * is not_found, then `passage`'s barrier refusal; undefined when it may. Read-only; hound flight,
+ * sighted refuge, population wander and the crow share it.
+ */
+export function npcPassage(world: World, room: RoomDefinition, direction: string) {
+  const exit = exitOf(room, direction);
+  if (!exit || exit.hidden_until || exit.climb) return 'not_found' as const;
+  return passage(world, room, direction);
+}
+
+/**
  * The fall of a climb (toolbox row 30) when `body` crosses the exit in `direction` without the
  * climb's item: its HP loss after `levels`, stopping at 1 or the pool's minimum (a fall never
  * kills), and its narration key. Undefined when the exit is no climb or the body holds the item.

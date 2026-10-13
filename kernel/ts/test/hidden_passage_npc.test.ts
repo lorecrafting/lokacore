@@ -8,16 +8,18 @@ import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { escapeDirections } from '../src/mechanics/combat/flee.ts';
 import { h1, h2, home, fixture, wounded, begun, due, seated, run } from './c4_pack_fixture.ts';
 import { fresh } from './deer_fixture.ts';
+import { key as rowKey } from '../src/foundation/compose.ts';
 
 /**
  * `world` with the exit `direction` of room `room` hidden until a false-default bool fact is true,
- * or with `climb` a climb face instead (row 30; its item is never read by an NPC).
+ * or with `climb` a climb face instead (row 30; its item is never read by an NPC), or with `door`
+ * a closed barrier (row W26's npcPassage).
  */
 function hide<W extends World>(
   world: W,
   room: string,
   direction: 'east' | 'south',
-  climb = false,
+  climb: boolean | 'door' = false,
 ): W {
   const [id] = Object.entries(world.cartridge.facts!).find(
     ([, f]) => f.value_type.type === 'bool' && f.value_type.default === false,
@@ -25,22 +27,26 @@ function hide<W extends World>(
   const [, cartridge_id, cartridge_version, key] = /^(.+)@(.+):fact\/(.+)$/.exec(id)!;
   const fact = { cartridge_id, cartridge_version, kind: 'fact', key };
   const r = world.rooms[room]!;
+  const barrier = { ...fact, kind: 'barrier' };
   const exits = {
     ...r.exits,
     [direction]: {
       ...r.exits[direction]!,
-      ...(climb
-        ? { climb: { item: { ...fact, kind: 'item' }, damage: 1, fell: 'x' } }
-        : { hidden_until: { fact, equals: true } }),
+      ...(climb === 'door'
+        ? { barrier }
+        : climb
+          ? { climb: { item: { ...fact, kind: 'item' }, damage: 1, fell: 'x' } }
+          : { hidden_until: { fact, equals: true } }),
     },
   };
-  return { ...world, rooms: { ...world.rooms, [room]: { ...r, exits } } } as W;
+  const barrierInitial = { ...world.barrierInitial, [rowKey(barrier)]: 'closed' };
+  return { ...world, barrierInitial, rooms: { ...world.rooms, [room]: { ...r, exits } } } as W;
 }
 
-// Breaks: a wounded hound flees through a hidden or climb face (its only area exit), naming it in
-// enemy_fled.
-for (const climb of [false, true])
-  test(`a wounded hound whose only area exit is ${climb ? 'a climb' : 'hidden'} stays in combat`, () => {
+// Breaks: a wounded hound flees through a hidden or climb face or a closed door (its only area
+// exit), naming it in enemy_fled.
+for (const climb of [false, true, 'door'] as const)
+  test(`a wounded hound whose only area exit is ${climb === 'door' ? 'a closed door' : climb ? 'a climb' : 'hidden'} stays in combat`, () => {
     const result = due(hide(seated(begun(wounded(fixture(), 1))), home, 'east', climb));
     assert.equal(result.decision.kind, 'accepted', JSON.stringify(result.decision));
     assert.equal(result.world.state.containers[h2], home);
