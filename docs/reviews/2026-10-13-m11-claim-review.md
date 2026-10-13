@@ -39,3 +39,33 @@
 - Same-time-job lesson: the order job writes only `job.complete`, so order among same-time jobs cannot matter.
 - Composition: `schedule/rule.ts` dispatches the `order` kind as it does `wage`. No capability code names a content key.
 - `docs/lessons/storage.md`: the mobile test reopens the real SQLite store while pending and after completion and checks the replay.
+
+## Fix round 1
+
+- Head `cc41d7d739fc2927348d61cab835b765496054ce` (one commit on `526d6ab8`); I reviewed only its 7 files and their direct callers. Hosted CI: `ci` and `book-e2e` were in progress at review time.
+- Green: `node --test` escrow and e1 (19 pass, my probe included); `mix test` content_escrow (2 pass); `bin/check_size.exs` and `bin/check_ts_size.mjs` exit 0. `services.ex` is 313 lines under its `# size: allow 315`, which states a reason.
+
+Dispositions:
+
+1. Finding 1 is fixed (`kernel/ts/test/e1.ts:33`). No receipt is regenerated, which is correct: `check_hash` is computed when E1 evidence is recorded (`kernel/ts/test/e1.ts:64`) and is stored only in dated `docs/evidence` snapshots, which stay frozen. The precedent `628bc29` is the same one line.
+2. Finding 2 is fixed in both kernels, per the PM ruling (`owned` in `kernel/ts/src/content/cartridge_services.ts:32-41` and `lib/loka/content/services.ex:58-68`; rule in `docs/system/cartridge.md`). Probes:
+   - The `rent` probe (a plain entitlement on fact `ordered`) is now refused SCHEMA_VIOLATION at `.benefit.fact` in both kernels.
+   - A commission fact written as a full DefinitionRef is refused too.
+   - With two timed commissions on one fact, Elixir reports both; the TS loader reports `claim`, the same first diagnostic.
+   - The `entitlement_texts` rewrite in `services.ex` gives the same text sets.
+3. Finding 3 is fixed (`docs/system/mechanics.md:1512`).
+
+Mutants:
+
+- Killed: TS `owned` not called (3 fail); Elixir `owned` dropped (content_escrow 1/2).
+- Survived: see finding 4.
+
+## Findings, fix round 1
+
+4. **should-fix** at `kernel/ts/test/escrow.test.ts:358-366` and `test/loka/content_escrow_test.exs:71-78`. The planted twin case is an escrowed entitlement. A mutant that checks only escrowed entitlements survives in both kernels:
+   - TS: `fact` with `s.benefit.escrow &&` added; escrow 0 fail.
+   - Elixir: the second comprehension matching `"escrow" => _`; 2/2 pass.
+
+   Scenario: under that mutant the finding-2 `rent` service (no escrow) loads again, and its claim hands over the sword with no ore and no wait. Fix: make the planted benefit a plain `{kind: entitlement, fact: ordered}` in both tests, adding a `service.already_paid` text.
+
+Verdict, fix round 1: **APPROVE WITH NOTES** (the blocker is fixed; finding 4 is open).
