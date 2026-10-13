@@ -5,7 +5,7 @@ defmodule Loka.ContentPropertyTest do
   # Breaks (toolbox row 25; twin of the loader rows in kernel/ts/test/property.test.ts): a deposit
   # or withdraw compiles under API 1.82, with an account that is not a bounded int player fact
   # from 0 or is no fact, a vault that is no NPC or holds no pennies, branches on one account with
-  # different vaults, an entitlement or an authored dialogue write on the account, or without
+  # different vaults or currencies, an entitlement or an authored dialogue write on the account, or without
   # service.no_funds.
   test "the bank keeps its API floor, a bounded account, one vault and its texts", %{dir: dir} do
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, [])
@@ -41,6 +41,10 @@ defmodule Loka.ContentPropertyTest do
            {"SCHEMA_VIOLATION", "#{at}.vault"}},
           {[{"services/withdraw_b.json", &put_in(&1, ["benefit", "vault"], "clerk_a")}],
            {"SCHEMA_VIOLATION", "services/withdraw_b.benefit.vault"}},
+          {[
+             {"services/withdraw_b.json", &Map.put(&1, "currency", "hp")},
+             {"npcs/vault.json", &put_in(&1, ["resource_starts", "hp"], 0)}
+           ], {"SCHEMA_VIOLATION", "services/withdraw_b.benefit.vault"}},
           {[{"services/buy_hut.json", &put_in(&1, ["benefit", "fact"], "savings")}],
            {"SCHEMA_VIOLATION", "services/buy_hut.benefit.fact"}},
           {[

@@ -1,4 +1,4 @@
-# size: allow 351, row 20a/20b/25 escrow orders check in the same service admission pass as their commission
+# size: allow 352, row 20a/20b/25 escrow orders check in the same service admission pass as their commission
 defmodule Loka.Content.Services do
   @moduledoc "Checks finite immediate service declarations and their exact provider stock."
   import Loka.Content.Source, only: [diag: 2, diag: 3, diag: 4, at: 2, ref: 3]
@@ -60,16 +60,17 @@ defmodule Loka.Content.Services do
       vaults(declared)
   end
 
-  # Toolbox row 25: the services on one account name one vault.
+  # Toolbox row 25: the services on one account name one vault and one currency.
   defp vaults(declared) do
-    banks = for {rel, %{"benefit" => b}} <- declared, bank?(b), do: {rel, b}
+    banks = for {rel, s} <- declared, bank?(s["benefit"]), do: {rel, s}
 
-    for {rel, b} <- banks,
-        Enum.any?(banks, fn {_, o} ->
-          o["account"] == b["account"] and o["vault"] != b["vault"]
-        end),
+    for {rel, s} <- banks,
+        Enum.any?(banks, fn {_, o} -> account(o) == account(s) and home(o) != home(s) end),
         do: bad(at(rel, ["benefit", "vault"]))
   end
+
+  defp account(s), do: s["benefit"]["account"]
+  defp home(s), do: {s["benefit"]["vault"], s["currency"]}
 
   defp bank?(b), do: b["kind"] in ~w(deposit withdraw)
 

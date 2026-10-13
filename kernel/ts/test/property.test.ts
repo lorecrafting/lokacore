@@ -195,7 +195,7 @@ test('h. a purse of 10 cannot deposit 10 after the fee; offer and use agree', ()
 
 // Twin of test/loka/content_property_test.exs. Breaks: the loader admits deposit or withdraw
 // below API 1.83, an account that is not a bounded int player fact from 0, a vault that is not an
-// NPC holding the currency, branches on one account with different vaults, another benefit or an
+// NPC holding the currency, branches on one account with different vaults or currencies, another benefit or an
 // authored dialogue write on the account, or a bank service without service.no_funds.
 test('g. the loader keeps the bank to API 1.83, a bounded account and one vault', () => {
   const diagnostic = (edit: (c: any) => void) => {
@@ -233,6 +233,13 @@ test('g. the loader keeps the bank to API 1.83, a bounded account and one vault'
     ],
     [
       (c) => (benefit(c, 'withdraw_b').vault = ref('npc', 'clerk_a')),
+      ['SCHEMA_VIOLATION', `${at('deposit_a')}.benefit.vault`],
+    ],
+    [
+      (c) => {
+        c.services[`${S}:service/withdraw_b`].currency = ref('resource', 'hp');
+        c.npcs[`${S}:npc/vault`].resource_starts.hp = 0;
+      },
       ['SCHEMA_VIOLATION', `${at('deposit_a')}.benefit.vault`],
     ],
     [

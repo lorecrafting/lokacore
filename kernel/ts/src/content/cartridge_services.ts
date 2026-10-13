@@ -137,7 +137,7 @@ function escrow(c: Obj, e: Obj, at: string, check: Checks, out: Diagnostic[]) {
 }
 
 // Toolbox row 25: the account is a bounded int player fact from 0, the vault an NPC holding the
-// currency, and every service on one account names one vault.
+// currency, and every service on one account names one vault and one currency.
 function bank(c: Obj, s: Obj, at: string, check: Checks, out: Diagnostic[]) {
   const b = s.benefit,
     fact = get(c, check, b.account, 'fact', `${at}.benefit.account`),
@@ -154,7 +154,9 @@ function bank(c: Obj, s: Obj, at: string, check: Checks, out: Diagnostic[]) {
   const vault = get(c, check, b.vault, 'npc', `${at}.benefit.vault`);
   const clash = Object.values(c.services as Obj).some(
     (o) =>
-      banks(o.benefit) && same(o.benefit.account, b.account) && !same(o.benefit.vault, b.vault),
+      banks(o.benefit) &&
+      same(o.benefit.account, b.account) &&
+      !same([o.benefit.vault, o.currency], [b.vault, s.currency]),
   );
   if (vault && (vault.resource_starts?.[s.currency.key] === undefined || clash))
     bad(out, `${at}.benefit.vault`);
