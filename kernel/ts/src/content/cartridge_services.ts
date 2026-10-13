@@ -23,7 +23,21 @@ export function services(c: Obj): Diagnostic[] {
     }
   }
   beds(c, check, out);
+  owned(c, out);
   return out;
+}
+
+// Toolbox row 20b: a timed order's fact belongs to its commission alone; another entitlement
+// setting it would open an order with no inputs and no job.
+function owned(c: Obj, out: Diagnostic[]) {
+  const entries = Object.entries((c.services ?? {}) as Obj),
+    fact = (s: Obj) => s.benefit.kind === 'entitlement' && refString(s.benefit.fact);
+  const owner = new Map(
+    entries.filter(([, s]) => s.benefit.escrow?.ready_after).map(([r, s]) => [fact(s), r]),
+  );
+  for (const [ref, s] of entries)
+    if (fact(s) && owner.has(fact(s)) && owner.get(fact(s)) !== ref)
+      bad(out, `.cartridge.services${step(ref)}.benefit.fact`);
 }
 
 function definition(c: Obj, s: Obj, ref: string, check: Checks, out: Diagnostic[]) {

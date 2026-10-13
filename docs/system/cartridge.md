@@ -1358,6 +1358,7 @@ The compiler (`lib/loka/content/services.ex`) and the loader (`kernel/ts/src/con
 - An `output` not located in the custody room: SCHEMA_VIOLATION `invalid_value` at the same path.
 - A claim or cancel `service` that is not a service: UNRESOLVED_REFERENCE at `.benefit.service`.
 - A claim or cancel `service` whose benefit is not an escrow with `ready_after`: SCHEMA_VIOLATION `invalid_value` at `.benefit.service`.
+- Another service's `entitlement` naming the `fact` of a commission whose escrow declares `ready_after`: SCHEMA_VIOLATION `invalid_value` at that service's `.benefit.fact`. It would open an order with no inputs and no job.
 - A `ready_after` without the `schedule` capability: UNDECLARED_CAPABILITY at `.benefit.escrow.ready_after`.
 
 Required cartridge text:

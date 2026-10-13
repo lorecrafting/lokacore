@@ -317,7 +317,8 @@ test('a new order after a cancel waits for its own job', () => {
 
 // Twin of test/loka/content_escrow_test.exs. Breaks: the loader admits claim, cancel or a timed
 // escrow below API 1.80, a claim naming a service with no ready_after, an output outside custody,
-// a timed escrow without the schedule capability, or a claim or cancel without its refusal texts.
+// a timed escrow without the schedule capability, another entitlement naming the timed order's
+// fact (it would open an order with no ore and no job), or a claim or cancel without its texts.
 test('the loader keeps claim and cancel to API 1.80, a timed commission and its texts', () => {
   const diagnostic = (edit: (c: any) => void) => {
     const r = reload(edit);
@@ -353,6 +354,15 @@ test('the loader keeps claim and cancel to API 1.80, a timed commission and its 
         delete c.manifest.time_policy;
       },
       ['UNDECLARED_CAPABILITY', `${at('commission')}.benefit.escrow.ready_after`],
+    ],
+    [
+      (c) =>
+        (svc(c, 'cancel').benefit = {
+          kind: 'entitlement',
+          fact: ref('fact', 'ordered'),
+          escrow: { items: [ref('item', 'ore_a')], quantity: 1, custody: ref('room', 'vault') },
+        }),
+      ['SCHEMA_VIOLATION', `${at('cancel')}.benefit.fact`],
     ],
     [(c) => delete c.text['service.not_ready'], ['UNRESOLVED_REFERENCE', `${at('claim')}.wait`]],
     [(c) => delete c.text['service.no_output'], ['UNRESOLVED_REFERENCE', `${at('claim')}.output`]],

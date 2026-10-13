@@ -1,3 +1,4 @@
+# size: allow 315, row 20a/20b escrow orders check in the same service admission pass as their commission
 defmodule Loka.Content.Services do
   @moduledoc "Checks finite immediate service declarations and their exact provider stock."
   import Loka.Content.Source, only: [diag: 2, diag: 3, diag: 4, at: 2, ref: 3]
@@ -51,7 +52,19 @@ defmodule Loka.Content.Services do
     declared = for {_, {rel, [], s}} <- defs["service"], do: {rel, s}
 
     Enum.flat_map(declared, fn {rel, s} -> service(rel, s, m, defs, text) end) ++
-      beds(m, defs, text) ++ api(m, declared) ++ providers(m, defs)
+      beds(m, defs, text) ++ api(m, declared) ++ providers(m, defs) ++ owned(declared)
+  end
+
+  # Toolbox row 20b: a timed order's fact belongs to its commission alone; another entitlement
+  # setting it would open an order with no inputs and no job.
+  defp owned(declared) do
+    owners =
+      for {rel, %{"benefit" => %{"escrow" => %{"ready_after" => _}} = b}} <- declared,
+          do: {b["fact"], rel}
+
+    for {rel, %{"benefit" => %{"kind" => "entitlement", "fact" => f}}} <- declared,
+        Enum.any?(owners, fn {o, owner} -> o == f and owner != rel end),
+        do: bad(at(rel, ["benefit", "fact"]))
   end
 
   defp api(m, declared) do
@@ -169,10 +182,11 @@ defmodule Loka.Content.Services do
 
   defp entitlement_texts(nil), do: ~w(service.unaffordable service.already_paid)
 
-  defp entitlement_texts(escrow),
-    do:
-      ~w(service.unaffordable service.order_open service.missing_inputs) ++
-        if(is_map_key(escrow, "ready_after"), do: ~w(service.no_output), else: [])
+  defp entitlement_texts(%{"ready_after" => _}),
+    do: entitlement_texts(%{}) ++ ~w(service.no_output)
+
+  defp entitlement_texts(_),
+    do: ~w(service.unaffordable service.order_open service.missing_inputs)
 
   defp service_texts(s) do
     reasons =
