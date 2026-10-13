@@ -48,3 +48,9 @@ Scoped to `f68c90c` (`friction.ts`, `friction.test.ts`) and the callers `refusal
 4. Finding 4: the PM reports the `/code-review` result; not verified here.
 
 Verdict after round 1: **APPROVE WITH NOTES** (one should-fix, item 3).
+
+## Fix round 2 (head `edfc46b26cf2f6293516c42405c0a4b534bf01d5`)
+
+Scoped to `edfc46b` (`friction.test.ts` only). The round 1 cache gap is **fixed**. The drift test (`friction.test.ts:119-146`) refuses `move east` in square and then `move west` in gate. Gate is reached by a real `step` east. Hand-check: each room's view offers its one exit, and `invalid_state` is a code the view shows for a move, so each refusal is drift: count 2, rooms square and gate. Baseline friction tests: 6/6 pass. Mutant M7 (the cache keyed on one constant) is killed by this test: square's view lists no west exit, so the gate refusal would read as agreeing.
+
+Verdict after round 2: **APPROVE**. No open items.
