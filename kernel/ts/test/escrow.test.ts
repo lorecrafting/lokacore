@@ -356,12 +356,10 @@ test('the loader keeps claim and cancel to API 1.80, a timed commission and its 
       ['UNDECLARED_CAPABILITY', `${at('commission')}.benefit.escrow.ready_after`],
     ],
     [
-      (c) =>
-        (svc(c, 'cancel').benefit = {
-          kind: 'entitlement',
-          fact: ref('fact', 'ordered'),
-          escrow: { items: [ref('item', 'ore_a')], quantity: 1, custody: ref('room', 'vault') },
-        }),
+      (c) => {
+        svc(c, 'cancel').benefit = { kind: 'entitlement', fact: ref('fact', 'ordered') };
+        c.text['service.already_paid'] = 'Already paid.';
+      },
       ['SCHEMA_VIOLATION', `${at('cancel')}.benefit.fact`],
     ],
     [(c) => delete c.text['service.not_ready'], ['UNRESOLVED_REFERENCE', `${at('claim')}.wait`]],

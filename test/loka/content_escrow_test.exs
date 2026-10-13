@@ -70,11 +70,8 @@ defmodule Loka.ContentEscrowTest do
            ], {"UNDECLARED_CAPABILITY", "services/commission.benefit.escrow.ready_after"}},
           {[
              {"services/cancel.json",
-              &Map.put(&1, "benefit", %{
-                "kind" => "entitlement",
-                "fact" => "ordered",
-                "escrow" => %{"items" => ["ore_a"], "quantity" => 1, "custody" => "vault"}
-              })}
+              &Map.put(&1, "benefit", %{"kind" => "entitlement", "fact" => "ordered"})},
+             {"text.json", &Map.put(&1, "service.already_paid", "Already paid.")}
            ], {"SCHEMA_VIOLATION", "services/cancel.benefit.fact"}},
           {[{"text.json", &Map.delete(&1, "service.not_ready")}],
            {"UNRESOLVED_REFERENCE", claim}},
