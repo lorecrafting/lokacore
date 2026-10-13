@@ -26,7 +26,10 @@ export function commerce(c: Obj): Diagnostic[] {
       npc.resource_starts?.[s.resource.key] === undefined
     )
       out.push(diag('RESOURCE_SPEC_INVALID', at));
-    s.offers.forEach((o: Obj, i: number) => out.push(...stock(c, o, `${at}.offers[${i}].stock`)));
+    const plain = s.offers.filter((o: Obj) => !o.stock).map((o: Obj) => refString(o.item));
+    s.offers.forEach((o: Obj, i: number) =>
+      out.push(...stock(c, o, `${at}.offers[${i}].stock`, plain)),
+    );
     for (const o of s.offers) {
       const item = c.items?.[refString(o.item)];
       if (
@@ -63,7 +66,7 @@ function discountValid(c: Obj, s: Obj, npc: Obj) {
 }
 
 // Toolbox row W11: a price per count of a set of distinct items led by the offer's own.
-function stock(c: Obj, o: Obj, at: string): Diagnostic[] {
+function stock(c: Obj, o: Obj, at: string, plain: string[]): Diagnostic[] {
   if (!o.stock) return [];
   const { items, buy } = o.stock,
     keys = items.map((r: Obj) => refString(r as never));
@@ -72,7 +75,8 @@ function stock(c: Obj, o: Obj, at: string): Diagnostic[] {
       ? []
       : [diag('UNRESOLVED_REFERENCE', `${at}.items[${i}]`)],
   );
-  if (new Set(keys).size !== keys.length) out.push(diag('DUPLICATE_DEFINITION', `${at}.items`));
+  if (new Set(keys).size !== keys.length || keys.some((k: string) => plain.includes(k)))
+    out.push(diag('DUPLICATE_DEFINITION', `${at}.items`));
   if (buy.length !== items.length || keys[0] !== refString(o.item) || buy[0] !== o.buy)
     out.push(diag('SCHEMA_VIOLATION', at, { error: 'invalid_value' }));
   return out;

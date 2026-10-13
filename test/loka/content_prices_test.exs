@@ -4,7 +4,7 @@ defmodule Loka.ContentPricesTest do
 
   # Breaks (toolbox row W11; twin of the loader rows in kernel/ts/test/prices.test.ts): a stock
   # table compiles under API 1.81, with a price per count that does not match its set, a set not
-  # led by the offer's item, a flat buy other than the first price, a repeated or unknown item.
+  # led by the offer's item, a flat buy other than the first price, a repeated or unknown item, or a plain offer's item.
   test "a stock table keeps its API floor, one price per item, the offer's item first", %{
     dir: dir
   } do
@@ -24,6 +24,15 @@ defmodule Loka.ContentPricesTest do
           {[stock.(&Map.put(&1, "buy", 4))], {"SCHEMA_VIOLATION", at}},
           {[stock.(&put_in(&1, ["stock", "items"], ["fish_a", "fish_b", "fish_a"]))],
            {"DUPLICATE_DEFINITION", "#{at}.items"}},
+          {[
+             {"npcs/fishmonger.json",
+              &update_in(&1, ["shop", "offers"], fn [o] ->
+                [
+                  put_in(o, ["stock", "items"], ["fish_a", "fish_b", "basket"]),
+                  %{"item" => "basket", "buy" => 1, "sell" => 1}
+                ]
+              end)}
+           ], {"DUPLICATE_DEFINITION", "#{at}.items"}},
           {[stock.(&put_in(&1, ["stock", "items"], ["fish_a", "fish_b", "nowhere"]))],
            {"UNRESOLVED_REFERENCE", "#{at}.items[2]"}}
         ] do

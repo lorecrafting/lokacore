@@ -42,10 +42,12 @@ defmodule Loka.Content.Commerce do
 
   # Toolbox row W11: a price per count of a set of distinct items led by the offer's own.
   defp stocks(m, defs, rel, offers) do
+    plain = for o <- offers, !o["stock"], do: o["item"]
+
     stock_api(m, offers) ++
       for {%{"stock" => %{"items" => items, "buy" => buy}} = o, i} <- Enum.with_index(offers),
           path = at(rel, ["shop", "offers", i, "stock"]),
-          d <- unresolved(items, path, m, defs) ++ stock_shape(o, items, buy, path),
+          d <- unresolved(items, path, m, defs) ++ stock_shape(o, items, buy, path, plain),
           do: d
   end
 
@@ -55,9 +57,10 @@ defmodule Loka.Content.Commerce do
         do: diag("UNRESOLVED_REFERENCE", path <> ".items[#{i}]")
   end
 
-  defp stock_shape(o, items, buy, path) do
+  defp stock_shape(o, items, buy, path, plain) do
     shape = [
-      {Enum.uniq(items) == items, diag("DUPLICATE_DEFINITION", path <> ".items")},
+      {Enum.uniq(items) == items and not Enum.any?(items, &(&1 in plain)),
+       diag("DUPLICATE_DEFINITION", path <> ".items")},
       {length(buy) == length(items) and hd(items) == o["item"] and hd(buy) == o["buy"],
        diag("SCHEMA_VIOLATION", path, %{"error" => "invalid_value"})}
     ]

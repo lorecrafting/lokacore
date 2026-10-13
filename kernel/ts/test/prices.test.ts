@@ -148,7 +148,8 @@ test('a trade job moves a fish from the fisher to the fishmonger and the price f
   assert.deepEqual([held(w, fisher), held(w, monger), row(w).buy.price], [[], ['a', 'c'], 3]);
 });
 
-// e. Breaks: each declaration check dropped, or the 1.82 floor lowered.
+// e. Breaks: each declaration check dropped (a set naming a plain offer's item too), or the 1.82
+// floor lowered.
 test('the loader refuses a malformed stock table and a kernel_api below 1.82', () => {
   const offer = (c: any) => c.npcs[`${S}:npc/fishmonger`].shop.offers[0];
   const refused = (edit: (c: any) => void) => {
@@ -167,6 +168,14 @@ test('the loader refuses a malformed stock table and a kernel_api below 1.82', (
   );
   assert.deepEqual(
     refused((c) => (offer(c).stock.items[2] = ref('fish_b'))),
+    ['DUPLICATE_DEFINITION', `${at}.items`, undefined],
+  );
+  const basket = ref('basket');
+  assert.deepEqual(
+    refused((c) => {
+      c.npcs[`${S}:npc/fishmonger`].shop.offers.push({ item: basket, buy: 1, sell: 1 });
+      offer(c).stock.items[2] = basket;
+    }),
     ['DUPLICATE_DEFINITION', `${at}.items`, undefined],
   );
   assert.deepEqual(
