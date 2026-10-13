@@ -51,16 +51,22 @@ export function commerceSave(world: World, db: Db, meta: Meta, revision: number)
           spec.maximum,
         );
       } else if (money.length) {
-        const payment = dialoguePayment(world, command, shop.resource);
-        checkPayment(
-          money,
-          shop.resource,
-          payment.payer,
-          payment.recipient,
-          payment.amount,
-          balances,
-          spec.minimum,
-          spec.maximum,
+        const payments = [
+          dialoguePayment(world, command, shop.resource),
+          ...bankPayment(world, command),
+        ];
+        if (money.length !== 2 * payments.length) invalid();
+        payments.forEach((payment, i) =>
+          checkPayment(
+            money.slice(2 * i, 2 * i + 2),
+            shop.resource,
+            payment.payer,
+            payment.recipient,
+            payment.amount,
+            balances,
+            spec.minimum,
+            spec.maximum,
+          ),
         );
       }
       for (const op of decision.delta.ops)
@@ -251,6 +257,17 @@ function custodyEvidence(
     ['attack', 'flee', 'elapsed'].includes(p.type) &&
     d.delta.ops.some((o) => o.op === 'entity.create' && o.identity.id === op.destination_id)
   );
+}
+
+/** The bank pair after the fee (toolbox row 25): `amount` moves between the body and the vault. */
+function bankPayment(world: World, command: Command) {
+  const p = command.payload;
+  const benefit =
+    p.type === 'use_service' && world.cartridge.services?.[refString(p.service)]?.benefit;
+  if (!benefit || (benefit.kind !== 'deposit' && benefit.kind !== 'withdraw')) return [];
+  const vault = world.entityIds[refString(benefit.vault)];
+  const [payer, recipient] = benefit.kind === 'deposit' ? [world.body, vault] : [vault, world.body];
+  return [{ payer, recipient, amount: benefit.amount }];
 }
 
 function checkPayment(

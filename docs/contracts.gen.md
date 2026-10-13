@@ -772,13 +772,15 @@ StateScope and AudiencePolicy (03 §6).
 
 B8 typed finite paid entitlement, meal and provider-owned serving.
 
-- **ServiceBenefit**: Closed paid entitlement, finite meal recovery, provider-owned complete liquid serving (recovery is MV only) or, toolbox row 21, a repair adding up to amount to the wielded weapon's durability fact; or, toolbox row 20b, a claim or cancel of the named commission service's timed escrow order.
+- **ServiceBenefit**: Closed paid entitlement, finite meal recovery, provider-owned complete liquid serving (recovery is MV only) or, toolbox row 21, a repair adding up to amount to the wielded weapon's durability fact; or, toolbox row 20b, a claim or cancel of the named commission service's timed escrow order; or, toolbox row 25, a deposit or withdraw of amount between the player's pool and the vault NPC's, mirrored in the account fact, the price being the fee.
   - `entitlement`
   - `meal`
   - `drink`
   - `repair`
   - `claim`
   - `cancel`
+  - `deposit`
+  - `withdraw`
 - **ServiceDefinition**: Exact original-provider action and conserved quote with one typed immediate benefit.
 
 ## Localized text contracts (`protocol/text.schema.json`)

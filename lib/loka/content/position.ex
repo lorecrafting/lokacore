@@ -91,6 +91,11 @@ defmodule Loka.Content.Position do
         s["benefit"]["kind"] == "entitlement",
         do: s["benefit"]["fact"]["key"]
       ),
+      for(
+        {_, {_, _, s}} <- defs["service"],
+        s["benefit"]["kind"] in ~w(deposit withdraw),
+        do: s["benefit"]["account"]["key"]
+      ),
       Enum.map(Map.keys(defs["skill"]), &("skill_" <> &1)),
       for({key, {_, _, %{"growth" => _}}} <- defs["skill"], do: "uses_" <> key),
       for({key, {_, _, %{"tip" => _}}} <- defs["recipe"], do: "seen_tip_" <> key)

@@ -1,0 +1,15 @@
+{
+  "keywords": [
+    "thief"
+  ],
+  "short": "npc.thief.short",
+  "room_line": "npc.thief.room",
+  "description": "npc.thief.description",
+  "room": "lane",
+  "daily_schedule": {
+    "8": {
+      "room": "hut",
+      "walks": true
+    }
+  }
+}

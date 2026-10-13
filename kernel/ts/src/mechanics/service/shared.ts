@@ -19,7 +19,7 @@ import { living } from '../death/shared.ts';
 import { engaged } from '../combat/shared.ts';
 import { assigned, bounded, value } from '../fact.ts';
 import { equipped } from '../lookups.ts';
-import { adjust, level, resourceRef, resourceSpec, transfer } from '../resource.ts';
+import { adjust, level, resourceRef, resourceSpec, transfer, type Levels } from '../resource.ts';
 import { serving } from '../liquid/shared.ts';
 import { selected } from '../containment/stock.ts';
 import { giveRefused } from '../containment/shared.ts';
@@ -55,22 +55,26 @@ export function transition(
   if (order && 'code' in order) return order;
   const paid = transfer(world, body, p.provider_id, service.currency, p.quoted_price);
   if (!paid) return serviceRefusal('insufficient_resource', 'service.unaffordable');
-  const done = granted(world, p, body, benefit, order, paid.ops, inputs.ops, steps);
+  const done = granted(world, p, body, service, order, paid, inputs.ops, steps);
   return 'code' in done ? done : { ops: done.ops, service };
 }
 
 // The service's benefit after payment: settle an order, grant an entitlement (taking any escrow
-// inputs), repair, or recover.
+// inputs), bank, repair, or recover.
 function granted(
   world: World,
   p: Payload,
   body: EntityId,
-  benefit: ServiceDefinition['benefit'],
+  service: ServiceDefinition,
   order: Order | undefined,
-  ops: readonly DeltaOp[],
+  paid: { ops: readonly DeltaOp[]; levels: Levels },
   inputs: readonly DeltaOp[],
   steps: Steps,
 ): UnavailableReason | { ops: readonly DeltaOp[] } {
+  const { benefit } = service,
+    { ops } = paid;
+  if (benefit.kind === 'deposit' || benefit.kind === 'withdraw')
+    return banked(world, p, body, service.currency, benefit, paid);
   if (benefit.kind === 'entitlement') {
     const start = { ops: [...ops, ...inputs], position: 0, facts: {} },
       grant = { fact: benefit.fact, value: true };
@@ -230,6 +234,31 @@ function repair(
   const start = { ops, position: 0, facts: {} },
     step = { fact: d.fact, value: next, subject: wielded!.id };
   return { ops: assigned(world, p.actor_id, start, step, 'durability').ops };
+}
+
+// Toolbox row 25: `amount` moves between the body and the vault on the levels the fee left, and
+// the service-owned account follows it; the vault short or a bound passed refuses.
+function banked(
+  world: World,
+  p: Payload,
+  body: EntityId,
+  currency: DefinitionRef,
+  benefit: Extract<ServiceDefinition['benefit'], { kind: 'deposit' | 'withdraw' }>,
+  paid: { ops: readonly DeltaOp[]; levels: Levels },
+): UnavailableReason | { ops: readonly DeltaOp[] } {
+  const vault = world.entityIds[refString(benefit.vault)],
+    deposit = benefit.kind === 'deposit',
+    by = deposit ? benefit.amount : -benefit.amount,
+    current = value(world, p.actor_id, benefit.account),
+    next = bounded(world, benefit.account, current, by);
+  const [from, to] = deposit ? [body, vault] : [vault, body];
+  const moved = transfer(world, from, to, currency, benefit.amount, paid.levels);
+  if (!moved || next === undefined || next !== Number(current) + by)
+    return deposit
+      ? serviceRefusal('insufficient_resource', 'service.unaffordable')
+      : serviceRefusal('invalid_state', 'service.no_funds');
+  const start = { ops: [...paid.ops, ...moved.ops], position: 0, facts: {} };
+  return assigned(world, p.actor_id, start, { fact: benefit.account, value: next }, 'service');
 }
 
 function recovery(

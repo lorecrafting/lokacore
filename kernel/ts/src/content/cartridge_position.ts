@@ -76,14 +76,18 @@ function writes(c: Obj, write: (s: Obj, at: string, allowed?: string) => void) {
 
 /**
  * Authored facts only the engine writes: each quest patrol's trust_fact, each entitlement service's
- * fact.
+ * fact and each deposit or withdraw service's account (toolbox row 25).
  */
 export const engineWrittenRefs = (c: Obj): string[] => [
   ...Object.values((c.quests ?? {}) as Obj).flatMap((q) =>
     q.patrol ? [refString(q.patrol.trust_fact)] : [],
   ),
   ...Object.values((c.services ?? {}) as Obj).flatMap((s) =>
-    s.benefit.kind === 'entitlement' ? [refString(s.benefit.fact)] : [],
+    s.benefit.kind === 'entitlement'
+      ? [refString(s.benefit.fact)]
+      : s.benefit.account
+        ? [refString(s.benefit.account)]
+        : [],
   ),
 ];
 

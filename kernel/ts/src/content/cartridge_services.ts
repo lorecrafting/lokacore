@@ -8,7 +8,13 @@ export function services(c: Obj): Diagnostic[] {
     check = checkers(c, out);
   const [major, minor] = c.manifest.requires.kernel_api.at_least.split('.').map(Number);
   const all = Object.values((c.services ?? {}) as Obj);
-  const floor = all.some(timed) ? 80 : all.some((s) => s.benefit.escrow) ? 79 : 23;
+  const floor = all.some((s) => banks(s.benefit))
+    ? 83
+    : all.some(timed)
+      ? 80
+      : all.some((s) => s.benefit.escrow)
+        ? 79
+        : 23;
   if (all.length && (major < 1 || (major === 1 && minor < floor)))
     out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
   for (const [ref, s] of Object.entries((c.services ?? {}) as Obj))
@@ -66,6 +72,7 @@ function definition(c: Obj, s: Obj, ref: string, check: Checks, out: Diagnostic[
       bad(out, `${at}.benefit.fact`);
     if (b.escrow) escrow(c, b.escrow, `${at}.benefit.escrow`, check, out);
   } else if (b.kind === 'repair') repair(c, b, at, check, out);
+  else if (banks(b)) bank(c, s, at, check, out);
   else if (ordered(b)) {
     const commission = get(c, check, b.service, 'service', `${at}.benefit.service`);
     if (commission && !commission.benefit.escrow?.ready_after) bad(out, `${at}.benefit.service`);
@@ -79,6 +86,7 @@ function definition(c: Obj, s: Obj, ref: string, check: Checks, out: Diagnostic[
 // The refusal texts a service needs, by benefit.
 function refusals(b: Obj) {
   const kind = b.kind;
+  if (banks(b)) return { payment: 'service.unaffordable', funds: 'service.no_funds' };
   if (ordered(b))
     return {
       payment: 'service.unaffordable',
@@ -128,6 +136,30 @@ function escrow(c: Obj, e: Obj, at: string, check: Checks, out: Diagnostic[]) {
     );
 }
 
+// Toolbox row 25: the account is a bounded int player fact from 0, the vault an NPC holding the
+// currency, and every service on one account names one vault.
+function bank(c: Obj, s: Obj, at: string, check: Checks, out: Diagnostic[]) {
+  const b = s.benefit,
+    fact = get(c, check, b.account, 'fact', `${at}.benefit.account`),
+    t = fact?.value_type;
+  if (
+    fact &&
+    (t.type !== 'int' ||
+      t.minimum !== 0 ||
+      !Number.isSafeInteger(t.maximum) ||
+      t.default !== 0 ||
+      !same(fact.scopes, ['player']))
+  )
+    bad(out, `${at}.benefit.account`);
+  const vault = get(c, check, b.vault, 'npc', `${at}.benefit.vault`);
+  const clash = Object.values(c.services as Obj).some(
+    (o) =>
+      banks(o.benefit) && same(o.benefit.account, b.account) && !same(o.benefit.vault, b.vault),
+  );
+  if (vault && (vault.resource_starts?.[s.currency.key] === undefined || clash))
+    bad(out, `${at}.benefit.vault`);
+}
+
 // Toolbox row 21: a repair restores a fact some weapon's durability names.
 function repair(c: Obj, b: Obj, at: string, check: Checks, out: Diagnostic[]) {
   get(c, check, b.fact, 'fact', `${at}.benefit.fact`);
@@ -175,6 +207,7 @@ function beds(c: Obj, check: Checks, out: Diagnostic[]) {
       }
 }
 const ordered = (b: Obj) => b.kind === 'claim' || b.kind === 'cancel';
+const banks = (b: Obj) => b.kind === 'deposit' || b.kind === 'withdraw';
 const timed = (s: Obj) => ordered(s.benefit) || s.benefit.escrow?.ready_after !== undefined;
 const finite = (r: Obj | undefined): r is Obj => !!r && r.gain === 0 && !r.regen;
 const bad = (out: Diagnostic[], at: string) =>
