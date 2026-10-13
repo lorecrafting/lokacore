@@ -90,7 +90,7 @@ const refused = (w: World, code: string) => {
 
 // Breaks: no input check (a use with too few ore pays and orders), the escrow transfers dropped
 // (the ore stays held), quantity ignored (all three held go), the fact not set or the open check
-// missing (a retry takes two more and pays again), a check after the payment, an extra event.
+// missing (a retry takes two more and pays again), an extra event.
 test('the smith takes two ore once; too few is refused and a retry takes none', () => {
   let w = fresh();
   assert.deepEqual([pennies(w), pennies(w, smith(w))], [10, 0]);
@@ -139,7 +139,7 @@ test('the smith takes two ore once; too few is refused and a retry takes none', 
   assert.deepEqual([pennies(w), pennies(w, smith(w))], [7, 3]);
 });
 
-// Breaks: inputs moved (or the order set) before the payment check passes.
+// Breaks: the payment refusal skipped when the inputs are held (the ore leaves, the order is set).
 test('a broke player keeps the ore and gets no order', () => {
   let w = fresh(sampler((c) => (c.resources[`${S}:resource/pennies`].start = 2)));
   w = take(w, 'a', 'b');
