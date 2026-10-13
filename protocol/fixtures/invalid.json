@@ -24569,6 +24569,55 @@
     ]
   },
   {
+    "name": "reaction_population_spawn_no_plan",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "clock_hour"
+      },
+      "apply": [
+        {
+          "op": "population.spawn"
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/apply/0/plan",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "reaction_population_spawn_extra_key",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "clock_hour"
+      },
+      "apply": [
+        {
+          "op": "population.spawn",
+          "plan": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "population",
+            "key": "raiders"
+          },
+          "room": "village"
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/apply/0/room",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
     "contract": "StatusDefinition",
     "value": {
       "key": "flying",

@@ -624,7 +624,7 @@ event's quest/outcome, and agree with its actor and scope; inconsistent evidence
 `precondition_failed`. The instance's actor owns the delivery. Its `when` is read on the proposal so far at the event's logical time.
 `apply` assigns facts at that actor's scope, activates a declared quest through
 `quest.activate {quest}`, or requests typed `quest.resolve {quest, outcome}` and
-`quest.fail {quest, outcome}` transitions, or ([row 41](#decay-toolbox-row-41)) moves the subject item to a room through `item.move {room}`. Resolve and fail are legal only on a
+`quest.fail {quest, outcome}` transitions, or ([row 41](#decay-toolbox-row-41)) moves the subject item to a room through `item.move {room}`, or ([row 37a](#phased-world-events-toolbox-row-37a)) births one bundle of a population plan through `population.spawn {plan}`. Resolve and fail are legal only on a
 `fact_changed` trigger, for the trigger's actor; resolve checks the quest objective,
 and fail requires an active or objectives_complete actor instance. Neither changes a
 terminal instance. Activation is legal only on a quest-resolution trigger; any prior
@@ -2809,3 +2809,24 @@ Found by [showcase plan 2](../showcase/combat-district.md) (#368); the PM brief 
   - Reused: B8 entitlement, G7 locks, the barrier lock verb and key, W26 walking, service offers, `ownership`, `bounded`.
   - New: two benefit kinds, one message key (`service.no_funds`), the 1.83 floor.
   - Missing invariant: none (resource bounds and composition `from` checks cover the transfers).
+
+## Phased world events (toolbox row 37a)
+
+[Toolbox row 37a](../MECHANICS-TOOLBOX.md#ranked-toolbox); its sampler: "full-moon raid spawns one bundle per cycle; reopening does not respawn it". The PM brief is in Beads `loka-kgd.131` (2026-10-13). [Declarations](cartridge.md#status-declarations) govern it. The trigger is content on what exists: a [reaction@1](#reaction1-kerneltssrcmechanicsreactionts) rule on `clock_hour` ([row W25](#exposure-cold-hot-damp-and-windy-toolbox-row-w25)) whose `when` reads the [`sky {lunar}`](#time-windows-hour-and-moon-gates-toolbox-row-10) leaf and a once-per-cycle fact. No reaction step could birth an NPC, so the row adds one step, which [row 39](../MECHANICS-TOOLBOX.md#ranked-toolbox) reuses.
+
+- **Step.** `population.spawn {plan}` births one bundle of the named [population plan](#c3-bounded-living-hounds-selected-contract) into the plan's `home`, at the delivery's logical time, in the lowest slot (1 to `cap`) with no living member (no member, or a dead one awaiting replacement), through the plan job's own birth (`birth`, `kernel/ts/src/mechanics/population/birth.ts`, and its slot row and sight binding, `birthSlot` in `settle.ts`), in the delivery's writer group (`spawn`, `kernel/ts/src/mechanics/population/react.ts`). A later spawn of the same rule takes the next free slot. No free slot: nothing (no fault, no event). No RNG draw: a plan's `chance` and its day and night targets govern its own job only; the step ignores them. Any trigger may carry it (unlike `population.suppress`).
+- **Members.** A spawned member is that plan's member: it wanders, fights and dies as one, a dead member's slot keeps `replacement_delay`, and it counts toward `cap`. The plan's own job is unchanged.
+- **Once per cycle (content).** The raid rule is `clock_hour` with `when` `all [sky {lunar full}, fact_compare {raided equals false}]` and `apply [population.spawn {plan raiders}, fact.assign {raided true}]`; a second rule, `clock_hour` with `when` `sky {lunar new}`, assigns `raided` false. Reopen does not respawn: the spawn and the fact write commit with the hour's advance in one receipt.
+- **Silent.** No narration and no event beyond a birth's: the member appears in its room's list.
+- **Opt-in.** A cartridge with a `population.spawn` step needs `kernel_api` 1.84 (KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least`); its `plan` must resolve to a population plan of the cartridge (UNRESOLVED_REFERENCE at the step's `plan`), in both kernels. A resolved plan already declares the `population` capability (the lock stage). Installed kernel 1.84. Chapter 1 declares none.
+- **Book.** No new element and no line: spawned NPCs show as today.
+- **Known limits.** The spawn room is the plan's `home` (no per-step room); one bundle per step. A plan without `chance` (an ecology plan) births its day or night target, at least 1, at genesis and refills it, so a plan only the step should fill is an encounter plan whose own draw content keeps out of play (the sampler's).
+- **Traps.** [Trap 1](../MECHANICS-TOOLBOX.md#traps) holds: the trigger is the calendar job's `clock_hour` on the logical clock. No new job, event, op or save section.
+- **Sampler.** `cartridges/raid_sampler`: [row 10](#time-windows-hour-and-moon-gates-toolbox-row-10)'s calendar (100 units an hour, 10 hours a day, lunar period 2000, `new` from 0, `full` from 1000); a village and a field (entry, where the player waits out of reach); `raiders` `{home village, area [village, field], cap 2, day_target 1, night_target 1, night_start 8, night_end 2, replacement_delay 100000, wander_interval 100000, chance 1}` (its own boundary falls past every test hour); the instance fact `raided` (false); the rules `raid` and `calm` above. A fresh world and the world at 999 hold no raider. At 1000 one raider stands in the village and `raided` is true; at 1900 there is still one. At 2000 `raided` is false; at 3000 a second raider stands in the village. At 5000 both slots are full: no third raider, no fault, `raided` true. A world rebuilt from the receipts up to 1000 equals the live one and still holds one raider at 1900 (`kernel/ts/test/raid.test.ts`).
+- **Composition record** ([architecture](architecture.md#building-mechanics-by-composition)).
+  - Consumer: `raid_sampler`. Later: 37b aftermath, 39 boss summons.
+  - Reads: the plan's `cap`, `home` and slot rows.
+  - Writes: what the plan job's birth writes (`entity.create`, `entity.transfer`, `resource.initialize`, `population.slot`, a sight binding). All are existing ops.
+  - Events, jobs and save rows: none new.
+  - Reused: `birth` and `birthSlot`, the `clock_hour` trigger, the `sky` leaf, `fact.assign`, population plans.
+  - New: the `population.spawn` step, `spawn` and the 1.84 floor; no foundation change.
