@@ -23,6 +23,13 @@ export type Policy = (
   visits: Record<string, number>,
 ) => Payload[];
 type Tally = Record<string, { in?: number; out?: number }>;
+/** Sees every candidate the run steps, refused or accepted, with its plain step's result. */
+export type Observe = (
+  before: World,
+  p: Payload,
+  result: ReturnType<Kernel['step']>,
+  at: { command: Command; seed: number; step: number },
+) => void;
 
 const CAP = 5000; // ponytail: steps per seed, so a policy that never passes time still ends
 // The worker's command types, best first; ancestry first, as nothing else is accepted before it.
@@ -76,13 +83,16 @@ function shuffled<T>(xs: T[], g: Gen): T[] {
 }
 
 /** Measured flows (cartridge.md "Measured flows (balance tool 2)"). */
-export function flows(c: Cartridge, opts: { seeds?: number; days?: number; policy?: Policy } = {}) {
-  const { seeds = 16, days = 3, policy = worker } = opts;
+export function flows(
+  c: Cartridge,
+  opts: { seeds?: number; days?: number; policy?: Policy; observe?: Observe } = {},
+) {
+  const { seeds = 16, days = 3, policy = worker, observe } = opts;
   const currencies = new Set(ledger(c as unknown as Obj).currencies.map((r) => r.resource));
   const coin: Tally = {};
   const items: Tally = {};
   const runs = Array.from({ length: seeds }, (_, s) =>
-    run(c, s + 1, days, policy, currencies, coin, items),
+    run(c, s + 1, days, policy, currencies, coin, items, observe),
   );
   const hours = Math.max(...runs.map((r) => r.samples.length));
   const at = (h: number) => runs.flatMap((r) => r.samples[h] ?? []);
@@ -119,6 +129,7 @@ function run(
   currencies: Set<string>,
   coin: Tally,
   items: Tally,
+  observe?: Observe,
 ) {
   const g = gen(seed);
   const rng = [g.draw(), g.draw(), g.draw(), (g.draw() | 1) >>> 0];
@@ -131,7 +142,7 @@ function run(
   for (let n = 1; n <= CAP && w.state.clock < end; n++) {
     const before = w;
     const fresh = policy(w, gameView(w), g, visits).filter((p) => !hourly.has(same(p)));
-    const [played, after] = first(w, fresh, seed, n) ?? [];
+    const [played, after] = first(w, fresh, seed, n, observe) ?? [];
     if (!played || !after) break;
     w = after;
     if (Math.floor(w.state.clock / hour) !== Math.floor(before.state.clock / hour))
@@ -154,10 +165,12 @@ const same = (p: Payload) => JSON.stringify({ ...p, continuation_id: undefined }
 // The first candidate the kernel accepts, with its world. Refused candidates take the plain
 // step; the accepted one is replayed through the simulator's `checked`, so every played step keeps
 // every invariant (checking each candidate was 85% of a run).
-function first(w: World, candidates: Payload[], seed: number, n: number) {
+function first(w: World, candidates: Payload[], seed: number, n: number, observe?: Observe) {
   for (const p of candidates) {
     const [kernel, command] = delivered(w, p, seed, n);
-    if (kernel.step(w, command, n).decision.kind !== 'accepted') continue;
+    const result = kernel.step(w, command, n);
+    observe?.(w, p, result, { command, seed, step: n });
+    if (result.decision.kind !== 'accepted') continue;
     const r = checked(kernel, w, command, n);
     if (r.failure) throw new Error(`seed ${seed} step ${n}: ${r.failure.id} ${r.failure.detail}`);
     return [p, r.world] as const;
