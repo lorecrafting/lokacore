@@ -163,6 +163,31 @@ test('e. any enter lock refuses a walking NPC, even one that holds for the playe
   assert.deepEqual(changes, []);
 });
 
+// Breaks: the walker refusal reads only the enter lock (the guard passes the gate and re-locks it).
+test("e2. a traverse lock on the lane's east exit refuses the guard; the gate emits nothing", () => {
+  changes = [];
+  const lock = { policy_version: 1, root: { op: 'has_item', item: ref('item', 'hut_key') } };
+  const w = play(
+    fresh((c) => (c.rooms[room('lane')].exits.east.locks = { traverse: lock })),
+    at(9.5),
+  );
+  assert.equal(where(w, 'guard'), room('lane'));
+  assert.deepEqual(changes, []);
+});
+
+// Lane to keep by two two-exit routes: east through the gate and the yard (direction key "east"
+// sorts first), or north through the open hut and a test-local hut east exit. Breaks: the path
+// search tries exits in another order (the guard goes by the hut, no gate events).
+test('e3. of two equal routes the guard takes the first in direction-key order', () => {
+  changes = [];
+  const w = play(
+    fresh((c) => (c.rooms[room('hut')].exits.east = { to: ref('room', 'keep') })),
+    at(9.5),
+  );
+  assert.equal(where(w, 'guard'), room('keep'));
+  assert.equal(changes.filter(([b]) => b === 'gate').length, 4);
+});
+
 // Breaks: walks read on a step that does not declare it (the locked hut stops the thief).
 test('f. without walks the thief jumps into the locked hut', () => {
   const w = play(

@@ -232,7 +232,7 @@ defmodule Loka.Content.Source do
 
   # Toolbox row W10: a daily_schedule hour may be [case, ..., room key], or (row W26) one walking
   # case {room, walks: true, goal?}; schedule_cases is compiler output only (Loka.Content.Schedules).
-  # The walking case precedes DefinitionRef, so a malformed walking hour reports its own errors.
+  # A malformed map hour reports the errors of the closer of the two (Loka.Core.Contracts anyOf).
   defp schedule(contracts, defs) do
     one = defs["ScheduleCases"]["items"]
 

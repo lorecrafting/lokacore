@@ -46,5 +46,27 @@ defmodule Loka.ContentDoorsTest do
     assert {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"} in codes(diags)
   end
 
+  # Breaks: the source walking case does not require walks (a lone {room} hour compiles to
+  # schedule_cases) or room, or a full reference hour with a bad key reports the walking case's
+  # errors.
+  test "a lone hour needs room and walks; a bad reference hour reports its key" do
+    dir = Loka.ContentSource.copy("cartridges/doors_sampler")
+
+    for {hour, at} <- [{%{"room" => "hut"}, "walks"}, {%{"walks" => true}, "room"}] do
+      lone = &put_in(&1, ["daily_schedule", "8"], hour)
+      assert {:error, diags} = Loka.ContentSource.compile(dir, [{"npcs/thief.json", lone}])
+
+      assert [{"SCHEMA_VIOLATION", "npcs/thief.daily_schedule.8.#{at}", "missing_property"}] ==
+               errors(diags)
+    end
+
+    bad = &put_in(&1, ["daily_schedule", "10"], Map.put(@ref, "key", "Yard"))
+    assert {:error, diags} = Loka.ContentSource.compile(dir, [{"npcs/thief.json", bad}])
+
+    assert [{"SCHEMA_VIOLATION", "npcs/thief.daily_schedule.10.key", "pattern_mismatch"}] ==
+             errors(diags)
+  end
+
   defp codes(diags), do: Enum.map(diags, &{&1["code"], &1["path"]})
+  defp errors(diags), do: Enum.map(diags, &{&1["code"], &1["path"], &1["data"]["error"]})
 end

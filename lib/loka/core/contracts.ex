@@ -139,17 +139,12 @@ defmodule Loka.Core.Contracts do
     do: Enum.flat_map(v, fn {k, x} -> errors(sub, x, child(path, k), defs) end)
 
   # The value's JSON type selects the anyOf branch. Two branches share a type only in the source
-  # schema's schedule hour (Loka.Content.Source): the first that accepts the value, else the
-  # first's errors.
+  # schema's schedule hour (Loka.Content.Source): the errors of the branch with fewest (none when
+  # one accepts the value; the first on a tie), so a bad reference reports its own key.
   defp keyword("anyOf", bs, v, path, defs) do
     case Enum.filter(bs, &type?(json_type(&1, defs), v)) do
-      [] ->
-        [%{path: path, code: :invalid_type}]
-
-      [b | _] = typed ->
-        if Enum.any?(typed, &(errors(&1, v, path, defs) == [])),
-          do: [],
-          else: errors(b, v, path, defs)
+      [] -> [%{path: path, code: :invalid_type}]
+      typed -> typed |> Enum.map(&errors(&1, v, path, defs)) |> Enum.min_by(&length/1)
     end
   end
 
