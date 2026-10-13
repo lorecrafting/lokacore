@@ -1,0 +1,33 @@
+{
+  "on": {
+    "event": "clock_hour"
+  },
+  "when": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": [
+        {
+          "op": "sky",
+          "lunar": "full"
+        },
+        {
+          "op": "fact_compare",
+          "fact": "raided",
+          "equals": false
+        }
+      ]
+    }
+  },
+  "apply": [
+    {
+      "op": "population.spawn",
+      "plan": "raiders"
+    },
+    {
+      "op": "fact.assign",
+      "fact": "raided",
+      "value": true
+    }
+  ]
+}

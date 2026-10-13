@@ -1,0 +1,19 @@
+{
+  "on": {
+    "event": "clock_hour"
+  },
+  "when": {
+    "policy_version": 1,
+    "root": {
+      "op": "sky",
+      "lunar": "new"
+    }
+  },
+  "apply": [
+    {
+      "op": "fact.assign",
+      "fact": "raided",
+      "value": false
+    }
+  ]
+}

@@ -34,6 +34,7 @@ const FLOORS: Record<string, number> = {
   'status.cure': 53, // status reader 3 (row G3)
   'barrier.set': 56, // row W22 (loka-kgd.96)
   'item.move': 77, // row 41 (decay)
+  'population.spawn': 84, // row 37a (phased world events)
 };
 
 const each = (c: Obj): [Obj, string][] =>
@@ -48,7 +49,13 @@ export const uses = (c: Obj) =>
     ['definition', 'reaction', at],
     ['event', r.on.event, `${at}.on.event`],
     ...r.apply.flatMap((s: Obj, i: number) =>
-      ['population.suppress', 'experience.grant', 'status.cure', 'item.move'].includes(s.op)
+      [
+        'population.suppress',
+        'experience.grant',
+        'status.cure',
+        'item.move',
+        'population.spawn',
+      ].includes(s.op)
         ? []
         : [
             [
@@ -109,6 +116,8 @@ export function reactions(c: Obj, { named, typedValue }: Checks): Diagnostic[] {
         out.push(...barrierSet(c, s, r.on.room, `${at}.apply[${i}]`, named));
       } else if (s.op === 'item.move') {
         named(s.room, 'room', `${at}.apply[${i}].room`); // row 41
+      } else if (s.op === 'population.spawn') {
+        named(s.plan, 'population', `${at}.apply[${i}].plan`); // row 37a
       } else if (!['status.apply', 'status.cure', 'experience.grant'].includes(s.op)) {
         // status steps, experience.grant, fact.adjust's int: with their declarations (cartridge_standing.ts).
         named(s.fact, 'fact', `${at}.apply[${i}].fact`);

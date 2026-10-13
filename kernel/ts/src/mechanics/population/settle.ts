@@ -76,10 +76,11 @@ export function encounter(
   return { ...born, rng: after };
 }
 
-function birthSlot(
+/** One birth into `slot` with its slot row and sight binding; also row 37a's population.spawn. */
+export function birthSlot(
   world: World,
   occurrence_id: CommandId,
-  job: JobRow,
+  job: Pick<JobRow, 'job' | 'due_time'>,
   slot: number,
   row: Slots[number]['row'],
   mint: Mint,
@@ -115,7 +116,7 @@ function birthSlot(
 function birthSight(
   world: World,
   occurrence_id: CommandId,
-  job: JobRow,
+  job: Pick<JobRow, 'job' | 'due_time'>,
   slot: number,
   value: Slots[number]['row'],
   member_id: EntityId,

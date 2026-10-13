@@ -39,6 +39,7 @@ defmodule Loka.Content.LeafRefs do
       "light.ignite" => %{"item" => "item"},
       "barrier.set" => %{"barrier" => "barrier"},
       "item.move" => %{"room" => "room"},
+      "population.spawn" => %{"plan" => "population"},
       "quest.activate" => %{"quest" => "quest"},
       "quest.resolve" => %{"quest" => "quest"},
       "quest.fail" => %{"quest" => "quest"}

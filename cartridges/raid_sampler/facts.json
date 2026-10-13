@@ -1,0 +1,15 @@
+{
+  "facts": {
+    "raided": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "instance"
+      ],
+      "meaning": "Raiders have come this full moon."
+    }
+  }
+}

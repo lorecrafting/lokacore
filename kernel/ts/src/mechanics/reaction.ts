@@ -36,6 +36,7 @@ import { saturate } from '../foundation/int.ts';
 import { npcsIn } from './death/shared.ts';
 import { setBarrier } from './barrier/react.ts';
 import { moveItem } from './containment/react.ts';
+import { spawn } from './population/react.ts';
 
 type On = ReactionRule['on'];
 // Each trigger filter (W1; reaction.schema.json): true when the event's payload field equals it.
@@ -152,6 +153,8 @@ export function sequence(
       ops.push(...setBarrier(then, step, cause, about.subject, group, own, emit)); // row W22
     } else if (step.op === 'item.move') {
       ops.push(...moveItem(then, step, about.subject, group, ops, holders)); // row 41
+    } else if (step.op === 'population.spawn') {
+      ops.push(...spawn(then, step, by.id, group, ops, mint)); // row 37a
     } else if (step.op === 'experience.grant') {
       gained = saturate(gained + step.amount);
     } else {
