@@ -38,37 +38,18 @@ export function commerceSave(world: World, db: Db, meta: Meta, revision: number)
         (o) => o.op === 'resource.adjust' && same(o.resource, shop.resource),
       );
       const p = command.payload;
-      if (p.type === 'buy' || p.type === 'sell') {
-        shopReceipt(world, provider, shop, custody, command, decision);
-        checkPayment(
-          money,
-          shop.resource,
-          p.type === 'buy' ? world.body : provider,
-          p.type === 'buy' ? provider : world.body,
-          p.quoted_price,
-          balances,
-          spec.minimum,
-          spec.maximum,
-        );
-      } else if (money.length) {
-        const payments = [
-          dialoguePayment(world, command, shop.resource),
-          ...bankPayment(world, command),
-        ];
-        if (money.length !== 2 * payments.length) invalid();
-        payments.forEach((payment, i) =>
-          checkPayment(
-            money.slice(2 * i, 2 * i + 2),
-            shop.resource,
-            payment.payer,
-            payment.recipient,
-            payment.amount,
-            balances,
-            spec.minimum,
-            spec.maximum,
-          ),
-        );
-      }
+      const shopped = p.type === 'buy' || p.type === 'sell';
+      if (shopped) shopReceipt(world, provider, shop, custody, command, decision);
+      const [payer, recipient] = p.type === 'buy' ? [world.body, provider] : [provider, world.body];
+      const payments = shopped
+        ? [{ payer, recipient, amount: p.quoted_price }]
+        : money.length
+          ? [dialoguePayment(world, command, shop.resource), ...bankPayment(world, command)]
+          : [];
+      if (money.length !== 2 * payments.length) invalid();
+      payments.forEach((x, i) =>
+        checkPayment(money.slice(2 * i, 2 * i + 2), shop.resource, x, balances, spec),
+      );
       for (const op of decision.delta.ops)
         if (op.op === 'entity.transfer' && Object.hasOwn(custody, op.entity_id)) {
           if (
@@ -273,12 +254,9 @@ function bankPayment(world: World, command: Command) {
 function checkPayment(
   ops: readonly DeltaOp[],
   resource: DefinitionRef,
-  payer: string,
-  recipient: string,
-  amount: number,
+  { payer, recipient, amount }: { payer: string; recipient: string; amount: number },
   balances: Record<string, number>,
-  minimum: number,
-  maximum: number,
+  { minimum, maximum }: { minimum: number; maximum: number },
 ) {
   if (
     balances[payer] === undefined ||
