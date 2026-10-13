@@ -151,7 +151,7 @@ export function sequence(
     } else if (step.op === 'barrier.set') {
       ops.push(...setBarrier(then, step, cause, about.subject, group, own, emit)); // row W22
     } else if (step.op === 'item.move') {
-      ops.push(...moveItem(then, step, about.subject, group)); // row 41
+      ops.push(...moveItem(then, step, about.subject, group, ops)); // row 41
     } else if (step.op === 'experience.grant') {
       gained = saturate(gained + step.amount);
     } else {

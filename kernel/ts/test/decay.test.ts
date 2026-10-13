@@ -16,6 +16,8 @@ import type { Cartridge, World } from '../src/runtime/decision.ts';
 import type { EntityId } from '../src/contracts.gen.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { activeStatuses } from '../src/mechanics/status/shared.ts';
+import { moveItem } from '../src/mechanics/containment/react.ts';
+import { uses } from '../src/content/cartridge_reactions.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-decay-'));
 let artifact: Uint8Array;
@@ -139,6 +141,20 @@ test('a subject that is not an item stays where it is', () => {
   w = drop(w, 'rag');
   assert.equal(w.state.containers[body(w)], room(w, 'market'));
   assert.equal(at(w, 'rag'), 'market');
+  // An NPC subject (the sampler has none: the body poses as one) takes nothing either.
+  const npc = { ...w, entities: { ...w.entities, [body(w)]: { kind: 'npc' } } } as never;
+  assert.deepEqual(moveItem(npc, move as never, body(w), 1, []), []);
+});
+
+// Break: a later step moves the item from where it was before the rule (a stale source faults).
+test('a second item.move in one rule starts where the first left the item', () => {
+  const steps = ['midden', 'market'].map((k) => ({ op: 'item.move', room: ref('room', k) }));
+  let w = take(
+    fresh((c) => (c.reactions[`${S}reaction/spoil`].apply = steps)),
+    'fish',
+  );
+  w = wait(w, w.state.clock + 86400);
+  assert.equal(at(w, 'fish'), 'market');
 });
 
 // Break: no "already there" check (a transfer from the midden to itself).
@@ -208,4 +224,9 @@ test('the loader refuses item.move below 1.77 or with an unknown room', () => {
     'UNRESOLVED_REFERENCE',
     `.cartridge.reactions["${spoil}"].apply[0].room`,
   ]);
+  // Break: item.move counted as a fact_changed writer (it emits no event, so needs no fact@1).
+  const steps = uses(JSON.parse(new TextDecoder().decode(artifact)).cartridge).filter(([, , p]) =>
+    /(spoil|sweep)"\]\.apply/.test(p),
+  );
+  assert.deepEqual(steps, []);
 });
