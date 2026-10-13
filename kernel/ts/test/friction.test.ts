@@ -14,7 +14,7 @@ import { fileURLToPath } from 'node:url';
 import { after, test } from 'node:test';
 import type { Policy } from '../play/flows.ts';
 import { friction, tally } from '../play/friction.ts';
-import { INSTALLED, loadCartridge, newWorld, type Cartridge } from '../src/index.ts';
+import { INSTALLED, loadCartridge, newWorld, step, type Cartridge } from '../src/index.ts';
 import type { Payload } from './sim.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-friction-'));
@@ -111,27 +111,37 @@ test('a held fact that changes value is a new fact', () => {
   assert.deepEqual(t.report().new_facts, { count: 1, median_steps_between: 5 });
 });
 
-// Breaks: drift checked on accepted candidates instead of refused ones. A fresh world's view
-// lists square's east exit as available; a refusal invalid_state (a code the view shows on an
-// exit) on that move is a disagreement.
-test('a refusal of a move the view offers is drift', () => {
-  const w = newWorld(content, '1e5f9b6d-4a2c-4d3b-8f8e-7c6b5d4e3f2a' as never, [1, 2, 3, 4]);
-  const payload = { actor_id: w.character, type: 'move', direction: 'east' };
-  const command = {
-    id: 'dddddddd-5555-4333-8444-000000000001',
+// Breaks: drift checked on accepted candidates instead of refused ones, or a refusal checked
+// against another world's view (one cached view reused: the gate refusal read against square's,
+// which lists no west exit). Each room's view lists its one exit as available (east in square,
+// west in gate); a refusal invalid_state (a code the view shows on an exit) of that move is a
+// disagreement.
+test('a refusal of a move the view offers is drift, in each room', () => {
+  const square = newWorld(content, '1e5f9b6d-4a2c-4d3b-8f8e-7c6b5d4e3f2a' as never, [1, 2, 3, 4]);
+  const move = (w: typeof square, direction: string, n: number) => ({
+    id: `dddddddd-5555-4333-8444-00000000000${n}`,
     world_context_id: w.context,
-    payload,
-  };
+    payload: { actor_id: w.character, type: 'move', direction },
+  });
+  const gate = step(square, move(square, 'east', 1) as never, 1).world;
   const decision = { kind: 'rejected', error: { code: 'invalid_state' } };
   const t = tally();
-  t.observe(w, { type: 'move', direction: 'east' }, { decision, world: w } as never, {
-    command: command as never,
-    seed: 1,
-    step: 1,
-  });
+  for (const [n, w, direction] of [
+    [1, square, 'east'],
+    [2, gate, 'west'],
+  ] as const)
+    t.observe(w, { type: 'move', direction }, { decision, world: w } as never, {
+      command: move(w, direction, n) as never,
+      seed: 1,
+      step: n,
+    });
+  const code = 'invalid_state';
   assert.deepEqual(t.report().drift, {
-    count: 1,
-    first: [{ seed: 1, step: 1, room: 'square', command: 'move', code: 'invalid_state' }],
+    count: 2,
+    first: [
+      { seed: 1, step: 1, room: 'square', command: 'move', code },
+      { seed: 1, step: 2, room: 'gate', command: 'move', code },
+    ],
   });
 });
 
