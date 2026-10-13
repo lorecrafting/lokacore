@@ -44,7 +44,7 @@ export function commerceSave(world: World, db: Db, meta: Meta, revision: number)
       const payments = shopped
         ? [{ payer, recipient, amount: p.quoted_price }]
         : money.length
-          ? [dialoguePayment(world, command, shop.resource), ...bankPayment(world, command)]
+          ? bankPayments(world, command, dialoguePayment(world, command, shop.resource))
           : [];
       if (money.length !== 2 * payments.length) invalid();
       payments.forEach((x, i) =>
@@ -240,21 +240,28 @@ function custodyEvidence(
   );
 }
 
-/** The bank pair after the fee (toolbox row 25): `amount` moves between the body and the vault. */
-function bankPayment(world: World, command: Command) {
+/**
+ * The fee with any bank pair (toolbox row 25): `amount` moves between the body and the vault after
+ * a deposit's fee and before a withdraw's.
+ */
+function bankPayments(world: World, command: Command, fee: Payment) {
   const p = command.payload;
   const benefit =
     p.type === 'use_service' && world.cartridge.services?.[refString(p.service)]?.benefit;
-  if (!benefit || (benefit.kind !== 'deposit' && benefit.kind !== 'withdraw')) return [];
+  if (!benefit || (benefit.kind !== 'deposit' && benefit.kind !== 'withdraw')) return [fee];
   const vault = world.entityIds[refString(benefit.vault)];
-  const [payer, recipient] = benefit.kind === 'deposit' ? [world.body, vault] : [vault, world.body];
-  return [{ payer, recipient, amount: benefit.amount }];
+  const deposit = benefit.kind === 'deposit';
+  const [payer, recipient] = deposit ? [world.body, vault] : [vault, world.body];
+  const bank = { payer, recipient, amount: benefit.amount };
+  return deposit ? [fee, bank] : [bank, fee];
 }
+
+type Payment = { payer: string; recipient: string; amount: number };
 
 function checkPayment(
   ops: readonly DeltaOp[],
   resource: DefinitionRef,
-  { payer, recipient, amount }: { payer: string; recipient: string; amount: number },
+  { payer, recipient, amount }: Payment,
   balances: Record<string, number>,
   { minimum, maximum }: { minimum: number; maximum: number },
 ) {

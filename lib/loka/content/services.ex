@@ -1,8 +1,8 @@
-# size: allow 352, row 20a/20b/25 escrow orders check in the same service admission pass as their commission
+# size: allow 363, row 20a/20b/25 escrow orders and bank accounts check in the same service admission pass
 defmodule Loka.Content.Services do
   @moduledoc "Checks finite immediate service declarations and their exact provider stock."
   import Loka.Content.Source, only: [diag: 2, diag: 3, diag: 4, at: 2, ref: 3]
-  alias Loka.Content.Refs
+  alias Loka.Content.{Position, Refs}
 
   defp service_benefit(b, m) do
     fields =
@@ -254,19 +254,19 @@ defmodule Loka.Content.Services do
     ]
   end
 
-  # Toolbox row 25: the account is a bounded int player fact from 0; the vault holds the currency.
-  defp benefit(%{"kind" => k, "account" => a, "vault" => v}, _, s, m, defs)
+  # Toolbox row 25: the account is a bounded int player fact from 0 no other engine writer owns;
+  # the vault holds the currency; both can hold `amount`.
+  defp benefit(%{"kind" => k, "account" => a, "vault" => v, "amount" => n}, _, s, m, defs)
        when k in ~w(deposit withdraw) do
     f = resolved(a, "fact", m, defs)
-    t = f["value_type"] || %{}
     vault = resolved(v, "npc", m, defs)
 
     [
-      {f == %{} or
-         (f["scopes"] == ["player"] and t["type"] == "int" and t["minimum"] == 0 and
-            is_integer(t["maximum"]) and t["default"] == 0), ["benefit", "account"]},
+      {f == %{} or account?(f, a, m, defs), ["benefit", "account"]},
       {vault == %{} or (vault["resource_starts"] || %{})[s["currency"]["key"]] != nil,
-       ["benefit", "vault"]}
+       ["benefit", "vault"]},
+      {holds?(f["value_type"], n) and holds?(resolved(s["currency"], "resource", m, defs), n),
+       ["benefit", "amount"]}
     ]
   end
 
@@ -274,6 +274,17 @@ defmodule Loka.Content.Services do
     recovery = resolved(b["recovery"], "resource", m, defs)
     [{recovery["key"] == "mv", ["benefit", "recovery"]}] ++ stock(b, npc, s, m, defs)
   end
+
+  defp account?(%{"value_type" => t} = f, a, m, defs),
+    do:
+      f["scopes"] == ["player"] and t["type"] == "int" and t["minimum"] == 0 and
+        is_integer(t["maximum"]) and t["default"] == 0 and
+        a["key"] not in Position.foreign_names(m, defs)
+
+  defp holds?(%{"minimum" => lo, "maximum" => hi}, n) when is_integer(lo) and is_integer(hi),
+    do: hi - lo >= n
+
+  defp holds?(_, _), do: true
 
   defp stock(%{"kind" => "meal"} = b, npc, s, m, defs) do
     stock = resolved(b["stock"], "resource", m, defs)

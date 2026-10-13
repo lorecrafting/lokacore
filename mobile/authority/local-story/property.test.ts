@@ -54,42 +54,81 @@ const books = (w: World) => [
   value(w, w.character, ref('fact', 'savings')),
 ];
 
-// Breaks: save recovery reconciles one payment pair per use_service, so the bank's second pair
-// (10 pennies between the body and the vault) makes cold reopen save_corrupt.
-test('the hut, a deposit at branch A and a withdrawal at branch B survive cold reopen', (t) => {
+/** A fresh save on the sampler; `invoke` asserts saved and accepted unless `replay`. */
+function session(t: { after: (f: () => void) => void }) {
   const dir = mkdtempSync(join(tmpdir(), 'loka-property-saves-'));
   t.after(() => rmSync(dir, { recursive: true, force: true }));
   const path = join(dir, 'bank.db');
-  let p = elapsedHost(path, undefined, bundle);
-  let story = openStory(p.db, releases, p.host);
-  assert.equal(story.kind, 'open');
-  if (story.kind !== 'open') return;
   let n = 0;
-  const invoke = (action_key: string, target_ids: string[], input = {}) => {
-    const r = (story as Extract<typeof story, { kind: 'open' }>).invoke({
-      invocation_id: `cccccccc-2424-4024-8024-${String(++n).padStart(12, '0')}`,
-      actor_id: initial.character,
-      action_key,
-      target_ids,
-      input,
-    });
-    assert.equal(r.kind, 'saved', JSON.stringify(r));
-    if (r.kind === 'saved') assert.equal((r.decision as any).kind, 'accepted', JSON.stringify(r));
+  const s = {
+    p: elapsedHost(path, undefined, bundle),
+    story: undefined as unknown as Extract<ReturnType<typeof openStory>, { kind: 'open' }>,
+    open() {
+      const story = openStory(s.p.db, releases, s.p.host);
+      if (story.kind === 'open') s.story = story;
+      return story;
+    },
+    reopen() {
+      s.p.sql.close();
+      s.p = elapsedHost(path, undefined, bundle);
+      return s.open();
+    },
+    invoke(action_key: string, target_ids: string[], input = {}, id = ++n) {
+      const r = s.story.invoke({
+        invocation_id: `cccccccc-2424-4024-8024-${String(id).padStart(12, '0')}`,
+        actor_id: initial.character,
+        action_key,
+        target_ids,
+        input,
+      });
+      assert.equal(r.kind, 'saved', JSON.stringify(r));
+      if (r.kind === 'saved') assert.equal((r.decision as any).kind, 'accepted', JSON.stringify(r));
+      return r;
+    },
+    use(action: string, provider: string, service: string, id?: number) {
+      const price = service === 'buy_hut' ? 10 : 1;
+      const input = { service: ref('service', service), quoted_price: price };
+      return s.invoke(action, [npc(provider)], input, id);
+    },
   };
-  const use = (action: string, provider: string, service: string, quoted_price: number) =>
-    invoke(action, [npc(provider)], { service: ref('service', service), quoted_price });
-  use('buy_hut', 'seller', 'buy_hut', 10);
-  use('deposit', 'clerk_a', 'deposit_a', 1);
-  assert.deepEqual(books(story.world()), [9, 30, 10]);
-  invoke('move', [], { direction: 'east' });
-  use('withdraw', 'clerk_b', 'withdraw_b', 1);
-  assert.deepEqual(books(story.world()), [18, 20, 0]);
-  p.sql.close();
+  assert.equal(s.open().kind, 'open');
+  return s;
+}
 
-  p = elapsedHost(path, undefined, bundle);
-  story = openStory(p.db, releases, p.host);
-  assert.equal(story.kind, 'open', JSON.stringify(story));
-  if (story.kind !== 'open') return;
-  assert.deepEqual(books(story.world()), [18, 20, 0]);
-  p.sql.close();
+// Breaks: save recovery reconciles one payment pair per use_service (the bank's second pair, 10
+// pennies between the body and the vault, makes cold reopen save_corrupt), the withdraw pair
+// expected after its fee, or a lost-ack retry of the deposit not replayed (it charges again).
+test('the hut, a deposit at branch A and a withdrawal at branch B survive cold reopen', (t) => {
+  const s = session(t);
+  s.use('buy_hut', 'seller', 'buy_hut');
+  s.use('deposit', 'clerk_a', 'deposit_a');
+  assert.deepEqual(books(s.story.world()), [9, 30, 10]);
+  const again = s.use('deposit', 'clerk_a', 'deposit_a', 2);
+  if (again.kind === 'saved') assert.equal(again.replay, true);
+  assert.deepEqual(books(s.story.world()), [9, 30, 10]);
+  s.invoke('move', [], { direction: 'east' });
+  s.use('withdraw', 'clerk_b', 'withdraw_b');
+  assert.deepEqual(books(s.story.world()), [18, 20, 0]);
+
+  assert.equal(s.reopen().kind, 'open');
+  assert.deepEqual(books(s.story.world()), [18, 20, 0]);
+  s.p.sql.close();
+});
+
+// Breaks: reopen trusts a stored savings row the receipts do not produce (10 forged to 11).
+test('a forged savings row reopens save_corrupt', (t) => {
+  const s = session(t);
+  s.use('deposit', 'clerk_a', 'deposit_a');
+  assert.deepEqual(books(s.story.world()), [19, 30, 10]);
+  const row = Object.keys(s.story.world().state.facts ?? {}).find(
+    (k) => JSON.parse(k).fact.key === 'savings',
+  )!;
+  const forged = s.p.sql
+    .prepare("UPDATE state_row SET value='11' WHERE section='facts' AND key=?")
+    .run(row);
+  assert.equal(forged.changes, 1);
+  const snapshot = s.p.sql.prepare('SELECT * FROM state_row ORDER BY section,key').all();
+  assert.equal(openStory(s.p.db, releases, s.p.host).kind, 'save_corrupt');
+  assert.deepEqual(s.p.sql.prepare('SELECT * FROM state_row ORDER BY section,key').all(), snapshot);
+  s.p.sql.close();
 });

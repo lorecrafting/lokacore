@@ -807,6 +807,9 @@ B3/S2 payment history and B7 liquid history must recognize the new service
 producer without weakening their own checks. Merely plausible bounded stock,
 MV or paid=true is insufficient evidence. Lawful later movement, death, elapsed
 recovery and other payment producers cannot invalidate an old service receipt.
+A [bank](mechanics.md#property-and-bank-toolbox-rows-24-and-25) receipt carries
+a second money pair, body to vault for a deposit (after the fee) and vault to
+body for a withdraw (before the fee), reconciled like the fee pair.
 
 Room proof requires its unique paid transition and matching exact payment;
 meal proof requires one exact stock debit/payment and independently valid capped

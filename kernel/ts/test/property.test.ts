@@ -17,6 +17,7 @@ import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { value } from '../src/mechanics/fact.ts';
+import { skillSpec, usesSpec } from '../src/content/cartridge_skills.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-property-sampler-'));
 let artifact: Uint8Array;
@@ -193,6 +194,19 @@ test('h. a purse of 10 cannot deposit 10 after the fee; offer and use agree', ()
   assert.deepEqual(books(w), [10, 20, 0, 0, 0]);
 });
 
+// PM ruling 2026-10-13: a withdraw pays its fee after the payout. Hand-derived: purse 11, fee 1
+// (11 -> 10), deposit 10 (-> 0, savings 10, vault 30); withdraw payout 10 (0 -> 10), fee 1
+// (-> 9, clerk A 2), savings 0, vault 20. Breaks: the withdraw fee charged before the payout.
+test('h2. a purse of 11 deposits 10 and can still withdraw it, ending at 9', () => {
+  let w = fresh((c) => (c.resources[`${S}:resource/pennies`].start = 11));
+  w = play(w, use(w, 'clerk_a', 'deposit_a', 1));
+  assert.deepEqual(books(w), [0, 30, 1, 0, 10]);
+  assert.equal(offer(w, 'clerk_a', 1).available, true);
+  const r = send(w, use(w, 'clerk_a', 'withdraw_a', 1));
+  assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
+  assert.deepEqual(books(r.world), [9, 20, 2, 0, 0]);
+});
+
 // Twin of test/loka/content_property_test.exs. Breaks: the loader admits deposit or withdraw
 // below API 1.83, an account that is not a bounded int player fact from 0, a vault that is not an
 // NPC holding the currency, branches on one account with different vaults or currencies, another benefit or an
@@ -262,6 +276,33 @@ test('g. the loader keeps the bank to API 1.83, a bounded account and one vault'
     [
       (c) => (c.services[`${S}:service/buy_hut`].benefit.fact = ref('fact', 'savings')),
       ['SCHEMA_VIOLATION', `${at('buy_hut')}.benefit.fact`],
+    ],
+    [
+      (c) => (savings(c).value_type.maximum = 9),
+      ['SCHEMA_VIOLATION', `${at('deposit_a')}.benefit.amount`],
+    ],
+    [
+      (c) => (benefit(c, 'deposit_a').amount = 101),
+      ['SCHEMA_VIOLATION', `${at('deposit_a')}.benefit.amount`],
+    ],
+    [
+      (c) => {
+        c.manifest.requires.capabilities.skills = c.lock.capabilities.skills = 1;
+        const root = { op: 'all', items: [] };
+        c.skills = {
+          [`${S}:skill/pick`]: {
+            key: 'pick',
+            label: 'service.deposit',
+            requirement: 'service.deposit',
+            qualification: { policy_version: 1, root },
+            growth: [10, 20],
+          },
+        };
+        c.facts[`${S}:fact/skill_pick`] = skillSpec('pick');
+        c.facts[`${S}:fact/uses_pick`] = usesSpec('pick', [10, 20]);
+        benefit(c, 'deposit_a').account = ref('fact', 'uses_pick');
+      },
+      ['SCHEMA_VIOLATION', `${at('deposit_a')}.benefit.account`],
     ],
     [
       (c) => delete c.text['service.no_funds'],

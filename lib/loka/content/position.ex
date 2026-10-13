@@ -64,8 +64,19 @@ defmodule Loka.Content.Position do
         }
   end
 
-  # ponytail: gather reserved names together; split on growth. # credo:disable-for-next-line Credo.Check.Refactor.ABCSize
   defp reserved_names(m, defs) do
+    engine_names(m, defs) ++
+      for {_, {_, _, s}} <- defs["service"],
+          s["benefit"]["kind"] in ~w(deposit withdraw),
+          do: s["benefit"]["account"]["key"]
+  end
+
+  @doc "Fact keys another engine writer owns; no bank account may be one (toolbox row 25)."
+  @spec foreign_names(map(), map()) :: [String.t()]
+  def foreign_names(m, defs), do: engine_names(m, defs) ++ dream_names(defs)
+
+  # ponytail: gather reserved names together; split on growth. # credo:disable-for-next-line Credo.Check.Refactor.ABCSize
+  defp engine_names(m, defs) do
     keys = if required?(m), do: ["position"], else: []
 
     scenes =
@@ -90,11 +101,6 @@ defmodule Loka.Content.Position do
         {_, {_, _, s}} <- defs["service"],
         s["benefit"]["kind"] == "entitlement",
         do: s["benefit"]["fact"]["key"]
-      ),
-      for(
-        {_, {_, _, s}} <- defs["service"],
-        s["benefit"]["kind"] in ~w(deposit withdraw),
-        do: s["benefit"]["account"]["key"]
       ),
       Enum.map(Map.keys(defs["skill"]), &("skill_" <> &1)),
       for({key, {_, _, %{"growth" => _}}} <- defs["skill"], do: "uses_" <> key),

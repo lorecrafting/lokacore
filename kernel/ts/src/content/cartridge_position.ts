@@ -27,11 +27,7 @@ const SPEC = {
 
 export function reserved(c: Obj): Diagnostic[] {
   const expected = expectedFacts(c);
-  const dreamRefs = Object.values((c.scenes ?? {}) as Obj).flatMap((s) =>
-    s.control === 'presentation_only'
-      ? [refString(s.on.rest.credit), ...s.on_end.assign.map((a: Obj) => refString(a.fact))]
-      : [],
-  );
+  const dreamRefs = dreams(c);
   const refs = Object.keys(expected).map((k) => `${c.manifest.id}@${c.manifest.version}:fact/${k}`);
   const owned = [...refs, ...engineWrittenRefs(c)];
   const out: Diagnostic[] = [];
@@ -74,21 +70,36 @@ function writes(c: Obj, write: (s: Obj, at: string, allowed?: string) => void) {
     );
 }
 
+/** The facts a presentation_only scene credits or assigns (dream-owned). */
+const dreams = (c: Obj): string[] =>
+  Object.values((c.scenes ?? {}) as Obj).flatMap((s) =>
+    s.control === 'presentation_only'
+      ? [refString(s.on.rest.credit), ...s.on_end.assign.map((a: Obj) => refString(a.fact))]
+      : [],
+  );
+
 /**
  * Authored facts only the engine writes: each quest patrol's trust_fact, each entitlement service's
- * fact and each deposit or withdraw service's account (toolbox row 25).
+ * fact and, with `accounts`, each deposit or withdraw service's account (toolbox row 25).
  */
-export const engineWrittenRefs = (c: Obj): string[] => [
+export const engineWrittenRefs = (c: Obj, accounts = true): string[] => [
   ...Object.values((c.quests ?? {}) as Obj).flatMap((q) =>
     q.patrol ? [refString(q.patrol.trust_fact)] : [],
   ),
   ...Object.values((c.services ?? {}) as Obj).flatMap((s) =>
     s.benefit.kind === 'entitlement'
       ? [refString(s.benefit.fact)]
-      : s.benefit.account
+      : s.benefit.account && accounts
         ? [refString(s.benefit.account)]
         : [],
   ),
+];
+
+/** Every fact an engine writer other than the bank owns; no bank account may be one (row 25). */
+export const foreignRefs = (c: Obj): string[] => [
+  ...Object.keys(expectedFacts(c)).map((k) => `${c.manifest.id}@${c.manifest.version}:fact/${k}`),
+  ...dreams(c),
+  ...engineWrittenRefs(c, false),
 ];
 
 export function expectedFacts(c: Obj): Obj {

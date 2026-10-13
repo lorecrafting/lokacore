@@ -5,8 +5,9 @@ defmodule Loka.ContentPropertyTest do
   # Breaks (toolbox row 25; twin of the loader rows in kernel/ts/test/property.test.ts): a deposit
   # or withdraw compiles under API 1.82, with an account that is not a bounded int player fact
   # from 0 or is no fact, a vault that is no NPC or holds no pennies, branches on one account with
-  # different vaults or currencies, an entitlement or an authored dialogue write on the account, or without
-  # service.no_funds.
+  # different vaults or currencies, an entitlement or an authored dialogue write on the account, an
+  # account or currency pool that cannot hold `amount`, an account another engine writer owns
+  # (uses_pick), or without service.no_funds.
   test "the bank keeps its API floor, a bounded account, one vault and its texts", %{dir: dir} do
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, [])
     at = "services/deposit_a.benefit"
@@ -24,6 +25,13 @@ defmodule Loka.ContentPropertyTest do
           "sequence" => [%{"op" => "fact.assign", "fact" => "savings", "value" => 50}]
         }
       }
+    }
+
+    pick = %{
+      "label" => "service.deposit",
+      "requirement" => "service.deposit",
+      "qualification" => talk["policy"],
+      "growth" => [10, 20]
     }
 
     for {edits, expected} <- [
@@ -51,6 +59,14 @@ defmodule Loka.ContentPropertyTest do
              {"cartridge.json", &put_in(&1, ["requires", "capabilities", "dialogue"], 1)},
              {"dialogues/clerk_gift.json", talk}
            ], "RESERVED_FACT"},
+          {[{"facts.json", &savings.(&1, ["maximum"], 9)}], {"SCHEMA_VIOLATION", "#{at}.amount"}},
+          {[{"services/deposit_a.json", &put_in(&1, ["benefit", "amount"], 101)}],
+           {"SCHEMA_VIOLATION", "#{at}.amount"}},
+          {[
+             {"cartridge.json", &put_in(&1, ["requires", "capabilities", "skills"], 1)},
+             {"skills/pick.json", pick},
+             {"services/deposit_a.json", &put_in(&1, ["benefit", "account"], "uses_pick")}
+           ], {"SCHEMA_VIOLATION", "#{at}.account"}},
           {[{"text.json", &Map.delete(&1, "service.no_funds")}],
            {"UNRESOLVED_REFERENCE", "services/deposit_a"}}
         ] do

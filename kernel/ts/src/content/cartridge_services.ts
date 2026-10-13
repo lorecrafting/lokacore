@@ -2,6 +2,7 @@ import { same } from '../foundation/compose.ts';
 import { refString } from '../runtime/decision.ts';
 import { checkers, diag, step, type Checks, type Obj } from './cartridge_refs.ts';
 import type { Diagnostic } from '../contracts.gen.ts';
+import { foreignRefs } from './cartridge_position.ts';
 
 export function services(c: Obj): Diagnostic[] {
   const out: Diagnostic[] = [],
@@ -136,21 +137,29 @@ function escrow(c: Obj, e: Obj, at: string, check: Checks, out: Diagnostic[]) {
     );
 }
 
-// Toolbox row 25: the account is a bounded int player fact from 0, the vault an NPC holding the
-// currency, and every service on one account names one vault and one currency.
+// Toolbox row 25: the account is a bounded int player fact from 0 that no other engine writer
+// owns, the vault an NPC holding the currency, both able to hold `amount`, and every service on one
+// account names one vault and one currency.
 function bank(c: Obj, s: Obj, at: string, check: Checks, out: Diagnostic[]) {
   const b = s.benefit,
     fact = get(c, check, b.account, 'fact', `${at}.benefit.account`),
-    t = fact?.value_type;
+    t = fact?.value_type,
+    pool = c.resources?.[refString(s.currency)];
   if (
     fact &&
     (t.type !== 'int' ||
       t.minimum !== 0 ||
       !Number.isSafeInteger(t.maximum) ||
       t.default !== 0 ||
-      !same(fact.scopes, ['player']))
+      !same(fact.scopes, ['player']) ||
+      foreignRefs(c).includes(refString(b.account)))
   )
     bad(out, `${at}.benefit.account`);
+  if (
+    (fact && t.maximum - t.minimum < b.amount) ||
+    (pool && pool.maximum - pool.minimum < b.amount)
+  )
+    bad(out, `${at}.benefit.amount`);
   const vault = get(c, check, b.vault, 'npc', `${at}.benefit.vault`);
   const clash = Object.values(c.services as Obj).some(
     (o) =>
