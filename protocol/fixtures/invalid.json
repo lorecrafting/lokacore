@@ -15256,8 +15256,8 @@
     },
     "errors": [
       {
-        "path": "/at_least",
-        "code": "missing_property"
+        "path": "",
+        "code": "exclusive_properties"
       },
       {
         "path": "/resource",

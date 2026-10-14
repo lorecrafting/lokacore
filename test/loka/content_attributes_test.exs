@@ -109,7 +109,7 @@ defmodule Loka.ContentAttributesTest do
          [d(s, "#{root}.at_least", %{"error" => "above_maximum"})]},
       missing:
         {Map.delete(pool("mv", 1), "at_least"), true, str,
-         [d(s, "#{root}.at_least", %{"error" => "missing_property"})]},
+         [d(s, root, %{"error" => "exclusive_properties"})]},
       extra: {Map.put(stat("str", 1), "x", 1), true, str, [d(u, "#{root}.x", %{})]},
       authored_key:
         {stat("str", 1), true, %{"str" => %{"key" => "str", "start" => 14}},
