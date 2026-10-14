@@ -205,7 +205,7 @@ function custodyEvidence(
   op: Extract<DeltaOp, { op: 'entity.transfer' }>,
 ) {
   const p = command.payload;
-  if (p.type === 'buy' || p.type === 'sell') return true; // shopReceipt checked the entire exchange.
+  if (p.type === 'buy' || p.type === 'sell') return true; // Its own shop's shopReceipt checks the exchange.
   // liquidSave already replayed the owned bottom corpse and every original root.
   if (p.type === 'recover_corpse')
     return (
