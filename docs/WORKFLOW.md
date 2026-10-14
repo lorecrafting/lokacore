@@ -63,7 +63,7 @@ Report at the end of the slice, not at every step.
    `docs/system` sections (the clause for each behavior; an archived plan for new work), files in and out of scope, acceptance (which checks and fixtures must
    pass, which red controls to add, mutation cases, literal expected values), the relevant `docs/lessons/` file, and anything the owner
    decided, and a scope trigger (what makes the developer stop and ask, for example an unplanned
-   protocol change with new behavior). The PM splits plan rows sized L into two briefs, and a brief holds one M-size toolbox item (or its engine and Book halves) per developer run, never a batch of three (loka-kgd.11 needed four runs); every brief states the
+   protocol change with new behavior). The PM splits plan rows sized L into two briefs, and a brief holds one M-size toolbox item (or its engine and Book halves) per developer run, never a batch of three (loka-kgd.11 needed four runs); an M engine row that adds both a new schema field and a sampler also gets two briefs, engine then content (loka-3jhb); every brief states the
    handoff threshold up front ([Claude Code specifics](#token-hygiene)). Obsolete development fixtures may be updated under the
    [forward-development decision](decisions/owner-decision-forward-development-2026-10-05.md).
    Store the brief durably when it is drafted, one home per kind, and before the spawn (the PM checks the Beads notes first; a developer lost to a limit left its brief only in a scratchpad, loka-ydy): a slice brief and its design input
