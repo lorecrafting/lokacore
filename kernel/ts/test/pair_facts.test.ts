@@ -124,7 +124,8 @@ test('facts_typed refuses a pair row without two distinct NPCs', () => {
 });
 
 // Breaks (the first site reported is the smith's variant): the loader admits row FD4 below 1.89, a pair fact outside instance scope, `with` on
-// another fact, a pair fact read without `with` (or with an item), or `with` a spawn template.
+// another fact, a pair fact read without `with` (or with an item), or `with` a spawn template or
+// the site's own npc.
 test('row FD4 needs 1.89, instance scope and a with NPC at each pair site', () => {
   const smith = `${S}:npc/smith`;
   const rootAt = `.cartridge.npcs[${JSON.stringify(smith)}].room_line_variants[0].when.root`;
@@ -146,6 +147,7 @@ test('row FD4 needs 1.89, instance scope and a with NPC at each pair site', () =
       `${rootAt}.with`,
     ],
     [(c) => delete root(c).with, 'FACT_SCOPE_UNSUPPORTED', `${rootAt}.with`],
+    [(c) => (root(c).with = ref('npc', 'smith')), 'FACT_SCOPE_UNSUPPORTED', `${rootAt}.with`],
     [(c) => (root(c).item = ref('item', 'apple')), 'FACT_SCOPE_UNSUPPORTED', `${rootAt}.item`],
     [
       (c) => (c.npcs[`${S}:npc/miller`].spawn_template = true),

@@ -241,12 +241,12 @@ function assignment(
   const who = (named ? world.entityIds[refString(named)] : subject(cause)) || undefined;
   const thing = who !== undefined && (world.entities[who] || world.details[who]);
   if (subjective(world, step.fact) && !thing) return undefined;
+  if (durable(world, step.fact)) throw new KernelError('precondition_failed');
   const partner = step.with && world.entityIds[refString(step.with)];
   if (paired(world, step.fact)) {
     const npc = (id?: EntityId) => id !== undefined && world.entities[id]?.kind === 'npc';
     if (!npc(who) || !npc(partner) || who === partner) return undefined;
   }
-  if (durable(world, step.fact)) throw new KernelError('precondition_failed');
   const { kind: _, ...target } = targetOf(world, actor, step.fact, who, partner);
   const at = key({ kind: 'fact', ...target });
   const expected = Object.hasOwn(set, at) ? set[at] : value(world, actor, step.fact, who, partner);

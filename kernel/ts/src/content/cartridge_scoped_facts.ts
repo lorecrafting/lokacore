@@ -28,16 +28,6 @@ const targetless = (at: string) =>
   TARGETLESS.some((p) => at.startsWith(p)) ||
   /^\.cartridge\.rooms\[[^\]]*\](\.exits\.[a-z_]+)?\.locks\.(enter|traverse)\./.test(at);
 const scoped = (spec: Obj | undefined) => spec?.per_subject === true;
-const used = (c: Obj, flag: string, field: string) =>
-  Object.values((c.facts ?? {}) as Record<string, Obj>).some((f) => f[flag] === true) ||
-  some(c, (o) => OPS.includes(o.op) && (field === 'with' ? 'with' in o : fieldsOf(o).length > 0));
-function some(c: Obj, test: (o: Obj) => boolean): boolean {
-  let hit = false;
-  nodes(c, (o) => {
-    hit ||= test(o);
-  });
-  return hit;
-}
 // Toolbox row 21: a weapon's durability and a repair benefit read their fact at the wielded weapon.
 const wielded = (o?: Obj) => o?.wear !== undefined || o?.kind === 'repair';
 const fieldsOf = (o: Obj) =>
@@ -56,9 +46,16 @@ function nodes(c: Obj, visit: (o: Obj, at: string, parent?: Obj, field?: string)
 
 /** KERNEL_API_RANGE_INVALID when the cartridge uses row W2 below 1.47 or row FD4 below 1.89. */
 export function scopedFacts(c: Obj): Diagnostic[] {
+  const facts = Object.values((c.facts ?? {}) as Record<string, Obj>);
+  let w2 = facts.some(scoped);
+  let fd4 = facts.some((f) => f.npc_pair === true);
+  nodes(c, (o) => {
+    if (!OPS.includes(o.op)) return;
+    w2 ||= fieldsOf(o).length > 0;
+    fd4 ||= Object.hasOwn(o, 'with');
+  });
   const api = c.manifest.requires.kernel_api.at_least;
-  return (used(c, 'per_subject', 'npc') && apiCmp(api, '1.47') < 0) ||
-    (used(c, 'npc_pair', 'with') && apiCmp(api, '1.89') < 0)
+  return (w2 && apiCmp(api, '1.47') < 0) || (fd4 && apiCmp(api, '1.89') < 0)
     ? [diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least')]
     : [];
 }
@@ -80,6 +77,7 @@ export function scopeSites(c: Obj): Diagnostic[] {
     if (paired(o.fact) !== Object.hasOwn(o, 'with')) out.push(`${at}.with`);
     else if (o.with && o.item) out.push(`${at}.item`);
     else if (o.with && c.npcs?.[refString(o.with)]?.spawn_template) out.push(`${at}.with`);
+    else if (o.with && o.npc && refString(o.with) === refString(o.npc)) out.push(`${at}.with`);
     else if (fields.length > 1 || (o.npc && c.npcs?.[refString(o.npc)]?.spawn_template))
       out.push(`${at}.${fields.at(-1)}`);
     else if (fields.length && !subjective(o.fact)) out.push(`${at}.${fields[0]}`);

@@ -2879,7 +2879,7 @@ Gap 4 of the [depth audit](../rnd/depth-and-ux-2026-10-13.md) (owner approved 20
 
 - **Declaration.** A FactSpec with `npc_pair: true` (const; absent otherwise) is an NPC-NPC pair fact. It must also be `per_subject: true` with `scopes: ["instance"]`: who owes whom among NPCs is world state (FACT_SCOPE_UNSUPPORTED at `.cartridge.facts[<ref>].npc_pair` otherwise).
 - **Row key.** The fact MutationTarget, `fact.assign` op, ScopedFact and `fact_changed` payload carry an optional `with_id` (EntityId) beside `subject_id`; both kernels compose it into the target text. Rows are **ordered**: subject toward `with`. Debts and grudges are directional, an ordered key needs no hidden sort rule, and an author wanting a symmetric bond writes both rows. No new save section: the row lives in `facts` like any other.
-- **Naming the two NPCs.** Every site naming a pair fact carries `with` (an NPC instance reference) and no `item`; `with` on any other fact, a pair fact without `with`, or `with` naming a spawn template is FACT_SCOPE_UNSUPPORTED at that field.
+- **Naming the two NPCs.** Every site naming a pair fact carries `with` (an NPC instance reference) and no `item`; `with` on any other fact, a pair fact without `with`, or `with` naming a spawn template or the site's own `npc` is FACT_SCOPE_UNSUPPORTED at that field. A pair fact is no weapon's durability fact (SCHEMA_VIOLATION): durability reads no partner.
   - `fact_compare`: the subject is the leaf's `npc` (or `subject: "target"`), the partner is `with`. A missing subject or partner reads false.
   - Reaction `fact.assign` and `fact.adjust`: the subject is the step's `npc`, else the event's declared subject (never the listener default or the body); the partner is `with`. The step writes nothing unless both are distinct NPC entities.
   - A W6 room line variant and a W10 case are `fact_compare` leaves, so they read pairs unchanged.
@@ -2896,7 +2896,7 @@ Gap 4 of the [depth audit](../rnd/depth-and-ux-2026-10-13.md) (owner approved 20
   9. Instancing: met; none built or assumed; one row per ordered pair per world.
 - **Opt-in.** An `npc_pair` fact or a `with` field needs `kernel_api` 1.89 (KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least`, both kernels). Without them nothing changes: every other cartridge keeps its bytes and hash.
 - **Book.** No new element and no [Book UI](book-ui.md) change: the reading is an authored room line variant.
-- **Known limits.** No leaf reads "any pair" or counts rows; a pair is named by two authored NPCs, so a spawned NPC cannot be in a pair.
+- **Known limits.** No leaf reads "any pair" or counts rows. `with` names an authored NPC (not a spawn template, not the site's own `npc`), so a spawned NPC can be a pair's subject only, through the event's declared subject. A pair fact cannot be a weapon's durability fact or a group fact.
 - **Sampler.** `cartridges/rivals_sampler`: the smith and the miller in the square, an apple. Giving the apple to the smith while the miller is present sets `gloats` (bool) for smith toward miller only; the smith's room line then reads "The smith polishes her apple where the miller can see."
 - **Composition record** ([architecture](architecture.md#building-mechanics-by-composition)).
   - Consumer: `rivals_sampler`. Later: the showcase's social district (loka-y6yg.4).
