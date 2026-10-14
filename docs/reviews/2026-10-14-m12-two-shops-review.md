@@ -3,6 +3,7 @@
 - Branch `toolbox/m12-two-shops`, head `b759a67fdee533e19345d0a40e16406709fef6ef`, forked at `6171ecdf`; batch head now `6642e7c1` (no change since the fork to `commerce-save.ts`, `receipt-save.ts`, `receipt-history.ts`, `exchange-save.ts`, `shop-event.ts`, `cartridges/prices_sampler` or `lib/loka/content/commerce.ex`). No PR (batch model). Hosted CI green on the head (ci, book-e2e).
 - Governing: Beads `loka-kgd.149` brief; M11 batch review finding 1 (`docs/reviews/2026-10-13-m11-batch-fable-review.md` on `toolbox/batch-m12`); [storage lessons](../lessons/storage.md); [reviewer stance](../../.claude/agents/reviewer.md).
 - Verdict: **CHANGES REQUIRED**. The code at the head is correct; two of its new branches have no test that goes red when they are broken (reviewer.md step 3).
+- Recheck at `49ba7f136fb9599b9874d73c43f8aee5ebe9f2f3`: **APPROVE** (see Fix round 1).
 - Written 2026-10-14 by anthropic/claude-opus-5-5 (main reviewer). This replaces the partial record of `644a9cf2`, which stopped before the diff was read because the disk was full.
 
 ## Must be true (written before the diff)
@@ -43,3 +44,17 @@ Focused run (two_shops, commerce, prices, property, escrow): green.
 
 - "red controls: the tracking shop ignoring another shop's moves fails the lawful reopen" (b759a67f): backed (the `:59` mutant goes red).
 - "A receipt naming a provider that is not a shop is save_corrupt (red control: guard removed)" (b759a67f): not backed (finding 1).
+
+## Fix round 1 (`49ba7f136fb9599b9874d73c43f8aee5ebe9f2f3`)
+
+This is a scoped recheck (WORKFLOW step 6). It covers only the touched test code. `commerce-save.ts` has not changed since `b759a67f`. At the head the whole `two_shops.test.ts` passes.
+
+| Finding | Disposition | Proof (run by the reviewer) |
+|---|---|---|
+| 1 | Fixed. `two_shops.test.ts:182-200` holds the no-shop forgery: provider set to the body, `resource.adjust` ops stripped, and the penny rows set to 15 and 0. Each UPDATE must change exactly one row (`:196`). | Mutant: delete `commerce-save.ts:43` and read `sellerShop?.resource`. Result: `Missing expected exception` at `:200`; the save opens. Caught, and for the right reason. |
+| 2 | Fixed. The shells-currency two-shop test is at `:205-219`. Its expected rows (`[15,25,0]`, `[16,20,4]`) are hand-derived. | Mutant: change `:48` to `? true`. Result: `save_corrupt` at reopen (`:78` via `:124`). Caught. |
+| 3 | Fixed. The commit message of `49ba7f13` reports `/code-review medium` (8 findings, with the disposition of each). | Read. |
+
+The commit sends two dispositions to the PM: a no-shop cartridge never checks buy receipts, and there is no test of cross-currency money ops on another shop's receipt. Both are outside the brief. They are not findings here.
+
+Verdict: **APPROVE**. No new findings.
