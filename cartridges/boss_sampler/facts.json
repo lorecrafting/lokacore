@@ -1,0 +1,26 @@
+{
+  "facts": {
+    "summoned": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "instance"
+      ],
+      "meaning": "The warlord has called his guards."
+    },
+    "withdrawn": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "instance"
+      ],
+      "meaning": "The warlord falls back to his lair."
+    }
+  }
+}

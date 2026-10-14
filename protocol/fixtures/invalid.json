@@ -13529,6 +13529,7 @@
         "event": "attack_result",
         "hit": 1,
         "attacker": 1,
+        "target": 1,
         "x": 1
       },
       "apply": []
@@ -13540,6 +13541,10 @@
       },
       {
         "path": "/on/hit",
+        "code": "invalid_type"
+      },
+      {
+        "path": "/on/target",
         "code": "invalid_type"
       },
       {

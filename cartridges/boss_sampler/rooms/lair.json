@@ -1,0 +1,9 @@
+{
+  "title": "room.lair.title",
+  "description": "room.lair.description",
+  "exits": {
+    "south": {
+      "to": "hall"
+    }
+  }
+}

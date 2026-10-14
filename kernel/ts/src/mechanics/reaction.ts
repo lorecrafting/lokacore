@@ -58,6 +58,7 @@ export const FILTERS: Record<string, Match> = {
   item: (w, want, p) => w.entityIds[refString(want)] === p.item_id,
   npc: (w, want, p) => w.entityIds[refString(want)] === p.entity_id, // the entrant (W3), the hearer (G9)
   attacker: (w, want, p) => w.entityIds[refString(want)] === p.attacker_id, // loka-kgd.79
+  target: (w, want, p) => w.entityIds[refString(want)] === p.target_id, // row 39
   victim: ref('victim_definition'),
   custom: (_, want, p) => want === p.event.key,
   check: (_, want, p) => want === p.check.key,

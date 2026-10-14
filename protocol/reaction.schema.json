@@ -341,6 +341,10 @@
                 "attacker": {
                   "$ref": "identity.schema.json#/$defs/DefinitionRef",
                   "description": "The attacker is this NPC's authored instance (loka-kgd.79); a player's blow never matches. Needs kernel_api at least 1.58."
+                },
+                "target": {
+                  "$ref": "identity.schema.json#/$defs/DefinitionRef",
+                  "description": "The target is this NPC's authored instance (row 39); a blow on the player never matches. Needs kernel_api at least 1.87."
                 }
               },
               "required": [

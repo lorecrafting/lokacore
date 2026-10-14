@@ -1,0 +1,78 @@
+{
+  "keywords": [
+    "warlord"
+  ],
+  "short": "npc.warlord.short",
+  "room_line": "npc.warlord.room",
+  "description": "npc.warlord.description",
+  "room": "hall",
+  "hp": {
+    "minimum": 0,
+    "maximum": 20,
+    "start": 20,
+    "gain": 0
+  },
+  "attack": {
+    "chance": 100,
+    "damage_min": 1,
+    "damage_max": 1
+  },
+  "daily_schedule": {
+    "0": [
+      {
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "fact_compare",
+            "fact": "withdrawn",
+            "equals": true
+          }
+        },
+        "room": "lair"
+      },
+      "hall"
+    ],
+    "1": [
+      {
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "fact_compare",
+            "fact": "withdrawn",
+            "equals": true
+          }
+        },
+        "room": "lair"
+      },
+      "hall"
+    ],
+    "2": [
+      {
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "fact_compare",
+            "fact": "withdrawn",
+            "equals": true
+          }
+        },
+        "room": "lair"
+      },
+      "hall"
+    ],
+    "3": [
+      {
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "fact_compare",
+            "fact": "withdrawn",
+            "equals": true
+          }
+        },
+        "room": "lair"
+      },
+      "hall"
+    ]
+  }
+}
