@@ -17,7 +17,7 @@ import { bodyOf, refString, type World } from '../runtime/decision.ts';
 import { barrierState, questOf } from './lookups.ts';
 import { key } from '../foundation/compose.ts';
 import { subjective, value } from './fact.ts';
-import { level } from './resource.ts';
+import { level, resourceSpec } from './resource.ts';
 import { stateIs } from './escort/shared.ts';
 import { present } from '../commands/target.ts';
 import { hourOf, skyPhase } from './calendar.ts';
@@ -87,7 +87,7 @@ export function holds(
     case 'light_off':
     case 'stat_compare':
     case 'resource_compare':
-      return atLeast(world, actor, p, ctx.steps);
+      return atLeast(world, actor, p, ctx);
     case 'has_tag':
       return tagsOf(world, actor, p, ctx.target)?.includes(p.tag) === true;
     case 'wearing':
@@ -123,17 +123,22 @@ function compared(
   return value(world, actor, p.fact, subject) === p.equals;
 }
 
-// attributes@1's leaves: the actor's saved value or definition start, or the current body pool.
+// attributes@1's leaves: the actor's saved value or definition start, or the current pool on the
+// actor's body or (row 39, subject) a reaction's event subject, against at_least or a percent of
+// its maximum (value * 100 >= percent * maximum: integer math, no rounding).
 function atLeast(
   world: World,
   actor: CharacterId,
   p: Extract<Policy, { op: 'stat_compare' | 'resource_compare' | 'light_off' }>,
-  steps: { n: number },
+  ctx: Ctx,
 ): boolean {
-  if (p.op === 'light_off') return !illuminated(world, actor, steps);
+  if (p.op === 'light_off') return !illuminated(world, actor, ctx.steps);
   if (p.op === 'stat_compare') return attributeValue(world, actor, p.attribute) >= p.at_least;
-  const body = bodyOf(world, actor);
-  return body !== undefined && level(world, body, p.resource)! >= p.at_least;
+  const who = (p.subject && ctx.subject) || bodyOf(world, actor);
+  const now = who === undefined ? undefined : level(world, who, p.resource);
+  if (now === undefined) return false;
+  if (p.at_least_percent === undefined) return now >= p.at_least;
+  return now * 100 >= p.at_least_percent * resourceSpec(world, who!, p.resource)!.maximum;
 }
 
 // tags@1's subjects: a named definition (a constant), the target item's or the actor's room's.
