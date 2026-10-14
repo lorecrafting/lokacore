@@ -135,8 +135,14 @@ function atLeast(
 ): boolean {
   if (p.op === 'light_off') return !illuminated(world, actor, ctx.steps);
   if (p.op === 'stat_compare') return attributeValue(world, actor, p.attribute) >= p.at_least;
-  const who = (p.subject && ctx.subject) || bodyOf(world, actor);
-  const now = who === undefined ? undefined : level(world, who, p.resource);
+  const body = bodyOf(world, actor);
+  const who = (p.subject && ctx.subject) || body;
+  // Another entity holds the pool only by its own spec (an NPC's hp), not the cartridge default.
+  const holds =
+    who !== undefined &&
+    (who === body ||
+      world.entityResourceSpecs[key({ kind: 'resource', resource: p.resource, entity_id: who })]);
+  const now = holds ? level(world, who, p.resource) : undefined;
   if (now === undefined) return false;
   if (p.at_least_percent === undefined) return now >= p.at_least;
   return mul(now, 100) >= mul(p.at_least_percent, resourceSpec(world, who!, p.resource)!.maximum);

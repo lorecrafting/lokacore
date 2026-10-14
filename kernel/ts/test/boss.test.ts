@@ -189,3 +189,14 @@ test('the loader refuses subject, at_least_percent or target below 1.87', () => 
     assert.deepEqual(r.ok ? keep : [r.diagnostic.code, r.diagnostic.path], api);
   }
 });
+
+// Breaks: the subject leaf reads a pool its entity does not hold through the cartridge-wide spec
+// (the warlord has no `mv`: full by default, or NaN with regen, which faults the attack).
+test('a subject without the pool reads false', () => {
+  const w = fought((c) => {
+    const items = c.reactions[R('summon')].when.root.items;
+    items[0] = JSON.parse(JSON.stringify(items[0].item).replace('"key":"hp"', '"key":"mv"'));
+    items[0].at_least_percent = 1;
+  });
+  assert.deepEqual([hp(w), guards(w).length, fact(w, 'summoned')], [19, 0, false]);
+});
