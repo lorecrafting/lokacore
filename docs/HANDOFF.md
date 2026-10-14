@@ -67,6 +67,8 @@ State 2026-10-14 (local session): briefs live in each issue's Beads notes.
 5. Close M12 as M10 and M11 closed: toolbox table edit, one Fable batch review, green CI, PR, merge with
    the head pinned, close issues.
 
+Order from here: the owner adopted the Fable priority plan on 2026-10-14 ("keep going, follow the fable priority plan"; `docs/briefs/toolbox-priority-plan-2026-10-14.md` on `toolbox/batch-m12`). M12 rest: FD4, FD1, `.151`; FD3 moves to M13; W12 prey hunt, 43b, 48a-c and RS-7 are deferred; row 38 runs with RS-4; S2 is cut (it duplicates Built rooms slice 2). Plan defaults the PM takes unless the owner objects: one Book word-bar slice after RS, Built rooms after M15, Balance gates on the showcase only.
+
 Then the Realm seams batch (`loka-kgd.150`, slices RS-1 to RS-8; RS-7 deferred to the Realm), before
 M13. Then M13 to M15. Settle (S1 to S4) waits for an owner yes.
 
