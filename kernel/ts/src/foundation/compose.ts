@@ -55,7 +55,9 @@ export function compose(state: State, delta: StateDelta, final = true): Result {
   if (over(counts(state, ops))) return { fault: { kind: 'fault', code: 'budget_exceeded' } };
   let horizon = state.clock;
   for (const op of ops) if (op.op === 'time.advance') horizon = op.to;
-  const ctx: Ctx = { state, horizon, at: horizon, overlay: new Map() };
+  // A partial compose (proposal.ts now()) may hold a reaction's schedule without its job's
+  // job.complete, so it only checks against the clock; the final compose checks the job's time.
+  const ctx: Ctx = { state, horizon, at: final ? horizon : state.clock, overlay: new Map() };
   for (const [index, op] of ops.entries()) {
     const t = target(op);
     if (!initialPair(op, ops[index + 1]) || !repeatPair(op, ops[index + 1]))

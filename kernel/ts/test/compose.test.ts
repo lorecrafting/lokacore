@@ -461,3 +461,33 @@ test('NPC HP schema trust-boundary literals', () => {
   for (const c of read('protocol/fixtures/entity_resource.json').contracts)
     assert.equal(validate('NpcHp', c.value).length === 0, c.valid, c.id);
 });
+
+// Breaks: a partial compose (proposal.ts now()) checks a reaction's schedule against the advance
+// target although its job's job.complete joined an earlier slice (a 3-hour deer wait faulted
+// nonfuture_job), or stops refusing a schedule not after the clock.
+test('a partial compose checks a schedule against the clock, the final one against the target', () => {
+  const job = {
+    cartridge_id: 'lantern',
+    cartridge_version: '0.1.0',
+    kind: 'schedule',
+    key: 'bram',
+  };
+  const ops = (due_time: number) => [
+    { op: 'time.advance', writer_group: 0, from: 6, to: 40 },
+    {
+      op: 'job.schedule',
+      writer_group: 1,
+      job_id: 'd2000000-0000-4000-8000-000000000000',
+      job,
+      due_time,
+    },
+  ];
+  const code = (due: number, final: boolean) => {
+    const r = compose(state('base'), { ops: ops(due) } as never, final);
+    return 'fault' in r ? r.fault.code : 'ok';
+  };
+  assert.deepEqual(
+    [code(30, false), code(6, false), code(30, true)],
+    ['ok', 'nonfuture_job', 'nonfuture_job'],
+  );
+});
