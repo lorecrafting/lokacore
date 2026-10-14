@@ -49,3 +49,18 @@ Commit claims rerun: "the durable refusal runs before the pair check" (`reaction
 3. **Should-fix.** `reaction.ts:248`: the `who === partner` refusal has no test. Failure in `rivals_sampler`: the player gives the apple to the miller. `item_acquired` names the miller as its subject, and `with` is also the miller. Without the guard the step writes the row (miller, miller). The reviewer confirmed this with a throwaway probe: under M6 the "give to miller, expect no gloats row" assertion goes red; at the head it is green. `facts_typed` refuses that row, so the world holds a broken invariant; the spec says the step writes nothing. Add that test.
 4. **Nit.** Neither commit message reports the developer's `/code-review` result.
 5. **Nit.** `protocol/fixtures/composition.json:2321` pins two different `with_id` values but not one subject with and without `with_id`. M4a/M4b show that the composition is pinned, but the brief's with-or-without no-alias claim has no direct known answer.
+
+## Fix recheck (round 1)
+
+- Reviewed `26f0db6a..caa0e13e` (commits `4f4679b7`, `d2715450`, `caa0e13e`); scope per [WORKFLOW step 6](../WORKFLOW.md): the dispositions, the code they touched, its direct callers. Written 2026-10-14 by anthropic/claude-opus-5-5 (fresh recheck reviewer; the main reviewer was unavailable).
+- Verdict: **APPROVE** (no new findings).
+
+| # | Disposition | Proof |
+|---|---|---|
+| 1 | Fixed | `fact.ts` 270, `reaction.ts` 300, `fact_typed.ts` 63 lines; `node bin/check_ts_size.mjs` exit 0 locally. Move is behavior-preserving: `npcPair` (`fact.ts:39`) is the old `npc(a) && npc(b) && a !== b` for both callers (`reaction.ts:246`, `fact_typed.ts:57`); `typedFact`/`trailFact`/`invariants` moved verbatim; the only importers (`proposal_adopt.ts:6`, `world.ts:20`) repointed; `apiFloor` (`cartridge_reactions.ts:77`) is the old inline `Math.max` verbatim. `tsc` (src, test, play) exit 0. No Elixir file touched. |
+| 2 | Fixed | `pair_facts.test.ts:132` adds `at(apple, miller)`. Mutant: drop `npc(s)` in `fact_typed.ts:57` -> "facts_typed refuses a pair row without two distinct NPCs" red. |
+| 3 | Fixed | `pair_facts.test.ts:107`. Mutant: `reaction.ts:246` checks both NPC kinds but not `who !== partner` -> "the miller given the apple gloats over no one" red. |
+| 4 | Fixed | `/code-review medium` result (6 findings, 4 fixed, 2 disputed with reasons) in the `caa0e13e` message. |
+| 5 | Fixed | `composition.json:2403` `fact-without-with-is-another-target`: literal targets, one subject with and without `with_id`. Read by `compose.test.ts` and `compose_test.exs` (`for c <- cases()`), both green at the head. Red control: expected `with_id` of its first target changed (`composition.json:2458`) -> `compose.test.ts` and `compose_test.exs` red, each naming this case. No importer of the moved names in `mobile/` or `web/`. |
+
+Focused runs at the head: kernel `pair_facts`, `compose`, `validate` (fail 0); `mix test compose_test.exs content_scoped_facts_test.exs` (14 passed). Mutants restored, tree clean. Hosted CI on `caa0e13e`: `ci` run 38623523614 jobs kernel (incl. `check_ts_size.mjs`, `ts_size_red_controls.sh`), elixir, mobile, sim, lint, e1-recorder all success (ci-green aggregate queued at writing); `book-e2e` run 38623523711 in progress at writing (green at round 1; the fix touches no Book code). PM confirms both before merge.
