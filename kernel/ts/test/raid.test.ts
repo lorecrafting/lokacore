@@ -293,7 +293,7 @@ test('FD1: a cause at 1000 delivered in an advance to 1900 is due at 1901; at 10
 });
 
 // Breaks: the job's `when` is not re-read at its due time (a guard cannot cancel it), or a rule
-// gone from the cartridge faults the advance instead of completing its job.
+// gone from the cartridge, or a step that faults then, wedges the job instead of completing it.
 test('FD1: a false `when` at the due time, or a removed rule, only completes the job', () => {
   // after 1100: due 2100, past `calm` clearing `raided` at the new moon (2000).
   const late = elapsed(
@@ -306,6 +306,20 @@ test('FD1: a false `when` at the due time, or a removed rule, only completes the
   delete reactions[AFTERSHOCK];
   const gone = elapsed({ ...w, cartridge: { ...w.cartridge, reactions } }, 1700);
   assert.deepEqual([fact(gone, 'aftershocks') ?? 0, statuses(gone)], [0, [[1600, 'completed']]]);
+  // A step that faults at the due time (no such quest to fail) completes the job too.
+  const quest = {
+    cartridge_id: 'raid_sampler',
+    cartridge_version: '0.0.1',
+    kind: 'quest',
+    key: 'none',
+  };
+  const fails = {
+    ...(reactions[AFTERSHOCK] ?? w.cartridge.reactions![AFTERSHOCK]!),
+    apply: [{ op: 'quest.fail', quest, outcome: 'x' }],
+  };
+  const faulting = { ...w.cartridge.reactions, [AFTERSHOCK]: fails } as typeof reactions;
+  const stuck = elapsed({ ...w, cartridge: { ...w.cartridge, reactions: faulting } }, 1700);
+  assert.deepEqual(statuses(stuck), [[1600, 'completed']]);
 });
 
 // Breaks: time_since reads `<` for `>=`, compares the wrong side, or an unset fact reads false.

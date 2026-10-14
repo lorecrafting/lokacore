@@ -326,8 +326,8 @@ function delayed(
 }
 
 /** Row FD1: a reaction job's run_job. It completes; then its rule runs for the stored actor at the
- * due time, as a delivery whose event has no subject. A rule gone from the cartridge, or a `when`
- * that fails then, writes only the completion (a fact guard cancels a delayed reaction). */
+ * due time, as a delivery whose event has no subject. A rule gone from the cartridge, a `when`
+ * that fails then, or a step that faults then, writes only the completion (a fact guard cancels a delayed reaction). */
 export function runDelayed(
   world: World,
   command: { id: CommandId },
@@ -342,7 +342,8 @@ export function runDelayed(
   const cause = { id: command.id, logical_time: row.due_time, position: 0 };
   const stand = { ...cause, payload: { type: 'custom_event' } } as unknown as DomainEvent;
   const ran = rule && sequence(world, row.actor_id!, rule, stand, 0, steps, mint, { fired: true });
-  if (ran?.kind === 'fault' || ran?.kind === 'rejected') return ran;
-  const [ops, events] = ran ? [ran.delta.ops, ran.events] : [[], []];
-  return accepted(world, 'job_ran', [done, ...ops], events as never[], ran?.narration);
+  // A step that cannot run then (a quest no longer active) completes the job: a fault would wedge it.
+  const ok = ran?.kind === 'accepted' ? ran : undefined;
+  const [ops, events] = ok ? [ok.delta.ops, ok.events] : [[], []];
+  return accepted(world, 'job_ran', [done, ...ops], events as never[], ok?.narration);
 }
