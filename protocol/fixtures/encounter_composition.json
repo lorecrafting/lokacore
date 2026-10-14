@@ -2050,6 +2050,196 @@
           }
         ]
       }
+    },
+    {
+      "id": "reaction-schedule-stores-actor",
+      "state": "base",
+      "ops": [
+        {
+          "op": "job.schedule",
+          "writer_group": 0,
+          "job_id": "00000007-0000-4000-8000-000000000000",
+          "job": {
+            "cartridge_id": "raid_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "reaction",
+            "key": "aftershock"
+          },
+          "due_time": 20,
+          "actor_id": "00000001-0000-4000-8000-000000000000"
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "job",
+              "job_id": "00000007-0000-4000-8000-000000000000"
+            },
+            "value": {
+              "job": {
+                "cartridge_id": "raid_sampler",
+                "cartridge_version": "0.0.1",
+                "kind": "reaction",
+                "key": "aftershock"
+              },
+              "due_time": 20,
+              "status": "pending",
+              "actor_id": "00000001-0000-4000-8000-000000000000"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "reaction-schedule-needs-actor",
+      "state": "base",
+      "ops": [
+        {
+          "op": "job.schedule",
+          "writer_group": 0,
+          "job_id": "00000007-0000-4000-8000-000000000000",
+          "job": {
+            "cartridge_id": "raid_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "reaction",
+            "key": "aftershock"
+          },
+          "due_time": 20
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "job",
+            "job_id": "00000007-0000-4000-8000-000000000000"
+          }
+        }
+      },
+      "counterfeit": {
+        "changes": [
+          {
+            "target": {
+              "kind": "job",
+              "job_id": "00000007-0000-4000-8000-000000000000"
+            },
+            "value": {
+              "job": {
+                "cartridge_id": "raid_sampler",
+                "cartridge_version": "0.0.1",
+                "kind": "reaction",
+                "key": "aftershock"
+              },
+              "due_time": 20,
+              "status": "pending"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "reaction-schedule-refuses-encounter",
+      "state": "base",
+      "ops": [
+        {
+          "op": "job.schedule",
+          "writer_group": 0,
+          "job_id": "00000007-0000-4000-8000-000000000000",
+          "job": {
+            "cartridge_id": "raid_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "reaction",
+            "key": "aftershock"
+          },
+          "due_time": 20,
+          "actor_id": "00000001-0000-4000-8000-000000000000",
+          "encounter_id": "00000006-0000-4000-8000-000000000000"
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "job",
+            "job_id": "00000007-0000-4000-8000-000000000000"
+          }
+        }
+      },
+      "counterfeit": {
+        "changes": [
+          {
+            "target": {
+              "kind": "job",
+              "job_id": "00000007-0000-4000-8000-000000000000"
+            },
+            "value": {
+              "job": {
+                "cartridge_id": "raid_sampler",
+                "cartridge_version": "0.0.1",
+                "kind": "reaction",
+                "key": "aftershock"
+              },
+              "due_time": 20,
+              "status": "pending",
+              "actor_id": "00000001-0000-4000-8000-000000000000",
+              "encounter_id": "00000006-0000-4000-8000-000000000000"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "actor-alone-only-on-reaction",
+      "state": "base",
+      "ops": [
+        {
+          "op": "job.schedule",
+          "writer_group": 0,
+          "job_id": "00000007-0000-4000-8000-000000000000",
+          "job": {
+            "cartridge_id": "raid_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "npc",
+            "key": "wolf"
+          },
+          "due_time": 20,
+          "actor_id": "00000001-0000-4000-8000-000000000000"
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "job",
+            "job_id": "00000007-0000-4000-8000-000000000000"
+          }
+        }
+      },
+      "counterfeit": {
+        "changes": [
+          {
+            "target": {
+              "kind": "job",
+              "job_id": "00000007-0000-4000-8000-000000000000"
+            },
+            "value": {
+              "job": {
+                "cartridge_id": "raid_sampler",
+                "cartridge_version": "0.0.1",
+                "kind": "npc",
+                "key": "wolf"
+              },
+              "due_time": 20,
+              "status": "pending",
+              "actor_id": "00000001-0000-4000-8000-000000000000"
+            }
+          }
+        ]
+      }
     }
   ]
 }

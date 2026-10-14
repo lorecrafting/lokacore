@@ -63,7 +63,11 @@ export function holds(
   ctx.steps.n++;
   switch (p.op) {
     case 'fact_compare':
-      return compared(world, actor, p, ctx.target);
+      return read(world, actor, p, ctx.target) === p.equals;
+    case 'time_since': {
+      const at = read(world, actor, p, ctx.target); // row FD1: a stamped time; unset reads its default
+      return at !== undefined && world.state.clock - (at as number) >= p.at_least;
+    }
     case 'has_item':
       return held(world, world.entityIds[refString(p.item)], bodyOf(world, actor));
     case 'barrier_state':
@@ -110,17 +114,18 @@ function uninstalled(leaf: never): never {
 }
 
 // fact@1's read: an entity or pair fact (toolbox row W2) at its named NPC or item, or with subject
-// target at the action's target (false without one); any other fact at its one scope.
-function compared(
+// target at the action's target (none without one); any other fact at its one scope.
+function read(
   world: World,
   actor: CharacterId,
-  p: Extract<Policy, { op: 'fact_compare' }>,
+  p: Extract<Policy, { op: 'fact_compare' | 'time_since' }>,
   target: EntityId | undefined,
-): boolean {
+) {
   const named = p.npc ?? p.item;
-  const subject = named ? world.entityIds[refString(named)] : p.subject && target;
-  if (subjective(world, p.fact) && subject === undefined) return false;
-  return value(world, actor, p.fact, subject) === p.equals;
+  const by = p.op === 'fact_compare' && p.subject ? target : undefined;
+  const subject = named ? world.entityIds[refString(named)] : by;
+  if (subjective(world, p.fact) && subject === undefined) return undefined;
+  return value(world, actor, p.fact, subject);
 }
 
 // attributes@1's leaves: the actor's saved value or definition start, or the current body pool.

@@ -1,5 +1,6 @@
-// Toolbox rows 37a and 37b through the real elapsed driver and SQLite: a save closed mid-raid
-// cold-reopens, and the new moon then counts the raid's aftermath once.
+// Toolbox rows 37a, 37b and FD1 through the real elapsed driver and SQLite: a save closed mid-raid
+// cold-reopens with its delayed aftershock pending, which then runs once at 1600, and the new moon
+// counts the raid's aftermath once.
 import assert from 'node:assert/strict';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -17,7 +18,8 @@ const changes = (sql: DatabaseSync, fact: string) =>
     .map((e: any) => [e.logical_time, e.payload.new]);
 
 // Breaks: cold reopen of a save holding a spawned raider and `raided` true is refused, or the
-// reopened world counts the aftermath twice (or never) over two new-moon hours.
+// reopened world counts the aftermath twice (or never) over two new-moon hours; FD1: the pending
+// reaction job (due 1600) is refused on reopen, lost, or runs early, twice or never.
 test('a save closed mid-raid cold-reopens; the new moon counts the aftermath once', (t) => {
   const bundle = compiled('cartridges/raid_sampler');
   const dir = mkdtempSync(join(tmpdir(), 'loka-raid-reopen-'));
@@ -34,6 +36,7 @@ test('a save closed mid-raid cold-reopens; the new moon counts the aftermath onc
   a.clock.mono += 20_000;
   assert.equal(a.game.pulse().kind, 'ready');
   assert.deepEqual(changes(a.sql, 'raided'), [[1000, true]]);
+  assert.deepEqual(changes(a.sql, 'aftershocks'), []);
   a.sql.close();
   b = elapsedHost(path, { wall: a.clock.wall, mono: a.clock.mono }, bundle);
   for (const ms of [20_000, 2_000]) {
@@ -43,4 +46,5 @@ test('a save closed mid-raid cold-reopens; the new moon counts the aftermath onc
   }
   assert.equal(b.game.view().view.time, 2100);
   assert.deepEqual(changes(b.sql, 'aftermaths'), [[2000, 1]]);
+  assert.deepEqual(changes(b.sql, 'aftershocks'), [[1600, 1]]);
 });

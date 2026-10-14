@@ -4,11 +4,13 @@
 import type {
   CharacterId,
   CommandId,
+  DefinitionRef,
   DeltaOp,
   DomainEvent,
   EntityId,
   EventPayload,
   FactValue,
+  JobId,
   ReactionRule,
   TextKey,
 } from '../contracts.gen.ts';
@@ -101,9 +103,10 @@ export function triggered(world: World, e: DomainEvent): ReactionRule[] {
  */
 const ACTIVATES = ['quest_resolved', 'rested'];
 // The advance's status holders' groups (G3), and the bodies dead after the cause (`diedAfter`).
-type Delivery = { holders?: Map<string, number>; dead?: ReadonlySet<EntityId> };
+// fired: a delayed rule's job run (toolbox row FD1), which runs the steps instead of scheduling them.
+type Delivery = { holders?: Map<string, number>; dead?: ReadonlySet<EntityId>; fired?: boolean };
 
-// size: allow 60, one ordered delivery lowers fact assignments, quest effects, suppression and spawn
+// size: allow 61, one ordered delivery lowers fact assignments, quest effects, suppression and spawn
 export function sequence(
   world: World,
   listener: CharacterId,
@@ -112,13 +115,14 @@ export function sequence(
   group: number,
   steps: { n: number },
   mint: Mint,
-  { holders = new Map(), dead = new Set() }: Delivery = {},
+  { holders = new Map(), dead = new Set(), fired = false }: Delivery = {},
 ): Decision<EventPayload['type']> | undefined {
   const actor = resolvedActor(world, cause, listener); // a quest event's evidenced owner
   if (!actor) return { kind: 'fault', code: 'precondition_failed' };
   const then = { ...world, state: { ...world.state, clock: cause.logical_time } };
   const about = { steps, cause, subject: subject(cause, bodyOf(then, actor)) }; // status reader 1
   if (rule.when && !holds(then, actor, rule.when.root, about)) return undefined;
+  if (rule.after && !fired) return delayed(world, actor, rule, cause, group, mint);
   const activated = new Set<string>();
   const own = { holders, set: {}, applied: new Set<string>(), doors: new Map() }; // holders: the advance's
   const [ops, events, narration]: [DeltaOp[], DomainEvent[], { key: TextKey }[]] = [[], [], []];
@@ -223,7 +227,7 @@ function holdersOf(
 }
 type StatusStep = Extract<ReactionRule['apply'][number], { op: 'status.apply' | 'status.cure' }>;
 
-// A fact.assign, or (row 15) a fact.adjust lowered to one at the bounded sum (nothing when the
+// A fact.assign, (row FD1) a fact.stamp of the delivery's time, or (row 15) a fact.adjust lowered to one at the bounded sum (nothing when the
 // fact cannot be adjusted); an entity or pair fact (row W2) at the step's named NPC's or item's
 // instance, else at the event's subject when that is an NPC, item or detail (never the body
 // fallback); with no such subject the step writes nothing. A row an earlier reaction of this
@@ -231,7 +235,10 @@ type StatusStep = Extract<ReactionRule['apply'][number], { op: 'status.apply' | 
 function assignment(
   world: World,
   actor: CharacterId,
-  step: Extract<ReactionRule['apply'][number], { op: 'fact.assign' | 'fact.adjust' }>,
+  step: Extract<
+    ReactionRule['apply'][number],
+    { op: 'fact.assign' | 'fact.adjust' | 'fact.stamp' }
+  >,
   group: number,
   { set, holders }: { set: Record<string, FactValue>; holders: Map<string, number> },
   cause: DomainEvent,
@@ -245,7 +252,11 @@ function assignment(
   const at = key({ kind: 'fact', ...target });
   const expected = Object.hasOwn(set, at) ? set[at] : value(world, actor, step.fact, who);
   const next =
-    step.op === 'fact.adjust' ? bounded(world, step.fact, expected, step.amount) : step.value;
+    step.op === 'fact.adjust'
+      ? bounded(world, step.fact, expected, step.amount)
+      : step.op === 'fact.stamp'
+        ? cause.logical_time // row FD1: the delivery's time
+        : step.value;
   if (next === undefined) return undefined;
   set[at] = next;
   const writer_group = holders.get(at) ?? group;
@@ -294,4 +305,44 @@ function resolvedActor(world: World, cause: DomainEvent, actor: CharacterId) {
     cause.scope.character_id === source.scope.character_id
     ? source.scope.character_id
     : undefined;
+}
+
+// Row FD1: a rule with `after` writes one reaction job for its actor in place of its steps.
+function delayed(
+  world: World,
+  actor: CharacterId,
+  rule: ReactionRule,
+  cause: DomainEvent,
+  group: number,
+  mint: Mint,
+): Decision<never> {
+  const { id, version } = world.cartridge.manifest;
+  const job = { cartridge_id: id, cartridge_version: version, kind: 'reaction', key: rule.key };
+  // ponytail: a delay ending inside this proposal's advance arrives 1 s after it (the composer
+  // refuses a job due inside it, compose_job.ts nonfuture_job); never early, possibly late.
+  const due_time = Math.max(saturate(cause.logical_time + rule.after!), world.state.clock + 1);
+  const op = { op: 'job.schedule', writer_group: group, job_id: mint() as JobId, job, due_time };
+  return accepted(world, 'reacted', [{ ...op, actor_id: actor } as DeltaOp], []);
+}
+
+/** Row FD1: a reaction job's run_job. It completes; then its rule runs for the stored actor at the
+ * due time, as a delivery whose event has no subject. A rule gone from the cartridge, or a `when`
+ * that fails then, writes only the completion (a fact guard cancels a delayed reaction). */
+export function runDelayed(
+  world: World,
+  command: { id: CommandId },
+  job_id: JobId,
+  row: { job: DefinitionRef; actor_id?: CharacterId; due_time: number },
+  mint: Mint,
+  steps: { n: number },
+): Decision<never> {
+  const done: DeltaOp = { op: 'job.complete', writer_group: 0, job_id };
+  const rule = world.cartridge.reactions?.[refString(row.job)];
+  // A stand-in cause: no subject field (custom_event names none), the job's time.
+  const cause = { id: command.id, logical_time: row.due_time, position: 0 };
+  const stand = { ...cause, payload: { type: 'custom_event' } } as unknown as DomainEvent;
+  const ran = rule && sequence(world, row.actor_id!, rule, stand, 0, steps, mint, { fired: true });
+  if (ran?.kind === 'fault' || ran?.kind === 'rejected') return ran;
+  const [ops, events] = ran ? [ran.delta.ops, ran.events] : [[], []];
+  return accepted(world, 'job_ran', [done, ...ops], events as never[], ran?.narration);
 }

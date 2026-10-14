@@ -167,6 +167,7 @@ function job(op: Any, row: Any, horizon: number): Any {
       next.crow_generation = op.crow_generation;
       next.crow_phase = op.crow_phase;
     }
+    if (op.job.kind === 'reaction') next.actor_id = op.actor_id; // FD1's stored actor
     if (op.sight !== undefined) next.sight = op.sight;
     if (op.bleed_body_id !== undefined) {
       next.bleed_body_id = op.bleed_body_id;
@@ -196,10 +197,13 @@ function bindingValid(op: Any) {
   )
     return crowBindingValid(op);
   if (
-    (op.quest_instance_id === undefined && op.water_generation === undefined) !==
+    (op.quest_instance_id === undefined &&
+      op.water_generation === undefined &&
+      op.job.kind !== 'reaction') !==
       (op.actor_id === undefined) ||
     (op.quest_instance_id !== undefined &&
-      (op.job.kind !== 'quest' || op.encounter_id !== undefined))
+      (op.job.kind !== 'quest' || op.encounter_id !== undefined)) ||
+    (op.job.kind === 'reaction' && op.encounter_id !== undefined)
   )
     return false;
   if (

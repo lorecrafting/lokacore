@@ -9,6 +9,7 @@ defmodule Loka.Content.LeafRefs do
   def all,
     do: %{
       "fact_compare" => %{"fact" => "fact", "npc" => "npc", "item" => "item"},
+      "time_since" => %{"fact" => "fact", "npc" => "npc", "item" => "item"},
       "has_item" => %{"item" => "item"},
       "quest_state" => %{"quest" => "quest"},
       "escort_state" => %{"quest" => "quest"},
@@ -26,6 +27,7 @@ defmodule Loka.Content.LeafRefs do
     do: %{
       "fact.assign" => %{"fact" => "fact", "item" => "item", "npc" => "npc"},
       "fact.adjust" => %{"fact" => "fact", "item" => "item", "npc" => "npc"},
+      "fact.stamp" => %{"fact" => "fact", "item" => "item", "npc" => "npc"},
       "skill.acquire" => %{"skill" => "skill"},
       "topic.grant" => %{"topic" => "topic"},
       "status.apply" => %{

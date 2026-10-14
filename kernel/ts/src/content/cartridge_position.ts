@@ -37,7 +37,7 @@ export function reserved(c: Obj): Diagnostic[] {
       out.push(diag('RESERVED_FACT', `.cartridge.facts${step(ref)}`));
   const write = (s: Obj, at: string, allowed?: string) => {
     if (
-      (s.op === 'fact.assign' || s.op === 'fact.adjust') &&
+      ['fact.assign', 'fact.adjust', 'fact.stamp'].includes(s.op) &&
       (owned.includes(refString(s.fact)) ||
         (dreamRefs.includes(refString(s.fact)) && refString(s.fact) !== allowed))
     )

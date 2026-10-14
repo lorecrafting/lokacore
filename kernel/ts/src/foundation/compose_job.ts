@@ -54,10 +54,13 @@ function bindingValid(op: Extract<DeltaOp, { op: 'job.schedule' }>) {
   )
     return crowBindingValid(op);
   if (
-    (op.quest_instance_id === undefined && op.water_generation === undefined) !==
+    (op.quest_instance_id === undefined &&
+      op.water_generation === undefined &&
+      op.job.kind !== 'reaction') !==
       (op.actor_id === undefined) ||
     (op.quest_instance_id !== undefined &&
-      (op.job.kind !== 'quest' || op.encounter_id !== undefined))
+      (op.job.kind !== 'quest' || op.encounter_id !== undefined)) ||
+    (op.job.kind === 'reaction' && op.encounter_id !== undefined)
   )
     return false;
   if (
@@ -117,6 +120,7 @@ function pendingJob(op: Extract<DeltaOp, { op: 'job.schedule' }>): Json {
     ...(op.quest_instance_id === undefined
       ? {}
       : { quest_instance_id: op.quest_instance_id, actor_id: op.actor_id }),
+    ...(op.job.kind === 'reaction' ? { actor_id: op.actor_id! } : {}), // FD1's stored actor
     ...(op.sight === undefined ? {} : { sight: op.sight }),
     ...(op.bleed_body_id === undefined
       ? {}

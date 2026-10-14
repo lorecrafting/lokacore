@@ -120,7 +120,7 @@ export function reactions(c: Obj, { named, typedValue }: Checks): Diagnostic[] {
       } else if (!['status.apply', 'status.cure', 'experience.grant'].includes(s.op)) {
         // status steps, experience.grant, fact.adjust's int: with their declarations (cartridge_standing.ts).
         named(s.fact, 'fact', `${at}.apply[${i}].fact`);
-        if (s.op !== 'fact.adjust') typedValue(s.fact, s.value, `${at}.apply[${i}].value`);
+        if (s.op === 'fact.assign') typedValue(s.fact, s.value, `${at}.apply[${i}].value`);
         for (const f of ['npc', 'item']) if (s[f]) named(s[f], f, `${at}.apply[${i}].${f}`);
       }
     });

@@ -8,8 +8,15 @@ import { refString } from '../runtime/decision.ts';
 import { diag, step, type Obj } from './cartridge_refs.ts';
 import { apiCmp } from './cartridge_installed.ts';
 
-const SITES = ['fact_compare', 'fact.assign', 'fact.adjust', 'fact_changed'];
-const OPS = SITES.slice(0, 3); // the sites that are ops and may name a subject
+const SITES = [
+  'fact_compare',
+  'fact.assign',
+  'fact.adjust',
+  'fact.stamp',
+  'time_since',
+  'fact_changed',
+];
+const OPS = SITES.slice(0, 5); // the sites that are ops and may name a subject
 const SUBJECTS = ['subject', 'npc', 'item'];
 // Toolbox rows G8 and 22a: the group reads its member, stay and fight facts at each NPC.
 const GROUP = ['member', 'stay', 'fight'].map((k) => `.cartridge.world.group.${k}`);
@@ -67,7 +74,8 @@ export function scopeSites(c: Obj): Diagnostic[] {
       out.push(`${at}.${fields.at(-1)}`);
     else if (fields.length && !subjective(o.fact)) out.push(`${at}.${fields[0]}`);
     else if (o.subject === 'target' && targetless(at)) out.push(`${at}.subject`);
-    else if (o.op === 'fact_compare' && !fields.length && subjective(o.fact)) out.push(at);
+    else if (/^(fact_compare|time_since)$/.test(o.op) && !fields.length && subjective(o.fact))
+      out.push(at);
   });
   // ponytail: a per_subject fact there waits for a subject-aware reconciler.
   for (const [ref, d] of Object.entries((c.dialogues ?? {}) as Record<string, Obj>)) {

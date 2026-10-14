@@ -47,6 +47,7 @@ import { runStatus } from '../status/job.ts';
 import { moves } from '../status/shared.ts';
 
 import { runSight } from '../population/behavior.ts';
+import { runDelayed } from '../reaction.ts';
 
 // `at`: the drain's hour for this run; a later listed hour the advance crosses is a sub-step of the
 // row's one run_job, which its first hour completed (scheduledJob, loka-qi0r; runPopulation, loka-6ql4;
@@ -87,6 +88,8 @@ export const decideAt = (
     if (row.job.kind === 'wage')
       return runWage(world, payload.job_id, row, mint, at ?? row.due_time);
     if (row.job.kind === 'order') return orderReady(world, payload.job_id, row);
+    if (row.job.kind === 'reaction')
+      return runDelayed(world, command, payload.job_id, row, mint, steps); // FD1
     return scheduledJob(world, command, payload.job_id, row, mint, steps, at ?? row.due_time);
   }
   return advance(world, payload);

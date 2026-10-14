@@ -326,6 +326,7 @@ defmodule Loka.Content.Checks do
     entry(m, entry, defs) ++
       texts(defs, text) ++
       Loka.Content.Cues.check(m, defs, text, registry, trees(defs)) ++
+      Loka.Content.Delayed.check(m, defs, trees(defs)) ++
       if(m,
         do:
           Enum.flat_map(rooms, &room(&1, m, defs, registry)) ++

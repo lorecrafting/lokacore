@@ -17,6 +17,8 @@ import { apply } from '../src/runtime/apply.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { cmp } from '../src/foundation/validate.ts';
 import { encode } from '../src/foundation/canonical.ts';
+import { holds } from '../src/mechanics/policy.ts';
+import { sequence } from '../src/mechanics/reaction.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-raid-sampler-'));
 let artifact: Uint8Array;
@@ -212,6 +214,8 @@ test('g: the loader refuses population.spawn or a 0 target below 1.84, or an unk
   for (const drop of [false, true]) {
     const old = load((c) => {
       c.manifest.requires.kernel_api.at_least = '1.83';
+      delete c.reactions[AFTERSHOCK]; // row FD1's rule and stamp need 1.88 on their own
+      c.reactions[raid].apply.pop();
       // drop: the plan's target 0 alone; else the step alone (targets 1)
       if (drop) c.reactions[raid].apply.shift();
       else Object.assign(Object.values(c.populations)[0]!, { day_target: 1, night_target: 1 });
@@ -248,4 +252,130 @@ test('37b: the aftermath applies once per cycle, across new-moon hours and a reb
   assert.equal(aftermaths(rebuilt), 1);
   rebuilt = elapsed(rebuilt, 4900);
   assert.equal(aftermaths(rebuilt), 2);
+});
+
+// Row FD1: `aftershock` (after 600) adds 1 to `aftershocks` while `raided` is true; `raid` stamps
+// `raided_at` with its time.
+const AFTERSHOCK = 'raid_sampler@0.0.1:reaction/aftershock';
+const reactionJobs = (w: World) =>
+  Object.values(w.state.jobs ?? {}).filter((j) => j.job.kind === 'reaction');
+const statuses = (w: World) => reactionJobs(w).map((j) => [j.due_time, j.status]);
+
+// Breaks: the delay is dropped (the step runs at the raid), the job is due early or late, runs
+// twice, or never runs.
+test('FD1: a raid at 1000 adds its aftershock at 1600, not before, once', () => {
+  let w = elapsed(world(), 1000);
+  assert.deepEqual(statuses(w), [[1600, 'pending']]);
+  w = elapsed(w, 1500);
+  assert.equal(fact(w, 'aftershocks') ?? 0, 0);
+  w = elapsed(w, 1600);
+  assert.equal(fact(w, 'aftershocks'), 1);
+  w = elapsed(w, 1900);
+  assert.deepEqual([fact(w, 'aftershocks'), statuses(w)], [1, [[1600, 'completed']]]);
+});
+
+// Breaks: a cause inside the advance gets its bare due time (nonfuture_job faults the wait) or
+// a time earlier than the cause plus `after`.
+test('FD1: a cause at 1000 delivered in an advance to 1900 is due at 1901; at 1000 it is 1600', () => {
+  const w0 = world();
+  const rule = w0.cartridge.reactions![AFTERSHOCK]!;
+  const raided = Object.keys(elapsed(world(), 1000).state.facts!).find(
+    (k) => JSON.parse(k).fact.key === 'raided',
+  )!;
+  const due = (clock: number) => {
+    const w = { ...w0, state: { ...w0.state, clock, facts: { [raided]: true } } } as World;
+    const cause = { id: 'c', logical_time: 1000, position: 1, payload: { type: 'custom_event' } };
+    const r = sequence(w, w.character, rule, cause as never, 1, { n: 0 }, () => 'j');
+    assert.equal(r?.kind, 'accepted');
+    return r?.kind === 'accepted' && (r.delta.ops[0] as { due_time: number }).due_time;
+  };
+  assert.deepEqual([due(1900), due(1000)], [1901, 1600]);
+});
+
+// Breaks: the job's `when` is not re-read at its due time (a guard cannot cancel it), or a rule
+// gone from the cartridge faults the advance instead of completing its job.
+test('FD1: a false `when` at the due time, or a removed rule, only completes the job', () => {
+  // after 1100: due 2100, past `calm` clearing `raided` at the new moon (2000).
+  const late = elapsed(
+    world((c) => (c.reactions[AFTERSHOCK].after = 1100)),
+    2200,
+  );
+  assert.deepEqual([fact(late, 'aftershocks') ?? 0, statuses(late)], [0, [[2100, 'completed']]]);
+  const w = elapsed(world(), 1000);
+  const reactions = { ...w.cartridge.reactions };
+  delete reactions[AFTERSHOCK];
+  const gone = elapsed({ ...w, cartridge: { ...w.cartridge, reactions } }, 1700);
+  assert.deepEqual([fact(gone, 'aftershocks') ?? 0, statuses(gone)], [0, [[1600, 'completed']]]);
+});
+
+// Breaks: time_since reads `<` for `>=`, compares the wrong side, or an unset fact reads false.
+test('FD1: time_since 600 after a stamp at 1000 is false at 1599 and true at 1600', () => {
+  const since = {
+    op: 'time_since',
+    fact: {
+      cartridge_id: 'raid_sampler',
+      cartridge_version: '0.0.1',
+      key: 'raided_at',
+      kind: 'fact',
+    },
+    at_least: 600,
+  } as never;
+  const at = (w: World, clock: number) =>
+    holds({ ...w, state: { ...w.state, clock } }, w.character, since, { steps: { n: 0 } });
+  const raidedW = elapsed(world(), 1000);
+  assert.equal(fact(raidedW, 'raided_at'), 1000);
+  assert.deepEqual([at(raidedW, 1599), at(raidedW, 1600)], [false, true]);
+  const fresh = world();
+  assert.deepEqual([at(fresh, 599), at(fresh, 600)], [false, true]);
+});
+
+// Breaks (twin of test/loka/content_raid_test.exs): `after`, fact.stamp or time_since loads
+// under API 1.87; a delayed rule keeps a step that reads its event; a stamp or time_since names a
+// fact that cannot hold every clock value.
+test('FD1: the loader keeps API 1.88, event-free delayed steps and an unbounded int clock fact', () => {
+  const raid = 'raid_sampler@0.0.1:reaction/raid';
+  const calm = 'raid_sampler@0.0.1:reaction/calm';
+  const ref = (key: string) => ({ ...w0Ref, key });
+  const w0Ref = { cartridge_id: 'raid_sampler', cartridge_version: '0.0.1', kind: 'fact' };
+  const since = { op: 'time_since', fact: ref('raided_at'), at_least: 600 };
+  const old = (c: any) => (c.manifest.requires.kernel_api.at_least = '1.87');
+  const unstamped = (c: any) => c.reactions[raid].apply.pop();
+  const unshocked = (c: any) => delete c.reactions[AFTERSHOCK];
+  const api = ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'];
+  const bad = (at: string) => ['SCHEMA_VIOLATION', `.cartridge.reactions["${at}`];
+  const cases: [((c: any) => void)[], string[]][] = [
+    [[old, unstamped], api],
+    [
+      [
+        old,
+        unstamped,
+        unshocked,
+        (c) => (c.reactions[calm].when.root = { op: 'not', item: since }),
+      ],
+      api,
+    ],
+    [[old, unshocked], api],
+    [
+      [
+        (c) =>
+          c.reactions[AFTERSHOCK].apply.push({
+            op: 'item.move',
+            room: { ...w0Ref, kind: 'room', key: 'village' },
+          }),
+      ],
+      bad(`${AFTERSHOCK}"].apply[1].op`),
+    ],
+    [
+      [(c) => (c.reactions[raid].apply.at(-1).fact = ref('aftershocks'))],
+      bad(`${raid}"].apply[2].fact`),
+    ],
+    [
+      [(c) => (c.reactions[calm].when.root = { ...since, fact: ref('raided') })],
+      bad(`${calm}"].when.root.fact`),
+    ],
+  ];
+  for (const [edits, expected] of cases) {
+    const r = load((c) => edits.forEach((e) => e(c)));
+    assert.deepEqual(r.ok ? undefined : [r.diagnostic.code, r.diagnostic.path], expected);
+  }
 });

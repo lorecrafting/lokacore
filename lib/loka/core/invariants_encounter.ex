@@ -260,7 +260,10 @@ defmodule Loka.Core.InvariantsEncounter do
 
     case present do
       fields when fields in [[], ["encounter_id"]] ->
-        get_in(op, ["job", "kind"]) != "population_bundle"
+        get_in(op, ["job", "kind"]) not in ["population_bundle", "reaction"]
+
+      ["actor_id"] ->
+        get_in(op, ["job", "kind"]) == "reaction"
 
       ["quest_instance_id", "actor_id"] ->
         get_in(op, ["job", "kind"]) == "quest"
