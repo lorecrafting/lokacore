@@ -85,8 +85,9 @@ function act(w: World, payload: object): World {
 }
 const slot = (w: World, n: number) =>
   Object.entries(w.state.population_slots!).find(([k]) => JSON.parse(k).slot === n)![1];
-const raided = (w: World) =>
-  Object.entries(w.state.facts ?? {}).find(([k]) => k.includes('raided'))?.[1] ?? false;
+const fact = (w: World, key: string) =>
+  Object.entries(w.state.facts ?? {}).find(([k]) => JSON.parse(k).fact.key === key)?.[1];
+const raided = (w: World) => fact(w, 'raided') ?? false;
 
 // Breaks: genesis or an hour before the full moon births a raider (the plan's own job, or the
 // rule firing outside the full phase).
@@ -222,4 +223,29 @@ test('g: the loader refuses population.spawn or a 0 target below 1.84, or an unk
     'UNRESOLVED_REFERENCE',
     `.cartridge.reactions["${raid}"].apply[0].plan`,
   ]);
+});
+
+// Row 37b: the `aftermath` rule adds 1 to the instance fact `aftermaths` on `raided`'s
+// fact_changed to false, which fires only at the first new-moon hour after a raid.
+const aftermaths = (w: World) => fact(w, 'aftermaths') ?? 0;
+
+// Breaks: the rule counts the raid's own change to true, counts every new-moon hour (a clock_hour
+// trigger), or a world rebuilt from the receipts counts the closed cycle again.
+test('37b: the aftermath applies once per cycle, across new-moon hours and a rebuild', () => {
+  const receipts: DeltaOp[][] = [];
+  let w = elapsed(world(), 1900, receipts);
+  assert.equal(aftermaths(w), 0);
+  w = elapsed(w, 2100, receipts);
+  assert.equal(aftermaths(w), 1);
+  let rebuilt = world();
+  for (const ops of receipts) {
+    const r = apply(rebuilt, ops);
+    assert.ok('world' in r, JSON.stringify(r));
+    rebuilt = r.world;
+  }
+  assert.deepEqual(rebuilt.state, w.state);
+  rebuilt = elapsed(rebuilt, 2900);
+  assert.equal(aftermaths(rebuilt), 1);
+  rebuilt = elapsed(rebuilt, 4900);
+  assert.equal(aftermaths(rebuilt), 2);
 });
