@@ -600,7 +600,7 @@ Every filter present must equal its payload field; a filter means the same field
 | `barrier_changed`                                                                                                    | `barrier`, `to`                                                                                                       | the actor's body                               |
 | `scene_ended`                                                                                                        | `scene`                                                                                                               | the actor's body                               |
 | `entity_died`                                                                                                        | `victim` (victim_definition), `room` (room_id)                                                                        | victim_id                                      |
-| `attack_result`                                                                                                      | `hit`, `attacker` (attacker_id is that NPC's authored instance; [loka-kgd.79](#attacker-filter-loka-kgd79))           | target_id                                      |
+| `attack_result`                                                                                                      | `hit`, `attacker` (attacker_id is that NPC's authored instance; [loka-kgd.79](#attacker-filter-loka-kgd79)), `target` (target_id, likewise; [row 39](#boss-phases-toolbox-row-39))           | target_id                                      |
 | `filled`, `poured`, `drank`                                                                                          | `kind`                                                                                                                | the actor's body                               |
 | `entity_entered_room`                                                                                                | `room` (required), `npc` (entity_id is that NPC's authored instance; [row W3](#rumour-by-co-presence-toolbox-row-w3)) | entity_id                                      |
 | `rested`                                                                                                             | `room` (required)                                                                                                     | body_id                                        |
@@ -615,7 +615,7 @@ taking an item) still reads the actor's `when` and writes the actor's facts, que
 experience; only `status.apply`, ([status reader 3](#status-readers-toolbox-rows-sr1-sr2-and-sr3)) `status.cure` and `status_active {subject: "subject"}` follow the subject, which may be the actor's body, an NPC or an
 item ([row G3](#statuses-on-npcs-and-things-toolbox-row-g3)), unless the step names an `item`, ([row 42](#potions-and-songs-toolbox-rows-18-and-42)) an `npc` or ([status reader 9](#a-room-as-a-status-holder-status-reader-9)) a `room`; any other subject (a detail) takes nothing, and since status reader 9 a room subject takes it; ([row W22](#fire-toolbox-row-w22)) `barrier.set` names its barrier or acts on the event's room; ([row 41](#decay-toolbox-row-41)) `item.move` moves the subject when it is an item. A check, action or custom event's subject_id
 names its target, so its status lands on the doer: a failed disarm poisons the actor. A filter naming a definition (`item`,
-`room`, `quest`, `story_point`, `barrier`, `scene`, `kind`, `victim`, `npc` and `attacker` as an NPC, `status`) must name one of
+`room`, `quest`, `story_point`, `barrier`, `scene`, `kind`, `victim`, `npc`, `attacker` and `target` as an NPC, `status`) must name one of
 this cartridge (`item` matches its authored instance only, never a created one such as a
 harvested pelt); key filters (`custom`, `check`, `choice`, `action`, `outcome`) are not resolved
 and a key no event carries never matches.
@@ -2873,6 +2873,36 @@ Found by [showcase plan 2](../showcase/combat-district.md) (#368); the PM brief 
   - Reused: per_subject facts (W2), reserved engine facts (`uses_`), check@1, `npcPassage`, wander and C4 flight.
   - New: the track check kind, `world.trails`, plan `trail` and `hunts`, room subjects for trail facts, the 1.85 floor.
   - Missing invariant: none (facts_typed covers the rows).
+
+## Boss phases (toolbox row 39)
+
+[Toolbox row 39](../MECHANICS-TOOLBOX.md#ranked-toolbox); its sampler: "boss summons at 60% HP, withdraws at 25%, drops one crown". The PM brief is in Beads `loka-kgd.134` (2026-10-14). The phases are content on what exists: [reaction@1](#reaction1-kerneltssrcmechanicsreactionts) rules on `attack_result` whose `when` reads the boss's hp, with [row 37a](#phased-world-events-toolbox-row-37a)'s `population.spawn` and `fact.assign`. No leaf read another entity's pool or a share of a maximum, so the row widens [`resource_compare`](#attributes1-kerneltssrcmechanicspolicyts60) by two optional fields.
+
+- **Subject.** `subject: "subject"` reads the pool on the reaction's event subject (the reaction@1 table: `attack_result`'s `target_id`; the actor's body for an event without one), as `status_active {subject: subject}` names its holder. Outside a reaction's `when` it reads the actor's body, as without the field. Without the field the leaf reads the actor's body, as before. An entity other than the actor's body holds the pool only by its own spec (an NPC's `hp`); one without reads false, never the cartridge default.
+- **Percent.** `at_least_percent` (1 to 100) holds when the current value times 100 is at least the percent times the entity's maximum (an NPC's own `hp` maximum, the player body's derived one; [resource@1](#resource1-kerneltssrcmechanicsresourcets) `resourceSpec`): integer math, no division, so there is no rounding. A leaf has exactly one of `at_least` and `at_least_percent` (`exactlyOneRequired`). "Below P%" is `not {at_least_percent P}`, by the [leaf naming](#property-tags-and-the-policy-leaf-set-toolbox-row-g1) rule ("below" is `not`). The sampler's "at or below 60%" is `not {at_least_percent 61}`, exact at maximum 20: it holds at 12 (1200 < 1220) and fails at 13; `not {at_least_percent 26}` holds at 5 and fails at 6. At maximum 21, `at_least_percent 60` holds at 13 (1300 ≥ 1260) and fails at 12 (1200 < 1260).
+- **Read time.** A reaction on `attack_result` reads the pool after the hit's loss (the delivery runs over the cause's committed writes): a boss at 13 of 20 hit for 1 reads 12.
+- **Opt-in.** A `resource_compare` with `subject` or `at_least_percent` needs `kernel_api` 1.87 (KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least`), in both kernels (`kernel/ts/src/content/cartridge_variants.ts`, `lib/loka/content/variants.ex`). Installed kernel 1.87. Chapter 1 declares none.
+- **Target filter.** `attack_result` takes a `target` filter (an NPC; the payload's `target_id` is that NPC's authored instance), as `attacker` names the striker ([loka-kgd.79](#attacker-filter-loka-kgd79)); `FILTERS` in `kernel/ts/src/mechanics/reaction.ts`, `target` in `NAMED` (`kernel/ts/src/content/cartridge_reactions.ts`). Needs `kernel_api` 1.87. Without it the warlord's hit on a player at 15 of 30 reads the player's pool as the subject and summons.
+- **Summon once.** The summon rule's `when` also reads `summoned` false and the warlord's hp at least 1 (the killing blow calls no guard), and its `apply` sets `summoned`, so later hits under 60% spawn no second guard (one `population.spawn`, one guard); withdraw sets `withdrawn`, which the warlord's [conditional schedule](#conditional-schedules-toolbox-row-w10) reads at the next hour.
+- **Crown.** The crown is an authored item held by the warlord; it falls into his corpse on death by [death@1](#death1--corpse-custody-and-same-body-return-m5-b-foundation) custody. No loot table, no new drop rule.
+- **Known limits.** With whole hp values, `not {at_least_percent P+1}` means "at or below P%" only when no value lies in [P%, P+1%) of the maximum: at maximum 99, hp 60 (60.6%) also holds (6000 < 6039). An exact "at or below" needs a new field (follow-up if content needs it). Phases fire on `attack_result` only: a loss from a status, bleed or spell does not summon until the next hit. A `subject` that is another player's body reads false, and `maxima()` knows only the session's body (Realm follow-up, seams 1 and 2).
+- **Realm seams** (owner decision 2026-10-13, brief checklist).
+  1. Actor: met; the leaf reads the event subject's pool, never `world.character`; the reaction writes only `instance` facts and spawns.
+  2. Reactions: met; each rule names its subject (`subject: "subject"`) and its target (`target: "warlord"`), so a hit on any other entity, a player included, fires nothing.
+  3. Credit: met; the crown goes to the corpse, and kill credit is the encounter's validated credited character ([death@1](#death1--corpse-custody-and-same-body-return-m5-b-foundation)); the phases pay nothing.
+  4. Time: met; no new job kind or clock read (spawned guards use row 37a's jobs); withdraw takes effect at the schedule's next hour.
+  5. Scope: met; the boss is shared-world in the Realm: `summoned` and `withdrawn` are `instance` facts, so every player sees one summon and one withdrawal.
+  6. Text: not applicable; authored narration lines only.
+  7. Ownership: met; the crown moves by death@1 custody, nothing else changes owner.
+  8. Trust: not applicable; nothing imported.
+  9. Instancing: met; none built or assumed; one boss per world, shared as in line 5.
+- **Book.** No new element and no [Book UI](book-ui.md) change.
+- **Sampler.** `cartridges/boss_sampler`: a hall and a lair; the warlord (hp 20, hits for 1, holds the crown) in the hall, schedule to the lair when `withdrawn`; population `guards` (cap 2, day and night target 0; the summon spawns one); reactions `summon` and `withdraw`. Tests: `kernel/ts/test/boss.test.ts`, `test/loka/content_boss_test.exs`, `mobile/authority/local-story/boss.test.ts` (cold reopen).
+- **Composition record** ([architecture](architecture.md#building-mechanics-by-composition)).
+  - Consumer: `boss_sampler`. Later: showcase bosses.
+  - Reads: the subject's resource level and `resourceSpec` maximum, the `summoned` fact, `attack_result`'s `target_id`.
+  - Writes: `population.spawn` ([row 37a](#phased-world-events-toolbox-row-37a)) and `fact.assign` (existing ops); no new op, event or job.
+  - New parts: two optional `resource_compare` fields and one reaction filter; no new mechanic.
 
 ## NPC-NPC pair facts (toolbox row FD4)
 

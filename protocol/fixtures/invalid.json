@@ -13529,6 +13529,7 @@
         "event": "attack_result",
         "hit": 1,
         "attacker": 1,
+        "target": 1,
         "x": 1
       },
       "apply": []
@@ -13540,6 +13541,10 @@
       },
       {
         "path": "/on/hit",
+        "code": "invalid_type"
+      },
+      {
+        "path": "/on/target",
         "code": "invalid_type"
       },
       {
@@ -15251,8 +15256,8 @@
     },
     "errors": [
       {
-        "path": "/at_least",
-        "code": "missing_property"
+        "path": "",
+        "code": "exclusive_properties"
       },
       {
         "path": "/resource",
@@ -19454,6 +19459,122 @@
     "errors": [
       {
         "path": "/levelling/unspent",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "resource_compare_percent_zero",
+    "contract": "Policy",
+    "value": {
+      "op": "resource_compare",
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "hp"
+      },
+      "at_least_percent": 0
+    },
+    "errors": [
+      {
+        "path": "/at_least_percent",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "name": "resource_compare_percent_over",
+    "contract": "Policy",
+    "value": {
+      "op": "resource_compare",
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "hp"
+      },
+      "at_least_percent": 101
+    },
+    "errors": [
+      {
+        "path": "/at_least_percent",
+        "code": "above_maximum"
+      }
+    ]
+  },
+  {
+    "name": "resource_compare_percent_string",
+    "contract": "Policy",
+    "value": {
+      "op": "resource_compare",
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "hp"
+      },
+      "at_least_percent": "60"
+    },
+    "errors": [
+      {
+        "path": "/at_least_percent",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "name": "resource_compare_both_thresholds",
+    "contract": "Policy",
+    "value": {
+      "op": "resource_compare",
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "hp"
+      },
+      "at_least": 1,
+      "at_least_percent": 60
+    },
+    "errors": [
+      {
+        "path": "",
+        "code": "exclusive_properties"
+      }
+    ]
+  },
+  {
+    "name": "resource_compare_self_subject",
+    "contract": "Policy",
+    "value": {
+      "op": "resource_compare",
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "hp"
+      },
+      "subject": "self",
+      "at_least": 1
+    },
+    "errors": [
+      {
+        "path": "/subject",
+        "code": "not_in_enum"
+      }
+    ]
+  },
+  {
+    "name": "resource_compare_no_resource",
+    "contract": "Policy",
+    "value": {
+      "op": "resource_compare",
+      "at_least_percent": 60
+    },
+    "errors": [
+      {
+        "path": "/resource",
         "code": "missing_property"
       }
     ]

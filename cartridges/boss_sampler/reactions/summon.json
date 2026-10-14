@@ -1,0 +1,45 @@
+{
+  "on": {
+    "event": "attack_result",
+    "target": "warlord"
+  },
+  "when": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": [
+        {
+          "op": "not",
+          "item": {
+            "op": "resource_compare",
+            "subject": "subject",
+            "resource": "hp",
+            "at_least_percent": 61
+          }
+        },
+        {
+          "op": "resource_compare",
+          "subject": "subject",
+          "resource": "hp",
+          "at_least": 1
+        },
+        {
+          "op": "fact_compare",
+          "fact": "summoned",
+          "equals": false
+        }
+      ]
+    }
+  },
+  "apply": [
+    {
+      "op": "population.spawn",
+      "plan": "guards"
+    },
+    {
+      "op": "fact.assign",
+      "fact": "summoned",
+      "value": true
+    }
+  ]
+}

@@ -275,7 +275,7 @@
           "additionalProperties": false
         },
         {
-          "description": "The current value of the resource on the actor's body (regenerated to now, before the action's costs) is at least at_least; false for an actor without a body. Owned by attributes@1.",
+          "description": "The current value of the resource on the actor's body (regenerated to now, before the action's costs) is at least at_least; false for an actor without a body. Toolbox row 39 (kernel_api at least 1.87): subject subject reads the pool on a reaction's event subject (the actor's body outside a reaction); at_least_percent holds when value * 100 >= percent * the entity's maximum. Exactly one of at_least and at_least_percent. Owned by attributes@1.",
           "type": "object",
           "properties": {
             "op": {
@@ -284,14 +284,27 @@
             "resource": {
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
+            "subject": {
+              "enum": [
+                "subject"
+              ]
+            },
             "at_least": {
               "$ref": "resource.schema.json#/$defs/ResourceInt"
+            },
+            "at_least_percent": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
             }
           },
           "required": [
             "op",
-            "resource",
-            "at_least"
+            "resource"
+          ],
+          "exactlyOneRequired": [
+            "at_least",
+            "at_least_percent"
           ],
           "additionalProperties": false
         },

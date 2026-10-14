@@ -2,7 +2,8 @@ defmodule Loka.Content.Variants do
   @moduledoc """
   Toolbox row W6: an entity text variant (all but an item's older `room_line_variants`) or a
   `status_active` or `npc_present` leaf needs kernel_api 1.46; a `status_active` leaf reading
-  `self` or `subject` (status reader 1, row G3) 1.53. Twin of
+  `self` or `subject` (status reader 1, row G3) 1.53; a `resource_compare` with `subject` or
+  `at_least_percent` (row 39) 1.87. Twin of
   kernel/ts/src/content/cartridge_variants.ts.
   """
   import Loka.Content.Source, only: [diag: 3]
@@ -17,13 +18,18 @@ defmodule Loka.Content.Variants do
       |> String.split(".")
       |> Enum.map(&String.to_integer/1)
 
-    floor = if reader?(defs) or reader?(settings), do: [1, 53], else: [1, 46]
+    relative = relative?(defs) or relative?(settings)
 
-    if (Enum.any?(Entities.all(defs), &variant?/1) or leaf?(defs) or leaf?(settings)) and
-         api < floor,
+    if (relative or Enum.any?(Entities.all(defs), &variant?/1) or leaf?(defs) or leaf?(settings)) and
+         api < floor(relative, defs, settings),
        do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least", %{})],
        else: []
   end
+
+  defp floor(true, _, _), do: [1, 87]
+
+  defp floor(_, defs, settings),
+    do: if(reader?(defs) or reader?(settings), do: [1, 53], else: [1, 46])
 
   defp variant?({kind, _, e}),
     do:
@@ -41,4 +47,13 @@ defmodule Loka.Content.Variants do
   defp reader?(v) when is_list(v), do: Enum.any?(v, &reader?/1)
   defp reader?(v) when is_tuple(v), do: reader?(Tuple.to_list(v))
   defp reader?(_), do: false
+
+  defp relative?(%{"op" => "resource_compare"} = p)
+       when is_map_key(p, "subject") or is_map_key(p, "at_least_percent"),
+       do: true
+
+  defp relative?(v) when is_map(v), do: Enum.any?(Map.values(v), &relative?/1)
+  defp relative?(v) when is_list(v), do: Enum.any?(v, &relative?/1)
+  defp relative?(v) when is_tuple(v), do: relative?(Tuple.to_list(v))
+  defp relative?(_), do: false
 end

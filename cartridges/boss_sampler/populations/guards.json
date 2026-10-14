@@ -1,0 +1,15 @@
+{
+  "bundle": "guards",
+  "home": "hall",
+  "area": [
+    "hall",
+    "lair"
+  ],
+  "cap": 2,
+  "day_target": 0,
+  "night_target": 0,
+  "night_start": 3,
+  "night_end": 1,
+  "replacement_delay": 10000,
+  "wander_interval": 100
+}
