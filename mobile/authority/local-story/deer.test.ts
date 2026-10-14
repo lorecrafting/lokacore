@@ -1,4 +1,4 @@
-// size: allow 540, deer custody, sight, fault, reaction-spawn reopen and ClockDriver catch-up cases share one real SQLite fixture
+// size: allow 545, deer custody, sight, fault, reaction-spawn reopen and ClockDriver catch-up cases share one real SQLite fixture
 import assert from 'node:assert/strict';
 import { test, type TestContext } from 'node:test';
 import { DatabaseSync } from 'node:sqlite';
@@ -92,6 +92,12 @@ function setup(t: TestContext, seed?: readonly number[], release?: Release) {
   assert.equal(choice.kind, 'saved', JSON.stringify(choice));
   return { path, p, story, selected };
 }
+const accepted = (r: { kind: string; decision?: unknown }) =>
+  assert.equal(
+    r.kind === 'saved' && (r.decision as { kind?: string } | null)?.kind,
+    'accepted',
+    JSON.stringify(r),
+  );
 function move(story: ReturnType<typeof setup>['story'], direction: string, n: number) {
   const result = story.invoke({
     invocation_id: `cccccccc-0000-4000-8000-${String(n).padStart(12, '0')}`,
@@ -168,8 +174,9 @@ test('reaction spawn into a sighted plan with the player home cold-reopens', (t)
   const waited = (stops: number[]) => {
     const run = setup(t, undefined, release);
     for (const [i, d] of ['south', 'south', 'west'].entries()) move(run.story, d, i + 1);
-    for (const [k, until] of stops.slice(1).entries())
-      run.story.elapsed({ expected_run_id: run.story.runId(), from: stops[k]!, until });
+    for (const [k, until] of stops.slice(1).entries()) {
+      accepted(run.story.elapsed({ expected_run_id: run.story.runId(), from: stops[k]!, until }));
+    }
     return run;
   };
   const { path, p, story } = waited([64800, 68400]); // slot job 65100 and plan job 68400 move one deer
@@ -530,8 +537,6 @@ test('a 72-hour catch-up in ClockDriver steps is accepted at every step', (t) =>
       (j) => j.status === 'pending' && j.job.kind !== 'calendar',
     );
     const until = Math.min(end, ...due.map((j) => j.due_time));
-    const r = story.elapsed({ expected_run_id: story.runId(), from: s.clock, until });
-    const kind = r.kind === 'saved' && (r.decision as { kind?: string } | null)?.kind;
-    assert.equal(kind, 'accepted', `${s.clock} ${JSON.stringify(r)}`);
+    accepted(story.elapsed({ expected_run_id: story.runId(), from: s.clock, until }));
   }
 });

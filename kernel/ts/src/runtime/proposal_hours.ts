@@ -38,15 +38,18 @@ export function queueScheduled(due: Due, ops: readonly DeltaOp[], to: number) {
 }
 
 // A run writing a target that a run of strictly earlier due time wrote (`earlier`) joins that
-// run's writer group, as steps commit them in order (loka-kgd.151).
+// run's writer group, as steps commit them in order (loka-kgd.151). A target that a run of the
+// same due time (`same`) wrote stays apart, so that conflict faults as it does in steps.
 export function joinEarlier(
   all: DeltaOp[],
-  earlier: readonly DeltaOp[],
+  [earlier, same]: readonly DeltaOp[][],
   own: readonly DeltaOp[],
   group: number,
   maps: Map<string, number>[],
 ) {
   const mine = new Set(own.map((o) => key(target(o))));
-  const groups = earlier.filter((o) => o.writer_group !== group && mine.has(key(target(o))));
+  const hit = (o: DeltaOp) => o.writer_group !== group && mine.has(key(target(o)));
+  if (same!.some(hit)) return;
+  const groups = earlier!.filter(hit);
   merge(all, new Set(groups.map((o) => o.writer_group)), group, maps);
 }
