@@ -58,6 +58,8 @@ Answers to the plan's open questions ([record](decisions/owner-decision-mechanic
 
 ## Ranked toolbox
 
+From the rest of M12 on, the batch order follows the [priority plan of 2026-10-14](briefs/toolbox-priority-plan-2026-10-14.md) (owner-adopted); the table rows are re-ranked to it at each batch close.
+
 **Rank** is the batch, and table order within a batch is the order to build
 ([re-rank decision](decisions/owner-decision-toolbox-rerank-2026-10-09.md), from the
 [roadmap review](reviews/2026-10-09-mechanics-roadmap-review.md); [re-rank 2](decisions/pm-decision-toolbox-rerank-2-2026-10-09.md),
