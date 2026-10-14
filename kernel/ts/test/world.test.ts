@@ -143,8 +143,6 @@ test('a fresh world mints IdSource ids and puts the player in the entry room', (
   });
 });
 
-// Astra A1. Breaks: the default pools without a way to regenerate (no schedule@1, so no wait):
-// 82 moves leave the body at 0 mv for good.
 // Break: a lookup that returns the character for any body.
 test('actorOf names the character only for its own body', () => {
   const w = fresh();
@@ -153,6 +151,8 @@ test('actorOf names the character only for its own body', () => {
   assert.equal(actorOf(w, 'nope' as World['body']), undefined);
 });
 
+// Astra A1. Breaks: the default pools without a way to regenerate (no schedule@1, so no wait):
+// 82 moves leave the body at 0 mv for good.
 test('a body out of mv waits an hour and moves again', () => {
   let w = fresh();
   let n = 0;
