@@ -38,3 +38,30 @@ Note, not a finding: one long wait and hourly steps give different results ([1, 
 | M2: fire-time `when` skipped when `fired` | `raid.test.ts` | killed |
 | M3: `policy.ts:68` `>=` changed to `>` | `raid.test.ts` | killed |
 | M4: replayed reaction row drops `actor_id` (`invariants_encounter.ts`) | `encounter_composition`, `encounter_bleed_jobs` | killed (it survives `raid.test.ts` and the mobile test) |
+
+## Recheck of fix round 1 (scoped)
+
+- Exact head `e2d6e3d49201df14a19e3845a00861c2ea654ac3`, diff `f4c6fa32..e2d6e3d4`; the two review-record commits are excluded. Written 2026-10-14 by anthropic/claude-opus-5-5. The original reviewer was not available.
+- Verdict: **CHANGES REQUIRED**.
+- Hosted CI on the head: `ci` 38633064062 and `book-e2e` 38633063967 are both success.
+
+| Item | Disposition | Proof |
+|---|---|---|
+| 1 | **Partly fixed.** Two delayed `fact.assign` jobs now share a group. | Red control: drop the shared ops in `job.ts:170-175`. `raid.test.ts:288` fails. |
+| 2 | Fixed | The CI above is green. |
+| 3 | Fixed for `after`; see R2 for `time_since` | Mutant: per-rule floor skipped. TS fails at `raid.test.ts:433`. Elixir fails at `content_raid_test.exs:57`. |
+| 4 | Fixed | Mutant: clamp `+1` dropped. The driver case fails at `raid.test.ts:313`. |
+| 5 | Fixed (commit messages) | Read in `2800d87d`. |
+| M4 | Holds | Three mutants were run against the mobile test. The writer strips `actor_id`: the test fails at `raid_aftermath.test.ts:42` (`save_corrupt`). The completion row drops `actor_id`: it fails at `:38`. The replay rebuild drops `actor_id` (`invariants_encounter.ts:170`): this one still survives the mobile test, but the kernel invariant tests kill it, as in round 1. |
+
+### Findings
+
+R1. **Blocker (finding 1 not closed).** Two delayed rules that write one status in one advance still fault and wedge the save. Example: `status.apply` and `status.cure` on `shaken`, both with `after`, both due at 1600. They fault `conflicting_write` on the status target, and both jobs stay `[1600, pending]`. Every later wait then faults again. The same pair without `after` composes (`shaken` active, generation 1). `cartridge_delayed.ts:24-27` allows these steps under `after`. The cause: the reaction branch at `kernel/ts/src/mechanics/status/job.ts:170-175` collects `fact.assign` targets only. Ordinary deliveries use the proposal's holder map (`runtime/proposal.ts:246`) instead. Fix: give delayed jobs the same holders, or key every step's target, and add a status-pair case next to `raid.test.ts:278`.
+
+R2. **Should-fix (open item c, extends finding 3).** Elixir and TS disagree on a `time_since` cartridge at kernel_api 1.0. The cartridge has no reactions, so `v2` is nil. Elixir compiles it, because `compiler.ex:106` passes nil trees and `delayed.ex` skips the leaf scan and the int-fact clock check. TS refuses it with `KERNEL_API_RANGE_INVALID` (`cartridge_delayed.ts:31-34`). A rule with `after` cannot reach this path, because any reaction makes `v2` truthy.
+
+R3. **Nit (open item a).** The docstring at `reaction.ts:329-330` says that a step that faults at fire time completes the job. A thrown `KernelError` (for example a durable fact, `reaction.ts:250`) escapes `runDelayed` and leaves the job pending. This is not a new wedge: the same rule without `after` faults the same way, so it is a loader gap that existed before FD1. Fix the sentence.
+
+Open items judged not a finding:
+- (b) The fire-time `when` reads no event. The stand-in cause is a `custom_event` with no subject field (`reaction.ts:341-342`), so `subject()` returns the actor's body (`reaction.ts:197-203`). `policy.ts` reads no cause payload, so the read is deterministic and matches the spec.
+- (d) `e1_obligations.ts:403` covers Chapter 1 only, and Chapter 1 declares no `after`.
