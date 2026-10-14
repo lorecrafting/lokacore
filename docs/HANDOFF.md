@@ -6,9 +6,8 @@ the next steps, the standing owner rules that the repo does not yet state, and o
 questions. Rewrite it at each stable checkpoint (a merge, a review verdict, a pushed fix) and before
 the session ends; commit and push it with the Beads export.
 
-Written 2026-10-14 UTC by Claude Code (Opus 5.5) at the end of local session
-0d166efd (stopped for a Claude Code restart to load the patched compaction hook), for the next
-session to continue.
+Written 2026-10-14 UTC by Claude Code (Opus 5.5) in local session 5f461c39, stopped for a Claude
+Code restart to turn fast-jev compaction off.
 
 ## Start of a session
 
@@ -51,26 +50,24 @@ rule); both upstream comments posted (fast-jev-compaction#89, claude-code#99727;
 
 Next, in order:
 
-0. Prove the compaction fix (`loka-bwfo`) BEFORE any long agent. The cached hook
-   (`hooks/fast-jev.ts`, original `.orig-0.3.0`) now rebuilds kept assistant rows and kept tool_result
-   rows without their handle. Spawn a Sonnet general-purpose agent that reads large docs until it
-   auto-compacts, calls the advisor once before compaction, and makes a few tool calls after it. Run
-   both scripts from the `loka-bwfo` notes on its transcript (`dangling-parents.py`, `shared-ids.py`):
-   both must print 0. Then resume it once with SendMessage: no 400 = proven; lift the no-advisor and
-   never-resume rules (WORKFLOW token hygiene) in the housekeeping PR and close `loka-bwfo`. If live
-   turns break (thinking blocks dropped) or the 400 returns: turn fast-jev compaction off (built-in
-   compaction) and tell the owner.
-1. Long-wait slice `loka-kgd.152` + `.151`: design approved (copied into the `.152` notes with the
-   PM rulings). WIP on `toolbox/longwait-loop` at `e8eea2f0`, worktree `longwait-loop`: unfinished
-   and unchecked. A fresh developer finishes it from the brief, the design note and the rulings, then
-   main review + second opinion (proposal.ts, protocol rule).
-2. FD1 `loka-kgd.138` on `toolbox/m12-delayed` at `56cbcc33` (merged main, kernel_api 1.90; throw
-   wedge, holders, sight counterfeits, when-leaf refusal, XP probe done). Left: confirm red controls
-   and the raid pair-test hash-order fix, `bin/prepush.sh`, `/code-review medium`, CI; then main
-   review + second opinion. After `.152` lands, remove FD1's "wait end + 1" clamp. Merge both slices
-   into `toolbox/batch-longwait`, one Fable batch review, merge.
-3. Realm seams batch `loka-kgd.150` (RS-1, RS-4 + row 38 `loka-kgd.133`, RS-2 + RS-3, RS-5, RS-6,
-   RS-8; RS-7 deferred), then the Book word bar `loka-x6t.39` in the mechanics lane.
+0. Compaction (`loka-bwfo`): the 400 fix is proven (session 5f461c39: 0 dangling parents, 0 shared ids,
+   resume ok), but fast-jev compaction broke live turns (Opus agents compact at ~90k to 5-20k with no
+   summary and lose their task; one reviewer compacted 14 times). The owner kept it OFF: the plugin is
+   disabled in the user settings and takes effect after a Claude Code restart. Check a new agent's
+   first compaction has a long `durationMs` (built-in summary), not ~200 ms. Close `loka-bwfo` in #384.
+1. Long-wait slice `loka-kgd.152` + `.151` on `toolbox/longwait-loop` at `ce744cc6` (CI not checked).
+   Its round-1 message was lost: a fresh developer runs round 1 from the `.152` notes (reproduce and
+   fix review findings 2, 3, 4, 6 or file follow-ups; report the 72h check, red controls, fixtures in
+   both kernels). Then main review + Fable second opinion (proposal.ts, protocol rule).
+2. FD1 `loka-kgd.138` on `toolbox/m12-delayed` at `6970272d`, CI green, all items done; its main
+   review died with no findings (compactions, then an API safeguard false positive): run a fresh main
+   review, then a second opinion. After `.152` lands, remove the "wait end + 1" clamp. Merge both
+   slices into `toolbox/batch-longwait`, one Fable batch review, merge.
+3. Realm seams batch `loka-kgd.150`: Fable briefs in each child's notes (PM rulings in `.150.7` and
+   `.150.2`). Batch branch `toolbox/batch-rs` (= main 6dc2f3ae). RS-1 done at `3c525470` on
+   `toolbox/rs-1`; its review was running at the restart (rerun if no result). Next RS-4 + row 38,
+   RS-2 + RS-3, RS-5, RS-6 + RS-8 (Sonnet, parallel). Then the word bar `loka-x6t.39`: touch-first,
+   optional keyboard for Say (owner, notes in `.39`).
 4. M13 (FD3 storylets first), Built rooms `loka-kgd.109`, M14 (43b mounts right after 43a), M15,
    Homestead, then Settle S3/S4 only on an owner yes.
 5. Housekeeping draft #384 then takes `loka-mm5v` and `loka-xroj` (after the long-wait batch; they
@@ -84,7 +81,7 @@ by hand (union, `json.dumps(indent=2)`). Developers run `bin/prepush.sh` before 
 wait on CI; the PM watches CI.
 
 Session lessons (2026-10-14):
-- Until step 0 passes: agents never call the advisor, never wait in the background, and no agent is
+- Before 2026-10-14 (now lifted: the 400 fix is proven): agents never call the advisor, never wait in the background, and no agent is
   resumed after a compaction. Check its transcript for `compact_boundary` before any SendMessage.
   This session two Opus developers died on the 400: one resumed after one compaction (the PM did not
   check), one mid-run after three compactions with no resume (each compaction rewrote its one advisor
@@ -135,7 +132,10 @@ Session lessons (2026-10-14):
   S3/S4 after Homestead on a yes); Built rooms between M13 and M14; Balance gates on the showcase only;
   keep W9 "sleep provokes"; `loka-b60` at the release candidate; "yes to word bar, put mounts after
   43a in M14"; approved all five retro items.
-- `fast-jev-compaction` stays on with `compactAtPercent: 101` (owner: "yes apply compactAtPercent
+- 2026-10-14 (session 5f461c39): fast-jev compaction OFF ("ok keep it off"); Fable allowed for
+  important judgment work beyond the routing table (paraphrased: the weekly limit binds before Fable);
+  jev-kit not installed (meagre gain), upstream issue jonathanavis96/jev-kit#39 filed.
+- Earlier: `fast-jev-compaction` stays on with `compactAtPercent: 101` (owner: "yes apply compactAtPercent
   101, if you tihnk that is good for us"; "please fix the jev-compaction plugin i think its useful").
 
 ## Open owner questions
