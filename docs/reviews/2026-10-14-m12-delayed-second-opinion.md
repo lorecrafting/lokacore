@@ -35,3 +35,25 @@
 ## Open items
 
 - Pre-existing, not FD1: Elixir `other_binding?/1` never checks `sight`; `{npc, sight}` and `{quest, actor_id, quest_instance_id, sight}` are accepted by Elixir and refused by TS at both `e78a8629` and head. For the PM to file.
+
+## Recheck of fix round 1 (scoped)
+
+- Exact commit `e2d6e3d49201df14a19e3845a00861c2ea654ac3` (fixes `2800d87d`, `e2d6e3d4`; base `f4c6fa32`). Fresh reviewer; the original is unavailable. Scope: findings 1-2 and the `proposal.ts` change only.
+- **Verdict: APPROVE WITH NOTES.**
+
+### Dispositions
+
+1. Finding 1 **resolved.** `compose_encounter.ex:288` adds `op["sight"] == nil` to the FD1 clause; `invariants_encounter.ex:266` the same. Case `reaction-schedule-refuses-sight` (`encounter_composition.json:2195`, `precondition_failed`, with counterfeit) passes in both kernels (`encounter_composition_test.exs` 6/6, `encounter_composition.test.ts` green). Mutant E1 (drop the sight clause in `compose_encounter.ex`): red, `reaction-schedule-refuses-sight`.
+2. Finding 2 **resolved.** `reaction-schedule-refuses-quest` (`:2267`) and `-water` (`:2319`) present, both `precondition_failed` with counterfeits.
+
+### `proposal.ts:292` (delayed jobs share fact writer groups)
+
+- Touches only reaction jobs: the new branch in `statusGroup` (`job.ts:170-176`) is taken only when `currentRound` is absent and `job.kind === 'reaction'`; `ops` defaults to `[]`; `proposal.ts:292` is the only caller. Holder keys are built as `key({kind: 'fact', ...target})`, the same as `reaction.ts:252`.
+- Job order: the `due` loop and `dueJobs` sort are unchanged. One transaction: `merge` relabels groups inside `p.ops`; no new proposal or commit.
+- Elixir twin: none. `Loka.Runtime` is a boundary with no code (`docs/system/architecture.md:14`); proposal composition is TS-only.
+- Mutant T1 (drop the `ops` argument): red, `raid.test.ts` "two delayed rules on one fact both apply".
+- Real-SQLite probe (throwaway, not committed): `raid_sampler` plus a copy `aftershock2` (same `after` 600), `elapsedHost` to 1000, close, cold reopen, then to 2100 in one pulse and in 2000 ms steps. Reopen and uninterrupted control are deep-equal (reaction jobs, facts, view); both jobs pending at 1600 before, completed after; `aftershocks` 2. Red control: T1 makes the probe fail.
+
+### New finding
+
+- **nit** `lib/loka/core/invariants_encounter.ex:266`: the `op["sight"] == nil` clause is not pinned. Mutant E2 (remove it) stays green, as `job/3` (`:213-218`) projects no `sight`, so the counterfeit carrying `sight` mismatches either way. Failure: a later edit drops the clause and the invariant then accepts a counterfeit reaction row without `sight` for a `sight`-bearing op. Fix: a counterfeit for `reaction-schedule-refuses-sight` whose row omits `sight`.
