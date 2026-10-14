@@ -20,18 +20,16 @@ defmodule Loka.Content.Variants do
 
     relative = relative?(defs) or relative?(settings)
 
-    floor =
-      cond do
-        relative -> [1, 87]
-        reader?(defs) or reader?(settings) -> [1, 53]
-        true -> [1, 46]
-      end
-
     if (relative or Enum.any?(Entities.all(defs), &variant?/1) or leaf?(defs) or leaf?(settings)) and
-         api < floor,
+         api < floor(relative, defs, settings),
        do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least", %{})],
        else: []
   end
+
+  defp floor(true, _, _), do: [1, 87]
+
+  defp floor(_, defs, settings),
+    do: if(reader?(defs) or reader?(settings), do: [1, 53], else: [1, 46])
 
   defp variant?({kind, _, e}),
     do:
