@@ -47,7 +47,7 @@ import { runStatus } from '../status/job.ts';
 import { moves } from '../status/shared.ts';
 
 import { runSight } from '../population/behavior.ts';
-import { runDelayed } from '../reaction.ts';
+import { runDelayed } from '../delayed.ts';
 
 // `at`: the drain's hour for this run; a later listed hour the advance crosses is a sub-step of the
 // row's one run_job, which its first hour completed (scheduledJob, loka-qi0r; runPopulation, loka-6ql4;

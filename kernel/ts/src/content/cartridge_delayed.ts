@@ -1,9 +1,10 @@
 // Toolbox row FD1 at the cartridge trust boundary: a reaction's `after`, the fact.stamp step and the
-// time_since leaf need kernel_api 1.90; a delayed rule carries no step that reads its event; a
-// stamped or timed fact is an int fact that can hold any clock value. Twin of lib/loka/content/delayed.ex.
+// time_since leaf need kernel_api 1.90; a delayed rule carries no step that reads its event and no
+// `when` leaf that reads its subject; a stamped or timed fact is an int fact that can hold any clock
+// value. Twin of lib/loka/content/delayed.ex.
 import { refString } from '../runtime/decision.ts';
 import type { DefinitionRef, Diagnostic } from '../contracts.gen.ts';
-import { diag, nodes, step, type Obj } from './cartridge_refs.ts';
+import { diag, nodes, step, walk, type Obj } from './cartridge_refs.ts';
 import { apiCmp } from './cartridge_installed.ts';
 
 const EVENT_BOUND = ['barrier.set', 'item.move', 'population.suppress'];
@@ -27,6 +28,11 @@ export function delayed(c: Obj): Diagnostic[] {
       )
         out.push(diag('SCHEMA_VIOLATION', `${at}.apply[${i}].op`, { error: 'invalid_value' }));
     });
+    // At fire the event's subject is gone and `subject` would read the actor's body instead.
+    if (r.after !== undefined && r.when)
+      for (const [n, path] of walk(r.when.root, `${at}.when.root`))
+        if (n.subject === 'subject')
+          out.push(diag('SCHEMA_VIOLATION', `${path}.subject`, { error: 'invalid_value' }));
   }
   for (const [n, at] of nodes(c))
     if (n.op === 'time_since') ((used = true), clock(n.fact, `${at}.fact`));

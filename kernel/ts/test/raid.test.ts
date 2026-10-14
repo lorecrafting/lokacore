@@ -295,11 +295,31 @@ test('FD1: two delayed rules on one fact both apply, in hourly waits or one wait
   }
 });
 
+// Breaks: two delayed experience.grant jobs for one actor in one advance take separate writer groups
+// on the levelling row (conflicting_write, both stay pending and wedge later waits).
+test('FD1: two delayed experience grants due in one advance both count', () => {
+  const xp = (c: any) => {
+    const level_up = 'item.player_corpse.short'; // any catalog key: no level is reached
+    c.world.levelling = { thresholds: [30, 100], points_per_level: 1, level_up };
+    c.manifest.requires.capabilities.attributes = c.lock.capabilities.attributes = 1;
+    c.reactions[AFTERSHOCK].apply = [{ op: 'experience.grant', amount: 5 }];
+    c.reactions[AFTERSHOCK + '2'] = { ...c.reactions[AFTERSHOCK], key: 'aftershock2' };
+  };
+  const at1000 = elapsed(world(xp), 1000);
+  for (const w of [elapsed(at1000, 1800), elapsed(at1000, 1800, [], 100000)])
+    assert.deepEqual(
+      [
+        Object.values(w.state.levelling ?? {}).map((l) => l.experience),
+        statuses(w).map(([, s]) => s),
+      ],
+      [[10], ['completed', 'completed']],
+    );
+});
+
 // Breaks: two delayed jobs moving one body's status in one advance take separate writer groups
-// (conflicting_write on the status row, both stay pending and wedge later waits). Equal-due jobs
-// run in job id order (proposal.ts dueJobs); `b_shake`'s id (5a9e...) sorts before `a_steady`'s
-// (cb37...), so the apply runs first and the cure ends the status.
-test('FD1: a delayed status.apply and status.cure due at 1600 both run, in hourly waits or one', () => {
+// (conflicting_write on the status row, both stay pending and wedge later waits). The cure is due
+// 1 s after the apply, so the order is the due time's, not the job ids'.
+test('FD1: a delayed status.apply at 1600 and status.cure at 1601 both run, in hourly waits or one', () => {
   const R = (kind: string, key: string) => ({ ...REF, kind, key });
   const REF = { cartridge_id: 'raid_sampler', cartridge_version: '0.0.1' };
   const SHAKEN = 'raid_sampler@0.0.1:status/shaken';
@@ -318,25 +338,26 @@ test('FD1: a delayed status.apply and status.cure due at 1600 both run, in hourl
     };
     const rule = c.reactions[AFTERSHOCK];
     delete c.reactions[AFTERSHOCK];
-    for (const [key, op] of [
-      ['b_shake', 'status.apply'],
-      ['a_steady', 'status.cure'],
+    for (const [key, op, after] of [
+      ['shake', 'status.apply', 600],
+      ['steady', 'status.cure', 601],
     ])
       c.reactions[`raid_sampler@0.0.1:reaction/${key}`] = {
         ...rule,
         key,
+        after,
         apply: [{ op, status: R('status', 'shaken') }],
       };
   };
   const at1000 = elapsed(world(pair), 1000);
   for (const w of [elapsed(at1000, 1800), elapsed(at1000, 1800, [], 100000)])
     assert.deepEqual(
-      [Object.values(w.state.statuses ?? {}).map((s) => s.active), statuses(w)],
+      [Object.values(w.state.statuses ?? {}).map((s) => s.active), statuses(w).sort()],
       [
         [false],
         [
           [1600, 'completed'],
-          [1600, 'completed'],
+          [1601, 'completed'],
         ],
       ],
     );
@@ -408,6 +429,21 @@ test('FD1: a false `when` at the due time, or a removed rule, only completes the
   assert.deepEqual(statuses(stuck), [[1600, 'completed']]);
 });
 
+// Breaks: a delayed step that throws (an adjust of a weapon's durability fact) leaves its job
+// pending, so the next advance and every later one faults (elapsed asserts each is accepted).
+test('FD1: a delayed step that throws completes its job and writes nothing', () => {
+  const w = elapsed(world(), 1000);
+  const fact_ = w.cartridge.reactions![AFTERSHOCK]!.apply[0] as { fact: unknown };
+  const blade = { weapon: { durability: { fact: fact_.fact } } };
+  const items = { ...w.cartridge.items, 'raid_sampler@0.0.1:item/blade': blade } as never;
+  const worn = elapsed({ ...w, cartridge: { ...w.cartridge, items } }, 1700);
+  const later = elapsed(worn, 1800);
+  assert.deepEqual(
+    [fact(later, 'aftershocks'), statuses(later)],
+    [undefined, [[1600, 'completed']]],
+  );
+});
+
 // Breaks: time_since reads `<` for `>=`, compares the wrong side, or an unset fact reads false.
 test('FD1: time_since 600 after a stamp at 1000 is false at 1599 and true at 1600', () => {
   const since = {
@@ -430,8 +466,8 @@ test('FD1: time_since 600 after a stamp at 1000 is false at 1599 and true at 160
 });
 
 // Breaks (twin of test/loka/content_raid_test.exs): `after`, fact.stamp or time_since loads
-// under API 1.89; a delayed rule keeps a step that reads its event; a stamp or time_since names a
-// fact that cannot hold every clock value.
+// under API 1.89; a delayed rule keeps a step that reads its event or a `when` leaf that reads its
+// subject; a stamp or time_since names a fact that cannot hold every clock value.
 test('FD1: the loader keeps API 1.90, event-free delayed steps and an unbounded int clock fact', () => {
   const raid = 'raid_sampler@0.0.1:reaction/raid';
   const calm = 'raid_sampler@0.0.1:reaction/calm';
@@ -473,6 +509,22 @@ test('FD1: the loader keeps API 1.90, event-free delayed steps and an unbounded 
     [
       [(c) => (c.reactions[calm].when.root = { ...since, fact: ref('raided') })],
       bad(`${calm}"].when.root.fact`),
+    ],
+    [
+      [
+        (c) => (c.manifest.requires.capabilities.attributes = c.lock.capabilities.attributes = 1),
+        (c) =>
+          (c.reactions[AFTERSHOCK].when.root = {
+            op: 'not',
+            item: {
+              op: 'resource_compare',
+              resource: { ...ref('mv'), kind: 'resource' },
+              at_least: 1,
+              subject: 'subject',
+            },
+          }),
+      ],
+      bad(`${AFTERSHOCK}"].when.root.item.subject`),
     ],
   ];
   for (const [edits, expected] of cases) {

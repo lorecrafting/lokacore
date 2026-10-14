@@ -29,7 +29,7 @@ defmodule Loka.ContentRaidTest do
 
   # Breaks (toolbox row FD1; twin of the loader test in kernel/ts/test/raid.test.ts): `after`,
   # fact.stamp or time_since compiles under API 1.89; a delayed rule keeps a step that reads its
-  # event; a stamp or time_since names a fact that cannot hold every clock value; a rule with
+  # event or a `when` leaf that reads its subject; a stamp or time_since names a fact that cannot hold every clock value; a rule with
   # `after` and no steps compiles under 1.89.
   test "after, fact.stamp and time_since keep API 1.90 and an unbounded int fact" do
     dir = Loka.ContentSource.copy("cartridges/raid_sampler")
@@ -39,6 +39,15 @@ defmodule Loka.ContentRaidTest do
     since = %{"op" => "time_since", "fact" => "raided_at", "at_least" => 600}
     leaf = &put_in(&1, ["when", "root"], %{"op" => "not", "item" => since})
     move = %{"op" => "item.move", "room" => "village"}
+
+    mv = %{
+      "op" => "resource_compare",
+      "resource" => "mv",
+      "at_least" => 1,
+      "subject" => "subject"
+    }
+
+    mv = %{"op" => "not", "item" => mv}
 
     for {edits, expected} <- [
           {[old, unstamped], api},
@@ -52,7 +61,9 @@ defmodule Loka.ContentRaidTest do
            {"SCHEMA_VIOLATION", "reactions/raid.apply[2].fact"}},
           {[
              {"reactions/calm.json", &put_in(&1, ["when", "root"], %{since | "fact" => "raided"})}
-           ], {"SCHEMA_VIOLATION", "reactions/calm.when.root.fact"}}
+           ], {"SCHEMA_VIOLATION", "reactions/calm.when.root.fact"}},
+          {[{"reactions/aftershock.json", &put_in(&1, ["when", "root"], mv)}],
+           {"SCHEMA_VIOLATION", "reactions/aftershock.when.root.item.subject"}}
         ] do
       assert {:error, diags} = Loka.ContentSource.compile(dir, edits)
       assert expected in Enum.map(diags, &{&1["code"], &1["path"]}), inspect(diags)

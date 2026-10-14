@@ -1,11 +1,10 @@
-// size: allow 350, reaction@1's triggers, its one ordered delivery and row FD1's delayed job run
+// size: allow 350, reaction@1's triggers and its one ordered delivery (row FD1: or its delayed job)
 // reaction@1 (capability_registry.json; reaction.schema.json ReactionRule; 21 §3.4, §11; 06
 // §14; 04 §5.2): the rules an event triggers and one delivery's explicit sequence. proposal.ts
 // propose runs the FIFO queue, numbers the writer groups and counts the budgets.
 import type {
   CharacterId,
   CommandId,
-  DefinitionRef,
   DeltaOp,
   DomainEvent,
   EntityId,
@@ -328,28 +327,4 @@ function delayed(
   const due_time = Math.max(saturate(cause.logical_time + rule.after!), world.state.clock + 1);
   const op = { op: 'job.schedule', writer_group: group, job_id: mint() as JobId, job, due_time };
   return accepted(world, 'reacted', [{ ...op, actor_id: actor } as DeltaOp], []);
-}
-
-/** Row FD1: a reaction job's run_job. It completes; then its rule runs for the stored actor at the
- * due time, as a delivery whose event has no subject. A rule gone from the cartridge, a `when`
- * that fails then, or a step that faults then, writes only the completion (a fact guard cancels it).
- * A step that throws (a durable fact) leaves the job pending, as without `after` (spec Known limits). */
-export function runDelayed(
-  world: World,
-  command: { id: CommandId },
-  job_id: JobId,
-  row: { job: DefinitionRef; actor_id?: CharacterId; due_time: number },
-  mint: Mint,
-  steps: { n: number },
-): Decision<never> {
-  const done: DeltaOp = { op: 'job.complete', writer_group: 0, job_id };
-  const rule = world.cartridge.reactions?.[refString(row.job)];
-  // A stand-in cause: no subject field (custom_event names none), the job's time.
-  const cause = { id: command.id, logical_time: row.due_time, position: 0 };
-  const stand = { ...cause, payload: { type: 'custom_event' } } as unknown as DomainEvent;
-  const ran = rule && sequence(world, row.actor_id!, rule, stand, 0, steps, mint, { fired: true });
-  // A step that faults then (a quest no longer active) completes the job: a fault would wedge it.
-  const ok = ran?.kind === 'accepted' ? ran : undefined;
-  const [ops, events] = ok ? [ok.delta.ops, ok.events] : [[], []];
-  return accepted(world, 'job_ran', [done, ...ops], events as never[], ok?.narration);
 }
