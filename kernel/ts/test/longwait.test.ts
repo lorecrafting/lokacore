@@ -10,10 +10,10 @@ const done = (job_id: string, writer_group: number) =>
 // joins it transitively and the B/C equal-due conflict is accepted where steps fault (loka-kgd.151).
 test('a run joins an earlier writer of its target, but not across an equal-due writer', () => {
   const all = [done('x', 1)];
-  joinEarlier(all, [all.slice(), []], [done('x', 2)], 2, []);
+  joinEarlier(all, [0, 1], [done('x', 2)], 2, []);
   assert.equal(all[0]!.writer_group, 2);
   all.push(done('x', 2));
-  joinEarlier(all, [all.slice(0, 1), all.slice(1)], [done('x', 3)], 3, []);
+  joinEarlier(all, [0, 1], [done('x', 3)], 3, []);
   assert.deepEqual(
     all.map((o) => o.writer_group),
     [2, 2],

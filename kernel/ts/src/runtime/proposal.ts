@@ -292,8 +292,7 @@ function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined
     groups.set(job_id, group);
     const handoff = sightHandoff(p.world, p.ops, at, job_id as JobId, due_time, ran.delta.ops);
     if (due_time !== last) [cut, last] = [p.ops.length, due_time]; // only strictly earlier jobs
-    const split = [p.ops.slice(start, cut), p.ops.slice(cut)];
-    joinEarlier(p.ops, split, ran.delta.ops, group, [p.holders, groups]);
+    joinEarlier(p.ops, [start, cut], ran.delta.ops, group, [p.holders, groups]);
     const mark = p.ops.length;
     const own = ran.delta.ops.map((o) => ({ ...o, writer_group: handoffGroup(o, handoff, group) }));
     p.group++;
