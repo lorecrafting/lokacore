@@ -96,6 +96,7 @@ directory that holds a `node_modules` link (`168811a` committed one; untracked o
   agents, at most 3 running tests.
 - Budget: the weekly Claude allowance resets Wednesdays 05:00 HST; Fable draws the same pool faster.
   Near the cap, keep to 1 or 2 agents and Sonnet for bounded work.
+- Jev (TypeSafe): spend approved (owner, 2026-10-14: "yes to this approve to allow spend"); briefs and cartridge text may leave the machine, redacted first, never saves or player words, and Jev is advisory only, never a gate (owner, 2026-10-14: "yes to both, briefs can leave the machine"). Pi keeps its $2/day cap. A decision record goes in the next housekeeping PR.
 - Pi work is marked (commit trailer `Harness: pi (...)`, a `Written ... in the Pi harness` line,
   `[Pi · model · session]` on tracker comments). Claude Code work uses the normal co-author trailer.
 
