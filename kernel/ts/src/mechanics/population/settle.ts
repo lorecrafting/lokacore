@@ -262,7 +262,6 @@ const held = (world: World, member: string) => {
   const origin = world.state.created?.[member]?.origin;
   return origin?.kind === 'spawned' && origin.occurrence_id === member;
 };
-
 function wanderable(
   world: World,
   row: Slots[number]['row'],
