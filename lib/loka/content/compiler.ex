@@ -6,7 +6,6 @@ defmodule Loka.Content.Compiler do
     Artifact,
     Checks,
     Dialogues,
-    Links,
     Quests,
     Reactions,
     Recipes,
@@ -82,7 +81,7 @@ defmodule Loka.Content.Compiler do
       Quests.check(manifest, defs, v2, registry),
       Reactions.check(manifest, defs, v2, registry),
       Dialogues.check(manifest, defs, v2, located, registry),
-      Links.check(defs, v2),
+      Loka.Content.Links.check(defs, v2),
       final_checks(manifest, defs, v2, located, registry)
     ])
   end
