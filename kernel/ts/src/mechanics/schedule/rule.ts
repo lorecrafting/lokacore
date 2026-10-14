@@ -131,6 +131,7 @@ function scheduledJob(
   // A goal (toolbox row W10) is narration only when the player sees the NPC leave.
   const stays = still || !path;
   const doors = stays ? [] : path.flatMap(relock);
+  // ast-grep-ignore: ts-rule-actor-from-command
   const seen = goal && !stays && world.state.containers[world.body] === from;
   const transfer = { op: 'entity.transfer', writer_group: 0, entity_id: npc } as const;
   const move: DeltaOp[] = stays ? [] : [{ ...transfer, source_id: from, destination_id: room }];

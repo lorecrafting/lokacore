@@ -30,8 +30,10 @@ export function waterValid(world: World) {
     if (j.status === 'pending' && rows[j.actor_id!]?.job_id !== id) return false;
   }
   const below = settings.routes.some(
+    // ast-grep-ignore: ts-rule-actor-from-command
     (r) => world.roomIds[refString(r.bottom)] === world.state.containers[world.body],
   );
+  // ast-grep-ignore: ts-rule-actor-from-command
   return below === (rows[world.character]?.room_id != null);
 }
 

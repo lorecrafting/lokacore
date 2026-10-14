@@ -25,6 +25,8 @@ echo 'defmodule Loka.Core.RedControl do def x, do: File.read!("x") end' > lib/lo
 printf 'export const t = Date.now();\nexport const decide = () => 0;\n' > kernel/ts/src/red_control.ts
 # Astra's A2 counterexamples too: an aliased Object.assign, Function I/O, JSON.parse any.
 printf "import { readFileSync } from 'node:fs';\nexport const f = (w) => { w.state.clock = 1; };\nconst { assign } = Object;\nFunction('x')();\nconst p = JSON.parse('{}');\n" >> kernel/ts/src/mechanics/movement/rule.ts
+# Realm seams rule 1: a new World actor read in a mechanic.
+echo 'export const z = world.character;' >> kernel/ts/src/mechanics/movement/rule.ts
 # Foundation must not import the runtime, even as types.
 printf "import type { World } from '../runtime/decision.ts';\n" > kernel/ts/src/foundation/red_control.ts
 # Review F2: an inline rule registered in RULES.

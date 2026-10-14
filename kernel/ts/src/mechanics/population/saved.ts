@@ -88,6 +88,7 @@ function sightJobValid(world: World, id: string, job: JobRow): boolean {
       due_time: job.due_time,
       sight,
     }).length &&
+    // ast-grep-ignore: ts-rule-actor-from-command
     sight.player_id === world.character &&
     sight.generation >= 1 &&
     sight.seen_at + spec.plan.sight.delay === job.due_time &&

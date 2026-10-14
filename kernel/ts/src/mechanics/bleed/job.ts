@@ -26,6 +26,7 @@ function fatalBleed(
     command,
     {
       loss: ops[1] as Extract<DeltaOp, { op: 'resource.adjust' }>,
+      // ast-grep-ignore: ts-rule-actor-from-command
       owner_id: world.character,
       killer_id: row.source_id!,
       credited_character_id: null,

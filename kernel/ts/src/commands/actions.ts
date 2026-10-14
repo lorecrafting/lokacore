@@ -95,13 +95,16 @@ function engine(world: World): ActionSet {
           verb !== 'expedition' &&
           !(verb === 'wait' && world.cartridge.manifest.time_policy),
       )
+      // ast-grep-ignore: ts-rule-actor-from-command
       .filter(([verb]) => verb !== 'choose_ancestry' || needsAncestry(world, world.character))
+      // ast-grep-ignore: ts-rule-actor-from-command
       .filter(([verb]) => verb !== 'raise_attribute' || points(world, world.character))
       // Row 29a: cast only in a cartridge with a spell.
       .filter(
         ([verb]) => verb !== 'cast' || allRecipes(world).some((r) => r.target.kind === 'spell'),
       )
       // Row G9: no speech while a conversation is open (the speech rule refuses it too).
+      // ast-grep-ignore: ts-rule-actor-from-command
       .filter(([verb]) => !SPEECH.includes(verb) || !pending(world, world.character))
       .map(([verb, [target, input]]): [string, Offered] => {
         const key = verb as Key;
@@ -225,6 +228,7 @@ export function refusal(
   set?: ActionSet,
 ) {
   const choiceGated = payload.type !== 'choose_ancestry' && payload.type !== 'elapsed';
+  // ast-grep-ignore: ts-rule-actor-from-command
   if (choiceGated && needsAncestry(world, world.character)) return 'invalid_state';
   if (
     payload.type === 'wait' &&

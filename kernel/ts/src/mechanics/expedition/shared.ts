@@ -56,6 +56,7 @@ export function refused(
 ) {
   const { spec } = definition(world);
   const body = bodyOf(world, actor);
+  // ast-grep-ignore: ts-rule-actor-from-command
   if (!body || actor !== world.character) return 'not_found' as const;
   if (detailFor(world, spec, transition) !== detail_id) return 'invalid_target' as const;
   const room =

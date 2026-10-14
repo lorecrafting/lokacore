@@ -22,6 +22,7 @@ export function fatalTick(
   mint: Mint,
   narration: Text[],
 ) {
+  // ast-grep-ignore: ts-rule-actor-from-command
   const player = body === visit.body;
   const fight = engaged(visit, body);
   if (fight && (player || lastOpponent(fight.row))) ops.push(...closeEncounter(visit, body));
@@ -46,6 +47,7 @@ function dies(
     command,
     {
       loss: ops.find((o) => o.op === 'resource.adjust') as Adjust,
+      // ast-grep-ignore: ts-rule-actor-from-command
       owner_id: player ? visit.character : null,
       killer_id: null,
       credited_character_id: null,

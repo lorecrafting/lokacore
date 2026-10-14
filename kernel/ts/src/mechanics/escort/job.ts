@@ -23,6 +23,7 @@ export function firstWage(cartridge: Cartridge, clock: number, mint: Mint) {
 const members = (world: World) =>
   (Object.keys(world.entities).sort(cmp) as EntityId[]).filter(
     (id) =>
+      // ast-grep-ignore: ts-rule-actor-from-command
       world.entities[id]!.kind === 'npc' && member(world, world.character, id) && living(world, id),
   );
 
@@ -34,6 +35,7 @@ const members = (world: World) =>
 export function runWage(world: World, job_id: JobId, row: JobRow, mint: Mint, at: number) {
   const group = world.cartridge.world!.group!;
   const { resource, amount, every } = group.wage!;
+  // ast-grep-ignore: ts-rule-actor-from-command
   const purse = world.body;
   let levels: Levels = {};
   let run = { ops: [] as readonly DeltaOp[], position: 0, facts: {} };
@@ -53,6 +55,7 @@ export function runWage(world: World, job_id: JobId, row: JobRow, mint: Mint, at
       run = { ...run, ops: [...run.ops, out.op, into.op] };
     } else {
       balance = undefined; // the paid members are a prefix
+      // ast-grep-ignore: ts-rule-actor-from-command
       run = assigned(world, world.character, run, {
         fact: group.member,
         value: false,

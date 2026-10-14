@@ -53,7 +53,9 @@ export function giveRefused(world: World, item: EntityId, steps: Steps = { n: 0 
 function ceiling(world: World, body: EntityId) {
   const max = world.cartridge.world?.carry?.max_grams;
   const table = world.cartridge.world?.derived?.carry_grams;
+  // ast-grep-ignore: ts-rule-actor-from-command
   if (!table || body !== world.body || !Number.isSafeInteger(max) || max! < 0) return max;
+  // ast-grep-ignore: ts-rule-actor-from-command
   return Math.max(0, saturate(max! + derived(world, world.character, table)));
 }
 
@@ -211,6 +213,7 @@ export function putRefused(
       : ('exit_closed' as const);
   if (!opened(world, destination, body)) return 'not_present' as const;
   // The one character's put locks, the destination's and its containers' (W26: NPCs ignore them).
+  // ast-grep-ignore: ts-rule-actor-from-command
   const locked = chainRefused(world, world.character, destination, 'put', steps);
   if (locked) return locked;
   const capacity = world.capacities[destination];

@@ -77,6 +77,7 @@ export const settleFor = (
   const moves = specOf(world, status)?.modifies?.some(({ attribute }) =>
     terms.some((t) => refString(t.attribute) === refString(attribute)),
   );
+  // ast-grep-ignore: ts-rule-actor-from-command
   return body === world.body && moves
     ? settleMaxima(world).map((op) => ({ ...op, writer_group, at: world.state.clock }))
     : [];

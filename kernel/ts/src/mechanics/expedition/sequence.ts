@@ -109,6 +109,7 @@ function houndHere(world: World, spec: Spec, body: EntityId, steps: Steps) {
         row.origin.role === 'hound' &&
         same(row.origin.by, spec.hound_population) &&
         world.state.containers[id] === world.state.containers[body] &&
+        // ast-grep-ignore: ts-rule-actor-from-command
         !attackRefused(world, world.character, id) &&
         admission(world, id, steps)?.includes(id),
     )

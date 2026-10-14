@@ -183,6 +183,10 @@ export type Entity =
 export const bodyOf = (world: World, actor: CharacterId): EntityId | undefined =>
   actor === world.character ? world.body : undefined;
 
+/** The character acting through `body`, if admitted; the Realm replaces both lookups with the admitted set. */
+export const actorOf = (world: World, body: EntityId): CharacterId | undefined =>
+  body === world.body ? world.character : undefined;
+
 export type Accepted = Extract<DecisionResult, { kind: 'accepted' }>;
 export type Event<E> = Omit<DomainEvent, 'payload'> & {
   readonly payload: Extract<EventPayload, { type: E }>;
