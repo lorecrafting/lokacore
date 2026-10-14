@@ -129,7 +129,8 @@
       "fact_changed"
     ],
     "policies": [
-      "fact_compare"
+      "fact_compare",
+      "time_since"
     ]
   },
   {

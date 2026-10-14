@@ -2872,3 +2872,36 @@ Found by [showcase plan 2](../showcase/combat-district.md) (#368); the PM brief 
   - Reused: per_subject facts (W2), reserved engine facts (`uses_`), check@1, `npcPassage`, wander and C4 flight.
   - New: the track check kind, `world.trails`, plan `trail` and `hunts`, room subjects for trail facts, the 1.85 floor.
   - Missing invariant: none (facts_typed covers the rows).
+
+## Delayed reactions (toolbox row FD1)
+
+[Toolbox row FD1](../MECHANICS-TOOLBOX.md#ranked-toolbox) (source: `docs/rnd/depth-and-ux-2026-10-13.md` gap 1): "a consequence arrives later; a rule reads how long ago something happened". The PM brief is in Beads `loka-kgd.138` (2026-10-14). [Declarations](cartridge.md#delayed-reaction-declarations) govern it. Facts hold plain values (no write time), so the row stores a time in an int fact.
+
+- **`after`.** A [reaction@1](#reaction1-kerneltssrcmechanicsreactionts) rule may carry `after: <int >= 1>`, in logical seconds, on the whole rule (not per step). On delivery its `when` is read as today; when it holds, the rule writes one `job.schedule` in its writer group instead of its steps: job `{kind: "reaction", key: <rule key>}`, `actor_id` the delivery's actor (the quest-evidenced owner or the command actor), due at `max(cause time + after, horizon + 1)`, where the horizon is the proposal's clock (a wait's `until`).
+- **Fire.** The job runs as any `run_job` (decided `job_ran`): it completes, then the rule's `when` is read again for the stored actor at the due time, and when it holds the steps run for that actor at that time, as a delivery whose event has no subject. A `when` that fails at fire time writes nothing but the completion: a fact guard is the only cancellation. A rule gone from the cartridge completes the job with no effect. The job never reads `world.character`.
+- **Event-bound steps refused.** A rule with `after` may not carry `barrier.set`, `item.move`, `population.suppress` or a `status.apply` with `co_present` or `tag` (they read the event or its room); both kernels refuse it (SCHEMA_VIOLATION `invalid_value` at the step's `op`). An entity or pair fact step without `npc` or `item` writes nothing at fire time (no subject).
+- **`fact.stamp`.** The step `{op: "fact.stamp", fact, npc?, item?}` writes the delivery's logical time (the due time when fired) into an int fact, lowered to the existing `fact.assign` op (so it emits `fact_changed` when the value changes). The fact must be an int fact without `maximum` and with `minimum` absent or at most 0 (SCHEMA_VIOLATION `invalid_value` at the step's `fact`).
+- **`time_since`.** The policy leaf `{op: "time_since", fact, npc?, item?, at_least: <int >= 0>}` (fact@1) holds when `clock - value >= at_least`, the fact read as `fact_compare` reads it; one query step. A fact never stamped holds its default (0 for the stamp's facts), so the leaf holds once the clock reaches `at_least`. The fact must meet `fact.stamp`'s rule.
+- **Realm seams** (owner decision 2026-10-13, brief checklist).
+  1. Actor: met; the job stores `actor_id` when scheduled and the fire reads it, never `world.character`.
+  2. Reactions: met; the actor is the delivery's resolved actor, captured once; a fired step's subject is that actor's body or its named NPC or item, never a listener default.
+  3. Credit: not applicable; no shared payout (`experience.grant` goes to the stored actor).
+  4. Time: met; delays and `time_since` are logical seconds on the world clock; no device clock, no skip, no `from`/`until`.
+  5. Scope: met; steps and the stamp write at each fact's declared scope (player facts per player); one job per delivery, no once-per-world event.
+  6. Text: not applicable; no text, `speech@1` unchanged.
+  7. Ownership: not applicable; `item.move` is refused on a delayed rule.
+  8. Trust: met; the job row is this authority's; a cold reopen validates the job's actor as any job row.
+  9. Instancing: not applicable; none built; the job is per actor.
+- **Opt-in.** `after`, `fact.stamp` and `time_since` need `kernel_api` 1.88 (KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least`, both kernels). Installed kernel 1.88. Chapter 1 declares none.
+- **Book.** No new element and no line.
+- **Known limits.** A delay that would end inside the same wait arrives 1 s after the wait ends: never early, possibly late (the composer refuses a job due inside the proposal's advance; PM ruling 2026-10-14). No subject is carried: fired steps reach only the actor's body and named NPCs and items. No `job.cancel` by content. `after` is per rule, not per step.
+- **Traps.** No RNG; one bounded job per delivery; the stamp is an existing fact write.
+- **Sampler.** `cartridges/raid_sampler` adds the instance int fact `raided_at` (default 0) stamped by `raid`, and the rule `aftershock` (`fact_changed {raided}`, `after` 600, `when` `fact_compare {raided equals true}`, `apply [fact.adjust {aftershocks 1}]`) with its instance int fact `aftershocks` (0 to 100). A raid at 1000 inside a wait to 1900 schedules `aftershock` at 1901 (not 1600: never inside the wait); a wait to 1900 then to 2000 leaves `aftershocks` 1 from 1901. A `time_since {raided_at, at_least 600}` reads false at 1599 and true at 1600 after a stamp at 1000; on a fresh world it is true from 600. A real-SQLite save closed with the job pending cold-reopens and fires it once (`mobile/authority/local-story/raid_aftermath.test.ts`).
+- **Composition record** ([architecture](architecture.md#building-mechanics-by-composition)).
+  - Consumer: `raid_sampler`. Later: the showcase's cause-and-effect slice.
+  - Reads: the rule's `when` at both times, the job row's `actor_id`.
+  - Writes: `job.schedule`, `job.complete` and the steps' existing ops; `fact.stamp` lowers to `fact.assign`.
+  - Events, save rows: none new; the job is a `JobRow` with existing columns (`job`, `actor_id`).
+  - Reused: `sequence`, the job drain, `fact.assign`, `fact_compare`'s read.
+  - New: `after`, the reaction job kind, `fact.stamp`, `time_since`, the 1.88 floor; foundation: the job composer (both kernels, and both job invariants) admits `actor_id` on a `reaction` job (PM ruling 2026-10-14, second opinion).
+  - Missing invariant: none (job rows are checked by the job invariants).

@@ -449,6 +449,12 @@
         "when": {
           "$ref": "policy.schema.json#/$defs/VersionedPolicy"
         },
+        "after": {
+          "description": "Toolbox row FD1 (kernel_api at least 1.88): the steps run this many logical seconds after delivery, as a reaction job for the delivery's actor, when `when` holds at both times; due no earlier than 1 s after the proposal's clock.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        },
         "apply": {
           "type": "array",
           "items": {
@@ -649,6 +655,18 @@
                   "plan": { "$ref": "identity.schema.json#/$defs/DefinitionRef" }
                 },
                 "required": ["op", "plan"],
+                "additionalProperties": false
+              },
+              {
+                "description": "Toolbox row FD1 (kernel_api at least 1.88): writes the delivery's logical time into an int fact (no maximum, minimum absent or at most 0) at the subject a fact.assign step writes at, as a fact.assign.",
+                "type": "object",
+                "properties": {
+                  "op": { "const": "fact.stamp" },
+                  "fact": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
+                  "npc": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
+                  "item": { "$ref": "identity.schema.json#/$defs/DefinitionRef" }
+                },
+                "required": ["op", "fact"],
                 "additionalProperties": false
               }
             ]

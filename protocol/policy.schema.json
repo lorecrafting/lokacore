@@ -502,6 +502,19 @@
             "sense"
           ],
           "additionalProperties": false
+        },
+        {
+          "description": "Toolbox row FD1: the world clock minus the int fact's value (as fact_compare reads it, at its named NPC or item) is at least at_least; a fact never stamped holds its default. Owned by fact@1. Needs kernel_api at least 1.88.",
+          "type": "object",
+          "properties": {
+            "op": { "const": "time_since" },
+            "fact": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
+            "npc": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
+            "item": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
+            "at_least": { "type": "integer", "minimum": 0, "maximum": 2147483647 }
+          },
+          "required": ["op", "fact", "at_least"],
+          "additionalProperties": false
         }
       ],
       "examples": [
