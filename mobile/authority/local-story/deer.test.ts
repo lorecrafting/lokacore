@@ -1,3 +1,4 @@
+// size: allow 520, deer custody, sight, fault and reaction-spawn reopen cases share one real SQLite fixture
 import assert from 'node:assert/strict';
 import { test, type TestContext } from 'node:test';
 import { DatabaseSync } from 'node:sqlite';
