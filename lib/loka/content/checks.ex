@@ -11,7 +11,7 @@ defmodule Loka.Content.Checks do
   @doc "Expands short source references to local DefinitionRefs (owner decision 2026-09-25)."
   @spec expand(term(), map()) :: term()
   def expand(%{} = value, m) when is_map_key(value, "bundle") or is_map_key(value, "corpse"),
-    do: Loka.Content.Population.expand(value, m)
+    do: Loka.Content.Population.expand(value, m, &expand/2)
 
   # Toolbox row G6: a definition's cues, whatever clause expands the rest of it (an NPC or a
   # status does not recurse), so a short reference in a cue's condition always expands.

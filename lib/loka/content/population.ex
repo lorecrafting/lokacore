@@ -28,7 +28,7 @@ defmodule Loka.Content.Population do
       )
 
   # ponytail: one bounded plan expansion keeps short refs together. # credo:disable-for-next-line Credo.Check.Refactor.ABCSize
-  def expand(%{"bundle" => b, "home" => home, "area" => area} = plan, m) do
+  def expand(%{"bundle" => b, "home" => home, "area" => area} = plan, m, expand) do
     plan
     |> Map.put("bundle", ref(b, "population_bundle", m))
     |> Map.put("home", ref(home, "room", m))
@@ -49,12 +49,12 @@ defmodule Loka.Content.Population do
       end
     end)
     |> Map.new(fn
-      {k, v} when k in @gates -> {k, Loka.Content.Checks.expand(v, m)}
+      {k, v} when k in @gates -> {k, expand.(v, m)}
       kv -> kv
     end)
   end
 
-  def expand(%{"npc" => n, "corpse" => c} = bundle, m) do
+  def expand(%{"npc" => n, "corpse" => c} = bundle, m, _expand) do
     bundle
     |> Map.put("npc", ref(n, "npc", m))
     |> Map.put("corpse", ref(c, "item", m))

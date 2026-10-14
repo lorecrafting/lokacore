@@ -167,6 +167,28 @@ test('one long elapsed command reads wander_when at each occurrence time', () =>
     );
 });
 
+// Breaks: births ignore birth_when, or read it at the elapsed command's end clock, not the
+// occurrence's due time (the stepped run is the control; the two long runs see the difference).
+test('one long elapsed command reads birth_when at each occurrence time', () => {
+  const at5 = slay(
+    world((c) => {
+      c.populations[DEER].birth_when = {
+        policy_version: 1,
+        root: { op: 'time_window', from: 5, to: 6 },
+      };
+    }),
+    DEER,
+    2,
+  );
+  assert.ok(!alive(elapsed(at5, 499), DEER, 2), 'held before hour 5');
+  for (const w of [
+    elapsed(at5, 600),
+    elapsed(at5, 600, [], 600),
+    elapsed(elapsed(at5, 499), 600, [], 600),
+  ])
+    assert.ok(alive(w, DEER, 2));
+});
+
 // Breaks (loader; twin of test/loka/content_fen_test.exs): population_count under API 1.85, an
 // unknown plan, an actor leaf in a gate, or a floor above day_target loads.
 test('the loader refuses an old API, an unknown plan, an actor leaf and a high floor', () => {
