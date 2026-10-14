@@ -84,7 +84,7 @@ const apiFloor = (r: Obj): number =>
     ...r.apply.map((s: Obj) => (s.tag ? 56 : s.co_present ? 50 : (FLOORS[s.op] ?? 0))),
   );
 
-// size: allow 53, finite reaction API, typed suppression and status references stay in one ordered check
+// size: allow 47, typed suppression and status references stay in one ordered check
 export function reactions(c: Obj, { named, typedValue }: Checks): Diagnostic[] {
   const out: Diagnostic[] = [];
   const [major, minor] = c.manifest.requires.kernel_api.at_least.split('.').map(Number);

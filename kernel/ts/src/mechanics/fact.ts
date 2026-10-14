@@ -1,5 +1,5 @@
-// Typed scoped facts (fact@1; 03 §7, §13; 21 §3.9, §4 Fact): the value an actor reads, and the
-// facts_typed invariant. A world keeps each fact's default (newWorld) and the facts set since
+// Typed scoped facts (fact@1; 03 §7, §13; 21 §3.9, §4 Fact): the value an actor reads and sets
+// (the facts_typed invariant: fact_typed.ts). A world keeps each fact's default (newWorld) and the facts set since
 // (State.facts, by canonical MutationTarget text, the key composition writes).
 import { KernelError } from '../foundation/error.ts';
 import { add } from '../foundation/int.ts';

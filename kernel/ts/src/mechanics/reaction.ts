@@ -227,7 +227,7 @@ type StatusStep = Extract<ReactionRule['apply'][number], { op: 'status.apply' | 
 // fact cannot be adjusted); an entity or pair fact (row W2) at the step's named NPC's or item's
 // instance, else at the event's subject when that is an NPC, item or detail (never the body
 // fallback); with no such subject the step writes nothing. An npc_pair fact (row FD4) writes at that
-// subject toward the step's `with` NPC, only when both are distinct authored NPCs. A row an earlier reaction of this
+// subject toward the step's `with` NPC, only when both are distinct NPCs. A row an earlier reaction of this
 // advance wrote keeps that write's writer group, so the writes compose in order (loka-j2mo).
 function assignment(
   world: World,
