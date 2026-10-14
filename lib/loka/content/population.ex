@@ -140,8 +140,8 @@ defmodule Loka.Content.Population do
     |> add(not sight_valid?(p["sight"], p["area"], rooms, text, bundle), ["sight", "narration"])
     |> add(manifest["requires"]["capabilities"]["population"] != 1, ["bundle"])
     |> add(p["floor"] != nil and (p["floor"] > p["day_target"] or p["chance"] != nil), ["floor"])
-    |> add(p["birth_when"] != nil and not actorless?(p["birth_when"]["root"]), ["birth_when"])
-    |> add(p["wander_when"] != nil and not actorless?(p["wander_when"]["root"]), ["wander_when"])
+    |> add(is_map(p["birth_when"]) and not actorless?(p["birth_when"]["root"]), ["birth_when"])
+    |> add(is_map(p["wander_when"]) and not actorless?(p["wander_when"]["root"]), ["wander_when"])
   end
 
   defp actorless?(%{"op" => "not", "item" => i}), do: actorless?(i)

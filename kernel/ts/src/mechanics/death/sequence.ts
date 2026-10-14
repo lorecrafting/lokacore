@@ -104,6 +104,10 @@ function corpseDefinition(world: World, victim_id: EntityId, player: boolean) {
   return player ? settings.player_corpse : (population?.corpse ?? settings.npc_corpse);
 }
 
+// Row W12: a slot at or below the plan's floor is due again at once.
+const delay = (plan: { floor?: number; replacement_delay: number }, slot: number) =>
+  slot <= (plan.floor ?? 0) ? 0 : plan.replacement_delay;
+
 function populationLoss(world: World, loss: Loss): DeltaOp[] {
   const spawned = world.state.created?.[loss.entity_id];
   if (spawned?.origin.kind !== 'spawned' || !['hound', 'deer'].includes(spawned.origin.role))
@@ -138,9 +142,7 @@ function populationLoss(world: World, loss: Loss): DeltaOp[] {
       expected: before,
       value: {
         ...before,
-        replacement_due:
-          (loss.at ?? world.state.clock) +
-          (slot <= (population.plan.floor ?? 0) ? 0 : population.plan.replacement_delay), // row W12
+        replacement_due: (loss.at ?? world.state.clock) + delay(population.plan, slot),
         ...(population.plan.sight && { sight_job_id: null }),
       },
     },

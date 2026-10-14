@@ -27,20 +27,20 @@ const opposite: Record<string, string> = {
 };
 
 /** Loader twin of the compiler's narrow two-room, one-hound/one-pelt plan check. */
-export function population(c: Obj): Diagnostic[] {
-  const plans = c.populations ?? {};
-  // Toolbox row 9: an encounter plan (`chance`) needs kernel_api 1.74; row 37a: a day_target 0
-  // (a plan only population.spawn fills) needs 1.84.
-  // Row W12: a floor, a plan gate or a population_count leaf anywhere needs 1.86.
-  const list = Object.values(plans) as Obj[];
-  const w12 =
-    list.some((p) => GATED.some((k) => p[k] !== undefined)) ||
-    nodes(c).some(([n]) => n.op === 'population_count');
-  const floor = w12
+// Toolbox row 9: an encounter plan (`chance`) needs kernel_api 1.74; row 37a: a day_target 0
+// (a plan only population.spawn fills) needs 1.84; row W12: a floor, a plan gate or a
+// population_count leaf anywhere needs 1.86.
+const apiFloor = (c: Obj, list: Obj[]) =>
+  list.some((p) => GATED.some((k) => p[k] !== undefined)) ||
+  nodes(c).some(([n]) => n.op === 'population_count')
     ? '1.86'
     : list.some((p) => p.day_target === 0)
       ? '1.84'
       : list.some((p) => p.chance !== undefined) && '1.74';
+
+export function population(c: Obj): Diagnostic[] {
+  const plans = c.populations ?? {};
+  const floor = apiFloor(c, Object.values(plans) as Obj[]);
   const out: Diagnostic[] =
     floor && apiCmp(c.manifest.requires.kernel_api.at_least, floor) < 0
       ? [diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least')]

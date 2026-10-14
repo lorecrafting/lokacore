@@ -108,6 +108,14 @@ export function parts(c: Obj): [string, Obj, string][] {
   return [...out, ...cueParts(c)];
 }
 
+/** Each population plan gate's located root (row W12). */
+const gateRoots = (c: Obj): [Obj, string][] =>
+  Object.entries((c.populations ?? {}) as Obj).flatMap(([ref, p]) =>
+    (['birth_when', 'wander_when'] as const).flatMap((k): [Obj, string][] =>
+      p[k] ? [[p[k].root, `.cartridge.populations${step(ref)}.${k}.root`]] : [],
+    ),
+  );
+
 // Policy nodes with diagnostic paths, across every definition that declares a condition.
 export function nodes(c: Obj): [Obj, string][] {
   const walk = (p: Obj, at: string): [Obj, string][] => [
@@ -140,11 +148,7 @@ export function nodes(c: Obj): [Obj, string][] {
       walk(d.policy.root, `.cartridge.dialogues${step(ref)}.policy.root`),
     ),
     ...lockRoots(c).flatMap(([p, at]) => walk(p, at)),
-    ...Object.entries((c.populations ?? {}) as Obj).flatMap(([ref, p]) =>
-      (['birth_when', 'wander_when'] as const).flatMap((k) =>
-        p[k] ? walk(p[k].root, `.cartridge.populations${step(ref)}.${k}.root`) : [],
-      ),
-    ),
+    ...gateRoots(c).flatMap(([p, at]) => walk(p, at)),
     ...Object.entries((c.barriers ?? {}) as Obj).flatMap(([ref, b]) =>
       b.opens_when
         ? walk(b.opens_when.root, `.cartridge.barriers${step(ref)}.opens_when.root`)

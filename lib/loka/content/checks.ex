@@ -437,9 +437,8 @@ defmodule Loka.Content.Checks do
     ])
   end
 
-  defp expand_attack(npc, m) do
-    if npc["attack"], do: Map.put(npc, "attack", expand(npc["attack"], m)), else: npc
-  end
+  defp expand_attack(npc, m),
+    do: if(npc["attack"], do: Map.put(npc, "attack", expand(npc["attack"], m)), else: npc)
 
   # run_job is authority-internal (04 §1): no action builds it.
   defp command(rel, name, required, elapsed?) do

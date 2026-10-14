@@ -46,7 +46,7 @@ type Ctx = {
  * (target_present is false without one), `ctx.subject` a reaction's event subject; each leaf it
  * evaluates adds one to `ctx.steps.n` (04 §5.4 query_steps).
  */
-// size: allow 62, one case per policy leaf (mechanics.md policy leaf set, toolbox row G1)
+// size: allow 60, one case per policy leaf (mechanics.md policy leaf set, toolbox row G1)
 export function holds(
   world: World,
   actor: CharacterId,
