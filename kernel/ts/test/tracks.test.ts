@@ -272,8 +272,8 @@ test('the loader refuses each bad trail declaration', () => {
 });
 
 // Breaks: facts_typed admitting a room subject for any fact (rooms are subjects of the engine's
-// trail facts only), or refusing the trail rows.
-test('facts_typed admits a room subject for trail facts only', () => {
+// trail facts only), a trail fact naming its mover, or refusing the trail rows.
+test('facts_typed admits a room subject for trail facts only, and only a room', () => {
   const w = to(start(), 68401);
   assert.ok(holds('facts_typed', w));
   const [k, v] = Object.entries(w.state.facts!).find(([k]) => k.includes('trail_hounds_exit'))!;
@@ -299,4 +299,7 @@ test('facts_typed admits a room subject for trail facts only', () => {
     ),
   );
   assert.equal(holds('facts_typed', as(k.replace('trail_hounds_exit', 'scent'))), false);
+
+  const mover = k.replace(/"subject_id":"[^"]*"/, `"subject_id":"${member(w, 'hounds')}"`);
+  assert.equal(holds('facts_typed', as(mover)), false);
 });

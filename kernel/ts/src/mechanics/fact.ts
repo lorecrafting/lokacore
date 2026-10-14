@@ -246,12 +246,12 @@ export const invariants: Readonly<Record<string, (world: World) => boolean>> = {
         subject_id?: string;
       };
       const s = t.subject_id;
-      // A subject is an NPC, item, detail (row W2) or a trail fact's room (W13); none is removed.
+      // A subject is an NPC, item or detail (row W2); a trail fact's subject is its room (W13).
       const known =
         s === undefined ||
-        Object.hasOwn(world.entities, s) ||
-        Object.hasOwn(world.details, s) ||
-        (Object.hasOwn(world.rooms, s) && trailFact(world, t.fact.key));
+        (trailFact(world, t.fact.key)
+          ? Object.hasOwn(world.rooms, s)
+          : Object.hasOwn(world.entities, s) || Object.hasOwn(world.details, s));
       return known && typedFact(world, t, v);
     }),
 };
