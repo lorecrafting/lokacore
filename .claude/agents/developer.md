@@ -27,12 +27,13 @@ Before handing off:
 1. The brief names the [lane](../../docs/WORKFLOW.md#delivery-lanes). In every lane run only
    the touched layer's type/compile checks and the focused tests your diff touches, under `nice -n 10`; never the full
    `npm test`, the Storybook smoke, `test:e2e` or `bin/check_all.sh` on the M1 ([two-lane CI](../../docs/decisions/owner-decision-two-lane-ci-2026-10-09.md)).
+   Before every push run `bin/prepush.sh` (CI's static checks, about 30 s) and fix what fails.
    Hosted CI on the pushed head is the final run (it includes the full `npm test` of each package):
-   after a push, check `gh run list --branch <branch> --commit "$(git rev-parse HEAD)"` (the full sha; a short one matches nothing) every ~2 minutes, never `gh run watch` (rate limits, timeouts);
-   a push run can start late: give up to ~2 minutes before concluding there is none (then report it, do not dispatch), and never dispatch one by hand when a push run exists (the dispatch cancels it, loka-thz);
-   quote each verdict (job names, durations) in the handoff; fix a red run before handing off. Every new check has a
+   after a push, confirm `ci.yml` and `book-e2e.yml` started with one `gh run list --commit "$(git rev-parse HEAD)"` call (the full sha; a short one matches nothing) and hand back (a run can start up to ~2 minutes late: report an empty list, never dispatch);
+   the PM watches CI and sends a red run back as a finding. Never start a background wait for CI (2026-10-14: two developers died resuming after a CI wait),
+   and never dispatch a run by hand when a push run exists (the dispatch cancels it, loka-thz). Every new check has a
    planted violation that fails; a planted break or red control stops only the PIDs it started, never a process by name ([Git hygiene](../../docs/WORKFLOW.md#git-hygiene)).
-2. Commit first, then self-review the diff once: `/code-review medium` on the branch (the review never runs checkout, stash or reset in your worktree)
+2. Commit first, then self-review the diff once: `/code-review medium` on the branch diff against its base, run from your slice worktree with the worktree path or branch as the target, never the main checkout (your cwd resets to it, loka-0w4; the review never runs checkout, stash or reset in your worktree)
    when a non-tiny diff changes code or bulk-edits docs (otherwise, or if skills are
    unavailable, the same questions by hand; [owner decision](../../docs/decisions/owner-decision-review-tools-2026-10-02.md)). Then break your own core logic once and
    confirm a test fails; if none does, the tests are not done. Fix or record a
@@ -40,7 +41,7 @@ Before handing off:
 3. Commit (attribution lines per the session). Provisional local:
    hand the branch and exact head to the PM without pushing; draft PR: push only when the brief
    says (the branch is pushed once per wave); hosted PR: push the branch and open the PR citing the governing `docs/system` sections and
-   including the `/code-review` result and the hosted run verdicts. A "catches", "only here" or "every" claim, and every
+   including the `/code-review` result and the hosted runs started. A "catches", "only here" or "every" claim, and every
    `file:line` cite, in the PR body or handoff is copied from a red-control, test or grep run in
    the same turn; the PR body lists those runs. A slice that adds or changes a mechanic
    includes the [composition record](../../docs/system/architecture.md#building-mechanics-by-composition).
