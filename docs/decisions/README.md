@@ -11,6 +11,7 @@ their summaries are in [this index at `15c7d41b`](https://github.com/lorecraftin
 What each rule in force says: [owner-rules.md](../system/owner-rules.md). A new record adds one
 dated line below, newest first.
 
+- 2026-10-14 [Owner decision: Jev (TypeSafe) spend, data and compaction](owner-decision-jev-typesafe-2026-10-14.md)
 - 2026-10-13 [Owner decision: Realm seams, no new single-player assumptions](owner-decision-realm-seams-2026-10-13.md)
 - 2026-10-13 [Owner decision: Fable's depth and UX audit adopted](owner-decision-depth-ux-audit-2026-10-13.md)
 - 2026-10-12 [Owner decision: one lane, the mechanics toolbox; Storybook polish paused](owner-decision-one-lane-mechanics-2026-10-12.md)
