@@ -5,7 +5,7 @@
   "title": "Ambient Sampler",
   "requires": {
     "kernel_api": {
-      "at_least": "1.46",
+      "at_least": "1.45",
       "below": "2.0"
     },
     "content_schema": 1,
@@ -23,10 +23,6 @@
     "offline_private"
   ],
   "entry": "yard",
-  "time_policy": {
-    "profile": "real_elapsed",
-    "rate": 50
-  },
   "calendar": {
     "start": 0,
     "units_per_hour": 3600,

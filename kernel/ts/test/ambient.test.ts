@@ -45,6 +45,12 @@ test('the yard description follows sky and hour together', () => {
     [5, 12, 'room.yard.description'],
     [2, 6, 'room.yard.clear_dawn'],
     [5, 6, 'room.yard.description'],
+    [5, 21, 'room.yard.rain_night'],
+    [5, 20, 'room.yard.description'],
+    [5, 5, 'room.yard.description'],
+    [2, 5, 'room.yard.clear_dawn'],
+    [2, 7, 'room.yard.clear_dawn'],
+    [2, 8, 'room.yard.description'],
   ];
   for (const [day, hour, key] of rows) assert.equal(at(day, hour), key, `day ${day} hour ${hour}`);
 });
