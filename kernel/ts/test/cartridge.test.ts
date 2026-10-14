@@ -104,6 +104,24 @@ test('the loader rejects a bounded integer fact default outside its bounds', () 
     ),
   }));
 
+// Breaks (row FD1; twin of test/loka/content_raid_test.exs): a time_since leaf loads under API
+// 1.0 in a cartridge with no world content.
+test('the loader keeps API 1.88 for a time_since policy without world content', () => {
+  const cartridge = structuredClone(read('protocol/fixtures/cartridge_hash.json').value);
+  const fact = cartridge.facts['ashmere_hello@0.0.1:fact/village_arrived'];
+  fact.value_type = { type: 'int', default: 0 };
+  const policy = cartridge.policies['ashmere_hello@0.0.1:policy/village_arrived'];
+  policy.root = { op: 'time_since', fact: policy.root.fact, at_least: 600 };
+  assert.deepEqual(load(cartridge), {
+    ok: false,
+    diagnostic: diagnostic(
+      'KERNEL_API_RANGE_INVALID',
+      '.cartridge.manifest.requires.kernel_api.at_least',
+      {},
+    ),
+  });
+});
+
 // Breaks: default validation is accidentally limited to v1, leaving a v2 artifact with an
 // impossible unwritten fact default loadable.
 test('the loader rejects an invalid v2 fact default', () => {

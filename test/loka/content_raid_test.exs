@@ -58,4 +58,22 @@ defmodule Loka.ContentRaidTest do
       assert expected in Enum.map(diags, &{&1["code"], &1["path"]}), inspect(diags)
     end
   end
+
+  # Breaks (row FD1; twin of the time_since case in kernel/ts/test/cartridge.test.ts): a
+  # time_since leaf compiles under API 1.0 in a cartridge with no world content (no v2 source).
+  test "a time_since policy keeps API 1.88 without world content" do
+    dir = Loka.ContentSource.copy("cartridges/ashmere_hello")
+    int = %{"type" => "int", "default" => 0}
+    since = %{"op" => "time_since", "fact" => "village_arrived", "at_least" => 600}
+
+    edits = [
+      {"facts.json", &put_in(&1, ["facts", "village.arrived", "value_type"], int)},
+      {"policies/village_arrived.json", &%{&1 | "root" => since}}
+    ]
+
+    assert {:error, diags} = Loka.ContentSource.compile(dir, edits)
+
+    assert Enum.map(diags, &{&1["code"], &1["path"]}) ==
+             [{"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"}]
+  end
 end

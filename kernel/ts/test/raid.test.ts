@@ -295,6 +295,53 @@ test('FD1: two delayed rules on one fact both apply, in hourly waits or one wait
   }
 });
 
+// Breaks: two delayed jobs moving one body's status in one advance take separate writer groups
+// (conflicting_write on the status row, both stay pending and wedge later waits). Equal-due jobs
+// run in job id order (proposal.ts dueJobs); `b_shake`'s id (5a9e...) sorts before `a_steady`'s
+// (cb37...), so the apply runs first and the cure ends the status.
+test('FD1: a delayed status.apply and status.cure due at 1600 both run, in hourly waits or one', () => {
+  const R = (kind: string, key: string) => ({ ...REF, kind, key });
+  const REF = { cartridge_id: 'raid_sampler', cartridge_version: '0.0.1' };
+  const SHAKEN = 'raid_sampler@0.0.1:status/shaken';
+  const pair = (c: any) => {
+    c.lock.capabilities.status = c.manifest.requires.capabilities.status = 1;
+    c.statuses = {
+      [SHAKEN]: {
+        key: 'shaken',
+        duration: 1200,
+        tick_every: 600,
+        per_tick: -1,
+        resource: R('resource', 'mv'),
+        label: 'band.hurt',
+        narration: { applied: 'band.hurt', tick: 'band.hurt', expired: 'band.hurt' },
+      },
+    };
+    const rule = c.reactions[AFTERSHOCK];
+    delete c.reactions[AFTERSHOCK];
+    for (const [key, op] of [
+      ['b_shake', 'status.apply'],
+      ['a_steady', 'status.cure'],
+    ])
+      c.reactions[`raid_sampler@0.0.1:reaction/${key}`] = {
+        ...rule,
+        key,
+        apply: [{ op, status: R('status', 'shaken') }],
+      };
+  };
+  const at1000 = elapsed(world(pair), 1000);
+  for (const w of [elapsed(at1000, 1800), elapsed(at1000, 1800, [], 100000)])
+    assert.deepEqual(
+      [Object.values(w.state.statuses ?? {}).map((s) => s.active), statuses(w)],
+      [
+        [false],
+        [
+          [1600, 'completed'],
+          [1600, 'completed'],
+        ],
+      ],
+    );
+});
+
 // Breaks: a cause inside the advance gets its bare due time (nonfuture_job faults the wait) or
 // a time earlier than the cause plus `after`. `echo` (after 100) follows the 1600 aftershock.
 test('FD1: a cause at 1600 inside a wait to 1800 is due at 1801; in hourly waits at 1700', () => {
