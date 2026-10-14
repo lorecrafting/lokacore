@@ -6,8 +6,8 @@ the next steps, the standing owner rules that the repo does not yet state, and o
 questions. Rewrite it at each stable checkpoint (a merge, a review verdict, a pushed fix) and before
 the session ends; commit and push it with the Beads export.
 
-Written 2026-10-14 UTC by Claude Code (Opus 5.5) at the end of cloud session
-01FtwqZjvGA5A9sL3d8WjiJz (credits ran out), for a local Claude Code session to continue.
+Written 2026-10-14 UTC by Claude Code (Opus 5.5) at the end of local session
+01DvPym9pzaxaCbY2Ycszv9f (after batch M12), for the next session to continue.
 
 ## Start of a session
 
@@ -41,47 +41,49 @@ Written 2026-10-14 UTC by Claude Code (Opus 5.5) at the end of cloud session
 One lane: the mechanics toolbox only (epic `loka-kgd`, [MECHANICS-TOOLBOX.md](MECHANICS-TOOLBOX.md));
 Storybook polish (`loka-x6t`) stays paused ([record](decisions/owner-decision-one-lane-mechanics-2026-10-12.md)).
 The PM decides mechanics calls itself, records them in Beads notes, and keeps going batch after batch.
+Batch order: the owner-adopted [priority plan](briefs/toolbox-priority-plan-2026-10-14.md)
+(2026-10-14), with the owner's answers below.
 
-Done this session: #380 (loka-kgd, mechanics batch M10) and #381 (loka-kgd, mechanics batch M11)
-merged to `main`. The owner approved the Fable depth and UX audit
-(report `docs/rnd/depth-and-ux-2026-10-13.md`) and the rule that rows from M12 on add no new
-single-player assumption (Realm seams record `docs/decisions/owner-decision-realm-seams-2026-10-13.md`,
-seams audit `docs/rnd/realm-seams-audit-2026-10-13.md`). Both records and the report reach `main` with the
-M12 batch PR (they are on `toolbox/batch-m12`).
+Done this session: #382 (loka-j945, prepush checks and the pm_merge conflict resolver) and #383
+(loka-kgd, mechanics batch M12: 37a, 37b, W13, W12, 39, FD4, FD8, two-shop save fix; `kernel_api` 1.89).
 
-Batch M12: branch `toolbox/batch-m12`, head `c5fccf72` (worktree `worktrees.noindex/m12-batch`).
-State 2026-10-14 (local session): briefs live in each issue's Beads notes.
+Next, in order:
 
-1. Merged into the batch: 37a raid spawn `.131` (reviewed `924c18b2`, 1.84) and the two-shop save
-   fix `.149` (reviewed `e7cc58ac`, main + save second opinion approve).
-2. W13 tracks `.136`, `toolbox/m12-tracks` (1.85): both reviewers APPROVE WITH NOTES on `03101ac0`
-   (records `review-m12-tracks`, `review-m12-tracks-2nd`); fix round 1 running (facts_typed must require a
-   room subject for trail facts; revert a `lockStage` reformat). PM rulings: a hunter holds when any
-   body is in its room; an out-of-area hunter parks; player trails are instance scope.
-3. Building: 37b + 38 `.132`/`.133` (`toolbox/m12-aftermath`, content), W12 `.135`
-   (`toolbox/m12-populations`, 1.86; prey hunt deferred until W13 merges).
-4. Briefed, not started: 39 `.134` (1.87), FD8 `.145` (content, Sonnet). Still to brief: FD1 `.138`
-   (1.88, after 37b; delays in logical units, not real minutes, per seams rule 4), FD3 `.140` (after
-   37b), FD4 `.141` (after W13: both touch `fact.ts`), and bug `.151` (Chapter 1 deer
-   `conflicting_write` on one long advance; found by the 37a recheck).
-5. Close M12 as M10 and M11 closed: toolbox table edit, one Fable batch review, green CI, PR, merge with
-   the head pinned, close issues.
-
-Order from here: the owner adopted the Fable priority plan on 2026-10-14 ("keep going, follow the fable priority plan"; `docs/briefs/toolbox-priority-plan-2026-10-14.md` on `toolbox/batch-m12`). M12 rest: FD4, FD1, `.151`; FD3 moves to M13; W12 prey hunt, 43b, 48a-c and RS-7 are deferred; row 38 runs with RS-4; S2 is cut (it duplicates Built rooms slice 2). Plan defaults the PM takes unless the owner objects: one Book word-bar slice after RS, Built rooms after M15, Balance gates on the showcase only.
-
-Owner answers 2026-10-14 (paraphrased): defer carry-over 48a-c and RS-7; Settle per the PM recommendation (S1 into Homestead, S2 merged into Built rooms, S3/S4 after Homestead on a yes); Built rooms between M13 and M14; Balance gates fail on the showcase only; keep W9 "sleep provokes"; loka-b60 at the release candidate. Then (owner, 2026-10-14: "yes to word bar, put mounts after 43a in M14"): one Book word-bar slice (loka-x6t.39) runs in the mechanics lane after the Realm seams batch; 43b mounts runs right after 43a in M14.
-
-Then the Realm seams batch (`loka-kgd.150`, slices RS-1 to RS-8; RS-7 deferred to the Realm), before
-M13. Then M13 to M15. Settle (S1 to S4) waits for an owner yes.
+0. First, in a fresh session: prove the compaction-plugin fix (`loka-bwfo`): run
+   `python3 -I dangling-parents.py <agent transcript>` on one compacted subagent
+   (expect 0; the script and the bug report text are in the
+   `loka-bwfo` notes). Then file the report at tamaratran/fast-jev-compaction and anthropics/claude-code.
+   The patched hook is in the plugin cache (`hooks/fast-jev.ts`, original kept as `.orig-0.3.0`); a
+   marketplace update reverts it.
+1. Long-wait slice: `loka-kgd.152` (P1, one long wait faults `nonfuture_job`, `compose_job.ts:17`),
+   `loka-kgd.151` (Chapter 1 deer `conflicting_write` on one long advance) and FD1 delayed reactions
+   `loka-kgd.138`, all jobs inside one long advance. FD1 is built on `toolbox/m12-delayed` at
+   `afe53bee` (kernel_api 1.88; records on `review-m12-delayed`, `-2nd`, `-recheck`, `-2nd-recheck`,
+   `-recheck2`) and is not merged: a delayed step that throws leaves its job pending forever, and
+   delayed jobs should share the proposal's holder map (pass `p.holders` into `runDelayed`, loka-akl7)
+   instead of per-op special cases. Details in the `.138` notes. Brief it as one engine slice (split
+   engine and content if large, `loka-3jhb`), main review + second opinion (proposal.ts).
+2. Realm seams batch `loka-kgd.150` (RS-1, RS-4 + row 38 `loka-kgd.133`, RS-2 + RS-3, RS-5, RS-6,
+   RS-8; RS-7 deferred), then the Book word bar `loka-x6t.39` in the mechanics lane.
+3. M13 (FD3 storylets first), Built rooms `loka-kgd.109`, M14 (43b mounts right after 43a), M15,
+   Homestead, then Settle S3/S4 only on an owner yes.
+4. The next housekeeping PR carries the approved retro items `loka-mm5v`, `loka-dgl6`, `loka-3jhb`,
+   `loka-xroj` (and `loka-bwfo` above) plus the Jev decision record.
 
 Merge mechanics: `bin/pm_merge.sh <batch-worktree> <batch-branch> <slice-branch> <review-branch>
-"<subject>" <reviewed-sha>` works only when nothing conflicts. Slices in one batch always conflict on
-the `kernel_api` line in `kernel/ts/src/runtime/world.ts` (keep the highest), on
-`protocol/fixtures/invalid.json` (take the union of both sides' new cases, keep `json.dumps(indent=2)`
-formatting, never prettier), on `docs/system/mechanics.md` end-of-file sections (keep both) and on the
-generated `docs/toolbox.gen.json` and `docs/system-graph.gen.json` (run `elixir bin/contracts.exs`).
-After a manual merge run the same checks `pm_merge.sh` runs before pushing. Never `git add -A` a
-directory that holds a `node_modules` link (`168811a` committed one; untracked on the M12 batch).
+"<subject>" <reviewed-sha>` now resolves the routine conflicts itself (generated files, the review
+index, appended `docs/system/mechanics.md` sections, the `kernel_api` line in `world.ts`) and stops on
+anything else; a code conflict goes to the slice developer (merge the batch into the slice branch).
+`protocol/fixtures/invalid.json` is still by hand (union, `json.dumps(indent=2)`). Developers run
+`bin/prepush.sh` before every push and never wait on CI; the PM watches CI.
+
+Session lessons (2026-10-14):
+- Subagents died seven times on "`server_tool_use` ids must be unique" after a compaction, on a
+  SendMessage resume or a self-resume after a background CI wait. Until `loka-bwfo` proves the fix:
+  never resume a compacted agent, keep agents short, and tell every agent: foreground commands only,
+  no background waits.
+- Run a second opinion on the head after the main review's fix round, not in parallel on a head the
+  main review fails.
 
 ## Standing owner rules not yet written elsewhere in the repo
 
@@ -114,16 +116,19 @@ directory that holds a `node_modules` link (`168811a` committed one; untracked o
 - The disk fills after about seven worktrees (2.2 GB each); remove merged worktrees first.
 - Agents must never run `git worktree prune` while another agent's worktree is in use.
 
+## Owner answers this session (paraphrased unless quoted)
+
+- Adopted the Fable priority plan ("keep going, follow the fable priority plan"); defer carry-over
+  48a-c and RS-7; Settle per the PM recommendation (S1 into Homestead, S2 merged into Built rooms,
+  S3/S4 after Homestead on a yes); Built rooms between M13 and M14; Balance gates on the showcase only;
+  keep W9 "sleep provokes"; `loka-b60` at the release candidate; "yes to word bar, put mounts after
+  43a in M14"; approved all five retro items.
+- `fast-jev-compaction` stays on with `compactAtPercent: 101` (owner: "yes apply compactAtPercent
+  101, if you tihnk that is good for us"; "please fix the jev-compaction plugin i think its useful").
+
 ## Open owner questions
 
-1. W9 sleep, provisional "sleep provokes" (a hostile NPC in the room fights the sleeper): shipped in
-   #380; still the owner's call to keep or reverse.
-2. Balance 3 `loka-kgd.107.3`: do balance gates fail CI on the showcase only, or on every sampler?
-   PM default: showcase only.
-3. Settle tier (S1 to S4): part of "finish the toolbox"? PM default: after M15, with S2 (runtime rooms)
-   behind a design record the owner approves.
-4. RS-7 (receipt digests, save v3) refuses old device saves; deferred to the Realm unless the owner
-   pulls it forward.
+None open.
 
 ## Parked (polish lane)
 
