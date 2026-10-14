@@ -56,16 +56,24 @@ defmodule Loka.Content.Population do
           do: diag("SCHEMA_VIOLATION", at(rel, steps ++ error))
   end
 
-  # Toolbox row 9: an encounter plan (`chance`) needs kernel_api 1.74.
+  # Toolbox row 9: an encounter plan (`chance`) needs kernel_api 1.74; row 37a: a day_target 0
+  # (a plan only population.spawn fills) needs 1.84.
   defp floor(m, plans) do
-    encounter = Enum.any?(for {_, {_, _, p}} <- plans, is_map(p), do: Map.has_key?(p, "chance"))
+    list = for {_, {_, _, p}} <- plans, is_map(p), do: p
+
+    floor =
+      cond do
+        Enum.any?(list, &(&1["day_target"] == 0)) -> [1, 84]
+        Enum.any?(list, &Map.has_key?(&1, "chance")) -> [1, 74]
+        true -> [0]
+      end
 
     api =
       m["requires"]["kernel_api"]["at_least"]
       |> String.split(".")
       |> Enum.map(&String.to_integer/1)
 
-    if encounter and api < [1, 74],
+    if api < floor,
       do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
       else: []
   end

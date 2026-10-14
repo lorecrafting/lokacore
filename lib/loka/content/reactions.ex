@@ -84,7 +84,8 @@ defmodule Loka.Content.Reactions do
     "population.suppress" => 35,
     "status.cure" => 53,
     "barrier.set" => 56,
-    "item.move" => 77
+    "item.move" => 77,
+    "population.spawn" => 84
   }
 
   # The kernel_api minor each trigger event needs: spoken 1.48 (G9), status_applied 1.53 (status
@@ -183,6 +184,10 @@ defmodule Loka.Content.Reactions do
   # Row 41 (decay): the sink room resolves; the step emits no event.
   defp consequence(rel, {%{"op" => "item.move"} = s, i}, _, ctx),
     do: reference(rel, ["apply", i], "room", s, ctx.m, ctx.defs)
+
+  # Row 37a (phased world events): the plan resolves; the step emits no event.
+  defp consequence(rel, {%{"op" => "population.spawn"} = s, i}, _, ctx),
+    do: reference(rel, ["apply", i], {"plan", "population"}, s, ctx.m, ctx.defs)
 
   # Status reader 3 (row G3): the subject's status.
   defp consequence(rel, {%{"op" => "status.cure"} = s, i}, _, ctx),

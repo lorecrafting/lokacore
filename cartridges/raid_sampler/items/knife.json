@@ -1,0 +1,12 @@
+{
+  "keywords": [
+    "knife"
+  ],
+  "short": "item.knife.short",
+  "room_line": "item.knife.room",
+  "description": "item.knife.description",
+  "mass_grams": 200,
+  "location": {
+    "in": "template"
+  }
+}

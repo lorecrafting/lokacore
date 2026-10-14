@@ -640,6 +640,16 @@
                 },
                 "required": ["op", "room"],
                 "additionalProperties": false
+              },
+              {
+                "description": "Toolbox row 37a (phased world events; kernel_api at least 1.84): births one bundle of the population plan into its home, in the highest free slot up to cap, as the plan job's birth does; no free slot births nothing. No RNG draw (the plan's chance and targets govern its own job only).",
+                "type": "object",
+                "properties": {
+                  "op": { "const": "population.spawn" },
+                  "plan": { "$ref": "identity.schema.json#/$defs/DefinitionRef" }
+                },
+                "required": ["op", "plan"],
+                "additionalProperties": false
               }
             ]
           }

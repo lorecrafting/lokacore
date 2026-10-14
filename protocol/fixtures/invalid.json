@@ -24569,6 +24569,55 @@
     ]
   },
   {
+    "name": "reaction_population_spawn_no_plan",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "clock_hour"
+      },
+      "apply": [
+        {
+          "op": "population.spawn"
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/apply/0/plan",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "reaction_population_spawn_extra_key",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "clock_hour"
+      },
+      "apply": [
+        {
+          "op": "population.spawn",
+          "plan": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "population",
+            "key": "raiders"
+          },
+          "room": "village"
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/apply/0/room",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
     "contract": "StatusDefinition",
     "value": {
       "key": "flying",
@@ -26068,6 +26117,51 @@
     "errors": [
       {
         "path": "/chance",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "contract": "PopulationPlan",
+    "value": {
+      "key": "bandits",
+      "bundle": {
+        "cartridge_id": "encounter_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "population_bundle",
+        "key": "bandits"
+      },
+      "home": {
+        "cartridge_id": "encounter_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "room",
+        "key": "road"
+      },
+      "area": [
+        {
+          "cartridge_id": "encounter_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "road"
+        },
+        {
+          "cartridge_id": "encounter_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "crossroads"
+        }
+      ],
+      "cap": 1,
+      "day_target": -1,
+      "night_target": 1,
+      "night_start": 20,
+      "night_end": 6,
+      "replacement_delay": 3600,
+      "wander_interval": 3600
+    },
+    "errors": [
+      {
+        "path": "/day_target",
         "code": "below_minimum"
       }
     ]

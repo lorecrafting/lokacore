@@ -1,15 +1,17 @@
+// size: allow 520, deer custody, sight, fault and reaction-spawn reopen cases share one real SQLite fixture
 import assert from 'node:assert/strict';
 import { test, type TestContext } from 'node:test';
 import { DatabaseSync } from 'node:sqlite';
+import { createHash } from 'node:crypto';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { bundle, content, ref } from '../../../kernel/ts/test/deer_fixture.ts';
-import { newWorld } from '../../../kernel/ts/src/index.ts';
+import { INSTALLED, loadCartridge, newWorld } from '../../../kernel/ts/src/index.ts';
 import { encode } from '../../../kernel/ts/src/foundation/canonical.ts';
 import { jobCommandId } from '../../../kernel/ts/src/foundation/id_source.ts';
 import { deerSave } from './deer-save.ts';
-import { openStory } from './authority.ts';
+import { openStory, type Release } from './authority.ts';
 
 const initial = (seed: readonly number[] = [1, 2, 3, 4]) =>
   newWorld(content, '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, seed);
@@ -23,7 +25,7 @@ function adapter(sql: DatabaseSync) {
     isInTransactionSync: () => sql.isTransaction,
   };
 }
-function setup(t: TestContext, seed?: readonly number[]) {
+function setup(t: TestContext, seed?: readonly number[], release?: Release) {
   const dir = mkdtempSync(join(tmpdir(), 'loka-deer-'));
   t.after(() => rmSync(dir, { recursive: true }));
   const path = join(dir, 'save.db');
@@ -72,9 +74,11 @@ function setup(t: TestContext, seed?: readonly number[]) {
     time: { wall: () => 10000, monotonic: () => 0 },
   };
   const p = { sql, db, host, fault };
-  const selected = seed
-    ? ([{ fresh: initial(seed), content_hash: bundle.sha256 }] as const)
-    : releases;
+  const selected = release
+    ? ([release] as const)
+    : seed
+      ? ([{ fresh: initial(seed), content_hash: bundle.sha256 }] as const)
+      : releases;
   const story = openStory(p.db as never, selected, p.host);
   assert.equal(story.kind, 'open');
   if (story.kind !== 'open') throw Error('open failed');
@@ -136,6 +140,54 @@ test('pending sight and confirmed flight cold-reopen with conserved deer custody
       .length,
     0,
   );
+});
+
+// Breaks: a reaction spawn into a sighted plan, the player in its home, binds a sight that the
+// save cannot explain, so the cold reopen is save_corrupt (review 2026-10-13, row 37a).
+test('reaction spawn into a sighted plan with the player home cold-reopens', (t) => {
+  const c = JSON.parse(bundle.canonical);
+  const [cartridge_id, cartridge_version] = [content.manifest.id, content.manifest.version];
+  const plan = { cartridge_id, cartridge_version, key: 'willow_deer', kind: 'population' };
+  c.manifest.requires.kernel_api.at_least = '1.84';
+  c.populations[ref('population', 'willow_deer')].cap = 2;
+  c.reactions[ref('reaction', 'herd')] = {
+    key: 'herd',
+    on: { event: 'clock_hour' },
+    apply: [{ op: 'population.spawn', plan }],
+  };
+  const canonical = encode(c);
+  const sha256 = createHash('sha256').update(canonical).digest('hex');
+  const loaded = loadCartridge(
+    new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
+    INSTALLED,
+  );
+  assert.ok(loaded.ok, JSON.stringify(loaded));
+  const fresh = newWorld(loaded.cartridge as never, initial().context, [1, 2, 3, 4]);
+  const release = { fresh, content_hash: sha256 };
+  const { path, p, story } = setup(t, undefined, release);
+  for (const [i, direction] of ['south', 'south', 'west'].entries()) move(story, direction, i + 1);
+  // Split: one 64800-68400 advance faults conflicting_write on origin/main too (open item loka-kgd.151).
+  for (const [from, until] of [
+    [64800, 65100],
+    [65100, 68300],
+    [68300, 68400],
+  ]) {
+    const advanced = story.elapsed({ expected_run_id: story.runId(), from, until });
+    assert.equal(advanced.kind, 'saved', `${from} ${JSON.stringify(advanced)}`);
+  }
+  const home = story.world().roomIds[ref('room', 'willow_shade')];
+  assert.equal(story.world().state.containers[story.world().body], home);
+  const deer = Object.entries(story.world().state.created ?? {})
+    .filter(([, i]) => i.origin.kind === 'spawned' && i.definition.key === 'willow_deer')
+    .map(([id]) => story.world().state.containers[id]);
+  assert.deepEqual(deer, [home, home]);
+  p.sql.close();
+  const q = new DatabaseSync(path);
+  t.after(() => q.close());
+  const reopened = openStory(adapter(q) as never, [release], p.host);
+  assert.equal(reopened.kind, 'open');
+  if (reopened.kind === 'open')
+    assert.equal(encode(reopened.world().state as never), encode(story.world().state as never));
 });
 
 // Breaks: a surviving round-to-sight handoff commits a state that cold reopen misclassifies or replays as a second flight.

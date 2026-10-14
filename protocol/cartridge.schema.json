@@ -2157,12 +2157,12 @@
         },
         "day_target": {
           "type": "integer",
-          "minimum": 1,
+          "minimum": 0,
           "maximum": 64
         },
         "night_target": {
           "type": "integer",
-          "minimum": 1,
+          "minimum": 0,
           "maximum": 64
         },
         "night_start": {

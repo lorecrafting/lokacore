@@ -1,0 +1,9 @@
+{
+  "title": "room.village.title",
+  "description": "room.village.description",
+  "exits": {
+    "south": {
+      "to": "field"
+    }
+  }
+}
