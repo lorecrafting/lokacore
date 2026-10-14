@@ -52,6 +52,7 @@ import { runDelayed } from '../reaction.ts';
 // `at`: the drain's hour for this run; a later listed hour the advance crosses is a sub-step of the
 // row's one run_job, which its first hour completed (scheduledJob, loka-qi0r; runPopulation, loka-6ql4;
 // runStatus, loka-6ztc).
+// size: allow 42, one run_job dispatch over every job kind (row FD1 adds reaction)
 export const decideAt = (
   world: World,
   command: Parameters<Rule<'schedule'>>[1],

@@ -64,10 +64,8 @@ export function holds(
   switch (p.op) {
     case 'fact_compare':
       return read(world, actor, p, ctx.target) === p.equals;
-    case 'time_since': {
-      const at = read(world, actor, p, ctx.target); // row FD1: a stamped time; unset reads its default
-      return at !== undefined && world.state.clock - (at as number) >= p.at_least;
-    }
+    case 'time_since': // row FD1: a stamped time; no subject reads undefined, so NaN, false
+      return world.state.clock - (read(world, actor, p, ctx.target) as number) >= p.at_least;
     case 'has_item':
       return held(world, world.entityIds[refString(p.item)], bodyOf(world, actor));
     case 'barrier_state':

@@ -1,3 +1,4 @@
+// size: allow 350, reaction@1's triggers, its one ordered delivery and row FD1's delayed job run
 // reaction@1 (capability_registry.json; reaction.schema.json ReactionRule; 21 §3.4, §11; 06
 // §14; 04 §5.2): the rules an event triggers and one delivery's explicit sequence. proposal.ts
 // propose runs the FIFO queue, numbers the writer groups and counts the budgets.
@@ -106,7 +107,7 @@ const ACTIVATES = ['quest_resolved', 'rested'];
 // fired: a delayed rule's job run (toolbox row FD1), which runs the steps instead of scheduling them.
 type Delivery = { holders?: Map<string, number>; dead?: ReadonlySet<EntityId>; fired?: boolean };
 
-// size: allow 61, one ordered delivery lowers fact assignments, quest effects, suppression and spawn
+// size: allow 60, one ordered delivery lowers fact assignments, quest effects, suppression and spawn
 export function sequence(
   world: World,
   listener: CharacterId,
@@ -123,8 +124,7 @@ export function sequence(
   const about = { steps, cause, subject: subject(cause, bodyOf(then, actor)) }; // status reader 1
   if (rule.when && !holds(then, actor, rule.when.root, about)) return undefined;
   if (rule.after && !fired) return delayed(world, actor, rule, cause, group, mint);
-  const activated = new Set<string>();
-  const own = { holders, set: {}, applied: new Set<string>(), doors: new Map() }; // holders: the advance's
+  const own = { holders, set: {}, applied: new Set<string>(), doors: new Map(), quests: new Set() };
   const [ops, events, narration]: [DeltaOp[], DomainEvent[], { key: TextKey }[]] = [[], [], []];
   let [position, gained] = [0, 0]; // gained: one levelling write per rule (no row race)
   const by = { id: cause.id as string as CommandId, payload: { actor_id: actor } };
@@ -132,9 +132,9 @@ export function sequence(
   for (const step of rule.apply) {
     if (step.op === 'quest.activate') {
       if (!ACTIVATES.includes(rule.on.event)) return { kind: 'fault', code: 'precondition_failed' };
-      if (questOf(world, actor, step.quest) || activated.has(refString(step.quest))) continue;
+      if (questOf(world, actor, step.quest) || own.quests.has(refString(step.quest))) continue;
       const started = activation(mint, actor, step.quest);
-      activated.add(refString(step.quest));
+      own.quests.add(refString(step.quest));
       ops.push(...started.ops.map((op) => ({ ...op, writer_group: group })));
       emit(started.payload);
     } else if (step.op === 'quest.resolve' || step.op === 'quest.fail') {
