@@ -3,6 +3,7 @@ import { water } from './cartridge_water.ts';
 import { topics } from './cartridge_topics.ts';
 import { pools } from './cartridge_pools.ts';
 import { replenish } from './cartridge_replenish.ts';
+import { trails } from './cartridge_trails.ts';
 import { fuel } from './cartridge_fuel.ts';
 import { skills } from './cartridge_skills.ts';
 import { exchanges } from './cartridge_exchange.ts';
@@ -200,7 +201,7 @@ export function refStage(c: Obj): Diagnostic[] {
   }
   out.push(...reserved(c), ...featureApi(c), ...locks(c));
   if (c.format !== 'loka-cartridge-v2') return out;
-  out.push(...exchanges(c, check), ...fuel(c, check), ...replenish(c, check));
+  out.push(...exchanges(c, check), ...fuel(c, check), ...replenish(c, check), ...trails(c, check));
   spatialRefs(c, check, out);
   out.push(...knowledge(c, check));
   for (const [r, at] of npcRooms(c)) named(r, 'room', at);

@@ -22,12 +22,14 @@ import { travel } from '../escort/shared.ts';
 import { entrySight } from '../population/behavior.ts';
 import { engage } from '../disposition.ts';
 import { crossable, fall, fare, passage } from './shared.ts';
+import { left } from '../trail.ts';
 
 /** Shared ordinary/escape movement: admission, one payment, one transfer and closure. */
 type MoveCommand = {
   readonly id: CommandId;
   readonly payload: { readonly actor_id: CharacterId; readonly direction: Key };
 };
+// size: allow 41, the player's trail (toolbox row W13) is one more op of the move's one decision
 export function moveSequence(
   world: World,
   command: MoveCommand,
@@ -49,6 +51,7 @@ export function moveSequence(
   const ops = [
     ...paid.ops,
     transfer,
+    ...left(world, here, direction, world.state.clock),
     ...water.travel(world, actor_id, there, plan.water?.entering, mint),
     ...travel(world, actor_id, here, there),
     ...closeMovementEncounter(world, body, mint),

@@ -104,7 +104,8 @@ defmodule Loka.Content.Position do
       ),
       Enum.map(Map.keys(defs["skill"]), &("skill_" <> &1)),
       for({key, {_, _, %{"growth" => _}}} <- defs["skill"], do: "uses_" <> key),
-      for({key, {_, _, %{"tip" => _}}} <- defs["recipe"], do: "seen_tip_" <> key)
+      for({key, {_, _, %{"tip" => _}}} <- defs["recipe"], do: "seen_tip_" <> key),
+      Loka.Content.Trails.names(defs)
     ])
   end
 

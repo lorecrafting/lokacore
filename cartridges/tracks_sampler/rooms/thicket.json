@@ -1,0 +1,15 @@
+{
+  "title": "room.thicket.title",
+  "description": "room.thicket.description",
+  "exits": {
+    "west": {
+      "to": "clearing"
+    }
+  },
+  "details": {
+    "ground": {
+      "aliases": ["ground", "tracks"],
+      "description": "detail.thicket.ground"
+    }
+  }
+}

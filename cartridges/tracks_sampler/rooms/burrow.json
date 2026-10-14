@@ -1,0 +1,15 @@
+{
+  "title": "room.burrow.title",
+  "description": "room.burrow.description",
+  "exits": {
+    "south": {
+      "to": "clearing"
+    }
+  },
+  "details": {
+    "ground": {
+      "aliases": ["ground", "tracks"],
+      "description": "detail.burrow.ground"
+    }
+  }
+}

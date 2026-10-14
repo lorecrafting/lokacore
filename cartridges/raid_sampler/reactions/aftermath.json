@@ -1,0 +1,21 @@
+{
+  "on": {
+    "event": "fact_changed",
+    "fact": "raided"
+  },
+  "when": {
+    "policy_version": 1,
+    "root": {
+      "op": "fact_compare",
+      "fact": "raided",
+      "equals": false
+    }
+  },
+  "apply": [
+    {
+      "op": "fact.adjust",
+      "fact": "aftermaths",
+      "amount": 1
+    }
+  ]
+}

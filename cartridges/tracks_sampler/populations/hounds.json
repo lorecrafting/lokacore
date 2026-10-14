@@ -1,0 +1,29 @@
+{
+  "bundle": "hounds",
+  "home": "clearing",
+  "area": [
+    "clearing",
+    "thicket"
+  ],
+  "cap": 1,
+  "day_target": 1,
+  "night_target": 1,
+  "night_start": 20,
+  "night_end": 6,
+  "replacement_delay": 86400,
+  "wander_interval": 3600,
+  "trail": true,
+  "pack": {
+    "flight_below_percent": 25,
+    "flight_fare": 0,
+    "narration": {
+      "helper_joined": "combat.hound_joined",
+      "enemy_fled": {
+        "east": "combat.hound_fled_east",
+        "west": "combat.hound_fled_west"
+      },
+      "primary_changed": "combat.hound_targeted",
+      "pack_withdrew": "combat.hounds_gone"
+    }
+  }
+}

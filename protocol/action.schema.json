@@ -1034,6 +1034,27 @@
                 ]
               },
               "additionalProperties": false
+            },
+            {
+              "description": "A track check (toolbox row W13, docs/system/mechanics.md Tracks and trails; kernel_api at least 1.85): passes when the trail of population plan plan (its key; the plan declares trail) in the actor's room is fresh (world.trails.fresh_for); draws no RNG; on success the outcome's lines are followed by world.trails.leads[<exit>].",
+              "type": "object",
+              "properties": {
+                "key": {
+                  "$ref": "action.schema.json#/$defs/Key"
+                },
+                "kind": {
+                  "const": "track"
+                },
+                "plan": {
+                  "$ref": "action.schema.json#/$defs/Key"
+                }
+              },
+              "required": [
+                "key",
+                "kind",
+                "plan"
+              ],
+              "additionalProperties": false
             }
           ]
         },
