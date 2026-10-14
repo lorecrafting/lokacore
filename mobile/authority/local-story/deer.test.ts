@@ -74,7 +74,7 @@ function setup(t: TestContext, seed?: readonly number[], release?: Release) {
   };
   const p = { sql, db, host, fault };
   const selected = release
-    ? [release]
+    ? ([release] as const)
     : seed
       ? ([{ fresh: initial(seed), content_hash: bundle.sha256 }] as const)
       : releases;

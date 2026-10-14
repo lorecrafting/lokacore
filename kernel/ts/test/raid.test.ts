@@ -211,7 +211,9 @@ test('g: the loader refuses population.spawn or a 0 target below 1.84, or an unk
   for (const drop of [false, true]) {
     const old = load((c) => {
       c.manifest.requires.kernel_api.at_least = '1.83';
-      if (drop) c.reactions[raid].apply.shift(); // the plan's target 0 alone
+      // drop: the plan's target 0 alone; else the step alone (targets 1)
+      if (drop) c.reactions[raid].apply.shift();
+      else Object.assign(Object.values(c.populations)[0]!, { day_target: 1, night_target: 1 });
     });
     assert.deepEqual(old.ok ? undefined : [old.diagnostic.code, old.diagnostic.path], api);
   }
