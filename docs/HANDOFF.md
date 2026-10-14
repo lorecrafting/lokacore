@@ -7,7 +7,8 @@ questions. Rewrite it at each stable checkpoint (a merge, a review verdict, a pu
 the session ends; commit and push it with the Beads export.
 
 Written 2026-10-14 UTC by Claude Code (Opus 5.5) at the end of local session
-01DvPym9pzaxaCbY2Ycszv9f (after batch M12), for the next session to continue.
+0d166efd (stopped for a Claude Code restart to load the patched compaction hook), for the next
+session to continue.
 
 ## Start of a session
 
@@ -44,46 +45,54 @@ The PM decides mechanics calls itself, records them in Beads notes, and keeps go
 Batch order: the owner-adopted [priority plan](briefs/toolbox-priority-plan-2026-10-14.md)
 (2026-10-14), with the owner's answers below.
 
-Done this session: #382 (loka-j945, prepush checks and the pm_merge conflict resolver) and #383
-(loka-kgd, mechanics batch M12: 37a, 37b, W13, W12, 39, FD4, FD8, two-shop save fix; `kernel_api` 1.89).
+Done this session: draft #384 (loka-3jhb, housekeeping: Jev decision record and the brief-split
+rule); both upstream comments posted (fast-jev-compaction#89, claude-code#99727; links in the
+`loka-bwfo` notes). Batch branch `toolbox/batch-longwait` (= main 50e2af2f) exists, no PR yet.
 
 Next, in order:
 
-0. First, in a fresh session: prove the compaction-plugin fix (`loka-bwfo`): run
-   `python3 -I dangling-parents.py <agent transcript>` on one compacted subagent
-   (expect 0; the script and the bug report text are in the
-   `loka-bwfo` notes). Then file the report at tamaratran/fast-jev-compaction and anthropics/claude-code.
-   The patched hook is in the plugin cache (`hooks/fast-jev.ts`, original kept as `.orig-0.3.0`); a
-   marketplace update reverts it.
-1. Long-wait slice: `loka-kgd.152` (P1, one long wait faults `nonfuture_job`, `compose_job.ts:17`),
-   `loka-kgd.151` (Chapter 1 deer `conflicting_write` on one long advance) and FD1 delayed reactions
-   `loka-kgd.138`, all jobs inside one long advance. FD1 is built on `toolbox/m12-delayed` at
-   `afe53bee` (kernel_api 1.88; records on `review-m12-delayed`, `-2nd`, `-recheck`, `-2nd-recheck`,
-   `-recheck2`) and is not merged: a delayed step that throws leaves its job pending forever, and
-   delayed jobs should share the proposal's holder map (pass `p.holders` into `runDelayed`, loka-akl7)
-   instead of per-op special cases. Details in the `.138` notes. Brief it as one engine slice (split
-   engine and content if large, `loka-3jhb`), main review + second opinion (proposal.ts).
-2. Realm seams batch `loka-kgd.150` (RS-1, RS-4 + row 38 `loka-kgd.133`, RS-2 + RS-3, RS-5, RS-6,
+0. Prove the compaction fix (`loka-bwfo`) BEFORE any long agent. The cached hook
+   (`hooks/fast-jev.ts`, original `.orig-0.3.0`) now rebuilds kept assistant rows and kept tool_result
+   rows without their handle. Spawn a Sonnet general-purpose agent that reads large docs until it
+   auto-compacts, calls the advisor once before compaction, and makes a few tool calls after it. Run
+   both scripts from the `loka-bwfo` notes on its transcript (`dangling-parents.py`, `shared-ids.py`):
+   both must print 0. Then resume it once with SendMessage: no 400 = proven; lift the no-advisor and
+   never-resume rules (WORKFLOW token hygiene) in the housekeeping PR and close `loka-bwfo`. If live
+   turns break (thinking blocks dropped) or the 400 returns: turn fast-jev compaction off (built-in
+   compaction) and tell the owner.
+1. Long-wait slice `loka-kgd.152` + `.151`: design approved (copied into the `.152` notes with the
+   PM rulings). WIP on `toolbox/longwait-loop` at `e8eea2f0`, worktree `longwait-loop`: unfinished
+   and unchecked. A fresh developer finishes it from the brief, the design note and the rulings, then
+   main review + second opinion (proposal.ts, protocol rule).
+2. FD1 `loka-kgd.138` on `toolbox/m12-delayed` at `56cbcc33` (merged main, kernel_api 1.90; throw
+   wedge, holders, sight counterfeits, when-leaf refusal, XP probe done). Left: confirm red controls
+   and the raid pair-test hash-order fix, `bin/prepush.sh`, `/code-review medium`, CI; then main
+   review + second opinion. After `.152` lands, remove FD1's "wait end + 1" clamp. Merge both slices
+   into `toolbox/batch-longwait`, one Fable batch review, merge.
+3. Realm seams batch `loka-kgd.150` (RS-1, RS-4 + row 38 `loka-kgd.133`, RS-2 + RS-3, RS-5, RS-6,
    RS-8; RS-7 deferred), then the Book word bar `loka-x6t.39` in the mechanics lane.
-3. M13 (FD3 storylets first), Built rooms `loka-kgd.109`, M14 (43b mounts right after 43a), M15,
+4. M13 (FD3 storylets first), Built rooms `loka-kgd.109`, M14 (43b mounts right after 43a), M15,
    Homestead, then Settle S3/S4 only on an owner yes.
-4. The next housekeeping PR carries the approved retro items `loka-mm5v`, `loka-dgl6`, `loka-3jhb`,
-   `loka-xroj` (and `loka-bwfo` above) plus the Jev decision record.
+5. Housekeeping draft #384 then takes `loka-mm5v` and `loka-xroj` (after the long-wait batch; they
+   build on it), `loka-dgl6`, and the token-hygiene update from step 0.
 
 Merge mechanics: `bin/pm_merge.sh <batch-worktree> <batch-branch> <slice-branch> <review-branch>
-"<subject>" <reviewed-sha>` now resolves the routine conflicts itself (generated files, the review
-index, appended `docs/system/mechanics.md` sections, the `kernel_api` line in `world.ts`) and stops on
-anything else; a code conflict goes to the slice developer (merge the batch into the slice branch).
-`protocol/fixtures/invalid.json` is still by hand (union, `json.dumps(indent=2)`). Developers run
-`bin/prepush.sh` before every push and never wait on CI; the PM watches CI.
+"<subject>" <reviewed-sha>` resolves the routine conflicts (generated files, the review index,
+appended `docs/system/mechanics.md` sections, the `kernel_api` line in `world.ts`) and stops on
+anything else; a code conflict goes to the slice developer. `protocol/fixtures/invalid.json` is still
+by hand (union, `json.dumps(indent=2)`). Developers run `bin/prepush.sh` before every push and never
+wait on CI; the PM watches CI.
 
 Session lessons (2026-10-14):
-- Subagents died seven times on "`server_tool_use` ids must be unique" after a compaction, on a
-  SendMessage resume or a self-resume after a background CI wait. Until `loka-bwfo` proves the fix:
-  never resume a compacted agent, keep agents short, and tell every agent: foreground commands only,
-  no background waits.
+- Until step 0 passes: agents never call the advisor, never wait in the background, and no agent is
+  resumed after a compaction. Check its transcript for `compact_boundary` before any SendMessage.
+  This session two Opus developers died on the 400: one resumed after one compaction (the PM did not
+  check), one mid-run after three compactions with no resume (each compaction rewrote its one advisor
+  message under the same `message.id`).
 - Run a second opinion on the head after the main review's fix round, not in parallel on a head the
   main review fails.
+- The pre-commit hook blocks Prettier issues; run `npx prettier --write` on the files, never
+  `--no-verify`.
 
 ## Standing owner rules not yet written elsewhere in the repo
 
@@ -117,6 +126,9 @@ Session lessons (2026-10-14):
 - Agents must never run `git worktree prune` while another agent's worktree is in use.
 
 ## Owner answers this session (paraphrased unless quoted)
+
+- 2026-10-14 (session 0d166efd): "yes restart after the batch merges, and post both comments";
+  then restart now ("yes go ahead").
 
 - Adopted the Fable priority plan ("keep going, follow the fable priority plan"); defer carry-over
   48a-c and RS-7; Settle per the PM recommendation (S1 into Homestead, S2 merged into Built rooms,
