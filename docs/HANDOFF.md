@@ -60,8 +60,8 @@ Batch M12: branch `toolbox/batch-m12`, head `6642e7c1` (M11 final head + docs + 
 2. Two-shop save bug `loka-kgd.149` (P1), `toolbox/m12-two-shops` at `b759a67f`. Not reviewed yet (both
    reviewers stopped on a full disk). Run a fresh main review and a save second opinion; the partial
    record on `review-m12-two-shops` (`644a9cf2`) lists the points to check first.
-3. Row W13 tracks `loka-kgd.136`, `toolbox/m12-tracks` (code `e8cbbf7`, WIP marker `dde57fd3`, 1.85).
-   Built and self-checked; design note in the issue notes. Needs: the hosted CI verdict on `e8cbbf7`;
+3. Row W13 tracks `loka-kgd.136`, `toolbox/m12-tracks` at `0d2d4094` (1.85; CI on `dde57fd3` failed on a schema statement length, fixed in `0d2d4094`, CI pending at session end).
+   Built and self-checked; design note in the issue notes. Needs: the hosted CI verdict on `0d2d4094`;
    two PM rulings (does a hunter chase out of the player's room; an out-of-area hunter parks); then two
    reviewers (it widens the `facts_typed` invariant to rooms for engine-written facts).
 4. Waves 2 and 3 (not started): 37b `.132` and 38 `.133` (content, one run), W12 `.135`, 39 `.134`
