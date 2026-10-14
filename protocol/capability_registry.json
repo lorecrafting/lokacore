@@ -349,6 +349,9 @@
     ],
     "events": [
       "shooed"
+    ],
+    "policies": [
+      "population_count"
     ]
   },
   {

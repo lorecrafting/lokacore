@@ -2332,6 +2332,19 @@
           ],
           "additionalProperties": false
         },
+        "floor": {
+          "description": "Toolbox row W12 (kernel_api at least 1.86): slots 1 to floor refill at the plan's next occurrence: a member dying there is due at its death time, not after replacement_delay, and they birth whatever birth_when says. At most day_target; refused with chance (SCHEMA_VIOLATION, both kernels).",
+          "type": "integer",
+          "minimum": 1
+        },
+        "birth_when": {
+          "description": "Toolbox row W12 (kernel_api at least 1.86): while false at an occurrence, the plan births nothing above floor. Its tree may use only all, any, not, population_count, time_window, sky and barrier_state (SCHEMA_VIOLATION otherwise, both kernels).",
+          "$ref": "policy.schema.json#/$defs/VersionedPolicy"
+        },
+        "wander_when": {
+          "description": "Toolbox row W12 (kernel_api at least 1.86): while false at a wander boundary, no member wanders. The same leaf limit as birth_when.",
+          "$ref": "policy.schema.json#/$defs/VersionedPolicy"
+        },
         "walks": {
           "const": true,
           "description": "Toolbox row W26 (kernel_api at least 1.81; mechanics.md NPCs use doors): the wander step crosses its exit as a walking NPC does (npcPassage with walks): a closed door passes and stays closed, a locked one only for a member holding its key_item (unlocked, opened, closed and locked again); any traverse lock on the exit or enter lock on the room refuses it."

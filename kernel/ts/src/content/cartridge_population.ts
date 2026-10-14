@@ -1,8 +1,21 @@
 import type { DefinitionRef, Diagnostic } from '../contracts.gen.ts';
 import { refString } from '../runtime/decision.ts';
 import { apiCmp } from './cartridge_installed.ts';
-import { diag, step, type Obj } from './cartridge_refs.ts';
+import { diag, nodes, step, type Obj } from './cartridge_refs.ts';
 
+const GATED = ['floor', 'birth_when', 'wander_when'];
+// A plan gate has no actor (row W12): only these leaves read world state alone.
+const ACTORLESS = new Set([
+  'all',
+  'any',
+  'not',
+  'population_count',
+  'time_window',
+  'sky',
+  'barrier_state',
+]);
+const actorless = (p: Obj): boolean =>
+  ACTORLESS.has(p.op) && (p.op === 'not' ? actorless(p.item) : (p.items ?? []).every(actorless));
 const ref = (r: Obj) => refString(r as DefinitionRef);
 const opposite: Record<string, string> = {
   north: 'south',
@@ -18,10 +31,16 @@ export function population(c: Obj): Diagnostic[] {
   const plans = c.populations ?? {};
   // Toolbox row 9: an encounter plan (`chance`) needs kernel_api 1.74; row 37a: a day_target 0
   // (a plan only population.spawn fills) needs 1.84.
+  // Row W12: a floor, a plan gate or a population_count leaf anywhere needs 1.86.
   const list = Object.values(plans) as Obj[];
-  const floor = list.some((p) => p.day_target === 0)
-    ? '1.84'
-    : list.some((p) => p.chance !== undefined) && '1.74';
+  const w12 =
+    list.some((p) => GATED.some((k) => p[k] !== undefined)) ||
+    nodes(c).some(([n]) => n.op === 'population_count');
+  const floor = w12
+    ? '1.86'
+    : list.some((p) => p.day_target === 0)
+      ? '1.84'
+      : list.some((p) => p.chance !== undefined) && '1.74';
   const out: Diagnostic[] =
     floor && apiCmp(c.manifest.requires.kernel_api.at_least, floor) < 0
       ? [diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least')]
@@ -46,6 +65,10 @@ export function population(c: Obj): Diagnostic[] {
     if (!area) out.push(diag('SCHEMA_VIOLATION', `${at}.area`));
     if (!validPeriods) out.push(diag('SCHEMA_VIOLATION', `${at}.wander_interval`));
     if (!targets) out.push(diag('SCHEMA_VIOLATION', `${at}.day_target`));
+    if (p.floor !== undefined && (p.floor > p.day_target || p.chance !== undefined))
+      out.push(diag('SCHEMA_VIOLATION', `${at}.floor`));
+    for (const k of ['birth_when', 'wander_when'])
+      if (p[k] && !actorless(p[k].root)) out.push(diag('SCHEMA_VIOLATION', `${at}.${k}`));
     if (c.lock.capabilities.population !== 1)
       out.push(diag('UNDECLARED_CAPABILITY', at, { capability: 'population' }, ['population@1']));
   }

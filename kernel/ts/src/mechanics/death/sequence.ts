@@ -138,7 +138,9 @@ function populationLoss(world: World, loss: Loss): DeltaOp[] {
       expected: before,
       value: {
         ...before,
-        replacement_due: (loss.at ?? world.state.clock) + population.plan.replacement_delay,
+        replacement_due:
+          (loss.at ?? world.state.clock) +
+          (slot <= (population.plan.floor ?? 0) ? 0 : population.plan.replacement_delay), // row W12
         ...(population.plan.sight && { sight_job_id: null }),
       },
     },

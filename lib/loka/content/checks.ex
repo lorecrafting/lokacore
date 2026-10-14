@@ -432,7 +432,8 @@ defmodule Loka.Content.Checks do
       Dialogues.conditions(defs),
       Loka.Content.Skills.conditions(defs),
       Loka.Content.Barriers.conditions(defs),
-      Loka.Content.Cues.conditions(defs)
+      Loka.Content.Cues.conditions(defs),
+      Loka.Content.Population.conditions(defs)
     ])
   end
 

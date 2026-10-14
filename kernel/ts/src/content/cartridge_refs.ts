@@ -140,6 +140,11 @@ export function nodes(c: Obj): [Obj, string][] {
       walk(d.policy.root, `.cartridge.dialogues${step(ref)}.policy.root`),
     ),
     ...lockRoots(c).flatMap(([p, at]) => walk(p, at)),
+    ...Object.entries((c.populations ?? {}) as Obj).flatMap(([ref, p]) =>
+      (['birth_when', 'wander_when'] as const).flatMap((k) =>
+        p[k] ? walk(p[k].root, `.cartridge.populations${step(ref)}.${k}.root`) : [],
+      ),
+    ),
     ...Object.entries((c.barriers ?? {}) as Obj).flatMap(([ref, b]) =>
       b.opens_when
         ? walk(b.opens_when.root, `.cartridge.barriers${step(ref)}.opens_when.root`)

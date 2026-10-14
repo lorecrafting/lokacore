@@ -12,5 +12,6 @@ export const LEAF_REFS: Readonly<Record<string, Readonly<Record<string, string>>
   visited_count: { room: 'room' },
   status_active: { status: 'status' },
   npc_present: { npc: 'npc' },
+  population_count: { plan: 'population' },
   cue_perceived: { npc: 'npc' },
 };

@@ -19,6 +19,7 @@ defmodule Loka.Content.LeafRefs do
       "visited_count" => %{"room" => "room"},
       "status_active" => %{"status" => "status"},
       "npc_present" => %{"npc" => "npc"},
+      "population_count" => %{"plan" => "population"},
       "cue_perceived" => %{"npc" => "npc"}
     }
 
