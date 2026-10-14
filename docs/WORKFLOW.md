@@ -280,6 +280,10 @@ item or too much complexity. Mechanics, save, protocol or engine items leave the
   a reason, open items, no narrative.
 - PM state file: labeled "AS OF PR #N"; cite every PR as #N (Beads id, short description); one "Open objectives" line; owner words only verbatim
   or marked "(paraphrased)"; keep `file:line` pointers and exact errors; drop spent exploration.
+- Never resume (SendMessage) a subagent whose context was compacted: spawn a fresh one with the
+  brief and the record (2026-10-14: three Opus resumes failed on a duplicate `server_tool_use` id).
+- A second opinion on a slice runs on the head after the main review's fix round, never in parallel
+  on a head the main review already failed (one full review saved per blocker round).
 - Start a new slice agent with a self-contained brief and no inherited chat
   history; keep a visited path/revision list while following doc links. Reuse
   developer and reviewer context for scoped fixes only while it stays small.

@@ -27,12 +27,13 @@ Before handing off:
 1. The brief names the [lane](../../docs/WORKFLOW.md#delivery-lanes). In every lane run only
    the touched layer's type/compile checks and the focused tests your diff touches, under `nice -n 10`; never the full
    `npm test`, the Storybook smoke, `test:e2e` or `bin/check_all.sh` on the M1 ([two-lane CI](../../docs/decisions/owner-decision-two-lane-ci-2026-10-09.md)).
+   Before every push run `bin/prepush.sh` (CI's static checks, about 30 s) and fix what fails.
    Hosted CI on the pushed head is the final run (it includes the full `npm test` of each package):
    after a push, check `gh run list --branch <branch> --commit "$(git rev-parse HEAD)"` (the full sha; a short one matches nothing) every ~2 minutes, never `gh run watch` (rate limits, timeouts);
    a push run can start late: give up to ~2 minutes before concluding there is none (then report it, do not dispatch), and never dispatch one by hand when a push run exists (the dispatch cancels it, loka-thz);
    quote each verdict (job names, durations) in the handoff; fix a red run before handing off. Every new check has a
    planted violation that fails; a planted break or red control stops only the PIDs it started, never a process by name ([Git hygiene](../../docs/WORKFLOW.md#git-hygiene)).
-2. Commit first, then self-review the diff once: `/code-review medium` on the branch (the review never runs checkout, stash or reset in your worktree)
+2. Commit first, then self-review the diff once: `/code-review medium` on the branch diff against its base, run from your slice worktree with the worktree path or branch as the target, never the main checkout (your cwd resets to it, loka-0w4; the review never runs checkout, stash or reset in your worktree)
    when a non-tiny diff changes code or bulk-edits docs (otherwise, or if skills are
    unavailable, the same questions by hand; [owner decision](../../docs/decisions/owner-decision-review-tools-2026-10-02.md)). Then break your own core logic once and
    confirm a test fails; if none does, the tests are not done. Fix or record a
