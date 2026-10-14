@@ -29,7 +29,7 @@ Before handing off:
    `npm test`, the Storybook smoke, `test:e2e` or `bin/check_all.sh` on the M1 ([two-lane CI](../../docs/decisions/owner-decision-two-lane-ci-2026-10-09.md)).
    Before every push run `bin/prepush.sh` (CI's static checks, about 30 s) and fix what fails.
    Hosted CI on the pushed head is the final run (it includes the full `npm test` of each package):
-   after a push, confirm `ci.yml` and `book-e2e.yml` started with one `gh run list --commit "$(git rev-parse HEAD)"` call (the full sha; a short one matches nothing) and hand back;
+   after a push, confirm `ci.yml` and `book-e2e.yml` started with one `gh run list --commit "$(git rev-parse HEAD)"` call (the full sha; a short one matches nothing) and hand back (a run can start up to ~2 minutes late: report an empty list, never dispatch);
    the PM watches CI and sends a red run back as a finding. Never start a background wait for CI (2026-10-14: two developers died resuming after a CI wait),
    and never dispatch a run by hand when a push run exists (the dispatch cancels it, loka-thz). Every new check has a
    planted violation that fails; a planted break or red control stops only the PIDs it started, never a process by name ([Git hygiene](../../docs/WORKFLOW.md#git-hygiene)).

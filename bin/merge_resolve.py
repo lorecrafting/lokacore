@@ -2,7 +2,7 @@
 """Resolve the known additive conflicts of the merge in progress in this repo (bin/pm_merge.sh):
 - docs/system/mechanics.md: one conflict that ends the file and only adds text on both sides (two
   appended sections) keeps both, ours first, with the leading lines both sides share kept once;
-  a duplicate `## ` heading afterwards refuses;
+  a shared part that ends inside a section, or a duplicate `## ` heading afterwards, refuses;
 - kernel/ts/src/runtime/world.ts: one conflict whose sides are each one kernel_api line keeps the higher;
 - a generated file or docs/reviews/README.md takes theirs, as does a review record whose sides differ
   only in whitespace (another review record is left); then every generator reruns.
@@ -40,7 +40,10 @@ def tail_union(text):
     h = hunks[0]
     ours, theirs = h[1].splitlines(True), h[3].splitlines(True)
     shared = len(os.path.commonprefix([ours, theirs]))  # a section both sides appended (a cherry-pick) stays once
-    merged = text[: h.start()] + h[1].rstrip("\n") + "\n\n" + "".join(theirs[shared:]).lstrip("\n")
+    rest = "".join(theirs[shared:]).lstrip("\n")
+    if rest and not rest.startswith("## "):  # the shared part ends inside a section: the sides edit one section
+        return None
+    merged = text[: h.start()] + h[1].rstrip("\n") + ("\n\n" + rest if rest else "\n")
     heads = re.findall(r"^## .*$", merged, re.M)
     return merged if len(heads) == len(set(heads)) else None
 

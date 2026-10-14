@@ -99,7 +99,7 @@ their rules and red controls remain available for resumption.
 - `bin/merge_resolve_red_controls.sh` checks that `bin/merge_resolve.py` (the `bin/pm_merge.sh` resolver) keeps both
   `docs/system/mechanics.md` tail sections (ours first, a section both sides appended once), the higher
   `kernel_api` (1.10 over 1.9) and a regenerated `docs/system-graph.gen.json`, and leaves unresolved a tail
-  that repeats a `## ` heading, a conflict in the middle of `mechanics.md`, a review record that differs
+  that repeats a `## ` heading or gives one heading two bodies, a conflict in the middle of `mechanics.md`, a review record that differs
   beyond whitespace, an edit of the last `mechanics.md` line and a TypeScript source conflict.
 - `bin/integration_red_controls.sh` runs the PM scripts in throwaway repositories with stubs.
   It runs `bin/sync_pr.sh` (merge `main` into a PR branch): a code conflict is refused, a review

@@ -1,7 +1,7 @@
 #!/bin/sh
 # bin/merge_resolve.py (bin/pm_merge.sh) resolves a mechanics.md tail (a section both sides appended
 # kept once), a kernel_api line and a generated-file conflict, and leaves unresolved: a tail that
-# repeats a `## ` heading, a conflict in the middle of mechanics.md, a review record that differs
+# repeats a `## ` heading or gives one heading two bodies, a conflict in the middle of mechanics.md, a review record that differs
 # beyond whitespace, an edit of the last mechanics.md line and a conflict in a TypeScript source.
 set -eu
 . "$(dirname "$0")/lib/clean_git_env.sh"
@@ -44,6 +44,8 @@ left() { # <name> <expected unmerged files>: the resolver exits 1 and leaves exa
 }
 pair dup 's/\z/\n## X\n\nx\n\n## Dup\n\nd\n/' 's/\z/\n## Dup\n\ne\n/'
 left 'a repeated heading' $m
+pair body 's/\z/\n## Same\n\nd\n/' 's/\z/\n## Same\n\ne\n/'
+left 'one heading with two bodies' $m
 pair mid 's/\n/\nmid one\n/' 's/\n/\nmid two\n/'
 left 'a conflict in the middle of mechanics.md' $m
 r=docs/reviews/zz-record.md ws=docs/reviews/zz-spaces.md
