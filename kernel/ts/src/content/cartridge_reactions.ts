@@ -122,6 +122,7 @@ export function reactions(c: Obj, { named, typedValue }: Checks): Diagnostic[] {
         named(s.fact, 'fact', `${at}.apply[${i}].fact`);
         if (s.op !== 'fact.adjust') typedValue(s.fact, s.value, `${at}.apply[${i}].value`);
         for (const f of ['npc', 'item']) if (s[f]) named(s[f], f, `${at}.apply[${i}].${f}`);
+        if (s.with) named(s.with, 'npc', `${at}.apply[${i}].with`); // row FD4
       }
     });
   }

@@ -32,30 +32,45 @@ export function scopeOf(world: World, actor: CharacterId, fact: DefinitionRef): 
 export const subjective = (world: World, fact: DefinitionRef): boolean =>
   world.cartridge.facts[refString(fact)].per_subject === true;
 
+/** Toolbox row FD4: true for an npc_pair fact, one value per ordered pair of NPCs. */
+export const paired = (world: World, fact: DefinitionRef): boolean =>
+  world.cartridge.facts[refString(fact)].npc_pair === true;
+
 /**
  * The fact MutationTarget `actor` reads and sets `fact` at: its scope (scopeOf) and, for a
- * per_subject fact, `subject` (row W2), which such a fact cannot be read or set without.
+ * per_subject fact, `subject` (row W2), and for an npc_pair fact also `partner` (row FD4), which
+ * such a fact cannot be read or set without.
  */
 export function targetOf(
   world: World,
   actor: CharacterId,
   fact: DefinitionRef,
   subject?: EntityId,
-): { kind: 'fact'; fact: DefinitionRef; scope: StateScope; subject_id?: EntityId } {
+  partner?: EntityId,
+): {
+  kind: 'fact';
+  fact: DefinitionRef;
+  scope: StateScope;
+  subject_id?: EntityId;
+  with_id?: EntityId;
+} {
   const scope = scopeOf(world, actor, fact);
   if (!subjective(world, fact)) return { kind: 'fact', fact, scope };
   if (subject === undefined) throw new KernelError('precondition_failed');
-  return { kind: 'fact', fact, scope, subject_id: subject };
+  if (!paired(world, fact)) return { kind: 'fact', fact, scope, subject_id: subject };
+  if (partner === undefined) throw new KernelError('precondition_failed');
+  return { kind: 'fact', fact, scope, subject_id: subject, with_id: partner };
 }
 
-/** The fact's value for `actor` (and `subject`): its record at targetOf, else its default. */
+/** The fact's value for `actor` (and `subject`, `partner`): its record at targetOf, else its default. */
 export function value(
   world: World,
   actor: CharacterId,
   fact: DefinitionRef,
   subject?: EntityId,
+  partner?: EntityId,
 ): FactValue {
-  const at = key(targetOf(world, actor, fact, subject));
+  const at = key(targetOf(world, actor, fact, subject, partner));
   return world.state.facts?.[at] ?? world.factDefaults[key(fact)];
 }
 
@@ -216,6 +231,7 @@ export function typedFact(
     readonly fact: DefinitionRef;
     readonly scope: { kind: string };
     readonly subject_id?: unknown;
+    readonly with_id?: unknown;
   },
   v: FactValue,
 ): boolean {
@@ -224,6 +240,7 @@ export function typedFact(
     spec !== undefined &&
     spec.scopes.includes(t.scope.kind as never) &&
     (spec.per_subject === true) === (t.subject_id !== undefined) &&
+    (spec.npc_pair === true) === (t.with_id !== undefined) &&
     typed(v, spec.value_type)
   );
 }
@@ -244,14 +261,19 @@ export const invariants: Readonly<Record<string, (world: World) => boolean>> = {
         fact: DefinitionRef;
         scope: { kind: string };
         subject_id?: string;
+        with_id?: string;
       };
       const s = t.subject_id;
-      // A subject is an NPC, item or detail (row W2); a trail fact's subject is its room (W13).
+      const npc = (id: string) => world.entities[id as EntityId]?.kind === 'npc';
+      // A subject is an NPC, item or detail (row W2); a trail fact's subject is its room (W13); a
+      // pair's two are distinct NPCs (FD4).
       const known =
         s === undefined ||
-        (trailFact(world, t.fact.key)
-          ? Object.hasOwn(world.rooms, s)
-          : Object.hasOwn(world.entities, s) || Object.hasOwn(world.details, s));
+        (t.with_id !== undefined
+          ? npc(s) && npc(t.with_id) && s !== t.with_id
+          : trailFact(world, t.fact.key)
+            ? Object.hasOwn(world.rooms, s)
+            : Object.hasOwn(world.entities, s) || Object.hasOwn(world.details, s));
       return known && typedFact(world, t, v);
     }),
 };
@@ -283,10 +305,12 @@ export function factChanged(
     .filter((o) => !same(o.expected, o.value))
     .map((o) => {
       const subject = o.subject_id === undefined ? {} : { subject_id: o.subject_id };
+      const partner = o.with_id === undefined ? {} : { with_id: o.with_id };
       const payload = {
         type: 'fact_changed',
         fact: o.fact,
         ...subject,
+        ...partner,
         old: o.expected,
         new: o.value,
       };

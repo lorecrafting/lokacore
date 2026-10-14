@@ -355,6 +355,9 @@
             "subject_id": {
               "$ref": "identity.schema.json#/$defs/EntityId"
             },
+            "with_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
             "old": {
               "$ref": "delta.schema.json#/$defs/FactValue"
             },

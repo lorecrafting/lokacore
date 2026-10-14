@@ -175,6 +175,10 @@
             "item": {
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
+            "with": {
+              "description": "Toolbox row FD4 (kernel_api at least 1.89): an npc_pair fact's second NPC, read at the pair (subject toward with).",
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
             "equals": {
               "$ref": "delta.schema.json#/$defs/FactValue"
             }

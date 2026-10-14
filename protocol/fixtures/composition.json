@@ -2318,6 +2318,88 @@
       }
     },
     {
+      "id": "fact-with-is-part-of-target",
+      "state": "base",
+      "ops": [
+        {
+          "op": "fact.assign",
+          "writer_group": 0,
+          "fact": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "fact",
+            "key": "trust"
+          },
+          "scope": {
+            "kind": "player",
+            "character_id": "a0000000-0000-4000-8000-000000000000"
+          },
+          "expected": "neutral",
+          "value": "wary",
+          "subject_id": "50000000-0000-4000-8000-000000000000",
+          "with_id": "60000000-0000-4000-8000-000000000000"
+        },
+        {
+          "op": "fact.assign",
+          "writer_group": 1,
+          "fact": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "fact",
+            "key": "trust"
+          },
+          "scope": {
+            "kind": "player",
+            "character_id": "a0000000-0000-4000-8000-000000000000"
+          },
+          "expected": "neutral",
+          "value": "wary",
+          "subject_id": "50000000-0000-4000-8000-000000000000",
+          "with_id": "70000000-0000-4000-8000-000000000000"
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "fact",
+              "fact": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "fact",
+                "key": "trust"
+              },
+              "scope": {
+                "kind": "player",
+                "character_id": "a0000000-0000-4000-8000-000000000000"
+              },
+              "subject_id": "50000000-0000-4000-8000-000000000000",
+              "with_id": "60000000-0000-4000-8000-000000000000"
+            },
+            "value": "wary"
+          },
+          {
+            "target": {
+              "kind": "fact",
+              "fact": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "fact",
+                "key": "trust"
+              },
+              "scope": {
+                "kind": "player",
+                "character_id": "a0000000-0000-4000-8000-000000000000"
+              },
+              "subject_id": "50000000-0000-4000-8000-000000000000",
+              "with_id": "70000000-0000-4000-8000-000000000000"
+            },
+            "value": "wary"
+          }
+        ]
+      }
+    },
+    {
       "id": "capacity-across-groups",
       "state": "base",
       "ops": [

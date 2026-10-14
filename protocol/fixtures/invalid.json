@@ -22855,6 +22855,30 @@
     ]
   },
   {
+    "name": "fact_spec_npc_pair_false",
+    "contract": "FactSpec",
+    "value": {
+      "key": "gloats",
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "instance"
+      ],
+      "per_subject": true,
+      "npc_pair": false,
+      "meaning": "Whether the subject NPC gloats over the with NPC."
+    },
+    "errors": [
+      {
+        "path": "/npc_pair",
+        "code": "const_mismatch"
+      }
+    ]
+  },
+  {
     "name": "shop_buy_discount_friendly_false",
     "contract": "Shop",
     "value": {
