@@ -102,7 +102,20 @@ test('the smith given the apple before the miller gloats over him, one ordered r
   assert.ok(invariant('facts_typed', w));
 });
 
-// Breaks: facts_typed admits a pair row naming a non-NPC, one NPC twice, or no with_id.
+// Breaks: the step writes a pair row when its subject is its `with` NPC (the miller given the
+// apple is both), which facts_typed then refuses.
+test('the miller given the apple gloats over no one', () => {
+  let w = newWorld(content, CONTEXT as never, [1, 2, 3, 4]);
+  const apple = id(w, 'item/apple');
+  const miller = id(w, 'npc/miller');
+  w = act(w, { type: 'take', item_id: apple });
+  w = act(w, { type: 'give', item_id: apple, recipient_id: miller });
+  assert.equal(w.state.containers[apple], miller);
+  assert.deepEqual(w.state.facts ?? {}, {});
+});
+
+// Breaks: facts_typed admits a pair row naming a non-NPC (as partner or subject), one NPC twice,
+// or no with_id.
 test('facts_typed refuses a pair row without two distinct NPCs', () => {
   const w = gift();
   const smith = id(w, 'npc/smith');
@@ -115,7 +128,8 @@ test('facts_typed refuses a pair row without two distinct NPCs', () => {
       subject_id,
       ...(with_id && { with_id }),
     } as never);
-  for (const k of [at(smith, id(w, 'item/apple')), at(smith, smith), at(miller)])
+  const apple = id(w, 'item/apple');
+  for (const k of [at(smith, apple), at(apple, miller), at(smith, smith), at(miller)])
     assert.equal(
       invariant('facts_typed', { ...w, state: { ...w.state, facts: { [k]: true } } }),
       false,

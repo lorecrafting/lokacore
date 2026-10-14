@@ -3,7 +3,6 @@
 // (State.facts, by canonical MutationTarget text, the key composition writes).
 import { KernelError } from '../foundation/error.ts';
 import { add } from '../foundation/int.ts';
-import { decode } from '../foundation/canonical.ts';
 import { key, same } from '../foundation/compose.ts';
 import type {
   CharacterId,
@@ -35,6 +34,11 @@ export const subjective = (world: World, fact: DefinitionRef): boolean =>
 /** Toolbox row FD4: true for an npc_pair fact, one value per ordered pair of NPCs. */
 export const paired = (world: World, fact: DefinitionRef): boolean =>
   world.cartridge.facts[refString(fact)].npc_pair === true;
+
+/** True when `a` and `b` are two distinct NPCs, the only two a pair fact's row names (row FD4). */
+export const npcPair = (world: World, a?: string, b?: string): boolean =>
+  a !== b &&
+  [a, b].every((id) => id !== undefined && world.entities[id as EntityId]?.kind === 'npc');
 
 /**
  * The fact MutationTarget `actor` reads and sets `fact` at: its scope (scopeOf) and, for a
@@ -219,64 +223,6 @@ export const typed = (v: FactValue, t: FactType): boolean =>
       : Number.isSafeInteger(v) &&
         (v as number) >= (t.minimum ?? -Infinity) &&
         (v as number) <= (t.maximum ?? Infinity);
-
-/**
- * True when the cartridge declares the fact at target `t` (a fact.assign or a decoded saved key),
- * allows `t`'s scope kind, `t` names a subject exactly when the fact is per_subject (row W2), and
- * `v` is of its type.
- */
-export function typedFact(
-  world: World,
-  t: {
-    readonly fact: DefinitionRef;
-    readonly scope: { kind: string };
-    readonly subject_id?: unknown;
-    readonly with_id?: unknown;
-  },
-  v: FactValue,
-): boolean {
-  const spec = world.cartridge.facts[refString(t.fact)];
-  return (
-    spec !== undefined &&
-    spec.scopes.includes(t.scope.kind as never) &&
-    (spec.per_subject === true) === (t.subject_id !== undefined) &&
-    (spec.npc_pair === true) === (t.with_id !== undefined) &&
-    typed(v, spec.value_type)
-  );
-}
-
-// Toolbox row W13: a compiler-reserved trail fact (a plan's with trail, characters' if one hunts).
-const trailFact = (world: World, k: string) =>
-  Object.values(world.cartridge.populations ?? {}).some(
-    (p) =>
-      (p.trail && (k === `trail_${p.key}_exit` || k === `trail_${p.key}_at`)) ||
-      (p.hunts && (k === 'trail_exit' || k === 'trail_at')),
-  );
-
-/** Registered invariants of facts (protocol/invariants.json), pure checks of a world. */
-export const invariants: Readonly<Record<string, (world: World) => boolean>> = {
-  facts_typed: (world) =>
-    Object.entries(world.state.facts ?? {}).every(([text, v]) => {
-      const t = decode(text) as {
-        fact: DefinitionRef;
-        scope: { kind: string };
-        subject_id?: string;
-        with_id?: string;
-      };
-      const s = t.subject_id;
-      const npc = (id: string) => world.entities[id as EntityId]?.kind === 'npc';
-      // A subject is an NPC, item or detail (row W2); a trail fact's subject is its room (W13); a
-      // pair's two are distinct NPCs (FD4).
-      const known =
-        s === undefined ||
-        (t.with_id !== undefined
-          ? npc(s) && npc(t.with_id) && s !== t.with_id
-          : trailFact(world, t.fact.key)
-            ? Object.hasOwn(world.rooms, s)
-            : Object.hasOwn(world.entities, s) || Object.hasOwn(world.details, s));
-      return known && typedFact(world, t, v);
-    }),
-};
 
 type Assign = Extract<DeltaOp, { op: 'fact.assign' }>;
 

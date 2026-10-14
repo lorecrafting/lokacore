@@ -22,7 +22,7 @@ import {
   type Mint,
   type World,
 } from '../runtime/decision.ts';
-import { bounded, durable, paired, subjective, targetOf, value } from './fact.ts';
+import { bounded, durable, npcPair, paired, subjective, targetOf, value } from './fact.ts';
 import { KernelError } from '../foundation/error.ts';
 import { holds } from './policy.ts';
 import { starts } from './scene/shared.ts';
@@ -243,10 +243,7 @@ function assignment(
   if (subjective(world, step.fact) && !thing) return undefined;
   if (durable(world, step.fact)) throw new KernelError('precondition_failed');
   const partner = step.with && world.entityIds[refString(step.with)];
-  if (paired(world, step.fact)) {
-    const npc = (id?: EntityId) => id !== undefined && world.entities[id]?.kind === 'npc';
-    if (!npc(who) || !npc(partner) || who === partner) return undefined;
-  }
+  if (paired(world, step.fact) && !npcPair(world, who, partner)) return undefined;
   const { kind: _, ...target } = targetOf(world, actor, step.fact, who, partner);
   const at = key({ kind: 'fact', ...target });
   const expected = Object.hasOwn(set, at) ? set[at] : value(world, actor, step.fact, who, partner);

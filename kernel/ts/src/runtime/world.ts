@@ -17,7 +17,7 @@ import {
   type Owned,
 } from '../contracts.gen.ts';
 import { allocator, rejected, type Mint, type Rule, type Steps, type World } from './decision.ts';
-import { invariants as factInvariants } from '../mechanics/fact.ts';
+import { invariants as factInvariants } from '../mechanics/fact_typed.ts';
 import { needsAncestry, refusal } from '../commands/actions.ts';
 import * as action_recipe from '../mechanics/action_recipe/rule.ts';
 import * as knowledge from '../mechanics/knowledge/rule.ts';
