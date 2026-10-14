@@ -51,7 +51,7 @@ defmodule Loka.Content.Trails do
           ],
           do: {name, spec.(name, "plan #{key}", "instance")}
 
-    player =
+    characters =
       if Enum.any?(plans(defs), &match?({_, _, _, %{"hunts" => true}}, &1)),
         do: [
           {"trail_exit", exit_spec("trail_exit", "a character", "instance")},
@@ -59,7 +59,7 @@ defmodule Loka.Content.Trails do
         ],
         else: []
 
-    planned ++ player
+    planned ++ characters
   end
 
   @doc "The trail fact names the engine owns (Position.engine_names)."

@@ -1,7 +1,8 @@
 // Toolbox row W13 (docs/system/mechanics.md Tracks and trails): a trail is two engine facts per
 // room, the exit a leaver last left it by and when, per_subject on the room (compiler-added:
 // trail_<plan>_exit/_at for a plan with `trail`, trail_exit/_at for characters when some plan
-// `hunts`; all instance scope: tracks are world state, so no actor picks a row). Written with fact.assign (fact_changed follows, runtime/proposal.ts);
+// `hunts`; all instance scope: tracks are world state, so no actor picks a row). Written with
+// fact.assign (fact_changed follows, runtime/proposal.ts);
 // fresh while now - at < world.trails.fresh_for, derived on read, never ticked.
 import { key } from '../foundation/compose.ts';
 import type {

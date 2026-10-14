@@ -2381,7 +2381,7 @@
         },
         "hunts": {
           "const": true,
-          "description": "Toolbox row W13 (kernel_api at least 1.85): each wander step takes the exit of the player's fresh trail in the member's room when npcPassage admits it, else wanders as before; the player then leaves trails (trail_exit, trail_at); needs world.trails."
+          "description": "Toolbox row W13 (kernel_api at least 1.85): a member in a room holding a character's body holds; else each wander step takes the exit of the characters' fresh trail in the member's room when npcPassage admits it, else wanders as before; characters then leave trails (trail_exit, trail_at, instance scope); needs world.trails."
         }
       },
       "required": [
