@@ -1,7 +1,7 @@
 defmodule Loka.Content.ScopedFacts do
   @moduledoc """
   Toolbox row W2: a per_subject (entity or pair) fact, or a subject field (npc, item, subject) on a
-  fact_compare, fact.assign or fact.adjust, needs kernel_api 1.47. Twin of the floor in
+  fact_compare, fact.assign, fact.adjust, fact.stamp or time_since, needs kernel_api 1.47. Twin of the floor in
   kernel/ts/src/content/cartridge_scoped_facts.ts; where such a fact may be named is checked by
   the loader only (FACT_SCOPE_UNSUPPORTED).
   """
@@ -27,7 +27,8 @@ defmodule Loka.Content.ScopedFacts do
   defp scoped?(_), do: false
 
   # A subject field: npc or item, and subject on a fact_compare only (as the loader's fieldsOf).
-  defp subject?(%{"op" => op} = n) when op in ~w(fact_compare fact.assign fact.adjust) do
+  defp subject?(%{"op" => op} = n)
+       when op in ~w(fact_compare fact.assign fact.adjust fact.stamp time_since) do
     fields = if op == "fact_compare", do: ~w(npc item subject), else: ~w(npc item)
     Enum.any?(fields, &is_map_key(n, &1)) or Enum.any?(Map.values(n), &subject?/1)
   end

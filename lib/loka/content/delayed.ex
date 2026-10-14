@@ -32,9 +32,10 @@ defmodule Loka.Content.Delayed do
       )
 
   defp refused({rel, %{"after" => _}, s, i}) do
-    if s["op"] in @event_bound or Map.has_key?(s, "co_present") or Map.has_key?(s, "tag"),
-      do: [diag("SCHEMA_VIOLATION", at(rel, ["apply", i, "op"]), %{"error" => "invalid_value"})],
-      else: []
+    if s["op"] in @event_bound or
+         (s["op"] == "status.apply" and (Map.has_key?(s, "co_present") or Map.has_key?(s, "tag"))),
+       do: [diag("SCHEMA_VIOLATION", at(rel, ["apply", i, "op"]), %{"error" => "invalid_value"})],
+       else: []
   end
 
   defp refused(_), do: []

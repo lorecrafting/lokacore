@@ -314,7 +314,7 @@ test('FD1: a false `when` at the due time, or a removed rule, only completes the
     key: 'none',
   };
   const fails = {
-    ...(reactions[AFTERSHOCK] ?? w.cartridge.reactions![AFTERSHOCK]!),
+    ...w.cartridge.reactions![AFTERSHOCK]!,
     apply: [{ op: 'quest.fail', quest, outcome: 'x' }],
   };
   const faulting = { ...w.cartridge.reactions, [AFTERSHOCK]: fails } as typeof reactions;

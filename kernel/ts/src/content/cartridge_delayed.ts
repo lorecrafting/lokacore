@@ -21,7 +21,10 @@ export function delayed(c: Obj): Diagnostic[] {
     used ||= r.after !== undefined;
     r.apply.forEach((s: Obj, i: number) => {
       if (s.op === 'fact.stamp') ((used = true), clock(s.fact, `${at}.apply[${i}].fact`));
-      if (r.after !== undefined && (EVENT_BOUND.includes(s.op) || s.co_present || s.tag))
+      if (
+        r.after !== undefined &&
+        (EVENT_BOUND.includes(s.op) || (s.op === 'status.apply' && (s.co_present || s.tag)))
+      )
         out.push(diag('SCHEMA_VIOLATION', `${at}.apply[${i}].op`, { error: 'invalid_value' }));
     });
   }

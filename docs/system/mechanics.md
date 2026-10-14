@@ -2890,11 +2890,11 @@ Found by [showcase plan 2](../showcase/combat-district.md) (#368); the PM brief 
   5. Scope: met; steps and the stamp write at each fact's declared scope (player facts per player); one job per delivery, no once-per-world event.
   6. Text: not applicable; no text, `speech@1` unchanged.
   7. Ownership: not applicable; `item.move` is refused on a delayed rule.
-  8. Trust: met; the job row is this authority's; a cold reopen validates the job's actor as any job row.
+  8. Trust: met; the job row is this authority's; the job invariants (both kernels) require `actor_id` on a reaction job, but no check ties it to a character row (Known limits).
   9. Instancing: not applicable; none built; the job is per actor.
 - **Opt-in.** `after`, `fact.stamp` and `time_since` need `kernel_api` 1.88 (KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least`, both kernels). Installed kernel 1.88. Chapter 1 declares none.
 - **Book.** No new element and no line.
-- **Known limits.** A delay that would end inside the same wait arrives 1 s after the wait ends: never early, possibly late (the composer refuses a job due inside the proposal's advance; PM ruling 2026-10-14). No subject is carried: fired steps reach only the actor's body and named NPCs and items. No `job.cancel` by content. `after` is per rule, not per step.
+- **Known limits.** A delay that would end inside the same wait arrives 1 s after the wait ends: never early, possibly late (the composer refuses a job due inside the proposal's advance; PM ruling 2026-10-14). No subject is carried: fired steps reach only the actor's body and named NPCs and items. No `job.cancel` by content. `after` is per rule, not per step. A reaction job's `actor_id` is not checked against the character rows on reopen.
 - **Traps.** No RNG; one bounded job per delivery; the stamp is an existing fact write.
 - **Sampler.** `cartridges/raid_sampler` adds the instance int fact `raided_at` (default 0) stamped by `raid`, and the rule `aftershock` (`fact_changed {raided}`, `after` 600, `when` `fact_compare {raided equals true}`, `apply [fact.adjust {aftershocks 1}]`) with its instance int fact `aftershocks` (0 to 100). A raid at 1000 inside a wait to 1900 schedules `aftershock` at 1901 (not 1600: never inside the wait); a wait to 1900 then to 2000 leaves `aftershocks` 1 from 1901. A `time_since {raided_at, at_least 600}` reads false at 1599 and true at 1600 after a stamp at 1000; on a fresh world it is true from 600. A real-SQLite save closed with the job pending cold-reopens and fires it once (`mobile/authority/local-story/raid_aftermath.test.ts`).
 - **Composition record** ([architecture](architecture.md#building-mechanics-by-composition)).
