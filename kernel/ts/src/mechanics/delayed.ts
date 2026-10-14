@@ -11,7 +11,8 @@ import { KernelError } from '../foundation/error.ts';
 import { accepted, refString, type Decision, type Mint, type World } from '../runtime/decision.ts';
 import { sequence } from './reaction.ts';
 
-/** The advance's writer group of each row written so far (proposal.ts holders) and this run's. */
+/** The advance's writer group of each row written so far (proposal.ts holders) and its latest
+ * group; the run takes the next one. */
 export type Joins = { holders: Map<string, number>; group: number };
 
 /** The job completes; then its rule runs for the stored actor at the due time, as a delivery whose
@@ -25,8 +26,9 @@ export function runDelayed(
   row: { job: DefinitionRef; actor_id?: CharacterId; due_time: number },
   mint: Mint,
   steps: { n: number },
-  { holders, group }: Joins = { holders: new Map(), group: 0 },
+  { holders, group: last }: Joins = { holders: new Map(), group: -1 },
 ): Decision<never> {
+  const group = last + 1;
   const done: DeltaOp = { op: 'job.complete', writer_group: group, job_id };
   const rule = world.cartridge.reactions?.[refString(row.job)];
   // A stand-in cause: no subject field (custom_event names none), the job's time.

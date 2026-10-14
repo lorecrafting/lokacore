@@ -281,13 +281,7 @@ function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined
       payload: { type: 'run_job', job_id: job_id as JobId },
     } as const;
     const m = allocator(at, run);
-    const ran = admit(
-      'schedule',
-      schedule.decideAt(at, run, m, undefined, due_time, tick, {
-        holders: p.holders,
-        group: p.group + 1,
-      }),
-    );
+    const ran = admit('schedule', schedule.decideAt(at, run, m, undefined, due_time, tick, p));
     if (ran.kind !== 'accepted') return ran;
     if ((p.limit = queueHour(due, job_id, ran))) return BUDGET;
     p.rng = ran.rng;
