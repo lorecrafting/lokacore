@@ -31,3 +31,12 @@
 
 1. should-fix, `kernel/ts/src/mechanics/fact.ts:251-254`: a trail fact naming an NPC or item still passes. Probe: the real `trail_hounds_exit` row with subject swapped to a hound member: `holds('facts_typed')` = true. Spec says trail facts take "the room left as subject" and "Missing invariant: none (facts_typed covers the rows)". Failure: a regression that writes the mover id as subject keeps the invariant green; only the row assertions in `tracks.test.ts` catch it. The spec's "facts_typed covers the rows" claim is not backed by the run. Fix (one line, fix round): for a trail key, require a room subject; add the NPC-subject case to `tracks.test.ts:276`.
 2. nit: no PR body yet, so no reported `/code-review medium` result (Beads notes say it ran). Report it on the batch PR.
+
+## Fix round 1 recheck (head `144d0fa64d9b105e728815bd5c7586160691439f`)
+
+Scope: `144d0fa6` (`fact.ts`, `tracks.test.ts`), the `lockStage` dispute and one self-review question. Verdict: **APPROVE**.
+
+- Finding 1 resolved. `kernel/ts/src/mechanics/fact.ts:252-254`: a trail key now admits only a room; other keys admit only an entity or detail. `tracks.test.ts:303-304` swaps the subject to a hound member and expects false. `node --test test/tracks.test.ts` is green at head. Mutants, each red on that test only: M1 (room admitted for any fact) and M4 (trail key also admits an entity, the pre-fix behaviour).
+- Finding 2 (no `/code-review` report) stays open for the batch PR body.
+- `lockStage` dispute (`kernel/ts/src/content/cartridge.ts:221`): the developer is right, keep the reformat. With the old loop restored, `bin/check_ts_size.mjs` exits 1 (`cartridge.ts` 302/300 lines, `lockStage` 41/40). At head it exits 0. Close the main review's nit.
+- `fresh()` lower bound (`trail.ts:46`): no path found, so no lower bound is needed. A character trail is written only by a player move, at `world.state.clock` before that root's `time.advance` (`movement/sequence.ts:54`). Jobs run only inside an advance, due in `(clock, to]` and sorted by due time (`runtime/proposal.ts:309-310`). So a hunt's `job.due_time` (`settle.ts:186`) is never earlier than a character trail's `at`. Plan trails come from jobs in the same due-time order. Even if a negative age did occur, the hunter would only follow a just-laid trail. Neither seam would see it, because the runtime is TypeScript only.

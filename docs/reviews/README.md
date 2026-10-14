@@ -12,7 +12,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 
 - [Review: two shops save fix, save second opinion (loka-kgd.149)](2026-10-14-m12-two-shops-second-opinion.md): **APPROVE**
 - [Review: two shops make cold reopen save_corrupt (loka-kgd.149)](2026-10-14-m12-two-shops-review.md): **APPROVE**
-- [Review: W13 tracks and trails, invariant and portable contracts, second opinion](2026-10-14-m12-tracks-second-opinion.md): **APPROVE WITH NOTES**
+- [Review: W13 tracks and trails, invariant and portable contracts, second opinion](2026-10-14-m12-tracks-second-opinion.md): **APPROVE**
 - [Review: m12 tracks and trails (toolbox row W13), main review](2026-10-14-m12-tracks-review.md): **APPROVE WITH NOTES**
 - [Review: toolbox row 37a, phased world event spawn (loka-kgd.131)](2026-10-13-m12-raid-review.md): **APPROVE WITH NOTES**
 - [Review: m11 property and bank (rows 24/25) mobile save, second opinion](2026-10-13-m11-property-second-opinion.md): **APPROVE WITH NOTES**
