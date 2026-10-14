@@ -1,4 +1,4 @@
-// size: allow 540, the raid sampler (row 37a) and its delayed reactions (row FD1) share one compiled world
+// size: allow 555, the raid sampler (row 37a) and its delayed reactions (row FD1) share one compiled world
 // Toolbox row 37a on the compiled raid sampler (mechanics.md "Phased world events"): the lunar
 // cycle is 2000 units, new at 0, full at 1000; the `raid` rule spawns one `raiders` bundle (cap 2,
 // targets 0, wander every hour) at the first full-moon clock_hour while `raided` is false, and
@@ -294,6 +294,24 @@ test('FD1: two delayed rules on one fact both apply, in hourly waits or one wait
         [2, ['completed', 'completed']],
       );
   }
+});
+
+// Breaks: the delayed run's fact rows miss the advance's holder map (proposal.ts jobs() call site),
+// so a reaction to its write takes a fresh group on the same row (conflicting_write).
+test('FD1: a reaction to a delayed write adds to the same fact in one advance', () => {
+  const echo = (c: any) => {
+    const { after: _, ...rule } = c.reactions[AFTERSHOCK];
+    const fact = rule.apply[0].fact; // aftershocks
+    c.reactions['raid_sampler@0.0.1:reaction/echo'] = {
+      ...rule,
+      key: 'echo',
+      on: { event: 'fact_changed', fact },
+      when: { policy_version: 1, root: { op: 'fact_compare', fact, equals: 1 } },
+    };
+  };
+  const at1000 = elapsed(world(echo), 1000);
+  for (const w of [elapsed(at1000, 1800), elapsed(at1000, 1800, [], 100000)])
+    assert.deepEqual([fact(w, 'aftershocks'), statuses(w)], [2, [[1600, 'completed']]]);
 });
 
 // Breaks: two delayed experience.grant jobs for one actor in one advance take separate writer groups
