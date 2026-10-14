@@ -1,6 +1,8 @@
 // A job's next step inside the advance as its own drain step (runtime/proposal.ts jobs; `next` is
 // set by schedule/rule.ts scheduledJob, population/shared.ts runPopulation and status/job.ts runStatus).
-import { over } from '../foundation/compose.ts';
+import { key, over, target } from '../foundation/compose.ts';
+import type { DeltaOp } from '../contracts.gen.ts';
+import { merge } from '../mechanics/status/job.ts';
 import { cmp } from '../foundation/validate.ts';
 
 // A drain entry; a crossed status sub-step carries its true next tick (status/job.ts runStatus).
@@ -24,4 +26,27 @@ export function enqueue(due: Due, job_id: string, due_time: number, tick?: numbe
   );
   due.splice(k < 0 ? due.length : k, 0, [job_id, { due_time, tick }]);
   return over({ due_jobs_per_advance: due.length });
+}
+
+// A job a run scheduled inside the advance runs at its own due time, as in steps (loka-kgd.152).
+export function queueScheduled(due: Due, ops: readonly DeltaOp[], to: number) {
+  for (const o of ops)
+    if (o.op === 'job.schedule' && o.due_time <= to) {
+      const limit = enqueue(due, o.job_id, o.due_time);
+      if (limit) return limit;
+    }
+}
+
+// A run writing a target that a run of strictly earlier due time wrote (`earlier`) joins that
+// run's writer group, as steps commit them in order (loka-kgd.151).
+export function joinEarlier(
+  all: DeltaOp[],
+  earlier: readonly DeltaOp[],
+  own: readonly DeltaOp[],
+  group: number,
+  maps: Map<string, number>[],
+) {
+  const mine = new Set(own.map((o) => key(target(o))));
+  const groups = earlier.filter((o) => o.writer_group !== group && mine.has(key(target(o))));
+  merge(all, new Set(groups.map((o) => o.writer_group)), group, maps);
 }

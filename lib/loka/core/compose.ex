@@ -28,41 +28,41 @@ defmodule Loka.Core.Compose do
   defp apply_all(state, ops, final) do
     horizon = Enum.reduce(ops, state["clock"], &advance_target/2)
 
-    steps = Enum.zip([ops, Enum.drop(ops, 1) ++ [nil], job_times(state, ops, horizon)])
+    at = if final, do: horizon, else: state["clock"]
+    steps = Enum.zip([ops, Enum.drop(ops, 1) ++ [nil], job_times(state, ops, at)])
 
     case Enum.reduce_while(steps, %{}, &step_pair(&1, &2, {state, horizon})) do
       %{"fault" => _} = f ->
         f
 
       overlay ->
-        finish(overlay, if(final, do: due_unrun(overlay, horizon)))
+        case {ComposeChoice.pending_at_limit(overlay), final && due_unrun(overlay, horizon)} do
+          {nil, unrun} when unrun in [nil, false] ->
+            %{"changes" => overlay |> Enum.sort() |> Enum.map(&row/1)}
+
+          {nil, t} ->
+            fault("nonfuture_job", t)
+
+          {t, _} ->
+            fault("precondition_failed", t)
+        end
     end
   end
 
-  defp finish(overlay, unrun) do
-    case {ComposeChoice.pending_at_limit(overlay), unrun} do
-      {nil, nil} -> %{"changes" => overlay |> Enum.sort() |> Enum.map(&row/1)}
-      {nil, t} -> fault("nonfuture_job", t)
-      {t, _} -> fault("precondition_failed", t)
-    end
-  end
-
-  # Each op's scheduling time: the due time of the last job.complete before it, else the target.
-  defp job_times(state, ops, horizon) do
+  # Each op's scheduling time: the due time of the last job.complete before it, else `at`
+  # (the target; a partial compose: the clock).
+  defp job_times(state, ops, at) do
     due = Map.new(section(state, "jobs"), fn {id, j} -> {id, j["due_time"]} end)
 
-    {times, _} =
-      Enum.map_reduce(ops, {horizon, due}, fn op, {at, due} ->
-        due =
-          if op["op"] == "job.schedule",
-            do: Map.put_new(due, op["job_id"], op["due_time"]),
-            else: due
+    Enum.scan(ops, {at, due}, fn op, {at, due} ->
+      due =
+        if op["op"] == "job.schedule",
+          do: Map.put_new(due, op["job_id"], op["due_time"]),
+          else: due
 
-        at = if op["op"] == "job.complete", do: Map.get(due, op["job_id"], at), else: at
-        {at, {at, due}}
-      end)
-
-    times
+      {if(op["op"] == "job.complete", do: Map.get(due, op["job_id"], at), else: at), due}
+    end)
+    |> Enum.map(&elem(&1, 0))
   end
 
   # Only job.schedule writes a pending row: one due by the target must have run in this advance.

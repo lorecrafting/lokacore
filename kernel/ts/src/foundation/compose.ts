@@ -16,7 +16,7 @@ import {
 } from './compose_population.ts';
 import { packMemberRemains, packMemberInitiallyPresent } from './compose_pack.ts';
 import { openEncounter, changeEncounter } from './compose_encounter.ts';
-import { composeJob } from './compose_job.ts';
+import { composeJob, unrunJob } from './compose_job.ts';
 import { target } from './compose_target.ts';
 import { completeBirths, creationValid, initialPair, initialPlacement } from './creation.ts';
 import { sightHandoffValid } from './compose_sight.ts';
@@ -55,8 +55,6 @@ export function compose(state: State, delta: StateDelta, final = true): Result {
   if (over(counts(state, ops))) return { fault: { kind: 'fault', code: 'budget_exceeded' } };
   let horizon = state.clock;
   for (const op of ops) if (op.op === 'time.advance') horizon = op.to;
-  // A partial compose (proposal.ts now()) may hold a reaction's schedule without its job's
-  // job.complete, so it only checks against the clock; the final compose checks the job's time.
   const ctx: Ctx = { state, horizon, at: final ? horizon : state.clock, overlay: new Map() };
   for (const [index, op] of ops.entries()) {
     const t = target(op);
@@ -70,20 +68,14 @@ export function compose(state: State, delta: StateDelta, final = true): Result {
       !sightRebindValid(state, ops, index, prior.group)
     )
       return fault('conflicting_write', t);
-    const before = read(t, ctx);
-    if (op.op === 'job.complete') ctx.at = get(before as Obj, 'due_time') as number;
-    const out = apply(op, before, ctx);
+    const out = apply(op, read(t, ctx), ctx);
     if ('code' in out) return fault(out.code, t);
     ctx.overlay.set(k, { group: op.writer_group, target: t, value: out.value });
   }
   for (const w of ctx.overlay.values())
     if (w.target.kind === 'choice' && pendingAtLimit(w.value))
       return fault('precondition_failed', w.target);
-  // Only job.schedule writes a pending row: one due by the target must have run in this advance.
-  for (const w of ctx.overlay.values())
-    if (final && w.target.kind === 'job' && get(w.value as Obj, 'status') === 'pending')
-      if ((get(w.value as Obj, 'due_time') as number) <= horizon)
-        return fault('nonfuture_job', w.target);
+    else if (final && unrunJob(w, horizon)) return fault('nonfuture_job', w.target);
   if (final && (!completeBirths(ops, state) || !sightHandoffValid(state, ops)))
     return fault('precondition_failed', { kind: 'clock' });
   const rows = [...ctx.overlay].sort(([a], [b]) => (a < b ? -1 : 1));
@@ -142,7 +134,7 @@ function apply(op: DeltaOp, row: Json | undefined, ctx: Ctx): Outcome {
     case 'job.schedule':
     case 'job.complete':
     case 'job.cancel':
-      return composeJob(op, row, ctx.horizon, ctx.at);
+      return composeJob(op, row, ctx);
     case 'encounter.open':
     case 'encounter.advance':
     case 'encounter.close':

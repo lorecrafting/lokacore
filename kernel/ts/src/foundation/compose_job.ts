@@ -1,21 +1,27 @@
 // Job row admission and binding checks for the composer.
-import type { DeltaOp, ErrorCode } from '../contracts.gen.ts';
+import type { DeltaOp, ErrorCode, MutationTarget } from '../contracts.gen.ts';
 import type { Json } from './canonical.ts';
 
 type Row = { [key: string]: Json };
 type Outcome = { value: Json } | { code: ErrorCode };
 const failed: Outcome = { code: 'precondition_failed' };
 
+// Only job.schedule writes a pending row: one due by the target must have run in this advance.
+export const unrunJob = (w: { target: MutationTarget; value: Json }, horizon: number) =>
+  w.target.kind === 'job' &&
+  (w.value as Row).status === 'pending' &&
+  ((w.value as Row).due_time as number) <= horizon;
+
+// ctx.at: the due time of the last job.complete, else the target (a partial compose: the clock).
 export function composeJob(
   op: DeltaOp & { op: `job.${string}` },
   value: Json | undefined,
-  horizon: number,
-  at = horizon,
+  ctx: { horizon: number; at: number },
 ): Outcome {
   const row = value as Row | undefined;
   if (op.op === 'job.schedule') {
     if (row !== undefined) return failed;
-    if (op.due_time <= at) return { code: 'nonfuture_job' };
+    if (op.due_time <= ctx.at) return { code: 'nonfuture_job' };
     if (!bindingValid(op)) return failed;
     return { value: pendingJob(op) };
   }
@@ -43,7 +49,9 @@ export function composeJob(
     )
       ? { value: { ...row, status: 'cancelled' } }
       : failed;
-  return (row.due_time as number) <= horizon ? { value: { ...row, status: 'completed' } } : failed;
+  if ((row.due_time as number) > ctx.horizon) return failed;
+  ctx.at = row.due_time as number;
+  return { value: { ...row, status: 'completed' } };
 }
 
 function bindingValid(op: Extract<DeltaOp, { op: 'job.schedule' }>) {

@@ -143,9 +143,8 @@ test('pending sight and confirmed flight cold-reopen with conserved deer custody
 });
 
 // Breaks: a reaction spawn into a sighted plan, the player in its home, binds a sight that the
-// save cannot explain, so the cold reopen is save_corrupt (review 2026-10-13, row 37a); or a
-// job writing a row an earlier-due job of the same advance wrote keeps its own writer group
-// (one advance faults conflicting_write where three steps pass, loka-kgd.151).
+// save cannot explain, so the cold reopen is save_corrupt (review 2026-10-13, row 37a); or one
+// advance faults conflicting_write where three steps pass (loka-kgd.151).
 test('reaction spawn into a sighted plan with the player home cold-reopens', (t) => {
   const c = JSON.parse(bundle.canonical);
   const [cartridge_id, cartridge_version] = [content.manifest.id, content.manifest.version];
@@ -166,24 +165,16 @@ test('reaction spawn into a sighted plan with the player home cold-reopens', (t)
   assert.ok(loaded.ok, JSON.stringify(loaded));
   const fresh = newWorld(loaded.cartridge as never, initial().context, [1, 2, 3, 4]);
   const release = { fresh, content_hash: sha256 };
-  const waited = (spans: number[][]) => {
+  const waited = (stops: number[]) => {
     const run = setup(t, undefined, release);
-    for (const [i, direction] of ['south', 'south', 'west'].entries())
-      move(run.story, direction, i + 1);
-    for (const [from, until] of spans) {
-      const advanced = run.story.elapsed({ expected_run_id: run.story.runId(), from, until });
-      assert.equal(advanced.kind, 'saved', `${from} ${JSON.stringify(advanced)}`);
-    }
+    for (const [i, d] of ['south', 'south', 'west'].entries()) move(run.story, d, i + 1);
+    for (const [k, until] of stops.slice(1).entries())
+      run.story.elapsed({ expected_run_id: run.story.runId(), from: stops[k]!, until });
     return run;
   };
-  // One 64800-68400 advance faulted conflicting_write: the slot job (65100) and the plan job
-  // (68400) both move one deer in separate writer groups (loka-kgd.151).
-  const { path, p, story } = waited([[64800, 68400]]);
-  const split = waited([
-    [64800, 65100],
-    [65100, 68300],
-    [68300, 68400],
-  ]).story.world().state;
+  const { path, p, story } = waited([64800, 68400]); // slot job 65100 and plan job 68400 move one deer
+  const split = waited([64800, 65100, 68300, 68400]).story.world().state;
+  assert.equal(split.clock, 68400);
   assert.equal(encode(story.world().state as never), encode(split as never));
   const home = story.world().roomIds[ref('room', 'willow_shade')];
   assert.equal(story.world().state.containers[story.world().body], home);
