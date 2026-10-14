@@ -19504,6 +19504,26 @@
     ]
   },
   {
+    "name": "resource_compare_percent_string",
+    "contract": "Policy",
+    "value": {
+      "op": "resource_compare",
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "hp"
+      },
+      "at_least_percent": "60"
+    },
+    "errors": [
+      {
+        "path": "/at_least_percent",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
     "name": "resource_compare_both_thresholds",
     "contract": "Policy",
     "value": {

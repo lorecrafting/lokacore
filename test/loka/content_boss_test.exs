@@ -28,6 +28,7 @@ defmodule Loka.ContentBossTest do
                else: l |> Map.delete("at_least_percent") |> Map.put("at_least", 1)
            end)
            |> update_in(["on"], &if(keep == :target, do: &1, else: Map.delete(&1, "target")))
+           |> strip_alive(rule, keep)
          end}
       end
     end
@@ -39,4 +40,10 @@ defmodule Loka.ContentBossTest do
       assert api in Enum.map(diags, &{&1["code"], &1["path"]}), inspect({keep, diags})
     end
   end
+
+  # The summon's alive leaf (hp at least 1) also names the subject.
+  defp strip_alive(r, "summon", keep) when keep != :subject,
+    do: update_in(r, ["when", "root", "items", Access.at(1)], &Map.delete(&1, "subject"))
+
+  defp strip_alive(r, _rule, _keep), do: r
 end

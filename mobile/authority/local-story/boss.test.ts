@@ -52,15 +52,17 @@ test('a mid-fight save after the summon and the withdraw reopens cold and fights
     p.sql.close();
     rmSync(saves, { recursive: true, force: true });
   });
-  const reopen = () => {
-    p.sql.close();
-    p = elapsedHost(path, undefined, bundle);
+  const opened = () => {
     const s = openStory(p.db, releases, p.host);
     if (s.kind !== 'open') throw new Error(s.kind);
     return s;
   };
-  let story = openStory(p.db, releases, p.host);
-  if (story.kind !== 'open') throw new Error(story.kind);
+  const reopen = () => {
+    p.sql.close();
+    p = elapsedHost(path, undefined, bundle);
+    return opened();
+  };
+  let story = opened();
   const attack = story.invoke({
     invocation_id: 'dddddddd-9999-4999-8999-000000000001',
     actor_id: initial.character,
@@ -72,16 +74,15 @@ test('a mid-fight save after the summon and the withdraw reopens cold and fights
   const until = (to: number) => {
     const from = story.world().state.clock;
     const r = story.elapsed({ expected_run_id: story.runId(), from, until: to });
-    if (r.kind !== 'saved') console.log(JSON.stringify(r).slice(0, 1500));
     return r.kind;
   };
   for (const to of [1350, 2300]) {
     for (let at = story.world().state.clock + 150; at < to; at += 150)
       assert.equal(until(at), 'saved', `at ${at}`);
     assert.equal(until(to), 'saved');
-    const saved = encode(story.world().state);
+    const saved = encode(story.world().state as never);
     story = reopen();
-    assert.equal(encode(story.world().state), saved, `reopened at ${to}`);
+    assert.equal(encode(story.world().state as never), saved, `reopened at ${to}`);
   }
   assert.equal(until(2450), 'saved');
 });
