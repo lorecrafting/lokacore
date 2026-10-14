@@ -50,13 +50,12 @@ function world(edit?: (c: any) => void) {
   );
 }
 let n = 0;
-// ponytail: one elapsed run spanning more than one combat round faults nonfuture_job (pre-existing,
-// reproduces with no reactions); advance in steps of 50 until that bug is fixed.
-function elapsed(w: World, until: number): World {
+// One elapsed run to `until`, or runs ending at each multiple of `stride` (loka-kgd.152).
+function elapsed(w: World, until: number, stride = until, log?: string[]): World {
   while (w.state.clock < until) {
     const run_id = `aaaaaaaa-0000-4000-8000-${String(++n).padStart(12, '0')}` as never;
     const from = w.state.clock;
-    const to = Math.min(until, from - (from % 50) + 50);
+    const to = Math.min(until, from - (from % stride) + stride);
     const r = stepElapsed(
       w,
       {
@@ -67,6 +66,8 @@ function elapsed(w: World, until: number): World {
       n,
     );
     assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
+    if (r.decision.kind === 'accepted')
+      log?.push(...r.decision.events.map((e: any) => `${e.logical_time} ${e.payload.type}`));
     w = r.world;
   }
   return w;
@@ -199,4 +200,38 @@ test('a subject without the pool reads false', () => {
     items[0].at_least_percent = 1;
   });
   assert.deepEqual([hp(w), guards(w).length, fact(w, 'summoned')], [19, 0, false]);
+});
+
+// Breaks (loka-kgd.152): the drain reads its due list once (the round due at 300, scheduled by the
+// round at 150, never runs: nonfuture_job), or a job scheduled inside the wait runs at the wait's
+// end. Steps of 50 cross at most one round each; 20 hp less one per round, the summon at 12 (60%)
+// after the round at 1200.
+test('one wait through nine rounds equals the same wait in steps of 50', () => {
+  const w = world();
+  const a = act(w, { type: 'attack', target_id: boss(w) });
+  const [oneLog, stepLog]: string[][] = [[], []];
+  const [one, steps] = [elapsed(a, 1350, 1350, oneLog), elapsed(a, 1350, 50, stepLog)];
+  const rounds = [150, 300, 450, 600, 750, 900, 1050, 1200, 1350];
+  const hits = rounds.flatMap((t) => [`${t} attack_result`, `${t} attack_result`]);
+  hits.splice(16, 0, '1200 fact_changed');
+  assert.deepEqual([oneLog, stepLog], [hits, hits]);
+  // Hourly jobs differ by design: one wait runs them as sub-steps of one row (proposal_hours.ts).
+  const rows = (v: World, pick: (enc: boolean, status: string) => boolean) =>
+    Object.values(v.state.jobs!)
+      .filter((j) => pick(!!j.encounter_id, j.status))
+      .sort((x, y) => x.due_time - y.due_time || x.job.key.localeCompare(y.job.key))
+      .map((j) => `${j.due_time} ${j.status} ${j.job.key}${j.encounter_id ? ' round' : ''}`);
+  for (const v of [one, steps]) {
+    assert.deepEqual(
+      rows(v, (enc) => enc),
+      [...rounds.map((t) => `${t} completed warlord round`), '1500 pending warlord round'],
+    );
+    assert.deepEqual(
+      rows(v, (_, s) => s === 'pending'),
+      ['1400 pending guards', '1400 pending warlord', '1500 pending warlord round'],
+    );
+  }
+  const rest = (v: World) => encode({ ...v.state, jobs: null, population_plans: null } as never);
+  assert.equal(rest(one), rest(steps));
+  assert.deepEqual([hp(one), guards(one).length], [11, 1]);
 });

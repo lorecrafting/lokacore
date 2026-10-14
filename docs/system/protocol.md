@@ -92,7 +92,10 @@ storage half):
    `when` holds (its write to a status holder or fact row an earlier reaction of the advance wrote
    joins that reaction's group, [mechanics.md](mechanics.md)) (`mechanics/reaction.ts:25`, `:44`), to quiescence; then, when the root advanced time,
    each due pending job runs as a `run_job` in `(due_time, job_id)` order with its reactions
-   (`runtime/proposal.ts:253`). Deliveries, reaction depth and query steps are counted as they go.
+   (`runtime/proposal.ts:264`); a job a run schedules due by the target joins that order and runs
+   in the same advance, and a run writing a target that a run of strictly earlier due time wrote
+   joins that run's writer group (equal-due writes still fault `conflicting_write`), so one long
+   wait equals the same wait in steps (loka-kgd.152, .151). Deliveries, reaction depth and query steps are counted as they go.
 7. **Adopt** (`runtime/proposal.ts:42`): a `fact.assign` outside its FactSpec faults
    `precondition_failed`; the whole proposal is checked against the budgets (`:60`); the delta
    composes (`foundation/compose.ts:82`) and the written rows, the RNG and each new continuation's
@@ -126,7 +129,7 @@ faults `conflicting_write` (`:104`), no last-writer-wins. Ops and preconditions:
 | `quest.activate` | quest instance | new id; no open instance of that quest at that scope |
 | `quest.transition` | quest instance | `from` is the state; legal (`:24`): active→objectives_complete/failed/abandoned, objectives_complete→resolved/failed/abandoned, failed/abandoned→active; `resolved` needs an outcome |
 | `choice.open` / `resolve` / `close` | continuation | open: new id; resolve: pending, offers `choice_id`, `opened_revision` equals `expected_revision` (`:215`); close: pending |
-| `job.schedule` / `job.complete` | job | schedule: new id, `due_time` later than the advance's target (`nonfuture_job`, `:169`); complete: pending and due by the target |
+| `job.schedule` / `job.complete` | job | schedule: new id, `due_time` later than the due time of the job whose run schedules it, else than the advance's target (`nonfuture_job`, `foundation/compose_job.ts:18`); a job scheduled due by the target completes in the same advance, else `nonfuture_job` (`compose.ts:84`); complete: pending and due by the target |
 | `time.advance` | clock | `from` is the clock, `to` later |
 | `resource.adjust` | resource of an entity | `from` is the current (regenerated) value; `to` within the spec's bounds |
 | `cooldown.start` | actor's action | `from` is the stored start; `at` is the clock |

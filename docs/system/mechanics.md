@@ -670,7 +670,12 @@ an earlier reaction of the same advance wrote joins that write's writer group, s
 on two sub-steps of one wait, or for two NPCs in one advance, writes the row in order
 (`mechanics/reaction.ts` assignment, loka-j2mo). Every drain step counts toward
 `due_jobs_per_advance`, and a wait crossing more steps faults `budget_exceeded`; while hours are
-crossed, the count also includes due jobs the drain skips, so that fault can come early. One unit of
+crossed, the count also includes due jobs the drain skips, so that fault can come early. A job a
+drain step schedules due by the target runs in the same advance at its own due time, as steps would
+run it (`runtime/proposal.ts` jobs, loka-kgd.152). _Known limit:_ each such job counts toward
+`created_jobs` (64 per proposal), so one wait through a fight of more than about 64 rounds faults
+`budget_exceeded` where shorter waits pass; the host ends each elapsed step at the next pending job
+(`mobile/authority/local-story/elapsed.ts` boundary), so an offline catch-up stays under it. One unit of
 logical time is defined by the cartridge calendar: positive exact units per hour, hours per day
 and displayed subdivisions per hour. Time 0 begins day 1 at midnight. Daily schedules and
 policy leaf `time_window {from, to}` use calendar hours, including half-open windows that wrap

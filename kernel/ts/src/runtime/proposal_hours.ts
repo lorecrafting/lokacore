@@ -14,10 +14,14 @@ export type Due = [string, { due_time: number; tick?: number }][];
  */
 export function queueHour(due: Due, job_id: string, ran: object) {
   const { next, tick } = ran as { next?: number; tick?: number };
-  if (next === undefined) return;
+  if (next !== undefined) return enqueue(due, job_id, next, tick);
+}
+
+// Inserts a drain step in (due_time, job_id) order; the limit if the drain outgrows due_jobs_per_advance.
+export function enqueue(due: Due, job_id: string, due_time: number, tick?: number) {
   const k = due.findIndex(
-    ([id, j]) => j.due_time > next || (j.due_time === next && cmp(id, job_id) > 0),
+    ([id, j]) => j.due_time > due_time || (j.due_time === due_time && cmp(id, job_id) > 0),
   );
-  due.splice(k < 0 ? due.length : k, 0, [job_id, { due_time: next, tick }]);
+  due.splice(k < 0 ? due.length : k, 0, [job_id, { due_time, tick }]);
   return over({ due_jobs_per_advance: due.length });
 }

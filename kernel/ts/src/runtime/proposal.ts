@@ -4,7 +4,7 @@ import { vary } from '../mechanics/variety.ts';
 // Proposal admission, FIFO composition and adoption (04 §5.1-§5.4); runtime/world.ts routes commands here.
 import { populationDeadlinePairs } from './proposal_deadlines.ts';
 import { apply } from './apply.ts';
-import { over, type Limit } from '../foundation/compose.ts';
+import { over, key, target, type Limit } from '../foundation/compose.ts';
 import {
   type CommandId,
   type DeltaOp,
@@ -23,7 +23,7 @@ import * as schedule from '../mechanics/schedule/rule.ts';
 import { cmp } from '../foundation/validate.ts';
 import { currentRound } from '../mechanics/combat/round.ts';
 import { handoffGroup, sightHandoff } from './proposal_sight.ts';
-import { queueHour, type Due } from './proposal_hours.ts';
+import { enqueue, queueHour, type Due } from './proposal_hours.ts';
 import { merge, statusGroup } from '../mechanics/status/job.ts';
 import { anyPending as pending, parted } from '../mechanics/dialogue/selection.ts';
 import { admit, type Admitted } from './proposal_admit.ts';
@@ -265,6 +265,9 @@ function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined
   const { due, to } = dueJobs(p.world, root);
   const populationPairs = populationDeadlinePairs(p.world, to);
   const groups = new Map<string, number>();
+  const start = p.ops.length;
+  let cut = start;
+  let last = -1;
   for (const [job_id, { due_time, tick }] of due) {
     const at = now(p);
     if (!('cartridge' in at)) return at;
@@ -294,10 +297,21 @@ function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined
     const group = joined?.group ?? fresh;
     groups.set(job_id, group);
     const handoff = sightHandoff(p.world, p.ops, at, job_id as JobId, due_time, ran.delta.ops);
+    if (due_time !== last) [cut, last] = [p.ops.length, due_time]; // only strictly earlier jobs
+    const mine = new Set(ran.delta.ops.map((o) => key(target(o))));
+    const earlier = p.ops
+      .slice(start, cut)
+      .filter((o) => o.writer_group !== group && mine.has(key(target(o))));
+    merge(p.ops, new Set(earlier.map((o) => o.writer_group)), group, [p.holders, groups]);
+    const mark = p.ops.length;
     const own = ran.delta.ops.map((o) => ({ ...o, writer_group: handoffGroup(o, handoff, group) }));
     p.group++;
     const failed = join(p, own, ran.events, cause(p, due_time, run.id), 0, m) ?? react(p);
     if (failed) return failed;
+    // A job this run scheduled inside the advance runs at its own due time, as in steps.
+    for (const o of p.ops.slice(mark))
+      if (o.op === 'job.schedule' && o.due_time <= to)
+        if ((p.limit = enqueue(due, o.job_id, o.due_time))) return BUDGET;
   }
 }
 

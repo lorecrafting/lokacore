@@ -12,6 +12,7 @@ export function encountersHold(state: Any, ops: Any[], result: Any): boolean {
   const preceding: Any[] = [];
   let horizon = state.clock;
   for (const op of ops) if (op.op === 'time.advance') horizon = op.to;
+  let at = horizon; // a job's run schedules later than its own due time
   for (const op of ops) {
     if (op.op === 'entity.transfer') containers.set(op.entity_id, op.destination_id);
     if (op.op === 'population.slot')
@@ -26,7 +27,8 @@ export function encountersHold(state: Any, ops: Any[], result: Any): boolean {
       });
     }
     if (op.op.startsWith('job.')) {
-      const row = job(op, jobs.get(op.job_id), horizon);
+      if (op.op === 'job.complete') at = jobs.get(op.job_id)?.due_time ?? at;
+      const row = job(op, jobs.get(op.job_id), horizon, at);
       if (!row) return false;
       jobs.set(op.job_id, row);
       written.set(`job:${op.job_id}`, { target: { kind: 'job', job_id: op.job_id }, value: row });
@@ -147,9 +149,9 @@ function participants(op: Any, containers: Map<string, Any>, known: Any): boolea
   );
 }
 
-function job(op: Any, row: Any, horizon: number): Any {
+function job(op: Any, row: Any, horizon: number, at: number): Any {
   if (op.op === 'job.schedule') {
-    if (row !== undefined || op.due_time <= horizon) return undefined;
+    if (row !== undefined || op.due_time <= at) return undefined;
     if (!bindingValid(op)) return undefined;
     const next: Any = { job: op.job, due_time: op.due_time, status: 'pending' };
     if (op.encounter_id !== undefined) next.encounter_id = op.encounter_id;

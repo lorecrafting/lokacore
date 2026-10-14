@@ -143,7 +143,9 @@ test('pending sight and confirmed flight cold-reopen with conserved deer custody
 });
 
 // Breaks: a reaction spawn into a sighted plan, the player in its home, binds a sight that the
-// save cannot explain, so the cold reopen is save_corrupt (review 2026-10-13, row 37a).
+// save cannot explain, so the cold reopen is save_corrupt (review 2026-10-13, row 37a); or a
+// job writing a row an earlier-due job of the same advance wrote keeps its own writer group
+// (one advance faults conflicting_write where three steps pass, loka-kgd.151).
 test('reaction spawn into a sighted plan with the player home cold-reopens', (t) => {
   const c = JSON.parse(bundle.canonical);
   const [cartridge_id, cartridge_version] = [content.manifest.id, content.manifest.version];
@@ -164,17 +166,25 @@ test('reaction spawn into a sighted plan with the player home cold-reopens', (t)
   assert.ok(loaded.ok, JSON.stringify(loaded));
   const fresh = newWorld(loaded.cartridge as never, initial().context, [1, 2, 3, 4]);
   const release = { fresh, content_hash: sha256 };
-  const { path, p, story } = setup(t, undefined, release);
-  for (const [i, direction] of ['south', 'south', 'west'].entries()) move(story, direction, i + 1);
-  // Split: one 64800-68400 advance faults conflicting_write on origin/main too (open item loka-kgd.151).
-  for (const [from, until] of [
+  const waited = (spans: number[][]) => {
+    const run = setup(t, undefined, release);
+    for (const [i, direction] of ['south', 'south', 'west'].entries())
+      move(run.story, direction, i + 1);
+    for (const [from, until] of spans) {
+      const advanced = run.story.elapsed({ expected_run_id: run.story.runId(), from, until });
+      assert.equal(advanced.kind, 'saved', `${from} ${JSON.stringify(advanced)}`);
+    }
+    return run;
+  };
+  // One 64800-68400 advance faulted conflicting_write: the slot job (65100) and the plan job
+  // (68400) both move one deer in separate writer groups (loka-kgd.151).
+  const { path, p, story } = waited([[64800, 68400]]);
+  const split = waited([
     [64800, 65100],
     [65100, 68300],
     [68300, 68400],
-  ]) {
-    const advanced = story.elapsed({ expected_run_id: story.runId(), from, until });
-    assert.equal(advanced.kind, 'saved', `${from} ${JSON.stringify(advanced)}`);
-  }
+  ]).story.world().state;
+  assert.equal(encode(story.world().state as never), encode(split as never));
   const home = story.world().roomIds[ref('room', 'willow_shade')];
   assert.equal(story.world().state.containers[story.world().body], home);
   const deer = Object.entries(story.world().state.created ?? {})
@@ -516,4 +526,24 @@ test('real COMMIT faults preserve all-prior or all-next deer rows and one replay
         );
       }
     }
+});
+
+// Breaks: a host step of an offline catch-up exceeds the 64-created-jobs budget now that jobs
+// scheduled inside an advance run in it (loka-kgd.152); the ClockDriver stops at each pending job.
+test('a 72-hour catch-up in ClockDriver steps is accepted at every step', (t) => {
+  const { story } = setup(t);
+  for (const [i, direction] of ['south', 'south', 'west'].entries()) move(story, direction, i + 1);
+  const end = story.world().state.clock + 72 * 3600;
+  while (story.world().state.clock < end) {
+    const { clock, jobs } = story.world().state;
+    let until = end; // elapsed.ts boundary(): the calendar job is never a stop
+    for (const j of Object.values(jobs ?? {}))
+      if (j.status === 'pending' && j.job.kind !== 'calendar') until = Math.min(until, j.due_time);
+    const r = story.elapsed({ expected_run_id: story.runId(), from: clock, until });
+    assert.equal(
+      r.kind === 'saved' && r.decision.kind,
+      'accepted',
+      `${clock} ${JSON.stringify(r)}`,
+    );
+  }
 });

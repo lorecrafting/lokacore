@@ -81,9 +81,9 @@ defmodule Loka.Core.InvariantsEncounter do
          {encounters, jobs, containers, slots, written},
          _,
          horizon,
-         _
+         preceding
        ) do
-    case job(op, jobs[op["job_id"]], horizon) do
+    case job(op, jobs[op["job_id"]], run_time(preceding, jobs, horizon), horizon) do
       nil ->
         {:halt, false}
 
@@ -95,6 +95,14 @@ defmodule Loka.Core.InvariantsEncounter do
   end
 
   defp replay(_, rows, _, _, _), do: {:cont, rows}
+
+  # A job's run schedules later than its own due time (the last job.complete before this op).
+  defp run_time(preceding, jobs, horizon) do
+    case Enum.filter(preceding, &(&1["op"] == "job.complete")) |> List.last() do
+      nil -> horizon
+      done -> get_in(jobs, [done["job_id"], "due_time"]) || horizon
+    end
+  end
 
   defp record(written, op, row) do
     target = Compose.target(op)
@@ -209,8 +217,8 @@ defmodule Loka.Core.InvariantsEncounter do
       containers[op["npc_id"]] == op["room_id"]
   end
 
-  defp job(%{"op" => "job.schedule"} = op, row, horizon) do
-    if row == nil and op["due_time"] > horizon and binding?(op),
+  defp job(%{"op" => "job.schedule"} = op, row, at, _horizon) do
+    if row == nil and op["due_time"] > at and binding?(op),
       do:
         Map.take(
           op,
@@ -219,7 +227,7 @@ defmodule Loka.Core.InvariantsEncounter do
         |> Map.put("status", "pending")
   end
 
-  defp job(op, row, horizon) do
+  defp job(op, row, _at, horizon) do
     cond do
       row["status"] != "pending" ->
         nil

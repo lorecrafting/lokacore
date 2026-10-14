@@ -10,11 +10,12 @@ export function composeJob(
   op: DeltaOp & { op: `job.${string}` },
   value: Json | undefined,
   horizon: number,
+  at = horizon,
 ): Outcome {
   const row = value as Row | undefined;
   if (op.op === 'job.schedule') {
     if (row !== undefined) return failed;
-    if (op.due_time <= horizon) return { code: 'nonfuture_job' };
+    if (op.due_time <= at) return { code: 'nonfuture_job' };
     if (!bindingValid(op)) return failed;
     return { value: pendingJob(op) };
   }

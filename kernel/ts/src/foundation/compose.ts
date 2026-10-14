@@ -38,7 +38,7 @@ export type Change = { target: MutationTarget; value: Json };
 export type Fault = { kind: 'fault'; code: ErrorCode; target?: MutationTarget };
 export type Result = { changes: Change[] } | { fault: Fault };
 export type Written = { group: number; target: MutationTarget; value: Json };
-export type Ctx = { state: State; horizon: number; overlay: Map<string, Written> };
+export type Ctx = { state: State; horizon: number; at: number; overlay: Map<string, Written> };
 export type Outcome = { value: Json } | { code: ErrorCode };
 const DOOR: Record<string, string[]> = {
   closed: ['open', 'locked'],
@@ -55,7 +55,7 @@ export function compose(state: State, delta: StateDelta, final = true): Result {
   if (over(counts(state, ops))) return { fault: { kind: 'fault', code: 'budget_exceeded' } };
   let horizon = state.clock;
   for (const op of ops) if (op.op === 'time.advance') horizon = op.to;
-  const ctx: Ctx = { state, horizon, overlay: new Map() };
+  const ctx: Ctx = { state, horizon, at: horizon, overlay: new Map() };
   for (const [index, op] of ops.entries()) {
     const t = target(op);
     if (!initialPair(op, ops[index + 1]) || !repeatPair(op, ops[index + 1]))
@@ -68,13 +68,20 @@ export function compose(state: State, delta: StateDelta, final = true): Result {
       !sightRebindValid(state, ops, index, prior.group)
     )
       return fault('conflicting_write', t);
-    const out = apply(op, read(t, ctx), ctx);
+    const before = read(t, ctx);
+    if (op.op === 'job.complete') ctx.at = get(before as Obj, 'due_time') as number;
+    const out = apply(op, before, ctx);
     if ('code' in out) return fault(out.code, t);
     ctx.overlay.set(k, { group: op.writer_group, target: t, value: out.value });
   }
   for (const w of ctx.overlay.values())
     if (w.target.kind === 'choice' && pendingAtLimit(w.value))
       return fault('precondition_failed', w.target);
+  // Only job.schedule writes a pending row: one due by the target must have run in this advance.
+  for (const w of ctx.overlay.values())
+    if (final && w.target.kind === 'job' && get(w.value as Obj, 'status') === 'pending')
+      if ((get(w.value as Obj, 'due_time') as number) <= horizon)
+        return fault('nonfuture_job', w.target);
   if (final && (!completeBirths(ops, state) || !sightHandoffValid(state, ops)))
     return fault('precondition_failed', { kind: 'clock' });
   const rows = [...ctx.overlay].sort(([a], [b]) => (a < b ? -1 : 1));
@@ -133,7 +140,7 @@ function apply(op: DeltaOp, row: Json | undefined, ctx: Ctx): Outcome {
     case 'job.schedule':
     case 'job.complete':
     case 'job.cancel':
-      return composeJob(op, row, ctx.horizon);
+      return composeJob(op, row, ctx.horizon, ctx.at);
     case 'encounter.open':
     case 'encounter.advance':
     case 'encounter.close':
