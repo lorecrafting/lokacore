@@ -36,8 +36,8 @@ export function trailFacts(c: Obj): Obj {
       out[`trail_${p.key}_at`] = atSpec(`trail_${p.key}_at`, `plan ${p.key}`, 'instance');
     }
   if (plans(c).some(([, p]) => p.hunts)) {
-    out.trail_exit = exitSpec('trail_exit', 'the player', 'player');
-    out.trail_at = atSpec('trail_at', 'the player', 'player');
+    out.trail_exit = exitSpec('trail_exit', 'a character', 'instance');
+    out.trail_at = atSpec('trail_at', 'a character', 'instance');
   }
   return out;
 }

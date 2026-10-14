@@ -190,6 +190,16 @@ test("a hunter follows the player's fresh trail; a cold or shut one gives its pl
   assert.equal(hunt(68101, door), 'thicket');
 });
 
+// Breaks: the hold dropped (the hunter leaves north along the fresh trail, away from the player).
+test("a hunter in the player's room holds even on a fresh trail", () => {
+  let w = to(start(), 68101);
+  w = play(w, { type: 'move', direction: 'north' });
+  w = play(w, { type: 'move', direction: 'south' });
+  assert.deepEqual(trails(w, 'trail_')['clearing'].slice(-2), ['north', 68101]);
+  w = to(w, 68401);
+  assert.equal(where(w, member(w, 'hunters')), 'clearing');
+});
+
 // Breaks: trail ops written without the opt-in (a byte change for every older cartridge).
 test('without hunts the player leaves no trail; without trail a wander writes none', () => {
   const r = load((c) => {

@@ -1,11 +1,10 @@
 // Toolbox row W13 (docs/system/mechanics.md Tracks and trails): a trail is two engine facts per
 // room, the exit a leaver last left it by and when, per_subject on the room (compiler-added:
-// trail_<plan>_exit/_at at instance scope for a plan with `trail`, trail_exit/_at at player scope
-// when some plan `hunts`). Written with fact.assign (fact_changed follows, runtime/proposal.ts);
+// trail_<plan>_exit/_at for a plan with `trail`, trail_exit/_at for characters when some plan
+// `hunts`; all instance scope: tracks are world state, so no actor picks a row). Written with fact.assign (fact_changed follows, runtime/proposal.ts);
 // fresh while now - at < world.trails.fresh_for, derived on read, never ticked.
 import { key } from '../foundation/compose.ts';
 import type {
-  CharacterId,
   DefinitionRef,
   DeltaOp,
   EntityId,
@@ -14,7 +13,6 @@ import type {
   TextKey,
 } from '../contracts.gen.ts';
 import type { World } from '../runtime/decision.ts';
-import { targetOf, value } from './fact.ts';
 import { npcPassage } from './movement/shared.ts';
 
 const fact = (world: World, name: string): DefinitionRef => ({
@@ -24,30 +22,34 @@ const fact = (world: World, name: string): DefinitionRef => ({
   key: name as DefinitionRef['key'],
 });
 
-// The plan's trail facts, or the player's when `plan` is undefined.
+// The plan's trail facts, or the characters' when `plan` is undefined.
 const facts = (world: World, plan?: string) =>
   (plan ? [`trail_${plan}_exit`, `trail_${plan}_at`] : ['trail_exit', 'trail_at']).map((n) =>
     fact(world, n),
   );
 
-/** The exit the trail of `plan` (or `actor`'s) in `room` leads by while fresh at `now`. */
-export function fresh(
-  world: World,
-  actor: CharacterId,
-  room: EntityId,
-  now: number,
-  plan?: string,
-): Key | undefined {
+// The instance-scope MutationTarget of trail fact `f` in `room`, and its value there.
+const target = (world: World, f: DefinitionRef, room: EntityId) => ({
+  fact: f,
+  scope: { kind: 'instance' as const, world_context_id: world.context },
+  subject_id: room,
+});
+const value = (world: World, f: DefinitionRef, room: EntityId) =>
+  world.state.facts?.[key({ kind: 'fact', ...target(world, f, room) })] ??
+  world.factDefaults[key(f)];
+
+/** The exit the trail of `plan` (or the characters') in `room` leads by while fresh at `now`. */
+export function fresh(world: World, room: EntityId, now: number, plan?: string): Key | undefined {
   const trails = world.cartridge.world?.trails;
-  const [exit, at] = facts(world, plan).map((f) => value(world, actor, f, room));
+  const [exit, at] = facts(world, plan).map((f) => value(world, f, room));
   return trails && exit !== 'none' && now - (at as number) < trails.fresh_for
     ? (exit as Key)
     : undefined;
 }
 
 /**
- * A hunting plan's member's exit from `here` (taken before its wander): the player's fresh trail,
- * when npcPassage admits it.
+ * A hunting plan's member's exit from `here` (taken before its wander): the characters' fresh
+ * trail, when npcPassage admits it; null when a character's body is in `here` (the member holds).
  */
 export function chase(
   world: World,
@@ -56,7 +58,12 @@ export function chase(
   now: number,
   walker?: EntityId,
 ) {
-  const exit = plan.hunts ? fresh(world, world.character, here, now) : undefined;
+  if (!plan.hunts) return undefined;
+  const bodies = Object.keys(world.knownEntities).filter(
+    (id) => world.knownEntities[id]!.kind === 'body',
+  );
+  if (bodies.some((b) => world.state.containers[b] === here)) return null;
+  const exit = fresh(world, here, now);
   const room = world.rooms[here];
   return exit && !npcPassage(world, room, exit, walker)
     ? ([exit, room.exits[exit as keyof typeof room.exits]!] as const)
@@ -64,12 +71,11 @@ export function chase(
 }
 
 /**
- * The fact.assign ops saying `plan`'s member (or `actor`) left `room` by `exit` at `at`: none
- * unless the plan has `trail` (for the player: unless some plan `hunts`).
+ * The fact.assign ops saying `plan`'s member (or a character) left `room` by `exit` at `at`: none
+ * unless the plan has `trail` (for a character: unless some plan `hunts`).
  */
 export function left(
   world: World,
-  actor: CharacterId,
   room: EntityId,
   exit: string,
   at: number,
@@ -81,11 +87,13 @@ export function left(
   return [
     [e, exit],
     [t, at],
-  ].map(([f, v]) => {
-    const { kind: _, ...target } = targetOf(world, actor, f as DefinitionRef, room);
-    const expected = value(world, actor, f as DefinitionRef, room);
-    return { op: 'fact.assign', writer_group: 0, ...target, expected, value: v as Key | number };
-  });
+  ].map(([f, v]) => ({
+    op: 'fact.assign',
+    writer_group: 0,
+    ...target(world, f as DefinitionRef, room),
+    expected: value(world, f as DefinitionRef, room),
+    value: v as Key | number,
+  }));
 }
 
 /** `ops` keeping only the first trail write of each target (one write per room and plan). */

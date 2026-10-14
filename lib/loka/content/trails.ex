@@ -54,8 +54,8 @@ defmodule Loka.Content.Trails do
     player =
       if Enum.any?(plans(defs), &match?({_, _, _, %{"hunts" => true}}, &1)),
         do: [
-          {"trail_exit", exit_spec("trail_exit", "the player", "player")},
-          {"trail_at", at_spec("trail_at", "the player", "player")}
+          {"trail_exit", exit_spec("trail_exit", "a character", "instance")},
+          {"trail_at", at_spec("trail_at", "a character", "instance")}
         ],
         else: []
 

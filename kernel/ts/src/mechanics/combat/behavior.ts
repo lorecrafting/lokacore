@@ -71,7 +71,7 @@ export function flight(
   const leaving = moves(world, id) ? flightExit(world, here, plan.area, steps) : undefined;
   const fled = leaving && flightWrite(world, id, at, here, origin, leaving);
   // Toolbox row W13: a trailing plan's fleeing member leaves its trail in the room it left.
-  const trail = fled ? left(world, world.character, here, fled.direction, at, plan) : [];
+  const trail = fled ? left(world, here, fled.direction, at, plan) : [];
   return fled && { ...fled, ops: [...fled.ops, ...trail] };
 }
 

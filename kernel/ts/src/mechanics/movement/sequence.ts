@@ -51,7 +51,7 @@ export function moveSequence(
   const ops = [
     ...paid.ops,
     transfer,
-    ...left(world, actor_id, here, direction, world.state.clock),
+    ...left(world, here, direction, world.state.clock),
     ...water.travel(world, actor_id, there, plan.water?.entering, mint),
     ...travel(world, actor_id, here, there),
     ...closeMovementEncounter(world, body, mint),

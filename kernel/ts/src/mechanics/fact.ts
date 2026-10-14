@@ -228,7 +228,7 @@ export function typedFact(
   );
 }
 
-// Toolbox row W13: a compiler-reserved trail fact (a plan's with trail, the player's if one hunts).
+// Toolbox row W13: a compiler-reserved trail fact (a plan's with trail, characters' if one hunts).
 const trailFact = (world: World, k: string) =>
   Object.values(world.cartridge.populations ?? {}).some(
     (p) =>

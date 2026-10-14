@@ -175,7 +175,7 @@ function resolve(
   // Toolbox row W13: a track check passes on the plan's fresh trail in the actor's room.
   const lead =
     check.kind === 'track'
-      ? fresh(world, actor, world.state.containers[body], world.state.clock, check.plan)
+      ? fresh(world, world.state.containers[body], world.state.clock, check.plan)
       : undefined;
   const passed =
     check.kind === 'luck'

@@ -182,8 +182,10 @@ function wanderOne(
   const room = world.rooms[from];
   // Toolbox row W26: a walking plan crosses doors as a walking schedule step does.
   const walker = plan.walks ? (member as EntityId) : undefined;
+  const hunt = chase(world, plan, from, job.due_time, walker);
+  if (hunt === null) return [];
   const edge =
-    chase(world, plan, from, job.due_time, walker) ??
+    hunt ??
     (to &&
       Object.entries(room.exits).find(
         ([d, e]) => world.roomIds[refString(e.to)] === to && !npcPassage(world, room, d, walker),
@@ -198,7 +200,7 @@ function wanderOne(
   return [
     ...doors.map((d) => d.op),
     transfer,
-    ...left(world, world.character, from, edge[0], job.due_time, plan),
+    ...left(world, from, edge[0], job.due_time, plan),
     ...arrivalSight(
       world,
       occurrence_id,

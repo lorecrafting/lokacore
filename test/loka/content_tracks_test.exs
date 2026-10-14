@@ -23,7 +23,7 @@ defmodule Loka.ContentTracksTest do
 
     exit = facts["tracks_sampler@0.0.1:fact/trail_hounds_exit"]
     assert {exit["scopes"], exit["per_subject"]} == {["instance"], true}
-    assert facts["tracks_sampler@0.0.1:fact/trail_exit"]["scopes"] == ["player"]
+    assert facts["tracks_sampler@0.0.1:fact/trail_exit"]["scopes"] == ["instance"]
 
     assert {:ok, fear, _} =
              Loka.ContentSource.compile(Loka.ContentSource.copy("cartridges/fear_sampler"), [])
