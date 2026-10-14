@@ -1,0 +1,47 @@
+{
+  "title": "room.yard.title",
+  "description": "room.yard.description",
+  "exits": {},
+  "variants": [
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": [
+            {
+              "op": "sky",
+              "weather": "rain"
+            },
+            {
+              "op": "time_window",
+              "from": 21,
+              "to": 5
+            }
+          ]
+        }
+      },
+      "description": "room.yard.rain_night"
+    },
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": [
+            {
+              "op": "sky",
+              "weather": "clear"
+            },
+            {
+              "op": "time_window",
+              "from": 5,
+              "to": 8
+            }
+          ]
+        }
+      },
+      "description": "room.yard.clear_dawn"
+    }
+  ]
+}
