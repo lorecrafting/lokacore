@@ -1,7 +1,7 @@
 // Two shops in one cartridge through real SQLite (save.md, B3 shop recovery; loka-kgd.149). Each
 // world is a test-local clone of cartridges/prices_sampler whose fishmonger sells fish_a at a flat 5
 // (no stock prices, so no receipt history replay vouches for a Buy) and whose fisher is a second
-// penny shop with the offers each test names.
+// shop, in pennies or a test-local currency, with the offers each test names.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
@@ -25,7 +25,7 @@ import { elapsedHost } from './__tests__/elapsed-host.test.ts';
 const root = fileURLToPath(new URL('../../../', import.meta.url));
 const S = 'prices_sampler@0.0.1';
 
-function twoShops(fisherOffers: object[]) {
+function twoShops(fisherOffers: object[], currency = 'pennies') {
   const scratch = mkdtempSync(join(tmpdir(), 'loka-two-shops-'));
   let artifact;
   try {
@@ -36,14 +36,16 @@ function twoShops(fisherOffers: object[]) {
       change(json);
       writeFileSync(join(src, file), JSON.stringify(json));
     };
+    if (currency !== 'pennies')
+      edit('resources.json', (r) => (r.resources[currency] = { ...r.resources.pennies }));
     edit(
       'npcs/fishmonger.json',
       (monger) => (monger.shop.offers = [{ item: 'fish_a', buy: 5, sell: 1 }]),
     );
     edit('npcs/fisher.json', (fisher) => {
-      fisher.resource_starts = { pennies: 0 };
+      fisher.resource_starts = { pennies: 0, [currency]: 0 };
       fisher.shop = {
-        resource: 'pennies',
+        resource: currency,
         offers: fisherOffers,
         bought: 'shop.bought',
         sold: 'shop.sold',
@@ -78,7 +80,7 @@ function twoShops(fisherOffers: object[]) {
     if (story.kind !== 'open') throw new Error(JSON.stringify(story));
     return { p, story };
   };
-  /** Accepted, saved invocations, then the holders of fish_a and the basket and everyone's pennies. */
+  /** Accepted, saved invocations, then the holders of fish_a and the basket and everyone's money. */
   const play = (path: string, steps: [string, string[], object][]) => {
     const { p, story } = open(path);
     for (const [i, [action_key, target_ids, input]] of steps.entries()) {
@@ -97,7 +99,9 @@ function twoShops(fisherOffers: object[]) {
   };
   const summary = (w: World) => [
     [fish, basket].map((item) => w.state.containers[item]),
-    [w.body, monger, fisher].map((e) => level(w, e, resourceRef(w, 'pennies'))),
+    ...[...new Set(['pennies', currency])].map((c) =>
+      [w.body, monger, fisher].map((e) => level(w, e, resourceRef(w, c))),
+    ),
   ];
   /** Rewrite the stored receipt of the invocation numbered `n` (1-based). */
   const forge = (path: string, n: number, change: (command: any, response: any) => void) => {
@@ -126,6 +130,16 @@ function twoShops(fisherOffers: object[]) {
 }
 
 const basketShop = twoShops([{ item: 'basket', buy: 4, sell: 1 }]);
+/** Fish_a at the fishmonger for 5, then the basket at the fisher for 4. */
+const twoBuys = ({
+  monger,
+  fisher,
+  fish,
+  basket,
+}: typeof basketShop): [string, string[], object][] => [
+  ['buy', [monger, fish], { quoted_price: 5 }],
+  ['buy', [fisher, basket], { quoted_price: 4 }],
+];
 
 function scratchDir(t: { after(fn: () => void): void }) {
   const dir = mkdtempSync(join(tmpdir(), 'loka-two-shops-save-'));
@@ -143,34 +157,65 @@ test('one buy at each of two shops survives cold reopen', (t) => {
     [body, body],
     [11, 25, 4],
   ];
-  const truth = play(path, [
-    ['buy', [monger, fish], { quoted_price: 5 }],
-    ['buy', [fisher, basket], { quoted_price: 4 }],
-  ]);
+  const truth = play(path, twoBuys(basketShop));
   assert.deepEqual(truth, expected);
   assert.deepEqual(reopened(path), expected);
 });
 
 // Breaks: a receipt is checked only under a shop it does not name, so its narration is never bound
-// to that shop's bought line; or a receipt naming a provider that is not a shop is never bound to
-// any shop.
+// to that shop's bought line; or a receipt naming a provider that is not a shop, with no money ops
+// and penny rows that agree with that, is never bound to any shop (a free basket).
 test('a forged receipt at either shop, or naming no shop, is save_corrupt', (t) => {
   const { monger, fisher, fish, basket, initial, bundle, play, forge } = basketShop;
   const dir = scratchDir(t);
   const forgeries: [number, (command: any, response: any) => void][] = [
     [1, (_, response) => (response.narration = [{ key: 'shop.sold' }])],
     [2, (_, response) => (response.narration = [{ key: 'shop.sold' }])],
-    [2, (command) => (command.payload.provider_id = initial.body)],
   ];
   for (const [i, [n, change]] of forgeries.entries()) {
     const path = join(dir, `forged-${i}.db`);
-    play(path, [
-      ['buy', [monger, fish], { quoted_price: 5 }],
-      ['buy', [fisher, basket], { quoted_price: 4 }],
-    ]);
+    play(path, twoBuys(basketShop));
     forge(path, n, change);
     assert.throws(() => elapsedHost(path, undefined, bundle), /save_corrupt/, String(i));
   }
+  const path = join(dir, 'no-shop.db');
+  play(path, twoBuys(basketShop));
+  forge(path, 2, (command, response) => {
+    command.payload.provider_id = initial.body;
+    response.delta.ops = response.delta.ops.filter((o: any) => o.op !== 'resource.adjust');
+  });
+  const sql = new DatabaseSync(path);
+  for (const [entity, pennies] of [
+    [initial.body, 15],
+    [fisher, 0],
+  ] as const) {
+    const changed = sql
+      .prepare(
+        "UPDATE state_row SET value=json_set(value,'$.value',?) WHERE section='resources' AND json_extract(key,'$.entity_id')=? AND json_extract(key,'$.resource.key')='pennies'",
+      )
+      .run(pennies, entity).changes;
+    assert.equal(changed, 1); // exactly the penny row, so only the guard can refuse
+  }
+  sql.close();
+  assert.throws(() => elapsedHost(path, undefined, bundle), /save_corrupt/);
+});
+
+// Breaks: another shop's receipt counts as a payment in this shop's currency, so a buy in shells
+// at the fisher is save_corrupt under the fishmonger's pennies.
+test('one buy at each of two shops with different currencies survives cold reopen', (t) => {
+  const shells = twoShops([{ item: 'basket', buy: 4, sell: 1 }], 'shells');
+  const { initial, play, reopened } = shells;
+  const path = join(scratchDir(t), 'shells.db');
+  const body = initial.body;
+  // Pennies: body 20 - 5, fishmonger 20 + 5, fisher 0; shells: body 20 - 4, fisher 0 + 4.
+  const expected = [
+    [body, body],
+    [15, 25, 0],
+    [16, 20, 4],
+  ];
+  const truth = play(path, twoBuys(shells));
+  assert.deepEqual(truth, expected);
+  assert.deepEqual(reopened(path), expected);
 });
 
 // Breaks: the fishmonger's custody ignores a move of its fish_a made by the fisher's stock offer
