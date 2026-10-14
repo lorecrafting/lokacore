@@ -15,24 +15,29 @@ defmodule Loka.Content.Delayed do
   def check(nil, _, _), do: []
 
   def check(m, defs, trees) do
-    rules = for {_, {rel, [], r}} <- defs["reaction"], do: {rel, r}
-
-    steps =
-      for {rel, r} <- rules, {s, i} <- Enum.with_index(r["apply"]), do: {rel, r, s, i}
-
+    steps = steps(defs)
     stamps = for {rel, _, %{"op" => "fact.stamp"} = s, i} <- steps, do: {rel, ["apply", i], s}
-    leaves = Enum.flat_map(trees, fn {rel, path, root} -> timed(rel, path, root) end)
+    timed = stamps ++ Enum.flat_map(trees, fn {rel, path, root} -> timed(rel, path, root) end)
 
-    refused =
-      for {rel, %{"after" => _}, s, i} <- steps,
-          s["op"] in @event_bound or Map.has_key?(s, "co_present") or Map.has_key?(s, "tag"),
-          do: diag("SCHEMA_VIOLATION", at(rel, ["apply", i, "op"]), %{"error" => "invalid_value"})
-
-    used =
-      stamps != [] or leaves != [] or Enum.any?(rules, fn {_, r} -> Map.has_key?(r, "after") end)
-
-    Enum.flat_map(stamps ++ leaves, &clock(&1, m, defs)) ++ refused ++ floor(m, used)
+    Enum.flat_map(timed, &clock(&1, m, defs)) ++
+      Enum.flat_map(steps, &refused/1) ++ floor(m, timed, steps)
   end
+
+  defp steps(defs),
+    do:
+      for(
+        {_, {rel, [], r}} <- defs["reaction"],
+        {s, i} <- Enum.with_index(r["apply"]),
+        do: {rel, r, s, i}
+      )
+
+  defp refused({rel, %{"after" => _}, s, i}) do
+    if s["op"] in @event_bound or Map.has_key?(s, "co_present") or Map.has_key?(s, "tag"),
+      do: [diag("SCHEMA_VIOLATION", at(rel, ["apply", i, "op"]), %{"error" => "invalid_value"})],
+      else: []
+  end
+
+  defp refused(_), do: []
 
   defp clock({rel, path, n}, m, defs) do
     case resolve(n["fact"], "fact", m, defs) do
@@ -60,7 +65,9 @@ defmodule Loka.Content.Delayed do
 
   defp timed(_, _, _), do: []
 
-  defp floor(m, used) do
+  defp floor(m, timed, steps) do
+    used = timed != [] or Enum.any?(steps, fn {_, r, _, _} -> Map.has_key?(r, "after") end)
+
     api =
       m["requires"]["kernel_api"]["at_least"]
       |> String.split(".")

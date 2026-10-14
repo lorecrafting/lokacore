@@ -322,11 +322,12 @@ defmodule Loka.Content.Checks do
 
   def rooms(m, defs, {entry, text}, registry) do
     rooms = for {_, {rel, [], r}} <- defs["room"], do: {rel, r}
+    trees = trees(defs)
 
     entry(m, entry, defs) ++
       texts(defs, text) ++
-      Loka.Content.Cues.check(m, defs, text, registry, trees(defs)) ++
-      Loka.Content.Delayed.check(m, defs, trees(defs)) ++
+      Loka.Content.Cues.check(m, defs, text, registry, trees) ++
+      Loka.Content.Delayed.check(m, defs, trees) ++
       if(m,
         do:
           Enum.flat_map(rooms, &room(&1, m, defs, registry)) ++
