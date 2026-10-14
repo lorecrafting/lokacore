@@ -69,6 +69,8 @@ State 2026-10-14 (local session): briefs live in each issue's Beads notes.
 
 Order from here: the owner adopted the Fable priority plan on 2026-10-14 ("keep going, follow the fable priority plan"; `docs/briefs/toolbox-priority-plan-2026-10-14.md` on `toolbox/batch-m12`). M12 rest: FD4, FD1, `.151`; FD3 moves to M13; W12 prey hunt, 43b, 48a-c and RS-7 are deferred; row 38 runs with RS-4; S2 is cut (it duplicates Built rooms slice 2). Plan defaults the PM takes unless the owner objects: one Book word-bar slice after RS, Built rooms after M15, Balance gates on the showcase only.
 
+Owner answers 2026-10-14 (paraphrased): defer carry-over 48a-c and RS-7; Settle per the PM recommendation (S1 into Homestead, S2 merged into Built rooms, S3/S4 after Homestead on a yes); Built rooms between M13 and M14; Balance gates fail on the showcase only; keep W9 "sleep provokes"; loka-b60 at the release candidate. Then (owner, 2026-10-14: "yes to word bar, put mounts after 43a in M14"): one Book word-bar slice (loka-x6t.39) runs in the mechanics lane after the Realm seams batch; 43b mounts runs right after 43a in M14.
+
 Then the Realm seams batch (`loka-kgd.150`, slices RS-1 to RS-8; RS-7 deferred to the Realm), before
 M13. Then M13 to M15. Settle (S1 to S4) waits for an owner yes.
 
