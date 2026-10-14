@@ -8,7 +8,7 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
 import { gameView, INSTALLED, loadCartridge, newWorld } from '../src/index.ts';
-import type { Cartridge } from '../src/runtime/decision.ts';
+import type { Cartridge, World } from '../src/runtime/decision.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-ambient-sampler-'));
 let artifact: Uint8Array;
@@ -31,8 +31,8 @@ const content = loaded.cartridge as Cartridge;
 const CONTEXT = '7e1f0c2a-5d3b-4c8e-9a6f-000000000003';
 const at = (day: number, hour: number) => {
   const w = newWorld(content, CONTEXT as never, [1, 2, 3, 4]);
-  w.state.clock = ((day - 1) * 24 + hour) * 3600;
-  return gameView(w).place.description.key;
+  const clock = ((day - 1) * 24 + hour) * 3600;
+  return gameView({ ...w, state: { ...w.state, clock } } as World).place.description.key;
 };
 
 // Breaks: a variant drops the sky leaf (clear night shows rain), drops the hour (rain by day
