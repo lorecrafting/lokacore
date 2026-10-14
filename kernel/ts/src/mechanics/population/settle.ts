@@ -76,7 +76,8 @@ export function encounter(
   return { ...born, rng: after };
 }
 
-/** One birth into `slot` with its slot row and sight binding; also row 37a's population.spawn. */
+/** One birth into `slot` with its slot row and sight binding; also row 37a's population.spawn,
+ * which binds no sight (`sighted` false): only a plan job's birth can explain a birth sight. */
 export function birthSlot(
   world: World,
   occurrence_id: CommandId,
@@ -84,6 +85,7 @@ export function birthSlot(
   slot: number,
   row: Slots[number]['row'],
   mint: Mint,
+  sighted = true,
 ) {
   const generation = row.generation + 1;
   const made = birth(world, job.job, slot, generation, occurrence_id, job.due_time, mint);
@@ -96,7 +98,7 @@ export function birthSlot(
     ...((spec.plan.pack || spec.plan.sight) && { last_flight_at: null }),
     ...(spec.plan.sight && { sight_job_id: null }),
   };
-  const sight = birthSight(world, occurrence_id, job, slot, value, member_id, mint);
+  const sight = sighted ? birthSight(world, occurrence_id, job, slot, value, member_id, mint) : [];
   const binding = sight.find((op) => op.op === 'population.slot');
   const ops: DeltaOp[] = [
     ...made,

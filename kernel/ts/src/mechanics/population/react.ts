@@ -31,6 +31,6 @@ export function spawn(
   const member = mint(); // birth's first mint is the member's id
   let first = true;
   const own = () => (first ? ((first = false), member) : mint());
-  const { ops } = birthSlot(world, member as CommandId, job, free.slot, free.row, own);
+  const { ops } = birthSlot(world, member as CommandId, job, free.slot, free.row, own, false);
   return ops.map((op) => ({ ...op, writer_group: group }));
 }
