@@ -49,26 +49,21 @@ single-player assumption (Realm seams record `docs/decisions/owner-decision-real
 seams audit `docs/rnd/realm-seams-audit-2026-10-13.md`). Both records and the report reach `main` with the
 M12 batch PR (they are on `toolbox/batch-m12`).
 
-Batch M12: branch `toolbox/batch-m12`, head `6642e7c1` (M11 final head + docs + `main` merged;
-`kernel_api` 1.83). Slices, each on its own pushed branch:
+Batch M12: branch `toolbox/batch-m12`, head `c5fccf72` (worktree `worktrees.noindex/m12-batch`).
+State 2026-10-14 (local session): briefs live in each issue's Beads notes.
 
-1. Row 37a raid spawn `loka-kgd.131`, `toolbox/m12-raid` at `3084ce75` (1.84), after fix round 1.
-   Recheck (partial record on pushed branch `review-m12-raid` at `c16433dd`): CHANGES REQUIRED, one new
-   blocker: a spawn into a plan with sight makes a mobile cold reopen `save_corrupt`
-   (`deer-save.ts` `populationCause`); fix: the spawn skips `birthSight`. Fix round 2 is the last; then
-   rerun the `taken` and floor mutants, CI, recheck.
-2. Two-shop save bug `loka-kgd.149` (P1), `toolbox/m12-two-shops` at `b759a67f`. Not reviewed yet (both
-   reviewers stopped on a full disk). Run a fresh main review and a save second opinion; the partial
-   record on `review-m12-two-shops` (`644a9cf2`) lists the points to check first.
-3. Row W13 tracks `loka-kgd.136`, `toolbox/m12-tracks` at `0d2d4094` (1.85; CI on `dde57fd3` failed on a schema statement length, fixed in `0d2d4094`, CI green on `0d2d4094`).
-   Built and self-checked; design note in the issue notes. Needs:
-   two PM rulings (does a hunter chase out of the player's room; an out-of-area hunter parks); then two
-   reviewers (it widens the `facts_typed` invariant to rooms for engine-written facts).
-4. Waves 2 and 3 (not started): 37b `.132` and 38 `.133` (content, one run), W12 `.135`, 39 `.134`
-   (engine: `resource_compare` subject and percent), plus the audit rows placed in M12 (FD1 delayed
-   reactions `.138`, FD3 storylets `.140`, FD4 NPC pair facts `.141`, FD8 ambient lines `.145`). Write
-   each brief after an Explore lookup (an engine row needs the lookup; briefs written from sketches hit
-   scope triggers twice) and paste the seams checklist.
+1. Merged into the batch: 37a raid spawn `.131` (reviewed `924c18b2`, 1.84) and the two-shop save
+   fix `.149` (reviewed `e7cc58ac`, main + save second opinion approve).
+2. W13 tracks `.136`, `toolbox/m12-tracks` (1.85): both reviewers APPROVE WITH NOTES on `03101ac0`
+   (records `review-m12-tracks`, `review-m12-tracks-2nd`); fix round 1 running (facts_typed must require a
+   room subject for trail facts; revert a `lockStage` reformat). PM rulings: a hunter holds when any
+   body is in its room; an out-of-area hunter parks; player trails are instance scope.
+3. Building: 37b + 38 `.132`/`.133` (`toolbox/m12-aftermath`, content), W12 `.135`
+   (`toolbox/m12-populations`, 1.86; prey hunt deferred until W13 merges).
+4. Briefed, not started: 39 `.134` (1.87), FD8 `.145` (content, Sonnet). Still to brief: FD1 `.138`
+   (1.88, after 37b; delays in logical units, not real minutes, per seams rule 4), FD3 `.140` (after
+   37b), FD4 `.141` (after W13: both touch `fact.ts`), and bug `.151` (Chapter 1 deer
+   `conflicting_write` on one long advance; found by the 37a recheck).
 5. Close M12 as M10 and M11 closed: toolbox table edit, one Fable batch review, green CI, PR, merge with
    the head pinned, close issues.
 
