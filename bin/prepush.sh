@@ -6,11 +6,11 @@
 #   bin/prepush.sh
 cd "$(git rev-parse --show-toplevel)" || exit 2
 export MIX_ENV=test
-logs=$(mktemp -d "${TMPDIR:-/tmp}/prepush.XXXXXX")
+logs=${TMPDIR:-/tmp}
 fail=0
 run() { # <name> <command...>
   n=$1; shift
-  if nice -n 10 mise exec -- "$@" >"$logs/$n.out" 2>&1; then echo "${n}_OK"; else echo "${n}_FAIL ($logs/$n.out)"; fail=1; fi
+  if nice -n 10 mise exec -- "$@" >"$logs/pm_$n.out" 2>&1; then echo "${n}_OK"; else echo "${n}_FAIL ($logs/pm_$n.out)"; fail=1; fi
 }
 run TS_SIZE node bin/check_ts_size.mjs
 run EX_SIZE elixir bin/check_size.exs
@@ -24,5 +24,4 @@ run COMPILE mix compile --warnings-as-errors
 run XREF sh -c 'mix xref graph --format cycles --fail-above 0 && mix xref graph --label compile-connected --fail-above 0'
 run CREDO mix credo --strict
 run DOCS elixir bin/check_docs.exs
-[ $fail = 1 ] || rm -rf "$logs"
 exit $fail

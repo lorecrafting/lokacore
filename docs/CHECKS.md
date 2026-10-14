@@ -97,9 +97,10 @@ their rules and red controls remain available for resumption.
   (`bin/beads_pr_drift.py`). The check needs no `br` binary.
 - `bin/orphans_red_controls.sh` checks that `bin/orphans.sh` lists a busy, old orphan and skips a child, a young, an idle, a system and a server process. `bin/worktree_setup_red_controls.sh` checks that `bin/worktree_setup.sh` links main's `node_modules` for a matching lockfile and removes the link before `npm ci` after a lockfile change.
 - `bin/merge_resolve_red_controls.sh` checks that `bin/merge_resolve.py` (the `bin/pm_merge.sh` resolver) keeps both
-  `docs/system/mechanics.md` tail sections (ours first), the higher `kernel_api` (1.10 over 1.9) and a
-  regenerated `docs/system-graph.gen.json`, and leaves an edit of the last `mechanics.md` line and a TypeScript
-  source conflict unresolved.
+  `docs/system/mechanics.md` tail sections (ours first, a section both sides appended once), the higher
+  `kernel_api` (1.10 over 1.9) and a regenerated `docs/system-graph.gen.json`, and leaves unresolved a tail
+  that repeats a `## ` heading, a conflict in the middle of `mechanics.md`, a review record that differs
+  beyond whitespace, an edit of the last `mechanics.md` line and a TypeScript source conflict.
 - `bin/integration_red_controls.sh` runs the PM scripts in throwaway repositories with stubs.
   It runs `bin/sync_pr.sh` (merge `main` into a PR branch): a code conflict is refused, a review
   index conflict is regenerated, the merge is pushed, and a failed docs check blocks the push.

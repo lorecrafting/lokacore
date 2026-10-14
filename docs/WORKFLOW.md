@@ -268,6 +268,9 @@ item or too much complexity. Mechanics, save, protocol or engine items leave the
   notice, no sleep or poll loops. Any agent that expects a run over ~10 minutes (full-suite
   mutants, the 10,000-sequence simulator) stops and asks the PM, who tells the owner before it starts
   ([owner decision](decisions/owner-decision-process-tightening-2026-10-08.md)).
+- A developer pushes, confirms with one `gh run list --commit <full sha>` call that `ci.yml` and
+  `book-e2e.yml` started, and hands back; the PM watches CI and returns a red run as a finding (no
+  agent starts a background wait for CI: two developers died resuming after one, 2026-10-14).
 - Mutants: a full-suite sweep runs only at release-candidate certification and the E3 gate on that
   same candidate. Elsewhere: a red control on the new test, and `bin/mutate.sh` triage ("already
   caught?") run narrow first against the test files that import the mutated module, the full suite
