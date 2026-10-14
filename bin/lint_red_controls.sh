@@ -58,7 +58,8 @@ else
   out=$(ast-grep scan --error . mobile/app/.storybook 2>&1) # hidden directories only when named
 fi
 status=0
-for rule in $(ls lint/rules | sed 's/\.yml$//'); do
+# Rules and their test cases both name the ids, so a deleted rule file is reported too.
+for rule in $(ls lint/rules lint/tests | sed -nE 's/(-test)?\.yml$//p' | sort -u); do
   [ "$core_only" -eq 0 ] || { case "$rule" in mobile-*) continue ;; esac; }
   if printf '%s' "$out" | grep -q "error\[$rule\]"; then echo "ok   $rule"; else echo "FAIL $rule not reported"; status=1; fi
 done
