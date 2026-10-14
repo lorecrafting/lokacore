@@ -49,7 +49,7 @@ export function fresh(world: World, room: EntityId, now: number, plan?: string):
 
 /**
  * A hunting plan's member's exit from `here` (taken before its wander): the characters' fresh
- * trail, when npcPassage admits it; null when a character's body is in `here` (the member holds).
+ * trail, when npcPassage admits it; false when a character's body is in `here` (the member holds).
  */
 export function chase(
   world: World,
@@ -62,7 +62,7 @@ export function chase(
   const bodies = Object.keys(world.knownEntities).filter(
     (id) => world.knownEntities[id]!.kind === 'body',
   );
-  if (bodies.some((b) => world.state.containers[b] === here)) return null;
+  if (bodies.some((b) => world.state.containers[b] === here)) return false;
   const exit = fresh(world, here, now);
   const room = world.rooms[here];
   return exit && !npcPassage(world, room, exit, walker)

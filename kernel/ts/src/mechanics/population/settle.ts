@@ -162,7 +162,7 @@ export function wanders(
   return once(ops);
 }
 
-// size: allow 50, a walker moves with its key passage (W26), a hunt picks its edge, a trail (W13)
+// size: allow 50, a walker crosses doors (W26), a hunt picks its edge or holds (false), a trail (W13)
 function wanderOne(
   world: World,
   occurrence_id: CommandId,
@@ -182,10 +182,8 @@ function wanderOne(
   const room = world.rooms[from];
   // Toolbox row W26: a walking plan crosses doors as a walking schedule step does.
   const walker = plan.walks ? (member as EntityId) : undefined;
-  const hunt = chase(world, plan, from, job.due_time, walker);
-  if (hunt === null) return [];
   const edge =
-    hunt ??
+    chase(world, plan, from, job.due_time, walker) ??
     (to &&
       Object.entries(room.exits).find(
         ([d, e]) => world.roomIds[refString(e.to)] === to && !npcPassage(world, room, d, walker),
