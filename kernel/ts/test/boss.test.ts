@@ -121,6 +121,8 @@ test('the phases read the warlord after the hit: at or below 60% summons, at or 
     const name = rule === 'summon' ? 'summoned' : 'withdrawn';
     assert.equal(fact(w, name), fires, `${rule} ${pct}% of ${maximum} at ${after}`);
   }
+  // The authored summon leaf (not overridden) holds at exactly 60%: 12 of 20.
+  assert.equal(fact(fought(warlordHp(20, 13)), 'summoned'), true);
 });
 
 // Breaks: the `summoned` guard is dropped or not read (a second hit under 60% spawns the second
