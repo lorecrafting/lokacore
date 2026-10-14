@@ -11,7 +11,7 @@ defmodule Loka.Content.Checks do
   @doc "Expands short source references to local DefinitionRefs (owner decision 2026-09-25)."
   @spec expand(term(), map()) :: term()
   def expand(%{} = value, m) when is_map_key(value, "bundle") or is_map_key(value, "corpse"),
-    do: Loka.Content.Population.expand(value, m)
+    do: Loka.Content.Population.expand(value, m, &expand/2)
 
   # Toolbox row G6: a definition's cues, whatever clause expands the rest of it (an NPC or a
   # status does not recurse), so a short reference in a cue's condition always expands.
@@ -432,13 +432,13 @@ defmodule Loka.Content.Checks do
       Dialogues.conditions(defs),
       Loka.Content.Skills.conditions(defs),
       Loka.Content.Barriers.conditions(defs),
-      Loka.Content.Cues.conditions(defs)
+      Loka.Content.Cues.conditions(defs),
+      Loka.Content.Population.conditions(defs)
     ])
   end
 
-  defp expand_attack(npc, m) do
-    if npc["attack"], do: Map.put(npc, "attack", expand(npc["attack"], m)), else: npc
-  end
+  defp expand_attack(npc, m),
+    do: if(npc["attack"], do: Map.put(npc, "attack", expand(npc["attack"], m)), else: npc)
 
   # run_job is authority-internal (04 §1): no action builds it.
   defp command(rel, name, required, elapsed?) do

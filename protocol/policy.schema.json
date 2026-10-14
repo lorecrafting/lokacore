@@ -441,6 +441,28 @@
           "additionalProperties": false
         },
         {
+          "description": "The named population plan has at least at_least living members: slots 1 to cap whose row has a member_id and no replacement_due (toolbox row W12). Derived on read; reads no actor. Needs kernel_api at least 1.86. Owned by population@1.",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "population_count"
+            },
+            "plan": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "at_least": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          "required": [
+            "op",
+            "plan",
+            "at_least"
+          ],
+          "additionalProperties": false
+        },
+        {
           "description": "The subject holds an active status of this definition (status@1 row; toolbox row W6). subject target: the action's target, or, in an entity's own variant (TextVariants), the entity described; false without a target or for a detail. subject self (toolbox row G3 reader 1): the actor's body. subject subject (reader 1): in a reaction's when, the event's subject, the holder a status.apply without item, npc or co_present lands on; false anywhere else. Needs kernel_api at least 1.46, and 1.53 for self or subject. Owned by status@1.",
           "type": "object",
           "properties": {

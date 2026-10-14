@@ -1,0 +1,21 @@
+{
+  "keywords": [
+    "deer"
+  ],
+  "short": "npc.deer.short",
+  "room_line": "npc.deer.room",
+  "description": "npc.deer.description",
+  "room": "fen",
+  "spawn_template": true,
+  "hp": {
+    "minimum": 0,
+    "maximum": 1,
+    "start": 1,
+    "gain": 0
+  },
+  "attack": {
+    "chance": 50,
+    "damage_min": 1,
+    "damage_max": 1
+  }
+}

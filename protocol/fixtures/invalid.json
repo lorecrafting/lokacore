@@ -20740,6 +20740,46 @@
     ]
   },
   {
+    "contract": "Policy",
+    "value": {
+      "op": "population_count"
+    },
+    "errors": [
+      {
+        "path": "/at_least",
+        "code": "missing_property"
+      },
+      {
+        "path": "/plan",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "Policy",
+    "value": {
+      "op": "population_count",
+      "plan": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "population",
+        "key": "hounds"
+      },
+      "at_least": 0,
+      "x": 1
+    },
+    "errors": [
+      {
+        "path": "/at_least",
+        "code": "below_minimum"
+      },
+      {
+        "path": "/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
     "contract": "VisitedRoom",
     "value": {
       "actor_id": "10000000-0000-4000-8000-000000000001",
@@ -26327,6 +26367,59 @@
       {
         "path": "/walks",
         "code": "const_mismatch"
+      }
+    ]
+  },
+  {
+    "contract": "PopulationPlan",
+    "value": {
+      "key": "bandits",
+      "bundle": {
+        "cartridge_id": "encounter_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "population_bundle",
+        "key": "bandits"
+      },
+      "home": {
+        "cartridge_id": "encounter_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "room",
+        "key": "road"
+      },
+      "area": [
+        {
+          "cartridge_id": "encounter_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "road"
+        },
+        {
+          "cartridge_id": "encounter_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "crossroads"
+        }
+      ],
+      "cap": 1,
+      "day_target": 1,
+      "night_target": 1,
+      "night_start": 20,
+      "night_end": 6,
+      "replacement_delay": 3600,
+      "wander_interval": 3600,
+      "floor": 0,
+      "birth_when": {
+        "policy_version": 1
+      }
+    },
+    "errors": [
+      {
+        "path": "/birth_when/root",
+        "code": "missing_property"
+      },
+      {
+        "path": "/floor",
+        "code": "below_minimum"
       }
     ]
   },
