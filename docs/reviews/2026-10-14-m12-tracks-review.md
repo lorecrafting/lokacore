@@ -1,7 +1,7 @@
 # Review: m12 tracks and trails (toolbox row W13), main review
 
 - Branch `toolbox/m12-tracks`, exact commit `03101ac0d1ca28222bf41e9d32bebfd718479241` (base `toolbox/batch-m12` `6642e7c1`); Beads `loka-kgd.136`; kernel_api 1.85. Batch lane, no PR. A separate second opinion covers the facts_typed widening.
-- Governing: [mechanics.md Tracks and trails](../system/mechanics.md#tracks-and-trails-toolbox-row-w13), [cartridge.md Trail declarations](../system/cartridge.md#trail-declarations), `protocol/invariants.json` facts_typed, realm seams (`docs/decisions/owner-decision-realm-seams-2026-10-13.md`, on main, not yet on this branch), brief acceptance a-f and PM rulings 2026-10-14 (hold on any body; out-of-area park; instance-scope player trails).
+- Governing: [mechanics.md Tracks and trails](../system/mechanics.md#tracks-and-trails-toolbox-row-w13), [cartridge.md Trail declarations](../system/cartridge.md#trail-declarations), `protocol/invariants.json` facts_typed, realm seams (`docs/decisions/owner-decision-realm-seams-2026-10-13.md`, on `toolbox/batch-m12`, after this branch's base), brief acceptance a-f and PM rulings 2026-10-14 (hold on any body; out-of-area park; instance-scope player trails).
 - Hosted CI on the head: `ci` and `book-e2e` success (`gh run list --commit 03101ac0...`).
 - **Verdict: APPROVE WITH NOTES.**
 
@@ -22,10 +22,12 @@
 - 2: TS `expectedFacts` (`cartridge_position.ts:125`) merges `trailFacts`. Elixir `trails.ex:69-73` and `position.ex:108`. Both kernels test a declaration case and an authored-assign case.
 - 3: `left` (`trail.ts:86`) returns [] without the opt-in. The diff touches no frozen fixture (only additions to `invalid.json` and the gen docs).
 - 7: reviewer probe (not committed) on the mobile local-story save: move plus elapsed with the sampler, then a cold reopen. Four room-subject rows (`trail_at`, `trail_exit`, `trail_hounds_at`, `trail_hounds_exit`) reopen with no error. The diff adds no save or table change.
-- 8: `git diff` adds no `world.character`, `Date`, `performance` or `Math.random` in `kernel/ts/src` or `lib`. Seams 1, 4, 5 and 9 are met. Seams 2, 3, 6, 7 and 8 are n/a for the reasons in the spec list, and I agree with them.
+- 8: `git diff` adds no `world.character`, `Date`, `performance` or `Math.random` in `kernel/ts/src` or `lib`. Seams 1, 4, 5 and 9 are met. The rest are n/a. 2: the row adds no reaction trigger or event. 3: no kill or credit attribution. 6: no speech. 7: no item ownership. 8: no new trust boundary (the loader re-checks every trail declaration).
 - Parity checks: TS runs `trails()` only for v2 (`cartridge_refs.ts:203-204`), while Elixir `Trails.check` runs for any format (`compiler.ex:101`). This is n/a: the v1 branch of `CompiledCartridge` has `additionalProperties: false` and no `world` or `populations`. The schema `trails` object requires `fresh_for` and `leads`, so neither kernel can read an undefined value. facts_typed has no Elixir runtime twin (`implemented_in` typescript; no `lib/` match), so on the Elixir side the twin is the synthesis and the reserve.
 - Seam 1: the hold reads `world.knownEntities` kind `body` (`trail.ts:63-66`). That map is pinned world state (`fresh.ts:217`), not a per-viewer set.
 - Composition: `lint/rules/ts-rule-module-imports.yml` adds only `../trail.ts` to the shared-module list. `trail.ts` names no mechanic and no content.
+- 2 (adjust): the trail reserve reuses the position write-site scan, which covers `fact.adjust` as well as `fact.assign` (`cartridge_position.ts:40`, `position.ex:47`). So an authored adjust of a room-subject trail fact is RESERVED_FACT, not a facts_typed pass.
+- 5 (W26): `tracks.test.ts:162-193` puts a locked barrier on the fresh exit and expects the plain wander.
 - PM claim reruns: hold at `trail.ts:66` confirmed (M3). Hosted CI green on the head confirmed.
 
 ## Mutants (detached worktree, focused files, all restored)
