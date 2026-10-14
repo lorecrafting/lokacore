@@ -327,9 +327,8 @@ function delayed(
 
 /** Row FD1: a reaction job's run_job. It completes; then its rule runs for the stored actor at the
  * due time, as a delivery whose event has no subject. A rule gone from the cartridge, a `when`
- * that fails then, or a step that faults then, writes only the completion (a fact guard cancels a
- * delayed reaction). A step that throws (a durable fact, `assignment`) escapes and leaves the job
- * pending, as the same rule without `after` faults its delivery (spec Known limits). */
+ * that fails then, or a step that faults then, writes only the completion (a fact guard cancels it).
+ * A step that throws (a durable fact) leaves the job pending, as without `after` (spec Known limits). */
 export function runDelayed(
   world: World,
   command: { id: CommandId },
