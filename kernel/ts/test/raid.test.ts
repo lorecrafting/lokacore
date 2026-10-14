@@ -85,8 +85,9 @@ function act(w: World, payload: object): World {
 }
 const slot = (w: World, n: number) =>
   Object.entries(w.state.population_slots!).find(([k]) => JSON.parse(k).slot === n)![1];
-const raided = (w: World) =>
-  Object.entries(w.state.facts ?? {}).find(([k]) => k.includes('raided'))?.[1] ?? false;
+const fact = (w: World, key: string) =>
+  Object.entries(w.state.facts ?? {}).find(([k]) => JSON.parse(k).fact.key === key)?.[1];
+const raided = (w: World) => fact(w, 'raided') ?? false;
 
 // Breaks: genesis or an hour before the full moon births a raider (the plan's own job, or the
 // rule firing outside the full phase).
@@ -226,8 +227,7 @@ test('g: the loader refuses population.spawn or a 0 target below 1.84, or an unk
 
 // Row 37b: the `aftermath` rule adds 1 to the instance fact `aftermaths` on `raided`'s
 // fact_changed to false, which fires only at the first new-moon hour after a raid.
-const aftermaths = (w: World) =>
-  Object.entries(w.state.facts ?? {}).find(([k]) => k.includes('aftermaths'))?.[1] ?? 0;
+const aftermaths = (w: World) => fact(w, 'aftermaths') ?? 0;
 
 // Breaks: the rule counts the raid's own change to true, counts every new-moon hour (a clock_hour
 // trigger), or a world rebuilt from the receipts counts the closed cycle again.
