@@ -10,7 +10,7 @@ of closed work are deleted once their lesson is folded, and linked by permalink
 Reviews before R2 live in the [legacy repository](https://github.com/lorecrafting/lokacore-v2-legacy)
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
-- [Review: two shops save fix, save second opinion (loka-kgd.149)](2026-10-14-m12-two-shops-second-opinion.md): **CHANGES REQUIRED**
+- [Review: two shops save fix, save second opinion (loka-kgd.149)](2026-10-14-m12-two-shops-second-opinion.md): **APPROVE**
 - [Review: two shops make cold reopen save_corrupt (loka-kgd.149)](2026-10-14-m12-two-shops-review.md): **APPROVE**
 - [Review: toolbox row 37a, phased world event spawn (loka-kgd.131)](2026-10-13-m12-raid-review.md): **APPROVE WITH NOTES**
 - [Review: m11 property and bank (rows 24/25) mobile save, second opinion](2026-10-13-m11-property-second-opinion.md): **APPROVE WITH NOTES**

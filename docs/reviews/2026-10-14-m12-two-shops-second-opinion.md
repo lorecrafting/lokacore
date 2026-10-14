@@ -42,3 +42,13 @@
 
 - Commit `49ba7f13`: "the guard is the refuser today" (red control, guard deleted). Backed: the `:43` mutant goes red.
 - Commit `49ba7f13`: "shells currency; one buy at each shop reopens (red control)". Backed: the `:48 ? true` mutant goes red on the shells test.
+
+## Recheck: fix round 2 at `e7cc58acfe923b2f0a09b4397e9da7d51d2f0eb2`
+
+Scope: only the touched test code, `two_shops.test.ts:204-231`.
+
+- Finding 1, **fixed**. The shells test now plays a second save in which invocation 2 (the fisher's shells buy) also gets a penny copy of each `resource.adjust` op. The state rows are unchanged, and the test expects `save_corrupt` (`:230`). It passes at head. Under the survivor mutant `if (payments.length && money.length !== 2 * payments.length)` at `commerce-save.ts:54`, it fails at `:230` with "Missing expected exception" (1 of 4 tests red). I reran this myself.
+- Finding 2 stays with `loka-b60`, as recorded.
+- No new findings in the touched code.
+
+Verdict: **APPROVE**.
