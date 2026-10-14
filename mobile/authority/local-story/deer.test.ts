@@ -1,4 +1,4 @@
-// size: allow 520, deer custody, sight, fault and reaction-spawn reopen cases share one real SQLite fixture
+// size: allow 540, deer custody, sight, fault, reaction-spawn reopen and ClockDriver catch-up cases share one real SQLite fixture
 import assert from 'node:assert/strict';
 import { test, type TestContext } from 'node:test';
 import { DatabaseSync } from 'node:sqlite';
@@ -519,22 +519,19 @@ test('real COMMIT faults preserve all-prior or all-next deer rows and one replay
     }
 });
 
-// Breaks: a host step of an offline catch-up exceeds the 64-created-jobs budget now that jobs
-// scheduled inside an advance run in it (loka-kgd.152); the ClockDriver stops at each pending job.
+// Breaks: a host step of an offline catch-up exceeds the 64-created-jobs budget (loka-kgd.152).
 test('a 72-hour catch-up in ClockDriver steps is accepted at every step', (t) => {
   const { story } = setup(t);
   for (const [i, direction] of ['south', 'south', 'west'].entries()) move(story, direction, i + 1);
   const end = story.world().state.clock + 72 * 3600;
-  while (story.world().state.clock < end) {
-    const { clock, jobs } = story.world().state;
-    let until = end; // elapsed.ts boundary(): the calendar job is never a stop
-    for (const j of Object.values(jobs ?? {}))
-      if (j.status === 'pending' && j.job.kind !== 'calendar') until = Math.min(until, j.due_time);
-    const r = story.elapsed({ expected_run_id: story.runId(), from: clock, until });
-    assert.equal(
-      r.kind === 'saved' && r.decision.kind,
-      'accepted',
-      `${clock} ${JSON.stringify(r)}`,
+  for (let s = story.world().state; s.clock < end; s = story.world().state) {
+    // elapsed.ts boundary(): stop at the next pending job; the calendar job is never a stop
+    const due = Object.values(s.jobs ?? {}).filter(
+      (j) => j.status === 'pending' && j.job.kind !== 'calendar',
     );
+    const until = Math.min(end, ...due.map((j) => j.due_time));
+    const r = story.elapsed({ expected_run_id: story.runId(), from: s.clock, until });
+    const kind = r.kind === 'saved' && (r.decision as { kind?: string } | null)?.kind;
+    assert.equal(kind, 'accepted', `${s.clock} ${JSON.stringify(r)}`);
   }
 });

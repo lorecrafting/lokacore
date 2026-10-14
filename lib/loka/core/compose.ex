@@ -1,7 +1,7 @@
 # size: allow 352, typed knowledge, patrol, final birth admission, status and levelling share portable composition
 defmodule Loka.Core.Compose do
   @moduledoc "Portable delta composition: changed rows only; atomic conflicts and bounded work."
-  alias Loka.Core.{ComposeChoice, ComposePack, Creation}
+  alias Loka.Core.{ComposeChoice, ComposeJob, ComposePack, Creation}
   @profile_path Path.expand("../../../docs/spec/conformance/composition-profile.json", __DIR__)
   @external_resource @profile_path
   @profile File.read!(@profile_path)
@@ -27,51 +27,21 @@ defmodule Loka.Core.Compose do
 
   defp apply_all(state, ops, final) do
     horizon = Enum.reduce(ops, state["clock"], &advance_target/2)
-
-    at = if final, do: horizon, else: state["clock"]
-    steps = Enum.zip([ops, Enum.drop(ops, 1) ++ [nil], job_times(state, ops, at)])
+    times = ComposeJob.times(state, ops, if(final, do: horizon, else: state["clock"]))
+    steps = Enum.zip([ops, Enum.drop(ops, 1) ++ [nil], times])
 
     case Enum.reduce_while(steps, %{}, &step_pair(&1, &2, {state, horizon})) do
-      %{"fault" => _} = f ->
-        f
-
-      overlay ->
-        case {ComposeChoice.pending_at_limit(overlay), final && due_unrun(overlay, horizon)} do
-          {nil, unrun} when unrun in [nil, false] ->
-            %{"changes" => overlay |> Enum.sort() |> Enum.map(&row/1)}
-
-          {nil, t} ->
-            fault("nonfuture_job", t)
-
-          {t, _} ->
-            fault("precondition_failed", t)
-        end
+      %{"fault" => _} = f -> f
+      overlay -> finish(overlay, final && ComposeJob.unrun(overlay, horizon))
     end
   end
 
-  # Each op's scheduling time: the due time of the last job.complete before it, else `at`
-  # (the target; a partial compose: the clock).
-  defp job_times(state, ops, at) do
-    due = Map.new(section(state, "jobs"), fn {id, j} -> {id, j["due_time"]} end)
-
-    Enum.scan(ops, {at, due}, fn op, {at, due} ->
-      due =
-        if op["op"] == "job.schedule",
-          do: Map.put_new(due, op["job_id"], op["due_time"]),
-          else: due
-
-      {if(op["op"] == "job.complete", do: Map.get(due, op["job_id"], at), else: at), due}
-    end)
-    |> Enum.map(&elem(&1, 0))
-  end
-
-  # Only job.schedule writes a pending row: one due by the target must have run in this advance.
-  defp due_unrun(overlay, horizon) do
-    Enum.find_value(overlay, fn {_, {_, target, value}} ->
-      if target["kind"] == "job" and value["status"] == "pending" and
-           value["due_time"] <= horizon,
-         do: target
-    end)
+  defp finish(overlay, unrun) do
+    cond do
+      t = ComposeChoice.pending_at_limit(overlay) -> fault("precondition_failed", t)
+      unrun -> fault("nonfuture_job", unrun)
+      true -> %{"changes" => overlay |> Enum.sort() |> Enum.map(&row/1)}
+    end
   end
 
   defp step_pair({op, next, at}, overlay, ctx) do
