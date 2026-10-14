@@ -38,7 +38,7 @@ export function births(
   mint: Mint,
 ) {
   const plan = world.populationSpecs[key(job.job)]!.plan;
-  const floor = plan.birth_when && !gate(world, plan.birth_when) ? (plan.floor ?? 0) : target;
+  const floor = gate(world, plan.birth_when, job.due_time) ? target : (plan.floor ?? 0);
   const ops: DeltaOp[] = [];
   const ids = new Set<string>();
   for (const { slot, row } of slots) {
@@ -49,8 +49,9 @@ export function births(
   }
   return { ops, ids };
 }
-/** A plan gate (row W12): its tree reads no actor (the loader's leaf allow-list). */
-const gate = (world: World, when: VersionedPolicy) => holds(world, '' as CharacterId, when.root);
+/** A plan gate (row W12), absent or holding at the occurrence's time `due`; it reads no actor. */
+const gate = (world: World, when: VersionedPolicy | undefined, due: number) =>
+  !when || holds({ ...world, state: { ...world.state, clock: due } }, '' as CharacterId, when.root);
 
 /** A slot within the target with no living member whose replacement is due by `due`. */
 export const eligible = (slot: number, row: Slots[number]['row'], target: number, due: number) =>
@@ -162,7 +163,7 @@ export function wanders(
   mint: Mint,
   walked: Walked,
 ): DeltaOp[] {
-  if (job.due_time !== wanderDue || (plan.wander_when && !gate(world, plan.wander_when))) return [];
+  if (job.due_time !== wanderDue || !gate(world, plan.wander_when, wanderDue)) return [];
   const [home, nest] = plan.area.map((r) => world.roomIds[refString(r)]);
   const ops: DeltaOp[] = [];
   for (const { row } of slots)

@@ -150,6 +150,23 @@ test('a false wander_when keeps every deer where it was born', () => {
   );
 });
 
+// Breaks: a plan gate reads the elapsed command's end clock, not the occurrence's due time (the
+// stepped run above steps one hour at a time and cannot see it).
+test('one long elapsed command reads wander_when at each occurrence time', () => {
+  const hollow = (w: World) => [1, 2, 3].map((i) => w.state.containers[born(w, DEER, i)!]);
+  const at3 = world((c) => {
+    c.populations[DEER].wander_when = {
+      policy_version: 1,
+      root: { op: 'time_window', from: 3, to: 4 },
+    };
+  });
+  for (const w of [elapsed(at3, 1000), elapsed(at3, 1000, [], 1000)])
+    assert.deepEqual(
+      hollow(w),
+      [1, 2, 3].map(() => w.roomIds['fen_sampler@0.0.1:room/hollow']),
+    );
+});
+
 // Breaks (loader; twin of test/loka/content_fen_test.exs): population_count under API 1.85, an
 // unknown plan, an actor leaf in a gate, or a floor above day_target loads.
 test('the loader refuses an old API, an unknown plan, an actor leaf and a high floor', () => {
