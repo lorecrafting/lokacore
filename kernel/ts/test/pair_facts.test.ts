@@ -57,6 +57,7 @@ const gloats = (w: World, npc: string, other: string) =>
     { steps: { n: 0 } },
   );
 let n = 0;
+let lastEvents: readonly { payload: Record<string, unknown> }[] = [];
 const act = (w: World, p: object) => {
   n += 1;
   const s = step(
@@ -69,6 +70,7 @@ const act = (w: World, p: object) => {
     n,
   );
   assert.equal(s.decision.kind, 'accepted', JSON.stringify(s.decision));
+  lastEvents = (s.decision as never as { events: typeof lastEvents }).events;
   return s.world;
 };
 const gift = () => {
@@ -99,6 +101,8 @@ test('the smith given the apple before the miller gloats over him, one ordered r
       ],
     ],
   );
+  const changed = lastEvents.find((e) => e.payload.type === 'fact_changed');
+  assert.equal(changed?.payload.with_id, id(w, 'npc/miller'));
   assert.ok(invariant('facts_typed', w));
 });
 

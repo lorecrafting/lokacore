@@ -2883,7 +2883,7 @@ Gap 4 of the [depth audit](../rnd/depth-and-ux-2026-10-13.md) (owner approved 20
   - `fact_compare`: the subject is the leaf's `npc` (or `subject: "target"`), the partner is `with`. A missing subject or partner reads false.
   - Reaction `fact.assign` and `fact.adjust`: the subject is the step's `npc`, else the event's declared subject (never the listener default or the body); the partner is `with`. The step writes nothing unless both are distinct NPC entities.
   - A W6 room line variant and a W10 case are `fact_compare` leaves, so they read pairs unchanged.
-- **facts_typed.** A row has `with_id` exactly when its fact is `npc_pair`, and then its subject and `with_id` are two distinct NPC entities (`kernel/ts/src/mechanics/fact.ts`); a pair row naming an item, a detail, one NPC twice, or no partner is a broken invariant.
+- **facts_typed.** A row has `with_id` exactly when its fact is `npc_pair`, and then its subject and `with_id` are two distinct NPC entities (`kernel/ts/src/mechanics/fact_typed.ts`); a pair row naming an item, a detail, one NPC twice, or no partner is a broken invariant.
 - **Realm seams** (owner decision 2026-10-13, brief checklist).
   1. Actor: met; the step's subject is its named NPC or the event's declared subject; no new `world.character` read.
   2. Reactions: met; no new trigger; the step names its subject from the event's declared subject or `npc`, never the listener default.
