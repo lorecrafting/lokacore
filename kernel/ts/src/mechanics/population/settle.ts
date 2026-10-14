@@ -242,6 +242,12 @@ function arrivalSight(
     : [];
 }
 
+/** A row 37a spawn (its occurrence id is its own id) holds home: no other writer group moves it. */
+const held = (world: World, member: string) => {
+  const origin = world.state.created?.[member]?.origin;
+  return origin?.kind === 'spawned' && origin.occurrence_id === member;
+};
+
 function wanderable(
   world: World,
   row: Slots[number]['row'],
@@ -253,6 +259,7 @@ function wanderable(
     !!member &&
     row.replacement_due === null &&
     !born.has(member) &&
+    !held(world, member) &&
     row.last_flight_at !== job.due_time &&
     !Object.values(world.state.crows ?? {}).some(
       (crow) => crow.member_id === member && crow.phase !== 'idle',

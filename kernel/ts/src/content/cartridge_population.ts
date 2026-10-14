@@ -16,10 +16,14 @@ const opposite: Record<string, string> = {
 /** Loader twin of the compiler's narrow two-room, one-hound/one-pelt plan check. */
 export function population(c: Obj): Diagnostic[] {
   const plans = c.populations ?? {};
-  // Toolbox row 9: an encounter plan (`chance`) needs kernel_api 1.74.
+  // Toolbox row 9: an encounter plan (`chance`) needs kernel_api 1.74; row 37a: a day_target 0
+  // (a plan only population.spawn fills) needs 1.84.
+  const list = Object.values(plans) as Obj[];
+  const floor = list.some((p) => p.day_target === 0)
+    ? '1.84'
+    : list.some((p) => p.chance !== undefined) && '1.74';
   const out: Diagnostic[] =
-    (Object.values(plans) as Obj[]).some((p) => p.chance !== undefined) &&
-    apiCmp(c.manifest.requires.kernel_api.at_least, '1.74') < 0
+    floor && apiCmp(c.manifest.requires.kernel_api.at_least, floor) < 0
       ? [diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least')]
       : [];
   for (const [planRef, p] of Object.entries(plans) as [string, Obj][]) {

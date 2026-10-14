@@ -152,7 +152,7 @@ export function sequence(
     } else if (step.op === 'item.move') {
       ops.push(...moveItem(then, step, about.subject, group, ops, holders)); // row 41
     } else if (step.op === 'population.spawn') {
-      ops.push(...spawn(then, step, by.id, group, ops, mint)); // row 37a
+      ops.push(...spawn(then, step, group, ops, mint)); // row 37a
     } else if (step.op === 'experience.grant') {
       gained = saturate(gained + step.amount);
     } else {

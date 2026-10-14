@@ -6,11 +6,10 @@
     "field"
   ],
   "cap": 2,
-  "day_target": 1,
-  "night_target": 1,
+  "day_target": 0,
+  "night_target": 0,
   "night_start": 8,
   "night_end": 2,
-  "replacement_delay": 100000,
-  "wander_interval": 100000,
-  "chance": 1
+  "replacement_delay": 10000,
+  "wander_interval": 100
 }
