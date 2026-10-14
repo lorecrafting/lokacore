@@ -1,3 +1,4 @@
+// size: allow 306, RS-1 actor-read freeze markers until RS-2 removes them
 // ActionSet: engine, cartridge, room, choice; combat restricts admission/projection (06 §19).
 import {
   CAPABILITY_OWNERS,
@@ -220,6 +221,7 @@ export const detailAt = (world: World, a: Offered) =>
  */
 import { visible } from '../mechanics/light/shared.ts';
 
+// size: allow 41, one RS-1 freeze marker until RS-2 removes it
 export function refusal(
   world: World,
   payload: CommandPayload,

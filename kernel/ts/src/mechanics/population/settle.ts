@@ -1,3 +1,4 @@
+// size: allow 303, RS-1 actor-read freeze markers until RS-2 removes them
 import type {
   CharacterId,
   CommandId,
