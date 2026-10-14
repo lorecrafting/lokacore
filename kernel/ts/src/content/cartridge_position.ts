@@ -1,5 +1,6 @@
 import { skillSpec, usesSpec } from './cartridge_skills.ts';
 import { tipSpec } from './cartridge_recipes.ts';
+import { trailFacts } from './cartridge_trails.ts';
 // The loader's engine-fact check (cartridge.md Compiler; DiagnosticCode RESERVED_FACT), twin of
 // lib/loka/content/position.ex: under position@1 the fact position is the engine's, so the
 // scene@1 also reserves each scene_<key> fact. The artifact must carry exactly these FactSpecs,
@@ -121,5 +122,5 @@ export function expectedFacts(c: Obj): Obj {
   }
   for (const r of Object.values((c.recipes ?? {}) as Obj))
     if (r.tip) expected[`seen_tip_${r.key}`] = tipSpec(r.key);
-  return expected;
+  return { ...expected, ...trailFacts(c) };
 }

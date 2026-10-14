@@ -14,6 +14,7 @@ import { barrierState } from '../lookups.ts';
 import { npcPassage, relock } from '../movement/shared.ts';
 import { happened } from '../schedule/behavior.ts';
 import { moves } from '../status/shared.ts';
+import { chase, left, once } from '../trail.ts';
 import { birth } from './birth.ts';
 import { bindSight } from './behavior.ts';
 
@@ -161,10 +162,10 @@ export function wanders(
     ops.push(
       ...wanderOne(world, occurrence_id, planRef, plan, job, row, born, [home, nest], mint, walked),
     );
-  return ops;
+  return once(ops);
 }
 
-// size: allow 47, a walking member (row W26) commits its key passage with its move and sight
+// size: allow 50, a walker crosses doors (W26), a hunt picks its edge or holds (false), a trail (W13)
 function wanderOne(
   world: World,
   occurrence_id: CommandId,
@@ -185,19 +186,22 @@ function wanderOne(
   // Toolbox row W26: a walking plan crosses doors as a walking schedule step does.
   const walker = plan.walks ? (member as EntityId) : undefined;
   const edge =
-    to &&
-    Object.entries(room.exits).find(
-      ([d, e]) => world.roomIds[refString(e.to)] === to && !npcPassage(world, room, d, walker),
-    );
-  if (!to || !edge || !moves(world, member)) return [];
+    chase(world, plan, from, job.due_time, walker) ??
+    (to &&
+      Object.entries(room.exits).find(
+        ([d, e]) => world.roomIds[refString(e.to)] === to && !npcPassage(world, room, d, walker),
+      ));
+  if (!edge || !moves(world, member)) return [];
+  const there = world.roomIds[refString(edge[1].to)]!;
   const door = walker && edge[1].barrier;
   const doors = door && barrierState(world, door) === 'locked' ? relock(door) : [];
   for (const d of doors)
     events.push(happened(world, { id: occurrence_id }, mint, job.due_time, d.changed));
-  const transfer = moveOp(member as EntityId, from, to);
+  const transfer = moveOp(member as EntityId, from, there);
   return [
     ...doors.map((d) => d.op),
     transfer,
+    ...left(world, from, edge[0], job.due_time, plan),
     ...arrivalSight(
       world,
       occurrence_id,
@@ -207,7 +211,7 @@ function wanderOne(
       row,
       member as EntityId,
       from,
-      to,
+      there,
       mint,
     ),
   ];

@@ -60,6 +60,7 @@ import { opposed, practised } from '../skills.ts';
 import { cureOps } from '../status/shared.ts';
 import { spellOf, useRefused } from './shared.ts';
 import { effect, fightBack, type Effected } from './spell.ts';
+import { fresh, trailLead } from '../trail.ts';
 
 export const decide: Rule<'action_recipe'> = (world, command, mint, steps = { n: 0 }) => {
   const p = command.payload;
@@ -96,7 +97,7 @@ export const decide: Rule<'action_recipe'> = (world, command, mint, steps = { n:
     rolled?.outcome ?? 'performed',
     [...run.ops, ...cooldown, ...time],
     [...run.events, ...completed],
-    [said, ...run.lines],
+    [said, ...run.lines, ...trailLead(world, rolled?.lead)],
     run.rng,
   );
 };
@@ -171,6 +172,11 @@ function resolve(
   const [n, rng] =
     check.kind === 'luck' ? uniform(world.state.rng, 100, DRAWS) : [0, world.state.rng];
   const actor = command.payload.actor_id;
+  // Toolbox row W13: a track check passes on the plan's fresh trail in the actor's room.
+  const lead =
+    check.kind === 'track'
+      ? fresh(world, world.state.containers[body], world.state.clock, check.plan)
+      : undefined;
   const passed =
     check.kind === 'luck'
       ? n < check.chance
@@ -178,7 +184,9 @@ function resolve(
         ? attributeValue(world, actor, check.attribute) >= check.difficulty
         : check.kind === 'opposed'
           ? opposed(world, actor, check, world.details[subject_id]?.rating ?? 0)
-          : level(world, body, check.resource)! >= check.difficulty;
+          : check.kind === 'track'
+            ? lead !== undefined
+            : level(world, body, check.resource)! >= check.difficulty;
   const { id: cartridge_id, version: cartridge_version } = world.cartridge.manifest;
   const payload: CheckEvent = {
     type: passed ? 'check_passed' : 'check_failed',
@@ -186,7 +194,7 @@ function resolve(
     subject_id,
   };
   const outcome = passed ? ('success' as const) : ('failure' as const);
-  return { outcome, rng, event: event(world, command, mint, 1, payload) };
+  return { outcome, rng, event: event(world, command, mint, 1, payload), lead };
 }
 
 type Command = Parameters<Rule<'action_recipe'>>[1];
