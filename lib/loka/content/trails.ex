@@ -44,7 +44,7 @@ defmodule Loka.Content.Trails do
   defp specs(defs) do
     planned =
       for {key, _, _, %{"trail" => true}} <- plans(defs),
-          String.length(key) <= 53,
+          byte_size(key) <= 53,
           {name, spec} <- [
             {"trail_#{key}_exit", &exit_spec/3},
             {"trail_#{key}_at", &at_spec/3}

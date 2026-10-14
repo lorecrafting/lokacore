@@ -97,7 +97,7 @@ export const decide: Rule<'action_recipe'> = (world, command, mint, steps = { n:
     rolled?.outcome ?? 'performed',
     [...run.ops, ...cooldown, ...time],
     [...run.events, ...completed],
-    [said, ...trailLead(world, rolled?.lead), ...run.lines],
+    [said, ...run.lines, ...trailLead(world, rolled?.lead)],
     run.rng,
   );
 };
