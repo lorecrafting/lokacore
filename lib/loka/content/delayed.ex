@@ -1,7 +1,7 @@
 defmodule Loka.Content.Delayed do
   @moduledoc """
   Toolbox row FD1: a reaction's `after`, the fact.stamp step and the time_since leaf need
-  kernel_api 1.88; a delayed rule carries no step that reads its event (barrier.set, item.move,
+  kernel_api 1.90; a delayed rule carries no step that reads its event (barrier.set, item.move,
   population.suppress, a co_present or tagged step); a stamped or timed fact is an int fact with no
   maximum and a minimum absent or at most 0. Twin of kernel/ts/src/content/cartridge_delayed.ts.
   """
@@ -66,7 +66,7 @@ defmodule Loka.Content.Delayed do
 
   defp timed(_, _, _), do: []
 
-  # Per rule, so a rule with `after` and no steps needs 1.88 too.
+  # Per rule, so a rule with `after` and no steps needs 1.90 too.
   defp floor(m, timed, defs) do
     used = timed != [] or for({_, {_, [], %{"after" => _}}} <- defs["reaction"], do: 1) != []
 
@@ -75,7 +75,7 @@ defmodule Loka.Content.Delayed do
       |> String.split(".")
       |> Enum.map(&String.to_integer/1)
 
-    if used and api < [1, 88],
+    if used and api < [1, 90],
       do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
       else: []
   end

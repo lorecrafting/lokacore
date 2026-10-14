@@ -213,7 +213,7 @@ test('g: the loader refuses population.spawn or a 0 target below 1.84, or an unk
   for (const drop of [false, true]) {
     const old = load((c) => {
       c.manifest.requires.kernel_api.at_least = '1.83';
-      delete c.reactions[AFTERSHOCK]; // row FD1's rule and stamp need 1.88 on their own
+      delete c.reactions[AFTERSHOCK]; // row FD1's rule and stamp need 1.90 on their own
       c.reactions[raid].apply.pop();
       // drop: the plan's target 0 alone; else the step alone (targets 1)
       if (drop) c.reactions[raid].apply.shift();
@@ -430,15 +430,15 @@ test('FD1: time_since 600 after a stamp at 1000 is false at 1599 and true at 160
 });
 
 // Breaks (twin of test/loka/content_raid_test.exs): `after`, fact.stamp or time_since loads
-// under API 1.87; a delayed rule keeps a step that reads its event; a stamp or time_since names a
+// under API 1.89; a delayed rule keeps a step that reads its event; a stamp or time_since names a
 // fact that cannot hold every clock value.
-test('FD1: the loader keeps API 1.88, event-free delayed steps and an unbounded int clock fact', () => {
+test('FD1: the loader keeps API 1.90, event-free delayed steps and an unbounded int clock fact', () => {
   const raid = 'raid_sampler@0.0.1:reaction/raid';
   const calm = 'raid_sampler@0.0.1:reaction/calm';
   const ref = (key: string) => ({ ...w0Ref, key });
   const w0Ref = { cartridge_id: 'raid_sampler', cartridge_version: '0.0.1', kind: 'fact' };
   const since = { op: 'time_since', fact: ref('raided_at'), at_least: 600 };
-  const old = (c: any) => (c.manifest.requires.kernel_api.at_least = '1.87');
+  const old = (c: any) => (c.manifest.requires.kernel_api.at_least = '1.89');
   const unstamped = (c: any) => c.reactions[raid].apply.pop();
   const unshocked = (c: any) => delete c.reactions[AFTERSHOCK];
   const api = ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'];

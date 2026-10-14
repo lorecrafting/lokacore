@@ -106,7 +106,7 @@ test('the loader rejects a bounded integer fact default outside its bounds', () 
 
 // Breaks (row FD1; twin of test/loka/content_raid_test.exs): a time_since leaf loads under API
 // 1.0 in a cartridge with no world content.
-test('the loader keeps API 1.88 for a time_since policy without world content', () => {
+test('the loader keeps API 1.90 for a time_since policy without world content', () => {
   const cartridge = structuredClone(read('protocol/fixtures/cartridge_hash.json').value);
   const fact = cartridge.facts['ashmere_hello@0.0.1:fact/village_arrived'];
   fact.value_type = { type: 'int', default: 0 };

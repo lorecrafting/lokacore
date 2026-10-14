@@ -3,6 +3,8 @@
 // (FACT_SCOPE_UNSUPPORTED), such a fact is named only where a subject is known (a fact_compare, a
 // fact.assign or fact.adjust step, a reaction's fact_changed trigger), and a subject field names
 // one NPC or item instance, of such a fact only, and subject "target" only where a target can be.
+// Row FD4: npc_pair facts and `with` fields need 1.89; such a fact is per_subject at instance scope
+// only, and is named only by an op with a `with` NPC instance and no item; `with` names only it.
 import type { Diagnostic } from '../contracts.gen.ts';
 import { refString } from '../runtime/decision.ts';
 import { diag, step, type Obj } from './cartridge_refs.ts';
@@ -49,13 +51,18 @@ function nodes(c: Obj, visit: (o: Obj, at: string, parent?: Obj, field?: string)
   for (const [k, v] of Object.entries(c)) if (k !== 'facts') walk(v, `.cartridge${step(k)}`);
 }
 
-/** KERNEL_API_RANGE_INVALID when the cartridge uses row W2 below kernel_api 1.47. */
+/** KERNEL_API_RANGE_INVALID when the cartridge uses row W2 below 1.47 or row FD4 below 1.89. */
 export function scopedFacts(c: Obj): Diagnostic[] {
-  let used = Object.values((c.facts ?? {}) as Record<string, Obj>).some(scoped);
+  const facts = Object.values((c.facts ?? {}) as Record<string, Obj>);
+  let w2 = facts.some(scoped);
+  let fd4 = facts.some((f) => f.npc_pair === true);
   nodes(c, (o) => {
-    if (OPS.includes(o.op) && fieldsOf(o).length) used = true;
+    if (!OPS.includes(o.op)) return;
+    w2 ||= fieldsOf(o).length > 0;
+    fd4 ||= Object.hasOwn(o, 'with');
   });
-  return used && apiCmp(c.manifest.requires.kernel_api.at_least, '1.47') < 0
+  const api = c.manifest.requires.kernel_api.at_least;
+  return (w2 && apiCmp(api, '1.47') < 0) || (fd4 && apiCmp(api, '1.89') < 0)
     ? [diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least')]
     : [];
 }
@@ -63,14 +70,22 @@ export function scopedFacts(c: Obj): Diagnostic[] {
 /** FACT_SCOPE_UNSUPPORTED at each site that names a subject this kernel cannot read (row W2). */
 export function scopeSites(c: Obj): Diagnostic[] {
   const subjective = (ref: Obj) => scoped(c.facts?.[refString(ref as never)]);
+  const paired = (ref: Obj) => c.facts?.[refString(ref as never)]?.npc_pair === true;
   const out: string[] = [];
+  for (const [k, f] of Object.entries((c.facts ?? {}) as Record<string, Obj>))
+    if (f.npc_pair && !(f.per_subject && f.scopes.length === 1 && f.scopes[0] === 'instance'))
+      out.push(`.cartridge.facts${step(k)}.npc_pair`);
   nodes(c, (o, at, parent, field) => {
     if (o.kind === 'fact' && subjective(o))
       if (field !== 'fact' || !(SITES.includes(parent?.op ?? parent?.event) || wielded(parent)))
         if (!GROUP.includes(at)) out.push(at);
     if (!OPS.includes(o.op) || !o.fact) return;
     const fields = fieldsOf(o);
-    if (fields.length > 1 || (o.npc && c.npcs?.[refString(o.npc)]?.spawn_template))
+    if (paired(o.fact) !== Object.hasOwn(o, 'with')) out.push(`${at}.with`);
+    else if (o.with && o.item) out.push(`${at}.item`);
+    else if (o.with && c.npcs?.[refString(o.with)]?.spawn_template) out.push(`${at}.with`);
+    else if (o.with && o.npc && refString(o.with) === refString(o.npc)) out.push(`${at}.with`);
+    else if (fields.length > 1 || (o.npc && c.npcs?.[refString(o.npc)]?.spawn_template))
       out.push(`${at}.${fields.at(-1)}`);
     else if (fields.length && !subjective(o.fact)) out.push(`${at}.${fields[0]}`);
     else if (o.subject === 'target' && targetless(at)) out.push(`${at}.subject`);

@@ -341,6 +341,10 @@
                 "attacker": {
                   "$ref": "identity.schema.json#/$defs/DefinitionRef",
                   "description": "The attacker is this NPC's authored instance (loka-kgd.79); a player's blow never matches. Needs kernel_api at least 1.58."
+                },
+                "target": {
+                  "$ref": "identity.schema.json#/$defs/DefinitionRef",
+                  "description": "The target is this NPC's authored instance (row 39); a blow on the player never matches. Needs kernel_api at least 1.87."
                 }
               },
               "required": [
@@ -450,7 +454,7 @@
           "$ref": "policy.schema.json#/$defs/VersionedPolicy"
         },
         "after": {
-          "description": "Toolbox row FD1 (kernel_api at least 1.88): the steps run this many logical seconds after delivery, as a reaction job for the delivery's actor, when `when` holds at both times; due no earlier than 1 s after the proposal's clock.",
+          "description": "Toolbox row FD1 (kernel_api at least 1.90): the steps run this many logical seconds after delivery, as a reaction job for the delivery's actor, when `when` holds at both times; due no earlier than 1 s after the proposal's clock.",
           "type": "integer",
           "minimum": 1,
           "maximum": 2147483647
@@ -472,6 +476,10 @@
                     "$ref": "identity.schema.json#/$defs/DefinitionRef"
                   },
                   "item": {
+                    "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                  },
+                  "with": {
+                    "description": "Toolbox row FD4 (kernel_api at least 1.89): an npc_pair fact's second NPC; the step writes at the pair (its subject toward this NPC).",
                     "$ref": "identity.schema.json#/$defs/DefinitionRef"
                   },
                   "value": {
@@ -499,6 +507,10 @@
                     "$ref": "identity.schema.json#/$defs/DefinitionRef"
                   },
                   "item": {
+                    "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                  },
+                  "with": {
+                    "description": "Toolbox row FD4 (kernel_api at least 1.89): an npc_pair fact's second NPC; the step writes at the pair (its subject toward this NPC).",
                     "$ref": "identity.schema.json#/$defs/DefinitionRef"
                   },
                   "amount": {
@@ -658,7 +670,7 @@
                 "additionalProperties": false
               },
               {
-                "description": "Toolbox row FD1 (kernel_api at least 1.88): writes the delivery's logical time into an int fact (no maximum, minimum absent or at most 0) at the subject a fact.assign step writes at, as a fact.assign.",
+                "description": "Toolbox row FD1 (kernel_api at least 1.90): writes the delivery's logical time into an int fact (no maximum, minimum absent or at most 0) at the subject a fact.assign step writes at, as a fact.assign.",
                 "type": "object",
                 "properties": {
                   "op": { "const": "fact.stamp" },

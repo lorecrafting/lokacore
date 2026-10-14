@@ -1,9 +1,11 @@
 import type {
+  CharacterId,
   CommandId,
   DefinitionRef,
   DeltaOp,
   DomainEvent,
   EntityId,
+  VersionedPolicy,
 } from '../../contracts.gen.ts';
 import { key } from '../../foundation/compose.ts';
 import { uniform } from '../../foundation/rng.ts';
@@ -11,6 +13,7 @@ import { refString, type JobRow, type Mint, type World } from '../../runtime/dec
 import { engaged } from '../combat/shared.ts';
 import { living } from '../death/shared.ts';
 import { barrierState } from '../lookups.ts';
+import { holds } from '../policy.ts';
 import { npcPassage, relock } from '../movement/shared.ts';
 import { happened } from '../schedule/behavior.ts';
 import { moves } from '../status/shared.ts';
@@ -35,16 +38,22 @@ export function births(
   slots: Slots,
   mint: Mint,
 ) {
+  const plan = world.populationSpecs[key(job.job)]!.plan;
+  const floor = gate(world, plan.birth_when, job.due_time) ? target : (plan.floor ?? 0);
   const ops: DeltaOp[] = [];
   const ids = new Set<string>();
   for (const { slot, row } of slots) {
-    if (!eligible(slot, row, target, job.due_time)) continue;
+    if (slot > floor || !eligible(slot, row, target, job.due_time)) continue;
     const born = birthSlot(world, occurrence_id, job, slot, row, mint);
     ops.push(...born.ops);
     ids.add(born.member_id);
   }
   return { ops, ids };
 }
+/** A plan gate (row W12), absent or holding at the occurrence's time `due`; it reads no actor. */
+const gate = (world: World, when: VersionedPolicy | undefined, due: number) =>
+  !when || holds({ ...world, state: { ...world.state, clock: due } }, '' as CharacterId, when.root);
+
 /** A slot within the target with no living member whose replacement is due by `due`. */
 export const eligible = (slot: number, row: Slots[number]['row'], target: number, due: number) =>
   slot <= target &&
@@ -155,7 +164,7 @@ export function wanders(
   mint: Mint,
   walked: Walked,
 ): DeltaOp[] {
-  if (job.due_time !== wanderDue) return [];
+  if (job.due_time !== wanderDue || !gate(world, plan.wander_when, wanderDue)) return [];
   const [home, nest] = plan.area.map((r) => world.roomIds[refString(r)]);
   const ops: DeltaOp[] = [];
   for (const { row } of slots)
@@ -253,7 +262,6 @@ const held = (world: World, member: string) => {
   const origin = world.state.created?.[member]?.origin;
   return origin?.kind === 'spawned' && origin.occurrence_id === member;
 };
-
 function wanderable(
   world: World,
   row: Slots[number]['row'],

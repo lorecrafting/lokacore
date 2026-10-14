@@ -235,7 +235,7 @@ test('the forge sets a fine or crude band by strength, once', () => {
 });
 
 // Twin of test/loka/content_durability_test.exs. Breaks: the loader admits durability or repair
-// below API 1.69, a durability fact that is not per_subject or is unbounded, a repair of a fact no
+// below API 1.69, a durability fact that is not per_subject, is an npc_pair or is unbounded, a repair of a fact no
 // weapon uses, or a repair service without its refusal text.
 test('the loader keeps durability to API 1.69, a bounded entity fact and its repair texts', () => {
   const diagnostic = (edit: (c: any) => void) => {
@@ -252,6 +252,13 @@ test('the loader keeps durability to API 1.69, a bounded entity fact and its rep
     ],
     [(c) => delete c.facts[`${S}:fact/edge`].per_subject, ['SCHEMA_VIOLATION', at]],
     [(c) => (c.facts[`${S}:fact/edge`].scopes = ['player']), ['SCHEMA_VIOLATION', at]],
+    [
+      (c) => {
+        c.manifest.requires.kernel_api.at_least = '1.89';
+        c.facts[`${S}:fact/edge`].npc_pair = true; // row FD4: durability reads no partner
+      },
+      ['SCHEMA_VIOLATION', at],
+    ],
     [(c) => delete c.facts[`${S}:fact/edge`].value_type.maximum, ['SCHEMA_VIOLATION', at]],
     [
       (c) => (c.services[`${S}:service/mend`].benefit.fact = ref('fact', 'quality')),

@@ -3,7 +3,9 @@
 The active checks run in hosted CI on every push to a branch, nightly on `main` and by hand; a green
 run on the exact head is the merge gate with review ([two-lane CI](decisions/owner-decision-two-lane-ci-2026-10-09.md)).
 Locally, pre-commit checks the staged files and developers run only the tests their diff touches;
-`bin/check_all.sh` mirrors the hosted line for an occasional full local run.
+`bin/check_all.sh` mirrors the hosted line for an occasional full local run. `bin/prepush.sh` runs
+the static checks of hosted CI, no test suite, in about 30 s before every push and after every
+`bin/pm_merge.sh` merge.
 The [scope audit](evidence/2026-10-06-ci-scope-audit.md) records the costs measured when lanes were selected locally.
 Mobile checks are paused by the [owner decision](decisions/owner-decision-web-first-mobile-pause-2026-10-05.md);
 their rules and red controls remain available for resumption.
@@ -33,7 +35,7 @@ their rules and red controls remain available for resumption.
   `.prettierignore` only applies there). CI and `bin/check_all.sh` currently select
   non-mobile files; `mobile/` formatting is deferred in both, but the pre-commit hook
   still runs Prettier and `ast-grep scan --error` on staged `mobile/` files. The mobile app's
-  `npx tsc --noEmit` is also deferred. Active TypeScript verification is
+  `npx tsc --noEmit` is not in CI; `bin/prepush.sh` runs it locally. Active TypeScript verification is
   `npm run typecheck && npm test` in `kernel/ts` and `npm test` in `mobile/app` (local-story
   authority and Book tests), in CI's `kernel` and `mobile` jobs and `bin/check_all.sh` (Node's built-in test runner).
   `bin/check_all.sh` sets `TEST_REPORTER=dot` (the `npm test` scripts default to `spec`): one dot per
@@ -94,6 +96,11 @@ their rules and red controls remain available for resumption.
   and a reserved ID, and checks the session-start PR drift report
   (`bin/beads_pr_drift.py`). The check needs no `br` binary.
 - `bin/orphans_red_controls.sh` checks that `bin/orphans.sh` lists a busy, old orphan and skips a child, a young, an idle, a system and a server process. `bin/worktree_setup_red_controls.sh` checks that `bin/worktree_setup.sh` links main's `node_modules` for a matching lockfile and removes the link before `npm ci` after a lockfile change.
+- `bin/merge_resolve_red_controls.sh` checks that `bin/merge_resolve.py` (the `bin/pm_merge.sh` resolver) keeps both
+  `docs/system/mechanics.md` tail sections (ours first, a section both sides appended once), the higher
+  `kernel_api` (1.10 over 1.9) and a regenerated `docs/system-graph.gen.json`, and leaves unresolved a tail
+  that repeats a `## ` heading or gives one heading two bodies, a conflict in the middle of `mechanics.md`, a review record that differs
+  beyond whitespace, an edit of the last `mechanics.md` line and a TypeScript source conflict.
 - `bin/integration_red_controls.sh` runs the PM scripts in throwaway repositories with stubs.
   It runs `bin/sync_pr.sh` (merge `main` into a PR branch): a code conflict is refused, a review
   index conflict is regenerated, the merge is pushed, and a failed docs check blocks the push.

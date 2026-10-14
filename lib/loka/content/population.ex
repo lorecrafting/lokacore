@@ -12,8 +12,23 @@ defmodule Loka.Content.Population do
     "down" => "up"
   }
 
+  # Row W12: a plan gate has no actor, so its tree reads world state alone.
+  @gates ~w(birth_when wander_when)
+  @actorless ~w(all any not population_count time_window sky barrier_state)
+
+  @doc "Each plan gate's located policy root (row W12; twin of the TS loader's nodes/1)."
+  def conditions(defs),
+    do:
+      for(
+        {_, {rel, steps, p}} <- defs["population"] || %{},
+        is_map(p),
+        k <- @gates,
+        is_map(p[k]),
+        do: {rel, steps ++ [k, "root"], p[k]["root"]}
+      )
+
   # ponytail: one bounded plan expansion keeps short refs together. # credo:disable-for-next-line Credo.Check.Refactor.ABCSize
-  def expand(%{"bundle" => b, "home" => home, "area" => area} = plan, m) do
+  def expand(%{"bundle" => b, "home" => home, "area" => area} = plan, m, expand) do
     plan
     |> Map.put("bundle", ref(b, "population_bundle", m))
     |> Map.put("home", ref(home, "room", m))
@@ -33,9 +48,13 @@ defmodule Loka.Content.Population do
           })
       end
     end)
+    |> Map.new(fn
+      {k, v} when k in @gates -> {k, expand.(v, m)}
+      kv -> kv
+    end)
   end
 
-  def expand(%{"npc" => n, "corpse" => c} = bundle, m) do
+  def expand(%{"npc" => n, "corpse" => c} = bundle, m, _expand) do
     bundle
     |> Map.put("npc", ref(n, "npc", m))
     |> Map.put("corpse", ref(c, "item", m))
@@ -49,7 +68,7 @@ defmodule Loka.Content.Population do
     plans = defs["population"] || %{}
     calendar = settings["calendar"]
 
-    floor(manifest, plans) ++
+    floor(manifest, defs, plans) ++
       for {_key, {rel, steps, plan}} <- plans,
           is_map(plan),
           error <- plan_errors(manifest, defs, calendar, if(v2, do: elem(v2, 1), else: %{}), plan),
@@ -57,15 +76,24 @@ defmodule Loka.Content.Population do
   end
 
   # Toolbox row 9: an encounter plan (`chance`) needs kernel_api 1.74; row 37a: a day_target 0
-  # (a plan only population.spawn fills) needs 1.84.
-  defp floor(m, plans) do
+  # (a plan only population.spawn fills) needs 1.84; row W12: a floor, a plan gate or a
+  # population_count leaf anywhere needs 1.86.
+  defp floor(m, defs, plans) do
     list = for {_, {_, _, p}} <- plans, is_map(p), do: p
 
     floor =
       cond do
-        Enum.any?(list, &(&1["day_target"] == 0)) -> [1, 84]
-        Enum.any?(list, &Map.has_key?(&1, "chance")) -> [1, 74]
-        true -> [0]
+        w12?(list, defs) ->
+          [1, 86]
+
+        Enum.any?(list, &(&1["day_target"] == 0)) ->
+          [1, 84]
+
+        Enum.any?(list, &Map.has_key?(&1, "chance")) ->
+          [1, 74]
+
+        true ->
+          [0]
       end
 
     api =
@@ -111,7 +139,28 @@ defmodule Loka.Content.Population do
     |> add(not pack_valid?(p["pack"], p["area"], rooms, text), ["pack", "narration"])
     |> add(not sight_valid?(p["sight"], p["area"], rooms, text, bundle), ["sight", "narration"])
     |> add(manifest["requires"]["capabilities"]["population"] != 1, ["bundle"])
+    |> add(p["floor"] != nil and (p["floor"] > p["day_target"] or p["chance"] != nil), ["floor"])
+    |> add(is_map(p["birth_when"]) and not actorless?(p["birth_when"]["root"]), ["birth_when"])
+    |> add(is_map(p["wander_when"]) and not actorless?(p["wander_when"]["root"]), ["wander_when"])
   end
+
+  defp actorless?(%{"op" => "not", "item" => i}), do: actorless?(i)
+
+  defp actorless?(%{"op" => op} = p) when op in @actorless,
+    do: Enum.all?(p["items"] || [], &actorless?/1)
+
+  defp actorless?(_), do: false
+
+  defp w12?(plans, defs),
+    do:
+      Enum.any?(plans, &Enum.any?(["floor" | @gates], fn k -> Map.has_key?(&1, k) end)) or
+        counts?(defs)
+
+  defp counts?(%{"op" => "population_count"}), do: true
+  defp counts?(v) when is_map(v), do: Enum.any?(Map.values(v), &counts?/1)
+  defp counts?(v) when is_list(v), do: Enum.any?(v, &counts?/1)
+  defp counts?(v) when is_tuple(v), do: counts?(Tuple.to_list(v))
+  defp counts?(_), do: false
 
   defp pack_valid?(nil, _, _, _), do: true
 

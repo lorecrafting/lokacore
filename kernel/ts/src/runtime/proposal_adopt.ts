@@ -3,7 +3,7 @@ import { apply, base } from './apply.ts';
 import { counts, over, target, type Limit } from '../foundation/compose.ts';
 import type { DecisionResult, DeltaOp } from '../contracts.gen.ts';
 import type { Mint, Steps, World } from './decision.ts';
-import { typedFact } from '../mechanics/fact.ts';
+import { typedFact } from '../mechanics/fact_typed.ts';
 import { utf8 } from '../foundation/sha256.ts';
 import { recoveryFault } from '../mechanics/resource.ts';
 import { propose, BUDGET, type Actor } from './proposal.ts';

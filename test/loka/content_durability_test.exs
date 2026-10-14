@@ -3,8 +3,8 @@ defmodule Loka.ContentDurabilityTest do
   setup_all do: %{dir: Loka.ContentSource.copy("cartridges/durability_sampler")}
 
   # Breaks (toolbox row 21; twin of the loader rows in kernel/ts/test/durability.test.ts): a
-  # durability or repair compiles under API 1.68, a durability fact that is not per_subject or is
-  # unbounded, a repair of a fact no weapon uses, or a repair without its refusal text.
+  # durability or repair compiles under API 1.68, a durability fact that is not per_subject, is an
+  # npc_pair (row FD4) or is unbounded, a repair of a fact no weapon uses, or a repair without its refusal text.
   test "durability keeps its API floor, a bounded entity fact and its repair texts", %{dir: dir} do
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, [])
     edge = ["facts", "edge"]
@@ -19,6 +19,7 @@ defmodule Loka.ContentDurabilityTest do
            {"SCHEMA_VIOLATION", fact}},
           {{"facts.json", &put_in(&1, edge ++ ["scopes"], ["player"])},
            {"SCHEMA_VIOLATION", fact}},
+          {{"facts.json", &put_in(&1, edge ++ ["npc_pair"], true)}, {"SCHEMA_VIOLATION", fact}},
           {{"services/mend.json", &put_in(&1, ["benefit", "fact"], "quality")},
            {"SCHEMA_VIOLATION", "services/mend.benefit.fact"}},
           {{"text.json", &Map.delete(&1, "service.nothing_to_repair")},

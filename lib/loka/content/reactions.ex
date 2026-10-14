@@ -40,7 +40,8 @@ defmodule Loka.Content.Reactions do
     "status" => "status",
     "kind" => "liquid",
     "npc" => "npc",
-    "attacker" => "npc"
+    "attacker" => "npc",
+    "target" => "npc"
   }
   @doc "Each trigger filter that names a definition (W1), with that definition's kind."
   @spec filters() :: %{String.t() => String.t()}
@@ -61,9 +62,9 @@ defmodule Loka.Content.Reactions do
         reference(rel, ["on"], {f, kind}, on, ctx.m, ctx.defs)
       end)
 
-  # A spawn template has no instance to enter (row W3) or attack (loka-kgd.79).
+  # A spawn template has no instance to enter (row W3), attack (loka-kgd.79) or be hit (row 39).
   defp instances(rel, on, ctx),
-    do: Enum.flat_map(Map.take(on, ["npc", "attacker"]), &instance(rel, &1, ctx))
+    do: Enum.flat_map(Map.take(on, ["npc", "attacker", "target"]), &instance(rel, &1, ctx))
 
   defp instance(rel, {f, n}, ctx) do
     case resolve(n, "npc", ctx.m, ctx.defs) do
@@ -93,14 +94,15 @@ defmodule Loka.Content.Reactions do
   @events %{"quest_resolved" => 8, "spoken" => 48, "status_applied" => 53}
 
   # One diagnostic per rule below its highest floor; the entrant filter needs 1.47 (row W3), the
-  # attacker filter 1.58 (loka-kgd.79), a co_present status.apply 1.50 (W21), with a tag 1.56 (W22),
-  # naming a room 1.65 (status reader 9).
+  # attacker filter 1.58 (loka-kgd.79), the target filter 1.87 (row 39), a co_present
+  # status.apply 1.50 (W21), with a tag 1.56 (W22), naming a room 1.65 (status reader 9).
   defp api(r, manifest) do
     floor =
       Enum.max([
         Map.get(@events, r["on"]["event"], 0),
         if(Map.has_key?(r["on"], "npc"), do: 47, else: 0),
-        if(Map.has_key?(r["on"], "attacker"), do: 58, else: 0)
+        if(Map.has_key?(r["on"], "attacker"), do: 58, else: 0),
+        if(Map.has_key?(r["on"], "target"), do: 87, else: 0)
         | Enum.map(r["apply"], &step_floor/1)
       ])
 

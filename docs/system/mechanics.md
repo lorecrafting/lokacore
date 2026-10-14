@@ -600,7 +600,7 @@ Every filter present must equal its payload field; a filter means the same field
 | `barrier_changed`                                                                                                    | `barrier`, `to`                                                                                                       | the actor's body                               |
 | `scene_ended`                                                                                                        | `scene`                                                                                                               | the actor's body                               |
 | `entity_died`                                                                                                        | `victim` (victim_definition), `room` (room_id)                                                                        | victim_id                                      |
-| `attack_result`                                                                                                      | `hit`, `attacker` (attacker_id is that NPC's authored instance; [loka-kgd.79](#attacker-filter-loka-kgd79))           | target_id                                      |
+| `attack_result`                                                                                                      | `hit`, `attacker` (attacker_id is that NPC's authored instance; [loka-kgd.79](#attacker-filter-loka-kgd79)), `target` (target_id, likewise; [row 39](#boss-phases-toolbox-row-39))           | target_id                                      |
 | `filled`, `poured`, `drank`                                                                                          | `kind`                                                                                                                | the actor's body                               |
 | `entity_entered_room`                                                                                                | `room` (required), `npc` (entity_id is that NPC's authored instance; [row W3](#rumour-by-co-presence-toolbox-row-w3)) | entity_id                                      |
 | `rested`                                                                                                             | `room` (required)                                                                                                     | body_id                                        |
@@ -615,7 +615,7 @@ taking an item) still reads the actor's `when` and writes the actor's facts, que
 experience; only `status.apply`, ([status reader 3](#status-readers-toolbox-rows-sr1-sr2-and-sr3)) `status.cure` and `status_active {subject: "subject"}` follow the subject, which may be the actor's body, an NPC or an
 item ([row G3](#statuses-on-npcs-and-things-toolbox-row-g3)), unless the step names an `item`, ([row 42](#potions-and-songs-toolbox-rows-18-and-42)) an `npc` or ([status reader 9](#a-room-as-a-status-holder-status-reader-9)) a `room`; any other subject (a detail) takes nothing, and since status reader 9 a room subject takes it; ([row W22](#fire-toolbox-row-w22)) `barrier.set` names its barrier or acts on the event's room; ([row 41](#decay-toolbox-row-41)) `item.move` moves the subject when it is an item. A check, action or custom event's subject_id
 names its target, so its status lands on the doer: a failed disarm poisons the actor. A filter naming a definition (`item`,
-`room`, `quest`, `story_point`, `barrier`, `scene`, `kind`, `victim`, `npc` and `attacker` as an NPC, `status`) must name one of
+`room`, `quest`, `story_point`, `barrier`, `scene`, `kind`, `victim`, `npc`, `attacker` and `target` as an NPC, `status`) must name one of
 this cartridge (`item` matches its authored instance only, never a created one such as a
 harvested pelt); key filters (`custom`, `check`, `choice`, `action`, `outcome`) are not resolved
 and a key no event carries never matches.
@@ -2051,6 +2051,7 @@ Nothing is stored: the stats are read at use, so a later attribute writer change
 - **Book.** The status line shows the weather in words beside the sky glyph and adds weather, season and tide to the glyph's accessible label ([Book UI](book-ui.md#world-and-status-entry); trap 12). A cartridge says why a torch will not light with a description variant on `sky weather` (the sign is in the text).
 - **Sampler.** `cartridges/sky_sampler`: 100 units an hour, 10 hours a day; weather `clear` 1, `rain` 1 (wet); season `spring` from 0 and `autumn` from 2000 of 4000; tide `low` from 0 and `high` from 250 of 500. The yard (`exposed`) has a rain variant; the shed east is sheltered. With world id `5b7d9f1a-3c5e-4a7b-9d1f-4a6c8e0b2d4f` days 1 to 5 are rain and day 6 is clear: a held torch is refused in the yard on day 1, lights in the shed, and lights in the yard at 5000.
 - **Out of scope.** Seasonal weather tables, tide-gated connections (archived `tide@1`), a rain status row (no state: trap 11) and dousing a lit flame.
+- **Ambient sampler (toolbox row FD8).** `cartridges/ambient_sampler`: the yard's description is a variant on `sky {weather: rain}` with `time_window` 21 to 5 (`room.yard.rain_night`), another on clear with `time_window` 5 to 8 (`room.yard.clear_dawn`), else `room.yard.description`. Content only: derived on read, no state, event or job, so no reaction narrates (a reaction's only voice is a status line).
 - **Composition record.** Consumer: description variants and every policy site, the GameView calendar status, light@1's ignite; later W25 exposure through `sky()` and `weather()`. Reads: the committed clock, the world id and the authored calendar; writes, events, jobs and save rows: none. Reused: the lunar cut lookup (now `CalendarCycle`), the policy evaluator, G1 tags, light@1's shared transition and the GameView verb filter, the SHA-256 foundation. New: `calendar.weather`, `.season`, `.tide`, three `sky` fields, three `CalendarStatus` fields and the `exposed` tag (`kernel_api` at least 1.45); no foundation change.
 
 ## Pick and force a barrier (toolbox rows 13 and G12)
@@ -2873,6 +2874,93 @@ Found by [showcase plan 2](../showcase/combat-district.md) (#368); the PM brief 
   - New: the track check kind, `world.trails`, plan `trail` and `hunts`, room subjects for trail facts, the 1.85 floor.
   - Missing invariant: none (facts_typed covers the rows).
 
+## Boss phases (toolbox row 39)
+
+[Toolbox row 39](../MECHANICS-TOOLBOX.md#ranked-toolbox); its sampler: "boss summons at 60% HP, withdraws at 25%, drops one crown". The PM brief is in Beads `loka-kgd.134` (2026-10-14). The phases are content on what exists: [reaction@1](#reaction1-kerneltssrcmechanicsreactionts) rules on `attack_result` whose `when` reads the boss's hp, with [row 37a](#phased-world-events-toolbox-row-37a)'s `population.spawn` and `fact.assign`. No leaf read another entity's pool or a share of a maximum, so the row widens [`resource_compare`](#attributes1-kerneltssrcmechanicspolicyts60) by two optional fields.
+
+- **Subject.** `subject: "subject"` reads the pool on the reaction's event subject (the reaction@1 table: `attack_result`'s `target_id`; the actor's body for an event without one), as `status_active {subject: subject}` names its holder. Outside a reaction's `when` it reads the actor's body, as without the field. Without the field the leaf reads the actor's body, as before. An entity other than the actor's body holds the pool only by its own spec (an NPC's `hp`); one without reads false, never the cartridge default.
+- **Percent.** `at_least_percent` (1 to 100) holds when the current value times 100 is at least the percent times the entity's maximum (an NPC's own `hp` maximum, the player body's derived one; [resource@1](#resource1-kerneltssrcmechanicsresourcets) `resourceSpec`): integer math, no division, so there is no rounding. A leaf has exactly one of `at_least` and `at_least_percent` (`exactlyOneRequired`). "Below P%" is `not {at_least_percent P}`, by the [leaf naming](#property-tags-and-the-policy-leaf-set-toolbox-row-g1) rule ("below" is `not`). The sampler's "at or below 60%" is `not {at_least_percent 61}`, exact at maximum 20: it holds at 12 (1200 < 1220) and fails at 13; `not {at_least_percent 26}` holds at 5 and fails at 6. At maximum 21, `at_least_percent 60` holds at 13 (1300 ≥ 1260) and fails at 12 (1200 < 1260).
+- **Read time.** A reaction on `attack_result` reads the pool after the hit's loss (the delivery runs over the cause's committed writes): a boss at 13 of 20 hit for 1 reads 12.
+- **Opt-in.** A `resource_compare` with `subject` or `at_least_percent` needs `kernel_api` 1.87 (KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least`), in both kernels (`kernel/ts/src/content/cartridge_variants.ts`, `lib/loka/content/variants.ex`). Installed kernel 1.87. Chapter 1 declares none.
+- **Target filter.** `attack_result` takes a `target` filter (an NPC; the payload's `target_id` is that NPC's authored instance), as `attacker` names the striker ([loka-kgd.79](#attacker-filter-loka-kgd79)); `FILTERS` in `kernel/ts/src/mechanics/reaction.ts`, `target` in `NAMED` (`kernel/ts/src/content/cartridge_reactions.ts`). Needs `kernel_api` 1.87. Without it the warlord's hit on a player at 15 of 30 reads the player's pool as the subject and summons.
+- **Summon once.** The summon rule's `when` also reads `summoned` false and the warlord's hp at least 1 (the killing blow calls no guard), and its `apply` sets `summoned`, so later hits under 60% spawn no second guard (one `population.spawn`, one guard); withdraw sets `withdrawn`, which the warlord's [conditional schedule](#conditional-schedules-toolbox-row-w10) reads at the next hour.
+- **Crown.** The crown is an authored item held by the warlord; it falls into his corpse on death by [death@1](#death1--corpse-custody-and-same-body-return-m5-b-foundation) custody. No loot table, no new drop rule.
+- **Known limits.** With whole hp values, `not {at_least_percent P+1}` means "at or below P%" only when no value lies in [P%, P+1%) of the maximum: at maximum 99, hp 60 (60.6%) also holds (6000 < 6039). An exact "at or below" needs a new field (follow-up if content needs it). Phases fire on `attack_result` only: a loss from a status, bleed or spell does not summon until the next hit. A `subject` that is another player's body reads false, and `maxima()` knows only the session's body (Realm follow-up, seams 1 and 2).
+- **Realm seams** (owner decision 2026-10-13, brief checklist).
+  1. Actor: met; the leaf reads the event subject's pool, never `world.character`; the reaction writes only `instance` facts and spawns.
+  2. Reactions: met; each rule names its subject (`subject: "subject"`) and its target (`target: "warlord"`), so a hit on any other entity, a player included, fires nothing.
+  3. Credit: met; the crown goes to the corpse, and kill credit is the encounter's validated credited character ([death@1](#death1--corpse-custody-and-same-body-return-m5-b-foundation)); the phases pay nothing.
+  4. Time: met; no new job kind or clock read (spawned guards use row 37a's jobs); withdraw takes effect at the schedule's next hour.
+  5. Scope: met; the boss is shared-world in the Realm: `summoned` and `withdrawn` are `instance` facts, so every player sees one summon and one withdrawal.
+  6. Text: not applicable; authored narration lines only.
+  7. Ownership: met; the crown moves by death@1 custody, nothing else changes owner.
+  8. Trust: not applicable; nothing imported.
+  9. Instancing: met; none built or assumed; one boss per world, shared as in line 5.
+- **Book.** No new element and no [Book UI](book-ui.md) change.
+- **Sampler.** `cartridges/boss_sampler`: a hall and a lair; the warlord (hp 20, hits for 1, holds the crown) in the hall, schedule to the lair when `withdrawn`; population `guards` (cap 2, day and night target 0; the summon spawns one); reactions `summon` and `withdraw`. Tests: `kernel/ts/test/boss.test.ts`, `test/loka/content_boss_test.exs`, `mobile/authority/local-story/boss.test.ts` (cold reopen).
+- **Composition record** ([architecture](architecture.md#building-mechanics-by-composition)).
+  - Consumer: `boss_sampler`. Later: showcase bosses.
+  - Reads: the subject's resource level and `resourceSpec` maximum, the `summoned` fact, `attack_result`'s `target_id`.
+  - Writes: `population.spawn` ([row 37a](#phased-world-events-toolbox-row-37a)) and `fact.assign` (existing ops); no new op, event or job.
+  - New parts: two optional `resource_compare` fields and one reaction filter; no new mechanic.
+
+## NPC-NPC pair facts (toolbox row FD4)
+
+Gap 4 of the [depth audit](../rnd/depth-and-ux-2026-10-13.md) (owner approved 2026-10-13): [W2](#entity-and-pair-facts-toolbox-row-w2) pairs an NPC with the character only; row FD4 adds one value per pair of NPCs, so rivalries, debts and romances among NPCs need no simulation. The PM brief is in Beads `loka-kgd.141` (2026-10-14).
+
+- **Declaration.** A FactSpec with `npc_pair: true` (const; absent otherwise) is an NPC-NPC pair fact. It must also be `per_subject: true` with `scopes: ["instance"]`: who owes whom among NPCs is world state (FACT_SCOPE_UNSUPPORTED at `.cartridge.facts[<ref>].npc_pair` otherwise).
+- **Row key.** The fact MutationTarget, `fact.assign` op, ScopedFact and `fact_changed` payload carry an optional `with_id` (EntityId) beside `subject_id`; both kernels compose it into the target text. Rows are **ordered**: subject toward `with`. Debts and grudges are directional, an ordered key needs no hidden sort rule, and an author wanting a symmetric bond writes both rows. No new save section: the row lives in `facts` like any other.
+- **Naming the two NPCs.** Every site naming a pair fact carries `with` (an NPC instance reference) and no `item`; `with` on any other fact, a pair fact without `with`, or `with` naming a spawn template or the site's own `npc` is FACT_SCOPE_UNSUPPORTED at that field. A pair fact is no weapon's durability fact (SCHEMA_VIOLATION): durability reads no partner.
+  - `fact_compare`: the subject is the leaf's `npc` (or `subject: "target"`), the partner is `with`. A missing subject or partner reads false.
+  - Reaction `fact.assign` and `fact.adjust`: the subject is the step's `npc`, else the event's declared subject (never the listener default or the body); the partner is `with`. The step writes nothing unless both are distinct NPC entities.
+  - A W6 room line variant and a W10 case are `fact_compare` leaves, so they read pairs unchanged.
+- **facts_typed.** A row has `with_id` exactly when its fact is `npc_pair`, and then its subject and `with_id` are two distinct NPC entities (`kernel/ts/src/mechanics/fact_typed.ts`); a pair row naming an item, a detail, one NPC twice, or no partner is a broken invariant.
+- **Realm seams** (owner decision 2026-10-13, brief checklist).
+  1. Actor: met; the step's subject is its named NPC or the event's declared subject; no new `world.character` read.
+  2. Reactions: met; no new trigger; the step names its subject from the event's declared subject or `npc`, never the listener default.
+  3. Credit: not applicable; no payout.
+  4. Time: not applicable; no delay or clock read.
+  5. Scope: met; pair facts are world state, `instance` only; Realm audience: every player in the world reads one row per pair.
+  6. Text: not applicable; variant lines are authored, `speech@1` unchanged.
+  7. Ownership: not applicable; nothing owned moves.
+  8. Trust: not applicable; nothing imported.
+  9. Instancing: met; none built or assumed; one row per ordered pair per world.
+- **Opt-in.** An `npc_pair` fact or a `with` field needs `kernel_api` 1.89 (KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least`, both kernels). Without them nothing changes: every other cartridge keeps its bytes and hash.
+- **Book.** No new element and no [Book UI](book-ui.md) change: the reading is an authored room line variant.
+- **Known limits.** No leaf reads "any pair" or counts rows. `with` names an authored NPC (not a spawn template, not the site's own `npc`), so a spawned NPC can be a pair's subject only, through the event's declared subject. A pair fact cannot be a weapon's durability fact or a group fact.
+- **Sampler.** `cartridges/rivals_sampler`: the smith and the miller in the square, an apple. Giving the apple to the smith while the miller is present sets `gloats` (bool) for smith toward miller only; the smith's room line then reads "The smith polishes her apple where the miller can see."
+- **Composition record** ([architecture](architecture.md#building-mechanics-by-composition)).
+  - Consumer: `rivals_sampler`. Later: the showcase's social district (loka-y6yg.4).
+  - Reads: fact rows at (subject, with), the event's declared subject.
+  - Writes: `fact.assign` (existing op) with `fact_changed` (existing event) at the pair target.
+  - Writer ownership: reaction steps own authored pair facts, as for W2.
+  - Jobs and save rows: none new; pair rows live in `facts`.
+  - Reused: per_subject facts (W2), `fact_compare`, reaction fact steps, W6 variants, compose_target.
+  - New: FactSpec `npc_pair`, the `with` field, the target's `with_id`, the 1.89 floor.
+  - Missing invariant: none (facts_typed covers the rows).
+
+## Population plans reading populations (toolbox row W12)
+
+[Toolbox row W12](../MECHANICS-TOOLBOX.md#ranked-toolbox); its sampler: "kill the hounds and the deer fill the fen; the deer never drop below the declared floor". The PM brief is in Beads `loka-kgd.135` (2026-10-14); the optional prey hunt is out (a later row reuses W13). [Declarations](cartridge.md#status-declarations) govern it. A [population plan](#c3-bounded-living-hounds-selected-contract) gains three optional fields and the policy set one leaf; the plan's job is otherwise unchanged.
+
+- **Leaf.** `population_count {plan, at_least}` (`at_least` an integer from 1) holds when the named plan has at least `at_least` living members: slots 1 to `cap` whose row has a `member_id` and no `replacement_due` (a dead member keeps its id with `replacement_due` set and does not count). Derived on read from the slot rows; no RNG, no actor. A plan whose slot rows do not exist yet counts 0. Owned by `population@1`. Usable in any policy tree.
+- **Plan gates.** `birth_when` and `wander_when`, each a versioned policy. At a plan occurrence, a false `birth_when` births nothing above the floor; a false `wander_when` moves no member. Both are read at the occurrence's logical time on the world before the occurrence's own ops. They hold no actor, so their trees may use only `all`, `any`, `not`, `population_count`, `time_window`, `sky` and `barrier_state`; any other leaf is SCHEMA_VIOLATION at the field, in both kernels. The gate covers every birth of the plan's job: an occurrence (ecology or encounter) and the end of a `population.suppress` window. Genesis ignores `birth_when` (genesis births to target as before, so no plan order matters), and so does `population.spawn` (as it ignores targets).
+- **Floor.** `floor`, an integer from 1 to the plan's `day_target` (the smaller target), on a plan without `chance` (an encounter draw births one slot per roll and cannot keep a floor; SCHEMA_VIOLATION at `floor` otherwise). A member that dies in a slot at or below `floor` gets `replacement_due` equal to its death time, not death time plus `replacement_delay` (`deathSequence`, `kernel/ts/src/mechanics/death/sequence.ts`), and slots at or below `floor` birth whatever `birth_when` says. So the plan's next occurrence refills them. Kills cannot be prevented, so "never below the floor" means: below it at most until the plan's next occurrence (at most one `wander_interval`, sooner at a night boundary). A `population.suppress` window outranks the floor (a quiet plan births nothing until it ends).
+- **Opt-in.** `population_count` in any tree, or any of `floor`, `birth_when` and `wander_when`, needs `kernel_api` at least **1.86** (KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least`, both kernels); a `plan` that names no population plan of the cartridge is UNRESOLVED_REFERENCE at the leaf's `plan`. Installed kernel 1.86. Chapter 1 and every existing sampler declare none and keep their bytes.
+- **Same time.** Two plans' jobs due at one time run in job id order, so one plan's count read at that time depends on that order. The sampler keeps its kills off a shared due time; the count is otherwise exact.
+- **Book.** No new element and no line.
+- **Realm seams** (owner rule `docs/decisions/owner-decision-realm-seams-2026-10-13.md`). 1 Actor: met: the plan gates read no actor (the leaf allow-list above); no new `world.character`. 2 Reactions: n/a: no trigger or step. 3 Credit: n/a: no payout; a kill credits as before. 4 Time: met: the floor refill and the gates run on the plan's logical job; no device clock, no skip, no new `from`/`until`. 5 Scope: met: the count reads world-state slot rows; a birth is a world change every player in the room sees. 6 Text: n/a: no text. 7 Ownership: n/a: nothing owned. 8 Trust: met: the count is derived from this authority's own slot rows; no receipt or import read. 9 Instancing: met: a plan is shared-world; none assumed.
+- **Known limits.** The gates read world state only (no actor, fact or quest leaf). The floor is per slot, so a floor plan refills slots 1 to `floor`, not any living member below it. Same-time job order above.
+- **Traps.** [Trap 1](../MECHANICS-TOOLBOX.md#traps) holds: the gates and the floor ride the plan's existing job on the logical clock. No new job, event, op or save section.
+- **Sampler.** `cartridges/fen_sampler`: [row 10](#time-windows-hour-and-moon-gates-toolbox-row-10)'s calendar shape (100 units an hour, 10 hours a day); a fen (entry) and a hollow; `hounds` `{home hollow, area [hollow, fen], cap 1, targets 1, replacement_delay 100000, wander_interval 100}`; `deer` `{home fen, area [fen, hollow], cap 3, targets 3, floor 1, replacement_delay 200, wander_interval 100, birth_when not population_count {hounds, at_least 1}}`. Genesis gives one hound and three deer. Deer slain in slots 2 and 3 stay dead past their delay while the hound lives; once the hound is slain, the next occurrence births both. The slot-1 deer slain while the hound lives is reborn at the next wander boundary (`kernel/ts/test/fen.test.ts`, `test/loka/content_fen_test.exs`).
+- **Composition record** ([architecture](architecture.md#building-mechanics-by-composition)).
+  - Consumer: `fen_sampler`. Later: a quest plan's floor; the prey hunt row.
+  - Reads: slot rows of any plan (the leaf); the plan's `floor` (the death sequence and `births`).
+  - Writes: none new: the existing birth, wander and `population.slot` ops.
+  - Events, jobs and save rows: none new.
+  - Reused: `holds` and the policy walkers, `births`, `wanders`, the death sequence, population plans.
+  - New: the `population_count` leaf, three plan fields, the 1.86 floor; no foundation change.
+
 ## Delayed reactions (toolbox row FD1)
 
 [Toolbox row FD1](../MECHANICS-TOOLBOX.md#ranked-toolbox) (source: `docs/rnd/depth-and-ux-2026-10-13.md` gap 1): "a consequence arrives later; a rule reads how long ago something happened". The PM brief is in Beads `loka-kgd.138` (2026-10-14). [Declarations](cartridge.md#delayed-reaction-declarations) govern it. Facts hold plain values (no write time), so the row stores a time in an int fact.
@@ -2892,7 +2980,7 @@ Found by [showcase plan 2](../showcase/combat-district.md) (#368); the PM brief 
   7. Ownership: not applicable; `item.move` is refused on a delayed rule.
   8. Trust: met; the job row is this authority's; the job invariants (both kernels) require `actor_id` on a reaction job, but no check ties it to a character row (Known limits).
   9. Instancing: not applicable; none built; the job is per actor.
-- **Opt-in.** `after`, `fact.stamp` and `time_since` need `kernel_api` 1.88 (KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least`, both kernels). Installed kernel 1.88. Chapter 1 declares none.
+- **Opt-in.** `after`, `fact.stamp` and `time_since` need `kernel_api` 1.90 (KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least`, both kernels). Installed kernel 1.90. Chapter 1 declares none.
 - **Book.** No new element and no line.
 - **Known limits.** A delay that would end inside the same wait arrives 1 s after the wait ends: never early, possibly late (the composer refuses a job due inside the proposal's advance; PM ruling 2026-10-14). No subject is carried: fired steps reach only the actor's body and named NPCs and items. No `job.cancel` by content. `after` is per rule, not per step. A reaction job's `actor_id` is not checked against the character rows on reopen. A fired step that throws rather than faults (a `fact.assign` to a durable fact) leaves the job pending, so every later advance faults, as the same rule without `after` faults every delivery; no loader check refuses it yet.
 - **Traps.** No RNG; one bounded job per delivery; the stamp is an existing fact write.
@@ -2903,5 +2991,5 @@ Found by [showcase plan 2](../showcase/combat-district.md) (#368); the PM brief 
   - Writes: `job.schedule`, `job.complete` and the steps' existing ops; `fact.stamp` lowers to `fact.assign`.
   - Events, save rows: none new; the job is a `JobRow` with existing columns (`job`, `actor_id`).
   - Reused: `sequence`, the job drain, `fact.assign`, `fact_compare`'s read.
-  - New: `after`, the reaction job kind, `fact.stamp`, `time_since`, the 1.88 floor; foundation: the job composer (both kernels, and both job invariants) admits `actor_id` on a `reaction` job (PM ruling 2026-10-14, second opinion).
+  - New: `after`, the reaction job kind, `fact.stamp`, `time_since`, the 1.90 floor; foundation: the job composer (both kernels, and both job invariants) admits `actor_id` on a `reaction` job (PM ruling 2026-10-14, second opinion).
   - Missing invariant: none (job rows are checked by the job invariants).

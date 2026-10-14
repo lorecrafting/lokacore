@@ -1,5 +1,5 @@
 // Toolbox row FD1 at the cartridge trust boundary: a reaction's `after`, the fact.stamp step and the
-// time_since leaf need kernel_api 1.88; a delayed rule carries no step that reads its event; a
+// time_since leaf need kernel_api 1.90; a delayed rule carries no step that reads its event; a
 // stamped or timed fact is an int fact that can hold any clock value. Twin of lib/loka/content/delayed.ex.
 import { refString } from '../runtime/decision.ts';
 import type { DefinitionRef, Diagnostic } from '../contracts.gen.ts';
@@ -30,7 +30,7 @@ export function delayed(c: Obj): Diagnostic[] {
   }
   for (const [n, at] of nodes(c))
     if (n.op === 'time_since') ((used = true), clock(n.fact, `${at}.fact`));
-  if (used && apiCmp(c.manifest.requires.kernel_api.at_least, '1.88') < 0)
+  if (used && apiCmp(c.manifest.requires.kernel_api.at_least, '1.90') < 0)
     out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
   return out;
 }

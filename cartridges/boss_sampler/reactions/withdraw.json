@@ -1,0 +1,25 @@
+{
+  "on": {
+    "event": "attack_result",
+    "target": "warlord"
+  },
+  "when": {
+    "policy_version": 1,
+    "root": {
+      "op": "not",
+      "item": {
+        "op": "resource_compare",
+        "subject": "subject",
+        "resource": "hp",
+        "at_least_percent": 26
+      }
+    }
+  },
+  "apply": [
+    {
+      "op": "fact.assign",
+      "fact": "withdrawn",
+      "value": true
+    }
+  ]
+}

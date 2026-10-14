@@ -1,0 +1,55 @@
+{
+  "api_version": "loka/v3",
+  "id": "ambient_sampler",
+  "version": "0.0.1",
+  "title": "Ambient Sampler",
+  "requires": {
+    "kernel_api": {
+      "at_least": "1.45",
+      "below": "2.0"
+    },
+    "content_schema": 1,
+    "rule_ir": 1,
+    "capabilities": {
+      "movement": 1,
+      "policy": 1,
+      "schedule": 1,
+      "calendar": 1,
+      "description_variant": 1
+    },
+    "client_features": []
+  },
+  "supported_profiles": [
+    "offline_private"
+  ],
+  "entry": "yard",
+  "calendar": {
+    "start": 0,
+    "units_per_hour": 3600,
+    "hours_per_day": 24,
+    "subdivisions_per_hour": 4,
+    "weather": [
+      {
+        "phase": "clear",
+        "weight": 1
+      },
+      {
+        "phase": "frost",
+        "weight": 1
+      },
+      {
+        "phase": "heat",
+        "weight": 1
+      },
+      {
+        "phase": "rain",
+        "weight": 1,
+        "wet": true
+      },
+      {
+        "phase": "gale",
+        "weight": 1
+      }
+    ]
+  }
+}
