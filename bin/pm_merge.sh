@@ -19,7 +19,7 @@ git fetch -q origin || exit 2
 pre=$(git rev-parse HEAD)
 
 merge() { # <ref> <message>
-  if git -c merge.conflictStyle=merge merge --no-ff -q "$1" -m "$2" -m "$tr" >/dev/null 2>&1; then echo "MERGED $1"; return 0; fi
+  if git -c merge.conflictStyle=diff3 merge --no-ff -q "$1" -m "$2" -m "$tr" >/dev/null 2>&1; then echo "MERGED $1"; return 0; fi
   c=$(git diff --name-only --diff-filter=U)
   # The known additive conflicts (bin/merge_resolve.py: mechanics.md tail sections, the kernel_api
   # line, generated files and docs/reviews/) are resolved; any other conflict stops the merge.
@@ -27,7 +27,7 @@ merge() { # <ref> <message>
     git commit -q --no-edit >/dev/null 2>&1; then
     echo "MERGED $1 (resolved: $(echo $c))"; return 0
   fi
-  echo "CONFLICT $1: $(echo $c)"; git merge --abort 2>/dev/null; return 1
+  echo "CONFLICT $1: $(echo $c) (\$TMPDIR/pm_resolve.out)"; git merge --abort 2>/dev/null; return 1
 }
 merge "$sha" "Merge $slice: $subj" || exit 1
 merge "$rec" "Merge review record for $subj" || { git reset -q --hard "$pre"; exit 1; }

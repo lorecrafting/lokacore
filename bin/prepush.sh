@@ -24,4 +24,5 @@ run COMPILE mix compile --warnings-as-errors
 run XREF sh -c 'mix xref graph --format cycles --fail-above 0 && mix xref graph --label compile-connected --fail-above 0'
 run CREDO mix credo --strict
 run DOCS elixir bin/check_docs.exs
+[ $fail = 1 ] || rm -rf "$logs"
 exit $fail
