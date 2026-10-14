@@ -17,6 +17,7 @@ import { bodyOf, refString, type World } from '../runtime/decision.ts';
 import { barrierState, questOf } from './lookups.ts';
 import { key } from '../foundation/compose.ts';
 import { subjective, value } from './fact.ts';
+import { mul } from '../foundation/int.ts';
 import { level, resourceSpec } from './resource.ts';
 import { stateIs } from './escort/shared.ts';
 import { present } from '../commands/target.ts';
@@ -138,7 +139,7 @@ function atLeast(
   const now = who === undefined ? undefined : level(world, who, p.resource);
   if (now === undefined) return false;
   if (p.at_least_percent === undefined) return now >= p.at_least;
-  return now * 100 >= p.at_least_percent * resourceSpec(world, who!, p.resource)!.maximum;
+  return mul(now, 100) >= mul(p.at_least_percent, resourceSpec(world, who!, p.resource)!.maximum);
 }
 
 // tags@1's subjects: a named definition (a constant), the target item's or the actor's room's.

@@ -1,5 +1,5 @@
 // Toolbox row 39 on the compiled boss sampler (mechanics.md "Boss phases"): the warlord (hp 20,
-// hits the player for 1 each round) calls two guards once at or below 60% (`summon`), sets the
+// hits the player for 1 each round) calls one guard once at or below 60% while alive (`summon`), sets the
 // `withdrawn` fact at or below 25% (`withdraw`; his schedule reads it each hour) and holds one crown.
 // The player (hp 30) hits for 1.
 import assert from 'node:assert/strict';
@@ -50,6 +50,8 @@ function world(edit?: (c: any) => void) {
   );
 }
 let n = 0;
+// ponytail: one elapsed run spanning more than one combat round faults nonfuture_job (pre-existing,
+// reproduces with no reactions); advance in steps of 50 until that bug is fixed.
 function elapsed(w: World, until: number): World {
   while (w.state.clock < until) {
     const run_id = `aaaaaaaa-0000-4000-8000-${String(++n).padStart(12, '0')}` as never;
@@ -154,9 +156,11 @@ test('withdraw at 25%: the warlord moves to his lair at the next hour', () => {
   assert.equal(at2300.state.containers[boss(at2300)], at2300.roomIds[`${P}room/lair`]);
 });
 
-// Breaks: death custody leaves the crown on the dead warlord or loses it.
-test('the warlord drops his one crown into his corpse in the hall', () => {
+// Breaks: death custody leaves the crown on the dead warlord or loses it; the summon fires on the
+// killing blow (hp 0 is under 60%).
+test('the warlord drops his one crown into his corpse in the hall, and calls no guard dying', () => {
   const w = fought(warlordHp(20, 1), 150);
+  assert.deepEqual([guards(w).length, fact(w, 'summoned')], [0, false]);
   const corpse = w.state.containers[w.entityIds[`${P}item/crown`]!]!;
   assert.equal(w.entities[corpse as never]!.key, 'npc_corpse');
   assert.equal(w.state.containers[corpse], w.roomIds[`${P}room/hall`]);
@@ -176,6 +180,7 @@ test('the loader refuses subject, at_least_percent or target below 1.87', () => 
       }
       if (keep !== 'target') delete c.reactions[R(k)].on.target;
     }
+    if (keep !== 'subject') delete c.reactions[R('summon')].when.root.items[1].subject;
   };
   const api = ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'];
   assert.ok(load(old('none')).ok);

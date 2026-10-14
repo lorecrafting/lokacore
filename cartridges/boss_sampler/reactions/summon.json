@@ -18,6 +18,12 @@
           }
         },
         {
+          "op": "resource_compare",
+          "subject": "subject",
+          "resource": "hp",
+          "at_least": 1
+        },
+        {
           "op": "fact_compare",
           "fact": "summoned",
           "equals": false
