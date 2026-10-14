@@ -28382,5 +28382,204 @@
         "code": "const_mismatch"
       }
     ]
+  },
+  {
+    "name": "reaction_after_zero",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "clock_hour"
+      },
+      "apply": [
+        {
+          "op": "fact.stamp",
+          "fact": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "fact",
+            "key": "raided_at"
+          }
+        }
+      ],
+      "after": 0
+    },
+    "errors": [
+      {
+        "path": "/after",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "name": "reaction_after_over_int32",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "clock_hour"
+      },
+      "apply": [
+        {
+          "op": "fact.stamp",
+          "fact": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "fact",
+            "key": "raided_at"
+          }
+        }
+      ],
+      "after": 2147483648
+    },
+    "errors": [
+      {
+        "path": "/after",
+        "code": "above_maximum"
+      }
+    ]
+  },
+  {
+    "name": "reaction_fact_stamp_no_fact",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "clock_hour"
+      },
+      "apply": [
+        {
+          "op": "fact.stamp"
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/apply/0/fact",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "reaction_fact_stamp_extra_key",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "clock_hour"
+      },
+      "apply": [
+        {
+          "op": "fact.stamp",
+          "fact": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "fact",
+            "key": "raided_at"
+          },
+          "value": 1
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/apply/0/value",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "policy_time_since_no_fact",
+    "contract": "Policy",
+    "value": {
+      "op": "time_since",
+      "at_least": 600
+    },
+    "errors": [
+      {
+        "path": "/fact",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "policy_time_since_no_at_least",
+    "contract": "Policy",
+    "value": {
+      "op": "time_since",
+      "fact": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "fact",
+        "key": "raided_at"
+      }
+    },
+    "errors": [
+      {
+        "path": "/at_least",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "policy_time_since_negative",
+    "contract": "Policy",
+    "value": {
+      "op": "time_since",
+      "fact": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "fact",
+        "key": "raided_at"
+      },
+      "at_least": -1
+    },
+    "errors": [
+      {
+        "path": "/at_least",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "name": "policy_time_since_over_int32",
+    "contract": "Policy",
+    "value": {
+      "op": "time_since",
+      "fact": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "fact",
+        "key": "raided_at"
+      },
+      "at_least": 2147483648
+    },
+    "errors": [
+      {
+        "path": "/at_least",
+        "code": "above_maximum"
+      }
+    ]
+  },
+  {
+    "name": "policy_time_since_extra_key",
+    "contract": "Policy",
+    "value": {
+      "op": "time_since",
+      "fact": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "fact",
+        "key": "raided_at"
+      },
+      "at_least": 600,
+      "equals": 1
+    },
+    "errors": [
+      {
+        "path": "/equals",
+        "code": "unknown_property"
+      }
+    ]
   }
 ]
