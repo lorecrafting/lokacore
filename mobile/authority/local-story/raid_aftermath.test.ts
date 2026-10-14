@@ -19,7 +19,8 @@ const changes = (sql: DatabaseSync, fact: string) =>
 
 // Breaks: cold reopen of a save holding a spawned raider and `raided` true is refused, or the
 // reopened world counts the aftermath twice (or never) over two new-moon hours; FD1: the pending
-// reaction job (due 1600) is refused on reopen, lost, or runs early, twice or never.
+// reaction job (due 1600) is refused on reopen, lost, or runs early, twice or never, or its saved
+// row drops actor_id.
 test('a save closed mid-raid cold-reopens; the new moon counts the aftermath once', (t) => {
   const bundle = compiled('cartridges/raid_sampler');
   const dir = mkdtempSync(join(tmpdir(), 'loka-raid-reopen-'));
@@ -39,6 +40,18 @@ test('a save closed mid-raid cold-reopens; the new moon counts the aftermath onc
   assert.deepEqual(changes(a.sql, 'aftershocks'), []);
   a.sql.close();
   b = elapsedHost(path, { wall: a.clock.wall, mono: a.clock.mono }, bundle);
+  const shock = () =>
+    (
+      b!.sql.prepare("SELECT value FROM state_row WHERE section='jobs'").all() as {
+        value: string;
+      }[]
+    )
+      .map((r) => JSON.parse(r.value))
+      .filter((j) => j.job.kind === 'reaction')
+      .map((j) => [j.due_time, j.status, j.actor_id]);
+  const actor = shock()[0]?.[2];
+  assert.match(actor, /^[0-9a-f-]{36}$/);
+  assert.deepEqual(shock(), [[1600, 'pending', actor]]);
   for (const ms of [20_000, 2_000]) {
     b.clock.wall += ms; // to 2000 (the new moon), then a second new-moon hour at 2100
     b.clock.mono += ms;
@@ -47,4 +60,5 @@ test('a save closed mid-raid cold-reopens; the new moon counts the aftermath onc
   assert.equal(b.game.view().view.time, 2100);
   assert.deepEqual(changes(b.sql, 'aftermaths'), [[2000, 1]]);
   assert.deepEqual(changes(b.sql, 'aftershocks'), [[1600, 1]]);
+  assert.deepEqual(shock(), [[1600, 'completed', actor]]);
 });

@@ -29,7 +29,8 @@ defmodule Loka.ContentRaidTest do
 
   # Breaks (toolbox row FD1; twin of the loader test in kernel/ts/test/raid.test.ts): `after`,
   # fact.stamp or time_since compiles under API 1.87; a delayed rule keeps a step that reads its
-  # event; a stamp or time_since names a fact that cannot hold every clock value.
+  # event; a stamp or time_since names a fact that cannot hold every clock value; a rule with
+  # `after` and no steps compiles under 1.87.
   test "after, fact.stamp and time_since keep API 1.88 and an unbounded int fact" do
     dir = Loka.ContentSource.copy("cartridges/raid_sampler")
     api = {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"}
@@ -44,6 +45,7 @@ defmodule Loka.ContentRaidTest do
           {[old, unstamped, {"reactions/aftershock.json", nil}, {"reactions/calm.json", leaf}],
            api},
           {[old, {"reactions/aftershock.json", nil}], api},
+          {[old, unstamped, {"reactions/aftershock.json", &%{&1 | "apply" => []}}], api},
           {[{"reactions/aftershock.json", &update_in(&1, ["apply"], fn a -> a ++ [move] end)}],
            {"SCHEMA_VIOLATION", "reactions/aftershock.apply[1].op"}},
           {[{"reactions/raid.json", &put_in(&1, ["apply", Access.at(2), "fact"], "aftershocks")}],

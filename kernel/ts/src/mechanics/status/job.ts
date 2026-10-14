@@ -9,6 +9,7 @@ import type {
   StatusRow,
   TextKey,
 } from '../../contracts.gen.ts';
+import { key } from '../../foundation/compose.ts';
 import { add } from '../../foundation/int.ts';
 import { accepted, type JobRow, type Mint, type World } from '../../runtime/decision.ts';
 import { currentRound } from '../combat/round.ts';
@@ -150,7 +151,8 @@ const successor = (
 // hp settle (row 2c) also writes; every roster member counts, as the player's or an ally's blow
 // falls on another member when the primary is gone (row 6b); a bleed tick on its body joins too, so
 // a round and its equal-due bleed (C5 pair) share one; a replenish run joins the groups of the items
-// it moves (replenishMovers, row 41). A round joins all of those groups: the lowest
+// it moves (replenishMovers, row 41); a delayed reaction's run joins the groups of the fact rows it
+// writes, as an ordinary reaction does (reaction.ts holders, row FD1). A round joins all of those groups: the lowest
 // is kept and the others are returned for the caller to merge into it (loka-x2gv).
 export function statusGroup(
   at: World,
@@ -158,13 +160,20 @@ export function statusGroup(
   job: JobRow,
   holders: Map<string, number>,
   next: number,
+  ops: readonly DeltaOp[] = [],
 ) {
   const round = currentRound(at, id, job);
   const held = round
     ? [round.body_id, ...(round.active_ids ?? [round.npc_id])]
     : job.job.kind === 'replenish'
       ? replenishMovers(at, job) // row 41: a decay move and a restock of one item share a group
-      : [job.job.kind === 'status' ? statusHolder(at, id)?.body : job.bleed_body_id];
+      : job.job.kind === 'reaction'
+        ? ops.flatMap((o) => {
+            if (o.op !== 'fact.assign') return [];
+            const { op: _, writer_group: _g, expected: _e, value: _v, ...target } = o;
+            return [key({ kind: 'fact', ...target })];
+          })
+        : [job.job.kind === 'status' ? statusHolder(at, id)?.body : job.bleed_body_id];
   const bodies = held.filter((b) => b !== undefined);
   if (!bodies.length) return undefined;
   const found = new Set(bodies.map((b) => holders.get(b)));

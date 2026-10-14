@@ -284,7 +284,8 @@ defmodule Loka.Core.ComposeEncounter do
 
       # FD1: a delayed reaction stores its actor
       {false, false, true, false} ->
-        get_in(op, ["job", "kind"]) == "reaction" and op["encounter_id"] == nil
+        get_in(op, ["job", "kind"]) == "reaction" and
+          [op["encounter_id"], op["sight"]] == [nil, nil]
 
       {true, false, true, false} ->
         get_in(op, ["job", "kind"]) == "quest" and op["encounter_id"] == nil

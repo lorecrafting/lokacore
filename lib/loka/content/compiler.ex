@@ -103,7 +103,8 @@ defmodule Loka.Content.Compiler do
         Scenes.check(manifest, defs, v2, registry) ++
         Ancestries.check(manifest, defs, located, if(v2, do: elem(v2, 1), else: %{})) ++
         Loka.Content.Floors.check(manifest, defs, located) ++
-        Loka.Content.Replenish.check(manifest, defs)
+        Loka.Content.Replenish.check(manifest, defs) ++
+        Loka.Content.Delayed.check(manifest, defs, v2 && Checks.trees(defs))
 
   # v2 when the source declares world content, entry/settings, text, resources or attributes.
   defp v2(defs, {entry, settings}, text, files) do

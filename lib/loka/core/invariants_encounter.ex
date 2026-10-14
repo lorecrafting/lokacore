@@ -263,7 +263,7 @@ defmodule Loka.Core.InvariantsEncounter do
         get_in(op, ["job", "kind"]) not in ["population_bundle", "reaction"]
 
       ["actor_id"] ->
-        get_in(op, ["job", "kind"]) == "reaction"
+        get_in(op, ["job", "kind"]) == "reaction" and op["sight"] == nil
 
       ["quest_instance_id", "actor_id"] ->
         get_in(op, ["job", "kind"]) == "quest"

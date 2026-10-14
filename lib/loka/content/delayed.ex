@@ -11,8 +11,8 @@ defmodule Loka.Content.Delayed do
   @event_bound ~w(barrier.set item.move population.suppress)
 
   @doc "Diagnostics for the reactions of `defs` and the policy `trees` (`{rel, steps, root}`)."
-  @spec check(map() | nil, map(), list()) :: [map()]
-  def check(nil, _, _), do: []
+  @spec check(map() | nil, map(), list() | nil) :: [map()]
+  def check(m, _, trees) when is_nil(m) or is_nil(trees), do: []
 
   def check(m, defs, trees) do
     steps = steps(defs)
@@ -20,7 +20,7 @@ defmodule Loka.Content.Delayed do
     timed = stamps ++ Enum.flat_map(trees, fn {rel, path, root} -> timed(rel, path, root) end)
 
     Enum.flat_map(timed, &clock(&1, m, defs)) ++
-      Enum.flat_map(steps, &refused/1) ++ floor(m, timed, steps)
+      Enum.flat_map(steps, &refused/1) ++ floor(m, timed, defs)
   end
 
   defp steps(defs),
@@ -66,8 +66,9 @@ defmodule Loka.Content.Delayed do
 
   defp timed(_, _, _), do: []
 
-  defp floor(m, timed, steps) do
-    used = timed != [] or Enum.any?(steps, fn {_, r, _, _} -> Map.has_key?(r, "after") end)
+  # Per rule, so a rule with `after` and no steps needs 1.88 too.
+  defp floor(m, timed, defs) do
+    used = timed != [] or for({_, {_, [], %{"after" => _}}} <- defs["reaction"], do: 1) != []
 
     api =
       m["requires"]["kernel_api"]["at_least"]

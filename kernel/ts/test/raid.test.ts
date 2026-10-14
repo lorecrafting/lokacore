@@ -18,7 +18,6 @@ import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { cmp } from '../src/foundation/validate.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { holds } from '../src/mechanics/policy.ts';
-import { sequence } from '../src/mechanics/reaction.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-raid-sampler-'));
 let artifact: Uint8Array;
@@ -274,22 +273,62 @@ test('FD1: a raid at 1000 adds its aftershock at 1600, not before, once', () => 
   assert.deepEqual([fact(w, 'aftershocks'), statuses(w)], [1, [[1600, 'completed']]]);
 });
 
-// Breaks: a cause inside the advance gets its bare due time (nonfuture_job faults the wait) or
-// a time earlier than the cause plus `after`.
-test('FD1: a cause at 1000 delivered in an advance to 1900 is due at 1901; at 1000 it is 1600', () => {
-  const w0 = world();
-  const rule = w0.cartridge.reactions![AFTERSHOCK]!;
-  const raided = Object.keys(elapsed(world(), 1000).state.facts!).find(
-    (k) => JSON.parse(k).fact.key === 'raided',
-  )!;
-  const due = (clock: number) => {
-    const w = { ...w0, state: { ...w0.state, clock, facts: { [raided]: true } } } as World;
-    const cause = { id: 'c', logical_time: 1000, position: 1, payload: { type: 'custom_event' } };
-    const r = sequence(w, w.character, rule, cause as never, 1, { n: 0 }, () => 'j');
-    assert.equal(r?.kind, 'accepted');
-    return r?.kind === 'accepted' && (r.delta.ops[0] as { due_time: number }).due_time;
+// Breaks: two delayed jobs writing one fact in one advance take separate writer groups
+// (conflicting_write, both stay pending and wedge later waits), or the result depends on chunking.
+test('FD1: two delayed rules on one fact both apply, in hourly waits or one wait', () => {
+  const twin = (a: number, b: number) => (c: any) => {
+    c.reactions[AFTERSHOCK].after = a;
+    c.reactions[AFTERSHOCK + '2'] = { ...c.reactions[AFTERSHOCK], key: 'aftershock2', after: b };
   };
-  assert.deepEqual([due(1900), due(1000)], [1901, 1600]);
+  for (const [a, b] of [
+    [600, 600],
+    [600, 700],
+  ]) {
+    const at1000 = elapsed(world(twin(a!, b!)), 1000);
+    const hourly = elapsed(at1000, 1800);
+    const once = elapsed(at1000, 1800, [], 100000);
+    for (const w of [hourly, once])
+      assert.deepEqual(
+        [fact(w, 'aftershocks'), statuses(w).map(([, s]) => s)],
+        [2, ['completed', 'completed']],
+      );
+  }
+});
+
+// Breaks: a cause inside the advance gets its bare due time (nonfuture_job faults the wait) or
+// a time earlier than the cause plus `after`. `echo` (after 100) follows the 1600 aftershock.
+test('FD1: a cause at 1600 inside a wait to 1800 is due at 1801; in hourly waits at 1700', () => {
+  const echo = (c: any) => {
+    const shock = c.reactions[AFTERSHOCK];
+    const fact = { ...shock.apply[0].fact, key: 'raided_at' };
+    c.reactions[AFTERSHOCK + '_echo'] = {
+      ...shock,
+      key: 'aftershock_echo',
+      on: { event: 'fact_changed', fact: shock.apply[0].fact },
+      after: 100,
+      apply: [{ op: 'fact.stamp', fact }],
+    };
+  };
+  const at1000 = elapsed(world(echo), 1000);
+  const once = elapsed(at1000, 1800, [], 100000);
+  const hourly = elapsed(at1000, 1800);
+  assert.deepEqual(
+    [statuses(once), statuses(hourly)],
+    [
+      [
+        [1600, 'completed'],
+        [1801, 'pending'],
+      ],
+      [
+        [1600, 'completed'],
+        [1700, 'completed'],
+      ],
+    ],
+  );
+  assert.equal(fact(elapsed(once, 1900), 'raided_at'), 1801);
+  // Row 37a: one wait to 1900 fires `raid` at its end, so the stamp is 1900 and the job due 2500.
+  const long = elapsed(world(), 1900, [], 100000);
+  assert.deepEqual([fact(long, 'raided_at'), statuses(long)], [1900, [[2500, 'pending']]]);
 });
 
 // Breaks: the job's `when` is not re-read at its due time (a guard cannot cancel it), or a rule
@@ -317,7 +356,7 @@ test('FD1: a false `when` at the due time, or a removed rule, only completes the
     ...w.cartridge.reactions![AFTERSHOCK]!,
     apply: [{ op: 'quest.fail', quest, outcome: 'x' }],
   };
-  const faulting = { ...w.cartridge.reactions, [AFTERSHOCK]: fails } as typeof reactions;
+  const faulting = { ...w.cartridge.reactions, [AFTERSHOCK]: fails } as never;
   const stuck = elapsed({ ...w, cartridge: { ...w.cartridge, reactions: faulting } }, 1700);
   assert.deepEqual(statuses(stuck), [[1600, 'completed']]);
 });
@@ -369,6 +408,7 @@ test('FD1: the loader keeps API 1.88, event-free delayed steps and an unbounded 
       api,
     ],
     [[old, unshocked], api],
+    [[old, unstamped, (c) => (c.reactions[AFTERSHOCK].apply = [])], api],
     [
       [
         (c) =>

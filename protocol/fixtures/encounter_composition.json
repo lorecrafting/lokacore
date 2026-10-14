@@ -2192,6 +2192,184 @@
       }
     },
     {
+      "id": "reaction-schedule-refuses-sight",
+      "state": "base",
+      "ops": [
+        {
+          "op": "job.schedule",
+          "writer_group": 0,
+          "job_id": "00000007-0000-4000-8000-000000000000",
+          "job": {
+            "cartridge_id": "raid_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "reaction",
+            "key": "aftershock"
+          },
+          "due_time": 20,
+          "actor_id": "00000001-0000-4000-8000-000000000000",
+          "sight": {
+            "member_id": "00000002-0000-4000-8000-000000000000",
+            "player_id": "00000001-0000-4000-8000-000000000000",
+            "slot": 1,
+            "generation": 1,
+            "seen_at": 0,
+            "cause_kind": "player_entry",
+            "cause_id": "00000009-0000-4000-8000-000000000000",
+            "source_id": null,
+            "destination_id": "00000003-0000-4000-8000-000000000000"
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "job",
+            "job_id": "00000007-0000-4000-8000-000000000000"
+          }
+        }
+      },
+      "counterfeit": {
+        "changes": [
+          {
+            "target": {
+              "kind": "job",
+              "job_id": "00000007-0000-4000-8000-000000000000"
+            },
+            "value": {
+              "job": {
+                "cartridge_id": "raid_sampler",
+                "cartridge_version": "0.0.1",
+                "kind": "reaction",
+                "key": "aftershock"
+              },
+              "due_time": 20,
+              "status": "pending",
+              "actor_id": "00000001-0000-4000-8000-000000000000",
+              "sight": {
+                "member_id": "00000002-0000-4000-8000-000000000000",
+                "player_id": "00000001-0000-4000-8000-000000000000",
+                "slot": 1,
+                "generation": 1,
+                "seen_at": 0,
+                "cause_kind": "player_entry",
+                "cause_id": "00000009-0000-4000-8000-000000000000",
+                "source_id": null,
+                "destination_id": "00000003-0000-4000-8000-000000000000"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "reaction-schedule-refuses-quest",
+      "state": "base",
+      "ops": [
+        {
+          "op": "job.schedule",
+          "writer_group": 0,
+          "job_id": "00000007-0000-4000-8000-000000000000",
+          "job": {
+            "cartridge_id": "raid_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "reaction",
+            "key": "aftershock"
+          },
+          "due_time": 20,
+          "actor_id": "00000001-0000-4000-8000-000000000000",
+          "quest_instance_id": "00000008-0000-4000-8000-000000000000"
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "job",
+            "job_id": "00000007-0000-4000-8000-000000000000"
+          }
+        }
+      },
+      "counterfeit": {
+        "changes": [
+          {
+            "target": {
+              "kind": "job",
+              "job_id": "00000007-0000-4000-8000-000000000000"
+            },
+            "value": {
+              "job": {
+                "cartridge_id": "raid_sampler",
+                "cartridge_version": "0.0.1",
+                "kind": "reaction",
+                "key": "aftershock"
+              },
+              "due_time": 20,
+              "status": "pending",
+              "actor_id": "00000001-0000-4000-8000-000000000000",
+              "quest_instance_id": "00000008-0000-4000-8000-000000000000"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "reaction-schedule-refuses-water",
+      "state": "base",
+      "ops": [
+        {
+          "op": "job.schedule",
+          "writer_group": 0,
+          "job_id": "00000007-0000-4000-8000-000000000000",
+          "job": {
+            "cartridge_id": "raid_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "reaction",
+            "key": "aftershock"
+          },
+          "due_time": 20,
+          "actor_id": "00000001-0000-4000-8000-000000000000",
+          "water_body_id": "00000004-0000-4000-8000-000000000000",
+          "water_generation": 1
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "job",
+            "job_id": "00000007-0000-4000-8000-000000000000"
+          }
+        }
+      },
+      "counterfeit": {
+        "changes": [
+          {
+            "target": {
+              "kind": "job",
+              "job_id": "00000007-0000-4000-8000-000000000000"
+            },
+            "value": {
+              "job": {
+                "cartridge_id": "raid_sampler",
+                "cartridge_version": "0.0.1",
+                "kind": "reaction",
+                "key": "aftershock"
+              },
+              "due_time": 20,
+              "status": "pending",
+              "actor_id": "00000001-0000-4000-8000-000000000000",
+              "water_body_id": "00000004-0000-4000-8000-000000000000",
+              "water_generation": 1
+            }
+          }
+        ]
+      }
+    },
+    {
       "id": "actor-alone-only-on-reaction",
       "state": "base",
       "ops": [

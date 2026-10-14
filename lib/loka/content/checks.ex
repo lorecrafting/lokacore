@@ -322,12 +322,10 @@ defmodule Loka.Content.Checks do
 
   def rooms(m, defs, {entry, text}, registry) do
     rooms = for {_, {rel, [], r}} <- defs["room"], do: {rel, r}
-    trees = trees(defs)
 
     entry(m, entry, defs) ++
       texts(defs, text) ++
-      Loka.Content.Cues.check(m, defs, text, registry, trees) ++
-      Loka.Content.Delayed.check(m, defs, trees) ++
+      Loka.Content.Cues.check(m, defs, text, registry, trees(defs)) ++
       if(m,
         do:
           Enum.flat_map(rooms, &room(&1, m, defs, registry)) ++
@@ -421,8 +419,8 @@ defmodule Loka.Content.Checks do
 
   defp actions(defs), do: for({_, {rel, [], a}} <- defs["action"], do: {rel, a})
 
-  # Every located policy root from the source definitions (twin of the TS loader's nodes/1).
-  defp trees(defs) do
+  @doc "Every located policy root from the source definitions (twin of the TS loader's nodes/1)."
+  def trees(defs) do
     Enum.concat([
       for({_, {rel, [], p}} <- defs["policy"], do: {rel, ["root"], p["root"]}),
       for({rel, a} <- actions(defs), do: {rel, ["policy", "root"], a["policy"]["root"]}),
