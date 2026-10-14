@@ -16,12 +16,17 @@ defmodule Loka.Content.Delayed do
 
   def check(m, defs, trees) do
     steps = steps(defs)
-    stamps = for {rel, _, %{"op" => "fact.stamp"} = s, i} <- steps, do: {rel, ["apply", i], s}
-    leaves = Enum.flat_map(trees, fn {rel, path, root} -> nodes(rel, path, root) end)
-    timed = stamps ++ for({_, _, %{"op" => "time_since"}} = n <- leaves, do: n)
+    timed = timed(steps, trees)
 
     Enum.flat_map(timed, &clock(&1, m, defs)) ++
       Enum.flat_map(steps, &refused/1) ++ subjective(defs) ++ floor(m, timed, defs)
+  end
+
+  # Each fact.stamp step and time_since leaf, with its path.
+  defp timed(steps, trees) do
+    stamps = for {rel, _, %{"op" => "fact.stamp"} = s, i} <- steps, do: {rel, ["apply", i], s}
+    leaves = Enum.flat_map(trees, fn {rel, path, root} -> nodes(rel, path, root) end)
+    stamps ++ for({_, _, %{"op" => "time_since"}} = n <- leaves, do: n)
   end
 
   # At fire the event's subject is gone and `subject` would read the actor's body instead.

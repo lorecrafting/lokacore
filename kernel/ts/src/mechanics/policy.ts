@@ -76,10 +76,8 @@ export function holds(
       return stateIs(world, actor, p.quest, p.state);
     case 'quest_state': // false in every state while the actor has no instance
       return questOf(world, actor, p.quest)?.[1].state === p.state;
-    case 'time_window': {
-      const hour = hourOf(world.cartridge, world.state.clock);
-      return p.from < p.to ? p.from <= hour && hour < p.to : hour >= p.from || hour < p.to;
-    }
+    case 'time_window':
+      return inWindow(world, p);
     case 'sky': {
       const f = (['lunar', 'weather', 'season', 'tide'] as const).find((k) => p[k] !== undefined)!;
       return skyPhase(world.cartridge, world.context, world.state.clock, f) === p[f];
@@ -109,6 +107,12 @@ export function holds(
     default:
       return uninstalled(p); // a schema leaf without its case here fails tsc
   }
+}
+
+// A window that wraps midnight (from > to) holds from `from` to the end of the day and from 0 to `to`.
+function inWindow(world: World, p: Extract<Policy, { op: 'time_window' }>): boolean {
+  const hour = hourOf(world.cartridge, world.state.clock);
+  return p.from < p.to ? p.from <= hour && hour < p.to : hour >= p.from || hour < p.to;
 }
 
 function uninstalled(leaf: never): never {
