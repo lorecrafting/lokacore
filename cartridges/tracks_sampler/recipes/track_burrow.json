@@ -1,0 +1,44 @@
+{
+  "label": "actions.track",
+  "aliases": [
+    "track"
+  ],
+  "target": {
+    "kind": "detail",
+    "room": "burrow",
+    "detail": "ground"
+  },
+  "priority": 5,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": []
+    }
+  },
+  "check": {
+    "key": "track_burrow",
+    "kind": "track",
+    "plan": "hounds"
+  },
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "tracked",
+          "value": true
+        }
+      ],
+      "narration": {
+        "actor": "narration.track.success"
+      }
+    },
+    "failure": {
+      "sequence": [],
+      "narration": {
+        "actor": "narration.track.failure"
+      }
+    }
+  }
+}

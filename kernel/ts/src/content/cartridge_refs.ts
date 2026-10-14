@@ -3,6 +3,7 @@ import { water } from './cartridge_water.ts';
 import { topics } from './cartridge_topics.ts';
 import { pools } from './cartridge_pools.ts';
 import { replenish } from './cartridge_replenish.ts';
+import { trails } from './cartridge_trails.ts';
 import { fuel } from './cartridge_fuel.ts';
 import { skills } from './cartridge_skills.ts';
 import { exchanges } from './cartridge_exchange.ts';
@@ -108,6 +109,14 @@ export function parts(c: Obj): [string, Obj, string][] {
   return [...out, ...cueParts(c)];
 }
 
+/** Each population plan gate's located root (row W12). */
+const gateRoots = (c: Obj): [Obj, string][] =>
+  Object.entries((c.populations ?? {}) as Obj).flatMap(([ref, p]) =>
+    (['birth_when', 'wander_when'] as const).flatMap((k): [Obj, string][] =>
+      p[k] ? [[p[k].root, `.cartridge.populations${step(ref)}.${k}.root`]] : [],
+    ),
+  );
+
 // Policy nodes with diagnostic paths, across every definition that declares a condition.
 export function nodes(c: Obj): [Obj, string][] {
   const walk = (p: Obj, at: string): [Obj, string][] => [
@@ -140,6 +149,7 @@ export function nodes(c: Obj): [Obj, string][] {
       walk(d.policy.root, `.cartridge.dialogues${step(ref)}.policy.root`),
     ),
     ...lockRoots(c).flatMap(([p, at]) => walk(p, at)),
+    ...gateRoots(c).flatMap(([p, at]) => walk(p, at)),
     ...Object.entries((c.barriers ?? {}) as Obj).flatMap(([ref, b]) =>
       b.opens_when
         ? walk(b.opens_when.root, `.cartridge.barriers${step(ref)}.opens_when.root`)
@@ -200,7 +210,7 @@ export function refStage(c: Obj): Diagnostic[] {
   }
   out.push(...reserved(c), ...featureApi(c), ...locks(c));
   if (c.format !== 'loka-cartridge-v2') return out;
-  out.push(...exchanges(c, check), ...fuel(c, check), ...replenish(c, check));
+  out.push(...exchanges(c, check), ...fuel(c, check), ...replenish(c, check), ...trails(c, check));
   spatialRefs(c, check, out);
   out.push(...knowledge(c, check));
   for (const [r, at] of npcRooms(c)) named(r, 'room', at);

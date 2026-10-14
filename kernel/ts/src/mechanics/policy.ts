@@ -2,7 +2,7 @@ import { illuminated } from './light/shared.ts';
 // The policy evaluator (policy@1, fact@1's fact_compare, containment@1's has_item, schedule@1's
 // time_window, barrier@1's barrier_state, quest@1's quest_state, target_resolution@1's
 // target_present, attributes@1's stat_compare and resource_compare, tags@1's has_tag, calendar@1's sky,
-// variety@1's visited_count, equipment@1's wearing, attributes@1's level_compare (row 29a), status@1's status_active, target_resolution@1's
+// variety@1's visited_count, population@1's population_count (row W12), equipment@1's wearing, attributes@1's level_compare (row 29a), status@1's status_active, target_resolution@1's
 // npc_present; 21 §3.2, §4 Policy; 06 §20-21): pure, over committed state, for one
 // actor and the target of the action evaluated, if any.
 import type {
@@ -16,8 +16,9 @@ import type {
 import { bodyOf, refString, type World } from '../runtime/decision.ts';
 import { barrierState, questOf } from './lookups.ts';
 import { key } from '../foundation/compose.ts';
-import { subjective, value } from './fact.ts';
-import { level } from './resource.ts';
+import { paired, subjective, value } from './fact.ts';
+import { mul } from '../foundation/int.ts';
+import { level, resourceSpec } from './resource.ts';
 import { stateIs } from './escort/shared.ts';
 import { present } from '../commands/target.ts';
 import { hourOf, skyPhase } from './calendar.ts';
@@ -27,6 +28,7 @@ import { currentStatus } from './status/shared.ts';
 import { living } from './death/shared.ts';
 import { perceived } from './senses.ts';
 import { levelling } from './levelling/shared.ts';
+import { livingCount } from './population/refs.ts';
 
 // The policy that always holds; here, not in dialogue/shared.ts, so scene/shared.ts (and
 // disposition.ts through it) imports no dialogue module: the Metro bundle threw on that cycle.
@@ -82,12 +84,14 @@ export function holds(
     }
     case 'visited_count':
       return visits(world, actor, world.roomIds[refString(p.room)]!) >= p.at_least;
+    case 'population_count': // row W12; reads no actor
+      return livingCount(world, p.plan) >= p.at_least;
     case 'target_present':
       return ctx.target !== undefined && present(world, actor, ctx.target, ctx.steps);
     case 'light_off':
     case 'stat_compare':
     case 'resource_compare':
-      return atLeast(world, actor, p, ctx.steps);
+      return atLeast(world, actor, p, ctx);
     case 'has_tag':
       return tagsOf(world, actor, p, ctx.target)?.includes(p.tag) === true;
     case 'wearing':
@@ -110,7 +114,8 @@ function uninstalled(leaf: never): never {
 }
 
 // fact@1's read: an entity or pair fact (toolbox row W2) at its named NPC or item, or with subject
-// target at the action's target (false without one); any other fact at its one scope.
+// target at the action's target (false without one), and an npc_pair fact (row FD4) at that
+// subject toward its `with` NPC; any other fact at its one scope.
 function compared(
   world: World,
   actor: CharacterId,
@@ -119,21 +124,34 @@ function compared(
 ): boolean {
   const named = p.npc ?? p.item;
   const subject = named ? world.entityIds[refString(named)] : p.subject && target;
+  const partner = p.with && world.entityIds[refString(p.with)];
   if (subjective(world, p.fact) && subject === undefined) return false;
-  return value(world, actor, p.fact, subject) === p.equals;
+  if (paired(world, p.fact) && !partner) return false;
+  return value(world, actor, p.fact, subject, partner) === p.equals;
 }
 
-// attributes@1's leaves: the actor's saved value or definition start, or the current body pool.
+// attributes@1's leaves: the actor's saved value or definition start, or the current pool on the
+// actor's body or (row 39, subject) a reaction's event subject, against at_least or a percent of
+// its maximum (value * 100 >= percent * maximum: integer math, no rounding).
 function atLeast(
   world: World,
   actor: CharacterId,
   p: Extract<Policy, { op: 'stat_compare' | 'resource_compare' | 'light_off' }>,
-  steps: { n: number },
+  ctx: Ctx,
 ): boolean {
-  if (p.op === 'light_off') return !illuminated(world, actor, steps);
+  if (p.op === 'light_off') return !illuminated(world, actor, ctx.steps);
   if (p.op === 'stat_compare') return attributeValue(world, actor, p.attribute) >= p.at_least;
   const body = bodyOf(world, actor);
-  return body !== undefined && level(world, body, p.resource)! >= p.at_least;
+  const who = (p.subject && ctx.subject) || body;
+  // Another entity holds the pool only by its own spec (an NPC's hp), not the cartridge default.
+  const holds =
+    who !== undefined &&
+    (who === body ||
+      world.entityResourceSpecs[key({ kind: 'resource', resource: p.resource, entity_id: who })]);
+  const now = holds ? level(world, who, p.resource) : undefined;
+  if (now === undefined) return false;
+  if (p.at_least_percent === undefined) return now >= p.at_least;
+  return mul(now, 100) >= mul(p.at_least_percent, resourceSpec(world, who!, p.resource)!.maximum);
 }
 
 // tags@1's subjects: a named definition (a constant), the target item's or the actor's room's.

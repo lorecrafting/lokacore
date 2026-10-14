@@ -1,0 +1,27 @@
+{
+  "bundle": "deer",
+  "home": "fen",
+  "area": [
+    "fen",
+    "hollow"
+  ],
+  "cap": 3,
+  "day_target": 3,
+  "night_target": 3,
+  "night_start": 8,
+  "night_end": 2,
+  "wander_interval": 100,
+  "replacement_delay": 200,
+  "floor": 1,
+  "birth_when": {
+    "policy_version": 1,
+    "root": {
+      "op": "not",
+      "item": {
+        "op": "population_count",
+        "plan": "hounds",
+        "at_least": 1
+      }
+    }
+  }
+}

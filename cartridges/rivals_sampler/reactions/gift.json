@@ -1,0 +1,21 @@
+{
+  "on": {
+    "event": "item_acquired",
+    "item": "apple"
+  },
+  "when": {
+    "policy_version": 1,
+    "root": {
+      "op": "npc_present",
+      "npc": "miller"
+    }
+  },
+  "apply": [
+    {
+      "op": "fact.assign",
+      "fact": "gloats",
+      "with": "miller",
+      "value": true
+    }
+  ]
+}

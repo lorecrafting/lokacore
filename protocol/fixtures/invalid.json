@@ -13529,6 +13529,7 @@
         "event": "attack_result",
         "hit": 1,
         "attacker": 1,
+        "target": 1,
         "x": 1
       },
       "apply": []
@@ -13540,6 +13541,10 @@
       },
       {
         "path": "/on/hit",
+        "code": "invalid_type"
+      },
+      {
+        "path": "/on/target",
         "code": "invalid_type"
       },
       {
@@ -15251,8 +15256,8 @@
     },
     "errors": [
       {
-        "path": "/at_least",
-        "code": "missing_property"
+        "path": "",
+        "code": "exclusive_properties"
       },
       {
         "path": "/resource",
@@ -19459,6 +19464,122 @@
     ]
   },
   {
+    "name": "resource_compare_percent_zero",
+    "contract": "Policy",
+    "value": {
+      "op": "resource_compare",
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "hp"
+      },
+      "at_least_percent": 0
+    },
+    "errors": [
+      {
+        "path": "/at_least_percent",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "name": "resource_compare_percent_over",
+    "contract": "Policy",
+    "value": {
+      "op": "resource_compare",
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "hp"
+      },
+      "at_least_percent": 101
+    },
+    "errors": [
+      {
+        "path": "/at_least_percent",
+        "code": "above_maximum"
+      }
+    ]
+  },
+  {
+    "name": "resource_compare_percent_string",
+    "contract": "Policy",
+    "value": {
+      "op": "resource_compare",
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "hp"
+      },
+      "at_least_percent": "60"
+    },
+    "errors": [
+      {
+        "path": "/at_least_percent",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "name": "resource_compare_both_thresholds",
+    "contract": "Policy",
+    "value": {
+      "op": "resource_compare",
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "hp"
+      },
+      "at_least": 1,
+      "at_least_percent": 60
+    },
+    "errors": [
+      {
+        "path": "",
+        "code": "exclusive_properties"
+      }
+    ]
+  },
+  {
+    "name": "resource_compare_self_subject",
+    "contract": "Policy",
+    "value": {
+      "op": "resource_compare",
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "hp"
+      },
+      "subject": "self",
+      "at_least": 1
+    },
+    "errors": [
+      {
+        "path": "/subject",
+        "code": "not_in_enum"
+      }
+    ]
+  },
+  {
+    "name": "resource_compare_no_resource",
+    "contract": "Policy",
+    "value": {
+      "op": "resource_compare",
+      "at_least_percent": 60
+    },
+    "errors": [
+      {
+        "path": "/resource",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
     "name": "has_tag_unknown_tag",
     "contract": "Policy",
     "value": {
@@ -20724,6 +20845,46 @@
         "cartridge_version": "1.0.0",
         "kind": "room",
         "key": "garden"
+      },
+      "at_least": 0,
+      "x": 1
+    },
+    "errors": [
+      {
+        "path": "/at_least",
+        "code": "below_minimum"
+      },
+      {
+        "path": "/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "Policy",
+    "value": {
+      "op": "population_count"
+    },
+    "errors": [
+      {
+        "path": "/at_least",
+        "code": "missing_property"
+      },
+      {
+        "path": "/plan",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "Policy",
+    "value": {
+      "op": "population_count",
+      "plan": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "population",
+        "key": "hounds"
       },
       "at_least": 0,
       "x": 1
@@ -22855,6 +23016,30 @@
     ]
   },
   {
+    "name": "fact_spec_npc_pair_false",
+    "contract": "FactSpec",
+    "value": {
+      "key": "gloats",
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "instance"
+      ],
+      "per_subject": true,
+      "npc_pair": false,
+      "meaning": "Whether the subject NPC gloats over the with NPC."
+    },
+    "errors": [
+      {
+        "path": "/npc_pair",
+        "code": "const_mismatch"
+      }
+    ]
+  },
+  {
     "name": "shop_buy_discount_friendly_false",
     "contract": "Shop",
     "value": {
@@ -24569,6 +24754,55 @@
     ]
   },
   {
+    "name": "reaction_population_spawn_no_plan",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "clock_hour"
+      },
+      "apply": [
+        {
+          "op": "population.spawn"
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/apply/0/plan",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "reaction_population_spawn_extra_key",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "clock_hour"
+      },
+      "apply": [
+        {
+          "op": "population.spawn",
+          "plan": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "population",
+            "key": "raiders"
+          },
+          "room": "village"
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/apply/0/room",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
     "contract": "StatusDefinition",
     "value": {
       "key": "flying",
@@ -26103,6 +26337,51 @@
         }
       ],
       "cap": 1,
+      "day_target": -1,
+      "night_target": 1,
+      "night_start": 20,
+      "night_end": 6,
+      "replacement_delay": 3600,
+      "wander_interval": 3600
+    },
+    "errors": [
+      {
+        "path": "/day_target",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "contract": "PopulationPlan",
+    "value": {
+      "key": "bandits",
+      "bundle": {
+        "cartridge_id": "encounter_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "population_bundle",
+        "key": "bandits"
+      },
+      "home": {
+        "cartridge_id": "encounter_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "room",
+        "key": "road"
+      },
+      "area": [
+        {
+          "cartridge_id": "encounter_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "road"
+        },
+        {
+          "cartridge_id": "encounter_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "crossroads"
+        }
+      ],
+      "cap": 1,
       "day_target": 1,
       "night_target": 1,
       "night_start": 20,
@@ -26209,6 +26488,59 @@
       {
         "path": "/walks",
         "code": "const_mismatch"
+      }
+    ]
+  },
+  {
+    "contract": "PopulationPlan",
+    "value": {
+      "key": "bandits",
+      "bundle": {
+        "cartridge_id": "encounter_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "population_bundle",
+        "key": "bandits"
+      },
+      "home": {
+        "cartridge_id": "encounter_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "room",
+        "key": "road"
+      },
+      "area": [
+        {
+          "cartridge_id": "encounter_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "road"
+        },
+        {
+          "cartridge_id": "encounter_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "crossroads"
+        }
+      ],
+      "cap": 1,
+      "day_target": 1,
+      "night_target": 1,
+      "night_start": 20,
+      "night_end": 6,
+      "replacement_delay": 3600,
+      "wander_interval": 3600,
+      "floor": 0,
+      "birth_when": {
+        "policy_version": 1
+      }
+    },
+    "errors": [
+      {
+        "path": "/birth_when/root",
+        "code": "missing_property"
+      },
+      {
+        "path": "/floor",
+        "code": "below_minimum"
       }
     ]
   },
@@ -27915,6 +28247,377 @@
       {
         "path": "/fact",
         "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "track_check_fields",
+    "contract": "ActionRecipe",
+    "value": {
+      "key": "pick_gate",
+      "label": "actions.pick_gate",
+      "aliases": [
+        "pick"
+      ],
+      "target": {
+        "kind": "detail",
+        "room": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "hall"
+        },
+        "detail": "gate"
+      },
+      "priority": 5,
+      "policy": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": []
+        }
+      },
+      "check": {
+        "key": "k",
+        "kind": "track",
+        "plan": "Hounds",
+        "quarry": "player"
+      },
+      "outcomes": {
+        "success": {
+          "sequence": [
+            {
+              "op": "fact.assign",
+              "fact": {
+                "cartridge_id": "c",
+                "cartridge_version": "1.0.0",
+                "kind": "fact",
+                "key": "gate_open"
+              },
+              "value": true
+            }
+          ],
+          "narration": {
+            "actor": "narration.pick.success"
+          }
+        },
+        "failure": {
+          "sequence": [],
+          "narration": {
+            "actor": "narration.pick.failure"
+          }
+        }
+      }
+    },
+    "errors": [
+      {
+        "path": "/check/plan",
+        "code": "pattern_mismatch"
+      },
+      {
+        "path": "/check/quarry",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "track_check_no_plan",
+    "contract": "ActionRecipe",
+    "value": {
+      "key": "pick_gate",
+      "label": "actions.pick_gate",
+      "aliases": [
+        "pick"
+      ],
+      "target": {
+        "kind": "detail",
+        "room": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "hall"
+        },
+        "detail": "gate"
+      },
+      "priority": 5,
+      "policy": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": []
+        }
+      },
+      "check": {
+        "key": "k",
+        "kind": "track"
+      },
+      "outcomes": {
+        "success": {
+          "sequence": [
+            {
+              "op": "fact.assign",
+              "fact": {
+                "cartridge_id": "c",
+                "cartridge_version": "1.0.0",
+                "kind": "fact",
+                "key": "gate_open"
+              },
+              "value": true
+            }
+          ],
+          "narration": {
+            "actor": "narration.pick.success"
+          }
+        },
+        "failure": {
+          "sequence": [],
+          "narration": {
+            "actor": "narration.pick.failure"
+          }
+        }
+      }
+    },
+    "errors": [
+      {
+        "path": "/check/plan",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "track_check_no_key",
+    "contract": "ActionRecipe",
+    "value": {
+      "key": "pick_gate",
+      "label": "actions.pick_gate",
+      "aliases": [
+        "pick"
+      ],
+      "target": {
+        "kind": "detail",
+        "room": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "hall"
+        },
+        "detail": "gate"
+      },
+      "priority": 5,
+      "policy": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": []
+        }
+      },
+      "check": {
+        "kind": "track",
+        "plan": "hounds"
+      },
+      "outcomes": {
+        "success": {
+          "sequence": [
+            {
+              "op": "fact.assign",
+              "fact": {
+                "cartridge_id": "c",
+                "cartridge_version": "1.0.0",
+                "kind": "fact",
+                "key": "gate_open"
+              },
+              "value": true
+            }
+          ],
+          "narration": {
+            "actor": "narration.pick.success"
+          }
+        },
+        "failure": {
+          "sequence": [],
+          "narration": {
+            "actor": "narration.pick.failure"
+          }
+        }
+      }
+    },
+    "errors": [
+      {
+        "path": "/check/key",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "trails_bounds",
+    "contract": "WorldSettings",
+    "value": {
+      "trails": {
+        "fresh_for": 0,
+        "leads": {
+          "sideways": "trail.lead.east"
+        },
+        "rain": true
+      }
+    },
+    "errors": [
+      {
+        "path": "/trails/fresh_for",
+        "code": "below_minimum"
+      },
+      {
+        "path": "/trails/leads/sideways",
+        "code": "unknown_property"
+      },
+      {
+        "path": "/trails/rain",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "trails_required",
+    "contract": "WorldSettings",
+    "value": {
+      "trails": {}
+    },
+    "errors": [
+      {
+        "path": "/trails/fresh_for",
+        "code": "missing_property"
+      },
+      {
+        "path": "/trails/leads",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "trails_types",
+    "contract": "WorldSettings",
+    "value": {
+      "trails": {
+        "fresh_for": 1.5,
+        "leads": {
+          "north": "Trail East",
+          "south": "Trail East",
+          "east": "Trail East",
+          "west": "Trail East",
+          "up": "Trail East",
+          "down": "Trail East"
+        }
+      }
+    },
+    "errors": [
+      {
+        "path": "/trails/fresh_for",
+        "code": "invalid_type"
+      },
+      {
+        "path": "/trails/leads/down",
+        "code": "pattern_mismatch"
+      },
+      {
+        "path": "/trails/leads/east",
+        "code": "pattern_mismatch"
+      },
+      {
+        "path": "/trails/leads/north",
+        "code": "pattern_mismatch"
+      },
+      {
+        "path": "/trails/leads/south",
+        "code": "pattern_mismatch"
+      },
+      {
+        "path": "/trails/leads/up",
+        "code": "pattern_mismatch"
+      },
+      {
+        "path": "/trails/leads/west",
+        "code": "pattern_mismatch"
+      }
+    ]
+  },
+  {
+    "name": "trails_leads_type",
+    "contract": "WorldSettings",
+    "value": {
+      "trails": {
+        "fresh_for": 1,
+        "leads": []
+      }
+    },
+    "errors": [
+      {
+        "path": "/trails/leads",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "name": "trails_type",
+    "contract": "WorldSettings",
+    "value": {
+      "trails": true
+    },
+    "errors": [
+      {
+        "path": "/trails",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "name": "population_plan_trail_hunts_false",
+    "contract": "PopulationPlan",
+    "value": {
+      "key": "bandits",
+      "bundle": {
+        "cartridge_id": "encounter_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "population_bundle",
+        "key": "bandits"
+      },
+      "home": {
+        "cartridge_id": "encounter_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "room",
+        "key": "road"
+      },
+      "area": [
+        {
+          "cartridge_id": "encounter_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "road"
+        },
+        {
+          "cartridge_id": "encounter_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "crossroads"
+        }
+      ],
+      "cap": 1,
+      "day_target": 1,
+      "night_target": 1,
+      "night_start": 20,
+      "night_end": 6,
+      "replacement_delay": 3600,
+      "wander_interval": 3600,
+      "chance": 25,
+      "trail": false,
+      "hunts": false
+    },
+    "errors": [
+      {
+        "path": "/hunts",
+        "code": "const_mismatch"
+      },
+      {
+        "path": "/trail",
+        "code": "const_mismatch"
       }
     ]
   }

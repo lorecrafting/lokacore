@@ -1,0 +1,18 @@
+{
+  "title": "room.clearing.title",
+  "description": "room.clearing.description",
+  "exits": {
+    "east": {
+      "to": "thicket"
+    },
+    "north": {
+      "to": "burrow"
+    }
+  },
+  "details": {
+    "ground": {
+      "aliases": ["ground", "tracks"],
+      "description": "detail.clearing.ground"
+    }
+  }
+}

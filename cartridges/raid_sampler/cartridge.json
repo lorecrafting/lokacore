@@ -1,0 +1,105 @@
+{
+  "api_version": "loka/v3",
+  "id": "raid_sampler",
+  "version": "0.0.1",
+  "title": "Raid Sampler",
+  "requires": {
+    "kernel_api": {
+      "at_least": "1.84",
+      "below": "2.0"
+    },
+    "content_schema": 1,
+    "rule_ir": 1,
+    "capabilities": {
+      "movement": 1,
+      "containment": 1,
+      "resource": 1,
+      "combat": 1,
+      "schedule": 1,
+      "death": 1,
+      "behavior": 1,
+      "description_variant": 1,
+      "calendar": 1,
+      "position": 1,
+      "population": 1,
+      "fact": 1,
+      "policy": 1,
+      "reaction": 1
+    },
+    "client_features": []
+  },
+  "supported_profiles": [
+    "offline_private"
+  ],
+  "entry": "field",
+  "time_policy": {
+    "profile": "real_elapsed",
+    "rate": 50
+  },
+  "world": {
+    "bands": [
+      {
+        "at_percent": 100,
+        "key": "ready",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 50,
+        "key": "hurt",
+        "tone": "warning"
+      },
+      {
+        "at_percent": 0,
+        "key": "dying",
+        "tone": "danger"
+      }
+    ],
+    "death": {
+      "player_corpse": "player_corpse",
+      "npc_corpse": "npc_corpse",
+      "shrine": "field",
+      "restore": {
+        "hp": 10,
+        "mv": 100
+      }
+    },
+    "combat": {
+      "player_attack": {
+        "chance": 100,
+        "damage_min": 1,
+        "damage_max": 1
+      },
+      "interval": 150,
+      "sleep_multiplier": 2,
+      "flee_multiplier": 2,
+      "narration": {
+        "player_hit": "combat.player_hit",
+        "player_miss": "combat.player_miss",
+        "npc_hit": "combat.npc_hit",
+        "npc_miss": "combat.npc_miss",
+        "player_died": "combat.player_died",
+        "npc_died": "combat.npc_died"
+      }
+    }
+  },
+  "calendar": {
+    "start": 0,
+    "units_per_hour": 100,
+    "hours_per_day": 10,
+    "subdivisions_per_hour": 10,
+    "lunar": {
+      "period": 2000,
+      "origin": 0,
+      "phases": [
+        {
+          "at": 0,
+          "phase": "new"
+        },
+        {
+          "at": 1000,
+          "phase": "full"
+        }
+      ]
+    }
+  }
+}

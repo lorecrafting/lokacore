@@ -22,6 +22,7 @@ const NAMED: Record<string, string> = {
   scene: 'scene',
   status: 'status',
   story_point: 'story_point',
+  target: 'npc',
   victim: 'npc',
 };
 
@@ -34,6 +35,7 @@ const FLOORS: Record<string, number> = {
   'status.cure': 53, // status reader 3 (row G3)
   'barrier.set': 56, // row W22 (loka-kgd.96)
   'item.move': 77, // row 41 (decay)
+  'population.spawn': 84, // row 37a (phased world events)
 };
 
 const each = (c: Obj): [Obj, string][] =>
@@ -48,7 +50,13 @@ export const uses = (c: Obj) =>
     ['definition', 'reaction', at],
     ['event', r.on.event, `${at}.on.event`],
     ...r.apply.flatMap((s: Obj, i: number) =>
-      ['population.suppress', 'experience.grant', 'status.cure', 'item.move'].includes(s.op)
+      [
+        'population.suppress',
+        'experience.grant',
+        'status.cure',
+        'item.move',
+        'population.spawn',
+      ].includes(s.op)
         ? []
         : [
             [
@@ -66,27 +74,31 @@ export const uses = (c: Obj) =>
     ),
   ]) as ['definition' | 'event', string, string][];
 
-// size: allow 53, finite reaction API, typed suppression and status references stay in one ordered check
+// The kernel_api minor a reaction needs: the highest of its trigger's and its steps' rows.
+const apiFloor = (r: Obj): number =>
+  Math.max(
+    r.on.event === 'quest_resolved' ? 8 : 0,
+    r.on.event === 'spoken' ? 48 : r.on.npc ? 47 : 0, // speech (G9), the entrant filter (W3)
+    r.on.target ? 87 : r.on.attacker ? 58 : 0, // loka-kgd.79, row 39
+    r.on.event === 'status_applied' ? 53 : 0, // status reader 2 (row G3)
+    // co_present: row W21; its tag: row W22
+    ...r.apply.map((s: Obj) => (s.tag ? 56 : s.co_present ? 50 : (FLOORS[s.op] ?? 0))),
+  );
+
+// size: allow 47, typed suppression and status references stay in one ordered check
 export function reactions(c: Obj, { named, typedValue }: Checks): Diagnostic[] {
   const out: Diagnostic[] = [];
   const [major, minor] = c.manifest.requires.kernel_api.at_least.split('.').map(Number);
   for (const [r, at] of each(c)) {
-    const floor = Math.max(
-      r.on.event === 'quest_resolved' ? 8 : 0,
-      r.on.event === 'spoken' ? 48 : r.on.npc ? 47 : 0, // speech (G9), the entrant filter (W3)
-      r.on.attacker ? 58 : 0, // loka-kgd.79
-      r.on.event === 'status_applied' ? 53 : 0, // status reader 2 (row G3)
-      // co_present: row W21; its tag: row W22
-      ...r.apply.map((s: Obj) => (s.tag ? 56 : s.co_present ? 50 : (FLOORS[s.op] ?? 0))),
-    );
+    const floor = apiFloor(r);
     if (floor && (major < 1 || (major === 1 && minor < floor)))
       out.push(
         diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'),
       );
     for (const [field, kind] of Object.entries(NAMED))
       if (r.on[field]) named(r.on[field], kind, `${at}.on.${field}`);
-    // A spawn template has no instance to enter (row W3) or attack (loka-kgd.79).
-    for (const f of ['npc', 'attacker'])
+    // A spawn template has no instance to enter (row W3), attack (loka-kgd.79) or be hit (row 39).
+    for (const f of ['npc', 'attacker', 'target'])
       if (r.on[f] && c.npcs?.[refString(r.on[f])]?.spawn_template)
         out.push(diag('SCHEMA_VIOLATION', `${at}.on.${f}`, { error: 'invalid_value' }));
     r.apply.forEach((s: Obj, i: number) => {
@@ -107,13 +119,15 @@ export function reactions(c: Obj, { named, typedValue }: Checks): Diagnostic[] {
           out.push(diag('OUTCOME_MISMATCH', `${at}.apply[${i}].op`));
       } else if (s.op === 'barrier.set') {
         out.push(...barrierSet(c, s, r.on.room, `${at}.apply[${i}]`, named));
-      } else if (s.op === 'item.move') {
-        named(s.room, 'room', `${at}.apply[${i}].room`); // row 41
+      } else if (s.op === 'item.move' || s.op === 'population.spawn') {
+        const [f, kind] = s.op === 'item.move' ? ['room', 'room'] : ['plan', 'population']; // rows 41, 37a
+        named(s[f], kind, `${at}.apply[${i}].${f}`);
       } else if (!['status.apply', 'status.cure', 'experience.grant'].includes(s.op)) {
         // status steps, experience.grant, fact.adjust's int: with their declarations (cartridge_standing.ts).
         named(s.fact, 'fact', `${at}.apply[${i}].fact`);
         if (s.op !== 'fact.adjust') typedValue(s.fact, s.value, `${at}.apply[${i}].value`);
         for (const f of ['npc', 'item']) if (s[f]) named(s[f], f, `${at}.apply[${i}].${f}`);
+        if (s.with) named(s.with, 'npc', `${at}.apply[${i}].with`); // row FD4
       }
     });
   }

@@ -1,0 +1,13 @@
+{
+  "bundle": "hunters",
+  "home": "clearing",
+  "area": ["clearing", "thicket"],
+  "cap": 1,
+  "day_target": 1,
+  "night_target": 1,
+  "night_start": 20,
+  "night_end": 6,
+  "replacement_delay": 86400,
+  "wander_interval": 3600,
+  "hunts": true
+}

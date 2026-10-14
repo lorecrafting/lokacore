@@ -10,6 +10,14 @@ of closed work are deleted once their lesson is folded, and linked by permalink
 Reviews before R2 live in the [legacy repository](https://github.com/lorecrafting/lokacore-v2-legacy)
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
+- [Review: two shops save fix, save second opinion (loka-kgd.149)](2026-10-14-m12-two-shops-second-opinion.md): **APPROVE**
+- [Review: two shops make cold reopen save_corrupt (loka-kgd.149)](2026-10-14-m12-two-shops-review.md): **APPROVE**
+- [Review: W13 tracks and trails, invariant and portable contracts, second opinion](2026-10-14-m12-tracks-second-opinion.md): **APPROVE**
+- [Review: m12 tracks and trails (toolbox row W13), main review](2026-10-14-m12-tracks-review.md): **APPROVE WITH NOTES**
+- [Second opinion: toolbox row FD4, NPC-NPC pair facts (loka-kgd.141)](2026-10-14-m12-pairs-second-opinion.md): **CHANGES REQUIRED**
+- [Review: toolbox row FD4, NPC-NPC pair facts (loka-kgd.141)](2026-10-14-m12-pairs-review.md): **APPROVE**
+- [Review: mechanics batch M12 (Fable batch review, final head)](2026-10-14-m12-batch-fable-review.md): **APPROVE WITH NOTES**
+- [Review: toolbox row 37a, phased world event spawn (loka-kgd.131)](2026-10-13-m12-raid-review.md): **APPROVE WITH NOTES**
 - [Review: m11 property and bank (rows 24/25) mobile save, second opinion](2026-10-13-m11-property-second-opinion.md): **APPROVE WITH NOTES**
 - [Review: toolbox rows 24 and 25, property ownership and bank (loka-kgd.127)](2026-10-13-m11-property-review.md): **APPROVE WITH NOTES**
 - [Review: toolbox row W11 stock-sensitive prices, save/reconciliation second opinion (loka-kgd.128)](2026-10-13-m11-prices-second-opinion.md): **APPROVE**

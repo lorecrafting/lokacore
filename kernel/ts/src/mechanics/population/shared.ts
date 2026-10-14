@@ -257,7 +257,8 @@ function targetAt(world: World, plan: Plan, at: number) {
   const hour = hourOf(world.cartridge, at);
   return hour >= plan.night_start || hour < plan.night_end ? plan.night_target : plan.day_target;
 }
-function slotRows(world: World, plan: DefinitionRef, cap: number): Slots {
+/** Every slot row 1..cap of `plan`; a missing row is a broken save (precondition_failed). */
+export function slotRows(world: World, plan: DefinitionRef, cap: number): Slots {
   return Array.from({ length: cap }, (_, i) => {
     const slot = i + 1;
     const row = world.state.population_slots?.[key({ kind: 'population_slot', plan, slot })];

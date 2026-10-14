@@ -1,9 +1,11 @@
 import type {
+  CharacterId,
   CommandId,
   DefinitionRef,
   DeltaOp,
   DomainEvent,
   EntityId,
+  VersionedPolicy,
 } from '../../contracts.gen.ts';
 import { key } from '../../foundation/compose.ts';
 import { uniform } from '../../foundation/rng.ts';
@@ -11,9 +13,11 @@ import { refString, type JobRow, type Mint, type World } from '../../runtime/dec
 import { engaged } from '../combat/shared.ts';
 import { living } from '../death/shared.ts';
 import { barrierState } from '../lookups.ts';
+import { holds } from '../policy.ts';
 import { npcPassage, relock } from '../movement/shared.ts';
 import { happened } from '../schedule/behavior.ts';
 import { moves } from '../status/shared.ts';
+import { chase, left, once } from '../trail.ts';
 import { birth } from './birth.ts';
 import { bindSight } from './behavior.ts';
 
@@ -34,16 +38,22 @@ export function births(
   slots: Slots,
   mint: Mint,
 ) {
+  const plan = world.populationSpecs[key(job.job)]!.plan;
+  const floor = gate(world, plan.birth_when, job.due_time) ? target : (plan.floor ?? 0);
   const ops: DeltaOp[] = [];
   const ids = new Set<string>();
   for (const { slot, row } of slots) {
-    if (!eligible(slot, row, target, job.due_time)) continue;
+    if (slot > floor || !eligible(slot, row, target, job.due_time)) continue;
     const born = birthSlot(world, occurrence_id, job, slot, row, mint);
     ops.push(...born.ops);
     ids.add(born.member_id);
   }
   return { ops, ids };
 }
+/** A plan gate (row W12), absent or holding at the occurrence's time `due`; it reads no actor. */
+const gate = (world: World, when: VersionedPolicy | undefined, due: number) =>
+  !when || holds({ ...world, state: { ...world.state, clock: due } }, '' as CharacterId, when.root);
+
 /** A slot within the target with no living member whose replacement is due by `due`. */
 export const eligible = (slot: number, row: Slots[number]['row'], target: number, due: number) =>
   slot <= target &&
@@ -76,13 +86,16 @@ export function encounter(
   return { ...born, rng: after };
 }
 
-function birthSlot(
+/** One birth into `slot` with its slot row and sight binding; also row 37a's population.spawn,
+ * which binds no sight (`sighted` false): only a plan job's birth can explain a birth sight. */
+export function birthSlot(
   world: World,
   occurrence_id: CommandId,
-  job: JobRow,
+  job: Pick<JobRow, 'job' | 'due_time'>,
   slot: number,
   row: Slots[number]['row'],
   mint: Mint,
+  sighted = true,
 ) {
   const generation = row.generation + 1;
   const made = birth(world, job.job, slot, generation, occurrence_id, job.due_time, mint);
@@ -95,7 +108,7 @@ function birthSlot(
     ...((spec.plan.pack || spec.plan.sight) && { last_flight_at: null }),
     ...(spec.plan.sight && { sight_job_id: null }),
   };
-  const sight = birthSight(world, occurrence_id, job, slot, value, member_id, mint);
+  const sight = sighted ? birthSight(world, occurrence_id, job, slot, value, member_id, mint) : [];
   const binding = sight.find((op) => op.op === 'population.slot');
   const ops: DeltaOp[] = [
     ...made,
@@ -115,7 +128,7 @@ function birthSlot(
 function birthSight(
   world: World,
   occurrence_id: CommandId,
-  job: JobRow,
+  job: Pick<JobRow, 'job' | 'due_time'>,
   slot: number,
   value: Slots[number]['row'],
   member_id: EntityId,
@@ -151,17 +164,17 @@ export function wanders(
   mint: Mint,
   walked: Walked,
 ): DeltaOp[] {
-  if (job.due_time !== wanderDue) return [];
+  if (job.due_time !== wanderDue || !gate(world, plan.wander_when, wanderDue)) return [];
   const [home, nest] = plan.area.map((r) => world.roomIds[refString(r)]);
   const ops: DeltaOp[] = [];
   for (const { row } of slots)
     ops.push(
       ...wanderOne(world, occurrence_id, planRef, plan, job, row, born, [home, nest], mint, walked),
     );
-  return ops;
+  return once(ops);
 }
 
-// size: allow 47, a walking member (row W26) commits its key passage with its move and sight
+// size: allow 50, a walker crosses doors (W26), a hunt picks its edge or holds (false), a trail (W13)
 function wanderOne(
   world: World,
   occurrence_id: CommandId,
@@ -182,19 +195,22 @@ function wanderOne(
   // Toolbox row W26: a walking plan crosses doors as a walking schedule step does.
   const walker = plan.walks ? (member as EntityId) : undefined;
   const edge =
-    to &&
-    Object.entries(room.exits).find(
-      ([d, e]) => world.roomIds[refString(e.to)] === to && !npcPassage(world, room, d, walker),
-    );
-  if (!to || !edge || !moves(world, member)) return [];
+    chase(world, plan, from, job.due_time, walker) ??
+    (to &&
+      Object.entries(room.exits).find(
+        ([d, e]) => world.roomIds[refString(e.to)] === to && !npcPassage(world, room, d, walker),
+      ));
+  if (!edge || !moves(world, member)) return [];
+  const there = world.roomIds[refString(edge[1].to)]!;
   const door = walker && edge[1].barrier;
   const doors = door && barrierState(world, door) === 'locked' ? relock(door) : [];
   for (const d of doors)
     events.push(happened(world, { id: occurrence_id }, mint, job.due_time, d.changed));
-  const transfer = moveOp(member as EntityId, from, to);
+  const transfer = moveOp(member as EntityId, from, there);
   return [
     ...doors.map((d) => d.op),
     transfer,
+    ...left(world, from, edge[0], job.due_time, plan),
     ...arrivalSight(
       world,
       occurrence_id,
@@ -204,7 +220,7 @@ function wanderOne(
       row,
       member as EntityId,
       from,
-      to,
+      there,
       mint,
     ),
   ];
@@ -241,6 +257,11 @@ function arrivalSight(
     : [];
 }
 
+/** A row 37a spawn (its occurrence id is its own id) holds home: no other writer group moves it. */
+const held = (world: World, member: string) => {
+  const origin = world.state.created?.[member]?.origin;
+  return origin?.kind === 'spawned' && origin.occurrence_id === member;
+};
 function wanderable(
   world: World,
   row: Slots[number]['row'],
@@ -252,6 +273,7 @@ function wanderable(
     !!member &&
     row.replacement_due === null &&
     !born.has(member) &&
+    !held(world, member) &&
     row.last_flight_at !== job.due_time &&
     !Object.values(world.state.crows ?? {}).some(
       (crow) => crow.member_id === member && crow.phase !== 'idle',

@@ -1,0 +1,13 @@
+{
+  "keywords": [
+    "crown"
+  ],
+  "short": "item.crown.short",
+  "room_line": "item.crown.room",
+  "description": "item.crown.description",
+  "location": {
+    "in": "npc",
+    "npc": "warlord"
+  },
+  "mass_grams": 500
+}

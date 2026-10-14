@@ -149,7 +149,7 @@
       "document": "03-domain-state-persistence.md",
       "heading": "## 7. Typed world facts and narrative memory"
     },
-    "statement": "Every stored fact is a fact the cartridge declares, in a scope kind it allows, with a value of its FactSpec type (bool, one of its enum values, or an int within its bounds).",
+    "statement": "Every stored fact is declared, in a scope kind it allows, with its FactSpec type; subject exactly when per_subject (a room only for trail facts); with_id exactly when npc_pair (two distinct NPCs).",
     "implemented_in": "typescript"
   },
   {

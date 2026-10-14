@@ -1,9 +1,8 @@
-// Typed scoped facts (fact@1; 03 §7, §13; 21 §3.9, §4 Fact): the value an actor reads, and the
-// facts_typed invariant. A world keeps each fact's default (newWorld) and the facts set since
+// Typed scoped facts (fact@1; 03 §7, §13; 21 §3.9, §4 Fact): the value an actor reads and sets
+// (the facts_typed invariant: fact_typed.ts). A world keeps each fact's default (newWorld) and the facts set since
 // (State.facts, by canonical MutationTarget text, the key composition writes).
 import { KernelError } from '../foundation/error.ts';
 import { add } from '../foundation/int.ts';
-import { decode } from '../foundation/canonical.ts';
 import { key, same } from '../foundation/compose.ts';
 import type {
   CharacterId,
@@ -32,30 +31,50 @@ export function scopeOf(world: World, actor: CharacterId, fact: DefinitionRef): 
 export const subjective = (world: World, fact: DefinitionRef): boolean =>
   world.cartridge.facts[refString(fact)].per_subject === true;
 
+/** Toolbox row FD4: true for an npc_pair fact, one value per ordered pair of NPCs. */
+export const paired = (world: World, fact: DefinitionRef): boolean =>
+  world.cartridge.facts[refString(fact)].npc_pair === true;
+
+/** True when `a` and `b` are two distinct NPCs, the only two a pair fact's row names (row FD4). */
+export const npcPair = (world: World, a?: string, b?: string): boolean =>
+  a !== b &&
+  [a, b].every((id) => id !== undefined && world.entities[id as EntityId]?.kind === 'npc');
+
 /**
  * The fact MutationTarget `actor` reads and sets `fact` at: its scope (scopeOf) and, for a
- * per_subject fact, `subject` (row W2), which such a fact cannot be read or set without.
+ * per_subject fact, `subject` (row W2), and for an npc_pair fact also `partner` (row FD4), which
+ * such a fact cannot be read or set without.
  */
 export function targetOf(
   world: World,
   actor: CharacterId,
   fact: DefinitionRef,
   subject?: EntityId,
-): { kind: 'fact'; fact: DefinitionRef; scope: StateScope; subject_id?: EntityId } {
+  partner?: EntityId,
+): {
+  kind: 'fact';
+  fact: DefinitionRef;
+  scope: StateScope;
+  subject_id?: EntityId;
+  with_id?: EntityId;
+} {
   const scope = scopeOf(world, actor, fact);
   if (!subjective(world, fact)) return { kind: 'fact', fact, scope };
   if (subject === undefined) throw new KernelError('precondition_failed');
-  return { kind: 'fact', fact, scope, subject_id: subject };
+  if (!paired(world, fact)) return { kind: 'fact', fact, scope, subject_id: subject };
+  if (partner === undefined) throw new KernelError('precondition_failed');
+  return { kind: 'fact', fact, scope, subject_id: subject, with_id: partner };
 }
 
-/** The fact's value for `actor` (and `subject`): its record at targetOf, else its default. */
+/** The fact's value for `actor` (and `subject`, `partner`): its record at targetOf, else its default. */
 export function value(
   world: World,
   actor: CharacterId,
   fact: DefinitionRef,
   subject?: EntityId,
+  partner?: EntityId,
 ): FactValue {
-  const at = key(targetOf(world, actor, fact, subject));
+  const at = key(targetOf(world, actor, fact, subject, partner));
   return world.state.facts?.[at] ?? world.factDefaults[key(fact)];
 }
 
@@ -205,46 +224,6 @@ export const typed = (v: FactValue, t: FactType): boolean =>
         (v as number) >= (t.minimum ?? -Infinity) &&
         (v as number) <= (t.maximum ?? Infinity);
 
-/**
- * True when the cartridge declares the fact at target `t` (a fact.assign or a decoded saved key),
- * allows `t`'s scope kind, `t` names a subject exactly when the fact is per_subject (row W2), and
- * `v` is of its type.
- */
-export function typedFact(
-  world: World,
-  t: {
-    readonly fact: DefinitionRef;
-    readonly scope: { kind: string };
-    readonly subject_id?: unknown;
-  },
-  v: FactValue,
-): boolean {
-  const spec = world.cartridge.facts[refString(t.fact)];
-  return (
-    spec !== undefined &&
-    spec.scopes.includes(t.scope.kind as never) &&
-    (spec.per_subject === true) === (t.subject_id !== undefined) &&
-    typed(v, spec.value_type)
-  );
-}
-
-/** Registered invariants of facts (protocol/invariants.json), pure checks of a world. */
-export const invariants: Readonly<Record<string, (world: World) => boolean>> = {
-  facts_typed: (world) =>
-    Object.entries(world.state.facts ?? {}).every(([text, v]) => {
-      const t = decode(text) as {
-        fact: DefinitionRef;
-        scope: { kind: string };
-        subject_id?: string;
-      };
-      const s = t.subject_id;
-      // A subject is an NPC, item or detail of this world (row W2); nothing removes one.
-      const known =
-        s === undefined || Object.hasOwn(world.entities, s) || Object.hasOwn(world.details, s);
-      return known && typedFact(world, t, v);
-    }),
-};
-
 type Assign = Extract<DeltaOp, { op: 'fact.assign' }>;
 
 /** What a sequence's fact_changed events share: its world, cause, correlation, time and actor. */
@@ -272,10 +251,12 @@ export function factChanged(
     .filter((o) => !same(o.expected, o.value))
     .map((o) => {
       const subject = o.subject_id === undefined ? {} : { subject_id: o.subject_id };
+      const partner = o.with_id === undefined ? {} : { with_id: o.with_id };
       const payload = {
         type: 'fact_changed',
         fact: o.fact,
         ...subject,
+        ...partner,
         old: o.expected,
         new: o.value,
       };

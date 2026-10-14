@@ -1,0 +1,28 @@
+{
+  "facts": {
+    "raided": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "instance"
+      ],
+      "meaning": "Raiders have come this full moon."
+    },
+    "aftermaths": {
+      "version": 1,
+      "value_type": {
+        "type": "int",
+        "minimum": 0,
+        "maximum": 100,
+        "default": 0
+      },
+      "scopes": [
+        "instance"
+      ],
+      "meaning": "Raids the village has come through, counted at each new moon after one."
+    }
+  }
+}

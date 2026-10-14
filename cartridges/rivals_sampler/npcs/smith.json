@@ -1,0 +1,24 @@
+{
+  "keywords": [
+    "smith"
+  ],
+  "short": "npc.smith.short",
+  "room_line": "npc.smith.room",
+  "room_line_variants": [
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "fact_compare",
+          "fact": "gloats",
+          "npc": "smith",
+          "with": "miller",
+          "equals": true
+        }
+      },
+      "description": "npc.smith.room_gloating"
+    }
+  ],
+  "description": "npc.smith.description",
+  "room": "square"
+}

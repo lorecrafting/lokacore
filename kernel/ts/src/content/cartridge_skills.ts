@@ -146,7 +146,13 @@ function durability(c: Obj, checks: Checks): Diagnostic[] {
       t?.type === 'int' && Number.isSafeInteger(t.minimum) && Number.isSafeInteger(t.maximum);
     if (
       f &&
-      !(bounded && f.per_subject === true && f.scopes.length === 1 && f.scopes[0] === 'instance')
+      !(
+        bounded &&
+        f.per_subject === true &&
+        !f.npc_pair &&
+        f.scopes.length === 1 &&
+        f.scopes[0] === 'instance'
+      )
     )
       out.push(diag('SCHEMA_VIOLATION', at, { error: 'invalid_value' }));
   }

@@ -175,6 +175,10 @@
             "item": {
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
+            "with": {
+              "description": "Toolbox row FD4 (kernel_api at least 1.89): an npc_pair fact's second NPC, read at the pair (subject toward with).",
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
             "equals": {
               "$ref": "delta.schema.json#/$defs/FactValue"
             }
@@ -271,7 +275,7 @@
           "additionalProperties": false
         },
         {
-          "description": "The current value of the resource on the actor's body (regenerated to now, before the action's costs) is at least at_least; false for an actor without a body. Owned by attributes@1.",
+          "description": "The current value of the resource on the actor's body (regenerated to now, before the action's costs) is at least at_least; false for an actor without a body. Toolbox row 39 (kernel_api at least 1.87): subject subject reads the pool on a reaction's event subject (the actor's body outside a reaction); at_least_percent holds when value * 100 >= percent * the entity's maximum. Exactly one of at_least and at_least_percent. Owned by attributes@1.",
           "type": "object",
           "properties": {
             "op": {
@@ -280,14 +284,27 @@
             "resource": {
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
+            "subject": {
+              "enum": [
+                "subject"
+              ]
+            },
             "at_least": {
               "$ref": "resource.schema.json#/$defs/ResourceInt"
+            },
+            "at_least_percent": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
             }
           },
           "required": [
             "op",
-            "resource",
-            "at_least"
+            "resource"
+          ],
+          "exactlyOneRequired": [
+            "at_least",
+            "at_least_percent"
           ],
           "additionalProperties": false
         },
@@ -432,6 +449,28 @@
           "required": [
             "op",
             "room",
+            "at_least"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "The named population plan has at least at_least living members: slots 1 to cap whose row has a member_id and no replacement_due (toolbox row W12). Derived on read; reads no actor. Needs kernel_api at least 1.86. Owned by population@1.",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "population_count"
+            },
+            "plan": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "at_least": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          "required": [
+            "op",
+            "plan",
             "at_least"
           ],
           "additionalProperties": false

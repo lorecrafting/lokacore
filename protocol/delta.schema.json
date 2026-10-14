@@ -213,6 +213,9 @@
             "subject_id": {
               "$ref": "identity.schema.json#/$defs/EntityId"
             },
+            "with_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
             "expected": {
               "$ref": "#/$defs/FactValue"
             },
@@ -1835,6 +1838,9 @@
               "$ref": "scope.schema.json#/$defs/StateScope"
             },
             "subject_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "with_id": {
               "$ref": "identity.schema.json#/$defs/EntityId"
             }
           },

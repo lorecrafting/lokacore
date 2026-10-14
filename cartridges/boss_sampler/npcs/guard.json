@@ -1,0 +1,21 @@
+{
+  "keywords": [
+    "guard"
+  ],
+  "short": "npc.guard.short",
+  "room_line": "npc.guard.room",
+  "description": "npc.guard.description",
+  "room": "hall",
+  "spawn_template": true,
+  "hp": {
+    "minimum": 0,
+    "maximum": 3,
+    "start": 3,
+    "gain": 0
+  },
+  "attack": {
+    "chance": 0,
+    "damage_min": 1,
+    "damage_max": 1
+  }
+}

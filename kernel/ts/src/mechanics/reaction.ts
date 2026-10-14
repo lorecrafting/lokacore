@@ -22,7 +22,7 @@ import {
   type Mint,
   type World,
 } from '../runtime/decision.ts';
-import { bounded, durable, subjective, targetOf, value } from './fact.ts';
+import { bounded, durable, npcPair, paired, subjective, targetOf, value } from './fact.ts';
 import { KernelError } from '../foundation/error.ts';
 import { holds } from './policy.ts';
 import { starts } from './scene/shared.ts';
@@ -36,6 +36,7 @@ import { saturate } from '../foundation/int.ts';
 import { npcsIn } from './death/shared.ts';
 import { setBarrier } from './barrier/react.ts';
 import { moveItem } from './containment/react.ts';
+import { spawn } from './population/react.ts';
 
 type On = ReactionRule['on'];
 // Each trigger filter (W1; reaction.schema.json): true when the event's payload field equals it.
@@ -57,6 +58,7 @@ export const FILTERS: Record<string, Match> = {
   item: (w, want, p) => w.entityIds[refString(want)] === p.item_id,
   npc: (w, want, p) => w.entityIds[refString(want)] === p.entity_id, // the entrant (W3), the hearer (G9)
   attacker: (w, want, p) => w.entityIds[refString(want)] === p.attacker_id, // loka-kgd.79
+  target: (w, want, p) => w.entityIds[refString(want)] === p.target_id, // row 39
   victim: ref('victim_definition'),
   custom: (_, want, p) => want === p.event.key,
   check: (_, want, p) => want === p.check.key,
@@ -102,7 +104,7 @@ const ACTIVATES = ['quest_resolved', 'rested'];
 // The advance's status holders' groups (G3), and the bodies dead after the cause (`diedAfter`).
 type Delivery = { holders?: Map<string, number>; dead?: ReadonlySet<EntityId> };
 
-// size: allow 60, one ordered delivery lowers fact assignments, quest effects and suppression
+// size: allow 60, one ordered delivery lowers fact assignments, quest effects, suppression and spawn
 export function sequence(
   world: World,
   listener: CharacterId,
@@ -121,8 +123,7 @@ export function sequence(
   const activated = new Set<string>();
   const own = { holders, set: {}, applied: new Set<string>(), doors: new Map() }; // holders: the advance's
   const [ops, events, narration]: [DeltaOp[], DomainEvent[], { key: TextKey }[]] = [[], [], []];
-  let position = 0;
-  let gained = 0; // one levelling write per rule, so two grants never race on one expected row
+  let [position, gained] = [0, 0]; // gained: one levelling write per rule (no row race)
   const by = { id: cause.id as string as CommandId, payload: { actor_id: actor } };
   const emit = (payload: EventPayload) => events.push(event(then, by, mint, ++position, payload));
   for (const step of rule.apply) {
@@ -134,8 +135,7 @@ export function sequence(
       ops.push(...started.ops.map((op) => ({ ...op, writer_group: group })));
       emit(started.payload);
     } else if (step.op === 'quest.resolve' || step.op === 'quest.fail') {
-      if (rule.on.event !== 'fact_changed') return { kind: 'fault', code: 'precondition_failed' };
-      const result = terminal(world, actor, step, group, steps);
+      const result = rule.on.event === 'fact_changed' && terminal(world, actor, step, group, steps);
       if (!result) return { kind: 'fault', code: 'precondition_failed' };
       ops.push(...result.ops);
       if ('payload' in result) emit(result.payload);
@@ -152,6 +152,8 @@ export function sequence(
       ops.push(...setBarrier(then, step, cause, about.subject, group, own, emit)); // row W22
     } else if (step.op === 'item.move') {
       ops.push(...moveItem(then, step, about.subject, group, ops, holders)); // row 41
+    } else if (step.op === 'population.spawn') {
+      ops.push(...spawn(then, step, group, ops, mint)); // row 37a
     } else if (step.op === 'experience.grant') {
       gained = saturate(gained + step.amount);
     } else {
@@ -221,11 +223,11 @@ function holdersOf(
   return apply.tag ? itemsTagged(world, rooms, apply.tag) : npcsIn(world, rooms);
 }
 type StatusStep = Extract<ReactionRule['apply'][number], { op: 'status.apply' | 'status.cure' }>;
-
 // A fact.assign, or (row 15) a fact.adjust lowered to one at the bounded sum (nothing when the
 // fact cannot be adjusted); an entity or pair fact (row W2) at the step's named NPC's or item's
 // instance, else at the event's subject when that is an NPC, item or detail (never the body
-// fallback); with no such subject the step writes nothing. A row an earlier reaction of this
+// fallback); with no such subject the step writes nothing. An npc_pair fact (row FD4) writes at that
+// subject toward the step's `with` NPC, only when both are distinct NPCs. A row an earlier reaction of this
 // advance wrote keeps that write's writer group, so the writes compose in order (loka-j2mo).
 function assignment(
   world: World,
@@ -240,9 +242,11 @@ function assignment(
   const thing = who !== undefined && (world.entities[who] || world.details[who]);
   if (subjective(world, step.fact) && !thing) return undefined;
   if (durable(world, step.fact)) throw new KernelError('precondition_failed');
-  const { kind: _, ...target } = targetOf(world, actor, step.fact, who);
+  const partner = step.with && world.entityIds[refString(step.with)];
+  if (paired(world, step.fact) && !npcPair(world, who, partner)) return undefined;
+  const { kind: _, ...target } = targetOf(world, actor, step.fact, who, partner);
   const at = key({ kind: 'fact', ...target });
-  const expected = Object.hasOwn(set, at) ? set[at] : value(world, actor, step.fact, who);
+  const expected = Object.hasOwn(set, at) ? set[at] : value(world, actor, step.fact, who, partner);
   const next =
     step.op === 'fact.adjust' ? bounded(world, step.fact, expected, step.amount) : step.value;
   if (next === undefined) return undefined;

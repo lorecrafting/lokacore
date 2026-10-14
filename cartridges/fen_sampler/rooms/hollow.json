@@ -1,0 +1,9 @@
+{
+  "title": "room.hollow.title",
+  "description": "room.hollow.description",
+  "exits": {
+    "south": {
+      "to": "fen"
+    }
+  }
+}

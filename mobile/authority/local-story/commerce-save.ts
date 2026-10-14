@@ -37,10 +37,17 @@ export function commerceSave(world: World, db: Db, meta: Meta, revision: number)
       );
       const p = command.payload;
       const shopped = p.type === 'buy' || p.type === 'sell';
-      if (shopped) shopReceipt(world, provider, shop, custody, command, decision);
-      const [payer, recipient] = p.type === 'buy' ? [world.body, provider] : [provider, world.body];
+      // Each receipt is checked once, under its own shop; another shop's moves only its own currency.
+      const seller = shopped ? p.provider_id : (provider as EntityId);
+      const sellerShop = (world.entities[seller] as { shop?: Shop } | undefined)?.shop;
+      if (!sellerShop) invalid();
+      if (shopped && seller === provider)
+        shopReceipt(world, provider, shop, custody, command, decision);
+      const [payer, recipient] = p.type === 'buy' ? [world.body, seller] : [seller, world.body];
       const payments = shopped
-        ? [{ payer, recipient, amount: p.quoted_price }]
+        ? same(sellerShop.resource, shop.resource)
+          ? [{ payer, recipient, amount: p.quoted_price }]
+          : []
         : money.length
           ? bankPayments(world, command, dialoguePayment(world, command, shop.resource))
           : [];
@@ -198,7 +205,7 @@ function custodyEvidence(
   op: Extract<DeltaOp, { op: 'entity.transfer' }>,
 ) {
   const p = command.payload;
-  if (p.type === 'buy' || p.type === 'sell') return true; // shopReceipt checked the entire exchange.
+  if (p.type === 'buy' || p.type === 'sell') return true; // Its own shop's shopReceipt checks the exchange.
   // liquidSave already replayed the owned bottom corpse and every original root.
   if (p.type === 'recover_corpse')
     return (

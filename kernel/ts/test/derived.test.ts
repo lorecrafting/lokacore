@@ -11,6 +11,7 @@ import { decide } from '../src/mechanics/attributes/rule.ts';
 import { derived } from '../src/mechanics/attributes/shared.ts';
 import { carryingAdded, carryingExchange } from '../src/mechanics/containment/shared.ts';
 import { adjust, level, resourceRef } from '../src/mechanics/resource.ts';
+import { holds } from '../src/mechanics/policy.ts';
 import { apply } from '../src/runtime/apply.ts';
 import { gameView } from '../src/view/view.ts';
 import {
@@ -206,6 +207,23 @@ test('a maximum lowered to 4 reads the start value 10 as 4 and caps the death re
   );
   assert.equal(gameView(fought).place!.title.key, 'room.hall.title'); // died and returned at the shrine
   assert.deepEqual(hpView(fought), [4, 4]);
+});
+
+// Breaks (row 39): at_least_percent reads the authored maximum 10 instead of the derived 22, so
+// 46% would hold (1000 >= 460). Hardy: constitution 16, 10 + 2 * (16 - 10) = 22, hp 10.
+test('at_least_percent compares against the derived maximum', () => {
+  const tough = structuredClone(content) as any;
+  tough.world.derived.hp_max.terms[0].per_point = 2;
+  const w = chosen('hardy', tough);
+  assert.deepEqual(hpView(w), [10, 22]);
+  const at = (at_least_percent: number) =>
+    holds(w, w.character, {
+      op: 'resource_compare',
+      resource: resourceRef(w, 'hp'),
+      at_least_percent,
+    });
+  assert.equal(at(45), true); // 1000 >= 990
+  assert.equal(at(46), false); // 1000 < 1012
 });
 
 // Breaks: the loader drops a derived-table check, so an artifact with a dangling attribute,

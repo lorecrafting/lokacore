@@ -1,0 +1,21 @@
+{
+  "keywords": [
+    "hound"
+  ],
+  "short": "npc.hound.short",
+  "room_line": "npc.hound.room",
+  "description": "npc.hound.description",
+  "room": "hollow",
+  "spawn_template": true,
+  "hp": {
+    "minimum": 0,
+    "maximum": 1,
+    "start": 1,
+    "gain": 0
+  },
+  "attack": {
+    "chance": 50,
+    "damage_min": 1,
+    "damage_max": 1
+  }
+}

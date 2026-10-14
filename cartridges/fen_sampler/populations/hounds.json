@@ -1,0 +1,15 @@
+{
+  "bundle": "hounds",
+  "home": "hollow",
+  "area": [
+    "hollow",
+    "fen"
+  ],
+  "cap": 1,
+  "day_target": 1,
+  "night_target": 1,
+  "night_start": 8,
+  "night_end": 2,
+  "wander_interval": 100,
+  "replacement_delay": 100000
+}
