@@ -1,0 +1,14 @@
+{
+  "room.square.title": "Market Square",
+  "room.square.description": "Stalls ring a cobbled square.",
+  "item.apple.short": "an apple",
+  "item.apple.room": "A red [apple] sits on a crate.",
+  "item.apple.description": "A crisp red apple.",
+  "npc.smith.short": "the smith",
+  "npc.smith.room": "The [smith] wipes soot from her hands.",
+  "npc.smith.room_gloating": "The [smith] polishes her apple where the miller can see.",
+  "npc.smith.description": "A broad woman in a leather apron.",
+  "npc.miller.short": "the miller",
+  "npc.miller.room": "The [miller] leans on a flour sack.",
+  "npc.miller.description": "A dusty man with a slow smile."
+}

@@ -60,6 +60,7 @@ export function target(op: DeltaOp): MutationTarget {
 function factTarget(op: Extract<DeltaOp, { op: 'fact.assign' }>): MutationTarget {
   const t: Record<string, unknown> = { kind: 'fact', fact: op.fact, scope: op.scope };
   if (op.subject_id !== undefined) t.subject_id = op.subject_id;
+  if (op.with_id !== undefined) t.with_id = op.with_id;
   return t as MutationTarget;
 }
 

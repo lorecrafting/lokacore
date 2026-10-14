@@ -472,6 +472,10 @@
                   "item": {
                     "$ref": "identity.schema.json#/$defs/DefinitionRef"
                   },
+                  "with": {
+                    "description": "Toolbox row FD4 (kernel_api at least 1.89): an npc_pair fact's second NPC; the step writes at the pair (its subject toward this NPC).",
+                    "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                  },
                   "value": {
                     "$ref": "delta.schema.json#/$defs/FactValue"
                   }
@@ -497,6 +501,10 @@
                     "$ref": "identity.schema.json#/$defs/DefinitionRef"
                   },
                   "item": {
+                    "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                  },
+                  "with": {
+                    "description": "Toolbox row FD4 (kernel_api at least 1.89): an npc_pair fact's second NPC; the step writes at the pair (its subject toward this NPC).",
                     "$ref": "identity.schema.json#/$defs/DefinitionRef"
                   },
                   "amount": {

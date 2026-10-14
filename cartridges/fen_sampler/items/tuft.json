@@ -1,0 +1,12 @@
+{
+  "keywords": [
+    "tuft"
+  ],
+  "short": "item.tuft.short",
+  "room_line": "item.tuft.room",
+  "description": "item.tuft.description",
+  "mass_grams": 10,
+  "location": {
+    "in": "template"
+  }
+}

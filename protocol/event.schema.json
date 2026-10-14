@@ -343,7 +343,7 @@
           "additionalProperties": false
         },
         {
-          "description": "A fact changed from old to new (03 \u00a77). subject_id is present exactly when the fact.assign that changed it had one.",
+          "description": "A fact changed from old to new (03 \u00a77). subject_id is present exactly when the fact.assign that changed it had one. with_id is present exactly when the fact is npc_pair (two distinct NPCs).",
           "type": "object",
           "properties": {
             "type": {
@@ -353,6 +353,9 @@
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
             "subject_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "with_id": {
               "$ref": "identity.schema.json#/$defs/EntityId"
             },
             "old": {
