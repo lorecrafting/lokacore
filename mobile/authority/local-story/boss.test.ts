@@ -76,11 +76,27 @@ test('a mid-fight save after the summon and the withdraw reopens cold and fights
     const r = story.elapsed({ expected_run_id: story.runId(), from, until: to });
     return r.kind;
   };
-  for (const to of [1350, 2300]) {
+  const checkpoints = [
+    [1350, [1, true, false, false]],
+    [2300, [1, true, true, true]],
+  ] as const;
+  for (const [to, want] of checkpoints) {
     for (let at = story.world().state.clock + 150; at < to; at += 150)
       assert.equal(until(at), 'saved', `at ${at}`);
     assert.equal(until(to), 'saved');
-    const saved = encode(story.world().state as never);
+    const { state, roomIds, entities } = story.world();
+    const fact = (name: string) =>
+      Object.entries(state.facts ?? {}).find(([k]) => k.includes(name))?.[1] ?? false;
+    const spawned = Object.keys(entities).filter(
+      (e) => state.created?.[e]?.origin.kind === 'spawned' && entities[e]!.kind === 'npc',
+    );
+    const inLair = state.containers[warlord] === roomIds['boss_sampler@0.0.1:room/lair'];
+    assert.deepEqual(
+      [spawned.length, fact('summoned'), fact('withdrawn'), inLair],
+      want,
+      `saved at ${to}`,
+    );
+    const saved = encode(state as never);
     story = reopen();
     assert.equal(encode(story.world().state as never), saved, `reopened at ${to}`);
   }

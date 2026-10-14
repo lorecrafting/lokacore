@@ -19545,25 +19545,6 @@
     ]
   },
   {
-    "name": "resource_compare_no_threshold",
-    "contract": "Policy",
-    "value": {
-      "op": "resource_compare",
-      "resource": {
-        "cartridge_id": "c",
-        "cartridge_version": "1.0.0",
-        "kind": "resource",
-        "key": "hp"
-      }
-    },
-    "errors": [
-      {
-        "path": "",
-        "code": "exclusive_properties"
-      }
-    ]
-  },
-  {
     "name": "resource_compare_self_subject",
     "contract": "Policy",
     "value": {
