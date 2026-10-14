@@ -6,8 +6,8 @@ the next steps, the standing owner rules that the repo does not yet state, and o
 questions. Rewrite it at each stable checkpoint (a merge, a review verdict, a pushed fix) and before
 the session ends; commit and push it with the Beads export.
 
-Written 2026-10-13 UTC by Claude Code (Opus 5.5), from the Pi handoff of 2026-10-12 (Pi session
-01a12efa) and the local Claude Code memory.
+Written 2026-10-14 UTC by Claude Code (Opus 5.5) at the end of cloud session
+01FtwqZjvGA5A9sL3d8WjiJz (credits ran out), for a local Claude Code session to continue.
 
 ## Start of a session
 
@@ -39,39 +39,49 @@ Written 2026-10-13 UTC by Claude Code (Opus 5.5), from the Pi handoff of 2026-10
 ## Lane and next steps
 
 One lane: the mechanics toolbox only (epic `loka-kgd`, [MECHANICS-TOOLBOX.md](MECHANICS-TOOLBOX.md));
-Storybook polish (`loka-x6t`) is paused until the owner reactivates it
-([record](decisions/owner-decision-one-lane-mechanics-2026-10-12.md)). The PM decides mechanics calls
-itself, records them in Beads notes, and starts the next row without asking
-([record](decisions/owner-decision-autonomous-mechanics-2026-10-03.md)).
+Storybook polish (`loka-x6t`) stays paused ([record](decisions/owner-decision-one-lane-mechanics-2026-10-12.md)).
+The PM decides mechanics calls itself, records them in Beads notes, and keeps going batch after batch.
 
-Batch M10: branch `toolbox/batch-m10`, head `b6156e83`, hosted CI green, `kernel_api` 1.76. Merged
-into it, each reviewed and re-checked: G8 group `loka-kgd.115`, 19b replenish `loka-kgd.85`, 6b gear
-budget `loka-kgd.107.17`, 22a hireling orders `loka-kgd.116`, 9 random encounters `loka-kgd.117`,
-22b hireling wages `loka-kgd.118`, W9 sleep `loka-kgd.119`, balance 2 flows `loka-kgd.107.2`,
-balance 7 fight matrix `loka-kgd.107.7`. Their issues stay open until the batch merges to `main`.
+Done this session: #380 (loka-kgd, mechanics batch M10) and #381 (loka-kgd, mechanics batch M11)
+merged to `main`. The owner approved the Fable depth and UX audit
+(report `docs/rnd/depth-and-ux-2026-10-13.md`) and the rule that rows from M12 on add no new
+single-player assumption (Realm seams record `docs/decisions/owner-decision-realm-seams-2026-10-13.md`,
+seams audit `docs/rnd/realm-seams-audit-2026-10-13.md`). Both records and the report reach `main` with the
+M12 batch PR (they are on `toolbox/batch-m12`).
 
-Wave 4 (briefs are in each issue's Beads notes; coding stopped when the API credit ran out):
+Batch M12: branch `toolbox/batch-m12`, head `c5fccf72` (worktree `worktrees.noindex/m12-batch`).
+State 2026-10-14 (local session): briefs live in each issue's Beads notes.
 
-1. Row 32 fast travel `loka-kgd.120` (S, no engine change: a transport route gated by
-   `visited_count`). Branch `toolbox/m10-fast-travel`, head `7938460b` (sampler and test, WIP). To do:
-   docs (`docs/system/mechanics.md`, `cartridge.md`), tests green, self-review, review, recheck,
-   merge into the batch.
-2. Row 41 decay `loka-kgd.121` (M, `kernel_api` 1.77, new `item.move {room}` reaction step). Branch
-   `toolbox/m10-decay` from the batch head. Corpse decay is split off as `loka-kgd.122`.
-3. Balance 8 friction report `loka-kgd.107.8` (M, `kernel/ts/play/friction.ts` and a `flows.ts`
-   hook). Branch `toolbox/m10-balance-8` from the batch head.
-4. Then on the batch: regenerate `docs/toolbox.gen.json` and `docs/system-graph.gen.json`; update the
-   MECHANICS-TOOLBOX table (add 19b, move 41 to M10, split 22 into 22a and 22b); one Fable batch
-   review on the final head, fix, Fable recheck; green hosted CI; PR to `main`; merge with
-   `--match-head-commit`; close the issues; delete the slice branches.
-5. Next batches: M11 (G7 locks, W26, 24, 20a, 20b, W11), then M12 to M15 per the toolbox table and
-   `br ready`, batch after batch without stopping, until no open `loka-kgd` row is left. Balance 3 `loka-kgd.107.3` waits on owner question 2.
+1. Merged into the batch: 37a raid spawn `.131` (reviewed `924c18b2`, 1.84) and the two-shop save
+   fix `.149` (reviewed `e7cc58ac`, main + save second opinion approve).
+2. W13 tracks `.136`, `toolbox/m12-tracks` (1.85): both reviewers APPROVE WITH NOTES on `03101ac0`
+   (records `review-m12-tracks`, `review-m12-tracks-2nd`); fix round 1 running (facts_typed must require a
+   room subject for trail facts; revert a `lockStage` reformat). PM rulings: a hunter holds when any
+   body is in its room; an out-of-area hunter parks; player trails are instance scope.
+3. Building: 37b + 38 `.132`/`.133` (`toolbox/m12-aftermath`, content), W12 `.135`
+   (`toolbox/m12-populations`, 1.86; prey hunt deferred until W13 merges).
+4. Briefed, not started: 39 `.134` (1.87), FD8 `.145` (content, Sonnet). Still to brief: FD1 `.138`
+   (1.88, after 37b; delays in logical units, not real minutes, per seams rule 4), FD3 `.140` (after
+   37b), FD4 `.141` (after W13: both touch `fact.ts`), and bug `.151` (Chapter 1 deer
+   `conflicting_write` on one long advance; found by the 37a recheck).
+5. Close M12 as M10 and M11 closed: toolbox table edit, one Fable batch review, green CI, PR, merge with
+   the head pinned, close issues.
 
-Per slice: brief in Beads notes, developer, CI on the head (`bin/wait_ci.sh <sha>`), fresh Opus
-reviewer, fix round by the same developer, reviewer recheck, then `bin/pm_merge.sh <batch-worktree>
-toolbox/batch-m10 <slice-branch> <review-branch> "<subject>" <reviewed-sha>` (merges the reviewed head slice and review record, runs
-the touched checks, pushes the batch only when green). Developers do not wait on CI; the PM watches
-it. Put worktrees outside the main checkout; locally under a `.noindex` folder, so Spotlight skips them.
+Order from here: the owner adopted the Fable priority plan on 2026-10-14 ("keep going, follow the fable priority plan"; `docs/briefs/toolbox-priority-plan-2026-10-14.md` on `toolbox/batch-m12`). M12 rest: FD4, FD1, `.151`; FD3 moves to M13; W12 prey hunt, 43b, 48a-c and RS-7 are deferred; row 38 runs with RS-4; S2 is cut (it duplicates Built rooms slice 2). Plan defaults the PM takes unless the owner objects: one Book word-bar slice after RS, Built rooms after M15, Balance gates on the showcase only.
+
+Owner answers 2026-10-14 (paraphrased): defer carry-over 48a-c and RS-7; Settle per the PM recommendation (S1 into Homestead, S2 merged into Built rooms, S3/S4 after Homestead on a yes); Built rooms between M13 and M14; Balance gates fail on the showcase only; keep W9 "sleep provokes"; loka-b60 at the release candidate. Then (owner, 2026-10-14: "yes to word bar, put mounts after 43a in M14"): one Book word-bar slice (loka-x6t.39) runs in the mechanics lane after the Realm seams batch; 43b mounts runs right after 43a in M14.
+
+Then the Realm seams batch (`loka-kgd.150`, slices RS-1 to RS-8; RS-7 deferred to the Realm), before
+M13. Then M13 to M15. Settle (S1 to S4) waits for an owner yes.
+
+Merge mechanics: `bin/pm_merge.sh <batch-worktree> <batch-branch> <slice-branch> <review-branch>
+"<subject>" <reviewed-sha>` works only when nothing conflicts. Slices in one batch always conflict on
+the `kernel_api` line in `kernel/ts/src/runtime/world.ts` (keep the highest), on
+`protocol/fixtures/invalid.json` (take the union of both sides' new cases, keep `json.dumps(indent=2)`
+formatting, never prettier), on `docs/system/mechanics.md` end-of-file sections (keep both) and on the
+generated `docs/toolbox.gen.json` and `docs/system-graph.gen.json` (run `elixir bin/contracts.exs`).
+After a manual merge run the same checks `pm_merge.sh` runs before pushing. Never `git add -A` a
+directory that holds a `node_modules` link (`168811a` committed one; untracked on the M12 batch).
 
 ## Standing owner rules not yet written elsewhere in the repo
 
@@ -90,15 +100,30 @@ it. Put worktrees outside the main checkout; locally under a `.noindex` folder, 
   agents, at most 3 running tests.
 - Budget: the weekly Claude allowance resets Wednesdays 05:00 HST; Fable draws the same pool faster.
   Near the cap, keep to 1 or 2 agents and Sonnet for bounded work.
+- Jev (TypeSafe): spend approved (owner, 2026-10-14: "yes to this approve to allow spend"); briefs and cartridge text may leave the machine, redacted first, never saves or player words, and Jev is advisory only, never a gate (owner, 2026-10-14: "yes to both, briefs can leave the machine"). Pi keeps its $2/day cap. A decision record goes in the next housekeeping PR.
 - Pi work is marked (commit trailer `Harness: pi (...)`, a `Written ... in the Pi harness` line,
   `[Pi · model · session]` on tracker comments). Claude Code work uses the normal co-author trailer.
 
+## Cloud session lessons (if the next session is in the cloud again)
+
+- `gh` works over REST only (GraphQL blocked: no `gh pr create`/`merge`; use the GitHub MCP tools);
+  `gh auth status` misreports. git and REST branch deletion are blocked: merged branches
+  `toolbox/m10-*` and `toolbox/m11-*` remain on GitHub; the owner deletes them locally
+  (`git push origin --delete <branch>`).
+- `br` 0.7.4 has no reachable release asset; build it from the `v0.7.4` tag with cargo (13 minutes).
+- The disk fills after about seven worktrees (2.2 GB each); remove merged worktrees first.
+- Agents must never run `git worktree prune` while another agent's worktree is in use.
+
 ## Open owner questions
 
-1. W9 sleep, provisional "sleep provokes": an accepted Sleep calls G11 engage, so a hostile NPC in
-   the room opens a fight on the sleeper. Reversible until the M10 batch PR.
+1. W9 sleep, provisional "sleep provokes" (a hostile NPC in the room fights the sleeper): shipped in
+   #380; still the owner's call to keep or reverse.
 2. Balance 3 `loka-kgd.107.3`: do balance gates fail CI on the showcase only, or on every sampler?
    PM default: showcase only.
+3. Settle tier (S1 to S4): part of "finish the toolbox"? PM default: after M15, with S2 (runtime rooms)
+   behind a design record the owner approves.
+4. RS-7 (receipt digests, save v3) refuses old device saves; deferred to the Realm unless the owner
+   pulls it forward.
 
 ## Parked (polish lane)
 
@@ -107,3 +132,4 @@ it. Put worktrees outside the main checkout; locally under a `.noindex` folder, 
 - [Give action plan](plans/loka-x6t.31-give-action.md) for `loka-x6t.31` (Book never offers Give),
   drafted by Pi on 2026-10-13, not reviewed. Known gap: it offers Give to every NPC in the room
   without an engine check that the recipient accepts.
+- Book UX from the Fable audit (`loka-x6t.39` to `.52`, word bar first) waits in the paused polish lane.

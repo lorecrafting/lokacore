@@ -1,11 +1,13 @@
 #!/bin/sh
-# Merge a reviewed slice and its review record into a batch worktree, run the post-merge checks
-# (including only the tests the merge touched), and push the batch if everything passes.
+# Merge a reviewed slice and its review record into a batch worktree, resolving the known additive
+# conflicts (bin/merge_resolve.py), run the post-merge checks (bin/prepush.sh plus only the tests the
+# merge touched), and push the batch if everything passes.
 # Usage: pm_merge.sh <batch-worktree> <batch-branch> <slice-branch> <review-branch> "<subject>" <reviewed-sha>
-# Prints one line per step; logs go to $TMPDIR/pm_<check>.out. Exit 0 = pushed; any failure resets
+# Prints one line per step; each FAIL line names its log. Exit 0 = pushed; any failure resets
 # the worktree to its start head, so a rerun re-checks the whole slice.
 # ponytail: runs only the test files the merge touched; hosted CI on the batch head runs the rest.
 set -u
+here=$(cd "$(dirname "$0")" && pwd)
 wt=$1 batch=$2 slice=${3#origin/} rec=$4 subj=$5 sha=$6
 cd "$wt" || exit 2
 tr="Co-Authored-By: ${COAUTHOR:-Claude Opus 5.5} <noreply@anthropic.com>"
@@ -17,16 +19,15 @@ git fetch -q origin || exit 2
 pre=$(git rev-parse HEAD)
 
 merge() { # <ref> <message>
-  if git merge --no-ff -q "$1" -m "$2" -m "$tr" >/dev/null 2>&1; then echo "MERGED $1"; return 0; fi
+  if git -c merge.conflictStyle=diff3 merge --no-ff -q "$1" -m "$2" -m "$tr" >/dev/null 2>&1; then echo "MERGED $1"; return 0; fi
   c=$(git diff --name-only --diff-filter=U)
-  # Conflicts only under docs/reviews/ (the generated index, or a record a slice branch also carries):
-  # the incoming review record wins, then the index is regenerated.
-  if [ -n "$c" ] && [ -z "$(echo "$c" | grep -v '^docs/reviews/')" ]; then
-    echo "$c" | xargs git checkout -q --theirs -- && sh bin/review_index.sh >/dev/null 2>&1 &&
-      git add docs/reviews/ && git commit -q --no-edit >/dev/null 2>&1 &&
-      { echo "MERGED $1 (review index regenerated)"; return 0; }
+  # The known additive conflicts (bin/merge_resolve.py: mechanics.md tail sections, the kernel_api
+  # line, generated files, docs/reviews/README.md and whitespace-only review records) are resolved; any other conflict stops the merge.
+  if [ -n "$c" ] && python3 "$here/merge_resolve.py" >"${TMPDIR:-/tmp}/pm_resolve.out" 2>&1 &&
+    git commit -q --no-edit >/dev/null 2>&1; then
+    echo "MERGED $1 (resolved: $(echo $c))"; return 0
   fi
-  echo "CONFLICT $1: $(echo $c)"; git merge --abort 2>/dev/null; return 1
+  echo "CONFLICT $1: $(echo $c) (\$TMPDIR/pm_resolve.out)"; git merge --abort 2>/dev/null; return 1
 }
 merge "$sha" "Merge $slice: $subj" || exit 1
 merge "$rec" "Merge review record for $subj" || { git reset -q --hard "$pre"; exit 1; }
@@ -39,16 +40,7 @@ run() { # <name> <command...>
 ch=$(git diff --name-only --diff-filter=d "$pre" HEAD)
 ts=$(echo "$ch" | sed -n 's#^kernel/ts/\(test/.*\.test\.ts\)$#\1#p' | tr '\n' ' ')
 ex=$(echo "$ch" | grep -E '^test/.*_test\.exs$' | tr '\n' ' ')
-run TYPECHECK sh -c 'cd kernel/ts && nice -n 10 mise exec -- npm run -s typecheck'
-run PRETTIER sh -c "git ls-files -z '*.ts' '*.tsx' '*.mjs' '*.js' '*.json' ':(exclude)mobile/**' | xargs -0 nice -n 10 mise exec -- node_modules/.bin/prettier --check"
-run CONTRACTS mise exec -- elixir bin/contracts.exs --check
-run TS_SIZE mise exec -- node bin/check_ts_size.mjs
-run EX_SIZE mise exec -- elixir bin/check_size.exs
-if echo "$ch" | grep -qE '^(lib|test)/.*\.exs?$'; then
-  run MIX_FORMAT mise exec -- mix format --check-formatted
-  run COMPILE mise exec -- mix compile --warnings-as-errors
-  run CREDO mise exec -- mix credo --strict
-fi
+sh "$here/prepush.sh" || fail=1
 [ -n "$ts" ] && run TS_TESTS sh -c "cd kernel/ts && nice -n 10 mise exec -- node --test --test-reporter=dot $ts"
 [ -n "$ex" ] && run EX_TESTS sh -c "nice -n 10 mise exec -- mix test $ex"
 [ "$fail" = 0 ] || { echo "NOT PUSHED; reset to pre-merge $pre"; git reset -q --hard "$pre"; exit 1; }

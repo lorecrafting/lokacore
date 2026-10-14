@@ -38,6 +38,7 @@ m sh bin/beads_red_controls.sh
 m sh bin/graph_diff_red_controls.sh
 m sh bin/orphans_red_controls.sh
 m sh bin/worktree_setup_red_controls.sh
+m sh bin/merge_resolve_red_controls.sh
 [ "${1-}" = --no-ts ] && exit 0
 for d in . kernel/ts mobile/app; do
   step "$d node_modules"; [ -d $d/node_modules ] || { echo "$d not checked: run (cd $d && mise exec -- npm ci)"; exit 1; }
