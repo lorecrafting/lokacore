@@ -166,6 +166,7 @@ test('reaction spawn into a sighted plan with the player home cold-reopens', (t)
   const release = { fresh, content_hash: sha256 };
   const { path, p, story } = setup(t, undefined, release);
   for (const [i, direction] of ['south', 'south', 'west'].entries()) move(story, direction, i + 1);
+  // Split: one 64800-68400 advance faults conflicting_write on origin/main too (open item).
   for (const [from, until] of [
     [64800, 65100],
     [65100, 68300],
