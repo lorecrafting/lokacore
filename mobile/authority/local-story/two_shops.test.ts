@@ -201,11 +201,12 @@ test('a forged receipt at either shop, or naming no shop, is save_corrupt', (t) 
 });
 
 // Breaks: another shop's receipt counts as a payment in this shop's currency, so a buy in shells
-// at the fisher is save_corrupt under the fishmonger's pennies.
+// at the fisher is save_corrupt under the fishmonger's pennies; or that receipt may carry penny ops.
 test('one buy at each of two shops with different currencies survives cold reopen', (t) => {
   const shells = twoShops([{ item: 'basket', buy: 4, sell: 1 }], 'shells');
-  const { initial, play, reopened } = shells;
-  const path = join(scratchDir(t), 'shells.db');
+  const { initial, bundle, play, forge, reopened } = shells;
+  const dir = scratchDir(t);
+  const path = join(dir, 'shells.db');
   const body = initial.body;
   // Pennies: body 20 - 5, fishmonger 20 + 5, fisher 0; shells: body 20 - 4, fisher 0 + 4.
   const expected = [
@@ -216,6 +217,17 @@ test('one buy at each of two shops with different currencies survives cold reope
   const truth = play(path, twoBuys(shells));
   assert.deepEqual(truth, expected);
   assert.deepEqual(reopened(path), expected);
+  // The fisher's shells buy also invents the same moves in pennies; the state rows are unchanged.
+  const forged = join(dir, 'pennies-forged.db');
+  play(forged, twoBuys(shells));
+  forge(forged, 2, (_, response) =>
+    response.delta.ops.push(
+      ...response.delta.ops
+        .filter((o: any) => o.op === 'resource.adjust')
+        .map((o: any) => ({ ...o, resource: { ...o.resource, key: 'pennies' } })),
+    ),
+  );
+  assert.throws(() => elapsedHost(forged, undefined, bundle), /save_corrupt/);
 });
 
 // Breaks: the fishmonger's custody ignores a move of its fish_a made by the fisher's stock offer
