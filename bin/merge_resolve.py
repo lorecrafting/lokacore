@@ -62,7 +62,7 @@ RULES = {"docs/system/mechanics.md": tail_union, "kernel/ts/src/runtime/world.ts
 
 def same_but_whitespace(f):
     try:
-        return len({" ".join(git("show", f":{n}:{f}").split()) for n in (2, 3)}) == 1
+        return len({"\n".join(" ".join(l.split()) for l in git("show", f":{n}:{f}").splitlines()) for n in (2, 3)}) == 1  # line breaks count
     except subprocess.CalledProcessError:  # modify/delete: a side is missing
         return False
 
