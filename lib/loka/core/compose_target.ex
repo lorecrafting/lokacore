@@ -9,7 +9,7 @@ defmodule Loka.Core.ComposeTarget do
     do: Map.put(Map.take(op, ~w(actor_id npc_id)), "kind", "observation")
 
   def target(%{"op" => "fact.assign"} = op),
-    do: Map.put(Map.take(op, ~w(fact scope subject_id)), "kind", "fact")
+    do: Map.put(Map.take(op, ~w(fact scope subject_id with_id)), "kind", "fact")
 
   def target(%{"op" => "character.select", "character_id" => id}),
     do: %{"kind" => "character", "character_id" => id}

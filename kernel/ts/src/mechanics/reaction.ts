@@ -22,7 +22,7 @@ import {
   type Mint,
   type World,
 } from '../runtime/decision.ts';
-import { bounded, durable, subjective, targetOf, value } from './fact.ts';
+import { bounded, durable, npcPair, paired, subjective, targetOf, value } from './fact.ts';
 import { KernelError } from '../foundation/error.ts';
 import { holds } from './policy.ts';
 import { starts } from './scene/shared.ts';
@@ -226,7 +226,8 @@ type StatusStep = Extract<ReactionRule['apply'][number], { op: 'status.apply' | 
 // A fact.assign, or (row 15) a fact.adjust lowered to one at the bounded sum (nothing when the
 // fact cannot be adjusted); an entity or pair fact (row W2) at the step's named NPC's or item's
 // instance, else at the event's subject when that is an NPC, item or detail (never the body
-// fallback); with no such subject the step writes nothing. A row an earlier reaction of this
+// fallback); with no such subject the step writes nothing. An npc_pair fact (row FD4) writes at that
+// subject toward the step's `with` NPC, only when both are distinct NPCs. A row an earlier reaction of this
 // advance wrote keeps that write's writer group, so the writes compose in order (loka-j2mo).
 function assignment(
   world: World,
@@ -241,9 +242,11 @@ function assignment(
   const thing = who !== undefined && (world.entities[who] || world.details[who]);
   if (subjective(world, step.fact) && !thing) return undefined;
   if (durable(world, step.fact)) throw new KernelError('precondition_failed');
-  const { kind: _, ...target } = targetOf(world, actor, step.fact, who);
+  const partner = step.with && world.entityIds[refString(step.with)];
+  if (paired(world, step.fact) && !npcPair(world, who, partner)) return undefined;
+  const { kind: _, ...target } = targetOf(world, actor, step.fact, who, partner);
   const at = key({ kind: 'fact', ...target });
-  const expected = Object.hasOwn(set, at) ? set[at] : value(world, actor, step.fact, who);
+  const expected = Object.hasOwn(set, at) ? set[at] : value(world, actor, step.fact, who, partner);
   const next =
     step.op === 'fact.adjust' ? bounded(world, step.fact, expected, step.amount) : step.value;
   if (next === undefined) return undefined;

@@ -2873,3 +2873,38 @@ Found by [showcase plan 2](../showcase/combat-district.md) (#368); the PM brief 
   - Reused: per_subject facts (W2), reserved engine facts (`uses_`), check@1, `npcPassage`, wander and C4 flight.
   - New: the track check kind, `world.trails`, plan `trail` and `hunts`, room subjects for trail facts, the 1.85 floor.
   - Missing invariant: none (facts_typed covers the rows).
+
+## NPC-NPC pair facts (toolbox row FD4)
+
+Gap 4 of the [depth audit](../rnd/depth-and-ux-2026-10-13.md) (owner approved 2026-10-13): [W2](#entity-and-pair-facts-toolbox-row-w2) pairs an NPC with the character only; row FD4 adds one value per pair of NPCs, so rivalries, debts and romances among NPCs need no simulation. The PM brief is in Beads `loka-kgd.141` (2026-10-14).
+
+- **Declaration.** A FactSpec with `npc_pair: true` (const; absent otherwise) is an NPC-NPC pair fact. It must also be `per_subject: true` with `scopes: ["instance"]`: who owes whom among NPCs is world state (FACT_SCOPE_UNSUPPORTED at `.cartridge.facts[<ref>].npc_pair` otherwise).
+- **Row key.** The fact MutationTarget, `fact.assign` op, ScopedFact and `fact_changed` payload carry an optional `with_id` (EntityId) beside `subject_id`; both kernels compose it into the target text. Rows are **ordered**: subject toward `with`. Debts and grudges are directional, an ordered key needs no hidden sort rule, and an author wanting a symmetric bond writes both rows. No new save section: the row lives in `facts` like any other.
+- **Naming the two NPCs.** Every site naming a pair fact carries `with` (an NPC instance reference) and no `item`; `with` on any other fact, a pair fact without `with`, or `with` naming a spawn template or the site's own `npc` is FACT_SCOPE_UNSUPPORTED at that field. A pair fact is no weapon's durability fact (SCHEMA_VIOLATION): durability reads no partner.
+  - `fact_compare`: the subject is the leaf's `npc` (or `subject: "target"`), the partner is `with`. A missing subject or partner reads false.
+  - Reaction `fact.assign` and `fact.adjust`: the subject is the step's `npc`, else the event's declared subject (never the listener default or the body); the partner is `with`. The step writes nothing unless both are distinct NPC entities.
+  - A W6 room line variant and a W10 case are `fact_compare` leaves, so they read pairs unchanged.
+- **facts_typed.** A row has `with_id` exactly when its fact is `npc_pair`, and then its subject and `with_id` are two distinct NPC entities (`kernel/ts/src/mechanics/fact_typed.ts`); a pair row naming an item, a detail, one NPC twice, or no partner is a broken invariant.
+- **Realm seams** (owner decision 2026-10-13, brief checklist).
+  1. Actor: met; the step's subject is its named NPC or the event's declared subject; no new `world.character` read.
+  2. Reactions: met; no new trigger; the step names its subject from the event's declared subject or `npc`, never the listener default.
+  3. Credit: not applicable; no payout.
+  4. Time: not applicable; no delay or clock read.
+  5. Scope: met; pair facts are world state, `instance` only; Realm audience: every player in the world reads one row per pair.
+  6. Text: not applicable; variant lines are authored, `speech@1` unchanged.
+  7. Ownership: not applicable; nothing owned moves.
+  8. Trust: not applicable; nothing imported.
+  9. Instancing: met; none built or assumed; one row per ordered pair per world.
+- **Opt-in.** An `npc_pair` fact or a `with` field needs `kernel_api` 1.89 (KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least`, both kernels). Without them nothing changes: every other cartridge keeps its bytes and hash.
+- **Book.** No new element and no [Book UI](book-ui.md) change: the reading is an authored room line variant.
+- **Known limits.** No leaf reads "any pair" or counts rows. `with` names an authored NPC (not a spawn template, not the site's own `npc`), so a spawned NPC can be a pair's subject only, through the event's declared subject. A pair fact cannot be a weapon's durability fact or a group fact.
+- **Sampler.** `cartridges/rivals_sampler`: the smith and the miller in the square, an apple. Giving the apple to the smith while the miller is present sets `gloats` (bool) for smith toward miller only; the smith's room line then reads "The smith polishes her apple where the miller can see."
+- **Composition record** ([architecture](architecture.md#building-mechanics-by-composition)).
+  - Consumer: `rivals_sampler`. Later: the showcase's social district (loka-y6yg.4).
+  - Reads: fact rows at (subject, with), the event's declared subject.
+  - Writes: `fact.assign` (existing op) with `fact_changed` (existing event) at the pair target.
+  - Writer ownership: reaction steps own authored pair facts, as for W2.
+  - Jobs and save rows: none new; pair rows live in `facts`.
+  - Reused: per_subject facts (W2), `fact_compare`, reaction fact steps, W6 variants, compose_target.
+  - New: FactSpec `npc_pair`, the `with` field, the target's `with_id`, the 1.89 floor.
+  - Missing invariant: none (facts_typed covers the rows).

@@ -158,7 +158,7 @@ defmodule Loka.Content.Skills do
   defp entity_int?(%{"value_type" => t} = f),
     do:
       t["type"] == "int" and is_integer(t["minimum"]) and is_integer(t["maximum"]) and
-        f["per_subject"] == true and f["scopes"] == ["instance"]
+        f["per_subject"] == true and f["scopes"] == ["instance"] and f["npc_pair"] != true
 
   defp block(rel, %{"block_chance" => _} = item),
     do: if(item["slot"] == "off_hand", do: [], else: [bad(at(rel, ["block_chance"]))])

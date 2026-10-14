@@ -125,6 +125,7 @@
     ],
     "modules": [
       "kernel/ts/src/mechanics/fact.ts",
+      "kernel/ts/src/mechanics/fact_typed.ts",
       "kernel/ts/src/mechanics/policy.ts"
     ],
     "fixtures": [

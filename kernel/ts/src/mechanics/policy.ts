@@ -16,7 +16,7 @@ import type {
 import { bodyOf, refString, type World } from '../runtime/decision.ts';
 import { barrierState, questOf } from './lookups.ts';
 import { key } from '../foundation/compose.ts';
-import { subjective, value } from './fact.ts';
+import { paired, subjective, value } from './fact.ts';
 import { level } from './resource.ts';
 import { stateIs } from './escort/shared.ts';
 import { present } from '../commands/target.ts';
@@ -110,7 +110,8 @@ function uninstalled(leaf: never): never {
 }
 
 // fact@1's read: an entity or pair fact (toolbox row W2) at its named NPC or item, or with subject
-// target at the action's target (false without one); any other fact at its one scope.
+// target at the action's target (false without one), and an npc_pair fact (row FD4) at that
+// subject toward its `with` NPC; any other fact at its one scope.
 function compared(
   world: World,
   actor: CharacterId,
@@ -119,8 +120,10 @@ function compared(
 ): boolean {
   const named = p.npc ?? p.item;
   const subject = named ? world.entityIds[refString(named)] : p.subject && target;
+  const partner = p.with && world.entityIds[refString(p.with)];
   if (subjective(world, p.fact) && subject === undefined) return false;
-  return value(world, actor, p.fact, subject) === p.equals;
+  if (paired(world, p.fact) && !partner) return false;
+  return value(world, actor, p.fact, subject, partner) === p.equals;
 }
 
 // attributes@1's leaves: the actor's saved value or definition start, or the current body pool.
