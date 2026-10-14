@@ -34,3 +34,13 @@
 ## PM ruling 1 (target 0): size
 
 More than schema plus genesis. Genesis needs no code (`initialOps` count 0, `genesisSlots` writes generation-0 rows). Needed: `protocol/cartridge.schema.json` `minimum` 0 on both targets and contracts regen; a 1.84 floor for a 0 target in both loaders (else a cartridge claiming 1.83 loads only on 1.84), with invalid/loader twins; cartridge.md and the Known-limits sentence. Finding 1 applies to such a plan.
+
+## Fix round (3084ce7, on 809b8ff), partial: the PM stopped it
+
+Verdict: **CHANGES REQUIRED**. The recheck is partial: the floor mutants and CI were not run.
+
+- Disposition 1(b) holds. Probe on contexts 3d4e/1111/2222/3333, with both the full moon from 100 and the target-1 chance-100 probe. For every context, a single 0->400 advance gives the same raiders and rooms as an hourly 0->400. The shipped sampler's 0->1000 single advance births 1 raider with no fault. `raid.test.ts` passes (exit 0).
+- Disposition 2: the two-spawn test exists (`kernel/ts/test/raid.test.ts:139`). I did not rerun the `taken` mutant.
+- Dispositions 3 and 4: the spec text is present (809b8ff). Both kernels have a 1.84 floor for day_target 0 (`cartridge_population.ts:19-29`, `population.ex:59-79`). Floor mutants were not run.
+- 1(a), occurrence_id = member id. This is sound for the kernel. The schema pattern is the same as for an entity id. Origin equality compares only a child with its holder (`creation.ts:79`, `invariants_creation.ex:209`). Elixir does not compose births. A mobile cold reopen of the raid sampler after 0->1000 with one spawned raider opens with equal state.
+- **New blocker** (`react.ts` spawn -> `birthSight`, settle.ts). Scenario: a Chapter 1 copy whose reaction spawns into the oak_deer sight plan while the player stands in its home. Result: the mobile cold reopen is `save_corrupt`. Cause: the sight job's cause_id is the member id, and `deer-save.ts` `populationCause` requires `jobCommandId(population job, seen_at)` plus a population job.complete in the same writer group. The control (no spawn reaction) opens with equal state. The same failure was present at 9697574, where cause_id was the event id. Minimal fix: spawn skips `birthSight` (a birthSlot flag; the next entry binds sight). Alternatively, deer-save accepts the spawn cause.
