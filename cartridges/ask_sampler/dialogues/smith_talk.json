@@ -1,0 +1,30 @@
+{
+  "npc": "smith",
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": []
+    }
+  },
+  "prompt": "dialogue.smith.prompt",
+  "roles": {
+    "smith": {
+      "role": "npc",
+      "npc": "smith"
+    }
+  },
+  "choices": {
+    "help": {
+      "label": "dialogue.smith.help",
+      "narration": "narration.smith.help",
+      "sequence": [
+        {
+          "op": "fact.adjust",
+          "fact": "trust",
+          "amount": 1
+        }
+      ]
+    }
+  }
+}

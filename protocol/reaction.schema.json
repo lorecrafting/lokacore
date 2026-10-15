@@ -73,6 +73,29 @@
             },
             {
               "type": "object",
+              "description": "Toolbox row FD7 (speech@1; kernel_api at least 1.96): the actor asked an NPC about a topic.",
+              "properties": {
+                "event": {
+                  "const": "asked"
+                },
+                "npc": {
+                  "$ref": "identity.schema.json#/$defs/DefinitionRef",
+                  "description": "The asked NPC is this NPC's authored instance."
+                },
+                "topic": {
+                  "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                },
+                "answered": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "event"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
               "properties": {
                 "event": {
                   "const": "quest_resolved"

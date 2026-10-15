@@ -13,6 +13,7 @@ const INPUTS: readonly string[] = [
   'ancestry',
   'attribute',
   'word',
+  'topic',
   'direction',
   'choice_id',
   'continuation_id',

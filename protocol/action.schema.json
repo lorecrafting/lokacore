@@ -43,6 +43,7 @@
           "pattern": "^[a-zA-Z]{1,32}$"
         },
         "word": { "$ref": "#/$defs/Word" },
+        "topic": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
         "scene": {
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
@@ -344,6 +345,7 @@
         "ancestry",
         "attribute",
         "word",
+        "topic",
         "direction",
         "choice_id",
         "continuation_id",

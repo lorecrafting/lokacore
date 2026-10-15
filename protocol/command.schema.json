@@ -620,6 +620,26 @@
           "additionalProperties": false
         },
         {
+          "description": "Ask an NPC in the actor's room about a topic the actor knows (speech@1; toolbox row FD7). The NPC's first authored answer on that topic whose condition holds is narrated, else its unknown line; an answer may grant another topic.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "ask"
+            },
+            "actor_id": {
+              "$ref": "identity.schema.json#/$defs/CharacterId"
+            },
+            "target_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "topic": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            }
+          },
+          "required": ["type", "actor_id", "target_id", "topic"],
+          "additionalProperties": false
+        },
+        {
           "description": "Cast the spell whose word this is (action_recipe@1; toolbox row 29a): the word, case-folded, names a spell recipe (action.schema.json RecipeTarget spell), performed like a perform of it. An unknown word and a spell whose policy fails are refused alike, invalid_state; the word never reaches narration.",
           "type": "object",
           "properties": {

@@ -1,4 +1,4 @@
-// size: allow 338, food, water, practical skills, local Knock, G7 get locks and the drawn storylet (row FD3) and row 33 theft share the composed view list; the viewer is threaded (loka-kgd.150.5)
+// size: allow 344, food, water, practical skills, local Knock, G7 get locks and the drawn storylet (row FD3) and row 33 theft and the row FD7 ask share the composed view list; the viewer is threaded (loka-kgd.150.5)
 import { running as modalScene } from '../mechanics/scene/shared.ts';
 import { foodActions } from './food.ts';
 import { useActions } from './use.ts';
@@ -18,6 +18,7 @@ import type {
   EntityId,
   ErrorCode,
   Key,
+  NpcDefinition,
   TargetSpec,
 } from '../contracts.gen.ts';
 import { admission, detailAt, refusal, resolved, type Offered } from '../commands/actions.ts';
@@ -32,6 +33,7 @@ import { carrying, giveRefused, putRefused } from '../mechanics/containment/shar
 import { theftRefused } from '../mechanics/containment/theft.ts';
 import { movable as movableItem } from '../runtime/created.ts';
 import { attackRefused } from '../mechanics/combat/shared.ts';
+import { askRefused } from '../mechanics/speech/ask.ts';
 import { combatOffered } from './combat.ts';
 import * as expedition from '../mechanics/expedition/shared.ts';
 import { reach } from '../mechanics/lookups.ts';
@@ -163,12 +165,13 @@ function entityOffered(
       ? !!a.engine && a.command === 'take'
       : a.target.kind === 'entity' &&
         a.target.scopes.includes(scope as never) &&
-        (!equip(a) || fits(world, actor, a, id));
+        (!equip(a) || fits(world, actor, a, id)) &&
+        (a.command !== 'ask' || !!(world.entities[id] as NpcDefinition | undefined)?.ask); // row FD7
 }
 
 // `a` as listed for `actor` (on entity `id` in `scope`, if any): a door verb on an item is aimed
 // at it, with the item's scope and no input, so target_ids [id] fills target_id (commands/invocation.ts).
-// size: allow 50, exact detail harvest joins shared action admission and projection
+// size: allow 53, exact detail harvest and the row FD7 ask join shared action admission and projection
 function advertise(
   world: World,
   actor: CharacterId,
@@ -216,6 +219,9 @@ function advertise(
         : undefined) ||
       (a.command === 'attack' && target !== undefined
         ? attackRefused(world, actor, target)
+        : undefined) ||
+      (a.command === 'ask' && target !== undefined
+        ? askRefused(world, actor, target, steps)
         : undefined);
   return code ? { available: false, ...shown, reason: { code } } : { available: true, ...shown };
 }

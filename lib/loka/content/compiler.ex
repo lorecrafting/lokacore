@@ -57,7 +57,7 @@ defmodule Loka.Content.Compiler do
   # {warnings, errors} of the lists of diagnostics
   defp split(lists), do: lists |> Enum.concat() |> Enum.split_with(&(&1["severity"] == "warning"))
 
-  # ponytail: one ordered check list; row 33 theft joins it. # credo:disable-for-next-line /ABCSize|CyclomaticComplexity/
+  # ponytail: one ordered check list; row 33 theft and row FD7 asks join it. # credo:disable-for-next-line /ABCSize|CyclomaticComplexity/
   defp checks(manifest, defs, v2, located, registry) do
     Enum.concat([
       Loka.Content.Calendar.check(elem(located, 1)["calendar"] || %{}, defs, manifest),
@@ -77,6 +77,7 @@ defmodule Loka.Content.Compiler do
       Loka.Content.Death.check(manifest, defs, located),
       Loka.Content.Combat.check(manifest, defs, located, v2),
       Loka.Content.Theft.check(manifest, defs, located, v2),
+      Loka.Content.Asks.check(manifest, defs),
       Checks.check(manifest, if(v2, do: defs, else: %{defs | "resource" => %{}}), registry),
       Checks.rooms(manifest, defs, v2, registry),
       Recipes.check(manifest, defs, v2, registry),

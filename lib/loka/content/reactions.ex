@@ -42,7 +42,8 @@ defmodule Loka.Content.Reactions do
     "npc" => "npc",
     "attacker" => "npc",
     "target" => "npc",
-    "witness" => "npc"
+    "witness" => "npc",
+    "topic" => "topic"
   }
   @doc "Each trigger filter that names a definition (W1), with that definition's kind."
   @spec filters() :: %{String.t() => String.t()}
@@ -96,8 +97,8 @@ defmodule Loka.Content.Reactions do
   }
 
   # The kernel_api minor each trigger event needs: spoken 1.48 (G9), status_applied 1.53 (status
-  # reader 2, row G3).
-  @events %{"quest_resolved" => 8, "spoken" => 48, "status_applied" => 53}
+  # reader 2, row G3), asked 1.96 (FD7).
+  @events %{"quest_resolved" => 8, "spoken" => 48, "status_applied" => 53, "asked" => 96}
 
   # One diagnostic per rule below its highest floor; filters: npc 1.47 (W3), attacker 1.58
   # (loka-kgd.79), target 1.87 (row 39), witness 1.95 (FD5); a co_present status.apply 1.50 (W21),

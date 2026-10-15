@@ -1,0 +1,62 @@
+{
+  "facts": {
+    "topic_mill_known": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The player knows about the mill."
+    },
+    "topic_moon_known": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The player knows about the moon."
+    },
+    "topic_smugglers_known": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The player knows about the smugglers."
+    },
+    "wanted": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The guard wants the player."
+    },
+    "trust": {
+      "version": 1,
+      "value_type": {
+        "type": "int",
+        "default": 0,
+        "minimum": 0,
+        "maximum": 1
+      },
+      "scopes": [
+        "player"
+      ],
+      "per_subject": true,
+      "meaning": "How far an NPC trusts the player."
+    }
+  }
+}

@@ -780,6 +780,18 @@
           "required": ["type", "entity_id", "loudness"],
           "additionalProperties": false,
           "description": "Toolbox row G9 (speech@1): the NPC entity_id heard the actor speak, one event per hearer. word is the case-folded word only when it is an authored keyword (a dialogue's keyword or a spoken reaction's word), else absent."
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": { "const": "asked" },
+            "entity_id": { "$ref": "identity.schema.json#/$defs/EntityId" },
+            "topic": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
+            "answered": { "type": "boolean" }
+          },
+          "required": ["type", "entity_id", "topic", "answered"],
+          "additionalProperties": false,
+          "description": "Toolbox row FD7 (speech@1): the actor asked the NPC entity_id about a topic; answered is false when the NPC gave its unknown line."
         }
       ],
       "examples": [
