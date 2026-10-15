@@ -4,7 +4,7 @@ import { Text, View } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { plain, why, type Page as Route } from './model.ts';
 import { ActionCard, Cards } from './actions.tsx';
-import { EntityLine, LogLines } from './lines.tsx';
+import { Asides, EntityLine, LogLines } from './lines.tsx';
 import { Control, Page } from './pages.tsx';
 import type { Button, presenter } from './presenter.ts';
 import { note, prose, usePalette, type Palette } from './palette.ts';
@@ -137,6 +137,7 @@ export function NoticePage(
   return (
     <Page title={p.screen.text(detail.title)} foot={foot(p, !!board, detail.id)}>
       <Text style={prose(c)}>{description}</Text>
+      <Asides keys={'asides' in detail ? detail.asides : undefined} text={p.screen.text} />
       {'remaining' in detail && <Text style={note(c)}>Remaining: {detail.remaining}</Text>}
       {/* A read whose text is the description (the well) adds nothing the page does not show. */}
       <LogLines

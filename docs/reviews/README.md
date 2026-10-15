@@ -17,8 +17,16 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: m12 tracks and trails (toolbox row W13), main review](2026-10-14-m12-tracks-review.md): **APPROVE WITH NOTES**
 - [Second opinion: toolbox row FD4, NPC-NPC pair facts (loka-kgd.141)](2026-10-14-m12-pairs-second-opinion.md): **CHANGES REQUIRED**
 - [Review: toolbox row FD4, NPC-NPC pair facts (loka-kgd.141)](2026-10-14-m12-pairs-review.md): **APPROVE**
+- [Review: FD1 delayed reactions, job checker and save, second opinion](2026-10-14-m12-delayed-second-opinion.md): **APPROVE WITH NOTES**
+- [Review: FD1 delayed reactions and the time_since leaf, main review (loka-kgd.138)](2026-10-14-m12-delayed-review.md): **CHANGES REQUIRED**
 - [Review: mechanics batch M12 (Fable batch review, final head)](2026-10-14-m12-batch-fable-review.md): **APPROVE WITH NOTES**
+- [Review: long-wait mechanics batch (loka-kgd.152 + FD1 + perf), batch head](2026-10-14-longwait-batch-review.md): **APPROVE WITH NOTES**
 - [Review: toolbox row 16, sneak and hide (loka-nfdq, batch M13)](2026-10-14-loka-nfdq-sneak-review.md): **APPROVE WITH NOTES**
+- [Second opinion: one long elapsed wait equals the same wait in steps (loka-kgd.152, loka-kgd.151)](2026-10-14-loka-kgd.152-longwait-second-opinion.md): **APPROVE WITH NOTES**
+- [Review: one long elapsed wait equals the same wait in steps (loka-kgd.152, loka-kgd.151)](2026-10-14-loka-kgd.152-longwait-review.md): **APPROVE WITH NOTES**
+- [Review: FD3 storylet deck (loka-kgd.140, batch M13)](2026-10-14-loka-kgd.140-fd3-review.md): **APPROVE**
+- [Review: FD2 passive skill voices (loka-kgd.139, batch M13)](2026-10-14-loka-kgd.139-fd2-review.md): **APPROVE WITH NOTES**
+- [Review: FD1 finish round, delayed reactions (loka-kgd.138)](2026-10-14-loka-kgd.138-fd1-final-review.md): **APPROVE WITH NOTES**
 - [Review: toolbox row 37a, phased world event spawn (loka-kgd.131)](2026-10-13-m12-raid-review.md): **APPROVE WITH NOTES**
 - [Review: m11 property and bank (rows 24/25) mobile save, second opinion](2026-10-13-m11-property-second-opinion.md): **APPROVE WITH NOTES**
 - [Review: toolbox rows 24 and 25, property ownership and bank (loka-kgd.127)](2026-10-13-m11-property-review.md): **APPROVE WITH NOTES**

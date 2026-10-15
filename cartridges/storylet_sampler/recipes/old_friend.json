@@ -1,0 +1,31 @@
+{
+  "label": "actions.old_friend",
+  "aliases": [
+    "friend"
+  ],
+  "target": {
+    "kind": "storylet"
+  },
+  "priority": 5,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "visited_count",
+      "room": "market",
+      "at_least": 3
+    }
+  },
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "event.emit",
+          "event": "friend_met"
+        }
+      ],
+      "narration": {
+        "actor": "narration.old_friend"
+      }
+    }
+  }
+}

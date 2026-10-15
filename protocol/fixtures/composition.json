@@ -3669,6 +3669,277 @@
       }
     },
     {
+      "id": "job-schedule-and-run-inside-advance",
+      "state": "base",
+      "ops": [
+        {
+          "op": "time.advance",
+          "writer_group": 0,
+          "from": 6,
+          "to": 40
+        },
+        {
+          "op": "job.complete",
+          "writer_group": 1,
+          "job_id": "d1000000-0000-4000-8000-000000000000"
+        },
+        {
+          "op": "job.schedule",
+          "writer_group": 1,
+          "job_id": "d2000000-0000-4000-8000-000000000000",
+          "job": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "schedule",
+            "key": "bram"
+          },
+          "due_time": 30
+        },
+        {
+          "op": "job.complete",
+          "writer_group": 1,
+          "job_id": "d2000000-0000-4000-8000-000000000000"
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "job",
+              "job_id": "d1000000-0000-4000-8000-000000000000"
+            },
+            "value": {
+              "job": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "schedule",
+                "key": "bram"
+              },
+              "due_time": 19,
+              "status": "completed"
+            }
+          },
+          {
+            "target": {
+              "kind": "job",
+              "job_id": "d2000000-0000-4000-8000-000000000000"
+            },
+            "value": {
+              "job": {
+                "cartridge_id": "lantern",
+                "cartridge_version": "0.1.0",
+                "kind": "schedule",
+                "key": "bram"
+              },
+              "due_time": 30,
+              "status": "completed"
+            }
+          },
+          {
+            "target": {
+              "kind": "clock"
+            },
+            "value": 40
+          }
+        ]
+      }
+    },
+    {
+      "id": "job-schedule-at-running-job-time",
+      "state": "base",
+      "ops": [
+        {
+          "op": "time.advance",
+          "writer_group": 0,
+          "from": 6,
+          "to": 40
+        },
+        {
+          "op": "job.complete",
+          "writer_group": 1,
+          "job_id": "d1000000-0000-4000-8000-000000000000"
+        },
+        {
+          "op": "job.schedule",
+          "writer_group": 1,
+          "job_id": "d2000000-0000-4000-8000-000000000000",
+          "job": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "schedule",
+            "key": "bram"
+          },
+          "due_time": 19
+        },
+        {
+          "op": "job.complete",
+          "writer_group": 1,
+          "job_id": "d2000000-0000-4000-8000-000000000000"
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "nonfuture_job",
+          "target": {
+            "kind": "job",
+            "job_id": "d2000000-0000-4000-8000-000000000000"
+          }
+        }
+      }
+    },
+    {
+      "id": "job-schedule-inside-advance-never-run",
+      "state": "base",
+      "ops": [
+        {
+          "op": "time.advance",
+          "writer_group": 0,
+          "from": 6,
+          "to": 40
+        },
+        {
+          "op": "job.complete",
+          "writer_group": 1,
+          "job_id": "d1000000-0000-4000-8000-000000000000"
+        },
+        {
+          "op": "job.schedule",
+          "writer_group": 1,
+          "job_id": "d2000000-0000-4000-8000-000000000000",
+          "job": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "schedule",
+            "key": "bram"
+          },
+          "due_time": 40
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "nonfuture_job",
+          "target": {
+            "kind": "job",
+            "job_id": "d2000000-0000-4000-8000-000000000000"
+          }
+        }
+      }
+    },
+    {
+      "id": "job-unrun-faults-in-key-order",
+      "state": "base",
+      "ops": [
+        {
+          "op": "time.advance",
+          "writer_group": 0,
+          "from": 6,
+          "to": 40
+        },
+        {
+          "op": "job.complete",
+          "writer_group": 1,
+          "job_id": "d1000000-0000-4000-8000-000000000000"
+        },
+        {
+          "op": "job.schedule",
+          "writer_group": 1,
+          "job_id": "d9000000-0000-4000-8000-000000000000",
+          "job": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "schedule",
+            "key": "bram"
+          },
+          "due_time": 40
+        },
+        {
+          "op": "job.schedule",
+          "writer_group": 1,
+          "job_id": "d2000000-0000-4000-8000-000000000000",
+          "job": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "schedule",
+            "key": "bram"
+          },
+          "due_time": 40
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "nonfuture_job",
+          "target": {
+            "kind": "job",
+            "job_id": "d2000000-0000-4000-8000-000000000000"
+          }
+        }
+      }
+    },
+    {
+      "id": "job-schedule-checked-against-preceding-complete",
+      "state": "base",
+      "ops": [
+        {
+          "op": "time.advance",
+          "writer_group": 0,
+          "from": 6,
+          "to": 40
+        },
+        {
+          "op": "job.complete",
+          "writer_group": 1,
+          "job_id": "d1000000-0000-4000-8000-000000000000"
+        },
+        {
+          "op": "job.schedule",
+          "writer_group": 1,
+          "job_id": "d2000000-0000-4000-8000-000000000000",
+          "job": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "schedule",
+            "key": "bram"
+          },
+          "due_time": 30
+        },
+        {
+          "op": "job.complete",
+          "writer_group": 1,
+          "job_id": "d2000000-0000-4000-8000-000000000000"
+        },
+        {
+          "op": "job.schedule",
+          "writer_group": 1,
+          "job_id": "d9000000-0000-4000-8000-000000000000",
+          "job": {
+            "cartridge_id": "lantern",
+            "cartridge_version": "0.1.0",
+            "kind": "schedule",
+            "key": "bram"
+          },
+          "due_time": 25
+        },
+        {
+          "op": "job.complete",
+          "writer_group": 1,
+          "job_id": "d9000000-0000-4000-8000-000000000000"
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "nonfuture_job",
+          "target": {
+            "kind": "job",
+            "job_id": "d9000000-0000-4000-8000-000000000000"
+          }
+        }
+      }
+    },
+    {
       "id": "job-schedule-after-advance-target",
       "state": "base",
       "ops": [

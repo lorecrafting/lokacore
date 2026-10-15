@@ -385,3 +385,34 @@ test("an entity target in the action's scope is admitted", () => {
   assert.equal(step(occupants, look(BRAM), 0).decision.kind, 'accepted');
   assert.deepEqual(step(occupants, look(SATCHEL), 0).decision, refused); // an item is no occupant
 });
+
+// Row FD1, a root delivery: ring_bell's action_completed is stamped at 0, before its 60 s
+// advance. Breaks: the delay is not clamped past the advance, so the job due at 30 faults the
+// command (nonfuture_job), or it is clamped later than 61.
+test('FD1: a delayed rule on a 60 s recipe, after 30, is due at 61', () => {
+  const w = world((c) => {
+    c.manifest.requires.kernel_api.at_least = '1.90';
+    c.manifest.requires.capabilities.reaction = c.lock.capabilities.reaction = 1;
+    c.recipes[RECIPE].duration = 60;
+    const fact = ref('fact', 'rung_at');
+    c.facts['ashmere_bell@0.0.1:fact/rung_at'] = {
+      key: 'rung_at',
+      meaning: 'When the bell was rung.',
+      scopes: ['instance'],
+      value_type: { default: 0, type: 'int' },
+      version: 1,
+    };
+    c.reactions = {
+      'ashmere_bell@0.0.1:reaction/echo': {
+        key: 'echo',
+        on: { event: 'action_completed', action: 'ring_bell' },
+        after: 30,
+        apply: [{ op: 'fact.stamp', fact }],
+      },
+    };
+  });
+  const { decision, world: rung } = step(w, ring(), 0);
+  assert.equal(decision.kind, 'accepted', JSON.stringify(decision));
+  const jobs = Object.values(rung.state.jobs ?? {}).map((j) => [j.due_time, j.status]);
+  assert.deepEqual([rung.state.clock, jobs], [60, [[61, 'pending']]]);
+});

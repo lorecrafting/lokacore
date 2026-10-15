@@ -150,15 +150,19 @@ const successor = (
 // hp settle (row 2c) also writes; every roster member counts, as the player's or an ally's blow
 // falls on another member when the primary is gone (row 6b); a bleed tick on its body joins too, so
 // a round and its equal-due bleed (C5 pair) share one; a replenish run joins the groups of the items
-// it moves (replenishMovers, row 41). A round joins all of those groups: the lowest
-// is kept and the others are returned for the caller to merge into it (loka-x2gv).
+// it moves (replenishMovers, row 41); a delayed reaction's run joins the groups of every row it
+// writes through the same holders map an ordinary reaction uses (reaction.ts holders, row FD1). A
+// round joins all of those groups: the lowest is kept and the others are returned for the caller to
+// merge into it (loka-x2gv).
 export function statusGroup(
   at: World,
   id: JobId,
   job: JobRow,
   holders: Map<string, number>,
   next: number,
+  ops: readonly DeltaOp[] = [],
 ) {
+  if (job.job.kind === 'reaction') return joined(ops); // its run took the holders' groups
   const round = currentRound(at, id, job);
   const held = round
     ? [round.body_id, ...(round.active_ids ?? [round.npc_id])]
@@ -173,6 +177,15 @@ export function statusGroup(
   found.delete(group);
   for (const b of bodies) holders.set(b, group);
   return { group, merged: found as Set<number> };
+}
+
+// A delayed reaction's run (row FD1) wrote each row in the group its holder already had, else in
+// the run's fresh one: the lowest is the job's, the others merge into it.
+function joined(ops: readonly DeltaOp[]) {
+  const found = new Set(ops.map((o) => o.writer_group));
+  const group = Math.min(...found);
+  found.delete(group);
+  return { group, merged: found };
 }
 
 // Relabel a proposal's writes so far, and each group map, from the merged groups to `to`, so the

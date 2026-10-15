@@ -3,7 +3,7 @@ import { illuminated } from './light/shared.ts';
 // time_window, barrier@1's barrier_state, quest@1's quest_state, target_resolution@1's
 // target_present, attributes@1's stat_compare and resource_compare, tags@1's has_tag, calendar@1's sky,
 // variety@1's visited_count, population@1's population_count (row W12), equipment@1's wearing, attributes@1's level_compare (row 29a), status@1's status_active, target_resolution@1's
-// npc_present; 21 §3.2, §4 Policy; 06 §20-21): pure, over committed state, for one
+// npc_present, skills@1's skill_compare (row FD2); 21 §3.2, §4 Policy; 06 §20-21): pure, over committed state, for one
 // actor and the target of the action evaluated, if any.
 import type {
   CharacterId,
@@ -29,6 +29,7 @@ import { living } from './death/shared.ts';
 import { perceived } from './senses.ts';
 import { levelling } from './levelling/shared.ts';
 import { livingCount } from './population/refs.ts';
+import { level as skillLevel } from './skill_level.ts';
 
 // The policy that always holds; here, not in dialogue/shared.ts, so scene/shared.ts (and
 // disposition.ts through it) imports no dialogue module: the Metro bundle threw on that cycle.
@@ -65,7 +66,9 @@ export function holds(
   ctx.steps.n++;
   switch (p.op) {
     case 'fact_compare':
-      return compared(world, actor, p, ctx.target);
+      return read(world, actor, p, ctx.target) === p.equals;
+    case 'time_since': // row FD1: a stamped time; no subject reads undefined, so NaN, false
+      return world.state.clock - (read(world, actor, p, ctx.target) as number) >= p.at_least;
     case 'has_item':
       return held(world, world.entityIds[refString(p.item)], bodyOf(world, actor));
     case 'barrier_state':
@@ -74,10 +77,8 @@ export function holds(
       return stateIs(world, actor, p.quest, p.state);
     case 'quest_state': // false in every state while the actor has no instance
       return questOf(world, actor, p.quest)?.[1].state === p.state;
-    case 'time_window': {
-      const hour = hourOf(world.cartridge, world.state.clock);
-      return p.from < p.to ? p.from <= hour && hour < p.to : hour >= p.from || hour < p.to;
-    }
+    case 'time_window':
+      return inWindow(world, p);
     case 'sky': {
       const f = (['lunar', 'weather', 'season', 'tide'] as const).find((k) => p[k] !== undefined)!;
       return skyPhase(world.cartridge, world.context, world.state.clock, f) === p[f];
@@ -91,13 +92,13 @@ export function holds(
     case 'light_off':
     case 'stat_compare':
     case 'resource_compare':
+    case 'level_compare':
+    case 'skill_compare':
       return atLeast(world, actor, p, ctx);
     case 'has_tag':
       return tagsOf(world, actor, p, ctx.target)?.includes(p.tag) === true;
     case 'wearing':
       return wearing(world, actor, p.tag);
-    case 'level_compare': // row 29a; level 1 without world.levelling
-      return (levelling(world, actor)?.level ?? 1) >= p.at_least;
     case 'status_active':
       return statusActive(world, actor, p, ctx);
     case 'npc_present':
@@ -109,25 +110,33 @@ export function holds(
   }
 }
 
+// A window that wraps midnight (from > to) holds from `from` to the end of the day and from 0 to `to`.
+function inWindow(world: World, p: Extract<Policy, { op: 'time_window' }>): boolean {
+  const hour = hourOf(world.cartridge, world.state.clock);
+  return p.from < p.to ? p.from <= hour && hour < p.to : hour >= p.from || hour < p.to;
+}
+
 function uninstalled(leaf: never): never {
   throw new Error(`policy op ${(leaf as Policy).op} is not installed`);
 }
 
 // fact@1's read: an entity or pair fact (toolbox row W2) at its named NPC or item, or with subject
-// target at the action's target (false without one), and an npc_pair fact (row FD4) at that
-// subject toward its `with` NPC; any other fact at its one scope.
-function compared(
+// target at the action's target (none without one), and an npc_pair fact (row FD4) at that
+// subject toward its `with` NPC (none without one); any other fact at its one scope.
+function read(
   world: World,
   actor: CharacterId,
-  p: Extract<Policy, { op: 'fact_compare' }>,
+  p: Extract<Policy, { op: 'fact_compare' | 'time_since' }>,
   target: EntityId | undefined,
-): boolean {
+) {
   const named = p.npc ?? p.item;
-  const subject = named ? world.entityIds[refString(named)] : p.subject && target;
-  const partner = p.with && world.entityIds[refString(p.with)];
-  if (subjective(world, p.fact) && subject === undefined) return false;
-  if (paired(world, p.fact) && !partner) return false;
-  return value(world, actor, p.fact, subject, partner) === p.equals;
+  const by = p.op === 'fact_compare' && p.subject ? target : undefined;
+  const subject = named ? world.entityIds[refString(named)] : by;
+  const partner =
+    p.op === 'fact_compare' && p.with ? world.entityIds[refString(p.with)] : undefined;
+  if (subjective(world, p.fact) && subject === undefined) return undefined;
+  if (paired(world, p.fact) && !partner) return undefined;
+  return value(world, actor, p.fact, subject, partner);
 }
 
 // attributes@1's leaves: the actor's saved value or definition start, or the current pool on the
@@ -136,10 +145,16 @@ function compared(
 function atLeast(
   world: World,
   actor: CharacterId,
-  p: Extract<Policy, { op: 'stat_compare' | 'resource_compare' | 'light_off' }>,
+  p: Extract<
+    Policy,
+    { op: 'stat_compare' | 'resource_compare' | 'light_off' | 'level_compare' | 'skill_compare' }
+  >,
   ctx: Ctx,
 ): boolean {
   if (p.op === 'light_off') return !illuminated(world, actor, ctx.steps);
+  // row 29a: level 1 without world.levelling
+  if (p.op === 'level_compare') return (levelling(world, actor)?.level ?? 1) >= p.at_least;
+  if (p.op === 'skill_compare') return skillLevel(world, actor, p.skill) >= p.at_least; // row FD2
   if (p.op === 'stat_compare') return attributeValue(world, actor, p.attribute) >= p.at_least;
   const body = bodyOf(world, actor);
   const who = (p.subject && ctx.subject) || body;

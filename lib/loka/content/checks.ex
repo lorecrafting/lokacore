@@ -138,6 +138,9 @@ defmodule Loka.Content.Checks do
   def expand(%{"kind" => "use", "tool" => %{"liquid" => l}} = target, m) when is_binary(l),
     do: put_in(target, ["tool", "liquid"], ref(l, "liquid", m))
 
+  def expand(%{"kind" => "storylet", "rooms" => rs} = target, m) when is_list(rs),
+    do: Map.put(target, "rooms", Enum.map(rs, &ref(&1, "room", m)))
+
   def expand(%{"offers" => offers, "resource" => r} = shop, m),
     do:
       shop
@@ -229,18 +232,15 @@ defmodule Loka.Content.Checks do
   def expand(%{"story_point" => p, "title" => t} = chapter, m) when is_binary(t),
     do: Map.put(chapter, "story_point", ref(p, "story_point", m))
 
-  def expand(%{"story_point" => p, "outcome" => o} = trigger, m) when is_binary(o),
-    do:
-      trigger
-      |> Map.delete("story_point")
-      |> expand(m)
-      |> Map.put("story_point", ref(p, "story_point", m))
+  def expand(%{"story_point" => p, "outcome" => o} = t, m) when is_binary(o),
+    do: Map.put(expand(Map.delete(t, "story_point"), m), "story_point", ref(p, "story_point", m))
 
   def expand(%{"quest" => q, "outcome" => o} = trigger, m) when is_binary(o),
     do: trigger |> Map.delete("quest") |> expand(m) |> Map.put("quest", ref(q, "quest", m))
 
-  def expand(%{"action" => a, "room" => r, "detail" => _} = trigger, m) when is_binary(a),
-    do: trigger |> Map.put("action", ref(a, "recipe", m)) |> Map.put("room", ref(r, "room", m))
+  # A scene's action trigger; one a storylet starts names no room (row FD3).
+  def expand(%{"action" => a, "outcome" => _} = t, m) when is_binary(a),
+    do: Map.replace_lazy(%{t | "action" => ref(a, "recipe", m)}, "room", &ref(&1, "room", m))
 
   def expand(%{"player_corpse" => _, "npc_corpse" => _, "shrine" => _} = death, m),
     do: Loka.Content.Death.expand(death, m)
@@ -419,8 +419,8 @@ defmodule Loka.Content.Checks do
 
   defp actions(defs), do: for({_, {rel, [], a}} <- defs["action"], do: {rel, a})
 
-  # Every located policy root from the source definitions (twin of the TS loader's nodes/1).
-  defp trees(defs) do
+  @doc "Every located policy root from the source definitions (twin of the TS loader's nodes/1)."
+  def trees(defs) do
     Enum.concat([
       for({_, {rel, [], p}} <- defs["policy"], do: {rel, ["root"], p["root"]}),
       for({rel, a} <- actions(defs), do: {rel, ["policy", "root"], a["policy"]["root"]}),

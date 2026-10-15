@@ -181,7 +181,7 @@ shows it. A control whose shown text is its whole name (Leave, Got it, an action
 
 ## Detail-page order
 
-Detail pages show title/identity, authored description and projected item state, then their
+Detail pages show title/identity, authored description and its [asides](#aside-details), projected item state, then their
 chronological event log only when entries exist, then currently offered options in the same
 scrolling content. An empty log has no heading or placeholder. NPC, item, notice, board and
 combat details follow this order; World retains its [room-page order](#world-and-status-entry).
@@ -1004,6 +1004,14 @@ GameView `levelling` carries `{level, experience, next, unspent}` from [experien
 
 GameView `cues` lists the [sense cues](mechanics.md#sense-cues-sound-smell-and-heat-toolbox-row-g6) reaching the player's room, nearest first. The World page shows one quiet line per cue, in that order, as one block after the room's entity lines: the authored text, then " from the " and the direction key when the cue comes from another room ("Hammering from the east"), the text alone when it comes from this room ("Heat beats out from the forge."). Two cues with the same text and direction are two lines. The sense is in the authored words, never an icon or a colour alone; the line is not pressable and its accessible name is its text. No cues, no block: Chapter 1 declares none. The presenter never walks exits or decides what reaches the player (proposed wording, pending designer approval, loka-kgd.65).
 
+## Aside details
+
+GameView `place.asides` and a notice's `asides` are the character's own mind noticing more ([passive skill voices](mechanics.md#passive-skill-voices-toolbox-row-fd2)). Each is one quiet line, in projected order, as one block directly after the authored description: on World before the exit warnings, on a detail before its projected item state. The skill is in the authored words, never a label, icon or colour; the line is not pressable, carries no touch link (link markup shows as plain words) and its accessible name is its text. No asides, no block: Chapter 1 declares none. The presenter never decides which aside holds.
+
 ## Lore details
 
 The Journal page says "Nothing written yet." only when it has neither quests nor known topics; after its quests, it shows **Lore** (a section title) when GameView `topics` is non-empty: each known topic's authored label, one per line, in projected order, then for each GameView `deduction` its topics' labels joined by " + " and its card. The card is the deduction's offered action when the current place offers it; when the place lists it unavailable, the unavailable card with the action's own reason; otherwise the unavailable card with the reason "Not here". Pressing the card performs the recipe as any place action; the topic it grants then joins the list and the deduction disappears. Badges are topics and are listed with them. Nothing shows when no topic is known. ([Lore codex](mechanics.md#lore-codex-and-deduction-toolbox-row-46); wording proposed, designer to approve: Beads `loka-x6t.14`.)
+
+## Storylet card details
+
+GameView `storylet` names the one place action the [storylet deck](mechanics.md#storylet-deck-toolbox-row-fd3) draws for the player here this hour. The World page shows it as one Action card, its own block directly before the verb lines, never a verb line: it can be listed unavailable, and a verb line has no unavailable form. The card reads the recipe's authored label alone, never a heading, prefix ("Opportunity:"), icon or colour; unavailable, it is the `label: reason` note of the Action card row, never a disabled card. Pressing it performs the action as any place action under [live action freshness](#live-action-freshness): its result, including a failed check, is the receipt's narration in the log, and a scene it starts opens as any [scene](#chapters-scenes-and-recovery). A new room or hour redraws the page: the card may change or go, silently (no live region; it is page content as the entity lines are); a press drawn under the old pick is refused and the Book redraws, never a substituted card. Its accessible name is its label, role button. No pick, no block; at most one card. The presenter never draws or filters storylets.

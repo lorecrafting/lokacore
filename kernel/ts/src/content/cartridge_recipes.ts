@@ -68,10 +68,16 @@ export function recipes(c: Obj, { named, typedValue, text }: Checks): Diagnostic
 }
 
 // The target's room and detail resolve, or (row G4) a use's tool liquid names a liquid of this
-// cartridge.
+// cartridge, or (row FD3) a storylet's rooms resolve.
 function target(c: Obj, r: Obj, at: string, named: Checks['named']): Diagnostic[] {
   const { room, detail, tool } = r.target;
   if (r.target.kind === 'spell') return [];
+  if (r.target.kind === 'storylet') {
+    (r.target.rooms ?? []).forEach((x: Obj, i: number) =>
+      named(x, 'room', `${at}.target.rooms[${i}]`),
+    );
+    return [];
+  }
   if (r.target.kind === 'use') {
     if (tool.liquid) named(tool.liquid, 'liquid', `${at}.target.tool.liquid`);
     return [];
@@ -102,10 +108,13 @@ function uses(c: Obj): Diagnostic[] {
       ),
     ),
   );
-  return recipes.some(([, r]) => r.target.kind === 'use') &&
-    apiCmp(c.manifest.requires.kernel_api.at_least, '1.49') < 0
-    ? [...out, diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least')]
-    : out;
+  // Row FD3: a storylet target needs kernel_api 1.92 (one diagnostic, like recipes.ex storylets).
+  const floor = (kind: string, api: string) =>
+    recipes.some(([, r]) => r.target.kind === kind) &&
+    apiCmp(c.manifest.requires.kernel_api.at_least, api) < 0
+      ? [diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least')]
+      : [];
+  return [...out, ...floor('use', '1.49'), ...floor('storylet', '1.92')];
 }
 
 // Toolbox row 29a: a spell target needs kernel_api 1.51, and no two spells share a word

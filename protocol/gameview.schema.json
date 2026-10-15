@@ -1027,6 +1027,14 @@
         },
         "description": {
           "$ref": "text.schema.json#/$defs/Text"
+        },
+        "asides": {
+          "description": "Toolbox row FD2: the text of every aside of this room whose condition holds for the viewing actor, in authored order (room.schema.json Aside); absent when none holds.",
+          "type": "array",
+          "items": {
+            "$ref": "text.schema.json#/$defs/Text"
+          },
+          "minItems": 1
         }
       },
       "required": [
@@ -1178,6 +1186,10 @@
         },
         "scene": {
           "$ref": "#/$defs/SceneView"
+        },
+        "storylet": {
+          "description": "Toolbox row FD3 (kernel_api at least 1.92): the key of the storylet the deck draws for the actor here this hour (action.schema.json RecipeTarget storylet), present exactly when that action is listed in actions, available or not (mechanics.md Storylet deck); an optional field: the snapshot format stays.",
+          "$ref": "action.schema.json#/$defs/Key"
         },
         "combat": {
           "$ref": "gameview.schema.json#/$defs/CombatView"
@@ -2089,6 +2101,14 @@
         },
         "description": {
           "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "asides": {
+          "description": "Toolbox row FD2: the text of every aside of this detail whose condition holds for the viewing actor, in authored order (room.schema.json Aside); absent when none holds.",
+          "type": "array",
+          "items": {
+            "$ref": "text.schema.json#/$defs/Text"
+          },
+          "minItems": 1
         },
         "actions": {
           "type": "array",
