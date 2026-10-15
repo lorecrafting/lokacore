@@ -26,17 +26,18 @@ Items 3 and 4 hold. Item 1 fails (finding 1). Items 2 and 5 hold only in part (f
    - It is the failure that [storage.md:24-27](../lessons/storage.md) records: a validator rejecting lawful content.
    - `mechanics.md:3348` documents only the release-rename limit, so this is not a recorded known limit.
    - Probe E shows the same failure class: `alternates` on `narration.fed.applied` also gives `save_corrupt`. Line 0 had this limit before this slice.
-   - Fix (question 4): [save.md:973-974](../system/save.md) binds only line 0, the item's authored key. `checked` already requires a string key on every line (`session.ts:71-73`). So drop the tail check, as the perform and read receipts do, and keep line 0. A shared food-rule helper would still miss lines added by reactions and by `vary()`, so it is not safer.
-2. **Blocker (a mutant survives): order is untested.** Cite: `kitchen.test.ts:36-38`. It uses one distinct status (`fed`, listed twice).
+   - Fix (question 4): [save.md:973-974](../system/save.md) binds only line 0, the item's authored key. `checked` already requires a string key on every line (`session.ts:73-74`). So drop the tail check, as the perform and read receipts do, and keep line 0. A shared food-rule helper would still miss lines added by reactions and by `vary()`, so it is not safer.
+2. **Blocker (a mutant survives): order is untested.** Cite: `mobile/authority/local-story/kitchen.test.ts:36-38`. It uses one distinct status (`fed`, listed twice).
    - Mutant M2: accept any unused `applies` status, each once, in any order. It survived kitchen, food, status and r9c (`node --test`, exit 0, 9/9).
    - Failure: a check that ignores order passes the suite.
    - This finding goes away if finding 1 removes the tail check.
-3. **Note: an omitted status line is accepted.**
+3. **Nit: an omitted status line is accepted.**
    - Probe B shows a silent refresh, `[meal, spoiling.applied]`, which is correct. Because a silent refresh must pass, a forged `[meal]` with the status lines removed passes too.
    - This affects narration only. The status rows come from the delta.
 
 ## Disposition proof
 
+- Must-be-true item 4: `session.ts:60-69` throws `save_corrupt` with `newGame` offered. That path has no unlink or delete, so the file is kept.
 - Baseline at 45450614: the four mobile Eat tests pass (9/9), and kernel `test/kitchen.test.ts` exits 0.
 - Probe A: two distinct statuses give `[meal, fed, spoiling]` and the save reopens. Six forgeries are each refused: reorder, duplicate, extra, missing first, repeat, meal line repeated.
 - Probe D: a meal that cures and applies `fed` while `fed` is not active. The cure does nothing and the applied line lands. Cure-wins was not exercised.
