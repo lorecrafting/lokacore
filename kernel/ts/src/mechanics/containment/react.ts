@@ -80,11 +80,13 @@ function moveNpc(
   emit: (payload: EventPayload) => void,
 ): DeltaOp[] {
   const npc = step.npc ? world.entityIds[refString(step.npc)] : subject;
-  const [room] = step.room ? [world.roomIds[refString(step.room)]] : eventRooms(world, cause, npc);
+  const [room] = step.room
+    ? [world.roomIds[refString(step.room)]]
+    : eventRooms(world, cause, subject);
   if (!npc || !room || world.entities[npc]?.kind !== 'npc') return [];
   if (!living(world, npc) || engaged(world, npc)) return [];
-  const moved = ops.filter((o) => o.op === 'entity.transfer' && o.entity_id === npc).pop();
-  const at = moved?.op === 'entity.transfer' ? moved.destination_id : world.state.containers[npc];
+  const last = ops.filter((o) => o.op === 'entity.transfer' && o.entity_id === npc).pop();
+  const at = last?.op === 'entity.transfer' ? last.destination_id : world.state.containers[npc];
   if (!at || at === room) return [];
   const writer_group = holders.get(npc) ?? group;
   holders.set(npc, writer_group);

@@ -141,6 +141,22 @@ test('a hidden taker is unseen unless the baker is alert enough to pierce it', (
   assert.deepEqual(grateful(w), [[id(w, 'npc/baker'), 'player', true]]);
 });
 
+// Breaks: a named npc.move with no room reading the NPC's own room instead of the event subject's
+// (item_acquired carries no room_id), so the baker never leaves the mill.
+test('an npc.move naming the baker and no room brings him to the taker', () => {
+  const rule = `${S}:reaction/witnessed`;
+  const reactions = (content as any).reactions;
+  const on = { event: 'item_acquired', item: ref('item', 'apple') };
+  const apply = [{ op: 'npc.move', npc: ref('npc', 'baker') }];
+  const moving = {
+    ...content,
+    reactions: { ...reactions, [rule]: { ...reactions[rule], on, apply } },
+  };
+  let w = newWorld(moving as Cartridge, CONTEXT as never, [1, 2, 3, 4]);
+  w = take(w);
+  assert.equal(w.state.containers[id(w, 'npc/baker')], w.roomIds[`${S}:room/square`]);
+});
+
 /** The sampler's artifact, edited and re-hashed, loaded: its first diagnostic's code and path. */
 function reload(edit: (c: any) => void) {
   const c = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
