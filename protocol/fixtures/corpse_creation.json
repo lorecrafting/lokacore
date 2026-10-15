@@ -3007,22 +3007,6 @@
         "owner": "00000000-0000-4000-8000-000000000007"
       },
       "valid": true
-    },
-    {
-      "id": "EntityOrigin built rejects unknown direction",
-      "contract": "EntityOrigin",
-      "value": {
-        "kind": "built",
-        "site": {
-          "cartridge_id": "c",
-          "cartridge_version": "1.0.0",
-          "kind": "room",
-          "key": "lane"
-        },
-        "direction": "northeast",
-        "owner": "00000000-0000-4000-8000-000000000007"
-      },
-      "valid": false
     }
   ],
   "runtime_ids": {

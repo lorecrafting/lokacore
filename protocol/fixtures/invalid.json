@@ -28525,6 +28525,212 @@
     ]
   },
   {
+    "contract": "ServiceBenefit",
+    "value": {
+      "kind": "build",
+      "site": {
+        "cartridge_id": "build_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "room",
+        "key": "lane"
+      },
+      "direction": "north"
+    },
+    "errors": [
+      {
+        "path": "/blueprint",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "ServiceBenefit",
+    "value": {
+      "kind": "build",
+      "blueprint": {
+        "cartridge_id": "build_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "blueprint",
+        "key": "hut"
+      },
+      "direction": "north"
+    },
+    "errors": [
+      {
+        "path": "/site",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "ServiceBenefit",
+    "value": {
+      "kind": "build",
+      "blueprint": {
+        "cartridge_id": "build_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "blueprint",
+        "key": "hut"
+      },
+      "site": {
+        "cartridge_id": "build_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "room",
+        "key": "lane"
+      }
+    },
+    "errors": [
+      {
+        "path": "/direction",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "ServiceBenefit",
+    "value": {
+      "kind": "build",
+      "blueprint": {
+        "cartridge_id": "build_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "blueprint",
+        "key": "hut"
+      },
+      "site": {
+        "cartridge_id": "build_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "room",
+        "key": "lane"
+      },
+      "direction": "northeast"
+    },
+    "errors": [
+      {
+        "path": "/direction",
+        "code": "not_in_enum"
+      }
+    ]
+  },
+  {
+    "contract": "ServiceBenefit",
+    "value": {
+      "kind": "build",
+      "blueprint": {
+        "cartridge_id": "build_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "blueprint",
+        "key": "hut"
+      },
+      "site": {
+        "cartridge_id": "build_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "room",
+        "key": "lane"
+      },
+      "direction": "north",
+      "x": 1
+    },
+    "errors": [
+      {
+        "path": "/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "EntityOrigin",
+    "value": {
+      "kind": "built",
+      "direction": "north",
+      "owner": "00000000-0000-4000-8000-000000000007"
+    },
+    "errors": [
+      {
+        "path": "/site",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "EntityOrigin",
+    "value": {
+      "kind": "built",
+      "site": {
+        "cartridge_id": "build_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "room",
+        "key": "lane"
+      },
+      "owner": "00000000-0000-4000-8000-000000000007"
+    },
+    "errors": [
+      {
+        "path": "/direction",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "EntityOrigin",
+    "value": {
+      "kind": "built",
+      "site": {
+        "cartridge_id": "build_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "room",
+        "key": "lane"
+      },
+      "direction": "north"
+    },
+    "errors": [
+      {
+        "path": "/owner",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "EntityOrigin",
+    "value": {
+      "kind": "built",
+      "site": {
+        "cartridge_id": "build_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "room",
+        "key": "lane"
+      },
+      "direction": "northeast",
+      "owner": "00000000-0000-4000-8000-000000000007"
+    },
+    "errors": [
+      {
+        "path": "/direction",
+        "code": "not_in_enum"
+      }
+    ]
+  },
+  {
+    "contract": "EntityOrigin",
+    "value": {
+      "kind": "built",
+      "site": {
+        "cartridge_id": "build_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "room",
+        "key": "lane"
+      },
+      "direction": "north",
+      "owner": "00000000-0000-4000-8000-000000000007",
+      "x": 1
+    },
+    "errors": [
+      {
+        "path": "/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
     "name": "track_check_fields",
     "contract": "ActionRecipe",
     "value": {
