@@ -10,5 +10,17 @@
     "in": "template"
   },
   "mass_grams": 0,
-  "container": true
+  "container": true,
+  "locks": {
+    "put": {
+      "policy_version": 1,
+      "root": {
+        "op": "not",
+        "item": {
+          "op": "all",
+          "items": []
+        }
+      }
+    }
+  }
 }

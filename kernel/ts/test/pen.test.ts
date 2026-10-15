@@ -18,6 +18,7 @@ import { test } from 'node:test';
 import { INSTALLED, loadCartridge, newWorld, step, stepElapsed } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import type { EntityId } from '../src/contracts.gen.ts';
+import { fatal } from './death_fixture.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { activeStatuses } from '../src/mechanics/status/shared.ts';
 import { key } from '../src/foundation/compose.ts';
@@ -148,7 +149,7 @@ test('a stranger is refused the pen; the bought entitlement lets them in', () =>
 
 // Breaks: co_present not reaching the trough event's NPCs, spent_grain not running in the Put's own
 // advance (hs-1), the feed `when` letting a Take in the pen feed, or a Give of the grain accepted
-// (it would feed the seller or a hen and never reach the midden).
+// (it would feed the seller or a hen and never reach the midden), or a Put into either corpse.
 test('grain in the trough feeds both hens and goes to the midden in the same advance', () => {
   const w = feed();
   assert.equal(hens(w).length, 2);
@@ -163,6 +164,36 @@ test('grain in the trough feeds both hens and goes to the midden in the same adv
   for (const h of hens(d)) assert.deepEqual(statuses(d, h as EntityId), []);
   assert.equal(
     code(d, { type: 'put', item_id: item(d, 'grain_01'), container_id: item(d, 'nest') }),
+    'permission_denied',
+  );
+  // A corpse would hold the grain, feed its room and let the sack be taken back at will.
+  const corpse = play(d, { type: 'attack', target_id: hens(d)[0]! });
+  const body = elapsed(corpse, corpse.state.clock + 600, 1);
+  const named = new Set(Object.values(body.entityIds));
+  const remains = Object.keys(body.state.containers).filter(
+    (id) =>
+      body.state.containers[id] === room(body, 'pen') &&
+      !named.has(id as EntityId) &&
+      body.entities[id]?.kind === 'item',
+  );
+  assert.equal(remains.length, 1);
+  assert.equal(
+    code(body, { type: 'put', item_id: item(body, 'grain_01'), container_id: remains[0] }),
+    'permission_denied',
+  );
+  // fatal() names its killer by the containers sampler's id; alias it to a live hen here.
+  const killer = { 'ashmere_sampler@0.0.8:npc/cellar_rat_1': hens(body)[0]! };
+  const died = fatal({ ...body, entityIds: { ...body.entityIds, ...killer } }).next.world;
+  const corpseId = Object.keys(died.state.containers).find(
+    (id) => died.state.containers[id] === room(died, 'pen') && !(id in body.state.containers),
+  )!;
+  // The grain the player carried lies in the corpse; take it back and try to return it.
+  const back = play(play(died, { type: 'move', direction: 'north' }), {
+    type: 'take',
+    item_id: item(died, 'grain_01'),
+  });
+  assert.equal(
+    code(back, { type: 'put', item_id: item(back, 'grain_01'), container_id: corpseId }),
     'permission_denied',
   );
   for (const to of [npc(d, 'seller'), hens(d)[0]!])
@@ -181,14 +212,22 @@ test('fed hens lay on each tick up to the nest cap; unfed hens never lay', () =>
   assert.equal(nest(elapsed(fresh(), C0 + 57600)), 0);
 });
 
-// Breaks: the egg's `edible` block dropped or bound to a pool the eat does not raise.
-test('a taken egg is eaten and raises mv by 2', () => {
-  let w = elapsed(feed(), C0 + 14400);
-  const egg = item(w, inside(w, item(w, 'nest'))[0]!);
-  w = withMv(play(w, { type: 'take', item_id: egg }), 90);
-  w = play(w, { type: 'eat', item_id: egg });
-  assert.notEqual(w.state.containers[egg], w.body);
-  assert.equal(level(w, w.body, resourceRef(w, 'mv')), 92);
+// Breaks: any egg's `edible` block dropped or bound to a pool the eat does not raise.
+test('each of the six eggs is eaten and raises mv by 2', () => {
+  let w = feed();
+  const eaten: string[] = [];
+  for (const t of [14400, 28800, 43200]) {
+    w = elapsed(w, C0 + t);
+    for (const k of inside(w, item(w, 'nest'))) {
+      const egg = item(w, k);
+      w = withMv(play(w, { type: 'take', item_id: egg }), 90);
+      w = play(w, { type: 'eat', item_id: egg });
+      assert.notEqual(w.state.containers[egg], w.body);
+      assert.equal(level(w, w.body, resourceRef(w, 'mv')), 92);
+      eaten.push(k);
+    }
+  }
+  assert.deepEqual(eaten.sort(), ['egg_01', 'egg_02', 'egg_03', 'egg_04', 'egg_05', 'egg_06']);
 });
 
 // Breaks: grain_return off its 86400 period, or not returning the sack to the yard.
@@ -207,31 +246,35 @@ test('the third and fourth hens are born at the night boundary', () => {
   assert.equal(hens(elapsed(w, C0 + 3 * 86400)).length, 4);
 });
 
-// Breaks: replacement_delay ignored or off by one; the slot refilling before its due time.
-test('a killed hen refills its slot 86400 after its death', () => {
-  let w = elapsed(fresh(), C0 + 86400);
+// Breaks: replacement_delay ignored or off by one; a slot above the floor refilling before its due.
+// Killed at 21:00 so its due falls at night, when slot 3 is under the target.
+test('a killed born hen refills its slot 86400 after its death', () => {
+  let w = elapsed(fresh(), C0 + 43200 + 3600);
   w = play(buy(w), { type: 'move', direction: 'north' });
-  const first = slots(w)[0]![1].member_id!;
-  w = play(w, { type: 'attack', target_id: first });
+  const third = slots(w)[2]![1].member_id!;
+  w = play(w, { type: 'attack', target_id: third });
   // One-unit steps, so the clock stops at the death.
-  while (slots(w)[0]![1].replacement_due === null) w = elapsed(w, w.state.clock + 1, 1);
-  const due = slots(w)[0]![1].replacement_due!;
+  while (slots(w)[2]![1].replacement_due === null) w = elapsed(w, w.state.clock + 1, 1);
+  const due = slots(w)[2]![1].replacement_due!;
   assert.equal(due, w.state.clock + 86400);
   w = elapsed(w, due - 1);
   assert.equal(hens(w).length, 3);
   w = elapsed(w, due);
   assert.equal(hens(w).length, 4);
-  assert.notEqual(slots(w)[0]![1].member_id, first);
+  assert.notEqual(slots(w)[2]![1].member_id, third);
 });
 
-// Breaks: births not gated by birth_when (a lone hen breeds to the night target).
-test('a lone hen does not breed', () => {
+// Breaks: the floor dropped or below 2 (slot 2's hen killed on day one strands the flock, as
+// births need two live hens).
+test('a starting hen killed on day one is replaced within the hour', () => {
   let w = play(buy(fresh()), { type: 'move', direction: 'north' });
-  w = play(w, { type: 'attack', target_id: slots(w)[0]![1].member_id! });
-  w = elapsed(w, C0 + 43200);
-  assert.equal(hens(w).length, 1);
-  // Past the dead hen's replacement_due (its death + 86400): a refill skipping birth_when shows here.
-  assert.equal(hens(elapsed(w, C0 + 2 * 86400)).length, 1);
+  const first = slots(w)[1]![1].member_id!;
+  w = play(w, { type: 'attack', target_id: first });
+  // It dies at C0+150 (one combat round); a floor slot is due at once and the next hourly
+  // settle refills it, long before the night births that need two live hens.
+  w = elapsed(w, C0 + 3600);
+  assert.equal(hens(w).length, 2);
+  assert.notEqual(slots(w)[1]![1].member_id, first);
 });
 
 // Breaks: a lay, birth or return that depends on how the elapsed time is chunked.

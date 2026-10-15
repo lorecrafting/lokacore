@@ -6,6 +6,7 @@
     "coop"
   ],
   "cap": 4,
+  "floor": 2,
   "day_target": 2,
   "night_target": 4,
   "night_start": 20,
