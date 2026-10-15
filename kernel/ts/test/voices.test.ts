@@ -130,7 +130,7 @@ const door = `.cartridge.rooms[${JSON.stringify(hall)}].details.carved_door`;
 // fails in play), the leaf loses its owner, or the 1.91 floor misses asides or a lone leaf
 // (twin of content_voices_test.exs).
 test('the loader checks asides and skill_compare: references, text, owner and floor', () => {
-  const rows: [(c: any) => void, unknown[]][] = [
+  const rows: [(c: any) => void, unknown][] = [
     [
       (c) => (c.rooms[hall].details.carved_door.asides[0].when.root.skill.key = 'ghost'),
       ['UNRESOLVED_REFERENCE', `${door}.asides[0].when.root.skill`, { target: `${C}:skill/ghost` }],
@@ -177,6 +177,18 @@ test('the loader checks asides and skill_compare: references, text, owner and fl
         delete c.recipes[`${C}:recipe/read_glyphs`];
       },
       ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least', {}],
+    ],
+    [
+      // A detail named `asides` is no aside: with no aside and no leaf, 1.90 still loads.
+      (c) => {
+        c.manifest.requires.kernel_api.at_least = '1.90';
+        delete c.rooms[hall].asides;
+        delete c.rooms[hall].details.carved_door.asides;
+        c.rooms[hall].details.asides = { ...c.rooms[hall].details.runes, aliases: ['plaque'] };
+        delete c.npcs[`${C}:npc/sage`].room_line_variants;
+        delete c.recipes[`${C}:recipe/read_glyphs`];
+      },
+      'loaded',
     ],
   ];
   for (const [change, expected] of rows) {

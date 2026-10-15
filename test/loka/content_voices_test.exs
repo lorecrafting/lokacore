@@ -49,5 +49,19 @@ defmodule Loka.ContentVoicesTest do
       assert {:error, diags} = Loka.ContentSource.compile(dir, changes)
       assert @floor in Enum.map(diags, &{&1["code"], &1["path"]}), inspect(diags)
     end
+
+    # A detail named `asides` is no aside: with no aside and no leaf, 1.90 still loads.
+    named =
+      {"rooms/hall.json",
+       &put_in(&1, ["details", "asides"], %{
+         "aliases" => ["plaque"],
+         "description" => "detail.runes"
+       })}
+
+    assert {:ok, _, _} =
+             Loka.ContentSource.compile(
+               dir,
+               [api, no_asides, named] ++ Enum.drop(asides_only, 2)
+             )
   end
 end
