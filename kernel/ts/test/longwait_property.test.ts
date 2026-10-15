@@ -77,13 +77,14 @@ type Spawned = {
   origin?: { by?: { key: string }; slot?: number; generation?: number; role?: string };
 };
 
-// The state as canonical JSON with job and event ids dropped, only pending jobs kept, and every
-// spawned id replaced by the spawner, slot, generation and role that made it (spawn and event ids
-// derive from job ids).
+// The state as canonical JSON with job ids and death origins' event ids dropped, only pending jobs
+// kept, and every spawned id replaced by the spawner, slot, generation and role that made it (spawn
+// and event ids derive from job ids).
 function normal(w: World): Record<string, string> {
-  const s = JSON.parse(encode(w.state as never), (k, v) =>
-    k === 'job_id' || k === 'occurrence_id' || k === 'event_id' ? undefined : v,
-  );
+  const s = JSON.parse(encode(w.state as never), function (k, v) {
+    const death = k === 'event_id' && this.kind === 'death';
+    return k === 'job_id' || k === 'occurrence_id' || death ? undefined : v;
+  });
   s.jobs = Object.values(s.jobs ?? {})
     .filter((j: any) => j.status === 'pending')
     .map((j) => encode(j as never))
