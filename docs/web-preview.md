@@ -23,10 +23,9 @@ source worktree, run the commands above; the browser URL stays the same. Current
 play survives reload and a closed/reopened tab. Browser saves have no cross-build
 migration promise.
 
-In a slice worktree, run `bin/worktree_setup.sh` instead of `npm ci`: it links the main
-checkout's `node_modules`, and `npm ci` through that link would wipe the main install.
-Metro watches the link's real path ([`metro.config.js`](../mobile/app/metro.config.js)).
-To check a sampler room at 390 px there without touching the owner's preview (each walk serves
+In a slice worktree, `bin/worktree_setup.sh` replaces `npm ci`: it clones the main checkout's
+`node_modules` (APFS copy-on-write, a few seconds). Not a symlink: Metro then resolves `expo`
+outside its watched folders and serves the SQLite worker at a broken URL, a blank page. To check a sampler room at 390 px there without touching the owner's preview (each walk serves
 the Book on a free port and screenshots every page to `.walkthrough/steps`):
 
 ```sh
