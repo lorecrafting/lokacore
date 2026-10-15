@@ -147,7 +147,7 @@ test('a fresh world mints IdSource ids and puts the player in the entry room', (
 test('actorOf names the character only for its own body', () => {
   const w = fresh();
   assert.equal(actorOf(w, BODY as World['body']), CHARACTER);
-  assert.equal(actorOf(w, BOATHOUSE as World['body']), undefined); // a real entity, not the body
+  assert.equal(actorOf(w, BOATHOUSE as World['body']), undefined); // a real room id
   assert.equal(actorOf(w, 'nope' as World['body']), undefined);
 });
 

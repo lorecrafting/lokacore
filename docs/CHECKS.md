@@ -27,8 +27,8 @@ their rules and red controls remain available for resumption.
   `<module>.decide`, never mutate, cast or name `Object`/`JSON`/`Function`-like escapes, and
   import only kernel modules; the typed `Rule` contract (`kernel/ts/test/rule_ownership.ts`)
   and `step`'s event-ownership check keep each to its capability's commands and events. The foundation
-  imports only its own modules and generated contracts (`ts-foundation-imports`). Mechanics and commands
-  read no `world.character` or `world.body` (`ts-rule-actor-from-command`, [Realm seams](decisions/owner-decision-realm-seams-2026-10-13.md) rule 1); each existing read is frozen with
+  imports only its own modules and generated contracts (`ts-foundation-imports`). Kernel code outside `runtime/` and `view/`
+  reads no `world.character` or `world.body` (`ts-rule-actor-from-command`, [Realm seams](decisions/owner-decision-realm-seams-2026-10-13.md) rule 1); each existing read is frozen with
   `// ast-grep-ignore: ts-rule-actor-from-command` until RS-2 removes it. Every
   rule has valid and invalid cases in `lint/tests/`; `bin/lint_red_controls.sh --core-only` plants
   kernel violations and requires each active rule to report them. The full mode remains for later mobile work.
