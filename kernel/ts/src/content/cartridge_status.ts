@@ -19,10 +19,12 @@ export function status(c: Obj): Diagnostic[] {
     ),
   ) as [string, Obj][];
   const cures = Object.entries(c.items ?? {}).flatMap(([ref, i]: [string, any]) =>
-    ((i.edible?.cures ?? []) as Obj[]).map((s, n) => [
-      `.cartridge.items${step(ref)}.edible.cures[${n}]`,
-      s,
-    ]),
+    (['cures', 'applies'] as const).flatMap((k) =>
+      ((i.edible?.[k] ?? []) as Obj[]).map((s, n) => [
+        `.cartridge.items${step(ref)}.edible.${k}[${n}]`,
+        s,
+      ]),
+    ),
   ) as [string, Obj][];
   const { immune, named, drinks, lone, g3 } = api146(c);
   if (!Object.keys(defs).length && !applies.length && !cures.length && !g3) return out;

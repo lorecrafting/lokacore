@@ -9,11 +9,7 @@ defmodule Loka.Content.Status do
   def check(m, defs, {_, text}, settings) do
     statuses = defs["status"] || %{}
 
-    cures =
-      for {_, {rel, _, i}} <- defs["item"],
-          cures = get_in(i, ["edible", "cures"]),
-          cures,
-          do: {rel, ["edible", "cures"], cures}
+    cures = edible_lists(defs)
 
     {later, g3} = api_146(defs)
 
@@ -21,7 +17,17 @@ defmodule Loka.Content.Status do
       do: [],
       else:
         gate(m, floor(statuses, g3)) ++
-          values(statuses, {m, settings}, defs, text) ++ foods(cures ++ later, m, defs)
+          values(statuses, {m, settings}, defs, text) ++
+          foods(cures ++ later, m, defs) ++ meals(cures, m, defs, settings)
+  end
+
+  # Row hs-5: a meal's `applies` names statuses as its `cures` do.
+  defp edible_lists(defs) do
+    for {_, {rel, _, i}} <- defs["item"],
+        k <- ~w(cures applies),
+        list = get_in(i, ["edible", k]),
+        list,
+        do: {rel, ["edible", k], list}
   end
 
   # The fields needing kernel_api 1.46: row G3's immune lists, steps naming an item (or, row 42, an
@@ -168,6 +174,18 @@ defmodule Loka.Content.Status do
   defp pierced_by(_, _, _, _), do: []
 
   @doc "Row 16: expands a pierced_by; `expand` (Checks.expand) expands the rest."
+  # Row hs-5: an edible's `applies` names statuses as its `cures` do.
+  def edible(e, m, expand) do
+    {lists, rest} = Map.split(e, ~w(cures applies))
+
+    Map.merge(
+      expand.(rest, m),
+      Map.new(lists, fn {k, l} ->
+        {k, if(is_list(l), do: Enum.map(l, &ref(&1, "status", m)), else: l)}
+      end)
+    )
+  end
+
   def expand(%{"pierced_by" => %{"skill" => k, "attribute" => a}} = s, m, expand),
     do:
       Map.put(expand.(Map.delete(s, "pierced_by"), m), "pierced_by", %{
@@ -177,13 +195,30 @@ defmodule Loka.Content.Status do
 
   # loka-kgd.50: a permanent status never modifies an attribute the derived hp maximum reads.
   defp hp_max(rel, s, settings) do
-    terms =
-      for t <- get_in(settings, ["world", "derived", "hp_max", "terms"]) || [], do: t["attribute"]
+    terms = hp_terms(settings)
 
     for {a, i} <- Enum.with_index(s["modifies"] || []),
         permanent?(s) and a["attribute"] in terms,
         do: diag("SCHEMA_VIOLATION", at(rel, ["modifies", i, "attribute"]))
   end
+
+  # Row hs-5: a meal's status never moves the derived hp maximum either (loka-kgd.50).
+  defp meals(lists, m, defs, settings) do
+    terms = hp_terms(settings)
+
+    for {rel, ["edible", "applies"] = path, list} <- lists,
+        {s, i} <- Enum.with_index(list),
+        {_, _, d} <- [Refs.resolve(s, "status", m, defs)],
+        Enum.any?(d["modifies"] || [], &(&1["attribute"] in terms)),
+        do: diag("SCHEMA_VIOLATION", at(rel, path ++ [i]))
+  end
+
+  defp hp_terms(settings),
+    do:
+      for(
+        t <- get_in(settings, ["world", "derived", "hp_max", "terms"]) || [],
+        do: t["attribute"]
+      )
 
   defp missing_text(_, _, _, :unknown), do: []
 

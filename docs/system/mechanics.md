@@ -3362,6 +3362,33 @@ Beads `loka-kgd.109.3` (first half). A built room weathers into ruin and a mend 
 - **Sampler.** `weathering` 600 s (`per_tick -1` and `tick_every 300`, which the schema requires); `ruin` is permanent, with the text "the roof has fallen in"; reaction `ruin`; `mend_hut` costs 3 pennies and 1 timber into `yard`. At 600 s the hut reads in ruin, its exits are unchanged and the player can leave. A mend gives back the owned paragraph, and 600 s later the hut is a ruin again. A mend on a sound hut is `service.nothing_to_mend` (`kernel/ts/test/built.test.ts`). Weathering and ruin survive cold reopen, and weathering ends in ruin after a reopen (`mobile/authority/local-story/built.test.ts`).
 - **Composition record.** Consumer: `build_sampler`. Reads: blueprint `weathering`/`ruin`, the current status on the room, and the created identity's origin. Writes: `status.transition` (apply/cure) on a room holder, and `entity.transfer` of mend inputs. Reused: status@1 apply, expire and cure; reaction `status_expired`; service payment and escrow; the S2 site lookup. New: the room policy subject, the compose created-holder rule, the mend benefit, and `unmendable`/`mended`. Missing invariant: none. Named exception: none (compose names no mechanic).
 
+## Cooking (Homestead row hs-5)
+
+Homestead row hs-5 (Beads `loka-kgd.108.4`): a cook turns two caught fish into a stew over a timed commission, and the stew is a meal that leaves a buff. Declaration: an edible's `applies` ([status declarations](cartridge.md#status-declarations), `kernel_api` 1.101). Save rules: none new.
+
+- **Command.** None new: Eat ([D4](#d4-homes-finite-apples-and-eat-selected-contract)) and `use_service` with an [escrow](#escrow-custody-toolbox-row-20a) and a [timed claim](#timed-job-claim-and-cancel-toolbox-row-20b).
+- **Admission.** A meal with no `applies` that restores nothing and cures nothing is `invalid_state`, as before. At the pool maximum a meal with `applies` is eaten only when at least one listed status would newly land (not `immune`, not already active): its statuses apply and the capped restore writes nothing; otherwise it is refused `invalid_state` as a plain meal.
+- **Effect** (`decide` in `kernel/ts/src/mechanics/food/rule.ts`). After the restore and the cures, each `applies` status lands on the eater's body through `statusStep` (`mechanics/status/shared.ts`), as a reaction step would: one writer group with the meal, `status_applied` only while a reaction listens for it, `immune` holds, and a refresh while active is silent. No `ate` event. The narration is the meal's line, then each first-applied status's `applied` line in `applies` order; a reaction on `status_applied` may add its own lines after them. The mobile local-story Eat receipt binds only line 0, the meal's authored key ([save.md](save.md#d4-finite-food-and-terminal-custody-recovery); `mobile/authority/local-story/food-receipt.ts`), so reaction and `alternates` lines reopen.
+- **Gate.** A listed status must not modify an attribute that is a `world.derived.hp_max` term (loka-kgd.50): the compiler (`lib/loka/content/status.ex` `meals`) and the loader (`kernel/ts/src/content/cartridge_food.ts`) refuse it with SCHEMA_VIOLATION at `edible.applies[i]`.
+- **Realm seams** (owner decision 2026-10-13, brief checklist).
+  1. Actor: met; Eat and the order read `p.actor_id`. One open order per service is row 20b's known limit.
+  2. Reactions: not applicable; no new event.
+  3. Credit: not applicable.
+  4. Time: met; the commission's `ready_after`, the status's duration and the replenish grid all run on the logical clock.
+  5. Scope: met; the buff is a status on the actor's own body.
+  6. to 9. Not applicable.
+- **Opt-in.** `applies` needs food@1, status@1 and `kernel_api` 1.101. Chapter 1 declares none.
+- **Book.** No new component: the cook's offered services, Eat, and the condition line.
+- **Known limits.** A service claim emits no `item_acquired`, so a claimed stew does not spoil until it is next acquired (dropped and taken again); no new event kind in this row (PM ruling; follow-up filed by the PM). No recipe step: the cook's commission is the cooking (the beginner tier, `stew_plain_01`; the hearth tiers and player cooking are hs-13). A status a meal both cures and applies is written once: the cure wins. A forged Eat receipt of the bare meal line, its status lines removed, is accepted (narration only). The receipt's line 0 is checked against the current release, so a receipt from an older release can fail after a key rename (pre-production: no backward save compatibility).
+- **Sampler.** `cartridges/kitchen_sampler`: the cook in the kitchen offers `stew` and `claim` (1 penny each). One fish is `service.missing_inputs`; two are taken into the larder; claim at +299 is `service.not_ready`, at +300 the stew is held. Eating it restores 10 mv and str reads 11 (`fed`) for 3600 s, then 10. A claimed stew held a day is still fresh; one dropped and taken again reads "a cold, filmed stew" and lands in the midden after 86400 s. The larder returns the spent fish to the pond every 3600 s (`kernel/ts/test/kitchen.test.ts`, `test/loka/content_food_test.exs`, `protocol/fixtures/loader_floors.json`).
+- **Composition record** ([architecture](architecture.md#building-mechanics-by-composition)).
+  - Consumer: `kitchen_sampler`. Later: the Homestead batch and the showcase.
+  - Reads: the edible's `applies`, the status definitions, `world.derived.hp_max`.
+  - Writes: the status rows `statusStep` writes; jobs, events and save rows: none new.
+  - Reused: Eat, `statusStep`, escrow and timed claim, decay's spoil reactions, timed replenish, description variants.
+  - New: `ItemEdible.applies` and its hp-max gate.
+  - Missing invariant: none. Named exceptions: none.
+
 ## Craft (Homestead hs-10)
 
 Homestead hs-10 (Beads `loka-kgd.108.7`): a recipe may spend held items and hand out an item from a stock. Declarations: [craft](cartridge.md#craft-declarations) (`kernel_api` 1.101).
