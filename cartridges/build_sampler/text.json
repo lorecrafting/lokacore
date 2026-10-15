@@ -10,5 +10,12 @@
   "service.buy_plot.used": "The seller takes your coin; the plot is yours.",
   "blueprint.hut.title": "The Hut",
   "blueprint.hut.description": "A small hut of rough planks.",
-  "blueprint.hut.description.owned": "Your small hut of rough planks."
+  "blueprint.hut.description.owned": "Your small hut of rough planks.",
+  "npc.carpenter.short": "the carpenter",
+  "npc.carpenter.room": "A [carpenter](carpenter) waits with a cart of planks.",
+  "npc.carpenter.description": "A carpenter who raises huts on bought plots.",
+  "service.raise_hut": "Raise a hut",
+  "service.raise_hut.used": "The carpenter raises a hut on your plot.",
+  "service.site_taken": "Something already stands there.",
+  "service.construction_full": "Nothing more can be built here."
 }

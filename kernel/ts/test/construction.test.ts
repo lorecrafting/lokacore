@@ -101,6 +101,9 @@ test('a site and world.construction each need construction@1', () => {
     delete c.manifest.requires.capabilities.construction;
     delete c.lock.capabilities.construction;
     delete c.blueprints;
+    // the S2 build service names a blueprint; without one it is unresolved, not ungated
+    delete c.services['build_sampler@0.0.1:service/raise_hut'];
+    delete c.npcs['build_sampler@0.0.1:npc/carpenter'].services;
   };
   const gate = (at: string) => ['UNDECLARED_CAPABILITY', at];
   assert.deepEqual(
@@ -116,5 +119,28 @@ test('a site and world.construction each need construction@1', () => {
       delete lane(c).site;
     }),
     gate('.cartridge.world.construction'),
+  );
+});
+
+// Breaks (Built rooms S2): the loader admits a build service whose direction is not in the
+// site's directions, whose blueprint the site does not list, or whose site does not resolve.
+test('a build benefit names a direction and blueprint of its resolved site', () => {
+  const svc = (c: Obj) => c.services['build_sampler@0.0.1:service/raise_hut'];
+  const at = (p: string) => `.cartridge.services["build_sampler@0.0.1:service/raise_hut"]${p}`;
+  assert.deepEqual(
+    refused((c) => (svc(c).benefit.direction = 'east')),
+    ['SCHEMA_VIOLATION', at('.benefit.direction')],
+  );
+  assert.deepEqual(
+    refused((c) => {
+      const hut = 'build_sampler@0.0.1:blueprint/hut';
+      c.blueprints['build_sampler@0.0.1:blueprint/shed'] = { ...c.blueprints[hut], key: 'shed' };
+      svc(c).benefit.blueprint = { ...svc(c).benefit.blueprint, key: 'shed' };
+    }),
+    ['SCHEMA_VIOLATION', at('.benefit.blueprint')],
+  );
+  assert.deepEqual(
+    refused((c) => (svc(c).benefit.site = { ...svc(c).benefit.site, key: 'nowhere' })),
+    ['UNRESOLVED_REFERENCE', at('.benefit.site')],
   );
 });

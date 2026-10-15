@@ -305,6 +305,38 @@
             "amount"
           ],
           "additionalProperties": false
+        },
+        {
+          "description": "Built rooms S2 (construction@1): raise blueprint at site's direction. blueprint is one of site.blueprints and direction one of site.directions (SCHEMA_VIOLATION invalid_value otherwise). Refused service.site_taken while a built room holds that site direction and service.construction_full at world.construction.max_total.",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "build"
+            },
+            "blueprint": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "site": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "direction": {
+              "enum": [
+                "north",
+                "south",
+                "east",
+                "west",
+                "up",
+                "down"
+              ]
+            }
+          },
+          "required": [
+            "kind",
+            "blueprint",
+            "site",
+            "direction"
+          ],
+          "additionalProperties": false
         }
       ],
       "description": "Closed paid entitlement, finite meal recovery, provider-owned complete liquid serving (recovery is MV only) or, toolbox row 21, a repair adding up to amount to the wielded weapon's durability fact; or, toolbox row 20b, a claim or cancel of the named commission service's timed escrow order; or, toolbox row 25, a deposit or withdraw of amount between the player's pool and the vault NPC's, mirrored in the account fact, the price being the fee.",

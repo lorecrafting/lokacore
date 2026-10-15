@@ -82,4 +82,25 @@ defmodule Loka.ContentConstructionTest do
       assert {"UNDECLARED_CAPABILITY", path} in pairs(diags), inspect(diags)
     end
   end
+
+  # Breaks (Built rooms S2): the compiler admits a build service whose direction is not in the
+  # site's directions, whose blueprint the site does not list, or whose site does not resolve
+  # (the TS loader refuses them too; construction.test.ts).
+  test "a build benefit names a direction and blueprint of its resolved site" do
+    dir = Loka.ContentSource.copy(@dir)
+    build = &{"services/raise_hut.json", fn s -> put_in(s, ["benefit", &1], &2) end}
+    shed = {"blueprints/shed.json", JSON.decode!(File.read!("#{@dir}/blueprints/hut.json"))}
+
+    for {edits, expected} <- [
+          {[build.("direction", "east")],
+           [{"SCHEMA_VIOLATION", "services/raise_hut.benefit.direction"}]},
+          {[shed, build.("blueprint", "shed")],
+           [{"SCHEMA_VIOLATION", "services/raise_hut.benefit.blueprint"}]},
+          {[build.("site", "nowhere")],
+           [{"UNRESOLVED_REFERENCE", "services/raise_hut.benefit.site"}]}
+        ] do
+      assert {:error, diags} = Loka.ContentSource.compile(dir, edits)
+      assert pairs(diags) == expected
+    end
+  end
 end
