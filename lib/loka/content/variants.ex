@@ -24,10 +24,10 @@ defmodule Loka.Content.Variants do
 
     voices = voice?(defs) or aside?(defs)
     identity = is_map_key(settings["world"] || %{}, "identity")
-    furnish = furnish?(defs) or furnish?(settings)
+    furnish = furnish?([defs, settings])
 
-    if (furnish or identity or voices or relative or used?(defs, settings)) and
-         api < if(furnish, do: [1, 101], else: floor(identity, voices, relative, defs, settings)),
+    if (identity or voices or relative or used?(defs, settings)) and
+         api < floor(furnish, identity, voices, relative, defs, settings),
        do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least", %{})],
        else: []
   end
@@ -35,11 +35,12 @@ defmodule Loka.Content.Variants do
   defp used?(defs, settings),
     do: Enum.any?(Entities.all(defs), &variant?/1) or leaf?(defs) or leaf?(settings)
 
-  defp floor(true, _, _, _, _), do: [1, 97]
-  defp floor(_, true, _, _, _), do: [1, 91]
-  defp floor(_, _, true, _, _), do: [1, 87]
+  defp floor(true, _, _, _, _, _), do: [1, 101]
+  defp floor(_, true, _, _, _, _), do: [1, 97]
+  defp floor(_, _, true, _, _, _), do: [1, 91]
+  defp floor(_, _, _, true, _, _), do: [1, 87]
 
-  defp floor(_, _, _, defs, settings),
+  defp floor(_, _, _, _, defs, settings),
     do: if(reader?(defs) or reader?(settings), do: [1, 53], else: [1, 46])
 
   defp variant?({kind, _, e}),
@@ -47,7 +48,7 @@ defmodule Loka.Content.Variants do
       Map.has_key?(e, "short_variants") or Map.has_key?(e, "description_variants") or
         (kind == "npc" and Map.has_key?(e, "room_line_variants"))
 
-  defp leaf?(%{"op" => op}) when op in ["status_active", "npc_present"], do: true
+  defp leaf?(%{"op" => op}) when op in ["status_active", "npc_present", "item_present"], do: true
   defp leaf?(v) when is_map(v), do: Enum.any?(Map.values(v), &leaf?/1)
   defp leaf?(v) when is_list(v), do: Enum.any?(v, &leaf?/1)
   defp leaf?(v) when is_tuple(v), do: leaf?(Tuple.to_list(v))
