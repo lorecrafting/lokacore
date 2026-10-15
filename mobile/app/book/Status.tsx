@@ -2,24 +2,16 @@
 import type { ReactElement } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
-import {
-  bleedingLine,
-  branch,
-  conditionLine,
-  pools,
-  said,
-  sky,
-  toneOf,
-  type Pool,
-} from './model.ts';
+import { bleedingLine, branch, pools, said, sky, toneOf, type Pool } from './model.ts';
 import { band, Tap } from './pages.tsx';
+import { StatusIcons } from './StatusIcon.tsx';
 import { usePalette, type Palette } from './palette.ts';
 import { size, space, type } from './tokens.ts';
 
-// One line, never wrapping: the sky glyph (sun by day, moon by night), the position, bleeding, then
+// The status icon row (StatusIcon.tsx) when any condition is on, then one line, never wrapping: the sky glyph (sun by day, moon by night), the position, bleeding, then
 // the resource button, which shows the condition pools coloured by band when GameView carries them
 // (the room-view status line, an owner-ruled departure) and opens Contents, the index of the
-// existing book sections. Too wide, the position and condition items truncate; the pools never
+// existing book sections. Too wide, the position truncates; the pools never
 // shrink (polish pick mv1j35ltxddx).
 type StatusProps = {
   time: number;
@@ -32,6 +24,7 @@ type StatusProps = {
   locked: boolean;
   pending: boolean;
   open: () => void;
+  openCharacter: () => void; // a status icon's tap
   openPosition?: () => void;
 };
 
@@ -66,7 +59,6 @@ const skyText = (p: StatusProps) =>
     .filter(Boolean)
     .join(' ');
 
-// size: allow 42, each condition item carries its own accessible name beside its text
 export function StatusLine(p: StatusProps) {
   const c = usePalette();
   const items = [
@@ -83,23 +75,18 @@ export function StatusLine(p: StatusProps) {
         {bleedingLine(p.bleeding, p.time, p.text)}
       </Text>
     ),
-    ...(p.conditions ?? []).map((x, i) => {
-      const line = conditionLine(x, p.time, p.text);
-      return (
-        <Text
-          key={`${x.label}-${i}`}
-          numberOfLines={1}
-          style={{ ...type.small, color: (x.per_tick ?? 0) < 0 ? c.danger : c.dim }}
-          accessibilityLabel={line.replaceAll(' · ', ', ')}
-        >
-          {line}
-        </Text>
-      );
-    }),
     <Contents key="contents" {...p} resources={pools(p.resources)} />,
   ].filter(Boolean);
   return (
     <View>
+      {!!p.conditions?.length && (
+        <StatusIcons
+          conditions={p.conditions}
+          time={p.time}
+          text={p.text}
+          open={p.locked ? undefined : p.openCharacter}
+        />
+      )}
       <View style={statusRow}>
         {items.map((item, i) => (i ? joined(c, item as ReactElement) : item))}
       </View>
@@ -111,7 +98,7 @@ export function StatusLine(p: StatusProps) {
 }
 
 // Each " · " belongs to the item after it, so the line never starts with a lone dot. Every item
-// but the pools may shrink (position and the condition items truncate, longer ones giving up more).
+// but the pools may shrink (position truncates).
 const joined = (c: Palette, item: ReactElement) => (
   <View key={item.key} style={item.key === 'contents' ? group : { ...group, ...shrink }}>
     <Text aria-hidden style={{ ...type.small, color: c.dim }}>

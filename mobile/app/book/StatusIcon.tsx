@@ -1,0 +1,156 @@
+// The status icon row above the status line (BOOK-UI-COMPONENTS.md, Status icon): one round,
+// graphic-only icon per condition, five then a +N disc. A tap opens Character; a hold (a hover on
+// web) shows the label and time left in the Tip's look. Locked (scene, combat, chapter page), the
+// discs are pictures, not buttons.
+import { useEffect, useRef, useState } from 'react';
+import { Animated, Pressable, Text, View } from 'react-native';
+import type { GameView } from '../../packages/game-view/session.ts';
+import { useReducedMotion } from './fade.ts';
+import { glyph } from './glyphs.ts';
+import { statusName, statusTip } from './model.ts';
+import { usePalette, type Palette } from './palette.ts';
+import { motion, radius, size, space, type } from './tokens.ts';
+
+type Say = (key: string) => string;
+type Look = 'buff' | 'debuff' | 'neutral';
+type Props = {
+  conditions: NonNullable<GameView['conditions']>;
+  time: number;
+  text: Say;
+  open?: () => void; // absent while locked
+};
+
+const SHOWN = 5; // icons before the +N disc
+
+export function StatusIcons(p: Props) {
+  const [tip, setTip] = useState<string>();
+  const shown = p.conditions.slice(0, SHOWN);
+  const more = p.conditions.length - shown.length;
+  return (
+    <View style={{ flexDirection: 'row', justifyContent: 'center', columnGap: space.sm }}>
+      {shown.map((x, i) => (
+        <Icon
+          key={`${x.label}-${i}`}
+          look={x.kind ?? 'neutral'}
+          name={statusName(x, p.time, p.text)}
+          tip={statusTip(x, p.time, p.text)}
+          setTip={setTip}
+          open={p.open}
+        >
+          {glyph(x.label, x.kind)}
+        </Icon>
+      ))}
+      {more > 0 && (
+        <Icon look="neutral" name={`+${more} more`} open={p.open} label>
+          {`+${more}`}
+        </Icon>
+      )}
+      {tip !== undefined && <Tooltip text={tip} />}
+    </View>
+  );
+}
+
+const looks = (c: Palette) => ({
+  buff: { fill: c.card, border: c.line, ink: c.fg },
+  debuff: { fill: c.fg, border: c.danger, ink: c.bg },
+  neutral: { fill: c.card, border: c.line, ink: c.dim },
+});
+
+function Icon(p: {
+  look: Look;
+  name: string;
+  tip?: string;
+  setTip?: (tip?: string) => void;
+  open?: () => void;
+  label?: boolean; // the +N disc: its count is shown text, so it leads the name (label in name)
+  children: string;
+}) {
+  const c = usePalette();
+  const l = looks(c)[p.look];
+  const disc = (
+    <View
+      style={{
+        width: size.statusIcon,
+        height: size.statusIcon,
+        borderRadius: size.statusIcon / 2,
+        borderWidth: size.rule,
+        borderColor: l.border,
+        backgroundColor: l.fill,
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <Text aria-hidden={!p.label} style={{ ...(p.label ? type.label : type.small), color: l.ink }}>
+        {p.children}
+      </Text>
+    </View>
+  );
+  const box = {
+    width: size.touch,
+    height: size.touch,
+    alignItems: 'center',
+    justifyContent: 'center',
+  } as const;
+  if (!p.open)
+    return (
+      <View accessibilityRole="image" accessibilityLabel={p.name} style={box}>
+        {disc}
+      </View>
+    );
+  const show = () => p.setTip?.(p.tip);
+  const hide = () => p.setTip?.(undefined);
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`${p.name}, opens Character`}
+      onPress={p.open}
+      onLongPress={show}
+      onPressOut={hide}
+      onHoverIn={show}
+      onHoverOut={hide}
+      style={box}
+    >
+      {disc}
+    </Pressable>
+  );
+}
+
+// The Tip's bubble (Footer.tsx Tip) without Got it, over the row; it fades in, cut under reduced
+// motion, and never takes a touch.
+function Tooltip({ text }: { text: string }) {
+  const c = usePalette();
+  const reduced = useReducedMotion();
+  const shown = useRef(new Animated.Value(reduced ? 1 : 0)).current;
+  useEffect(() => {
+    if (!reduced)
+      Animated.timing(shown, {
+        toValue: 1,
+        duration: motion.fade.duration,
+        useNativeDriver: true,
+      }).start();
+  }, [reduced, shown]);
+  return (
+    <Animated.View
+      pointerEvents="none"
+      style={{
+        position: 'absolute',
+        bottom: size.touch,
+        left: 0,
+        right: 0,
+        alignItems: 'center',
+        opacity: shown,
+      }}
+    >
+      <View
+        style={{
+          backgroundColor: c.fg,
+          borderRadius: radius.card,
+          paddingVertical: space.md,
+          paddingHorizontal: space.lg,
+        }}
+      >
+        <Text style={{ ...type.small, color: c.bg }}>{text}</Text>
+      </View>
+    </Animated.View>
+  );
+}

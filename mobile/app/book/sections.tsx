@@ -3,7 +3,16 @@
 import { useState } from 'react';
 import { Text, View } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
-import { bandPhrase, cap, plain, toneOf, why, type group, type Thing } from './model.ts';
+import {
+  bandPhrase,
+  cap,
+  conditionLine,
+  plain,
+  toneOf,
+  why,
+  type group,
+  type Thing,
+} from './model.ts';
 import type { Button, DetailLine } from './presenter.ts';
 import { note, prose, usePalette } from './palette.ts';
 import { DiscoveredMap } from './DiscoveredMap.tsx';
@@ -45,7 +54,7 @@ export function CharacterPage(
       {p.view?.bleeding && <Text style={prose(c)}>{p.text(p.view.bleeding.label)}</Text>}
       {p.view?.conditions?.map((x, i) => (
         <Text key={`${x.label}-${i}`} style={prose(c)}>
-          {cap(p.text(x.label))}
+          {cap(conditionLine(x, p.view!.time, p.text))}
         </Text>
       ))}
       <SkillDetails view={p.view} text={p.text} />

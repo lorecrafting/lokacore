@@ -55,6 +55,7 @@ const { Footer } = await import('./Footer.tsx');
 const { StatusLine } = await import('./Status.tsx');
 const { BookView } = await import('./Book.tsx');
 const { CharacterPage } = await import('./sections.tsx');
+const { StatusIcons } = await import('./StatusIcon.tsx');
 
 function browser(t: { after: (cleanup: () => void) => void }) {
   const originalWindow = globalThis.window;
@@ -233,7 +234,7 @@ test('the chapter title page leaves only Continue', () => {
   assert.equal(navigation, false);
   assert.equal(status.props.locked, true);
   const button = StatusLine(status.props)
-    .props.children[0].props.children.flat() // the row, then its items
+    .props.children[1].props.children.flat() // past the (absent) icon row: the row, then its items
     .find((c: any) => c?.key === 'contents').props.children[1]; // its " · " group: dot, button
   const contents = button.type(button.props);
   const colours = (e: any): string[] =>
@@ -262,7 +263,7 @@ test('status shows hp, ma and mv only; Character bands those only, never pennies
     pending: false,
     open: () => {},
   } as any);
-  const button = status.props.children[0].props.children
+  const button = status.props.children[1].props.children
     .flat()
     .find((c: any) => c?.key === 'contents').props.children[1];
   const contents = button.type(button.props);
@@ -311,10 +312,75 @@ test('the status line shows the weather in words and names season and tide', () 
     pending: false,
     open: () => {},
   } as any);
-  const sky = status.props.children[0].props.children[0];
+  const sky = status.props.children[1].props.children[0];
   assert.equal([sky.props.children].flat().join(''), '○ rain');
   assert.equal(
     sky.props.accessibilityLabel,
     'day 1, 00:00, night, full moon, rain, autumn, high tide',
   );
+});
+
+// Breaks: a sixth icon where the +N disc belongs (or the disc at five), a name losing its polarity or
+// giving a permanent status a time, the glyph not falling back by polarity, a locked icon still a
+// button, or the Character page dropping a condition's time, tick or sign
+// (book-ui.md Conditions details; BOOK-UI-COMPONENTS.md, Status icon).
+test('status icons: five then +N, named by label, time and polarity, pictures while locked', () => {
+  const at = (label: string, kind?: string, ends_at?: number, per_tick?: number) =>
+    ({ label, kind, ends_at, per_tick, resource: 'hp', tick_every: 60 }) as any;
+  const five = [
+    at('condition.fed', 'buff', 3600),
+    at('poisoned', 'debuff', 960, -1),
+    at('rested', undefined, 1320),
+    at('scarred', 'debuff'),
+    at('warded', 'buff', 810, 5),
+  ];
+  const text = (key: string) => (key === 'condition.fed' ? 'fed' : key);
+  const icons = (conditions: any[], open?: () => void) => {
+    const [shown, more] = StatusIcons({ conditions, time: 720, text, open }).props.children;
+    return [...shown, more].filter(Boolean).map((e: any) => e.type(e.props));
+  };
+  const names = (es: any[]) => es.map((e) => e.props.accessibilityLabel);
+  const opened: string[] = [];
+  const open = () => opened.push('character');
+  const shown = icons(five, open);
+  assert.deepEqual(names(shown), [
+    'fed, 48m remaining, buff, opens Character',
+    'poisoned, 4m remaining, debuff, opens Character',
+    'rested, 10m remaining, opens Character',
+    'scarred, debuff, opens Character',
+    'warded, 90s remaining, buff, opens Character',
+  ]);
+  const glyphOf = (e: any) => e.props.children.props.children.props.children;
+  assert.deepEqual(shown.map(glyphOf), ['◡', '▼', '○', '▼', '▲']);
+  const six = icons([...five, at('mighty', 'buff', 4000)], open);
+  assert.equal(six.length, 6);
+  assert.equal(six[5].props.accessibilityLabel, '+1 more, opens Character');
+  assert.equal(glyphOf(six[5]), '+1');
+  six[5].props.onPress();
+  assert.deepEqual(opened, ['character']);
+  const locked = icons(five);
+  assert.deepEqual(
+    locked.map((e) => [e.type, e.props.accessibilityRole]),
+    five.map(() => ['View', 'image']),
+  );
+  assert.equal(locked[0].props.accessibilityLabel, 'fed, 48m remaining, buff');
+  const character = CharacterPage({
+    view: { time: 720, conditions: five } as any,
+    text,
+    world: () => {},
+  });
+  const lines = [character.props.children]
+    .flat(2)
+    .filter(
+      (t: any) =>
+        t?.key?.startsWith?.('poisoned') ||
+        t?.key?.startsWith?.('warded') ||
+        t?.key?.startsWith?.('scarred'),
+    )
+    .map((t: any) => t.props.children);
+  assert.deepEqual(lines, [
+    'Poisoned · 4m remaining · -1 HP each 60s',
+    'Scarred',
+    'Warded · 90s remaining · +5 HP each 60s',
+  ]);
 });

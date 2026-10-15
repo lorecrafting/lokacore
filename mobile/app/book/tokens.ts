@@ -114,6 +114,7 @@ export const size = {
   footerRule: 92, // each hairline beside the minimap
   focus: 2, // the web keyboard focus ring: its outline width and its offset
   chapterRule: 80, // the chapter card's short rule (the mock's `.chapter i`)
+  statusIcon: 28, // a status icon's disc, inside a size.touch box
 };
 
 export const radius = { tag: 3, card: 10, chip: 22 }; // chip: a pill, half size.touch
