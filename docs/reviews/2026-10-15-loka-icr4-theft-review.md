@@ -33,3 +33,29 @@ All eleven hold at head.
 ## Dispositions judged
 
 No victim slot on `custom_event` (schema closed; spec:3144 documents it). Elixir `check(_,_,_,nil)` and TS non-v2 skip agree. Dropping the separate 1.94 floors is covered transitively by `world.theft`.
+
+## Save second opinion
+
+- Branch `toolbox/m13-theft`, commit reviewed `b6d931ed1c9fe64780c0a730ec7753cdc65b345f` (base `toolbox/batch-m13` `0e2914c6`); scope: commerce-save custody seed only ([WORKFLOW.md:38](../WORKFLOW.md), [storage lessons](../lessons/storage.md)). Written by anthropic/claude-opus-5-5.
+- Verdict: **APPROVE WITH NOTES**.
+
+### Must be true (before the diff)
+
+1. A clean offer's seed is unchanged: both loaders (`kernel/ts/src/content/cartridge_commerce.ts:26-34`, `lib/loka/content/commerce.ex` `stocked?`) require it to start with its provider, so `fresh` holder == provider.
+2. A stolen offer's seed is its authored starting holder, read from `fresh` = `pinned(release, saved.pin)` (`authority.ts:98-102,163-167`): same context, so its `entityIds` match the saved world; authored containers draw no rng.
+3. The take transfer and the `stolen` fact row commit in one transaction; failed COMMIT keeps neither, a lost ack keeps both and redelivery replays the stored receipt.
+4. Cold reopen replays after a take, a fence sale and a buy-back from the fence.
+5. Chapter 1 and existing commerce saves reopen unchanged.
+
+All five hold at head.
+
+### Evidence
+
+- Focused at head, exit 0: mobile `theft.test.ts`, `commerce.test.ts`, `two_shops.test.ts`, `prices.test.ts`, `r9c_custody_terminal.test.ts`, `chapters.test.ts`.
+- Mutants (each reverted, tree clean): `commerce-save.ts:33` seed from the saved `world` → 8 fail across theft, commerce, two_shops; stolen offers seeded with the provider (old behavior) → theft.test `save_corrupt` at the first reopen (:94).
+- Red control: `commerce-save.ts:65` skip the custody update on `sell` → theft.test fails at the new reopen (:103, `save_corrupt`); same mutant with :103-105 removed → green. The new reopen is what catches it; main finding 1 is resolved.
+- Scratch probe (deleted): failed COMMIT on take(purse) → `pending`; reopen: purse with the merchant, `stolen` false; retry accepted. Lost ack → `pending`; reopen: purse on the body, `stolen` true; redelivery of the same `invocation_id` returns the stored `accepted` receipt, no double effect; reopen again clean. Stolen purse sold to the fence then bought back → reopen OK, purse on the body, still `stolen` (spec:3162 limit).
+
+### Findings
+
+1. nit, `mobile/authority/local-story/commerce-save.ts:59-64` with `:241-244`: a fence's stolen offer may now name any NPC's item, and no loader rejects content that also moves that item by a path `custodyEvidence` refuses (a dialogue exchange or give, `choose`; a replenish job, `containment/job.ts:60-75`; an `item.move` reaction). Scenario: the merchant also gives the purse through dialogue; the receipt saves, the next launch is `save_corrupt`. Clean offers carry the same exposure for the shop's own stock (the developer's claim holds); this widens it to any NPC's item. Not run. Add a Known limit at `docs/system/mechanics.md:3162` or a loader guard like the escrow guard at `kernel/ts/src/content/cartridge_services.ts:114-123`.
