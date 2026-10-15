@@ -490,8 +490,8 @@ test('a concealed lesson is left out of the opened choices and refused', () => {
 
 // Breaks (hs-14 save check, dialogue-save.ts and dialogue-receipt.ts): a saved row may drop a
 // choice that teaches no skill or a shown one (whittle), reorder, be empty, name an id the
-// dialogue lacks or not be a list (a TypeError, not save_corrupt); or the full row or the one less
-// the hidden lesson is refused.
+// dialogue lacks or not be a list (a TypeError, not save_corrupt), or be empty when every choice
+// is concealed; or the full row or the one less the hidden lesson is refused.
 test('a saved row may lack only a lesson of a hidden skill', () => {
   const w = secret(true);
   const d = w.cartridge.dialogues![`${P}dialogue/old_carver_carving`]!;
@@ -515,6 +515,8 @@ test('a saved row may lack only a lesson of a hidden skill', () => {
     rows.map((ids) => openable(w, d2, ids)),
     [true, true, false, false, false, false, false, false],
   );
+  // Every choice concealed: the empty row still matches the filter, so only the length check refuses.
+  assert.equal(openable(w, { ...d, choices: { learn: d.choices.learn! } }, []), false);
 });
 
 // Breaks (hs-14 secret; twin of content_craft_test.exs): a shown skill's qualification or a
