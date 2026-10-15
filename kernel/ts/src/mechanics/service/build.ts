@@ -20,6 +20,7 @@ import {
 } from '../../runtime/decision.ts';
 import { assigned, value } from '../fact.ts';
 import { selected } from '../containment/stock.ts';
+import { applyStatus } from '../status/shared.ts';
 
 type Build = Extract<ServiceDefinition['benefit'], { kind: 'build' }>;
 const refused = (key: string) => ({
@@ -42,20 +43,31 @@ export function unbuildable(world: World, b: Build, owner: CharacterId) {
   return undefined;
 }
 
-const created = (b: Build, owner: CharacterId, mint: Mint): DeltaOp => {
+// The created row, then (S4) the blueprint's weathering on the new room. The room is known only
+// after hydrate, so the status is applied on a world that already knows it (compose admits a
+// holder created earlier in the same delta).
+function created(world: World, b: Build, owner: CharacterId, mint: Mint): DeltaOp[] {
   const origin = { kind: 'built', site: b.site, direction: b.direction, owner } as const;
   const identity = { id: mint() as EntityId, definition: b.blueprint, origin };
-  return { op: 'entity.create', writer_group: 0, identity };
-};
+  const weathering = world.cartridge.blueprints?.[refString(b.blueprint)]?.weathering;
+  const known = { ...world.knownEntities, [identity.id]: { kind: 'room' as const } };
+  return [
+    { op: 'entity.create', writer_group: 0, identity },
+    ...(weathering
+      ? applyStatus({ ...world, knownEntities: known }, identity.id, weathering, 0, mint)
+      : []),
+  ];
+}
 
 /** A paid build without materials mints the room's identity; hydrate derives the room from it. */
 export function raised(
+  world: World,
   p: Extract<CommandPayload, { type: 'use_service' }>,
   s: ServiceDefinition,
   mint: Mint,
 ): DeltaOp[] {
   return s.benefit.kind === 'build' && !s.benefit.escrow
-    ? [created(s.benefit, p.actor_id, mint)]
+    ? created(world, s.benefit, p.actor_id, mint)
     : [];
 }
 
@@ -86,7 +98,7 @@ export function built(
     { fact: b.fact, value: false },
     'service',
   ).ops;
-  if (!unbuildable(world, b, owner)) return [created(b, owner, mint), ...closed];
+  if (!unbuildable(world, b, owner)) return [...created(world, b, owner, mint), ...closed];
   const custody = world.roomIds[refString(b.escrow.custody)];
   const body = bodyOf(world, owner);
   if (!body) return 'precondition_failed';

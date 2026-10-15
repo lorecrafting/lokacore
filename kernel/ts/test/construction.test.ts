@@ -40,7 +40,7 @@ test('build_sampler: the pinned artifact loads with the same content hash', () =
 });
 
 // Breaks: the loader admits a site direction the room has an exit in, a site blueprint the
-// cartridge does not define, a blueprint text key or enter-lock fact it does not define, or construction content below kernel_api 1.99, each alone.
+// cartridge does not define, a blueprint text key, enter-lock fact or (S4) weathering or ruin status it does not define, or construction content below kernel_api 1.99, each alone.
 test('a site names no exit direction and only defined blueprints; construction needs 1.99', () => {
   assert.deepEqual(
     refused((c) => (lane(c).exits.north = { to: c.entry })),
@@ -67,6 +67,11 @@ test('a site names no exit direction and only defined blueprints; construction n
     refused((c) => (hut(c).locks.enter.root.fact.key = 'nope')),
     ['UNRESOLVED_REFERENCE', at('.locks.enter.root.fact')],
   );
+  for (const f of ['weathering', 'ruin'])
+    assert.deepEqual(
+      refused((c) => (hut(c)[f].key = 'nope')),
+      ['UNRESOLVED_REFERENCE', at(`.${f}`)],
+    );
   const below = (c: Obj) => (c.manifest.requires.kernel_api.at_least = '1.98');
   assert.deepEqual(refused(below), floor);
   assert.deepEqual(

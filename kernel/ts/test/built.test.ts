@@ -339,8 +339,12 @@ test('a commission raises for its job owner, caps per owner, and an unrefundable
   const mint = () => 'eeeeeeee-0000-4000-8000-00000000000f';
   const ops = due(own(w), id as never, { ...row, actor_id: other }, mint, { n: 0 }) as any[];
   assert.equal(ops[0].identity.origin.owner, other);
-  assert.equal(ops.length, 2);
-  assert.match(JSON.stringify(ops[1]), new RegExp(other));
+  // The created row, its weathering status and job (S4), then the owner's order fact closed.
+  assert.deepEqual(
+    ops.map((o) => o.op),
+    ['entity.create', 'status.transition', 'job.schedule', 'fact.assign'],
+  );
+  assert.match(JSON.stringify(ops[3]), new RegExp(other));
 
   w = elapse(w, w.state.clock + 7200);
   const b = { ...w.cartridge.services![`${S}:service/raise_hut`].benefit, direction: 'east' };

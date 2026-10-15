@@ -29,5 +29,14 @@
   "service.cancel_hut": "Cancel the hut",
   "service.cancel_hut.used": "The carpenter returns your timber.",
   "service.no_order": "The carpenter holds no order of yours.",
-  "service.ready": "The hut is already finished."
+  "service.ready": "The hut is already finished.",
+  "blueprint.hut.description.ruin": "A small hut of rough planks; the roof has fallen in.",
+  "condition.weathering": "weathering",
+  "narration.weathering.applied": "The weather starts on the new planks.",
+  "narration.weathering.tick": "The weather works at the planks.",
+  "narration.weathering.expired": "The weather has had its way.",
+  "condition.ruin": "in ruin",
+  "narration.ruin.applied": "The roof falls in.",
+  "narration.ruin.tick": "The ruin settles.",
+  "narration.ruin.expired": "The ruin is mended."
 }

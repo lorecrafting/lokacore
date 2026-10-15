@@ -31,6 +31,15 @@ export function construction(c: Obj): Diagnostic[] {
         out.push(diag('UNRESOLVED_REFERENCE', `${at}.blueprints[${i}]`, { target }));
     });
   }
+  // Built rooms S4: a blueprint's weathering and ruin name statuses of this cartridge.
+  for (const [ref, b] of Object.entries((c.blueprints ?? {}) as Obj))
+    for (const f of ['weathering', 'ruin'])
+      if (b[f] && !Object.hasOwn(c.statuses ?? {}, refString(b[f])))
+        out.push(
+          diag('UNRESOLVED_REFERENCE', `.cartridge.blueprints${step(ref)}.${f}`, {
+            target: refString(b[f]),
+          }),
+        );
   const used =
     sites.length > 0 ||
     Object.keys(c.blueprints ?? {}).length > 0 ||

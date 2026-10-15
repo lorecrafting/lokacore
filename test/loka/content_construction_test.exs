@@ -17,8 +17,8 @@ defmodule Loka.ContentConstructionTest do
   end
 
   # Breaks (Built rooms S1): the compiler accepts a site direction the room has an exit in, a site
-  # blueprint the cartridge does not define, a blueprint text key or enter-lock fact it does not
-  # define, or construction content below kernel_api 1.99 (the TS
+  # blueprint the cartridge does not define, a blueprint text key, enter-lock fact or (S4)
+  # weathering or ruin status it does not define, or construction content below kernel_api 1.99 (the TS
   # loader refuses them too; construction.test.ts).
   test "a site names no exit direction and only defined blueprints; construction needs 1.99" do
     dir = Loka.ContentSource.copy(@dir)
@@ -34,7 +34,10 @@ defmodule Loka.ContentConstructionTest do
           {[hut(["variants", Access.at(0), "description"], "blueprint.hut.nope")],
            [{"UNRESOLVED_REFERENCE", "blueprints/hut.variants[0].description"}]},
           {[hut(["locks", "enter", "root", "fact"], "nope")],
-           [{"UNRESOLVED_REFERENCE", "blueprints/hut.locks.enter.root.fact"}]}
+           [{"UNRESOLVED_REFERENCE", "blueprints/hut.locks.enter.root.fact"}]},
+          {[hut(["weathering"], "nope")],
+           [{"UNRESOLVED_REFERENCE", "blueprints/hut.weathering"}]},
+          {[hut(["ruin"], "nope")], [{"UNRESOLVED_REFERENCE", "blueprints/hut.ruin"}]}
         ] do
       assert {:error, diags} = Loka.ContentSource.compile(dir, edits)
       assert pairs(diags) == expected

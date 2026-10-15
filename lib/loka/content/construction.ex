@@ -22,6 +22,7 @@ defmodule Loka.Content.Construction do
 
     Enum.flat_map(sites, &site(&1, m, defs)) ++
       Enum.flat_map(blueprints, &(owned_parts(&1, required) ++ texts(&1, text(v2)))) ++
+      Enum.flat_map(blueprints, &statuses(&1, m, defs)) ++
       requirements(m, defs, blueprints, sites, settings)
   end
 
@@ -60,7 +61,24 @@ defmodule Loka.Content.Construction do
   def expand(%{"site" => %{"blueprints" => bs} = s} = room, m) when is_list(bs),
     do: %{room | "site" => %{s | "blueprints" => Enum.map(bs, &ref(&1, "blueprint", m))}}
 
+  # Built rooms S4: a blueprint's weathering and ruin statuses (no other definition has them).
+  def expand(%{} = b, m) when is_map_key(b, "weathering") or is_map_key(b, "ruin"),
+    do:
+      Map.new(b, fn
+        {f, v} when f in ~w(weathering ruin) -> {f, ref(v, "status", m)}
+        kv -> kv
+      end)
+
   def expand(definition, _), do: definition
+
+  defp statuses({rel, b}, m, defs) do
+    for {f, r} <- Map.take(b, ~w(weathering ruin)),
+        resolve(r, "status", m, defs) == :unresolved,
+        do:
+          diag("UNRESOLVED_REFERENCE", at(rel, [f]), %{
+            "target" => "#{r["cartridge_id"]}@#{r["cartridge_version"]}:#{r["kind"]}/#{r["key"]}"
+          })
+  end
 
   defp site({rel, r, s}, m, defs) do
     exits = r["exits"] || %{}

@@ -20,7 +20,10 @@
       "service": 1,
       "construction": 1,
       "description_variant": 1,
-      "schedule": 1
+      "schedule": 1,
+      "status": 1,
+      "reaction": 1,
+      "death": 1
     },
     "client_features": []
   },

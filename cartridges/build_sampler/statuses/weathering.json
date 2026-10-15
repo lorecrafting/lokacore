@@ -1,0 +1,12 @@
+{
+  "duration": 600,
+  "tick_every": 300,
+  "resource": "hp",
+  "per_tick": -1,
+  "label": "condition.weathering",
+  "narration": {
+    "applied": "narration.weathering.applied",
+    "tick": "narration.weathering.tick",
+    "expired": "narration.weathering.expired"
+  }
+}
