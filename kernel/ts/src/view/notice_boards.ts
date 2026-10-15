@@ -5,21 +5,22 @@ import { resolved, refusal } from '../commands/actions.ts';
 import { positionOf } from '../mechanics/position/shared.ts';
 import { visible } from '../mechanics/light/shared.ts';
 import { selected } from '../mechanics/containment/stock.ts';
-import type { AdvertisedAction, EntityId, NoticeBoardView } from '../contracts.gen.ts';
+import type { AdvertisedAction, CharacterId, EntityId, NoticeBoardView } from '../contracts.gen.ts';
 import type { Steps, World } from '../runtime/decision.ts';
 import * as description_variant from '../mechanics/description_variant/rule.ts';
 
 export function noticeViews(
   world: World,
+  actor: CharacterId,
   here: EntityId,
   actions: (id: string) => AdvertisedAction[],
   steps: Steps = { n: 0 },
 ) {
-  const boards = noticeBoards(world, here, actions, steps);
+  const boards = noticeBoards(world, actor, here, actions, steps);
   const grouped = new Set(boards.flatMap((board) => board.notices.map((notice) => notice.id)));
   const notices = Object.entries(world.details).flatMap(([id, detail]) =>
     detail.room === here &&
-    visible(world, world.character, id, steps) &&
+    visible(world, actor, id, steps) &&
     (detail.readable ||
       detail.harvest ||
       detail.perception ||
@@ -32,9 +33,9 @@ export function noticeViews(
             id: id as EntityId,
             title: detailTitle(detail),
             ...harvestRemaining(world, detail, here),
-            description: description_variant.describe(world, world.character, detail, steps),
-            ...bedView(world, detail, steps),
-            ...transportActions(world, id as EntityId, detail, actions, steps),
+            description: description_variant.describe(world, actor, detail, steps),
+            ...bedView(world, actor, detail, steps),
+            ...transportActions(world, actor, id as EntityId, detail, actions, steps),
           },
         ]
       : [],
@@ -54,12 +55,13 @@ function harvestRemaining(world: World, detail: World['details'][string], here: 
 // Membership is compiler/loader-validated; the current room has at most 64 details.
 function noticeBoards(
   world: World,
+  actor: CharacterId,
   here: EntityId,
   actions: (id: string) => AdvertisedAction[],
   steps: Steps = { n: 0 },
 ): NoticeBoardView[] {
   const details = Object.entries(world.details).filter(
-    ([id, detail]) => detail.room === here && visible(world, world.character, id, steps),
+    ([id, detail]) => detail.room === here && visible(world, actor, id, steps),
   );
   const ids = new Map(details.map(([id, detail]) => [detail.key, id as EntityId]));
   return details.flatMap(([id, detail]) => {
@@ -69,14 +71,14 @@ function noticeBoards(
       {
         id: id as EntityId,
         title: board.title,
-        description: description_variant.describe(world, world.character, detail, steps),
+        description: description_variant.describe(world, actor, detail, steps),
         notices: board.notices.map((notice) => ({
           id: ids.get(notice.detail)!,
           ...offered(actions(ids.get(notice.detail)!)),
           title: notice.title,
           description: description_variant.describe(
             world,
-            world.character,
+            actor,
             world.details[ids.get(notice.detail)!],
             steps,
           ),
@@ -88,15 +90,16 @@ function noticeBoards(
 
 function transportActions(
   world: World,
+  actor: CharacterId,
   id: EntityId,
   detail: World['details'][string],
   actions: (id: string) => AdvertisedAction[],
   steps: Steps,
 ) {
-  const transport = transportOffer(world, id, steps);
+  const transport = transportOffer(world, actor, id, steps);
   return transport
     ? { transport, actions: [transport.action] }
-    : offered(detail.bed ? bedActions(world, detail, steps) : actions(id));
+    : offered(detail.bed ? bedActions(world, actor, detail, steps) : actions(id));
 }
 
 const offered = (actions: AdvertisedAction[]) => (actions.length ? { actions } : {});
@@ -112,17 +115,18 @@ const detailTitle = (detail: World['details'][string]) =>
 
 function bedActions(
   world: World,
+  actor: CharacterId,
   detail: World['details'][string],
   steps: Steps,
 ): AdvertisedAction[] {
-  if (!detail.bed || value(world, world.character, detail.bed.entitlement) !== true) return [];
-  const p = { type: 'rest', actor_id: world.character } as const;
-  return Object.values(resolved(world, world.character))
+  if (!detail.bed || value(world, actor, detail.bed.entitlement) !== true) return [];
+  const p = { type: 'rest', actor_id: actor } as const;
+  return Object.values(resolved(world, actor))
     .filter((a) => a.command === 'rest')
     .map((a) => {
       const code =
         refusal(world, p, steps, a.key) ??
-        (positionOf(world, world.character) === 'resting' ? ('invalid_state' as const) : undefined);
+        (positionOf(world, actor) === 'resting' ? ('invalid_state' as const) : undefined);
       const offer = {
         action_key: a.key,
         command: a.command,
@@ -137,8 +141,8 @@ function bedActions(
     });
 }
 
-function bedView(world: World, detail: World['details'][string], steps: Steps) {
+function bedView(world: World, actor: CharacterId, detail: World['details'][string], steps: Steps) {
   if (!detail.bed) return {};
-  const dream = dreamView(world, detail, steps);
+  const dream = dreamView(world, actor, detail, steps);
   return { bed: true as const, ...(dream && { dream }) };
 }
