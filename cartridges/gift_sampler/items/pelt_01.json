@@ -1,0 +1,12 @@
+{
+  "keywords": [
+    "pelt"
+  ],
+  "short": "item.pelt.short",
+  "room_line": "item.pelt.room",
+  "description": "item.pelt.description",
+  "location": {
+    "in": "room",
+    "room": "yard"
+  }
+}

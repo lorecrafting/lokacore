@@ -9,13 +9,15 @@ export function services(c: Obj): Diagnostic[] {
     check = checkers(c, out);
   const [major, minor] = c.manifest.requires.kernel_api.at_least.split('.').map(Number);
   const all = Object.values((c.services ?? {}) as Obj);
-  const floor = all.some((s) => banks(s.benefit))
-    ? 83
-    : all.some(timed)
-      ? 80
-      : all.some((s) => s.benefit.escrow)
-        ? 79
-        : 23;
+  const floor = all.some(barters)
+    ? 101
+    : all.some((s) => banks(s.benefit))
+      ? 83
+      : all.some(timed)
+        ? 80
+        : all.some((s) => s.benefit.escrow)
+          ? 79
+          : 23;
   if (all.length && (major < 1 || (major === 1 && minor < floor)))
     out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
   for (const [ref, s] of Object.entries((c.services ?? {}) as Obj))
@@ -62,6 +64,8 @@ function definition(c: Obj, s: Obj, ref: string, check: Checks, out: Diagnostic[
     bad(out, `${at}.currency`);
   if (!npc?.services?.some((r: Obj) => refString(r as never) === ref)) bad(out, `${at}.provider`);
   const b = s.benefit;
+  // Row kgd.70: only an escrowed entitlement may be free (a barter); any other benefit is paid.
+  if (s.price === 0 && !(b.kind === 'entitlement' && b.escrow)) bad(out, `${at}.price`);
   if (commission(b)) {
     const fact = get(c, check, b.fact, 'fact', `${at}.benefit.fact`);
     if (
@@ -77,9 +81,11 @@ function definition(c: Obj, s: Obj, ref: string, check: Checks, out: Diagnostic[
   else if (banks(b)) bank(c, s, at, check, out);
   else if (ordered(b)) {
     const commission = get(c, check, b.service, 'service', `${at}.benefit.service`);
-    // Built rooms S3: only an order with an output (20b) can be claimed; a build raises its room.
-    const need = b.kind === 'claim' ? 'output' : 'ready_after';
-    if (commission && !commission.benefit.escrow?.[need]) bad(out, `${at}.benefit.service`);
+    // Only a timed order (20b) settles, a claim one with an output (Built rooms S3: a build
+    // raises its room); a barter (row kgd.70) hands its output over and leaves no order open.
+    const e = commission?.benefit.escrow;
+    if (commission && !(e?.ready_after && (b.kind === 'cancel' || e.output)))
+      bad(out, `${at}.benefit.service`);
   } else {
     const recovery = get(c, check, b.recovery, 'resource', `${at}.benefit.recovery`);
     if (recovery && recovery.key !== 'mv') bad(out, `${at}.benefit.recovery`);
@@ -125,7 +131,7 @@ function refusals(b: Obj) {
       ? { target: 'service.nothing_to_repair' }
       : kind !== 'entitlement' && { stock: 'service.sold_out' }),
     ...(b.escrow && { inputs: 'service.missing_inputs' }),
-    ...(b.escrow?.ready_after && { output: 'service.no_output' }),
+    ...(b.escrow?.output && { output: 'service.no_output' }),
   };
 }
 
@@ -258,6 +264,9 @@ function beds(c: Obj, check: Checks, out: Diagnostic[]) {
 const commission = (b: Obj) => b.kind === 'entitlement' || (b.kind === 'build' && !!b.fact),
   ordered = (b: Obj) => b.kind === 'claim' || b.kind === 'cancel';
 const banks = (b: Obj) => b.kind === 'deposit' || b.kind === 'withdraw';
+// Row kgd.70 (API 1.101): a free service, or an output handed over at once (no ready_after).
+const barters = (s: Obj) =>
+  s.price === 0 || (s.benefit.escrow?.output !== undefined && !s.benefit.escrow.ready_after);
 const timed = (s: Obj) => ordered(s.benefit) || s.benefit.escrow?.ready_after !== undefined;
 const finite = (r: Obj | undefined): r is Obj => !!r && r.gain === 0 && !r.regen;
 const bad = (out: Diagnostic[], at: string) =>

@@ -27,7 +27,8 @@ test('shop contracts reject missing fields and malformed positive prices', () =>
   }
   for (const price of [0, 2147483648]) {
     assert.ok(validate('CommandPayload', { ...command, quoted_price: price }).length);
-    assert.ok(validate('ActionInput', { quoted_price: price }).length);
+    // Row kgd.70: a barter quotes 0 through the shared input; buy refuses it in CommandPayload.
+    assert.ok(validate('ActionInput', { quoted_price: price || -1 }).length);
     assert.ok(validate('ShopOffer', { ...shop.offers[0], buy: price }).length);
     assert.ok(validate('ShopOffer', { ...shop.offers[0], sell: price }).length);
   }

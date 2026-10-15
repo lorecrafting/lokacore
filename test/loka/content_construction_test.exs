@@ -101,6 +101,11 @@ defmodule Loka.ContentConstructionTest do
     claim_text =
       {"text.json", &Map.merge(&1, %{"service.not_ready" => "-", "service.no_output" => "-"})}
 
+    free_build = [
+      {"services/raise_hut.json", &Map.put(&1, "price", 0)},
+      {"cartridge.json", &put_in(&1, ~w(requires kernel_api at_least), "1.101")}
+    ]
+
     shed = {"blueprints/shed.json", JSON.decode!(File.read!("#{@dir}/blueprints/hut.json"))}
 
     for {edits, expected} <- [
@@ -112,6 +117,8 @@ defmodule Loka.ContentConstructionTest do
            [{"UNRESOLVED_REFERENCE", "services/raise_hut.benefit.site"}]},
           {[{"services/cancel_hut.json", &put_in(&1, ["benefit", "kind"], "claim")}, claim_text],
            [{"SCHEMA_VIOLATION", "services/cancel_hut.benefit.service"}]},
+          # row kgd.70: price 0 is for an entitlement barter only, never a build
+          {free_build, [{"SCHEMA_VIOLATION", "services/raise_hut.price"}]},
           {[{"facts.json", &put_in(&1, ~w(facts hut_ordered value_type default), true)}],
            [{"SCHEMA_VIOLATION", "services/raise_hut.benefit.fact"}]},
           {[mend.("direction", "east")],

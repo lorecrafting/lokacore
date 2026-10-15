@@ -176,8 +176,9 @@ test('a mend benefit names a direction of its resolved site and a site blueprint
 });
 
 // Breaks (Built rooms S3): the loader admits a claim on a build commission (it has no output to
-// hand over; the room is raised at completion), or a build commission whose fact is not a false-default player bool.
-test('a build commission cannot be claimed and its fact is a player bool', () => {
+// hand over; the room is raised at completion), or a build commission whose fact is not a false-default player bool;
+// row kgd.70: a free build admitted (price 0 is for an entitlement barter only).
+test('a build commission cannot be claimed or free and its fact is a player bool', () => {
   const sv = (c: Obj, k: string) => c.services[`build_sampler@0.0.1:service/${k}`];
   assert.deepEqual(
     refused((c) => (sv(c, 'cancel_hut').benefit.kind = 'claim')),
@@ -185,6 +186,13 @@ test('a build commission cannot be claimed and its fact is a player bool', () =>
       'SCHEMA_VIOLATION',
       '.cartridge.services["build_sampler@0.0.1:service/cancel_hut"].benefit.service',
     ],
+  );
+  assert.deepEqual(
+    refused((c) => {
+      sv(c, 'raise_hut').price = 0;
+      c.manifest.requires.kernel_api.at_least = '1.101';
+    }),
+    ['SCHEMA_VIOLATION', '.cartridge.services["build_sampler@0.0.1:service/raise_hut"].price'],
   );
   assert.deepEqual(
     refused((c) => (c.facts['build_sampler@0.0.1:fact/hut_ordered'].value_type.default = true)),

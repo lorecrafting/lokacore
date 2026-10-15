@@ -1,4 +1,4 @@
-// size: allow 312, the build and mend benefits (Built rooms S2 to S4) add their gates and commission to the one transition query
+// size: allow 316, the build and mend benefits (Built rooms S2 to S4) and the barter (row kgd.70) add their gates and commission to the one transition query
 // One bounded admission/transition query for exact keyed service offers and execution.
 import {
   LIMITS,
@@ -62,9 +62,11 @@ export function transition(
   const order: UnavailableReason | Order | undefined =
     benefit.kind === 'claim' || benefit.kind === 'cancel' ? open(world, p, benefit) : undefined;
   if (order && 'code' in order) return order;
-  const paid = ['deposit', 'withdraw'].includes(benefit.kind) // banked pays its own fee
-    ? { ops: [] }
-    : transfer(world, body, p.provider_id, service.currency, p.quoted_price);
+  // banked pays its own fee; a barter (row kgd.70, price 0) pays none
+  const paid =
+    ['deposit', 'withdraw'].includes(benefit.kind) || service.price === 0
+      ? { ops: [] }
+      : transfer(world, body, p.provider_id, service.currency, p.quoted_price);
   if (!paid) return serviceRefusal('insufficient_resource', 'service.unaffordable');
   const done = granted(world, p, body, service, order, paid, inputs.ops, steps);
   return 'code' in done ? done : { ops: done.ops, service };
@@ -139,16 +141,19 @@ function escrowed(
     const code = giveRefused(world, id, steps);
     if (code) return { code };
   }
-  const destination_id = world.roomIds[refString(escrow.custody)];
-  return {
-    ops: ids.map((entity_id) => ({
-      op: 'entity.transfer' as const,
-      writer_group: 0,
-      entity_id,
-      source_id: body,
-      destination_id,
-    })),
-  };
+  const custody = world.roomIds[refString(escrow.custody)];
+  const move = (entity_id: EntityId, source_id: EntityId, destination_id: EntityId) => ({
+    op: 'entity.transfer' as const,
+    writer_group: 0,
+    entity_id,
+    source_id,
+    destination_id,
+  });
+  const ops = ids.map((id) => move(id, body, custody));
+  // Row kgd.70: an output with no ready_after is a barter, handed over with the inputs; no job.
+  if (escrow.output && !escrow.ready_after)
+    ops.push(move(world.entityIds[refString(escrow.output)], custody, body));
+  return { ops };
 }
 
 /** Toolbox row 20b: the engine job a timed commission's order waits for. */
