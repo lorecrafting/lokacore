@@ -1,4 +1,4 @@
-// size: allow 317, the build and mend benefits (Built rooms S2 to S4) and the barter (row kgd.70) add their gates and commission to the one transition query
+// size: allow 312, the build and mend benefits (Built rooms S2 to S4) and the barter (row kgd.70) add their gates and commission to the one transition query
 // One bounded admission/transition query for exact keyed service offers and execution.
 import {
   LIMITS,
@@ -142,19 +142,20 @@ function escrowed(
     if (code) return { code };
   }
   const custody = world.roomIds[refString(escrow.custody)];
-  const move = (entity_id: EntityId, source_id: EntityId, destination_id: EntityId) => ({
-    op: 'entity.transfer' as const,
-    writer_group: 0,
-    entity_id,
-    source_id,
-    destination_id,
-  });
   const ops = ids.map((id) => move(id, body, custody));
   // Row kgd.70: an output with no ready_after is a barter, handed over with the inputs; no job.
   if (escrow.output && !escrow.ready_after)
     ops.push(move(world.entityIds[refString(escrow.output)], custody, body));
   return { ops };
 }
+
+const move = (entity_id: EntityId, source_id: EntityId, destination_id: EntityId) => ({
+  op: 'entity.transfer' as const,
+  writer_group: 0,
+  entity_id,
+  source_id,
+  destination_id,
+});
 
 /** Toolbox row 20b: the engine job a timed commission's order waits for. */
 export const orderJob = (service: DefinitionRef): DefinitionRef => ({ ...service, kind: 'order' });
@@ -221,13 +222,7 @@ function settle(
       ? selected(world, escrow.items, custody, escrow.quantity, steps)
       : [world.entityIds[refString(escrow.output!)]];
   if (typeof ids === 'string') return { code: ids };
-  const moves = ids.map((entity_id) => ({
-    op: 'entity.transfer' as const,
-    writer_group: 0,
-    entity_id,
-    source_id: custody,
-    destination_id: body,
-  }));
+  const moves = ids.map((id) => move(id, custody, body));
   const start = { ops: [...paid, ...moves], position: 0, facts: {} };
   const b = commission.benefit as Extract<ServiceDefinition['benefit'], { kind: 'entitlement' }>;
   return { ops: assigned(world, p.actor_id, start, { fact: b.fact, value: false }, 'service').ops };
