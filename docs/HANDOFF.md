@@ -58,9 +58,10 @@ Done this session (8c186cca):
 
 In flight (check each first):
 1. **`loka-x6t.64`** (status `kind` buff/debuff, part 1 of `.55`): branch `toolbox/x6t-64` head 3aeeeeb2,
-   worktree `../worktrees.noindex/x6t-64`. A fresh Opus reviewer was running at the clear (record on local
-   branch `review-x6t-64`, worktree `review-x6t64` it removes). If no record: spawn a fresh reviewer (brief
-   in the issue notes). Then CI green, `bin/pm_merge.sh` into batch B.
+   worktree `../worktrees.noindex/x6t-64`. Review APPROVE WITH NOTES (record on local branch
+   `review-x6t-64`, 2726c70d; cherry-pick it). Fix round with a fresh Opus developer: the nits and PM
+   rulings in the issue notes (author debuff on gored and scar, showcase hash). Then CI green and
+   `bin/pm_merge.sh` into batch B.
 2. Batch B CI on 37a569da: check `gh run list --commit 37a569da...`.
 
 Next, in order:
@@ -71,7 +72,8 @@ Next, in order:
    lesson choice in dialogue (trap: all concealed -> no empty `choices`; validate GameView vs schema) and
    loader refusal of qualification/dialogue policies reading a hidden skill. Then re-check `loka-x6t.60`.
 3. hs-9 raze (`loka-otn4`, save: second opinion) last in batch B. Read the usage meter first (loka-stzq).
-4. Batch close: merge `main` into batch B, open the draft PR, one Fable review of the batch head, fix
+4. Batch close: bump kernel_api to 1.102 for every batch B gated feature (they reuse 1.101, which
+   main already carries; move their loader_floors cases), merge `main` into batch B, open the draft PR, one Fable review of the batch head, fix
    round (include the hs-8 nit: mechanics.md "Give pairs" says the rule does not check sight; actions.ts
    rejects a hidden recipient), ready, CI green, merge, `after_merge.sh`, close the slice issues, delete
    branches and worktrees (`toolbox/hs-*`, `review-hs-*`, `review-x6t-64`).
