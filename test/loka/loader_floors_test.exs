@@ -6,8 +6,9 @@ defmodule Loka.LoaderFloorsTest do
 
   defp compile(dir, c, at) do
     api = {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], at)}
-    edits = for [file, path, value] <- c["edits"] || [], do: {file, &edit(&1, path, value)}
-    Loka.ContentSource.compile(dir, merge(edits ++ [api]))
+    {whole, edits} = Enum.split_with(c["edits"] || [], &match?([_, [], _], &1))
+    edits = for [file, path, value] <- edits, do: {file, &edit(&1, path, value)}
+    Loka.ContentSource.compile(dir, merge(edits ++ [api]) ++ for([f, [], v] <- whole, do: {f, v}))
   end
 
   # A null value deletes the key (a case below a later sampler key's floor).

@@ -40,6 +40,7 @@ import { saturate } from '../foundation/int.ts';
 import { npcsIn } from './death/shared.ts';
 import { setBarrier } from './barrier/react.ts';
 import { moved } from './containment/react.ts';
+import { replenishStep } from './containment/job.ts';
 import { witnesses } from './senses.ts';
 import { spawn } from './population/react.ts';
 
@@ -177,6 +178,10 @@ export function sequence(
       ops.push(...moved(then, step, actor, about, group, ops, holders, emit)); // rows 41, FD5
     } else if (step.op === 'population.spawn') {
       ops.push(...spawn(then, step, group, ops, mint)); // row 37a
+    } else if (step.op === 'replenish.run') {
+      const ran = replenishStep(then, step.key, group, steps, holders); // Homestead hs-1
+      if (typeof ran === 'string') return { kind: 'fault', code: ran };
+      ops.push(...ran);
     } else if (step.op === 'experience.grant') {
       gained = saturate(gained + step.amount);
     } else {

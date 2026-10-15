@@ -39,12 +39,15 @@ const FLOORS: Record<string, number> = {
   'item.move': 77, // row 41 (decay)
   'population.spawn': 84, // row 37a (phased world events)
   'npc.move': 95, // row FD5 (loka-kgd.22)
+  'replenish.run': 101, // Homestead hs-1
 };
 
-// The definitions an item.move (row 41), population.spawn (row 37a) or npc.move (row FD5) step names.
+// The definitions an item.move (row 41), population.spawn (row 37a), npc.move (row FD5) or
+// replenish.run (Homestead hs-1) step names.
 const MOVES: Record<string, [string, string][]> = {
   'item.move': [['room', 'room']],
   'population.spawn': [['plan', 'population']],
+  'replenish.run': [['key', 'replenish']],
   'npc.move': [
     ['npc', 'npc'],
     ['room', 'room'],
@@ -69,6 +72,7 @@ export const uses = (c: Obj) =>
         'status.cure',
         'item.move',
         'population.spawn',
+        'replenish.run',
       ].includes(s.op)
         ? []
         : [

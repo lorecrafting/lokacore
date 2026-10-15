@@ -206,7 +206,7 @@ export function checkers(c: Obj, out: Diagnostic[]) {
   const named = (r: Obj, kind: string, path: string) => {
     const target = refString(r as DefinitionRef);
     const ok = r.cartridge_id === id && r.cartridge_version === version && r.kind === kind;
-    const section = kind === 'status' ? 'statuses' : `${kind}s`;
+    const section = kind === 'status' ? 'statuses' : kind === 'replenish' ? kind : `${kind}s`;
     if (!(ok && Object.hasOwn(c[section] ?? {}, target)))
       out.push(diag('UNRESOLVED_REFERENCE', path, { target }));
   };

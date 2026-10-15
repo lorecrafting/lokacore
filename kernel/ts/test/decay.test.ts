@@ -250,3 +250,20 @@ test('the loader refuses item.move below 1.77 or with an unknown room', () => {
   );
   assert.deepEqual(steps, []);
 });
+
+// Break: replenish.run ignores the item's earlier group (hs-1: the spoil move and the same-event
+// restock would write the fish in two groups: conflicting_write). `tidy` sorts after `spoil`, so
+// it sees the move.
+test('a restock rule on the spoil event moves the spoiled fish to the market at once', () => {
+  const edit = (c: any) => {
+    c.manifest.requires.kernel_api.at_least = '1.101';
+    c.reactions[`${S}reaction/tidy`] = {
+      key: 'tidy',
+      on: { event: 'status_expired', status: ref('status', 'spoiling') },
+      apply: [{ op: 'replenish.run', key: ref('replenish', 'restock') }],
+    };
+  };
+  let w = take(fresh(edit), 'fish');
+  w = wait(w, w.state.clock + 86400);
+  assert.equal(at(w, 'fish'), 'market');
+});

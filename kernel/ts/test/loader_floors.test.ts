@@ -3,9 +3,9 @@
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
 import { INSTALLED, loadCartridge } from '../src/index.ts';
@@ -50,8 +50,10 @@ test('each fixture floor: the loader accepts the floor and refuses just below it
         ...(c.edits ?? []),
         ['cartridge.json', ['requires', 'kernel_api', 'at_least'], c.floor] as const,
       ]) {
-        const json = JSON.parse(readFileSync(join(dir, file), 'utf8'));
-        set(json, path as string[], value);
+        // An empty key path writes the whole (possibly new) file.
+        const json = path.length ? JSON.parse(readFileSync(join(dir, file), 'utf8')) : value;
+        if (path.length) set(json, path as string[], value);
+        mkdirSync(dirname(join(dir, file)), { recursive: true });
         writeFileSync(join(dir, file), JSON.stringify(json));
       }
     }
