@@ -55,8 +55,8 @@ const P = 'craft_sampler@0.0.1:';
 const item = (w: World, k: string) => w.entityIds[`${P}item/${k}`]!;
 const room = (w: World, k: string) => w.roomIds[`${P}room/${k}`]!;
 const at = (w: World, k: string) => w.state.containers[item(w, k)];
-const fresh = () =>
-  newWorld(content, '6a1f3c2e-9b4d-4e7a-8c5f-2d0b1e3a4c6f' as never, [1, 2, 3, 4]);
+const fresh = (c = content) =>
+  newWorld(c, '6a1f3c2e-9b4d-4e7a-8c5f-2d0b1e3a4c6f' as never, [1, 2, 3, 4]);
 const take = (w: World, k: string) => ok(w, { type: 'take', item_id: item(w, k) });
 const holding = () => take(take(fresh(), 'stick_01'), 'stick_02');
 const carve = (w: World, i?: number) => play(w, { type: 'perform', action: 'carve_spoon' }, i);
@@ -115,8 +115,8 @@ test('a failed carve spends a stick and makes nothing; the next carve makes a sp
 });
 
 // Breaks: admission or the offer ignores the craft (an empty-handed carve is accepted, or the
-// offer shows available while step refuses), the shortage loses its reason line, or an empty
-// store keeps the reason line it does not own.
+// offer shows available while step refuses), step checks a cooldown before the shortage the offer
+// shows, the shortage loses its reason line, or an empty store keeps the reason line it does not own.
 test('no stick, or no spoon left, refuses with the same code offered', () => {
   let w = ok(ok(holding(), { type: 'perform', action: 'carve_spoon' }), {
     type: 'perform',
@@ -127,6 +127,13 @@ test('no stick, or no spoon left, refuses with the same code offered', () => {
   assert.equal(offer(w).available, false);
   assert.equal(offer(w).reason?.message?.key, 'craft.carve_spoon.needs');
   assert.ok(agrees(w, r));
+  // With a cooldown running too, step refuses the shortage the offer shows (commands/actions.ts).
+  const k = `${P}recipe/carve_spoon`;
+  const recipes = { ...content.recipes, [k]: { ...content.recipes![k]!, cooldown: 1000 } };
+  const cooled = carve(take(fresh({ ...content, recipes }), 'stick_01')).world;
+  r = carve(cooled);
+  assert.equal(code(r), 'invalid_state');
+  assert.ok(agrees(cooled, r));
   // Sticks put back in hand, store emptied: the yield refuses with no message.
   w = {
     ...w,
@@ -227,4 +234,34 @@ test('loader: a craft needs resolved, placed holders, distinct items, a catalog 
     'loaded',
   );
   for (const [edit, code, path] of cases) assert.deepEqual(load(edit), [code, at + path]);
+});
+
+// Breaks: the craft skips the carry check on the exchange (a heavier spoon for a stick exceeds the
+// limit) or hands over a stick the give rule protects.
+test('a craft the body cannot carry, or a protected stick, refuses with the same code offered', () => {
+  const heavy = (w: World, k: string) => ({ ...w.entities[item(w, k)]!, mass_grams: 200 });
+  let w = take(
+    fresh({ ...content, world: { ...content.world, carry: { max_grams: 100 } } }),
+    'stick_01',
+  );
+  w = {
+    ...w,
+    entities: {
+      ...w.entities,
+      [item(w, 'spoon_01')]: heavy(w, 'spoon_01'),
+      [item(w, 'spoon_02')]: heavy(w, 'spoon_02'),
+    },
+  };
+  let r = carve(w);
+  assert.equal(code(r), 'too_heavy');
+  assert.ok(agrees(w, r));
+  w = take(fresh(), 'stick_01');
+  const stick = item(w, 'stick_01');
+  w = {
+    ...w,
+    entities: { ...w.entities, [stick]: { ...w.entities[stick]!, give_allowed: false } },
+  };
+  r = carve(w);
+  assert.equal(code(r), 'invalid_state');
+  assert.ok(agrees(w, r));
 });
