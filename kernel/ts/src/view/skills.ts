@@ -40,7 +40,7 @@ export function skillViews(world: World, actor: CharacterId, steps = { n: 0 }) {
 }
 
 // Homestead hs-14: level only with growth, locked only with a prerequisite, and a hidden skill is
-// left out while its prerequisite fails.
+// left out while its prerequisite fails and it is not acquired.
 function skillView(
   world: World,
   actor: CharacterId,
@@ -49,13 +49,14 @@ function skillView(
   steps: { n: number },
 ) {
   const locked = s.prerequisite && !holds(world, actor, s.prerequisite.root, { steps });
-  if (s.hidden && locked) return [];
+  const st = status(world, actor, skill, steps);
+  if (s.hidden && locked && !st.acquired) return [];
   return [
     {
       skill,
       label: s.label,
       requirement: s.requirement,
-      ...status(world, actor, skill, steps),
+      ...st,
       ...(s.growth && { level: level(world, actor, skill) }),
       ...(s.prerequisite && { locked: locked! }),
       ...(s.profession && { profession: s.profession }),
@@ -71,8 +72,15 @@ function levellingView(world: World, actor: CharacterId) {
   return { levelling: { level, experience, ...(next !== undefined && { next }), unspent } };
 }
 
-/** Original free-bound lessons identify the existing actor SkillViews; no second acquisition projection. */
-export function freeLessons(world: World, npc: string) {
+/**
+ * Original free-bound lessons identify the existing actor SkillViews; no second acquisition
+ * projection. A lesson for a skill the view leaves out (hs-14) is left out too.
+ */
+export function freeLessons(world: World, npc: string, actor: CharacterId, steps = { n: 0 }) {
+  const shown = (r: DefinitionRef) => {
+    const s = world.cartridge.skills![refString(r)]!;
+    return skillView(world, actor, s, r, steps).length > 0;
+  };
   const refs = Object.values(world.cartridge.dialogues ?? {})
     .filter((d) => world.entityIds[refString(d.npc)] === npc)
     .flatMap((d) =>
@@ -81,7 +89,8 @@ export function freeLessons(world: World, npc: string) {
           ? []
           : (o.sequence ?? []).flatMap((s) => (s.op === 'skill.acquire' ? [s.skill] : [])),
       ),
-    );
+    )
+    .filter(shown);
   return refs.length ? { lessons: refs } : {};
 }
 

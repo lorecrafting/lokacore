@@ -3466,7 +3466,7 @@ Homestead hs-11 (Beads `loka-kgd.108.8`): a skill may require another skill's le
 Homestead hs-14 (Beads `loka-kgd.108.11`): GameView projects each skill's tree state so the Book draws the Character page's skill tree. Declarations: [skill prerequisite](cartridge.md#skill-prerequisite-declarations) `hidden` and `profession` (`kernel_api` 1.101).
 
 - **Command.** None new.
-- **Projection** (`skillViews` in `kernel/ts/src/view/skills.ts`): a SkillView gains `level` (only for a skill with `growth`; `level` in `kernel/ts/src/content/skill_level.ts`), `locked` (only for a skill with `prerequisite`: the prerequisite does not hold for the viewing actor, the same `holds` the hs-11 admission reads) and `profession` (the authored key). A skill with `hidden` is left out while it is `locked`. A cartridge whose skills declare none of `growth`, `prerequisite` and `profession` keeps its GameView bytes (`mobile/app/stories.test.ts`).
+- **Projection** (`skillViews` in `kernel/ts/src/view/skills.ts`): a SkillView gains `level` (only for a skill with `growth`; `level` in `kernel/ts/src/content/skill_level.ts`), `locked` (only for a skill with `prerequisite`: the prerequisite does not hold for the viewing actor, the same `holds` the hs-11 admission reads) and `profession` (the authored key). A skill with `hidden` is left out while it is `locked` and not acquired; once acquired it always shows. An NPC's `lessons` leave out a skill the view leaves out (`freeLessons`). A cartridge whose skills declare none of `growth`, `prerequisite` and `profession` keeps its GameView bytes (`mobile/app/stories.test.ts`).
 - **Load check.** A `skill_compare` in the prerequisite of a skill without `hidden` naming a skill with `hidden` is SCHEMA_VIOLATION at `skills/<key>.prerequisite` (`prerequisites` in `kernel/ts/src/content/cartridge_skills.ts`; `Loka.Content.Skills.itself/3`).
 - **Effect.** None.
 - **Realm seams** (owner decision 2026-10-13, brief checklist).
@@ -3477,8 +3477,8 @@ Homestead hs-14 (Beads `loka-kgd.108.11`): GameView projects each skill's tree s
 - **Opt-in.** A skill declares `profession` or `hidden`. Chapter 1 declares none.
 - **Book.** [Skill tree details](book-ui.md#skill-tree-details): `Professions` in `mobile/app/book/skills.tsx`, between the xp line and the Raise cards. An NPC lesson line reads `locked` (proposed, pending designer approval).
 - **Traps.** None met; trap 8 checked: `locked` reads the hs-11 gate, a skill level the actor raises, and adds no gate.
-- **Known limits.** A hidden skill whose prerequisite fails after it is learned is left out. An NPC's lessons still list a hidden skill's choice key (the Book draws no line for it).
-- **Sampler.** `cartridges/craft_sampler`: whittling under Woodcraft, carving under Handcraft, and joinery (Woodcraft, `prerequisite` carving at least 1). At start the Character page shows Handcraft with "Carving — locked" and Woodcraft with "Joinery — locked"; once carving is learned it reads "Carving, level 1 — qualified" (`kernel/ts/test/craft.test.ts`, `test/loka/content_craft_test.exs`).
+- **Known limits.** None.
+- **Sampler.** `cartridges/craft_sampler`: whittling under Woodcraft, carving under Handcraft, and joinery (Woodcraft, `prerequisite` carving at least 1). At start the Character page shows Handcraft with "Carving — locked" and Woodcraft with "Joinery — locked" and "Whittling — not learned"; once carving is learned it reads "Carving, level 1 — qualified" and Woodcraft "Joinery — not learned" and "Whittling — not learned" (`kernel/ts/test/craft.test.ts`, `test/loka/content_craft_test.exs`).
 - **Composition record** ([architecture](architecture.md#building-mechanics-by-composition)).
   - Consumer: `craft_sampler`. Later: Homestead profession trees.
   - Reads: the actor's facts through `holds` and `level`.

@@ -98,9 +98,10 @@ test('Character draws projected attributes and acquired qualification with autho
 });
 
 // Breaks (hs-14, book-ui.md "Skill tree details"): a profession box drawn among the acquired lines,
-// an unacquired unlocked box drawn, professions out of first-listed order, a level shown when not
-// projected, or an NPC lesson reading "not learned" while the box is locked.
-test('Character groups profession boxes under their title, acquired then locked', () => {
+// an unacquired box dropped or read "locked" when not locked, professions out of first-listed
+// order, a level shown when not projected, an NPC lesson reading "not learned" while the box is
+// locked, or "Nothing is known" drawn above a profession box.
+test('Character groups profession boxes under their title, acquired then not learned', () => {
   const box = (key: string, profession: string | undefined, more: object) => ({
     skill: { key },
     label: key,
@@ -127,6 +128,16 @@ test('Character groups profession boxes under their title, acquired then locked'
     'Woodcraft',
     'whittling, level 2 — qualified; whittling req',
     'joinery — unqualified; joinery req',
+    'turning — not learned; turning req',
+    'Handcraft',
+    'carving — locked; carving req',
+    'Loomcraft',
+    'weaving — not learned; weaving req',
+    'Back to World',
+  ]);
+  const locked = { skills: [box('carving', 'Handcraft', { locked: true })] };
+  assert.deepEqual(words(CharacterPage({ view: locked, text, world: () => {} } as any)), [
+    'Character',
     'Handcraft',
     'carving — locked; carving req',
     'Back to World',

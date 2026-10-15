@@ -36,10 +36,10 @@ export function SkillDetails(p: { view?: GameView; text: (key: string) => string
 }
 
 // Homestead hs-14 (book-ui.md Skill tree details): each profession in first-listed order, then its
-// acquired boxes as body text and its locked unacquired boxes as a Note.
+// acquired boxes as body text and its unacquired boxes as a Note (locked or not learned).
 export function Professions(p: { view?: GameView; text: (key: string) => string }) {
   const c = usePalette();
-  const listed = p.view?.skills?.filter((s) => s.profession && (s.acquired || s.locked)) ?? [];
+  const listed = p.view?.skills?.filter((s) => s.profession) ?? [];
   return [...new Set(listed.map((s) => s.profession!))].map((profession) => (
     <Fragment key={profession}>
       <SectionTitle>{p.text(profession)}</SectionTitle>
@@ -53,7 +53,9 @@ export function Professions(p: { view?: GameView; text: (key: string) => string 
               {s.qualified ? 'qualified' : 'unqualified'}; {p.text(s.requirement)}
             </Text>
           ) : (
-            <Note key={s.skill.key}>{`${p.text(s.label)} — locked; ${p.text(s.requirement)}`}</Note>
+            <Note key={s.skill.key}>
+              {`${p.text(s.label)} — ${s.locked ? 'locked' : 'not learned'}; ${p.text(s.requirement)}`}
+            </Note>
           ),
         )}
     </Fragment>

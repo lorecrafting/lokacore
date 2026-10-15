@@ -389,6 +389,48 @@ test('a hidden skill is left out of the view while its prerequisite fails', () =
   assert.deepEqual(keys(carve(level1).world), ['carving', 'whittling']);
 });
 
+// Breaks (hs-14 review): a learned hidden skill vanishes when its prerequisite stops holding, or an
+// NPC lists a lesson for a skill the view leaves out. Carving is hidden and needs stick_02 held.
+test('a learned hidden skill stays in the view; a lesson for a left-out skill is not listed', () => {
+  const carving = content.skills![`${P}skill/carving`]!;
+  const stick = { ...(carving.prerequisite!.root as any).skill, kind: 'item', key: 'stick_02' };
+  const root = { op: 'has_item', item: stick } as never;
+  const c = {
+    ...content,
+    skills: {
+      ...content.skills,
+      [`${P}skill/carving`]: {
+        ...carving,
+        hidden: true,
+        prerequisite: { policy_version: 1, root },
+      },
+      [`${P}skill/joinery`]: { ...content.skills![`${P}skill/joinery`]!, hidden: true },
+    },
+  };
+  const carver = (w: World) => w.entityIds[`${P}npc/old_carver`]!;
+  const seen = (w: World) => ({
+    keys: gameView(w).skills!.map((s) => s.skill.key),
+    lessons: gameView(w)
+      .entities.find((e) => e.id === carver(w))!
+      .lessons?.map((r) => r.key),
+  });
+  const w0 = fresh(c as never);
+  assert.deepEqual(seen(w0), { keys: ['whittling'], lessons: undefined });
+  const held = take(take(w0, 'stick_01'), 'stick_02');
+  assert.deepEqual(seen(held), { keys: ['carving', 'whittling'], lessons: ['carving'] });
+  const talking = ok(held, { type: 'talk', target_id: carver(held) });
+  const [continuation_id] = pending(talking, talking.character)!;
+  const learned = ok(talking, { type: 'choose', choice_id: 'learn', continuation_id });
+  const dropped = ok(learned, { type: 'drop', item_id: item(learned, 'stick_02') });
+  assert.equal(box(dropped, 'carving').locked, true);
+  assert.equal(box(dropped, 'carving').acquired, true);
+  // joinery needs carving 1, which learning gives
+  assert.deepEqual(seen(dropped), {
+    keys: ['carving', 'joinery', 'whittling'],
+    lessons: ['carving'],
+  });
+});
+
 // Breaks (hs-14; twin of content_craft_test.exs): a shown skill whose prerequisite reads a hidden
 // skill loads, a hidden skill reading a hidden one is refused, or an unknown profession text
 // loads. The floor is loader_floors.json's "a skill profession" case.
