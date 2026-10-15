@@ -146,7 +146,7 @@ test('a condition is a debuff on any harm, a buff on a gain alone, else no kind;
   const rows: [object, string | undefined][] = [
     [{ per_tick: -1 }, 'debuff'],
     [{ per_tick: 0 }, undefined],
-    [none, undefined], // no effect field, like gored or scarred
+    [none, undefined], // no effect field and no authored kind
     [{ per_tick: 1 }, 'buff'], // a plain gain, like fed
     [{ per_tick: 1, modifies: [by(2), by(-1)] }, 'debuff'],
     [{ ...none, modifies: [by(0)] }, undefined],

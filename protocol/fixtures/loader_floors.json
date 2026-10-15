@@ -325,6 +325,8 @@
       "floor": "1.58",
       "below": "1.57",
       "source": "cartridges/toolbox_showcase",
+      "feature": "a reaction's attacker filter (loka-kgd.79)",
+      "edits": [["statuses/gored.json", ["kind"], null]],
       "compiler": [
         "KERNEL_API_RANGE_INVALID",
         "cartridge.requires.kernel_api.at_least"
