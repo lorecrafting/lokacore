@@ -137,9 +137,9 @@ export function NoticePage(
   return (
     <Page title={p.screen.text(detail.title)} foot={foot(p, !!board, detail.id)}>
       <Text style={prose(c)}>{description}</Text>
-      {'asides' in detail && (
-        <Asides lines={(detail.asides ?? []).map((a) => p.screen.text(a.key))} />
-      )}
+      <Asides
+        lines={('asides' in detail ? (detail.asides ?? []) : []).map((a) => p.screen.text(a.key))}
+      />
       {'remaining' in detail && <Text style={note(c)}>Remaining: {detail.remaining}</Text>}
       {/* A read whose text is the description (the well) adds nothing the page does not show. */}
       <LogLines

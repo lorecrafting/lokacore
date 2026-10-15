@@ -43,10 +43,17 @@ test('asides show as quiet lines after the description, in projected order', asy
   const { RoomPage } = await import('./pages.tsx');
   const { NoticePage } = await import('./notices.tsx');
   const asides = [{ key: 'You know these [runes](runes).' }, { key: 'A mason marked this.' }];
+  const { Note } = await import('./lines.tsx');
+  const quiet = JSON.stringify(Note({ children: 'x' }).props.style);
+  // A Note-styled line shows as `~line`, so an aside drawn in prose style no longer matches.
   const flow = (page: any) =>
     nodes(page)
       .filter((n) => n.type === 'Text' || n.type === 'Pressable')
-      .map((n) => (n.type === 'Pressable' ? 'TAP' : words(n)));
+      .map((n) =>
+        n.type === 'Pressable'
+          ? 'TAP'
+          : (JSON.stringify(n.props.style) === quiet ? '~' : '') + words(n),
+      );
   const world = (place: object) => {
     const r = room('The hall is cold.');
     const view = { ...r.view, place: { ...r.view.place, ...place } };
@@ -57,11 +64,14 @@ test('asides show as quiet lines after the description, in projected order', asy
   const at = shown.indexOf('The hall is cold.');
   assert.deepEqual(shown.slice(at, at + 4), [
     'The hall is cold.',
-    'You know these runes.',
-    'A mason marked this.',
-    'Water roars to the north.',
+    '~You know these runes.',
+    '~A mason marked this.',
+    '~Water roars to the north.',
   ]);
-  assert.deepEqual(world({}).slice(at, at + 2), ['The hall is cold.', 'Water roars to the north.']);
+  assert.deepEqual(world({}).slice(at, at + 2), [
+    'The hall is cold.',
+    '~Water roars to the north.',
+  ]);
   const notice = (extra: object) =>
     flow(
       NoticePage({
@@ -79,9 +89,9 @@ test('asides show as quiet lines after the description, in projected order', asy
   assert.deepEqual(notice({ asides, remaining: 2 }).slice(0, 5), [
     'Door',
     'A door.',
-    'You know these runes.',
-    'A mason marked this.',
-    'Remaining: 2',
+    '~You know these runes.',
+    '~A mason marked this.',
+    '~Remaining: 2',
   ]);
-  assert.deepEqual(notice({ remaining: 2 }).slice(0, 3), ['Door', 'A door.', 'Remaining: 2']);
+  assert.deepEqual(notice({ remaining: 2 }).slice(0, 3), ['Door', 'A door.', '~Remaining: 2']);
 });
