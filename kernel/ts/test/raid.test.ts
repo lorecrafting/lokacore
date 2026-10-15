@@ -1,4 +1,4 @@
-// size: allow 580, the raid sampler (row 37a) and its delayed reactions (row FD1) share one compiled world
+// size: allow 605, the raid sampler (row 37a) and its delayed reactions (row FD1) share one compiled world
 // Toolbox row 37a on the compiled raid sampler (mechanics.md "Phased world events"): the lunar
 // cycle is 2000 units, new at 0, full at 1000; the `raid` rule spawns one `raiders` bundle (cap 2,
 // targets 0, wander every hour) at the first full-moon clock_hour while `raided` is false, and
@@ -19,6 +19,8 @@ import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { cmp } from '../src/foundation/validate.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { holds } from '../src/mechanics/policy.ts';
+
+const BUDGET = { kind: 'fault', code: 'budget_exceeded' };
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-raid-sampler-'));
 let artifact: Uint8Array;
@@ -413,6 +415,35 @@ test('FD1: a cause at 1600 inside a wait to 1800 runs at 1700, in one wait as in
   // Row 37a: one wait to 1900 fires `raid` at its end, so the stamp is 1900 and the job due 2500.
   const long = elapsed(world(), 1900, [], 100000);
   assert.deepEqual([fact(long, 'raided_at'), statuses(long)], [1900, [[2500, 'pending']]]);
+});
+
+// Breaks: a delayed run's fired `when` is not counted in the advance's query_steps (04 §5.4).
+// `link` (after 1) adds 1 to `aftershocks` below 41: from the 1600 aftershock, 40 links each read
+// `leaves` when scheduled and again when fired. 500 leaves: 40 000 steps, over 32 768 (uncounted
+// fires leave 20 000); 300 leaves: 24 000, under it.
+test('FD1: a delayed chain past the step budget in one wait faults budget_exceeded', () => {
+  const link = (leaves: number) => (c: any) => {
+    const shocks = R('fact', 'aftershocks');
+    const since = { op: 'time_since', fact: R('fact', 'raided_at'), at_least: 0 };
+    const stop = { op: 'not', item: { op: 'fact_compare', fact: shocks, equals: 41 } };
+    const items = [stop, ...Array(leaves - 1).fill(since)];
+    c.reactions['raid_sampler@0.0.1:reaction/link'] = {
+      key: 'link',
+      on: { event: 'fact_changed', fact: shocks },
+      after: 1,
+      when: { policy_version: 1, root: { op: 'all', items } },
+      apply: [{ op: 'fact.adjust', fact: shocks, amount: 1 }],
+    };
+  };
+  const wait = (w: World) => {
+    const run_id = 'cccccccc-0000-4000-8000-000000000001' as never;
+    const payload = { type: 'elapsed', actor_id: w.character, run_id, from: 1000, until: 1700 };
+    const id = elapsedCommandId(run_id, w.context, 1000, 1700) as never;
+    return stepElapsed(w, { id, world_context_id: w.context, payload } as never, 1);
+  };
+  const over = wait(elapsed(world(link(500)), 1000));
+  assert.deepEqual([over.decision, over.limit], [BUDGET, 'query_steps']);
+  assert.equal(fact(wait(elapsed(world(link(300)), 1000)).world, 'aftershocks'), 41);
 });
 
 // Breaks: the job's `when` is not re-read at its due time (a guard cannot cancel it), or a rule
