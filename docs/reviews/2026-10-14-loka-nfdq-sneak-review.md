@@ -65,3 +65,11 @@ Reachability: the only shipped concealment status is `sneak_sampler` `hidden`. I
 Findings:
 - **R1-1 Blocker.** The refusal also catches a status that an existing test makes concealing. `kernel/ts/test/status_readers.test.ts:422` and `test/loka/content_status_readers_test.exs:49` both fail at 524a49a3: `ward_sampler` `reaction/blessing` (entity_entered_room, shrine) applies `warded`, and the test gives `warded` `concealment: hidden`. Expected `loaded`; got OUTCOME_MISMATCH at `reactions["ward_sampler@0.0.1:reaction/blessing"].apply[0].op`. Hosted CI will go red. Fix: have the readers tests make a status that no entry reaction applies concealing, or narrow the refusal. Do not change the expected values.
 - **R1-2 Should-fix.** The Known limits sentence at `docs/system/mechanics.md:3039` names only the entry-reaction refusal. It does not name the other unhandled paths: a fact_changed chain, patrol or expedition events, or an entry reaction that cures a concealment. It also does not name follow-up loka-5i4c, which drops the refusal. That is the PM's stated remaining item.
+
+## Fix round 2 recheck (head `28142ab1b2d2d55bec99e275d92e1d791aca2bcc`)
+
+Verdict: **APPROVE WITH NOTES**.
+
+- R1-1: fixed. The loader rows now use `soaked`. Its only writer is `ward_sampler/reactions/drench.json`, on `spoken`, not on entry. Every test file that names `concealment` is green at this head: `kernel/ts/test/sneak.test.ts` and `status_readers.test.ts` (16 pass); `test/loka/content_status_readers_test.exs`, `content_status_test.exs`, `content_status_movement_test.exs` and `content_reactions_test.exs` (exit 0).
+- R1-2: fixed. `docs/system/mechanics.md:3039` names the fact_changed chain, the patrol and expedition events, the entry cure and loka-5i4c.
+- Developer open notes, none a blocker, all for loka-5i4c: the refusal is broader than needed; the doc says "still fault" without its condition (engaged on that move while already concealed); the engage tests build a `warded` concealment in memory that the loader would refuse; nothing pins that no entry reaction applies `soaked`. If a later entry reaction applies `soaked`, the loader rows go red loudly, not silently.
