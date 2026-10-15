@@ -99,4 +99,8 @@ test('stolen goods and wanted survive cold reopen; the fence still knows them', 
   run('sell', [npc('fence'), item('purse')], { quoted_price: 3 });
   assert.equal(story.world().state.containers[item('purse')], npc('fence'));
   p.sql.close();
+
+  ({ p, story } = reopen());
+  assert.equal(story.world().state.containers[item('purse')], npc('fence'));
+  p.sql.close();
 });
