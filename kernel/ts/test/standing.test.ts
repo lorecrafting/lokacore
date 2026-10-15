@@ -89,7 +89,7 @@ const give = (w: World, item: string, to: string) => {
   });
 };
 const greeting = (w: World) => spokenBy(w, w.character, id(w, 'npc', 'maud'))?.key;
-const bread = (w: World) => shelf(w, id(w, 'npc', 'peg'))![0].buy;
+const bread = (w: World) => shelf(w, w.character, id(w, 'npc', 'peg'))![0].buy;
 
 // Breaks: a reaction's fact.adjust writes nothing, writes the giver's body or a shared row, or a
 // stone (no authored gift) counts; Maud's warm greeting ignores her pair fact.

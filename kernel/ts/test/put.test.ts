@@ -104,7 +104,7 @@ test('Put refuses worn/nonheld, missing/non-item, inaccessible, self and descend
     },
   };
   assert.equal(run(w, { type: 'put', item_id: key, container_id: key }).decision.kind, 'fault');
-  assert.equal(putRefused(w, w.body, key, key, { n: 0 }), 'containment_cycle');
+  assert.equal(putRefused(w, w.character, w.body, key, key, { n: 0 }), 'containment_cycle');
   w = { ...w, state: { ...w.state, containers: { ...w.state.containers, [child]: key } } };
   assert.equal(run(w, { type: 'put', item_id: key, container_id: child }).decision.kind, 'fault');
 });
@@ -114,7 +114,7 @@ test('Put enumeration and pair admission obey the shared query limit with no par
   let w = unlocked();
   const item = entity(w, 'item', 'reward_key');
   const chest = entity(w, 'item', 'reward_chest');
-  assert.equal(putRefused(w, w.body, item, chest, { n: 32768 }), 'budget_exceeded');
+  assert.equal(putRefused(w, w.character, w.body, item, chest, { n: 32768 }), 'budget_exceeded');
   const entities = { ...w.entities };
   for (let i = 0; i < 33000; i++)
     entities[`bbbbbbbb-0000-4000-8000-${String(i).padStart(12, '0')}`] =
@@ -142,7 +142,10 @@ test('only authored receptacles accept Put pairs and conserved transfers', () =>
     const result = run(w, { type: 'put', item_id: cloak, container_id: destination });
     assert.deepEqual(result.decision, { kind: 'rejected', error: { code: 'invalid_target' } });
     assert.equal(result.world, before);
-    assert.equal(putRefused(w, w.body, cloak, destination, { n: 0 }), 'invalid_target');
+    assert.equal(
+      putRefused(w, w.character, w.body, cloak, destination, { n: 0 }),
+      'invalid_target',
+    );
     assert.equal(
       lists(w, w.character)
         .of('inventory', cloak)

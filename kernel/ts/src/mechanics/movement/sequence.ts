@@ -55,7 +55,7 @@ export function moveSequence(
     ...water.travel(world, actor_id, there, plan.water?.entering, mint),
     ...travel(world, actor_id, here, there),
     ...closeMovementEncounter(world, body, mint),
-    ...entrySight(world, here, there, command.id, mint, steps),
+    ...entrySight(world, actor_id, here, there, command.id, mint, steps),
   ];
   const entered = event(world, command, mint, 1, {
     type: 'entity_entered_room',

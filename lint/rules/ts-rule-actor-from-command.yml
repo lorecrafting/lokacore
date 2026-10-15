@@ -1,0 +1,12 @@
+id: ts-rule-actor-from-command
+language: tsx
+severity: error
+message: "Kernel code outside runtime/ and view/ reads the world's one character or body. Read the command's actor (bodyOf(world, actor), actorOf(world, body)); docs/decisions/owner-decision-realm-seams-2026-10-13.md rule 1. Existing reads carry `// ast-grep-ignore: ts-rule-actor-from-command` until RS-2 removes them."
+files: [kernel/ts/src/**]
+ignores: [kernel/ts/src/runtime/**, kernel/ts/src/view/**]
+# ponytail: matches the World aliases on main (world, w, visit) by name; a new alias evades it. Widen the regex when RS-2 lands.
+rule:
+  kind: member_expression
+  all:
+    - has: { field: property, regex: ^(character|body)$ }
+    - has: { field: object, kind: identifier, regex: ^(world|w|visit)$ }

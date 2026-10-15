@@ -1,0 +1,29 @@
+{
+  "on": {
+    "event": "entity_entered_room",
+    "room": "village"
+  },
+  "when": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": [
+        {
+          "op": "fact_compare",
+          "fact": "raided",
+          "equals": true
+        },
+        {
+          "op": "npc_present",
+          "npc": "defender"
+        }
+      ]
+    }
+  },
+  "apply": [
+    {
+      "op": "quest.activate",
+      "quest": "hold_the_gate"
+    }
+  ]
+}

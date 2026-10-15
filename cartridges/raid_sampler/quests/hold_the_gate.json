@@ -1,0 +1,25 @@
+{
+  "title": "quest.hold_the_gate.title",
+  "objective": {
+    "evidence": "current_state",
+    "policy": {
+      "policy_version": 1,
+      "root": {
+        "op": "fact_compare",
+        "fact": "raided",
+        "equals": false
+      }
+    }
+  },
+  "journal": {
+    "active": "quest.hold_the_gate.active",
+    "objectives_met": "quest.hold_the_gate.ready",
+    "resolved": "quest.hold_the_gate.resolved",
+    "failed": "quest.hold_the_gate.failed",
+    "abandoned": "quest.hold_the_gate.failed",
+    "outcomes": {
+      "held": "quest.hold_the_gate.held",
+      "fallen": "quest.hold_the_gate.fallen"
+    }
+  }
+}

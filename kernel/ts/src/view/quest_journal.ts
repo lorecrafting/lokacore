@@ -1,5 +1,5 @@
 // Current chapter and player quest journal projections.
-import type { ChapterView, QuestJournal, QuestView, Key } from '../contracts.gen.ts';
+import type { CharacterId, ChapterView, QuestJournal, QuestView, Key } from '../contracts.gen.ts';
 import { refString, type QuestRow, type World, type Steps } from '../runtime/decision.ts';
 import * as patrol from '../mechanics/patrol/shared.ts';
 import { definition } from '../mechanics/dialogue/shared.ts';
@@ -9,7 +9,7 @@ import { holds } from '../mechanics/policy.ts';
 import { holdsNow } from '../mechanics/quest/lifecycle.ts';
 import { cmp } from '../foundation/validate.ts';
 
-export function chapter(world: World): ChapterView | undefined {
+export function chapter(world: World, actor: CharacterId): ChapterView | undefined {
   const chapters = world.cartridge.chapters;
   if (!chapters) return;
   let index = 0;
@@ -27,10 +27,10 @@ export function chapter(world: World): ChapterView | undefined {
             kind: 'fact' as const,
             key: `story_point_${c.story_point!.key}` as Key,
           };
-          return value(world, world.character, marker) === outcome;
+          return value(world, actor, marker) === outcome;
         }
         const d = definition(world, t.dialogue);
-        const q = questOf(world, world.character, d.quest!)?.[1];
+        const q = questOf(world, actor, d.quest!)?.[1];
         return q?.state === 'resolved' && q.outcome === t.choice;
       })
     )
@@ -39,9 +39,9 @@ export function chapter(world: World): ChapterView | undefined {
   return { index, title: chapters[index]!.title };
 }
 
-export function journal(world: World, steps: Steps): QuestView[] {
+export function journal(world: World, actor: CharacterId, steps: Steps): QuestView[] {
   return Object.entries(world.state.quests ?? {})
-    .filter(([, { scope: s }]) => s.kind === 'player' && s.character_id === world.character)
+    .filter(([, { scope: s }]) => s.kind === 'player' && s.character_id === actor)
     .map(([id, q]) => {
       const progress = { ...patrolProgress(world, id, steps), ...remaining(world, id, q) };
       const expedition = expeditionProgress(world, id);
@@ -51,15 +51,12 @@ export function journal(world: World, steps: Steps): QuestView[] {
       if (!j) return shown;
       const variant =
         q.state === 'active'
-          ? j.active_variants?.find((v) => holds(world, world.character, v.when.root))?.text
+          ? j.active_variants?.find((v) => holds(world, actor, v.when.root))?.text
           : undefined;
       const failed = expedition.expedition?.status === 'failed';
       const met =
         q.state === 'objectives_complete' ||
-        (q.state === 'active' &&
-          !failed &&
-          !variant &&
-          holdsNow(world, world.character, q.quest, { n: 0 }));
+        (q.state === 'active' && !failed && !variant && holdsNow(world, actor, q.quest, { n: 0 }));
       const journal = failed
         ? j.failed
         : met

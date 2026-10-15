@@ -3,6 +3,7 @@
 import { capped, validOverrideRow } from '../foundation/resource.ts';
 import { current, key, same } from '../foundation/compose.ts';
 import type {
+  CharacterId,
   DefinitionRef,
   DeltaOp,
   EntityId,
@@ -11,7 +12,7 @@ import type {
   RecipeCost,
   ResourceRegen,
 } from '../contracts.gen.ts';
-import type { World } from '../runtime/decision.ts';
+import { actorOf, admitted, type World } from '../runtime/decision.ts';
 import { add, saturate } from '../foundation/int.ts';
 import { fact, positionOf } from './position/shared.ts';
 import { cmp } from '../foundation/validate.ts';
@@ -30,16 +31,18 @@ export const resourceRef = (world: World, k: string): DefinitionRef => ({
 });
 
 /**
- * The player body's pool maxima moved by the derived hp_max table (mechanics.md resource@1), by
- * canonical resource target; composition reads the same map (runtime/apply.ts base).
+ * A character body's pool maxima moved by the derived hp_max table (mechanics.md resource@1), by
+ * canonical resource target ({} for any other body); composition reads the same map (runtime/apply.ts base).
  */
-export function maxima(world: World): Readonly<Record<string, number>> {
+export function maxima(world: World, body: EntityId): Readonly<Record<string, number>> {
   const table = world.cartridge.world?.derived?.hp_max;
+  const actor = actorOf(world, body);
+  if (!table || !actor) return {}; // cheap bail first: resourceSpec calls this for every entity
   const hp = resourceRef(world, 'hp');
-  const at = key({ kind: 'resource', resource: hp, entity_id: world.body });
+  const at = key({ kind: 'resource', resource: hp, entity_id: body });
   const spec = world.resourceSpecs[key(hp)];
-  if (!table || !spec || world.entityResourceSpecs[at]) return {};
-  const maximum = saturate(spec.maximum + derived(world, world.character, table));
+  if (!spec || world.entityResourceSpecs[at]) return {};
+  const maximum = saturate(spec.maximum + derived(world, actor, table));
   return { [at]: Math.max(spec.minimum, maximum) };
 }
 
@@ -49,15 +52,17 @@ export function maxima(world: World): Readonly<Record<string, number>> {
  * regeneration (resource@1).
  */
 export const settleMaxima = (world: World) =>
-  Object.keys(maxima(world)).length
-    ? [adjust(world, world.body, resourceRef(world, 'hp'), 0, {}).op]
-    : [];
+  admitted(world).flatMap(([, body]) =>
+    Object.keys(maxima(world, body)).length
+      ? [adjust(world, body, resourceRef(world, 'hp'), 0, {}).op]
+      : [],
+  );
 
 /** Effective definition for this exact resource target, falling back to the pool. */
 export function resourceSpec(world: World, entity: EntityId, resource: DefinitionRef) {
   const at = key({ kind: 'resource', resource, entity_id: entity });
   const spec = world.entityResourceSpecs[at] ?? world.resourceSpecs[key(resource)];
-  const maximum = entity === world.body && spec ? maxima(world)[at] : undefined;
+  const maximum = spec ? maxima(world, entity)[at] : undefined;
   return maximum === undefined ? spec : { ...spec, maximum };
 }
 
@@ -181,17 +186,27 @@ export function recoveryAdjustments(
 }
 
 /** Final RPG agreement: only touched opted player pools, or all when position is written. */
-export function recoveryFault(world: World, ops?: readonly DeltaOp[]): MutationTarget | undefined {
+export const recoveryFault = (world: World, ops?: readonly DeltaOp[]) =>
+  admitted(world)
+    .map(([actor, body]) => bodyFault(world, actor, body, ops))
+    .find(Boolean);
+
+function bodyFault(
+  world: World,
+  actor: CharacterId,
+  body: EntityId,
+  ops?: readonly DeltaOp[],
+): MutationTarget | undefined {
   const positionWritten = ops?.some(
     (o) =>
       o.op === 'fact.assign' &&
       same(o.fact, fact(world)) &&
       o.scope.kind === 'player' &&
-      o.scope.character_id === world.character,
+      o.scope.character_id === actor,
   );
   const touched = new Set(
     ops?.flatMap((o) =>
-      o.op === 'resource.adjust' && o.entity_id === world.body ? [key(o.resource)] : [],
+      o.op === 'resource.adjust' && o.entity_id === body ? [key(o.resource)] : [],
     ),
   );
   if (ops && !positionWritten && touched.size === 0) return undefined;
@@ -201,10 +216,10 @@ export function recoveryFault(world: World, ops?: readonly DeltaOp[]): MutationT
     if (!spec.regen) continue;
     const resource = resourceRef(world, spec.key);
     if (ops && !positionWritten && !touched.has(key(resource))) continue;
-    const target: MutationTarget = { kind: 'resource', resource, entity_id: world.body };
+    const target: MutationTarget = { kind: 'resource', resource, entity_id: body };
     const row = world.state.resources?.[key(target)];
-    const value = level(world, world.body, resource);
-    const position = positionOf(world, world.character);
+    const value = level(world, body, resource);
+    const position = positionOf(world, actor);
     const rate =
       typeof position === 'string'
         ? spec.regen.by_position[position as keyof typeof spec.regen.by_position]

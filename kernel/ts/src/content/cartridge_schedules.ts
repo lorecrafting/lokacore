@@ -3,6 +3,7 @@
 // `walks` on a case or a population plan (toolbox row W26) needs 1.81. Twin of
 // lib/loka/content/schedules.ex.
 import type { Diagnostic } from '../contracts.gen.ts';
+import { refString } from '../runtime/decision.ts';
 import { checkers, diag, step, type Obj } from './cartridge_refs.ts';
 import { apiCmp } from './cartridge_installed.ts';
 
@@ -16,6 +17,16 @@ export const cases = (c: Obj): [Obj, string][] =>
       ]),
     ),
   );
+
+// Realm seam 5: a job has no player, so a case `when` names no fact with player scope.
+function playerFacts(c: Obj, v: unknown, at: string, out: Diagnostic[]): void {
+  if (!v || typeof v !== 'object') return;
+  const o = v as Obj;
+  if (o.op === 'fact_compare' && c.facts?.[refString(o.fact)]?.scopes?.includes('player'))
+    out.push(diag('FACT_SCOPE_UNSUPPORTED', `${at}.fact`));
+  for (const [k, x] of Object.entries(o))
+    playerFacts(c, x, Array.isArray(o) ? `${at}[${k}]` : `${at}${step(k)}`, out);
+}
 
 export function schedules(c: Obj): Diagnostic[] {
   const out: Diagnostic[] = [];
@@ -32,6 +43,7 @@ export function schedules(c: Obj): Diagnostic[] {
   for (const [k, at] of all) {
     named(k.room, 'room', `${at}.room`);
     text(k, ['goal'], at);
+    playerFacts(c, k.when, `${at}.when`, out);
   }
   const api = c.manifest.requires.kernel_api.at_least;
   const walks =

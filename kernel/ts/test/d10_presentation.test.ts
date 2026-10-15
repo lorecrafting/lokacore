@@ -85,7 +85,7 @@ test('Map joins actor-owned visited rooms and only links with two visited endpoi
       },
     },
   };
-  const map = knowledgeView(world).map!;
+  const map = knowledgeView(world, world.character).map!;
   assert.deepEqual(
     map.rooms.map(({ id, x, y, z }) => ({ id, x, y, z })).sort((a, b) => a.y - b.y),
     [

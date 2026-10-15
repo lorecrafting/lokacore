@@ -1,5 +1,11 @@
 // Bed-local projection; eligibility is shared with direct invocation and never runs a decision.
-import type { AdvertisedAction, CommandPayload, DreamView, Key } from '../contracts.gen.ts';
+import type {
+  AdvertisedAction,
+  CharacterId,
+  CommandPayload,
+  DreamView,
+  Key,
+} from '../contracts.gen.ts';
 import { refusal, resolved, type Offered } from '../commands/actions.ts';
 import { KernelError } from '../foundation/error.ts';
 import { refString, type World, type Steps } from '../runtime/decision.ts';
@@ -19,6 +25,7 @@ import {
 
 export function dreamView(
   world: World,
+  actor: CharacterId,
   detail: World['details'][string],
   steps: Steps,
 ): DreamView | undefined {
@@ -29,13 +36,13 @@ export function dreamView(
       s.on.rest.detail === detail.key,
   );
   if (!scene) return;
-  const index = value(world, world.character, fact(world, scene));
+  const index = value(world, actor, fact(world, scene));
   if (typeof index !== 'number' || index === 0) return;
-  const shown = line(world, world.character, scene, index);
+  const shown = line(world, actor, scene, index);
   if (!shown) throw new KernelError('precondition_failed');
-  const code = safe(world, world.character, scene, steps);
+  const code = safe(world, actor, scene, steps);
   if (code === 'budget_exceeded') throw new KernelError(code);
-  const row = choice(world, world.character, scene)?.[1];
+  const row = choice(world, actor, scene)?.[1];
   const view = {
     scene: reference(world, scene),
     title: scene.title,
@@ -48,30 +55,30 @@ export function dreamView(
     ...(code && { reason: { code } }),
   };
   if (code || index < 0) return view;
-  return { ...view, ...controls(world, scene, index, steps) };
+  return { ...view, ...controls(world, actor, scene, index, steps) };
 }
 
-function controls(world: World, scene: Dream, index: number, steps: Steps) {
-  const set = Object.values(resolved(world, world.character));
+function controls(world: World, actor: CharacterId, scene: Dream, index: number, steps: Steps) {
+  const set = Object.values(resolved(world, actor));
   if (index !== 4) {
     const action = set.find((a) => a.command === 'continue');
     if (!action) return {};
     const p = {
       type: 'continue',
-      actor_id: world.character,
+      actor_id: actor,
       scene: reference(world, scene),
       line: index,
     } as const;
     return { action: offered(world, action, p, steps) };
   }
-  return choices(world, scene, set, steps);
+  return choices(world, actor, scene, set, steps);
 }
 
-function choices(world: World, scene: Dream, set: Offered[], steps: Steps) {
-  const selected = choice(world, world.character, scene),
+function choices(world: World, actor: CharacterId, scene: Dream, set: Offered[], steps: Steps) {
+  const selected = choice(world, actor, scene),
     action = set.find((a) => a.command === 'choose' && a.input.includes('dream'));
   if (!selected || !action) return {};
-  const current = draw(world, world.character, scene, selected[1]);
+  const current = draw(world, actor, scene, selected[1]);
   return {
     choice: {
       continuation_id: selected[0],
@@ -80,7 +87,7 @@ function choices(world: World, scene: Dream, set: Offered[], steps: Steps) {
       choices: options(scene)!.choices.map((option) => {
         const p = {
           type: 'choose',
-          actor_id: world.character,
+          actor_id: actor,
           continuation_id: selected[0],
           choice_id: option.choice_id,
           dream: current,

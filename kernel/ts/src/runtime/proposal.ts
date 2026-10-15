@@ -90,7 +90,7 @@ export function propose(
     join(p, root.delta.ops, root.events, base, 0, mint) ?? react(p) ?? jobs(p, root) ?? farewell(p);
   if (failed) return { decision: failed, ...(p.limit && { limit: p.limit }) };
   const ops = oneWrite(p.ops);
-  p.narration.push(...levelUp(world, ops));
+  p.narration.push(...levelUp(world, command.payload.actor_id, ops));
   return {
     decision: {
       ...root,

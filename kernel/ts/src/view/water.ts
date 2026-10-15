@@ -1,11 +1,11 @@
-import type { GameView, EntityId, Key, CorpseRecoveryView } from '../contracts.gen.ts';
+import type { CharacterId, GameView, EntityId, Key, CorpseRecoveryView } from '../contracts.gen.ts';
 import { refString, type World, type Steps } from '../runtime/decision.ts';
 import { recovery } from '../mechanics/containment/recovery.ts';
 import { refusal } from '../commands/actions.ts';
 import { LIMITS } from '../contracts.gen.ts';
 import { KernelError } from '../foundation/error.ts';
 
-function corpseViews(world: World, steps: Steps): CorpseRecoveryView[] {
+function corpseViews(world: World, actor: CharacterId, steps: Steps): CorpseRecoveryView[] {
   const corpse_recovery: CorpseRecoveryView[] = [];
   // Empty corpse history needs only one holder scan; shared admission still validates each offer.
   const nonempty = new Set<string>();
@@ -17,12 +17,12 @@ function corpseViews(world: World, steps: Steps): CorpseRecoveryView[] {
     if (++steps.n > LIMITS.query_steps) throw new KernelError('budget_exceeded');
     if (!nonempty.has(id)) continue;
     const corpse_id = id as EntityId;
-    const plan = recovery(world, world.character, corpse_id, steps);
+    const plan = recovery(world, actor, corpse_id, steps);
     if (
       typeof plan === 'string' ||
       refusal(
         world,
-        { type: 'recover_corpse', actor_id: world.character, corpse_id },
+        { type: 'recover_corpse', actor_id: actor, corpse_id },
         steps,
         'recover_corpse' as Key,
       )
@@ -40,11 +40,12 @@ function corpseViews(world: World, steps: Steps): CorpseRecoveryView[] {
 
 export function waterViews(
   world: World,
+  actor: CharacterId,
   steps: Steps,
 ): Pick<GameView, 'water' | 'corpse_recovery'> {
   if (!world.cartridge.world?.water) return {};
-  const current = world.state.water?.[world.character],
-    corpse_recovery = corpseViews(world, steps);
+  const current = world.state.water?.[actor],
+    corpse_recovery = corpseViews(world, actor, steps);
   return {
     ...(current?.deadline !== null &&
       current?.deadline !== undefined && {

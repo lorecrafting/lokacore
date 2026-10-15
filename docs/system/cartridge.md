@@ -120,12 +120,14 @@ loader validate each policy/reference/text and require API1.9 for this field or 
 riddle. Riddle choice references and bank multiplicity are checked before loading.
 
 Reaction authoring accepts exact `on: quest_resolved {quest, outcome}` and
-`apply: quest.activate {quest}` only under that trigger. Both quest references expand from
+`apply: quest.activate {quest}`, which (Beads `loka-kgd.150.2`) both kernels admit only under
+`quest_resolved`, `rested` or `entity_entered_room`, the triggers whose subject can be a character
+(OUTCOME_MISMATCH at the step's `op` elsewhere); an NPC entrant activates nothing. Both quest references expand from
 source short keys, resolve to local quest definitions, and require the quest event owner in
 the capability lock. These trigger/consequence forms require kernel API at least 1.8.
 Existing fact/room triggers retain their semantics.
-From API1.12, fact_changed reactions may apply typed `quest.resolve {quest, outcome}`
-and `quest.fail {quest, outcome}`. Both require a local quest reference and quest capability;
+From API1.12, reactions may apply typed `quest.resolve {quest, outcome}`
+and `quest.fail {quest, outcome}`, since `loka-kgd.150.2` on any trigger (for each holder). Both require a local quest reference and quest capability;
 resolve emits the quest-owned `quest_resolved` event. A scene may start on exact
 `quest_resolved {quest, outcome}` instead of a story point, with the same actor/instance
 evidence check as reaction delivery. The compiler expands these short quest references.
@@ -1899,7 +1901,7 @@ A recipe may declare `tip`, a catalog key (`UNRESOLVED_REFERENCE` at `recipes/<k
 
 ## Conditional schedule declarations
 
-[Conditional schedules](mechanics.md#conditional-schedules-toolbox-row-w10): in source, a `daily_schedule` hour may be a list `[case, ..., room]` of 1 to 8 cases `{when, room, goal?}` (`when` a versioned policy, `room` and its leaves' references short keys, `goal` a catalog key) ending in a short room key, the fallback. The compiler (`lib/loka/content/schedules.ex`; expansion in `npc_fields.ex`, conditions and goal texts in `entities.ex`) refuses a fallback that is not last or a case after it (SCHEMA_VIOLATION `invalid_value` at `npcs/<key>.daily_schedule.<hour>`), an unresolved room (UNRESOLVED_REFERENCE at `<hour>[<i>].room`, or `<hour>[<i>]` for the fallback), goal text or leaf reference, and a list below `kernel_api` **1.47** (KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least`); it emits the hour's fallback in `daily_schedule` and its cases in `schedule_cases`, which source may not author. The loader (`kernel/ts/src/content/cartridge_schedules.ts`) checks the artifact's `schedule_cases`: each hour one the `daily_schedule` lists (SCHEMA_VIOLATION `invalid_value`), rooms, goal texts, condition references and owners, and the 1.47 floor. A case's `when` reads with the player as the actor and the NPC as the target, so actor-relative leaves (`npc_present`, `target_present`, `has_tag {subject: "room"}`, `light_off`) read the player's room and light, usually elsewhere, not the NPC's: `npc_present child` reads "the child is with the player", not "the child is home"; use a fact for the NPC's situation. No diagnostic warns. Sampler: `cartridges/schedule_sampler`.
+[Conditional schedules](mechanics.md#conditional-schedules-toolbox-row-w10): in source, a `daily_schedule` hour may be a list `[case, ..., room]` of 1 to 8 cases `{when, room, goal?}` (`when` a versioned policy, `room` and its leaves' references short keys, `goal` a catalog key) ending in a short room key, the fallback. The compiler (`lib/loka/content/schedules.ex`; expansion in `npc_fields.ex`, conditions and goal texts in `entities.ex`) refuses a fallback that is not last or a case after it (SCHEMA_VIOLATION `invalid_value` at `npcs/<key>.daily_schedule.<hour>`), an unresolved room (UNRESOLVED_REFERENCE at `<hour>[<i>].room`, or `<hour>[<i>]` for the fallback), goal text or leaf reference, and a list below `kernel_api` **1.47** (KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least`); it emits the hour's fallback in `daily_schedule` and its cases in `schedule_cases`, which source may not author. The loader (`kernel/ts/src/content/cartridge_schedules.ts`) checks the artifact's `schedule_cases`: each hour one the `daily_schedule` lists (SCHEMA_VIOLATION `invalid_value`), rooms, goal texts, condition references and owners, and the 1.47 floor. A case's `when` reads with the player as the actor and the NPC as the target, so actor-relative leaves (`npc_present`, `target_present`, `has_tag {subject: "room"}`, `light_off`) read the player's room and light, usually elsewhere, not the NPC's: `npc_present child` reads "the child is with the player", not "the child is home"; use a fact for the NPC's situation. The loader and the compiler refuse a `fact_compare` in a case `when` that names a fact with `player` scope (FACT_SCOPE_UNSUPPORTED at `<case>.when…fact`; the compiler at `npcs/<key>.daily_schedule.<hour>[<i>].when…fact`), as a schedule is world state with no player. No other leaf is refused. Sampler: `cartridges/schedule_sampler`.
 
 ## Standing and disposition declarations
 

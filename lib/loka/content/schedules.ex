@@ -8,7 +8,7 @@ defmodule Loka.Content.Schedules do
   kernel/ts/src/content/cartridge_schedules.ts.
   """
   import Loka.Content.Source, only: [at: 2, diag: 3]
-  import Loka.Content.Refs, only: [reference: 6]
+  import Loka.Content.Refs, only: [reference: 6, resolve: 4]
 
   # A missing or schema-invalid manifest (nil) has its own diagnostics.
   def check(nil, _), do: []
@@ -28,8 +28,44 @@ defmodule Loka.Content.Schedules do
         do: {rel, h, c}
   end
 
-  defp hour({_, _, c} = list, md) when is_list(c), do: order(list) ++ rooms(list, md)
-  defp hour({rel, h, c}, md), do: room(rel, h, c, md)
+  defp hour({rel, h, c} = list, md) when is_list(c) do
+    own =
+      for {k, i} <- Enum.with_index(c),
+          is_map(k),
+          d <- no_player(rel, ["daily_schedule", h, i], k, md),
+          do: d
+
+    order(list) ++ rooms(list, md) ++ own
+  end
+
+  defp hour({rel, h, c}, md),
+    do: room(rel, h, c, md) ++ no_player(rel, ["daily_schedule", h], c, md)
+
+  # Realm seam 5: a job has no player, so a case `when` names no fact with player scope.
+  defp no_player(rel, steps, c, md), do: walk(rel, steps ++ ["when"], c["when"], md)
+
+  defp walk(rel, steps, %{"op" => "fact_compare"} = v, {m, defs} = md) do
+    here =
+      case resolve(v["fact"], "fact", m, defs) do
+        {_, _, %{"scopes" => s}} ->
+          if "player" in s,
+            do: [diag("FACT_SCOPE_UNSUPPORTED", at(rel, steps ++ ["fact"]), %{})],
+            else: []
+
+        _ ->
+          []
+      end
+
+    here ++ Enum.flat_map(v, fn {k, x} -> walk(rel, steps ++ [k], x, md) end)
+  end
+
+  defp walk(rel, steps, v, md) when is_map(v),
+    do: Enum.flat_map(v, fn {k, x} -> walk(rel, steps ++ [k], x, md) end)
+
+  defp walk(rel, steps, v, md) when is_list(v),
+    do: v |> Enum.with_index() |> Enum.flat_map(fn {x, i} -> walk(rel, steps ++ [i], x, md) end)
+
+  defp walk(_, _, _, _), do: []
 
   defp floor(false, _, _), do: []
 

@@ -1,7 +1,7 @@
 import type { DefinitionRef, PopulationSlot } from '../../contracts.gen.ts';
 import { validate } from '../../foundation/validate.ts';
 import { key, same } from '../../foundation/compose.ts';
-import { refString, type JobRow, type World } from '../../runtime/decision.ts';
+import { bodyOf, refString, type JobRow, type World } from '../../runtime/decision.ts';
 import { planRef } from './refs.ts';
 
 /** Cold-load the current sight bindings without trusting a job row on its own. */
@@ -88,7 +88,7 @@ function sightJobValid(world: World, id: string, job: JobRow): boolean {
       due_time: job.due_time,
       sight,
     }).length &&
-    sight.player_id === world.character &&
+    bodyOf(world, sight.player_id) !== undefined &&
     sight.generation >= 1 &&
     sight.seen_at + spec.plan.sight.delay === job.due_time &&
     origin?.kind === 'spawned' &&

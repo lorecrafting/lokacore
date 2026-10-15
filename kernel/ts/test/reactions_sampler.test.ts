@@ -9,8 +9,8 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
 import { gameView, INSTALLED, loadCartridge, newWorld, step } from '../src/index.ts';
-import type { Cartridge, World } from '../src/runtime/decision.ts';
-import { triggered } from '../src/mechanics/reaction.ts';
+import { allocator, type Cartridge, type World } from '../src/runtime/decision.ts';
+import { sequence, triggered } from '../src/mechanics/reaction.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-reactions-sampler-'));
 let artifact: Uint8Array;
@@ -115,4 +115,82 @@ test('a victim filter skips a death without a victim definition', () => {
     }) as never;
   assert.deepEqual(triggered(w, died({})), []);
   assert.equal(triggered(w, died({ victim_definition: hound })).length, 1);
+});
+
+// loka-kgd.150.2: a delivery runs for the subject's character, else the event's own actor_id,
+// never the root command's actor. Breaks: entity_died's subject mapped to 'doer', or the root
+// actor kept as the delivery's actor.
+test('an entity_died delivery runs for the victim player, else for the doer', () => {
+  const c = structuredClone(content) as any;
+  c.facts[`${R}:fact/crow_drawn`].scopes = ['player'];
+  const fact = { cartridge_id: 'reactions_sampler', cartridge_version: '0.0.1', kind: 'fact' };
+  const rule = {
+    key: 'mourn',
+    on: { event: 'entity_died' },
+    apply: [{ op: 'fact.assign', fact: { ...fact, key: 'crow_drawn' }, value: true }],
+  } as never;
+  const w = fresh(c);
+  const actorFor = (victim_id: unknown) => {
+    const cause = {
+      id: 'dddddddd-4444-4333-8444-000000000001',
+      actor_id: 'char:other',
+      logical_time: 0,
+      payload: { type: 'entity_died', victim_id, room_id: w.body, cause: 'x' },
+    } as never;
+    const d = sequence(w, w.character, rule, cause, 1, { n: 0 }, allocator(w, cause));
+    assert.equal(d?.kind, 'accepted', JSON.stringify(d));
+    return (d as any).delta.ops[0].scope.character_id;
+  };
+  assert.equal(actorFor(w.body), w.character);
+  assert.equal(actorFor(item(w, 'bone')), 'char:other');
+});
+
+// loka-kgd.150.2 (PM 2026-10-14): a trigger naming a character ends only that character's quest; a
+// world trigger ends every holder's. Breaks: a character's trigger ends other characters' quests.
+test('quest.fail ends the trigger character instance only; a world trigger ends every holder', () => {
+  const quest = {
+    cartridge_id: R.split('@')[0],
+    cartridge_version: '0.0.1',
+    kind: 'quest',
+    key: 'q',
+  };
+  const rule = {
+    key: 'lose',
+    on: { event: 'rested' },
+    apply: [{ op: 'quest.fail', quest, outcome: 'lost' }],
+  };
+  const base = fresh();
+  const row = (character_id: string) => ({
+    quest,
+    scope: { kind: 'player', character_id },
+    state: 'active',
+  });
+  // The body is char:other's here, so a trigger about it names char:other.
+  const w = {
+    ...base,
+    character: 'char:other',
+    state: { ...base.state, quests: { a: row(base.character), b: row('char:other') } },
+  } as unknown as World;
+  const failed = (payload: object, by: object = { actor_id: 'char:other' }) => {
+    const cause = {
+      id: 'dddddddd-4444-4333-8444-000000000002',
+      logical_time: 0,
+      payload,
+      ...by,
+    } as never;
+    const d = sequence(w, w.character, rule as never, cause, 1, { n: 0 }, allocator(w, cause));
+    assert.equal(d?.kind, 'accepted', JSON.stringify(d));
+    return (d as any).delta.ops.map((op: any) => [op.instance_id, op.to]);
+  };
+  assert.deepEqual(failed({ type: 'rested', body_id: w.body, room_id: w.body }), [['b', 'failed']]);
+  assert.deepEqual(failed({ type: 'check_failed', check: 'x' }), [['b', 'failed']]); // the doer's
+  const scope = { kind: 'player', character_id: 'char:other' }; // a player fact names its owner
+  assert.deepEqual(failed({ type: 'fact_changed', fact: quest }, { scope }), [['b', 'failed']]);
+  assert.deepEqual(
+    failed({ type: 'entity_died', victim_id: item(w, 'bone'), room_id: w.body, cause: 'x' }),
+    [
+      ['a', 'failed'],
+      ['b', 'failed'],
+    ],
+  );
 });

@@ -124,20 +124,23 @@ defmodule Loka.Content.Reactions do
   defp consequence(rel, {%{"op" => "quest.activate"} = s, i}, on, ctx) do
     path = at(rel, ["apply", i, "op"])
 
+    # loka-kgd.150.2: only a trigger whose subject resolves to a character activates.
     restricted =
-      if on["event"] == "quest_resolved", do: [], else: [diag("OUTCOME_MISMATCH", path)]
+      if on["event"] in ["quest_resolved", "rested", "entity_entered_room"],
+        do: [],
+        else: [diag("OUTCOME_MISMATCH", path)]
 
     restricted ++
       owned(path, "quest_activated", ctx.events) ++
       reference(rel, ["apply", i], "quest", s, ctx.m, ctx.defs)
   end
 
-  defp consequence(rel, {%{"op" => op} = s, i}, on, ctx)
+  defp consequence(rel, {%{"op" => op} = s, i}, _on, ctx)
        when op in ["quest.resolve", "quest.fail"] do
+    # Legal on any trigger; the kernel acts per holder (loka-kgd.150.2).
     path = at(rel, ["apply", i, "op"])
-    restricted = if on["event"] == "fact_changed", do: [], else: [diag("OUTCOME_MISMATCH", path)]
     event = if op == "quest.resolve", do: owned(path, "quest_resolved", ctx.events), else: []
-    restricted ++ event ++ reference(rel, ["apply", i], "quest", s, ctx.m, ctx.defs)
+    event ++ reference(rel, ["apply", i], "quest", s, ctx.m, ctx.defs)
   end
 
   defp consequence(rel, {%{"op" => "population.suppress"} = s, i}, on, ctx) do

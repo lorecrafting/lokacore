@@ -1,4 +1,4 @@
-import type { BandTable, Key, ResourceView } from '../contracts.gen.ts';
+import type { BandTable, EntityId, Key, ResourceView } from '../contracts.gen.ts';
 import { refString, type World } from '../runtime/decision.ts';
 import { level, resourceRef, resourceSpec } from '../mechanics/resource.ts';
 import { cmp } from '../foundation/validate.ts';
@@ -25,7 +25,8 @@ const BANDS: BandTable = (
 // The body's resources at the clock (mechanics/resource.ts level), in DefinitionRefString order, each with
 // the first band of its table whose cut p reaches, compared in integers (p measured from the
 // minimum; maximum = minimum gives the top row; 32-bit ResourceInts keep every product exact).
-export function resources(world: World): ResourceView[] {
+export function resources(world: World, body: EntityId | undefined): ResourceView[] {
+  if (!body) return [];
   return Object.values(world.resourceSpecs)
     .filter(
       (s) =>
@@ -35,8 +36,8 @@ export function resources(world: World): ResourceView[] {
     )
     .map(({ key: k, bands }) => {
       const resource = resourceRef(world, k);
-      const { minimum, maximum } = resourceSpec(world, world.body, resource);
-      const current = level(world, world.body, resource)!;
+      const { minimum, maximum } = resourceSpec(world, body, resource);
+      const current = level(world, body, resource)!;
       const { key: band, tone } = (bands ?? world.cartridge.world?.bands ?? BANDS).find(
         (b) => 100 * (current - minimum) >= b.at_percent * (maximum - minimum),
       )!;
@@ -46,8 +47,9 @@ export function resources(world: World): ResourceView[] {
 }
 
 // Active statuses on the body (toolbox rows 1, W8), absent when none.
-export function conditionViews(world: World) {
-  const conditions = activeStatuses(world, world.body).map(({ spec, row }) => ({
+export function conditionViews(world: World, body: EntityId | undefined) {
+  if (!body) return {};
+  const conditions = activeStatuses(world, body).map(({ spec, row }) => ({
     label: spec.label,
     ...(row.job_id && { ends_at: row.ends_at, next_tick_at: row.next_tick_at }), // none: row W8
     resource: spec.resource.key as Key,

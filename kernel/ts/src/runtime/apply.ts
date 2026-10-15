@@ -1,7 +1,7 @@
 import { hydrate } from './created.ts';
 import { compose, counts, over, type Fault, type Limit } from '../foundation/compose.ts';
 import type { DeltaOp } from '../contracts.gen.ts';
-import { row, type State, type World } from './decision.ts';
+import { admitted, row, type State, type World } from './decision.ts';
 import { maxima } from '../mechanics/resource.ts';
 
 // The state after composing `ops` over the world's state, the fact defaults, the declared
@@ -50,6 +50,6 @@ export const base = (world: World) =>
     liquid_specs: world.liquidSpecs,
     resource_specs: world.resourceSpecs,
     entity_resource_specs: world.entityResourceSpecs,
-    resource_maxima: maxima(world),
+    resource_maxima: Object.assign({}, ...admitted(world).map(([, body]) => maxima(world, body))),
     barrier_initial: world.barrierInitial,
   }) as unknown as Parameters<typeof compose>[0];

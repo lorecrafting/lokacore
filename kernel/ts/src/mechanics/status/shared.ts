@@ -14,7 +14,7 @@ import type {
 } from '../../contracts.gen.ts';
 import { add } from '../../foundation/int.ts';
 import { key } from '../../foundation/compose.ts';
-import { type Mint, refString, type World } from '../../runtime/decision.ts';
+import { actorOf, type Mint, refString, type World } from '../../runtime/decision.ts';
 import { cmp } from '../../foundation/validate.ts';
 import { HOLDERS } from '../../foundation/compose_status.ts';
 import { living } from '../death/shared.ts';
@@ -77,7 +77,7 @@ export const settleFor = (
   const moves = specOf(world, status)?.modifies?.some(({ attribute }) =>
     terms.some((t) => refString(t.attribute) === refString(attribute)),
   );
-  return body === world.body && moves
+  return actorOf(world, body) !== undefined && moves
     ? settleMaxima(world).map((op) => ({ ...op, writer_group, at: world.state.clock }))
     : [];
 };

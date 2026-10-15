@@ -1,0 +1,12 @@
+id: ts-rule-actor-from-command
+valid:
+  - "const b = bodyOf(world, actor);"
+  - "const a = actorOf(world, body);"
+  - "const x = picked.body;"
+  - "const c = o.scope.character_id;"
+  - "const t = world.state.clock;"
+invalid:
+  - "const c = world.character;"
+  - "const b = w.body;"
+  - "const c = visit.character;"
+  - "const r = world.state.containers[world.body];"

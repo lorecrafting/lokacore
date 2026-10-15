@@ -1,3 +1,4 @@
+// size: allow 309, population jobs bind sight for the admitted character in the room (seerIn, loka-kgd.150.4)
 import type {
   CharacterId,
   CommandId,
@@ -9,7 +10,7 @@ import type {
 } from '../../contracts.gen.ts';
 import { key } from '../../foundation/compose.ts';
 import { uniform } from '../../foundation/rng.ts';
-import { refString, type JobRow, type Mint, type World } from '../../runtime/decision.ts';
+import { admitted, refString, type JobRow, type Mint, type World } from '../../runtime/decision.ts';
 import { engaged } from '../combat/shared.ts';
 import { living } from '../death/shared.ts';
 import { barrierState } from '../lookups.ts';
@@ -125,6 +126,10 @@ export function birthSlot(
   return { ops, member_id };
 }
 
+// The first admitted character whose body stands in `room` (a population job has no actor).
+const seerIn = (world: World, room: EntityId) =>
+  admitted(world).find(([, body]) => world.state.containers[body] === room)?.[0];
+
 function birthSight(
   world: World,
   occurrence_id: CommandId,
@@ -135,9 +140,11 @@ function birthSight(
   mint: Mint,
 ): DeltaOp[] {
   const spec = world.populationSpecs[key(job.job)]!;
-  return spec.plan.sight && world.state.containers[world.body] === spec.home
+  const seer = seerIn(world, spec.home);
+  return spec.plan.sight && seer
     ? bindSight(
         world,
+        seer,
         job.job,
         slot,
         value,
@@ -238,11 +245,13 @@ function arrivalSight(
   to: EntityId,
   mint: Mint,
 ): DeltaOp[] {
-  if (!plan.sight || to !== world.state.containers[world.body]) return [];
+  const seer = seerIn(world, to);
+  if (!plan.sight || !seer) return [];
   const origin = world.state.created?.[member]?.origin;
   return origin?.kind === 'spawned'
     ? bindSight(
         world,
+        seer,
         planRef,
         origin.slot,
         row,

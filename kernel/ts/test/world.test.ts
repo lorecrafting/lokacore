@@ -10,7 +10,7 @@ import { hash } from '../src/foundation/canonical.ts';
 import { commandId } from '../src/foundation/id_source.ts';
 import type { Command } from '../src/contracts.gen.ts';
 import { loadCartridge, type Cartridge, type World } from '../src/index.ts';
-import { accepted, allocator, event, rejected } from '../src/runtime/decision.ts';
+import { accepted, actorOf, allocator, event, rejected } from '../src/runtime/decision.ts';
 import {
   admit,
   gameView,
@@ -141,6 +141,14 @@ test('a fresh world mints IdSource ids and puts the player in the entry room', (
     ],
     time: 0,
   });
+});
+
+// Break: a lookup that returns the character for any body.
+test('actorOf names the character only for its own body', () => {
+  const w = fresh();
+  assert.equal(actorOf(w, BODY as World['body']), CHARACTER);
+  assert.equal(actorOf(w, BOATHOUSE as World['body']), undefined); // a real room id
+  assert.equal(actorOf(w, 'nope' as World['body']), undefined);
 });
 
 // Astra A1. Breaks: the default pools without a way to regenerate (no schedule@1, so no wait):

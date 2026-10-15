@@ -1,0 +1,21 @@
+{
+  "on": {
+    "event": "fact_changed",
+    "fact": "raided"
+  },
+  "when": {
+    "policy_version": 1,
+    "root": {
+      "op": "fact_compare",
+      "fact": "raided",
+      "equals": false
+    }
+  },
+  "apply": [
+    {
+      "op": "quest.resolve",
+      "quest": "hold_the_gate",
+      "outcome": "held"
+    }
+  ]
+}
