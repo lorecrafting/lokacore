@@ -288,8 +288,7 @@ function assignment(
   return { op: 'fact.assign' as const, writer_group, ...target, expected, value: next };
 }
 
-// quest.resolve/fail for the trigger's own character, else (a world trigger) each holder (the
-// Actor column), or undefined when one faults.
+// quest.resolve/fail for the trigger's own character, else each holder; undefined on a fault.
 function ending(
   world: World,
   step: Extract<ReactionRule['apply'][number], { op: 'quest.resolve' | 'quest.fail' }>,
