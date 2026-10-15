@@ -20,6 +20,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: FD1 delayed reactions, job checker and save, second opinion](2026-10-14-m12-delayed-second-opinion.md): **APPROVE WITH NOTES**
 - [Review: FD1 delayed reactions and the time_since leaf, main review (loka-kgd.138)](2026-10-14-m12-delayed-review.md): **CHANGES REQUIRED**
 - [Review: mechanics batch M12 (Fable batch review, final head)](2026-10-14-m12-batch-fable-review.md): **APPROVE WITH NOTES**
+- [Review: long-wait mechanics batch (loka-kgd.152 + FD1 + perf), batch head](2026-10-14-longwait-batch-review.md): **APPROVE WITH NOTES**
 - [Second opinion: one long elapsed wait equals the same wait in steps (loka-kgd.152, loka-kgd.151)](2026-10-14-loka-kgd.152-longwait-second-opinion.md): **APPROVE WITH NOTES**
 - [Review: one long elapsed wait equals the same wait in steps (loka-kgd.152, loka-kgd.151)](2026-10-14-loka-kgd.152-longwait-review.md): **APPROVE WITH NOTES**
 - [Review: FD1 finish round, delayed reactions (loka-kgd.138)](2026-10-14-loka-kgd.138-fd1-final-review.md): **APPROVE WITH NOTES**
