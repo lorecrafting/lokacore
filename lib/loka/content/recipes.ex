@@ -50,7 +50,16 @@ defmodule Loka.Content.Recipes do
       shared: shared_checks(defs)
     }
 
-    Enum.flat_map(all(defs), &recipe(&1, ctx)) ++ contributions(defs, actions) ++ uses(defs, m)
+    Enum.flat_map(all(defs), &recipe(&1, ctx)) ++
+      contributions(defs, actions) ++ uses(defs, m) ++ storylets(defs, m)
+  end
+
+  # Toolbox row FD3: a storylet target needs kernel_api 1.92 (one diagnostic).
+  defp storylets(defs, m) do
+    if Enum.any?(all(defs), fn {_, r} -> r["target"]["kind"] == "storylet" end) and
+         api(m) < [1, 92],
+       do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
+       else: []
   end
 
   # Toolbox row G4: a use target needs kernel_api 1.49 (one diagnostic), and a status.cure step
@@ -248,6 +257,15 @@ defmodule Loka.Content.Recipes do
 
   # Toolbox row 29a: a spell names no definition.
   defp target(_, %{"kind" => "spell"}, _, _), do: []
+
+  # Toolbox row FD3: each of a storylet's rooms names a room of this cartridge.
+  defp target(rel, %{"kind" => "storylet"} = t, m, defs),
+    do:
+      for(
+        {r, i} <- Enum.with_index(Map.get(t, "rooms", [])),
+        d <- reference(rel, ["target", "rooms"], {i, "room"}, %{i => r}, m, defs),
+        do: d
+      )
 
   # The room resolves (reference/6), then the detail is one of its details.
   defp target(rel, t, m, defs) do

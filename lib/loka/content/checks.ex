@@ -138,6 +138,10 @@ defmodule Loka.Content.Checks do
   def expand(%{"kind" => "use", "tool" => %{"liquid" => l}} = target, m) when is_binary(l),
     do: put_in(target, ["tool", "liquid"], ref(l, "liquid", m))
 
+  # Toolbox row FD3: a storylet target's rooms.
+  def expand(%{"kind" => "storylet", "rooms" => rs} = target, m) when is_list(rs),
+    do: Map.put(target, "rooms", Enum.map(rs, &ref(&1, "room", m)))
+
   def expand(%{"offers" => offers, "resource" => r} = shop, m),
     do:
       shop
@@ -241,6 +245,11 @@ defmodule Loka.Content.Checks do
 
   def expand(%{"action" => a, "room" => r, "detail" => _} = trigger, m) when is_binary(a),
     do: trigger |> Map.put("action", ref(a, "recipe", m)) |> Map.put("room", ref(r, "room", m))
+
+  # Toolbox row FD3: a scene started by a storylet names no room or detail.
+  def expand(%{"action" => a, "outcome" => o} = trigger, m)
+      when is_binary(a) and is_binary(o) and map_size(trigger) == 2,
+      do: Map.put(trigger, "action", ref(a, "recipe", m))
 
   def expand(%{"player_corpse" => _, "npc_corpse" => _, "shrine" => _} = death, m),
     do: Loka.Content.Death.expand(death, m)

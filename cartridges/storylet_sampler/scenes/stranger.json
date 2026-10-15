@@ -1,0 +1,33 @@
+{
+  "on": {
+    "action": "stranger_beckons",
+    "outcome": "success"
+  },
+  "control": "modal",
+  "steps": [
+    {
+      "type": "narrate",
+      "text": "scene.stranger.hood"
+    },
+    {
+      "type": "narrate",
+      "text": "scene.stranger.errand"
+    },
+    {
+      "type": "await_ack"
+    },
+    {
+      "type": "end"
+    }
+  ],
+  "on_end": {
+    "assign": [
+      {
+        "fact": "errand_offered",
+        "value": true
+      }
+    ],
+    "story_point": "stranger_errand",
+    "outcome": "offered"
+  }
+}

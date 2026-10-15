@@ -99,6 +99,7 @@ export function gameView(world: World, actor: CharacterId = world.character): Ga
     journal: journal(world, actor, steps),
     ...(current && { chapter: current }),
     ...(showing && { scene: showing }),
+    ...(actions.place.some((a) => a.action_key === actions.drawn) && { storylet: actions.drawn }),
     ...timeView(world),
     ...(choice && { choice }),
     ...(pools.length > 0 && { resources: pools }),

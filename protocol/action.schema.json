@@ -565,7 +565,7 @@
       ]
     },
     "RecipeTarget": {
-      "description": "What an ActionRecipe acts on (06 §20 target; 21 §7 TargetSpec): one inspectable detail, by its room and its key in that room's details, offered only while the actor is in that room; or (toolbox row G4, kernel_api at least 1.49) a use: a tool the actor holds, used on another item on the floor of the actor's room or carried directly, both chosen by the invocation (perform item_id and target_id), the recipe keyed by the tool's properties here and the target's through its policy (has_tag and status_active, subject target), never by item ids; or (toolbox row 29a, kernel_api at least 1.51) a spell named by its word.",
+      "description": "What an ActionRecipe acts on (06 §20 target; 21 §7 TargetSpec): one inspectable detail, by its room and its key in that room's details, offered only while the actor is in that room; or (toolbox row G4, kernel_api at least 1.49) a use: a tool the actor holds, used on another item on the floor of the actor's room or carried directly, both chosen by the invocation (perform item_id and target_id), the recipe keyed by the tool's properties here and the target's through its policy (has_tag and status_active, subject target), never by item ids; or (toolbox row 29a, kernel_api at least 1.51) a spell named by its word; or (toolbox row FD3, kernel_api at least 1.92) a storylet, offered to an actor only when the deck draws it.",
       "oneOf": [
         {
           "type": "object",
@@ -617,6 +617,32 @@
           "required": [
             "kind",
             "word"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "description": "Toolbox row FD3 (kernel_api at least 1.92): a storylet, one card of the deck an actor may draw in its room: held where its policy holds for the actor and, with rooms, the actor's body is in one of them (every room otherwise); of the storylets holding, the actor is offered only the one picked by SHA-256 of '<actor>:<room key>:<hour index>' weighted by weight (default 1; mechanics.md Storylet deck), and performs it by key with no target_id or item_id; it acts on the actor's body.",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "storylet"
+            },
+            "rooms": {
+              "type": "array",
+              "items": {
+                "$ref": "identity.schema.json#/$defs/DefinitionRef"
+              },
+              "minItems": 1,
+              "maxItems": 16
+            },
+            "weight": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          "required": [
+            "kind"
           ],
           "additionalProperties": false
         }
