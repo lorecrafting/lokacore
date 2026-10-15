@@ -40,6 +40,7 @@ defmodule Loka.ContentRaidTest do
     since = %{"op" => "time_since", "fact" => "raided_at", "at_least" => 600}
     leaf = &put_in(&1, ["when", "root"], %{"op" => "not", "item" => since})
     move = %{"op" => "item.move", "room" => "village"}
+    npc_move = %{"op" => "npc.move"}
     shake = %{"op" => "status.apply", "status" => "shaken", "co_present" => true}
 
     mv = %{
@@ -59,6 +60,9 @@ defmodule Loka.ContentRaidTest do
           {[old, unstamped, {"reactions/aftershock.json", &%{&1 | "apply" => []}}], api},
           {[{"reactions/aftershock.json", &update_in(&1, ["apply"], fn a -> a ++ [move] end)}],
            {"SCHEMA_VIOLATION", "reactions/aftershock.apply[1].op"}},
+          {[
+             {"reactions/aftershock.json", &update_in(&1, ["apply"], fn a -> a ++ [npc_move] end)}
+           ], {"SCHEMA_VIOLATION", "reactions/aftershock.apply[1].op"}},
           {[{"reactions/raid.json", &put_in(&1, ["apply", Access.at(2), "fact"], "aftershocks")}],
            {"SCHEMA_VIOLATION", "reactions/raid.apply[2].fact"}},
           {[{"facts.json", &put_in(&1, ["facts", "raided_at", "value_type", "minimum"], 1)}],

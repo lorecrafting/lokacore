@@ -809,6 +809,20 @@
       ]
     },
     {
+      "floor": "1.95",
+      "below": "1.94",
+      "source": "cartridges/reactions_sampler",
+      "feature": "npc.move without a witness filter",
+      "compiler": [
+        "KERNEL_API_RANGE_INVALID",
+        "cartridge.requires.kernel_api.at_least"
+      ],
+      "loader": [
+        "KERNEL_API_RANGE_INVALID",
+        ".cartridge.manifest.requires.kernel_api.at_least"
+      ]
+    },
+    {
       "floor": "1.96",
       "below": "1.95",
       "source": "cartridges/ask_sampler",
