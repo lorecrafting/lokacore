@@ -17,7 +17,13 @@ git worktree add -q "$t/wt" -b wt
 cd "$t/wt"
 PATH="$t/stub:$PATH" sh bin/worktree_setup.sh
 [ ! -L node_modules ] && [ -f node_modules/.loka-lock-cksum ] || { echo 'worktree_setup control failed: matching lockfile not cloned' >&2; exit 1; }
-ln -s "$t/main/node_modules" old && rm -rf node_modules && mv old node_modules # an older worktree's link
+echo stale > node_modules/.loka-lock-cksum
+PATH="$t/stub:$PATH" sh bin/worktree_setup.sh
+cmp -s node_modules/.loka-lock-cksum "$t/main/node_modules/.loka-lock-cksum" || { echo 'worktree_setup control failed: stale clone kept' >&2; exit 1; }
+rm -rf node_modules && ln -s "$t/main/node_modules" node_modules # an older worktree's link
+PATH="$t/stub:$PATH" sh bin/worktree_setup.sh
+[ ! -L node_modules ] || { echo 'worktree_setup control failed: older link kept' >&2; exit 1; }
+rm -rf node_modules && ln -s "$t/main/node_modules" node_modules
 echo B > package-lock.json
 PATH="$t/stub:$PATH" sh bin/worktree_setup.sh
 [ ! -e "$t/main/node_modules/WIPED" ] && [ ! -L node_modules ] || { echo 'worktree_setup control failed: npm ci ran through the link' >&2; exit 1; }
