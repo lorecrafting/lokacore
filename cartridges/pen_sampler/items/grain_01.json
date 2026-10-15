@@ -1,0 +1,14 @@
+{
+  "keywords": [
+    "grain",
+    "sack"
+  ],
+  "short": "item.grain_01.short",
+  "room_line": "item.grain_01.room",
+  "description": "item.grain_01.description",
+  "location": {
+    "in": "room",
+    "room": "yard"
+  },
+  "mass_grams": 1000
+}
