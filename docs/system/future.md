@@ -9,6 +9,8 @@ and deferred carries are in the [ROADMAP](../ROADMAP.md); published A–D mechan
 
 Current work and open gates: [ROADMAP](../ROADMAP.md#slices).
 
+Worldbuilding subproject (Beads loka-ikch): the [stub tree](../worldbuilding/README.md) of every world area to decide, with canon tiers and fill order.
+
 ## Chapter one and the proof cartridge
 
 - The release uses [one shared difficulty](../decisions/owner-decision-single-difficulty-2026-10-03.md);

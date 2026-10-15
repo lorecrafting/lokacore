@@ -79,7 +79,7 @@ amk() {
   M=$(mktemp -d); git clone -q "$O" "$M" 2>/dev/null; (cd "$M" && git merge -q --no-ff origin/pr -m merge && { [ -z "${STALE-}" ] || { cp "$bin/after_merge.sh" bin/ && git commit -qam script; }; } && git push -q origin main)
   echo local-write >> .beads/issues.jsonl; : > "$R.br"
 }
-amk; head=$(git rev-parse HEAD); echo stray > s; am dirty 1; rm s
+amk; head=$(git rev-parse HEAD); echo stray >> docs/ROADMAP.md; am dirty 1; git checkout -q docs/ROADMAP.md
 [ "$(git rev-parse HEAD)" = "$head" ] && [ ! -s "$R.br" ] && [ -d "$R.wt" ] || bad 'after_merge dirty: changed something'
 touch "$R.wt/u"; am dirty-worktree 1; rm "$R.wt/u"
 [ "$(git rev-parse HEAD)" = "$head" ] && [ ! -s "$R.br" ] || bad 'after_merge dirty-worktree: changed something'
@@ -90,7 +90,8 @@ git branch -q -f review-7 pr
 am export-both 1; [ "$(git rev-parse HEAD)" = "$head" ] && [ ! -s "$R.br" ] || bad 'after_merge export-both: changed something'
 (cd "$M" && git revert --no-edit HEAD > /dev/null && git push -q origin main)
 PR_STATE=OPEN; am open 1; PR_STATE=MERGED; [ ! -s "$R.br" ] && git rev-parse -q --verify review-7 > /dev/null || bad 'after_merge open: changed something'
-echo r2 > docs/ROADMAP.md; am success 0 'ROADMAP status: X merged (#7)'
+echo r2 > docs/ROADMAP.md; echo u > owner.cjs # an untracked owner file must not block (loka-jxwu)
+am success 0 'ROADMAP status: X merged (#7)'
 git fetch -q origin
 [ "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)" ] && [ "$(git log -1 --format=%s)" = 'ROADMAP status: X merged (#7)' ] \
   && [ -f f ] && [ "$(git show origin/main:docs/ROADMAP.md)" = r2 ] || bad 'after_merge success: main not pulled, committed and pushed'
@@ -199,8 +200,8 @@ if grep -q '^worktree' out; then bad 'session_status leftovers: main checkout li
 # prints a blank. A stub gh applies the real --jq to controlled `run list` records; other calls fail.
 mkdir -p "$tmp/gh"; cat > "$tmp/gh/gh" <<'SH'
 #!/bin/sh
-[ "$1 $2" = "run list" ] || exit 1
-case $* in *ci.yml*) json=$CI ;; *) json=$E2E ;; esac
+case "$1 $2" in "run list") ;; "run view") json=$JOBS ;; "pr list") json=$PRS ;; *) exit 1 ;; esac
+case $* in "run list"*ci.yml*) json=$CI ;; "run list"*) json=$E2E ;; esac
 while [ $# -gt 1 ]; do [ "$1" = --jq ] && q=$2; shift; done
 printf '%s\n' "$json" | jq -r "$q"
 SH
@@ -212,6 +213,75 @@ grep -qx 'ci.yml failure abcdef01 u1 (red: fix first)' out && grep -qx 'book-e2e
 CI='[{"conclusion":"","status":"in_progress","headSha":"abcdef0123","url":"u1"}]' E2E='[]' \
   HK=hk.json PATH="$tmp/gh:$tmp/stub:$PATH" capped sh bin/session_status.sh > out 2>&1 || true
 grep -qx 'ci.yml in_progress abcdef01 u1' out || bad 'session_status nightly: running run misreported'
+# Break: the sim job's duration is missing for a PR head or the nightly, another job or an unfinished sim is printed.
+J='{"jobs":[{"name":"lint","conclusion":"success","startedAt":"2026-10-15T10:00:00Z","completedAt":"2026-10-15T10:01:00Z"},{"name":"sim","conclusion":"success","startedAt":"2026-10-15T10:00:00Z","completedAt":"2026-10-15T10:07:23Z"},{"name":"sim","conclusion":"","startedAt":"2026-10-15T10:00:00Z","completedAt":"0001-01-01T00:00:00Z"}]}'
+CI='[{"conclusion":"success","status":"completed","headSha":"abcdef0123","url":"u1","databaseId":7}]' E2E='[]' PRS='[{"headRefOid":"1234567890ab"}]' JOBS=$J \
+  HK=hk.json PATH="$tmp/gh:$tmp/stub:$PATH" capped sh bin/session_status.sh > out 2>&1 || true
+[ "$(grep -c 'sim job' out)" = 2 ] && grep -qx 'PR head 12345678: sim job success 443s' out && grep -qx 'ci.yml nightly: sim job success 443s' out \
+  || { bad 'session_status sim time: wrong lines'; grep 'sim job' out; }
+# --- pm_merge.sh ---------------------------------------------------------------------------
+# A batch worktree, a slice and a record branch on a bare origin (stub prepush.sh passes). Stub gh applies the real
+# --jq to $CI and $E2E, the run lists of ci.yml and book-e2e.yml (newest first). Break: a merge goes ahead while the newest
+# run of either workflow is not a success (failed, cancelled at its timeout, still running, none); a superseded older run blocks.
+mkdir -p "$tmp/pmgh"; cat > "$tmp/pmgh/gh" <<'SH'
+#!/bin/sh
+case $* in *ci.yml*) json=$CI ;; *) json=$E2E ;; esac
+a=$*; while [ $# -gt 1 ]; do [ "$1" = --jq ] && q=$2; [ "$1" = --commit ] && c=$2; shift; done
+[ "${c-}" = "$EXPECT_SHA" ] || json='[]' # runs exist only for the reviewed sha; no or another --commit finds none
+printf '%s\n' "$json" | jq -r "$q"
+SH
+chmod +x "$tmp/pmgh/gh"
+pm() { # <case> <want-rc> <want-output>
+  O=$(mktemp -d); git init -q --bare -b main "$O"; R=$(mktemp -d); cd "$R"; git clone -q "$O" . 2>/dev/null
+  git checkout -qb batch; mkdir bin node_modules; cp "$bin/pm_merge.sh" bin/; printf '#!/bin/sh\nexit 0\n' > bin/prepush.sh; echo base > a
+  git add . && git commit -qm base && git push -q origin batch
+  git checkout -qb slice; echo s > s; git add s && git commit -qm slice && git push -q origin slice
+  git checkout -q batch; git checkout -qb rec; echo r > r; git add r && git commit -qm rec && git push -q origin rec; git checkout -q batch
+  pre=$(git rev-parse HEAD); rc=0; EXPECT_SHA=$(git rev-parse origin/slice) PATH="$tmp/pmgh:$PATH" capped sh bin/pm_merge.sh "$R" batch slice rec subj "$(git rev-parse origin/slice)" > "$R.out" 2>&1 || rc=$?
+  [ "$rc" = "$2" ] && grep -q "$3" "$R.out" || { bad "pm_merge $1: exit $rc, want $2 with '$3'"; sed 's/^/  /' "$R.out"; }
+  if [ "$2" != 0 ]; then [ "$(git rev-parse HEAD)" = "$pre" ] && [ "$(git rev-parse origin/batch)" = "$pre" ] || bad "pm_merge $1: merged or pushed"; fi
+}
+ok='[{"conclusion":"success"},{"conclusion":"cancelled"}]'
+CI=$ok E2E=$ok pm green 0 '^PUSHED batch'
+CI='[{"conclusion":"cancelled"}]' E2E=$ok pm ci-timeout 2 'ci.yml on .* is cancelled'
+CI=$ok E2E='[{"conclusion":"failure"}]' pm e2e-red 2 'book-e2e.yml on .* is failure'
+CI=$ok E2E='[]' pm e2e-missing 2 'book-e2e.yml on .* is missing'
+CI='[{"conclusion":""}]' E2E=$ok pm ci-running 2 'ci.yml on .* is still running'
+# --- prepush.sh ----------------------------------------------------------------------------
+# A repo whose stub mise logs each check and fails them when STUB_RC=1; origin/main is the base commit.
+# Break: two runs share log files, so one reports the other's output (the first log must still read "run-a" after
+# run b); a sampler hash change does not add the transcript and Impact story checks, or any other change adds them.
+mkdir -p "$tmp/pp"; cat > "$tmp/pp/mise" <<'SH'
+#!/bin/sh
+shift 2; echo "$*" >> "$PP_LOG"; echo "run-$RUN"; exit "${STUB_RC:-0}"
+SH
+chmod +x "$tmp/pp/mise"
+R=$(mktemp -d); cd "$R"; git init -q -b main; mkdir bin protocol protocol/fixtures; cp "$bin/prepush.sh" bin/; echo a > a; git add . && git commit -qm base; git update-ref refs/remotes/origin/main HEAD
+pp() { PP_LOG=$R.pp RUN=$1 STUB_RC=${2-0} PATH="$tmp/pp:$PATH" capped sh bin/prepush.sh > "$R.$1" 2>&1 || true; }
+pp a 1; pp b 1
+la=$(sed -n 's/^TS_SIZE_FAIL (\(.*\))$/\1/p' "$R.a"); lb=$(sed -n 's/^TS_SIZE_FAIL (\(.*\))$/\1/p' "$R.b")
+[ -n "$la" ] && [ "$la" != "$lb" ] && grep -qx run-a "$la" && grep -qx run-b "$lb" || bad "prepush logs: run a's log is '$la' ($(cat "$la" 2>/dev/null)), run b's '$lb'"
+: > "$R.pp"; echo x > a; git commit -qam other; pp c
+! grep -q 'transcripts.test.ts' "$R.pp" && ! grep -q IMPACT_STORY "$R.c" || bad 'prepush: transcript or Impact checks ran without a sampler hash change'
+echo '{}' > protocol/fixtures/new_sampler_hash.json; git add . && git commit -qm hash; : > "$R.pp"; pp d
+grep -q 'test/transcripts.test.ts' "$R.pp" && grep -q '^IMPACT_STORY_' "$R.d" || bad 'prepush: a sampler hash change did not run the transcript and Impact checks'
+# --- check_impact_fixtures.sh ----------------------------------------------------------------
+# Break: the Impact story's pinned list is not compared with the README row (a new fixture only in the README passes).
+R=$(mktemp -d); cd "$R"; git init -q -b main; mkdir -p protocol mobile/app/stories
+printf '| `cartridge.schema.json` | cartridge | 05 §8 | `a_hash.json`, `b_sampler_hash.json` |\n' > protocol/README.md
+printf "export const Impact: Story = {\n  x: ['a_hash.json',\n  'b_sampler_hash.json'],\n};\n" > mobile/app/stories/SystemDataModel.stories.tsx
+sh "$bin/check_impact_fixtures.sh" > /dev/null 2>&1 || bad 'check_impact_fixtures: matching lists refused'
+sed -i.bak 's/`a_hash.json`, /`a_hash.json`, `c_hash.json`, /' protocol/README.md
+if sh "$bin/check_impact_fixtures.sh" > /dev/null 2>&1; then bad 'check_impact_fixtures: a README fixture missing from the story passed'; fi
+# --- agent_load_gate.sh --------------------------------------------------------------------
+# Stub uptime prints the macOS and the Linux format. Break: 8.00 or more does not refuse, 7.99 refuses, the message omits the load.
+mkdir -p "$tmp/up"; printf '#!/bin/sh\necho "$UP"\n' > "$tmp/up/uptime"; chmod +x "$tmp/up/uptime"
+lg() { rc=0; UP=$2 PATH="$tmp/up:$PATH" sh "$bin/agent_load_gate.sh" > /dev/null 2> "$tmp/lg.err" || rc=$?; [ "$rc" = "$3" ] || bad "agent_load_gate $1: exit $rc, want $3"; }
+lg mac-7.99 '12:00  up 3 days,  2 users,  load averages: 7.99 9.50 9.00' 0
+lg mac-15 '12:00  up 3 days,  2 users,  load averages: 15.93 9.50 9.00' 2
+grep -q 'load is 15.93' "$tmp/lg.err" || bad 'agent_load_gate: message omits the load'
+lg comma-decimal 'load averages: 9,50 9,00 9,00' 0
+lg linux-8 ' 12:00:01 up 3 days,  2 users,  load average: 8.00, 9.50, 9.00' 2
 # --- .githooks/pre-commit ----------------------------------------------------------------------
 # Stub mise runs nothing but fails `elixir bin/contracts.exs --check`. Break: a staged MECHANICS-TOOLBOX.md,
 # CHECKS.md, system/mechanics.md or protocol/ file commits though the generated JSON is stale, or an unrelated file pays for the check.

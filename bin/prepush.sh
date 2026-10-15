@@ -6,7 +6,7 @@
 #   bin/prepush.sh
 cd "$(git rev-parse --show-toplevel)" || exit 2
 export MIX_ENV=test
-logs=${TMPDIR:-/tmp}
+logs=$(mktemp -d "${TMPDIR:-/tmp}/prepush.XXXXXX") || exit 2 # per run: parallel runs must not overwrite each other
 fail=0
 run() { # <name> <command...>
   n=$1; shift
@@ -24,4 +24,9 @@ run COMPILE mix compile --warnings-as-errors
 run XREF sh -c 'mix xref graph --format cycles --fail-above 0 && mix xref graph --label compile-connected --fail-above 0'
 run CREDO mix credo --strict
 run DOCS elixir bin/check_docs.exs
+# A sampler hash change breaks the transcript known answers and the Impact story's fixture list (loka-j6qd).
+if git diff --name-only origin/main...HEAD 2>/dev/null | grep -q '^protocol/fixtures/.*_sampler_hash\.json$'; then
+  run TRANSCRIPTS sh -c 'cd kernel/ts && node --test --test-reporter=dot test/transcripts.test.ts'
+  run IMPACT_STORY sh bin/check_impact_fixtures.sh
+fi
 exit $fail
