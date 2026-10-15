@@ -2,7 +2,8 @@ defmodule Loka.Content.Theft do
   @moduledoc """
   Toolbox rows 33 and 34 (mechanics.md Theft, fence and witnessed offense): world.theft needs
   kernel_api 1.94, names this cartridge's skill, attribute and an instance-scoped per_subject bool
-  stolen fact, and every bank vault NPC then carries a get lock. Twin of
+  stolen fact, and every bank vault NPC then carries a get lock; without world.theft an NPC lock or
+  a stolen offer is refused (ruling 2026-10-15). Twin of
   kernel/ts/src/content/cartridge_theft.ts.
   """
   import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2, ref: 3]
@@ -40,7 +41,19 @@ defmodule Loka.Content.Theft do
     floor ++ refs ++ stolen(t, m, defs) ++ narration(t, text) ++ vaults(m, defs)
   end
 
-  def check(_, _, _, _), do: []
+  def check(_, defs, _, _), do: unarmed(defs)
+
+  # Nothing reads an NPC lock or a stolen offer without world.theft.
+  defp unarmed(defs) do
+    for {_, {rel, steps, n}} <- defs["npc"] || %{},
+        path <-
+          if(n["locks"], do: [steps ++ ["locks"]], else: []) ++
+            for(
+              {%{"stolen" => true}, i} <- Enum.with_index(get_in(n, ["shop", "offers"]) || []),
+              do: steps ++ ["shop", "offers", i, "stolen"]
+            ),
+        do: diag("SCHEMA_VIOLATION", at(rel, path), %{"error" => "invalid_value"})
+  end
 
   defp stolen(t, m, defs) do
     case resolve(t["stolen"], "fact", m, defs) do

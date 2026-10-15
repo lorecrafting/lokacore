@@ -46,7 +46,7 @@ defmodule Loka.Content.Commerce do
     plain = for o <- offers, !o["stock"], do: o["item"]
 
     stock_api(m, offers) ++
-      stolen(m, rel, offers) ++
+      stolen(rel, offers) ++
       for {%{"stock" => %{"items" => items, "buy" => buy}} = o, i} <- Enum.with_index(offers),
           path = at(rel, ["shop", "offers", i, "stock"]),
           d <- unresolved(items, path, m, defs) ++ stock_shape(o, items, buy, path, plain),
@@ -70,19 +70,13 @@ defmodule Loka.Content.Commerce do
     for {false, d} <- shape, do: d
   end
 
-  # Toolbox row 33: a fence's stolen offer needs kernel_api 1.94 and names one item, never a stock set.
-  defp stolen(m, rel, offers) do
-    api =
-      if Enum.any?(offers, & &1["stolen"]) and version(m) < [1, 94],
-        do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
-        else: []
-
-    api ++
-      for {%{"stolen" => true, "stock" => _}, i} <- Enum.with_index(offers),
-          do:
-            diag("SCHEMA_VIOLATION", at(rel, ["shop", "offers", i, "stolen"]), %{
-              "error" => "invalid_value"
-            })
+  # Toolbox row 33: a fence's stolen offer names one item, never a stock set.
+  defp stolen(rel, offers) do
+    for {%{"stolen" => true, "stock" => _}, i} <- Enum.with_index(offers),
+        do:
+          diag("SCHEMA_VIOLATION", at(rel, ["shop", "offers", i, "stolen"]), %{
+            "error" => "invalid_value"
+          })
   end
 
   defp stock_api(m, offers) do

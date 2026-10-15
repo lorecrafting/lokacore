@@ -59,9 +59,12 @@ export function stolen(
     ),
     { kind: 'opposed', skill: theft.skill },
   );
+  // The victim notices through the bystanders' sense filter, then only above the thief's skill.
+  const seers = witnesses(world, body);
   const noticed =
+    seers.includes(victim) &&
     level(world, actor, theft.skill) < (npcValue(world, victim, theft.attribute) ?? 0);
-  if (!noticed && witnesses(world, body, victim).length === 0)
+  if (!noticed && seers.every((id) => id === victim))
     return accepted(world, 'taken', run.ops, taken, [{ key: theft.narration.unseen }]);
   const { id: cartridge_id, version: cartridge_version } = world.cartridge.manifest;
   const notice = event(world, command, mint, run.position + 1, {

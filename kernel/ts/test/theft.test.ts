@@ -118,8 +118,8 @@ test('2. lifting the purse from the lone merchant is unseen and marks it stolen'
 });
 
 // Breaks: the fence check skipped or compared loosely, either way: a stolen ring sold back to its
-// clean shop, a clean ring sold to the fence, a clean ring refused by its shop, or the fence
-// refusing a stolen purse.
+// clean shop, a clean ring sold to the fence, a clean ring refused by its shop, the fence
+// refusing a stolen purse, or a fence's stock shut off from theft.
 test('3. a stolen ring will not sell back to the shopkeeper; the fence buys the stolen purse', () => {
   let c = go(fresh(), 'west');
   const clean = { provider_id: npc(c, 'shopkeeper'), item_id: item(c, 'ring') };
@@ -143,6 +143,9 @@ test('3. a stolen ring will not sell back to the shopkeeper; the fence buys the 
   assert.equal(pennies(w), 13);
   assert.equal(w.state.containers[item(w, 'purse')], fence);
   assert.equal(stolen(w, 'purse'), true);
+  // Ruling 2026-10-15: the fence is a living NPC holding an item, so the purse lifts back.
+  w = play(w, take(w, 'purse')).w;
+  assert.deepEqual([w.state.containers[item(w, 'purse')], stolen(w, 'purse')], [w.body, true]);
 });
 
 // Breaks: a sighted bystander (the guard) not counted, the notice on the victim instead of the
@@ -168,18 +171,27 @@ test('4. lifting the ring beside the guard is seen: theft_seen on the thief, wan
   assert.ok(lines(back).includes('guard.collars'));
 });
 
-// Breaks: witnesses ignoring concealment (the shopkeeper sees a hidden thief), or concealment
-// fooling the victim's own notice.
-test('6. a hidden thief is still noticed by an alert victim, never by a bystander', () => {
-  const hide = (w: World) => {
-    const row = { [statusKey(w.body, ref('status', 'hidden'))]: { generation: 1, active: true } };
+// Breaks: witnesses ignoring concealment (the shopkeeper sees a hidden thief), the victim's notice
+// skipping the same sense filter (a blind or unpiercing guard notices), or an alert victim fooled.
+test('6. a hidden thief is noticed only by a victim who sees through it, never by a bystander', () => {
+  const on = (key: string, holder: (w: World) => string) => (w: World) => {
+    const row = {
+      [statusKey(holder(w) as never, ref('status', key))]: { generation: 1, active: true },
+    };
     return { ...w, state: { ...w.state, statuses: { ...w.state.statuses, ...row } } } as World;
   };
+  const hide = on('hidden', (w) => w.body);
   let w = hide(go(fresh(), 'west'));
   assert.deepEqual(lines(play(w, take(w, 'badge')).d), ['theft.seen']);
   w = hide(go(fresh(alertness('guard', 0)), 'west'));
   const r = play(w, take(w, 'badge'));
   assert.deepEqual([lines(r.d), wanted(r.w)], [['theft.unseen'], false]);
+  const blindStatus = (c: any) => {
+    const { concealment, pierced_by, ...h } = c.statuses[`${S}:status/hidden`];
+    c.statuses[`${S}:status/blinded`] = { ...h, key: 'blinded', perception: { sight: 'blind' } };
+  };
+  w = on('blinded', (w) => npc(w, 'guard'))(hide(go(fresh(blindStatus), 'west')));
+  assert.deepEqual(lines(play(w, take(w, 'badge')).d), ['theft.unseen']);
 });
 
 // Breaks: the NPC get lock not read (the vault's ledger taken or listed), or theft reaching past
@@ -230,24 +242,6 @@ test('8. loader: vault lock, reserved stolen fact, fence offers, floors, stolen 
     ['SCHEMA_VIOLATION', `.cartridge.npcs["${F}"].shop.offers[0].stolen`],
   );
   assert.deepEqual(diagnostic(api), ['KERNEL_API_RANGE_INVALID', API]);
-  const bare = (c: any) => {
-    api(c);
-    delete c.world.theft;
-  };
-  assert.deepEqual(
-    diagnostic((c) => {
-      bare(c);
-      delete c.npcs[F].shop;
-    }),
-    ['KERNEL_API_RANGE_INVALID', API],
-  ); // the vault's NPC lock alone
-  assert.deepEqual(
-    diagnostic((c) => {
-      bare(c);
-      delete c.npcs[`${S}:npc/vault`].locks;
-    }),
-    ['KERNEL_API_RANGE_INVALID', API],
-  ); // the fence's stolen offers alone
   assert.deepEqual(
     diagnostic((c) => {
       api(c);
@@ -256,6 +250,16 @@ test('8. loader: vault lock, reserved stolen fact, fence offers, floors, stolen 
     }),
     ['KERNEL_API_RANGE_INVALID', API],
   ); // world.theft alone
+  // Ruling 2026-10-15: without world.theft nothing reads an NPC lock or a stolen offer.
+  const V = `${S}:npc/vault`;
+  assert.deepEqual(
+    diagnostic((c) => (delete c.world.theft, delete c.npcs[F].shop)),
+    ['SCHEMA_VIOLATION', `.cartridge.npcs["${V}"].locks`],
+  );
+  assert.deepEqual(
+    diagnostic((c) => (delete c.world.theft, delete c.npcs[V].locks)),
+    ['SCHEMA_VIOLATION', `.cartridge.npcs["${F}"].shop.offers[0].stolen`],
+  );
   assert.deepEqual(
     diagnostic((c) => delete c.npcs[F].shop.offers[0].stolen),
     ['UNRESOLVED_REFERENCE', `.cartridge.npcs["${F}"].shop`],

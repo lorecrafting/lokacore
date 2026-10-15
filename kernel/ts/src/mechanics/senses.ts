@@ -161,10 +161,10 @@ export function perceived(
 }
 
 /**
- * Toolbox row 33: the living NPCs in `body`'s room, `except` left out, that see `body`: not blind
- * (status reader 6) and `body` not concealed from them (status reader 8). Lookups only.
+ * Toolbox row 33: the living NPCs in `body`'s room that see `body`: not blind (status reader 6)
+ * and `body` not concealed from them (status reader 8). Lookups only.
  */
-export const witnesses = (w: World, body: EntityId, except?: EntityId) =>
+export const witnesses = (w: World, body: EntityId) =>
   npcsIn(w, [w.state.containers[body]!]).filter(
-    (id) => id !== except && !perceives(w, id, 'blind') && !concealed(w, body, id),
+    (id) => !perceives(w, id, 'blind') && !concealed(w, body, id),
   );

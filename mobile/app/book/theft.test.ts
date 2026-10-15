@@ -47,7 +47,7 @@ registerHooks({
     };
   },
 });
-const { Item } = await import('./Menu.tsx');
+const { Item, ThingPage } = await import('./Menu.tsx');
 
 function nodes(element: any): any[] {
   if (Array.isArray(element)) return element.flatMap(nodes);
@@ -83,8 +83,8 @@ const sorted = (v: any): any =>
 const canonical = JSON.stringify(sorted(artifact.cartridge));
 const bundle = { canonical, sha256: createHash('sha256').update(canonical).digest('hex') };
 
-// Breaks: GameView stops listing what a living NPC holds, or Item drops contents for a non-item
-// entry. Expected page text is independent literals from the sampler's text.json.
+// Breaks: GameView stops listing what a living NPC holds, Item drops contents for a non-item
+// entry, or a living NPC's holdings list under Inside instead of Held (designer, row 33). Expected page text is independent literals from the sampler's text.json.
 test('a merchant entry lists the purse it holds; the purse offers Take', (t) => {
   const a = elapsedHost(':memory:', { wall: 10000, mono: 0 }, bundle);
   t.after(() => a.sql.close());
@@ -103,7 +103,7 @@ test('a merchant entry lists the purse it holds; the purse offers Take', (t) => 
   assert.deepEqual(text, [
     'A merchant',
     'A merchant with a fat purse.',
-    'Inside',
+    'Held',
     'A purse',
     'Leave',
   ]);
@@ -111,4 +111,11 @@ test('a merchant entry lists the purse it holds; the purse offers Take', (t) => 
     screen.buttons.some((b) => b.label === 'Take a purse'),
     JSON.stringify(screen.buttons.map((b) => b.label)),
   );
+  // A container (any non-NPC entry) keeps Inside.
+  const box = { id: 'box', kind: 'item', name: 'box', actions: [] };
+  const coin = { ...box, id: 'coin', name: 'coin' };
+  const shelf = nodes(
+    ThingPage({ thing: box, text: (k: string) => k, actions: [], log: [], contents: [coin] }),
+  );
+  assert.ok(shelf.some((n) => n.props.children === 'Inside'));
 });

@@ -63,9 +63,6 @@ function stocks(c: Obj, offers: Obj[], at: string, version: number): Diagnostic[
   const out: Diagnostic[] = [];
   if (offers.some((o) => o.stock) && version < 1082)
     out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
-  // Toolbox row 33: a fence's stolen offer needs kernel_api 1.94 and names one item, never a stock set.
-  if (offers.some((o) => o.stolen) && version < 1094)
-    out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
   const plain = offers.filter((o) => !o.stock).map((o) => refString(o.item));
   offers.forEach((o, i) => {
     if (o.stolen && o.stock)

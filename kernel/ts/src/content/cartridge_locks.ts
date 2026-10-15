@@ -1,5 +1,5 @@
 // Toolbox row G7 at the cartridge trust boundary (twin of lib/loka/content/locks.ex): any access
-// lock needs kernel_api 1.78 (an NPC's get lock, row 33, 1.94), and a put lock only a container item may carry.
+// lock needs kernel_api 1.78, and a put lock only a container item may carry.
 import type { Diagnostic } from '../contracts.gen.ts';
 import { diag, step, type Obj } from './cartridge_refs.ts';
 import { apiCmp } from './cartridge_installed.ts';
@@ -21,12 +21,10 @@ export function lockRoots(c: Obj): [Obj, string][] {
   return out;
 }
 
-/** KERNEL_API_RANGE_INVALID for any lock below 1.78 (an NPC's, row 33, below 1.94); SCHEMA_VIOLATION for a put lock on a non-container. */
+/** KERNEL_API_RANGE_INVALID for any lock below 1.78; SCHEMA_VIOLATION for a put lock on a non-container. */
 export function locks(c: Obj): Diagnostic[] {
-  const api = c.manifest.requires.kernel_api.at_least;
-  const npc = Object.values((c.npcs ?? {}) as Obj).some((n: Obj) => n.locks);
   const floor =
-    (lockRoots(c).length && apiCmp(api, '1.78') < 0) || (npc && apiCmp(api, '1.94') < 0)
+    lockRoots(c).length && apiCmp(c.manifest.requires.kernel_api.at_least, '1.78') < 0
       ? [diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least')]
       : [];
   return [
