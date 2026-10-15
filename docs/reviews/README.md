@@ -19,7 +19,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: status re-applied inside one long wait (loka-j958, PR #388)](2026-10-15-loka-j958-review.md): **APPROVE WITH NOTES**
 - [Review: theft, fence and witnessed offense (loka-icr4, toolbox row 33)](2026-10-15-loka-icr4-theft-review.md): **APPROVE WITH NOTES**
 - [Review: Built rooms S2, save second opinion (loka-1q3n)](2026-10-15-loka-1q3n-built-s2-save-second-opinion.md): **APPROVE WITH NOTES**
-- [Review: Built rooms S2, raise the hut (loka-1q3n)](2026-10-15-loka-1q3n-built-s2-review.md): **CHANGES REQUIRED**
+- [Review: Built rooms S2, raise the hut (loka-1q3n)](2026-10-15-loka-1q3n-built-s2-review.md): **APPROVE**
 - [Review: word bar S2 (loka-1lpq), GameView spell_words and speech.phrases](2026-10-15-loka-1lpq-wordbar-s2-review.md): **APPROVE**
 - [Review: Realm seams batch (loka-kgd.150, PR #386)](2026-10-14-realm-seams-batch-review.md): **APPROVE**
 - [Review: two shops save fix, save second opinion (loka-kgd.149)](2026-10-14-m12-two-shops-second-opinion.md): **APPROVE**

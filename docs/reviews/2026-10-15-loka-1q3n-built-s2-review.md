@@ -35,3 +35,12 @@ Survived: invariants_creation.ts:173 built provenance to `true`; invariants_crea
 - builtValid vs unbuildable overlap (load vs admission) and build.ts:20 scan per render (created rows are few): acceptable.
 - Missing browser screenshot (walkthrough harness blank page): noted, not a finding.
 - No developer `/code-review` result reported in the handback: nit, run in the fix round.
+
+## Fix round 1 (9a4d00e7659b1c16ef0594deccdb36fe0ddf6e29)
+
+Verdict: **APPROVE**.
+
+- Merge 5f51da25: no change to the slice's files between b911cfa2 and 9a4d00e7^ (`git diff --stat` empty).
+- Finding 1, fixed: counterfeits added (corpse_creation.json). Reran two red controls: invariants_creation.ts:173 built provenance to `true` and invariants_creation.ex:295 `built_provenance?` to `true`; both now fail the "built room by an unknown owner faults" counterfeit.
+- Question 3, answered: refs are expanded on both sides before the compare; content_construction_test.exs:110 compiles both mixed forms. Accepted on the developer's red control; not rerun.
+- Nit 2: filed as loka-trex. The mobile built.test.ts comment now matches what the test does.
