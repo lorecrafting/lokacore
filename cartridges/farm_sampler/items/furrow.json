@@ -1,0 +1,63 @@
+{
+  "keywords": [
+    "furrow"
+  ],
+  "short": "item.furrow.short",
+  "room_line": "item.furrow.room",
+  "description": "item.furrow.description",
+  "location": {
+    "in": "room",
+    "room": "field"
+  },
+  "mass_grams": 20000,
+  "container": true,
+  "immune": [
+    "growing_plot"
+  ],
+  "description_variants": [
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": [
+            {
+              "op": "status_active",
+              "subject": "target",
+              "status": "growing"
+            },
+            {
+              "op": "time_since",
+              "fact": "sown_at",
+              "item": "furrow",
+              "at_least": 64800
+            }
+          ]
+        }
+      },
+      "description": "item.furrow.heavy"
+    },
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": [
+            {
+              "op": "status_active",
+              "subject": "target",
+              "status": "growing"
+            },
+            {
+              "op": "time_since",
+              "fact": "sown_at",
+              "item": "furrow",
+              "at_least": 3600
+            }
+          ]
+        }
+      },
+      "description": "item.furrow.shoots"
+    }
+  ]
+}

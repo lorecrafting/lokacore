@@ -1,0 +1,89 @@
+{
+  "api_version": "loka/v3",
+  "id": "farm_sampler",
+  "version": "0.0.1",
+  "title": "Farm Sampler",
+  "requires": {
+    "kernel_api": {
+      "at_least": "1.101",
+      "below": "2.0"
+    },
+    "content_schema": 1,
+    "rule_ir": 1,
+    "capabilities": {
+      "movement": 1,
+      "containment": 1,
+      "resource": 1,
+      "policy": 1,
+      "tags": 1,
+      "fact": 1,
+      "action_recipe": 1,
+      "reaction": 1,
+      "status": 1,
+      "schedule": 1,
+      "liquid": 1,
+      "death": 1,
+      "position": 1,
+      "calendar": 1,
+      "description_variant": 1,
+      "service": 1,
+      "commerce": 1
+    },
+    "client_features": []
+  },
+  "supported_profiles": [
+    "offline_private"
+  ],
+  "entry": "field",
+  "calendar": {
+    "start": 3600,
+    "units_per_hour": 3600,
+    "hours_per_day": 24,
+    "subdivisions_per_hour": 4,
+    "season": {
+      "period": 691200,
+      "origin": 0,
+      "phases": [
+        {
+          "at": 0,
+          "phase": "spring"
+        },
+        {
+          "at": 345600,
+          "phase": "winter"
+        }
+      ]
+    }
+  },
+  "world": {
+    "carry": {
+      "max_grams": 5000
+    },
+    "bands": [
+      {
+        "at_percent": 100,
+        "key": "ready",
+        "tone": "normal"
+      },
+      {
+        "at_percent": 50,
+        "key": "hurt",
+        "tone": "warning"
+      },
+      {
+        "at_percent": 0,
+        "key": "dying",
+        "tone": "danger"
+      }
+    ],
+    "death": {
+      "player_corpse": "player_corpse",
+      "npc_corpse": "npc_corpse",
+      "shrine": "field",
+      "restore": {
+        "hp": 10,
+        "mv": 10
+      }
+    }
+  }
+}

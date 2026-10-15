@@ -1,0 +1,18 @@
+{
+  "items": [
+    "turnip_01",
+    "turnip_02",
+    "turnip_03"
+  ],
+  "from": {
+    "in": "room",
+    "room": "larder"
+  },
+  "to": {
+    "in": "item",
+    "item": "furrow"
+  },
+  "cap": 1,
+  "count": 1,
+  "every": 1000000000
+}
