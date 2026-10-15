@@ -49,8 +49,22 @@ defmodule Loka.Content.Ancestries do
       labels ++
       Refs.reference("cartridge.json", path, "attribute", choice, manifest, defs) ++
       skill ++
+      learned_only(manifest, defs, path, choice["skill"]) ++
       faction(manifest, defs, path, choice["faction"]) ++
       bound(manifest, defs, path, choice)
+  end
+
+  # Homestead hs-11: a birth grant skips learning, so it never grants a box with a prerequisite.
+  defp learned_only(_, _, _, nil), do: []
+
+  defp learned_only(manifest, defs, path, skill) do
+    case Refs.resolve(skill, "skill", manifest, defs) do
+      {_, _, %{"prerequisite" => _}} ->
+        [diag("SCHEMA_VIOLATION", at("cartridge.json", path ++ ["skill"]))]
+
+      _ ->
+        []
+    end
   end
 
   defp capability(manifest, path, choice) do

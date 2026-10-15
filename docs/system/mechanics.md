@@ -3374,3 +3374,30 @@ Homestead hs-10 (Beads `loka-kgd.108.7`): a recipe may spend held items and hand
   - Reused: `selected`, `giveRefused`, `carryingExchange`, `item_acquired`, `practised`, `ItemLocation`, the replenish holder checks.
   - New: `RecipeCraft`, `crafted`, `craftRefused`, `made`; COMPOSES `action_recipe` → `containment`; the 1.101 floor.
   - Missing invariant: none.
+
+## Skill trees (Homestead hs-11)
+
+Homestead hs-11 (Beads `loka-kgd.108.8`): a skill may require another skill's level before it is learned, so any profession can declare a tree. Declarations: [skill prerequisite](cartridge.md#skill-prerequisite-declarations) (`kernel_api` 1.101).
+
+- **Command.** None new: the teacher dialogue's `choose`, whose sequence holds `skill.acquire`.
+- **Admission** (`blocked` in `kernel/ts/src/mechanics/dialogue/shared.ts`, which the offer in GameView's choice list and the `choose` press both read): a `skill.acquire` whose skill's `prerequisite` does not hold for the choosing actor refuses `invalid_state`, as an already learned skill does (`learnable` in `kernel/ts/src/mechanics/skills.ts`). `acquire` itself does not test the prerequisite, so no start grant may skip it: an ancestry whose `skill` has a `prerequisite` is refused at load ([cartridge](cartridge.md#skill-prerequisite-declarations)).
+- **Effect.** None new: an admitted acquisition writes `skill_<key>` true as before. XP (the `uses_<key>` count) is read, never spent.
+- **Realm seams** (owner decision 2026-10-13, brief checklist).
+  1. Actor: met; the prerequisite is evaluated for the `choose` command's actor.
+  2. Reactions: not applicable.
+  3. Credit: not applicable.
+  4. Time: met; no clock.
+  5. Scope: met; acquisition and use-count facts are player scope already.
+  6. to 9. Not applicable.
+- **Opt-in.** A skill declares `prerequisite`. Chapter 1 declares none.
+- **Book.** No new component: the dialogue choice is offered unavailable until the prerequisite holds.
+- **Traps.** None met; trap 8 checked: the gate is a skill level the actor raises, not a consequence.
+- **Known limits.** Only a prerequisite naming its own skill is refused at load; a cycle in which each of two skills needs the other at some level (A needs `skill_compare` B, B needs `skill_compare` A, neither under `not`) loads and leaves both unlearnable. A cycle in which each needs the other not learned (each leaf under `not`) is a learnable either-or pair. A box's trainer fee is the dialogue's existing `lesson_payment`; hidden boxes are not in this slice.
+- **Sampler.** `cartridges/craft_sampler`: the old carver in the workshop teaches carving (`prerequisite` whittling at least 2). After one failed carve (whittling 1) the lesson is offered unavailable and `choose` refuses `invalid_state`; after the second carve (whittling 2) it is accepted (`kernel/ts/test/craft.test.ts`, `test/loka/content_craft_test.exs`).
+- **Composition record** ([architecture](architecture.md#building-mechanics-by-composition)).
+  - Consumer: `craft_sampler`. Later: Homestead profession trees.
+  - Reads: the actor's facts through `holds` (`skill_compare`, use counts).
+  - Writes: none new.
+  - Reused: VersionedPolicy, `holds`, `skill_compare`, `skill.acquire`, the dialogue `blocked` admission, the policy reference walk.
+  - New: `SkillDefinition.prerequisite`, `learnable`, the self-reference check, the 1.101 floor.
+  - Missing invariant: none.

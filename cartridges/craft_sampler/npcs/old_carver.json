@@ -1,0 +1,10 @@
+{
+  "keywords": [
+    "carver",
+    "old"
+  ],
+  "short": "npc.old_carver.short",
+  "room_line": "npc.old_carver.room",
+  "description": "npc.old_carver.description",
+  "room": "workshop"
+}
