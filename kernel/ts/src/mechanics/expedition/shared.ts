@@ -56,7 +56,7 @@ export function refused(
 ) {
   const { spec } = definition(world);
   const body = bodyOf(world, actor);
-  if (!body || actor !== world.character) return 'not_found' as const;
+  if (!body) return 'not_found' as const;
   if (detailFor(world, spec, transition) !== detail_id) return 'invalid_target' as const;
   const room =
     world.roomIds[refString(transition === 'shelter' ? spec.shelter_room : spec.start_room)];

@@ -177,6 +177,13 @@ test('the loader checks schedule_cases rooms, goal texts, conditions, hours and 
       { error: 'invalid_value' },
     ],
     [
+      // Seam 5: a job has no player; the instance fact child_lost passes in every other test.
+      (c) => (c.facts[`${C}:fact/child_lost`].scopes = ['player']),
+      'FACT_SCOPE_UNSUPPORTED',
+      `${at0}.when.root.fact`,
+      {},
+    ],
+    [
       (c) => (c.manifest.requires.kernel_api.at_least = '1.46'),
       'KERNEL_API_RANGE_INVALID',
       '.cartridge.manifest.requires.kernel_api.at_least',

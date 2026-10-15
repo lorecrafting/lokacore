@@ -40,7 +40,7 @@ import {
 
 const WET = '5ca5e000-0000-4000-8000-000000000306';
 const AT_SEVEN = 7 * HOUR;
-const bread = (w: World, who = 'nell') => shelf(w, npc(w, who))![0];
+const bread = (w: World, who = 'nell') => shelf(w, w.character, npc(w, who))![0];
 const quest = (w: World) => gameView(w).journal[0]!;
 // Intimidate's use count and level.
 function intimidate(w: World) {

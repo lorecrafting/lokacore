@@ -10,7 +10,7 @@ import type {
   TextKey,
 } from '../../contracts.gen.ts';
 import { add } from '../../foundation/int.ts';
-import { accepted, type JobRow, type Mint, type World } from '../../runtime/decision.ts';
+import { accepted, actorOf, type JobRow, type Mint, type World } from '../../runtime/decision.ts';
 import { currentRound } from '../combat/round.ts';
 import { replenishMovers } from '../containment/job.ts';
 import { adjust, level, resourceSpec } from '../resource.ts';
@@ -46,7 +46,7 @@ export function runStatus(
   const { body, row } = held;
   const spec = specOf(world, status);
   if (!spec) return { kind: 'fault', code: 'precondition_failed' } as const;
-  const player = body === world.body;
+  const player = actorOf(world, body) !== undefined;
   const tick = carried ?? row.next_tick_at;
   const visit = { ...world, state: { ...world.state, clock: now } };
   const expired = now >= row.ends_at;

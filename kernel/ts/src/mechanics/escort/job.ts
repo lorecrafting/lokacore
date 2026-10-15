@@ -1,8 +1,14 @@
 // Hireling wages (toolbox row 22b; docs/system/mechanics.md Hireling wages): one world job pays
 // every living group member its wage from the player's purse, on a fixed grid; an unpaid member
 // leaves the group (member false). Nothing is minted: the wage resource is conserved.
-import type { DeltaOp, EntityId, JobId } from '../../contracts.gen.ts';
-import { type Cartridge, type JobRow, type Mint, type World } from '../../runtime/decision.ts';
+import type { CharacterId, DeltaOp, EntityId, JobId } from '../../contracts.gen.ts';
+import {
+  admitted,
+  type Cartridge,
+  type JobRow,
+  type Mint,
+  type World,
+} from '../../runtime/decision.ts';
 import { cmp } from '../../foundation/validate.ts';
 import { adjust, level, resourceSpec, type Levels } from '../resource.ts';
 import { assigned } from '../fact.ts';
@@ -19,11 +25,10 @@ export function firstWage(cartridge: Cartridge, clock: number, mint: Mint) {
   return { [mint()]: { job, due_time: clock + wage.every, status: 'pending' } as JobRow };
 }
 
-// The living NPCs whose member fact is true for the character, in EntityId order.
-const members = (world: World) =>
+// The living NPCs whose member fact is true for `character`, in EntityId order.
+const members = (world: World, character: CharacterId) =>
   (Object.keys(world.entities).sort(cmp) as EntityId[]).filter(
-    (id) =>
-      world.entities[id]!.kind === 'npc' && member(world, world.character, id) && living(world, id),
+    (id) => world.entities[id]!.kind === 'npc' && member(world, character, id) && living(world, id),
   );
 
 /**
@@ -34,11 +39,13 @@ const members = (world: World) =>
 export function runWage(world: World, job_id: JobId, row: JobRow, mint: Mint, at: number) {
   const group = world.cartridge.world!.group!;
   const { resource, amount, every } = group.wage!;
-  const purse = world.body;
+  // ponytail: the one admitted character pays; a wage row stores none (compose_job.ts bindingValid
+  // admits actor_id only on quest and water jobs). Realm: the row stores its payer (save change).
+  const [character, purse] = admitted(world)[0]!;
   let levels: Levels = {};
   let run = { ops: [] as readonly DeltaOp[], position: 0, facts: {} };
   let balance = level(world, purse, resource);
-  for (const npc of members(world)) {
+  for (const npc of members(world, character)) {
     const to = level(world, npc, resource);
     if (
       balance !== undefined &&
@@ -53,7 +60,7 @@ export function runWage(world: World, job_id: JobId, row: JobRow, mint: Mint, at
       run = { ...run, ops: [...run.ops, out.op, into.op] };
     } else {
       balance = undefined; // the paid members are a prefix
-      run = assigned(world, world.character, run, {
+      run = assigned(world, character, run, {
         fact: group.member,
         value: false,
         subject: npc,

@@ -1,21 +1,20 @@
 import { availability } from '../mechanics/transport/shared.ts';
 import { KernelError } from '../foundation/error.ts';
 import { refString, type World, type Steps } from '../runtime/decision.ts';
-import type { EntityId, Key, TransportOffer } from '../contracts.gen.ts';
+import type { CharacterId, EntityId, Key, TransportOffer } from '../contracts.gen.ts';
 
-export function transportOffer(w: World, id: EntityId, steps: Steps): TransportOffer | undefined {
+export function transportOffer(
+  w: World,
+  actor: CharacterId,
+  id: EntityId,
+  steps: Steps,
+): TransportOffer | undefined {
   const route = w.details[id].transport?.route;
   if (!route) return;
   const t = w.cartridge.transports![refString(route)];
   const r = availability(
     w,
-    {
-      type: 'use_transport',
-      actor_id: w.character,
-      endpoint_id: id,
-      route,
-      quoted_fare: t.fare,
-    },
+    { type: 'use_transport', actor_id: actor, endpoint_id: id, route, quoted_fare: t.fare },
     steps,
     t.action,
   );

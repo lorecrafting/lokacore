@@ -1,10 +1,10 @@
 import { status } from '../mechanics/skills.ts';
 import { refString, type World } from '../runtime/decision.ts';
-import type { DefinitionRef, Key } from '../contracts.gen.ts';
+import type { CharacterId, DefinitionRef, Key } from '../contracts.gen.ts';
 import { choice, value, worn } from '../mechanics/attributes/shared.ts';
 import { levelling } from '../mechanics/levelling/shared.ts';
 
-export function skillViews(world: World, steps = { n: 0 }) {
+export function skillViews(world: World, actor: CharacterId, steps = { n: 0 }) {
   const ref = (kind: string, key: DefinitionRef['key']): DefinitionRef => ({
     cartridge_id: world.cartridge.manifest.id,
     cartridge_version: world.cartridge.manifest.version,
@@ -17,13 +17,13 @@ export function skillViews(world: World, steps = { n: 0 }) {
       skill,
       label: s.label,
       requirement: s.requirement,
-      ...status(world, world.character, skill, steps),
+      ...status(world, actor, skill, steps),
     };
   });
-  const attributes = attributeViews(world, ref);
-  const selected = choice(world, world.character);
+  const attributes = attributeViews(world, actor, ref);
+  const selected = choice(world, actor);
   return {
-    ...levellingView(world),
+    ...levellingView(world, actor),
     ...(skills.length && { skills }),
     ...(attributes.length && { attributes }),
     ...(selected && { ancestry: selected.ancestry }),
@@ -44,8 +44,8 @@ export function skillViews(world: World, steps = { n: 0 }) {
 }
 
 /** The player's level, experience, next threshold (absent at the top) and unspent points (row 4). */
-function levellingView(world: World) {
-  const l = levelling(world, world.character);
+function levellingView(world: World, actor: CharacterId) {
+  const l = levelling(world, actor);
   if (!l) return {};
   const { level, experience, next, unspent } = l;
   return { levelling: { level, experience, ...(next !== undefined && { next }), unspent } };
@@ -69,12 +69,16 @@ export function freeLessons(world: World, npc: string) {
  * Each authored attribute's value and, when nonzero, what identified worn items grant (toolbox
  * rows 3 and 27).
  */
-function attributeViews(world: World, ref: (kind: string, key: Key) => DefinitionRef) {
+function attributeViews(
+  world: World,
+  actor: CharacterId,
+  ref: (kind: string, key: Key) => DefinitionRef,
+) {
   return Object.values(world.cartridge.attributes ?? {}).map((a) => {
-    const bonus = worn(world, world.character, ref('attribute', a.key), true);
+    const bonus = worn(world, actor, ref('attribute', a.key), true);
     return {
       attribute: ref('attribute', a.key),
-      value: value(world, world.character, ref('attribute', a.key)),
+      value: value(world, actor, ref('attribute', a.key)),
       ...(bonus !== 0 && { worn: bonus }),
     };
   });

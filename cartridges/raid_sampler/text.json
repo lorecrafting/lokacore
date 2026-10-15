@@ -26,5 +26,15 @@
   "room.field.description": "Stubble under the open sky. The village lies north.",
   "npc.raider.short": "a raider",
   "npc.raider.room": "A [[raider|raider]] prowls here.",
-  "npc.raider.description": "A raider with a knife, come with the full moon."
+  "npc.raider.description": "A raider with a knife, come with the full moon.",
+  "npc.defender.short": "the defender",
+  "npc.defender.room": "The [[defender|defender]] stands at the gate.",
+  "npc.defender.description": "A villager with a spear, holding the gate.",
+  "quest.hold_the_gate.title": "Hold the Gate",
+  "quest.hold_the_gate.active": "Keep the defender alive until the raid ends.",
+  "quest.hold_the_gate.ready": "The raid is over.",
+  "quest.hold_the_gate.resolved": "The gate held.",
+  "quest.hold_the_gate.failed": "The defender fell.",
+  "quest.hold_the_gate.held": "The defender lived to see the new moon.",
+  "quest.hold_the_gate.fallen": "The defender fell at the gate."
 }
