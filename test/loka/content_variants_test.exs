@@ -64,4 +64,18 @@ defmodule Loka.ContentVariantsTest do
              inspect(diags)
     end
   end
+
+  # Breaks (twin of kernel/ts/test/variants.test.ts): the compiler accepts a status kind
+  # (loka-x6t.64) outside buff and debuff.
+  test "a status kind is buff or debuff" do
+    dir = Loka.ContentSource.copy("cartridges/variants_sampler")
+    neutral = &Map.put(&1, "kind", "neutral")
+    assert {:error, diags} = Loka.ContentSource.compile(dir, [{"statuses/bruised.json", neutral}])
+
+    assert Enum.any?(
+             diags,
+             &match?(%{"code" => "SCHEMA_VIOLATION", "path" => "statuses/bruised.kind"}, &1)
+           ),
+           inspect(diags)
+  end
 end

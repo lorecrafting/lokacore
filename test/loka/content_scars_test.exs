@@ -14,10 +14,13 @@ defmodule Loka.ContentScarsTest do
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, [])
     api = &put_in(&1, ["requires", "kernel_api", "at_least"], "1.47")
 
-    assert {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api"} in diags(
-             dir,
-             "cartridge.json",
-             api
+    # The scar's kind (1.101, loka-x6t.64) dropped, so it cannot shadow the 1.48 floor.
+    unkinded = {"statuses/scar.json", &Map.delete(&1, "kind")}
+    assert {:error, ds} = Loka.ContentSource.compile(dir, [{"cartridge.json", api}, unkinded])
+
+    assert {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api"} in Enum.map(
+             ds,
+             &{&1["code"], &1["path"]}
            )
 
     assert {"SCHEMA_VIOLATION", "statuses/scar.per_tick"} in diags(

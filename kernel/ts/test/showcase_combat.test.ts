@@ -79,9 +79,10 @@ const bleeding = (at: number) => ({
   resource: 'hp',
   per_tick: -1,
   tick_every: 900,
+  kind: 'debuff',
 });
 // A permanent status shows no end and no tick (its tick_every is required by the schema; it never runs).
-const GORED = { label: 'condition.gored', resource: 'hp', tick_every: 60 };
+const GORED = { label: 'condition.gored', resource: 'hp', tick_every: 60, kind: 'debuff' }; // authored kind
 
 /** The pack members spawned in `roomKey`, lower id first. */
 const goblinsIn = (w: World, roomKey: string) =>
@@ -382,6 +383,7 @@ test('loader: the attacker filter needs API 1.58 and an authored NPC', () => {
   const gore = (api: string, key: string) => (c: any) => {
     c.manifest.requires.kernel_api.at_least = api;
     c.reactions[ref('reaction', 'boar_gore')].on.attacker = { ...C, kind: 'npc', key };
+    delete c.statuses[ref('status', 'gored')].kind; // 1.101 (loka-x6t.64)
   };
   const at = `.cartridge.reactions["${ref('reaction', 'boar_gore')}"].on.attacker`;
   assert.equal(reload(gore('1.58', 'boar')), 'ok');

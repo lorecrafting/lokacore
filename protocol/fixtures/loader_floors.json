@@ -325,6 +325,8 @@
       "floor": "1.58",
       "below": "1.57",
       "source": "cartridges/toolbox_showcase",
+      "feature": "a reaction's attacker filter (loka-kgd.79)",
+      "edits": [["statuses/gored.json", ["kind"], null]],
       "compiler": [
         "KERNEL_API_RANGE_INVALID",
         "cartridge.requires.kernel_api.at_least"
@@ -1081,6 +1083,14 @@
       "feature": "service.benefit.escrow.output without ready_after (a barter, row kgd.70)",
       "edits": [["services/knife_for_pelts.json", ["price"], 1]],
       "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
+      "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
+    },
+    {
+      "floor": "1.101",
+      "below": "1.100",
+      "source": "cartridges/variants_sampler",
+      "feature": "a status kind (loka-x6t.64)",
+      "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api"],
       "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
     }
   ]

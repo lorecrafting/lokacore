@@ -3,6 +3,7 @@
   "tick_every": 18000,
   "resource": "hp",
   "per_tick": 1,
+  "kind": "debuff",
   "label": "condition.bruised",
   "narration": {
     "applied": "narration.bruised.applied",

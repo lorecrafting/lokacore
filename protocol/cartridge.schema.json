@@ -2791,6 +2791,13 @@
           },
           "description": "Toolbox row 2c: while the status is active on a holder, each modifier is added to the holder's attribute as attributes@1 reads it (kernel_api at least 1.46)."
         },
+        "kind": {
+          "enum": [
+            "buff",
+            "debuff"
+          ],
+          "description": "Toolbox row loka-x6t.64 (kernel_api at least 1.101): the status icon's polarity, shown as GameView ConditionView.kind; wins over the polarity derived from the effect fields."
+        },
         "fear": {
           "const": true,
           "description": "Toolbox row W21 (kernel_api at least 1.50): while active on a pack member, its C4 flight is attempted on its every opponent turn, whatever its hp; may stand in for per_tick."

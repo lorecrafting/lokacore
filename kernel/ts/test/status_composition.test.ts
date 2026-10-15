@@ -13,7 +13,8 @@ test('literal status composition cases', () => {
 });
 
 // Breaks: generic admission accepts an active status row, a transition or a condition view
-// missing one owned field, or an inactive row carrying a live field.
+// missing one owned field, an inactive row carrying a live field, or a condition kind outside
+// buff and debuff.
 test('status rows, transitions and condition views require their complete shape', () => {
   const op = read('protocol/fixtures/status_composition.json').cases[0].ops[0];
   assert.deepEqual(validate('DeltaOp', op), []);
@@ -47,11 +48,16 @@ test('status rows, transitions and condition views require their complete shape'
     resource: 'hp',
     per_tick: -1,
     tick_every: 60,
+    kind: 'debuff',
   };
   assert.deepEqual(validate('ConditionView', view), []);
+  assert.deepEqual(validate('ConditionView', { ...view, kind: 'buff' }), []);
+  assert.deepEqual(validate('ConditionView', { ...view, kind: 'neutral' }), [
+    { path: '/kind', code: 'not_in_enum' },
+  ]);
   // per_tick is absent for a status that never ticks (row 2c), ends_at and next_tick_at for a
-  // permanent one (row W8).
-  const optional = ['per_tick', 'ends_at', 'next_tick_at'];
+  // permanent one (row W8); kind (loka-x6t.64) is optional.
+  const optional = ['per_tick', 'ends_at', 'next_tick_at', 'kind'];
   for (const field of Object.keys(view).filter((f) => !optional.includes(f))) {
     const partial: Record<string, unknown> = { ...view };
     delete partial[field];

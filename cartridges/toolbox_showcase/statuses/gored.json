@@ -2,6 +2,7 @@
   "duration": "permanent",
   "tick_every": 60,
   "resource": "hp",
+  "kind": "debuff",
   "label": "condition.gored",
   "narration": {
     "applied": "narration.gored.applied",

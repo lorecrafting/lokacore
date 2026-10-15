@@ -1,4 +1,4 @@
-import type { BandTable, EntityId, Key, ResourceView } from '../contracts.gen.ts';
+import type { BandTable, EntityId, Key, ResourceView, StatusDefinition } from '../contracts.gen.ts';
 import { refString, type World } from '../runtime/decision.ts';
 import { level, resourceRef, resourceSpec } from '../mechanics/resource.ts';
 import { cmp } from '../foundation/validate.ts';
@@ -46,7 +46,8 @@ export function resources(world: World, body: EntityId | undefined): ResourceVie
     .sort((a, b) => cmp(refString(a.resource), refString(b.resource)));
 }
 
-// Active statuses on the body (toolbox rows 1, W8), absent when none.
+// Active statuses on the body (toolbox rows 1, W8), absent when none; kind is the icon polarity
+// (loka-x6t.64), never the modifier amounts.
 export function conditionViews(world: World, body: EntityId | undefined) {
   if (!body) return {};
   const conditions = activeStatuses(world, body).map(({ spec, row }) => ({
@@ -55,6 +56,23 @@ export function conditionViews(world: World, body: EntityId | undefined) {
     resource: spec.resource.key as Key,
     ...(spec.per_tick !== undefined && { per_tick: spec.per_tick }),
     tick_every: spec.tick_every,
+    ...(polarity(spec) && { kind: polarity(spec) }),
   }));
   return conditions.length > 0 ? { conditions } : {};
+}
+
+// The authored kind, else debuff on any harm, buff on any gain, none for a status with no effect.
+function polarity(s: StatusDefinition): 'buff' | 'debuff' | undefined {
+  if (s.kind) return s.kind;
+  const tick = s.per_tick ?? 0;
+  const amounts = [
+    ...(s.modifies ?? []).map((m) => m.modifier),
+    ...Object.values(s.resistances ?? {}),
+  ];
+  const cost = s.movement?.cost_percent ?? 100;
+  const { sight, hearing } = s.perception ?? {};
+  if (tick < 0 || amounts.some((n) => n < 0) || s.fear || s.blocks || s.allows) return 'debuff';
+  if (sight === 'blind' || hearing === 'deaf' || cost > 100) return 'debuff';
+  const gain = tick > 0 || amounts.some((n) => n > 0) || sight || cost < 100;
+  return gain || s.movement?.passes || s.concealment ? 'buff' : undefined;
 }
