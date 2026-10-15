@@ -2,6 +2,7 @@
 // across reopen, a failed COMMIT, a lost acknowledgement and replay (docs/system/save.md).
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -32,9 +33,16 @@ try {
 } finally {
   rmSync(scratch, { recursive: true });
 }
-const loaded = loadCartridge(new TextEncoder().encode(JSON.stringify(artifact)), INSTALLED);
+// `fed` listed twice is written once (food/shared.ts applied), so it owns one receipt line.
+const stewEdible = artifact.cartridge.items['kitchen_sampler@0.0.1:item/stew_plain_01'].edible;
+stewEdible.applies = [stewEdible.applies[0], stewEdible.applies[0]];
+const canonical = encode(artifact.cartridge);
+const bundle = { canonical, sha256: createHash('sha256').update(canonical).digest('hex') };
+const loaded = loadCartridge(
+  new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${bundle.sha256}"}`),
+  INSTALLED,
+);
 if (!loaded.ok) throw new Error(JSON.stringify(loaded));
-const bundle = { canonical: encode(artifact.cartridge), sha256: artifact.content_hash as string };
 const initial = newWorld(
   loaded.cartridge as Cartridge,
   '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never,
@@ -136,6 +144,7 @@ test('the stew Eat survives reopen, failed and lost COMMIT and replay; a forged 
       [...lines, { key: 'narration.fish_seen' }],
       [lines[0], { key: 'narration.fish_seen' }],
       [{ key: 'narration.fish_seen' }, lines[1]],
+      [lines[0], null],
     ]) {
       const d = { ...JSON.parse(row.response), narration: forged };
       p.sql
