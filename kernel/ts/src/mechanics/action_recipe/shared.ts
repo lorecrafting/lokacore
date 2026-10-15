@@ -3,6 +3,7 @@
 // keyed by the tool's properties (UseTool) and, through its policy, the target's; never by ids.
 import type {
   ActionRecipe,
+  CharacterId,
   CommandPayload,
   EntityId,
   RecipeTarget,
@@ -10,6 +11,7 @@ import type {
 } from '../../contracts.gen.ts';
 import { bodyOf, refString, type Steps, type World } from '../../runtime/decision.ts';
 import { engaged } from '../combat/shared.ts';
+import { value as factValue } from '../fact.ts';
 import { toolHeld } from '../lookups.ts';
 import { holds } from '../policy.ts';
 import { folded } from '../speech/shared.ts';
@@ -64,23 +66,30 @@ export function useAdmission(
   return body ? useRefused(world, recipe.target, body, item_id, target_id, steps) : 'not_found';
 }
 
-/** Toolbox row 29a: the spell recipe whose word is `word`, case-folded (speech/shared.ts folded). */
-export const spellOf = (world: World, word: unknown) => {
+/**
+ * Toolbox row 29a: the spell recipe whose word is `word`, case-folded (speech/shared.ts folded),
+ * while `actor` has learned it (word bar S2: its learned fact reads true); an unlearned spell is
+ * no spell to its caster.
+ */
+export const spellOf = (world: World, actor: CharacterId, word: unknown) => {
   const w = folded(word);
   return Object.values(world.cartridge.recipes ?? {}).find(
-    (r) => r.target.kind === 'spell' && r.target.word === w,
+    (r) =>
+      r.target.kind === 'spell' &&
+      r.target.word === w &&
+      factValue(world, actor, r.target.learned) === true,
   );
 };
 
 /**
  * step's admission of a cast (commands/actions.ts refusal), before the spell's costs: invalid_state
- * for an unknown word and for a spell whose policy fails alike, so a refusal never tells which
+ * for an unknown or unlearned word and for a spell whose policy fails alike, so a refusal never tells which
  * words are spells; in a fight, also for a spell with a duration (row 29b: its time.advance would
  * run the round job inside the cast).
  */
 export function castAdmission(world: World, payload: CommandPayload, steps: Steps) {
   if (payload.type !== 'cast') return undefined;
-  const spell = spellOf(world, payload.word);
+  const spell = spellOf(world, payload.actor_id, payload.word);
   const body = bodyOf(world, payload.actor_id);
   const busy = !!spell?.duration && !!body && !!engaged(world, body);
   return spell && !busy && holds(world, payload.actor_id, spell.policy.root, { steps })

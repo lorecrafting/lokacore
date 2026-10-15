@@ -1,30 +1,53 @@
 defmodule Loka.Content.Spells do
   @moduledoc """
-  Toolbox row 29a: a spell recipe target needs kernel_api 1.51 (one diagnostic), and no two spells
-  share a word (DUPLICATE_DEFINITION at each one's word); row 29b: an effect step (status.apply,
-  damage, light.ignite) sits on a spell (SCHEMA_VIOLATION at its op), needs kernel_api 1.55 and
-  its owner (UNDECLARED_CAPABILITY at its op: damage death@1 by entity_died, light.ignite light@1
-  by the ignite command; status.apply's status already needs status@1). Twin of spells/1 in
-  kernel/ts/src/content/cartridge_recipes.ts and the recipe steps of lockStage in cartridge.ts.
+  Toolbox row 29a: a spell recipe target needs kernel_api 1.98 (one diagnostic), and no two spells
+  share a word (DUPLICATE_DEFINITION at each one's word); its learned names a bool fact of this
+  cartridge (FACT_TYPE_MISMATCH otherwise; the loader alone refuses a per_subject fact,
+  FACT_SCOPE_UNSUPPORTED). Row 29b: an effect step (status.apply, damage, light.ignite) sits on a
+  spell (SCHEMA_VIOLATION at its op) and needs its owner (UNDECLARED_CAPABILITY at its op: damage
+  death@1 by entity_died, light.ignite light@1 by the ignite command; status.apply's status
+  already needs status@1). Word bar S2: speech.phrases needs kernel_api 1.98 too. Twin of
+  spells/1 in kernel/ts/src/content/cartridge_recipes.ts and the recipe steps of lockStage in
+  cartridge.ts.
   """
   import Loka.Content.Source, only: [at: 2, diag: 2, diag: 3]
   import Loka.Content.Refs, only: [owners: 2, owned: 3]
+  alias Loka.Content.Refs
 
   @effects ~w(status.apply damage light.ignite)
   @owners %{"damage" => {"events", "entity_died"}, "light.ignite" => {"commands", "ignite"}}
 
   # A missing or schema-invalid manifest (nil) has its own diagnostics.
-  def check(nil, _, _), do: []
+  def check(nil, _, _, _), do: []
 
-  def check(m, defs, registry) do
-    spells =
-      for {_, {rel, [], %{"target" => %{"kind" => "spell"}} = r}} <- defs["recipe"] || %{},
-          do: {rel, r["target"]["word"]}
+  def check(m, defs, registry, settings) do
+    targets =
+      for {_, {rel, [], %{"target" => %{"kind" => "spell"} = t}}} <- defs["recipe"] || %{},
+          do: {rel, t}
 
+    spells = for {rel, t} <- targets, do: {rel, t["word"]}
     effects = effects(defs)
-    least = if effects != [], do: [1, 55], else: [1, 51]
-    out = shared(spells) ++ placed(effects) ++ unowned(effects, m, registry)
-    if spells != [] and api(m) < least, do: [floor() | out], else: out
+
+    out =
+      shared(spells) ++
+        Enum.flat_map(targets, &learned(&1, m, defs)) ++
+        placed(effects) ++ unowned(effects, m, registry)
+
+    floored = targets != [] or Map.has_key?(settings, "speech")
+    if floored and api(m) < [1, 98], do: [floor() | out], else: out
+  end
+
+  defp learned({rel, t}, m, defs) do
+    bool =
+      case Refs.resolve(t["learned"], "fact", m, defs) do
+        {_, _, %{"value_type" => %{"type" => type}}} when type != "bool" ->
+          [diag("FACT_TYPE_MISMATCH", at(rel, ["target", "learned"]))]
+
+        _ ->
+          []
+      end
+
+    Refs.reference(rel, ["target"], {"learned", "fact"}, t, m, defs) ++ bool
   end
 
   defp shared(spells) do

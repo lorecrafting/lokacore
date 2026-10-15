@@ -1,5 +1,38 @@
 {
   "facts": {
+    "flamma_known": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": true
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The player knows the word flamma from the start."
+    },
+    "lux_known": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": true
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The player knows the word lux from the start."
+    },
+    "ward_known": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": true
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The player knows the word ward from the start."
+    },
     "ward_landed": {
       "version": 1,
       "value_type": {

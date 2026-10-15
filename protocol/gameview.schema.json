@@ -3,6 +3,60 @@
   "title": "GameView contracts",
   "description": "The portable GameView envelope and its freshness (04 §14-§16; 00 §4.10; pre-release-proof.md P5). One schema for Story and Realm hosts; React Native renders it and never re-derives legality (04 §15).",
   "$defs": {
+    "SpellWord": {
+      "description": "Word bar S2: one learned spell's word and whether a cast of it is admitted now; reason is present exactly when it is not.",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "word": {
+              "$ref": "dialogue.schema.json#/$defs/SpokenKeyword"
+            },
+            "available": {
+              "const": true
+            }
+          },
+          "required": [
+            "word",
+            "available"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "word": {
+              "$ref": "dialogue.schema.json#/$defs/SpokenKeyword"
+            },
+            "available": {
+              "const": false
+            },
+            "reason": {
+              "$ref": "#/$defs/UnavailableReason"
+            }
+          },
+          "required": [
+            "word",
+            "available",
+            "reason"
+          ],
+          "additionalProperties": false
+        }
+      ],
+      "examples": [
+        {
+          "word": "lux",
+          "available": true
+        },
+        {
+          "word": "ward",
+          "available": false,
+          "reason": {
+            "code": "invalid_state"
+          }
+        }
+      ]
+    },
     "AdvertisedAction": {
       "description": "One action of a resolved ActionSet (04 §19), for the entity or place it is listed under, with what the client needs to build its ActionInvocation (04 §2, §17) without a handwritten per-action catalog: the target spec (implicit entity targets name the entity an action is listed under; concrete target_ids name the exact targets, including Read place actions aimed at inspectable details) and the input parameters it requires, both from its ActionDefinition (action.schema.json). Lists are in presentation order, highest priority first (00 §4.10). Optional command is the resolved semantic command key for participant wording/ownership; action_key remains the invocation identity. Light item controls supply it.",
       "oneOf": [
@@ -1190,6 +1244,22 @@
         },
         "scene": {
           "$ref": "#/$defs/SceneView"
+        },
+        "spell_words": {
+          "description": "Word bar S2 (toolbox row 29a): one entry per spell whose learned fact reads true for the actor, in recipe key order (canonical); available and reason from the cast's own admission (commands/actions.ts refusal, then the recipe's cooldown and costs). Absent when the actor has learned none; an unlearned spell is never listed.",
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/SpellWord"
+          }
+        },
+        "phrases": {
+          "description": "Word bar S2: the cartridge's speech.phrases, unchanged; absent when it authors none.",
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "action.schema.json#/$defs/Word"
+          }
         },
         "storylet": {
           "description": "Toolbox row FD3 (kernel_api at least 1.92): the key of the storylet the deck draws for the actor here this hour (action.schema.json RecipeTarget storylet), present exactly when that action is listed in actions, available or not (mechanics.md Storylet deck); an optional field: the snapshot format stays.",

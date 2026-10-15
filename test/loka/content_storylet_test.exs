@@ -45,7 +45,8 @@ defmodule Loka.ContentStoryletTest do
     # Only a storylet recipe may start an unplaced scene.
     spell = [
       {"recipes/stranger_beckons.json",
-       &put_in(&1, ["target"], %{"kind" => "spell", "word" => "lux"})}
+       &put_in(&1, ["target"], %{"kind" => "spell", "word" => "lux", "learned" => "robbed"})},
+      {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.98")}
     ]
 
     assert {:error, diags} = Loka.ContentSource.compile(dir, spell)

@@ -1,7 +1,7 @@
 {
   "label": "spell.noctis",
   "aliases": ["noctis"],
-  "target": { "kind": "spell", "word": "noctis" },
+  "target": { "kind": "spell", "word": "noctis", "learned": "noctis_known" },
   "priority": 0,
   "policy": {
     "policy_version": 1,

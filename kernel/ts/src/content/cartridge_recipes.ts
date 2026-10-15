@@ -71,7 +71,15 @@ export function recipes(c: Obj, { named, typedValue, text }: Checks): Diagnostic
 // cartridge, or (row FD3) a storylet's rooms resolve.
 function target(c: Obj, r: Obj, at: string, named: Checks['named']): Diagnostic[] {
   const { room, detail, tool } = r.target;
-  if (r.target.kind === 'spell') return [];
+  if (r.target.kind === 'spell') {
+    // Word bar S2: learned names a bool fact (a per_subject one is FACT_SCOPE_UNSUPPORTED in the
+    // W2 site walk, as row 27's identified).
+    named(r.target.learned, 'fact', `${at}.target.learned`);
+    const spec = c.facts[refString(r.target.learned)];
+    return spec && spec.value_type.type !== 'bool'
+      ? [diag('FACT_TYPE_MISMATCH', `${at}.target.learned`)]
+      : [];
+  }
   if (r.target.kind === 'storylet') {
     (r.target.rooms ?? []).forEach((x: Obj, i: number) =>
       named(x, 'room', `${at}.target.rooms[${i}]`),
@@ -117,9 +125,9 @@ function uses(c: Obj): Diagnostic[] {
   return [...out, ...floor('use', '1.49'), ...floor('storylet', '1.92')];
 }
 
-// Toolbox row 29a: a spell target needs kernel_api 1.51, and no two spells share a word
-// (DUPLICATE_DEFINITION at each one's word); row 29b: an effect step sits on a spell
-// (SCHEMA_VIOLATION at its op) and needs kernel_api 1.55.
+// Toolbox row 29a: a spell target needs kernel_api 1.98 (as does word bar S2's speech.phrases),
+// and no two spells share a word (DUPLICATE_DEFINITION at each one's word); row 29b: an effect
+// step sits on a spell (SCHEMA_VIOLATION at its op).
 function spells(c: Obj): Diagnostic[] {
   const recipes = Object.entries((c.recipes ?? {}) as Obj);
   const all = recipes.filter(([, r]) => r.target.kind === 'spell');
@@ -138,8 +146,7 @@ function spells(c: Obj): Diagnostic[] {
   for (const [r, at] of effects)
     if (r.target.kind !== 'spell')
       out.push(diag('SCHEMA_VIOLATION', at, { error: 'invalid_value' }));
-  const floor = effects.length ? '1.55' : '1.51';
-  if (all.length && apiCmp(c.manifest.requires.kernel_api.at_least, floor) < 0)
+  if ((all.length || c.speech) && apiCmp(c.manifest.requires.kernel_api.at_least, '1.98') < 0)
     out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
   return out;
 }

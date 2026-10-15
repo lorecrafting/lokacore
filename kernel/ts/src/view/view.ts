@@ -1,4 +1,5 @@
-// size: allow 306, row 33 lists an NPC's lock-admitted holdings beside container contents
+// size: allow 308, row 33 lists an NPC's lock-admitted holdings beside container contents; word bar S2
+import { wordViews } from './spells.ts';
 import { knowledgeView } from './knowledge.ts';
 import { movementPlan } from '../mechanics/movement/sequence.ts';
 import { edge } from '../mechanics/water/shared.ts';
@@ -66,7 +67,7 @@ import { currentBleed } from '../mechanics/bleed/shared.ts';
  * as amended), absent when the cartridge has none; and the player's position (position@1), absent
  * without it; and the highest reached chapter marker, absent without chapter declarations.
  */
-// size: allow 42, the viewer's body is derived once for every projection (loka-kgd.150.5); row FD3 storylet
+// size: allow 43, the viewer's body is derived once for every projection (loka-kgd.150.5); row FD3 storylet; word bar S2
 export function gameView(world: World, actor: CharacterId = world.character): GameView {
   const body = bodyOf(world, actor);
   const fight = body ? engaged(world, body) : undefined;
@@ -101,6 +102,7 @@ export function gameView(world: World, actor: CharacterId = world.character): Ga
     journal: journal(world, actor, steps),
     ...(current && { chapter: current }),
     ...(showing && { scene: showing }),
+    ...wordViews(world, actor, steps),
     ...(actions.place.some((a) => a.action_key === actions.drawn) && { storylet: actions.drawn }),
     ...timeView(world),
     ...(choice && { choice }),

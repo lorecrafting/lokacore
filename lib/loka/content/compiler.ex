@@ -101,7 +101,7 @@ defmodule Loka.Content.Compiler do
       Loka.Content.BellCue.check(manifest, defs, located, v2) ++
         Position.check(manifest, defs, elem(located, 1)) ++
         Loka.Content.Trails.check(manifest, defs, v2, located, registry) ++
-        Loka.Content.Spells.check(manifest, defs, registry) ++
+        Loka.Content.Spells.check(manifest, defs, registry, elem(located, 1)) ++
         Scenes.check(manifest, defs, v2, registry) ++
         Ancestries.check(manifest, defs, located, if(v2, do: elem(v2, 1), else: %{})) ++
         Loka.Content.Floors.check(manifest, defs, located) ++
@@ -142,7 +142,9 @@ defmodule Loka.Content.Compiler do
 
     case validated(rel, [], "ManifestFile", m, Map.put(defs, "ManifestFile", file)) do
       [] ->
-        {extra, manifest} = Map.split(m, ~w(entry calendar world chapters ancestries alternates))
+        {extra, manifest} =
+          Map.split(m, ~w(entry calendar world chapters ancestries alternates speech))
+
         located = {ref(extra["entry"], "room", m), settings(extra, m)}
         diags = Requires.check(rel, manifest, registry)
         manifest = manifest |> Position.requires() |> Scenes.requires()
@@ -160,20 +162,23 @@ defmodule Loka.Content.Compiler do
     |> put_in(["properties", "entry"], %{"$ref" => "DefinitionRef"})
     |> put_in(["properties", "calendar"], %{"$ref" => "Calendar"})
     |> put_in(["properties", "world"], %{"$ref" => "WorldSettings"})
-    |> Map.update!("properties", &Map.merge(&1, Map.take(v2, ~w(chapters ancestries alternates))))
+    |> Map.update!(
+      "properties",
+      &Map.merge(&1, Map.take(v2, ~w(chapters ancestries alternates speech)))
+    )
   end
 
-  # alternates holds text keys, not references: kept out of expand, whose clauses match keys.
+  # alternates and speech hold text keys and words, not references: kept out of expand, whose clauses match keys.
   defp settings(extra, m),
     do:
-      Map.drop(extra, ["entry", "alternates"])
+      Map.drop(extra, ["entry", "alternates", "speech"])
       |> Water.settings(m)
       |> Derived.settings(m)
       |> Levelling.settings(m)
       |> Combat.settings(m)
       |> Loka.Content.Theft.settings(m)
       |> Checks.expand(m)
-      |> Map.merge(Map.take(extra, ["alternates"]))
+      |> Map.merge(Map.take(extra, ["alternates", "speech"]))
 
   # text.json is the TextCatalog; nil when absent, :unknown when rejected (keys then unresolved).
   defp text([]), do: {nil, []}

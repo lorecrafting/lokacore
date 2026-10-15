@@ -71,6 +71,19 @@ const levelled = (w: World, experience: number): World => ({
   },
 });
 
+/** The sampler's artifact after `change`, as the loader's verdict: 'loaded' or [code, path]. */
+function verdict(change: (c: Record<string, any>) => void) {
+  const c = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
+  change(c);
+  const canonical = encode(c);
+  const sha256 = createHash('sha256').update(canonical).digest('hex');
+  const r = loadCartridge(
+    new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
+    INSTALLED,
+  );
+  return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
+}
+
 function fresh(): World {
   n = 0;
   return newWorld(content, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e55' as never, [1, 2, 3, 4]);
@@ -203,15 +216,100 @@ test('loader: spells and the level_compare leaf need 1.51; spell words are uniqu
       `.cartridge.rooms["spells_sampler@0.0.1:room/tower"].actions[0].actions[0]`,
     ],
   ];
-  for (const [change, diagnostic, path] of rows) {
-    const c = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
-    change(c);
-    const canonical = encode(c);
-    const sha256 = createHash('sha256').update(canonical).digest('hex');
-    const r = loadCartridge(
-      new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-      INSTALLED,
-    );
-    assert.deepEqual(r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path], [diagnostic, path]);
-  }
+  for (const [change, diagnostic, path] of rows)
+    assert.deepEqual(verdict(change), [diagnostic, path]);
+});
+
+const words = (w: World, actor = w.character) =>
+  (gameView(w, actor).spell_words ?? []).map((s) => [s.word, s.reason?.code ?? 'available']);
+
+// Breaks (word bar S2): spell_words lists a spell the viewer has not learned (ward before the
+// quest, noctis before the grimoire), reads learned for world.character instead of the viewer
+// (realm seam 1), or its availability differs from cast's own refusal (lux short of ash, ward at
+// level 1); or an unlearned spell's cast is told apart from an unknown word.
+test('spell_words lists learned spells only, with cast admission as availability', () => {
+  let w = fresh();
+  assert.deepEqual(words(w), [['lux', 'insufficient_resource']]);
+  assert.deepEqual(words(gather(w)), [['lux', 'available']]);
+  assert.deepEqual(cast(fresh(), 'ward').decision, cast(fresh(), 'xyzzy').decision);
+  w = ok(play(w, { type: 'accept_quest', quest: ref('quest', 'apprentice') }, 'apprentice'));
+  w = ok(play(w, { type: 'perform', action: 'trace_sigil' }));
+  w = ok(
+    play(w, { type: 'raise_attribute', attribute: ref('attribute', 'wis') }, 'raise_attribute'),
+  );
+  assert.deepEqual(words(w), [
+    ['lux', 'insufficient_resource'],
+    ['ward', 'available'],
+  ]);
+  assert.deepEqual(words(levelled(w, 0)), [
+    ['lux', 'insufficient_resource'],
+    ['ward', 'invalid_state'],
+  ]);
+  const other = 'char:other' as never;
+  assert.deepEqual(
+    words(w, other).map(([word]) => word),
+    ['lux'],
+  );
+});
+
+// Breaks: an entry listed available whose cast (its word, through the offered cast action) is
+// refused, so the word bar would offer a chip that fails.
+test('every available spell_words entry casts', () => {
+  let w = gather(fresh());
+  w = ok(play(w, { type: 'accept_quest', quest: ref('quest', 'apprentice') }, 'apprentice'));
+  w = ok(play(w, { type: 'perform', action: 'trace_sigil' }));
+  w = ok(
+    play(w, { type: 'raise_attribute', attribute: ref('attribute', 'wis') }, 'raise_attribute'),
+  );
+  const available = gameView(w).spell_words!.filter((s) => s.available);
+  assert.deepEqual(
+    available.map((s) => s.word),
+    ['lux', 'ward'],
+  );
+  for (const s of available) ok(cast(w, s.word));
+});
+
+// Breaks: the TS loader admits a spell without learned, naming a fact this cartridge lacks, a
+// non-bool fact or a per_subject one, or a spell below kernel_api 1.98 (content_spells_test.exs).
+test('loader: a spell learned names a bool player fact; spells need 1.98', () => {
+  const at = `.cartridge.recipes[${JSON.stringify('spells_sampler@0.0.1:recipe/ward')}]`;
+  const fact = (c: Record<string, any>, key: string, spec: object) => {
+    const taught = c.facts['spells_sampler@0.0.1:fact/ward_taught'];
+    c.facts[`spells_sampler@0.0.1:fact/${key}`] = { ...taught, key, ...spec };
+    c.recipes['spells_sampler@0.0.1:recipe/ward'].target.learned = ref('fact', key);
+  };
+  const rows: [(c: Record<string, any>) => void, string, string][] = [
+    [
+      (c) => delete c.recipes['spells_sampler@0.0.1:recipe/ward'].target.learned,
+      'SCHEMA_VIOLATION',
+      `${at}.target.learned`,
+    ],
+    [
+      (c) => fact(c, 'count', { value_type: { type: 'int', default: 0 } }),
+      'FACT_TYPE_MISMATCH',
+      `${at}.target.learned`,
+    ],
+    [
+      (c) => (c.recipes['spells_sampler@0.0.1:recipe/ward'].target.learned = ref('fact', 'nope')),
+      'UNRESOLVED_REFERENCE',
+      `${at}.target.learned`,
+    ],
+    [
+      (c) =>
+        fact(c, 'each', {
+          value_type: { type: 'bool', default: false },
+          scopes: ['instance'],
+          per_subject: true,
+        }),
+      'FACT_SCOPE_UNSUPPORTED',
+      `${at}.target.learned`,
+    ],
+    [
+      (c) => (c.manifest.requires.kernel_api.at_least = '1.97'),
+      'KERNEL_API_RANGE_INVALID',
+      '.cartridge.manifest.requires.kernel_api.at_least',
+    ],
+  ];
+  for (const [change, diagnostic, path] of rows)
+    assert.deepEqual(verdict(change), [diagnostic, path]);
 });

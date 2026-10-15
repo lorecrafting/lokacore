@@ -24,7 +24,7 @@
 // (toolbox row G4) acts on the invoked target with the invoked held tool (shared.ts useRefused); its
 // status.cure steps end the target's active status (status/shared.ts cureOps). A spell (toolbox row
 // 29a) is the same run, reached by cast's word instead of perform's key (shared.ts spellOf; step's
-// castAdmission refused an unknown or barred word).
+// castAdmission refused an unknown, unlearned or barred word).
 import type {
   ActionRecipe,
   CharacterId,
@@ -104,7 +104,9 @@ export const decide: Rule<'action_recipe'> = (world, command, mint, steps = { n:
 
 // The recipe a perform names by key in the actor's set, or (row 29a) the spell a cast names by word.
 const recipeOf = (world: World, p: Command['payload']) =>
-  p.type === 'cast' ? spellOf(world, p.word) : resolved(world, p.actor_id)[p.action]?.recipe;
+  p.type === 'cast'
+    ? spellOf(world, p.actor_id, p.word)
+    : resolved(world, p.actor_id)[p.action]?.recipe;
 
 // The entity the recipe acts on, or the decision refusing it: its detail, in the actor's room (no
 // item_id; a target_id must be it); or (row G4) a use's invoked target (shared.ts useRefused; a reach

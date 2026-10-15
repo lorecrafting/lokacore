@@ -5,7 +5,8 @@
   ],
   "target": {
     "kind": "spell",
-    "word": "ward"
+    "word": "ward",
+    "learned": "ward_known"
   },
   "priority": 0,
   "policy": {
