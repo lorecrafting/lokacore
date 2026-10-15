@@ -48,6 +48,7 @@ defmodule Loka.Content.Checks do
 
   def expand(%{"rest" => r}, m), do: %{"rest" => Loka.Content.Dreams.expand(r, m)}
   def expand(%{"every" => _, "from" => _} = r, m), do: Loka.Content.Replenish.expand(r, m)
+  def expand(%{"pierced_by" => _} = s, m), do: Loka.Content.Status.expand(s, m, &expand/2)
 
   def expand(%{"label" => _, "text" => _, "topic" => topic} = readable, m),
     do: Map.put(readable, "topic", ref(topic, "topic", m))
@@ -175,7 +176,6 @@ defmodule Loka.Content.Checks do
       )
 
   def expand(%{"discovered" => f} = n, m), do: Map.put(n, "discovered", ref(f, "fact", m))
-
   def expand(%{"label" => _, "fact" => f} = n, m), do: Map.put(n, "fact", ref(f, "fact", m))
 
   def expand(%{"skill" => s} = n, m) when is_binary(s),
@@ -189,14 +189,6 @@ defmodule Loka.Content.Checks do
 
   def expand(%{"immune" => c} = e, m) when is_list(c),
     do: Map.put(expand(Map.delete(e, "immune"), m), "immune", Enum.map(c, &ref(&1, "status", m)))
-
-  # A status's pierced_by (row 16) names a skill and an attribute.
-  def expand(%{"pierced_by" => %{"skill" => k, "attribute" => a}} = s, m),
-    do:
-      Map.put(expand(Map.delete(s, "pierced_by"), m), "pierced_by", %{
-        "skill" => ref(k, "skill", m),
-        "attribute" => ref(a, "attribute", m)
-      })
 
   # A status's modifiers (row 2c) are ancestry-shaped {attribute, modifier}.
   def expand(%{"modifies" => l} = s, m) when is_list(l),

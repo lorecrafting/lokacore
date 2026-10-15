@@ -81,14 +81,7 @@ function definition(c: Obj, ref: string, s: Obj): Diagnostic[] {
       : s.per_tick === undefined && !s.modifies && !s.fear && !reader(s))
   )
     out.push(diag('SCHEMA_VIOLATION', `${at}.per_tick`));
-  // Row 16: pierced_by only beside a concealment, naming this cartridge's skill and attribute.
-  if (s.pierced_by && !s.concealment) out.push(diag('SCHEMA_VIOLATION', `${at}.pierced_by`));
-  for (const [field, table] of [
-    ['skill', 'skills'],
-    ['attribute', 'attributes'],
-  ] as const)
-    if (s.pierced_by && !c[table]?.[refString(s.pierced_by[field])])
-      out.push(diag('UNRESOLVED_REFERENCE', `${at}.pierced_by.${field}`));
+  out.push(...piercedBy(c, at, s));
   // Status reader 6: a perception names a sense (the schema subset has no minProperties).
   if (s.perception && !Object.keys(s.perception).length)
     out.push(diag('SCHEMA_VIOLATION', `${at}.perception`));
@@ -155,4 +148,17 @@ function api146(c: Obj) {
     modifies.length ||
     Object.values(c.reactions ?? {}).some((r: any) => r.on.event.startsWith('status_'));
   return { immune, named: [...items, ...modifies], drinks, lone, g3 };
+}
+
+// Row 16: pierced_by only beside a concealment, naming this cartridge's skill and attribute.
+function piercedBy(c: Obj, at: string, s: Obj): Diagnostic[] {
+  if (!s.pierced_by) return [];
+  const out = s.concealment ? [] : [diag('SCHEMA_VIOLATION', `${at}.pierced_by`)];
+  for (const [field, table] of [
+    ['skill', 'skills'],
+    ['attribute', 'attributes'],
+  ] as const)
+    if (!c[table]?.[refString(s.pierced_by[field])])
+      out.push(diag('UNRESOLVED_REFERENCE', `${at}.pierced_by.${field}`));
+  return out;
 }
