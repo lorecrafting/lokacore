@@ -2,6 +2,7 @@
 // authority and Book. Expected text is literal from cartridges/speech_sampler and
 // cartridges/spells_sampler text.json; facts are the samplers' reaction facts.
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import { compiled } from '../../authority/local-story/__tests__/compiled.ts';
 import { book } from './__tests__/polish-book.test.ts';
@@ -116,12 +117,16 @@ test('every word chip on the square is admitted', () => {
 });
 
 // Breaks: a word press emitted with no word (the kernel refuses `{}`), or chips offered while a
-// conversation is open.
-test('no word press without a word; none while a conversation is open', () => {
-  const b = book(speech as never);
+// combat, scene or conversation is open (the square's own view with one of them set).
+test('no word press without a word, nor in combat, a scene or a conversation', () => {
+  const v = book(speech as never).game.view().view;
   const say = (k: string) => k;
-  const words = (v: GameView) => buttonsOf(v, say, say).filter((p) => WORDS.includes(p.action_key));
-  assert.deepEqual(words({ ...b.game.view().view, phrases: [] }), []);
-  b.tap('ward, say');
-  assert.deepEqual(words(b.game.view().view), []);
+  const words = (w: GameView) => buttonsOf(w, say, say).filter((p) => WORDS.includes(p.action_key));
+  assert.equal(words(v).length, 12);
+  assert.deepEqual(words({ ...v, phrases: [] }), []);
+  const open = (f: string) =>
+    JSON.parse(readFileSync(new URL(`../stories/views/${f}.json`, import.meta.url), 'utf8')).view;
+  assert.deepEqual(words({ ...v, combat: open('combat-one-foe').combat }), [], 'combat');
+  assert.deepEqual(words({ ...v, scene: open('scene').scene }), [], 'scene');
+  assert.deepEqual(words({ ...v, choice: open('npc-choice').choice }), [], 'conversation');
 });
