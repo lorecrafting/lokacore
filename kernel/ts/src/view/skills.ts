@@ -2,7 +2,7 @@ import { status } from '../mechanics/skills.ts';
 import { level } from '../mechanics/skill_level.ts';
 import { holds } from '../mechanics/policy.ts';
 import { refString, type World } from '../runtime/decision.ts';
-import type { CharacterId, DefinitionRef, Key } from '../contracts.gen.ts';
+import type { CharacterId, DefinitionRef, Key, SkillDefinition } from '../contracts.gen.ts';
 import { choice, value, worn } from '../mechanics/attributes/shared.ts';
 import { levelling } from '../mechanics/levelling/shared.ts';
 
@@ -13,24 +13,9 @@ export function skillViews(world: World, actor: CharacterId, steps = { n: 0 }) {
     kind,
     key,
   });
-  // Homestead hs-14: level only with growth, locked only with a prerequisite, and a hidden skill
-  // is left out while its prerequisite fails.
-  const skills = Object.values(world.cartridge.skills ?? {}).flatMap((s) => {
-    const skill = ref('skill', s.key);
-    const locked = s.prerequisite && !holds(world, actor, s.prerequisite.root, { steps });
-    if (s.hidden && locked) return [];
-    return [
-      {
-        skill,
-        label: s.label,
-        requirement: s.requirement,
-        ...status(world, actor, skill, steps),
-        ...(s.growth && { level: level(world, actor, skill) }),
-        ...(s.prerequisite && { locked: locked! }),
-        ...(s.profession && { profession: s.profession }),
-      },
-    ];
-  });
+  const skills = Object.values(world.cartridge.skills ?? {}).flatMap((s) =>
+    skillView(world, actor, s, ref('skill', s.key), steps),
+  );
   const attributes = attributeViews(world, actor, ref);
   const selected = choice(world, actor);
   return {
@@ -52,6 +37,30 @@ export function skillViews(world: World, actor: CharacterId, steps = { n: 0 }) {
         })),
       }),
   };
+}
+
+// Homestead hs-14: level only with growth, locked only with a prerequisite, and a hidden skill is
+// left out while its prerequisite fails.
+function skillView(
+  world: World,
+  actor: CharacterId,
+  s: SkillDefinition,
+  skill: DefinitionRef,
+  steps: { n: number },
+) {
+  const locked = s.prerequisite && !holds(world, actor, s.prerequisite.root, { steps });
+  if (s.hidden && locked) return [];
+  return [
+    {
+      skill,
+      label: s.label,
+      requirement: s.requirement,
+      ...status(world, actor, skill, steps),
+      ...(s.growth && { level: level(world, actor, skill) }),
+      ...(s.prerequisite && { locked: locked! }),
+      ...(s.profession && { profession: s.profession }),
+    },
+  ];
 }
 
 /** The player's level, experience, next threshold (absent at the top) and unspent points (row 4). */
