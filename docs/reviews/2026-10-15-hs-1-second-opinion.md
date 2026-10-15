@@ -41,3 +41,14 @@ Items 2 to 5 hold. Item 1 fails.
 | m4 `job.ts:101` filter `!== 'entity.transfer'` | sweep test fails |
 
 Cites rerun: `replenish.test.ts:284` (DUPLICATE_DEFINITION test), `:310` (sweep, fails under m2 to m4) and `decay.test.ts:273` (two runs) are all backed. The baseline is 35 of 35 green.
+
+## Fix round 2 re-check (head `947d8b27`, commit `947d8b27` only)
+
+Scope: the dispositions of findings 1 and 2 and the code they touch (`job.ts:94`, `proposal.ts:58-60`, mechanics.md Step bullet, `decay.test.ts:296-318`). Nothing else reopened.
+
+1. **Finding 1, fixed.** `job.ts:94` is now `roots?.get(item) ?? holders.get(item) ?? group`. Its only caller passes `roots: p.roots` (`proposal.ts:252`), so timed jobs still see no `roots` and keep the row 41 join. The new test (`decay.test.ts:296-318`) is my probe, run as both `a_toss` and `z_toss`. Its expected `midden` comes from the content, not from the code. Red control in a detached worktree at `947d8b27`: put the old order (`holders` first) back in `job.ts:94`. Then `z_toss` fails `conflicting_write` and `a_toss` passes, 36 of 37. Reverted: 37 of 37 green (replenish, decay and compose). The mechanics.md Step bullet now gives the order as root, then earlier write, then delivery group, and says why. That matches the code.
+2. **Question 2, settled by a note.** `proposal.ts:58-59` and the Step bullet now name the limit (`merge` and `joinEarlier` do not relabel `roots`) and when to upgrade it. That is right for a case that no content or command can reach today.
+
+Elixir: no runtime for this step, so nothing to check there.
+
+Verdict after fix round 2: **APPROVE**.
