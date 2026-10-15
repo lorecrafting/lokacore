@@ -33,6 +33,7 @@ export function enqueue(due: Due, job_id: string, due_time: number, tick?: numbe
 export function queueScheduled(due: Due, ops: readonly DeltaOp[], to: number) {
   for (const o of ops)
     if (o.op === 'job.schedule' && o.due_time <= to) {
+      // Safe to splice into the list being drained: a run schedules strictly after its own time.
       const limit = enqueue(due, o.job_id, o.due_time);
       if (limit) return limit;
     }
