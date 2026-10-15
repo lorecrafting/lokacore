@@ -1,0 +1,14 @@
+{
+  "keywords": [
+    "trough"
+  ],
+  "short": "item.trough.short",
+  "room_line": "item.trough.room",
+  "description": "item.trough.description",
+  "location": {
+    "in": "room",
+    "room": "pen"
+  },
+  "mass_grams": 20000,
+  "container": true
+}

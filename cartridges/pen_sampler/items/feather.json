@@ -1,0 +1,12 @@
+{
+  "keywords": [
+    "feather"
+  ],
+  "short": "item.feather.short",
+  "room_line": "item.feather.room",
+  "description": "item.feather.description",
+  "location": {
+    "in": "template"
+  },
+  "mass_grams": 1
+}

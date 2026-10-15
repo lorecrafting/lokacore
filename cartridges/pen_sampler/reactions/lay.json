@@ -1,0 +1,12 @@
+{
+  "on": {
+    "event": "status_ticked",
+    "status": "fed"
+  },
+  "apply": [
+    {
+      "op": "replenish.run",
+      "key": "eggs"
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "provider": "seller",
+  "currency": "pennies",
+  "action": "buy_pen",
+  "label": "service.buy_pen",
+  "narration": "service.buy_pen.used",
+  "price": 10,
+  "benefit": {
+    "kind": "entitlement",
+    "fact": "owns_pen"
+  }
+}
