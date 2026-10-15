@@ -21,12 +21,7 @@ defmodule Loka.Content.Variants do
 
     relative = relative?(defs) or relative?(settings)
 
-    # Twin of TS asideParts: only a room's or detail's `asides`, never a key named so elsewhere.
-    voices =
-      voice?(defs) or
-        Enum.any?(
-          for({_, {_, [], r}} <- Map.get(defs, "room", %{}), do: RoomParts.asides(r) != [])
-        )
+    voices = voice?(defs) or aside?(defs)
 
     if (voices or relative or Enum.any?(Entities.all(defs), &variant?/1) or leaf?(defs) or
           leaf?(settings)) and api < floor(voices, relative, defs, settings),
@@ -50,6 +45,11 @@ defmodule Loka.Content.Variants do
   defp leaf?(v) when is_list(v), do: Enum.any?(v, &leaf?/1)
   defp leaf?(v) when is_tuple(v), do: leaf?(Tuple.to_list(v))
   defp leaf?(_), do: false
+
+  # Twin of TS asideParts: only a room's or detail's `asides`, never a key named so elsewhere.
+  defp aside?(defs),
+    do:
+      Enum.any?(for({_, {_, [], r}} <- Map.get(defs, "room", %{}), do: RoomParts.asides(r) != []))
 
   defp voice?(%{"op" => "skill_compare"}), do: true
   defp voice?(v) when is_map(v), do: Enum.any?(Map.values(v), &voice?/1)
