@@ -1,4 +1,4 @@
-import { status } from '../mechanics/skills.ts';
+import { concealed, status } from '../mechanics/skills.ts';
 import { level } from '../mechanics/skill_level.ts';
 import { holds } from '../mechanics/policy.ts';
 import { refString, type World } from '../runtime/decision.ts';
@@ -49,14 +49,13 @@ function skillView(
   steps: { n: number },
 ) {
   const locked = s.prerequisite && !holds(world, actor, s.prerequisite.root, { steps });
-  const st = status(world, actor, skill, steps);
-  if (s.hidden && locked && !st.acquired) return [];
+  if (concealed(world, actor, skill, steps)) return [];
   return [
     {
       skill,
       label: s.label,
       requirement: s.requirement,
-      ...st,
+      ...status(world, actor, skill, steps),
       ...(s.growth && { level: level(world, actor, skill) }),
       ...(s.prerequisite && { locked: locked! }),
       ...(s.profession && { profession: s.profession }),
@@ -77,10 +76,6 @@ function levellingView(world: World, actor: CharacterId) {
  * projection. A lesson for a skill the view leaves out (hs-14) is left out too.
  */
 export function freeLessons(world: World, npc: string, actor: CharacterId, steps = { n: 0 }) {
-  const shown = (r: DefinitionRef) => {
-    const s = world.cartridge.skills![refString(r)]!;
-    return skillView(world, actor, s, r, steps).length > 0;
-  };
   const refs = Object.values(world.cartridge.dialogues ?? {})
     .filter((d) => world.entityIds[refString(d.npc)] === npc)
     .flatMap((d) =>
@@ -90,7 +85,7 @@ export function freeLessons(world: World, npc: string, actor: CharacterId, steps
           : (o.sequence ?? []).flatMap((s) => (s.op === 'skill.acquire' ? [s.skill] : [])),
       ),
     )
-    .filter(shown);
+    .filter((r) => !concealed(world, actor, r, steps));
   return refs.length ? { lessons: refs } : {};
 }
 

@@ -2106,7 +2106,7 @@
         },
         "hidden": {
           "const": true,
-          "description": "Homestead hs-14 (docs/system/mechanics.md Skill trees): the skill is left out of GameView skills, and of NPC lessons, while its prerequisite fails and it is not acquired. A non-hidden skill whose prerequisite reads a hidden skill is refused."
+          "description": "Homestead hs-14 (docs/system/mechanics.md Skill trees): the skill is left out of GameView skills, of NPC lessons and of a pending choice (its lesson choice), while its prerequisite fails and it is not acquired. A non-hidden skill whose prerequisite reads a hidden skill is refused."
         }
       },
       "required": [

@@ -431,6 +431,27 @@ test('a learned hidden skill stays in the view; a lesson for a left-out skill is
   });
 });
 
+// Breaks (hs-14 round 2): the conversation offers a hidden skill's lesson, even unavailable, while
+// its prerequisite (whittling 2) fails; or hiding it also hides it once the prerequisite holds, or
+// lets a forged choose through.
+test('a hidden skill lesson is not offered until its prerequisite holds; choose still refuses', () => {
+  const carving = content.skills![`${P}skill/carving`]!;
+  const c = {
+    ...content,
+    skills: { ...content.skills, [`${P}skill/carving`]: { ...carving, hidden: true } },
+  };
+  const talk = (w: World) => ok(w, { type: 'talk', target_id: w.entityIds[`${P}npc/old_carver`]! });
+  const ids = (w: World) => gameView(w).choice!.choices.map((o) => o.choice_id);
+  const whittled = carve(take(take(fresh(c as never), 'stick_01'), 'stick_02')).world; // whittling 1
+  const level1 = talk(whittled);
+  assert.ok(!ids(level1).includes('learn'));
+  const [continuation_id] = pending(level1, level1.character)!;
+  const forged = play(level1, { type: 'choose', choice_id: 'learn', continuation_id });
+  assert.equal(code(forged), 'invalid_state');
+  const level2 = talk(carve(whittled).world);
+  assert.ok(ids(level2).includes('learn'));
+});
+
 // Breaks (hs-14; twin of content_craft_test.exs): a shown skill whose prerequisite reads a hidden
 // skill loads, a hidden skill reading a hidden one is refused, or an unknown profession text
 // loads. The floor is loader_floors.json's "a skill profession" case.

@@ -1,7 +1,7 @@
 import * as patrol from '../patrol/shared.ts';
 import { apart, pending } from './selection.ts';
 import { validAttempts } from './behavior.ts';
-import { learnable } from '../skills.ts';
+import { concealed, learnable } from '../skills.ts';
 import { exchangeBlocked } from './exchange.ts';
 import { refused as escortRefused } from '../escort/shared.ts';
 // dialogue@1 (capability_registry.json; 06 §17, §33, §37, §43; 04 §5.3): what the dialogue rule
@@ -183,6 +183,13 @@ function roleBlocked(
   }
 }
 
+/** hs-14: a concealed skill's lesson is not offered at all; choose still refuses it. */
+function secret(world: World, actor: CharacterId, o: DialogueChoice, steps: Steps) {
+  return (o.sequence ?? []).some(
+    (s) => s.op === 'skill.acquire' && concealed(world, actor, s.skill, steps),
+  );
+}
+
 /**
  * `actor`'s PendingChoice for the GameView (04 §14), if it has one: the dialogue's prompt, its
  * speaker's bound EntityId (from the row, never a name lookup), closable (06 §37), and each option
@@ -199,6 +206,7 @@ export function choiceView(
   if (!found) return undefined;
   const [continuation_id, row] = found;
   const d = definition(world, row.source);
+  const shown = row.choice_ids.filter((id) => !secret(world, actor, d.choices[id]!, steps));
   const speaker = Object.keys(d.roles).find((n) => {
     const r = d.roles[n]!;
     return r.role === 'npc' && same(r.npc, d.npc);
@@ -215,7 +223,7 @@ export function choiceView(
         ...(row.attempts && { attempts: row.attempts }),
       },
     }),
-    choices: row.choice_ids.map((choice_id) => {
+    choices: shown.map((choice_id) => {
       const option = d.choices[choice_id]!;
       const q = option.patrol && questOf(world, actor, option.patrol.quest);
       const saved = q && world.state.patrols?.[q[0]];
