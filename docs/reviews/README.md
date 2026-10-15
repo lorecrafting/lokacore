@@ -31,7 +31,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: Homestead hs-6 furnishing, `item_present` leaf + `furnish_sampler` (loka-kgd.108.6)](2026-10-15-hs-6-review.md): **APPROVE**
 - [Save second opinion: Homestead hs-5, the mobile Eat receipt with `applies`](2026-10-15-hs-5-second-opinion.md): **APPROVE**
 - [Review: Homestead hs-5, cooking (`edible.applies`, kitchen_sampler)](2026-10-15-hs-5-review.md): **APPROVE WITH NOTES**
-- [Review: Homestead hs-14, Book skill tree on the Character page (loka-kgd.108.11)](2026-10-15-hs-14-review.md): **CHANGES REQUIRED**
+- [Review: Homestead hs-14, Book skill tree on the Character page (loka-kgd.108.11)](2026-10-15-hs-14-review.md): **APPROVE**
 - [Review: Homestead hs-12, the self-build recipe step and craft_sampler](2026-10-15-hs-12-review.md): **APPROVE**
 - [Review: skill prerequisite, engine (Homestead hs-11, loka-kgd.108.8)](2026-10-15-hs-11-review.md): **APPROVE**
 - [Review: Homestead hs-10 craft (loka-kgd.108.7)](2026-10-15-hs-10-review.md): **APPROVE**
