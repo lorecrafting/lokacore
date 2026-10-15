@@ -101,16 +101,19 @@ const withPool = (w: World, pool: string, value: number): World => ({
 });
 
 // Breaks: entry applies nothing, a tick drains the wrong amount or direction, the tick at the end
-// still drains, or expiry leaves the condition on the Character page.
+// still drains, expiry leaves the condition on the Character page, or the view drops the authored
+// duration (the ring denominator, loka-x6t.65) or leaves the GameView schema.
 test('the dart corridor poisons for four ticks and then expires', () => {
   let w = fresh();
   const t0 = w.state.clock;
   assert.equal(gameView(w).conditions, undefined);
   w = play(w, { type: 'move', direction: 'east' });
+  assert.deepEqual(validate('GameView', gameView(w)), []);
   assert.deepEqual(gameView(w).conditions, [
     {
       label: 'condition.poisoned',
       ends_at: t0 + 300,
+      duration: 300,
       next_tick_at: t0 + 60,
       resource: 'hp',
       per_tick: -1,
@@ -225,7 +228,8 @@ test('a fatal poison tick runs the death return and clears every status', () => 
   assert.equal(gameView(w).conditions, undefined);
 });
 
-// Breaks: a re-application while active keeps the old end, or restarts the tick cadence.
+// Breaks: a re-application while active keeps the old end, restarts the tick cadence, or shows a
+// duration other than the authored one (the ring would leave [0, 1], loka-x6t.65).
 test('re-entering while poisoned extends the end and keeps the tick cadence', () => {
   let w = fresh();
   const t0 = w.state.clock;
@@ -233,7 +237,7 @@ test('re-entering while poisoned extends the end and keeps the tick cadence', ()
   w = play(w, { type: 'move', direction: 'west' });
   w = play(w, { type: 'move', direction: 'east' });
   const [c] = gameView(w).conditions!;
-  assert.deepEqual([c!.ends_at, c!.next_tick_at], [t0 + 420, t0 + 180]);
+  assert.deepEqual([c!.ends_at, c!.duration, c!.next_tick_at], [t0 + 420, 300, t0 + 180]);
   // Ticks at +180, +240, +300 and +360 take hp from 8 to 4; +420 is the end, with no tick.
   w = wait(w, 300);
   assert.equal(hp(w), 4);
