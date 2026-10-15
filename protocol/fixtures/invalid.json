@@ -20047,6 +20047,34 @@
     ]
   },
   {
+    "name": "skill_prerequisite_without_version",
+    "contract": "SkillDefinition",
+    "value": {
+      "key": "carving",
+      "label": "skill.carving.label",
+      "requirement": "skill.carving.requirement",
+      "qualification": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": []
+        }
+      },
+      "prerequisite": {
+        "root": {
+          "op": "all",
+          "items": []
+        }
+      }
+    },
+    "errors": [
+      {
+        "path": "/prerequisite/policy_version",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
     "name": "detail_rating_not_integer",
     "contract": "InspectableDetail",
     "value": {

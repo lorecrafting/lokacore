@@ -168,9 +168,12 @@ export function nodes(c: Obj): [Obj, string][] {
     ...Object.entries((c.reactions ?? {}) as Obj).flatMap(([ref, r]) =>
       r.when ? walk(r.when.root, `.cartridge.reactions${step(ref)}.when.root`) : [],
     ),
-    ...Object.entries((c.skills ?? {}) as Obj).flatMap(([ref, s]) =>
-      walk(s.qualification.root, `.cartridge.skills${step(ref)}.qualification.root`),
-    ),
+    ...Object.entries((c.skills ?? {}) as Obj).flatMap(([ref, s]) => [
+      ...walk(s.qualification.root, `.cartridge.skills${step(ref)}.qualification.root`),
+      ...(s.prerequisite
+        ? walk(s.prerequisite.root, `.cartridge.skills${step(ref)}.prerequisite.root`)
+        : []),
+    ]),
     ...Object.entries((c.dialogues ?? {}) as Obj).flatMap(([ref, d]) =>
       walk(d.policy.root, `.cartridge.dialogues${step(ref)}.policy.root`),
     ),

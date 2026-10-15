@@ -20,5 +20,13 @@
   "actions.carve_spoon": "Carve a spoon",
   "craft.carve_spoon.needs": "You need a stick to carve.",
   "narration.carve_spoon.success": "A spoon takes shape.",
-  "narration.carve_spoon.failure": "The stick splits."
+  "narration.carve_spoon.failure": "The stick splits.",
+  "skill.carving.label": "Carving",
+  "skill.carving.requirement": "Whittle well first (whittling 2).",
+  "npc.old_carver.short": "the old carver",
+  "npc.old_carver.room": "The old [carver](old_carver) sits by the bench.",
+  "npc.old_carver.description": "A stooped carver with sure hands.",
+  "old_carver.carving.prompt": "\"Show me you can whittle, and I will teach you to carve.\"",
+  "old_carver.carving.choice": "Learn carving",
+  "old_carver.carving.learned": "The old carver shows you how to follow the grain."
 }

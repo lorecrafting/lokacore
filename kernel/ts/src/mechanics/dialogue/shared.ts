@@ -1,7 +1,7 @@
 import * as patrol from '../patrol/shared.ts';
 import { apart, pending } from './selection.ts';
 import { validAttempts } from './behavior.ts';
-import { membership } from '../skills.ts';
+import { membership, prerequisiteHolds } from '../skills.ts';
 import { exchangeBlocked } from './exchange.ts';
 import { refused as escortRefused } from '../escort/shared.ts';
 // dialogue@1 (capability_registry.json; 06 §17, §33, §37, §43; 04 §5.3): what the dialogue rule
@@ -120,7 +120,11 @@ export function blocked(
   const escort = escortRefused(world, row, option);
   if (escort) return escort;
   for (const step of option.sequence ?? [])
-    if (step.op === 'skill.acquire' && membership(world, row.actor_id, step.skill) !== false)
+    if (
+      step.op === 'skill.acquire' &&
+      (membership(world, row.actor_id, step.skill) !== false ||
+        !prerequisiteHolds(world, row.actor_id, step.skill, steps))
+    )
       return 'invalid_state' as const;
   if (
     (option.payment || option.lesson_payment) &&

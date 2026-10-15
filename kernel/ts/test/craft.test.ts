@@ -2,7 +2,8 @@
 // bench carries carve_spoon (opposed whittling, rating 1, growth [1]); it consumes one of
 // stick_01..02 into the sealed scrap room and yields one of spoon_01..02 from the sealed store.
 // The sticks and a waist sack lie in the workshop; the first try fails (whittling 0), the second
-// succeeds (whittling 1).
+// succeeds (whittling 1). Homestead hs-11: whittling grows [1, 2]; the old carver in the workshop
+// teaches carving, whose prerequisite is whittling 2.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
@@ -17,6 +18,8 @@ import { encode } from '../src/foundation/canonical.ts';
 import { hydrate } from '../src/runtime/created.ts';
 import { check } from '../src/runtime/invariants.ts';
 import { resolved } from '../src/commands/actions.ts';
+import { pending } from '../src/mechanics/dialogue/shared.ts';
+import { acquire } from '../src/mechanics/skills.ts';
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));
 const scratch = mkdtempSync(join(tmpdir(), 'loka-craft-sampler-'));
@@ -178,6 +181,18 @@ test('reopening between the two carves gives the same ids', () => {
 // Breaks: the loader admits a template or non-container holder, an unresolved item, holder or
 // reason, a duplicate item, or a craft on a storylet or spell (twin of test/loka/content_craft_test.exs;
 // the floor is loader_floors.json's "a craft" case).
+const loadEdited = (edit: (c: any) => void) => {
+  const c = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
+  edit(c);
+  const canonical = encode(c);
+  const sha256 = createHash('sha256').update(canonical).digest('hex');
+  const r = loadCartridge(
+    new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
+    INSTALLED,
+  );
+  return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
+};
+
 test('loader: a craft needs resolved, placed holders, distinct items, a catalog reason, a station', () => {
   const R = (kind: string, key: string) => ({
     cartridge_id: 'craft_sampler',
@@ -186,17 +201,8 @@ test('loader: a craft needs resolved, placed holders, distinct items, a catalog 
     key,
   });
   const at = `.cartridge.recipes["${P}recipe/carve_spoon"].craft`;
-  const load = (edit: (r: any, c: any) => void) => {
-    const c = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
-    edit(c.recipes[`${P}recipe/carve_spoon`], c);
-    const canonical = encode(c);
-    const sha256 = createHash('sha256').update(canonical).digest('hex');
-    const r = loadCartridge(
-      new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-      INSTALLED,
-    );
-    return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
-  };
+  const load = (edit: (r: any, c: any) => void) =>
+    loadEdited((c) => edit(c.recipes[`${P}recipe/carve_spoon`], c));
   const cases: [(r: any, c: any) => void, string, string][] = [
     [(r) => (r.craft.consume.to = { in: 'template' }), 'SCHEMA_VIOLATION', '.consume.to'],
     [
@@ -246,6 +252,21 @@ test('loader: a craft needs resolved, placed holders, distinct items, a catalog 
   for (const [edit, code, path] of cases) assert.deepEqual(load(edit), [code, at + path]);
 });
 
+// Breaks (hs-11; twin of content_craft_test.exs): a skill prerequisite naming its own skill, or an
+// unknown skill, loads. The floor is loader_floors.json's "a skill prerequisite" case.
+test('loader: a skill prerequisite resolves and never names its own skill', () => {
+  const at = `.cartridge.skills["${P}skill/carving"].prerequisite`;
+  // The leaf sits under all and not, so a walker that skips nesting misses it.
+  const naming = (key: string) => (c: any) => {
+    const p = c.skills[`${P}skill/carving`].prerequisite;
+    const leaf = { ...p.root, skill: { ...p.root.skill, key } };
+    p.root = { op: 'all', items: [{ op: 'not', item: leaf }] };
+  };
+  const leaf = at + '.root.items[0].item.skill';
+  assert.deepEqual(loadEdited(naming('carving')), ['SCHEMA_VIOLATION', at]);
+  assert.deepEqual(loadEdited(naming('nothing')), ['UNRESOLVED_REFERENCE', leaf]);
+});
+
 // A stick held, a carry limit of 100 g and 200 g spoons: the carve's exchange is too heavy.
 const heavy = (c = content) => {
   const w = take(fresh({ ...c, world: { ...c.world, carry: { max_grams: 100 } } }), 'stick_01');
@@ -292,4 +313,47 @@ test('a craft whose policy fails refuses on the policy, as offered', () => {
   const r = carve(w);
   assert.equal(code(r), 'invalid_state'); // not the craft's too_heavy
   assert.ok(agrees(w, r));
+});
+
+// Homestead hs-11. Breaks: the dialogue admission (dialogue/shared.ts blocked) skips the
+// prerequisite (the offer shows learn while choose is refused: agrees fails), skills.ts acquire
+// skips it (the direct acquire at level 1 succeeds), or a learned box can be learned again.
+test('carving is learned only at whittling 2, offered and admitted alike', () => {
+  const carver = (w: World) => w.entityIds[`${P}npc/old_carver`]!;
+  const learned = (w: World) =>
+    Object.entries(w.state.facts ?? {}).find(([k]) => k.includes('"skill_carving"'))?.[1] ?? false;
+  const learn = (w0: World) => {
+    const w = ok(w0, { type: 'talk', target_id: carver(w0) });
+    const [continuation_id] = pending(w, w.character)!;
+    const command = { payload: { type: 'choose', choice_id: 'learn', continuation_id } };
+    const offered = gameView(w).choice!.choices.find((c) => c.choice_id === 'learn')!;
+    const r = play(w, command.payload);
+    assert.ok(
+      check('gameview_agrees_with_admission', { view: gameView(w), command, decision: r.decision }),
+    );
+    return { w, r, offered };
+  };
+  const level1 = carve(holding()).world; // failed: one use, whittling 1
+  const refused = learn(level1);
+  assert.equal(refused.offered.available, false);
+  assert.equal(code(refused.r), 'invalid_state');
+  assert.equal(refused.r.world, refused.w); // nothing changed
+  assert.equal(learned(refused.w), false);
+  const carving = {
+    cartridge_id: 'craft_sampler',
+    cartridge_version: '0.0.1',
+    kind: 'skill',
+    key: 'carving',
+  };
+  assert.throws(
+    () => acquire(level1, level1.character, { ops: [], position: 0, facts: {} }, carving as never),
+    /precondition_failed/,
+  );
+  const level2 = carve(level1).world; // two uses: whittling 2
+  const taught = learn(level2);
+  assert.equal(taught.offered.available, true);
+  assert.equal(code(taught.r), 'accepted');
+  assert.equal(learned(taught.r.world), true);
+  const w = taught.r.world; // the conversation ends with the lesson
+  assert.equal(code(play(w, { type: 'talk', target_id: carver(w) })), 'invalid_state');
 });

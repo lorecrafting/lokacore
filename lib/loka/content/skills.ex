@@ -52,7 +52,9 @@ defmodule Loka.Content.Skills do
     do:
       for(
         {_, {rel, _, s}} <- defs["skill"],
-        do: {rel, ["qualification", "root"], s["qualification"]["root"]}
+        field <- ~w(qualification prerequisite),
+        is_map_key(s, field),
+        do: {rel, [field, "root"], s[field]["root"]}
       )
 
   def check(nil, _, _, _), do: []
@@ -61,8 +63,9 @@ defmodule Loka.Content.Skills do
     caps = m["requires"]["capabilities"]
 
     Enum.flat_map(defs["skill"], &definition(&1, caps, text)) ++
-      Enum.flat_map(defs["skill"], &growth/1) ++
+      Enum.flat_map(defs["skill"], &(growth(&1) ++ itself(&1))) ++
       floor(m, defs) ++
+      prerequisite_floor(m, defs) ++
       equipment(m, defs) ++ dodge(m, defs, settings) ++ defense_narration(defs, settings)
   end
 
@@ -85,6 +88,36 @@ defmodule Loka.Content.Skills do
   end
 
   defp growth(_), do: []
+
+  # Homestead hs-11: a box never requires itself.
+  defp itself({key, {rel, _, %{"prerequisite" => p}}}),
+    do:
+      if(
+        Enum.any?(
+          leaves(p["root"]),
+          &match?(%{"op" => "skill_compare", "skill" => %{"key" => ^key}}, &1)
+        ),
+        do: [bad(at(rel, ["prerequisite"]))],
+        else: []
+      )
+
+  defp itself(_), do: []
+
+  defp leaves(%{"op" => op, "items" => items}) when op in ~w(all any),
+    do: Enum.flat_map(items, &leaves/1)
+
+  defp leaves(%{"op" => "not", "item" => item}), do: leaves(item)
+  defp leaves(leaf), do: [leaf]
+
+  # Homestead hs-11: a skill prerequisite needs API 1.101.
+  defp prerequisite_floor(m, defs),
+    do:
+      if(
+        Enum.any?(defs["skill"], &match?({_, {_, _, %{"prerequisite" => _}}}, &1)) and
+          version(m) < [1, 101],
+        do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
+        else: []
+      )
 
   # Toolbox rows 5 and G5: skill growth, an opposed check or a detail rating needs API 1.44.
   defp floor(m, defs) do

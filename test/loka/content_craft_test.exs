@@ -56,4 +56,30 @@ defmodule Loka.ContentCraftTest do
     spell = %{"kind" => "spell", "word" => "carve", "learned" => "spoon_carved"}
     assert {"SCHEMA_VIOLATION", @at} in codes(dir, &Map.put(&1, "target", spell))
   end
+
+  # Break (hs-11; twin of the loader test in kernel/ts/test/craft.test.ts): a skill prerequisite
+  # naming its own skill, or an unknown skill, compiles. The floor is loader_floors.json's
+  # "a skill prerequisite" case.
+  test "a skill prerequisite resolves and never names its own skill", %{dir: dir} do
+    # The leaf sits under all and not, so a walker that skips nesting misses it.
+    nested = fn key ->
+      leaf = %{"op" => "skill_compare", "skill" => key, "at_least" => 2}
+      %{"op" => "all", "items" => [%{"op" => "not", "item" => leaf}]}
+    end
+
+    naming = fn key ->
+      assert {:error, diags} =
+               Loka.ContentSource.compile(dir, [
+                 {"skills/carving.json", &put_in(&1, ["prerequisite", "root"], nested.(key))}
+               ])
+
+      Enum.map(diags, &{&1["code"], &1["path"]})
+    end
+
+    assert {"SCHEMA_VIOLATION", "skills/carving.prerequisite"} in naming.("carving")
+
+    assert {"UNRESOLVED_REFERENCE", "skills/carving.prerequisite.root.items[0].item.skill"} in naming.(
+             "nothing"
+           )
+  end
 end

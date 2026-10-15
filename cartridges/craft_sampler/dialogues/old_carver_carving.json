@@ -1,0 +1,33 @@
+{
+  "npc": "old_carver",
+  "roles": {
+    "teacher": {
+      "role": "npc",
+      "npc": "old_carver"
+    }
+  },
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "not",
+      "item": {
+        "op": "fact_compare",
+        "fact": "skill_carving",
+        "equals": true
+      }
+    }
+  },
+  "prompt": "old_carver.carving.prompt",
+  "choices": {
+    "learn": {
+      "label": "old_carver.carving.choice",
+      "narration": "old_carver.carving.learned",
+      "sequence": [
+        {
+          "op": "skill.acquire",
+          "skill": "carving"
+        }
+      ]
+    }
+  }
+}
