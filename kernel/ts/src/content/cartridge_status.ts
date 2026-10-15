@@ -30,13 +30,7 @@ export function status(c: Obj): Diagnostic[] {
   if (!Object.keys(defs).length && !applies.length && !cures.length && !g3) return out;
   const all = Object.values(defs);
   const room = named.some(([, , table]) => table === 'rooms'); // status reader 9: a step naming a room
-  const floor = all.some((s) => s.kind) // an authored icon polarity (loka-x6t.64)
-    ? '1.101'
-    : all.some((s) => s.pierced_by)
-      ? '1.93'
-      : room
-        ? '1.65'
-        : floorOf(all, g3);
+  const floor = floorOf(all, g3, room);
   if (
     apiCmp(c.manifest.requires.kernel_api.at_least, floor) < 0 ||
     ['status', 'death'].some((k) => c.lock.capabilities[k] !== 1) // a fatal hp tick needs death
@@ -50,22 +44,29 @@ export function status(c: Obj): Diagnostic[] {
   return [...out, ...lone.map((at) => diag('SCHEMA_VIOLATION', at, { error: 'invalid_value' }))];
 }
 
-// The highest floor any declaration needs: movement (SR7), perception and concealment (SR6, SR8),
-// readers (SR4, SR5), fear (W21), permanent (W8), the G3 fields.
-const floorOf = (all: Obj[], g3: unknown) =>
-  all.some((s) => s.movement)
-    ? '1.62'
-    : all.some((s) => s.perception || s.concealment)
-      ? '1.61'
-      : all.some(reader)
-        ? '1.54'
-        : all.some((s) => s.fear)
-          ? '1.50'
-          : all.some(lasting)
-            ? '1.48'
-            : g3
-              ? '1.46'
-              : '1.38';
+// The highest floor any declaration needs: an authored kind (loka-x6t.64), pierced_by (row 16), a
+// step naming a room (SR9), movement (SR7), perception and concealment (SR6, SR8), readers (SR4,
+// SR5), fear (W21), permanent (W8), the G3 fields.
+const floorOf = (all: Obj[], g3: unknown, room: boolean) =>
+  all.some((s) => s.kind)
+    ? '1.101'
+    : all.some((s) => s.pierced_by)
+      ? '1.93'
+      : room
+        ? '1.65'
+        : all.some((s) => s.movement)
+          ? '1.62'
+          : all.some((s) => s.perception || s.concealment)
+            ? '1.61'
+            : all.some(reader)
+              ? '1.54'
+              : all.some((s) => s.fear)
+                ? '1.50'
+                : all.some(lasting)
+                  ? '1.48'
+                  : g3
+                    ? '1.46'
+                    : '1.38';
 
 // Row W8: a permanent status never ticks, so it declares no per_tick; a fear one (row W21) may omit it.
 const lasting = (s: Obj) => s.duration === 'permanent';
