@@ -20075,6 +20075,45 @@
     ]
   },
   {
+    "name": "build_step_without_direction",
+    "contract": "RecipeStep",
+    "value": {
+      "op": "build",
+      "blueprint": {
+        "cartridge_id": "craft_sampler",
+        "cartridge_version": "2.0.0",
+        "kind": "blueprint",
+        "key": "hut_timbered"
+      }
+    },
+    "errors": [
+      {
+        "path": "/direction",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "build_step_direction_not_a_direction",
+    "contract": "RecipeStep",
+    "value": {
+      "op": "build",
+      "blueprint": {
+        "cartridge_id": "craft_sampler",
+        "cartridge_version": "2.0.0",
+        "kind": "blueprint",
+        "key": "hut_timbered"
+      },
+      "direction": "northwest"
+    },
+    "errors": [
+      {
+        "path": "/direction",
+        "code": "not_in_enum"
+      }
+    ]
+  },
+  {
     "name": "detail_rating_not_integer",
     "contract": "InspectableDetail",
     "value": {

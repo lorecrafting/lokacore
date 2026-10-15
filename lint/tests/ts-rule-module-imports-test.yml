@@ -14,6 +14,7 @@ valid:
   # Break: named pure helpers are rejected along with rule-module imports.
   - "import { moveSequence } from './sequence.ts';"
   - "import { roundSequence } from '../combat/round.ts';"
+  - "import { created } from '../service/build.ts';"
   - "import { runBleed } from '../bleed/job.ts';"
   - "import { runStatus } from '../status/job.ts';"
   - "import { runReplenish } from '../containment/job.ts';"

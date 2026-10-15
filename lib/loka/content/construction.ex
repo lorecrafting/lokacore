@@ -25,7 +25,58 @@ defmodule Loka.Content.Construction do
         blueprints,
         &(owned_parts(&1, required) ++ texts(&1, text(v2)) ++ statuses(&1, m, defs))
       ) ++
-      requirements(m, defs, blueprints, sites, settings)
+      requirements(m, defs, blueprints, sites, settings) ++ builds(m, defs, text(v2), settings)
+  end
+
+  # Built rooms S6: a recipe build step sits in the success outcome of a detail target whose room is a site listing its
+  # blueprint and direction, at most one per sequence, with world.construction, the build refusal
+  # texts and kernel_api 1.101 (twin of builds in cartridge_construction.ts). The listed blueprint
+  # resolves and owns construction@1 already.
+  defp builds(m, defs, text, settings) do
+    for {_, {rel, [], r}} <- defs["recipe"] || %{},
+        {name, o} <- r["outcomes"],
+        {s, i} <- Enum.with_index(o["sequence"]),
+        s["op"] == "build",
+        path = ["outcomes", name, "sequence", i],
+        d <- build(m, defs, text, settings, {rel, path, r, s, i, o["sequence"]}),
+        do: d
+  end
+
+  defp build(m, defs, text, settings, {rel, path, r, s, i, sequence}) do
+    site =
+      with %{"kind" => "detail", "room" => room} <- r["target"],
+           {_, _, %{"site" => site}} <- resolve(room, "room", m, defs),
+           do: site,
+           else: (_ -> nil)
+
+    earlier = Enum.any?(Enum.take(sequence, i), &(&1["op"] == "build"))
+    op = at(rel, path ++ ["op"])
+
+    for(
+      true <- [
+        earlier or path |> Enum.at(1) != "success" or site == nil or
+          get_in(settings, ["world", "construction"]) == nil
+      ],
+      do: diag("SCHEMA_VIOLATION", op, %{"error" => "invalid_value"})
+    ) ++
+      for(true <- [api(m) < [1, 101]], do: floor_diag()) ++
+      for(
+        k <- ~w(service.site_taken service.construction_full),
+        text != :unknown and not is_map_key(text, k),
+        do: diag("UNRESOLVED_REFERENCE", op, %{"target" => k})
+      ) ++
+      if(site == nil,
+        do: [],
+        else:
+          for(
+            {f, ok} <- [
+              {"blueprint", s["blueprint"] in site["blueprints"]},
+              {"direction", s["direction"] in site["directions"]}
+            ],
+            not ok,
+            do: diag("SCHEMA_VIOLATION", at(rel, path ++ [f]), %{"error" => "invalid_value"})
+          )
+      )
   end
 
   # A site or world.construction needs construction@1 (a blueprint is owned through the registry);
@@ -119,13 +170,17 @@ defmodule Loka.Content.Construction do
   end
 
   defp floor(m, used, world) do
-    api =
+    if (used or is_map_key(world, "construction")) and api(m) < [1, 99],
+      do: [floor_diag()],
+      else: []
+  end
+
+  defp floor_diag,
+    do: diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least", %{})
+
+  defp api(m),
+    do:
       m["requires"]["kernel_api"]["at_least"]
       |> String.split(".")
       |> Enum.map(&String.to_integer/1)
-
-    if (used or is_map_key(world, "construction")) and api < [1, 99],
-      do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least", %{})],
-      else: []
-  end
 end

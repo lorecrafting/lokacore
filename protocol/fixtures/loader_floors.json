@@ -986,7 +986,31 @@
       "below": "1.100",
       "source": "cartridges/craft_sampler",
       "feature": "a craft",
-      "edits": [["skills/carving.json", ["prerequisite"], null]],
+      "edits": [
+        ["skills/carving.json", ["prerequisite"], null],
+        ["skills/carpentry.json", ["prerequisite"], null],
+        [
+          "recipes/raise_timbered_hut.json",
+          ["outcomes", "success", "sequence"],
+          [{ "op": "fact.assign", "fact": "wood_chopped", "value": true }]
+        ]
+      ],
+      "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
+      "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
+    },
+    {
+      "floor": "1.101",
+      "below": "1.100",
+      "source": "cartridges/craft_sampler",
+      "feature": "a build step",
+      "edits": [
+        ["skills/carving.json", ["prerequisite"], null],
+        ["skills/carpentry.json", ["prerequisite"], null],
+        ["recipes/carve_spoon.json", ["craft"], null],
+        ["recipes/chop.json", ["craft"], null],
+        ["recipes/saw.json", ["craft"], null],
+        ["recipes/raise_timbered_hut.json", ["craft"], null]
+      ],
       "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
       "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
     },

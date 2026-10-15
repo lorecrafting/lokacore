@@ -10,6 +10,28 @@
         "instance"
       ],
       "meaning": "A spoon has been carved at the bench."
+    },
+    "wood_chopped": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "instance"
+      ],
+      "meaning": "A log has been chopped from the oak."
+    },
+    "timber_sawn": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "instance"
+      ],
+      "meaning": "A timber has been sawn at the sawhorse."
     }
   }
 }

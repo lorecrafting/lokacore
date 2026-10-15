@@ -3460,3 +3460,33 @@ Homestead hs-11 (Beads `loka-kgd.108.8`): a skill may require another skill's le
   - Reused: VersionedPolicy, `holds`, `skill_compare`, `skill.acquire`, the dialogue `blocked` admission, the policy reference walk.
   - New: `SkillDefinition.prerequisite`, `learnable`, the self-reference check, the 1.101 floor.
   - Missing invariant: none.
+
+## Built rooms S6: self-build
+
+Homestead hs-12 (Beads `loka-kgd.108.9`): a player raises a blueprint at a site with a recipe, as the build service does. Declarations: [recipe build steps](cartridge.md#recipe-build-step-declarations) (`kernel_api` 1.101).
+
+- **Command.** None new: `perform` on a detail-target recipe whose success sequence holds `build {blueprint, direction}`.
+- **Admission** (`craftRefused` in `kernel/ts/src/mechanics/action_recipe/shared.ts`, which the offer in `view/action_lists.ts` and the press in `commands/actions.ts` both read): the craft's refusal first (hs-10), then the build service's `unbuildable` (`service/build.ts`) for the target's room as site and the actor as owner: `service.site_taken` or `service.construction_full` (`max_total`, `max_per_owner`), each `invalid_state`.
+- **Effect** (`step` in `kernel/ts/src/mechanics/action_recipe/rule.ts`). The step appends the build service's `created` (`service/build.ts`): `entity.create` of the blueprint with origin `{kind: "built", site, direction, owner}`, the owner the perform's `actor_id`, under the command's mint, then the blueprint's weathering (S4). The loader refuses a build step outside the success outcome; a failed check runs the failure sequence, so nothing is built while the craft's consume still runs (owner answer: a failed craft loses its inputs). No job: a recipe's `duration` is the labour.
+- **Realm seams** (owner decision 2026-10-13, brief checklist).
+  1. Actor: met; the owner is the perform's `actor_id`, never `world.character`.
+  2. Reactions: not applicable.
+  3. Credit: not applicable.
+  4. Time: met; the recipe's `duration` is logical seconds.
+  5. Scope: met; the built row is public world state, as S2.
+  6. Not applicable.
+  7. Exclusive, shared-world; the room moves by none; theft never.
+  8. Not applicable.
+  9. Shared-world; one structure per site direction (`service.site_taken`), whoever raised it.
+- **Opt-in.** A recipe declares a `build` step. Chapter 1 declares none.
+- **Book.** No new component: the recipe card is offered unavailable with the refusal text, and the new room's exit appears in the site.
+- **Traps.** None met; trap 8 checked: carpentry is a skill level the actor raises, not a consequence.
+- **Known limits.** No build job from a recipe, no mend or raze by recipe, no tool by tag. A recipe build counts against the blueprint's caps exactly as a service build; the two share one site.
+- **Sampler.** `cartridges/craft_sampler` v2 (`kernel/ts/test/craft.test.ts`, `test/loka/content_craft_test.exs`). Ancestry woodfolk grants woodcutting; the axe lies in the workshop. `chop` (glade oak, 600 s) yields a log from the sealed woodpile; after two chops the old carver teaches carpentry (`prerequisite` woodcutting at least 2); `saw` (workshop sawhorse) turns two logs back into the woodpile and yields a timber. `raise_timbered_hut` (lane plot stakes, carpentry 2) spends two timbers into the sealed yard and raises "a timbered hut" north of the lane. The carpenter's `raise_hut_plain` (5 pennies) then refuses `service.site_taken`; raised first, it leaves the recipe unavailable and a forged perform `invalid_state` with the timbers held. Reopen keeps the room id and exits; replay mints the same id.
+- **Composition record** ([architecture](architecture.md#building-mechanics-by-composition)).
+  - Consumer: `craft_sampler`. Later: Homestead self-build.
+  - Reads: the recipe's detail target room, the blueprint caps, the built rows' origins.
+  - Writes: `entity.create` (and S4 weathering) through `created`.
+  - Reused: S2/S3 `unbuildable` and `created`, hs-10 craft and `craftRefused`, the recipe check and outcome.
+  - New: RecipeStep `build`, the build-step loader checks, the 1.101 floor.
+  - Missing invariant: none.
