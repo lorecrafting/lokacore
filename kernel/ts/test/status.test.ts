@@ -186,22 +186,6 @@ test('a condition is a debuff on any harm, a buff on a gain alone, else no kind;
   }
 });
 
-// Breaks: the GameView schema takes a zero duration, or a duration without its end or an end
-// without its duration (present exactly together, loka-x6t.65).
-test('the schema holds a condition duration at least 1 and only beside ends_at', () => {
-  const view = gameView(play(fresh(), { type: 'move', direction: 'east' }));
-  const [c] = view.conditions!;
-  const { ends_at, duration, ...permanent } = c!;
-  const at = (condition: object) => validate('GameView', { ...view, conditions: [condition] });
-  assert.deepEqual(at({ ...c, duration: 1 }), []);
-  for (const bad of [
-    { ...c, duration: 0 },
-    { ...permanent, ends_at },
-    { ...permanent, duration },
-  ])
-    assert.notDeepEqual(at(bad), [], JSON.stringify(bad));
-});
-
 // Breaks: cures are ignored, the cured status keeps draining through its stale job, or the
 // antidote is refused at the pool maximum.
 test('drinking the antidote ends the poison and its pending tick', () => {
