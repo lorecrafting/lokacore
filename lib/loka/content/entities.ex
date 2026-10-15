@@ -84,14 +84,22 @@ defmodule Loka.Content.Entities do
     for {_, rel, e} <- all(defs), {steps, root} <- roots(e), do: {rel, steps, root}
   end
 
-  # Variant and (row W10) schedule case conditions, (row G11) disposition conditions and (row G7)
-  # access locks.
+  # Variant and (row W10) schedule case conditions, (row G11) disposition conditions, (row G7)
+  # access locks and (row FD7) ask answer conditions.
   defp roots(e) do
     for(
       {steps, %{"when" => w}} <- variants(e) ++ cases(e),
       do: {steps ++ ["when", "root"], w["root"]}
     ) ++
-      policies(e, "disposition", ~w(hostile friendly)) ++ policies(e, "locks", ~w(get put))
+      policies(e, "disposition", ~w(hostile friendly)) ++
+      policies(e, "locks", ~w(get put)) ++
+      answers(e)
+  end
+
+  # Toolbox row FD7: each ask answer's condition (read with the NPC as the target).
+  defp answers(e) do
+    for {%{"when" => w}, i} <- Enum.with_index(get_in(e, ["ask", "answers"]) || []),
+        do: {["ask", "answers", i, "when", "root"], w["root"]}
   end
 
   defp policies(e, field, keys) do
@@ -142,6 +150,17 @@ defmodule Loka.Content.Entities do
 
   defp disposition_texts(_), do: []
 
+  # Toolbox row FD7: an NPC's unknown line and each answer's text.
+  defp ask_texts(%{"ask" => a}),
+    do:
+      [{["ask", "unknown"], a["unknown"]}] ++
+        for(
+          {x, i} <- Enum.with_index(a["answers"]),
+          do: {["ask", "answers", i, "text"], x["text"]}
+        )
+
+  defp ask_texts(_), do: []
+
   defp variant_texts(e),
     do: for({s, v} <- variants(e), do: {s ++ ["description"], v["description"]})
 
@@ -164,7 +183,8 @@ defmodule Loka.Content.Entities do
         fuel_texts(e) ++
         readable_texts(e) ++
         goal_texts(e) ++
-        disposition_texts(e)
+        disposition_texts(e) ++
+        ask_texts(e)
 
   @doc """
   CONTAINMENT_CYCLE at each item whose location leads back to it through items, and

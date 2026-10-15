@@ -23,6 +23,7 @@ const NAMED: Record<string, string> = {
   status: 'status',
   story_point: 'story_point',
   target: 'npc',
+  topic: 'topic', // row FD7
   victim: 'npc',
   witness: 'npc', // row FD5
 };
@@ -95,6 +96,7 @@ const apiFloor = (r: Obj): number =>
     r.on.event === 'spoken' ? 48 : r.on.npc ? 47 : 0, // speech (G9), the entrant filter (W3)
     r.on.target ? 87 : r.on.attacker ? 58 : 0, // loka-kgd.79, row 39
     r.on.witness ? 95 : 0, // row FD5
+    r.on.event === 'asked' ? 96 : 0, // row FD7
     r.on.event === 'status_applied' ? 53 : 0, // status reader 2 (row G3)
     // co_present: row W21; its tag: row W22
     ...r.apply.map((s: Obj) => (s.tag ? 56 : s.co_present ? 50 : (FLOORS[s.op] ?? 0))),

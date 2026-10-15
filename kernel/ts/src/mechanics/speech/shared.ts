@@ -1,10 +1,18 @@
 // speech@1 (toolbox row G9): who hears a word and whether it is an authored keyword.
-import type { CharacterId, EntityId, SpokenKeyword } from '../../contracts.gen.ts';
+import type {
+  CharacterId,
+  DefinitionRef,
+  EntityId,
+  NpcDefinition,
+  SpokenKeyword,
+} from '../../contracts.gen.ts';
+import { same } from '../../foundation/compose.ts';
 import { cmp } from '../../foundation/validate.ts';
 import { refString, type Steps, type World } from '../../runtime/decision.ts';
 import { npcsIn } from '../death/shared.ts';
 import { spokenBy } from '../dialogue/shared.ts';
 import { around } from '../senses.ts';
+import { holds } from '../policy.ts';
 
 /**
  * The word case-folded, or undefined unless it is a string of 1 to 32 ASCII letters. Free text (toolbox trap
@@ -55,3 +63,19 @@ export function answer(
   }
   return undefined;
 }
+
+/**
+ * Row FD7: `npc`'s first answer, in authored order, on `topic` whose when holds (`actor` the
+ * actor, `npc` the target); undefined when none does (the NPC says its unknown line).
+ */
+export const answerTo = (
+  w: World,
+  actor: CharacterId,
+  npc: EntityId,
+  topic: DefinitionRef,
+  steps: Steps,
+) =>
+  (w.entities[npc] as NpcDefinition | undefined)?.ask?.answers.find(
+    (a) =>
+      same(a.topic, topic) && (!a.when || holds(w, actor, a.when.root, { target: npc, steps })),
+  );

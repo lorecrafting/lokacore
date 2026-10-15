@@ -502,10 +502,12 @@
     "commands": [
       "say",
       "whisper",
-      "shout"
+      "shout",
+      "ask"
     ],
     "events": [
-      "spoken"
+      "spoken",
+      "asked"
     ]
   },
   {

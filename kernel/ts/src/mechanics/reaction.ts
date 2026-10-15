@@ -80,6 +80,8 @@ export const FILTERS: Record<string, Match> = {
   status: ref('status'),
   word: equal('word'),
   loudness: equal('loudness'),
+  topic: ref('topic'), // row FD7
+  answered: equal('answered'),
   // Row FD5: the NPC, alive in the room of the event's subject (else its doer's body), sees it;
   // never its own witness (a dead victim, alive in the pre-command world, saw nothing).
   witness: (w, want, _, e) => {
@@ -211,6 +213,7 @@ const SUBJECT: { [K in On['event']]: keyof Extract<EventPayload, { type: K }> | 
   status_ticked: 'body_id',
   status_expired: 'body_id',
   spoken: 'entity_id',
+  asked: 'entity_id',
   action_completed: 'doer',
   barrier_changed: 'doer',
   check_failed: 'doer',
