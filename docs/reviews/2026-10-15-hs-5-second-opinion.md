@@ -53,3 +53,25 @@ Items 3 and 4 hold. Item 1 fails (finding 1). Items 2 and 5 hold only in part (f
   - First review: "5 forged cases, all throw". Backed by the baseline run.
   - First review: "R4 order ignored: killed". Not backed. Resetting `next` also breaks dedup, so R4 was killed by the duplicate forgery. M2 isolates order, and it survives.
   - First review: "`applied` is schema-required" (`cartridge.schema.json:2761-2765`). Confirmed.
+
+## Fix round 2 (45450614..0cc4022f)
+
+- Commit reviewed: `0cc4022fbb62dfe18eeb8986b4a2853ce47e40e6`.
+
+| # | Status | Proof |
+|---|---|---|
+| 1 Blocker: lawful reaction becomes `save_corrupt` | Verified | `food-receipt.ts:23` binds only line 0, as [save.md:973-974](../system/save.md) does. The real-SQLite journey (`kitchen.test.ts:42-47`) adds a `status_applied` reaction that applies `spoiling`. Reopen, failed COMMIT, lost ack, replay and `coldReopen` pass with three lines. |
+| 2 Blocker: order untested | Moot | The tail check is gone. |
+| 3 Nit: bare `[meal]` accepted | Verified | Known limit at `mechanics.md:3348`. Pinned at `kitchen.test.ts:162-163`. |
+
+- Callers: `eatReceipt` has one caller, `narration.ts:160`. Neither `narration.ts` nor `session.ts` changed. A null or keyless tail line is still refused at open as `save_corrupt` (`session.ts:73-74`).
+- Baseline at 0cc4022f: kitchen, food, status and r9c tests pass, 9/9.
+
+| Mutant | Result |
+|---|---|
+| `:23` line-0 check replaced by `!d.narration` | killed: `kitchen.test.ts:170` |
+| 45450614 tail check restored | killed: `kitchen.test.ts:92` |
+
+- Both claims in the handback are backed by these runs.
+
+Verdict: **APPROVE**.
