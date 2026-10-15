@@ -9,16 +9,6 @@ mise exec -- npm ci --no-audit --no-fund
 mise exec -- npm run web:preview
 ```
 
-In a slice worktree, run `bin/worktree_setup.sh` instead of `npm ci`: it links the main
-checkout's `node_modules`, and `npm ci` through that link would wipe the main install.
-Metro watches the link's real path ([`metro.config.js`](../mobile/app/metro.config.js)).
-To check a sampler room at 390 px there without touching the owner's preview (each walk serves
-the Book on a free port and screenshots every page to `.walkthrough/steps`):
-
-```sh
-mise exec -- bin/loka dev cartridges/ashmere_sampler && cd mobile/app && LOKA_WALK=ashmere_sampler mise exec -- npm run walkthrough
-```
-
 Open **http://localhost:19006**. Keep that process running while editing the same
 worktree. Metro watches the app, mobile authority, kernel and bundled fixture sources;
 Book UI edits appear through Fast Refresh. An already-open game retains its loaded
@@ -32,6 +22,16 @@ At a playable checkpoint, stop the preview process with Ctrl-C. In the new revie
 source worktree, run the commands above; the browser URL stays the same. Current-build
 play survives reload and a closed/reopened tab. Browser saves have no cross-build
 migration promise.
+
+In a slice worktree, run `bin/worktree_setup.sh` instead of `npm ci`: it links the main
+checkout's `node_modules`, and `npm ci` through that link would wipe the main install.
+Metro watches the link's real path ([`metro.config.js`](../mobile/app/metro.config.js)).
+To check a sampler room at 390 px there without touching the owner's preview (each walk serves
+the Book on a free port and screenshots every page to `.walkthrough/steps`):
+
+```sh
+mise exec -- bin/loka dev cartridges/ashmere_sampler && cd mobile/app && LOKA_WALK=ashmere_sampler mise exec -- npm run walkthrough
+```
 
 `expo-sqlite` 57.0.3's browser worker needs an asynchronous first open before synchronous
 session calls, plus the narrow install-time length, error-message and elapsed-time fixes in
