@@ -2405,6 +2405,19 @@
         },
         "usable": {
           "type": "boolean"
+        },
+        "level": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Homestead hs-14: present only for a skill with growth; the base 1 while acquired plus each growth threshold reached."
+        },
+        "locked": {
+          "type": "boolean",
+          "description": "Homestead hs-14: present only for a skill with a prerequisite; true while the prerequisite fails for the actor."
+        },
+        "profession": {
+          "$ref": "text.schema.json#/$defs/TextKey",
+          "description": "Homestead hs-14: present only when the skill names a profession heading."
         }
       },
       "required": [

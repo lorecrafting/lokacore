@@ -7,7 +7,7 @@ import { bandPhrase, cap, plain, toneOf, why, type group, type Thing } from './m
 import type { Button, DetailLine } from './presenter.ts';
 import { note, prose, usePalette } from './palette.ts';
 import { DiscoveredMap } from './DiscoveredMap.tsx';
-import { levelLine, RaiseCards, SkillDetails, xpLine } from './skills.tsx';
+import { levelLine, Professions, RaiseCards, SkillDetails, xpLine } from './skills.tsx';
 import { size, space, type } from './tokens.ts';
 import { ActionCard, Cards, ContinueButton } from './actions.tsx';
 import { EntityLine, LogLines, Note } from './lines.tsx';
@@ -53,6 +53,7 @@ export function CharacterPage(
         </Text>
       ))}
       {levelling && <Text style={prose(c)}>{xpLine(levelling)}</Text>}
+      <Professions view={p.view} text={p.text} />
       <RaiseCards {...p} />
     </Page>
   );

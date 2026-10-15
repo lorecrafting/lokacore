@@ -28,5 +28,9 @@
   "npc.old_carver.description": "A stooped carver with sure hands.",
   "old_carver.carving.prompt": "\"Show me you can whittle, and I will teach you to carve.\"",
   "old_carver.carving.choice": "Learn carving",
-  "old_carver.carving.learned": "The old carver shows you how to follow the grain."
+  "old_carver.carving.learned": "The old carver shows you how to follow the grain.",
+  "profession.woodcraft": "Woodcraft",
+  "profession.handcraft": "Handcraft",
+  "skill.joinery.label": "Joinery",
+  "skill.joinery.requirement": "Learn to carve first (carving 1)."
 }

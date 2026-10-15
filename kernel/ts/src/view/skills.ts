@@ -1,4 +1,6 @@
 import { status } from '../mechanics/skills.ts';
+import { level } from '../mechanics/skill_level.ts';
+import { holds } from '../mechanics/policy.ts';
 import { refString, type World } from '../runtime/decision.ts';
 import type { CharacterId, DefinitionRef, Key } from '../contracts.gen.ts';
 import { choice, value, worn } from '../mechanics/attributes/shared.ts';
@@ -11,14 +13,23 @@ export function skillViews(world: World, actor: CharacterId, steps = { n: 0 }) {
     kind,
     key,
   });
-  const skills = Object.values(world.cartridge.skills ?? {}).map((s) => {
+  // Homestead hs-14: level only with growth, locked only with a prerequisite, and a hidden skill
+  // is left out while its prerequisite fails.
+  const skills = Object.values(world.cartridge.skills ?? {}).flatMap((s) => {
     const skill = ref('skill', s.key);
-    return {
-      skill,
-      label: s.label,
-      requirement: s.requirement,
-      ...status(world, actor, skill, steps),
-    };
+    const locked = s.prerequisite && !holds(world, actor, s.prerequisite.root, { steps });
+    if (s.hidden && locked) return [];
+    return [
+      {
+        skill,
+        label: s.label,
+        requirement: s.requirement,
+        ...status(world, actor, skill, steps),
+        ...(s.growth && { level: level(world, actor, skill) }),
+        ...(s.prerequisite && { locked: locked! }),
+        ...(s.profession && { profession: s.profession }),
+      },
+    ];
   });
   const attributes = attributeViews(world, actor, ref);
   const selected = choice(world, actor);
@@ -52,8 +63,6 @@ function levellingView(world: World, actor: CharacterId) {
 }
 
 /** Original free-bound lessons identify the existing actor SkillViews; no second acquisition projection. */
-// ponytail: lists a lesson whose prerequisite does not hold (the choice is grey); hs-14's `locked`
-// field (loka-kgd.108.11) marks it.
 export function freeLessons(world: World, npc: string) {
   const refs = Object.values(world.cartridge.dialogues ?? {})
     .filter((d) => world.entityIds[refString(d.npc)] === npc)

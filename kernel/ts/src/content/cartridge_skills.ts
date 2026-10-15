@@ -25,7 +25,7 @@ export function skills(c: Obj, checks: Checks): Diagnostic[] {
   const bad = (at: string) => out.push(diag('SCHEMA_VIOLATION', at, { error: 'invalid_value' }));
   for (const [ref, s] of Object.entries((c.skills ?? {}) as Obj)) {
     const at = `.cartridge.skills${step(ref)}`;
-    checks.text(s, ['label', 'requirement'], at);
+    checks.text(s, ['label', 'requirement', 'profession'], at);
     if (s.key.length > 58) bad(`${at}.key`);
     for (const capability of ['skills', 'policy', 'fact'])
       if (c.lock.capabilities[capability] !== 1)
@@ -61,13 +61,17 @@ export function skills(c: Obj, checks: Checks): Diagnostic[] {
 }
 
 // Homestead hs-11: a prerequisite never names its own skill, no ancestry grants its box, and it
-// needs API 1.101.
+// needs API 1.101. Homestead hs-14: a shown skill's prerequisite never reads a hidden skill, and a
+// profession also needs API 1.101.
 function prerequisites(c: Obj): Diagnostic[] {
   const named = Object.entries((c.skills ?? {}) as Obj).filter(([, s]) => s.prerequisite);
   const out = named
     .filter(([ref, s]) =>
       walk(s.prerequisite.root, '').some(
-        ([p]) => p.op === 'skill_compare' && refString(p.skill) === ref,
+        ([p]) =>
+          p.op === 'skill_compare' &&
+          (refString(p.skill) === ref ||
+            (!s.hidden && c.skills?.[refString(p.skill)]?.hidden === true)),
       ),
     )
     .map(([ref]) =>
@@ -79,7 +83,8 @@ function prerequisites(c: Obj): Diagnostic[] {
   for (const [choice, a] of Object.entries((c.ancestries ?? {}) as Obj))
     if (a.skill && c.skills?.[refString(a.skill)]?.prerequisite)
       out.push(diag('SCHEMA_VIOLATION', `.cartridge.ancestries${step(choice)}.skill`));
-  if (named.length && apiCmp(c.manifest.requires.kernel_api.at_least, '1.101') < 0)
+  const professions = Object.values((c.skills ?? {}) as Obj).some((s) => s.profession);
+  if ((named.length || professions) && apiCmp(c.manifest.requires.kernel_api.at_least, '1.101') < 0)
     out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
   return out;
 }

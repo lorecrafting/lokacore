@@ -314,6 +314,8 @@ test('a craft whose policy fails refuses on the policy, as offered', () => {
   assert.ok(agrees(w, r));
 });
 
+const box = (w: World, key: string) => gameView(w).skills!.find((s) => s.skill.key === key)!;
+
 // Homestead hs-11. Breaks: the dialogue admission (dialogue/shared.ts blocked) skips the
 // prerequisite (the level-1 choose is accepted), the offer disagrees with admission (agrees
 // fails), or the conversation offers the lesson again after it is learned.
@@ -335,14 +337,74 @@ test('carving is learned only at whittling 2, offered and admitted alike', () =>
   const level1 = carve(holding()).world; // failed: one use, whittling 1
   const refused = learn(level1);
   assert.equal(refused.offered.available, false);
+  assert.equal(box(refused.w, 'carving').locked, true); // hs-14: the view says why
   assert.equal(code(refused.r), 'invalid_state');
   assert.equal(refused.r.world, refused.w); // nothing changed
   assert.equal(learned(refused.w), false);
   const level2 = carve(level1).world; // two uses: whittling 2
   const taught = learn(level2);
   assert.equal(taught.offered.available, true);
+  assert.equal(box(taught.w, 'carving').locked, false);
   assert.equal(code(taught.r), 'accepted');
   assert.equal(learned(taught.r.world), true);
   const w = taught.r.world; // the conversation ends with the lesson
   assert.equal(code(play(w, { type: 'talk', target_id: carver(w) })), 'invalid_state');
+});
+
+// Homestead hs-14 (book-ui.md Skill tree details). Breaks: level is projected without growth or
+// stops at the wrong growth threshold, locked is projected without a prerequisite or flips at
+// the wrong whittling level, or profession is dropped. Whittling grows [1, 2]; carving needs
+// whittling 2; joinery (no growth) needs carving 1.
+test('the skill tree view: level with growth, locked with a prerequisite, at the boundaries', () => {
+  const tree = (w: World) =>
+    gameView(w).skills!.map(({ skill, level, locked, profession }) => ({
+      key: skill.key,
+      ...(level !== undefined && { level }),
+      ...(locked !== undefined && { locked }),
+      profession,
+    }));
+  const row = (key: string, more: object, profession: string) => ({ key, ...more, profession });
+  const at = (w: World, whittling: number, carvingLocked: boolean) =>
+    assert.deepEqual(tree(w), [
+      row('carving', { level: 0, locked: carvingLocked }, 'profession.handcraft'),
+      row('joinery', { locked: true }, 'profession.woodcraft'),
+      row('whittling', { level: whittling }, 'profession.woodcraft'),
+    ]);
+  const level1 = carve(holding()).world;
+  at(fresh(), 0, true);
+  at(level1, 1, true);
+  at(carve(level1).world, 2, false);
+});
+
+// Breaks (hs-14): a hidden skill is projected while its prerequisite fails, or stays out once
+// it holds.
+test('a hidden skill is left out of the view while its prerequisite fails', () => {
+  const hide = (k: string) => ({
+    [`${P}skill/${k}`]: { ...content.skills![`${P}skill/${k}`]!, hidden: true },
+  });
+  const c = { ...content, skills: { ...content.skills, ...hide('carving'), ...hide('joinery') } };
+  const keys = (w: World) => gameView(w).skills!.map((s) => s.skill.key);
+  const level1 = carve(take(take(fresh(c as never), 'stick_01'), 'stick_02')).world;
+  assert.deepEqual(keys(level1), ['whittling']);
+  assert.deepEqual(keys(carve(level1).world), ['carving', 'whittling']);
+});
+
+// Breaks (hs-14; twin of content_craft_test.exs): a shown skill whose prerequisite reads a hidden
+// skill loads, a hidden skill reading a hidden one is refused, or an unknown profession text
+// loads. The floor is loader_floors.json's "a skill profession" case.
+test('loader: a shown prerequisite never reads a hidden skill; a profession resolves', () => {
+  const S = (k: string) => `${P}skill/${k}`;
+  const hide =
+    (...keys: string[]) =>
+    (c: any) =>
+      keys.forEach((k) => (c.skills[S(k)].hidden = true));
+  assert.deepEqual(loadEdited(hide('carving')), [
+    'SCHEMA_VIOLATION',
+    `.cartridge.skills["${S('joinery')}"].prerequisite`,
+  ]);
+  assert.equal(loadEdited(hide('carving', 'joinery')), 'loaded');
+  assert.deepEqual(
+    loadEdited((c) => (c.skills[S('whittling')].profession = 'profession.nothing')),
+    ['UNRESOLVED_REFERENCE', `.cartridge.skills["${S('whittling')}"].profession`],
+  );
 });

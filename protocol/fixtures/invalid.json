@@ -31800,5 +31800,177 @@
         "code": "unknown_property"
       }
     ]
+  },
+  {
+    "name": "skill_hidden_without_prerequisite",
+    "contract": "SkillDefinition",
+    "value": {
+      "key": "carving",
+      "label": "skill.carving.label",
+      "requirement": "skill.carving.requirement",
+      "qualification": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": []
+        }
+      },
+      "hidden": true
+    },
+    "errors": [
+      {
+        "path": "/prerequisite",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "skill_hidden_false",
+    "contract": "SkillDefinition",
+    "value": {
+      "key": "carving",
+      "label": "skill.carving.label",
+      "requirement": "skill.carving.requirement",
+      "qualification": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": []
+        }
+      },
+      "hidden": false,
+      "prerequisite": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": []
+        }
+      }
+    },
+    "errors": [
+      {
+        "path": "/hidden",
+        "code": "const_mismatch"
+      }
+    ]
+  },
+  {
+    "name": "skill_profession_not_text_key",
+    "contract": "SkillDefinition",
+    "value": {
+      "key": "carving",
+      "label": "skill.carving.label",
+      "requirement": "skill.carving.requirement",
+      "qualification": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": []
+        }
+      },
+      "profession": "Woodcraft"
+    },
+    "errors": [
+      {
+        "path": "/profession",
+        "code": "pattern_mismatch"
+      }
+    ]
+  },
+  {
+    "name": "skill_view_level_negative",
+    "contract": "SkillView",
+    "value": {
+      "skill": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "skill",
+        "key": "carving"
+      },
+      "label": "skill.carving.label",
+      "requirement": "skill.carving.requirement",
+      "acquired": false,
+      "qualified": true,
+      "usable": false,
+      "level": -1
+    },
+    "errors": [
+      {
+        "path": "/level",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "name": "skill_view_level_not_integer",
+    "contract": "SkillView",
+    "value": {
+      "skill": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "skill",
+        "key": "carving"
+      },
+      "label": "skill.carving.label",
+      "requirement": "skill.carving.requirement",
+      "acquired": false,
+      "qualified": true,
+      "usable": false,
+      "level": 1.5
+    },
+    "errors": [
+      {
+        "path": "/level",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "name": "skill_view_locked_not_boolean",
+    "contract": "SkillView",
+    "value": {
+      "skill": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "skill",
+        "key": "carving"
+      },
+      "label": "skill.carving.label",
+      "requirement": "skill.carving.requirement",
+      "acquired": false,
+      "qualified": true,
+      "usable": false,
+      "locked": "yes"
+    },
+    "errors": [
+      {
+        "path": "/locked",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "name": "skill_view_profession_not_text_key",
+    "contract": "SkillView",
+    "value": {
+      "skill": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "skill",
+        "key": "carving"
+      },
+      "label": "skill.carving.label",
+      "requirement": "skill.carving.requirement",
+      "acquired": false,
+      "qualified": true,
+      "usable": false,
+      "profession": "Woodcraft"
+    },
+    "errors": [
+      {
+        "path": "/profession",
+        "code": "pattern_mismatch"
+      }
+    ]
   }
 ]

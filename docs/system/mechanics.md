@@ -3451,7 +3451,7 @@ Homestead hs-11 (Beads `loka-kgd.108.8`): a skill may require another skill's le
 - **Opt-in.** A skill declares `prerequisite`. Chapter 1 declares none.
 - **Book.** No new component: the dialogue choice is offered unavailable until the prerequisite holds.
 - **Traps.** None met; trap 8 checked: the gate is a skill level the actor raises, not a consequence.
-- **Known limits.** Only a prerequisite naming its own skill is refused at load; a cycle in which each of two skills needs the other at some level (A needs `skill_compare` B, B needs `skill_compare` A, neither under `not`) loads and leaves both unlearnable. A cycle in which each needs the other not learned (each leaf under `not`) is a learnable either-or pair. A box's trainer fee is the dialogue's existing `lesson_payment`; hidden boxes are not in this slice.
+- **Known limits.** Only a prerequisite naming its own skill is refused at load; a cycle in which each of two skills needs the other at some level (A needs `skill_compare` B, B needs `skill_compare` A, neither under `not`) loads and leaves both unlearnable. A cycle in which each needs the other not learned (each leaf under `not`) is a learnable either-or pair. A box's trainer fee is the dialogue's existing `lesson_payment`; hidden boxes are [hs-14](#skill-tree-view-homestead-hs-14).
 - **Sampler.** `cartridges/craft_sampler`: the old carver in the workshop teaches carving (`prerequisite` whittling at least 2). After one failed carve (whittling 1) the lesson is offered unavailable and `choose` refuses `invalid_state`; after the second carve (whittling 2) it is accepted (`kernel/ts/test/craft.test.ts`, `test/loka/content_craft_test.exs`).
 - **Composition record** ([architecture](architecture.md#building-mechanics-by-composition)).
   - Consumer: `craft_sampler`. Later: Homestead profession trees.
@@ -3460,6 +3460,30 @@ Homestead hs-11 (Beads `loka-kgd.108.8`): a skill may require another skill's le
   - Reused: VersionedPolicy, `holds`, `skill_compare`, `skill.acquire`, the dialogue `blocked` admission, the policy reference walk.
   - New: `SkillDefinition.prerequisite`, `learnable`, the self-reference check, the 1.101 floor.
   - Missing invariant: none.
+
+## Skill tree view (Homestead hs-14)
+
+Homestead hs-14 (Beads `loka-kgd.108.11`): GameView projects each skill's tree state so the Book draws the Character page's skill tree. Declarations: [skill prerequisite](cartridge.md#skill-prerequisite-declarations) `hidden` and `profession` (`kernel_api` 1.101).
+
+- **Command.** None new.
+- **Projection** (`skillViews` in `kernel/ts/src/view/skills.ts`): a SkillView gains `level` (only for a skill with `growth`; `level` in `kernel/ts/src/content/skill_level.ts`), `locked` (only for a skill with `prerequisite`: the prerequisite does not hold for the viewing actor, the same `holds` the hs-11 admission reads) and `profession` (the authored key). A skill with `hidden` is left out while it is `locked`. A cartridge whose skills declare none of `growth`, `prerequisite` and `profession` keeps its GameView bytes (`mobile/app/stories.test.ts`).
+- **Load check.** A `skill_compare` in the prerequisite of a skill without `hidden` naming a skill with `hidden` is SCHEMA_VIOLATION at `skills/<key>.prerequisite` (`prerequisites` in `kernel/ts/src/content/cartridge_skills.ts`; `Loka.Content.Skills.itself/3`).
+- **Effect.** None.
+- **Realm seams** (owner decision 2026-10-13, brief checklist).
+  1. Actor: met; `locked` and `hidden` are evaluated for the viewing actor.
+  2. to 5. Not applicable: no trigger, payout, clock or new scope.
+  6. Not applicable: authored text only.
+  7. to 9. Not applicable: no ownership, receipt or free text.
+- **Opt-in.** A skill declares `profession` or `hidden`. Chapter 1 declares none.
+- **Book.** [Skill tree details](book-ui.md#skill-tree-details): `Professions` in `mobile/app/book/skills.tsx`, between the xp line and the Raise cards. An NPC lesson line reads `locked` (proposed, pending designer approval).
+- **Traps.** None met; trap 8 checked: `locked` reads the hs-11 gate, a skill level the actor raises, and adds no gate.
+- **Known limits.** A hidden skill whose prerequisite fails after it is learned is left out. An NPC's lessons still list a hidden skill's choice key (the Book draws no line for it).
+- **Sampler.** `cartridges/craft_sampler`: whittling under Woodcraft, carving under Handcraft, and joinery (Woodcraft, `prerequisite` carving at least 1). At start the Character page shows Handcraft with "Carving — locked" and Woodcraft with "Joinery — locked"; once carving is learned it reads "Carving, level 1 — qualified" (`kernel/ts/test/craft.test.ts`, `test/loka/content_craft_test.exs`).
+- **Composition record** ([architecture](architecture.md#building-mechanics-by-composition)).
+  - Consumer: `craft_sampler`. Later: Homestead profession trees.
+  - Reads: the actor's facts through `holds` and `level`.
+  - Writes: none.
+  - Reused: VersionedPolicy, `holds`, `level`, the hs-11 policy reference walk, `SectionTitle`, `Note`.
 
 ## Self-cooking (Homestead hs-13)
 

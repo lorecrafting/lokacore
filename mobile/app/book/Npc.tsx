@@ -144,7 +144,7 @@ const npcSkills = (c: Palette, p: NpcProps) =>
     )
     .map((s) => (
       <Text key={s.skill.key} style={note(c)}>
-        {p.text(s.label)}: {s.acquired ? 'learned' : 'not learned'}; currently{' '}
+        {p.text(s.label)}: {s.acquired ? 'learned' : s.locked ? 'locked' : 'not learned'}; currently{' '}
         {s.qualified ? 'qualified' : 'unqualified'}. {p.text(s.requirement)}
       </Text>
     ));

@@ -82,4 +82,25 @@ defmodule Loka.ContentCraftTest do
              "nothing"
            )
   end
+
+  # Break (hs-14; twin of the loader test in kernel/ts/test/craft.test.ts): a shown skill whose
+  # prerequisite reads a hidden skill compiles, a hidden skill reading a hidden one is refused,
+  # or an unknown profession text compiles. The floor is loader_floors.json's
+  # "a skill profession" case.
+  test "a shown prerequisite never reads a hidden skill; a profession resolves", %{dir: dir} do
+    edit = fn edits ->
+      case Loka.ContentSource.compile(dir, edits) do
+        {:error, diags} -> Enum.map(diags, &{&1["code"], &1["path"]})
+        {:ok, _, _} -> :ok
+      end
+    end
+
+    hide = &{"skills/#{&1}.json", fn s -> Map.put(s, "hidden", true) end}
+
+    assert edit.([hide.("carving")]) == [{"SCHEMA_VIOLATION", "skills/joinery.prerequisite"}]
+    assert edit.([hide.("carving"), hide.("joinery")]) == :ok
+
+    assert edit.([{"skills/whittling.json", &Map.put(&1, "profession", "profession.nothing")}]) ==
+             [{"UNRESOLVED_REFERENCE", "skills/whittling.profession"}]
+  end
 end
