@@ -2,7 +2,7 @@
 
 - Branch `toolbox/wb-s2`, exact head `4fd81aca22c727b7d97906cdcf8882a2e9f32203`, base `43ee6605` (diff `43ee6605...4fd81aca`). No PR (batch model).
 - Governing: brief in `br show loka-1lpq`; [mechanics.md row 29a and speech](../system/mechanics.md), [cartridge.md Spells/Speech](../system/cartridge.md), [realm seams checklist](../decisions/owner-decision-realm-seams-2026-10-13.md#brief-checklist) (seams 1, 5, 6, 8), [contracts lessons](../lessons/contracts.md), [reviewer stance](../../.claude/agents/reviewer.md).
-- Verdict: **CHANGES REQUIRED** (finding 1).
+- Verdict: **CHANGES REQUIRED** (finding 1) at 4fd81aca; **APPROVE** at fix round 1 head 697af599 (below).
 - Written 2026-10-15 by anthropic/claude-opus-5-5.
 
 ## Must be true (written before the diff)
@@ -67,3 +67,18 @@ m1 and m2 also survive the wider set combat_credit, status_readers, spells, spel
 | s2 schema: drop `phrases` minItems | killed (both) |
 
 The GameView `spell_words` and `phrases` constraints are pinned by rows in `protocol/fixtures/invalid.json` (23412-23480).
+
+## Fix round 1 (scoped re-check, `4fd81aca..697af599`)
+
+Exact head `697af599f7c8ccb83d4892ef1ddb03efff25e81a`. The focused TS and Elixir files pass at head (TS exit 0, Elixir 42 passed). Every mutant below was reverted and the tree is clean.
+
+| # | Disposition | Proof |
+|---|---|---|
+| 1 | Fixed | `noctis.json` has an empty policy. Mutant m1 (`spellOf` without `learned`) is now killed by "an unknown word and unread noctis are refused alike". |
+| 2 | Dispute accepted | `runtime/world.ts:187` rejects any command whose `actor_id` is not `world.character` (not_found) before cast admission runs, so m2 cannot change a cast decision. `shared.ts:92` already reads `payload.actor_id`. No test is owed now. The Realm row that admits a second actor owes the test of a cast by that second actor. |
+| 3 | Fixed | TS `cartridge_recipes.ts:83` (`same(scopes, ['player'])`) and Elixir `spells.ex` (`["player"]`, no `per_subject`) both refuse other scopes. Red controls: dropping the TS scope check is killed by the TS loader row; dropping the Elixir `FACT_SCOPE_UNSUPPORTED` clause is killed by `content_spells_test`. `per_subject` is `const: true` in the schema, so the two kernels cannot differ on `false`. |
+| 4 | Fixed | `cartridge_recipes.ts:155` and `spells.ex` `phrases/2`. Red controls: disabling the TS check is killed by the "phrases … with speech@1" test; disabling the Elixir check is killed by `content_speech_test`. |
+| 5 | Fixed | `mechanics.md` and both effect tests now read 1.98. |
+| 6 | Partly verified | The handback table is not in Beads or in the commit body. Instead I reran two claims from the commit body (the noctis refusal and the scope refusal in both kernels), as the rows above show. |
+
+Verdict at 697af599: **APPROVE**.
