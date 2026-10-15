@@ -1,4 +1,4 @@
-# size: allow 321, storylet targets (row FD3) and recipe reasons (loka-j64e) check their floor and rooms beside the other recipe targets
+# size: allow 322, craft checks (hs-10), storylet targets (row FD3) and recipe reasons (loka-j64e) check their floor and rooms beside the other recipe targets
 defmodule Loka.Content.Recipes do
   @moduledoc """
   Action recipes and rooms' action contributions (action.schema.json ActionRecipe,
@@ -55,7 +55,8 @@ defmodule Loka.Content.Recipes do
       contributions(defs, actions) ++
       uses(defs, m) ++
       storylets(defs, m) ++
-      RecipeTips.reasons(all(defs), ctx, api(m) < [1, 100])
+      RecipeTips.reasons(all(defs), ctx, api(m) < [1, 100]) ++
+      Loka.Content.Replenish.craft(m, defs, text)
   end
 
   # Toolbox row FD3: a storylet target needs kernel_api 1.92 (one diagnostic).

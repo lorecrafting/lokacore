@@ -5,13 +5,18 @@ import type {
   ActionRecipe,
   CharacterId,
   CommandPayload,
+  DefinitionRef,
+  DeltaOp,
   EntityId,
+  ItemLocation,
   RecipeTarget,
   UnavailableReason,
   UseTool,
 } from '../../contracts.gen.ts';
 import { bodyOf, refString, type Steps, type World } from '../../runtime/decision.ts';
 import { engaged } from '../combat/shared.ts';
+import { carryingExchange, giveRefused } from '../containment/shared.ts';
+import { selected } from '../containment/stock.ts';
 import { value as factValue } from '../fact.ts';
 import { toolHeld } from '../lookups.ts';
 import { holds } from '../policy.ts';
@@ -110,3 +115,69 @@ export const policyRefusal = (recipe?: ActionRecipe): UnavailableReason =>
   recipe?.reason
     ? { code: 'invalid_state', message: { key: recipe.reason } }
     : { code: 'invalid_state' };
+
+export type Transfer = Extract<DeltaOp, { op: 'entity.transfer' }>;
+const transfer = (
+  entity_id: EntityId,
+  source_id: EntityId,
+  destination_id: EntityId,
+): Transfer => ({
+  op: 'entity.transfer',
+  writer_group: 0,
+  entity_id,
+  source_id,
+  destination_id,
+});
+// The loader admits only a room, npc or item holder for a craft (never template).
+const holder = (world: World, l: ItemLocation) =>
+  l.in === 'room'
+    ? world.roomIds[refString(l.room)]
+    : world.entityIds[refString(l.in === 'npc' ? l.npc : (l as { item: DefinitionRef }).item)];
+
+/**
+ * Homestead hs-10: a station recipe's craft, read before any draw. The first `quantity` consume
+ * items held directly in the body (lowest EntityId, each one Give would let go) move to `to`, and
+ * one yield item directly in `from` moves to the body; fewer held refuses invalid_state with the
+ * consume reason, an empty `from` without one, a body that cannot carry the exchange too_heavy.
+ */
+export function crafted(
+  world: World,
+  recipe: ActionRecipe,
+  body: EntityId,
+  steps: Steps,
+): UnavailableReason | { consumed: Transfer[]; made: Transfer[] } {
+  const { consume, yield: made } = recipe.craft ?? {};
+  const ids = consume ? selected(world, consume.items, body, consume.quantity, steps) : [];
+  if (typeof ids === 'string') return { code: ids };
+  if (consume && ids.length < consume.quantity)
+    return consume.reason
+      ? { code: 'invalid_state', message: { key: consume.reason } }
+      : { code: 'invalid_state' };
+  for (const id of ids) {
+    const code = giveRefused(world, id, steps);
+    if (code) return { code };
+  }
+  const from = made && holder(world, made.from);
+  const out = made ? selected(world, made.items, from!, 1, steps) : [];
+  if (typeof out === 'string') return { code: out };
+  if (made && !out.length) return { code: 'invalid_state' };
+  const code = carryingExchange(world, body, ids, out, steps);
+  if (code) return { code };
+  const to = consume && holder(world, consume.to);
+  return {
+    consumed: ids.map((id) => transfer(id, body, to!)),
+    made: out.map((id) => transfer(id, from!, body)),
+  };
+}
+
+/** A craft's refusal for the command (commands/actions.ts) and its offer (view/action_lists.ts). */
+export const craftRefused = (
+  world: World,
+  recipe: ActionRecipe | undefined,
+  body: EntityId | undefined,
+  steps: Steps,
+) => {
+  if (!recipe?.craft || !body) return undefined;
+  const c = crafted(world, recipe, body, steps);
+  return 'code' in c ? c : undefined;
+};

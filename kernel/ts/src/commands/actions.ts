@@ -33,7 +33,7 @@ import { engaged } from '../mechanics/combat/shared.ts';
 import { eligible } from '../mechanics/combat/behavior.ts';
 import { choice as characterChoice } from '../mechanics/attributes/shared.ts';
 import { levelling } from '../mechanics/levelling/shared.ts';
-import { castAdmission, useAdmission } from '../mechanics/action_recipe/shared.ts';
+import { castAdmission, craftRefused, useAdmission } from '../mechanics/action_recipe/shared.ts';
 
 /**
  * One action of a set: what the GameView advertises, the Command type it resolves to, the
@@ -258,11 +258,12 @@ export function refusalReason(
           : 'unsupported_capability',
     };
   const use = useAdmission(world, matching[0]!.recipe, payload, steps); // row G4
-  const used = use ? { code: use } : castAdmission(world, payload, steps); // row 29a
+  const crafting = perform && craftRefused(world, matching[0]!.recipe, bodyOf(world, actor), steps);
+  const used = use ? { code: use } : crafting || castAdmission(world, payload, steps); // hs-10, 29a
   const ok = (a: Offered, d = detailAt(world, a)) =>
     (d === undefined || visible(world, actor, d, steps)) &&
     holds(world, actor, a.policy.root, { target: d ?? primaryTarget(payload), steps });
-  // An offered action's reason text is the GameView's (view/action_lists.ts); only cast's reaches here.
+  // An offered action's reason text is the GameView's (view/action_lists.ts); only cast's and craft's reach here.
   return used ?? (matching.some((a) => ok(a)) ? undefined : { code: 'invalid_state' });
 }
 

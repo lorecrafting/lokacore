@@ -1,0 +1,14 @@
+{
+  "keywords": [
+    "spoon",
+    "spoon_02"
+  ],
+  "short": "item.spoon.short",
+  "room_line": "item.spoon.room",
+  "description": "item.spoon.description",
+  "mass_grams": 100,
+  "location": {
+    "in": "room",
+    "room": "store"
+  }
+}

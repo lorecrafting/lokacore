@@ -47,7 +47,7 @@ defmodule Loka.Content.Checks do
       |> Map.put("transport", Map.update!(t, "route", &ref(&1, "transport", m)))
 
   def expand(%{"rest" => r}, m), do: %{"rest" => Loka.Content.Dreams.expand(r, m)}
-  def expand(%{"every" => _, "from" => _} = r, m), do: Loka.Content.Replenish.expand(r, m)
+  def expand(%{"items" => _, "from" => _} = r, m), do: Loka.Content.Replenish.expand(r, m)
   def expand(%{"pierced_by" => _} = s, m), do: Loka.Content.Status.expand(s, m, &expand/2)
   def expand(%{"learned" => l, "word" => _} = t, m), do: %{t | "learned" => ref(l, "fact", m)}
 

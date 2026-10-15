@@ -1,0 +1,68 @@
+{
+  "label": "actions.carve_spoon",
+  "aliases": [
+    "carve"
+  ],
+  "target": {
+    "kind": "detail",
+    "room": "workshop",
+    "detail": "bench"
+  },
+  "priority": 5,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": []
+    }
+  },
+  "check": {
+    "key": "carve_spoon",
+    "kind": "opposed",
+    "skill": "whittling"
+  },
+  "craft": {
+    "consume": {
+      "items": [
+        "stick_01",
+        "stick_02"
+      ],
+      "quantity": 1,
+      "to": {
+        "in": "room",
+        "room": "scrap"
+      },
+      "reason": "craft.carve_spoon.needs"
+    },
+    "yield": {
+      "items": [
+        "spoon_01",
+        "spoon_02"
+      ],
+      "from": {
+        "in": "room",
+        "room": "store"
+      }
+    }
+  },
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "spoon_carved",
+          "value": true
+        }
+      ],
+      "narration": {
+        "actor": "narration.carve_spoon.success"
+      }
+    },
+    "failure": {
+      "sequence": [],
+      "narration": {
+        "actor": "narration.carve_spoon.failure"
+      }
+    }
+  }
+}

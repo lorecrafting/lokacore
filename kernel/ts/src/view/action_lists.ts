@@ -1,5 +1,5 @@
 // size: allow 350, food, water, practical skills, local Knock, G7 get locks and the drawn storylet (row FD3) and row 33 theft and the row FD7 ask share the composed view list; the viewer is threaded (loka-kgd.150.5)
-import { policyRefusal } from '../mechanics/action_recipe/shared.ts';
+import { craftRefused, policyRefusal } from '../mechanics/action_recipe/shared.ts';
 import { running as modalScene } from '../mechanics/scene/shared.ts';
 import { foodActions } from './food.ts';
 import { useActions } from './use.ts';
@@ -205,11 +205,11 @@ function advertise(
     (speaks(world, target)
       ? talkRefused(world, actor, target, a.dialogue, steps) && 'invalid_state'
       : 'not_found');
-  const policy = holds(world, actor, a.policy.root, { target, steps })
-    ? undefined
+  const refused = holds(world, actor, a.policy.root, { target, steps })
+    ? craftRefused(world, a.recipe, bodyOf(world, actor), steps) // a craft's refusal (hs-10)
     : policyRefusal(a.recipe); // the command's refusal of a failed policy, with its reason
   const code =
-    policy?.code ??
+    refused?.code ??
     (talk ||
       (a.command === 'flee' && !escapeDirections(world, actor).length
         ? 'invalid_state'
@@ -228,7 +228,7 @@ function advertise(
         ? askRefused(world, actor, target, steps)
         : undefined));
   return code
-    ? { available: false, ...shown, reason: policy ?? { code } }
+    ? { available: false, ...shown, reason: refused ?? { code } }
     : { available: true, ...shown };
 }
 

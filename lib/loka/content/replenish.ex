@@ -1,19 +1,28 @@
 defmodule Loka.Content.Replenish do
   @moduledoc """
-  Replenish entries (toolbox row 19b, docs/system/cartridge.md Replenish declarations);
+  Replenish entries and recipe crafts (toolbox row 19b, Homestead hs-10; docs/system/cartridge.md
+  Replenish and Craft declarations);
   twin of cartridge_replenish.ts.
   """
   import Loka.Content.Source, only: [at: 2, diag: 2, diag: 3, ref: 3]
   alias Loka.Content.Refs
 
-  @doc "An entry with its short item and holder references expanded."
+  @doc "An entry (or a craft consume or yield) with its short item and holder references expanded."
   @spec expand(map(), map()) :: map()
   def expand(r, m),
     do:
-      r
-      |> Map.update!("items", &Enum.map(&1, fn i -> ref(i, "item", m) end))
-      |> Map.update!("from", &location(&1, m))
-      |> Map.update!("to", &location(&1, m))
+      Map.new(r, fn
+        {"items", is} -> {"items", Enum.map(is, &ref(&1, "item", m))}
+        {e, l} when e in ~w(from to) -> {e, location(l, m)}
+        kv -> kv
+      end)
+
+  @doc "A recipe with its craft consume expanded (Checks.expand covers yield's items and from)."
+  @spec consume(term(), map()) :: term()
+  def consume(%{"craft" => %{"consume" => c}} = r, m),
+    do: put_in(r, ["craft", "consume"], expand(c, m))
+
+  def consume(definition, _), do: definition
 
   defp location(%{"in" => k} = l, m) when k in ~w(room npc item),
     do: Map.update!(l, k, &ref(&1, k, m))
@@ -36,36 +45,90 @@ defmodule Loka.Content.Replenish do
 
   defp entry(m, defs, rel, r) do
     same = if r["from"] == r["to"], do: [diag("SCHEMA_VIOLATION", at(rel, ["from"]))], else: []
-
-    items(m, defs, rel, r["items"]) ++
-      holder(m, defs, rel, "from", r) ++ holder(m, defs, rel, "to", r) ++ same
+    stock(m, defs, rel, [], r, ~w(from to)) ++ same
   end
 
-  defp items(m, defs, rel, items) do
+  @doc """
+  Homestead hs-10 (docs/system/cartridge.md Craft declarations): a craft recipe needs kernel_api
+  1.101 (one diagnostic), sits on no spell or storylet, its consume and yield follow replenish's
+  item and holder rules, and consume's reason has a catalog entry (unless `text` is `:unknown`).
+  """
+  @spec craft(map(), map(), map() | :unknown) :: [map()]
+  def craft(m, defs, text) do
+    crafts = for {_, {rel, [], %{"craft" => c} = r}} <- defs["recipe"], do: {rel, r, c}
+
+    floor =
+      if crafts != [] and api(m) < [1, 101],
+        do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
+        else: []
+
+    floor ++
+      for {rel, r, c} <- crafts,
+          d <- misplaced(rel, r) ++ parts(m, defs, rel, c) ++ reason(rel, c, text),
+          do: d
+  end
+
+  # A spell or storylet has no station whose stock it could use.
+  defp misplaced(rel, r),
+    do:
+      if(r["target"]["kind"] in ~w(spell storylet),
+        do: [diag("SCHEMA_VIOLATION", at(rel, ["craft"]), %{"error" => "invalid_value"})],
+        else: []
+      )
+
+  defp parts(m, defs, rel, c),
+    do:
+      for(
+        {part, end_} <- [{"consume", "to"}, {"yield", "from"}],
+        is_map_key(c, part),
+        d <- stock(m, defs, rel, ["craft", part], c[part], [end_]),
+        do: d
+      )
+
+  defp reason(rel, %{"consume" => %{"reason" => k}}, text) when is_map(text),
+    do:
+      if(is_map_key(text, k),
+        do: [],
+        else: [diag("UNRESOLVED_REFERENCE", at(rel, ~w(craft consume reason)), %{"target" => k})]
+      )
+
+  defp reason(_, _, _), do: []
+
+  # Replenish's rules, shared with craft: no duplicate item, each item and holder resolves, and
+  # each holder (`ends`, by field) is placed.
+  defp stock(m, defs, rel, steps, r, ends),
+    do:
+      items(m, defs, rel, steps, r["items"]) ++
+        Enum.flat_map(ends, &holder(m, defs, rel, steps, &1, r))
+
+  defp items(m, defs, rel, steps, items) do
     duplicate =
       if length(Enum.uniq(items)) != length(items),
-        do: [diag("DUPLICATE_DEFINITION", at(rel, ["items"]))],
+        do: [diag("DUPLICATE_DEFINITION", at(rel, steps ++ ["items"]))],
         else: []
 
     duplicate ++
       for {i, n} <- Enum.with_index(items),
-          d <- unresolved(m, defs, i, "item", at(rel, ["items", n])),
+          d <- unresolved(m, defs, i, "item", at(rel, steps ++ ["items", n])),
           do: d
   end
 
-  defp holder(m, defs, rel, end_, r) do
+  defp holder(m, defs, rel, steps, end_, r) do
     %{"in" => k} = l = r[end_]
 
     case k != "template" and Refs.resolve(l[k], k, m, defs) do
       :unresolved ->
-        [diag("UNRESOLVED_REFERENCE", at(rel, [end_, k]), %{"target" => l[k]})]
+        [diag("UNRESOLVED_REFERENCE", at(rel, steps ++ [end_, k]), %{"target" => l[k]})]
 
       {_, _, d} ->
         nests = end_ == "to" and nests?(m, defs, r["items"])
-        if placed?(d, k, nests), do: [], else: [diag("SCHEMA_VIOLATION", at(rel, [end_]))]
+
+        if placed?(d, k, nests),
+          do: [],
+          else: [diag("SCHEMA_VIOLATION", at(rel, steps ++ [end_]))]
 
       false ->
-        [diag("SCHEMA_VIOLATION", at(rel, [end_]))]
+        [diag("SCHEMA_VIOLATION", at(rel, steps ++ [end_]))]
 
       _ ->
         []
