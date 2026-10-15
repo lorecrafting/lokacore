@@ -633,8 +633,8 @@ any trigger and act for each of the quest's holders: every player-scope instance
 that is active or objectives_complete, in character order; with no holder the step writes
 nothing. Resolve checks the quest objective per holder (an unmet objective faults
 `precondition_failed`). Neither changes a terminal instance. Activation is legal on a
-quest-resolution, `rested` or `entity_entered_room` trigger, for the subject's character; a
-subject that is not an admitted player body (an NPC entering, a world trigger) activates
+quest-resolution, `rested` or `entity_entered_room` trigger, for the delivery's actor (the
+Actor column); a subject that is not an admitted player body (an NPC entering) activates
 nothing. Any prior instance for that character, including terminal instances, skips activation. The delivery uses
 one writer group and causal allocator; its quest-owned `quest_activated` is admitted through
 reaction's quest composition, caused by the source event and correlated with the root command.

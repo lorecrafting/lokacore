@@ -1,3 +1,4 @@
+// size: allow 365, reaction@1 keeps its total trigger SUBJECT table beside the one delivery sequence
 // reaction@1 (capability_registry.json; reaction.schema.json ReactionRule; 21 §3.4, §11; 06
 // §14; 04 §5.2): the rules an event triggers and one delivery's explicit sequence. proposal.ts
 // propose runs the FIFO queue, numbers the writer groups and counts the budgets.
@@ -117,16 +118,12 @@ export function sequence(
   mint: Mint,
   { holders = new Map(), dead = new Set() }: Delivery = {},
 ): Decision<EventPayload['type']> | undefined {
-  const named = subjectOf(cause);
-  const character = named && actorOf(world, named); // loka-kgd.150.2: the subject's player, else the doer
-  // ponytail: the root command's actor stands in while proposal-made events (a delivery's
-  // fact_changed, a job's events) carry no actor_id; stamping them re-pins fixtures (Realm R14).
-  const actor = resolvedActor(world, cause, character ?? cause.actor_id ?? root); // a quest event's evidenced owner
+  const [actor, npc] = deliveryActor(world, cause, root);
   if (!actor) return { kind: 'fault', code: 'precondition_failed' };
   const then = { ...world, state: { ...world.state, clock: cause.logical_time } };
   const about = { steps, cause, subject: subject(cause, bodyOf(then, actor)) }; // status reader 1
   if (rule.when && !holds(then, actor, rule.when.root, about)) return undefined;
-  const activated = new Set<string>();
+  const begun = new Set<string>();
   const own = { holders, set: {}, applied: new Set<string>(), doors: new Map() }; // holders: the advance's
   const [ops, events, narration]: [DeltaOp[], DomainEvent[], { key: TextKey }[]] = [[], [], []];
   let [position, gained] = [0, 0]; // gained: one levelling write per rule (no row race)
@@ -136,19 +133,15 @@ export function sequence(
   for (const step of rule.apply) {
     if (step.op === 'quest.activate') {
       if (!ACTIVATES.includes(rule.on.event)) return { kind: 'fault', code: 'precondition_failed' };
-      if (named && !character) continue; // an NPC's or the world's trigger activates nothing
-      if (questOf(world, actor, step.quest) || activated.has(refString(step.quest))) continue;
+      if (npc || questOf(world, actor, step.quest) || begun.has(refString(step.quest))) continue;
       const started = activation(mint, actor, step.quest);
-      activated.add(refString(step.quest));
+      begun.add(refString(step.quest));
       ops.push(...started.ops.map((op) => ({ ...op, writer_group: group })));
       emit(started.payload);
     } else if (step.op === 'quest.resolve' || step.op === 'quest.fail') {
-      for (const holder of questHolders(world, step.quest)) {
-        const result = terminal(world, holder, step, group, steps);
-        if (!result) return { kind: 'fault', code: 'precondition_failed' };
-        ops.push(...result.ops);
-        if ('payload' in result) emit(result.payload, holder);
-      }
+      const ended = ending(world, step, group, steps, emit);
+      if (!ended) return { kind: 'fault', code: 'precondition_failed' };
+      ops.push(...ended);
     } else if (step.op === 'population.suppress') {
       ops.push(...suppress(world, actor, step.plan, step.duration, cause, group, mint));
     } else if (step.op === 'status.apply' || step.op === 'status.cure') {
@@ -295,6 +288,24 @@ function assignment(
   return { op: 'fact.assign' as const, writer_group, ...target, expected, value: next };
 }
 
+// quest.resolve/fail for each holder (the Actor column), or undefined when one faults.
+function ending(
+  world: World,
+  step: Extract<ReactionRule['apply'][number], { op: 'quest.resolve' | 'quest.fail' }>,
+  group: number,
+  steps: { n: number },
+  emit: (payload: EventPayload, actor_id: CharacterId) => void,
+) {
+  const ops: DeltaOp[] = [];
+  for (const holder of questHolders(world, step.quest)) {
+    const result = terminal(world, holder, step, group, steps);
+    if (!result) return undefined;
+    ops.push(...result.ops);
+    if ('payload' in result) emit(result.payload, holder);
+  }
+  return ops;
+}
+
 function terminal(
   world: World,
   actor: CharacterId,
@@ -323,6 +334,18 @@ function terminal(
 }
 
 // A quest event's evidenced player instance owns the delivery; legacy triggers keep the root actor.
+/** loka-kgd.150.2: the delivery's actor (the subject's character, else the doer) and whether a
+ * subject that is no player's body (an NPC, a world trigger) blocks activation.
+ * ponytail: the root command's actor stands in while proposal-made events (a delivery's
+ * fact_changed, a job's events) carry no actor_id; stamping them re-pins fixtures (Realm R14). */
+function deliveryActor(world: World, cause: DomainEvent, root: CharacterId) {
+  const named = subjectOf(cause);
+  const character = named && actorOf(world, named);
+  const actor = resolvedActor(world, cause, character ?? cause.actor_id ?? root);
+  return [actor, Boolean(named && !character)] as const;
+}
+
+// A quest event's evidenced owner.
 function resolvedActor(world: World, cause: DomainEvent, actor: CharacterId | undefined) {
   if (cause.payload.type !== 'quest_resolved') return actor;
   const source = world.state.quests?.[cause.payload.instance_id];
