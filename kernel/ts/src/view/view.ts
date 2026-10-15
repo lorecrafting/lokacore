@@ -17,6 +17,7 @@ import { living } from '../mechanics/death/shared.ts';
 // The player's GameView (04 §14; 00 §4.10), read from a World.
 import type {
   AdvertisedAction,
+  CharacterId,
   ContentView,
   EntityId,
   EntityView,
@@ -28,7 +29,7 @@ import type {
 } from '../contracts.gen.ts';
 import { lists } from './action_lists.ts';
 import { refusal, resolved } from '../commands/actions.ts';
-import { COMPASS, refString, type Entity, type Steps, type World } from '../runtime/decision.ts';
+import { bodyOf, refString, type Entity, type Steps, type World } from '../runtime/decision.ts';
 import { barrierState, exitOf, opened } from '../mechanics/lookups.ts';
 import { choiceView } from '../mechanics/dialogue/shared.ts';
 import { describe, describeEntity } from '../mechanics/description_variant/rule.ts';
@@ -63,37 +64,39 @@ import { currentBleed } from '../mechanics/bleed/shared.ts';
  * as amended), absent when the cartridge has none; and the player's position (position@1), absent
  * without it; and the highest reached chapter marker, absent without chapter declarations.
  */
-export function gameView(world: World): GameView {
-  const fight = engaged(world, world.body);
-  const here = world.state.containers[world.body];
+// size: allow 41, the viewer's body is derived once for every projection (loka-kgd.150.5)
+export function gameView(world: World, actor: CharacterId = world.character): GameView {
+  const body = bodyOf(world, actor);
+  const fight = body ? engaged(world, body) : undefined;
+  const here = body ? world.state.containers[body] : undefined;
   const steps = { n: 0 };
-  const actions = lists(world, world.character, steps);
-  const equipment = equipmentViews(world, actions, steps);
-  const choice = fight ? undefined : choiceView(world, world.character, steps);
-  const pools = resources(world);
-  const current = chapter(world);
-  const showing = scene.running(world, world.character);
-  const at = position.positionOf(world, world.character) as Key | undefined;
-  const bleed = currentBleed(world, world.body);
+  const actions = lists(world, actor, steps);
+  const equipment = equipmentViews(world, actor, actions, steps);
+  const choice = fight ? undefined : choiceView(world, actor, steps);
+  const pools = resources(world, body);
+  const current = chapter(world, actor);
+  const showing = scene.running(world, actor);
+  const at = position.positionOf(world, actor) as Key | undefined;
+  const bleed = body ? currentBleed(world, body) : undefined;
   const view: GameView = {
-    actor_id: world.character,
-    ...knowledgeView(world, steps),
-    ...waterViews(world, steps),
-    ...skillViews(world, steps),
-    ...(world.cartridge.topics && lore(world, world.character)),
+    actor_id: actor,
+    ...knowledgeView(world, actor, steps),
+    ...waterViews(world, actor, steps),
+    ...skillViews(world, actor, steps),
+    ...(world.cartridge.topics && lore(world, actor)),
     ...(fight && { combat: combatView(world, fight) }),
     ...(bleed && { bleeding: bleedingView(world, bleed) }),
-    ...conditionViews(world),
-    ...cueViews(world, steps, holds),
-    place: placeView(world, here, steps),
-    exits: exits(world, actions.door, steps),
+    ...conditionViews(world, body),
+    ...cueViews(world, actor, body, steps, holds),
+    place: placeView(world, actor, here, steps),
+    exits: exits(world, actor, actions.door, steps),
     actions: actions.place,
-    ...noticeViews(world, here, actions.notice, steps),
-    entities: within(world, actions, here, undefined, steps),
-    inventory: within(world, actions, world.body, undefined, steps),
+    ...(here && noticeViews(world, actor, here, actions.notice, steps)),
+    entities: body && here ? within(world, actor, body, actions, here, undefined, steps) : [],
+    inventory: body ? within(world, actor, body, actions, body, undefined, steps) : [],
     ...(equipment.length > 0 && { equipment }),
     ...(at !== undefined && { position: at }),
-    journal: journal(world, steps),
+    journal: journal(world, actor, steps),
     ...(current && { chapter: current }),
     ...(showing && { scene: showing }),
     ...timeView(world),
@@ -104,13 +107,16 @@ export function gameView(world: World): GameView {
   return view;
 }
 
-function placeView(world: World, here: EntityId, steps: Steps) {
-  const room = world.rooms[here];
+function placeView(world: World, actor: CharacterId, here: EntityId | undefined, steps: Steps) {
   const text = (key: TextKey) => ({ key });
+  // A body-less actor (unreachable in the Story) sees no place; the shape stays.
+  if (!here)
+    return { id: '' as EntityId, title: text('' as TextKey), description: text('' as TextKey) };
+  const room = world.rooms[here];
   return {
     id: here,
     title: text(room.title),
-    description: text(describe(world, world.character, room, steps)),
+    description: text(describe(world, actor, room, steps)),
   };
 }
 
@@ -132,6 +138,8 @@ function bleedingView(world: World, bleed: NonNullable<ReturnType<typeof current
 // worn, its contents (c1-locks).
 function within(
   world: World,
+  actor: CharacterId,
+  body: EntityId,
   actions: Lists,
   holder: EntityId,
   worn?: (id: string) => AdvertisedAction[],
@@ -142,13 +150,14 @@ function within(
       ([id]) =>
         world.state.containers[id] === holder &&
         living(world, id) &&
-        visible(world, world.character, id, steps),
+        visible(world, actor, id, steps),
     )
     .map(([id, e]) => {
-      const scope = holder === world.body ? 'inventory' : SCOPE[e.kind];
-      const contents = e.kind === 'item' && !worn ? inside(world, actions, id, scope, steps) : [];
+      const scope = holder === body ? 'inventory' : SCOPE[e.kind];
+      const contents =
+        e.kind === 'item' && !worn ? inside(world, actor, body, actions, id, scope, steps) : [];
       return {
-        ...viewOf(world, id, e, worn ? worn(id) : actions.of(scope, id), steps),
+        ...viewOf(world, actor, id, e, worn ? worn(id) : actions.of(scope, id), steps),
         ...(contents.length > 0 && { contents }),
       };
     });
@@ -161,24 +170,22 @@ const SCOPE = { item: 'room_contents', npc: 'room_occupants' } as const;
 // its container verbs (ContentView; c1-locks).
 function inside(
   world: World,
+  actor: CharacterId,
+  body: EntityId,
   actions: Lists,
   box: string,
   scope: string,
   steps: Steps,
 ): ContentView[] {
   const under = (id: string) => {
-    for (
-      let c = world.state.containers[id];
-      opened(world, c, world.body);
-      c = world.state.containers[c]
-    )
+    for (let c = world.state.containers[id]; opened(world, c, body); c = world.state.containers[c])
       if (c === box) return true;
     return false;
   };
   return Object.entries(world.entities)
-    .filter(([id]) => under(id) && visible(world, world.character, id, steps))
+    .filter(([id]) => under(id) && visible(world, actor, id, steps))
     .map(([id, e]) => ({
-      ...viewOf(world, id, e, actions.of(scope, id, true), steps),
+      ...viewOf(world, actor, id, e, actions.of(scope, id, true), steps),
       container_id: world.state.containers[id],
     }));
 }
@@ -186,14 +193,15 @@ function inside(
 // An entity as the view names it, with its barrier's state if it has one.
 const viewOf = (
   world: World,
+  actor: CharacterId,
   id: string,
   e: Entity,
   actions: AdvertisedAction[],
   steps: Steps,
 ) => ({
   id: id as EntityId,
-  name: describeEntity(world, world.character, id as EntityId, 'short', steps),
-  description: describeEntity(world, world.character, id as EntityId, 'description', steps),
+  name: describeEntity(world, actor, id as EntityId, 'short', steps),
+  description: describeEntity(world, actor, id as EntityId, 'description', steps),
   kind: e.kind as Key,
   ...(e.kind === 'item' && e.slot && { slot: e.slot }),
   ...(e.kind === 'item' &&
@@ -207,9 +215,10 @@ const viewOf = (
   actions,
   ...liquidView(world, id),
   ...(e.kind === 'npc' && freeLessons(world, id)),
-  ...(e.kind === 'npc' && e.services && { services: services(world, id as EntityId, steps) }),
+  ...(e.kind === 'npc' &&
+    e.services && { services: services(world, actor, id as EntityId, steps) }),
   ...(fuelView(world, id) && { fuel: fuelView(world, id) }),
-  ...(e.kind === 'npc' && e.shop && { shop: shelf(world, world.character, id as EntityId) }),
+  ...(e.kind === 'npc' && e.shop && { shop: shelf(world, actor, id as EntityId) }),
   ...(e.kind === 'npc' &&
     carrying(world, id as EntityId) && { carrying: carrying(world, id as EntityId) }),
 });
@@ -219,18 +228,15 @@ type Lists = ReturnType<typeof lists>;
 // The exits of the body's room in compass order (movement.sight's): each unavailable with the
 // code movement would refuse it with, with its barrier's door, and with what is seen through it
 // unless that barrier bars the way.
-function exits(
-  world: World,
-  door: (direction: Key) => AdvertisedAction[],
-  steps: Steps,
-): ExitView[] {
-  const actor_id = world.character;
-  const room = world.rooms[world.state.containers[world.body]];
+function exits(world: World, actor_id: CharacterId, door: Lists['door'], steps: Steps): ExitView[] {
+  const body = bodyOf(world, actor_id);
+  if (!body) return [];
+  const room = world.rooms[world.state.containers[body]];
   const set = resolved(world, actor_id);
-  return movement.sight(world, world.body, steps).map(({ direction, ...seen }) => {
+  return movement.sight(world, body, steps).map(({ direction, ...seen }) => {
     const barrier = exitOf(room, direction)!.barrier;
     const destination = world.roomIds[refString(exitOf(room, direction)!.to)];
-    const wet = edge(world, world.state.containers[world.body], destination, direction);
+    const wet = edge(world, world.state.containers[body], destination, direction);
     const shown = {
       direction,
       ...(wet?.entering && { warning: world.cartridge.world!.water!.warning }),
@@ -261,9 +267,11 @@ function exits(
 }
 
 // One entry per place in a holder: the finger holder lists two (toolbox row 3).
-function equipmentViews(world: World, actions: Lists, steps: Steps) {
+function equipmentViews(world: World, actor: CharacterId, actions: Lists, steps: Steps) {
+  const body = bodyOf(world, actor);
+  if (!body) return [];
   return Object.entries(world.slots).flatMap(([slot, holder]) => {
-    const items = within(world, actions, holder, actions.worn, steps);
+    const items = within(world, actor, body, actions, holder, actions.worn, steps);
     return Array.from({ length: world.capacities[holder] }, (_, i) => ({
       slot: slot as SlotKey,
       ...(items[i] && { item: items[i] }),

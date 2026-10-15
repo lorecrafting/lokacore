@@ -1,4 +1,4 @@
-// size: allow 333, food, water, practical skills, local Knock and G7 get locks share the composed view list
+// size: allow 334, food, water, practical skills, local Knock and G7 get locks share the composed view list; the viewer is threaded (loka-kgd.150.5)
 import { running as modalScene } from '../mechanics/scene/shared.ts';
 import { foodActions } from './food.ts';
 import { useActions } from './use.ts';
@@ -59,7 +59,7 @@ export function lists(world: World, actor: CharacterId, steps = { n: 0 }) {
   const at = position.positionOf(world, actor);
   const current = Object.keys(position.VERBS).find((v) => position.VERBS[v]![0] === at);
   const body = bodyOf(world, actor);
-  const take = takeAdmission(world, body, steps);
+  const take = takeAdmission(world, actor, body, steps);
   const here = (a: Offered, d = detailAt(world, a)) =>
     !a.recipe ||
     (d !== undefined &&
@@ -76,7 +76,7 @@ export function lists(world: World, actor: CharacterId, steps = { n: 0 }) {
       .flatMap((a) => {
         const shown = advertise(world, actor, a, take, steps, id, scope);
         return a.command === 'put' && id && body
-          ? putPairs(world, body, id as EntityId, shown, steps)
+          ? putPairs(world, actor, body, id as EntityId, shown, steps)
           : [shown];
       });
   const liquid = (id: string) => liquidActions(world, actor, id, set, steps);
@@ -115,7 +115,7 @@ export function lists(world: World, actor: CharacterId, steps = { n: 0 }) {
   };
 }
 
-function takeAdmission(world: World, body: EntityId | undefined, steps: { n: number }) {
+function takeAdmission(world: World, actor: CharacterId, body: EntityId | undefined, steps: Steps) {
   // Each item's reach and get-walk verdict, kept so a later budget fault does not undo it.
   const admitted = new Map<EntityId, boolean | 'permission_denied'>();
   let carry: ReturnType<typeof carrying> | undefined;
@@ -124,7 +124,7 @@ function takeAdmission(world: World, body: EntityId | undefined, steps: { n: num
     if (world.state.containers[item] === body) return 'invalid_state' as const;
     let reached = admitted.get(item) ?? reach(world, body, item, steps);
     if (reached === true && !admitted.has(item))
-      reached = chainRefused(world, world.character, item, 'get', steps) ?? true;
+      reached = chainRefused(world, actor, item, 'get', steps) ?? true;
     if (typeof reached === 'boolean' || reached === 'permission_denied')
       admitted.set(item, reached);
     if (typeof reached === 'string') return reached;
@@ -276,6 +276,7 @@ function movable(world: World, a: Offered, id?: string): boolean {
 // Enumerate bounded concrete pairs; exhaustion replaces the whole source offer, never a prefix.
 function putPairs(
   world: World,
+  actor: CharacterId,
   body: EntityId,
   item: EntityId,
   shown: AdvertisedAction,
@@ -288,7 +289,7 @@ function putPairs(
     if (++steps.n > LIMITS.query_steps)
       return [{ ...shown, available: false, reason: { code: 'budget_exceeded' } }];
     if (world.entities[id].kind !== 'item' || id === item) continue;
-    const code = putRefused(world, world.character, body, item, id as EntityId, steps);
+    const code = putRefused(world, actor, body, item, id as EntityId, steps);
     if (code === 'budget_exceeded') return [{ ...shown, available: false, reason: { code } }];
     if (!code) pairs.push({ ...shown, target_ids: [item, id as EntityId] });
   }

@@ -1,4 +1,5 @@
 import type {
+  CharacterId,
   DefinitionRef,
   EntityId,
   Key,
@@ -12,17 +13,19 @@ import { availability } from '../mechanics/service/shared.ts';
 
 export function services(
   world: World,
+  actor: CharacterId,
   provider: EntityId,
   steps: Steps,
 ): ServiceOffer[] | undefined {
   const npc = world.entities[provider];
   if (npc?.kind !== 'npc' || !npc.services) return;
-  const set = resolved(world, world.character);
-  return npc.services.map((ref) => offer(world, provider, ref, set, steps));
+  const set = resolved(world, actor);
+  return npc.services.map((ref) => offer(world, actor, provider, ref, set, steps));
 }
 
 function offer(
   world: World,
+  actor: CharacterId,
   provider: EntityId,
   ref: DefinitionRef,
   set: ReturnType<typeof resolved>,
@@ -34,7 +37,7 @@ function offer(
     world,
     {
       type: 'use_service',
-      actor_id: world.character,
+      actor_id: actor,
       provider_id: provider,
       service: ref,
       quoted_price: s.price,

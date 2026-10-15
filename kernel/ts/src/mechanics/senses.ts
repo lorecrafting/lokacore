@@ -118,11 +118,16 @@ export function reaching(
 }
 
 /** GameView cues: those reaching the actor's room, nearest first, then by direction and text. */
-export function cueViews(w: World, steps: Steps, holds: Holds) {
-  // ast-grep-ignore: ts-rule-actor-from-command
-  const deaf = perceives(w, w.body, 'deaf'); // status reader 6: no sound reaches a deaf listener
-  // ast-grep-ignore: ts-rule-actor-from-command
-  const cues = reaching(w, w.character, w.state.containers[w.body]!, steps, holds)
+export function cueViews(
+  w: World,
+  actor: CharacterId,
+  body: EntityId | undefined,
+  steps: Steps,
+  holds: Holds,
+) {
+  if (!body) return {};
+  const deaf = perceives(w, body, 'deaf'); // status reader 6: no sound reaches a deaf listener
+  const cues = reaching(w, actor, w.state.containers[body]!, steps, holds)
     .filter(({ cue }) => !(deaf && cue.sense === 'sound'))
     .sort(
       (a, b) =>
