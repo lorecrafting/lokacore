@@ -164,6 +164,14 @@ test('world.identity loader refusals', () => {
     ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'],
   );
   assert.deepEqual(
+    diagnostic((c) => {
+      delete c.manifest.requires.capabilities.description_variant;
+      delete c.lock.capabilities.description_variant;
+      delete c.npcs[`${S}:npc/stranger`].short_variants;
+    }),
+    ['UNDECLARED_CAPABILITY', '.cartridge.world.identity.name_variants[0]'],
+  );
+  assert.deepEqual(
     diagnostic((c) => (c.world.identity.name = 'identity.nope')),
     ['UNRESOLVED_REFERENCE', '.cartridge.world.identity.name'],
   );
