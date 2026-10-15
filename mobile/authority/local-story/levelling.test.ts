@@ -18,7 +18,7 @@ import {
 } from '../../../kernel/ts/src/index.ts';
 import type { World } from '../../../kernel/ts/src/runtime/decision.ts';
 import { openStory } from './authority.ts';
-import { elapsedHost, receipts } from './__tests__/elapsed-host.test.ts';
+import { coldReopen, elapsedHost, receipts } from './__tests__/elapsed-host.test.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-levelling-save-'));
 const saves = mkdtempSync(join(tmpdir(), 'loka-levelling-saves-'));
@@ -133,5 +133,6 @@ test('levelling rows survive reopen, failed and lost COMMIT, and replay once', (
       assert.equal(lines(replay).includes(LEVEL_UP), action === 'kill', action + kind);
       assert.equal(receipts(p.sql), count + 1, action + kind);
       p.sql.close();
+      coldReopen(path, bundle);
     }
 });

@@ -17,7 +17,7 @@ import {
   type Cartridge,
 } from '../../../kernel/ts/src/index.ts';
 import { openStory } from './authority.ts';
-import { elapsedHost } from './__tests__/elapsed-host.test.ts';
+import { coldReopen, elapsedHost } from './__tests__/elapsed-host.test.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-derived-hp-'));
 let artifact;
@@ -98,4 +98,5 @@ test('a save holding hp 15 above the authored maximum 10 reopens at 15 / 16', (t
   p = elapsedHost(path, undefined, bundle);
   story = open();
   assert.deepEqual([hp().current, hp().maximum], [15, 16]);
+  coldReopen(path, bundle);
 });

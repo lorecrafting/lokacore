@@ -16,7 +16,7 @@ import {
   type Cartridge,
 } from '../../../kernel/ts/src/index.ts';
 import { openStory } from './authority.ts';
-import { elapsedHost } from './__tests__/elapsed-host.test.ts';
+import { coldReopen, elapsedHost } from './__tests__/elapsed-host.test.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-scars-save-'));
 const saves = mkdtempSync(join(tmpdir(), 'loka-scars-saves-'));
@@ -83,4 +83,5 @@ test('a permanent scar row reopens and keeps through the next round', (t) => {
   assert.equal(round(), 'saved');
   story = reopen();
   assert.deepEqual(gameView(story.world()).conditions, SCARRED);
+  coldReopen(path, bundle);
 });

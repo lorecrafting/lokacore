@@ -9,6 +9,7 @@ import { loadCartridge, newWorld, type Cartridge } from '../../../kernel/ts/src/
 import { gameView, INSTALLED } from '../../../kernel/ts/src/runtime/world.ts';
 import { read } from '../../../kernel/ts/test/read.ts';
 import { openStory, type Saved } from './authority.ts';
+import { coldReopen } from './__tests__/elapsed-host.test.ts';
 
 const kat = read('protocol/fixtures/containers_cartridge_sampler_hash.json');
 const loaded = loadCartridge(
@@ -216,6 +217,7 @@ test('sampler invocation walk reaches all six rooms and resumes the carried endi
       .map((r) => JSON.parse(r.record as string));
     assert.equal(records.filter((r) => r.event === 'trace.command').length, 31);
     assert.equal(sql.prepare('SELECT count(*) AS n FROM receipt').get()!.n, 31);
+    coldReopen(path, kat, host.kernel_version);
   } finally {
     sql.close();
     rmSync(dir, { recursive: true, force: true });

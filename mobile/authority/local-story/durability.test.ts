@@ -17,7 +17,7 @@ import {
 } from '../../../kernel/ts/src/index.ts';
 import { value } from '../../../kernel/ts/src/mechanics/fact.ts';
 import { openStory } from './authority.ts';
-import { elapsedHost } from './__tests__/elapsed-host.test.ts';
+import { coldReopen, elapsedHost } from './__tests__/elapsed-host.test.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-durability-save-'));
 const file = join(scratch, 'artifact.json');
@@ -86,4 +86,5 @@ test('the edge one worn hit left survives cold reopen', (t) => {
   if (reopened.kind === 'open')
     assert.equal(value(reopened.world(), initial.character, edge, sword), 1);
   p.sql.close();
+  coldReopen(path, bundle);
 });

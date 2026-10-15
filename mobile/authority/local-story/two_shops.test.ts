@@ -20,7 +20,7 @@ import {
 } from '../../../kernel/ts/src/index.ts';
 import { level, resourceRef } from '../../../kernel/ts/src/mechanics/resource.ts';
 import { openStory } from './authority.ts';
-import { elapsedHost } from './__tests__/elapsed-host.test.ts';
+import { coldReopen, elapsedHost } from './__tests__/elapsed-host.test.ts';
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));
 const S = 'prices_sampler@0.0.1';
@@ -160,6 +160,7 @@ test('one buy at each of two shops survives cold reopen', (t) => {
   const truth = play(path, twoBuys(basketShop));
   assert.deepEqual(truth, expected);
   assert.deepEqual(reopened(path), expected);
+  coldReopen(path, basketShop.bundle);
 });
 
 // Breaks: a receipt is checked only under a shop it does not name, so its narration is never bound

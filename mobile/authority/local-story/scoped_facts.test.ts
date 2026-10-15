@@ -18,7 +18,7 @@ import {
 import { value } from '../../../kernel/ts/src/mechanics/fact.ts';
 import type { World } from '../../../kernel/ts/src/runtime/decision.ts';
 import { openStory } from './authority.ts';
-import { elapsedHost } from './__tests__/elapsed-host.test.ts';
+import { coldReopen, elapsedHost } from './__tests__/elapsed-host.test.ts';
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));
 const SAMPLER = join(root, 'cartridges/scoped_facts_sampler');
@@ -80,7 +80,7 @@ function save(t: TestContext, name: string, r: Release = base) {
     if (s.kind !== 'open') throw new Error(s.kind);
     return s;
   };
-  const h = { p: elapsedHost(path, undefined, bundle), n: 0 } as any;
+  const h = { p: elapsedHost(path, undefined, bundle), n: 0, path } as any;
   h.story = open();
   h.reopen = () => {
     h.p.sql.close();
@@ -123,6 +123,7 @@ test('pair and entity fact rows survive cold reopen and replay', (t) => {
   assert.deepEqual(smith, [1, 1, true]);
   assert.deepEqual([read(w, 'times_met', 'npc/miller'), read(w, 'fed', 'npc/miller')], [0, false]);
   h.p.sql.close();
+  coldReopen(h.path, base.bundle);
 });
 
 // Breaks (facts-save.ts): a forged fact row loads and is read or faults later instead of giving

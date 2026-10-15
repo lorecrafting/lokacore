@@ -20,7 +20,7 @@ import {
 } from '../../../kernel/ts/src/index.ts';
 import { level, resourceRef } from '../../../kernel/ts/src/mechanics/resource.ts';
 import { openStory } from './authority.ts';
-import { elapsedHost } from './__tests__/elapsed-host.test.ts';
+import { coldReopen, elapsedHost } from './__tests__/elapsed-host.test.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-prices-save-'));
 const file = join(scratch, 'artifact.json');
@@ -112,6 +112,7 @@ test('two fish bought at two prices survive cold reopen; a failed COMMIT keeps a
   ({ p, story } = reopen());
   assert.deepEqual(truth(story.world()), [[true, true, true], 10, 30]);
   p.sql.close();
+  coldReopen(path, bundle);
 });
 
 // Breaks: no receipt replay for a stock offer (the swap passes the shape check: the final custody

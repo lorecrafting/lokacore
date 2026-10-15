@@ -20,7 +20,7 @@ import {
 import { value } from '../../../kernel/ts/src/mechanics/fact.ts';
 import { level, resourceRef } from '../../../kernel/ts/src/mechanics/resource.ts';
 import { openStory } from './authority.ts';
-import { elapsedHost } from './__tests__/elapsed-host.test.ts';
+import { coldReopen, elapsedHost } from './__tests__/elapsed-host.test.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-property-save-'));
 const file = join(scratch, 'artifact.json');
@@ -61,6 +61,7 @@ function session(t: { after: (f: () => void) => void }) {
   const path = join(dir, 'bank.db');
   let n = 0;
   const s = {
+    path,
     p: elapsedHost(path, undefined, bundle),
     story: undefined as unknown as Extract<ReturnType<typeof openStory>, { kind: 'open' }>,
     open() {
@@ -113,6 +114,7 @@ test('the hut, a deposit at branch A and a withdrawal at branch B survive cold r
   assert.equal(s.reopen().kind, 'open');
   assert.deepEqual(books(s.story.world()), [18, 20, 0]);
   s.p.sql.close();
+  coldReopen(s.path, bundle);
 });
 
 // Breaks: reopen trusts a stored savings row the receipts do not produce (10 forged to 11).

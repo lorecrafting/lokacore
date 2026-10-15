@@ -17,7 +17,7 @@ import {
 import { value } from '../../../kernel/ts/src/mechanics/fact.ts';
 import type { World } from '../../../kernel/ts/src/runtime/decision.ts';
 import { openStory } from './authority.ts';
-import { elapsedHost } from './__tests__/elapsed-host.test.ts';
+import { coldReopen, elapsedHost } from './__tests__/elapsed-host.test.ts';
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));
 const scratch = mkdtempSync(join(tmpdir(), 'loka-pair-facts-save-'));
@@ -91,4 +91,5 @@ test('an NPC-NPC pair row survives cold reopen and replay', (t) => {
   const w = story.world();
   assert.deepEqual([gloats(w, 'smith', 'miller'), gloats(w, 'miller', 'smith')], [true, false]);
   p.sql.close();
+  coldReopen(path, bundle);
 });

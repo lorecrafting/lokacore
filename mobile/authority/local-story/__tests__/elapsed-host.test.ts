@@ -81,6 +81,17 @@ export function elapsedHost(
   return { ...p, bundle, game: openGame(p.db, bundle, p.host) };
 }
 
+// Cold-reopens the save file at `path` on a fresh connection through openGame, the app's launch
+// path (its refusal, e.g. save_corrupt, throws); every sampler test with a file save calls it once
+// after its scripted moves (loka-dgl6). The caller's committed connection may stay open.
+export function coldReopen(
+  path: string,
+  bundle: ReturnType<typeof elapsedBundle>,
+  kernel_version?: string,
+) {
+  elapsedHost(path, undefined, bundle, kernel_version).sql.close();
+}
+
 export const checkpoint = (sql: DatabaseSync) => ({
   ...sql.prepare('SELECT wall_ms, remainder, target FROM elapsed').get(),
 });

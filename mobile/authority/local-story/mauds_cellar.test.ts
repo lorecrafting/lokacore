@@ -15,7 +15,7 @@ import { read } from '../../../kernel/ts/test/read.ts';
 import { value } from '../../../kernel/ts/src/mechanics/fact.ts';
 import { living } from '../../../kernel/ts/src/mechanics/death/shared.ts';
 import { engaged } from '../../../kernel/ts/src/mechanics/combat/shared.ts';
-import { elapsedHost } from './__tests__/elapsed-host.test.ts';
+import { coldReopen, elapsedHost } from './__tests__/elapsed-host.test.ts';
 import { openStory } from './authority.ts';
 
 const bundle = read('protocol/fixtures/containers_cartridge_sampler_hash.json');
@@ -163,6 +163,7 @@ test('production five preacceptance kills reopen into Maud reward and usable sto
   p.invoke('take', [brassId]);
   assert.equal(p.story.world().state.containers[brassId], fresh.body);
   p.sql.close();
+  coldReopen(path, bundle);
 });
 
 // Breaks: an omitted production objective leaf accepts four kills, or acceptance

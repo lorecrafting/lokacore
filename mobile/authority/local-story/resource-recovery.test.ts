@@ -13,7 +13,7 @@ import {
   type Cartridge,
 } from '../../../kernel/ts/src/index.ts';
 import { read } from '../../../kernel/ts/test/read.ts';
-import { elapsedHost } from './__tests__/elapsed-host.test.ts';
+import { coldReopen, elapsedHost } from './__tests__/elapsed-host.test.ts';
 import { openGame } from './session.ts';
 import { openStory } from './authority.ts';
 
@@ -102,6 +102,7 @@ test('Rest/reopen/Stand keeps literal fractions and replays the Rest receipt wit
   } finally {
     p.sql.close();
   }
+  coldReopen(path, bundle);
 });
 
 // Breaks: load treats a missing opted row as free recovery or accepts malformed/wrong-but-authored metadata.

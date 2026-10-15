@@ -18,7 +18,7 @@ import {
 import { level, resourceRef } from '../../../kernel/ts/src/mechanics/resource.ts';
 import type { World } from '../../../kernel/ts/src/runtime/decision.ts';
 import { openStory } from './authority.ts';
-import { elapsedHost, receipts } from './__tests__/elapsed-host.test.ts';
+import { coldReopen, elapsedHost, receipts } from './__tests__/elapsed-host.test.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-status-save-'));
 const saves = mkdtempSync(join(tmpdir(), 'loka-status-saves-'));
@@ -123,5 +123,6 @@ test('status tick and cure survive reopen, failed and lost COMMIT, and replay on
       if (replay.kind === 'saved') assert.equal(replay.replay, committed, action + kind);
       assert.equal(receipts(p.sql), before + 1, action + kind);
       p.sql.close();
+      coldReopen(path, bundle);
     }
 });

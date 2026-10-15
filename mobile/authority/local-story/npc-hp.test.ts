@@ -22,7 +22,7 @@ import {
 import { identify, INTENT_DIGEST_VERSION } from '../../../kernel/ts/src/commands/invocation.ts';
 import { key } from '../../../kernel/ts/src/foundation/compose.ts';
 import { read } from '../../../kernel/ts/test/read.ts';
-import { elapsedHost } from './__tests__/elapsed-host.test.ts';
+import { coldReopen, elapsedHost } from './__tests__/elapsed-host.test.ts';
 import { load, type Receipt } from './store.ts';
 import { save, settle, scope, type Story } from './save.ts';
 import { openStory } from './authority.ts';
@@ -139,6 +139,7 @@ test('actual adopted rat adjustment commits, reopens pinned HP and replays witho
   } finally {
     reopened.sql.close();
   }
+  coldReopen(path, kat);
 });
 
 // Breaks: required HP rows silently heal on load, or use player bounds/position metadata.
