@@ -101,10 +101,7 @@ export function buttonsOf(v: GameView, label: Say, text: Say): Press[] {
     })),
     ...dreamButtons(v, label),
     ...shopButtons(v, text),
-    ...askButtons(v, text),
-    ...wordButtons(v, text),
-    ...serviceButtons(v, text),
-    ...transportButtons(v, text),
+    ...[askButtons, wordButtons, serviceButtons, transportButtons].flatMap((f) => f(v, text)),
     ...asked(v, label),
   ];
 }

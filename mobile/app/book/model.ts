@@ -104,7 +104,8 @@ const OWN = [
   'raise_attribute', // the Character page's own cards
 ];
 
-export function group(buttons: Button[]) {
+export function group(all: Button[]) {
+  const buttons = all.filter((b) => !WORDS.includes(b.action_key)); // the Word block's chips are apart
   const dir = (b: Button) => (b.input as { direction?: string }).direction;
   const aimed = (b: Button) => b.target_ids.length > 0;
   return {
@@ -127,16 +128,11 @@ export function group(buttons: Button[]) {
         (!aimed(b) || b.place) &&
         !dir(b) &&
         !OWN.includes(b.action_key) &&
-        !WORDS.includes(b.action_key) &&
         b.action_key !== 'scan',
     ),
-    word: buttons.filter((b) => WORDS.includes(b.action_key)), // the Word block's chips
+    word: all.filter((b) => WORDS.includes(b.action_key)),
     on: (id: string) =>
-      buttons.filter(
-        (b) =>
-          !WORDS.includes(b.action_key) &&
-          (b.detail_id ? b.detail_id === id : b.target_ids.includes(id)),
-      ),
+      buttons.filter((b) => (b.detail_id ? b.detail_id === id : b.target_ids.includes(id))),
   };
 }
 export const plain = (s: string) => s.replace(/\[([^\]]*)\]\([^)]*\)/g, '$1');
