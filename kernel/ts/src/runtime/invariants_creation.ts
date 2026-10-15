@@ -32,15 +32,18 @@ export function creationsHold(state: Any, ops: Any[], result: Any): boolean {
     if (validate('EntityIdentity', i).length || i.scope !== undefined || i.audience !== undefined)
       return false;
     const next = ops[index + 1];
+    const built = i.origin.kind === 'built'; // a built room is never placed
     if (
       made.has(i.id) ||
       state.created?.[i.id] !== undefined ||
       state.known_entities?.[i.id] !== undefined ||
       state.containers?.[i.id] !== undefined ||
-      next?.op !== 'entity.transfer' ||
-      next.entity_id !== i.id ||
-      next.source_id !== null ||
-      next.writer_group !== op.writer_group
+      (built
+        ? next?.op === 'entity.transfer' && next.entity_id === i.id
+        : next?.op !== 'entity.transfer' ||
+          next.entity_id !== i.id ||
+          next.source_id !== null ||
+          next.writer_group !== op.writer_group)
     )
       return false;
     if (!provenance(state, i)) return false;
@@ -168,6 +171,13 @@ function provenance(state: Any, i: Any): boolean {
         : i.origin.member_id !== i.id)
     );
   }
+  if (i.origin.kind === 'built')
+    return (
+      i.definition.kind === 'blueprint' &&
+      Object.values(state.known_entities ?? {}).some(
+        (e: Any) => e.kind === 'body' && e.owner_id === i.origin.owner,
+      )
+    );
   const victim = state.known_entities?.[i.origin.victim_id];
   const template = state.corpse_templates?.[key(i.definition)];
   return (
@@ -198,7 +208,10 @@ function rowsMatch(result: Any, i: Any): boolean {
     result.changes.some(
       (c: Any) => c.target.kind === 'entity' && c.target.entity_id === i.id && same(c.value, i),
     ) &&
-    result.changes.some((c: Any) => c.target.kind === 'containment' && c.target.entity_id === i.id)
+    result.changes.some(
+      (c: Any) => c.target.kind === 'containment' && c.target.entity_id === i.id,
+    ) ===
+      (i.origin.kind !== 'built')
   );
 }
 

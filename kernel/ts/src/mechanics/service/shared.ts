@@ -43,6 +43,8 @@ export function transition(
   if ('code' in service) return service;
   if (p.quoted_price !== service.price) return { code: 'invalid_state' as const };
   const benefit = service.benefit;
+  const room = benefit.kind === 'build' && unbuildable(world, benefit);
+  if (room) return room;
   const escrow = benefit.kind === 'entitlement' ? benefit.escrow : undefined;
   if (benefit.kind === 'entitlement' && value(world, p.actor_id, benefit.fact) !== false)
     return serviceRefusal('invalid_state', escrow ? 'service.order_open' : 'service.already_paid');
@@ -82,6 +84,7 @@ function granted(
       grant = { fact: benefit.fact, value: true };
     return assigned(world, p.actor_id, start, grant, 'service');
   }
+  if (benefit.kind === 'build') return { ops }; // the room itself is minted in raised()
   if (benefit.kind === 'repair') return repair(world, p, body, benefit, ops);
   if (benefit.kind === 'claim' || benefit.kind === 'cancel')
     return settle(world, p, body, order!, ops, steps);
@@ -156,6 +159,40 @@ export function scheduled(world: World, p: Payload, s: ServiceDefinition, mint: 
       job: orderJob(p.service),
       due_time,
     },
+  ];
+}
+
+type Build = Extract<ServiceDefinition['benefit'], { kind: 'build' }>;
+// Built rooms S2: one structure per site direction, at most world.construction.max_total.
+function unbuildable(world: World, b: Build) {
+  const built = Object.values(world.state.created ?? {}).filter((i) => i.origin.kind === 'built');
+  if (
+    built.some(
+      (i) =>
+        i.origin.kind === 'built' &&
+        same(i.origin.site, b.site) &&
+        i.origin.direction === b.direction,
+    )
+  )
+    return serviceRefusal('invalid_state', 'service.site_taken');
+  if (built.length >= (world.cartridge.world?.construction?.max_total ?? 0))
+    return serviceRefusal('invalid_state', 'service.construction_full');
+  return undefined;
+}
+
+/** Built rooms S2: a paid build mints the room's identity; hydrate derives the room from it. */
+export function raised(p: Payload, s: ServiceDefinition, mint: Mint): DeltaOp[] {
+  const b = s.benefit;
+  if (b.kind !== 'build') return [];
+  const id = mint() as EntityId;
+  const origin = {
+    kind: 'built',
+    site: b.site,
+    direction: b.direction,
+    owner: p.actor_id,
+  } as const;
+  return [
+    { op: 'entity.create', writer_group: 0, identity: { id, definition: b.blueprint, origin } },
   ];
 }
 

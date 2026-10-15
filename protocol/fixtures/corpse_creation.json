@@ -1626,6 +1626,235 @@
           }
         ]
       }
+    },
+    {
+      "id": "built room has exactly its identity row",
+      "state": {
+        "clock": 0,
+        "containers": {
+          "00000000-0000-4000-8000-000000000001": "00000000-0000-4000-8000-000000000003",
+          "00000000-0000-4000-8000-000000000002": "00000000-0000-4000-8000-000000000003",
+          "00000000-0000-4000-8000-000000000006": "00000000-0000-4000-8000-000000000001"
+        },
+        "known_entities": {
+          "00000000-0000-4000-8000-000000000001": {
+            "kind": "body",
+            "owner_id": "00000000-0000-4000-8000-000000000007"
+          },
+          "00000000-0000-4000-8000-000000000002": {
+            "kind": "npc"
+          },
+          "00000000-0000-4000-8000-000000000003": {
+            "kind": "room"
+          },
+          "00000000-0000-4000-8000-000000000004": {
+            "kind": "room"
+          },
+          "00000000-0000-4000-8000-000000000006": {
+            "kind": "slot"
+          }
+        },
+        "corpse_templates": {
+          "{\"cartridge_id\":\"c\",\"cartridge_version\":\"1.0.0\",\"key\":\"player_corpse\",\"kind\":\"item\"}": "player",
+          "{\"cartridge_id\":\"c\",\"cartridge_version\":\"1.0.0\",\"key\":\"rat_corpse\",\"kind\":\"item\"}": "npc"
+        }
+      },
+      "ops": [
+        {
+          "op": "entity.create",
+          "writer_group": 0,
+          "identity": {
+            "id": "00000000-0000-4000-8000-000000000005",
+            "definition": {
+              "cartridge_id": "c",
+              "cartridge_version": "1.0.0",
+              "kind": "blueprint",
+              "key": "hut"
+            },
+            "origin": {
+              "kind": "built",
+              "site": {
+                "cartridge_id": "c",
+                "cartridge_version": "1.0.0",
+                "kind": "room",
+                "key": "lane"
+              },
+              "direction": "north",
+              "owner": "00000000-0000-4000-8000-000000000007"
+            }
+          }
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "entity",
+              "entity_id": "00000000-0000-4000-8000-000000000005"
+            },
+            "value": {
+              "id": "00000000-0000-4000-8000-000000000005",
+              "definition": {
+                "cartridge_id": "c",
+                "cartridge_version": "1.0.0",
+                "kind": "blueprint",
+                "key": "hut"
+              },
+              "origin": {
+                "kind": "built",
+                "site": {
+                  "cartridge_id": "c",
+                  "cartridge_version": "1.0.0",
+                  "kind": "room",
+                  "key": "lane"
+                },
+                "direction": "north",
+                "owner": "00000000-0000-4000-8000-000000000007"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "non-built creation without placement faults",
+      "state": {
+        "clock": 0,
+        "containers": {
+          "00000000-0000-4000-8000-000000000001": "00000000-0000-4000-8000-000000000003",
+          "00000000-0000-4000-8000-000000000002": "00000000-0000-4000-8000-000000000003",
+          "00000000-0000-4000-8000-000000000006": "00000000-0000-4000-8000-000000000001"
+        },
+        "known_entities": {
+          "00000000-0000-4000-8000-000000000001": {
+            "kind": "body",
+            "owner_id": "00000000-0000-4000-8000-000000000007"
+          },
+          "00000000-0000-4000-8000-000000000002": {
+            "kind": "npc"
+          },
+          "00000000-0000-4000-8000-000000000003": {
+            "kind": "room"
+          },
+          "00000000-0000-4000-8000-000000000004": {
+            "kind": "room"
+          },
+          "00000000-0000-4000-8000-000000000006": {
+            "kind": "slot"
+          }
+        },
+        "corpse_templates": {
+          "{\"cartridge_id\":\"c\",\"cartridge_version\":\"1.0.0\",\"key\":\"player_corpse\",\"kind\":\"item\"}": "player",
+          "{\"cartridge_id\":\"c\",\"cartridge_version\":\"1.0.0\",\"key\":\"rat_corpse\",\"kind\":\"item\"}": "npc"
+        }
+      },
+      "ops": [
+        {
+          "op": "entity.create",
+          "writer_group": 0,
+          "identity": {
+            "id": "00000000-0000-4000-8000-000000000005",
+            "definition": {
+              "cartridge_id": "c",
+              "cartridge_version": "1.0.0",
+              "kind": "item",
+              "key": "player_corpse"
+            },
+            "origin": {
+              "kind": "death",
+              "victim_id": "00000000-0000-4000-8000-000000000001",
+              "event_id": "00000000-0000-4000-8000-000000000008",
+              "owner_id": "00000000-0000-4000-8000-000000000007"
+            }
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "entity",
+            "entity_id": "00000000-0000-4000-8000-000000000005"
+          }
+        }
+      }
+    },
+    {
+      "id": "built room cannot be placed",
+      "state": {
+        "clock": 0,
+        "containers": {
+          "00000000-0000-4000-8000-000000000001": "00000000-0000-4000-8000-000000000003",
+          "00000000-0000-4000-8000-000000000002": "00000000-0000-4000-8000-000000000003",
+          "00000000-0000-4000-8000-000000000006": "00000000-0000-4000-8000-000000000001"
+        },
+        "known_entities": {
+          "00000000-0000-4000-8000-000000000001": {
+            "kind": "body",
+            "owner_id": "00000000-0000-4000-8000-000000000007"
+          },
+          "00000000-0000-4000-8000-000000000002": {
+            "kind": "npc"
+          },
+          "00000000-0000-4000-8000-000000000003": {
+            "kind": "room"
+          },
+          "00000000-0000-4000-8000-000000000004": {
+            "kind": "room"
+          },
+          "00000000-0000-4000-8000-000000000006": {
+            "kind": "slot"
+          }
+        },
+        "corpse_templates": {
+          "{\"cartridge_id\":\"c\",\"cartridge_version\":\"1.0.0\",\"key\":\"player_corpse\",\"kind\":\"item\"}": "player",
+          "{\"cartridge_id\":\"c\",\"cartridge_version\":\"1.0.0\",\"key\":\"rat_corpse\",\"kind\":\"item\"}": "npc"
+        }
+      },
+      "ops": [
+        {
+          "op": "entity.create",
+          "writer_group": 0,
+          "identity": {
+            "id": "00000000-0000-4000-8000-000000000005",
+            "definition": {
+              "cartridge_id": "c",
+              "cartridge_version": "1.0.0",
+              "kind": "blueprint",
+              "key": "hut"
+            },
+            "origin": {
+              "kind": "built",
+              "site": {
+                "cartridge_id": "c",
+                "cartridge_version": "1.0.0",
+                "kind": "room",
+                "key": "lane"
+              },
+              "direction": "north",
+              "owner": "00000000-0000-4000-8000-000000000007"
+            }
+          }
+        },
+        {
+          "op": "entity.transfer",
+          "writer_group": 0,
+          "entity_id": "00000000-0000-4000-8000-000000000005",
+          "source_id": null,
+          "destination_id": "00000000-0000-4000-8000-000000000003"
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "entity",
+            "entity_id": "00000000-0000-4000-8000-000000000005"
+          }
+        }
+      }
     }
   ],
   "contracts": [
@@ -2592,6 +2821,38 @@
         "victim_id": "00000000-0000-4000-8000-000000000001",
         "event_id": 1,
         "owner_id": "00000000-0000-4000-8000-000000000007"
+      },
+      "valid": false
+    },
+    {
+      "id": "EntityOrigin accepts built",
+      "contract": "EntityOrigin",
+      "value": {
+        "kind": "built",
+        "site": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "lane"
+        },
+        "direction": "north",
+        "owner": "00000000-0000-4000-8000-000000000007"
+      },
+      "valid": true
+    },
+    {
+      "id": "EntityOrigin built rejects unknown direction",
+      "contract": "EntityOrigin",
+      "value": {
+        "kind": "built",
+        "site": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "room",
+          "key": "lane"
+        },
+        "direction": "northeast",
+        "owner": "00000000-0000-4000-8000-000000000007"
       },
       "valid": false
     }
