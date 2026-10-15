@@ -51,3 +51,14 @@ RS-1 red control (`bin/lint_red_controls.sh --core-only`, plants `world.characte
 Claims rerun: "48 markers -> 1 marker left" (grep: one marker, `schedule/behavior.ts:51`); RS-1 red control ok. Not probed: TS `c.facts[refString(...)]` against Elixir `resolve/4` for a `fact_compare` naming an imported module's fact (both loaders use the same lookup as their other fact checks).
 
 Checks 1 to 9 of the brief checklist: each slice's Beads notes answer them; row 38's answers are in `mechanics.md:2874`.
+
+## Fix round 1 (head `9bcba705bbfafe232453c231e00ddd309d93ec98`; fixes `26ea0167`, `9bcba705`; record cherry-picked as `d5d9b966`)
+
+Verdict: **APPROVE**. Scope: the two fix commits, `raid.test.ts` and the two `mechanics.md` clauses, plus `reaction.ts:125-136` and `policy.ts:135-190` as the code the wording describes.
+
+1. Accepted. `kernel/ts/test/raid.test.ts:306-318`: test-local patch moves the defender to the field with a `daily_schedule` into the village at hour 2; player waits in the village; defender out at 1100, in at 1300, `gate(w)` is `[]`. Mutant `reaction.ts:136` `npc ||` dropped: red-narrow (rerun by me). The patched artifact passes the TS loader in `load()` (`assert.ok(r.ok)`); no cartridge file changed, so the Elixir loader has nothing new to compile.
+2. Accepted, dev's wording is the precise one. `sequence` evaluates `when` with `actor` = `cause.actor_id ?? root` (`reaction.ts:343`, `:125`); `subject` leaves (`status_active`, `resource_compare`) read `ctx.subject`, the entrant (`policy.ts:149`, `:183`). `mechanics.md:655-657`, `:2872`.
+3, 4. Accepted: PR body reworded and reports the self-review.
+5. Acknowledged, out of scope as recorded.
+
+Open: none. Follow-up for the Realm, already in the record: the wage job's stored payer and the `schedule/behavior.ts:51` evaluator.
