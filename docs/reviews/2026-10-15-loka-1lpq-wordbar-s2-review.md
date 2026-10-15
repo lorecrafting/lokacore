@@ -14,7 +14,7 @@
 5. Every `kernel_api (at least) 1.N` in `protocol/*.schema.json` has a loader_floors case.
 6. Cartridges without spells or phrases are unchanged.
 
-Items 1, 2, 4, 5 and 6 hold. Item 3 holds in the code, but no test guards the cast path (finding 1). Elixir has no GameView or cast runtime, so the leak check covers the TS runtime and both compilers.
+Items 1, 2, 5 and 6 hold. Item 4 holds for pattern, order and floor; its speech@1 gating is open (PM rulings below). Item 3 holds in the code, but no test guards the cast path (finding 1). Elixir has no GameView or cast runtime, so the leak check covers the TS runtime and both compilers.
 
 ## Findings
 
@@ -31,6 +31,8 @@ I probed these by compiling a scratch copy with `mix loka.compile` and loading i
 - A `per_subject` learned fact is accepted by Elixir and refused by TS (FACT_SCOPE_UNSUPPORTED).
 - Phrases without speech@1: neither kernel has a check (the diff adds none).
 - `cartridges/spells_sampler/recipes/noctis.json` still has its `fact_compare`.
+
+Handback claims rerun: "every spell has learned" (jq over `cartridges/*/recipes`: all six spells name one) holds; "view-to-invocation check" (`spells.test.ts:260`; m3-m5 killed) holds.
 
 ## Accepted deviations
 
@@ -49,6 +51,8 @@ I probed these by compiling a scratch copy with `mix loka.compile` and loading i
 |---|---|
 | m1 `shared.ts:80` drop learned | **survived** |
 | m2 `shared.ts:80` `world.character` | **survived** |
+
+m1 and m2 also survive the wider set combat_credit, status_readers, spells, spell_effects and speech tests (every TS test naming a spell cartridge or cast).
 | m3 `view/spells.ts:22` drop learned filter | killed (spells.test spell_words) |
 | m4 view: drop `refusal` | killed |
 | m5 view: drop `admission` | killed |
