@@ -1,4 +1,4 @@
-// size: allow 309, the build benefit (Built rooms S2, S3) adds its gate and commission to the one transition query
+// size: allow 312, the build and mend benefits (Built rooms S2 to S4) add their gates and commission to the one transition query
 // One bounded admission/transition query for exact keyed service offers and execution.
 import {
   LIMITS,
@@ -24,7 +24,7 @@ import { adjust, level, resourceRef, resourceSpec, transfer, type Levels } from 
 import { serving } from '../liquid/shared.ts';
 import { selected } from '../containment/stock.ts';
 import { giveRefused } from '../containment/shared.ts';
-import { unbuildable } from './build.ts';
+import { unbuildable, unmendable } from './build.ts';
 export { built, raised } from './build.ts';
 
 type Payload = Extract<CommandPayload, { type: 'use_service' }>;
@@ -46,11 +46,13 @@ export function transition(
   if ('code' in service) return service;
   if (p.quoted_price !== service.price) return { code: 'invalid_state' as const };
   const benefit = service.benefit;
-  const blocked = benefit.kind === 'build' && unbuildable(world, benefit, p.actor_id);
+  const blocked =
+    (benefit.kind === 'build' && unbuildable(world, benefit, p.actor_id)) ||
+    (benefit.kind === 'mend' && unmendable(world, benefit));
   if (blocked) return blocked;
   const commission =
     benefit.kind === 'entitlement' || benefit.kind === 'build' ? benefit : undefined;
-  const escrow: Escrow = commission?.escrow;
+  const escrow: Escrow = benefit.kind === 'mend' ? benefit.escrow : commission?.escrow;
   if (commission?.fact && value(world, p.actor_id, commission.fact) !== false)
     return serviceRefusal('invalid_state', escrow ? 'service.order_open' : 'service.already_paid');
   if (escrow?.output && away(world, escrow))
@@ -89,6 +91,7 @@ function granted(
       grant = { fact: benefit.fact!, value: true };
     return assigned(world, p.actor_id, start, grant, 'service');
   }
+  if (benefit.kind === 'mend') return { ops: [...ops, ...inputs] }; // cure and weathering in raised()
   if (benefit.kind === 'build') return { ops }; // the room itself is minted in raised() or built()
   if (benefit.kind === 'repair') return repair(world, p, body, benefit, ops);
   if (benefit.kind === 'claim' || benefit.kind === 'cancel')

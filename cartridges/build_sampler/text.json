@@ -38,5 +38,8 @@
   "condition.ruin": "in ruin",
   "narration.ruin.applied": "The roof falls in.",
   "narration.ruin.tick": "The ruin settles.",
-  "narration.ruin.expired": "The ruin is mended."
+  "narration.ruin.expired": "The ruin is mended.",
+  "service.mend_hut": "Mend the hut",
+  "service.mend_hut.used": "The carpenter takes a length of timber and your coin, and puts the roof back on.",
+  "service.nothing_to_mend": "Nothing here needs mending."
 }

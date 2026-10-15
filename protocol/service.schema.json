@@ -382,9 +382,65 @@
               "fact"
             ]
           }
+        },
+        {
+          "description": "Built rooms S4 (construction@1): mend the built room at site's direction. Refused service.nothing_to_mend unless that room's blueprint ruin status is active on it; otherwise the mend cures ruin and applies the blueprint's weathering again. site and direction as build's.",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "mend"
+            },
+            "site": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "direction": {
+              "enum": [
+                "north",
+                "south",
+                "east",
+                "west",
+                "up",
+                "down"
+              ]
+            },
+            "escrow": {
+              "type": "object",
+              "description": "The first quantity of these directly held items move to the custody room with the mend (spent at once).",
+              "properties": {
+                "items": {
+                  "type": "array",
+                  "minItems": 1,
+                  "maxItems": 16,
+                  "items": {
+                    "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                  }
+                },
+                "quantity": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 16
+                },
+                "custody": {
+                  "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                }
+              },
+              "required": [
+                "items",
+                "quantity",
+                "custody"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "kind",
+            "site",
+            "direction"
+          ],
+          "additionalProperties": false
         }
       ],
-      "description": "Closed paid entitlement, finite meal recovery, provider-owned complete liquid serving (recovery is MV only) or, toolbox row 21, a repair adding up to amount to the wielded weapon's durability fact; or, toolbox row 20b, a claim or cancel of the named commission service's timed escrow order; or, toolbox row 25, a deposit or withdraw of amount between the player's pool and the vault NPC's, mirrored in the account fact, the price being the fee.",
+      "description": "Closed paid entitlement, finite meal recovery, provider-owned complete liquid serving (recovery is MV only) or, toolbox row 21, a repair adding up to amount to the wielded weapon's durability fact; or, toolbox row 20b, a claim or cancel of the named commission service's timed escrow order; or, toolbox row 25, a deposit or withdraw of amount between the player's pool and the vault NPC's, mirrored in the account fact, the price being the fee; or, Built rooms S2 to S4, a build or mend of a site's room.",
       "examples": [
         {
           "kind": "entitlement",

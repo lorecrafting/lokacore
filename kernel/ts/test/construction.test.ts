@@ -109,6 +109,7 @@ test('a site and world.construction each need construction@1', () => {
     // the S2 build service names a blueprint; without one it is unresolved, not ungated
     delete c.services['build_sampler@0.0.1:service/raise_hut'];
     delete c.services['build_sampler@0.0.1:service/cancel_hut'];
+    delete c.services['build_sampler@0.0.1:service/mend_hut'];
     delete c.npcs['build_sampler@0.0.1:npc/carpenter'].services;
   };
   const gate = (at: string) => ['UNDECLARED_CAPABILITY', at];
@@ -148,6 +149,29 @@ test('a build benefit names a direction and blueprint of its resolved site', () 
   assert.deepEqual(
     refused((c) => (svc(c).benefit.site = { ...svc(c).benefit.site, key: 'nowhere' })),
     ['UNRESOLVED_REFERENCE', at('.benefit.site')],
+  );
+});
+
+// Breaks (Built rooms S4): the loader admits a mend whose direction is not in its site's
+// directions, whose site lists no blueprint with a ruin to cure, or whose site does not resolve.
+test('a mend benefit names a direction of its resolved site and a site blueprint with a ruin', () => {
+  const svc = (c: Obj) => c.services['build_sampler@0.0.1:service/mend_hut'];
+  const at = (p: string) => `.cartridge.services["build_sampler@0.0.1:service/mend_hut"]${p}`;
+  assert.deepEqual(
+    refused((c) => (svc(c).benefit.direction = 'east')),
+    ['SCHEMA_VIOLATION', at('.benefit.direction')],
+  );
+  assert.deepEqual(
+    refused((c) => delete c.blueprints['build_sampler@0.0.1:blueprint/hut'].ruin),
+    ['SCHEMA_VIOLATION', at('.benefit.site')],
+  );
+  assert.deepEqual(
+    refused((c) => (svc(c).benefit.site = { ...svc(c).benefit.site, key: 'nowhere' })),
+    ['UNRESOLVED_REFERENCE', at('.benefit.site')],
+  );
+  assert.deepEqual(
+    refused((c) => delete c.text['service.nothing_to_mend']),
+    ['UNRESOLVED_REFERENCE', at('.target')],
   );
 });
 

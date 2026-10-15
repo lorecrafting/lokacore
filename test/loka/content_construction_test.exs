@@ -91,9 +91,12 @@ defmodule Loka.ContentConstructionTest do
   # (the TS loader refuses them too; construction.test.ts).
   # Breaks (Built rooms S3): the compiler admits a claim on a build commission or a build fact that
   # is not a false-default player bool (construction.test.ts pins the TS side).
+  # Breaks (Built rooms S4): the compiler admits a mend whose direction is not its site's, whose
+  # site lists no blueprint with a ruin, or whose site does not resolve (construction.test.ts too).
   test "a build benefit names a direction and blueprint of its resolved site" do
     dir = Loka.ContentSource.copy(@dir)
     build = &{"services/raise_hut.json", fn s -> put_in(s, ["benefit", &1], &2) end}
+    mend = &{"services/mend_hut.json", fn s -> put_in(s, ["benefit", &1], &2) end}
     # a claim needs its own refusal text; supplied so only the commission check refuses
     claim_text =
       {"text.json", &Map.merge(&1, %{"service.not_ready" => "-", "service.no_output" => "-"})}
@@ -110,7 +113,15 @@ defmodule Loka.ContentConstructionTest do
           {[{"services/cancel_hut.json", &put_in(&1, ["benefit", "kind"], "claim")}, claim_text],
            [{"SCHEMA_VIOLATION", "services/cancel_hut.benefit.service"}]},
           {[{"facts.json", &put_in(&1, ~w(facts hut_ordered value_type default), true)}],
-           [{"SCHEMA_VIOLATION", "services/raise_hut.benefit.fact"}]}
+           [{"SCHEMA_VIOLATION", "services/raise_hut.benefit.fact"}]},
+          {[mend.("direction", "east")],
+           [{"SCHEMA_VIOLATION", "services/mend_hut.benefit.direction"}]},
+          {[{"blueprints/hut.json", &Map.delete(&1, "ruin")}],
+           [{"SCHEMA_VIOLATION", "services/mend_hut.benefit.site"}]},
+          {[mend.("site", "nowhere")],
+           [{"UNRESOLVED_REFERENCE", "services/mend_hut.benefit.site"}]},
+          {[{"text.json", &Map.delete(&1, "service.nothing_to_mend")}],
+           [{"UNRESOLVED_REFERENCE", "services/mend_hut"}]}
         ] do
       assert {:error, diags} = Loka.ContentSource.compile(dir, edits)
       assert pairs(diags) == expected

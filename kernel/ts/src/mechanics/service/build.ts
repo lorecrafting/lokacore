@@ -20,7 +20,7 @@ import {
 } from '../../runtime/decision.ts';
 import { assigned, value } from '../fact.ts';
 import { selected } from '../containment/stock.ts';
-import { applyStatus } from '../status/shared.ts';
+import { applyStatus, cureOps, currentStatus } from '../status/shared.ts';
 
 type Build = Extract<ServiceDefinition['benefit'], { kind: 'build' }>;
 const refused = (key: string) => ({
@@ -59,13 +59,43 @@ function created(world: World, b: Build, owner: CharacterId, mint: Mint): DeltaO
   ];
 }
 
-/** A paid build without materials mints the room's identity; hydrate derives the room from it. */
+type Mend = Extract<ServiceDefinition['benefit'], { kind: 'mend' }>;
+
+/** Built rooms S4: the room built at the mend's site direction while its blueprint's ruin is active
+ * on it, else undefined. */
+function ruined(world: World, b: Mend) {
+  const [id, room] =
+    Object.entries(world.state.created ?? {}).find(
+      ([, i]) =>
+        i.origin.kind === 'built' &&
+        same(i.origin.site, b.site) &&
+        i.origin.direction === b.direction,
+    ) ?? [];
+  const blueprint = room && world.cartridge.blueprints?.[refString(room.definition)];
+  return blueprint?.ruin && currentStatus(world, id as EntityId, blueprint.ruin)
+    ? { id: id as EntityId, blueprint }
+    : undefined;
+}
+
+export const unmendable = (world: World, b: Mend) =>
+  ruined(world, b) ? undefined : refused('service.nothing_to_mend');
+
+// The mend cures ruin and weathers the room again from now.
+function mended(world: World, b: Mend, mint: Mint): DeltaOp[] {
+  const { id, blueprint } = ruined(world, b)!;
+  const again = blueprint.weathering ? applyStatus(world, id, blueprint.weathering, 0, mint) : [];
+  return [...cureOps(world, id, [blueprint.ruin!]), ...again];
+}
+
+/** A paid build without materials mints the room's identity; hydrate derives the room from it.
+ * A mend (S4) cures and re-weathers its ruined room. */
 export function raised(
   world: World,
   p: Extract<CommandPayload, { type: 'use_service' }>,
   s: ServiceDefinition,
   mint: Mint,
 ): DeltaOp[] {
+  if (s.benefit.kind === 'mend') return mended(world, s.benefit, mint);
   return s.benefit.kind === 'build' && !s.benefit.escrow
     ? created(world, s.benefit, p.actor_id, mint)
     : [];

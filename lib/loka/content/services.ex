@@ -1,4 +1,4 @@
-# size: allow 401, row 20a/20b/25 escrow orders, bank accounts and Built rooms S2-S3 builds check in the same service admission pass
+# size: allow 427, row 20a/20b/25 escrow orders, bank accounts and Built rooms S2-S4 builds and mends check in the same service admission pass
 defmodule Loka.Content.Services do
   @moduledoc "Checks finite immediate service declarations and their exact provider stock."
   import Loka.Content.Source, only: [diag: 2, diag: 3, diag: 4, at: 2, ref: 3]
@@ -11,6 +11,7 @@ defmodule Loka.Content.Services do
         k when k in ~w(claim cancel) -> [{"service", "service"}]
         k when k in ~w(deposit withdraw) -> [{"account", "fact"}, {"vault", "npc"}]
         "build" -> [{"blueprint", "blueprint"}, {"site", "room"}] ++ fact_field(b)
+        "mend" -> [{"site", "room"}]
         "meal" -> [{"stock", "resource"}, {"recovery", "resource"}]
         "drink" -> [{"vessel", "item"}, {"liquid", "liquid"}, {"recovery", "resource"}]
       end
@@ -143,6 +144,9 @@ defmodule Loka.Content.Services do
       unresolved(b, "blueprint", at(rel, ["benefit", "blueprint"]), m, defs) ++
         unresolved(r, "room", at(rel, ["benefit", "site"]), m, defs)
 
+  defp benefit_refs(rel, %{"kind" => "mend", "site" => r}, m, defs),
+    do: unresolved(r, "room", at(rel, ["benefit", "site"]), m, defs)
+
   defp benefit_refs(_, _, _, _), do: []
 
   # Toolbox row 20a: distinct items held to a room; no shop offer (commerce save reconciles offer
@@ -248,6 +252,11 @@ defmodule Loka.Content.Services do
       ~w(service.unaffordable service.site_taken service.construction_full) ++
         if(b["escrow"], do: ~w(service.order_open service.missing_inputs), else: [])
 
+  defp reasons(%{"kind" => "mend"} = b),
+    do:
+      ~w(service.unaffordable service.nothing_to_mend) ++
+        if(b["escrow"], do: ~w(service.missing_inputs), else: [])
+
   defp reasons(_), do: ~w(service.unaffordable service.full_mv service.sold_out)
 
   defp benefit(%{"kind" => "entitlement", "fact" => r}, _, _, m, defs) do
@@ -300,6 +309,23 @@ defmodule Loka.Content.Services do
       _ ->
         []
     end ++ build_fact(build, m, defs)
+  end
+
+  # Built rooms S4: a resolved site lists the direction and some blueprint with a ruin to cure.
+  defp benefit(%{"kind" => "mend", "site" => r} = mend, _, _, m, defs) do
+    case Refs.resolve(r, "room", m, defs) do
+      {_, _, room} ->
+        site = room["site"] || %{}
+        ruin? = &(resolved(&1, "blueprint", m, defs)["ruin"] != nil)
+
+        [
+          {mend["direction"] in (site["directions"] || []), ["benefit", "direction"]},
+          {Enum.any?(site["blueprints"] || [], ruin?), ["benefit", "site"]}
+        ]
+
+      _ ->
+        []
+    end
   end
 
   defp benefit(b, npc, s, m, defs) do

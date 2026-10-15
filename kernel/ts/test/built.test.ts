@@ -65,6 +65,7 @@ const use = (provider: string, service: string, quoted_price: number) => (w: Wor
 const buy = use('seller', 'buy_plot', 10);
 const raise = use('carpenter', 'raise_hut', 5);
 const cancel = use('carpenter', 'cancel_hut', 1);
+const mend = use('carpenter', 'mend_hut', 3);
 const pennies = (w: World) => level(w, w.body, resourceRef(w, 'pennies'));
 const take = (w: World, ...ks: string[]) =>
   ks.reduce((x, k) => play(x, { type: 'take', item_id: x.entityIds[`${S}:item/timber_${k}`] }), w);
@@ -89,9 +90,9 @@ const built = (w: World) =>
   Object.keys(w.state.created ?? {}).filter((id) => w.state.created![id].origin.kind === 'built');
 // The offer's refusal and the press's are the same code (view-to-invocation); the press carries
 // only the code, the offer also the reason's text key (none for a failing policy).
-function refused(w: World, code: string, key?: string) {
-  const offer = gameView(w).entities.find((e) => e.id === npc(w, 'carpenter'))!.services![0];
-  const r = send(w, raise(w));
+function refused(w: World, code: string, key?: string, [use, i] = [raise, 0] as const) {
+  const offer = gameView(w).entities.find((e) => e.id === npc(w, 'carpenter'))!.services![i];
+  const r = send(w, use(w));
   assert.deepEqual(r.decision, { kind: 'rejected', error: { code } });
   assert.deepEqual((offer.action as { reason?: unknown }).reason, {
     code,
@@ -411,4 +412,23 @@ test('600 s after completion the hut reads in ruin, its exits unchanged, and the
   assert.deepEqual(gameView(w).exits, exits);
   w = play(w, { type: 'move', direction: 'south' });
   assert.equal(w.state.containers[w.body], lane);
+});
+
+// Built rooms S4 mend (mechanics.md Built rooms, S4). Breaks: a mend admitted on a sound hut, the
+// mend not curing ruin, the timber or price not taken, or weathering not applied again from the mend.
+test('mend is refused on a sound hut; on a ruin it cures it for 3 pennies and a timber, and weathering restarts', () => {
+  n = 0;
+  let w = take(raised(play(fresh(), buy(fresh()))), 'c');
+  const yard = w.roomIds[`${S}:room/yard`]!;
+  refused(w, 'invalid_state', 'service.nothing_to_mend', [mend, 2]);
+  w = elapse(w, w.state.clock + 600);
+  const [before, held0] = [pennies(w), held(w, yard)];
+  w = play(w, mend(w));
+  assert.deepEqual([before - pennies(w), held(w, yard) - held0, held(w, w.body)], [3, 1, 0]);
+  w = play(w, { type: 'move', direction: 'north' });
+  assert.equal(gameView(w).place.description.key, 'blueprint.hut.description.owned');
+  w = elapse(w, w.state.clock + 599);
+  assert.equal(gameView(w).place.description.key, 'blueprint.hut.description.owned');
+  w = elapse(w, w.state.clock + 1);
+  assert.equal(gameView(w).place.description.key, 'blueprint.hut.description.ruin');
 });

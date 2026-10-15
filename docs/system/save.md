@@ -351,6 +351,14 @@ mints the same id (`mobile/authority/local-story/built.test.ts`). No new load re
 `actor_id` forged to another actor is `save_corrupt` through the receipt replay, which every
 cartridge with services runs (`liquid-save.ts`).
 
+Built rooms S4 ([mechanics.md](mechanics.md#built-rooms-s4-weather-and-mend)): `weathering` and
+`ruin` on a built room are ordinary status rows whose holder is the room id, saved and loaded as
+every status row is. Hydrate does not read statuses: a ruined room hydrates with the same id,
+exits and locks. Compose admits a status row on a room created earlier in the same delta (kind
+from the identity row, as hydrate derives it). No new row kind, no new load refusal and no format
+bump. Cold reopen with weathering or ruin active, and weathering expiring after a reopen, are
+pinned through the real loader (`mobile/authority/local-story/built.test.ts`).
+
 | Layer | Where | Refusal |
 | --- | --- | --- |
 | Compose (apply a delta) | `creationValid` and `initialPair` (`kernel/ts/src/foundation/creation.ts`; `Loka.Core.Creation`) | fault `precondition_failed`: the definition is not a blueprint, the owner is no body's owner, or an `entity.transfer` places the room |

@@ -133,6 +133,12 @@ Dialogue owns incoming transfer and adjustment lowering; containment owns Put; p
 acquisition quests/reactions; authority owns atomic save/receipt/adoption. No named Maud or
 chest rule belongs in the kernel. See [PM adoption](../decisions/pm-decision-m20-b1-reward-storage-2026-10-04.md).
 
+A typed write may name an entity that an earlier `entity.create` in the same proposal made.
+Compose takes that entity's kind from the created identity by the rule hydrate uses
+(`createdKind`, `foundation/creation.ts`; `Loka.Core.Creation.kind/1`), never from a mechanic's
+name. An entity created later in the delta stays unknown. The Built rooms S4 consumer is a status
+on a room raised in the same proposal ([mechanics](mechanics.md#built-rooms-s4-weather-and-mend)).
+
 ## Two kernels, one semantic contract
 
 The foundation (encoding, hash, integers, RNG, ids, composition, validation, the

@@ -73,8 +73,7 @@ function definition(c: Obj, s: Obj, ref: string, check: Checks, out: Diagnostic[
       bad(out, `${at}.benefit.fact`);
     if (b.escrow) escrow(c, b.escrow, `${at}.benefit.escrow`, check, out);
     if (b.kind === 'build') build(c, b, at, check, out);
-  } else if (b.kind === 'repair') repair(c, b, at, check, out);
-  else if (b.kind === 'build') build(c, b, at, check, out);
+  } else if (b.kind in sited) sited[b.kind as keyof typeof sited](c, b, at, check, out);
   else if (banks(b)) bank(c, s, at, check, out);
   else if (ordered(b)) {
     const commission = get(c, check, b.service, 'service', `${at}.benefit.service`);
@@ -88,6 +87,8 @@ function definition(c: Obj, s: Obj, ref: string, check: Checks, out: Diagnostic[
   }
 }
 
+const sited = { repair, build, mend };
+
 // The refusal texts a service needs, by benefit.
 function refusals(b: Obj) {
   const kind = b.kind;
@@ -98,6 +99,12 @@ function refusals(b: Obj) {
       site: 'service.site_taken',
       full: 'service.construction_full',
       ...(b.escrow && { headroom: 'service.order_open', inputs: 'service.missing_inputs' }),
+    };
+  if (kind === 'mend')
+    return {
+      payment: 'service.unaffordable',
+      target: 'service.nothing_to_mend',
+      ...(b.escrow && { inputs: 'service.missing_inputs' }),
     };
   if (ordered(b))
     return {
@@ -198,6 +205,16 @@ function build(c: Obj, b: Obj, at: string, check: Checks, out: Diagnostic[]) {
   if (blueprint && !room.site?.blueprints.some((r: Obj) => same(r, b.blueprint)))
     bad(out, `${at}.benefit.blueprint`);
   if (!room.site?.directions.includes(b.direction)) bad(out, `${at}.benefit.direction`);
+}
+
+// Built rooms S4: the site lists the direction and some blueprint with a ruin to cure.
+function mend(c: Obj, b: Obj, at: string, check: Checks, out: Diagnostic[]) {
+  if (b.escrow) escrow(c, b.escrow, `${at}.benefit.escrow`, check, out);
+  const room = get(c, check, b.site, 'room', `${at}.benefit.site`);
+  if (!room) return;
+  if (!room.site?.directions.includes(b.direction)) bad(out, `${at}.benefit.direction`);
+  if (!room.site?.blueprints.some((r: Obj) => c.blueprints?.[refString(r as never)]?.ruin))
+    bad(out, `${at}.benefit.site`);
 }
 
 function stock(c: Obj, s: Obj, npc: Obj | undefined, at: string, check: Checks, out: Diagnostic[]) {
