@@ -48,6 +48,7 @@ defmodule Loka.Content.Checks do
 
   def expand(%{"rest" => r}, m), do: %{"rest" => Loka.Content.Dreams.expand(r, m)}
   def expand(%{"every" => _, "from" => _} = r, m), do: Loka.Content.Replenish.expand(r, m)
+  def expand(%{"pierced_by" => _} = s, m), do: Loka.Content.Status.expand(s, m, &expand/2)
 
   def expand(%{"label" => _, "text" => _, "topic" => topic} = readable, m),
     do: Map.put(readable, "topic", ref(topic, "topic", m))
@@ -175,7 +176,6 @@ defmodule Loka.Content.Checks do
       )
 
   def expand(%{"discovered" => f} = n, m), do: Map.put(n, "discovered", ref(f, "fact", m))
-
   def expand(%{"label" => _, "fact" => f} = n, m), do: Map.put(n, "fact", ref(f, "fact", m))
 
   def expand(%{"skill" => s} = n, m) when is_binary(s),

@@ -1,0 +1,36 @@
+{
+  "keywords": [
+    "sentry"
+  ],
+  "short": "npc.sentry.short",
+  "room_line": "npc.sentry.room",
+  "description": "npc.sentry.description",
+  "room": "gate",
+  "hp": {
+    "minimum": 0,
+    "maximum": 4,
+    "start": 4,
+    "gain": 0
+  },
+  "attributes": [
+    {
+      "attribute": "alertness",
+      "value": 1
+    }
+  ],
+  "attack": {
+    "chance": 100,
+    "damage_min": 1,
+    "damage_max": 1
+  },
+  "disposition": {
+    "hostile": {
+      "policy_version": 1,
+      "root": {
+        "op": "all",
+        "items": []
+      }
+    },
+    "engage": "sentry.spots"
+  }
+}

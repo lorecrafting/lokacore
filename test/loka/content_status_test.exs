@@ -42,4 +42,41 @@ defmodule Loka.ContentStatusTest do
       assert {:error, _} = Loka.ContentSource.compile(dir, [{file, change}]), file
     end
   end
+
+  # Breaks (row 16; twin of the loader case in kernel/ts/test/sneak.test.ts): pierced_by compiles
+  # without a concealment, naming no skill or attribute, or under API 1.92; an entry reaction applying
+  # a concealment compiles (the engage cure then faults conflicting_write on that move).
+  test "pierced_by needs a concealment, a real skill and attribute, API 1.93, no entry concealment" do
+    dir = Loka.ContentSource.copy("cartridges/sneak_sampler")
+    hidden = &{"statuses/hidden.json", &1}
+
+    diags = fn edits ->
+      assert {:error, ds} = Loka.ContentSource.compile(dir, edits)
+      Enum.map(ds, &{&1["code"], &1["path"]})
+    end
+
+    assert {:ok, _, _} = Loka.ContentSource.compile(dir, [])
+
+    assert {"SCHEMA_VIOLATION", "statuses/hidden.pierced_by"} in diags.([
+             hidden.(&(&1 |> Map.delete("concealment") |> Map.put("per_tick", -1)))
+           ])
+
+    assert {"UNRESOLVED_REFERENCE", "statuses/hidden.pierced_by.skill"} in diags.([
+             hidden.(&put_in(&1, ["pierced_by", "skill"], "none"))
+           ])
+
+    assert {"UNRESOLVED_REFERENCE", "statuses/hidden.pierced_by.attribute"} in diags.([
+             hidden.(&put_in(&1, ["pierced_by", "attribute"], "none"))
+           ])
+
+    entry = %{"event" => "entity_entered_room", "room" => "keep"}
+
+    assert {"OUTCOME_MISMATCH", "reactions/hide.apply[0].op"} in diags.([
+             {"reactions/hide.json", &Map.put(&1, "on", entry)}
+           ])
+
+    assert {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api"} in diags.([
+             {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.92")}
+           ])
+  end
 end

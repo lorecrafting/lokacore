@@ -11,7 +11,7 @@ import { engaged, encounterId, npcRef } from './combat/shared.ts';
 import { jobId } from './schedule/behavior.ts';
 import { attacked } from './crow/behavior.ts';
 import { running } from './scene/shared.ts';
-import { concealed } from './status/shared.ts';
+import { activeStatuses, concealed, cureOps } from './status/shared.ts';
 
 export type Disposition = 'hostile' | 'wary' | 'friendly';
 
@@ -47,8 +47,17 @@ export function engage(
   const npc = hostileAt(world, actor, there, steps);
   const ops = npc ? opened(world, actor, body, npc, mint, world.state.clock) : [];
   if (!ops.length) return { ops: [], narration: [] };
+  // Row 16: a spotted entrant is caught; its concealment ends with the encounter.
+  const hiding = activeStatuses(world, body).filter(({ spec }) => spec.concealment);
   return {
-    ops,
+    ops: [
+      ...ops,
+      ...cureOps(
+        world,
+        body,
+        hiding.map(({ status }) => status),
+      ),
+    ],
     narration: [{ key: (world.entities[npc!] as NpcDefinition).disposition!.engage! }],
   };
 }

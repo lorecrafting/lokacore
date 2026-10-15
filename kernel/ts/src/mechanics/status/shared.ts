@@ -18,6 +18,7 @@ import { actorOf, type Mint, refString, type World } from '../../runtime/decisio
 import { cmp } from '../../foundation/validate.ts';
 import { HOLDERS } from '../../foundation/compose_status.ts';
 import { living } from '../death/shared.ts';
+import { pierces } from '../skills.ts';
 import { settleMaxima } from '../resource.ts';
 
 type Active = Extract<StatusRow, { active: true }>;
@@ -217,12 +218,16 @@ export const perceives = (
 ) =>
   sensed(world, body).some((s) => s.perception?.sight === sense || s.perception?.hearing === sense);
 
-/** Status reader 8: whether `seer` fails to see `holder`: hidden, or invisible without see_invisible. */
+/**
+ * Status reader 8: whether `seer` fails to see `holder`: hidden, or invisible without see_invisible,
+ * unless the status's `pierced_by` (row 16) lets the seer see through it.
+ */
 export const concealed = (world: World, holder: EntityId, seer: EntityId | undefined) =>
   sensed(world, holder).some(
     (s) =>
-      s.concealment === 'hidden' ||
-      (s.concealment === 'invisible' && !perceives(world, seer, 'see_invisible')),
+      (s.concealment === 'hidden' ||
+        (s.concealment === 'invisible' && !perceives(world, seer, 'see_invisible'))) &&
+      !(s.pierced_by && pierces(world, s.pierced_by, holder, seer)),
   );
 
 /**

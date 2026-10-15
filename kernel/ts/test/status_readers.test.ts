@@ -410,13 +410,13 @@ test('loader: reader fields need API 1.54 and name player commands', () => {
 
 // Breaks (twin of test/loka/content_status_readers_test.exs): a perception or a concealment (each
 // alone) loads under API 1.60, such a status without per_tick is refused, or an empty perception
-// loads.
+// loads. `soaked`: no entry reaction applies it (row 16).
 test('loader: perception and concealment need API 1.61 and stand in for per_tick', () => {
   const at = (api: string, fields: object) =>
     reload((c) => {
       c.manifest.requires.kernel_api.at_least = api;
-      const { resistances: _, ...plain } = c.statuses[S('warded')];
-      c.statuses[S('warded')] = { ...plain, ...fields };
+      const { resistances: _, ...plain } = c.statuses[S('soaked')];
+      c.statuses[S('soaked')] = { ...plain, ...fields };
     });
   for (const fields of [{ perception: { hearing: 'deaf' } }, { concealment: 'hidden' }]) {
     assert.deepEqual(at('1.61', fields), 'loaded');
@@ -428,6 +428,6 @@ test('loader: perception and concealment need API 1.61 and stand in for per_tick
   }
   assert.deepEqual(at('1.61', { perception: {} }), [
     'SCHEMA_VIOLATION',
-    `.cartridge.statuses["${S('warded')}"].perception`,
+    `.cartridge.statuses["${S('soaked')}"].perception`,
   ]);
 });

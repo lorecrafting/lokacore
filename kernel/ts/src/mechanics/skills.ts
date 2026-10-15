@@ -1,7 +1,7 @@
 import { key } from '../foundation/compose.ts';
-import type { CharacterId, DefinitionRef } from '../contracts.gen.ts';
+import type { CharacterId, DefinitionRef, EntityId } from '../contracts.gen.ts';
 import { KernelError } from '../foundation/error.ts';
-import { refString, type Steps, type World } from '../runtime/decision.ts';
+import { actorOf, refString, type Steps, type World } from '../runtime/decision.ts';
 import { assigned, scopeOf, value, type Assigned } from './fact.ts';
 import { holds } from './policy.ts';
 import { npcValue, value as attributeValue } from './attributes/shared.ts';
@@ -79,3 +79,23 @@ export const opposed = (
     ? level(world, actor, check.skill)
     : attributeValue(world, actor, check.attribute!)) >=
   (check.npc ? npcValue(world, world.entityIds[refString(check.npc)]!, check.attribute!)! : rating);
+
+/**
+ * Row 16: the seer's `attribute` (an NPC's declared value, a player's value) is greater than the
+ * holder's `skill` level; a holder without a character (a hidden NPC) is never pierced. No draw.
+ */
+export function pierces(
+  world: World,
+  { skill, attribute }: { skill: DefinitionRef; attribute: DefinitionRef },
+  holder: EntityId,
+  seer: EntityId | undefined,
+) {
+  const actor = actorOf(world, holder);
+  if (actor === undefined || seer === undefined) return false;
+  const player = actorOf(world, seer);
+  const sees =
+    player === undefined
+      ? npcValue(world, seer, attribute)
+      : attributeValue(world, player, attribute);
+  return sees !== undefined && sees > level(world, actor, skill);
+}

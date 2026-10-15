@@ -1,6 +1,6 @@
 defmodule Loka.Content.Status do
   @moduledoc "Checks toolbox row 1 status declarations, their appliers, the foods that cure them, (row G3) the NPCs and items immune to them and (row 2c) their attribute modifiers and (row G13) the liquids that cure them; (row W8) permanent statuses never tick nor move the derived hp maximum."
-  import Loka.Content.Source, only: [at: 2, diag: 2]
+  import Loka.Content.Source, only: [at: 2, diag: 2, ref: 3]
   alias Loka.Content.Refs
 
   def check(nil, _, _, _), do: []
@@ -50,7 +50,7 @@ defmodule Loka.Content.Status do
 
   defp trigger?(_), do: false
 
-  # A movement status (reader 7) needs 1.62, a perception or concealment (readers 6, 8) 1.61, a status
+  # A pierced_by (row 16) needs 1.93, a movement status (reader 7) 1.62, a perception or concealment (readers 6, 8) 1.61, a status
   # reader (4, 5) 1.54, a fear status (row W21) 1.50, a permanent one (row W8) 1.48, the fields above 1.46.
   defp floor(statuses, g3) do
     defs = for {_, {_, _, s}} <- statuses, is_map(s), do: s
@@ -66,6 +66,7 @@ defmodule Loka.Content.Status do
 
   defp floors,
     do: [
+      {&Map.has_key?(&1, "pierced_by"), [1, 93]},
       {&Map.has_key?(&1, "movement"), [1, 62]},
       {&senses?/1, [1, 61]},
       {&reader?/1, [1, 54]},
@@ -110,7 +111,7 @@ defmodule Loka.Content.Status do
       per_tick(rel, s) ++
       missing_text(rel, ["label"], [s["label"]], text) ++
       missing_text(rel, ["narration"], Map.values(s["narration"] || %{}), text) ++
-      modifies(rel, s, m, defs) ++
+      refs(rel, s, m, defs) ++
       hp_max(rel, s, settings) ++ readers(rel, s)
   end
 
@@ -145,12 +146,34 @@ defmodule Loka.Content.Status do
        else: []
   end
 
+  defp refs(rel, s, m, defs), do: modifies(rel, s, m, defs) ++ pierced_by(rel, s, m, defs)
+
   # Row 2c: each status modifier names a real attribute.
   defp modifies(rel, s, m, defs) do
     for {a, i} <- Enum.with_index(s["modifies"] || []),
         d <- Refs.reference(rel, ["modifies", i], "attribute", a, m, defs),
         do: d
   end
+
+  # Row 16: pierced_by only beside a concealment, naming a real skill and attribute.
+  defp pierced_by(rel, %{"pierced_by" => p} = s, m, defs) do
+    if(Map.has_key?(s, "concealment"),
+      do: [],
+      else: [diag("SCHEMA_VIOLATION", at(rel, ["pierced_by"]))]
+    ) ++
+      Refs.reference(rel, ["pierced_by"], "skill", p, m, defs) ++
+      Refs.reference(rel, ["pierced_by"], "attribute", p, m, defs)
+  end
+
+  defp pierced_by(_, _, _, _), do: []
+
+  @doc "Row 16: expands a pierced_by; `expand` (Checks.expand) expands the rest."
+  def expand(%{"pierced_by" => %{"skill" => k, "attribute" => a}} = s, m, expand),
+    do:
+      Map.put(expand.(Map.delete(s, "pierced_by"), m), "pierced_by", %{
+        "skill" => ref(k, "skill", m),
+        "attribute" => ref(a, "attribute", m)
+      })
 
   # loka-kgd.50: a permanent status never modifies an attribute the derived hp maximum reads.
   defp hp_max(rel, s, settings) do

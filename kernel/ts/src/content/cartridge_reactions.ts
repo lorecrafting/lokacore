@@ -130,8 +130,21 @@ export function reactions(c: Obj, { named, typedValue }: Checks): Diagnostic[] {
       }
     });
   }
-  return out;
+  return [...out, ...entryConcealment(c)];
 }
+
+// Row 16: entry engagement cures concealment on the same move (conflicting_write), so a reaction on
+// entity_entered_room may not apply a concealment status.
+const entryConcealment = (c: Obj) =>
+  each(c).flatMap(([r, at]) =>
+    r.on.event !== 'entity_entered_room'
+      ? []
+      : r.apply.flatMap((s: Obj, i: number) =>
+          s.op === 'status.apply' && c.statuses?.[refString(s.status)]?.concealment
+            ? [diag('OUTCOME_MISMATCH', `${at}.apply[${i}].op`)]
+            : [],
+        ),
+  );
 
 // Row W22 (loka-kgd.96): a named barrier resolves; to locked needs a key_item on the named barrier,
 // or on every barrier carrying the tag, else no key could ever unlock it (BARRIER_UNREACHABLE_KEY).
