@@ -160,6 +160,22 @@ test('the loader refuses storylets below 1.92, unknown rooms, weight 0 and half-
     [(t: any) => (t.room = t.rooms[0]), 'UNKNOWN_FIELD'],
   ] as const)
     assert.equal(refused((c) => f(pick(c).target))[0], code, String(f));
+  // A storylet has no detail and so no rating to oppose.
+  assert.deepEqual(
+    refused((c) => {
+      const C = { cartridge_id: 'storylet_sampler', cartridge_version: '0.0.1' };
+      for (const caps of [c.lock.capabilities, c.manifest.requires.capabilities])
+        Object.assign(caps, { attributes: 1, check: 1 });
+      c.attributes = { 'storylet_sampler@0.0.1:attribute/str': { key: 'str', start: 8 } };
+      pick(c).check = {
+        key: 'lift',
+        kind: 'opposed',
+        attribute: { ...C, kind: 'attribute', key: 'str' },
+      };
+      pick(c).outcomes.failure = pick(c).outcomes.success;
+    }),
+    ['SCHEMA_VIOLATION', `${PICK}.check`],
+  );
   const scene = 'storylet_sampler@0.0.1:scene/stranger';
   assert.deepEqual(
     refused((c) => (c.scenes[scene].on.detail = 'stall')),

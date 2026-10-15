@@ -3079,7 +3079,7 @@ Gap 4 of the [depth audit](../rnd/depth-and-ux-2026-10-13.md) (owner approved 20
   8. Trust: not applicable; nothing stored.
   9. Instancing: met; none built.
 - **Opt-in.** A storylet target needs `kernel_api` 1.92 (KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least`, both kernels). Installed kernel 1.93. Chapter 1 declares none.
-- **Book.** Not built in this slice: the Action card's placement and wording wait on the designer.
+- **Book.** The room page draws the pick as one Action card after the details and before the verbs; an unavailable pick is a `label: reason` note, and the pick never appears as a verb line ([storylet card](book-ui.md#storylet-card-details); `mobile/app/book/storylet.test.ts`).
 - **Known limits.** The deck draws per room and hour, not on entering a room: re-entering within the hour shows the same card. A storylet with `rooms` absent is in every room's deck. A policy that changes inside the hour can change the pick within it.
 - **Traps.** No RNG draw and no stored state; the hash is the W7 pattern.
 - **Sampler.** `cartridges/storylet_sampler`: `market` and `lane`; `pickpocket` (rooms market and lane, weight 1), `stranger_beckons` (market, weight 3, hours 0 to 2 while `scene_stranger` is 0; its scene `stranger` offers the quest `stranger_errand`), `old_friend` (every room, after three market visits). For the sampler's actor the market draws pickpocket at hour 0, stranger_beckons at hours 1 and 10, and the lane pickpocket (`kernel/ts/test/storylet.test.ts`, hashes pinned with `shasum -a 256`).

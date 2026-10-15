@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import { compiled } from '../../authority/local-story/__tests__/compiled.ts';
+import { control } from './__tests__/control.test.ts';
 import { book, nodes, words } from './__tests__/polish-book.test.ts';
 
 const verb = { label: 'Look', action_key: 'look', target_ids: [], input: {} };
@@ -62,6 +63,9 @@ test('an unavailable storylet is the label: reason note, not a pressable', async
 });
 
 const bundle = compiled('cartridges/storylet_sampler');
+const said = JSON.parse(
+  readFileSync(new URL('../../../cartridges/storylet_sampler/text.json', import.meta.url), 'utf8'),
+);
 
 // Breaks: the card sends another action, drops the drawn freshness token, adds targets or input,
 // the press is refused (the Book's invocation disagrees with what the authority admits), or the
@@ -79,12 +83,6 @@ test('pressing the card sends the offered invocation and the authority admits it
     sent.push(intent);
     return invoke(intent);
   };
-  const said = JSON.parse(
-    readFileSync(
-      new URL('../../../cartridges/storylet_sampler/text.json', import.meta.url),
-      'utf8',
-    ),
-  );
   const revision = b.sql.prepare('SELECT revision FROM head').get()!.revision;
   b.tap(said[offered.label]);
   assert.deepEqual(sent, [
@@ -98,4 +96,35 @@ test('pressing the card sends the offered invocation and the authority admits it
   assert.ok(b.sql.prepare('SELECT revision FROM head').get()!.revision > revision);
   // The sampler's beckoning stranger starts a scene: it opens as any scene does.
   assert.ok(b.text().includes(said['scene.stranger.hood']), 'the started scene opens');
+});
+
+// Breaks: a card drawn before the hour changed is rebound to the new view's token (or sent with a
+// fresh one), so the authority runs a pick it no longer offers instead of answering stale_view; or
+// the Book keeps the old card after the refusal instead of redrawing the new pick.
+test('a card pressed after the hour changes the pick is refused as stale and redrawn', (t) => {
+  const b = book(bundle);
+  t.after(() => b.sql.close());
+  const old = control(b.draw(), said['actions.stranger_beckons']);
+  const { token } = b.game.view();
+  // Elsewhere the clock passes hour 2 (100 units an hour), where the stranger stops beckoning.
+  b.game.invoke({
+    action_key: 'wait',
+    target_ids: [],
+    input: { until: 300 },
+    view_freshness_token: token,
+  });
+  assert.equal(b.game.view().view.storylet, 'pickpocket');
+  const replies: unknown[] = [];
+  const invoke = b.game.invoke;
+  b.game.invoke = (intent) => {
+    const reply = invoke(intent);
+    replies.push([intent.view_freshness_token, reply.kind]);
+    return reply;
+  };
+  old.props.onPress();
+  assert.deepEqual(replies, [[token, 'stale_view']]);
+  assert.equal(b.p.screen().log.at(-1), 'The page had changed; here it is again.');
+  const shown = b.labels();
+  assert.ok(shown.includes(said['actions.pickpocket']), JSON.stringify(shown));
+  assert.ok(!shown.includes(said['actions.stranger_beckons']));
 });
