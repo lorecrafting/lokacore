@@ -17,7 +17,7 @@ git fetch -q origin || exit 2
 [ "$(git rev-parse HEAD)" = "$(git rev-parse "origin/$batch")" ] || { echo "NOT LEVEL with origin/$batch"; exit 2; }
 [ "$(git rev-parse "origin/$slice")" = "$(git rev-parse "$sha")" ] || { echo "origin/$slice is not the reviewed head $sha"; exit 2; }
 # A fresh batch worktree has no node_modules, and the merge commit's Prettier hook needs it (loka-o5c2); use this worktree's copy, which cds to its own root.
-[ -e node_modules ] || sh bin/worktree_setup.sh >"${TMPDIR:-/tmp}/pm_setup.out" 2>&1 || { echo "SETUP_FAIL (\$TMPDIR/pm_setup.out)"; exit 2; }
+[ -e node_modules ] || sh bin/worktree_setup.sh >"${TMPDIR:-/tmp}/pm_setup.out" 2>&1 || { echo "SETUP_FAIL (${TMPDIR:-/tmp}/pm_setup.out)"; exit 2; }
 pre=$(git rev-parse HEAD)
 
 merge() { # <ref> <message>
