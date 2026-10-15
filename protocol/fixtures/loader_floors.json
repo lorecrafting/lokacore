@@ -1,5 +1,5 @@
 {
-  "description": "Loader floors (Beads loka-xroj): each kernel_api floor read by both kernels. A case compiles source (with edits: [file, key path, value] set before compiling) at kernel_api floor: the compiler and the loader accept it; at below the compiler reports compiler and the loader (the floor artifact with at_least changed and rehashed) reports loader. Every 'kernel_api (at least) 1.N' in protocol/*.schema.json has a case (test/loka/loader_floors_test.exs). Expected values are hand-checked against each feature's own floor test.",
+  "description": "Loader floors (Beads loka-xroj): each kernel_api floor read by both kernels. A case compiles source (with edits: [file, key path, value] set before compiling) at kernel_api floor: the compiler and the loader accept it; at below the compiler reports compiler and the loader (the floor artifact with at_least changed and rehashed) reports loader. Every 'kernel_api (at least) 1.N' in protocol/*.schema.json has a case (test/loka/loader_floors_test.exs). Code-only floors (sampler-level, no schema text) also have cases but no coverage check. Expected values are literals, not computed by either loader.",
   "cases": [
     {
       "floor": "1.38",
@@ -492,6 +492,30 @@
             },
             "per_level": 1
           }
+        ]
+      ],
+      "compiler": [
+        "KERNEL_API_RANGE_INVALID",
+        "cartridge.requires.kernel_api.at_least"
+      ],
+      "loader": [
+        "KERNEL_API_RANGE_INVALID",
+        ".cartridge.manifest.requires.kernel_api.at_least"
+      ]
+    },
+    {
+      "floor": "1.73",
+      "below": "1.72",
+      "source": "cartridges/group_sampler",
+      "edits": [
+        [
+          "cartridge.json",
+          [
+            "world",
+            "group",
+            "stay"
+          ],
+          "in_group"
         ]
       ],
       "compiler": [

@@ -15,7 +15,7 @@ type Case = {
   floor: string;
   below: string;
   source: string;
-  edits?: [string, (string | number)[], unknown][];
+  edits?: [string, string[], unknown][];
   loader: [string, string];
 };
 const root = fileURLToPath(new URL('../../../', import.meta.url));
@@ -23,7 +23,7 @@ const { cases } = JSON.parse(
   readFileSync(join(root, 'protocol/fixtures/loader_floors.json'), 'utf8'),
 ) as { cases: Case[] };
 
-const set = (o: any, path: (string | number)[], value: unknown) => {
+const set = (o: any, path: string[], value: unknown) => {
   for (const k of path.slice(0, -1)) o = o[k];
   o[path.at(-1)!] = value;
 };
@@ -50,7 +50,7 @@ test('each fixture floor: the loader accepts the floor and refuses just below it
         ['cartridge.json', ['requires', 'kernel_api', 'at_least'], c.floor] as const,
       ]) {
         const json = JSON.parse(readFileSync(join(dir, file), 'utf8'));
-        set(json, path as (string | number)[], value);
+        set(json, path as string[], value);
         writeFileSync(join(dir, file), JSON.stringify(json));
       }
       execFileSync('mix', ['loka.compile', dir, `${dir}.json`], {
