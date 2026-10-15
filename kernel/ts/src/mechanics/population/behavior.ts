@@ -91,6 +91,7 @@ export function bindSight(
       : []),
     sightJob(plan, job_id, at + spec.plan.sight.delay, {
       member_id,
+      // ast-grep-ignore: ts-rule-actor-from-command
       player_id: world.character,
       slot,
       generation: prior.generation,
@@ -129,6 +130,7 @@ function sightJob(
   return { op: 'job.schedule', writer_group: 0, job_id, job: plan, due_time, sight };
 }
 
+// size: allow 41, one RS-1 freeze marker until RS-2 removes it
 export function runSight(world: World, job_id: JobId, job: JobRow, steps: Steps) {
   const sight = job.sight;
   if (!sight) throw new KernelError('precondition_failed');
@@ -141,6 +143,7 @@ export function runSight(world: World, job_id: JobId, job: JobRow, steps: Steps)
   const present =
     slot.replacement_due === null &&
     living(world, sight.member_id) &&
+    // ast-grep-ignore: ts-rule-actor-from-command
     world.state.containers[world.body] === here &&
     world.rooms[here];
   if (!present) return accepted<never>(world, 'job_ran', [done, clear], []);
@@ -183,6 +186,7 @@ function activeSight(world: World, job_id: JobId, job: JobRow) {
     slot.sight_job_id !== job_id ||
     slot.member_id !== sight.member_id ||
     slot.generation !== sight.generation ||
+    // ast-grep-ignore: ts-rule-actor-from-command
     sight.player_id !== world.character
   )
     return undefined;

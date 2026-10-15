@@ -45,16 +45,21 @@ export const decide: Rule<'movement'> = (world, command, mint, steps = { n: 0 })
  */
 export function sight(world: World, body: EntityId, steps: Steps = { n: 0 }) {
   const room = world.rooms[world.state.containers[body]];
+  // ast-grep-ignore: ts-rule-actor-from-command
   const shown = (d: string) => has(room.exits, d) && !hidden(world, room, d, world.character);
   return COMPASS.filter(shown).map((direction) => {
+    // ast-grep-ignore: ts-rule-actor-from-command
     const barred = passage(world, room, direction, world.character, steps);
     if (barred) return { direction, code: barred };
+    // ast-grep-ignore: ts-rule-actor-from-command
     if (dark(world, world.character, steps)) return { direction };
     const there = world.roomIds[refString(exitTo(room, direction)!)];
     if (
       perceives(world, there, 'blind') || // status reader 9: a darkened room hides its contents
       (world.rooms[there].dark_description &&
+        // ast-grep-ignore: ts-rule-actor-from-command
         !darkSight(world, world.character) &&
+        // ast-grep-ignore: ts-rule-actor-from-command
         !illuminated(world, world.character, steps))
     )
       return { direction };
@@ -68,6 +73,7 @@ export function sight(world: World, body: EntityId, steps: Steps = { n: 0 }) {
 
 /** Registered invariants of movement (protocol/invariants.json), pure checks of a world. */
 export const invariants: Readonly<Record<string, (world: World) => boolean>> = {
+  // ast-grep-ignore: ts-rule-actor-from-command
   player_in_one_room: (world) => has(world.rooms, world.state.containers[world.body]),
   exits_resolve: (world) =>
     values(world.rooms).every((room) =>

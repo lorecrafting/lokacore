@@ -111,7 +111,7 @@ function advance(world: World, payload: Advance) {
   );
 }
 
-// size: allow 47, a walking step (row W26) commits its key passages, move and next hour together
+// size: allow 48, a walking step (row W26) commits its key passages, move and next hour together; one RS-1 freeze marker
 function scheduledJob(
   world: World,
   command: Parameters<Rule<'schedule'>>[1],
@@ -131,6 +131,7 @@ function scheduledJob(
   // A goal (toolbox row W10) is narration only when the player sees the NPC leave.
   const stays = still || !path;
   const doors = stays ? [] : path.flatMap(relock);
+  // ast-grep-ignore: ts-rule-actor-from-command
   const seen = goal && !stays && world.state.containers[world.body] === from;
   const transfer = { op: 'entity.transfer', writer_group: 0, entity_id: npc } as const;
   const move: DeltaOp[] = stays ? [] : [{ ...transfer, source_id: from, destination_id: room }];

@@ -1,4 +1,4 @@
-// size: allow 305, the closed State row sections include toolbox status and levelling rows
+// size: allow 309, the closed State row sections include toolbox status and levelling rows; actorOf beside bodyOf
 // What rule modules (mechanics/<capability>/rule.ts) see: the World they read, the typed Rule and
 // Decision contract that limits each capability to its own commands and events
 // (capability_registry.json, through contracts.gen.ts Owned), and pure helpers. The router,
@@ -182,6 +182,10 @@ export type Entity =
  */
 export const bodyOf = (world: World, actor: CharacterId): EntityId | undefined =>
   actor === world.character ? world.body : undefined;
+
+/** The character acting through `body`, if admitted; the Realm replaces both lookups with the admitted set. */
+export const actorOf = (world: World, body: EntityId): CharacterId | undefined =>
+  body === world.body ? world.character : undefined;
 
 export type Accepted = Extract<DecisionResult, { kind: 'accepted' }>;
 export type Event<E> = Omit<DomainEvent, 'payload'> & {

@@ -1,3 +1,4 @@
+// size: allow 303, RS-1 actor-read freeze markers until RS-2 removes them
 import type {
   CharacterId,
   CommandId,
@@ -135,6 +136,7 @@ function birthSight(
   mint: Mint,
 ): DeltaOp[] {
   const spec = world.populationSpecs[key(job.job)]!;
+  // ast-grep-ignore: ts-rule-actor-from-command
   return spec.plan.sight && world.state.containers[world.body] === spec.home
     ? bindSight(
         world,
@@ -238,6 +240,7 @@ function arrivalSight(
   to: EntityId,
   mint: Mint,
 ): DeltaOp[] {
+  // ast-grep-ignore: ts-rule-actor-from-command
   if (!plan.sight || to !== world.state.containers[world.body]) return [];
   const origin = world.state.created?.[member]?.origin;
   return origin?.kind === 'spawned'

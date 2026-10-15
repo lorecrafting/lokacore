@@ -46,6 +46,7 @@ export function runStatus(
   const { body, row } = held;
   const spec = specOf(world, status);
   if (!spec) return { kind: 'fault', code: 'precondition_failed' } as const;
+  // ast-grep-ignore: ts-rule-actor-from-command
   const player = body === world.body;
   const tick = carried ?? row.next_tick_at;
   const visit = { ...world, state: { ...world.state, clock: now } };
