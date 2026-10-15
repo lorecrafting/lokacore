@@ -104,6 +104,9 @@ Session lessons (2026-10-14):
 - Models: developers Opus (Sonnet for bounded docs or content); reviewers fresh Opus; Fable only for
   the one review per mechanics batch head, E-gates and the release-candidate audit
   ([WORKFLOW.md](WORKFLOW.md) routing table).
+- Fable drafts briefs for new modules, contract changes (save, protocol, world graph), Realm-sensitive
+  rows and new interaction patterns, one Fable run per batch; Opus or Sonnet brief rows that follow
+  an existing pattern, S rows and content (owner 2026-10-14: "yes record the fable brief rule").
 - Load gate: run `uptime` in its own call before each spawn; spawn only below load 8; at most 5
   agents, at most 3 running tests.
 - Budget: the weekly Claude allowance resets Wednesdays 05:00 HST; Fable draws the same pool faster.
