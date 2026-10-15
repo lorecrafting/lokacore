@@ -163,7 +163,11 @@ Session lessons (2026-10-15, b5fe9338):
 - Approve or reject retro items from 2026-10-15 (b5fe9338): `loka-0fhi` (merge_resolve unions
   additive fixture and doc conflicts), `loka-ujau` (bin/push_slice.sh prints the real push status),
   `loka-vro5` (content slices hand back an item loop table), `loka-zgqt` (check table rows paste the
-  failing mutant line).
+  failing mutant line), `loka-df49` (log subagent tokens per slice in Beads, sum per batch).
+- Approved 2026-10-15, to do in the next housekeeping PR: `loka-stzq` (read the usage meter at session
+  start and before any large fan-out; report usage per batch). Workflows/ultracode: not for routine
+  work (PM recommendation after the owner's question); a bounded fan-out only, with explicit models,
+  a concurrency cap, worktree isolation and a usage reading before and after.
 
 ## Parked (polish lane)
 
