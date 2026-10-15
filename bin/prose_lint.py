@@ -20,7 +20,7 @@ def sentences(s):
 
 
 def words(s):
-    return re.findall(r"[A-Za-z']+", s)
+    return re.findall(r"[A-Za-z'’]+", s)
 
 
 def syllables(w):  # ponytail: vowel-group heuristic, +-10% off; fine for a trend, not a score
