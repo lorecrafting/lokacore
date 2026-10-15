@@ -6,7 +6,6 @@ Status: stub. Area: [The warden order and the hidden elites](../README.md#03-ord
 
 **Must answer.**
 - What are the stages (stirring, search, trial, acceptance) and what does each require?
-- Which requirements are skill mastery, which quest facts, which places visited, which levels?
 - What does the player experience before unlock (asides, dreams, rumours)?
 - What happens to a character who finds the path but refuses it?
 

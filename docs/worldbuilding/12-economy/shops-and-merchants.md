@@ -7,7 +7,6 @@ Status: stub. Area: [Economy: currency, trade and markets](../README.md#12-econo
 **Must answer.**
 - What kinds of shop exist per settlement size?
 - How does stock replenish and price respond to stock?
-- What does a merchant refuse to buy (the buyback cap, the gold spigot)?
 
 **Must agree with.** [Trade routes and markets](../12-economy/trade-routes-and-markets.md), [Common folk and service NPCs](../22-characters/common-folk-and-service-npcs.md).
 

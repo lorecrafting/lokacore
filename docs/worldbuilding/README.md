@@ -92,8 +92,6 @@ Before a stub is promoted to `draft` or `canon`:
   [Worldbuilding Stack Exchange's](https://worldbuilding.stackexchange.com/) recurring categories
   (used only to check the area list for gaps).
 
-The parked mechanics side, with the Koster lessons, is [docs/game-design/](../game-design/README.md).
-
 ## Table of contents
 
 Area folders are numbered in fill order. Counts are stubs per area.

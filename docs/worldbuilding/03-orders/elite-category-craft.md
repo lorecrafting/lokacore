@@ -6,8 +6,6 @@ Status: stub. Area: [The warden order and the hidden elites](../README.md#03-ord
 
 **Must answer.**
 - What can it make that nobody else can, and what consumes it (interdependence)?
-- What is its unlock path (mastery, commissions, a found schematic)?
-- How does it stay rare without starving the economy?
 
 **Must agree with.** [Hidden elites: overview](../03-orders/hidden-elites-overview.md), [Masterwork and signature](../14-crafting/masterwork-and-signature.md), [Starter category: crafting](../15-professions/starting-crafting.md), [Scarcity and abundance](../12-economy/scarcity-and-abundance.md).
 

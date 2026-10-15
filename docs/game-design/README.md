@@ -10,6 +10,8 @@ to the worldbuilding tree. Inputs: [MECHANICS-TOOLBOX.md](../MECHANICS-TOOLBOX.m
 
 Open question moved from the hidden-elite stubs (Koster's Jedi lesson): cartridge data on the phone will be read and shared, so how secret can a hidden path be, and what does the design do when its requirements are public?
 
+Further open questions moved from worldbuilding stubs (2026-10-15): spell declaration fields (word, learned gate, level, attributes, reagents, mana, effects) and starter, profession-gated or elite-only spells; skill, quest, place and level requirements for the warden path and elite unlocks; merchant buyback cap and gold spigot; which ecology balances are simulated; offline crafting without other players; which tools gate which harvests and crafts; how crafting and martial elites stay rare without starving the economy.
+
 ## Table of contents
 
 
