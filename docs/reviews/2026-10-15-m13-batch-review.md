@@ -54,3 +54,16 @@ All eight hold (evidence below). Item 1 holds to the letter of both sections and
 - Known and not re-reported: loka-kgd.154, loka-kgd.155, loka-kgd.156, loka-ynfo, loka-3wwm; "ask offered with no known topic" belongs to the FD7 Book half (loka-s05w).
 
 Verdict: APPROVE WITH NOTES.
+
+## Fix round 1 re-check (branch `toolbox/m13-fixes`, head `4cb52cedbba457e11de05c2c2b6b356e7e14aae4`)
+
+Scope: `git diff 56f6bea9..4cb52ced` (three fix commits over the cherry-picked record), the code touched and its direct callers.
+
+- F1 fixed: `docs/system/mechanics.md:3163` Known limits now states a victim named as `witness` saw but need not have noticed, and that "the victim noticed" is reachable only through the notice.
+- F2 fixed: `mechanics.md:624` adds the `asked` row (filters `npc`, `topic`, `answered`; subject `entity_id`; actor the subject's character, else actor_id), matching `SUBJECT` at `kernel/ts/src/mechanics/reaction.ts:216` and the FD7 text at `:3236`.
+- F3 by design: `kernel/ts/test/dialogue.test.ts:515-522` already pins the NPC-moved-away case as `not_present` on choose with close still working; question closed.
+- C11 (ask/whisper missing from `TARGETS`, `kernel/ts/src/commands/invocation.ts:72-73`): both new tests go through `identify` then `resolve` (the Book path) before `play`/`accepted`. Red control: deleting the two TARGETS lines fails exactly `ask.test.ts` "the smith's offered ask, invoked as the Book does, is admitted and answers" and `speech.test.ts` "a whisper reaches only its addressee"; restored, 29/29 green with `senses.test.ts`.
+- C1 (`pierces` moved into `kernel/ts/src/mechanics/status/shared.ts:305`): body byte-identical to the removed `skills.ts` function; `level` now imported from `skill_level.ts`, which `skills.ts` re-exports, so the value is the same; one caller at `:234`. Mutant `>` to `>=` fails `sneak.test.ts` "hidden passes the sentry, the captain sees through it" and `theft.test.ts` 6; restored, green. `node bin/check_ts_size.mjs` exit 0 with the `allow 320` line reported as info (file is 319 lines).
+- Disputes spot-checked: C2 holds, `view/action_lists.ts:137` and `mechanics/containment/rule.ts:61` both call `theftRefused` on the unreached branch; C3 holds, `runtime/proposal.ts:235` triggers from `p.world`, the pre-command world. C7 split and loka-kgd.157/158 filings not re-examined.
+
+No new findings. Verdict after fix round 1: APPROVE.
