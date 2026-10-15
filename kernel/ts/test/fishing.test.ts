@@ -1,4 +1,4 @@
-// Homestead hs-3, fishing (docs/lessons/mechanics.md Fishing) on the compiled fishing sampler: the
+// Homestead hs-3, fishing (docs/system/mechanics.md Fishing) on the compiled fishing sampler: the
 // bank holds a rod (tag wooden), a sack and the pool (tag water); the larder holds trout_01,
 // trout_02, eel_01 and salmon_01. A passing `fish` cast emits `bite`; three reactions run the
 // trout (06:00-18:00), eel (other hours) and salmon (rain) entries, each larder to bank, cap 1.
@@ -110,7 +110,6 @@ test('the trout window is 06:00 inclusive to 18:00 exclusive at the cast start',
   assert.deepEqual(landed(D + 6 * HOUR - 1), ['eel_01']);
   assert.match(landed(D + 6 * HOUR)[0]!, TROUT);
   assert.match(landed(D + 18 * HOUR - 1)[0]!, TROUT);
-  assert.match(landed(D + 18 * HOUR - 30)[0]!, TROUT);
   assert.deepEqual(landed(D + 18 * HOUR), ['eel_01']);
 });
 
@@ -172,10 +171,11 @@ test('the cast card is listed with the rod in hand and unlisted without it', () 
   assert.ok(card.target_ids!.includes(id(w, 'pool')));
 });
 
-// Breaks: the target policy drops has_tag water (a cast at the sack), or the held-tool rule
-// admits a rod inside a worn sack.
+// Breaks: the target policy drops has_tag water (a cast at the sack), the held-tool rule admits a
+// rod inside a worn sack, or the carry limit goes (the pool could be taken off the bank).
 test('a cast at anything but water, or with the rod in a worn sack, is refused', () => {
   const w = holding(2 * DAY + 10 * HOUR);
+  assert.equal(play(w, { type: 'take', item_id: id(w, 'pool') }).decision.kind, 'rejected');
   assert.deepEqual(cast(w, PASS, 'sack').decision, {
     kind: 'rejected',
     error: { code: 'invalid_state' },

@@ -50,6 +50,9 @@
     ]
   },
   "world": {
+    "carry": {
+      "max_grams": 5000
+    },
     "bands": [
       {
         "at_percent": 100,
