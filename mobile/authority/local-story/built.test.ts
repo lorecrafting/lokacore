@@ -251,11 +251,13 @@ test('a self-built hut survives cold reopen, its replay raises no second hut, an
   t.after(() => rmSync(dir, { recursive: true, force: true }));
   const path = join(dir, 'self.db');
   const craft = compiled('cartridges/craft_sampler');
+  const l = loadCartridge(
+    new TextEncoder().encode(`{"cartridge":${craft.canonical},"content_hash":"${craft.sha256}"}`),
+    INSTALLED,
+  );
+  if (!l.ok) throw new Error(JSON.stringify(l));
   const fresh = newWorld(
-    loadCartridge(
-      new TextEncoder().encode(`{"cartridge":${craft.canonical},"content_hash":"${craft.sha256}"}`),
-      INSTALLED,
-    ).cartridge as Cartridge,
+    l.cartridge as Cartridge,
     '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never,
     [1, 2, 3, 4],
   );
@@ -280,7 +282,7 @@ test('a self-built hut survives cold reopen, its replay raises no second hut, an
       input,
     };
     const r = story.invoke(i);
-    assert.equal(r.kind === 'saved' && r.decision.kind, 'accepted', JSON.stringify(r));
+    assert.equal(r.kind === 'saved' && (r.decision as any).kind, 'accepted', JSON.stringify(r));
     return i;
   };
   const id = (k: string) => fresh.entityIds[`craft_sampler@0.0.1:${k}`]!;
