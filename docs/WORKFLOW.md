@@ -63,7 +63,7 @@ Report at the end of the slice, not at every step.
    `docs/system` sections (the clause for each behavior; an archived plan for new work), files in and out of scope, acceptance (which checks and fixtures must
    pass, which red controls to add, mutation cases, literal expected values), the relevant `docs/lessons/` file, and anything the owner
    decided, and a scope trigger (what makes the developer stop and ask, for example an unplanned
-   protocol change with new behavior). The PM splits plan rows sized L into two briefs, and a brief holds one M-size toolbox item (or its engine and Book halves) per developer run, never a batch of three (loka-kgd.11 needed four runs); every brief states the
+   protocol change with new behavior). The PM splits plan rows sized L into two briefs, and a brief holds one M-size toolbox item (or its engine and Book halves) per developer run, never a batch of three (loka-kgd.11 needed four runs); an M engine row that adds both a new schema field and a sampler also gets two briefs, engine then content (loka-3jhb); every brief states the
    handoff threshold up front ([Claude Code specifics](#token-hygiene)). Obsolete development fixtures may be updated under the
    [forward-development decision](decisions/owner-decision-forward-development-2026-10-05.md).
    Store the brief durably when it is drafted, one home per kind, and before the spawn (the PM checks the Beads notes first; a developer lost to a limit left its brief only in a scratchpad, loka-ydy): a slice brief and its design input
@@ -85,7 +85,7 @@ Report at the end of the slice, not at every step.
    main checkout. Locally only the focused tests the diff touches; hosted CI on the pushed head is
    the final run ([two-lane CI](decisions/owner-decision-two-lane-ci-2026-10-09.md)). A PR that adds or changes a schema also runs the
    schema mutant sweep in the [contract lessons](lessons/contracts.md) before remote publication; the provisional local lane checks generation and focused invalid cases first. Commit, then publish
-   per the brief's [lane](#delivery-lanes) (description cites the `docs/system` sections and includes the `/code-review` result) and hand back the note `developer.md` specifies.
+   per the brief's [lane](#delivery-lanes) (description cites the `docs/system` sections and includes the `/code-review` result) and hand back the note `developer.md` specifies. The PM appends the note's `/code-review` open items to the slice's Beads notes at handback.
 4. **Verify and review.** PM does not relay claims: for a pushed PR it confirms the push started
    `ci.yml` and `book-e2e.yml` on the head (`gh run list --branch <branch>`) and starts review
    right away, without waiting for them; for
@@ -125,7 +125,8 @@ Report at the end of the slice, not at every step.
 7. **Merge (PM).** Merge with a merge commit (`gh pr merge <N> --merge`; `--admin` while branch protection still requires the old checks) once the verdict is
    APPROVE or APPROVE WITH NOTES with nothing open on the exact pushed head, and `ci.yml` and
    `book-e2e.yml` are green on that head (every push runs them; `--match-head-commit <sha>`;
-   [two-lane CI](decisions/owner-decision-two-lane-ci-2026-10-09.md)). An E-gate closure or the
+   [two-lane CI](decisions/owner-decision-two-lane-ci-2026-10-09.md)). A job cancelled at its timeout is red,
+   a superseded run is not: `bin/session_status.sh` lists cancelled jobs (name, seconds) of the open PR heads and the nightly runs, so compare each with its `timeout-minutes`. An E-gate closure or the
    release candidate also needs a green `gh workflow run ci.yml --ref <branch> -f full=true` on the
    exact head, so the E1 recorder ran ([E1 certification](system/e1-certification.md#e1-exact-candidate-proof-policy));
    that dispatch cancels the head's push run of `ci.yml` (same concurrency group), so the dispatch
@@ -269,8 +270,8 @@ item or too much complexity. Mechanics, save, protocol or engine items leave the
   mutants, the 10,000-sequence simulator) stops and asks the PM, who tells the owner before it starts
   ([owner decision](decisions/owner-decision-process-tightening-2026-10-08.md)).
 - A developer pushes, confirms with one `gh run list --commit <full sha>` call that `ci.yml` and
-  `book-e2e.yml` started, and hands back; the PM watches CI and returns a red run as a finding (no
-  agent starts a background wait for CI: two developers died resuming after one, 2026-10-14).
+  `book-e2e.yml` started, and hands back; the PM watches CI and returns a red run as a finding;
+  developers never wait on CI.
 - Mutants: a full-suite sweep runs only at release-candidate certification and the E3 gate on that
   same candidate. Elsewhere: a red control on the new test, and `bin/mutate.sh` triage ("already
   caught?") run narrow first against the test files that import the mutated module, the full suite
@@ -283,8 +284,8 @@ item or too much complexity. Mechanics, save, protocol or engine items leave the
   a reason, open items, no narrative.
 - PM state file: labeled "AS OF PR #N"; cite every PR as #N (Beads id, short description); one "Open objectives" line; owner words only verbatim
   or marked "(paraphrased)"; keep `file:line` pointers and exact errors; drop spent exploration.
-- Never resume (SendMessage) a subagent whose context was compacted: spawn a fresh one with the
-  brief and the record (2026-10-14: three Opus resumes failed on a duplicate `server_tool_use` id).
+- A subagent compacted by the built-in compaction may be resumed. The 2026-10-14 duplicate-id 400
+  came from the `fast-jev-compaction` plugin, now off (loka-bwfo).
 - A second opinion on a slice runs on the head after the main review's fix round, never in parallel
   on a head the main review already failed (one full review saved per blocker round).
 - Start a new slice agent with a self-contained brief and no inherited chat

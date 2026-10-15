@@ -21,7 +21,7 @@ import {
 import { value } from '../../../kernel/ts/src/mechanics/fact.ts';
 import { level, resourceRef } from '../../../kernel/ts/src/mechanics/resource.ts';
 import { openStory } from './authority.ts';
-import { elapsedHost } from './__tests__/elapsed-host.test.ts';
+import { coldReopen, elapsedHost } from './__tests__/elapsed-host.test.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-escrow-save-'));
 const file = join(scratch, 'artifact.json');
@@ -173,4 +173,5 @@ test('the order job survives cold reopen and the sword is claimed once', (t) => 
   assert.equal(story.world().state.containers[sword], story.world().body);
   assert.deepEqual(truth(story.world()), [[true, true, false, false], 6, false]);
   p.sql.close();
+  coldReopen(path, bundle);
 });

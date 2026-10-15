@@ -22,7 +22,7 @@ import {
 } from '../../../kernel/ts/src/index.ts';
 import { encode } from '../../../kernel/ts/src/foundation/canonical.ts';
 import { read } from '../../../kernel/ts/test/read.ts';
-import { elapsedHost } from './__tests__/elapsed-host.test.ts';
+import { coldReopen, elapsedHost } from './__tests__/elapsed-host.test.ts';
 import { load, type Receipt } from './store.ts';
 import { save, settle, scope, type Story } from './save.ts';
 import { openStory } from './authority.ts';
@@ -125,6 +125,7 @@ test('corpse identity, worn roots and shrine return reopen atomically and receip
       .entities.find((e) => e.id === corpse)!
       .contents?.some((e) => e.id === entity(fresh, 'item/trunk')),
   );
+  coldReopen(path, bundle);
 });
 
 // Breaks: an old bundled profile opens the new pin and silently ignores created rows.

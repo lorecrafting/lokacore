@@ -16,7 +16,7 @@ import {
   type Cartridge,
 } from '../../../kernel/ts/src/index.ts';
 import { openStory } from './authority.ts';
-import { elapsedHost } from './__tests__/elapsed-host.test.ts';
+import { coldReopen, elapsedHost } from './__tests__/elapsed-host.test.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-boss-save-'));
 const saves = mkdtempSync(join(tmpdir(), 'loka-boss-saves-'));
@@ -101,4 +101,5 @@ test('a mid-fight save after the summon and the withdraw reopens cold and fights
     assert.equal(encode(story.world().state as never), saved, `reopened at ${to}`);
   }
   assert.equal(until(2450), 'saved');
+  coldReopen(path, bundle);
 });
