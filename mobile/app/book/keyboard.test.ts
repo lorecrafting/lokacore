@@ -350,11 +350,12 @@ test('status icons: five then +N, named by label, time and polarity, pictures wh
     'scarred, debuff, opens Character',
     'warded, 90s remaining, buff, opens Character',
   ]);
-  const glyphOf = (e: any) => e.props.children.props.children.props.children;
+  const discOf = (e: any) => e.props.children.type(e.props.children.props);
+  const glyphOf = (e: any) => discOf(e).props.children.props.children;
   assert.deepEqual(shown.map(glyphOf), ['◡', '−', '○', '−', '+']);
   const c = color.light;
   const look = (e: any) => {
-    const disc = e.props.children.props;
+    const disc = discOf(e).props;
     return [disc.style.backgroundColor, disc.style.borderColor, disc.children.props.style.color];
   };
   assert.deepEqual(shown.slice(0, 3).map(look), [

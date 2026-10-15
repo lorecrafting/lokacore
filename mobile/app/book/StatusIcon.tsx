@@ -64,26 +64,7 @@ function Icon(p: {
   open?: () => void;
   children: string;
 }) {
-  const c = usePalette();
-  const l = looks(c)[p.look];
-  const disc = (
-    <View
-      style={{
-        width: size.statusIcon,
-        height: size.statusIcon,
-        borderRadius: size.statusIcon / 2,
-        borderWidth: size.rule,
-        borderColor: l.border,
-        backgroundColor: l.fill,
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-    >
-      <Text aria-hidden style={{ ...type.label, color: l.ink }}>
-        {p.children}
-      </Text>
-    </View>
-  );
+  const disc = <Disc look={p.look}>{p.children}</Disc>;
   const box = {
     width: size.touch,
     height: size.touch,
@@ -111,6 +92,30 @@ function Icon(p: {
     >
       {disc}
     </Pressable>
+  );
+}
+
+// The disc alone, so the countdown ring (loka-x6t.65) can wrap it: size.statusIcon plus a
+// size.rule ring on each side still fits the size.touch box, so row spacing stays.
+function Disc(p: { look: Look; children: string }) {
+  const l = looks(usePalette())[p.look];
+  return (
+    <View
+      style={{
+        width: size.statusIcon,
+        height: size.statusIcon,
+        borderRadius: size.statusIcon / 2,
+        borderWidth: size.rule,
+        borderColor: l.border,
+        backgroundColor: l.fill,
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <Text aria-hidden style={{ ...type.label, color: l.ink }}>
+        {p.children}
+      </Text>
+    </View>
   );
 }
 
