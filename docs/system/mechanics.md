@@ -3480,10 +3480,10 @@ Homestead hs-14 (Beads `loka-kgd.108.11`): GameView projects each skill's tree s
 - **Known limits.** A choice is filtered when the conversation opens: if a hidden skill's prerequisite (a `has_item`, say) fails while the choice is pending, the choice still lists, unavailable `invalid_state`. A `fact_compare` on a hidden skill's `uses_<key>` fact is not refused at load.
 - **Sampler.** `cartridges/craft_sampler`: whittling under Woodcraft, carving under Handcraft, and joinery (Woodcraft, `prerequisite` carving at least 1). At start the Character page shows Handcraft with "Carving — locked" and Woodcraft with "Joinery — locked" and "Whittling — not learned"; once carving is learned it reads "Carving, level 1 — qualified" and Woodcraft "Joinery — not learned" and "Whittling — not learned" (`kernel/ts/test/craft.test.ts`, `test/loka/content_craft_test.exs`).
 - **Composition record** ([architecture](architecture.md#building-mechanics-by-composition)).
-  - Consumer: `craft_sampler`. Later: Homestead profession trees.
-  - Reads: the actor's facts through `holds` and `level`.
+  - Consumer: `craft_sampler`; talk, say, whisper and the GameView talk action (through `spokenBy`). Later: Homestead profession trees.
+  - Reads: the actor's facts through `holds` and `level`; dialogue choice sequences (`offered`).
   - Writes: none.
-  - Reused: VersionedPolicy, `holds`, `level`, the hs-11 policy reference walk, `SectionTitle`, `Note`.
+  - Reused: VersionedPolicy, `holds`, `level`, `spokenBy`, `opening`, the hs-11 policy reference walk, `SectionTitle`, `Note`.
 
 ## Self-cooking (Homestead hs-13)
 

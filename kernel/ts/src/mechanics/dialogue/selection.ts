@@ -20,7 +20,6 @@ import { holds } from '../policy.ts';
 import { living } from '../death/shared.ts';
 import { disposition } from '../disposition.ts';
 import { concealed } from '../skills.ts';
-import { choiceIds } from './shared.ts';
 
 /** The dialogues whose speaker is `target`, in key order (a speaker may have several). */
 const spoken = (world: World, target: EntityId | undefined) =>
@@ -36,6 +35,9 @@ const spoken = (world: World, target: EntityId | undefined) =>
 /** Whether `target` speaks any dialogue (else its talk is not_found). */
 export const speaks = (world: World, target: EntityId | undefined) =>
   spoken(world, target).length > 0;
+
+/** The ids of `d`'s choices, in key order. */
+export const choiceIds = (d: DialogueDefinition) => Object.keys(d.choices).sort(cmp) as Key[];
 
 /** `d`'s choice ids less those that teach a skill concealed from `actor` (Homestead hs-14). */
 export const offered = (world: World, actor: CharacterId, d: DialogueDefinition, steps: Steps) =>

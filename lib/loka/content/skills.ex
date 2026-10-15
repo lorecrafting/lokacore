@@ -122,15 +122,16 @@ defmodule Loka.Content.Skills do
     hidden? =
       &match?({_, _, %{"hidden" => true}}, Loka.Content.Refs.resolve(&1, "skill", m, defs))
 
+    # Only skill_compare (in a policy) and skill.acquire (in a sequence) carry a "skill".
     reads? = fn p ->
       Enum.any?(Loka.Content.Policies.nodes(p["root"], []), fn {n, _} ->
-        n["op"] == "skill_compare" and hidden?.(n["skill"])
+        hidden?.(n["skill"])
       end)
     end
 
     teaches? = fn d ->
       Enum.any?(Map.values(d["choices"]), fn o ->
-        Enum.any?(o["sequence"] || [], &(&1["op"] == "skill.acquire" and hidden?.(&1["skill"])))
+        Enum.any?(o["sequence"] || [], &hidden?.(&1["skill"]))
       end)
     end
 
