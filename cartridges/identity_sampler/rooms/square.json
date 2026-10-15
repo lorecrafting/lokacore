@@ -1,0 +1,26 @@
+{
+  "title": "room.square.title",
+  "description": "room.square.description",
+  "exits": {
+    "north": {
+      "to": "den"
+    },
+    "east": {
+      "to": "gate"
+    }
+  },
+  "details": {
+    "notice": {
+      "aliases": [
+        "notice"
+      ],
+      "description": "detail.notice"
+    },
+    "rack": {
+      "aliases": [
+        "rack"
+      ],
+      "description": "detail.rack"
+    }
+  }
+}

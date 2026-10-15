@@ -6,6 +6,7 @@ import { definition } from '../mechanics/dialogue/shared.ts';
 import { questOf } from '../mechanics/lookups.ts';
 import { value } from '../mechanics/fact.ts';
 import { holds } from '../mechanics/policy.ts';
+import { describeEntity } from '../mechanics/description_variant/rule.ts';
 import { holdsNow } from '../mechanics/quest/lifecycle.ts';
 import { cmp } from '../foundation/validate.ts';
 
@@ -43,7 +44,7 @@ export function journal(world: World, actor: CharacterId, steps: Steps): QuestVi
   return Object.entries(world.state.quests ?? {})
     .filter(([, { scope: s }]) => s.kind === 'player' && s.character_id === actor)
     .map(([id, q]) => {
-      const progress = { ...patrolProgress(world, id, steps), ...remaining(world, id, q) };
+      const progress = { ...patrolProgress(world, actor, id, steps), ...remaining(world, id, q) };
       const expedition = expeditionProgress(world, id);
       const d = world.cartridge.quests![refString(q.quest)];
       const shown = { ...progress, ...expedition, quest: q.quest, state: q.state, title: d.title };
@@ -117,7 +118,7 @@ function expeditionProgress(world: World, id: string) {
   };
 }
 
-function patrolProgress(world: World, id: string, steps: Steps) {
+function patrolProgress(world: World, actor: CharacterId, id: string, steps: Steps) {
   const found = world.state.patrols?.[id];
   const walked = found && patrol.route(world, found, steps);
   const progress =
@@ -125,7 +126,7 @@ function patrolProgress(world: World, id: string, steps: Steps) {
       ? {
           patrol: {
             leader_id: found.npc_id,
-            leader_name: world.entities[found.npc_id].short,
+            leader_name: describeEntity(world, actor, found.npc_id, 'short', steps),
             room_title: world.rooms[walked.here].title,
             next_title: world.rooms[walked.there].title,
             room: walked.settings.route[found.cursor],

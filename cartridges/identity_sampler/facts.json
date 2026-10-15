@@ -1,0 +1,38 @@
+{
+  "facts": {
+    "knows_name": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "per_subject": true,
+      "meaning": "Whether this NPC has told the character its name."
+    },
+    "wanted": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "Whether the watch wants the character."
+    },
+    "topic_houndbane_known": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The character has earned the Houndbane title."
+    }
+  }
+}

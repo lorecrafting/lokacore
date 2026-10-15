@@ -28569,6 +28569,25 @@
     ]
   },
   {
+    "name": "identity_required",
+    "contract": "WorldSettings",
+    "value": {
+      "identity": {
+        "title": "identity.title"
+      }
+    },
+    "errors": [
+      {
+        "path": "/identity/name",
+        "code": "missing_property"
+      },
+      {
+        "path": "/identity/title",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
     "name": "population_plan_trail_hunts_false",
     "contract": "PopulationPlan",
     "value": {

@@ -85,3 +85,19 @@ export const describeEntity = (
   const of = { description: e[field], variants: e[`${field}_variants`] };
   return describe(world, actor, of, steps, id);
 };
+
+/** Toolbox rows W15 and FD9: the player's displayed name (world.identity), its body the target;
+ * undefined without world.identity. */
+export const displayedName = (world: World, actor: CharacterId, steps: Steps = { n: 0 }) => {
+  const id = world.cartridge.world?.identity;
+  return (
+    id &&
+    describe(
+      world,
+      actor,
+      { description: id.name, variants: id.name_variants },
+      steps,
+      bodyOf(world, actor),
+    )
+  );
+};

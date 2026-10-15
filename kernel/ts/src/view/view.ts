@@ -86,7 +86,7 @@ export function gameView(world: World, actor: CharacterId = world.character): Ga
     ...waterViews(world, actor, steps),
     ...skillViews(world, actor, steps),
     ...(world.cartridge.topics && lore(world, actor)),
-    ...(fight && { combat: combatView(world, fight) }),
+    ...(fight && { combat: combatView(world, actor, fight, steps) }),
     ...(bleed && { bleeding: bleedingView(world, bleed) }),
     ...conditionViews(world, body),
     ...cueViews(world, actor, body, steps, holds),
@@ -291,16 +291,15 @@ function equipmentViews(world: World, actor: CharacterId, actions: Lists, steps:
   });
 }
 
-function combatView(world: World, fight: NonNullable<ReturnType<typeof engaged>>) {
+type Fight = NonNullable<ReturnType<typeof engaged>>;
+function combatView(world: World, actor: CharacterId, fight: Fight, steps: Steps) {
+  const name = (id: EntityId) => describeEntity(world, actor, id, 'short', steps);
   return {
     encounter_id: fight.id,
     opponent_id: fight.row.npc_id,
-    name: world.entities[fight.row.npc_id].short,
+    name: name(fight.row.npc_id),
     ...(fight.row.active_ids && {
-      active_opponents: fight.row.active_ids.map((id) => ({
-        id,
-        name: world.entities[id].short,
-      })),
+      active_opponents: fight.row.active_ids.map((id) => ({ id, name: name(id) })),
     }),
   };
 }

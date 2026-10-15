@@ -1604,6 +1604,22 @@
             "narration"
           ],
           "additionalProperties": false
+        },
+        "identity": {
+          "description": "Toolbox rows W15 and FD9 (kernel_api at least 1.97; mechanics.md Recognition and earned titles): the player's displayed name, the text key name, varied by name_variants (TextVariants, first match wins; subject target is the player's body). GameView projects it as actor_name.",
+          "type": "object",
+          "properties": {
+            "name": {
+              "$ref": "text.schema.json#/$defs/TextKey"
+            },
+            "name_variants": {
+              "$ref": "entity.schema.json#/$defs/TextVariants"
+            }
+          },
+          "required": [
+            "name"
+          ],
+          "additionalProperties": false
         }
       },
       "additionalProperties": false,

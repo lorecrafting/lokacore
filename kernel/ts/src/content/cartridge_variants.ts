@@ -2,7 +2,7 @@
 // room_line_variants) or a status_active or npc_present leaf needs kernel_api 1.46; a status_active
 // leaf reading self or subject (status reader 1, row G3) 1.53; a resource_compare with subject or
 // at_least_percent (row 39) 1.87; a room's or detail's asides or a skill_compare leaf (row FD2)
-// 1.91. Twin of lib/loka/content/variants.ex.
+// 1.91; world.identity (rows W15, FD9) 1.97. Twin of lib/loka/content/variants.ex.
 import type { Diagnostic } from '../contracts.gen.ts';
 import { asideParts, diag, nodes, type Obj } from './cartridge_refs.ts';
 import { apiCmp } from './cartridge_installed.ts';
@@ -15,13 +15,22 @@ export function variants(c: Obj): Diagnostic[] {
   );
   const voices = asideParts(c).length > 0 || leaves.some((p) => p.op === 'skill_compare');
   const used =
+    !!c.world?.identity ||
     voices ||
     relative ||
     Object.values((c.npcs ?? {}) as Obj).some((n) => item(n) || n.room_line_variants) ||
     Object.values((c.items ?? {}) as Obj).some(item) ||
     leaves.some((p) => p.op === 'status_active' || p.op === 'npc_present');
   const reader = leaves.some((p) => p.op === 'status_active' && p.subject !== 'target');
-  const floor = voices ? '1.91' : relative ? '1.87' : reader ? '1.53' : '1.46';
+  const floor = c.world?.identity
+    ? '1.97'
+    : voices
+      ? '1.91'
+      : relative
+        ? '1.87'
+        : reader
+          ? '1.53'
+          : '1.46';
   return used && apiCmp(c.manifest.requires.kernel_api.at_least, floor) < 0
     ? [diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least')]
     : [];

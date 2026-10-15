@@ -107,6 +107,9 @@ export function parts(c: Obj): [string, Obj, string][] {
   for (const [ref, b] of Object.entries((c.barriers ?? {}) as Obj))
     add('barrier', b, `.cartridge.barriers${step(ref)}`);
   if (c.calendar) out.push(['calendar', c.calendar, '.cartridge.calendar']);
+  (c.world?.identity?.name_variants ?? []).forEach((v: Obj, i: number) =>
+    out.push(['variant', v, `.cartridge.world.identity.name_variants[${i}]`]),
+  ); // rows W15, FD9
   return [...out, ...cueParts(c)];
 }
 
@@ -257,6 +260,7 @@ export function refStage(c: Obj): Diagnostic[] {
     text(a, ['label', 'accessibility'], `.cartridge.actions${step(ref)}`);
   for (const [kind, d, at] of parts(c)) text(d, TEXT[kind] ?? ['description'], at);
   for (const [a, at] of asideParts(c)) text(a, ['text'], at);
+  text(c.world?.identity ?? {}, ['name'], '.cartridge.world.identity'); // rows W15, FD9
   out.push(...water(c, check), ...skills(c, check), ...topics(c, check));
   ancestryRefs(c, check, out);
   out.push(...recipes(c, check), ...holders(c), ...barriers(c, check.named), ...links(c));

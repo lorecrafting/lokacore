@@ -1,0 +1,32 @@
+{
+  "label": "actions.don_hood",
+  "aliases": [
+    "don"
+  ],
+  "target": {
+    "kind": "detail",
+    "room": "square",
+    "detail": "rack"
+  },
+  "priority": 5,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": []
+    }
+  },
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "event.emit",
+          "event": "hood"
+        }
+      ],
+      "narration": {
+        "actor": "narration.don_hood"
+      }
+    }
+  }
+}

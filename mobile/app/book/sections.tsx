@@ -28,11 +28,16 @@ export function CharacterPage(
   const resources = p.resources ?? p.view?.resources ?? [];
   const position = p.position ?? p.view?.position;
   const levelling = p.view?.levelling;
+  const name = p.view?.actor_name;
   const known =
-    resources.length || p.view?.attributes?.length || p.view?.skills?.some((s) => s.acquired);
+    name ||
+    resources.length ||
+    p.view?.attributes?.length ||
+    p.view?.skills?.some((s) => s.acquired);
   return (
     <Page title="Character" foot={home(p.world)}>
       {!known && <Note>Nothing is known about you yet.</Note>}
+      {name && <Text style={prose(c)}>{p.text(name)}</Text>}
       {position && <Text style={prose(c)}>{cap(position)}</Text>}
       {p.view?.ancestry && (
         <Text style={prose(c)}>{cap(p.view.ancestry.replaceAll('_', '-'))}</Text>
