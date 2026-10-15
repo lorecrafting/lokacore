@@ -2,8 +2,11 @@
 // holds a public furrow, a plot (put lock on `owns_plot`, sold by the seller for 10 of 30 pennies),
 // a seed sack holding seed_01 and a watering can; the sealed larder holds turnip_01..03, the
 // sealed midden nothing. The clock starts at 3600 in spring (winter from 345600). Putting the seed
-// in a bed grows it for 86400 s; watered within the last 43200 s at the end it yields one turnip,
-// otherwise it withers; either way the seed goes to the midden and stays there. Expected values are
+// in a bed sends the seed to the midden at once and grows the bed for 86400 s; at the end the bed
+// yields one turnip when `watered_at` is under 43200 s old (`not time_since at_least 43200`), so
+// water at C0+43200 (43200 s old) withers and at C0+43201 ripens; otherwise it withers. Each
+// sowing yields at most one crop. The midden returns the seed to the sack every 172800 s from
+// world start (first at 176400), and the next sowing cures `withered`. Expected values are
 // hand-counted from those literals.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
@@ -153,12 +156,53 @@ for (const [bed, other] of BEDS) {
     assert.deepEqual(inside(w, room(w, 'midden')), ['seed_01']);
     assert.equal(inside(w, room(w, 'larder')).length, 3);
   });
+
+  // Breaks: the ripen/wither 43200 literal or the `not` moved by one second either way.
+  test(`${bed}: watered at C0+43200 it withers, at C0+43201 it ripens`, () => {
+    for (const [dt, crop] of [
+      [43200, []],
+      [43201, ['turnip_01']],
+    ] as const) {
+      let w = put(ready(bed), bed);
+      const c0 = clock(w);
+      w = at(play(at(w, c0 + dt), water(w, bed)), c0 + 86400);
+      assert.deepEqual(inside(w, item(w, bed)), crop, String(dt));
+      assert.deepEqual(statuses(w, item(w, bed)), crop.length ? [] : ['withered'], String(dt));
+    }
+  });
+
+  // Breaks: the sow rule's spent_<bed> step removed: the seed stays in the bed, so a Take back
+  // and a Put in the other bed sow a second crop from one seed.
+  test(`${bed}: the seed leaves for the midden at sowing, so one seed grows one crop`, () => {
+    let w = put(ready(bed), bed);
+    assert.deepEqual(inside(w, item(w, bed)), []);
+    assert.deepEqual(inside(w, room(w, 'midden')), ['seed_01']);
+    assert.equal(code(w, { type: 'take', item_id: item(w, 'seed_01') }), 'not_present');
+    const sow = { type: 'put', item_id: item(w, 'seed_01'), container_id: item(w, other) };
+    assert.notEqual(code(w, sow), 'accepted');
+    w = play(at(w, clock(w) + 50000), water(w, bed));
+    w = at(w, clock(w) + 36400);
+    assert.deepEqual(inside(w, room(w, 'larder')), ['turnip_02', 'turnip_03']);
+  });
 }
 
-// Breaks: the sow rule's `not has_item` gate removed, so a Take back (holder: the body) puts a
-// draining growing status on the player.
-test('taking the seed back out of the furrow puts no growing status on the body', () => {
-  let w = take(put(ready('furrow'), 'furrow'), 'seed_01');
+// Breaks: the seed_return entry removed or its `every` changed, or the sow rule's withered cure
+// removed (the re-sown bed stays withered).
+test('the seed returns to the sack at 176400 and sowing it cures the withered furrow', () => {
+  let w = at(put(ready('furrow'), 'furrow'), 90000);
+  assert.deepEqual(statuses(w, item(w, 'furrow')), ['withered']);
+  w = at(w, 176399);
+  assert.deepEqual(inside(w, item(w, 'sack')), []);
+  w = at(w, 176400);
+  assert.deepEqual(inside(w, item(w, 'sack')), ['seed_01']);
+  w = put(take(w, 'seed_01'), 'furrow');
+  assert.deepEqual(statuses(w, item(w, 'furrow')), ['growing']);
+});
+
+// Breaks: the sow rule's `not has_item` gate removed, so taking the seed from the sack (holder:
+// the body) puts a draining growing status on the player.
+test('taking the seed from the sack puts no growing status on the body', () => {
+  let w = ready('furrow');
   const hp = level(w, w.body, resourceRef(w, 'hp'));
   w = at(w, clock(w) + 7200);
   assert.deepEqual(statuses(w, w.body), []);
@@ -216,11 +260,12 @@ test("a stranger's Take of the plot's turnip is permission_denied", () => {
 test('one advance, hourly steps and a reopen before ripening reach the same harvest', () => {
   let w = put(ready('furrow'), 'furrow');
   const c0 = clock(w);
-  w = play(at(w, c0 + 50000), water(w, 'furrow'));
-  const one = at(w, c0 + 86400);
+  const one = at(play(at(w, c0 + 50000), water(w, 'furrow')), c0 + 86400);
   let hourly = w;
-  for (let t = c0 + 50000 + 3600; t < c0 + 86400; t += 3600) hourly = at(hourly, t);
-  hourly = at(hourly, c0 + 86400);
+  for (let t = c0 + 3600; t < c0 + 50000; t += 3600) hourly = at(hourly, t);
+  hourly = play(at(hourly, c0 + 50000), water(hourly, 'furrow'));
+  for (let t = c0 + 50400; t <= c0 + 86400; t += 3600) hourly = at(hourly, t);
+  w = play(at(w, c0 + 50000), water(w, 'furrow'));
   const reopened = at(hydrate(fresh(), JSON.parse(JSON.stringify(w.state)), true)!, c0 + 86400);
   assert.deepEqual(inside(one, item(one, 'furrow')), ['turnip_01']);
   assert.deepEqual(statuses(one, item(one, 'furrow')), []);

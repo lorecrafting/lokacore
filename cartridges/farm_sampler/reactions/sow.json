@@ -24,6 +24,10 @@
   },
   "apply": [
     {
+      "op": "status.cure",
+      "status": "withered"
+    },
+    {
       "op": "status.apply",
       "status": "growing"
     },
@@ -34,6 +38,14 @@
     {
       "op": "fact.stamp",
       "fact": "sown_at"
+    },
+    {
+      "op": "replenish.run",
+      "key": "spent_furrow"
+    },
+    {
+      "op": "replenish.run",
+      "key": "spent_plot"
     }
   ]
 }

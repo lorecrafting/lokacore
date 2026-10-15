@@ -19,10 +19,6 @@
     {
       "op": "replenish.run",
       "key": "crop_plot"
-    },
-    {
-      "op": "replenish.run",
-      "key": "spent_plot"
     }
   ]
 }

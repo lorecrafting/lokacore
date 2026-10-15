@@ -19,10 +19,6 @@
     {
       "op": "replenish.run",
       "key": "crop_furrow"
-    },
-    {
-      "op": "replenish.run",
-      "key": "spent_furrow"
     }
   ]
 }

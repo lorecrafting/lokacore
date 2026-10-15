@@ -17,10 +17,6 @@
       "op": "status.apply",
       "status": "withered",
       "item": "furrow"
-    },
-    {
-      "op": "replenish.run",
-      "key": "spent_furrow"
     }
   ]
 }
