@@ -10,4 +10,3 @@ Status: stub. Area: [Characters as archetypes](../README.md#22-characters). Cano
 
 **Must agree with.** [Trainers and teaching](../15-professions/trainers-and-teaching.md), [The warden path: finding and entering the order](../03-orders/warden-path-and-unlock.md), [Ageing and lifespan](../20-health/aging-and-lifespan.md).
 
-**Feeds.** trainer choices; E2 prerequisite; storylets.

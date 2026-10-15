@@ -10,4 +10,3 @@ Status: stub. Area: [Places: settlements, landmarks, dungeons](../README.md#23-p
 
 **Must agree with.** [Architecture styles](../18-arts/architecture-styles.md), [Lost civilisations and ruins](../04-history/lost-civilizations-and-ruins.md), [Sacred sites](../23-places/sacred-sites.md).
 
-**Feeds.** D10 discovered places; 46 codex; map content.

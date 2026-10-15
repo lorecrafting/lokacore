@@ -12,4 +12,3 @@ Status: stub. Area: [Magic and power systems](../README.md#02-magic). Canon tier
 
 **Must agree with.** [The Power: the cosmic force behind the wardens](../01-cosmology/the-power.md), [First law: understanding before solving](../02-magic/first-law-understanding.md), [Interactions between systems](../02-magic/interactions-between-systems.md), [Starter category: scholar and arcane](../15-professions/starting-scholar-arcane.md).
 
-**Feeds.** spell engine (rows 29a/29b); 18 potions; 42 songs; 28 curses and blessings.

@@ -10,4 +10,3 @@ Status: stub. Area: [Calendar, time and astronomy](../README.md#17-time). Canon 
 
 **Must agree with.** [Planet and sky](../05-geography/planet-and-sky.md), [Astrology and omens](../17-time/astrology-and-omens.md), [Astronomy and stars](../17-time/astronomy-and-stars.md).
 
-**Feeds.** 31 derived sky; FD8 ambient lines by sky x hour.

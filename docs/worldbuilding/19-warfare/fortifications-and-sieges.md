@@ -10,4 +10,3 @@ Status: stub. Area: [Military and warfare](../README.md#19-warfare). Canon tier:
 
 **Must agree with.** [Settlement types](../23-places/settlement-types.md), [Player towns and settlements](../23-places/player-towns.md), [Enforcement: watch and guards](../11-law/enforcement-watch-and-guards.md).
 
-**Feeds.** S4 defense; S2 construction; barrier@1; G12 force a barrier.

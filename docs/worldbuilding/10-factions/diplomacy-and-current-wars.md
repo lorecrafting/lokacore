@@ -10,4 +10,3 @@ Status: stub. Area: [Factions and politics](../README.md#10-factions). Canon tie
 
 **Must agree with.** [The present day](../04-history/present-day.md), [Governments and states](../10-factions/governments-and-states.md), [Warfare and armies](../19-warfare/warfare-and-armies.md).
 
-**Feeds.** 37 phased world events; S4 raids; faction quests.

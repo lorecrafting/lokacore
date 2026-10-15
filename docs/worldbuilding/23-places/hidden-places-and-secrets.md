@@ -10,4 +10,3 @@ Status: stub. Area: [Places: settlements, landmarks, dungeons](../README.md#23-p
 
 **Must agree with.** [Secrets tiers: who knows what](../25-mysteries/secrets-tiers.md), [Warden places](../03-orders/warden-places.md), [Sensing, perception and concealment](../02-magic/sensing-and-perception-magic.md).
 
-**Feeds.** 11 hidden passages; D10 discovered places; G7 locks; hidden skills.

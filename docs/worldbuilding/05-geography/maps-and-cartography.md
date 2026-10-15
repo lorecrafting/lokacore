@@ -11,4 +11,3 @@ Status: stub. Area: [Geography: worlds, lands, climate, travel](../README.md#05-
 
 **Must agree with.** [Continents and seas](../05-geography/continents-and-seas.md), [What the world itself does not know](../01-cosmology/the-unknown.md), [In-world documents and readables](../18-arts/in-world-documents-and-readables.md).
 
-**Feeds.** G10/W14 map pins; D10 discovered places; cartridge map.

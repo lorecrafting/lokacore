@@ -11,4 +11,3 @@ Status: stub. Area: [Daily life](../README.md#16-daily-life). Canon tier: none y
 
 **Must agree with.** [Hazards and exposure](../05-geography/hazards-and-exposure.md), [Social structure and class](../07-peoples/social-structure-and-class.md), [Crafting chains](../14-crafting/crafting-chains.md).
 
-**Feeds.** W25 exposure tags; equipment@1 slots; W6 variants.

@@ -11,4 +11,3 @@ Status: stub. Area: [Religion, belief and rites](../README.md#09-religion). Cano
 
 **Must agree with.** [Afterlife and the metaphysics of death](../01-cosmology/afterlife-and-death-metaphysics.md), [Death and what follows](../20-health/death-and-what-follows.md), [Rites and sacraments](../09-religion/rites-and-sacraments.md).
 
-**Feeds.** death@1 corpse custody; 41 corpse decay; D6 owned-corpse recovery.

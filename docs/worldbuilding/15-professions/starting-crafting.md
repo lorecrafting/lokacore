@@ -11,4 +11,3 @@ Status: stub. Area: [Professions and skill trees](../README.md#15-professions). 
 
 **Must agree with.** [Crafting chains](../14-crafting/crafting-chains.md), [Stations and workshops](../14-crafting/stations-and-workshops.md), [Elite category: craft](../03-orders/elite-category-craft.md).
 
-**Feeds.** E1 craft; E3 build; 21 quality; 20 commissions.

@@ -11,4 +11,3 @@ Status: stub. Area: [Law, crime and justice](../README.md#11-law). Canon tier: n
 
 **Must agree with.** [Crimes and punishments](../11-law/crimes-and-punishments.md), [Elite category: martial](../03-orders/elite-category-martial.md), [Law across borders](../11-law/law-across-borders.md).
 
-**Feeds.** 34 witnessed crime and wanted; W3 rumour; bounty quests.

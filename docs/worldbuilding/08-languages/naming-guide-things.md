@@ -9,6 +9,5 @@ Status: stub. Area: [Languages and naming](../README.md#08-languages). Canon tie
 - How are tiers of quality named (plain, hearty, feast)?
 - Are spell words a language of their own?
 
-**Must agree with.** [Naming guide: people](../08-languages/naming-guide-people.md), [Quality and experimentation](../14-crafting/quality-and-experimentation.md), [Spells: catalog structure](../02-magic/spells-catalog-structure.md).
+**Must agree with.** [Naming guide: people](../08-languages/naming-guide-people.md), [Spells: catalog structure](../02-magic/spells-catalog-structure.md).
 
-**Feeds.** item content; 29a spell word; 27 identified-name variants.

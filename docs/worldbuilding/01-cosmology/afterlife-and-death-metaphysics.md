@@ -12,4 +12,3 @@ Status: stub. Area: [Cosmology and metaphysics](../README.md#01-cosmology). Cano
 
 **Must agree with.** [Metaphysics: what is real](../01-cosmology/metaphysics.md), [Death and what follows](../20-health/death-and-what-follows.md), [Resurrection and return rules](../20-health/resurrection-and-return-rules.md), [Death rites](../09-religion/death-rites.md).
 
-**Feeds.** death@1 corpse custody and same-body return; 47 death penalty options; W9 dream hooks.

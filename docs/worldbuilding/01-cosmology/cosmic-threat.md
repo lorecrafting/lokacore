@@ -12,4 +12,3 @@ Status: stub. Area: [Cosmology and metaphysics](../README.md#01-cosmology). Cano
 
 **Must agree with.** [The warden order](../03-orders/warden-order.md), [Antagonists and pressures](../21-story/antagonists-and-pressures.md), [The Power: the cosmic force behind the wardens](../01-cosmology/the-power.md), [Monsters and beasts](../06-ecology/monsters-and-beasts.md).
 
-**Feeds.** 37 phased world events; 39 boss phases; S4 settlement raids; 9 random encounters.

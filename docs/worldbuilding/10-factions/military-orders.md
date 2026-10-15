@@ -10,4 +10,3 @@ Status: stub. Area: [Factions and politics](../README.md#10-factions). Canon tie
 
 **Must agree with.** [Warfare and armies](../19-warfare/warfare-and-armies.md), [Mercenaries and hirelings](../19-warfare/mercenaries-and-hirelings.md), [Elite category: martial](../03-orders/elite-category-martial.md).
 
-**Feeds.** 22 hirelings; S4 settlement defense; G8 groups.

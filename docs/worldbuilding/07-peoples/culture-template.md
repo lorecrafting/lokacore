@@ -11,4 +11,3 @@ Status: stub. Area: [Peoples, species and cultures](../README.md#07-peoples). Ca
 
 **Must agree with.** [Manners, greetings and taboos](../16-daily-life/manners-greetings-and-taboos.md), [Religions roster](../09-religion/religions-roster.md), [Naming guide: people](../08-languages/naming-guide-people.md), [Crafting traditions by culture](../14-crafting/crafting-traditions-by-culture.md).
 
-**Feeds.** dialogue content; W7 narration alternates; G6 sense cues.

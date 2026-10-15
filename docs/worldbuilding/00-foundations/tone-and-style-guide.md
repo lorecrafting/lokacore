@@ -12,4 +12,3 @@ Status: stub. Area: [Foundations: premise, tone, player, canon housekeeping](../
 
 **Must agree with.** [Narration voice](../00-foundations/narration-voice.md), [In-world documents and readables](../18-arts/in-world-documents-and-readables.md), [Idioms, oaths and swearing](../08-languages/idioms-oaths-and-swearing.md).
 
-**Feeds.** narration@1 text keys; W7 narration variety; W6 entity variants; readable@1.

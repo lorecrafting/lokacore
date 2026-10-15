@@ -11,4 +11,3 @@ Status: stub. Area: [Daily life](../README.md#16-daily-life). Canon tier: none y
 
 **Must agree with.** [Flora](../06-ecology/flora.md), [Consumables: food, drink and medicine](../14-crafting/consumables-food-and-medicine.md), [Hospitality and inns](../16-daily-life/hospitality-and-inns.md).
 
-**Feeds.** G13 hunger and thirst; D4 finite apples and Eat; hs-5 edible; B7 well and waterskin.

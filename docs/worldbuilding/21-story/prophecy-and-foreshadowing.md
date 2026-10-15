@@ -10,4 +10,3 @@ Status: stub. Area: [The main storyline, chapters and themes](../README.md#21-st
 
 **Must agree with.** [The future and what is foretold](../04-history/future-and-prophecy.md), [Reveals schedule](../25-mysteries/reveals-schedule.md), [Cosmic time and cycles](../01-cosmology/time-and-cycles.md).
 
-**Feeds.** readables; dialogue content; storylets.

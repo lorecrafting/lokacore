@@ -10,4 +10,3 @@ Status: stub. Area: [Languages and naming](../README.md#08-languages). Canon tie
 
 **Must agree with.** [Language families](../08-languages/language-families.md), [Tone and style guide](../00-foundations/tone-and-style-guide.md).
 
-**Feeds.** narration text; dialogue content.

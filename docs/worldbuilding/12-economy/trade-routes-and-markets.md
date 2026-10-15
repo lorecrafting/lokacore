@@ -1,6 +1,6 @@
 # Trade routes and markets
 
-Status: stub. Area: [Economy: currency, trade, faucets and sinks](../README.md#12-economy). Canon tier: none yet.
+Status: stub. Area: [Economy: currency, trade and markets](../README.md#12-economy). Canon tier: none yet.
 
 **Purpose.** What moves between regions, along which routes, and where it is sold.
 
@@ -11,4 +11,3 @@ Status: stub. Area: [Economy: currency, trade, faucets and sinks](../README.md#1
 
 **Must agree with.** [Travel, distances and the room scale](../05-geography/travel-and-distances.md), [Natural resources and their distribution](../05-geography/natural-resources.md), [Shops and merchants](../12-economy/shops-and-merchants.md).
 
-**Feeds.** 10 time windows (market days); 32 fast travel; 9 encounters; W11 prices.

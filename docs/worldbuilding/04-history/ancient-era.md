@@ -10,4 +10,3 @@ Status: stub. Area: [Deep history and eras](../README.md#04-history). Canon tier
 
 **Must agree with.** [Lost civilisations and ruins](../04-history/lost-civilizations-and-ruins.md), [Dungeons and ruins](../23-places/dungeons-and-ruins.md), [Language families](../08-languages/language-families.md), [Technology level](../13-technology/technology-level.md).
 
-**Feeds.** dungeon content; 27 unidentified items; 11 hidden passages.

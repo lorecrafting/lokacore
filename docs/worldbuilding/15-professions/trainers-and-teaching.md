@@ -7,8 +7,6 @@ Status: stub. Area: [Professions and skill trees](../README.md#15-professions). 
 **Must answer.**
 - Is teaching a person, a book, a place, a rite, or all of them?
 - What do trainers charge (owner ruling: coin fee per box) and why in lore?
-- Can players teach players in the Realm?
 
 **Must agree with.** [Education and apprenticeship](../16-daily-life/education-and-apprenticeship.md), [Taxes, tolls and fees](../12-economy/taxes-tolls-and-fees.md), [Guilds and companies](../10-factions/guilds-and-companies.md).
 
-**Feeds.** trainer dialogue choices; skill.acquire step; E2 prerequisite.

@@ -11,4 +11,3 @@ Status: stub. Area: [Geography: worlds, lands, climate, travel](../README.md#05-
 
 **Must agree with.** [The starting region](../05-geography/starting-region.md), [Settlement template](../23-places/settlement-template.md), [Governments and states](../10-factions/governments-and-states.md).
 
-**Feeds.** cartridge map; cartridge world block.

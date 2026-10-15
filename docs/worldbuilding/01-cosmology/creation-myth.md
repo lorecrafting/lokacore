@@ -12,6 +12,4 @@ Status: stub. Area: [Cosmology and metaphysics](../README.md#01-cosmology). Cano
 
 **Must agree with.** [Structure of the cosmos](../01-cosmology/cosmos-structure.md), [Gods and great powers](../01-cosmology/gods-and-powers.md), [Era: creation](../04-history/age-of-creation.md), [Religions roster](../09-religion/religions-roster.md), [Mysteries register](../25-mysteries/mysteries-register.md).
 
-**Feeds.** readable@1 texts; 46 lore codex; 18-arts folklore content.
-
 **Owner notes (input, not canon until absorbed).** [opening-line](../notes/opening-line.md).

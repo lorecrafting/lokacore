@@ -10,4 +10,3 @@ Status: stub. Area: [Geography: worlds, lands, climate, travel](../README.md#05-
 
 **Must agree with.** [Climate and weather](../05-geography/climate-and-weather.md), [Clothing and fashion](../16-daily-life/clothing-and-fashion.md), [Injury and healing](../20-health/injury-and-healing.md).
 
-**Feeds.** W25 exposure; G13 hunger and thirst; B4 light and darkness; 1 statuses.

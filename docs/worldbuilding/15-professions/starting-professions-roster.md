@@ -11,4 +11,3 @@ Status: stub. Area: [Professions and skill trees](../README.md#15-professions). 
 
 **Must agree with.** [Profession system overview](../15-professions/profession-system-overview.md), [The starting region](../05-geography/starting-region.md), [Player fantasy](../00-foundations/player-fantasy.md).
 
-**Feeds.** D11 character choice; trainer content; E2 trees.

@@ -6,10 +6,8 @@ Status: stub. Area: [Foundations: premise, tone, player, canon housekeeping](../
 
 **Must answer.**
 - What are the three core fantasies (for example a master of a craft, a hidden warden, a town founder)?
-- Which fantasies are solo and offline, which need the Realm?
 - What must the first hour deliver, and what is deliberately withheld?
 - How does phone play (short sessions, elapsed time) shape the fantasy?
 
-**Must agree with.** [Premise and pillars](../00-foundations/premise-and-pillars.md), [The player's role in the world](../00-foundations/player-role-in-world.md), [Profession system overview](../15-professions/profession-system-overview.md), [Story versus Realm canon](../26-realm/story-vs-realm-canon.md).
+**Must agree with.** [Premise and pillars](../00-foundations/premise-and-pillars.md), [The player's role in the world](../00-foundations/player-role-in-world.md), [Profession system overview](../15-professions/profession-system-overview.md)
 
-**Feeds.** D11 character choice; chapter structure; toolbox sampler order.

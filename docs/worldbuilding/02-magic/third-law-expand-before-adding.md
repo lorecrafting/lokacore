@@ -11,4 +11,3 @@ Status: stub. Area: [Magic and power systems](../README.md#02-magic). Canon tier
 
 **Must agree with.** [Magic systems overview](../02-magic/magic-overview.md), [Magic and society](../02-magic/magic-and-society.md), [Premise and pillars](../00-foundations/premise-and-pillars.md).
 
-**Feeds.** toolbox review; cartridge content review.

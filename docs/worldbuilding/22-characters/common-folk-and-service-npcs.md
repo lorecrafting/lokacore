@@ -10,4 +10,3 @@ Status: stub. Area: [Characters as archetypes](../README.md#22-characters). Cano
 
 **Must agree with.** [NPC archetypes by culture](../07-peoples/npc-archetypes-by-culture.md), [Shops and merchants](../12-economy/shops-and-merchants.md), [Work and the daily schedule](../16-daily-life/work-and-daily-schedule.md).
 
-**Feeds.** schedule@1; shop offers; W3 rumour; W15 recognition.

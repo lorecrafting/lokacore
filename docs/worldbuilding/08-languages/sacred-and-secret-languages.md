@@ -11,4 +11,3 @@ Status: stub. Area: [Languages and naming](../README.md#08-languages). Canon tie
 
 **Must agree with.** [The warden order](../03-orders/warden-order.md), [Rites and sacraments](../09-religion/rites-and-sacraments.md), [Spells: catalog structure](../02-magic/spells-catalog-structure.md).
 
-**Feeds.** W16 comprehension by skill; readables; E2 prerequisite leaves.

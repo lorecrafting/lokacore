@@ -10,4 +10,3 @@ Status: stub. Area: [Daily life](../README.md#16-daily-life). Canon tier: none y
 
 **Must agree with.** [Travel, distances and the room scale](../05-geography/travel-and-distances.md), [Hospitality and inns](../16-daily-life/hospitality-and-inns.md), [Taxes, tolls and fees](../12-economy/taxes-tolls-and-fees.md).
 
-**Feeds.** D1 ferry; W15 recognition; W25 exposure.

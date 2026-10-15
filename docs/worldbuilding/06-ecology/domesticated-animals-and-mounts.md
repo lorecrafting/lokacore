@@ -11,4 +11,3 @@ Status: stub. Area: [Ecology: flora, fauna, monsters](../README.md#06-ecology). 
 
 **Must agree with.** [Fauna](../06-ecology/fauna.md), [Transport technology](../13-technology/transport-technology.md), [Housing and architecture](../16-daily-life/housing-and-architecture.md).
 
-**Feeds.** 43b mount relation; 45 pet growth; 22 hireling orders; S1 furnishing (stable).

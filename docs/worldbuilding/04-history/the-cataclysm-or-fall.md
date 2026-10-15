@@ -11,4 +11,3 @@ Status: stub. Area: [Deep history and eras](../README.md#04-history). Canon tier
 
 **Must agree with.** [The cosmic threat or pressure](../01-cosmology/cosmic-threat.md), [Deep time outline](../04-history/deep-time-outline.md), [Mysteries register](../25-mysteries/mysteries-register.md).
 
-**Feeds.** dungeon content; 37 phased world events (echoes); storylets.

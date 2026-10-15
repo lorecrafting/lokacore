@@ -11,4 +11,3 @@ Status: stub. Area: [Magic and power systems](../README.md#02-magic). Canon tier
 
 **Must agree with.** [Costs, risks and failure](../02-magic/costs-and-risks.md), [The cosmic threat or pressure](../01-cosmology/cosmic-threat.md), [Mental health, madness and fear](../20-health/mental-health-madness-and-fear.md).
 
-**Feeds.** 28 curses and blessing; W8 permanent statuses; SR9 room statuses; W6 variants.

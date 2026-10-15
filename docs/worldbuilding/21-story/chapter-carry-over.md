@@ -8,6 +8,5 @@ Status: stub. Area: [The main storyline, chapters and themes](../README.md#21-st
 - What is declared continuity and what resets?
 - What does the world remember of the player's earlier deeds?
 
-**Must agree with.** [Chapter structure](../21-story/chapter-structure.md), [Economy: offline to Realm import](../12-economy/realm-import-policy.md), [Import policy: offline into the Realm](../26-realm/import-policy.md).
+**Must agree with.** [Chapter structure](../21-story/chapter-structure.md)
 
-**Feeds.** 48 chapter carry-over; 48c item and knowledge ports.

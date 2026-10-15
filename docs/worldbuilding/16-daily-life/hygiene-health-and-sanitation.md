@@ -10,4 +10,3 @@ Status: stub. Area: [Daily life](../README.md#16-daily-life). Canon tier: none y
 
 **Must agree with.** [Disease and plague](../20-health/disease-and-plague.md), [Waterways and the sea](../05-geography/waterways-and-sea.md), [Capital and major cities](../23-places/capital-and-major-cities.md).
 
-**Feeds.** G6 sense cues (smell); B7 well; 1 disease statuses.

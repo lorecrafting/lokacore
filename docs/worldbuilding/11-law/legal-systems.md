@@ -11,4 +11,3 @@ Status: stub. Area: [Law, crime and justice](../README.md#11-law). Canon tier: n
 
 **Must agree with.** [Governments and states](../10-factions/governments-and-states.md), [Social structure and class](../07-peoples/social-structure-and-class.md), [Trials and justice](../11-law/trials-and-justice.md).
 
-**Feeds.** 33 offense kinds; 35 trial; 36 jail.

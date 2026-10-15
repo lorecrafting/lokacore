@@ -11,4 +11,3 @@ Status: stub. Area: [Languages and naming](../README.md#08-languages). Canon tie
 
 **Must agree with.** [Phonology template](../08-languages/phonology-template.md), [Names and identity](../07-peoples/names-and-identity.md), [Glossary](../00-foundations/glossary.md).
 
-**Feeds.** NPC content; W15 displayed identity.

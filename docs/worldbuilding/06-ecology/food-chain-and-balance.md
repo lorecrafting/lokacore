@@ -11,4 +11,3 @@ Status: stub. Area: [Ecology: flora, fauna, monsters](../README.md#06-ecology). 
 
 **Must agree with.** [Fauna](../06-ecology/fauna.md), [Monster ecology and populations](../06-ecology/monster-ecology.md), [Biomes](../05-geography/biomes.md).
 
-**Feeds.** W12 population plans (RNG-free); D8 crow scavenging.

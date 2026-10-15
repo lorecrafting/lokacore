@@ -11,4 +11,3 @@ Status: stub. Area: [Religion, belief and rites](../README.md#09-religion). Cano
 
 **Must agree with.** [Religion template](../09-religion/religion-template.md), [Gods and great powers](../01-cosmology/gods-and-powers.md), [The truth of belief](../09-religion/truth-of-belief.md), [The starting region](../05-geography/starting-region.md).
 
-**Feeds.** 15 faction standing; festivals content; dialogue content.

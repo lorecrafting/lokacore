@@ -12,4 +12,3 @@ Status: stub. Area: [Cosmology and metaphysics](../README.md#01-cosmology). Cano
 
 **Must agree with.** [Planes and worlds](../05-geography/planes-and-worlds.md), [Planet and sky](../05-geography/planet-and-sky.md), [Astronomy and stars](../17-time/astronomy-and-stars.md), [The Power: the cosmic force behind the wardens](../01-cosmology/the-power.md).
 
-**Feeds.** derived sky (row 31); calendar@1 solar and lunar cuts; fast travel content (row 32).

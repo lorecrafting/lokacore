@@ -11,4 +11,3 @@ Status: stub. Area: [Ecology: flora, fauna, monsters](../README.md#06-ecology). 
 
 **Must agree with.** [Monsters and beasts](../06-ecology/monsters-and-beasts.md), [Food chain and balance](../06-ecology/food-chain-and-balance.md), [Player towns and settlements](../23-places/player-towns.md).
 
-**Feeds.** W12 population plans; S4 settlement raids; 19b replenish; C3 bounded hounds.

@@ -11,4 +11,3 @@ Status: stub. Area: [Daily life](../README.md#16-daily-life). Canon tier: none y
 
 **Must agree with.** [Calendar](../17-time/calendar.md), [Rites and sacraments](../09-religion/rites-and-sacraments.md), [Legendary events](../04-history/legendary-events.md).
 
-**Feeds.** 10 time windows; 37 phased world events; FD8 ambient lines.

@@ -11,4 +11,3 @@ Status: stub. Area: [Professions and skill trees](../README.md#15-professions). 
 
 **Must agree with.** [Source and access: who can use magic and how it is learned](../02-magic/source-and-access.md), [Translation and comprehension in play](../08-languages/translation-in-play.md), [Elite category: arcane](../03-orders/elite-category-arcane.md), [Secrets tiers: who knows what](../25-mysteries/secrets-tiers.md).
 
-**Feeds.** 29a/29b spells; W16 literacy; 27 identification; 46 codex.

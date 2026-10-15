@@ -10,4 +10,3 @@ Status: stub. Area: [Arts, music and literature](../README.md#18-arts). Canon ti
 
 **Must agree with.** [Crafting traditions by culture](../14-crafting/crafting-traditions-by-culture.md), [Culture template](../07-peoples/culture-template.md).
 
-**Feeds.** item content; room descriptions; W6 variants.

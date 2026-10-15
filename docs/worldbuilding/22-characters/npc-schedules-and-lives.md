@@ -8,6 +8,5 @@ Status: stub. Area: [Characters as archetypes](../README.md#22-characters). Cano
 - What is a believable day for each role, and what breaks it (weather, festival, fear, death)?
 - Do NPCs have lives together (pairs, feuds, families)?
 
-**Must agree with.** [Work and the daily schedule](../16-daily-life/work-and-daily-schedule.md), [Family and household roles](../16-daily-life/family-and-household-roles.md), [Weather model](../17-time/weather-model.md).
+**Must agree with.** [Work and the daily schedule](../16-daily-life/work-and-daily-schedule.md), [Family and household roles](../16-daily-life/family-and-household-roles.md)
 
-**Feeds.** schedule@1; W10 conditional schedules; W26 doors; FD4 NPC-NPC pair facts.

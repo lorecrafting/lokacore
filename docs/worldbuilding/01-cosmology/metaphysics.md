@@ -12,4 +12,3 @@ Status: stub. Area: [Cosmology and metaphysics](../README.md#01-cosmology). Cano
 
 **Must agree with.** [Afterlife and the metaphysics of death](../01-cosmology/afterlife-and-death-metaphysics.md), [Death and what follows](../20-health/death-and-what-follows.md), [The truth of belief](../09-religion/truth-of-belief.md), [The Power: the cosmic force behind the wardens](../01-cosmology/the-power.md).
 
-**Feeds.** death@1 same-body return; W15 recognition; FD6 chronicle; W8 permanent statuses.

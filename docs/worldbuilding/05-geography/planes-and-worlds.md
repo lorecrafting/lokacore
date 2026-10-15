@@ -11,4 +11,3 @@ Status: stub. Area: [Geography: worlds, lands, climate, travel](../README.md#05-
 
 **Must agree with.** [Structure of the cosmos](../01-cosmology/cosmos-structure.md), [Sacred sites](../23-places/sacred-sites.md), [Rituals and long magic](../02-magic/rituals-and-long-magic.md).
 
-**Feeds.** fast travel content; 10 time windows; SR7 movement statuses.

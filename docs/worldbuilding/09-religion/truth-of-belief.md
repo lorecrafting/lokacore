@@ -11,4 +11,3 @@ Status: stub. Area: [Religion, belief and rites](../README.md#09-religion). Cano
 
 **Must agree with.** [Gods and great powers](../01-cosmology/gods-and-powers.md), [Hometowns and origins](../07-peoples/hometowns-and-origins.md), [Metaphysics: what is real](../01-cosmology/metaphysics.md), [Continuity and contradictions log](../00-foundations/continuity-log.md).
 
-**Feeds.** E2 prerequisite leaves by origin; policy@1 fact leaves; FD2 asides.

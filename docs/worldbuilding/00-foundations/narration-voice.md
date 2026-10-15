@@ -11,8 +11,6 @@ Status: stub. Area: [Foundations: premise, tone, player, canon housekeeping](../
 - How does the voice change with visit tiers, sky, exposure and statuses?
 - How does the owner's chosen opening line set the voice for everything after it?
 
-**Must agree with.** [Tone and style guide](../00-foundations/tone-and-style-guide.md), [XP kinds and growth by use](../15-professions/xp-kinds-and-growth.md), [Weather model](../17-time/weather-model.md), [Chapter structure](../21-story/chapter-structure.md).
-
-**Feeds.** narration@1; FD2 passive skill voices; W7 visit tiers; FD8 ambient lines; W27 away recap.
+**Must agree with.** [Tone and style guide](../00-foundations/tone-and-style-guide.md), [Chapter structure](../21-story/chapter-structure.md).
 
 **Owner notes (input, not canon until absorbed).** [opening-line](../notes/opening-line.md).

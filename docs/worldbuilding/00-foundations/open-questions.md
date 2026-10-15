@@ -11,4 +11,3 @@ Status: stub. Area: [Foundations: premise, tone, player, canon housekeeping](../
 
 **Must agree with.** [Continuity and contradictions log](../00-foundations/continuity-log.md), [Premise and pillars](../00-foundations/premise-and-pillars.md).
 
-**Feeds.** docs/decisions records; Beads loka-ikch notes.

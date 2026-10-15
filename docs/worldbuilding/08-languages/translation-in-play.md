@@ -11,4 +11,3 @@ Status: stub. Area: [Languages and naming](../README.md#08-languages). Canon tie
 
 **Must agree with.** [Language families](../08-languages/language-families.md), [Starter category: scholar and arcane](../15-professions/starting-scholar-arcane.md), [Quest types](../24-quests/quest-types.md).
 
-**Feeds.** W16 languages and literacy; 5 skill growth; readable@1.

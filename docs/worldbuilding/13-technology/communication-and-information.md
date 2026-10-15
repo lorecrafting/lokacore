@@ -11,4 +11,3 @@ Status: stub. Area: [Technology and materials](../README.md#13-technology). Cano
 
 **Must agree with.** [Reputation and standing](../10-factions/reputation-and-standing.md), [Rumours and information flow](../24-quests/rumours-and-information-flow.md), [Scripts and literacy](../08-languages/scripts-and-literacy.md).
 
-**Feeds.** W3 rumour by co-presence; W14 letters by job; FD7 ask about topic.

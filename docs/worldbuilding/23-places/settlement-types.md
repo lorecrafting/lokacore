@@ -11,4 +11,3 @@ Status: stub. Area: [Places: settlements, landmarks, dungeons](../README.md#23-p
 
 **Must agree with.** [Settlement template](../23-places/settlement-template.md), [Enforcement: watch and guards](../11-law/enforcement-watch-and-guards.md), [Player towns and settlements](../23-places/player-towns.md).
 
-**Feeds.** S3 settlement; room content; services content.

@@ -10,4 +10,3 @@ Status: stub. Area: [Law, crime and justice](../README.md#11-law). Canon tier: n
 
 **Must agree with.** [Outlaws, bounties and the wanted](../11-law/outlaws-bounties-and-wanted.md), [Governments and states](../10-factions/governments-and-states.md).
 
-**Feeds.** fact scopes for wanted; 15 standing per faction.

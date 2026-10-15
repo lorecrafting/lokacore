@@ -11,4 +11,3 @@ Status: stub. Area: [Religion, belief and rites](../README.md#09-religion). Cano
 
 **Must agree with.** [Religions roster](../09-religion/religions-roster.md), [The cosmic threat or pressure](../01-cosmology/cosmic-threat.md), [Secret societies](../10-factions/secret-societies.md), [Crimes and punishments](../11-law/crimes-and-punishments.md).
 
-**Feeds.** faction content; 33 offense kinds; storylets.

@@ -10,4 +10,3 @@ Status: stub. Area: [Religion, belief and rites](../README.md#09-religion). Cano
 
 **Must agree with.** [Sacred sites](../23-places/sacred-sites.md), [Travel, distances and the room scale](../05-geography/travel-and-distances.md), [Quest types](../24-quests/quest-types.md).
 
-**Feeds.** D10 discovered places; 44 race objective; W24 deadlines.

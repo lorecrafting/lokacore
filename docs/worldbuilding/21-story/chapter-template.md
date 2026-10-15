@@ -8,6 +8,5 @@ Status: stub. Area: [The main storyline, chapters and themes](../README.md#21-st
 - Place, time, cast (as roles), inciting event, stakes, endings, mechanics introduced, lore revealed, carry-over declared?
 - What is the first scene and the last?
 
-**Must agree with.** [Chapter structure](../21-story/chapter-structure.md), [Quest template](../24-quests/quest-template.md).
+**Must agree with.** [Chapter structure](../21-story/chapter-structure.md)
 
-**Feeds.** cartridge structure; scene@1; story points.

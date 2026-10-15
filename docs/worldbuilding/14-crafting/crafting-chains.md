@@ -11,4 +11,3 @@ Status: stub. Area: [Crafting traditions and chains](../README.md#14-crafting). 
 
 **Must agree with.** [Materials catalog](../13-technology/materials-catalog.md), [Consumables: food, drink and medicine](../14-crafting/consumables-food-and-medicine.md), [Crafting philosophy: interdependence](../14-crafting/crafting-philosophy.md).
 
-**Feeds.** E1 craft recipes; item content; 21 repair.

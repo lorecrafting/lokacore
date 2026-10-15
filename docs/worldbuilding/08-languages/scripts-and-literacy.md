@@ -11,4 +11,3 @@ Status: stub. Area: [Languages and naming](../README.md#08-languages). Canon tie
 
 **Must agree with.** [Literature and books](../18-arts/literature-and-books.md), [Education and apprenticeship](../16-daily-life/education-and-apprenticeship.md), [Language families](../08-languages/language-families.md).
 
-**Feeds.** W16 literacy as a skill fact; readable@1; G10 writing group.

@@ -11,4 +11,3 @@ Status: stub. Area: [Deep history and eras](../README.md#04-history). Canon tier
 
 **Must agree with.** [The starting region](../05-geography/starting-region.md), [The starting settlement](../23-places/starting-settlement.md), [Chapter structure](../21-story/chapter-structure.md), [Work and the daily schedule](../16-daily-life/work-and-daily-schedule.md).
 
-**Feeds.** cartridge start state; calendar@1 start; schedule@1.

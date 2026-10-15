@@ -11,4 +11,3 @@ Status: stub. Area: [Ecology: flora, fauna, monsters](../README.md#06-ecology). 
 
 **Must agree with.** [Disease and plague](../20-health/disease-and-plague.md), [Era: recent](../04-history/recent-era.md), [Fauna](../06-ecology/fauna.md).
 
-**Feeds.** 1 status effects (disease); SR3 cure; 41 decay.

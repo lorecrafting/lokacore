@@ -10,4 +10,3 @@ Status: stub. Area: [Health, death and afterlife](../README.md#20-health). Canon
 
 **Must agree with.** [Clergy and temples](../09-religion/clergy-and-temples.md), [Starter category: healing](../15-professions/starting-healing.md), [Settlement template](../23-places/settlement-template.md).
 
-**Feeds.** S9 infirmary; service offers; B8 immediate services.

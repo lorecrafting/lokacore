@@ -9,6 +9,5 @@ Status: stub. Area: [Geography: worlds, lands, climate, travel](../README.md#05-
 - What weather kinds exist and how often, per season and region?
 - Which weather is dangerous (exposure) and which changes play (tides, fog, snow)?
 
-**Must agree with.** [Weather model](../17-time/weather-model.md), [Seasons](../17-time/seasons.md), [Hazards and exposure](../05-geography/hazards-and-exposure.md).
+**Must agree with.** [Seasons](../17-time/seasons.md), [Hazards and exposure](../05-geography/hazards-and-exposure.md).
 
-**Feeds.** 31 derived sky tables; W25 exposure; FD8 ambient lines.

@@ -10,4 +10,3 @@ Status: stub. Area: [Peoples, species and cultures](../README.md#07-peoples). Ca
 
 **Must agree with.** [Era: recent](../04-history/recent-era.md), [Relations and prejudice between peoples](../07-peoples/relations-between-peoples.md), [Settlement types](../23-places/settlement-types.md).
 
-**Feeds.** NPC content; 15 faction standing.

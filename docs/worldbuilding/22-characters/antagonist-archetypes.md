@@ -10,4 +10,3 @@ Status: stub. Area: [Characters as archetypes](../README.md#22-characters). Cano
 
 **Must agree with.** [Antagonists and pressures](../21-story/antagonists-and-pressures.md), [Warden history and schisms](../03-orders/warden-history-and-schism.md), [Heresies and cults](../09-religion/heresies-and-cults.md).
 
-**Feeds.** G11 disposition; 14 dialogue checks; 39 boss phases.

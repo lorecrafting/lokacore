@@ -11,4 +11,3 @@ Status: stub. Area: [Religion, belief and rites](../README.md#09-religion). Cano
 
 **Must agree with.** [The Power: the cosmic force behind the wardens](../01-cosmology/the-power.md), [The warden order](../03-orders/warden-order.md), [The truth of belief](../09-religion/truth-of-belief.md).
 
-**Feeds.** 29a learned gate sources; E2 prerequisite leaves.

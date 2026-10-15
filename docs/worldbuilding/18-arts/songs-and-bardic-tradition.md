@@ -10,4 +10,3 @@ Status: stub. Area: [Arts, music and literature](../README.md#18-arts). Canon ti
 
 **Must agree with.** [Music and instruments](../18-arts/music-and-instruments.md), [Historiography: who records and what is wrong](../04-history/historiography.md), [Red herrings and false lore](../25-mysteries/red-herrings-and-false-lore.md).
 
-**Feeds.** readables; 46 codex; FD7 topics.

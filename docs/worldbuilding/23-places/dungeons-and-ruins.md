@@ -11,4 +11,3 @@ Status: stub. Area: [Places: settlements, landmarks, dungeons](../README.md#23-p
 
 **Must agree with.** [Lost civilisations and ruins](../04-history/lost-civilizations-and-ruins.md), [Dungeon template](../23-places/dungeon-template.md), [Monster ecology and populations](../06-ecology/monster-ecology.md).
 
-**Feeds.** dungeon-crawl sampler rows (11, 12, 13, 26, 30, B4); 8 loot; 19b replenish.

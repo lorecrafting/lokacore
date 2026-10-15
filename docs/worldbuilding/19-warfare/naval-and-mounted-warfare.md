@@ -10,4 +10,3 @@ Status: stub. Area: [Military and warfare](../README.md#19-warfare). Canon tier:
 
 **Must agree with.** [Waterways and the sea](../05-geography/waterways-and-sea.md), [Domesticated animals and mounts](../06-ecology/domesticated-animals-and-mounts.md).
 
-**Feeds.** 43 mounts; D6 water depths; SR7 water tags.

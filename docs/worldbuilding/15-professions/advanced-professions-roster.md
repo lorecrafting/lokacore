@@ -9,6 +9,5 @@ Status: stub. Area: [Professions and skill trees](../README.md#15-professions). 
 - Which are guild-gated, which origin-gated, which free?
 - What does each add that no starter has?
 
-**Must agree with.** [Starting professions roster](../15-professions/starting-professions-roster.md), [Skill tree grammar](../15-professions/skill-tree-grammar.md), [Guilds and companies](../10-factions/guilds-and-companies.md).
+**Must agree with.** [Starting professions roster](../15-professions/starting-professions-roster.md), [Guilds and companies](../10-factions/guilds-and-companies.md).
 
-**Feeds.** E2 prerequisite (multi-skill); trainers; recipe policies.

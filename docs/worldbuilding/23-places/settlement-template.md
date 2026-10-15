@@ -11,4 +11,3 @@ Status: stub. Area: [Places: settlements, landmarks, dungeons](../README.md#23-p
 
 **Must agree with.** [Settlement types](../23-places/settlement-types.md), [Region template](../05-geography/region-template.md), [Authority figures](../22-characters/authority-figures.md), [Starting professions roster](../15-professions/starting-professions-roster.md).
 
-**Feeds.** cartridge map; services; schedules.

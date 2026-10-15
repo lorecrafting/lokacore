@@ -11,4 +11,3 @@ Status: stub. Area: [Deep history and eras](../README.md#04-history). Canon tier
 
 **Must agree with.** [Deep time outline](../04-history/deep-time-outline.md), [Calendar](../17-time/calendar.md), [Continuity and contradictions log](../00-foundations/continuity-log.md).
 
-**Feeds.** calendar@1; readables; NPC content ages.

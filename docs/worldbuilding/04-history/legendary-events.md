@@ -10,4 +10,3 @@ Status: stub. Area: [Deep history and eras](../README.md#04-history). Canon tier
 
 **Must agree with.** [Festivals and holidays](../16-daily-life/festivals-and-holidays.md), [Proverbs, folklore and tales](../18-arts/proverbs-folklore-and-tales.md), [Master timeline](../04-history/timeline-master.md).
 
-**Feeds.** dialogue content; 10 time windows (anniversaries); festivals content.
