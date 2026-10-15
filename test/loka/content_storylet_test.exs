@@ -32,5 +32,14 @@ defmodule Loka.ContentStoryletTest do
     half = [{"scenes/stranger.json", &put_in(&1, ["on", "detail"], "stall")}]
     assert {:error, diags} = Loka.ContentSource.compile(dir, half)
     assert pairs(diags) == [{"SCHEMA_VIOLATION", "scenes/stranger.on"}]
+
+    # Only a storylet recipe may start an unplaced scene.
+    spell = [
+      {"recipes/stranger_beckons.json",
+       &put_in(&1, ["target"], %{"kind" => "spell", "word" => "lux"})}
+    ]
+
+    assert {:error, diags} = Loka.ContentSource.compile(dir, spell)
+    assert pairs(diags) == [{"SCHEMA_VIOLATION", "scenes/stranger.on"}]
   end
 end

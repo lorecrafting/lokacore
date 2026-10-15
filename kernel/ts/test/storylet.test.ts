@@ -155,6 +155,12 @@ test('the loader refuses storylets below 1.92, unknown rooms, weight 0 and half-
     refused((c) => (c.scenes[scene].on.detail = 'stall')),
     ['SCHEMA_VIOLATION', `.cartridge.scenes["${scene}"].on`],
   );
+  // Only a storylet recipe may start an unplaced scene.
+  const beckons = 'storylet_sampler@0.0.1:recipe/stranger_beckons';
+  assert.deepEqual(
+    refused((c) => (c.recipes[beckons].target = { kind: 'spell', word: 'lux' })),
+    ['SCHEMA_VIOLATION', `.cartridge.scenes["${scene}"].on`],
+  );
 });
 
 // Breaks: the view drops a drawn storylet on cooldown instead of listing it unavailable (ruling E).
