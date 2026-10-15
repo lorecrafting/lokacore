@@ -15,9 +15,9 @@ sh bin/orphans.sh
 echo "## Compaction mode (newest subagent compact_boundary; durationMs < 1000 = hook, loka-oy8i)"
 # Project dir name: repo path with / and . replaced by - (Claude Code's rule). Prints no paths.
 pd="$HOME/.claude/projects/$(git rev-parse --git-common-dir | xargs -I{} sh -c 'cd "{}/.." && pwd -P' | tr '/.' '--')"
-f=$(grep -l compact_boundary "$pd"/*/subagents/*.jsonl 2>/dev/null | xargs ls -t 2>/dev/null | head -1)
+f=$(grep -l '"subtype":"compact_boundary"' "$pd"/*/subagents/*.jsonl 2>/dev/null | xargs ls -t 2>/dev/null | head -1)
 if [ -z "$f" ]; then echo "compaction: none seen"; else
-  grep compact_boundary "$f" | tail -1 | python3 -I -c '
+  grep '"subtype":"compact_boundary"' "$f" | tail -1 | python3 -I -c '
 import json, sys, time, os
 d = json.loads(sys.stdin.readline())["compactMetadata"]["durationMs"]
 age = int((time.time() - os.stat(sys.argv[1]).st_mtime) / 60)
