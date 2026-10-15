@@ -892,6 +892,36 @@
         "KERNEL_API_RANGE_INVALID",
         ".cartridge.manifest.requires.kernel_api.at_least"
       ]
+    },
+    {
+      "floor": "1.99",
+      "below": "1.98",
+      "source": "cartridges/status_sampler",
+      "feature": "a status_active leaf with subject room (Built rooms S4)",
+      "edits": [
+        [
+          "reactions/dart.json",
+          [
+            "when"
+          ],
+          {
+            "policy_version": 1,
+            "root": {
+              "op": "status_active",
+              "subject": "room",
+              "status": "poison"
+            }
+          }
+        ]
+      ],
+      "compiler": [
+        "KERNEL_API_RANGE_INVALID",
+        "cartridge.requires.kernel_api.at_least"
+      ],
+      "loader": [
+        "KERNEL_API_RANGE_INVALID",
+        ".cartridge.manifest.requires.kernel_api.at_least"
+      ]
     }
   ]
 }

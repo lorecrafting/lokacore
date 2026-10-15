@@ -4,7 +4,8 @@ defmodule Loka.Content.Construction do
   names no direction the room has an exit in (SITE_EXIT_CONFLICT) and only blueprints of this
   cartridge (UNRESOLVED_REFERENCE); a blueprint, its tags and description variants are owned by
   their capabilities, and its title and descriptions have catalog entries; a site or
-  world.construction needs construction@1; a blueprint, a site or world.construction needs kernel_api 1.99. Twin of kernel/ts/src/content/cartridge_construction.ts
+  world.construction needs construction@1; a blueprint, a site, world.construction or (S4) a
+  `status_active` leaf with subject `room` needs kernel_api 1.99. Twin of kernel/ts/src/content/cartridge_construction.ts
   (the TS loader checks blueprint parts in cartridge_refs.ts). Variant and enter-lock conditions
   join Checks.trees/1 through RoomParts.conditions/1.
   """
@@ -21,12 +22,12 @@ defmodule Loka.Content.Construction do
 
     Enum.flat_map(sites, &site(&1, m, defs)) ++
       Enum.flat_map(blueprints, &(owned_parts(&1, required) ++ texts(&1, text(v2)))) ++
-      requirements(m, blueprints, sites, settings)
+      requirements(m, defs, blueprints, sites, settings)
   end
 
   # A site or world.construction needs construction@1 (a blueprint is owned through the registry);
   # any construction content needs kernel_api 1.99.
-  defp requirements(m, blueprints, sites, settings) do
+  defp requirements(m, defs, blueprints, sites, settings) do
     world =
       if get_in(settings, ["world", "construction"]),
         do: ["cartridge.world.construction"],
@@ -35,8 +36,20 @@ defmodule Loka.Content.Construction do
     for p <- for({rel, _, _} <- sites, do: at(rel, ["site"])) ++ world,
         m["requires"]["capabilities"]["construction"] != 1 do
       diag("UNDECLARED_CAPABILITY", p, %{"capability" => "construction"}, ["construction@1"])
-    end ++ floor(m, blueprints != [] or sites != [], settings["world"] || %{})
+    end ++
+      floor(
+        m,
+        blueprints != [] or sites != [] or room_leaf?(defs) or room_leaf?(settings),
+        settings["world"] || %{}
+      )
   end
+
+  # Built rooms S4: status_active read at the actor's room (status reader 9).
+  defp room_leaf?(%{"op" => "status_active", "subject" => "room"}), do: true
+  defp room_leaf?(v) when is_map(v), do: Enum.any?(Map.values(v), &room_leaf?/1)
+  defp room_leaf?(v) when is_list(v), do: Enum.any?(v, &room_leaf?/1)
+  defp room_leaf?(v) when is_tuple(v), do: room_leaf?(Tuple.to_list(v))
+  defp room_leaf?(_), do: false
 
   defp blueprints(defs), do: for({_, {rel, [], b}} <- defs["blueprint"] || %{}, do: {rel, b})
 
