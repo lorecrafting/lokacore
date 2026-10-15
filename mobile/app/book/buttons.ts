@@ -93,8 +93,9 @@ export function buttonsOf(v: GameView, label: Say, text: Say): Press[] {
     ...travel(v),
     ...doors,
     ...heldButtons(v, button, projected, names, text),
+    ...askButtons(v, text),
     ...(v.known_npcs ?? []).map((n) => ({
-      label: `Ask where ${text(n.name)} is`,
+      label: `${LABEL.askWhere} ${text(n.name)} is`,
       action_key: 'where',
       target_ids: [n.id],
       input: {},
@@ -117,6 +118,21 @@ const raiseButtons = (v: GameView): Press[] =>
         input: { attribute: a.attribute },
       }))
     : [];
+
+// One Ask about card per known topic on each NPC offering ask, in projected order (row FD7).
+const askButtons = (v: GameView, text: Say): Press[] =>
+  v.entities.flatMap((e) =>
+    e.actions
+      .filter((a) => a.action_key === 'ask' && a.available)
+      .flatMap((a) =>
+        (v.topics ?? []).map((t) => ({
+          label: `${LABEL.askAbout} ${text(t.label)}`,
+          action_key: a.action_key,
+          target_ids: [e.id],
+          input: { topic: t.topic },
+        })),
+      ),
+  );
 
 // The place's own actions, then a scene's Continue.
 function placeButtons(v: GameView, button: ToButton) {
@@ -143,7 +159,7 @@ function heldButtons(
 ) {
   return projected.flatMap((e) =>
     e.actions
-      .filter((a) => a.available && a.action_key !== 'give') // ponytail: Give waits for a touch recipient selector
+      .filter((a) => a.available && !['give', 'ask'].includes(a.action_key)) // ponytail: Give waits for a touch recipient selector; ask is askButtons
       .map((a) => {
         const destination = a.target_ids?.[1] && names.get(a.target_ids[1]);
         const offered = button(
