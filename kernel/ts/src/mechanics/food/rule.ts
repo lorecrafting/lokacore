@@ -7,7 +7,7 @@ export const decide: Rule<'food'> = (world, command, mint, steps) => {
     return result.code === 'budget_exceeded' || result.code === 'precondition_failed'
       ? { kind: 'fault', code: result.code }
       : rejected(result.code);
-  const meal = applied(world, command, mint, result.edible);
+  const meal = applied(world, command, mint, result);
   return {
     ...accepted(world, 'eaten', [...result.ops, ...meal.ops], meal.events, [
       { key: result.edible.narration },

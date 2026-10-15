@@ -14,8 +14,8 @@ export function food(c: Obj): Diagnostic[] {
     check.text(e, ['label', 'narration'], at);
     check.named(e.resource, 'resource', `${at}.resource`);
     const recovery = c.resources?.[refString(e.resource)];
-    const [major, minor] = c.manifest.requires.kernel_api.at_least.split('.').map(Number);
-    if (major < 1 || (major === 1 && minor < 27))
+    // Row hs-5: a meal's `applies` needs 1.101.
+    if (apiCmp(c.manifest.requires.kernel_api.at_least, e.applies ? '1.101' : '1.27') < 0)
       out.push(
         diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'),
       );
@@ -31,13 +31,8 @@ export function food(c: Obj): Diagnostic[] {
       c.lock.capabilities.resource !== 1
     )
       out.push(diag('SCHEMA_VIOLATION', at, { error: 'invalid_value' }));
-    if (!e.applies) continue;
     // Row hs-5: a meal's status never moves the derived hp maximum (loka-kgd.50).
-    if (apiCmp(c.manifest.requires.kernel_api.at_least, '1.101') < 0)
-      out.push(
-        diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'),
-      );
-    (e.applies as Obj[]).forEach((s, n) => {
+    ((e.applies ?? []) as Obj[]).forEach((s, n) => {
       const modifies = (c.statuses?.[refString(s as never)]?.modifies ?? []) as Obj[];
       if (modifies.some((m) => hp.includes(refString(m.attribute as never))))
         out.push(diag('SCHEMA_VIOLATION', `${at}.applies[${n}]`));

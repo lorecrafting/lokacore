@@ -13,6 +13,7 @@ import { refusal } from '../../commands/actions.ts';
 import {
   bodyOf,
   event,
+  refString,
   type Event,
   type Mint,
   type Steps,
@@ -71,12 +72,18 @@ export function applied(
   world: World,
   command: Parameters<typeof event>[1],
   mint: Mint,
-  edible: ItemEdible,
+  { edible, ops }: { edible: ItemEdible; ops: readonly DeltaOp[] },
 ) {
   const body = bodyOf(world, command.payload.actor_id)!;
   const events: Event<Applied['type']>[] = [];
   const emit = (p: Applied) => events.push(event(world, command, mint, events.length + 1, p));
-  const own = { holders: new Map<string, number>(), applied: new Set<string>() };
+  // A status the meal cures and applies is written once: the cure wins, as a spell's earlier write.
+  const applied = new Set(
+    ops.flatMap((o) =>
+      o.op === 'status.transition' ? [`${o.body_id}|${refString(o.status)}`] : [],
+    ),
+  );
+  const own = { holders: new Map<string, number>(), applied };
   const steps = (edible.applies ?? []).map((status) =>
     statusStep(world, { op: 'status.apply', status }, [body], body, 0, own, mint, emit),
   );

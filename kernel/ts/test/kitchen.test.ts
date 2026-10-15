@@ -74,9 +74,9 @@ function wait(w: World, seconds: number) {
   assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
   return r.world;
 }
-const fresh = () => {
+const fresh = (c = content) => {
   n = 0;
-  return newWorld(content, '4f5a6b7c-8d9e-4a0b-9c1d-2e3f4a5b6c7d' as never, [1, 2, 3, 4]);
+  return newWorld(c, '4f5a6b7c-8d9e-4a0b-9c1d-2e3f4a5b6c7d' as never, [1, 2, 3, 4]);
 };
 const item = (w: World, k: string) => w.entityIds[`${S}:item/${k}`]!;
 const cook = (w: World) => w.entityIds[`${S}:npc/cook`]!;
@@ -107,8 +107,8 @@ const catchFish = (w: World, ...ks: string[]) => {
 const str = (w: World) => value(w, w.character, ref('attribute', 'str'));
 const mv = (w: World) => level(w, w.body, resourceRef(w, 'mv'));
 /** A world holding the claimed stew, at C0 + 300 after the order. */
-const served = () => {
-  let w = use(catchFish(fresh(), 'fish_01', 'fish_02'), 'stew').world;
+const served = (c = content) => {
+  let w = use(catchFish(fresh(c), 'fish_01', 'fish_02'), 'stew').world;
   w = wait(w, 300);
   return play(w, {
     type: 'use_service',
@@ -143,7 +143,7 @@ test('two fish order a stew that is ready 300 s later; the larder restocks the p
 });
 
 // Breaks: `applies` ignored (no hearty, str 10), applied before the meal or to the wrong holder,
-// the hearty line missing or before the meal's, the buff stacking with itself, or never expiring (12 at +3600).
+// the hearty line missing or before the meal's, or the buff never expiring (12 at +3600).
 test('eating the stew restores mv and makes the eater hearty for an hour', () => {
   let w = served();
   const before = mv(w);
@@ -158,6 +158,21 @@ test('eating the stew restores mv and makes the eater hearty for an hour', () =>
   w = r.world;
   assert.deepEqual([mv(w) - before, str(w)], [10, 12]);
   w = wait(w, 3600);
+  assert.equal(str(w), 10);
+});
+
+// Breaks: a meal that cures and applies one status writing both a cure and a refresh of the row.
+test('a meal that cures and applies the active hearty writes it once: the cure wins', () => {
+  const r = reload((c) => {
+    const stew = c.items[`${S}:item/stew_01`].edible;
+    c.items[`${S}:item/fish_03`].edible = { ...stew };
+    stew.cures = [ref('status', 'hearty')];
+  });
+  assert.ok(r.ok, JSON.stringify(r));
+  let w = catchFish(served(r.cartridge as Cartridge), 'fish_03');
+  w = play(w, { type: 'eat', item_id: item(w, 'fish_03') });
+  assert.equal(str(w), 12);
+  w = play(w, { type: 'eat', item_id: item(w, 'stew_01') });
   assert.equal(str(w), 10);
 });
 
