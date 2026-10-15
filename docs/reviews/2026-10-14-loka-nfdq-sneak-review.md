@@ -49,3 +49,19 @@ No PR body yet; reran two doc cites. `mechanics.md:3025` "`pierces`, `status/sha
 | `status.ex` concealment guard to `true` | red |
 | `status.ex` drop attribute `Refs.reference` | **green** (finding 3) |
 | `cartridge_status.ts` drop `['attribute', 'attributes']` | **green** (finding 3; `sneak.test.ts` only) |
+
+## Fix round 1 recheck (head `524a49a3d1a9b250a66e25e71496ca6df333f558`; fixes `8ec83f65`, `524a49a3`)
+
+Verdict: **CHANGES REQUIRED** (finding R1-1 is new: the refusal breaks two existing tests).
+
+Dispositions:
+- Finding 1: entry reactions that apply a concealment are now refused with OUTCOME_MISMATCH at `apply[i].op` (`kernel/ts/src/content/cartridge_reactions.ts:133-147`, `lib/loka/content/reactions.ex:214`). The narrower runtime fix waits on loka-5i4c (PM ruling). Red controls rerun: removing the refusal turns `sneak.test.ts` red (TS) and `content_status_test.exs` red (Elixir).
+- Finding 2 (now 3): the attribute rows are added in both twins and are green on the clean head. Not re-mutated.
+- Nit 3: fixed (`mechanics.md:3025`).
+- Nit 4: kept, as the developer chose.
+
+Reachability: the only shipped concealment status is `sneak_sampler` `hidden`. It is applied only on `check_passed` from the `hide` recipe, which does not move the player, so no shipped path reaches the cure conflict. Nothing is a blocker now on reachability.
+
+Findings:
+- **R1-1 Blocker.** The refusal also catches a status that an existing test makes concealing. `kernel/ts/test/status_readers.test.ts:422` and `test/loka/content_status_readers_test.exs:49` both fail at 524a49a3: `ward_sampler` `reaction/blessing` (entity_entered_room, shrine) applies `warded`, and the test gives `warded` `concealment: hidden`. Expected `loaded`; got OUTCOME_MISMATCH at `reactions["ward_sampler@0.0.1:reaction/blessing"].apply[0].op`. Hosted CI will go red. Fix: have the readers tests make a status that no entry reaction applies concealing, or narrow the refusal. Do not change the expected values.
+- **R1-2 Should-fix.** The Known limits sentence at `docs/system/mechanics.md:3039` names only the entry-reaction refusal. It does not name the other unhandled paths: a fact_changed chain, patrol or expedition events, or an entry reaction that cures a concealment. It also does not name follow-up loka-5i4c, which drops the refusal. That is the PM's stated remaining item.
