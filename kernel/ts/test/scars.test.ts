@@ -87,7 +87,8 @@ const bitten = (w: World) => {
   );
   return d?.kind === 'accepted' ? [d.delta.ops.length, d.narration] : d;
 };
-const SCARRED = [{ label: 'condition.scarred', resource: 'hp', tick_every: 60 }];
+// No per_tick, modifier, fear or blocks: buff by the loka-x6t.64 rule, however it reads.
+const SCARRED = [{ label: 'condition.scarred', resource: 'hp', tick_every: 60, kind: 'buff' }];
 
 // Breaks: a permanent status gets an end or an expiry job, refreshes or re-narrates on a later
 // hit, is cleared by the same-body return, is not cured by `cures`, is not seen by W6's

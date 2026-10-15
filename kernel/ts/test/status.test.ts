@@ -13,6 +13,7 @@ import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { key } from '../src/foundation/compose.ts';
 import { encode } from '../src/foundation/canonical.ts';
+import { validate } from '../src/foundation/validate.ts';
 import { sequence } from '../src/mechanics/reaction.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 
@@ -114,6 +115,7 @@ test('the dart corridor poisons for four ticks and then expires', () => {
       resource: 'hp',
       per_tick: -1,
       tick_every: 60,
+      kind: 'debuff',
     },
   ]);
   w = wait(w, 60);
@@ -129,6 +131,37 @@ test('the dart corridor poisons for four ticks and then expires', () => {
   w = play(w, { type: 'move', direction: 'east' });
   assert.equal(gameView(w).conditions?.length, 1);
   assert.equal(hp(wait(w, 60)), 5);
+});
+
+// Breaks: ConditionView.kind (loka-x6t.64) misses a debuff signal (a negative tick, any negative
+// modifier, fear, blocks), calls a zero tick or zero modifier a debuff, reads only the first
+// modifier, or leaves the GameView schema.
+test('a condition is a debuff on a loss, a negative modifier, fear or blocks, else a buff', () => {
+  const poisoned = play(fresh(), { type: 'move', direction: 'east' });
+  const spec = poisoned.cartridge.statuses![poisonRef]!;
+  const attribute = { ...spec.resource, kind: 'attribute', key: 'str' };
+  const by = (modifier: number) => ({ attribute, modifier });
+  const rows: [object, string][] = [
+    [{ per_tick: -1 }, 'debuff'],
+    [{ per_tick: 0 }, 'buff'],
+    [{ per_tick: 1 }, 'buff'], // a plain gain, like fed
+    [{ per_tick: 1, modifies: [by(2), by(-1)] }, 'debuff'],
+    [{ per_tick: 1, modifies: [by(0)] }, 'buff'],
+    [{ per_tick: 1, fear: true }, 'debuff'],
+    [{ per_tick: 1, blocks: ['move'] }, 'debuff'],
+  ];
+  for (const [change, kind] of rows) {
+    const w = {
+      ...poisoned,
+      cartridge: {
+        ...poisoned.cartridge,
+        statuses: { ...poisoned.cartridge.statuses, [poisonRef]: { ...spec, ...change } },
+      },
+    } as World;
+    const view = gameView(w);
+    assert.deepEqual(validate('GameView', view), [], JSON.stringify(change));
+    assert.equal(view.conditions![0]!.kind, kind, JSON.stringify(change));
+  }
 });
 
 // Breaks: cures are ignored, the cured status keeps draining through its stale job, or the

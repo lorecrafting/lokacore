@@ -79,9 +79,11 @@ const bleeding = (at: number) => ({
   resource: 'hp',
   per_tick: -1,
   tick_every: 900,
+  kind: 'debuff',
 });
 // A permanent status shows no end and no tick (its tick_every is required by the schema; it never runs).
-const GORED = { label: 'condition.gored', resource: 'hp', tick_every: 60 };
+// No per_tick, modifier, fear or blocks: buff by the loka-x6t.64 rule.
+const GORED = { label: 'condition.gored', resource: 'hp', tick_every: 60, kind: 'buff' };
 
 /** The pack members spawned in `roomKey`, lower id first. */
 const goblinsIn = (w: World, roomKey: string) =>

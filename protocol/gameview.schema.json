@@ -2724,7 +2724,7 @@
       "additionalProperties": false
     },
     "ConditionView": {
-      "description": "One active body status: its authored label, end and next tick (both absent for a permanent status, row W8) and per-tick resource change (absent for a status that never ticks, row 2c).",
+      "description": "One active body status: its authored label, end and next tick (both absent for a permanent status, row W8) and per-tick resource change (absent for a status that never ticks, row 2c). kind (loka-x6t.64) is debuff when per_tick is negative, any modifies entry is negative, or fear or blocks is present; buff otherwise.",
       "examples": [
         {
           "label": "condition.poisoned",
@@ -2732,13 +2732,20 @@
           "next_tick_at": 160,
           "resource": "hp",
           "per_tick": -1,
-          "tick_every": 60
+          "tick_every": 60,
+          "kind": "debuff"
         }
       ],
       "type": "object",
       "properties": {
         "label": {
           "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "kind": {
+          "enum": [
+            "buff",
+            "debuff"
+          ]
         },
         "ends_at": {
           "$ref": "command.schema.json#/$defs/LogicalTime"
