@@ -3477,7 +3477,7 @@ Homestead hs-14 (Beads `loka-kgd.108.11`): GameView projects each skill's tree s
 - **Opt-in.** A skill declares `profession` or `hidden`. Chapter 1 declares none.
 - **Book.** [Skill tree details](book-ui.md#skill-tree-details): `Professions` in `mobile/app/book/skills.tsx`, between the xp line and the Raise cards. An NPC lesson line reads `locked` (proposed, pending designer approval).
 - **Traps.** None met; trap 8 checked: `locked` reads the hs-11 gate, a skill level the actor raises, and adds no gate.
-- **Known limits.** None.
+- **Known limits.** A hidden skill's teaching choice still lists in the conversation, unavailable, while its prerequisite fails (the dialogue choice list is not filtered).
 - **Sampler.** `cartridges/craft_sampler`: whittling under Woodcraft, carving under Handcraft, and joinery (Woodcraft, `prerequisite` carving at least 1). At start the Character page shows Handcraft with "Carving — locked" and Woodcraft with "Joinery — locked" and "Whittling — not learned"; once carving is learned it reads "Carving, level 1 — qualified" and Woodcraft "Joinery — not learned" and "Whittling — not learned" (`kernel/ts/test/craft.test.ts`, `test/loka/content_craft_test.exs`).
 - **Composition record** ([architecture](architecture.md#building-mechanics-by-composition)).
   - Consumer: `craft_sampler`. Later: Homestead profession trees.
