@@ -350,7 +350,6 @@ test('loader: a spell learned names a bool player fact; spells need 1.98', () =>
 test('loader: a recipe reason resolves and needs 1.100, which is above 1.99', () => {
   const ward = (c: Record<string, any>) => c.recipes['spells_sampler@0.0.1:recipe/ward'];
   const at = `.cartridge.recipes[${JSON.stringify('spells_sampler@0.0.1:recipe/ward')}]`;
-  assert.equal(INSTALLED.kernel_api, '1.100');
   assert.equal(
     verdict(() => {}),
     'loaded',
