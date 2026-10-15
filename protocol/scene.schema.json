@@ -19,6 +19,7 @@
               ]
             },
             "on": {
+              "description": "What starts the scene: a story point reached, a quest outcome, or an action recipe's success; an action start names the recipe's room and detail, or neither when the recipe is a storylet (toolbox row FD3, kernel_api at least 1.92; mechanics.md Storylet deck).",
               "type": "object",
               "properties": {
                 "story_point": {

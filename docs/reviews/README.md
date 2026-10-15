@@ -24,6 +24,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: toolbox row 16, sneak and hide (loka-nfdq, batch M13)](2026-10-14-loka-nfdq-sneak-review.md): **APPROVE WITH NOTES**
 - [Second opinion: one long elapsed wait equals the same wait in steps (loka-kgd.152, loka-kgd.151)](2026-10-14-loka-kgd.152-longwait-second-opinion.md): **APPROVE WITH NOTES**
 - [Review: one long elapsed wait equals the same wait in steps (loka-kgd.152, loka-kgd.151)](2026-10-14-loka-kgd.152-longwait-review.md): **APPROVE WITH NOTES**
+- [Review: FD3 storylet deck (loka-kgd.140, batch M13)](2026-10-14-loka-kgd.140-fd3-review.md): **APPROVE**
 - [Review: FD2 passive skill voices (loka-kgd.139, batch M13)](2026-10-14-loka-kgd.139-fd2-review.md): **APPROVE WITH NOTES**
 - [Review: FD1 finish round, delayed reactions (loka-kgd.138)](2026-10-14-loka-kgd.138-fd1-final-review.md): **APPROVE WITH NOTES**
 - [Review: toolbox row 37a, phased world event spawn (loka-kgd.131)](2026-10-13-m12-raid-review.md): **APPROVE WITH NOTES**

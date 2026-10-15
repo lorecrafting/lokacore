@@ -64,7 +64,7 @@ import { currentBleed } from '../mechanics/bleed/shared.ts';
  * as amended), absent when the cartridge has none; and the player's position (position@1), absent
  * without it; and the highest reached chapter marker, absent without chapter declarations.
  */
-// size: allow 41, the viewer's body is derived once for every projection (loka-kgd.150.5)
+// size: allow 42, the viewer's body is derived once for every projection (loka-kgd.150.5); row FD3 storylet
 export function gameView(world: World, actor: CharacterId = world.character): GameView {
   const body = bodyOf(world, actor);
   const fight = body ? engaged(world, body) : undefined;
@@ -99,6 +99,7 @@ export function gameView(world: World, actor: CharacterId = world.character): Ga
     journal: journal(world, actor, steps),
     ...(current && { chapter: current }),
     ...(showing && { scene: showing }),
+    ...(actions.place.some((a) => a.action_key === actions.drawn) && { storylet: actions.drawn }),
     ...timeView(world),
     ...(choice && { choice }),
     ...(pools.length > 0 && { resources: pools }),

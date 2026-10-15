@@ -3073,6 +3073,39 @@ Gap 4 of the [depth audit](../rnd/depth-and-ux-2026-10-13.md) (owner approved 20
   - New: `after`, the reaction job kind, `fact.stamp`, `time_since`, the 1.90 floor; foundation: the job composer (both kernels, and both job invariants) admits `actor_id` on a `reaction` job (PM ruling 2026-10-14, second opinion).
   - Missing invariant: none (job rows are checked by the job invariants).
 
+## Storylet deck (toolbox row FD3)
+
+[Toolbox row FD3](../MECHANICS-TOOLBOX.md#ranked-toolbox) (source: `docs/rnd/depth-and-ux-2026-10-13.md` gap 3): "the place offers one opportunity drawn from the cards that hold". The PM brief is in Beads `loka-kgd.140` (2026-10-14, rulings A to F). [Declarations](cartridge.md#storylet-declarations) govern it.
+
+- **Declaration.** A storylet is an [action recipe](#action_recipe1-mechanicsaction_reciperulets49) whose `target` is `{kind: "storylet", rooms?, weight?}`: `rooms` 1 to 16 rooms of this cartridge (absent: every room), `weight` 1 to 100 (default 1). Its policy, costs, cooldown, check and outcomes are the recipe's own.
+- **Pick.** For an actor whose body is in a room, the deck is the storylet recipes whose `rooms` are absent or name that room and whose policy holds for that actor, in key order (code-unit). The hour index is `floor(clock / hour)` with the cartridge's hour in logical seconds (absolute, not the hour of day). `r` is the first four bytes, big-endian, of SHA-256 over the UTF-8 of `<actor id>:<room key>:<hour index>`, modulo the deck's weight sum; the pick is the first storylet whose cumulative weight passes `r`. It is derived on every read (`kernel/ts/src/mechanics/storylet/shared.ts` `pick`): no trigger, step, job, event or save row, and never the authority RNG, so the view and the perform it invites agree within the hour and replay draws the same card.
+- **Acceptance.** `perform {action: <storylet key>}` with no `target_id` or `item_id` (else `invalid_target`); a storylet that is not the actor's pick now is `invalid_state`; the pick is decided as any recipe on the actor's body as subject (`action_recipe/rule.ts` `subjectOf`).
+- **Scene.** A [scene](#scene1-mechanicsscenerulets) `on {action, outcome: "success"}` naming a storylet recipe names neither `room` nor `detail`, and starts when that recipe completes for the event's `actor_id` (`mechanics/scene/shared.ts` `legacyStarts`).
+- **GameView.** Only the pick is listed among the place's actions, available or not as the recipe's advertise reads (a cooldown or cost shows it unavailable with its reason); `GameView.storylet` is its key exactly when it is listed (absent under a modal scene).
+- **Realm seams** (owner decision 2026-10-13, brief checklist).
+  1. Actor: met; `pick(world, actor)` reads the command's `actor_id` or the viewer actor, never `world.character`.
+  2. Reactions: not applicable; no trigger of its own; content reactions on the recipe's events use RS-4's delivery actor.
+  3. Credit: not applicable.
+  4. Time: met; the logical clock's hour index; no job, no skip.
+  5. Scope: met; the draw is per player (the actor is hashed); the card is shown to that player only; the storylet's steps write at their own declared scopes.
+  6. Text: not applicable.
+  7. Ownership: not applicable.
+  8. Trust: not applicable; nothing stored.
+  9. Instancing: met; none built.
+- **Opt-in.** A storylet target needs `kernel_api` 1.92 (KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least`, both kernels). Installed kernel 1.93. Chapter 1 declares none.
+- **Book.** The room page draws the pick as one Action card after the details and before the verbs; an unavailable pick is a `label: reason` note, and the pick never appears as a verb line ([storylet card](book-ui.md#storylet-card-details); `mobile/app/book/storylet.test.ts`).
+- **Known limits.** The deck draws per room and hour, not on entering a room: re-entering within the hour shows the same card. A storylet with `rooms` absent is in every room's deck. A policy that changes inside the hour can change the pick within it.
+- **Traps.** No RNG draw and no stored state; the hash is the W7 pattern.
+- **Sampler.** `cartridges/storylet_sampler`: `market` and `lane`; `pickpocket` (rooms market and lane, weight 1), `stranger_beckons` (market, weight 3, hours 0 to 2 while `scene_stranger` is 0; its scene `stranger` offers the quest `stranger_errand`), `old_friend` (every room, after three market visits). For the sampler's actor the market draws pickpocket at hour 0, stranger_beckons at hours 1 and 10, and the lane pickpocket (`kernel/ts/test/storylet.test.ts`, hashes pinned with `shasum -a 256`).
+- **Composition record** ([architecture](architecture.md#building-mechanics-by-composition)).
+  - Consumer: `storylet_sampler`. Later: the showcase's opportunity cards.
+  - Reads: the recipes' policies, the actor's room, the clock.
+  - Writes: none new (the recipe's own outcome ops).
+  - Events, save rows: none new (`action_completed` as any recipe).
+  - Reused: `action_recipe@1` decide and advertise, `holds`, `sha256`, the scene action start.
+  - New: the storylet `RecipeTarget`, `pick`, `GameView.storylet`, the scene start without room and detail, the 1.92 floor.
+  - Missing invariant: none (nothing stored).
+
 ## Sneak and hide (toolbox row 16)
 
 [Toolbox row 16](../MECHANICS-TOOLBOX.md#ranked-toolbox); the PM brief is in Beads `loka-nfdq` (2026-10-14). Hiding is content: a detail recipe with an opposed check, a reaction on its `check_passed` applying a `hidden` status ([SR8](#perception-and-concealment-on-a-status-toolbox-rows-sr6-and-sr8)). The row adds one reader field, so a keen NPC sees through it, and one consequence, so being spotted ends it.

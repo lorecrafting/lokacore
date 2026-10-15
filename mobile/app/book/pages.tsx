@@ -4,11 +4,11 @@
 import type { ReactNode } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
-import { plain, type group, type Pool } from './model.ts';
+import { plain, why, type group, type Pool } from './model.ts';
 import type { Button, DetailLine } from './presenter.ts';
 import { note, prose, usePalette, type Palette } from './palette.ts';
 import { opacity, size, space, type } from './tokens.ts';
-import { VerbLine } from './actions.tsx';
+import { ActionCard, VerbLine } from './actions.tsx';
 import { Asides, AwayRecap, Here, LogLines } from './lines.tsx';
 import type { RecapLine } from './recap.ts';
 import { useTitleFocus } from './title.ts';
@@ -128,6 +128,7 @@ export function RoomPage(p: {
         <Control label={LABEL.continueConversation} onPress={p.openChoice} />
       )}
       {p.details}
+      {storylet(p.view, p.g, p.press, p.text)}
       {actions.length > 0 && <View>{actions}</View>}
       {p.log.length > 0 && <LogLines lines={p.log} />}
     </Page>
@@ -164,11 +165,24 @@ const warnings = (c: Palette, view: GameView, text: Say) => {
   );
 };
 
-// The place's own actions; a notice's actions stay on its notice page.
+// The deck's pick here this hour (book-ui.md, Storylet card details): its card, or the
+// unavailable note with the action's reason.
+const storylet = (view: GameView, g: Grouped, press: (b: Button) => void, text: Say) => {
+  if (!view.storylet) return null;
+  const b = g.place.find((x) => x.action_key === view.storylet);
+  if (b) return <ActionCard b={b} press={press} />;
+  const offer = view.actions.find((a) => a.action_key === view.storylet);
+  return (
+    offer && !offer.available && <ActionCard label={text(offer.label)} reason={why(offer, text)} />
+  );
+};
+
+// The place's own actions; a notice's actions stay on its notice page; the storylet has its card.
 const placeActions = (view: GameView, g: Grouped, press: (b: Button) => void) =>
   g.place
     .filter(
       (b) =>
+        b.action_key !== view.storylet &&
         ![
           ...(view.notices ?? []),
           ...(view.notice_boards ?? []).flatMap((board) => board.notices),

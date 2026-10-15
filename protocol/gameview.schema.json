@@ -1187,6 +1187,10 @@
         "scene": {
           "$ref": "#/$defs/SceneView"
         },
+        "storylet": {
+          "description": "Toolbox row FD3 (kernel_api at least 1.92): the key of the storylet the deck draws for the actor here this hour (action.schema.json RecipeTarget storylet), present exactly when that action is listed in actions, available or not (mechanics.md Storylet deck); an optional field: the snapshot format stays.",
+          "$ref": "action.schema.json#/$defs/Key"
+        },
         "combat": {
           "$ref": "gameview.schema.json#/$defs/CombatView"
         },
