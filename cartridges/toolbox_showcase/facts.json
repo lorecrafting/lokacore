@@ -233,9 +233,9 @@
         "default": false
       },
       "scopes": [
-        "player"
+        "instance"
       ],
-      "meaning": "The Warden has heard who forced the tollhouse strongbox."
+      "meaning": "The Warden has heard who forced the tollhouse strongbox: world state, so his schedule may read it."
     },
     "letter_burnt": {
       "version": 1,
@@ -244,9 +244,9 @@
         "default": false
       },
       "scopes": [
-        "player"
+        "instance"
       ],
-      "meaning": "The player burnt the Reeve's letter in Wat's fire."
+      "meaning": "The Reeve's letter has burnt in Wat's fire: world state, so Wat's schedule may read it."
     },
     "knows_ash": {
       "version": 1,

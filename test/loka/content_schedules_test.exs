@@ -51,4 +51,17 @@ defmodule Loka.ContentSchedulesTest do
              &{&1["code"], &1["path"]}
            )
   end
+
+  # Breaks (Realm seam 5): a case `when` reading a player-scope fact (a job has no player) compiles;
+  # the instance fact child_lost passes in the tests above (twin of schedule_cases.test.ts).
+  test "a case when naming a player-scope fact is refused" do
+    dir = Loka.ContentSource.copy("cartridges/schedule_sampler")
+    player = &put_in(&1, ["facts", "child_lost", "scopes"], ["player"])
+    assert {:error, diags} = Loka.ContentSource.compile(dir, [{"facts.json", player}])
+
+    assert {"FACT_SCOPE_UNSUPPORTED", "npcs/maud.daily_schedule.8[0].when.root.fact"} in Enum.map(
+             diags,
+             &{&1["code"], &1["path"]}
+           )
+  end
 end
