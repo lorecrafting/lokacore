@@ -4,7 +4,8 @@ defmodule Loka.Content.Variants do
   `status_active` or `npc_present` leaf needs kernel_api 1.46; a `status_active` leaf reading
   `self` or `subject` (status reader 1, row G3) 1.53; a `resource_compare` with `subject` or
   `at_least_percent` (row 39) 1.87; a room's or detail's `asides` or a `skill_compare` leaf
-  (row FD2) 1.91; world.identity (rows W15, FD9) 1.97. Twin of
+  (row FD2) 1.91; world.identity (rows W15, FD9) 1.97; an `item_present` leaf (Homestead hs-6)
+  1.101. Twin of
   kernel/ts/src/content/cartridge_variants.ts.
   """
   import Loka.Content.Source, only: [diag: 3]
@@ -23,9 +24,10 @@ defmodule Loka.Content.Variants do
 
     voices = voice?(defs) or aside?(defs)
     identity = is_map_key(settings["world"] || %{}, "identity")
+    furnish = furnish?(defs) or furnish?(settings)
 
-    if (identity or voices or relative or used?(defs, settings)) and
-         api < floor(identity, voices, relative, defs, settings),
+    if (furnish or identity or voices or relative or used?(defs, settings)) and
+         api < if(furnish, do: [1, 101], else: floor(identity, voices, relative, defs, settings)),
        do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least", %{})],
        else: []
   end
@@ -55,6 +57,12 @@ defmodule Loka.Content.Variants do
   defp aside?(defs),
     do:
       Enum.any?(for({_, {_, [], r}} <- Map.get(defs, "room", %{}), do: RoomParts.asides(r) != []))
+
+  defp furnish?(%{"op" => "item_present"}), do: true
+  defp furnish?(v) when is_map(v), do: Enum.any?(Map.values(v), &furnish?/1)
+  defp furnish?(v) when is_list(v), do: Enum.any?(v, &furnish?/1)
+  defp furnish?(v) when is_tuple(v), do: furnish?(Tuple.to_list(v))
+  defp furnish?(_), do: false
 
   defp voice?(%{"op" => "skill_compare"}), do: true
   defp voice?(v) when is_map(v), do: Enum.any?(Map.values(v), &voice?/1)

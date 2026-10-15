@@ -59,7 +59,8 @@
       "item_dropped"
     ],
     "policies": [
-      "has_item"
+      "has_item",
+      "item_present"
     ]
   },
   {

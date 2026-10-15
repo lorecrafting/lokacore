@@ -29764,6 +29764,19 @@
     ]
   },
   {
+    "contract": "Policy",
+    "value": {
+      "op": "item_present",
+      "tag": "nope"
+    },
+    "errors": [
+      {
+        "path": "/tag",
+        "code": "not_in_enum"
+      }
+    ]
+  },
+  {
     "contract": "RoomDefinition",
     "value": {
       "key": "r",

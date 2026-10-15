@@ -524,6 +524,23 @@
           "additionalProperties": false
         },
         {
+          "description": "An item carrying this property tag (Tag, toolbox row G1) lies directly in the actor's current room: on its floor, not carried and not inside a container there (Homestead hs-6, furnishing). In a room's or blueprint's variant that room is the room being described, as status_active subject room; in a reaction's when the reaction's actor's room. One query step per entity in the room. Needs kernel_api at least 1.101. Owned by containment@1.",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "item_present"
+            },
+            "tag": {
+              "$ref": "entity.schema.json#/$defs/Tag"
+            }
+          },
+          "required": [
+            "op",
+            "tag"
+          ],
+          "additionalProperties": false
+        },
+        {
           "description": "The NPC of this definition is present: in the actor's current room and alive (hp above 0 when it has hp); false without a body. Presence, not posture (the player's posture is the position fact). Toolbox row W6. Needs kernel_api at least 1.46. Owned by target_resolution@1.",
           "type": "object",
           "properties": {

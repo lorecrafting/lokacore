@@ -1,0 +1,15 @@
+{
+  "keywords": [
+    "bed"
+  ],
+  "short": "item.bed.short",
+  "room_line": "item.bed.room",
+  "description": "item.bed.description",
+  "location": {
+    "in": "room",
+    "room": "yard"
+  },
+  "tags": [
+    "bed"
+  ]
+}

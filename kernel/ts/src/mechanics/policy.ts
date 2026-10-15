@@ -13,6 +13,7 @@ import type {
   Tag,
   VersionedPolicy,
 } from '../contracts.gen.ts';
+import { LIMITS } from '../contracts.gen.ts';
 import { bodyOf, refString, type World } from '../runtime/decision.ts';
 import { barrierState, questOf } from './lookups.ts';
 import { key } from '../foundation/compose.ts';
@@ -103,6 +104,8 @@ export function holds(
       return statusActive(world, actor, p, ctx);
     case 'npc_present':
       return here(world, actor, world.entityIds[refString(p.npc)]);
+    case 'item_present':
+      return furnished(world, actor, p.tag, ctx.steps);
     case 'cue_perceived':
       return perceived(world, actor, p, ctx, holds);
     default:
@@ -208,6 +211,20 @@ function here(world: World, actor: CharacterId, id: string | undefined): boolean
   const body = bodyOf(world, actor);
   if (id === undefined || body === undefined) return false;
   return world.state.containers[id] === world.state.containers[body] && living(world, id);
+}
+
+// item_present (Homestead hs-6): an item with `tag` lies directly in the actor's room, the room a
+// room variant describes (placeView); one query step per entity in the room.
+function furnished(world: World, actor: CharacterId, tag: Tag, steps: { n: number }): boolean {
+  const body = bodyOf(world, actor);
+  const room = body && world.state.containers[body];
+  for (const [id, at] of Object.entries(world.state.containers)) {
+    if (at !== room) continue;
+    if (++steps.n > LIMITS.query_steps) return false;
+    const e = world.entities[id];
+    if (e?.kind === 'item' && e.tags?.includes(tag)) return true;
+  }
+  return false;
 }
 
 // `item` is inside `holder`, directly or through the items it is in (the loader and compose
