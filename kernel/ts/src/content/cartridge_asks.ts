@@ -1,6 +1,7 @@
 // Toolbox row FD7 at the cartridge trust boundary (twin of lib/loka/content/asks.ex): an NPC's ask
-// names topics of this cartridge and texts of its catalog, needs speech@1 and topics@1 and
-// kernel_api 1.96. Its answers' conditions are walked with every other policy (cartridge_refs.ts nodes).
+// names topics of this cartridge and texts of its catalog, needs speech@1 (topics@1 through its
+// topics) and kernel_api 1.96. Its answers' conditions are walked with every other policy
+// (cartridge_refs.ts nodes).
 import type { Diagnostic } from '../contracts.gen.ts';
 import { apiCmp } from './cartridge_installed.ts';
 import { diag, step, type Checks, type Obj } from './cartridge_refs.ts';
@@ -18,9 +19,9 @@ export function asks(c: Obj, { named, text }: Checks): Diagnostic[] {
   const npcs = Object.entries((c.npcs ?? {}) as Obj).filter(([, n]) => n.ask);
   for (const [ref, n] of npcs) {
     const at = `.cartridge.npcs${step(ref)}.ask`;
-    for (const capability of ['speech', 'topics'])
-      if (c.lock.capabilities[capability] !== 1)
-        out.push(diag('UNDECLARED_CAPABILITY', at, { capability }, [`${capability}@1`]));
+    // No topics@1 check: an answer's topic needs a topic definition, refused without topics@1.
+    if (c.lock.capabilities.speech !== 1)
+      out.push(diag('UNDECLARED_CAPABILITY', at, { capability: 'speech' }, ['speech@1']));
     text(n.ask, ['unknown'], at);
     n.ask.answers.forEach((a: Obj, i: number) => {
       named(a.topic, 'topic', `${at}.answers[${i}].topic`);

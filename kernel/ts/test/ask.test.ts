@@ -141,11 +141,19 @@ test('a topic the actor does not know is refused; an answer holds only when its 
   assert.deepEqual([s.text, s.events.length], ['smith.smugglers', 1]);
 });
 
-// Breaks: an NPC without ask admitted, the asked reaction's npc/topic/answered filters ignored, a hostile
+// Breaks: an NPC without ask, in another room or not an NPC admitted, the asked reaction's npc/topic/answered filters ignored, a hostile
 // NPC still answering, or ask admitted (or offered) during a pending conversation.
 test('the miller cannot be asked; the guard turns hostile on smugglers; a conversation blocks ask', () => {
   const w = answer(square(), 'smith', 'mill').w;
   assert.equal(refused(w, 'miller', 'mill'), 'invalid_target');
+  const gate = newWorld(content, '7e1f0c2a-5d3b-4c8e-9a6f-00000000000a' as never, [1, 2, 3, 4]);
+  assert.equal(refused(gate, 'smith', 'mill'), 'not_present');
+  const room = {
+    type: 'ask',
+    target_id: w.entityIds[`${P}room/square`],
+    topic: ref('topic', 'mill'),
+  };
+  assert.equal((play(w, room).decision as { error?: { code: string } }).error?.code, 'not_found');
   assert.equal(value(answer(w, 'smith', 'smugglers').w, w.character, ref('fact', 'wanted')), false);
   const g = answer(w, 'guard', 'smugglers');
   assert.equal(g.text, 'guard.unknown');
@@ -169,9 +177,9 @@ test('the miller cannot be asked; the guard turns hostile on smugglers; a conver
   assert.equal(refused(t, 'smith', 'mill'), 'unsupported_capability'); // speech verbs leave the set
 });
 
-// Breaks: the loader trusting an ask's topic, its owning capability, the 1.96 floor, or an asked
+// Breaks: the loader trusting an ask's topic, grants, texts or answer condition, its owning capability, the 1.96 floor, or an asked
 // trigger's topic.
-test('the loader refuses an unknown answer topic, ask without speech@1, 1.95 and a bad trigger topic', () => {
+test('the loader refuses an unknown answer topic or grant, ask without speech@1, 1.95 and a bad trigger topic', () => {
   const smith = `${P}npc/smith`;
   const refusal = (change: (c: Obj) => void) => {
     const r = reload(change);
@@ -184,12 +192,33 @@ test('the loader refuses an unknown answer topic, ask without speech@1, 1.95 and
     ['UNRESOLVED_REFERENCE', 'topic'],
   );
   assert.deepEqual(
+    refusal((c) => (c.npcs[smith].ask.answers[0].grants = nope)),
+    ['UNRESOLVED_REFERENCE', 'grants'],
+  );
+  for (const [change, field] of [
+    [(a: Obj) => (a.unknown = 'nope'), 'unknown'],
+    [(a: Obj) => (a.answers[0].text = 'nope'), 'text'],
+    [(a: Obj) => (a.answers[1].when.root.fact = ref('fact', 'nope')), 'fact'],
+  ] as const)
+    assert.deepEqual(
+      refusal((c) => change(c.npcs[smith].ask)),
+      ['UNRESOLVED_REFERENCE', field],
+    );
+  assert.deepEqual(
     refusal((c) => {
       delete c.lock.capabilities.speech;
       delete c.manifest.requires.capabilities.speech;
       delete c.reactions[`${P}reaction/guard_smugglers`]; // its asked trigger needs speech@1 too
     }),
     ['UNDECLARED_CAPABILITY', 'ask'],
+  );
+  // Without topics@1 the topic definitions refuse first (cartridge_asks.ts has no topics@1 check).
+  assert.deepEqual(
+    refusal((c) => {
+      delete c.lock.capabilities.topics;
+      delete c.manifest.requires.capabilities.topics;
+    })[0],
+    'UNDECLARED_CAPABILITY',
   );
   // Each floor alone: the asks' (no asked trigger left), then the asked trigger's (no ask left).
   for (const drop of [
