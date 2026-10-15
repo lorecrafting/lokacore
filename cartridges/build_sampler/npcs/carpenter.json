@@ -1,0 +1,15 @@
+{
+  "keywords": [
+    "carpenter"
+  ],
+  "short": "npc.carpenter.short",
+  "room_line": "npc.carpenter.room",
+  "description": "npc.carpenter.description",
+  "room": "lane",
+  "resource_starts": {
+    "pennies": 0
+  },
+  "services": [
+    "raise_hut"
+  ]
+}

@@ -335,6 +335,33 @@ continues fencing input and elapsed work until the existing reconciliation confi
 all prior or all next rows. The exact release pin refuses a missing or mismatched release;
 this addition uses existing save-v2 rows without a format bump or old-save migration.
 
+## Built rooms
+
+Built rooms S2 ([mechanics.md](mechanics.md#built-rooms-toolbox-row-s2-foundation)). A raised
+room's only saved trace is its `created` identity row (origin `built {site, direction, owner}`,
+definition the blueprint). No room row, exit row or containment row is saved: every hydrate
+derives the room and its two exits from the identity row and the pinned cartridge, so reopen
+gives the same room id and exits, and receipt replay mints the same id. It uses the existing
+changed-row transaction and save-v2 rows, with no format bump.
+
+| Layer | Where | Refusal |
+| --- | --- | --- |
+| Compose (apply a delta) | `creationValid` and `initialPair` (`kernel/ts/src/foundation/creation.ts`; `Loka.Core.Creation`) | fault `precondition_failed`: the definition is not a blueprint, the owner is no body's owner, or an `entity.transfer` places the room |
+| Hydrate on apply | `raise`, `builtValid` (`kernel/ts/src/runtime/created.ts`) | `precondition_failed`, the same checks as on load |
+| Hydrate on load | the same, `loading` true | `save_corrupt` |
+
+Load refuses `save_corrupt`, with no repair and no skipped row, when a built row:
+
+- names a blueprint the pinned cartridge lacks, or a site that is not one of its rooms;
+- has a direction the site's `site.directions` does not list, or a blueprint its `site.blueprints` does not list;
+- shares its site and direction with another built row;
+- makes the built rows more than `world.construction.max_total`;
+- has an owner that no body's `owner_id` names;
+- has an `id` other than its row key.
+
+Invariant `exits_resolve` ranges over the hydrated rooms: a save whose built rows did not
+hydrate leaves the site's exit unresolved, so it can never load silently.
+
 ## Live encounter persistence (M6-A)
 
 Encounter rows and combat job binding/cancellation commit in the existing changed-row

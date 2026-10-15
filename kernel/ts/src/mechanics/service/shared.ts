@@ -1,3 +1,4 @@
+// size: allow 306, the build benefit (Built rooms S2) adds its pre-payment gate to the one transition query
 // One bounded admission/transition query for exact keyed service offers and execution.
 import {
   LIMITS,
@@ -23,6 +24,8 @@ import { adjust, level, resourceRef, resourceSpec, transfer, type Levels } from 
 import { serving } from '../liquid/shared.ts';
 import { selected } from '../containment/stock.ts';
 import { giveRefused } from '../containment/shared.ts';
+import { unbuildable } from './build.ts';
+export { raised } from './build.ts';
 
 type Payload = Extract<CommandPayload, { type: 'use_service' }>;
 export function availability(world: World, p: Payload, steps: Steps = { n: 0 }, action?: Key) {
@@ -43,6 +46,8 @@ export function transition(
   if ('code' in service) return service;
   if (p.quoted_price !== service.price) return { code: 'invalid_state' as const };
   const benefit = service.benefit;
+  const blocked = benefit.kind === 'build' && unbuildable(world, benefit);
+  if (blocked) return blocked;
   const escrow = benefit.kind === 'entitlement' ? benefit.escrow : undefined;
   if (benefit.kind === 'entitlement' && value(world, p.actor_id, benefit.fact) !== false)
     return serviceRefusal('invalid_state', escrow ? 'service.order_open' : 'service.already_paid');
@@ -82,6 +87,7 @@ function granted(
       grant = { fact: benefit.fact, value: true };
     return assigned(world, p.actor_id, start, grant, 'service');
   }
+  if (benefit.kind === 'build') return { ops }; // the room itself is minted in raised()
   if (benefit.kind === 'repair') return repair(world, p, body, benefit, ops);
   if (benefit.kind === 'claim' || benefit.kind === 'cancel')
     return settle(world, p, body, order!, ops, steps);

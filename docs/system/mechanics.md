@@ -3257,3 +3257,34 @@ Gap 7 of the [depth audit](../rnd/depth-and-ux-2026-10-13.md): [Toolbox row FD7]
   - Reused: speech admission, G11 disposition, `holds` with a target, topics `grant` and `knownTopics`, the W1 filter table, KERNEL_API_RANGE_INVALID, UNDECLARED_CAPABILITY.
   - New: command `ask`, input `topic`, `NpcDefinition.ask`, event `asked` with its trigger and filters `topic` and `answered`, `answerTo`, the 1.96 floor.
   - Missing invariant: none. Named exceptions: none.
+
+## Built rooms (toolbox row S2 foundation)
+
+[Toolbox row S2](../MECHANICS-TOOLBOX.md#ranked-toolbox), Built rooms slice 1 second half (Beads `loka-kgd.109.1`, `loka-1q3n`): a paid service raises a blueprint as a room on an authored site at once; the player walks in. Declarations: [blueprints and sites](cartridge.md#blueprint-and-site-declarations) (construction@1, `kernel_api` 1.99; this half adds no floor). Save rules: [save.md, Built rooms](save.md#built-rooms).
+
+- **Command.** None new: `use_service` on a service whose benefit is `{kind: "build", blueprint, site, direction}` (`protocol/service.schema.json`). The compiler and loader resolve the refs and check that `direction` is one of the site's `site.directions` and `blueprint` one of its `site.blueprints`. The ActionSet offers it as every service: key the action's, target the provider, no input.
+- **Admission** (`transition` in `kernel/ts/src/mechanics/service/shared.ts`, as every service, then `unbuildable` in `service/build.ts`): after the price, a built row already on that site and direction refuses `invalid_state` `service.site_taken`; as many built rows as `world.construction.max_total` refuse `invalid_state` `service.construction_full`. The offer shows the same refusal as the press (`kernel/ts/test/built.test.ts`). A failing action policy refuses `invalid_state` with no message, as for every action.
+- **Effect.** The payment, then one `entity.create` (`raised` in `service/build.ts`): identity `{id: mint, definition: the blueprint, origin: built {site, direction, owner: p.actor_id}}`. No `entity.transfer` follows: a room has no container (`initialPair`, `kernel/ts/src/foundation/creation.ts`; `Loka.Core.Creation.initial_pair?`). Provenance: the definition is a blueprint and the owner is some body's owner (`creationValid` / `Creation.valid?`).
+- **The room.** `hydrate` (`raise` in `kernel/ts/src/runtime/created.ts`) derives a `RoomDefinition` from the pinned blueprint on every hydrate: key `built_<id with - as _>` (a DefinitionRef key cannot hold `/` or `-`), the blueprint's cartridge id and version, exit `{opposite(direction): {to: site}}`; it adds the exit `{direction: {to: the room}}` to the site and writes `rooms`, `roomIds` and `knownEntities[id] = {kind: "room"}`. Every room reader reads that overlay; none changed. Invariant `exits_resolve` (`protocol/invariants.json`, unchanged) now ranges over the hydrated rooms, built ones included.
+- **Map.** A built room is placed one unit from its site in its direction (north `-y`, up `+z`) and linked both ways (`positions` in `kernel/ts/src/view/knowledge.ts`); a site with no position gives the room none.
+- **Realm seams** (owner decision 2026-10-13, brief checklist).
+  1. Actor: met; the owner is `p.actor_id`.
+  2. Reactions: not applicable; no event.
+  3. Credit: not applicable.
+  4. Time: met; no clock, the room is raised at once.
+  5. Scope: met; the room is world state, audience public.
+  6. Text: not applicable.
+  7. Ownership: exclusive, shared-world; the owner is in the identity row; moves by none in v1; theft never.
+  8. Not applicable.
+  9. Instancing: shared-world; one structure per site direction.
+- **Opt-in.** A build benefit needs construction@1 with its site and blueprint ([declarations](cartridge.md#blueprint-and-site-declarations)). Chapter 1 declares none.
+- **Book.** No new component: the carpenter's offered service, the hut's Room page and the footer map.
+- **Known limits.** Instant: no materials, no build job, no decay and no raze. One blueprint per service. The owner has no rights over the room beyond the blueprint's `locks.enter`.
+- **Sampler.** `cartridges/build_sampler`: the carpenter in the lane offers `raise_hut` (price 5, policy `owns_plot`). Buy the plot (20 pennies left), raise the hut (15): north leads to "The Hut", south back to the lane; a second raise is `service.site_taken`; reopen keeps the room id and exits and replay mints the same id; a forged row refuses the load (`kernel/ts/test/built.test.ts`, `mobile/authority/local-story/built.test.ts`, `protocol/fixtures/corpse_creation.json` built cases in both kernels).
+- **Composition record** ([architecture](architecture.md#building-mechanics-by-composition)).
+  - Consumer: `build_sampler`. Later: Built rooms slice 2 and the showcase.
+  - Reads: `created`, the cartridge's blueprints, sites and `world.construction`.
+  - Writes: `entity.create` of a built identity; jobs, events and save rows: none new (the identity row is the room's only saved trace).
+  - Reused: service@1 price, payment and admission; the created-row hydrate overlay; mint; `entity.create`; `exits_resolve`; the map.
+  - New: `EntityOrigin` kind `built`, benefit kind `build`, `raise` and `builtValid` in hydrate, `unbuildable`, the map step.
+  - Missing invariant: none. Named exceptions: a built `entity.create` has no placement.

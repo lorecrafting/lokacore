@@ -73,6 +73,7 @@ function definition(c: Obj, s: Obj, ref: string, check: Checks, out: Diagnostic[
       bad(out, `${at}.benefit.fact`);
     if (b.escrow) escrow(c, b.escrow, `${at}.benefit.escrow`, check, out);
   } else if (b.kind === 'repair') repair(c, b, at, check, out);
+  else if (b.kind === 'build') build(c, b, at, check, out);
   else if (banks(b)) bank(c, s, at, check, out);
   else if (ordered(b)) {
     const commission = get(c, check, b.service, 'service', `${at}.benefit.service`);
@@ -88,6 +89,12 @@ function definition(c: Obj, s: Obj, ref: string, check: Checks, out: Diagnostic[
 function refusals(b: Obj) {
   const kind = b.kind;
   if (banks(b)) return { payment: 'service.unaffordable', funds: 'service.no_funds' };
+  if (kind === 'build')
+    return {
+      payment: 'service.unaffordable',
+      site: 'service.site_taken',
+      full: 'service.construction_full',
+    };
   if (ordered(b))
     return {
       payment: 'service.unaffordable',
@@ -177,6 +184,16 @@ function repair(c: Obj, b: Obj, at: string, check: Checks, out: Diagnostic[]) {
   const items = Object.values((c.items ?? {}) as Obj);
   if (!items.some((i) => i.weapon?.durability && same(i.weapon.durability.fact, b.fact)))
     bad(out, `${at}.benefit.fact`);
+}
+
+// Built rooms S2: the site is a room whose site lists both the direction and the blueprint.
+function build(c: Obj, b: Obj, at: string, check: Checks, out: Diagnostic[]) {
+  const blueprint = get(c, check, b.blueprint, 'blueprint', `${at}.benefit.blueprint`);
+  const room = get(c, check, b.site, 'room', `${at}.benefit.site`);
+  if (!room) return;
+  if (blueprint && !room.site?.blueprints.some((r: Obj) => same(r, b.blueprint)))
+    bad(out, `${at}.benefit.blueprint`);
+  if (!room.site?.directions.includes(b.direction)) bad(out, `${at}.benefit.direction`);
 }
 
 function stock(c: Obj, s: Obj, npc: Obj | undefined, at: string, check: Checks, out: Diagnostic[]) {

@@ -112,7 +112,7 @@ export function witnessedObligations(
       committed = closed(before, ops, benefit);
     else if (benefit.kind === 'deposit' || benefit.kind === 'withdraw')
       committed = ops.some((op) => op.op === 'fact.assign' && same(op.fact, benefit.account));
-    else {
+    else if (benefit.kind === 'meal' || benefit.kind === 'drink') {
       const old = level(before, before.body, benefit.recovery);
       const maximum = resourceSpec(before, before.body, benefit.recovery)?.maximum;
       const gain =

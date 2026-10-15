@@ -30,21 +30,26 @@ export function creationValid(identity: Json, state: State): boolean {
         (['hound', 'deer'].includes(origin.role as string)
           ? origin.member_id === i.id
           : origin.member_id !== i.id)
-      : origin.kind === 'death' &&
-        (template === 'player'
-          ? victim?.kind === 'body' && origin.owner_id === victim.owner_id
-          : template === 'npc' && victim?.kind === 'npc' && origin.owner_id === null))
+      : origin.kind === 'built'
+        ? // Built rooms S2: a blueprint raised by a known character (some body's owner)
+          (i.definition as Obj).kind === 'blueprint' &&
+          Object.values(section(state, 'known_entities')).some(
+            (e) => (e as Obj).kind === 'body' && (e as Obj).owner_id === origin.owner,
+          )
+        : origin.kind === 'death' &&
+          (template === 'player'
+            ? victim?.kind === 'body' && origin.owner_id === victim.owner_id
+            : template === 'npc' && victim?.kind === 'npc' && origin.owner_id === null))
   );
 }
 
+/** A create is followed by its first placement, except a built room, which is never placed. */
 export function initialPair(op: DeltaOp, next: DeltaOp | undefined): boolean {
-  return (
-    op.op !== 'entity.create' ||
-    (next?.op === 'entity.transfer' &&
-      next.entity_id === op.identity.id &&
-      next.source_id === null &&
-      next.writer_group === op.writer_group)
-  );
+  if (op.op !== 'entity.create') return true;
+  const placed = next?.op === 'entity.transfer' && next.entity_id === op.identity.id;
+  return op.identity.origin?.kind === 'built'
+    ? !placed
+    : placed && next.source_id === null && next.writer_group === op.writer_group;
 }
 
 export function initialPlacement(

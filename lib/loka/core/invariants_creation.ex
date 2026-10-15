@@ -1,3 +1,4 @@
+# size: allow 315, corpse, spawn and built provenance share the one creation oracle
 defmodule Loka.Core.InvariantsCreation do
   @moduledoc "Independent durable creation/initial-custody proof (M5-B)."
   alias Loka.Core.{Compose, Contracts}
@@ -247,9 +248,17 @@ defmodule Loka.Core.InvariantsCreation do
     Contracts.validate("EntityIdentity", i) == :ok and
       not Map.has_key?(i, "scope") and not Map.has_key?(i, "audience") and
       Enum.all?(~w(created known_entities containers), &(get_in(s, [&1, i["id"]]) == nil)) and
-      match?(%{"op" => "entity.transfer", "source_id" => nil}, next) and
-      placed?(s, next, op, ops) and provenance?(s, i) and rows_match?(result, i)
+      paired_create?(s, i, op, next, ops) and provenance?(s, i) and rows_match?(result, i)
   end
+
+  # A built room is never placed; every other create is followed by its first placement.
+  defp paired_create?(_, %{"origin" => %{"kind" => "built"}, "id" => id}, _, next, _),
+    do: not match?(%{"op" => "entity.transfer", "entity_id" => ^id}, next)
+
+  defp paired_create?(s, _, op, next, ops),
+    do:
+      match?(%{"op" => "entity.transfer", "source_id" => nil}, next) and
+        placed?(s, next, op, ops)
 
   defp rows_match?(result, i) do
     Enum.any?(
@@ -259,24 +268,35 @@ defmodule Loka.Core.InvariantsCreation do
       Enum.any?(
         result["changes"],
         &(&1["target"] == %{"kind" => "containment", "entity_id" => i["id"]})
-      )
+      ) == (i["origin"]["kind"] != "built")
   end
 
   defp provenance?(s, i) do
     origin = i["origin"]
 
-    if origin["kind"] == "spawned" do
-      spec = get_in(s, ["population_specs", Compose.key(origin["by"])])
-
-      spec != nil and origin["bundle"] == spec["bundle"] and
-        origin["slot"] <= spec["cap"] and i["definition"] == spec[origin["role"]] and
-        if(origin["role"] == "hound",
-          do: origin["member_id"] == i["id"],
-          else: origin["member_id"] != i["id"]
-        )
-    else
-      death_provenance?(s, i, origin)
+    case origin["kind"] do
+      "spawned" -> spawn_provenance?(s, i, origin)
+      "built" -> built_provenance?(s, i, origin)
+      _ -> death_provenance?(s, i, origin)
     end
+  end
+
+  defp spawn_provenance?(s, i, origin) do
+    spec = get_in(s, ["population_specs", Compose.key(origin["by"])])
+
+    spec != nil and origin["bundle"] == spec["bundle"] and
+      origin["slot"] <= spec["cap"] and i["definition"] == spec[origin["role"]] and
+      if(origin["role"] == "hound",
+        do: origin["member_id"] == i["id"],
+        else: origin["member_id"] != i["id"]
+      )
+  end
+
+  defp built_provenance?(s, i, origin) do
+    i["definition"]["kind"] == "blueprint" and
+      Enum.any?(Map.get(s, "known_entities", %{}), fn {_, e} ->
+        e["kind"] == "body" and e["owner_id"] == origin["owner"]
+      end)
   end
 
   defp death_provenance?(s, i, origin) do

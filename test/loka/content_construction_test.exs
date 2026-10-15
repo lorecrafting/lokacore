@@ -82,4 +82,40 @@ defmodule Loka.ContentConstructionTest do
       assert {"UNDECLARED_CAPABILITY", path} in pairs(diags), inspect(diags)
     end
   end
+
+  # Breaks (Built rooms S2): the compiler admits a build service whose direction is not in the
+  # site's directions, whose blueprint the site does not list, or whose site does not resolve
+  # (the TS loader refuses them too; construction.test.ts).
+  test "a build benefit names a direction and blueprint of its resolved site" do
+    dir = Loka.ContentSource.copy(@dir)
+    build = &{"services/raise_hut.json", fn s -> put_in(s, ["benefit", &1], &2) end}
+    shed = {"blueprints/shed.json", JSON.decode!(File.read!("#{@dir}/blueprints/hut.json"))}
+
+    for {edits, expected} <- [
+          {[build.("direction", "east")],
+           [{"SCHEMA_VIOLATION", "services/raise_hut.benefit.direction"}]},
+          {[shed, build.("blueprint", "shed")],
+           [{"SCHEMA_VIOLATION", "services/raise_hut.benefit.blueprint"}]},
+          {[build.("site", "nowhere")],
+           [{"UNRESOLVED_REFERENCE", "services/raise_hut.benefit.site"}]}
+        ] do
+      assert {:error, diags} = Loka.ContentSource.compile(dir, edits)
+      assert pairs(diags) == expected
+    end
+  end
+
+  # Breaks (Built rooms S2 review): the site check compares the service blueprint with the site's
+  # list before both are expanded to full refs, so a bare key on one side and a full ref on the
+  # other is refused (services.ex benefit/5 relies on Construction.expand and Services.expand).
+  test "a build benefit matches its site blueprint across short and full reference forms" do
+    full = %{"cartridge_id" => "build_sampler", "cartridge_version" => "0.0.1"}
+    full = Map.merge(full, %{"kind" => "blueprint", "key" => "hut"})
+    service = {"services/raise_hut.json", &put_in(&1, ["benefit", "blueprint"], full)}
+    site = {"rooms/lane.json", &put_in(&1, ["site", "blueprints"], [full])}
+
+    for edit <- [service, site] do
+      dir = Loka.ContentSource.copy(@dir)
+      assert {:ok, _, []} = Loka.ContentSource.compile(dir, [edit])
+    end
+  end
 end

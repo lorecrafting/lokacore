@@ -708,6 +708,7 @@ Typed relations and runtime entity identity/provenance (21 §4; 03 §3, §11; 05
   - `authored`: Placed by the cartridge's authored content.
   - `spawned`: Created by the definition `by` (a spawn bundle or population plan).
   - `death`
+  - `built`: Built rooms S2 (construction@1; mechanics.md Built rooms): a room raised by a build service. The identity's definition is the BlueprintDefinition; site is the authored room it opens from, direction the site direction it occupies (one of site.directions), owner the character who paid.
 - **EscortRelation**: API1.11 escort@1 relation, keyed by actor_id. Identity is immutable; only status changes through escort.transition. The original continuation and choice bind the selected NPC and active quest instance.
 - **EscortStatus**: The bounded escort lifecycle: following moves with the actor, separated waits for explicit rejoin, completed never follows again.
 - **ExpeditionAttempt**: One player's current bounded expedition attempt, bound to its quest instance.
@@ -793,6 +794,7 @@ B8 typed finite paid entitlement, meal and provider-owned serving.
   - `cancel`
   - `deposit`
   - `withdraw`
+  - `build`: Built rooms S2 (construction@1): raise blueprint at site's direction. blueprint is one of site.blueprints and direction one of site.directions (SCHEMA_VIOLATION invalid_value otherwise). Refused service.site_taken while a built room holds that site direction and service.construction_full at world.construction.max_total.
 - **ServiceDefinition**: Exact original-provider action and conserved quote with one typed immediate benefit.
 
 ## Localized text contracts (`protocol/text.schema.json`)

@@ -299,6 +299,38 @@
             "owner_id"
           ],
           "additionalProperties": false
+        },
+        {
+          "description": "Built rooms S2 (construction@1; mechanics.md Built rooms): a room raised by a build service. The identity's definition is the BlueprintDefinition; site is the authored room it opens from, direction the site direction it occupies (one of site.directions), owner the character who paid.",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "built"
+            },
+            "site": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "direction": {
+              "enum": [
+                "north",
+                "south",
+                "east",
+                "west",
+                "up",
+                "down"
+              ]
+            },
+            "owner": {
+              "$ref": "identity.schema.json#/$defs/CharacterId"
+            }
+          },
+          "required": [
+            "kind",
+            "site",
+            "direction",
+            "owner"
+          ],
+          "additionalProperties": false
         }
       ],
       "examples": [

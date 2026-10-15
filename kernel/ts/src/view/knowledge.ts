@@ -1,10 +1,39 @@
 import { present } from '../commands/target.ts';
 import type { CharacterId, EntityId, GameView, Key } from '../contracts.gen.ts';
-import { bodyOf, COMPASS, refString, type Steps, type World } from '../runtime/decision.ts';
+import {
+  bodyOf,
+  COMPASS,
+  refString,
+  type Cartridge,
+  type Steps,
+  type World,
+} from '../runtime/decision.ts';
 import { exitOf, hidden } from '../mechanics/lookups.ts';
 import { cmp } from '../foundation/validate.ts';
 import { refusal, resolved } from '../commands/actions.ts';
 import { describeEntity, displayedName } from '../mechanics/description_variant/rule.ts';
+
+const STEP: Record<string, [number, number, number]> = {
+  north: [0, -1, 0],
+  south: [0, 1, 0],
+  east: [1, 0, 0],
+  west: [-1, 0, 0],
+  up: [0, 0, 1],
+  down: [0, 0, -1],
+};
+
+// Built rooms S2: a built room sits one unit from its site in its direction (north is -y).
+function positions(world: World, authored: NonNullable<Cartridge['map_positions']>) {
+  const at = new Map(authored.map((p) => [world.roomIds[refString(p.room)], p]));
+  for (const [id, { origin }] of Object.entries(world.state.created ?? {})) {
+    if (origin.kind !== 'built') continue;
+    const site = at.get(world.roomIds[refString(origin.site)]);
+    if (!site) continue;
+    const [dx, dy, dz] = STEP[origin.direction];
+    at.set(id as EntityId, { ...site, x: site.x + dx, y: site.y + dy, z: site.z + dz });
+  }
+  return at;
+}
 
 export function knowledgeView(
   world: World,
@@ -19,17 +48,20 @@ export function knowledgeView(
       .filter((r) => r.actor_id === actor)
       .map((r) => r.room_id),
   );
-  const rooms = world.cartridge.map_positions
-    .flatMap((p) => {
-      const id = world.roomIds[refString(p.room)];
-      return visited.has(id) ? [{ id, title: world.rooms[id].title, x: p.x, y: p.y, z: p.z }] : [];
-    })
+  const at = positions(world, world.cartridge.map_positions);
+  const rooms = [...at]
+    .flatMap(([id, p]) =>
+      visited.has(id) ? [{ id, title: world.rooms[id].title, x: p.x, y: p.y, z: p.z }] : [],
+    )
     .sort((a, b) => cmp(a.id, b.id));
   const links = rooms.flatMap(({ id }) =>
     COMPASS.flatMap((direction) => {
       const exit = exitOf(world.rooms[id], direction);
       const to = exit && world.roomIds[refString(exit.to)];
-      return to && visited.has(to) && !hidden(world, world.rooms[id], direction, actor)
+      return to &&
+        visited.has(to) &&
+        at.has(to) &&
+        !hidden(world, world.rooms[id], direction, actor)
         ? [{ from: id, to, direction }]
         : [];
     }),

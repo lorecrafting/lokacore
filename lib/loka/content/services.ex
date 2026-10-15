@@ -1,4 +1,4 @@
-# size: allow 363, row 20a/20b/25 escrow orders and bank accounts check in the same service admission pass
+# size: allow 389, row 20a/20b/25 escrow orders, bank accounts and Built rooms S2 builds check in the same service admission pass
 defmodule Loka.Content.Services do
   @moduledoc "Checks finite immediate service declarations and their exact provider stock."
   import Loka.Content.Source, only: [diag: 2, diag: 3, diag: 4, at: 2, ref: 3]
@@ -10,6 +10,7 @@ defmodule Loka.Content.Services do
         k when k in ~w(entitlement repair) -> [{"fact", "fact"}]
         k when k in ~w(claim cancel) -> [{"service", "service"}]
         k when k in ~w(deposit withdraw) -> [{"account", "fact"}, {"vault", "npc"}]
+        "build" -> [{"blueprint", "blueprint"}, {"site", "room"}]
         "meal" -> [{"stock", "resource"}, {"recovery", "resource"}]
         "drink" -> [{"vessel", "item"}, {"liquid", "liquid"}, {"recovery", "resource"}]
       end
@@ -133,6 +134,11 @@ defmodule Loka.Content.Services do
       unresolved(a, "fact", at(rel, ["benefit", "account"]), m, defs) ++
         unresolved(v, "npc", at(rel, ["benefit", "vault"]), m, defs)
 
+  defp benefit_refs(rel, %{"kind" => "build", "blueprint" => b, "site" => r}, m, defs),
+    do:
+      unresolved(b, "blueprint", at(rel, ["benefit", "blueprint"]), m, defs) ++
+        unresolved(r, "room", at(rel, ["benefit", "site"]), m, defs)
+
   defp benefit_refs(_, _, _, _), do: []
 
   # Toolbox row 20a: distinct items held to a room; no shop offer (commerce save reconciles offer
@@ -231,6 +237,9 @@ defmodule Loka.Content.Services do
   defp reasons(%{"kind" => k}) when k in ~w(deposit withdraw),
     do: ~w(service.unaffordable service.no_funds)
 
+  defp reasons(%{"kind" => "build"}),
+    do: ~w(service.unaffordable service.site_taken service.construction_full)
+
   defp reasons(_), do: ~w(service.unaffordable service.full_mv service.sold_out)
 
   defp benefit(%{"kind" => "entitlement", "fact" => r}, _, _, m, defs) do
@@ -268,6 +277,23 @@ defmodule Loka.Content.Services do
       {holds?(f["value_type"], n) and holds?(resolved(s["currency"], "resource", m, defs), n),
        ["benefit", "amount"]}
     ]
+  end
+
+  # Built rooms S2: a resolved site lists the direction and a resolved blueprint.
+  defp benefit(%{"kind" => "build", "blueprint" => b, "site" => r} = build, _, _, m, defs) do
+    case Refs.resolve(r, "room", m, defs) do
+      {_, _, room} ->
+        site = room["site"] || %{}
+
+        [
+          {resolved(b, "blueprint", m, defs) == %{} or b in (site["blueprints"] || []),
+           ["benefit", "blueprint"]},
+          {build["direction"] in (site["directions"] || []), ["benefit", "direction"]}
+        ]
+
+      _ ->
+        []
+    end
   end
 
   defp benefit(b, npc, s, m, defs) do
