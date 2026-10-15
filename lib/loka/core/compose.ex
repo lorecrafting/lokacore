@@ -94,10 +94,17 @@ defmodule Loka.Core.Compose do
         {:halt, fault("conflicting_write", target)}
 
       _ ->
-        if(String.starts_with?(op["op"], "job."),
-          do: Loka.Core.ComposeEncounter.job(op, read(target, ctx), horizon, at),
-          else: apply_op(op, target, ctx)
-        )
+        cond do
+          String.starts_with?(op["op"], "job.") ->
+            Loka.Core.ComposeEncounter.job(op, read(target, ctx), horizon, at)
+
+          # Against the composing time: a drain job's sub-step may (re)apply a status ending before the target.
+          op["op"] == "status.transition" ->
+            Loka.Core.ComposeStatus.transition(op, read(target, ctx), state, at)
+
+          true ->
+            apply_op(op, target, ctx)
+        end
         |> write(overlay, k, group, target)
     end
   end
@@ -179,9 +186,6 @@ defmodule Loka.Core.Compose do
 
   defp apply_op(%{"op" => "bleed.transition"} = op, t, {state, horizon, overlay} = ctx),
     do: Loka.Core.ComposeBleed.transition(op, read(t, ctx), state, horizon, overlay)
-
-  defp apply_op(%{"op" => "status.transition"} = op, t, {state, horizon, _} = ctx),
-    do: Loka.Core.ComposeStatus.transition(op, read(t, ctx), state, horizon)
 
   defp apply_op(%{"op" => "levelling.set"} = op, t, ctx),
     do: Loka.Core.ComposeLevelling.set(op, read(t, ctx))

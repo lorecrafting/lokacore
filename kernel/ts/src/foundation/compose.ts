@@ -117,7 +117,8 @@ function apply(op: DeltaOp, row: Json | undefined, ctx: Ctx): Outcome {
   if (op.op === 'entity.create') return createEntity(op, row, ctx.state);
   if (op.op === 'bleed.transition')
     return transitionBleed(op, row, ctx.state, ctx.horizon, ctx.overlay);
-  if (op.op === 'status.transition') return transitionStatus(op, row, ctx.state, ctx.horizon);
+  // Against the composing time: a drain job's sub-step may (re)apply a status ending before the target.
+  if (op.op === 'status.transition') return transitionStatus(op, row, ctx.state, ctx.at);
   if (op.op === 'levelling.set') return setLevelling(op, row);
   switch (op.op) {
     case 'visit.record':

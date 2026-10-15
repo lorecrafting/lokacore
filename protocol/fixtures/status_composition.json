@@ -1,5 +1,5 @@
 {
-  "description": "Hand-written toolbox row 1 composition answers: a status row is keyed by its holder (a body, or since row G3 an NPC or item) and status target, keeps one generation while active, never shortens its end, and tombstones inactive; a permanent row (row W8) is its generation alone and never changes kind while active. No kernel supplies expected values. Changes are listed in canonical target-key order.",
+  "description": "Hand-written toolbox row 1 composition answers: a status row is keyed by its holder (a body, or since row G3 an NPC or item) and status target, keeps one generation while active, never shortens its end, and tombstones inactive; a permanent row (row W8) is its generation alone and never changes kind while active. An active row's end and tick are checked against the composing time: the due time of the last completed job, else the horizon (Beads loka-j958). No kernel supplies expected values. Changes are listed in canonical target-key order.",
   "cases": [
     {
       "id": "first-generation",
@@ -1273,6 +1273,268 @@
               "cartridge_version": "0.0.1",
               "kind": "status",
               "key": "scar"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "applied-and-expired-inside-advance",
+      "state": {
+        "clock": 100,
+        "known_entities": {
+          "a0000000-0000-4000-8000-000000000002": {
+            "kind": "body"
+          }
+        },
+        "jobs": {
+          "a0000000-0000-4000-8000-000000000007": {
+            "job": {
+              "cartridge_id": "status_sampler",
+              "cartridge_version": "0.0.1",
+              "kind": "status",
+              "key": "poison"
+            },
+            "due_time": 160,
+            "status": "pending"
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "time.advance",
+          "writer_group": 0,
+          "from": 100,
+          "to": 1000
+        },
+        {
+          "op": "job.complete",
+          "writer_group": 1,
+          "job_id": "a0000000-0000-4000-8000-000000000007"
+        },
+        {
+          "op": "status.transition",
+          "writer_group": 1,
+          "body_id": "a0000000-0000-4000-8000-000000000002",
+          "status": {
+            "cartridge_id": "status_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "status",
+            "key": "bruised"
+          },
+          "expected": null,
+          "value": {
+            "active": true,
+            "generation": 1,
+            "ends_at": 400,
+            "next_tick_at": 400,
+            "job_id": "a0000000-0000-4000-8000-000000000008"
+          }
+        },
+        {
+          "op": "job.schedule",
+          "writer_group": 1,
+          "job_id": "a0000000-0000-4000-8000-000000000008",
+          "job": {
+            "cartridge_id": "status_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "status",
+            "key": "bruised"
+          },
+          "due_time": 400
+        },
+        {
+          "op": "job.complete",
+          "writer_group": 1,
+          "job_id": "a0000000-0000-4000-8000-000000000008"
+        },
+        {
+          "op": "status.transition",
+          "writer_group": 1,
+          "body_id": "a0000000-0000-4000-8000-000000000002",
+          "status": {
+            "cartridge_id": "status_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "status",
+            "key": "bruised"
+          },
+          "expected": {
+            "active": true,
+            "generation": 1,
+            "ends_at": 400,
+            "next_tick_at": 400,
+            "job_id": "a0000000-0000-4000-8000-000000000008"
+          },
+          "value": {
+            "active": false,
+            "generation": 1
+          }
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "status",
+              "body_id": "a0000000-0000-4000-8000-000000000002",
+              "status": {
+                "cartridge_id": "status_sampler",
+                "cartridge_version": "0.0.1",
+                "kind": "status",
+                "key": "bruised"
+              }
+            },
+            "value": {
+              "active": false,
+              "generation": 1
+            }
+          },
+          {
+            "target": {
+              "kind": "job",
+              "job_id": "a0000000-0000-4000-8000-000000000007"
+            },
+            "value": {
+              "job": {
+                "cartridge_id": "status_sampler",
+                "cartridge_version": "0.0.1",
+                "kind": "status",
+                "key": "poison"
+              },
+              "due_time": 160,
+              "status": "completed"
+            }
+          },
+          {
+            "target": {
+              "kind": "job",
+              "job_id": "a0000000-0000-4000-8000-000000000008"
+            },
+            "value": {
+              "job": {
+                "cartridge_id": "status_sampler",
+                "cartridge_version": "0.0.1",
+                "kind": "status",
+                "key": "bruised"
+              },
+              "due_time": 400,
+              "status": "completed"
+            }
+          },
+          {
+            "target": {
+              "kind": "clock"
+            },
+            "value": 1000
+          }
+        ]
+      }
+    },
+    {
+      "id": "end-at-completed-job-refused",
+      "state": {
+        "clock": 100,
+        "known_entities": {
+          "a0000000-0000-4000-8000-000000000002": {
+            "kind": "body"
+          }
+        },
+        "jobs": {
+          "a0000000-0000-4000-8000-000000000007": {
+            "job": {
+              "cartridge_id": "status_sampler",
+              "cartridge_version": "0.0.1",
+              "kind": "status",
+              "key": "poison"
+            },
+            "due_time": 160,
+            "status": "pending"
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "time.advance",
+          "writer_group": 0,
+          "from": 100,
+          "to": 1000
+        },
+        {
+          "op": "job.complete",
+          "writer_group": 1,
+          "job_id": "a0000000-0000-4000-8000-000000000007"
+        },
+        {
+          "op": "status.transition",
+          "writer_group": 1,
+          "body_id": "a0000000-0000-4000-8000-000000000002",
+          "status": {
+            "cartridge_id": "status_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "status",
+            "key": "bruised"
+          },
+          "expected": null,
+          "value": {
+            "active": true,
+            "generation": 1,
+            "ends_at": 160,
+            "next_tick_at": 160,
+            "job_id": "a0000000-0000-4000-8000-000000000008"
+          }
+        },
+        {
+          "op": "job.schedule",
+          "writer_group": 1,
+          "job_id": "a0000000-0000-4000-8000-000000000008",
+          "job": {
+            "cartridge_id": "status_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "status",
+            "key": "bruised"
+          },
+          "due_time": 160
+        },
+        {
+          "op": "job.complete",
+          "writer_group": 1,
+          "job_id": "a0000000-0000-4000-8000-000000000008"
+        },
+        {
+          "op": "status.transition",
+          "writer_group": 1,
+          "body_id": "a0000000-0000-4000-8000-000000000002",
+          "status": {
+            "cartridge_id": "status_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "status",
+            "key": "bruised"
+          },
+          "expected": {
+            "active": true,
+            "generation": 1,
+            "ends_at": 160,
+            "next_tick_at": 160,
+            "job_id": "a0000000-0000-4000-8000-000000000008"
+          },
+          "value": {
+            "active": false,
+            "generation": 1
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "status",
+            "body_id": "a0000000-0000-4000-8000-000000000002",
+            "status": {
+              "cartridge_id": "status_sampler",
+              "cartridge_version": "0.0.1",
+              "kind": "status",
+              "key": "bruised"
             }
           }
         }

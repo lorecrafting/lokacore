@@ -77,11 +77,12 @@ type Spawned = {
   origin?: { by?: { key: string }; slot?: number; generation?: number; role?: string };
 };
 
-// The state as canonical JSON with job ids dropped, only pending jobs kept, and every spawned id
-// replaced by the spawner, slot, generation and role that made it (spawn ids derive from job ids).
+// The state as canonical JSON with job and event ids dropped, only pending jobs kept, and every
+// spawned id replaced by the spawner, slot, generation and role that made it (spawn and event ids
+// derive from job ids).
 function normal(w: World): Record<string, string> {
   const s = JSON.parse(encode(w.state as never), (k, v) =>
-    k === 'job_id' || k === 'occurrence_id' ? undefined : v,
+    k === 'job_id' || k === 'occurrence_id' || k === 'event_id' ? undefined : v,
   );
   s.jobs = Object.values(s.jobs ?? {})
     .filter((j: any) => j.status === 'pending')
@@ -108,25 +109,6 @@ const EXCEPTIONS: Record<
   string,
   (hourly: World | { fault: string }, long: World | { fault: string }) => void
 > = {
-  // mechanics.md:1956 (status Known limit): a refresh whose new end is at or before the advance
-  // end faults precondition_failed; `soaked` is refreshed every hour by four reactions. The fix
-  // for loka-j958 removes this exception and the two "Same limit" ones below.
-  toolbox_showcase: (hourly, long) => {
-    assert.ok(!('fault' in hourly), encode(hourly as never));
-    assert.match((long as { fault: string }).fault, /precondition_failed/);
-  },
-  // Same limit, any re-apply in one advance: the guard's poison ticks re-apply `fury` (end +600)
-  // inside each hour; the long wait re-applies `poison` (end +300) on the guard's next 07:00.
-  npc_status_sampler: (hourly, long) => {
-    assert.match((hourly as { fault: string }).fault, /precondition_failed.*"key":"fury"/);
-    assert.match((long as { fault: string }).fault, /precondition_failed.*"key":"poison"/);
-  },
-  // Same limit: Maud enters the yard each 07:00 and `bruised` (end +10 hours) is re-applied on the
-  // second day of the long wait; each hourly advance ends before it would expire.
-  variants_sampler: (hourly, long) => {
-    assert.ok(!('fault' in hourly), encode(hourly as never));
-    assert.match((long as { fault: string }).fault, /precondition_failed.*"key":"bruised"/);
-  },
   // mechanics.md:2138 (clock_hour): one settlement crossing many hour boundaries fires once, at the
   // wait end, so `raid` fires at 3000 (full moon) and not at 1000, and `calm` never sees a new moon.
   raid_sampler: (hourly, long) => {
