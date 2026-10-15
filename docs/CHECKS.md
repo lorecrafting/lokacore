@@ -98,6 +98,7 @@ their rules and red controls remain available for resumption.
   and a reserved ID, and checks the session-start PR drift report
   (`bin/beads_pr_drift.py`). The check needs no `br` binary.
 - `bin/orphans_red_controls.sh` checks that `bin/orphans.sh` lists a busy, old orphan and skips a child, a young, an idle, a system and a server process. `bin/worktree_setup_red_controls.sh` checks that `bin/worktree_setup.sh` links main's `node_modules` for a matching lockfile and removes the link before `npm ci` after a lockfile change.
+- `bin/prose_lint.py <cartridge dir>` (report only, never a gate; exit 0 on findings, 2 on bad input; balance N6 text health): per cartridge it prints W7 variant groups whose texts share a first word, keys with one alternate, sentence length (mean, spread) per key kind, and the Flesch-Kincaid grade. Band-phrase coverage is skipped: N6 defines no bands. Its control `bin/prose_lint_red_controls.sh` (fixture `test/fixtures/prose_lint`) is in `ci.yml`'s `lint` job.
 - `bin/merge_resolve_red_controls.sh` checks that `bin/merge_resolve.py` (the `bin/pm_merge.sh` resolver) keeps both
   `docs/system/mechanics.md` tail sections (ours first, a section both sides appended once), the higher
   `kernel_api` (1.10 over 1.9) and a regenerated `docs/system-graph.gen.json`, and leaves unresolved a tail
