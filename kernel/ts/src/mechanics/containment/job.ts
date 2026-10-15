@@ -33,14 +33,14 @@ export function firstReplenish(cartridge: Cartridge, clock: number, mint: Mint) 
 }
 
 // The loader refuses a template location, so `at` names a room, an NPC or an item.
-const holder = (world: World, at: ItemLocation): EntityId =>
+export const holder = (world: World, at: ItemLocation): EntityId =>
   at.in === 'room'
     ? world.roomIds[refString(at.room)]
     : world.entityIds[refString(at.in === 'npc' ? at.npc : (at as { item: DefinitionRef }).item)];
 
 // The target's free room: its declared capacity less everything directly in it, whatever the
 // item (as commerce/shared.ts), so a move never exceeds it; unbounded without a capacity.
-function free(world: World, to: EntityId, steps: Steps): number | 'budget_exceeded' {
+export function free(world: World, to: EntityId, steps: Steps): number | 'budget_exceeded' {
   let left = world.capacities[to] ?? Infinity;
   if (left !== Infinity)
     for (const c of Object.values(world.state.containers)) {

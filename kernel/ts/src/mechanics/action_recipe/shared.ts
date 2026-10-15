@@ -5,10 +5,8 @@ import type {
   ActionRecipe,
   CharacterId,
   CommandPayload,
-  DefinitionRef,
   DeltaOp,
   EntityId,
-  ItemLocation,
   RecipeTarget,
   UnavailableReason,
   UseTool,
@@ -16,6 +14,7 @@ import type {
 import { bodyOf, refString, type Steps, type World } from '../../runtime/decision.ts';
 import { engaged } from '../combat/shared.ts';
 import { carryingExchange, giveRefused } from '../containment/shared.ts';
+import { free, holder } from '../containment/job.ts';
 import { selected } from '../containment/stock.ts';
 import { value as factValue } from '../fact.ts';
 import { toolHeld } from '../lookups.ts';
@@ -128,17 +127,13 @@ const transfer = (
   source_id,
   destination_id,
 });
-// The loader admits only a room, npc or item holder for a craft (never template).
-const holder = (world: World, l: ItemLocation) =>
-  l.in === 'room'
-    ? world.roomIds[refString(l.room)]
-    : world.entityIds[refString(l.in === 'npc' ? l.npc : (l as { item: DefinitionRef }).item)];
 
 /**
  * Homestead hs-10: a station recipe's craft, read before any draw. The first `quantity` consume
  * items held directly in the body (lowest EntityId, each one Give would let go) move to `to`, and
  * one yield item directly in `from` moves to the body; fewer held refuses invalid_state with the
- * consume reason, an empty `from` without one, a body that cannot carry the exchange too_heavy.
+ * consume reason, a full `to` or an empty `from` without one, a body that cannot carry the
+ * exchange too_heavy.
  */
 export function crafted(
   world: World,
@@ -157,13 +152,16 @@ export function crafted(
     const code = giveRefused(world, id, steps);
     if (code) return { code };
   }
+  const to = consume && holder(world, consume.to);
+  const left = to ? free(world, to, steps) : Infinity; // a full `to` refuses as a full put does
+  if (typeof left === 'string') return { code: left };
+  if (left < ids.length) return { code: 'invalid_state' };
   const from = made && holder(world, made.from);
   const out = made ? selected(world, made.items, from!, 1, steps) : [];
   if (typeof out === 'string') return { code: out };
   if (made && !out.length) return { code: 'invalid_state' };
   const code = carryingExchange(world, body, ids, out, steps);
   if (code) return { code };
-  const to = consume && holder(world, consume.to);
   return {
     consumed: ids.map((id) => transfer(id, body, to!)),
     made: out.map((id) => transfer(id, from!, body)),

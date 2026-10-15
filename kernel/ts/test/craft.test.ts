@@ -176,7 +176,7 @@ test('reopening between the two carves gives the same ids', () => {
 });
 
 // Breaks: the loader admits a template or non-container holder, an unresolved item, holder or
-// reason, a duplicate item, or a craft on a storylet (twin of test/loka/content_craft_test.exs;
+// reason, a duplicate item, or a craft on a storylet or spell (twin of test/loka/content_craft_test.exs;
 // the floor is loader_floors.json's "a craft" case).
 test('loader: a craft needs resolved, placed holders, distinct items, a catalog reason, a station', () => {
   const R = (kind: string, key: string) => ({
@@ -186,9 +186,9 @@ test('loader: a craft needs resolved, placed holders, distinct items, a catalog 
     key,
   });
   const at = `.cartridge.recipes["${P}recipe/carve_spoon"].craft`;
-  const load = (edit: (r: any) => void) => {
+  const load = (edit: (r: any, c: any) => void) => {
     const c = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
-    edit(c.recipes[`${P}recipe/carve_spoon`]);
+    edit(c.recipes[`${P}recipe/carve_spoon`], c);
     const canonical = encode(c);
     const sha256 = createHash('sha256').update(canonical).digest('hex');
     const r = loadCartridge(
@@ -197,7 +197,7 @@ test('loader: a craft needs resolved, placed holders, distinct items, a catalog 
     );
     return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
   };
-  const cases: [(r: any) => void, string, string][] = [
+  const cases: [(r: any, c: any) => void, string, string][] = [
     [(r) => (r.craft.consume.to = { in: 'template' }), 'SCHEMA_VIOLATION', '.consume.to'],
     [
       (r) => (r.craft.yield.from = { in: 'item', item: R('item', 'stick_02') }),
@@ -228,6 +228,16 @@ test('loader: a craft needs resolved, placed holders, distinct items, a catalog 
       'SCHEMA_VIOLATION',
       '',
     ],
+    [
+      (r, c) => {
+        const known = { ...c.facts[`${P}fact/spoon_carved`], key: 'known', scopes: ['player'] };
+        c.facts[`${P}fact/known`] = known; // a valid learned fact, so only the craft refuses
+        delete r.check;
+        r.target = { kind: 'spell', word: 'carve', learned: R('fact', 'known') };
+      },
+      'SCHEMA_VIOLATION',
+      '',
+    ],
   ];
   assert.equal(
     load(() => {}),
@@ -236,22 +246,17 @@ test('loader: a craft needs resolved, placed holders, distinct items, a catalog 
   for (const [edit, code, path] of cases) assert.deepEqual(load(edit), [code, at + path]);
 });
 
+// A stick held, a carry limit of 100 g and 200 g spoons: the carve's exchange is too heavy.
+const heavy = (c = content) => {
+  const w = take(fresh({ ...c, world: { ...c.world, carry: { max_grams: 100 } } }), 'stick_01');
+  const spoon = (k: string) => ({ [item(w, k)]: { ...w.entities[item(w, k)]!, mass_grams: 200 } });
+  return { ...w, entities: { ...w.entities, ...spoon('spoon_01'), ...spoon('spoon_02') } };
+};
+
 // Breaks: the craft skips the carry check on the exchange (a heavier spoon for a stick exceeds the
 // limit) or hands over a stick the give rule protects.
 test('a craft the body cannot carry, or a protected stick, refuses with the same code offered', () => {
-  const heavy = (w: World, k: string) => ({ ...w.entities[item(w, k)]!, mass_grams: 200 });
-  let w = take(
-    fresh({ ...content, world: { ...content.world, carry: { max_grams: 100 } } }),
-    'stick_01',
-  );
-  w = {
-    ...w,
-    entities: {
-      ...w.entities,
-      [item(w, 'spoon_01')]: heavy(w, 'spoon_01'),
-      [item(w, 'spoon_02')]: heavy(w, 'spoon_02'),
-    },
-  };
+  let w = heavy();
   let r = carve(w);
   assert.equal(code(r), 'too_heavy');
   assert.ok(agrees(w, r));
@@ -263,5 +268,28 @@ test('a craft the body cannot carry, or a protected stick, refuses with the same
   };
   r = carve(w);
   assert.equal(code(r), 'invalid_state');
+  assert.ok(agrees(w, r));
+});
+
+// Breaks: the craft drops a stick into a scrap room already at its capacity (a full put refuses).
+test('a craft whose scrap room is full refuses with the same code offered', () => {
+  const w0 = holding();
+  const w = { ...w0, capacities: { ...w0.capacities, [room(w0, 'scrap')]: 0 } };
+  const r = carve(w);
+  assert.equal(code(r), 'invalid_state');
+  assert.ok(agrees(w, r));
+});
+
+// Breaks: the press reads the craft before the recipe's policy, so it refuses too_heavy while
+// the offer (view/action_lists.ts) refuses on the policy.
+test('a craft whose policy fails refuses on the policy, as offered', () => {
+  const key = `${P}recipe/carve_spoon`;
+  const shut = {
+    ...content.recipes![key]!,
+    policy: { policy_version: 1, root: { op: 'any', items: [] } },
+  };
+  const w = heavy({ ...content, recipes: { ...content.recipes, [key]: shut } } as never);
+  const r = carve(w);
+  assert.equal(code(r), 'invalid_state'); // not the craft's too_heavy
   assert.ok(agrees(w, r));
 });

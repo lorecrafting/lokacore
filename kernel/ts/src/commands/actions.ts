@@ -258,13 +258,13 @@ export function refusalReason(
           : 'unsupported_capability',
     };
   const use = useAdmission(world, matching[0]!.recipe, payload, steps); // row G4
-  const crafting = perform && craftRefused(world, matching[0]!.recipe, bodyOf(world, actor), steps);
-  const used = use ? { code: use } : crafting || castAdmission(world, payload, steps); // hs-10, 29a
+  const used = use ? { code: use } : castAdmission(world, payload, steps); // row 29a
   const ok = (a: Offered, d = detailAt(world, a)) =>
     (d === undefined || visible(world, actor, d, steps)) &&
     holds(world, actor, a.policy.root, { target: d ?? primaryTarget(payload), steps });
   // An offered action's reason text is the GameView's (view/action_lists.ts); only cast's and craft's reach here.
-  return used ?? (matching.some((a) => ok(a)) ? undefined : { code: 'invalid_state' });
+  if (used || !matching.some((a) => ok(a))) return used ?? { code: 'invalid_state' };
+  return craftRefused(world, matching[0]!.recipe, bodyOf(world, actor), steps); // after policy, as the offer (hs-10)
 }
 
 // A spell (row 29a) is cast by its word, never offered or performed by its key.
