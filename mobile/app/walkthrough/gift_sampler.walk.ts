@@ -8,12 +8,12 @@ walk('1-barter', 'Barter: two pelts for the knife, no coin', async (r) => {
   await settle();
   for (let i = 0; i < 2; i++) {
     await screen
-      .getByRole('button', /^A pelt lies here/)
+      .getByRole('button', /^A pelt is here/)
       .first()
       .tap();
     await screen.getByRole('button', 'Take a pelt').tap();
   }
-  await screen.getByRole('button', /^The trader sorts/).tap();
+  await screen.getByRole('button', /^The trader is here/).tap();
   await screen.getByRole('button', /Trade two pelts for the knife/).tap();
   await settle();
 });
