@@ -2200,7 +2200,7 @@ Nothing is stored: the stats are read at use, so a later attribute writer change
 [Toolbox row W6](../MECHANICS-TOOLBOX.md#ranked-toolbox); [declarations](cartridge.md#entity-variant-declarations) govern it; the PM brief is in Beads `loka-kgd.37` (2026-10-10).
 
 - **Variants.** An NPC may declare `short_variants`, `room_line_variants` and `description_variants`, an item `short_variants` and `description_variants` (its `room_line_variants` are older); each is a `TextVariants` list (`protocol/entity.schema.json`) of `DescriptionVariant`, read like a room's: the first whose `when` holds replaces the base text, which stays mandatory. One reader, `describeEntity` (`kernel/ts/src/mechanics/description_variant/rule.ts`), calls `describe` with the entity as the policy target, so in an entity's own variant `subject: "target"` and `target_present` read the thing described.
-- **Where shown.** The GameView entity `name` (short) and `description` (room contents, inventory, nested contents); the text player's room lines and examine. Every other reader of `short` (combat opponent names, shop lines, Knowledge, escort leader, water, recovery narration, the text player's take, drop and give narration, scan, disambiguation and NPC locations) still shows the base text (known limit). An item's older `room_line_variants` now also read the item as the target; no cartridge's room-line variant reads a target.
+- **Where shown.** The GameView entity `name` (short) and `description` (room contents, inventory, nested contents); the text player's room lines and examine. Since rows W15 and FD9 also Knowledge `known_npcs`, the combat name and opponents, and an escort's `leader_name` ([recognition](#recognition-and-earned-titles-toolbox-rows-w15-and-fd9)). Every other reader of `short` (shop lines, water, recovery narration, the text player's take, drop and give narration, scan, disambiguation and NPC locations) still shows the base text (known limit). An item's older `room_line_variants` now also read the item as the target; no cartridge's room-line variant reads a target.
 - **`status_active {subject: "target", status}`** (owned by status@1): holds when the target has an active row of the status (any [row G3](#statuses-on-npcs-and-things-toolbox-row-g3) holder); false without a target or for a detail, so it serves an entity's own variants and the policy of an action that targets an entity, and never holds in a room or detail variant, a reaction or a recipe (whose target is a detail). Only `subject: "target"` exists: no acceptance needs the actor's own statuses or a named holder.
 - **`npc_present {npc}`** (owned by target_resolution@1, beside `target_present`): holds when the named NPC's instance is in the actor's current room and living (hp above 0 when it has hp); no light, perception or reach test, unlike `target_present`. It names a definition because a recipe's target is a detail, so `subject: "target"` could not name the NPC. It is presence, not posture: the player's posture is position@1's `position` fact, read by `fact_compare`. _Why not owned by position@1:_ requiring position@1 adds the posture fact and the sit and stand verbs. _Known limit:_ a spawned copy of a template is not its definition's instance, so it reads false.
 - **Presence gate (row G3 carry, Beads `loka-kgd.42`).** A recipe whose opposed check names an `npc` adds `npc_present {npc}` to its policy, so the check is shown unavailable and refused while that NPC is elsewhere or dead.
@@ -3193,6 +3193,36 @@ Gap 4 of the [depth audit](../rnd/depth-and-ux-2026-10-13.md) (owner approved 20
   - Events, jobs and save rows: none new; `entity_entered_room` exists.
   - Reused: W1 filters and delivery, W2 entity and pair facts, row 33 `witnesses`, row 41 `moveItem` writer-group join, `eventRooms`, `KERNEL_API_RANGE_INVALID`.
   - New: the `witness` filter, the `npc.move` step, the 1.95 floor, reaction@1 composing `movement`.
+  - Missing invariant: none.
+
+## Recognition and earned titles (toolbox rows W15 and FD9)
+
+[Toolbox rows W15 and FD9](../MECHANICS-TOOLBOX.md#ranked-toolbox) (Beads `loka-kgd.146`): who the character is to the world, built from W2 pair facts, W6 variants, G3 statuses and row 46 topics. Story subset only; the Realm's identity rules are the owner's.
+
+- **NPC recognition is content.** An NPC's `short` is its unknown form; a `short_variants` entry reading a pair fact at the NPC (`fact_compare {fact: knows_name, subject: "target", equals: true}`, the fact `per_subject` with scope `player`) names it once a dialogue choice's `fact.assign` writes that fact at the speaker. Every GameView reader of an NPC's short name now resolves its variants for the viewing character: the room list, Knowledge `known_npcs`, the combat `name` and `active_opponents`, an exit's `sight`, and an escort's `leader_name`.
+- **Displayed name.** `world.identity {name, name_variants?}` ([declarations](cartridge.md#identity-declarations)) is the character's displayed name: GameView `actor_name`, the first `name_variants` entry whose condition holds, read with the actor's body as target (so `status_active {subject: "target"}` reads the character's own statuses), else `name`. Order is first match, so a disguise listed before a title hides it. Absent without `world.identity`.
+- **Disguise** is a G3 status on the body; an NPC's `disposition.hostile` may read `not status_active {subject: "self", status}` to let a disguised, wanted character pass. No arrest, recognition check or disguise stripping.
+- **Earned title** (FD9): a topic fact, granted the row 46 way (here an `entity_entered_room` reaction with a `when` that it is not yet known), is read by a name variant.
+- **Realm seams** (owner decision 2026-10-13, brief checklist).
+  1. Actor: met; the name and every NPC name are read for the viewing character, never `world.character`.
+  2. Reactions: met; nothing new fires.
+  3. Credit: not applicable.
+  4. Time: met; a disguise ends at its status expiry.
+  5. Scope: met; `knows_name` is a player-scoped pair fact, each character's own.
+  6. Text: met; every name is an authored text key; no player-typed name.
+  7. Ownership: not applicable; nothing owned moves.
+  8. Trust: not applicable; nothing imported.
+  9. Instancing: not applicable; none built or assumed.
+- **Opt-in.** `world.identity` needs `kernel_api` 1.97 in both kernels. Installed kernel 1.97. Chapter 1 declares none and shows no `actor_name`.
+- **Known limits.** The text player's lines and water narration still show the base short. No player-typed name.
+- **Sampler.** `cartridges/identity_sampler`: the square's hooded stranger, the notice (wanted), the cloak rack (disguised, two game hours; its 1 mv per hour tick is there because a timed status with no other effect needs a non-zero `per_tick` (cartridge.schema.json)), the den (Houndbane title) and the gate guard.
+- **Composition record** ([architecture](architecture.md#building-mechanics-by-composition)).
+  - Consumer: `identity_sampler`. Later: FD7, the showcase social district.
+  - Reads: W6 `describe`/`describeEntity`, W2 pair facts, G3 `status_active`, topics facts.
+  - Writes: none new (`fact.assign`, `status.apply` exist).
+  - Events, jobs and save rows: none new.
+  - Reused: W6 variants, W2 scope checks (`FACT_SCOPE_UNSUPPORTED`, the name variant read with no fact subject), G3 statuses, row 46 reactions, `KERNEL_API_RANGE_INVALID`.
+  - New: `world.identity`, `displayedName`, GameView `actor_name`, the 1.97 floor.
   - Missing invariant: none.
 
 ## Ask about a topic (toolbox row FD7)

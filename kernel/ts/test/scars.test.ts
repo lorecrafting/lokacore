@@ -91,7 +91,7 @@ const SCARRED = [{ label: 'condition.scarred', resource: 'hp', tick_every: 60 }]
 
 // Breaks: a permanent status gets an end or an expiry job, refreshes or re-narrates on a later
 // hit, is cleared by the same-body return, is not cured by `cures`, is not seen by W6's
-// status_active, or opens silently (the applied line keyed on a job).
+// status_active (room list or combat name), or opens silently (the applied line keyed on a job).
 test('a wolf bite leaves a scar that survives death and return, and the salve cures it', () => {
   let w = newWorld(content, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, [1, 2, 3, 4]);
   assert.deepEqual(bitten(w), [1, [{ key: 'narration.scar.applied' }]]);
@@ -101,6 +101,7 @@ test('a wolf bite leaves a scar that survives death and return, and the salve cu
   assert.equal(hp(w), 6);
   assert.deepEqual(conditions(w), SCARRED);
   assert.equal(wolfName(w), 'npc.wolf.short_scarred');
+  assert.equal(gameView(w).combat?.name, 'npc.wolf.short_scarred'); // rows W15, FD9
   assert.deepEqual(bitten(w), [0, undefined]); // scarred already: no write, no line
   const pending = Object.values(w.state.jobs ?? {}).filter((j) => j.status === 'pending');
   assert.ok(!pending.some((j) => j.job.kind === 'status'), 'a permanent status schedules no job');

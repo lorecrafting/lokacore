@@ -1,4 +1,4 @@
-// size: allow 338, ancestry, bell area, Study edge, barrier opens_when and ask answer roots join shared reference admission
+// size: allow 344, ancestry, bell area, Study edge, barrier opens_when, ask answer roots and identity name variants join shared reference admission
 import { water } from './cartridge_water.ts';
 import { topics } from './cartridge_topics.ts';
 import { pools } from './cartridge_pools.ts';
@@ -108,7 +108,12 @@ export function parts(c: Obj): [string, Obj, string][] {
   for (const [ref, b] of Object.entries((c.barriers ?? {}) as Obj))
     add('barrier', b, `.cartridge.barriers${step(ref)}`);
   if (c.calendar) out.push(['calendar', c.calendar, '.cartridge.calendar']);
-  return [...out, ...cueParts(c)];
+  return [...out, ...cueParts(c), ...identityParts(c)];
+}
+
+function identityParts(c: Obj, at = '.cartridge.world.identity.name_variants') {
+  const vs: Obj[] = c.world?.identity?.name_variants ?? []; // rows W15, FD9
+  return vs.map((v, i) => ['variant', v, `${at}[${i}]`] as [string, Obj, string]);
 }
 
 /** Each population plan gate's located root (row W12). */
@@ -260,6 +265,7 @@ export function refStage(c: Obj): Diagnostic[] {
     text(a, ['label', 'accessibility'], `.cartridge.actions${step(ref)}`);
   for (const [kind, d, at] of parts(c)) text(d, TEXT[kind] ?? ['description'], at);
   for (const [a, at] of asideParts(c)) text(a, ['text'], at);
+  text(c.world?.identity ?? {}, ['name'], '.cartridge.world.identity'); // rows W15, FD9
   out.push(...water(c, check), ...skills(c, check), ...topics(c, check));
   ancestryRefs(c, check, out);
   out.push(...recipes(c, check), ...holders(c), ...barriers(c, check.named), ...links(c));
