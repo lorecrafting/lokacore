@@ -441,7 +441,7 @@ test('a hidden skill lesson is not offered until its prerequisite holds; choose 
     skills: { ...content.skills, [`${P}skill/carving`]: { ...carving, hidden: true } },
   };
   const talk = (w: World) => ok(w, { type: 'talk', target_id: w.entityIds[`${P}npc/old_carver`]! });
-  const ids = (w: World) => gameView(w).choice!.choices.map((o): string => o.choice_id);
+  const ids = (w: World) => gameView(w).choice!.choices.map((o) => o.choice_id);
   const whittled = carve(take(take(fresh(c as never), 'stick_01'), 'stick_02')).world; // whittling 1
   const level1 = talk(whittled);
   assert.ok(!ids(level1).includes('learn'));
