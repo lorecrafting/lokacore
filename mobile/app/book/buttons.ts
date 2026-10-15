@@ -161,10 +161,14 @@ function heldButtons(
     e.actions
       .filter((a) => a.available && !['give', 'ask', 'whisper'].includes(a.action_key)) // ponytail: give waits for a recipient selector, whisper for word bar S3 (loka-a9pn); ask is askButtons
       .map((a) => {
+        // A use pair (G4) lists [target, tool]: this page's item is the tool, so name the target.
+        const target = a.target_ids?.[1] === e.id && names.get(a.target_ids[0]!);
         const destination = a.target_ids?.[1] && names.get(a.target_ids[1]);
         const offered = button(
           a,
-          ` ${text(e.name)}${destination ? ` ${commandOf(a) === 'refuel' ? 'from' : commandOf(a) === 'pour' ? 'into' : 'in'} ${text(destination)}` : ''}`,
+          target
+            ? ` ${text(target)}`
+            : ` ${text(e.name)}${destination ? ` ${commandOf(a) === 'refuel' ? 'from' : commandOf(a) === 'pour' ? 'into' : 'in'} ${text(destination)}` : ''}`,
           e.id,
         );
         return a.action_key === 'bandage' && v.bleeding
