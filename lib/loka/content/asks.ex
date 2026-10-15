@@ -23,14 +23,14 @@ defmodule Loka.Content.Asks do
           m["requires"]["capabilities"][c] != 1,
           do: diag("UNDECLARED_CAPABILITY", at(rel, ["ask"]), %{"capability" => c}, ["#{c}@1"])
 
-    refs =
-      for {x, i} <- Enum.with_index(a["answers"]),
-          f <- ~w(topic grants),
-          is_map_key(x, f),
-          d <- reference(rel, ["ask", "answers", i], {f, "topic"}, x, m, defs),
-          do: d
+    owners ++ Enum.flat_map(Enum.with_index(a["answers"]), &refs(&1, rel, m, defs))
+  end
 
-    owners ++ refs
+  defp refs({x, i}, rel, m, defs) do
+    for f <- ~w(topic grants),
+        is_map_key(x, f),
+        d <- reference(rel, ["ask", "answers", i], {f, "topic"}, x, m, defs),
+        do: d
   end
 
   defp floor(_, []), do: []

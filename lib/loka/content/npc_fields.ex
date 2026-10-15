@@ -10,13 +10,14 @@ defmodule Loka.Content.NpcFields do
     |> update("attributes", fn c ->
       Enum.map(c, fn a -> Map.update!(a, "attribute", &ref(&1, "attribute", m)) end)
     end)
-    |> update("ask", fn a ->
-      Map.update!(a, "answers", &Enum.map(&1, fn x -> answer(x, m, expand) end))
-    end)
+    |> update("ask", &ask(&1, m, expand))
     |> Map.merge(variants(npc, m, expand))
   end
 
-  # Toolbox row FD7: an answer's topic, granted topic and condition.
+  # Toolbox row FD7: each answer's topic, granted topic and condition.
+  defp ask(a, m, expand),
+    do: Map.update!(a, "answers", &Enum.map(&1, fn x -> answer(x, m, expand) end))
+
   defp answer(a, m, expand) do
     a
     |> Map.update!("topic", &ref(&1, "topic", m))

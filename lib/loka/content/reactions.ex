@@ -96,8 +96,7 @@ defmodule Loka.Content.Reactions do
     "npc.move" => 95
   }
 
-  # The kernel_api minor each trigger event needs: spoken 1.48 (G9), status_applied 1.53 (status
-  # reader 2, row G3), asked 1.96 (FD7).
+  # Each trigger event's kernel_api minor: spoken 1.48 (G9), status_applied 1.53 (G3), asked 1.96 (FD7).
   @events %{"quest_resolved" => 8, "spoken" => 48, "status_applied" => 53, "asked" => 96}
 
   # One diagnostic per rule below its highest floor; filters: npc 1.47 (W3), attacker 1.58

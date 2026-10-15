@@ -1,4 +1,4 @@
-# size: allow 348, ancestry, static map, status source, levelling settings, replenish, trail and theft wiring join the existing compiler boundary
+# size: allow 349, ancestry, static map, status source, levelling settings, replenish, trail, theft and asks wiring join the existing compiler boundary
 defmodule Loka.Content.Compiler do
   @moduledoc "Validates source files and builds the CompiledCartridge (05 §3–§8, 06 §20–21)."
   alias Loka.Content.{

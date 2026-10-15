@@ -20,9 +20,9 @@ import {
   type World,
 } from '../../runtime/decision.ts';
 import { npcsIn } from '../death/shared.ts';
+import { pending } from '../dialogue/shared.ts';
 import { disposition } from '../disposition.ts';
-import { value } from '../fact.ts';
-import { grant } from '../topics/shared.ts';
+import { grant, knownTopics } from '../topics/shared.ts';
 import { answerTo } from './shared.ts';
 
 /** Why `actor` may not ask `target` now, whatever the topic (the GameView's check too). */
@@ -34,17 +34,12 @@ export function askRefused(
 ): ErrorCode | undefined {
   const body = bodyOf(world, actor);
   const room = body && world.state.containers[body];
-  if (!room) return 'invalid_state'; // a pending conversation drops speech verbs first (actions.ts)
+  if (!room || pending(world, actor)) return 'invalid_state';
   if (world.knownEntities[target]?.kind !== 'npc') return 'not_found';
   if (!npcsIn(world, [room]).includes(target)) return 'not_present';
   if (!(world.entities[target] as NpcDefinition | undefined)?.ask) return 'invalid_target';
   if (disposition(world, actor, target, steps) === 'hostile') return 'invalid_state';
 }
-
-const known = (world: World, actor: CharacterId, topic: DefinitionRef) => {
-  const d = world.cartridge.topics?.[refString(topic)];
-  return !!d && value(world, actor, d.fact) === true;
-};
 
 export function ask(
   world: World,
@@ -57,7 +52,9 @@ export function ask(
   const { actor_id, target_id, topic } = command.payload;
   const code =
     askRefused(world, actor_id, target_id, steps) ??
-    (known(world, actor_id, topic) ? undefined : 'invalid_state');
+    (knownTopics(world, actor_id).some((t) => refString(t.topic) === refString(topic))
+      ? undefined
+      : 'invalid_state');
   if (code) return rejected(code);
   const answer = answerTo(world, actor_id, target_id, topic, steps);
   const run = { ops: [], facts: {}, position: 1 }; // the asked event holds position 1

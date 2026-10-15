@@ -151,7 +151,11 @@ test('the miller cannot be asked; the guard turns hostile on smugglers; a conver
   assert.equal(g.text, 'guard.unknown');
   assert.equal(value(g.w, g.w.character, ref('fact', 'wanted')), true);
   assert.equal(refused(g.w, 'guard', 'moon'), 'invalid_state');
-  assert.deepEqual(offer(g.w, 'guard')?.reason, { code: 'invalid_state' });
+  assert.deepEqual(offer(g.w, 'guard'), {
+    ...offer(w, 'guard'),
+    available: false,
+    reason: { code: 'invalid_state' },
+  });
   const strict = reload((c) => (c.reactions[`${P}reaction/guard_smugglers`].on.answered = true));
   assert.ok(strict.ok);
   const unanswered = answer(
@@ -190,7 +194,7 @@ test('the loader refuses an unknown answer topic, ask without speech@1, 1.95 and
   // Each floor alone: the asks' (no asked trigger left), then the asked trigger's (no ask left).
   for (const drop of [
     (c: Obj) => delete c.reactions[`${P}reaction/guard_smugglers`],
-    (c: Obj) => Object.values(c.npcs).forEach((n: Obj) => delete n.ask),
+    (c: Obj) => Object.values(c.npcs as Record<string, Obj>).forEach((n) => void delete n.ask),
   ])
     assert.deepEqual(
       refusal((c) => {
