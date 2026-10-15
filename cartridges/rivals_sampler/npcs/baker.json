@@ -1,0 +1,9 @@
+{
+  "keywords": [
+    "baker"
+  ],
+  "short": "npc.baker.short",
+  "room_line": "npc.baker.room",
+  "description": "npc.baker.description",
+  "room": "mill"
+}

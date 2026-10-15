@@ -10,6 +10,17 @@
         "instance"
       ],
       "meaning": "A bone lies in the yard; a crow has come down for it."
+    },
+    "crow_fed": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "instance"
+      ],
+      "meaning": "The crow has flown down to the yard for the bone."
     }
   }
 }

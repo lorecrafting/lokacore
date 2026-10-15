@@ -7,5 +7,10 @@
   "item.bone.description": "A soup bone, picked almost clean.",
   "item.pebble.short": "a pebble",
   "item.pebble.room": "A round [pebble] lies in the mud.",
-  "item.pebble.description": "A smooth grey pebble."
+  "item.pebble.description": "A smooth grey pebble.",
+  "room.roost.title": "The Roost",
+  "room.roost.description": "A sagging loft above the yard, white with droppings.",
+  "npc.crow.short": "the crow",
+  "npc.crow.room": "A black [crow] watches from a beam.",
+  "npc.crow.description": "A glossy crow with a clever eye."
 }

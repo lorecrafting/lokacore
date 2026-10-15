@@ -714,6 +714,13 @@
       "floor": "1.89",
       "below": "1.88",
       "source": "cartridges/rivals_sampler",
+      "edits": [
+        [
+          "reactions/witnessed.json",
+          ["on"],
+          { "event": "item_acquired", "item": "apple" }
+        ]
+      ],
       "compiler": [
         "KERNEL_API_RANGE_INVALID",
         "cartridge.requires.kernel_api.at_least"
@@ -779,6 +786,33 @@
       "floor": "1.94",
       "below": "1.93",
       "source": "cartridges/theft_sampler",
+      "compiler": [
+        "KERNEL_API_RANGE_INVALID",
+        "cartridge.requires.kernel_api.at_least"
+      ],
+      "loader": [
+        "KERNEL_API_RANGE_INVALID",
+        ".cartridge.manifest.requires.kernel_api.at_least"
+      ]
+    },
+    {
+      "floor": "1.95",
+      "below": "1.94",
+      "source": "cartridges/rivals_sampler",
+      "compiler": [
+        "KERNEL_API_RANGE_INVALID",
+        "cartridge.requires.kernel_api.at_least"
+      ],
+      "loader": [
+        "KERNEL_API_RANGE_INVALID",
+        ".cartridge.manifest.requires.kernel_api.at_least"
+      ]
+    },
+    {
+      "floor": "1.95",
+      "below": "1.94",
+      "source": "cartridges/reactions_sampler",
+      "feature": "npc.move without a witness filter",
       "compiler": [
         "KERNEL_API_RANGE_INVALID",
         "cartridge.requires.kernel_api.at_least"

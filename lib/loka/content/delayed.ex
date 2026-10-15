@@ -1,7 +1,7 @@
 defmodule Loka.Content.Delayed do
   @moduledoc """
   Toolbox row FD1: a reaction's `after`, the fact.stamp step and the time_since leaf need
-  kernel_api 1.90; a delayed rule carries no step that reads its event (barrier.set, item.move,
+  kernel_api 1.90; a delayed rule carries no step that reads its event (barrier.set, item.move, npc.move,
   population.suppress, a co_present or tagged step, a quest step: RS-4's subject) and no `when`
   leaf with `subject: "subject"`;
   a stamped or timed fact is an int fact with no maximum and a minimum absent or at most 0. Twin of kernel/ts/src/content/cartridge_delayed.ts.
@@ -10,7 +10,7 @@ defmodule Loka.Content.Delayed do
   import Loka.Content.Refs, only: [resolve: 4]
 
   # The fired job keeps its actor, not the subject RS-4's quest steps read (NPC no-op, trigger holder).
-  @event_bound ~w(barrier.set item.move population.suppress quest.activate quest.resolve quest.fail)
+  @event_bound ~w(barrier.set item.move npc.move population.suppress quest.activate quest.resolve quest.fail)
 
   @doc "Diagnostics for the reactions of `defs` and the policy `trees` (`{rel, steps, root}`)."
   @spec check(map() | nil, map(), list() | nil) :: [map()]

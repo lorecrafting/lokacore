@@ -1,4 +1,4 @@
-// size: allow 402, reaction@1 keeps its total trigger SUBJECT table beside the one delivery sequence (row FD1: or its delayed job)
+// size: allow 418, reaction@1 keeps its total trigger SUBJECT table and filters (row FD5: witness) beside the one delivery sequence (row FD1: or its delayed job)
 // reaction@1 (capability_registry.json; reaction.schema.json ReactionRule; 21 §3.4, §11; 06
 // §14; 04 §5.2): the rules an event triggers and one delivery's explicit sequence. proposal.ts
 // propose runs the FIFO queue, numbers the writer groups and counts the budgets.
@@ -39,13 +39,14 @@ import { grant } from './levelling/shared.ts';
 import { saturate } from '../foundation/int.ts';
 import { npcsIn } from './death/shared.ts';
 import { setBarrier } from './barrier/react.ts';
-import { moveItem } from './containment/react.ts';
+import { moved } from './containment/react.ts';
+import { witnesses } from './senses.ts';
 import { spawn } from './population/react.ts';
 
 type On = ReactionRule['on'];
 // Each trigger filter (W1; reaction.schema.json): true when the event's payload field equals it.
 // A field means the same payload field in every event kind that declares it.
-type Match = (w: World, want: any, p: any) => boolean;
+type Match = (w: World, want: any, p: any, e: DomainEvent) => boolean;
 // Null-safe: a player's entity_died carries no victim_definition.
 const ref =
   (field: string): Match =>
@@ -79,6 +80,13 @@ export const FILTERS: Record<string, Match> = {
   status: ref('status'),
   word: equal('word'),
   loudness: equal('loudness'),
+  // Row FD5: the NPC, alive in the room of the event's subject (else its doer's body), sees it;
+  // never its own witness (a dead victim, alive in the pre-command world, saw nothing).
+  witness: (w, want, _, e) => {
+    const body = subjectOf(e) ?? (e.actor_id && bodyOf(w, e.actor_id));
+    const npc = w.entityIds[refString(want)]!;
+    return !!body && npc !== body && witnesses(w, body).includes(npc);
+  },
 };
 
 /**
@@ -89,7 +97,9 @@ export const FILTERS: Record<string, Match> = {
 export function triggered(world: World, e: DomainEvent): ReactionRule[] {
   const meets = ({ on }: ReactionRule) =>
     on.event === e.payload.type &&
-    Object.entries(on).every(([f, want]) => f === 'event' || FILTERS[f]!(world, want, e.payload));
+    Object.entries(on).every(
+      ([f, want]) => f === 'event' || FILTERS[f]!(world, want, e.payload, e),
+    );
   const authored = Object.values(world.cartridge.reactions ?? {})
     .filter(meets)
     .sort((a, b) => cmp(a.key, b.key));
@@ -161,8 +171,8 @@ export function sequence(
       narration.push(...applying.narration);
     } else if (step.op === 'barrier.set') {
       ops.push(...setBarrier(then, step, cause, about.subject, group, own, emit)); // row W22
-    } else if (step.op === 'item.move') {
-      ops.push(...moveItem(then, step, about.subject, group, ops, holders)); // row 41
+    } else if (step.op === 'item.move' || step.op === 'npc.move') {
+      ops.push(...moved(then, step, actor, about, group, ops, holders, emit)); // rows 41, FD5
     } else if (step.op === 'population.spawn') {
       ops.push(...spawn(then, step, group, ops, mint)); // row 37a
     } else if (step.op === 'experience.grant') {

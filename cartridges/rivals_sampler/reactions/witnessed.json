@@ -1,0 +1,15 @@
+{
+  "on": {
+    "event": "item_acquired",
+    "item": "apple",
+    "witness": "baker"
+  },
+  "apply": [
+    {
+      "op": "fact.assign",
+      "fact": "gratitude",
+      "npc": "baker",
+      "value": true
+    }
+  ]
+}
