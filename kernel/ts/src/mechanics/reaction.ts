@@ -80,10 +80,12 @@ export const FILTERS: Record<string, Match> = {
   status: ref('status'),
   word: equal('word'),
   loudness: equal('loudness'),
-  // Row FD5: the NPC, alive in the room of the event's subject (else its doer's body), sees it.
+  // Row FD5: the NPC, alive in the room of the event's subject (else its doer's body), sees it;
+  // never its own witness (a dead victim, alive in the pre-command world, saw nothing).
   witness: (w, want, _, e) => {
     const body = subjectOf(e) ?? (e.actor_id && bodyOf(w, e.actor_id));
-    return !!body && witnesses(w, body).includes(w.entityIds[refString(want)]!);
+    const npc = w.entityIds[refString(want)]!;
+    return !!body && npc !== body && witnesses(w, body).includes(npc);
   },
 };
 

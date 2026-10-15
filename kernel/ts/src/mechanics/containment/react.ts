@@ -17,6 +17,7 @@ import { engaged } from '../combat/shared.ts';
 import { living } from '../death/shared.ts';
 import { eventRooms } from '../lookups.ts';
 import { running } from '../scene/shared.ts';
+import { moves } from '../status/shared.ts';
 
 export function moveItem(
   world: World,
@@ -84,7 +85,11 @@ function moveNpc(
     ? [world.roomIds[refString(step.room)]]
     : eventRooms(world, cause, subject);
   if (!npc || !room || world.entities[npc]?.kind !== 'npc') return [];
-  if (!living(world, npc) || engaged(world, npc)) return [];
+  // A following escort stays with its player (escort@1: never detached); a rooted NPC stays put.
+  const escorting = Object.values(world.state.escorts ?? {}).some(
+    (e) => e?.npc_id === npc && e.status === 'following',
+  );
+  if (!living(world, npc) || engaged(world, npc) || escorting || !moves(world, npc)) return [];
   const last = ops.filter((o) => o.op === 'entity.transfer' && o.entity_id === npc).pop();
   const at = last?.op === 'entity.transfer' ? last.destination_id : world.state.containers[npc];
   if (!at || at === room) return [];

@@ -11,6 +11,8 @@ import { test } from 'node:test';
 import { gameView, INSTALLED, loadCartridge, newWorld, step } from '../src/index.ts';
 import { allocator, type Cartridge, type World } from '../src/runtime/decision.ts';
 import { sequence, triggered } from '../src/mechanics/reaction.ts';
+import { statusKey } from '../src/mechanics/status/shared.ts';
+const ref = { cartridge_id: 'reactions_sampler', cartridge_version: '0.0.1', kind: 'status' };
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-reactions-sampler-'));
 let artifact: Uint8Array;
@@ -60,7 +62,8 @@ test('a dropped bone shows the crow variant; a dropped pebble does not', () => {
 });
 
 // Row FD5 (loka-kgd.22). Breaks: npc.move not emitting entity_entered_room (crow_lands never
-// fires), the move ignoring the event's room (a roost drop moves nothing), or an engaged NPC moved.
+// fires), the move ignoring the event's room (a roost drop moves nothing), or an engaged, escorting
+// (escort@1: never detached) or move-barred (status reader 4) NPC moved.
 test('a bone dropped in the yard brings the crow down; in the roost or mid-fight it stays', () => {
   const crow = (w: World) => w.entityIds[`${R}:npc/crow`]!;
   const at = (w: World) => w.state.containers[crow(w)];
@@ -88,6 +91,14 @@ test('a bone dropped in the yard brings the crow down; in the roost or mid-fight
   const busy = takeDrop(fighting, 'bone');
   assert.equal(busy.decision.kind, 'accepted');
   assert.equal(at(busy.world), roost);
+  const escorts = { [w.character]: { status: 'following', npc_id: crow(w) } };
+  const escort = takeDrop({ ...w, state: { ...w.state, escorts } } as unknown as World, 'bone');
+  assert.equal(at(escort.world), roost);
+  const statuses = { [`${R}:status/rooted`]: { key: 'rooted', blocks: ['move'] } };
+  const held = statusKey(crow(w), { ...ref, key: 'rooted' } as never);
+  const state = { ...w.state, statuses: { [held]: { generation: 1, active: true } } };
+  const rooted = { ...w, state, cartridge: { ...w.cartridge, statuses } } as unknown as World;
+  assert.equal(at(takeDrop(rooted, 'bone').world), roost);
 });
 
 // Breaks: deliveries of a newly triggerable kind escaping the FIFO budgets. A pebble drop starts

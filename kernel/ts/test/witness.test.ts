@@ -15,6 +15,7 @@ import type { Cartridge, World } from '../src/runtime/decision.ts';
 import type { EntityId } from '../src/contracts.gen.ts';
 import { decode, encode } from '../src/foundation/canonical.ts';
 import { statusKey } from '../src/mechanics/status/shared.ts';
+import { triggered } from '../src/mechanics/reaction.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-witness-'));
 let artifact: Uint8Array;
@@ -155,6 +156,18 @@ test('an npc.move naming the baker and no room brings him to the taker', () => {
   let w = newWorld(moving as Cartridge, CONTEXT as never, [1, 2, 3, 4]);
   w = take(w);
   assert.equal(w.state.containers[id(w, 'npc/baker')], w.roomIds[`${S}:room/square`]);
+});
+
+// Breaks: the subject counted as its own witness (the baker taking the apple, or a victim alive in
+// the pre-command world, sees itself).
+test('the baker is never his own witness', () => {
+  const w = world('square');
+  const got = (holder_id: EntityId) =>
+    triggered(w, {
+      payload: { type: 'item_acquired', item_id: id(w, 'item/apple'), holder_id },
+    } as never).some((r) => r.key === 'witnessed');
+  assert.equal(got(w.body), true);
+  assert.equal(got(id(w, 'npc/baker')), false);
 });
 
 /** The sampler's artifact, edited and re-hashed, loaded: its first diagnostic's code and path. */
