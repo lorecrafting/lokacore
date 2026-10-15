@@ -1,0 +1,33 @@
+{
+  "npc": "cook",
+  "roles": {
+    "teacher": {
+      "role": "npc",
+      "npc": "cook"
+    }
+  },
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "not",
+      "item": {
+        "op": "fact_compare",
+        "fact": "skill_cooking",
+        "equals": true
+      }
+    }
+  },
+  "prompt": "cook.cooking.prompt",
+  "choices": {
+    "learn": {
+      "label": "cook.cooking.choice",
+      "narration": "cook.cooking.learned",
+      "sequence": [
+        {
+          "op": "skill.acquire",
+          "skill": "cooking"
+        }
+      ]
+    }
+  }
+}

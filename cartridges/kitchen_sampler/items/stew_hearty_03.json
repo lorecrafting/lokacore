@@ -1,0 +1,36 @@
+{
+  "keywords": [
+    "stew",
+    "hearty"
+  ],
+  "short": "item.stew_hearty.short",
+  "short_variants": [
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "status_active",
+          "subject": "target",
+          "status": "spoiling"
+        }
+      },
+      "description": "item.stew_hearty.short_spoiling"
+    }
+  ],
+  "room_line": "item.stew_hearty.room",
+  "description": "item.stew_hearty.description",
+  "mass_grams": 500,
+  "location": {
+    "in": "room",
+    "room": "larder"
+  },
+  "edible": {
+    "resource": "mv",
+    "amount": 10,
+    "label": "action.eat",
+    "narration": "narration.eat_stew_hearty",
+    "applies": [
+      "hearty"
+    ]
+  }
+}

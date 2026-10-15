@@ -10,6 +10,17 @@
         "player"
       ],
       "meaning": "The cook holds this character's stew order."
+    },
+    "cooked": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "This character has cooked a dish at the hearth."
     }
   }
 }
