@@ -14,15 +14,20 @@
 
 ## Mutants (detached worktree, restored)
 
-Killed: created.ts direction, one-per-site, site blueprint list; creation.ts and creation.ex built owner; initialPair built branch (TS, Elixir); site exit overlay (mobile built.test.ts); initialPair no-origin (`origin?.` to `origin.`).
-Survived: invariants_creation.ts:173 built provenance to `true`; invariants_creation.ex:295 `built_provenance?` to `true`; invariants_creation.ts:213 containment clause (and `.ex:271`, per handback); knowledge.ts:63 `at.has(to)` dropped.
+Killed: created.ts direction, one-per-site, site blueprint list; creation.ts and creation.ex built owner; initialPair built branch (TS, Elixir); site exit overlay (mobile built.test.ts); initialPair no-origin (`origin?.` to `origin.`); creation.ts blueprint kind to `true`.
+Survived: invariants_creation.ts:173 built provenance to `true`; invariants_creation.ex:295 `built_provenance?` to `true`; invariants_creation.ts:213 containment clause (and `.ex:271`, per handback); knowledge.ts:63 `at.has(to)` dropped (equivalent: map_positions must cover every authored room, cartridge_knowledge.ts:66, so a built room always has its site's position). Elixir `.ex:271` containment not run here; the handback reports it uncaught.
 
 ## Findings
 
 1. **Blocker**: protocol/fixtures/corpse_creation.json:1890, :1959. The cases "built room by an unknown owner" and "of a non-blueprint definition" have no `counterfeit`, so the independent built-provenance checks in both kernels never meet their planted violation. A regression that makes `built_provenance?` always true leaves a forged-owner create unflagged by the invariant and the suite green. Fix: add `counterfeit` results to both cases; add a counterfeit with a containment row to "built room has exactly its identity row" (:1631) for the rows_match clause.
-2. Should-fix: handback claim "corpse_creation (blueprint kind, owner)" covers the compose side only; the invariant side is not backed (finding 1).
-3. Nit: knowledge.ts:26. No check stops an authored room at the site's direction cell (cartridge_knowledge.ts:63 only rejects duplicate authored coordinates; SITE_EXIT_CONFLICT checks only the site's exits). A cartridge with knowledge@1 and a site gets two map rooms on one cell. Defer to Beads.
-4. Nit: knowledge.ts:63 `at.has(to)` has no test (survived). A link to a built room whose site has no map position would name an unlisted room.
+2. Nit: knowledge.ts:26 (described, not run). No check stops an authored room at the site's direction cell (cartridge_knowledge.ts:63 only rejects duplicate authored coordinates; SITE_EXIT_CONFLICT checks only the site's exits). A cartridge with knowledge@1 and a site gets two map rooms on one cell. Defer to Beads.
+3. Question: lib/loka/content/services.ex:289 compares `b in site["blueprints"]` raw; the TS loader (cartridge_services.ts:194) uses `same`. A source naming the blueprint in two ref forms (short in the service, full in the site) may get a spurious compiler diagnostic. The sampler uses one form.
+
+## Verified
+
+- Handback claims rerun: built owner (creation.ts, creation.ex) and "create with no origin faults (TS)": both killed, backed.
+- Overlay: only created.ts:148, fresh.ts and knowledge.ts read `cartridge.rooms`/`map_positions` directly; movement, look and exits read the overlaid `world.rooms` (overlay mutant killed).
+- Replay id: built.test.ts walkthrough replay and the mobile receipt replay. Offer and press parity: site_taken and pre-plot refusals.
 
 ## Judged, not findings
 
