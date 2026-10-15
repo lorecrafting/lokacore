@@ -165,9 +165,10 @@ defmodule Loka.Content.Reactions do
   # Checked with world.levelling (Loka.Content.Levelling).
   defp consequence(_, {%{"op" => "experience.grant"}, _}, _, _), do: []
 
-  defp consequence(rel, {%{"op" => "status.apply"} = s, i}, _, ctx),
+  defp consequence(rel, {%{"op" => "status.apply"} = s, i}, on, ctx),
     do:
-      reference(rel, ["apply", i], "status", s, ctx.m, ctx.defs) ++
+      revealed(rel, s, i, on, ctx) ++
+        reference(rel, ["apply", i], "status", s, ctx.m, ctx.defs) ++
         if(s["item"], do: reference(rel, ["apply", i], "item", s, ctx.m, ctx.defs), else: []) ++
         if(s["item"] && s["co_present"],
           do: [
@@ -208,6 +209,16 @@ defmodule Loka.Content.Reactions do
           d <- reference(rel, ["apply", i], f, s, ctx.m, ctx.defs),
           do: d
         )
+
+  # Row 16: entry engagement cures concealment in the same move, so an entry reaction may not apply one.
+  defp revealed(rel, %{"status" => %{"key" => k}}, i, %{"event" => "entity_entered_room"}, ctx) do
+    case (ctx.defs["status"] || %{})[k] do
+      {_, _, %{"concealment" => _}} -> [diag("OUTCOME_MISMATCH", at(rel, ["apply", i, "op"]))]
+      _ -> []
+    end
+  end
+
+  defp revealed(_, _, _, _, _), do: []
 
   defp hit(s, room, ctx) do
     if s["barrier"],

@@ -121,7 +121,11 @@ export function reactions(c: Obj, { named, typedValue }: Checks): Diagnostic[] {
       } else if (s.op === 'item.move' || s.op === 'population.spawn') {
         const [f, kind] = s.op === 'item.move' ? ['room', 'room'] : ['plan', 'population']; // rows 41, 37a
         named(s[f], kind, `${at}.apply[${i}].${f}`);
-      } else if (!['status.apply', 'status.cure', 'experience.grant'].includes(s.op)) {
+      } else if (s.op === 'status.apply') {
+        // Row 16: entry engagement cures concealment in the same move (conflicting_write).
+        if (r.on.event === 'entity_entered_room' && c.statuses?.[refString(s.status)]?.concealment)
+          out.push(diag('OUTCOME_MISMATCH', `${at}.apply[${i}].op`));
+      } else if (!['status.cure', 'experience.grant'].includes(s.op)) {
         // status steps, experience.grant, fact.adjust's int: with their declarations (cartridge_standing.ts).
         named(s.fact, 'fact', `${at}.apply[${i}].fact`);
         if (s.op !== 'fact.adjust') typedValue(s.fact, s.value, `${at}.apply[${i}].value`);

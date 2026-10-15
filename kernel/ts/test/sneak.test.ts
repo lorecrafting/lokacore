@@ -134,8 +134,9 @@ function reload(edit: (c: any) => void) {
 }
 
 // Breaks (twin of the row 16 case in test/loka/content_status_test.exs): pierced_by loading without
-// a concealment, naming no skill, or under API 1.92.
-test('loader: pierced_by needs a concealment, a real skill and API 1.93', () => {
+// a concealment, naming no skill or attribute, or under API 1.92; an entry reaction applying a
+// concealment loading (the engage cure then faults conflicting_write on that move).
+test('loader: pierced_by needs a concealment, a real skill and attribute, API 1.93, no entry concealment', () => {
   const S = `${C.cartridge_id}@${C.cartridge_version}:status/hidden`;
   const at = `.cartridge.statuses["${S}"].pierced_by`;
   assert.equal(
@@ -154,6 +155,22 @@ test('loader: pierced_by needs a concealment, a real skill and API 1.93', () => 
       (c) => (c.statuses[S].pierced_by.skill = { ...c.statuses[S].pierced_by.skill, key: 'none' }),
     ),
     ['UNRESOLVED_REFERENCE', `${at}.skill`],
+  );
+  assert.deepEqual(
+    reload(
+      (c) =>
+        (c.statuses[S].pierced_by.attribute = {
+          ...c.statuses[S].pierced_by.attribute,
+          key: 'none',
+        }),
+    ),
+    ['UNRESOLVED_REFERENCE', `${at}.attribute`],
+  );
+  const R = `${C.cartridge_id}@${C.cartridge_version}:reaction/hide`;
+  const keep = { ...C, kind: 'room', key: 'keep' };
+  assert.deepEqual(
+    reload((c) => (c.reactions[R].on = { event: 'entity_entered_room', room: keep })),
+    ['OUTCOME_MISMATCH', `.cartridge.reactions["${R}"].apply[0].op`],
   );
   assert.deepEqual(
     reload((c) => (c.manifest.requires.kernel_api.at_least = '1.92')),

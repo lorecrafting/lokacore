@@ -44,8 +44,9 @@ defmodule Loka.ContentStatusTest do
   end
 
   # Breaks (row 16; twin of the loader case in kernel/ts/test/sneak.test.ts): pierced_by compiles
-  # without a concealment, naming no skill or under API 1.92.
-  test "pierced_by needs a concealment, a real skill and API 1.93" do
+  # without a concealment, naming no skill or attribute, or under API 1.92; an entry reaction applying
+  # a concealment compiles (the engage cure then faults conflicting_write on that move).
+  test "pierced_by needs a concealment, a real skill and attribute, API 1.93, no entry concealment" do
     dir = Loka.ContentSource.copy("cartridges/sneak_sampler")
     hidden = &{"statuses/hidden.json", &1}
 
@@ -62,6 +63,16 @@ defmodule Loka.ContentStatusTest do
 
     assert {"UNRESOLVED_REFERENCE", "statuses/hidden.pierced_by.skill"} in diags.([
              hidden.(&put_in(&1, ["pierced_by", "skill"], "none"))
+           ])
+
+    assert {"UNRESOLVED_REFERENCE", "statuses/hidden.pierced_by.attribute"} in diags.([
+             hidden.(&put_in(&1, ["pierced_by", "attribute"], "none"))
+           ])
+
+    entry = %{"event" => "entity_entered_room", "room" => "keep"}
+
+    assert {"OUTCOME_MISMATCH", "reactions/hide.apply[0].op"} in diags.([
+             {"reactions/hide.json", &Map.put(&1, "on", entry)}
            ])
 
     assert {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api"} in diags.([
