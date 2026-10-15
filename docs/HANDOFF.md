@@ -6,7 +6,7 @@ the next steps, the standing owner rules that the repo does not yet state, and o
 questions. Rewrite it at each stable checkpoint (a merge, a review verdict, a pushed fix) and before
 the session ends; commit and push it with the Beads export.
 
-Written 2026-10-14 UTC by Claude Code (Opus 5.5) in local session 84e03897, at a clean checkpoint
+Written 2026-10-14 UTC by Claude Code (Opus 5.5) in local session c4308118, at a clean checkpoint
 (no agent running; every branch pushed) for an owner-requested clear.
 
 ## Start of a session
@@ -45,44 +45,40 @@ Batch order: the owner-adopted [priority plan](briefs/toolbox-priority-plan-2026
 Compaction: fast-jev is off; built-in compaction confirmed (24-43 s, with a summary). The advisor,
 background waits and resumes after a compaction are allowed (owner, 2026-10-14).
 
-Done this session: #385 (`loka-kgd.107.21`, prose lint) merged; Realm seams slices all built and
-merged into `toolbox/batch-rs`; batch PR #386 opened; long-wait and FD1 reviewed to approval.
+Done this session (c4308118): #386 (`loka-kgd.150`, Realm seams batch) merged at bac7d6fe; #387
+(`loka-kgd.152`/`.151` long wait + `loka-kgd.138` FD1 delayed reactions + drain perf) merged at cc9a62fa
+(CI sim 341 s vs main 350 s). M13 batch `toolbox/batch-m13` at 0e2914c6 holds main + row 16
+(`loka-nfdq`), FD2 (`loka-kgd.139`), FD3 (`loka-kgd.140`), each reviewed to APPROVE (records in
+docs/reviews/2026-10-14-*). Settle S3/S4 approved and designed; FD7 Book half decided (owner answers below).
 
 Next, in order:
 
-1. **Realm seams batch #386** (`loka-kgd.150`, branch `toolbox/batch-rs` at `85e84069`, main merged in).
-   RS-1, RS-4 + row 38, RS-6 + RS-8, RS-2 + RS-3, RS-5 all merged. Run the one **Fable batch
-   review** on the head (it was held for load). Ask it to check: RS-3's claim that jobs store their
-   character (the wage job row stores none, per the RS-2/3 developer); the NPC-entrant no-op for
-   `quest.activate` on `entity_entered_room` (no loader test pins it). Rulings already made are in each
-   child's Beads notes. Then CI green on the head, merge (`--match-head-commit`), close the children
-   (`.150.1-.7`, `loka-kgd.133`), follow-up `loka-6ij9`.
-2. **Long-wait batch** (`toolbox/batch-longwait` = main 50e2af2f, no PR yet):
-   - `loka-kgd.152` + `.151` on `toolbox/longwait-loop` at `3b25c212`: approved (main review +
-     recheck, Fable second opinion + recheck). The last CI runs were cancelled: the sim job hit its
-     10-minute timeout (a slowdown, fixed in 3b25c212: 200 seeds 8.5 s vs main 7.5 s). Check CI on
-     3b25c212; if sim still times out, add a target->group index in `proposal_hours.ts` (one more
-     dev run). Then `bin/pm_merge.sh` into the batch with review records (origin branches
-     `review-longwait`, `-recheck`, `-fable`, `-fable-recheck`). Follow-ups `loka-7n60`, `loka-l9oq`.
-   - FD1 `loka-kgd.138` on `toolbox/m12-delayed` at `7c71e119`: approved (main + Fable second
-     opinion; records on origin `review-m12-delayed-final`, `review-m12-delayed-fable`). After .152 is
-     in the batch, one Opus run: merge the batch (one conflict at `proposal.ts:288-292`, keep FD1's
-     `p` arg and 6-arg `statusGroup`), remove the "wait end + 1" clamp for job-run deliveries only
-     (keep it for root deliveries, ruling (b) in `.152`), count delayed runs in steps/deliveries
-     (`proposal.ts:284`), update `raid.test.ts:391`. Scoped recheck, then one Fable batch review,
-     open the batch PR, merge.
-3. **M13**: FD2 (`loka-kgd.139`) then FD3 (`loka-kgd.140`); Fable briefs with PM rulings are in their
-   Beads notes (kernel_api 1.91, 1.92). Start after both batches land (FD2 needs FD1's `policy.ts`
-   and RS-5's `view.ts`). Then a Fable brief run for 16, 33, FD5 + `loka-kgd.22`, FD7 (owner rule
-   below), W15 + FD9 by Opus.
-4. Word bar `loka-x6t.39` (touch-first, optional keyboard for Say), Built rooms `loka-kgd.109`, M14
-   (ghost-walk `loka-kgd.69` with jail; mounts after 43a), M15 (G10 is letters by job only; pins and
-   notes descoped), Homestead, Settle S3/S4 only on an owner yes.
-5. Housekeeping draft #384: has the token-hygiene update, `loka-9ruc` (pre-push hook runs
-   `bin/prepush.sh`), `loka-oy8i` (session_status compaction line), the G10 plan edit. Add
-   `loka-mm5v`, `loka-xroj` after the long-wait batch, `loka-dgl6`, and approved retro items
-   `loka-13i3`, `loka-z167`, `loka-o5c2`. Its branch edits `docs/HANDOFF.md` (one line): on conflict keep main's HANDOFF and
-   re-apply "the pre-push hook runs it". Close `loka-bwfo` when #384 merges.
+1. **Row 33** theft, fence, witnessed offense (`loka-icr4`) on `toolbox/m13-theft` at a17c31ed
+   (worktree `m13-theft`, off batch-m13 1174492e; prepush ok; kernel_api 1.94). A fresh Opus developer
+   finishes the LEFT list in its Beads notes (rerun mobile theft, locks and Elixir disposition/lock/NPC/hash
+   tests; re-grep /code-review lines), merges `toolbox/batch-m13` in, and answers the open questions
+   with PM rulings (steal back from a fence; blind or asleep victim; a stolen offer or `locks` without
+   `world.theft` loads silently: refuse it; designer confirms the "Inside" heading). Rulings already made
+   are in its notes (fence offers: only `stolen: true` may name another NPC's item; crowd sees, unseen =
+   victim alone or thief concealed; offense subject = the thief). Then fresh Opus review, pm_merge.
+2. **FD5** witness ledger (`loka-kgd.142`) + `loka-kgd.22` (reaction moves an NPC): one run on
+   `reaction.ts` after 33; Fable brief in their notes (kernel_api next free; 1.95+).
+3. **FD7** ask about topic (`loka-kgd.144`): kernel half now (Fable brief in notes), Book half as
+   "Ask about X" rows on the NPC card in its own designer-consulted slice.
+4. W15 + FD9 (Opus briefs). Then one Fable batch review on the M13 head, batch PR, merge; close
+   `loka-nfdq`, `.139`, `.140`, `loka-icr4` and the rest on merge.
+5. **`loka-j958` (P1 bug):** a status re-applied inside one long wait faults the wait (3-day wait in
+   toolbox_showcase, npc_status_sampler, variants_sampler); fix in the status composer, then drop the
+   three exceptions in `kernel/ts/test/longwait_property.test.ts`. First engine bug after M13 rows in flight.
+6. Then word bar `loka-x6t.39`, Built rooms `loka-kgd.109`, Homestead `loka-kgd.108`, Settle S3
+   `loka-mytp` / S4 `loka-oxgk` (design: docs/rnd/settle-design-2026-10-14.md on #384; five slices;
+   Fable briefs at build time), M14, M15.
+7. **Housekeeping draft #384** (`housekeeping/2026-10-14b`, worktree `housekeeping-1014b`, head
+   3e7cdb64 + b1adbbb2 decision record + addc7c7c Settle design): has token hygiene, `loka-9ruc`,
+   `loka-oy8i`, G10 plan edit, `loka-13i3`, `loka-z167`, `loka-o5c2`, `loka-dgl6`, `loka-mm5v`, the
+   Settle/FD7 decision record. Add `loka-xroj` (twin loader-floor fixture), then one review, merge;
+   close `loka-bwfo` and the items. Retro items from this session for owner approval: `loka-0j8u`,
+   `loka-bjwq`, `loka-60rs`, `loka-iqga`, `loka-a2av`; also `loka-cnqx` (prepush log names).
 
 Merge mechanics: `bin/pm_merge.sh <batch-worktree> <batch-branch> <slice-branch> <review-branch>
 "<subject>" <reviewed-sha>`; a new batch worktree needs `bin/worktree_setup.sh` before its first
@@ -90,13 +86,12 @@ merge commit (Prettier hook). Generated files on conflict: regenerate (`elixir b
 writes `docs/checks.gen.json`). Developers run `bin/prepush.sh` (the #384 hook will enforce it) and
 never wait on CI; the PM watches CI and treats a cancelled job at its timeout as red.
 
-Session lessons (2026-10-14, session 84e03897):
-- A developer's `/code-review` result can be the only record of its findings: put open items in
-  Beads at handback (retro `loka-z167`).
-- "cancelled" in `gh run list` can be a job timeout, not a superseded run: open the run (retro
-  `loka-13i3`).
-- Spotlight: the owner added `~/dev` to Spotlight Privacy; mds load spikes from the main checkout
-  should stop.
+Session lessons (2026-10-14, session c4308118):
+- Local perf proxies can hide a CI slowdown (200 seeds equal; CI 10000-sequence test +27%): judge
+  perf by the CI sim job time on the head (retro `loka-60rs`).
+- Merging two reviewed batches can break a rule neither broke alone (FD1 delayed jobs lost the event
+  subject RS-4 needs): run the batch-level review on the merged head, not before the main merge.
+- Run `uptime` in its own call before every spawn (broken once this session at load 15.9; retro `loka-0j8u`).
 
 ## Standing owner rules not yet written elsewhere in the repo
 
@@ -134,6 +129,11 @@ Session lessons (2026-10-14, session 84e03897):
 
 ## Owner answers this session (paraphrased unless quoted)
 
+- 2026-10-14 (session c4308118): Settle S3/S4 yes ("yes lets do s3 and s4, fable will plan it right?
+  please make it super world class!"); the seven Settle questions and FD7 "all as recommended" (record
+  `docs/decisions/owner-decision-settle-and-fd7-2026-10-14.md` on #384). repowise: skip for now (PM
+  assessment; one-session trial held in reserve).
+
 - 2026-10-14 (session 84e03897): approved retro items `loka-9ruc`, `loka-oy8i`; G10 map pins and
   journal notes descoped ("maybe descope that for now"), letters by job kept; death penalty options
   (row 47) kept ("lets keep it"); retro items `loka-13i3`, `loka-z167`, `loka-o5c2` approved ("approve all three retro items"); Fable drafts briefs for hard rows ("yes record the fable brief
@@ -147,6 +147,11 @@ Session lessons (2026-10-14, session 84e03897):
 - Cloud compute (`loka-2of`, prices refreshed in its notes): the bottleneck is M1 CPU, not CI (CI is
   free: the repo is public). PM pick: a Hetzner CAX41 agent box (~$45/mo, 16 ARM cores) or CAX31
   (~$20/mo, within the $20 budget). Owner to choose and sign up; the PM then writes setup steps.
+
+- Approve or reject this session's retro items: `loka-0j8u` (hook refuses a spawn at load 8+),
+  `loka-bjwq` (developers always push; read prepush status), `loka-60rs` (CI sim time per batch head),
+  `loka-iqga` (merge_resolve combines one-row doc edits and imports), `loka-a2av` (collapse Beads notes
+  at approval); plus `loka-cnqx` (prepush per-run log directory).
 
 ## Parked (polish lane)
 
