@@ -109,6 +109,7 @@ export function RoomPage(p: {
   open: (id: string) => void;
   openChoice: () => void;
   details: ReactNode;
+  word?: ReactNode; // the Word block, after the room's actions
 }) {
   const c = usePalette();
   const look = p.g.look;
@@ -130,6 +131,7 @@ export function RoomPage(p: {
       {p.details}
       {storylet(p.view, p.g, p.press, p.text)}
       {actions.length > 0 && <View>{actions}</View>}
+      {p.word}
       {p.log.length > 0 && <LogLines lines={p.log} />}
     </Page>
   );
