@@ -75,6 +75,7 @@ const wield = (w: World) =>
 const bleeding = (at: number) => ({
   label: 'condition.bleeding',
   ends_at: at + 1800,
+  duration: 1800,
   next_tick_at: at + 900,
   resource: 'hp',
   per_tick: -1,
