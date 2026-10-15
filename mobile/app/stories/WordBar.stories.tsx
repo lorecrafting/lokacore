@@ -1,7 +1,7 @@
 // WordBar: the World page's Word block (BOOK-UI-COMPONENTS.md, Chip and Text field).
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { expect, fn } from 'storybook/test';
-import type { GameView } from '../book/presenter.ts';
+import type { GameView } from '../../packages/game-view/session.ts';
 import { WordBar } from '../book/WordBar.tsx';
 import { button } from './fixtures.ts';
 
