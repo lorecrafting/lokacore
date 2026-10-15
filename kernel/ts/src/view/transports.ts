@@ -14,13 +14,7 @@ export function transportOffer(
   const t = w.cartridge.transports![refString(route)];
   const r = availability(
     w,
-    {
-      type: 'use_transport',
-      actor_id: actor,
-      endpoint_id: id,
-      route,
-      quoted_fare: t.fare,
-    },
+    { type: 'use_transport', actor_id: actor, endpoint_id: id, route, quoted_fare: t.fare },
     steps,
     t.action,
   );

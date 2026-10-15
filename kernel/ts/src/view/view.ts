@@ -29,14 +29,7 @@ import type {
 } from '../contracts.gen.ts';
 import { lists } from './action_lists.ts';
 import { refusal, resolved } from '../commands/actions.ts';
-import {
-  bodyOf,
-  COMPASS,
-  refString,
-  type Entity,
-  type Steps,
-  type World,
-} from '../runtime/decision.ts';
+import { bodyOf, refString, type Entity, type Steps, type World } from '../runtime/decision.ts';
 import { barrierState, exitOf, opened } from '../mechanics/lookups.ts';
 import { choiceView } from '../mechanics/dialogue/shared.ts';
 import { describe, describeEntity } from '../mechanics/description_variant/rule.ts';
@@ -71,13 +64,14 @@ import { currentBleed } from '../mechanics/bleed/shared.ts';
  * as amended), absent when the cartridge has none; and the player's position (position@1), absent
  * without it; and the highest reached chapter marker, absent without chapter declarations.
  */
+// size: allow 41, the viewer's body is derived once for every projection (loka-kgd.150.5)
 export function gameView(world: World, actor: CharacterId = world.character): GameView {
   const body = bodyOf(world, actor);
   const fight = body ? engaged(world, body) : undefined;
   const here = body ? world.state.containers[body] : undefined;
   const steps = { n: 0 };
   const actions = lists(world, actor, steps);
-  const equipment = body ? equipmentViews(world, actor, body, actions, steps) : [];
+  const equipment = equipmentViews(world, actor, actions, steps);
   const choice = fight ? undefined : choiceView(world, actor, steps);
   const pools = resources(world, body);
   const current = chapter(world, actor);
@@ -95,7 +89,7 @@ export function gameView(world: World, actor: CharacterId = world.character): Ga
     ...conditionViews(world, body),
     ...cueViews(world, actor, body, steps, holds),
     place: placeView(world, actor, here, steps),
-    exits: exits(world, actor, body, actions.door, steps),
+    exits: exits(world, actor, actions.door, steps),
     actions: actions.place,
     ...(here && noticeViews(world, actor, here, actions.notice, steps)),
     entities: body && here ? within(world, actor, body, actions, here, undefined, steps) : [],
@@ -234,13 +228,8 @@ type Lists = ReturnType<typeof lists>;
 // The exits of the body's room in compass order (movement.sight's): each unavailable with the
 // code movement would refuse it with, with its barrier's door, and with what is seen through it
 // unless that barrier bars the way.
-function exits(
-  world: World,
-  actor_id: CharacterId,
-  body: EntityId | undefined,
-  door: (direction: Key) => AdvertisedAction[],
-  steps: Steps,
-): ExitView[] {
+function exits(world: World, actor_id: CharacterId, door: Lists['door'], steps: Steps): ExitView[] {
+  const body = bodyOf(world, actor_id);
   if (!body) return [];
   const room = world.rooms[world.state.containers[body]];
   const set = resolved(world, actor_id);
@@ -278,13 +267,9 @@ function exits(
 }
 
 // One entry per place in a holder: the finger holder lists two (toolbox row 3).
-function equipmentViews(
-  world: World,
-  actor: CharacterId,
-  body: EntityId,
-  actions: Lists,
-  steps: Steps,
-) {
+function equipmentViews(world: World, actor: CharacterId, actions: Lists, steps: Steps) {
+  const body = bodyOf(world, actor);
+  if (!body) return [];
   return Object.entries(world.slots).flatMap(([slot, holder]) => {
     const items = within(world, actor, body, actions, holder, actions.worn, steps);
     return Array.from({ length: world.capacities[holder] }, (_, i) => ({

@@ -1,4 +1,4 @@
-// size: allow 333, food, water, practical skills, local Knock and G7 get locks share the composed view list
+// size: allow 334, food, water, practical skills, local Knock and G7 get locks share the composed view list; the viewer is threaded (loka-kgd.150.5)
 import { running as modalScene } from '../mechanics/scene/shared.ts';
 import { foodActions } from './food.ts';
 import { useActions } from './use.ts';
@@ -115,12 +115,7 @@ export function lists(world: World, actor: CharacterId, steps = { n: 0 }) {
   };
 }
 
-function takeAdmission(
-  world: World,
-  actor: CharacterId,
-  body: EntityId | undefined,
-  steps: { n: number },
-) {
+function takeAdmission(world: World, actor: CharacterId, body: EntityId | undefined, steps: Steps) {
   // Each item's reach and get-walk verdict, kept so a later budget fault does not undo it.
   const admitted = new Map<EntityId, boolean | 'permission_denied'>();
   let carry: ReturnType<typeof carrying> | undefined;
