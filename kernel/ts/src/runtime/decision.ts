@@ -1,4 +1,4 @@
-// size: allow 315, the closed State row sections include toolbox status and levelling rows; actorOf and admitted beside bodyOf
+// size: allow 317, the closed State row sections include toolbox status and levelling rows; actorOf and admitted beside bodyOf; COMPOSES containment (row 33)
 // What rule modules (mechanics/<capability>/rule.ts) see: the World they read, the typed Rule and
 // Decision contract that limits each capability to its own commands and events
 // (capability_registry.json, through contracts.gen.ts Owned), and pure helpers. The router,
@@ -209,7 +209,8 @@ export type Mint = () => string;
  * entity_entered_room (movement@1's) as a move does, and a status job its tick and expiry
  * (status@1's); reactions activate quest-owned instances and land statuses; a choice resolves its
  * dialogue's quest (quest@1's quest_resolved) and hands a bound item over (containment@1's item_acquired, as give);
- * a spell (row 29b) lands a status (status_applied) and kills (entity_died). */
+ * a spell (row 29b) lands a status (status_applied) and kills (entity_died); a seen theft (row 33)
+ * reports its notice as action_recipe@1's custom_event. */
 export const COMPOSES = {
   expedition: ['quest'],
   transport: ['movement'],
@@ -220,6 +221,7 @@ export const COMPOSES = {
   dialogue: ['quest', 'containment', 'movement', 'check'],
   movement: ['quest'],
   commerce: ['containment'],
+  containment: ['action_recipe'],
   scene: ['dialogue', 'quest'],
   reaction: ['quest', 'status', 'barrier'], // barrier.set's barrier_changed (row W22)
   speech: ['dialogue'], // a spoken keyword opens its dialogue (choice_opened, as talk; row G9)

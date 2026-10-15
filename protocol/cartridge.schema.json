@@ -1562,6 +1562,48 @@
             "leads"
           ],
           "additionalProperties": false
+        },
+        "theft": {
+          "description": "Toolbox rows 33 and 34 (kernel_api at least 1.94; mechanics.md Theft, fence and witnessed offense): take may lift an item a living NPC in the actor's room directly holds. The victim notices when the actor's level in skill is below the victim's value of attribute (absent: 0); every other living NPC there that is not blind and the actor's body is not concealed from also sees. Containment alone sets the per_subject instance bool fact stolen true on the item; a seen theft emits custom_event noticed (subject: the thief's body) and says narration.seen, an unseen one narration.unseen.",
+          "type": "object",
+          "properties": {
+            "skill": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "attribute": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "stolen": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "noticed": {
+              "$ref": "action.schema.json#/$defs/Key"
+            },
+            "narration": {
+              "type": "object",
+              "properties": {
+                "seen": {
+                  "$ref": "text.schema.json#/$defs/TextKey"
+                },
+                "unseen": {
+                  "$ref": "text.schema.json#/$defs/TextKey"
+                }
+              },
+              "required": [
+                "seen",
+                "unseen"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "skill",
+            "attribute",
+            "stolen",
+            "noticed",
+            "narration"
+          ],
+          "additionalProperties": false
         }
       },
       "additionalProperties": false,

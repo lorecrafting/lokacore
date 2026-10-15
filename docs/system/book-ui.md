@@ -298,7 +298,7 @@ Retry retains original action/target context and appends each confirmed Take/Dro
 When Take removes an item from a corpse's Contents, the confirmed result returns to
 that corpse detail, puts the named pickup line in its local history once, and keeps
 Back to World available. The taken item appears in Carrying. An unavailable corpse
-closes its detail through the ordinary stale-route rule; no success is inferred.
+closes its detail through the ordinary stale-route rule; no success is inferred. A living NPC's directly held items, offered under `world.theft`, list under **Held** (not Inside), as Entity lines that open the ordinary item detail with Take; a corpse or container keeps **Inside**.
 
 An item action advertised unavailable with `too_heavy` appears as a non-action note using its
 actual catalog label and **too heavy to carry**. It invokes nothing; available actions retain their

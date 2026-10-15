@@ -1,0 +1,12 @@
+{
+  "keywords": [
+    "badge"
+  ],
+  "short": "item.badge.short",
+  "room_line": "item.badge.room",
+  "description": "item.badge.description",
+  "location": {
+    "in": "npc",
+    "npc": "guard"
+  }
+}

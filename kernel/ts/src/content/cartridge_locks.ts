@@ -16,6 +16,8 @@ export function lockRoots(c: Obj): [Obj, string][] {
   for (const [ref, i] of Object.entries((c.items ?? {}) as Obj))
     for (const f of ['get', 'put'])
       if (i.locks?.[f]) out.push([i.locks[f].root, `.cartridge.items${step(ref)}.locks.${f}.root`]);
+  for (const [ref, n] of Object.entries((c.npcs ?? {}) as Obj))
+    if (n.locks) out.push([n.locks.get.root, `.cartridge.npcs${step(ref)}.locks.get.root`]);
   return out;
 }
 

@@ -1,3 +1,4 @@
+// size: allow 306, row 33 lists an NPC's lock-admitted holdings beside container contents
 import { knowledgeView } from './knowledge.ts';
 import { movementPlan } from '../mechanics/movement/sequence.ts';
 import { edge } from '../mechanics/water/shared.ts';
@@ -36,6 +37,7 @@ import { asides, describe, describeEntity } from '../mechanics/description_varia
 import * as movement from '../mechanics/movement/rule.ts';
 import { cueViews } from '../mechanics/senses.ts';
 import { holds } from '../mechanics/policy.ts';
+import { lockRefused } from '../mechanics/locks.ts';
 import * as scene from '../mechanics/scene/shared.ts';
 import * as position from '../mechanics/position/shared.ts';
 import { shelf } from '../mechanics/commerce/shared.ts';
@@ -135,10 +137,9 @@ function bleedingView(world: World, bleed: NonNullable<ReturnType<typeof current
   };
 }
 
-// The entities directly in `holder` (the room, the body or a slot holder), each with its short
-// name, kind and actions (`worn`, else by scope: an item here by room_contents, an NPC by
-// room_occupants, a held item by inventory); an item also with its barrier's state and, unless
-// worn, its contents (c1-locks).
+// The entities directly in `holder` (room, body or slot holder), each with its short name, kind and
+// actions (`worn`, else by scope: room_contents, room_occupants or inventory); an item also with its
+// barrier's state and, unless worn, its contents (c1-locks); a theft NPC its holdings (row 33).
 function within(
   world: World,
   actor: CharacterId,
@@ -157,8 +158,15 @@ function within(
     )
     .map(([id, e]) => {
       const scope = holder === body ? 'inventory' : SCOPE[e.kind];
+      // Row 33: an NPC's direct holdings its get lock admits; a vault's locked pool stays private.
       const contents =
-        e.kind === 'item' && !worn ? inside(world, actor, body, actions, id, scope, steps) : [];
+        e.kind === 'item' && !worn
+          ? inside(world, actor, body, actions, id, scope, steps)
+          : e.kind === 'npc' && world.cartridge.world?.theft
+            ? inside(world, actor, body, actions, id, 'room_contents', steps, true).filter(
+                (c) => !lockRefused(world, actor, e.locks?.get, c.id, steps),
+              )
+            : [];
       return {
         ...viewOf(world, actor, id, e, worn ? worn(id) : actions.of(scope, id), steps),
         ...(contents.length > 0 && { contents }),
@@ -168,9 +176,8 @@ function within(
 
 const SCOPE = { item: 'room_contents', npc: 'room_occupants' } as const;
 
-// What item `box` holds in reach (every container from the item up to `box` opened, `box` too),
-// at any depth, in DefinitionRefString order, each with its direct container and only take and
-// its container verbs (ContentView; c1-locks).
+// What item `box` holds in reach (all containers up to `box` opened), at any depth, in ref order,
+// each with its container, take and container verbs (ContentView; c1-locks); `direct`: box's own.
 function inside(
   world: World,
   actor: CharacterId,
@@ -179,8 +186,10 @@ function inside(
   box: string,
   scope: string,
   steps: Steps,
+  direct = false,
 ): ContentView[] {
   const under = (id: string) => {
+    if (direct) return world.state.containers[id] === box;
     for (let c = world.state.containers[id]; opened(world, c, body); c = world.state.containers[c])
       if (c === box) return true;
     return false;

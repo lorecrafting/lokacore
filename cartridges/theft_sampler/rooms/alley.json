@@ -1,0 +1,9 @@
+{
+  "title": "room.alley.title",
+  "description": "room.alley.description",
+  "exits": {
+    "west": {
+      "to": "square"
+    }
+  }
+}

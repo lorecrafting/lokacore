@@ -21,6 +21,7 @@ defmodule Loka.Content.Commerce do
       else: o
   end
 
+  # ponytail: one shop admission; row 33 adds stolen offers. # credo:disable-for-next-line /ABCSize|CyclomaticComplexity/
   defp shop(m, defs, rel, npc) do
     s = npc["shop"]
     path = at(rel, ["shop"])
@@ -35,7 +36,7 @@ defmodule Loka.Content.Commerce do
     funds = if funded?(resource, npc), do: [], else: [diag("RESOURCE_SPEC_INVALID", path)]
 
     items =
-      for ref <- ids, not stocked?(ref, npc, m, defs), do: diag("UNRESOLVED_REFERENCE", path)
+      for o <- s["offers"], not stocked?(o, npc, m, defs), do: diag("UNRESOLVED_REFERENCE", path)
 
     api ++ duplicate ++ funds ++ items ++ discount(m, defs, npc, s, path)
   end
@@ -45,6 +46,7 @@ defmodule Loka.Content.Commerce do
     plain = for o <- offers, !o["stock"], do: o["item"]
 
     stock_api(m, offers) ++
+      stolen(rel, offers) ++
       for {%{"stock" => %{"items" => items, "buy" => buy}} = o, i} <- Enum.with_index(offers),
           path = at(rel, ["shop", "offers", i, "stock"]),
           d <- unresolved(items, path, m, defs) ++ stock_shape(o, items, buy, path, plain),
@@ -66,6 +68,15 @@ defmodule Loka.Content.Commerce do
     ]
 
     for {false, d} <- shape, do: d
+  end
+
+  # Toolbox row 33: a fence's stolen offer names one item, never a stock set.
+  defp stolen(rel, offers) do
+    for {%{"stolen" => true, "stock" => _}, i} <- Enum.with_index(offers),
+        do:
+          diag("SCHEMA_VIOLATION", at(rel, ["shop", "offers", i, "stolen"]), %{
+            "error" => "invalid_value"
+          })
   end
 
   defp stock_api(m, offers) do
@@ -116,10 +127,11 @@ defmodule Loka.Content.Commerce do
 
   defp funded?(_, _), do: false
 
-  defp stocked?(ref, npc, m, defs) do
-    case Refs.resolve(ref, "item", m, defs) do
+  # Starting custody: the shop's own item, or (toolbox row 33) any NPC's item for a stolen offer.
+  defp stocked?(o, npc, m, defs) do
+    case Refs.resolve(o["item"], "item", m, defs) do
       {_, _, %{"location" => %{"in" => "npc", "npc" => holder}}} ->
-        holder == Loka.Content.Source.ref(npc["key"], "npc", m)
+        o["stolen"] == true or holder == Loka.Content.Source.ref(npc["key"], "npc", m)
 
       _ ->
         false

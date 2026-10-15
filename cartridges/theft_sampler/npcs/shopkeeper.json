@@ -1,0 +1,24 @@
+{
+  "keywords": [
+    "shopkeeper"
+  ],
+  "short": "npc.shopkeeper.short",
+  "room_line": "npc.shopkeeper.room",
+  "description": "npc.shopkeeper.description",
+  "room": "market",
+  "resource_starts": {
+    "pennies": 10
+  },
+  "shop": {
+    "resource": "pennies",
+    "offers": [
+      {
+        "item": "ring",
+        "buy": 8,
+        "sell": 5
+      }
+    ],
+    "bought": "shop.bought",
+    "sold": "shop.sold"
+  }
+}
