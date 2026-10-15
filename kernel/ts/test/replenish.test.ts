@@ -229,6 +229,9 @@ const digging =
     c.manifest.requires.kernel_api.at_least = at_least;
     for (const k of ['action_recipe', 'reaction'])
       c.manifest.requires.capabilities[k] = c.lock.capabilities[k] = 1;
+    // The step emits no event: it needs no fact@1 (which owns fact_changed).
+    delete c.manifest.requires.capabilities.fact;
+    delete c.lock.capabilities.fact;
     c.recipes = {
       [`${S}recipe/dig`]: {
         key: 'dig',
@@ -257,7 +260,8 @@ const dig = (w: World) => {
 
 // Breaks: the step is not dispatched (the mine stays empty), ignores the cap (3 on the third dig)
 // or count (2 at once), completes or schedules the entry's job (jobs change), or the timed job
-// stops counting the stock the step moved (a third ore at 3600).
+// stops counting the stock the step moved (a third ore at 3600), or the loader claims the step
+// emits fact_changed (no fact@1 here).
 test('a dig event moves one ore from the store at once, up to the cap; the job still runs', () => {
   const loaded = edited(digging());
   assert.ok(loaded.ok, JSON.stringify(loaded));
