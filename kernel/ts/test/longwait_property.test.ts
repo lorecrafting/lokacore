@@ -141,6 +141,10 @@ const EXCEPTIONS: Record<
   },
 };
 
+test('every exception names a compiled cartridge', () => {
+  for (const k of Object.keys(EXCEPTIONS)) assert.ok(artifacts.has(k), k);
+});
+
 for (const [file, bytes] of artifacts) {
   const loaded = loadCartridge(bytes, INSTALLED);
   assert.ok(loaded.ok, `${file}: ${JSON.stringify(loaded).slice(0, 300)}`);
