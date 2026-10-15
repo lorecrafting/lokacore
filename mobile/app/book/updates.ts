@@ -3,7 +3,8 @@
 import { useEffect } from 'react';
 import type { Game, GameSubscription } from '../../packages/game-view/session.ts';
 import type { BookProps } from './Book.tsx';
-import { pagesAfter, restoredItemPages, type Page } from './model.ts';
+import { WORDS } from './buttons.ts';
+import { conversation, pagesAfter, restoredItemPages, type Page } from './model.ts';
 import type { presenter } from './presenter.ts';
 
 export type Presenter = ReturnType<typeof presenter>;
@@ -16,6 +17,11 @@ export type BookState = {
   setFlip: (next: (f: { turn: number; dir: 1 | -1 }) => { turn: number; dir: 1 | -1 }) => void;
   redraw: (next: (n: number) => number) => void;
 };
+
+// A word that opens a conversation (the elder answers "ward") turns to it, as Talk does, whether
+// its press settles at once or later.
+export const wordTurn = (next: Page[], key: string, was: Screen['view'], now: Screen['view']) =>
+  WORDS.includes(key) && !was.choice && now.choice ? [...next, conversation(now)] : next;
 
 export function resultPages(next: Page[], screen: ReturnType<Presenter['screen']>) {
   if (screen.returnWorld && !screen.view.combat) return [];
@@ -48,6 +54,8 @@ function applyUpdate(p: BookProps, pr: Presenter, s: BookState, update: GameSubs
   let next = pagesAfter(before.stack, before.view, after.view);
   next = restoredCompletion(p, s, update, after, next);
   if (terminal) next = resultPages(next, after);
+  if (terminal && update.kind === 'completion')
+    next = wordTurn(next, update.intent.action_key, before.view, after.view);
   current.current = { stack: next, view: after.view };
   setStack(next);
   if (terminal && next !== before.stack) setFlip((f) => ({ turn: f.turn + 1, dir: 1 }));
