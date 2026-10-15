@@ -37,9 +37,10 @@ export function queueScheduled(due: Due, ops: readonly DeltaOp[], to: number) {
     }
 }
 
-// A run writing a target that a run of strictly earlier due time wrote (`earlier`) joins that
-// run's writer group, as steps commit them in order (loka-kgd.151): `all` from `start` to `cut`;
-// a target that a run of the same due time (from `cut`) wrote stays apart, faulting as in steps.
+// A run (or its reaction's or credit's group) writing a target that a run of strictly earlier due
+// time wrote (`earlier`) joins that run's writer group, as steps commit them in order
+// (loka-kgd.151): `all` from `start` to `cut`; a target that a run of the same due time, or a
+// sibling group of this run (from `cut`), wrote stays apart, faulting as in steps.
 export function joinEarlier(
   all: DeltaOp[],
   [start, cut]: readonly number[],
@@ -52,4 +53,25 @@ export function joinEarlier(
   if (all.slice(cut).some(hit)) return;
   const groups = all.slice(start, cut).filter(hit);
   merge(all, new Set(groups.map((o) => o.writer_group)), group, maps);
+}
+
+// A run's ops from `mark` (its reactions', a kill's credit, combat/credit.ts) join strictly earlier
+// writers per writer group; a sight handoff's reused group (proposal_sight.ts) stays as it is.
+export function joinTail(
+  all: DeltaOp[],
+  [start, cut, mark]: readonly number[],
+  handoff: number | undefined,
+  maps: Map<string, number>[],
+) {
+  const tail = all.slice(mark);
+  for (const g of new Set(tail.map((o) => o.writer_group)))
+    if (g !== handoff)
+      joinEarlier(
+        all,
+        [start, cut],
+        tail.filter((o) => o.writer_group === g),
+        g,
+        maps,
+      );
+  return all.slice(mark);
 }

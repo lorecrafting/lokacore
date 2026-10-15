@@ -23,7 +23,7 @@ import * as schedule from '../mechanics/schedule/rule.ts';
 import { cmp } from '../foundation/validate.ts';
 import { currentRound } from '../mechanics/combat/round.ts';
 import { handoffGroup, sightHandoff } from './proposal_sight.ts';
-import { joinEarlier, queueHour, queueScheduled, type Due } from './proposal_hours.ts';
+import { joinEarlier, joinTail, queueHour, queueScheduled, type Due } from './proposal_hours.ts';
 import { merge, statusGroup } from '../mechanics/status/job.ts';
 import { anyPending as pending, parted } from '../mechanics/dialogue/selection.ts';
 import { admit, type Admitted } from './proposal_admit.ts';
@@ -261,6 +261,7 @@ function react(p: P): Admitted | undefined {
 }
 
 // Each due job of the root's explicit advance, then its reactions, or the result that ends them.
+// size: allow 41, a drain step joins its run's writes before its reactions and its tail after
 function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined {
   const { due, to } = dueJobs(p.world, root);
   const populationPairs = populationDeadlinePairs(p.world, to);
@@ -298,12 +299,8 @@ function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined
     p.group++;
     const failed = join(p, own, ran.events, cause(p, due_time, run.id), 0, m) ?? react(p);
     if (failed) return failed;
-    // Its reactions' writes and a kill's credit (combat/credit.ts) join strictly earlier writers too.
-    for (const g of new Set(p.ops.slice(mark).map((o) => o.writer_group))) {
-      const mine = p.ops.slice(mark).filter((o) => o.writer_group === g);
-      joinEarlier(p.ops, [start, cut], mine, g, [p.holders, groups]);
-    }
-    if ((p.limit = queueScheduled(due, p.ops.slice(mark), to))) return BUDGET;
+    const tail = joinTail(p.ops, [start, cut, mark], handoff?.group, [p.holders, groups]);
+    if ((p.limit = queueScheduled(due, tail, to))) return BUDGET;
   }
 }
 
