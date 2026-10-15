@@ -22,16 +22,17 @@ function smith() {
   b.tap('The smith');
   return b;
 }
-const asks = (b: ReturnType<typeof book>) => b.labels().filter((l) => l.startsWith('Ask '));
+const asks = (b: ReturnType<typeof book>) => b.labels().filter((l) => l.startsWith(LABEL.askAbout));
 
 // Breaks: ask shows as one generic card (no per-topic expansion, or input {} so the kernel
 // refuses it), topics out of projected order, a raw topic key instead of the DefinitionRef, or
 // a card left when the actor knows no topic, or ask cards placed before the NPC's other cards.
 test('the smith offers one Ask about card per known topic; no topic, no card', () => {
   const b = smith();
-  assert.deepEqual(asks(b), ['Ask about The mill', 'Ask about The moon']);
+  assert.deepEqual(asks(b), [`${LABEL.askAbout} The mill`, `${LABEL.askAbout} The moon`]);
   const labels = b.labels();
-  assert.ok(labels.findIndex((l) => l.startsWith('Talk')) < labels.indexOf('Ask about The mill'));
+  const talk = labels.findIndex((l) => l.startsWith('Talk'));
+  assert.ok(talk >= 0 && talk < labels.indexOf(`${LABEL.askAbout} The mill`));
   const v = b.game.view().view;
   const id = v.entities.find((e) => e.name === 'npc.smith.short')!.id;
   const say = (k: string) => k;
@@ -51,14 +52,14 @@ test('the smith offers one Ask about card per known topic; no topic, no card', (
 // offers on the smith is pressed, so this is the view-to-invocation check.
 test('each Ask about card is admitted: the answer joins the page, a grant adds its card', () => {
   const b = smith();
-  b.tap('Ask about The mill');
-  b.tap('Ask about The moon');
+  b.tap(`${LABEL.askAbout} The mill`);
+  b.tap(`${LABEL.askAbout} The moon`);
   assert.deepEqual(asks(b), [
-    'Ask about The mill',
-    'Ask about The moon',
-    'Ask about The smugglers',
+    `${LABEL.askAbout} The mill`,
+    `${LABEL.askAbout} The moon`,
+    `${LABEL.askAbout} The smugglers`,
   ]);
-  b.tap('Ask about The smugglers');
+  b.tap(`${LABEL.askAbout} The smugglers`);
   const shown = b.text();
   const lines = shown.slice(shown.indexOf('A smith at her forge.') + 1, shown.indexOf(asks(b)[0]));
   assert.deepEqual(
