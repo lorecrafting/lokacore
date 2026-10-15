@@ -6,8 +6,8 @@ the next steps, the standing owner rules that the repo does not yet state, and o
 questions. Rewrite it at each stable checkpoint (a merge, a review verdict, a pushed fix) and before
 the session ends; commit and push it with the Beads export.
 
-Written 2026-10-15 UTC by Claude Code (Opus 5.5) in local session 84e03897, at a clean checkpoint
-(no agent running; every branch merged or pushed) for an owner-requested clear.
+Written 2026-10-15 UTC by Claude Code (Opus 5.5) in local session b5fe9338, for an owner-requested
+clear. State at writing: see "In flight at the clear" below.
 
 ## Start of a session
 
@@ -38,57 +38,72 @@ Written 2026-10-15 UTC by Claude Code (Opus 5.5) in local session 84e03897, at a
 
 ## Lane and next steps
 
-One lane: the mechanics toolbox only (epic `loka-kgd`, [MECHANICS-TOOLBOX.md](MECHANICS-TOOLBOX.md));
-Storybook polish (`loka-x6t`) stays paused ([record](decisions/owner-decision-one-lane-mechanics-2026-10-12.md)).
-The PM decides mechanics calls itself, records them in Beads notes, and keeps going batch after batch.
-Batch order: the owner-adopted [priority plan](briefs/toolbox-priority-plan-2026-10-14.md).
-Compaction: fast-jev is off; built-in compaction confirmed (24-43 s, with a summary). The advisor,
-background waits and resumes after a compaction are allowed (owner, 2026-10-14).
+Mechanics toolbox (epic `loka-kgd`, [MECHANICS-TOOLBOX.md](MECHANICS-TOOLBOX.md)) is the build lane;
+Storybook polish (`loka-x6t`) stays paused. The PM decides mechanics calls itself and records them in
+Beads notes. Owner product order (2026-10-15, record pending, see below): **no Chapter 1 yet**; finish
+all showcases (placeholders where lore is missing), then UI polish, then worldbuilding, then the
+official Chapters 1-3; temporary test cartridges or showcases are welcome any time.
 
-Done this session (84e03897), all on `main`:
-- #389 (`loka-kgd`, mechanics batch M13: sneak, skill voices, storylets, theft, witness, ask kernel
-  half, recognition and titles; kernel_api 1.94-1.97) at b9371090. Fable batch review APPROVE WITH NOTES;
-  fix round found a real bug: `ask`/`whisper` missing from the invocation TARGETS.
-- #390 (`loka-s05w`, FD7 Book half: "Ask about X" cards on the NPC page) at e66def4a.
-- #391 (`loka-x6t.39`, word bar batch: use-on pair cards, GameView `spell_words`/`phrases` at 1.98,
-  Chip component and Word block with "Type a word" for Say) at 06bac4f5.
-- #392 (`loka-kgd.109`, Built rooms batch S1-S4: blueprints and sites, raise the hut through a carpenter
-  service, time and timber, weather and mend; kernel_api 1.99; new compose rule: a status may sit on an
-  entity created earlier in the same proposal) at c520bbd9. Save second opinions on S2-S4.
+Done this session (b5fe9338), on `main`:
+- #393 (`loka-j64e`, recipe `reason` text: a learned spell shows why it cannot be cast; kernel_api 1.100).
+- #394 (`loka-tx2h` + 9 retro items, housekeeping: pm_merge refuses a non-green reviewed sha, prepush
+  per-run logs, after_merge ignores untracked files, sampler-hash checks, Agent load-gate hook,
+  developer.md push/code-review/mutate rules, Fable brief rule, Homestead skill-path decision record).
+- #395 and #396 (`loka-ikch`, worldbuilding): `docs/worldbuilding/` stub tree (260 lore stubs in 27
+  areas, `notes/` with the opening line), mechanics stubs parked in `docs/game-design/` (36, the
+  future GDD), Koster research in `docs/rnd/koster-design-lessons-2026-10-15.md`.
+
+In flight at the clear (check each first):
+1. **#398 Homestead batch A** (`toolbox/batch-homestead-a`, head e064721d = a8648de2 + the Fable
+   record): hs-1 `replenish.run` (1.101), hs-10 craft, hs-11 skill prerequisites, hs-2 farming, hs-3
+   fishing (`rod` tag), hs-4 animals, hs-5 `edible.applies` + mobile meal receipt (line 0 only). Every
+   slice was reviewed on its head (`docs/reviews/2026-10-15-hs-*`). **Fable batch review: APPROVE WITH
+   NOTES** (`docs/reviews/2026-10-15-homestead-a-batch-review.md`). One fix round, Opus developer in
+   its own worktree from that branch: (S1) the `loader_floors.json` case "a craft" is shadowed by
+   `craft_sampler`'s skill prerequisite, so lowering the craft floor in either kernel stays green; edit
+   the case so craft alone is pinned, red control in both kernels; (nits) `food-receipt.ts:14` cites
+   save.md, but the line-0 rule lives in mechanics.md Cooking; add the MECHANICS-TOOLBOX row .108.4
+   cooking; put the slices' `/code-review` results in the PR body. Fable re-check of the fix (scoped,
+   same agent if alive, else a fresh Opus reviewer), then ci and book-e2e green on the new head, then
+   `gh pr merge 398 --merge --match-head-commit <head>`. After the merge: `bin/after_merge.sh`; delete
+   local `review-hs-1`, `review-hs-5`, `review-hs-10`, `review-hs-11`, `review-398` and the slice
+   branches (`loka-h9ht`); remove `../worktrees.noindex/batch-homestead-a`.
+2. **#397** (`loka-uh5u`) merged: `bin/worktree_setup.sh` clones node_modules; slice worktrees run the
+   Book in a browser. Existing worktrees must rerun `bin/worktree_setup.sh`.
+3. **hs-12 self-build** (`loka-kgd.108.9`, open): not started (no code). Branch `toolbox/hs-12` sits at
+   the batch-B base a8648de2 (`toolbox/batch-homestead-b` was cut from batch A's head); worktree
+   `../worktrees.noindex/hs-12` kept. Code map in its Beads notes. After #398 merges, merge `main` into
+   `toolbox/batch-homestead-b`, then spawn hs-12 with its brief.
 
 Next, in order:
+0. #397 is merged: one Sonnet catch-up pass takes 390 px screenshots of the batch A samplers
+   (farm, fishing, pen, kitchen, craft) for the owner; every batch B slice that changes what the
+   player sees hands back its own 390 px screenshot (owner asked 2026-10-15).
+1. Batch B (all briefs in Beads notes, "BRIEF loka hs-N"): hs-12 self-build (`.108.9`), hs-13
+   self-cooking (`.108.10`, owns hearth, hearty stews, feast), hs-6 furnishing (`.108.6`), hs-7 gifting
+   and barter (`.108.5` + `loka-kgd.70`), hs-8 Give in the Book (`loka-x6t.31`, designer consult; needs
+   #397), hs-14 skill tree screen (`.108.11`), hs-9 raze (`loka-otn4`, save: second opinion) last.
+2. A docs PR with decision records for: no Chapter 1 yet (order above); worldbuilding decoupled from
+   game mechanics (`docs/game-design/` is the parked GDD); Homestead professions rulings (failed craft
+   loses inputs; coin fee per skill box, XP never spent; several hidden elites possible).
+3. Then Settle S3 `loka-mytp` / S4 `loka-oxgk` (Fable briefs first), M14, M15.
+4. Follow-ups: `loka-kgd.108.12` (claim emits no item_acquired), `.108.13` (spoil restarts on retake);
+   older: `loka-trex`, `loka-z4cp`, `loka-kgd.157`, `.158`, `.154`-`.156`, `loka-ynfo`, `loka-3wwm`.
 
-1. **`loka-j64e` at kernel_api 1.100**, its own hosted PR from `main`: an optional authored reason text
-   key on a recipe, so a learned spell the actor cannot cast yet shows a reason (today "not now"). Brief
-   in its Beads notes (option a; one reason for the whole policy).
-2. **Homestead batch A** (`toolbox/batch-homestead-a` from `main` after j64e): hs-1 `loka-5m0u`
-   (`replenish.run` reaction step, 1.101), then hs-2 farming (`loka-kgd.108.1`), hs-3 fishing (`.108.3`),
-   hs-4 animals (`.108.2`), hs-5 cooking (`.108.4`). Batch B: hs-6 furnishing (`.108.6` + Settle S1),
-   hs-7 gifting and barter (`.108.5` + `loka-kgd.70`), hs-8 Give in the Book (`loka-x6t.31`, designer
-   consult), hs-9 raze (`loka-otn4`). All briefs: `br show loka-kgd.108` notes, "FABLE BRIEFS
-   HOMESTEAD" (COMMON block + one section per slice + PM rulings). Fable said hs-2/3/4 may run in
-   parallel after hs-1 (content only) and hs-5 beside hs-1.
-3. Then Settle S3 `loka-mytp` / S4 `loka-oxgk` (Fable briefs at build time), M14, M15.
-4. Follow-ups filed this session: `loka-trex` (built room can share a map cell), `loka-z4cp` (permanent
-   status still schedules a tick), `loka-kgd.157` (npc.move leaves the patrol cursor), `.158` (TARGETS
-   duplicates VERBS by hand). Older: `loka-kgd.154`, `.155`, `.156`, `loka-ynfo`, `loka-3wwm`.
+Merge mechanics: `bin/pm_merge.sh <batch-worktree> <batch-branch> <slice-branch> <review-branch or the
+sha> "<subject>" <reviewed-sha>` (refuses a non-green sha). It stops on stacked additive conflicts in
+`loader_floors.json`, `mechanics.md`, `MECHANICS-TOOLBOX.md` and the gen files (retro `loka-0fhi`):
+merge by hand, keep both sides, run `elixir bin/contracts.exs`, `bin/review_index.sh`, focused tests,
+push. Batch worktree: `../worktrees.noindex/batch-homestead-a`. `bin/after_merge.sh` now works with the
+owner's untracked `scripts/`.
 
-Merge mechanics: `bin/pm_merge.sh <batch-worktree> <batch-branch> <slice-branch> <review-branch>
-"<subject>" <reviewed-sha>` (the reviewed sha must equal the slice's origin head, so put the record on
-the slice branch or pass the record branch built on that head). A generated `docs/reviews/README.md`
-conflict: rerun `bin/review_index.sh`. Each new kernel_api floor needs a case in
-`protocol/fixtures/loader_floors.json` (#384): put it in the brief. `bin/after_merge.sh` stops on the
-owner's untracked `scripts/` (retro `loka-jxwu`): do its steps by hand until fixed.
-
-Session lessons (2026-10-15, session 84e03897):
-- Check the slice's own CI before `pm_merge` (word bar S2 was merged red; retro `loka-tx2h`).
-- A sampler hash change also needs its transcript known answer and the SystemDataModel Impact story
-  list; put it in every brief that touches a sampler (broke CI twice; retro `loka-j6qd`).
-- Store the developer's check table in Beads at handback, before spawning the reviewer (reviewers
-  could not find it three times; retro `loka-8lkq`).
-- Kernel tests that send ready Commands miss invocation gaps: a new verb needs one test through the
-  Book's resolve path (C11 in M13).
-- Developers cannot run the browser check in a slice worktree (retro `loka-uh5u`); stories stand in.
+Session lessons (2026-10-15, b5fe9338):
+- Content slices hid a faucet or exploit every time (re-sow, drop-retake spoil, corpse feeding, an
+  honest receipt refused); probe item loops in every content brief (retro `loka-vro5`).
+- Handback check tables were wrong in four slices; reviewers must rerun 2 claims (retro `loka-zgqt`).
+- A save-path change in a fix round (hs-5 receipt) needed a second opinion that found a new blocker;
+  a `runtime/proposal.ts` touch in a fix round (hs-1) triggers one too.
+- Parallel slices at one kernel_api floor all append to the same fixture and doc spots.
 
 ## Standing owner rules not yet written elsewhere in the repo
 
@@ -124,44 +139,35 @@ Session lessons (2026-10-15, session 84e03897):
 - The disk fills after about seven worktrees (2.2 GB each); remove merged worktrees first.
 - Agents must never run `git worktree prune` while another agent's worktree is in use.
 
-## Owner answers this session (paraphrased unless quoted)
+## Owner answers this session
 
-- 2026-10-14 (session c4308118): Settle S3/S4 yes ("yes lets do s3 and s4, fable will plan it right?
-  please make it super world class!"); the seven Settle questions and FD7 "all as recommended" (record
-  `docs/decisions/owner-decision-settle-and-fd7-2026-10-14.md` on #384). repowise: skip for now (PM
-  assessment; one-session trial held in reserve).
-
-- 2026-10-14 (session 84e03897): approved retro items `loka-9ruc`, `loka-oy8i`; G10 map pins and
-  journal notes descoped ("maybe descope that for now"), letters by job kept; death penalty options
-  (row 47) kept ("lets keep it"); retro items `loka-13i3`, `loka-z167`, `loka-o5c2` approved ("approve all three retro items"); Fable drafts briefs for hard rows ("yes record the fable brief
-  rule", rule above); `~/dev` added to Spotlight Privacy.
-- Earlier 2026-10-14: fast-jev compaction OFF ("ok keep it off"); Fable allowed for important
-  judgment work; adopted the Fable priority plan; Settle S1 into Homestead, S2 cut, S3/S4 on a yes;
-  word bar touch-first; mounts after 43a in M14.
-
-- 2026-10-15 (session 84e03897): retro `loka-wu5e` approved ("approved"): every brief requires the
-  developer to mutate every new conditional in its diff before handback and report each in the
-  check-to-test table; until developer.md says so (next housekeeping PR), paste it into each brief.
-- 2026-10-15 (session 84e03897): PM rulings the owner may overrule (none asked directly):
-  Built rooms build through a hired carpenter NPC, not a free-hand verb; raze moved to Homestead;
-  Homestead: cook NPC (no own hearth yet), fishing is a luck miss with hour/season/weather catches (no
-  rarity table), no chicks in v1 (row 45 later), barter at price 0, Give as "Give to <NPC>" cards on the
-  item page; word bar: `learned` required on every spell, static say phrases, keyboard behind a "Type a
-  word" control, ask never in the bar.
+- 2026-10-15 (session b5fe9338, paraphrased unless quoted): cloud compute no longer needed
+  (`loka-2of` closed). Retro items: approved as recommended ("go with your recs"), `loka-8lkq` and
+  `loka-iqga` rejected. Homestead: the skill path replaces NPC cooking and building; a paid NPC gives
+  only a beginner tier; SWG-style skill trees for many professions ("yes SWO skilltrees sounds good"),
+  several hidden elite professions; "GO with all your recs" on: skill tree screen in batch B, a failed
+  craft loses its inputs, a skill box costs a trainer coin fee with XP never spent.
+- Worldbuilding (`loka-ikch`): our own cosmology and lore from the ground up; it replaces the Ashmere
+  setting (new content uses generic names); a Jedi-like order of cosmic wardens is one hidden elite;
+  folder `docs/worldbuilding/`, loose notes in `notes/`; the game opens with "In the beginning of this
+  great eon..."; worldbuilding is story and canon only, mechanics and balance live apart (future GDD).
+- Chapter 1: not now; showcases first (placeholders for missing lore), then UI polish, then
+  worldbuilding, then the official Chapters 1-3; temporary showcases or cartridges to test things are
+  fine.
 
 ## Open owner questions
 
-- Cloud compute (`loka-2of`, prices refreshed in its notes): the bottleneck is M1 CPU, not CI (CI is
-  free: the repo is public). PM pick: a Hetzner CAX41 agent box (~$45/mo, 16 ARM cores) or CAX31
-  (~$20/mo, within the $20 budget). Owner to choose and sign up; the PM then writes setup steps.
-
-- Approve or reject retro items: from 2026-10-14 `loka-0j8u` (hook refuses a spawn at load 8+),
-  `loka-bjwq` (developers always push; read prepush status), `loka-60rs` (CI sim time per batch head),
-  `loka-iqga` (merge_resolve combines one-row doc edits and imports), `loka-a2av` (collapse Beads notes
-  at approval), `loka-cnqx` (prepush per-run log directory); from 2026-10-15 `loka-hisj` (/code-review names its target), `loka-jxwu`
-  (after_merge.sh ignores untracked files), `loka-tx2h` (pm_merge refuses a red reviewed sha),
-  `loka-j6qd` (sampler hash change runs transcripts and the Impact story check), `loka-8lkq` (check table
-  in the last commit body), `loka-uh5u` (browser checks in slice worktrees).
+- Worldbuilding, first five decisions (not urgent: worldbuilding comes after showcases and UI polish):
+  premise and pillars; cosmology shape; magic hardness and cost; hidden-elite secrecy (Koster's Jedi
+  lesson: phone data will be mined; secret vs discoverable path); Story vs Realm canon.
+- Approve or reject retro items from 2026-10-15 (b5fe9338): `loka-0fhi` (merge_resolve unions
+  additive fixture and doc conflicts), `loka-ujau` (bin/push_slice.sh prints the real push status),
+  `loka-vro5` (content slices hand back an item loop table), `loka-zgqt` (check table rows paste the
+  failing mutant line), `loka-df49` (log subagent tokens per slice in Beads, sum per batch).
+- Approved 2026-10-15, to do in the next housekeeping PR: `loka-stzq` (read the usage meter at session
+  start and before any large fan-out; report usage per batch). Workflows/ultracode: not for routine
+  work (PM recommendation after the owner's question); a bounded fan-out only, with explicit models,
+  a concurrency cap, worktree isolation and a usage reading before and after.
 
 ## Parked (polish lane)
 
