@@ -1,7 +1,7 @@
 // C row Pages, Sections (design-input-batch-4-2026-10-09.md 1); routes: stories/routes.ts.
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { ContentsPage } from '../book/Menu.tsx';
-import { RaiseCards, SkillDetails } from '../book/skills.tsx';
+import { Professions, RaiseCards, SkillDetails } from '../book/skills.tsx';
 import { AncestryPage, CarryingPage, CharacterPage, SettingsPage } from '../book/sections.tsx';
 import { JournalPage } from '../book/journal.tsx';
 import { pageStory } from './screen.tsx';
@@ -21,6 +21,7 @@ const meta: Meta = {
     CarryingPage,
     CharacterPage,
     SkillDetails,
+    Professions,
     RaiseCards,
     ContentsPage,
     SettingsPage,
