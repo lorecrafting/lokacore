@@ -122,32 +122,39 @@ defmodule Loka.Content.Skills do
     hidden? =
       &match?({_, _, %{"hidden" => true}}, Loka.Content.Refs.resolve(&1, "skill", m, defs))
 
-    # Only skill_compare (in a policy) and skill.acquire (in a sequence) carry a "skill".
-    reads? = fn p ->
-      Enum.any?(Loka.Content.Policies.nodes(p["root"], []), fn {n, _} ->
-        hidden?.(n["skill"])
-      end)
-    end
+    shown_qualifications(defs, hidden?) ++ dialogues(defs, hidden?)
+  end
 
-    teaches? = fn d ->
+  defp shown_qualifications(defs, hidden?),
+    do:
+      for(
+        {_, {rel, _, s}} <- defs["skill"],
+        !s["hidden"],
+        reads?(s["qualification"], hidden?),
+        do: bad(at(rel, ["qualification"]))
+      )
+
+  defp dialogues(defs, hidden?),
+    do:
+      for(
+        {_, {rel, [], d}} <- defs["dialogue"] || %{},
+        {field, true} <- [
+          {"policy", reads?(d["policy"], hidden?)},
+          {"label", !!d["label"] and teaches?(d, hidden?)}
+        ],
+        do: bad(at(rel, [field]))
+      )
+
+  # Only skill_compare (in a policy) and skill.acquire (in a sequence) carry a "skill".
+  defp reads?(p, hidden?),
+    do:
+      Enum.any?(Loka.Content.Policies.nodes(p["root"], []), fn {n, _} -> hidden?.(n["skill"]) end)
+
+  defp teaches?(d, hidden?),
+    do:
       Enum.any?(Map.values(d["choices"]), fn o ->
         Enum.any?(o["sequence"] || [], &hidden?.(&1["skill"]))
       end)
-    end
-
-    for(
-      {_, {rel, _, s}} <- defs["skill"],
-      !s["hidden"],
-      reads?.(s["qualification"]),
-      do: bad(at(rel, ["qualification"]))
-    ) ++
-      for {_, {rel, [], d}} <- defs["dialogue"] || %{},
-          {field, true} <- [
-            {"policy", reads?.(d["policy"])},
-            {"label", !!d["label"] and teaches?.(d)}
-          ],
-          do: bad(at(rel, [field]))
-  end
 
   defp hidden(m, defs),
     do: for({key, {_, _, %{"hidden" => true}}} <- defs["skill"], do: ref(m, key))
