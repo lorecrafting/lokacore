@@ -235,3 +235,51 @@ test('one wait through nine rounds equals the same wait in steps of 50', () => {
   assert.equal(rest(one), rest(steps));
   assert.deepEqual([hp(one), guards(one).length], [11, 1]);
 });
+
+// Breaks (loka-kgd.151, review finding 3): a reaction at round 150 writes `marked`, and the kill at
+// 600 credits it (combat/credit.ts) in the round's group, so one wait faults conflicting_write
+// while steps commit the two writes in turn. The fact is the death credit's; the reaction is test-only.
+test('a reaction write and a later death credit of one fact compose in one wait as in steps', () => {
+  const ref = (kind: string, key: string) => ({
+    cartridge_id: 'boss_sampler',
+    cartridge_version: '0.0.1',
+    key,
+    kind,
+  });
+  const w = world((c) => {
+    warlordHp(4, 4)(c);
+    delete c.reactions[R('summon')];
+    delete c.reactions[R('withdraw')];
+    c.facts[`${P}fact/marked`] = {
+      key: 'marked',
+      meaning: 'The warlord is marked.',
+      scopes: ['player'],
+      value_type: { default: false, type: 'bool' },
+      version: 1,
+    };
+    c.world.death_credit = [
+      { fact: ref('fact', 'marked'), npc: ref('npc', 'warlord'), room: ref('room', 'hall') },
+    ];
+    const at_least_percent = 70; // only the first hit (3 of 4) leaves the warlord this high
+    c.reactions[R('mark')] = {
+      apply: [{ fact: ref('fact', 'marked'), op: 'fact.assign', value: false }],
+      key: 'mark',
+      on: { event: 'attack_result', target: ref('npc', 'warlord') },
+      when: {
+        policy_version: 1,
+        root: {
+          at_least_percent,
+          op: 'resource_compare',
+          resource: ref('resource', 'hp'),
+          subject: 'subject',
+        },
+      },
+    };
+  });
+  const a = act(w, { type: 'attack', target_id: boss(w) });
+  const [oneLog, stepLog]: string[][] = [[], []];
+  const [one, steps] = [elapsed(a, 750, 750, oneLog), elapsed(a, 750, 50, stepLog)];
+  assert.deepEqual(oneLog, stepLog);
+  assert.deepEqual([hp(one), fact(one, 'marked')], [0, true]);
+  assert.equal(encode(one.state.facts as never), encode(steps.state.facts as never));
+});

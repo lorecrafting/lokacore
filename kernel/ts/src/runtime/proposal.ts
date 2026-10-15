@@ -298,6 +298,11 @@ function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined
     p.group++;
     const failed = join(p, own, ran.events, cause(p, due_time, run.id), 0, m) ?? react(p);
     if (failed) return failed;
+    // Its reactions' writes and a kill's credit (combat/credit.ts) join strictly earlier writers too.
+    for (const g of new Set(p.ops.slice(mark).map((o) => o.writer_group))) {
+      const mine = p.ops.slice(mark).filter((o) => o.writer_group === g);
+      joinEarlier(p.ops, [start, cut], mine, g, [p.holders, groups]);
+    }
     if ((p.limit = queueScheduled(due, p.ops.slice(mark), to))) return BUDGET;
   }
 }
