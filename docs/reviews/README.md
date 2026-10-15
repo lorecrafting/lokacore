@@ -32,6 +32,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: Homestead hs-10 craft (loka-kgd.108.7)](2026-10-15-hs-10-review.md): **APPROVE**
 - [Second opinion: hs-1 replenish.run root-command join (loka-5m0u)](2026-10-15-hs-1-second-opinion.md): **APPROVE**
 - [Review: replenish.run reaction step (Homestead hs-1, loka-5m0u)](2026-10-15-hs-1-review.md): **APPROVE**
+- [Review: Homestead batch A head (PR #398, loka-kgd.108)](2026-10-15-homestead-a-batch-review.md): **APPROVE WITH NOTES**
 - [Review: Built rooms batch head (loka-kgd.109; S1-S4)](2026-10-15-built-batch-review.md): **APPROVE**
 - [Review: Realm seams batch (loka-kgd.150, PR #386)](2026-10-14-realm-seams-batch-review.md): **APPROVE**
 - [Review: two shops save fix, save second opinion (loka-kgd.149)](2026-10-14-m12-two-shops-second-opinion.md): **APPROVE**
