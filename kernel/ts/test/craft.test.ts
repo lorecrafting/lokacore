@@ -1,4 +1,4 @@
-// size: allow 570, the craft sampler walks (hs-10 to hs-12) share one compiled cartridge and helpers
+// size: allow 680, the craft sampler walks (hs-10 to hs-12) and the hs-14 skill tree share one compiled cartridge and helpers
 // Homestead hs-10 (docs/system/mechanics.md Craft) on the compiled craft sampler: the workshop's
 // bench carries carve_spoon (opposed whittling, rating 1, growth [1]); it consumes one of
 // stick_01..02 into the sealed scrap room and yields one of spoon_01..02 from the sealed store.
