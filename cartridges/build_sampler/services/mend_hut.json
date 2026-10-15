@@ -1,0 +1,22 @@
+{
+  "provider": "carpenter",
+  "currency": "pennies",
+  "action": "mend_hut",
+  "label": "service.mend_hut",
+  "narration": "service.mend_hut.used",
+  "price": 3,
+  "benefit": {
+    "kind": "mend",
+    "site": "lane",
+    "direction": "north",
+    "escrow": {
+      "items": [
+        "timber_a",
+        "timber_b",
+        "timber_c"
+      ],
+      "quantity": 1,
+      "custody": "yard"
+    }
+  }
+}

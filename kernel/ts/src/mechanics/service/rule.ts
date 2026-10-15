@@ -13,7 +13,7 @@ export const decide: Rule<'service'> = (world, command, mint, steps) => {
   const ops = [
     ...result.ops,
     ...scheduled(world, payload, result.service, mint),
-    ...raised(payload, result.service, mint),
+    ...raised(world, payload, result.service, mint),
   ];
   return accepted(world, 'service_used', ops, [], [{ key: result.service.narration }]);
 };

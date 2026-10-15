@@ -107,7 +107,7 @@ defmodule Loka.Core.Compose do
 
       # Against the composing time: a drain job's sub-step may write a status or bleed ending before the target.
       op["op"] == "status.transition" ->
-        ComposeStatus.transition(op, read(target, ctx), state, at)
+        ComposeStatus.transition(op, read(target, ctx), state, at, overlay)
 
       op["op"] == "bleed.transition" ->
         ComposeBleed.transition(op, read(target, ctx), state, at, overlay)

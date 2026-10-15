@@ -11,6 +11,7 @@
   },
   "services": [
     "raise_hut",
-    "cancel_hut"
+    "cancel_hut",
+    "mend_hut"
   ]
 }

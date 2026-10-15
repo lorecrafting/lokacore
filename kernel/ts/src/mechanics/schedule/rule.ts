@@ -92,7 +92,7 @@ export const decideAt = (
       return runReplenish(world, payload.job_id, row, mint, steps, at ?? row.due_time);
     if (row.job.kind === 'wage')
       return runWage(world, payload.job_id, row, mint, at ?? row.due_time);
-    if (row.job.kind === 'order') return orderReady(world, payload.job_id, row, mint, steps);
+    if (row.job.kind === 'order') return orderReady(world, payload.job_id, row, mint, steps, at);
     if (row.job.kind === 'reaction')
       return runDelayed(world, command, payload.job_id, row, mint, steps, joins); // FD1
     return scheduledJob(world, command, payload.job_id, row, mint, steps, at ?? row.due_time);
@@ -172,9 +172,18 @@ function scheduledJob(
 // Toolbox row 20b: a due order job completes; the order is now ready. A build commission's
 // (Built rooms S3) also raises the room, its id minted from this run_job's jobCommandId.
 // A refund it cannot make faults (as containment's replenish does).
-function orderReady(world: World, job_id: JobId, row: JobRow, mint: Mint, steps: Steps) {
+// The room is raised at the job's due time, so its weathering starts then (Built rooms S4).
+function orderReady(
+  world: World,
+  job_id: JobId,
+  row: JobRow,
+  mint: Mint,
+  steps: Steps,
+  at = row.due_time,
+) {
   if (row.status !== 'pending') return accepted<never>(world, 'job_ran', [], []);
-  const ops = built(world, job_id, row, mint, steps);
+  const then = { ...world, state: { ...world.state, clock: at } };
+  const ops = built(then, job_id, row, mint, steps);
   if (typeof ops === 'string') return { kind: 'fault', code: ops } as const;
   const done = { op: 'job.complete', writer_group: 0, job_id } as const;
   return accepted<never>(world, 'job_ran', [done, ...ops], []);

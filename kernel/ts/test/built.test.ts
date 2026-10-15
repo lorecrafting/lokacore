@@ -65,6 +65,7 @@ const use = (provider: string, service: string, quoted_price: number) => (w: Wor
 const buy = use('seller', 'buy_plot', 10);
 const raise = use('carpenter', 'raise_hut', 5);
 const cancel = use('carpenter', 'cancel_hut', 1);
+const mend = use('carpenter', 'mend_hut', 3);
 const pennies = (w: World) => level(w, w.body, resourceRef(w, 'pennies'));
 const take = (w: World, ...ks: string[]) =>
   ks.reduce((x, k) => play(x, { type: 'take', item_id: x.entityIds[`${S}:item/timber_${k}`] }), w);
@@ -89,9 +90,14 @@ const built = (w: World) =>
   Object.keys(w.state.created ?? {}).filter((id) => w.state.created![id].origin.kind === 'built');
 // The offer's refusal and the press's are the same code (view-to-invocation); the press carries
 // only the code, the offer also the reason's text key (none for a failing policy).
-function refused(w: World, code: string, key?: string) {
-  const offer = gameView(w).entities.find((e) => e.id === npc(w, 'carpenter'))!.services![0];
-  const r = send(w, raise(w));
+function refused(
+  w: World,
+  code: string,
+  key?: string,
+  [use, i]: [typeof raise, number] = [raise, 0],
+) {
+  const offer = gameView(w).entities.find((e) => e.id === npc(w, 'carpenter'))!.services![i];
+  const r = send(w, use(w));
   assert.deepEqual(r.decision, { kind: 'rejected', error: { code } });
   assert.deepEqual((offer.action as { reason?: unknown }).reason, {
     code,
@@ -339,8 +345,12 @@ test('a commission raises for its job owner, caps per owner, and an unrefundable
   const mint = () => 'eeeeeeee-0000-4000-8000-00000000000f';
   const ops = due(own(w), id as never, { ...row, actor_id: other }, mint, { n: 0 }) as any[];
   assert.equal(ops[0].identity.origin.owner, other);
-  assert.equal(ops.length, 2);
-  assert.match(JSON.stringify(ops[1]), new RegExp(other));
+  // The created row, its weathering status and job (S4), then the owner's order fact closed.
+  assert.deepEqual(
+    ops.map((o) => o.op),
+    ['entity.create', 'status.transition', 'job.schedule', 'fact.assign'],
+  );
+  assert.match(JSON.stringify(ops[3]), new RegExp(other));
 
   w = elapse(w, w.state.clock + 7200);
   const b = { ...w.cartridge.services![`${S}:service/raise_hut`].benefit, direction: 'east' };
@@ -380,4 +390,50 @@ test('a commission raises for its job owner, caps per owner, and an unrefundable
   assert.ok(
     (due(mine, id as never, row, mint, { n: at }) as any[]).some((o) => o.op === 'entity.transfer'),
   );
+});
+
+// Built rooms S4 (mechanics.md Built rooms, S4). Breaks: weathering not applied at completion,
+// ruin not reacted onto the room (or onto the player instead), the ruin variant read against the
+// actor's body rather than the room (policy status_active subject room), or ruin changing the
+// hut's exits or trapping the player inside.
+test('600 s after completion the hut reads in ruin, its exits unchanged, and the player can leave', () => {
+  n = 0;
+  let w = fresh();
+  w = raised(play(w, buy(w)));
+  const lane = w.state.containers[w.body];
+  w = play(w, { type: 'move', direction: 'north' });
+  const [hut] = built(w);
+  const exits = gameView(w).exits;
+  assert.equal(gameView(w).place.description.key, 'blueprint.hut.description.owned');
+  w = elapse(w, w.state.clock + 599);
+  assert.equal(gameView(w).place.description.key, 'blueprint.hut.description.owned');
+  w = elapse(w, w.state.clock + 1);
+  assert.equal(gameView(w).place.description.key, 'blueprint.hut.description.ruin');
+  const ruin = Object.entries(w.state.statuses ?? {}).filter(([, r]) => r.active);
+  assert.deepEqual(
+    ruin.map(([at]) => [JSON.parse(at).body_id, JSON.parse(at).status.key]),
+    [[hut, 'ruin']],
+  );
+  assert.deepEqual(gameView(w).exits, exits);
+  w = play(w, { type: 'move', direction: 'south' });
+  assert.equal(w.state.containers[w.body], lane);
+});
+
+// Built rooms S4 mend (mechanics.md Built rooms, S4). Breaks: a mend admitted on a sound hut, the
+// mend not curing ruin, the timber or price not taken, or weathering not applied again from the mend.
+test('mend is refused on a sound hut; on a ruin it cures it for 3 pennies and a timber, and weathering restarts', () => {
+  n = 0;
+  let w = take(raised(play(fresh(), buy(fresh()))), 'c');
+  const yard = w.roomIds[`${S}:room/yard`]!;
+  refused(w, 'invalid_state', 'service.nothing_to_mend', [mend, 2]);
+  w = elapse(w, w.state.clock + 600);
+  const [before, held0] = [pennies(w)!, held(w, yard)];
+  w = play(w, mend(w));
+  assert.deepEqual([before - pennies(w)!, held(w, yard) - held0, held(w, w.body)], [3, 1, 0]);
+  w = play(w, { type: 'move', direction: 'north' });
+  assert.equal(gameView(w).place.description.key, 'blueprint.hut.description.owned');
+  w = elapse(w, w.state.clock + 599);
+  assert.equal(gameView(w).place.description.key, 'blueprint.hut.description.owned');
+  w = elapse(w, w.state.clock + 1);
+  assert.equal(gameView(w).place.description.key, 'blueprint.hut.description.ruin');
 });

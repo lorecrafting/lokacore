@@ -2,6 +2,11 @@ defmodule Loka.Core.Creation do
   @moduledoc "Pinned corpse and population provenance with initial placement guards."
   alias Loka.Core.{Canonical, Contracts}
 
+  @doc "The kind a created identity hydrates as (TS runtime/created.ts): built -> room, a spawned hound or deer -> npc, else item."
+  def kind(%{"origin" => %{"kind" => "built"}}), do: "room"
+  def kind(%{"origin" => %{"kind" => "spawned", "role" => r}}) when r in ~w(hound deer), do: "npc"
+  def kind(_), do: "item"
+
   # A create is followed by its first placement, except a built room, which is never placed.
   def initial_pair?(op, next) do
     placed =

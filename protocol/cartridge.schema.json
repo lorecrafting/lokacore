@@ -2621,7 +2621,7 @@
       "additionalProperties": false
     },
     "BlueprintDefinition": {
-      "description": "Built rooms S1 (kernel_api at least 1.99; construction@1; cartridge.md Blueprint and site declarations): one structure a player may build at a room's site (RoomDefinition.site). Its key; title and description, the text keys of the room it becomes; optional variants (DescriptionVariant) and tags (Tag) as a room's; optional locks.enter, the policy the mover must hold to come into the built room, as a room's (toolbox row G7). Nothing builds in S1: the cartridge declares and both compilers check. Built rooms S3: optional max_per_owner, the most rooms of this blueprint one character may own at once; an order at the cap is refused service.construction_full.",
+      "description": "Built rooms S1 (kernel_api at least 1.99; construction@1; cartridge.md Blueprint and site declarations): one structure a player may build at a room's site (RoomDefinition.site). Its key; title and description, the text keys of the room it becomes; optional variants (DescriptionVariant) and tags (Tag) as a room's; optional locks.enter, the policy the mover must hold to come into the built room, as a room's (toolbox row G7). Nothing builds in S1: the cartridge declares and both compilers check. Built rooms S3: optional max_per_owner, the most rooms of this blueprint one character may own at once; an order at the cap is refused service.construction_full. Built rooms S4: optional weathering, a status of this cartridge the room gets when it is raised (and again when mended); optional ruin, the status a mend cures (a reaction applies it, typically on weathering's status_expired), the mend benefit refuses service.nothing_to_mend unless ruin is active on the room.",
       "type": "object",
       "properties": {
         "key": {
@@ -2665,6 +2665,12 @@
           "type": "integer",
           "minimum": 1,
           "maximum": 1000
+        },
+        "weathering": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
+        "ruin": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
         }
       },
       "required": [

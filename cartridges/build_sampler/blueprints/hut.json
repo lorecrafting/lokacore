@@ -7,6 +7,17 @@
       "when": {
         "policy_version": 1,
         "root": {
+          "op": "status_active",
+          "subject": "room",
+          "status": "ruin"
+        }
+      },
+      "description": "blueprint.hut.description.ruin"
+    },
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
           "op": "fact_compare",
           "fact": "owns_plot",
           "equals": true
@@ -24,5 +35,7 @@
         "equals": true
       }
     }
-  }
+  },
+  "weathering": "weathering",
+  "ruin": "ruin"
 }

@@ -1715,6 +1715,222 @@
           }
         }
       }
+    },
+    {
+      "id": "holder-created-earlier-in-delta-accepted",
+      "state": {
+        "clock": 100,
+        "known_entities": {
+          "00000000-0000-4000-8000-000000000001": {
+            "kind": "body",
+            "owner_id": "00000000-0000-4000-8000-000000000007"
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "entity.create",
+          "writer_group": 0,
+          "identity": {
+            "id": "00000000-0000-4000-8000-000000000005",
+            "definition": {
+              "cartridge_id": "c",
+              "cartridge_version": "1.0.0",
+              "kind": "blueprint",
+              "key": "hut"
+            },
+            "origin": {
+              "kind": "built",
+              "site": {
+                "cartridge_id": "c",
+                "cartridge_version": "1.0.0",
+                "kind": "room",
+                "key": "lane"
+              },
+              "direction": "north",
+              "owner": "00000000-0000-4000-8000-000000000007"
+            }
+          }
+        },
+        {
+          "op": "status.transition",
+          "writer_group": 0,
+          "body_id": "00000000-0000-4000-8000-000000000005",
+          "status": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "status",
+            "key": "ruin"
+          },
+          "expected": null,
+          "value": {
+            "active": true,
+            "generation": 1
+          }
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "status",
+              "body_id": "00000000-0000-4000-8000-000000000005",
+              "status": {
+                "cartridge_id": "c",
+                "cartridge_version": "1.0.0",
+                "kind": "status",
+                "key": "ruin"
+              }
+            },
+            "value": {
+              "active": true,
+              "generation": 1
+            }
+          },
+          {
+            "target": {
+              "kind": "entity",
+              "entity_id": "00000000-0000-4000-8000-000000000005"
+            },
+            "value": {
+              "id": "00000000-0000-4000-8000-000000000005",
+              "definition": {
+                "cartridge_id": "c",
+                "cartridge_version": "1.0.0",
+                "kind": "blueprint",
+                "key": "hut"
+              },
+              "origin": {
+                "kind": "built",
+                "site": {
+                  "cartridge_id": "c",
+                  "cartridge_version": "1.0.0",
+                  "kind": "room",
+                  "key": "lane"
+                },
+                "direction": "north",
+                "owner": "00000000-0000-4000-8000-000000000007"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "holder-neither-known-nor-created-refused",
+      "state": {
+        "clock": 100,
+        "known_entities": {
+          "00000000-0000-4000-8000-000000000001": {
+            "kind": "body",
+            "owner_id": "00000000-0000-4000-8000-000000000007"
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "status.transition",
+          "writer_group": 0,
+          "body_id": "00000000-0000-4000-8000-000000000005",
+          "status": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "status",
+            "key": "ruin"
+          },
+          "expected": null,
+          "value": {
+            "active": true,
+            "generation": 1
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "status",
+            "body_id": "00000000-0000-4000-8000-000000000005",
+            "status": {
+              "cartridge_id": "c",
+              "cartridge_version": "1.0.0",
+              "kind": "status",
+              "key": "ruin"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "holder-created-later-in-delta-refused",
+      "state": {
+        "clock": 100,
+        "known_entities": {
+          "00000000-0000-4000-8000-000000000001": {
+            "kind": "body",
+            "owner_id": "00000000-0000-4000-8000-000000000007"
+          }
+        }
+      },
+      "ops": [
+        {
+          "op": "status.transition",
+          "writer_group": 0,
+          "body_id": "00000000-0000-4000-8000-000000000005",
+          "status": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "status",
+            "key": "ruin"
+          },
+          "expected": null,
+          "value": {
+            "active": true,
+            "generation": 1
+          }
+        },
+        {
+          "op": "entity.create",
+          "writer_group": 0,
+          "identity": {
+            "id": "00000000-0000-4000-8000-000000000005",
+            "definition": {
+              "cartridge_id": "c",
+              "cartridge_version": "1.0.0",
+              "kind": "blueprint",
+              "key": "hut"
+            },
+            "origin": {
+              "kind": "built",
+              "site": {
+                "cartridge_id": "c",
+                "cartridge_version": "1.0.0",
+                "kind": "room",
+                "key": "lane"
+              },
+              "direction": "north",
+              "owner": "00000000-0000-4000-8000-000000000007"
+            }
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "status",
+            "body_id": "00000000-0000-4000-8000-000000000005",
+            "status": {
+              "cartridge_id": "c",
+              "cartridge_version": "1.0.0",
+              "kind": "status",
+              "key": "ruin"
+            }
+          }
+        }
+      }
     }
   ]
 }

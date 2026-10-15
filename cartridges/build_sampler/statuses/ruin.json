@@ -1,0 +1,11 @@
+{
+  "duration": "permanent",
+  "tick_every": 86400,
+  "resource": "hp",
+  "label": "condition.ruin",
+  "narration": {
+    "applied": "narration.ruin.applied",
+    "tick": "narration.ruin.tick",
+    "expired": "narration.ruin.expired"
+  }
+}

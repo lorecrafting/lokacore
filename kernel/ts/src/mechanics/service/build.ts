@@ -20,6 +20,7 @@ import {
 } from '../../runtime/decision.ts';
 import { assigned, value } from '../fact.ts';
 import { selected } from '../containment/stock.ts';
+import { applyStatus, cureOps, currentStatus } from '../status/shared.ts';
 
 type Build = Extract<ServiceDefinition['benefit'], { kind: 'build' }>;
 const refused = (key: string) => ({
@@ -42,20 +43,61 @@ export function unbuildable(world: World, b: Build, owner: CharacterId) {
   return undefined;
 }
 
-const created = (b: Build, owner: CharacterId, mint: Mint): DeltaOp => {
+// The created row, then (S4) the blueprint's weathering on the new room. The room is known only
+// after hydrate, so the status is applied on a world that already knows it (compose admits a
+// holder created earlier in the same delta).
+function created(world: World, b: Build, owner: CharacterId, mint: Mint): DeltaOp[] {
   const origin = { kind: 'built', site: b.site, direction: b.direction, owner } as const;
   const identity = { id: mint() as EntityId, definition: b.blueprint, origin };
-  return { op: 'entity.create', writer_group: 0, identity };
-};
+  const weathering = world.cartridge.blueprints?.[refString(b.blueprint)]?.weathering;
+  const known = { ...world.knownEntities, [identity.id]: { kind: 'room' as const } };
+  return [
+    { op: 'entity.create', writer_group: 0, identity },
+    ...(weathering
+      ? applyStatus({ ...world, knownEntities: known }, identity.id, weathering, 0, mint)
+      : []),
+  ];
+}
 
-/** A paid build without materials mints the room's identity; hydrate derives the room from it. */
+type Mend = Extract<ServiceDefinition['benefit'], { kind: 'mend' }>;
+
+/** Built rooms S4: the room built at the mend's site direction while its blueprint's ruin is active
+ * on it, else undefined. */
+function ruined(world: World, b: Mend) {
+  const [id, room] =
+    Object.entries(world.state.created ?? {}).find(
+      ([, i]) =>
+        i.origin.kind === 'built' &&
+        same(i.origin.site, b.site) &&
+        i.origin.direction === b.direction,
+    ) ?? [];
+  const blueprint = room && world.cartridge.blueprints?.[refString(room.definition)];
+  return blueprint?.ruin && currentStatus(world, id as EntityId, blueprint.ruin)
+    ? { id: id as EntityId, blueprint }
+    : undefined;
+}
+
+export const unmendable = (world: World, b: Mend) =>
+  ruined(world, b) ? undefined : refused('service.nothing_to_mend');
+
+// The mend cures ruin and weathers the room again from now.
+function mended(world: World, b: Mend, mint: Mint): DeltaOp[] {
+  const { id, blueprint } = ruined(world, b)!;
+  const again = blueprint.weathering ? applyStatus(world, id, blueprint.weathering, 0, mint) : [];
+  return [...cureOps(world, id, [blueprint.ruin!]), ...again];
+}
+
+/** A paid build without materials mints the room's identity; hydrate derives the room from it.
+ * A mend (S4) cures and re-weathers its ruined room. */
 export function raised(
+  world: World,
   p: Extract<CommandPayload, { type: 'use_service' }>,
   s: ServiceDefinition,
   mint: Mint,
 ): DeltaOp[] {
+  if (s.benefit.kind === 'mend') return mended(world, s.benefit, mint);
   return s.benefit.kind === 'build' && !s.benefit.escrow
-    ? [created(s.benefit, p.actor_id, mint)]
+    ? created(world, s.benefit, p.actor_id, mint)
     : [];
 }
 
@@ -86,7 +128,7 @@ export function built(
     { fact: b.fact, value: false },
     'service',
   ).ops;
-  if (!unbuildable(world, b, owner)) return [created(b, owner, mint), ...closed];
+  if (!unbuildable(world, b, owner)) return [...created(world, b, owner, mint), ...closed];
   const custody = world.roomIds[refString(b.escrow.custody)];
   const body = bodyOf(world, owner);
   if (!body) return 'precondition_failed';

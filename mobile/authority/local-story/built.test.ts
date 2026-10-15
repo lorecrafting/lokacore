@@ -12,6 +12,7 @@ import {
   newWorld,
   type Cartridge,
 } from '../../../kernel/ts/src/index.ts';
+import { activeStatuses } from '../../../kernel/ts/src/mechanics/status/shared.ts';
 import { read } from '../../../kernel/ts/test/read.ts';
 import { openStory } from './authority.ts';
 import { coldReopen, elapsedHost } from './__tests__/elapsed-host.test.ts';
@@ -153,7 +154,9 @@ test('a real failed or lost COMMIT at completion retries to the same single hut'
     assert.deepEqual(b.created(), straight.created());
     const rows = (x: typeof b) =>
       x.p.sql
-        .prepare("SELECT key, value FROM state_row WHERE section IN ('created', 'facts', 'jobs')")
+        .prepare(
+          "SELECT key, value FROM state_row WHERE section IN ('created', 'facts', 'jobs', 'statuses')",
+        )
         .all();
     assert.deepEqual(rows(b), rows(straight));
     b.p.sql.close();
@@ -181,4 +184,58 @@ test('a pending build order forged to another owner is save_corrupt and the file
   const bytes = readFileSync(path);
   assert.throws(() => coldReopen(path, bundle), /save_corrupt/);
   assert.deepEqual(readFileSync(path), bytes);
+});
+
+const opened = (p: ReturnType<typeof elapsedHost>) => {
+  const s = openStory(p.db, releases, p.host);
+  if (s.kind !== 'open') throw new Error(JSON.stringify(s));
+  return s;
+};
+const advance = (story: ReturnType<typeof opened>, by: number) => {
+  const from = story.world().state.clock;
+  const r = story.elapsed({ expected_run_id: story.runId(), from, until: from + by });
+  assert.equal(r.kind, 'saved', JSON.stringify(r));
+};
+const held = (story: ReturnType<typeof opened>, holder: string) =>
+  activeStatuses(story.world(), holder as never).map((s) => s.status.key);
+
+// Built rooms S4 (save.md, Built rooms): the hut's weathering and ruin rows are saved status rows.
+// Breaks: load checking a status row's holder before hydrate derives the built room (the hut's
+// weathering or ruin row refused as save_corrupt), weathering's job not resumed after a reopen (no
+// ruin), or the ruin landing on the player's body instead of the hut.
+test('weathering and ruin on the hut survive cold reopen; weathering ends in ruin after one', (t) => {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-built-weather-'));
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
+  const path = join(dir, 'weather.db');
+  const built = build(path, true);
+  const [hut] = built.created();
+  built.p.sql.close();
+  let p = elapsedHost(path, undefined, bundle);
+  let story = opened(p);
+  assert.deepEqual(held(story, hut!), ['weathering']);
+  advance(story, 600);
+  assert.deepEqual(held(story, hut!), ['ruin']);
+  assert.deepEqual(held(story, story.world().body), []);
+  p.sql.close();
+  p = elapsedHost(path, undefined, bundle);
+  story = opened(p);
+  assert.deepEqual(held(story, hut!), ['ruin']);
+  p.sql.close();
+});
+
+// Breaks: an advance spanning the order's completion and weathering's end leaving weathering
+// undrained (the step faults on an expired status) or raising the hut without its ruin.
+test('one advance across completion and the end of weathering raises the hut in ruin', (t) => {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-built-span-'));
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
+  const path = join(dir, 'span.db');
+  const { p } = build(path, false, 'ordered');
+  p.sql.close();
+  const q = elapsedHost(path, undefined, bundle);
+  const story = opened(q);
+  advance(story, 7800);
+  const [hut] = Object.keys(story.world().state.created ?? {});
+  assert.deepEqual(held(story, hut!), ['ruin']);
+  q.sql.close();
+  coldReopen(path, bundle);
 });

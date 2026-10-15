@@ -118,7 +118,8 @@ function apply(op: DeltaOp, row: Json | undefined, ctx: Ctx): Outcome {
   if (op.op === 'fuel.set') return composeFuel(op, row, ctx.state);
   if (op.op === 'entity.create') return createEntity(op, row, ctx.state);
   if (op.op === 'bleed.transition') return transitionBleed(op, row, ctx.state, ctx.at, ctx.overlay);
-  if (op.op === 'status.transition') return transitionStatus(op, row, ctx.state, ctx.at);
+  if (op.op === 'status.transition')
+    return transitionStatus(op, row, ctx.state, ctx.at, ctx.overlay);
   if (op.op === 'levelling.set') return setLevelling(op, row);
   switch (op.op) {
     case 'visit.record':
