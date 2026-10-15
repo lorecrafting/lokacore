@@ -32,15 +32,16 @@ defmodule Loka.Core.Compose do
 
     case Enum.reduce_while(steps, %{}, &step_pair(&1, &2, {state, horizon})) do
       %{"fault" => _} = f -> f
-      overlay -> finish(overlay, final && ComposeJob.unrun(overlay, horizon))
+      overlay -> finish(Enum.sort(overlay), final, horizon)
     end
   end
 
-  defp finish(overlay, unrun) do
+  # Rows in key order (a map past 32 keys iterates in hash order): the first fault matches TS.
+  defp finish(rows, final, horizon) do
     cond do
-      t = ComposeChoice.pending_at_limit(overlay) -> fault("precondition_failed", t)
-      unrun -> fault("nonfuture_job", unrun)
-      true -> %{"changes" => overlay |> Enum.sort() |> Enum.map(&row/1)}
+      t = ComposeChoice.pending_at_limit(rows) -> fault("precondition_failed", t)
+      t = final && ComposeJob.unrun(rows, horizon) -> fault("nonfuture_job", t)
+      true -> %{"changes" => Enum.map(rows, &row/1)}
     end
   end
 

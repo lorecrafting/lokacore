@@ -72,13 +72,14 @@ export function compose(state: State, delta: StateDelta, final = true): Result {
     if ('code' in out) return fault(out.code, t);
     ctx.overlay.set(k, { group: op.writer_group, target: t, value: out.value });
   }
-  for (const w of ctx.overlay.values())
-    if (w.target.kind === 'choice' && pendingAtLimit(w.value))
-      return fault('precondition_failed', w.target);
-    else if (final && unrunJob(w, horizon)) return fault('nonfuture_job', w.target);
+  // Final checks read rows in key order, as the Elixir twin does: the first fault is the same.
+  const rows = [...ctx.overlay].sort(([a], [b]) => (a < b ? -1 : 1));
+  const limit = rows.find(([, w]) => w.target.kind === 'choice' && pendingAtLimit(w.value));
+  if (limit) return fault('precondition_failed', limit[1].target);
+  const unrun = final && rows.find(([, w]) => unrunJob(w, horizon));
+  if (unrun) return fault('nonfuture_job', unrun[1].target);
   if (final && (!completeBirths(ops, state) || !sightHandoffValid(state, ops)))
     return fault('precondition_failed', { kind: 'clock' });
-  const rows = [...ctx.overlay].sort(([a], [b]) => (a < b ? -1 : 1));
   return { changes: rows.map(([, w]) => ({ target: w.target, value: w.value })) };
 }
 export function counts(state: State, ops: readonly DeltaOp[]) {

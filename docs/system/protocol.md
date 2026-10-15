@@ -129,7 +129,7 @@ faults `conflicting_write` (`:104`), no last-writer-wins. Ops and preconditions:
 | `quest.activate` | quest instance | new id; no open instance of that quest at that scope |
 | `quest.transition` | quest instance | `from` is the state; legal (`:24`): active→objectives_complete/failed/abandoned, objectives_complete→resolved/failed/abandoned, failed/abandoned→active; `resolved` needs an outcome |
 | `choice.open` / `resolve` / `close` | continuation | open: new id; resolve: pending, offers `choice_id`, `opened_revision` equals `expected_revision` (`:215`); close: pending |
-| `job.schedule` / `job.complete` | job | schedule: new id, `due_time` later than the due time of the job whose run schedules it, else than the advance's target (`nonfuture_job`, `foundation/compose_job.ts:24`); a job scheduled due by the target completes in the same advance, else `nonfuture_job` (`compose.ts:78`); complete: pending and due by the target |
+| `job.schedule` / `job.complete` | job | schedule: new id, `due_time` later than the due time of the job whose run schedules it, else than the advance's target (`nonfuture_job`, `foundation/compose_job.ts:24`); a job scheduled due by the target completes in the same advance, else `nonfuture_job` on the first such job in target-key order, after the choice limit check (`compose.ts:80`); complete: pending and due by the target |
 | `time.advance` | clock | `from` is the clock, `to` later |
 | `resource.adjust` | resource of an entity | `from` is the current (regenerated) value; `to` within the spec's bounds |
 | `cooldown.start` | actor's action | `from` is the stored start; `at` is the clock |
