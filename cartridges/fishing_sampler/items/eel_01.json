@@ -1,0 +1,14 @@
+{
+  "keywords": [
+    "eel",
+    "eel_01"
+  ],
+  "short": "item.eel.short",
+  "room_line": "item.eel.room",
+  "description": "item.eel.description",
+  "mass_grams": 500,
+  "location": {
+    "in": "room",
+    "room": "larder"
+  }
+}

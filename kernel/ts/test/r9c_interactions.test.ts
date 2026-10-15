@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { test } from 'node:test';
 import { INSTALLED, loadCartridge, newWorld } from '../src/index.ts';
+import { encode } from '../src/foundation/canonical.ts';
 import { read } from './read.ts';
 
 // The synthetic E2 cartridge (cartridges/r9c_interactions): its compiled bytes equal this pin
@@ -66,4 +67,20 @@ test('malformed and unknown-capability variants are refused before any world exi
     assert.equal(loaded.ok, false);
     assert.deepEqual([loaded.diagnostic.code, loaded.diagnostic.path], [code, path]);
   }
+});
+
+// Homestead hs-11. Breaks: an ancestry grants at birth a skill whose prerequisite was never met.
+test('loader: an ancestry never grants a skill with a prerequisite', () => {
+  const c = JSON.parse(pin.canonical);
+  c.skills['r9c_interactions@0.0.1:skill/swim'].prerequisite = {
+    policy_version: 1,
+    root: { op: 'all', items: [] },
+  };
+  c.manifest.requires.kernel_api.at_least = '1.101';
+  const loaded = load(encode(c));
+  assert.equal(loaded.ok, false);
+  assert.deepEqual(
+    [loaded.diagnostic.code, loaded.diagnostic.path],
+    ['SCHEMA_VIOLATION', '.cartridge.ancestries.fen_born.skill'],
+  );
 });

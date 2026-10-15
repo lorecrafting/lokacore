@@ -1,0 +1,16 @@
+{
+  "keywords": [
+    "pool"
+  ],
+  "short": "item.pool.short",
+  "room_line": "item.pool.room",
+  "description": "item.pool.description",
+  "mass_grams": 1000000,
+  "location": {
+    "in": "room",
+    "room": "bank"
+  },
+  "tags": [
+    "water"
+  ]
+}

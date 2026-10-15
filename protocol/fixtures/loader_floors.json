@@ -1,5 +1,5 @@
 {
-  "description": "Loader floors (Beads loka-xroj): each kernel_api floor read by both kernels. A case compiles source (with edits: [file, key path, value] set before compiling; a null value deletes the key) at kernel_api floor: the compiler and the loader accept it; at below the compiler reports compiler and the loader (the floor artifact with at_least changed and rehashed) reports loader. Every 'kernel_api (at least) 1.N' in protocol/*.schema.json has a case (test/loka/loader_floors_test.exs). Code-only floors (sampler-level, no schema text) also have cases but no coverage check. Expected values are literals, not computed by either loader.",
+  "description": "Loader floors (Beads loka-xroj): each kernel_api floor read by both kernels. A case compiles source (with edits: [file, key path, value] set before compiling; a null value deletes the key; an empty key path writes the whole file, which may be new) at kernel_api floor: the compiler and the loader accept it; at below the compiler reports compiler and the loader (the floor artifact with at_least changed and rehashed) reports loader. Every 'kernel_api (at least) 1.N' in protocol/*.schema.json has a case (test/loka/loader_floors_test.exs). Code-only floors (sampler-level, no schema text) also have cases but no coverage check. Expected values are literals, not computed by either loader.",
   "cases": [
     {
       "floor": "1.38",
@@ -937,6 +937,81 @@
         "KERNEL_API_RANGE_INVALID",
         ".cartridge.manifest.requires.kernel_api.at_least"
       ]
+    },
+    {
+      "floor": "1.101",
+      "below": "1.100",
+      "source": "cartridges/replenish_sampler",
+      "feature": "a replenish.run reaction step",
+      "edits": [
+        ["cartridge.json", ["requires", "capabilities", "action_recipe"], 1],
+        ["cartridge.json", ["requires", "capabilities", "reaction"], 1],
+        [
+          "recipes/dig.json",
+          [],
+          {
+            "label": "action.mine",
+            "aliases": ["dig"],
+            "target": { "kind": "detail", "room": "mine", "detail": "seam" },
+            "priority": 10,
+            "policy": { "policy_version": 1, "root": { "op": "all", "items": [] } },
+            "outcomes": {
+              "success": {
+                "sequence": [{ "op": "event.emit", "event": "dig" }],
+                "narration": { "actor": "narration.mine" }
+              }
+            }
+          }
+        ],
+        [
+          "reactions/dig.json",
+          [],
+          {
+            "on": { "event": "custom_event", "custom": "dig" },
+            "apply": [{ "op": "replenish.run", "key": "seam_regrowth" }]
+          }
+        ]
+      ],
+      "compiler": [
+        "KERNEL_API_RANGE_INVALID",
+        "cartridge.requires.kernel_api.at_least"
+      ],
+      "loader": [
+        "KERNEL_API_RANGE_INVALID",
+        ".cartridge.manifest.requires.kernel_api.at_least"
+      ]
+    },
+    {
+      "floor": "1.101",
+      "below": "1.100",
+      "source": "cartridges/craft_sampler",
+      "feature": "a craft",
+      "edits": [["skills/carving.json", ["prerequisite"], null]],
+      "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
+      "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
+    },
+    {
+      "floor": "1.101",
+      "below": "1.100",
+      "source": "cartridges/skills_sampler",
+      "feature": "a skill prerequisite",
+      "edits": [
+        [
+          "skills/pick.json",
+          ["prerequisite"],
+          { "policy_version": 1, "root": { "op": "all", "items": [] } }
+        ]
+      ],
+      "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
+      "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
+    },
+    {
+      "floor": "1.101",
+      "below": "1.100",
+      "source": "cartridges/kitchen_sampler",
+      "feature": "edible.applies",
+      "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
+      "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
     }
   ]
 }

@@ -1,0 +1,9 @@
+{
+  "title": "room.coop.title",
+  "description": "room.coop.description",
+  "exits": {
+    "west": {
+      "to": "pen"
+    }
+  }
+}

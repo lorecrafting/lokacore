@@ -2086,6 +2086,10 @@
         "qualification": {
           "$ref": "policy.schema.json#/$defs/VersionedPolicy"
         },
+        "prerequisite": {
+          "$ref": "policy.schema.json#/$defs/VersionedPolicy",
+          "description": "Homestead hs-11 (docs/system/mechanics.md Skill trees; kernel_api at least 1.101): read for the acquiring actor with no target; skill.acquire is refused while it fails. A skill_compare naming this skill is refused."
+        },
         "growth": {
           "description": "Toolbox row 5 (docs/system/mechanics.md skill growth; kernel_api at least 1.44): strictly increasing use counts reaching levels 2, 3 and so on above the base; the count is the reserved player fact uses_<key>.",
           "type": "array",

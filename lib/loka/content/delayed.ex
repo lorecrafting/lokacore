@@ -10,7 +10,7 @@ defmodule Loka.Content.Delayed do
   import Loka.Content.Refs, only: [resolve: 4]
 
   # The fired job keeps its actor, not the subject RS-4's quest steps read (NPC no-op, trigger holder).
-  @event_bound ~w(barrier.set item.move npc.move population.suppress quest.activate quest.resolve quest.fail)
+  @event_bound ~w(barrier.set item.move npc.move population.suppress quest.activate quest.resolve quest.fail replenish.run)
 
   @doc "Diagnostics for the reactions of `defs` and the policy `trees` (`{rel, steps, root}`)."
   @spec check(map() | nil, map(), list() | nil) :: [map()]

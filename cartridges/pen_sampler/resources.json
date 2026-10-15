@@ -1,0 +1,30 @@
+{
+  "resources": {
+    "pennies": {
+      "minimum": 0,
+      "maximum": 100,
+      "start": 30,
+      "gain": 0
+    },
+    "hp": {
+      "minimum": 0,
+      "maximum": 10,
+      "start": 10
+    },
+    "mv": {
+      "minimum": 0,
+      "maximum": 100,
+      "start": 100,
+      "gain": 18,
+      "regen": {
+        "every": 3600,
+        "by_position": {
+          "standing": 18,
+          "sitting": 18,
+          "resting": 36,
+          "sleeping": 36
+        }
+      }
+    }
+  }
+}

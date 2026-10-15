@@ -1,0 +1,16 @@
+{
+  "keywords": [
+    "cook"
+  ],
+  "short": "npc.cook.short",
+  "room_line": "npc.cook.room",
+  "description": "npc.cook.description",
+  "room": "kitchen",
+  "resource_starts": {
+    "pennies": 0
+  },
+  "services": [
+    "stew",
+    "claim"
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "keywords": [
+    "seller"
+  ],
+  "short": "npc.seller.short",
+  "room_line": "npc.seller.room",
+  "description": "npc.seller.description",
+  "room": "yard",
+  "resource_starts": {
+    "pennies": 0
+  },
+  "services": [
+    "buy_pen"
+  ]
+}

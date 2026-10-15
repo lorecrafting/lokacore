@@ -1,0 +1,22 @@
+{
+  "on": {
+    "event": "status_expired",
+    "status": "growing"
+  },
+  "when": {
+    "policy_version": 1,
+    "root": {
+      "op": "time_since",
+      "fact": "watered_at",
+      "item": "furrow",
+      "at_least": 43200
+    }
+  },
+  "apply": [
+    {
+      "op": "status.apply",
+      "status": "withered",
+      "item": "furrow"
+    }
+  ]
+}

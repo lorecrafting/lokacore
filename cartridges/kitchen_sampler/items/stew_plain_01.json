@@ -1,0 +1,35 @@
+{
+  "keywords": [
+    "stew"
+  ],
+  "short": "item.stew_plain.short",
+  "short_variants": [
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "status_active",
+          "subject": "target",
+          "status": "spoiling"
+        }
+      },
+      "description": "item.stew_plain.short_spoiling"
+    }
+  ],
+  "room_line": "item.stew_plain.room",
+  "description": "item.stew_plain.description",
+  "mass_grams": 500,
+  "location": {
+    "in": "room",
+    "room": "larder"
+  },
+  "edible": {
+    "resource": "mv",
+    "amount": 10,
+    "label": "action.eat",
+    "narration": "narration.eat_stew_plain",
+    "applies": [
+      "fed"
+    ]
+  }
+}

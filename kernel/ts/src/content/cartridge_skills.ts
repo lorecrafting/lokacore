@@ -1,4 +1,4 @@
-import { diag, step, type Checks, type Obj } from './cartridge_refs.ts';
+import { diag, step, walk, type Checks, type Obj } from './cartridge_refs.ts';
 import { refString } from '../runtime/decision.ts';
 import { apiCmp } from './cartridge_installed.ts';
 import type { Diagnostic } from '../contracts.gen.ts';
@@ -57,7 +57,31 @@ export function skills(c: Obj, checks: Checks): Diagnostic[] {
         diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'),
       );
   }
-  return [...out, ...growth(c), ...durability(c, checks)];
+  return [...out, ...growth(c), ...prerequisites(c), ...durability(c, checks)];
+}
+
+// Homestead hs-11: a prerequisite never names its own skill, no ancestry grants its box, and it
+// needs API 1.101.
+function prerequisites(c: Obj): Diagnostic[] {
+  const named = Object.entries((c.skills ?? {}) as Obj).filter(([, s]) => s.prerequisite);
+  const out = named
+    .filter(([ref, s]) =>
+      walk(s.prerequisite.root, '').some(
+        ([p]) => p.op === 'skill_compare' && refString(p.skill) === ref,
+      ),
+    )
+    .map(([ref]) =>
+      diag('SCHEMA_VIOLATION', `.cartridge.skills${step(ref)}.prerequisite`, {
+        error: 'invalid_value',
+      }),
+    );
+  // A birth grant skips learning, so an ancestry never grants a box with a prerequisite.
+  for (const [choice, a] of Object.entries((c.ancestries ?? {}) as Obj))
+    if (a.skill && c.skills?.[refString(a.skill)]?.prerequisite)
+      out.push(diag('SCHEMA_VIOLATION', `.cartridge.ancestries${step(choice)}.skill`));
+  if (named.length && apiCmp(c.manifest.requires.kernel_api.at_least, '1.101') < 0)
+    out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
+  return out;
 }
 
 // Toolbox rows 5 and G5: growth thresholds strictly increase; skill growth, an opposed check or

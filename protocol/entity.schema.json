@@ -372,6 +372,7 @@
         "fragile",
         "liquid_holding",
         "metal",
+        "rod",
         "sharp",
         "silver",
         "warm",
@@ -443,6 +444,9 @@
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
         "metal": {
+          "$ref": "entity.schema.json#/$defs/ResistancePercent"
+        },
+        "rod": {
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
         "sharp": {
@@ -1308,6 +1312,14 @@
         },
         "cures": {
           "description": "Statuses (toolbox row 1) this food ends when eaten; eating is allowed at the pool maximum while one of them is active.",
+          "type": "array",
+          "items": {
+            "$ref": "identity.schema.json#/$defs/DefinitionRef"
+          },
+          "minItems": 1
+        },
+        "applies": {
+          "description": "Toolbox row hs-5 (kernel_api at least 1.101): statuses Eat applies to the eater's body after the recovery and any cures, through the shared status apply (status_applied on a first application, immune holds, a refresh is silent); none may modify an hp-maximum attribute.",
           "type": "array",
           "items": {
             "$ref": "identity.schema.json#/$defs/DefinitionRef"

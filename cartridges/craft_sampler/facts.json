@@ -1,0 +1,15 @@
+{
+  "facts": {
+    "spoon_carved": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "instance"
+      ],
+      "meaning": "A spoon has been carved at the bench."
+    }
+  }
+}

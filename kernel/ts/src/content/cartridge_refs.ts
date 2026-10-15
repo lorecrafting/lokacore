@@ -1,4 +1,4 @@
-// size: allow 348, ancestry, bell area, Study edge, barrier opens_when, ask answer roots, identity name variants and blueprints join shared reference admission
+// size: allow 350, ancestry, bell area, Study edge, barrier opens_when, ask answer roots, identity name variants, blueprints and skill prerequisites join shared reference admission
 import { water } from './cartridge_water.ts';
 import { topics } from './cartridge_topics.ts';
 import { pools } from './cartridge_pools.ts';
@@ -169,7 +169,9 @@ export function nodes(c: Obj): [Obj, string][] {
       r.when ? walk(r.when.root, `.cartridge.reactions${step(ref)}.when.root`) : [],
     ),
     ...Object.entries((c.skills ?? {}) as Obj).flatMap(([ref, s]) =>
-      walk(s.qualification.root, `.cartridge.skills${step(ref)}.qualification.root`),
+      ['qualification', 'prerequisite'].flatMap((f) =>
+        s[f] ? walk(s[f].root, `.cartridge.skills${step(ref)}.${f}.root`) : [],
+      ),
     ),
     ...Object.entries((c.dialogues ?? {}) as Obj).flatMap(([ref, d]) =>
       walk(d.policy.root, `.cartridge.dialogues${step(ref)}.policy.root`),
@@ -206,7 +208,7 @@ export function checkers(c: Obj, out: Diagnostic[]) {
   const named = (r: Obj, kind: string, path: string) => {
     const target = refString(r as DefinitionRef);
     const ok = r.cartridge_id === id && r.cartridge_version === version && r.kind === kind;
-    const section = kind === 'status' ? 'statuses' : `${kind}s`;
+    const section = kind === 'status' ? 'statuses' : kind === 'replenish' ? kind : `${kind}s`;
     if (!(ok && Object.hasOwn(c[section] ?? {}, target)))
       out.push(diag('UNRESOLVED_REFERENCE', path, { target }));
   };

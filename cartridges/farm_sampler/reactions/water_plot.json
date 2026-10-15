@@ -1,0 +1,13 @@
+{
+  "on": {
+    "event": "custom_event",
+    "custom": "watered_plot"
+  },
+  "apply": [
+    {
+      "op": "fact.stamp",
+      "fact": "watered_at",
+      "item": "plot"
+    }
+  ]
+}

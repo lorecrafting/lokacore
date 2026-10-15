@@ -47,7 +47,7 @@ defmodule Loka.Content.Checks do
       |> Map.put("transport", Map.update!(t, "route", &ref(&1, "transport", m)))
 
   def expand(%{"rest" => r}, m), do: %{"rest" => Loka.Content.Dreams.expand(r, m)}
-  def expand(%{"every" => _, "from" => _} = r, m), do: Loka.Content.Replenish.expand(r, m)
+  def expand(%{"items" => _, "from" => _} = r, m), do: Loka.Content.Replenish.expand(r, m)
   def expand(%{"pierced_by" => _} = s, m), do: Loka.Content.Status.expand(s, m, &expand/2)
   def expand(%{"learned" => l, "word" => _} = t, m), do: %{t | "learned" => ref(l, "fact", m)}
 
@@ -187,8 +187,8 @@ defmodule Loka.Content.Checks do
   def expand(%{"effect" => e} = n, m) when is_binary(e),
     do: n |> Map.delete("effect") |> expand(m) |> Map.put("effect", ref(e, "bleed", m))
 
-  def expand(%{"cures" => c} = e, m) when is_list(c),
-    do: Map.put(expand(Map.delete(e, "cures"), m), "cures", Enum.map(c, &ref(&1, "status", m)))
+  def expand(%{} = e, m) when is_map_key(e, "cures") or is_map_key(e, "applies"),
+    do: Loka.Content.Status.edible(e, m, &expand/2)
 
   def expand(%{"immune" => c} = e, m) when is_list(c),
     do: Map.put(expand(Map.delete(e, "immune"), m), "immune", Enum.map(c, &ref(&1, "status", m)))

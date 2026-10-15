@@ -1,0 +1,26 @@
+{
+  "keywords": [
+    "nest"
+  ],
+  "short": "item.nest.short",
+  "room_line": "item.nest.room",
+  "description": "item.nest.description",
+  "location": {
+    "in": "room",
+    "room": "pen"
+  },
+  "mass_grams": 20000,
+  "container": true,
+  "locks": {
+    "put": {
+      "policy_version": 1,
+      "root": {
+        "op": "not",
+        "item": {
+          "op": "all",
+          "items": []
+        }
+      }
+    }
+  }
+}

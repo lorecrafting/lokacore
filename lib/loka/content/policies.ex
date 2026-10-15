@@ -6,7 +6,7 @@ defmodule Loka.Content.Policies do
   def tree({rel, steps, root}, ctx),
     do: for({node, at} <- nodes(root, steps), d <- node(rel, at, node, ctx), do: d)
 
-  defp nodes(%{"op" => op, "items" => items} = n, steps) when op in ~w(all any) do
+  def nodes(%{"op" => op, "items" => items} = n, steps) when op in ~w(all any) do
     children =
       items
       |> Enum.with_index()
@@ -15,10 +15,10 @@ defmodule Loka.Content.Policies do
     [{n, steps} | children]
   end
 
-  defp nodes(%{"op" => "not", "item" => item} = n, steps),
+  def nodes(%{"op" => "not", "item" => item} = n, steps),
     do: [{n, steps} | nodes(item, steps ++ ["item"])]
 
-  defp nodes(n, steps), do: [{n, steps}]
+  def nodes(n, steps), do: [{n, steps}]
 
   defp node(rel, steps, %{"op" => op} = n, {m, defs, required}) do
     owned(at(rel, steps ++ ["op"]), op, required) ++

@@ -732,6 +732,16 @@
                 "additionalProperties": false
               },
               {
+                "description": "Homestead hs-1 (kernel_api at least 1.101): one run of the replenish entry key's move, as its job's run does (up to count of its items directly in from, lowest EntityId first, until to holds cap or is full), at once: no job completed or scheduled, no event, no line; nothing when nothing fits. Refused on a rule with after.",
+                "type": "object",
+                "properties": {
+                  "op": { "const": "replenish.run" },
+                  "key": { "$ref": "identity.schema.json#/$defs/DefinitionRef" }
+                },
+                "required": ["op", "key"],
+                "additionalProperties": false
+              },
+              {
                 "description": "Toolbox row FD1 (kernel_api at least 1.90): writes the delivery's logical time into an int fact (no maximum, minimum absent or at most 0) at the subject a fact.assign step writes at, as a fact.assign.",
                 "type": "object",
                 "properties": {

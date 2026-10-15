@@ -52,7 +52,9 @@ defmodule Loka.Content.Skills do
     do:
       for(
         {_, {rel, _, s}} <- defs["skill"],
-        do: {rel, ["qualification", "root"], s["qualification"]["root"]}
+        field <- ~w(qualification prerequisite),
+        is_map_key(s, field),
+        do: {rel, [field, "root"], s[field]["root"]}
       )
 
   def check(nil, _, _, _), do: []
@@ -61,8 +63,9 @@ defmodule Loka.Content.Skills do
     caps = m["requires"]["capabilities"]
 
     Enum.flat_map(defs["skill"], &definition(&1, caps, text)) ++
-      Enum.flat_map(defs["skill"], &growth/1) ++
+      Enum.flat_map(defs["skill"], &(growth(&1) ++ itself(m, &1))) ++
       floor(m, defs) ++
+      prerequisite_floor(m, defs) ++
       equipment(m, defs) ++ dodge(m, defs, settings) ++ defense_narration(defs, settings)
   end
 
@@ -85,6 +88,35 @@ defmodule Loka.Content.Skills do
   end
 
   defp growth(_), do: []
+
+  # Homestead hs-11: a box never requires itself (its own full ref, as cartridge_skills.ts).
+  defp itself(m, {key, {rel, _, %{"prerequisite" => p}}}) do
+    me = %{
+      "cartridge_id" => m["id"],
+      "cartridge_version" => m["version"],
+      "kind" => "skill",
+      "key" => key
+    }
+
+    if Enum.any?(
+         Loka.Content.Policies.nodes(p["root"], []),
+         &match?({%{"op" => "skill_compare", "skill" => ^me}, _}, &1)
+       ),
+       do: [bad(at(rel, ["prerequisite"]))],
+       else: []
+  end
+
+  defp itself(_, _), do: []
+
+  # Homestead hs-11: a skill prerequisite needs API 1.101.
+  defp prerequisite_floor(m, defs),
+    do:
+      if(
+        Enum.any?(defs["skill"], &match?({_, {_, _, %{"prerequisite" => _}}}, &1)) and
+          version(m) < [1, 101],
+        do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
+        else: []
+      )
 
   # Toolbox rows 5 and G5: skill growth, an opposed check or a detail rating needs API 1.44.
   defp floor(m, defs) do

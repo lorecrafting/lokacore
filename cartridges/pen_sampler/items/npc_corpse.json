@@ -1,0 +1,26 @@
+{
+  "keywords": [
+    "corpse",
+    "npc_corpse"
+  ],
+  "short": "item.npc_corpse.short",
+  "room_line": "item.npc_corpse.room",
+  "description": "item.npc_corpse.description",
+  "location": {
+    "in": "template"
+  },
+  "mass_grams": 0,
+  "container": true,
+  "locks": {
+    "put": {
+      "policy_version": 1,
+      "root": {
+        "op": "not",
+        "item": {
+          "op": "all",
+          "items": []
+        }
+      }
+    }
+  }
+}

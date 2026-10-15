@@ -34,6 +34,15 @@ export function status(world: World, actor: CharacterId, skill: DefinitionRef, s
   return { acquired, qualified, usable: acquired && qualified };
 }
 
+/** Not yet learned, and (Homestead hs-11) its prerequisite, when declared, holds; dialogue
+ * admission only: an ancestry grant at birth (attributes/rule.ts) is not learning. */
+export function learnable(world: World, actor: CharacterId, skill: DefinitionRef, steps: Steps) {
+  const p = world.cartridge.skills?.[refString(skill)]?.prerequisite;
+  return (
+    membership(world, actor, skill) === false && (!p || holds(world, actor, p.root, { steps }))
+  );
+}
+
 export function acquire(world: World, actor: CharacterId, run: Assigned, skill: DefinitionRef) {
   if (!world.cartridge.skills?.[refString(skill)] || membership(world, actor, skill) !== false)
     throw new KernelError('precondition_failed');

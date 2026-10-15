@@ -1,3 +1,4 @@
+# size: allow 317, reaction@1 rule admission keeps every step's floor and reference clause (Homestead hs-1: replenish.run and its repeat check) in one consequence table
 defmodule Loka.Content.Reactions do
   @moduledoc """
   Reaction rules in a v2 source (reaction.schema.json ReactionRule; 21 §11; 06 §14), twin of
@@ -55,7 +56,18 @@ defmodule Loka.Content.Reactions do
       owned(at(rel, ["on", "event"]), event, ctx.events) ++
       named(rel, on, ctx) ++
       instances(rel, on, ctx) ++
-      Enum.flat_map(Enum.with_index(r["apply"]), &consequence(rel, &1, on, ctx))
+      steps(rel, Enum.with_index(r["apply"]), on, ctx)
+  end
+
+  # Homestead hs-1: a second replenish.run of one entry in a rule would pick the items the first
+  # moved (twin of `runs` in kernel/ts/src/content/cartridge_reactions.ts).
+  defp steps(rel, apply, on, ctx) do
+    runs = for {%{"op" => "replenish.run", "key" => k}, i} <- apply, do: {k, i}
+
+    Enum.flat_map(apply, &consequence(rel, &1, on, ctx)) ++
+      for {{k, i}, n} <- Enum.with_index(runs),
+          Enum.any?(Enum.take(runs, n), &(elem(&1, 0) == k)),
+          do: diag("DUPLICATE_DEFINITION", at(rel, ["apply", i, "key"]))
   end
 
   defp named(rel, on, ctx),
@@ -93,7 +105,8 @@ defmodule Loka.Content.Reactions do
     "barrier.set" => 56,
     "item.move" => 77,
     "population.spawn" => 84,
-    "npc.move" => 95
+    "npc.move" => 95,
+    "replenish.run" => 101
   }
 
   # Each trigger event's kernel_api minor: spoken 1.48 (G9), status_applied 1.53 (G3), asked 1.96 (FD7).
@@ -212,6 +225,10 @@ defmodule Loka.Content.Reactions do
   # Row 37a (phased world events): the plan resolves; the step emits no event.
   defp consequence(rel, {%{"op" => "population.spawn"} = s, i}, _, ctx),
     do: reference(rel, ["apply", i], {"plan", "population"}, s, ctx.m, ctx.defs)
+
+  # Homestead hs-1: the replenish entry resolves; the step emits no event.
+  defp consequence(rel, {%{"op" => "replenish.run"} = s, i}, _, ctx),
+    do: reference(rel, ["apply", i], {"key", "replenish"}, s, ctx.m, ctx.defs)
 
   # Status reader 3 (row G3): the subject's status.
   defp consequence(rel, {%{"op" => "status.cure"} = s, i}, _, ctx),
