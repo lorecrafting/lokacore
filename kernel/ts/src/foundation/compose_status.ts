@@ -37,12 +37,12 @@ export function transitionStatus(op: Op, row: Json | undefined, state: State, no
   return { value: next as Json };
 }
 
-/** A delta's last write may not leave a timed status or bleed active at or past its end (a skipped expiry). */
+/** A delta's last write may not leave a timed status or bleed active past its end or a tick (skipped). */
 export function expiredStatus(w: { target: { kind: string }; value: Json }, horizon: number) {
   const v = w.value as Op['value'];
   return (
     (w.target.kind === 'status' || w.target.kind === 'bleed') &&
     v.active &&
-    (v.ends_at ?? Infinity) <= horizon
+    ((v.ends_at ?? Infinity) <= horizon || (v.next_tick_at ?? Infinity) < horizon)
   );
 }

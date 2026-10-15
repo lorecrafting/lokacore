@@ -1,7 +1,7 @@
 # size: allow 352, typed knowledge, patrol, final birth admission, status and levelling share portable composition
 defmodule Loka.Core.Compose do
   @moduledoc "Portable delta composition: changed rows only; atomic conflicts and bounded work."
-  alias Loka.Core.{ComposeChoice, ComposeJob, ComposePack, ComposeStatus, Creation}
+  alias Loka.Core.{ComposeBleed, ComposeChoice, ComposeJob, ComposePack, ComposeStatus, Creation}
   @profile_path Path.expand("../../../docs/spec/conformance/composition-profile.json", __DIR__)
   @external_resource @profile_path
   @profile File.read!(@profile_path)
@@ -105,12 +105,12 @@ defmodule Loka.Core.Compose do
       String.starts_with?(op["op"], "job.") ->
         Loka.Core.ComposeEncounter.job(op, read(target, ctx), horizon, at)
 
-      # Against the composing time: a drain job's sub-step may (re)apply a status or bleed ending before the target.
+      # Against the composing time: a drain job's sub-step may write a status or bleed ending before the target.
       op["op"] == "status.transition" ->
         ComposeStatus.transition(op, read(target, ctx), state, at)
 
       op["op"] == "bleed.transition" ->
-        Loka.Core.ComposeBleed.transition(op, read(target, ctx), state, at, overlay)
+        ComposeBleed.transition(op, read(target, ctx), state, at, overlay)
 
       true ->
         apply_op(op, target, ctx)

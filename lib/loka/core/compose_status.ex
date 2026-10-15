@@ -35,11 +35,12 @@ defmodule Loka.Core.ComposeStatus do
   defp generation?(prior, next),
     do: next["generation"] == (prior["generation"] || 0) + if(next["active"], do: 1, else: 0)
 
-  @doc "A delta's last write may not leave a timed status or bleed active at or past its end (a skipped expiry)."
+  @doc "A delta's last write may not leave a timed status or bleed active past its end or a tick (skipped)."
   def expired(overlay, horizon) do
     Enum.find_value(overlay, fn {_, {_, target, value}} ->
       if target["kind"] in ~w(status bleed) and value["active"] == true and
-           is_integer(value["ends_at"]) and value["ends_at"] <= horizon,
+           is_integer(value["ends_at"]) and
+           (value["ends_at"] <= horizon or value["next_tick_at"] < horizon),
          do: target
     end)
   end
