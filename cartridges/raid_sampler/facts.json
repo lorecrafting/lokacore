@@ -23,6 +23,30 @@
         "instance"
       ],
       "meaning": "Raids the village has come through, counted at each new moon after one."
+    },
+    "raided_at": {
+      "version": 1,
+      "value_type": {
+        "type": "int",
+        "default": 0
+      },
+      "scopes": [
+        "instance"
+      ],
+      "meaning": "When raiders last came, in logical seconds."
+    },
+    "aftershocks": {
+      "version": 1,
+      "value_type": {
+        "type": "int",
+        "minimum": 0,
+        "maximum": 100,
+        "default": 0
+      },
+      "scopes": [
+        "instance"
+      ],
+      "meaning": "Aftershocks the village felt, each 600 seconds after a raid."
     }
   }
 }

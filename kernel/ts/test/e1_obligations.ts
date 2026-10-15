@@ -420,13 +420,13 @@ export function reactionWitnesses(before: World, after: World, decision: Decisio
           o.outcome === step.outcome,
       );
     }
-    if (step.op === 'fact.assign' || step.op === 'fact.adjust')
+    if (step.op === 'fact.assign' || step.op === 'fact.adjust' || step.op === 'fact.stamp')
       return ops.find(
         (o) =>
           o.op === 'fact.assign' &&
           same(o.fact, step.fact) &&
           same(o.scope, scopeOf(before, actor, step.fact)) &&
-          (step.op === 'fact.adjust' || o.value === step.value),
+          (step.op !== 'fact.assign' || o.value === step.value),
       );
     if (step.op === 'status.apply' || step.op === 'status.cure')
       return ops.find((o) => o.op === 'status.transition' && same(o.status, step.status));

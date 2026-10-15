@@ -1,4 +1,4 @@
-// size: allow 520, deer custody, sight, fault and reaction-spawn reopen cases share one real SQLite fixture
+// size: allow 545, deer custody, sight, fault, reaction-spawn reopen and ClockDriver catch-up cases share one real SQLite fixture
 import assert from 'node:assert/strict';
 import { test, type TestContext } from 'node:test';
 import { DatabaseSync } from 'node:sqlite';
@@ -92,6 +92,12 @@ function setup(t: TestContext, seed?: readonly number[], release?: Release) {
   assert.equal(choice.kind, 'saved', JSON.stringify(choice));
   return { path, p, story, selected };
 }
+const accepted = (r: { kind: string; decision?: unknown }) =>
+  assert.equal(
+    r.kind === 'saved' && (r.decision as { kind?: string } | null)?.kind,
+    'accepted',
+    JSON.stringify(r),
+  );
 function move(story: ReturnType<typeof setup>['story'], direction: string, n: number) {
   const result = story.invoke({
     invocation_id: `cccccccc-0000-4000-8000-${String(n).padStart(12, '0')}`,
@@ -143,7 +149,8 @@ test('pending sight and confirmed flight cold-reopen with conserved deer custody
 });
 
 // Breaks: a reaction spawn into a sighted plan, the player in its home, binds a sight that the
-// save cannot explain, so the cold reopen is save_corrupt (review 2026-10-13, row 37a).
+// save cannot explain, so the cold reopen is save_corrupt (review 2026-10-13, row 37a); or one
+// advance faults conflicting_write where three steps pass (loka-kgd.151).
 test('reaction spawn into a sighted plan with the player home cold-reopens', (t) => {
   const c = JSON.parse(bundle.canonical);
   const [cartridge_id, cartridge_version] = [content.manifest.id, content.manifest.version];
@@ -164,17 +171,18 @@ test('reaction spawn into a sighted plan with the player home cold-reopens', (t)
   assert.ok(loaded.ok, JSON.stringify(loaded));
   const fresh = newWorld(loaded.cartridge as never, initial().context, [1, 2, 3, 4]);
   const release = { fresh, content_hash: sha256 };
-  const { path, p, story } = setup(t, undefined, release);
-  for (const [i, direction] of ['south', 'south', 'west'].entries()) move(story, direction, i + 1);
-  // Split: one 64800-68400 advance faults conflicting_write on origin/main too (open item loka-kgd.151).
-  for (const [from, until] of [
-    [64800, 65100],
-    [65100, 68300],
-    [68300, 68400],
-  ]) {
-    const advanced = story.elapsed({ expected_run_id: story.runId(), from, until });
-    assert.equal(advanced.kind, 'saved', `${from} ${JSON.stringify(advanced)}`);
-  }
+  const waited = (stops: number[]) => {
+    const run = setup(t, undefined, release);
+    for (const [i, d] of ['south', 'south', 'west'].entries()) move(run.story, d, i + 1);
+    for (const [k, until] of stops.slice(1).entries()) {
+      accepted(run.story.elapsed({ expected_run_id: run.story.runId(), from: stops[k]!, until }));
+    }
+    return run;
+  };
+  const { path, p, story } = waited([64800, 68400]); // slot job 65100 and plan job 68400 move one deer
+  const split = waited([64800, 65100, 68300, 68400]).story.world().state;
+  assert.equal(split.clock, 68400);
+  assert.equal(encode(story.world().state as never), encode(split as never));
   const home = story.world().roomIds[ref('room', 'willow_shade')];
   assert.equal(story.world().state.containers[story.world().body], home);
   const deer = Object.entries(story.world().state.created ?? {})
@@ -516,4 +524,19 @@ test('real COMMIT faults preserve all-prior or all-next deer rows and one replay
         );
       }
     }
+});
+
+// Breaks: a host step of an offline catch-up exceeds the 64-created-jobs budget (loka-kgd.152).
+test('a 72-hour catch-up in ClockDriver steps is accepted at every step', (t) => {
+  const { story } = setup(t);
+  for (const [i, direction] of ['south', 'south', 'west'].entries()) move(story, direction, i + 1);
+  const end = story.world().state.clock + 72 * 3600;
+  for (let s = story.world().state; s.clock < end; s = story.world().state) {
+    // elapsed.ts boundary(): stop at the next pending job; the calendar job is never a stop
+    const due = Object.values(s.jobs ?? {}).filter(
+      (j) => j.status === 'pending' && j.job.kind !== 'calendar',
+    );
+    const until = Math.min(end, ...due.map((j) => j.due_time));
+    accepted(story.elapsed({ expected_run_id: story.runId(), from: s.clock, until }));
+  }
 });

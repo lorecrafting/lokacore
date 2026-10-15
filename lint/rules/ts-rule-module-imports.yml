@@ -8,6 +8,6 @@ rule:
   matches: module-specifier
   not:
     any:
-      - regex: "^['\"](\\.\\./\\.\\./(foundation|runtime|commands)/[a-z0-9_]+\\.ts|\\.\\./\\.\\./contracts\\.gen\\.ts|\\.\\./(fact|policy|lookups|resource|reaction|skills|disposition|locks|trail)\\.ts|(\\.\\./[a-z0-9_]+/|\\./)(shared|lifecycle|behavior)\\.ts)['\"]$"
+      - regex: "^['\"](\\.\\./\\.\\./(foundation|runtime|commands)/[a-z0-9_]+\\.ts|\\.\\./\\.\\./contracts\\.gen\\.ts|\\.\\./(fact|policy|lookups|resource|reaction|delayed|skills|disposition|locks|trail)\\.ts|(\\.\\./[a-z0-9_]+/|\\./)(shared|lifecycle|behavior)\\.ts)['\"]$"
       - regex: "^['\"](\\./(sequence|flee|payment|exchange|harvest|recovery|spell)\\.ts|\\.\\./combat/round\\.ts|\\.\\./water/expiry\\.ts|\\.\\./(bleed|status|quest|containment|escort)/job\\.ts)['\"]$"
       - regex: "^['\"]\\.\\./(patrol|scene)/sequence\\.ts['\"]$"

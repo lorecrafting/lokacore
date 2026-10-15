@@ -28,6 +28,7 @@ import { cmp, validate } from '../foundation/validate.ts';
 import { calendarStage } from './cartridge_calendar.ts';
 import { variety } from './cartridge_variety.ts';
 import { exposure } from './cartridge_exposure.ts';
+import { delayed } from './cartridge_delayed.ts';
 import { senses } from './cartridge_senses.ts';
 import { variants } from './cartridge_variants.ts';
 import { schedules } from './cartridge_schedules.ts';
@@ -290,6 +291,7 @@ function declarations(c: Obj): Diagnostic[] {
     ...variety(c),
     ...exposure(c),
     ...senses(c),
+    ...delayed(c),
     ...variants(c),
     ...scopedFacts(c),
     ...schedules(c),
