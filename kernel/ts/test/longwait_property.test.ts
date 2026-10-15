@@ -109,7 +109,8 @@ const EXCEPTIONS: Record<
   (hourly: World | { fault: string }, long: World | { fault: string }) => void
 > = {
   // mechanics.md:1956 (status Known limit): a refresh whose new end is at or before the advance
-  // end faults precondition_failed; `soaked` is refreshed every hour by four reactions.
+  // end faults precondition_failed; `soaked` is refreshed every hour by four reactions. The fix
+  // for loka-j958 removes this exception and the two "Same limit" ones below.
   toolbox_showcase: (hourly, long) => {
     assert.ok(!('fault' in hourly), encode(hourly as never));
     assert.match((long as { fault: string }).fault, /precondition_failed/);

@@ -53,10 +53,16 @@ test('each fixture floor: the loader accepts the floor and refuses just below it
         set(json, path as string[], value);
         writeFileSync(join(dir, file), JSON.stringify(json));
       }
-      execFileSync('mix', ['loka.compile', dir, `${dir}.json`], {
-        cwd: root,
-        stdio: 'pipe',
-      });
+    }
+    // One BEAM compiles every case (as longwait_property.test.ts does); a refused case fails the match.
+    const script = `for d <- File.ls!(${JSON.stringify(scratch)}) do
+      dir = Path.join(${JSON.stringify(scratch)}, d)
+      {:ok, b, _} = Loka.Content.compile(dir)
+      File.write!(dir <> ".json", b)
+    end`;
+    execFileSync('mix', ['run', '--no-start', '-e', script], { cwd: root, stdio: 'pipe' });
+    for (const [n, c] of cases.entries()) {
+      const dir = join(scratch, String(n));
       const { cartridge } = JSON.parse(readFileSync(`${dir}.json`, 'utf8'));
       assert.equal(load(cartridge), 'loaded', `${c.source} at ${c.floor}`);
       cartridge.manifest.requires.kernel_api.at_least = c.below;
