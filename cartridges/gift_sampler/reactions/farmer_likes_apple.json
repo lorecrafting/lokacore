@@ -1,0 +1,27 @@
+{
+  "on": {
+    "event": "item_acquired",
+    "item": "apple"
+  },
+  "when": {
+    "policy_version": 1,
+    "root": {
+      "op": "fact_compare",
+      "fact": "gifted_apple",
+      "equals": false,
+      "npc": "farmer"
+    }
+  },
+  "apply": [
+    {
+      "op": "fact.adjust",
+      "fact": "trust",
+      "amount": 1
+    },
+    {
+      "op": "fact.assign",
+      "fact": "gifted_apple",
+      "value": true
+    }
+  ]
+}

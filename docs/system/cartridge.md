@@ -1356,7 +1356,7 @@ its source and real SQLite acceptance are recorded in the
 - `ready_after`: an integer, 1 to 31536000.
 - `output`: an item ref.
 
-`ready_after` and `output` are required together. It also adds two `ServiceBenefit` kinds, `{kind: "claim", service}` and `{kind: "cancel", service}` (`protocol/service.schema.json`), each naming a service ref (short keys in source). Any of them needs `kernel_api` at least **1.80**.
+`ready_after` needs `output`; an `output` alone is a [barter](#barter-declarations). It also adds two `ServiceBenefit` kinds, `{kind: "claim", service}` and `{kind: "cancel", service}` (`protocol/service.schema.json`), each naming a service ref (short keys in source). Any of them needs `kernel_api` at least **1.80**.
 
 The compiler (`lib/loka/content/services.ex`) and the loader (`kernel/ts/src/content/cartridge_services.ts`) refuse:
 
@@ -1372,6 +1372,15 @@ Required cartridge text:
 - A claim: `service.no_order`, `service.not_ready` and `service.no_output`.
 - A cancel: `service.no_order` and `service.ready`.
 - A commission with `ready_after`: also `service.no_output`.
+
+### Barter declarations
+
+[Barter](mechanics.md#barter-toolbox-row-kgd70) admits a service `price` of 0 (`protocol/service.schema.json`; `quoted_price` minimum 0 in `protocol/command.schema.json` and `protocol/action.schema.json`, GameView `ServiceOffer.price` minimum 0) and an escrow `output` without `ready_after`. Either needs `kernel_api` at least **1.101**. The compiler (`lib/loka/content/services.ex`) and the loader (`kernel/ts/src/content/cartridge_services.ts`) refuse:
+
+- `price` 0 on a service that is not an `entitlement` with `escrow`: SCHEMA_VIOLATION `invalid_value` at `.price`.
+- A claim or cancel naming a commission with no `ready_after`: SCHEMA_VIOLATION `invalid_value` at `.benefit.service` (nothing is left to claim).
+
+Required cartridge text: an escrow with `output`: `service.no_output`.
 
 ### Property and bank declarations
 

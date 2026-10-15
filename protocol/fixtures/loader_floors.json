@@ -1044,6 +1044,27 @@
       "feature": "an item_present leaf",
       "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
       "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
+    },
+    {
+      "floor": "1.101",
+      "below": "1.100",
+      "source": "cartridges/gift_sampler",
+      "feature": "service.price 0 (a barter, row kgd.70)",
+      "edits": [
+        ["services/knife_for_pelts.json", ["benefit", "escrow", "ready_after"], 3600],
+        ["cartridge.json", ["requires", "capabilities", "schedule"], 1]
+      ],
+      "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
+      "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
+    },
+    {
+      "floor": "1.101",
+      "below": "1.100",
+      "source": "cartridges/gift_sampler",
+      "feature": "service.benefit.escrow.output without ready_after (a barter, row kgd.70)",
+      "edits": [["services/knife_for_pelts.json", ["price"], 1]],
+      "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
+      "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
     }
   ]
 }

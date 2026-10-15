@@ -1576,7 +1576,7 @@ services are separate direct offers, not a first-eligible dialogue replacement.
   - No quality from a check (C3-M03 forge, later).
   - A reaction or replenish naming the custody room can still move the items (row 20a limit).
   - The output moves to the body without a carry check.
-  - Claim and cancel cost at least 1 (the service price minimum is unchanged), because a free use would need command `quoted_price` and the offer price to allow 0, a protocol change.
+  - Claim and cancel cost at least 1. The schema price minimum is 0 since the barter (row kgd.70), but the loader refuses price 0 at `.price` for every benefit except an escrowed entitlement.
 - **Opt-in.** `ready_after`, `output`, `claim` and `cancel` need `kernel_api` 1.80 (KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least`) in both kernels. A cartridge without them keeps its bytes, hash, ids, receipts and GameView. Chapter 1 declares none.
 - **Book.** No new element: two more service offers.
 - **Traps.** [Trap 1](../MECHANICS-TOOLBOX.md#traps) holds: due times are on the logical clock. One new job kind; no new save section, op, event or command.
@@ -3549,3 +3549,40 @@ Homestead hs-12 (Beads `loka-kgd.108.9`): a player raises a blueprint at a site 
   - Reused: S2/S3 `unbuildable` and `created`, hs-10 craft and `craftRefused`, the recipe check and outcome.
   - New: RecipeStep `build`, the build-step loader checks, the 1.101 floor.
   - Missing invariant: none.
+
+## Barter (toolbox row kgd.70)
+
+Homestead hs-7 (Beads `loka-kgd.108.5`, `loka-kgd.70`): liked and disliked gifts move one person's trust, trust tiers open talk, and two pelts buy a knife with no coin. Gifting is content on [row 15](#standing-and-disposition-toolbox-rows-15-and-g11) and W2; barter extends an [escrow](#escrow-custody-toolbox-row-20a) commission. Declarations: [barter](cartridge.md#barter-declarations) (`kernel_api` 1.101).
+
+- **Gifts (content).** Give (containment@1) emits `item_acquired` with the NPC as holder. Per NPC, one reaction per liked item (`fact.adjust trust +1`) and per disliked item (`-1`), each `when` a per-NPC flag (`gifted_<item>`, `fact_compare equals false`) that the same reaction sets true, so each item pays once: a second apple, or give, take back and give again, changes nothing. An item with no reaction (the stone) changes nothing. Trust is an int pair fact bounded -1 to 1.
+- **Tiers (content).** Trust -1, 0 and 1 select the cold, plain and warm dialogue (`fact_compare` policy) and the W6 room line. Trap 8: the tier is a line, and a gate only for dialogue.
+- **Barter.** An `escrow` may declare `output` without `ready_after`. The commission's `transition` (`kernel/ts/src/mechanics/service/shared.ts` `escrowed`) then adds one `entity.transfer` of the output from the custody room to the body after the input transfers, in the same proposal: no job, no claim. The no-output refusal (`not_found`, `service.no_output`) applies to every escrow with an `output`.
+- **Price 0.** A service with `price` 0 pays nothing: `transition` writes no payment op. The quoted price must still match (0). Only an `entitlement` with `escrow` may be free (the loader refusal below); commerce save reconciles currency only for NPCs with a shop, so a zero payment needs no save change. A buy or sell quoting 0 now passes the action schema (`quoted_price` minimum 0) and is rejected at resolve with a receipted `unsupported_capability` (`kernel/ts/src/commands/invocation.ts:121`), not refused `invalid` at identify; a retry with the same `invocation_id` replays that rejection. A shop price stays at least 1, so the quote check at `kernel/ts/src/mechanics/commerce/shared.ts:71` never matches 0.
+- **Atomicity.** One proposal: the inputs to custody, the output to the body and the entitlement fact true. A replayed invocation returns its stored receipt; a new one finds the entitlement true and refuses `invalid_state`, `service.order_open`.
+- **Writer.** service@1 writes the transfers and the fact; reaction@1 writes the gift facts.
+- **Silent.** No event beyond the service's own; no `item_acquired` for the output.
+- **Realm seams** (owner decision 2026-10-13, brief checklist). This row adds no new single-player assumption.
+  1. Actor: met; the body is the command actor's.
+  2. Reactions: met; the `item_acquired` subject is the holder NPC.
+  3. Credit: not applicable.
+  4. Time: met; no clock, no job.
+  5. Scope: met; trust and the gift flags are pair facts with the NPC as subject; the barter's entitlement is player scope.
+  6. Text: not applicable.
+  7. Ownership: met; a barter moves custody both ways by the actor's own act; theft never.
+  8. Not applicable.
+  9. Not applicable.
+- **Opt-in.** A service declares `price` 0 or an `output` without `ready_after`. Chapter 1 declares none.
+- **Book.** No change: the offer shows the existing price note; Give is not yet offered in the Book (Beads `loka-x6t.31`), so gifts are kernel-only until hs-8.
+- **Traps.** Trap 8 checked (tiers are lines, gates only in dialogue); no other applies: no new job, event, op or save row.
+- **Known limits.**
+  - The entitlement stays true after a barter, so the trade completes once per character and a retry reads `service.order_open`.
+  - A gift pays the holder but its `when` reads the flag at the farmer. An apple given to the trader sets the trader's trust and flag, not the farmer's, and the trader is paid again on each later gift that passes the farmer's flag: in a probe, apple, rat, apple to the trader gave trust 1, 0, 1. Trust stays bounded at -1..1, so this is no faucet. The apple the trader holds cannot be taken back (`not_present`), so the farmer's warm tier is then unreachable. Upgrade: a holder filter on the trigger.
+  - Carrying capacity is not checked on the output transfer.
+- **Sampler.** `cartridges/gift_sampler`: a yard (the farmer, the trader with 0 pennies, an apple, a stone, a dead rat, three pelts) and a sealed stall, the custody room holding the knife. Stone: trust 0; apple: 1, warm; a second apple: 1; then the rat: 0, plain; a rat first: -1, cold. One pelt held: `not_owned`, `service.missing_inputs`; three held: the knife is held, two pelts in the stall, one held, pennies 0 and 0, no job row; a retry: `service.order_open` (`kernel/ts/test/gift.test.ts`, `test/loka/content_gift_test.exs`, `mobile/authority/local-story/gift.test.ts` for cold reopen and replay).
+- **Composition record** ([architecture](architecture.md#building-mechanics-by-composition)).
+  - Consumer: `gift_sampler`. Later: Homestead friendship (hs-8 Book Give), S3 settlement trade.
+  - Reads: the entitlement fact, body and custody containers, pair facts through `fact_compare`.
+  - Writes: `entity.transfer`, `fact.assign`, `fact.adjust`; ops, events, jobs and save rows: none new.
+  - Reused: row 20a escrow, the 20b output and `service.no_output`, Give's `item_acquired`, W1 reactions, W2 pair facts, W6 room lines, the dialogue policy.
+  - New: the output transfer for an untimed escrow, the price 0 path, the loader price check, the 1.101 floor.
+  - Missing invariant: none (`one_container_per_item` covers the transfers).

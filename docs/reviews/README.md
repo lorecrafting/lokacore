@@ -26,6 +26,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: Built rooms S2, raise the hut (loka-1q3n)](2026-10-15-loka-1q3n-built-s2-review.md): **APPROVE**
 - [Review: word bar S2 (loka-1lpq), GameView spell_words and speech.phrases](2026-10-15-loka-1lpq-wordbar-s2-review.md): **APPROVE**
 - [Review: PR #393 recipe reason at kernel_api 1.100 (loka-j64e)](2026-10-15-j64e-review.md): **APPROVE WITH NOTES**
+- [Review: Homestead hs-7 gifting and barter (loka-kgd.108.5, loka-kgd.70)](2026-10-15-hs-7-review.md): **APPROVE WITH NOTES**
 - [Review: Homestead hs-6 furnishing, `item_present` leaf + `furnish_sampler` (loka-kgd.108.6)](2026-10-15-hs-6-review.md): **APPROVE**
 - [Save second opinion: Homestead hs-5, the mobile Eat receipt with `applies`](2026-10-15-hs-5-second-opinion.md): **APPROVE**
 - [Review: Homestead hs-5, cooking (`edible.applies`, kitchen_sampler)](2026-10-15-hs-5-review.md): **APPROVE WITH NOTES**

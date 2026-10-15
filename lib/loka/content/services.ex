@@ -1,4 +1,4 @@
-# size: allow 428, row 20a/20b/25 escrow orders, bank accounts and Built rooms S2-S4 builds and mends check in the same service admission pass
+# size: allow 441, row 20a/20b/25 escrow orders, kgd.70 barters, bank accounts and Built rooms S2-S4 builds and mends check in the same service admission pass
 defmodule Loka.Content.Services do
   @moduledoc "Checks finite immediate service declarations and their exact provider stock."
   import Loka.Content.Source, only: [diag: 2, diag: 3, diag: 4, at: 2, ref: 3]
@@ -99,19 +99,26 @@ defmodule Loka.Content.Services do
       |> String.split(".")
       |> Enum.map(&String.to_integer/1)
 
-    if declared != [] and minimum < api_floor(Enum.map(declared, fn {_, s} -> s["benefit"] end)),
+    if declared != [] and minimum < api_floor(Enum.map(declared, fn {_, s} -> s end)),
       do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
       else: []
   end
 
-  defp api_floor(benefits) do
+  defp api_floor(services) do
+    benefits = Enum.map(services, & &1["benefit"])
+
     cond do
+      Enum.any?(services, &barter?/1) -> [1, 101]
       Enum.any?(benefits, &bank?/1) -> [1, 83]
       Enum.any?(benefits, &timed?/1) -> [1, 80]
       Enum.any?(benefits, & &1["escrow"]) -> [1, 79]
       true -> [1, 23]
     end
   end
+
+  # Row kgd.70 (API 1.101): a free service, or an output handed over at once (no ready_after).
+  defp barter?(%{"price" => p, "benefit" => b}),
+    do: p == 0 or (is_map_key(b["escrow"] || %{}, "output") and not timed?(b))
 
   defp timed?(b),
     do: b["kind"] in ~w(claim cancel) or is_map_key(b["escrow"] || %{}, "ready_after")
@@ -125,12 +132,16 @@ defmodule Loka.Content.Services do
 
   defp service(rel, s, m, defs, text) do
     npc = resolved(s["provider"], "npc", m, defs)
-    checks = bindings(s, npc, m, defs) ++ benefit(s["benefit"], npc, s, m, defs)
+    checks = bindings(s, npc, m, defs) ++ benefit(s["benefit"], npc, s, m, defs) ++ [free(s)]
 
     texts(rel, service_texts(s), text) ++
       for({valid, steps} <- checks, not valid, do: bad(at(rel, steps))) ++
       escrow(rel, s["benefit"]["escrow"], m, defs) ++ benefit_refs(rel, s["benefit"], m, defs)
   end
+
+  # Row kgd.70: only an escrowed entitlement may be free (a barter); any other benefit is paid.
+  defp free(%{"price" => p, "benefit" => b}),
+    do: {p != 0 or (b["kind"] == "entitlement" and is_map_key(b, "escrow")), ["price"]}
 
   defp benefit_refs(rel, %{"service" => r}, m, defs),
     do: unresolved(r, "service", at(rel, ["benefit", "service"]), m, defs)
@@ -177,10 +188,11 @@ defmodule Loka.Content.Services do
   end
 
   # Toolbox row 20b: the finished output already lies in custody.
-  defp output(path, %{"output" => r, "custody" => custody}, m, defs) do
+  defp output(path, %{"output" => r, "custody" => custody} = e, m, defs) do
     at = path.(["output"])
 
-    schedule(path, m) ++
+    # Row kgd.70: an output with no ready_after is a barter, handed over at once; no job.
+    if(is_map_key(e, "ready_after"), do: schedule(path, m), else: []) ++
       case Refs.resolve(r, "item", m, defs) do
         :unresolved -> [diag("UNRESOLVED_REFERENCE", at, %{"target" => r})]
         {_, _, %{"location" => %{"in" => "room", "room" => ^custody}}} -> []
@@ -225,7 +237,7 @@ defmodule Loka.Content.Services do
 
   defp entitlement_texts(nil), do: ~w(service.unaffordable service.already_paid)
 
-  defp entitlement_texts(%{"ready_after" => _}),
+  defp entitlement_texts(%{"output" => _}),
     do: entitlement_texts(%{}) ++ ~w(service.no_output)
 
   defp entitlement_texts(_),
@@ -272,11 +284,12 @@ defmodule Loka.Content.Services do
   end
 
   # Toolbox row 20b: claim and cancel name a timed commission; Built rooms S3: a claim one with
-  # an output (a build raises its room instead).
+  # an output (a build raises its room instead); row kgd.70: a barter (no ready_after) leaves none.
   defp benefit(%{"kind" => k, "service" => r}, _, _, m, defs) when k in ~w(claim cancel) do
     c = resolved(r, "service", m, defs)
-    need = if k == "claim", do: "output", else: "ready_after"
-    [{c == %{} or is_map_key(c["benefit"]["escrow"] || %{}, need), ["benefit", "service"]}]
+    e = c["benefit"]["escrow"] || %{}
+    settles = is_map_key(e, "ready_after") and (k == "cancel" or is_map_key(e, "output"))
+    [{c == %{} or settles, ["benefit", "service"]}]
   end
 
   # Toolbox row 25: the account is a bounded int player fact from 0 no other engine writer owns;
