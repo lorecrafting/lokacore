@@ -121,11 +121,7 @@ export function reactions(c: Obj, { named, typedValue }: Checks): Diagnostic[] {
       } else if (s.op === 'item.move' || s.op === 'population.spawn') {
         const [f, kind] = s.op === 'item.move' ? ['room', 'room'] : ['plan', 'population']; // rows 41, 37a
         named(s[f], kind, `${at}.apply[${i}].${f}`);
-      } else if (s.op === 'status.apply') {
-        // Row 16: entry engagement cures concealment in the same move (conflicting_write).
-        if (r.on.event === 'entity_entered_room' && c.statuses?.[refString(s.status)]?.concealment)
-          out.push(diag('OUTCOME_MISMATCH', `${at}.apply[${i}].op`));
-      } else if (!['status.cure', 'experience.grant'].includes(s.op)) {
+      } else if (!['status.apply', 'status.cure', 'experience.grant'].includes(s.op)) {
         // status steps, experience.grant, fact.adjust's int: with their declarations (cartridge_standing.ts).
         named(s.fact, 'fact', `${at}.apply[${i}].fact`);
         if (s.op !== 'fact.adjust') typedValue(s.fact, s.value, `${at}.apply[${i}].value`);
@@ -134,8 +130,21 @@ export function reactions(c: Obj, { named, typedValue }: Checks): Diagnostic[] {
       }
     });
   }
-  return out;
+  return [...out, ...entryConcealment(c)];
 }
+
+// Row 16: entry engagement cures concealment on the same move (conflicting_write), so a reaction on
+// entity_entered_room may not apply a concealment status.
+const entryConcealment = (c: Obj) =>
+  each(c).flatMap(([r, at]) =>
+    r.on.event !== 'entity_entered_room'
+      ? []
+      : r.apply.flatMap((s: Obj, i: number) =>
+          s.op === 'status.apply' && c.statuses?.[refString(s.status)]?.concealment
+            ? [diag('OUTCOME_MISMATCH', `${at}.apply[${i}].op`)]
+            : [],
+        ),
+  );
 
 // Row W22 (loka-kgd.96): a named barrier resolves; to locked needs a key_item on the named barrier,
 // or on every barrier carrying the tag, else no key could ever unlock it (BARRIER_UNREACHABLE_KEY).
