@@ -60,15 +60,24 @@ In flight at the clear (check each first):
    reviewed on its head (records `docs/reviews/2026-10-15-hs-*`). A **Fable batch-head review** was
    started; if its record (`review-398` local branch, `docs/reviews/2026-10-15-homestead-a-batch-review.md`)
    is missing, rerun it (prompt pattern: cross-slice composition, faucets across the batch, the 1.101
-   floor cases, save/replay on the combined head, doc contradictions). Then fix, green CI, merge.
-2. **#397** (`loka-uh5u`, worktree_setup clones node_modules so slice worktrees run the Book in a
-   browser): approved at f344bf79; merge when ci and book-e2e are green on that sha.
+   floor cases, save/replay on the combined head, doc contradictions). The record lives only on the
+   local branch `review-398` (on top of a8648de2): merge `review-398` into `toolbox/batch-homestead-a`
+   (worktree `../worktrees.noindex/batch-homestead-a`) and push, or let the fix push carry it; then
+   ci and book-e2e green on that new head; then `gh pr merge 398 --merge --match-head-commit <head>`.
+   CI on a8648de2 was not watched. After the merge: delete local `review-hs-1`, `review-hs-5`,
+   `review-hs-10`, `review-hs-11`, `review-398` and the slice branches (`after_merge.sh` may stop on
+   local review branches, `loka-h9ht`).
+2. **#397** (`loka-uh5u`) merged: `bin/worktree_setup.sh` clones node_modules; slice worktrees run the
+   Book in a browser. Existing worktrees must rerun `bin/worktree_setup.sh`.
 3. **hs-12 self-build** (`loka-kgd.108.9`, open): not started (no code). Branch `toolbox/hs-12` sits at
    the batch-B base a8648de2 (`toolbox/batch-homestead-b` was cut from batch A's head); worktree
    `../worktrees.noindex/hs-12` kept. Code map in its Beads notes. After #398 merges, merge `main` into
    `toolbox/batch-homestead-b`, then spawn hs-12 with its brief.
 
 Next, in order:
+0. #397 is merged: one Sonnet catch-up pass takes 390 px screenshots of the batch A samplers
+   (farm, fishing, pen, kitchen, craft) for the owner; every batch B slice that changes what the
+   player sees hands back its own 390 px screenshot (owner asked 2026-10-15).
 1. Batch B (all briefs in Beads notes, "BRIEF loka hs-N"): hs-12 self-build (`.108.9`), hs-13
    self-cooking (`.108.10`, owns hearth, hearty stews, feast), hs-6 furnishing (`.108.6`), hs-7 gifting
    and barter (`.108.5` + `loka-kgd.70`), hs-8 Give in the Book (`loka-x6t.31`, designer consult; needs
