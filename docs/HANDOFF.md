@@ -54,19 +54,20 @@ Done this session (b5fe9338), on `main`:
   future GDD), Koster research in `docs/rnd/koster-design-lessons-2026-10-15.md`.
 
 In flight at the clear (check each first):
-1. **#398 Homestead batch A** (`toolbox/batch-homestead-a`, head a8648de2, main merged in): hs-1
-   `replenish.run` (1.101), hs-10 craft, hs-11 skill prerequisites, hs-2 farming, hs-3 fishing
-   (`rod` tag), hs-4 animals, hs-5 `edible.applies` + mobile meal receipt (line 0 only). Every slice
-   reviewed on its head (records `docs/reviews/2026-10-15-hs-*`). A **Fable batch-head review** was
-   started; if its record (`review-398` local branch, `docs/reviews/2026-10-15-homestead-a-batch-review.md`)
-   is missing, rerun it (prompt pattern: cross-slice composition, faucets across the batch, the 1.101
-   floor cases, save/replay on the combined head, doc contradictions). The record lives only on the
-   local branch `review-398` (on top of a8648de2): merge `review-398` into `toolbox/batch-homestead-a`
-   (worktree `../worktrees.noindex/batch-homestead-a`) and push, or let the fix push carry it; then
-   ci and book-e2e green on that new head; then `gh pr merge 398 --merge --match-head-commit <head>`.
-   CI on a8648de2 was not watched. After the merge: delete local `review-hs-1`, `review-hs-5`,
-   `review-hs-10`, `review-hs-11`, `review-398` and the slice branches (`after_merge.sh` may stop on
-   local review branches, `loka-h9ht`).
+1. **#398 Homestead batch A** (`toolbox/batch-homestead-a`, head e064721d = a8648de2 + the Fable
+   record): hs-1 `replenish.run` (1.101), hs-10 craft, hs-11 skill prerequisites, hs-2 farming, hs-3
+   fishing (`rod` tag), hs-4 animals, hs-5 `edible.applies` + mobile meal receipt (line 0 only). Every
+   slice was reviewed on its head (`docs/reviews/2026-10-15-hs-*`). **Fable batch review: APPROVE WITH
+   NOTES** (`docs/reviews/2026-10-15-homestead-a-batch-review.md`). One fix round, Opus developer in
+   its own worktree from that branch: (S1) the `loader_floors.json` case "a craft" is shadowed by
+   `craft_sampler`'s skill prerequisite, so lowering the craft floor in either kernel stays green; edit
+   the case so craft alone is pinned, red control in both kernels; (nits) `food-receipt.ts:14` cites
+   save.md, but the line-0 rule lives in mechanics.md Cooking; add the MECHANICS-TOOLBOX row .108.4
+   cooking; put the slices' `/code-review` results in the PR body. Fable re-check of the fix (scoped,
+   same agent if alive, else a fresh Opus reviewer), then ci and book-e2e green on the new head, then
+   `gh pr merge 398 --merge --match-head-commit <head>`. After the merge: `bin/after_merge.sh`; delete
+   local `review-hs-1`, `review-hs-5`, `review-hs-10`, `review-hs-11`, `review-398` and the slice
+   branches (`loka-h9ht`); remove `../worktrees.noindex/batch-homestead-a`.
 2. **#397** (`loka-uh5u`) merged: `bin/worktree_setup.sh` clones node_modules; slice worktrees run the
    Book in a browser. Existing worktrees must rerun `bin/worktree_setup.sh`.
 3. **hs-12 self-build** (`loka-kgd.108.9`, open): not started (no code). Branch `toolbox/hs-12` sits at
