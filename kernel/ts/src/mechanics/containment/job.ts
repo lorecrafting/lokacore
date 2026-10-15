@@ -105,12 +105,13 @@ function transfers(
   const r = world.cartridge.replenish![refString(key)];
   const moved = moves(world, key, steps);
   if (typeof moved === 'string') return moved;
+  const [source_id, destination_id] = [holder(world, r.from), holder(world, r.to)];
   return moved.map((entity_id) => ({
     op: 'entity.transfer',
     writer_group: groupOf(entity_id),
     entity_id,
-    source_id: holder(world, r.from),
-    destination_id: holder(world, r.to),
+    source_id,
+    destination_id,
   }));
 }
 

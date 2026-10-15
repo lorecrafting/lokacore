@@ -179,9 +179,9 @@ export function sequence(
     } else if (step.op === 'population.spawn') {
       ops.push(...spawn(then, step, group, ops, mint)); // row 37a
     } else if (step.op === 'replenish.run') {
-      const ran = replenishStep(then, step.key, group, steps, holders); // Homestead hs-1
-      if (typeof ran === 'string') return { kind: 'fault', code: ran };
-      ops.push(...ran);
+      const refill = replenishStep(then, step.key, group, steps, holders); // Homestead hs-1
+      if (typeof refill === 'string') return { kind: 'fault', code: refill };
+      ops.push(...refill);
     } else if (step.op === 'experience.grant') {
       gained = saturate(gained + step.amount);
     } else {
