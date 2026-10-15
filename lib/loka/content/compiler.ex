@@ -1,4 +1,4 @@
-# size: allow 345, ancestry, static map, status source, levelling settings, replenish and trail wiring join the existing compiler boundary
+# size: allow 348, ancestry, static map, status source, levelling settings, replenish, trail and theft wiring join the existing compiler boundary
 defmodule Loka.Content.Compiler do
   @moduledoc "Validates source files and builds the CompiledCartridge (05 §3–§8, 06 §20–21)."
   alias Loka.Content.{
@@ -58,6 +58,7 @@ defmodule Loka.Content.Compiler do
   # {warnings, errors} of the lists of diagnostics
   defp split(lists), do: lists |> Enum.concat() |> Enum.split_with(&(&1["severity"] == "warning"))
 
+  # ponytail: one ordered check list; row 33 theft joins it. # credo:disable-for-next-line /ABCSize|CyclomaticComplexity/
   defp checks(manifest, defs, v2, located, registry) do
     Enum.concat([
       Loka.Content.Calendar.check(elem(located, 1)["calendar"] || %{}, defs, manifest),

@@ -39,6 +39,7 @@ defmodule Loka.Content.Position do
 
   @doc "RESERVED_FACT for content writes to engine-owned facts (row 33: the theft stolen fact too)."
   @spec check(map() | nil, map(), map()) :: [map()]
+  # ponytail: one reserved-fact scan; row 33 adds the stolen fact. # credo:disable-for-next-line /ABCSize|CyclomaticComplexity/
   def check(m, defs, settings) when m != nil do
     refs = reserved_refs(m, defs) ++ List.wrap(get_in(settings, ["world", "theft", "stolen"]))
     dream_refs = Enum.map(dream_names(defs), &Loka.Content.Source.ref(&1, "fact", m))

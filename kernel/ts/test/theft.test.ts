@@ -182,12 +182,13 @@ test('6. a hidden thief is still noticed by an alert victim, never by a bystande
   assert.deepEqual([lines(r.d), wanted(r.w)], [['theft.unseen'], false]);
 });
 
-// Breaks: the NPC get lock not read (the vault's ledger taken), or theft reaching past what an
-// NPC directly holds (the coin inside the merchant's purse).
-test('7. the vault refuses its ledger; nested items stay out of reach', () => {
+// Breaks: the NPC get lock not read (the vault's ledger taken or listed), or theft reaching past
+// what an NPC directly holds (the coin inside the merchant's purse).
+test('7. the vault refuses and hides its ledger; nested items stay out of reach', () => {
   let w = fresh();
   assert.equal(refused(w, take(w, 'coin')), 'not_present');
   w = go(w, 'south');
+  assert.equal(gameView(w).entities.find((e) => e.id === npc(w, 'vault'))!.contents, undefined);
   assert.equal(refused(w, take(w, 'ledger')), 'permission_denied');
   assert.equal(w.state.containers[item(w, 'ledger')], npc(w, 'vault'));
   assert.deepEqual(

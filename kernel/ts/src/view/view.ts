@@ -1,3 +1,4 @@
+// size: allow 306, row 33 lists an NPC's lock-admitted holdings beside container contents
 import { knowledgeView } from './knowledge.ts';
 import { movementPlan } from '../mechanics/movement/sequence.ts';
 import { edge } from '../mechanics/water/shared.ts';
@@ -36,6 +37,7 @@ import { describe, describeEntity } from '../mechanics/description_variant/rule.
 import * as movement from '../mechanics/movement/rule.ts';
 import { cueViews } from '../mechanics/senses.ts';
 import { holds } from '../mechanics/policy.ts';
+import { lockRefused } from '../mechanics/locks.ts';
 import * as scene from '../mechanics/scene/shared.ts';
 import * as position from '../mechanics/position/shared.ts';
 import { shelf } from '../mechanics/commerce/shared.ts';
@@ -154,12 +156,15 @@ function within(
     )
     .map(([id, e]) => {
       const scope = holder === body ? 'inventory' : SCOPE[e.kind];
-      // A theft cartridge lists what an NPC directly holds, takeable (toolbox row 33).
+      // A theft cartridge lists what an NPC directly holds and its get lock admits (toolbox row
+      // 33); a locked pool such as a bank vault's stays private.
       const contents =
         e.kind === 'item' && !worn
           ? inside(world, actor, body, actions, id, scope, steps)
           : e.kind === 'npc' && world.cartridge.world?.theft
-            ? inside(world, actor, body, actions, id, 'room_contents', steps, true)
+            ? inside(world, actor, body, actions, id, 'room_contents', steps, true).filter(
+                (c) => !lockRefused(world, actor, e.locks?.get, c.id, steps),
+              )
             : [];
       return {
         ...viewOf(world, actor, id, e, worn ? worn(id) : actions.of(scope, id), steps),

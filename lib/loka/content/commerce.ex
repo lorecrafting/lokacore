@@ -21,6 +21,7 @@ defmodule Loka.Content.Commerce do
       else: o
   end
 
+  # ponytail: one shop admission; row 33 adds stolen offers. # credo:disable-for-next-line /ABCSize|CyclomaticComplexity/
   defp shop(m, defs, rel, npc) do
     s = npc["shop"]
     path = at(rel, ["shop"])

@@ -10,14 +10,16 @@ defmodule Loka.Content.NpcFields do
     |> update("attributes", fn c ->
       Enum.map(c, fn a -> Map.update!(a, "attribute", &ref(&1, "attribute", m)) end)
     end)
-    |> update("disposition", &expand.(&1, m))
-    |> update("locks", &expand.(&1, m))
     |> Map.merge(variants(npc, m, expand))
   end
 
-  # Toolbox row W6: the conditions of its text variants.
+  # Toolbox row W6: the conditions of its text variants; (row G11) disposition and (row G7) lock conditions.
   defp variants(npc, m, expand) do
-    for {f, v} <- Map.take(npc, ~w(short_variants room_line_variants description_variants)),
+    for {f, v} <-
+          Map.take(
+            npc,
+            ~w(short_variants room_line_variants description_variants disposition locks)
+          ),
         into: %{},
         do: {f, expand.(v, m)}
   end

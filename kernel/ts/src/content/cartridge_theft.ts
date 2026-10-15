@@ -23,7 +23,7 @@ export function theft(c: Obj, named: Checks['named']): Diagnostic[] {
     out.push(diag('FACT_SCOPE_UNSUPPORTED', `${at}.stolen`));
   for (const k of ['seen', 'unseen'])
     if (!Object.hasOwn(c.text, t.narration[k]))
-      out.push(diag('UNRESOLVED_REFERENCE', `${at}.narration.${k}`));
+      out.push(diag('UNRESOLVED_REFERENCE', `${at}.narration.${k}`, { target: t.narration[k] }));
   for (const [ref, s] of Object.entries((c.services ?? {}) as Obj)) {
     const b = s.benefit;
     if (

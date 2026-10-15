@@ -46,6 +46,7 @@ function room(world: World, destination: EntityId, steps: Steps) {
  * One current offer query serves both the rule and Peg's page; no stock reservation. A hostile
  * shopkeeper (toolbox row G11) refuses as a stale price does.
  */
+// size: allow 47, the row 33 stolen-offer match joins the one offer query
 export function exchange(
   world: World,
   actor: CharacterId,

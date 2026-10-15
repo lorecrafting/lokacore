@@ -1,4 +1,4 @@
-// size: allow 334, food, water, practical skills, local Knock and G7 get locks share the composed view list; the viewer is threaded (loka-kgd.150.5)
+// size: allow 335, food, water, practical skills, local Knock, G7 get locks and row 33 theft share the composed view list; the viewer is threaded (loka-kgd.150.5)
 import { running as modalScene } from '../mechanics/scene/shared.ts';
 import { foodActions } from './food.ts';
 import { useActions } from './use.ts';
