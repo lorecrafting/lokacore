@@ -191,7 +191,7 @@ function heldButtons(
 ) {
   return projected.flatMap((e) =>
     e.actions
-      .filter((a) => a.available && !['give', 'ask', 'whisper'].includes(a.action_key)) // ponytail: give waits for a recipient selector; whisper is wordButtons, ask is askButtons
+      .filter((a) => a.available && !['ask', 'whisper'].includes(a.action_key)) // whisper is wordButtons, ask is askButtons
       .map((a) => {
         // A use pair (G4) lists [target, tool]: this page's item is the tool, so name the target
         // and keep the card on this page (detail_id), not the target's.
@@ -201,7 +201,14 @@ function heldButtons(
             detail_id: e.id,
           };
         const destination = a.target_ids?.[1] && names.get(a.target_ids[1]);
-        const join = commandOf(a) === 'refuel' ? 'from' : commandOf(a) === 'pour' ? 'into' : 'in';
+        const join =
+          commandOf(a) === 'refuel'
+            ? 'from'
+            : commandOf(a) === 'pour'
+              ? 'into'
+              : commandOf(a) === 'give'
+                ? 'to'
+                : 'in';
         const offered = button(
           a,
           ` ${text(e.name)}${destination ? ` ${join} ${text(destination)}` : ''}`,

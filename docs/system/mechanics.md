@@ -3586,3 +3586,15 @@ Homestead hs-7 (Beads `loka-kgd.108.5`, `loka-kgd.70`): liked and disliked gifts
   - Reused: row 20a escrow, the 20b output and `service.no_output`, Give's `item_acquired`, W1 reactions, W2 pair facts, W6 room lines, the dialogue policy.
   - New: the output transfer for an untimed escrow, the price 0 path, the loader price check, the 1.101 floor.
   - Missing invariant: none (`one_container_per_item` covers the transfers).
+
+## Give pairs
+
+Homestead hs-8 (Beads `loka-x6t.31`); the Book form is in [book-ui.md](book-ui.md#item-details-and-takedrop). The GameView lists Give on a held item once per living NPC in the actor's room, with `target_ids [item, recipient]`, in the room's EntityId order, as it lists Put pairs: a pair is listed when the command would be accepted. The item admission is `giveRefused`, the recipient admission `recipient(world, id, here)` (missing or dead: `not_found`; not an NPC: `invalid_target`; elsewhere: `not_present`; at capacity: `invalid_state`), both in `kernel/ts/src/mechanics/containment/shared.ts`; `rule.ts` and `view/action_lists.ts` call the same functions. A refused item, a corpse or no one present lists no pair; a budget fault keeps the pair listed unavailable, as for Put.
+
+- **Composition record** ([architecture](architecture.md#building-mechanics-by-composition)).
+  - Key `give`, command `give`, ordered targets [item, recipient] (`target_ids` to `item_id`, `recipient_id`), input none.
+  - Reads: body custody, the item's `give_allowed`, the recipient's kind, life and room, its capacity.
+  - Writes, ops, events, jobs, save rows, schema fields: none new (`target_ids` already exists on the advertised action).
+  - Reused: the Give rule, its `item_acquired`, the Put-pair projection.
+  - New: the shared `recipient` admission (moved from `rule.ts`), the Give pair listing.
+  - Missing invariant: none.

@@ -144,13 +144,16 @@ function pressed(game: Game, b: Button, detail: string | undefined, s: Logs, tex
   s.confirmedRead = undefined;
   if (!game.pending() && b.action_key === 'give' && b.target_ids.length !== 2) return '';
   const was = game.view().view;
-  const item = ['take', 'drop'].includes(b.action_key)
-    ? things(was).find((e) => e.id === b.target_ids[0])
-    : undefined;
+  const named = (id?: string) => {
+    const e = things(was).find((t) => t.id === id);
+    return e && text(e.name);
+  };
+  const item = ['take', 'drop', 'give'].includes(b.action_key) ? named(b.target_ids[0]) : undefined;
   s.retry ??= {
     button: { ...b, target_ids: [...b.target_ids], input: { ...b.input } },
     detail,
-    item: item && text(item.name),
+    item,
+    to: b.action_key === 'give' ? named(b.target_ids[1]) : undefined,
   };
   let reply: Reply;
   try {

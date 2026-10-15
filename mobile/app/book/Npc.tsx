@@ -10,7 +10,7 @@ import { note, prose, usePalette, type Palette } from './palette.ts';
 import { Riddle } from './Riddle.tsx';
 import { space } from './tokens.ts';
 import { LABEL } from './labels.ts';
-import { priceNote } from './offers.ts';
+import { offerLabel } from './offers.ts';
 type Say = (key: string) => string;
 type Grouped = ReturnType<typeof group>;
 type Screen = ReturnType<ReturnType<typeof presenter>['screen']>;
@@ -178,7 +178,7 @@ function ServiceOptions(p: NpcProps & { actions: Button[] }) {
     ) : (
       <ActionCard
         key={s.service.key}
-        label={`${p.text(s.label)} (${priceNote(s)})`}
+        label={offerLabel(s, p.text, (n) => ` (${n})`)}
         reason={s.action.available ? undefined : why(s.action, p.text)}
       />
     );

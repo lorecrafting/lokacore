@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { priceNote, serviceButtons } from './offers.ts';
+import { offerLabel, priceNote, serviceButtons } from './offers.ts';
 
 const offer = (key: string, price: number, benefit: object) => ({
   service: { kind: 'service', key },
@@ -18,6 +18,7 @@ const view = {
         offer('withdraw', 1, { kind: 'withdraw', account: {}, vault: {}, amount: 10 }),
         offer('meal', 2, { kind: 'meal', amount: 4 }),
         offer('repair', 3, { kind: 'repair', amount: 5 }),
+        offer('barter', 0, { kind: 'goods' }),
       ],
     },
   ],
@@ -25,7 +26,7 @@ const view = {
 const text = (k: string) => ({ 'service.deposit': 'Deposit ten pennies' })[k] ?? k;
 
 // Breaks (PM ruling 2026-10-13): a bank or repair offer labelled with the meal's MV suffix, or a
-// bank fee shown as a bare price. Npc.tsx shows the same priceNote in parentheses.
+// bank fee shown as a bare price; a price-0 barter labelled with " — 0p" or "(0p)" (hs-8).
 test('Book service labels: a bank fee, the MV note only on a meal or drink', () => {
   assert.deepEqual(
     serviceButtons(view as never, text).map((b) => b.label),
@@ -34,7 +35,13 @@ test('Book service labels: a bank fee, the MV note only on a meal or drink', () 
       'service.withdraw — fee 1p',
       'service.meal — 2p; up to +4 MV, capped',
       'service.repair — 3p',
+      'service.barter',
     ],
   );
+  // The NPC page's unavailable card (Npc.tsx) wraps the note; a price-0 barter still shows none.
+  const [meal, barter] = [2, 4].map((i) => view.entities[0]!.services[i] as never);
+  const wrapped = (n: string) => ` (${n})`;
+  assert.equal(offerLabel(meal, text, wrapped), 'service.meal (2p; up to +4 MV, capped)');
+  assert.equal(offerLabel(barter, text, wrapped), 'service.barter');
   assert.equal(priceNote(view.entities[0]!.services[1] as never), 'fee 1p');
 });
