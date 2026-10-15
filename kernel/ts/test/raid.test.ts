@@ -316,8 +316,7 @@ test('FD1: a reaction to a delayed write adds to the same fact in one advance', 
 
 // Breaks: two delayed experience.grant jobs for one actor in one advance take separate writer groups
 // on the levelling row (conflicting_write, both stay pending and wedge later waits). This stands in
-// for a delayed grant beside kill credit: both reach the row through oneWrite (proposal.ts), and a
-// probe of a rat kill plus a delayed grant in one levelling_sampler wait gave 10 + 5, one write.
+// for a delayed grant beside kill credit: both reach the row through oneWrite (proposal.ts).
 test('FD1: two delayed experience grants due in one advance both count', () => {
   const xp = (c: any) => {
     const level_up = 'item.player_corpse.short'; // any catalog key: no level is reached
