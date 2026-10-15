@@ -52,9 +52,9 @@ All five hold at head.
 ### Evidence
 
 - Focused at head, exit 0: mobile `theft.test.ts`, `commerce.test.ts`, `two_shops.test.ts`, `prices.test.ts`, `r9c_custody_terminal.test.ts`, `chapters.test.ts`.
-- Mutants (each reverted, tree clean): `commerce-save.ts:33` seed from the saved `world` → 8 fail across theft, commerce, two_shops; stolen offers seeded with the provider (old behavior) → theft.test `save_corrupt` at the first reopen (:94).
+- Mutants (each reverted, tree clean): `commerce-save.ts:33` seed from the saved `world` → 10 of 12 fail across theft, commerce, two_shops; stolen offers seeded with the provider (old behavior) → theft.test `save_corrupt` at the first reopen (:94).
 - Red control: `commerce-save.ts:65` skip the custody update on `sell` → theft.test fails at the new reopen (:103, `save_corrupt`); same mutant with :103-105 removed → green. The new reopen is what catches it; main finding 1 is resolved.
-- Scratch probe (deleted): failed COMMIT on take(purse) → `pending`; reopen: purse with the merchant, `stolen` false; retry accepted. Lost ack → `pending`; reopen: purse on the body, `stolen` true; redelivery of the same `invocation_id` returns the stored `accepted` receipt, no double effect; reopen again clean. Stolen purse sold to the fence then bought back → reopen OK, purse on the body, still `stolen` (spec:3162 limit).
+- Scratch probe (deleted): failed COMMIT on take(purse) → `pending`; reopen: purse with the merchant, `stolen` false; retry accepted. Lost ack → `pending`; reopen: purse on the body, `stolen` true; redelivery of the same `invocation_id` returns `accepted` for a purse already on the body (stored-receipt replay inferred; a fresh take would refuse); reopen again clean. Stolen purse sold to the fence then bought back → reopen OK, purse on the body, still `stolen` (spec:3162 limit).
 
 ### Findings
 
