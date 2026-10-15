@@ -268,7 +268,7 @@ test('mixed consequences preserve fact/event order and skip a duplicate local ac
 });
 
 // Breaks: loader leaves the new quest refs unchecked, accepts activation under an actorless
-// legacy trigger, omits quest/reaction lock ownership, or permits an older kernel API range.
+// trigger (fact_changed; entering is legal since loka-kgd.150.2), omits quest/reaction lock ownership, or permits an older kernel API range.
 test('loader rejects missing quest references, trigger misuse and missing ownership locks', () => {
   for (const [change, code] of [
     [
@@ -282,8 +282,8 @@ test('loader rejects missing quest references, trigger misuse and missing owners
     [
       (c: any) =>
         (c.reactions[prefix + 'reaction/start_search'].on = {
-          event: 'entity_entered_room',
-          room: ref('room', 'reed_bank'),
+          event: 'fact_changed',
+          fact: ref('fact', 'fen_tracks_found'),
         }),
       'OUTCOME_MISMATCH',
     ],

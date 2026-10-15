@@ -14,7 +14,7 @@ defmodule Loka.ContentFirstSearchTest do
       {"target quest", "UNRESOLVED_REFERENCE", search,
        &put_in(&1, ["apply", Access.at(0), "quest"], "absent")},
       {"actorless", "OUTCOME_MISMATCH", search,
-       &Map.put(&1, "on", %{"event" => "entity_entered_room", "room" => "reed_bank"})},
+       &Map.put(&1, "on", %{"event" => "fact_changed", "fact" => "fen_tracks_found"})},
       {"quest owner", "UNDECLARED_CAPABILITY", "cartridge.json",
        &update_in(&1, caps, fn c -> Map.delete(c, "quest") end)},
       {"reaction owner", "UNDECLARED_CAPABILITY", "cartridge.json",

@@ -393,8 +393,8 @@ completes to `objectives_complete` as its own writer group. Resolution (`:111`) 
 rule that resolves it (a dialogue choice or typed reaction): no open instance `invalid_state`; `active` with an
 unmet `current_state` objective `quest_requirement`; else `quest.transition` to
 `objectives_complete` (if needed) and `resolved` with the choice as outcome, and
-`quest_resolved`. A typed reaction may instead fail an actor-owned active or
-objectives_complete instance with a declared outcome. Failure never reopens a terminal
+`quest_resolved`. A typed reaction may instead fail an active or
+objectives_complete instance (whose: Attribution below) with a declared outcome. Failure never reopens a terminal
 instance and emits no event. Policy leaf `quest_state`; the GameView journal lists the player's instances.
 A quest may declare `journal` texts: `active`, `objectives_met`, `resolved`, `failed`,
 `abandoned`, and optional `outcomes` keyed by outcome. The view selects one TextKey without
@@ -599,33 +599,41 @@ room, or (toolbox row W1) any other registered event kind with optional filters,
 Rules run one after another: each rule's `when` reads the writes of the rules and deliveries before it in the same command, and a later rule may rewrite a fact an earlier one wrote (the write joins the earlier write's writer group, `assignment` in `kernel/ts/src/mechanics/reaction.ts`, loka-j2mo), so the last write wins, deterministically by rule-key and delivery order. Archived 04 §5.3 calls repeated independent assignments a conflict; this rule governs ([difference 11](DIFFERENCES.md)).
 Every filter present must equal its payload field; a filter means the same field in every kind:
 
-| Trigger `on.event`                                                                                                   | Optional filters (payload field)                                                                                      | Subject (status.apply target)                  |
-| -------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
-| `item_acquired`                                                                                                      | `item` (item_id)                                                                                                      | holder_id                                      |
-| `item_dropped`, `shooed`                                                                                             | `item` (item_id), `room` (room_id)                                                                                    | the actor's body                               |
-| `quest_activated`                                                                                                    | `quest`                                                                                                               | the actor's body                               |
-| `choice_opened`                                                                                                      | none                                                                                                                  | the actor's body                               |
-| `choice_resolved`                                                                                                    | `choice` (choice_id)                                                                                                  | the actor's body                               |
-| `story_point_reached`                                                                                                | `story_point`, `outcome`                                                                                              | the actor's body                               |
-| `custom_event`                                                                                                       | `custom` (the event's key)                                                                                            | the actor's body                               |
-| `action_completed`                                                                                                   | `action`                                                                                                              | the actor's body                               |
-| `check_passed`, `check_failed`                                                                                       | `check` (the check's key)                                                                                             | the actor's body (subject_id is the target)    |
-| `barrier_changed`                                                                                                    | `barrier`, `to`                                                                                                       | the actor's body                               |
-| `scene_ended`                                                                                                        | `scene`                                                                                                               | the actor's body                               |
-| `entity_died`                                                                                                        | `victim` (victim_definition), `room` (room_id)                                                                        | victim_id                                      |
-| `attack_result`                                                                                                      | `hit`, `attacker` (attacker_id is that NPC's authored instance; [loka-kgd.79](#attacker-filter-loka-kgd79)), `target` (target_id, likewise; [row 39](#boss-phases-toolbox-row-39))           | target_id                                      |
-| `filled`, `poured`, `drank`                                                                                          | `kind`                                                                                                                | the actor's body                               |
-| `entity_entered_room`                                                                                                | `room` (required), `npc` (entity_id is that NPC's authored instance; [row W3](#rumour-by-co-presence-toolbox-row-w3)) | entity_id                                      |
-| `rested`                                                                                                             | `room` (required)                                                                                                     | body_id                                        |
-| `clock_hour` ([row W25](#exposure-cold-hot-damp-and-windy-toolbox-row-w25))                                          | none                                                                                                                  | the actor's body                               |
-| `fact_changed`                                                                                                       | `fact` (required)                                                                                                     | subject_id when present, else the actor's body |
-| `status_applied` ([status readers](#status-readers-toolbox-rows-sr1-sr2-and-sr3)), `status_ticked`, `status_expired` | `status`                                                                                                              | body_id (the status's holder)                  |
-| `quest_resolved`                                                                                                     | `quest`, `outcome` (both required)                                                                                    | the actor's body                               |
+| Trigger `on.event`                                                                                                   | Optional filters (payload field)                                                                                      | Subject (status.apply target)                  | Actor (delivery runs for) |
+| -------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- | --- |
+| `item_acquired`                                                                                                      | `item` (item_id)                                                                                                      | holder_id                                      | the subject's character, else actor_id |
+| `item_dropped`, `shooed`                                                                                             | `item` (item_id), `room` (room_id)                                                                                    | the actor's body                               | the event's actor_id |
+| `quest_activated`                                                                                                    | `quest`                                                                                                               | the actor's body                               | the event's actor_id |
+| `choice_opened`                                                                                                      | none                                                                                                                  | the actor's body                               | the event's actor_id |
+| `choice_resolved`                                                                                                    | `choice` (choice_id)                                                                                                  | the actor's body                               | the event's actor_id |
+| `story_point_reached`                                                                                                | `story_point`, `outcome`                                                                                              | the actor's body                               | the event's actor_id |
+| `custom_event`                                                                                                       | `custom` (the event's key)                                                                                            | the actor's body                               | the event's actor_id |
+| `action_completed`                                                                                                   | `action`                                                                                                              | the actor's body                               | the event's actor_id |
+| `check_passed`, `check_failed`                                                                                       | `check` (the check's key)                                                                                             | the actor's body (subject_id is the target)    | the event's actor_id |
+| `barrier_changed`                                                                                                    | `barrier`, `to`                                                                                                       | the actor's body                               | the event's actor_id |
+| `scene_ended`                                                                                                        | `scene`                                                                                                               | the actor's body                               | the event's actor_id |
+| `entity_died`                                                                                                        | `victim` (victim_definition), `room` (room_id)                                                                        | victim_id                                      | the subject's character, else actor_id |
+| `attack_result`                                                                                                      | `hit`, `attacker` (attacker_id is that NPC's authored instance; [loka-kgd.79](#attacker-filter-loka-kgd79)), `target` (target_id, likewise; [row 39](#boss-phases-toolbox-row-39))           | target_id                                      | the subject's character, else actor_id |
+| `filled`, `poured`, `drank`                                                                                          | `kind`                                                                                                                | the actor's body                               | the event's actor_id |
+| `entity_entered_room`                                                                                                | `room` (required), `npc` (entity_id is that NPC's authored instance; [row W3](#rumour-by-co-presence-toolbox-row-w3)) | entity_id                                      | the subject's character, else actor_id |
+| `rested`                                                                                                             | `room` (required)                                                                                                     | body_id                                        | the subject's character, else actor_id |
+| `clock_hour` ([row W25](#exposure-cold-hot-damp-and-windy-toolbox-row-w25))                                          | none                                                                                                                  | the actor's body                               | the event's actor_id |
+| `fact_changed`                                                                                                       | `fact` (required)                                                                                                     | subject_id when present, else the actor's body | the subject's character, else actor_id |
+| `status_applied` ([status readers](#status-readers-toolbox-rows-sr1-sr2-and-sr3)), `status_ticked`, `status_expired` | `status`                                                                                                              | body_id (the status's holder)                  | the subject's character, else actor_id |
+| `quest_resolved`                                                                                                     | `quest`, `outcome` (both required)                                                                                    | the actor's body                               | the resolved instance's actor |
 
-Attribution: every delivery runs for the command actor (the quest-resolution exception below),
-so an event whose subject is an NPC or a thing (a hound's death, a hit on a guard, a crow
-taking an item) still reads the actor's `when` and writes the actor's facts, quests and
-experience; only `status.apply`, ([status reader 3](#status-readers-toolbox-rows-sr1-sr2-and-sr3)) `status.cure` and `status_active {subject: "subject"}` follow the subject, which may be the actor's body, an NPC or an
+Attribution (Beads `loka-kgd.150.2`): a delivery runs for the Actor column's character. When
+the trigger's subject is an admitted player body, that body's character owns the delivery;
+otherwise the event's own `actor_id` does, so an event whose subject is an NPC or a thing (a
+hound's death, a hit on a guard, a crow taking an item) reads the doer's `when` and writes the
+doer's facts, quests and experience. An event the host makes without an `actor_id` (a
+delivery's `fact_changed`, a due job's events) falls back to the root command's actor, so a
+job-caused trigger runs for the elapsed command's actor; the Realm delivers per character (R14).
+`quest.resolve` and `quest.fail` end only the trigger's own character's instance when the trigger
+names one (a player-body subject; the `actor_id` of an event whose Subject is the actor's body; a
+`quest_resolved` owner; a player-scoped `fact_changed`'s character), else (an NPC or thing subject, a `clock_hour` or
+host event without `actor_id`, a non-player fact) every holder's.
+Only `status.apply`, ([status reader 3](#status-readers-toolbox-rows-sr1-sr2-and-sr3)) `status.cure` and `status_active {subject: "subject"}` follow the subject, which may be the actor's body, an NPC or an
 item ([row G3](#statuses-on-npcs-and-things-toolbox-row-g3)), unless the step names an `item`, ([row 42](#potions-and-songs-toolbox-rows-18-and-42)) an `npc` or ([status reader 9](#a-room-as-a-status-holder-status-reader-9)) a `room`; any other subject (a detail) takes nothing, and since status reader 9 a room subject takes it; ([row W22](#fire-toolbox-row-w22)) `barrier.set` names its barrier or acts on the event's room; ([row 41](#decay-toolbox-row-41)) `item.move` moves the subject when it is an item. A check, action or custom event's subject_id
 names its target, so its status lands on the doer: a failed disarm poisons the actor. A filter naming a definition (`item`,
 `room`, `quest`, `story_point`, `barrier`, `scene`, `kind`, `victim`, `npc`, `attacker` and `target` as an NPC, `status`) must name one of
@@ -637,11 +645,14 @@ event's quest/outcome, and agree with its actor and scope; inconsistent evidence
 `precondition_failed`. The instance's actor owns the delivery. Its `when` is read on the proposal so far at the event's logical time.
 `apply` assigns facts at that actor's scope, activates a declared quest through
 `quest.activate {quest}`, or requests typed `quest.resolve {quest, outcome}` and
-`quest.fail {quest, outcome}` transitions, or ([row 41](#decay-toolbox-row-41)) moves the subject item to a room through `item.move {room}`, or ([row 37a](#phased-world-events-toolbox-row-37a)) births one bundle of a population plan through `population.spawn {plan}`. Resolve and fail are legal only on a
-`fact_changed` trigger, for the trigger's actor; resolve checks the quest objective,
-and fail requires an active or objectives_complete actor instance. Neither changes a
-terminal instance. Activation is legal only on a quest-resolution trigger; any prior
-instance for that actor, including terminal instances, skips activation. The delivery uses
+`quest.fail {quest, outcome}` transitions, or ([row 41](#decay-toolbox-row-41)) moves the subject item to a room through `item.move {room}`, or ([row 37a](#phased-world-events-toolbox-row-37a)) births one bundle of a population plan through `population.spawn {plan}`. Resolve and fail are legal on
+any trigger and act for each of the quest's holders: every player-scope instance of the quest
+that is active or objectives_complete, in character order; with no holder the step writes
+nothing. Resolve checks the quest objective per holder (an unmet objective faults
+`precondition_failed`). Neither changes a terminal instance. Activation is legal on a
+quest-resolution, `rested` or `entity_entered_room` trigger, for the delivery's actor (the
+Actor column); a subject that is not an admitted player body (an NPC entering) activates
+nothing. Any prior instance for that character, including terminal instances, skips activation. The delivery uses
 one writer group and causal allocator; its quest-owned `quest_activated` is admitted through
 reaction's quest composition, caused by the source event and correlated with the root command.
 The resulting events trigger further rules, FIFO, to quiescence, within the deliveries,
@@ -2851,6 +2862,34 @@ Found by [showcase plan 2](../showcase/combat-district.md) (#368); the PM brief 
   - Events, jobs and save rows: none new.
   - Reused: `birth` and `birthSlot`, the `clock_hour` and `fact_changed` triggers, the `sky` and `fact_compare` leaves, `fact.assign` and `fact.adjust`, population plans; 37b adds no code.
   - New: the `population.spawn` step, `spawn`, `held`, targets from 0 and the 1.84 floors; no foundation change.
+
+## Protect objective (toolbox row 38)
+
+[Toolbox row 38](../MECHANICS-TOOLBOX.md#ranked-toolbox); its sampler: "named defender alive at close wins; dead fails". Beads `loka-kgd.133`, built with [RS-4](#reaction1-kerneltssrcmechanicsreactionts) (`loka-kgd.150.2`), whose subject attribution and per-holder quest steps it needs. Content only on [reaction@1](#reaction1-kerneltssrcmechanicsreactionts) and the [phased raid](#phased-world-events-toolbox-row-37a).
+
+- **Rules.** `called_to_hold`: `entity_entered_room {room village}` with `when` `all [fact_compare {raided equals true}, npc_present {defender}]`, `apply [quest.activate {hold_the_gate}]`; it activates for the entrant's character, and an NPC entering activates nothing. `defender_fell`: `entity_died {victim defender}`, `apply [quest.fail {hold_the_gate, outcome fallen}]`. `gate_held`: `fact_changed {fact raided}` with `when` `fact_compare {raided equals false}`, `apply [quest.resolve {hold_the_gate, outcome held}]`.
+- **Win and loss.** The quest `hold_the_gate` (player scope) has the `current_state` objective `raided equals false`. The defender's death and the raid's end name no character, so they act on every holder: the death fails every open instance; the new moon resolves every one still held. A failed instance is terminal, so the new moon leaves it failed; with no holder either step writes nothing.
+- **Realm audience.** `instance`: the defender and `raided` are world state, so one defender's death fails every holder and the raid's end resolves every holder.
+- **Realm seams** (owner rule `docs/decisions/owner-decision-realm-seams-2026-10-13.md`).
+  1. Actor: met; activation goes to the entrant's character (the Actor column), resolve and fail to each holder; no root-actor write.
+  2. Reactions: met; `entity_entered_room` names its entrant, `entity_died` its victim (an NPC: the steps act per holder), `fact_changed {raided}` no subject.
+  3. Credit: not applicable; no payout, the kill credits as before.
+  4. Time: met; the raid and its end are the calendar's logical `clock_hour`; no device clock, no skip.
+  5. Scope: met; the quest is player scope, one per entrant; `raided` and the defender are `instance`, audience above.
+  6. Text: met; authored journal and outcome lines; `speech@1` unchanged.
+  7. Ownership: not applicable; nothing owned moves.
+  8. Trust: not applicable; nothing imported.
+  9. Instancing: met; none assumed; one defender per world.
+- **Book.** No new element: the Journal shows the quest and its outcome line.
+- **Known limits.** The defender never returns; after its death no one can take the quest again in that world. The quest is once per character: a later raid does not offer it again. A player already in the village when the raid begins is called only on entering again (activation needs an entrant). The raiders attack players only, so the defender dies only at a player's hand; a raider threat needs NPC-against-NPC combat, not in the toolbox. A player who leaves keeps the quest; the outcome is decided by the defender and the moon alone.
+- **Sampler.** `cartridges/raid_sampler`: the defender (1 hp, no attack) in the village; `kernel/ts/test/raid.test.ts` row 38 cases.
+- **Composition record** ([architecture](architecture.md#building-mechanics-by-composition)).
+  - Consumer: `raid_sampler`.
+  - Reads: `raided`, the defender's presence (`npc_present`), the quest's holders.
+  - Writes: `quest.activate`, `quest.transition`; all existing ops.
+  - Events, jobs and save rows: none new.
+  - Reused: the `entity_entered_room`, `entity_died` and `fact_changed` triggers, `quest.activate`, `quest.resolve` and `quest.fail` (RS-4 per holder), the `fact_compare` and `npc_present` leaves, the 37a raid.
+  - New: content only; no code.
 
 ## Tracks and trails (toolbox row W13)
 

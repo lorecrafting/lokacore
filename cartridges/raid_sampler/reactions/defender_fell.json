@@ -1,0 +1,13 @@
+{
+  "on": {
+    "event": "entity_died",
+    "victim": "defender"
+  },
+  "apply": [
+    {
+      "op": "quest.fail",
+      "quest": "hold_the_gate",
+      "outcome": "fallen"
+    }
+  ]
+}
