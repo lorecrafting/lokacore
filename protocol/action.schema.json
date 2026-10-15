@@ -843,6 +843,34 @@
             "by"
           ],
           "additionalProperties": false
+        },
+        {
+          "description": "Built rooms S6 (kernel_api at least 1.101; detail-target recipes only, at most one per sequence, construction@1): raise blueprint at the recipe target's room (its site) toward direction for the actor, as a build service does (service.schema.json); success outcome only (the loader refuses it elsewhere). Admission refuses the perform while the build would be refused (service.site_taken, service.construction_full).",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "build"
+            },
+            "blueprint": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "direction": {
+              "enum": [
+                "north",
+                "south",
+                "east",
+                "west",
+                "up",
+                "down"
+              ]
+            }
+          },
+          "required": [
+            "op",
+            "blueprint",
+            "direction"
+          ],
+          "additionalProperties": false
         }
       ],
       "examples": [

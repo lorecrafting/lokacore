@@ -1,13 +1,27 @@
 {
   "title": "room.workshop.title",
   "description": "room.workshop.description",
-  "exits": {},
+  "exits": {
+    "west": {
+      "to": "glade"
+    },
+    "east": {
+      "to": "lane"
+    }
+  },
   "details": {
     "bench": {
       "aliases": [
         "bench"
       ],
       "description": "detail.bench",
+      "rating": 1
+    },
+    "sawhorse": {
+      "aliases": [
+        "sawhorse"
+      ],
+      "description": "detail.sawhorse",
       "rating": 1
     }
   }

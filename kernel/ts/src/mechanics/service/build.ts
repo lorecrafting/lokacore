@@ -22,7 +22,10 @@ import { assigned, value } from '../fact.ts';
 import { selected } from '../containment/stock.ts';
 import { applyStatus, cureOps, currentStatus } from '../status/shared.ts';
 
-type Build = Extract<ServiceDefinition['benefit'], { kind: 'build' }>;
+type Build = Pick<
+  Extract<ServiceDefinition['benefit'], { kind: 'build' }>,
+  'blueprint' | 'site' | 'direction'
+>; // a build service's or (S6) a recipe build step's
 const refused = (key: string) => ({
   code: 'invalid_state' as const,
   message: { key: key as TextKey },
@@ -46,7 +49,7 @@ export function unbuildable(world: World, b: Build, owner: CharacterId) {
 // The created row, then (S4) the blueprint's weathering on the new room. The room is known only
 // after hydrate, so the status is applied on a world that already knows it (compose admits a
 // holder created earlier in the same delta).
-function created(world: World, b: Build, owner: CharacterId, mint: Mint): DeltaOp[] {
+export function created(world: World, b: Build, owner: CharacterId, mint: Mint): DeltaOp[] {
   const origin = { kind: 'built', site: b.site, direction: b.direction, owner } as const;
   const identity = { id: mint() as EntityId, definition: b.blueprint, origin };
   const weathering = world.cartridge.blueprints?.[refString(b.blueprint)]?.weathering;

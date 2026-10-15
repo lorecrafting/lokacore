@@ -206,7 +206,7 @@ function advertise(
       ? talkRefused(world, actor, target, a.dialogue, steps) && 'invalid_state'
       : 'not_found');
   const refused = holds(world, actor, a.policy.root, { target, steps })
-    ? craftRefused(world, a.recipe, bodyOf(world, actor), steps) // a craft's refusal (hs-10)
+    ? craftRefused(world, a.recipe, actor, steps) // a craft's refusal (hs-10)
     : policyRefusal(a.recipe); // the command's refusal of a failed policy, with its reason
   const code =
     refused?.code ??
