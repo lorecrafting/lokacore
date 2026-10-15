@@ -1,0 +1,46 @@
+{
+  "api_version": "loka/v3",
+  "id": "build_sampler",
+  "version": "0.0.1",
+  "title": "Build Sampler",
+  "requires": {
+    "kernel_api": {
+      "at_least": "1.99",
+      "below": "2.0"
+    },
+    "content_schema": 1,
+    "rule_ir": 1,
+    "capabilities": {
+      "movement": 1,
+      "containment": 1,
+      "resource": 1,
+      "calendar": 1,
+      "fact": 1,
+      "policy": 1,
+      "service": 1,
+      "construction": 1,
+      "description_variant": 1,
+      "schedule": 1,
+      "status": 1,
+      "reaction": 1,
+      "death": 1
+    },
+    "client_features": []
+  },
+  "supported_profiles": [
+    "offline_private"
+  ],
+  "entry": "lane",
+  "time_policy": {
+    "profile": "real_elapsed",
+    "rate": 50
+  },
+  "calendar": {
+    "start": 25200
+  },
+  "world": {
+    "construction": {
+      "max_total": 1
+    }
+  }
+}

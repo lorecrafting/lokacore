@@ -54,6 +54,7 @@ export function composeJob(
   return { value: { ...row, status: 'completed' } };
 }
 
+// size: allow 43, one binding table per job kind (Built rooms S3: an order job may carry its owner)
 function bindingValid(op: Extract<DeltaOp, { op: 'job.schedule' }>) {
   if (
     op.crow_member_id !== undefined ||
@@ -63,13 +64,17 @@ function bindingValid(op: Extract<DeltaOp, { op: 'job.schedule' }>) {
   )
     return crowBindingValid(op);
   if (
-    (op.quest_instance_id === undefined &&
-      op.water_generation === undefined &&
-      op.job.kind !== 'reaction') !==
-      (op.actor_id === undefined) ||
+    // Built rooms S3: an order job may carry its owner (a build commission's).
+    (op.job.kind !== 'order' &&
+      (op.quest_instance_id === undefined &&
+        op.water_generation === undefined &&
+        op.job.kind !== 'reaction') !==
+        (op.actor_id === undefined)) ||
     (op.quest_instance_id !== undefined &&
       (op.job.kind !== 'quest' || op.encounter_id !== undefined)) ||
-    (op.job.kind === 'reaction' && op.encounter_id !== undefined)
+    (['reaction', 'order'].includes(op.job.kind) &&
+      op.actor_id !== undefined &&
+      op.encounter_id !== undefined)
   )
     return false;
   if (
@@ -129,7 +134,10 @@ function pendingJob(op: Extract<DeltaOp, { op: 'job.schedule' }>): Json {
     ...(op.quest_instance_id === undefined
       ? {}
       : { quest_instance_id: op.quest_instance_id, actor_id: op.actor_id }),
-    ...(op.job.kind === 'reaction' ? { actor_id: op.actor_id! } : {}), // FD1's stored actor
+    // FD1's stored actor; Built rooms S3: a build order's owner
+    ...((op.job.kind === 'reaction' || op.job.kind === 'order') && op.actor_id !== undefined
+      ? { actor_id: op.actor_id }
+      : {}),
     ...(op.sight === undefined ? {} : { sight: op.sight }),
     ...(op.bleed_body_id === undefined
       ? {}

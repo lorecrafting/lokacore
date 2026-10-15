@@ -188,14 +188,17 @@ function tagsOf(
 }
 
 // status_active's holder: the action's target, (status reader 1, row G3) the actor's body for self,
-// or a reaction's event subject for subject (reaction.ts sequence; none elsewhere).
+// or a reaction's event subject for subject (reaction.ts sequence; none elsewhere), or (Built rooms
+// S4, status reader 9) the actor's room for room: the only room a room variant is read in (placeView).
 function statusActive(
   world: World,
   actor: CharacterId,
   p: Extract<Policy, { op: 'status_active' }>,
   ctx: Ctx,
 ) {
-  const who = { self: bodyOf(world, actor), subject: ctx.subject, target: ctx.target }[p.subject];
+  const self = bodyOf(world, actor);
+  const room = self && world.state.containers[self];
+  const who = { self, subject: ctx.subject, target: ctx.target, room }[p.subject];
   return who !== undefined && !!currentStatus(world, who, p.status);
 }
 

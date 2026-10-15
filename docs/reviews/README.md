@@ -15,9 +15,17 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: recognition and earned titles (loka-kgd.146, rows W15 and FD9)](2026-10-15-loka-kgd.146-w15-fd9-review.md): **APPROVE WITH NOTES**
 - [Review: ask about a topic, kernel half (loka-kgd.144 FD7)](2026-10-15-loka-kgd.144-fd7-review.md): **APPROVE WITH NOTES**
 - [Review: witness ledger and reaction moves (loka-kgd.142 FD5, loka-kgd.22)](2026-10-15-loka-kgd.142-fd5-review.md): **APPROVE WITH NOTES**
+- [Second opinion (save and status rows only): Built rooms S4 (loka-kgd.109.3)](2026-10-15-loka-kgd.109.3-built-s4-save-second-opinion.md): **APPROVE WITH NOTES**
+- [Review: Built rooms S4, weather and mend (loka-kgd.109.3)](2026-10-15-loka-kgd.109.3-built-s4-review.md): **APPROVE WITH NOTES**
+- [Review: Built rooms S3, save second opinion (loka-kgd.109.2)](2026-10-15-loka-kgd.109.2-built-s3-save-second-opinion.md): **APPROVE**
+- [Review: Built rooms S3, time and timber (loka-kgd.109.2)](2026-10-15-loka-kgd.109.2-built-s3-review.md): **APPROVE**
+- [Review: Built rooms S1, blueprint and site contract (loka-kgd.109.1, construction@1, kernel_api 1.99)](2026-10-15-loka-kgd.109.1-built-s1-review.md): **APPROVE**
 - [Review: status re-applied inside one long wait (loka-j958, PR #388)](2026-10-15-loka-j958-review.md): **APPROVE WITH NOTES**
 - [Review: theft, fence and witnessed offense (loka-icr4, toolbox row 33)](2026-10-15-loka-icr4-theft-review.md): **APPROVE WITH NOTES**
+- [Review: Built rooms S2, save second opinion (loka-1q3n)](2026-10-15-loka-1q3n-built-s2-save-second-opinion.md): **APPROVE WITH NOTES**
+- [Review: Built rooms S2, raise the hut (loka-1q3n)](2026-10-15-loka-1q3n-built-s2-review.md): **APPROVE**
 - [Review: word bar S2 (loka-1lpq), GameView spell_words and speech.phrases](2026-10-15-loka-1lpq-wordbar-s2-review.md): **APPROVE**
+- [Review: Built rooms batch head (loka-kgd.109; S1-S4)](2026-10-15-built-batch-review.md): **APPROVE**
 - [Review: Realm seams batch (loka-kgd.150, PR #386)](2026-10-14-realm-seams-batch-review.md): **APPROVE**
 - [Review: two shops save fix, save second opinion (loka-kgd.149)](2026-10-14-m12-two-shops-second-opinion.md): **APPROVE**
 - [Review: two shops make cold reopen save_corrupt (loka-kgd.149)](2026-10-14-m12-two-shops-review.md): **APPROVE**

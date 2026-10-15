@@ -35,10 +35,10 @@ export function services(c: Obj): Diagnostic[] {
 }
 
 // Toolbox row 20b: a timed order's fact belongs to its commission alone; another entitlement
-// setting it would open an order with no inputs and no job.
+// setting it would open an order with no inputs and no job (Built rooms S3: or a build commission).
 function owned(c: Obj, out: Diagnostic[]) {
   const entries = Object.entries((c.services ?? {}) as Obj),
-    fact = (s: Obj) => s.benefit.kind === 'entitlement' && refString(s.benefit.fact);
+    fact = (s: Obj) => commission(s.benefit) && refString(s.benefit.fact);
   const owner = new Map(
     entries.filter(([, s]) => s.benefit.escrow?.ready_after).map(([r, s]) => [fact(s), r]),
   );
@@ -62,7 +62,7 @@ function definition(c: Obj, s: Obj, ref: string, check: Checks, out: Diagnostic[
     bad(out, `${at}.currency`);
   if (!npc?.services?.some((r: Obj) => refString(r as never) === ref)) bad(out, `${at}.provider`);
   const b = s.benefit;
-  if (b.kind === 'entitlement') {
+  if (commission(b)) {
     const fact = get(c, check, b.fact, 'fact', `${at}.benefit.fact`);
     if (
       fact &&
@@ -72,11 +72,14 @@ function definition(c: Obj, s: Obj, ref: string, check: Checks, out: Diagnostic[
     )
       bad(out, `${at}.benefit.fact`);
     if (b.escrow) escrow(c, b.escrow, `${at}.benefit.escrow`, check, out);
-  } else if (b.kind === 'repair') repair(c, b, at, check, out);
+    if (b.kind === 'build') build(c, b, at, check, out);
+  } else if (b.kind in sited) sited[b.kind as keyof typeof sited](c, b, at, check, out);
   else if (banks(b)) bank(c, s, at, check, out);
   else if (ordered(b)) {
     const commission = get(c, check, b.service, 'service', `${at}.benefit.service`);
-    if (commission && !commission.benefit.escrow?.ready_after) bad(out, `${at}.benefit.service`);
+    // Built rooms S3: only an order with an output (20b) can be claimed; a build raises its room.
+    const need = b.kind === 'claim' ? 'output' : 'ready_after';
+    if (commission && !commission.benefit.escrow?.[need]) bad(out, `${at}.benefit.service`);
   } else {
     const recovery = get(c, check, b.recovery, 'resource', `${at}.benefit.recovery`);
     if (recovery && recovery.key !== 'mv') bad(out, `${at}.benefit.recovery`);
@@ -84,10 +87,25 @@ function definition(c: Obj, s: Obj, ref: string, check: Checks, out: Diagnostic[
   }
 }
 
+const sited = { repair, build, mend };
+
 // The refusal texts a service needs, by benefit.
 function refusals(b: Obj) {
   const kind = b.kind;
   if (banks(b)) return { payment: 'service.unaffordable', funds: 'service.no_funds' };
+  if (kind === 'build')
+    return {
+      payment: 'service.unaffordable',
+      site: 'service.site_taken',
+      full: 'service.construction_full',
+      ...(b.escrow && { headroom: 'service.order_open', inputs: 'service.missing_inputs' }),
+    };
+  if (kind === 'mend')
+    return {
+      payment: 'service.unaffordable',
+      target: 'service.nothing_to_mend',
+      ...(b.escrow && { inputs: 'service.missing_inputs' }),
+    };
   if (ordered(b))
     return {
       payment: 'service.unaffordable',
@@ -179,6 +197,26 @@ function repair(c: Obj, b: Obj, at: string, check: Checks, out: Diagnostic[]) {
     bad(out, `${at}.benefit.fact`);
 }
 
+// Built rooms S2: the site is a room whose site lists both the direction and the blueprint.
+function build(c: Obj, b: Obj, at: string, check: Checks, out: Diagnostic[]) {
+  const blueprint = get(c, check, b.blueprint, 'blueprint', `${at}.benefit.blueprint`);
+  const room = get(c, check, b.site, 'room', `${at}.benefit.site`);
+  if (!room) return;
+  if (blueprint && !room.site?.blueprints.some((r: Obj) => same(r, b.blueprint)))
+    bad(out, `${at}.benefit.blueprint`);
+  if (!room.site?.directions.includes(b.direction)) bad(out, `${at}.benefit.direction`);
+}
+
+// Built rooms S4: the site lists the direction and some blueprint with a ruin to cure.
+function mend(c: Obj, b: Obj, at: string, check: Checks, out: Diagnostic[]) {
+  if (b.escrow) escrow(c, b.escrow, `${at}.benefit.escrow`, check, out);
+  const room = get(c, check, b.site, 'room', `${at}.benefit.site`);
+  if (!room) return;
+  if (!room.site?.directions.includes(b.direction)) bad(out, `${at}.benefit.direction`);
+  if (!room.site?.blueprints.some((r: Obj) => c.blueprints?.[refString(r as never)]?.ruin))
+    bad(out, `${at}.benefit.site`);
+}
+
 function stock(c: Obj, s: Obj, npc: Obj | undefined, at: string, check: Checks, out: Diagnostic[]) {
   const b = s.benefit;
   if (b.kind === 'meal') {
@@ -217,7 +255,8 @@ function beds(c: Obj, check: Checks, out: Diagnostic[]) {
         if (c.lock.capabilities.position !== 1 || c.lock.capabilities.service !== 1) bad(out, at);
       }
 }
-const ordered = (b: Obj) => b.kind === 'claim' || b.kind === 'cancel';
+const commission = (b: Obj) => b.kind === 'entitlement' || (b.kind === 'build' && !!b.fact),
+  ordered = (b: Obj) => b.kind === 'claim' || b.kind === 'cancel';
 const banks = (b: Obj) => b.kind === 'deposit' || b.kind === 'withdraw';
 const timed = (s: Obj) => ordered(s.benefit) || s.benefit.escrow?.ready_after !== undefined;
 const finite = (r: Obj | undefined): r is Obj => !!r && r.gain === 0 && !r.regen;

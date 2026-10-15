@@ -1,5 +1,5 @@
 import { accepted, rejected, type Rule } from '../../runtime/decision.ts';
-import { scheduled, transition } from './shared.ts';
+import { raised, scheduled, transition } from './shared.ts';
 
 export const decide: Rule<'service'> = (world, command, mint, steps) => {
   const result = transition(world, command.payload, steps);
@@ -9,6 +9,11 @@ export const decide: Rule<'service'> = (world, command, mint, steps) => {
       result.code === 'containment_cycle'
       ? { kind: 'fault', code: result.code }
       : rejected(result.code);
-  const ops = [...result.ops, ...scheduled(world, command.payload, result.service, mint)];
+  const { payload } = command;
+  const ops = [
+    ...result.ops,
+    ...scheduled(world, payload, result.service, mint),
+    ...raised(world, payload, result.service, mint),
+  ];
   return accepted(world, 'service_used', ops, [], [{ key: result.service.narration }]);
 };

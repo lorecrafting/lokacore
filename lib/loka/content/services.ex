@@ -1,24 +1,30 @@
-# size: allow 363, row 20a/20b/25 escrow orders and bank accounts check in the same service admission pass
+# size: allow 428, row 20a/20b/25 escrow orders, bank accounts and Built rooms S2-S4 builds and mends check in the same service admission pass
 defmodule Loka.Content.Services do
   @moduledoc "Checks finite immediate service declarations and their exact provider stock."
   import Loka.Content.Source, only: [diag: 2, diag: 3, diag: 4, at: 2, ref: 3]
   alias Loka.Content.{Position, Refs}
 
-  defp service_benefit(b, m) do
-    fields =
-      case b["kind"] do
-        k when k in ~w(entitlement repair) -> [{"fact", "fact"}]
-        k when k in ~w(claim cancel) -> [{"service", "service"}]
-        k when k in ~w(deposit withdraw) -> [{"account", "fact"}, {"vault", "npc"}]
-        "meal" -> [{"stock", "resource"}, {"recovery", "resource"}]
-        "drink" -> [{"vessel", "item"}, {"liquid", "liquid"}, {"recovery", "resource"}]
-      end
+  defp benefit_fields(b) do
+    case b["kind"] do
+      k when k in ~w(entitlement repair) -> [{"fact", "fact"}]
+      k when k in ~w(claim cancel) -> [{"service", "service"}]
+      k when k in ~w(deposit withdraw) -> [{"account", "fact"}, {"vault", "npc"}]
+      "build" -> [{"blueprint", "blueprint"}, {"site", "room"}] ++ fact_field(b)
+      "mend" -> [{"site", "room"}]
+      "meal" -> [{"stock", "resource"}, {"recovery", "resource"}]
+      "drink" -> [{"vessel", "item"}, {"liquid", "liquid"}, {"recovery", "resource"}]
+    end
+  end
 
-    Enum.reduce(fields, b, fn {field, kind}, result ->
+  defp service_benefit(b, m) do
+    Enum.reduce(benefit_fields(b), b, fn {field, kind}, result ->
       Map.update!(result, field, &ref(&1, kind, m))
     end)
     |> escrow_refs(m)
   end
+
+  defp fact_field(%{"fact" => _}), do: [{"fact", "fact"}]
+  defp fact_field(_), do: []
 
   defp escrow_refs(%{"escrow" => e} = b, m) do
     items = Enum.map(e["items"], &ref(&1, "item", m))
@@ -75,13 +81,14 @@ defmodule Loka.Content.Services do
   defp bank?(b), do: b["kind"] in ~w(deposit withdraw)
 
   # Toolbox row 20b: a timed order's fact belongs to its commission alone; another entitlement
-  # setting it would open an order with no inputs and no job.
+  # setting it would open an order with no inputs and no job (Built rooms S3: or a build commission).
   defp owned(declared) do
     owners =
       for {rel, %{"benefit" => %{"escrow" => %{"ready_after" => _}} = b}} <- declared,
           do: {b["fact"], rel}
 
-    for {rel, %{"benefit" => %{"kind" => "entitlement", "fact" => f}}} <- declared,
+    for {rel, %{"benefit" => %{"kind" => k, "fact" => f}}} <- declared,
+        k in ~w(entitlement build),
         Enum.any?(owners, fn {o, owner} -> o == f and owner != rel end),
         do: bad(at(rel, ["benefit", "fact"]))
   end
@@ -133,6 +140,14 @@ defmodule Loka.Content.Services do
       unresolved(a, "fact", at(rel, ["benefit", "account"]), m, defs) ++
         unresolved(v, "npc", at(rel, ["benefit", "vault"]), m, defs)
 
+  defp benefit_refs(rel, %{"kind" => "build", "blueprint" => b, "site" => r}, m, defs),
+    do:
+      unresolved(b, "blueprint", at(rel, ["benefit", "blueprint"]), m, defs) ++
+        unresolved(r, "room", at(rel, ["benefit", "site"]), m, defs)
+
+  defp benefit_refs(rel, %{"kind" => "mend", "site" => r}, m, defs),
+    do: unresolved(r, "room", at(rel, ["benefit", "site"]), m, defs)
+
   defp benefit_refs(_, _, _, _), do: []
 
   # Toolbox row 20a: distinct items held to a room; no shop offer (commerce save reconciles offer
@@ -173,6 +188,8 @@ defmodule Loka.Content.Services do
       end
   end
 
+  # Built rooms S3: a build commission has ready_after and no output.
+  defp output(path, %{"ready_after" => _}, m, _), do: schedule(path, m)
   defp output(_, _, _, _), do: []
 
   defp inputs(items, path, m, defs) do
@@ -231,6 +248,16 @@ defmodule Loka.Content.Services do
   defp reasons(%{"kind" => k}) when k in ~w(deposit withdraw),
     do: ~w(service.unaffordable service.no_funds)
 
+  defp reasons(%{"kind" => "build"} = b),
+    do:
+      ~w(service.unaffordable service.site_taken service.construction_full) ++
+        if(b["escrow"], do: ~w(service.order_open service.missing_inputs), else: [])
+
+  defp reasons(%{"kind" => "mend"} = b),
+    do:
+      ~w(service.unaffordable service.nothing_to_mend) ++
+        if(b["escrow"], do: ~w(service.missing_inputs), else: [])
+
   defp reasons(_), do: ~w(service.unaffordable service.full_mv service.sold_out)
 
   defp benefit(%{"kind" => "entitlement", "fact" => r}, _, _, m, defs) do
@@ -244,14 +271,12 @@ defmodule Loka.Content.Services do
     [{r in named, ["benefit", "fact"]}]
   end
 
-  # Toolbox row 20b: claim and cancel name a timed commission.
+  # Toolbox row 20b: claim and cancel name a timed commission; Built rooms S3: a claim one with
+  # an output (a build raises its room instead).
   defp benefit(%{"kind" => k, "service" => r}, _, _, m, defs) when k in ~w(claim cancel) do
     c = resolved(r, "service", m, defs)
-
-    [
-      {c == %{} or is_map_key(c["benefit"]["escrow"] || %{}, "ready_after"),
-       ["benefit", "service"]}
-    ]
+    need = if k == "claim", do: "output", else: "ready_after"
+    [{c == %{} or is_map_key(c["benefit"]["escrow"] || %{}, need), ["benefit", "service"]}]
   end
 
   # Toolbox row 25: the account is a bounded int player fact from 0 no other engine writer owns;
@@ -270,10 +295,50 @@ defmodule Loka.Content.Services do
     ]
   end
 
+  # Built rooms S2: a resolved site lists the direction and a resolved blueprint.
+  defp benefit(%{"kind" => "build", "blueprint" => b, "site" => r} = build, _, _, m, defs) do
+    case Refs.resolve(r, "room", m, defs) do
+      {_, _, room} ->
+        site = room["site"] || %{}
+
+        [
+          {resolved(b, "blueprint", m, defs) == %{} or b in (site["blueprints"] || []),
+           ["benefit", "blueprint"]},
+          {build["direction"] in (site["directions"] || []), ["benefit", "direction"]}
+        ]
+
+      _ ->
+        []
+    end ++ build_fact(build, m, defs)
+  end
+
+  # Built rooms S4: a resolved site lists the direction and some blueprint with a ruin to cure.
+  defp benefit(%{"kind" => "mend", "site" => r} = mend, _, _, m, defs) do
+    case Refs.resolve(r, "room", m, defs) do
+      {_, _, room} ->
+        site = room["site"] || %{}
+        ruin? = &(resolved(&1, "blueprint", m, defs)["ruin"] != nil)
+
+        [
+          {mend["direction"] in (site["directions"] || []), ["benefit", "direction"]},
+          {Enum.any?(site["blueprints"] || [], ruin?), ["benefit", "site"]}
+        ]
+
+      _ ->
+        []
+    end
+  end
+
   defp benefit(b, npc, s, m, defs) do
     recovery = resolved(b["recovery"], "resource", m, defs)
     [{recovery["key"] == "mv", ["benefit", "recovery"]}] ++ stock(b, npc, s, m, defs)
   end
+
+  # Built rooms S3: a build commission's fact is an entitlement's (a player bool from false).
+  defp build_fact(%{"fact" => r}, m, defs),
+    do: benefit(%{"kind" => "entitlement", "fact" => r}, nil, nil, m, defs)
+
+  defp build_fact(_, _, _), do: []
 
   defp account?(%{"value_type" => t} = f, a, m, defs),
     do:

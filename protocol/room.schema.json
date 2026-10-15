@@ -500,6 +500,40 @@
         "cues": {
           "$ref": "entity.schema.json#/$defs/Cues"
         },
+        "site": {
+          "description": "Built rooms S1 (kernel_api at least 1.99; construction@1; cartridge.md Blueprint and site declarations): where a structure may be built from this room. directions, the compass directions a built room may open on, none an authored exit of this room (SITE_EXIT_CONFLICT); blueprints, the BlueprintDefinitions that may be built here (UNRESOLVED_REFERENCE otherwise).",
+          "type": "object",
+          "properties": {
+            "directions": {
+              "type": "array",
+              "items": {
+                "enum": [
+                  "north",
+                  "south",
+                  "east",
+                  "west",
+                  "up",
+                  "down"
+                ]
+              },
+              "minItems": 1,
+              "maxItems": 6
+            },
+            "blueprints": {
+              "type": "array",
+              "items": {
+                "$ref": "identity.schema.json#/$defs/DefinitionRef"
+              },
+              "minItems": 1,
+              "maxItems": 16
+            }
+          },
+          "required": [
+            "directions",
+            "blueprints"
+          ],
+          "additionalProperties": false
+        },
         "locks": {
           "description": "Toolbox row G7 (kernel_api at least 1.78; mechanics.md Access locks): enter, the policy the mover must hold to come into this room, read by movementPlan after the exit's traverse lock; failing it refuses permission_denied. Read with no target.",
           "type": "object",

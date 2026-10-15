@@ -7,7 +7,7 @@ import { diag, step, type Obj } from './cartridge_refs.ts';
 import { refString } from '../runtime/decision.ts';
 
 type Named = (r: Obj, kind: string, path: string) => void;
-const OPPOSITE: Readonly<Record<string, string>> = {
+export const OPPOSITE: Readonly<Record<string, string>> = {
   north: 'south',
   south: 'north',
   east: 'west',

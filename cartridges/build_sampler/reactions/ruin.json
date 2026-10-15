@@ -1,0 +1,12 @@
+{
+  "on": {
+    "event": "status_expired",
+    "status": "weathering"
+  },
+  "apply": [
+    {
+      "op": "status.apply",
+      "status": "ruin"
+    }
+  ]
+}

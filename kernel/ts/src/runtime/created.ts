@@ -1,11 +1,14 @@
-import { creationValid } from '../foundation/creation.ts';
+import { createdKind, creationValid } from '../foundation/creation.ts';
 // Derived corpse definitions are rebuilt from durable identity and the pinned cartridge only.
 import { key, same } from '../foundation/compose.ts';
-import type { EntityId } from '../contracts.gen.ts';
+import type { DefinitionRef, EntityId, Key, RoomDefinition } from '../contracts.gen.ts';
+import { OPPOSITE } from '../content/cartridge_barriers.ts';
 import { refString, type Entity, type State, type World } from './decision.ts';
 
 type Identity = NonNullable<State['created']>[string];
 type Draft = {
+  rooms?: Record<string, RoomDefinition>;
+  roomIds?: Record<string, EntityId>;
   entities?: Record<string, Entity>;
   knownEntities?: Record<string, World['knownEntities'][string]>;
   capacities?: Record<string, number>;
@@ -36,6 +39,7 @@ export function hydrate(world: World, state: State, loading = false): World | un
     }
     if (!derive(world, state, id, identity, draft)) return undefined;
   }
+  if ((draft.rooms || loading) && !builtValid(world, state)) return undefined;
   const next = { ...world, state, ...draft };
   if (
     (draft.entities || (loading && (world.cartridge.world?.death || world.consumed))) &&
@@ -69,9 +73,8 @@ function derive(world: World, state: State, id: string, identity: Identity, draf
     })
   )
     return false;
-  const member =
-    identity.origin.kind === 'spawned' &&
-    (identity.origin.role === 'hound' || identity.origin.role === 'deer');
+  if (identity.origin.kind === 'built') return raise(world, id, identity, draft);
+  const member = createdKind(identity as never) === 'npc';
   const template = member
     ? world.cartridge.npcs?.[refString(identity.definition)]
     : world.cartridge.items?.[refString(identity.definition)];
@@ -133,6 +136,46 @@ function houndValid(world: World, state: State, id: string, identity: Identity, 
   draft.entityResourceSpecs ??= { ...world.entityResourceSpecs };
   draft.entityResourceSpecs[hpTarget] = spec.hp;
   return true;
+}
+
+type Built = Extract<Identity['origin'], { kind: 'built' }>;
+// Built rooms S2: the room is the blueprint, entered from its site by the origin's direction.
+function raise(world: World, id: string, identity: Identity, draft: Draft): boolean {
+  const { site, direction } = identity.origin as Built;
+  const blueprint = world.cartridge.blueprints?.[refString(identity.definition)];
+  const declared = world.cartridge.rooms[refString(site)]?.site;
+  const siteId = world.roomIds[refString(site)];
+  if (
+    !blueprint ||
+    !siteId ||
+    !declared?.directions.includes(direction) ||
+    !declared.blueprints.some((b) => same(b, identity.definition))
+  )
+    return false;
+  // A DefinitionRef key is [a-z][a-z0-9_]*, so the room key spells the uuid with underscores.
+  const room = `built_${id.replaceAll('-', '_')}` as Key;
+  const ref: DefinitionRef = { ...identity.definition, kind: 'room', key: room };
+  draft.rooms ??= { ...world.rooms };
+  draft.roomIds ??= { ...world.roomIds };
+  draft.knownEntities ??= { ...world.knownEntities };
+  const at = draft.rooms[siteId];
+  draft.rooms[siteId] = { ...at, exits: { ...at.exits, [direction]: { to: ref } } };
+  draft.rooms[id] = { ...blueprint, key: room, exits: { [OPPOSITE[direction]]: { to: site } } };
+  draft.roomIds[refString(ref)] = id as EntityId;
+  draft.knownEntities[id] = { kind: 'room' };
+  return true;
+}
+
+// Over every built row of the state, not only the changed ones: one per site direction, at most
+// world.construction.max_total.
+function builtValid(world: World, state: State): boolean {
+  const sites = Object.values(state.created ?? {}).flatMap((i) =>
+    i?.origin.kind === 'built' ? [key([i.origin.site, i.origin.direction])] : [],
+  );
+  return (
+    new Set(sites).size === sites.length &&
+    sites.length <= (world.cartridge.world?.construction?.max_total ?? 0)
+  );
 }
 
 function itemValid(world: World, state: State, id: string, identity: Identity, draft: Draft) {

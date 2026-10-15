@@ -2,12 +2,21 @@ defmodule Loka.Core.Creation do
   @moduledoc "Pinned corpse and population provenance with initial placement guards."
   alias Loka.Core.{Canonical, Contracts}
 
-  def initial_pair?(op, next) when is_map(next),
-    do:
-      next["op"] == "entity.transfer" and next["entity_id"] == op["identity"]["id"] and
-        next["source_id"] == nil and next["writer_group"] == op["writer_group"]
+  @doc "The kind a created identity hydrates as (TS runtime/created.ts): built -> room, a spawned hound or deer -> npc, else item."
+  def kind(%{"origin" => %{"kind" => "built"}}), do: "room"
+  def kind(%{"origin" => %{"kind" => "spawned", "role" => r}}) when r in ~w(hound deer), do: "npc"
+  def kind(_), do: "item"
 
-  def initial_pair?(_, _), do: false
+  # A create is followed by its first placement, except a built room, which is never placed.
+  def initial_pair?(op, next) do
+    placed =
+      is_map(next) and next["op"] == "entity.transfer" and
+        next["entity_id"] == op["identity"]["id"]
+
+    if op["identity"]["origin"]["kind"] == "built",
+      do: not placed,
+      else: placed and next["source_id"] == nil and next["writer_group"] == op["writer_group"]
+  end
 
   def valid?(identity, state) do
     Contracts.validate("EntityIdentity", identity) == :ok and
@@ -19,7 +28,22 @@ defmodule Loka.Core.Creation do
 
   defp provenance?(identity, state) do
     origin = identity["origin"]
-    if origin["kind"] == "spawned", do: spawned?(identity, state), else: death?(identity, state)
+
+    case origin["kind"] do
+      "spawned" -> spawned?(identity, state)
+      "built" -> built?(identity, state)
+      _ -> death?(identity, state)
+    end
+  end
+
+  # Built rooms S2: a blueprint raised by a known character (some body's owner).
+  defp built?(identity, state) do
+    owner = identity["origin"]["owner"]
+
+    identity["definition"]["kind"] == "blueprint" and
+      Enum.any?(section(state, "known_entities"), fn {_, e} ->
+        e["kind"] == "body" and e["owner_id"] == owner
+      end)
   end
 
   defp spawned?(identity, state) do
