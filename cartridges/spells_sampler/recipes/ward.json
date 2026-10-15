@@ -1,7 +1,7 @@
 {
   "label": "spell.ward",
   "aliases": ["ward"],
-  "target": { "kind": "spell", "word": "ward" },
+  "target": { "kind": "spell", "word": "ward", "learned": "ward_taught" },
   "priority": 0,
   "policy": {
     "policy_version": 1,

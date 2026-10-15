@@ -7,7 +7,7 @@ import type {
   Key,
 } from '../../packages/game-view/session.ts';
 import type { Button, DetailLine } from './presenter.ts';
-import { commandOf } from './buttons.ts';
+import { commandOf, WORDS } from './buttons.ts';
 export { buttonsOf } from './buttons.ts';
 import { reason, SENTENCE } from './words.ts';
 import { things } from './item-pages.ts';
@@ -104,7 +104,8 @@ const OWN = [
   'raise_attribute', // the Character page's own cards
 ];
 
-export function group(buttons: Button[]) {
+export function group(all: Button[]) {
+  const buttons = all.filter((b) => !WORDS.includes(b.action_key)); // the Word block's chips are apart
   const dir = (b: Button) => (b.input as { direction?: string }).direction;
   const aimed = (b: Button) => b.target_ids.length > 0;
   return {
@@ -129,6 +130,7 @@ export function group(buttons: Button[]) {
         !OWN.includes(b.action_key) &&
         b.action_key !== 'scan',
     ),
+    word: all.filter((b) => WORDS.includes(b.action_key)),
     on: (id: string) =>
       buttons.filter((b) => (b.detail_id ? b.detail_id === id : b.target_ids.includes(id))),
   };
@@ -138,7 +140,8 @@ export const plain = (s: string) => s.replace(/\[([^\]]*)\]\([^)]*\)/g, '$1');
 type Offered =
   | GameView['exits'][number]
   | GameView['actions'][number]
-  | NonNullable<GameView['choice']>['choices'][number];
+  | NonNullable<GameView['choice']>['choices'][number]
+  | NonNullable<GameView['spell_words']>[number];
 export const why = (e: Offered, text: (key: string) => string) =>
   e.available ? '' : e.reason.message ? text(e.reason.message.key) : reason(e.reason.code);
 
@@ -265,7 +268,9 @@ export function actionContext(
     b.target_ids,
     b.detail_id,
     Object.entries(b.input)
+      // A typed answer or Say word keeps the offered button's context (and its live token).
       .filter(([key]) => !(b.action_key === 'choose' && key === 'answer'))
+      .filter(([key]) => !(b.action_key === 'say' && key === 'word'))
       .sort(([a], [z]) => a.localeCompare(z)),
     b.detail_id?.startsWith('dream:') ? dreamAt(view, b.detail_id.slice('dream:'.length)) : null,
     view.actor_id,

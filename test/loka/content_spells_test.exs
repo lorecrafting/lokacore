@@ -57,4 +57,42 @@ defmodule Loka.ContentSpellsTest do
     assert {:error, diags} = Loka.ContentSource.compile(dir, room)
     assert pairs(diags) == [{"UNRESOLVED_REFERENCE", "rooms/tower.actions[0].actions[0]"}]
   end
+
+  # Breaks (word bar S2): the compiler accepts a spell with no learned fact, one naming a fact this
+  # cartridge lacks, a non-bool one, an instance or per_subject one, or a spell below kernel_api 1.98 (the TS loader refuses them
+  # too; spells.test.ts).
+  test "a spell's learned names a bool player fact of this cartridge; spells need 1.98" do
+    dir = Loka.ContentSource.copy(@dir)
+    learned = &{"recipes/ward.json", fn r -> update_in(r, ["target"], &1) end}
+
+    fact = fn key, spec ->
+      [
+        learned.(&Map.put(&1, "learned", key)),
+        {"facts.json",
+         &put_in(&1, ["facts", key], Map.merge(%{"version" => 1, "meaning" => "A fact."}, spec))}
+      ]
+    end
+
+    bool = %{"value_type" => %{"type" => "bool", "default" => false}}
+
+    for {edits, expected} <- [
+          {[learned.(&Map.delete(&1, "learned"))],
+           {"SCHEMA_VIOLATION", "recipes/ward.target.learned"}},
+          {[learned.(&Map.put(&1, "learned", "nope"))],
+           {"UNRESOLVED_REFERENCE", "recipes/ward.target.learned"}},
+          {fact.("count", %{
+             "value_type" => %{"type" => "int", "default" => 0},
+             "scopes" => ["player"]
+           }), {"FACT_TYPE_MISMATCH", "recipes/ward.target.learned"}},
+          {fact.("world", Map.put(bool, "scopes", ["instance"])),
+           {"FACT_SCOPE_UNSUPPORTED", "recipes/ward.target.learned"}},
+          {fact.("pair", Map.merge(bool, %{"scopes" => ["player"], "per_subject" => true})),
+           {"FACT_SCOPE_UNSUPPORTED", "recipes/ward.target.learned"}},
+          {[{"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.97")}],
+           @floor}
+        ] do
+      assert {:error, diags} = Loka.ContentSource.compile(dir, edits)
+      assert pairs(diags) == [expected]
+    end
+  end
 end

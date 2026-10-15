@@ -215,7 +215,22 @@
     {
       "floor": "1.51",
       "below": "1.50",
-      "source": "cartridges/spells_sampler",
+      "source": "cartridges/levelling_sampler",
+      "feature": "a level_compare policy leaf",
+      "edits": [
+        [
+          "quests/cull.json",
+          [
+            "offer",
+            "policy",
+            "root"
+          ],
+          {
+            "op": "level_compare",
+            "at_least": 2
+          }
+        ]
+      ],
       "compiler": [
         "KERNEL_API_RANGE_INVALID",
         "cartridge.requires.kernel_api.at_least"
@@ -270,19 +285,6 @@
       "compiler": [
         "KERNEL_API_RANGE_INVALID",
         "cartridge.requires.kernel_api"
-      ],
-      "loader": [
-        "KERNEL_API_RANGE_INVALID",
-        ".cartridge.manifest.requires.kernel_api.at_least"
-      ]
-    },
-    {
-      "floor": "1.55",
-      "below": "1.54",
-      "source": "cartridges/spell_effects_sampler",
-      "compiler": [
-        "KERNEL_API_RANGE_INVALID",
-        "cartridge.requires.kernel_api.at_least"
       ],
       "loader": [
         "KERNEL_API_RANGE_INVALID",
@@ -840,6 +842,34 @@
       "below": "1.96",
       "source": "cartridges/identity_sampler",
       "feature": "world.identity",
+      "compiler": [
+        "KERNEL_API_RANGE_INVALID",
+        "cartridge.requires.kernel_api.at_least"
+      ],
+      "loader": [
+        "KERNEL_API_RANGE_INVALID",
+        ".cartridge.manifest.requires.kernel_api.at_least"
+      ]
+    },
+    {
+      "floor": "1.98",
+      "below": "1.97",
+      "source": "cartridges/spells_sampler",
+      "feature": "a spell's learned",
+      "compiler": [
+        "KERNEL_API_RANGE_INVALID",
+        "cartridge.requires.kernel_api.at_least"
+      ],
+      "loader": [
+        "KERNEL_API_RANGE_INVALID",
+        ".cartridge.manifest.requires.kernel_api.at_least"
+      ]
+    },
+    {
+      "floor": "1.98",
+      "below": "1.97",
+      "source": "cartridges/speech_sampler",
+      "feature": "speech.phrases",
       "compiler": [
         "KERNEL_API_RANGE_INVALID",
         "cartridge.requires.kernel_api.at_least"

@@ -10,12 +10,14 @@ of closed work are deleted once their lesson is folded, and linked by permalink
 Reviews before R2 live in the [legacy repository](https://github.com/lorecrafting/lokacore-v2-legacy)
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
+- [Review: word bar batch head (loka-x6t.39: S1 loka-jsqq, S2 loka-1lpq, S3 loka-a9pn)](2026-10-15-wordbar-batch-review.md): **APPROVE WITH NOTES**
 - [Review: mechanics batch M13 head (cross-row interactions)](2026-10-15-m13-batch-review.md): **APPROVE**
 - [Review: recognition and earned titles (loka-kgd.146, rows W15 and FD9)](2026-10-15-loka-kgd.146-w15-fd9-review.md): **APPROVE WITH NOTES**
 - [Review: ask about a topic, kernel half (loka-kgd.144 FD7)](2026-10-15-loka-kgd.144-fd7-review.md): **APPROVE WITH NOTES**
 - [Review: witness ledger and reaction moves (loka-kgd.142 FD5, loka-kgd.22)](2026-10-15-loka-kgd.142-fd5-review.md): **APPROVE WITH NOTES**
 - [Review: status re-applied inside one long wait (loka-j958, PR #388)](2026-10-15-loka-j958-review.md): **APPROVE WITH NOTES**
 - [Review: theft, fence and witnessed offense (loka-icr4, toolbox row 33)](2026-10-15-loka-icr4-theft-review.md): **APPROVE WITH NOTES**
+- [Review: word bar S2 (loka-1lpq), GameView spell_words and speech.phrases](2026-10-15-loka-1lpq-wordbar-s2-review.md): **APPROVE**
 - [Review: Realm seams batch (loka-kgd.150, PR #386)](2026-10-14-realm-seams-batch-review.md): **APPROVE**
 - [Review: two shops save fix, save second opinion (loka-kgd.149)](2026-10-14-m12-two-shops-second-opinion.md): **APPROVE**
 - [Review: two shops make cold reopen save_corrupt (loka-kgd.149)](2026-10-14-m12-two-shops-review.md): **APPROVE**

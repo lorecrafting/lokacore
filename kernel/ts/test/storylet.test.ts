@@ -184,7 +184,19 @@ test('the loader refuses storylets below 1.92, unknown rooms, weight 0 and half-
   // Only a storylet recipe may start an unplaced scene.
   const beckons = 'storylet_sampler@0.0.1:recipe/stranger_beckons';
   assert.deepEqual(
-    refused((c) => (c.recipes[beckons].target = { kind: 'spell', word: 'lux' })),
+    refused(
+      (c) =>
+        (c.recipes[beckons].target = {
+          kind: 'spell',
+          word: 'lux',
+          learned: {
+            cartridge_id: 'storylet_sampler',
+            cartridge_version: '0.0.1',
+            kind: 'fact',
+            key: 'robbed',
+          },
+        }),
+    ),
     ['SCHEMA_VIOLATION', `.cartridge.scenes["${scene}"].on`],
   );
 });

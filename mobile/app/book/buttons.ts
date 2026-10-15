@@ -101,9 +101,7 @@ export function buttonsOf(v: GameView, label: Say, text: Say): Press[] {
     })),
     ...dreamButtons(v, label),
     ...shopButtons(v, text),
-    ...askButtons(v, text),
-    ...serviceButtons(v, text),
-    ...transportButtons(v, text),
+    ...[askButtons, wordButtons, serviceButtons, transportButtons].flatMap((f) => f(v, text)),
     ...asked(v, label),
   ];
 }
@@ -134,6 +132,40 @@ const askButtons = (v: GameView, text: Say): Press[] =>
       ),
   );
 
+// The Word block's chips (word bar S3): each phrase said, whispered to each NPC offering whisper
+// and shouted, and each castable spell word; only while no combat, scene or conversation is open.
+export const WORDS = ['say', 'whisper', 'shout', 'cast'];
+export const wordless = (v: GameView) => Boolean(v.combat || v.scene || v.choice);
+// The spell words the Word block shows: none unless Cast is offered here.
+export const castWords = (v: GameView) =>
+  !wordless(v) && v.actions.some((a) => a.action_key === 'cast') ? (v.spell_words ?? []) : [];
+function wordButtons(v: GameView, text: Say): Press[] {
+  if (wordless(v)) return [];
+  const offered = (key: string) => v.actions.some((a) => a.action_key === key && a.available);
+  const chip = (key: string, word: string, to?: { id: string; name: string }) => ({
+    label: `${word}, ${to ? `whisper to ${text(to.name)}` : key}`,
+    action_key: key,
+    target_ids: to ? [to.id] : [],
+    input: { word },
+  });
+  const phrases = v.phrases ?? [];
+  return [
+    // First, the keyboard's Say without a word: the live twin of every typed word (actionContext).
+    ...(offered('say')
+      ? [{ ...chip('say', ''), input: {} }, ...phrases.map((w) => chip('say', w))]
+      : []),
+    ...v.entities.flatMap((e) =>
+      e.actions.some((a) => a.action_key === 'whisper' && a.available)
+        ? phrases.map((w) => chip('whisper', w, e))
+        : [],
+    ),
+    ...(offered('shout') ? phrases.map((w) => chip('shout', w)) : []),
+    ...castWords(v)
+      .filter((s) => s.available)
+      .map((s) => chip('cast', s.word)),
+  ];
+}
+
 // The place's own actions, then a scene's Continue.
 function placeButtons(v: GameView, button: ToButton) {
   const place = v.actions.filter(
@@ -159,12 +191,20 @@ function heldButtons(
 ) {
   return projected.flatMap((e) =>
     e.actions
-      .filter((a) => a.available && !['give', 'ask', 'whisper'].includes(a.action_key)) // ponytail: give waits for a recipient selector, whisper for word bar S3 (loka-a9pn); ask is askButtons
+      .filter((a) => a.available && !['give', 'ask', 'whisper'].includes(a.action_key)) // ponytail: give waits for a recipient selector; whisper is wordButtons, ask is askButtons
       .map((a) => {
+        // A use pair (G4) lists [target, tool]: this page's item is the tool, so name the target
+        // and keep the card on this page (detail_id), not the target's.
+        if (a.target_ids?.[1] === e.id)
+          return {
+            ...button(a, ` ${text(names.get(a.target_ids[0]!) ?? '')}`),
+            detail_id: e.id,
+          };
         const destination = a.target_ids?.[1] && names.get(a.target_ids[1]);
+        const join = commandOf(a) === 'refuel' ? 'from' : commandOf(a) === 'pour' ? 'into' : 'in';
         const offered = button(
           a,
-          ` ${text(e.name)}${destination ? ` ${commandOf(a) === 'refuel' ? 'from' : commandOf(a) === 'pour' ? 'into' : 'in'} ${text(destination)}` : ''}`,
+          ` ${text(e.name)}${destination ? ` ${join} ${text(destination)}` : ''}`,
           e.id,
         );
         return a.action_key === 'bandage' && v.bleeding

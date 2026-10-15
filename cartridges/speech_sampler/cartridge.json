@@ -5,7 +5,7 @@
   "title": "Speech Sampler",
   "requires": {
     "kernel_api": {
-      "at_least": "1.48",
+      "at_least": "1.98",
       "below": "2.0"
     },
     "content_schema": 1,
@@ -24,5 +24,8 @@
   "supported_profiles": [
     "offline_private"
   ],
-  "entry": "square"
+  "entry": "square",
+  "speech": {
+    "phrases": ["ward", "help", "hello"]
+  }
 }
