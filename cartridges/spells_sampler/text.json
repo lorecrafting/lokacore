@@ -17,7 +17,7 @@
   "narration.trace_sigil": "You trace the sigil; the word of warding settles in your mind.",
   "spell.lux": "Lux",
   "spell.ward": "Ward",
-  "reason.ward": "Needs level 2",
+  "reason.ward": "Needs level 2 and wisdom 11",
   "spell.noctis": "Noctis",
   "narration.lux": "The ash flares and a pale light hangs in the air.",
   "narration.ward": "A faint ward shimmers around you.",
