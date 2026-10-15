@@ -462,7 +462,11 @@
         "inventory"
        ]
       },
-      "input": []
+      "input": [],
+      "target_ids": [
+       "48a8dc05-4012-86d8-9d24-e68f2d7317ac",
+       "bea306fb-2b58-847c-a4e0-045f9d13b739"
+      ]
      }
     ]
    },
@@ -495,7 +499,11 @@
         "inventory"
        ]
       },
-      "input": []
+      "input": [],
+      "target_ids": [
+       "b8ae5599-3dd8-86ef-968d-8c22d9b3fe56",
+       "bea306fb-2b58-847c-a4e0-045f9d13b739"
+      ]
      },
      {
       "available": true,

@@ -568,7 +568,11 @@
         "inventory"
        ]
       },
-      "input": []
+      "input": [],
+      "target_ids": [
+       "13951eb1-f988-89b1-9bf2-a9fb73caa1bc",
+       "ee88876f-e173-89bf-b354-fa9b2ddb3f0b"
+      ]
      }
     ]
    }

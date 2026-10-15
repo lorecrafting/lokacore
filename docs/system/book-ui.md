@@ -371,7 +371,7 @@ Other-player presence requires a real projection and UI scope; no fabricated pla
 Attack/skill controls wait until GameView offers them; there are no placeholders or invented
 character data. Reading-time safety and interruption integration remains
 future work under the [reading-time decision](../decisions/owner-decision-reading-time-2026-10-03.md).
-Preserve genuine errors and meaningful history
+A refusal reads as the kernel reports it: preserve genuine errors and meaningful history
 rather than hiding errors or clearing same-room history. Whisper needs a word, so the NPC page offers no Whisper card; whispering is the [Word bar](#word-bar)'s. Carries remain in the [roadmap](../ROADMAP.md). Further cosmetic polish is deferred under the [C1 UI-deferral record](../decisions/owner-decision-c1-gate-ui-deferral-2026-10-03.md).
 
 ## Combat interaction
