@@ -77,9 +77,10 @@ export function runReplenish(
 
 /**
  * Homestead hs-1: a reaction's replenish.run step, one run of the entry's move body and no job,
- * each item in the group an earlier write of the advance gave it (row 41's join) or the root
- * command's group (`roots`), else `group`. ponytail: it reads world state, not the rule's earlier
- * `ops`, so an item.move of the same items in one rule picks the same items; upgrade if needed.
+ * each item in the root command's group if the root moved it (`roots`; a status holder's group
+ * is no container write), else an earlier write's group (row 41's join), else `group`. ponytail:
+ * it reads world state, not the rule's earlier `ops`, so an item.move of the same items in one
+ * rule picks the same items; upgrade if needed.
  */
 export function replenishStep(
   world: World,
@@ -90,7 +91,7 @@ export function replenishStep(
   roots?: ReadonlyMap<string, number>,
 ) {
   return transfers(world, key, steps, (item) => {
-    const writer_group = holders.get(item) ?? roots?.get(item) ?? group;
+    const writer_group = roots?.get(item) ?? holders.get(item) ?? group;
     holders.set(item, writer_group);
     return writer_group;
   });

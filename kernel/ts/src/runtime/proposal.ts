@@ -1,6 +1,6 @@
 import { enteredActors, knowledgeLast, record } from '../mechanics/knowledge/shared.ts';
 import { vary } from '../mechanics/variety.ts';
-// size: allow 344, typed quest reactions, deadline pairing and group merging share FIFO admission
+// size: allow 346, typed quest reactions, deadline pairing and group merging share FIFO admission
 // Proposal admission, FIFO composition and adoption (04 §5.1-§5.4); runtime/world.ts routes commands here.
 import { populationDeadlinePairs } from './proposal_deadlines.ts';
 import { apply } from './apply.ts';
@@ -55,7 +55,9 @@ type P = {
   rng: World['state']['rng'];
   narration: Text[];
   holders: Map<string, number>; // each status holder's, reaction fact row's writer group (G3)
-  roots: ReadonlyMap<string, number>; // each item the root command moved: its writer group (hs-1)
+  // Each item the root command moved: its writer group (hs-1). ponytail: merge and joinEarlier do
+  // not relabel it; pass it to their maps once a root command both moves an item and advances time.
+  roots: ReadonlyMap<string, number>;
   limit?: Limit | undefined; // set only just before a budget fault returns
 };
 export const BUDGET = { kind: 'fault', code: 'budget_exceeded' } as Admitted;

@@ -292,3 +292,27 @@ test('two runs on one event move the fish out and back in one wait', () => {
   w = wait(w, w.state.clock + 3600);
   assert.equal(at(w, 'fish'), 'market');
 });
+
+// Break: replenish.run prefers the item's earlier group to the root command's (hs-1: `litter`'s
+// status group then writes the rag's container after the drop did: conflicting_write when the
+// toss rule sorts after `litter`). Both orders must pass.
+for (const rule of ['a_toss', 'z_toss'])
+  test(`a drop-time ${rule} run moves the dropped rag in the drop's group`, () => {
+    const edit = (c: any) => {
+      c.manifest.requires.kernel_api.at_least = '1.101';
+      c.replenish[`${S}replenish/toss`] = {
+        ...c.replenish[`${S}replenish/restock`],
+        key: 'toss',
+        items: [ref('item', 'rag')],
+        from: { in: 'room', room: ref('room', 'market') },
+        to: { in: 'room', room: ref('room', 'midden') },
+      };
+      c.reactions[`${S}reaction/${rule}`] = {
+        ...c.reactions[`${S}reaction/litter`],
+        key: rule,
+        apply: [{ op: 'replenish.run', key: ref('replenish', 'toss') }],
+      };
+    };
+    const w = drop(take(fresh(edit), 'rag'), 'rag');
+    assert.equal(at(w, 'rag'), 'midden');
+  });
