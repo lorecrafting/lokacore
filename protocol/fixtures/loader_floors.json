@@ -1,0 +1,728 @@
+{
+  "description": "Loader floors (Beads loka-xroj): each kernel_api floor read by both kernels. A case compiles source (with edits: [file, key path, value] set before compiling) at kernel_api floor: the compiler and the loader accept it; at below the compiler reports compiler and the loader (the floor artifact with at_least changed and rehashed) reports loader. Every 'kernel_api (at least) 1.N' in protocol/*.schema.json has a case (test/loka/loader_floors_test.exs). Code-only floors (sampler-level, no schema text) also have cases but no coverage check. Expected values are literals, not computed by either loader.",
+  "cases": [
+    {
+      "floor": "1.38",
+      "below": "1.37",
+      "source": "cartridges/status_sampler",
+      "compiler": [
+        "KERNEL_API_RANGE_INVALID",
+        "cartridge.requires.kernel_api"
+      ],
+      "loader": [
+        "KERNEL_API_RANGE_INVALID",
+        ".cartridge.manifest.requires.kernel_api.at_least"
+      ]
+    },
+    {
+      "floor": "1.39",
+      "below": "1.38",
+      "source": "cartridges/ashmere_missing_child",
+      "feature": "a derived table (damage)",
+      "edits": [
+        [
+          "cartridge.json",
+          [
+            "world",
+            "derived"
+          ],
+          {
+            "damage": {
+              "terms": [
+                {
+                  "attribute": "str",
+                  "per_point": 1,
+                  "pivot": 10
+                }
+              ]
+            }
+          }
+        ]
+      ],
+      "compiler": [
+        "KERNEL_API_RANGE_INVALID",
+        "cartridge.requires.kernel_api.at_least"
+      ],
+      "loader": [
+        "KERNEL_API_RANGE_INVALID",
+        ".cartridge.manifest.requires.kernel_api.at_least"
+      ]
+    },
+    {
+      "floor": "1.40",
+      "below": "1.39",
+      "source": "cartridges/ashmere_missing_child",
+      "feature": "a derived hp_max table",
+      "edits": [
+        [
+          "cartridge.json",
+          [
+            "world",
+            "derived"
+          ],
+          {
+            "hp_max": {
+              "terms": [
+                {
+                  "attribute": "con",
+                  "per_point": 1,
+                  "pivot": 10
+                }
+              ]
+            }
+          }
+        ]
+      ],
+      "compiler": [
+        "KERNEL_API_RANGE_INVALID",
+        "cartridge.requires.kernel_api.at_least"
+      ],
+      "loader": [
+        "KERNEL_API_RANGE_INVALID",
+        ".cartridge.manifest.requires.kernel_api.at_least"
+      ]
+    },
+    {
+      "floor": "1.41",
+      "below": "1.40",
+      "source": "cartridges/affects_sampler",
+      "compiler": [
+        "KERNEL_API_RANGE_INVALID",
+        "cartridge.requires.kernel_api.at_least"
+      ],
+      "loader": [
+        "KERNEL_API_RANGE_INVALID",
+        ".cartridge.manifest.requires.kernel_api.at_least"
+      ]
+    },
+    {
+      "floor": "1.42",
+      "below": "1.41",
+      "source": "cartridges/levelling_sampler",
+      "compiler": [
+        "KERNEL_API_RANGE_INVALID",
+        "cartridge.requires.kernel_api.at_least"
+      ],
+      "loader": [
+        "KERNEL_API_RANGE_INVALID",
+        ".cartridge.manifest.requires.kernel_api.at_least"
+      ]
+    },
+    {
+      "floor": "1.43",
+      "below": "1.42",
+      "source": "cartridges/loot_sampler",
+      "compiler": [
+        "KERNEL_API_RANGE_INVALID",
+        "cartridge.requires.kernel_api.at_least"
+      ],
+      "loader": [
+        "KERNEL_API_RANGE_INVALID",
+        ".cartridge.manifest.requires.kernel_api.at_least"
+      ]
+    },
+    {
+      "floor": "1.44",
+      "below": "1.43",
+      "source": "cartridges/damage_sampler",
+      "compiler": [
+        "KERNEL_API_RANGE_INVALID",
+        "cartridge.requires.kernel_api.at_least"
+      ],
+      "loader": [
+        "KERNEL_API_RANGE_INVALID",
+        ".cartridge.manifest.requires.kernel_api.at_least"
+      ]
+    },
+    {
+      "floor": "1.45",
+      "below": "1.44",
+      "source": "cartridges/barrier_sampler",
+      "compiler": [
+        "KERNEL_API_RANGE_INVALID",
+        "cartridge.requires.kernel_api.at_least"
+      ],
+      "loader": [
+        "KERNEL_API_RANGE_INVALID",
+        ".cartridge.manifest.requires.kernel_api.at_least"
+      ]
+    },
+    {
+      "floor": "1.46",
+      "below": "1.45",
+      "source": "cartridges/quest_sampler",
+      "compiler": [
+        "KERNEL_API_RANGE_INVALID",
+        "cartridge.requires.kernel_api.at_least"
+      ],
+      "loader": [
+        "KERNEL_API_RANGE_INVALID",
+        ".cartridge.manifest.requires.kernel_api.at_least"
+      ]
+    },
+    {
+      "floor": "1.47",
+      "below": "1.46",
+      "source": "cartridges/persuade_sampler",
+      "compiler": [
+        "KERNEL_API_RANGE_INVALID",
+        "cartridge.requires.kernel_api.at_least"
+      ],
+      "loader": [
+        "KERNEL_API_RANGE_INVALID",
+        ".cartridge.manifest.requires.kernel_api.at_least"
+      ]
+    },
+    {
+      "floor": "1.48",
+      "below": "1.47",
+      "source": "cartridges/senses_sampler",
+      "compiler": [
+        "KERNEL_API_RANGE_INVALID",
+        "cartridge.requires.kernel_api.at_least"
+      ],
+      "loader": [
+        "KERNEL_API_RANGE_INVALID",
+        ".cartridge.manifest.requires.kernel_api.at_least"
+      ]
+    },
+    {
+      "floor": "1.49",
+      "below": "1.48",
+      "source": "cartridges/use_sampler",
+      "compiler": [
+        "KERNEL_API_RANGE_INVALID",
+        "cartridge.requires.kernel_api.at_least"
+      ],
+      "loader": [
+        "KERNEL_API_RANGE_INVALID",
+        ".cartridge.manifest.requires.kernel_api.at_least"
+      ]
+    },
+    {
+      "floor": "1.50",
+      "below": "1.49",
+      "source": "cartridges/fear_sampler",
+      "compiler": [
+        "KERNEL_API_RANGE_INVALID",
+        "cartridge.requires.kernel_api"
+      ],
+      "loader": [
+        "KERNEL_API_RANGE_INVALID",
+        ".cartridge.manifest.requires.kernel_api.at_least"
+      ]
+    },
+    {
+      "floor": "1.51",
+      "below": "1.50",
+      "source": "cartridges/spells_sampler",
+      "compiler": [
+        "KERNEL_API_RANGE_INVALID",
+        "cartridge.requires.kernel_api.at_least"
+      ],
+      "loader": [
+        "KERNEL_API_RANGE_INVALID",
+        ".cartridge.manifest.requires.kernel_api.at_least"
+      ]
+    },
+    {
+      "floor": "1.52",
+      "below": "1.51",
+      "source": "cartridges/harvest_sampler",
+      "compiler": [
+        "KERNEL_API_RANGE_INVALID",
+        "rooms/mine.details.seam.harvest"
+      ],
+      "loader": [
+        "KERNEL_API_RANGE_INVALID",
+        ".cartridge.rooms[\"harvest_sampler@0.0.1:room/mine\"].details.seam.harvest"
+      ]
+    },
+    {
+      "floor": "1.53",
+      "below": "1.52",
+      "source": "cartridges/elements_sampler",
+      "compiler": [
+        "KERNEL_API_RANGE_INVALID",
+        "cartridge.requires.kernel_api.at_least"
+      ],
+      "loader": [
+        "KERNEL_API_RANGE_INVALID",
+        ".cartridge.manifest.requires.kernel_api.at_least"
+      ]
+    },
+    {
+      "floor": "1.54",
+      "below": "1.53",
+      "source": "cartridges/status_sampler",
+      "feature": "status reader 4 (blocks)",
+      "edits": [
+        [
+          "statuses/poison.json",
+          [
+            "blocks"
+          ],
+          [
+            "say"
+          ]
+        ]
+      ],
+      "compiler": [
+        "KERNEL_API_RANGE_INVALID",
+        "cartridge.requires.kernel_api"
+      ],
+      "loader": [
+        "KERNEL_API_RANGE_INVALID",
+        ".cartridge.manifest.requires.kernel_api.at_least"
+      ]
+    },
+    {
+      "floor": "1.55",
+      "below": "1.54",
+      "source": "cartridges/spell_effects_sampler",
+      "compiler": [
+        "KERNEL_API_RANGE_INVALID",
+        "cartridge.requires.kernel_api.at_least"
+      ],
+      "loader": [
+        "KERNEL_API_RANGE_INVALID",
+        ".cartridge.manifest.requires.kernel_api.at_least"
+      ]
+    },
+    {
+      "floor": "1.56",
+      "below": "1.55",
+      "source": "cartridges/status_sampler",
+      "feature": "a co_present status.apply with a tag (W22)",
+      "edits": [
+        [
+          "reactions/dart.json",
+          [
+            "apply"
+          ],
+          [
+            {
+              "op": "status.apply",
+              "status": "poison",
+              "co_present": true,
+              "tag": "wooden"
+            }
+          ]
+        ]
+      ],
+      "compiler": [
+        "KERNEL_API_RANGE_INVALID",
+        "cartridge.requires.kernel_api.at_least"
+      ],
+      "loader": [
+        "KERNEL_API_RANGE_INVALID",
+        ".cartridge.manifest.requires.kernel_api.at_least"
+      ]
+    },
+    {
+      "floor": "1.58",
+      "below": "1.57",
+      "source": "cartridges/toolbox_showcase",
+      "compiler": [
+        "KERNEL_API_RANGE_INVALID",
+        "cartridge.requires.kernel_api.at_least"
+      ],
+      "loader": [
+        "KERNEL_API_RANGE_INVALID",
+        ".cartridge.manifest.requires.kernel_api.at_least"
+      ]
+    },
+    {
+      "floor": "1.61",
+      "below": "1.60",
+      "source": "cartridges/status_sampler",
+      "feature": "status reader 8 (concealment)",
+      "edits": [
+        [
+          "statuses/poison.json",
+          [
+            "concealment"
+          ],
+          "hidden"
+        ]
+      ],
+      "compiler": [
+        "KERNEL_API_RANGE_INVALID",
+        "cartridge.requires.kernel_api"
+      ],
+      "loader": [
+        "KERNEL_API_RANGE_INVALID",
+        ".cartridge.manifest.requires.kernel_api.at_least"
+      ]
+    },
+    {
+      "floor": "1.62",
+      "below": "1.61",
+      "source": "cartridges/status_sampler",
+      "feature": "status reader 7 (movement)",
+      "edits": [
+        [
+          "statuses/poison.json",
+          [
+            "movement"
+          ],
+          {
+            "cost_percent": 50
+          }
+        ]
+      ],
+      "compiler": [
+        "KERNEL_API_RANGE_INVALID",
+        "cartridge.requires.kernel_api"
+      ],
+      "loader": [
+        "KERNEL_API_RANGE_INVALID",
+        ".cartridge.manifest.requires.kernel_api.at_least"
+      ]
+    },
+    {
+      "floor": "1.65",
+      "below": "1.64",
+      "source": "cartridges/status_sampler",
+      "feature": "status reader 9 (a status.apply naming a room)",
+      "edits": [
+        [
+          "reactions/dart.json",
+          [
+            "apply"
+          ],
+          [
+            {
+              "op": "status.apply",
+              "status": "poison",
+              "room": "hall"
+            }
+          ]
+        ]
+      ],
+      "compiler": [
+        "KERNEL_API_RANGE_INVALID",
+        "cartridge.requires.kernel_api.at_least"
+      ],
+      "loader": [
+        "KERNEL_API_RANGE_INVALID",
+        ".cartridge.manifest.requires.kernel_api.at_least"
+      ]
+    },
+    {
+      "floor": "1.67",
+      "below": "1.66",
+      "source": "cartridges/ranged_sampler",
+      "compiler": [
+        "KERNEL_API_RANGE_INVALID",
+        "cartridge.requires.kernel_api.at_least"
+      ],
+      "loader": [
+        "KERNEL_API_RANGE_INVALID",
+        ".cartridge.manifest.requires.kernel_api.at_least"
+      ]
+    },
+    {
+      "floor": "1.68",
+      "below": "1.67",
+      "source": "cartridges/identify_sampler",
+      "compiler": [
+        "KERNEL_API_RANGE_INVALID",
+        "cartridge.requires.kernel_api.at_least"
+      ],
+      "loader": [
+        "KERNEL_API_RANGE_INVALID",
+        ".cartridge.manifest.requires.kernel_api.at_least"
+      ]
+    },
+    {
+      "floor": "1.69",
+      "below": "1.68",
+      "source": "cartridges/durability_sampler",
+      "compiler": [
+        "KERNEL_API_RANGE_INVALID",
+        "cartridge.requires.kernel_api.at_least"
+      ],
+      "loader": [
+        "KERNEL_API_RANGE_INVALID",
+        ".cartridge.manifest.requires.kernel_api.at_least"
+      ]
+    },
+    {
+      "floor": "1.70",
+      "below": "1.69",
+      "source": "cartridges/group_sampler",
+      "compiler": [
+        "KERNEL_API_RANGE_INVALID",
+        "cartridge.requires.kernel_api.at_least"
+      ],
+      "loader": [
+        "KERNEL_API_RANGE_INVALID",
+        ".cartridge.manifest.requires.kernel_api.at_least"
+      ]
+    },
+    {
+      "floor": "1.71",
+      "below": "1.70",
+      "source": "cartridges/replenish_sampler",
+      "compiler": [
+        "KERNEL_API_RANGE_INVALID",
+        "cartridge.requires.kernel_api.at_least"
+      ],
+      "loader": [
+        "KERNEL_API_RANGE_INVALID",
+        ".cartridge.manifest.requires.kernel_api.at_least"
+      ]
+    },
+    {
+      "floor": "1.72",
+      "below": "1.71",
+      "source": "cartridges/affects_sampler",
+      "feature": "a gear budget (balance 6b)",
+      "edits": [
+        [
+          "cartridge.json",
+          [
+            "world",
+            "gear_budget"
+          ],
+          {
+            "per_slot": {
+              "waist": 1
+            },
+            "per_level": 1
+          }
+        ]
+      ],
+      "compiler": [
+        "KERNEL_API_RANGE_INVALID",
+        "cartridge.requires.kernel_api.at_least"
+      ],
+      "loader": [
+        "KERNEL_API_RANGE_INVALID",
+        ".cartridge.manifest.requires.kernel_api.at_least"
+      ]
+    },
+    {
+      "floor": "1.73",
+      "below": "1.72",
+      "source": "cartridges/group_sampler",
+      "edits": [
+        [
+          "cartridge.json",
+          [
+            "world",
+            "group",
+            "stay"
+          ],
+          "in_group"
+        ]
+      ],
+      "compiler": [
+        "KERNEL_API_RANGE_INVALID",
+        "cartridge.requires.kernel_api.at_least"
+      ],
+      "loader": [
+        "KERNEL_API_RANGE_INVALID",
+        ".cartridge.manifest.requires.kernel_api.at_least"
+      ]
+    },
+    {
+      "floor": "1.74",
+      "below": "1.73",
+      "source": "cartridges/encounter_sampler",
+      "compiler": [
+        "KERNEL_API_RANGE_INVALID",
+        "cartridge.requires.kernel_api.at_least"
+      ],
+      "loader": [
+        "KERNEL_API_RANGE_INVALID",
+        ".cartridge.manifest.requires.kernel_api.at_least"
+      ]
+    },
+    {
+      "floor": "1.75",
+      "below": "1.74",
+      "source": "cartridges/hireling_sampler",
+      "compiler": [
+        "KERNEL_API_RANGE_INVALID",
+        "cartridge.requires.kernel_api.at_least"
+      ],
+      "loader": [
+        "KERNEL_API_RANGE_INVALID",
+        ".cartridge.manifest.requires.kernel_api.at_least"
+      ]
+    },
+    {
+      "floor": "1.77",
+      "below": "1.76",
+      "source": "cartridges/decay_sampler",
+      "compiler": [
+        "KERNEL_API_RANGE_INVALID",
+        "cartridge.requires.kernel_api.at_least"
+      ],
+      "loader": [
+        "KERNEL_API_RANGE_INVALID",
+        ".cartridge.manifest.requires.kernel_api.at_least"
+      ]
+    },
+    {
+      "floor": "1.78",
+      "below": "1.77",
+      "source": "cartridges/access_sampler",
+      "compiler": [
+        "KERNEL_API_RANGE_INVALID",
+        "cartridge.requires.kernel_api.at_least"
+      ],
+      "loader": [
+        "KERNEL_API_RANGE_INVALID",
+        ".cartridge.manifest.requires.kernel_api.at_least"
+      ]
+    },
+    {
+      "floor": "1.80",
+      "below": "1.79",
+      "source": "cartridges/escrow_sampler",
+      "compiler": [
+        "KERNEL_API_RANGE_INVALID",
+        "cartridge.requires.kernel_api.at_least"
+      ],
+      "loader": [
+        "KERNEL_API_RANGE_INVALID",
+        ".cartridge.manifest.requires.kernel_api.at_least"
+      ]
+    },
+    {
+      "floor": "1.81",
+      "below": "1.80",
+      "source": "cartridges/doors_sampler",
+      "compiler": [
+        "KERNEL_API_RANGE_INVALID",
+        "cartridge.requires.kernel_api.at_least"
+      ],
+      "loader": [
+        "KERNEL_API_RANGE_INVALID",
+        ".cartridge.manifest.requires.kernel_api.at_least"
+      ]
+    },
+    {
+      "floor": "1.82",
+      "below": "1.81",
+      "source": "cartridges/prices_sampler",
+      "compiler": [
+        "KERNEL_API_RANGE_INVALID",
+        "cartridge.requires.kernel_api.at_least"
+      ],
+      "loader": [
+        "KERNEL_API_RANGE_INVALID",
+        ".cartridge.manifest.requires.kernel_api.at_least"
+      ]
+    },
+    {
+      "floor": "1.83",
+      "below": "1.82",
+      "source": "cartridges/property_sampler",
+      "compiler": [
+        "KERNEL_API_RANGE_INVALID",
+        "cartridge.requires.kernel_api.at_least"
+      ],
+      "loader": [
+        "KERNEL_API_RANGE_INVALID",
+        ".cartridge.manifest.requires.kernel_api.at_least"
+      ]
+    },
+    {
+      "floor": "1.84",
+      "below": "1.83",
+      "source": "cartridges/fear_sampler",
+      "feature": "a population.spawn step (row 37a)",
+      "edits": [
+        [
+          "reactions/begone.json",
+          [
+            "apply"
+          ],
+          [
+            {
+              "op": "population.spawn",
+              "plan": "goblins"
+            }
+          ]
+        ]
+      ],
+      "compiler": [
+        "KERNEL_API_RANGE_INVALID",
+        "cartridge.requires.kernel_api.at_least"
+      ],
+      "loader": [
+        "KERNEL_API_RANGE_INVALID",
+        ".cartridge.manifest.requires.kernel_api.at_least"
+      ]
+    },
+    {
+      "floor": "1.85",
+      "below": "1.84",
+      "source": "cartridges/tracks_sampler",
+      "compiler": [
+        "KERNEL_API_RANGE_INVALID",
+        "cartridge.requires.kernel_api.at_least"
+      ],
+      "loader": [
+        "KERNEL_API_RANGE_INVALID",
+        ".cartridge.manifest.requires.kernel_api.at_least"
+      ]
+    },
+    {
+      "floor": "1.86",
+      "below": "1.85",
+      "source": "cartridges/fen_sampler",
+      "compiler": [
+        "KERNEL_API_RANGE_INVALID",
+        "cartridge.requires.kernel_api.at_least"
+      ],
+      "loader": [
+        "KERNEL_API_RANGE_INVALID",
+        ".cartridge.manifest.requires.kernel_api.at_least"
+      ]
+    },
+    {
+      "floor": "1.87",
+      "below": "1.86",
+      "source": "cartridges/boss_sampler",
+      "compiler": [
+        "KERNEL_API_RANGE_INVALID",
+        "cartridge.requires.kernel_api.at_least"
+      ],
+      "loader": [
+        "KERNEL_API_RANGE_INVALID",
+        ".cartridge.manifest.requires.kernel_api.at_least"
+      ]
+    },
+    {
+      "floor": "1.89",
+      "below": "1.88",
+      "source": "cartridges/rivals_sampler",
+      "compiler": [
+        "KERNEL_API_RANGE_INVALID",
+        "cartridge.requires.kernel_api.at_least"
+      ],
+      "loader": [
+        "KERNEL_API_RANGE_INVALID",
+        ".cartridge.manifest.requires.kernel_api.at_least"
+      ]
+    },
+    {
+      "floor": "1.90",
+      "below": "1.89",
+      "source": "cartridges/raid_sampler",
+      "compiler": [
+        "KERNEL_API_RANGE_INVALID",
+        "cartridge.requires.kernel_api.at_least"
+      ],
+      "loader": [
+        "KERNEL_API_RANGE_INVALID",
+        ".cartridge.manifest.requires.kernel_api.at_least"
+      ]
+    }
+  ]
+}

@@ -8,7 +8,7 @@ import { join } from 'node:path';
 import { test } from 'node:test';
 import type { DatabaseSync } from 'node:sqlite';
 import { compiled } from './__tests__/compiled.ts';
-import { elapsedHost } from './__tests__/elapsed-host.test.ts';
+import { coldReopen, elapsedHost } from './__tests__/elapsed-host.test.ts';
 
 // The committed fact_changed events of `fact`, as [logical_time, new].
 const changes = (sql: DatabaseSync, fact: string) =>
@@ -61,4 +61,5 @@ test('a save closed mid-raid cold-reopens; the new moon counts the aftermath onc
   assert.deepEqual(changes(b.sql, 'aftermaths'), [[2000, 1]]);
   assert.deepEqual(changes(b.sql, 'aftershocks'), [[1600, 1]]);
   assert.deepEqual(shock(), [[1600, 'completed', actor]]);
+  coldReopen(path, bundle);
 });

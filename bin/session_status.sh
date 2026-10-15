@@ -12,8 +12,31 @@ else
 fi
 echo "## Orphaned busy processes (bin/orphans.sh; check, then stop by PID)"
 sh bin/orphans.sh
+echo "## Compaction mode (newest subagent compact_boundary; durationMs < 1000 = hook, loka-oy8i)"
+# Project dir name: repo path with / and . replaced by - (Claude Code's rule). Prints no paths.
+pd="$HOME/.claude/projects/$(git rev-parse --git-common-dir | xargs -I{} sh -c 'cd "{}/.." && pwd -P' | tr '/.' '--')"
+# Newest 100 transcripts only: grepping all of them takes ~10 s of the 30 s hook limit.
+f=$(ls -t "$pd"/*/subagents/*.jsonl 2>/dev/null | head -100 | xargs grep -l '"subtype":"compact_boundary"' 2>/dev/null | xargs ls -t 2>/dev/null | head -1)
+if [ -z "$f" ]; then echo "compaction: none seen"; else
+  grep '"subtype":"compact_boundary"' "$f" | tail -1 | python3 -I -c '
+import json, sys, time
+from datetime import datetime
+e = json.loads(sys.stdin.readline())
+d = e["compactMetadata"]["durationMs"]
+age = int((time.time() - datetime.fromisoformat(e["timestamp"].replace("Z", "+00:00")).timestamp()) / 60)
+print("compaction: built-in (%d s, %d min ago)" % (d / 1000, age) if d >= 1000 else "compaction: HOOK? (~%d ms, %d min ago) - stop spawning" % (d, age))
+' "$f" 2>/dev/null || echo "compaction: unreadable"
+fi
 echo "## Open PRs"
 gh pr list --limit 10 2>/dev/null || echo "gh unavailable"
+# A job cancelled at its timeout is red (docs/WORKFLOW.md, Loop step 7); cancelled jobs of the open PR heads (all runs) and the nightly runs print as "name duration".
+cancelled() { # <label> <gh run list args...>
+  l=$1; shift
+  for id in $(gh run list "$@" --json databaseId,conclusion --jq '.[]|select(.conclusion=="cancelled")|.databaseId' 2>/dev/null); do
+    gh run view "$id" --json jobs --jq '.jobs[]|select(.conclusion=="cancelled")|"cancelled job: \(.name) \((.completedAt|fromdate)-(.startedAt|fromdate))s"' 2>/dev/null | sed "s|^|$l run $id: |"
+  done
+}
+for sha in $(gh pr list --limit 10 --json headRefOid --jq '.[].headRefOid' 2>/dev/null); do cancelled "PR head $(printf %.8s "$sha")" --commit "$sha"; done
 echo "## Nightly hosted CI on main"
 # A red nightly is the session's first job (docs/decisions/owner-decision-preproduction-gate-2026-10-08.md); gh failing prints nothing.
 for wf in ci.yml book-e2e.yml; do
@@ -21,6 +44,7 @@ for wf in ci.yml book-e2e.yml; do
     --jq '.[] | "\(if .status == "completed" then .conclusion else .status end) \(.headSha[:8]) \(.url)"' 2>/dev/null) || continue
   case $run in success*|in_progress*|queued*|waiting*|pending*|requested*|"") ;; *) run="$run (red: fix first)" ;; esac
   echo "$wf ${run:-no scheduled run yet}"
+  cancelled "$wf nightly" --workflow "$wf" --branch main --event schedule --limit 3
 done
 echo "## Housekeeping queue"
 # One br query (open ids/titles and the newest created_at) and one git query; failure prints a note.

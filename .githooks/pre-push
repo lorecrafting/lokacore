@@ -1,0 +1,13 @@
+#!/bin/sh
+# Refuses a push when bin/prepush.sh fails (loka-9ruc). Activate once per clone: git config core.hooksPath .githooks
+# Status-only pushes (every changed file under .beads/ or docs/HANDOFF.md) skip the check; a new branch or an unknown remote sha runs it.
+z=0000000000000000000000000000000000000000
+skip=1
+while read -r _ local_sha _ remote_sha; do
+  [ "$local_sha" = "$z" ] && continue
+  [ "$remote_sha" = "$z" ] && { skip=0; break; }
+  files=$(git diff --name-only "$remote_sha" "$local_sha" 2>/dev/null) || { skip=0; break; }
+  [ -n "$(printf '%s\n' "$files" | grep -vE '^(\.beads/|docs/HANDOFF\.md$)')" ] && { skip=0; break; }
+done
+[ "$skip" = 1 ] && exit 0
+exec "$(git rev-parse --show-toplevel)/bin/prepush.sh"
