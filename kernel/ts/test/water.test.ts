@@ -449,6 +449,7 @@ test('ordinary combat death below also invalidates the original water occurrence
   }
 });
 
+// Breaks: waterValid's occupancy check skipped (e.g. an empty `admitted` set makes it vacuous).
 test('a character body in a water bottom without an occupancy row is invalid', () => {
   const bottom = green(run(learned(fresh()), { type: 'move', direction: 'down' }));
   const w = fresh();

@@ -12,7 +12,7 @@ import type {
   RecipeCost,
   ResourceRegen,
 } from '../contracts.gen.ts';
-import { actorOf, admitted, bodyOf, type World } from '../runtime/decision.ts';
+import { actorOf, admitted, type World } from '../runtime/decision.ts';
 import { add, saturate } from '../foundation/int.ts';
 import { fact, positionOf } from './position/shared.ts';
 import { cmp } from '../foundation/validate.ts';
@@ -36,11 +36,12 @@ export const resourceRef = (world: World, k: string): DefinitionRef => ({
  */
 export function maxima(world: World, body: EntityId): Readonly<Record<string, number>> {
   const table = world.cartridge.world?.derived?.hp_max;
+  const actor = actorOf(world, body);
+  if (!table || !actor) return {}; // cheap bail first: resourceSpec calls this for every entity
   const hp = resourceRef(world, 'hp');
   const at = key({ kind: 'resource', resource: hp, entity_id: body });
   const spec = world.resourceSpecs[key(hp)];
-  const actor = actorOf(world, body);
-  if (!table || !spec || !actor || world.entityResourceSpecs[at]) return {};
+  if (!spec || world.entityResourceSpecs[at]) return {};
   const maximum = saturate(spec.maximum + derived(world, actor, table));
   return { [at]: Math.max(spec.minimum, maximum) };
 }
@@ -185,13 +186,17 @@ export function recoveryAdjustments(
 }
 
 /** Final RPG agreement: only touched opted player pools, or all when position is written. */
-export function recoveryFault(
+export const recoveryFault = (world: World, ops?: readonly DeltaOp[]) =>
+  admitted(world)
+    .map(([actor, body]) => bodyFault(world, actor, body, ops))
+    .find(Boolean);
+
+function bodyFault(
   world: World,
   actor: CharacterId,
+  body: EntityId,
   ops?: readonly DeltaOp[],
 ): MutationTarget | undefined {
-  const body = bodyOf(world, actor);
-  if (!body) return undefined; // no admitted body, no pool to check
   const positionWritten = ops?.some(
     (o) =>
       o.op === 'fact.assign' &&

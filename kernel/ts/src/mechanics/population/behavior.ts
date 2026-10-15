@@ -28,6 +28,7 @@ import { moves } from '../status/shared.ts';
 import { planRef } from './refs.ts';
 
 /** Bind only a current deer generation observed on an actual player entry (`seer` entering). */
+// size: allow 42, the entering `seer` is threaded to each bound sight (loka-kgd.150.4)
 export function entrySight(
   world: World,
   seer: CharacterId,
@@ -134,7 +135,6 @@ function sightJob(
   return { op: 'job.schedule', writer_group: 0, job_id, job: plan, due_time, sight };
 }
 
-// size: allow 41, one RS-1 freeze marker until RS-2 removes it
 export function runSight(world: World, job_id: JobId, job: JobRow, steps: Steps) {
   const sight = job.sight;
   if (!sight) throw new KernelError('precondition_failed');

@@ -1,4 +1,4 @@
-// size: allow 303, RS-1 actor-read freeze markers until RS-2 removes them
+// size: allow 309, population jobs bind sight for the admitted character in the room (seerIn, loka-kgd.150.4)
 import type {
   CharacterId,
   CommandId,

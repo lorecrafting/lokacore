@@ -225,7 +225,7 @@ export function refusal(
   set?: ActionSet,
 ) {
   const gated = 'actor_id' in payload && !['choose_ancestry', 'elapsed'].includes(payload.type);
-  if (gated && needsAncestry(world, payload.actor_id)) return 'invalid_state'; // run_job: no actor
+  if (gated && needsAncestry(world, payload.actor_id)) return 'invalid_state'; // `in`: types only, run_job never gets here
   if (
     payload.type === 'wait' &&
     world.cartridge.manifest.time_policy &&
