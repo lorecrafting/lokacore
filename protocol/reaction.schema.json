@@ -115,7 +115,7 @@
                 },
                 "witness": {
                   "$ref": "identity.schema.json#/$defs/DefinitionRef",
-                  "description": "Toolbox row FD5 (kernel_api at least 1.95): this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it)."
+                  "description": "Toolbox row FD5 (kernel_api at least 1.95): this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
                 },
                 "item": {
                   "$ref": "identity.schema.json#/$defs/DefinitionRef"
@@ -134,7 +134,7 @@
                 },
                 "witness": {
                   "$ref": "identity.schema.json#/$defs/DefinitionRef",
-                  "description": "Toolbox row FD5 (kernel_api at least 1.95): this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it)."
+                  "description": "Toolbox row FD5 (kernel_api at least 1.95): this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
                 },
                 "item": {
                   "$ref": "identity.schema.json#/$defs/DefinitionRef"
@@ -249,7 +249,7 @@
                 },
                 "witness": {
                   "$ref": "identity.schema.json#/$defs/DefinitionRef",
-                  "description": "Toolbox row FD5 (kernel_api at least 1.95): this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it)."
+                  "description": "Toolbox row FD5 (kernel_api at least 1.95): this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
                 },
                 "action": {
                   "$ref": "action.schema.json#/$defs/Key"
@@ -268,7 +268,7 @@
                 },
                 "witness": {
                   "$ref": "identity.schema.json#/$defs/DefinitionRef",
-                  "description": "Toolbox row FD5 (kernel_api at least 1.95): this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it)."
+                  "description": "Toolbox row FD5 (kernel_api at least 1.95): this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
                 },
                 "check": {
                   "$ref": "action.schema.json#/$defs/Key"
@@ -287,7 +287,7 @@
                 },
                 "witness": {
                   "$ref": "identity.schema.json#/$defs/DefinitionRef",
-                  "description": "Toolbox row FD5 (kernel_api at least 1.95): this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it)."
+                  "description": "Toolbox row FD5 (kernel_api at least 1.95): this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
                 },
                 "check": {
                   "$ref": "action.schema.json#/$defs/Key"
@@ -339,7 +339,7 @@
                 },
                 "witness": {
                   "$ref": "identity.schema.json#/$defs/DefinitionRef",
-                  "description": "Toolbox row FD5 (kernel_api at least 1.95): this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it)."
+                  "description": "Toolbox row FD5 (kernel_api at least 1.95): this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
                 },
                 "victim": {
                   "$ref": "identity.schema.json#/$defs/DefinitionRef"
@@ -361,7 +361,7 @@
                 },
                 "witness": {
                   "$ref": "identity.schema.json#/$defs/DefinitionRef",
-                  "description": "Toolbox row FD5 (kernel_api at least 1.95): this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it)."
+                  "description": "Toolbox row FD5 (kernel_api at least 1.95): this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
                 },
                 "hit": {
                   "type": "boolean"

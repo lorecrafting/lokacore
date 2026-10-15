@@ -573,6 +573,13 @@ test('FD1: the loader keeps API 1.90, event-free delayed steps and an unbounded 
       bad(`${AFTERSHOCK}"].apply[1].op`),
     ],
     [
+      [
+        (c) => (c.manifest.requires.kernel_api.at_least = '1.95'),
+        (c) => c.reactions[AFTERSHOCK].apply.push({ op: 'npc.move' }),
+      ],
+      bad(`${AFTERSHOCK}"].apply[1].op`),
+    ],
+    [
       [(c) => (c.reactions[raid].apply.at(-1).fact = ref('aftershocks'))],
       bad(`${raid}"].apply[2].fact`),
     ],
