@@ -26,7 +26,7 @@ All eleven hold at head.
 
 ## Findings
 
-1. nit, `docs/system/mechanics.md:3161`: claims "a cold reopen after a theft and a fence sale replays"; `mobile/authority/local-story/theft.test.ts:99-101` sells to the fence then closes without reopening. A custody-evidence fault on the stolen-offer sell transfer would surface as `save_corrupt` only on the player's next launch. Add a reopen after line 100, or narrow the claim.
+1. nit, `docs/system/mechanics.md:3161`: claims "a cold reopen after a theft and a fence sale replays"; `mobile/authority/local-story/theft.test.ts:99-101` sells to the fence then closes without reopening. Probe (scratch copy with a third reopen after line 100, removed): reopens at head, purse with the fence. The claim is true but not pinned: a later custody-evidence fault on the stolen-offer sell transfer would surface as `save_corrupt` only on the player's next launch. Add that reopen to the test.
 2. question: an escort or hireling NPC travelling with the thief counts as a bystander witness (spec: every other living NPC). Intended?
 3. nit: `/code-review` result not yet reported (no PR); report it in the batch PR body.
 
