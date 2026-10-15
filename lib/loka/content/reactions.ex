@@ -99,18 +99,14 @@ defmodule Loka.Content.Reactions do
   # reader 2, row G3).
   @events %{"quest_resolved" => 8, "spoken" => 48, "status_applied" => 53}
 
-  # One diagnostic per rule below its highest floor; the entrant filter needs 1.47 (row W3), the
-  # attacker filter 1.58 (loka-kgd.79), the target filter 1.87 (row 39), the witness filter 1.95
-  # (row FD5), a co_present
-  # status.apply 1.50 (W21), with a tag 1.56 (W22), naming a room 1.65 (status reader 9).
+  # One diagnostic per rule below its highest floor; filters: npc 1.47 (W3), attacker 1.58
+  # (loka-kgd.79), target 1.87 (row 39), witness 1.95 (FD5); a co_present status.apply 1.50 (W21),
+  # with a tag 1.56 (W22), naming a room 1.65 (status reader 9).
   @filters %{"npc" => 47, "attacker" => 58, "target" => 87, "witness" => 95}
   defp api(r, manifest) do
     floor = rule_floor(r)
-
-    version =
-      manifest["requires"]["kernel_api"]["at_least"]
-      |> String.split(".")
-      |> Enum.map(&String.to_integer/1)
+    at_least = manifest["requires"]["kernel_api"]["at_least"]
+    version = Enum.map(String.split(at_least, "."), &String.to_integer/1)
 
     if floor > 0 and version < [1, floor],
       do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
