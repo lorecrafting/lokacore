@@ -19,7 +19,6 @@ import { hydrate } from '../src/runtime/created.ts';
 import { check } from '../src/runtime/invariants.ts';
 import { resolved } from '../src/commands/actions.ts';
 import { pending } from '../src/mechanics/dialogue/shared.ts';
-import { acquire } from '../src/mechanics/skills.ts';
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));
 const scratch = mkdtempSync(join(tmpdir(), 'loka-craft-sampler-'));
@@ -316,8 +315,8 @@ test('a craft whose policy fails refuses on the policy, as offered', () => {
 });
 
 // Homestead hs-11. Breaks: the dialogue admission (dialogue/shared.ts blocked) skips the
-// prerequisite (the offer shows learn while choose is refused: agrees fails), skills.ts acquire
-// skips it (the direct acquire at level 1 succeeds), or a learned box can be learned again.
+// prerequisite (the level-1 choose is accepted), the offer disagrees with admission (agrees
+// fails), or a learned box can be learned again.
 test('carving is learned only at whittling 2, offered and admitted alike', () => {
   const carver = (w: World) => w.entityIds[`${P}npc/old_carver`]!;
   const learned = (w: World) =>
@@ -339,16 +338,6 @@ test('carving is learned only at whittling 2, offered and admitted alike', () =>
   assert.equal(code(refused.r), 'invalid_state');
   assert.equal(refused.r.world, refused.w); // nothing changed
   assert.equal(learned(refused.w), false);
-  const carving = {
-    cartridge_id: 'craft_sampler',
-    cartridge_version: '0.0.1',
-    kind: 'skill',
-    key: 'carving',
-  };
-  assert.throws(
-    () => acquire(level1, level1.character, { ops: [], position: 0, facts: {} }, carving as never),
-    /precondition_failed/,
-  );
   const level2 = carve(level1).world; // two uses: whittling 2
   const taught = learn(level2);
   assert.equal(taught.offered.available, true);

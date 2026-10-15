@@ -27,14 +27,6 @@ export function skills(c: Obj, checks: Checks): Diagnostic[] {
     const at = `.cartridge.skills${step(ref)}`;
     checks.text(s, ['label', 'requirement'], at);
     if (s.key.length > 58) bad(`${at}.key`);
-    // Homestead hs-11: a box never requires itself.
-    if (
-      s.prerequisite &&
-      walk(s.prerequisite.root, '').some(
-        ([p]) => p.op === 'skill_compare' && refString(p.skill) === ref,
-      )
-    )
-      bad(`${at}.prerequisite`);
     for (const capability of ['skills', 'policy', 'fact'])
       if (c.lock.capabilities[capability] !== 1)
         out.push(diag('UNDECLARED_CAPABILITY', at, { capability }, [`${capability}@1`]));
@@ -65,12 +57,26 @@ export function skills(c: Obj, checks: Checks): Diagnostic[] {
         diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'),
       );
   }
-  if (
-    Object.values((c.skills ?? {}) as Obj).some((s) => s.prerequisite) &&
-    apiCmp(c.manifest.requires.kernel_api.at_least, '1.101') < 0
-  )
+  return [...out, ...growth(c), ...prerequisites(c), ...durability(c, checks)];
+}
+
+// Homestead hs-11: a prerequisite never names its own skill and needs API 1.101.
+function prerequisites(c: Obj): Diagnostic[] {
+  const named = Object.entries((c.skills ?? {}) as Obj).filter(([, s]) => s.prerequisite);
+  const out = named
+    .filter(([ref, s]) =>
+      walk(s.prerequisite.root, '').some(
+        ([p]) => p.op === 'skill_compare' && refString(p.skill) === ref,
+      ),
+    )
+    .map(([ref]) =>
+      diag('SCHEMA_VIOLATION', `.cartridge.skills${step(ref)}.prerequisite`, {
+        error: 'invalid_value',
+      }),
+    );
+  if (named.length && apiCmp(c.manifest.requires.kernel_api.at_least, '1.101') < 0)
     out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
-  return [...out, ...growth(c), ...durability(c, checks)];
+  return out;
 }
 
 // Toolbox rows 5 and G5: growth thresholds strictly increase; skill growth, an opposed check or

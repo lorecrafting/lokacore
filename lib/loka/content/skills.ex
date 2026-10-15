@@ -63,7 +63,7 @@ defmodule Loka.Content.Skills do
     caps = m["requires"]["capabilities"]
 
     Enum.flat_map(defs["skill"], &definition(&1, caps, text)) ++
-      Enum.flat_map(defs["skill"], &(growth(&1) ++ itself(&1))) ++
+      Enum.flat_map(defs["skill"], &(growth(&1) ++ itself(m, &1))) ++
       floor(m, defs) ++
       prerequisite_floor(m, defs) ++
       equipment(m, defs) ++ dodge(m, defs, settings) ++ defense_narration(defs, settings)
@@ -89,25 +89,24 @@ defmodule Loka.Content.Skills do
 
   defp growth(_), do: []
 
-  # Homestead hs-11: a box never requires itself.
-  defp itself({key, {rel, _, %{"prerequisite" => p}}}),
-    do:
-      if(
-        Enum.any?(
-          leaves(p["root"]),
-          &match?(%{"op" => "skill_compare", "skill" => %{"key" => ^key}}, &1)
-        ),
-        do: [bad(at(rel, ["prerequisite"]))],
-        else: []
-      )
+  # Homestead hs-11: a box never requires itself (its own full ref, as cartridge_skills.ts).
+  defp itself(m, {key, {rel, _, %{"prerequisite" => p}}}) do
+    me = %{
+      "cartridge_id" => m["id"],
+      "cartridge_version" => m["version"],
+      "kind" => "skill",
+      "key" => key
+    }
 
-  defp itself(_), do: []
+    if Enum.any?(
+         Loka.Content.Policies.nodes(p["root"], []),
+         &match?({%{"op" => "skill_compare", "skill" => ^me}, _}, &1)
+       ),
+       do: [bad(at(rel, ["prerequisite"]))],
+       else: []
+  end
 
-  defp leaves(%{"op" => op, "items" => items}) when op in ~w(all any),
-    do: Enum.flat_map(items, &leaves/1)
-
-  defp leaves(%{"op" => "not", "item" => item}), do: leaves(item)
-  defp leaves(leaf), do: [leaf]
+  defp itself(_, _), do: []
 
   # Homestead hs-11: a skill prerequisite needs API 1.101.
   defp prerequisite_floor(m, defs),

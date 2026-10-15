@@ -34,23 +34,15 @@ export function status(world: World, actor: CharacterId, skill: DefinitionRef, s
   return { acquired, qualified, usable: acquired && qualified };
 }
 
-/** Homestead hs-11: the skill's prerequisite holds for the acquiring actor (none: it holds). */
-export function prerequisiteHolds(
-  world: World,
-  actor: CharacterId,
-  skill: DefinitionRef,
-  steps?: Steps,
-) {
+/** Homestead hs-11: the prerequisite, when declared, holds; checked at dialogue admission only,
+ * since an ancestry grant at birth (attributes/rule.ts) is not learning. */
+export function learnable(world: World, actor: CharacterId, skill: DefinitionRef, steps: Steps) {
   const p = world.cartridge.skills?.[refString(skill)]?.prerequisite;
-  return !p || holds(world, actor, p.root, steps && { steps });
+  return !p || holds(world, actor, p.root, { steps });
 }
 
 export function acquire(world: World, actor: CharacterId, run: Assigned, skill: DefinitionRef) {
-  if (
-    !world.cartridge.skills?.[refString(skill)] ||
-    membership(world, actor, skill) !== false ||
-    !prerequisiteHolds(world, actor, skill)
-  )
+  if (!world.cartridge.skills?.[refString(skill)] || membership(world, actor, skill) !== false)
     throw new KernelError('precondition_failed');
   return assigned(world, actor, run, { fact: acquisition(skill), value: true }, 'skills');
 }

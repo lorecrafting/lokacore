@@ -1,4 +1,4 @@
-// size: allow 348, ancestry, bell area, Study edge, barrier opens_when, ask answer roots, identity name variants and blueprints join shared reference admission
+// size: allow 350, ancestry, bell area, Study edge, barrier opens_when, ask answer roots, identity name variants, blueprints and skill prerequisites join shared reference admission
 import { water } from './cartridge_water.ts';
 import { topics } from './cartridge_topics.ts';
 import { pools } from './cartridge_pools.ts';
@@ -168,12 +168,11 @@ export function nodes(c: Obj): [Obj, string][] {
     ...Object.entries((c.reactions ?? {}) as Obj).flatMap(([ref, r]) =>
       r.when ? walk(r.when.root, `.cartridge.reactions${step(ref)}.when.root`) : [],
     ),
-    ...Object.entries((c.skills ?? {}) as Obj).flatMap(([ref, s]) => [
-      ...walk(s.qualification.root, `.cartridge.skills${step(ref)}.qualification.root`),
-      ...(s.prerequisite
-        ? walk(s.prerequisite.root, `.cartridge.skills${step(ref)}.prerequisite.root`)
-        : []),
-    ]),
+    ...Object.entries((c.skills ?? {}) as Obj).flatMap(([ref, s]) =>
+      ['qualification', 'prerequisite'].flatMap((f) =>
+        s[f] ? walk(s[f].root, `.cartridge.skills${step(ref)}.${f}.root`) : [],
+      ),
+    ),
     ...Object.entries((c.dialogues ?? {}) as Obj).flatMap(([ref, d]) =>
       walk(d.policy.root, `.cartridge.dialogues${step(ref)}.policy.root`),
     ),

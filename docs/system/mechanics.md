@@ -3362,7 +3362,7 @@ Homestead hs-10 (Beads `loka-kgd.108.7`): a recipe may spend held items and hand
 Homestead hs-11 (Beads `loka-kgd.108.8`): a skill may require another skill's level before it is learned, so any profession can declare a tree. Declarations: [skill prerequisite](cartridge.md#skill-prerequisite-declarations) (`kernel_api` 1.101).
 
 - **Command.** None new: the teacher dialogue's `choose`, whose sequence holds `skill.acquire`.
-- **Admission** (`blocked` in `kernel/ts/src/mechanics/dialogue/shared.ts`, which the offer in GameView's choice list and the `choose` press both read): a `skill.acquire` whose skill's `prerequisite` does not hold for the choosing actor refuses `invalid_state`, as an already learned skill does. `acquire` (`kernel/ts/src/mechanics/skills.ts`) throws `precondition_failed` on the same test (`prerequisiteHolds`), so no other path grants the box.
+- **Admission** (`blocked` in `kernel/ts/src/mechanics/dialogue/shared.ts`, which the offer in GameView's choice list and the `choose` press both read): a `skill.acquire` whose skill's `prerequisite` does not hold for the choosing actor refuses `invalid_state` (`learnable` in `kernel/ts/src/mechanics/skills.ts`). `acquire` itself does not test the prerequisite: an ancestry grant at character creation (`kernel/ts/src/mechanics/attributes/rule.ts`) is not learning and bypasses it.
 - **Effect.** None new: an admitted acquisition writes `skill_<key>` true as before. XP (the `uses_<key>` count) is read, never spent.
 - **Realm seams** (owner decision 2026-10-13, brief checklist).
   1. Actor: met; the prerequisite is evaluated for the `choose` command's actor.
@@ -3381,5 +3381,5 @@ Homestead hs-11 (Beads `loka-kgd.108.8`): a skill may require another skill's le
   - Reads: the actor's facts through `holds` (`skill_compare`, use counts).
   - Writes: none new.
   - Reused: VersionedPolicy, `holds`, `skill_compare`, `skill.acquire`, the dialogue `blocked` admission, the policy reference walk.
-  - New: `SkillDefinition.prerequisite`, `prerequisiteHolds`, the self-reference check, the 1.101 floor.
+  - New: `SkillDefinition.prerequisite`, `learnable`, the self-reference check, the 1.101 floor.
   - Missing invariant: none.
