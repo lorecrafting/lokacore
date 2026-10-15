@@ -35,7 +35,17 @@ defmodule Loka.ContentVoicesTest do
        &(Map.delete(&1, "asides")
          |> update_in(["details", "carved_door"], fn d -> Map.delete(d, "asides") end))}
 
-    for changes <- [[api], [api, no_asides]] do
+    # Asides alone, with no skill_compare leaf anywhere, still need 1.91.
+    asides_only = [
+      api,
+      {"rooms/hall.json",
+       &(put_in(&1, ["asides", Access.at(0), "when", "root"], %{"op" => "all", "items" => []})
+         |> update_in(["details", "carved_door"], fn d -> Map.delete(d, "asides") end))},
+      {"npcs/sage.json", &Map.delete(&1, "room_line_variants")},
+      {"recipes/read_glyphs.json", nil}
+    ]
+
+    for changes <- [[api], [api, no_asides], asides_only] do
       assert {:error, diags} = Loka.ContentSource.compile(dir, changes)
       assert @floor in Enum.map(diags, &{&1["code"], &1["path"]}), inspect(diags)
     end

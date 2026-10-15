@@ -168,6 +168,16 @@ test('the loader checks asides and skill_compare: references, text, owner and fl
       },
       ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least', {}],
     ],
+    [
+      (c) => {
+        c.manifest.requires.kernel_api.at_least = '1.90';
+        c.rooms[hall].asides[0].when.root = { op: 'all', items: [] };
+        delete c.rooms[hall].details.carved_door.asides;
+        delete c.npcs[`${C}:npc/sage`].room_line_variants;
+        delete c.recipes[`${C}:recipe/read_glyphs`];
+      },
+      ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least', {}],
+    ],
   ];
   for (const [change, expected] of rows) {
     assert.deepEqual(load(change), expected);
