@@ -1,4 +1,6 @@
+// size: allow 302, final checks order rows by code point so both kernels report the same first fault
 import { recordKnowledge } from './compose_knowledge.ts';
+import { cmp } from './validate.ts';
 import { choice, pendingAtLimit } from './compose_choice.ts';
 import { composeLiquid } from './compose_liquid.ts';
 import { transitionBleed } from './compose_bleed.ts';
@@ -72,8 +74,7 @@ export function compose(state: State, delta: StateDelta, final = true): Result {
     if ('code' in out) return fault(out.code, t);
     ctx.overlay.set(k, { group: op.writer_group, target: t, value: out.value });
   }
-  // Final checks read rows in key order, as the Elixir twin does: the first fault is the same.
-  const rows = [...ctx.overlay].sort(([a], [b]) => (a < b ? -1 : 1));
+  const rows = [...ctx.overlay].sort(([a], [b]) => cmp(a, b)); // key order picks the first fault
   const limit = rows.find(([, w]) => w.target.kind === 'choice' && pendingAtLimit(w.value));
   if (limit) return fault('precondition_failed', limit[1].target);
   const unrun = final && rows.find(([, w]) => unrunJob(w, horizon));

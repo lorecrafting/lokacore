@@ -36,7 +36,7 @@ defmodule Loka.Core.Compose do
     end
   end
 
-  # Rows in key order (a map past 32 keys iterates in hash order): the first fault matches TS.
+  # Rows in key order (a map past 32 keys iterates in hash order): choice and job faults match TS.
   defp finish(rows, final, horizon) do
     cond do
       t = ComposeChoice.pending_at_limit(rows) -> fault("precondition_failed", t)
