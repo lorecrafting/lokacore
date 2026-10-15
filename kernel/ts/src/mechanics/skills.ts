@@ -34,11 +34,13 @@ export function status(world: World, actor: CharacterId, skill: DefinitionRef, s
   return { acquired, qualified, usable: acquired && qualified };
 }
 
-/** Homestead hs-11: the prerequisite, when declared, holds; checked at dialogue admission only,
- * since an ancestry grant at birth (attributes/rule.ts) is not learning. */
+/** Not yet learned, and (Homestead hs-11) its prerequisite, when declared, holds; dialogue
+ * admission only: an ancestry grant at birth (attributes/rule.ts) is not learning. */
 export function learnable(world: World, actor: CharacterId, skill: DefinitionRef, steps: Steps) {
   const p = world.cartridge.skills?.[refString(skill)]?.prerequisite;
-  return !p || holds(world, actor, p.root, { steps });
+  return (
+    membership(world, actor, skill) === false && (!p || holds(world, actor, p.root, { steps }))
+  );
 }
 
 export function acquire(world: World, actor: CharacterId, run: Assigned, skill: DefinitionRef) {

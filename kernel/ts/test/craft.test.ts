@@ -316,7 +316,7 @@ test('a craft whose policy fails refuses on the policy, as offered', () => {
 
 // Homestead hs-11. Breaks: the dialogue admission (dialogue/shared.ts blocked) skips the
 // prerequisite (the level-1 choose is accepted), the offer disagrees with admission (agrees
-// fails), or a learned box can be learned again.
+// fails), or the conversation offers the lesson again after it is learned.
 test('carving is learned only at whittling 2, offered and admitted alike', () => {
   const carver = (w: World) => w.entityIds[`${P}npc/old_carver`]!;
   const learned = (w: World) =>
