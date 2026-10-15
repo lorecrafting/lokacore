@@ -26,7 +26,7 @@ migration promise.
 In a slice worktree, `bin/worktree_setup.sh` replaces `npm ci`: it clones the main checkout's
 `node_modules` (APFS copy-on-write, a few seconds). Not a symlink: Metro then resolves `expo`
 outside its watched folders and serves the SQLite worker at a broken URL, a blank page. To check a sampler room at 390 px there without touching the owner's preview (each walk serves
-the Book on a free port and screenshots every page to `.walkthrough/steps`):
+the Book on a free port and screenshots every page into `mobile/app/.walkthrough/contact-sheet.html`):
 
 ```sh
 mise exec -- bin/loka dev cartridges/ashmere_sampler && cd mobile/app && LOKA_WALK=ashmere_sampler mise exec -- npm run walkthrough
