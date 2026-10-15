@@ -1972,7 +1972,7 @@ The [away recap](mechanics.md#away-recap-toolbox-row-w27) reads the optional `ti
 
 ## Identity declarations
 
-[Recognition and earned titles](mechanics.md#recognition-and-earned-titles-toolbox-rows-w15-and-fd9) add one optional declaration, `world.identity {name, name_variants?}` (`protocol/cartridge.schema.json` `WorldSettings`), needing `kernel_api` at least 1.97 (KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least`). `name` and each variant's `description` are text keys (UNRESOLVED_REFERENCE); `name_variants` are W6 `TextVariants`, owned by `description_variant` (CAPABILITY_MISSING), each condition naming declared definitions (UNRESOLVED_REFERENCE); a `fact_compare` with `subject: "target"` there is FACT_SCOPE_UNSUPPORTED (loader only, as every scope site). Both kernels refuse the rest.
+[Recognition and earned titles](mechanics.md#recognition-and-earned-titles-toolbox-rows-w15-and-fd9) add one optional declaration, `world.identity {name, name_variants?}` (`protocol/cartridge.schema.json` `WorldSettings`), needing `kernel_api` at least 1.97 (KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least`). `name` and each variant's `description` are text keys (UNRESOLVED_REFERENCE); `name_variants` are W6 `TextVariants`, owned by `description_variant` (UNDECLARED_CAPABILITY), each condition naming declared definitions (UNRESOLVED_REFERENCE); a `fact_compare` with `subject: "target"` there is FACT_SCOPE_UNSUPPORTED (loader only, as every scope site). Both kernels refuse the rest.
 
 ## NPC door declarations
 
