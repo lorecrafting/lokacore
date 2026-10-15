@@ -154,7 +154,9 @@ test('a real failed or lost COMMIT at completion retries to the same single hut'
     assert.deepEqual(b.created(), straight.created());
     const rows = (x: typeof b) =>
       x.p.sql
-        .prepare("SELECT key, value FROM state_row WHERE section IN ('created', 'facts', 'jobs')")
+        .prepare(
+          "SELECT key, value FROM state_row WHERE section IN ('created', 'facts', 'jobs', 'statuses')",
+        )
         .all();
     assert.deepEqual(rows(b), rows(straight));
     b.p.sql.close();
