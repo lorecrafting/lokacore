@@ -90,13 +90,15 @@ const names = (w: World, k: string) => {
     v.known_npcs?.find((e) => e.id === npc(w, k))?.name,
   ];
 };
+// Realm seam 1: a second character in the same world, with none of the player's facts or body.
+const OTHER = 'char:other' as never;
 const wanted = (w: World) => value(w, w.character, ref('fact', 'wanted'));
 const lines = (d: { narration?: readonly { key: unknown }[] }) =>
   (d.narration ?? []).map((l) => l.key);
 
 // Breaks: an NPC name read without the actor's facts (knownNpcs or the room list showing the base
-// short after the stranger is named, also seen through an exit), or the pair fact written at the
-// wrong subject.
+// short after the stranger is named, also seen through an exit), a name read for world.character
+// instead of the viewer (realm seam 1), or the pair fact written at the wrong subject.
 test('the stranger is unnamed until it gives its name', () => {
   let w = fresh();
   assert.equal(gameView(w).actor_name, 'identity.name');
@@ -115,15 +117,25 @@ test('the stranger is unnamed until it gives its name', () => {
     beyond.entities.find((e) => e.id === npc(w, 'stranger'))!.name,
     'npc.stranger.short_named',
   );
+  // The other character also met the stranger (its own observation row) but never asked its name.
+  const met = Object.values(r.w.state.observed_npcs!).find((o) => o.npc_id === npc(w, 'stranger'))!;
+  const both = { ...r.w.state.observed_npcs, other: { ...met, actor_id: OTHER } };
+  const other = gameView({ ...r.w, state: { ...r.w.state, observed_npcs: both } }, OTHER);
+  assert.deepEqual(
+    other.known_npcs?.map((e) => e.name),
+    ['npc.stranger.short'],
+  );
 });
 
 // Breaks: the title not granted on entry, variants read last-match (the title over the disguise),
-// displayedName reading a status without the actor's body as target, or the status not expiring.
+// displayedName reading a status without the actor's body as target, actor_name read for
+// world.character instead of the viewer (realm seam 1), or the status not expiring.
 test('the den earns a title; a hood hides it for two game hours', () => {
   let w = go(fresh(), 'north');
   assert.equal(gameView(w).actor_name, 'identity.name_houndbane');
   w = perform(go(w, 'south'), 'don_hood');
   assert.equal(gameView(w).actor_name, 'identity.name_hooded');
+  assert.equal(gameView(w, OTHER).actor_name, 'identity.name');
   w = wait(w, 7200);
   assert.equal(gameView(w).actor_name, 'identity.name_houndbane');
 });
