@@ -358,6 +358,16 @@ test('a commission raises for its job owner, caps per owner, and an unrefundable
     due(again, id as never, { ...row, actor_id: other }, mint, { n: 0 }),
     'precondition_failed',
   );
+  // Through orderReady: elapsing past that order's due time faults and changes nothing.
+  const pending = { ...row, actor_id: other, due_time: w.state.clock + 1 };
+  const stray = own({ ...w, state: { ...w.state, jobs: { ...w.state.jobs, [id]: pending } } });
+  const from = stray.state.clock;
+  const run_id = 'aaaaaaaa-1091-4091-8091-0000000000ff';
+  const payload = { type: 'elapsed', actor_id: w.character, run_id, from, until: from + 2 };
+  const command = { id: elapsedCommandId(run_id, w.context, from, from + 2), payload };
+  const r = stepElapsed(stray, { ...command, world_context_id: w.context } as never, 99);
+  assert.deepEqual(r.decision, { kind: 'fault', code: 'precondition_failed' });
+  assert.equal(r.world, stray);
   const mine = {
     ...again,
     state: {

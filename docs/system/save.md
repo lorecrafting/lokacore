@@ -347,9 +347,9 @@ changed-row transaction and save-v2 rows, with no format bump.
 Built rooms S3: a build commission's order job row carries `actor_id`, the owner the completion
 reads (compose and invariants allow `actor_id` on `order` jobs as on `reaction` jobs). The room
 is minted at completion under the job's command id, so a reopen between order and completion
-mints the same id (`mobile/authority/local-story/built.test.ts`). Load refuses a build order job
-whose `actor_id` is not the save's character as `save_corrupt` (`deadline-save.ts`, the per-job
-check, independent of the receipt replay).
+mints the same id (`mobile/authority/local-story/built.test.ts`). No new load refusal: a job
+`actor_id` forged to another actor is `save_corrupt` through the receipt replay, which every
+cartridge with services runs (`liquid-save.ts`).
 
 | Layer | Where | Refusal |
 | --- | --- | --- |

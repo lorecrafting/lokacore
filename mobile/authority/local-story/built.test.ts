@@ -162,7 +162,7 @@ test('a real failed or lost COMMIT at completion retries to the same single hut'
 });
 
 // Breaks: load admitting a saved build order whose owner (actor_id) names another actor, which
-// would raise the room for them; refused by whichever load check, with the file left unchanged.
+// would raise the room for them; refused by the receipt replay (liquid-save.ts), with the file left unchanged.
 test('a pending build order forged to another owner is save_corrupt and the file is unchanged', (t) => {
   const dir = mkdtempSync(join(tmpdir(), 'loka-built-owner-'));
   t.after(() => rmSync(dir, { recursive: true, force: true }));
