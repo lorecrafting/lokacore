@@ -103,4 +103,19 @@ defmodule Loka.ContentConstructionTest do
       assert pairs(diags) == expected
     end
   end
+
+  # Breaks (Built rooms S2 review): the site check compares the service blueprint with the site's
+  # list before both are expanded to full refs, so a bare key on one side and a full ref on the
+  # other is refused (services.ex benefit/5 relies on Construction.expand and Services.expand).
+  test "a build benefit matches its site blueprint across short and full reference forms" do
+    full = %{"cartridge_id" => "build_sampler", "cartridge_version" => "0.0.1"}
+    full = Map.merge(full, %{"kind" => "blueprint", "key" => "hut"})
+    service = {"services/raise_hut.json", &put_in(&1, ["benefit", "blueprint"], full)}
+    site = {"rooms/lane.json", &put_in(&1, ["site", "blueprints"], [full])}
+
+    for edit <- [service, site] do
+      dir = Loka.ContentSource.copy(@dir)
+      assert {:ok, _, []} = Loka.ContentSource.compile(dir, [edit])
+    end
+  end
 end

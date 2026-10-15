@@ -38,8 +38,8 @@ const service = (key: string) => ({
 });
 
 // Breaks: the built identity row not saved or not hydrated on load (north not offered after
-// reopen), the receipt replay minting a second room, or load admitting a row whose direction
-// the site does not declare.
+// reopen), the receipt replay minting a second room, or load admitting a forged built row
+// (refused as save_corrupt by a load check, not specifically by the direction check).
 test('the hut survives cold reopen, its receipt replays, and a forged east row is save_corrupt', (t) => {
   const dir = mkdtempSync(join(tmpdir(), 'loka-built-saves-'));
   t.after(() => rmSync(dir, { recursive: true, force: true }));

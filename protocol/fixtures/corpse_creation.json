@@ -1714,6 +1714,43 @@
             }
           }
         ]
+      },
+      "counterfeit": {
+        "changes": [
+          {
+            "target": {
+              "kind": "containment",
+              "entity_id": "00000000-0000-4000-8000-000000000005"
+            },
+            "value": "00000000-0000-4000-8000-000000000003"
+          },
+          {
+            "target": {
+              "kind": "entity",
+              "entity_id": "00000000-0000-4000-8000-000000000005"
+            },
+            "value": {
+              "id": "00000000-0000-4000-8000-000000000005",
+              "definition": {
+                "cartridge_id": "c",
+                "cartridge_version": "1.0.0",
+                "kind": "blueprint",
+                "key": "hut"
+              },
+              "origin": {
+                "kind": "built",
+                "site": {
+                  "cartridge_id": "c",
+                  "cartridge_version": "1.0.0",
+                  "kind": "room",
+                  "key": "lane"
+                },
+                "direction": "north",
+                "owner": "00000000-0000-4000-8000-000000000007"
+              }
+            }
+          }
+        ]
       }
     },
     {
@@ -1953,6 +1990,36 @@
             "entity_id": "00000000-0000-4000-8000-000000000005"
           }
         }
+      },
+      "counterfeit": {
+        "changes": [
+          {
+            "target": {
+              "kind": "entity",
+              "entity_id": "00000000-0000-4000-8000-000000000005"
+            },
+            "value": {
+              "id": "00000000-0000-4000-8000-000000000005",
+              "definition": {
+                "cartridge_id": "c",
+                "cartridge_version": "1.0.0",
+                "kind": "blueprint",
+                "key": "hut"
+              },
+              "origin": {
+                "kind": "built",
+                "site": {
+                  "cartridge_id": "c",
+                  "cartridge_version": "1.0.0",
+                  "kind": "room",
+                  "key": "lane"
+                },
+                "direction": "north",
+                "owner": "00000000-0000-4000-8000-000000000009"
+              }
+            }
+          }
+        ]
       }
     },
     {
@@ -2022,6 +2089,36 @@
             "entity_id": "00000000-0000-4000-8000-000000000005"
           }
         }
+      },
+      "counterfeit": {
+        "changes": [
+          {
+            "target": {
+              "kind": "entity",
+              "entity_id": "00000000-0000-4000-8000-000000000005"
+            },
+            "value": {
+              "id": "00000000-0000-4000-8000-000000000005",
+              "definition": {
+                "cartridge_id": "c",
+                "cartridge_version": "1.0.0",
+                "kind": "item",
+                "key": "hut"
+              },
+              "origin": {
+                "kind": "built",
+                "site": {
+                  "cartridge_id": "c",
+                  "cartridge_version": "1.0.0",
+                  "kind": "room",
+                  "key": "lane"
+                },
+                "direction": "north",
+                "owner": "00000000-0000-4000-8000-000000000007"
+              }
+            }
+          }
+        ]
       }
     },
     {
