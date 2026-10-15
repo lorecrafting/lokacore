@@ -80,8 +80,8 @@ Next, in order:
    notes descoped), Homestead, Settle S3/S4 only on an owner yes.
 5. Housekeeping draft #384: has the token-hygiene update, `loka-9ruc` (pre-push hook runs
    `bin/prepush.sh`), `loka-oy8i` (session_status compaction line), the G10 plan edit. Add
-   `loka-mm5v`, `loka-xroj` after the long-wait batch, `loka-dgl6`, and this session's retro items if
-   approved. Its branch edits `docs/HANDOFF.md` (one line): on conflict keep main's HANDOFF and
+   `loka-mm5v`, `loka-xroj` after the long-wait batch, `loka-dgl6`, and approved retro items
+   `loka-13i3`, `loka-z167`, `loka-o5c2`. Its branch edits `docs/HANDOFF.md` (one line): on conflict keep main's HANDOFF and
    re-apply "the pre-push hook runs it". Close `loka-bwfo` when #384 merges.
 
 Merge mechanics: `bin/pm_merge.sh <batch-worktree> <batch-branch> <slice-branch> <review-branch>
@@ -136,7 +136,7 @@ Session lessons (2026-10-14, session 84e03897):
 
 - 2026-10-14 (session 84e03897): approved retro items `loka-9ruc`, `loka-oy8i`; G10 map pins and
   journal notes descoped ("maybe descope that for now"), letters by job kept; death penalty options
-  (row 47) kept ("lets keep it"); Fable drafts briefs for hard rows ("yes record the fable brief
+  (row 47) kept ("lets keep it"); retro items `loka-13i3`, `loka-z167`, `loka-o5c2` approved ("approve all three retro items"); Fable drafts briefs for hard rows ("yes record the fable brief
   rule", rule above); `~/dev` added to Spotlight Privacy.
 - Earlier 2026-10-14: fast-jev compaction OFF ("ok keep it off"); Fable allowed for important
   judgment work; adopted the Fable priority plan; Settle S1 into Homestead, S2 cut, S3/S4 on a yes;
@@ -147,7 +147,6 @@ Session lessons (2026-10-14, session 84e03897):
 - Cloud compute (`loka-2of`, prices refreshed in its notes): the bottleneck is M1 CPU, not CI (CI is
   free: the repo is public). PM pick: a Hetzner CAX41 agent box (~$45/mo, 16 ARM cores) or CAX31
   (~$20/mo, within the $20 budget). Owner to choose and sign up; the PM then writes setup steps.
-- Retro items `loka-13i3`, `loka-z167`, `loka-o5c2` (this session): approve or reject.
 
 ## Parked (polish lane)
 
