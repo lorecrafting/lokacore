@@ -9,4 +9,19 @@ defmodule Loka.ContentR9cInteractionsTest do
     expected = ~s({"cartridge":#{@kat["canonical"]},"content_hash":"#{@kat["sha256"]}"})
     assert Loka.Content.compile("cartridges/r9c_interactions") == {:ok, expected, []}
   end
+
+  # Homestead hs-11. Breaks: an ancestry grants at birth a skill whose prerequisite was never met.
+  test "an ancestry never grants a skill with a prerequisite" do
+    prerequisite = %{"policy_version" => 1, "root" => %{"op" => "all", "items" => []}}
+
+    assert {:error, diags} =
+             Loka.ContentSource.compile(Loka.ContentSource.copy("cartridges/r9c_interactions"), [
+               {"skills/swim.json", &Map.put(&1, "prerequisite", prerequisite)},
+               {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.101")}
+             ])
+
+    assert Enum.map(diags, &{&1["code"], &1["path"]}) == [
+             {"SCHEMA_VIOLATION", "cartridge.ancestries.fen_born.skill"}
+           ]
+  end
 end

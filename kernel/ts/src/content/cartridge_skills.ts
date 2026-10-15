@@ -60,7 +60,8 @@ export function skills(c: Obj, checks: Checks): Diagnostic[] {
   return [...out, ...growth(c), ...prerequisites(c), ...durability(c, checks)];
 }
 
-// Homestead hs-11: a prerequisite never names its own skill and needs API 1.101.
+// Homestead hs-11: a prerequisite never names its own skill, no ancestry grants its box, and it
+// needs API 1.101.
 function prerequisites(c: Obj): Diagnostic[] {
   const named = Object.entries((c.skills ?? {}) as Obj).filter(([, s]) => s.prerequisite);
   const out = named
@@ -74,6 +75,10 @@ function prerequisites(c: Obj): Diagnostic[] {
         error: 'invalid_value',
       }),
     );
+  // A birth grant skips learning, so an ancestry never grants a box with a prerequisite.
+  for (const [choice, a] of Object.entries((c.ancestries ?? {}) as Obj))
+    if (a.skill && c.skills?.[refString(a.skill)]?.prerequisite)
+      out.push(diag('SCHEMA_VIOLATION', `.cartridge.ancestries${step(choice)}.skill`));
   if (named.length && apiCmp(c.manifest.requires.kernel_api.at_least, '1.101') < 0)
     out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
   return out;

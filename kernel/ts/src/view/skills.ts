@@ -52,6 +52,8 @@ function levellingView(world: World, actor: CharacterId) {
 }
 
 /** Original free-bound lessons identify the existing actor SkillViews; no second acquisition projection. */
+// ponytail: lists a lesson whose prerequisite does not hold (the choice is grey); hs-14's `locked`
+// field (loka-kgd.108.11) marks it.
 export function freeLessons(world: World, npc: string) {
   const refs = Object.values(world.cartridge.dialogues ?? {})
     .filter((d) => world.entityIds[refString(d.npc)] === npc)

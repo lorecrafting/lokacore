@@ -1954,7 +1954,7 @@ The [away recap](mechanics.md#away-recap-toolbox-row-w27) reads the optional `ti
 
 ## Skill prerequisite declarations
 
-[Skill trees](mechanics.md#skill-trees-homestead-hs-11) add one optional skill field (`protocol/cartridge.schema.json` `SkillDefinition`, `kernel_api` 1.101): `prerequisite`, a VersionedPolicy evaluated for the learning actor. Its leaves are checked as `qualification`'s (an unknown `skill_compare` skill is UNRESOLVED_REFERENCE at `skills/carving.prerequisite.root.skill`); a `skill_compare` anywhere in it naming the skill itself is SCHEMA_VIOLATION at `prerequisite` (`prerequisites` in `kernel/ts/src/content/cartridge_skills.ts`; `Loka.Content.Skills.itself/1`). A prerequisite below `kernel_api` 1.101 is KERNEL_API_RANGE_INVALID (`protocol/fixtures/loader_floors.json`).
+[Skill trees](mechanics.md#skill-trees-homestead-hs-11) add one optional skill field (`protocol/cartridge.schema.json` `SkillDefinition`, `kernel_api` 1.101): `prerequisite`, a VersionedPolicy evaluated for the learning actor. Its leaves are checked as `qualification`'s (an unknown `skill_compare` skill is UNRESOLVED_REFERENCE at `skills/carving.prerequisite.root.skill`); a `skill_compare` anywhere in it naming the skill itself is SCHEMA_VIOLATION at `prerequisite` (`prerequisites` in `kernel/ts/src/content/cartridge_skills.ts`; `Loka.Content.Skills.itself/2`). An ancestry's `skill` naming a skill with a `prerequisite` is SCHEMA_VIOLATION at `ancestries.<choice>.skill`, since a birth grant skips learning (the same `prerequisites`; `Loka.Content.Ancestries.learned_only/4`). A prerequisite below `kernel_api` 1.101 is KERNEL_API_RANGE_INVALID (`protocol/fixtures/loader_floors.json`).
 
 ## Durability declarations
 
