@@ -1,0 +1,47 @@
+{
+  "label": "action.fish",
+  "aliases": [
+    "fish"
+  ],
+  "target": {
+    "kind": "use",
+    "tool": {
+      "tag": "rod"
+    }
+  },
+  "priority": 5,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "has_tag",
+      "subject": "target",
+      "tag": "water"
+    }
+  },
+  "check": {
+    "key": "fish",
+    "kind": "luck",
+    "chance": 50
+  },
+  "cooldown": 600,
+  "duration": 60,
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "event.emit",
+          "event": "bite"
+        }
+      ],
+      "narration": {
+        "actor": "narration.fish.bite"
+      }
+    },
+    "failure": {
+      "sequence": [],
+      "narration": {
+        "actor": "narration.fish.miss"
+      }
+    }
+  }
+}

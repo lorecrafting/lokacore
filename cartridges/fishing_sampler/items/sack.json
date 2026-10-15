@@ -1,0 +1,15 @@
+{
+  "keywords": [
+    "sack"
+  ],
+  "short": "item.sack.short",
+  "room_line": "item.sack.room",
+  "description": "item.sack.description",
+  "mass_grams": 100,
+  "location": {
+    "in": "room",
+    "room": "bank"
+  },
+  "container": true,
+  "slot": "waist"
+}

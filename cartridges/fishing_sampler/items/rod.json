@@ -1,0 +1,17 @@
+{
+  "keywords": [
+    "rod"
+  ],
+  "short": "item.rod.short",
+  "room_line": "item.rod.room",
+  "description": "item.rod.description",
+  "mass_grams": 400,
+  "location": {
+    "in": "room",
+    "room": "bank"
+  },
+  "tags": [
+    "rod",
+    "wooden"
+  ]
+}

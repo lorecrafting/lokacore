@@ -1,0 +1,19 @@
+{
+  "on": {
+    "event": "custom_event",
+    "custom": "bite"
+  },
+  "when": {
+    "policy_version": 1,
+    "root": {
+      "op": "sky",
+      "weather": "rain"
+    }
+  },
+  "apply": [
+    {
+      "op": "replenish.run",
+      "key": "salmon"
+    }
+  ]
+}

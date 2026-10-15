@@ -1,0 +1,16 @@
+{
+  "items": [
+    "eel_01"
+  ],
+  "from": {
+    "in": "room",
+    "room": "larder"
+  },
+  "to": {
+    "in": "room",
+    "room": "bank"
+  },
+  "cap": 1,
+  "count": 1,
+  "every": 1000000000
+}

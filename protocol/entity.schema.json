@@ -372,6 +372,7 @@
         "fragile",
         "liquid_holding",
         "metal",
+        "rod",
         "sharp",
         "silver",
         "warm",
@@ -443,6 +444,9 @@
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
         "metal": {
+          "$ref": "entity.schema.json#/$defs/ResistancePercent"
+        },
+        "rod": {
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
         "sharp": {
