@@ -27,7 +27,7 @@ Before handing off:
 1. The brief names the [lane](../../docs/WORKFLOW.md#delivery-lanes). In every lane run only
    the touched layer's type/compile checks and the focused tests your diff touches, under `nice -n 10`; never the full
    `npm test`, the Storybook smoke, `test:e2e` or `bin/check_all.sh` on the M1 ([two-lane CI](../../docs/decisions/owner-decision-two-lane-ci-2026-10-09.md)).
-   Before every push run `bin/prepush.sh` (CI's static checks, about 30 s) and fix what fails.
+   The pre-push hook runs `bin/prepush.sh` (CI's static checks, about 30 s) and refuses a failing push: fix what fails; `--no-verify` needs the owner's OK.
    Hosted CI on the pushed head is the final run (it includes the full `npm test` of each package):
    after a push, confirm `ci.yml` and `book-e2e.yml` started with one `gh run list --commit "$(git rev-parse HEAD)"` call (the full sha; a short one matches nothing) and hand back (a run can start up to ~2 minutes late: report an empty list, never dispatch);
    the PM watches CI and sends a red run back as a finding. Never wait on CI,

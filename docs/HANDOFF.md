@@ -75,7 +75,7 @@ Merge mechanics: `bin/pm_merge.sh <batch-worktree> <batch-branch> <slice-branch>
 index, appended `docs/system/mechanics.md` sections, the `kernel_api` line in `world.ts`) and stops on
 anything else; a code conflict goes to the slice developer (merge the batch into the slice branch).
 `protocol/fixtures/invalid.json` is still by hand (union, `json.dumps(indent=2)`). Developers run
-`bin/prepush.sh` before every push and never wait on CI; the PM watches CI.
+`bin/prepush.sh` before every push (the pre-push hook runs it) and never wait on CI; the PM watches CI.
 
 Session lessons (2026-10-14):
 - Subagents died seven times on "`server_tool_use` ids must be unique" after a compaction, on a

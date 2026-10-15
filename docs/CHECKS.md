@@ -5,7 +5,7 @@ run on the exact head is the merge gate with review ([two-lane CI](decisions/own
 Locally, pre-commit checks the staged files and developers run only the tests their diff touches;
 `bin/check_all.sh` mirrors the hosted line for an occasional full local run. `bin/prepush.sh` runs
 the static checks of hosted CI, no test suite, in about 30 s before every push and after every
-`bin/pm_merge.sh` merge.
+`bin/pm_merge.sh` merge. The `.githooks/pre-push` hook runs it on every push (status-only pushes under `.beads/` or `docs/HANDOFF.md` skip it); `--no-verify` needs the owner's OK.
 The [scope audit](evidence/2026-10-06-ci-scope-audit.md) records the costs measured when lanes were selected locally.
 Mobile checks are paused by the [owner decision](decisions/owner-decision-web-first-mobile-pause-2026-10-05.md);
 their rules and red controls remain available for resumption.
