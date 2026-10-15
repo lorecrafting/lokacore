@@ -292,7 +292,9 @@ defmodule Loka.Core.ComposeTest do
     knowledge = JSON.decode!(File.read!("protocol/fixtures/knowledge_composition.json"))["cases"]
     expedition = JSON.decode!(File.read!("protocol/fixtures/expedition.json"))["cases"]
 
-    for c <- knowledge ++ expedition,
+    status = JSON.decode!(File.read!("protocol/fixtures/status_composition.json"))["cases"]
+
+    for c <- knowledge ++ expedition ++ status,
         do: differential([%{"state" => c["state"], "delta" => %{"ops" => c["ops"]}}])
 
     :rand.seed(:exsss, {5, 5, 5})

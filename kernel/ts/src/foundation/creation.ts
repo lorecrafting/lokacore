@@ -43,6 +43,15 @@ export function creationValid(identity: Json, state: State): boolean {
   );
 }
 
+/** The kind a created identity hydrates as (runtime/created.ts): built -> room, a spawned hound or deer -> npc, else item. */
+export function createdKind(identity: Json): 'room' | 'npc' | 'item' {
+  const origin = (identity as Obj).origin as Obj;
+  if (origin.kind === 'built') return 'room';
+  return origin.kind === 'spawned' && ['hound', 'deer'].includes(origin.role as string)
+    ? 'npc'
+    : 'item';
+}
+
 /** A create is followed by its first placement, except a built room, which is never placed. */
 export function initialPair(op: DeltaOp, next: DeltaOp | undefined): boolean {
   if (op.op !== 'entity.create') return true;

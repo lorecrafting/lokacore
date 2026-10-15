@@ -1,4 +1,4 @@
-import { creationValid } from '../foundation/creation.ts';
+import { createdKind, creationValid } from '../foundation/creation.ts';
 // Derived corpse definitions are rebuilt from durable identity and the pinned cartridge only.
 import { key, same } from '../foundation/compose.ts';
 import type { DefinitionRef, EntityId, Key, RoomDefinition } from '../contracts.gen.ts';
@@ -74,9 +74,7 @@ function derive(world: World, state: State, id: string, identity: Identity, draf
   )
     return false;
   if (identity.origin.kind === 'built') return raise(world, id, identity, draft);
-  const member =
-    identity.origin.kind === 'spawned' &&
-    (identity.origin.role === 'hound' || identity.origin.role === 'deer');
+  const member = createdKind(identity as never) === 'npc';
   const template = member
     ? world.cartridge.npcs?.[refString(identity.definition)]
     : world.cartridge.items?.[refString(identity.definition)];

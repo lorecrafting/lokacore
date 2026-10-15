@@ -1,13 +1,20 @@
 import type { DeltaOp } from '../contracts.gen.ts';
 import type { Json } from './canonical.ts';
-import { same, type State } from './compose.ts';
+import { key, same, type State, type Written } from './compose.ts';
+import { createdKind } from './creation.ts';
 
 type Op = Extract<DeltaOp, { op: 'status.transition' }>;
 /** The entity kinds a status row may sit on (rows 1, G3, status reader 9); never a detail or slot. */
 export const HOLDERS = ['body', 'npc', 'item', 'room'];
 
 /** One checked status generation on a body, NPC, item or room (rows 1, G3, reader 9): the holder and status pair is the target. */
-export function transitionStatus(op: Op, row: Json | undefined, state: State, now: number) {
+export function transitionStatus(
+  op: Op,
+  row: Json | undefined,
+  state: State,
+  now: number,
+  overlay: Map<string, Written>,
+) {
   const prior = row as Op['value'] | undefined;
   const next = op.value;
   const known = (state.known_entities ?? {}) as Record<string, { kind?: string }>;
@@ -23,11 +30,14 @@ export function transitionStatus(op: Op, row: Json | undefined, state: State, no
         // An active row keeps its generation; a refresh or successor never shortens the end (and
         // a permanent row, with no end, never turns timed).
         (!prior?.active || next.ends_at >= prior.ends_at!);
+  // A holder an entity.create earlier in this delta made has the kind it will hydrate as.
+  const created = overlay.get(key({ kind: 'entity', entity_id: op.body_id }))?.value;
+  const kind = known[op.body_id]?.kind ?? (created && createdKind(created));
   const generation = prior?.active
     ? next.generation === prior.generation
     : next.generation === (prior?.generation ?? 0) + (next.active ? 1 : 0);
   if (
-    !HOLDERS.includes(known[op.body_id]?.kind as string) ||
+    !HOLDERS.includes(kind as string) ||
     !same(row ?? null, op.expected) ||
     !shape ||
     !generation ||
