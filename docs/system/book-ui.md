@@ -237,7 +237,7 @@ currently projected. A newer unrelated narration receipt cannot provide detail i
 
 Tapping an NPC opens full details using its actual projected name, authored description and
 actions. Description comes first. Outside a conversation the page offers the person's actions as
-cards straight after the description: Talk, shop and service offers; the foot is Leave. It shows
+cards straight after the description: Talk, shop, [Ask about](#fd7-ask-details) and service offers; the foot is Leave. It shows
 no past conversation log on a fresh visit to the page or after Leave the conversation (the log
 shows again inside a new conversation); lines since that visit began or that Leave are the only
 history. Answering (a `choose` press) puts that page **in conversation**, and it stays so after a one-reply
@@ -371,7 +371,7 @@ Give invocations remain valid; engine mechanics are unchanged. Touch recipient s
 explicit carry: implement it when a touch flow can supply a recipient from actual projected
 valid targets, with its own approved scope. The inspected unsupported-capability rejection was
 one incomplete Give; later moves were accepted. Preserve genuine errors and meaningful history
-rather than hiding errors or clearing same-room history. Carries remain in the [roadmap](../ROADMAP.md). Further cosmetic polish is deferred under the [C1 UI-deferral record](../decisions/owner-decision-c1-gate-ui-deferral-2026-10-03.md).
+rather than hiding errors or clearing same-room history. Whisper needs a word; until the word bar (loka-a9pn) the NPC page offers no Whisper card rather than one the kernel always refuses. Carries remain in the [roadmap](../ROADMAP.md). Further cosmetic polish is deferred under the [C1 UI-deferral record](../decisions/owner-decision-c1-gate-ui-deferral-2026-10-03.md).
 
 ## Combat interaction
 
@@ -1018,7 +1018,7 @@ The Journal page says "Nothing written yet." only when it has neither quests nor
 
 ## FD7 ask details
 
-An NPC that the GameView lists `ask` on shows, after its other action cards and before services, one card per known topic (GameView `topics`, projected order) labelled "Ask about" and the topic's authored label. Pressing it sends `ask` with that topic; the answer or the person's knows-nothing line joins the page's history as narration, the page stays, no conversation opens. A topic granted by the answer adds its card at once. No known topics, no cards and no note; a hostile, absent or unlisted person shows none, as Talk. ([Ask about a topic](mechanics.md#ask-about-a-topic-toolbox-row-fd7))
+An NPC that the GameView lists an available `ask` on shows, after its other action cards and before services, one card per known topic (GameView `topics`, projected order) labelled "Ask about" and the topic's authored label. Pressing it sends `ask` with that topic; the answer or the person's knows-nothing line joins the page's history as narration, the page stays, no conversation opens. A topic granted by the answer adds its card at once. No known topics, no cards and no note; a hostile, absent or unlisted person shows none, as Talk. ([Ask about a topic](mechanics.md#ask-about-a-topic-toolbox-row-fd7))
 
 ## Storylet card details
 

@@ -93,7 +93,6 @@ export function buttonsOf(v: GameView, label: Say, text: Say): Press[] {
     ...travel(v),
     ...doors,
     ...heldButtons(v, button, projected, names, text),
-    ...askButtons(v, text),
     ...(v.known_npcs ?? []).map((n) => ({
       label: `${LABEL.askWhere} ${text(n.name)} is`,
       action_key: 'where',
@@ -102,6 +101,7 @@ export function buttonsOf(v: GameView, label: Say, text: Say): Press[] {
     })),
     ...dreamButtons(v, label),
     ...shopButtons(v, text),
+    ...askButtons(v, text),
     ...serviceButtons(v, text),
     ...transportButtons(v, text),
     ...asked(v, label),

@@ -74,3 +74,19 @@ test('each Ask about card is admitted: the answer joins the page, a grant adds i
   assert.equal(shown[0], 'The smith');
   assert.ok(b.labels().includes(LABEL.leave) && !b.labels().includes(LABEL.leaveConversation));
 });
+
+// Breaks: an ask the GameView lists unavailable still shows its topic cards.
+test('the guard turned hostile by smugglers offers no Ask about card', () => {
+  const b = smith();
+  b.tap(`${LABEL.askAbout} The mill`);
+  b.tap(LABEL.leave);
+  b.tap('The guard');
+  b.tap(`${LABEL.askAbout} The smugglers`);
+  const v = b.game.view().view;
+  const guard = v.entities.find((e) => e.name === 'npc.guard.short')!;
+  assert.deepEqual(
+    guard.actions.filter((a) => a.action_key === 'ask').map((a) => a.available),
+    [false],
+  );
+  assert.deepEqual(b.text().slice(0, 1).concat(asks(b)), ['The guard']);
+});
