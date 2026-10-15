@@ -9,7 +9,7 @@ import type { Button, DetailLine } from './presenter.ts';
 import { note, prose, usePalette, type Palette } from './palette.ts';
 import { opacity, size, space, type } from './tokens.ts';
 import { VerbLine } from './actions.tsx';
-import { AwayRecap, Here, LogLines } from './lines.tsx';
+import { Asides, AwayRecap, Here, LogLines } from './lines.tsx';
 import type { RecapLine } from './recap.ts';
 import { useTitleFocus } from './title.ts';
 import { LABEL } from './labels.ts';
@@ -121,6 +121,7 @@ export function RoomPage(p: {
     >
       {p.recap && <AwayRecap lines={p.recap} />}
       {paragraphs(c, p.text(p.view.place.description.key))}
+      <Asides lines={(p.view.place.asides ?? []).map((a) => p.text(a.key))} />
       {warnings(c, p.view, p.text)}
       <Here view={p.view} text={p.text} open={p.open} />
       {p.view.choice && !p.view.entities.some((e) => e.id === p.view.choice!.speaker_id) && (

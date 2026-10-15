@@ -12,6 +12,7 @@ import RoomLongLogView from './views/room-long-log.json';
 import RoomAtNightView from './views/room-at-night.json';
 import RoomRefusalView from './views/room-refusal.json';
 import senses from '../../../cartridges/senses_sampler/text.json';
+import voices from '../../../cartridges/voices_sampler/text.json';
 
 const meta: Meta = {
   title: 'Pages/Room',
@@ -83,5 +84,27 @@ export const SenseCuesHere: StoryObj = {
   play: async ({ canvas }) => {
     await expect(await canvas.findByText('Heat beats out from the forge.')).toBeVisible();
     await expect(canvas.getByText('Hammering')).toBeVisible();
+  },
+};
+
+// The voices sampler's hall aside (toolbox row FD2, book-ui.md Aside details) on a generated room.
+// Breaks: the aside is dropped or drawn before the room's prose.
+export const Asides: StoryObj = {
+  ...pageStory({
+    ...RoomFirstView,
+    view: {
+      ...RoomFirstView.view,
+      place: { ...RoomFirstView.view.place, asides: [{ key: 'aside.hall.lore' }] },
+    },
+  }),
+  args: { words: { 'aside.hall.lore': voices['aside.hall.lore'] } },
+  name: 'Asides',
+  play: async ({ canvas }) => {
+    const aside = await canvas.findByText(voices['aside.hall.lore']);
+    await expect(aside).toBeVisible();
+    const prose = canvas.getByText(/Reeds crowd/);
+    await expect(
+      prose.compareDocumentPosition(aside) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
   },
 };
