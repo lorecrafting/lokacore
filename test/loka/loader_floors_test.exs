@@ -6,9 +6,13 @@ defmodule Loka.LoaderFloorsTest do
 
   defp compile(dir, c, at) do
     api = {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], at)}
-    edits = for [file, path, value] <- c["edits"] || [], do: {file, &put_in(&1, path, value)}
+    edits = for [file, path, value] <- c["edits"] || [], do: {file, &edit(&1, path, value)}
     Loka.ContentSource.compile(dir, merge(edits ++ [api]))
   end
+
+  # A null value deletes the key (a case below a later sampler key's floor).
+  defp edit(json, path, nil), do: elem(pop_in(json, path), 1)
+  defp edit(json, path, value), do: put_in(json, path, value)
 
   # ContentSource.compile takes one change per file: chain the changes of one file.
   defp merge(edits) do

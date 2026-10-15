@@ -30851,5 +30851,74 @@
         "code": "invalid_type"
       }
     ]
+  },
+  {
+    "contract": "ActionRecipe",
+    "value": {
+      "key": "ring_bell",
+      "label": "actions.ring_bell",
+      "aliases": [
+        "ring",
+        "pull"
+      ],
+      "target": {
+        "kind": "detail",
+        "room": {
+          "cartridge_id": "ashmere_bell",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "belfry"
+        },
+        "detail": "bell"
+      },
+      "priority": 10,
+      "policy": {
+        "policy_version": 1,
+        "root": {
+          "op": "not",
+          "item": {
+            "op": "fact_compare",
+            "fact": {
+              "cartridge_id": "ashmere_bell",
+              "cartridge_version": "0.0.1",
+              "kind": "fact",
+              "key": "chapel_bell_rung"
+            },
+            "equals": true
+          }
+        }
+      },
+      "outcomes": {
+        "success": {
+          "sequence": [
+            {
+              "op": "fact.assign",
+              "fact": {
+                "cartridge_id": "ashmere_bell",
+                "cartridge_version": "0.0.1",
+                "kind": "fact",
+                "key": "chapel_bell_rung"
+              },
+              "value": true
+            },
+            {
+              "op": "event.emit",
+              "event": "bell_rung"
+            }
+          ],
+          "narration": {
+            "actor": "narration.ring_bell.actor",
+            "observers": "narration.ring_bell.observers"
+          }
+        }
+      },
+      "reason": "Needs Level 2"
+    },
+    "errors": [
+      {
+        "path": "/reason",
+        "code": "pattern_mismatch"
+      }
+    ]
   }
 ]

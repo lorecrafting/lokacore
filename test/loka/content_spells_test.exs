@@ -95,4 +95,24 @@ defmodule Loka.ContentSpellsTest do
       assert pairs(diags) == [expected]
     end
   end
+
+  # Breaks: the recipe reason check dropped, or 1.100 read as a string (below 1.99).
+  test "a recipe reason names a text key and needs 1.100, which is above 1.99" do
+    dir = Loka.ContentSource.copy(@dir)
+    api = &{"cartridge.json", fn m -> put_in(m, ["requires", "kernel_api"], &1) end}
+    reason = &{"recipes/ward.json", &1}
+    at_199 = api.(%{"at_least" => "1.99", "below" => "1.100"})
+
+    for {edits, expected} <- [
+          {[reason.(&Map.put(&1, "reason", "reason.nope"))],
+           [{"UNRESOLVED_REFERENCE", "recipes/ward.reason"}]},
+          {[at_199], [@floor]}
+        ] do
+      assert {:error, diags} = Loka.ContentSource.compile(dir, edits)
+      assert pairs(diags) == expected
+    end
+
+    assert {:ok, _, []} =
+             Loka.ContentSource.compile(dir, [at_199, reason.(&Map.delete(&1, "reason"))])
+  end
 end

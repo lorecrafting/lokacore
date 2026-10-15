@@ -110,7 +110,7 @@ test('spell words: refused ones carry their reason; lux casts once ash is gather
   );
   b.tap('Take up the apprenticeship');
   b.tap('Trace the sigil');
-  assert.ok(b.text().includes('ward, cast: not now'));
+  assert.ok(b.text().includes('ward, cast: Needs level 2'));
   assert.ok(!b.labels().some((l) => l.endsWith(', cast')));
   b.tap('Gather ash');
   b.tap('lux, cast');

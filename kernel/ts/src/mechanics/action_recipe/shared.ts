@@ -7,6 +7,7 @@ import type {
   CommandPayload,
   EntityId,
   RecipeTarget,
+  UnavailableReason,
   UseTool,
 } from '../../contracts.gen.ts';
 import { bodyOf, refString, type Steps, type World } from '../../runtime/decision.ts';
@@ -63,7 +64,9 @@ export function useAdmission(
   if (recipe?.target.kind !== 'use' || payload.type !== 'perform') return undefined;
   const body = bodyOf(world, payload.actor_id);
   const { item_id, target_id } = payload;
-  return body ? useRefused(world, recipe.target, body, item_id, target_id, steps) : 'not_found';
+  return body
+    ? useRefused(world, recipe.target, body, item_id, target_id, steps)
+    : ('not_found' as const);
 }
 
 /**
@@ -87,12 +90,23 @@ export const spellOf = (world: World, actor: CharacterId, word: unknown) => {
  * words are spells; in a fight, also for a spell with a duration (row 29b: its time.advance would
  * run the round job inside the cast).
  */
-export function castAdmission(world: World, payload: CommandPayload, steps: Steps) {
+export function castAdmission(
+  world: World,
+  payload: CommandPayload,
+  steps: Steps,
+): UnavailableReason | undefined {
   if (payload.type !== 'cast') return undefined;
   const spell = spellOf(world, payload.actor_id, payload.word);
   const body = bodyOf(world, payload.actor_id);
   const busy = !!spell?.duration && !!body && !!engaged(world, body);
-  return spell && !busy && holds(world, payload.actor_id, spell.policy.root, { steps })
+  if (!spell || busy) return { code: 'invalid_state' };
+  return holds(world, payload.actor_id, spell.policy.root, { steps })
     ? undefined
-    : ('invalid_state' as const);
+    : policyRefusal(spell);
 }
+
+/** A failed policy's refusal, carrying the recipe's authored `reason` text when it has one (loka-j64e). */
+export const policyRefusal = (recipe?: ActionRecipe): UnavailableReason =>
+  recipe?.reason
+    ? { code: 'invalid_state', message: { key: recipe.reason } }
+    : { code: 'invalid_state' };

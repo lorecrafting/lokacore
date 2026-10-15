@@ -1,4 +1,4 @@
-# size: allow 318, storylet targets (row FD3) check their floor and rooms beside the other recipe targets
+# size: allow 321, storylet targets (row FD3) and recipe reasons (loka-j64e) check their floor and rooms beside the other recipe targets
 defmodule Loka.Content.Recipes do
   @moduledoc """
   Action recipes and rooms' action contributions (action.schema.json ActionRecipe,
@@ -52,7 +52,10 @@ defmodule Loka.Content.Recipes do
     }
 
     Enum.flat_map(all(defs), &recipe(&1, ctx)) ++
-      contributions(defs, actions) ++ uses(defs, m) ++ storylets(defs, m)
+      contributions(defs, actions) ++
+      uses(defs, m) ++
+      storylets(defs, m) ++
+      RecipeTips.reasons(all(defs), ctx, api(m) < [1, 100])
   end
 
   # Toolbox row FD3: a storylet target needs kernel_api 1.92 (one diagnostic).

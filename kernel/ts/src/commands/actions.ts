@@ -1,3 +1,4 @@
+// size: allow 309, the command refusal and its GameView reason share one admission chain (loka-j64e)
 // ActionSet: engine, cartridge, room, choice; combat restricts admission/projection (06 §19).
 import {
   CAPABILITY_OWNERS,
@@ -13,6 +14,7 @@ import {
   type RecipeTarget,
   type TargetSpec,
   type TextKey,
+  type UnavailableReason,
   type VersionedPolicy,
 } from '../contracts.gen.ts';
 import { key, same } from '../foundation/compose.ts';
@@ -217,22 +219,26 @@ export const detailAt = (world: World, a: Offered) =>
  */
 import { visible } from '../mechanics/light/shared.ts';
 
-export function refusal(
+export const refusal = (...args: Parameters<typeof refusalReason>) => refusalReason(...args)?.code;
+
+/** refusal with its reason: a failed spell policy carries the recipe's `reason` text (loka-j64e). */
+// size: allow 43, the reason rides the same admission chain as the code
+export function refusalReason(
   world: World,
   payload: CommandPayload,
   steps: Steps,
   action?: Key,
   set?: ActionSet,
-) {
+): UnavailableReason | undefined {
   const gated = 'actor_id' in payload && !['choose_ancestry', 'elapsed'].includes(payload.type);
-  if (gated && needsAncestry(world, payload.actor_id)) return 'invalid_state'; // `in`: types only, run_job never gets here
+  if (gated && needsAncestry(world, payload.actor_id)) return { code: 'invalid_state' }; // `in`: types only, run_job never gets here
   if (
     payload.type === 'wait' &&
     world.cartridge.manifest.time_policy &&
     !fighting(world, payload.actor_id)
   )
-    return 'permission_denied';
-  if (hiddenTarget(world, payload, steps)) return 'not_present';
+    return { code: 'permission_denied' };
+  if (hiddenTarget(world, payload, steps)) return { code: 'not_present' };
   const perform = payload.type === 'perform';
   const actor = (payload as { actor_id: CharacterId }).actor_id;
   const matching = Object.values(set ?? resolved(world, actor)).filter(
@@ -244,18 +250,20 @@ export function refusal(
     (perform && !recipeKeys(world).includes(payload.action)) ||
     (payload.type === 'accept_quest' && !world.cartridge.quests?.[refString(payload.quest)]);
   if (!matching.length)
-    return unknown
-      ? 'not_found'
-      : fighting(world, actor) || barred(world, actor, payload.type)
-        ? 'invalid_state'
-        : 'unsupported_capability';
-  const used =
-    useAdmission(world, matching[0]!.recipe, payload, steps) ?? // row G4
-    castAdmission(world, payload, steps); // row 29a
+    return {
+      code: unknown
+        ? 'not_found'
+        : fighting(world, actor) || barred(world, actor, payload.type)
+          ? 'invalid_state'
+          : 'unsupported_capability',
+    };
+  const use = useAdmission(world, matching[0]!.recipe, payload, steps); // row G4
+  const used = use ? { code: use } : castAdmission(world, payload, steps); // row 29a
   const ok = (a: Offered, d = detailAt(world, a)) =>
     (d === undefined || visible(world, actor, d, steps)) &&
     holds(world, actor, a.policy.root, { target: d ?? primaryTarget(payload), steps });
-  return used || (matching.some((a) => ok(a)) ? undefined : 'invalid_state');
+  // An offered action's reason text is the GameView's (view/action_lists.ts); only cast's reaches here.
+  return used ?? (matching.some((a) => ok(a)) ? undefined : { code: 'invalid_state' });
 }
 
 // A spell (row 29a) is cast by its word, never offered or performed by its key.

@@ -3,7 +3,7 @@
 // none; its availability is cast's own admission: step's refusal, then the recipe's cooldown and
 // costs. And the cartridge's static speech.phrases (say's word chips), absent without them.
 import type { CharacterId, Key, SpellWord, Word } from '../contracts.gen.ts';
-import { admission, refusal, resolved } from '../commands/actions.ts';
+import { admission, refusalReason, resolved } from '../commands/actions.ts';
 import { value as factValue } from '../mechanics/fact.ts';
 import { bodyOf, type Steps, type World } from '../runtime/decision.ts';
 
@@ -23,9 +23,9 @@ function spellWords(world: World, actor: CharacterId, steps: Steps): SpellWord[]
     const word = r.target.word;
     const cast = { type: 'cast', actor_id: actor, word: word as string as Word } as const;
     const admitted = body ? admission(world, r, actor, body) : 'not_found';
-    const code =
-      refusal(world, cast, steps, 'cast' as Key, set) ??
-      (typeof admitted === 'string' ? admitted : undefined);
-    return [code ? { word, available: false, reason: { code } } : { word, available: true }];
+    const reason =
+      refusalReason(world, cast, steps, 'cast' as Key, set) ??
+      (typeof admitted === 'string' ? { code: admitted } : undefined);
+    return [reason ? { word, available: false, reason } : { word, available: true }];
   });
 }
