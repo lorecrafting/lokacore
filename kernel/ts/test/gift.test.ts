@@ -16,6 +16,7 @@ import { INSTALLED, gameView, loadCartridge, newWorld, step } from '../src/index
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import type { EntityId } from '../src/contracts.gen.ts';
 import { decode, encode } from '../src/foundation/canonical.ts';
+import { validate } from '../src/foundation/validate.ts';
 import { spokenBy } from '../src/mechanics/dialogue/shared.ts';
 import { describeEntity } from '../src/mechanics/description_variant/rule.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
@@ -151,12 +152,13 @@ const pennies = (w: World, who: EntityId) => level(w, who, resourceRef(w, 'penni
 
 // Breaks: the output left in custody (or moved only by a later claim), a job scheduled for an
 // untimed output, price 0 charged or refused, quantity ignored (all three pelts go), one pelt
-// accepted, the knife handed over twice.
+// accepted, the knife handed over twice, a price-0 offer refused by the GameView schema.
 test('two pelts and no coin buy the knife at once; one pelt does not', () => {
   let w = take(fresh(), 'pelt_01');
   refused(w, 'not_owned', 'service.missing_inputs');
   w = take(w, 'pelt_02', 'pelt_03');
   assert.deepEqual([offer(w).price, offer(w).action.available], [0, true]);
+  assert.deepEqual(validate('GameView', gameView(w)), []);
   const r = barter(w);
   assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
   w = r.world;

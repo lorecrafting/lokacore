@@ -4,7 +4,7 @@
 // kgd.70)).
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -20,14 +20,28 @@ import {
 import { openStory } from './authority.ts';
 import { elapsedHost } from './__tests__/elapsed-host.test.ts';
 
+const root = fileURLToPath(new URL('../../../', import.meta.url));
 const scratch = mkdtempSync(join(tmpdir(), 'loka-gift-save-'));
 const file = join(scratch, 'artifact.json');
 let artifact;
 try {
-  execFileSync('mix', ['loka.compile', 'cartridges/gift_sampler', file], {
-    cwd: fileURLToPath(new URL('../../../', import.meta.url)),
-    stdio: 'pipe',
+  // The trader also keeps a shop (selling the stone), so commerceSave reconciles every receipt,
+  // the price-0 barter included, on each reopen.
+  const src = join(scratch, 'gift_sampler');
+  cpSync(join(root, 'cartridges/gift_sampler'), src, { recursive: true });
+  const edit = (f: string, change: (json: any) => void) => {
+    const json = JSON.parse(readFileSync(join(src, f), 'utf8'));
+    change(json);
+    writeFileSync(join(src, f), JSON.stringify(json));
+  };
+  edit('cartridge.json', (c) => (c.requires.capabilities.commerce = 1));
+  edit('items/stone.json', (s) => (s.location = { in: 'npc', npc: 'trader' }));
+  edit('text.json', (t) => Object.assign(t, { 'shop.bought': 'Bought.', 'shop.sold': 'Sold.' }));
+  edit('npcs/trader.json', (n) => {
+    n.shop = { resource: 'pennies', offers: [{ item: 'stone', buy: 5, sell: 2 }] };
+    Object.assign(n.shop, { bought: 'shop.bought', sold: 'shop.sold' });
   });
+  execFileSync('mix', ['loka.compile', src, file], { cwd: root, stdio: 'pipe' });
   artifact = JSON.parse(readFileSync(file, 'utf8'));
 } finally {
   rmSync(scratch, { recursive: true });
@@ -59,8 +73,8 @@ const truth = (w: World) => [
   w.state.jobs ?? {},
 ];
 
-// Breaks: save recovery rejects the barter's output transfer out of a room (cold reopen is
-// save_corrupt), the receipt not replayed (a retry is refused order_open), or the gift's pair fact
+// Breaks: save recovery rejects the barter's output transfer out of a room, or commerceSave expects
+// a payment pair from the price-0 barter (either makes cold reopen save_corrupt), the receipt not replayed (a retry is refused order_open), or the gift's pair fact
 // not saved.
 test('a gift and a barter survive cold reopen; the barter retry replays', (t) => {
   const dir = mkdtempSync(join(tmpdir(), 'loka-gift-saves-'));

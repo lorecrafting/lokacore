@@ -1576,7 +1576,7 @@ services are separate direct offers, not a first-eligible dialogue replacement.
   - No quality from a check (C3-M03 forge, later).
   - A reaction or replenish naming the custody room can still move the items (row 20a limit).
   - The output moves to the body without a carry check.
-  - Claim and cancel cost at least 1 (the service price minimum is unchanged), because a free use would need command `quoted_price` and the offer price to allow 0, a protocol change.
+  - Claim and cancel cost at least 1. The schema price minimum is 0 since the barter (row kgd.70), but the loader refuses price 0 at `.price` for every benefit except an escrowed entitlement.
 - **Opt-in.** `ready_after`, `output`, `claim` and `cancel` need `kernel_api` 1.80 (KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least`) in both kernels. A cartridge without them keeps its bytes, hash, ids, receipts and GameView. Chapter 1 declares none.
 - **Book.** No new element: two more service offers.
 - **Traps.** [Trap 1](../MECHANICS-TOOLBOX.md#traps) holds: due times are on the logical clock. One new job kind; no new save section, op, event or command.
@@ -3517,7 +3517,7 @@ Homestead hs-7 (Beads `loka-kgd.108.5`, `loka-kgd.70`): liked and disliked gifts
 - **Traps.** Trap 8 checked (tiers are lines, gates only in dialogue); no other applies: no new job, event, op or save row.
 - **Known limits.**
   - The entitlement stays true after a barter, so the trade completes once per character and a retry reads `service.order_open`.
-  - A gift's `when` reads the farmer's flag, not the holder: in a cartridge where another NPC receives the apple, the farmer still gains trust. One NPC per liked item until a holder filter exists.
+  - A gift pays the holder but its `when` reads the flag at the farmer. An apple given to the trader sets the trader's trust and flag, not the farmer's, and the trader is paid again on each later gift that passes the farmer's flag: in a probe, apple, rat, apple to the trader gave trust 1, 0, 1. Trust stays bounded at -1..1, so this is no faucet. The apple the trader holds cannot be taken back (`not_present`), so the farmer's warm tier is then unreachable. Upgrade: a holder filter on the trigger.
   - Carrying capacity is not checked on the output transfer.
 - **Sampler.** `cartridges/gift_sampler`: a yard (the farmer, the trader with 0 pennies, an apple, a stone, a dead rat, three pelts) and a sealed stall, the custody room holding the knife. Stone: trust 0; apple: 1, warm; a second apple: 1; then the rat: 0, plain; a rat first: -1, cold. One pelt held: `not_owned`, `service.missing_inputs`; three held: the knife is held, two pelts in the stall, one held, pennies 0 and 0, no job row; a retry: `service.order_open` (`kernel/ts/test/gift.test.ts`, `test/loka/content_gift_test.exs`, `mobile/authority/local-story/gift.test.ts` for cold reopen and replay).
 - **Composition record** ([architecture](architecture.md#building-mechanics-by-composition)).
