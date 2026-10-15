@@ -51,7 +51,7 @@ emits `status_expired` only (an expired job skips the tick, `kernel/ts/src/mecha
   {status: word_travels, item: strongbox}` (`npc_status_sampler` torch on the door). Reaction
   `word_out`: `on {event: status_expired, status: word_travels}` `apply fact.assign warden_knows true`
   (`npc_status_sampler/reactions/charred.json`; the delivery runs for the command actor, so the
-  player's fact is written whatever advance crosses the expiry). Fact `warden_knows`, player bool.
+  player's fact is written whatever advance crosses the expiry). Fact `warden_knows`, instance bool (a schedule case reads it, Realm seam 5).
 - Warden (`npcs/warden.json`): `disposition.hostile` becomes `any(all(wardle_standing -2, trust 0 at
   target), all(warden_knows true, trust 0 at target))`; `engage` unchanged. `daily_schedule` `"13":
   [{when: fact_compare warden_knows true, room: village_green, goal: npc.warden.goal_green},
@@ -75,7 +75,7 @@ emits `status_expired` only (an expired job skips the tick, `kernel/ts/src/mecha
 
 ## Pattern 3: the burnt letter (an echo)
 
-- `reactions/letter_ash_after.json` adds `fact.assign letter_burnt true` (player bool) beside the
+- `reactions/letter_ash_after.json` adds `fact.assign letter_burnt true` (instance bool, read by Wat's schedule case) beside the
   standing -2.
 - Wat (`npcs/wat.json`): `daily_schedule` adds `"14": [{when: fact_compare letter_burnt true, room:
   warden_gate, goal: npc.wat.goal_gate}, shepherd_hut]`, `"16": shepherd_hut`; hours 8 and 9 stay
