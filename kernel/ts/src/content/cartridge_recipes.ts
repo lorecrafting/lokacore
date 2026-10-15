@@ -1,6 +1,7 @@
 // The loader's recipe checks (action_recipe@1; action.schema.json ActionRecipe), twin of
 // lib/loka/content/recipes.ex, and each room's action contribution.
 import { CAPABILITY_OWNERS, type Diagnostic } from '../contracts.gen.ts';
+import { same } from '../foundation/compose.ts';
 import { apiCmp } from './cartridge_installed.ts';
 import { refString } from '../runtime/decision.ts';
 import { diag, step, type Checks, type Obj } from './cartridge_refs.ts';
@@ -72,12 +73,15 @@ export function recipes(c: Obj, { named, typedValue, text }: Checks): Diagnostic
 function target(c: Obj, r: Obj, at: string, named: Checks['named']): Diagnostic[] {
   const { room, detail, tool } = r.target;
   if (r.target.kind === 'spell') {
-    // Word bar S2: learned names a bool fact (a per_subject one is FACT_SCOPE_UNSUPPORTED in the
-    // W2 site walk, as row 27's identified).
+    // Word bar S2: learned names a bool fact of player scope alone, the caster's (a per_subject
+    // one is FACT_SCOPE_UNSUPPORTED in the W2 site walk).
     named(r.target.learned, 'fact', `${at}.target.learned`);
     const spec = c.facts[refString(r.target.learned)];
-    return spec && spec.value_type.type !== 'bool'
-      ? [diag('FACT_TYPE_MISMATCH', `${at}.target.learned`)]
+    if (!spec) return [];
+    if (spec.value_type.type !== 'bool')
+      return [diag('FACT_TYPE_MISMATCH', `${at}.target.learned`)];
+    return !same(spec.scopes, ['player'])
+      ? [diag('FACT_SCOPE_UNSUPPORTED', `${at}.target.learned`)]
       : [];
   }
   if (r.target.kind === 'storylet') {
@@ -125,8 +129,8 @@ function uses(c: Obj): Diagnostic[] {
   return [...out, ...floor('use', '1.49'), ...floor('storylet', '1.92')];
 }
 
-// Toolbox row 29a: a spell target needs kernel_api 1.98 (as does word bar S2's speech.phrases),
-// and no two spells share a word (DUPLICATE_DEFINITION at each one's word); row 29b: an effect
+// Toolbox row 29a: a spell target needs kernel_api 1.98 (as do word bar S2's speech.phrases, which
+// also need speech@1), and no two spells share a word (DUPLICATE_DEFINITION at each one's word); row 29b: an effect
 // step sits on a spell (SCHEMA_VIOLATION at its op).
 function spells(c: Obj): Diagnostic[] {
   const recipes = Object.entries((c.recipes ?? {}) as Obj);
@@ -148,6 +152,12 @@ function spells(c: Obj): Diagnostic[] {
       out.push(diag('SCHEMA_VIOLATION', at, { error: 'invalid_value' }));
   if ((all.length || c.speech) && apiCmp(c.manifest.requires.kernel_api.at_least, '1.98') < 0)
     out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
+  if (c.speech && c.lock.capabilities.speech !== 1)
+    out.push(
+      diag('UNDECLARED_CAPABILITY', '.cartridge.speech.phrases', { capability: 'speech' }, [
+        'speech@1',
+      ]),
+    );
   return out;
 }
 const EFFECTS = ['status.apply', 'damage', 'light.ignite'];

@@ -148,11 +148,12 @@ test('ward needs the quest-taught word, level 2 and wis 11', () => {
 });
 
 // Breaks: an unknown word is refused differently from a spell not yet learned (a probe tells real
-// words), a spell is offered or performed by its key, or reading the grimoire does not teach noctis.
+// words; noctis has no policy, so only its learned fact refuses it), a spell is offered or
+// performed by its key, or reading the grimoire does not teach noctis.
 test('an unknown word and unread noctis are refused alike; noctis works once read', () => {
   let w = fresh();
   assert.equal(code(cast(w, 'xyzzy')), 'invalid_state');
-  assert.equal(code(cast(w, 'noctis')), 'invalid_state');
+  assert.deepEqual(cast(w, 'noctis').decision, cast(w, 'xyzzy').decision);
   assert.equal(code(play(w, { type: 'perform', action: 'noctis' })), 'not_found');
   const keys = gameView(w).actions.map((a) => a.action_key);
   assert.ok(!keys.some((k) => ['lux', 'ward', 'noctis'].includes(k)), String(keys));
@@ -273,7 +274,7 @@ test('every available spell_words entry casts', () => {
 });
 
 // Breaks: the TS loader admits a spell without learned, naming a fact this cartridge lacks, a
-// non-bool fact or a per_subject one, or a spell below kernel_api 1.98 (content_spells_test.exs).
+// non-bool fact, a per_subject one or an instance-scoped one, or a spell below kernel_api 1.98 (content_spells_test.exs).
 test('loader: a spell learned names a bool player fact; spells need 1.98', () => {
   const at = `.cartridge.recipes[${JSON.stringify('spells_sampler@0.0.1:recipe/ward')}]`;
   const fact = (c: Record<string, any>, key: string, spec: object) => {
@@ -299,11 +300,17 @@ test('loader: a spell learned names a bool player fact; spells need 1.98', () =>
     ],
     [
       (c) =>
-        fact(c, 'each', {
+        fact(c, 'pair', {
           value_type: { type: 'bool', default: false },
-          scopes: ['instance'],
+          scopes: ['player'],
           per_subject: true,
         }),
+      'FACT_SCOPE_UNSUPPORTED',
+      `${at}.target.learned`,
+    ],
+    [
+      (c) =>
+        fact(c, 'world', { value_type: { type: 'bool', default: false }, scopes: ['instance'] }),
       'FACT_SCOPE_UNSUPPORTED',
       `${at}.target.learned`,
     ],
