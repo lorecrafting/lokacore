@@ -259,7 +259,7 @@ test('a craft the body cannot carry, or a protected stick, refuses with the same
   const stick = item(w, 'stick_01');
   w = {
     ...w,
-    entities: { ...w.entities, [stick]: { ...w.entities[stick]!, give_allowed: false } },
+    entities: { ...w.entities, [stick]: { ...w.entities[stick]!, give_allowed: false } as never },
   };
   r = carve(w);
   assert.equal(code(r), 'invalid_state');
