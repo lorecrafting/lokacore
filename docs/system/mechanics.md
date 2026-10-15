@@ -3199,7 +3199,7 @@ Gap 4 of the [depth audit](../rnd/depth-and-ux-2026-10-13.md) (owner approved 20
 
 [Toolbox rows W15 and FD9](../MECHANICS-TOOLBOX.md#ranked-toolbox) (Beads `loka-kgd.146`): who the character is to the world, built from W2 pair facts, W6 variants, G3 statuses and row 46 topics. Story subset only; the Realm's identity rules are the owner's.
 
-- **NPC recognition is content.** An NPC's `short` is its unknown form; a `short_variants` entry reading a pair fact at the NPC (`fact_compare {fact: knows_name, subject: "target", equals: true}`, the fact `per_subject` with scope `player`) names it once a dialogue choice's `fact.assign` writes that fact at the speaker. Every GameView reader of an NPC's short name now resolves its variants for the viewing character: the room list, Knowledge `known_npcs`, the combat `name` and `active_opponents`, and an escort's `leader_name`.
+- **NPC recognition is content.** An NPC's `short` is its unknown form; a `short_variants` entry reading a pair fact at the NPC (`fact_compare {fact: knows_name, subject: "target", equals: true}`, the fact `per_subject` with scope `player`) names it once a dialogue choice's `fact.assign` writes that fact at the speaker. Every GameView reader of an NPC's short name now resolves its variants for the viewing character: the room list, Knowledge `known_npcs`, the combat `name` and `active_opponents`, an exit's `sight`, and an escort's `leader_name`.
 - **Displayed name.** `world.identity {name, name_variants?}` ([declarations](cartridge.md#identity-declarations)) is the character's displayed name: GameView `actor_name`, the first `name_variants` entry whose condition holds, read with the actor's body as target (so `status_active {subject: "target"}` reads the character's own statuses), else `name`. Order is first match, so a disguise listed before a title hides it. Absent without `world.identity`.
 - **Disguise** is a G3 status on the body; an NPC's `disposition.hostile` may read `not status_active {subject: "self", status}` to let a disguised, wanted character pass. No arrest, recognition check or disguise stripping.
 - **Earned title** (FD9): a topic fact, granted the row 46 way (here an `entity_entered_room` reaction with a `when` that it is not yet known), is read by a name variant.
@@ -3209,12 +3209,13 @@ Gap 4 of the [depth audit](../rnd/depth-and-ux-2026-10-13.md) (owner approved 20
   3. Credit: not applicable.
   4. Time: met; a disguise ends at its status expiry.
   5. Scope: met; `knows_name` is a player-scoped pair fact, each character's own.
-  6. Save: met; no new row.
-  7. to 8.: not applicable.
-  9. Presentation: met; the Book shows `actor_name` as authored text.
+  6. Text: met; every name is an authored text key; no player-typed name.
+  7. Ownership: not applicable; nothing owned moves.
+  8. Trust: not applicable; nothing imported.
+  9. Instancing: not applicable; none built or assumed.
 - **Opt-in.** `world.identity` needs `kernel_api` 1.97 in both kernels. Installed kernel 1.97. Chapter 1 declares none and shows no `actor_name`.
 - **Known limits.** The text player's lines and water narration still show the base short. No player-typed name.
-- **Sampler.** `cartridges/identity_sampler`: the square's hooded stranger, the notice (wanted), the cloak rack (disguised, two game hours), the den (Houndbane title) and the gate guard.
+- **Sampler.** `cartridges/identity_sampler`: the square's hooded stranger, the notice (wanted), the cloak rack (disguised, two game hours; its 1 mv per hour tick is there because a timed status with no other effect needs a non-zero `per_tick` (cartridge.schema.json)), the den (Houndbane title) and the gate guard.
 - **Composition record** ([architecture](architecture.md#building-mechanics-by-composition)).
   - Consumer: `identity_sampler`. Later: FD7, the showcase social district.
   - Reads: W6 `describe`/`describeEntity`, W2 pair facts, G3 `status_active`, topics facts.

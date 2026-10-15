@@ -5,7 +5,8 @@ defmodule Loka.Content.Identity do
   definitions through ops the cartridge's capabilities own. Twin of the world.identity entries
   of the TS loader's parts and refStage (kernel/ts/src/content/cartridge_refs.ts); Variants
   holds the 1.97 floor. Called from Variety. The name variants' condition roots also get
-  Delayed's time_since checks (Checks.trees/1 holds definition roots only).
+  Delayed's time_since checks and the target-subject FACT_SCOPE_UNSUPPORTED walk (Checks.trees/1
+  holds definition roots only).
   """
   import Loka.Content.Source, only: [at: 2, diag: 3]
   import Loka.Content.Refs, only: [owned: 3, owners: 1, owners: 2]
@@ -20,11 +21,28 @@ defmodule Loka.Content.Identity do
 
     owned_all(variants, caps, registry) ++
       Enum.flat_map(trees, &Loka.Content.Policies.tree(&1, {m, defs, {caps, owners(registry)}})) ++
-      Loka.Content.Delayed.check(m, Map.put(defs, "reaction", %{}), trees) ++
+      clocks(m, defs, trees) ++
       texts(keys(id, variants), text)
   end
 
   def check(_, _, _, _), do: []
+
+  defp clocks(m, defs, trees),
+    do:
+      Loka.Content.Delayed.check(m, Map.put(defs, "reaction", %{}), trees) ++
+        Enum.flat_map(trees, fn {rel, p, root} -> targetless(rel, p, root) end)
+
+  # A name variant reads the player's body with no fact subject (twin of TS TARGETLESS).
+  defp targetless(rel, p, %{"op" => "fact_compare", "subject" => "target"}),
+    do: [diag("FACT_SCOPE_UNSUPPORTED", at(rel, p ++ ["subject"]), %{})]
+
+  defp targetless(rel, p, v) when is_map(v),
+    do: Enum.flat_map(v, fn {k, x} -> targetless(rel, p ++ [k], x) end)
+
+  defp targetless(rel, p, v) when is_list(v),
+    do: v |> Enum.with_index() |> Enum.flat_map(fn {x, i} -> targetless(rel, p ++ [i], x) end)
+
+  defp targetless(_, _, _), do: []
 
   defp owned_all(variants, caps, registry),
     do:

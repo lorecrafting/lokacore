@@ -95,7 +95,8 @@ const lines = (d: { narration?: readonly { key: unknown }[] }) =>
   (d.narration ?? []).map((l) => l.key);
 
 // Breaks: an NPC name read without the actor's facts (knownNpcs or the room list showing the base
-// short after the stranger is named), or the pair fact written at the wrong subject.
+// short after the stranger is named, also seen through an exit), or the pair fact written at the
+// wrong subject.
 test('the stranger is unnamed until it gives its name', () => {
   let w = fresh();
   assert.equal(gameView(w).actor_name, 'identity.name');
@@ -109,6 +110,11 @@ test('the stranger is unnamed until it gives its name', () => {
     'npc.stranger.short_named',
     'npc.stranger.short_named',
   ]);
+  const beyond = gameView(go(r.w, 'north')).exits.find((x) => x.direction === 'south')!.sight!;
+  assert.equal(
+    beyond.entities.find((e) => e.id === npc(w, 'stranger'))!.name,
+    'npc.stranger.short_named',
+  );
 });
 
 // Breaks: the title not granted on entry, variants read last-match (the title over the disguise),

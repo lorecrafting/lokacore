@@ -263,10 +263,11 @@ function exits(world: World, actor_id: CharacterId, door: Lists['door'], steps: 
         sight: {
           room: seen.room!,
           title: world.rooms[seen.room!].title,
-          entities: seen.entities.map((id) => {
-            const { short: name, kind } = world.entities[id];
-            return { id, name, kind: kind as Key };
-          }),
+          entities: seen.entities.map((id) => ({
+            id,
+            name: describeEntity(world, actor_id, id, 'short', steps),
+            kind: world.entities[id].kind as Key,
+          })),
         },
       }),
     };
