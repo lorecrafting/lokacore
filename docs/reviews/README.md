@@ -10,7 +10,7 @@ of closed work are deleted once their lesson is folded, and linked by permalink
 Reviews before R2 live in the [legacy repository](https://github.com/lorecrafting/lokacore-v2-legacy)
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
-- [Review: status re-applied inside one long wait (loka-j958, PR #388)](2026-10-15-loka-j958-review.md): **CHANGES REQUIRED**
+- [Review: status re-applied inside one long wait (loka-j958, PR #388)](2026-10-15-loka-j958-review.md): **APPROVE WITH NOTES**
 - [Review: Realm seams batch (loka-kgd.150, PR #386)](2026-10-14-realm-seams-batch-review.md): **APPROVE**
 - [Review: two shops save fix, save second opinion (loka-kgd.149)](2026-10-14-m12-two-shops-second-opinion.md): **APPROVE**
 - [Review: two shops make cold reopen save_corrupt (loka-kgd.149)](2026-10-14-m12-two-shops-review.md): **APPROVE**
