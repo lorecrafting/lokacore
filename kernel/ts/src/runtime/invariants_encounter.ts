@@ -186,7 +186,7 @@ function job(op: Any, row: Any, horizon: number, at: number): Any {
   return row.due_time <= horizon ? { ...row, status: 'completed' } : undefined;
 }
 
-// size: allow 43, one binding table per job kind (row FD1: a reaction job carries actor_id alone)
+// size: allow 47, one binding table per job kind (FD1: a reaction job carries actor_id; S3: an order job may)
 function bindingValid(op: Any) {
   if (
     op.bleed_body_id !== undefined ||

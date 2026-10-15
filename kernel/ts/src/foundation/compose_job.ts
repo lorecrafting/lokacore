@@ -54,6 +54,7 @@ export function composeJob(
   return { value: { ...row, status: 'completed' } };
 }
 
+// size: allow 43, one binding table per job kind (Built rooms S3: an order job may carry its owner)
 function bindingValid(op: Extract<DeltaOp, { op: 'job.schedule' }>) {
   if (
     op.crow_member_id !== undefined ||

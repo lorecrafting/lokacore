@@ -152,22 +152,25 @@ defmodule Loka.Content.Services do
   defp escrow(rel, %{"items" => items, "quantity" => quantity, "custody" => custody} = e, m, defs) do
     path = &at(rel, ["benefit", "escrow" | &1])
 
+    inputs(items, path, m, defs) ++
+      unresolved(custody, "room", path.(["custody"]), m, defs) ++
+      shape(items, quantity, path) ++ schedule(path, e, m) ++ output(path, e, m, defs)
+  end
+
+  defp shape(items, quantity, path) do
     shape = [
       {Enum.uniq(items) == items, diag("DUPLICATE_DEFINITION", path.(["items"]))},
       {quantity <= length(items), bad(path.(["quantity"]))}
     ]
 
-    inputs(items, path, m, defs) ++
-      unresolved(custody, "room", path.(["custody"]), m, defs) ++
-      for({false, d} <- shape, do: d) ++
-      if(e["ready_after"], do: schedule(path, m), else: []) ++ output(path, e, m, defs)
+    for {false, d} <- shape, do: d
   end
 
   # Toolbox row 20b: the work job a timed order (ready_after) needs schedule.
-  defp schedule(path, m) do
+  defp schedule(path, e, m) do
     owner = %{"capability" => "schedule"}
 
-    if is_map_key(m["requires"]["capabilities"], "schedule"),
+    if e["ready_after"] == nil or is_map_key(m["requires"]["capabilities"], "schedule"),
       do: [],
       else: [diag("UNDECLARED_CAPABILITY", path.(["ready_after"]), owner, ["schedule@1"])]
   end

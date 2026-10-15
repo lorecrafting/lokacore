@@ -283,7 +283,6 @@ defmodule Loka.Core.ComposeEncounter do
       {false, false, false, false} ->
         get_in(op, ["job", "kind"]) != "reaction"
 
-      # Built rooms S3: an order job may carry its owner (a build commission's).
       {false, false, true, false} ->
         get_in(op, ["job", "kind"]) in ["reaction", "order"] and
           [op["encounter_id"], op["sight"]] == [nil, nil]
