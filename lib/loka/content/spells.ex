@@ -25,16 +25,12 @@ defmodule Loka.Content.Spells do
       for {_, {rel, [], %{"target" => %{"kind" => "spell"} = t}}} <- defs["recipe"] || %{},
           do: {rel, t}
 
-    spells = for {rel, t} <- targets, do: {rel, t["word"]}
     effects = effects(defs)
 
-    out =
-      shared(spells) ++
-        Enum.flat_map(targets, &learned(&1, m, defs)) ++
-        placed(effects) ++ unowned(effects, m, registry)
-
-    floored = targets != [] or Map.has_key?(settings, "speech")
-    if floored and api(m) < [1, 98], do: [floor() | out], else: out
+    floor(targets != [] or Map.has_key?(settings, "speech"), m) ++
+      shared(targets) ++
+      Enum.flat_map(targets, &learned(&1, m, defs)) ++
+      placed(effects) ++ unowned(effects, m, registry)
   end
 
   defp learned({rel, t}, m, defs) do
@@ -50,11 +46,11 @@ defmodule Loka.Content.Spells do
     Refs.reference(rel, ["target"], {"learned", "fact"}, t, m, defs) ++ bool
   end
 
-  defp shared(spells) do
-    words = Enum.frequencies_by(spells, &elem(&1, 1))
+  defp shared(targets) do
+    words = Enum.frequencies_by(targets, &elem(&1, 1)["word"])
 
-    for {rel, w} <- spells,
-        words[w] > 1,
+    for {rel, t} <- targets,
+        words[t["word"]] > 1,
         do: diag("DUPLICATE_DEFINITION", at(rel, ["target", "word"]))
   end
 
@@ -80,7 +76,11 @@ defmodule Loka.Content.Spells do
         do: d
   end
 
-  defp floor, do: diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")
+  defp floor(floored, m) do
+    if floored and api(m) < [1, 98],
+      do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
+      else: []
+  end
 
   defp api(m),
     do:
