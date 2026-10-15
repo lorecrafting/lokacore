@@ -183,11 +183,19 @@ function roleBlocked(
   }
 }
 
-/** hs-14: a concealed skill's lesson is not offered at all; choose still refuses it. */
-function secret(world: World, actor: CharacterId, o: DialogueChoice, steps: Steps) {
-  return (o.sequence ?? []).some(
-    (s) => s.op === 'skill.acquire' && concealed(world, actor, s.skill, steps),
-  );
+/** hs-14: the row's choices less a concealed skill's lesson; choose still refuses that one. */
+function offered(
+  world: World,
+  actor: CharacterId,
+  d: DialogueDefinition,
+  ids: readonly Key[],
+  steps: Steps,
+) {
+  const secret = (o: DialogueChoice) =>
+    (o.sequence ?? []).some(
+      (s) => s.op === 'skill.acquire' && concealed(world, actor, s.skill, steps),
+    );
+  return ids.filter((id) => !secret(d.choices[id]!));
 }
 
 /**
@@ -206,7 +214,6 @@ export function choiceView(
   if (!found) return undefined;
   const [continuation_id, row] = found;
   const d = definition(world, row.source);
-  const shown = row.choice_ids.filter((id) => !secret(world, actor, d.choices[id]!, steps));
   const speaker = Object.keys(d.roles).find((n) => {
     const r = d.roles[n]!;
     return r.role === 'npc' && same(r.npc, d.npc);
@@ -223,7 +230,7 @@ export function choiceView(
         ...(row.attempts && { attempts: row.attempts }),
       },
     }),
-    choices: shown.map((choice_id) => {
+    choices: offered(world, actor, d, row.choice_ids, steps).map((choice_id) => {
       const option = d.choices[choice_id]!;
       const q = option.patrol && questOf(world, actor, option.patrol.quest);
       const saved = q && world.state.patrols?.[q[0]];
