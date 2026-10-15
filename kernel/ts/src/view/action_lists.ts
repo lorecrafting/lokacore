@@ -30,7 +30,7 @@ import * as barrier from '../mechanics/barrier/rule.ts';
 import * as equipment from '../mechanics/equipment/rule.ts';
 import * as position from '../mechanics/position/shared.ts';
 import { cmp } from '../foundation/validate.ts';
-import { carrying, giveRefused, putRefused } from '../mechanics/containment/shared.ts';
+import { carrying, giveRefused, putRefused, recipient } from '../mechanics/containment/shared.ts';
 import { theftRefused } from '../mechanics/containment/theft.ts';
 import { movable as movableItem } from '../runtime/created.ts';
 import { attackRefused } from '../mechanics/combat/shared.ts';
@@ -81,9 +81,17 @@ export function lists(world: World, actor: CharacterId, steps = { n: 0 }) {
       .sort((a, b) => b.priority - a.priority || cmp(a.key, b.key))
       .flatMap((a) => {
         const shown = advertise(world, actor, a, take, steps, id, scope);
-        return a.command === 'put' && id && body
-          ? putPairs(world, actor, body, id as EntityId, shown, steps)
-          : [shown];
+        if (!id || !body) return [shown];
+        const item = id as EntityId;
+        if (a.command === 'put')
+          return pairs(world, body, item, shown, steps, 'item', (t) =>
+            putRefused(world, actor, body, item, t, steps),
+          );
+        // Give lists only its available pairs (book-ui.md "Item details"); exhaustion still replaces it.
+        if (a.command !== 'give') return [shown];
+        if (!shown.available && shown.reason.code !== 'budget_exceeded') return [];
+        const here = world.state.containers[body]!;
+        return pairs(world, body, item, shown, steps, 'npc', (t) => recipient(world, t, here));
       });
   const liquid = (id: string) => liquidActions(world, actor, id, set, steps);
   return {
@@ -289,27 +297,29 @@ function movable(world: World, a: Offered, id?: string): boolean {
   );
 }
 
-// Enumerate bounded concrete pairs; exhaustion replaces the whole source offer, never a prefix.
-function putPairs(
+// Enumerate bounded concrete pairs (Put: [item, container]; Give: [item, recipient]) under the
+// command's own refusal; exhaustion replaces the whole source offer, never a prefix.
+function pairs(
   world: World,
-  actor: CharacterId,
   body: EntityId,
   item: EntityId,
   shown: AdvertisedAction,
   steps: { n: number },
+  kind: 'item' | 'npc',
+  refused: (target: EntityId) => string | undefined,
 ): AdvertisedAction[] {
   if (world.state.containers[item] !== body) return [];
-  const pairs: AdvertisedAction[] = [];
+  const found: AdvertisedAction[] = [];
   for (const id in world.entities) {
     if (!Object.hasOwn(world.entities, id)) continue;
     if (++steps.n > LIMITS.query_steps)
       return [{ ...shown, available: false, reason: { code: 'budget_exceeded' } }];
-    if (world.entities[id].kind !== 'item' || id === item) continue;
-    const code = putRefused(world, actor, body, item, id as EntityId, steps);
+    if (world.entities[id].kind !== kind || id === item) continue;
+    const code = refused(id as EntityId);
     if (code === 'budget_exceeded') return [{ ...shown, available: false, reason: { code } }];
-    if (!code) pairs.push({ ...shown, target_ids: [item, id as EntityId] });
+    if (!code) found.push({ ...shown, target_ids: [item, id as EntityId] });
   }
-  return pairs;
+  return found;
 }
 
 function noticeOffer(world: World, a: Offered, id: string) {

@@ -215,3 +215,42 @@ test('price 0 needs a barter escrow; a price below 0 and a claim of an untimed o
     ['SCHEMA_VIOLATION', `.cartridge.services["${S}:service/claim"].benefit.service`],
   );
 });
+
+// hs-8 view-to-invocation check (key `give`, docs/system/mechanics.md "Give pairs"). Breaks: a pair
+// listed for a corpse, an absent NPC, the actor's own body or an item giveRefused refuses; a
+// listed pair the rule then refuses; the pairs not limited to the held item.
+test('every listed Give pair is accepted; a corpse, no one here and a refused item list none', () => {
+  const c = sampler((c) => {
+    c.npcs[`${S}:npc/trader`].hp = { minimum: 0, maximum: 10, start: 0, gain: 0 };
+    c.items[`${S}:item/stone`].give_allowed = false;
+  });
+  const gives = (w: World, item: EntityId) =>
+    gameView(w)
+      .inventory.find((e) => e.id === item)!
+      .actions.filter((a) => a.action_key === 'give')
+      .map((a) => a.available && a.target_ids);
+  const sent = (w: World, item: EntityId, to: EntityId) =>
+    run(w, { type: 'give', item_id: item, recipient_id: to }).decision.kind;
+  let w = fresh(c);
+  const [apple, stone, trader] = [
+    id(w, 'item', 'apple'),
+    id(w, 'item', 'stone'),
+    id(w, 'npc', 'trader'),
+  ];
+  w = act(act(w, { type: 'take', item_id: apple }), { type: 'take', item_id: stone });
+  const listed = gives(w, apple);
+  assert.deepEqual(listed, [[apple, farmer(w)]]); // the corpse trader is not listed
+  for (const [item, to] of listed as EntityId[][]) assert.equal(sent(w, item!, to!), 'accepted');
+  assert.equal(sent(w, apple, trader), 'rejected');
+  assert.deepEqual(gives(w, stone), []);
+  assert.equal(sent(w, stone, farmer(w)), 'rejected');
+  const away = {
+    ...w,
+    state: {
+      ...w.state,
+      containers: { ...w.state.containers, [farmer(w)]: w.roomIds[`${S}:room/stall`]! },
+    },
+  };
+  assert.deepEqual(gives(away, apple), []);
+  assert.equal(sent(away, apple, farmer(w)), 'rejected');
+});
