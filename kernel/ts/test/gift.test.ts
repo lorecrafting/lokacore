@@ -253,4 +253,10 @@ test('every listed Give pair is accepted; a corpse, no one here and a refused it
   };
   assert.deepEqual(gives(away, apple), []);
   assert.equal(sent(away, apple, farmer(w)), 'rejected');
+  const here = w.state.containers[farmer(w)]!; // an NPC the dark hides is not offered
+  const dark = {
+    ...w,
+    rooms: { ...w.rooms, [here]: { ...w.rooms[here]!, dark_description: 'Dark.' } },
+  };
+  assert.deepEqual(gives(dark, apple), []);
 });

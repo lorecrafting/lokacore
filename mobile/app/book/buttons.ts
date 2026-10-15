@@ -192,7 +192,13 @@ function heldButtons(
 ) {
   return projected.flatMap((e) =>
     e.actions
-      .filter((a) => a.available && !['ask', 'whisper'].includes(a.action_key)) // whisper is wordButtons, ask is askButtons
+      // whisper is wordButtons, ask is askButtons; a Give without its recipient pair cannot be sent
+      .filter(
+        (a) =>
+          a.available &&
+          !['ask', 'whisper'].includes(a.action_key) &&
+          (a.action_key !== 'give' || a.target_ids?.length === 2),
+      )
       .map((a) => {
         // A use pair (G4) lists [target, tool]: this page's item is the tool, so name the target
         // and keep the card on this page (detail_id), not the target's.

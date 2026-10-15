@@ -6,6 +6,7 @@ import { elapsedHost } from '../../authority/local-story/__tests__/elapsed-host.
 import { darkMarshBundle } from '../../authority/local-story/__tests__/priory-fixture.ts';
 import type { GameSubscription } from '../../packages/game-view/session.ts';
 import { CONTENTS } from './__tests__/control.test.ts';
+import { buttonsOf } from './buttons.ts';
 import { book, bundle, fixture, nodes, words } from './__tests__/polish-book.test.ts';
 
 // Breaks: an unconfirmed Take leaves the detail or announces success; retry loses its original
@@ -96,6 +97,14 @@ test('a held item offers Give only to a present recipient and logs the confirmed
   const line = 'You give a brass lantern to Old Bram.';
   assert.equal(h.p.screen().log.filter((s: string) => s === line).length, 1);
   h.sql.close();
+});
+
+// Breaks: an available Give with no [item, recipient] pair (story fixtures) drawn as a dead card.
+test('a Give offer without its recipient pair draws no card', () => {
+  const url = new URL('../stories/views/carrying-held.json', import.meta.url);
+  const v = JSON.parse(readFileSync(url, 'utf8')).view;
+  const keys = buttonsOf(v, String, String).map((p) => p.action_key);
+  assert.deepEqual([keys.includes('drop'), keys.includes('give')], [true, false]);
 });
 
 // Breaks: inventory Drop stays in detail, falsely succeeds while pending, or retry loses its name.

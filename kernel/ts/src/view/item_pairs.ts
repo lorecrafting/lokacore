@@ -3,6 +3,7 @@
 import { LIMITS } from '../contracts.gen.ts';
 import type { AdvertisedAction, CharacterId, EntityId } from '../contracts.gen.ts';
 import { putRefused, recipient } from '../mechanics/containment/shared.ts';
+import { visible } from '../mechanics/light/shared.ts';
 import type { World } from '../runtime/decision.ts';
 
 export function itemPairs(
@@ -22,7 +23,10 @@ export function itemPairs(
   // A refused item lists no Give pair; exhaustion still replaces the offer.
   if (!shown.available && shown.reason.code !== 'budget_exceeded') return [];
   const here = world.state.containers[body]!;
-  return pairs(world, body, item, shown, steps, 'npc', (t) => recipient(world, t, here));
+  // The view offers only a recipient the actor sees (dark, concealed); the rule stays as is.
+  return pairs(world, body, item, shown, steps, 'npc', (t) =>
+    visible(world, actor, t, steps) ? recipient(world, t, here) : 'not_found',
+  );
 }
 
 // Enumerate bounded concrete pairs (Put: [item, container]; Give: [item, recipient]) under the
