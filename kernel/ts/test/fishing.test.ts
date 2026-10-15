@@ -159,11 +159,15 @@ test('the bank holds one trout at a time and the larder bounds the catch', () =>
   assert.deepEqual(fishIn(w, 'larder'), ['eel_01', 'salmon_01']);
 });
 
-// Breaks: the fish card shows without a wooden tool in hand, or the held rod stops offering it.
+// Breaks: the fish card shows without a rod in hand, the tool gate reads a looser tag than rod
+// (a held wooden item that is no rod fishes), or the held rod stops offering it.
 test('the cast card is listed with the rod in hand and unlisted without it', () => {
   const offers = (w: World) => JSON.stringify(gameView(w)).includes('"action_key":"fish"');
   assert.equal(offers(newWorld(content, CONTEXT as never, PASS as never)), false);
   const w = holding(0);
+  const rod = id(w, 'rod');
+  const stick = { ...w.entities[rod]!, tags: ['wooden'] } as never;
+  assert.equal(offers({ ...w, entities: { ...w.entities, [rod]: stick } }), false);
   const card = gameView(w)
     .inventory.find((i) => i.id === id(w, 'rod'))!
     .actions.find((a) => a.action_key === 'fish')!;

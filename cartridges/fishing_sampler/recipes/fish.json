@@ -6,7 +6,7 @@
   "target": {
     "kind": "use",
     "tool": {
-      "tag": "wooden"
+      "tag": "rod"
     }
   },
   "priority": 5,
