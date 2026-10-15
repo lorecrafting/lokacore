@@ -47,7 +47,7 @@ and not repeated here.
   ([2026-10-08](../decisions/owner-decision-world-time-starts-at-entry-2026-10-08.md)).
 - One development lane, the mechanics toolbox; the Storybook polish lane is paused until the owner reactivates it ([record](../decisions/owner-decision-one-lane-mechanics-2026-10-12.md)).
 - Fable's depth and UX audit is adopted in full: toolbox rows FD1-FD10, tooling, Book UX in the parked polish lane; reading size and high-contrast ink are approved Settings; LLM uses stay presentation-only; a Realm seams batch runs between M12 and M13 ([record](../decisions/owner-decision-depth-ux-audit-2026-10-13.md)).
-- Jev (TypeSafe): spend approved; redacted briefs and cartridge text may leave the machine, never saves or player words; advisory only; Pi keeps its $2/day cap; `fast-jev-compaction` stays on at 101 and agents are never resumed after a compaction until `loka-bwfo` ([record](../decisions/owner-decision-jev-typesafe-2026-10-14.md)).
+- Jev (TypeSafe): spend approved; redacted briefs and cartridge text may leave the machine, never saves or player words; advisory only; Pi keeps its $2/day cap; `fast-jev-compaction` is off since 2026-10-14 (built-in compaction; resumes allowed, `loka-bwfo`) ([record](../decisions/owner-decision-jev-typesafe-2026-10-14.md)).
 
 - Realm seams: new rules read the actor from the command, new jobs store their owner, and no new row adds a single-player assumption ([record](../decisions/owner-decision-realm-seams-2026-10-13.md)).
 - Every new toolbox mechanic is opt-in by a cartridge field; Chapter 1 and the seeded corpus stay

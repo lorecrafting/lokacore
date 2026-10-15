@@ -269,8 +269,8 @@ item or too much complexity. Mechanics, save, protocol or engine items leave the
   mutants, the 10,000-sequence simulator) stops and asks the PM, who tells the owner before it starts
   ([owner decision](decisions/owner-decision-process-tightening-2026-10-08.md)).
 - A developer pushes, confirms with one `gh run list --commit <full sha>` call that `ci.yml` and
-  `book-e2e.yml` started, and hands back; the PM watches CI and returns a red run as a finding (no
-  agent starts a background wait for CI: two developers died resuming after one, 2026-10-14).
+  `book-e2e.yml` started, and hands back; the PM watches CI and returns a red run as a finding;
+  developers never wait on CI.
 - Mutants: a full-suite sweep runs only at release-candidate certification and the E3 gate on that
   same candidate. Elsewhere: a red control on the new test, and `bin/mutate.sh` triage ("already
   caught?") run narrow first against the test files that import the mutated module, the full suite
@@ -283,8 +283,8 @@ item or too much complexity. Mechanics, save, protocol or engine items leave the
   a reason, open items, no narrative.
 - PM state file: labeled "AS OF PR #N"; cite every PR as #N (Beads id, short description); one "Open objectives" line; owner words only verbatim
   or marked "(paraphrased)"; keep `file:line` pointers and exact errors; drop spent exploration.
-- Never resume (SendMessage) a subagent whose context was compacted: spawn a fresh one with the
-  brief and the record (2026-10-14: three Opus resumes failed on a duplicate `server_tool_use` id).
+- A subagent compacted by the built-in compaction may be resumed. The 2026-10-14 duplicate-id 400
+  came from the `fast-jev-compaction` plugin, now off (loka-bwfo).
 - A second opinion on a slice runs on the head after the main review's fix round, never in parallel
   on a head the main review already failed (one full review saved per blocker round).
 - Start a new slice agent with a self-contained brief and no inherited chat

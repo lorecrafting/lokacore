@@ -30,7 +30,7 @@ Before handing off:
    Before every push run `bin/prepush.sh` (CI's static checks, about 30 s) and fix what fails.
    Hosted CI on the pushed head is the final run (it includes the full `npm test` of each package):
    after a push, confirm `ci.yml` and `book-e2e.yml` started with one `gh run list --commit "$(git rev-parse HEAD)"` call (the full sha; a short one matches nothing) and hand back (a run can start up to ~2 minutes late: report an empty list, never dispatch);
-   the PM watches CI and sends a red run back as a finding. Never start a background wait for CI (2026-10-14: two developers died resuming after a CI wait),
+   the PM watches CI and sends a red run back as a finding. Never wait on CI,
    and never dispatch a run by hand when a push run exists (the dispatch cancels it, loka-thz). Every new check has a
    planted violation that fails; a planted break or red control stops only the PIDs it started, never a process by name ([Git hygiene](../../docs/WORKFLOW.md#git-hygiene)).
 2. Commit first, then self-review the diff once: `/code-review medium` on the branch diff against its base, run from your slice worktree with the worktree path or branch as the target, never the main checkout (your cwd resets to it, loka-0w4; the review never runs checkout, stash or reset in your worktree)
