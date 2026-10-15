@@ -79,18 +79,21 @@ function definition(c: Obj, s: Obj, ref: string, check: Checks, out: Diagnostic[
     if (b.kind === 'build') build(c, b, at, check, out);
   } else if (b.kind in sited) sited[b.kind as keyof typeof sited](c, b, at, check, out);
   else if (banks(b)) bank(c, s, at, check, out);
-  else if (ordered(b)) {
-    const commission = get(c, check, b.service, 'service', `${at}.benefit.service`);
-    // Only a timed order (20b) settles, a claim one with an output (Built rooms S3: a build
-    // raises its room); a barter (row kgd.70) hands its output over and leaves no order open.
-    const e = commission?.benefit.escrow;
-    if (commission && !(e?.ready_after && (b.kind === 'cancel' || e.output)))
-      bad(out, `${at}.benefit.service`);
-  } else {
+  else if (ordered(b)) order(c, b, at, check, out);
+  else {
     const recovery = get(c, check, b.recovery, 'resource', `${at}.benefit.recovery`);
     if (recovery && recovery.key !== 'mv') bad(out, `${at}.benefit.recovery`);
     stock(c, s, npc, at, check, out);
   }
+}
+
+// Only a timed order (20b) settles, a claim one with an output (Built rooms S3: a build raises its
+// room); a barter (row kgd.70) hands its output over and leaves no order open.
+function order(c: Obj, b: Obj, at: string, check: Checks, out: Diagnostic[]) {
+  const commission = get(c, check, b.service, 'service', `${at}.benefit.service`);
+  const e = commission?.benefit.escrow;
+  if (commission && !(e?.ready_after && (b.kind === 'cancel' || e.output)))
+    bad(out, `${at}.benefit.service`);
 }
 
 const sited = { repair, build, mend };

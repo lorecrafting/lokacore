@@ -1,4 +1,4 @@
-// size: allow 316, the build and mend benefits (Built rooms S2 to S4) and the barter (row kgd.70) add their gates and commission to the one transition query
+// size: allow 317, the build and mend benefits (Built rooms S2 to S4) and the barter (row kgd.70) add their gates and commission to the one transition query
 // One bounded admission/transition query for exact keyed service offers and execution.
 import {
   LIMITS,
