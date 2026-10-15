@@ -12,7 +12,7 @@ defmodule Loka.Content.RoomParts do
 
   def variant_texts(defs, text) do
     for {_, {rel, [], r}} <- defs["room"],
-        {steps, t} <- description_keys(r) ++ climb_keys(r),
+        {steps, t} <- description_keys(r) ++ climb_keys(r) ++ aside_keys(r),
         not is_map_key(text, t),
         do: diag("UNRESOLVED_REFERENCE", at(rel, steps), %{"target" => t})
   end
@@ -24,14 +24,15 @@ defmodule Loka.Content.RoomParts do
           field <- ~w(answered unanswered),
           do: {["exits", dir, "knock", field], e["knock"][field]}
 
-    variants =
-      for({s, v} <- variants(r), do: {s ++ ["description"], v["description"]}) ++
-        for {s, a} <- asides(r), do: {s ++ ["text"], a["text"]}
+    variants = for {s, v} <- variants(r), do: {s ++ ["description"], v["description"]}
 
     if r["dark_description"],
       do: [{["dark_description"], r["dark_description"]} | variants ++ knock],
       else: variants ++ knock
   end
+
+  # Toolbox row FD2: each aside's text.
+  defp aside_keys(r), do: for({s, a} <- asides(r), do: {s ++ ["text"], a["text"]})
 
   # Toolbox row 30: each climb face's fall narration.
   defp climb_keys(r),
