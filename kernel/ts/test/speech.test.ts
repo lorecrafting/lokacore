@@ -121,10 +121,11 @@ test('a whisper reaches only its addressee', () => {
   const offered = gameView(w)
     .entities?.find((e) => e.id === id(w, 'smith'))
     ?.actions?.find((a) => a.action_key === 'whisper');
+  assert.ok(offered, 'whisper offered on the smith');
   const i = identify('speech-test', w.character, {
     invocation_id: 'bbbbbbbb-0000-4000-8000-000000000003',
     actor_id: w.character,
-    action_key: offered!.action_key,
+    action_key: offered.action_key,
     target_ids: [id(w, 'smith')],
     input: { word: 'ward' },
   } as never);
