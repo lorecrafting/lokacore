@@ -14,6 +14,7 @@ import { carrying, giveRefused } from '../containment/shared.ts';
 import { selected } from '../containment/stock.ts';
 import { status } from '../skills.ts';
 import { disposition } from '../disposition.ts';
+import { value } from '../fact.ts';
 
 // A stock offer (toolbox row W11) prices by the count of its set the NPC holds; a friendly discount
 // (toolbox row 15) takes the NPC's disposition (row G11), a skill one the skill.
@@ -74,6 +75,14 @@ export function exchange(
   if (typeof first === 'string') return first;
   const moved = first[0];
   if (moved === undefined || world.state.containers[moved] !== source) return 'not_owned' as const;
+  // A fence's offer buys only stolen goods, any other only clean ones (toolbox rows 33 and 34).
+  const theft = world.cartridge.world?.theft;
+  if (
+    verb === 'sell' &&
+    theft &&
+    (value(world, actor, theft.stolen, moved) === true) !== (offer.stolen === true)
+  )
+    return 'invalid_state' as const;
   const custody =
     verb === 'buy' ? carrying(world, body, steps)(moved) : giveRefused(world, moved, steps);
   if (custody) return custody;

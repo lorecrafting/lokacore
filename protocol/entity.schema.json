@@ -660,6 +660,19 @@
         },
         "cues": {
           "$ref": "entity.schema.json#/$defs/Cues"
+        },
+        "locks": {
+          "description": "Toolbox row 33 (kernel_api at least 1.94; mechanics.md Theft, fence and witnessed offense): get, the policy an actor must hold to take an item this NPC directly holds (target: that item); refuses permission_denied.",
+          "type": "object",
+          "properties": {
+            "get": {
+              "$ref": "policy.schema.json#/$defs/VersionedPolicy"
+            }
+          },
+          "required": [
+            "get"
+          ],
+          "additionalProperties": false
         }
       },
       "required": [
@@ -899,6 +912,10 @@
             "buy"
           ],
           "additionalProperties": false
+        },
+        "stolen": {
+          "description": "Toolbox row 34 (kernel_api at least 1.94): this shopkeeper is a fence; sell takes only an instance whose world.theft stolen fact is true, and a shop without it only one whose fact is false. Never on a stock offer.",
+          "const": true
         }
       },
       "required": [

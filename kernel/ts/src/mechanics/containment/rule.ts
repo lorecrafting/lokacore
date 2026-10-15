@@ -26,6 +26,7 @@ import { check } from '../../runtime/invariants.ts';
 import { reach } from '../lookups.ts';
 import { chainRefused } from '../locks.ts';
 import { carrying, giveRefused, putRefused } from './shared.ts';
+import { stolen, theftRefused } from './theft.ts';
 import { movable } from '../../runtime/created.ts';
 
 // size: allow 55, finite Harvest and the G7 get-lock walk join the conserved-transfer decision
@@ -54,12 +55,15 @@ export const decide: Rule<'containment'> = (world, command, mint, steps = { n: 0
     if (at === body) return rejected('invalid_state');
     const reached = reach(world, body, p.item_id, steps);
     if (typeof reached === 'string') return { kind: 'fault', code: reached };
-    if (!reached) return rejected('not_present');
-    const code =
-      chainRefused(world, p.actor_id, p.item_id, 'get', steps) ??
-      carrying(world, body, steps)(p.item_id);
-    if (code === 'permission_denied' || code === 'too_heavy') return rejected(code);
+    const code = reached
+      ? (chainRefused(world, p.actor_id, p.item_id, 'get', steps) ??
+        carrying(world, body, steps)(p.item_id))
+      : theftRefused(world, p.actor_id, body, p.item_id, steps);
+    if (code === 'not_present' || code === 'permission_denied' || code === 'too_heavy')
+      return rejected(code);
     if (code) return { kind: 'fault', code };
+    if (!reached)
+      return stolen(world, command, mint, [body, p.item_id], move(body), acquired(body));
     return accepted(world, 'taken', move(body), acquired(body));
   }
   if (p.type === 'put') {

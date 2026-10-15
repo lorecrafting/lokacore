@@ -12,11 +12,11 @@ import {
 } from '../contracts.gen.ts';
 import { bodyOf, refString, type Steps, type World } from '../runtime/decision.ts';
 import { cmp } from '../foundation/validate.ts';
-import { living } from './death/shared.ts';
+import { living, npcsIn } from './death/shared.ts';
 import { fuelView } from './light/shared.ts';
 import { exitOf, hidden } from './lookups.ts';
 import type { holds } from './policy.ts';
-import { perceives, specOf } from './status/shared.ts';
+import { concealed, perceives, specOf } from './status/shared.ts';
 
 type Source = { readonly room: string; readonly cue: Cue };
 type Near = { readonly d: number; readonly direction?: string };
@@ -159,3 +159,12 @@ export function perceived(
   const cues = reaching(w, actor, room, ctx.steps, holds, outcomeCues(w, actor, ctx.cause));
   return cues.some(({ cue }) => cue.sense === p.sense) && ctx.steps.n <= LIMITS.query_steps;
 }
+
+/**
+ * Toolbox row 33: the living NPCs in `body`'s room, `except` left out, that see `body`: not blind
+ * (status reader 6) and `body` not concealed from them (status reader 8). Lookups only.
+ */
+export const witnesses = (w: World, body: EntityId, except?: EntityId) =>
+  npcsIn(w, [w.state.containers[body]!]).filter(
+    (id) => id !== except && !perceives(w, id, 'blind') && !concealed(w, body, id),
+  );

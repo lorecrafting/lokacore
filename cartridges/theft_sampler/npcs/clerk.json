@@ -1,0 +1,15 @@
+{
+  "keywords": [
+    "clerk"
+  ],
+  "short": "npc.clerk.short",
+  "room_line": "npc.clerk.room",
+  "description": "npc.clerk.description",
+  "room": "market",
+  "attributes": [
+    {
+      "attribute": "alertness",
+      "value": 1
+    }
+  ]
+}

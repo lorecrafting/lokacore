@@ -28,6 +28,7 @@ import * as equipment from '../mechanics/equipment/rule.ts';
 import * as position from '../mechanics/position/shared.ts';
 import { cmp } from '../foundation/validate.ts';
 import { carrying, giveRefused, putRefused } from '../mechanics/containment/shared.ts';
+import { theftRefused } from '../mechanics/containment/theft.ts';
 import { movable as movableItem } from '../runtime/created.ts';
 import { attackRefused } from '../mechanics/combat/shared.ts';
 import { combatOffered } from './combat.ts';
@@ -128,7 +129,7 @@ function takeAdmission(world: World, actor: CharacterId, body: EntityId | undefi
     if (typeof reached === 'boolean' || reached === 'permission_denied')
       admitted.set(item, reached);
     if (typeof reached === 'string') return reached;
-    if (!reached) return 'not_present' as const;
+    if (!reached) return theftRefused(world, actor, body, item, steps); // the take rule's twin
     carry ??= carrying(world, body, steps);
     return carry(item);
   };

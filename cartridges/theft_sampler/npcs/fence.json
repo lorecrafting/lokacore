@@ -1,0 +1,31 @@
+{
+  "keywords": [
+    "fence"
+  ],
+  "short": "npc.fence.short",
+  "room_line": "npc.fence.room",
+  "description": "npc.fence.description",
+  "room": "alley",
+  "resource_starts": {
+    "pennies": 10
+  },
+  "shop": {
+    "resource": "pennies",
+    "offers": [
+      {
+        "item": "purse",
+        "buy": 6,
+        "sell": 3,
+        "stolen": true
+      },
+      {
+        "item": "ring",
+        "buy": 6,
+        "sell": 3,
+        "stolen": true
+      }
+    ],
+    "bought": "shop.bought",
+    "sold": "shop.sold"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "title": "room.strongroom.title",
+  "description": "room.strongroom.description",
+  "exits": {
+    "north": {
+      "to": "square"
+    }
+  }
+}

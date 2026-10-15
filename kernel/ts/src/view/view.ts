@@ -154,8 +154,13 @@ function within(
     )
     .map(([id, e]) => {
       const scope = holder === body ? 'inventory' : SCOPE[e.kind];
+      // A theft cartridge lists what an NPC directly holds, takeable (toolbox row 33).
       const contents =
-        e.kind === 'item' && !worn ? inside(world, actor, body, actions, id, scope, steps) : [];
+        e.kind === 'item' && !worn
+          ? inside(world, actor, body, actions, id, scope, steps)
+          : e.kind === 'npc' && world.cartridge.world?.theft
+            ? inside(world, actor, body, actions, id, 'room_contents', steps, true)
+            : [];
       return {
         ...viewOf(world, actor, id, e, worn ? worn(id) : actions.of(scope, id), steps),
         ...(contents.length > 0 && { contents }),
@@ -167,7 +172,7 @@ const SCOPE = { item: 'room_contents', npc: 'room_occupants' } as const;
 
 // What item `box` holds in reach (every container from the item up to `box` opened, `box` too),
 // at any depth, in DefinitionRefString order, each with its direct container and only take and
-// its container verbs (ContentView; c1-locks).
+// its container verbs (ContentView; c1-locks); `direct`: only what `box` itself holds.
 function inside(
   world: World,
   actor: CharacterId,
@@ -176,8 +181,10 @@ function inside(
   box: string,
   scope: string,
   steps: Steps,
+  direct = false,
 ): ContentView[] {
   const under = (id: string) => {
+    if (direct) return world.state.containers[id] === box;
     for (let c = world.state.containers[id]; opened(world, c, body); c = world.state.containers[c])
       if (c === box) return true;
     return false;
