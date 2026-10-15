@@ -26,7 +26,10 @@ export function theft(c: Obj, named: Checks['named']): Diagnostic[] {
       out.push(diag('UNRESOLVED_REFERENCE', `${at}.narration.${k}`));
   for (const [ref, s] of Object.entries((c.services ?? {}) as Obj)) {
     const b = s.benefit;
-    if ((b.kind === 'deposit' || b.kind === 'withdraw') && !c.npcs?.[refString(b.vault)]?.locks?.get)
+    if (
+      (b.kind === 'deposit' || b.kind === 'withdraw') &&
+      !c.npcs?.[refString(b.vault)]?.locks?.get
+    )
       out.push(
         diag('SCHEMA_VIOLATION', `.cartridge.services${step(ref)}.benefit.vault`, {
           error: 'invalid_value',
