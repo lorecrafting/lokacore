@@ -16,6 +16,7 @@ import type { DefinitionRef, EntityId } from '../src/contracts.gen.ts';
 import { value } from '../src/mechanics/fact.ts';
 import { knownTopics } from '../src/mechanics/topics/shared.ts';
 import { encode } from '../src/foundation/canonical.ts';
+import { identify, resolve } from '../src/commands/invocation.ts';
 import type { Obj } from '../src/content/cartridge_refs.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-ask-sampler-'));
@@ -122,6 +123,25 @@ test('ask lists on NPCs with an ask; the matching answer grants its topic, else 
     ],
   );
   assert.equal(answer(w, 'guard', 'moon').text, 'guard.moon');
+});
+
+// Breaks: the Book's ask invocation (the GameView action on the NPC, the topic as input) resolved
+// without its NPC (TARGETS in commands/invocation.ts lacks ask), so every ask from the view is
+// refused unsupported_capability; step-level tests send ready Commands and never see it.
+test("the smith's offered ask, invoked as the Book does, is admitted and answers", () => {
+  const w = square();
+  const i = identify('ask-test', w.character, {
+    invocation_id: 'bbbbbbbb-0000-4000-8000-000000000001',
+    actor_id: w.character,
+    action_key: offer(w, 'smith')!.action_key,
+    target_ids: [id(w, 'smith')],
+    input: { topic: ref('topic', 'mill') },
+  } as never);
+  const command = resolve(w, i as never);
+  assert.ok('payload' in command, JSON.stringify(command));
+  const r = play(w, command.payload);
+  assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
+  assert.equal((r.decision as { narration?: { key: string }[] }).narration?.[0]?.key, 'smith.mill');
 });
 
 // Breaks: an unknown topic asked (the known-topic check dropped), an answer's when ignored or

@@ -10,6 +10,7 @@ of closed work are deleted once their lesson is folded, and linked by permalink
 Reviews before R2 live in the [legacy repository](https://github.com/lorecrafting/lokacore-v2-legacy)
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
+- [Review: mechanics batch M13 head (cross-row interactions)](2026-10-15-m13-batch-review.md): **APPROVE WITH NOTES**
 - [Review: recognition and earned titles (loka-kgd.146, rows W15 and FD9)](2026-10-15-loka-kgd.146-w15-fd9-review.md): **APPROVE WITH NOTES**
 - [Review: ask about a topic, kernel half (loka-kgd.144 FD7)](2026-10-15-loka-kgd.144-fd7-review.md): **APPROVE WITH NOTES**
 - [Review: witness ledger and reaction moves (loka-kgd.142 FD5, loka-kgd.22)](2026-10-15-loka-kgd.142-fd5-review.md): **APPROVE WITH NOTES**

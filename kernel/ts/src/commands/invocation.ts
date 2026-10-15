@@ -69,6 +69,8 @@ const TARGETS: Readonly<Record<string, readonly string[]>> = {
   attack: ['target_id'],
   shoo: ['crow_id'],
   talk: ['target_id'],
+  ask: ['target_id'],
+  whisper: ['target_id'],
   perform: ['target_id', 'item_id'],
   buy: ['provider_id', 'item_id'],
   sell: ['provider_id', 'item_id'],
