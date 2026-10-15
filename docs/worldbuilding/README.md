@@ -49,7 +49,7 @@ What must be decided before the rest can be written, after Sanderson (start from
 and play need; limits before powers), Tolkien (languages before names; deep history before the
 present) and the Koster checklist (decide economy, consent and import rules before the Realm):
 
-1. **Foundations** (00): premise and pillars, player fantasy, tone, Story vs Realm canon.
+1. **Foundations** (00): premise and pillars, player fantasy, tone, Story vs Realm canon (stub in Realm canon, 26).
 2. **Cosmology and the Power** (01), then **magic systems with their limits** (02): every people,
    faith and profession depends on what power is and what it costs.
 3. **The warden order and the elite categories** (03): shape, rarity and secrecy policy, before
@@ -86,14 +86,14 @@ Before a stub is promoted to `draft` or `canon`:
 
 - Brandon Sanderson, laws of magic: [First Law](https://www.brandonsanderson.com/blogs/blog/sandersons-first-law),
   [Second Law](https://www.brandonsanderson.com/blogs/blog/sandersons-second-law),
-  [Third Law](https://www.brandonsanderson.com/blogs/blog/sandersons-third-law); summary with the
+  [Third Law](https://www.brandonsanderson.com/blogs/blog/sandersons-third-law-of-magic); summary with the
   Zeroth Law at [Coppermind](https://coppermind.net/wiki/Sanderson%27s_Laws_of_Magic); the BYU
   lecture series ("Writing Science Fiction and Fantasy",
   [2020 playlist](https://www.youtube.com/playlist?list=PLSH_xM-KC3Zv-79sVZTTj-YA6IAqh8qeQ)),
   worldbuilding lectures.
 - J. R. R. Tolkien: *The Lord of the Rings*, Appendices A to F (chronology, calendars, languages
   and writing systems); languages-first method in *Letters* no. 165
-  ([LOTR appendices](https://en.wikipedia.org/wiki/The_Lord_of_the_Rings#Appendices)).
+  ([LOTR appendices](https://en.wikipedia.org/wiki/The_Lord_of_the_Rings)).
 - Star Wars: the Force, eras and factions; the Holocron continuity database's canon tiers
   (G, T, C, S, N) ([canon overview](https://starwars.fandom.com/wiki/Canon)).
 - Patricia C. Wrede, *Fantasy Worldbuilding Questions*
