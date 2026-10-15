@@ -11,7 +11,7 @@ export function eatReceipt(
   const p = command.payload;
   if (p.type !== 'eat') throw new Error('malformed JSON: invalid committed Eat');
   const item = world.entities[p.item_id];
-  // save.md binds only line 0; reactions and `alternates` may add or vary later lines (session.ts keys each).
+  // mechanics.md Cooking binds only line 0; reactions and `alternates` may add or vary later lines (session.ts keys each).
   if (
     validate('Command', command).length ||
     command.id !== command_id ||
