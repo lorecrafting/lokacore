@@ -124,25 +124,46 @@ test('ask lists on NPCs with an ask; the matching answer grants its topic, else 
   assert.equal(answer(w, 'guard', 'moon').text, 'guard.moon');
 });
 
-// Breaks: an unknown topic asked (the known-topic check dropped), or an answer's when ignored
-// or read without the NPC as target (the smith's trust is a pair fact).
-test('a topic the actor does not know is refused; an answer holds only when its when does', () => {
+// Breaks: an unknown topic asked (the known-topic check dropped), an answer's when ignored or
+// read without the NPC as target (the smith's trust is a pair fact), or a later answer on the same
+// topic picked over the first that holds (find read as findLast).
+test('a topic the actor does not know is refused; the first answer whose when holds is given', () => {
   assert.equal(refused(square(), 'smith', 'smugglers'), 'invalid_state');
-  const w = answer(square(), 'smith', 'mill').w;
+  // The smith told about mill (trust 0), then helped in her talk (trust 1).
+  const told = (c: Cartridge) => {
+    const w = answer(square(c), 'smith', 'mill').w;
+    let t = accepted(w, { type: 'talk', target_id: id(w, 'smith') });
+    t = accepted(t, {
+      type: 'choose',
+      continuation_id: gameView(t).choice!.continuation_id,
+      choice_id: 'help',
+    });
+    assert.equal(value(t, t.character, ref('fact', 'trust'), id(t, 'smith')), 1);
+    return [w, t] as const;
+  };
+  const [w, t] = told(content);
   assert.equal(answer(w, 'smith', 'smugglers').text, 'smith.unknown');
-  let t = accepted(w, { type: 'talk', target_id: id(w, 'smith') });
-  t = accepted(t, {
-    type: 'choose',
-    continuation_id: gameView(t).choice!.continuation_id,
-    choice_id: 'help',
-  });
-  assert.equal(value(t, t.character, ref('fact', 'trust'), id(t, 'smith')), 1);
   const s = answer(t, 'smith', 'smugglers');
   assert.deepEqual([s.text, s.events.length], ['smith.smugglers', 1]);
+  // A fallback smugglers answer authored after the trust-gated one.
+  const fallback = reload((c) =>
+    c.npcs[`${P}npc/smith`].ask.answers.push({
+      topic: ref('topic', 'smugglers'),
+      text: 'smith.mill',
+    }),
+  );
+  assert.ok(fallback.ok);
+  const [f0, f1] = told(fallback.cartridge as Cartridge);
+  assert.deepEqual(
+    [answer(f1, 'smith', 'smugglers').text, answer(f0, 'smith', 'smugglers').text],
+    ['smith.smugglers', 'smith.mill'],
+  );
 });
 
-// Breaks: an NPC without ask, in another room or not an NPC admitted, the asked reaction's npc/topic/answered filters ignored, a hostile
-// NPC still answering, or ask admitted (or offered) during a pending conversation.
+// Breaks: an NPC without ask, in another room or not an NPC admitted, the asked reaction's
+// npc/topic/answered filters ignored, its subject not the asked NPC (a pair fact step with no
+// named NPC then writes nothing), a hostile NPC still answering, or ask admitted (or offered)
+// during a pending conversation.
 test('the miller cannot be asked; the guard turns hostile on smugglers; a conversation blocks ask', () => {
   const w = answer(square(), 'smith', 'mill').w;
   assert.equal(refused(w, 'miller', 'mill'), 'invalid_target');
@@ -154,7 +175,9 @@ test('the miller cannot be asked; the guard turns hostile on smugglers; a conver
     topic: ref('topic', 'mill'),
   };
   assert.equal((play(w, room).decision as { error?: { code: string } }).error?.code, 'not_found');
-  assert.equal(value(answer(w, 'smith', 'smugglers').w, w.character, ref('fact', 'wanted')), false);
+  const wanted = (npc: string, topic: string) =>
+    value(answer(w, npc, topic).w, w.character, ref('fact', 'wanted'));
+  assert.deepEqual([wanted('smith', 'smugglers'), wanted('guard', 'moon')], [false, false]);
   const g = answer(w, 'guard', 'smugglers');
   assert.equal(g.text, 'guard.unknown');
   assert.equal(value(g.w, g.w.character, ref('fact', 'wanted')), true);
@@ -172,6 +195,24 @@ test('the miller cannot be asked; the guard turns hostile on smugglers; a conver
     'smugglers',
   );
   assert.equal(value(unanswered.w, unanswered.w.character, ref('fact', 'wanted')), false);
+  // The asked reaction's subject is the asked NPC: trust (a pair fact) set toward the guard.
+  const toward = reload((c) =>
+    c.reactions[`${P}reaction/guard_smugglers`].apply.push({
+      op: 'fact.assign',
+      fact: ref('fact', 'trust'),
+      value: 1,
+    }),
+  );
+  assert.ok(toward.ok);
+  const tw = answer(
+    answer(square(toward.cartridge as Cartridge), 'smith', 'mill').w,
+    'guard',
+    'smugglers',
+  ).w;
+  assert.deepEqual(
+    ['guard', 'smith'].map((k) => value(tw, tw.character, ref('fact', 'trust'), id(tw, k))),
+    [1, 0],
+  );
   const t = accepted(w, { type: 'talk', target_id: id(w, 'smith') });
   assert.equal(offer(t, 'smith'), undefined);
   assert.equal(refused(t, 'smith', 'mill'), 'unsupported_capability'); // speech verbs leave the set
