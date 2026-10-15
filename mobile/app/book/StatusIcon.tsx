@@ -23,8 +23,10 @@ type Props = {
 const SHOWN = 5; // icons before the +N disc
 
 export function StatusIcons(p: Props) {
-  const [tip, setTip] = useState<string>();
+  // The held icon's label, so the tip follows the clock and goes with the icon or the lock.
+  const [held, setHeld] = useState<string>();
   const shown = p.conditions.slice(0, SHOWN);
+  const tip = p.open ? shown.find((x) => x.label === held) : undefined;
   const more = p.conditions.length - shown.length;
   return (
     <View style={{ flexDirection: 'row', justifyContent: 'center', columnGap: space.sm }}>
@@ -33,8 +35,7 @@ export function StatusIcons(p: Props) {
           key={`${x.label}-${i}`}
           look={x.kind ?? 'neutral'}
           name={statusName(x, p.time, p.text)}
-          tip={statusTip(x, p.time, p.text)}
-          setTip={setTip}
+          hold={(on) => setHeld(on ? x.label : undefined)}
           open={p.open}
         >
           {glyph(x.label, x.kind)}
@@ -45,7 +46,7 @@ export function StatusIcons(p: Props) {
           {`+${more}`}
         </Icon>
       )}
-      {tip !== undefined && <Tooltip text={tip} />}
+      {tip && <Tooltip text={statusTip(tip, p.time, p.text)} />}
     </View>
   );
 }
@@ -59,8 +60,7 @@ const looks = (c: Palette) => ({
 function Icon(p: {
   look: Look;
   name: string;
-  tip?: string;
-  setTip?: (tip?: string) => void;
+  hold?: (on: boolean) => void;
   open?: () => void;
   children: string;
 }) {
@@ -77,8 +77,8 @@ function Icon(p: {
         {disc}
       </View>
     );
-  const show = () => p.setTip?.(p.tip);
-  const hide = () => p.setTip?.(undefined);
+  const show = () => p.hold?.(true);
+  const hide = () => p.hold?.(false);
   return (
     <Pressable
       accessibilityRole="button"
@@ -88,6 +88,8 @@ function Icon(p: {
       onPressOut={hide}
       onHoverIn={show}
       onHoverOut={hide}
+      onFocus={show}
+      onBlur={hide}
       style={box}
     >
       {disc}
@@ -124,9 +126,11 @@ function Disc(p: { look: Look; children: string }) {
 export function Tooltip({ text }: { text: string }) {
   const c = usePalette();
   const reduced = useReducedMotion();
-  const shown = useRef(new Animated.Value(reduced ? 1 : 0)).current;
+  const shown = useRef(new Animated.Value(0)).current;
   useEffect(() => {
-    if (!reduced)
+    if (reduced)
+      shown.setValue(1); // also when reduced motion turns on mid-fade
+    else
       Animated.timing(shown, {
         toValue: 1,
         duration: motion.fade.duration,

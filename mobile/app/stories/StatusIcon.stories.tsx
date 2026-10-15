@@ -1,6 +1,7 @@
 // StatusIcons: the round, graphic-only condition icons above the status line
 // (BOOK-UI-COMPONENTS.md, Status icon). Time 720 in every story.
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
+import { useState } from 'react';
 import { expect, fireEvent, fn, waitFor } from 'storybook/test';
 import { StatusIcons } from '../book/StatusIcon.tsx';
 
@@ -104,5 +105,49 @@ export const Locked: Story = {
   play: async ({ canvas }) => {
     await expect(canvas.queryByRole('button')).toBeNull();
     await expect(canvas.getByRole('img', { name: 'fed, 48m remaining, buff' })).toBeVisible();
+  },
+};
+
+// Focused (keyboard): the tip shows; it follows the clock and goes with its icon or the lock.
+function Live(p: { text: (key: string) => string }) {
+  const [time, setTime] = useState(720);
+  const [conditions, setConditions] = useState([fed, poisoned]);
+  const [locked, setLocked] = useState(false);
+  return (
+    <>
+      <StatusIcons
+        conditions={conditions}
+        time={time}
+        text={p.text}
+        open={locked ? undefined : () => {}}
+      />
+      <button onClick={() => setTime(780)}>later</button>
+      <button onClick={() => setConditions([poisoned])}>expire</button>
+      <button onClick={() => setLocked(true)}>lock</button>
+    </>
+  );
+}
+export const Focused: Story = {
+  render: (args) => <Live text={args.text} />,
+  play: async ({ canvas }) => {
+    const tip = (text: string) => waitFor(() => expect(canvas.getByText(text)).toBeVisible());
+    const none = () => waitFor(() => expect(canvas.queryByText(/remaining$/)).toBeNull());
+    const press = (name: string) => fireEvent.click(canvas.getByText(name)); // focus stays on the icon
+    const focusFed = async () => {
+      canvas.getByRole('button', { name: /^fed/ }).focus();
+      await tip('fed, 48m remaining');
+    };
+    await focusFed();
+    canvas.getByRole('button', { name: /^fed/ }).blur();
+    await none();
+    await focusFed();
+    press('later');
+    await tip('fed, 47m remaining');
+    press('expire'); // poisoned takes fed's place; its tip must not appear
+    await none();
+    canvas.getByRole('button', { name: /^poisoned/ }).focus();
+    await tip('poisoned, 3m remaining');
+    press('lock');
+    await none();
   },
 };

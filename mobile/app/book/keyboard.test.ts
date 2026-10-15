@@ -34,7 +34,7 @@ registerHooks({
         format: 'module',
         shortCircuit: true,
         source:
-          "export const Pressable='Pressable',Text='Text',TextInput='TextInput',View='View',ScrollView='ScrollView',SafeAreaView='SafeAreaView',AccessibilityInfo={announceForAccessibility:()=>{}},Easing={},Animated={View:'View',Value:class {constructor(v){this.v=v}}},PanResponder={create:()=>({panHandlers:{}})};",
+          "export const Pressable='Pressable',Text='Text',TextInput='TextInput',View='View',ScrollView='ScrollView',SafeAreaView='SafeAreaView',AccessibilityInfo={announceForAccessibility:()=>{}},Easing={},Animated={View:'View',Value:class {constructor(v){this.v=v}setValue(v){this.v=v}}},PanResponder={create:()=>({panHandlers:{}})};",
       };
     if (!url.endsWith('.tsx')) return next(url, context);
     return {
