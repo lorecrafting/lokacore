@@ -15,26 +15,34 @@ defmodule Loka.Content.Identity do
   def check(m, defs, %{"world" => %{"identity" => id}}, {text, registry}) do
     caps = m["requires"]["capabilities"]
 
-    variants =
-      Enum.with_index(id["name_variants"] || [], fn v, i -> {v, @path ++ ["name_variants", i]} end)
+    variants = Enum.with_index(id["name_variants"] || [], &{&1, @path ++ ["name_variants", &2]})
+    trees = trees(variants)
 
-    keys = [
-      {id["name"], @path ++ ["name"]}
-      | for({v, p} <- variants, do: {v["description"], p ++ ["description"]})
-    ]
-
-    # Checks.trees/1 reads definitions only; these roots get its tree checks here.
-    trees =
-      for {v, p} <- variants, do: {"cartridge.json", p ++ ["when", "root"], v["when"]["root"]}
-
-    Enum.flat_map(variants, fn {_, p} ->
-      owned(at("cartridge.json", p), "variant", {caps, owners(registry, ["definitions"])})
-    end) ++
+    owned_all(variants, caps, registry) ++
       Enum.flat_map(trees, &Loka.Content.Policies.tree(&1, {m, defs, {caps, owners(registry)}})) ++
-      Loka.Content.Delayed.check(m, Map.put(defs, "reaction", %{}), trees) ++ texts(keys, text)
+      Loka.Content.Delayed.check(m, Map.put(defs, "reaction", %{}), trees) ++
+      texts(keys(id, variants), text)
   end
 
   def check(_, _, _, _), do: []
+
+  defp owned_all(variants, caps, registry),
+    do:
+      for(
+        {_, p} <- variants,
+        d <- owned(at("cartridge.json", p), "variant", {caps, owners(registry, ["definitions"])}),
+        do: d
+      )
+
+  # Checks.trees/1 reads definitions only; these roots get its tree checks here.
+  defp trees(variants),
+    do: for({v, p} <- variants, do: {"cartridge.json", p ++ ["when", "root"], v["when"]["root"]})
+
+  defp keys(id, variants),
+    do: [
+      {id["name"], @path ++ ["name"]}
+      | for({v, p} <- variants, do: {v["description"], p ++ ["description"]})
+    ]
 
   defp texts(_, :unknown), do: []
 

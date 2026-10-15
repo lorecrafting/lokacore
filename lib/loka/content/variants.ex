@@ -24,12 +24,14 @@ defmodule Loka.Content.Variants do
     voices = voice?(defs) or aside?(defs)
     identity = is_map_key(settings["world"] || %{}, "identity")
 
-    if (identity or voices or relative or Enum.any?(Entities.all(defs), &variant?/1) or
-          leaf?(defs) or leaf?(settings)) and
+    if (identity or voices or relative or used?(defs, settings)) and
          api < floor(identity, voices, relative, defs, settings),
        do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least", %{})],
        else: []
   end
+
+  defp used?(defs, settings),
+    do: Enum.any?(Entities.all(defs), &variant?/1) or leaf?(defs) or leaf?(settings)
 
   defp floor(true, _, _, _, _), do: [1, 97]
   defp floor(_, true, _, _, _), do: [1, 91]
