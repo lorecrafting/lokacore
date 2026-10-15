@@ -3,6 +3,7 @@
 # conflicts (bin/merge_resolve.py), run the post-merge checks (bin/prepush.sh plus only the tests the
 # merge touched), and push the batch if everything passes.
 # Usage: pm_merge.sh <batch-worktree> <batch-branch> <slice-branch> <review-branch> "<subject>" <reviewed-sha>
+# Refuses unless ci.yml and book-e2e.yml concluded success on the reviewed sha.
 # Prints one line per step; each FAIL line names its log. Exit 0 = pushed; any failure resets
 # the worktree to its start head, so a rerun re-checks the whole slice.
 # ponytail: runs only the test files the merge touched; hosted CI on the batch head runs the rest.
@@ -16,6 +17,12 @@ git fetch -q origin || exit 2
 [ "$(git rev-parse --abbrev-ref HEAD)" = "$batch" ] || { echo "NOT ON $batch"; exit 2; }
 [ "$(git rev-parse HEAD)" = "$(git rev-parse "origin/$batch")" ] || { echo "NOT LEVEL with origin/$batch"; exit 2; }
 [ "$(git rev-parse "origin/$slice")" = "$(git rev-parse "$sha")" ] || { echo "origin/$slice is not the reviewed head $sha"; exit 2; }
+# Hosted CI must be green on the reviewed sha (loka-tx2h): the newest run of each workflow counts, so a
+# superseded (cancelled) older run passes and a run cancelled at its timeout, a running one or none refuses.
+for wf in ci.yml book-e2e.yml; do
+  c=$(gh run list --workflow "$wf" --commit "$(git rev-parse "$sha")" --limit 1 --json conclusion --jq '.[0].conclusion // "missing"') || { echo "cannot read $wf runs for $sha"; exit 2; }
+  [ "$c" = success ] || { echo "$wf on $sha is ${c:-still running}, not success"; exit 2; }
+done
 # A fresh batch worktree has no node_modules, and the merge commit's Prettier hook needs it (loka-o5c2); use this worktree's copy, which cds to its own root.
 [ -e node_modules ] || sh bin/worktree_setup.sh >"${TMPDIR:-/tmp}/pm_setup.out" 2>&1 || { echo "SETUP_FAIL (${TMPDIR:-/tmp}/pm_setup.out)"; exit 2; }
 pre=$(git rev-parse HEAD)

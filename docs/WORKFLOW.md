@@ -21,6 +21,7 @@ other cross-vendor reviews are retired. Every `Agent` spawn names its `model`<a 
 |---|---|---|
 | Lookup or broad search; a brief drafter's search, citation re-anchoring and consumer inventories | [`Explore`](../.claude/agents/Explore.md) agent, Haiku (project override; the built-in inherits Opus); the drafter keeps only decisions | never for judgment |
 | PM mechanical chores (index rebuilds, CI watching, the housekeeping PR); bounded copy, content or docs edit from a fixed brief | Sonnet (`developer` for edits) | spec conflict or cross-layer behavior: Opus |
+| Brief drafting | Opus or Sonnet for a row that follows an existing pattern, an S row or content (owner, 2026-10-14) | Fable drafts the brief for a new module, a contract change (save, protocol, world graph), a Realm-sensitive row or a new interaction pattern: one Fable run per batch |
 | Slice implementation, tests, fix rounds | `developer`, Opus; Sonnet only for a bounded content or docs edit ([routing record](decisions/owner-decision-two-lane-ci-2026-10-09.md), superseding [Sonnet developers](archive/decisions/owner-decision-sonnet-developers-2026-09-30.md)) | — |
 | Independent review, fix re-check | fresh `reviewer`, Opus, for every item, infra and polish PR | one Fable review per mechanics batch, on the final batch head ([routing record](decisions/owner-decision-two-lane-ci-2026-10-09.md)); E2 and E3 gate closure: Fable; E1 closure: an Opus reviewer and a Fable second opinion ([record](decisions/owner-decision-e1-closure-reviewers-2026-10-07.md)), Fable audit at release-candidate certification ([record](decisions/owner-decision-chapter-one-polish-order-2026-10-07.md)) |
 | Book UI design check or review | `designer`, Fable in the polish phase ([record](decisions/owner-decision-designer-fable-2026-10-08.md)), plus a fresh `reviewer`: a quick correctness pass for a pure UI polish batch (it also checks the designer's spec and token text); in a [live polish session](#live-polish-session) the owner's approval is the design review, and a picker nit goes to a Sonnet designer | mechanics, save, protocol or kernel in the diff: the normal `reviewer` review |
@@ -170,6 +171,7 @@ The PM owns tracker writes; builders and reviewers report through
 the usual brief and review record. `docs/ROADMAP.md` remains the published status
 and completion count, briefs own scope, reviews own findings, and this workflow
 owns merge gates. Beads holds short current status, links and dependencies only.
+At review approval the PM collapses a row's notes to a two-line current state (head, record, open follow-ups); the history stays in the review record.
 Active issues carry one `stage:` label (building, review, fixing, recheck, integrated, gate), which the PM moves at each step; status stays `in_progress` until the reviewed merge to `main`.
 Keep one PM writer across worktrees/clones; `br` run from any worktree uses the integration
 checkout's database and JSONL, so commit tracker changes from that checkout, not a slice branch.
