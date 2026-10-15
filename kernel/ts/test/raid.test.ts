@@ -1,4 +1,4 @@
-// size: allow 605, the raid sampler (row 37a) and its delayed reactions (row FD1) share one compiled world
+// size: allow 623, the raid sampler (row 37a) and its delayed reactions (row FD1) share one compiled world
 // Toolbox row 37a on the compiled raid sampler (mechanics.md "Phased world events"): the lunar
 // cycle is 2000 units, new at 0, full at 1000; the `raid` rule spawns one `raiders` bundle (cap 2,
 // targets 0, wander every hour) at the first full-moon clock_hour while `raided` is false, and
@@ -417,6 +417,14 @@ test('FD1: a cause at 1600 inside a wait to 1800 runs at 1700, in one wait as in
   assert.deepEqual([fact(long, 'raided_at'), statuses(long)], [1900, [[2500, 'pending']]]);
 });
 
+// One elapsed advance from 1000 to 1700.
+const wait = (w: World) => {
+  const run_id = 'cccccccc-0000-4000-8000-000000000001' as never;
+  const payload = { type: 'elapsed', actor_id: w.character, run_id, from: 1000, until: 1700 };
+  const id = elapsedCommandId(run_id, w.context, 1000, 1700) as never;
+  return stepElapsed(w, { id, world_context_id: w.context, payload } as never, 1);
+};
+
 // Breaks: a delayed run's fired `when` is not counted in the advance's query_steps (04 §5.4).
 // `link` (after 1) adds 1 to `aftershocks` below 41: from the 1600 aftershock, 40 links each read
 // `leaves` when scheduled and again when fired. 500 leaves: 40 000 steps, over 32 768 (uncounted
@@ -435,15 +443,26 @@ test('FD1: a delayed chain past the step budget in one wait faults budget_exceed
       apply: [{ op: 'fact.adjust', fact: shocks, amount: 1 }],
     };
   };
-  const wait = (w: World) => {
-    const run_id = 'cccccccc-0000-4000-8000-000000000001' as never;
-    const payload = { type: 'elapsed', actor_id: w.character, run_id, from: 1000, until: 1700 };
-    const id = elapsedCommandId(run_id, w.context, 1000, 1700) as never;
-    return stepElapsed(w, { id, world_context_id: w.context, payload } as never, 1);
-  };
   const over = wait(elapsed(world(link(500)), 1000));
   assert.deepEqual([over.decision, over.limit], [BUDGET, 'query_steps']);
   assert.equal(fact(wait(elapsed(world(link(300)), 1000)).world, 'aftershocks'), 41);
+});
+
+// Breaks: a delayed fire is not counted as a delivery (delayed.ts), or the count is not checked
+// after the fire (proposal.ts), so an advance that ends on a fire commits at 8193 of 8192.
+// In the wait: calm and raid at the crossed hour (2), the aftershock fire (3), `n` empty rules
+// and `late` on its `aftershocks` change (n + 4), then `late`'s fire, last (n + 5).
+test('FD1: an advance that ends on a delayed fire past the delivery cap faults budget_exceeded', () => {
+  const crowd = (n: number) => (c: any) => {
+    const on = { event: 'fact_changed', fact: R('fact', 'aftershocks') };
+    for (let i = 0; i < n; i++)
+      c.reactions[`raid_sampler@0.0.1:reaction/e${i}`] = { key: `e${i}`, on, apply: [] };
+    const apply = [{ op: 'fact.adjust', fact: R('fact', 'aftermaths'), amount: 1 }];
+    c.reactions['raid_sampler@0.0.1:reaction/late'] = { key: 'late', on, after: 1, apply };
+  };
+  const over = wait(elapsed(world(crowd(8188)), 1000));
+  assert.deepEqual([over.decision, over.limit], [BUDGET, 'deliveries']);
+  assert.equal(wait(elapsed(world(crowd(8187)), 1000)).decision.kind, 'accepted');
 });
 
 // Breaks: the job's `when` is not re-read at its due time (a guard cannot cancel it), or a rule
