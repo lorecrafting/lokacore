@@ -90,7 +90,12 @@ const built = (w: World) =>
   Object.keys(w.state.created ?? {}).filter((id) => w.state.created![id].origin.kind === 'built');
 // The offer's refusal and the press's are the same code (view-to-invocation); the press carries
 // only the code, the offer also the reason's text key (none for a failing policy).
-function refused(w: World, code: string, key?: string, [use, i] = [raise, 0] as const) {
+function refused(
+  w: World,
+  code: string,
+  key?: string,
+  [use, i]: [typeof raise, number] = [raise, 0],
+) {
   const offer = gameView(w).entities.find((e) => e.id === npc(w, 'carpenter'))!.services![i];
   const r = send(w, use(w));
   assert.deepEqual(r.decision, { kind: 'rejected', error: { code } });
@@ -422,9 +427,9 @@ test('mend is refused on a sound hut; on a ruin it cures it for 3 pennies and a 
   const yard = w.roomIds[`${S}:room/yard`]!;
   refused(w, 'invalid_state', 'service.nothing_to_mend', [mend, 2]);
   w = elapse(w, w.state.clock + 600);
-  const [before, held0] = [pennies(w), held(w, yard)];
+  const [before, held0] = [pennies(w)!, held(w, yard)];
   w = play(w, mend(w));
-  assert.deepEqual([before - pennies(w), held(w, yard) - held0, held(w, w.body)], [3, 1, 0]);
+  assert.deepEqual([before - pennies(w)!, held(w, yard) - held0, held(w, w.body)], [3, 1, 0]);
   w = play(w, { type: 'move', direction: 'north' });
   assert.equal(gameView(w).place.description.key, 'blueprint.hut.description.owned');
   w = elapse(w, w.state.clock + 599);

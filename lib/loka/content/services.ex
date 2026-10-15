@@ -1,22 +1,23 @@
-# size: allow 427, row 20a/20b/25 escrow orders, bank accounts and Built rooms S2-S4 builds and mends check in the same service admission pass
+# size: allow 428, row 20a/20b/25 escrow orders, bank accounts and Built rooms S2-S4 builds and mends check in the same service admission pass
 defmodule Loka.Content.Services do
   @moduledoc "Checks finite immediate service declarations and their exact provider stock."
   import Loka.Content.Source, only: [diag: 2, diag: 3, diag: 4, at: 2, ref: 3]
   alias Loka.Content.{Position, Refs}
 
-  defp service_benefit(b, m) do
-    fields =
-      case b["kind"] do
-        k when k in ~w(entitlement repair) -> [{"fact", "fact"}]
-        k when k in ~w(claim cancel) -> [{"service", "service"}]
-        k when k in ~w(deposit withdraw) -> [{"account", "fact"}, {"vault", "npc"}]
-        "build" -> [{"blueprint", "blueprint"}, {"site", "room"}] ++ fact_field(b)
-        "mend" -> [{"site", "room"}]
-        "meal" -> [{"stock", "resource"}, {"recovery", "resource"}]
-        "drink" -> [{"vessel", "item"}, {"liquid", "liquid"}, {"recovery", "resource"}]
-      end
+  defp benefit_fields(b) do
+    case b["kind"] do
+      k when k in ~w(entitlement repair) -> [{"fact", "fact"}]
+      k when k in ~w(claim cancel) -> [{"service", "service"}]
+      k when k in ~w(deposit withdraw) -> [{"account", "fact"}, {"vault", "npc"}]
+      "build" -> [{"blueprint", "blueprint"}, {"site", "room"}] ++ fact_field(b)
+      "mend" -> [{"site", "room"}]
+      "meal" -> [{"stock", "resource"}, {"recovery", "resource"}]
+      "drink" -> [{"vessel", "item"}, {"liquid", "liquid"}, {"recovery", "resource"}]
+    end
+  end
 
-    Enum.reduce(fields, b, fn {field, kind}, result ->
+  defp service_benefit(b, m) do
+    Enum.reduce(benefit_fields(b), b, fn {field, kind}, result ->
       Map.update!(result, field, &ref(&1, kind, m))
     end)
     |> escrow_refs(m)
