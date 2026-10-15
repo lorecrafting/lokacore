@@ -380,7 +380,7 @@ completes to `objectives_complete` as its own writer group. Resolution (`:111`) 
 rule that resolves it (a dialogue choice or typed reaction): no open instance `invalid_state`; `active` with an
 unmet `current_state` objective `quest_requirement`; else `quest.transition` to
 `objectives_complete` (if needed) and `resolved` with the choice as outcome, and
-`quest_resolved`. A typed reaction may instead fail an actor-owned active or
+`quest_resolved`. A typed reaction may instead fail each holder's active or
 objectives_complete instance with a declared outcome. Failure never reopens a terminal
 instance and emits no event. Policy leaf `quest_state`; the GameView journal lists the player's instances.
 A quest may declare `journal` texts: `active`, `objectives_met`, `resolved`, `failed`,
@@ -2842,6 +2842,34 @@ Found by [showcase plan 2](../showcase/combat-district.md) (#368); the PM brief 
   - Events, jobs and save rows: none new.
   - Reused: `birth` and `birthSlot`, the `clock_hour` and `fact_changed` triggers, the `sky` and `fact_compare` leaves, `fact.assign` and `fact.adjust`, population plans; 37b adds no code.
   - New: the `population.spawn` step, `spawn`, `held`, targets from 0 and the 1.84 floors; no foundation change.
+
+## Protect objective (toolbox row 38)
+
+[Toolbox row 38](../MECHANICS-TOOLBOX.md#ranked-toolbox); its sampler: "named defender alive at close wins; dead fails". Beads `loka-kgd.133`, built with [RS-4](#reaction1-kerneltssrcmechanicsreactionts) (`loka-kgd.150.2`), whose subject attribution and per-holder quest steps it needs. Content only on [reaction@1](#reaction1-kerneltssrcmechanicsreactionts) and the [phased raid](#phased-world-events-toolbox-row-37a).
+
+- **Rules.** `called_to_hold`: `entity_entered_room {room village}` with `when` `all [fact_compare {raided equals true}, npc_present {defender}]`, `apply [quest.activate {hold_the_gate}]`; it activates for the entrant's character, and an NPC entering activates nothing. `defender_fell`: `entity_died {victim defender}`, `apply [quest.fail {hold_the_gate, outcome fallen}]`. `gate_held`: `fact_changed {fact raided}` with `when` `fact_compare {raided equals false}`, `apply [quest.resolve {hold_the_gate, outcome held}]`.
+- **Win and loss.** The quest `hold_the_gate` (player scope) has the `current_state` objective `raided equals false`. The defender's death fails every holder's open instance; the raid's end (the new moon) resolves every open instance still held. A failed instance is terminal, so the new moon leaves it failed; with no holder either step writes nothing.
+- **Realm audience.** `instance`: the defender and `raided` are world state, so one defender's death fails every holder and the raid's end resolves every holder.
+- **Realm seams** (owner rule `docs/decisions/owner-decision-realm-seams-2026-10-13.md`).
+  1. Actor: met; activation goes to the entrant's character (the Actor column), resolve and fail to each holder; no root-actor write.
+  2. Reactions: met; `entity_entered_room` names its entrant, `entity_died` its victim (an NPC: the steps act per holder), `fact_changed {raided}` no subject.
+  3. Credit: not applicable; no payout, the kill credits as before.
+  4. Time: met; the raid and its end are the calendar's logical `clock_hour`; no device clock, no skip.
+  5. Scope: met; the quest is player scope, one per entrant; `raided` and the defender are `instance`, audience above.
+  6. Text: met; authored journal and outcome lines; `speech@1` unchanged.
+  7. Ownership: not applicable; nothing owned moves.
+  8. Trust: not applicable; nothing imported.
+  9. Instancing: met; none assumed; one defender per world.
+- **Book.** No new element: the Journal shows the quest and its outcome line.
+- **Known limits.** The defender never returns; after its death no one can take the quest again in that world. A player who leaves keeps the quest; the outcome is decided by the defender and the moon alone.
+- **Sampler.** `cartridges/raid_sampler`: the defender (1 hp, no attack) in the village; `kernel/ts/test/raid.test.ts` row 38 cases.
+- **Composition record** ([architecture](architecture.md#building-mechanics-by-composition)).
+  - Consumer: `raid_sampler`.
+  - Reads: `raided`, the defender's presence (`npc_present`), the quest's holders.
+  - Writes: `quest.activate`, `quest.transition`; all existing ops.
+  - Events, jobs and save rows: none new.
+  - Reused: the `entity_entered_room`, `entity_died` and `fact_changed` triggers, `quest.activate`, `quest.resolve` and `quest.fail` (RS-4 per holder), the `fact_compare` and `npc_present` leaves, the 37a raid.
+  - New: content only; no code.
 
 ## Tracks and trails (toolbox row W13)
 

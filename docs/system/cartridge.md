@@ -120,12 +120,14 @@ loader validate each policy/reference/text and require API1.9 for this field or 
 riddle. Riddle choice references and bank multiplicity are checked before loading.
 
 Reaction authoring accepts exact `on: quest_resolved {quest, outcome}` and
-`apply: quest.activate {quest}` only under that trigger. Both quest references expand from
+`apply: quest.activate {quest}`, which (Beads `loka-kgd.150.2`) both kernels admit only under
+`quest_resolved`, `rested` or `entity_entered_room`, the triggers whose subject is a character
+(OUTCOME_MISMATCH at the step's `op` elsewhere). Both quest references expand from
 source short keys, resolve to local quest definitions, and require the quest event owner in
 the capability lock. These trigger/consequence forms require kernel API at least 1.8.
 Existing fact/room triggers retain their semantics.
-From API1.12, fact_changed reactions may apply typed `quest.resolve {quest, outcome}`
-and `quest.fail {quest, outcome}`. Both require a local quest reference and quest capability;
+From API1.12, reactions may apply typed `quest.resolve {quest, outcome}`
+and `quest.fail {quest, outcome}`, since `loka-kgd.150.2` on any trigger (for each holder). Both require a local quest reference and quest capability;
 resolve emits the quest-owned `quest_resolved` event. A scene may start on exact
 `quest_resolved {quest, outcome}` instead of a story point, with the same actor/instance
 evidence check as reaction delivery. The compiler expands these short quest references.

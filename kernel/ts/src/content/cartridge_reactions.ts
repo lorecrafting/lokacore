@@ -104,12 +104,11 @@ export function reactions(c: Obj, { named, typedValue }: Checks): Diagnostic[] {
     r.apply.forEach((s: Obj, i: number) => {
       if (s.op === 'quest.activate') {
         named(s.quest, 'quest', `${at}.apply[${i}].quest`);
-        if (r.on.event !== 'quest_resolved')
+        // loka-kgd.150.2: only a trigger whose subject resolves to a character activates.
+        if (!['quest_resolved', 'rested', 'entity_entered_room'].includes(r.on.event))
           out.push(diag('OUTCOME_MISMATCH', `${at}.apply[${i}].op`));
       } else if (s.op === 'quest.resolve' || s.op === 'quest.fail') {
-        named(s.quest, 'quest', `${at}.apply[${i}].quest`);
-        if (r.on.event !== 'fact_changed')
-          out.push(diag('OUTCOME_MISMATCH', `${at}.apply[${i}].op`));
+        named(s.quest, 'quest', `${at}.apply[${i}].quest`); // any trigger, per holder
       } else if (s.op === 'population.suppress') {
         named(s.plan, 'population', `${at}.apply[${i}].plan`);
         if (r.on.fact) typedValue(r.on.fact, true, `${at}.on.fact`);
