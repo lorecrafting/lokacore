@@ -21,8 +21,10 @@ defmodule Loka.Content.Construction do
     required = {m["requires"]["capabilities"], owners(registry, ["definitions"])}
 
     Enum.flat_map(sites, &site(&1, m, defs)) ++
-      Enum.flat_map(blueprints, &(owned_parts(&1, required) ++ texts(&1, text(v2)))) ++
-      Enum.flat_map(blueprints, &statuses(&1, m, defs)) ++
+      Enum.flat_map(
+        blueprints,
+        &(owned_parts(&1, required) ++ texts(&1, text(v2)) ++ statuses(&1, m, defs))
+      ) ++
       requirements(m, defs, blueprints, sites, settings)
   end
 

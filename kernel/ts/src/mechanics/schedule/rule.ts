@@ -92,8 +92,7 @@ export const decideAt = (
       return runReplenish(world, payload.job_id, row, mint, steps, at ?? row.due_time);
     if (row.job.kind === 'wage')
       return runWage(world, payload.job_id, row, mint, at ?? row.due_time);
-    if (row.job.kind === 'order')
-      return orderReady(world, payload.job_id, row, mint, steps, at ?? row.due_time);
+    if (row.job.kind === 'order') return orderReady(world, payload.job_id, row, mint, steps, at);
     if (row.job.kind === 'reaction')
       return runDelayed(world, command, payload.job_id, row, mint, steps, joins); // FD1
     return scheduledJob(world, command, payload.job_id, row, mint, steps, at ?? row.due_time);
@@ -180,7 +179,7 @@ function orderReady(
   row: JobRow,
   mint: Mint,
   steps: Steps,
-  at: number,
+  at = row.due_time,
 ) {
   if (row.status !== 'pending') return accepted<never>(world, 'job_ran', [], []);
   const then = { ...world, state: { ...world.state, clock: at } };

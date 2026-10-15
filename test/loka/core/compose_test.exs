@@ -291,7 +291,6 @@ defmodule Loka.Core.ComposeTest do
 
     knowledge = JSON.decode!(File.read!("protocol/fixtures/knowledge_composition.json"))["cases"]
     expedition = JSON.decode!(File.read!("protocol/fixtures/expedition.json"))["cases"]
-
     status = JSON.decode!(File.read!("protocol/fixtures/status_composition.json"))["cases"]
 
     for c <- knowledge ++ expedition ++ status,

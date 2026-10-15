@@ -31,15 +31,7 @@ export function construction(c: Obj): Diagnostic[] {
         out.push(diag('UNRESOLVED_REFERENCE', `${at}.blueprints[${i}]`, { target }));
     });
   }
-  // Built rooms S4: a blueprint's weathering and ruin name statuses of this cartridge.
-  for (const [ref, b] of Object.entries((c.blueprints ?? {}) as Obj))
-    for (const f of ['weathering', 'ruin'])
-      if (b[f] && !Object.hasOwn(c.statuses ?? {}, refString(b[f])))
-        out.push(
-          diag('UNRESOLVED_REFERENCE', `.cartridge.blueprints${step(ref)}.${f}`, {
-            target: refString(b[f]),
-          }),
-        );
+  out.push(...statusRefs(c));
   const used =
     sites.length > 0 ||
     Object.keys(c.blueprints ?? {}).length > 0 ||
@@ -48,4 +40,17 @@ export function construction(c: Obj): Diagnostic[] {
   if (used && apiCmp(c.manifest.requires.kernel_api.at_least, '1.99') < 0)
     out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
   return out;
+}
+
+// Built rooms S4: a blueprint's weathering and ruin name statuses of this cartridge.
+function statusRefs(c: Obj): Diagnostic[] {
+  return Object.entries((c.blueprints ?? {}) as Obj).flatMap(([ref, b]) =>
+    ['weathering', 'ruin']
+      .filter((f) => b[f] && !Object.hasOwn(c.statuses ?? {}, refString(b[f])))
+      .map((f) =>
+        diag('UNRESOLVED_REFERENCE', `.cartridge.blueprints${step(ref)}.${f}`, {
+          target: refString(b[f]),
+        }),
+      ),
+  );
 }
