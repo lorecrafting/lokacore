@@ -261,7 +261,7 @@ function react(p: P, ran = false): Admitted | undefined {
 }
 
 // Each due job of the root's explicit advance, then its reactions, or the result that ends them.
-// size: allow 41, a drain step joins its run's writes before its reactions and its tail after
+// size: allow 42, a drain step joins its run's writes before its reactions and its tail after
 function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined {
   const { due, to } = dueJobs(p.world, root);
   const populationPairs = populationDeadlinePairs(p.world, to);
@@ -282,7 +282,8 @@ function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined
     const m = allocator(at, run);
     const ran = admit('schedule', schedule.decideAt(at, run, m, undefined, due_time, tick, p));
     if (ran.kind !== 'accepted') return ran;
-    if ((p.limit = queueHour(due, job_id, ran))) return BUDGET;
+    if ((p.limit = queueHour(due, job_id, ran) ?? over({ deliveries: p.deliveries })))
+      return BUDGET;
     p.rng = ran.rng;
     p.narration.push(...(ran.narration ?? []));
     // A population partner's group, or an earlier crossed hour's.
