@@ -266,8 +266,8 @@ function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined
   const { due, to } = dueJobs(p.world, root);
   const populationPairs = populationDeadlinePairs(p.world, to);
   const groups = new Map<string, number>();
-  const start = p.ops.length;
-  let [cut, last] = [start, -1];
+  const w = { next: p.ops.length, at: new Map<string, number[]>() };
+  let [cut, last] = [w.next, -1];
   for (const [job_id, { due_time, tick }] of due) {
     const at = now(p);
     if (!('cartridge' in at)) return at;
@@ -293,13 +293,13 @@ function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined
     groups.set(job_id, group);
     const handoff = sightHandoff(p.world, p.ops, at, job_id as JobId, due_time, ran.delta.ops);
     if (due_time !== last) [cut, last] = [p.ops.length, due_time]; // only strictly earlier jobs
-    joinEarlier(p.ops, [start, cut], ran.delta.ops, group, [p.holders, groups]);
+    joinEarlier(p.ops, [w, cut], ran.delta.ops, group, [p.holders, groups]);
     const mark = p.ops.length;
     const own = ran.delta.ops.map((o) => ({ ...o, writer_group: handoffGroup(o, handoff, group) }));
     p.group++;
     const failed = join(p, own, ran.events, cause(p, due_time, run.id), 0, m) ?? react(p, true);
     if (failed) return failed;
-    const tail = joinTail(p.ops, [start, cut, mark], handoff?.group, [p.holders, groups]);
+    const tail = joinTail(p.ops, [w, cut, mark], handoff?.group, [p.holders, groups]);
     if ((p.limit = queueScheduled(due, tail, to))) return BUDGET;
   }
 }
