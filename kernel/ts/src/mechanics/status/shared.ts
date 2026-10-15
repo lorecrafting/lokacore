@@ -18,6 +18,8 @@ import { actorOf, type Mint, refString, type World } from '../../runtime/decisio
 import { cmp } from '../../foundation/validate.ts';
 import { HOLDERS } from '../../foundation/compose_status.ts';
 import { living } from '../death/shared.ts';
+import { npcValue, value } from '../attributes/shared.ts';
+import { level } from '../skills.ts';
 import { settleMaxima } from '../resource.ts';
 
 type Active = Extract<StatusRow, { active: true }>;
@@ -217,13 +219,35 @@ export const perceives = (
 ) =>
   sensed(world, body).some((s) => s.perception?.sight === sense || s.perception?.hearing === sense);
 
-/** Status reader 8: whether `seer` fails to see `holder`: hidden, or invisible without see_invisible. */
+/**
+ * Status reader 8: whether `seer` fails to see `holder`: hidden, or invisible without see_invisible,
+ * unless the status's `pierced_by` (row 16) lets the seer see through it.
+ */
 export const concealed = (world: World, holder: EntityId, seer: EntityId | undefined) =>
   sensed(world, holder).some(
     (s) =>
-      s.concealment === 'hidden' ||
-      (s.concealment === 'invisible' && !perceives(world, seer, 'see_invisible')),
+      (s.concealment === 'hidden' ||
+        (s.concealment === 'invisible' && !perceives(world, seer, 'see_invisible'))) &&
+      !(s.pierced_by && pierces(world, s.pierced_by, holder, seer)),
   );
+
+/**
+ * Row 16: the seer's `attribute` (an NPC's declared value, a player's value) is greater than the
+ * holder's `skill` level; a holder without a character (a hidden NPC) is never pierced. No draw.
+ */
+function pierces(
+  world: World,
+  { skill, attribute }: { skill: DefinitionRef; attribute: DefinitionRef },
+  holder: EntityId,
+  seer: EntityId | undefined,
+) {
+  const actor = actorOf(world, holder);
+  if (actor === undefined || seer === undefined) return false;
+  const player = actorOf(world, seer);
+  const sees =
+    player === undefined ? npcValue(world, seer, attribute) : value(world, player, attribute);
+  return sees !== undefined && sees > level(world, actor, skill);
+}
 
 /**
  * Status reader 7: the `movement` declarations of `body`'s active statuses, in definition order

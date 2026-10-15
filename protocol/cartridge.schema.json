@@ -2688,7 +2688,24 @@
             "invisible",
             "hidden"
           ],
-          "description": "Status reader 8 (kernel_api at least 1.61): while active on an NPC, the player does not see it; on the player's body, an NPC does not engage it on entry. invisible yields to a see_invisible perception; hidden to none. May stand in for per_tick."
+          "description": "Status reader 8 (kernel_api at least 1.61): while active on an NPC, the player does not see it; on the player's body, an NPC does not engage it on entry. invisible yields to a see_invisible perception; hidden to none, unless pierced_by. May stand in for per_tick."
+        },
+        "pierced_by": {
+          "type": "object",
+          "properties": {
+            "skill": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "attribute": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            }
+          },
+          "required": [
+            "skill",
+            "attribute"
+          ],
+          "additionalProperties": false,
+          "description": "Toolbox row 16 (kernel_api at least 1.93), only beside concealment: a seer whose attribute value (an NPC's declared value, a player's attributes@1 value) is greater than the holder's skill level sees through the concealment; a holder without a character is never pierced. No draw. While the holder is a player's body, an NPC that engages it on entry ends every active concealment status on it."
         }
       },
       "required": [

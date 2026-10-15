@@ -190,6 +190,14 @@ defmodule Loka.Content.Checks do
   def expand(%{"immune" => c} = e, m) when is_list(c),
     do: Map.put(expand(Map.delete(e, "immune"), m), "immune", Enum.map(c, &ref(&1, "status", m)))
 
+  # A status's pierced_by (row 16) names a skill and an attribute.
+  def expand(%{"pierced_by" => %{"skill" => k, "attribute" => a}} = s, m),
+    do:
+      Map.put(expand(Map.delete(s, "pierced_by"), m), "pierced_by", %{
+        "skill" => ref(k, "skill", m),
+        "attribute" => ref(a, "attribute", m)
+      })
+
   # A status's modifiers (row 2c) are ancestry-shaped {attribute, modifier}.
   def expand(%{"modifies" => l} = s, m) when is_list(l),
     do: Map.put(expand(Map.delete(s, "modifies"), m), "modifies", expand(l, m))
