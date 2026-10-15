@@ -92,15 +92,13 @@ export function holds(
     case 'light_off':
     case 'stat_compare':
     case 'resource_compare':
+    case 'level_compare':
+    case 'skill_compare':
       return atLeast(world, actor, p, ctx);
     case 'has_tag':
       return tagsOf(world, actor, p, ctx.target)?.includes(p.tag) === true;
     case 'wearing':
       return wearing(world, actor, p.tag);
-    case 'level_compare': // row 29a; level 1 without world.levelling
-      return (levelling(world, actor)?.level ?? 1) >= p.at_least;
-    case 'skill_compare': // row FD2
-      return skillLevel(world, actor, p.skill) >= p.at_least;
     case 'status_active':
       return statusActive(world, actor, p, ctx);
     case 'npc_present':
@@ -147,10 +145,16 @@ function read(
 function atLeast(
   world: World,
   actor: CharacterId,
-  p: Extract<Policy, { op: 'stat_compare' | 'resource_compare' | 'light_off' }>,
+  p: Extract<
+    Policy,
+    { op: 'stat_compare' | 'resource_compare' | 'light_off' | 'level_compare' | 'skill_compare' }
+  >,
   ctx: Ctx,
 ): boolean {
   if (p.op === 'light_off') return !illuminated(world, actor, ctx.steps);
+  // row 29a: level 1 without world.levelling
+  if (p.op === 'level_compare') return (levelling(world, actor)?.level ?? 1) >= p.at_least;
+  if (p.op === 'skill_compare') return skillLevel(world, actor, p.skill) >= p.at_least; // row FD2
   if (p.op === 'stat_compare') return attributeValue(world, actor, p.attribute) >= p.at_least;
   const body = bodyOf(world, actor);
   const who = (p.subject && ctx.subject) || body;

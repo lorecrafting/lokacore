@@ -3,7 +3,8 @@ defmodule Loka.Content.Variants do
   Toolbox row W6: an entity text variant (all but an item's older `room_line_variants`) or a
   `status_active` or `npc_present` leaf needs kernel_api 1.46; a `status_active` leaf reading
   `self` or `subject` (status reader 1, row G3) 1.53; a `resource_compare` with `subject` or
-  `at_least_percent` (row 39) 1.87. Twin of
+  `at_least_percent` (row 39) 1.87; a room's or detail's `asides` or a `skill_compare` leaf
+  (row FD2) 1.91. Twin of
   kernel/ts/src/content/cartridge_variants.ts.
   """
   import Loka.Content.Source, only: [diag: 3]
@@ -20,15 +21,18 @@ defmodule Loka.Content.Variants do
 
     relative = relative?(defs) or relative?(settings)
 
-    if (relative or Enum.any?(Entities.all(defs), &variant?/1) or leaf?(defs) or leaf?(settings)) and
-         api < floor(relative, defs, settings),
+    voices = voice?(defs)
+
+    if (voices or relative or Enum.any?(Entities.all(defs), &variant?/1) or leaf?(defs) or
+          leaf?(settings)) and api < floor(voices, relative, defs, settings),
        do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least", %{})],
        else: []
   end
 
-  defp floor(true, _, _), do: [1, 87]
+  defp floor(true, _, _, _), do: [1, 91]
+  defp floor(_, true, _, _), do: [1, 87]
 
-  defp floor(_, defs, settings),
+  defp floor(_, _, defs, settings),
     do: if(reader?(defs) or reader?(settings), do: [1, 53], else: [1, 46])
 
   defp variant?({kind, _, e}),
@@ -41,6 +45,13 @@ defmodule Loka.Content.Variants do
   defp leaf?(v) when is_list(v), do: Enum.any?(v, &leaf?/1)
   defp leaf?(v) when is_tuple(v), do: leaf?(Tuple.to_list(v))
   defp leaf?(_), do: false
+
+  defp voice?(%{"op" => "skill_compare"}), do: true
+  defp voice?(%{"asides" => _}), do: true
+  defp voice?(v) when is_map(v), do: Enum.any?(Map.values(v), &voice?/1)
+  defp voice?(v) when is_list(v), do: Enum.any?(v, &voice?/1)
+  defp voice?(v) when is_tuple(v), do: voice?(Tuple.to_list(v))
+  defp voice?(_), do: false
 
   defp reader?(%{"op" => "status_active", "subject" => s}) when s != "target", do: true
   defp reader?(v) when is_map(v), do: Enum.any?(Map.values(v), &reader?/1)

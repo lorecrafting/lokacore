@@ -93,6 +93,25 @@ test('lore 0, 1 and 2 show more asides, the scholar line and the decipher action
   assert.equal(perform(w, 'read_glyphs').decision.kind, 'accepted');
 });
 
+// Breaks: asides shown while the room's dark description replaces its text (sighted lines in the
+// dark), or a board notice not carrying its detail's asides.
+test('a dark room shows no asides; a board notice carries its detail asides', () => {
+  const w = study(study(fresh())); // lore 2
+  const room = w.roomIds[`${C}:room/hall`]!;
+  const runes = Object.keys(w.details).find((id) => w.details[id]!.key === 'runes')!;
+  const notice_board = { title: 'board', notices: [{ detail: 'carved_door', title: 'door' }] };
+  const boarded = {
+    ...w,
+    details: { ...w.details, [runes]: { ...w.details[runes]!, notice_board } },
+  };
+  assert.deepEqual(
+    gameView(boarded as World).notice_boards?.[0]?.notices[0]?.asides?.map((t) => t.key),
+    ['aside.door.lore', 'aside.door.glance'],
+  );
+  const dim = { ...w, rooms: { ...w.rooms, [room]: { ...w.rooms[room]!, dark_description: 'x' } } };
+  assert.equal(gameView(dim as World).place.asides, undefined);
+});
+
 const load = (change: (c: any) => void) => {
   const c = structuredClone(source);
   change(c);

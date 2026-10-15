@@ -255,6 +255,7 @@ export function refStage(c: Obj): Diagnostic[] {
   for (const [ref, a] of Object.entries(c.actions as Obj))
     text(a, ['label', 'accessibility'], `.cartridge.actions${step(ref)}`);
   for (const [kind, d, at] of parts(c)) text(d, TEXT[kind] ?? ['description'], at);
+  for (const [a, at] of asideParts(c)) text(a, ['text'], at);
   out.push(...water(c, check), ...skills(c, check), ...topics(c, check));
   ancestryRefs(c, check, out);
   out.push(...recipes(c, check), ...holders(c), ...barriers(c, check.named), ...links(c));

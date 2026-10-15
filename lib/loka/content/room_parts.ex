@@ -24,7 +24,9 @@ defmodule Loka.Content.RoomParts do
           field <- ~w(answered unanswered),
           do: {["exits", dir, "knock", field], e["knock"][field]}
 
-    variants = for {s, v} <- variants(r), do: {s ++ ["description"], v["description"]}
+    variants =
+      for({s, v} <- variants(r), do: {s ++ ["description"], v["description"]}) ++
+        for {s, a} <- asides(r), do: {s ++ ["text"], a["text"]}
 
     if r["dark_description"],
       do: [{["dark_description"], r["dark_description"]} | variants ++ knock],

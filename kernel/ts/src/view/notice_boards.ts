@@ -84,18 +84,17 @@ function noticeBoards(
         id: id as EntityId,
         title: board.title,
         description: description_variant.describe(world, actor, detail, steps),
-        notices: board.notices.map((notice) => ({
-          id: ids.get(notice.detail)!,
-          ...offered(actions(ids.get(notice.detail)!)),
-          title: notice.title,
-          description: description_variant.describe(
-            world,
-            actor,
-            world.details[ids.get(notice.detail)!],
-            steps,
-          ),
-          ...asideView(world, actor, world.details[ids.get(notice.detail)!], steps),
-        })),
+        notices: board.notices.map((notice) => {
+          const id = ids.get(notice.detail)!;
+          const shown = world.details[id];
+          return {
+            id,
+            ...offered(actions(id)),
+            title: notice.title,
+            description: description_variant.describe(world, actor, shown, steps),
+            ...asideView(world, actor, shown, steps),
+          };
+        }),
       },
     ];
   });

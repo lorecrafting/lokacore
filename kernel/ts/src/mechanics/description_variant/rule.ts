@@ -59,14 +59,19 @@ export const describe = (
     : (of.variants?.find((v) => holds(world, actor, v.when.root, { target, steps }))?.description ??
       of.description);
 
-/** Toolbox row FD2: the text of every aside of a room or detail that holds for `actor`, in authored order. */
+/** Toolbox row FD2: the text of every aside of a room or detail that holds for `actor`, in
+ * authored order; none while `describe` shows the dark description. */
 export const asides = (
   world: World,
   actor: CharacterId,
-  of: { readonly asides?: readonly Aside[] },
+  of: { readonly asides?: readonly Aside[]; readonly dark_description?: TextKey },
   steps: Steps = { n: 0 },
 ): TextKey[] =>
-  (of.asides ?? []).filter((a) => holds(world, actor, a.when.root, { steps })).map((a) => a.text);
+  of.dark_description && dark(world, actor, steps)
+    ? []
+    : (of.asides ?? [])
+        .filter((a) => holds(world, actor, a.when.root, { steps }))
+        .map((a) => a.text);
 
 /** An entity's `field` text as `actor` sees it: its `<field>_variants`, the entity the target (toolbox row W6). */
 export const describeEntity = (
