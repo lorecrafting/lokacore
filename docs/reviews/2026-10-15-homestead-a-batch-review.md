@@ -35,3 +35,18 @@ Holds: 1, 2, 4, 5, 6. 3 fails for the craft floor (finding 1).
 ## Disposition
 
 Open: finding 1 (fix round, with a mutant line pasted), nits 2-4. Settled: composition of hs-1 with hs-10 and hs-5 with hs-4 (probes A, B), union of loader_floors.json, receipts (mutant red), economy loops bounded.
+
+## Fix re-check (2026-10-15)
+
+- Fix head `e7124ac0cd39c21ec76cec29abc441acc5b2b3a4` (commit e7124ac0 after merge bf231644 of `origin/main`). Re-check by anthropic/claude-opus-5-5, replacing the batch reviewer. Scope: [WORKFLOW Loop step 6](../WORKFLOW.md); fix commit only.
+- Verdict: **APPROVE** at e7124ac0.
+
+| Item | Disposition | Evidence |
+|---|---|---|
+| Finding 1 (craft floor shadowed) | fixed | `protocol/fixtures/loader_floors.json:989` adds `"edits": [["skills/carving.json", ["prerequisite"], null]]` to case "a craft". Unmutated: `kernel/ts` `loader_floors.test.ts` + `craft.test.ts` pass, `mix test test/loka/loader_floors_test.exs` 2 passed (edited craft_sampler loads at 1.101 in both kernels). Mutant `'1.101' -> '1.100'` at `kernel/ts/src/content/cartridge_replenish.ts:27`: `loader_floors.test.ts:72` red, `cartridges/craft_sampler at 1.100` got `'loaded'`, expected `KERNEL_API_RANGE_INVALID`. Mutant `[1, 101] -> [1, 100]` at `lib/loka/content/replenish.ex:68` (`mix test --force`): `loader_floors_test.exs:36` MatchError, craft_sampler compiled `{:ok, ...}`; 1/2 passed. Both reverted. The generic `KERNEL_API_RANGE_INVALID` code is accepted by the PM: craft is now the case's only 1.101 feature. |
+| Nit 2 (`/code-review` in PR body) | fixed | PR body section "Slice /code-review results" lists each slice. |
+| Nit 3 (receipt comment) | fixed | `mobile/authority/local-story/food-receipt.ts:14` now cites mechanics.md Cooking; `docs/system/mechanics.md:3387` holds the line-0 clause. |
+| Nit 4 (toolbox row) | fixed | `docs/MECHANICS-TOOLBOX.md` adds row `.108.4` (Cooking, hs-5); `docs/toolbox.gen.json` carries `"id":".108.4"` (diff check only). |
+| Merge bf231644 | no damage | Main changed none of `loader_floors.json`, `mechanics.md`, `MECHANICS-TOOLBOX.md` since merge base a7c38bdf; `git diff e064721d bf231644` on those files is empty. Main's 10 changed files equal main in the merge (`git diff aeb7f727 bf231644` on them is empty). |
+
+- Open: none. Hosted CI on e7124ac0 at the time of writing: graph-diff success; ci and book-e2e in progress.
