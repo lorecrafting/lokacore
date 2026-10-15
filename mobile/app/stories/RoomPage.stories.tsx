@@ -2,6 +2,7 @@
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { expect } from 'storybook/test';
 import { Body } from '../book/Body.tsx';
+import { Asides as AsideLines } from '../book/lines.tsx';
 import { NoticeEntries } from '../book/notices.tsx';
 import { RoomPage } from '../book/pages.tsx';
 import { pageStory } from './screen.tsx';
@@ -17,7 +18,7 @@ import voices from '../../../cartridges/voices_sampler/text.json';
 const meta: Meta = {
   title: 'Pages/Room',
   component: RoomPage,
-  subcomponents: { Body, NoticeEntries },
+  subcomponents: { Body, NoticeEntries, Asides: AsideLines },
 };
 export default meta;
 
