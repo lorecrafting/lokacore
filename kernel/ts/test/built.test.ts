@@ -129,7 +129,8 @@ test('a second structure past max_total is refused', () => {
 
 // Breaks: hydrate admitting a built row whose direction the site does not declare, two rows on
 // one site direction (max_total 2), more rows than max_total (a second direction), an owner no
-// body has, an id other than its row key, an unknown blueprint or an unknown site.
+// body has, an id other than its row key, an unknown blueprint, a
+// blueprint the site does not list, or an unknown site.
 test('a forged built row refuses the load', () => {
   n = 0;
   let w = fresh();
@@ -138,6 +139,13 @@ test('a forged built row refuses the load', () => {
   const other = '00000000-0000-4000-8000-0000000000b2';
   const two = sampler((c) => (c.world.construction.max_total = 2));
   const east = sampler((c) => c.rooms[`${S}:room/lane`].site.directions.push('east'));
+  const shed = sampler(
+    (c) =>
+      (c.blueprints[`${S}:blueprint/shed`] = {
+        ...c.blueprints[`${S}:blueprint/hut`],
+        key: 'shed',
+      }),
+  );
   const twin = (direction: string) => (s: any) =>
     (s.created[other] = {
       ...s.created[hut],
@@ -150,7 +158,8 @@ test('a forged built row refuses the load', () => {
     [east, twin('east')],
     [sampler(), (s: any) => (s.created[hut].origin.owner = other)],
     [sampler(), (s: any) => (s.created[hut].id = other)],
-    [sampler(), (s: any) => (s.created[hut].definition.key = 'shed')],
+    [shed, (s: any) => (s.created[hut].definition.key = 'shed')],
+    [sampler(), (s: any) => (s.created[hut].definition.key = 'nowhere')],
     [sampler(), (s: any) => (s.created[hut].origin.site.key = 'nowhere')],
   ] as const) {
     const state = JSON.parse(JSON.stringify(w.state));
