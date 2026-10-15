@@ -27,7 +27,8 @@ const page = (b: ReturnType<typeof yard>, item: string) => {
 };
 
 // Breaks: the pair reads its tool as a destination ("Quench a bucket in a bucket"), names the
-// tool instead of the target, or presses ids other than the listed [target, tool] pair. Every
+// tool instead of the target, shows on the target's page too, or presses ids other than the
+// listed [target, tool] pair. Every
 // listed pair is pressed, so this is the view-to-invocation check.
 test('the bucket offers Quench a cart, the oilcan Oil a winch; each press is admitted', () => {
   const b = yard();
@@ -42,6 +43,9 @@ test('the bucket offers Quench a cart, the oilcan Oil a winch; each press is adm
       .map((p) => [p.action_key, p.target_ids, p.input]),
     listed.map((a) => [a.action_key, a.target_ids, {}]),
   );
+  b.tap(/cart is here/);
+  assert.ok(!b.labels().some((l) => l.startsWith('Quench')), b.labels().join(' | '));
+  b.tap('Leave');
   page(b, 'bucket');
   assert.ok(b.labels().includes('Quench a cart'), b.labels().join(' | '));
   b.tap('Quench a cart');

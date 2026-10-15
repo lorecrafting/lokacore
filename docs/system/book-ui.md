@@ -316,7 +316,7 @@ Put appears as a concrete pair button using projected source/destination names a
 Each button captures its projection freshness and follows the normal GameSession invocation
 and confirmed receipt routing. There is no separate storage session or recipient selector.
 
-A held tool's page shows one card per use pair (G4) its GameView actions list available, in listed order: the recipe's authored label and the target's projected name ("Quench a cart" on the bucket), never the tool's own name. Pressing it sends the listed action key with target_ids [target, tool] and no input; the page stays and the result joins its history. A pair the GameView lists unavailable, or does not list, shows no card, as other held actions; the Book adds no availability rule. ([Use X on Y](mechanics.md#use-x-on-y-toolbox-row-g4); wording proposed, designer to approve: Beads `loka-x6t.39`.)
+A held tool's page shows one card per use pair (G4) its GameView actions list available, in listed order: the recipe's authored label and the target's projected name ("Quench a cart" on the bucket), never the tool's own name, and only there (the target's page shows none). Pressing it sends the listed action key with target_ids [target, tool] and no input; the page stays and the result joins its history. A pair the GameView lists unavailable, or does not list, shows no card, as other held actions; the Book adds no availability rule. ([Use X on Y](mechanics.md#use-x-on-y-toolbox-row-g4); wording proposed, designer to approve: Beads `loka-x6t.39`.)
 
 Quest completion updates its journal and confirmed narration. A terminal side quest
 never implies that the whole story has ended. World shows no whole-story completion
