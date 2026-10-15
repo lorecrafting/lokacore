@@ -18,6 +18,7 @@ After the foundation phase, work follows the ranked [mechanics toolbox](MECHANIC
 release scope; Chapter 1 is a frozen regression fixture until the [toolbox showcase](SHOWCASE.md), the
 composition proof that grows one district per batch, covers its play families
 ([owner decision](decisions/owner-decision-showcase-2026-10-10.md)).
+Product order since 2026-10-15: showcases, UI polish, worldbuilding, then the official Chapters 1-3 ([record](decisions/owner-decision-product-order-2026-10-15.md)).
 
 ## Slices
 
