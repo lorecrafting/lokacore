@@ -267,3 +267,28 @@ test('a restock rule on the spoil event moves the spoiled fish to the market at 
   w = wait(w, w.state.clock + 86400);
   assert.equal(at(w, 'fish'), 'market');
 });
+
+// Break: replenish.run does not record the group it wrote the item in (hs-1: `back` would write
+// the fish `toss` just moved in a second group: conflicting_write). `pitch` sorts before `reclaim`.
+test('two runs on one event move the fish out and back in one wait', () => {
+  const edit = (c: any) => {
+    c.manifest.requires.kernel_api.at_least = '1.101';
+    const restock = c.replenish[`${S}replenish/restock`];
+    const [market, midden] = [restock.to, restock.from];
+    c.replenish[`${S}replenish/toss`] = { ...restock, key: 'toss', from: market, to: midden };
+    c.replenish[`${S}replenish/back`] = { ...restock, key: 'back' };
+    const on = { event: 'status_expired', status: ref('status', 'rot') };
+    for (const [key, run] of [
+      ['pitch', 'toss'],
+      ['reclaim', 'back'],
+    ])
+      c.reactions[`${S}reaction/${key}`] = {
+        key,
+        on,
+        apply: [{ op: 'replenish.run', key: ref('replenish', run!) }],
+      };
+  };
+  let w = drop(take(fresh(edit), 'rag'), 'rag');
+  w = wait(w, w.state.clock + 3600);
+  assert.equal(at(w, 'fish'), 'market');
+});

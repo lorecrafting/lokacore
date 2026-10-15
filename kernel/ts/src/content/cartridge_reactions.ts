@@ -106,7 +106,7 @@ const apiFloor = (r: Obj): number =>
     ...r.apply.map((s: Obj) => (s.tag ? 56 : s.co_present ? 50 : (FLOORS[s.op] ?? 0))),
   );
 
-// size: allow 49, typed suppression, status and move (row FD5) references stay in one ordered check
+// size: allow 53, typed suppression, status and move (row FD5; hs-1 repeated run) references stay in one ordered check
 export function reactions(c: Obj, { named, typedValue }: Checks): Diagnostic[] {
   const out: Diagnostic[] = [];
   const [major, minor] = c.manifest.requires.kernel_api.at_least.split('.').map(Number);
@@ -123,6 +123,7 @@ export function reactions(c: Obj, { named, typedValue }: Checks): Diagnostic[] {
     for (const f of ['npc', 'attacker', 'target', 'witness'])
       if (r.on[f] && c.npcs?.[refString(r.on[f])]?.spawn_template)
         out.push(diag('SCHEMA_VIOLATION', `${at}.on.${f}`, { error: 'invalid_value' }));
+    const runs = new Set<string>(); // the rule's replenish.run keys so far
     r.apply.forEach((s: Obj, i: number) => {
       if (s.op === 'quest.activate') {
         named(s.quest, 'quest', `${at}.apply[${i}].quest`);
@@ -142,6 +143,9 @@ export function reactions(c: Obj, { named, typedValue }: Checks): Diagnostic[] {
         out.push(...barrierSet(c, s, r.on.room, `${at}.apply[${i}]`, named));
       } else if (MOVES[s.op]) {
         for (const [f, kind] of MOVES[s.op]) if (s[f]) named(s[f], kind, `${at}.apply[${i}].${f}`);
+        // hs-1: a second run of one entry in a rule would pick the items the first moved
+        if (s.op === 'replenish.run' && runs.size === runs.add(refString(s.key)).size)
+          out.push(diag('DUPLICATE_DEFINITION', `${at}.apply[${i}].key`));
         if (s.npc && c.npcs?.[refString(s.npc)]?.spawn_template)
           // row FD5: no instance to move
           out.push(diag('SCHEMA_VIOLATION', `${at}.apply[${i}].npc`, { error: 'invalid_value' }));

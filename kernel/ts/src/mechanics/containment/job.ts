@@ -77,9 +77,9 @@ export function runReplenish(
 
 /**
  * Homestead hs-1: a reaction's replenish.run step, one run of the entry's move body and no job,
- * each item in the group an earlier write of the advance gave it (row 41's join), else `group`.
- * ponytail: it reads world state, not the rule's earlier `ops`, so a second replenish.run or an
- * item.move of the same items in one rule picks the same items; upgrade if a rule needs both.
+ * each item in the group an earlier write of the advance gave it (row 41's join) or the root
+ * command's group (`roots`), else `group`. ponytail: it reads world state, not the rule's earlier
+ * `ops`, so an item.move of the same items in one rule picks the same items; upgrade if needed.
  */
 export function replenishStep(
   world: World,
@@ -87,13 +87,18 @@ export function replenishStep(
   group: number,
   steps: Steps,
   holders: Map<string, number>,
+  roots?: ReadonlyMap<string, number>,
 ) {
   return transfers(world, key, steps, (item) => {
-    const writer_group = holders.get(item) ?? group;
+    const writer_group = holders.get(item) ?? roots?.get(item) ?? group;
     holders.set(item, writer_group);
     return writer_group;
   });
 }
+
+/** Each item a decision's ops move, with that op's writer group (hs-1: the root command's). */
+export const moverGroups = (ops: readonly DeltaOp[]) =>
+  new Map(ops.flatMap((o) => (o.op === 'entity.transfer' ? [[o.entity_id, o.writer_group]] : [])));
 
 // One run of entry `key`'s move body as transfers, each in the writer group `groupOf` gives it.
 function transfers(

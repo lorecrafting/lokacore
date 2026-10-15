@@ -118,7 +118,8 @@ defmodule Loka.ContentReplenishTest do
   end
 
   # Break (twin of the loader test in kernel/ts/test/replenish.test.ts): replenish.run compiles
-  # with an unresolved key, under API 1.101, or on a rule with `after` (refused as item.move is).
+  # with an unresolved key, under API 1.101, on a rule with `after` (refused as item.move is), or
+  # twice with one key in a rule.
   test "replenish.run needs API 1.101, a replenish entry and no after", %{dir: dir} do
     run = %{"op" => "replenish.run", "key" => "seam_regrowth"}
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, digging(run))
@@ -136,6 +137,11 @@ defmodule Loka.ContentReplenishTest do
     assert {"SCHEMA_VIOLATION", "reactions/dig.apply[0].op"} in codes(
              dir,
              digging(run, "1.101", %{"after" => 60})
+           )
+
+    assert {"DUPLICATE_DEFINITION", "reactions/dig.apply[1].key"} in codes(
+             dir,
+             digging(run, "1.101", %{"apply" => [run, run]})
            )
   end
 end

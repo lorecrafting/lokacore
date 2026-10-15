@@ -1,4 +1,4 @@
-# size: allow 306, reaction@1 rule admission keeps every step's floor and reference clause (Homestead hs-1: replenish.run) in one consequence table
+# size: allow 317, reaction@1 rule admission keeps every step's floor and reference clause (Homestead hs-1: replenish.run and its repeat check) in one consequence table
 defmodule Loka.Content.Reactions do
   @moduledoc """
   Reaction rules in a v2 source (reaction.schema.json ReactionRule; 21 §11; 06 §14), twin of
@@ -56,7 +56,18 @@ defmodule Loka.Content.Reactions do
       owned(at(rel, ["on", "event"]), event, ctx.events) ++
       named(rel, on, ctx) ++
       instances(rel, on, ctx) ++
-      Enum.flat_map(Enum.with_index(r["apply"]), &consequence(rel, &1, on, ctx))
+      Enum.flat_map(Enum.with_index(r["apply"]), &consequence(rel, &1, on, ctx)) ++
+      reruns(rel, r["apply"])
+  end
+
+  # Homestead hs-1: a second replenish.run of one entry in a rule would pick the items the first
+  # moved (twin of `runs` in kernel/ts/src/content/cartridge_reactions.ts).
+  defp reruns(rel, apply) do
+    runs = for {%{"op" => "replenish.run", "key" => k}, i} <- Enum.with_index(apply), do: {k, i}
+
+    for {{k, i}, n} <- Enum.with_index(runs),
+        Enum.any?(Enum.take(runs, n), &(elem(&1, 0) == k)),
+        do: diag("DUPLICATE_DEFINITION", at(rel, ["apply", i, "key"]))
   end
 
   defp named(rel, on, ctx),

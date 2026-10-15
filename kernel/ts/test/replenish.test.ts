@@ -280,8 +280,8 @@ test('a dig event moves one ore from the store at once, up to the cap; the job s
 });
 
 // Breaks: a stale key loads (both kernels: test/loka/content_replenish_test.exs), the step's
-// 1.101 floor or its refusal under `after` (as item.move's, row FD1) is dropped.
-test('loader: replenish.run needs kernel_api 1.101, a replenish entry and no after', () => {
+// 1.101 floor, its refusal under `after` (as item.move's, row FD1) or of a repeated key is dropped.
+test('loader: replenish.run needs kernel_api 1.101, a replenish entry, no after, one run a key', () => {
   const reload = (edit: (c: any) => void) => {
     const r = edited(edit);
     return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
@@ -302,4 +302,32 @@ test('loader: replenish.run needs kernel_api 1.101, a replenish entry and no aft
     }),
     ['SCHEMA_VIOLATION', `${at}.apply[0].op`],
   );
+  assert.deepEqual(reload(digging([RUN, RUN])), ['DUPLICATE_DEFINITION', `${at}.apply[1].key`]);
+});
+
+// Break: replenish.run ignores the root command's write of the item (hs-1 fix round 1): the drop
+// and the same-command sweep write the ore in two groups, and the drop faults conflicting_write.
+test('a sweep rule on item_dropped moves the dropped ore on in the same command', () => {
+  const loaded = edited((c) => {
+    digging()(c);
+    c.replenish[`${S}replenish/sweep`] = {
+      ...c.replenish[`${S}replenish/seam_regrowth`],
+      key: 'sweep',
+      from: { in: 'room', room: ref('room', 'mine') },
+      to: { in: 'room', room: ref('room', 'store') },
+      cap: 5,
+    };
+    c.reactions[`${S}reaction/dig`].on = { event: 'item_dropped' };
+    c.reactions[`${S}reaction/dig`].apply = [{ ...RUN, key: ref('replenish', 'sweep') }];
+  });
+  assert.ok(loaded.ok, JSON.stringify(loaded));
+  const w = harvested(loaded.cartridge as Cartridge);
+  assert.deepEqual(ore(w), [0, 3]); // the other two ore are held
+  const rooms = [id(w, 'room', 'mine'), id(w, 'room', 'store')];
+  const held = ORE.map((k) => id(w, 'item', k)).find(
+    (o) => !rooms.includes(w.state.containers[o]!),
+  )!;
+  const r = play(w, { type: 'drop', item_id: held });
+  assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
+  assert.equal(r.world.state.containers[held], rooms[1]);
 });

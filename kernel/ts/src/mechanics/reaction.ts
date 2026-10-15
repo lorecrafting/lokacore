@@ -1,4 +1,4 @@
-// size: allow 439, reaction@1 keeps its total trigger SUBJECT table and filters (row FD5: witness) beside the one delivery sequence (row FD1: or its delayed job; quest.activate split out for hs-1)
+// size: allow 440, reaction@1 keeps its total trigger SUBJECT table and filters (row FD5: witness) beside the one delivery sequence (row FD1: or its delayed job; quest.activate split out for hs-1)
 // reaction@1 (capability_registry.json; reaction.schema.json ReactionRule; 21 §3.4, §11; 06
 // §14; 04 §5.2): the rules an event triggers and one delivery's explicit sequence. proposal.ts
 // propose runs the FIFO queue, numbers the writer groups and counts the budgets.
@@ -123,6 +123,7 @@ const ACTIVATES = ['quest_resolved', 'rested', 'entity_entered_room'];
 // ran: a delivery inside an advance's job run, whose delayed jobs may fall due inside the advance.
 type Delivery = {
   holders?: Map<string, number>;
+  roots?: ReadonlyMap<string, number>; // the root command's item moves' groups (hs-1)
   dead?: ReadonlySet<EntityId>;
   fired?: boolean;
   ran?: boolean;
@@ -137,7 +138,7 @@ export function sequence(
   group: number,
   steps: { n: number },
   mint: Mint,
-  { holders = new Map(), dead = new Set(), fired = false, ran = false }: Delivery = {},
+  { holders = new Map(), dead = new Set(), fired = false, ran = false, roots }: Delivery = {},
 ): Decision<EventPayload['type']> | undefined {
   const [actor, npc, trigger] = deliveryActor(world, cause, root);
   if (!actor) return { kind: 'fault', code: 'precondition_failed' };
@@ -175,7 +176,7 @@ export function sequence(
     } else if (step.op === 'population.spawn') {
       ops.push(...spawn(then, step, group, ops, mint)); // row 37a
     } else if (step.op === 'replenish.run') {
-      const refill = replenishStep(then, step.key, group, steps, holders); // Homestead hs-1
+      const refill = replenishStep(then, step.key, group, steps, holders, roots); // hs-1
       if (typeof refill === 'string') return { kind: 'fault', code: refill };
       ops.push(...refill);
     } else if (step.op === 'experience.grant') {

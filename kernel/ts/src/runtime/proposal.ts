@@ -1,6 +1,6 @@
 import { enteredActors, knowledgeLast, record } from '../mechanics/knowledge/shared.ts';
 import { vary } from '../mechanics/variety.ts';
-// size: allow 342, typed quest reactions, deadline pairing and group merging share FIFO admission
+// size: allow 344, typed quest reactions, deadline pairing and group merging share FIFO admission
 // Proposal admission, FIFO composition and adoption (04 §5.1-§5.4); runtime/world.ts routes commands here.
 import { populationDeadlinePairs } from './proposal_deadlines.ts';
 import { apply } from './apply.ts';
@@ -25,6 +25,7 @@ import { currentRound } from '../mechanics/combat/round.ts';
 import { handoffGroup, sightHandoff } from './proposal_sight.ts';
 import { joinEarlier, joinTail, queueHour, queueScheduled, type Due } from './proposal_hours.ts';
 import { merge, statusGroup } from '../mechanics/status/job.ts';
+import { moverGroups } from '../mechanics/containment/job.ts';
 import { anyPending as pending, parted } from '../mechanics/dialogue/selection.ts';
 import { admit, type Admitted } from './proposal_admit.ts';
 export { admit, ownerOf, type Admitted } from './proposal_admit.ts';
@@ -54,6 +55,7 @@ type P = {
   rng: World['state']['rng'];
   narration: Text[];
   holders: Map<string, number>; // each status holder's, reaction fact row's writer group (G3)
+  roots: ReadonlyMap<string, number>; // each item the root command moved: its writer group (hs-1)
   limit?: Limit | undefined; // set only just before a budget fault returns
 };
 export const BUDGET = { kind: 'fault', code: 'budget_exceeded' } as Admitted;
@@ -61,6 +63,7 @@ export const BUDGET = { kind: 'fault', code: 'budget_exceeded' } as Admitted;
  * Each sequence gets one writer group; event positions are global, allocators causal.
  * now() lazily applies the prefix and retains hydration/RNG for real later consumers.
  */
+// size: allow 41, root, jobs and deliveries compose in one place; hs-1 adds the root moves' groups
 export function propose(
   world: World,
   root: Admitted,
@@ -84,6 +87,7 @@ export function propose(
     rng: root.rng,
     narration: [...(root.narration ?? [])],
     holders: new Map(),
+    roots: moverGroups(root.delta.ops),
   };
   const base = { ...cause(p, world.state.clock, command.id), actor_id: command.payload.actor_id };
   const failed =
@@ -243,7 +247,7 @@ function react(p: P, ran = false): Admitted | undefined {
         p.group + 1,
         p.steps,
         next.mint,
-        { holders: p.holders, dead, ran },
+        { holders: p.holders, dead, ran, roots: p.roots },
       );
       const depth = next.depth + 1;
       p.limit = over({ deliveries: ++p.deliveries, reaction_depth: depth, query_steps: p.steps.n });
