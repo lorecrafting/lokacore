@@ -8,7 +8,7 @@ import { compiled } from '../../authority/local-story/__tests__/compiled.ts';
 import { elapsedHost } from '../../authority/local-story/__tests__/elapsed-host.test.ts';
 import { book } from './__tests__/polish-book.test.ts';
 import type { GameView } from '../../packages/game-view/session.ts';
-import { buttonsOf, WORDS } from './buttons.ts';
+import { buttonsOf, castWords, WORDS } from './buttons.ts';
 import { intentOf } from './model.ts';
 import { LABEL } from './labels.ts';
 
@@ -98,11 +98,16 @@ test('a typed word is said like its chip, even after the view moves on, and neve
 });
 
 // Breaks: a refused spell word hidden or pressable, its reason missing, a learned word not shown,
-// or a cast press not admitted (mana unchanged).
+// a spell word shown where Cast is not offered, or a cast press not admitted (mana unchanged).
 test('spell words: refused ones carry their reason; lux casts once ash is gathered', () => {
   const b = book(spells as never);
   const castRow = (t: string[]) => t.slice(t.indexOf(LABEL.cast), t.indexOf(LABEL.cast) + 3);
   assert.deepEqual(castRow(b.text()), [LABEL.cast, 'lux', 'lux, cast: too exhausted']);
+  const v = b.game.view().view;
+  assert.deepEqual(
+    castWords({ ...v, actions: v.actions.filter((x) => x.action_key !== 'cast') }),
+    [],
+  );
   b.tap('Take up the apprenticeship');
   b.tap('Trace the sigil');
   assert.ok(b.text().includes('ward, cast: not now'));
