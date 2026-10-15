@@ -10,5 +10,6 @@
     "in": "room",
     "room": "yard"
   },
-  "mass_grams": 1000
+  "mass_grams": 1000,
+  "give_allowed": false
 }

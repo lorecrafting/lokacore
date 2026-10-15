@@ -20,6 +20,8 @@ import type { Cartridge, World } from '../src/runtime/decision.ts';
 import type { EntityId } from '../src/contracts.gen.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { activeStatuses } from '../src/mechanics/status/shared.ts';
+import { key } from '../src/foundation/compose.ts';
+import { level, resourceRef } from '../src/mechanics/resource.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-pen-sampler-'));
 let artifact: Uint8Array;
@@ -120,6 +122,22 @@ const feed = () => {
   return play(w, { type: 'put', item_id: item(w, 'grain_01'), container_id: item(w, 'trough') });
 };
 const nest = (w: World) => inside(w, item(w, 'nest')).length;
+// The player's mv pool set to `value` now (regen 18 an hour from here), as status.test.ts withPool.
+const withMv = (w: World, value: number): World => ({
+  ...w,
+  state: {
+    ...w.state,
+    resources: {
+      ...w.state.resources,
+      [key({ kind: 'resource', entity_id: w.body, resource: resourceRef(w, 'mv') })]: {
+        value,
+        at: w.state.clock,
+        rate: 18,
+        remainder: 0,
+      },
+    },
+  },
+});
 
 // Breaks: the pen lock dropped or reading another fact (a stranger walks in).
 test('a stranger is refused the pen; the bought entitlement lets them in', () => {
@@ -129,7 +147,8 @@ test('a stranger is refused the pen; the bought entitlement lets them in', () =>
 });
 
 // Breaks: co_present not reaching the trough event's NPCs, spent_grain not running in the Put's own
-// advance (hs-1), or the feed reaction firing on a Drop or Take of the grain in the pen.
+// advance (hs-1), the feed `when` letting a Take in the pen feed, or a Give of the grain accepted
+// (it would feed the seller or a hen and never reach the midden).
 test('grain in the trough feeds both hens and goes to the midden in the same advance', () => {
   const w = feed();
   assert.equal(hens(w).length, 2);
@@ -140,11 +159,17 @@ test('grain in the trough feeds both hens and goes to the midden in the same adv
   d = play(buy(d), { type: 'move', direction: 'north' });
   d = play(d, { type: 'drop', item_id: item(d, 'grain_01') });
   d = play(d, { type: 'take', item_id: item(d, 'grain_01') });
+  assert.equal(hens(d).length, 2);
   for (const h of hens(d)) assert.deepEqual(statuses(d, h as EntityId), []);
   assert.equal(
     code(d, { type: 'put', item_id: item(d, 'grain_01'), container_id: item(d, 'nest') }),
     'permission_denied',
   );
+  for (const to of [npc(d, 'seller'), hens(d)[0]!])
+    assert.equal(
+      code(d, { type: 'give', item_id: item(d, 'grain_01'), recipient_id: to }),
+      'invalid_state',
+    );
 });
 
 // Breaks: a lay on an unfed hen, a lay before the first tick, the cap exceeded or not counted.
@@ -154,6 +179,16 @@ test('fed hens lay on each tick up to the nest cap; unfed hens never lay', () =>
   assert.deepEqual(seen, [0, 2, 2, 3, 3]);
   assert.equal(inside(w, room(w, 'larder')).length, 3);
   assert.equal(nest(elapsed(fresh(), C0 + 57600)), 0);
+});
+
+// Breaks: the egg's `edible` block dropped or bound to a pool the eat does not raise.
+test('a taken egg is eaten and raises mv by 2', () => {
+  let w = elapsed(feed(), C0 + 14400);
+  const egg = item(w, inside(w, item(w, 'nest'))[0]!);
+  w = withMv(play(w, { type: 'take', item_id: egg }), 90);
+  w = play(w, { type: 'eat', item_id: egg });
+  assert.notEqual(w.state.containers[egg], w.body);
+  assert.equal(level(w, w.body, resourceRef(w, 'mv')), 92);
 });
 
 // Breaks: grain_return off its 86400 period, or not returning the sack to the yard.
@@ -195,6 +230,8 @@ test('a lone hen does not breed', () => {
   w = play(w, { type: 'attack', target_id: slots(w)[0]![1].member_id! });
   w = elapsed(w, C0 + 43200);
   assert.equal(hens(w).length, 1);
+  // Past the dead hen's replacement_due (its death + 86400): a refill skipping birth_when shows here.
+  assert.equal(hens(elapsed(w, C0 + 2 * 86400)).length, 1);
 });
 
 // Breaks: a lay, birth or return that depends on how the elapsed time is chunked.
