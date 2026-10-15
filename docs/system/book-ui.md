@@ -181,7 +181,7 @@ shows it. A control whose shown text is its whole name (Leave, Got it, an action
 
 ## Detail-page order
 
-Detail pages show title/identity, authored description and projected item state, then their
+Detail pages show title/identity, authored description and its [asides](#aside-details), projected item state, then their
 chronological event log only when entries exist, then currently offered options in the same
 scrolling content. An empty log has no heading or placeholder. NPC, item, notice, board and
 combat details follow this order; World retains its [room-page order](#world-and-status-entry).
@@ -1003,6 +1003,10 @@ GameView `levelling` carries `{level, experience, next, unspent}` from [experien
 ## Sense cues details
 
 GameView `cues` lists the [sense cues](mechanics.md#sense-cues-sound-smell-and-heat-toolbox-row-g6) reaching the player's room, nearest first. The World page shows one quiet line per cue, in that order, as one block after the room's entity lines: the authored text, then " from the " and the direction key when the cue comes from another room ("Hammering from the east"), the text alone when it comes from this room ("Heat beats out from the forge."). Two cues with the same text and direction are two lines. The sense is in the authored words, never an icon or a colour alone; the line is not pressable and its accessible name is its text. No cues, no block: Chapter 1 declares none. The presenter never walks exits or decides what reaches the player (proposed wording, pending designer approval, loka-kgd.65).
+
+## Aside details
+
+GameView `place.asides` and a notice's `asides` are the character's own mind noticing more ([passive skill voices](mechanics.md#passive-skill-voices-toolbox-row-fd2)). Each is one quiet line, in projected order, as one block directly after the authored description: on World before the exit warnings, on a detail before its projected item state. The skill is in the authored words, never a label, icon or colour; the line is not pressable, carries no touch link (link markup shows as plain words) and its accessible name is its text. No asides, no block: Chapter 1 declares none. The presenter never decides which aside holds.
 
 ## Lore details
 

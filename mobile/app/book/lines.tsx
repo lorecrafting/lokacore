@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Text, View } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
-import { cap, cueLine } from './model.ts';
+import { cap, cueLine, plain } from './model.ts';
 import { LABEL } from './labels.ts';
 import type { DetailLine } from './logs.ts';
 import type { RecapLine } from './recap.ts';
@@ -32,6 +32,24 @@ export function EntityLine(p: { name: string; rest?: string; note?: string; onPr
 // A dim body note: an empty state, "save not confirmed" (BOOK-UI-COMPONENTS.md, Note).
 export function Note({ children }: { children: string }) {
   return <Text style={note(usePalette())}>{children}</Text>;
+}
+
+// The character's passive voices (book-ui.md, Aside details): one Note per line, one block, links
+// shown as plain words; no asides, no block.
+export function Asides({
+  keys = [],
+  text,
+}: {
+  keys?: readonly { key: string }[];
+  text: (key: string) => string;
+}) {
+  return keys.length > 0 ? (
+    <View>
+      {keys.map((a, i) => (
+        <Note key={i}>{plain(text(a.key))}</Note>
+      ))}
+    </View>
+  ) : null;
 }
 
 // One Text per line: narration in ink, a system line dim italic, a refused line after its tag. The

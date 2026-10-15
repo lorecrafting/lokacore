@@ -28819,5 +28819,336 @@
         "code": "unknown_property"
       }
     ]
+  },
+  {
+    "contract": "Policy",
+    "value": {
+      "op": "skill_compare"
+    },
+    "errors": [
+      {
+        "path": "/at_least",
+        "code": "missing_property"
+      },
+      {
+        "path": "/skill",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "Policy",
+    "value": {
+      "op": "skill_compare",
+      "skill": {
+        "cartridge_id": "c",
+        "cartridge_version": "0.0.1",
+        "kind": "skill",
+        "key": "lore"
+      },
+      "at_least": 0,
+      "x": 1
+    },
+    "errors": [
+      {
+        "path": "/at_least",
+        "code": "below_minimum"
+      },
+      {
+        "path": "/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "RoomDefinition",
+    "value": {
+      "key": "r",
+      "title": "t",
+      "description": "d",
+      "exits": {},
+      "asides": []
+    },
+    "errors": [
+      {
+        "path": "/asides",
+        "code": "too_few_items"
+      }
+    ]
+  },
+  {
+    "contract": "RoomDefinition",
+    "value": {
+      "key": "r",
+      "title": "t",
+      "description": "d",
+      "exits": {},
+      "asides": [
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "a"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "a"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "a"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "a"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "a"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "a"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "a"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "a"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "a"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "a"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "a"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "a"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "a"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "a"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "a"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "a"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "a"
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/asides",
+        "code": "too_many_items"
+      }
+    ]
+  },
+  {
+    "contract": "RoomDefinition",
+    "value": {
+      "key": "r",
+      "title": "t",
+      "description": "d",
+      "exits": {},
+      "asides": [
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "x": 1
+        },
+        {
+          "text": "a"
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/asides/0/text",
+        "code": "missing_property"
+      },
+      {
+        "path": "/asides/0/x",
+        "code": "unknown_property"
+      },
+      {
+        "path": "/asides/1/when",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "InspectableDetail",
+    "value": {
+      "aliases": [
+        "a"
+      ],
+      "description": "d",
+      "asides": []
+    },
+    "errors": [
+      {
+        "path": "/asides",
+        "code": "too_few_items"
+      }
+    ]
+  },
+  {
+    "contract": "PlaceView",
+    "value": {
+      "id": "11111111-2222-4333-8444-555555555555",
+      "title": {
+        "key": "t"
+      },
+      "description": {
+        "key": "d"
+      },
+      "asides": []
+    },
+    "errors": [
+      {
+        "path": "/asides",
+        "code": "too_few_items"
+      }
+    ]
+  },
+  {
+    "contract": "NoticeView",
+    "value": {
+      "id": "11111111-2222-4333-8444-555555555555",
+      "title": "t",
+      "description": "d",
+      "asides": []
+    },
+    "errors": [
+      {
+        "path": "/asides",
+        "code": "too_few_items"
+      }
+    ]
   }
 ]

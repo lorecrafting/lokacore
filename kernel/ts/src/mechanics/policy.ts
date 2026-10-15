@@ -3,7 +3,7 @@ import { illuminated } from './light/shared.ts';
 // time_window, barrier@1's barrier_state, quest@1's quest_state, target_resolution@1's
 // target_present, attributes@1's stat_compare and resource_compare, tags@1's has_tag, calendar@1's sky,
 // variety@1's visited_count, population@1's population_count (row W12), equipment@1's wearing, attributes@1's level_compare (row 29a), status@1's status_active, target_resolution@1's
-// npc_present; 21 §3.2, §4 Policy; 06 §20-21): pure, over committed state, for one
+// npc_present, skills@1's skill_compare (row FD2); 21 §3.2, §4 Policy; 06 §20-21): pure, over committed state, for one
 // actor and the target of the action evaluated, if any.
 import type {
   CharacterId,
@@ -29,6 +29,7 @@ import { living } from './death/shared.ts';
 import { perceived } from './senses.ts';
 import { levelling } from './levelling/shared.ts';
 import { livingCount } from './population/refs.ts';
+import { level as skillLevel } from './skill_level.ts';
 
 // The policy that always holds; here, not in dialogue/shared.ts, so scene/shared.ts (and
 // disposition.ts through it) imports no dialogue module: the Metro bundle threw on that cycle.
@@ -91,13 +92,13 @@ export function holds(
     case 'light_off':
     case 'stat_compare':
     case 'resource_compare':
+    case 'level_compare':
+    case 'skill_compare':
       return atLeast(world, actor, p, ctx);
     case 'has_tag':
       return tagsOf(world, actor, p, ctx.target)?.includes(p.tag) === true;
     case 'wearing':
       return wearing(world, actor, p.tag);
-    case 'level_compare': // row 29a; level 1 without world.levelling
-      return (levelling(world, actor)?.level ?? 1) >= p.at_least;
     case 'status_active':
       return statusActive(world, actor, p, ctx);
     case 'npc_present':
@@ -144,10 +145,16 @@ function read(
 function atLeast(
   world: World,
   actor: CharacterId,
-  p: Extract<Policy, { op: 'stat_compare' | 'resource_compare' | 'light_off' }>,
+  p: Extract<
+    Policy,
+    { op: 'stat_compare' | 'resource_compare' | 'light_off' | 'level_compare' | 'skill_compare' }
+  >,
   ctx: Ctx,
 ): boolean {
   if (p.op === 'light_off') return !illuminated(world, actor, ctx.steps);
+  // row 29a: level 1 without world.levelling
+  if (p.op === 'level_compare') return (levelling(world, actor)?.level ?? 1) >= p.at_least;
+  if (p.op === 'skill_compare') return skillLevel(world, actor, p.skill) >= p.at_least; // row FD2
   if (p.op === 'stat_compare') return attributeValue(world, actor, p.attribute) >= p.at_least;
   const body = bodyOf(world, actor);
   const who = (p.subject && ctx.subject) || body;
