@@ -1,0 +1,35 @@
+{
+  "label": "actions.water",
+  "aliases": [
+    "water"
+  ],
+  "target": {
+    "kind": "use",
+    "tool": {
+      "tag": "liquid_holding",
+      "liquid": "water"
+    }
+  },
+  "priority": 5,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "status_active",
+      "subject": "target",
+      "status": "growing_plot"
+    }
+  },
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "event.emit",
+          "event": "watered_plot"
+        }
+      ],
+      "narration": {
+        "actor": "narration.water"
+      }
+    }
+  }
+}

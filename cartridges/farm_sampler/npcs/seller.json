@@ -1,0 +1,19 @@
+{
+  "keywords": [
+    "seller"
+  ],
+  "short": "npc.seller.short",
+  "room_line": "npc.seller.room",
+  "description": "npc.seller.description",
+  "room": "field",
+  "resource_starts": {
+    "pennies": 0
+  },
+  "services": [
+    "buy_plot"
+  ],
+  "immune": [
+    "growing",
+    "growing_plot"
+  ]
+}

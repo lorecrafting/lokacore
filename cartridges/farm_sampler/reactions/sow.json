@@ -1,0 +1,51 @@
+{
+  "on": {
+    "event": "item_acquired",
+    "item": "seed_01"
+  },
+  "when": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": [
+        {
+          "op": "sky",
+          "season": "spring"
+        },
+        {
+          "op": "not",
+          "item": {
+            "op": "has_item",
+            "item": "seed_01"
+          }
+        }
+      ]
+    }
+  },
+  "apply": [
+    {
+      "op": "status.cure",
+      "status": "withered"
+    },
+    {
+      "op": "status.apply",
+      "status": "growing"
+    },
+    {
+      "op": "status.apply",
+      "status": "growing_plot"
+    },
+    {
+      "op": "fact.stamp",
+      "fact": "sown_at"
+    },
+    {
+      "op": "replenish.run",
+      "key": "spent_furrow"
+    },
+    {
+      "op": "replenish.run",
+      "key": "spent_plot"
+    }
+  ]
+}
