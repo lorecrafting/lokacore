@@ -42,7 +42,8 @@ test('the offered storylet is one Action card after the details, before the verb
   assert.ok(details < at(card.label) && at(card.label) < at('Look'));
 });
 
-// Breaks: an unavailable pick dropped, drawn as a disabled card, or without its reason.
+// Breaks: an unavailable pick dropped, drawn as a disabled card, or without its reason; an
+// available pick with no Button drawn as an unavailable note.
 test('an unavailable storylet is the label: reason note, not a pressable', async () => {
   const listed = {
     action_key: 'beckons',
@@ -55,6 +56,9 @@ test('an unavailable storylet is the label: reason note, not a pressable', async
     drawn.some((n) => n.type === 'Text' && words(n) === 'A stranger beckons: Not at night.'),
   );
   assert.ok(!drawn.some((n) => n.props?.accessibilityLabel === 'A stranger beckons'));
+  // Listed available but given no Button (say, it takes input): no note that reads as unavailable.
+  const unpressable = await blocks(room([{ ...listed, available: true }], [verb]));
+  assert.ok(!unpressable.some((n) => words(n).startsWith('A stranger beckons')));
 });
 
 const bundle = compiled('cartridges/storylet_sampler');

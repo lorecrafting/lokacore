@@ -169,9 +169,11 @@ const warnings = (c: Palette, view: GameView, text: Say) => {
 const storylet = (view: GameView, g: Grouped, press: (b: Button) => void, text: Say) => {
   if (!view.storylet) return null;
   const b = g.place.find((x) => x.action_key === view.storylet);
-  const offer = view.actions.find((a) => a.action_key === view.storylet);
   if (b) return <ActionCard b={b} press={press} />;
-  return offer && <ActionCard label={text(offer.label)} reason={why(offer, text)} />;
+  const offer = view.actions.find((a) => a.action_key === view.storylet);
+  return (
+    offer && !offer.available && <ActionCard label={text(offer.label)} reason={why(offer, text)} />
+  );
 };
 
 // The place's own actions; a notice's actions stay on its notice page; the storylet has its card.
