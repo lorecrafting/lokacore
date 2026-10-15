@@ -31,12 +31,16 @@ export function priceNote({ benefit: b, price }: Offer): string {
   return `${price}p${mv}`;
 }
 
+/** A priced offer's label with its note; a price-0 barter's authored label names its inputs. */
+export const offerLabel = (s: Offer, text: Say, note = (n: string) => ` — ${n}`) =>
+  s.price ? `${text(s.label)}${note(priceNote(s))}` : text(s.label);
+
 export function serviceButtons(v: GameView, text: Say): Press[] {
   return v.entities.flatMap((e) =>
     (e.services ?? [])
       .filter((s) => s.action.available)
       .map((s) => ({
-        label: `${text(s.label)} — ${priceNote(s)}`,
+        label: offerLabel(s, text),
         action_key: s.action.action_key,
         command: s.action.command,
         detail_id: e.id,

@@ -69,6 +69,7 @@ const REASON: Record<string, string> = {
 };
 // A refused move's log line that is its own sentence, not "The way north is …" (0 MV).
 export const SENTENCE: Record<string, string> = { insufficient_resource: 'You are too exhausted.' };
+export const given = (item: string, to: string) => `You give ${item} to ${to}.`;
 export const reason = (code: string) => REASON[code] ?? code.replaceAll('_', ' ');
 
 type Say = (key: string) => string;

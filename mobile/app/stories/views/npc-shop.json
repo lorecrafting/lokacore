@@ -463,7 +463,11 @@
         "inventory"
        ]
       },
-      "input": []
+      "input": [],
+      "target_ids": [
+       "619363b4-697f-8e0d-ae4a-5208a285a460",
+       "bea306fb-2b58-847c-a4e0-045f9d13b739"
+      ]
      },
      {
       "available": true,
@@ -516,7 +520,11 @@
         "inventory"
        ]
       },
-      "input": []
+      "input": [],
+      "target_ids": [
+       "48a8dc05-4012-86d8-9d24-e68f2d7317ac",
+       "bea306fb-2b58-847c-a4e0-045f9d13b739"
+      ]
      }
     ]
    },
@@ -548,7 +556,11 @@
         "inventory"
        ]
       },
-      "input": []
+      "input": [],
+      "target_ids": [
+       "30c00822-6fb5-833d-a05e-7787134bea59",
+       "bea306fb-2b58-847c-a4e0-045f9d13b739"
+      ]
      },
      {
       "available": true,
@@ -642,7 +654,11 @@
         "inventory"
        ]
       },
-      "input": []
+      "input": [],
+      "target_ids": [
+       "c02e04c1-54a8-850e-ac17-20b61b7c9630",
+       "bea306fb-2b58-847c-a4e0-045f9d13b739"
+      ]
      },
      {
       "available": true,
@@ -738,7 +754,11 @@
         "inventory"
        ]
       },
-      "input": []
+      "input": [],
+      "target_ids": [
+       "ab0ecc27-da55-8e79-a207-6e4cb55436c9",
+       "bea306fb-2b58-847c-a4e0-045f9d13b739"
+      ]
      },
      {
       "available": true,

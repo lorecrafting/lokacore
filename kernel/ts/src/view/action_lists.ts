@@ -30,7 +30,8 @@ import * as barrier from '../mechanics/barrier/rule.ts';
 import * as equipment from '../mechanics/equipment/rule.ts';
 import * as position from '../mechanics/position/shared.ts';
 import { cmp } from '../foundation/validate.ts';
-import { carrying, giveRefused, putRefused } from '../mechanics/containment/shared.ts';
+import { carrying, giveRefused } from '../mechanics/containment/shared.ts';
+import { itemPairs } from './item_pairs.ts';
 import { theftRefused } from '../mechanics/containment/theft.ts';
 import { movable as movableItem } from '../runtime/created.ts';
 import { attackRefused } from '../mechanics/combat/shared.ts';
@@ -81,8 +82,8 @@ export function lists(world: World, actor: CharacterId, steps = { n: 0 }) {
       .sort((a, b) => b.priority - a.priority || cmp(a.key, b.key))
       .flatMap((a) => {
         const shown = advertise(world, actor, a, take, steps, id, scope);
-        return a.command === 'put' && id && body
-          ? putPairs(world, actor, body, id as EntityId, shown, steps)
+        return id && body
+          ? itemPairs(world, actor, body, id as EntityId, a.command, shown, steps)
           : [shown];
       });
   const liquid = (id: string) => liquidActions(world, actor, id, set, steps);
@@ -287,29 +288,6 @@ function movable(world: World, a: Offered, id?: string): boolean {
     movableItem(world, id as EntityId) ||
     !['take', 'drop', 'give', 'wear', 'remove'].includes(a.command)
   );
-}
-
-// Enumerate bounded concrete pairs; exhaustion replaces the whole source offer, never a prefix.
-function putPairs(
-  world: World,
-  actor: CharacterId,
-  body: EntityId,
-  item: EntityId,
-  shown: AdvertisedAction,
-  steps: { n: number },
-): AdvertisedAction[] {
-  if (world.state.containers[item] !== body) return [];
-  const pairs: AdvertisedAction[] = [];
-  for (const id in world.entities) {
-    if (!Object.hasOwn(world.entities, id)) continue;
-    if (++steps.n > LIMITS.query_steps)
-      return [{ ...shown, available: false, reason: { code: 'budget_exceeded' } }];
-    if (world.entities[id].kind !== 'item' || id === item) continue;
-    const code = putRefused(world, actor, body, item, id as EntityId, steps);
-    if (code === 'budget_exceeded') return [{ ...shown, available: false, reason: { code } }];
-    if (!code) pairs.push({ ...shown, target_ids: [item, id as EntityId] });
-  }
-  return pairs;
 }
 
 function noticeOffer(world: World, a: Offered, id: string) {

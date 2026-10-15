@@ -41,7 +41,7 @@ export type Logs = {
   log: DetailLine[];
   combatLog: string[];
   details: Map<string, DetailLine[]>;
-  retry?: { button: Button; detail?: string; item?: string; invocation?: string };
+  retry?: { button: Button; detail?: string; item?: string; to?: string; invocation?: string };
   projection: Projection;
   status: ElapsedStatus;
   recovered?: boolean;

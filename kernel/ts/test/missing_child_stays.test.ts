@@ -180,7 +180,7 @@ test('the original message is received once, cannot be given away, and resolves 
   const give = gameView(a.world())
     .inventory.find((e) => e.id === message)!
     .actions.find((v) => v.action_key === 'give');
-  assert.ok(give && !give.available);
+  assert.equal(give, undefined); // a refused item lists no Give pair (hs-8)
   a.run({ type: 'give', item_id: message, recipient_id: ids['npc/wren'] }, 'invalid_state');
   a.run({ type: 'give', item_id: ids['item/fox_drawing'], recipient_id: ids['npc/wren'] });
   a.move('north', 'north', 'north', 'north');
@@ -339,10 +339,8 @@ test('Give refuses a trunk containing the message but permits the empty trunk af
   const offer = () =>
     gameView(a.world())
       .inventory.find((e) => e.id === trunk)!
-      .actions.find((v) => v.action_key === 'give');
-  const blocked = offer()!;
-  assert.equal(blocked.available, false);
-  assert.deepEqual('reason' in blocked && blocked.reason, { code: 'invalid_state' });
+      .actions.find((v) => v.action_key === 'give' && v.target_ids?.[1] === ids['npc/wren']);
+  assert.equal(offer(), undefined); // a refused item lists no Give pair to Wren (hs-8)
   a.run({ type: 'give', item_id: trunk, recipient_id: ids['npc/wren'] }, 'invalid_state');
   assert.equal(a.world().state.containers[message], trunk);
   assert.equal(a.world().state.containers[trunk], ids.body);

@@ -502,18 +502,6 @@
        ]
       },
       "input": []
-     },
-     {
-      "available": true,
-      "action_key": "give",
-      "label": "action.give",
-      "target": {
-       "kind": "entity",
-       "scopes": [
-        "inventory"
-       ]
-      },
-      "input": []
      }
     ]
    }

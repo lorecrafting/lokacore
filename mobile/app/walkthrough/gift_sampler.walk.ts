@@ -1,5 +1,5 @@
 // Homestead hs-7 at 390 px (`LOKA_WALK=gift_sampler npm run walkthrough`): take two pelts and
-// trade them to the trader for the knife. Give is not offered in the Book yet (Beads loka-x6t.31).
+// trade them to the trader for the knife; hs-8: give the apple to the farmer from its page.
 import { settle, walk } from './walk.ts';
 
 walk('1-barter', 'Barter: two pelts for the knife, no coin', async (r) => {
@@ -15,5 +15,25 @@ walk('1-barter', 'Barter: two pelts for the knife, no coin', async (r) => {
   }
   await screen.getByRole('button', /^The trader is here/).tap();
   await screen.getByRole('button', /Trade two pelts for the knife/).tap();
+  await settle();
+});
+
+walk('2-give', 'Give: the apple to the farmer from its page', async (r) => {
+  const { screen } = r;
+  await r.app.clearState();
+  await settle();
+  await screen
+    .getByRole('button', /^An apple is here/)
+    .first()
+    .tap();
+  await screen.getByRole('button', 'Take an apple').tap();
+  await screen.getByRole('button', /opens Contents/).tap();
+  await screen.getByRole('button', /^Equipment & Inventory/).tap();
+  await screen
+    .getByRole('button', /^an apple/)
+    .first()
+    .tap();
+  await settle();
+  await screen.getByRole('button', /^Give an apple to the farmer/).tap();
   await settle();
 });
