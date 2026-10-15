@@ -1,4 +1,4 @@
-// size: allow 550, the AB brief places the reaction witness here; new witnesses get their own module
+// size: allow 551, the AB brief places the reaction witness here; new witnesses get their own module
 import { gameView, type World } from '../src/index.ts';
 import { repaired } from './e1_repair.ts';
 import { closed } from './e1_order.ts';
