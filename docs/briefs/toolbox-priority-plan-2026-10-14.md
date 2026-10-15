@@ -75,7 +75,7 @@ Filler (Sonnet, no kernel files, parallel with RS): showcase content bugs `loka-
 |---|---|---|---|
 | 1 | 47 death penalty options | S | Same death thread as M14 row 3; a cartridge option on row 4. |
 | 2 | W16 languages and literacy | S | `skills.ts` + readable; cheap, no dependencies pending. |
-| 3 | G10 writing group: map pins + letters by job | S + S | Keep pins and mail (no text input needed); the notes half waits on the word bar. |
+| 3 | G10 letters by job | S | Mail only; map pins and journal notes descoped (owner 2026-10-14, paraphrased: not needed for now; `loka-x6t.49` deferred). |
 | 4 | FD6 chronicle view (`.143`) | M (view) | Decouple from 48a (it only needs receipts and W27); after RS-5. Fable #9. |
 | - | 48a, 48b, 48c chapter carry-over (+ RS-7) | M + L + M (+ M) | Defer: Chapters 2-3 are out of release scope, so no consumer exists; 48b needs RS-7 first. Owner decision 2. |
 
@@ -96,7 +96,7 @@ Filler (Sonnet, no kernel files, parallel with RS): showcase content bugs `loka-
 - **43b mounts** (M): defer past M15; fixed time and no travel skip make a mount a flavour row; 43a gives the showcase terrain.
 - **45 pet growth**: shrink L to S-M (above).
 - **48a/48b/48c + RS-7**: defer until a second cartridge is planned (about 5 runs with no consumer).
-- **FD7 ask about topic, G10 notes half, `loka-kgd.72/.77/.82`**: hold behind the word bar decision; otherwise they are the fourth and fifth kernel-only text verbs nobody can play.
+- **FD7 ask about topic, `loka-kgd.72/.77/.82`**: hold behind the word bar decision; otherwise they are the fourth and fifth kernel-only text verbs nobody can play.
 - **FD9** folds into the W15 run; **RS-3** into the RS-2 run; **row 38** into the RS-4 run.
 - **Diagnostics group issues `.107.10-.16`** (seven placeholders): collapse into one recurring batch-close step.
 - **`loka-kgd.104`** (spell duration status fault): fold into the spells follow-up; unreachable by content.
