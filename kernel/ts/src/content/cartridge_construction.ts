@@ -1,6 +1,7 @@
 // Built rooms S1 at the cartridge trust boundary (twin of lib/loka/content/construction.ex): a
 // room's site names no direction the room has an exit in (SITE_EXIT_CONFLICT) and only blueprints
-// of this cartridge; a blueprint, a site or world.construction needs kernel_api 1.99. Blueprint
+// of this cartridge; a site or world.construction needs construction@1; a blueprint, a site or
+// world.construction needs kernel_api 1.99. Blueprint
 // text, tags, variants and the enter lock are checked with every other part (cartridge_refs.ts).
 import type { DefinitionRef, Diagnostic } from '../contracts.gen.ts';
 import { refString } from '../runtime/decision.ts';
@@ -10,8 +11,17 @@ import { apiCmp } from './cartridge_installed.ts';
 export function construction(c: Obj): Diagnostic[] {
   const out: Diagnostic[] = [];
   const sites = Object.entries((c.rooms ?? {}) as Obj).filter(([, r]) => r.site);
+  // A site or world.construction needs construction@1 (a blueprint is owned through the registry).
+  const gate = (at: string) => {
+    if (c.lock.capabilities.construction !== 1)
+      out.push(
+        diag('UNDECLARED_CAPABILITY', at, { capability: 'construction' }, ['construction@1']),
+      );
+  };
+  if (c.world?.construction) gate('.cartridge.world.construction');
   for (const [ref, r] of sites) {
     const at = `.cartridge.rooms${step(ref)}.site`;
+    gate(at);
     r.site.directions.forEach((d: string, i: number) => {
       if (r.exits?.[d]) out.push(diag('SITE_EXIT_CONFLICT', `${at}.directions[${i}]`));
     });

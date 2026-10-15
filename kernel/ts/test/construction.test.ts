@@ -94,3 +94,27 @@ test('a site names no exit direction and only defined blueprints; construction n
     floor,
   );
 });
+
+// Breaks: the loader admits a site or world.construction from a cartridge without construction@1.
+test('a site and world.construction each need construction@1', () => {
+  const unowned = (c: Obj) => {
+    delete c.manifest.requires.capabilities.construction;
+    delete c.lock.capabilities.construction;
+    delete c.blueprints;
+  };
+  const gate = (at: string) => ['UNDECLARED_CAPABILITY', at];
+  assert.deepEqual(
+    refused((c) => {
+      unowned(c);
+      delete c.world.construction;
+    }),
+    gate('.cartridge.rooms["build_sampler@0.0.1:room/lane"].site'),
+  );
+  assert.deepEqual(
+    refused((c) => {
+      unowned(c);
+      delete lane(c).site;
+    }),
+    gate('.cartridge.world.construction'),
+  );
+});

@@ -40,7 +40,7 @@ defmodule Loka.ContentConstructionTest do
       assert pairs(diags) == expected
     end
 
-    # Each trigger alone: world.construction or a blueprint with no site still needs 1.99.
+    # Each trigger alone: world.construction, a blueprint or a site still needs 1.99.
     only_world = [
       api("1.98"),
       {"blueprints/hut.json", nil},
@@ -53,7 +53,13 @@ defmodule Loka.ContentConstructionTest do
       {"rooms/lane.json", &Map.delete(&1, "site")}
     ]
 
-    for edits <- [only_world, only_blueprint] do
+    only_site = [
+      api("1.98"),
+      {"blueprints/hut.json", nil},
+      {"cartridge.json", &Map.delete(&1, "world")}
+    ]
+
+    for edits <- [only_world, only_blueprint, only_site] do
       assert {:error, diags} = Loka.ContentSource.compile(dir, edits)
       assert @floor in pairs(diags), inspect(diags)
     end
@@ -64,5 +70,16 @@ defmodule Loka.ContentConstructionTest do
 
     assert {:error, diags} = Loka.ContentSource.compile(dir, [unowned])
     assert {"UNDECLARED_CAPABILITY", "blueprints/hut"} in pairs(diags), inspect(diags)
+
+    # A site and world.construction each need construction@1 too, with no blueprint defined.
+    for {drop, path} <- [
+          {{"cartridge.json", &Map.delete(&1, "world")}, "rooms/lane.site"},
+          {{"rooms/lane.json", &Map.delete(&1, "site")}, "cartridge.world.construction"}
+        ] do
+      assert {:error, diags} =
+               Loka.ContentSource.compile(dir, [unowned, {"blueprints/hut.json", nil}, drop])
+
+      assert {"UNDECLARED_CAPABILITY", path} in pairs(diags), inspect(diags)
+    end
   end
 end
