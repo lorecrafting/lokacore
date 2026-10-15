@@ -28638,6 +28638,333 @@
     ]
   },
   {
+    "contract": "ServiceBenefit",
+    "value": {
+      "kind": "build",
+      "blueprint": {
+        "cartridge_id": "build_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "blueprint",
+        "key": "hut"
+      },
+      "site": {
+        "cartridge_id": "build_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "room",
+        "key": "lane"
+      },
+      "direction": "north",
+      "fact": {
+        "cartridge_id": "build_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "fact",
+        "key": "hut_ordered"
+      }
+    },
+    "errors": [
+      {
+        "path": "/escrow",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "ServiceBenefit",
+    "value": {
+      "kind": "build",
+      "blueprint": {
+        "cartridge_id": "build_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "blueprint",
+        "key": "hut"
+      },
+      "site": {
+        "cartridge_id": "build_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "room",
+        "key": "lane"
+      },
+      "direction": "north",
+      "escrow": {
+        "items": [
+          {
+            "cartridge_id": "build_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "timber_a"
+          }
+        ],
+        "quantity": 2,
+        "custody": {
+          "cartridge_id": "build_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "yard"
+        },
+        "ready_after": 7200
+      }
+    },
+    "errors": [
+      {
+        "path": "/fact",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "ServiceBenefit",
+    "value": {
+      "kind": "build",
+      "blueprint": {
+        "cartridge_id": "build_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "blueprint",
+        "key": "hut"
+      },
+      "site": {
+        "cartridge_id": "build_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "room",
+        "key": "lane"
+      },
+      "direction": "north",
+      "fact": {
+        "cartridge_id": "build_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "fact",
+        "key": "hut_ordered"
+      },
+      "escrow": {
+        "x": 1
+      }
+    },
+    "errors": [
+      {
+        "path": "/escrow/custody",
+        "code": "missing_property"
+      },
+      {
+        "path": "/escrow/items",
+        "code": "missing_property"
+      },
+      {
+        "path": "/escrow/quantity",
+        "code": "missing_property"
+      },
+      {
+        "path": "/escrow/ready_after",
+        "code": "missing_property"
+      },
+      {
+        "path": "/escrow/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "ServiceBenefit",
+    "value": {
+      "kind": "build",
+      "blueprint": {
+        "cartridge_id": "build_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "blueprint",
+        "key": "hut"
+      },
+      "site": {
+        "cartridge_id": "build_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "room",
+        "key": "lane"
+      },
+      "direction": "north",
+      "fact": {
+        "cartridge_id": "build_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "fact",
+        "key": "hut_ordered"
+      },
+      "escrow": {
+        "items": [],
+        "quantity": 0,
+        "custody": {
+          "cartridge_id": "build_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "yard"
+        },
+        "ready_after": 0
+      }
+    },
+    "errors": [
+      {
+        "path": "/escrow/items",
+        "code": "too_few_items"
+      },
+      {
+        "path": "/escrow/quantity",
+        "code": "below_minimum"
+      },
+      {
+        "path": "/escrow/ready_after",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "contract": "ServiceBenefit",
+    "value": {
+      "kind": "build",
+      "blueprint": {
+        "cartridge_id": "build_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "blueprint",
+        "key": "hut"
+      },
+      "site": {
+        "cartridge_id": "build_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "room",
+        "key": "lane"
+      },
+      "direction": "north",
+      "fact": {
+        "cartridge_id": "build_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "fact",
+        "key": "hut_ordered"
+      },
+      "escrow": {
+        "items": [
+          {
+            "cartridge_id": "build_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "timber_a"
+          },
+          {
+            "cartridge_id": "build_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "timber_a"
+          },
+          {
+            "cartridge_id": "build_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "timber_a"
+          },
+          {
+            "cartridge_id": "build_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "timber_a"
+          },
+          {
+            "cartridge_id": "build_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "timber_a"
+          },
+          {
+            "cartridge_id": "build_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "timber_a"
+          },
+          {
+            "cartridge_id": "build_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "timber_a"
+          },
+          {
+            "cartridge_id": "build_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "timber_a"
+          },
+          {
+            "cartridge_id": "build_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "timber_a"
+          },
+          {
+            "cartridge_id": "build_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "timber_a"
+          },
+          {
+            "cartridge_id": "build_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "timber_a"
+          },
+          {
+            "cartridge_id": "build_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "timber_a"
+          },
+          {
+            "cartridge_id": "build_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "timber_a"
+          },
+          {
+            "cartridge_id": "build_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "timber_a"
+          },
+          {
+            "cartridge_id": "build_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "timber_a"
+          },
+          {
+            "cartridge_id": "build_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "timber_a"
+          },
+          {
+            "cartridge_id": "build_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "timber_a"
+          }
+        ],
+        "quantity": 17,
+        "custody": {
+          "cartridge_id": "build_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "yard"
+        },
+        "ready_after": 31536001
+      }
+    },
+    "errors": [
+      {
+        "path": "/escrow/items",
+        "code": "too_many_items"
+      },
+      {
+        "path": "/escrow/quantity",
+        "code": "above_maximum"
+      },
+      {
+        "path": "/escrow/ready_after",
+        "code": "above_maximum"
+      }
+    ]
+  },
+  {
     "contract": "EntityOrigin",
     "value": {
       "kind": "built",
@@ -29911,6 +30238,51 @@
       {
         "path": "/variants",
         "code": "too_many_items"
+      }
+    ]
+  },
+  {
+    "contract": "BlueprintDefinition",
+    "value": {
+      "key": "hut",
+      "title": "t",
+      "description": "d",
+      "max_per_owner": 0
+    },
+    "errors": [
+      {
+        "path": "/max_per_owner",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "contract": "BlueprintDefinition",
+    "value": {
+      "key": "hut",
+      "title": "t",
+      "description": "d",
+      "max_per_owner": 1001
+    },
+    "errors": [
+      {
+        "path": "/max_per_owner",
+        "code": "above_maximum"
+      }
+    ]
+  },
+  {
+    "contract": "BlueprintDefinition",
+    "value": {
+      "key": "hut",
+      "title": "t",
+      "description": "d",
+      "max_per_owner": 1.5
+    },
+    "errors": [
+      {
+        "path": "/max_per_owner",
+        "code": "invalid_type"
       }
     ]
   },
