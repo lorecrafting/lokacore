@@ -21,7 +21,7 @@ import {
 } from '../../runtime/decision.ts';
 import { engaged } from '../combat/shared.ts';
 import { adjust, level, resourceRef, resourceSpec } from '../resource.ts';
-import { cureOps, statusStep } from '../status/shared.ts';
+import { cureOps, currentStatus, immune, statusStep } from '../status/shared.ts';
 
 type Payload = Extract<CommandPayload, { type: 'eat' }>;
 export function availability(world: World, p: Payload, steps: Steps, action: Key) {
@@ -48,8 +48,11 @@ export function transition(
   if (current === undefined || !spec) return { code: 'precondition_failed' };
   const cured = cureOps(world, body, edible.cures);
   const by = Math.min(edible.amount, spec.maximum - current);
-  // Row hs-5: a meal with `applies` is eaten at the maximum for its buff (restoring nothing).
-  if (by <= 0 && !cured.length && !edible.applies?.length) return { code: 'invalid_state' };
+  // Row hs-5: at the maximum a meal is eaten only for a status that would newly land on the eater.
+  const lands = edible.applies?.some(
+    (s) => !immune(world, body, s) && !currentStatus(world, body, s),
+  );
+  if (by <= 0 && !cured.length && !lands) return { code: 'invalid_state' };
   return {
     edible,
     ops: [

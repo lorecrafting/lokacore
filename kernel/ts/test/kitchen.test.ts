@@ -205,22 +205,29 @@ test('a reaction on status_applied hears the first fed, and a refresh stays sile
   assert.deepEqual(types('fish_03'), [[], 1]);
 });
 
-// Breaks: a meal with `applies` refused at full mv, or a meal with nothing to apply or cure
-// eaten there (PM ruling: the buff applies, the restore is capped).
-test('at full mv the stew still applies fed; a plain meal is refused', () => {
+// Breaks: a meal with `applies` refused at full mv, or eaten there when nothing would newly land:
+// a plain meal, an immune eater, or fed already active (PM rulings: the buff applies, the restore
+// is capped; a meal that would land no new status is refused as a plain meal).
+test('at full mv the stew applies fed; a plain, immune or refresh-only meal is refused', () => {
   const r = reload((c) => {
     const { applies: _, ...plain } = c.items[`${S}:item/stew_plain_01`].edible;
     c.items[`${S}:item/fish_03`].edible = plain;
+    c.items[`${S}:item/fish_04`].edible = c.items[`${S}:item/stew_plain_01`].edible;
   });
   assert.ok(r.ok, JSON.stringify(r));
-  let w = wait(catchFish(served(r.cartridge as Cartridge), 'fish_03'), 7200);
+  let w = wait(catchFish(served(r.cartridge as Cartridge), 'fish_03', 'fish_04'), 7200);
   assert.equal(mv(w), 100);
-  assert.deepEqual(send(w, { type: 'eat', item_id: item(w, 'fish_03') }).decision, {
-    kind: 'rejected',
-    error: { code: 'invalid_state' },
-  });
+  const refused = (w: World, k: string) =>
+    assert.deepEqual(send(w, { type: 'eat', item_id: item(w, k) }).decision, {
+      kind: 'rejected',
+      error: { code: 'invalid_state' },
+    });
+  refused(w, 'fish_03');
+  const body = { ...w.entities[w.body], immune: [ref('status', 'fed')] };
+  refused({ ...w, entities: { ...w.entities, [w.body]: body } } as World, 'fish_04');
   w = play(w, { type: 'eat', item_id: item(w, 'stew_plain_01') });
   assert.deepEqual([mv(w), str(w)], [100, 11]);
+  refused(w, 'fish_04');
 });
 
 // Breaks: the keep reaction missing, the W6 variant not reading spoiling, the spoil reaction not
