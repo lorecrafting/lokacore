@@ -1,4 +1,4 @@
-// size: allow 555, the raid sampler (row 37a) and its delayed reactions (row FD1) share one compiled world
+// size: allow 580, the raid sampler (row 37a) and its delayed reactions (row FD1) share one compiled world
 // Toolbox row 37a on the compiled raid sampler (mechanics.md "Phased world events"): the lunar
 // cycle is 2000 units, new at 0, full at 1000; the `raid` rule spawns one `raiders` bundle (cap 2,
 // targets 0, wander every hour) at the first full-moon clock_hour while `raided` is false, and
