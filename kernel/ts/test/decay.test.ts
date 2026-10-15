@@ -250,3 +250,69 @@ test('the loader refuses item.move below 1.77 or with an unknown room', () => {
   );
   assert.deepEqual(steps, []);
 });
+
+// Break: replenish.run ignores the item's earlier group (hs-1: the spoil move and the same-event
+// restock would write the fish in two groups: conflicting_write). `tidy` sorts after `spoil`, so
+// it sees the move.
+test('a restock rule on the spoil event moves the spoiled fish to the market at once', () => {
+  const edit = (c: any) => {
+    c.manifest.requires.kernel_api.at_least = '1.101';
+    c.reactions[`${S}reaction/tidy`] = {
+      key: 'tidy',
+      on: { event: 'status_expired', status: ref('status', 'spoiling') },
+      apply: [{ op: 'replenish.run', key: ref('replenish', 'restock') }],
+    };
+  };
+  let w = take(fresh(edit), 'fish');
+  w = wait(w, w.state.clock + 86400);
+  assert.equal(at(w, 'fish'), 'market');
+});
+
+// Break: replenish.run does not record the group it wrote the item in (hs-1: `back` would write
+// the fish `toss` just moved in a second group: conflicting_write). `pitch` sorts before `reclaim`.
+test('two runs on one event move the fish out and back in one wait', () => {
+  const edit = (c: any) => {
+    c.manifest.requires.kernel_api.at_least = '1.101';
+    const restock = c.replenish[`${S}replenish/restock`];
+    const [market, midden] = [restock.to, restock.from];
+    c.replenish[`${S}replenish/toss`] = { ...restock, key: 'toss', from: market, to: midden };
+    c.replenish[`${S}replenish/back`] = { ...restock, key: 'back' };
+    const on = { event: 'status_expired', status: ref('status', 'rot') };
+    for (const [key, run] of [
+      ['pitch', 'toss'],
+      ['reclaim', 'back'],
+    ])
+      c.reactions[`${S}reaction/${key}`] = {
+        key,
+        on,
+        apply: [{ op: 'replenish.run', key: ref('replenish', run!) }],
+      };
+  };
+  let w = drop(take(fresh(edit), 'rag'), 'rag');
+  w = wait(w, w.state.clock + 3600);
+  assert.equal(at(w, 'fish'), 'market');
+});
+
+// Break: replenish.run prefers the item's earlier group to the root command's (hs-1: `litter`'s
+// status group then writes the rag's container after the drop did: conflicting_write when the
+// toss rule sorts after `litter`). Both orders must pass.
+for (const rule of ['a_toss', 'z_toss'])
+  test(`a drop-time ${rule} run moves the dropped rag in the drop's group`, () => {
+    const edit = (c: any) => {
+      c.manifest.requires.kernel_api.at_least = '1.101';
+      c.replenish[`${S}replenish/toss`] = {
+        ...c.replenish[`${S}replenish/restock`],
+        key: 'toss',
+        items: [ref('item', 'rag')],
+        from: { in: 'room', room: ref('room', 'market') },
+        to: { in: 'room', room: ref('room', 'midden') },
+      };
+      c.reactions[`${S}reaction/${rule}`] = {
+        ...c.reactions[`${S}reaction/litter`],
+        key: rule,
+        apply: [{ op: 'replenish.run', key: ref('replenish', 'toss') }],
+      };
+    };
+    const w = drop(take(fresh(edit), 'rag'), 'rag');
+    assert.equal(at(w, 'rag'), 'midden');
+  });

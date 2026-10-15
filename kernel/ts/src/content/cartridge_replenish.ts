@@ -14,18 +14,52 @@ export function replenish(c: Obj, { named }: Checks): Diagnostic[] {
       : [];
   for (const [ref, r] of entries) {
     const at = `.cartridge.replenish${step(ref)}`;
-    const items = r.items as DefinitionRef[];
-    if (new Set(items.map(refString)).size !== items.length)
-      out.push(diag('DUPLICATE_DEFINITION', `${at}.items`));
-    items.forEach((i, n) => named(i, 'item', `${at}.items[${n}]`));
-    const nests = items.some((i) => c.items?.[refString(i)]?.container === true);
-    for (const end of ['from', 'to']) {
-      const { in: k } = r[end];
-      if (k === 'template' || !placed(c, r[end], end === 'to' && nests))
-        out.push(diag('SCHEMA_VIOLATION', `${at}.${end}`));
-      else named(r[end][k], k, `${at}.${end}.${k}`);
-    }
+    out.push(...stock(c, named, at, r.items, { from: r.from, to: r.to }));
     if (same(r.from, r.to)) out.push(diag('SCHEMA_VIOLATION', `${at}.from`));
+  }
+  return out;
+}
+
+/** Homestead hs-10: each craft recipe's consume and yield (docs/system/cartridge.md Craft). */
+export function craft(c: Obj, { named, text }: Checks): Diagnostic[] {
+  const crafts = Object.entries((c.recipes ?? {}) as Obj).filter(([, r]) => r.craft);
+  const out: Diagnostic[] =
+    crafts.length && apiCmp(c.manifest.requires.kernel_api.at_least, '1.101') < 0
+      ? [diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least')]
+      : [];
+  for (const [ref, r] of crafts) {
+    const at = `.cartridge.recipes${step(ref)}.craft`;
+    const { consume, yield: made } = r.craft;
+    // A spell or storylet has no station whose stock it could use (craft recipes are station recipes).
+    if (['spell', 'storylet'].includes(r.target.kind))
+      out.push(diag('SCHEMA_VIOLATION', at, { error: 'invalid_value' }));
+    if (consume) {
+      out.push(...stock(c, named, `${at}.consume`, consume.items, { to: consume.to }));
+      text(consume, ['reason'], `${at}.consume`);
+    }
+    if (made) out.push(...stock(c, named, `${at}.yield`, made.items, { from: made.from }));
+  }
+  return out;
+}
+
+// Replenish's item and holder rules, shared with craft: no duplicate item, each item and holder
+// resolves, and each holder (`ends`, by field) is placed.
+function stock(
+  c: Obj,
+  named: Checks['named'],
+  at: string,
+  items: DefinitionRef[],
+  ends: Obj,
+): Diagnostic[] {
+  const out: Diagnostic[] = [];
+  if (new Set(items.map(refString)).size !== items.length)
+    out.push(diag('DUPLICATE_DEFINITION', `${at}.items`));
+  items.forEach((i, n) => named(i, 'item', `${at}.items[${n}]`));
+  const nests = items.some((i) => c.items?.[refString(i)]?.container === true);
+  for (const [end, l] of Object.entries(ends)) {
+    if (l.in === 'template' || !placed(c, l, end === 'to' && nests))
+      out.push(diag('SCHEMA_VIOLATION', `${at}.${end}`));
+    else named(l[l.in], l.in, `${at}.${end}.${l.in}`);
   }
   return out;
 }

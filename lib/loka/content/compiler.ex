@@ -1,14 +1,16 @@
-# size: allow 355, ancestry, static map, status source, levelling settings, replenish, trail, theft, asks, speech and construction wiring join the existing compiler boundary
+# size: allow 357, craft consume expansion, ancestry, static map, status source, levelling settings, replenish, trail, theft, asks, speech and construction wiring join the existing compiler boundary
 defmodule Loka.Content.Compiler do
   @moduledoc "Validates source files and builds the CompiledCartridge (05 §3–§8, 06 §20–21)."
   alias Loka.Content.{
     Ancestries,
     Artifact,
     Checks,
+    Construction,
     Dialogues,
     Quests,
     Reactions,
     Recipes,
+    Replenish,
     Requires
   }
 
@@ -249,7 +251,7 @@ defmodule Loka.Content.Compiler do
   end
 
   defp expand({rel, steps, v}, m),
-    do: {rel, steps, Loka.Content.Construction.expand(Checks.expand(v, m), m)}
+    do: {rel, steps, v |> Checks.expand(m) |> Construction.expand(m) |> Replenish.consume(m)}
 
   defp expand(:invalid, _), do: :invalid
 

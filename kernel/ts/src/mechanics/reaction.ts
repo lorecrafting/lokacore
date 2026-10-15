@@ -1,4 +1,4 @@
-// size: allow 418, reaction@1 keeps its total trigger SUBJECT table and filters (row FD5: witness) beside the one delivery sequence (row FD1: or its delayed job)
+// size: allow 440, reaction@1 keeps its total trigger SUBJECT table and filters (row FD5: witness) beside the one delivery sequence (row FD1: or its delayed job; quest.activate split out for hs-1)
 // reaction@1 (capability_registry.json; reaction.schema.json ReactionRule; 21 §3.4, §11; 06
 // §14; 04 §5.2): the rules an event triggers and one delivery's explicit sequence. proposal.ts
 // propose runs the FIFO queue, numbers the writer groups and counts the budgets.
@@ -40,6 +40,7 @@ import { saturate } from '../foundation/int.ts';
 import { npcsIn } from './death/shared.ts';
 import { setBarrier } from './barrier/react.ts';
 import { moved } from './containment/react.ts';
+import { replenishStep } from './containment/job.ts';
 import { witnesses } from './senses.ts';
 import { spawn } from './population/react.ts';
 
@@ -122,12 +123,13 @@ const ACTIVATES = ['quest_resolved', 'rested', 'entity_entered_room'];
 // ran: a delivery inside an advance's job run, whose delayed jobs may fall due inside the advance.
 type Delivery = {
   holders?: Map<string, number>;
+  roots?: ReadonlyMap<string, number>; // the root command's item moves' groups (hs-1)
   dead?: ReadonlySet<EntityId>;
   fired?: boolean;
   ran?: boolean;
 };
 
-// size: allow 60, one ordered delivery lowers fact assignments, quest effects, suppression and spawn
+// size: allow 60, one ordered delivery lowers fact assignments, quest effects, suppression, spawn and replenish runs
 export function sequence(
   world: World,
   root: CharacterId, // the root command's actor
@@ -136,7 +138,7 @@ export function sequence(
   group: number,
   steps: { n: number },
   mint: Mint,
-  { holders = new Map(), dead = new Set(), fired = false, ran = false }: Delivery = {},
+  { holders = new Map(), dead = new Set(), fired = false, ran = false, roots }: Delivery = {},
 ): Decision<EventPayload['type']> | undefined {
   const [actor, npc, trigger] = deliveryActor(world, cause, root);
   if (!actor) return { kind: 'fault', code: 'precondition_failed' };
@@ -152,12 +154,8 @@ export function sequence(
     events.push(event(then, { ...by, payload: { actor_id } }, mint, ++position, payload));
   for (const step of rule.apply) {
     if (step.op === 'quest.activate') {
-      if (!ACTIVATES.includes(rule.on.event)) return { kind: 'fault', code: 'precondition_failed' };
-      if (npc || questOf(world, actor, step.quest) || own.seen.has(refString(step.quest))) continue;
-      const started = activation(mint, actor, step.quest);
-      own.seen.add(refString(step.quest));
-      ops.push(...started.ops.map((op) => ({ ...op, writer_group: group })));
-      emit(started.payload);
+      if (!activate(world, rule, actor, !!npc, step.quest, own.seen, group, ops, mint, emit))
+        return { kind: 'fault', code: 'precondition_failed' };
     } else if (step.op === 'quest.resolve' || step.op === 'quest.fail') {
       const ended = ending(world, step, group, steps, emit, trigger);
       if (!ended) return { kind: 'fault', code: 'precondition_failed' };
@@ -177,6 +175,10 @@ export function sequence(
       ops.push(...moved(then, step, actor, about, group, ops, holders, emit)); // rows 41, FD5
     } else if (step.op === 'population.spawn') {
       ops.push(...spawn(then, step, group, ops, mint)); // row 37a
+    } else if (step.op === 'replenish.run') {
+      const refill = replenishStep(then, step.key, group, steps, holders, roots); // hs-1
+      if (typeof refill === 'string') return { kind: 'fault', code: refill };
+      ops.push(...refill);
     } else if (step.op === 'experience.grant') {
       gained = saturate(gained + step.amount);
     } else {
@@ -187,6 +189,29 @@ export function sequence(
   }
   ops.push(...grant(then, actor, gained, group));
   return accepted(world, 'reacted', ops, events, narration.length ? narration : undefined);
+}
+
+// One quest.activate step: false when the trigger starts no quests; nothing for an NPC delivery or
+// a quest already started (by an earlier step too).
+function activate(
+  world: World,
+  rule: ReactionRule,
+  actor: CharacterId,
+  npc: boolean,
+  quest: DefinitionRef,
+  seen: Set<unknown>,
+  group: number,
+  ops: DeltaOp[],
+  mint: Mint,
+  emit: (payload: EventPayload) => void,
+): boolean {
+  if (!ACTIVATES.includes(rule.on.event)) return false;
+  if (npc || questOf(world, actor, quest) || seen.has(refString(quest))) return true;
+  const started = activation(mint, actor, quest);
+  seen.add(refString(quest));
+  ops.push(...started.ops.map((op) => ({ ...op, writer_group: group })));
+  emit(started.payload);
+  return true;
 }
 
 /** loka-kgd.105: the bodies an `entity_died` after `cause` names; they hold none of its statuses

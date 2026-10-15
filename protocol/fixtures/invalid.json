@@ -25077,6 +25077,55 @@
     ]
   },
   {
+    "name": "reaction_replenish_run_no_key",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "clock_hour"
+      },
+      "apply": [
+        {
+          "op": "replenish.run"
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/apply/0/key",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "reaction_replenish_run_extra_key",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "clock_hour"
+      },
+      "apply": [
+        {
+          "op": "replenish.run",
+          "key": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "replenish",
+            "key": "seam"
+          },
+          "count": 2
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/apply/0/count",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
     "contract": "StatusDefinition",
     "value": {
       "key": "flying",
@@ -30918,6 +30967,796 @@
       {
         "path": "/reason",
         "code": "pattern_mismatch"
+      }
+    ]
+  },
+  {
+    "contract": "RecipeCraft",
+    "value": {},
+    "errors": [
+      {
+        "path": "/yield",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "RecipeCraft",
+    "value": {
+      "consume": {}
+    },
+    "errors": [
+      {
+        "path": "/consume/items",
+        "code": "missing_property"
+      },
+      {
+        "path": "/consume/quantity",
+        "code": "missing_property"
+      },
+      {
+        "path": "/consume/to",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "RecipeCraft",
+    "value": {
+      "consume": {
+        "items": [],
+        "quantity": 1,
+        "to": {
+          "in": "room",
+          "room": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "scrap"
+          }
+        }
+      }
+    },
+    "errors": [
+      {
+        "path": "/consume/items",
+        "code": "too_few_items"
+      }
+    ]
+  },
+  {
+    "contract": "RecipeCraft",
+    "value": {
+      "consume": {
+        "items": [
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s0"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s1"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s2"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s3"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s4"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s5"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s6"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s7"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s8"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s9"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s10"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s11"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s12"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s13"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s14"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s15"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s16"
+          }
+        ],
+        "quantity": 1,
+        "to": {
+          "in": "room",
+          "room": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "scrap"
+          }
+        }
+      }
+    },
+    "errors": [
+      {
+        "path": "/consume/items",
+        "code": "too_many_items"
+      }
+    ]
+  },
+  {
+    "contract": "RecipeCraft",
+    "value": {
+      "consume": {
+        "items": [
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "stick_01"
+          }
+        ],
+        "quantity": 0,
+        "to": {
+          "in": "room",
+          "room": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "scrap"
+          }
+        }
+      }
+    },
+    "errors": [
+      {
+        "path": "/consume/quantity",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "contract": "RecipeCraft",
+    "value": {
+      "consume": {
+        "items": [
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "stick_01"
+          }
+        ],
+        "quantity": 17,
+        "to": {
+          "in": "room",
+          "room": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "scrap"
+          }
+        }
+      }
+    },
+    "errors": [
+      {
+        "path": "/consume/quantity",
+        "code": "above_maximum"
+      }
+    ]
+  },
+  {
+    "contract": "RecipeCraft",
+    "value": {
+      "consume": {
+        "items": [
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "stick_01"
+          }
+        ],
+        "quantity": 1,
+        "to": {
+          "in": "room",
+          "room": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "scrap"
+          }
+        },
+        "x": 1
+      }
+    },
+    "errors": [
+      {
+        "path": "/consume/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "RecipeCraft",
+    "value": {
+      "yield": {}
+    },
+    "errors": [
+      {
+        "path": "/yield/from",
+        "code": "missing_property"
+      },
+      {
+        "path": "/yield/items",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "RecipeCraft",
+    "value": {
+      "yield": {
+        "items": [],
+        "from": {
+          "in": "room",
+          "room": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "scrap"
+          }
+        }
+      }
+    },
+    "errors": [
+      {
+        "path": "/yield/items",
+        "code": "too_few_items"
+      }
+    ]
+  },
+  {
+    "contract": "RecipeCraft",
+    "value": {
+      "yield": {
+        "items": [
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s0"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s1"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s2"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s3"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s4"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s5"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s6"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s7"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s8"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s9"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s10"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s11"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s12"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s13"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s14"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s15"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s16"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s17"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s18"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s19"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s20"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s21"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s22"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s23"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s24"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s25"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s26"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s27"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s28"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s29"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s30"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s31"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s32"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s33"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s34"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s35"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s36"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s37"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s38"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s39"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s40"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s41"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s42"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s43"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s44"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s45"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s46"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s47"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s48"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s49"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s50"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s51"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s52"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s53"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s54"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s55"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s56"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s57"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s58"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s59"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s60"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s61"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s62"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s63"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "s64"
+          }
+        ],
+        "from": {
+          "in": "room",
+          "room": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "scrap"
+          }
+        }
+      }
+    },
+    "errors": [
+      {
+        "path": "/yield/items",
+        "code": "too_many_items"
+      }
+    ]
+  },
+  {
+    "contract": "RecipeCraft",
+    "value": {
+      "yield": {
+        "items": [
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "spoon_01"
+          }
+        ],
+        "from": {
+          "in": "room",
+          "room": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "scrap"
+          }
+        },
+        "x": 1
+      }
+    },
+    "errors": [
+      {
+        "path": "/yield/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "RecipeCraft",
+    "value": {
+      "yield": {
+        "items": [
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "item",
+            "key": "spoon_01"
+          }
+        ],
+        "from": {
+          "in": "room",
+          "room": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "room",
+            "key": "scrap"
+          }
+        }
+      },
+      "x": 1
+    },
+    "errors": [
+      {
+        "path": "/x",
+        "code": "unknown_property"
       }
     ]
   }

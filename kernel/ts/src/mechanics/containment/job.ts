@@ -33,14 +33,14 @@ export function firstReplenish(cartridge: Cartridge, clock: number, mint: Mint) 
 }
 
 // The loader refuses a template location, so `at` names a room, an NPC or an item.
-const holder = (world: World, at: ItemLocation): EntityId =>
+export const holder = (world: World, at: ItemLocation): EntityId =>
   at.in === 'room'
     ? world.roomIds[refString(at.room)]
     : world.entityIds[refString(at.in === 'npc' ? at.npc : (at as { item: DefinitionRef }).item)];
 
 // The target's free room: its declared capacity less everything directly in it, whatever the
 // item (as commerce/shared.ts), so a move never exceeds it; unbounded without a capacity.
-function free(world: World, to: EntityId, steps: Steps): number | 'budget_exceeded' {
+export function free(world: World, to: EntityId, steps: Steps): number | 'budget_exceeded' {
   let left = world.capacities[to] ?? Infinity;
   if (left !== Infinity)
     for (const c of Object.values(world.state.containers)) {
@@ -63,23 +63,67 @@ export function runReplenish(
   steps: Steps,
   at: number,
 ) {
-  const r = world.cartridge.replenish![refString(row.job)];
-  const [from, to] = [holder(world, r.from), holder(world, r.to)];
-  const moved = moves(world, row, steps);
-  if (typeof moved === 'string') return { kind: 'fault', code: moved } as const;
-  const ops: DeltaOp[] = moved.map((entity_id) => ({
-    op: 'entity.transfer',
-    writer_group: 0,
-    entity_id,
-    source_id: from,
-    destination_id: to,
-  }));
-  return regrid(world, job_id, row, mint, at + r.every, ops);
+  const ops = transfers(world, row.job, steps, () => 0);
+  if (typeof ops === 'string') return { kind: 'fault', code: ops } as const;
+  return regrid(
+    world,
+    job_id,
+    row,
+    mint,
+    at + world.cartridge.replenish![refString(row.job)].every,
+    ops,
+  );
 }
 
-// The items one run of `row` moves now: up to `count`, until the target holds `cap`.
-function moves(world: World, row: JobRow, steps: Steps) {
-  const r = world.cartridge.replenish![refString(row.job)];
+/**
+ * Homestead hs-1: a reaction's replenish.run step, one run of the entry's move body and no job,
+ * each item in the root command's group if the root moved it (`roots`; a status holder's group
+ * is no container write), else an earlier write's group (row 41's join), else `group`. ponytail:
+ * it reads world state, not the rule's earlier `ops`, so an item.move of the same items in one
+ * rule picks the same items; upgrade if needed.
+ */
+export function replenishStep(
+  world: World,
+  key: DefinitionRef,
+  group: number,
+  steps: Steps,
+  holders: Map<string, number>,
+  roots?: ReadonlyMap<string, number>,
+) {
+  return transfers(world, key, steps, (item) => {
+    const writer_group = roots?.get(item) ?? holders.get(item) ?? group;
+    holders.set(item, writer_group);
+    return writer_group;
+  });
+}
+
+/** Each item a decision's ops move, with that op's writer group (hs-1: the root command's). */
+export const moverGroups = (ops: readonly DeltaOp[]) =>
+  new Map(ops.flatMap((o) => (o.op === 'entity.transfer' ? [[o.entity_id, o.writer_group]] : [])));
+
+// One run of entry `key`'s move body as transfers, each in the writer group `groupOf` gives it.
+function transfers(
+  world: World,
+  key: DefinitionRef,
+  steps: Steps,
+  groupOf: (item: EntityId) => number,
+): DeltaOp[] | 'budget_exceeded' {
+  const r = world.cartridge.replenish![refString(key)];
+  const moved = moves(world, key, steps);
+  if (typeof moved === 'string') return moved;
+  const [source_id, destination_id] = [holder(world, r.from), holder(world, r.to)];
+  return moved.map((entity_id) => ({
+    op: 'entity.transfer',
+    writer_group: groupOf(entity_id),
+    entity_id,
+    source_id,
+    destination_id,
+  }));
+}
+
+// The items one run of entry `key` moves now: up to `count`, until the target holds `cap`.
+function moves(world: World, key: DefinitionRef, steps: Steps) {
+  const r = world.cartridge.replenish![refString(key)];
   const [from, to] = [holder(world, r.from), holder(world, r.to)];
   const held = selected(world, r.items, to, Infinity, steps);
   if (typeof held === 'string') return held;
@@ -91,7 +135,7 @@ function moves(world: World, row: JobRow, steps: Steps) {
 
 /** The items a due replenish run will move, whose earlier writer's group it joins (row 41). */
 export function replenishMovers(world: World, row: JobRow): EntityId[] {
-  const moved = moves(world, row, { n: 0 });
+  const moved = moves(world, row.job, { n: 0 });
   return typeof moved === 'string' ? [] : moved;
 }
 

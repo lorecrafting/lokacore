@@ -1,0 +1,14 @@
+{
+  "title": "room.workshop.title",
+  "description": "room.workshop.description",
+  "exits": {},
+  "details": {
+    "bench": {
+      "aliases": [
+        "bench"
+      ],
+      "description": "detail.bench",
+      "rating": 1
+    }
+  }
+}

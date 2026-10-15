@@ -873,7 +873,7 @@
       ]
     },
     "ActionRecipe": {
-      "description": "A cartridge-local action composed only of registered operations (06 §20 Composed actions / ActionRecipe; 21 §7; 05 §28), invoked by the perform command: its stable key (its ActionSet identity), label, the aliases a player types as its verb (the first words of the command), its target, presentation priority, availability policy (evaluated for the actor; while it fails the action is shown unavailable and perform is rejected), and its outcomes. success is one explicit sequence of at most 16 steps, run in order as one logical decision (04 §5.2) and followed by the engine's action_completed event, and the narration its actor reads; observers is the line others in the room would read, kept for the first host with a second viewer. Optional (R5 S6): a check (RecipeCheck; check@1), whose result selects the outcome: success when it passes, failure when it fails; a recipe has a failure outcome exactly when it has a check (OUTCOME_MISMATCH). A failed check is an accepted perform with outcome failure whose RNG draw and time commit like success (04 §5.0); a recipe without a check has outcome performed. failure's sequence may be empty. duration, a whole number of LogicalTime units, advances the clock by that much on every accepted perform, success or failure (21 §7 Cost, time; 04 §5.4: one time.advance after the outcome's steps); events keep the time the perform was admitted at. action_completed follows the outcome's steps when the outcome is performed or success, never failure. Optional (R5 S6b): costs (RecipeCost, resource@1), paid in order by the actor's body on every admitted perform, failure included; one it cannot pay rejects the perform insufficient_resource before any check or draw. cooldown, a whole number of LogicalTime units: a perform by the same actor before the last admitted attempt's time plus cooldown is rejected cooldown; an admitted attempt, failure included, starts it at its admission time (delta cooldown.start), and at exactly that time plus cooldown the recipe is available again. Admission order: target, cooldown, costs, then the check. Optional (toolbox row W23, kernel_api 1.46, fact@1): tip, a text the actor reads once, after the outcome's narration, on the first accepted perform (success, failure or performed); that perform also assigns the engine-owned player fact seen_tip_<key> (bool, default false) true, which the compiler adds, so a recipe with a tip has a key of at most 55 characters and no definition writes that fact (RESERVED_FACT). Optional (loka-j64e, kernel_api 1.100): reason, a text key the GameView adds as the message of an offered ActionSet action's (or learned spell word's) unavailable reason while its policy fails (a use-target recipe is hidden then, so its reason is not shown); the perform or cast refusal stays invalid_state. Result bands join later.",
+      "description": "A cartridge-local action composed only of registered operations (06 §20 Composed actions / ActionRecipe; 21 §7; 05 §28), invoked by the perform command: its stable key (its ActionSet identity), label, the aliases a player types as its verb (the first words of the command), its target, presentation priority, availability policy (evaluated for the actor; while it fails the action is shown unavailable and perform is rejected), and its outcomes. success is one explicit sequence of at most 16 steps, run in order as one logical decision (04 §5.2) and followed by the engine's action_completed event, and the narration its actor reads; observers is the line others in the room would read, kept for the first host with a second viewer. Optional (R5 S6): a check (RecipeCheck; check@1), whose result selects the outcome: success when it passes, failure when it fails; a recipe has a failure outcome exactly when it has a check (OUTCOME_MISMATCH). A failed check is an accepted perform with outcome failure whose RNG draw and time commit like success (04 §5.0); a recipe without a check has outcome performed. failure's sequence may be empty. duration, a whole number of LogicalTime units, advances the clock by that much on every accepted perform, success or failure (21 §7 Cost, time; 04 §5.4: one time.advance after the outcome's steps); events keep the time the perform was admitted at. action_completed follows the outcome's steps when the outcome is performed or success, never failure. Optional (R5 S6b): costs (RecipeCost, resource@1), paid in order by the actor's body on every admitted perform, failure included; one it cannot pay rejects the perform insufficient_resource before any check or draw. cooldown, a whole number of LogicalTime units: a perform by the same actor before the last admitted attempt's time plus cooldown is rejected cooldown; an admitted attempt, failure included, starts it at its admission time (delta cooldown.start), and at exactly that time plus cooldown the recipe is available again. Admission order: target, cooldown, costs, then the check. Optional (toolbox row W23, kernel_api 1.46, fact@1): tip, a text the actor reads once, after the outcome's narration, on the first accepted perform (success, failure or performed); that perform also assigns the engine-owned player fact seen_tip_<key> (bool, default false) true, which the compiler adds, so a recipe with a tip has a key of at most 55 characters and no definition writes that fact (RESERVED_FACT). Optional (loka-j64e, kernel_api 1.100): reason, a text key the GameView adds as the message of an offered ActionSet action's (or learned spell word's) unavailable reason while its policy fails (a use-target recipe is hidden then, so its reason is not shown); the perform or cast refusal stays invalid_state. Optional (Homestead hs-10, kernel_api 1.101): craft (RecipeCraft), the items a station recipe uses up and makes; a spell or storylet recipe has none (SCHEMA_VIOLATION). Result bands join later.",
       "type": "object",
       "properties": {
         "key": {
@@ -1101,6 +1101,9 @@
           },
           "minItems": 1,
           "maxItems": 8
+        },
+        "craft": {
+          "$ref": "#/$defs/RecipeCraft"
         },
         "cooldown": {
           "type": "integer",
@@ -1526,6 +1529,104 @@
           "key": "k",
           "kind": "luck",
           "chance": 99
+        }
+      ]
+    },
+    "RecipeCraft": {
+      "description": "What a craft recipe uses up and makes (docs/system/mechanics.md Craft; Homestead hs-10, kernel_api 1.101): consume, yield or both. consume: on every accepted perform, failure included, the first quantity of the listed items the actor's body holds directly (lowest EntityId first; one inside a worn or carried container does not count) move to the holder to; while the body holds fewer the perform is rejected invalid_state and the offer is unavailable, its reason's message reason when declared. yield: unless the outcome is failure, one of the listed items directly in the holder from (lowest EntityId first) moves to the body, with item_acquired after the check's events; while from holds none the perform is rejected invalid_state and the offer is unavailable with no message. Every moved item passes the body's carrying limits (give rules). The loader refuses a template location, a holder with no placed entity (a spawn-template NPC or template item), an item holder that is not a container, duplicate items, and an unresolved item, holder or reason.",
+      "type": "object",
+      "properties": {
+        "consume": {
+          "type": "object",
+          "properties": {
+            "items": {
+              "type": "array",
+              "items": {
+                "$ref": "identity.schema.json#/$defs/DefinitionRef"
+              },
+              "minItems": 1,
+              "maxItems": 16
+            },
+            "quantity": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 16
+            },
+            "to": {
+              "$ref": "entity.schema.json#/$defs/ItemLocation"
+            },
+            "reason": {
+              "$ref": "text.schema.json#/$defs/TextKey"
+            }
+          },
+          "required": ["items", "quantity", "to"],
+          "additionalProperties": false
+        },
+        "yield": {
+          "type": "object",
+          "properties": {
+            "items": {
+              "type": "array",
+              "items": {
+                "$ref": "identity.schema.json#/$defs/DefinitionRef"
+              },
+              "minItems": 1,
+              "maxItems": 64
+            },
+            "from": {
+              "$ref": "entity.schema.json#/$defs/ItemLocation"
+            }
+          },
+          "required": ["items", "from"],
+          "additionalProperties": false
+        }
+      },
+      "requiredUnless": {
+        "consume": ["yield"]
+      },
+      "additionalProperties": false,
+      "examples": [
+        {
+          "consume": {
+            "items": [
+              {
+                "cartridge_id": "craft_sampler",
+                "cartridge_version": "1.0.0",
+                "kind": "item",
+                "key": "stick_01"
+              }
+            ],
+            "quantity": 1,
+            "to": {
+              "in": "item",
+              "item": {
+                "cartridge_id": "craft_sampler",
+                "cartridge_version": "1.0.0",
+                "kind": "item",
+                "key": "scrap"
+              }
+            },
+            "reason": "craft.carve_spoon.needs"
+          },
+          "yield": {
+            "items": [
+              {
+                "cartridge_id": "craft_sampler",
+                "cartridge_version": "1.0.0",
+                "kind": "item",
+                "key": "spoon_01"
+              }
+            ],
+            "from": {
+              "in": "item",
+              "item": {
+                "cartridge_id": "craft_sampler",
+                "cartridge_version": "1.0.0",
+                "kind": "item",
+                "key": "store"
+              }
+            }
+          }
         }
       ]
     },

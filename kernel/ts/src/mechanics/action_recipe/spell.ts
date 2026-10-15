@@ -38,7 +38,12 @@ import { transition, visible } from '../light/shared.ts';
 export type Effected = {
   readonly ops: readonly DeltaOp[];
   readonly events: readonly Event<
-    'custom_event' | 'check_passed' | 'check_failed' | 'status_applied' | 'entity_died'
+    | 'custom_event'
+    | 'check_passed'
+    | 'check_failed'
+    | 'status_applied'
+    | 'entity_died'
+    | 'item_acquired'
   >[];
   readonly position: number;
   readonly levels: Levels;
