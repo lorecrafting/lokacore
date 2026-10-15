@@ -67,6 +67,7 @@ Current work and open gates: [ROADMAP](../ROADMAP.md#slices).
 
 ## Online
 
+- Deferred to the Realm by the [seams audit](../rnd/realm-seams-audit-2026-10-13.md) (record: [realm seams](../decisions/owner-decision-realm-seams-2026-10-13.md)): the admitted-actor set and `bodyOf` as a lookup; an actor-less `elapsed`; `party` scope and `audience` on creation; the GameView audience filter; the instancing record; `speech@2`; ownership transfer, inheritance and griefing rules; credit kinds `party` and contested; per-character reaction delivery; owners for the actor-relative schedule `when` leaves ([W10](mechanics.md#conditional-schedules-toolbox-row-w10)).
 - [14 §R14](../archive/spec/14-implementation-plan.md#r14--beam-online-authority--realm-mode-skeleton) to
   [§R22](../archive/spec/14-implementation-plan.md#r22--persistent-text-mmorpg-expansion): the BEAM
   authority, Realm Mode, co-op instances, shards; specs [07](../archive/spec/07-offline-storypacks-to-mmo.md),
