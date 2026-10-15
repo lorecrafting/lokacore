@@ -257,6 +257,6 @@ test('every listed Give pair is accepted; a corpse, no one here and a refused it
   const dark = {
     ...w,
     rooms: { ...w.rooms, [here]: { ...w.rooms[here]!, dark_description: 'Dark.' } },
-  };
+  } as World;
   assert.deepEqual(gives(dark, apple), []);
 });

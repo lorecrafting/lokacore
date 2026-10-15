@@ -183,6 +183,8 @@ function placeButtons(v: GameView, button: ToButton) {
   return placed;
 }
 
+const JOIN: Record<string, string> = { refuel: 'from', pour: 'into', give: 'to' };
+
 function heldButtons(
   v: GameView,
   button: ToButton,
@@ -208,14 +210,7 @@ function heldButtons(
             detail_id: e.id,
           };
         const destination = a.target_ids?.[1] && names.get(a.target_ids[1]);
-        const join =
-          commandOf(a) === 'refuel'
-            ? 'from'
-            : commandOf(a) === 'pour'
-              ? 'into'
-              : commandOf(a) === 'give'
-                ? 'to'
-                : 'in';
+        const join = JOIN[commandOf(a)] ?? 'in';
         const offered = button(
           a,
           ` ${text(e.name)}${destination ? ` ${join} ${text(destination)}` : ''}`,
