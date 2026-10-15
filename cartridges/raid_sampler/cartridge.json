@@ -24,7 +24,9 @@
       "population": 1,
       "fact": 1,
       "policy": 1,
-      "reaction": 1
+      "reaction": 1,
+      "quest": 1,
+      "target_resolution": 1
     },
     "client_features": []
   },
