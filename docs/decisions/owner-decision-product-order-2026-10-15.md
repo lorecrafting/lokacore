@@ -3,7 +3,7 @@
 Written 2026-10-15 in Claude Code (PM), from the owner's session prompt and
 [HANDOFF](../HANDOFF.md) "Owner answers this session" and "Lane and next steps".
 
-Owner, 2026-10-15 (paraphrased): "no Chapter 1 yet. Finish all showcases (placeholders where lore is
+Owner, 2026-10-15 (session prompt): "no Chapter 1 yet. Finish all showcases (placeholders where lore is
 missing), then UI polish, then worldbuilding, then the official Chapters 1-3. Temporary test cartridges
 are fine. New content uses generic names (a new world lore will replace Ashmere)."
 
