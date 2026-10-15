@@ -81,8 +81,8 @@ const ore = (w: World) =>
       ORE.filter((k) => w.state.containers[id(w, 'item', k)] === id(w, 'room', room)).length,
   );
 const mine = (w: World) => play(w, { type: 'harvest', target_id: Object.keys(w.details)[0] });
-const harvested = () => {
-  let w = fresh();
+const harvested = (cartridge = content) => {
+  let w = fresh(cartridge);
   for (let i = 0; i < 2; i++) {
     const r = mine(w);
     assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
@@ -219,4 +219,115 @@ test('loader: replenish needs kernel_api 1.71 and resolved, distinct holders and
       '.cartridge.rooms["replenish_sampler@0.0.1:room/mine"].details.seam.harvest.items[2]',
     ],
   );
+});
+
+// Homestead hs-1: the sampler with a `dig` recipe on the seam whose custom_event `dig` runs `apply`.
+const RUN = { op: 'replenish.run', key: ref('replenish', 'seam_regrowth') };
+const digging =
+  (apply: object[] = [RUN], at_least = '1.101') =>
+  (c: any) => {
+    c.manifest.requires.kernel_api.at_least = at_least;
+    for (const k of ['action_recipe', 'reaction'])
+      c.manifest.requires.capabilities[k] = c.lock.capabilities[k] = 1;
+    // The step emits no event: it needs no fact@1 (which owns fact_changed).
+    delete c.manifest.requires.capabilities.fact;
+    delete c.lock.capabilities.fact;
+    c.recipes = {
+      [`${S}recipe/dig`]: {
+        key: 'dig',
+        label: 'action.mine',
+        aliases: ['dig'],
+        target: { kind: 'detail', room: ref('room', 'mine'), detail: 'seam' },
+        priority: 10,
+        policy: { policy_version: 1, root: { op: 'all', items: [] } },
+        outcomes: {
+          success: {
+            sequence: [{ op: 'event.emit', event: 'dig' }],
+            narration: { actor: 'narration.mine' },
+          },
+        },
+      },
+    };
+    c.reactions = {
+      [`${S}reaction/dig`]: { key: 'dig', on: { event: 'custom_event', custom: 'dig' }, apply },
+    };
+  };
+const dig = (w: World) => {
+  const r = play(w, { type: 'perform', action: 'dig' });
+  assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
+  return r.world;
+};
+
+// Breaks: the step is not dispatched (the mine stays empty), ignores the cap (3 on the third dig)
+// or count (2 at once), completes or schedules the entry's job (jobs change), or the timed job
+// stops counting the stock the step moved (a third ore at 3600), or the loader claims the step
+// emits fact_changed (no fact@1 here).
+test('a dig event moves one ore from the store at once, up to the cap; the job still runs', () => {
+  const loaded = edited(digging());
+  assert.ok(loaded.ok, JSON.stringify(loaded));
+  let w = harvested(loaded.cartridge as Cartridge);
+  const jobs = w.state.jobs;
+  w = dig(w);
+  assert.deepEqual(ore(w), [1, 2]);
+  w = dig(w);
+  assert.deepEqual(ore(w), [2, 1]);
+  w = dig(w);
+  assert.deepEqual(ore(w), [2, 1]);
+  assert.equal(w.state.clock, 0);
+  assert.deepEqual(w.state.jobs, jobs);
+  w = waitUntil(w, 3600);
+  assert.deepEqual(ore(w), [2, 1]);
+});
+
+// Breaks: a stale key loads (both kernels: test/loka/content_replenish_test.exs), the step's
+// 1.101 floor, its refusal under `after` (as item.move's, row FD1) or of a repeated key is dropped.
+test('loader: replenish.run needs kernel_api 1.101, a replenish entry, no after, one run a key', () => {
+  const reload = (edit: (c: any) => void) => {
+    const r = edited(edit);
+    return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
+  };
+  const at = `.cartridge.reactions["${S}reaction/dig"]`;
+  assert.deepEqual(reload(digging([{ ...RUN, key: ref('replenish', 'gone') }])), [
+    'UNRESOLVED_REFERENCE',
+    `${at}.apply[0].key`,
+  ]);
+  assert.deepEqual(reload(digging([RUN], '1.100')), [
+    'KERNEL_API_RANGE_INVALID',
+    '.cartridge.manifest.requires.kernel_api.at_least',
+  ]);
+  assert.deepEqual(
+    reload((c) => {
+      digging()(c);
+      c.reactions[`${S}reaction/dig`].after = 60;
+    }),
+    ['SCHEMA_VIOLATION', `${at}.apply[0].op`],
+  );
+  assert.deepEqual(reload(digging([RUN, RUN])), ['DUPLICATE_DEFINITION', `${at}.apply[1].key`]);
+});
+
+// Break: replenish.run ignores the root command's write of the item (hs-1 fix round 1): the drop
+// and the same-command sweep write the ore in two groups, and the drop faults conflicting_write.
+test('a sweep rule on item_dropped moves the dropped ore on in the same command', () => {
+  const loaded = edited((c) => {
+    digging()(c);
+    c.replenish[`${S}replenish/sweep`] = {
+      ...c.replenish[`${S}replenish/seam_regrowth`],
+      key: 'sweep',
+      from: { in: 'room', room: ref('room', 'mine') },
+      to: { in: 'room', room: ref('room', 'store') },
+      cap: 5,
+    };
+    c.reactions[`${S}reaction/dig`].on = { event: 'item_dropped' };
+    c.reactions[`${S}reaction/dig`].apply = [{ ...RUN, key: ref('replenish', 'sweep') }];
+  });
+  assert.ok(loaded.ok, JSON.stringify(loaded));
+  const w = harvested(loaded.cartridge as Cartridge);
+  assert.deepEqual(ore(w), [0, 3]); // the other two ore are held
+  const rooms = [id(w, 'room', 'mine'), id(w, 'room', 'store')];
+  const held = ORE.map((k) => id(w, 'item', k)).find(
+    (o) => !rooms.includes(w.state.containers[o]!),
+  )!;
+  const r = play(w, { type: 'drop', item_id: held });
+  assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
+  assert.equal(r.world.state.containers[held], rooms[1]);
 });

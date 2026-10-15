@@ -16,6 +16,7 @@ const EVENT_BOUND = [
   'quest.activate',
   'quest.resolve',
   'quest.fail',
+  'replenish.run', // Homestead hs-1: refused as item.move is
 ];
 
 export function delayed(c: Obj): Diagnostic[] {

@@ -84,4 +84,64 @@ defmodule Loka.ContentReplenishTest do
              seam(&Map.put(&1, "to", %{"in" => "npc", "npc" => "trader"}))
            )
   end
+
+  # Homestead hs-1: the sampler with a `dig` recipe whose custom_event `dig` runs `step`.
+  defp digging(step, at_least \\ "1.101", rule \\ %{}) do
+    # The step emits no event: it needs no fact@1 (which owns fact_changed).
+    caps = &(&1 |> Map.delete("fact") |> Map.merge(%{"action_recipe" => 1, "reaction" => 1}))
+
+    [
+      {"cartridge.json",
+       &(&1
+         |> put_in(["requires", "kernel_api", "at_least"], at_least)
+         |> update_in(["requires", "capabilities"], caps))},
+      {"recipes/dig.json",
+       %{
+         "label" => "action.mine",
+         "aliases" => ["dig"],
+         "target" => %{"kind" => "detail", "room" => "mine", "detail" => "seam"},
+         "priority" => 10,
+         "policy" => %{"policy_version" => 1, "root" => %{"op" => "all", "items" => []}},
+         "outcomes" => %{
+           "success" => %{
+             "sequence" => [%{"op" => "event.emit", "event" => "dig"}],
+             "narration" => %{"actor" => "narration.mine"}
+           }
+         }
+       }},
+      {"reactions/dig.json",
+       Map.merge(
+         %{"on" => %{"event" => "custom_event", "custom" => "dig"}, "apply" => [step]},
+         rule
+       )}
+    ]
+  end
+
+  # Break (twin of the loader test in kernel/ts/test/replenish.test.ts): replenish.run compiles
+  # with an unresolved key, under API 1.101, on a rule with `after` (refused as item.move is), or
+  # twice with one key in a rule.
+  test "replenish.run needs API 1.101, a replenish entry and no after", %{dir: dir} do
+    run = %{"op" => "replenish.run", "key" => "seam_regrowth"}
+    assert {:ok, _, _} = Loka.ContentSource.compile(dir, digging(run))
+
+    assert {"UNRESOLVED_REFERENCE", "reactions/dig.apply[0].key"} in codes(
+             dir,
+             digging(%{run | "key" => "gone"})
+           )
+
+    assert {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"} in codes(
+             dir,
+             digging(run, "1.100")
+           )
+
+    assert {"SCHEMA_VIOLATION", "reactions/dig.apply[0].op"} in codes(
+             dir,
+             digging(run, "1.101", %{"after" => 60})
+           )
+
+    assert {"DUPLICATE_DEFINITION", "reactions/dig.apply[1].key"} in codes(
+             dir,
+             digging(run, "1.101", %{"apply" => [run, run]})
+           )
+  end
 end

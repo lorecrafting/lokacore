@@ -25077,6 +25077,55 @@
     ]
   },
   {
+    "name": "reaction_replenish_run_no_key",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "clock_hour"
+      },
+      "apply": [
+        {
+          "op": "replenish.run"
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/apply/0/key",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "reaction_replenish_run_extra_key",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "clock_hour"
+      },
+      "apply": [
+        {
+          "op": "replenish.run",
+          "key": {
+            "cartridge_id": "c",
+            "cartridge_version": "1.0.0",
+            "kind": "replenish",
+            "key": "seam"
+          },
+          "count": 2
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/apply/0/count",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
     "contract": "StatusDefinition",
     "value": {
       "key": "flying",
