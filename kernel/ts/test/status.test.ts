@@ -133,22 +133,41 @@ test('the dart corridor poisons for four ticks and then expires', () => {
   assert.equal(hp(wait(w, 60)), 5);
 });
 
-// Breaks: ConditionView.kind (loka-x6t.64) misses a debuff signal (a negative tick, any negative
-// modifier, fear, blocks), calls a zero tick or zero modifier a debuff, reads only the first
-// modifier, or leaves the GameView schema.
-test('a condition is a debuff on a loss, a negative modifier, fear or blocks, else a buff', () => {
+// Breaks: ConditionView.kind (loka-x6t.64) ignores an authored kind, misses a harm signal (a
+// negative tick, modifier or resistance, fear, blocks, allows, blind, deaf, a dearer step), takes
+// an exact boundary (0, cost 100) for a gain or a harm, misses a gain signal, gives a status with
+// no effect a kind, reads only the first modifier, or leaves the GameView schema.
+test('a condition is a debuff on any harm, a buff on a gain alone, else no kind; kind wins', () => {
   const poisoned = play(fresh(), { type: 'move', direction: 'east' });
   const spec = poisoned.cartridge.statuses![poisonRef]!;
   const attribute = { ...spec.resource, kind: 'attribute', key: 'str' };
   const by = (modifier: number) => ({ attribute, modifier });
-  const rows: [object, string][] = [
+  const none = { per_tick: undefined };
+  const rows: [object, string | undefined][] = [
     [{ per_tick: -1 }, 'debuff'],
-    [{ per_tick: 0 }, 'buff'],
+    [{ per_tick: 0 }, undefined],
+    [none, undefined], // no effect field, like gored or scarred
     [{ per_tick: 1 }, 'buff'], // a plain gain, like fed
     [{ per_tick: 1, modifies: [by(2), by(-1)] }, 'debuff'],
-    [{ per_tick: 1, modifies: [by(0)] }, 'buff'],
+    [{ ...none, modifies: [by(0)] }, undefined],
+    [{ ...none, modifies: [by(1)] }, 'buff'],
     [{ per_tick: 1, fear: true }, 'debuff'],
     [{ per_tick: 1, blocks: ['move'] }, 'debuff'],
+    [{ per_tick: 1, allows: ['look'] }, 'debuff'],
+    [{ ...none, resistances: { fire: -1 } }, 'debuff'],
+    [{ ...none, resistances: { fire: 0 } }, undefined],
+    [{ ...none, resistances: { fire: 1 } }, 'buff'],
+    [{ ...none, resistances: { fire: 1, physical: -1 } }, 'debuff'],
+    [{ per_tick: 1, perception: { sight: 'blind' } }, 'debuff'],
+    [{ per_tick: 1, perception: { hearing: 'deaf' } }, 'debuff'],
+    [{ ...none, perception: { sight: 'dark_sight' } }, 'buff'],
+    [{ per_tick: 1, movement: { cost_percent: 101 } }, 'debuff'],
+    [{ ...none, movement: { cost_percent: 100 } }, undefined],
+    [{ ...none, movement: { cost_percent: 99 } }, 'buff'],
+    [{ ...none, movement: { passes: ['water'] } }, 'buff'],
+    [{ ...none, concealment: 'hidden' }, 'buff'],
+    [{ per_tick: 1, kind: 'debuff' }, 'debuff'], // bruised and notched
+    [{ per_tick: -1, kind: 'buff' }, 'buff'],
   ];
   for (const [change, kind] of rows) {
     const w = {

@@ -192,3 +192,21 @@ test("the loader checks a new variant list's references and text keys", () => {
     ]);
   }
 });
+
+// Breaks (twin of test/loka/content_variants_test.exs): a status kind (loka-x6t.64) outside buff
+// and debuff loads.
+test('loader: a status kind is buff or debuff', () => {
+  const source = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
+  assert.equal(source.statuses[`${C}:status/bruised`].kind, 'debuff');
+  source.statuses[`${C}:status/bruised`].kind = 'neutral';
+  const canonical = encode(source);
+  const sha256 = createHash('sha256').update(canonical).digest('hex');
+  const r = loadCartridge(
+    new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
+    INSTALLED,
+  );
+  assert.deepEqual(r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path], [
+    'SCHEMA_VIOLATION',
+    `.cartridge.statuses[${JSON.stringify(`${C}:status/bruised`)}].kind`,
+  ]);
+});

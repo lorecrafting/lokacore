@@ -2724,7 +2724,7 @@
       "additionalProperties": false
     },
     "ConditionView": {
-      "description": "One active body status: its authored label, end and next tick (both absent for a permanent status, row W8) and per-tick resource change (absent for a status that never ticks, row 2c). kind (loka-x6t.64) is debuff when per_tick is negative, any modifies entry is negative, or fear or blocks is present; buff otherwise.",
+      "description": "One active body status: its authored label, end and next tick (both absent for a permanent status, row W8) and per-tick resource change (absent for a status that never ticks, row 2c). kind (loka-x6t.64) is the status's authored kind; otherwise debuff when per_tick is negative, any modifies or resistances entry is negative, fear, blocks or allows is present, sight is blind, hearing is deaf or movement.cost_percent is above 100; else buff when the status has any gain (a positive per_tick, modifies or resistances entry, another sight, movement passes, a cost_percent below 100 or a concealment); absent for a status with no effect field.",
       "examples": [
         {
           "label": "condition.poisoned",

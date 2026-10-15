@@ -41,7 +41,7 @@ const initial = newWorld(
 );
 const releases = [{ fresh: initial, content_hash: bundle.sha256 }] as const;
 const wolf = initial.entityIds['scars_sampler@0.0.1:npc/wolf']!;
-const SCARRED = [{ label: 'condition.scarred', resource: 'hp', tick_every: 60, kind: 'buff' }];
+const SCARRED = [{ label: 'condition.scarred', resource: 'hp', tick_every: 60 }];
 
 // Breaks: load or recovery refuses or rewrites an active status row with no ends_at, next_tick_at
 // or job_id, or an elapsed run after reopen faults on it (a status job looked up by its job id).

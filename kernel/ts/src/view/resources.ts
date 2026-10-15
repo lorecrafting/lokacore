@@ -1,4 +1,4 @@
-import type { BandTable, EntityId, Key, ResourceView } from '../contracts.gen.ts';
+import type { BandTable, EntityId, Key, ResourceView, StatusDefinition } from '../contracts.gen.ts';
 import { refString, type World } from '../runtime/decision.ts';
 import { level, resourceRef, resourceSpec } from '../mechanics/resource.ts';
 import { cmp } from '../foundation/validate.ts';
@@ -56,13 +56,23 @@ export function conditionViews(world: World, body: EntityId | undefined) {
     resource: spec.resource.key as Key,
     ...(spec.per_tick !== undefined && { per_tick: spec.per_tick }),
     tick_every: spec.tick_every,
-    kind:
-      (spec.per_tick ?? 0) < 0 ||
-      spec.fear ||
-      spec.blocks ||
-      spec.modifies?.some((m) => m.modifier < 0)
-        ? ('debuff' as const)
-        : ('buff' as const),
+    ...(polarity(spec) && { kind: polarity(spec) }),
   }));
   return conditions.length > 0 ? { conditions } : {};
+}
+
+// The authored kind, else debuff on any harm, buff on any gain, none for a status with no effect.
+function polarity(s: StatusDefinition): 'buff' | 'debuff' | undefined {
+  if (s.kind) return s.kind;
+  const tick = s.per_tick ?? 0;
+  const amounts = [
+    ...(s.modifies ?? []).map((m) => m.modifier),
+    ...Object.values(s.resistances ?? {}),
+  ];
+  const cost = s.movement?.cost_percent ?? 100;
+  const { sight, hearing } = s.perception ?? {};
+  if (tick < 0 || amounts.some((n) => n < 0) || s.fear || s.blocks || s.allows) return 'debuff';
+  if (sight === 'blind' || hearing === 'deaf' || cost > 100) return 'debuff';
+  const gain = tick > 0 || amounts.some((n) => n > 0) || sight || cost < 100;
+  return gain || s.movement?.passes || s.concealment ? 'buff' : undefined;
 }

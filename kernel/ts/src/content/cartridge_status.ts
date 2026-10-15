@@ -30,7 +30,13 @@ export function status(c: Obj): Diagnostic[] {
   if (!Object.keys(defs).length && !applies.length && !cures.length && !g3) return out;
   const all = Object.values(defs);
   const room = named.some(([, , table]) => table === 'rooms'); // status reader 9: a step naming a room
-  const floor = all.some((s) => s.pierced_by) ? '1.93' : room ? '1.65' : floorOf(all, g3);
+  const floor = all.some((s) => s.kind) // an authored icon polarity (loka-x6t.64)
+    ? '1.101'
+    : all.some((s) => s.pierced_by)
+      ? '1.93'
+      : room
+        ? '1.65'
+        : floorOf(all, g3);
   if (
     apiCmp(c.manifest.requires.kernel_api.at_least, floor) < 0 ||
     ['status', 'death'].some((k) => c.lock.capabilities[k] !== 1) // a fatal hp tick needs death
