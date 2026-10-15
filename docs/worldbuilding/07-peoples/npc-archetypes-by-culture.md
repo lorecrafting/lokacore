@@ -10,4 +10,3 @@ Status: stub. Area: [Peoples, species and cultures](../README.md#07-peoples). Ca
 
 **Must agree with.** [Common folk and service NPCs](../22-characters/common-folk-and-service-npcs.md), [Work and the daily schedule](../16-daily-life/work-and-daily-schedule.md), [Culture template](../07-peoples/culture-template.md).
 
-**Feeds.** NPC blueprints; schedule@1; W10 conditional schedules.

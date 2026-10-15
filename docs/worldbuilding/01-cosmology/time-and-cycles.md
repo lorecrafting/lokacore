@@ -11,6 +11,4 @@ Status: stub. Area: [Cosmology and metaphysics](../README.md#01-cosmology). Cano
 
 **Must agree with.** [Deep time outline](../04-history/deep-time-outline.md), [Time reckoning and eras](../17-time/time-reckoning-and-eras.md), [Prophecy and foreshadowing](../21-story/prophecy-and-foreshadowing.md), [Creation and origin myth](../01-cosmology/creation-myth.md).
 
-**Feeds.** calendar@1 epoch; 37 phased world events; chapter structure.
-
 **Owner notes (input, not canon until absorbed).** [opening-line](../notes/opening-line.md).

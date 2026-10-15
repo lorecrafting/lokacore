@@ -10,4 +10,3 @@ Status: stub. Area: [Deep history and eras](../README.md#04-history). Canon tier
 
 **Must agree with.** [Creation and origin myth](../01-cosmology/creation-myth.md), [Deep time outline](../04-history/deep-time-outline.md), [Extinct and mythic creatures](../06-ecology/extinct-and-mythic-creatures.md).
 
-**Feeds.** 23-places landmarks; 13-technology materials of ancient origin.

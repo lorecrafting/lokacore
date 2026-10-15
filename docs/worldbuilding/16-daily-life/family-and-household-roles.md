@@ -10,4 +10,3 @@ Status: stub. Area: [Daily life](../README.md#16-daily-life). Canon tier: none y
 
 **Must agree with.** [Gender, family and kinship](../07-peoples/gender-family-and-kinship.md), [NPC schedules and lives](../22-characters/npc-schedules-and-lives.md).
 
-**Feeds.** D4 homes; schedule@1; FD4 NPC-NPC pair facts.

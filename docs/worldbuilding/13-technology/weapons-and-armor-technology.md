@@ -10,4 +10,3 @@ Status: stub. Area: [Technology and materials](../README.md#13-technology). Cano
 
 **Must agree with.** [Weapons catalog](../19-warfare/weapons-catalog.md), [Armour and shields](../19-warfare/armor-and-shields.md), [Metallurgy and alloys](../13-technology/metallurgy-and-alloys.md).
 
-**Feeds.** equipment@1; 3 slots and affects; 21 durability.

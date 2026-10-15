@@ -10,4 +10,3 @@ Status: stub. Area: [Daily life](../README.md#16-daily-life). Canon tier: none y
 
 **Must agree with.** [Day and night](../17-time/day-and-night.md), [NPC archetypes by culture](../07-peoples/npc-archetypes-by-culture.md), [Festivals and holidays](../16-daily-life/festivals-and-holidays.md).
 
-**Feeds.** schedule@1 daily_schedule; W10 conditional schedules; 10 time windows.

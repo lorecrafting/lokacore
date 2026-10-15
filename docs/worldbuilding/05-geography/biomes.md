@@ -11,4 +11,3 @@ Status: stub. Area: [Geography: worlds, lands, climate, travel](../README.md#05-
 
 **Must agree with.** [Flora](../06-ecology/flora.md), [Fauna](../06-ecology/fauna.md), [Natural resources and their distribution](../05-geography/natural-resources.md), [Climate and weather](../05-geography/climate-and-weather.md).
 
-**Feeds.** room content; G6 sense cues; 19 harvest; 43a terrain costs.

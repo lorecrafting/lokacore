@@ -8,6 +8,5 @@ Status: stub. Area: [Places: settlements, landmarks, dungeons](../README.md#23-p
 - Origin, builders, era, purpose, inhabitants, hazards, locks, puzzles, treasure, secret, exit?
 - Which mechanics does it sample, and at what difficulty?
 
-**Must agree with.** [Dungeons and ruins](../23-places/dungeons-and-ruins.md), [Quest template](../24-quests/quest-template.md).
+**Must agree with.** [Dungeons and ruins](../23-places/dungeons-and-ruins.md)
 
-**Feeds.** room content; traps; barriers; loot tables.

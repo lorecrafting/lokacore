@@ -10,4 +10,3 @@ Status: stub. Area: [Mysteries and secrets](../README.md#25-mysteries). Canon ti
 
 **Must agree with.** [Acts and turning points](../21-story/acts-and-turning-points.md), [Prophecy and foreshadowing](../21-story/prophecy-and-foreshadowing.md), [Mysteries register](../25-mysteries/mysteries-register.md).
 
-**Feeds.** story points; quest stages; D10 discovered places.

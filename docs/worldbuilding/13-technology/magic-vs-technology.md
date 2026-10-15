@@ -9,6 +9,5 @@ Status: stub. Area: [Technology and materials](../README.md#13-technology). Cano
 - Is magic industrial, artisanal, or forbidden in trade?
 - What would change if the Power withdrew?
 
-**Must agree with.** [Magic and society](../02-magic/magic-and-society.md), [Technology level](../13-technology/technology-level.md), [Prices and the value scale](../12-economy/prices-and-value-scale.md).
+**Must agree with.** [Magic and society](../02-magic/magic-and-society.md), [Technology level](../13-technology/technology-level.md)
 
-**Feeds.** item content; service offers.

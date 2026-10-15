@@ -10,4 +10,3 @@ Status: stub. Area: [Ecology: flora, fauna, monsters](../README.md#06-ecology). 
 
 **Must agree with.** [Era: creation](../04-history/age-of-creation.md), [Proverbs, folklore and tales](../18-arts/proverbs-folklore-and-tales.md), [Mysteries register](../25-mysteries/mysteries-register.md).
 
-**Feeds.** 13-technology materials; 27 unidentified items; readables.

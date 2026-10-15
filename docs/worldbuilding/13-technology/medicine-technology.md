@@ -10,4 +10,3 @@ Status: stub. Area: [Technology and materials](../README.md#13-technology). Cano
 
 **Must agree with.** [Medicine, herbs and remedies](../20-health/medicine-herbs-and-remedies.md), [Injury and healing](../20-health/injury-and-healing.md).
 
-**Feeds.** C5 bleeding and bandage; S9 herbs; SR3 cure.

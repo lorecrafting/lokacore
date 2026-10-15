@@ -10,4 +10,3 @@ Status: stub. Area: [Quests and story hooks](../README.md#24-quests). Canon tier
 
 **Must agree with.** [Communication and information](../13-technology/communication-and-information.md), [Hospitality and inns](../16-daily-life/hospitality-and-inns.md), [Red herrings and false lore](../25-mysteries/red-herrings-and-false-lore.md).
 
-**Feeds.** W3 rumour by co-presence; FD7 ask about topic; 46 codex.

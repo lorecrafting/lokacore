@@ -11,4 +11,3 @@ Status: stub. Area: [Health, death and afterlife](../README.md#20-health). Canon
 
 **Must agree with.** [Diseases and parasites](../06-ecology/diseases-and-parasites.md), [Era: recent](../04-history/recent-era.md), [The cosmic threat or pressure](../01-cosmology/cosmic-threat.md).
 
-**Feeds.** 1 disease statuses; SR3 cure; G3 statuses on NPCs.

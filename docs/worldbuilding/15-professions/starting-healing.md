@@ -11,4 +11,3 @@ Status: stub. Area: [Professions and skill trees](../README.md#15-professions). 
 
 **Must agree with.** [Injury and healing](../20-health/injury-and-healing.md), [Clergy and temples](../09-religion/clergy-and-temples.md), [Consumables: food, drink and medicine](../14-crafting/consumables-food-and-medicine.md).
 
-**Feeds.** C5 bandage; SR3 cure; S9 herbs; 1 statuses.

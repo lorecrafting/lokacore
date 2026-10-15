@@ -11,4 +11,3 @@ Status: stub. Area: [Law, crime and justice](../README.md#11-law). Canon tier: n
 
 **Must agree with.** [Banking and credit](../12-economy/banking-and-credit.md), [Warden code and doctrine](../03-orders/warden-code-and-doctrine.md), [Idioms, oaths and swearing](../08-languages/idioms-oaths-and-swearing.md).
 
-**Feeds.** 20 timed jobs and escrow; S2 Chandler's debt pattern; 22b wages.

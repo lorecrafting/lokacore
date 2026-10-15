@@ -11,4 +11,3 @@ Status: stub. Area: [Ecology: flora, fauna, monsters](../README.md#06-ecology). 
 
 **Must agree with.** [Sensing, perception and concealment](../02-magic/sensing-and-perception-magic.md), [Metaphysics: what is real](../01-cosmology/metaphysics.md), [The truth of belief](../09-religion/truth-of-belief.md).
 
-**Feeds.** SR8 concealment; dialogue@1; G11 disposition.

@@ -5,10 +5,7 @@ Status: stub. Area: [Magic and power systems](../README.md#02-magic). Canon tier
 **Purpose.** How spells are organised (schools, words, tiers) and what each entry must declare, before any spell is written.
 
 **Must answer.**
-- What are the groupings (schools, elements, verbs) and do they come from lore or from the engine's effect kinds?
-- What does each spell declare: word, learned gate, level, attributes, reagents, mana, effects?
-- Which spells are starter, which profession-gated, which elite-only?
+- What are the groupings (schools, elements, verbs) and what in the lore justifies them?
 
 **Must agree with.** [Magic systems overview](../02-magic/magic-overview.md), [Starter category: scholar and arcane](../15-professions/starting-scholar-arcane.md), [Warden powers and limits](../03-orders/warden-powers-and-limits.md).
 
-**Feeds.** 29a cast admission; 29b effects (status.apply, damage kind, light); G1 tags.

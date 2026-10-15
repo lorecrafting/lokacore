@@ -11,4 +11,3 @@ Status: stub. Area: [Ecology: flora, fauna, monsters](../README.md#06-ecology). 
 
 **Must agree with.** [Biomes](../05-geography/biomes.md), [Medicine, herbs and remedies](../20-health/medicine-herbs-and-remedies.md), [Food and drink](../16-daily-life/food-and-drink.md), [Harvestables and regrowth](../06-ecology/harvestables-and-regrowth.md).
 
-**Feeds.** 19 harvest; 19b replenish; S9 herbs; 18 potions.

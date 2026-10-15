@@ -10,4 +10,3 @@ Status: stub. Area: [Calendar, time and astronomy](../README.md#17-time). Canon 
 
 **Must agree with.** [The truth of belief](../09-religion/truth-of-belief.md), [Astronomy and stars](../17-time/astronomy-and-stars.md), [Hometowns and origins](../07-peoples/hometowns-and-origins.md).
 
-**Feeds.** D11 character choice; policy leaves on sky; storylets.

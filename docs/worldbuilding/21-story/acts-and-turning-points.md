@@ -10,4 +10,3 @@ Status: stub. Area: [The main storyline, chapters and themes](../README.md#21-st
 
 **Must agree with.** [Reveals schedule](../25-mysteries/reveals-schedule.md), [Main storyline arc](../21-story/main-storyline-arc.md), [Endings and player agency](../21-story/endings-and-player-agency.md).
 
-**Feeds.** story points; quest@1 outcomes; FD1 delayed consequences.

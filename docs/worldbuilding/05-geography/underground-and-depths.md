@@ -11,4 +11,3 @@ Status: stub. Area: [Geography: worlds, lands, climate, travel](../README.md#05-
 
 **Must agree with.** [Monsters and beasts](../06-ecology/monsters-and-beasts.md), [Resources and raw materials](../12-economy/resources-and-raw-materials.md), [Afterlife and the metaphysics of death](../01-cosmology/afterlife-and-death-metaphysics.md).
 
-**Feeds.** B4 darkness; 30 rope and climb; SR7 chasm tags; dungeon content.

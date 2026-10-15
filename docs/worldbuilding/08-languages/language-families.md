@@ -11,4 +11,3 @@ Status: stub. Area: [Languages and naming](../README.md#08-languages). Canon tie
 
 **Must agree with.** [The common tongue](../08-languages/common-tongue.md), [Cultures roster](../07-peoples/cultures-roster.md), [Era: ancient](../04-history/ancient-era.md), [Sacred and secret languages](../08-languages/sacred-and-secret-languages.md).
 
-**Feeds.** W16 languages and literacy; readable@1 language field.

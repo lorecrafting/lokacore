@@ -11,4 +11,3 @@ Status: stub. Area: [Peoples, species and cultures](../README.md#07-peoples). Ca
 
 **Must agree with.** [Diplomacy and current wars](../10-factions/diplomacy-and-current-wars.md), [Diaspora and migration](../07-peoples/diaspora-and-migration.md), [Starter category: social and entertainer](../15-professions/starting-social-entertainer.md).
 
-**Feeds.** G11 disposition; 15 faction standing; W2 pair facts.

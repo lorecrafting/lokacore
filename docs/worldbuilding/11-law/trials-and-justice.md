@@ -10,4 +10,3 @@ Status: stub. Area: [Law, crime and justice](../README.md#11-law). Canon tier: n
 
 **Must agree with.** [Legal systems](../11-law/legal-systems.md), [Crimes and punishments](../11-law/crimes-and-punishments.md).
 
-**Feeds.** 35 trial; 36 jail (fine or escape); dialogue checks (14).

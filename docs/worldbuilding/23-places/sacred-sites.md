@@ -10,4 +10,3 @@ Status: stub. Area: [Places: settlements, landmarks, dungeons](../README.md#23-p
 
 **Must agree with.** [Pilgrimage and holy places](../09-religion/pilgrimage-and-holy-places.md), [Warden places](../03-orders/warden-places.md), [Rituals and long magic](../02-magic/rituals-and-long-magic.md).
 
-**Feeds.** SR9 room statuses; 10 time windows; G7 locks.

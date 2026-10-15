@@ -11,4 +11,3 @@ Status: stub. Area: [Factions and politics](../README.md#10-factions). Canon tie
 
 **Must agree with.** [Factions roster](../10-factions/factions-roster.md), [Reputation and standing](../10-factions/reputation-and-standing.md).
 
-**Feeds.** 15 standing tiers; dialogue availability; shop access.

@@ -12,4 +12,3 @@ Status: stub. Area: [Cosmology and metaphysics](../README.md#01-cosmology). Cano
 
 **Must agree with.** [The truth of belief](../09-religion/truth-of-belief.md), [The Power: the cosmic force behind the wardens](../01-cosmology/the-power.md), [Religions roster](../09-religion/religions-roster.md), [Era: the age of myth](../04-history/age-of-myth.md).
 
-**Feeds.** 28 curses and blessings; FD1 delayed reactions (divine consequence); storylets (FD3).

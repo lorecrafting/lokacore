@@ -10,4 +10,3 @@ Status: stub. Area: [Deep history and eras](../README.md#04-history). Canon tier
 
 **Must agree with.** [Gods and great powers](../01-cosmology/gods-and-powers.md), [Religions roster](../09-religion/religions-roster.md), [Proverbs, folklore and tales](../18-arts/proverbs-folklore-and-tales.md), [Warden history and schisms](../03-orders/warden-history-and-schism.md).
 
-**Feeds.** readables; folklore content; 46 codex.

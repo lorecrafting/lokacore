@@ -11,4 +11,3 @@ Status: stub. Area: [Professions and skill trees](../README.md#15-professions). 
 
 **Must agree with.** [Martial arts and duelling](../19-warfare/martial-arts-and-dueling.md), [Elite category: martial](../03-orders/elite-category-martial.md), [Crafting philosophy: interdependence](../14-crafting/crafting-philosophy.md).
 
-**Feeds.** combat@1; C1 training; 17 ranged; 6 multi-target; 22 hirelings.

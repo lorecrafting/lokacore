@@ -9,6 +9,5 @@ Status: stub. Area: [Health, death and afterlife](../README.md#20-health). Canon
 - Does the player character age over real elapsed time?
 - Do the old hold knowledge the young cannot?
 
-**Must agree with.** [Species template](../07-peoples/species-template.md), [Elapsed time and phone play](../17-time/elapsed-time-and-phone-play.md), [Mentor archetypes](../22-characters/mentor-archetypes.md).
+**Must agree with.** [Species template](../07-peoples/species-template.md), [Mentor archetypes](../22-characters/mentor-archetypes.md).
 
-**Feeds.** NPC content; W6 variants; calendar@1.

@@ -10,4 +10,3 @@ Status: stub. Area: [Factions and politics](../README.md#10-factions). Canon tie
 
 **Must agree with.** [Social structure and class](../07-peoples/social-structure-and-class.md), [Titles and recognition](../15-professions/titles-and-recognition.md), [Player towns and settlements](../23-places/player-towns.md).
 
-**Feeds.** FD9 earned titles; S3 settlement; W15 recognition.

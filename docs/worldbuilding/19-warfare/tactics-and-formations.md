@@ -10,4 +10,3 @@ Status: stub. Area: [Military and warfare](../README.md#19-warfare). Canon tier:
 
 **Must agree with.** [Warfare and armies](../19-warfare/warfare-and-armies.md), [Mental health, madness and fear](../20-health/mental-health-madness-and-fear.md).
 
-**Feeds.** 6c pack plans; W21 fear and morale; C4 hound response and flight; G8 groups.

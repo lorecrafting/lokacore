@@ -11,4 +11,3 @@ Status: stub. Area: [Health, death and afterlife](../README.md#20-health). Canon
 
 **Must agree with.** [Flora](../06-ecology/flora.md), [Consumables: food, drink and medicine](../14-crafting/consumables-food-and-medicine.md), [Poisons and antidotes](../20-health/poisons-and-antidotes.md).
 
-**Feeds.** S9 infirmary herbs; 18 potions; E1 craft.

@@ -10,4 +10,3 @@ Status: stub. Area: [Mysteries and secrets](../README.md#25-mysteries). Canon ti
 
 **Must agree with.** [Historiography: who records and what is wrong](../04-history/historiography.md), [The truth of belief](../09-religion/truth-of-belief.md), [Continuity and contradictions log](../00-foundations/continuity-log.md).
 
-**Feeds.** readables; dialogue content; 46 codex.

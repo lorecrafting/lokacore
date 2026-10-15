@@ -12,4 +12,3 @@ Status: stub. Area: [Geography: worlds, lands, climate, travel](../README.md#05-
 
 **Must agree with.** [Region template](../05-geography/region-template.md), [The starting settlement](../23-places/starting-settlement.md), [Starting professions roster](../15-professions/starting-professions-roster.md), [Warden places](../03-orders/warden-places.md), [The present day](../04-history/present-day.md).
 
-**Feeds.** first new-world cartridge; chapter 1 replacement.

@@ -11,4 +11,3 @@ Status: stub. Area: [Professions and skill trees](../README.md#15-professions). 
 
 **Must agree with.** [Harvestables and regrowth](../06-ecology/harvestables-and-regrowth.md), [Hazards and exposure](../05-geography/hazards-and-exposure.md), [Elite category: wild](../03-orders/elite-category-wild.md).
 
-**Feeds.** 19 tool-gated harvest; W13 tracks; W25 exposure; 43a terrain.

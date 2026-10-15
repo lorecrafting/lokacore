@@ -11,4 +11,3 @@ Status: stub. Area: [Ecology: flora, fauna, monsters](../README.md#06-ecology). 
 
 **Must agree with.** [Domesticated animals and mounts](../06-ecology/domesticated-animals-and-mounts.md), [Food chain and balance](../06-ecology/food-chain-and-balance.md), [Food and drink](../16-daily-life/food-and-drink.md).
 
-**Feeds.** population plans (W12); 8 loot tables; D7 bounded deer; schedule@1.

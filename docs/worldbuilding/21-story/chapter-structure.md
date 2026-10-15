@@ -11,6 +11,4 @@ Status: stub. Area: [The main storyline, chapters and themes](../README.md#21-st
 
 **Must agree with.** [Chapter template](../21-story/chapter-template.md), [The starting region](../05-geography/starting-region.md), [Chapter carry-over](../21-story/chapter-carry-over.md), [The present day](../04-history/present-day.md).
 
-**Feeds.** cartridge per chapter; 48a/48b export and import; docs/ROADMAP.md.
-
 **Owner notes (input, not canon until absorbed).** [opening-line](../notes/opening-line.md).

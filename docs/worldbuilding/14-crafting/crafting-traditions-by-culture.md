@@ -10,4 +10,3 @@ Status: stub. Area: [Crafting traditions and chains](../README.md#14-crafting). 
 
 **Must agree with.** [Culture template](../07-peoples/culture-template.md), [Visual arts and crafts](../18-arts/visual-arts-and-crafts.md), [Crafting chains](../14-crafting/crafting-chains.md).
 
-**Feeds.** item content; W6 variants; 27 identification.

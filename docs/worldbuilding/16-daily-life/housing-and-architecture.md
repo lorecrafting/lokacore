@@ -11,4 +11,3 @@ Status: stub. Area: [Daily life](../README.md#16-daily-life). Canon tier: none y
 
 **Must agree with.** [Housing plots and land](../23-places/housing-plots-and-land.md), [Stations and workshops](../14-crafting/stations-and-workshops.md), [Architecture styles](../18-arts/architecture-styles.md), [Furniture and household goods](../16-daily-life/furniture-and-household.md).
 
-**Feeds.** S1 furnishing; S2 construction; E3 build; built rooms (docs/rnd/built-rooms-2026-10-11.md).

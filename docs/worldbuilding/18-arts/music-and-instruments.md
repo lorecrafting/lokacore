@@ -10,4 +10,3 @@ Status: stub. Area: [Arts, music and literature](../README.md#18-arts). Canon ti
 
 **Must agree with.** [Starter category: social and entertainer](../15-professions/starting-social-entertainer.md), [Magic systems overview](../02-magic/magic-overview.md), [Songs and the bardic tradition](../18-arts/songs-and-bardic-tradition.md).
 
-**Feeds.** 42 song and instrument buff; 2c status modifiers; G6 sound cues.

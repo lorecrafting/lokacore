@@ -11,4 +11,3 @@ Status: stub. Area: [Calendar, time and astronomy](../README.md#17-time). Canon 
 
 **Must agree with.** [Structure of the cosmos](../01-cosmology/cosmos-structure.md), [Astrology and omens](../17-time/astrology-and-omens.md), [Maps and cartography](../05-geography/maps-and-cartography.md).
 
-**Feeds.** readables; FD8 ambient lines; 46 codex.

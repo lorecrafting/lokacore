@@ -11,4 +11,3 @@ Status: stub. Area: [Health, death and afterlife](../README.md#20-health). Canon
 
 **Must agree with.** [Flora](../06-ecology/flora.md), [Elite category: shadow](../03-orders/elite-category-shadow.md), [Medicine, herbs and remedies](../20-health/medicine-herbs-and-remedies.md).
 
-**Feeds.** 1 poison statuses; SR3 cure; G2 damage kinds.

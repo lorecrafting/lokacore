@@ -11,4 +11,3 @@ Status: stub. Area: [Foundations: premise, tone, player, canon housekeeping](../
 
 **Must agree with.** [Premise and pillars](../00-foundations/premise-and-pillars.md), [Main storyline arc](../21-story/main-storyline-arc.md), [The warden order](../03-orders/warden-order.md).
 
-**Feeds.** dialogue@1 choice texts; quest@1 outcomes; scene@1 framing.

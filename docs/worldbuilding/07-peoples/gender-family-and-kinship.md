@@ -11,4 +11,3 @@ Status: stub. Area: [Peoples, species and cultures](../README.md#07-peoples). Ca
 
 **Must agree with.** [Family and household roles](../16-daily-life/family-and-household-roles.md), [Culture template](../07-peoples/culture-template.md), [Property and ownership law](../11-law/property-and-ownership-law.md).
 
-**Feeds.** NPC content; 24 ownership and inheritance (Realm).

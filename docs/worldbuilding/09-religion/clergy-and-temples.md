@@ -11,4 +11,3 @@ Status: stub. Area: [Religion, belief and rites](../README.md#09-religion). Cano
 
 **Must agree with.** [Starter category: healing](../15-professions/starting-healing.md), [Sacred sites](../23-places/sacred-sites.md), [Governments and states](../10-factions/governments-and-states.md).
 
-**Feeds.** service offers; B8-style immediate services; 36 sanctuary rules (law).

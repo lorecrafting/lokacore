@@ -10,4 +10,3 @@ Status: stub. Area: [Arts, music and literature](../README.md#18-arts). Canon ti
 
 **Must agree with.** [Scripts and literacy](../08-languages/scripts-and-literacy.md), [Historiography: who records and what is wrong](../04-history/historiography.md), [In-world documents and readables](../18-arts/in-world-documents-and-readables.md).
 
-**Feeds.** readable@1; D2 held books and public Priory; 46 codex.

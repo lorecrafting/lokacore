@@ -1,6 +1,6 @@
 # Banking and credit
 
-Status: stub. Area: [Economy: currency, trade, faucets and sinks](../README.md#12-economy). Canon tier: none yet.
+Status: stub. Area: [Economy: currency, trade and markets](../README.md#12-economy). Canon tier: none yet.
 
 **Purpose.** Where money and goods are kept, borrowed and lent, and who is trusted with them.
 
@@ -10,4 +10,3 @@ Status: stub. Area: [Economy: currency, trade, faucets and sinks](../README.md#1
 
 **Must agree with.** [Currency](../12-economy/currency.md), [Contracts, oaths and debt](../11-law/contracts-oaths-and-debt.md).
 
-**Feeds.** 25 bank: money and item deposit; 24 ownership.

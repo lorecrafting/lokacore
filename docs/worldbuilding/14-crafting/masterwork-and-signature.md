@@ -11,4 +11,3 @@ Status: stub. Area: [Crafting traditions and chains](../README.md#14-crafting). 
 
 **Must agree with.** [Elite category: craft](../03-orders/elite-category-craft.md), [Magic items and artifacts](../02-magic/magic-items-and-artifacts.md), [Titles and recognition](../15-professions/titles-and-recognition.md).
 
-**Feeds.** W6 variants; FD9 titles; 3 affects.

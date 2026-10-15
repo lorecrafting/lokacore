@@ -10,4 +10,3 @@ Status: stub. Area: [Characters as archetypes](../README.md#22-characters). Cano
 
 **Must agree with.** [Mercenaries and hirelings](../19-warfare/mercenaries-and-hirelings.md), [Domesticated animals and mounts](../06-ecology/domesticated-animals-and-mounts.md), [Relationships and trust](../22-characters/relationships-and-trust.md).
 
-**Feeds.** G8 groups; 22 hirelings; FD10 companion remarks; 45 pet growth.

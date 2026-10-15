@@ -7,9 +7,7 @@ Status: stub. Area: [Foundations: premise, tone, player, canon housekeeping](../
 **Must answer.**
 - Is the player a nobody who may become anyone, or marked from the start?
 - What can the player change permanently, and what can they never change (world scale vs town scale)?
-- How do many players (Realm) each hold the same role without contradiction?
 - Where does the player come from (origins) and what does origin gate (LegendMUD hometown gating)?
 
-**Must agree with.** [Player fantasy](../00-foundations/player-fantasy.md), [Player character origins](../22-characters/player-character-origins.md), [Hometowns and origins](../07-peoples/hometowns-and-origins.md), [Shared world rules](../26-realm/shared-world-rules.md).
+**Must agree with.** [Player fantasy](../00-foundations/player-fantasy.md), [Player character origins](../22-characters/player-character-origins.md), [Hometowns and origins](../07-peoples/hometowns-and-origins.md)
 
-**Feeds.** D11 character choice; FD9 earned titles; W15 recognition; 48 chapter carry-over.

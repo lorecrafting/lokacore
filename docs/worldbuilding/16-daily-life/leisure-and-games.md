@@ -10,4 +10,3 @@ Status: stub. Area: [Daily life](../README.md#16-daily-life). Canon tier: none y
 
 **Must agree with.** [Music and instruments](../18-arts/music-and-instruments.md), [Crimes and punishments](../11-law/crimes-and-punishments.md).
 
-**Feeds.** 26 puzzles; dialogue content; check@1.

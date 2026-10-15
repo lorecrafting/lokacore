@@ -12,4 +12,3 @@ Status: stub. Area: [Magic and power systems](../README.md#02-magic). Canon tier
 
 **Must agree with.** [Second law: limits over powers](../02-magic/second-law-limits-and-costs.md), [Corruption, curses and blessings](../02-magic/corruption-curses-and-blessings.md), [Death and what follows](../20-health/death-and-what-follows.md).
 
-**Feeds.** check@1 outcomes; 29b spell effects; G3 statuses; 1 status effects over time.

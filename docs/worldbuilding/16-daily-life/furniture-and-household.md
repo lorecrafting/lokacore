@@ -10,4 +10,3 @@ Status: stub. Area: [Daily life](../README.md#16-daily-life). Canon tier: none y
 
 **Must agree with.** [Housing and architecture](../16-daily-life/housing-and-architecture.md), [Crafting chains](../14-crafting/crafting-chains.md).
 
-**Feeds.** S1 functional furnishing; containment@1; 24 ownership.

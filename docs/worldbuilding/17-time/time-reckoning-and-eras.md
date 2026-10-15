@@ -10,6 +10,4 @@ Status: stub. Area: [Calendar, time and astronomy](../README.md#17-time). Canon 
 
 **Must agree with.** [Master timeline](../04-history/timeline-master.md), [Calendar](../17-time/calendar.md), [Cosmic time and cycles](../01-cosmology/time-and-cycles.md).
 
-**Feeds.** calendar@1 epoch; readables.
-
 **Owner notes (input, not canon until absorbed).** [opening-line](../notes/opening-line.md).

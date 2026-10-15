@@ -11,4 +11,3 @@ Status: stub. Area: [Peoples, species and cultures](../README.md#07-peoples). Ca
 
 **Must agree with.** [Species roster](../07-peoples/species-roster.md), [Culture template](../07-peoples/culture-template.md), [Ageing and lifespan](../20-health/aging-and-lifespan.md).
 
-**Feeds.** NPC blueprints; W6 entity variants.

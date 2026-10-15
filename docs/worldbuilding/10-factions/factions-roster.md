@@ -9,6 +9,5 @@ Status: stub. Area: [Factions and politics](../README.md#10-factions). Canon tie
 - What does each want, fear, and control?
 - Which factions can the player join, serve, or fight?
 
-**Must agree with.** [Faction template](../10-factions/faction-template.md), [Profession demand map](../15-professions/profession-demand-map.md), [The starting region](../05-geography/starting-region.md).
+**Must agree with.** [Faction template](../10-factions/faction-template.md), [The starting region](../05-geography/starting-region.md).
 
-**Feeds.** 15 reputation and affinity tiers; G11 disposition; faction quests.

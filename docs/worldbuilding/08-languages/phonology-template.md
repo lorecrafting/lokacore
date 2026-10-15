@@ -10,4 +10,3 @@ Status: stub. Area: [Languages and naming](../README.md#08-languages). Canon tie
 
 **Must agree with.** [Language families](../08-languages/language-families.md), [Naming guide: people](../08-languages/naming-guide-people.md).
 
-**Feeds.** content authoring guide.

@@ -11,4 +11,3 @@ Status: stub. Area: [Factions and politics](../README.md#10-factions). Canon tie
 
 **Must agree with.** [Nobility and titles](../10-factions/nobility-and-titles.md), [Legal systems](../11-law/legal-systems.md), [Taxes, tolls and fees](../12-economy/taxes-tolls-and-fees.md), [Succession and legitimacy](../10-factions/succession-and-legitimacy.md).
 
-**Feeds.** faction content; 36 jail; S3 settlement governance.

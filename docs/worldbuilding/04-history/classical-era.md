@@ -10,4 +10,3 @@ Status: stub. Area: [Deep history and eras](../README.md#04-history). Canon tier
 
 **Must agree with.** [Governments and states](../10-factions/governments-and-states.md), [Legal systems](../11-law/legal-systems.md), [Warden history and schisms](../03-orders/warden-history-and-schism.md).
 
-**Feeds.** faction content; 15 reputation; law content.

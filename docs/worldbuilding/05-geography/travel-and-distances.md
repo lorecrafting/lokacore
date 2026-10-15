@@ -10,6 +10,5 @@ Status: stub. Area: [Geography: worlds, lands, climate, travel](../README.md#05-
 - What are the roads, ferries, passes and ways, and who controls them?
 - What is fast travel in lore terms (coach, ship, gate) and what does it cost?
 
-**Must agree with.** [Waterways and the sea](../05-geography/waterways-and-sea.md), [Transport technology](../13-technology/transport-technology.md), [Trade routes and markets](../12-economy/trade-routes-and-markets.md), [Elapsed time and phone play](../17-time/elapsed-time-and-phone-play.md).
+**Must agree with.** [Waterways and the sea](../05-geography/waterways-and-sea.md), [Transport technology](../13-technology/transport-technology.md), [Trade routes and markets](../12-economy/trade-routes-and-markets.md)
 
-**Feeds.** movement@1; 32 fast travel; 43a terrain costs; D1 paid ferry; 44 race objective.

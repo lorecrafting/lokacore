@@ -10,6 +10,5 @@ Status: stub. Area: [Magic and power systems](../README.md#02-magic). Canon tier
 - How do towns, courts and armies treat a mage?
 - Which professions exist only because magic exists?
 
-**Must agree with.** [Guilds and companies](../10-factions/guilds-and-companies.md), [Crimes and punishments](../11-law/crimes-and-punishments.md), [Prices and the value scale](../12-economy/prices-and-value-scale.md), [Magic versus technology](../13-technology/magic-vs-technology.md).
+**Must agree with.** [Guilds and companies](../10-factions/guilds-and-companies.md), [Crimes and punishments](../11-law/crimes-and-punishments.md), [Magic versus technology](../13-technology/magic-vs-technology.md).
 
-**Feeds.** 15 reputation and faction standing; 33 offense kinds; shop offers.

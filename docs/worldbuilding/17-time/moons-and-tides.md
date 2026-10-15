@@ -11,4 +11,3 @@ Status: stub. Area: [Calendar, time and astronomy](../README.md#17-time). Canon 
 
 **Must agree with.** [Planet and sky](../05-geography/planet-and-sky.md), [Rituals and long magic](../02-magic/rituals-and-long-magic.md), [Monster ecology and populations](../06-ecology/monster-ecology.md).
 
-**Feeds.** calendar@1 lunar cut; 10 moon gates; 31 tide; S4 full-moon raids.

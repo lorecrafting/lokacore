@@ -10,4 +10,3 @@ Status: stub. Area: [Places: settlements, landmarks, dungeons](../README.md#23-p
 
 **Must agree with.** [Governments and states](../10-factions/governments-and-states.md), [Trade routes and markets](../12-economy/trade-routes-and-markets.md), [Hygiene, health and sanitation](../16-daily-life/hygiene-health-and-sanitation.md).
 
-**Feeds.** later chapters; 32 fast travel.

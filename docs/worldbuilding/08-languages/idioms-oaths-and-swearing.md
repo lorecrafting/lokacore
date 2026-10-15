@@ -11,4 +11,3 @@ Status: stub. Area: [Languages and naming](../README.md#08-languages). Canon tie
 
 **Must agree with.** [Tone and style guide](../00-foundations/tone-and-style-guide.md), [Religions roster](../09-religion/religions-roster.md), [Contracts, oaths and debt](../11-law/contracts-oaths-and-debt.md).
 
-**Feeds.** dialogue content; W7 alternates.

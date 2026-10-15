@@ -11,4 +11,3 @@ Status: stub. Area: [Places: settlements, landmarks, dungeons](../README.md#23-p
 
 **Must agree with.** [The starting region](../05-geography/starting-region.md), [Settlement template](../23-places/settlement-template.md), [Player fantasy](../00-foundations/player-fantasy.md), [Chapter structure](../21-story/chapter-structure.md).
 
-**Feeds.** chapter 1 cartridge; D11 character choice.

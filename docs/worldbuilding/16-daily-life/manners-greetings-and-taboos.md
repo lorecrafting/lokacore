@@ -11,4 +11,3 @@ Status: stub. Area: [Daily life](../README.md#16-daily-life). Canon tier: none y
 
 **Must agree with.** [Culture template](../07-peoples/culture-template.md), [Idioms, oaths and swearing](../08-languages/idioms-oaths-and-swearing.md), [Reputation and standing](../10-factions/reputation-and-standing.md).
 
-**Feeds.** G11 disposition; dialogue content; 14 dialogue checks.

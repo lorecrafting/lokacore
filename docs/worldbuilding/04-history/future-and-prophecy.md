@@ -10,4 +10,3 @@ Status: stub. Area: [Deep history and eras](../README.md#04-history). Canon tier
 
 **Must agree with.** [Prophecy and foreshadowing](../21-story/prophecy-and-foreshadowing.md), [Cosmic time and cycles](../01-cosmology/time-and-cycles.md), [Chapter structure](../21-story/chapter-structure.md).
 
-**Feeds.** foreshadowing content; W24 deadlines; 37 world events.

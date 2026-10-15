@@ -11,4 +11,3 @@ Status: stub. Area: [Cosmology and metaphysics](../README.md#01-cosmology). Cano
 
 **Must agree with.** [Mysteries register](../25-mysteries/mysteries-register.md), [Maps and cartography](../05-geography/maps-and-cartography.md), [Structure of the cosmos](../01-cosmology/cosmos-structure.md).
 
-**Feeds.** 11 hidden passages; D10 discovered places; red herrings in readables.

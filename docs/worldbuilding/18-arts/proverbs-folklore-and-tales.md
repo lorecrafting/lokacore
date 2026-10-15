@@ -10,4 +10,3 @@ Status: stub. Area: [Arts, music and literature](../README.md#18-arts). Canon ti
 
 **Must agree with.** [Idioms, oaths and swearing](../08-languages/idioms-oaths-and-swearing.md), [Red herrings and false lore](../25-mysteries/red-herrings-and-false-lore.md), [Era: the age of myth](../04-history/age-of-myth.md).
 
-**Feeds.** dialogue content; readables; W7 alternates.

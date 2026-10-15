@@ -8,6 +8,5 @@ Status: stub. Area: [Quests and story hooks](../README.md#24-quests). Canon tier
 - What is each profession's first commission, trial and master's task?
 - Which lead toward hidden paths without saying so?
 
-**Must agree with.** [Profession system overview](../15-professions/profession-system-overview.md), [Elite unlock grammar](../15-professions/elite-unlock-grammar.md), [Schematics and recipes](../14-crafting/schematics-and-recipes.md).
+**Must agree with.** [Profession system overview](../15-professions/profession-system-overview.md), [Schematics and recipes](../14-crafting/schematics-and-recipes.md).
 
-**Feeds.** 20 timed jobs; E1 craft; trainers; quest facts as E2 leaves.

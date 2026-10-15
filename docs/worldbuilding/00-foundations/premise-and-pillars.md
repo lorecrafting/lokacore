@@ -12,4 +12,3 @@ Status: stub. Area: [Foundations: premise, tone, player, canon housekeeping](../
 
 **Must agree with.** [Themes and questions](../00-foundations/themes.md), [Player fantasy](../00-foundations/player-fantasy.md), [Structure of the cosmos](../01-cosmology/cosmos-structure.md), [Main storyline arc](../21-story/main-storyline-arc.md).
 
-**Feeds.** every cartridge; the tone of narration@1 text keys; the toolbox priority order.

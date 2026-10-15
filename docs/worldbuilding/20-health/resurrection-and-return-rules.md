@@ -11,4 +11,3 @@ Status: stub. Area: [Health, death and afterlife](../README.md#20-health). Canon
 
 **Must agree with.** [Afterlife and the metaphysics of death](../01-cosmology/afterlife-and-death-metaphysics.md), [Limits and impossibilities](../02-magic/limits-and-impossibilities.md), [Death and what follows](../20-health/death-and-what-follows.md), [The player's role in the world](../00-foundations/player-role-in-world.md).
 
-**Feeds.** death@1 same-body return; 47 death penalty options; W8 permanent marks.

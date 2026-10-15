@@ -11,4 +11,3 @@ Status: stub. Area: [Religion, belief and rites](../README.md#09-religion). Cano
 
 **Must agree with.** [Life stages and coming of age](../07-peoples/life-stages-and-coming-of-age.md), [Festivals and holidays](../16-daily-life/festivals-and-holidays.md), [Death rites](../09-religion/death-rites.md).
 
-**Feeds.** scene@1; W8 permanent statuses; FD9 titles; 10 time windows.

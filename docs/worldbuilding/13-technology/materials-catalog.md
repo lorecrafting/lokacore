@@ -9,6 +9,5 @@ Status: stub. Area: [Technology and materials](../README.md#13-technology). Cano
 - What tags does each carry (burnable, metal, sharp, fragile, waterproof)?
 - Which materials matter against which creatures (silver vs iron)?
 
-**Must agree with.** [Resources and raw materials](../12-economy/resources-and-raw-materials.md), [Damage kinds and materials](../19-warfare/damage-kinds-and-materials.md), [Crafting chains](../14-crafting/crafting-chains.md).
+**Must agree with.** [Resources and raw materials](../12-economy/resources-and-raw-materials.md), [Crafting chains](../14-crafting/crafting-chains.md).
 
-**Feeds.** G1 property tags; 40 material-sensitive damage; W25 exposure tags.

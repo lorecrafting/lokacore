@@ -11,4 +11,3 @@ Status: stub. Area: [Foundations: premise, tone, player, canon housekeeping](../
 
 **Must agree with.** [Premise and pillars](../00-foundations/premise-and-pillars.md), [Tone and style guide](../00-foundations/tone-and-style-guide.md).
 
-**Feeds.** review checklists for content PRs.

@@ -11,4 +11,3 @@ Status: stub. Area: [Geography: worlds, lands, climate, travel](../README.md#05-
 
 **Must agree with.** [Day and night](../17-time/day-and-night.md), [Moons and tides](../17-time/moons-and-tides.md), [Astronomy and stars](../17-time/astronomy-and-stars.md), [Structure of the cosmos](../01-cosmology/cosmos-structure.md).
 
-**Feeds.** calendar@1 solar and lunar cuts; 31 derived sky.

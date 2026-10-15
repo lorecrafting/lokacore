@@ -11,4 +11,3 @@ Status: stub. Area: [Health, death and afterlife](../README.md#20-health). Canon
 
 **Must agree with.** [Afterlife and the metaphysics of death](../01-cosmology/afterlife-and-death-metaphysics.md), [Resurrection and return rules](../20-health/resurrection-and-return-rules.md), [Death rites](../09-religion/death-rites.md), [Property and ownership law](../11-law/property-and-ownership-law.md).
 
-**Feeds.** death@1 corpse custody and same-body return; 47 death penalty; D6 owned-corpse recovery; 41 corpse decay.

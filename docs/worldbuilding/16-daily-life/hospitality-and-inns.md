@@ -11,4 +11,3 @@ Status: stub. Area: [Daily life](../README.md#16-daily-life). Canon tier: none y
 
 **Must agree with.** [Food and drink](../16-daily-life/food-and-drink.md), [Manners, greetings and taboos](../16-daily-life/manners-greetings-and-taboos.md), [Rumours and information flow](../24-quests/rumours-and-information-flow.md).
 
-**Feeds.** S10 Lantern Rest and dream; W9 sleep; W3 rumour; B8 immediate services.

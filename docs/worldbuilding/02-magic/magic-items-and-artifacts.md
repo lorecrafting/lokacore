@@ -8,8 +8,6 @@ Status: stub. Area: [Magic and power systems](../README.md#02-magic). Canon tier
 - Can players make magic items, through which profession, and at what cost?
 - What are the artifact tiers and how many unique artifacts exist?
 - Do items have wills, histories or names, and do they decay?
-- How are artifacts kept out of the Realm's economy (bound, unique, decaying)?
 
-**Must agree with.** [Masterwork and signature](../14-crafting/masterwork-and-signature.md), [Materials catalog](../13-technology/materials-catalog.md), [Corruption, curses and blessings](../02-magic/corruption-curses-and-blessings.md), [Import policy: offline into the Realm](../26-realm/import-policy.md).
+**Must agree with.** [Masterwork and signature](../14-crafting/masterwork-and-signature.md), [Materials catalog](../13-technology/materials-catalog.md), [Corruption, curses and blessings](../02-magic/corruption-curses-and-blessings.md)
 
-**Feeds.** 3 item slots and affects; 27 unidentified items; 21 durability; 24 ownership.

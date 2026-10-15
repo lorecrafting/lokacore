@@ -11,4 +11,3 @@ Status: stub. Area: [Religion, belief and rites](../README.md#09-religion). Cano
 
 **Must agree with.** [Religions roster](../09-religion/religions-roster.md), [Clergy and temples](../09-religion/clergy-and-temples.md), [Rites and sacraments](../09-religion/rites-and-sacraments.md).
 
-**Feeds.** service offers; 28 blessings; 10 time windows.

@@ -10,4 +10,3 @@ Status: stub. Area: [Peoples, species and cultures](../README.md#07-peoples). Ca
 
 **Must agree with.** [Rites and sacraments](../09-religion/rites-and-sacraments.md), [Ageing and lifespan](../20-health/aging-and-lifespan.md), [Education and apprenticeship](../16-daily-life/education-and-apprenticeship.md).
 
-**Feeds.** chapter structure; D11 character choice.

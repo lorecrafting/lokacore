@@ -11,4 +11,3 @@ Status: stub. Area: [Magic and power systems](../README.md#02-magic). Canon tier
 
 **Must agree with.** [Warden powers and limits](../03-orders/warden-powers-and-limits.md), [Secrets tiers: who knows what](../25-mysteries/secrets-tiers.md), [Magical creatures](../06-ecology/magical-creatures.md).
 
-**Feeds.** G6 sense cues; SR6 perception; SR8 concealment; 16 sneak and hide; 11 search.

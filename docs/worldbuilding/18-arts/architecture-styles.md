@@ -10,4 +10,3 @@ Status: stub. Area: [Arts, music and literature](../README.md#18-arts). Canon ti
 
 **Must agree with.** [Housing and architecture](../16-daily-life/housing-and-architecture.md), [Lost civilisations and ruins](../04-history/lost-civilizations-and-ruins.md), [Landmarks and wonders](../23-places/landmarks-and-wonders.md).
 
-**Feeds.** room descriptions; blueprint content; W7 alternates.

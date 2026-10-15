@@ -11,4 +11,3 @@ Status: stub. Area: [Foundations: premise, tone, player, canon housekeeping](../
 
 **Must agree with.** [Open questions for the owner](../00-foundations/open-questions.md), [Red herrings and false lore](../25-mysteries/red-herrings-and-false-lore.md), [Historiography: who records and what is wrong](../04-history/historiography.md).
 
-**Feeds.** review checklists; canon tier promotion in the README.

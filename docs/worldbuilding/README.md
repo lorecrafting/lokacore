@@ -6,26 +6,19 @@ canon is not an input). This folder is the world bible's skeleton: one short stu
 needs a decision, with no lore, names or answers yet. Stubs are filled in order, promoted through
 the canon tiers below, and each fact lives in exactly one stub (one fact, one place).
 
-The engine owns mechanics and cartridges own numbers and lore
-([owner decision](../decisions/owner-decision-world-parameters-2026-10-02.md)), so every stub
-names the game systems it feeds, by toolbox row id ([toolbox](../MECHANICS-TOOLBOX.md)) or
-installed capability ([mechanics](../system/mechanics.md)). The profession engine set (E1 craft,
-E2 skill prerequisite, E3 build step) is in Beads `loka-kgd.108`, note "FABLE PROFESSIONS".
+This folder is storyline, background and canon only. Game mechanics, balance and system stubs
+moved to the parked [game design doc](../game-design/README.md) (owner 2026-10-15).
 
 ## How to use a stub
 
 Every stub has the same shape: `Status`, `Purpose`, `Must answer` (the questions), `Must agree
-with` (cohesion links), `Feeds` (systems). To fill one: answer its questions under a new
+with` (cohesion links). To fill one: answer its questions under a new
 `## Decisions` heading, keep the questions, change `Status: stub` to the tier reached, and check
 every linked stub still agrees (log any clash in the
 [continuity log](00-foundations/continuity-log.md)). A stub that needs an owner call lists it in
 [open questions](00-foundations/open-questions.md). Stubs stay short; a long answer becomes a
 sibling file in the same area, linked from the stub. Raw owner notes go in [notes/](notes/README.md)
 and are not canon until a stub absorbs them.
-
-Hidden-elite stubs (area 03) each carry Koster's Jedi lesson as an open question: cartridge data
-on the phone will be read and shared, so how secret can a hidden path be? Stubs ask; they do not
-answer.
 
 ## Canon tiers
 
@@ -40,19 +33,18 @@ Modelled on the Star Wars Holocron's G/T/C/S/N ladder, reduced to what Loka need
 | `retired` | superseded; kept one release for the continuity log | owner |
 
 Cartridge content is canon only for what the bible says; a game's numbers (as in Star Wars games'
-stats) are never lore. Player-made Realm content is a tier below the bible (the Realm stubs decide
-the rules).
+stats) are never lore.
 
 ## Fill order
 
 What must be decided before the rest can be written, after Sanderson (start from what the story
 and play need; limits before powers), Tolkien (languages before names; deep history before the
-present) and the Koster checklist (decide economy, consent and import rules before the Realm):
+present):
 
-1. **Foundations** (00): premise and pillars, player fantasy, tone, Story vs Realm canon (stub in Realm canon, 26).
+1. **Foundations** (00): premise and pillars, player fantasy, tone.
 2. **Cosmology and the Power** (01), then **magic systems with their limits** (02): every people,
    faith and profession depends on what power is and what it costs.
-3. **The warden order and the elite categories** (03): shape, rarity and secrecy policy, before
+3. **The warden order and the elite categories** (03): shape and secrecy, before
    professions and factions are drawn around them.
 4. **Deep history and eras** (04) with **calendar and time** (17): dates, eras and the day-one
    state that every place and faction cites.
@@ -60,12 +52,11 @@ present) and the Koster checklist (decide economy, consent and import rules befo
 6. **Peoples and languages** (07, 08): languages and naming guides before any name is written.
 7. **Religion, factions, law** (09, 10, 11).
 8. **Economy, technology, crafting, professions** (12, 13, 14, 15): one pass together, since each
-   constrains the others (interdependence, faucets and sinks, demand per profession).
+   constrains the others (interdependence between trades).
 9. **Daily life, arts, warfare, health** (16, 18, 19, 20).
 10. **Story, characters, places, quests** (21, 22, 23, 24), then **mysteries** (25) as the register of
     what the earlier areas hid.
-11. **Realm** (26) rules are written before the Realm exists; **glossary, continuity log and open
-    questions** (00) are kept throughout.
+11. **Glossary, continuity log and open questions** (00) are kept throughout.
 
 ## Cohesion checklist
 
@@ -74,12 +65,7 @@ Before a stub is promoted to `draft` or `canon`:
 - Every `Must agree with` link was re-read and still agrees; clashes are in the continuity log.
 - The answer invents nothing another stub owns (one fact, one place); it links instead.
 - Names follow the naming guides (08) and are in the glossary with the owning stub.
-- Every power, item or rule states its cost and limit (Sanderson's second law) and its place in
-  faucets and sinks (12).
-- Every secret is in the mysteries register with its tier and reveal (25), and its data-mining
-  exposure is stated.
-- The systems in `Feeds` exist, or the gap is in the mechanics gap register (00).
-- Offline Story and Realm readings are both stated where they differ (26).
+- Every secret is in the mysteries register with its tier and reveal (25).
 - The Ashmere setting is not cited as a source.
 
 ## Sources consulted
@@ -102,15 +88,9 @@ Before a stub is promoted to `draft` or `canon`:
   deep history, regional gazetteers, pantheon, calendar) and *Eberron Campaign Setting* (Baker,
   2004: tone pillars, magic as the world's engine, every element has a hook)
   ([Eberron](https://en.wikipedia.org/wiki/Eberron)).
-- Raph Koster: LegendMUD, Ultima Online and Star Wars Galaxies lessons, in the repo at
-  [docs/rnd/koster-design-lessons-2026-10-15.md](../rnd/koster-design-lessons-2026-10-15.md) with
-  its [research notes](../rnd/koster-research-notes/legendmud-ultima-online.md); its checklist
-  section feeds areas 03, 12, 14, 15, 23 and 26.
 - Worldbuilding checklists: the Wrede list above, the SFWA worldbuilding resources, and
   [Worldbuilding Stack Exchange's](https://worldbuilding.stackexchange.com/) recurring categories
   (used only to check the area list for gaps).
-- Loka inputs: [MECHANICS-TOOLBOX.md](../MECHANICS-TOOLBOX.md), [mechanics.md](../system/mechanics.md),
-  [world-parameters.md](../world-parameters.md), Beads `loka-ikch` and `loka-kgd.108`.
 
 ## Table of contents
 
@@ -118,7 +98,7 @@ Area folders are numbered in fill order. Counts are stubs per area.
 
 ### 00-foundations
 
-Foundations: premise, tone, player, canon housekeeping (12 stubs).
+Foundations: premise, tone, player, canon housekeeping (10 stubs).
 
 - [Premise and pillars](00-foundations/premise-and-pillars.md)
 - [Themes and questions](00-foundations/themes.md)
@@ -127,8 +107,6 @@ Foundations: premise, tone, player, canon housekeeping (12 stubs).
 - [Player fantasy](00-foundations/player-fantasy.md)
 - [The player's role in the world](00-foundations/player-role-in-world.md)
 - [Inspirations and anti-inspirations](00-foundations/inspirations-and-anti-inspirations.md)
-- [Lore to cartridge mapping](00-foundations/cartridge-mapping.md)
-- [Mechanics gap register](00-foundations/mechanics-gap-register.md)
 - [Glossary](00-foundations/glossary.md)
 - [Continuity and contradictions log](00-foundations/continuity-log.md)
 - [Open questions for the owner](00-foundations/open-questions.md)
@@ -168,7 +146,7 @@ Magic and power systems (14 stubs).
 
 ### 03-orders
 
-The warden order and the hidden elites (16 stubs).
+The warden order and the hidden elites (14 stubs).
 
 - [Hidden elites: overview](03-orders/hidden-elites-overview.md)
 - [The warden order](03-orders/warden-order.md)
@@ -184,8 +162,6 @@ The warden order and the hidden elites (16 stubs).
 - [Elite category: wild](03-orders/elite-category-wild.md)
 - [Elite category: shadow](03-orders/elite-category-shadow.md)
 - [Elite rivalries and relations](03-orders/elite-rivalries-and-relations.md)
-- [Elite rarity and power budget](03-orders/elite-rarity-and-power-budget.md)
-- [Elites in the shared Realm](03-orders/elites-and-the-realm.md)
 
 ### 04-history
 
@@ -303,7 +279,7 @@ Factions and politics (11 stubs).
 
 ### 11-law
 
-Law, crime and justice (9 stubs).
+Law, crime and justice (8 stubs).
 
 - [Legal systems](11-law/legal-systems.md)
 - [Crimes and punishments](11-law/crimes-and-punishments.md)
@@ -313,25 +289,19 @@ Law, crime and justice (9 stubs).
 - [Contracts, oaths and debt](11-law/contracts-oaths-and-debt.md)
 - [Outlaws, bounties and the wanted](11-law/outlaws-bounties-and-wanted.md)
 - [Law across borders](11-law/law-across-borders.md)
-- [Player crime, griefing and consent](11-law/player-crime-and-consent.md)
 
 ### 12-economy
 
-Economy: currency, trade, faucets and sinks (13 stubs).
+Economy: currency, trade and markets (8 stubs).
 
 - [Currency](12-economy/currency.md)
-- [Prices and the value scale](12-economy/prices-and-value-scale.md)
 - [Trade routes and markets](12-economy/trade-routes-and-markets.md)
 - [Resources and raw materials](12-economy/resources-and-raw-materials.md)
-- [Faucets and sinks](12-economy/faucets-and-sinks.md)
 - [Scarcity and abundance](12-economy/scarcity-and-abundance.md)
 - [Banking and credit](12-economy/banking-and-credit.md)
 - [Taxes, tolls and fees](12-economy/taxes-tolls-and-fees.md)
 - [Labour and wages](12-economy/labor-and-wages.md)
 - [Shops and merchants](12-economy/shops-and-merchants.md)
-- [Player market and friction](12-economy/player-market-and-friction.md)
-- [Economy ledger and metrics](12-economy/economy-ledger-and-metrics.md)
-- [Economy: offline to Realm import](12-economy/realm-import-policy.md)
 
 ### 13-technology
 
@@ -350,27 +320,21 @@ Technology and materials (10 stubs).
 
 ### 14-crafting
 
-Crafting traditions and chains (10 stubs).
+Crafting traditions and chains (7 stubs).
 
 - [Crafting philosophy: interdependence](14-crafting/crafting-philosophy.md)
 - [Crafting chains](14-crafting/crafting-chains.md)
 - [Schematics and recipes](14-crafting/schematics-and-recipes.md)
-- [Quality and experimentation](14-crafting/quality-and-experimentation.md)
 - [Stations and workshops](14-crafting/stations-and-workshops.md)
-- [Resource attributes and rotation](14-crafting/resource-attributes-and-rotation.md)
-- [Durability, repair and decay](14-crafting/durability-repair-and-decay.md)
 - [Consumables: food, drink and medicine](14-crafting/consumables-food-and-medicine.md)
 - [Crafting traditions by culture](14-crafting/crafting-traditions-by-culture.md)
 - [Masterwork and signature](14-crafting/masterwork-and-signature.md)
 
 ### 15-professions
 
-Professions and skill trees (19 stubs).
+Professions and skill trees (13 stubs).
 
 - [Profession system overview](15-professions/profession-system-overview.md)
-- [Skill tree grammar](15-professions/skill-tree-grammar.md)
-- [Capacity budget and surrender](15-professions/capacity-budget-and-surrender.md)
-- [XP kinds and growth by use](15-professions/xp-kinds-and-growth.md)
 - [Starting professions roster](15-professions/starting-professions-roster.md)
 - [Starter category: combat](15-professions/starting-combat.md)
 - [Starter category: crafting](15-professions/starting-crafting.md)
@@ -381,11 +345,8 @@ Professions and skill trees (19 stubs).
 - [Starter category: scholar and arcane](15-professions/starting-scholar-arcane.md)
 - [Starter category: civic and builder](15-professions/starting-civic-builder.md)
 - [Advanced professions roster](15-professions/advanced-professions-roster.md)
-- [Elite unlock grammar](15-professions/elite-unlock-grammar.md)
 - [Trainers and teaching](15-professions/trainers-and-teaching.md)
 - [Titles and recognition](15-professions/titles-and-recognition.md)
-- [Profession demand map](15-professions/profession-demand-map.md)
-- [Profession balance and playtest](15-professions/profession-balance-and-playtest.md)
 
 ### 16-daily-life
 
@@ -407,7 +368,7 @@ Daily life (13 stubs).
 
 ### 17-time
 
-Calendar, time and astronomy (10 stubs).
+Calendar, time and astronomy (8 stubs).
 
 - [Calendar](17-time/calendar.md)
 - [Day and night](17-time/day-and-night.md)
@@ -417,8 +378,6 @@ Calendar, time and astronomy (10 stubs).
 - [Astronomy and stars](17-time/astronomy-and-stars.md)
 - [Astrology and omens](17-time/astrology-and-omens.md)
 - [Time reckoning and eras](17-time/time-reckoning-and-eras.md)
-- [Elapsed time and phone play](17-time/elapsed-time-and-phone-play.md)
-- [Weather model](17-time/weather-model.md)
 
 ### 18-arts
 
@@ -435,7 +394,7 @@ Arts, music and literature (8 stubs).
 
 ### 19-warfare
 
-Military and warfare (10 stubs).
+Military and warfare (9 stubs).
 
 - [Warfare and armies](19-warfare/warfare-and-armies.md)
 - [Weapons catalog](19-warfare/weapons-catalog.md)
@@ -446,7 +405,6 @@ Military and warfare (10 stubs).
 - [Naval and mounted warfare](19-warfare/naval-and-mounted-warfare.md)
 - [War and magic](19-warfare/war-and-magic.md)
 - [Martial arts and duelling](19-warfare/martial-arts-and-dueling.md)
-- [Damage kinds and materials](19-warfare/damage-kinds-and-materials.md)
 
 ### 20-health
 
@@ -464,7 +422,7 @@ Health, death and afterlife (9 stubs).
 
 ### 21-story
 
-The main storyline, chapters and themes (10 stubs).
+The main storyline, chapters and themes (9 stubs).
 
 - [Main storyline arc](21-story/main-storyline-arc.md)
 - [Chapter structure](21-story/chapter-structure.md)
@@ -474,7 +432,6 @@ The main storyline, chapters and themes (10 stubs).
 - [Endings and player agency](21-story/endings-and-player-agency.md)
 - [Side stories and storylets](21-story/side-stories-and-storylets.md)
 - [Chapter carry-over](21-story/chapter-carry-over.md)
-- [Story mode versus Realm events](21-story/story-mode-vs-realm-events.md)
 - [Prophecy and foreshadowing](21-story/prophecy-and-foreshadowing.md)
 
 ### 22-characters
@@ -511,38 +468,20 @@ Places: settlements, landmarks, dungeons (12 stubs).
 
 ### 24-quests
 
-Quests and story hooks (9 stubs).
+Quests and story hooks (6 stubs).
 
 - [Quest types](24-quests/quest-types.md)
-- [Quest template](24-quests/quest-template.md)
 - [Story hooks catalog](24-quests/story-hooks-catalog.md)
 - [Rumours and information flow](24-quests/rumours-and-information-flow.md)
-- [Rewards and stakes](24-quests/rewards-and-stakes.md)
-- [Deadlines and failure](24-quests/deadlines-and-failure.md)
 - [World events](24-quests/world-events.md)
 - [Faction quests](24-quests/faction-quests.md)
 - [Profession quests](24-quests/profession-quests.md)
 
 ### 25-mysteries
 
-Mysteries and secrets (5 stubs).
+Mysteries and secrets (4 stubs).
 
 - [Mysteries register](25-mysteries/mysteries-register.md)
 - [Secrets tiers: who knows what](25-mysteries/secrets-tiers.md)
 - [Reveals schedule](25-mysteries/reveals-schedule.md)
 - [Red herrings and false lore](25-mysteries/red-herrings-and-false-lore.md)
-- [Data-mining exposure](25-mysteries/data-mining-exposure.md)
-
-### 26-realm
-
-Offline Story versus the shared Realm (9 stubs).
-
-- [Story versus Realm canon](26-realm/story-vs-realm-canon.md)
-- [Shared world rules](26-realm/shared-world-rules.md)
-- [Import policy: offline into the Realm](26-realm/import-policy.md)
-- [PvP and consent](26-realm/pvp-and-consent.md)
-- [Social ladder and trust](26-realm/social-ladder-and-trust.md)
-- [Staff and governance](26-realm/staff-and-governance.md)
-- [Player towns and land supply](26-realm/player-towns-and-land-supply.md)
-- [Persistence and export](26-realm/persistence-and-export.md)
-- [Live ops and change policy](26-realm/live-ops-and-change-policy.md)

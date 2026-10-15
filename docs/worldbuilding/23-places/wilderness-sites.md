@@ -10,4 +10,3 @@ Status: stub. Area: [Places: settlements, landmarks, dungeons](../README.md#23-p
 
 **Must agree with.** [Biomes](../05-geography/biomes.md), [Travel, distances and the room scale](../05-geography/travel-and-distances.md), [Harvestables and regrowth](../06-ecology/harvestables-and-regrowth.md).
 
-**Feeds.** D5 dry Deep Fen; C6 night in the marsh; W25 exposure; 9 encounters.

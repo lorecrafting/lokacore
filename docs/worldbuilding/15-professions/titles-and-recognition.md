@@ -11,4 +11,3 @@ Status: stub. Area: [Professions and skill trees](../README.md#15-professions). 
 
 **Must agree with.** [Names and identity](../07-peoples/names-and-identity.md), [Nobility and titles](../10-factions/nobility-and-titles.md), [Reputation and standing](../10-factions/reputation-and-standing.md).
 
-**Feeds.** FD9 earned titles; W15 recognition; 46 codex badges.

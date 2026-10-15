@@ -11,4 +11,3 @@ Status: stub. Area: [Professions and skill trees](../README.md#15-professions). 
 
 **Must agree with.** [Player towns and settlements](../23-places/player-towns.md), [Stations and workshops](../14-crafting/stations-and-workshops.md), [Elite category: social and civic](../03-orders/elite-category-social-civic.md).
 
-**Feeds.** E3 build step; S1 to S4 settlement rows; 24 ownership.

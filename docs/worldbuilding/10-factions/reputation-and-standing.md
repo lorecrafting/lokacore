@@ -11,4 +11,3 @@ Status: stub. Area: [Factions and politics](../README.md#10-factions). Canon tie
 
 **Must agree with.** [Faction template](../10-factions/faction-template.md), [Relations and prejudice between peoples](../07-peoples/relations-between-peoples.md), [Outlaws, bounties and the wanted](../11-law/outlaws-bounties-and-wanted.md).
 
-**Feeds.** 15 reputation tiers; W3 rumour by co-presence; W2 pair facts; FD5 witness ledger.

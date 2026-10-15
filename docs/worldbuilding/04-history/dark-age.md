@@ -10,4 +10,3 @@ Status: stub. Area: [Deep history and eras](../README.md#04-history). Canon tier
 
 **Must agree with.** [Historiography: who records and what is wrong](../04-history/historiography.md), [Clergy and temples](../09-religion/clergy-and-temples.md), [Literature and books](../18-arts/literature-and-books.md).
 
-**Feeds.** readables; false lore; 46 codex.

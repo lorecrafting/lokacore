@@ -11,4 +11,3 @@ Status: stub. Area: [Peoples, species and cultures](../README.md#07-peoples). Ca
 
 **Must agree with.** [Culture template](../07-peoples/culture-template.md), [Hometowns and origins](../07-peoples/hometowns-and-origins.md), [The starting region](../05-geography/starting-region.md).
 
-**Feeds.** D11 character choice; dialogue content; 15 faction standing.

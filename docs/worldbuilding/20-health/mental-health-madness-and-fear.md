@@ -11,4 +11,3 @@ Status: stub. Area: [Health, death and afterlife](../README.md#20-health). Canon
 
 **Must agree with.** [Corruption, curses and blessings](../02-magic/corruption-curses-and-blessings.md), [Tactics and formations](../19-warfare/tactics-and-formations.md), [Medicine, herbs and remedies](../20-health/medicine-herbs-and-remedies.md).
 
-**Feeds.** W21 fear and morale; 1 statuses; W9 dream hooks; SR4 blocks on statuses.
