@@ -56,7 +56,7 @@ defmodule Loka.Content.Construction do
             })
   end
 
-  defp text(nil), do: %{}
+  defp text(nil), do: :unknown
   defp text(v2), do: elem(v2, 1)
 
   defp owned_parts({rel, b}, required) do
