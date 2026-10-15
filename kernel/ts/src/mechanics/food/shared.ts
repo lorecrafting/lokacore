@@ -48,7 +48,8 @@ export function transition(
   if (current === undefined || !spec) return { code: 'precondition_failed' };
   const cured = cureOps(world, body, edible.cures);
   const by = Math.min(edible.amount, spec.maximum - current);
-  if (by <= 0 && cured.length === 0) return { code: 'invalid_state' };
+  // Row hs-5: a meal with `applies` is eaten at the maximum for its buff (restoring nothing).
+  if (by <= 0 && !cured.length && !edible.applies?.length) return { code: 'invalid_state' };
   return {
     edible,
     ops: [

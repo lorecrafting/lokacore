@@ -40,23 +40,34 @@ defmodule Loka.ContentMealTest do
   setup_all do: %{dir: Loka.ContentSource.copy("cartridges/kitchen_sampler")}
 
   # Row hs-5. Breaks: an empty `applies` (minItems), a ref left unresolved, or a meal status
-  # moving the derived hp maximum (loka-kgd.50); the 1.101 floor row is in loader_floors.json.
+  # moving the derived hp maximum (loka-kgd.50), its term named short or qualified; the 1.101
+  # floor row is in loader_floors.json.
   test "a meal's applies resolves and never names an hp_max status", %{dir: dir} do
-    stew = "items/stew_01.json"
+    stew = "items/stew_plain_01.json"
     read = &JSON.decode!(File.read!(Path.join(dir, &1)))
 
     hp_max = %{
       "hp_max" => %{"terms" => [%{"attribute" => "str", "per_point" => 1, "pivot" => 10}]}
     }
 
-    at = "items/stew_01.edible.applies"
+    at = "items/stew_plain_01.edible.applies"
     edit = &[{stew, put_in(read.(stew), ["edible", "applies"], &1)}]
-    derived = [{"cartridge.json", put_in(read.("cartridge.json"), ["world", "derived"], hp_max)}]
+    derive = &[{"cartridge.json", put_in(read.("cartridge.json"), ["world", "derived"], &1)}]
+    derived = derive.(hp_max)
+    # The same attribute as a qualified ref: the gate compares expanded refs, not source strings.
+    qualified =
+      put_in(hp_max, ["hp_max", "terms", Access.at(0), "attribute"], %{
+        "cartridge_id" => "kitchen_sampler",
+        "cartridge_version" => "0.0.1",
+        "kind" => "attribute",
+        "key" => "str"
+      })
 
     cases = [
       {edit.([]), {"SCHEMA_VIOLATION", at}},
       {edit.(["nothing"]), {"UNRESOLVED_REFERENCE", at <> "[0]"}},
-      {derived, {"SCHEMA_VIOLATION", at <> "[0]"}}
+      {derived, {"SCHEMA_VIOLATION", at <> "[0]"}},
+      {derive.(qualified), {"SCHEMA_VIOLATION", at <> "[0]"}}
     ]
 
     for {changes, expected} <- cases do

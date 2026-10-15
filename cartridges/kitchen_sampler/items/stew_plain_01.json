@@ -2,7 +2,7 @@
   "keywords": [
     "stew"
   ],
-  "short": "item.stew.short",
+  "short": "item.stew_plain.short",
   "short_variants": [
     {
       "when": {
@@ -13,11 +13,11 @@
           "status": "spoiling"
         }
       },
-      "description": "item.stew.short_spoiling"
+      "description": "item.stew_plain.short_spoiling"
     }
   ],
-  "room_line": "item.stew.room",
-  "description": "item.stew.description",
+  "room_line": "item.stew_plain.room",
+  "description": "item.stew_plain.description",
   "mass_grams": 500,
   "location": {
     "in": "room",
@@ -27,9 +27,9 @@
     "resource": "mv",
     "amount": 10,
     "label": "action.eat",
-    "narration": "narration.eat_stew",
+    "narration": "narration.eat_stew_plain",
     "applies": [
-      "hearty"
+      "fed"
     ]
   }
 }

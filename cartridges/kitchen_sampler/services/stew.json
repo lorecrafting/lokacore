@@ -19,7 +19,7 @@
       "quantity": 2,
       "custody": "larder",
       "ready_after": 300,
-      "output": "stew_01"
+      "output": "stew_plain_01"
     }
   }
 }
