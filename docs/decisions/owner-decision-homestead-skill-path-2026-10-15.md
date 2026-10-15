@@ -15,3 +15,15 @@ Skill trees in the style of Star Wars Galaxies are approved ("yes SWO skilltrees
 3. Skill trees, Star Wars Galaxies style, are the progression shape for those skills.
 
 This overrules the PM ruling "cook NPC, not self-cooking" in the notes of `loka-kgd.108`.
+
+## Professions rulings (added 2026-10-15, session b5fe9338)
+
+Owner, 2026-10-15 (HANDOFF "Owner answers this session"): "GO with all your recs" on the skill tree
+screen, the failed craft and the skill box fee (points 1, 2 and 4 below). Separately, in the same
+session (paraphrased): several hidden elite professions are possible (point 3).
+
+1. A failed craft loses its inputs.
+2. A skill box costs a trainer coin fee; XP is never spent. A novice box is free (owner note, "novice boxes free", in the
+   Beads `loka-kgd.108` notes).
+3. Several hidden elite professions are possible.
+4. The skill tree screen is built in batch B (`loka-kgd.108.11`).
