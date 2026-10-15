@@ -221,7 +221,10 @@ test('loader: spells and the level_compare leaf need 1.51; spell words are uniqu
 });
 
 const words = (w: World, actor = w.character) =>
-  (gameView(w, actor).spell_words ?? []).map((s) => [s.word, s.reason?.code ?? 'available']);
+  (gameView(w, actor).spell_words ?? []).map((s) => [
+    s.word,
+    s.available ? 'available' : s.reason.code,
+  ]);
 
 // Breaks (word bar S2): spell_words lists a spell the viewer has not learned (ward before the
 // quest, noctis before the grimoire), reads learned for world.character instead of the viewer
