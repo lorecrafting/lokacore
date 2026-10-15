@@ -385,3 +385,30 @@ test('a commission raises for its job owner, caps per owner, and an unrefundable
     (due(mine, id as never, row, mint, { n: at }) as any[]).some((o) => o.op === 'entity.transfer'),
   );
 });
+
+// Built rooms S4 (mechanics.md Built rooms, S4). Breaks: weathering not applied at completion,
+// ruin not reacted onto the room (or onto the player instead), the ruin variant read against the
+// actor's body rather than the room (policy status_active subject room), or ruin changing the
+// hut's exits or trapping the player inside.
+test('600 s after completion the hut reads in ruin, its exits unchanged, and the player can leave', () => {
+  n = 0;
+  let w = fresh();
+  w = raised(play(w, buy(w)));
+  const lane = w.state.containers[w.body];
+  w = play(w, { type: 'move', direction: 'north' });
+  const [hut] = built(w);
+  const exits = gameView(w).exits;
+  assert.equal(gameView(w).place.description.key, 'blueprint.hut.description.owned');
+  w = elapse(w, w.state.clock + 599);
+  assert.equal(gameView(w).place.description.key, 'blueprint.hut.description.owned');
+  w = elapse(w, w.state.clock + 1);
+  assert.equal(gameView(w).place.description.key, 'blueprint.hut.description.ruin');
+  const ruin = Object.entries(w.state.statuses ?? {}).filter(([, r]) => r.active);
+  assert.deepEqual(
+    ruin.map(([at]) => [JSON.parse(at).body_id, JSON.parse(at).status.key]),
+    [[hut, 'ruin']],
+  );
+  assert.deepEqual(gameView(w).exits, exits);
+  w = play(w, { type: 'move', direction: 'south' });
+  assert.equal(w.state.containers[w.body], lane);
+});
