@@ -6,8 +6,8 @@ the next steps, the standing owner rules that the repo does not yet state, and o
 questions. Rewrite it at each stable checkpoint (a merge, a review verdict, a pushed fix) and before
 the session ends; commit and push it with the Beads export.
 
-Written 2026-10-15 UTC by Claude Code (Opus 5.5) in local session 59bde69f, at a clean checkpoint
-(no agent running; every branch pushed) for an owner-requested clear.
+Written 2026-10-15 UTC by Claude Code (Opus 5.5) in local session 84e03897, at a clean checkpoint
+(no agent running; every branch merged or pushed) for an owner-requested clear.
 
 ## Start of a session
 
@@ -45,36 +45,33 @@ Batch order: the owner-adopted [priority plan](briefs/toolbox-priority-plan-2026
 Compaction: fast-jev is off; built-in compaction confirmed (24-43 s, with a summary). The advisor,
 background waits and resumes after a compaction are allowed (owner, 2026-10-14).
 
-Done this session (59bde69f): #384 (housekeeping 2026-10-14b: `loka-xroj` loader-floor fixture,
-`loka-9ruc`, `loka-oy8i`, `loka-13i3`, `loka-z167`, `loka-o5c2`, `loka-dgl6`, `loka-mm5v`, `loka-bwfo`)
-merged at 6dae3d79; #388 (`loka-j958` + `loka-k6ga`, composer checks status and bleed writes at the
-composing time; a final check refuses a row left active past the advance) merged at e753bd69.
-**Batch M13 complete on `toolbox/batch-m13` at 56f6bea9** (main e753bd69 merged in at 3c154ef4):
-row 16 (`loka-nfdq`), FD2 (`loka-kgd.139`), FD3 (`loka-kgd.140`), row 33 theft (`loka-icr4`, 1.94, review +
-save second opinion), FD5 witness + npc.move (`loka-kgd.142` + `loka-kgd.22`, 1.95), FD7 ask kernel half
-(`loka-kgd.144`, 1.96), W15 recognition + FD9 titles (`loka-kgd.146`, 1.97). Every row reviewed to
-APPROVE (WITH NOTES), second opinions where required; records in docs/reviews/2026-10-15-*.md on the
-batch. Each row's CI was green on its reviewed head.
+Done this session (84e03897), all on `main`:
+- #389 (`loka-kgd`, mechanics batch M13: sneak, skill voices, storylets, theft, witness, ask kernel
+  half, recognition and titles; kernel_api 1.94-1.97) at b9371090. Fable batch review APPROVE WITH NOTES;
+  fix round found a real bug: `ask`/`whisper` missing from the invocation TARGETS.
+- #390 (`loka-s05w`, FD7 Book half: "Ask about X" cards on the NPC page) at e66def4a.
+- #391 (`loka-x6t.39`, word bar batch: use-on pair cards, GameView `spell_words`/`phrases` at 1.98,
+  Chip component and Word block with "Type a word" for Say) at 06bac4f5.
+- #392 (`loka-kgd.109`, Built rooms batch S1-S4: blueprints and sites, raise the hut through a carpenter
+  service, time and timber, weather and mend; kernel_api 1.99; new compose rule: a status may sit on an
+  entity created earlier in the same proposal) at c520bbd9. Save second opinions on S2-S4.
 
 Next, in order:
 
-1. **M13 batch close.** One Fable review on the batch head 56f6bea9 (merged head, per the 2026-10-14
-   lesson): whole-batch interactions (theft x witness x ask x identity in reaction.ts and the view),
-   loader_floors 1.91-1.97, longwait_property, CI sim job time vs main (judge perf there), and the open
-   notes: W15 seam-1 two-actor tests (37a963ea, not rechecked separately), FD7 "Ask offered with no known
-   topic" (Book half), `/code-review` results for the PR body (each row's notes). Then merge main once,
-   open the batch PR, CI green, merge; close `loka-nfdq`, `.139`, `.140`, `loka-icr4`, `.142`, `.22`,
-   `.144` (kernel half; keep the Book half open or file it), `.146`. Worktree `batch-m13`; slice branches
-   `toolbox/m13-*` are merged into it (delete on merge; `toolbox/m13-floors` too).
-2. **FD7 Book half:** "Ask about X" rows on the NPC card, designer-consulted slice
-   (docs/decisions/owner-decision-settle-and-fd7-2026-10-14.md); fixes the no-known-topic nit.
-3. Then word bar `loka-x6t.39`, Built rooms `loka-kgd.109`, Homestead `loka-kgd.108`, Settle S3
-   `loka-mytp` / S4 `loka-oxgk` (docs/rnd/settle-design-2026-10-14.md; five slices; Fable briefs at build
-   time), M14, M15.
-4. P3 follow-ups filed this session: `loka-kgd.154` (witness filter reads the pre-command world in one
-   long wait), `.155` (plain advance over a saved pending job falling due), `.156` (runtime test for the
-   k6ga bleed fix), `loka-ynfo` (schedule moves can teleport a following escort), `loka-3wwm` (Elixir
-   accepts topics without topics@1).
+1. **`loka-j64e` at kernel_api 1.100**, its own hosted PR from `main`: an optional authored reason text
+   key on a recipe, so a learned spell the actor cannot cast yet shows a reason (today "not now"). Brief
+   in its Beads notes (option a; one reason for the whole policy).
+2. **Homestead batch A** (`toolbox/batch-homestead-a` from `main` after j64e): hs-1 `loka-5m0u`
+   (`replenish.run` reaction step, 1.101), then hs-2 farming (`loka-kgd.108.1`), hs-3 fishing (`.108.3`),
+   hs-4 animals (`.108.2`), hs-5 cooking (`.108.4`). Batch B: hs-6 furnishing (`.108.6` + Settle S1),
+   hs-7 gifting and barter (`.108.5` + `loka-kgd.70`), hs-8 Give in the Book (`loka-x6t.31`, designer
+   consult), hs-9 raze (`loka-otn4`). All briefs: `br show loka-kgd.108` notes, "FABLE BRIEFS
+   HOMESTEAD" (COMMON block + one section per slice + PM rulings). Fable said hs-2/3/4 may run in
+   parallel after hs-1 (content only) and hs-5 beside hs-1.
+3. Then Settle S3 `loka-mytp` / S4 `loka-oxgk` (Fable briefs at build time), M14, M15.
+4. Follow-ups filed this session: `loka-trex` (built room can share a map cell), `loka-z4cp` (permanent
+   status still schedules a tick), `loka-kgd.157` (npc.move leaves the patrol cursor), `.158` (TARGETS
+   duplicates VERBS by hand). Older: `loka-kgd.154`, `.155`, `.156`, `loka-ynfo`, `loka-3wwm`.
 
 Merge mechanics: `bin/pm_merge.sh <batch-worktree> <batch-branch> <slice-branch> <review-branch>
 "<subject>" <reviewed-sha>` (the reviewed sha must equal the slice's origin head, so put the record on
@@ -83,13 +80,15 @@ conflict: rerun `bin/review_index.sh`. Each new kernel_api floor needs a case in
 `protocol/fixtures/loader_floors.json` (#384): put it in the brief. `bin/after_merge.sh` stops on the
 owner's untracked `scripts/` (retro `loka-jxwu`): do its steps by hand until fixed.
 
-Session lessons (2026-10-15, session 59bde69f):
-- Untested guards cost most review rounds (6 of 9): send the developer the "every new check -> failing
-  test" table requirement in the brief and before handback (retro `loka-wu5e`).
-- Merging main into a batch can fail the new fixture checks (#384 floors): merge main into the batch
-  early, as soon as a housekeeping or engine PR lands, and fix it on a side branch.
-- Start the next row on the previous row's reviewed head when it shares a file (FD7 on FD5); merge the
-  batch before its review.
+Session lessons (2026-10-15, session 84e03897):
+- Check the slice's own CI before `pm_merge` (word bar S2 was merged red; retro `loka-tx2h`).
+- A sampler hash change also needs its transcript known answer and the SystemDataModel Impact story
+  list; put it in every brief that touches a sampler (broke CI twice; retro `loka-j6qd`).
+- Store the developer's check table in Beads at handback, before spawning the reviewer (reviewers
+  could not find it three times; retro `loka-8lkq`).
+- Kernel tests that send ready Commands miss invocation gaps: a new verb needs one test through the
+  Book's resolve path (C11 in M13).
+- Developers cannot run the browser check in a slice worktree (retro `loka-uh5u`); stories stand in.
 
 ## Standing owner rules not yet written elsewhere in the repo
 
@@ -140,6 +139,13 @@ Session lessons (2026-10-15, session 59bde69f):
   judgment work; adopted the Fable priority plan; Settle S1 into Homestead, S2 cut, S3/S4 on a yes;
   word bar touch-first; mounts after 43a in M14.
 
+- 2026-10-15 (session 84e03897): PM rulings the owner may overrule (none asked directly):
+  Built rooms build through a hired carpenter NPC, not a free-hand verb; raze moved to Homestead;
+  Homestead: cook NPC (no own hearth yet), fishing is a luck miss with hour/season/weather catches (no
+  rarity table), no chicks in v1 (row 45 later), barter at price 0, Give as "Give to <NPC>" cards on the
+  item page; word bar: `learned` required on every spell, static say phrases, keyboard behind a "Type a
+  word" control, ask never in the bar.
+
 ## Open owner questions
 
 - Cloud compute (`loka-2of`, prices refreshed in its notes): the bottleneck is M1 CPU, not CI (CI is
@@ -151,7 +157,9 @@ Session lessons (2026-10-15, session 59bde69f):
   `loka-iqga` (merge_resolve combines one-row doc edits and imports), `loka-a2av` (collapse Beads notes
   at approval), `loka-cnqx` (prepush per-run log directory); from 2026-10-15 `loka-wu5e` (developer
   hands back a check-to-red-control table), `loka-hisj` (/code-review names its target), `loka-jxwu`
-  (after_merge.sh ignores untracked files).
+  (after_merge.sh ignores untracked files), `loka-tx2h` (pm_merge refuses a red reviewed sha),
+  `loka-j6qd` (sampler hash change runs transcripts and the Impact story check), `loka-8lkq` (check table
+  in the last commit body), `loka-uh5u` (browser checks in slice worktrees).
 
 ## Parked (polish lane)
 
@@ -160,4 +168,5 @@ Session lessons (2026-10-15, session 59bde69f):
 - [Give action plan](plans/loka-x6t.31-give-action.md) for `loka-x6t.31` (Book never offers Give),
   drafted by Pi on 2026-10-13, not reviewed. Known gap: it offers Give to every NPC in the room
   without an engine check that the recipient accepts.
-- Book UX from the Fable audit (`loka-x6t.39` to `.52`, word bar first) waits in the paused polish lane.
+- Book UX from the Fable audit (`loka-x6t.40` to `.52`) waits in the paused polish lane (`.39` word bar
+  shipped in #391; `loka-x6t.31` Give is now Homestead hs-8).
