@@ -103,16 +103,9 @@ defmodule Loka.Content.Reactions do
   # attacker filter 1.58 (loka-kgd.79), the target filter 1.87 (row 39), the witness filter 1.95
   # (row FD5), a co_present
   # status.apply 1.50 (W21), with a tag 1.56 (W22), naming a room 1.65 (status reader 9).
+  @filters %{"npc" => 47, "attacker" => 58, "target" => 87, "witness" => 95}
   defp api(r, manifest) do
-    floor =
-      Enum.max([
-        Map.get(@events, r["on"]["event"], 0),
-        if(Map.has_key?(r["on"], "npc"), do: 47, else: 0),
-        if(Map.has_key?(r["on"], "attacker"), do: 58, else: 0),
-        if(Map.has_key?(r["on"], "target"), do: 87, else: 0),
-        if(Map.has_key?(r["on"], "witness"), do: 95, else: 0)
-        | Enum.map(r["apply"], &step_floor/1)
-      ])
+    floor = rule_floor(r)
 
     version =
       manifest["requires"]["kernel_api"]["at_least"]
@@ -122,6 +115,14 @@ defmodule Loka.Content.Reactions do
     if floor > 0 and version < [1, floor],
       do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
       else: []
+  end
+
+  defp rule_floor(%{"on" => on, "apply" => apply}) do
+    Enum.max([
+      Map.get(@events, on["event"], 0)
+      | Enum.map(@filters, fn {f, n} -> if Map.has_key?(on, f), do: n, else: 0 end) ++
+          Enum.map(apply, &step_floor/1)
+    ])
   end
 
   defp step_floor(%{"op" => "status.apply", "room" => _}), do: 65
