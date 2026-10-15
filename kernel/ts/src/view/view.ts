@@ -137,10 +137,9 @@ function bleedingView(world: World, bleed: NonNullable<ReturnType<typeof current
   };
 }
 
-// The entities directly in `holder` (the room, the body or a slot holder), each with its short
-// name, kind and actions (`worn`, else by scope: an item here by room_contents, an NPC by
-// room_occupants, a held item by inventory); an item also with its barrier's state and, unless
-// worn, its contents (c1-locks).
+// The entities directly in `holder` (room, body or slot holder), each with its short name, kind and
+// actions (`worn`, else by scope: room_contents, room_occupants or inventory); an item also with its
+// barrier's state and, unless worn, its contents (c1-locks); a theft NPC its holdings (row 33).
 function within(
   world: World,
   actor: CharacterId,
@@ -159,8 +158,7 @@ function within(
     )
     .map(([id, e]) => {
       const scope = holder === body ? 'inventory' : SCOPE[e.kind];
-      // A theft cartridge lists what an NPC directly holds and its get lock admits (toolbox row
-      // 33); a locked pool such as a bank vault's stays private.
+      // Row 33: an NPC's direct holdings its get lock admits; a vault's locked pool stays private.
       const contents =
         e.kind === 'item' && !worn
           ? inside(world, actor, body, actions, id, scope, steps)
@@ -178,9 +176,8 @@ function within(
 
 const SCOPE = { item: 'room_contents', npc: 'room_occupants' } as const;
 
-// What item `box` holds in reach (every container from the item up to `box` opened, `box` too),
-// at any depth, in DefinitionRefString order, each with its direct container and only take and
-// its container verbs (ContentView; c1-locks); `direct`: only what `box` itself holds.
+// What item `box` holds in reach (all containers up to `box` opened), at any depth, in ref order,
+// each with its container, take and container verbs (ContentView; c1-locks); `direct`: box's own.
 function inside(
   world: World,
   actor: CharacterId,
