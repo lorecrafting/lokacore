@@ -10,6 +10,7 @@ import { fact as position } from '../src/mechanics/position/shared.ts';
 import { resourceRef, level } from '../src/mechanics/resource.ts';
 import { movementPlan } from '../src/mechanics/movement/sequence.ts';
 import { expiry } from '../src/mechanics/water/expiry.ts';
+import { waterValid } from '../src/mechanics/water/saved.ts';
 import { allocator } from '../src/runtime/decision.ts';
 import { recover } from '../src/mechanics/containment/recovery.ts';
 import { LIMITS, type Command, type Key } from '../src/contracts.gen.ts';
@@ -446,4 +447,18 @@ test('ordinary combat death below also invalidates the original water occurrence
     assert.equal(died.payload.type, 'entity_died');
     if (died.payload.type === 'entity_died') assert.equal(died.payload.cause, undefined);
   }
+});
+
+test('a character body in a water bottom without an occupancy row is invalid', () => {
+  const bottom = green(run(learned(fresh()), { type: 'move', direction: 'down' }));
+  const w = fresh();
+  assert.equal(waterValid(w), true);
+  const moved = {
+    ...w,
+    state: {
+      ...w.state,
+      containers: { ...w.state.containers, [w.body]: bottom.state.containers[bottom.body]! },
+    },
+  };
+  assert.equal(waterValid(moved), false);
 });
