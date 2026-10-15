@@ -12,6 +12,8 @@ config.watchFolders = [
   path.resolve(__dirname, '..'),
   path.resolve(__dirname, '../../kernel/ts/src'),
   path.resolve(__dirname, '../../protocol/fixtures'),
+  // A slice worktree's node_modules links to the main checkout's (bin/worktree_setup.sh): watch its real path.
+  fs.realpathSync(path.join(__dirname, 'node_modules')),
 ];
 // The kernel version's commit (ADR-075 §3), inlined into the bundle as EXPO_PUBLIC_KERNEL_COMMIT:
 // HEAD, with -dirty when the tree has changes (never the bare HEAD then); unset when git fails.
