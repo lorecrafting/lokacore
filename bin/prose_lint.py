@@ -34,7 +34,7 @@ def bad(msg):
 
 def load(path):
     try:
-        with open(path) as f:
+        with open(path, encoding="utf-8") as f:
             return json.load(f)
     except (OSError, ValueError) as e:
         bad(f"prose_lint: {path}: {e}")
@@ -46,6 +46,8 @@ def main(argv):
     d = argv[1].rstrip("/")
     text = load(f"{d}/text.json")
     alts = load(f"{d}/cartridge.json").get("alternates", {})
+    if not isinstance(alts, dict) or not all(isinstance(v, list) for v in alts.values()):
+        bad(f"prose_lint: {d}: alternates must map a key to a list of keys")
     for k, v in alts.items():
         for x in [k, *v]:
             if x not in text:
