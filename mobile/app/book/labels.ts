@@ -25,6 +25,9 @@ export const LABEL = {
   held: 'Held',
   worn: 'Worn',
   where: 'Where',
+  askWhere: 'Ask where',
+  // Before a topic's authored label on an NPC's card (row FD7).
+  askAbout: 'Ask about',
   lore: 'Lore',
   notHere: 'Not here',
   // The away recap's heading (toolbox row W27; wording pending designer, loka-x6t.14).

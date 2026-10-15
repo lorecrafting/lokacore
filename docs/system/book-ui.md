@@ -237,7 +237,7 @@ currently projected. A newer unrelated narration receipt cannot provide detail i
 
 Tapping an NPC opens full details using its actual projected name, authored description and
 actions. Description comes first. Outside a conversation the page offers the person's actions as
-cards straight after the description: Talk, shop and service offers; the foot is Leave. It shows
+cards straight after the description: Talk, shop, [Ask about](#fd7-ask-details) and service offers; the foot is Leave. It shows
 no past conversation log on a fresh visit to the page or after Leave the conversation (the log
 shows again inside a new conversation); lines since that visit began or that Leave are the only
 history. Answering (a `choose` press) puts that page **in conversation**, and it stays so after a one-reply
@@ -371,7 +371,7 @@ Give invocations remain valid; engine mechanics are unchanged. Touch recipient s
 explicit carry: implement it when a touch flow can supply a recipient from actual projected
 valid targets, with its own approved scope. The inspected unsupported-capability rejection was
 one incomplete Give; later moves were accepted. Preserve genuine errors and meaningful history
-rather than hiding errors or clearing same-room history. Carries remain in the [roadmap](../ROADMAP.md). Further cosmetic polish is deferred under the [C1 UI-deferral record](../decisions/owner-decision-c1-gate-ui-deferral-2026-10-03.md).
+rather than hiding errors or clearing same-room history. Whisper needs a word; until the word bar (loka-a9pn) the NPC page offers no Whisper card rather than one the kernel always refuses. Carries remain in the [roadmap](../ROADMAP.md). Further cosmetic polish is deferred under the [C1 UI-deferral record](../decisions/owner-decision-c1-gate-ui-deferral-2026-10-03.md).
 
 ## Combat interaction
 
@@ -1015,6 +1015,10 @@ GameView `place.asides` and a notice's `asides` are the character's own mind not
 ## Lore details
 
 The Journal page says "Nothing written yet." only when it has neither quests nor known topics; after its quests, it shows **Lore** (a section title) when GameView `topics` is non-empty: each known topic's authored label, one per line, in projected order, then for each GameView `deduction` its topics' labels joined by " + " and its card. The card is the deduction's offered action when the current place offers it; when the place lists it unavailable, the unavailable card with the action's own reason; otherwise the unavailable card with the reason "Not here". Pressing the card performs the recipe as any place action; the topic it grants then joins the list and the deduction disappears. Badges are topics and are listed with them. Nothing shows when no topic is known. ([Lore codex](mechanics.md#lore-codex-and-deduction-toolbox-row-46); wording proposed, designer to approve: Beads `loka-x6t.14`.)
+
+## FD7 ask details
+
+An NPC that the GameView lists an available `ask` on shows, after its other action cards and before services, one card per known topic (GameView `topics`, projected order) labelled "Ask about" and the topic's authored label. Pressing it sends `ask` with that topic; the answer or the person's knows-nothing line joins the page's history as narration, the page stays, no conversation opens. A topic granted by the answer adds its card at once. No known topics, no cards and no note; a hostile, absent or unlisted person shows none, as Talk. ([Ask about a topic](mechanics.md#ask-about-a-topic-toolbox-row-fd7))
 
 ## Storylet card details
 

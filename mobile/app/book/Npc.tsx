@@ -95,7 +95,7 @@ export function NpcPage(p: NpcProps) {
       {!talk && (
         <Cards>
           {cards.map((b) => (
-            <ActionCard key={b.label} b={b} press={p.press} />
+            <ActionCard key={b.label + JSON.stringify(b.input)} b={b} press={p.press} />
           ))}
           <ServiceOptions {...p} actions={actions} />
         </Cards>
