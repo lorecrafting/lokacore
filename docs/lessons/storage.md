@@ -26,7 +26,7 @@ Hard-won lessons for SQLite and persistence. Persistence lessons from R6 onward 
   handoff rejected a lawful combat/bleed interleaving as `save_corrupt`, and a D9
   suppression deadline check did the same
   ([ARCH-D10-01](../evidence/2026-10-06-post-d10-architecture-audit.md)).
-- Every sampler test that writes a save file ends with one `coldReopen(path, bundle)`
+- Each sampler save file gets one `coldReopen(path, bundle)`
   (`mobile/authority/local-story/__tests__/elapsed-host.test.ts`): a fresh connection through
   `openGame`, the app's launch path, after the last scripted move. Reviewers found the 37a
   sight, two-shop receipt and W12 floor breaks only after such moves (loka-dgl6).
