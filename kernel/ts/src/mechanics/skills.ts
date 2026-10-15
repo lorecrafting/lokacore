@@ -34,6 +34,13 @@ export function status(world: World, actor: CharacterId, skill: DefinitionRef, s
   return { acquired, qualified, usable: acquired && qualified };
 }
 
+/** Homestead hs-14: hidden, not acquired and its prerequisite fails; views and choices leave it out. */
+export function concealed(world: World, actor: CharacterId, skill: DefinitionRef, steps: Steps) {
+  const s = world.cartridge.skills?.[refString(skill)];
+  const p = s?.hidden && s.prerequisite;
+  return !!p && !membership(world, actor, skill) && !holds(world, actor, p.root, { steps });
+}
+
 /** Not yet learned, and (Homestead hs-11) its prerequisite, when declared, holds; dialogue
  * admission only: an ancestry grant at birth (attributes/rule.ts) is not learning. */
 export function learnable(world: World, actor: CharacterId, skill: DefinitionRef, steps: Steps) {

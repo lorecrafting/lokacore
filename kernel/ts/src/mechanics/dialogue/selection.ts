@@ -19,6 +19,8 @@ import { cmp } from '../../foundation/validate.ts';
 import { holds } from '../policy.ts';
 import { living } from '../death/shared.ts';
 import { disposition } from '../disposition.ts';
+import { concealed } from '../skills.ts';
+import { choiceIds } from './shared.ts';
 
 /** The dialogues whose speaker is `target`, in key order (a speaker may have several). */
 const spoken = (world: World, target: EntityId | undefined) =>
@@ -35,9 +37,19 @@ const spoken = (world: World, target: EntityId | undefined) =>
 export const speaks = (world: World, target: EntityId | undefined) =>
   spoken(world, target).length > 0;
 
+/** `d`'s choice ids less those that teach a skill concealed from `actor` (Homestead hs-14). */
+export const offered = (world: World, actor: CharacterId, d: DialogueDefinition, steps: Steps) =>
+  choiceIds(d).filter(
+    (id) =>
+      !d.choices[id]!.sequence?.some(
+        (s) => s.op === 'skill.acquire' && concealed(world, actor, s.skill, steps),
+      ),
+  );
+
 /**
  * The dialogue `actor`'s talk to `target` opens: the first of `target`'s dialogues, in key order,
- * whose own policy holds, if any; none while `target` is hostile to `actor` (toolbox row G11).
+ * whose own policy holds and that offers a choice (hs-14), if any; none while `target` is hostile
+ * to `actor` (toolbox row G11).
  * A talk never opens a keyword dialogue; a say or whisper of `word` opens only one keyed by it
  * (speech@1, row G9). Each policy leaf it evaluates adds one to `steps` (04 §5.4).
  */
@@ -55,7 +67,8 @@ export const spokenBy = (
         (d) =>
           d.keyword === word &&
           (!selected || world.cartridge.dialogues?.[refString(selected)] === d) &&
-          holds(world, actor, d.policy.root, { target, steps }),
+          holds(world, actor, d.policy.root, { target, steps }) &&
+          offered(world, actor, d, steps).length > 0,
       );
 
 /**

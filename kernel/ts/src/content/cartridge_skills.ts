@@ -1,7 +1,7 @@
 import { diag, step, walk, type Checks, type Obj } from './cartridge_refs.ts';
 import { refString } from '../runtime/decision.ts';
 import { apiCmp } from './cartridge_installed.ts';
-import type { Diagnostic } from '../contracts.gen.ts';
+import type { DefinitionRef, Diagnostic } from '../contracts.gen.ts';
 
 export const skillSpec = (key: string) => ({
   key: `skill_${key}`,
@@ -79,6 +79,23 @@ function prerequisites(c: Obj): Diagnostic[] {
         error: 'invalid_value',
       }),
     );
+  // Homestead hs-14 (secret): no shown skill's qualification and no dialogue policy reads a hidden
+  // skill, and no labeled talk teaches one.
+  const hidden = (r: DefinitionRef) => c.skills?.[refString(r)]?.hidden === true;
+  const reads = (root: Obj) =>
+    walk(root, '').some(([p]) => p.op === 'skill_compare' && hidden(p.skill));
+  const bad = (at: string) => out.push(diag('SCHEMA_VIOLATION', at, { error: 'invalid_value' }));
+  for (const [ref, s] of Object.entries((c.skills ?? {}) as Obj))
+    if (!s.hidden && reads(s.qualification.root))
+      bad(`.cartridge.skills${step(ref)}.qualification`);
+  for (const [ref, d] of Object.entries((c.dialogues ?? {}) as Obj)) {
+    const at = `.cartridge.dialogues${step(ref)}`;
+    if (reads(d.policy.root)) bad(`${at}.policy`);
+    const teaches = Object.values(d.choices as Obj).some((o) =>
+      (o.sequence ?? []).some((q: Obj) => q.op === 'skill.acquire' && hidden(q.skill)),
+    );
+    if (d.label !== undefined && teaches) bad(`${at}.label`);
+  }
   // A birth grant skips learning, so an ancestry never grants a box with a prerequisite.
   for (const [choice, a] of Object.entries((c.ancestries ?? {}) as Obj))
     if (a.skill && c.skills?.[refString(a.skill)]?.prerequisite)

@@ -87,7 +87,7 @@ defmodule Loka.ContentCraftTest do
   # prerequisite reads a hidden skill compiles, a hidden skill reading a hidden one is refused,
   # or an unknown profession text compiles. The floor is loader_floors.json's
   # "a skill profession" case.
-  test "a shown prerequisite never reads a hidden skill; a profession resolves", %{dir: dir} do
+  test "nothing shown reads or names a hidden skill; a profession resolves", %{dir: dir} do
     edit = fn edits ->
       case Loka.ContentSource.compile(dir, edits) do
         {:error, diags} -> Enum.map(diags, &{&1["code"], &1["path"]})
@@ -102,6 +102,30 @@ defmodule Loka.ContentCraftTest do
 
     assert edit.([{"skills/whittling.json", &Map.put(&1, "profession", "profession.nothing")}]) ==
              [{"UNRESOLVED_REFERENCE", "skills/whittling.profession"}]
+
+    # hs-14 secret (twin of craft.test.ts "loader: no shown qualification, ..."): a shown skill's
+    # qualification, any dialogue policy, or a talk label on a dialogue teaching a hidden skill.
+    reads = %{
+      "policy_version" => 1,
+      "root" => %{"op" => "skill_compare", "skill" => "carving", "at_least" => 1}
+    }
+
+    read = &{"#{&1}.json", fn x -> Map.put(x, &2, reads) end}
+    hidden = [hide.("carving"), hide.("joinery")]
+
+    assert edit.([read.("skills/whittling", "qualification") | hidden]) ==
+             [{"SCHEMA_VIOLATION", "skills/whittling.qualification"}]
+
+    assert edit.([read.("dialogues/old_carver_carpentry", "policy") | hidden]) ==
+             [{"SCHEMA_VIOLATION", "dialogues/old_carver_carpentry.policy"}]
+
+    assert edit.([read.("skills/joinery", "qualification") | hidden]) == :ok
+
+    label =
+      {"dialogues/old_carver_carving.json", &Map.put(&1, "label", "old_carver.carving.prompt")}
+
+    assert edit.([label | hidden]) == [{"SCHEMA_VIOLATION", "dialogues/old_carver_carving.label"}]
+    assert edit.([label]) == :ok
   end
 
   # Break (Built rooms S6; twin of the loader test in kernel/ts/test/craft.test.ts): a build step
