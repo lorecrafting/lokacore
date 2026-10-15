@@ -20114,6 +20114,41 @@
     ]
   },
   {
+    "name": "build_step_without_blueprint",
+    "contract": "RecipeStep",
+    "value": {
+      "op": "build",
+      "direction": "north"
+    },
+    "errors": [
+      {
+        "path": "/blueprint",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "build_step_with_unknown_property",
+    "contract": "RecipeStep",
+    "value": {
+      "op": "build",
+      "blueprint": {
+        "cartridge_id": "craft_sampler",
+        "cartridge_version": "2.0.0",
+        "kind": "blueprint",
+        "key": "hut_timbered"
+      },
+      "direction": "north",
+      "site": "lane"
+    },
+    "errors": [
+      {
+        "path": "/site",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
     "name": "detail_rating_not_integer",
     "contract": "InspectableDetail",
     "value": {
