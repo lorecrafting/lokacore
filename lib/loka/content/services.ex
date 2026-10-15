@@ -1,4 +1,4 @@
-# size: allow 399, row 20a/20b/25 escrow orders, bank accounts and Built rooms S2-S3 builds check in the same service admission pass
+# size: allow 401, row 20a/20b/25 escrow orders, bank accounts and Built rooms S2-S3 builds check in the same service admission pass
 defmodule Loka.Content.Services do
   @moduledoc "Checks finite immediate service declarations and their exact provider stock."
   import Loka.Content.Source, only: [diag: 2, diag: 3, diag: 4, at: 2, ref: 3]
@@ -152,25 +152,21 @@ defmodule Loka.Content.Services do
   defp escrow(rel, %{"items" => items, "quantity" => quantity, "custody" => custody} = e, m, defs) do
     path = &at(rel, ["benefit", "escrow" | &1])
 
-    inputs(items, path, m, defs) ++
-      unresolved(custody, "room", path.(["custody"]), m, defs) ++
-      shape(items, quantity, path) ++ schedule(path, e, m) ++ output(path, e, m, defs)
-  end
-
-  defp shape(items, quantity, path) do
     shape = [
       {Enum.uniq(items) == items, diag("DUPLICATE_DEFINITION", path.(["items"]))},
       {quantity <= length(items), bad(path.(["quantity"]))}
     ]
 
-    for {false, d} <- shape, do: d
+    inputs(items, path, m, defs) ++
+      unresolved(custody, "room", path.(["custody"]), m, defs) ++
+      for({false, d} <- shape, do: d) ++ output(path, e, m, defs)
   end
 
-  # Toolbox row 20b: the work job a timed order (ready_after) needs schedule.
-  defp schedule(path, e, m) do
+  # Toolbox row 20b: the work job a timed order (output comes with ready_after) needs schedule.
+  defp schedule(path, m) do
     owner = %{"capability" => "schedule"}
 
-    if e["ready_after"] == nil or is_map_key(m["requires"]["capabilities"], "schedule"),
+    if is_map_key(m["requires"]["capabilities"], "schedule"),
       do: [],
       else: [diag("UNDECLARED_CAPABILITY", path.(["ready_after"]), owner, ["schedule@1"])]
   end
@@ -179,13 +175,16 @@ defmodule Loka.Content.Services do
   defp output(path, %{"output" => r, "custody" => custody}, m, defs) do
     at = path.(["output"])
 
-    case Refs.resolve(r, "item", m, defs) do
-      :unresolved -> [diag("UNRESOLVED_REFERENCE", at, %{"target" => r})]
-      {_, _, %{"location" => %{"in" => "room", "room" => ^custody}}} -> []
-      _ -> [bad(at)]
-    end
+    schedule(path, m) ++
+      case Refs.resolve(r, "item", m, defs) do
+        :unresolved -> [diag("UNRESOLVED_REFERENCE", at, %{"target" => r})]
+        {_, _, %{"location" => %{"in" => "room", "room" => ^custody}}} -> []
+        _ -> [bad(at)]
+      end
   end
 
+  # Built rooms S3: a build commission has ready_after and no output.
+  defp output(path, %{"ready_after" => _}, m, _), do: schedule(path, m)
   defp output(_, _, _, _), do: []
 
   defp inputs(items, path, m, defs) do
