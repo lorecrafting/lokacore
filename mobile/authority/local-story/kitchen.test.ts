@@ -129,11 +129,12 @@ test('the stew Eat survives reopen, failed and lost COMMIT and replay; a forged 
       .prepare('SELECT command_id, response FROM receipt WHERE invocation_id=?')
       .get(eat.invocation_id) as { command_id: string; response: string };
     assert.deepEqual(story.narration(row.command_id)?.lines, lines, kind);
-    // Red controls: a forged second fed line, an extra line no status of the stew owns, or the
-    // meal's own line replaced (each status line must follow it once, in `applies` order).
+    // Red controls: a forged second fed line, an extra line or a status line no status of the
+    // stew owns, or the meal's own line replaced (each status line follows it once, in order).
     for (const forged of [
       [...lines, lines[1]],
       [...lines, { key: 'narration.fish_seen' }],
+      [lines[0], { key: 'narration.fish_seen' }],
       [{ key: 'narration.fish_seen' }, lines[1]],
     ]) {
       const d = { ...JSON.parse(row.response), narration: forged };
