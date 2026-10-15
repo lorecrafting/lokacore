@@ -17,15 +17,20 @@ defmodule Loka.Content.Construction do
   def check(nil, _, _, _, _), do: []
 
   def check(m, defs, v2, {_, settings}, registry) do
-    {blueprints, sites} = {blueprints(defs), sites(defs)}
-    required = {m["requires"]["capabilities"], owners(registry, ["definitions"])}
+    {blueprints, sites, text} = {blueprints(defs), sites(defs), text(v2)}
 
     Enum.flat_map(sites, &site(&1, m, defs)) ++
-      Enum.flat_map(
-        blueprints,
-        &(owned_parts(&1, required) ++ texts(&1, text(v2)) ++ statuses(&1, m, defs))
-      ) ++
-      requirements(m, defs, blueprints, sites, settings) ++ builds(m, defs, text(v2), settings)
+      owned_blueprints(blueprints, m, defs, text, registry) ++
+      requirements(m, defs, blueprints, sites, settings) ++ builds(m, defs, text, settings)
+  end
+
+  defp owned_blueprints(blueprints, m, defs, text, registry) do
+    required = {m["requires"]["capabilities"], owners(registry, ["definitions"])}
+
+    Enum.flat_map(
+      blueprints,
+      &(owned_parts(&1, required) ++ texts(&1, text) ++ statuses(&1, m, defs))
+    )
   end
 
   # Built rooms S6: a recipe build step sits in the success outcome of a detail target whose room is a site listing its
@@ -37,46 +42,51 @@ defmodule Loka.Content.Construction do
         {name, o} <- r["outcomes"],
         {s, i} <- Enum.with_index(o["sequence"]),
         s["op"] == "build",
-        path = ["outcomes", name, "sequence", i],
-        d <- build(m, defs, text, settings, {rel, path, r, s, i, o["sequence"]}),
+        d <- build(m, defs, text, settings, {rel, name, r, s, o["sequence"], i}),
         do: d
   end
 
-  defp build(m, defs, text, settings, {rel, path, r, s, i, sequence}) do
-    site =
-      with %{"kind" => "detail", "room" => room} <- r["target"],
-           {_, _, %{"site" => site}} <- resolve(room, "room", m, defs),
-           do: site,
-           else: (_ -> nil)
-
-    earlier = Enum.any?(Enum.take(sequence, i), &(&1["op"] == "build"))
+  defp build(m, defs, text, settings, {rel, name, r, s, sequence, i}) do
+    path = ["outcomes", name, "sequence", i]
+    site = build_site(r["target"], m, defs)
     op = at(rel, path ++ ["op"])
 
     for(
-      true <- [
-        earlier or path |> Enum.at(1) != "success" or site == nil or
-          get_in(settings, ["world", "construction"]) == nil
-      ],
+      true <- [misplaced?(sequence, i, name, site, settings)],
       do: diag("SCHEMA_VIOLATION", op, %{"error" => "invalid_value"})
     ) ++
       for(true <- [api(m) < [1, 101]], do: floor_diag()) ++
-      for(
-        k <- ~w(service.site_taken service.construction_full),
+      refusal_texts(text, op) ++ on_site(site, s, rel, path)
+  end
+
+  # A second build in the sequence, a build outside success, off a site or without world.construction.
+  defp misplaced?(sequence, i, name, site, settings),
+    do:
+      Enum.any?(Enum.take(sequence, i), &(&1["op"] == "build")) or name != "success" or
+        site == nil or get_in(settings, ["world", "construction"]) == nil
+
+  defp refusal_texts(text, op) do
+    for k <- ~w(service.site_taken service.construction_full),
         text != :unknown and not is_map_key(text, k),
         do: diag("UNRESOLVED_REFERENCE", op, %{"target" => k})
-      ) ++
-      if(site == nil,
-        do: [],
-        else:
-          for(
-            {f, ok} <- [
-              {"blueprint", s["blueprint"] in site["blueprints"]},
-              {"direction", s["direction"] in site["directions"]}
-            ],
-            not ok,
-            do: diag("SCHEMA_VIOLATION", at(rel, path ++ [f]), %{"error" => "invalid_value"})
-          )
-      )
+  end
+
+  defp build_site(target, m, defs) do
+    with %{"kind" => "detail", "room" => room} <- target,
+         {_, _, %{"site" => site}} <- resolve(room, "room", m, defs),
+         do: site,
+         else: (_ -> nil)
+  end
+
+  defp on_site(nil, _, _, _), do: []
+
+  defp on_site(site, s, rel, path) do
+    for {f, ok} <- [
+          {"blueprint", s["blueprint"] in site["blueprints"]},
+          {"direction", s["direction"] in site["directions"]}
+        ],
+        not ok,
+        do: diag("SCHEMA_VIOLATION", at(rel, path ++ [f]), %{"error" => "invalid_value"})
   end
 
   # A site or world.construction needs construction@1 (a blueprint is owned through the registry);
