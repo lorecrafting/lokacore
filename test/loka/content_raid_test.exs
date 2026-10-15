@@ -70,11 +70,13 @@ defmodule Loka.ContentRaidTest do
            ], {"SCHEMA_VIOLATION", "reactions/calm.when.root.fact"}},
           {[{"reactions/aftershock.json", &put_in(&1, ["when", "root"], mv)}],
            {"SCHEMA_VIOLATION", "reactions/aftershock.when.root.item.subject"}},
-          # RS-4: the fired job keeps no subject, so an NPC entrant would activate for the player.
+          # RS-4: the fired job keeps its actor, not the subject or trigger its quest steps read.
           {[{"reactions/called_to_hold.json", &Map.put(&1, "after", 100)}],
            {"SCHEMA_VIOLATION", "reactions/called_to_hold.apply[0].op"}},
           {[{"reactions/gate_held.json", &Map.put(&1, "after", 100)}],
-           {"SCHEMA_VIOLATION", "reactions/gate_held.apply[0].op"}}
+           {"SCHEMA_VIOLATION", "reactions/gate_held.apply[0].op"}},
+          {[{"reactions/defender_fell.json", &Map.put(&1, "after", 100)}],
+           {"SCHEMA_VIOLATION", "reactions/defender_fell.apply[0].op"}}
         ] do
       assert {:error, diags} = Loka.ContentSource.compile(dir, edits)
       assert expected in Enum.map(diags, &{&1["code"], &1["path"]}), inspect(diags)

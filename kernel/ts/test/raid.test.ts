@@ -538,7 +538,7 @@ test('FD1: time_since 600 after a stamp at 1000 is false at 1599 and true at 160
 test('FD1: the loader keeps API 1.90, event-free delayed steps and an unbounded int clock fact', () => {
   const raid = 'raid_sampler@0.0.1:reaction/raid';
   const calm = 'raid_sampler@0.0.1:reaction/calm';
-  const [called, held] = ['called_to_hold', 'gate_held'].map(
+  const quests = ['called_to_hold', 'gate_held', 'defender_fell'].map(
     (k) => `raid_sampler@0.0.1:reaction/${k}`,
   );
   const ref = (key: string) => ({ ...w0Ref, key });
@@ -619,9 +619,11 @@ test('FD1: the loader keeps API 1.90, event-free delayed steps and an unbounded 
       ],
       bad(`${AFTERSHOCK}"].when.root.item.subject`),
     ],
-    // RS-4: the fired job keeps no subject, so an NPC entrant would activate for the player.
-    [[(c) => (c.reactions[called].after = 100)], bad(`${called}"].apply[0].op`)],
-    [[(c) => (c.reactions[held].after = 100)], bad(`${held}"].apply[0].op`)],
+    // RS-4: the fired job keeps its actor, not the subject or trigger its quest steps read.
+    ...quests.map((k): [((c: any) => void)[], string[]] => [
+      [(c) => (c.reactions[k].after = 100)],
+      bad(`${k}"].apply[0].op`),
+    ]),
   ];
   for (const [edits, expected] of cases) {
     const r = load((c) => edits.forEach((e) => e(c)));
