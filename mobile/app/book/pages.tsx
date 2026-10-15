@@ -121,7 +121,7 @@ export function RoomPage(p: {
     >
       {p.recap && <AwayRecap lines={p.recap} />}
       {paragraphs(c, p.text(p.view.place.description.key))}
-      <Asides lines={(p.view.place.asides ?? []).map((a) => p.text(a.key))} />
+      <Asides keys={p.view.place.asides} text={p.text} />
       {warnings(c, p.view, p.text)}
       <Here view={p.view} text={p.text} open={p.open} />
       {p.view.choice && !p.view.entities.some((e) => e.id === p.view.choice!.speaker_id) && (

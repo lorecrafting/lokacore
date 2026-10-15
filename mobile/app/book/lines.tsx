@@ -36,11 +36,17 @@ export function Note({ children }: { children: string }) {
 
 // The character's passive voices (book-ui.md, Aside details): one Note per line, one block, links
 // shown as plain words; no asides, no block.
-export function Asides({ lines }: { lines: readonly string[] }) {
-  return lines.length > 0 ? (
+export function Asides({
+  keys = [],
+  text,
+}: {
+  keys?: readonly { key: string }[];
+  text: (key: string) => string;
+}) {
+  return keys.length > 0 ? (
     <View>
-      {lines.map((line, i) => (
-        <Note key={i}>{plain(line)}</Note>
+      {keys.map((a, i) => (
+        <Note key={i}>{plain(text(a.key))}</Note>
       ))}
     </View>
   ) : null;
