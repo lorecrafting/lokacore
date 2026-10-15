@@ -1,0 +1,25 @@
+{
+  "provider": "cook",
+  "currency": "pennies",
+  "action": "commission",
+  "label": "service.stew",
+  "narration": "service.stew.used",
+  "price": 1,
+  "benefit": {
+    "kind": "entitlement",
+    "fact": "ordered",
+    "escrow": {
+      "items": [
+        "fish_01",
+        "fish_02",
+        "fish_03",
+        "fish_04",
+        "fish_05"
+      ],
+      "quantity": 2,
+      "custody": "larder",
+      "ready_after": 300,
+      "output": "stew_01"
+    }
+  }
+}

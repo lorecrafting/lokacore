@@ -1,0 +1,9 @@
+{
+  "title": "room.pond.title",
+  "description": "room.pond.description",
+  "exits": {
+    "south": {
+      "to": "kitchen"
+    }
+  }
+}

@@ -190,6 +190,10 @@ defmodule Loka.Content.Checks do
   def expand(%{"cures" => c} = e, m) when is_list(c),
     do: Map.put(expand(Map.delete(e, "cures"), m), "cures", Enum.map(c, &ref(&1, "status", m)))
 
+  def expand(%{"applies" => c} = e, m) when is_list(c),
+    do:
+      Map.put(expand(Map.delete(e, "applies"), m), "applies", Enum.map(c, &ref(&1, "status", m)))
+
   def expand(%{"immune" => c} = e, m) when is_list(c),
     do: Map.put(expand(Map.delete(e, "immune"), m), "immune", Enum.map(c, &ref(&1, "status", m)))
 

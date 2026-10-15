@@ -1,0 +1,20 @@
+{
+  "items": [
+    "fish_01",
+    "fish_02",
+    "fish_03",
+    "fish_04",
+    "fish_05"
+  ],
+  "from": {
+    "in": "room",
+    "room": "larder"
+  },
+  "to": {
+    "in": "room",
+    "room": "pond"
+  },
+  "cap": 5,
+  "count": 2,
+  "every": 3600
+}

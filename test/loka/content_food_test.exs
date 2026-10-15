@@ -34,3 +34,34 @@ defmodule Loka.ContentFoodTest do
     end
   end
 end
+
+defmodule Loka.ContentMealTest do
+  use ExUnit.Case, async: true
+  setup_all do: %{dir: Loka.ContentSource.copy("cartridges/kitchen_sampler")}
+
+  # Row hs-5. Breaks: an empty `applies` (minItems), a ref left unresolved, or a meal status
+  # moving the derived hp maximum (loka-kgd.50); the 1.101 floor row is in loader_floors.json.
+  test "a meal's applies resolves and never names an hp_max status", %{dir: dir} do
+    stew = "items/stew_01.json"
+    read = &JSON.decode!(File.read!(Path.join(dir, &1)))
+
+    hp_max = %{
+      "hp_max" => %{"terms" => [%{"attribute" => "str", "per_point" => 1, "pivot" => 10}]}
+    }
+
+    at = "items/stew_01.edible.applies"
+    edit = &[{stew, put_in(read.(stew), ["edible", "applies"], &1)}]
+    derived = [{"cartridge.json", put_in(read.("cartridge.json"), ["world", "derived"], hp_max)}]
+
+    cases = [
+      {edit.([]), {"SCHEMA_VIOLATION", at}},
+      {edit.(["nothing"]), {"UNRESOLVED_REFERENCE", at <> "[0]"}},
+      {derived, {"SCHEMA_VIOLATION", at <> "[0]"}}
+    ]
+
+    for {changes, expected} <- cases do
+      assert {:error, ds} = Loka.ContentSource.compile(dir, changes)
+      assert expected in for(d <- ds, do: {d["code"], d["path"]})
+    end
+  end
+end

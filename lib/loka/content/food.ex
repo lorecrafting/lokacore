@@ -13,8 +13,12 @@ defmodule Loka.Content.Food do
       |> String.split(".")
       |> Enum.map(&String.to_integer/1)
 
+    # Row hs-5: a meal's `applies` needs 1.101.
+    floor =
+      if Enum.any?(foods, fn {_, i} -> i["edible"]["applies"] end), do: [1, 101], else: [1, 27]
+
     api =
-      if foods != [] and minimum < [1, 27],
+      if foods != [] and minimum < floor,
         do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
         else: []
 

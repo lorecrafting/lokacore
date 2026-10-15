@@ -11,9 +11,10 @@ defmodule Loka.Content.Status do
 
     cures =
       for {_, {rel, _, i}} <- defs["item"],
-          cures = get_in(i, ["edible", "cures"]),
-          cures,
-          do: {rel, ["edible", "cures"], cures}
+          k <- ~w(cures applies),
+          list = get_in(i, ["edible", k]),
+          list,
+          do: {rel, ["edible", k], list}
 
     {later, g3} = api_146(defs)
 
@@ -21,7 +22,8 @@ defmodule Loka.Content.Status do
       do: [],
       else:
         gate(m, floor(statuses, g3)) ++
-          values(statuses, {m, settings}, defs, text) ++ foods(cures ++ later, m, defs)
+          values(statuses, {m, settings}, defs, text) ++
+          foods(cures ++ later, m, defs) ++ meals(cures, m, defs, settings)
   end
 
   # The fields needing kernel_api 1.46: row G3's immune lists, steps naming an item (or, row 42, an
@@ -183,6 +185,18 @@ defmodule Loka.Content.Status do
     for {a, i} <- Enum.with_index(s["modifies"] || []),
         permanent?(s) and a["attribute"] in terms,
         do: diag("SCHEMA_VIOLATION", at(rel, ["modifies", i, "attribute"]))
+  end
+
+  # Row hs-5: a meal's status never moves the derived hp maximum either (loka-kgd.50).
+  defp meals(lists, m, defs, settings) do
+    terms =
+      for t <- get_in(settings, ["world", "derived", "hp_max", "terms"]) || [], do: t["attribute"]
+
+    for {rel, ["edible", "applies"] = path, list} <- lists,
+        {s, i} <- Enum.with_index(list),
+        {_, _, d} <- [Refs.resolve(s, "status", m, defs)],
+        Enum.any?(d["modifies"] || [], &(&1["attribute"] in terms)),
+        do: diag("SCHEMA_VIOLATION", at(rel, path ++ [i]))
   end
 
   defp missing_text(_, _, _, :unknown), do: []

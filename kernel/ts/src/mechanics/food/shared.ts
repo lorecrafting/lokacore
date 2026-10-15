@@ -2,6 +2,7 @@
 import {
   LIMITS,
   type CommandPayload,
+  type EventPayload,
   type DeltaOp,
   type Key,
   type ItemEdible,
@@ -9,10 +10,17 @@ import {
   type UnavailableReason,
 } from '../../contracts.gen.ts';
 import { refusal } from '../../commands/actions.ts';
-import { bodyOf, type Steps, type World } from '../../runtime/decision.ts';
+import {
+  bodyOf,
+  event,
+  type Event,
+  type Mint,
+  type Steps,
+  type World,
+} from '../../runtime/decision.ts';
 import { engaged } from '../combat/shared.ts';
 import { adjust, level, resourceRef, resourceSpec } from '../resource.ts';
-import { cureOps } from '../status/shared.ts';
+import { cureOps, statusStep } from '../status/shared.ts';
 
 type Payload = Extract<CommandPayload, { type: 'eat' }>;
 export function availability(world: World, p: Payload, steps: Steps, action: Key) {
@@ -53,5 +61,28 @@ export function transition(
       ...cured, // first, so a cure's hp settle (row 2c) reads the hp before the meal
       ...(by > 0 ? [adjust(world, body, edible.resource, by, {}).op] : []),
     ],
+  };
+}
+
+type Applied = Extract<EventPayload, { type: 'status_applied' }>;
+/** Row hs-5: the meal's `applies` lands on the eater's body after the restore and cures, as a
+ * reaction step would (one writer group, status reader 2's event, immune, silent refresh). */
+export function applied(
+  world: World,
+  command: Parameters<typeof event>[1],
+  mint: Mint,
+  edible: ItemEdible,
+) {
+  const body = bodyOf(world, command.payload.actor_id)!;
+  const events: Event<Applied['type']>[] = [];
+  const emit = (p: Applied) => events.push(event(world, command, mint, events.length + 1, p));
+  const own = { holders: new Map<string, number>(), applied: new Set<string>() };
+  const steps = (edible.applies ?? []).map((status) =>
+    statusStep(world, { op: 'status.apply', status }, [body], body, 0, own, mint, emit),
+  );
+  return {
+    ops: steps.flatMap((d) => d.ops),
+    events,
+    lines: steps.flatMap((d) => d.narration),
   };
 }
