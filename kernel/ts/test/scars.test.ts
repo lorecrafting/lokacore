@@ -130,7 +130,10 @@ test('the loader refuses each unsound permanent status', () => {
   const rows: [Uint8Array, (c: any) => void, string, string][] = [
     [
       artifact,
-      (c) => (c.manifest.requires.kernel_api.at_least = '1.47'),
+      (c) => {
+        c.manifest.requires.kernel_api.at_least = '1.47';
+        delete c.statuses[SCAR].kind; // 1.101 (loka-x6t.64) would shadow the 1.48 floor
+      },
       'KERNEL_API_RANGE_INVALID',
       '.cartridge.manifest.requires.kernel_api.at_least',
     ],
