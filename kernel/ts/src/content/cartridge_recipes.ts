@@ -237,13 +237,20 @@ function reservedCommands(c: Obj): string[] {
 }
 
 // Toolbox row W23: a recipe's tip resolves and needs kernel_api 1.46 (a tipped key over 55
-// characters fails the schema at its seen_tip_ FactSpec).
+// characters fails the schema at its seen_tip_ FactSpec); its refusal reason (loka-j64e), 1.100.
 function tips(c: Obj, text: Checks['text']): Diagnostic[] {
-  const tipped = Object.entries((c.recipes ?? {}) as Obj).filter(([, r]) => r.tip);
   const out: Diagnostic[] = [];
-  for (const [ref, r] of tipped) text(r, ['tip'], `.cartridge.recipes${step(ref)}`);
-  if (tipped.length && apiCmp(c.manifest.requires.kernel_api.at_least, '1.46') < 0)
-    out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
+  for (const [field, floor] of [
+    ['tip', '1.46'],
+    ['reason', '1.100'],
+  ] as const) {
+    const keyed = Object.entries((c.recipes ?? {}) as Obj).filter(([, r]) => r[field]);
+    for (const [ref, r] of keyed) text(r, [field], `.cartridge.recipes${step(ref)}`);
+    if (keyed.length && apiCmp(c.manifest.requires.kernel_api.at_least, floor) < 0)
+      out.push(
+        diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'),
+      );
+  }
   return out;
 }
 

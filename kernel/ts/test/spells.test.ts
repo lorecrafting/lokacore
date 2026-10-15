@@ -256,6 +256,27 @@ test('spell_words lists learned spells only, with cast admission as availability
   );
 });
 
+// Breaks (loka-j64e): the authored reason is dropped from spell_words or the offered action, the
+// cast refusal and spell_words read different admissions, or an unlearned ward leaks its reason.
+test("a failed recipe policy carries the recipe's reason in the GameView; the command refuses alike", () => {
+  let w = fresh();
+  w = ok(play(w, { type: 'accept_quest', quest: ref('quest', 'apprentice') }, 'apprentice'));
+  w = ok(play(w, { type: 'perform', action: 'trace_sigil' }));
+  w = levelled(w, 0); // taught, wis 11, level 1
+  const ward = gameView(w).spell_words?.find((s) => s.word === 'ward');
+  const reason = { code: 'invalid_state', message: { key: 'reason.ward' } };
+  assert.deepEqual(ward, { word: 'ward', available: false, reason });
+  assert.equal(code(cast(w, 'ward')), 'invalid_state');
+  assert.deepEqual(cast(fresh(), 'ward').decision, cast(fresh(), 'xyzzy').decision);
+  const key = 'spells_sampler@0.0.1:recipe/trace_sigil';
+  const trace = { ...content.recipes![key as never]!, reason: 'reason.ward' as never };
+  const recipes = { ...content.recipes, [key]: trace } as Cartridge['recipes'];
+  const v = newWorld({ ...content, recipes }, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e55' as never, [1]);
+  const offer = gameView(v).actions.find((a) => a.label === 'actions.trace_sigil');
+  assert.deepEqual(offer && !offer.available && offer.reason, reason);
+  assert.equal(code(play(v, { type: 'perform', action: 'trace_sigil' })), 'invalid_state');
+});
+
 // Breaks: an entry listed available whose cast (its word, through the offered cast action) is
 // refused, so the word bar would offer a chip that fails.
 test('every available spell_words entry casts', () => {
@@ -322,4 +343,28 @@ test('loader: a spell learned names a bool player fact; spells need 1.98', () =>
   ];
   for (const [change, diagnostic, path] of rows)
     assert.deepEqual(verdict(change), [diagnostic, path]);
+});
+
+// Breaks (loka-j64e): a recipe reason is not resolved in the catalog, its 1.100 floor is missing,
+// or kernel_api compares as text ('1.99' > '1.100'), refusing 1.100 or admitting 1.99.
+test('loader: a recipe reason resolves and needs 1.100, which is above 1.99', () => {
+  const ward = (c: Record<string, any>) => c.recipes['spells_sampler@0.0.1:recipe/ward'];
+  const at = `.cartridge.recipes[${JSON.stringify('spells_sampler@0.0.1:recipe/ward')}]`;
+  assert.equal(
+    verdict(() => {}),
+    'loaded',
+  );
+  assert.deepEqual(
+    verdict((c) => (ward(c).reason = 'reason.nope')),
+    ['UNRESOLVED_REFERENCE', `${at}.reason`],
+  );
+  assert.deepEqual(
+    verdict((c) => (c.manifest.requires.kernel_api.at_least = '1.99')),
+    ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'],
+  );
+  const plain = (c: Record<string, any>) => {
+    delete ward(c).reason;
+    c.manifest.requires.kernel_api.at_least = '1.99';
+  };
+  assert.equal(verdict(plain), 'loaded');
 });

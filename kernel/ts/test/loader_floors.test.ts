@@ -25,7 +25,8 @@ const { cases } = JSON.parse(
 
 const set = (o: any, path: string[], value: unknown) => {
   for (const k of path.slice(0, -1)) o = o[k];
-  o[path.at(-1)!] = value;
+  if (value === null) delete o[path.at(-1)!];
+  else o[path.at(-1)!] = value;
 };
 const load = (cartridge: unknown) => {
   const canonical = encode(cartridge as never);

@@ -50,6 +50,22 @@ defmodule Loka.Content.RecipeTips do
 
   def check(_, _, _, _), do: []
 
+  @doc "loka-j64e: each recipe `reason` resolves; any reason needs kernel_api 1.100 (one diagnostic)."
+  def reasons(recipes, %{text: text}, old) do
+    reasoned = for {rel, %{"reason" => reason}} <- recipes, do: {rel, reason}
+
+    for(
+      {rel, key} <- reasoned,
+      text != :unknown,
+      not is_map_key(text, key),
+      do: diag("UNRESOLVED_REFERENCE", at(rel, ["reason"]), %{"target" => key})
+    ) ++
+      if(reasoned != [] and old,
+        do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
+        else: []
+      )
+  end
+
   defp tip_diag(rel, tip, :text),
     do: diag("UNRESOLVED_REFERENCE", at(rel, ["tip"]), %{"target" => tip})
 

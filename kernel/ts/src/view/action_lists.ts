@@ -1,4 +1,5 @@
-// size: allow 344, food, water, practical skills, local Knock, G7 get locks and the drawn storylet (row FD3) and row 33 theft and the row FD7 ask share the composed view list; the viewer is threaded (loka-kgd.150.5)
+// size: allow 350, food, water, practical skills, local Knock, G7 get locks and the drawn storylet (row FD3) and row 33 theft and the row FD7 ask share the composed view list; the viewer is threaded (loka-kgd.150.5)
+import { policyRefusal } from '../mechanics/action_recipe/shared.ts';
 import { running as modalScene } from '../mechanics/scene/shared.ts';
 import { foodActions } from './food.ts';
 import { useActions } from './use.ts';
@@ -171,7 +172,7 @@ function entityOffered(
 
 // `a` as listed for `actor` (on entity `id` in `scope`, if any): a door verb on an item is aimed
 // at it, with the item's scope and no input, so target_ids [id] fills target_id (commands/invocation.ts).
-// size: allow 53, exact detail harvest and the row FD7 ask join shared action admission and projection
+// size: allow 58, exact detail harvest, the row FD7 ask and a recipe's reason (loka-j64e) join shared action admission and projection
 function advertise(
   world: World,
   actor: CharacterId,
@@ -204,9 +205,12 @@ function advertise(
     (speaks(world, target)
       ? talkRefused(world, actor, target, a.dialogue, steps) && 'invalid_state'
       : 'not_found');
-  const code = !holds(world, actor, a.policy.root, { target, steps })
-    ? 'invalid_state'
-    : talk ||
+  const policy = holds(world, actor, a.policy.root, { target, steps })
+    ? undefined
+    : policyRefusal(a.recipe); // the command's refusal of a failed policy, with its reason
+  const code =
+    policy?.code ??
+    (talk ||
       (a.command === 'flee' && !escapeDirections(world, actor).length
         ? 'invalid_state'
         : undefined) ||
@@ -222,8 +226,10 @@ function advertise(
         : undefined) ||
       (a.command === 'ask' && target !== undefined
         ? askRefused(world, actor, target, steps)
-        : undefined);
-  return code ? { available: false, ...shown, reason: { code } } : { available: true, ...shown };
+        : undefined));
+  return code
+    ? { available: false, ...shown, reason: policy ?? { code } }
+    : { available: true, ...shown };
 }
 
 function harvestOffered(
