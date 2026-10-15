@@ -169,23 +169,26 @@ export function crafted(
   };
 }
 
-/** A craft's refusal for the command (commands/actions.ts) and its offer (view/action_lists.ts),
- * then (Built rooms S6) its build step's, as the build service's (service/build.ts unbuildable). */
+/** A craft's refusal for the command (commands/actions.ts) and its offer (view/action_lists.ts):
+ * (Built rooms S6) its build step's first, as the build service's (service/build.ts unbuildable),
+ * so a taken site shows site_taken, not the spent inputs. */
 export const craftRefused = (
   world: World,
   recipe: ActionRecipe | undefined,
   actor: CharacterId,
   steps: Steps,
 ) => {
+  const s = recipe?.outcomes.success.sequence.find((x) => x.op === 'build');
+  const b =
+    s &&
+    recipe!.target.kind === 'detail' &&
+    unbuildable(
+      world,
+      { blueprint: s.blueprint, site: recipe!.target.room, direction: s.direction },
+      actor,
+    );
+  if (b) return b;
   const body = bodyOf(world, actor);
   const c = recipe?.craft && body && crafted(world, recipe, body, steps);
-  if (c && 'code' in c) return c;
-  const s = recipe?.outcomes.success.sequence.find((x) => x.op === 'build');
-  return s && recipe!.target.kind === 'detail'
-    ? unbuildable(
-        world,
-        { blueprint: s.blueprint, site: recipe!.target.room, direction: s.direction },
-        actor,
-      )
-    : undefined;
+  return c && 'code' in c ? c : undefined;
 };

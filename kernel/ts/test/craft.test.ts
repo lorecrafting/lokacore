@@ -427,8 +427,8 @@ test('chop, learn carpentry, saw and raise the timbered hut north of the lane', 
   w = move(w, 'south');
   assert.deepEqual(hire(w).decision, { kind: 'rejected', error: { code: 'invalid_state' } });
   assert.deepEqual(offer(w, 'raise_hut_plain').reason, refusal('service.site_taken'));
-  // the timbers are spent, so the craft's refusal comes first (the carpenter test shows site_taken)
-  assert.deepEqual(offer(w, 'raise_timbered_hut').reason, refusal('craft.raise.needs'));
+  // the site's refusal before the spent timbers' craft.raise.needs, as the build service's
+  assert.deepEqual(offer(w, 'raise_timbered_hut').reason, refusal('service.site_taken'));
 });
 
 // Breaks: admission skips the build refusal (a forged raise on a taken site is accepted), or the
