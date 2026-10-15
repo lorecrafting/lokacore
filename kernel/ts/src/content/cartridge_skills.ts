@@ -57,7 +57,7 @@ export function skills(c: Obj, checks: Checks): Diagnostic[] {
         diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'),
       );
   }
-  return [...out, ...growth(c), ...prerequisites(c), ...durability(c, checks)];
+  return [...out, ...growth(c), ...prerequisites(c), ...secret(c), ...durability(c, checks)];
 }
 
 // Homestead hs-11: a prerequisite never names its own skill, no ancestry grants its box, and it
@@ -79,8 +79,20 @@ function prerequisites(c: Obj): Diagnostic[] {
         error: 'invalid_value',
       }),
     );
-  // Homestead hs-14 (secret): no shown skill's qualification and no dialogue policy reads a hidden
-  // skill, and no labeled talk teaches one.
+  // A birth grant skips learning, so an ancestry never grants a box with a prerequisite.
+  for (const [choice, a] of Object.entries((c.ancestries ?? {}) as Obj))
+    if (a.skill && c.skills?.[refString(a.skill)]?.prerequisite)
+      out.push(diag('SCHEMA_VIOLATION', `.cartridge.ancestries${step(choice)}.skill`));
+  const professions = Object.values((c.skills ?? {}) as Obj).some((s) => s.profession);
+  if ((named.length || professions) && apiCmp(c.manifest.requires.kernel_api.at_least, '1.101') < 0)
+    out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
+  return out;
+}
+
+// Homestead hs-14 (secret): no shown skill's qualification and no dialogue policy reads a hidden
+// skill, and no labeled talk teaches one.
+function secret(c: Obj): Diagnostic[] {
+  const out: Diagnostic[] = [];
   const hidden = (r: DefinitionRef) => c.skills?.[refString(r)]?.hidden === true;
   const reads = (root: Obj) =>
     walk(root, '').some(([p]) => p.op === 'skill_compare' && hidden(p.skill));
@@ -96,13 +108,6 @@ function prerequisites(c: Obj): Diagnostic[] {
     );
     if (d.label !== undefined && teaches) bad(`${at}.label`);
   }
-  // A birth grant skips learning, so an ancestry never grants a box with a prerequisite.
-  for (const [choice, a] of Object.entries((c.ancestries ?? {}) as Obj))
-    if (a.skill && c.skills?.[refString(a.skill)]?.prerequisite)
-      out.push(diag('SCHEMA_VIOLATION', `.cartridge.ancestries${step(choice)}.skill`));
-  const professions = Object.values((c.skills ?? {}) as Obj).some((s) => s.profession);
-  if ((named.length || professions) && apiCmp(c.manifest.requires.kernel_api.at_least, '1.101') < 0)
-    out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
   return out;
 }
 

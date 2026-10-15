@@ -1,3 +1,4 @@
+# size: allow 340, skill loading keeps the hs-11 prerequisite and hs-14 secret checks beside the tree they read
 defmodule Loka.Content.Skills do
   @moduledoc "Reserved skill acquisition facts and equipment/lesson references."
   import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2]
