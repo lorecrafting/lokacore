@@ -478,6 +478,15 @@
         },
         "water": {
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
+        },
+        "bed": {
+          "$ref": "entity.schema.json#/$defs/ResistancePercent"
+        },
+        "forge": {
+          "$ref": "entity.schema.json#/$defs/ResistancePercent"
+        },
+        "rug": {
+          "$ref": "entity.schema.json#/$defs/ResistancePercent"
         }
       },
       "additionalProperties": false,
