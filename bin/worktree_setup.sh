@@ -14,7 +14,9 @@ for d in . kernel/ts mobile/app; do
     # Re-clone an older worktree's link or a stale clone; a partial clone stays in .tmp.
     if [ -L "$d/node_modules" ] || [ "$(cat "$d/node_modules/.loka-lock-cksum" 2> /dev/null)" != "$sum" ]; then
       rm -rf "$d/node_modules" "$d/node_modules.tmp"
-      cp -cR "$main/$d/node_modules" "$d/node_modules.tmp" && mv "$d/node_modules.tmp" "$d/node_modules"
+      cp -cR "$main/$d/node_modules" "$d/node_modules.tmp" || { rm -rf "$d/node_modules.tmp"; echo "worktree_setup: cloning $main/$d/node_modules failed" >&2; exit 1; }
+      rm -rf "$d/node_modules.tmp/.cache" # main's build caches, e.g. Storybook's test results
+      mv "$d/node_modules.tmp" "$d/node_modules"
     fi
   else
     # npm ci through an older worktree's link would wipe the main checkout's install.
