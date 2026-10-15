@@ -3,7 +3,7 @@
 # pull main, close the Beads issue, remove the PR branch's worktree, delete the branch (local and
 # remote) and review-<PR>, commit the Beads export (plus a ROADMAP edit already made) and push main.
 #   bin/after_merge.sh <PR> <beads-id> [ROADMAP commit subject]
-# Refuses unless the PR is MERGED, main is checked out and the tree is clean apart from
+# Refuses unless the PR is MERGED, main is checked out and the tracked files are clean (untracked files are ignored, like pm_merge.sh) apart from
 # .beads/issues.jsonl, and docs/ROADMAP.md (which must then be edited) when a subject is given.
 # A dirty export is copied out, reset, the pull runs, it is copied back and `br sync --flush-only`
 # rewrites it from the database; it is refused when main also changed the export (the post-merge
@@ -30,7 +30,7 @@ fi
 info=$($GH pr view "$pr" --json state,headRefName --jq '"\(.state) \(.headRefName)"') || die "cannot read PR #$pr"
 [ "${info%% *}" = MERGED ] || die "PR #$pr is ${info%% *}, not MERGED"
 branch=${info#* }
-for f in $(git status --porcelain --untracked-files=all | cut -c4-); do
+for f in $(git status --porcelain --untracked-files=no | cut -c4-); do
   [ "$f" = $j ] || { [ -n "$subject" ] && [ "$f" = docs/ROADMAP.md ]; } || die "uncommitted $f"
 done
 [ -z "$subject" ] || ! git diff --quiet -- docs/ROADMAP.md || die 'subject given but docs/ROADMAP.md is unchanged'

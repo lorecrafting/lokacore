@@ -28,15 +28,16 @@ Before handing off:
    the touched layer's type/compile checks and the focused tests your diff touches, under `nice -n 10`; never the full
    `npm test`, the Storybook smoke, `test:e2e` or `bin/check_all.sh` on the M1 ([two-lane CI](../../docs/decisions/owner-decision-two-lane-ci-2026-10-09.md)).
    The pre-push hook runs `bin/prepush.sh` (CI's static checks, about 30 s) and refuses a failing push: fix what fails; `--no-verify` needs the owner's OK.
+   Read prepush's own exit status (its log directory is per run) before any push. A finished hosted-PR slice is always pushed, even when the brief names no push: an unpushed head is not durable.
    Hosted CI on the pushed head is the final run (it includes the full `npm test` of each package):
    after a push, confirm `ci.yml` and `book-e2e.yml` started with one `gh run list --commit "$(git rev-parse HEAD)"` call (the full sha; a short one matches nothing) and hand back (a run can start up to ~2 minutes late: report an empty list, never dispatch);
    the PM watches CI and sends a red run back as a finding. Never wait on CI,
    and never dispatch a run by hand when a push run exists (the dispatch cancels it, loka-thz). Every new check has a
    planted violation that fails; a planted break or red control stops only the PIDs it started, never a process by name ([Git hygiene](../../docs/WORKFLOW.md#git-hygiene)).
-2. Commit first, then self-review the diff once: `/code-review medium` on the branch diff against its base, run from your slice worktree with the worktree path or branch as the target, never the main checkout (your cwd resets to it, loka-0w4; the review never runs checkout, stash or reset in your worktree)
+2. Commit first, then self-review the diff once: one `/code-review medium <base>...HEAD` (or the branch name) on the branch diff against its base, never a bare second run (a second run reviewed another PR's diff), run from your slice worktree with the worktree path or branch as the target, never the main checkout (your cwd resets to it, loka-0w4; the review never runs checkout, stash or reset in your worktree)
    when a non-tiny diff changes code or bulk-edits docs (otherwise, or if skills are
-   unavailable, the same questions by hand; [owner decision](../../docs/decisions/owner-decision-review-tools-2026-10-02.md)). Then break your own core logic once and
-   confirm a test fails; if none does, the tests are not done. Fix or record a
+   unavailable, the same questions by hand; [owner decision](../../docs/decisions/owner-decision-review-tools-2026-10-02.md)). Then mutate every new conditional in the diff (not only the checks you listed) and
+   confirm a test fails for each; if none does, the tests are not done. The handback holds a check-to-test table: each new check (both kernels where it exists in both) and the test that fails when it is removed. Fix or record a
    disposition for each finding.
 3. Commit (attribution lines per the session). Provisional local:
    hand the branch and exact head to the PM without pushing; draft PR: push only when the brief

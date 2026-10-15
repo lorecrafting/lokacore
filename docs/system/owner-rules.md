@@ -49,6 +49,7 @@ and not repeated here.
 - Fable's depth and UX audit is adopted in full: toolbox rows FD1-FD10, tooling, Book UX in the parked polish lane; reading size and high-contrast ink are approved Settings; LLM uses stay presentation-only; a Realm seams batch runs between M12 and M13 ([record](../decisions/owner-decision-depth-ux-audit-2026-10-13.md)).
 - Jev (TypeSafe): spend approved; redacted briefs and cartridge text may leave the machine, never saves or player words; advisory only; Pi keeps its $2/day cap; `fast-jev-compaction` is off since 2026-10-14 (built-in compaction; resumes allowed, `loka-bwfo`) ([record](../decisions/owner-decision-jev-typesafe-2026-10-14.md)).
 
+- In Homestead the skill path replaces NPC cooking and building; a paid NPC reaches only a beginner tier, better results need the player's own crafting, and Star Wars Galaxies style skill trees are approved ([record](../decisions/owner-decision-homestead-skill-path-2026-10-15.md)).
 - Realm seams: new rules read the actor from the command, new jobs store their owner, and no new row adds a single-player assumption ([record](../decisions/owner-decision-realm-seams-2026-10-13.md)).
 - Every new toolbox mechanic is opt-in by a cartridge field; Chapter 1 and the seeded corpus stay
   unchanged. The toolbox is ranked vocabulary first ([record](../decisions/owner-decision-toolbox-rerank-2026-10-09.md)).
