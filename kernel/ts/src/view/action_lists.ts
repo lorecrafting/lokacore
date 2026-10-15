@@ -1,4 +1,4 @@
-// size: allow 334, food, water, practical skills, local Knock and G7 get locks share the composed view list; the viewer is threaded (loka-kgd.150.5)
+// size: allow 337, food, water, practical skills, local Knock, G7 get locks and the drawn storylet (row FD3) share the composed view list; the viewer is threaded (loka-kgd.150.5)
 import { running as modalScene } from '../mechanics/scene/shared.ts';
 import { foodActions } from './food.ts';
 import { useActions } from './use.ts';
@@ -54,6 +54,8 @@ const HIDDEN = [
   'drink',
   ...MODAL,
 ];
+const hidden = (world: World, actor: CharacterId, a: Offered) =>
+  HIDDEN.includes(a.command) || (a.command === 'continue' && !modalScene(world, actor));
 // size: allow 60, one composed ActionSet/query context projects item and exact-subject Notice offers
 export function lists(world: World, actor: CharacterId, steps = { n: 0 }) {
   const set = resolved(world, actor);
@@ -61,19 +63,15 @@ export function lists(world: World, actor: CharacterId, steps = { n: 0 }) {
   const current = Object.keys(position.VERBS).find((v) => position.VERBS[v]![0] === at);
   const body = bodyOf(world, actor);
   const take = takeAdmission(world, actor, body, steps);
-  const drawn = pick(world, actor, steps)?.key; // row FD3: the one storylet offered here
+  const drawn = pick(world, actor, steps, set)?.key; // row FD3: the one storylet offered here
   const here = (a: Offered, d = detailAt(world, a)) =>
     !a.recipe ||
-    (a.recipe.target.kind === 'storylet'
-      ? a.key === drawn
-      : d !== undefined &&
-        world.details[d].room === world.state.containers[body!] &&
-        light.visible(world, actor, d, steps));
-  const hidden = (a: Offered) =>
-    HIDDEN.includes(a.command) || (a.command === 'continue' && !modalScene(world, actor));
+    (d !== undefined &&
+      world.details[d].room === world.state.containers[body!] &&
+      light.visible(world, actor, d, steps));
   const listed = (fits: (a: Offered) => boolean, id?: string, scope?: string) =>
     Object.values(set)
-      .filter((a) => fits(a) && here(a) && !hidden(a))
+      .filter((a) => fits(a) && (a.key === drawn || here(a)) && !hidden(world, actor, a))
       .filter((a) => movable(world, a, id) && combatOffered(world, actor, body, a, id))
       .filter((a) => a.speaker === undefined || a.speaker === id)
       .sort((a, b) => b.priority - a.priority || cmp(a.key, b.key))

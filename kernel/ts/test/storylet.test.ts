@@ -95,6 +95,16 @@ test('one card per actor, room and hour index; the view lists only it', () => {
   const lane = run(at(100), { type: 'move', direction: 'east' });
   assert.equal(lane.decision.kind, 'accepted');
   assert.equal(drawn(lane.world)[0], 'pickpocket');
+  // A room that subtracts the hour's card from the ActionSet draws from what it leaves.
+  const market = 'storylet_sampler@0.0.1:room/market';
+  const cut = load(
+    (c) => (c.rooms[market].actions = [{ op: 'subtract', actions: ['pickpocket'] }]),
+  );
+  assert.ok(cut.ok, JSON.stringify(cut));
+  assert.equal(
+    drawn(newWorld(cut.cartridge as Cartridge, fresh.context, [1, 2, 3, 4]))[0],
+    'stranger_beckons',
+  );
 });
 
 // Breaks: a perform of a storylet that is not the pick (or names a target) is accepted, or

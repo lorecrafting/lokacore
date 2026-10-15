@@ -7,17 +7,20 @@ import type { ActionRecipe, CharacterId } from '../../contracts.gen.ts';
 import { sha256, utf8 } from '../../foundation/sha256.ts';
 import { cmp } from '../../foundation/validate.ts';
 import { bodyOf, refString, type Steps, type World } from '../../runtime/decision.ts';
+import { resolved } from '../../commands/actions.ts';
 import { units } from '../calendar.ts';
 import { holds } from '../policy.ts';
 
-export function pick(world: World, actor: CharacterId, steps: Steps): ActionRecipe | undefined {
+// set: the actor's resolved ActionSet, so a room's remove or a status bar takes a storylet out of the deck.
+export function pick(world: World, actor: CharacterId, steps: Steps, set = resolved(world, actor)) {
   const body = bodyOf(world, actor);
   const room = body && world.state.containers[body];
   if (room === undefined || !world.rooms[room]) return undefined;
-  const deck = Object.values(world.cartridge.recipes ?? {})
+  const deck = Object.values(set)
+    .map((a) => a.recipe)
     .filter(
-      (r) =>
-        r.target.kind === 'storylet' &&
+      (r): r is ActionRecipe =>
+        r?.target.kind === 'storylet' &&
         (r.target.rooms?.some((ref) => world.roomIds[refString(ref)] === room) ?? true) &&
         holds(world, actor, r.policy.root, { steps }),
     )

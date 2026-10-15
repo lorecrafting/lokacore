@@ -1,4 +1,4 @@
-# size: allow 320, action-started scenes validate source and end exports beside modal rules
+# size: allow 326, action-started and storylet-started (row FD3) scenes validate source and end exports beside modal rules
 defmodule Loka.Content.Scenes do
   @moduledoc """
   scene@1's modal ordered subset, trigger/text references and compiler-added facts

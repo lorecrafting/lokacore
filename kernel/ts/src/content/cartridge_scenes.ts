@@ -47,6 +47,7 @@ export function scenes(c: Obj): Diagnostic[] {
 
 type Checks = ReturnType<typeof checkers>;
 
+// size: allow 41, placed and storylet (row FD3) action starts share one source check
 function source(c: Obj, s: Obj, at: string, named: Checks['named'], out: Diagnostic[]) {
   const on = s.on;
   const quest = !!on.quest,

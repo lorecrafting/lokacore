@@ -1,3 +1,4 @@
+# size: allow 318, storylet targets (row FD3) check their floor and rooms beside the other recipe targets
 defmodule Loka.Content.Recipes do
   @moduledoc """
   Action recipes and rooms' action contributions (action.schema.json ActionRecipe,
@@ -160,9 +161,9 @@ defmodule Loka.Content.Recipes do
     end
   end
 
-  # An unresolved room or detail is the target's own diagnostic; a use or spell target (rows G4,
-  # 29a) has no detail and so no rating.
-  defp rated?(%{"kind" => kind}, _, _) when kind in ~w(use spell), do: false
+  # An unresolved room or detail is the target's own diagnostic; a use, spell or storylet target
+  # (rows G4, 29a, FD3) has no detail and so no rating.
+  defp rated?(%{"kind" => kind}, _, _) when kind in ~w(use spell storylet), do: false
 
   defp rated?(t, m, defs) do
     case resolve(t["room"], "room", m, defs) do

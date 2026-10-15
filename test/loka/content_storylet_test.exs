@@ -25,6 +25,15 @@ defmodule Loka.ContentStoryletTest do
     assert {:error, diags} = Loka.ContentSource.compile(dir, nowhere)
     assert pairs(diags) == [{"UNRESOLVED_REFERENCE", "recipes/pickpocket.target.rooms[1]"}]
 
+    # A storylet has no detail and so no rating to oppose.
+    opposed = [
+      {"recipes/pickpocket.json",
+       &Map.put(&1, "check", %{"key" => "lift", "kind" => "opposed", "attribute" => "str"})}
+    ]
+
+    assert {:error, diags} = Loka.ContentSource.compile(dir, opposed)
+    assert {"SCHEMA_VIOLATION", "recipes/pickpocket.check"} in pairs(diags)
+
     zero = [{"recipes/pickpocket.json", &put_in(&1, ["target", "weight"], 0)}]
     assert {:error, diags} = Loka.ContentSource.compile(dir, zero)
     assert pairs(diags) == [{"SCHEMA_VIOLATION", "recipes/pickpocket.target.weight"}]
