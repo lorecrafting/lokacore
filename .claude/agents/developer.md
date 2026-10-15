@@ -47,7 +47,7 @@ Before handing off:
    includes the [composition record](../../docs/system/architecture.md#building-mechanics-by-composition).
    Do not merge.
 4. Remove your own scratch worktrees and stop your own background watchers (by PID). Reply with: what changed, branch and head SHA, the commands you actually ran (exit status, failing lines), self-review
-   findings with dispositions, deviations from the brief, open questions. If the brief gave
+   findings with dispositions (list each open `/code-review` item on its own line with `file:line`, for the PM's Beads notes), deviations from the brief, open questions. If the brief gave
    a timebox, stop at it and return what you have. Under 250 words, rules-shaped: paths with `file:line`, decisions with a
    reason, open items, no narrative.
 

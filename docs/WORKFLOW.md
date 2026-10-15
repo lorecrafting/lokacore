@@ -85,7 +85,7 @@ Report at the end of the slice, not at every step.
    main checkout. Locally only the focused tests the diff touches; hosted CI on the pushed head is
    the final run ([two-lane CI](decisions/owner-decision-two-lane-ci-2026-10-09.md)). A PR that adds or changes a schema also runs the
    schema mutant sweep in the [contract lessons](lessons/contracts.md) before remote publication; the provisional local lane checks generation and focused invalid cases first. Commit, then publish
-   per the brief's [lane](#delivery-lanes) (description cites the `docs/system` sections and includes the `/code-review` result) and hand back the note `developer.md` specifies.
+   per the brief's [lane](#delivery-lanes) (description cites the `docs/system` sections and includes the `/code-review` result) and hand back the note `developer.md` specifies. The PM appends the note's `/code-review` open items to the slice's Beads notes at handback.
 4. **Verify and review.** PM does not relay claims: for a pushed PR it confirms the push started
    `ci.yml` and `book-e2e.yml` on the head (`gh run list --branch <branch>`) and starts review
    right away, without waiting for them; for
@@ -125,7 +125,8 @@ Report at the end of the slice, not at every step.
 7. **Merge (PM).** Merge with a merge commit (`gh pr merge <N> --merge`; `--admin` while branch protection still requires the old checks) once the verdict is
    APPROVE or APPROVE WITH NOTES with nothing open on the exact pushed head, and `ci.yml` and
    `book-e2e.yml` are green on that head (every push runs them; `--match-head-commit <sha>`;
-   [two-lane CI](decisions/owner-decision-two-lane-ci-2026-10-09.md)). An E-gate closure or the
+   [two-lane CI](decisions/owner-decision-two-lane-ci-2026-10-09.md)). A job cancelled at its timeout is red,
+   a superseded run is not: `bin/session_status.sh` lists cancelled jobs (name, seconds) of the open PR heads and the nightly runs, so compare each with its `timeout-minutes`. An E-gate closure or the
    release candidate also needs a green `gh workflow run ci.yml --ref <branch> -f full=true` on the
    exact head, so the E1 recorder ran ([E1 certification](system/e1-certification.md#e1-exact-candidate-proof-policy));
    that dispatch cancels the head's push run of `ci.yml` (same concurrency group), so the dispatch

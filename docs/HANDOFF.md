@@ -6,8 +6,8 @@ the next steps, the standing owner rules that the repo does not yet state, and o
 questions. Rewrite it at each stable checkpoint (a merge, a review verdict, a pushed fix) and before
 the session ends; commit and push it with the Beads export.
 
-Written 2026-10-14 UTC by Claude Code (Opus 5.5) at the end of local session
-01DvPym9pzaxaCbY2Ycszv9f (after batch M12), for the next session to continue.
+Written 2026-10-14 UTC by Claude Code (Opus 5.5) in local session 84e03897, at a clean checkpoint
+(no agent running; every branch pushed) for an owner-requested clear.
 
 ## Start of a session
 
@@ -41,49 +41,62 @@ Written 2026-10-14 UTC by Claude Code (Opus 5.5) at the end of local session
 One lane: the mechanics toolbox only (epic `loka-kgd`, [MECHANICS-TOOLBOX.md](MECHANICS-TOOLBOX.md));
 Storybook polish (`loka-x6t`) stays paused ([record](decisions/owner-decision-one-lane-mechanics-2026-10-12.md)).
 The PM decides mechanics calls itself, records them in Beads notes, and keeps going batch after batch.
-Batch order: the owner-adopted [priority plan](briefs/toolbox-priority-plan-2026-10-14.md)
-(2026-10-14), with the owner's answers below.
+Batch order: the owner-adopted [priority plan](briefs/toolbox-priority-plan-2026-10-14.md).
+Compaction: fast-jev is off; built-in compaction confirmed (24-43 s, with a summary). The advisor,
+background waits and resumes after a compaction are allowed (owner, 2026-10-14).
 
-Done this session: #382 (loka-j945, prepush checks and the pm_merge conflict resolver) and #383
-(loka-kgd, mechanics batch M12: 37a, 37b, W13, W12, 39, FD4, FD8, two-shop save fix; `kernel_api` 1.89).
+Done this session: #385 (`loka-kgd.107.21`, prose lint) merged; Realm seams slices all built and
+merged into `toolbox/batch-rs`; batch PR #386 opened; long-wait and FD1 reviewed to approval.
 
 Next, in order:
 
-0. First, in a fresh session: prove the compaction-plugin fix (`loka-bwfo`): run
-   `python3 -I dangling-parents.py <agent transcript>` on one compacted subagent
-   (expect 0; the script and the bug report text are in the
-   `loka-bwfo` notes). Then file the report at tamaratran/fast-jev-compaction and anthropics/claude-code.
-   The patched hook is in the plugin cache (`hooks/fast-jev.ts`, original kept as `.orig-0.3.0`); a
-   marketplace update reverts it.
-1. Long-wait slice: `loka-kgd.152` (P1, one long wait faults `nonfuture_job`, `compose_job.ts:17`),
-   `loka-kgd.151` (Chapter 1 deer `conflicting_write` on one long advance) and FD1 delayed reactions
-   `loka-kgd.138`, all jobs inside one long advance. FD1 is built on `toolbox/m12-delayed` at
-   `afe53bee` (kernel_api 1.88; records on `review-m12-delayed`, `-2nd`, `-recheck`, `-2nd-recheck`,
-   `-recheck2`) and is not merged: a delayed step that throws leaves its job pending forever, and
-   delayed jobs should share the proposal's holder map (pass `p.holders` into `runDelayed`, loka-akl7)
-   instead of per-op special cases. Details in the `.138` notes. Brief it as one engine slice (split
-   engine and content if large, `loka-3jhb`), main review + second opinion (proposal.ts).
-2. Realm seams batch `loka-kgd.150` (RS-1, RS-4 + row 38 `loka-kgd.133`, RS-2 + RS-3, RS-5, RS-6,
-   RS-8; RS-7 deferred), then the Book word bar `loka-x6t.39` in the mechanics lane.
-3. M13 (FD3 storylets first), Built rooms `loka-kgd.109`, M14 (43b mounts right after 43a), M15,
-   Homestead, then Settle S3/S4 only on an owner yes.
-4. The next housekeeping PR carries the approved retro items `loka-mm5v`, `loka-dgl6`, `loka-3jhb`,
-   `loka-xroj` (and `loka-bwfo` above) plus the Jev decision record.
+1. **Realm seams batch #386** (`loka-kgd.150`, branch `toolbox/batch-rs` at `85e84069`, main merged in).
+   RS-1, RS-4 + row 38, RS-6 + RS-8, RS-2 + RS-3, RS-5 all merged. Run the one **Fable batch
+   review** on the head (it was held for load). Ask it to check: RS-3's claim that jobs store their
+   character (the wage job row stores none, per the RS-2/3 developer); the NPC-entrant no-op for
+   `quest.activate` on `entity_entered_room` (no loader test pins it). Rulings already made are in each
+   child's Beads notes. Then CI green on the head, merge (`--match-head-commit`), close the children
+   (`.150.1-.7`, `loka-kgd.133`), follow-up `loka-6ij9`.
+2. **Long-wait batch** (`toolbox/batch-longwait` = main 50e2af2f, no PR yet):
+   - `loka-kgd.152` + `.151` on `toolbox/longwait-loop` at `3b25c212`: approved (main review +
+     recheck, Fable second opinion + recheck). The last CI runs were cancelled: the sim job hit its
+     10-minute timeout (a slowdown, fixed in 3b25c212: 200 seeds 8.5 s vs main 7.5 s). Check CI on
+     3b25c212; if sim still times out, add a target->group index in `proposal_hours.ts` (one more
+     dev run). Then `bin/pm_merge.sh` into the batch with review records (origin branches
+     `review-longwait`, `-recheck`, `-fable`, `-fable-recheck`). Follow-ups `loka-7n60`, `loka-l9oq`.
+   - FD1 `loka-kgd.138` on `toolbox/m12-delayed` at `7c71e119`: approved (main + Fable second
+     opinion; records on origin `review-m12-delayed-final`, `review-m12-delayed-fable`). After .152 is
+     in the batch, one Opus run: merge the batch (one conflict at `proposal.ts:288-292`, keep FD1's
+     `p` arg and 6-arg `statusGroup`), remove the "wait end + 1" clamp for job-run deliveries only
+     (keep it for root deliveries, ruling (b) in `.152`), count delayed runs in steps/deliveries
+     (`proposal.ts:284`), update `raid.test.ts:391`. Scoped recheck, then one Fable batch review,
+     open the batch PR, merge.
+3. **M13**: FD2 (`loka-kgd.139`) then FD3 (`loka-kgd.140`); Fable briefs with PM rulings are in their
+   Beads notes (kernel_api 1.91, 1.92). Start after both batches land (FD2 needs FD1's `policy.ts`
+   and RS-5's `view.ts`). Then a Fable brief run for 16, 33, FD5 + `loka-kgd.22`, FD7 (owner rule
+   below), W15 + FD9 by Opus.
+4. Word bar `loka-x6t.39` (touch-first, optional keyboard for Say), Built rooms `loka-kgd.109`, M14
+   (ghost-walk `loka-kgd.69` with jail; mounts after 43a), M15 (G10 is letters by job only; pins and
+   notes descoped), Homestead, Settle S3/S4 only on an owner yes.
+5. Housekeeping draft #384: has the token-hygiene update, `loka-9ruc` (pre-push hook runs
+   `bin/prepush.sh`), `loka-oy8i` (session_status compaction line), the G10 plan edit. Add
+   `loka-mm5v`, `loka-xroj` after the long-wait batch, `loka-dgl6`, and approved retro items
+   `loka-13i3`, `loka-z167`, `loka-o5c2`. Its branch edits `docs/HANDOFF.md` (one line): on conflict keep main's HANDOFF and
+   re-apply "the pre-push hook runs it". Close `loka-bwfo` when #384 merges.
 
 Merge mechanics: `bin/pm_merge.sh <batch-worktree> <batch-branch> <slice-branch> <review-branch>
-"<subject>" <reviewed-sha>` now resolves the routine conflicts itself (generated files, the review
-index, appended `docs/system/mechanics.md` sections, the `kernel_api` line in `world.ts`) and stops on
-anything else; a code conflict goes to the slice developer (merge the batch into the slice branch).
-`protocol/fixtures/invalid.json` is still by hand (union, `json.dumps(indent=2)`). Developers run
-`bin/prepush.sh` before every push (the pre-push hook runs it) and never wait on CI; the PM watches CI.
+"<subject>" <reviewed-sha>`; a new batch worktree needs `bin/worktree_setup.sh` before its first
+merge commit (Prettier hook). Generated files on conflict: regenerate (`elixir bin/contracts.exs`
+writes `docs/checks.gen.json`). Developers run `bin/prepush.sh` (the #384 hook will enforce it) and
+never wait on CI; the PM watches CI and treats a cancelled job at its timeout as red.
 
-Session lessons (2026-10-14):
-- Subagents died seven times on "`server_tool_use` ids must be unique" after a compaction, on a
-  SendMessage resume or a self-resume after a background CI wait. Until `loka-bwfo` proves the fix:
-  never resume a compacted agent, keep agents short, and tell every agent: foreground commands only,
-  no background waits.
-- Run a second opinion on the head after the main review's fix round, not in parallel on a head the
-  main review fails.
+Session lessons (2026-10-14, session 84e03897):
+- A developer's `/code-review` result can be the only record of its findings: put open items in
+  Beads at handback (retro `loka-z167`).
+- "cancelled" in `gh run list` can be a job timeout, not a superseded run: open the run (retro
+  `loka-13i3`).
+- Spotlight: the owner added `~/dev` to Spotlight Privacy; mds load spikes from the main checkout
+  should stop.
 
 ## Standing owner rules not yet written elsewhere in the repo
 
@@ -98,10 +111,14 @@ Session lessons (2026-10-14):
 - Models: developers Opus (Sonnet for bounded docs or content); reviewers fresh Opus; Fable only for
   the one review per mechanics batch head, E-gates and the release-candidate audit
   ([WORKFLOW.md](WORKFLOW.md) routing table).
+- Fable drafts briefs for new modules, contract changes (save, protocol, world graph), Realm-sensitive
+  rows and new interaction patterns, one Fable run per batch; Opus or Sonnet brief rows that follow
+  an existing pattern, S rows and content (owner 2026-10-14: "yes record the fable brief rule").
 - Load gate: run `uptime` in its own call before each spawn; spawn only below load 8; at most 5
   agents, at most 3 running tests.
 - Budget: the weekly Claude allowance resets Wednesdays 05:00 HST; Fable draws the same pool faster.
   Near the cap, keep to 1 or 2 agents and Sonnet for bounded work.
+- Jev (TypeSafe): spend approved (owner, 2026-10-14: "yes to this approve to allow spend"); briefs and cartridge text may leave the machine, redacted first, never saves or player words, and Jev is advisory only, never a gate (owner, 2026-10-14: "yes to both, briefs can leave the machine"). Pi keeps its $2/day cap. A decision record goes in the next housekeeping PR.
 - Pi work is marked (commit trailer `Harness: pi (...)`, a `Written ... in the Pi harness` line,
   `[Pi · model · session]` on tracker comments). Claude Code work uses the normal co-author trailer.
 
@@ -117,17 +134,19 @@ Session lessons (2026-10-14):
 
 ## Owner answers this session (paraphrased unless quoted)
 
-- Adopted the Fable priority plan ("keep going, follow the fable priority plan"); defer carry-over
-  48a-c and RS-7; Settle per the PM recommendation (S1 into Homestead, S2 merged into Built rooms,
-  S3/S4 after Homestead on a yes); Built rooms between M13 and M14; Balance gates on the showcase only;
-  keep W9 "sleep provokes"; `loka-b60` at the release candidate; "yes to word bar, put mounts after
-  43a in M14"; approved all five retro items.
-- `fast-jev-compaction` stays on with `compactAtPercent: 101` (owner: "yes apply compactAtPercent
-  101, if you tihnk that is good for us"; "please fix the jev-compaction plugin i think its useful").
+- 2026-10-14 (session 84e03897): approved retro items `loka-9ruc`, `loka-oy8i`; G10 map pins and
+  journal notes descoped ("maybe descope that for now"), letters by job kept; death penalty options
+  (row 47) kept ("lets keep it"); retro items `loka-13i3`, `loka-z167`, `loka-o5c2` approved ("approve all three retro items"); Fable drafts briefs for hard rows ("yes record the fable brief
+  rule", rule above); `~/dev` added to Spotlight Privacy.
+- Earlier 2026-10-14: fast-jev compaction OFF ("ok keep it off"); Fable allowed for important
+  judgment work; adopted the Fable priority plan; Settle S1 into Homestead, S2 cut, S3/S4 on a yes;
+  word bar touch-first; mounts after 43a in M14.
 
 ## Open owner questions
 
-None open.
+- Cloud compute (`loka-2of`, prices refreshed in its notes): the bottleneck is M1 CPU, not CI (CI is
+  free: the repo is public). PM pick: a Hetzner CAX41 agent box (~$45/mo, 16 ARM cores) or CAX31
+  (~$20/mo, within the $20 budget). Owner to choose and sign up; the PM then writes setup steps.
 
 ## Parked (polish lane)
 
