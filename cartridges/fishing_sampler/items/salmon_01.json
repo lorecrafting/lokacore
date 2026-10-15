@@ -1,0 +1,14 @@
+{
+  "keywords": [
+    "salmon",
+    "salmon_01"
+  ],
+  "short": "item.salmon.short",
+  "room_line": "item.salmon.room",
+  "description": "item.salmon.description",
+  "mass_grams": 500,
+  "location": {
+    "in": "room",
+    "room": "larder"
+  }
+}
