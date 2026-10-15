@@ -149,9 +149,10 @@ test('a rule with two spawn steps births two raiders, slots 2 then 1', () => {
 
 // The full moon from 100: the raid's calendar job and the plan's job (wander boundary every hour)
 // are both due at 100; same-time jobs run in job id order, so context 1111… runs the calendar job
-// first and 2222… the plan's. `probe` also gives the plan target 1 and chance 100, so its own job
+// first and 4444… the plan's (the job ids depend on the content: row 38's defender moved them,
+// so a content change may need a new context here). `probe` also gives the plan target 1 and chance 100, so its own job
 // births slot 1 at 100 too.
-const CONTEXTS = ['11111111-1111-4111-8111-111111111111', '22222222-2222-4222-8222-222222222222'];
+const CONTEXTS = ['11111111-1111-4111-8111-111111111111', '44444444-4444-4444-8444-444444444444'];
 const fullAt100 = (c: any) => (c.calendar.lunar.phases[1].at = 100);
 const probe = (c: any) => {
   fullAt100(c);
@@ -248,4 +249,72 @@ test('37b: the aftermath applies once per cycle, across new-moon hours and a reb
   assert.equal(aftermaths(rebuilt), 1);
   rebuilt = elapsed(rebuilt, 4900);
   assert.equal(aftermaths(rebuilt), 2);
+});
+
+// Row 38 (protect objective): `called_to_hold` activates hold_the_gate for the player whose body
+// enters the village while raided; `defender_fell` fails it on the defender's death; `gate_held`
+// resolves it, per holder, when raided turns false.
+const gate = (w: World) =>
+  Object.values(w.state.quests ?? {})
+    .filter((q) => q.quest.key === 'hold_the_gate')
+    .map((q) => [q.scope, q.state, q.outcome]);
+const holder = (w: World, state: string, outcome?: string) => [
+  [{ kind: 'player', character_id: w.character }, state, outcome],
+];
+const defender = (w: World) =>
+  Object.keys(w.entities).find((e) => w.entities[e]!.kind === 'npc' && !raiders(w).includes(e))!;
+
+// Breaks: entering activates while the gate is not raided (the `when` not read for the entrant).
+test('38: entering the village before the raid activates nothing; no holder resolves nothing', () => {
+  let w = elapsed(act(world(), { type: 'move', direction: 'north' }), 999);
+  assert.deepEqual(gate(w), []);
+  w = elapsed(w, 2000);
+  assert.deepEqual(gate(w), []);
+});
+
+// Breaks: the entrant is not the delivery actor (activation lands on the root's actor or
+// nowhere), or the resolve step does not reach the holder on a world-caused fact_changed.
+test('38: entering while raided activates for the entrant; the new moon resolves it held', () => {
+  let w = act(elapsed(world(), 1000), { type: 'move', direction: 'north' });
+  assert.deepEqual(gate(w), holder(w, 'active'));
+  w = elapsed(act(w, { type: 'move', direction: 'south' }), 2000);
+  assert.deepEqual(gate(w), holder(w, 'resolved', 'held'));
+});
+
+// Breaks: quest.fail is legal only under fact_changed (the death does not fail it), or the resolve
+// step does not skip a terminal holder (the new moon overwrites failed or faults).
+test('38: the defender dying fails it fallen; the new moon leaves it failed', () => {
+  let w = act(elapsed(world(), 1000), { type: 'move', direction: 'north' });
+  w = elapsed(act(w, { type: 'attack', target_id: defender(w) }), 1200);
+  assert.deepEqual(gate(w), holder(w, 'failed', 'fallen'));
+  w = elapsed(w, 2000);
+  assert.deepEqual(gate(w), holder(w, 'failed', 'fallen'));
+});
+
+// Breaks: the activation `when` does not read the defender (a player entering after it fell takes
+// a quest the new moon then resolves held), or a fail with no holder writes or faults.
+test('38: with the defender already dead, entering while raided activates nothing', () => {
+  let w = act(world(), { type: 'move', direction: 'north' });
+  w = elapsed(act(w, { type: 'attack', target_id: defender(w) }), 1000);
+  w = act(act(w, { type: 'move', direction: 'south' }), { type: 'move', direction: 'north' });
+  assert.equal(raided(w), true);
+  assert.deepEqual(gate(w), []);
+});
+
+// Breaks: an NPC entrant activates for the root player (reaction.ts drops `npc ||`; the actor falls
+// back to the player, whose view holds the `when`). The defender walks field -> village on schedule.
+test('38: the defender walking into the raided village activates nothing', () => {
+  let w = world((c) => {
+    const d = c.npcs['raid_sampler@0.0.1:npc/defender'];
+    const at = (key: string) => ({ ...d.room, key });
+    d.daily_schedule = { '0': at('field'), '2': at('village') };
+    d.room = at('field');
+  });
+  // The player waits in the village, so the root player's `when` (npc_present) holds on entry.
+  w = elapsed(act(w, { type: 'move', direction: 'north' }), 1100);
+  assert.equal(raided(w), true);
+  assert.notEqual(w.state.containers[defender(w)], w.roomIds[VILLAGE]);
+  w = elapsed(w, 1300);
+  assert.equal(w.state.containers[defender(w)], w.roomIds[VILLAGE]);
+  assert.deepEqual(gate(w), []);
 });

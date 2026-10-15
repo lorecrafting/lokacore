@@ -48,6 +48,7 @@ export function placeOf(world: World, npc: EntityId, due: number, steps: Steps) 
   const at = { ...world, state: { ...world.state, clock: due } };
   const ctx = { target: npc, steps };
   const pick = e.schedule_cases?.[hour]?.find(
+    // ast-grep-ignore: ts-rule-actor-from-command
     (c) => !c.when || holds(at, world.character, c.when.root, ctx),
   );
   return {

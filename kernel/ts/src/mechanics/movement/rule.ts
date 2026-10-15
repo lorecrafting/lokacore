@@ -16,6 +16,8 @@ import { concealed, perceives } from '../status/shared.ts';
 // with nothing to change, no RNG and no event, like look; the host shows sight().
 import {
   accepted,
+  actorOf,
+  admitted,
   COMPASS,
   has,
   keys,
@@ -45,17 +47,19 @@ export const decide: Rule<'movement'> = (world, command, mint, steps = { n: 0 })
  */
 export function sight(world: World, body: EntityId, steps: Steps = { n: 0 }) {
   const room = world.rooms[world.state.containers[body]];
-  const shown = (d: string) => has(room.exits, d) && !hidden(world, room, d, world.character);
+  const actor = actorOf(world, body);
+  if (!actor) return []; // only an admitted character's body sees exits
+  const shown = (d: string) => has(room.exits, d) && !hidden(world, room, d, actor);
   return COMPASS.filter(shown).map((direction) => {
-    const barred = passage(world, room, direction, world.character, steps);
+    const barred = passage(world, room, direction, actor, steps);
     if (barred) return { direction, code: barred };
-    if (dark(world, world.character, steps)) return { direction };
+    if (dark(world, actor, steps)) return { direction };
     const there = world.roomIds[refString(exitTo(room, direction)!)];
     if (
       perceives(world, there, 'blind') || // status reader 9: a darkened room hides its contents
       (world.rooms[there].dark_description &&
-        !darkSight(world, world.character) &&
-        !illuminated(world, world.character, steps))
+        !darkSight(world, actor) &&
+        !illuminated(world, actor, steps))
     )
       return { direction };
     const at = (id: string): id is EntityId =>
@@ -68,7 +72,8 @@ export function sight(world: World, body: EntityId, steps: Steps = { n: 0 }) {
 
 /** Registered invariants of movement (protocol/invariants.json), pure checks of a world. */
 export const invariants: Readonly<Record<string, (world: World) => boolean>> = {
-  player_in_one_room: (world) => has(world.rooms, world.state.containers[world.body]),
+  player_in_one_room: (world) =>
+    admitted(world).every(([, body]) => has(world.rooms, world.state.containers[body])),
   exits_resolve: (world) =>
     values(world.rooms).every((room) =>
       values<{ to: DefinitionRef }>(room.exits).every((exit) =>

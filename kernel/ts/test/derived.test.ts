@@ -10,7 +10,8 @@ import { validate } from '../src/foundation/validate.ts';
 import { decide } from '../src/mechanics/attributes/rule.ts';
 import { derived } from '../src/mechanics/attributes/shared.ts';
 import { carryingAdded, carryingExchange } from '../src/mechanics/containment/shared.ts';
-import { adjust, level, resourceRef } from '../src/mechanics/resource.ts';
+import { adjust, level, maxima, resourceRef } from '../src/mechanics/resource.ts';
+import { sight } from '../src/mechanics/movement/rule.ts';
 import { holds } from '../src/mechanics/policy.ts';
 import { apply } from '../src/runtime/apply.ts';
 import { gameView } from '../src/view/view.ts';
@@ -331,4 +332,18 @@ test('a derived table requires its terms and a positive 32-bit divisor', () => {
   assert.deepEqual(validate('WorldSettings', { derived: { mv_max: ok } }), [
     { path: '/derived/mv_max', code: 'unknown_property' },
   ]);
+});
+
+// Breaks (loka-kgd.150.3): maxima or sight reads the one world character instead of the body's own,
+// so a non-character body (the anvil, in the hall with no hp spec of its own) gets hardy's derived
+// maximum 16 or the hall's exits.
+test("only a character's body has a derived hp maximum and sees exits", () => {
+  const w = chosen('hardy');
+  assert.deepEqual(Object.values(maxima(w, w.body)), [16]);
+  assert.deepEqual(maxima(w, anvil(w)), {});
+  assert.deepEqual(
+    sight(w, w.body).map((s) => s.direction),
+    ['east', 'north'], // cartridges/derived_sampler/rooms/hall.json
+  );
+  assert.deepEqual(sight(w, anvil(w)), []);
 });
