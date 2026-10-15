@@ -34,7 +34,7 @@ registerHooks({
         format: 'module',
         shortCircuit: true,
         source:
-          "export const Pressable='Pressable',Text='Text',TextInput='TextInput',View='View',ScrollView='ScrollView',SafeAreaView='SafeAreaView',AccessibilityInfo={announceForAccessibility:()=>{}},Easing={},Animated={View:'View',Value:class {}},PanResponder={create:()=>({panHandlers:{}})};",
+          "export const Pressable='Pressable',Text='Text',TextInput='TextInput',View='View',ScrollView='ScrollView',SafeAreaView='SafeAreaView',AccessibilityInfo={announceForAccessibility:()=>{}},Easing={},Animated={View:'View',Value:class {constructor(v){this.v=v}}},PanResponder={create:()=>({panHandlers:{}})};",
       };
     if (!url.endsWith('.tsx')) return next(url, context);
     return {
@@ -55,7 +55,7 @@ const { Footer } = await import('./Footer.tsx');
 const { StatusLine } = await import('./Status.tsx');
 const { BookView } = await import('./Book.tsx');
 const { CharacterPage } = await import('./sections.tsx');
-const { StatusIcons } = await import('./StatusIcon.tsx');
+const { StatusIcons, Tooltip } = await import('./StatusIcon.tsx');
 
 function browser(t: { after: (cleanup: () => void) => void }) {
   const originalWindow = globalThis.window;
@@ -368,6 +368,14 @@ test('status icons: five then +N, named by label, time and polarity, pictures wh
   assert.equal(glyphOf(six[5]), '+1');
   six[5].props.onPress();
   assert.deepEqual(opened, ['character']);
+  // Reduced motion (the fade stub): the tip shows at once, no fade started (no Animated.timing here).
+  assert.equal(Tooltip({ text: 'fed' }).props.style.opacity.v, 1);
+  const row = (props: object) =>
+    StatusLine({ time: 720, resources: [], text, open: () => {}, openCharacter: open, ...props })
+      .props.children[0];
+  assert.equal(row({ conditions: five }).props.open, open);
+  assert.equal(row({ conditions: five, locked: true }).props.open, undefined);
+  assert.equal(row({ conditions: [] }), false);
   const locked = icons(five);
   assert.deepEqual(
     locked.map((e) => [e.type, e.props.accessibilityRole]),

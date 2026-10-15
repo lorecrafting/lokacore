@@ -71,7 +71,7 @@ export const Five: Story = {
   args: { conditions: five },
   play: async ({ canvas }) => {
     await expect(canvas.getAllByRole('button')).toHaveLength(5);
-    await expect(canvas.queryByText(/^\+/)).toBeNull();
+    await expect(canvas.queryByRole('button', { name: /more/ })).toBeNull();
   },
 };
 

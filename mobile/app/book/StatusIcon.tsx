@@ -41,7 +41,7 @@ export function StatusIcons(p: Props) {
         </Icon>
       ))}
       {more > 0 && (
-        <Icon look="neutral" name={`+${more} more`} open={p.open} label>
+        <Icon look="neutral" name={`+${more} more`} open={p.open}>
           {`+${more}`}
         </Icon>
       )}
@@ -62,7 +62,6 @@ function Icon(p: {
   tip?: string;
   setTip?: (tip?: string) => void;
   open?: () => void;
-  label?: boolean; // the +N disc: its count is shown text, so it leads the name (label in name)
   children: string;
 }) {
   const c = usePalette();
@@ -80,7 +79,7 @@ function Icon(p: {
         justifyContent: 'center',
       }}
     >
-      <Text aria-hidden={!p.label} style={{ ...(p.label ? type.label : type.small), color: l.ink }}>
+      <Text aria-hidden style={{ ...type.label, color: l.ink }}>
         {p.children}
       </Text>
     </View>
@@ -117,7 +116,7 @@ function Icon(p: {
 
 // The Tip's bubble (Footer.tsx Tip) without Got it, over the row; it fades in, cut under reduced
 // motion, and never takes a touch.
-function Tooltip({ text }: { text: string }) {
+export function Tooltip({ text }: { text: string }) {
   const c = usePalette();
   const reduced = useReducedMotion();
   const shown = useRef(new Animated.Value(reduced ? 1 : 0)).current;
