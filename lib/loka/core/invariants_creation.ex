@@ -1,3 +1,4 @@
+# size: allow 315, corpse, spawn and built provenance share the one creation oracle
 defmodule Loka.Core.InvariantsCreation do
   @moduledoc "Independent durable creation/initial-custody proof (M5-B)."
   alias Loka.Core.{Compose, Contracts}
