@@ -17,6 +17,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Second opinion: toolbox row FD4, NPC-NPC pair facts (loka-kgd.141)](2026-10-14-m12-pairs-second-opinion.md): **CHANGES REQUIRED**
 - [Review: toolbox row FD4, NPC-NPC pair facts (loka-kgd.141)](2026-10-14-m12-pairs-review.md): **APPROVE**
 - [Review: mechanics batch M12 (Fable batch review, final head)](2026-10-14-m12-batch-fable-review.md): **APPROVE WITH NOTES**
+- [Review: one long elapsed wait equals the same wait in steps (loka-kgd.152, loka-kgd.151)](2026-10-14-loka-kgd.152-longwait-review.md): **CHANGES REQUIRED**
 - [Review: toolbox row 37a, phased world event spawn (loka-kgd.131)](2026-10-13-m12-raid-review.md): **APPROVE WITH NOTES**
 - [Review: m11 property and bank (rows 24/25) mobile save, second opinion](2026-10-13-m11-property-second-opinion.md): **APPROVE WITH NOTES**
 - [Review: toolbox rows 24 and 25, property ownership and bank (loka-kgd.127)](2026-10-13-m11-property-review.md): **APPROVE WITH NOTES**
