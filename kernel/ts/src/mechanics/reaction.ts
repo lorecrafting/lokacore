@@ -335,16 +335,16 @@ function terminal(
 }
 
 // A quest event's evidenced player instance owns the delivery; legacy triggers keep the root actor.
-/** loka-kgd.150.2: the delivery's actor (the subject's character, else the doer), whether a
- * subject that is no player's body (an NPC, a world trigger) blocks activation, and the
- * character the trigger itself names (its subject's, or a quest_resolved's owner), if any.
- * ponytail: the root command's actor stands in while proposal-made events (a delivery's
- * fact_changed, a job's events) carry no actor_id; stamping them re-pins fixtures (Realm R14). */
+/** loka-kgd.150.2: actor (the subject's character, else the doer), whether a non-player subject
+ * blocks activation, and the trigger's own character (Attribution). ponytail: the root actor
+ * stands in while proposal-made events carry no actor_id; stamping them re-pins fixtures (R14). */
 function deliveryActor(world: World, cause: DomainEvent, root: CharacterId) {
   const named = subjectOf(cause);
   const character = named && actorOf(world, named);
   const actor = resolvedActor(world, cause, character ?? cause.actor_id ?? root);
-  const own = character ?? (cause.payload.type === 'quest_resolved' ? actor : undefined);
+  const player = (s: DomainEvent['scope']) => (s.kind === 'player' ? s.character_id : undefined);
+  const doer = cause.payload.type === 'fact_changed' ? player(cause.scope) : cause.actor_id;
+  const own = named ? character : cause.payload.type === 'quest_resolved' ? actor : doer;
   return [actor, Boolean(named && !character), own] as const;
 }
 

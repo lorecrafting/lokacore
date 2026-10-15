@@ -380,8 +380,8 @@ completes to `objectives_complete` as its own writer group. Resolution (`:111`) 
 rule that resolves it (a dialogue choice or typed reaction): no open instance `invalid_state`; `active` with an
 unmet `current_state` objective `quest_requirement`; else `quest.transition` to
 `objectives_complete` (if needed) and `resolved` with the choice as outcome, and
-`quest_resolved`. A typed reaction may instead fail each holder's (Attribution below) active or
-objectives_complete instance with a declared outcome. Failure never reopens a terminal
+`quest_resolved`. A typed reaction may instead fail an active or
+objectives_complete instance (whose: Attribution below) with a declared outcome. Failure never reopens a terminal
 instance and emits no event. Policy leaf `quest_state`; the GameView journal lists the player's instances.
 A quest may declare `journal` texts: `active`, `objectives_met`, `resolved`, `failed`,
 `abandoned`, and optional `outcomes` keyed by outcome. The view selects one TextKey without
@@ -617,7 +617,9 @@ doer's facts, quests and experience. An event the host makes without an `actor_i
 delivery's `fact_changed`, a due job's events) falls back to the root command's actor, so a
 job-caused trigger runs for the elapsed command's actor; the Realm delivers per character (R14).
 `quest.resolve` and `quest.fail` end only the trigger's own character's instance when the trigger
-names one (a subject that is a player body, or a `quest_resolved` owner), else every holder's.
+names one (a player-body subject; the `actor_id` of an event whose Subject is the actor's body; a
+`quest_resolved` owner; a player-scoped `fact_changed`'s character), else (an NPC or thing subject, a `clock_hour` or
+host event without `actor_id`, a non-player fact) every holder's.
 Only `status.apply`, ([status reader 3](#status-readers-toolbox-rows-sr1-sr2-and-sr3)) `status.cure` and `status_active {subject: "subject"}` follow the subject, which may be the actor's body, an NPC or an
 item ([row G3](#statuses-on-npcs-and-things-toolbox-row-g3)), unless the step names an `item`, ([row 42](#potions-and-songs-toolbox-rows-18-and-42)) an `npc` or ([status reader 9](#a-room-as-a-status-holder-status-reader-9)) a `room`; any other subject (a detail) takes nothing, and since status reader 9 a room subject takes it; ([row W22](#fire-toolbox-row-w22)) `barrier.set` names its barrier or acts on the event's room; ([row 41](#decay-toolbox-row-41)) `item.move` moves the subject when it is an item. A check, action or custom event's subject_id
 names its target, so its status lands on the doer: a failed disarm poisons the actor. A filter naming a definition (`item`,
