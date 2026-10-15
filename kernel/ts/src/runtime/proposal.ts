@@ -23,7 +23,7 @@ import * as schedule from '../mechanics/schedule/rule.ts';
 import { cmp } from '../foundation/validate.ts';
 import { currentRound } from '../mechanics/combat/round.ts';
 import { handoffGroup, sightHandoff } from './proposal_sight.ts';
-import { queueHour, type Due } from './proposal_hours.ts';
+import { joinEarlier, joinTail, queueHour, queueScheduled, type Due } from './proposal_hours.ts';
 import { merge, statusGroup } from '../mechanics/status/job.ts';
 import { anyPending as pending, parted } from '../mechanics/dialogue/selection.ts';
 import { admit, type Admitted } from './proposal_admit.ts';
@@ -261,20 +261,19 @@ function react(p: P): Admitted | undefined {
 }
 
 // Each due job of the root's explicit advance, then its reactions, or the result that ends them.
+// size: allow 41, a drain step joins its run's writes before its reactions and its tail after
 function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined {
   const { due, to } = dueJobs(p.world, root);
   const populationPairs = populationDeadlinePairs(p.world, to);
   const groups = new Map<string, number>();
+  const start = p.ops.length;
+  let [cut, last] = [start, -1];
   for (const [job_id, { due_time, tick }] of due) {
     const at = now(p);
     if (!('cartridge' in at)) return at;
     const current = at.state.jobs?.[job_id];
-    if (
-      !current ||
-      (current.status !== 'pending' && current.due_time === due_time) ||
-      (current.encounter_id && !currentRound(at, job_id as JobId, current))
-    )
-      continue;
+    if (!current || (current.status !== 'pending' && current.due_time === due_time)) continue;
+    if (current.encounter_id && !currentRound(at, job_id as JobId, current)) continue;
     const run = {
       id: jobCommandId(job_id, due_time) as CommandId,
       world_context_id: p.world.context,
@@ -286,18 +285,22 @@ function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined
     if ((p.limit = queueHour(due, job_id, ran))) return BUDGET;
     p.rng = ran.rng;
     p.narration.push(...(ran.narration ?? []));
-    const partner = populationPairs.get(job_id);
-    const prior = groups.get(partner ?? job_id); // a partner's, or an earlier crossed hour's
-    const fresh = prior ?? p.group + 1;
+    // A population partner's group, or an earlier crossed hour's.
+    const fresh = groups.get(populationPairs.get(job_id) ?? job_id) ?? p.group + 1;
     const joined = statusGroup(at, job_id as JobId, current, p.holders, fresh, ran.delta.ops);
     if (joined) merge(p.ops, joined.merged, joined.group, [p.holders, groups]);
     const group = joined?.group ?? fresh;
     groups.set(job_id, group);
     const handoff = sightHandoff(p.world, p.ops, at, job_id as JobId, due_time, ran.delta.ops);
+    if (due_time !== last) [cut, last] = [p.ops.length, due_time]; // only strictly earlier jobs
+    joinEarlier(p.ops, [start, cut], ran.delta.ops, group, [p.holders, groups]);
+    const mark = p.ops.length;
     const own = ran.delta.ops.map((o) => ({ ...o, writer_group: handoffGroup(o, handoff, group) }));
     p.group++;
     const failed = join(p, own, ran.events, cause(p, due_time, run.id), 0, m) ?? react(p);
     if (failed) return failed;
+    const tail = joinTail(p.ops, [start, cut, mark], handoff?.group, [p.holders, groups]);
+    if ((p.limit = queueScheduled(due, tail, to))) return BUDGET;
   }
 }
 

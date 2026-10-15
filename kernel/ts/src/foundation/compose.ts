@@ -1,4 +1,6 @@
+// size: allow 302, final checks order rows by code point so both kernels report the same first fault
 import { recordKnowledge } from './compose_knowledge.ts';
+import { cmp } from './validate.ts';
 import { choice, pendingAtLimit } from './compose_choice.ts';
 import { composeLiquid } from './compose_liquid.ts';
 import { transitionBleed } from './compose_bleed.ts';
@@ -16,7 +18,7 @@ import {
 } from './compose_population.ts';
 import { packMemberRemains, packMemberInitiallyPresent } from './compose_pack.ts';
 import { openEncounter, changeEncounter } from './compose_encounter.ts';
-import { composeJob } from './compose_job.ts';
+import { composeJob, unrunJob } from './compose_job.ts';
 import { target } from './compose_target.ts';
 import { completeBirths, creationValid, initialPair, initialPlacement } from './creation.ts';
 import { sightHandoffValid } from './compose_sight.ts';
@@ -38,7 +40,7 @@ export type Change = { target: MutationTarget; value: Json };
 export type Fault = { kind: 'fault'; code: ErrorCode; target?: MutationTarget };
 export type Result = { changes: Change[] } | { fault: Fault };
 export type Written = { group: number; target: MutationTarget; value: Json };
-export type Ctx = { state: State; horizon: number; overlay: Map<string, Written> };
+export type Ctx = { state: State; horizon: number; at: number; overlay: Map<string, Written> };
 export type Outcome = { value: Json } | { code: ErrorCode };
 const DOOR: Record<string, string[]> = {
   closed: ['open', 'locked'],
@@ -55,7 +57,7 @@ export function compose(state: State, delta: StateDelta, final = true): Result {
   if (over(counts(state, ops))) return { fault: { kind: 'fault', code: 'budget_exceeded' } };
   let horizon = state.clock;
   for (const op of ops) if (op.op === 'time.advance') horizon = op.to;
-  const ctx: Ctx = { state, horizon, overlay: new Map() };
+  const ctx: Ctx = { state, horizon, at: final ? horizon : state.clock, overlay: new Map() };
   for (const [index, op] of ops.entries()) {
     const t = target(op);
     if (!initialPair(op, ops[index + 1]) || !repeatPair(op, ops[index + 1]))
@@ -72,12 +74,13 @@ export function compose(state: State, delta: StateDelta, final = true): Result {
     if ('code' in out) return fault(out.code, t);
     ctx.overlay.set(k, { group: op.writer_group, target: t, value: out.value });
   }
-  for (const w of ctx.overlay.values())
-    if (w.target.kind === 'choice' && pendingAtLimit(w.value))
-      return fault('precondition_failed', w.target);
+  const rows = [...ctx.overlay].sort(([a], [b]) => cmp(a, b)); // key order picks the first fault
+  const limit = rows.find(([, w]) => w.target.kind === 'choice' && pendingAtLimit(w.value));
+  if (limit) return fault('precondition_failed', limit[1].target);
+  const unrun = final && rows.find(([, w]) => unrunJob(w, horizon));
+  if (unrun) return fault('nonfuture_job', unrun[1].target);
   if (final && (!completeBirths(ops, state) || !sightHandoffValid(state, ops)))
     return fault('precondition_failed', { kind: 'clock' });
-  const rows = [...ctx.overlay].sort(([a], [b]) => (a < b ? -1 : 1));
   return { changes: rows.map(([, w]) => ({ target: w.target, value: w.value })) };
 }
 export function counts(state: State, ops: readonly DeltaOp[]) {
@@ -133,7 +136,7 @@ function apply(op: DeltaOp, row: Json | undefined, ctx: Ctx): Outcome {
     case 'job.schedule':
     case 'job.complete':
     case 'job.cancel':
-      return composeJob(op, row, ctx.horizon);
+      return composeJob(op, row, ctx);
     case 'encounter.open':
     case 'encounter.advance':
     case 'encounter.close':

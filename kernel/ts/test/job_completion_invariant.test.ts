@@ -59,3 +59,23 @@ test('a paired completion beyond the advance target is refused', () => {
     false,
   );
 });
+
+// Break (loka-kgd.152): the check reads due_time only from `before`, so a job scheduled and run
+// inside one long wait (the boss round at 300, scheduled by the round at 150) trips it.
+test('a job scheduled and completed inside the advance is owned by its run', () => {
+  const job = { cartridge_id: 'c', cartridge_version: '0.1.0', kind: 'schedule', key: 'k' };
+  const [a, b] = ['d1000000-0000-4000-8000-000000000000', 'd2000000-0000-4000-8000-000000000000'];
+  const before = { jobs: { [a]: { job, due_time: 150, status: 'pending' } } };
+  const ops = (due: number) => [
+    { op: 'time.advance', writer_group: 0, from: 0, to: 1050 },
+    { op: 'job.complete', writer_group: 1, job_id: a },
+    { op: 'job.schedule', writer_group: 1, job_id: b, job, due_time: due },
+    { op: 'job.complete', writer_group: 1, job_id: b },
+  ];
+  const holds = (due: number) =>
+    check('job_complete_owned_by_run', {
+      before,
+      decision: { kind: 'accepted', delta: { ops: ops(due) } },
+    } as never);
+  assert.deepEqual([holds(300), holds(1051)], [true, false]);
+});
