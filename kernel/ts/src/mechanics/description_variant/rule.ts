@@ -6,7 +6,13 @@ import { living } from '../death/shared.ts';
 // §14, §18). Accepted Look records visible NPC observations under knowledge@1; the host shows the GameView or the thing, each
 // described by describe(). A target_id is re-validated here, whatever resolved it: no detail or
 // entity by that id is not_found, one elsewhere not_present.
-import type { CharacterId, DescriptionVariant, EntityId, TextKey } from '../../contracts.gen.ts';
+import type {
+  Aside,
+  CharacterId,
+  DescriptionVariant,
+  EntityId,
+  TextKey,
+} from '../../contracts.gen.ts';
 import {
   accepted,
   bodyOf,
@@ -52,6 +58,15 @@ export const describe = (
     ? of.dark_description
     : (of.variants?.find((v) => holds(world, actor, v.when.root, { target, steps }))?.description ??
       of.description);
+
+/** Toolbox row FD2: the text of every aside of a room or detail that holds for `actor`, in authored order. */
+export const asides = (
+  world: World,
+  actor: CharacterId,
+  of: { readonly asides?: readonly Aside[] },
+  steps: Steps = { n: 0 },
+): TextKey[] =>
+  (of.asides ?? []).filter((a) => holds(world, actor, a.when.root, { steps })).map((a) => a.text);
 
 /** An entity's `field` text as `actor` sees it: its `<field>_variants`, the entity the target (toolbox row W6). */
 export const describeEntity = (

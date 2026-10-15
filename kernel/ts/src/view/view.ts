@@ -32,7 +32,7 @@ import { refusal, resolved } from '../commands/actions.ts';
 import { bodyOf, refString, type Entity, type Steps, type World } from '../runtime/decision.ts';
 import { barrierState, exitOf, opened } from '../mechanics/lookups.ts';
 import { choiceView } from '../mechanics/dialogue/shared.ts';
-import { describe, describeEntity } from '../mechanics/description_variant/rule.ts';
+import { asides, describe, describeEntity } from '../mechanics/description_variant/rule.ts';
 import * as movement from '../mechanics/movement/rule.ts';
 import { cueViews } from '../mechanics/senses.ts';
 import { holds } from '../mechanics/policy.ts';
@@ -113,10 +113,12 @@ function placeView(world: World, actor: CharacterId, here: EntityId | undefined,
   if (!here)
     return { id: '' as EntityId, title: text('' as TextKey), description: text('' as TextKey) };
   const room = world.rooms[here];
+  const lines = asides(world, actor, room, steps);
   return {
     id: here,
     title: text(room.title),
     description: text(describe(world, actor, room, steps)),
+    ...(lines.length > 0 && { asides: lines.map(text) }),
   };
 }
 

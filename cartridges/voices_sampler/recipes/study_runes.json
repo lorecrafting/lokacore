@@ -1,0 +1,44 @@
+{
+  "label": "actions.study_runes",
+  "aliases": [
+    "study"
+  ],
+  "target": {
+    "kind": "detail",
+    "room": "hall",
+    "detail": "runes"
+  },
+  "priority": 5,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": []
+    }
+  },
+  "check": {
+    "key": "study_runes",
+    "kind": "opposed",
+    "skill": "lore"
+  },
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "runes_read",
+          "value": true
+        }
+      ],
+      "narration": {
+        "actor": "narration.study_runes.success"
+      }
+    },
+    "failure": {
+      "sequence": [],
+      "narration": {
+        "actor": "narration.study_runes.failure"
+      }
+    }
+  }
+}

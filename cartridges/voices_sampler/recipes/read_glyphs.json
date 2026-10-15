@@ -1,0 +1,34 @@
+{
+  "label": "actions.read_glyphs",
+  "aliases": [
+    "decipher"
+  ],
+  "target": {
+    "kind": "detail",
+    "room": "hall",
+    "detail": "carved_door"
+  },
+  "priority": 5,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "skill_compare",
+      "skill": "lore",
+      "at_least": 2
+    }
+  },
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "glyphs_read",
+          "value": true
+        }
+      ],
+      "narration": {
+        "actor": "narration.read_glyphs.success"
+      }
+    }
+  }
+}

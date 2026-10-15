@@ -46,6 +46,16 @@ defmodule Loka.Content.RoomParts do
         do: {steps ++ ["variants", i], v}
   end
 
+  @doc "Toolbox row FD2: each aside of room `r` and of its details, with its steps in the room file."
+  @spec asides(map()) :: [{list(), map()}]
+  def asides(r) do
+    for {steps, d} <- [
+          {[], r} | for({k, d} <- Map.get(r, "details", %{}), do: {["details", k], d})
+        ],
+        {a, i} <- Enum.with_index(Map.get(d, "asides", [])),
+        do: {steps ++ ["asides", i], a}
+  end
+
   @doc """
   The room `r`, its details, embedded readables and description variants as `{steps, kind}`, the
   definition kinds of capability_registry.json.
@@ -85,7 +95,8 @@ defmodule Loka.Content.RoomParts do
   def conditions(defs) do
     for {_, {rel, [], r}} <- defs["room"],
         {steps, root} <-
-          for({s, v} <- variants(r), do: {s ++ ["when", "root"], v["when"]["root"]}) ++ locks(r),
+          for({s, v} <- variants(r) ++ asides(r), do: {s ++ ["when", "root"], v["when"]["root"]}) ++
+            locks(r),
         do: {rel, steps, root}
   end
 

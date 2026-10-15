@@ -454,6 +454,28 @@
           "additionalProperties": false
         },
         {
+          "description": "The actor's level in the named skill (skills@1: 1 when acquired, plus each growth threshold its use count has reached; 0 when neither) is at least at_least (toolbox row FD2). Derived on read. Needs kernel_api at least 1.91. Owned by skills@1.",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "skill_compare"
+            },
+            "skill": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "at_least": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          "required": [
+            "op",
+            "skill",
+            "at_least"
+          ],
+          "additionalProperties": false
+        },
+        {
           "description": "The named population plan has at least at_least living members: slots 1 to cap whose row has a member_id and no replacement_due (toolbox row W12). Derived on read; reads no actor. Needs kernel_api at least 1.86. Owned by population@1.",
           "type": "object",
           "properties": {

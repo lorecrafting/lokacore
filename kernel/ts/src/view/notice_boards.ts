@@ -34,6 +34,7 @@ export function noticeViews(
             title: detailTitle(detail),
             ...harvestRemaining(world, detail, here),
             description: description_variant.describe(world, actor, detail, steps),
+            ...asideView(world, actor, detail, steps),
             ...bedView(world, actor, detail, steps),
             ...transportActions(world, actor, id as EntityId, detail, actions, steps),
           },
@@ -44,6 +45,17 @@ export function noticeViews(
     ...(boards.length > 0 && { notice_boards: boards }),
     ...(notices.length > 0 && { notices }),
   };
+}
+
+// Toolbox row FD2: the detail's holding asides, absent when none holds.
+function asideView(
+  world: World,
+  actor: CharacterId,
+  detail: World['details'][string],
+  steps: Steps,
+) {
+  const lines = description_variant.asides(world, actor, detail, steps);
+  return lines.length > 0 ? { asides: lines.map((key) => ({ key })) } : {};
 }
 
 function harvestRemaining(world: World, detail: World['details'][string], here: EntityId) {
@@ -82,6 +94,7 @@ function noticeBoards(
             world.details[ids.get(notice.detail)!],
             steps,
           ),
+          ...asideView(world, actor, world.details[ids.get(notice.detail)!], steps),
         })),
       },
     ];

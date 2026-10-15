@@ -31,6 +31,7 @@ import { exposure } from './cartridge_exposure.ts';
 import { delayed } from './cartridge_delayed.ts';
 import { senses } from './cartridge_senses.ts';
 import { variants } from './cartridge_variants.ts';
+import { voices } from './cartridge_voices.ts';
 import { schedules } from './cartridge_schedules.ts';
 import { standing } from './cartridge_standing.ts';
 import { transports } from './cartridge_transports.ts';
@@ -293,6 +294,7 @@ function declarations(c: Obj): Diagnostic[] {
     ...senses(c),
     ...delayed(c),
     ...variants(c),
+    ...voices(c),
     ...scopedFacts(c),
     ...schedules(c),
     ...standing(c),
