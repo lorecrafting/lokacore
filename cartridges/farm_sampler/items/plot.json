@@ -35,7 +35,7 @@
           ]
         }
       },
-      "description": "item.furrow.heavy"
+      "description": "item.bed.heavy"
     },
     {
       "when": {
@@ -57,7 +57,7 @@
           ]
         }
       },
-      "description": "item.furrow.shoots"
+      "description": "item.bed.shoots"
     }
   ],
   "locks": {

@@ -3,8 +3,8 @@
 // a seed sack holding seed_01 and a watering can; the sealed larder holds turnip_01..03, the
 // sealed midden nothing. The clock starts at 3600 in spring (winter from 345600). Putting the seed
 // in a bed grows it for 86400 s; watered within the last 43200 s at the end it yields one turnip,
-// otherwise it withers; either way the seed goes to the midden, and an hourly job returns it to the
-// sack. Expected values are hand-counted from those literals.
+// otherwise it withers; either way the seed goes to the midden and stays there. Expected values are
+// hand-counted from those literals.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
@@ -120,14 +120,14 @@ for (const [bed, other] of BEDS) {
     w = at(w, c0 + 3599);
     assert.equal(text(w, bed), base);
     w = at(w, c0 + 3600);
-    assert.equal(text(w, bed), 'item.furrow.shoots');
+    assert.equal(text(w, bed), 'item.bed.shoots');
     w = at(w, c0 + 50000);
     w = play(w, water(w, bed));
     assert.equal(value(w, w.character, ref('watered_at'), item(w, bed)), c0 + 50000);
     w = at(w, c0 + 64799);
-    assert.equal(text(w, bed), 'item.furrow.shoots');
+    assert.equal(text(w, bed), 'item.bed.shoots');
     w = at(w, c0 + 64800);
-    assert.equal(text(w, bed), 'item.furrow.heavy');
+    assert.equal(text(w, bed), 'item.bed.heavy');
     w = at(w, c0 + 86400);
     assert.deepEqual(inside(w, item(w, bed)), ['turnip_01']);
     assert.deepEqual(inside(w, room(w, 'midden')), ['seed_01']);
@@ -210,7 +210,8 @@ test("a stranger's Take of the plot's turnip is permission_denied", () => {
   assert.equal(code(w, { type: 'take', item_id: item(w, 'turnip_01') }), 'accepted');
 });
 
-// One long advance and a reopen mid-growth reach the hourly-stepped state.
+// Breaks: a water reaction's stamp or ripen's `watered_at` read that depends on how the wait is
+// chunked or on in-memory state a reopen drops (one path ripens, another withers).
 test('one advance, hourly steps and a reopen before ripening reach the same harvest', () => {
   let w = put(ready('furrow'), 'furrow');
   const c0 = clock(w);
@@ -220,9 +221,10 @@ test('one advance, hourly steps and a reopen before ripening reach the same harv
   for (let t = c0 + 50000 + 3600; t < c0 + 86400; t += 3600) hourly = at(hourly, t);
   hourly = at(hourly, c0 + 86400);
   const reopened = at(hydrate(fresh(), JSON.parse(JSON.stringify(w.state)), true)!, c0 + 86400);
-  for (const x of [one, hourly, reopened]) {
-    assert.deepEqual(inside(x, item(x, 'furrow')), ['turnip_01']);
-    assert.deepEqual(statuses(x, item(x, 'furrow')), []);
+  assert.deepEqual(inside(one, item(one, 'furrow')), ['turnip_01']);
+  assert.deepEqual(statuses(one, item(one, 'furrow')), []);
+  for (const x of [hourly, reopened]) {
     assert.deepEqual(x.state.containers, one.state.containers);
+    assert.deepEqual(statuses(x, item(x, 'furrow')), []);
   }
 });
