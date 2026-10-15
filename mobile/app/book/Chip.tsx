@@ -11,7 +11,7 @@ export function Chip(p: { word: string; label: string; onPress?: () => void; pen
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={p.label}
-      accessibilityState={{ disabled: off, busy: !!p.pending }}
+      aria-busy={!!p.pending} // RN web maps aria-busy, not accessibilityState.busy
       disabled={off}
       onPress={p.onPress}
       style={{

@@ -154,6 +154,7 @@ function WorldPage(p: BodyProps) {
       details={<NoticeEntries {...p} />}
       word={
         <WordBar
+          key={view.place.id} // a half-typed word and its note stay in their room
           view={view}
           chips={p.g.word}
           pending={p.screen.pending}

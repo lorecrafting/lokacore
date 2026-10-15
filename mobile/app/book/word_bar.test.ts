@@ -8,6 +8,7 @@ import { compiled } from '../../authority/local-story/__tests__/compiled.ts';
 import { book } from './__tests__/polish-book.test.ts';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { buttonsOf, WORDS } from './buttons.ts';
+import { intentOf } from './model.ts';
 import { LABEL } from './labels.ts';
 
 const speech = compiled('cartridges/speech_sampler');
@@ -35,7 +36,8 @@ const type = (b: Book, word: string) => {
 test('the square offers Say, a Whisper row per NPC, Shout and the keyboard', () => {
   const b = book(speech as never);
   const words = (how: string) => ['ward', 'help', 'hello'].map((w) => `${w}, ${how}`);
-  assert.deepEqual(b.labels().slice(2, -1), [
+  const l = b.labels();
+  assert.deepEqual(l.slice(l.indexOf('ward, say'), l.indexOf(LABEL.typeAWord) + 1), [
     ...words('say'),
     ...words('whisper to the elder'),
     ...words('whisper to the smith'),
@@ -71,19 +73,26 @@ test('shouting help in the square alerts the watchman next door', () => {
   assert.deepEqual(facts(b), { elder_heard: true, watchman_alerted: true });
 });
 
-// Breaks: the typed word not sent as the Say chip's input, a bad word sent to the kernel, no
-// note on a bad word, or the typed text echoed into the page.
-test('a typed word is said like its chip; a bad word only shows the note', () => {
+// Breaks: a typed word not sent as a Say (or sent with the token of a view that has moved on),
+// a bad word sent to the kernel, no note on a bad word, or the typed word echoed into the page.
+test('a typed word is said like its chip, even after the view moves on, and never shown', () => {
   const b = book(speech as never);
+  const input = () => b.draw().find((n) => n.type === 'TextInput');
   b.tap(LABEL.typeAWord);
   const before = revision(b);
   type(b, 'two words');
   assert.equal(revision(b), before);
   assert.ok(b.text().includes(LABEL.oneWord));
-  type(b, 'help');
-  assert.deepEqual(facts(b), { elder_heard: true });
+  input().props.onChangeText('xyzzy');
+  const stale = input(); // drawn before a background update, so its Say token is old
+  const { view, token } = b.game.view();
+  const hello = buttonsOf(view, String, String).find((x) => x.label === 'hello, say')!;
+  b.game.invoke(intentOf({ ...hello, token })); // not through the Book: no new generation
+  const after = revision(b);
+  stale.props.onSubmitEditing();
+  assert.ok(revision(b) > after);
   assert.ok(!b.text().includes(LABEL.oneWord));
-  assert.ok(!b.text().some((t) => t.includes('two words')));
+  assert.ok(!b.text().some((t) => t.includes('xyzzy')));
 });
 
 // Breaks: a refused spell word hidden or pressable, its reason missing, a learned word not shown,
@@ -116,13 +125,16 @@ test('every word chip on the square is admitted', () => {
   }
 });
 
-// Breaks: a word press emitted with no word (the kernel refuses `{}`), or chips offered while a
+// Breaks: a word press emitted without one word (the kernel refuses it), or chips offered while a
 // combat, scene or conversation is open (the square's own view with one of them set).
 test('no word press without a word, nor in combat, a scene or a conversation', () => {
   const v = book(speech as never).game.view().view;
   const say = (k: string) => k;
   const words = (w: GameView) => buttonsOf(w, say, say).filter((p) => WORDS.includes(p.action_key));
   assert.equal(words(v).length, 12);
+  assert.ok(
+    words(v).every((p) => /^[a-zA-Z]{1,32}$/.test((p.input as { word?: string }).word ?? '')),
+  );
   assert.deepEqual(words({ ...v, phrases: [] }), []);
   const open = (f: string) =>
     JSON.parse(readFileSync(new URL(`../stories/views/${f}.json`, import.meta.url), 'utf8')).view;

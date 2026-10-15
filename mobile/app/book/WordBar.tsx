@@ -60,6 +60,7 @@ export function WordBar(p: {
   // ponytail: a typed word reuses a say chip's token and context, so say without phrases has no keyboard.
   const base = of('say')[0];
   const send = () => {
+    if (p.pending) return;
     if (!WORD.test(draft)) return setWrong(true);
     p.press({ ...base, label: LABEL.say, input: { word: draft } });
     setDraft('');
