@@ -118,12 +118,14 @@ const gateRoots = (c: Obj): [Obj, string][] =>
   );
 
 // Policy nodes with diagnostic paths, across every definition that declares a condition.
+/** Each node of one policy tree with its path. */
+export const walk = (p: Obj, at: string): [Obj, string][] => [
+  [p, at],
+  ...(p.op === 'not' ? walk(p.item, `${at}.item`) : []),
+  ...(p.items ?? []).flatMap((x: Obj, i: number) => walk(x, `${at}.items[${i}]`)),
+];
+
 export function nodes(c: Obj): [Obj, string][] {
-  const walk = (p: Obj, at: string): [Obj, string][] => [
-    [p, at],
-    ...(p.op === 'not' ? walk(p.item, `${at}.item`) : []),
-    ...(p.items ?? []).flatMap((x: Obj, i: number) => walk(x, `${at}.items[${i}]`)),
-  ];
   return [
     ...Object.entries(c.actions as Obj).flatMap(([ref, a]) =>
       walk(a.policy.root, `.cartridge.actions${step(ref)}.policy.root`),

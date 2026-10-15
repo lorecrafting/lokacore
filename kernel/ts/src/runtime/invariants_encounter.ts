@@ -12,6 +12,7 @@ export function encountersHold(state: Any, ops: Any[], result: Any): boolean {
   const preceding: Any[] = [];
   let horizon = state.clock;
   for (const op of ops) if (op.op === 'time.advance') horizon = op.to;
+  let at = horizon; // a job's run schedules later than its own due time
   for (const op of ops) {
     if (op.op === 'entity.transfer') containers.set(op.entity_id, op.destination_id);
     if (op.op === 'population.slot')
@@ -26,7 +27,8 @@ export function encountersHold(state: Any, ops: Any[], result: Any): boolean {
       });
     }
     if (op.op.startsWith('job.')) {
-      const row = job(op, jobs.get(op.job_id), horizon);
+      if (op.op === 'job.complete') at = jobs.get(op.job_id)?.due_time ?? at;
+      const row = job(op, jobs.get(op.job_id), horizon, at);
       if (!row) return false;
       jobs.set(op.job_id, row);
       written.set(`job:${op.job_id}`, { target: { kind: 'job', job_id: op.job_id }, value: row });
@@ -147,9 +149,9 @@ function participants(op: Any, containers: Map<string, Any>, known: Any): boolea
   );
 }
 
-function job(op: Any, row: Any, horizon: number): Any {
+function job(op: Any, row: Any, horizon: number, at: number): Any {
   if (op.op === 'job.schedule') {
-    if (row !== undefined || op.due_time <= horizon) return undefined;
+    if (row !== undefined || op.due_time <= at) return undefined;
     if (!bindingValid(op)) return undefined;
     const next: Any = { job: op.job, due_time: op.due_time, status: 'pending' };
     if (op.encounter_id !== undefined) next.encounter_id = op.encounter_id;
@@ -167,6 +169,7 @@ function job(op: Any, row: Any, horizon: number): Any {
       next.crow_generation = op.crow_generation;
       next.crow_phase = op.crow_phase;
     }
+    if (op.job.kind === 'reaction') next.actor_id = op.actor_id; // FD1's stored actor
     if (op.sight !== undefined) next.sight = op.sight;
     if (op.bleed_body_id !== undefined) {
       next.bleed_body_id = op.bleed_body_id;
@@ -181,6 +184,7 @@ function job(op: Any, row: Any, horizon: number): Any {
   return row.due_time <= horizon ? { ...row, status: 'completed' } : undefined;
 }
 
+// size: allow 43, one binding table per job kind (row FD1: a reaction job carries actor_id alone)
 function bindingValid(op: Any) {
   if (
     op.bleed_body_id !== undefined ||
@@ -196,10 +200,13 @@ function bindingValid(op: Any) {
   )
     return crowBindingValid(op);
   if (
-    (op.quest_instance_id === undefined && op.water_generation === undefined) !==
+    (op.quest_instance_id === undefined &&
+      op.water_generation === undefined &&
+      op.job.kind !== 'reaction') !==
       (op.actor_id === undefined) ||
     (op.quest_instance_id !== undefined &&
-      (op.job.kind !== 'quest' || op.encounter_id !== undefined))
+      (op.job.kind !== 'quest' || op.encounter_id !== undefined)) ||
+    (op.job.kind === 'reaction' && op.encounter_id !== undefined)
   )
     return false;
   if (

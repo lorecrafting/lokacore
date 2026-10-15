@@ -65,7 +65,9 @@ export function holds(
   ctx.steps.n++;
   switch (p.op) {
     case 'fact_compare':
-      return compared(world, actor, p, ctx.target);
+      return read(world, actor, p, ctx.target) === p.equals;
+    case 'time_since': // row FD1: a stamped time; no subject reads undefined, so NaN, false
+      return world.state.clock - (read(world, actor, p, ctx.target) as number) >= p.at_least;
     case 'has_item':
       return held(world, world.entityIds[refString(p.item)], bodyOf(world, actor));
     case 'barrier_state':
@@ -74,10 +76,8 @@ export function holds(
       return stateIs(world, actor, p.quest, p.state);
     case 'quest_state': // false in every state while the actor has no instance
       return questOf(world, actor, p.quest)?.[1].state === p.state;
-    case 'time_window': {
-      const hour = hourOf(world.cartridge, world.state.clock);
-      return p.from < p.to ? p.from <= hour && hour < p.to : hour >= p.from || hour < p.to;
-    }
+    case 'time_window':
+      return inWindow(world, p);
     case 'sky': {
       const f = (['lunar', 'weather', 'season', 'tide'] as const).find((k) => p[k] !== undefined)!;
       return skyPhase(world.cartridge, world.context, world.state.clock, f) === p[f];
@@ -109,25 +109,33 @@ export function holds(
   }
 }
 
+// A window that wraps midnight (from > to) holds from `from` to the end of the day and from 0 to `to`.
+function inWindow(world: World, p: Extract<Policy, { op: 'time_window' }>): boolean {
+  const hour = hourOf(world.cartridge, world.state.clock);
+  return p.from < p.to ? p.from <= hour && hour < p.to : hour >= p.from || hour < p.to;
+}
+
 function uninstalled(leaf: never): never {
   throw new Error(`policy op ${(leaf as Policy).op} is not installed`);
 }
 
 // fact@1's read: an entity or pair fact (toolbox row W2) at its named NPC or item, or with subject
-// target at the action's target (false without one), and an npc_pair fact (row FD4) at that
-// subject toward its `with` NPC; any other fact at its one scope.
-function compared(
+// target at the action's target (none without one), and an npc_pair fact (row FD4) at that
+// subject toward its `with` NPC (none without one); any other fact at its one scope.
+function read(
   world: World,
   actor: CharacterId,
-  p: Extract<Policy, { op: 'fact_compare' }>,
+  p: Extract<Policy, { op: 'fact_compare' | 'time_since' }>,
   target: EntityId | undefined,
-): boolean {
+) {
   const named = p.npc ?? p.item;
-  const subject = named ? world.entityIds[refString(named)] : p.subject && target;
-  const partner = p.with && world.entityIds[refString(p.with)];
-  if (subjective(world, p.fact) && subject === undefined) return false;
-  if (paired(world, p.fact) && !partner) return false;
-  return value(world, actor, p.fact, subject, partner) === p.equals;
+  const by = p.op === 'fact_compare' && p.subject ? target : undefined;
+  const subject = named ? world.entityIds[refString(named)] : by;
+  const partner =
+    p.op === 'fact_compare' && p.with ? world.entityIds[refString(p.with)] : undefined;
+  if (subjective(world, p.fact) && subject === undefined) return undefined;
+  if (paired(world, p.fact) && !partner) return undefined;
+  return value(world, actor, p.fact, subject, partner);
 }
 
 // attributes@1's leaves: the actor's saved value or definition start, or the current pool on the
