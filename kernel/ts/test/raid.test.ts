@@ -545,6 +545,7 @@ test('FD1: the loader keeps API 1.90, event-free delayed steps and an unbounded 
   const w0Ref = { cartridge_id: 'raid_sampler', cartridge_version: '0.0.1', kind: 'fact' };
   const since = { op: 'time_since', fact: ref('raided_at'), at_least: 600 };
   const old = (c: any) => (c.manifest.requires.kernel_api.at_least = '1.89');
+  const new95 = (c: any) => (c.manifest.requires.kernel_api.at_least = '1.95'); // npc.move's floor
   const unstamped = (c: any) => c.reactions[raid].apply.pop();
   const unshocked = (c: any) => delete c.reactions[AFTERSHOCK];
   const api = ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'];
@@ -562,23 +563,13 @@ test('FD1: the loader keeps API 1.90, event-free delayed steps and an unbounded 
     ],
     [[old, unshocked], api],
     [[old, unstamped, (c) => (c.reactions[AFTERSHOCK].apply = [])], api],
-    [
-      [
-        (c) =>
-          c.reactions[AFTERSHOCK].apply.push({
-            op: 'item.move',
-            room: { ...w0Ref, kind: 'room', key: 'village' },
-          }),
-      ],
+    ...[
+      { op: 'item.move', room: { ...w0Ref, kind: 'room', key: 'village' } },
+      { op: 'npc.move' },
+    ].map((step): [((c: any) => void)[], string[]] => [
+      [new95, (c) => c.reactions[AFTERSHOCK].apply.push(step)],
       bad(`${AFTERSHOCK}"].apply[1].op`),
-    ],
-    [
-      [
-        (c) => (c.manifest.requires.kernel_api.at_least = '1.95'),
-        (c) => c.reactions[AFTERSHOCK].apply.push({ op: 'npc.move' }),
-      ],
-      bad(`${AFTERSHOCK}"].apply[1].op`),
-    ],
+    ]),
     [
       [(c) => (c.reactions[raid].apply.at(-1).fact = ref('aftershocks'))],
       bad(`${raid}"].apply[2].fact`),
