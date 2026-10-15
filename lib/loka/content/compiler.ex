@@ -1,4 +1,4 @@
-# size: allow 351, ancestry, static map, status source, levelling settings, replenish, trail, theft, asks and speech wiring join the existing compiler boundary
+# size: allow 355, ancestry, static map, status source, levelling settings, replenish, trail, theft, asks, speech and construction wiring join the existing compiler boundary
 defmodule Loka.Content.Compiler do
   @moduledoc "Validates source files and builds the CompiledCartridge (05 §3–§8, 06 §20–21)."
   alias Loka.Content.{
@@ -248,7 +248,9 @@ defmodule Loka.Content.Compiler do
     end
   end
 
-  defp expand({rel, steps, v}, m), do: {rel, steps, Checks.expand(v, m)}
+  defp expand({rel, steps, v}, m),
+    do: {rel, steps, Loka.Content.Construction.expand(Checks.expand(v, m), m)}
+
   defp expand(:invalid, _), do: :invalid
 
   defp files(files, kind, contract),

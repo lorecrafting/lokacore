@@ -62,10 +62,6 @@ defmodule Loka.Content.Checks do
     |> Map.put("exits", Exits.expand(exits, m, &expand/2))
   end
 
-  # A room's site (Built rooms S1): its blueprints are short refs.
-  def expand(%{"directions" => _, "blueprints" => bs} = site, m) when is_list(bs),
-    do: %{site | "blueprints" => Enum.map(bs, &ref(&1, "blueprint", m))}
-
   def expand(%{"fact" => f, "equals" => _} = gate, m) when is_binary(f),
     do: Map.put(gate, "fact", ref(f, "fact", m))
 
@@ -372,8 +368,7 @@ defmodule Loka.Content.Checks do
       {kind, fields} <- [
         {"room", ~w(title description)},
         {"action", ~w(label accessibility)},
-        {"barrier", ["short"]},
-        {"blueprint", ~w(title description)}
+        {"barrier", ["short"]}
       ],
       {_, {rel, [], def}} <- defs[kind],
       d <- text_keys({rel, def}, fields, text),
@@ -438,8 +433,7 @@ defmodule Loka.Content.Checks do
       Loka.Content.Skills.conditions(defs),
       Loka.Content.Barriers.conditions(defs),
       Loka.Content.Cues.conditions(defs),
-      Loka.Content.Population.conditions(defs),
-      Loka.Content.Construction.conditions(defs)
+      Loka.Content.Population.conditions(defs)
     ])
   end
 

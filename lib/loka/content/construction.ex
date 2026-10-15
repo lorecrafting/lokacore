@@ -3,12 +3,12 @@ defmodule Loka.Content.Construction do
   Built rooms S1 (construction@1; cartridge.md Blueprint and site declarations): a room's site
   names no direction the room has an exit in (SITE_EXIT_CONFLICT) and only blueprints of this
   cartridge (UNRESOLVED_REFERENCE); a blueprint, its tags and description variants are owned by
-  their capabilities, and each variant's description has a catalog entry; a blueprint, a site or
+  their capabilities, and its title and descriptions have catalog entries; a blueprint, a site or
   world.construction needs kernel_api 1.99. Twin of kernel/ts/src/content/cartridge_construction.ts
-  (the TS loader checks blueprint parts in cartridge_refs.ts). Title and description keys are
-  Checks.texts/2's; variant and enter-lock conditions join Checks.trees/1 through conditions/1.
+  (the TS loader checks blueprint parts in cartridge_refs.ts). Variant and enter-lock conditions
+  join Checks.trees/1 through RoomParts.conditions/1.
   """
-  import Loka.Content.Source, only: [at: 2, diag: 3]
+  import Loka.Content.Source, only: [at: 2, diag: 3, ref: 3]
   import Loka.Content.Refs, only: [owned: 3, owners: 2, resolve: 4]
   alias Loka.Content.RoomParts
 
@@ -29,15 +29,11 @@ defmodule Loka.Content.Construction do
   defp sites(defs),
     do: for({_, {rel, [], %{"site" => s} = r}} <- defs["room"] || %{}, do: {rel, r, s})
 
-  @doc "Each blueprint's variant conditions and enter lock, as `{rel, steps, root}`."
-  def conditions(defs) do
-    for {rel, b} <- blueprints(defs), {steps, root} <- roots(b), do: {rel, steps, root}
-  end
+  @doc "A room definition with its site's short blueprint references expanded (other values as given)."
+  def expand(%{"site" => %{"blueprints" => bs} = s} = room, m) when is_list(bs),
+    do: %{room | "site" => %{s | "blueprints" => Enum.map(bs, &ref(&1, "blueprint", m))}}
 
-  defp roots(b) do
-    for({s, v} <- RoomParts.variants(b), do: {s ++ ["when", "root"], v["when"]["root"]}) ++
-      for %{"enter" => p} <- [b["locks"]], do: {["locks", "enter", "root"], p["root"]}
-  end
+  def expand(definition, _), do: definition
 
   defp site({rel, r, s}, m, defs) do
     exits = r["exits"] || %{}
@@ -68,12 +64,11 @@ defmodule Loka.Content.Construction do
   end
 
   defp texts({rel, b}, text) do
-    for {s, v} <- RoomParts.variants(b),
-        text != :unknown and not is_map_key(text, v["description"]),
-        do:
-          diag("UNRESOLVED_REFERENCE", at(rel, s ++ ["description"]), %{
-            "target" => v["description"]
-          })
+    keys = for {s, v} <- RoomParts.variants(b), do: {s ++ ["description"], v["description"]}
+
+    for {s, k} <- [{["title"], b["title"]}, {["description"], b["description"]} | keys],
+        text != :unknown and not is_map_key(text, k),
+        do: diag("UNRESOLVED_REFERENCE", at(rel, s), %{"target" => k})
   end
 
   defp floor(m, used, world) do

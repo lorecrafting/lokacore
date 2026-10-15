@@ -1,3 +1,4 @@
+// size: allow 304, construction joins the declaration stage
 // Cartridge artifact loader (05 §11, §20; CAR-05, CAR-07): artifact bytes and the installed
 // kernel/app → the decoded cartridge and its hash, or the one diagnostic of the first failing
 import { scopedFacts } from './cartridge_scoped_facts.ts';
