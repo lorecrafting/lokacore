@@ -1,7 +1,7 @@
 # size: allow 352, typed knowledge, patrol, final birth admission, status and levelling share portable composition
 defmodule Loka.Core.Compose do
   @moduledoc "Portable delta composition: changed rows only; atomic conflicts and bounded work."
-  alias Loka.Core.{ComposeChoice, ComposeJob, ComposePack, Creation}
+  alias Loka.Core.{ComposeChoice, ComposeJob, ComposePack, ComposeStatus, Creation}
   @profile_path Path.expand("../../../docs/spec/conformance/composition-profile.json", __DIR__)
   @external_resource @profile_path
   @profile File.read!(@profile_path)
@@ -41,6 +41,7 @@ defmodule Loka.Core.Compose do
     cond do
       t = ComposeChoice.pending_at_limit(rows) -> fault("precondition_failed", t)
       t = final && ComposeJob.unrun(rows, horizon) -> fault("nonfuture_job", t)
+      t = final && ComposeStatus.expired(rows, horizon) -> fault("precondition_failed", t)
       true -> %{"changes" => Enum.map(rows, &row/1)}
     end
   end
@@ -98,9 +99,12 @@ defmodule Loka.Core.Compose do
           String.starts_with?(op["op"], "job.") ->
             Loka.Core.ComposeEncounter.job(op, read(target, ctx), horizon, at)
 
-          # Against the composing time: a drain job's sub-step may (re)apply a status ending before the target.
+          # Against the composing time: a drain job's sub-step may (re)apply a status or bleed ending before the target.
           op["op"] == "status.transition" ->
-            Loka.Core.ComposeStatus.transition(op, read(target, ctx), state, at)
+            ComposeStatus.transition(op, read(target, ctx), state, at)
+
+          op["op"] == "bleed.transition" ->
+            Loka.Core.ComposeBleed.transition(op, read(target, ctx), state, at, overlay)
 
           true ->
             apply_op(op, target, ctx)
@@ -183,9 +187,6 @@ defmodule Loka.Core.Compose do
     initial = get_in(elem(ctx, 0), ["choices", op["continuation_id"]])
     ComposeChoice.transition(op, read(t, ctx), initial)
   end
-
-  defp apply_op(%{"op" => "bleed.transition"} = op, t, {state, horizon, overlay} = ctx),
-    do: Loka.Core.ComposeBleed.transition(op, read(t, ctx), state, horizon, overlay)
 
   defp apply_op(%{"op" => "levelling.set"} = op, t, ctx),
     do: Loka.Core.ComposeLevelling.set(op, read(t, ctx))

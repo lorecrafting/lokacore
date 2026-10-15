@@ -1,10 +1,10 @@
-// size: allow 302, final checks order rows by code point so both kernels report the same first fault
+// size: allow 304, final checks order rows by code point so both kernels report the same first fault
 import { recordKnowledge } from './compose_knowledge.ts';
 import { cmp } from './validate.ts';
 import { choice, pendingAtLimit } from './compose_choice.ts';
 import { composeLiquid } from './compose_liquid.ts';
 import { transitionBleed } from './compose_bleed.ts';
-import { transitionStatus } from './compose_status.ts';
+import { transitionStatus, expiredStatus } from './compose_status.ts';
 import { setLevelling } from './compose_levelling.ts';
 import { quest, repeatPair } from './compose_quest.ts';
 import { composeFuel } from './fuel.ts';
@@ -79,6 +79,8 @@ export function compose(state: State, delta: StateDelta, final = true): Result {
   if (limit) return fault('precondition_failed', limit[1].target);
   const unrun = final && rows.find(([, w]) => unrunJob(w, horizon));
   if (unrun) return fault('nonfuture_job', unrun[1].target);
+  const expired = final && rows.find(([, w]) => expiredStatus(w, horizon));
+  if (expired) return fault('precondition_failed', expired[1].target);
   if (final && (!completeBirths(ops, state) || !sightHandoffValid(state, ops)))
     return fault('precondition_failed', { kind: 'clock' });
   return { changes: rows.map(([, w]) => ({ target: w.target, value: w.value })) };
@@ -115,8 +117,7 @@ function apply(op: DeltaOp, row: Json | undefined, ctx: Ctx): Outcome {
   if (op.op === 'liquid.set') return composeLiquid(op, row, ctx.state);
   if (op.op === 'fuel.set') return composeFuel(op, row, ctx.state);
   if (op.op === 'entity.create') return createEntity(op, row, ctx.state);
-  if (op.op === 'bleed.transition')
-    return transitionBleed(op, row, ctx.state, ctx.horizon, ctx.overlay);
+  if (op.op === 'bleed.transition') return transitionBleed(op, row, ctx.state, ctx.at, ctx.overlay);
   if (op.op === 'status.transition') return transitionStatus(op, row, ctx.state, ctx.at);
   if (op.op === 'levelling.set') return setLevelling(op, row);
   switch (op.op) {

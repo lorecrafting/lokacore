@@ -36,3 +36,13 @@ export function transitionStatus(op: Op, row: Json | undefined, state: State, no
     return { code: 'precondition_failed' as const };
   return { value: next as Json };
 }
+
+/** A delta's last write may not leave a timed status or bleed active at or past its end (a skipped expiry). */
+export function expiredStatus(w: { target: { kind: string }; value: Json }, horizon: number) {
+  const v = w.value as Op['value'];
+  return (
+    (w.target.kind === 'status' || w.target.kind === 'bleed') &&
+    v.active &&
+    (v.ends_at ?? Infinity) <= horizon
+  );
+}
