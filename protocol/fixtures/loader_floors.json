@@ -339,6 +339,18 @@
       "feature": "status reader 8 (concealment)",
       "edits": [
         [
+          "reactions/dart.json",
+          [
+            "apply"
+          ],
+          [
+            {
+              "op": "status.apply",
+              "status": "blessing"
+            }
+          ]
+        ],
+        [
           "statuses/poison.json",
           [
             "concealment"
@@ -715,6 +727,58 @@
       "floor": "1.90",
       "below": "1.89",
       "source": "cartridges/raid_sampler",
+      "compiler": [
+        "KERNEL_API_RANGE_INVALID",
+        "cartridge.requires.kernel_api.at_least"
+      ],
+      "loader": [
+        "KERNEL_API_RANGE_INVALID",
+        ".cartridge.manifest.requires.kernel_api.at_least"
+      ]
+    },
+    {
+      "floor": "1.91",
+      "below": "1.90",
+      "source": "cartridges/voices_sampler",
+      "compiler": [
+        "KERNEL_API_RANGE_INVALID",
+        "cartridge.requires.kernel_api.at_least"
+      ],
+      "loader": [
+        "KERNEL_API_RANGE_INVALID",
+        ".cartridge.manifest.requires.kernel_api.at_least"
+      ]
+    },
+    {
+      "floor": "1.92",
+      "below": "1.91",
+      "source": "cartridges/storylet_sampler",
+      "compiler": [
+        "KERNEL_API_RANGE_INVALID",
+        "cartridge.requires.kernel_api.at_least"
+      ],
+      "loader": [
+        "KERNEL_API_RANGE_INVALID",
+        ".cartridge.manifest.requires.kernel_api.at_least"
+      ]
+    },
+    {
+      "floor": "1.93",
+      "below": "1.92",
+      "source": "cartridges/sneak_sampler",
+      "compiler": [
+        "KERNEL_API_RANGE_INVALID",
+        "cartridge.requires.kernel_api"
+      ],
+      "loader": [
+        "KERNEL_API_RANGE_INVALID",
+        ".cartridge.manifest.requires.kernel_api.at_least"
+      ]
+    },
+    {
+      "floor": "1.94",
+      "below": "1.93",
+      "source": "cartridges/theft_sampler",
       "compiler": [
         "KERNEL_API_RANGE_INVALID",
         "cartridge.requires.kernel_api.at_least"
