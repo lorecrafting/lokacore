@@ -315,7 +315,9 @@ test('FD1: a reaction to a delayed write adds to the same fact in one advance', 
 });
 
 // Breaks: two delayed experience.grant jobs for one actor in one advance take separate writer groups
-// on the levelling row (conflicting_write, both stay pending and wedge later waits).
+// on the levelling row (conflicting_write, both stay pending and wedge later waits). This stands in
+// for a delayed grant beside kill credit: both reach the row through oneWrite (proposal.ts), and a
+// probe of a rat kill plus a delayed grant in one levelling_sampler wait gave 10 + 5, one write.
 test('FD1: two delayed experience grants due in one advance both count', () => {
   const xp = (c: any) => {
     const level_up = 'item.player_corpse.short'; // any catalog key: no level is reached
@@ -335,26 +337,29 @@ test('FD1: two delayed experience grants due in one advance both count', () => {
     );
 });
 
+const R = (kind: string, key: string) => ({ ...REF, kind, key });
+const REF = { cartridge_id: 'raid_sampler', cartridge_version: '0.0.1' };
+const shaken = (c: any) => {
+  c.lock.capabilities.status = c.manifest.requires.capabilities.status = 1;
+  c.statuses = {
+    'raid_sampler@0.0.1:status/shaken': {
+      key: 'shaken',
+      duration: 1200,
+      tick_every: 600,
+      per_tick: -1,
+      resource: R('resource', 'mv'),
+      label: 'band.hurt',
+      narration: { applied: 'band.hurt', tick: 'band.hurt', expired: 'band.hurt' },
+    },
+  };
+};
+
 // Breaks: two delayed jobs moving one body's status in one advance take separate writer groups
 // (conflicting_write on the status row, both stay pending and wedge later waits). The cure is due
 // 1 s after the apply, so the order is the due time's, not the job ids'.
 test('FD1: a delayed status.apply at 1600 and status.cure at 1601 both run, in hourly waits or one', () => {
-  const R = (kind: string, key: string) => ({ ...REF, kind, key });
-  const REF = { cartridge_id: 'raid_sampler', cartridge_version: '0.0.1' };
-  const SHAKEN = 'raid_sampler@0.0.1:status/shaken';
   const pair = (c: any) => {
-    c.lock.capabilities.status = c.manifest.requires.capabilities.status = 1;
-    c.statuses = {
-      [SHAKEN]: {
-        key: 'shaken',
-        duration: 1200,
-        tick_every: 600,
-        per_tick: -1,
-        resource: R('resource', 'mv'),
-        label: 'band.hurt',
-        narration: { applied: 'band.hurt', tick: 'band.hurt', expired: 'band.hurt' },
-      },
-    };
+    shaken(c);
     const rule = c.reactions[AFTERSHOCK];
     delete c.reactions[AFTERSHOCK];
     for (const [key, op, after] of [
@@ -524,6 +529,29 @@ test('FD1: the loader keeps API 1.90, event-free delayed steps and an unbounded 
     [
       [(c) => (c.reactions[raid].apply.at(-1).fact = ref('aftershocks'))],
       bad(`${raid}"].apply[2].fact`),
+    ],
+    [
+      [
+        (c) =>
+          (c.facts['raid_sampler@0.0.1:fact/raided_at'].value_type = {
+            type: 'int',
+            minimum: 1,
+            default: 1,
+          }),
+      ],
+      bad(`${raid}"].apply[2].fact`),
+    ],
+    [
+      [
+        shaken,
+        (c) =>
+          c.reactions[AFTERSHOCK].apply.push({
+            op: 'status.apply',
+            status: R('status', 'shaken'),
+            co_present: true,
+          }),
+      ],
+      bad(`${AFTERSHOCK}"].apply[1].op`),
     ],
     [
       [(c) => (c.reactions[calm].when.root = { ...since, fact: ref('raided') })],
