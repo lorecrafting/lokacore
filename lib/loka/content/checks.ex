@@ -1,4 +1,4 @@
-# size: allow 450, ancestry, careful skill refs and Study ingress join shared source checking
+# size: allow 450, ancestry, careful skill refs, Study ingress, spell learned join source checking
 defmodule Loka.Content.Checks do
   @moduledoc "Capability ownership, references and fact types (05 §4, §6; 06 §20–21)."
   import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2, ref: 3]
@@ -49,6 +49,7 @@ defmodule Loka.Content.Checks do
   def expand(%{"rest" => r}, m), do: %{"rest" => Loka.Content.Dreams.expand(r, m)}
   def expand(%{"every" => _, "from" => _} = r, m), do: Loka.Content.Replenish.expand(r, m)
   def expand(%{"pierced_by" => _} = s, m), do: Loka.Content.Status.expand(s, m, &expand/2)
+  def expand(%{"learned" => l, "word" => _} = t, m), do: %{t | "learned" => ref(l, "fact", m)}
 
   def expand(%{"label" => _, "text" => _, "topic" => topic} = readable, m),
     do: Map.put(readable, "topic", ref(topic, "topic", m))
@@ -67,8 +68,7 @@ defmodule Loka.Content.Checks do
   def expand(%{"npc" => npc, "room" => room, "answered" => _} = knock, m),
     do: knock |> Map.put("npc", ref(npc, "npc", m)) |> Map.put("room", ref(room, "room", m))
 
-  # A reaction's trigger (ReactionRule on; the only source map with a string `event` and no
-  # `op`): its short filter references (W1).
+  # ReactionRule on (the only source map with a string `event` and no `op`): filter refs (W1).
   def expand(%{"event" => e} = on, m) when is_binary(e) and not is_map_key(on, "op"),
     do:
       Map.new(on, fn {f, v} ->

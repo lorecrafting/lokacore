@@ -144,9 +144,9 @@ test('ward lands warded on the caster: status_applied fires the reaction once', 
 });
 
 // Breaks: the TS loader admits an effect step on a recipe that is not a spell, an effect below
-// kernel_api 1.55, a damage step naming no NPC of the cartridge, or light.ignite without light@1
+// kernel_api 1.98, a damage step naming no NPC of the cartridge, or light.ignite without light@1
 // (both kernels refuse them; content_spell_effects_test.exs).
-test('loader: effect steps sit on spells, need 1.55, resolve and declare their owner', () => {
+test('loader: effect steps sit on spells, need 1.98, resolve and declare their owner', () => {
   const seq = (k: string) =>
     `.cartridge.recipes[${JSON.stringify(R(k))}].outcomes.success.sequence[0]`;
   const rows: [(c: Record<string, any>) => void, string, string][] = [
@@ -163,7 +163,7 @@ test('loader: effect steps sit on spells, need 1.55, resolve and declare their o
       `${seq('ward')}.op`,
     ],
     [
-      (c) => (c.manifest.requires.kernel_api.at_least = '1.54'),
+      (c) => (c.manifest.requires.kernel_api.at_least = '1.97'),
       'KERNEL_API_RANGE_INVALID',
       '.cartridge.manifest.requires.kernel_api.at_least',
     ],

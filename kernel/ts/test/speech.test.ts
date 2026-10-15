@@ -314,3 +314,38 @@ test('the loader refuses keywords and spoken reactions below 1.48, without speec
     ['OUTCOME_MISMATCH', 'keyword'],
   );
 });
+
+// Breaks (word bar S2): the GameView drops or reorders the cartridge's speech.phrases, lists them
+// when none are authored, or the TS loader admits a phrase that is not a Word, an empty list,
+// phrases below kernel_api 1.98 or without speech@1 (content_speech_test.exs).
+test('phrases: the authored speech.phrases, Words only, from 1.98 with speech@1', () => {
+  assert.deepEqual(gameView(fresh()).phrases, ['ward', 'help', 'hello']);
+  const none = reload((c) => delete c.speech);
+  assert.ok(none.ok, JSON.stringify(none));
+  assert.equal(gameView(fresh(none.cartridge as Cartridge)).phrases, undefined);
+  const refused = (change: (c: Obj) => void) => {
+    const r = reload(change);
+    return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
+  };
+  assert.deepEqual(
+    refused((c) => (c.speech.phrases = ['ward', 'Help!'])),
+    ['SCHEMA_VIOLATION', '.cartridge.speech.phrases[1]'],
+  );
+  assert.deepEqual(
+    refused((c) => (c.speech.phrases = [])),
+    ['SCHEMA_VIOLATION', '.cartridge.speech.phrases'],
+  );
+  assert.deepEqual(
+    refused((c) => (c.manifest.requires.kernel_api.at_least = '1.97')),
+    ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'],
+  );
+  assert.deepEqual(
+    refused((c) => {
+      delete c.manifest.requires.capabilities.speech;
+      delete c.lock.capabilities.speech;
+      c.reactions = {};
+      for (const d of Object.values(c.dialogues as Obj)) delete (d as Obj).keyword;
+    }),
+    ['UNDECLARED_CAPABILITY', '.cartridge.speech.phrases'],
+  );
+});

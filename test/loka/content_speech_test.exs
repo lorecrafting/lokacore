@@ -51,4 +51,29 @@ defmodule Loka.ContentSpeechTest do
     assert {:error, diags} = Loka.ContentSource.compile(dir, [riddled])
     assert {"OUTCOME_MISMATCH", "dialogues/elder_ward.keyword"} in pairs(diags), inspect(diags)
   end
+
+  # Breaks (word bar S2): the compiler accepts a speech.phrases entry that is not a Word, an empty
+  # phrases list, or phrases below kernel_api 1.98 or without speech@1 (the TS loader refuses them
+  # too; speech.test.ts).
+  test "speech.phrases are Words and need 1.98 and speech@1" do
+    dir = Loka.ContentSource.copy(@dir)
+    phrases = &{"cartridge.json", fn c -> put_in(c, ["speech", "phrases"], &1) end}
+
+    for {edits, expected} <- [
+          {[phrases.(["ward", "Help!"])], {"SCHEMA_VIOLATION", "cartridge.speech.phrases[1]"}},
+          {[phrases.([])], {"SCHEMA_VIOLATION", "cartridge.speech.phrases"}},
+          {[{"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.97")}],
+           {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"}}
+        ] do
+      assert {:error, diags} = Loka.ContentSource.compile(dir, edits)
+      assert pairs(diags) == [expected]
+    end
+
+    unowned =
+      {"cartridge.json",
+       &update_in(&1, ["requires", "capabilities"], fn c -> Map.delete(c, "speech") end)}
+
+    assert {:error, diags} = Loka.ContentSource.compile(dir, [unowned])
+    assert {"UNDECLARED_CAPABILITY", "cartridge.speech.phrases"} in pairs(diags), inspect(diags)
+  end
 end

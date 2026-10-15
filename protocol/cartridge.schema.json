@@ -251,6 +251,23 @@
             "world": {
               "$ref": "#/$defs/WorldSettings"
             },
+            "speech": {
+              "description": "Word bar S2 (speech@1, kernel_api at least 1.98): phrases, the cartridge's static say words, each a speech@1 Word, offered to every actor with no fact gate; GameView projects them as phrases. In source it is cartridge.json's speech, beside world.",
+              "type": "object",
+              "properties": {
+                "phrases": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "$ref": "action.schema.json#/$defs/Word"
+                  }
+                }
+              },
+              "required": [
+                "phrases"
+              ],
+              "additionalProperties": false
+            },
             "chapters": {
               "description": "Optional ordered chapter markers; absent preserves earlier cartridge bytes and meaning.",
               "type": "array",

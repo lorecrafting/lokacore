@@ -12,6 +12,12 @@
       "scopes": ["player"],
       "meaning": "The apprentice quest taught the player the word of warding."
     },
+    "lux_known": {
+      "version": 1,
+      "value_type": { "type": "bool", "default": true },
+      "scopes": ["player"],
+      "meaning": "The player knows the word of light from the start."
+    },
     "noctis_known": {
       "version": 1,
       "value_type": { "type": "bool", "default": false },

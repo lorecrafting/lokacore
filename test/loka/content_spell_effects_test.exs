@@ -5,9 +5,9 @@ defmodule Loka.ContentSpellEffectsTest do
   defp pairs(diags), do: Enum.map(diags, &{&1["code"], &1["path"]})
 
   # Breaks (toolbox row 29b): the compiler accepts an effect step on a recipe that is not a spell,
-  # an effect below kernel_api 1.55, a damage step naming no NPC of the cartridge, or light.ignite
+  # an effect below kernel_api 1.98, a damage step naming no NPC of the cartridge, or light.ignite
   # without light@1 (the TS loader refuses them too; spell_effects.test.ts).
-  test "effect steps sit on spells, need 1.55, resolve and declare their owner" do
+  test "effect steps sit on spells, need 1.98, resolve and declare their owner" do
     dir = Loka.ContentSource.copy(@dir)
     assert {:ok, _, []} = Loka.ContentSource.compile(dir, [])
 
@@ -16,7 +16,7 @@ defmodule Loka.ContentSpellEffectsTest do
     assert {:error, diags} = Loka.ContentSource.compile(dir, misplaced)
     assert pairs(diags) == [{"SCHEMA_VIOLATION", "recipes/ward.outcomes.success.sequence[0].op"}]
 
-    below = [{"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.54")}]
+    below = [{"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.97")}]
     assert {:error, diags} = Loka.ContentSource.compile(dir, below)
 
     assert pairs(diags) == [
