@@ -103,6 +103,7 @@ test('a site and world.construction each need construction@1', () => {
     delete c.blueprints;
     // the S2 build service names a blueprint; without one it is unresolved, not ungated
     delete c.services['build_sampler@0.0.1:service/raise_hut'];
+    delete c.services['build_sampler@0.0.1:service/cancel_hut'];
     delete c.npcs['build_sampler@0.0.1:npc/carpenter'].services;
   };
   const gate = (at: string) => ['UNDECLARED_CAPABILITY', at];
@@ -142,5 +143,25 @@ test('a build benefit names a direction and blueprint of its resolved site', () 
   assert.deepEqual(
     refused((c) => (svc(c).benefit.site = { ...svc(c).benefit.site, key: 'nowhere' })),
     ['UNRESOLVED_REFERENCE', at('.benefit.site')],
+  );
+});
+
+// Breaks (Built rooms S3): the loader admits a claim on a build commission (it has no output to
+// hand over; the room is raised at completion), or a build commission whose fact is not a false-default player bool.
+test('a build commission cannot be claimed and its fact is a player bool', () => {
+  const sv = (c: Obj, k: string) => c.services[`build_sampler@0.0.1:service/${k}`];
+  assert.deepEqual(
+    refused((c) => (sv(c, 'cancel_hut').benefit.kind = 'claim')),
+    [
+      'SCHEMA_VIOLATION',
+      '.cartridge.services["build_sampler@0.0.1:service/cancel_hut"].benefit.service',
+    ],
+  );
+  assert.deepEqual(
+    refused((c) => (c.facts['build_sampler@0.0.1:fact/hut_ordered'].value_type.default = true)),
+    [
+      'SCHEMA_VIOLATION',
+      '.cartridge.services["build_sampler@0.0.1:service/raise_hut"].benefit.fact',
+    ],
   );
 });

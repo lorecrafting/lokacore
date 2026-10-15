@@ -10,6 +10,17 @@
         "player"
       ],
       "meaning": "The character bought the plot north of the lane."
+    },
+    "hut_ordered": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The carpenter holds this character's timber for a hut."
     }
   }
 }

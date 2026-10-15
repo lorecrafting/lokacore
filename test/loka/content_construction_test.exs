@@ -86,9 +86,15 @@ defmodule Loka.ContentConstructionTest do
   # Breaks (Built rooms S2): the compiler admits a build service whose direction is not in the
   # site's directions, whose blueprint the site does not list, or whose site does not resolve
   # (the TS loader refuses them too; construction.test.ts).
+  # Breaks (Built rooms S3): the compiler admits a claim on a build commission or a build fact that
+  # is not a false-default player bool (construction.test.ts pins the TS side).
   test "a build benefit names a direction and blueprint of its resolved site" do
     dir = Loka.ContentSource.copy(@dir)
     build = &{"services/raise_hut.json", fn s -> put_in(s, ["benefit", &1], &2) end}
+    # a claim needs its own refusal text; supplied so only the commission check refuses
+    claim_text =
+      {"text.json", &Map.merge(&1, %{"service.not_ready" => "-", "service.no_output" => "-"})}
+
     shed = {"blueprints/shed.json", JSON.decode!(File.read!("#{@dir}/blueprints/hut.json"))}
 
     for {edits, expected} <- [
@@ -97,7 +103,11 @@ defmodule Loka.ContentConstructionTest do
           {[shed, build.("blueprint", "shed")],
            [{"SCHEMA_VIOLATION", "services/raise_hut.benefit.blueprint"}]},
           {[build.("site", "nowhere")],
-           [{"UNRESOLVED_REFERENCE", "services/raise_hut.benefit.site"}]}
+           [{"UNRESOLVED_REFERENCE", "services/raise_hut.benefit.site"}]},
+          {[{"services/cancel_hut.json", &put_in(&1, ["benefit", "kind"], "claim")}, claim_text],
+           [{"SCHEMA_VIOLATION", "services/cancel_hut.benefit.service"}]},
+          {[{"facts.json", &put_in(&1, ~w(facts hut_ordered value_type default), true)}],
+           [{"SCHEMA_VIOLATION", "services/raise_hut.benefit.fact"}]}
         ] do
       assert {:error, diags} = Loka.ContentSource.compile(dir, edits)
       assert pairs(diags) == expected

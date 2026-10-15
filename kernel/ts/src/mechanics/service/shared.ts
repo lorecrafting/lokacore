@@ -1,4 +1,4 @@
-// size: allow 306, the build benefit (Built rooms S2) adds its pre-payment gate to the one transition query
+// size: allow 309, the build benefit (Built rooms S2, S3) adds its gate and commission to the one transition query
 // One bounded admission/transition query for exact keyed service offers and execution.
 import {
   LIMITS,
@@ -25,7 +25,7 @@ import { serving } from '../liquid/shared.ts';
 import { selected } from '../containment/stock.ts';
 import { giveRefused } from '../containment/shared.ts';
 import { unbuildable } from './build.ts';
-export { raised } from './build.ts';
+export { built, raised } from './build.ts';
 
 type Payload = Extract<CommandPayload, { type: 'use_service' }>;
 export function availability(world: World, p: Payload, steps: Steps = { n: 0 }, action?: Key) {
@@ -46,10 +46,12 @@ export function transition(
   if ('code' in service) return service;
   if (p.quoted_price !== service.price) return { code: 'invalid_state' as const };
   const benefit = service.benefit;
-  const blocked = benefit.kind === 'build' && unbuildable(world, benefit);
+  const blocked = benefit.kind === 'build' && unbuildable(world, benefit, p.actor_id);
   if (blocked) return blocked;
-  const escrow = benefit.kind === 'entitlement' ? benefit.escrow : undefined;
-  if (benefit.kind === 'entitlement' && value(world, p.actor_id, benefit.fact) !== false)
+  const commission =
+    benefit.kind === 'entitlement' || benefit.kind === 'build' ? benefit : undefined;
+  const escrow: Escrow = commission?.escrow;
+  if (commission?.fact && value(world, p.actor_id, commission.fact) !== false)
     return serviceRefusal('invalid_state', escrow ? 'service.order_open' : 'service.already_paid');
   if (escrow?.output && away(world, escrow))
     return serviceRefusal('not_found', 'service.no_output');
@@ -82,12 +84,12 @@ function granted(
     { ops } = paid;
   if (benefit.kind === 'deposit' || benefit.kind === 'withdraw')
     return banked(world, p, body, service.currency, benefit);
-  if (benefit.kind === 'entitlement') {
+  if (benefit.kind === 'entitlement' || (benefit.kind === 'build' && benefit.fact)) {
     const start = { ops: [...ops, ...inputs], position: 0, facts: {} },
-      grant = { fact: benefit.fact, value: true };
+      grant = { fact: benefit.fact!, value: true };
     return assigned(world, p.actor_id, start, grant, 'service');
   }
-  if (benefit.kind === 'build') return { ops }; // the room itself is minted in raised()
+  if (benefit.kind === 'build') return { ops }; // the room itself is minted in raised() or built()
   if (benefit.kind === 'repair') return repair(world, p, body, benefit, ops);
   if (benefit.kind === 'claim' || benefit.kind === 'cancel')
     return settle(world, p, body, order!, ops, steps);
@@ -151,7 +153,8 @@ export const orderJob = (service: DefinitionRef): DefinitionRef => ({ ...service
 
 // Toolbox row 20b: a timed commission's order waits for one job, due ready_after from now.
 export function scheduled(world: World, p: Payload, s: ServiceDefinition, mint: Mint): DeltaOp[] {
-  const after = s.benefit.kind === 'entitlement' ? s.benefit.escrow?.ready_after : undefined;
+  const b = s.benefit;
+  const after = b.kind === 'entitlement' || b.kind === 'build' ? b.escrow?.ready_after : undefined;
   if (!after) return [];
   const due_time = world.state.clock + after;
   return [
@@ -161,6 +164,7 @@ export function scheduled(world: World, p: Payload, s: ServiceDefinition, mint: 
       job_id: mint() as JobId,
       job: orderJob(p.service),
       due_time,
+      ...(b.kind === 'build' && { actor_id: p.actor_id }), // Built rooms S3: built() reads the owner
     },
   ];
 }
@@ -204,12 +208,11 @@ function settle(
   steps: Steps,
 ): UnavailableReason | { ops: readonly DeltaOp[] } {
   const custody = world.roomIds[refString(escrow.custody)];
-  let ids = [world.entityIds[refString(escrow.output!)]];
-  if (kind === 'cancel') {
-    const back = selected(world, escrow.items, custody, escrow.quantity, steps);
-    if (typeof back === 'string') return { code: back };
-    ids = back;
-  }
+  const ids =
+    kind === 'cancel'
+      ? selected(world, escrow.items, custody, escrow.quantity, steps)
+      : [world.entityIds[refString(escrow.output!)]];
+  if (typeof ids === 'string') return { code: ids };
   const moves = ids.map((entity_id) => ({
     op: 'entity.transfer' as const,
     writer_group: 0,

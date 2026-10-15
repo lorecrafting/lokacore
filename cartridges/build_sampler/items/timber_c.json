@@ -1,0 +1,12 @@
+{
+  "keywords": [
+    "timber"
+  ],
+  "short": "item.timber.short",
+  "room_line": "item.timber.room",
+  "description": "item.timber.description",
+  "location": {
+    "in": "room",
+    "room": "lane"
+  }
+}

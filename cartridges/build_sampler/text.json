@@ -15,7 +15,19 @@
   "npc.carpenter.room": "A [carpenter](carpenter) waits with a cart of planks.",
   "npc.carpenter.description": "A carpenter who raises huts on bought plots.",
   "service.raise_hut": "Raise a hut",
-  "service.raise_hut.used": "The carpenter raises a hut on your plot.",
+  "service.raise_hut.used": "The carpenter takes two lengths of timber and your coin, and starts framing.",
   "service.site_taken": "Something already stands there.",
-  "service.construction_full": "Nothing more can be built here."
+  "service.construction_full": "Nothing more can be built here.",
+  "room.lane.framing": "A lane beside a plot to the north, where a hut frame of fresh timber is going up.",
+  "room.yard.title": "Timber Yard",
+  "room.yard.description": "The carpenter's fenced yard.",
+  "item.timber.short": "a length of timber",
+  "item.timber.room": "A length of [timber] lies here.",
+  "item.timber.description": "A sawn length of timber.",
+  "service.order_open": "The carpenter is already building for you.",
+  "service.missing_inputs": "Bring two lengths of timber.",
+  "service.cancel_hut": "Cancel the hut",
+  "service.cancel_hut.used": "The carpenter returns your timber.",
+  "service.no_order": "The carpenter holds no order of yours.",
+  "service.ready": "The hut is already finished."
 }

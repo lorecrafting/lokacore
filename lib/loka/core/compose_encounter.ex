@@ -284,7 +284,7 @@ defmodule Loka.Core.ComposeEncounter do
         get_in(op, ["job", "kind"]) != "reaction"
 
       {false, false, true, false} ->
-        get_in(op, ["job", "kind"]) == "reaction" and
+        get_in(op, ["job", "kind"]) in ["reaction", "order"] and
           [op["encounter_id"], op["sight"]] == [nil, nil]
 
       {true, false, true, false} ->

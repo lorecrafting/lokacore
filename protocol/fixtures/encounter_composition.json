@@ -2092,6 +2092,46 @@
       }
     },
     {
+      "id": "order-schedule-stores-owner",
+      "state": "base",
+      "ops": [
+        {
+          "op": "job.schedule",
+          "writer_group": 0,
+          "job_id": "00000007-0000-4000-8000-000000000000",
+          "job": {
+            "cartridge_id": "build_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "order",
+            "key": "raise_hut"
+          },
+          "due_time": 20,
+          "actor_id": "00000001-0000-4000-8000-000000000000"
+        }
+      ],
+      "expected": {
+        "changes": [
+          {
+            "target": {
+              "kind": "job",
+              "job_id": "00000007-0000-4000-8000-000000000000"
+            },
+            "value": {
+              "job": {
+                "cartridge_id": "build_sampler",
+                "cartridge_version": "0.0.1",
+                "kind": "order",
+                "key": "raise_hut"
+              },
+              "due_time": 20,
+              "status": "pending",
+              "actor_id": "00000001-0000-4000-8000-000000000000"
+            }
+          }
+        ]
+      }
+    },
+    {
       "id": "reaction-schedule-needs-actor",
       "state": "base",
       "ops": [
