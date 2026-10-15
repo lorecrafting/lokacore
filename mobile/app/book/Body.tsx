@@ -8,6 +8,7 @@ import { ContentsPage, Item, type Section } from './Menu.tsx';
 import { NpcDetail } from './Npc.tsx';
 import { NoticeEntries, NoticePage } from './notices.tsx';
 import { VerbLine } from './actions.tsx';
+import { WordBar } from './WordBar.tsx';
 import { RoomPage, RunningHead } from './pages.tsx';
 import { note, usePalette } from './palette.ts';
 import { space } from './tokens.ts';
@@ -151,6 +152,15 @@ function WorldPage(p: BodyProps) {
       open={openThing}
       openChoice={() => p.open(conversation(view))}
       details={<NoticeEntries {...p} />}
+      word={
+        <WordBar
+          view={view}
+          chips={p.g.word}
+          pending={p.screen.pending}
+          text={text}
+          press={p.press}
+        />
+      }
     />
   );
 }

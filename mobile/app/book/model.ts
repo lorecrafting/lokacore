@@ -7,7 +7,7 @@ import type {
   Key,
 } from '../../packages/game-view/session.ts';
 import type { Button, DetailLine } from './presenter.ts';
-import { commandOf } from './buttons.ts';
+import { commandOf, WORDS } from './buttons.ts';
 export { buttonsOf } from './buttons.ts';
 import { reason, SENTENCE } from './words.ts';
 import { things } from './item-pages.ts';
@@ -127,10 +127,16 @@ export function group(buttons: Button[]) {
         (!aimed(b) || b.place) &&
         !dir(b) &&
         !OWN.includes(b.action_key) &&
+        !WORDS.includes(b.action_key) &&
         b.action_key !== 'scan',
     ),
+    word: buttons.filter((b) => WORDS.includes(b.action_key)), // the Word block's chips
     on: (id: string) =>
-      buttons.filter((b) => (b.detail_id ? b.detail_id === id : b.target_ids.includes(id))),
+      buttons.filter(
+        (b) =>
+          !WORDS.includes(b.action_key) &&
+          (b.detail_id ? b.detail_id === id : b.target_ids.includes(id)),
+      ),
   };
 }
 export const plain = (s: string) => s.replace(/\[([^\]]*)\]\([^)]*\)/g, '$1');
@@ -138,7 +144,8 @@ export const plain = (s: string) => s.replace(/\[([^\]]*)\]\([^)]*\)/g, '$1');
 type Offered =
   | GameView['exits'][number]
   | GameView['actions'][number]
-  | NonNullable<GameView['choice']>['choices'][number];
+  | NonNullable<GameView['choice']>['choices'][number]
+  | NonNullable<GameView['spell_words']>[number];
 export const why = (e: Offered, text: (key: string) => string) =>
   e.available ? '' : e.reason.message ? text(e.reason.message.key) : reason(e.reason.code);
 

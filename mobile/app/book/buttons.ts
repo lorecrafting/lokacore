@@ -102,6 +102,7 @@ export function buttonsOf(v: GameView, label: Say, text: Say): Press[] {
     ...dreamButtons(v, label),
     ...shopButtons(v, text),
     ...askButtons(v, text),
+    ...wordButtons(v, text),
     ...serviceButtons(v, text),
     ...transportButtons(v, text),
     ...asked(v, label),
@@ -134,6 +135,34 @@ const askButtons = (v: GameView, text: Say): Press[] =>
       ),
   );
 
+// The Word block's chips (word bar S3): each phrase said, whispered to each NPC offering whisper
+// and shouted, and each castable spell word; only while no combat, scene or conversation is open.
+export const WORDS = ['say', 'whisper', 'shout', 'cast'];
+export const wordless = (v: GameView) => Boolean(v.combat || v.scene || v.choice);
+function wordButtons(v: GameView, text: Say): Press[] {
+  if (wordless(v)) return [];
+  const offered = (key: string) => v.actions.some((a) => a.action_key === key && a.available);
+  const chip = (key: string, word: string, to?: { id: string; name: string }) => ({
+    label: `${word}, ${to ? `whisper to ${text(to.name)}` : key}`,
+    action_key: key,
+    target_ids: to ? [to.id] : [],
+    input: { word },
+  });
+  const phrases = v.phrases ?? [];
+  return [
+    ...(offered('say') ? phrases.map((w) => chip('say', w)) : []),
+    ...v.entities.flatMap((e) =>
+      e.actions.some((a) => a.action_key === 'whisper' && a.available)
+        ? phrases.map((w) => chip('whisper', w, e))
+        : [],
+    ),
+    ...(offered('shout') ? phrases.map((w) => chip('shout', w)) : []),
+    ...(v.actions.some((a) => a.action_key === 'cast')
+      ? (v.spell_words ?? []).filter((s) => s.available).map((s) => chip('cast', s.word))
+      : []),
+  ];
+}
+
 // The place's own actions, then a scene's Continue.
 function placeButtons(v: GameView, button: ToButton) {
   const place = v.actions.filter(
@@ -159,7 +188,7 @@ function heldButtons(
 ) {
   return projected.flatMap((e) =>
     e.actions
-      .filter((a) => a.available && !['give', 'ask', 'whisper'].includes(a.action_key)) // ponytail: give waits for a recipient selector, whisper for word bar S3 (loka-a9pn); ask is askButtons
+      .filter((a) => a.available && !['give', 'ask', 'whisper'].includes(a.action_key)) // ponytail: give waits for a recipient selector; whisper is wordButtons, ask is askButtons
       .map((a) => {
         // A use pair (G4) lists [target, tool]: this page's item is the tool, so name the target
         // and keep the card on this page (detail_id), not the target's.
