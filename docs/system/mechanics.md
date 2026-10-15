@@ -652,7 +652,8 @@ nothing. Resolve checks the quest objective per holder (an unmet objective fault
 `precondition_failed`). Neither changes a terminal instance. Activation is legal on a
 quest-resolution, `rested` or `entity_entered_room` trigger, for the delivery's actor (the
 Actor column); a subject that is not an admitted player body (an NPC entering) activates
-nothing. Any prior instance for that character, including terminal instances, skips activation. The delivery uses
+nothing, and the rule's `when` still reads as the root command's actor, not the entrant (the
+Realm reads it as the subject), so no rule may rely on the entrant there. Any prior instance for that character, including terminal instances, skips activation. The delivery uses
 one writer group and causal allocator; its quest-owned `quest_activated` is admitted through
 reaction's quest composition, caused by the source event and correlated with the root command.
 The resulting events trigger further rules, FIFO, to quiescence, within the deliveries,
@@ -2867,7 +2868,7 @@ Found by [showcase plan 2](../showcase/combat-district.md) (#368); the PM brief 
 
 [Toolbox row 38](../MECHANICS-TOOLBOX.md#ranked-toolbox); its sampler: "named defender alive at close wins; dead fails". Beads `loka-kgd.133`, built with [RS-4](#reaction1-kerneltssrcmechanicsreactionts) (`loka-kgd.150.2`), whose subject attribution and per-holder quest steps it needs. Content only on [reaction@1](#reaction1-kerneltssrcmechanicsreactionts) and the [phased raid](#phased-world-events-toolbox-row-37a).
 
-- **Rules.** `called_to_hold`: `entity_entered_room {room village}` with `when` `all [fact_compare {raided equals true}, npc_present {defender}]`, `apply [quest.activate {hold_the_gate}]`; it activates for the entrant's character, and an NPC entering activates nothing. `defender_fell`: `entity_died {victim defender}`, `apply [quest.fail {hold_the_gate, outcome fallen}]`. `gate_held`: `fact_changed {fact raided}` with `when` `fact_compare {raided equals false}`, `apply [quest.resolve {hold_the_gate, outcome held}]`.
+- **Rules.** `called_to_hold`: `entity_entered_room {room village}` with `when` `all [fact_compare {raided equals true}, npc_present {defender}]`, `apply [quest.activate {hold_the_gate}]`; it activates for the entrant's character, and an NPC entering activates nothing (its `when` reads as the root command's actor, not the NPC). `defender_fell`: `entity_died {victim defender}`, `apply [quest.fail {hold_the_gate, outcome fallen}]`. `gate_held`: `fact_changed {fact raided}` with `when` `fact_compare {raided equals false}`, `apply [quest.resolve {hold_the_gate, outcome held}]`.
 - **Win and loss.** The quest `hold_the_gate` (player scope) has the `current_state` objective `raided equals false`. The defender's death and the raid's end name no character, so they act on every holder: the death fails every open instance; the new moon resolves every one still held. A failed instance is terminal, so the new moon leaves it failed; with no holder either step writes nothing.
 - **Realm audience.** `instance`: the defender and `raided` are world state, so one defender's death fails every holder and the raid's end resolves every holder.
 - **Realm seams** (owner rule `docs/decisions/owner-decision-realm-seams-2026-10-13.md`).

@@ -300,3 +300,18 @@ test('38: with the defender already dead, entering while raided activates nothin
   assert.equal(raided(w), true);
   assert.deepEqual(gate(w), []);
 });
+
+// Breaks: an NPC entrant activates for the root player (reaction.ts drops `npc ||`; the actor falls
+// back to the player, whose view holds the `when`). The defender walks field -> village on schedule.
+test('38: the defender walking into the raided village activates nothing', () => {
+  let w = world((c) => {
+    const d = c.npcs['raid_sampler@0.0.1:npc/defender'];
+    const at = (key: string) => ({ ...d.room, key });
+    d.daily_schedule = { '0': at('field'), '2': at('village') };
+    d.room = at('field');
+  });
+  w = elapsed(act(w, { type: 'move', direction: 'north' }), 1300);
+  assert.equal(raided(w), true);
+  assert.equal(w.state.containers[defender(w)], w.roomIds[VILLAGE]);
+  assert.deepEqual(gate(w), []);
+});
