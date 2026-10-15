@@ -56,18 +56,18 @@ defmodule Loka.Content.Reactions do
       owned(at(rel, ["on", "event"]), event, ctx.events) ++
       named(rel, on, ctx) ++
       instances(rel, on, ctx) ++
-      Enum.flat_map(Enum.with_index(r["apply"]), &consequence(rel, &1, on, ctx)) ++
-      reruns(rel, r["apply"])
+      steps(rel, Enum.with_index(r["apply"]), on, ctx)
   end
 
   # Homestead hs-1: a second replenish.run of one entry in a rule would pick the items the first
   # moved (twin of `runs` in kernel/ts/src/content/cartridge_reactions.ts).
-  defp reruns(rel, apply) do
-    runs = for {%{"op" => "replenish.run", "key" => k}, i} <- Enum.with_index(apply), do: {k, i}
+  defp steps(rel, apply, on, ctx) do
+    runs = for {%{"op" => "replenish.run", "key" => k}, i} <- apply, do: {k, i}
 
-    for {{k, i}, n} <- Enum.with_index(runs),
-        Enum.any?(Enum.take(runs, n), &(elem(&1, 0) == k)),
-        do: diag("DUPLICATE_DEFINITION", at(rel, ["apply", i, "key"]))
+    Enum.flat_map(apply, &consequence(rel, &1, on, ctx)) ++
+      for {{k, i}, n} <- Enum.with_index(runs),
+          Enum.any?(Enum.take(runs, n), &(elem(&1, 0) == k)),
+          do: diag("DUPLICATE_DEFINITION", at(rel, ["apply", i, "key"]))
   end
 
   defp named(rel, on, ctx),
