@@ -373,7 +373,7 @@ Give invocations remain valid; engine mechanics are unchanged. Touch recipient s
 explicit carry: implement it when a touch flow can supply a recipient from actual projected
 valid targets, with its own approved scope. The inspected unsupported-capability rejection was
 one incomplete Give; later moves were accepted. Preserve genuine errors and meaningful history
-rather than hiding errors or clearing same-room history. Whisper needs a word; until the word bar (loka-a9pn) the NPC page offers no Whisper card rather than one the kernel always refuses. Carries remain in the [roadmap](../ROADMAP.md). Further cosmetic polish is deferred under the [C1 UI-deferral record](../decisions/owner-decision-c1-gate-ui-deferral-2026-10-03.md).
+rather than hiding errors or clearing same-room history. Whisper needs a word, so the NPC page offers no Whisper card; whispering is the [Word bar](#word-bar)'s. Carries remain in the [roadmap](../ROADMAP.md). Further cosmetic polish is deferred under the [C1 UI-deferral record](../decisions/owner-decision-c1-gate-ui-deferral-2026-10-03.md).
 
 ## Combat interaction
 
@@ -1021,6 +1021,24 @@ The Journal page says "Nothing written yet." only when it has neither quests nor
 ## FD7 ask details
 
 An NPC that the GameView lists an available `ask` on shows, after its other action cards and before services, one card per known topic (GameView `topics`, projected order) labelled "Ask about" and the topic's authored label. Pressing it sends `ask` with that topic; the answer or the person's knows-nothing line joins the page's history as narration, the page stays, no conversation opens. A topic granted by the answer adds its card at once. No known topics, no cards and no note; a hostile, absent or unlisted person shows none, as Talk. ([Ask about a topic](mechanics.md#ask-about-a-topic-toolbox-row-fd7))
+
+## Word bar
+
+While the GameView offers `say`, `shout` or
+`cast` and no combat, scene or conversation is open, the World page shows a Word block after its
+action cards and before the log: the **Word** section title, then rows of
+[Chips](../BOOK-UI-COMPONENTS.md), each row under a Note-look title. Say: one chip per
+cartridge phrase (GameView `phrases`). Whisper to <name>: the same phrases, one row per present
+NPC that lists an available `whisper`. Two present people with one shown name share that title; the Book does not number them. Shout: the same phrases. Cast: one chip per learned spell
+word (GameView `spell_words`, never an unlearned one); a word the GameView refuses is an
+unavailable chip with a `word, cast: reason` line under the row. Each chip's name is the word, then
+how it is spoken (`ward, say`, `ward, whisper to the elder`, `ward, shout`, `ward, cast`); a press
+sends that action with `{word}`. A word that opens a conversation turns to it, as Talk does.
+While `say` is offered, with or without phrases, a **Type a word** Control opens one text field (named
+**A word**, up to 32 characters, no autocorrect or autocapitalize) and a **Say** Control;
+Enter or Say sends `say` with the typed word. A word that is not 1 to 32 letters is not sent and
+shows the Note **One word, letters only.** The Book never writes the typed word into the log; only its
+writer sees it.
 
 ## Storylet card details
 

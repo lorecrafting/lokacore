@@ -116,7 +116,7 @@ export const size = {
   chapterRule: 80, // the chapter card's short rule (the mock's `.chapter i`)
 };
 
-export const radius = { tag: 3, card: 10 };
+export const radius = { tag: 3, card: 10, chip: 22 }; // chip: a pill, half size.touch
 
 export const opacity = { disabled: 0.45 };
 
