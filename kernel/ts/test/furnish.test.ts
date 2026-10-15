@@ -136,7 +136,7 @@ test('well_rested ticks +2 mv five times in its hour, ends at 3600 s and does no
   const end = elapse(w, 3600);
   assert.deepEqual(rested(end.world), [], 'gone at 3600 s');
   assert.equal(said(end).filter((k) => k === 'narration.well_rested.tick').length, 5);
-  assert.equal(mv(end.world) - mv(elapse(base, 3600).world), 10);
+  assert.equal(mv(end.world)! - mv(elapse(base, 3600).world)!, 10);
   const again = ok(ok(w, { type: 'stand' }), { type: 'rest' });
   assert.equal(Object.keys(again.state.statuses ?? {}).length, 1, 'one row');
 });
