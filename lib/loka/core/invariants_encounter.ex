@@ -270,8 +270,9 @@ defmodule Loka.Core.InvariantsEncounter do
       fields when fields in [[], ["encounter_id"]] ->
         get_in(op, ["job", "kind"]) not in ["population_bundle", "reaction"]
 
+      # Built rooms S3: an order job may carry its owner (a build commission's).
       ["actor_id"] ->
-        get_in(op, ["job", "kind"]) == "reaction" and op["sight"] == nil
+        get_in(op, ["job", "kind"]) in ["reaction", "order"] and op["sight"] == nil
 
       ["quest_instance_id", "actor_id"] ->
         get_in(op, ["job", "kind"]) == "quest"

@@ -169,7 +169,9 @@ function job(op: Any, row: Any, horizon: number, at: number): Any {
       next.crow_generation = op.crow_generation;
       next.crow_phase = op.crow_phase;
     }
-    if (op.job.kind === 'reaction') next.actor_id = op.actor_id; // FD1's stored actor
+    // FD1's stored actor; Built rooms S3: a build order's owner
+    if (['reaction', 'order'].includes(op.job.kind) && op.actor_id !== undefined)
+      next.actor_id = op.actor_id;
     if (op.sight !== undefined) next.sight = op.sight;
     if (op.bleed_body_id !== undefined) {
       next.bleed_body_id = op.bleed_body_id;
@@ -200,13 +202,17 @@ function bindingValid(op: Any) {
   )
     return crowBindingValid(op);
   if (
-    (op.quest_instance_id === undefined &&
-      op.water_generation === undefined &&
-      op.job.kind !== 'reaction') !==
-      (op.actor_id === undefined) ||
+    // Built rooms S3: an order job may carry its owner (a build commission's).
+    (op.job.kind !== 'order' &&
+      (op.quest_instance_id === undefined &&
+        op.water_generation === undefined &&
+        op.job.kind !== 'reaction') !==
+        (op.actor_id === undefined)) ||
     (op.quest_instance_id !== undefined &&
       (op.job.kind !== 'quest' || op.encounter_id !== undefined)) ||
-    (op.job.kind === 'reaction' && op.encounter_id !== undefined)
+    (['reaction', 'order'].includes(op.job.kind) &&
+      op.actor_id !== undefined &&
+      op.encounter_id !== undefined)
   )
     return false;
   if (

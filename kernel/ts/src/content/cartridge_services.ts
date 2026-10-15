@@ -35,10 +35,10 @@ export function services(c: Obj): Diagnostic[] {
 }
 
 // Toolbox row 20b: a timed order's fact belongs to its commission alone; another entitlement
-// setting it would open an order with no inputs and no job.
+// setting it would open an order with no inputs and no job (Built rooms S3: or a build commission).
 function owned(c: Obj, out: Diagnostic[]) {
   const entries = Object.entries((c.services ?? {}) as Obj),
-    fact = (s: Obj) => s.benefit.kind === 'entitlement' && refString(s.benefit.fact);
+    fact = (s: Obj) => commission(s.benefit) && refString(s.benefit.fact);
   const owner = new Map(
     entries.filter(([, s]) => s.benefit.escrow?.ready_after).map(([r, s]) => [fact(s), r]),
   );
@@ -62,7 +62,7 @@ function definition(c: Obj, s: Obj, ref: string, check: Checks, out: Diagnostic[
     bad(out, `${at}.currency`);
   if (!npc?.services?.some((r: Obj) => refString(r as never) === ref)) bad(out, `${at}.provider`);
   const b = s.benefit;
-  if (b.kind === 'entitlement') {
+  if (commission(b)) {
     const fact = get(c, check, b.fact, 'fact', `${at}.benefit.fact`);
     if (
       fact &&
@@ -72,12 +72,15 @@ function definition(c: Obj, s: Obj, ref: string, check: Checks, out: Diagnostic[
     )
       bad(out, `${at}.benefit.fact`);
     if (b.escrow) escrow(c, b.escrow, `${at}.benefit.escrow`, check, out);
+    if (b.kind === 'build') build(c, b, at, check, out);
   } else if (b.kind === 'repair') repair(c, b, at, check, out);
   else if (b.kind === 'build') build(c, b, at, check, out);
   else if (banks(b)) bank(c, s, at, check, out);
   else if (ordered(b)) {
     const commission = get(c, check, b.service, 'service', `${at}.benefit.service`);
-    if (commission && !commission.benefit.escrow?.ready_after) bad(out, `${at}.benefit.service`);
+    // Built rooms S3: only an order with an output (20b) can be claimed; a build raises its room.
+    const need = b.kind === 'claim' ? 'output' : 'ready_after';
+    if (commission && !commission.benefit.escrow?.[need]) bad(out, `${at}.benefit.service`);
   } else {
     const recovery = get(c, check, b.recovery, 'resource', `${at}.benefit.recovery`);
     if (recovery && recovery.key !== 'mv') bad(out, `${at}.benefit.recovery`);
@@ -94,6 +97,7 @@ function refusals(b: Obj) {
       payment: 'service.unaffordable',
       site: 'service.site_taken',
       full: 'service.construction_full',
+      ...(b.escrow && { headroom: 'service.order_open', inputs: 'service.missing_inputs' }),
     };
   if (ordered(b))
     return {
@@ -234,7 +238,8 @@ function beds(c: Obj, check: Checks, out: Diagnostic[]) {
         if (c.lock.capabilities.position !== 1 || c.lock.capabilities.service !== 1) bad(out, at);
       }
 }
-const ordered = (b: Obj) => b.kind === 'claim' || b.kind === 'cancel';
+const commission = (b: Obj) => b.kind === 'entitlement' || (b.kind === 'build' && !!b.fact),
+  ordered = (b: Obj) => b.kind === 'claim' || b.kind === 'cancel';
 const banks = (b: Obj) => b.kind === 'deposit' || b.kind === 'withdraw';
 const timed = (s: Obj) => ordered(s.benefit) || s.benefit.escrow?.ready_after !== undefined;
 const finite = (r: Obj | undefined): r is Obj => !!r && r.gain === 0 && !r.regen;
