@@ -1,5 +1,6 @@
 // Homestead hs-13 at 390 px (`LOKA_WALK=kitchen_sampler npm run walkthrough`): catch two fish,
-// learn cooking from the cook, cook a hearty stew at the hearth and eat it.
+// learn cooking from the cook, cook a hearty stew at the hearth and eat it; open
+// Character from the status icon row.
 import { moves, settle, walk } from './walk.ts';
 import { LABEL } from '../book/labels.ts';
 
@@ -31,4 +32,11 @@ walk('1-kitchen', 'Kitchen: learn cooking, cook a hearty stew at the hearth, eat
     .tap();
   await screen.getByRole('button', /^Eat/).first().tap();
   await settle();
+  // The status icon row (the stew leaves hearty); its tap opens Character, which lists it with time left.
+  await screen
+    .getByRole('button', /^hearty.*opens Character$/i)
+    .first()
+    .tap();
+  await settle();
+  await screen.getByRole('button', LABEL.backToWorld).tap();
 });

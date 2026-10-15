@@ -98,7 +98,7 @@ export function StatusLine(p: StatusProps) {
 }
 
 // Each " · " belongs to the item after it, so the line never starts with a lone dot. Every item
-// but the pools may shrink (position truncates).
+// but the pools may shrink (position and bleeding truncate).
 const joined = (c: Palette, item: ReactElement) => (
   <View key={item.key} style={item.key === 'contents' ? group : { ...group, ...shrink }}>
     <Text aria-hidden style={{ ...type.small, color: c.dim }}>

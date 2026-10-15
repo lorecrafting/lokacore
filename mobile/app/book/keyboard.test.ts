@@ -351,7 +351,17 @@ test('status icons: five then +N, named by label, time and polarity, pictures wh
     'warded, 90s remaining, buff, opens Character',
   ]);
   const glyphOf = (e: any) => e.props.children.props.children.props.children;
-  assert.deepEqual(shown.map(glyphOf), ['◡', '▼', '○', '▼', '▲']);
+  assert.deepEqual(shown.map(glyphOf), ['◡', '−', '○', '−', '+']);
+  const c = color.light;
+  const look = (e: any) => {
+    const disc = e.props.children.props;
+    return [disc.style.backgroundColor, disc.style.borderColor, disc.children.props.style.color];
+  };
+  assert.deepEqual(shown.slice(0, 3).map(look), [
+    [c.card, c.line, c.fg],
+    [c.fg, c.danger, c.bg],
+    [c.card, c.line, c.dim],
+  ]);
   const six = icons([...five, at('mighty', 'buff', 4000)], open);
   assert.equal(six.length, 6);
   assert.equal(six[5].props.accessibilityLabel, '+1 more, opens Character');
