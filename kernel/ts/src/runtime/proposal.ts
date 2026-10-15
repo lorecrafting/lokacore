@@ -294,9 +294,9 @@ function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined
     groups.set(job_id, group);
     const handoff = sightHandoff(p.world, p.ops, at, job_id as JobId, due_time, ran.delta.ops);
     if (due_time !== last) [cut, last] = [p.ops.length, due_time]; // only strictly earlier jobs
-    joinEarlier(p.ops, [w, cut], ran.delta.ops, group, [p.holders, groups]);
-    const mark = p.ops.length;
     const own = ran.delta.ops.map((o) => ({ ...o, writer_group: handoffGroup(o, handoff, group) }));
+    joinEarlier(p.ops, [w, cut], own, group, [p.holders, groups]);
+    const mark = p.ops.length;
     p.group++;
     const failed = join(p, own, ran.events, cause(p, due_time, run.id), 0, m) ?? react(p, true);
     if (failed) return failed;

@@ -21,10 +21,11 @@ export function queueHour(due: Due, job_id: string, ran: object) {
 
 // Inserts a drain step in (due_time, job_id) order; the limit if the drain outgrows due_jobs_per_advance.
 export function enqueue(due: Due, job_id: string, due_time: number, tick?: number) {
-  const k = due.findIndex(
-    ([id, j]) => j.due_time > due_time || (j.due_time === due_time && cmp(id, job_id) > 0),
-  );
-  due.splice(k < 0 ? due.length : k, 0, [job_id, { due_time, tick }]);
+  const after = ([id, j]: Due[number]) =>
+    j.due_time > due_time || (j.due_time === due_time && cmp(id, job_id) > 0);
+  let k = due.length; // from the end: a new step is mostly due after the drained ones
+  while (k > 0 && after(due[k - 1])) k--;
+  due.splice(k, 0, [job_id, { due_time, tick }]);
   return over({ due_jobs_per_advance: due.length });
 }
 
@@ -63,7 +64,10 @@ export function joinEarlier(
   for (; w.next < all.length; w.next++) {
     const k = opKey(all[w.next]);
     const at = w.at.get(k);
-    if (at) at.push(w.next);
+    // Groups merge only whole, so a group's latest position stands for all of it (loka-kgd.152).
+    if (at?.length && all[at[at.length - 1]].writer_group === all[w.next].writer_group)
+      at[at.length - 1] = w.next;
+    else if (at) at.push(w.next);
     else w.at.set(k, [w.next]);
   }
   const groups = new Set<number>();
