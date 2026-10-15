@@ -675,7 +675,10 @@ drain step schedules due by the target runs in the same advance at its own due t
 run it (`runtime/proposal.ts` jobs, loka-kgd.152). _Known limit:_ each such job counts toward
 `created_jobs` (64 per proposal), so one wait through a fight of more than about 64 rounds faults
 `budget_exceeded` where shorter waits pass; the host ends each elapsed step at the next pending job
-(`mobile/authority/local-story/elapsed.ts` boundary), so an offline catch-up stays under it. One unit of
+(`mobile/authority/local-story/elapsed.ts` boundary), so an offline catch-up stays under it. _Known
+limit:_ a root command's own reactions schedule against the advance's target, so a delayed (`after`)
+reaction to a root event inside a duration advance is due no earlier than the target + 1; only jobs
+that job runs inside the wait schedule run inside it. One unit of
 logical time is defined by the cartridge calendar: positive exact units per hour, hours per day
 and displayed subdivisions per hour. Time 0 begins day 1 at midnight. Daily schedules and
 policy leaf `time_window {from, to}` use calendar hours, including half-open windows that wrap
