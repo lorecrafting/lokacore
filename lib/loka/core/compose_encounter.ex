@@ -190,13 +190,14 @@ defmodule Loka.Core.ComposeEncounter do
       op["next_opponent_id"] == (Enum.find(ids, &(&1 > selected)) || hd(ids))
   end
 
-  @spec job(map(), term(), integer()) :: {:ok, map()} | {:error, String.t()}
-  def job(%{"op" => "job.schedule"} = op, row, horizon) do
+  @doc "A job op's row; a schedule is due later than `at`, the scheduling job's own due time."
+  @spec job(map(), term(), integer(), integer()) :: {:ok, map()} | {:error, String.t()}
+  def job(%{"op" => "job.schedule"} = op, row, _horizon, at) do
     cond do
       row != nil ->
         {:error, "precondition_failed"}
 
-      op["due_time"] <= horizon ->
+      op["due_time"] <= at ->
         {:error, "nonfuture_job"}
 
       not binding?(op) ->
@@ -212,7 +213,7 @@ defmodule Loka.Core.ComposeEncounter do
     end
   end
 
-  def job(op, row, horizon) do
+  def job(op, row, horizon, _at) do
     cancel = op["op"] == "job.cancel"
 
     valid = if cancel, do: cancel_binding?(op, row), else: row["due_time"] <= horizon
@@ -280,7 +281,11 @@ defmodule Loka.Core.ComposeEncounter do
     case {op["quest_instance_id"] != nil, op["water_generation"] != nil, op["actor_id"] != nil,
           op["water_body_id"] != nil} do
       {false, false, false, false} ->
-        true
+        get_in(op, ["job", "kind"]) != "reaction"
+
+      {false, false, true, false} ->
+        get_in(op, ["job", "kind"]) == "reaction" and
+          [op["encounter_id"], op["sight"]] == [nil, nil]
 
       {true, false, true, false} ->
         get_in(op, ["job", "kind"]) == "quest" and op["encounter_id"] == nil

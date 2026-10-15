@@ -696,7 +696,15 @@ an earlier reaction of the same advance wrote joins that write's writer group, s
 on two sub-steps of one wait, or for two NPCs in one advance, writes the row in order
 (`mechanics/reaction.ts` assignment, loka-j2mo). Every drain step counts toward
 `due_jobs_per_advance`, and a wait crossing more steps faults `budget_exceeded`; while hours are
-crossed, the count also includes due jobs the drain skips, so that fault can come early. One unit of
+crossed, the count also includes due jobs the drain skips, so that fault can come early. A job a
+drain step schedules due by the target runs in the same advance at its own due time, as steps would
+run it (`runtime/proposal.ts` jobs, loka-kgd.152). _Known limit:_ each such job counts toward
+`created_jobs` (64 per proposal), so one wait through a fight of more than about 64 rounds faults
+`budget_exceeded` where shorter waits pass; the host ends each elapsed step at the next pending job
+(`mobile/authority/local-story/elapsed.ts` boundary), so an offline catch-up stays under it. _Known
+limit:_ a root command's own reactions schedule against the advance's target, so a delayed (`after`)
+reaction to a root event inside a duration advance is due no earlier than the target + 1; only jobs
+that job runs inside the wait schedule run inside it. One unit of
 logical time is defined by the cartridge calendar: positive exact units per hour, hours per day
 and displayed subdivisions per hour. Time 0 begins day 1 at midnight. Daily schedules and
 policy leaf `time_window {from, to}` use calendar hours, including half-open windows that wrap
@@ -3017,3 +3025,36 @@ Gap 4 of the [depth audit](../rnd/depth-and-ux-2026-10-13.md) (owner approved 20
   - Events, jobs and save rows: none new.
   - Reused: `holds` and the policy walkers, `births`, `wanders`, the death sequence, population plans.
   - New: the `population_count` leaf, three plan fields, the 1.86 floor; no foundation change.
+
+## Delayed reactions (toolbox row FD1)
+
+[Toolbox row FD1](../MECHANICS-TOOLBOX.md#ranked-toolbox) (source: `docs/rnd/depth-and-ux-2026-10-13.md` gap 1): "a consequence arrives later; a rule reads how long ago something happened". The PM brief is in Beads `loka-kgd.138` (2026-10-14). [Declarations](cartridge.md#delayed-reaction-declarations) govern it. Facts hold plain values (no write time), so the row stores a time in an int fact.
+
+- **`after`.** A [reaction@1](#reaction1-kerneltssrcmechanicsreactionts) rule may carry `after: <int >= 1>`, in logical seconds, on the whole rule (not per step). On delivery its `when` is read as today; when it holds, the rule writes one `job.schedule` in its writer group instead of its steps: job `{kind: "reaction", key: <rule key>}`, `actor_id` the delivery's actor (RS-4's [Attribution](#reaction1-kerneltssrcmechanicsreactionts): the subject's character, else the event's `actor_id`, else the root actor), due at `max(cause time + after, horizon + 1)` for a root command's delivery, where the horizon is the proposal's clock (a wait's `until`), and at `cause time + after` for a delivery inside a job run.
+- **Fire.** The job runs as any `run_job` (decided `job_ran`): it completes, then the rule's `when` is read again for the stored actor at the due time, and when it holds the steps run for that actor at that time, as a delivery whose event has no subject. A `when` that fails at fire time writes nothing but the completion: a fact guard is the only cancellation. A rule gone from the cartridge, or a step that faults or throws then (a quest no longer active, a `fact.assign` to a durable fact), completes the job with none of the rule's writes, events or lines: a pending job would wedge every later advance. The same rule without `after` faults its delivery instead (PM decision 2026-10-14). Each fire counts as one delivery and its `when` reads count as query steps in the advance's budget, so a delayed chain past `query_steps` faults `budget_exceeded`. The job never reads `world.character`.
+- **Event-bound steps refused.** A rule with `after` may not carry `barrier.set`, `item.move`, `population.suppress` or a `status.apply` with `co_present` or `tag` (they read the event or its room); both kernels refuse it (SCHEMA_VIOLATION `invalid_value` at the step's `op`). The fired job keeps its actor but not the event's subject ([RS-4](#reaction1-kerneltssrcmechanicsreactionts)'s NPC-entrant no-op, the trigger's own quest holder), so they also refuse `quest.activate`, `quest.resolve` and `quest.fail`; storing the subject on the job would lift this. An entity or pair fact step without `npc` or `item` writes nothing at fire time (no subject). Known limit: an untargeted `status.apply` or `status.cure` lands on the stored actor's body, which for an NPC-subject trigger (an NPC's death or entry) is the root player; storing the subject on the job (`loka-v86w`) fixes it.
+- **`fact.stamp`.** The step `{op: "fact.stamp", fact, npc?, item?}` writes the delivery's logical time (the due time when fired) into an int fact, lowered to the existing `fact.assign` op (so it emits `fact_changed` when the value changes). The fact must be an int fact without `maximum` and with `minimum` absent or at most 0 (SCHEMA_VIOLATION `invalid_value` at the step's `fact`).
+- **`time_since`.** The policy leaf `{op: "time_since", fact, npc?, item?, at_least: <int >= 0>}` (fact@1) holds when `clock - value >= at_least`, the fact read as `fact_compare` reads it; one query step. A fact never stamped holds its default (0 for the stamp's facts), so the leaf holds once the clock reaches `at_least`. The fact must meet `fact.stamp`'s rule.
+- **Realm seams** (owner decision 2026-10-13, brief checklist).
+  1. Actor: met; the job stores `actor_id` when scheduled and the fire reads it, never `world.character`.
+  2. Reactions: met; the actor is the delivery's resolved actor, captured once; a fired step's subject is that actor's body or its named NPC or item, never a listener default.
+  3. Credit: not applicable; no shared payout (`experience.grant` goes to the stored actor).
+  4. Time: met; delays and `time_since` are logical seconds on the world clock; no device clock, no skip, no `from`/`until`.
+  5. Scope: met; steps and the stamp write at each fact's declared scope (player facts per player); one job per delivery, no once-per-world event.
+  6. Text: not applicable; no text, `speech@1` unchanged.
+  7. Ownership: not applicable; `item.move` is refused on a delayed rule.
+  8. Trust: met; the job row is this authority's; the job invariants (both kernels) require `actor_id` on a reaction job, but no check ties it to a character row (Known limits).
+  9. Instancing: not applicable; none built; the job is per actor.
+- **Opt-in.** `after`, `fact.stamp` and `time_since` need `kernel_api` 1.90 (KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least`, both kernels). Installed kernel 1.90. Chapter 1 declares none.
+- **Book.** No new element and no line.
+- **Known limits.** A root command's delay that would end inside its own advance arrives 1 s after the advance ends: never early, possibly late (the composer refuses a root job due inside the proposal's advance; PM ruling 2026-10-14). A delay caused inside a job run is queued and runs at its due time inside the same wait. So a delayed rule whose fire changes the fact it watches keeps firing inside one long wait, which can fault `budget_exceeded` (`created_jobs`) where the same span in hourly waits passes (unless `after` is short enough for one hour to schedule over 64 of its jobs). No subject is carried: fired steps reach only the actor's body and named NPCs and items. No `job.cancel` by content. `after` is per rule, not per step. A reaction job's `actor_id` is not checked against the character rows on reopen. A fired step that throws is dropped silently (no event); no loader check refuses such a step yet.
+- **Traps.** No RNG; one bounded job per delivery; the stamp is an existing fact write.
+- **Sampler.** `cartridges/raid_sampler` adds the instance int fact `raided_at` (default 0) stamped by `raid`, and the rule `aftershock` (`fact_changed {raided}`, `after` 600, `when` `fact_compare {raided equals true}`, `apply [fact.adjust {aftershocks 1}]`) with its instance int fact `aftershocks` (0 to 100). A raid at 1000 (hourly waits) schedules `aftershock` at 1600. One wait to 1900 fires `raid` at the wait end (row 37a): `raided_at` 1900, `aftershock` due 2500. A cause inside a wait runs at its due time: a test rule `after` 100 on the 1600 aftershock runs at 1700 in one wait to 1800, as in hourly waits (`kernel/ts/test/raid.test.ts`). A rule `after` 30 on the bell's 60 s `ring_bell` (a root event) is due at 61 (`kernel/ts/test/recipes.test.ts`). Two delayed rules writing one fact, or one body's status, in one advance share its writer group, so both apply (a `status.apply` due at 1600 and a `status.cure` of that status due at 1601): a fired run writes each row in the group the advance already gave it, through the same holder map an ordinary reaction uses, and its job takes the lowest of those groups (`statusGroup`). A `time_since {raided_at, at_least 600}` reads false at 1599 and true at 1600 after a stamp at 1000; on a fresh world it is true from 600. A real-SQLite save closed with the job pending cold-reopens and fires it once (`mobile/authority/local-story/raid_aftermath.test.ts`).
+- **Composition record** ([architecture](architecture.md#building-mechanics-by-composition)).
+  - Consumer: `raid_sampler`. Later: the showcase's cause-and-effect slice.
+  - Reads: the rule's `when` at both times, the job row's `actor_id`.
+  - Writes: `job.schedule`, `job.complete` and the steps' existing ops; `fact.stamp` lowers to `fact.assign`.
+  - Events, save rows: none new; the job is a `JobRow` with existing columns (`job`, `actor_id`).
+  - Reused: `sequence`, the job drain, `fact.assign`, `fact_compare`'s read.
+  - New: `after`, the reaction job kind, `fact.stamp`, `time_since`, the 1.90 floor; foundation: the job composer (both kernels, and both job invariants) admits `actor_id` on a `reaction` job (PM ruling 2026-10-14, second opinion).
+  - Missing invariant: none (job rows are checked by the job invariants).

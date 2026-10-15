@@ -7,6 +7,7 @@ valid:
   - "import { activation } from './lifecycle.ts';"
   - "import { earned } from '../quest/lifecycle.ts';"
   - "import { pay } from '../resource.ts';"
+  - "import { runDelayed } from '../delayed.ts';"
   - "import { engage } from '../disposition.ts';"
   - "import { chainRefused } from '../locks.ts';"
   - "import { entered } from './behavior.ts';"

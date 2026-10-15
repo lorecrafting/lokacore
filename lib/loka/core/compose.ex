@@ -1,7 +1,7 @@
 # size: allow 352, typed knowledge, patrol, final birth admission, status and levelling share portable composition
 defmodule Loka.Core.Compose do
   @moduledoc "Portable delta composition: changed rows only; atomic conflicts and bounded work."
-  alias Loka.Core.{ComposeChoice, ComposePack, Creation}
+  alias Loka.Core.{ComposeChoice, ComposeJob, ComposePack, Creation}
   @profile_path Path.expand("../../../docs/spec/conformance/composition-profile.json", __DIR__)
   @external_resource @profile_path
   @profile File.read!(@profile_path)
@@ -17,7 +17,7 @@ defmodule Loka.Core.Compose do
         fault("budget_exceeded", nil)
 
       true ->
-        result = apply_all(state, ops)
+        result = apply_all(state, ops, final)
 
         if final and Map.has_key?(result, "changes") and not Creation.complete?(ops, state),
           do: fault("precondition_failed", %{"kind" => "clock"}),
@@ -25,28 +25,31 @@ defmodule Loka.Core.Compose do
     end
   end
 
-  defp apply_all(state, ops) do
+  defp apply_all(state, ops, final) do
     horizon = Enum.reduce(ops, state["clock"], &advance_target/2)
+    times = ComposeJob.times(state, ops, if(final, do: horizon, else: state["clock"]))
+    steps = Enum.zip([ops, Enum.drop(ops, 1) ++ [nil], times])
 
-    pairs = Enum.zip(ops, Enum.drop(ops, 1) ++ [nil])
-
-    case Enum.reduce_while(pairs, %{}, &step_pair(&1, &2, {state, horizon})) do
-      %{"fault" => _} = f ->
-        f
-
-      overlay ->
-        case ComposeChoice.pending_at_limit(overlay) do
-          nil -> %{"changes" => overlay |> Enum.sort() |> Enum.map(&row/1)}
-          t -> fault("precondition_failed", t)
-        end
+    case Enum.reduce_while(steps, %{}, &step_pair(&1, &2, {state, horizon})) do
+      %{"fault" => _} = f -> f
+      overlay -> finish(Enum.sort(overlay), final, horizon)
     end
   end
 
-  defp step_pair({op, next}, overlay, ctx) do
+  # Rows in key order (a map past 32 keys iterates in hash order): choice and job faults match TS.
+  defp finish(rows, final, horizon) do
+    cond do
+      t = ComposeChoice.pending_at_limit(rows) -> fault("precondition_failed", t)
+      t = final && ComposeJob.unrun(rows, horizon) -> fault("nonfuture_job", t)
+      true -> %{"changes" => Enum.map(rows, &row/1)}
+    end
+  end
+
+  defp step_pair({op, next, at}, overlay, ctx) do
     if (op["op"] == "entity.create" and not Creation.initial_pair?(op, next)) or
          not repeat_pair?(op, next),
        do: {:halt, fault("precondition_failed", target(op))},
-       else: step(op, overlay, ctx)
+       else: step(op, overlay, ctx, at)
   end
 
   defp repeat_pair?(%{"op" => "quest.retire"} = op, %{"op" => "quest.activate"} = next),
@@ -80,14 +83,22 @@ defmodule Loka.Core.Compose do
   defp advance_target(%{"op" => "time.advance", "to" => to}, _), do: to
   defp advance_target(_, t), do: t
 
-  defp step(op, overlay, {state, horizon}) do
+  defp step(op, overlay, {state, horizon}, at) do
     target = target(op)
     k = key(target)
     group = op["writer_group"]
+    ctx = {state, horizon, overlay}
 
     case overlay do
-      %{^k => {other, _, _}} when other != group -> {:halt, fault("conflicting_write", target)}
-      _ -> apply_op(op, target, {state, horizon, overlay}) |> write(overlay, k, group, target)
+      %{^k => {other, _, _}} when other != group ->
+        {:halt, fault("conflicting_write", target)}
+
+      _ ->
+        if(String.starts_with?(op["op"], "job."),
+          do: Loka.Core.ComposeEncounter.job(op, read(target, ctx), horizon, at),
+          else: apply_op(op, target, ctx)
+        )
+        |> write(overlay, k, group, target)
     end
   end
 
@@ -165,9 +176,6 @@ defmodule Loka.Core.Compose do
     initial = get_in(elem(ctx, 0), ["choices", op["continuation_id"]])
     ComposeChoice.transition(op, read(t, ctx), initial)
   end
-
-  defp apply_op(%{"op" => "job." <> _} = op, t, {_, horizon, _} = ctx),
-    do: Loka.Core.ComposeEncounter.job(op, read(t, ctx), horizon)
 
   defp apply_op(%{"op" => "bleed.transition"} = op, t, {state, horizon, overlay} = ctx),
     do: Loka.Core.ComposeBleed.transition(op, read(t, ctx), state, horizon, overlay)
