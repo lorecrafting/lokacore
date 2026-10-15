@@ -1,4 +1,5 @@
 import type {
+  CharacterId,
   CommandId,
   DefinitionRef,
   DeltaOp,
@@ -11,6 +12,7 @@ import { cmp } from '../../foundation/validate.ts';
 import { KernelError } from '../../foundation/error.ts';
 import {
   accepted,
+  bodyOf,
   COMPASS,
   refString,
   type JobRow,
@@ -25,9 +27,10 @@ import { npcPassage } from '../movement/shared.ts';
 import { moves } from '../status/shared.ts';
 import { planRef } from './refs.ts';
 
-/** Bind only a current deer generation observed on an actual player entry. */
+/** Bind only a current deer generation observed on an actual player entry (`seer` entering). */
 export function entrySight(
   world: World,
+  seer: CharacterId,
   source: EntityId,
   room: EntityId,
   cause_id: CommandId,
@@ -50,6 +53,7 @@ export function entrySight(
         ops.push(
           ...bindSight(
             world,
+            seer,
             plan,
             slot,
             row,
@@ -70,6 +74,7 @@ export function entrySight(
 /** The checked population transfer is the cause; the caller owns the slot's single writer. */
 export function bindSight(
   world: World,
+  player_id: CharacterId,
   plan: DefinitionRef,
   slot: number,
   prior: PopulationSlot,
@@ -91,8 +96,7 @@ export function bindSight(
       : []),
     sightJob(plan, job_id, at + spec.plan.sight.delay, {
       member_id,
-      // ast-grep-ignore: ts-rule-actor-from-command
-      player_id: world.character,
+      player_id,
       slot,
       generation: prior.generation,
       seen_at: at,
@@ -143,8 +147,7 @@ export function runSight(world: World, job_id: JobId, job: JobRow, steps: Steps)
   const present =
     slot.replacement_due === null &&
     living(world, sight.member_id) &&
-    // ast-grep-ignore: ts-rule-actor-from-command
-    world.state.containers[world.body] === here &&
+    world.state.containers[bodyOf(world, sight.player_id)!] === here && // activeSight: admitted
     world.rooms[here];
   if (!present) return accepted<never>(world, 'job_ran', [done, clear], []);
   const escape = moves(world, sight.member_id) ? refuge(world, plan, here, steps) : undefined;
@@ -186,8 +189,7 @@ function activeSight(world: World, job_id: JobId, job: JobRow) {
     slot.sight_job_id !== job_id ||
     slot.member_id !== sight.member_id ||
     slot.generation !== sight.generation ||
-    // ast-grep-ignore: ts-rule-actor-from-command
-    sight.player_id !== world.character
+    bodyOf(world, sight.player_id) === undefined
   )
     return undefined;
   return { plan, slot };

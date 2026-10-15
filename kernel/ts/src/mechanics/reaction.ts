@@ -118,7 +118,7 @@ export function sequence(
   mint: Mint,
   { holders = new Map(), dead = new Set() }: Delivery = {},
 ): Decision<EventPayload['type']> | undefined {
-  const [actor, npc, named] = deliveryActor(world, cause, root);
+  const [actor, npc, trigger] = deliveryActor(world, cause, root);
   if (!actor) return { kind: 'fault', code: 'precondition_failed' };
   const then = { ...world, state: { ...world.state, clock: cause.logical_time } };
   const about = { steps, cause, subject: subject(cause, bodyOf(then, actor)) }; // status reader 1
@@ -139,7 +139,7 @@ export function sequence(
       ops.push(...started.ops.map((op) => ({ ...op, writer_group: group })));
       emit(started.payload);
     } else if (step.op === 'quest.resolve' || step.op === 'quest.fail') {
-      const ended = ending(world, step, group, steps, emit, named);
+      const ended = ending(world, step, group, steps, emit, trigger);
       if (!ended) return { kind: 'fault', code: 'precondition_failed' };
       ops.push(...ended);
     } else if (step.op === 'population.suppress') {
@@ -334,7 +334,6 @@ function terminal(
   };
 }
 
-// A quest event's evidenced player instance owns the delivery; legacy triggers keep the root actor.
 /** loka-kgd.150.2: actor (the subject's character, else the doer), whether a non-player subject
  * blocks activation, and the trigger's own character (Attribution). ponytail: the root actor
  * stands in while proposal-made events carry no actor_id; stamping them re-pins fixtures (R14). */
@@ -343,7 +342,8 @@ function deliveryActor(world: World, cause: DomainEvent, root: CharacterId) {
   const character = named && actorOf(world, named);
   const actor = resolvedActor(world, cause, character ?? cause.actor_id ?? root);
   const player = (s: DomainEvent['scope']) => (s.kind === 'player' ? s.character_id : undefined);
-  const doer = cause.payload.type === 'fact_changed' ? player(cause.scope) : cause.actor_id;
+  const doer =
+    cause.payload.type === 'fact_changed' ? player(cause.scope) : (cause.actor_id ?? root);
   const own = named ? character : cause.payload.type === 'quest_resolved' ? actor : doer;
   return [actor, Boolean(named && !character), own] as const;
 }

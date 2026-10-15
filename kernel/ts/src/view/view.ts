@@ -209,7 +209,7 @@ const viewOf = (
   ...(e.kind === 'npc' && freeLessons(world, id)),
   ...(e.kind === 'npc' && e.services && { services: services(world, id as EntityId, steps) }),
   ...(fuelView(world, id) && { fuel: fuelView(world, id) }),
-  ...(e.kind === 'npc' && e.shop && { shop: shelf(world, id as EntityId) }),
+  ...(e.kind === 'npc' && e.shop && { shop: shelf(world, world.character, id as EntityId) }),
   ...(e.kind === 'npc' &&
     carrying(world, id as EntityId) && { carrying: carrying(world, id as EntityId) }),
 });

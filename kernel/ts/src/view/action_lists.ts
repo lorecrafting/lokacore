@@ -288,7 +288,7 @@ function putPairs(
     if (++steps.n > LIMITS.query_steps)
       return [{ ...shown, available: false, reason: { code: 'budget_exceeded' } }];
     if (world.entities[id].kind !== 'item' || id === item) continue;
-    const code = putRefused(world, body, item, id as EntityId, steps);
+    const code = putRefused(world, world.character, body, item, id as EntityId, steps);
     if (code === 'budget_exceeded') return [{ ...shown, available: false, reason: { code } }];
     if (!code) pairs.push({ ...shown, target_ids: [item, id as EntityId] });
   }

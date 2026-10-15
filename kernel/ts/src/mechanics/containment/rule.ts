@@ -63,7 +63,7 @@ export const decide: Rule<'containment'> = (world, command, mint, steps = { n: 0
     return accepted(world, 'taken', move(body), acquired(body));
   }
   if (p.type === 'put') {
-    const code = putRefused(world, body, p.item_id, p.container_id, steps);
+    const code = putRefused(world, p.actor_id, body, p.item_id, p.container_id, steps);
     if (code)
       return code === 'budget_exceeded' || code === 'containment_cycle'
         ? { kind: 'fault', code }

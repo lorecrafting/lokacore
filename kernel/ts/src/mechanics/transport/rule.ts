@@ -20,6 +20,7 @@ export const decide: Rule<'transport'> = (world, command, mint, steps) => {
       ...result.ops,
       ...entrySight(
         world,
+        command.payload.actor_id,
         world.state.containers[result.body],
         result.there,
         command.id,

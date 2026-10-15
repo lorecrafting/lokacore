@@ -38,7 +38,11 @@ export function adopt(
   if (spent) return faulted(BUDGET, world, spent);
   const applied = apply(world, out.delta.ops);
   if ('fault' in applied) return faulted(applied.fault, world, applied.limit);
-  const resource = recoveryFault({ ...world, state: applied.state }, out.delta.ops);
+  const resource = recoveryFault(
+    { ...world, state: applied.state },
+    command.payload.actor_id,
+    out.delta.ops,
+  );
   if (resource)
     return { decision: { kind: 'fault', code: 'precondition_failed', target: resource }, world };
   let choices = applied.state.choices;

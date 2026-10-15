@@ -187,6 +187,11 @@ export const bodyOf = (world: World, actor: CharacterId): EntityId | undefined =
 export const actorOf = (world: World, body: EntityId): CharacterId | undefined =>
   body === world.body ? world.character : undefined;
 
+/** Every admitted (character, body) pair: the one place the single-character Story lives; the Realm lists its admitted set. */
+export const admitted = (world: World): readonly (readonly [CharacterId, EntityId])[] => [
+  [world.character, world.body],
+];
+
 export type Accepted = Extract<DecisionResult, { kind: 'accepted' }>;
 export type Event<E> = Omit<DomainEvent, 'payload'> & {
   readonly payload: Extract<EventPayload, { type: E }>;
