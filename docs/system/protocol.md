@@ -92,7 +92,7 @@ storage half):
    `when` holds (its write to a status holder or fact row an earlier reaction of the advance wrote
    joins that reaction's group, [mechanics.md](mechanics.md)) (`mechanics/reaction.ts:25`, `:44`), to quiescence; then, when the root advanced time,
    each due pending job runs as a `run_job` in `(due_time, job_id)` order with its reactions
-   (`runtime/proposal.ts:264`); a job a run schedules due by the target joins that order and runs
+   (`runtime/proposal.ts:265`); a job a run schedules due by the target joins that order and runs
    in the same advance, and a run or its reactions writing a target that a run of strictly earlier
    due time (or its reactions) wrote joins that writer group (equal-due writes still fault `conflicting_write`), so one long
    wait equals the same wait in steps (loka-kgd.152, .151). Deliveries, reaction depth and query steps are counted as they go.
