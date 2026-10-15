@@ -12,7 +12,7 @@ const said = (key: string, word: string, to?: string) =>
     target_ids: to ? [to] : [],
     input: { word },
   });
-const keyboard = button('say', { action_key: 'say' });
+const keyboard = button(', say', { action_key: 'say' });
 const view = (more: Partial<GameView> = {}) =>
   ({ actions: [], entities: [smith], ...more }) as unknown as GameView;
 
@@ -29,8 +29,7 @@ const meta = {
       said('shout', 'help'),
     ],
     pending: false,
-    text: (key: string) =>
-      ({ 'npc.smith': 'Smith', 'spell.ignis.unlearned': 'Not yet learned.' })[key] ?? key,
+    text: (key: string) => ({ 'npc.smith': 'Smith' })[key] ?? key,
     press: fn(),
   },
 } satisfies Meta<typeof WordBar>;
@@ -44,6 +43,7 @@ export const Rows: Story = {
   },
 };
 
+// A learned word refused by its cost (reason code only, as the kernel emits).
 // Breaks: a refused spell word dropped, or shown without its reason.
 export const CastWithRefusedWord: Story = {
   args: {
@@ -54,7 +54,7 @@ export const CastWithRefusedWord: Story = {
         {
           word: 'ignis',
           available: false,
-          reason: { code: 'invalid_state', message: { key: 'spell.ignis.unlearned' } },
+          reason: { code: 'insufficient_resource' },
         },
       ],
     } as never),
@@ -65,7 +65,7 @@ export const CastWithRefusedWord: Story = {
       'aria-disabled',
       'true',
     );
-    await expect(canvas.getByText('ignis, cast: Not yet learned.')).toBeVisible();
+    await expect(canvas.getByText('ignis, cast: too exhausted')).toBeVisible();
   },
 };
 
