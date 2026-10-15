@@ -29,7 +29,7 @@ import { living } from './death/shared.ts';
 import { perceived } from './senses.ts';
 import { levelling } from './levelling/shared.ts';
 import { livingCount } from './population/refs.ts';
-import { level as skillLevel } from './skills.ts';
+import { level as skillLevel } from './skill_level.ts';
 
 // The policy that always holds; here, not in dialogue/shared.ts, so scene/shared.ts (and
 // disposition.ts through it) imports no dialogue module: the Metro bundle threw on that cycle.
