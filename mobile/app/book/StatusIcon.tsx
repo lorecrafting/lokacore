@@ -7,7 +7,7 @@ import { Animated, Pressable, Text, View } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { useReducedMotion } from './fade.ts';
 import { glyph } from './glyphs.ts';
-import { statusName, statusTip } from './model.ts';
+import { statusTip } from './model.ts';
 import { usePalette, type Palette } from './palette.ts';
 import { motion, radius, size, space, type } from './tokens.ts';
 
@@ -34,7 +34,7 @@ export function StatusIcons(p: Props) {
         <Icon
           key={`${x.label}-${i}`}
           look={x.kind ?? 'neutral'}
-          name={statusName(x, p.time, p.text)}
+          name={[statusTip(x, p.time, p.text), x.kind].filter(Boolean).join(', ')}
           hold={(on) => setHeld(on ? x.label : undefined)}
           open={p.open}
         >

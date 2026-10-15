@@ -32,9 +32,6 @@ export const conditionLine = (c: Condition, time: number, text: Say) =>
 // A status icon's hold tip (book-ui.md Conditions details): label and time left, no tick part.
 export const statusTip = (c: Condition, time: number, text: Say) =>
   [text(c.label), left(c, time)].filter(Boolean).join(', ');
-// Its accessible name: the tip, then the polarity the disc shows.
-export const statusName = (c: Condition, time: number, text: Say) =>
-  [statusTip(c, time, text), c.kind].filter(Boolean).join(', ');
 // Book UI Sense cues details (wording proposed; designer to approve): the direction key, none here.
 export const cueLine = (c: NonNullable<GameView['cues']>[number], text: Say) =>
   `${text(c.text)}${c.direction ? ` from the ${c.direction}` : ''}`;
