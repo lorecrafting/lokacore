@@ -1,4 +1,4 @@
-// size: allow 341, ancestry, bell area, Study edge, barrier opens_when roots and identity name variants join shared reference admission
+// size: allow 344, ancestry, bell area, Study edge, barrier opens_when, ask answer roots and identity name variants join shared reference admission
 import { water } from './cartridge_water.ts';
 import { topics } from './cartridge_topics.ts';
 import { pools } from './cartridge_pools.ts';
@@ -38,6 +38,7 @@ import { reactions } from './cartridge_reactions.ts';
 import { recipes } from './cartridge_recipes.ts';
 import { reserved } from './cartridge_position.ts';
 import { theft } from './cartridge_theft.ts';
+import { answerRoots, asks } from './cartridge_asks.ts';
 import { cueParts } from './cartridge_senses.ts';
 import { lockRoots, locks } from './cartridge_locks.ts';
 import { holders } from './cartridge_holders.ts';
@@ -157,7 +158,9 @@ export function nodes(c: Obj): [Obj, string][] {
     ...parts(c).flatMap(([k, v, at]) =>
       k === 'variant' || (k === 'cue' && v.when) ? walk(v.when.root, `${at}.when.root`) : [],
     ),
-    ...[...questPolicies(c), ...dispositions(c)].flatMap(([p, at]) => walk(p, at)),
+    ...[...questPolicies(c), ...dispositions(c), ...answerRoots(c)].flatMap(([p, at]) =>
+      walk(p, at),
+    ),
     ...cases(c).flatMap(([k, at]) => (k.when ? walk(k.when.root, `${at}.when.root`) : [])),
     ...Object.entries((c.reactions ?? {}) as Obj).flatMap(([ref, r]) =>
       r.when ? walk(r.when.root, `.cartridge.reactions${step(ref)}.when.root`) : [],
@@ -268,7 +271,7 @@ export function refStage(c: Obj): Diagnostic[] {
   out.push(...recipes(c, check), ...holders(c), ...barriers(c, check.named), ...links(c));
   out.push(...quests(c, check), ...reactions(c, check), ...dialogues(c, check));
   out.push(...pools(c, named), ...death(c, named), ...combat(c, named), ...commerce(c));
-  out.push(...theft(c, named));
+  out.push(...theft(c, named), ...asks(c, check));
   out.push(...derived(c, named), ...levelling(c, check));
   return out;
 }

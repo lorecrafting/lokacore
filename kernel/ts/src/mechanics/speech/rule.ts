@@ -1,13 +1,15 @@
-// speech@1 (toolbox row G9; mechanics.md social verbs): say, whisper or shout one word. Each NPC
+// speech@1 (toolbox row G9; mechanics.md social verbs): say, whisper or shout one word (ask: ask.ts). Each NPC
 // that hears it gets one spoken event; a say or whisper of a speaker's keyword opens that dialogue.
 import { accepted, bodyOf, event, rejected, type Rule } from '../../runtime/decision.ts';
 import { opening } from '../dialogue/behavior.ts';
 import { pending } from '../dialogue/shared.ts';
 import { answer, authored, folded, hearers } from './shared.ts';
 import { npcsIn } from '../death/shared.ts';
+import { ask } from './ask.ts';
 
 export const decide: Rule<'speech'> = (world, command, mint, steps = { n: 0 }) => {
   const p = command.payload;
+  if (p.type === 'ask') return ask(world, { ...command, payload: p }, mint, steps);
   const word = folded(p.word);
   const body = bodyOf(world, p.actor_id);
   const room = body && world.state.containers[body];

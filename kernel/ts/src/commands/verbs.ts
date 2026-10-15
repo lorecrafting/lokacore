@@ -27,6 +27,7 @@ export const VERBS: Readonly<Record<string, [TargetSpec, ActionInputParameter[]]
   cast: [{ kind: 'none' }, ['word']],
   whisper: [{ kind: 'entity', scopes: ['room_occupants'] }, ['word']],
   shout: [{ kind: 'none' }, ['word']],
+  ask: [{ kind: 'entity', scopes: ['room_occupants'] }, ['topic']], // row FD7
   read: [{ kind: 'entity', scopes: ['inspectable_details'] }, []],
   move: [{ kind: 'none' }, ['direction']],
   scan: [{ kind: 'none' }, []],

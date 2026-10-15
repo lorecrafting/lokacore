@@ -1,0 +1,34 @@
+{
+  "on": {
+    "event": "entity_entered_room",
+    "room": "square"
+  },
+  "when": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": [
+        {
+          "op": "not",
+          "item": {
+            "op": "fact_compare",
+            "fact": "topic_mill_known",
+            "equals": true
+          }
+        }
+      ]
+    }
+  },
+  "apply": [
+    {
+      "op": "fact.assign",
+      "fact": "topic_mill_known",
+      "value": true
+    },
+    {
+      "op": "fact.assign",
+      "fact": "topic_moon_known",
+      "value": true
+    }
+  ]
+}

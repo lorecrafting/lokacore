@@ -1,0 +1,32 @@
+{
+  "keywords": [
+    "smith"
+  ],
+  "short": "npc.smith.short",
+  "room_line": "npc.smith.room",
+  "description": "npc.smith.description",
+  "room": "square",
+  "ask": {
+    "unknown": "smith.unknown",
+    "answers": [
+      {
+        "topic": "mill",
+        "text": "smith.mill",
+        "grants": "smugglers"
+      },
+      {
+        "topic": "smugglers",
+        "text": "smith.smugglers",
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "fact_compare",
+            "fact": "trust",
+            "equals": 1,
+            "subject": "target"
+          }
+        }
+      }
+    ]
+  }
+}

@@ -226,6 +226,7 @@ The portable semantic Command registry (04 §1, §3, §21; 14 §R3A). Host-only 
   - `perform`: Perform a cartridge's ActionRecipe by its action key (06 §20; action.schema.json ActionRecipe). The authority re-resolves the key in the actor's ActionSet; target_id, when given, is the id target resolution returned for the words after the verb and must be the recipe's target. A use recipe (toolbox row G4) needs both target_id, the item used on, and item_id, the held tool.
   - `talk`: Talk to a character.
   - `say`: Say one word aloud to the NPCs in the actor's room (speech@1; toolbox row G9). The word is 1 to 32 ASCII letters, compared case-folded and only against authored keywords; it never reaches narration.
+  - `ask`: Ask an NPC in the actor's room about a topic the actor knows (speech@1; toolbox row FD7). The NPC's first authored answer on that topic whose condition holds is narrated, else its unknown line; an answer may grant another topic.
   - `cast`: Cast the spell whose word this is (action_recipe@1; toolbox row 29a): the word, case-folded, names a spell recipe (action.schema.json RecipeTarget spell), performed like a perform of it. An unknown word and a spell whose policy fails are refused alike, invalid_state; the word never reaches narration.
   - `shout`: Shout one word to the NPCs in the actor's room and in the rooms one exit away (speech@1; toolbox row G9).
   - `whisper`: Whisper one word to one NPC in the actor's room; no one else hears it (speech@1; toolbox row G9).
@@ -468,6 +469,7 @@ The DomainEvent envelope and registry, proposed versus committed (04 §1, §5.1,
   - `status_expired`: Toolbox row G3: an active status on a body, NPC or thing (body_id) reached its end; a cure or death emits none.
   - `quest_failed`: Toolbox row W24: a generic quest deadline expired and failed the open instance with its authored outcome; a legacy deadline or a quest.fail reaction emits none.
   - `spoken`: Toolbox row G9 (speech@1): the NPC entity_id heard the actor speak, one event per hearer. word is the case-folded word only when it is an authored keyword (a dialogue's keyword or a spoken reaction's word), else absent.
+  - `asked`: Toolbox row FD7 (speech@1): the actor asked the NPC entity_id about a topic; answered is false when the NPC gave its unknown line.
 - **Loudness**: How a word was spoken (speech@1; toolbox row G9): whisper reaches the addressee, say the speaker's room, shout the rooms one exit away too.
 
 ## Fact contracts (`protocol/fact.schema.json`)
