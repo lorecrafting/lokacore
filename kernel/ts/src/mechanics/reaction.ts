@@ -105,7 +105,13 @@ export function triggered(world: World, e: DomainEvent): ReactionRule[] {
 const ACTIVATES = ['quest_resolved', 'rested'];
 // The advance's status holders' groups (G3), and the bodies dead after the cause (`diedAfter`).
 // fired: a delayed rule's job run (toolbox row FD1), which runs the steps instead of scheduling them.
-type Delivery = { holders?: Map<string, number>; dead?: ReadonlySet<EntityId>; fired?: boolean };
+// ran: a delivery inside an advance's job run, whose delayed jobs may fall due inside the advance.
+type Delivery = {
+  holders?: Map<string, number>;
+  dead?: ReadonlySet<EntityId>;
+  fired?: boolean;
+  ran?: boolean;
+};
 
 // size: allow 60, one ordered delivery lowers fact assignments, quest effects, suppression and spawn
 export function sequence(
@@ -116,14 +122,14 @@ export function sequence(
   group: number,
   steps: { n: number },
   mint: Mint,
-  { holders = new Map(), dead = new Set(), fired = false }: Delivery = {},
+  { holders = new Map(), dead = new Set(), fired = false, ran = false }: Delivery = {},
 ): Decision<EventPayload['type']> | undefined {
   const actor = resolvedActor(world, cause, listener); // a quest event's evidenced owner
   if (!actor) return { kind: 'fault', code: 'precondition_failed' };
   const then = { ...world, state: { ...world.state, clock: cause.logical_time } };
   const about = { steps, cause, subject: subject(cause, bodyOf(then, actor)) }; // status reader 1
   if (rule.when && !holds(then, actor, rule.when.root, about)) return undefined;
-  if (rule.after && !fired) return delayed(world, actor, rule, cause, group, mint);
+  if (rule.after && !fired) return delayed(world, actor, rule, cause, group, mint, ran);
   const own = { holders, set: {}, applied: new Set<string>(), doors: new Map(), quests: new Set() };
   const [ops, events, narration]: [DeltaOp[], DomainEvent[], { key: TextKey }[]] = [[], [], []];
   let [position, gained] = [0, 0]; // gained: one levelling write per rule (no row race)
@@ -319,12 +325,14 @@ function delayed(
   cause: DomainEvent,
   group: number,
   mint: Mint,
+  ran: boolean,
 ): Decision<never> {
   const { id, version } = world.cartridge.manifest;
   const job = { cartridge_id: id, cartridge_version: version, kind: 'reaction', key: rule.key };
-  // ponytail: a delay ending inside this proposal's advance arrives 1 s after it (the composer
-  // refuses a job due inside it, compose_job.ts nonfuture_job); never early, possibly late.
-  const due_time = Math.max(saturate(cause.logical_time + rule.after!), world.state.clock + 1);
+  const due = saturate(cause.logical_time + rule.after!);
+  // ponytail: a root delivery's delay ending inside the advance arrives 1 s after it (the composer
+  // refuses a root job due inside it, nonfuture_job); a job run's is queued at its due time.
+  const due_time = ran ? due : Math.max(due, world.state.clock + 1);
   const op = { op: 'job.schedule', writer_group: group, job_id: mint() as JobId, job, due_time };
   return accepted(world, 'reacted', [{ ...op, actor_id: actor } as DeltaOp], []);
 }

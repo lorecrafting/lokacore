@@ -386,9 +386,10 @@ test('FD1: a delayed status.apply at 1600 and status.cure at 1601 both run, in h
     );
 });
 
-// Breaks: a cause inside the advance gets its bare due time (nonfuture_job faults the wait) or
-// a time earlier than the cause plus `after`. `echo` (after 100) follows the 1600 aftershock.
-test('FD1: a cause at 1600 inside a wait to 1800 is due at 1801; in hourly waits at 1700', () => {
+// Breaks: a job run's delayed rule is clamped to the wait end (1801 in one wait), faults
+// nonfuture_job, or is due before the cause plus `after`. `echo` (after 100) follows the 1600
+// aftershock, so one wait to 1800 runs it at 1700 as hourly waits do.
+test('FD1: a cause at 1600 inside a wait to 1800 runs at 1700, in one wait as in hourly waits', () => {
   const echo = (c: any) => {
     const shock = c.reactions[AFTERSHOCK];
     const fact = { ...shock.apply[0].fact, key: 'raided_at' };
@@ -403,20 +404,12 @@ test('FD1: a cause at 1600 inside a wait to 1800 is due at 1801; in hourly waits
   const at1000 = elapsed(world(echo), 1000);
   const once = elapsed(at1000, 1800, [], 100000);
   const hourly = elapsed(at1000, 1800);
-  assert.deepEqual(
-    [statuses(once), statuses(hourly)],
-    [
-      [
-        [1600, 'completed'],
-        [1801, 'pending'],
-      ],
-      [
-        [1600, 'completed'],
-        [1700, 'completed'],
-      ],
-    ],
-  );
-  assert.equal(fact(elapsed(once, 1900), 'raided_at'), 1801);
+  const ran = [
+    [1600, 'completed'],
+    [1700, 'completed'],
+  ];
+  assert.deepEqual([statuses(once), statuses(hourly)], [ran, ran]);
+  assert.deepEqual([fact(once, 'raided_at'), fact(hourly, 'raided_at')], [1700, 1700]);
   // Row 37a: one wait to 1900 fires `raid` at its end, so the stamp is 1900 and the job due 2500.
   const long = elapsed(world(), 1900, [], 100000);
   assert.deepEqual([fact(long, 'raided_at'), statuses(long)], [1900, [[2500, 'pending']]]);

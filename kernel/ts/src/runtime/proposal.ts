@@ -218,7 +218,7 @@ function earnedExit(p: P, instance_id: QuestInstanceId, at: Parameters<typeof st
 
 // The queue's deliveries to quiescence, or the fault that ends them.
 // size: allow 41, each delivery names the bodies dead after its cause once (loka-kgd.105)
-function react(p: P): Admitted | undefined {
+function react(p: P, ran = false): Admitted | undefined {
   for (let next; (next = p.queue.shift());) {
     const credited = creditDelivery(p, next);
     if (credited) return credited;
@@ -243,7 +243,7 @@ function react(p: P): Admitted | undefined {
         p.group + 1,
         p.steps,
         next.mint,
-        { holders: p.holders, dead },
+        { holders: p.holders, dead, ran },
       );
       const depth = next.depth + 1;
       p.limit = over({ deliveries: ++p.deliveries, reaction_depth: depth, query_steps: p.steps.n });
@@ -297,7 +297,7 @@ function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined
     const mark = p.ops.length;
     const own = ran.delta.ops.map((o) => ({ ...o, writer_group: handoffGroup(o, handoff, group) }));
     p.group++;
-    const failed = join(p, own, ran.events, cause(p, due_time, run.id), 0, m) ?? react(p);
+    const failed = join(p, own, ran.events, cause(p, due_time, run.id), 0, m) ?? react(p, true);
     if (failed) return failed;
     const tail = joinTail(p.ops, [start, cut, mark], handoff?.group, [p.holders, groups]);
     if ((p.limit = queueScheduled(due, tail, to))) return BUDGET;
