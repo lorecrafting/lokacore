@@ -4,6 +4,7 @@ import { CAPABILITY_OWNERS, type Diagnostic } from '../contracts.gen.ts';
 import { same } from '../foundation/compose.ts';
 import { apiCmp } from './cartridge_installed.ts';
 import { refString } from '../runtime/decision.ts';
+import { craft } from './cartridge_replenish.ts';
 import { diag, step, type Checks, type Obj } from './cartridge_refs.ts';
 
 /** Toolbox row W23: the FactSpec the compiler adds for a recipe's tip (recipes.ex tip_spec). */
@@ -65,7 +66,7 @@ export function recipes(c: Obj, { named, typedValue, text }: Checks): Diagnostic
     text(r, ['label'], at);
   }
   const more = [...contributions(c), ...attributes(c, { named, text, typedValue }), ...uses(c)];
-  return [...out, ...more, ...spells(c)];
+  return [...out, ...more, ...spells(c), ...craft(c, { named, text, typedValue })];
 }
 
 // The target's room and detail resolve, or (row G4) a use's tool liquid names a liquid of this

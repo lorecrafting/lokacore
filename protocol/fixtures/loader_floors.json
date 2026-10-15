@@ -980,6 +980,14 @@
         "KERNEL_API_RANGE_INVALID",
         ".cartridge.manifest.requires.kernel_api.at_least"
       ]
+    },
+    {
+      "floor": "1.101",
+      "below": "1.100",
+      "source": "cartridges/craft_sampler",
+      "feature": "a craft",
+      "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
+      "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
     }
   ]
 }

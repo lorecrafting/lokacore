@@ -25,6 +25,9 @@
 // status.cure steps end the target's active status (status/shared.ts cureOps). A spell (toolbox row
 // 29a) is the same run, reached by cast's word instead of perform's key (shared.ts spellOf; step's
 // castAdmission refused an unknown, unlearned or barred word).
+// A recipe's craft (Homestead hs-10; shared.ts crafted) moves its consume's first items held
+// directly to consume.to on every accepted perform, and unless the outcome is failure one yield
+// item from yield.from to the body with item_acquired before the steps (made).
 import type {
   ActionRecipe,
   CharacterId,
@@ -57,11 +60,12 @@ import { value as attributeValue } from '../attributes/shared.ts';
 import { uniform } from '../../foundation/rng.ts';
 import { opposed, practised } from '../skills.ts';
 import { cureOps } from '../status/shared.ts';
-import { spellOf, useRefused } from './shared.ts';
+import { crafted, spellOf, useRefused, type Transfer } from './shared.ts';
 import { pick } from '../storylet/shared.ts';
 import { effect, fightBack, type Effected } from './spell.ts';
 import { fresh, trailLead } from '../trail.ts';
 
+// size: allow 44, the craft's consume and yield join the one recipe run (Homestead hs-10)
 export const decide: Rule<'action_recipe'> = (world, command, mint, steps = { n: 0 }) => {
   const p = command.payload;
   const recipe = recipeOf(world, p);
@@ -74,12 +78,17 @@ export const decide: Rule<'action_recipe'> = (world, command, mint, steps = { n:
   const admitted = admission(world, recipe, actor_id, body);
   if (typeof admitted === 'string') return rejected(admitted);
   const { paid, last, from } = admitted;
+  const craft = crafted(world, recipe, body, steps); // Homestead hs-10
+  if ('code' in craft) return rejected(craft.code);
   const { check, duration } = recipe;
   const rolled = check && resolve(world, command, mint, check, subject_id, body);
   const { sequence, narration } = recipe.outcomes[rolled?.outcome ?? 'success']!;
-  const start: Run = { ...START, ...paid, rng: rolled?.rng ?? world.state.rng }; // row 29b: a kill's drops
+  const ops = [...paid.ops, ...craft.consumed];
+  const start: Run = { ...START, ...paid, ops, rng: rolled?.rng ?? world.state.rng }; // row 29b: a kill's drops
   const checked = rolled ? { ...start, events: [rolled.event], position: 1 } : start;
-  const begun = practised(world, actor_id, checked, check); // after the check reads the level
+  const practice = practised(world, actor_id, checked, check); // after the check reads the level
+  const kept = rolled?.outcome === 'failure' ? [] : craft.made;
+  const begun = made(world, command, mint, practice, kept);
   const ran = sequence.reduce(step(world, command, mint, subject_id, body), begun);
   const end = duration ? add(from, duration) : from; // a fight's first round never inside the cast
   const run = tip(world, actor_id, recipe, fightBack(world, actor_id, body, ran, mint, end));
@@ -212,6 +221,19 @@ type Run = Effected & {
 type CustomEvent = Extract<EventPayload, { type: 'custom_event' }>;
 type CheckEvent = Extract<EventPayload, { type: 'check_passed' | 'check_failed' }>;
 const START = { ops: [], events: [], position: 0, facts: {}, levels: {}, lines: [] };
+
+// Homestead hs-10: unless the outcome is failure, the craft's yield moves to the body, each with
+// an item_acquired after the practice's fact_changed and before the sequence.
+const made = (world: World, command: Command, mint: Mint, run: Run, moves: readonly Transfer[]) =>
+  moves.reduce((r, o): Run => {
+    const payload = {
+      type: 'item_acquired',
+      item_id: o.entity_id,
+      holder_id: o.destination_id,
+    } as const;
+    const e = event(world, command, mint, r.position + 1, payload);
+    return { ...r, ops: [...r.ops, o], position: r.position + 1, events: [...r.events, e] };
+  }, run);
 
 // One step of the sequence over the run so far.
 const step =

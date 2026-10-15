@@ -3327,3 +3327,32 @@ Beads `loka-kgd.109.3` (first half). A built room weathers into ruin and a mend 
 - **Realm seams.** 2 met: the reaction's steps land on the event's subject room. 4 met: the logical seconds of the status clock. 7 and 9 as in S2. The others are not applicable.
 - **Sampler.** `weathering` 600 s (`per_tick -1` and `tick_every 300`, which the schema requires); `ruin` is permanent, with the text "the roof has fallen in"; reaction `ruin`; `mend_hut` costs 3 pennies and 1 timber into `yard`. At 600 s the hut reads in ruin, its exits are unchanged and the player can leave. A mend gives back the owned paragraph, and 600 s later the hut is a ruin again. A mend on a sound hut is `service.nothing_to_mend` (`kernel/ts/test/built.test.ts`). Weathering and ruin survive cold reopen, and weathering ends in ruin after a reopen (`mobile/authority/local-story/built.test.ts`).
 - **Composition record.** Consumer: `build_sampler`. Reads: blueprint `weathering`/`ruin`, the current status on the room, and the created identity's origin. Writes: `status.transition` (apply/cure) on a room holder, and `entity.transfer` of mend inputs. Reused: status@1 apply, expire and cure; reaction `status_expired`; service payment and escrow; the S2 site lookup. New: the room policy subject, the compose created-holder rule, the mend benefit, and `unmendable`/`mended`. Missing invariant: none. Named exception: none (compose names no mechanic).
+
+## Craft (Homestead hs-10)
+
+Homestead hs-10 (Beads `loka-kgd.108.7`): a recipe may spend held items and hand out an item from a stock. Declarations: [craft](cartridge.md#craft-declarations) (`kernel_api` 1.101).
+
+- **Command.** None new: `perform` on a recipe with `craft`. The ActionSet offers it as every recipe.
+- **Admission** (`craftRefused` in `kernel/ts/src/mechanics/action_recipe/shared.ts`, from `refusalReason` in `kernel/ts/src/commands/actions.ts` and the offer in `kernel/ts/src/view/action_lists.ts`): fewer than `consume.quantity` of `consume.items` held directly by the actor's body (`selected`, `kernel/ts/src/mechanics/containment/stock.ts`; an item in a worn or carried container does not count) refuses `invalid_state` with message `consume.reason` when declared; a `consume.to` already at its capacity (`free`, `containment/job.ts`) refuses `invalid_state` with no message, as a full put does; none of `yield.items` directly in `yield.from` refuses `invalid_state` with no message; a yield the body cannot carry refuses as a take does (`carryingExchange`). The offer shows the same refusal as the press (`kernel/ts/test/craft.test.ts`).
+- **Effect** (`crafted` in `action_recipe/shared.ts`, `made` in `action_recipe/rule.ts`). On every accepted perform, failure included: the first `quantity` matching items held directly, lowest EntityId first, move to `consume.to` by `entity.transfer`. Unless the outcome is failure: the lowest-id yield item in `yield.from` moves to the body, then `item_acquired {item_id, holder_id: body}` after the check and `practised`'s fact_changed, before the outcome's steps. Nothing is minted: custody moves only.
+- **Realm seams** (owner decision 2026-10-13, brief checklist).
+  1. Actor: met; the body is `bodyOf(world, actor_id)`.
+  2. Reactions: not applicable; `item_acquired`'s holder is the body, as Harvest.
+  3. Credit: not applicable.
+  4. Time: met; no clock.
+  5. Scope: met; stock rooms are public world state; a craft moves custody only.
+  6. Text: not applicable.
+  7. Ownership: met; custody moves by the actor's own act; theft never.
+  8. Not applicable.
+  9. Not applicable.
+- **Opt-in.** A recipe declares `craft`. Chapter 1 declares none.
+- **Book.** No new component: the recipe's offered action and the inventory.
+- **Known limits.** A use-target recipe with a craft is not refused at load. One yield item per perform.
+- **Sampler.** `cartridges/craft_sampler`: the workshop bench carries `carve_spoon` (opposed whittling, rating 1). Take both sticks; the first carve fails (a stick to the scrap room, no spoon), the second makes a spoon; a third refuses `craft.carve_spoon.needs`; reopen keeps the ids (`kernel/ts/test/craft.test.ts`, `test/loka/content_craft_test.exs`).
+- **Composition record** ([architecture](architecture.md#building-mechanics-by-composition)).
+  - Consumer: `craft_sampler`. Later: Homestead cooking (hs-13).
+  - Reads: containers, the body's carry load.
+  - Writes: `entity.transfer`; ops, events, jobs and save rows: none new.
+  - Reused: `selected`, `giveRefused`, `carryingExchange`, `item_acquired`, `practised`, `ItemLocation`, the replenish holder checks.
+  - New: `RecipeCraft`, `crafted`, `craftRefused`, `made`; COMPOSES `action_recipe` → `containment`; the 1.101 floor.
+  - Missing invariant: none.
