@@ -14,6 +14,7 @@ import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
 import { INSTALLED, gameView, loadCartridge, newWorld, step } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
+import type { EntityId } from '../src/contracts.gen.ts';
 import { hydrate } from '../src/runtime/created.ts';
 import { activeStatuses } from '../src/mechanics/status/shared.ts';
 import { value } from '../src/mechanics/fact.ts';
@@ -70,7 +71,7 @@ const inside = (w: World, holder: string) =>
     .filter(([, id]) => w.state.containers[id] === holder)
     .map(([k]) => k.split('/')[1]!)
     .sort();
-const statuses = (w: World, id: string) => activeStatuses(w, id).map((s: any) => s.status.key);
+const statuses = (w: World, id: EntityId) => activeStatuses(w, id).map((s: any) => s.status.key);
 const text = (w: World, k: string) =>
   gameView(w).entities.find((e) => e.id === item(w, k))?.description;
 const take = (w: World, k: string) => play(w, { type: 'take', item_id: item(w, k) });
