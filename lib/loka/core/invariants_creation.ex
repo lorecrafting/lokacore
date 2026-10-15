@@ -274,25 +274,28 @@ defmodule Loka.Core.InvariantsCreation do
     origin = i["origin"]
 
     case origin["kind"] do
-      "spawned" ->
-        spec = get_in(s, ["population_specs", Compose.key(origin["by"])])
-
-        spec != nil and origin["bundle"] == spec["bundle"] and
-          origin["slot"] <= spec["cap"] and i["definition"] == spec[origin["role"]] and
-          if(origin["role"] == "hound",
-            do: origin["member_id"] == i["id"],
-            else: origin["member_id"] != i["id"]
-          )
-
-      "built" ->
-        i["definition"]["kind"] == "blueprint" and
-          Enum.any?(Map.get(s, "known_entities", %{}), fn {_, e} ->
-            e["kind"] == "body" and e["owner_id"] == origin["owner"]
-          end)
-
-      _ ->
-        death_provenance?(s, i, origin)
+      "spawned" -> spawn_provenance?(s, i, origin)
+      "built" -> built_provenance?(s, i, origin)
+      _ -> death_provenance?(s, i, origin)
     end
+  end
+
+  defp spawn_provenance?(s, i, origin) do
+    spec = get_in(s, ["population_specs", Compose.key(origin["by"])])
+
+    spec != nil and origin["bundle"] == spec["bundle"] and
+      origin["slot"] <= spec["cap"] and i["definition"] == spec[origin["role"]] and
+      if(origin["role"] == "hound",
+        do: origin["member_id"] == i["id"],
+        else: origin["member_id"] != i["id"]
+      )
+  end
+
+  defp built_provenance?(s, i, origin) do
+    i["definition"]["kind"] == "blueprint" and
+      Enum.any?(Map.get(s, "known_entities", %{}), fn {_, e} ->
+        e["kind"] == "body" and e["owner_id"] == origin["owner"]
+      end)
   end
 
   defp death_provenance?(s, i, origin) do
