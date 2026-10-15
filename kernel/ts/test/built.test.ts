@@ -7,7 +7,10 @@ import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import { INSTALLED, gameView, loadCartridge, newWorld, step, stepElapsed } from '../src/index.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
-import { value } from '../src/mechanics/fact.ts';
+import { targetOf, value } from '../src/mechanics/fact.ts';
+import { key } from '../src/foundation/compose.ts';
+import { built as due, unbuildable } from '../src/mechanics/service/build.ts';
+import { LIMITS } from '../src/contracts.gen.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { hydrate } from '../src/runtime/created.ts';
 import { invariants } from '../src/mechanics/movement/rule.ts';
@@ -317,4 +320,54 @@ test('a second commission due on a taken site returns its timber instead', () =>
   w = elapse(w, t0 + 7201);
   assert.deepEqual([built(w).length, held(w, w.body)], [1, 1]);
   assert.equal(value(w, w.character, ref('fact', 'hut_ordered_2')), false);
+});
+
+// Breaks: the owner taken from world.character instead of the job's actor_id (the room, the fact
+// closed or the cap counted for the wrong character), max_per_owner counted over every owner's
+// rows, a refund to an owner with no body here closing the order with the timber lost, or a
+// refund past the query budget closing it with the timber stranded (both must fault instead).
+test('a commission raises for its job owner, caps per owner, and an unrefundable one faults', () => {
+  n = 0;
+  let w = play(take(play(fresh(), buy(fresh())), 'a', 'b'), raise(fresh()));
+  const [id, row] = Object.entries(w.state.jobs ?? {}).find(([, r]) => r.job.kind === 'order')!;
+  const other = '0000000f-0000-4000-8000-000000000000' as never;
+  const fact = ref('fact', 'hut_ordered');
+  const own = (x: World) => ({
+    ...x,
+    state: { ...x.state, facts: { ...x.state.facts, [key(targetOf(x, other, fact))]: true } },
+  });
+  const mint = () => 'eeeeeeee-0000-4000-8000-00000000000f';
+  const ops = due(own(w), id as never, { ...row, actor_id: other }, mint, { n: 0 }) as any[];
+  assert.equal(ops[0].identity.origin.owner, other);
+  assert.equal(ops.length, 2);
+  assert.match(JSON.stringify(ops[1]), new RegExp(other));
+
+  w = elapse(w, w.state.clock + 7200);
+  const b = { ...w.cartridge.services![`${S}:service/raise_hut`].benefit, direction: 'east' };
+  const wide = { ...w.cartridge.world!, construction: { max_total: 2 } };
+  const capped = { ...w, cartridge: { ...w.cartridge, world: wide } } as World;
+  assert.equal(unbuildable(capped, b as never, other), undefined);
+  assert.equal(
+    unbuildable(capped, b as never, w.character)?.message.key,
+    'service.construction_full',
+  );
+
+  // A second order on the taken site: its refund faults for a bodiless owner and past the budget.
+  const again = own({ ...w, state: { ...w.state, jobs: { ...w.state.jobs, [id]: row } } });
+  assert.equal(
+    due(again, id as never, { ...row, actor_id: other }, mint, { n: 0 }),
+    'precondition_failed',
+  );
+  const mine = {
+    ...again,
+    state: {
+      ...again.state,
+      facts: { ...again.state.facts, [key(targetOf(w, w.character, fact))]: true },
+    },
+  };
+  const at = LIMITS.query_steps - (b as any).escrow.items.length; // one step per escrow item
+  assert.equal(due(mine, id as never, row, mint, { n: at + 1 }), 'budget_exceeded');
+  assert.ok(
+    (due(mine, id as never, row, mint, { n: at }) as any[]).some((o) => o.op === 'entity.transfer'),
+  );
 });

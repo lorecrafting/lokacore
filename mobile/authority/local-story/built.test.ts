@@ -1,7 +1,7 @@
 // Built rooms S2 through real SQLite (save.md, Built rooms): the raised hut's identity row is the
 // only saved trace of the room; reopen derives the room again and a forged row is save_corrupt.
 import assert from 'node:assert/strict';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
@@ -40,8 +40,9 @@ const service = (key: string) => ({
 const timber = (k: string) => initial.entityIds[`build_sampler@0.0.1:item/timber_${k}`]!;
 
 // Built rooms S3: buy the plot, take two timber, order the hut; with `reopen`, close and reopen
-// the save between order and completion; then elapse to the order's due time.
-function build(path: string, reopen: boolean) {
+// the save between order and completion; then elapse to the order's due time, stopping before it
+// on 'ordered', or first through a real COMMIT that fails or whose acknowledgement is lost.
+function build(path: string, reopen: boolean, mode?: 'ordered' | 'failed' | 'lost') {
   let p = elapsedHost(path, undefined, bundle);
   const open = () => {
     const s = openStory(p.db, releases, p.host);
@@ -79,8 +80,25 @@ function build(path: string, reopen: boolean) {
     p = elapsedHost(path, undefined, bundle);
     story = open();
   }
-  const r = story.elapsed({ expected_run_id: story.runId(), from, until: from + 7200 });
+  if (mode === 'ordered') return { p, raise, invocation, created };
+  const evidence = { expected_run_id: story.runId(), from, until: from + 7200 };
+  const rows = () => p.sql.prepare('SELECT * FROM state_row ORDER BY section, key').all();
+  if (mode) {
+    if (mode === 'failed')
+      p.sql.exec(
+        'PRAGMA foreign_keys=ON; CREATE TABLE parent(id PRIMARY KEY); CREATE TABLE child(id REFERENCES parent(id) DEFERRABLE INITIALLY DEFERRED)',
+      );
+    const before = rows();
+    p.fault.kind = mode;
+    p.fault.armed = true;
+    assert.equal(story.elapsed(evidence).kind, 'pending');
+    assert.deepEqual(created(), []);
+    p.fault.reads = false;
+    if (mode === 'failed') assert.deepEqual(rows(), before);
+  }
+  const r = story.elapsed(evidence);
   assert.equal(r.kind, 'saved', JSON.stringify(r));
+  if (mode) assert.equal(r.kind === 'saved' && r.replay, mode === 'lost');
   return { p, raise, invocation, created };
 }
 
@@ -122,4 +140,45 @@ test('the hut survives cold reopen, its receipt replays, and a forged east row i
     .run(JSON.stringify(forged), hut);
   p.sql.close();
   assert.throws(() => coldReopen(path, bundle), /save_corrupt/);
+});
+
+// Breaks: completion through a COMMIT that fails or whose acknowledgement is lost raising no hut,
+// a second hut or a different room id on the retry, or half its rows (hut without the fact closed).
+test('a real failed or lost COMMIT at completion retries to the same single hut', (t) => {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-built-commit-'));
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
+  const straight = build(join(dir, 'straight.db'), false);
+  for (const kind of ['failed', 'lost'] as const) {
+    const b = build(join(dir, `${kind}.db`), false, kind);
+    assert.deepEqual(b.created(), straight.created());
+    const rows = (x: typeof b) =>
+      x.p.sql
+        .prepare("SELECT key, value FROM state_row WHERE section IN ('created', 'facts', 'jobs')")
+        .all();
+    assert.deepEqual(rows(b), rows(straight));
+    b.p.sql.close();
+  }
+  straight.p.sql.close();
+});
+
+// Breaks: load admitting a saved build order whose owner (actor_id) names another actor, which
+// would raise the room for them; refused by whichever load check, with the file left unchanged.
+test('a pending build order forged to another owner is save_corrupt and the file is unchanged', (t) => {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-built-owner-'));
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
+  const path = join(dir, 'order.db');
+  const { p } = build(path, false, 'ordered');
+  const job = p.sql.prepare("SELECT key, value FROM state_row WHERE section = 'jobs'").all() as {
+    key: string;
+    value: string;
+  }[];
+  const order = job.find((j) => JSON.parse(j.value).job.kind === 'order')!;
+  const forged = { ...JSON.parse(order.value), actor_id: npc('seller') };
+  p.sql
+    .prepare("UPDATE state_row SET value = ? WHERE section = 'jobs' AND key = ?")
+    .run(JSON.stringify(forged), order.key);
+  p.sql.close();
+  const bytes = readFileSync(path);
+  assert.throws(() => coldReopen(path, bundle), /save_corrupt/);
+  assert.deepEqual(readFileSync(path), bytes);
 });

@@ -32,7 +32,12 @@ export function deadlineSave(world: World, db: Db, meta: Meta, exchanges = false
       (job.quest_instance_id !== undefined &&
         (validate('QuestInstanceId', job.quest_instance_id).length ||
           validate('CharacterId', job.actor_id).length ||
-          foreignDeadlineJob(world, job)))
+          foreignDeadlineJob(world, job))) ||
+      // Built rooms S3: a build commission's order job belongs to the save's character.
+      (job.job.kind === 'order' &&
+        world.cartridge.services?.[refString({ ...job.job, kind: 'service' })]?.benefit.kind ===
+          'build' &&
+        job.actor_id !== world.character)
     )
       invalid();
   for (const [questRef, definition] of Object.entries(world.cartridge.quests ?? {})) {

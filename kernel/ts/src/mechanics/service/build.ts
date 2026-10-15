@@ -61,14 +61,15 @@ export function raised(
 
 /** Built rooms S3: a due build commission's order job raises its owner's room (row.actor_id, never
  * the session character) and closes the order. A cancelled order, or one a later order of the same
- * owner replaced, writes nothing; a site lost meanwhile returns the materials in custody instead. */
+ * owner replaced, writes nothing; a site lost meanwhile returns the materials in custody instead.
+ * A refund past the query budget, or to an owner with no body here, faults: nothing is lost. */
 export function built(
   world: World,
   job_id: JobId,
   row: JobRow,
   mint: Mint,
   steps: Steps,
-): readonly DeltaOp[] {
+): readonly DeltaOp[] | 'budget_exceeded' | 'precondition_failed' {
   const b = world.cartridge.services?.[refString({ ...row.job, kind: 'service' })]?.benefit;
   const owner = row.actor_id;
   if (b?.kind !== 'build' || !b.fact || !b.escrow || !owner) return [];
@@ -88,14 +89,15 @@ export function built(
   if (!unbuildable(world, b, owner)) return [created(b, owner, mint), ...closed];
   const custody = world.roomIds[refString(b.escrow.custody)];
   const body = bodyOf(world, owner);
-  const back = body ? selected(world, b.escrow.items, custody, b.escrow.quantity, steps) : [];
-  if (typeof back === 'string') return [];
+  if (!body) return 'precondition_failed';
+  const back = selected(world, b.escrow.items, custody, b.escrow.quantity, steps);
+  if (typeof back === 'string') return back;
   const moves = back.map((entity_id) => ({
     op: 'entity.transfer' as const,
     writer_group: 0,
     entity_id,
     source_id: custody,
-    destination_id: body!,
+    destination_id: body,
   }));
   return [...moves, ...closed];
 }

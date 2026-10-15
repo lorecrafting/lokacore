@@ -171,15 +171,14 @@ function scheduledJob(
 
 // Toolbox row 20b: a due order job completes; the order is now ready. A build commission's
 // (Built rooms S3) also raises the room, its id minted from this run_job's jobCommandId.
-const orderReady = (world: World, job_id: JobId, row: JobRow, mint: Mint, steps: Steps) =>
-  accepted<never>(
-    world,
-    'job_ran',
-    row.status === 'pending'
-      ? [{ op: 'job.complete', writer_group: 0, job_id }, ...built(world, job_id, row, mint, steps)]
-      : [],
-    [],
-  );
+// A refund it cannot make faults (as containment's replenish does).
+function orderReady(world: World, job_id: JobId, row: JobRow, mint: Mint, steps: Steps) {
+  if (row.status !== 'pending') return accepted<never>(world, 'job_ran', [], []);
+  const ops = built(world, job_id, row, mint, steps);
+  if (typeof ops === 'string') return { kind: 'fault', code: ops } as const;
+  const done = { op: 'job.complete', writer_group: 0, job_id } as const;
+  return accepted<never>(world, 'job_ran', [done, ...ops], []);
+}
 
 // size: allow 50, one expiry checks its bound occurrence and commits status, trust and job together
 function deadlineJob(world: World, jobId: JobId, row: JobRow) {
