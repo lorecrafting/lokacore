@@ -1,5 +1,5 @@
 // RS-5: gameView reads the passed viewer, never the world's own character (realm seams rule 1).
-// Break caught: gameView, placeView or exits reads world.character or world.body, not the actor.
+// Break caught: gameView sets actor_id from world.character, or exits reads world.body.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { gameView } from '../src/index.ts';
