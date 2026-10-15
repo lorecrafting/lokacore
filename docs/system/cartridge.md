@@ -121,8 +121,8 @@ riddle. Riddle choice references and bank multiplicity are checked before loadin
 
 Reaction authoring accepts exact `on: quest_resolved {quest, outcome}` and
 `apply: quest.activate {quest}`, which (Beads `loka-kgd.150.2`) both kernels admit only under
-`quest_resolved`, `rested` or `entity_entered_room`, the triggers whose subject is a character
-(OUTCOME_MISMATCH at the step's `op` elsewhere). Both quest references expand from
+`quest_resolved`, `rested` or `entity_entered_room`, the triggers whose subject can be a character
+(OUTCOME_MISMATCH at the step's `op` elsewhere); an NPC entrant activates nothing. Both quest references expand from
 source short keys, resolve to local quest definitions, and require the quest event owner in
 the capability lock. These trigger/consequence forms require kernel API at least 1.8.
 Existing fact/room triggers retain their semantics.

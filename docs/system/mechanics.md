@@ -2861,7 +2861,7 @@ Found by [showcase plan 2](../showcase/combat-district.md) (#368); the PM brief 
   8. Trust: not applicable; nothing imported.
   9. Instancing: met; none assumed; one defender per world.
 - **Book.** No new element: the Journal shows the quest and its outcome line.
-- **Known limits.** The defender never returns; after its death no one can take the quest again in that world. A player who leaves keeps the quest; the outcome is decided by the defender and the moon alone.
+- **Known limits.** The defender never returns; after its death no one can take the quest again in that world. The quest is once per character: a later raid does not offer it again. A player already in the village when the raid begins is called only on entering again (activation needs an entrant). The raiders attack players only, so the defender dies only at a player's hand; a raider threat needs NPC-against-NPC combat, not in the toolbox. A player who leaves keeps the quest; the outcome is decided by the defender and the moon alone.
 - **Sampler.** `cartridges/raid_sampler`: the defender (1 hp, no attack) in the village; `kernel/ts/test/raid.test.ts` row 38 cases.
 - **Composition record** ([architecture](architecture.md#building-mechanics-by-composition)).
   - Consumer: `raid_sampler`.

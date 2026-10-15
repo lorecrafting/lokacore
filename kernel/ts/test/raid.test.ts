@@ -149,7 +149,8 @@ test('a rule with two spawn steps births two raiders, slots 2 then 1', () => {
 
 // The full moon from 100: the raid's calendar job and the plan's job (wander boundary every hour)
 // are both due at 100; same-time jobs run in job id order, so context 1111… runs the calendar job
-// first and 4444… the plan's. `probe` also gives the plan target 1 and chance 100, so its own job
+// first and 4444… the plan's (the job ids depend on the content: row 38's defender moved them,
+// so a content change may need a new context here). `probe` also gives the plan target 1 and chance 100, so its own job
 // births slot 1 at 100 too.
 const CONTEXTS = ['11111111-1111-4111-8111-111111111111', '44444444-4444-4444-8444-444444444444'];
 const fullAt100 = (c: any) => (c.calendar.lunar.phases[1].at = 100);
