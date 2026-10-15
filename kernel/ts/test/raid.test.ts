@@ -310,8 +310,11 @@ test('38: the defender walking into the raided village activates nothing', () =>
     d.daily_schedule = { '0': at('field'), '2': at('village') };
     d.room = at('field');
   });
-  w = elapsed(act(w, { type: 'move', direction: 'north' }), 1300);
+  // The player waits in the village, so the root player's `when` (npc_present) holds on entry.
+  w = elapsed(act(w, { type: 'move', direction: 'north' }), 1100);
   assert.equal(raided(w), true);
+  assert.notEqual(w.state.containers[defender(w)], w.roomIds[VILLAGE]);
+  w = elapsed(w, 1300);
   assert.equal(w.state.containers[defender(w)], w.roomIds[VILLAGE]);
   assert.deepEqual(gate(w), []);
 });
