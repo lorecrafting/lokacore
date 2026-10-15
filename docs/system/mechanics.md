@@ -3460,3 +3460,33 @@ Homestead hs-11 (Beads `loka-kgd.108.8`): a skill may require another skill's le
   - Reused: VersionedPolicy, `holds`, `skill_compare`, `skill.acquire`, the dialogue `blocked` admission, the policy reference walk.
   - New: `SkillDefinition.prerequisite`, `learnable`, the self-reference check, the 1.101 floor.
   - Missing invariant: none.
+
+## Self-cooking (Homestead hs-13)
+
+Homestead hs-13 (Beads `loka-kgd.108.10`): the player cooks at the kitchen hearth instead of commissioning the cook. Content only; no engine change, no new `kernel_api` floor.
+
+- **Command.** None new: `talk` and `choose learn` at the cook ([skill trees](#skill-trees-homestead-hs-11)); `perform cook_stew` or `perform cook_feast` at the hearth detail ([craft](#craft-homestead-hs-10)).
+- **Admission.** The cook offers `learn` (`skill.acquire cooking`, no payment) while the skill is not held. `cook_stew` requires `skill_compare cooking 1` and two of `fish_01`..`fish_05` held; `cook_feast` requires `skill_compare cooking 2` (two uses, growth `[2, 4]`) and three. A failing policy is offered unavailable `invalid_state` with no message; a fish shortage refuses `craft.cook_stew.needs` or `craft.cook_feast.needs`; a larder with no dish left refuses with no message.
+- **Effect.** The opposed check against the hearth's rating 1 passes at level 1. On every accepted perform the fish move to the larder (the hs-5 restock returns two to the pond each hour, cap five); on success the lowest-id dish (`stew_hearty_01`..`03`, `feast_01`) moves from the larder to the body. A failure ("the pot boils over") keeps the fish in the larder and yields nothing. Each crafted dish gets `spoiling` from its keep reaction, as the plain stew does; eating one applies `hearty` (str +2, 3600 s).
+- **Realm seams** (owner decision 2026-10-13, brief checklist), as hs-5 and hs-10.
+  1. Actor: met; craft and eat act on `bodyOf(world, actor_id)`.
+  2. Reactions: met; the keep reactions match the dish's `item_acquired`, whose holder is the body.
+  3. Credit: not applicable; nothing is killed.
+  4. Time: met; spoil and restock run on the clock as in hs-5.
+  5. Scope: met; the larder and pond are public world state; custody moves only.
+  6. Text: not applicable; authored keys only.
+  7. Ownership: met; the actor's own act moves custody; theft never.
+  8. Trust: not applicable.
+  9. Instancing: not applicable.
+- **Opt-in.** Cartridge content. Chapter 1 declares none.
+- **Book.** No new component: the hearth detail link, the recipe's offered action, the cook's dialogue.
+- **Known limits.** Three hearty stews and one feast exist; eaten or spoiled dishes never return, so a fourth stew refuses. The brief's 300 s recipe duration is not modelled (recipes have no duration). At rating 1 a learned cook never fails; the failure path is tested at rating 2. The feast reuses `hearty`.
+- **Traps.** 11 (statuses only for state): `hearty` has a duration.
+- **Sampler.** `cartridges/kitchen_sampler` (`kernel/ts/test/kitchen.test.ts`).
+- **Composition record** ([architecture](architecture.md#building-mechanics-by-composition)).
+  - Consumer: `kitchen_sampler`.
+  - Reads: the actor's facts (`skill_compare`, `uses_cooking`), containers.
+  - Writes: none new.
+  - Reused: `craft`, `skill_compare`, `skill.acquire`, the opposed check, Eat `applies`, the keep and spoil reactions, `replenish.run`.
+  - New: content only.
+  - Missing invariant: none.

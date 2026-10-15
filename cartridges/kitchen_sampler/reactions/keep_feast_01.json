@@ -1,0 +1,13 @@
+{
+  "on": {
+    "event": "item_acquired",
+    "item": "feast_01"
+  },
+  "apply": [
+    {
+      "op": "status.apply",
+      "status": "spoiling",
+      "item": "feast_01"
+    }
+  ]
+}

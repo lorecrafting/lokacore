@@ -1,0 +1,35 @@
+{
+  "keywords": [
+    "feast"
+  ],
+  "short": "item.feast.short",
+  "short_variants": [
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "status_active",
+          "subject": "target",
+          "status": "spoiling"
+        }
+      },
+      "description": "item.feast.short_spoiling"
+    }
+  ],
+  "room_line": "item.feast.room",
+  "description": "item.feast.description",
+  "mass_grams": 500,
+  "location": {
+    "in": "room",
+    "room": "larder"
+  },
+  "edible": {
+    "resource": "mv",
+    "amount": 20,
+    "label": "action.eat",
+    "narration": "narration.eat_feast",
+    "applies": [
+      "hearty"
+    ]
+  }
+}
