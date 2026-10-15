@@ -1,3 +1,4 @@
+// size: allow 350, reaction@1's triggers and its one ordered delivery (row FD1: or its delayed job)
 // reaction@1 (capability_registry.json; reaction.schema.json ReactionRule; 21 §3.4, §11; 06
 // §14; 04 §5.2): the rules an event triggers and one delivery's explicit sequence. proposal.ts
 // propose runs the FIFO queue, numbers the writer groups and counts the budgets.
@@ -9,6 +10,7 @@ import type {
   EntityId,
   EventPayload,
   FactValue,
+  JobId,
   ReactionRule,
   TextKey,
 } from '../contracts.gen.ts';
@@ -102,7 +104,14 @@ export function triggered(world: World, e: DomainEvent): ReactionRule[] {
  */
 const ACTIVATES = ['quest_resolved', 'rested'];
 // The advance's status holders' groups (G3), and the bodies dead after the cause (`diedAfter`).
-type Delivery = { holders?: Map<string, number>; dead?: ReadonlySet<EntityId> };
+// fired: a delayed rule's job run (toolbox row FD1), which runs the steps instead of scheduling them.
+// ran: a delivery inside an advance's job run, whose delayed jobs may fall due inside the advance.
+type Delivery = {
+  holders?: Map<string, number>;
+  dead?: ReadonlySet<EntityId>;
+  fired?: boolean;
+  ran?: boolean;
+};
 
 // size: allow 60, one ordered delivery lowers fact assignments, quest effects, suppression and spawn
 export function sequence(
@@ -113,15 +122,15 @@ export function sequence(
   group: number,
   steps: { n: number },
   mint: Mint,
-  { holders = new Map(), dead = new Set() }: Delivery = {},
+  { holders = new Map(), dead = new Set(), fired = false, ran = false }: Delivery = {},
 ): Decision<EventPayload['type']> | undefined {
   const actor = resolvedActor(world, cause, listener); // a quest event's evidenced owner
   if (!actor) return { kind: 'fault', code: 'precondition_failed' };
   const then = { ...world, state: { ...world.state, clock: cause.logical_time } };
   const about = { steps, cause, subject: subject(cause, bodyOf(then, actor)) }; // status reader 1
   if (rule.when && !holds(then, actor, rule.when.root, about)) return undefined;
-  const activated = new Set<string>();
-  const own = { holders, set: {}, applied: new Set<string>(), doors: new Map() }; // holders: the advance's
+  if (rule.after && !fired) return delayed(world, actor, rule, cause, group, mint, ran);
+  const own = { holders, set: {}, applied: new Set<string>(), doors: new Map(), quests: new Set() };
   const [ops, events, narration]: [DeltaOp[], DomainEvent[], { key: TextKey }[]] = [[], [], []];
   let [position, gained] = [0, 0]; // gained: one levelling write per rule (no row race)
   const by = { id: cause.id as string as CommandId, payload: { actor_id: actor } };
@@ -129,9 +138,9 @@ export function sequence(
   for (const step of rule.apply) {
     if (step.op === 'quest.activate') {
       if (!ACTIVATES.includes(rule.on.event)) return { kind: 'fault', code: 'precondition_failed' };
-      if (questOf(world, actor, step.quest) || activated.has(refString(step.quest))) continue;
+      if (questOf(world, actor, step.quest) || own.quests.has(refString(step.quest))) continue;
       const started = activation(mint, actor, step.quest);
-      activated.add(refString(step.quest));
+      own.quests.add(refString(step.quest));
       ops.push(...started.ops.map((op) => ({ ...op, writer_group: group })));
       emit(started.payload);
     } else if (step.op === 'quest.resolve' || step.op === 'quest.fail') {
@@ -223,16 +232,20 @@ function holdersOf(
   return apply.tag ? itemsTagged(world, rooms, apply.tag) : npcsIn(world, rooms);
 }
 type StatusStep = Extract<ReactionRule['apply'][number], { op: 'status.apply' | 'status.cure' }>;
-// A fact.assign, or (row 15) a fact.adjust lowered to one at the bounded sum (nothing when the
-// fact cannot be adjusted); an entity or pair fact (row W2) at the step's named NPC's or item's
-// instance, else at the event's subject when that is an NPC, item or detail (never the body
-// fallback); with no such subject the step writes nothing. An npc_pair fact (row FD4) writes at that
-// subject toward the step's `with` NPC, only when both are distinct NPCs. A row an earlier reaction of this
-// advance wrote keeps that write's writer group, so the writes compose in order (loka-j2mo).
+// A fact.assign, (row FD1) a fact.stamp of the delivery's time, or (row 15) a fact.adjust lowered
+// to one at the bounded sum (nothing when the fact cannot be adjusted); an entity or pair fact
+// (row W2) at the step's named NPC's or item's instance, else at the event's subject when that is
+// an NPC, item or detail (never the body fallback); with no such subject the step writes nothing.
+// An npc_pair fact (row FD4) writes at that subject toward the step's `with` NPC, only when both
+// are distinct NPCs. A row an earlier reaction of this advance wrote keeps that write's writer
+// group, so the writes compose in order (loka-j2mo).
 function assignment(
   world: World,
   actor: CharacterId,
-  step: Extract<ReactionRule['apply'][number], { op: 'fact.assign' | 'fact.adjust' }>,
+  step: Extract<
+    ReactionRule['apply'][number],
+    { op: 'fact.assign' | 'fact.adjust' | 'fact.stamp' }
+  >,
   group: number,
   { set, holders }: { set: Record<string, FactValue>; holders: Map<string, number> },
   cause: DomainEvent,
@@ -242,13 +255,18 @@ function assignment(
   const thing = who !== undefined && (world.entities[who] || world.details[who]);
   if (subjective(world, step.fact) && !thing) return undefined;
   if (durable(world, step.fact)) throw new KernelError('precondition_failed');
-  const partner = step.with && world.entityIds[refString(step.with)];
+  const partner =
+    step.op !== 'fact.stamp' && step.with ? world.entityIds[refString(step.with)] : undefined;
   if (paired(world, step.fact) && !npcPair(world, who, partner)) return undefined;
   const { kind: _, ...target } = targetOf(world, actor, step.fact, who, partner);
   const at = key({ kind: 'fact', ...target });
   const expected = Object.hasOwn(set, at) ? set[at] : value(world, actor, step.fact, who, partner);
   const next =
-    step.op === 'fact.adjust' ? bounded(world, step.fact, expected, step.amount) : step.value;
+    step.op === 'fact.adjust'
+      ? bounded(world, step.fact, expected, step.amount)
+      : step.op === 'fact.stamp'
+        ? cause.logical_time // row FD1: the delivery's time
+        : step.value;
   if (next === undefined) return undefined;
   set[at] = next;
   const writer_group = holders.get(at) ?? group;
@@ -297,4 +315,24 @@ function resolvedActor(world: World, cause: DomainEvent, actor: CharacterId) {
     cause.scope.character_id === source.scope.character_id
     ? source.scope.character_id
     : undefined;
+}
+
+// Row FD1: a rule with `after` writes one reaction job for its actor in place of its steps.
+function delayed(
+  world: World,
+  actor: CharacterId,
+  rule: ReactionRule,
+  cause: DomainEvent,
+  group: number,
+  mint: Mint,
+  ran: boolean,
+): Decision<never> {
+  const { id, version } = world.cartridge.manifest;
+  const job = { cartridge_id: id, cartridge_version: version, kind: 'reaction', key: rule.key };
+  const due = saturate(cause.logical_time + rule.after!);
+  // ponytail: a root delivery's delay ending inside the advance arrives 1 s after it (the composer
+  // refuses a root job due inside it, nonfuture_job); a job run's is queued at its due time.
+  const due_time = ran ? due : Math.max(due, world.state.clock + 1);
+  const op = { op: 'job.schedule', writer_group: group, job_id: mint() as JobId, job, due_time };
+  return accepted(world, 'reacted', [{ ...op, actor_id: actor } as DeltaOp], []);
 }

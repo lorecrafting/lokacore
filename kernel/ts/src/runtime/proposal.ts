@@ -218,7 +218,7 @@ function earnedExit(p: P, instance_id: QuestInstanceId, at: Parameters<typeof st
 
 // The queue's deliveries to quiescence, or the fault that ends them.
 // size: allow 41, each delivery names the bodies dead after its cause once (loka-kgd.105)
-function react(p: P): Admitted | undefined {
+function react(p: P, ran = false): Admitted | undefined {
   for (let next; (next = p.queue.shift());) {
     const credited = creditDelivery(p, next);
     if (credited) return credited;
@@ -243,7 +243,7 @@ function react(p: P): Admitted | undefined {
         p.group + 1,
         p.steps,
         next.mint,
-        { holders: p.holders, dead },
+        { holders: p.holders, dead, ran },
       );
       const depth = next.depth + 1;
       p.limit = over({ deliveries: ++p.deliveries, reaction_depth: depth, query_steps: p.steps.n });
@@ -261,13 +261,13 @@ function react(p: P): Admitted | undefined {
 }
 
 // Each due job of the root's explicit advance, then its reactions, or the result that ends them.
-// size: allow 41, a drain step joins its run's writes before its reactions and its tail after
+// size: allow 42, a drain step joins its run's writes before its reactions and its tail after
 function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined {
   const { due, to } = dueJobs(p.world, root);
   const populationPairs = populationDeadlinePairs(p.world, to);
   const groups = new Map<string, number>();
-  const start = p.ops.length;
-  let [cut, last] = [start, -1];
+  const w = { next: p.ops.length, at: new Map<string, number[]>() };
+  let [cut, last] = [w.next, -1];
   for (const [job_id, { due_time, tick }] of due) {
     const at = now(p);
     if (!('cartridge' in at)) return at;
@@ -280,26 +280,27 @@ function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined
       payload: { type: 'run_job', job_id: job_id as JobId },
     } as const;
     const m = allocator(at, run);
-    const ran = admit('schedule', schedule.decideAt(at, run, m, undefined, due_time, tick));
+    const ran = admit('schedule', schedule.decideAt(at, run, m, undefined, due_time, tick, p));
     if (ran.kind !== 'accepted') return ran;
-    if ((p.limit = queueHour(due, job_id, ran))) return BUDGET;
+    if ((p.limit = queueHour(due, job_id, ran) ?? over({ deliveries: p.deliveries })))
+      return BUDGET;
     p.rng = ran.rng;
     p.narration.push(...(ran.narration ?? []));
     // A population partner's group, or an earlier crossed hour's.
     const fresh = groups.get(populationPairs.get(job_id) ?? job_id) ?? p.group + 1;
-    const joined = statusGroup(at, job_id as JobId, current, p.holders, fresh);
+    const joined = statusGroup(at, job_id as JobId, current, p.holders, fresh, ran.delta.ops);
     if (joined) merge(p.ops, joined.merged, joined.group, [p.holders, groups]);
     const group = joined?.group ?? fresh;
     groups.set(job_id, group);
     const handoff = sightHandoff(p.world, p.ops, at, job_id as JobId, due_time, ran.delta.ops);
     if (due_time !== last) [cut, last] = [p.ops.length, due_time]; // only strictly earlier jobs
-    joinEarlier(p.ops, [start, cut], ran.delta.ops, group, [p.holders, groups]);
+    joinEarlier(p.ops, [w, cut], ran.delta.ops, group, [p.holders, groups]);
     const mark = p.ops.length;
     const own = ran.delta.ops.map((o) => ({ ...o, writer_group: handoffGroup(o, handoff, group) }));
     p.group++;
-    const failed = join(p, own, ran.events, cause(p, due_time, run.id), 0, m) ?? react(p);
+    const failed = join(p, own, ran.events, cause(p, due_time, run.id), 0, m) ?? react(p, true);
     if (failed) return failed;
-    const tail = joinTail(p.ops, [start, cut, mark], handoff?.group, [p.holders, groups]);
+    const tail = joinTail(p.ops, [w, cut, mark], handoff?.group, [p.holders, groups]);
     if ((p.limit = queueScheduled(due, tail, to))) return BUDGET;
   }
 }

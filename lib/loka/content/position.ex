@@ -44,7 +44,7 @@ defmodule Loka.Content.Position do
     dream_refs = Enum.map(dream_names(defs), &Loka.Content.Source.ref(&1, "fact", m))
 
     for {rel, steps, s} <- sites(defs),
-        s["op"] in ["fact.assign", "fact.adjust"],
+        s["op"] in ["fact.assign", "fact.adjust", "fact.stamp"],
         reserved_write?(s, refs, dream_refs),
         do: diag("RESERVED_FACT", at(rel, steps ++ ["fact"]))
   end

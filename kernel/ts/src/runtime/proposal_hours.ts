@@ -45,29 +45,43 @@ function opKey(o: DeltaOp) {
   return k;
 }
 
+// The advance's op positions (from `next`) by target key; positions, not ops, as `merge` replaces
+// ops. Extended to the op list's end on each join, so writes appended outside `join` count too.
+export type Writes = { next: number; at: Map<string, number[]> };
+
 // A run (or its reaction's or credit's group) writing a target that a run of strictly earlier due
 // time wrote (`earlier`) joins that run's writer group, as steps commit them in order
-// (loka-kgd.151): `all` from `start` to `cut`; a target that a run of the same due time, or a
+// (loka-kgd.151): the indexed ops before `cut`; a target that a run of the same due time, or a
 // sibling group of this run (from `cut`), wrote stays apart, faulting as in steps.
 export function joinEarlier(
   all: DeltaOp[],
-  [start, cut]: readonly number[],
+  [w, cut]: readonly [Writes, number],
   own: readonly DeltaOp[],
   group: number,
   maps: Map<string, number>[],
 ) {
-  const mine = new Set(own.map(opKey));
-  const hit = (o: DeltaOp) => o.writer_group !== group && mine.has(opKey(o));
-  if (all.slice(cut).some(hit)) return;
-  const groups = all.slice(start, cut).filter(hit);
-  merge(all, new Set(groups.map((o) => o.writer_group)), group, maps);
+  for (; w.next < all.length; w.next++) {
+    const k = opKey(all[w.next]);
+    const at = w.at.get(k);
+    if (at) at.push(w.next);
+    else w.at.set(k, [w.next]);
+  }
+  const groups = new Set<number>();
+  for (const k of new Set(own.map(opKey)))
+    for (const i of w.at.get(k) ?? []) {
+      const g = all[i].writer_group;
+      if (g === group) continue;
+      if (i >= cut) return;
+      groups.add(g);
+    }
+  merge(all, groups, group, maps);
 }
 
 // A run's ops from `mark` (its reactions', a kill's credit, combat/credit.ts) join strictly earlier
 // writers per writer group; a sight handoff's reused group (proposal_sight.ts) stays as it is.
 export function joinTail(
   all: DeltaOp[],
-  [start, cut, mark]: readonly number[],
+  [w, cut, mark]: readonly [Writes, number, number],
   handoff: number | undefined,
   maps: Map<string, number>[],
 ) {
@@ -76,7 +90,7 @@ export function joinTail(
     if (g !== handoff)
       joinEarlier(
         all,
-        [start, cut],
+        [w, cut],
         tail.filter((o) => o.writer_group === g),
         g,
         maps,

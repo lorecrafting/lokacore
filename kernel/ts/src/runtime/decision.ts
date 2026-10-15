@@ -1,4 +1,4 @@
-// size: allow 305, the closed State row sections include toolbox status and levelling rows
+// size: allow 306, the closed State row sections include toolbox status and levelling rows
 // What rule modules (mechanics/<capability>/rule.ts) see: the World they read, the typed Rule and
 // Decision contract that limits each capability to its own commands and events
 // (capability_registry.json, through contracts.gen.ts Owned), and pure helpers. The router,
@@ -205,7 +205,8 @@ export const COMPOSES = {
   expedition: ['quest'],
   transport: ['movement'],
   action_recipe: ['check', 'status', 'death'],
-  schedule: ['movement', 'combat', 'death', 'quest', 'containment', 'status', 'barrier'], // W26 doors
+  // W26 doors; fact: a delayed reaction's fact_changed (row FD1)
+  schedule: ['movement', 'combat', 'death', 'quest', 'containment', 'status', 'barrier', 'fact'],
   combat: ['movement', 'quest'],
   dialogue: ['quest', 'containment', 'movement', 'check'],
   movement: ['quest'],

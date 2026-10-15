@@ -28,6 +28,10 @@
       "op": "fact.assign",
       "fact": "raided",
       "value": true
+    },
+    {
+      "op": "fact.stamp",
+      "fact": "raided_at"
     }
   ]
 }
