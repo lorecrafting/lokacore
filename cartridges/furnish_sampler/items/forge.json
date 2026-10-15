@@ -1,0 +1,15 @@
+{
+  "keywords": [
+    "forge"
+  ],
+  "short": "item.forge.short",
+  "room_line": "item.forge.room",
+  "description": "item.forge.description",
+  "location": {
+    "in": "room",
+    "room": "yard"
+  },
+  "tags": [
+    "forge"
+  ]
+}

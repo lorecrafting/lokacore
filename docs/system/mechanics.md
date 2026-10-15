@@ -3489,4 +3489,34 @@ Homestead hs-13 (Beads `loka-kgd.108.10`): the player cooks at the kitchen heart
   - Writes: the player fact `cooked` (a recipe needs one success step); ops, events, jobs and save rows: none new.
   - Reused: `craft`, `skill_compare`, `skill.acquire`, the opposed check, Eat `applies`, the keep and spoil reactions, `replenish.run`.
   - New: content only.
+
+## Furnishing (Homestead hs-6)
+
+Homestead hs-6 (Beads `loka-kgd.108.6`): a placed item changes what a room does or says by its [tag](#property-tags-and-the-policy-leaf-set-toolbox-row-g1). Policy leaf `item_present {tag}` (`protocol/policy.schema.json`, owned by `containment@1`, `kernel_api` 1.101).
+
+- **Leaf.** `item_present` holds when an item whose definition declares `tag` lies directly in the actor's room (`furnished`, `kernel/ts/src/mechanics/policy.ts:221`): an item carried, worn or inside a container in the room does not count. In a room variant the actor's room is the described room (the Book describes only the actor's room, `kernel/ts/src/view/view.ts:125`). It costs one query step plus one per container row scanned, in the room or not (as `recovery.ts`), so the budget bounds the scan; past `LIMITS.query_steps` it is false.
+- **Tags.** `bed`, `forge` and `rug` join the G1 `Tag` enum.
+- **Command.** None new: `take`, `drop`, `put`, `rest` and `perform`. A recipe whose policy fails stays offered, unavailable, with the policy refusal (`action_lists.ts`).
+- **Floor.** An `item_present` leaf anywhere in the cartridge needs `kernel_api` 1.101 (`cartridge_variants.ts`, `lib/loka/content/variants.ex`; `loader_floors.json` "an item_present leaf").
+- **Realm seams** (owner decision 2026-10-13, brief checklist).
+  1. Actor: met; the room is `bodyOf(world, actor)`'s container.
+  2. Reactions: met; `rested`'s subject is its `body_id`, and `status.apply` lands on it.
+  3. Credit: not applicable.
+  4. Time: met; `well_rested` runs in logical seconds on the elapsed path; no device clock.
+  5. Scope: met; placed items are public world state (custody); no new row.
+  6. Text: not applicable.
+  7. Ownership: met; placing changes no ownership. In an owned room the room's G7 locks govern who can place or take; the sampler hut is unowned, so anyone there can take the bed or rug.
+  8. Not applicable.
+  9. Not applicable.
+- **Traps** ([toolbox](../MECHANICS-TOOLBOX.md#traps)): 11 met, nothing new is stored; the leaf reads custody. 4 met, the rug line is an authored variant.
+- **Opt-in.** A cartridge declares the leaf. Chapter 1 declares none.
+- **Book.** No new component: Drop, Take and the room's description.
+- **Known limits.** No rate modifier: the bed's bonus is a status, not a rest-rate change. The leaf does not check ownership.
+- **Sampler.** `cartridges/furnish_sampler`: a bed, a forge and a rug lie in the yard; the hut north holds a chest and a bench. Rest in the hut with the bed dropped applies `well_rested` (+2 mv per 600 s for 3600 s); the bench's `temper` (opposed smithing) is available only with the forge in the hut; the dropped rug shows "A rug warms the boards." (`kernel/ts/test/furnish.test.ts`).
+- **Composition record** ([architecture](architecture.md#building-mechanics-by-composition)).
+  - Consumer: `furnish_sampler`. Later: Settle S1 functional furnishing.
+  - Reads: containers, item tags, the actor's body.
+  - Writes: none new.
+  - Reused: VersionedPolicy, `holds`, `rested`, `status.apply`, room `variants`, `action_recipe` policy and check, G1 tags.
+  - New: `item_present`, `furnished`, tags `bed`, `forge`, `rug`, the 1.101 floor.
   - Missing invariant: none.

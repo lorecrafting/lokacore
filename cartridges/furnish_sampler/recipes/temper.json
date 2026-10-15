@@ -1,0 +1,44 @@
+{
+  "label": "actions.temper",
+  "aliases": [
+    "temper"
+  ],
+  "target": {
+    "kind": "detail",
+    "room": "hut",
+    "detail": "bench"
+  },
+  "priority": 5,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "item_present",
+      "tag": "forge"
+    }
+  },
+  "check": {
+    "key": "temper",
+    "kind": "opposed",
+    "skill": "smithing"
+  },
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "resource.adjust",
+          "resource": "mv",
+          "by": -5
+        }
+      ],
+      "narration": {
+        "actor": "narration.temper.success"
+      }
+    },
+    "failure": {
+      "sequence": [],
+      "narration": {
+        "actor": "narration.temper.failure"
+      }
+    }
+  }
+}

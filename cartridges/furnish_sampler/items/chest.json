@@ -1,0 +1,14 @@
+{
+  "keywords": [
+    "chest"
+  ],
+  "short": "item.chest.short",
+  "room_line": "item.chest.room",
+  "description": "item.chest.description",
+  "location": {
+    "in": "room",
+    "room": "hut"
+  },
+  "mass_grams": 20000,
+  "container": true
+}
