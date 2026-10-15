@@ -45,7 +45,18 @@ defmodule Loka.ContentVoicesTest do
       {"recipes/read_glyphs.json", nil}
     ]
 
-    for changes <- [[api], [api, no_asides], asides_only] do
+    # Detail asides alone (no room aside, no leaf) need 1.91 too.
+    door_only = [
+      api,
+      {"rooms/hall.json",
+       &(Map.delete(&1, "asides")
+         |> update_in(@door, fn as ->
+           Enum.map(as, fn a -> put_in(a, ["when", "root"], %{"op" => "all", "items" => []}) end)
+         end))}
+      | Enum.drop(asides_only, 2)
+    ]
+
+    for changes <- [[api], [api, no_asides], asides_only, door_only] do
       assert {:error, diags} = Loka.ContentSource.compile(dir, changes)
       assert @floor in Enum.map(diags, &{&1["code"], &1["path"]}), inspect(diags)
     end
