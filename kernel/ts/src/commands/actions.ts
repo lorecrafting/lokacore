@@ -1,4 +1,3 @@
-// size: allow 306, RS-1 actor-read freeze markers until RS-2 removes them
 // ActionSet: engine, cartridge, room, choice; combat restricts admission/projection (06 §19).
 import {
   CAPABILITY_OWNERS,
@@ -85,7 +84,7 @@ export function apply(set: ActionSet, op: ActionContribution['op'], c: ActionSet
 }
 
 // The engine verbs whose owning capability the cartridge locks, labelled action.<verb>.
-function engine(world: World): ActionSet {
+function engine(world: World, actor: CharacterId): ActionSet {
   const locked = (verb: string) =>
     Object.hasOwn(world.cartridge.lock.capabilities, CAPABILITY_OWNERS.command[verb].split('@')[0]);
   return Object.fromEntries(
@@ -96,17 +95,14 @@ function engine(world: World): ActionSet {
           verb !== 'expedition' &&
           !(verb === 'wait' && world.cartridge.manifest.time_policy),
       )
-      // ast-grep-ignore: ts-rule-actor-from-command
-      .filter(([verb]) => verb !== 'choose_ancestry' || needsAncestry(world, world.character))
-      // ast-grep-ignore: ts-rule-actor-from-command
-      .filter(([verb]) => verb !== 'raise_attribute' || points(world, world.character))
+      .filter(([verb]) => verb !== 'choose_ancestry' || needsAncestry(world, actor))
+      .filter(([verb]) => verb !== 'raise_attribute' || points(world, actor))
       // Row 29a: cast only in a cartridge with a spell.
       .filter(
         ([verb]) => verb !== 'cast' || allRecipes(world).some((r) => r.target.kind === 'spell'),
       )
       // Row G9: no speech while a conversation is open (the speech rule refuses it too).
-      // ast-grep-ignore: ts-rule-actor-from-command
-      .filter(([verb]) => !SPEECH.includes(verb) || !pending(world, world.character))
+      .filter(([verb]) => !SPEECH.includes(verb) || !pending(world, actor))
       .map(([verb, [target, input]]): [string, Offered] => {
         const key = verb as Key;
         const label = `action.${verb}` as TextKey;
@@ -153,9 +149,9 @@ function cartridge(world: World, actor: CharacterId): ActionSet {
  * removes them; combat filters the result afterward), which lists never renders directly.
  */
 export function composed(world: World, actor: CharacterId): ActionSet {
-  if (needsAncestry(world, actor)) return { choose_ancestry: engine(world).choose_ancestry };
+  if (needsAncestry(world, actor)) return { choose_ancestry: engine(world, actor).choose_ancestry };
   if (scene.running(world, actor)) return scene.modal();
-  const [verbs, own] = [engine(world), cartridge(world, actor)];
+  const [verbs, own] = [engine(world, actor), cartridge(world, actor)];
   const all = { ...verbs, ...own };
   const body = bodyOf(world, actor);
   const room = body === undefined ? undefined : world.rooms[world.state.containers[body]];
@@ -221,7 +217,6 @@ export const detailAt = (world: World, a: Offered) =>
  */
 import { visible } from '../mechanics/light/shared.ts';
 
-// size: allow 41, one RS-1 freeze marker until RS-2 removes it
 export function refusal(
   world: World,
   payload: CommandPayload,
@@ -229,9 +224,8 @@ export function refusal(
   action?: Key,
   set?: ActionSet,
 ) {
-  const choiceGated = payload.type !== 'choose_ancestry' && payload.type !== 'elapsed';
-  // ast-grep-ignore: ts-rule-actor-from-command
-  if (choiceGated && needsAncestry(world, world.character)) return 'invalid_state';
+  const gated = 'actor_id' in payload && !['choose_ancestry', 'elapsed'].includes(payload.type);
+  if (gated && needsAncestry(world, payload.actor_id)) return 'invalid_state'; // `in`: types only, run_job never gets here
   if (
     payload.type === 'wait' &&
     world.cartridge.manifest.time_policy &&

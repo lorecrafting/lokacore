@@ -85,18 +85,20 @@ export function exchange(
     : ('insufficient_resource' as const);
 }
 
-export function shelf(world: World, provider: EntityId): ShopItemView[] | undefined {
+export function shelf(
+  world: World,
+  viewer: CharacterId,
+  provider: EntityId,
+): ShopItemView[] | undefined {
   const npc = world.entities[provider];
   if (npc?.kind !== 'npc' || !npc.shop) return;
   const steps = { n: 0 };
   return npc.shop.offers.map((o) => {
     const item_id = world.entityIds[refString(o.item)];
     const action = (verb: 'buy' | 'sell') => {
-      // ast-grep-ignore: ts-rule-actor-from-command
-      const quoted = verb === 'buy' ? buyPrice(world, world.character, provider, o, steps) : o.sell;
+      const quoted = verb === 'buy' ? buyPrice(world, viewer, provider, o, steps) : o.sell;
       const price = typeof quoted === 'number' ? quoted : o.buy; // past the budget exchange refuses
-      // ast-grep-ignore: ts-rule-actor-from-command
-      const result = exchange(world, world.character, provider, item_id, verb, price, steps);
+      const result = exchange(world, viewer, provider, item_id, verb, price, steps);
       return {
         price,
         available: typeof result !== 'string',

@@ -1,6 +1,6 @@
 import type { WaterOccupancy, WaterSettings } from '../../contracts.gen.ts';
 import { validate } from '../../foundation/validate.ts';
-import { refString, bodyOf, type World } from '../../runtime/decision.ts';
+import { admitted, refString, bodyOf, type World } from '../../runtime/decision.ts';
 
 export function waterValid(world: World) {
   const settings = world.cartridge.world?.water,
@@ -29,12 +29,13 @@ export function waterValid(world: World) {
       return false;
     if (j.status === 'pending' && rows[j.actor_id!]?.job_id !== id) return false;
   }
-  const below = settings.routes.some(
-    // ast-grep-ignore: ts-rule-actor-from-command
-    (r) => world.roomIds[refString(r.bottom)] === world.state.containers[world.body],
+  return admitted(world).every(
+    ([character, body]) =>
+      settings.routes.some(
+        (r) => world.roomIds[refString(r.bottom)] === world.state.containers[body],
+      ) ===
+      (rows[character]?.room_id != null),
   );
-  // ast-grep-ignore: ts-rule-actor-from-command
-  return below === (rows[world.character]?.room_id != null);
 }
 
 function occupancyValid(world: World, actor: string, row: WaterOccupancy, settings: WaterSettings) {

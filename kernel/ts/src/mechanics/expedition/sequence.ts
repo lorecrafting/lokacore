@@ -85,7 +85,7 @@ export function choose(world: World, command: Choice, mint: Mint, steps: Steps) 
     sheltered: false,
     status: 'active',
   };
-  const hound = houndHere(world, spec, body_id, steps);
+  const hound = houndHere(world, spec, actor_id, body_id, steps);
   const encounter = hound ? openHound(world, actor_id, body_id, hound, mint, steps) : [];
   return {
     ops: [...(activated?.ops ?? []), transition(before, after), ...encounter],
@@ -96,7 +96,7 @@ export function choose(world: World, command: Choice, mint: Mint, steps: Steps) 
   };
 }
 
-function houndHere(world: World, spec: Spec, body: EntityId, steps: Steps) {
+function houndHere(world: World, spec: Spec, actor: CharacterId, body: EntityId, steps: Steps) {
   return (
     Object.entries(world.state.created ?? {}) as [
       EntityId,
@@ -109,8 +109,7 @@ function houndHere(world: World, spec: Spec, body: EntityId, steps: Steps) {
         row.origin.role === 'hound' &&
         same(row.origin.by, spec.hound_population) &&
         world.state.containers[id] === world.state.containers[body] &&
-        // ast-grep-ignore: ts-rule-actor-from-command
-        !attackRefused(world, world.character, id) &&
+        !attackRefused(world, actor, id) &&
         admission(world, id, steps)?.includes(id),
     )
     .map(([id]) => id)

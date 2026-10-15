@@ -25,18 +25,14 @@ export function levelling(world: World, actor: CharacterId) {
 }
 
 /**
- * The cartridge's level_up line when `ops` (a whole proposal from `world`) raise the player
- * character's level: the stored row against the last write's value (mechanics.md row 4).
+ * The cartridge's level_up line when `ops` (a whole proposal from `world`) raise `actor`'s
+ * level: the stored row against the last write's value (mechanics.md row 4).
  */
-export function levelUp(world: World, ops: readonly DeltaOp[]): Text[] {
+export function levelUp(world: World, actor: CharacterId, ops: readonly DeltaOp[]): Text[] {
   const spec = world.cartridge.world?.levelling;
-  const last = ops
-    // ast-grep-ignore: ts-rule-actor-from-command
-    .filter((o) => o.op === 'levelling.set' && o.character_id === world.character)
-    .at(-1);
+  const last = ops.filter((o) => o.op === 'levelling.set' && o.character_id === actor).at(-1);
   if (!spec || last?.op !== 'levelling.set') return [];
-  // ast-grep-ignore: ts-rule-actor-from-command
-  const from = world.state.levelling?.[world.character]?.experience ?? 0;
+  const from = world.state.levelling?.[actor]?.experience ?? 0;
   return reached(spec, last.value.experience) > reached(spec, from) ? [{ key: spec.level_up }] : [];
 }
 

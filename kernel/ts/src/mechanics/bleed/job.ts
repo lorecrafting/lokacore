@@ -1,7 +1,14 @@
 import type { BleedRow, Command, DeltaOp, JobId } from '../../contracts.gen.ts';
 import { add } from '../../foundation/int.ts';
 import { same } from '../../foundation/compose.ts';
-import { accepted, refString, type JobRow, type Mint, type World } from '../../runtime/decision.ts';
+import {
+  accepted,
+  actorOf,
+  refString,
+  type JobRow,
+  type Mint,
+  type World,
+} from '../../runtime/decision.ts';
 import { prefix } from '../combat/round_attack.ts';
 import { closeEncounter } from '../combat/shared.ts';
 import { deathSequence } from '../death/sequence.ts';
@@ -21,13 +28,13 @@ function fatalBleed(
   ops: DeltaOp[],
   mint: Mint,
 ) {
+  const loss = ops[1] as Extract<DeltaOp, { op: 'resource.adjust' }>; // the bleeding body's
   const died = deathSequence(
     prefix(visit, ops, now),
     command,
     {
-      loss: ops[1] as Extract<DeltaOp, { op: 'resource.adjust' }>,
-      // ast-grep-ignore: ts-rule-actor-from-command
-      owner_id: world.character,
+      loss,
+      owner_id: actorOf(world, loss.entity_id) ?? null,
       killer_id: row.source_id!,
       credited_character_id: null,
       cause: 'bleeding',

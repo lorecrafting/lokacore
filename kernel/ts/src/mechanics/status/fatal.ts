@@ -1,6 +1,6 @@
 // A status tick that takes its holder's hp to 0 (status/job.ts runStatus; row 1, G3).
 import type { Command, DefinitionRef, DeltaOp, EntityId, Text } from '../../contracts.gen.ts';
-import { accepted, type Event, type Mint, type World } from '../../runtime/decision.ts';
+import { accepted, actorOf, type Event, type Mint, type World } from '../../runtime/decision.ts';
 import { prefix } from '../combat/round_attack.ts';
 import { closeEncounter, engaged, lastOpponent } from '../combat/shared.ts';
 import { deathSequence } from '../death/sequence.ts';
@@ -22,33 +22,26 @@ export function fatalTick(
   mint: Mint,
   narration: Text[],
 ) {
-  // ast-grep-ignore: ts-rule-actor-from-command
-  const player = body === visit.body;
+  const player = actorOf(visit, body) !== undefined;
   const fight = engaged(visit, body);
   if (fight && (player || lastOpponent(fight.row))) ops.push(...closeEncounter(visit, body));
   ops.push(endStatus(body, status, row, 0));
-  const died = dies(visit, command, ops, player, mint);
+  const died = dies(visit, command, ops, mint);
   const all = [...events, ...died.events.map((e) => ({ ...e, position: 2 }))];
   return accepted(visit, 'job_ran', ops, all, narration, died.rng);
 }
 
 // The ordinary death sequence after a fatal tick (its first resource.adjust is the hp loss), with
 // no killer; an NPC's drops roll from the world's RNG (row 8).
-function dies(
-  visit: World,
-  command: Pick<Command, 'id'>,
-  ops: DeltaOp[],
-  player: boolean,
-  mint: Mint,
-) {
+function dies(visit: World, command: Pick<Command, 'id'>, ops: DeltaOp[], mint: Mint) {
   const now = visit.state.clock;
+  const loss = ops.find((o) => o.op === 'resource.adjust') as Adjust;
   const died = deathSequence(
     prefix(visit, ops, now),
     command,
     {
-      loss: ops.find((o) => o.op === 'resource.adjust') as Adjust,
-      // ast-grep-ignore: ts-rule-actor-from-command
-      owner_id: player ? visit.character : null,
+      loss,
+      owner_id: actorOf(visit, loss.entity_id) ?? null,
       killer_id: null,
       credited_character_id: null,
     },

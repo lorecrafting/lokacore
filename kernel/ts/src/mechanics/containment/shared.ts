@@ -1,12 +1,12 @@
 // Derived carrying admission (docs/system/mechanics.md containment@1). The context lives
 // only for this decision/list projection; custody and pinned item definitions remain authoritative.
-import { LIMITS, type EntityId } from '../../contracts.gen.ts';
+import { LIMITS, type CharacterId, type EntityId } from '../../contracts.gen.ts';
 import { liquidRowValid } from '../../foundation/compose_liquid.ts';
 import { add, mul, saturate } from '../../foundation/int.ts';
 import { opened, reach, barrierState } from '../lookups.ts';
 import { chainRefused } from '../locks.ts';
 import type { Steps, World } from '../../runtime/decision.ts';
-import { refString } from '../../runtime/decision.ts';
+import { actorOf, refString } from '../../runtime/decision.ts';
 import { movable } from '../../runtime/created.ts';
 import { derived } from '../attributes/shared.ts';
 
@@ -53,10 +53,9 @@ export function giveRefused(world: World, item: EntityId, steps: Steps = { n: 0 
 function ceiling(world: World, body: EntityId) {
   const max = world.cartridge.world?.carry?.max_grams;
   const table = world.cartridge.world?.derived?.carry_grams;
-  // ast-grep-ignore: ts-rule-actor-from-command
-  if (!table || body !== world.body || !Number.isSafeInteger(max) || max! < 0) return max;
-  // ast-grep-ignore: ts-rule-actor-from-command
-  return Math.max(0, saturate(max! + derived(world, world.character, table)));
+  const actor = actorOf(world, body);
+  if (!table || !actor || !Number.isSafeInteger(max) || max! < 0) return max;
+  return Math.max(0, saturate(max! + derived(world, actor, table)));
 }
 
 export const load = (world: World, body: EntityId, steps: Steps) =>
@@ -179,6 +178,7 @@ function total(c: Context, root: string): number | Failure {
 // size: allow 50, one bounded pair query keeps source, reach, lid, ancestry and capacity admission together
 export function putRefused(
   world: World,
+  actor: CharacterId,
   body: EntityId,
   item: EntityId,
   destination: EntityId,
@@ -213,8 +213,7 @@ export function putRefused(
       : ('exit_closed' as const);
   if (!opened(world, destination, body)) return 'not_present' as const;
   // The one character's put locks, the destination's and its containers' (W26: NPCs ignore them).
-  // ast-grep-ignore: ts-rule-actor-from-command
-  const locked = chainRefused(world, world.character, destination, 'put', steps);
+  const locked = chainRefused(world, actor, destination, 'put', steps);
   if (locked) return locked;
   const capacity = world.capacities[destination];
   if (capacity !== undefined) {
