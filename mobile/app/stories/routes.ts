@@ -136,7 +136,7 @@ const satchel = [
   'Buy a torch — 2p',
   'Buy a small satchel — 4p',
   LABEL.leave,
-  ...contents('Equipment & Inventory'),
+  ...contents(LABEL.inventory),
   'a torch, open',
 ];
 // The lone crow in the Oak Branches; the deer at the Drowned Oak below it.
@@ -144,12 +144,7 @@ const oak = [...road, go('north', 'north', 'south', 'south', 'south', 'south', '
 const deer = [...oak, 'A deer is here.', 'Attack a deer', wait(3000)];
 // Wren's boot at the Reed Bank, taken, then dropped and taken again: World log lines, no move.
 const boot = ['Wren’s boot is here., open', 'Take Wren’s boot'];
-const again = [
-  ...contents('Equipment & Inventory'),
-  'Wren’s boot, open',
-  'Drop Wren’s boot',
-  ...boot,
-];
+const again = [...contents(LABEL.inventory), 'Wren’s boot, open', 'Drop Wren’s boot', ...boot];
 // The one-opponent fight (no pack roster, contracts CombatView): a cellar rat, two rounds in.
 const rat = [...inn, go('down'), nth('A cellar rat is here.'), 'Attack a cellar rat'];
 const bell = [
@@ -201,14 +196,14 @@ export const routes: Record<string, Step[]> = {
   'map-where': [...shut, 'Ask where Elspeth is'],
   dream: dream,
   journal: [...search, ...contents('Journal')],
-  'carrying-empty': [...fen, ...contents('Equipment & Inventory')],
+  'carrying-empty': [...fen, ...contents(LABEL.inventory)],
   'carrying-held': [
     ...fen,
     ...talk('Elspeth', ask),
     go('north', 'north'),
     'A fox drawing is here.',
     'Take a fox drawing',
-    ...contents('Equipment & Inventory'),
+    ...contents(LABEL.inventory),
   ],
   'character-unknown': [...fen, ...contents('Character')],
   // ponytail: one skill (Fen-born swim) and one topic (the Wisp's ward); Sedge's lessons need the night marsh.

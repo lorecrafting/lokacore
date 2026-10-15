@@ -1,6 +1,7 @@
 // Homestead hs-13 at 390 px (`LOKA_WALK=kitchen_sampler npm run walkthrough`): catch two fish,
 // learn cooking from the cook, cook a hearty stew at the hearth and eat it.
 import { moves, settle, walk } from './walk.ts';
+import { LABEL } from '../book/labels.ts';
 
 walk('1-kitchen', 'Kitchen: learn cooking, cook a hearty stew at the hearth, eat it', async (r) => {
   const { screen } = r;
@@ -23,7 +24,7 @@ walk('1-kitchen', 'Kitchen: learn cooking, cook a hearty stew at the hearth, eat
   await screen.getByRole('button', 'Cook a hearty stew').tap();
   await settle();
   await screen.getByRole('button', /opens Contents/).tap();
-  await screen.getByRole('button', /^Equipment & Inventory/).tap();
+  await screen.getByRole('button', new RegExp(`^${LABEL.inventory}`)).tap();
   await screen
     .getByRole('button', /hearty stew/)
     .first()

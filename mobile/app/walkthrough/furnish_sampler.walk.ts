@@ -2,7 +2,7 @@ import { walk, settle, moves } from './walk.ts';
 walk('1-furnish', 'furnish', async (r) => {
   await r.app.clearState();
   await settle();
-  for (const l of '/^Got it|/^A rug is here|/^Take|go:north|/opens Contents|/^Equipment|/rug|/^Drop'
+  for (const l of '/^Got it|/^A rug is here|/^Take|go:north|/opens Contents|/^Inventory|/rug|/^Drop'
     .split('|')
     .filter(Boolean)) {
     await settle();

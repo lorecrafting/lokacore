@@ -99,7 +99,7 @@ export function CarryingPage(p: {
 }) {
   const c = usePalette();
   return (
-    <Page title="Equipment & Inventory" foot={home(p.world)}>
+    <Page title={LABEL.inventory} foot={home(p.world)}>
       <SectionTitle>{LABEL.held}</SectionTitle>
       {p.items.length === 0 && <Note>You are carrying nothing.</Note>}
       {p.items.length > 0 && (

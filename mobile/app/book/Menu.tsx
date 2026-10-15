@@ -13,7 +13,7 @@ type Say = (key: string) => string;
 export type Section = 'character' | 'carrying' | 'map' | 'journal' | 'settings';
 const SECTIONS: [Section, string][] = [
   ['character', 'Character'],
-  ['carrying', 'Equipment & Inventory'],
+  ['carrying', LABEL.inventory],
   ['map', 'Map'],
   ['journal', 'Journal'],
   ['settings', 'Settings'],

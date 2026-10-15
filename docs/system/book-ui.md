@@ -67,10 +67,9 @@ the scrolling body, with status beneath it, inside the existing safe area.
 A projected Read place action keeps its exact detail target and authored label and follows
 the canonical [notice-detail rules](#notice-board-details).
 
-The enabled status/resources tap opens Contents. It lists exactly **Character**, **Equipment &
-Inventory**, **Map**, **Journal**, **Settings**. There is no Menu button or extra World navigation
+The enabled status/resources tap opens Contents. It lists exactly **Character**, **Inventory**, **Map**, **Journal**, **Settings**. There is no Menu button or extra World navigation
 row. Character shows existing projected resources and position, without unrelated index links.
-Equipment & Inventory separates held items from worn slots; Journal uses projected quest text;
+Inventory separates held items from worn slots; Journal uses projected quest text;
 Settings retains Start over and its confirmation/error handling, and holds the
 [page-turn sound](../BOOK-UI-COMPONENTS.md#page-turn) on/off control. Section returns say
 **Back to World**, clear the detail stack to World, and do not pop to Character or Contents.
@@ -285,14 +284,14 @@ currently no player-presence UI.
 
 ## Item details and Take/Drop
 
-Equipment & Inventory separates Held from Worn slots, including empty slots. Held/worn item
+Inventory separates Held from Worn slots, including empty slots. Held/worn item
 taps resolve the same detail; item pages follow [detail-page order](#detail-page-order), with directly nested
 reachable contents and current legal item/container/equipment actions, plus local **Leave** back to World. The available brass lantern therefore offers Take
 and Leave; Leave sends no engine verb. Confirmed accepted `taken` returns to World and adds a
 pickup event using the original projected item name: **You pick up a brass lantern.** for this
 sampler. Under the PM's explicitly adopted Drop symmetry, confirmed accepted `dropped` also
 returns to World with the original projected name: **You drop a brass lantern.** Held items
-open their same item detail from Equipment & Inventory, with existing offered Drop/other actions
+open their same item detail from Inventory, with existing offered Drop/other actions
 and Leave, without invented Use/Equip actions, Take while held, or a custom gesture.
 These replace generic Taken/Dropped fallbacks; authored narration takes precedence and
 meaningful consequences remain. Pending, refused, stale or failed attempts announce no success.
@@ -312,7 +311,7 @@ Successful ordinary Take/Drop are the specific exceptions to item-page retention
 Take follows the corpse-detail rule above. Other same-room item actions
 retain the page and route their results to that item's local chronological history while the
 item remains projected; leaving the room or losing the item closes
-obsolete details. Equipment & Inventory item taps keep existing reachable held/worn behavior.
+obsolete details. Inventory item taps keep existing reachable held/worn behavior.
 
 Put appears as a concrete pair button using projected source/destination names and IDs.
 Each button captures its projection freshness and follows the normal GameSession invocation
@@ -773,7 +772,7 @@ pause or new store/UI framework is introduced.
 
 [D2](mechanics.md#d2-held-books-and-public-priory-selected-contract) uses
 ordinary item detail order and custody projection. World → book detail → Take
-confirms the existing return to World. Contents → Equipment & Inventory → held
+confirms the existing return to World. Contents → Inventory → held
 book detail offers explicit Read; opening that item sends no Read. For an open
 held container, tapping its projected child pushes the child's full detail onto
 the existing stack. Back to the immediate container pops locally without a command;
