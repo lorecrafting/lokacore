@@ -62,10 +62,12 @@ defmodule Loka.Content.Skills do
   def check(m, defs, {_, settings}, text) do
     caps = m["requires"]["capabilities"]
 
-    hidden = for {key, {_, _, %{"hidden" => true}}} <- defs["skill"], do: ref(m, key)
+    hidden = hidden(m, defs)
 
-    Enum.flat_map(defs["skill"], &definition(&1, caps, text)) ++
-      Enum.flat_map(defs["skill"], &(growth(&1) ++ itself(m, &1, hidden))) ++
+    Enum.flat_map(
+      defs["skill"],
+      &(definition(&1, caps, text) ++ growth(&1) ++ itself(m, &1, hidden))
+    ) ++
       floor(m, defs) ++
       prerequisite_floor(m, defs) ++
       equipment(m, defs) ++ dodge(m, defs, settings) ++ defense_narration(defs, settings)
@@ -74,15 +76,19 @@ defmodule Loka.Content.Skills do
   defp definition({_, {rel, _, s}}, caps, text) do
     capability(rel, caps) ++
       if(String.length(s["key"]) <= 58, do: [], else: [bad(at(rel, ["key"]))]) ++
+      texts(rel, s, text)
+  end
+
+  defp definition(_, _, _), do: []
+
+  defp texts(rel, s, text),
+    do:
       for(
         field <- ~w(label requirement profession),
         is_map_key(s, field),
         text != :unknown and not is_map_key(text, s[field]),
         do: diag("UNRESOLVED_REFERENCE", at(rel, [field]), %{"target" => s[field]})
       )
-  end
-
-  defp definition(_, _, _), do: []
 
   # Toolbox row 5: growth thresholds strictly increase.
   defp growth({_, {rel, _, %{"growth" => g}}}) do
@@ -108,6 +114,9 @@ defmodule Loka.Content.Skills do
   end
 
   defp itself(_, _, _), do: []
+
+  defp hidden(m, defs),
+    do: for({key, {_, _, %{"hidden" => true}}} <- defs["skill"], do: ref(m, key))
 
   defp ref(m, key),
     do: %{
