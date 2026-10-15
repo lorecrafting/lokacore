@@ -73,6 +73,7 @@ test('a site names no exit direction and only defined blueprints; construction n
     refused((c) => {
       below(c);
       delete lane(c).site;
+      delete c.world.construction;
     }),
     floor,
   );
