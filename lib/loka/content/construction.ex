@@ -19,20 +19,23 @@ defmodule Loka.Content.Construction do
     {blueprints, sites} = {blueprints(defs), sites(defs)}
     required = {m["requires"]["capabilities"], owners(registry, ["definitions"])}
 
-    world = settings["world"] || %{}
-    gates = if is_map_key(world, "construction"), do: ["cartridge.world.construction"], else: []
-
     Enum.flat_map(sites, &site(&1, m, defs)) ++
       Enum.flat_map(blueprints, &(owned_parts(&1, required) ++ texts(&1, text(v2)))) ++
-      gated(m, for({rel, _, _} <- sites, do: at(rel, ["site"])) ++ gates) ++
-      floor(m, blueprints != [] or sites != [], world)
+      requirements(m, blueprints, sites, settings)
   end
 
-  # A site or world.construction needs construction@1 (a blueprint is owned through the registry).
-  defp gated(m, paths) do
-    for p <- paths, m["requires"]["capabilities"]["construction"] != 1 do
+  # A site or world.construction needs construction@1 (a blueprint is owned through the registry);
+  # any construction content needs kernel_api 1.99.
+  defp requirements(m, blueprints, sites, settings) do
+    world =
+      if get_in(settings, ["world", "construction"]),
+        do: ["cartridge.world.construction"],
+        else: []
+
+    for p <- for({rel, _, _} <- sites, do: at(rel, ["site"])) ++ world,
+        m["requires"]["capabilities"]["construction"] != 1 do
       diag("UNDECLARED_CAPABILITY", p, %{"capability" => "construction"}, ["construction@1"])
-    end
+    end ++ floor(m, blueprints != [] or sites != [], settings["world"] || %{})
   end
 
   defp blueprints(defs), do: for({_, {rel, [], b}} <- defs["blueprint"] || %{}, do: {rel, b})
