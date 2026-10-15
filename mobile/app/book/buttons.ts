@@ -136,6 +136,9 @@ const askButtons = (v: GameView, text: Say): Press[] =>
 // and shouted, and each castable spell word; only while no combat, scene or conversation is open.
 export const WORDS = ['say', 'whisper', 'shout', 'cast'];
 export const wordless = (v: GameView) => Boolean(v.combat || v.scene || v.choice);
+// The spell words the Word block shows: none unless Cast is offered here.
+export const castWords = (v: GameView) =>
+  !wordless(v) && v.actions.some((a) => a.action_key === 'cast') ? (v.spell_words ?? []) : [];
 function wordButtons(v: GameView, text: Say): Press[] {
   if (wordless(v)) return [];
   const offered = (key: string) => v.actions.some((a) => a.action_key === key && a.available);
@@ -147,16 +150,19 @@ function wordButtons(v: GameView, text: Say): Press[] {
   });
   const phrases = v.phrases ?? [];
   return [
-    ...(offered('say') ? phrases.map((w) => chip('say', w)) : []),
+    // First, the keyboard's Say without a word: the live twin of every typed word (actionContext).
+    ...(offered('say')
+      ? [{ ...chip('say', ''), input: {} }, ...phrases.map((w) => chip('say', w))]
+      : []),
     ...v.entities.flatMap((e) =>
       e.actions.some((a) => a.action_key === 'whisper' && a.available)
         ? phrases.map((w) => chip('whisper', w, e))
         : [],
     ),
     ...(offered('shout') ? phrases.map((w) => chip('shout', w)) : []),
-    ...(v.actions.some((a) => a.action_key === 'cast')
-      ? (v.spell_words ?? []).filter((s) => s.available).map((s) => chip('cast', s.word))
-      : []),
+    ...castWords(v)
+      .filter((s) => s.available)
+      .map((s) => chip('cast', s.word)),
   ];
 }
 

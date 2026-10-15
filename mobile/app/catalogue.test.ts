@@ -12,7 +12,6 @@ const stories = readdirSync(new URL('stories/', app)).filter((f) => f.endsWith('
 const EXEMPT: Record<string, string> = {
   Tap: 'shown through VerbLine and the room title',
   Here: 'the room page lines, shown through the RoomPage stories',
-  WordBar: 'rows of Chips (Chip stories); the live block is checked in book/word_bar.test.ts',
 };
 const EXEMPT_FILES = { 'MapDrawing.tsx': 'a drawing, shown through the map pages' };
 

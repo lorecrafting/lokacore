@@ -6,7 +6,6 @@ import { Combat } from './Combat.tsx';
 import { Footer } from './Footer.tsx';
 import { StatusLine } from './Status.tsx';
 import {
-  conversation,
   group,
   POSITION_ACTIONS,
   pagesAfter,
@@ -26,9 +25,8 @@ import { restoredNoticePages } from './notices.tsx';
 import { Body } from './Body.tsx';
 import { NightSky } from './NightSky.tsx';
 import { PageTurn } from './PageTurn.tsx';
-import { resultPages, useUpdates, type BookState, type Presenter } from './updates.ts';
+import { resultPages, useUpdates, wordTurn, type BookState, type Presenter } from './updates.ts';
 import { LABEL } from './labels.ts';
-import { WORDS } from './buttons.ts';
 
 /** What the phone shell injects: its confirm step and its first-run store (react-native-web has none). */
 export type Shell = {
@@ -68,9 +66,7 @@ function pressBook(p: BookProps, pr: Presenter, s: BookState, b: Button, detail?
       next = [...restoredItemPages(after.view, after.detail, after.confirmedRead), ...next];
   }
   next = resultPages(next, after);
-  // A word that opens a conversation (the elder answers "ward") turns to it, as Talk does.
-  if (WORDS.includes(b.action_key) && !before.view.choice && after.view.choice)
-    next = [...next, conversation(after.view)];
+  next = wordTurn(next, b.action_key, before.view, after.view);
   s.current.current = { stack: next, view: after.view };
   if (after.pending || after.fault) p.shell.recovered?.(false);
   else if (pr.recovered()) p.shell.recovered?.(true);

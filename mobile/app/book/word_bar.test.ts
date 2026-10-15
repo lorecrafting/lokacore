@@ -5,6 +5,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import { compiled } from '../../authority/local-story/__tests__/compiled.ts';
+import { elapsedHost } from '../../authority/local-story/__tests__/elapsed-host.test.ts';
 import { book } from './__tests__/polish-book.test.ts';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { buttonsOf, WORDS } from './buttons.ts';
@@ -13,6 +14,7 @@ import { LABEL } from './labels.ts';
 
 const speech = compiled('cartridges/speech_sampler');
 const spells = compiled('cartridges/spells_sampler');
+const ward = compiled('cartridges/ward_sampler');
 type Book = ReturnType<typeof book>;
 const facts = (b: Book) =>
   Object.fromEntries(
@@ -131,14 +133,66 @@ test('no word press without a word, nor in combat, a scene or a conversation', (
   const v = book(speech as never).game.view().view;
   const say = (k: string) => k;
   const words = (w: GameView) => buttonsOf(w, say, say).filter((p) => WORDS.includes(p.action_key));
-  assert.equal(words(v).length, 12);
-  assert.ok(
-    words(v).every((p) => /^[a-zA-Z]{1,32}$/.test((p.input as { word?: string }).word ?? '')),
-  );
-  assert.deepEqual(words({ ...v, phrases: [] }), []);
+  const [keyboard, ...chips] = words(v); // the keyboard's Say is never drawn as a chip
+  assert.deepEqual([keyboard.action_key, keyboard.input], ['say', {}]);
+  assert.equal(chips.length, 12);
+  assert.ok(chips.every((p) => /^[a-zA-Z]{1,32}$/.test((p.input as { word?: string }).word ?? '')));
+  assert.deepEqual(words({ ...v, phrases: [] }), [keyboard]);
   const open = (f: string) =>
     JSON.parse(readFileSync(new URL(`../stories/views/${f}.json`, import.meta.url), 'utf8')).view;
   assert.deepEqual(words({ ...v, combat: open('combat-one-foe').combat }), [], 'combat');
   assert.deepEqual(words({ ...v, scene: open('scene').scene }), [], 'scene');
   assert.deepEqual(words({ ...v, choice: open('npc-choice').choice }), [], 'conversation');
+});
+
+// Breaks: the Word block or its keyboard gated on phrases (ward_sampler offers Say with none, so
+// "drench" was unsayable), or the keyboard's wordless Say drawn as a chip.
+test('Say without phrases still offers the keyboard, and a typed word is heard', () => {
+  const b = book(ward as never);
+  assert.ok(b.text().includes(LABEL.word));
+  assert.ok(!b.labels().some((l) => l.endsWith(', say')));
+  b.tap(LABEL.typeAWord);
+  type(b, 'drench');
+  const said = b.sql.prepare('SELECT command FROM receipt').all();
+  assert.deepEqual(
+    said.map((r: any) => JSON.parse(r.command).payload.word),
+    ['drench'],
+  );
+});
+
+// Breaks: Enter sending while a press is pending (the presenter would retry the pending press).
+test('Enter while a press is pending sends nothing', () => {
+  const a = elapsedHost(':memory:', undefined, speech as never);
+  const b = book(speech as never, a);
+  b.tap(LABEL.typeAWord);
+  b.draw()
+    .find((n) => n.type === 'TextInput')
+    .props.onChangeText('xyzzy');
+  a.fault.kind = 'lost';
+  a.fault.armed = true;
+  b.tap('hello, say');
+  assert.ok(b.game.pending());
+  assert.ok(b.draw().find((n) => n.props.accessibilityLabel === LABEL.say).props.disabled);
+  let sent = 0;
+  const invoke = b.game.invoke;
+  b.game.invoke = (i) => (sent++, invoke(i));
+  b.draw()
+    .find((n) => n.type === 'TextInput')
+    .props.onSubmitEditing();
+  assert.equal(sent, 0);
+});
+
+// Breaks: a word press that settles later (its commit acknowledgement lost, then recovered by a
+// pulse) not turning to the conversation it opens, as a press that settles at once does.
+test('a word that settles later still turns to its conversation', () => {
+  const a = elapsedHost(':memory:', undefined, speech as never);
+  const b = book(speech as never, a);
+  a.fault.kind = 'lost';
+  a.fault.armed = true;
+  b.tap('ward, say');
+  assert.ok(b.game.pending());
+  assert.ok(!b.labels().includes('Thank her'));
+  a.fault.reads = false;
+  b.game.pulse();
+  assert.ok(b.labels().includes('Thank her'));
 });

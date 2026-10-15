@@ -1,19 +1,20 @@
 // The World page's Word block (book-ui.md, Word bar): say, whisper, shout and cast chips, and a
 // typed Say word that only its writer sees.
 import { useState, type ReactNode } from 'react';
-import { Text, TextInput, View } from 'react-native';
+import { TextInput, View } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
-import { wordless } from './buttons.ts';
+import { castWords } from './buttons.ts';
 import { Chip } from './Chip.tsx';
 import { LABEL } from './labels.ts';
+import { Note } from './lines.tsx';
 import { why } from './model.ts';
 import { Control, SectionTitle } from './pages.tsx';
-import { note, prose, usePalette } from './palette.ts';
+import { prose, usePalette } from './palette.ts';
 import type { Button } from './presenter.ts';
 import { size, space } from './tokens.ts';
 
 const WORD = /^[a-zA-Z]{1,32}$/; // the kernel's own check (kernel/ts/src/mechanics/speech/shared.ts)
-const wordOf = (b: Button) => (b.input as { word: string }).word;
+const wordOf = (b: Button) => (b.input as { word?: string }).word;
 
 export function WordBar(p: {
   view: GameView;
@@ -22,18 +23,15 @@ export function WordBar(p: {
   text: (key: string) => string;
   press: (b: Button) => void;
 }) {
-  const refused =
-    !wordless(p.view) && p.view.actions.some((a) => a.action_key === 'cast')
-      ? (p.view.spell_words ?? []).filter((s) => !s.available)
-      : [];
+  const refused = castWords(p.view).filter((s) => !s.available);
+  // The keyboard's Say (buttons.ts): offered with or without phrases, never a chip.
+  const base = p.chips.find((b) => !wordOf(b));
   if (!p.chips.length && !refused.length) return null;
   const of = (key: string, to?: string) =>
-    p.chips.filter((b) => b.action_key === key && (!to || b.target_ids[0] === to));
+    p.chips.filter((b) => wordOf(b) && b.action_key === key && (!to || b.target_ids[0] === to));
   const chips = (bs: Button[]) => bs.map((b) => chip(b, p));
   const whispered = [...new Set(of('whisper').map((b) => b.target_ids[0]))];
   const name = (id: string) => p.text(p.view.entities.find((e) => e.id === id)!.name);
-  // ponytail: a typed word reuses a say chip's token and context, so say without phrases has no keyboard.
-  const base = of('say')[0];
   return (
     <View style={{ gap: space.block }}>
       <SectionTitle>{LABEL.word}</SectionTitle>
@@ -57,8 +55,8 @@ export function WordBar(p: {
 
 const chip = (b: Button, p: { pending: boolean; press: (b: Button) => void }) => (
   <Chip
-    key={b.label}
-    word={wordOf(b)}
+    key={`${b.label}:${b.target_ids[0] ?? ''}`} // two same-name NPCs share a label
+    word={wordOf(b)!}
     label={b.label}
     pending={p.pending}
     onPress={() => p.press(b)}
@@ -66,22 +64,19 @@ const chip = (b: Button, p: { pending: boolean; press: (b: Button) => void }) =>
 );
 
 function Row(p: { title: string; children: ReactNode[]; reasons?: string[] }) {
-  const c = usePalette();
   if (!p.children.length) return null;
   return (
     <View style={{ gap: space.sm }}>
-      <Text style={note(c)}>{p.title}</Text>
+      <Note>{p.title}</Note>
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space.sm }}>{p.children}</View>
       {(p.reasons ?? []).map((r) => (
-        <Text key={r} style={note(c)}>
-          {r}
-        </Text>
+        <Note key={r}>{r}</Note>
       ))}
     </View>
   );
 }
 
-// The keyboard: a typed word goes as the say chip with its own word; only its writer sees it.
+// The keyboard: a typed word goes as the keyboard's Say with that word; only its writer sees it.
 function Typed(p: { base: Button; pending: boolean; press: (b: Button) => void }) {
   const c = usePalette();
   const [typing, setTyping] = useState(false);
@@ -100,6 +95,7 @@ function Typed(p: { base: Button; pending: boolean; press: (b: Button) => void }
     <View style={{ gap: space.sm }}>
       <TextInput
         accessibilityLabel={LABEL.aWord}
+        autoFocus
         value={draft}
         onChangeText={(t) => (setDraft(t), setWrong(false))}
         onSubmitEditing={send}
@@ -109,6 +105,7 @@ function Typed(p: { base: Button; pending: boolean; press: (b: Button) => void }
         spellCheck={false}
         style={{
           ...prose(c),
+          backgroundColor: c.bg,
           minHeight: size.touch,
           paddingHorizontal: space.lg,
           borderColor: c.line,
@@ -116,7 +113,7 @@ function Typed(p: { base: Button; pending: boolean; press: (b: Button) => void }
         }}
       />
       {row(<Control label={LABEL.say} onPress={send} disabled={p.pending} />)}
-      {wrong && <Text style={note(c)}>{LABEL.oneWord}</Text>}
+      {wrong && <Note>{LABEL.oneWord}</Note>}
     </View>
   );
 }

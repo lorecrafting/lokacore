@@ -1024,20 +1024,20 @@ An NPC that the GameView lists an available `ask` on shows, after its other acti
 
 ## Word bar
 
-Proposed, pending designer approval (loka-a9pn). While the GameView offers `say`, `shout` or
+While the GameView offers `say`, `shout` or
 `cast` and no combat, scene or conversation is open, the World page shows a Word block after its
-action cards and before the log: the `LABEL.word` section title, then rows of
+action cards and before the log: the **Word** section title, then rows of
 [Chips](../BOOK-UI-COMPONENTS.md), each row under a Note-look title. Say: one chip per
 cartridge phrase (GameView `phrases`). Whisper to <name>: the same phrases, one row per present
-NPC that lists an available `whisper`. Shout: the same phrases. Cast: one chip per learned spell
+NPC that lists an available `whisper`. Two present people with one shown name share that title; the Book does not number them. Shout: the same phrases. Cast: one chip per learned spell
 word (GameView `spell_words`, never an unlearned one); a word the GameView refuses is an
 unavailable chip with a `word, cast: reason` line under the row. Each chip's name is the word, then
 how it is spoken (`ward, say`, `ward, whisper to the elder`, `ward, shout`, `ward, cast`); a press
 sends that action with `{word}`. A word that opens a conversation turns to it, as Talk does.
-While a Say chip is offered, a `LABEL.typeAWord` Control opens one text field (named
-`LABEL.aWord`, up to 32 characters, no autocorrect or autocapitalize) and a `LABEL.say` Control;
+While `say` is offered, with or without phrases, a **Type a word** Control opens one text field (named
+**A word**, up to 32 characters, no autocorrect or autocapitalize) and a **Say** Control;
 Enter or Say sends `say` with the typed word. A word that is not 1 to 32 letters is not sent and
-shows the Note `LABEL.oneWord`. The Book never writes the typed word into the log; only its
+shows the Note **One word, letters only.** The Book never writes the typed word into the log; only its
 writer sees it.
 
 ## Storylet card details
