@@ -1,3 +1,4 @@
+# size: allow 306, reaction@1 rule admission keeps every step's floor and reference clause (Homestead hs-1: replenish.run) in one consequence table
 defmodule Loka.Content.Reactions do
   @moduledoc """
   Reaction rules in a v2 source (reaction.schema.json ReactionRule; 21 §11; 06 §14), twin of

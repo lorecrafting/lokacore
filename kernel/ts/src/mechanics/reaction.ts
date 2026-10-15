@@ -1,4 +1,4 @@
-// size: allow 418, reaction@1 keeps its total trigger SUBJECT table and filters (row FD5: witness) beside the one delivery sequence (row FD1: or its delayed job)
+// size: allow 420, reaction@1 keeps its total trigger SUBJECT table and filters (row FD5: witness) beside the one delivery sequence (row FD1: or its delayed job)
 // reaction@1 (capability_registry.json; reaction.schema.json ReactionRule; 21 §3.4, §11; 06
 // §14; 04 §5.2): the rules an event triggers and one delivery's explicit sequence. proposal.ts
 // propose runs the FIFO queue, numbers the writer groups and counts the budgets.
@@ -128,7 +128,7 @@ type Delivery = {
   ran?: boolean;
 };
 
-// size: allow 60, one ordered delivery lowers fact assignments, quest effects, suppression and spawn
+// size: allow 64, one ordered delivery lowers fact assignments, quest effects, suppression, spawn and replenish runs
 export function sequence(
   world: World,
   root: CharacterId, // the root command's actor
