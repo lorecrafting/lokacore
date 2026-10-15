@@ -17,6 +17,7 @@ import { value } from '../src/mechanics/fact.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import type { Obj } from '../src/content/cartridge_refs.ts';
 import { parse } from '../play/text.ts';
+import { identify, resolve } from '../src/commands/invocation.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-speech-sampler-'));
 let artifact: Uint8Array;
@@ -113,9 +114,27 @@ test('an unauthored word reaches no event; a malformed or missing word is refuse
 });
 
 // Breaks: a whisper heard by the whole room (the elder's reaction fires) or a keyword whispered to
-// another NPC opening the elder's dialogue.
+// another NPC opening the elder's dialogue, or the offered whisper resolving without its NPC
+// (TARGETS in commands/invocation.ts lacks whisper: every Book whisper unsupported_capability).
 test('a whisper reaches only its addressee', () => {
   const w = fresh();
+  const offered = gameView(w)
+    .entities?.find((e) => e.id === id(w, 'smith'))
+    ?.actions?.find((a) => a.action_key === 'whisper');
+  const i = identify('speech-test', w.character, {
+    invocation_id: 'bbbbbbbb-0000-4000-8000-000000000003',
+    actor_id: w.character,
+    action_key: offered!.action_key,
+    target_ids: [id(w, 'smith')],
+    input: { word: 'ward' },
+  } as never);
+  const command = resolve(w, i as never);
+  assert.deepEqual('payload' in command && command.payload, {
+    type: 'whisper',
+    actor_id: w.character,
+    target_id: id(w, 'smith'),
+    word: 'ward',
+  });
   const r = accepted(w, { type: 'whisper', target_id: id(w, 'smith'), word: 'ward' });
   assert.equal(r.decision.outcome, 'spoken');
   assert.deepEqual(

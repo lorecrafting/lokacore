@@ -18,7 +18,9 @@ import { actorOf, type Mint, refString, type World } from '../../runtime/decisio
 import { cmp } from '../../foundation/validate.ts';
 import { HOLDERS } from '../../foundation/compose_status.ts';
 import { living } from '../death/shared.ts';
-import { pierces } from '../skills.ts';
+// pierces lives here, its one caller: in skills.ts it closed skills -> policy -> status/shared.
+import { npcValue, value as attributeValue } from '../attributes/shared.ts';
+import { level } from '../skill_level.ts';
 import { settleMaxima } from '../resource.ts';
 
 type Active = Extract<StatusRow, { active: true }>;
@@ -292,4 +294,24 @@ export function statusStep(
     if (label && first && holder === body) out.narration.push({ key: label });
   }
   return out;
+}
+
+/**
+ * Row 16: the seer's `attribute` (an NPC's declared value, a player's value) is greater than the
+ * holder's `skill` level; a holder without a character (a hidden NPC) is never pierced. No draw.
+ */
+function pierces(
+  world: World,
+  { skill, attribute }: { skill: DefinitionRef; attribute: DefinitionRef },
+  holder: EntityId,
+  seer: EntityId | undefined,
+) {
+  const actor = actorOf(world, holder);
+  if (actor === undefined || seer === undefined) return false;
+  const player = actorOf(world, seer);
+  const sees =
+    player === undefined
+      ? npcValue(world, seer, attribute)
+      : attributeValue(world, player, attribute);
+  return sees !== undefined && sees > level(world, actor, skill);
 }
