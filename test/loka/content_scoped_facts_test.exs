@@ -53,6 +53,8 @@ defmodule Loka.ContentScopedFactsTest do
   test "row FD4 pair facts and with fields need 1.89; with short refs expand" do
     dir = Loka.ContentSource.copy("cartridges/rivals_sampler")
     api = {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.88")}
+    # the 1.95 witness rule (row FD5) goes with the older floor
+    api = [api, {"reactions/witnessed.json", fn _ -> nil end}]
 
     unpaired =
       {"facts.json", &update_in(&1, ["facts", "gloats"], fn f -> Map.delete(f, "npc_pair") end)}
@@ -65,10 +67,10 @@ defmodule Loka.ContentScopedFactsTest do
        &update_in(&1, ["apply", Access.at(0)], fn s -> Map.delete(s, "with") end)}
     ]
 
-    assert {:ok, _, _} = Loka.ContentSource.compile(dir, [api, unpaired | no_with])
+    assert {:ok, _, _} = Loka.ContentSource.compile(dir, api ++ [unpaired | no_with])
 
     for changes <- [[], [unpaired], [unpaired, hd(no_with)]] do
-      assert {:error, diags} = Loka.ContentSource.compile(dir, [api | changes])
+      assert {:error, diags} = Loka.ContentSource.compile(dir, api ++ changes)
       assert @floor in Enum.map(diags, &{&1["code"], &1["path"]}), inspect(diags)
     end
 

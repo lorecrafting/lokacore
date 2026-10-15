@@ -1,6 +1,6 @@
 // Toolbox row W1 on the compiled reactions sampler: an item_dropped trigger with item and room
-// filters (no bespoke job) sets the fact behind the crow room variant (prose only: no NPC
-// moves); its delivery keeps reaction@1's budgets.
+// filters (no bespoke job) sets the fact behind the crow room variant; its delivery keeps
+// reaction@1's budgets. Row FD5 (loka-kgd.22): the same drop moves the crow down from the roost.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
@@ -57,6 +57,37 @@ test('a dropped bone shows the crow variant; a dropped pebble does not', () => {
   const bone = takeDrop(pebble.world, 'bone');
   assert.equal(bone.decision.kind, 'accepted');
   assert.equal(room(bone.world), 'room.yard.crow');
+});
+
+// Row FD5 (loka-kgd.22). Breaks: npc.move not emitting entity_entered_room (crow_lands never
+// fires), the move ignoring the event's room (a roost drop moves nothing), or an engaged NPC moved.
+test('a bone dropped in the yard brings the crow down; in the roost or mid-fight it stays', () => {
+  const crow = (w: World) => w.entityIds[`${R}:npc/crow`]!;
+  const at = (w: World) => w.state.containers[crow(w)];
+  const fed = (w: World) =>
+    Object.entries(w.state.facts ?? {}).some(([k, v]) => k.includes('"crow_fed"') && v === true);
+  const w = fresh();
+  const roost = at(w);
+  const yard = w.roomIds[`${R}:room/yard`];
+  const yardDrop = takeDrop(w, 'bone');
+  const events = (yardDrop.decision as any).events.map((e: any) => e.payload);
+  assert.deepEqual(
+    events.filter((e: any) => e.type === 'entity_entered_room'),
+    [{ type: 'entity_entered_room', entity_id: crow(w), room_id: yard }],
+  );
+  assert.equal(at(yardDrop.world), yard);
+  assert.ok(fed(yardDrop.world));
+  const taken = act(w, { type: 'take', item_id: item(w, 'bone') });
+  const up = act(taken.world, { type: 'move', direction: 'up' });
+  const roostDrop = act(up.world, { type: 'drop', item_id: item(w, 'bone') });
+  assert.equal(roostDrop.decision.kind, 'accepted');
+  assert.equal(at(roostDrop.world), roost);
+  assert.ok(!fed(roostDrop.world));
+  const encounters = { e: { status: 'open', npc_id: crow(w), body_id: crow(w) } };
+  const fighting = { ...w, state: { ...w.state, encounters } } as unknown as World;
+  const busy = takeDrop(fighting, 'bone');
+  assert.equal(busy.decision.kind, 'accepted');
+  assert.equal(at(busy.world), roost);
 });
 
 // Breaks: deliveries of a newly triggerable kind escaping the FIFO budgets. A pebble drop starts

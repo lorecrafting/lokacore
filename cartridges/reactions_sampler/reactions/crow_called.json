@@ -1,0 +1,12 @@
+{
+  "on": {
+    "event": "item_dropped",
+    "item": "bone"
+  },
+  "apply": [
+    {
+      "op": "npc.move",
+      "npc": "crow"
+    }
+  ]
+}

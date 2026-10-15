@@ -113,6 +113,10 @@
                 "event": {
                   "const": "item_acquired"
                 },
+                "witness": {
+                  "$ref": "identity.schema.json#/$defs/DefinitionRef",
+                  "description": "Toolbox row FD5 (kernel_api at least 1.95): this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it)."
+                },
                 "item": {
                   "$ref": "identity.schema.json#/$defs/DefinitionRef"
                 }
@@ -127,6 +131,10 @@
               "properties": {
                 "event": {
                   "const": "item_dropped"
+                },
+                "witness": {
+                  "$ref": "identity.schema.json#/$defs/DefinitionRef",
+                  "description": "Toolbox row FD5 (kernel_api at least 1.95): this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it)."
                 },
                 "item": {
                   "$ref": "identity.schema.json#/$defs/DefinitionRef"
@@ -239,6 +247,10 @@
                 "event": {
                   "const": "action_completed"
                 },
+                "witness": {
+                  "$ref": "identity.schema.json#/$defs/DefinitionRef",
+                  "description": "Toolbox row FD5 (kernel_api at least 1.95): this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it)."
+                },
                 "action": {
                   "$ref": "action.schema.json#/$defs/Key"
                 }
@@ -254,6 +266,10 @@
                 "event": {
                   "const": "check_passed"
                 },
+                "witness": {
+                  "$ref": "identity.schema.json#/$defs/DefinitionRef",
+                  "description": "Toolbox row FD5 (kernel_api at least 1.95): this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it)."
+                },
                 "check": {
                   "$ref": "action.schema.json#/$defs/Key"
                 }
@@ -268,6 +284,10 @@
               "properties": {
                 "event": {
                   "const": "check_failed"
+                },
+                "witness": {
+                  "$ref": "identity.schema.json#/$defs/DefinitionRef",
+                  "description": "Toolbox row FD5 (kernel_api at least 1.95): this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it)."
                 },
                 "check": {
                   "$ref": "action.schema.json#/$defs/Key"
@@ -317,6 +337,10 @@
                 "event": {
                   "const": "entity_died"
                 },
+                "witness": {
+                  "$ref": "identity.schema.json#/$defs/DefinitionRef",
+                  "description": "Toolbox row FD5 (kernel_api at least 1.95): this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it)."
+                },
                 "victim": {
                   "$ref": "identity.schema.json#/$defs/DefinitionRef"
                 },
@@ -334,6 +358,10 @@
               "properties": {
                 "event": {
                   "const": "attack_result"
+                },
+                "witness": {
+                  "$ref": "identity.schema.json#/$defs/DefinitionRef",
+                  "description": "Toolbox row FD5 (kernel_api at least 1.95): this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it)."
                 },
                 "hit": {
                   "type": "boolean"
@@ -657,6 +685,17 @@
                   "room": { "$ref": "identity.schema.json#/$defs/DefinitionRef" }
                 },
                 "required": ["op", "room"],
+                "additionalProperties": false
+              },
+              {
+                "description": "Toolbox row FD5 (loka-kgd.22; kernel_api at least 1.95): jumps the named NPC (else the event's subject when it is an NPC) to room, else the event's room, as a schedule move does (no exit, passage or lock), and emits entity_entered_room at the cause's time. Nothing when the NPC is dead, engaged or already there, no room resolves, or the delivery's character is in a running scene.",
+                "type": "object",
+                "properties": {
+                  "op": { "const": "npc.move" },
+                  "npc": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
+                  "room": { "$ref": "identity.schema.json#/$defs/DefinitionRef" }
+                },
+                "required": ["op"],
                 "additionalProperties": false
               },
               {

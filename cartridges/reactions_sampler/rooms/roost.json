@@ -1,0 +1,9 @@
+{
+  "title": "room.roost.title",
+  "description": "room.roost.description",
+  "exits": {
+    "down": {
+      "to": "yard"
+    }
+  }
+}

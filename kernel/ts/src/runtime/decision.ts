@@ -223,7 +223,7 @@ export const COMPOSES = {
   commerce: ['containment'],
   containment: ['action_recipe'],
   scene: ['dialogue', 'quest'],
-  reaction: ['quest', 'status', 'barrier'], // barrier.set's barrier_changed (row W22)
+  reaction: ['quest', 'status', 'barrier', 'movement'], // W22 barrier_changed; FD5 npc.move's entity_entered_room
   speech: ['dialogue'], // a spoken keyword opens its dialogue (choice_opened, as talk; row G9)
 } as const;
 type Composed<C> = C extends keyof typeof COMPOSES

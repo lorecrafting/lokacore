@@ -12,6 +12,18 @@
       "per_subject": true,
       "npc_pair": true,
       "meaning": "Whether the subject NPC gloats over the with NPC."
+    },
+    "gratitude": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "per_subject": true,
+      "meaning": "Whether the subject NPC saw the player take the apple."
     }
   }
 }

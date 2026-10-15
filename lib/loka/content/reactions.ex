@@ -41,7 +41,8 @@ defmodule Loka.Content.Reactions do
     "kind" => "liquid",
     "npc" => "npc",
     "attacker" => "npc",
-    "target" => "npc"
+    "target" => "npc",
+    "witness" => "npc"
   }
   @doc "Each trigger filter that names a definition (W1), with that definition's kind."
   @spec filters() :: %{String.t() => String.t()}
@@ -62,14 +63,18 @@ defmodule Loka.Content.Reactions do
         reference(rel, ["on"], {f, kind}, on, ctx.m, ctx.defs)
       end)
 
-  # A spawn template has no instance to enter (row W3), attack (loka-kgd.79) or be hit (row 39).
+  # A spawn template has no instance to enter (row W3), attack (loka-kgd.79), be hit (row 39) or
+  # witness (row FD5).
   defp instances(rel, on, ctx),
-    do: Enum.flat_map(Map.take(on, ["npc", "attacker", "target"]), &instance(rel, &1, ctx))
+    do:
+      Enum.flat_map(Map.take(on, ["npc", "attacker", "target", "witness"]), fn {f, n} ->
+        instance(at(rel, ["on", f]), n, ctx)
+      end)
 
-  defp instance(rel, {f, n}, ctx) do
+  defp instance(path, n, ctx) do
     case resolve(n, "npc", ctx.m, ctx.defs) do
       {_, _, %{"spawn_template" => true}} ->
-        [diag("SCHEMA_VIOLATION", at(rel, ["on", f]), %{"error" => "invalid_value"})]
+        [diag("SCHEMA_VIOLATION", path, %{"error" => "invalid_value"})]
 
       _ ->
         []
@@ -86,7 +91,8 @@ defmodule Loka.Content.Reactions do
     "status.cure" => 53,
     "barrier.set" => 56,
     "item.move" => 77,
-    "population.spawn" => 84
+    "population.spawn" => 84,
+    "npc.move" => 95
   }
 
   # The kernel_api minor each trigger event needs: spoken 1.48 (G9), status_applied 1.53 (status
@@ -94,7 +100,8 @@ defmodule Loka.Content.Reactions do
   @events %{"quest_resolved" => 8, "spoken" => 48, "status_applied" => 53}
 
   # One diagnostic per rule below its highest floor; the entrant filter needs 1.47 (row W3), the
-  # attacker filter 1.58 (loka-kgd.79), the target filter 1.87 (row 39), a co_present
+  # attacker filter 1.58 (loka-kgd.79), the target filter 1.87 (row 39), the witness filter 1.95
+  # (row FD5), a co_present
   # status.apply 1.50 (W21), with a tag 1.56 (W22), naming a room 1.65 (status reader 9).
   defp api(r, manifest) do
     floor =
@@ -102,7 +109,8 @@ defmodule Loka.Content.Reactions do
         Map.get(@events, r["on"]["event"], 0),
         if(Map.has_key?(r["on"], "npc"), do: 47, else: 0),
         if(Map.has_key?(r["on"], "attacker"), do: 58, else: 0),
-        if(Map.has_key?(r["on"], "target"), do: 87, else: 0)
+        if(Map.has_key?(r["on"], "target"), do: 87, else: 0),
+        if(Map.has_key?(r["on"], "witness"), do: 95, else: 0)
         | Enum.map(r["apply"], &step_floor/1)
       ])
 
@@ -190,6 +198,19 @@ defmodule Loka.Content.Reactions do
   # Row 41 (decay): the sink room resolves; the step emits no event.
   defp consequence(rel, {%{"op" => "item.move"} = s, i}, _, ctx),
     do: reference(rel, ["apply", i], "room", s, ctx.m, ctx.defs)
+
+  # Row FD5 (loka-kgd.22): a named NPC and room resolve, the NPC no spawn template; the step emits
+  # entity_entered_room.
+  defp consequence(rel, {%{"op" => "npc.move"} = s, i}, _, ctx) do
+    owned(at(rel, ["apply", i, "op"]), "entity_entered_room", ctx.events) ++
+      for(
+        f <- ~w(npc room),
+        s[f],
+        d <- reference(rel, ["apply", i], f, s, ctx.m, ctx.defs),
+        do: d
+      ) ++
+      if(s["npc"], do: instance(at(rel, ["apply", i, "npc"]), s["npc"], ctx), else: [])
+  end
 
   # Row 37a (phased world events): the plan resolves; the step emits no event.
   defp consequence(rel, {%{"op" => "population.spawn"} = s, i}, _, ctx),

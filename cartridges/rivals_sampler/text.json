@@ -10,5 +10,10 @@
   "npc.smith.description": "A broad woman in a leather apron.",
   "npc.miller.short": "the miller",
   "npc.miller.room": "The [miller] leans on a flour sack.",
-  "npc.miller.description": "A dusty man with a slow smile."
+  "npc.miller.description": "A dusty man with a slow smile.",
+  "room.mill.title": "The Mill",
+  "room.mill.description": "Flour hangs in the still air.",
+  "npc.baker.short": "the baker",
+  "npc.baker.room": "The [baker] dusts flour from his sleeves.",
+  "npc.baker.description": "A round man who notices everything."
 }
