@@ -613,9 +613,10 @@ Attribution (Beads `loka-kgd.150.2`): a delivery runs for the Actor column's cha
 the trigger's subject is an admitted player body, that body's character owns the delivery;
 otherwise the event's own `actor_id` does, so an event whose subject is an NPC or a thing (a
 hound's death, a hit on a guard, a crow taking an item) reads the doer's `when` and writes the
-doer's facts, quests and experience. An event with no `actor_id` and no character subject faults
-`precondition_failed`. A job-caused trigger carries the elapsed command's actor; the Realm
-delivers per character (R14). Only `status.apply`, ([status reader 3](#status-readers-toolbox-rows-sr1-sr2-and-sr3)) `status.cure` and `status_active {subject: "subject"}` follow the subject, which may be the actor's body, an NPC or an
+doer's facts, quests and experience. An event the host makes without an `actor_id` (a
+delivery's `fact_changed`, a due job's events) falls back to the root command's actor, so a
+job-caused trigger runs for the elapsed command's actor; the Realm delivers per character (R14).
+Only `status.apply`, ([status reader 3](#status-readers-toolbox-rows-sr1-sr2-and-sr3)) `status.cure` and `status_active {subject: "subject"}` follow the subject, which may be the actor's body, an NPC or an
 item ([row G3](#statuses-on-npcs-and-things-toolbox-row-g3)), unless the step names an `item`, ([row 42](#potions-and-songs-toolbox-rows-18-and-42)) an `npc` or ([status reader 9](#a-room-as-a-status-holder-status-reader-9)) a `room`; any other subject (a detail) takes nothing, and since status reader 9 a room subject takes it; ([row W22](#fire-toolbox-row-w22)) `barrier.set` names its barrier or acts on the event's room; ([row 41](#decay-toolbox-row-41)) `item.move` moves the subject when it is an item. A check, action or custom event's subject_id
 names its target, so its status lands on the doer: a failed disarm poisons the actor. A filter naming a definition (`item`,
 `room`, `quest`, `story_point`, `barrier`, `scene`, `kind`, `victim`, `npc`, `attacker` and `target` as an NPC, `status`) must name one of

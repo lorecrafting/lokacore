@@ -9,8 +9,8 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
 import { gameView, INSTALLED, loadCartridge, newWorld, step } from '../src/index.ts';
-import type { Cartridge, World } from '../src/runtime/decision.ts';
-import { triggered } from '../src/mechanics/reaction.ts';
+import { allocator, type Cartridge, type World } from '../src/runtime/decision.ts';
+import { sequence, triggered } from '../src/mechanics/reaction.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-reactions-sampler-'));
 let artifact: Uint8Array;
@@ -115,4 +115,32 @@ test('a victim filter skips a death without a victim definition', () => {
     }) as never;
   assert.deepEqual(triggered(w, died({})), []);
   assert.equal(triggered(w, died({ victim_definition: hound })).length, 1);
+});
+
+// loka-kgd.150.2: a delivery runs for the subject's character, else the event's own actor_id,
+// never the root command's actor. Breaks: entity_died's subject mapped to 'doer', or the root
+// actor kept as the delivery's actor.
+test('an entity_died delivery runs for the victim player, else for the doer', () => {
+  const c = structuredClone(content) as any;
+  c.facts[`${R}:fact/crow_drawn`].scopes = ['player'];
+  const fact = { cartridge_id: 'reactions_sampler', cartridge_version: '0.0.1', kind: 'fact' };
+  const rule = {
+    key: 'mourn',
+    on: { event: 'entity_died' },
+    apply: [{ op: 'fact.assign', fact: { ...fact, key: 'crow_drawn' }, value: true }],
+  } as never;
+  const w = fresh(c);
+  const actorFor = (victim_id: unknown) => {
+    const cause = {
+      id: 'dddddddd-4444-4333-8444-000000000001',
+      actor_id: 'char:other',
+      logical_time: 0,
+      payload: { type: 'entity_died', victim_id, room_id: w.body, cause: 'x' },
+    } as never;
+    const d = sequence(w, w.character, rule, cause, 1, { n: 0 }, allocator(w, cause));
+    assert.equal(d?.kind, 'accepted', JSON.stringify(d));
+    return (d as any).delta.ops[0].scope.character_id;
+  };
+  assert.equal(actorFor(w.body), w.character);
+  assert.equal(actorFor(item(w, 'bone')), 'char:other');
 });
