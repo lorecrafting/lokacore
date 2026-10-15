@@ -524,7 +524,7 @@
           "additionalProperties": false
         },
         {
-          "description": "An item carrying this property tag (Tag, toolbox row G1) lies directly in the actor's current room: on its floor, not carried and not inside a container there (Homestead hs-6, furnishing). In a room's or blueprint's variant that room is the room being described, as status_active subject room; in a reaction's when the reaction's actor's room. One query step per entity in the room. Needs kernel_api at least 1.101. Owned by containment@1.",
+          "description": "An item carrying this property tag (Tag, toolbox row G1) lies directly in the actor's current room: on its floor, not carried and not inside a container there (Homestead hs-6, furnishing). That is the actor's room (the only room the Book describes), as status_active subject room; in a reaction's when the reaction's actor's room. One query step per container row scanned. Needs kernel_api at least 1.101. Owned by containment@1.",
           "type": "object",
           "properties": {
             "op": {

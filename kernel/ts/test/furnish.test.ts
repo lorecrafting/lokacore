@@ -101,16 +101,15 @@ test('item_present holds only for a tagged item lying directly in the actor room
   assert.equal(leaf(fresh(), 'bed'), true, 'in the yard, read from the yard');
 });
 
-// Breaks: the leaf costs a flat step, scans past the query budget, or a spent budget holds.
-test('item_present costs one step per entity scanned and fails past the budget', () => {
+// Breaks: the leaf charges only rows in the room (the budget no longer bounds the scan), or a
+// spent budget holds.
+test('item_present costs one step per container row scanned and fails past the budget', () => {
   const w = furnish('bed');
-  const room = w.state.containers[w.body];
-  const inRoom = Object.entries(w.state.containers).filter(([, at]) => at === room);
   const steps = { n: 0 };
   assert.equal(leaf(w, 'rug', steps), false);
-  assert.equal(steps.n, 1 + inRoom.length);
-  // The bed is the k-th entity scanned: the leaf's step plus k scans land exactly on the limit.
-  const k = inRoom.findIndex(([id]) => id === item(w, 'bed')) + 1;
+  assert.equal(steps.n, 6, 'the leaf step plus five rows: the body, bed, chest, forge and rug');
+  // The bed's row is the k-th scanned: the leaf's step plus k rows land exactly on the limit.
+  const k = Object.keys(w.state.containers).indexOf(item(w, 'bed')) + 1;
   assert.equal(leaf(w, 'bed', { n: LIMITS.query_steps - 1 - k }), true, 'budget just fits');
   assert.equal(leaf(w, 'bed', { n: LIMITS.query_steps - k }), false, 'one step over');
 });

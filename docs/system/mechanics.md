@@ -3465,7 +3465,7 @@ Homestead hs-11 (Beads `loka-kgd.108.8`): a skill may require another skill's le
 
 Homestead hs-6 (Beads `loka-kgd.108.6`): a placed item changes what a room does or says by its [tag](#property-tags-and-the-policy-leaf-set-toolbox-row-g1). Policy leaf `item_present {tag}` (`protocol/policy.schema.json`, owned by `containment@1`, `kernel_api` 1.101).
 
-- **Leaf.** `item_present` holds when an item whose definition declares `tag` lies directly in the actor's room (`furnished`, `kernel/ts/src/mechanics/policy.ts:218`): an item carried, worn or inside a container in the room does not count. In a room variant the actor's room is the described room (the Book describes only the actor's room, `kernel/ts/src/view/view.ts:125`). It costs one query step plus one per entity in the room; past `LIMITS.query_steps` it is false.
+- **Leaf.** `item_present` holds when an item whose definition declares `tag` lies directly in the actor's room (`furnished`, `kernel/ts/src/mechanics/policy.ts:221`): an item carried, worn or inside a container in the room does not count. In a room variant the actor's room is the described room (the Book describes only the actor's room, `kernel/ts/src/view/view.ts:125`). It costs one query step plus one per container row scanned, in the room or not (as `recovery.ts`), so the budget bounds the scan; past `LIMITS.query_steps` it is false.
 - **Tags.** `bed`, `forge` and `rug` join the G1 `Tag` enum.
 - **Command.** None new: `take`, `drop`, `put`, `rest` and `perform`. A recipe whose policy fails stays offered, unavailable, with the policy refusal (`action_lists.ts`).
 - **Floor.** An `item_present` leaf anywhere in the cartridge needs `kernel_api` 1.101 (`cartridge_variants.ts`, `lib/loka/content/variants.ex`; `loader_floors.json` "an item_present leaf").
@@ -3476,7 +3476,7 @@ Homestead hs-6 (Beads `loka-kgd.108.6`): a placed item changes what a room does 
   4. Time: met; `well_rested` runs in logical seconds on the elapsed path; no device clock.
   5. Scope: met; placed items are public world state (custody); no new row.
   6. Text: not applicable.
-  7. Ownership: met; placing is a custody move, no ownership change; furnishing follows the room's G7 locks.
+  7. Ownership: met; placing changes no ownership. In an owned room the room's G7 locks govern who can place or take; the sampler hut is unowned, so anyone there can take the bed or rug.
   8. Not applicable.
   9. Not applicable.
 - **Traps** ([toolbox](../MECHANICS-TOOLBOX.md#traps)): 11 met, nothing new is stored; the leaf reads custody. 4 met, the rug line is an authored variant.

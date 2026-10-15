@@ -217,13 +217,13 @@ function sky(world: World, p: Extract<Policy, { op: 'sky' }>): boolean {
 }
 
 // item_present (Homestead hs-6): an item with `tag` lies directly in the actor's room, the room a
-// room variant describes (placeView); one query step per entity in the room.
+// room variant describes (placeView); one query step per container row scanned, as recovery.ts.
 function furnished(world: World, actor: CharacterId, tag: Tag, steps: { n: number }): boolean {
   const body = bodyOf(world, actor);
   const room = body && world.state.containers[body];
   for (const [id, at] of Object.entries(world.state.containers)) {
-    if (at !== room) continue;
     if (++steps.n > LIMITS.query_steps) return false;
+    if (at !== room) continue;
     const e = world.entities[id];
     if (e?.kind === 'item' && e.tags?.includes(tag)) return true;
   }
