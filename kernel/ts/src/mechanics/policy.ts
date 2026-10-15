@@ -49,7 +49,7 @@ type Ctx = {
  * (target_present is false without one), `ctx.subject` a reaction's event subject; each leaf it
  * evaluates adds one to `ctx.steps.n` (04 §5.4 query_steps).
  */
-// size: allow 62, one case per policy leaf (mechanics.md policy leaf set, toolbox row G1)
+// size: allow 60, one case per policy leaf (mechanics.md policy leaf set, toolbox row G1)
 export function holds(
   world: World,
   actor: CharacterId,
@@ -80,10 +80,8 @@ export function holds(
       return questOf(world, actor, p.quest)?.[1].state === p.state;
     case 'time_window':
       return inWindow(world, p);
-    case 'sky': {
-      const f = (['lunar', 'weather', 'season', 'tide'] as const).find((k) => p[k] !== undefined)!;
-      return skyPhase(world.cartridge, world.context, world.state.clock, f) === p[f];
-    }
+    case 'sky':
+      return sky(world, p);
     case 'visited_count':
       return visits(world, actor, world.roomIds[refString(p.room)]!) >= p.at_least;
     case 'population_count': // row W12; reads no actor
@@ -211,6 +209,11 @@ function here(world: World, actor: CharacterId, id: string | undefined): boolean
   const body = bodyOf(world, actor);
   if (id === undefined || body === undefined) return false;
   return world.state.containers[id] === world.state.containers[body] && living(world, id);
+}
+
+function sky(world: World, p: Extract<Policy, { op: 'sky' }>): boolean {
+  const f = (['lunar', 'weather', 'season', 'tide'] as const).find((k) => p[k] !== undefined)!;
+  return skyPhase(world.cartridge, world.context, world.state.clock, f) === p[f];
 }
 
 // item_present (Homestead hs-6): an item with `tag` lies directly in the actor's room, the room a
