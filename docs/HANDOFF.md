@@ -6,8 +6,8 @@ the next steps, the standing owner rules that the repo does not yet state, and o
 questions. Rewrite it at each stable checkpoint (a merge, a review verdict, a pushed fix) and before
 the session ends; commit and push it with the Beads export.
 
-Written 2026-10-15 UTC by Claude Code (Opus 5.5) in local session 8c186cca (checkpoint after #398).
-State at writing: see "In flight" below.
+Written 2026-10-15 UTC by Claude Code (Opus 5.5) in local session 8c186cca, for an owner-requested
+clear. State at writing: see "In flight" below.
 
 ## Start of a session
 
@@ -44,34 +44,46 @@ Beads notes. Owner product order ([record](decisions/owner-decision-product-orde
 all showcases (placeholders where lore is missing), then UI polish, then worldbuilding, then the
 official Chapters 1-3; temporary test cartridges or showcases are welcome any time.
 
-Done this session (8c186cca), on `main`:
-- #398 (`loka-kgd.108`, Homestead batch A: replenish.run, craft, skill prerequisites, farming, fishing,
-  animals, cooking) merged at eeb437fa after the fix round (craft floor case pins craft alone; Opus
-  re-check APPROVE). Slices `loka-5m0u`, `.108.1`-`.108.4`, `.108.7`, `.108.8` closed; branches gone.
-- #399 (`loka-ikch`/`loka-kgd.108`, owner decision records 2026-10-15: product order, worldbuilding
-  decoupled, Homestead professions rulings) merged.
-- 390 px screenshots of the batch A samplers sent to the owner; findings `loka-x6t.53` (raw
-  `action.take:` text on the farm plot), `loka-x6t.54` (plant/water/eggs read as Put/Attack). Walk
-  files for the five samplers were drafted (scratch only; hs-12 and hs-13 commit theirs).
+Done this session (8c186cca):
+- On `main`: #398 (`loka-kgd.108`, Homestead batch A) merged; #399 (`loka-ikch`/`loka-kgd.108`, owner
+  decision records 2026-10-15: product order, worldbuilding decoupled, professions rulings) merged.
+- Batch B `toolbox/batch-homestead-b` (worktree `../worktrees.noindex/batch-homestead-b`, head 37a569da,
+  NO PR yet) holds six reviewed slices, each green on its own head, records in `docs/reviews/`:
+  hs-13 self-cooking (`.108.10`), hs-6 furnishing (`.108.6`), hs-12 self-build (`.108.9`), hs-7 gifting
+  and barter (`.108.5` + `loka-kgd.70`, second opinion), hs-8 Give in the Book (`loka-x6t.31`), hs-14
+  skill tree (`.108.11`; round 2 reverted by the escalation ladder). Each slice's handback, check table,
+  rulings and COST lines are in its Beads notes. Slice issues stay open until the batch PR merges.
+- 390 px screenshots of batch A sent to the owner; Fable panes audit filed as `loka-x6t.55`-`.62`;
+  status icon design settled (`loka-x6t.55` notes); own icon set later `loka-x6t.63`.
 
 In flight (check each first):
-1. **hs-12 self-build** (`loka-kgd.108.9`): Opus developer in `../worktrees.noindex/hs-12`, branch
-   `toolbox/hs-12` from batch B 69aa996a. Then fresh Opus review; a second opinion if it touches
-   save or `runtime/proposal.ts`.
-2. **hs-13 self-cooking** (`loka-kgd.108.10`): Opus developer in `../worktrees.noindex/hs-13`. PM
-   ruling: `learn cooking` is the novice box, free (20 pennies kept).
-3. Batch B integration worktree: `../worktrees.noindex/batch-homestead-b` (`toolbox/batch-homestead-b`
-   = main at 69aa996a).
+1. **`loka-x6t.64`** (status `kind` buff/debuff, part 1 of `.55`): branch `toolbox/x6t-64` head 3aeeeeb2,
+   worktree `../worktrees.noindex/x6t-64`. A fresh Opus reviewer was running at the clear (record on local
+   branch `review-x6t-64`, worktree `review-x6t64` it removes). If no record: spawn a fresh reviewer (brief
+   in the issue notes). Then CI green, `bin/pm_merge.sh` into batch B.
+2. Batch B CI on 37a569da: check `gh run list --commit 37a569da...`.
 
 Next, in order:
-1. Rest of batch B (briefs in Beads notes, "BRIEF loka hs-N"): hs-6 furnishing (`.108.6`), hs-7
-   gifting and barter (`.108.5` + `loka-kgd.70`), hs-8 Give in the Book (`loka-x6t.31`, designer
-   consult), hs-14 skill tree screen (`.108.11`), hs-9 raze (`loka-otn4`, save: second opinion) last.
-   Every brief adds: item loop table, exact-boundary tests, 390 px screenshot, a loader_floors case
-   whose cartridge carries no other feature at the same floor (batch A lesson).
-2. Then Settle S3 `loka-mytp` / S4 `loka-oxgk` (Fable briefs first), M14, M15.
-3. Follow-ups: `loka-kgd.108.12`, `.108.13`; `loka-x6t.53`; older: `loka-trex`, `loka-z4cp`,
-   `loka-kgd.157`, `.158`, `.154`-`.156`, `loka-ynfo`, `loka-3wwm`.
+1. `loka-x6t.55` part 2 (Book): status icon row (round, graphic only, placeholder Skia glyphs, hold
+   tooltip, tap opens Character; neutral disc when no kind) + rename Contents to "Inventory". Spec text,
+   catalogue row and rename file list in `.55` notes. Designer ratifies the book-ui.md text in review.
+2. `loka-kgd.108.14` (owner secrecy ruling: hidden skills show nothing anywhere): hide a hidden skill's
+   lesson choice in dialogue (trap: all concealed -> no empty `choices`; validate GameView vs schema) and
+   loader refusal of qualification/dialogue policies reading a hidden skill. Then re-check `loka-x6t.60`.
+3. hs-9 raze (`loka-otn4`, save: second opinion) last in batch B. Read the usage meter first (loka-stzq).
+4. Batch close: merge `main` into batch B, open the draft PR, one Fable review of the batch head, fix
+   round (include the hs-8 nit: mechanics.md "Give pairs" says the rule does not check sight; actions.ts
+   rejects a hidden recipient), ready, CI green, merge, `after_merge.sh`, close the slice issues, delete
+   branches and worktrees (`toolbox/hs-*`, `review-hs-*`, `review-x6t-64`).
+5. Housekeeping PR (owner approved 2026-10-15: "okay approve all your recs for the retro"):
+   `loka-0fhi`, `loka-ujau`, `loka-vro5`, `loka-zgqt`, `loka-df49`, `loka-7p2w`, plus `loka-stzq` and
+   the Jev record. New retro items this session (owner not yet asked): `loka-x3i0` (view tests validate
+   GameView vs schema), `loka-59uu` (floor diagnostics name the feature; shadowed floor cases x3).
+6. A docs PR with decision records: hidden-elite secrecy (secret), "Inventory" rename, status icons
+   (round, graphic-only, hold tooltip), Skills stays on Character until a second profession (audit).
+7. Then Settle S3 `loka-mytp` / S4 `loka-oxgk` (Fable briefs), M14, M15. Polish items from the audit
+   (`loka-x6t.56`-`.62`) wait for the UI polish phase.
+8. Follow-ups: `loka-kgd.108.12`, `.108.13`, `loka-x6t.53`, `.54`; older as before.
 
 Merge mechanics: `bin/pm_merge.sh <batch-worktree> <batch-branch> <slice-branch> <review-branch or the
 sha> "<subject>" <reviewed-sha>` (refuses a non-green sha). It stops on stacked additive conflicts in
@@ -80,13 +92,20 @@ merge by hand, keep both sides, run `elixir bin/contracts.exs`, `bin/review_inde
 push. Batch worktree: `../worktrees.noindex/batch-homestead-b`. `bin/after_merge.sh` now works with the
 owner's untracked `scripts/`.
 
-Session lessons (2026-10-15, b5fe9338):
-- Content slices hid a faucet or exploit every time (re-sow, drop-retake spoil, corpse feeding, an
-  honest receipt refused); probe item loops in every content brief (retro `loka-vro5`).
-- Handback check tables were wrong in four slices; reviewers must rerun 2 claims (retro `loka-zgqt`).
-- A save-path change in a fix round (hs-5 receipt) needed a second opinion that found a new blocker;
-  a `runtime/proposal.ts` touch in a fix round (hs-1) triggers one too.
-- Parallel slices at one kernel_api floor all append to the same fixture and doc spots.
+Session lessons (2026-10-15, b5fe9338 and 8c186cca):
+- Content slices hid a faucet every time in batch A; with an item loop table in every brief, batch B
+  found none (retro `loka-vro5`).
+- A loader_floors case was shadowed by another feature at the same floor three times (batch A craft,
+  hs-14 merge over hs-12's build step): after any merge that adds a feature to a shared sampler, rerun
+  the floor mutants of that sampler's other cases (retro `loka-59uu`).
+- Tests passed while the GameView they built failed the schema (hs-7 price 0, hs-14 empty choices):
+  validate gameView against the schema in view tests (retro `loka-x3i0`).
+- Developers ran /code-review in the main checkout (hs-7, hs-14): give the exact command with the
+  worktree and range (retro `loka-7p2w`).
+- A fix round that answers a developer's own open question can add a blocker (hs-14 round 2): rule on
+  such questions as follow-ups unless the owner already decided.
+- A save-path or `runtime/proposal.ts` change in a fix round gets a second opinion.
+- Parallel slices append to the same fixture and doc spots: expect a hand merge (retro `loka-0fhi`).
 
 ## Standing owner rules not yet written elsewhere in the repo
 
@@ -124,6 +143,13 @@ Session lessons (2026-10-15, b5fe9338):
 
 ## Owner answers this session
 
+- 2026-10-15 (session 8c186cca, quoted): retro "okay approve all your recs for the retro"; panes audit
+  answers "1. yes 2. Yes 3. go with your recommendation" = statuses on Character in batch B; rename to
+  "Inventory"; hidden elites SECRET (a hidden skill shows nothing anywhere until the player qualifies).
+  Status icons: "Perhaps we can go with status icons like in league of legends"; "lets make it round for
+  now, the icons, and no text needed only raphic, and we can design our own with fable or opus or
+  something, use place holders for now. Also no text because it will clutter, but if you press and hold
+  it, it will show a tooltip that explains what it is".
 - 2026-10-15 (session b5fe9338, paraphrased unless quoted): cloud compute no longer needed
   (`loka-2of` closed). Retro items: approved as recommended ("go with your recs"), `loka-8lkq` and
   `loka-iqga` rejected. Homestead: the skill path replaces NPC cooking and building; a paid NPC gives
@@ -140,17 +166,11 @@ Session lessons (2026-10-15, b5fe9338):
 
 ## Open owner questions
 
-- Worldbuilding, first five decisions (not urgent: worldbuilding comes after showcases and UI polish):
-  premise and pillars; cosmology shape; magic hardness and cost; hidden-elite secrecy (Koster's Jedi
-  lesson: phone data will be mined; secret vs discoverable path); Story vs Realm canon.
-- Approve or reject retro items from 2026-10-15 (b5fe9338): `loka-0fhi` (merge_resolve unions
-  additive fixture and doc conflicts), `loka-ujau` (bin/push_slice.sh prints the real push status),
-  `loka-vro5` (content slices hand back an item loop table), `loka-zgqt` (check table rows paste the
-  failing mutant line), `loka-df49` (log subagent tokens per slice in Beads, sum per batch).
-- Approved 2026-10-15, to do in the next housekeeping PR: `loka-stzq` (read the usage meter at session
-  start and before any large fan-out; report usage per batch). Workflows/ultracode: not for routine
-  work (PM recommendation after the owner's question); a bounded fan-out only, with explicit models,
-  a concurrency cap, worktree isolation and a usage reading before and after.
+- Worldbuilding, first decisions (not urgent: after showcases and UI polish): premise and pillars;
+  cosmology shape; magic hardness and cost; Story vs Realm canon. (Hidden-elite secrecy: decided, secret.)
+- Approve new retro items `loka-x3i0` and `loka-59uu` (PM recommends both).
+- Workflows/ultracode: not for routine work (PM recommendation); a bounded fan-out only, with explicit
+  models, a concurrency cap, worktree isolation and a usage reading before and after.
 
 ## Parked (polish lane)
 
