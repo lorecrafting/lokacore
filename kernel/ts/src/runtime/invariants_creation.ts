@@ -5,7 +5,6 @@ import { sightSlot } from './invariants_sight.ts';
 
 // Decoded portable observations, as in invariants.ts.
 type Any = any;
-// size: allow 45, one independent pass covers paired placement, origin and result rows
 export function creationsHold(state: Any, ops: Any[], result: Any): boolean {
   const made = new Set<string>();
   const identities = new Map<string, Any>();
@@ -31,19 +30,12 @@ export function creationsHold(state: Any, ops: Any[], result: Any): boolean {
     const i = op.identity;
     if (validate('EntityIdentity', i).length || i.scope !== undefined || i.audience !== undefined)
       return false;
-    const next = ops[index + 1];
-    const built = i.origin.kind === 'built'; // a built room is never placed
     if (
       made.has(i.id) ||
       state.created?.[i.id] !== undefined ||
       state.known_entities?.[i.id] !== undefined ||
       state.containers?.[i.id] !== undefined ||
-      (built
-        ? next?.op === 'entity.transfer' && next.entity_id === i.id
-        : next?.op !== 'entity.transfer' ||
-          next.entity_id !== i.id ||
-          next.source_id !== null ||
-          next.writer_group !== op.writer_group)
+      misplaced(i, op, ops[index + 1])
     )
       return false;
     if (!provenance(state, i)) return false;
@@ -156,6 +148,13 @@ function initialized(
   )
     return false;
   return true;
+}
+
+// A built room is never placed; every other creation is placed at once by the next op.
+function misplaced(i: Any, op: Any, next: Any): boolean {
+  const placed = next?.op === 'entity.transfer' && next.entity_id === i.id;
+  if (i.origin.kind === 'built') return placed;
+  return !placed || next.source_id !== null || next.writer_group !== op.writer_group;
 }
 
 function provenance(state: Any, i: Any): boolean {

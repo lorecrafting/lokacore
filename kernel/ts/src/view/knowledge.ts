@@ -1,6 +1,13 @@
 import { present } from '../commands/target.ts';
 import type { CharacterId, EntityId, GameView, Key } from '../contracts.gen.ts';
-import { bodyOf, COMPASS, refString, type Steps, type World } from '../runtime/decision.ts';
+import {
+  bodyOf,
+  COMPASS,
+  refString,
+  type Cartridge,
+  type Steps,
+  type World,
+} from '../runtime/decision.ts';
 import { exitOf, hidden } from '../mechanics/lookups.ts';
 import { cmp } from '../foundation/validate.ts';
 import { refusal, resolved } from '../commands/actions.ts';
@@ -15,6 +22,18 @@ const STEP: Record<string, [number, number, number]> = {
   down: [0, 0, -1],
 };
 
+// Built rooms S2: a built room sits one unit from its site in its direction (north is -y).
+function positions(world: World, authored: NonNullable<Cartridge['map_positions']>) {
+  const at = new Map(authored.map((p) => [world.roomIds[refString(p.room)], p]));
+  for (const [id, { origin }] of Object.entries(world.state.created ?? {})) {
+    const site = origin.kind === 'built' && at.get(world.roomIds[refString(origin.site)]);
+    if (!site || origin.kind !== 'built') continue;
+    const [dx, dy, dz] = STEP[origin.direction];
+    at.set(id as EntityId, { ...site, x: site.x + dx, y: site.y + dy, z: site.z + dz });
+  }
+  return at;
+}
+
 export function knowledgeView(
   world: World,
   actor: CharacterId,
@@ -28,16 +47,7 @@ export function knowledgeView(
       .filter((r) => r.actor_id === actor)
       .map((r) => r.room_id),
   );
-  const at = new Map(
-    world.cartridge.map_positions.map((p) => [world.roomIds[refString(p.room)], p]),
-  );
-  // Built rooms S2: a built room sits one unit from its site in its direction (north is -y).
-  for (const [id, { origin }] of Object.entries(world.state.created ?? {})) {
-    const site = origin.kind === 'built' && at.get(world.roomIds[refString(origin.site)]);
-    if (!site || origin.kind !== 'built') continue;
-    const [dx, dy, dz] = STEP[origin.direction];
-    at.set(id as EntityId, { ...site, x: site.x + dx, y: site.y + dy, z: site.z + dz });
-  }
+  const at = positions(world, world.cartridge.map_positions);
   const rooms = [...at]
     .flatMap(([id, p]) =>
       visited.has(id) ? [{ id, title: world.rooms[id].title, x: p.x, y: p.y, z: p.z }] : [],

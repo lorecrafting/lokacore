@@ -1,3 +1,4 @@
+// size: allow 306, the build benefit (Built rooms S2) adds its pre-payment gate to the one transition query
 // One bounded admission/transition query for exact keyed service offers and execution.
 import {
   LIMITS,
@@ -23,6 +24,8 @@ import { adjust, level, resourceRef, resourceSpec, transfer, type Levels } from 
 import { serving } from '../liquid/shared.ts';
 import { selected } from '../containment/stock.ts';
 import { giveRefused } from '../containment/shared.ts';
+import { unbuildable } from './build.ts';
+export { raised } from './build.ts';
 
 type Payload = Extract<CommandPayload, { type: 'use_service' }>;
 export function availability(world: World, p: Payload, steps: Steps = { n: 0 }, action?: Key) {
@@ -159,40 +162,6 @@ export function scheduled(world: World, p: Payload, s: ServiceDefinition, mint: 
       job: orderJob(p.service),
       due_time,
     },
-  ];
-}
-
-type Build = Extract<ServiceDefinition['benefit'], { kind: 'build' }>;
-// Built rooms S2: one structure per site direction, at most world.construction.max_total.
-function unbuildable(world: World, b: Build) {
-  const built = Object.values(world.state.created ?? {}).filter((i) => i.origin.kind === 'built');
-  if (
-    built.some(
-      (i) =>
-        i.origin.kind === 'built' &&
-        same(i.origin.site, b.site) &&
-        i.origin.direction === b.direction,
-    )
-  )
-    return serviceRefusal('invalid_state', 'service.site_taken');
-  if (built.length >= (world.cartridge.world?.construction?.max_total ?? 0))
-    return serviceRefusal('invalid_state', 'service.construction_full');
-  return undefined;
-}
-
-/** Built rooms S2: a paid build mints the room's identity; hydrate derives the room from it. */
-export function raised(p: Payload, s: ServiceDefinition, mint: Mint): DeltaOp[] {
-  const b = s.benefit;
-  if (b.kind !== 'build') return [];
-  const id = mint() as EntityId;
-  const origin = {
-    kind: 'built',
-    site: b.site,
-    direction: b.direction,
-    owner: p.actor_id,
-  } as const;
-  return [
-    { op: 'entity.create', writer_group: 0, identity: { id, definition: b.blueprint, origin } },
   ];
 }
 
