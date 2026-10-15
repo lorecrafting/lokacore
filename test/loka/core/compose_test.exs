@@ -1,4 +1,4 @@
-# size: allow 525, patrol, liquid, expedition rows and authored gain share the existing randomized differential pool
+# size: allow 526, patrol, liquid, expedition, status-holder rows and authored gain share the existing randomized differential pool
 defmodule Loka.Core.ComposeTest do
   use ExUnit.Case, async: true
   alias Loka.Core.{Canonical, Compose, Contracts, Invariants}
@@ -286,14 +286,14 @@ defmodule Loka.Core.ComposeTest do
   # Seeded small-pool deltas exercise conflicts, authored gain and preconditions across both kernels.
   @peer "kernel/ts/test/differential_peer.ts"
   test "differential: Elixir and TypeScript compose identically" do
-    for c <- JSON.decode!(File.read!("protocol/fixtures/corpse_creation.json"))["cases"],
+    for f <- ~w(corpse_creation status_composition),
+        c <- JSON.decode!(File.read!("protocol/fixtures/#{f}.json"))["cases"],
         do: differential([%{"state" => c["state"], "delta" => %{"ops" => c["ops"]}}])
 
     knowledge = JSON.decode!(File.read!("protocol/fixtures/knowledge_composition.json"))["cases"]
     expedition = JSON.decode!(File.read!("protocol/fixtures/expedition.json"))["cases"]
-    status = JSON.decode!(File.read!("protocol/fixtures/status_composition.json"))["cases"]
 
-    for c <- knowledge ++ expedition ++ status,
+    for c <- knowledge ++ expedition,
         do: differential([%{"state" => c["state"], "delta" => %{"ops" => c["ops"]}}])
 
     :rand.seed(:exsss, {5, 5, 5})
