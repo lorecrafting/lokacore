@@ -1,6 +1,6 @@
 defmodule Loka.Content.Locks do
   @moduledoc """
-  Toolbox row G7 (access locks): any `locks` on a room, exit or item needs kernel_api 1.78, and a
+  Toolbox row G7 (access locks): any `locks` on a room, exit, item or (row 33, 1.94) NPC needs kernel_api 1.78, and a
   `put` lock only a container item may carry (SCHEMA_VIOLATION invalid_value at its locks.put).
   Twin of kernel/ts/src/content/cartridge_locks.ts; the lock roots join the conditions in
   Loka.Content.RoomParts.conditions/1 and Loka.Content.Entities.conditions/1.
@@ -17,7 +17,7 @@ defmodule Loka.Content.Locks do
       |> Enum.map(&String.to_integer/1)
 
     floor =
-      if locked?(defs) and api < [1, 78],
+      if (locked?(defs) and api < [1, 78]) or (npc_locked?(defs) and api < [1, 94]),
         do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least", %{})],
         else: []
 
@@ -27,8 +27,13 @@ defmodule Loka.Content.Locks do
           do: diag("SCHEMA_VIOLATION", at(rel, ["locks", "put"]), %{"error" => "invalid_value"})
   end
 
+  # Toolbox row 33: an NPC's get lock (pickpocketing) needs kernel_api 1.94.
+  defp npc_locked?(defs),
+    do: Enum.any?(defs["npc"] || %{}, &match?({_, {_, _, %{"locks" => _}}}, &1))
+
   defp locked?(defs) do
-    Enum.any?(defs["item"] || %{}, &match?({_, {_, _, %{"locks" => _}}}, &1)) or
+    npc_locked?(defs) or
+      Enum.any?(defs["item"] || %{}, &match?({_, {_, _, %{"locks" => _}}}, &1)) or
       Enum.any?(defs["room"] || %{}, fn
         {_, {_, _, %{} = r}} ->
           is_map_key(r, "locks") or

@@ -37,6 +37,7 @@ import { quests, questPolicies, featureApi } from './cartridge_quests.ts';
 import { reactions } from './cartridge_reactions.ts';
 import { recipes } from './cartridge_recipes.ts';
 import { reserved } from './cartridge_position.ts';
+import { theft } from './cartridge_theft.ts';
 import { cueParts } from './cartridge_senses.ts';
 import { lockRoots, locks } from './cartridge_locks.ts';
 import { holders } from './cartridge_holders.ts';
@@ -245,6 +246,7 @@ export function refStage(c: Obj): Diagnostic[] {
   out.push(...recipes(c, check), ...holders(c), ...barriers(c, check.named), ...links(c));
   out.push(...quests(c, check), ...reactions(c, check), ...dialogues(c, check));
   out.push(...pools(c, named), ...death(c, named), ...combat(c, named), ...commerce(c));
+  out.push(...theft(c, named));
   out.push(...derived(c, named), ...levelling(c, check));
   return out;
 }

@@ -39,7 +39,7 @@
   "item.coin.description": "A copper coin.",
   "item.ring.short": "a ring",
   "item.ring.room": "A [ring] lies here.",
-  "item.ring.description": "A silver ring.",
+  "item.ring.description": "A silver ring from the shopkeeper's tray.",
   "item.ledger.short": "a ledger",
   "item.ledger.room": "A [ledger] lies here.",
   "item.ledger.description": "The bank ledger.",
@@ -52,9 +52,6 @@
   "npc.shopkeeper.short": "a shopkeeper",
   "npc.shopkeeper.room": "A [shopkeeper] minds a stall.",
   "npc.shopkeeper.description": "An honest shopkeeper.",
-  "npc.clerk.short": "a clerk",
-  "npc.clerk.room": "A [clerk] counts coins.",
-  "npc.clerk.description": "A clerk with a silver ring.",
   "npc.guard.short": "a guard",
   "npc.guard.room": "A [guard] watches the stalls.",
   "npc.guard.description": "A sharp-eyed town guard.",
@@ -72,5 +69,8 @@
   "service.deposit": "Deposit five pennies",
   "service.deposit.used": "The teller counts five pennies into the vault.",
   "service.unaffordable": "You cannot pay.",
-  "service.no_funds": "The vault holds too little of yours."
+  "service.no_funds": "The vault holds too little of yours.",
+  "item.badge.short": "a badge",
+  "item.badge.room": "A [badge] lies here.",
+  "item.badge.description": "A brass watch badge."
 }

@@ -13,11 +13,6 @@
     "resource": "pennies",
     "offers": [
       {
-        "item": "purse",
-        "buy": 8,
-        "sell": 5
-      },
-      {
         "item": "ring",
         "buy": 8,
         "sell": 5

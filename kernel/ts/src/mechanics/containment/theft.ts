@@ -1,6 +1,6 @@
 // Toolbox rows 33 and 34 (docs/system/mechanics.md, Theft, fence and witnessed offense): with
 // `world.theft` declared, take may lift an item a living NPC in the actor's room directly holds.
-// Containment alone sets the item's stolen fact; a seen theft emits custom_event `noticed`.
+// Containment alone sets the item's stolen fact; a seen theft emits custom_event `noticed` on the thief.
 import type { CharacterId, EntityId, StateDelta } from '../../contracts.gen.ts';
 import type { Event, Mint, Steps, World } from '../../runtime/decision.ts';
 import { accepted, event } from '../../runtime/decision.ts';
@@ -67,7 +67,7 @@ export function stolen(
   const notice = event(world, command, mint, run.position + 1, {
     type: 'custom_event',
     event: { cartridge_id, cartridge_version, kind: 'event', key: theft.noticed },
-    subject_id: victim,
+    subject_id: body,
   });
   return accepted(world, 'taken', run.ops, [...taken, notice], [{ key: theft.narration.seen }]);
 }

@@ -14,7 +14,10 @@ const SITES = ['fact_compare', 'fact.assign', 'fact.adjust', 'fact_changed'];
 const OPS = SITES.slice(0, 3); // the sites that are ops and may name a subject
 const SUBJECTS = ['subject', 'npc', 'item'];
 // Toolbox rows G8 and 22a: the group reads its member, stay and fight facts at each NPC.
-const GROUP = ['member', 'stay', 'fight'].map((k) => `.cartridge.world.group.${k}`);
+// Row 33: theft writes its stolen fact at the taken item.
+const GROUP = ['member', 'stay', 'fight']
+  .map((k) => `.cartridge.world.group.${k}`)
+  .concat('.cartridge.world.theft.stolen');
 // Choices whose facts save recovery reconciles by fact alone, with no subject: escort, receive
 // and hand_over (mobile dialogue-save), a riddle answer with a wrong_limit (topics-save) and a
 // dialogue of a legacy deadline quest (deadline-receipts); other choices' receipts are checked
