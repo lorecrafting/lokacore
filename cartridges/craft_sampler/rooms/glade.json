@@ -1,0 +1,18 @@
+{
+  "title": "room.glade.title",
+  "description": "room.glade.description",
+  "exits": {
+    "east": {
+      "to": "workshop"
+    }
+  },
+  "details": {
+    "oak": {
+      "aliases": [
+        "oak"
+      ],
+      "description": "detail.oak",
+      "rating": 1
+    }
+  }
+}

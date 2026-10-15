@@ -14,6 +14,9 @@ import {
 } from '../../../kernel/ts/src/index.ts';
 import { activeStatuses } from '../../../kernel/ts/src/mechanics/status/shared.ts';
 import { read } from '../../../kernel/ts/test/read.ts';
+import { resolved } from '../../../kernel/ts/src/commands/actions.ts';
+import { pending } from '../../../kernel/ts/src/mechanics/dialogue/shared.ts';
+import { compiled } from './__tests__/compiled.ts';
 import { openStory } from './authority.ts';
 import { coldReopen, elapsedHost } from './__tests__/elapsed-host.test.ts';
 
@@ -238,4 +241,80 @@ test('one advance across completion and the end of weathering raises the hut in 
   assert.deepEqual(held(story, hut!), ['ruin']);
   q.sql.close();
   coldReopen(path, bundle);
+});
+
+// Built rooms S6 (save.md, Built rooms): a recipe-built hut is the same identity row as a hired one.
+// Breaks: the raise's room not saved or not derived again on reopen (no hut, or the lane loses its
+// way north), or the raise's receipt replaying into a second room.
+test('a self-built hut survives cold reopen, its replay raises no second hut, and north enters it', (t) => {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-built-self-'));
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
+  const path = join(dir, 'self.db');
+  const craft = compiled('cartridges/craft_sampler');
+  const l = loadCartridge(
+    new TextEncoder().encode(`{"cartridge":${craft.canonical},"content_hash":"${craft.sha256}"}`),
+    INSTALLED,
+  );
+  if (!l.ok) throw new Error(JSON.stringify(l));
+  const fresh = newWorld(
+    l.cartridge as Cartridge,
+    '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never,
+    [1, 2, 3, 4],
+  );
+  const open = () => {
+    const p = elapsedHost(path, undefined, craft);
+    const s = openStory(p.db, [{ fresh, content_hash: craft.sha256 }], p.host);
+    if (s.kind !== 'open') throw new Error(JSON.stringify(s));
+    return { p, story: s };
+  };
+  let { p, story } = open();
+  let n = 0;
+  const go = (command: string, input: object = {}, target_ids: string[] = [], key?: string) => {
+    const set = resolved(story.world(), fresh.character);
+    const action_key = Object.keys(set).find(
+      (k) => set[k]!.command === command && (!key || set[k]!.key === key),
+    )!;
+    const i = {
+      invocation_id: `aaaaaaaa-1212-4212-8212-${String(++n).padStart(12, '0')}`,
+      actor_id: fresh.character,
+      action_key,
+      target_ids,
+      input,
+    };
+    const r = story.invoke(i);
+    assert.equal(r.kind === 'saved' && (r.decision as any).kind, 'accepted', JSON.stringify(r));
+    return i;
+  };
+  const id = (k: string) => fresh.entityIds[`craft_sampler@0.0.1:${k}`]!;
+  const chop = () => {
+    go('move', { direction: 'west' });
+    go('perform', {}, [], 'chop');
+    go('perform', {}, [], 'chop');
+    go('move', { direction: 'east' });
+  };
+  go('choose_ancestry', { ancestry: 'woodfolk' });
+  go('take', {}, [id('item/axe')]);
+  chop();
+  go('talk', {}, [id('npc/old_carver')]);
+  const [continuation_id] = pending(story.world(), fresh.character)!;
+  go('choose', { choice_id: 'learn_carpentry', continuation_id });
+  go('perform', {}, [], 'saw');
+  chop();
+  go('perform', {}, [], 'saw');
+  go('move', { direction: 'east' });
+  const raise = go('perform', {}, [], 'raise_timbered_hut');
+  const huts = () =>
+    Object.keys(story.world().state.created ?? {}).filter(
+      (k) => story.world().state.created![k]!.origin.kind === 'built',
+    );
+  const [hut] = huts();
+  p.sql.close();
+  coldReopen(path, craft);
+  ({ p, story } = open());
+  assert.deepEqual(huts(), [hut]);
+  assert.equal(story.invoke(raise).kind, 'saved');
+  assert.deepEqual(huts(), [hut]);
+  go('move', { direction: 'north' });
+  assert.equal(story.world().state.containers[story.world().body], hut);
+  p.sql.close();
 });

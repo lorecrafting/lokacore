@@ -264,7 +264,7 @@ export function refusalReason(
     holds(world, actor, a.policy.root, { target: d ?? primaryTarget(payload), steps });
   // An offered action's reason text is the GameView's (view/action_lists.ts); only cast's and craft's reach here.
   if (used || !matching.some((a) => ok(a))) return used ?? { code: 'invalid_state' };
-  return craftRefused(world, matching[0]!.recipe, bodyOf(world, actor), steps); // after policy, as the offer (hs-10)
+  return craftRefused(world, matching[0]!.recipe, actor, steps); // after policy, as the offer (hs-10)
 }
 
 // A spell (row 29a) is cast by its word, never offered or performed by its key.

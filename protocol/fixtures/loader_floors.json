@@ -991,7 +991,29 @@
         ["skills/joinery.json", ["prerequisite"], null],
         ["skills/whittling.json", ["profession"], null],
         ["skills/carving.json", ["profession"], null],
-        ["skills/joinery.json", ["profession"], null]
+        ["skills/joinery.json", ["profession"], null],
+        ["skills/carpentry.json", ["prerequisite"], null],
+        [
+          "recipes/raise_timbered_hut.json",
+          ["outcomes", "success", "sequence"],
+          [{ "op": "fact.assign", "fact": "wood_chopped", "value": true }]
+        ]
+      ],
+      "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
+      "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
+    },
+    {
+      "floor": "1.101",
+      "below": "1.100",
+      "source": "cartridges/craft_sampler",
+      "feature": "a build step",
+      "edits": [
+        ["skills/carving.json", ["prerequisite"], null],
+        ["skills/carpentry.json", ["prerequisite"], null],
+        ["recipes/carve_spoon.json", ["craft"], null],
+        ["recipes/chop.json", ["craft"], null],
+        ["recipes/saw.json", ["craft"], null],
+        ["recipes/raise_timbered_hut.json", ["craft"], null]
       ],
       "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
       "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
@@ -1033,6 +1055,27 @@
       "source": "cartridges/skills_sampler",
       "feature": "a skill profession",
       "edits": [["skills/pick.json", ["profession"], "skill.pick.label"]],
+      "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
+      "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
+    },
+    {
+      "floor": "1.101",
+      "below": "1.100",
+      "source": "cartridges/gift_sampler",
+      "feature": "service.price 0 (a barter, row kgd.70)",
+      "edits": [
+        ["services/knife_for_pelts.json", ["benefit", "escrow", "ready_after"], 3600],
+        ["cartridge.json", ["requires", "capabilities", "schedule"], 1]
+      ],
+      "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
+      "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
+    },
+    {
+      "floor": "1.101",
+      "below": "1.100",
+      "source": "cartridges/gift_sampler",
+      "feature": "service.benefit.escrow.output without ready_after (a barter, row kgd.70)",
+      "edits": [["services/knife_for_pelts.json", ["price"], 1]],
       "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
       "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
     }

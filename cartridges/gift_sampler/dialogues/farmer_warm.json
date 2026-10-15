@@ -1,0 +1,26 @@
+{
+  "npc": "farmer",
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "fact_compare",
+      "fact": "trust",
+      "equals": 1,
+      "subject": "target"
+    }
+  },
+  "prompt": "dialogue.farmer.warm",
+  "roles": {
+    "farmer": {
+      "role": "npc",
+      "npc": "farmer"
+    }
+  },
+  "choices": {
+    "chat": {
+      "label": "dialogue.farmer.chat",
+      "narration": "narration.farmer.warm",
+      "sequence": []
+    }
+  }
+}

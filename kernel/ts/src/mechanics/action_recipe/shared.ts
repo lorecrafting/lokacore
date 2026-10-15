@@ -19,6 +19,7 @@ import { selected } from '../containment/stock.ts';
 import { value as factValue } from '../fact.ts';
 import { toolHeld } from '../lookups.ts';
 import { holds } from '../policy.ts';
+import { unbuildable } from '../service/build.ts';
 import { folded } from '../speech/shared.ts';
 
 export type UseTarget = Extract<RecipeTarget, { kind: 'use' }>;
@@ -168,14 +169,26 @@ export function crafted(
   };
 }
 
-/** A craft's refusal for the command (commands/actions.ts) and its offer (view/action_lists.ts). */
+/** A craft's refusal for the command (commands/actions.ts) and its offer (view/action_lists.ts):
+ * (Built rooms S6) its build step's first, as the build service's (service/build.ts unbuildable),
+ * so a taken site shows site_taken, not the spent inputs. */
 export const craftRefused = (
   world: World,
   recipe: ActionRecipe | undefined,
-  body: EntityId | undefined,
+  actor: CharacterId,
   steps: Steps,
 ) => {
-  if (!recipe?.craft || !body) return undefined;
-  const c = crafted(world, recipe, body, steps);
-  return 'code' in c ? c : undefined;
+  const s = recipe?.outcomes.success.sequence.find((x) => x.op === 'build');
+  const b =
+    s &&
+    recipe!.target.kind === 'detail' &&
+    unbuildable(
+      world,
+      { blueprint: s.blueprint, site: recipe!.target.room, direction: s.direction },
+      actor,
+    );
+  if (b) return b;
+  const body = bodyOf(world, actor);
+  const c = recipe?.craft && body && crafted(world, recipe, body, steps);
+  return c && 'code' in c ? c : undefined;
 };

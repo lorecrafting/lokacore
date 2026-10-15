@@ -1,0 +1,12 @@
+{
+  "keywords": [
+    "rat"
+  ],
+  "short": "item.rat.short",
+  "room_line": "item.rat.room",
+  "description": "item.rat.description",
+  "location": {
+    "in": "room",
+    "room": "yard"
+  }
+}

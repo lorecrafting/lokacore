@@ -1356,7 +1356,7 @@ its source and real SQLite acceptance are recorded in the
 - `ready_after`: an integer, 1 to 31536000.
 - `output`: an item ref.
 
-`ready_after` and `output` are required together. It also adds two `ServiceBenefit` kinds, `{kind: "claim", service}` and `{kind: "cancel", service}` (`protocol/service.schema.json`), each naming a service ref (short keys in source). Any of them needs `kernel_api` at least **1.80**.
+`ready_after` needs `output`; an `output` alone is a [barter](#barter-declarations). It also adds two `ServiceBenefit` kinds, `{kind: "claim", service}` and `{kind: "cancel", service}` (`protocol/service.schema.json`), each naming a service ref (short keys in source). Any of them needs `kernel_api` at least **1.80**.
 
 The compiler (`lib/loka/content/services.ex`) and the loader (`kernel/ts/src/content/cartridge_services.ts`) refuse:
 
@@ -1372,6 +1372,15 @@ Required cartridge text:
 - A claim: `service.no_order`, `service.not_ready` and `service.no_output`.
 - A cancel: `service.no_order` and `service.ready`.
 - A commission with `ready_after`: also `service.no_output`.
+
+### Barter declarations
+
+[Barter](mechanics.md#barter-toolbox-row-kgd70) admits a service `price` of 0 (`protocol/service.schema.json`; `quoted_price` minimum 0 in `protocol/command.schema.json` and `protocol/action.schema.json`, GameView `ServiceOffer.price` minimum 0) and an escrow `output` without `ready_after`. Either needs `kernel_api` at least **1.101**. The compiler (`lib/loka/content/services.ex`) and the loader (`kernel/ts/src/content/cartridge_services.ts`) refuse:
+
+- `price` 0 on a service that is not an `entitlement` with `escrow`: SCHEMA_VIOLATION `invalid_value` at `.price`.
+- A claim or cancel naming a commission with no `ready_after`: SCHEMA_VIOLATION `invalid_value` at `.benefit.service` (nothing is left to claim).
+
+Required cartridge text: an escrow with `output`: `service.no_output`.
 
 ### Property and bank declarations
 
@@ -1955,6 +1964,10 @@ The [away recap](mechanics.md#away-recap-toolbox-row-w27) reads the optional `ti
 ## Skill prerequisite declarations
 
 [Skill trees](mechanics.md#skill-trees-homestead-hs-11) add one optional skill field (`protocol/cartridge.schema.json` `SkillDefinition`, `kernel_api` 1.101): `prerequisite`, a VersionedPolicy evaluated for the learning actor. Its leaves are checked as `qualification`'s (an unknown `skill_compare` skill is UNRESOLVED_REFERENCE at `skills/carving.prerequisite.root.skill`); a `skill_compare` anywhere in it naming the skill itself is SCHEMA_VIOLATION at `prerequisite` (`prerequisites` in `kernel/ts/src/content/cartridge_skills.ts`; `Loka.Content.Skills.itself/3`), and so is one in a skill without `hidden` naming a skill with `hidden` (a shown box never waits on a box the Book does not draw). An ancestry's `skill` naming a skill with a `prerequisite` is SCHEMA_VIOLATION at `ancestries.<choice>.skill`, since a birth grant skips learning (the same `prerequisites`; `Loka.Content.Ancestries.learned_only/4`). A prerequisite below `kernel_api` 1.101 is KERNEL_API_RANGE_INVALID (`protocol/fixtures/loader_floors.json`). [Skill tree views](mechanics.md#skill-tree-view-homestead-hs-14) add two more optional fields: `hidden` (`true` only, and only with a `prerequisite`; GameView and NPC lessons leave the skill out while its prerequisite fails and it is not acquired) and `profession`, a TextKey naming the Character page section the box is drawn under (an unknown key is UNRESOLVED_REFERENCE at `skills/<key>.profession`; below `kernel_api` 1.101 it is KERNEL_API_RANGE_INVALID).
+
+## Recipe build step declarations
+
+[Self-build](mechanics.md#built-rooms-s6-self-build) adds one outcome step a recipe's sequence may hold (`RecipeStep`, `protocol/action.schema.json`, `kernel_api` 1.101): `build {blueprint, direction}`, `blueprint` a blueprint ref (a short key in source) and `direction` a compass or vertical direction. The compiler (`builds` in `lib/loka/content/construction.ex`) and the loader (`builds` in `kernel/ts/src/content/cartridge_construction.ts`) refuse, at `recipes/<key>.outcomes.<outcome>.sequence[i]`: a build step outside the success outcome or on a recipe whose target is not a detail, a second build step in one sequence, a target room with no `site`, or a cartridge with no `world.construction` (SCHEMA_VIOLATION at `.op`); a catalog without `service.site_taken` or `service.construction_full` (UNRESOLVED_REFERENCE at `.op`); a blueprint or direction the target room's `site` does not list (SCHEMA_VIOLATION at `.blueprint` or `.direction`); and a floor under 1.101 (KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least`). The listed blueprint already resolves and owns construction@1.
 
 ## Durability declarations
 

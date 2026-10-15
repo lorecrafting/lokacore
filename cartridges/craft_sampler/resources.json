@@ -1,0 +1,10 @@
+{
+  "resources": {
+    "pennies": {
+      "minimum": 0,
+      "maximum": 100,
+      "start": 20,
+      "gain": 0
+    }
+  }
+}

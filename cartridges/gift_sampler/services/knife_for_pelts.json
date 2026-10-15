@@ -1,0 +1,22 @@
+{
+  "provider": "trader",
+  "currency": "pennies",
+  "action": "barter",
+  "label": "service.barter",
+  "narration": "service.barter.used",
+  "price": 0,
+  "benefit": {
+    "kind": "entitlement",
+    "fact": "traded_knife",
+    "escrow": {
+      "items": [
+        "pelt_01",
+        "pelt_02",
+        "pelt_03"
+      ],
+      "quantity": 2,
+      "custody": "stall",
+      "output": "knife_01"
+    }
+  }
+}

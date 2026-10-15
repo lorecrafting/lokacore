@@ -1,0 +1,43 @@
+{
+  "npc": "old_carver",
+  "roles": {
+    "teacher": {
+      "role": "npc",
+      "npc": "old_carver"
+    }
+  },
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": [
+        {
+          "op": "not",
+          "item": {
+            "op": "fact_compare",
+            "fact": "skill_carpentry",
+            "equals": true
+          }
+        },
+        {
+          "op": "skill_compare",
+          "skill": "woodcutting",
+          "at_least": 2
+        }
+      ]
+    }
+  },
+  "prompt": "old_carver.carpentry.prompt",
+  "choices": {
+    "learn_carpentry": {
+      "label": "old_carver.carpentry.choice",
+      "narration": "old_carver.carpentry.learned",
+      "sequence": [
+        {
+          "op": "skill.acquire",
+          "skill": "carpentry"
+        }
+      ]
+    }
+  }
+}
