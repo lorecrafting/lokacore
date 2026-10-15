@@ -1,0 +1,27 @@
+{
+  "title": "blueprint.hut.title",
+  "description": "blueprint.hut.description",
+  "variants": [
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "fact_compare",
+          "fact": "owns_plot",
+          "equals": true
+        }
+      },
+      "description": "blueprint.hut.description.owned"
+    }
+  ],
+  "locks": {
+    "enter": {
+      "policy_version": 1,
+      "root": {
+        "op": "fact_compare",
+        "fact": "owns_plot",
+        "equals": true
+      }
+    }
+  }
+}

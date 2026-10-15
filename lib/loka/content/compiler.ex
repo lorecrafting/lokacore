@@ -108,12 +108,13 @@ defmodule Loka.Content.Compiler do
         Ancestries.check(manifest, defs, located, if(v2, do: elem(v2, 1), else: %{})) ++
         Loka.Content.Floors.check(manifest, defs, located) ++
         Loka.Content.Replenish.check(manifest, defs) ++
-        Loka.Content.Delayed.check(manifest, defs, Checks.trees(defs))
+        Loka.Content.Delayed.check(manifest, defs, Checks.trees(defs)) ++
+        Loka.Content.Construction.check(manifest, defs, v2, located, registry)
 
   # v2 when the source declares world content, entry/settings, text, resources or attributes.
   defp v2(defs, {entry, settings}, text, files) do
     if Enum.any?(
-         ~w(room item npc recipe barrier quest reaction dialogue story_point scene liquid service transport population population_bundle replenish),
+         ~w(room item npc recipe barrier quest reaction dialogue story_point scene liquid service transport population population_bundle replenish blueprint),
          &(defs[&1] != %{})
        ) or
          entry != nil or
@@ -210,7 +211,8 @@ defmodule Loka.Content.Compiler do
     {"service", :service, "ServiceDefinition"},
     {"transport", :transport, "TransportDefinition"},
     {"bleed", :bleed, "BleedDefinition"},
-    {"status", :status, "StatusDefinition"}
+    {"status", :status, "StatusDefinition"},
+    {"blueprint", :blueprint, "BlueprintDefinition"}
   ]
 
   defp definitions(files, m) do

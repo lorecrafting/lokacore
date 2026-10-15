@@ -107,6 +107,8 @@ export function parts(c: Obj): [string, Obj, string][] {
   }
   for (const [ref, b] of Object.entries((c.barriers ?? {}) as Obj))
     add('barrier', b, `.cartridge.barriers${step(ref)}`);
+  for (const [ref, b] of Object.entries((c.blueprints ?? {}) as Obj))
+    add('blueprint', b, `.cartridge.blueprints${step(ref)}`);
   if (c.calendar) out.push(['calendar', c.calendar, '.cartridge.calendar']);
   return [...out, ...cueParts(c), ...identityParts(c)];
 }
@@ -187,6 +189,7 @@ const TEXT: Readonly<Record<string, string[]>> = {
   npc: ['short', 'room_line', 'description'],
   item: ['short', 'room_line', 'description'],
   barrier: ['short'],
+  blueprint: ['title', 'description'],
   readable: ['label', 'text', 'title'],
   cue: ['text'],
 };

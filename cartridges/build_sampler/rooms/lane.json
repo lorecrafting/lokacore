@@ -1,0 +1,13 @@
+{
+  "title": "room.lane.title",
+  "description": "room.lane.description",
+  "exits": {},
+  "site": {
+    "directions": [
+      "north"
+    ],
+    "blueprints": [
+      "hut"
+    ]
+  }
+}

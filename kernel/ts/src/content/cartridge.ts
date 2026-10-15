@@ -33,6 +33,7 @@ import { senses } from './cartridge_senses.ts';
 import { variants } from './cartridge_variants.ts';
 import { schedules } from './cartridge_schedules.ts';
 import { standing } from './cartridge_standing.ts';
+import { construction } from './cartridge_construction.ts';
 import { transports } from './cartridge_transports.ts';
 import { services } from './cartridge_services.ts';
 import { food } from './cartridge_food.ts';
@@ -143,6 +144,7 @@ const DEFINITION_MAPS = [
   'bleeds',
   'statuses',
   'replenish',
+  'blueprints',
 ];
 function keyStage(c: Obj): Diagnostic[] {
   const out: Diagnostic[] = [];
@@ -296,5 +298,6 @@ function declarations(c: Obj): Diagnostic[] {
     ...scopedFacts(c),
     ...schedules(c),
     ...standing(c),
+    ...construction(c),
   ];
 }

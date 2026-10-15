@@ -1,0 +1,14 @@
+{
+  "room.lane.title": "Market Lane",
+  "room.lane.description": "A lane beside an empty plot to the north.",
+  "npc.seller.short": "the seller",
+  "npc.seller.room": "The [seller](seller) offers the plot for sale.",
+  "npc.seller.description": "A brisk seller of building plots.",
+  "service.unaffordable": "You cannot pay.",
+  "service.already_paid": "The plot is already yours.",
+  "service.buy_plot": "Buy the plot",
+  "service.buy_plot.used": "The seller takes your coin; the plot is yours.",
+  "blueprint.hut.title": "The Hut",
+  "blueprint.hut.description": "A small hut of rough planks.",
+  "blueprint.hut.description.owned": "Your small hut of rough planks."
+}
