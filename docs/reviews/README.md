@@ -15,6 +15,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: recognition and earned titles (loka-kgd.146, rows W15 and FD9)](2026-10-15-loka-kgd.146-w15-fd9-review.md): **APPROVE WITH NOTES**
 - [Review: ask about a topic, kernel half (loka-kgd.144 FD7)](2026-10-15-loka-kgd.144-fd7-review.md): **APPROVE WITH NOTES**
 - [Review: witness ledger and reaction moves (loka-kgd.142 FD5, loka-kgd.22)](2026-10-15-loka-kgd.142-fd5-review.md): **APPROVE WITH NOTES**
+- [Review: Built rooms S3, time and timber (loka-kgd.109.2)](2026-10-15-loka-kgd.109.2-built-s3-review.md): **CHANGES REQUIRED**
 - [Review: Built rooms S1, blueprint and site contract (loka-kgd.109.1, construction@1, kernel_api 1.99)](2026-10-15-loka-kgd.109.1-built-s1-review.md): **APPROVE**
 - [Review: status re-applied inside one long wait (loka-j958, PR #388)](2026-10-15-loka-j958-review.md): **APPROVE WITH NOTES**
 - [Review: theft, fence and witnessed offense (loka-icr4, toolbox row 33)](2026-10-15-loka-icr4-theft-review.md): **APPROVE WITH NOTES**
