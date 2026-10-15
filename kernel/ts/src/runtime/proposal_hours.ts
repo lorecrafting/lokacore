@@ -37,6 +37,14 @@ export function queueScheduled(due: Due, ops: readonly DeltaOp[], to: number) {
     }
 }
 
+// Each drain step rescans the advance's ops, so a target's canonical key is encoded once per op.
+const keys = new WeakMap<DeltaOp, string>();
+function opKey(o: DeltaOp) {
+  let k = keys.get(o);
+  if (k === undefined) keys.set(o, (k = key(target(o))));
+  return k;
+}
+
 // A run (or its reaction's or credit's group) writing a target that a run of strictly earlier due
 // time wrote (`earlier`) joins that run's writer group, as steps commit them in order
 // (loka-kgd.151): `all` from `start` to `cut`; a target that a run of the same due time, or a
@@ -48,8 +56,8 @@ export function joinEarlier(
   group: number,
   maps: Map<string, number>[],
 ) {
-  const mine = new Set(own.map((o) => key(target(o))));
-  const hit = (o: DeltaOp) => o.writer_group !== group && mine.has(key(target(o)));
+  const mine = new Set(own.map(opKey));
+  const hit = (o: DeltaOp) => o.writer_group !== group && mine.has(opKey(o));
   if (all.slice(cut).some(hit)) return;
   const groups = all.slice(start, cut).filter(hit);
   merge(all, new Set(groups.map((o) => o.writer_group)), group, maps);
