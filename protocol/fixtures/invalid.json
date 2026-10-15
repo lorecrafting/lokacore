@@ -30287,6 +30287,316 @@
     ]
   },
   {
+    "contract": "ServiceBenefit",
+    "value": {
+      "kind": "mend",
+      "direction": "north"
+    },
+    "errors": [
+      {
+        "path": "/site",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "ServiceBenefit",
+    "value": {
+      "kind": "mend",
+      "site": {
+        "cartridge_id": "build_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "room",
+        "key": "lane"
+      }
+    },
+    "errors": [
+      {
+        "path": "/direction",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "ServiceBenefit",
+    "value": {
+      "kind": "mend",
+      "site": {
+        "cartridge_id": "build_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "room",
+        "key": "lane"
+      },
+      "direction": "northeast"
+    },
+    "errors": [
+      {
+        "path": "/direction",
+        "code": "not_in_enum"
+      }
+    ]
+  },
+  {
+    "contract": "ServiceBenefit",
+    "value": {
+      "kind": "mend",
+      "site": {
+        "cartridge_id": "build_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "room",
+        "key": "lane"
+      },
+      "direction": "north",
+      "x": 1
+    },
+    "errors": [
+      {
+        "path": "/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "ServiceBenefit",
+    "value": {
+      "kind": "mend",
+      "site": {
+        "cartridge_id": "build_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "room",
+        "key": "lane"
+      },
+      "direction": "north",
+      "escrow": {
+        "x": 1
+      }
+    },
+    "errors": [
+      {
+        "path": "/escrow/custody",
+        "code": "missing_property"
+      },
+      {
+        "path": "/escrow/items",
+        "code": "missing_property"
+      },
+      {
+        "path": "/escrow/quantity",
+        "code": "missing_property"
+      },
+      {
+        "path": "/escrow/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "ServiceBenefit",
+    "value": {
+      "kind": "mend",
+      "site": {
+        "cartridge_id": "build_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "room",
+        "key": "lane"
+      },
+      "direction": "north",
+      "escrow": {
+        "items": [],
+        "quantity": 0,
+        "custody": {
+          "cartridge_id": "build_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "yard"
+        }
+      }
+    },
+    "errors": [
+      {
+        "path": "/escrow/items",
+        "code": "too_few_items"
+      },
+      {
+        "path": "/escrow/quantity",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "contract": "ServiceBenefit",
+    "value": {
+      "kind": "mend",
+      "site": {
+        "cartridge_id": "build_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "room",
+        "key": "lane"
+      },
+      "direction": "north",
+      "escrow": {
+        "items": [
+          {
+            "cartridge_id": "build_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "timber_a"
+          },
+          {
+            "cartridge_id": "build_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "timber_a"
+          },
+          {
+            "cartridge_id": "build_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "timber_a"
+          },
+          {
+            "cartridge_id": "build_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "timber_a"
+          },
+          {
+            "cartridge_id": "build_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "timber_a"
+          },
+          {
+            "cartridge_id": "build_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "timber_a"
+          },
+          {
+            "cartridge_id": "build_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "timber_a"
+          },
+          {
+            "cartridge_id": "build_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "timber_a"
+          },
+          {
+            "cartridge_id": "build_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "timber_a"
+          },
+          {
+            "cartridge_id": "build_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "timber_a"
+          },
+          {
+            "cartridge_id": "build_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "timber_a"
+          },
+          {
+            "cartridge_id": "build_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "timber_a"
+          },
+          {
+            "cartridge_id": "build_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "timber_a"
+          },
+          {
+            "cartridge_id": "build_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "timber_a"
+          },
+          {
+            "cartridge_id": "build_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "timber_a"
+          },
+          {
+            "cartridge_id": "build_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "timber_a"
+          },
+          {
+            "cartridge_id": "build_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "timber_a"
+          }
+        ],
+        "quantity": 17,
+        "custody": {
+          "cartridge_id": "build_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "yard"
+        }
+      }
+    },
+    "errors": [
+      {
+        "path": "/escrow/items",
+        "code": "too_many_items"
+      },
+      {
+        "path": "/escrow/quantity",
+        "code": "above_maximum"
+      }
+    ]
+  },
+  {
+    "contract": "ServiceBenefit",
+    "value": {
+      "kind": "mend",
+      "site": {
+        "cartridge_id": "build_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "room",
+        "key": "lane"
+      },
+      "direction": "north",
+      "escrow": {
+        "items": [
+          {
+            "cartridge_id": "build_sampler",
+            "cartridge_version": "0.0.1",
+            "kind": "item",
+            "key": "timber_a"
+          }
+        ],
+        "quantity": 1,
+        "custody": {
+          "cartridge_id": "build_sampler",
+          "cartridge_version": "0.0.1",
+          "kind": "room",
+          "key": "yard"
+        },
+        "ready_after": 60
+      }
+    },
+    "errors": [
+      {
+        "path": "/escrow/ready_after",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
     "contract": "RoomDefinition",
     "value": {
       "key": "r",
