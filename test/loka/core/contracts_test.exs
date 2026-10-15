@@ -100,7 +100,14 @@ defmodule Loka.Core.ContractsTest do
   # DefinitionRefString pattern with the kind fixed; this breaks when the two drift.
   test "definition map keys use the DefinitionRefString pattern with their kind" do
     ref = Contracts.defs()["DefinitionRefString"]["pattern"]
-    maps = [{"facts", "fact"}, {"policies", "policy"}, {"actions", "action"}, {"rooms", "room"}]
+
+    maps = [
+      {"facts", "fact"},
+      {"policies", "policy"},
+      {"actions", "action"},
+      {"rooms", "room"},
+      {"blueprints", "blueprint"}
+    ]
 
     for %{"properties" => props} <- Contracts.defs()["CompiledCartridge"]["oneOf"],
         {map, kind} <- maps,

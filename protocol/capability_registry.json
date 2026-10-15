@@ -627,5 +627,16 @@
     "policies": [
       "visited_count"
     ]
+  },
+  {
+    "key": "construction",
+    "version": 1,
+    "portability": "portable",
+    "residency": "portable_capability",
+    "commands": [],
+    "definitions": [
+      "blueprint"
+    ],
+    "events": []
   }
 ]

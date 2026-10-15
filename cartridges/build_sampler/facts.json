@@ -1,0 +1,15 @@
+{
+  "facts": {
+    "owns_plot": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The character bought the plot north of the lane."
+    }
+  }
+}

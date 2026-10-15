@@ -1,4 +1,4 @@
-// size: allow 344, ancestry, bell area, Study edge, barrier opens_when, ask answer roots and identity name variants join shared reference admission
+// size: allow 348, ancestry, bell area, Study edge, barrier opens_when, ask answer roots, identity name variants and blueprints join shared reference admission
 import { water } from './cartridge_water.ts';
 import { topics } from './cartridge_topics.ts';
 import { pools } from './cartridge_pools.ts';
@@ -71,6 +71,7 @@ export const step = (name: string) =>
 export const ENTITY_VARIANTS = ['short_variants', 'room_line_variants', 'description_variants'];
 
 // Definition parts with their registry kind and diagnostic path.
+// size: allow 41, one add per definition map
 export function parts(c: Obj): [string, Obj, string][] {
   const out: [string, Obj, string][] = [];
   const add = (kind: string, d: Obj, at: string, fields = ['variants']) => {
@@ -107,6 +108,8 @@ export function parts(c: Obj): [string, Obj, string][] {
   }
   for (const [ref, b] of Object.entries((c.barriers ?? {}) as Obj))
     add('barrier', b, `.cartridge.barriers${step(ref)}`);
+  for (const [ref, b] of Object.entries((c.blueprints ?? {}) as Obj))
+    add('blueprint', b, `.cartridge.blueprints${step(ref)}`);
   if (c.calendar) out.push(['calendar', c.calendar, '.cartridge.calendar']);
   return [...out, ...cueParts(c), ...identityParts(c)];
 }
@@ -187,6 +190,7 @@ const TEXT: Readonly<Record<string, string[]>> = {
   npc: ['short', 'room_line', 'description'],
   item: ['short', 'room_line', 'description'],
   barrier: ['short'],
+  blueprint: ['title', 'description'],
   readable: ['label', 'text', 'title'],
   cue: ['text'],
 };

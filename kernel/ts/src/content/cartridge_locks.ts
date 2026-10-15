@@ -4,7 +4,7 @@ import type { Diagnostic } from '../contracts.gen.ts';
 import { diag, step, type Obj } from './cartridge_refs.ts';
 import { apiCmp } from './cartridge_installed.ts';
 
-/** Each lock's policy root and its path: room enter, exit traverse, item get and put. */
+/** Each lock's policy root and its path: room and blueprint enter, exit traverse, item get and put. */
 export function lockRoots(c: Obj): [Obj, string][] {
   const out: [Obj, string][] = [];
   for (const [ref, r] of Object.entries((c.rooms ?? {}) as Obj)) {
@@ -18,6 +18,9 @@ export function lockRoots(c: Obj): [Obj, string][] {
       if (i.locks?.[f]) out.push([i.locks[f].root, `.cartridge.items${step(ref)}.locks.${f}.root`]);
   for (const [ref, n] of Object.entries((c.npcs ?? {}) as Obj))
     if (n.locks) out.push([n.locks.get.root, `.cartridge.npcs${step(ref)}.locks.get.root`]);
+  for (const [ref, b] of Object.entries((c.blueprints ?? {}) as Obj))
+    if (b.locks)
+      out.push([b.locks.enter.root, `.cartridge.blueprints${step(ref)}.locks.enter.root`]);
   return out;
 }
 

@@ -1,0 +1,271 @@
+{
+  "description": "Pinned artifact of cartridges/build_sampler (Built rooms S1, construction@1; cartridge.md Blueprint and site declarations): value is the compiler's output; canonical and sha256 were recomputed in Python (sorted compact JSON, SHA-256). Kept in sync with the compiler by test/loka/content_construction_test.exs.",
+  "value": {
+    "actions": {
+      "build_sampler@0.0.1:action/buy_plot": {
+        "accessibility": "service.buy_plot",
+        "command": "use_service",
+        "input": [
+          "service",
+          "quoted_price"
+        ],
+        "key": "buy_plot",
+        "label": "service.buy_plot",
+        "policy": {
+          "policy_version": 1,
+          "root": {
+            "items": [],
+            "op": "all"
+          }
+        },
+        "priority": 0,
+        "target": {
+          "kind": "entity",
+          "scopes": [
+            "room_occupants"
+          ]
+        }
+      }
+    },
+    "blueprints": {
+      "build_sampler@0.0.1:blueprint/hut": {
+        "description": "blueprint.hut.description",
+        "key": "hut",
+        "locks": {
+          "enter": {
+            "policy_version": 1,
+            "root": {
+              "equals": true,
+              "fact": {
+                "cartridge_id": "build_sampler",
+                "cartridge_version": "0.0.1",
+                "key": "owns_plot",
+                "kind": "fact"
+              },
+              "op": "fact_compare"
+            }
+          }
+        },
+        "title": "blueprint.hut.title",
+        "variants": [
+          {
+            "description": "blueprint.hut.description.owned",
+            "when": {
+              "policy_version": 1,
+              "root": {
+                "equals": true,
+                "fact": {
+                  "cartridge_id": "build_sampler",
+                  "cartridge_version": "0.0.1",
+                  "key": "owns_plot",
+                  "kind": "fact"
+                },
+                "op": "fact_compare"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "calendar": {
+      "start": 25200
+    },
+    "entry": {
+      "cartridge_id": "build_sampler",
+      "cartridge_version": "0.0.1",
+      "key": "lane",
+      "kind": "room"
+    },
+    "facts": {
+      "build_sampler@0.0.1:fact/owns_plot": {
+        "key": "owns_plot",
+        "meaning": "The character bought the plot north of the lane.",
+        "scopes": [
+          "player"
+        ],
+        "value_type": {
+          "default": false,
+          "type": "bool"
+        },
+        "version": 1
+      }
+    },
+    "format": "loka-cartridge-v2",
+    "lock": {
+      "capabilities": {
+        "calendar": 1,
+        "construction": 1,
+        "containment": 1,
+        "description_variant": 1,
+        "fact": 1,
+        "movement": 1,
+        "policy": 1,
+        "resource": 1,
+        "schedule": 1,
+        "service": 1
+      },
+      "format": "loka-capability-lock-v1"
+    },
+    "manifest": {
+      "api_version": "loka/v3",
+      "id": "build_sampler",
+      "requires": {
+        "capabilities": {
+          "calendar": 1,
+          "construction": 1,
+          "containment": 1,
+          "description_variant": 1,
+          "fact": 1,
+          "movement": 1,
+          "policy": 1,
+          "resource": 1,
+          "schedule": 1,
+          "service": 1
+        },
+        "client_features": [],
+        "content_schema": 1,
+        "kernel_api": {
+          "at_least": "1.99",
+          "below": "2.0"
+        },
+        "rule_ir": 1
+      },
+      "supported_profiles": [
+        "offline_private"
+      ],
+      "title": "Build Sampler",
+      "version": "0.0.1"
+    },
+    "npcs": {
+      "build_sampler@0.0.1:npc/seller": {
+        "description": "npc.seller.description",
+        "key": "seller",
+        "keywords": [
+          "seller"
+        ],
+        "resource_starts": {
+          "pennies": 0
+        },
+        "room": {
+          "cartridge_id": "build_sampler",
+          "cartridge_version": "0.0.1",
+          "key": "lane",
+          "kind": "room"
+        },
+        "room_line": "npc.seller.room",
+        "services": [
+          {
+            "cartridge_id": "build_sampler",
+            "cartridge_version": "0.0.1",
+            "key": "buy_plot",
+            "kind": "service"
+          }
+        ],
+        "short": "npc.seller.short"
+      }
+    },
+    "policies": {},
+    "resources": {
+      "build_sampler@0.0.1:resource/hp": {
+        "gain": 5,
+        "key": "hp",
+        "maximum": 10,
+        "minimum": 0,
+        "start": 10
+      },
+      "build_sampler@0.0.1:resource/ma": {
+        "gain": 4,
+        "key": "ma",
+        "maximum": 100,
+        "minimum": 0,
+        "start": 100
+      },
+      "build_sampler@0.0.1:resource/mv": {
+        "gain": 18,
+        "key": "mv",
+        "maximum": 82,
+        "minimum": 0,
+        "start": 82
+      },
+      "build_sampler@0.0.1:resource/pennies": {
+        "gain": 0,
+        "key": "pennies",
+        "maximum": 100,
+        "minimum": 0,
+        "start": 30
+      }
+    },
+    "rooms": {
+      "build_sampler@0.0.1:room/lane": {
+        "description": "room.lane.description",
+        "exits": {},
+        "key": "lane",
+        "site": {
+          "blueprints": [
+            {
+              "cartridge_id": "build_sampler",
+              "cartridge_version": "0.0.1",
+              "key": "hut",
+              "kind": "blueprint"
+            }
+          ],
+          "directions": [
+            "north"
+          ]
+        },
+        "title": "room.lane.title"
+      }
+    },
+    "services": {
+      "build_sampler@0.0.1:service/buy_plot": {
+        "action": "buy_plot",
+        "benefit": {
+          "fact": {
+            "cartridge_id": "build_sampler",
+            "cartridge_version": "0.0.1",
+            "key": "owns_plot",
+            "kind": "fact"
+          },
+          "kind": "entitlement"
+        },
+        "currency": {
+          "cartridge_id": "build_sampler",
+          "cartridge_version": "0.0.1",
+          "key": "pennies",
+          "kind": "resource"
+        },
+        "key": "buy_plot",
+        "label": "service.buy_plot",
+        "narration": "service.buy_plot.used",
+        "price": 10,
+        "provider": {
+          "cartridge_id": "build_sampler",
+          "cartridge_version": "0.0.1",
+          "key": "seller",
+          "kind": "npc"
+        }
+      }
+    },
+    "text": {
+      "blueprint.hut.description": "A small hut of rough planks.",
+      "blueprint.hut.description.owned": "Your small hut of rough planks.",
+      "blueprint.hut.title": "The Hut",
+      "npc.seller.description": "A brisk seller of building plots.",
+      "npc.seller.room": "The [seller](seller) offers the plot for sale.",
+      "npc.seller.short": "the seller",
+      "room.lane.description": "A lane beside an empty plot to the north.",
+      "room.lane.title": "Market Lane",
+      "service.already_paid": "The plot is already yours.",
+      "service.buy_plot": "Buy the plot",
+      "service.buy_plot.used": "The seller takes your coin; the plot is yours.",
+      "service.unaffordable": "You cannot pay."
+    },
+    "world": {
+      "construction": {
+        "max_total": 1
+      }
+    }
+  },
+  "canonical": "{\"actions\":{\"build_sampler@0.0.1:action/buy_plot\":{\"accessibility\":\"service.buy_plot\",\"command\":\"use_service\",\"input\":[\"service\",\"quoted_price\"],\"key\":\"buy_plot\",\"label\":\"service.buy_plot\",\"policy\":{\"policy_version\":1,\"root\":{\"items\":[],\"op\":\"all\"}},\"priority\":0,\"target\":{\"kind\":\"entity\",\"scopes\":[\"room_occupants\"]}}},\"blueprints\":{\"build_sampler@0.0.1:blueprint/hut\":{\"description\":\"blueprint.hut.description\",\"key\":\"hut\",\"locks\":{\"enter\":{\"policy_version\":1,\"root\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"owns_plot\",\"kind\":\"fact\"},\"op\":\"fact_compare\"}}},\"title\":\"blueprint.hut.title\",\"variants\":[{\"description\":\"blueprint.hut.description.owned\",\"when\":{\"policy_version\":1,\"root\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"owns_plot\",\"kind\":\"fact\"},\"op\":\"fact_compare\"}}}]}},\"calendar\":{\"start\":25200},\"entry\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"lane\",\"kind\":\"room\"},\"facts\":{\"build_sampler@0.0.1:fact/owns_plot\":{\"key\":\"owns_plot\",\"meaning\":\"The character bought the plot north of the lane.\",\"scopes\":[\"player\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v2\",\"lock\":{\"capabilities\":{\"calendar\":1,\"construction\":1,\"containment\":1,\"description_variant\":1,\"fact\":1,\"movement\":1,\"policy\":1,\"resource\":1,\"schedule\":1,\"service\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"build_sampler\",\"requires\":{\"capabilities\":{\"calendar\":1,\"construction\":1,\"containment\":1,\"description_variant\":1,\"fact\":1,\"movement\":1,\"policy\":1,\"resource\":1,\"schedule\":1,\"service\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.99\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Build Sampler\",\"version\":\"0.0.1\"},\"npcs\":{\"build_sampler@0.0.1:npc/seller\":{\"description\":\"npc.seller.description\",\"key\":\"seller\",\"keywords\":[\"seller\"],\"resource_starts\":{\"pennies\":0},\"room\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"lane\",\"kind\":\"room\"},\"room_line\":\"npc.seller.room\",\"services\":[{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"buy_plot\",\"kind\":\"service\"}],\"short\":\"npc.seller.short\"}},\"policies\":{},\"resources\":{\"build_sampler@0.0.1:resource/hp\":{\"gain\":5,\"key\":\"hp\",\"maximum\":10,\"minimum\":0,\"start\":10},\"build_sampler@0.0.1:resource/ma\":{\"gain\":4,\"key\":\"ma\",\"maximum\":100,\"minimum\":0,\"start\":100},\"build_sampler@0.0.1:resource/mv\":{\"gain\":18,\"key\":\"mv\",\"maximum\":82,\"minimum\":0,\"start\":82},\"build_sampler@0.0.1:resource/pennies\":{\"gain\":0,\"key\":\"pennies\",\"maximum\":100,\"minimum\":0,\"start\":30}},\"rooms\":{\"build_sampler@0.0.1:room/lane\":{\"description\":\"room.lane.description\",\"exits\":{},\"key\":\"lane\",\"site\":{\"blueprints\":[{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"hut\",\"kind\":\"blueprint\"}],\"directions\":[\"north\"]},\"title\":\"room.lane.title\"}},\"services\":{\"build_sampler@0.0.1:service/buy_plot\":{\"action\":\"buy_plot\",\"benefit\":{\"fact\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"owns_plot\",\"kind\":\"fact\"},\"kind\":\"entitlement\"},\"currency\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"pennies\",\"kind\":\"resource\"},\"key\":\"buy_plot\",\"label\":\"service.buy_plot\",\"narration\":\"service.buy_plot.used\",\"price\":10,\"provider\":{\"cartridge_id\":\"build_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"seller\",\"kind\":\"npc\"}}},\"text\":{\"blueprint.hut.description\":\"A small hut of rough planks.\",\"blueprint.hut.description.owned\":\"Your small hut of rough planks.\",\"blueprint.hut.title\":\"The Hut\",\"npc.seller.description\":\"A brisk seller of building plots.\",\"npc.seller.room\":\"The [seller](seller) offers the plot for sale.\",\"npc.seller.short\":\"the seller\",\"room.lane.description\":\"A lane beside an empty plot to the north.\",\"room.lane.title\":\"Market Lane\",\"service.already_paid\":\"The plot is already yours.\",\"service.buy_plot\":\"Buy the plot\",\"service.buy_plot.used\":\"The seller takes your coin; the plot is yours.\",\"service.unaffordable\":\"You cannot pay.\"},\"world\":{\"construction\":{\"max_total\":1}}}",
+  "sha256": "2d247db048251ce243f7840c9bc601134326d23a670e685c5483911904e3d223"
+}

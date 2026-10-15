@@ -1100,5 +1100,26 @@
       "delta_preconditions_hold"
     ],
     "implemented_in": "toolbox row W7 (loka-kgd.29): narration alternates by command-id hash; visited_count"
+  },
+  "construction": {
+    "spec": "docs/system/cartridge.md Blueprint and site declarations (Built rooms S1)",
+    "contracts": [
+      "BlueprintDefinition",
+      "RoomDefinition",
+      "WorldSettings"
+    ],
+    "modules": [
+      "kernel/ts/src/content/cartridge_construction.ts",
+      "lib/loka/content/construction.ex"
+    ],
+    "fixtures": [
+      "protocol/fixtures/build_sampler_hash.json",
+      "protocol/fixtures/loader_floors.json",
+      "protocol/fixtures/invalid.json"
+    ],
+    "invariants": [
+      "unknown_types_fail_closed"
+    ],
+    "implemented_in": "Built rooms S1 (loka-kgd.109.1): blueprints, room sites and world.construction declared and checked; nothing builds yet"
   }
 }

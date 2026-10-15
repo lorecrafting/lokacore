@@ -96,7 +96,7 @@ defmodule Loka.Content.RoomParts do
   @doc "Each variant's condition in the schema-valid rooms, as `{rel, steps, root}`."
   @spec conditions(map()) :: [{String.t(), list(), map()}]
   def conditions(defs) do
-    for {_, {rel, [], r}} <- defs["room"],
+    for {_, {rel, [], r}} <- Enum.concat(defs["room"], defs["blueprint"]),
         {steps, root} <-
           for({s, v} <- variants(r) ++ asides(r), do: {s ++ ["when", "root"], v["when"]["root"]}) ++
             locks(r),

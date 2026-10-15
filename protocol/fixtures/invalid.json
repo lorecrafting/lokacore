@@ -29443,5 +29443,525 @@
         "code": "too_few_items"
       }
     ]
+  },
+  {
+    "contract": "BlueprintDefinition",
+    "value": {
+      "x": 1
+    },
+    "errors": [
+      {
+        "path": "/description",
+        "code": "missing_property"
+      },
+      {
+        "path": "/key",
+        "code": "missing_property"
+      },
+      {
+        "path": "/title",
+        "code": "missing_property"
+      },
+      {
+        "path": "/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "BlueprintDefinition",
+    "value": {
+      "key": "hut",
+      "title": "t",
+      "description": "d",
+      "variants": [],
+      "tags": [],
+      "locks": {
+        "x": 1
+      }
+    },
+    "errors": [
+      {
+        "path": "/locks/enter",
+        "code": "missing_property"
+      },
+      {
+        "path": "/locks/x",
+        "code": "unknown_property"
+      },
+      {
+        "path": "/tags",
+        "code": "too_few_items"
+      },
+      {
+        "path": "/variants",
+        "code": "too_few_items"
+      }
+    ]
+  },
+  {
+    "contract": "BlueprintDefinition",
+    "value": {
+      "key": "hut",
+      "title": "t",
+      "description": "d",
+      "variants": [
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "description": "d"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "description": "d"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "description": "d"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "description": "d"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "description": "d"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "description": "d"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "description": "d"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "description": "d"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "description": "d"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "description": "d"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "description": "d"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "description": "d"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "description": "d"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "description": "d"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "description": "d"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "description": "d"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "description": "d"
+        }
+      ],
+      "tags": [
+        "air",
+        "air",
+        "air",
+        "air",
+        "air",
+        "air",
+        "air",
+        "air",
+        "air",
+        "air",
+        "air",
+        "air",
+        "air",
+        "air",
+        "air",
+        "air",
+        "air"
+      ]
+    },
+    "errors": [
+      {
+        "path": "/tags",
+        "code": "too_many_items"
+      },
+      {
+        "path": "/variants",
+        "code": "too_many_items"
+      }
+    ]
+  },
+  {
+    "contract": "RoomDefinition",
+    "value": {
+      "key": "r",
+      "title": "t",
+      "description": "d",
+      "exits": {},
+      "site": {
+        "directions": [],
+        "x": 1
+      }
+    },
+    "errors": [
+      {
+        "path": "/site/blueprints",
+        "code": "missing_property"
+      },
+      {
+        "path": "/site/directions",
+        "code": "too_few_items"
+      },
+      {
+        "path": "/site/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "RoomDefinition",
+    "value": {
+      "key": "r",
+      "title": "t",
+      "description": "d",
+      "exits": {},
+      "site": {
+        "directions": [
+          "north"
+        ],
+        "blueprints": []
+      }
+    },
+    "errors": [
+      {
+        "path": "/site/blueprints",
+        "code": "too_few_items"
+      }
+    ]
+  },
+  {
+    "contract": "RoomDefinition",
+    "value": {
+      "key": "r",
+      "title": "t",
+      "description": "d",
+      "exits": {},
+      "site": {
+        "blueprints": [
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "0.0.1",
+            "kind": "blueprint",
+            "key": "hut"
+          }
+        ]
+      }
+    },
+    "errors": [
+      {
+        "path": "/site/directions",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "RoomDefinition",
+    "value": {
+      "key": "r",
+      "title": "t",
+      "description": "d",
+      "exits": {},
+      "site": {
+        "directions": [
+          "sideways",
+          "north",
+          "north",
+          "north",
+          "north",
+          "north",
+          "north"
+        ],
+        "blueprints": [
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "0.0.1",
+            "kind": "blueprint",
+            "key": "hut"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "0.0.1",
+            "kind": "blueprint",
+            "key": "hut"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "0.0.1",
+            "kind": "blueprint",
+            "key": "hut"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "0.0.1",
+            "kind": "blueprint",
+            "key": "hut"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "0.0.1",
+            "kind": "blueprint",
+            "key": "hut"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "0.0.1",
+            "kind": "blueprint",
+            "key": "hut"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "0.0.1",
+            "kind": "blueprint",
+            "key": "hut"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "0.0.1",
+            "kind": "blueprint",
+            "key": "hut"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "0.0.1",
+            "kind": "blueprint",
+            "key": "hut"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "0.0.1",
+            "kind": "blueprint",
+            "key": "hut"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "0.0.1",
+            "kind": "blueprint",
+            "key": "hut"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "0.0.1",
+            "kind": "blueprint",
+            "key": "hut"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "0.0.1",
+            "kind": "blueprint",
+            "key": "hut"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "0.0.1",
+            "kind": "blueprint",
+            "key": "hut"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "0.0.1",
+            "kind": "blueprint",
+            "key": "hut"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "0.0.1",
+            "kind": "blueprint",
+            "key": "hut"
+          },
+          {
+            "cartridge_id": "c",
+            "cartridge_version": "0.0.1",
+            "kind": "blueprint",
+            "key": "hut"
+          }
+        ]
+      }
+    },
+    "errors": [
+      {
+        "path": "/site/blueprints",
+        "code": "too_many_items"
+      },
+      {
+        "path": "/site/directions",
+        "code": "too_many_items"
+      },
+      {
+        "path": "/site/directions/0",
+        "code": "not_in_enum"
+      }
+    ]
+  },
+  {
+    "contract": "WorldSettings",
+    "value": {
+      "construction": {
+        "max_total": 0,
+        "x": 1
+      }
+    },
+    "errors": [
+      {
+        "path": "/construction/max_total",
+        "code": "below_minimum"
+      },
+      {
+        "path": "/construction/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "WorldSettings",
+    "value": {
+      "construction": {}
+    },
+    "errors": [
+      {
+        "path": "/construction/max_total",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "WorldSettings",
+    "value": {
+      "construction": {
+        "max_total": 1.5
+      }
+    },
+    "errors": [
+      {
+        "path": "/construction/max_total",
+        "code": "invalid_type"
+      }
+    ]
   }
 ]
