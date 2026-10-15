@@ -3466,7 +3466,7 @@ Homestead hs-11 (Beads `loka-kgd.108.8`): a skill may require another skill's le
 Homestead hs-13 (Beads `loka-kgd.108.10`): the player cooks at the kitchen hearth instead of commissioning the cook. Content only; no engine change, no new `kernel_api` floor.
 
 - **Command.** None new: `talk` and `choose learn` at the cook ([skill trees](#skill-trees-homestead-hs-11)); `perform cook_stew` or `perform cook_feast` at the hearth detail ([craft](#craft-homestead-hs-10)).
-- **Admission.** The cook offers `learn` (`skill.acquire cooking`, no payment) while the skill is not held. `cook_stew` requires `skill_compare cooking 1` and two of `fish_01`..`fish_05` held; `cook_feast` requires `skill_compare cooking 2` (two uses, growth `[2, 4]`) and three. A failing policy is offered unavailable `invalid_state` with no message; a fish shortage refuses `craft.cook_stew.needs` or `craft.cook_feast.needs`; a larder with no dish left refuses with no message.
+- **Admission.** The cook offers `learn` (`skill.acquire cooking`, free: the novice box, [owner decision](../decisions/owner-decision-homestead-skill-path-2026-10-15.md)) while the skill is not held. `cook_stew` requires `skill_compare cooking 1` and two of `fish_01`..`fish_05` held; `cook_feast` requires `skill_compare cooking 2` (two uses, growth `[2, 4]`) and three. A failing policy is offered unavailable `invalid_state` with no message; a fish shortage refuses `craft.cook_stew.needs` or `craft.cook_feast.needs`; a larder with no dish left refuses with no message.
 - **Effect.** The opposed check against the hearth's rating 1 passes at level 1. On every accepted perform the fish move to the larder (the hs-5 restock returns two to the pond each hour, cap five); on success the lowest-id dish (`stew_hearty_01`..`03`, `feast_01`) moves from the larder to the body. A failure ("the pot boils over") keeps the fish in the larder and yields nothing. Each crafted dish gets `spoiling` from its keep reaction, as the plain stew does; eating one applies `hearty` (str +2, 3600 s).
 - **Realm seams** (owner decision 2026-10-13, brief checklist), as hs-5 and hs-10.
   1. Actor: met; craft and eat act on `bodyOf(world, actor_id)`.
@@ -3480,13 +3480,13 @@ Homestead hs-13 (Beads `loka-kgd.108.10`): the player cooks at the kitchen heart
   9. Instancing: not applicable.
 - **Opt-in.** Cartridge content. Chapter 1 declares none.
 - **Book.** No new component: the hearth detail link, the recipe's offered action, the cook's dialogue.
-- **Known limits.** Three hearty stews and one feast exist; eaten or spoiled dishes never return, so a fourth stew refuses. The brief's 300 s recipe duration is not modelled (recipes have no duration). At rating 1 a learned cook never fails; the failure path is tested at rating 2. The feast reuses `hearty`.
+- **Known limits.** Three hearty stews and one feast exist; eaten or spoiled dishes never return, so a fourth stew refuses. The brief's 300 s cook has no `duration`: the sampler's `time_policy` (real elapsed) refuses a recipe duration `INVALID_TIME_POLICY` (`lib/loka/content/recipes.ex:111`). At rating 1 a learned cook never fails; the failure path is tested at rating 2. The feast reuses `hearty`.
 - **Traps.** 11 (statuses only for state): `hearty` has a duration.
 - **Sampler.** `cartridges/kitchen_sampler` (`kernel/ts/test/kitchen.test.ts`).
 - **Composition record** ([architecture](architecture.md#building-mechanics-by-composition)).
   - Consumer: `kitchen_sampler`.
   - Reads: the actor's facts (`skill_compare`, `uses_cooking`), containers.
-  - Writes: none new.
+  - Writes: the player fact `cooked` (a recipe needs one success step); ops, events, jobs and save rows: none new.
   - Reused: `craft`, `skill_compare`, `skill.acquire`, the opposed check, Eat `applies`, the keep and spoil reactions, `replenish.run`.
   - New: content only.
   - Missing invariant: none.

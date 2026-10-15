@@ -19,7 +19,8 @@ import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { value } from '../src/mechanics/attributes/shared.ts';
 import { currentStatus } from '../src/mechanics/status/shared.ts';
 import { pending } from '../src/mechanics/dialogue/shared.ts';
-import { level as skillLevel } from '../src/mechanics/skill_level.ts';
+import { level as skillLevel, practice } from '../src/mechanics/skill_level.ts';
+import { value as fact } from '../src/mechanics/fact.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-kitchen-sampler-'));
 let artifact: Uint8Array;
@@ -286,8 +287,7 @@ test('the loader refuses an unresolved applies and a meal that moves hp_max', ()
 // 3 fish; both send the fish to the larder and take the dish from it (three hearty stews, one
 // feast). `hearty` is str +2 for 3600 s.
 const cooking = ref('skill', 'cooking');
-const uses = (w: World) =>
-  Object.entries(w.state.facts ?? {}).find(([k]) => k.includes('"uses_cooking"'))?.[1] ?? 0;
+const uses = (w: World) => fact(w, w.character, practice(cooking));
 const pennies = (w: World) => level(w, w.body, resourceRef(w, 'pennies'));
 const cookOffer = (w: World, action: string) => {
   let found: { available: boolean; reason?: object } | undefined;
@@ -321,7 +321,10 @@ const learn = (w: World) => {
 };
 /** Hold `k` fish: wait on the larder's restock until the pond has enough, then fetch them. */
 const gather = (w: World, k: number) => {
-  while (fish(w, room(w, 'pond')) + fish(w, w.body) < k) w = wait(w, 3600);
+  for (let h = 0; fish(w, room(w, 'pond')) + fish(w, w.body) < k; h++) {
+    assert.ok(h < 48, 'the pond never restocks');
+    w = wait(w, 3600);
+  }
   const pond = [1, 2, 3, 4, 5]
     .map((i) => `fish_0${i}`)
     .filter((f) => w.state.containers[item(w, f)] === room(w, 'pond'));
@@ -335,8 +338,16 @@ const holder = (w: World, k: string) => w.state.containers[item(w, k)];
 // two fish (quantity 3), the growth step [2, 4] off by one, or a fourth stew from an empty larder.
 test('the cook teaches cooking free; stews and the feast are cooked at the hearth', () => {
   assert.equal(refusal(gather(fresh(), 2), 'cook_stew'), null); // level 0 < 1, no message
+  // After the learn the cook has nothing to say: talk is refused.
+  const teaches = (w: World) => {
+    const r = send(w, { type: 'talk', target_id: cook(w) });
+    return (
+      r.decision.kind === 'accepted' && JSON.stringify(gameView(r.world).choice).includes('"learn"')
+    );
+  };
+  assert.equal(teaches(fresh()), true);
   let w = learn(fresh());
-  assert.equal(pennies(w), pennies(fresh()));
+  assert.deepEqual([pennies(w), teaches(w)], [pennies(fresh()), false]);
   w = gather(w, 1);
   assert.equal(skillLevel(w, w.character, cooking), 1);
   assert.equal(refusal(w, 'cook_stew'), 'craft.cook_stew.needs'); // 1 fish < 2
@@ -360,12 +371,15 @@ test('the cook teaches cooking free; stews and the feast are cooked at the heart
     [holder(w, 'feast_01'), uses(w), skillLevel(w, w.character, cooking)],
     [w.body, 3, 2],
   );
+  assert.ok(currentStatus(w, item(w, 'feast_01'), ref('status', 'spoiling')));
   w = cooked(gather(w, 2), 'cook_stew').world;
   assert.deepEqual([uses(w), skillLevel(w, w.character, cooking)], [4, 3]);
   assert.equal(refusal(gather(w, 2), 'cook_stew'), null); // larder empty of hearty stews
   w = play(w, { type: 'eat', item_id: item(w, 'stew_hearty_01') });
   assert.equal(str(w), 12);
-  assert.equal(str(wait(w, 3600)), 10);
+  w = wait(w, 3600);
+  assert.equal(str(w), 10);
+  assert.equal(str(play(w, { type: 'eat', item_id: item(w, 'feast_01') })), 12);
 });
 
 // Breaks: a failed cook keeps the fish or still hands out a stew (the brief's "boils over").
