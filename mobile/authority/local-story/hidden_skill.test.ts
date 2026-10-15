@@ -97,8 +97,9 @@ test('a talk opened without its concealed lesson reopens, pending and chosen', (
   }
 });
 
-// Breaks: the check admits an id the dialogue lacks, a dropped choice that teaches no hidden skill
-// (whittle), another order or an empty list.
+// Breaks: a reopen admits a forged row (an id the dialogue lacks, a dropped choice that teaches
+// no hidden skill, another order, empty) or a refusal writes the file. The receipt is forged too,
+// so the row check (dialogue-save.ts, run before the receipt replay) is what refuses first.
 test('a forged choice_ids row is save_corrupt and the file is unchanged', (t) => {
   const dir = mkdtempSync(join(tmpdir(), 'loka-hidden-skill-forged-'));
   t.after(() => rmSync(dir, { recursive: true, force: true }));
@@ -111,6 +112,18 @@ test('a forged choice_ids row is save_corrupt and the file is unchanged', (t) =>
     p.sql
       .prepare("UPDATE state_row SET value = ? WHERE section = 'choices' AND key = ?")
       .run(JSON.stringify(row), rows[0]!.key as string);
+    // The talk's receipt carries the same choice.open; forged too, so the row check meets the row
+    // before the receipt replay (receipt-history.ts) would refuse it.
+    const last = p.sql
+      .prepare('SELECT command_id, response FROM receipt ORDER BY revision DESC LIMIT 1')
+      .get()!;
+    const response = JSON.parse(String(last.response));
+    const open = response.delta.ops.filter((o: any) => o.op === 'choice.open');
+    assert.equal(open.length, 1);
+    open[0].choice_ids = ids;
+    p.sql
+      .prepare('UPDATE receipt SET response = ? WHERE command_id = ?')
+      .run(JSON.stringify(response), last.command_id as string);
     p.sql.close();
     const bytes = readFileSync(path);
     assert.throws(() => coldReopen(path, craft), /save_corrupt/, JSON.stringify(ids));

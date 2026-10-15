@@ -20,7 +20,7 @@ import { hydrate } from '../src/runtime/created.ts';
 import { check } from '../src/runtime/invariants.ts';
 import { validate } from '../src/foundation/validate.ts';
 import { resolved } from '../src/commands/actions.ts';
-import { pending } from '../src/mechanics/dialogue/shared.ts';
+import { openable, pending } from '../src/mechanics/dialogue/shared.ts';
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));
 const scratch = mkdtempSync(join(tmpdir(), 'loka-craft-sampler-'));
@@ -488,10 +488,38 @@ test('a concealed lesson is left out of the opened choices and refused', () => {
   assert.deepEqual(ids(opened(carve(secret(true)).world)), ['learn', 'leave']); // whittling 2
 });
 
+// Breaks (hs-14 save check, dialogue-save.ts and dialogue-receipt.ts): a saved row may drop a
+// choice that teaches no skill or a shown one (whittle), reorder, be empty, name an id the
+// dialogue lacks or not be a list (a TypeError, not save_corrupt); or the full row or the one less
+// the hidden lesson is refused.
+test('a saved row may lack only a lesson of a hidden skill', () => {
+  const w = secret(true);
+  const d = w.cartridge.dialogues![`${P}dialogue/old_carver_carving`]!;
+  const [learn]: any = d.choices.learn!.sequence;
+  const whittle = {
+    ...d.choices.learn!,
+    sequence: [{ ...learn, skill: { ...learn.skill, key: 'whittling' } }],
+  };
+  const d2 = { ...d, choices: { ...d.choices, whittle } };
+  const rows = [
+    ['learn', 'leave', 'whittle'],
+    ['leave', 'whittle'],
+    ['learn', 'leave'],
+    ['learn', 'whittle'],
+    ['whittle', 'leave'],
+    ['bogus'],
+    [],
+    null,
+  ];
+  assert.deepEqual(
+    rows.map((ids) => openable(w, d2, ids)),
+    [true, true, false, false, false, false, false, false],
+  );
+});
+
 // Breaks (hs-14 secret; twin of content_craft_test.exs): a shown skill's qualification or a
 // dialogue policy reading a hidden skill loads, a labeled talk or a riddle dialogue (its letter
-// bank shows) teaching one loads, or a hidden
-// skill's own qualification reading one is refused.
+// bank shows) teaching one loads, or a hidden skill's own qualification reading one is refused.
 test('loader: no shown qualification, dialogue policy, talk label or riddle reveals a hidden skill', () => {
   const S = (k: string) => `${P}skill/${k}`;
   const D = (k: string) => `${P}dialogue/${k}`;
