@@ -47,7 +47,7 @@ export function creationValid(identity: Json, state: State): boolean {
 export function initialPair(op: DeltaOp, next: DeltaOp | undefined): boolean {
   if (op.op !== 'entity.create') return true;
   const placed = next?.op === 'entity.transfer' && next.entity_id === op.identity.id;
-  return op.identity.origin.kind === 'built'
+  return op.identity.origin?.kind === 'built'
     ? !placed
     : placed && next.source_id === null && next.writer_group === op.writer_group;
 }

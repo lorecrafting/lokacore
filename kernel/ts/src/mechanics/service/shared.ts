@@ -46,8 +46,8 @@ export function transition(
   if ('code' in service) return service;
   if (p.quoted_price !== service.price) return { code: 'invalid_state' as const };
   const benefit = service.benefit;
-  const room = benefit.kind === 'build' && unbuildable(world, benefit);
-  if (room) return room;
+  const blocked = benefit.kind === 'build' && unbuildable(world, benefit);
+  if (blocked) return blocked;
   const escrow = benefit.kind === 'entitlement' ? benefit.escrow : undefined;
   if (benefit.kind === 'entitlement' && value(world, p.actor_id, benefit.fact) !== false)
     return serviceRefusal('invalid_state', escrow ? 'service.order_open' : 'service.already_paid');

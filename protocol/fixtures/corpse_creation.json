@@ -2023,6 +2023,64 @@
           }
         }
       }
+    },
+    {
+      "id": "creation without an origin faults",
+      "state": {
+        "clock": 0,
+        "containers": {
+          "00000000-0000-4000-8000-000000000001": "00000000-0000-4000-8000-000000000003",
+          "00000000-0000-4000-8000-000000000002": "00000000-0000-4000-8000-000000000003",
+          "00000000-0000-4000-8000-000000000006": "00000000-0000-4000-8000-000000000001"
+        },
+        "known_entities": {
+          "00000000-0000-4000-8000-000000000001": {
+            "kind": "body",
+            "owner_id": "00000000-0000-4000-8000-000000000007"
+          },
+          "00000000-0000-4000-8000-000000000002": {
+            "kind": "npc"
+          },
+          "00000000-0000-4000-8000-000000000003": {
+            "kind": "room"
+          },
+          "00000000-0000-4000-8000-000000000004": {
+            "kind": "room"
+          },
+          "00000000-0000-4000-8000-000000000006": {
+            "kind": "slot"
+          }
+        },
+        "corpse_templates": {
+          "{\"cartridge_id\":\"c\",\"cartridge_version\":\"1.0.0\",\"key\":\"player_corpse\",\"kind\":\"item\"}": "player",
+          "{\"cartridge_id\":\"c\",\"cartridge_version\":\"1.0.0\",\"key\":\"rat_corpse\",\"kind\":\"item\"}": "npc"
+        }
+      },
+      "ops": [
+        {
+          "op": "entity.create",
+          "writer_group": 0,
+          "identity": {
+            "id": "00000000-0000-4000-8000-000000000005",
+            "definition": {
+              "cartridge_id": "c",
+              "cartridge_version": "1.0.0",
+              "kind": "blueprint",
+              "key": "hut"
+            }
+          }
+        }
+      ],
+      "expected": {
+        "fault": {
+          "kind": "fault",
+          "code": "precondition_failed",
+          "target": {
+            "kind": "entity",
+            "entity_id": "00000000-0000-4000-8000-000000000005"
+          }
+        }
+      }
     }
   ],
   "contracts": [
