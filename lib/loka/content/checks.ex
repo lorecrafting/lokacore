@@ -48,6 +48,7 @@ defmodule Loka.Content.Checks do
 
   def expand(%{"rest" => r}, m), do: %{"rest" => Loka.Content.Dreams.expand(r, m)}
   def expand(%{"every" => _, "from" => _} = r, m), do: Loka.Content.Replenish.expand(r, m)
+  def expand(%{"pierced_by" => _} = s, m), do: Loka.Content.Status.expand(s, m, &expand/2)
 
   def expand(%{"label" => _, "text" => _, "topic" => topic} = readable, m),
     do: Map.put(readable, "topic", ref(topic, "topic", m))
@@ -137,6 +138,9 @@ defmodule Loka.Content.Checks do
   def expand(%{"kind" => "use", "tool" => %{"liquid" => l}} = target, m) when is_binary(l),
     do: put_in(target, ["tool", "liquid"], ref(l, "liquid", m))
 
+  def expand(%{"kind" => "storylet", "rooms" => rs} = target, m) when is_list(rs),
+    do: Map.put(target, "rooms", Enum.map(rs, &ref(&1, "room", m)))
+
   def expand(%{"offers" => offers, "resource" => r} = shop, m),
     do:
       shop
@@ -175,7 +179,6 @@ defmodule Loka.Content.Checks do
       )
 
   def expand(%{"discovered" => f} = n, m), do: Map.put(n, "discovered", ref(f, "fact", m))
-
   def expand(%{"label" => _, "fact" => f} = n, m), do: Map.put(n, "fact", ref(f, "fact", m))
 
   def expand(%{"skill" => s} = n, m) when is_binary(s),
@@ -229,18 +232,15 @@ defmodule Loka.Content.Checks do
   def expand(%{"story_point" => p, "title" => t} = chapter, m) when is_binary(t),
     do: Map.put(chapter, "story_point", ref(p, "story_point", m))
 
-  def expand(%{"story_point" => p, "outcome" => o} = trigger, m) when is_binary(o),
-    do:
-      trigger
-      |> Map.delete("story_point")
-      |> expand(m)
-      |> Map.put("story_point", ref(p, "story_point", m))
+  def expand(%{"story_point" => p, "outcome" => o} = t, m) when is_binary(o),
+    do: Map.put(expand(Map.delete(t, "story_point"), m), "story_point", ref(p, "story_point", m))
 
   def expand(%{"quest" => q, "outcome" => o} = trigger, m) when is_binary(o),
     do: trigger |> Map.delete("quest") |> expand(m) |> Map.put("quest", ref(q, "quest", m))
 
-  def expand(%{"action" => a, "room" => r, "detail" => _} = trigger, m) when is_binary(a),
-    do: trigger |> Map.put("action", ref(a, "recipe", m)) |> Map.put("room", ref(r, "room", m))
+  # A scene's action trigger; one a storylet starts names no room (row FD3).
+  def expand(%{"action" => a, "outcome" => _} = t, m) when is_binary(a),
+    do: Map.replace_lazy(%{t | "action" => ref(a, "recipe", m)}, "room", &ref(&1, "room", m))
 
   def expand(%{"player_corpse" => _, "npc_corpse" => _, "shrine" => _} = death, m),
     do: Loka.Content.Death.expand(death, m)

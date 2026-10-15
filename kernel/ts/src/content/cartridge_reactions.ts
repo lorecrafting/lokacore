@@ -23,7 +23,9 @@ const NAMED: Record<string, string> = {
   status: 'status',
   story_point: 'story_point',
   target: 'npc',
+  topic: 'topic', // row FD7
   victim: 'npc',
+  witness: 'npc', // row FD5
 };
 
 // The kernel_api minor each consequence op needs (major 1).
@@ -36,6 +38,17 @@ const FLOORS: Record<string, number> = {
   'barrier.set': 56, // row W22 (loka-kgd.96)
   'item.move': 77, // row 41 (decay)
   'population.spawn': 84, // row 37a (phased world events)
+  'npc.move': 95, // row FD5 (loka-kgd.22)
+};
+
+// The definitions an item.move (row 41), population.spawn (row 37a) or npc.move (row FD5) step names.
+const MOVES: Record<string, [string, string][]> = {
+  'item.move': [['room', 'room']],
+  'population.spawn': [['plan', 'population']],
+  'npc.move': [
+    ['npc', 'npc'],
+    ['room', 'room'],
+  ],
 };
 
 const each = (c: Obj): [Obj, string][] =>
@@ -67,7 +80,9 @@ export const uses = (c: Obj) =>
                   ? 'quest_resolved'
                   : s.op === 'barrier.set'
                     ? 'barrier_changed'
-                    : 'fact_changed',
+                    : s.op === 'npc.move'
+                      ? 'entity_entered_room'
+                      : 'fact_changed',
               `${at}.apply[${i}].op`,
             ],
           ],
@@ -80,12 +95,14 @@ const apiFloor = (r: Obj): number =>
     r.on.event === 'quest_resolved' ? 8 : 0,
     r.on.event === 'spoken' ? 48 : r.on.npc ? 47 : 0, // speech (G9), the entrant filter (W3)
     r.on.target ? 87 : r.on.attacker ? 58 : 0, // loka-kgd.79, row 39
+    r.on.witness ? 95 : 0, // row FD5
+    r.on.event === 'asked' ? 96 : 0, // row FD7
     r.on.event === 'status_applied' ? 53 : 0, // status reader 2 (row G3)
     // co_present: row W21; its tag: row W22
     ...r.apply.map((s: Obj) => (s.tag ? 56 : s.co_present ? 50 : (FLOORS[s.op] ?? 0))),
   );
 
-// size: allow 47, typed suppression and status references stay in one ordered check
+// size: allow 49, typed suppression, status and move (row FD5) references stay in one ordered check
 export function reactions(c: Obj, { named, typedValue }: Checks): Diagnostic[] {
   const out: Diagnostic[] = [];
   const [major, minor] = c.manifest.requires.kernel_api.at_least.split('.').map(Number);
@@ -97,8 +114,9 @@ export function reactions(c: Obj, { named, typedValue }: Checks): Diagnostic[] {
       );
     for (const [field, kind] of Object.entries(NAMED))
       if (r.on[field]) named(r.on[field], kind, `${at}.on.${field}`);
-    // A spawn template has no instance to enter (row W3), attack (loka-kgd.79) or be hit (row 39).
-    for (const f of ['npc', 'attacker', 'target'])
+    // A spawn template has no instance to enter (row W3), attack (loka-kgd.79), be hit (row 39) or
+    // witness (row FD5).
+    for (const f of ['npc', 'attacker', 'target', 'witness'])
       if (r.on[f] && c.npcs?.[refString(r.on[f])]?.spawn_template)
         out.push(diag('SCHEMA_VIOLATION', `${at}.on.${f}`, { error: 'invalid_value' }));
     r.apply.forEach((s: Obj, i: number) => {
@@ -118,9 +136,11 @@ export function reactions(c: Obj, { named, typedValue }: Checks): Diagnostic[] {
           out.push(diag('OUTCOME_MISMATCH', `${at}.apply[${i}].op`));
       } else if (s.op === 'barrier.set') {
         out.push(...barrierSet(c, s, r.on.room, `${at}.apply[${i}]`, named));
-      } else if (s.op === 'item.move' || s.op === 'population.spawn') {
-        const [f, kind] = s.op === 'item.move' ? ['room', 'room'] : ['plan', 'population']; // rows 41, 37a
-        named(s[f], kind, `${at}.apply[${i}].${f}`);
+      } else if (MOVES[s.op]) {
+        for (const [f, kind] of MOVES[s.op]) if (s[f]) named(s[f], kind, `${at}.apply[${i}].${f}`);
+        if (s.npc && c.npcs?.[refString(s.npc)]?.spawn_template)
+          // row FD5: no instance to move
+          out.push(diag('SCHEMA_VIOLATION', `${at}.apply[${i}].npc`, { error: 'invalid_value' }));
       } else if (!['status.apply', 'status.cure', 'experience.grant'].includes(s.op)) {
         // status steps, experience.grant, fact.adjust's int: with their declarations (cartridge_standing.ts).
         named(s.fact, 'fact', `${at}.apply[${i}].fact`);
@@ -130,8 +150,21 @@ export function reactions(c: Obj, { named, typedValue }: Checks): Diagnostic[] {
       }
     });
   }
-  return out;
+  return [...out, ...entryConcealment(c)];
 }
+
+// Row 16: entry engagement cures concealment on the same move (conflicting_write), so a reaction on
+// entity_entered_room may not apply a concealment status.
+const entryConcealment = (c: Obj) =>
+  each(c).flatMap(([r, at]) =>
+    r.on.event !== 'entity_entered_room'
+      ? []
+      : r.apply.flatMap((s: Obj, i: number) =>
+          s.op === 'status.apply' && c.statuses?.[refString(s.status)]?.concealment
+            ? [diag('OUTCOME_MISMATCH', `${at}.apply[${i}].op`)]
+            : [],
+        ),
+  );
 
 // Row W22 (loka-kgd.96): a named barrier resolves; to locked needs a key_item on the named barrier,
 // or on every barrier carrying the tag, else no key could ever unlock it (BARRIER_UNREACHABLE_KEY).

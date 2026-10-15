@@ -2,7 +2,7 @@ import { diag, step, type Obj } from './cartridge_refs.ts';
 import type { Diagnostic } from '../contracts.gen.ts';
 import { refString } from '../runtime/decision.ts';
 
-/** Authored identities, starting custody and explicitly funded conserved currency. */
+/** Authored identities, starting custody (any NPC's item for a stolen offer) and explicitly funded conserved currency. */
 export function commerce(c: Obj): Diagnostic[] {
   const out: Diagnostic[] = [];
   for (const [ref, npc] of Object.entries((c.npcs ?? {}) as Obj)) {
@@ -29,7 +29,7 @@ export function commerce(c: Obj): Diagnostic[] {
         !item ||
         o.item.kind !== 'item' ||
         item.location.in !== 'npc' ||
-        refString(item.location.npc) !== ref
+        (!o.stolen && refString(item.location.npc) !== ref)
       )
         out.push(diag('UNRESOLVED_REFERENCE', at));
     }
@@ -64,7 +64,11 @@ function stocks(c: Obj, offers: Obj[], at: string, version: number): Diagnostic[
   if (offers.some((o) => o.stock) && version < 1082)
     out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
   const plain = offers.filter((o) => !o.stock).map((o) => refString(o.item));
-  offers.forEach((o, i) => out.push(...stock(c, o, `${at}.offers[${i}].stock`, plain)));
+  offers.forEach((o, i) => {
+    if (o.stolen && o.stock)
+      out.push(diag('SCHEMA_VIOLATION', `${at}.offers[${i}].stolen`, { error: 'invalid_value' }));
+    out.push(...stock(c, o, `${at}.offers[${i}].stock`, plain));
+  });
   return out;
 }
 

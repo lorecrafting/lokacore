@@ -12,7 +12,7 @@ defmodule Loka.Content.RoomParts do
 
   def variant_texts(defs, text) do
     for {_, {rel, [], r}} <- defs["room"],
-        {steps, t} <- description_keys(r) ++ climb_keys(r),
+        {steps, t} <- description_keys(r) ++ climb_keys(r) ++ aside_keys(r),
         not is_map_key(text, t),
         do: diag("UNRESOLVED_REFERENCE", at(rel, steps), %{"target" => t})
   end
@@ -31,6 +31,9 @@ defmodule Loka.Content.RoomParts do
       else: variants ++ knock
   end
 
+  # Toolbox row FD2: each aside's text.
+  defp aside_keys(r), do: for({s, a} <- asides(r), do: {s ++ ["text"], a["text"]})
+
   # Toolbox row 30: each climb face's fall narration.
   defp climb_keys(r),
     do:
@@ -44,6 +47,16 @@ defmodule Loka.Content.RoomParts do
         ],
         {v, i} <- Enum.with_index(Map.get(d, "variants", [])),
         do: {steps ++ ["variants", i], v}
+  end
+
+  @doc "Toolbox row FD2: each aside of room `r` and of its details, with its steps in the room file."
+  @spec asides(map()) :: [{list(), map()}]
+  def asides(r) do
+    for {steps, d} <- [
+          {[], r} | for({k, d} <- Map.get(r, "details", %{}), do: {["details", k], d})
+        ],
+        {a, i} <- Enum.with_index(Map.get(d, "asides", [])),
+        do: {steps ++ ["asides", i], a}
   end
 
   @doc """
@@ -85,7 +98,8 @@ defmodule Loka.Content.RoomParts do
   def conditions(defs) do
     for {_, {rel, [], r}} <- defs["room"],
         {steps, root} <-
-          for({s, v} <- variants(r), do: {s ++ ["when", "root"], v["when"]["root"]}) ++ locks(r),
+          for({s, v} <- variants(r) ++ asides(r), do: {s ++ ["when", "root"], v["when"]["root"]}) ++
+            locks(r),
         do: {rel, steps, root}
   end
 

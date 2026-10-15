@@ -30,7 +30,9 @@ export function reserved(c: Obj): Diagnostic[] {
   const expected = expectedFacts(c);
   const dreamRefs = dreams(c);
   const refs = Object.keys(expected).map((k) => `${c.manifest.id}@${c.manifest.version}:fact/${k}`);
-  const owned = [...refs, ...engineWrittenRefs(c)];
+  // Row 33: containment alone writes the stolen fact.
+  const stolen = c.world?.theft ? [refString(c.world.theft.stolen)] : [];
+  const owned = [...refs, ...engineWrittenRefs(c), ...stolen];
   const out: Diagnostic[] = [];
   for (const [i, ref] of refs.entries())
     if (!Object.hasOwn(c.facts, ref) || encode(c.facts[ref]) !== encode(Object.values(expected)[i]))

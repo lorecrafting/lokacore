@@ -1,4 +1,4 @@
-// size: allow 336, ancestry, bell area, Study edge and barrier opens_when roots join shared reference admission
+// size: allow 344, ancestry, bell area, Study edge, barrier opens_when, ask answer roots and identity name variants join shared reference admission
 import { water } from './cartridge_water.ts';
 import { topics } from './cartridge_topics.ts';
 import { pools } from './cartridge_pools.ts';
@@ -37,6 +37,8 @@ import { quests, questPolicies, featureApi } from './cartridge_quests.ts';
 import { reactions } from './cartridge_reactions.ts';
 import { recipes } from './cartridge_recipes.ts';
 import { reserved } from './cartridge_position.ts';
+import { theft } from './cartridge_theft.ts';
+import { answerRoots, asks } from './cartridge_asks.ts';
 import { cueParts } from './cartridge_senses.ts';
 import { lockRoots, locks } from './cartridge_locks.ts';
 import { holders } from './cartridge_holders.ts';
@@ -106,7 +108,12 @@ export function parts(c: Obj): [string, Obj, string][] {
   for (const [ref, b] of Object.entries((c.barriers ?? {}) as Obj))
     add('barrier', b, `.cartridge.barriers${step(ref)}`);
   if (c.calendar) out.push(['calendar', c.calendar, '.cartridge.calendar']);
-  return [...out, ...cueParts(c)];
+  return [...out, ...cueParts(c), ...identityParts(c)];
+}
+
+function identityParts(c: Obj, at = '.cartridge.world.identity.name_variants') {
+  const vs: Obj[] = c.world?.identity?.name_variants ?? []; // rows W15, FD9
+  return vs.map((v, i) => ['variant', v, `${at}[${i}]`] as [string, Obj, string]);
 }
 
 /** Each population plan gate's located root (row W12). */
@@ -115,6 +122,18 @@ const gateRoots = (c: Obj): [Obj, string][] =>
     (['birth_when', 'wander_when'] as const).flatMap((k): [Obj, string][] =>
       p[k] ? [[p[k].root, `.cartridge.populations${step(ref)}.${k}.root`]] : [],
     ),
+  );
+
+/** Toolbox row FD2: each room's and detail's aside with its path. */
+export const asideParts = (c: Obj): [Obj, string][] =>
+  Object.entries((c.rooms ?? {}) as Obj).flatMap(([ref, r]) =>
+    [
+      [r, `.cartridge.rooms${step(ref)}`],
+      ...Object.entries((r.details ?? {}) as Obj).map(([k, d]) => [
+        d,
+        `.cartridge.rooms${step(ref)}.details${step(k)}`,
+      ]),
+    ].flatMap(([d, at]) => (d.asides ?? []).map((a: Obj, i: number) => [a, `${at}.asides[${i}]`])),
   );
 
 // Policy nodes with diagnostic paths, across every definition that declares a condition.
@@ -139,7 +158,9 @@ export function nodes(c: Obj): [Obj, string][] {
     ...parts(c).flatMap(([k, v, at]) =>
       k === 'variant' || (k === 'cue' && v.when) ? walk(v.when.root, `${at}.when.root`) : [],
     ),
-    ...[...questPolicies(c), ...dispositions(c)].flatMap(([p, at]) => walk(p, at)),
+    ...[...questPolicies(c), ...dispositions(c), ...answerRoots(c)].flatMap(([p, at]) =>
+      walk(p, at),
+    ),
     ...cases(c).flatMap(([k, at]) => (k.when ? walk(k.when.root, `${at}.when.root`) : [])),
     ...Object.entries((c.reactions ?? {}) as Obj).flatMap(([ref, r]) =>
       r.when ? walk(r.when.root, `.cartridge.reactions${step(ref)}.when.root`) : [],
@@ -150,6 +171,7 @@ export function nodes(c: Obj): [Obj, string][] {
     ...Object.entries((c.dialogues ?? {}) as Obj).flatMap(([ref, d]) =>
       walk(d.policy.root, `.cartridge.dialogues${step(ref)}.policy.root`),
     ),
+    ...asideParts(c).flatMap(([a, at]) => walk(a.when.root, `${at}.when.root`)),
     ...lockRoots(c).flatMap(([p, at]) => walk(p, at)),
     ...gateRoots(c).flatMap(([p, at]) => walk(p, at)),
     ...Object.entries((c.barriers ?? {}) as Obj).flatMap(([ref, b]) =>
@@ -242,11 +264,14 @@ export function refStage(c: Obj): Diagnostic[] {
   for (const [ref, a] of Object.entries(c.actions as Obj))
     text(a, ['label', 'accessibility'], `.cartridge.actions${step(ref)}`);
   for (const [kind, d, at] of parts(c)) text(d, TEXT[kind] ?? ['description'], at);
+  for (const [a, at] of asideParts(c)) text(a, ['text'], at);
+  text(c.world?.identity ?? {}, ['name'], '.cartridge.world.identity'); // rows W15, FD9
   out.push(...water(c, check), ...skills(c, check), ...topics(c, check));
   ancestryRefs(c, check, out);
   out.push(...recipes(c, check), ...holders(c), ...barriers(c, check.named), ...links(c));
   out.push(...quests(c, check), ...reactions(c, check), ...dialogues(c, check));
   out.push(...pools(c, named), ...death(c, named), ...combat(c, named), ...commerce(c));
+  out.push(...theft(c, named), ...asks(c, check));
   out.push(...derived(c, named), ...levelling(c, check));
   return out;
 }

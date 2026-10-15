@@ -1,0 +1,30 @@
+{
+  "npc": "stranger",
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": []
+    }
+  },
+  "prompt": "dialogue.stranger.prompt",
+  "roles": {
+    "stranger": {
+      "role": "npc",
+      "npc": "stranger"
+    }
+  },
+  "choices": {
+    "ask_name": {
+      "label": "dialogue.stranger.ask_name",
+      "narration": "narration.stranger.ask_name",
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "knows_name",
+          "value": true
+        }
+      ]
+    }
+  }
+}

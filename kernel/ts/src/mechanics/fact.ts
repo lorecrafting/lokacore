@@ -117,7 +117,7 @@ export const seenTip = (world: World, recipe: string): DefinitionRef => ({
   key: `seen_tip_${recipe}` as DefinitionRef['key'],
 });
 
-type Owner = 'skills' | 'patrol' | 'service' | 'scene' | 'durability';
+type Owner = 'skills' | 'patrol' | 'service' | 'scene' | 'durability' | 'theft';
 
 /** Throws precondition_failed when only another owner's mechanic may write the fact `ref`. */
 function ownership(world: World, ref: DefinitionRef, owner?: Owner) {
@@ -155,6 +155,9 @@ function ownership(world: World, ref: DefinitionRef, owner?: Owner) {
   )
     throw new KernelError('precondition_failed');
   if (owner !== 'durability' && durable(world, ref)) throw new KernelError('precondition_failed');
+  const theft = world.cartridge.world?.theft;
+  if (owner !== 'theft' && theft && same(theft.stolen, ref))
+    throw new KernelError('precondition_failed');
 }
 
 /** Toolbox row 21: true for a fact some weapon's `durability` names (only `durability` writes it). */

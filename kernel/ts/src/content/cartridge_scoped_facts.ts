@@ -21,7 +21,10 @@ const SITES = [
 const OPS = SITES.slice(0, 5); // the sites that are ops and may name a subject
 const SUBJECTS = ['subject', 'npc', 'item'];
 // Toolbox rows G8 and 22a: the group reads its member, stay and fight facts at each NPC.
-const GROUP = ['member', 'stay', 'fight'].map((k) => `.cartridge.world.group.${k}`);
+// Row 33: theft writes its stolen fact at the taken item.
+const GROUP = ['member', 'stay', 'fight']
+  .map((k) => `.cartridge.world.group.${k}`)
+  .concat('.cartridge.world.theft.stolen');
 // Choices whose facts save recovery reconciles by fact alone, with no subject: escort, receive
 // and hand_over (mobile dialogue-save), a riddle answer with a wrong_limit (topics-save) and a
 // dialogue of a legacy deadline quest (deadline-receipts); other choices' receipts are checked
@@ -29,8 +32,10 @@ const GROUP = ['member', 'stay', 'fight'].map((k) => `.cartridge.world.group.${k
 const BOUND = ['escort', 'receive', 'hand_over'];
 // Definitions whose policies are read with no action target (reaction when, quest offer, objective
 // and journal, barrier opens_when, skill qualification, a room or exit lock): subject "target"
-// there never holds.
-const TARGETLESS = ['reactions', 'quests', 'barriers', 'skills'].map((k) => `.cartridge.${k}`);
+// there never holds. Rows W15, FD9: a name variant's target is the player's body, no fact subject.
+const TARGETLESS = ['reactions', 'quests', 'barriers', 'skills', 'world.identity'].map(
+  (k) => `.cartridge.${k}`,
+);
 const targetless = (at: string) =>
   TARGETLESS.some((p) => at.startsWith(p)) ||
   /^\.cartridge\.rooms\[[^\]]*\](\.exits\.[a-z_]+)?\.locks\.(enter|traverse)\./.test(at);

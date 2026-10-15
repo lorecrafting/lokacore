@@ -1,0 +1,24 @@
+{
+  "on": {
+    "event": "entity_entered_room",
+    "room": "den"
+  },
+  "when": {
+    "policy_version": 1,
+    "root": {
+      "op": "not",
+      "item": {
+        "op": "fact_compare",
+        "fact": "topic_houndbane_known",
+        "equals": true
+      }
+    }
+  },
+  "apply": [
+    {
+      "op": "fact.assign",
+      "fact": "topic_houndbane_known",
+      "value": true
+    }
+  ]
+}

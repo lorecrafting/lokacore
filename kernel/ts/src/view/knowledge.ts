@@ -4,13 +4,16 @@ import { bodyOf, COMPASS, refString, type Steps, type World } from '../runtime/d
 import { exitOf, hidden } from '../mechanics/lookups.ts';
 import { cmp } from '../foundation/validate.ts';
 import { refusal, resolved } from '../commands/actions.ts';
+import { describeEntity, displayedName } from '../mechanics/description_variant/rule.ts';
 
 export function knowledgeView(
   world: World,
   actor: CharacterId,
   steps: Steps = { n: 0 },
-): Pick<GameView, 'map' | 'known_npcs'> {
-  if (!world.cartridge.map_positions) return {};
+): Pick<GameView, 'map' | 'known_npcs' | 'actor_name'> {
+  const actor_name = displayedName(world, actor, steps);
+  const name = actor_name && { actor_name };
+  if (!world.cartridge.map_positions) return { ...name };
   const visited = new Set(
     Object.values(world.state.visited_rooms ?? {})
       .filter((r) => r.actor_id === actor)
@@ -32,6 +35,7 @@ export function knowledgeView(
     }),
   );
   return {
+    ...name,
     map: { rooms, links },
     ...(resolved(world, actor).where && { known_npcs: knownNpcs(world, actor, steps) }),
   };
@@ -58,5 +62,5 @@ function knownNpcs(world: World, actor: CharacterId, steps: Steps) {
         !refusal(world, { type: 'where', actor_id: actor, target_id }, steps, 'where' as Key),
     )
     .sort(cmp)
-    .map((id) => ({ id, name: world.entities[id].short }));
+    .map((id) => ({ id, name: describeEntity(world, actor, id, 'short', steps) }));
 }

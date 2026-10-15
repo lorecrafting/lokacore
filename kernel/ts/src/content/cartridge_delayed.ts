@@ -11,6 +11,7 @@ import { apiCmp } from './cartridge_installed.ts';
 const EVENT_BOUND = [
   'barrier.set',
   'item.move',
+  'npc.move', // row FD5: its NPC and room default to the event's
   'population.suppress',
   'quest.activate',
   'quest.resolve',

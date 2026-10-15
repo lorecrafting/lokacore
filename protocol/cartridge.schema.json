@@ -1562,6 +1562,64 @@
             "leads"
           ],
           "additionalProperties": false
+        },
+        "theft": {
+          "description": "Toolbox rows 33 and 34 (kernel_api at least 1.94; mechanics.md Theft, fence and witnessed offense): take may lift an item a living NPC in the actor's room directly holds. The victim notices when the actor's level in skill is below the victim's value of attribute (absent: 0); every other living NPC there that is not blind and the actor's body is not concealed from also sees. Containment alone sets the per_subject instance bool fact stolen true on the item; a seen theft emits custom_event noticed (subject: the thief's body) and says narration.seen, an unseen one narration.unseen.",
+          "type": "object",
+          "properties": {
+            "skill": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "attribute": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "stolen": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "noticed": {
+              "$ref": "action.schema.json#/$defs/Key"
+            },
+            "narration": {
+              "type": "object",
+              "properties": {
+                "seen": {
+                  "$ref": "text.schema.json#/$defs/TextKey"
+                },
+                "unseen": {
+                  "$ref": "text.schema.json#/$defs/TextKey"
+                }
+              },
+              "required": [
+                "seen",
+                "unseen"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "skill",
+            "attribute",
+            "stolen",
+            "noticed",
+            "narration"
+          ],
+          "additionalProperties": false
+        },
+        "identity": {
+          "description": "Toolbox rows W15 and FD9 (kernel_api at least 1.97; mechanics.md Recognition and earned titles): the player's displayed name, the text key name, varied by name_variants (TextVariants, first match wins; subject target is the player's body). GameView projects it as actor_name.",
+          "type": "object",
+          "properties": {
+            "name": {
+              "$ref": "text.schema.json#/$defs/TextKey"
+            },
+            "name_variants": {
+              "$ref": "entity.schema.json#/$defs/TextVariants"
+            }
+          },
+          "required": [
+            "name"
+          ],
+          "additionalProperties": false
         }
       },
       "additionalProperties": false,
@@ -2688,7 +2746,24 @@
             "invisible",
             "hidden"
           ],
-          "description": "Status reader 8 (kernel_api at least 1.61): while active on an NPC, the player does not see it; on the player's body, an NPC does not engage it on entry. invisible yields to a see_invisible perception; hidden to none. May stand in for per_tick."
+          "description": "Status reader 8 (kernel_api at least 1.61): while active on an NPC, the player does not see it; on the player's body, an NPC does not engage it on entry. invisible yields to a see_invisible perception; hidden to none, unless pierced_by. May stand in for per_tick."
+        },
+        "pierced_by": {
+          "type": "object",
+          "properties": {
+            "skill": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "attribute": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            }
+          },
+          "required": [
+            "skill",
+            "attribute"
+          ],
+          "additionalProperties": false,
+          "description": "Toolbox row 16 (kernel_api at least 1.93), only beside concealment: a seer whose attribute value (an NPC's declared value, a player's attributes@1 value) is greater than the holder's skill level sees through the concealment; a holder without a character is never pierced. No draw. While the holder is a player's body, an NPC that engages it on entry ends every active concealment status on it."
         }
       },
       "required": [

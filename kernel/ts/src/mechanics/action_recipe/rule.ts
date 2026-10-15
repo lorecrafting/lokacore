@@ -36,7 +36,6 @@ import type {
   NarrationParticipant,
   RecipeNarration,
   RecipeStep,
-  RecipeTarget,
 } from '../../contracts.gen.ts';
 import { admission, detailOf, resolved } from '../../commands/actions.ts';
 import {
@@ -59,6 +58,7 @@ import { uniform } from '../../foundation/rng.ts';
 import { opposed, practised } from '../skills.ts';
 import { cureOps } from '../status/shared.ts';
 import { spellOf, useRefused } from './shared.ts';
+import { pick } from '../storylet/shared.ts';
 import { effect, fightBack, type Effected } from './spell.ts';
 import { fresh, trailLead } from '../trail.ts';
 
@@ -69,7 +69,7 @@ export const decide: Rule<'action_recipe'> = (world, command, mint, steps = { n:
   if (!recipe || !body) return rejected(p.type === 'cast' ? 'invalid_state' : 'not_found');
   const { actor_id } = p;
   const action = recipe.key;
-  const subject_id = subjectOf(world, recipe.target, p, body, steps);
+  const subject_id = subjectOf(world, recipe, p, body, steps);
   if (typeof subject_id !== 'string') return subject_id;
   const admitted = admission(world, recipe, actor_id, body);
   if (typeof admitted === 'string') return rejected(admitted);
@@ -108,16 +108,21 @@ const recipeOf = (world: World, p: Command['payload']) =>
 
 // The entity the recipe acts on, or the decision refusing it: its detail, in the actor's room (no
 // item_id; a target_id must be it); or (row G4) a use's invoked target (shared.ts useRefused; a reach
-// fault faults the decision); or (row 29a) a spell's caster's body.
+// fault faults the decision); or (row 29a) a spell's caster's body; or (row FD3) a storylet's
+// performer's body, while the deck draws it (storylet/shared.ts pick; no target_id or item_id).
 function subjectOf(
   world: World,
-  target: RecipeTarget,
+  { key, target }: ActionRecipe,
   p: Command['payload'],
   body: EntityId,
   steps: Steps,
 ) {
   if (target.kind === 'spell') return body;
   if (p.type === 'cast') return rejected('invalid_state'); // spellOf names only spells
+  if (target.kind === 'storylet') {
+    if (p.item_id !== undefined || p.target_id !== undefined) return rejected('invalid_target');
+    return pick(world, p.actor_id, steps)?.key === key ? body : rejected('invalid_state');
+  }
   if (target.kind === 'use') {
     const code = useRefused(world, target, body, p.item_id, p.target_id, steps);
     if (code === 'budget_exceeded' || code === 'containment_cycle')

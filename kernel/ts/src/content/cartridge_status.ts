@@ -28,7 +28,7 @@ export function status(c: Obj): Diagnostic[] {
   if (!Object.keys(defs).length && !applies.length && !cures.length && !g3) return out;
   const all = Object.values(defs);
   const room = named.some(([, , table]) => table === 'rooms'); // status reader 9: a step naming a room
-  const floor = room ? '1.65' : floorOf(all, g3);
+  const floor = all.some((s) => s.pierced_by) ? '1.93' : room ? '1.65' : floorOf(all, g3);
   if (
     apiCmp(c.manifest.requires.kernel_api.at_least, floor) < 0 ||
     ['status', 'death'].some((k) => c.lock.capabilities[k] !== 1) // a fatal hp tick needs death
@@ -81,6 +81,7 @@ function definition(c: Obj, ref: string, s: Obj): Diagnostic[] {
       : s.per_tick === undefined && !s.modifies && !s.fear && !reader(s))
   )
     out.push(diag('SCHEMA_VIOLATION', `${at}.per_tick`));
+  out.push(...piercedBy(c, at, s));
   // Status reader 6: a perception names a sense (the schema subset has no minProperties).
   if (s.perception && !Object.keys(s.perception).length)
     out.push(diag('SCHEMA_VIOLATION', `${at}.perception`));
@@ -147,4 +148,17 @@ function api146(c: Obj) {
     modifies.length ||
     Object.values(c.reactions ?? {}).some((r: any) => r.on.event.startsWith('status_'));
   return { immune, named: [...items, ...modifies], drinks, lone, g3 };
+}
+
+// Row 16: pierced_by only beside a concealment, naming this cartridge's skill and attribute.
+function piercedBy(c: Obj, at: string, s: Obj): Diagnostic[] {
+  if (!s.pierced_by) return [];
+  const out = s.concealment ? [] : [diag('SCHEMA_VIOLATION', `${at}.pierced_by`)];
+  for (const [field, table] of [
+    ['skill', 'skills'],
+    ['attribute', 'attributes'],
+  ] as const)
+    if (!c[table]?.[refString(s.pierced_by[field])])
+      out.push(diag('UNRESOLVED_REFERENCE', `${at}.pierced_by.${field}`));
+  return out;
 }

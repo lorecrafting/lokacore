@@ -46,11 +46,11 @@ const tooHeavy = (thing: Thing | undefined, text: Say) => {
   );
 };
 
-// A container's Inside heading, then its rows as one block.
-const inside = (p: { contents: Thing[]; text: Say; open: (id: string) => void }) =>
+// A container's Inside heading (a living NPC's: Held), then its rows as one block.
+const inside = (p: { thing?: Thing; contents: Thing[]; text: Say; open: (id: string) => void }) =>
   p.contents.length > 0 && (
     <>
-      <SectionTitle>{LABEL.inside}</SectionTitle>
+      <SectionTitle>{p.thing?.kind === 'npc' ? LABEL.held : LABEL.inside}</SectionTitle>
       <View>
         {p.contents.map((e) => (
           <EntityLine key={e.id} name={cap(p.text(e.name))} onPress={() => p.open(e.id)} />

@@ -27,7 +27,7 @@ export function receiptRecovery(fresh: World, world: World, db: Db, meta: Meta, 
   const liquids = liquidSave(fresh, world, db, meta, revision);
   const exchanges = exchangeSave(fresh, world, db, meta, revision, liquids);
   dialogueSave(world, db, meta);
-  commerceSave(world, db, meta, revision);
+  commerceSave(fresh, world, db, meta, revision);
   deadlineSave(world, db, meta, exchanges);
   finaleSave(world, db, meta, revision);
   if (Object.values(world.cartridge.populations ?? {}).some((p) => p.sight))

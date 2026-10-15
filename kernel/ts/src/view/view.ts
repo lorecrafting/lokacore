@@ -1,3 +1,4 @@
+// size: allow 306, row 33 lists an NPC's lock-admitted holdings beside container contents
 import { knowledgeView } from './knowledge.ts';
 import { movementPlan } from '../mechanics/movement/sequence.ts';
 import { edge } from '../mechanics/water/shared.ts';
@@ -32,10 +33,11 @@ import { refusal, resolved } from '../commands/actions.ts';
 import { bodyOf, refString, type Entity, type Steps, type World } from '../runtime/decision.ts';
 import { barrierState, exitOf, opened } from '../mechanics/lookups.ts';
 import { choiceView } from '../mechanics/dialogue/shared.ts';
-import { describe, describeEntity } from '../mechanics/description_variant/rule.ts';
+import { asides, describe, describeEntity } from '../mechanics/description_variant/rule.ts';
 import * as movement from '../mechanics/movement/rule.ts';
 import { cueViews } from '../mechanics/senses.ts';
 import { holds } from '../mechanics/policy.ts';
+import { lockRefused } from '../mechanics/locks.ts';
 import * as scene from '../mechanics/scene/shared.ts';
 import * as position from '../mechanics/position/shared.ts';
 import { shelf } from '../mechanics/commerce/shared.ts';
@@ -64,7 +66,7 @@ import { currentBleed } from '../mechanics/bleed/shared.ts';
  * as amended), absent when the cartridge has none; and the player's position (position@1), absent
  * without it; and the highest reached chapter marker, absent without chapter declarations.
  */
-// size: allow 41, the viewer's body is derived once for every projection (loka-kgd.150.5)
+// size: allow 42, the viewer's body is derived once for every projection (loka-kgd.150.5); row FD3 storylet
 export function gameView(world: World, actor: CharacterId = world.character): GameView {
   const body = bodyOf(world, actor);
   const fight = body ? engaged(world, body) : undefined;
@@ -84,7 +86,7 @@ export function gameView(world: World, actor: CharacterId = world.character): Ga
     ...waterViews(world, actor, steps),
     ...skillViews(world, actor, steps),
     ...(world.cartridge.topics && lore(world, actor)),
-    ...(fight && { combat: combatView(world, fight) }),
+    ...(fight && { combat: combatView(world, actor, fight, steps) }),
     ...(bleed && { bleeding: bleedingView(world, bleed) }),
     ...conditionViews(world, body),
     ...cueViews(world, actor, body, steps, holds),
@@ -99,6 +101,7 @@ export function gameView(world: World, actor: CharacterId = world.character): Ga
     journal: journal(world, actor, steps),
     ...(current && { chapter: current }),
     ...(showing && { scene: showing }),
+    ...(actions.place.some((a) => a.action_key === actions.drawn) && { storylet: actions.drawn }),
     ...timeView(world),
     ...(choice && { choice }),
     ...(pools.length > 0 && { resources: pools }),
@@ -113,10 +116,12 @@ function placeView(world: World, actor: CharacterId, here: EntityId | undefined,
   if (!here)
     return { id: '' as EntityId, title: text('' as TextKey), description: text('' as TextKey) };
   const room = world.rooms[here];
+  const lines = asides(world, actor, room, steps);
   return {
     id: here,
     title: text(room.title),
     description: text(describe(world, actor, room, steps)),
+    ...(lines.length > 0 && { asides: lines.map(text) }),
   };
 }
 
@@ -132,10 +137,9 @@ function bleedingView(world: World, bleed: NonNullable<ReturnType<typeof current
   };
 }
 
-// The entities directly in `holder` (the room, the body or a slot holder), each with its short
-// name, kind and actions (`worn`, else by scope: an item here by room_contents, an NPC by
-// room_occupants, a held item by inventory); an item also with its barrier's state and, unless
-// worn, its contents (c1-locks).
+// The entities directly in `holder` (room, body or slot holder), each with its short name, kind and
+// actions (`worn`, else by scope: room_contents, room_occupants or inventory); an item also with its
+// barrier's state and, unless worn, its contents (c1-locks); a theft NPC its holdings (row 33).
 function within(
   world: World,
   actor: CharacterId,
@@ -154,8 +158,15 @@ function within(
     )
     .map(([id, e]) => {
       const scope = holder === body ? 'inventory' : SCOPE[e.kind];
+      // Row 33: an NPC's direct holdings its get lock admits; a vault's locked pool stays private.
       const contents =
-        e.kind === 'item' && !worn ? inside(world, actor, body, actions, id, scope, steps) : [];
+        e.kind === 'item' && !worn
+          ? inside(world, actor, body, actions, id, scope, steps)
+          : e.kind === 'npc' && world.cartridge.world?.theft
+            ? inside(world, actor, body, actions, id, 'room_contents', steps, true).filter(
+                (c) => !lockRefused(world, actor, e.locks?.get, c.id, steps),
+              )
+            : [];
       return {
         ...viewOf(world, actor, id, e, worn ? worn(id) : actions.of(scope, id), steps),
         ...(contents.length > 0 && { contents }),
@@ -165,9 +176,8 @@ function within(
 
 const SCOPE = { item: 'room_contents', npc: 'room_occupants' } as const;
 
-// What item `box` holds in reach (every container from the item up to `box` opened, `box` too),
-// at any depth, in DefinitionRefString order, each with its direct container and only take and
-// its container verbs (ContentView; c1-locks).
+// What item `box` holds in reach (all containers up to `box` opened), at any depth, in ref order,
+// each with its container, take and container verbs (ContentView; c1-locks); `direct`: box's own.
 function inside(
   world: World,
   actor: CharacterId,
@@ -176,8 +186,10 @@ function inside(
   box: string,
   scope: string,
   steps: Steps,
+  direct = false,
 ): ContentView[] {
   const under = (id: string) => {
+    if (direct) return world.state.containers[id] === box;
     for (let c = world.state.containers[id]; opened(world, c, body); c = world.state.containers[c])
       if (c === box) return true;
     return false;
@@ -251,10 +263,11 @@ function exits(world: World, actor_id: CharacterId, door: Lists['door'], steps: 
         sight: {
           room: seen.room!,
           title: world.rooms[seen.room!].title,
-          entities: seen.entities.map((id) => {
-            const { short: name, kind } = world.entities[id];
-            return { id, name, kind: kind as Key };
-          }),
+          entities: seen.entities.map((id) => ({
+            id,
+            name: describeEntity(world, actor_id, id, 'short', steps),
+            kind: world.entities[id].kind as Key,
+          })),
         },
       }),
     };
@@ -279,16 +292,15 @@ function equipmentViews(world: World, actor: CharacterId, actions: Lists, steps:
   });
 }
 
-function combatView(world: World, fight: NonNullable<ReturnType<typeof engaged>>) {
+type Fight = NonNullable<ReturnType<typeof engaged>>;
+function combatView(world: World, actor: CharacterId, fight: Fight, steps: Steps) {
+  const name = (id: EntityId) => describeEntity(world, actor, id, 'short', steps);
   return {
     encounter_id: fight.id,
     opponent_id: fight.row.npc_id,
-    name: world.entities[fight.row.npc_id].short,
+    name: name(fight.row.npc_id),
     ...(fight.row.active_ids && {
-      active_opponents: fight.row.active_ids.map((id) => ({
-        id,
-        name: world.entities[id].short,
-      })),
+      active_opponents: fight.row.active_ids.map((id) => ({ id, name: name(id) })),
     }),
   };
 }

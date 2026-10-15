@@ -125,6 +125,20 @@ test('Continue is refused while the leader is rooted', () => {
   assert.deepEqual(refused.decision, { kind: 'rejected', error: { code: 'invalid_state' } });
 });
 
+// Breaks (W15 review): the journal's patrol leader_name reads the base short, not the actor's
+// short_variants (the one displayed-name read every other view uses).
+test('journal leader name follows the leader short_variants', () => {
+  const id = npc(fresh);
+  const e = {
+    ...fresh.entities[id],
+    short_variants: [{ when: { root: { op: 'all', items: [] } }, description: 'npc.leader.named' }],
+  };
+  const a = journey({ ...fresh, entities: { ...fresh.entities, [id]: e } } as never);
+  a.start();
+  const leader = gameView(a.world).journal.find((q) => q.quest.key === 'watch_rounds')!.patrol!;
+  assert.equal(leader.leader_name, 'npc.leader.named');
+});
+
 // Breaks: actual fatal combat retains attempt credit, or leader-ahead death faults before revival.
 test('fatal combat invalidates together and awaiting attempts before immediate Restart', () => {
   for (const awaiting of [false, true]) {

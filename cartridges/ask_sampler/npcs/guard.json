@@ -1,0 +1,28 @@
+{
+  "keywords": [
+    "guard"
+  ],
+  "short": "npc.guard.short",
+  "room_line": "npc.guard.room",
+  "description": "npc.guard.description",
+  "room": "square",
+  "ask": {
+    "unknown": "guard.unknown",
+    "answers": [
+      {
+        "topic": "moon",
+        "text": "guard.moon"
+      }
+    ]
+  },
+  "disposition": {
+    "hostile": {
+      "policy_version": 1,
+      "root": {
+        "op": "fact_compare",
+        "fact": "wanted",
+        "equals": true
+      }
+    }
+  }
+}

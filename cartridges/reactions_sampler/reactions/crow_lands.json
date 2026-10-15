@@ -1,0 +1,14 @@
+{
+  "on": {
+    "event": "entity_entered_room",
+    "room": "yard",
+    "npc": "crow"
+  },
+  "apply": [
+    {
+      "op": "fact.assign",
+      "fact": "crow_fed",
+      "value": true
+    }
+  ]
+}

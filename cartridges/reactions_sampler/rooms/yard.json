@@ -1,7 +1,11 @@
 {
   "title": "room.yard.title",
   "description": "room.yard.description",
-  "exits": {},
+  "exits": {
+    "up": {
+      "to": "roost"
+    }
+  },
   "variants": [
     {
       "when": {

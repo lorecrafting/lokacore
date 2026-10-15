@@ -1,5 +1,5 @@
 defmodule Loka.Content.NpcFields do
-  @moduledoc "Expands an NPC definition's schedule, immune list, (toolbox row G3) attributes and (row W6) text variants and (row G11) disposition conditions to local DefinitionRefs; part of Loka.Content.Checks.expand."
+  @moduledoc "Expands an NPC definition's schedule, immune list, (toolbox row G3) attributes and (row W6) text variants (row G11) disposition conditions and (row G7) lock conditions and (row FD7) ask answers to local DefinitionRefs; part of Loka.Content.Checks.expand."
   import Loka.Content.Source, only: [ref: 3]
 
   # `expand` is Loka.Content.Checks.expand/2, passed in so this module does not call back into it.
@@ -10,13 +10,28 @@ defmodule Loka.Content.NpcFields do
     |> update("attributes", fn c ->
       Enum.map(c, fn a -> Map.update!(a, "attribute", &ref(&1, "attribute", m)) end)
     end)
-    |> update("disposition", &expand.(&1, m))
+    |> update("ask", &ask(&1, m, expand))
     |> Map.merge(variants(npc, m, expand))
   end
 
-  # Toolbox row W6: the conditions of its text variants.
+  # Toolbox row FD7: each answer's topic, granted topic and condition.
+  defp ask(a, m, expand),
+    do: Map.update!(a, "answers", &Enum.map(&1, fn x -> answer(x, m, expand) end))
+
+  defp answer(a, m, expand) do
+    a
+    |> Map.update!("topic", &ref(&1, "topic", m))
+    |> update("grants", &ref(&1, "topic", m))
+    |> update("when", &expand.(&1, m))
+  end
+
+  # Toolbox row W6: the conditions of its text variants; (row G11) disposition and (row G7) lock conditions.
   defp variants(npc, m, expand) do
-    for {f, v} <- Map.take(npc, ~w(short_variants room_line_variants description_variants)),
+    for {f, v} <-
+          Map.take(
+            npc,
+            ~w(short_variants room_line_variants description_variants disposition locks)
+          ),
         into: %{},
         do: {f, expand.(v, m)}
   end

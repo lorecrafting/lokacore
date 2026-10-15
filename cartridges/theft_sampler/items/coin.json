@@ -1,0 +1,12 @@
+{
+  "keywords": [
+    "coin"
+  ],
+  "short": "item.coin.short",
+  "room_line": "item.coin.room",
+  "description": "item.coin.description",
+  "location": {
+    "in": "item",
+    "item": "purse"
+  }
+}

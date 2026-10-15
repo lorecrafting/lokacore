@@ -96,6 +96,23 @@ test('Character draws projected attributes and acquired qualification with autho
   ]);
 });
 
+// Breaks: the displayed name missing, capitalised, labelled or not first, or the empty placeholder
+// shown beside it (book-ui.md "Displayed name details"; rows W15, FD9).
+test('Character opens with the authored displayed name when GameView carries one', () => {
+  const say = (key: string) => (key === 'identity.name' ? 'a hooded figure' : key);
+  assert.deepEqual(
+    words(
+      CharacterPage({ view: { actor_name: 'identity.name' } as any, text: say, world: () => {} }),
+    ),
+    ['Character', 'a hooded figure', 'Back to World'],
+  );
+  assert.deepEqual(words(CharacterPage({ view: {} as any, text: say, world: () => {} })), [
+    'Character',
+    'Nothing is known about you yet.',
+    'Back to World',
+  ]);
+});
+
 // Breaks: the Character line hides what worn items grant, or drops the sign of a loss (book-ui.md worn item affects).
 test('Character appends the signed worn affect to an attribute line', () => {
   const view: any = {

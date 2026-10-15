@@ -182,6 +182,9 @@
     "residency": "portable_capability",
     "definitions": [
       "skill"
+    ],
+    "policies": [
+      "skill_compare"
     ]
   },
   {
@@ -499,10 +502,12 @@
     "commands": [
       "say",
       "whisper",
-      "shout"
+      "shout",
+      "ask"
     ],
     "events": [
-      "spoken"
+      "spoken",
+      "asked"
     ]
   },
   {

@@ -1027,6 +1027,14 @@
         },
         "description": {
           "$ref": "text.schema.json#/$defs/Text"
+        },
+        "asides": {
+          "description": "Toolbox row FD2: the text of every aside of this room whose condition holds for the viewing actor, in authored order (room.schema.json Aside); absent when none holds.",
+          "type": "array",
+          "items": {
+            "$ref": "text.schema.json#/$defs/Text"
+          },
+          "minItems": 1
         }
       },
       "required": [
@@ -1169,6 +1177,10 @@
           "description": "Toolbox row W27: the authored away recap threshold in logical seconds (recap_after_minutes x 60 x rate); present exactly when the cartridge authors it.",
           "$ref": "command.schema.json#/$defs/LogicalTime"
         },
+        "actor_name": {
+          "description": "Toolbox rows W15 and FD9: the player's displayed name, world.identity.name or its first matching name variant; present exactly when the cartridge authors world.identity.",
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
         "calendar_status": {
           "$ref": "#/$defs/CalendarStatus"
         },
@@ -1178,6 +1190,10 @@
         },
         "scene": {
           "$ref": "#/$defs/SceneView"
+        },
+        "storylet": {
+          "description": "Toolbox row FD3 (kernel_api at least 1.92): the key of the storylet the deck draws for the actor here this hour (action.schema.json RecipeTarget storylet), present exactly when that action is listed in actions, available or not (mechanics.md Storylet deck); an optional field: the snapshot format stays.",
+          "$ref": "action.schema.json#/$defs/Key"
         },
         "combat": {
           "$ref": "gameview.schema.json#/$defs/CombatView"
@@ -2089,6 +2105,14 @@
         },
         "description": {
           "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "asides": {
+          "description": "Toolbox row FD2: the text of every aside of this detail whose condition holds for the viewing actor, in authored order (room.schema.json Aside); absent when none holds.",
+          "type": "array",
+          "items": {
+            "$ref": "text.schema.json#/$defs/Text"
+          },
+          "minItems": 1
         },
         "actions": {
           "type": "array",

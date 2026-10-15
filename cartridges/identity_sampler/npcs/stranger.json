@@ -1,0 +1,23 @@
+{
+  "keywords": [
+    "stranger"
+  ],
+  "short": "npc.stranger.short",
+  "short_variants": [
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "fact_compare",
+          "fact": "knows_name",
+          "equals": true,
+          "subject": "target"
+        }
+      },
+      "description": "npc.stranger.short_named"
+    }
+  ],
+  "room_line": "npc.stranger.room",
+  "description": "npc.stranger.description",
+  "room": "square"
+}

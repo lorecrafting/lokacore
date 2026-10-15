@@ -10,6 +10,7 @@ defmodule Loka.Content.LeafRefs do
     do: %{
       "fact_compare" => %{"fact" => "fact", "npc" => "npc", "item" => "item", "with" => "npc"},
       "time_since" => %{"fact" => "fact", "npc" => "npc", "item" => "item"},
+      "skill_compare" => %{"skill" => "skill"},
       "has_item" => %{"item" => "item"},
       "quest_state" => %{"quest" => "quest"},
       "escort_state" => %{"quest" => "quest"},
@@ -42,6 +43,7 @@ defmodule Loka.Content.LeafRefs do
       "light.ignite" => %{"item" => "item"},
       "barrier.set" => %{"barrier" => "barrier"},
       "item.move" => %{"room" => "room"},
+      "npc.move" => %{"npc" => "npc", "room" => "room"},
       "population.spawn" => %{"plan" => "population"},
       "quest.activate" => %{"quest" => "quest"},
       "quest.resolve" => %{"quest" => "quest"},

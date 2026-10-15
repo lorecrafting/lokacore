@@ -1,0 +1,14 @@
+{
+  "on": {
+    "event": "asked",
+    "npc": "guard",
+    "topic": "smugglers"
+  },
+  "apply": [
+    {
+      "op": "fact.assign",
+      "fact": "wanted",
+      "value": true
+    }
+  ]
+}

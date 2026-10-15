@@ -3,6 +3,7 @@
 export const LEAF_REFS: Readonly<Record<string, Readonly<Record<string, string>>>> = {
   fact_compare: { fact: 'fact', npc: 'npc', item: 'item', with: 'npc' },
   time_since: { fact: 'fact', npc: 'npc', item: 'item' }, // row FD1
+  skill_compare: { skill: 'skill' }, // row FD2
   has_item: { item: 'item' },
   quest_state: { quest: 'quest' },
   escort_state: { quest: 'quest' },

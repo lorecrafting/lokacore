@@ -60,7 +60,7 @@ export type ActionSet = Readonly<Record<string, Offered>>;
 // Toolbox row 4: Raise is offered only while the cartridge levels and points remain.
 const points = (world: World, actor: CharacterId) => (levelling(world, actor)?.unspent ?? 0) > 0;
 
-const SPEECH = ['say', 'whisper', 'shout'];
+const SPEECH = ['say', 'whisper', 'shout', 'ask'];
 
 export const needsAncestry = (world: World, actor: CharacterId) =>
   !!world.cartridge.ancestries && !characterChoice(world, actor);

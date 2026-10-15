@@ -1,0 +1,12 @@
+{
+  "on": {
+    "event": "action_completed",
+    "action": "don_hood"
+  },
+  "apply": [
+    {
+      "op": "status.apply",
+      "status": "disguised"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "title": "room.square.title",
+  "description": "room.square.description",
+  "exits": {
+    "east": {
+      "to": "alley"
+    },
+    "west": {
+      "to": "market"
+    },
+    "south": {
+      "to": "strongroom"
+    }
+  }
+}

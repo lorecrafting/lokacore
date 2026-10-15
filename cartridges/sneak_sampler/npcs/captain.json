@@ -1,0 +1,36 @@
+{
+  "keywords": [
+    "captain"
+  ],
+  "short": "npc.captain.short",
+  "room_line": "npc.captain.room",
+  "description": "npc.captain.description",
+  "room": "keep",
+  "hp": {
+    "minimum": 0,
+    "maximum": 4,
+    "start": 4,
+    "gain": 0
+  },
+  "attributes": [
+    {
+      "attribute": "alertness",
+      "value": 3
+    }
+  ],
+  "attack": {
+    "chance": 100,
+    "damage_min": 1,
+    "damage_max": 1
+  },
+  "disposition": {
+    "hostile": {
+      "policy_version": 1,
+      "root": {
+        "op": "all",
+        "items": []
+      }
+    },
+    "engage": "captain.spots"
+  }
+}

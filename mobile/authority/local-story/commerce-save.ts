@@ -24,13 +24,13 @@ function invalid(): never {
 }
 
 // size: allow 60, one ordered reconciliation loop joins exact money and custody evidence
-export function commerceSave(world: World, db: Db, meta: Meta, revision: number) {
+export function commerceSave(fresh: World, world: World, db: Db, meta: Meta, revision: number) {
   for (const [provider, npc] of Object.entries(world.entities)) {
     if (npc.kind !== 'npc' || !npc.shop) continue;
     const shop = npc.shop,
       spec = world.resourceSpecs[key(shop.resource)];
     const balances = startingBalances(world, shop.resource, spec.start);
-    const custody = offerCustody(world, shop, provider as EntityId);
+    const custody = offerCustody(fresh, shop);
     for (const { command, decision } of receipts(world, db, meta, revision)) {
       const money = decision.delta.ops.filter(
         (o) => o.op === 'resource.adjust' && same(o.resource, shop.resource),
@@ -78,10 +78,16 @@ export function commerceSave(world: World, db: Db, meta: Meta, revision: number)
 }
 
 // A stock offer's items (row W11) are not tracked: receiptHistory recomputes those exchanges, and a
-// trade job may move them.
-function offerCustody(world: World, shop: Shop, provider: EntityId): Record<string, EntityId> {
+// trade job may move them. Each item starts with its starting holder: the shop for a clean offer, any
+// NPC for a fence's stolen one (row 33).
+function offerCustody(fresh: World, shop: Shop): Record<string, EntityId> {
   return Object.fromEntries(
-    shop.offers.filter((o) => !o.stock).map((o) => [world.entityIds[refString(o.item)], provider]),
+    shop.offers
+      .filter((o) => !o.stock)
+      .map((o) => {
+        const id = fresh.entityIds[refString(o.item)]!;
+        return [id, fresh.state.containers[id]!];
+      }),
   );
 }
 

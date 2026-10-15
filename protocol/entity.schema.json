@@ -549,6 +549,41 @@
           },
           "additionalProperties": false
         },
+        "ask": {
+          "description": "Toolbox row FD7 (speech@1 with topics@1; kernel_api at least 1.96): what the NPC says when asked about a topic. The first answer in authored order whose topic is the one asked and whose when holds (the player as the actor, the NPC as the target) is narrated and grants its grants topic; none: unknown.",
+          "type": "object",
+          "properties": {
+            "unknown": {
+              "$ref": "text.schema.json#/$defs/TextKey"
+            },
+            "answers": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "topic": {
+                    "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                  },
+                  "text": {
+                    "$ref": "text.schema.json#/$defs/TextKey"
+                  },
+                  "when": {
+                    "$ref": "policy.schema.json#/$defs/VersionedPolicy"
+                  },
+                  "grants": {
+                    "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                  }
+                },
+                "required": ["topic", "text"],
+                "additionalProperties": false
+              },
+              "minItems": 1,
+              "maxItems": 32
+            }
+          },
+          "required": ["unknown", "answers"],
+          "additionalProperties": false
+        },
         "schedule_cases": {
           "description": "Toolbox row W10 (kernel_api at least 1.47): conditional hours of daily_schedule. Each key is an hour daily_schedule lists (checked by the compiler and the loader); when that hour's job runs, the NPC goes to the room of the first case whose condition holds, else to the hour's daily_schedule room (the fallback). The source form is a daily_schedule hour mapped to [case, ..., room], which the compiler splits into the two fields.",
           "type": "object",
@@ -660,6 +695,19 @@
         },
         "cues": {
           "$ref": "entity.schema.json#/$defs/Cues"
+        },
+        "locks": {
+          "description": "Toolbox row 33 (kernel_api at least 1.94; mechanics.md Theft, fence and witnessed offense): get, the policy an actor must hold to take an item this NPC directly holds (target: that item); refuses permission_denied.",
+          "type": "object",
+          "properties": {
+            "get": {
+              "$ref": "policy.schema.json#/$defs/VersionedPolicy"
+            }
+          },
+          "required": [
+            "get"
+          ],
+          "additionalProperties": false
         }
       },
       "required": [
@@ -899,6 +947,10 @@
             "buy"
           ],
           "additionalProperties": false
+        },
+        "stolen": {
+          "description": "Toolbox row 34 (kernel_api at least 1.94): this shopkeeper is a fence; sell takes only an instance whose world.theft stolen fact is true, and a shop without it only one whose fact is false. Never on a stock offer.",
+          "const": true
         }
       },
       "required": [

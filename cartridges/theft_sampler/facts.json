@@ -1,0 +1,40 @@
+{
+  "facts": {
+    "stolen": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "instance"
+      ],
+      "per_subject": true,
+      "meaning": "The item was lifted from someone; only theft sets it."
+    },
+    "wanted": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The town guard saw the character steal."
+    },
+    "savings": {
+      "version": 1,
+      "value_type": {
+        "type": "int",
+        "minimum": 0,
+        "maximum": 1000,
+        "default": 0
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "Pennies the vault holds for this character."
+    }
+  }
+}

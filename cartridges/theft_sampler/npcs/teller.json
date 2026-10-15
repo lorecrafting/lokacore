@@ -1,0 +1,15 @@
+{
+  "keywords": [
+    "teller"
+  ],
+  "short": "npc.teller.short",
+  "room_line": "npc.teller.room",
+  "description": "npc.teller.description",
+  "room": "strongroom",
+  "resource_starts": {
+    "pennies": 0
+  },
+  "services": [
+    "deposit"
+  ]
+}

@@ -1,4 +1,4 @@
-// size: allow 334, food, water, practical skills, local Knock and G7 get locks share the composed view list; the viewer is threaded (loka-kgd.150.5)
+// size: allow 344, food, water, practical skills, local Knock, G7 get locks and the drawn storylet (row FD3) and row 33 theft and the row FD7 ask share the composed view list; the viewer is threaded (loka-kgd.150.5)
 import { running as modalScene } from '../mechanics/scene/shared.ts';
 import { foodActions } from './food.ts';
 import { useActions } from './use.ts';
@@ -8,6 +8,7 @@ import { readActions } from './read_actions.ts';
 import * as light from '../mechanics/light/shared.ts';
 import { harvest } from '../mechanics/containment/harvest.ts';
 import { escapeDirections } from '../mechanics/combat/flee.ts';
+import { pick } from '../mechanics/storylet/shared.ts';
 // The GameView lists of an actor's ActionSet (commands/actions.ts resolved; 04 §14, §19; 00 §4.10).
 import { LIMITS } from '../contracts.gen.ts';
 import type {
@@ -17,6 +18,7 @@ import type {
   EntityId,
   ErrorCode,
   Key,
+  NpcDefinition,
   TargetSpec,
 } from '../contracts.gen.ts';
 import { admission, detailAt, refusal, resolved, type Offered } from '../commands/actions.ts';
@@ -28,8 +30,10 @@ import * as equipment from '../mechanics/equipment/rule.ts';
 import * as position from '../mechanics/position/shared.ts';
 import { cmp } from '../foundation/validate.ts';
 import { carrying, giveRefused, putRefused } from '../mechanics/containment/shared.ts';
+import { theftRefused } from '../mechanics/containment/theft.ts';
 import { movable as movableItem } from '../runtime/created.ts';
 import { attackRefused } from '../mechanics/combat/shared.ts';
+import { askRefused } from '../mechanics/speech/ask.ts';
 import { combatOffered } from './combat.ts';
 import * as expedition from '../mechanics/expedition/shared.ts';
 import { reach } from '../mechanics/lookups.ts';
@@ -53,6 +57,8 @@ const HIDDEN = [
   'drink',
   ...MODAL,
 ];
+const hidden = (world: World, actor: CharacterId, a: Offered) =>
+  HIDDEN.includes(a.command) || (a.command === 'continue' && !modalScene(world, actor));
 // size: allow 60, one composed ActionSet/query context projects item and exact-subject Notice offers
 export function lists(world: World, actor: CharacterId, steps = { n: 0 }) {
   const set = resolved(world, actor);
@@ -60,16 +66,15 @@ export function lists(world: World, actor: CharacterId, steps = { n: 0 }) {
   const current = Object.keys(position.VERBS).find((v) => position.VERBS[v]![0] === at);
   const body = bodyOf(world, actor);
   const take = takeAdmission(world, actor, body, steps);
+  const drawn = pick(world, actor, steps, set)?.key; // row FD3: the one storylet offered here
   const here = (a: Offered, d = detailAt(world, a)) =>
     !a.recipe ||
     (d !== undefined &&
       world.details[d].room === world.state.containers[body!] &&
       light.visible(world, actor, d, steps));
-  const hidden = (a: Offered) =>
-    HIDDEN.includes(a.command) || (a.command === 'continue' && !modalScene(world, actor));
   const listed = (fits: (a: Offered) => boolean, id?: string, scope?: string) =>
     Object.values(set)
-      .filter((a) => fits(a) && here(a) && !hidden(a))
+      .filter((a) => fits(a) && (a.key === drawn || here(a)) && !hidden(world, actor, a))
       .filter((a) => movable(world, a, id) && combatOffered(world, actor, body, a, id))
       .filter((a) => a.speaker === undefined || a.speaker === id)
       .sort((a, b) => b.priority - a.priority || cmp(a.key, b.key))
@@ -81,6 +86,7 @@ export function lists(world: World, actor: CharacterId, steps = { n: 0 }) {
       });
   const liquid = (id: string) => liquidActions(world, actor, id, set, steps);
   return {
+    drawn,
     notice: (id: string) =>
       listed((a) => noticeOffer(world, a, id), id, 'inspectable_details').concat(liquid(id)),
     place: [
@@ -128,7 +134,7 @@ function takeAdmission(world: World, actor: CharacterId, body: EntityId | undefi
     if (typeof reached === 'boolean' || reached === 'permission_denied')
       admitted.set(item, reached);
     if (typeof reached === 'string') return reached;
-    if (!reached) return 'not_present' as const;
+    if (!reached) return theftRefused(world, actor, body, item, steps); // the take rule's twin
     carry ??= carrying(world, body, steps);
     return carry(item);
   };
@@ -159,12 +165,13 @@ function entityOffered(
       ? !!a.engine && a.command === 'take'
       : a.target.kind === 'entity' &&
         a.target.scopes.includes(scope as never) &&
-        (!equip(a) || fits(world, actor, a, id));
+        (!equip(a) || fits(world, actor, a, id)) &&
+        (a.command !== 'ask' || !!(world.entities[id] as NpcDefinition | undefined)?.ask); // row FD7
 }
 
 // `a` as listed for `actor` (on entity `id` in `scope`, if any): a door verb on an item is aimed
 // at it, with the item's scope and no input, so target_ids [id] fills target_id (commands/invocation.ts).
-// size: allow 50, exact detail harvest joins shared action admission and projection
+// size: allow 53, exact detail harvest and the row FD7 ask join shared action admission and projection
 function advertise(
   world: World,
   actor: CharacterId,
@@ -212,6 +219,9 @@ function advertise(
         : undefined) ||
       (a.command === 'attack' && target !== undefined
         ? attackRefused(world, actor, target)
+        : undefined) ||
+      (a.command === 'ask' && target !== undefined
+        ? askRefused(world, actor, target, steps)
         : undefined);
   return code ? { available: false, ...shown, reason: { code } } : { available: true, ...shown };
 }
