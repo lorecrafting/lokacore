@@ -118,7 +118,7 @@ defmodule Loka.Content.Skills do
   defp itself(_, _, _), do: []
 
   # Homestead hs-14 (secret): no shown skill's qualification and no dialogue policy reads a hidden
-  # skill, and no labeled talk teaches one (cartridge_skills.ts).
+  # skill, and no labeled talk or riddle dialogue teaches one (cartridge_skills.ts).
   defp secret(m, defs) do
     hidden? =
       &match?({_, _, %{"hidden" => true}}, Loka.Content.Refs.resolve(&1, "skill", m, defs))
@@ -141,7 +141,8 @@ defmodule Loka.Content.Skills do
         {_, {rel, [], d}} <- defs["dialogue"] || %{},
         {field, true} <- [
           {"policy", reads?(d["policy"], hidden?)},
-          {"label", !!d["label"] and teaches?(d, hidden?)}
+          {"label", !!d["label"] and teaches?(d, hidden?)},
+          {"riddle", !!d["riddle"] and teaches?(d, hidden?)}
         ],
         do: bad(at(rel, [field]))
       )

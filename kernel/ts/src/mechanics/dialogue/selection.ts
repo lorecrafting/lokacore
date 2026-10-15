@@ -16,6 +16,7 @@ import {
   type ChoiceRow,
 } from '../../runtime/decision.ts';
 import { cmp } from '../../foundation/validate.ts';
+import { same } from '../../foundation/compose.ts';
 import { holds } from '../policy.ts';
 import { living } from '../death/shared.ts';
 import { disposition } from '../disposition.ts';
@@ -46,6 +47,27 @@ export const offered = (world: World, actor: CharacterId, d: DialogueDefinition,
       !d.choices[id]!.sequence?.some(
         (s) => s.op === 'skill.acquire' && concealed(world, actor, s.skill, steps),
       ),
+  );
+
+/**
+ * Whether a saved row's `ids` are ones an opening of `d` can write: `choiceIds(d)` in order, never
+ * empty, less only choices that `skill.acquire` a hidden skill (hs-14; the save checks, static
+ * because the actor has moved on since the opening).
+ */
+export const openable = (world: World, d: DialogueDefinition, ids: unknown) =>
+  Array.isArray(ids) &&
+  ids.length > 0 &&
+  same(
+    ids,
+    choiceIds(d).filter(
+      (id) =>
+        ids.includes(id) ||
+        !d.choices[id]!.sequence?.some(
+          (s) =>
+            s.op === 'skill.acquire' &&
+            world.cartridge.skills?.[refString(s.skill)]?.hidden === true,
+        ),
+    ),
   );
 
 /**

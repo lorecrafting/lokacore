@@ -18,7 +18,7 @@ import {
   type ChoiceRow,
   type World,
 } from '../../../kernel/ts/src/runtime/decision.ts';
-import { answerFits, bind, choiceIds } from '../../../kernel/ts/src/mechanics/dialogue/shared.ts';
+import { answerFits, bind, openable } from '../../../kernel/ts/src/mechanics/dialogue/shared.ts';
 import { scopeOf } from '../../../kernel/ts/src/mechanics/fact.ts';
 import { questOf } from '../../../kernel/ts/src/mechanics/lookups.ts';
 import type { Story } from './save.ts';
@@ -59,7 +59,7 @@ export function dialogueDetail(
       row.roles.filter((r) => !option.exchange || !/^(outgoing|incoming)_\d{2}$/.test(r.role)),
       bind(s.world, source),
     ) ||
-    !same(row.choice_ids, choiceIds(source))
+    !openable(s.world, source, row.choice_ids)
   )
     return invalid();
   const speaker = Object.entries(source.roles).find(

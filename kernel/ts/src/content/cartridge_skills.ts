@@ -90,7 +90,7 @@ function prerequisites(c: Obj): Diagnostic[] {
 }
 
 // Homestead hs-14 (secret): no shown skill's qualification and no dialogue policy reads a hidden
-// skill, and no labeled talk teaches one.
+// skill, and no labeled talk or riddle dialogue (its letter bank shows) teaches one.
 function secret(c: Obj): Diagnostic[] {
   const out: Diagnostic[] = [];
   const hidden = (r: DefinitionRef) => c.skills?.[refString(r)]?.hidden === true;
@@ -107,6 +107,7 @@ function secret(c: Obj): Diagnostic[] {
       (o.sequence ?? []).some((q: Obj) => q.op === 'skill.acquire' && hidden(q.skill)),
     );
     if (d.label !== undefined && teaches) bad(`${at}.label`);
+    if (d.riddle !== undefined && teaches) bad(`${at}.riddle`);
   }
   return out;
 }

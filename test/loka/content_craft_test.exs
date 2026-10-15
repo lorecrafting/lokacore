@@ -104,7 +104,7 @@ defmodule Loka.ContentCraftTest do
              [{"UNRESOLVED_REFERENCE", "skills/whittling.profession"}]
 
     # hs-14 secret (twin of craft.test.ts "loader: no shown qualification, ..."): a shown skill's
-    # qualification, any dialogue policy, or a talk label on a dialogue teaching a hidden skill.
+    # qualification, any dialogue policy, or a talk label or riddle on a dialogue teaching a hidden skill.
     reads = %{
       "policy_version" => 1,
       "root" => %{"op" => "skill_compare", "skill" => "carving", "at_least" => 1}
@@ -126,6 +126,20 @@ defmodule Loka.ContentCraftTest do
 
     assert edit.([label | hidden]) == [{"SCHEMA_VIOLATION", "dialogues/old_carver_carving.label"}]
     assert edit.([label]) == :ok
+
+    riddle =
+      {"dialogues/old_carver_carving.json",
+       &Map.put(&1, "riddle", %{
+         "choice_id" => "learn",
+         "answer" => "a",
+         "bank" => ["A"],
+         "wrong" => "old_carver.carving.prompt"
+       })}
+
+    assert edit.([riddle | hidden]) ==
+             [{"SCHEMA_VIOLATION", "dialogues/old_carver_carving.riddle"}]
+
+    assert edit.([riddle]) == :ok
   end
 
   # Break (Built rooms S6; twin of the loader test in kernel/ts/test/craft.test.ts): a build step

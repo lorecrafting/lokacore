@@ -489,9 +489,10 @@ test('a concealed lesson is left out of the opened choices and refused', () => {
 });
 
 // Breaks (hs-14 secret; twin of content_craft_test.exs): a shown skill's qualification or a
-// dialogue policy reading a hidden skill loads, a labeled talk teaching one loads, or a hidden
+// dialogue policy reading a hidden skill loads, a labeled talk or a riddle dialogue (its letter
+// bank shows) teaching one loads, or a hidden
 // skill's own qualification reading one is refused.
-test('loader: no shown qualification, dialogue policy or talk label reveals a hidden skill', () => {
+test('loader: no shown qualification, dialogue policy, talk label or riddle reveals a hidden skill', () => {
   const S = (k: string) => `${P}skill/${k}`;
   const D = (k: string) => `${P}dialogue/${k}`;
   const hide = (c: any) => ['carving', 'joinery'].forEach((k) => (c.skills[S(k)].hidden = true));
@@ -516,6 +517,18 @@ test('loader: no shown qualification, dialogue policy or talk label reveals a hi
     ['SCHEMA_VIOLATION', `.cartridge.dialogues["${D('old_carver_carving')}"].label`],
   );
   assert.equal(loadEdited(label), 'loaded'); // carving shown
+  const riddle = (c: any) =>
+    (c.dialogues[D('old_carver_carving')].riddle = {
+      choice_id: 'learn',
+      answer: 'a',
+      bank: ['A'],
+      wrong: 'old_carver.carving.prompt',
+    });
+  assert.deepEqual(
+    loadEdited((c) => (hide(c), riddle(c))),
+    ['SCHEMA_VIOLATION', `.cartridge.dialogues["${D('old_carver_carving')}"].riddle`],
+  );
+  assert.equal(loadEdited(riddle), 'loaded'); // carving shown
 });
 
 // Breaks (hs-14; twin of content_craft_test.exs): a shown skill whose prerequisite reads a hidden

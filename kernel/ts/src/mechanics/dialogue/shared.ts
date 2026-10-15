@@ -245,6 +245,7 @@ export function choiceView(
 
 export {
   choiceIds,
+  openable,
   speaks,
   spokenBy,
   talkRefused,
