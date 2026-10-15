@@ -96,7 +96,7 @@ const refused = (w: World, service: string, code: string, key: string) => {
   const offer = gameView(w)
     .entities.find((x) => x.id === cook(w))!
     .services!.find((s) => s.service.key === service)!.action;
-  assert.deepEqual(offer.reason, { code, message: { key } });
+  assert.deepEqual(offer.available ? undefined : offer.reason, { code, message: { key } });
 };
 /** Fetch `k` fish from the pond and come back to the kitchen. */
 const catchFish = (w: World, ...ks: string[]) => {
@@ -105,7 +105,7 @@ const catchFish = (w: World, ...ks: string[]) => {
   return play(w, { type: 'move', direction: 'south' });
 };
 const str = (w: World) => value(w, w.character, ref('attribute', 'str'));
-const mv = (w: World) => level(w, w.body, resourceRef(w, 'mv'));
+const mv = (w: World) => level(w, w.body, resourceRef(w, 'mv'))!;
 /** A world holding the claimed stew, at C0 + 300 after the order. */
 const served = (c = content) => {
   let w = use(catchFish(fresh(c), 'fish_01', 'fish_02'), 'stew').world;

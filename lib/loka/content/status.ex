@@ -174,6 +174,18 @@ defmodule Loka.Content.Status do
   defp pierced_by(_, _, _, _), do: []
 
   @doc "Row 16: expands a pierced_by; `expand` (Checks.expand) expands the rest."
+  # Row hs-5: an edible's `applies` names statuses as its `cures` do.
+  def edible(e, m, expand) do
+    {lists, rest} = Map.split(e, ~w(cures applies))
+
+    Map.merge(
+      expand.(rest, m),
+      Map.new(lists, fn {k, l} ->
+        {k, if(is_list(l), do: Enum.map(l, &ref(&1, "status", m)), else: l)}
+      end)
+    )
+  end
+
   def expand(%{"pierced_by" => %{"skill" => k, "attribute" => a}} = s, m, expand),
     do:
       Map.put(expand.(Map.delete(s, "pierced_by"), m), "pierced_by", %{
