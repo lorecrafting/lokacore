@@ -139,6 +139,9 @@ Session lessons (2026-10-15, session 84e03897):
   judgment work; adopted the Fable priority plan; Settle S1 into Homestead, S2 cut, S3/S4 on a yes;
   word bar touch-first; mounts after 43a in M14.
 
+- 2026-10-15 (session 84e03897): retro `loka-wu5e` approved ("approved"): every brief requires the
+  developer to mutate every new conditional in its diff before handback and report each in the
+  check-to-test table; until developer.md says so (next housekeeping PR), paste it into each brief.
 - 2026-10-15 (session 84e03897): PM rulings the owner may overrule (none asked directly):
   Built rooms build through a hired carpenter NPC, not a free-hand verb; raze moved to Homestead;
   Homestead: cook NPC (no own hearth yet), fishing is a luck miss with hour/season/weather catches (no
@@ -155,8 +158,7 @@ Session lessons (2026-10-15, session 84e03897):
 - Approve or reject retro items: from 2026-10-14 `loka-0j8u` (hook refuses a spawn at load 8+),
   `loka-bjwq` (developers always push; read prepush status), `loka-60rs` (CI sim time per batch head),
   `loka-iqga` (merge_resolve combines one-row doc edits and imports), `loka-a2av` (collapse Beads notes
-  at approval), `loka-cnqx` (prepush per-run log directory); from 2026-10-15 `loka-wu5e` (developer
-  hands back a check-to-red-control table), `loka-hisj` (/code-review names its target), `loka-jxwu`
+  at approval), `loka-cnqx` (prepush per-run log directory); from 2026-10-15 `loka-hisj` (/code-review names its target), `loka-jxwu`
   (after_merge.sh ignores untracked files), `loka-tx2h` (pm_merge refuses a red reviewed sha),
   `loka-j6qd` (sampler hash change runs transcripts and the Impact story check), `loka-8lkq` (check table
   in the last commit body), `loka-uh5u` (browser checks in slice worktrees).
