@@ -1,4 +1,4 @@
-// size: allow 570, the craft sampler walks (hs-10 to hs-12) share one compiled cartridge and helpers
+// size: allow 680, the craft sampler walks (hs-10 to hs-12) and the hs-14 skill tree share one compiled cartridge and helpers
 // Homestead hs-10 (docs/system/mechanics.md Craft) on the compiled craft sampler: the workshop's
 // bench carries carve_spoon (opposed whittling, rating 1, growth [1]); it consumes one of
 // stick_01..02 into the sealed scrap room and yields one of spoon_01..02 from the sealed store.
@@ -322,6 +322,8 @@ test('a craft whose policy fails refuses on the policy, as offered', () => {
   assert.ok(agrees(w, r));
 });
 
+const box = (w: World, key: string) => gameView(w).skills!.find((s) => s.skill.key === key)!;
+
 // Homestead hs-11. Breaks: the dialogue admission (dialogue/shared.ts blocked) skips the
 // prerequisite (the level-1 choose is accepted), the offer disagrees with admission (agrees
 // fails), or the conversation offers the lesson again after it is learned.
@@ -343,16 +345,122 @@ test('carving is learned only at whittling 2, offered and admitted alike', () =>
   const level1 = carve(holding()).world; // failed: one use, whittling 1
   const refused = learn(level1);
   assert.equal(refused.offered.available, false);
+  assert.equal(box(refused.w, 'carving').locked, true); // hs-14: the view says why
   assert.equal(code(refused.r), 'invalid_state');
   assert.equal(refused.r.world, refused.w); // nothing changed
   assert.equal(learned(refused.w), false);
   const level2 = carve(level1).world; // two uses: whittling 2
   const taught = learn(level2);
   assert.equal(taught.offered.available, true);
+  assert.equal(box(taught.w, 'carving').locked, false);
   assert.equal(code(taught.r), 'accepted');
   assert.equal(learned(taught.r.world), true);
   const w = taught.r.world; // the conversation ends with the lesson
   assert.equal(code(play(w, { type: 'talk', target_id: carver(w) })), 'invalid_state');
+});
+
+// Homestead hs-14 (book-ui.md Skill tree details). Breaks: level is projected without growth or
+// stops at the wrong growth threshold, locked is projected without a prerequisite or flips at
+// the wrong whittling level, or profession is dropped. Whittling grows [1, 2]; carving needs
+// whittling 2; joinery (no growth) needs carving 1.
+test('the skill tree view: level with growth, locked with a prerequisite, at the boundaries', () => {
+  const tree = (w: World) =>
+    gameView(w).skills!.map(({ skill, level, locked, profession }) => ({
+      key: skill.key,
+      ...(level !== undefined && { level }),
+      ...(locked !== undefined && { locked }),
+      profession,
+    }));
+  const row = (key: string, more: object, profession?: string) => ({ key, ...more, profession });
+  const at = (w: World, whittling: number, carvingLocked: boolean) =>
+    assert.deepEqual(tree(w), [
+      row('carpentry', { level: 0, locked: true }), // hs-12: needs woodcutting 2
+      row('carving', { level: 0, locked: carvingLocked }, 'profession.handcraft'),
+      row('joinery', { locked: true }, 'profession.woodcraft'),
+      row('whittling', { level: whittling }, 'profession.woodcraft'),
+      row('woodcutting', { level: 1 }), // hs-12: woodfolk grants it at birth
+    ]);
+  const level1 = carve(holding()).world;
+  at(fresh(), 0, true);
+  at(level1, 1, true);
+  at(carve(level1).world, 2, false);
+});
+
+// Breaks (hs-14): a hidden skill is projected while its prerequisite fails, or stays out once
+// it holds.
+test('a hidden skill is left out of the view while its prerequisite fails', () => {
+  const hide = (k: string) => ({
+    [`${P}skill/${k}`]: { ...content.skills![`${P}skill/${k}`]!, hidden: true },
+  });
+  const c = { ...content, skills: { ...content.skills, ...hide('carving'), ...hide('joinery') } };
+  const keys = (w: World) => gameView(w).skills!.map((s) => s.skill.key);
+  const level1 = carve(take(take(fresh(c as never), 'stick_01'), 'stick_02')).world;
+  assert.deepEqual(keys(level1), ['carpentry', 'whittling', 'woodcutting']);
+  assert.deepEqual(keys(carve(level1).world), ['carpentry', 'carving', 'whittling', 'woodcutting']);
+});
+
+// Breaks (hs-14 review): a learned hidden skill vanishes when its prerequisite stops holding, or an
+// NPC lists a lesson for a skill the view leaves out. Carving is hidden and needs stick_02 held.
+test('a learned hidden skill stays in the view; a lesson for a left-out skill is not listed', () => {
+  const carving = content.skills![`${P}skill/carving`]!;
+  const stick = { ...(carving.prerequisite!.root as any).skill, kind: 'item', key: 'stick_02' };
+  const root = { op: 'has_item', item: stick } as never;
+  const c = {
+    ...content,
+    skills: {
+      ...content.skills,
+      [`${P}skill/carving`]: {
+        ...carving,
+        hidden: true,
+        prerequisite: { policy_version: 1, root },
+      },
+      [`${P}skill/joinery`]: { ...content.skills![`${P}skill/joinery`]!, hidden: true },
+    },
+  };
+  const carver = (w: World) => w.entityIds[`${P}npc/old_carver`]!;
+  const seen = (w: World) => ({
+    keys: gameView(w).skills!.map((s) => s.skill.key),
+    lessons: gameView(w)
+      .entities.find((e) => e.id === carver(w))!
+      .lessons?.map((r) => r.key),
+  });
+  const w0 = fresh(c as never);
+  // hs-12's carpentry is shown, so the carver lists its lesson
+  const shown = (keys: string[], lessons: string[]) => ({
+    keys: ['carpentry', ...keys, 'woodcutting'],
+    lessons: ['carpentry', ...lessons],
+  });
+  assert.deepEqual(seen(w0), shown(['whittling'], []));
+  const held = take(take(w0, 'stick_01'), 'stick_02');
+  assert.deepEqual(seen(held), shown(['carving', 'whittling'], ['carving']));
+  const talking = ok(held, { type: 'talk', target_id: carver(held) });
+  const [continuation_id] = pending(talking, talking.character)!;
+  const learned = ok(talking, { type: 'choose', choice_id: 'learn', continuation_id });
+  const dropped = ok(learned, { type: 'drop', item_id: item(learned, 'stick_02') });
+  assert.equal(box(dropped, 'carving').locked, true);
+  assert.equal(box(dropped, 'carving').acquired, true);
+  // joinery needs carving 1, which learning gives
+  assert.deepEqual(seen(dropped), shown(['carving', 'joinery', 'whittling'], ['carving']));
+});
+
+// Breaks (hs-14; twin of content_craft_test.exs): a shown skill whose prerequisite reads a hidden
+// skill loads, a hidden skill reading a hidden one is refused, or an unknown profession text
+// loads. The floor is loader_floors.json's "a skill profession" case.
+test('loader: a shown prerequisite never reads a hidden skill; a profession resolves', () => {
+  const S = (k: string) => `${P}skill/${k}`;
+  const hide =
+    (...keys: string[]) =>
+    (c: any) =>
+      keys.forEach((k) => (c.skills[S(k)].hidden = true));
+  assert.deepEqual(loadEdited(hide('carving')), [
+    'SCHEMA_VIOLATION',
+    `.cartridge.skills["${S('joinery')}"].prerequisite`,
+  ]);
+  assert.equal(loadEdited(hide('carving', 'joinery')), 'loaded');
+  assert.deepEqual(
+    loadEdited((c) => (c.skills[S('whittling')].profession = 'profession.nothing')),
+    ['UNRESOLVED_REFERENCE', `.cartridge.skills["${S('whittling')}"].profession`],
+  );
 });
 
 // Homestead hs-12 (Built rooms S6): the axe lies in the workshop; chop at the glade's oak yields a

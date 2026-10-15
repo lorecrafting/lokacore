@@ -2099,6 +2099,14 @@
           },
           "minItems": 1,
           "maxItems": 8
+        },
+        "profession": {
+          "$ref": "text.schema.json#/$defs/TextKey",
+          "description": "Homestead hs-14 (docs/system/book-ui.md Skill tree details; kernel_api at least 1.101): the profession heading this skill is listed under on the Character page."
+        },
+        "hidden": {
+          "const": true,
+          "description": "Homestead hs-14 (docs/system/mechanics.md Skill trees): the skill is left out of GameView skills, and of NPC lessons, while its prerequisite fails and it is not acquired. A non-hidden skill whose prerequisite reads a hidden skill is refused."
         }
       },
       "required": [
@@ -2107,6 +2115,11 @@
         "requirement",
         "qualification"
       ],
+      "dependentRequired": {
+        "hidden": [
+          "prerequisite"
+        ]
+      },
       "additionalProperties": false,
       "description": "An acquired skill with authored display text and a policy for current qualification.",
       "examples": [

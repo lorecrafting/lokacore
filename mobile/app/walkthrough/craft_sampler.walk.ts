@@ -1,5 +1,6 @@
 // The self-build route (`LOKA_WALK=craft_sampler npm run walkthrough`, docs/web-preview.md):
-// chop, learn carpentry, saw a timbered hut's timber, raise the hut and enter it (hs-12).
+// chop, learn carpentry, saw a timbered hut's timber, raise the hut and enter it (hs-12); then
+// the Character page's skill tree before and after learning carving (hs-14).
 import { LABEL } from '../book/labels.ts';
 import { moves, scene, settle, walk } from './walk.ts';
 
@@ -34,3 +35,42 @@ walk('1-self-build', 'Self-build: chop, learn carpentry, saw, raise a timbered h
   await tap('Raise a timbered hut');
   await moves(screen, 'north');
 });
+
+walk(
+  '2-skill-tree',
+  'Craft: skill tree locked, carve twice, learn carving, skill tree again',
+  async (r) => {
+    const { screen } = r;
+    const character = async () => {
+      await settle();
+      await screen.getByRole('button', /opens Contents/).tap();
+      await screen.getByRole('button', /^Character/).tap();
+      await settle();
+      await screen.getByRole('button', LABEL.backToWorld).tap();
+    };
+    await r.app.clearState();
+    await settle();
+    await screen
+      .getByRole('button', /^Woodfolk/)
+      .first()
+      .tap();
+    await scene(screen);
+    await character();
+    for (let i = 0; i < 2; i++) {
+      await screen
+        .getByRole('button', /^A stick is here/)
+        .first()
+        .tap();
+      await screen.getByRole('button', 'Take a stick').tap();
+      await settle();
+      await screen.getByRole('button', 'Carve a spoon').tap();
+      await settle();
+    }
+    await screen.getByRole('button', /^The old carver is here/).tap();
+    await screen.getByRole('button', 'Talk the old carver').tap();
+    await screen.getByRole('button', 'Learn carving').tap();
+    const leave = () => screen.getByRole('button', /^Leave/).first();
+    for (let i = 0; i < 3 && (await settle(), await leave().isVisible()); i++) await leave().tap();
+    await character();
+  },
+);

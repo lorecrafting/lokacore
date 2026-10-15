@@ -128,7 +128,7 @@ const conversation = (p: NpcProps, choice?: NonNullable<GameView['choice']>) => 
 };
 
 // The skills this NPC teaches: learned or not, and whether the player qualifies now.
-const npcSkills = (c: Palette, p: NpcProps) =>
+export const npcSkills = (c: Palette, p: NpcProps) =>
   p.view.skills
     ?.filter(
       (s) =>
@@ -144,7 +144,7 @@ const npcSkills = (c: Palette, p: NpcProps) =>
     )
     .map((s) => (
       <Text key={s.skill.key} style={note(c)}>
-        {p.text(s.label)}: {s.acquired ? 'learned' : 'not learned'}; currently{' '}
+        {p.text(s.label)}: {s.acquired ? 'learned' : s.locked ? 'locked' : 'not learned'}; currently{' '}
         {s.qualified ? 'qualified' : 'unqualified'}. {p.text(s.requirement)}
       </Text>
     ));
