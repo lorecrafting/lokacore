@@ -31,6 +31,7 @@ test('the smith offers one Ask about card per known topic; no topic, no card', (
   const b = smith();
   assert.deepEqual(asks(b), [`${LABEL.askAbout} The mill`, `${LABEL.askAbout} The moon`]);
   const labels = b.labels();
+  assert.ok(!labels.some((l) => l.startsWith('Whisper'))); // no word to send until word bar S3
   const talk = labels.findIndex((l) => l.startsWith('Talk'));
   assert.ok(talk >= 0 && talk < labels.indexOf(`${LABEL.askAbout} The mill`));
   const v = b.game.view().view;
@@ -63,7 +64,7 @@ test('each Ask about card is admitted: the answer joins the page, a grant adds i
   const shown = b.text();
   const lines = shown.slice(shown.indexOf('A smith at her forge.') + 1, shown.indexOf(asks(b)[0]));
   assert.deepEqual(
-    lines.filter((l) => !l.startsWith('Talk') && !l.startsWith('Whisper')),
+    lines.filter((l) => !l.startsWith('Talk')),
     [
       '"The miller ships more than flour. Ask about the smugglers."',
       'The smith shrugs.',

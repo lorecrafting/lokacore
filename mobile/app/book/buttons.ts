@@ -159,7 +159,7 @@ function heldButtons(
 ) {
   return projected.flatMap((e) =>
     e.actions
-      .filter((a) => a.available && !['give', 'ask'].includes(a.action_key)) // ponytail: Give waits for a touch recipient selector; ask is askButtons
+      .filter((a) => a.available && !['give', 'ask', 'whisper'].includes(a.action_key)) // ponytail: give waits for a recipient selector, whisper for word bar S3 (loka-a9pn); ask is askButtons
       .map((a) => {
         const destination = a.target_ids?.[1] && names.get(a.target_ids[1]);
         const offered = button(
