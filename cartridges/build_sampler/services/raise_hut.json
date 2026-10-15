@@ -9,6 +9,17 @@
     "kind": "build",
     "blueprint": "hut",
     "site": "lane",
-    "direction": "north"
+    "direction": "north",
+    "fact": "hut_ordered",
+    "escrow": {
+      "items": [
+        "timber_a",
+        "timber_b",
+        "timber_c"
+      ],
+      "quantity": 2,
+      "custody": "yard",
+      "ready_after": 7200
+    }
   }
 }

@@ -37,13 +37,11 @@ const service = (key: string) => ({
   key,
 });
 
-// Breaks: the built identity row not saved or not hydrated on load (north not offered after
-// reopen), the receipt replay minting a second room, or load admitting a forged built row
-// (refused as save_corrupt by a load check, not specifically by the direction check).
-test('the hut survives cold reopen, its receipt replays, and a forged east row is save_corrupt', (t) => {
-  const dir = mkdtempSync(join(tmpdir(), 'loka-built-saves-'));
-  t.after(() => rmSync(dir, { recursive: true, force: true }));
-  const path = join(dir, 'hut.db');
+const timber = (k: string) => initial.entityIds[`build_sampler@0.0.1:item/timber_${k}`]!;
+
+// Built rooms S3: buy the plot, take two timber, order the hut; with `reopen`, close and reopen
+// the save between order and completion; then elapse to the order's due time.
+function build(path: string, reopen: boolean) {
   let p = elapsedHost(path, undefined, bundle);
   const open = () => {
     const s = openStory(p.db, releases, p.host);
@@ -66,22 +64,51 @@ test('the hut survives cold reopen, its receipt replays, and a forged east row i
     return r;
   };
   run(invocation('buy_plot', [npc('seller')], { service: service('buy_plot'), quoted_price: 10 }));
+  run(invocation('take', [timber('a')]));
+  run(invocation('take', [timber('b')]));
   const raise = invocation('raise_hut', [npc('carpenter')], {
     service: service('raise_hut'),
     quoted_price: 5,
   });
   run(raise);
   const created = () => Object.keys(story.world().state.created ?? {});
-  const [hut] = created();
-  p.sql.close();
+  assert.deepEqual(created(), []);
+  const from = story.world().state.clock;
+  if (reopen) {
+    p.sql.close();
+    p = elapsedHost(path, undefined, bundle);
+    story = open();
+  }
+  const r = story.elapsed({ expected_run_id: story.runId(), from, until: from + 7200 });
+  assert.equal(r.kind, 'saved', JSON.stringify(r));
+  return { p, raise, invocation, created };
+}
 
-  p = elapsedHost(path, undefined, bundle);
-  story = open();
+// Breaks: the order job's owner (actor_id) or the built identity row not saved or not hydrated
+// (no hut, or north not offered after reopen), a reopen between order and completion minting
+// a different room id, the receipt replay minting a second room, or load admitting a forged
+// built row (refused as save_corrupt by a load check, not specifically by the direction check).
+test('the hut survives cold reopen, its receipt replays, and a forged east row is save_corrupt', (t) => {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-built-saves-'));
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
+  const path = join(dir, 'hut.db');
+  const straight = build(join(dir, 'straight.db'), false).created();
+  straight.length || assert.fail('the uninterrupted run raised no hut');
+  const built = build(path, true);
+  const [hut] = built.created();
+  assert.deepEqual(built.created(), straight);
+  built.p.sql.close();
+
+  const p = elapsedHost(path, undefined, bundle);
+  const story = openStory(p.db, releases, p.host);
+  if (story.kind !== 'open') throw new Error(JSON.stringify(story));
+  const { raise, invocation } = built;
   assert.ok(gameView(story.world()).exits.some((e) => e.direction === 'north'));
-  const again = run(raise);
-  if (again.kind === 'saved') assert.equal(again.replay, true);
-  assert.deepEqual(created(), [hut]);
-  run(invocation('move', [], { direction: 'north' }));
+  const again = story.invoke(raise);
+  assert.equal(again.kind === 'saved' && again.replay, true, JSON.stringify(again));
+  assert.deepEqual(Object.keys(story.world().state.created ?? {}), [hut]);
+  const moved = story.invoke(invocation('move', [], { direction: 'north' }));
+  assert.equal(moved.kind, 'saved');
   assert.equal(story.world().state.containers[story.world().body], hut);
   coldReopen(path, bundle);
 

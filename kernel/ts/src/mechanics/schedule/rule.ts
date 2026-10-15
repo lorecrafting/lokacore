@@ -22,6 +22,7 @@ import {
   rejected,
   refString,
   type JobRow,
+  type Mint,
   type Rule,
   type Steps,
   type World,
@@ -49,6 +50,7 @@ import { moves } from '../status/shared.ts';
 
 import { runSight } from '../population/behavior.ts';
 import { runDelayed, type Joins } from '../delayed.ts';
+import { built } from '../service/shared.ts';
 
 // `at`: the drain's hour for this run; a later listed hour the advance crosses is a sub-step of the
 // row's one run_job, which its first hour completed (scheduledJob, loka-qi0r; runPopulation, loka-6ql4;
@@ -90,7 +92,7 @@ export const decideAt = (
       return runReplenish(world, payload.job_id, row, mint, steps, at ?? row.due_time);
     if (row.job.kind === 'wage')
       return runWage(world, payload.job_id, row, mint, at ?? row.due_time);
-    if (row.job.kind === 'order') return orderReady(world, payload.job_id, row);
+    if (row.job.kind === 'order') return orderReady(world, payload.job_id, row, mint, steps);
     if (row.job.kind === 'reaction')
       return runDelayed(world, command, payload.job_id, row, mint, steps, joins); // FD1
     return scheduledJob(world, command, payload.job_id, row, mint, steps, at ?? row.due_time);
@@ -167,12 +169,15 @@ function scheduledJob(
   return crossed ? { ...ran, next: due_time } : ran;
 }
 
-// Toolbox row 20b: a due order job completes and writes nothing else; the order is now ready.
-const orderReady = (world: World, job_id: JobId, row: JobRow) =>
+// Toolbox row 20b: a due order job completes; the order is now ready. A build commission's
+// (Built rooms S3) also raises the room, its id minted from this run_job's jobCommandId.
+const orderReady = (world: World, job_id: JobId, row: JobRow, mint: Mint, steps: Steps) =>
   accepted<never>(
     world,
     'job_ran',
-    row.status === 'pending' ? [{ op: 'job.complete', writer_group: 0, job_id }] : [],
+    row.status === 'pending'
+      ? [{ op: 'job.complete', writer_group: 0, job_id }, ...built(world, job_id, row, mint, steps)]
+      : [],
     [],
   );
 

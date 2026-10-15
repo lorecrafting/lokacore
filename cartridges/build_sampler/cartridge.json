@@ -19,7 +19,8 @@
       "policy": 1,
       "service": 1,
       "construction": 1,
-      "description_variant": 1
+      "description_variant": 1,
+      "schedule": 1
     },
     "client_features": []
   },
@@ -27,6 +28,10 @@
     "offline_private"
   ],
   "entry": "lane",
+  "time_policy": {
+    "profile": "real_elapsed",
+    "rate": 50
+  },
   "calendar": {
     "start": 25200
   },

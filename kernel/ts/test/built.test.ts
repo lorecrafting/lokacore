@@ -1,11 +1,13 @@
-// Built rooms S2 (mechanics.md Built rooms; save.md Built rooms): build_sampler's carpenter raises
-// the hut north of the lane once the plot is bought; the room is derived from its identity row on
-// every hydrate, and a forged row refuses the load.
+// Built rooms S2 and S3 (mechanics.md Built rooms; save.md Built rooms): build_sampler's carpenter
+// takes two timber and raises the hut north of the lane 7200 s after the order, once the plot is
+// bought; the room is derived from its identity row on every hydrate, and a forged row refuses the load.
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
-import { INSTALLED, gameView, loadCartridge, newWorld, step } from '../src/index.ts';
+import { INSTALLED, gameView, loadCartridge, newWorld, step, stepElapsed } from '../src/index.ts';
+import { elapsedCommandId } from '../src/foundation/id_source.ts';
+import { value } from '../src/mechanics/fact.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { hydrate } from '../src/runtime/created.ts';
 import { invariants } from '../src/mechanics/movement/rule.ts';
@@ -59,7 +61,27 @@ const use = (provider: string, service: string, quoted_price: number) => (w: Wor
 });
 const buy = use('seller', 'buy_plot', 10);
 const raise = use('carpenter', 'raise_hut', 5);
+const cancel = use('carpenter', 'cancel_hut', 1);
 const pennies = (w: World) => level(w, w.body, resourceRef(w, 'pennies'));
+const take = (w: World, ...ks: string[]) =>
+  ks.reduce((x, k) => play(x, { type: 'take', item_id: x.entityIds[`${S}:item/timber_${k}`] }), w);
+const elapse = (w: World, until: number) => {
+  const run_id = `aaaaaaaa-1091-4091-8091-${String(++n).padStart(12, '0')}`;
+  const from = w.state.clock;
+  const payload = { type: 'elapsed', actor_id: w.character, run_id, from, until };
+  const command = { id: elapsedCommandId(run_id, w.context, from, until), payload };
+  const r = stepElapsed(w, { ...command, world_context_id: w.context } as never, n);
+  assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
+  return r.world;
+};
+// The shipped flow: two timber taken, the hut ordered, and the order's 7200 s elapsed.
+const raised = (w: World) => {
+  w = play(take(w, 'a', 'b'), raise(w));
+  return elapse(w, w.state.clock + 7200);
+};
+const ordered = (w: World) => value(w, w.character, ref('fact', 'hut_ordered'));
+const held = (w: World, holder: string) =>
+  Object.values(w.state.containers).filter((c) => c === holder).length;
 const built = (w: World) =>
   Object.keys(w.state.created ?? {}).filter((id) => w.state.created![id].origin.kind === 'built');
 // The offer's refusal and the press's are the same code (view-to-invocation); the press carries
@@ -85,7 +107,7 @@ test('buy the plot, raise the hut, walk north into it and back; the room survive
   refused(w, 'invalid_state'); // owns_plot policy fails (actions.ts refusal: invalid_state)
   w = play(w, buy(w));
   assert.equal(pennies(w), 20);
-  w = play(w, raise(w));
+  w = raised(w);
   assert.equal(pennies(w), 15);
   const [hut] = built(w);
   assert.ok(
@@ -103,28 +125,40 @@ test('buy the plot, raise the hut, walk north into it and back; the room survive
   const reopened = hydrate(fresh(), JSON.parse(JSON.stringify(w.state)), true)!;
   const key = `built_${hut.replaceAll('-', '_')}`;
   assert.deepEqual(JSON.parse(JSON.stringify([reopened.roomIds, reopened.rooms[hut].exits])), [
-    { [`${S}:room/lane`]: lane, [`${S}:room/${key}`]: hut },
+    {
+      [`${S}:room/lane`]: lane,
+      [`${S}:room/yard`]: w.roomIds[`${S}:room/yard`],
+      [`${S}:room/${key}`]: hut,
+    },
     { south: { to: ref('room', 'lane') } },
   ]);
   assert.deepEqual({ ...reopened.rooms[lane].exits }, { north: { to: ref('room', key) } });
   n = 1; // the same command ids as above: the refused raise was command 1
   let again = fresh();
-  again = play(play(again, buy(again)), raise(again));
+  again = raised(play(again, buy(again)));
   assert.deepEqual(built(again), [hut], 'replay mints the same id');
 });
 
-// Break: the max_total cap not counted over the built rows (a second site direction is built
-// past world.construction.max_total 1).
-test('a second structure past max_total is refused', () => {
-  const wider = sampler((c) => {
-    c.rooms[`${S}:room/lane`].site.directions.push('east');
-    c.services[`${S}:service/raise_hut`].benefit.direction = 'east';
-  });
+// Breaks: the max_total cap not counted over the built rows (a second site direction is built
+// past world.construction.max_total 1), or (Built rooms S3) the blueprint's max_per_owner not
+// counted over the owner's rows (max_total 2: the order would get as far as missing_inputs).
+test('a second structure past max_total, or past max_per_owner, is refused', () => {
+  const wider = (max_total: number, cap?: number) =>
+    sampler((c) => {
+      c.rooms[`${S}:room/lane`].site.directions.push('east');
+      c.services[`${S}:service/raise_hut`].benefit.direction = 'east';
+      c.world.construction.max_total = max_total;
+      if (!cap) delete c.blueprints[`${S}:blueprint/hut`].max_per_owner;
+    });
   n = 0;
   let w = fresh();
-  w = play(play(w, buy(w)), raise(w));
-  const reopened = hydrate(fresh(wider), w.state, true)!;
-  refused(reopened, 'invalid_state', 'service.construction_full');
+  w = raised(play(w, buy(w)));
+  refused(hydrate(fresh(wider(1)), w.state, true)!, 'invalid_state', 'service.construction_full');
+  refused(
+    hydrate(fresh(wider(2, 1)), w.state, true)!,
+    'invalid_state',
+    'service.construction_full',
+  );
 });
 
 // Breaks: hydrate admitting a built row whose direction the site does not declare, two rows on
@@ -134,7 +168,7 @@ test('a second structure past max_total is refused', () => {
 test('a forged built row refuses the load', () => {
   n = 0;
   let w = fresh();
-  w = play(play(w, buy(w)), raise(w));
+  w = raised(play(w, buy(w)));
   const [hut] = built(w);
   const other = '00000000-0000-4000-8000-0000000000b2';
   const two = sampler((c) => (c.world.construction.max_total = 2));
@@ -173,14 +207,17 @@ test('a forged built row refuses the load', () => {
 // axis or sign (north is -y), or linking only one way.
 test('the map places the hut one step north of the lane and links both ways', () => {
   const mapped = sampler((c) => {
-    c.map_positions = [{ room: ref('room', 'lane'), x: 2, y: 5, z: 0 }];
+    c.map_positions = [
+      { room: ref('room', 'lane'), x: 2, y: 5, z: 0 },
+      { room: ref('room', 'yard'), x: 9, y: 9, z: 0 },
+    ];
     c.lock.capabilities.knowledge = 1;
     c.manifest.requires.capabilities.knowledge = 1;
   });
   n = 0;
   let w = fresh(mapped);
   const lane = w.state.containers[w.body];
-  w = play(play(w, buy(w)), raise(w));
+  w = raised(play(w, buy(w)));
   const [hut] = built(w);
   w = play(play(w, { type: 'move', direction: 'north' }), { type: 'move', direction: 'south' });
   const { rooms, links } = gameView(w).map!;
@@ -198,4 +235,86 @@ test('the map places the hut one step north of the lane and links both ways', ()
       [lane, hut, 'north'],
     ].sort(),
   );
+});
+
+// Built rooms S3. Breaks: the order taking fewer than two timber or not refusing one, the timber
+// not moved to the yard, the hut raised at order time or before 7200 s, the framing variant not
+// read while ordered, the order left open after completion, or a reopen between order and
+// completion minting a different room id (the job's owner or id lost in the save).
+test('two timber and 7200 s raise the hut; a reopen between order and completion mints the same id', () => {
+  n = 0;
+  let w = play(fresh(), buy(fresh()));
+  w = take(w, 'a');
+  refused(w, 'not_owned', 'service.missing_inputs');
+  w = play(take(w, 'b'), raise(w));
+  const yard = w.roomIds[`${S}:room/yard`]!;
+  assert.deepEqual([held(w, yard), held(w, w.body), ordered(w), built(w)], [2, 0, true, []]);
+  assert.equal(gameView(w).place.description.key, 'room.lane.framing');
+  const t0 = w.state.clock;
+  const reopened = hydrate(fresh(), JSON.parse(JSON.stringify(w.state)), true)!;
+  const mark = n;
+  w = elapse(w, t0 + 7199);
+  assert.deepEqual(built(w), []);
+  w = elapse(w, t0 + 7200);
+  assert.deepEqual([held(w, yard), ordered(w), built(w).length], [2, false, 1]);
+  assert.equal(gameView(w).place.description.key, 'room.lane.description');
+  n = mark;
+  const again = elapse(elapse(reopened, t0 + 7199), t0 + 7200);
+  assert.deepEqual(built(again), built(w));
+});
+
+// Breaks (20b cancel on a build commission): cancel not returning the timber or refunding the
+// fee, the order left open, or the cancelled order's job still raising the hut.
+test('cancel before due returns the timber, keeps the fee, and raises nothing', () => {
+  n = 0;
+  let w = play(fresh(), buy(fresh()));
+  w = play(take(w, 'a', 'b'), raise(w));
+  w = play(w, cancel(w));
+  assert.deepEqual([held(w, w.body), pennies(w), ordered(w)], [2, 14, false]);
+  w = elapse(w, w.state.clock + 7200);
+  assert.deepEqual(built(w), []);
+});
+
+// Break: the cancelled order's job raising the hut at its own due time (before the reorder's),
+// or neither job raising it.
+test('order, cancel, reorder: only the reorder raises the hut, at its own due time', () => {
+  n = 0;
+  let w = play(fresh(), buy(fresh()));
+  w = play(take(w, 'a', 'b'), raise(w));
+  const t0 = w.state.clock;
+  w = elapse(play(w, cancel(w)), t0 + 3600);
+  w = play(w, raise(w));
+  w = elapse(w, t0 + 7200);
+  assert.deepEqual([built(w), ordered(w)], [[], true]);
+  w = elapse(w, t0 + 10800);
+  assert.deepEqual([built(w).length, ordered(w)], [1, false]);
+});
+
+// Break (design call, PM question): a commission whose site was taken by another order meanwhile
+// raising a second room on it, or keeping its timber instead of returning it.
+test('a second commission due on a taken site returns its timber instead', () => {
+  const both = sampler((c) => {
+    const s = `${S}:service/raise_hut`;
+    c.facts[`${S}:fact/hut_ordered_2`] = {
+      ...c.facts[`${S}:fact/hut_ordered`],
+      key: 'hut_ordered_2',
+    };
+    c.services[`${s}_2`] = structuredClone(c.services[s]);
+    Object.assign(c.services[`${s}_2`], { key: 'raise_hut_2' });
+    c.services[`${s}_2`].benefit.fact.key = 'hut_ordered_2';
+    for (const k of ['', '_2']) c.services[`${s}${k}`].benefit.escrow.quantity = 1;
+    c.npcs[`${S}:npc/carpenter`].services.push(ref('service', 'raise_hut_2'));
+  });
+  n = 0;
+  let w = fresh(both);
+  w = play(take(play(w, buy(w)), 'a', 'b'), raise(w));
+  const t0 = w.state.clock;
+  w = elapse(w, t0 + 1);
+  w = play(w, use('carpenter', 'raise_hut_2', 5)(w));
+  w = elapse(w, t0 + 7200);
+  assert.equal(built(w).length, 1);
+  assert.equal(held(w, w.body), 0);
+  w = elapse(w, t0 + 7201);
+  assert.deepEqual([built(w).length, held(w, w.body)], [1, 1]);
+  assert.equal(value(w, w.character, ref('fact', 'hut_ordered_2')), false);
 });

@@ -344,6 +344,11 @@ derives the room and its two exits from the identity row and the pinned cartridg
 gives the same room id and exits, and receipt replay mints the same id. It uses the existing
 changed-row transaction and save-v2 rows, with no format bump.
 
+Built rooms S3: a build commission's order job row carries `actor_id`, the owner the completion
+reads (compose and invariants allow `actor_id` on `order` jobs as on `reaction` jobs). The room
+is minted at completion under the job's command id, so a reopen between order and completion
+mints the same id (`mobile/authority/local-story/built.test.ts`). No new load refusal.
+
 | Layer | Where | Refusal |
 | --- | --- | --- |
 | Compose (apply a delta) | `creationValid` and `initialPair` (`kernel/ts/src/foundation/creation.ts`; `Loka.Core.Creation`) | fault `precondition_failed`: the definition is not a blueprint, the owner is no body's owner, or an `entity.transfer` places the room |

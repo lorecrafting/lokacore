@@ -1,6 +1,7 @@
 {
   "title": "blueprint.hut.title",
   "description": "blueprint.hut.description",
+  "max_per_owner": 1,
   "variants": [
     {
       "when": {

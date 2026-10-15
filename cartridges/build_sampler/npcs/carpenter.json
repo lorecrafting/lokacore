@@ -10,6 +10,7 @@
     "pennies": 0
   },
   "services": [
-    "raise_hut"
+    "raise_hut",
+    "cancel_hut"
   ]
 }
