@@ -144,3 +144,50 @@ test('an entity_died delivery runs for the victim player, else for the doer', ()
   assert.equal(actorFor(w.body), w.character);
   assert.equal(actorFor(item(w, 'bone')), 'char:other');
 });
+
+// loka-kgd.150.2 (PM 2026-10-14): a trigger naming a character ends only that character's quest; a
+// world trigger ends every holder's. Breaks: a character's trigger ends other characters' quests.
+test('quest.fail ends the subject character instance only; a world trigger ends every holder', () => {
+  const quest = {
+    cartridge_id: R.split('@')[0],
+    cartridge_version: '0.0.1',
+    kind: 'quest',
+    key: 'q',
+  };
+  const rule = {
+    key: 'lose',
+    on: { event: 'rested' },
+    apply: [{ op: 'quest.fail', quest, outcome: 'lost' }],
+  };
+  const base = fresh();
+  const row = (character_id: string) => ({
+    quest,
+    scope: { kind: 'player', character_id },
+    state: 'active',
+  });
+  // The body is char:other's here, so a trigger about it names char:other.
+  const w = {
+    ...base,
+    character: 'char:other',
+    state: { ...base.state, quests: { a: row(base.character), b: row('char:other') } },
+  } as unknown as World;
+  const failed = (payload: object) => {
+    const cause = {
+      id: 'dddddddd-4444-4333-8444-000000000002',
+      actor_id: 'char:other',
+      logical_time: 0,
+      payload,
+    } as never;
+    const d = sequence(w, w.character, rule as never, cause, 1, { n: 0 }, allocator(w, cause));
+    assert.equal(d?.kind, 'accepted', JSON.stringify(d));
+    return (d as any).delta.ops.map((op: any) => [op.instance_id, op.to]);
+  };
+  assert.deepEqual(failed({ type: 'rested', body_id: w.body, room_id: w.body }), [['b', 'failed']]);
+  assert.deepEqual(
+    failed({ type: 'entity_died', victim_id: item(w, 'bone'), room_id: w.body, cause: 'x' }),
+    [
+      ['a', 'failed'],
+      ['b', 'failed'],
+    ],
+  );
+});

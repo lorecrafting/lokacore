@@ -380,7 +380,7 @@ completes to `objectives_complete` as its own writer group. Resolution (`:111`) 
 rule that resolves it (a dialogue choice or typed reaction): no open instance `invalid_state`; `active` with an
 unmet `current_state` objective `quest_requirement`; else `quest.transition` to
 `objectives_complete` (if needed) and `resolved` with the choice as outcome, and
-`quest_resolved`. A typed reaction may instead fail each holder's active or
+`quest_resolved`. A typed reaction may instead fail each holder's (Attribution below) active or
 objectives_complete instance with a declared outcome. Failure never reopens a terminal
 instance and emits no event. Policy leaf `quest_state`; the GameView journal lists the player's instances.
 A quest may declare `journal` texts: `active`, `objectives_met`, `resolved`, `failed`,
@@ -616,6 +616,8 @@ hound's death, a hit on a guard, a crow taking an item) reads the doer's `when` 
 doer's facts, quests and experience. An event the host makes without an `actor_id` (a
 delivery's `fact_changed`, a due job's events) falls back to the root command's actor, so a
 job-caused trigger runs for the elapsed command's actor; the Realm delivers per character (R14).
+`quest.resolve` and `quest.fail` end only the trigger's own character's instance when the trigger
+names one (a subject that is a player body, or a `quest_resolved` owner), else every holder's.
 Only `status.apply`, ([status reader 3](#status-readers-toolbox-rows-sr1-sr2-and-sr3)) `status.cure` and `status_active {subject: "subject"}` follow the subject, which may be the actor's body, an NPC or an
 item ([row G3](#statuses-on-npcs-and-things-toolbox-row-g3)), unless the step names an `item`, ([row 42](#potions-and-songs-toolbox-rows-18-and-42)) an `npc` or ([status reader 9](#a-room-as-a-status-holder-status-reader-9)) a `room`; any other subject (a detail) takes nothing, and since status reader 9 a room subject takes it; ([row W22](#fire-toolbox-row-w22)) `barrier.set` names its barrier or acts on the event's room; ([row 41](#decay-toolbox-row-41)) `item.move` moves the subject when it is an item. A check, action or custom event's subject_id
 names its target, so its status lands on the doer: a failed disarm poisons the actor. A filter naming a definition (`item`,
@@ -2848,7 +2850,7 @@ Found by [showcase plan 2](../showcase/combat-district.md) (#368); the PM brief 
 [Toolbox row 38](../MECHANICS-TOOLBOX.md#ranked-toolbox); its sampler: "named defender alive at close wins; dead fails". Beads `loka-kgd.133`, built with [RS-4](#reaction1-kerneltssrcmechanicsreactionts) (`loka-kgd.150.2`), whose subject attribution and per-holder quest steps it needs. Content only on [reaction@1](#reaction1-kerneltssrcmechanicsreactionts) and the [phased raid](#phased-world-events-toolbox-row-37a).
 
 - **Rules.** `called_to_hold`: `entity_entered_room {room village}` with `when` `all [fact_compare {raided equals true}, npc_present {defender}]`, `apply [quest.activate {hold_the_gate}]`; it activates for the entrant's character, and an NPC entering activates nothing. `defender_fell`: `entity_died {victim defender}`, `apply [quest.fail {hold_the_gate, outcome fallen}]`. `gate_held`: `fact_changed {fact raided}` with `when` `fact_compare {raided equals false}`, `apply [quest.resolve {hold_the_gate, outcome held}]`.
-- **Win and loss.** The quest `hold_the_gate` (player scope) has the `current_state` objective `raided equals false`. The defender's death fails every holder's open instance; the raid's end (the new moon) resolves every open instance still held. A failed instance is terminal, so the new moon leaves it failed; with no holder either step writes nothing.
+- **Win and loss.** The quest `hold_the_gate` (player scope) has the `current_state` objective `raided equals false`. The defender's death and the raid's end name no character, so they act on every holder: the death fails every open instance; the new moon resolves every one still held. A failed instance is terminal, so the new moon leaves it failed; with no holder either step writes nothing.
 - **Realm audience.** `instance`: the defender and `raided` are world state, so one defender's death fails every holder and the raid's end resolves every holder.
 - **Realm seams** (owner rule `docs/decisions/owner-decision-realm-seams-2026-10-13.md`).
   1. Actor: met; activation goes to the entrant's character (the Actor column), resolve and fail to each holder; no root-actor write.
