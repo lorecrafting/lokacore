@@ -1,4 +1,4 @@
-// size: allow 692, the raid sampler (row 37a) and its delayed reactions (row FD1) share one compiled world with row 38
+// size: allow 698, the raid sampler (row 37a) and its delayed reactions (row FD1) share one compiled world with row 38
 // Toolbox row 37a on the compiled raid sampler (mechanics.md "Phased world events"): the lunar
 // cycle is 2000 units, new at 0, full at 1000; the `raid` rule spawns one `raiders` bundle (cap 2,
 // targets 0, wander every hour) at the first full-moon clock_hour while `raided` is false, and
@@ -533,11 +533,14 @@ test('FD1: time_since 600 after a stamp at 1000 is false at 1599 and true at 160
 });
 
 // Breaks (twin of test/loka/content_raid_test.exs): `after`, fact.stamp or time_since loads
-// under API 1.89; a delayed rule keeps a step that reads its event or a `when` leaf that reads its
-// subject; a stamp or time_since names a fact that cannot hold every clock value.
+// under API 1.89; a delayed rule keeps a step that reads its event (RS-4: a quest step) or a `when`
+// leaf that reads its subject; a stamp or time_since names a fact that cannot hold every clock value.
 test('FD1: the loader keeps API 1.90, event-free delayed steps and an unbounded int clock fact', () => {
   const raid = 'raid_sampler@0.0.1:reaction/raid';
   const calm = 'raid_sampler@0.0.1:reaction/calm';
+  const [called, held] = ['called_to_hold', 'gate_held'].map(
+    (k) => `raid_sampler@0.0.1:reaction/${k}`,
+  );
   const ref = (key: string) => ({ ...w0Ref, key });
   const w0Ref = { cartridge_id: 'raid_sampler', cartridge_version: '0.0.1', kind: 'fact' };
   const since = { op: 'time_since', fact: ref('raided_at'), at_least: 600 };
@@ -616,6 +619,9 @@ test('FD1: the loader keeps API 1.90, event-free delayed steps and an unbounded 
       ],
       bad(`${AFTERSHOCK}"].when.root.item.subject`),
     ],
+    // RS-4: the fired job keeps no subject, so an NPC entrant would activate for the player.
+    [[(c) => (c.reactions[called].after = 100)], bad(`${called}"].apply[0].op`)],
+    [[(c) => (c.reactions[held].after = 100)], bad(`${held}"].apply[0].op`)],
   ];
   for (const [edits, expected] of cases) {
     const r = load((c) => edits.forEach((e) => e(c)));

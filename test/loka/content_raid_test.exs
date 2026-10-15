@@ -29,8 +29,9 @@ defmodule Loka.ContentRaidTest do
 
   # Breaks (toolbox row FD1; twin of the loader test in kernel/ts/test/raid.test.ts): `after`,
   # fact.stamp or time_since compiles under API 1.89; a delayed rule keeps a step that reads its
-  # event or a `when` leaf that reads its subject; a stamp or time_since names a fact that cannot
-  # hold every clock value; a rule with `after` and no steps compiles under 1.89.
+  # event (RS-4: a quest step) or a `when` leaf that reads its subject; a stamp or time_since
+  # names a fact that cannot hold every clock value; a rule with `after` and no steps compiles
+  # under 1.89.
   test "after, fact.stamp and time_since keep API 1.90 and an unbounded int fact" do
     dir = Loka.ContentSource.copy("cartridges/raid_sampler")
     api = {"KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"}
@@ -68,7 +69,12 @@ defmodule Loka.ContentRaidTest do
              {"reactions/calm.json", &put_in(&1, ["when", "root"], %{since | "fact" => "raided"})}
            ], {"SCHEMA_VIOLATION", "reactions/calm.when.root.fact"}},
           {[{"reactions/aftershock.json", &put_in(&1, ["when", "root"], mv)}],
-           {"SCHEMA_VIOLATION", "reactions/aftershock.when.root.item.subject"}}
+           {"SCHEMA_VIOLATION", "reactions/aftershock.when.root.item.subject"}},
+          # RS-4: the fired job keeps no subject, so an NPC entrant would activate for the player.
+          {[{"reactions/called_to_hold.json", &Map.put(&1, "after", 100)}],
+           {"SCHEMA_VIOLATION", "reactions/called_to_hold.apply[0].op"}},
+          {[{"reactions/gate_held.json", &Map.put(&1, "after", 100)}],
+           {"SCHEMA_VIOLATION", "reactions/gate_held.apply[0].op"}}
         ] do
       assert {:error, diags} = Loka.ContentSource.compile(dir, edits)
       assert expected in Enum.map(diags, &{&1["code"], &1["path"]}), inspect(diags)
