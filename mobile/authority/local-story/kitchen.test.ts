@@ -33,9 +33,18 @@ try {
 } finally {
   rmSync(scratch, { recursive: true });
 }
-// `fed` listed twice is written once (food/shared.ts applied), so it owns one receipt line.
-const stewEdible = artifact.cartridge.items['kitchen_sampler@0.0.1:item/stew_plain_01'].edible;
-stewEdible.applies = [stewEdible.applies[0], stewEdible.applies[0]];
+// Second-opinion probe C: a lawful reaction on the first `fed` adds spoiling's line to the Eat.
+const status = (key: string) => ({
+  cartridge_id: 'kitchen_sampler',
+  cartridge_version: '0.0.1',
+  kind: 'status',
+  key,
+});
+artifact.cartridge.reactions['kitchen_sampler@0.0.1:reaction/fed_seen'] = {
+  key: 'fed_seen',
+  on: { event: 'status_applied', status: status('fed') },
+  apply: [{ op: 'status.apply', status: status('spoiling') }],
+};
 const canonical = encode(artifact.cartridge);
 const bundle = { canonical, sha256: createHash('sha256').update(canonical).digest('hex') };
 const loaded = loadCartridge(
@@ -58,12 +67,17 @@ const ref = (kind: string, key: string) => ({
   key,
 });
 const str = (w: World) => value(w, w.character, ref('attribute', 'str') as never);
-const lines = [{ key: 'narration.eat_stew_plain' }, { key: 'narration.fed.applied' }];
+const lines = [
+  { key: 'narration.eat_stew_plain' },
+  { key: 'narration.fed.applied' },
+  { key: 'narration.spoiling.applied' },
+];
 
 // Breaks: the Eat receipt's status line refused on replay or reopen (the receipt allowed one line
-// only); a failed or uncertain COMMIT adopting half of the stew's custody or the fed status; a lost
-// acknowledgement applying fed twice; a forged extra line accepted as the meal's narration.
-test('the stew Eat survives reopen, failed and lost COMMIT and replay; a forged line is refused', (t) => {
+// only, or only the meal's own statuses' lines, so a reaction's line opened as save_corrupt); a
+// failed or uncertain COMMIT adopting half of the stew's custody or the fed status; a lost
+// acknowledgement applying fed twice; a forged line 0 accepted as the meal's narration.
+test('the stew Eat survives reopen, failed and lost COMMIT and replay; a forged line 0 is refused', (t) => {
   t.after(() => rmSync(saves, { recursive: true, force: true }));
   for (const kind of ['failed', 'lost'] as const) {
     const path = join(saves, `${kind}.db`);
@@ -137,25 +151,23 @@ test('the stew Eat survives reopen, failed and lost COMMIT and replay; a forged 
       .prepare('SELECT command_id, response FROM receipt WHERE invocation_id=?')
       .get(eat.invocation_id) as { command_id: string; response: string };
     assert.deepEqual(story.narration(row.command_id)?.lines, lines, kind);
-    // Red controls: a forged second fed line, an extra line or a status line no status of the
-    // stew owns, or the meal's own line replaced (each status line follows it once, in order).
-    for (const forged of [
-      [...lines, lines[1]],
-      [...lines, { key: 'narration.fish_seen' }],
-      [lines[0], { key: 'narration.fish_seen' }],
-      [{ key: 'narration.fish_seen' }, lines[1]],
-      [lines[0], null],
-    ]) {
+    const forge = (forged: unknown[]) => {
       const d = { ...JSON.parse(row.response), narration: forged };
       p.sql
         .prepare('UPDATE receipt SET response=? WHERE invocation_id=?')
         .run(JSON.stringify(d), eat.invocation_id);
-      assert.throws(
-        () => story.narration(row.command_id),
-        /invalid committed Eat/,
-        JSON.stringify(forged),
-      );
-    }
+      return () => story.narration(row.command_id);
+    };
+    // save.md binds only line 0: later lines are free (known limit: a forged bare [meal] passes).
+    for (const free of [[lines[0]], [lines[0], lines[2], lines[1], lines[1]]])
+      assert.deepEqual(forge(free)()?.lines, free, kind);
+    // Red controls: line 0 replaced, missing (a status line first) or null.
+    for (const forged of [
+      [{ key: 'narration.fish_seen' }, ...lines.slice(1)],
+      lines.slice(1),
+      [null, ...lines.slice(1)],
+    ])
+      assert.throws(forge(forged), /invalid committed Eat/, JSON.stringify(forged));
     p.sql
       .prepare('UPDATE receipt SET response=? WHERE invocation_id=?')
       .run(row.response, eat.invocation_id);
