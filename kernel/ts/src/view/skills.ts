@@ -1,6 +1,8 @@
 import { status } from '../mechanics/skills.ts';
+import { level } from '../mechanics/skill_level.ts';
+import { holds } from '../mechanics/policy.ts';
 import { refString, type World } from '../runtime/decision.ts';
-import type { CharacterId, DefinitionRef, Key } from '../contracts.gen.ts';
+import type { CharacterId, DefinitionRef, Key, SkillDefinition } from '../contracts.gen.ts';
 import { choice, value, worn } from '../mechanics/attributes/shared.ts';
 import { levelling } from '../mechanics/levelling/shared.ts';
 
@@ -11,15 +13,9 @@ export function skillViews(world: World, actor: CharacterId, steps = { n: 0 }) {
     kind,
     key,
   });
-  const skills = Object.values(world.cartridge.skills ?? {}).map((s) => {
-    const skill = ref('skill', s.key);
-    return {
-      skill,
-      label: s.label,
-      requirement: s.requirement,
-      ...status(world, actor, skill, steps),
-    };
-  });
+  const skills = Object.values(world.cartridge.skills ?? {}).flatMap((s) =>
+    skillView(world, actor, s, ref('skill', s.key), steps),
+  );
   const attributes = attributeViews(world, actor, ref);
   const selected = choice(world, actor);
   return {
@@ -43,6 +39,31 @@ export function skillViews(world: World, actor: CharacterId, steps = { n: 0 }) {
   };
 }
 
+// Homestead hs-14: level only with growth, locked only with a prerequisite, and a hidden skill is
+// left out while its prerequisite fails and it is not acquired.
+function skillView(
+  world: World,
+  actor: CharacterId,
+  s: SkillDefinition,
+  skill: DefinitionRef,
+  steps: { n: number },
+) {
+  const locked = s.prerequisite && !holds(world, actor, s.prerequisite.root, { steps });
+  const st = status(world, actor, skill, steps);
+  if (s.hidden && locked && !st.acquired) return [];
+  return [
+    {
+      skill,
+      label: s.label,
+      requirement: s.requirement,
+      ...st,
+      ...(s.growth && { level: level(world, actor, skill) }),
+      ...(s.prerequisite && { locked: locked! }),
+      ...(s.profession && { profession: s.profession }),
+    },
+  ];
+}
+
 /** The player's level, experience, next threshold (absent at the top) and unspent points (row 4). */
 function levellingView(world: World, actor: CharacterId) {
   const l = levelling(world, actor);
@@ -51,10 +72,15 @@ function levellingView(world: World, actor: CharacterId) {
   return { levelling: { level, experience, ...(next !== undefined && { next }), unspent } };
 }
 
-/** Original free-bound lessons identify the existing actor SkillViews; no second acquisition projection. */
-// ponytail: lists a lesson whose prerequisite does not hold (the choice is grey); hs-14's `locked`
-// field (loka-kgd.108.11) marks it.
-export function freeLessons(world: World, npc: string) {
+/**
+ * Original free-bound lessons identify the existing actor SkillViews; no second acquisition
+ * projection. A lesson for a skill the view leaves out (hs-14) is left out too.
+ */
+export function freeLessons(world: World, npc: string, actor: CharacterId, steps = { n: 0 }) {
+  const shown = (r: DefinitionRef) => {
+    const s = world.cartridge.skills![refString(r)]!;
+    return skillView(world, actor, s, r, steps).length > 0;
+  };
   const refs = Object.values(world.cartridge.dialogues ?? {})
     .filter((d) => world.entityIds[refString(d.npc)] === npc)
     .flatMap((d) =>
@@ -63,7 +89,8 @@ export function freeLessons(world: World, npc: string) {
           ? []
           : (o.sequence ?? []).flatMap((s) => (s.op === 'skill.acquire' ? [s.skill] : [])),
       ),
-    );
+    )
+    .filter(shown);
   return refs.length ? { lessons: refs } : {};
 }
 

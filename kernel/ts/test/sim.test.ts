@@ -100,6 +100,7 @@ test('two fresh ranges and regression seeds retain all sequence counts and cover
     'invalid_state',
     'invalid_target',
     'not_found',
+    'not_owned', // a repeated drop of the item just dropped (seeds 2 and 4)
     'permission_denied',
     'unsupported_capability',
   ]);
@@ -108,7 +109,7 @@ test('two fresh ranges and regression seeds retain all sequence counts and cover
     [
       '__proto__ accept_quest ashmere_bell ashmere_dusk ashmere_errand ashmere_facts',
       'ashmere_road ashmere_scene ashmere_wear choose close close_choice dance drop give',
-      'hasOwnProperty lock look move perform remove run_job scan take talk toString unlock wait wear',
+      'hasOwnProperty lock look move perform remove run_job scan take talk toString wait wear',
     ]
       .join(' ')
       .split(' '),

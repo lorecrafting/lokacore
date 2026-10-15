@@ -1,7 +1,7 @@
 // A NEW press's reply as the book's lines: its narration routed to the world, a detail page or
 // the combat log, plus who came or went and a conversation's journal and prompt changes.
 import type { Game, GameView, Reply } from '../../packages/game-view/session.ts';
-import { comings, replyLine } from './words.ts';
+import { comings, given, replyLine } from './words.ts';
 import {
   combatResult,
   detailLines,
@@ -43,7 +43,7 @@ export function received(game: Game, reply: Reply, was: GameView, s: Logs, text:
   const accepted =
     reply.kind === 'saved' && reply.decision.kind === 'accepted' ? reply.decision : undefined;
   const itemChanged =
-    !!accepted && ['taken', 'dropped', 'eaten', 'bandaged'].includes(accepted.outcome);
+    !!accepted && ['taken', 'dropped', 'given', 'eaten', 'bandaged'].includes(accepted.outcome);
   const moved = !!accepted && was.place.id !== now.place.id;
   resetLogs(s, now);
   const retained = retainedNarration(game, s, reply, accepted);
@@ -69,7 +69,7 @@ export function received(game: Game, reply: Reply, was: GameView, s: Logs, text:
   const routed = retained ? narrationLines(retained, now, text) : undefined;
   const taken = pickupLine(retained, text);
   // Empty routed combat narration deliberately stays out of World after escape.
-  const fallback = fallbackLine(itemChanged, accepted, attempt.item);
+  const fallback = fallbackLine(itemChanged, accepted, attempt);
   const line = repeated ? '' : taken || (routed?.[0] ?? replyLine(reply, text, now, fallback));
   if (line) lines.push(line);
   if (!repeated && routed?.[1]) s.combatLog.push(routed[1]);
@@ -90,12 +90,18 @@ function retainedNarration(game: Game, s: Logs, reply: Reply, accepted?: Accepte
     : undefined;
 }
 
-const fallbackLine = (itemChanged: boolean, accepted?: Accepted, item?: string) =>
-  itemChanged && accepted?.outcome !== 'eaten' && item
-    ? `You ${accepted?.outcome === 'taken' ? 'pick up' : 'drop'} ${item}.`
-    : accepted?.outcome === 'choice_closed'
-      ? ''
-      : undefined;
+const fallbackLine = (
+  itemChanged: boolean,
+  accepted: Accepted | undefined,
+  { item, to }: NonNullable<Logs['retry']>,
+) =>
+  accepted?.outcome === 'given'
+    ? item && to && given(item, to)
+    : itemChanged && accepted?.outcome !== 'eaten' && item
+      ? `You ${accepted?.outcome === 'taken' ? 'pick up' : 'drop'} ${item}.`
+      : accepted?.outcome === 'choice_closed'
+        ? ''
+        : undefined;
 
 // A changed journal notes itself on the speaker's page; a new choice prompt joins its speaker's.
 function conversationLines(

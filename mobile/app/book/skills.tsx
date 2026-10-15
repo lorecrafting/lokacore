@@ -1,5 +1,8 @@
 import { cap, plain } from './model.ts';
+import { Fragment } from 'react';
 import { Text } from 'react-native';
+import { SectionTitle } from './pages.tsx';
+import { Note } from './lines.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
 import type { Thing } from './model.ts';
 import { note, prose, usePalette } from './palette.ts';
@@ -22,7 +25,7 @@ export function SkillDetails(p: { view?: GameView; text: (key: string) => string
         </Text>
       ))}
       {p.view?.skills
-        ?.filter((s) => s.acquired)
+        ?.filter((s) => s.acquired && !s.profession)
         .map((s) => (
           <Text key={s.skill.key} style={prose(c)}>
             {p.text(s.label)} — {s.qualified ? 'qualified' : 'unqualified'}; {p.text(s.requirement)}
@@ -30,6 +33,33 @@ export function SkillDetails(p: { view?: GameView; text: (key: string) => string
         ))}
     </>
   );
+}
+
+// Homestead hs-14 (book-ui.md Skill tree details): each profession in first-listed order, then its
+// acquired boxes as body text and its unacquired boxes as a Note (locked or not learned).
+export function Professions(p: { view?: GameView; text: (key: string) => string }) {
+  const c = usePalette();
+  const listed = p.view?.skills?.filter((s) => s.profession) ?? [];
+  return [...new Set(listed.map((s) => s.profession!))].map((profession) => (
+    <Fragment key={profession}>
+      <SectionTitle>{p.text(profession)}</SectionTitle>
+      {listed
+        .filter((s) => s.profession === profession)
+        .map((s) =>
+          s.acquired ? (
+            <Text key={s.skill.key} style={prose(c)}>
+              {p.text(s.label)}
+              {s.level === undefined ? '' : `, level ${s.level}`} —{' '}
+              {s.qualified ? 'qualified' : 'unqualified'}; {p.text(s.requirement)}
+            </Text>
+          ) : (
+            <Note key={s.skill.key}>
+              {`${p.text(s.label)} — ${s.locked ? 'locked' : 'not learned'}; ${p.text(s.requirement)}`}
+            </Note>
+          ),
+        )}
+    </Fragment>
+  ));
 }
 
 type Levelling = NonNullable<GameView['levelling']>;

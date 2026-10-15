@@ -7,7 +7,7 @@ import { bandPhrase, cap, plain, toneOf, why, type group, type Thing } from './m
 import type { Button, DetailLine } from './presenter.ts';
 import { note, prose, usePalette } from './palette.ts';
 import { DiscoveredMap } from './DiscoveredMap.tsx';
-import { levelLine, RaiseCards, SkillDetails, xpLine } from './skills.tsx';
+import { levelLine, Professions, RaiseCards, SkillDetails, xpLine } from './skills.tsx';
 import { size, space, type } from './tokens.ts';
 import { ActionCard, Cards, ContinueButton } from './actions.tsx';
 import { EntityLine, LogLines, Note } from './lines.tsx';
@@ -19,6 +19,9 @@ const home = (world: () => void) => <Control label={LABEL.backToWorld} onPress={
 type Say = (key: string) => string;
 type Grouped = ReturnType<typeof group>;
 
+// A profession box is drawn even unacquired (book-ui.md Skill tree details), so it counts as known.
+const knownSkill = (s: { acquired: boolean; profession?: string }) => s.acquired || !!s.profession;
+
 export function CharacterPage(
   p: { view?: GameView; text: Say; world: () => void } & Pick<GameView, 'resources' | 'position'> &
     Parameters<typeof RaiseCards>[0],
@@ -29,8 +32,7 @@ export function CharacterPage(
   const position = p.position ?? p.view?.position;
   const levelling = p.view?.levelling;
   const name = p.view?.actor_name;
-  const known =
-    resources.length || p.view?.attributes?.length || p.view?.skills?.some((s) => s.acquired);
+  const known = resources.length || p.view?.attributes?.length || p.view?.skills?.some(knownSkill);
   return (
     <Page title="Character" foot={home(p.world)}>
       {!known && !name && <Note>Nothing is known about you yet.</Note>}
@@ -53,6 +55,7 @@ export function CharacterPage(
         </Text>
       ))}
       {levelling && <Text style={prose(c)}>{xpLine(levelling)}</Text>}
+      <Professions view={p.view} text={p.text} />
       <RaiseCards {...p} />
     </Page>
   );

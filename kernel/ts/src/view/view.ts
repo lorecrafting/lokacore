@@ -228,7 +228,7 @@ const viewOf = (
   ...(e.kind === 'item' && e.barrier && { state: barrierState(world, e.barrier) }),
   actions,
   ...liquidView(world, id),
-  ...(e.kind === 'npc' && freeLessons(world, id)),
+  ...(e.kind === 'npc' && freeLessons(world, id, actor, steps)),
   ...(e.kind === 'npc' &&
     e.services && { services: services(world, actor, id as EntityId, steps) }),
   ...(fuelView(world, id) && { fuel: fuelView(world, id) }),

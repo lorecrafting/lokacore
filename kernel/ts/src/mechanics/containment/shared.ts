@@ -6,7 +6,8 @@ import { add, mul, saturate } from '../../foundation/int.ts';
 import { opened, reach, barrierState } from '../lookups.ts';
 import { chainRefused } from '../locks.ts';
 import type { Steps, World } from '../../runtime/decision.ts';
-import { actorOf, refString } from '../../runtime/decision.ts';
+import { actorOf, has, refString, values } from '../../runtime/decision.ts';
+import { living } from '../death/shared.ts';
 import { movable } from '../../runtime/created.ts';
 import { derived } from '../attributes/shared.ts';
 
@@ -47,6 +48,19 @@ export function giveRefused(world: World, item: EntityId, steps: Steps = { n: 0 
       if (contained) return 'invalid_state' as const;
     }
   }
+}
+
+// ponytail: scans every container per call; index contents by holder when worlds grow.
+const held = (world: World, holder: string) =>
+  values(world.state.containers).filter((c) => c === holder).length;
+
+/** Give's recipient admission, shared by the rule and the GameView's Give pairs: a living NPC here with room. */
+export function recipient(world: World, id: EntityId, here: EntityId) {
+  if (!has(world.entities, id) || !living(world, id)) return 'not_found' as const;
+  if (world.entities[id].kind !== 'npc') return 'invalid_target' as const;
+  if (world.state.containers[id] !== here) return 'not_present' as const;
+  if (held(world, id) >= (world.capacities[id] ?? Infinity)) return 'invalid_state' as const;
+  return undefined;
 }
 
 /** The Take ceiling; the player's is moved by the derived carry_grams table (mechanics.md). */

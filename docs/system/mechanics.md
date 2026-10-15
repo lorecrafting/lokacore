@@ -3451,7 +3451,7 @@ Homestead hs-11 (Beads `loka-kgd.108.8`): a skill may require another skill's le
 - **Opt-in.** A skill declares `prerequisite`. Chapter 1 declares none.
 - **Book.** No new component: the dialogue choice is offered unavailable until the prerequisite holds.
 - **Traps.** None met; trap 8 checked: the gate is a skill level the actor raises, not a consequence.
-- **Known limits.** Only a prerequisite naming its own skill is refused at load; a cycle in which each of two skills needs the other at some level (A needs `skill_compare` B, B needs `skill_compare` A, neither under `not`) loads and leaves both unlearnable. A cycle in which each needs the other not learned (each leaf under `not`) is a learnable either-or pair. A box's trainer fee is the dialogue's existing `lesson_payment`; hidden boxes are not in this slice.
+- **Known limits.** Only a prerequisite naming its own skill is refused at load; a cycle in which each of two skills needs the other at some level (A needs `skill_compare` B, B needs `skill_compare` A, neither under `not`) loads and leaves both unlearnable. A cycle in which each needs the other not learned (each leaf under `not`) is a learnable either-or pair. A box's trainer fee is the dialogue's existing `lesson_payment`; hidden boxes are [hs-14](#skill-tree-view-homestead-hs-14).
 - **Sampler.** `cartridges/craft_sampler`: the old carver in the workshop teaches carving (`prerequisite` whittling at least 2). After one failed carve (whittling 1) the lesson is offered unavailable and `choose` refuses `invalid_state`; after the second carve (whittling 2) it is accepted (`kernel/ts/test/craft.test.ts`, `test/loka/content_craft_test.exs`).
 - **Composition record** ([architecture](architecture.md#building-mechanics-by-composition)).
   - Consumer: `craft_sampler`. Later: Homestead profession trees.
@@ -3460,6 +3460,30 @@ Homestead hs-11 (Beads `loka-kgd.108.8`): a skill may require another skill's le
   - Reused: VersionedPolicy, `holds`, `skill_compare`, `skill.acquire`, the dialogue `blocked` admission, the policy reference walk.
   - New: `SkillDefinition.prerequisite`, `learnable`, the self-reference check, the 1.101 floor.
   - Missing invariant: none.
+
+## Skill tree view (Homestead hs-14)
+
+Homestead hs-14 (Beads `loka-kgd.108.11`): GameView projects each skill's tree state so the Book draws the Character page's skill tree. Declarations: [skill prerequisite](cartridge.md#skill-prerequisite-declarations) `hidden` and `profession` (`kernel_api` 1.101).
+
+- **Command.** None new.
+- **Projection** (`skillViews` in `kernel/ts/src/view/skills.ts`): a SkillView gains `level` (only for a skill with `growth`; `level` in `kernel/ts/src/content/skill_level.ts`), `locked` (only for a skill with `prerequisite`: the prerequisite does not hold for the viewing actor, the same `holds` the hs-11 admission reads) and `profession` (the authored key). A skill with `hidden` is left out while it is `locked` and not acquired; once acquired it always shows. An NPC's `lessons` leave out a skill the view leaves out (`freeLessons`). A cartridge whose skills declare none of `growth`, `prerequisite` and `profession` keeps its GameView bytes (`mobile/app/stories.test.ts`).
+- **Load check.** A `skill_compare` in the prerequisite of a skill without `hidden` naming a skill with `hidden` is SCHEMA_VIOLATION at `skills/<key>.prerequisite` (`prerequisites` in `kernel/ts/src/content/cartridge_skills.ts`; `Loka.Content.Skills.itself/3`).
+- **Effect.** None.
+- **Realm seams** (owner decision 2026-10-13, brief checklist).
+  1. Actor: met; `locked` and `hidden` are evaluated for the viewing actor.
+  2. to 5. Not applicable: no trigger, payout, clock or new scope.
+  6. Not applicable: authored text only.
+  7. to 9. Not applicable: no ownership, receipt or free text.
+- **Opt-in.** A skill declares `profession` or `hidden`. Chapter 1 declares none.
+- **Book.** [Skill tree details](book-ui.md#skill-tree-details): `Professions` in `mobile/app/book/skills.tsx`, between the xp line and the Raise cards. An NPC lesson line reads `locked` (proposed, pending designer approval).
+- **Traps.** None met; trap 8 checked: `locked` reads the hs-11 gate, a skill level the actor raises, and adds no gate.
+- **Known limits.** A hidden skill's teaching choice still lists in the conversation, unavailable, while its prerequisite fails (the dialogue choice list is not filtered).
+- **Sampler.** `cartridges/craft_sampler`: whittling under Woodcraft, carving under Handcraft, and joinery (Woodcraft, `prerequisite` carving at least 1). At start the Character page shows Handcraft with "Carving — locked" and Woodcraft with "Joinery — locked" and "Whittling — not learned"; once carving is learned it reads "Carving, level 1 — qualified" and Woodcraft "Joinery — not learned" and "Whittling — not learned" (`kernel/ts/test/craft.test.ts`, `test/loka/content_craft_test.exs`).
+- **Composition record** ([architecture](architecture.md#building-mechanics-by-composition)).
+  - Consumer: `craft_sampler`. Later: Homestead profession trees.
+  - Reads: the actor's facts through `holds` and `level`.
+  - Writes: none.
+  - Reused: VersionedPolicy, `holds`, `level`, the hs-11 policy reference walk, `SectionTitle`, `Note`.
 
 ## Self-cooking (Homestead hs-13)
 
@@ -3586,3 +3610,15 @@ Homestead hs-7 (Beads `loka-kgd.108.5`, `loka-kgd.70`): liked and disliked gifts
   - Reused: row 20a escrow, the 20b output and `service.no_output`, Give's `item_acquired`, W1 reactions, W2 pair facts, W6 room lines, the dialogue policy.
   - New: the output transfer for an untimed escrow, the price 0 path, the loader price check, the 1.101 floor.
   - Missing invariant: none (`one_container_per_item` covers the transfers).
+
+## Give pairs
+
+Homestead hs-8 (Beads `loka-x6t.31`); the Book form is in [book-ui.md](book-ui.md#item-details-and-takedrop). The GameView lists Give on a held item once per living NPC in the actor's room that the actor can see, with `target_ids [item, recipient]`, in `world.entities` order (definitions first, then entities in creation order), as it lists Put pairs: a pair is listed when the command would be accepted. The listing is `kernel/ts/src/view/item_pairs.ts`. The item admission is `giveRefused`, the recipient admission `recipient(world, id, here)` (missing or dead: `not_found`; not an NPC: `invalid_target`; elsewhere: `not_present`; at capacity: `invalid_state`), both in `kernel/ts/src/mechanics/containment/shared.ts`; `rule.ts` and the listing call the same functions. The listing also applies `visible` (`mechanics/light/shared.ts`): an NPC the actor cannot see (a dark room, concealment) gets no pair, so the view never names a hidden NPC; the rule does not check sight. A refused item, a corpse or no one present lists no pair. Step-budget exhaustion during the listing replaces the whole Give offer with one unavailable offer (`budget_exceeded`, no `target_ids`), never a prefix of the pairs, as for Put.
+
+- **Composition record** ([architecture](architecture.md#building-mechanics-by-composition)).
+  - Key `give`, command `give`, ordered targets [item, recipient] (`target_ids` to `item_id`, `recipient_id`), input none.
+  - Reads: body custody, the item's `give_allowed`, the recipient's kind, life and room, its capacity.
+  - Writes, ops, events, jobs, save rows, schema fields: none new (`target_ids` already exists on the advertised action).
+  - Reused: the Give rule, its `item_acquired`, the Put-pair projection.
+  - New: the shared `recipient` admission (moved from `rule.ts`), the Give pair listing.
+  - Missing invariant: none.

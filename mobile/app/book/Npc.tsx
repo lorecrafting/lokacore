@@ -10,7 +10,7 @@ import { note, prose, usePalette, type Palette } from './palette.ts';
 import { Riddle } from './Riddle.tsx';
 import { space } from './tokens.ts';
 import { LABEL } from './labels.ts';
-import { priceNote } from './offers.ts';
+import { offerLabel } from './offers.ts';
 type Say = (key: string) => string;
 type Grouped = ReturnType<typeof group>;
 type Screen = ReturnType<ReturnType<typeof presenter>['screen']>;
@@ -128,7 +128,7 @@ const conversation = (p: NpcProps, choice?: NonNullable<GameView['choice']>) => 
 };
 
 // The skills this NPC teaches: learned or not, and whether the player qualifies now.
-const npcSkills = (c: Palette, p: NpcProps) =>
+export const npcSkills = (c: Palette, p: NpcProps) =>
   p.view.skills
     ?.filter(
       (s) =>
@@ -144,7 +144,7 @@ const npcSkills = (c: Palette, p: NpcProps) =>
     )
     .map((s) => (
       <Text key={s.skill.key} style={note(c)}>
-        {p.text(s.label)}: {s.acquired ? 'learned' : 'not learned'}; currently{' '}
+        {p.text(s.label)}: {s.acquired ? 'learned' : s.locked ? 'locked' : 'not learned'}; currently{' '}
         {s.qualified ? 'qualified' : 'unqualified'}. {p.text(s.requirement)}
       </Text>
     ));
@@ -178,7 +178,7 @@ function ServiceOptions(p: NpcProps & { actions: Button[] }) {
     ) : (
       <ActionCard
         key={s.service.key}
-        label={`${p.text(s.label)} (${priceNote(s)})`}
+        label={offerLabel(s, p.text, (n) => ` (${n})`)}
         reason={s.action.available ? undefined : why(s.action, p.text)}
       />
     );

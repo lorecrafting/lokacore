@@ -43,7 +43,8 @@ registerHooks({
 });
 const { SkillDetails, ItemDetails } = await import('./skills.tsx');
 const { CharacterPage } = await import('./sections.tsx');
-const { NpcDetail } = await import('./Npc.tsx');
+const { NpcDetail, npcSkills } = await import('./Npc.tsx');
+const { usePalette } = await import('./palette.ts');
 function words(element: any): string[] {
   if (Array.isArray(element)) return element.flatMap(words);
   if (!element || typeof element !== 'object') return [];
@@ -94,6 +95,65 @@ test('Character draws projected attributes and acquired qualification with autho
     'STR 9',
     'Sword craft — unqualified; STR at least 10',
   ]);
+});
+
+// Breaks (hs-14, book-ui.md "Skill tree details"): a profession box drawn among the acquired lines,
+// an unacquired box dropped or read "locked" when not locked, professions out of first-listed
+// order, a level shown when not projected, an NPC lesson reading "not learned" while the box is
+// locked, or "Nothing is known" drawn above a profession box.
+test('Character groups profession boxes under their title, acquired then not learned', () => {
+  const box = (key: string, profession: string | undefined, more: object) => ({
+    skill: { key },
+    label: key,
+    requirement: `${key} req`,
+    acquired: false,
+    qualified: false,
+    usable: false,
+    ...(profession && { profession }),
+    ...more,
+  });
+  const view: any = {
+    skills: [
+      box('swords', undefined, { acquired: true, qualified: true }),
+      box('whittling', 'Woodcraft', { acquired: true, qualified: true, level: 2 }),
+      box('carving', 'Handcraft', { locked: true }),
+      box('joinery', 'Woodcraft', { acquired: true }),
+      box('turning', 'Woodcraft', { locked: false }),
+      box('weaving', 'Loomcraft', {}),
+    ],
+  };
+  assert.deepEqual(words(CharacterPage({ view, text, world: () => {} })), [
+    'Character',
+    'swords — qualified; swords req',
+    'Woodcraft',
+    'whittling, level 2 — qualified; whittling req',
+    'joinery — unqualified; joinery req',
+    'turning — not learned; turning req',
+    'Handcraft',
+    'carving — locked; carving req',
+    'Loomcraft',
+    'weaving — not learned; weaving req',
+    'Back to World',
+  ]);
+  const locked = { skills: [box('carving', 'Handcraft', { locked: true })] };
+  assert.deepEqual(words(CharacterPage({ view: locked, text, world: () => {} } as any)), [
+    'Character',
+    'Handcraft',
+    'carving — locked; carving req',
+    'Back to World',
+  ]);
+  const npc = { lessons: view.skills.map((s: any) => s.skill) };
+  assert.deepEqual(
+    words(npcSkills(usePalette(), { view, npc, text } as any)).map((w) => w.split(';')[0]),
+    [
+      'swords: learned',
+      'whittling: learned',
+      'carving: locked',
+      'joinery: learned',
+      'turning: not learned',
+      'weaving: not learned',
+    ],
+  );
 });
 
 // Breaks: the displayed name missing, capitalised, labelled or not first, or the empty placeholder

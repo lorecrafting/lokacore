@@ -281,6 +281,8 @@ and absent speakers get no invented body, inferred name suffix or substituted ro
 Player descriptions are required when real player entities/descriptions are projected; there is
 currently no player-presence UI.
 
+**Barter offers.** A service offer with price 0 shows its authored label alone ("Knife for two pelts"), with no " — " and no parentheses, never "free"; its unavailable form is "Knife for two pelts: <reason>". The label names the inputs.
+
 ## Item details and Take/Drop
 
 Equipment & Inventory separates Held from Worn slots, including empty slots. Held/worn item
@@ -317,6 +319,8 @@ Each button captures its projection freshness and follows the normal GameSession
 and confirmed receipt routing. There is no separate storage session or recipient selector.
 
 A held tool's page shows one card per use pair (G4) the GameView lists available on it, in listed order, labelled with the recipe's authored label and the target's projected name ("Quench a cart" on the bucket), never the tool's own name; the target's page shows none. Pressing it sends the listed action key with target_ids [target, tool] and no input; the page stays and the result joins its history. A pair the GameView does not list, or lists unavailable, shows no card: held pages list only available actions, the `too_heavy` note above being the one exception; the Book adds no availability rule. ([Use X on Y](mechanics.md#use-x-on-y-toolbox-row-g4))
+
+A held item's page shows one card per Give pair the GameView lists available, at Give's place among its actions, in GameView order, labelled "Give", the item's and the recipient's projected names ("Give an apple to the farmer"). Pressing it sends give with target_ids [item, recipient]. A refused pair, or no one present, shows no card and no note. A confirmed given returns to World and adds **You give an apple to the farmer.** once with the original names; authored narration takes precedence. Pending, refused or stale presses claim nothing. ([Give pairs](mechanics.md#give-pairs))
 
 Quest completion updates its journal and confirmed narration. A terminal side quest
 never implies that the whole story has ended. World shows no whole-story completion
@@ -367,12 +371,7 @@ Other-player presence requires a real projection and UI scope; no fabricated pla
 Attack/skill controls wait until GameView offers them; there are no placeholders or invented
 character data. Reading-time safety and interruption integration remains
 future work under the [reading-time decision](../decisions/owner-decision-reading-time-2026-10-03.md).
-Give needs both item and recipient targets. The current touch item-action projection supplies
-only its item target, so it must not offer or dispatch that incomplete Give. Complete offered
-Give invocations remain valid; engine mechanics are unchanged. Touch recipient selection is an
-explicit carry: implement it when a touch flow can supply a recipient from actual projected
-valid targets, with its own approved scope. The inspected unsupported-capability rejection was
-one incomplete Give; later moves were accepted. Preserve genuine errors and meaningful history
+A refusal reads as the kernel reports it: preserve genuine errors and meaningful history
 rather than hiding errors or clearing same-room history. Whisper needs a word, so the NPC page offers no Whisper card; whispering is the [Word bar](#word-bar)'s. Carries remain in the [roadmap](../ROADMAP.md). Further cosmetic polish is deferred under the [C1 UI-deferral record](../decisions/owner-decision-c1-gate-ui-deferral-2026-10-03.md).
 
 ## Combat interaction
@@ -1043,3 +1042,9 @@ writer sees it.
 ## Storylet card details
 
 GameView `storylet` names the one place action the [storylet deck](mechanics.md#storylet-deck-toolbox-row-fd3) draws for the player here this hour. The World page shows it as one Action card, its own block directly before the verb lines, never a verb line: it can be listed unavailable, and a verb line has no unavailable form. The card reads the recipe's authored label alone, never a heading, prefix ("Opportunity:"), icon or colour; unavailable, it is the `label: reason` note of the Action card row, never a disabled card. Pressing it performs the action as any place action under [live action freshness](#live-action-freshness): its result, including a failed check, is the receipt's narration in the log, and a scene it starts opens as any [scene](#chapters-scenes-and-recovery). A new room or hour redraws the page: the card may change or go, silently (no live region; it is page content as the entity lines are); a press drawn under the old pick is refused and the Book redraws, never a substituted card. Its accessible name is its label, role button. No pick, no block; at most one card. The presenter never draws or filters storylets.
+
+## Skill tree details
+
+Skills without profession keep today's acquired lines. After the xp line and before the Raise cards, each profession in first-listed order is a SectionTitle, then its listed boxes in GameView order: acquired as body text "Whittling, level 2 — qualified; <requirement>" (", level N" only when projected); locked as a Note "Carving — locked; <requirement>"; any other unacquired box as a Note "Joinery — not learned; <requirement>" (the same Note). The Book draws only listed skills: a hidden box and an empty profession draw nothing.
+
+An NPC's lesson line reads `locked` in place of `not learned` while the skill's projected `locked` is true (proposed, pending designer approval, loka-kgd.108.11).
