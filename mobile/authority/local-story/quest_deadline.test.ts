@@ -20,7 +20,7 @@ import {
 import { value } from '../../../kernel/ts/src/mechanics/fact.ts';
 import type { World } from '../../../kernel/ts/src/runtime/decision.ts';
 import { openStory } from './authority.ts';
-import { elapsedHost, receipts } from './__tests__/elapsed-host.test.ts';
+import { coldReopen, elapsedHost, receipts } from './__tests__/elapsed-host.test.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-deadline-save-'));
 const file = join(scratch, 'artifact.json');
@@ -64,6 +64,7 @@ function save(t: TestContext, name: string) {
   };
   const s = {
     p,
+    path,
     story: open(),
     n: 0,
     // `same`: the reopened state equals the memory one (not after a pending COMMIT).
@@ -110,6 +111,7 @@ test('a pending generic deadline reopens, replays and its stale job only complet
   s.reopen();
   const w = s.story.world();
   assert.deepEqual([entry(w).state, job(w).status, trust(w)], ['resolved', 'completed', 2]);
+  coldReopen(s.path, bundle);
 });
 
 // Breaks: a failed expiry COMMIT adopts half of the failure, trust or job; a lost acknowledgement

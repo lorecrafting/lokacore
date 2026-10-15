@@ -15,7 +15,7 @@ import {
 import type { DecisionResult } from '../../../kernel/ts/src/contracts.gen.ts';
 import { level, resourceRef } from '../../../kernel/ts/src/mechanics/resource.ts';
 import { openStory } from './authority.ts';
-import { elapsedHost } from './__tests__/elapsed-host.test.ts';
+import { coldReopen, elapsedHost } from './__tests__/elapsed-host.test.ts';
 
 // Breaks: a lawful scheduled departure commits a save that cold reopen or COMMIT recovery rejects.
 test('scheduled opponent departure reopens and reconciles before a harmless due combat round', (t) => {
@@ -95,4 +95,5 @@ test('scheduled opponent departure reopens and reconciles before a harmless due 
   assert.equal(level(after, rat(after), resourceRef(after, 'hp')), 6);
   assert.equal(Object.values(after.state.encounters!)[0].status, 'closed');
   assert.equal(after.state.jobs![pending.job_id].status, 'completed');
+  coldReopen(path, artifact);
 });

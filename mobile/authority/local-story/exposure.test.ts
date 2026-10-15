@@ -9,7 +9,7 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
 import { encode } from '../../../kernel/ts/src/foundation/canonical.ts';
-import { elapsedHost } from './__tests__/elapsed-host.test.ts';
+import { coldReopen, elapsedHost } from './__tests__/elapsed-host.test.ts';
 
 function exposureBundle(edit = (_: any) => {}) {
   const dir = mkdtempSync(join(tmpdir(), 'loka-exposure-host-'));
@@ -94,4 +94,5 @@ test('a tick and refresh in one settlement and the calendar job survive SQLite r
     b.game.view().view.conditions?.map((c: { label: string }) => c.label),
     ['condition.chilled'],
   );
+  coldReopen(path, bundle);
 });
