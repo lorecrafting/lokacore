@@ -58,7 +58,7 @@ test('only confirmed pickup returns World, including a retry from another page',
   h.sql.close();
 });
 
-// Breaks: Give is offered with no one present, the card misnames its recipient or shows twice,
+// Breaks: Give is offered with no one present or on the recipient's page, the card misnames its recipient or shows twice,
 // the confirmed Give stays on the item page or logs no (or a Drop) line, or an incomplete press
 // is sent.
 test('a held item offers Give only to a present recipient and logs the confirmed gift once', () => {
@@ -82,6 +82,9 @@ test('a held item offers Give only to a present recipient and logs the confirmed
   h.tap('Leave');
   h.map();
   h.tap('Go south');
+  h.tap('Old Bram is here., open');
+  assert.deepEqual(gives(), []); // the recipient's page offers no Give card
+  h.tap('Leave');
   h.tap(CONTENTS);
   h.tap('Equipment & Inventory');
   h.tap('a brass lantern, open');

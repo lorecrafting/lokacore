@@ -141,7 +141,6 @@ test('take proposes one transfer to the body and item_acquired, at the Python st
   const oil = step(fresh(), take(OIL), 0).decision;
   assert.equal(oil.kind === 'accepted' && oil.outcome, 'taken');
   assert.equal(oil.kind === 'accepted' && (oil.delta.ops[0] as never)['source_id'], SATCHEL);
-  // Give is one [item, recipient] pair per present living NPC (hs-8): Bram is at the ferry.
   const held = [
     verb('drop', 'inventory'),
     { ...verb('give', 'inventory'), target_ids: [SATCHEL, BRAM] },

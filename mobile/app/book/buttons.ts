@@ -61,7 +61,8 @@ const toButton =
     label: `${label(a.label)}${name}`,
     action_key: a.action_key,
     ...(a.command && { command: a.command }),
-    ...(['read', 'refuel', 'pour', 'drink'].includes(commandOf(a)) && id && { detail_id: id }),
+    ...(['read', 'refuel', 'pour', 'drink', 'give'].includes(commandOf(a)) &&
+      id && { detail_id: id }),
     target_ids: a.target_ids ? [...a.target_ids] : id ? [id] : [],
     input: {},
   });
