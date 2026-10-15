@@ -57,16 +57,18 @@ defmodule Loka.Content.Replenish do
   def craft(m, defs, text) do
     crafts = for {_, {rel, [], %{"craft" => c} = r}} <- defs["recipe"], do: {rel, r, c}
 
-    floor =
-      if crafts != [] and api(m) < [1, 101],
-        do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
-        else: []
-
-    floor ++
+    floor(m, crafts) ++
       for {rel, r, c} <- crafts,
           d <- misplaced(rel, r) ++ parts(m, defs, rel, c) ++ reason(rel, c, text),
           do: d
   end
+
+  defp floor(m, crafts),
+    do:
+      if(crafts != [] and api(m) < [1, 101],
+        do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
+        else: []
+      )
 
   # A spell or storylet has no station whose stock it could use.
   defp misplaced(rel, r),
@@ -115,20 +117,18 @@ defmodule Loka.Content.Replenish do
 
   defp holder(m, defs, rel, steps, end_, r) do
     %{"in" => k} = l = r[end_]
+    path = steps ++ [end_]
+    unplaced = [diag("SCHEMA_VIOLATION", at(rel, path))]
 
     case k != "template" and Refs.resolve(l[k], k, m, defs) do
       :unresolved ->
-        [diag("UNRESOLVED_REFERENCE", at(rel, steps ++ [end_, k]), %{"target" => l[k]})]
+        [diag("UNRESOLVED_REFERENCE", at(rel, path ++ [k]), %{"target" => l[k]})]
 
       {_, _, d} ->
-        nests = end_ == "to" and nests?(m, defs, r["items"])
-
-        if placed?(d, k, nests),
-          do: [],
-          else: [diag("SCHEMA_VIOLATION", at(rel, steps ++ [end_]))]
+        if placed?(d, k, end_ == "to" and nests?(m, defs, r["items"])), do: [], else: unplaced
 
       false ->
-        [diag("SCHEMA_VIOLATION", at(rel, steps ++ [end_]))]
+        unplaced
 
       _ ->
         []
