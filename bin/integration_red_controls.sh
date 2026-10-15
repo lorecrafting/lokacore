@@ -226,7 +226,8 @@ CI='[{"conclusion":"success","status":"completed","headSha":"abcdef0123","url":"
 mkdir -p "$tmp/pmgh"; cat > "$tmp/pmgh/gh" <<'SH'
 #!/bin/sh
 case $* in *ci.yml*) json=$CI ;; *) json=$E2E ;; esac
-while [ $# -gt 1 ]; do [ "$1" = --jq ] && q=$2; shift; done
+a=$*; while [ $# -gt 1 ]; do [ "$1" = --jq ] && q=$2; [ "$1" = --commit ] && c=$2; shift; done
+[ "${c-}" = "$EXPECT_SHA" ] || json='[]' # runs exist only for the reviewed sha; no or another --commit finds none
 printf '%s\n' "$json" | jq -r "$q"
 SH
 chmod +x "$tmp/pmgh/gh"
@@ -236,7 +237,7 @@ pm() { # <case> <want-rc> <want-output>
   git add . && git commit -qm base && git push -q origin batch
   git checkout -qb slice; echo s > s; git add s && git commit -qm slice && git push -q origin slice
   git checkout -q batch; git checkout -qb rec; echo r > r; git add r && git commit -qm rec && git push -q origin rec; git checkout -q batch
-  pre=$(git rev-parse HEAD); rc=0; PATH="$tmp/pmgh:$PATH" capped sh bin/pm_merge.sh "$R" batch slice rec subj "$(git rev-parse origin/slice)" > "$R.out" 2>&1 || rc=$?
+  pre=$(git rev-parse HEAD); rc=0; EXPECT_SHA=$(git rev-parse origin/slice) PATH="$tmp/pmgh:$PATH" capped sh bin/pm_merge.sh "$R" batch slice rec subj "$(git rev-parse origin/slice)" > "$R.out" 2>&1 || rc=$?
   [ "$rc" = "$2" ] && grep -q "$3" "$R.out" || { bad "pm_merge $1: exit $rc, want $2 with '$3'"; sed 's/^/  /' "$R.out"; }
   if [ "$2" != 0 ]; then [ "$(git rev-parse HEAD)" = "$pre" ] && [ "$(git rev-parse origin/batch)" = "$pre" ] || bad "pm_merge $1: merged or pushed"; fi
 }
@@ -265,7 +266,7 @@ la=$(sed -n 's/^TS_SIZE_FAIL (\(.*\))$/\1/p' "$R.a"); lb=$(sed -n 's/^TS_SIZE_FA
 echo '{}' > protocol/fixtures/new_sampler_hash.json; git add . && git commit -qm hash; : > "$R.pp"; pp d
 grep -q 'test/transcripts.test.ts' "$R.pp" && grep -q '^IMPACT_STORY_' "$R.d" || bad 'prepush: a sampler hash change did not run the transcript and Impact checks'
 # --- check_impact_fixtures.sh ----------------------------------------------------------------
-# Break: the Impact story's pinned list is not compared with the README row (a new fixture only in the README passes, or order is ignored).
+# Break: the Impact story's pinned list is not compared with the README row (a new fixture only in the README passes).
 R=$(mktemp -d); cd "$R"; git init -q -b main; mkdir -p protocol mobile/app/stories
 printf '| `cartridge.schema.json` | cartridge | 05 §8 | `a_hash.json`, `b_sampler_hash.json` |\n' > protocol/README.md
 printf "export const Impact: Story = {\n  x: ['a_hash.json',\n  'b_sampler_hash.json'],\n};\n" > mobile/app/stories/SystemDataModel.stories.tsx
@@ -279,6 +280,7 @@ lg() { rc=0; UP=$2 PATH="$tmp/up:$PATH" sh "$bin/agent_load_gate.sh" > /dev/null
 lg mac-7.99 '12:00  up 3 days,  2 users,  load averages: 7.99 9.50 9.00' 0
 lg mac-15 '12:00  up 3 days,  2 users,  load averages: 15.93 9.50 9.00' 2
 grep -q 'load is 15.93' "$tmp/lg.err" || bad 'agent_load_gate: message omits the load'
+lg comma-decimal 'load averages: 9,50 9,00 9,00' 0
 lg linux-8 ' 12:00:01 up 3 days,  2 users,  load average: 8.00, 9.50, 9.00' 2
 # --- .githooks/pre-commit ----------------------------------------------------------------------
 # Stub mise runs nothing but fails `elixir bin/contracts.exs --check`. Break: a staged MECHANICS-TOOLBOX.md,
