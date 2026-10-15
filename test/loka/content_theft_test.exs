@@ -47,5 +47,20 @@ defmodule Loka.ContentTheftTest do
 
     assert diags.([{"facts.json", &put_in(&1, ["facts", "stolen", "scopes"], ["player"])}]) ==
              [{"FACT_SCOPE_UNSUPPORTED", "cartridge.world.theft.stolen"}]
+
+    theft = &{"cartridge.json", fn c -> put_in(c, ["world", "theft" | &1], "nope") end}
+
+    assert diags.([theft.(["skill"])]) == [
+             {"UNRESOLVED_REFERENCE", "cartridge.world.theft.skill"}
+           ]
+
+    assert diags.([theft.(["narration", "seen"])]) == [
+             {"UNRESOLVED_REFERENCE", "cartridge.world.theft.narration.seen"}
+           ]
+
+    nope = %{"op" => "fact_compare", "fact" => "nope", "equals" => true}
+
+    assert diags.([{"npcs/vault.json", &put_in(&1, ["locks", "get", "root"], nope)}]) ==
+             [{"UNRESOLVED_REFERENCE", "npcs/vault.locks.get.root.fact"}]
   end
 end
