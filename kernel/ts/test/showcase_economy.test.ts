@@ -39,10 +39,10 @@ const use = (w: World, provider: string, service: string, quoted_price: number) 
   service: R('service', service),
   quoted_price,
 });
-const trade = (w: World, type: string, item: string, quoted_price: number) => ({
+const trade = (w: World, type: string, item: string, quoted_price: number, who = 'chandler') => ({
   type,
   item_id: id(w, 'item', item),
-  provider_id: npc(w, 'chandler'),
+  provider_id: npc(w, who),
   quoted_price,
 });
 const walk = (w: World, ...ds: string[]) => ds.reduce((x, d) => go(x, d).world, w);
@@ -60,10 +60,10 @@ const exit = (w: World, direction: string) =>
   gameView(w).exits.find((e) => e.direction === direction)!;
 const candles = (w: World, holder: string) =>
   [1, 2, 3, 4, 5].map((n) => `candle_0${n}`).filter((c) => where(w, id(w, 'item', c)) === holder);
-const price = (w: World) =>
+const price = (w: World, who = 'chandler', item = 'candle_01') =>
   gameView(w)
-    .entities.find((e) => e.id === npc(w, 'chandler'))!
-    .shop!.find((s) => s.item_id === id(w, 'item', 'candle_01'))!.buy!.price;
+    .entities.find((e) => e.id === npc(w, who))!
+    .shop!.find((s) => s.item_id === id(w, 'item', item))!.buy!.price;
 const ores = (w: World, holder: string) =>
   [1, 2, 3, 4].map((n) => `ore_0${n}`).filter((o) => where(w, id(w, 'item', o)) === holder);
 const door = (w: World) =>
@@ -274,4 +274,23 @@ test('economy 8 branch: without the purchase the key, the door and the room refu
     },
   };
   assert.equal(refused(forced, { type: 'move', direction: 'south' }), 'permission_denied');
+});
+
+// Breaks: the yard shelf's table (one held 3), its hour, its cap of 1, or its crate.
+test('economy yard: the one-candle shelf sells at 3 and refills at 08:00', () => {
+  let y = walk(fresh(WORLD), 'down', 'down');
+  const seller = npc(y, 'yard_chandler');
+  const held = (x: World) =>
+    ['yard_candle_01', 'yard_candle_02'].filter((c) => where(x, id(x, 'item', c)) === seller);
+  assert.equal(price(y, 'yard_chandler', 'yard_candle_01'), 3);
+  y = play(y, trade(y, 'buy', 'yard_candle_01', 3, 'yard_chandler')).world;
+  assert.equal(pennies(y), 7);
+  assert.deepEqual(held(y), []);
+  assert.deepEqual(held(wait(y, 28799).world), []);
+  y = wait(y, 28800).world;
+  assert.deepEqual(held(y), ['yard_candle_02']);
+  assert.equal(price(y, 'yard_chandler', 'yard_candle_01'), 3);
+  y = play(y, trade(y, 'sell', 'yard_candle_01', 1, 'yard_chandler')).world;
+  assert.deepEqual(held(wait(y, 32400).world), ['yard_candle_01', 'yard_candle_02']);
+  valid(y);
 });
