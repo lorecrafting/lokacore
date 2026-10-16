@@ -2,7 +2,8 @@
 // a reaction's fact.adjust names a bounded int fact (FACT_TYPE_MISMATCH); an NPC's disposition
 // is on an authored NPC, with an engage line exactly when it is hostile and has an attack
 // (SCHEMA_VIOLATION), a text of this cartridge; either, or a friendly buy_discount, needs
-// kernel_api 1.47, a refuse line (Book hostile refusal) 1.104. Its conditions are walked with
+// kernel_api 1.47, a refuse line (Book hostile refusal) 1.104; asides (row FD10) are never on a
+// spawn template (SCHEMA_VIOLATION). Its conditions are walked with
 // every other policy (cartridge_refs.ts nodes).
 import type { Diagnostic } from '../contracts.gen.ts';
 import { refString } from '../runtime/decision.ts';
@@ -28,6 +29,11 @@ export function standing(c: Obj): Diagnostic[] {
   for (const [ref, n] of Object.entries((c.npcs ?? {}) as Obj)) {
     const d = n.disposition;
     if (n.shop?.buy_discount?.friendly) used = true;
+    // Row FD10: a spawned copy has no authored presence to remark from.
+    if (n.spawn_template && n.asides)
+      out.push(
+        diag('SCHEMA_VIOLATION', `.cartridge.npcs${step(ref)}.asides`, { error: 'invalid_value' }),
+      );
     if (!d) continue;
     used = true;
     const at = `.cartridge.npcs${step(ref)}.disposition`;

@@ -5,7 +5,7 @@ defmodule Loka.Content.Variants do
   `self` or `subject` (status reader 1, row G3) 1.53; a `resource_compare` with `subject` or
   `at_least_percent` (row 39) 1.87; a room's or detail's `asides` or a `skill_compare` leaf
   (row FD2) 1.91; world.identity (rows W15, FD9) 1.97; an `item_present` leaf (Homestead hs-6)
-  1.102. Twin of
+  1.102; an NPC's `asides` (row FD10) 1.107. Twin of
   kernel/ts/src/content/cartridge_variants.ts.
   """
   import Loka.Content.Source, only: [diag: 3]
@@ -22,12 +22,17 @@ defmodule Loka.Content.Variants do
 
     relative = relative?(defs) or relative?(settings)
 
-    voices = voice?(defs) or aside?(defs)
+    remarks = Enum.any?(for {_, {_, [], n}} <- defs["npc"] || %{}, do: is_map_key(n, "asides"))
+    voices = voice?(defs) or aside?(defs) or remarks
     identity = is_map_key(settings["world"] || %{}, "identity")
     furnish = furnish?([defs, settings])
 
     if (identity or voices or relative or used?(defs, settings)) and
-         api < floor(furnish, identity, voices, relative, defs, settings),
+         api <
+           if(remarks,
+             do: [1, 107],
+             else: floor(furnish, identity, voices, relative, defs, settings)
+           ),
        do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least", %{})],
        else: []
   end
@@ -54,7 +59,7 @@ defmodule Loka.Content.Variants do
   defp leaf?(v) when is_tuple(v), do: leaf?(Tuple.to_list(v))
   defp leaf?(_), do: false
 
-  # Twin of TS asideParts: only a room's or detail's `asides`, never a key named so elsewhere.
+  # Twin of TS asideParts (rooms and details; NPCs are `remarks`): never a key named so elsewhere.
   defp aside?(defs),
     do:
       Enum.any?(for({_, {_, [], r}} <- Map.get(defs, "room", %{}), do: RoomParts.asides(r) != []))

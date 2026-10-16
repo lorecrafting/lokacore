@@ -170,9 +170,12 @@ function within(
                 (c) => !lockRefused(world, actor, e.locks?.get, c.id, steps),
               )
             : [];
+      // Row FD10: a present NPC's asides, read with the NPC as the target.
+      const lines = e.kind === 'npc' ? asides(world, actor, e, steps, id as EntityId) : [];
       return {
         ...viewOf(world, actor, id, e, worn ? worn(id) : actions.of(scope, id), steps),
         ...(contents.length > 0 && { contents }),
+        ...(lines.length > 0 && { asides: lines.map((key) => ({ key })) }),
       };
     });
 }

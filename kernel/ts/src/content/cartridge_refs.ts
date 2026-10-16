@@ -127,17 +127,18 @@ const gateRoots = (c: Obj): [Obj, string][] =>
     ),
   );
 
-/** Toolbox row FD2: each room's and detail's aside with its path. */
+/** Toolbox row FD2: each room's and detail's aside with its path; row FD10: each NPC's. */
 export const asideParts = (c: Obj): [Obj, string][] =>
-  Object.entries((c.rooms ?? {}) as Obj).flatMap(([ref, r]) =>
-    [
+  [
+    ...Object.entries((c.rooms ?? {}) as Obj).flatMap(([ref, r]) => [
       [r, `.cartridge.rooms${step(ref)}`],
       ...Object.entries((r.details ?? {}) as Obj).map(([k, d]) => [
         d,
         `.cartridge.rooms${step(ref)}.details${step(k)}`,
       ]),
-    ].flatMap(([d, at]) => (d.asides ?? []).map((a: Obj, i: number) => [a, `${at}.asides[${i}]`])),
-  );
+    ]),
+    ...Object.entries((c.npcs ?? {}) as Obj).map(([ref, n]) => [n, `.cartridge.npcs${step(ref)}`]),
+  ].flatMap(([d, at]) => (d.asides ?? []).map((a: Obj, i: number) => [a, `${at}.asides[${i}]`]));
 
 // Policy nodes with diagnostic paths, across every definition that declares a condition.
 /** Each node of one policy tree with its path. */

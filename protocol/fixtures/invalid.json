@@ -30177,6 +30177,297 @@
     ]
   },
   {
+    "name": "npc_asides_empty",
+    "contract": "NpcDefinition",
+    "value": {
+      "key": "hal",
+      "keywords": [
+        "hal"
+      ],
+      "short": "npc.hal.short",
+      "room_line": "npc.hal.room",
+      "description": "npc.hal.description",
+      "room": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "yard"
+      },
+      "asides": []
+    },
+    "errors": [
+      {
+        "path": "/asides",
+        "code": "too_few_items"
+      }
+    ]
+  },
+  {
+    "name": "npc_asides_over_sixteen",
+    "contract": "NpcDefinition",
+    "value": {
+      "key": "hal",
+      "keywords": [
+        "hal"
+      ],
+      "short": "npc.hal.short",
+      "room_line": "npc.hal.room",
+      "description": "npc.hal.description",
+      "room": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "yard"
+      },
+      "asides": [
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "a"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "a"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "a"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "a"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "a"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "a"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "a"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "a"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "a"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "a"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "a"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "a"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "a"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "a"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "a"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "a"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "a"
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/asides",
+        "code": "too_many_items"
+      }
+    ]
+  },
+  {
+    "name": "npc_aside_shape",
+    "contract": "NpcDefinition",
+    "value": {
+      "key": "hal",
+      "keywords": [
+        "hal"
+      ],
+      "short": "npc.hal.short",
+      "room_line": "npc.hal.room",
+      "description": "npc.hal.description",
+      "room": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "yard"
+      },
+      "asides": [
+        {}
+      ]
+    },
+    "errors": [
+      {
+        "path": "/asides/0/text",
+        "code": "missing_property"
+      },
+      {
+        "path": "/asides/0/when",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "entity_view_asides_empty",
+    "contract": "EntityView",
+    "value": {
+      "id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+      "name": "npc.hal.short",
+      "kind": "npc",
+      "actions": [],
+      "asides": []
+    },
+    "errors": [
+      {
+        "path": "/asides",
+        "code": "too_few_items"
+      }
+    ]
+  },
+  {
+    "name": "entity_view_aside_bare_key",
+    "contract": "EntityView",
+    "value": {
+      "id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+      "name": "npc.hal.short",
+      "kind": "npc",
+      "actions": [],
+      "asides": [
+        "remark.hal.first"
+      ]
+    },
+    "errors": [
+      {
+        "path": "/asides/0",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
     "contract": "BlueprintDefinition",
     "value": {
       "x": 1

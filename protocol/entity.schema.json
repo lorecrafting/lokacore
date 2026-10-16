@@ -749,6 +749,15 @@
             "get"
           ],
           "additionalProperties": false
+        },
+        "asides": {
+          "description": "Toolbox row FD10 (kernel_api at least 1.107): companion remarks. Every aside whose condition holds for the viewing actor, read with this NPC as the target, is shown in authored order with the NPC while it is present (GameView entity asides); none changes state. Never on a spawn template.",
+          "type": "array",
+          "items": {
+            "$ref": "room.schema.json#/$defs/Aside"
+          },
+          "minItems": 1,
+          "maxItems": 16
         }
       },
       "required": [
