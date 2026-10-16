@@ -67,8 +67,8 @@ Status `planned (plan N)` means that showcase plan ([plan 1](showcase/hub-and-fi
 | escrow x timed claim x cancel | economy/law | `forge_stall` | `showcase_economy.test.ts` (economy 4, 5, 5 branch) | built |
 | bank x two counters x fees | economy/law | `counting_house`, `market_row` | `showcase_economy.test.ts` (economy 2, 3) | built |
 | property x locks x key barrier | economy/law | `strongroom` | `showcase_economy.test.ts` (economy 1, 2, 8, 8 branch) | built |
-| theft x sneak x witness x wanted x disposition | economy/law | `pawn_alley` (hide), `market_row` (the purse, the guard), `counting_house` (the fine) | `showcase_law.test.ts` (law 6, 9, 10) | planned (plan 5) |
-| fence x stolen provenance x get lock | economy/law | `pawn_alley` | `showcase_law.test.ts` (law 7, red control) | planned (plan 5) |
+| theft x sneak x witness x wanted x disposition | economy/law | `pawn_alley` (hide), `market_row` (the purse, the guard), `counting_house` (the fine) | `showcase_economy.test.ts` (economy 6, 9, 10, yard theft) | built |
+| fence x stolen provenance x get lock | economy/law | `pawn_alley` | `showcase_economy.test.ts` (economy 7, 7 control, yard theft) | built |
 | spells x reagents x light x dark room | magic/use-on | `loft` (ash, the lantern), `crypt` | `kernel/ts/test/showcase_magic.test.ts` (magic 2, 6) | planned (plan 6) |
 | command blocks x spells x readables | magic/use-on | `reading_room` (hushed; the grimoire) | `showcase_magic.test.ts` (magic 3) | planned (plan 6) |
 | quests x levelling x spell gates | magic/use-on | the errand, the Raise, `ward` | `showcase_magic.test.ts` (magic 4, 5) | planned (plan 6) |

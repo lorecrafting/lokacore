@@ -99,6 +99,35 @@ const pondAndStew = async (screen: Screen, { tap, take, held, position }: Steps)
   await settle();
 };
 
+// Law L (docs/showcase/economy-law-district.md, Book e2e), reduced: bank, shop, hide, strongroom.
+// The Book's NPC page lists no held things, so the lift, fence and wanted steps stay kernel-only.
+const law = async (screen: Screen, { tap, take }: Steps) => {
+  const npc = async (who: RegExp, ...labels: RegExp[]) => {
+    await tap(who);
+    for (const l of labels) await tap(l);
+    await tap(LABEL.leave);
+  };
+  await moves(screen, 'down', 'east');
+  await npc(/^The clerk is here/, /^Deposit five pennies/);
+  await moves(screen, 'west', 'north');
+  await npc(/^The market clerk is here/, /^Withdraw five pennies/);
+  await npc(/^The chandler is here/, /^Buy a tallow candle/);
+  await moves(screen, 'south', 'west');
+  await tap('Hide');
+  await moves(screen, 'east', 'north');
+  await npc(/^The merchant is here/); // the purse is not listed (NPC page gap)
+  await moves(screen, 'south', 'east');
+  await npc(/^The clerk is here/, /^Buy the strongroom/);
+  await take(/^The strongroom key is here/, /^Take the strongroom key/);
+  await moves(screen, 'west');
+  await tap('Map');
+  await tap(/^Unlock the strongroom door/);
+  await tap(/^Open the strongroom door/);
+  await tap('Go south');
+  await take(/^A strongroom chest is here/, /^Put a tallow candle/);
+  await settle();
+};
+
 walk(
   '1-homestead',
   'Homestead: lessons, carve, build, rest, give, barter, fish, stew',
@@ -112,3 +141,11 @@ walk(
     await pondAndStew(screen, s);
   },
 );
+
+walk('2-law', 'Law: bank, shop, hide, strongroom', async (r) => {
+  const { screen } = r;
+  await r.app.clearState();
+  await settle();
+  await scene(screen);
+  await law(screen, steps(screen));
+});
