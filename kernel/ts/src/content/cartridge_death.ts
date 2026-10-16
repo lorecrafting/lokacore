@@ -30,7 +30,7 @@ export function death(c: Obj, { named, text }: Checks): Diagnostic[] {
       bad(`.cartridge.items${step(ref)}.location.item`);
   out.push(...drops(c, named));
   if (!d) return out;
-  out.push(...requirements(c));
+  out.push(...requirements(c), ...penalty(c, text));
   named(d.shrine, 'room', '.cartridge.world.death.shrine');
   for (const field of ['player_corpse', 'npc_corpse']) {
     named(d[field], 'item', `.cartridge.world.death.${field}`);
@@ -43,11 +43,17 @@ export function death(c: Obj, { named, text }: Checks): Diagnostic[] {
     if (!spec || d.restore[pool] < spec.minimum || d.restore[pool] > spec.maximum)
       bad(`.cartridge.world.death.restore.${pool}`);
   }
-  // Row 47: an experience penalty needs world.levelling and its narration in text.
-  const lost = d.penalty?.experience;
-  if (lost && !c.world.levelling) bad('.cartridge.world.death.penalty.experience');
-  if (lost) text(lost, ['narration'], '.cartridge.world.death.penalty.experience');
   return out;
+}
+
+/** Row 47: an experience penalty needs world.levelling and its narration in text. */
+function penalty(c: Obj, text: Checks['text']): Diagnostic[] {
+  const at = '.cartridge.world.death.penalty.experience';
+  const lost = c.world.death.penalty?.experience;
+  if (lost) text(lost, ['narration'], at);
+  return lost && !c.world.levelling
+    ? [diag('SCHEMA_VIOLATION', at, { error: 'invalid_value' })]
+    : [];
 }
 
 function requirements(c: Obj): Diagnostic[] {
