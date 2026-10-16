@@ -83,7 +83,10 @@ test('case 1: road halves, marsh triples, the fen is refused and shown unavailab
   assert.equal(mv(r.world), 6);
   const exits = gameView(w).exits;
   const east = exits.find((e) => e.direction === 'east')!;
-  assert.deepEqual([east.available, east.reason?.code], [false, 'insufficient_resource']);
+  assert.deepEqual(
+    [east.available, 'reason' in east && east.reason?.code],
+    [false, 'insufficient_resource'],
+  );
   assert.equal(exits.find((e) => e.direction === 'west')!.available, true);
 });
 

@@ -37,15 +37,18 @@ export function pools(c: Obj, named: Checks['named']): Diagnostic[] {
   out.push(...npcHp(c));
   out.push(...npcStarts(c));
   if (c.world?.bands) out.push(...bands(c, c.world.bands, '.cartridge.world.bands'));
-  const cost = c.world?.movement?.cost;
-  if (cost) named(cost.resource, 'resource', '.cartridge.world.movement.cost.resource');
-  const movement = c.world?.movement;
-  if (
-    (movement?.terrain || (movement && !cost)) &&
-    apiCmp(c.manifest.requires.kernel_api.at_least, '1.106') < 0
-  )
-    out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
+  out.push(...movement(c, named));
   return out;
+}
+
+function movement(c: Obj, named: Checks['named']): Diagnostic[] {
+  const movement = c.world?.movement;
+  const cost = movement?.cost;
+  if (cost) named(cost.resource, 'resource', '.cartridge.world.movement.cost.resource');
+  return (movement?.terrain || (movement && !cost)) &&
+    apiCmp(c.manifest.requires.kernel_api.at_least, '1.106') < 0
+    ? [diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least')]
+    : [];
 }
 
 function npcHp(c: Obj): Diagnostic[] {
