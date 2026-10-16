@@ -162,6 +162,11 @@ polish stage which needs me at the computer for a bit."
 
 - #403 (loka-mytp.1/.2, narrate and plan-move engine steps) merged at 0f0603ed; settle-3 kept parked.
 - Showcase fixes y6yg.8/.9/.15/.16/.17 batched as one content PR (loka-y6yg.18); slice D needs no rebuild.
+- Decisions PR #404 (loka-kgd.162): G10 split (private notes, map pins, letters stay M15; public writing G10b deferred);
+  Chronicle FD6 no longer waits for carry-over; deferred rows do not block M14/M15 exit.
+- Book bugs (loka-y6yg.20): Fable designer ruled combat closure keeps the Combat page with Back to World; the
+  engage line goes to the combat log; a hostile NPC shows a refusal line from new cartridge text (protocol
+  change, own brief with review record + second opinion, after the content batch); x6t.28 U3 ruled out.
 
 ## Owner answers this session
 
