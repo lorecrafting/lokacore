@@ -549,6 +549,7 @@ test("raze moves an NPC in the hut to the lane; a holder's contents ride along",
 test('raze is refused for a non-owner, and while a corpse lies in the hut', () => {
   n = 0;
   const w = raised(play(fresh(), buy(fresh())));
+  const lane = w.state.containers[w.body];
   const [hut] = built(w);
   const b = w.cartridge.services![`${S}:service/raze_hut`]!.benefit as never;
   const other = '00000000-0000-4000-8000-0000000000c3' as never;
@@ -572,6 +573,34 @@ test('raze is refused for a non-owner, and while a corpse lies in the hut', () =
     message: { key: 'service.occupied' },
   });
   assert.deepEqual(unrazable(occupied, b, other), { code: 'permission_denied' });
+
+  // Breaks: a living spawned NPC (a hound that chased the player in) refusing the raze, or a dead
+  // one (hp 0, not a living body) moved; the seller stands in as the spawned hound.
+  const hound = npc(w, 'seller');
+  const hp = key({ kind: 'resource', resource: resourceRef(w, 'hp'), entity_id: hound });
+  const spawned = (value: number) =>
+    ({
+      ...w,
+      entities: { ...w.entities, [hound]: { ...w.entities[hound], hp: true } },
+      state: {
+        ...w.state,
+        created: {
+          ...w.state.created,
+          [hound]: {
+            id: hound,
+            definition: ref('npc', 'seller'),
+            origin: { kind: 'spawned', role: 'hound' },
+          },
+        },
+        containers: { ...w.state.containers, [hound]: hut },
+        resources: { ...w.state.resources, [hp]: { value, at: w.state.clock } },
+      },
+    }) as unknown as World;
+  assert.equal(play(spawned(4), raze(w)).state.containers[hound], lane);
+  assert.deepEqual(unrazable(spawned(0), b, w.character), {
+    code: 'invalid_state',
+    message: { key: 'service.occupied' },
+  });
 });
 
 // Breaks: the map placing a razed room (knowledge positions() not skipping the tombstone) or

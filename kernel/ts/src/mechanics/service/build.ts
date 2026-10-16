@@ -22,6 +22,7 @@ import { assigned, value } from '../fact.ts';
 import { selected } from '../containment/stock.ts';
 import { applyStatus, clearStatuses, cureOps, currentStatus } from '../status/shared.ts';
 import { movable } from '../../runtime/created.ts';
+import { living } from '../death/shared.ts';
 
 type Build = Pick<
   Extract<ServiceDefinition['benefit'], { kind: 'build' }>,
@@ -99,7 +100,7 @@ function mended(world: World, b: Mend, mint: Mint): DeltaOp[] {
 }
 
 /** Built rooms S5: only the owner razes the live room, and not while an entity that cannot move
- * (a corpse) lies in it. */
+ * (a corpse) lies in it; a living NPC body (a spawned hound or deer too) moves out. */
 export function unrazable(world: World, b: Raze, actor: CharacterId) {
   const [id, room] = live(world, b);
   if (!room) return refused('service.nothing_to_raze');
@@ -108,9 +109,9 @@ export function unrazable(world: World, b: Raze, actor: CharacterId) {
   const inside = Object.keys(world.state.containers).filter(
     (e) => world.state.containers[e] === id,
   );
-  return inside.some((e) => !movable(world, e as EntityId))
-    ? refused('service.occupied')
-    : undefined;
+  const stuck = (e: string) =>
+    !movable(world, e as EntityId) && !(world.entities[e]?.kind === 'npc' && living(world, e));
+  return inside.some(stuck) ? refused('service.occupied') : undefined;
 }
 
 // The razed room's statuses end (an expiry job then finds no active row), everything on its floor

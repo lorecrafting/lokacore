@@ -382,7 +382,7 @@ test('a razed hut stays razed through cold reopen and its receipt replays withou
   assert.equal(north(story), false);
   assert.deepEqual(story.world().rooms[hut]!.exits, {});
   const at = lane(story);
-  assert.notEqual(at, hut);
+  assert.equal(at, story.world().state.containers[story.world().body]); // the player stands in the lane
   const again = story.invoke(raze);
   assert.equal(again.kind === 'saved' && again.replay, true, JSON.stringify(again));
   assert.equal(lane(story), at);
