@@ -325,8 +325,9 @@
       "floor": "1.58",
       "below": "1.57",
       "source": "cartridges/toolbox_showcase",
-      "feature": "a reaction's attacker filter (loka-kgd.79); the Homestead (1.101/1.102) and the Undercroft's banks, escrow, stock tables, shelves and locks dropped",
+      "feature": "a reaction's attacker filter (loka-kgd.79); the Homestead (1.101/1.102), speech.phrases (1.98) and the Undercroft's banks, escrow, stock tables, shelves and locks dropped",
       "edits": [
+        ["cartridge.json", ["speech"], null],
         ["statuses/gored.json", ["kind"], null],
         ["cartridge.json", ["world", "construction"], null],
         ["rooms/holding_lane.json", ["site"], null],

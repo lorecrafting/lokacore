@@ -1,0 +1,51 @@
+{
+  "on": {
+    "event": "entity_entered_room",
+    "room": "warden_gate"
+  },
+  "when": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": [
+        {
+          "op": "npc_present",
+          "npc": "warden"
+        },
+        {
+          "op": "fact_compare",
+          "fact": "trust",
+          "npc": "warden",
+          "equals": 0
+        },
+        {
+          "op": "any",
+          "items": [
+            {
+              "op": "fact_compare",
+              "fact": "wardle_standing",
+              "equals": -2
+            },
+            {
+              "op": "fact_compare",
+              "fact": "warden_knows",
+              "equals": true
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "apply": [
+    {
+      "op": "barrier.set",
+      "barrier": "toll_gate",
+      "to": "closed"
+    },
+    {
+      "op": "fact.assign",
+      "fact": "warden_lets_pass",
+      "value": false
+    }
+  ]
+}

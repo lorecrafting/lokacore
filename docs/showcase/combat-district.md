@@ -102,7 +102,7 @@ No combat room is `exposed`, so no weather drain lands; no door is gated; rooms 
 > hand your blows land nothing, here or anywhere. North, a boar is penned: you can hear it grunt
 > from this yard. It gores: a wound that bleeds for a while and a scar that stays, even past your
 > death. The poultice on the bench stops the bleeding; nothing takes the scar away. West, Gil keeps
-> the gate with a raider in it; shout "ware" from here and Gil hears you through the wall, and he
+> the gate with a raider in it; a shout of "ware" from this yard carries through the wall to him, and he
 > fights beside you once you strike. Aldous pays a bounty on the raider, but only to one who takes
 > it before the raider falls. South is a pit with two
 > goblins who fight as a pack: in a pack you choose which one you hit. Every kill earns
@@ -116,7 +116,7 @@ No combat room is `exposed`, so no weather drain lands; no door is gated; rooms 
 - **Aldous** (drill-master): stays in `drill_yard`; no `attack`. Dialogues in key order, as
   Nell's: `aldous_lesson` (policy `fact_compare skill_blade false`; roles `teacher` and `sword`;
   choice `learn`: `sequence [skill.acquire blade]`, `receive {item: sword, from: teacher}`, no
-  `lesson_payment`; `leave`), then `aldous_talk` (policy `fact_compare raider_slain false`; `bounty`
+  `lesson_payment`; `leave`), then `aldous_talk` (policy `all(skill_blade true, raider_slain false)`, so Talk lists one dialogue at a time; the lesson ends "Keep your guard up.", which promises no work; `bounty`
   with `accept: bounty`, `leave`), then `aldous_yard` (policy `fact_compare raider_slain true`; its
   own prompt and `leave` only, so no bounty is offered once the raider is dead), and `aldous_steel` with `keyword: "steel"` (one `leave` choice; its prompt is the
   answer; Talk never lists it, [row G9](../system/mechanics.md#social-verbs-say-whisper-and-shout-toolbox-row-g9-engine-half);
@@ -172,7 +172,7 @@ default) and Flee 2, so mv is below 100 from step 1 on; no step pins an mv value
 | # | Step | Expected | Matrix cells |
 |---|---|---|---|
 | 1 | West from the inn; read `sign_combat`. | The text above. GameView `cues` lists the boar's grunt with direction north; in the inn (two exits away) and in `gate_yard` none. | senses cues x combat |
-| 2 | Talk to Aldous: `learn`; wield the sword; `say steel`; Talk: `bounty`. | `skill_blade` true, the sword received and worn in `wield`; Talk now opens `aldous_talk` (the lesson's policy fails). `say steel` opens `aldous_steel` (`choice_opened`); Talk never lists it; the same say in `gate_yard` is `spoken` only. `bounty` activates the quest (Journal active). | lesson x weapon; say x dialogue keyword |
+| 2 | Talk to Aldous: `learn`; wield the sword; `say steel`; Talk: `bounty`. | `skill_blade` true, the sword received and worn in `wield`; Before the lesson Talk lists `aldous_lesson` only; after it, `aldous_talk` only (the lesson's policy fails). `say steel` opens `aldous_steel` (`choice_opened`); Talk never lists it; the same say in `gate_yard` is `spoken` only. `bounty` activates the quest (Journal active). | lesson x weapon; say x dialogue keyword |
 | 3 | `say ware`, then `shout ware`, in the yard. In a separate branch (before any yard shout), `shout ware` from the inn. | After the say `gil_warned` is false (a say reaches the actor's room only); after the shout true, and Gil's description in `gate_yard` reads the warned variant. The inn branch: still false (two exits from Gil). The fact never resets, hence the branch. | shout x reactions x variants |
 | 4 | West; Attack the raider; round 1. | Player hits 2 (raider 1); the raider hits (hp 9); Gil hits 1 and the raider dies: `entity_died` with Gil as killer and the player credited; `raider_slain` true; `bounty` resolves `done` in the same proposal; experience 10 + 20 = 30, level 2, one `level_up` line last, 1 unspent; the raider's corpse is public and empty; Talk to Aldous then opens `aldous_yard` (Leave only). (Gil's own blow emits `attack_result`; `boar_gore` does not fire: no boar here.) | allies x kill credit x quest x levelling |
 | 5 | Raise `str`. | str 11, unspent 0, no Raise offered; the sword's derived damage is 3 (2 + floor(1 x (11 - 10) / 1)). | levelling x derived damage |
@@ -243,9 +243,8 @@ against rows 6a and 6c for this cartridge.
   `test/loka/content_showcase_test.exs`).
 - `showcase_body.test.ts`'s hub pin: four exits.
 - No Book test: cues, Raise cards and condition lines are existing Book elements (cue wording and
-  the Attack choice wording are pending the designer, Beads `loka-kgd.65`, `loka-x6t.14`); say and
-  shout have no Book input yet (`loka-kgd.72`), so steps 2 and 3 are kernel-only and the recorder
-  recipe skips them.
+  the Attack choice wording are pending the designer, Beads `loka-kgd.65`, `loka-x6t.14`); the Book
+  offers "ware" as a Shout chip (`speech.phrases`; `combat 3` pins the GameView offer); the recorder recipe still skips steps 2 and 3.
 
 ## Matrix cells this plan covers
 

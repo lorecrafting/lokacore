@@ -265,5 +265,10 @@
     "construction": {
       "max_total": 2
     }
+  },
+  "speech": {
+    "phrases": [
+      "ware"
+    ]
   }
 }

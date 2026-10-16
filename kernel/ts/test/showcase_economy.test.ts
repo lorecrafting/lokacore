@@ -138,8 +138,12 @@ test('economy 3: withdraw at clerk B twice; buy a candle; the stale quote refuse
   assert.equal(price(w), 2);
   w = play(w, trade(w, 'buy', 'candle_01', 2)).world;
   assert.equal(pennies(w), 6);
-  assert.deepEqual(candles(w, chandler), ['candle_01', 'candle_03']); // the shop picks candle_02
-  assert.deepEqual(candles(w, w.body), ['candle_02']);
+  const [bought, ...extra] = candles(w, w.body); // the shop picks which instance
+  assert.deepEqual(extra, []);
+  assert.deepEqual(
+    candles(w, chandler),
+    ['candle_01', 'candle_02', 'candle_03'].filter((c) => c !== bought),
+  );
   assert.equal(price(w), 3);
   assert.equal(refused(w, trade(w, 'buy', 'candle_01', 2)), 'invalid_state');
   valid(w);
@@ -176,8 +180,14 @@ test('economy 5: at 08:00 the shelf refills and the knife is ready', () => {
   assert.equal(refused(early, use(early, 'smith', 'forge_claim', 1)), 'invalid_state');
   assert.deepEqual(offer(early, 'claim').reason, reason('service.not_ready'));
   w = wait(w, T + HOUR).world;
-  assert.deepEqual(candles(w, chandler), ['candle_01', 'candle_03', 'candle_05']);
-  assert.deepEqual(candles(w, crate), ['candle_04']);
+  const left = candles(w, crate); // one of the two moved; the shop picks which
+  assert.equal(left.length, 1);
+  assert.deepEqual(
+    candles(w, chandler),
+    candles(early, chandler)
+      .concat(candles(early, crate).filter((c) => c !== left[0]))
+      .sort(),
+  );
   w = play(w, use(w, 'smith', 'forge_claim', 1)).world;
   assert.equal(pennies(w), 2);
   assert.equal(purse(w, 'smith'), 4);
@@ -192,7 +202,7 @@ test('economy 5: at 08:00 the shelf refills and the knife is ready', () => {
   });
   // The next hour's job finds her at the cap of 3 and moves nothing.
   w = wait(w, T + 2 * HOUR).world;
-  assert.deepEqual(candles(w, crate), ['candle_04']);
+  assert.deepEqual(candles(w, crate), left);
   w = go(w, 'south').world;
   assert.equal(price(w), 2);
   valid(w);

@@ -1,0 +1,34 @@
+{
+  "label": "actions.lift_store_bar",
+  "aliases": [
+    "lift"
+  ],
+  "target": {
+    "kind": "detail",
+    "room": "woodstore",
+    "detail": "store_bar"
+  },
+  "priority": 5,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "fact_compare",
+      "fact": "store_unbarred",
+      "equals": false
+    }
+  },
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "store_unbarred",
+          "value": true
+        }
+      ],
+      "narration": {
+        "actor": "narration.lift_store_bar.success"
+      }
+    }
+  }
+}

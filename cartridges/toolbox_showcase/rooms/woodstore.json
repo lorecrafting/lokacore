@@ -13,6 +13,13 @@
         "logs"
       ],
       "description": "detail.woodstore_logs"
+    },
+    "store_bar": {
+      "aliases": [
+        "store_bar",
+        "bar"
+      ],
+      "description": "detail.store_bar"
     }
   }
 }

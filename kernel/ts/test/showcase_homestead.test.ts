@@ -504,18 +504,18 @@ test('homestead 12: learn cooking, cook a hearty stew from two fresh fish, eat i
   assert.equal(refused(one, cookAt(one, 'cook_stew')), 'invalid_state');
   assert.deepEqual(offer(one, 'cook_stew').reason, reason('craft.cook_stew.needs'));
   w = play(w, cookAt(w, 'cook_stew')).world;
-  assert.equal(where(w, id(w, 'item', 'stew_hearty_02')), w.body);
+  assert.equal(where(w, id(w, 'item', 'stew_hearty_01')), w.body);
   assert.equal(fishIn(w, 'larder').length, 2);
   assert.equal(fact(w, 'uses_cooking'), 1);
   assert.deepEqual(offer(w, 'cook_feast').reason, { code: 'invalid_state' });
-  const hearty = id(w, 'item', 'stew_hearty_02');
-  w = eat(w, 'stew_hearty_02').world;
+  const hearty = id(w, 'item', 'stew_hearty_01');
+  w = eat(w, 'stew_hearty_01').world;
   assert.equal(str(w), 12);
   assert.deepEqual(labels(w), ['condition.hearty']);
   // Branch: the same stew eaten while fed is still active.
   const both = structuredClone(fed) as any;
   both.state.containers[hearty] = both.body;
-  assert.equal(str(eat(both, 'stew_hearty_02').world), 13);
+  assert.equal(str(eat(both, 'stew_hearty_01').world), 13);
   // The loop's pennies last: the 3 left buy the plot (step 13).
   assert.equal(pennies(play(walk(w, 'north'), farmer(w, 'buy_plot', 3)).world), 0);
   valid(w);
@@ -539,8 +539,9 @@ const water = (w: World) =>
     target_id: plot(w),
     item_id: id(w, 'item', 'watering_can'),
   }).world;
-// The kernel grows the set's lowest EntityId; ids mint in key order, so new items can shift it.
-const turnip = (w: World) => where(w, id(w, 'item', 'turnip_02')) === plot(w);
+// Which larder turnip the replenish draws follows the item ids, so any of the three counts.
+const turnip = (w: World) =>
+  ['turnip_01', 'turnip_02', 'turnip_03'].find((k) => where(w, id(w, 'item', k)) === plot(w));
 const croftTouched = (w: World) =>
   statusOn(w, 'croft_plot', 'withered') ||
   ['turnip_01', 'turnip_02', 'turnip_03'].some(
@@ -577,14 +578,14 @@ test('homestead 13: buy the plot, sow at 08:00, water after the midpoint, harves
   assert.equal(describe(wait(s, 28800 + 64800).world, 'plot'), 'item.plot.heavy');
   const at = (t: number) => wait(water(wait(s, 28800 + t).world), 28800 + DAY).world;
   const ripe = at(43201);
-  assert.equal(turnip(ripe), true);
+  const crop = turnip(ripe) ?? assert.fail('no turnip ripened');
   assert.equal(statusOn(ripe, 'plot', 'withered'), false);
   // One sow stamps both lifecycles on its holder; the other plot must stay untouched.
   assert.equal(croftTouched(ripe), false);
-  const h = take(ripe, 'turnip_02');
-  assert.equal(where(h, id(h, 'item', 'turnip_02')), h.body);
+  const h = take(ripe, crop);
+  assert.equal(where(h, id(h, 'item', crop)), h.body);
   for (const late of [at(43200), wait(s, 28800 + DAY).world]) {
-    assert.equal(turnip(late), false);
+    assert.equal(turnip(late), undefined);
     assert.equal(describe(late, 'plot'), 'item.plot.withered');
     assert.equal(croftTouched(late), false);
   }
@@ -628,7 +629,7 @@ test('homestead sandbox: a seed put in the strongbox starts nothing', () => {
     [where(w, id(w, 'item', 'seed_01')), on, fact(w, 'sown_at', plot(w))],
     [id(w, 'item', 'strongbox'), [], undefined],
   );
-  assert.deepEqual([croftTouched(later), turnip(later)], [false, false]);
+  assert.deepEqual([croftTouched(later), turnip(later)], [false, undefined]);
 });
 
 const hens = (w: World) =>
@@ -703,7 +704,7 @@ test('homestead sandbox: the croft plot is locked, ripens when watered early, wi
   // The lane plot stays untouched by the croft sow.
   for (const x of [ripe, late]) {
     assert.equal(statusOn(x, 'plot', 'withered'), false);
-    assert.equal(where(x, id(x, 'item', 'turnip_02')) === plot(x), false);
+    assert.equal(where(x, id(x, 'item', 'turnip_01')) === plot(x), false);
   }
 });
 
