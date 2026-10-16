@@ -22,6 +22,7 @@ import {
   labels,
   npc,
   play,
+  perform,
   pool,
   ref,
   refused,
@@ -600,6 +601,40 @@ test('homestead 13: buy the plot, sow at 08:00, water after the midpoint, harves
   assert.equal(where(winter, id(winter, 'item', 'seed_01')), plot(winter));
   assert.equal(statusOn(winter, 'plot', 'growing'), false);
   valid(h);
+});
+
+// Breaks: a container without the immune pair (sow stamps both lifecycles on whatever holds the
+// seed, so a seed put there would wither or ripen the plots); an item added later included.
+test('homestead sandbox: every container but the two plots is immune to growing and growing_croft', () => {
+  const w = fresh(WORLD);
+  const open = Object.entries(w.cartridge.items!)
+    .filter(([k, d]) => d.container && !k.endsWith('/plot') && !k.endsWith('/croft_plot'))
+    .filter(([, d]) => {
+      const keys = (d.immune ?? []).map((r) => r.key);
+      return !keys.includes('growing') || !keys.includes('growing_croft');
+    })
+    .map(([k]) => k);
+  assert.deepEqual(open, []);
+});
+
+// Breaks: the strongbox's immune pair (the seed in it would stamp growing there and, at expiry,
+// wither or ripen the plots).
+test('homestead sandbox: a seed put in the strongbox starts nothing', () => {
+  const at = { ...sown.state.containers, [sown.body]: room(sown, 'tollhouse') };
+  let w = { ...sown, state: { ...sown.state, containers: at } } as World;
+  w = perform(perform(w, 'pick_strongbox').world, 'pick_strongbox').world;
+  w = play(w, { type: 'open', target_id: id(w, 'item', 'strongbox') }).world;
+  w = put(w, 'seed_01', 'strongbox').world;
+  assert.equal(where(w, id(w, 'item', 'seed_01')), id(w, 'item', 'strongbox'));
+  assert.deepEqual(
+    ['strongbox', 'plot', 'croft_plot'].flatMap((k) =>
+      ['growing', 'growing_croft', 'withered'].filter((s) => statusOn(w, k, s)),
+    ),
+    [],
+  );
+  assert.equal(fact(w, 'sown_at', plot(w)), undefined);
+  assert.equal(croftTouched(wait(w, 28800 + DAY).world), false);
+  assert.equal(turnip(wait(w, 28800 + DAY).world), false);
 });
 
 const hens = (w: World) =>
