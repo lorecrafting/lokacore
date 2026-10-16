@@ -45,7 +45,7 @@ all showcases (placeholders where lore is missing), then UI polish, then worldbu
 official Chapters 1-3; temporary test cartridges or showcases are welcome any time.
 
 Done this session (fc1e2fd7), all on batch B `toolbox/batch-homestead-b` (worktree
-`../worktrees.noindex/batch-homestead-b`, head 71bda8c1, NO PR yet; each slice green on its own head):
+`../worktrees.noindex/batch-homestead-b`, head 0bd63713, NO PR yet; each slice green on its own head):
 - `loka-x6t.64` status kind (fix round: authored debuff on gored and scar; record review-x6t-64).
 - `loka-x6t.65` engine: `ConditionView.duration` (owner: "Lets put teh countdown timer on the rings
   for the icons"). Book half shipped inside x6t.55.
@@ -55,6 +55,10 @@ Done this session (fc1e2fd7), all on batch B `toolbox/batch-homestead-b` (worktr
 - `loka-x6t.55` part 2: status icon row (round, graphic only, placeholder glyphs, hold/focus tooltip,
   tap opens Character, 5 then +N), countdown ring (plain React Native, no Skia), "Inventory" rename.
   Designer and reviewer approved; no record (Book).
+- `loka-x6t.65` round B: the ring drains smoothly between game updates (owner: "yes we want smooth
+  live countdown for the cooldown timer ring"): display-only linear tween, at most 1 s, jumps on first
+  show and refresh, steps under reduced motion. Two fix rounds (a re-render dropped the arc past 6
+  o'clock; a useLayoutEffect switch broke six hand-written React test shims).
 - Earlier batch B slices (session 8c186cca): hs-13, hs-6, hs-12, hs-7, hs-8, hs-14.
 - Slice issues stay open until the batch PR merges; `loka-x6t.60` closes then too (notes).
 
