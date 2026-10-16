@@ -56,3 +56,22 @@ Scope: fix commit `032dd825e` and merge `25cdd330c` (batch `70aedd284`, row 35).
 6. Hosted CI at `032dd825e`: `ci` and `book-e2e` were in progress at writing; the merge gate is their success.
 
 Verdict: **APPROVE**.
+
+## Second opinion (protocol contract change)
+
+- Reviewed 2026-10-16 by anthropic/claude-opus-5-5, independent of the first review. Exact head `032dd825eb5a159777dadf6428ea7469e32d1be3` (fix round 1), base `origin/toolbox/batch-m14` `70aedd28`. Verdict: **APPROVE WITH NOTES**.
+- Must be true (written before the diff): (a) `EntityView.asides` optional, items `Text`, `minItems 1`, absent when none, and `gameview.schema.json` equals `contracts.gen.ts`; (b) `NpcDefinition.asides` 1 to 16 `Aside`; (c) both kernels: spawn template refused, texts resolve, `when` leaves expand, floor 1.107 not shadowed by 1.104 to 1.106; (d) existing cartridges unchanged; (e) no save rows, the viewer's `actor` (not `world.character`), the NPC the policy target.
+- Holds: all five. (a) `gameview.schema.json:569` matches `PlaceView.asides` (`:1106`) and `contracts.gen.ts:398`; `remarks.test.ts` validates every GameView it reads. (b) `entity.schema.json:753`, `contracts.gen.ts:461`. (c) TS `cartridge_standing.ts` / `cartridge_variants.ts` and Elixir `standing.ex` / `variants.ex` agree; `loader_floors.json` case `remarks_sampler` below 1.106. (d) only `remarks_sampler` NPCs carry `asides`; no hash fixture or snapshot changed; `contracts.exs` and `system_graph.exs` regenerate clean. (e) no save or event code touched; seam 1 as in question 1 above.
+- Fix round: finding 1 fixed (`remarks.test.ts` dark case; mutant D below is red); finding 2 fixed (`mechanics.md:2203`); finding 3 open (no PR).
+
+| Mutant (scratch worktree, reverted) | Result |
+| --- | --- |
+| A `EntityView.asides` `minItems` dropped in `gameview.schema.json` and `contracts.gen.ts` | red: `validate.test.ts` and `contracts_test.exs:29` |
+| B `view.ts:174` emits `asides: []` for every NPC | red: `remarks.test.ts` (`/entities/0/asides too_few_items`) |
+| C `standing.ex` template check removed | red: `content_remarks_test.exs:44` |
+| D `rule.ts:71` `of.dark_description &&` dropped | red: `remarks.test.ts` dark case |
+
+### Findings
+
+1. nit, `docs/system/mechanics.md:3701`: "The placement wording is a designer proposal (`book-ui.md` unchanged)" is stale. Fix round 032dd825 amended `book-ui.md` with the approved placement. A reader would think the Book spec is still open. Delete the sentence.
+2. nit (first record's 3, still open): there is no PR body to report the `/code-review` result.
