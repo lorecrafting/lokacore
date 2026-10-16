@@ -1,4 +1,4 @@
-// size: allow 740, the Homestead walk (steps 1 to 13) and its croft sandbox continue one world and share its helpers
+// size: allow 750, the Homestead walk (steps 1 to 13) and its croft sandbox continue one world and share its helpers
 // The showcase Homestead district walked step by step (docs/showcase/homestead-district.md,
 // guided loop steps 1 to 8). Each test continues the world the one before it left.
 import assert from 'node:assert/strict';
@@ -592,10 +592,8 @@ test('homestead 13: buy the plot, sow at 08:00, water after the midpoint, harves
   assert.equal(where(wait(s, 197999).world, id(s, 'item', 'seed_01')), room(s, 'midden'));
   s = take(wait(s, 198000).world, 'seed_01');
   s = put(s, 'seed_01', 'plot').world;
-  assert.deepEqual(
-    [statusOn(s, 'plot', 'withered'), statusOn(s, 'plot', 'growing')],
-    [false, true],
-  );
+  assert.equal(statusOn(s, 'plot', 'withered'), false);
+  assert.equal(statusOn(s, 'plot', 'growing'), true);
   // Day 4 is winter: the seed lies in the plot and nothing grows.
   const winter = put(sowable(3 * DAY + 28800), 'seed_01', 'plot').world;
   assert.equal(where(winter, id(winter, 'item', 'seed_01')), plot(winter));
@@ -603,38 +601,33 @@ test('homestead 13: buy the plot, sow at 08:00, water after the midpoint, harves
   valid(h);
 });
 
-// Breaks: a container without the immune pair (sow stamps both lifecycles on whatever holds the
-// seed, so a seed put there would wither or ripen the plots); an item added later included.
-test('homestead sandbox: every container but the two plots is immune to growing and growing_croft', () => {
-  const w = fresh(WORLD);
-  const open = Object.entries(w.cartridge.items!)
-    .filter(([k, d]) => d.container && !k.endsWith('/plot') && !k.endsWith('/croft_plot'))
-    .filter(([, d]) => {
-      const keys = (d.immune ?? []).map((r) => r.key);
-      return !keys.includes('growing') || !keys.includes('growing_croft');
-    })
-    .map(([k]) => k);
+// Breaks: a container (one added later included) without the pair sow stamps on its holder.
+test('homestead sandbox: every container but the two plots is immune to both sow statuses', () => {
+  const open = Object.entries(fresh(WORLD).cartridge.items!).filter(
+    ([k, d]) =>
+      d.container &&
+      !/item\/(croft_)?plot$/.test(k) &&
+      ['growing', 'growing_croft'].some((s) => !d.immune?.some((r) => r.key === s)),
+  );
   assert.deepEqual(open, []);
 });
 
-// Breaks: the strongbox's immune pair (the seed in it would stamp growing there and, at expiry,
-// wither or ripen the plots).
+// Breaks: the strongbox's immune pair (growing on it would wither or ripen the plots).
 test('homestead sandbox: a seed put in the strongbox starts nothing', () => {
   const at = { ...sown.state.containers, [sown.body]: room(sown, 'tollhouse') };
   let w = { ...sown, state: { ...sown.state, containers: at } } as World;
   w = perform(perform(w, 'pick_strongbox').world, 'pick_strongbox').world;
   w = play(w, { type: 'open', target_id: id(w, 'item', 'strongbox') }).world;
   w = put(w, 'seed_01', 'strongbox').world;
-  assert.equal(where(w, id(w, 'item', 'seed_01')), id(w, 'item', 'strongbox'));
-  assert.deepEqual(
-    ['strongbox', 'plot', 'croft_plot'].flatMap((k) =>
-      ['growing', 'growing_croft', 'withered'].filter((s) => statusOn(w, k, s)),
-    ),
-    [],
+  const on = ['strongbox', 'plot', 'croft_plot'].flatMap((k) =>
+    ['growing', 'growing_croft', 'withered'].filter((s) => statusOn(w, k, s)),
   );
-  assert.equal(fact(w, 'sown_at', plot(w)), undefined);
-  assert.equal(croftTouched(wait(w, 28800 + DAY).world), false);
-  assert.equal(turnip(wait(w, 28800 + DAY).world), false);
+  const later = wait(w, 28800 + DAY).world;
+  assert.deepEqual(
+    [where(w, id(w, 'item', 'seed_01')), on, fact(w, 'sown_at', plot(w))],
+    [id(w, 'item', 'strongbox'), [], undefined],
+  );
+  assert.deepEqual([croftTouched(later), turnip(later)], [false, false]);
 });
 
 const hens = (w: World) =>
@@ -737,12 +730,8 @@ test('homestead sandbox: the croft site, cot, pool and hearth', () => {
   assert.equal(pennies(shop), 3);
   assert.deepEqual(shop.state.built, { [hut!]: { razed_at: shop.state.clock } });
   assert.deepEqual(offer(c, 'cook_stew_croft').reason, { code: 'invalid_state' });
-  const cook = walk(
-    choose(talk(walk(c, 'down', 'south', 'south'), 'cook').world, 'cooking').world,
-    'north',
-    'north',
-    'up',
-  );
+  const taught = choose(talk(walk(c, 'down', 'south', 'south'), 'cook').world, 'cooking').world;
+  const cook = walk(taught, 'north', 'north', 'up');
   assert.deepEqual(offer(cook, 'cook_stew_croft').reason, reason('craft.cook_stew_croft.needs'));
 });
 
@@ -750,18 +739,10 @@ test('homestead sandbox: the croft site, cot, pool and hearth', () => {
 test('homestead sandbox: only the pen owner puts into the nest', () => {
   const stick = (x: World) => take(walk(x, 'north', 'up'), 'stick_03');
   const tenant = stick(yard());
-  assert.equal(
-    refused(tenant, {
-      type: 'put',
-      item_id: id(tenant, 'item', 'stick_03'),
-      container_id: id(tenant, 'item', 'nest'),
-    }),
-    'permission_denied',
-  );
+  const denied = put(tenant, 'stick_03', 'nest').decision as { error?: { code: string } };
+  assert.equal(denied.error?.code, 'permission_denied');
   const owner = put(stick(play(yard(), farmer(yard(), 'buy_pen', 3)).world), 'stick_03', 'nest');
   assert.equal(owner.decision.kind, 'accepted', JSON.stringify(owner.decision));
-  assert.equal(
-    where(owner.world, id(owner.world, 'item', 'stick_03')),
-    id(owner.world, 'item', 'nest'),
-  );
+  const o = owner.world;
+  assert.equal(where(o, id(o, 'item', 'stick_03')), id(o, 'item', 'nest'));
 });
