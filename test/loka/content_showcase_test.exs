@@ -51,7 +51,8 @@ defmodule Loka.ContentShowcaseTest do
   @immune_holders ~w(crate hall_strongbox hoard_chest npc_corpse player_corpse strongbox
                      strongroom_chest yard_crate)
 
-  # those immune pairs; the Undercroft's bank and forge services, shop stock tables and locks
+  # those immune pairs; the Undercroft's bank and forge services, shop stock tables and locks;
+  # the guard's disposition (arrest needs 1.105, toolbox row 35; hostile alone is refused)
   @dropped_keys for(i <- @immune_holders, do: {"items/" <> i, "immune"}) ++
                   for(n <- ~w(clerk_a clerk_b smith), do: {"npcs/" <> n, "services"}) ++
                   for(n <- ~w(chandler yard_chandler), do: {"npcs/" <> n, "shop"}) ++
@@ -60,7 +61,12 @@ defmodule Loka.ContentShowcaseTest do
                       ~w(items/hoard_chest items/strongroom_chest items/strongroom_key items/yard_crate rooms/strongroom),
                     do: {f, "locks"}
                   ) ++
-                  [{"npcs/fence", "locks"}, {"npcs/vault", "locks"}, {"npcs/fence", "shop"}]
+                  [
+                    {"npcs/fence", "locks"},
+                    {"npcs/vault", "locks"},
+                    {"npcs/fence", "shop"},
+                    {"npcs/guard", "disposition"}
+                  ]
 
   # Nell and Bess's disposition.refuse lines need 1.104 (Book hostile refusal).
   defp unrefuse(n), do: update_in(n, ["disposition"], &Map.delete(&1, "refuse"))
@@ -73,8 +79,6 @@ defmodule Loka.ContentShowcaseTest do
         {"rooms/holding_lane.json", &Map.delete(&1, "site")},
         {"npcs/carpenter.json", &Map.delete(&1, "services")},
         {"rooms/holding_croft.json", &Map.delete(&1, "site")},
-        # The guard's disposition.arrest needs 1.105 (toolbox row 35); hostile alone is refused.
-        {"npcs/guard.json", &Map.delete(&1, "disposition")},
         {"facts.json", &update_in(&1, ["facts"], fn f -> Map.drop(f, @homestead_facts) end)}
       ] ++
         for({f, k} <- @dropped_keys, do: {f <> ".json", fn m -> Map.delete(m, k) end})
