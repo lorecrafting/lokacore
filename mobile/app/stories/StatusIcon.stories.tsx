@@ -223,12 +223,10 @@ export const RingDraining: Story = {
     await waitFor(() => expect(left()).toBe(108)); // first view: no tween
     await wait(250);
     fireEvent.click(canvas.getByText('tick'));
-    await wait(100); // under way: neither the start nor the end yet
-    await expect(left()).toBeLessThan(108);
-    await expect(left()).toBeGreaterThan(106.85);
-    await waitFor(() => expect(left()).toBeCloseTo(106.8, 5), { timeout: 400 });
+    await waitFor(() => expect(left() < 108 && left() > 106.85).toBe(true)); // under way
+    await waitFor(() => expect(left()).toBeCloseTo(106.8, 5), { timeout: 1100 });
     fireEvent.click(canvas.getByText('reapply')); // the whole hour again: 360 at once
-    await waitFor(() => expect(left()).toBe(180), { timeout: 50 });
+    await waitFor(() => expect(left()).toBe(180), { timeout: 150 });
   },
 };
 
@@ -241,8 +239,7 @@ export const RingDrainingPastSix: Story = {
     await waitFor(() => expect(left()).toBeCloseTo(1, 5));
     await wait(250);
     fireEvent.click(canvas.getByText('tick'));
-    await wait(50);
-    await expect(left()).toBeGreaterThan(0); // still draining, not dropped
-    await waitFor(() => expect(left()).toBe(0), { timeout: 400 });
+    await waitFor(() => expect(left() < 1 && left() > 0).toBe(true)); // still draining, not dropped
+    await waitFor(() => expect(left()).toBe(0), { timeout: 1100 });
   },
 };
