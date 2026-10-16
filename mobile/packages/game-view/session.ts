@@ -21,6 +21,8 @@ export type NarrationRecord = CommittedNarration & {
   detail_id?: string;
   pickup_name?: string; // confirmed corpse-content Take, routed from its saved receipt
 };
+/** One Chronicle entry (mechanics.md, Chronicle): a host projection, not a kernel contract. */
+export type ChronicleEntry = { day: number; record: NarrationRecord; milestone: boolean };
 
 /** What a press sends: an invocation without its id and actor, which the session adds. */
 export type Intent = Omit<ActionInvocation, 'invocation_id' | 'actor_id'>;
@@ -58,6 +60,8 @@ export interface Game {
   text(key: string): string | undefined;
   /** Committed narration for an exact command, or the latest on reopen (06 §43). */
   lastNarration(command_id?: string): NarrationRecord | undefined;
+  /** Every committed narration of this story, by day (mechanics.md, Chronicle). */
+  chronicle(): readonly ChronicleEntry[];
 }
 
 /**

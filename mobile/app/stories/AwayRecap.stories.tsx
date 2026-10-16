@@ -37,3 +37,19 @@ export const Open: Story = {
     await expect(canvas.getByRole('button', { name: `${LABEL.awayRecap}, hide` })).toBeVisible();
   },
 };
+
+// The Chronicle's day (book-ui.md, Chronicle details): a story point's line in body type, named as one.
+// Breaks: the milestone line keeps the log look or loses its ", story point" name; another line gains it.
+export const Milestone: Story = {
+  args: {
+    heading: 'Day 7',
+    open: true,
+    milestone: (line: string) => line === 'The poison fades from your blood.',
+  },
+  play: async ({ canvas }) => {
+    await expect(
+      canvas.getByLabelText('The poison fades from your blood., story point'),
+    ).toBeVisible();
+    await expect(canvas.queryByLabelText(/poison burns.*story point/)).toBeNull();
+  },
+};

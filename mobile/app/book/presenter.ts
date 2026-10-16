@@ -42,6 +42,7 @@ import {
   type Logs,
 } from './logs.ts';
 import { received } from './received.ts';
+import { days } from './chronicle.ts';
 import { grouped, holding, pressedAway, settle } from './recap.ts';
 
 function background(
@@ -210,6 +211,7 @@ function screen(game: Game, s: Logs, label: Say, text: Say, generation: number) 
     log: s.log,
     combatLog: s.combatLog,
     recap: s.recap && grouped(s.recap),
+    chronicle: () => days(game.chronicle(), view, text), // read when the Journal opens
     detail: (id: string) => s.details.get(id) ?? [],
     pending: s.status.kind === 'pending' || (s.status.kind === 'error' && game.pending()),
     catchingUp: s.status.kind === 'catching_up',

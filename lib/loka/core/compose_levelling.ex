@@ -1,5 +1,5 @@
 defmodule Loka.Core.ComposeLevelling do
-  @moduledoc "One character's levelling row (toolbox row 4); the TypeScript story rule owns its writers."
+  @moduledoc "One character's levelling row (toolbox row 4; experience may fall, row 47); the TypeScript story rule owns its writers."
 
   def set(op, row) do
     prior = row || %{"experience" => 0, "allocated" => %{}}
@@ -8,7 +8,7 @@ defmodule Loka.Core.ComposeLevelling do
     kept =
       Enum.all?(prior["allocated"], fn {a, n} -> Map.get(next["allocated"], a, 0) >= n end)
 
-    if row == op["expected"] and next["experience"] >= prior["experience"] and kept,
+    if row == op["expected"] and kept,
       do: {:ok, next},
       else: {:error, "precondition_failed"}
   end

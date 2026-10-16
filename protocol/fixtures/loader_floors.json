@@ -1431,5 +1431,15 @@
       "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
       "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
     }
+,
+    {
+      "floor": "1.109",
+      "below": "1.108",
+      "source": "cartridges/penalty_sampler",
+      "feature": "a world.death.penalty (row 47)",
+      "edits": [],
+      "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
+      "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
+    }
   ]
 }
