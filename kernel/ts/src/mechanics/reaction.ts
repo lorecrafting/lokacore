@@ -129,7 +129,7 @@ type Delivery = {
   ran?: boolean;
 };
 
-// size: allow 60, one ordered delivery lowers fact assignments, quest effects, suppression, spawn and replenish runs
+// size: allow 60, one ordered delivery lowers fact assignments, quest effects, suppression, spawn, replenish runs and lines
 export function sequence(
   world: World,
   root: CharacterId, // the root command's actor
@@ -179,9 +179,9 @@ export function sequence(
       const refill = replenishStep(then, step.key, group, steps, holders, roots); // hs-1
       if (typeof refill === 'string') return { kind: 'fault', code: refill };
       ops.push(...refill);
-    } else if (step.op === 'experience.grant') {
-      gained = saturate(gained + step.amount);
-    } else {
+    } else if (step.op === 'experience.grant') gained = saturate(gained + step.amount);
+    else if (step.op === 'narrate') narration.push({ key: step.text });
+    else {
       const assigned = assignment(world, actor, step, group, own, cause);
       if (assigned) ops.push(assigned);
       if (assigned && assigned.expected !== assigned.value) position++;

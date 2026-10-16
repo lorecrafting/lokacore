@@ -646,7 +646,7 @@ event's quest/outcome, and agree with its actor and scope; inconsistent evidence
 `precondition_failed`. The instance's actor owns the delivery. Its `when` is read on the proposal so far at the event's logical time.
 `apply` assigns facts at that actor's scope, activates a declared quest through
 `quest.activate {quest}`, or requests typed `quest.resolve {quest, outcome}` and
-`quest.fail {quest, outcome}` transitions, or ([row 41](#decay-toolbox-row-41)) moves the subject item to a room through `item.move {room}`, or ([row FD5](#witness-ledger-and-reaction-moves-toolbox-row-fd5-loka-kgd22)) moves an NPC through `npc.move {npc?, room?}`, or ([row 37a](#phased-world-events-toolbox-row-37a)) births one bundle of a population plan through `population.spawn {plan}`, or ([Homestead hs-1](#replenish-on-an-event-homestead-hs-1)) runs one move of a replenish entry through `replenish.run {key}`. Resolve and fail are legal on
+`quest.fail {quest, outcome}` transitions, or ([row 41](#decay-toolbox-row-41)) moves the subject item to a room through `item.move {room}`, or ([row FD5](#witness-ledger-and-reaction-moves-toolbox-row-fd5-loka-kgd22)) moves an NPC through `npc.move {npc?, room?}`, or ([row 37a](#phased-world-events-toolbox-row-37a)) births one bundle of a population plan through `population.spawn {plan}`, or ([Homestead hs-1](#replenish-on-an-event-homestead-hs-1)) runs one move of a replenish entry through `replenish.run {key}`, or ([Settle S3-1](#settle-s3-1-narrate-n1)) says an authored line through `narrate {text}`. Resolve and fail are legal on
 any trigger and act for each of the quest's holders: every player-scope instance of the quest
 that is active or objectives_complete, in character order; with no holder the step writes
 nothing. Resolve checks the quest objective per holder (an unmet objective faults
@@ -3635,3 +3635,16 @@ Homestead hs-8 (Beads `loka-x6t.31`); the Book form is in [book-ui.md](book-ui.m
   - Reused: the Give rule, its `item_acquired`, the Put-pair projection.
   - New: the shared `recipient` admission (moved from `rule.ts`), the Give pair listing.
   - Missing invariant: none.
+
+## Settle S3-1: narrate (N1)
+
+[Settle](../MECHANICS-TOOLBOX.md#ranked-toolbox) row S3, slice settle-1 (Beads `loka-mytp.1`): a reaction can say an authored line, so an arrival, a leaving or a raid tells the player what happened.
+
+- **Step.** The [reaction@1](#reaction1-kerneltssrcmechanicsreactionts) step `{op: "narrate", text}`, `text` a TextKey. `sequence` (`kernel/ts/src/mechanics/reaction.ts`) appends `{key: text}` to the delivery's narration after the lines of the steps before it; the proposal joins it to the receipt's narration like any delivery line. It writes no op, emits no event, reads no actor or subject and schedules nothing. A rule with `after` may carry it: the fired rule says the line in the receipt of the advance that reaches its due time ([FD1](#delayed-reactions-toolbox-row-fd1)), not before.
+- **Opt-in.** `narrate` needs `kernel_api` 1.103 (KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least`, both kernels). A `text` not in the text catalog is UNRESOLVED_REFERENCE at the step's `text` (both kernels). Chapter 1 declares none.
+- **Book.** No new element: the line is a Log line in the World log, or in the Away recap block when an advance says it.
+- **Known limit.** The line goes to the delivery's character wherever they stand, not to the room of the event; content gates it with `when` when it is room-bound.
+- **Traps.** [Trap 1](../MECHANICS-TOOLBOX.md#traps) holds: the step reads no clock. No new op, event, job kind or save row.
+- **Realm seams.** 1 Actor met (no actor read). 2 Reactions met (no subject read). 3 Credit n/a. 4 Time met (a delayed line is said at its job's logical time). 5 Scope met (the line goes to the delivery's character, [R14](#reaction1-kerneltssrcmechanicsreactionts)). 6 Speech met (an authored TextKey; speech@1 unchanged). 7 to 9 n/a.
+- **Sampler.** `cartridges/settle_sampler`: `square` (entry) and `road` west of it, calendar start 600; `reactions/arrival_line` says `settle.arrival_line` when the character enters `road`.
+- **Composition record** ([architecture](architecture.md#building-mechanics-by-composition)). Consumer: settle-3 (arrival), settle-4 (leaving), settle-6 (raid). Reads: the rule's step only. Writes: none (the line is receipt narration, no op). Events, jobs and save rows: none. Reused: the `sequence` narration channel, `accepted`, the proposal's delivery-line join, `KERNEL_API_RANGE_INVALID`. New: the `narrate` step, its 1.103 floor, the text check in both loaders. Missing invariant: none.

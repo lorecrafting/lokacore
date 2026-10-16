@@ -22,9 +22,9 @@ defmodule Loka.Content.Reactions do
   @spec check(map() | nil, map(), {term(), map() | :unknown} | nil, [map()]) :: [map()]
   def check(m, _, v2, _) when m == nil or v2 == nil, do: []
 
-  def check(m, defs, _, registry) do
+  def check(m, defs, {_, text}, registry) do
     caps = m["requires"]["capabilities"]
-    ctx = %{m: m, defs: defs, kinds: {caps, owners(registry, ["definitions"])}}
+    ctx = %{m: m, defs: defs, text: text, kinds: {caps, owners(registry, ["definitions"])}}
     ctx = Map.put(ctx, :events, {caps, owners(registry, ["events"])})
     Enum.flat_map(all(defs), &rule(&1, ctx))
   end
@@ -106,7 +106,8 @@ defmodule Loka.Content.Reactions do
     "item.move" => 77,
     "population.spawn" => 84,
     "npc.move" => 95,
-    "replenish.run" => 101
+    "replenish.run" => 101,
+    "narrate" => 103
   }
 
   # Each trigger event's kernel_api minor: spoken 1.48 (G9), status_applied 1.53 (G3), asked 1.96 (FD7).
@@ -182,6 +183,13 @@ defmodule Loka.Content.Reactions do
 
   # Checked with world.levelling (Loka.Content.Levelling).
   defp consequence(_, {%{"op" => "experience.grant"}, _}, _, _), do: []
+
+  # Settle S3-1: a narrate line's text key is in the catalog (:unknown when the text failed).
+  defp consequence(rel, {%{"op" => "narrate", "text" => key}, i}, _, ctx) do
+    if ctx.text == :unknown or is_map_key(ctx.text, key),
+      do: [],
+      else: [diag("UNRESOLVED_REFERENCE", at(rel, ["apply", i, "text"]), %{"target" => key})]
+  end
 
   defp consequence(rel, {%{"op" => "status.apply"} = s, i}, on, ctx),
     do:

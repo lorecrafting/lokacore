@@ -1,4 +1,4 @@
-// size: allow 551, the AB brief places the reaction witness here; new witnesses get their own module
+// size: allow 552, the AB brief places the reaction witness here (Settle S3-1 narrate: none); new witnesses get their own module
 import { gameView, type World } from '../src/index.ts';
 import { repaired } from './e1_repair.ts';
 import { closed } from './e1_order.ts';
@@ -433,8 +433,9 @@ export function reactionWitnesses(before: World, after: World, decision: Decisio
     if (step.op === 'experience.grant')
       return ops.find((o) => o.op === 'levelling.set' && o.character_id === actor);
     if (step.op === 'barrier.set') return barrierOp(ops, step);
-    if (step.op === 'item.move' || step.op === 'npc.move' || step.op === 'replenish.run')
-      return undefined; // rows 41, FD5, Homestead hs-1: no witness yet
+    const { op } = step; // rows 41, FD5, hs-1: no witness yet; Settle S3-1 narrate writes no op
+    if (op === 'item.move' || op === 'npc.move' || op === 'replenish.run' || op === 'narrate')
+      return;
     const prior = before.state.population_plans?.[key(step.plan)];
     const next = after.state.population_plans?.[key(step.plan)];
     return ops.find(

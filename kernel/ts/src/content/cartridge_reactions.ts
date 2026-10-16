@@ -40,6 +40,7 @@ const FLOORS: Record<string, number> = {
   'population.spawn': 84, // row 37a (phased world events)
   'npc.move': 95, // row FD5 (loka-kgd.22)
   'replenish.run': 101, // Homestead hs-1
+  narrate: 103, // Settle S3-1
 };
 
 // The definitions an item.move (row 41), population.spawn (row 37a), npc.move (row FD5) or
@@ -73,6 +74,7 @@ export const uses = (c: Obj) =>
         'item.move',
         'population.spawn',
         'replenish.run',
+        'narrate',
       ].includes(s.op)
         ? []
         : [
@@ -106,8 +108,8 @@ const apiFloor = (r: Obj): number =>
     ...r.apply.map((s: Obj) => (s.tag ? 56 : s.co_present ? 50 : (FLOORS[s.op] ?? 0))),
   );
 
-// size: allow 53, typed suppression, status and move (row FD5; hs-1 repeated run) references stay in one ordered check
-export function reactions(c: Obj, { named, typedValue }: Checks): Diagnostic[] {
+// size: allow 55, typed suppression, status, move (row FD5; hs-1 repeated run) and line (S3-1) references stay in one ordered check
+export function reactions(c: Obj, { named, typedValue, text }: Checks): Diagnostic[] {
   const out: Diagnostic[] = [];
   const [major, minor] = c.manifest.requires.kernel_api.at_least.split('.').map(Number);
   for (const [r, at] of each(c)) {
@@ -149,6 +151,8 @@ export function reactions(c: Obj, { named, typedValue }: Checks): Diagnostic[] {
         if (s.npc && c.npcs?.[refString(s.npc)]?.spawn_template)
           // row FD5: no instance to move
           out.push(diag('SCHEMA_VIOLATION', `${at}.apply[${i}].npc`, { error: 'invalid_value' }));
+      } else if (s.op === 'narrate') {
+        text(s, ['text'], `${at}.apply[${i}]`); // Settle S3-1
       } else if (!['status.apply', 'status.cure', 'experience.grant'].includes(s.op)) {
         // status steps, experience.grant, fact.adjust's int: with their declarations (cartridge_standing.ts).
         named(s.fact, 'fact', `${at}.apply[${i}].fact`);

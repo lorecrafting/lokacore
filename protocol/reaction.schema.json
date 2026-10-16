@@ -742,6 +742,16 @@
                 "additionalProperties": false
               },
               {
+                "description": "Settle S3-1 (kernel_api at least 1.103): appends the authored line text to the delivery's narration, after the lines of the steps before it; no op, no event, no actor or subject read. Allowed with after: a fired rule's line joins its job's lines at the due time.",
+                "type": "object",
+                "properties": {
+                  "op": { "const": "narrate" },
+                  "text": { "$ref": "text.schema.json#/$defs/TextKey" }
+                },
+                "required": ["op", "text"],
+                "additionalProperties": false
+              },
+              {
                 "description": "Toolbox row FD1 (kernel_api at least 1.90): writes the delivery's logical time into an int fact (no maximum, minimum absent or at most 0) at the subject a fact.assign step writes at, as a fact.assign.",
                 "type": "object",
                 "properties": {
