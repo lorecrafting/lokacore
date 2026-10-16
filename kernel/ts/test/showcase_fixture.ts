@@ -339,11 +339,15 @@ export function homestead(c: any) {
     'withdraw_b',
   ])
     delete c.services[ref('service', k)];
-  // The law district: theft, hide, NPC locks, stolen offers and the fine.
+  // The law district: theft, hide, NPC locks, stolen offers, the fine, the jail talk and the
+  // guard's arrest (1.105; hostile alone is refused).
   delete c.world.theft;
   for (const k of ['fence', 'vault']) delete c.npcs[ref('npc', k)].locks;
   delete c.npcs[ref('npc', 'fence')].shop;
   delete c.statuses[ref('status', 'hidden')];
   for (const k of ['hide', 'yard_hide']) delete c.reactions[ref('reaction', k)];
-  delete c.dialogues[ref('dialogue', 'clerk_fine')];
+  for (const k of ['clerk_fine', 'jailer_broke', 'jailer_talk'])
+    delete c.dialogues[ref('dialogue', k)];
+  delete c.reactions[ref('reaction', 'charge')];
+  delete c.npcs[ref('npc', 'guard')].disposition;
 }

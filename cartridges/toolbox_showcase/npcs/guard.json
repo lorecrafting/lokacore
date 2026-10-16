@@ -32,7 +32,10 @@
         "equals": true
       }
     },
-    "engage": "npc.guard.engage"
+    "arrest": {
+      "to": "cell",
+      "narration": "npc.guard.arrest"
+    }
   },
   "resistances": {
     "physical": 100

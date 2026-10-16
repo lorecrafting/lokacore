@@ -1,0 +1,60 @@
+{
+  "npc": "jailer",
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": [
+        {
+          "op": "fact_compare",
+          "fact": "wanted",
+          "equals": true
+        },
+        {
+          "op": "not",
+          "item": {
+            "op": "resource_compare",
+            "resource": "pennies",
+            "at_least": 3
+          }
+        }
+      ]
+    }
+  },
+  "prompt": "dialogue.jailer.prompt",
+  "roles": {
+    "jailer": {
+      "role": "npc",
+      "npc": "jailer"
+    }
+  },
+  "choices": {
+    "pay": {
+      "label": "dialogue.jailer.pay",
+      "narration": "narration.jailer.paid",
+      "lesson_payment": {
+        "to": "jailer",
+        "resource": "pennies",
+        "amount": 3
+      },
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "wanted",
+          "value": false
+        }
+      ]
+    },
+    "work_off": {
+      "label": "dialogue.jailer.work_off",
+      "narration": "narration.jailer.work_off",
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "wanted",
+          "value": false
+        }
+      ]
+    }
+  }
+}

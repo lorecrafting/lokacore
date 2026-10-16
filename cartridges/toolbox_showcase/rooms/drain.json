@@ -1,0 +1,13 @@
+{
+  "title": "room.drain.title",
+  "description": "room.drain.description",
+  "exits": {
+    "up": {
+      "to": "cell",
+      "barrier": "grate"
+    },
+    "south": {
+      "to": "counting_house"
+    }
+  }
+}
