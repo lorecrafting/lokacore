@@ -1,5 +1,5 @@
 {
-  "description": "Hand-written toolbox row 4 composition answers: one levelling row per character, keyed by character id; it composes only when the stored row equals expected (null when absent) and neither the experience nor any allocated count falls; two writes in one proposal chain. No kernel supplies expected values.",
+  "description": "Hand-written toolbox row 4 composition answers: one levelling row per character, keyed by character id; it composes only when the stored row equals expected (null when absent) and no allocated count falls (experience may fall: a death's loss, toolbox row 47); two writes in one proposal chain. No kernel supplies expected values.",
   "cases": [
     {
       "id": "first-write-from-absent",
@@ -201,7 +201,7 @@
       }
     },
     {
-      "id": "experience-falls-refused",
+      "id": "experience-falls-composes",
       "state": {
         "clock": 100,
         "levelling": {
@@ -227,14 +227,18 @@
         }
       ],
       "expected": {
-        "fault": {
-          "kind": "fault",
-          "code": "precondition_failed",
-          "target": {
-            "kind": "levelling",
-            "character_id": "a0000000-0000-4000-8000-000000000001"
+        "changes": [
+          {
+            "target": {
+              "kind": "levelling",
+              "character_id": "a0000000-0000-4000-8000-000000000001"
+            },
+            "value": {
+              "experience": 10,
+              "allocated": {}
+            }
           }
-        }
+        ]
       }
     },
     {

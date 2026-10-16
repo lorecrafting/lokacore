@@ -28,7 +28,12 @@ export function narrationLines(
 export const worldLines = (last: NarrationRecord, view: GameView, text: Say) =>
   [...rendered(last, view, text, false), last.cue ? text(last.cue.key) : ''].filter(Boolean);
 
-const rendered = (last: NarrationRecord | undefined, view: GameView, text: Say, combat: boolean) =>
+export const rendered = (
+  last: NarrationRecord | undefined,
+  view: GameView,
+  text: Say,
+  combat: boolean,
+) =>
   withoutHeading(
     (last?.lines ?? []).filter((_, i) => !!last?.combat_lines?.includes(i) === combat),
     view,

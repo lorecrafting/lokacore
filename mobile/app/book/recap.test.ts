@@ -59,6 +59,10 @@ test('a three-hour absence opens the page with one collapsed recap, counts by li
     'Maud leaves. (6 times)',
     'Maud arrives. (6 times)',
   ]);
+  // The recap's lines are in ink, unlike its dim heading, and never a Chronicle story point.
+  const line = (s: string) => b.draw().find((x) => x.type === 'Text' && x.props.children === s);
+  assert.notEqual(line('You shiver.').props.style.color, line(LABEL.awayRecap).props.style.color);
+  assert.equal(line('You shiver.').props.accessibilityLabel, undefined);
   b.map();
   b.tap('Go north');
   assert.equal(count(b.text(), LABEL.awayRecap), 0);
