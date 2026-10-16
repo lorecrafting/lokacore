@@ -10,6 +10,7 @@ import type { World } from '../src/runtime/decision.ts';
 import { pending } from '../src/mechanics/dialogue/shared.ts';
 import { shelf } from '../src/mechanics/commerce/shared.ts';
 import { engaged } from '../src/mechanics/combat/shared.ts';
+import { barrierState } from '../src/mechanics/lookups.ts';
 import { describeEntity } from '../src/mechanics/description_variant/rule.ts';
 import { level } from '../src/mechanics/skills.ts';
 import {
@@ -63,7 +64,8 @@ test('social 1: the Low Wardle sign reads; bread from a wary Nell costs 4', () =
 
 // Breaks: help or wrong adjusts the wrong fact or amount, the standing does not clamp at -2, the
 // discount or the hostile refusal ignores the village standing, or the Warden never engages,
-// or the player's waited-out hits kill him and lose the toll gate.
+// the gate stays open on standing -2 alone, or the player's waited-out hits kill him and lose
+// the toll gate.
 test('social 2-3: help makes Nell friendly (bread 2); wrong twice makes her hostile and the Warden engage', () => {
   let w = green();
   w = play(w, {
@@ -97,6 +99,24 @@ test('social 2-3: help makes Nell friendly (bread 2); wrong twice makes her host
   assert.equal(outcome(passed), 'reason');
   const through = go(passed.world, 'east').world;
   assert.equal(where(through, through.body), room(through, 'tollhouse'));
+  // Standing back at -2 (he still knows nothing of the strongbox) shuts the lifted gate again.
+  const toll = {
+    cartridge_id: 'toolbox_showcase',
+    cartridge_version: '0.0.1',
+    kind: 'barrier',
+    key: 'toll_gate',
+  };
+  const back = go(go(through, 'west').world, 'west').world;
+  assert.equal(barrierState(back, toll as never), 'open');
+  const again = go(leave(say(back, 'reeve', 'wrong').world), 'east').world;
+  assert.deepEqual(
+    [
+      fact(again, 'wardle_standing'),
+      fact(again, 'warden_knows'),
+      barrierState(again, toll as never),
+    ],
+    [-2, undefined, 'closed'],
+  );
 });
 
 // Breaks: the gift reaction writes the giver's row or a shared one, or the Warden's hostility

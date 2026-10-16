@@ -12,6 +12,7 @@ import { pending } from '../src/mechanics/dialogue/shared.ts';
 import { engaged } from '../src/mechanics/combat/shared.ts';
 import { describeEntity } from '../src/mechanics/description_variant/rule.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
+import { validate } from '../src/foundation/validate.ts';
 import { activeStatuses, statusKey } from '../src/mechanics/status/shared.ts';
 import {
   attribute,
@@ -134,13 +135,14 @@ test('combat 2: the lesson gives the blade and the sword; say steel; the bounty'
   w = play(w, { type: 'close_choice', continuation_id }).world;
 });
 
-// Breaks: a say reaches Gil through the wall, a shout does not, a shout carries two exits (from
+// Breaks: the Book offers no "ware" chip, a say reaches Gil through the wall, a shout does not, a shout carries two exits (from
 // the inn), or Gil's description ignores the fact.
 test('combat 3: a shout of "ware" in the yard warns Gil; a say or a shout from the inn does not', () => {
   const fromInn = play(go(w, 'east').world, { type: 'shout', word: 'ware' }).world;
   assert.notEqual(fact(fromInn, 'gil_warned'), true);
   w = play(w, { type: 'say', word: 'ware' }).world;
   assert.notEqual(fact(w, 'gil_warned'), true);
+  assert.deepEqual(gameView(w).phrases, ['ware']); // the Book's Shout chip
   w = play(w, { type: 'shout', word: 'ware' }).world;
   assert.equal(fact(w, 'gil_warned'), true);
   w = go(w, 'west').world;
@@ -363,6 +365,33 @@ test('combat 11: the raider falls before the bounty is taken; the fight ends nor
   assert.equal(talk(go(s, 'east').world, 'aldous').opened, 'aldous_lesson');
 });
 
+// Breaks (loka-y6yg.8): Aldous's Talk card lists two Talk actions, the lesson and the bounty talk,
+// at once (also when the raider dies before the lesson); or after the raider dies the bounty talk is still offered.
+test('combat 11b: Aldous offers exactly one Talk before the lesson, after it, and after the raider either way', () => {
+  const talks = (w: World) => {
+    const view = gameView(w);
+    assert.deepEqual(validate('GameView', view), []);
+    const aldous = view.entities.find((e) => e.name === 'npc.aldous.short')!;
+    return aldous.actions.filter((a) => a.label === 'action.talk' && a.available).length;
+  };
+  let s = go(fresh(CTX), 'west').world;
+  assert.equal(talks(s), 1);
+  s = choose(talk(s, 'aldous').world, 'learn').world;
+  assert.equal(talks(s), 1);
+  s = play(s, { type: 'shout', word: 'ware' }).world;
+  s = attack(go(s, 'west').world, 'raider');
+  s = wait(s, s.state.clock + 450).world;
+  assert.equal(fact(s, 'raider_slain'), true);
+  assert.equal(talks(go(s, 'east').world), 1);
+  // The raider dies before the lesson: still one Talk, the lesson.
+  s = attack(
+    go(play(go(fresh(CTX), 'west').world, { type: 'shout', word: 'ware' }).world, 'west').world,
+    'raider',
+  );
+  s = go(wait(s, s.state.clock + 450).world, 'east').world;
+  assert.equal(talks(s), 1);
+});
+
 // Breaks: the tilt yard's pack plan is missing or homed elsewhere, or its Attack does not admit
 // the second goblin (Gil stays in the gate yard and does not join); or (loka-kgd.79) boar_gore
 // fires on a goblin's hit while the tilt boar is near, so the player bleeds and is gored.
@@ -386,6 +415,7 @@ test('loader: the attacker filter needs API 1.58 and an authored NPC', () => {
     c.manifest.requires.kernel_api.at_least = api;
     c.reactions[ref('reaction', 'boar_gore')].on.attacker = { ...C, kind: 'npc', key };
     delete c.statuses[ref('status', 'gored')].kind; // 1.102 (loka-x6t.64)
+    delete c.speech; // phrases: 1.98
     homestead(c);
   };
   const at = `.cartridge.reactions["${ref('reaction', 'boar_gore')}"].on.attacker`;

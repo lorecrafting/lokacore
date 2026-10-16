@@ -5,6 +5,7 @@ import type { World } from '../src/runtime/decision.ts';
 import { decode } from '../src/foundation/canonical.ts';
 import { engaged } from '../src/mechanics/combat/shared.ts';
 import { describeEntity } from '../src/mechanics/description_variant/rule.ts';
+import { barrierState } from '../src/mechanics/lookups.ts';
 import {
   choose,
   DAY,
@@ -155,6 +156,36 @@ test('social 18: from 13:00 day 2: the empty gate, the ledger mend, and the gree
   const fled = play(c.world, { type: 'flee' }).world;
   assert.notEqual(where(fled, fled.body), room(fled, 'village_green'));
   assert.equal(engaged(fled, fled.body), undefined);
+});
+
+// Breaks (loka-y6yg.16): the gate he opened stays open when he turns hostile, so fleeing him at the
+// gate lands in the tollhouse; or the gate shuts on a player he trusts.
+test('social 18b: a hostile Warden shuts the toll gate; fleeing him lands on the green', () => {
+  const toll = {
+    cartridge_id: 'toolbox_showcase',
+    cartridge_version: '0.0.1',
+    kind: 'barrier',
+    key: 'toll_gate',
+  };
+  const gate = (w: World) => barrierState(w, toll as never);
+  const late = wait(noon, DAY + 14 * HOUR + 1800).world;
+  assert.equal(gate(late), 'open');
+  const east = go(late, 'east').world;
+  assert.equal(engaged(east, east.body)?.row.npc_id, npc(east, 'warden'));
+  assert.equal(gate(east), 'closed');
+  assert.equal(fact(east, 'warden_lets_pass'), false); // else a plain Open reopens it once he walks off
+  const fled = play(east, { type: 'flee' }).world;
+  assert.deepEqual(
+    [where(fled, fled.body), engaged(fled, fled.body)],
+    [room(fled, 'village_green'), undefined],
+  );
+  const gift = play(noon, {
+    type: 'give',
+    item_id: id(noon, 'item', 'mill_ledger'),
+    recipient_id: npc(noon, 'warden'),
+  }).world;
+  const trusted = go(wait(gift, DAY + 14 * HOUR + 1800).world, 'east').world;
+  assert.deepEqual([engaged(trusted, trusted.body), gate(trusted)], [undefined, 'open']);
 });
 
 /** 09:00 day 1 in Wat's hut; the letter, if `letter`, taken before the accept (standing 1 after help). */
