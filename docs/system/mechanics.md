@@ -3614,7 +3614,7 @@ Homestead hs-7 (Beads `loka-kgd.108.5`, `loka-kgd.70`): liked and disliked gifts
   8. Not applicable.
   9. Not applicable.
 - **Opt-in.** A service declares `price` 0 or an `output` without `ready_after`. Chapter 1 declares none.
-- **Book.** No change: the offer shows the existing price note; Give is not yet offered in the Book (Beads `loka-x6t.31`), so gifts are kernel-only until hs-8.
+- **Book.** No change: the offer shows the existing price note; Give is offered in the Book since hs-8 (Beads `loka-x6t.31`).
 - **Traps.** Trap 8 checked (tiers are lines, gates only in dialogue); no other applies: no new job, event, op or save row.
 - **Known limits.**
   - The entitlement stays true after a barter, so the trade completes once per character and a retry reads `service.order_open`.

@@ -1,0 +1,24 @@
+{
+  "on": {
+    "event": "status_expired",
+    "status": "growing_croft"
+  },
+  "when": {
+    "policy_version": 1,
+    "root": {
+      "op": "not",
+      "item": {
+        "op": "time_since",
+        "fact": "watered_at",
+        "item": "croft_plot",
+        "at_least": 43200
+      }
+    }
+  },
+  "apply": [
+    {
+      "op": "replenish.run",
+      "key": "crop_croft"
+    }
+  ]
+}

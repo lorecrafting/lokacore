@@ -1,0 +1,18 @@
+{
+  "keywords": [
+    "sack"
+  ],
+  "short": "item.sack.short",
+  "room_line": "item.sack.room",
+  "description": "item.sack.description",
+  "mass_grams": 20000,
+  "location": {
+    "in": "room",
+    "room": "farm_yard"
+  },
+  "container": true,
+  "immune": [
+    "growing",
+    "growing_croft"
+  ]
+}

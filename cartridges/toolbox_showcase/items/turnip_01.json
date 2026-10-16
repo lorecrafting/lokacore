@@ -1,0 +1,13 @@
+{
+  "keywords": [
+    "turnip"
+  ],
+  "short": "item.turnip_01.short",
+  "room_line": "item.turnip_01.room",
+  "description": "item.turnip_01.description",
+  "mass_grams": 200,
+  "location": {
+    "in": "room",
+    "room": "larder"
+  }
+}

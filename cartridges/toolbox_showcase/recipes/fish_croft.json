@@ -1,0 +1,53 @@
+{
+  "label": "action.fish",
+  "aliases": [
+    "fish"
+  ],
+  "target": {
+    "kind": "detail",
+    "room": "holding_croft",
+    "detail": "croft_pool"
+  },
+  "priority": 5,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "any",
+      "items": [
+        {
+          "op": "has_item",
+          "item": "rod"
+        },
+        {
+          "op": "has_item",
+          "item": "rod_2"
+        }
+      ]
+    }
+  },
+  "check": {
+    "key": "fish_croft",
+    "kind": "luck",
+    "chance": 50
+  },
+  "cooldown": 600,
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "event.emit",
+          "event": "bite_croft"
+        }
+      ],
+      "narration": {
+        "actor": "narration.fish.bite"
+      }
+    },
+    "failure": {
+      "sequence": [],
+      "narration": {
+        "actor": "narration.fish.miss"
+      }
+    }
+  }
+}

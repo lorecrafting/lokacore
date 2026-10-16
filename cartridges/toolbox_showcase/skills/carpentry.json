@@ -1,0 +1,23 @@
+{
+  "label": "skill.carpentry.label",
+  "requirement": "skill.carpentry.requirement",
+  "qualification": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": []
+    }
+  },
+  "prerequisite": {
+    "policy_version": 1,
+    "root": {
+      "op": "skill_compare",
+      "skill": "woodcutting",
+      "at_least": 2
+    }
+  },
+  "growth": [
+    2
+  ],
+  "profession": "profession.forestry"
+}

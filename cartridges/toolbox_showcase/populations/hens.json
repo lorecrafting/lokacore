@@ -1,0 +1,34 @@
+{
+  "bundle": "hens",
+  "home": "holding_croft",
+  "area": [
+    "holding_croft",
+    "holding_lane"
+  ],
+  "cap": 4,
+  "floor": 2,
+  "day_target": 2,
+  "night_target": 4,
+  "night_start": 20,
+  "night_end": 6,
+  "wander_interval": 3600,
+  "replacement_delay": 86400,
+  "birth_when": {
+    "policy_version": 1,
+    "root": {
+      "op": "population_count",
+      "plan": "hens",
+      "at_least": 2
+    }
+  },
+  "wander_when": {
+    "policy_version": 1,
+    "root": {
+      "op": "not",
+      "item": {
+        "op": "all",
+        "items": []
+      }
+    }
+  }
+}

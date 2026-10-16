@@ -20,6 +20,7 @@ import {
   fresh,
   go,
   id,
+  homestead,
   play,
   pool,
   ref,
@@ -415,6 +416,7 @@ test('loader: the attacker filter needs API 1.58 and an authored NPC', () => {
     c.reactions[ref('reaction', 'boar_gore')].on.attacker = { ...C, kind: 'npc', key };
     delete c.statuses[ref('status', 'gored')].kind; // 1.102 (loka-x6t.64)
     delete c.speech; // phrases: 1.98
+    homestead(c);
   };
   const at = `.cartridge.reactions["${ref('reaction', 'boar_gore')}"].on.attacker`;
   assert.equal(reload(gore('1.58', 'boar')), 'ok');

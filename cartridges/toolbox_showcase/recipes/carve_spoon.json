@@ -1,0 +1,71 @@
+{
+  "label": "actions.carve_spoon",
+  "aliases": [
+    "carve"
+  ],
+  "target": {
+    "kind": "detail",
+    "room": "carpenter_shop",
+    "detail": "saw_bench"
+  },
+  "priority": 5,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "skill_compare",
+      "skill": "whittling",
+      "at_least": 1
+    }
+  },
+  "check": {
+    "key": "carve_spoon",
+    "kind": "opposed",
+    "skill": "whittling"
+  },
+  "craft": {
+    "consume": {
+      "items": [
+        "stick_01",
+        "stick_02",
+        "stick_03",
+        "stick_04"
+      ],
+      "quantity": 1,
+      "to": {
+        "in": "room",
+        "room": "midden"
+      },
+      "reason": "craft.carve_spoon.needs"
+    },
+    "yield": {
+      "items": [
+        "spoon_01",
+        "spoon_02"
+      ],
+      "from": {
+        "in": "room",
+        "room": "woodpile"
+      }
+    }
+  },
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "spoon_carved",
+          "value": true
+        }
+      ],
+      "narration": {
+        "actor": "narration.carve_spoon.success"
+      }
+    },
+    "failure": {
+      "sequence": [],
+      "narration": {
+        "actor": "narration.carve_spoon.failure"
+      }
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "keywords": [
+    "egg"
+  ],
+  "short": "item.egg_01.short",
+  "room_line": "item.egg_01.room",
+  "description": "item.egg_01.description",
+  "mass_grams": 60,
+  "location": {
+    "in": "room",
+    "room": "larder"
+  },
+  "edible": {
+    "resource": "mv",
+    "amount": 2,
+    "label": "action.eat",
+    "narration": "narration.eat_egg"
+  }
+}

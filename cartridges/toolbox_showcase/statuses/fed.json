@@ -1,0 +1,17 @@
+{
+  "duration": 3600,
+  "tick_every": 1800,
+  "resource": "mv",
+  "modifies": [
+    {
+      "attribute": "str",
+      "modifier": 1
+    }
+  ],
+  "label": "condition.fed",
+  "narration": {
+    "applied": "narration.fed.applied",
+    "tick": "narration.fed.tick",
+    "expired": "narration.fed.expired"
+  }
+}

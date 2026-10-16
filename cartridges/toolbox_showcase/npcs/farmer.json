@@ -1,0 +1,43 @@
+{
+  "keywords": [
+    "farmer"
+  ],
+  "short": "npc.farmer.short",
+  "room_line": "npc.farmer.room",
+  "description": "npc.farmer.description",
+  "room": "farm_yard",
+  "resource_starts": {
+    "pennies": 0
+  },
+  "services": [
+    "knife_for_pelts",
+    "buy_plot",
+    "buy_pen"
+  ],
+  "description_variants": [
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "fact_compare",
+          "fact": "regard",
+          "equals": 1,
+          "subject": "target"
+        }
+      },
+      "description": "npc.farmer.description_warm"
+    },
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "fact_compare",
+          "fact": "regard",
+          "equals": -1,
+          "subject": "target"
+        }
+      },
+      "description": "npc.farmer.description_cold"
+    }
+  ]
+}

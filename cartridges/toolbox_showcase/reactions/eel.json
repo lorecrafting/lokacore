@@ -1,0 +1,23 @@
+{
+  "on": {
+    "event": "custom_event",
+    "custom": "bite"
+  },
+  "when": {
+    "policy_version": 1,
+    "root": {
+      "op": "not",
+      "item": {
+        "op": "time_window",
+        "from": 6,
+        "to": 18
+      }
+    }
+  },
+  "apply": [
+    {
+      "op": "replenish.run",
+      "key": "eel"
+    }
+  ]
+}

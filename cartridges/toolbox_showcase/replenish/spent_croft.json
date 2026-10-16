@@ -1,0 +1,16 @@
+{
+  "items": [
+    "seed_01"
+  ],
+  "from": {
+    "in": "item",
+    "item": "croft_plot"
+  },
+  "to": {
+    "in": "room",
+    "room": "midden"
+  },
+  "cap": 1,
+  "count": 1,
+  "every": 1000000000
+}

@@ -1,0 +1,12 @@
+{
+  "on": {
+    "event": "status_expired",
+    "status": "spoiling"
+  },
+  "apply": [
+    {
+      "op": "item.move",
+      "room": "midden"
+    }
+  ]
+}

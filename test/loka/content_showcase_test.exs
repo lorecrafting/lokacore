@@ -4,6 +4,67 @@ defmodule Loka.ContentShowcaseTest do
   use ExUnit.Case, async: true
   @kat JSON.decode!(File.read!("protocol/fixtures/toolbox_showcase_hash.json"))
 
+  # The Homestead (crafts 1.101; build, raze, item_present, profession, hidden: 1.102) dropped
+  # for the older-floor rows; protocol/fixtures/loader_floors.json case 18 drops the same.
+  @homestead_files ~w(blueprints/hut_plain blueprints/hut_timbered actions/raise_hut_plain
+                    actions/raze_hut services/raise_hut_plain services/raze_hut recipes/chop
+                    recipes/saw recipes/carve_spoon recipes/raise_timbered_hut reactions/cot_rest
+                    actions/barter actions/buy_pen actions/buy_plot actions/claim
+                    actions/commission actions/raise_croft_hut actions/raze_croft_hut
+                    dialogues/cook_lesson items/cot_2 items/croft_plot items/dead_rat items/eel_01
+                    items/egg_01 items/egg_02 items/egg_03 items/egg_04 items/egg_05 items/egg_06
+                    items/feast_01 items/feather items/grain_01 items/holding_apple items/knife_01
+                    items/nest items/pelt_01 items/pelt_02 items/pelt_03 items/plot
+                    items/pond_water items/rod items/rod_2 items/sack items/salmon_01
+                    items/seed_01 items/stew_hearty_01 items/stew_hearty_02 items/stew_hearty_03
+                    items/stew_plain_01 items/stick_03 items/stick_04 items/trough items/trout_01
+                    items/trout_02 items/turnip_01 items/turnip_02 items/turnip_03
+                    items/watering_can npcs/cook npcs/farmer npcs/hen population_bundles/hens
+                    populations/hens reactions/croft_bite reactions/croft_cot_rest reactions/eel
+                    reactions/farmer_hates_rat reactions/farmer_likes_apple reactions/feed
+                    reactions/lay reactions/ripen_croft reactions/ripen_plot reactions/salmon
+                    reactions/sow reactions/spoil reactions/take_eel_01 reactions/take_salmon_01
+                    reactions/take_trout_01 reactions/take_trout_02 reactions/trout
+                    reactions/water_croft reactions/water_plot reactions/wither_croft
+                    reactions/wither_plot recipes/cook_feast recipes/cook_stew
+                    recipes/cook_stew_croft recipes/fish recipes/fish_croft recipes/water_croft
+                    recipes/water_plot replenish/croft_fish replenish/crop_croft
+                    replenish/crop_plot replenish/eel replenish/eggs replenish/grain_return
+                    replenish/restock replenish/salmon replenish/seed_return replenish/spent_croft
+                    replenish/spent_grain replenish/spent_plot replenish/trout services/buy_pen
+                    services/buy_plot services/claim services/knife_for_pelts
+                    services/raise_croft_hut services/raze_croft_hut services/stew statuses/fed
+                    statuses/growing statuses/growing_croft statuses/hearty statuses/hen_fed
+                    statuses/spoiling statuses/withered)
+
+  @homestead_facts ~w(cooked gifted_apple gifted_rat ordered owns_pen owns_plot regard sown_at
+                      traded_knife watered_at)
+
+  # the sow statuses are dropped, so are the other containers' immune pairs
+  @immune_holders ~w(hall_strongbox npc_corpse player_corpse strongbox)
+
+  defp homestead_edits,
+    do:
+      [
+        {"cartridge.json", &update_in(&1, ["world"], fn w -> Map.delete(w, "construction") end)},
+        {"rooms/holding_lane.json", &Map.delete(&1, "site")},
+        {"npcs/carpenter.json", &Map.delete(&1, "services")},
+        {"rooms/holding_croft.json", &Map.delete(&1, "site")},
+        {"facts.json", &update_in(&1, ["facts"], fn f -> Map.drop(f, @homestead_facts) end)}
+      ] ++ for(i <- @immune_holders, do: {"items/#{i}.json", &Map.delete(&1, "immune")})
+
+  defp homestead,
+    do:
+      homestead_edits() ++
+        for(
+          f <- @homestead_files,
+          do: {f <> ".json", nil}
+        ) ++
+        for(
+          s <- ~w(carpentry carving cooking joinery whittling woodcutting),
+          do: {"skills/#{s}.json", &Map.drop(&1, ~w(profession prerequisite hidden))}
+        )
+
   # Breaks: a short source reference stays unexpanded, a touch link is missing (a warning), or the
   # source drifts from the bytes the district walkthroughs run on.
   test "the showcase source compiles to its pinned answer without warnings" do
@@ -44,7 +105,7 @@ defmodule Loka.ContentShowcaseTest do
         {"reactions/gate_lifted.json", nil},
         {"reactions/gate_shut.json", nil},
         {"statuses/gored.json", &Map.delete(&1, "kind")}
-        | unfiltered
+        | unfiltered ++ homestead()
       ]
 
       # No tag left: the spread's tag dropped and the door named.
@@ -114,6 +175,7 @@ defmodule Loka.ContentShowcaseTest do
          &(&1 |> put_in(["requires", "kernel_api", "at_least"], api) |> Map.delete("speech"))},
         {"reactions/boar_gore.json", &put_in(&1, ["on", "attacker"], npc)},
         {"statuses/gored.json", &Map.delete(&1, "kind")}
+        | homestead()
       ])
     end
 

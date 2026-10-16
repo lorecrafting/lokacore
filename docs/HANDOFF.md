@@ -154,8 +154,37 @@ Session lessons (2026-10-15, b5fe9338, 8c186cca, fc1e2fd7 and 01da56d0):
 - The disk fills after about seven worktrees (2.2 GB each); remove merged worktrees first.
 - Agents must never run `git worktree prune` while another agent's worktree is in use.
 
+## Overnight decisions (session 93636711, for the owner's morning recap)
+
+Owner 2026-10-15 (quoted): "I will be sleeping now so be as autonomous as possible and make decisions on your
+own. And give me a recap of crucial decisions in the morning when i ask for it. Go all the way up to Ui
+polish stage which needs me at the computer for a bit."
+
+- #403 (loka-mytp.1/.2, narrate and plan-move engine steps) merged at 0f0603ed; settle-3 kept parked.
+- Showcase fixes y6yg.8/.9/.15/.16/.17 batched as one content PR (loka-y6yg.18); slice D needs no rebuild.
+- Decisions PR #404 (loka-kgd.162): G10 split (private notes, map pins, letters stay M15; public writing G10b deferred);
+  Chronicle FD6 no longer waits for carry-over; deferred rows do not block M14/M15 exit.
+- Book bugs (loka-y6yg.20): Fable designer ruled combat closure keeps the Combat page with Back to World; the
+  engage line goes to the combat log; a hostile NPC shows a refusal line from new cartridge text (protocol
+  change, own brief with review record + second opinion, after the content batch); x6t.28 U3 ruled out.
+- #404 merged. District plans #405 (loka-y6yg.19): Homestead, economy/law, magic, traps all ready; build in that
+  order, one slice each. Hub: magic up and economy/law down from the inn, Homestead west of fell_gate, traps down from
+  drill_yard (no second hub room). Economy/law ends at "wanted" plus a paid fine (trial and jail are M14).
+- #406 (loka-y6yg.20 part A, Book showcase bugs) merged: a fight's closing lines (kill, death, inn return, Flee) stay on
+  the ended Combat page with Back to World; any receipt that opens a fight logs on the Combat page. x6t.28 was the
+  test harness (a hidden tab pauses the clock), now a playtest rule.
+- #405 merged (plans 4-7). Homestead build started (loka-y6yg.21) as two sequential slices H1 (steps 1-8) and H2
+  (9-13, sandbox, e2e) on draft branch showcase/homestead. Plan toolbox findings filed as loka-kgd.163 (triage at M14).
+- #407 (loka-y6yg.21, Homestead district) merged. Built huts cannot carry a reaction, so the cot rest bonus does not work
+  in a hut: the sign promises only the rug. A seed put into a box no longer sows (non-plot containers are immune; a test
+  guards new containers). A player with 0 pennies cannot claim an ordered stew (known limit). Engine gaps in loka-kgd.163.
+- #408 (loka-y6yg.18, showcase fixes): the hostile Warden shuts the toll gate when the player enters (shared gate closes
+  for all, like gate_lifted); the combat sign's shout gets a Book chip ("ware").
+
 ## Owner answers this session
 
+- 2026-10-15 (session 93636711, AskUserQuestion choices, quoted): Book bugs x6t.27/.28/.32/.33 "Yes, fix with
+  showcase (Recommended)" (now loka-y6yg.20); usage "Under 70%, go" (Fable district plan and Fable designer run).
 - 2026-10-15 (session 01da56d0, quoted unless marked): usage "69% for weekly usage.  we're good, keep
   going"; "lets have generated residents" + choices "Generated townsfolk (Recommended)", "Authored name
   list (Recommended)"; "Hm lets table settlements for now i think homesteads is a good start and

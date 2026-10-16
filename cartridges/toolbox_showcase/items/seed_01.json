@@ -1,0 +1,14 @@
+{
+  "keywords": [
+    "seed"
+  ],
+  "short": "item.seed_01.short",
+  "room_line": "item.seed_01.room",
+  "description": "item.seed_01.description",
+  "mass_grams": 10,
+  "location": {
+    "in": "item",
+    "item": "sack"
+  },
+  "give_allowed": false
+}

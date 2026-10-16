@@ -13,7 +13,7 @@ defmodule Loka.LoaderFloorsTest do
     Loka.ContentSource.compile(dir, merge(edits ++ [api]) ++ whole(c))
   end
 
-  # An edit at path [] writes a whole (new) file.
+  # An edit at path [] writes a whole (new) file, or with null deletes it.
   defp whole(c), do: for([file, [], value] <- c["edits"] || [], do: {file, value})
 
   # A null value deletes the key (a case below a later sampler key's floor).

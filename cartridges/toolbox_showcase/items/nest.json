@@ -1,0 +1,28 @@
+{
+  "keywords": [
+    "nest"
+  ],
+  "short": "item.nest.short",
+  "room_line": "item.nest.room",
+  "description": "item.nest.description",
+  "mass_grams": 20000,
+  "location": {
+    "in": "room",
+    "room": "holding_croft"
+  },
+  "container": true,
+  "immune": [
+    "growing",
+    "growing_croft"
+  ],
+  "locks": {
+    "put": {
+      "policy_version": 1,
+      "root": {
+        "op": "fact_compare",
+        "fact": "owns_pen",
+        "equals": true
+      }
+    }
+  }
+}

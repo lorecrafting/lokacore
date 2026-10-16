@@ -1,0 +1,17 @@
+{
+  "keywords": [
+    "timber",
+    "timber_02"
+  ],
+  "short": "item.timber.short",
+  "room_line": "item.timber.room",
+  "description": "item.timber.description",
+  "mass_grams": 400,
+  "location": {
+    "in": "room",
+    "room": "timber_yard"
+  },
+  "tags": [
+    "wooden"
+  ]
+}

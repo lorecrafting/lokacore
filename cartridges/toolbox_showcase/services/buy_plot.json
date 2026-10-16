@@ -1,0 +1,12 @@
+{
+  "provider": "farmer",
+  "currency": "pennies",
+  "action": "buy_plot",
+  "label": "service.buy_plot",
+  "narration": "service.buy_plot.used",
+  "price": 3,
+  "benefit": {
+    "kind": "entitlement",
+    "fact": "owns_plot"
+  }
+}

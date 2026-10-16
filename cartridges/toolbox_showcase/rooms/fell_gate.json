@@ -10,6 +10,9 @@
     },
     "east": {
       "to": "the_fold"
+    },
+    "west": {
+      "to": "holding_lane"
     }
   },
   "details": {

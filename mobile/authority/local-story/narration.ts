@@ -64,13 +64,16 @@ const latest = (s: Story, command_id: string | undefined, before: number | null)
     before,
   );
 
-// The narration lines that belong to combat: an encounter root, attack, pack or engaged bleed.
+// The narration lines that belong to combat: an encounter root (any receipt that opens one, as a
+// move's engage does: book-ui.md, Opening), attack, pack or engaged bleed.
 function combatLines(s: Story, d: Accepted, lines: NonNullable<Accepted['narration']>) {
-  const root =
-    ['engaged', 'fled'].includes(d.outcome) &&
-    d.delta.ops.some(
-      (o) => o.writer_group === 0 && (o.op === 'encounter.open' || o.op === 'encounter.close'),
-    );
+  const root = d.delta.ops.some(
+    (o) =>
+      o.op === 'encounter.open' ||
+      (o.writer_group === 0 &&
+        o.op === 'encounter.close' &&
+        ['engaged', 'fled'].includes(d.outcome)),
+  );
   const keys = d.events.some((e) => e.payload.type === 'attack_result')
     ? Object.values(s.world.cartridge.world?.combat?.narration ?? {})
     : [];

@@ -1,0 +1,21 @@
+{
+  "items": [
+    "egg_01",
+    "egg_02",
+    "egg_03",
+    "egg_04",
+    "egg_05",
+    "egg_06"
+  ],
+  "from": {
+    "in": "room",
+    "room": "larder"
+  },
+  "to": {
+    "in": "item",
+    "item": "nest"
+  },
+  "cap": 3,
+  "count": 1,
+  "every": 1000000000
+}

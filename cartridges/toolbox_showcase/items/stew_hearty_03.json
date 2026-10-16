@@ -1,0 +1,23 @@
+{
+  "keywords": [
+    "stew",
+    "hearty"
+  ],
+  "short": "item.stew_hearty_03.short",
+  "room_line": "item.stew_hearty_03.room",
+  "description": "item.stew_hearty_03.description",
+  "mass_grams": 500,
+  "location": {
+    "in": "room",
+    "room": "larder"
+  },
+  "edible": {
+    "resource": "mv",
+    "amount": 10,
+    "label": "action.eat",
+    "narration": "narration.eat_stew_hearty",
+    "applies": [
+      "hearty"
+    ]
+  }
+}
