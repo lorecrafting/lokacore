@@ -124,6 +124,8 @@ test('the dart corridor poisons for four ticks and then expires', () => {
   w = wait(w, 60);
   assert.equal(hp(w), 9);
   assert.equal(gameView(w).conditions![0].next_tick_at, t0 + 120);
+  // The ring denominator is the authored length, not the time left (240 s here).
+  assert.equal(gameView(w).conditions![0].duration, 300);
   w = wait(w, 240);
   assert.equal(hp(w), 6);
   assert.equal(gameView(w).conditions, undefined);
