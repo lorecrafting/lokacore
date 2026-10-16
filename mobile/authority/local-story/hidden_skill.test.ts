@@ -84,9 +84,10 @@ function opened(path: string, choose = false) {
   return p;
 }
 
-// Breaks: the pending-row check (dialogue-save.ts) or the choose receipt check
-// (dialogue-receipt.ts) requires every authored choice, so the narrowed row the kernel wrote is
-// refused on reopen.
+// Breaks: a reopen check (dialogue-save.ts checkRow on the resolved row via skills-save.ts, or the
+// choose receipt check in dialogue-receipt.ts) requires every authored choice, so the narrowed row
+// is refused. The pending case reaches neither (no wrong_limit, no custody) and pins only that the
+// receipt replay admits it; the chosen case is the red control for both.
 test('a talk opened without its concealed lesson reopens, pending and chosen', (t) => {
   const dir = mkdtempSync(join(tmpdir(), 'loka-hidden-skill-'));
   t.after(() => rmSync(dir, { recursive: true, force: true }));
@@ -98,8 +99,9 @@ test('a talk opened without its concealed lesson reopens, pending and chosen', (
 });
 
 // Breaks: a reopen admits a forged row (an id the dialogue lacks, a dropped choice that teaches
-// no hidden skill, another order, empty) or a refusal writes the file. The receipt is forged too,
-// so the row check (dialogue-save.ts, run before the receipt replay) is what refuses first.
+// no hidden skill, another order, empty) or a refusal writes the file. End to end only: the
+// receipt replay (receipt-history.ts) refuses these before any row check, so `openable` itself is
+// pinned by craft.test.ts 'a saved row may lack only a lesson of a hidden skill'.
 test('a forged choice_ids row is save_corrupt and the file is unchanged', (t) => {
   const dir = mkdtempSync(join(tmpdir(), 'loka-hidden-skill-forged-'));
   t.after(() => rmSync(dir, { recursive: true, force: true }));
@@ -112,8 +114,7 @@ test('a forged choice_ids row is save_corrupt and the file is unchanged', (t) =>
     p.sql
       .prepare("UPDATE state_row SET value = ? WHERE section = 'choices' AND key = ?")
       .run(JSON.stringify(row), rows[0]!.key as string);
-    // The talk's receipt carries the same choice.open; forged too, so the row check meets the row
-    // before the receipt replay (receipt-history.ts) would refuse it.
+    // The talk's receipt carries the same choice.open; forged too, as a consistent forger would.
     const last = p.sql
       .prepare('SELECT command_id, response FROM receipt ORDER BY revision DESC LIMIT 1')
       .get()!;

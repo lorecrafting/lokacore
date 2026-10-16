@@ -515,6 +515,16 @@ test('a saved row may lack only a lesson of a hidden skill', () => {
     rows.map((ids) => openable(w, d2, ids)),
     [true, true, false, false, false, false, false, false],
   );
+  // A hidden skill with no prerequisite is never concealed (`concealed`), so its lesson stays.
+  const carving = `${P}skill/carving`;
+  const skills = {
+    ...w.cartridge.skills,
+    [carving]: { ...w.cartridge.skills![carving]!, prerequisite: undefined },
+  };
+  assert.equal(
+    openable({ ...w, cartridge: { ...w.cartridge, skills } } as any, d2, ['leave', 'whittle']),
+    false,
+  );
   // Every choice concealed: the empty row still matches the filter, so only the length check refuses.
   assert.equal(openable(w, { ...d, choices: { learn: d.choices.learn! } }, []), false);
 });

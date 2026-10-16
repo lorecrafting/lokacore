@@ -51,8 +51,8 @@ export const offered = (world: World, actor: CharacterId, d: DialogueDefinition,
 
 /**
  * Whether a saved row's `ids` are ones an opening of `d` can write: `choiceIds(d)` in order, never
- * empty, less only choices that `skill.acquire` a hidden skill (hs-14; the save checks, static
- * because the actor has moved on since the opening).
+ * empty, less only choices that `skill.acquire` a hidden skill with a prerequisite (hs-14; the save
+ * checks, static because the actor has moved on since the opening).
  */
 export const openable = (world: World, d: DialogueDefinition, ids: unknown) =>
   Array.isArray(ids) &&
@@ -65,7 +65,9 @@ export const openable = (world: World, d: DialogueDefinition, ids: unknown) =>
         !d.choices[id]!.sequence?.some(
           (s) =>
             s.op === 'skill.acquire' &&
-            world.cartridge.skills?.[refString(s.skill)]?.hidden === true,
+            // as `concealed` (skills.ts): a hidden skill with no prerequisite is never left out
+            !!world.cartridge.skills?.[refString(s.skill)]?.hidden &&
+            !!world.cartridge.skills[refString(s.skill)]!.prerequisite,
         ),
     ),
   );
