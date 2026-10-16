@@ -194,8 +194,10 @@ type BottomProps = {
 
 function Bottom(p: BottomProps) {
   const c = usePalette();
-  const { view, text, pending, fault } = p.screen;
-  const position = nextPosition(view.position, p.g.position);
+  const { view, text, pending, fault, ended } = p.screen;
+  // A tap on the position line acts only on the open World page.
+  const position = !p.page && !view.scene && !ended && nextPosition(view.position, p.g.position);
+  const shut = !!view.combat || !!ended;
   return (
     <View
       style={{
@@ -206,12 +208,7 @@ function Bottom(p: BottomProps) {
         borderTopColor: c.line,
       }}
     >
-      {!p.page &&
-        !view.ancestry_choices &&
-        !view.scene &&
-        !view.combat &&
-        !p.screen.ended &&
-        navigation(p)}
+      {!p.page && !view.ancestry_choices && !view.scene && !shut && navigation(p)}
       {!view.ancestry_choices && (
         <StatusLine
           time={view.time}
@@ -221,12 +218,8 @@ function Bottom(p: BottomProps) {
           conditions={view.conditions}
           position={view.position}
           text={text}
-          locked={!!view.scene || !!view.combat || !!p.screen.ended || p.page?.kind === 'chapter'}
-          openPosition={
-            !p.page && !view.scene && !p.screen.ended && position
-              ? () => p.press(position)
-              : undefined
-          }
+          locked={!!view.scene || shut || p.page?.kind === 'chapter'}
+          openPosition={position ? () => p.press(position) : undefined}
           pending={pending}
           open={() => p.open({ kind: 'contents' })}
           openCharacter={() => p.open({ kind: 'character' })}
