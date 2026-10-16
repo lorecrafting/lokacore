@@ -5,7 +5,7 @@ defmodule Loka.Content.Variants do
   `self` or `subject` (status reader 1, row G3) 1.53; a `resource_compare` with `subject` or
   `at_least_percent` (row 39) 1.87; a room's or detail's `asides` or a `skill_compare` leaf
   (row FD2) 1.91; world.identity (rows W15, FD9) 1.97; an `item_present` leaf (Homestead hs-6)
-  1.101. Twin of
+  1.102. Twin of
   kernel/ts/src/content/cartridge_variants.ts.
   """
   import Loka.Content.Source, only: [diag: 3]
@@ -35,7 +35,7 @@ defmodule Loka.Content.Variants do
   defp used?(defs, settings),
     do: Enum.any?(Entities.all(defs), &variant?/1) or leaf?(defs) or leaf?(settings)
 
-  defp floor(true, _, _, _, _, _), do: [1, 101]
+  defp floor(true, _, _, _, _, _), do: [1, 102]
   defp floor(_, true, _, _, _, _), do: [1, 97]
   defp floor(_, _, true, _, _, _), do: [1, 91]
   defp floor(_, _, _, true, _, _), do: [1, 87]

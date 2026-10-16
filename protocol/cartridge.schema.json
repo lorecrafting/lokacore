@@ -2102,7 +2102,7 @@
         },
         "profession": {
           "$ref": "text.schema.json#/$defs/TextKey",
-          "description": "Homestead hs-14 (docs/system/book-ui.md Skill tree details; kernel_api at least 1.101): the profession heading this skill is listed under on the Character page."
+          "description": "Homestead hs-14 (docs/system/book-ui.md Skill tree details; kernel_api at least 1.102): the profession heading this skill is listed under on the Character page."
         },
         "hidden": {
           "const": true,
@@ -2796,7 +2796,7 @@
             "buff",
             "debuff"
           ],
-          "description": "Toolbox row loka-x6t.64 (kernel_api at least 1.101): the status icon's polarity, shown as GameView ConditionView.kind; wins over the polarity derived from the effect fields."
+          "description": "Toolbox row loka-x6t.64 (kernel_api at least 1.102): the status icon's polarity, shown as GameView ConditionView.kind; wins over the polarity derived from the effect fields."
         },
         "fear": {
           "const": true,
