@@ -196,6 +196,9 @@ polish stage which needs me at the computer for a bit."
   water row or encounter behind (that state could not be saved and reopened). Terrain costs (43a) approved; room tags must
   be unique (new error code duplicate_items); entering a water-edge room skips the terrain fare (known limit). Tag-floor gap
   filed loka-kgd.169. Batch branch toolbox/batch-m14 (no PR yet).
+- M14 trial (row 35) done in the batch: arrest + charge line + jailer fine (no scene). Engine fix found on the way: a
+  currency used only by dialogue payments had no starting balance (fresh.ts). Arrest wording approved by the designer.
+  Companion remarks (FD10, 1.107) in review; a perceived NPC's remarks stay visible in a dark room (PM). Jail (36) building.
 
 ## Owner answers this session
 
