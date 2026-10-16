@@ -399,9 +399,10 @@ fi
 O=$(mktemp -d); git init -q --bare -b main "$O"; R=$(mktemp -d); cd "$R"
 git clone -q "$O" . 2>/dev/null; git checkout -qb main; echo 1 > a.txt; git add a.txt; git commit -qm base; git push -q origin main
 git checkout -qb slice; echo 2 > a.txt; git commit -qam slice
-out=$(sh "$bin/push_slice.sh" slice) && [ "$(echo "$out" | head -1)" = "PUSH_EXIT=0 $(git rev-parse slice)" ] || bad "push_slice: accepted push: $out"
+out=$(sh "$bin/push_slice.sh" "$R" slice) && [ "$(echo "$out" | head -1)" = "PUSH_EXIT=0 $(git rev-parse slice)" ] || bad "push_slice: accepted push: $out"
 git clone -q "$O" "$R.other" && git -C "$R.other" checkout -q slice && echo 3 > "$R.other/a.txt" && git -C "$R.other" commit -qam other && git -C "$R.other" push -q origin slice
 echo 4 > a.txt; git commit -qam diverged
-out=$(sh "$bin/push_slice.sh" slice) && bad "push_slice: a rejected push exited 0: $out"
+out=$(sh "$bin/push_slice.sh" "$R" slice) && bad "push_slice: a rejected push exited 0: $out"
 case "$out" in PUSH_EXIT=0*) bad "push_slice: a rejected push printed PUSH_EXIT=0";; PUSH_EXIT=*) ;; *) bad "push_slice: no PUSH_EXIT line: $out";; esac
+sh "$bin/push_slice.sh" "$R" main >/dev/null 2>&1 && bad "push_slice: pushed a branch that is not checked out in the worktree"
 exit $fail

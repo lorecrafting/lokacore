@@ -11,6 +11,7 @@
 Exit 0: all resolved and staged, not committed. Exit 1: prints the files it left; abort the merge.
 Needs merge.conflictStyle=diff3 (the base section proves an append).
   python3 bin/merge_resolve.py"""
+import json
 import os
 import re
 import subprocess
@@ -55,6 +56,8 @@ def section_union(text):
     # each side adds whole sections: the shared part ends at a section edge and a heading (or the end) follows
     if (rest and not rest.startswith(("## ", "### "))) or (after and not after.startswith("#")):
         return None
+    if len(set(re.findall(r"^(#{2,3}) ", "".join(ours + theirs), re.M))) > 1:  # a ### beside a ## would land under the wrong parent
+        return None
     merged = text[: h.start()] + h[1].rstrip("\n") + ("\n\n" + rest if rest else "") + ("\n\n" + after if after else "\n")
     heads = re.findall(r"^#{2,3} .*$", merged, re.M)
     return merged if len(heads) == len(set(heads)) else None
@@ -73,6 +76,16 @@ def rows_union(text):
     return text[: h.start()] + h[1] + "".join(theirs) + text[h.end() :]
 
 
+def elements(arr):
+    """The JSON elements of an array body, each with its leading indent."""
+    out, pos, dec = [], 0, json.JSONDecoder()
+    while pos < len(arr):
+        _, end = dec.raw_decode(arr, len(arr) - len(arr[pos:].lstrip()))
+        out.append(arr[pos:end])
+        pos = end + len(arr[end:]) - len(arr[end:].lstrip(",\n"))
+    return out
+
+
 def floors_union(_):
     """Both sides append whole elements to the top-level array of loader_floors.json: ours, then theirs' additions."""
     base, ours, theirs = (git("show", f":{n}:protocol/fixtures/loader_floors.json") for n in (1, 2, 3))
@@ -80,7 +93,8 @@ def floors_union(_):
     b, o, t = (x[: -len(tail)] for x in (base, ours, theirs))
     if not (o.startswith(b + ",\n") and t.startswith(b + ",\n")):
         return None
-    return o + t[len(b) :] + tail
+    have = {e.strip() for e in elements(o[len(b) + 2 :])}
+    return o + "".join(",\n" + e for e in elements(t[len(b) + 2 :]) if e.strip() not in have) + tail  # an element both sides added stays once
 
 
 def higher_kernel_api(text):
@@ -117,7 +131,10 @@ theirs, left = [], []
 for f in conflicted:
     if f in RULES:
         with open(f) as fh:
-            merged = RULES[f](fh.read())
+            try:
+                merged = RULES[f](fh.read())
+            except subprocess.CalledProcessError:  # a missing stage: modify/delete, add/add
+                merged = None
         if merged is None:
             left.append(f)
             continue

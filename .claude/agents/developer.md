@@ -28,7 +28,7 @@ Before handing off:
    the touched layer's type/compile checks and the focused tests your diff touches, under `nice -n 10`; never the full
    `npm test`, the Storybook smoke, `test:e2e` or `bin/check_all.sh` on the M1 ([two-lane CI](../../docs/decisions/owner-decision-two-lane-ci-2026-10-09.md)).
    The pre-push hook runs `bin/prepush.sh` (CI's static checks, about 30 s) and refuses a failing push: fix what fails; `--no-verify` needs the owner's OK.
-   Push with `bin/push_slice.sh <branch>` (the hook runs prepush) and read its one line `PUSH_EXIT=<n> <sha>`; the log path follows it. Every finished slice in the hosted-PR and draft-batch lanes is pushed, even when the brief names no push: an unpushed head is not durable.
+   Push with `bin/push_slice.sh <slice worktree> <branch>` (the hook runs prepush in that worktree) and read its one line `PUSH_EXIT=<n> <sha>`; the log path follows it. Every finished slice in the hosted-PR and draft-batch lanes is pushed, even when the brief names no push: an unpushed head is not durable.
    Hosted CI on the pushed head is the final run (it includes the full `npm test` of each package):
    after a push, confirm `ci.yml` and `book-e2e.yml` started with one `gh run list --commit "$(git rev-parse HEAD)"` call (the full sha; a short one matches nothing) and hand back (a run can start up to ~2 minutes late: report an empty list, never dispatch);
    the PM watches CI and sends a red run back as a finding. Never wait on CI,

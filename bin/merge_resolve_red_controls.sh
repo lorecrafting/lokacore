@@ -95,4 +95,11 @@ ap flo $fl 's/"1\.101"/"1.301"/' 's/"1\.101"/"1.302"/'
 left 'two edits of one loader floor' $fl
 ap rowid $tb 's/(\n\| 1 \|[^\n]*\n)/$1| ZZ | M9 | row a | x | S | – | x | x | open |\n/' 's/(\n\| 1 \|[^\n]*\n)/$1| ZZ | M9 | row b | x | S | – | x | x | open |\n/'
 left 'one row id on both sides' $tb
+ap dupfl $fl 's/\n  \]\n\}\n\z/$ENV{E1}\n  ]\n}\n/' 's/\n  \]\n\}\n\z/$ENV{E1}$ENV{E2}\n  ]\n}\n/'
+git show "$base:$fl" | perl -0pe 's/\n  \]\n\}\n\z/$ENV{E1}$ENV{E2}\n  ]\n}\n/' > "$t/expected.dup"
+unions 'a loader floor on both sides once' $fl "$t/expected.dup"
+ap lvl $m 's/\n## /\n## Mid A\n\nA text\n\n## /' 's/\n## /\n### Mid B\n\nB text\n\n## /'
+left 'a ### section beside a ## section' $m
+ap shape $tb 's/(\n\| 1 \|[^\n]*\n)/$1|ZA| row a\n/' 's/(\n\| 1 \|[^\n]*\n)/$1| ZB | M9 | row b | x | S | – | x | x | open |\n/'
+left 'a line that is not a table row' $tb
 echo 'merge_resolve controls: ok'
