@@ -1,0 +1,12 @@
+{
+  "on": {
+    "event": "status_applied",
+    "status": "warm"
+  },
+  "apply": [
+    {
+      "op": "status.cure",
+      "status": "wet"
+    }
+  ]
+}

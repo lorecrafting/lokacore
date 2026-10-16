@@ -1,0 +1,13 @@
+{
+  "keywords": [
+    "jar"
+  ],
+  "short": "item.attic_jar.short",
+  "room_line": "item.attic_jar.room",
+  "description": "item.attic_jar.description",
+  "mass_grams": 800,
+  "location": {
+    "in": "room",
+    "room": "loft_attic"
+  }
+}

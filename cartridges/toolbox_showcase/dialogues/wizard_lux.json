@@ -1,0 +1,31 @@
+{
+  "npc": "hedge_wizard",
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "fact_compare",
+      "fact": "lux_known",
+      "equals": false
+    }
+  },
+  "prompt": "dialogue.wizard_lux.prompt",
+  "roles": {
+    "wizard": {
+      "role": "npc",
+      "npc": "hedge_wizard"
+    }
+  },
+  "choices": {
+    "teach": {
+      "label": "dialogue.wizard_lux.teach",
+      "narration": "narration.wizard_lux.teach",
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "lux_known",
+          "value": true
+        }
+      ]
+    }
+  }
+}

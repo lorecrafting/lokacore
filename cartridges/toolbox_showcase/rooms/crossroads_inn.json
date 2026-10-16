@@ -16,6 +16,9 @@
     },
     "down": {
       "to": "undercroft"
+    },
+    "up": {
+      "to": "loft"
     }
   },
   "details": {

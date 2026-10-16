@@ -2,8 +2,11 @@
 // (docs/showcase/homestead-district.md steps 2 to 12) in the Book; the farm step is kernel-only.
 // Law 2-law: bank, shop, hide, lift, fence, strongroom (docs/showcase/economy-law-district.md),
 // reduced: the commission waits and the seen lift with its fine are kernel-only (showcase_economy).
+// Magic 3-magic: lux, hush, grimoire, ward, winch, dark crypt, flamma, golem yard
+// (docs/showcase/magic-district.md); the reactions' statuses are kernel-only (showcase_magic).
+import { expect } from 'e2e';
 import { LABEL } from '../book/labels.ts';
-import { moves, scene, settle, walk, type Screen } from './walk.ts';
+import { moves, scene, settle, walk, type Screen, type Walk } from './walk.ts';
 
 const steps = (screen: Screen) => {
   const tap = async (label: string | RegExp) => {
@@ -134,6 +137,70 @@ const law = async (screen: Screen, { tap, take }: Steps) => {
   await settle();
 };
 
+// Magic M2 (docs/showcase/magic-district.md steps 1 to 9), the Book e2e; ward is cast, not fought.
+const loft = async (r: Walk, { tap, take, held }: Steps) => {
+  const { screen } = r;
+  const pause = (ms: number) => new Promise((done) => setTimeout(done, ms));
+  const wizard = async (choice: string) => {
+    await tap(/^The hedge-wizard/);
+    await tap(/^Talk/);
+    await tap(choice);
+    await tap(LABEL.leaveConversation);
+    await tap(LABEL.leave);
+  };
+  await moves(screen, 'up');
+  await expect(screen.getByRole('button', /ma 5\/5/).first()).toBeVisible();
+  await wizard('Learn the word lux');
+  await wizard('Fetch the second word');
+  await tap('Gather ash');
+  await take(/^The lantern is here/, /^Take the lantern/);
+  await tap('lux, cast');
+  await moves(screen, 'north');
+  await pause(4_000); // the 120 s hush at rate 50
+  await take(/^The grimoire is here/, /^Take the grimoire/);
+  await held(/^the grimoire/);
+  await tap(/^Read/);
+  await tap(LABEL.leave);
+  await moves(screen, 'south');
+  await tap(/opens Contents$/);
+  await tap(/^Character/);
+  await tap('Raise CHA');
+  await tap(LABEL.backToWorld);
+  await tap('ward, cast');
+};
+
+const magic = async (r: Walk, steps: Steps) => {
+  const { screen } = r;
+  const { tap, take, held } = steps;
+  await loft(r, steps);
+  await take(/^The oilcan is here/, /^Take the oilcan/);
+  await take(/^The loft bucket is here/, /^Take the loft bucket/);
+  await moves(screen, 'east');
+  await held(/^the oilcan/); // a use recipe is offered on the held tool
+  await tap(/^Oil/);
+  await tap(LABEL.leave);
+  await tap('Map');
+  await tap(/^Open/);
+  await held(/^the lantern/);
+  await tap(/^Drop/); // the lit lantern left on the stair: the crypt below is dark
+  await moves(screen, 'down');
+  await r.note('The dark crypt');
+  await moves(screen, 'up');
+  await take(/^The lantern is here/, /^Take the lantern/);
+  await moves(screen, 'down');
+  await tap('flamma, cast');
+  await tap(/^Flee/);
+  await tap(LABEL.backToWorld);
+  await moves(screen, 'down');
+  await tap('flamma, cast'); // the second bolt kills the wight (magic 7)
+  await held(/^the loft bucket/); // the bier burns 180 s: quench it at once (magic 8)
+  await tap(/^Quench/);
+  await tap(LABEL.leave);
+  await moves(screen, 'up', 'west', 'west');
+  await r.note('The golem yard');
+  await settle();
+};
+
 walk(
   '1-homestead',
   'Homestead: lessons, carve, build, rest, give, barter, fish, stew',
@@ -154,4 +221,11 @@ walk('2-law', 'Law: bank, shop, hide, lift, fence, strongroom', async (r) => {
   await settle();
   await scene(screen);
   await law(screen, steps(screen));
+});
+
+walk('3-magic', 'Magic: lux, hush, grimoire, ward, winch, flamma, golem', async (r) => {
+  await r.app.clearState();
+  await settle();
+  await scene(r.screen);
+  await magic(r, steps(r.screen));
 });

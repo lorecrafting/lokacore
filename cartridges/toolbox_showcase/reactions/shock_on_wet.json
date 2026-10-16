@@ -1,0 +1,28 @@
+{
+  "on": {
+    "event": "status_applied",
+    "status": "shocked"
+  },
+  "when": {
+    "policy_version": 1,
+    "root": {
+      "op": "status_active",
+      "subject": "subject",
+      "status": "wet"
+    }
+  },
+  "apply": [
+    {
+      "op": "status.apply",
+      "status": "stunned"
+    },
+    {
+      "op": "status.cure",
+      "status": "shocked"
+    },
+    {
+      "op": "status.cure",
+      "status": "wet"
+    }
+  ]
+}

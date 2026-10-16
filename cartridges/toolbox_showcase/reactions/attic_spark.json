@@ -1,0 +1,13 @@
+{
+  "on": {
+    "event": "item_dropped",
+    "item": "attic_jar"
+  },
+  "apply": [
+    {
+      "op": "status.apply",
+      "status": "shocked",
+      "npc": "attic_golem"
+    }
+  ]
+}

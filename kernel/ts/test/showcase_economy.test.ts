@@ -1,4 +1,4 @@
-// size: allow 562, the Undercroft walk (steps 1 to 10) and its branches continue one world and share its helpers
+// size: allow 563, the Undercroft walk (steps 1 to 10) and its branches continue one world and share its helpers
 // The showcase economy and law district walked step by step (docs/showcase/economy-law-district.md,
 // guided loop steps 1 to 10). Each numbered test continues the world the one before it left; a
 // branch starts from a saved step. Fresh world at 07:00 (25200), pennies 10.
@@ -249,7 +249,8 @@ test('economy 6: hide in the alley, lift the merchant purse unseen', () => {
   w = walk(w, 'south', 'west');
   H = w.state.clock;
   const h = play(w, { type: 'perform', action: 'hide' });
-  assert.deepEqual(kinds(h), ['check_passed', 'fact_changed', 'custom_event', 'action_completed']);
+  const hid = ['check_passed', 'fact_changed', 'custom_event', 'action_completed'];
+  assert.deepEqual(kinds(h), [...hid, 'status_applied']); // a reaction listens (magic's shock_on_wet)
   assert.equal(fact(h.world, 'uses_stealth'), 1);
   w = walk(h.world, 'east', 'north');
   assert.deepEqual(labels(w), ['condition.hidden']);

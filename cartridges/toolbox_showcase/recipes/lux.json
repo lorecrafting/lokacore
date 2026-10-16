@@ -1,0 +1,46 @@
+{
+  "label": "spell.lux",
+  "aliases": [
+    "lux"
+  ],
+  "target": {
+    "kind": "spell",
+    "word": "lux",
+    "learned": "lux_known"
+  },
+  "priority": 0,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": []
+    }
+  },
+  "costs": [
+    {
+      "resource": "ma",
+      "amount": 2
+    },
+    {
+      "resource": "ash",
+      "amount": 1
+    }
+  ],
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "light.ignite",
+          "item": "lantern"
+        },
+        {
+          "op": "light.ignite",
+          "item": "attic_lantern"
+        }
+      ],
+      "narration": {
+        "actor": "narration.lux"
+      }
+    }
+  }
+}

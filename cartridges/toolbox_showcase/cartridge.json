@@ -48,7 +48,8 @@
       "speech": 1,
       "population": 1,
       "service": 1,
-      "construction": 1
+      "construction": 1,
+      "light": 1
     },
     "client_features": []
   },
@@ -250,6 +251,14 @@
         },
         {
           "npc": "tilt_goblin",
+          "experience": 10
+        },
+        {
+          "npc": "wight",
+          "experience": 10
+        },
+        {
+          "npc": "attic_wight",
           "experience": 10
         }
       ],

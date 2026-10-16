@@ -1,0 +1,11 @@
+{
+  "title": "room.crypt.title",
+  "description": "room.crypt.description",
+  "dark_description": "room.crypt.dark",
+  "exits": {
+    "up": {
+      "to": "crypt_stair",
+      "barrier": "crypt_gate"
+    }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "keywords": [
+    "bucket"
+  ],
+  "short": "item.rain_bucket.short",
+  "room_line": "item.rain_bucket.room",
+  "description": "item.rain_bucket.description",
+  "mass_grams": 500,
+  "location": {
+    "in": "room",
+    "room": "golem_yard"
+  }
+}

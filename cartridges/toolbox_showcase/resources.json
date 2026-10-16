@@ -106,6 +106,27 @@
           "tone": "danger"
         }
       ]
+    },
+    "ma": {
+      "minimum": 0,
+      "maximum": 5,
+      "start": 5,
+      "gain": 0,
+      "regen": {
+        "every": 3600,
+        "by_position": {
+          "standing": 1,
+          "sitting": 1,
+          "resting": 2,
+          "sleeping": 2
+        }
+      }
+    },
+    "ash": {
+      "minimum": 0,
+      "maximum": 5,
+      "start": 0,
+      "gain": 0
     }
   }
 }

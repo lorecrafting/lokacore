@@ -1,0 +1,27 @@
+{
+  "keywords": [
+    "lantern"
+  ],
+  "short": "item.attic_lantern.short",
+  "room_line": "item.attic_lantern.room",
+  "description": "item.lantern.description",
+  "location": {
+    "in": "room",
+    "room": "loft_attic"
+  },
+  "mass_grams": 800,
+  "tags": [
+    "metal"
+  ],
+  "fuel": {
+    "kind": "source",
+    "capacity": 36000,
+    "initial": 36000,
+    "rate": 1,
+    "unit": "flame",
+    "supply": "lamp_oil",
+    "ignited": "light.lantern_ignited",
+    "doused": "light.lantern_doused",
+    "refueled": "light.lantern_refueled"
+  }
+}

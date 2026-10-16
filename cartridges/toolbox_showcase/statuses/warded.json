@@ -1,0 +1,14 @@
+{
+  "duration": 600,
+  "tick_every": 150,
+  "resource": "mv",
+  "label": "condition.warded",
+  "narration": {
+    "applied": "narration.warded.applied",
+    "tick": "narration.warded.tick",
+    "expired": "narration.warded.expired"
+  },
+  "resistances": {
+    "physical": 50
+  }
+}

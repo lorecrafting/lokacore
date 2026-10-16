@@ -1,0 +1,18 @@
+{
+  "on": {
+    "event": "quest_resolved",
+    "quest": "errand",
+    "outcome": "done"
+  },
+  "apply": [
+    {
+      "op": "fact.assign",
+      "fact": "ward_taught",
+      "value": true
+    },
+    {
+      "op": "experience.grant",
+      "amount": 30
+    }
+  ]
+}

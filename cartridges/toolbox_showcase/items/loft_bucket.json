@@ -1,0 +1,24 @@
+{
+  "keywords": [
+    "bucket"
+  ],
+  "short": "item.loft_bucket.short",
+  "room_line": "item.loft_bucket.room",
+  "description": "item.loft_bucket.description",
+  "mass_grams": 500,
+  "location": {
+    "in": "room",
+    "room": "loft"
+  },
+  "tags": [
+    "liquid_holding"
+  ],
+  "vessel": {
+    "capacity": 1,
+    "unit_label": "liquid.units",
+    "initial": {
+      "kind": "water",
+      "quantity": 1
+    }
+  }
+}

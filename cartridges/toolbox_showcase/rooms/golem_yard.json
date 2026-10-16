@@ -1,0 +1,9 @@
+{
+  "title": "room.golem_yard.title",
+  "description": "room.golem_yard.description",
+  "exits": {
+    "east": {
+      "to": "loft"
+    }
+  }
+}

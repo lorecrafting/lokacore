@@ -1,0 +1,13 @@
+{
+  "keywords": [
+    "bucket"
+  ],
+  "short": "item.attic_bucket.short",
+  "room_line": "item.attic_bucket.room",
+  "description": "item.attic_bucket.description",
+  "mass_grams": 500,
+  "location": {
+    "in": "room",
+    "room": "loft_attic"
+  }
+}

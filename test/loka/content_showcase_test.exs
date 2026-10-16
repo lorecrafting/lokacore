@@ -42,7 +42,9 @@ defmodule Loka.ContentShowcaseTest do
                     services/forge_cancel services/forge_claim services/forge_commission
                     services/withdraw_a services/withdraw_b statuses/hidden reactions/hide
                     reactions/yard_hide dialogues/clerk_fine dialogues/jailer_broke
-                    dialogues/jailer_talk reactions/charge)
+                    dialogues/jailer_talk reactions/charge recipes/lux recipes/ward
+                    recipes/flamma reactions/flamma_sparks
+                    items/lantern items/attic_lantern items/lamp_oil)
 
   @homestead_facts ~w(cooked gifted_apple gifted_rat ordered owns_pen owns_plot regard sown_at
                       traded_knife watered_at)
@@ -65,17 +67,23 @@ defmodule Loka.ContentShowcaseTest do
                     {"npcs/fence", "locks"},
                     {"npcs/vault", "locks"},
                     {"npcs/fence", "shop"},
-                    {"npcs/guard", "disposition"}
+                    {"npcs/guard", "disposition"},
+                    {"rooms/crypt", "dark_description"}
                   ]
 
   # Nell and Bess's disposition.refuse lines need 1.104 (Book hostile refusal).
   defp unrefuse(n), do: update_in(n, ["disposition"], &Map.delete(&1, "refuse"))
 
+  defp homestead_manifest(c),
+    do:
+      c
+      |> update_in(["world"], &Map.drop(&1, ~w(construction theft)))
+      |> update_in(["requires", "capabilities"], &Map.delete(&1, "light"))
+
   defp homestead_edits,
     do:
       [
-        {"cartridge.json",
-         &update_in(&1, ["world"], fn w -> Map.drop(w, ~w(construction theft)) end)},
+        {"cartridge.json", &homestead_manifest/1},
         {"rooms/holding_lane.json", &Map.delete(&1, "site")},
         {"npcs/carpenter.json", &Map.delete(&1, "services")},
         {"rooms/holding_croft.json", &Map.delete(&1, "site")},

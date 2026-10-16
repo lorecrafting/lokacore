@@ -1,0 +1,10 @@
+{
+  "keywords": [
+    "wizard",
+    "hedge"
+  ],
+  "short": "npc.hedge_wizard.short",
+  "room_line": "npc.hedge_wizard.room",
+  "description": "npc.hedge_wizard.description",
+  "room": "loft"
+}

@@ -1,0 +1,42 @@
+{
+  "title": "room.loft.title",
+  "description": "room.loft.description",
+  "exits": {
+    "down": {
+      "to": "crossroads_inn"
+    },
+    "north": {
+      "to": "reading_room"
+    },
+    "east": {
+      "to": "crypt_stair"
+    },
+    "west": {
+      "to": "golem_yard"
+    },
+    "up": {
+      "to": "loft_attic"
+    }
+  },
+  "details": {
+    "sign_magic": {
+      "aliases": [
+        "sign",
+        "signpost"
+      ],
+      "description": "detail.sign_magic.description",
+      "readable": {
+        "label": "actions.read_sign",
+        "text": "readable.sign_magic",
+        "title": "detail.sign_magic.title"
+      }
+    },
+    "hearth": {
+      "aliases": [
+        "hearth",
+        "ash"
+      ],
+      "description": "detail.hearth.description"
+    }
+  }
+}
