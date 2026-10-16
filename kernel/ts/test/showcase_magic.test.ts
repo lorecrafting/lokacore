@@ -349,7 +349,7 @@ test('magic 9: the golem yard; wet then the jar stuns (hp 17); the jar alone sho
 });
 
 // Breaks: the attic loses its lit roof (lists no one), its own ash, its lantern's lux step, its
-// golem chain, or its wight's Attack.
+// golem chain (the torch warms, the jar alone shocks), or its wight's Attack.
 test('magic sandbox: the attic; every word and the fight without a light', () => {
   let a = perform(go(taught(), 'up').world, 'gather_attic_ash').world;
   assert.equal(pools(a).ash, 1);
@@ -357,6 +357,7 @@ test('magic sandbox: the attic; every word and the fight without a light', () =>
   assert.equal(fuelView(a, id(a, 'item', 'attic_lantern'))?.lit, true);
   for (const k of ['attic_bucket', 'attic_jar', 'attic_torch']) a = take(a, k);
   assert.deepEqual(statuses(drop(a, 'attic_torch'), 'attic_golem'), ['warm']);
+  assert.deepEqual(statuses(drop(a, 'attic_jar'), 'attic_golem'), ['shocked']);
   a = drop(drop(a, 'attic_bucket'), 'attic_jar');
   assert.deepEqual(statuses(a, 'attic_golem'), ['stunned']);
   const hit = act(a, { type: 'attack', target_id: npc(a, 'attic_wight') });

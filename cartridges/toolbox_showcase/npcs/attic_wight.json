@@ -17,8 +17,5 @@
     "chance": 100,
     "damage_min": 2,
     "damage_max": 2
-  },
-  "resistances": {
-    "fire": 50
   }
 }
