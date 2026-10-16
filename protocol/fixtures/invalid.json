@@ -25228,6 +25228,72 @@
     ]
   },
   {
+    "name": "reaction_narrate_no_text",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "clock_hour"
+      },
+      "apply": [
+        {
+          "op": "narrate"
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/apply/0/text",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "reaction_narrate_extra_key",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "clock_hour"
+      },
+      "apply": [
+        {
+          "op": "narrate",
+          "text": "settle.line",
+          "to": "room"
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/apply/0/to",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "reaction_narrate_text_not_string",
+    "contract": "ReactionRule",
+    "value": {
+      "key": "k",
+      "on": {
+        "event": "clock_hour"
+      },
+      "apply": [
+        {
+          "op": "narrate",
+          "text": 7
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/apply/0/text",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
     "contract": "StatusDefinition",
     "value": {
       "key": "flying",

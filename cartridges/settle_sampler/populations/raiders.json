@@ -1,0 +1,15 @@
+{
+  "bundle": "raiders",
+  "home": "square",
+  "area": [
+    "square",
+    "road"
+  ],
+  "cap": 3,
+  "day_target": 0,
+  "night_target": 0,
+  "night_start": 20,
+  "night_end": 6,
+  "replacement_delay": 4800,
+  "wander_interval": 2400
+}

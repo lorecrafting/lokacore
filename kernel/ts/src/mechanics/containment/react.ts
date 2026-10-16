@@ -16,6 +16,7 @@ import { refString, type World } from '../../runtime/decision.ts';
 import { engaged } from '../combat/shared.ts';
 import { living } from '../death/shared.ts';
 import { eventRooms } from '../lookups.ts';
+import { livingMembers } from '../population/refs.ts';
 import { running } from '../scene/shared.ts';
 import { moves } from '../status/shared.ts';
 
@@ -69,7 +70,8 @@ export const moved = (
 // schedule move does (no exit, passage or lock), from where an earlier step left it, in the writer
 // group of an earlier write of the NPC in the advance, else the delivery's, and emits its
 // entity_entered_room at the cause's time; nothing when it is already there, no room resolves or
-// (moved) the delivery's character is in a running scene.
+// (moved) the delivery's character is in a running scene. Settle S4-1: with plan, each member of
+// the plan's slots in EntityId order (moveOne skips the dead).
 function moveNpc(
   world: World,
   step: Extract<Move, { op: 'npc.move' }>,
@@ -80,11 +82,27 @@ function moveNpc(
   holders: Map<string, number>,
   emit: (payload: EventPayload) => void,
 ): DeltaOp[] {
-  const npc = step.npc ? world.entityIds[refString(step.npc)] : subject;
   const [room] = step.room
     ? [world.roomIds[refString(step.room)]]
     : eventRooms(world, cause, subject);
-  if (!npc || !room || world.entities[npc]?.kind !== 'npc') return [];
+  if (!room) return [];
+  const npcs = step.plan
+    ? livingMembers(world, step.plan).sort()
+    : [step.npc ? world.entityIds[refString(step.npc)] : subject];
+  // Members are distinct NPCs, so no member reads another's transfer from ops.
+  return npcs.flatMap((npc) => moveOne(world, npc, room, group, ops, holders, emit));
+}
+
+function moveOne(
+  world: World,
+  npc: EntityId | undefined,
+  room: string,
+  group: number,
+  ops: readonly DeltaOp[],
+  holders: Map<string, number>,
+  emit: (payload: EventPayload) => void,
+): DeltaOp[] {
+  if (!npc || world.entities[npc]?.kind !== 'npc') return [];
   // A following escort stays with its player (escort@1: never detached); a rooted NPC stays put.
   const escorting = Object.values(world.state.escorts ?? {}).some(
     (e) => e?.npc_id === npc && e.status === 'following',

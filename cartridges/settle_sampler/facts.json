@@ -1,0 +1,15 @@
+{
+  "facts": {
+    "band_out": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "instance"
+      ],
+      "meaning": "The raiders have gone out to the hills."
+    }
+  }
+}

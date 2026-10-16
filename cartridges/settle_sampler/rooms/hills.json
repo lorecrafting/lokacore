@@ -1,0 +1,9 @@
+{
+  "title": "room.hills.title",
+  "description": "room.hills.description",
+  "exits": {
+    "south": {
+      "to": "road"
+    }
+  }
+}

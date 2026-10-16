@@ -1,0 +1,21 @@
+{
+  "on": {
+    "event": "fact_changed",
+    "fact": "band_out"
+  },
+  "when": {
+    "policy_version": 1,
+    "root": {
+      "op": "fact_compare",
+      "fact": "band_out",
+      "equals": true
+    }
+  },
+  "apply": [
+    {
+      "op": "npc.move",
+      "plan": "raiders",
+      "room": "hills"
+    }
+  ]
+}

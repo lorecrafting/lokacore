@@ -1,4 +1,4 @@
-# size: allow 317, reaction@1 rule admission keeps every step's floor and reference clause (Homestead hs-1: replenish.run and its repeat check) in one consequence table
+# size: allow 340, reaction@1 rule admission keeps every step's floor and reference clause (Homestead hs-1: replenish.run and its repeat check; Settle S3-1: narrate text; S4-1: npc.move plan) in one consequence table
 defmodule Loka.Content.Reactions do
   @moduledoc """
   Reaction rules in a v2 source (reaction.schema.json ReactionRule; 21 §11; 06 §14), twin of
@@ -22,9 +22,9 @@ defmodule Loka.Content.Reactions do
   @spec check(map() | nil, map(), {term(), map() | :unknown} | nil, [map()]) :: [map()]
   def check(m, _, v2, _) when m == nil or v2 == nil, do: []
 
-  def check(m, defs, _, registry) do
+  def check(m, defs, {_, text}, registry) do
     caps = m["requires"]["capabilities"]
-    ctx = %{m: m, defs: defs, kinds: {caps, owners(registry, ["definitions"])}}
+    ctx = %{m: m, defs: defs, text: text, kinds: {caps, owners(registry, ["definitions"])}}
     ctx = Map.put(ctx, :events, {caps, owners(registry, ["events"])})
     Enum.flat_map(all(defs), &rule(&1, ctx))
   end
@@ -106,7 +106,8 @@ defmodule Loka.Content.Reactions do
     "item.move" => 77,
     "population.spawn" => 84,
     "npc.move" => 95,
-    "replenish.run" => 101
+    "replenish.run" => 101,
+    "narrate" => 103
   }
 
   # Each trigger event's kernel_api minor: spoken 1.48 (G9), status_applied 1.53 (G3), asked 1.96 (FD7).
@@ -114,7 +115,7 @@ defmodule Loka.Content.Reactions do
 
   # One diagnostic per rule below its highest floor; filters: npc 1.47 (W3), attacker 1.58
   # (loka-kgd.79), target 1.87 (row 39), witness 1.95 (FD5); a co_present status.apply 1.50 (W21),
-  # with a tag 1.56 (W22), naming a room 1.65 (status reader 9).
+  # with a tag 1.56 (W22), naming a room 1.65 (status reader 9); an npc.move naming a plan 1.103 (S4-1).
   @filters %{"npc" => 47, "attacker" => 58, "target" => 87, "witness" => 95}
   defp api(r, manifest) do
     floor = rule_floor(r)
@@ -135,6 +136,7 @@ defmodule Loka.Content.Reactions do
   end
 
   defp step_floor(%{"op" => "status.apply", "room" => _}), do: 65
+  defp step_floor(%{"op" => "npc.move", "plan" => _}), do: 103
   defp step_floor(%{"tag" => _}), do: 56
   defp step_floor(%{"co_present" => _}), do: 50
   defp step_floor(s), do: Map.get(@floors, s["op"], 0)
@@ -183,6 +185,13 @@ defmodule Loka.Content.Reactions do
   # Checked with world.levelling (Loka.Content.Levelling).
   defp consequence(_, {%{"op" => "experience.grant"}, _}, _, _), do: []
 
+  # Settle S3-1: a narrate line's text key is in the catalog (:unknown when the text failed).
+  defp consequence(rel, {%{"op" => "narrate", "text" => key}, i}, _, ctx) do
+    if ctx.text == :unknown or is_map_key(ctx.text, key),
+      do: [],
+      else: [diag("UNRESOLVED_REFERENCE", at(rel, ["apply", i, "text"]), %{"target" => key})]
+  end
+
   defp consequence(rel, {%{"op" => "status.apply"} = s, i}, on, ctx),
     do:
       revealed(rel, s, i, on, ctx) ++
@@ -210,7 +219,7 @@ defmodule Loka.Content.Reactions do
     do: reference(rel, ["apply", i], "room", s, ctx.m, ctx.defs)
 
   # Row FD5 (loka-kgd.22): a named NPC and room resolve, the NPC no spawn template; the step emits
-  # entity_entered_room.
+  # entity_entered_room. Settle S4-1: a plan resolves, never with npc and only with room.
   defp consequence(rel, {%{"op" => "npc.move"} = s, i}, _, ctx) do
     owned(at(rel, ["apply", i, "op"]), "entity_entered_room", ctx.events) ++
       for(
@@ -219,7 +228,8 @@ defmodule Loka.Content.Reactions do
         d <- reference(rel, ["apply", i], f, s, ctx.m, ctx.defs),
         do: d
       ) ++
-      if(s["npc"], do: instance(at(rel, ["apply", i, "npc"]), s["npc"], ctx), else: [])
+      if(s["npc"], do: instance(at(rel, ["apply", i, "npc"]), s["npc"], ctx), else: []) ++
+      plan_move(rel, s, i, ctx)
   end
 
   # Row 37a (phased world events): the plan resolves; the step emits no event.
@@ -244,6 +254,18 @@ defmodule Loka.Content.Reactions do
           d <- reference(rel, ["apply", i], f, s, ctx.m, ctx.defs),
           do: d
         )
+
+  defp plan_move(rel, %{"plan" => _} = s, i, ctx) do
+    reference(rel, ["apply", i], {"plan", "population"}, s, ctx.m, ctx.defs) ++
+      if(s["npc"] || !s["room"],
+        do: [
+          diag("SCHEMA_VIOLATION", at(rel, ["apply", i, "plan"]), %{"error" => "invalid_value"})
+        ],
+        else: []
+      )
+  end
+
+  defp plan_move(_, _, _, _), do: []
 
   # Row 16: entry engagement cures concealment in the same move, so an entry reaction may not apply one.
   defp revealed(rel, %{"status" => %{"key" => k}}, i, %{"event" => "entity_entered_room"}, ctx) do

@@ -1,0 +1,12 @@
+{
+  "title": "room.road.title",
+  "description": "room.road.description",
+  "exits": {
+    "east": {
+      "to": "square"
+    },
+    "north": {
+      "to": "hills"
+    }
+  }
+}
