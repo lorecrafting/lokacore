@@ -48,7 +48,7 @@ registerHooks({
   },
 });
 const { Item, ThingPage } = await import('./Menu.tsx');
-const { NpcDetail } = await import('./Npc.tsx');
+const { NpcDetail, NpcPage } = await import('./Npc.tsx');
 
 function nodes(element: any): any[] {
   if (Array.isArray(element)) return element.flatMap(nodes);
@@ -131,4 +131,27 @@ test('a merchant entry lists the purse it holds; the purse offers Take', (t) => 
     ThingPage({ thing: box, text: (k: string) => k, actions: [], log: [], contents: [coin] }),
   );
   assert.ok(shelf.some((n) => n.props.children === 'Inside'));
+  // Held lists only this NPC's things, and steps aside while a conversation runs.
+  const m = { id: 'm', kind: 'npc', name: 'm', actions: [] };
+  const held = (talking: boolean) =>
+    nodes(
+      NpcPage({
+        view: {
+          entities: [m, { ...box, container_id: 'm' }, { ...coin, container_id: 'other' }],
+          inventory: [],
+        },
+        npc: m,
+        text: (k: string) => k,
+        g: { on: () => [] },
+        press() {},
+        log: [],
+        leave() {},
+        open() {},
+        talking,
+      } as any),
+    )
+      .filter((n) => n.type === 'Text')
+      .map((n) => n.props.children);
+  assert.deepEqual(held(false).slice(1), ['Held', 'Box', 'Leave']);
+  assert.ok(!held(true).includes('Held'));
 });
