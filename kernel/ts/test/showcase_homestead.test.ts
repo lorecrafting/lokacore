@@ -136,6 +136,12 @@ test('homestead 3: carve_spoon twice; the third has no stick', () => {
     assert.deepEqual(r.lines, ['narration.carve_spoon.success']);
     w = r.world;
     assert.equal(tree(w).find(([k]) => k === 'whittling')![1], level);
+    // Whittling 2 exactly opens the carving lesson (offered unavailable at 1, homestead 2).
+    if (level === 2)
+      assert.deepEqual(
+        choices(talk(w, 'carpenter').world).find(([k]) => k === 'carving'),
+        ['carving', true],
+      );
   }
   assert.equal(fact(w, 'uses_whittling'), 2);
   for (const k of ['stick_01', 'stick_02'])
