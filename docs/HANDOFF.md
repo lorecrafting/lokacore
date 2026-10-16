@@ -60,7 +60,9 @@ Done this session (fc1e2fd7):
 In flight: none. No agent running.
 
 Next, in order:
-1. Batch close (the PM reads no usage meter: owner said 2026-10-15 "we're good just keep going"):
+0. Batch head 2910c69b: ci and book-e2e green (checked 2026-10-15). Recheck only if the batch moved.
+1. Batch close. Before the Fable batch review, ask the owner for the weekly bar (WORKFLOW usage
+   check, #400); the 2026-10-15 go-ahead ("we're good just keep going") covered hs-9 only.
    a. One Opus developer: bump kernel_api to 1.102 for every batch B gated feature (they reuse 1.101,
       which main already carries): `world.ts`/Elixir floors, loader_floors cases, the samplers'
       `at_least` (showcase and scars move too), hash fixtures; rerun every floor mutant of shared
@@ -73,17 +75,16 @@ Next, in order:
       computed twice; `kernel/ts/test/status.test.ts:149` duplicate row; `docs/system/cartridge.md:1773`;
       book-ui.md:989 Conditions locked ring wording; `selection.ts:62` hidden-lesson check x3;
       mechanics.md:3389 known limit: a corpse blocks raze for good (link `loka-kgd.122`); the
-      secrecy decision record links the hs-14 "Load check" section once it is on main.
+      secrecy decision record links the hs-14 "Load check" section once it is on main; S5 Known
+      limits line: a shared-world encounter left open in a razed hut (`saved.ts:80`, Realm).
    e. Ready, CI green, merge, `bin/after_merge.sh`, close the slice issues and `loka-x6t.60`, delete
       branches and worktrees (`toolbox/hs-*`, `toolbox/x6t-*`, `toolbox/kgd-108-14`, `review-hs-*`,
       `review-x6t-64`, `review-kgd-108-14*`, `review-hs-9*`).
 2. Then Settle S3 `loka-mytp` / S4 `loka-oxgk` (Fable briefs); then one small measuring-tools batch
    (`loka-kgd.107` notes: 107.1, .2, .5, .8, .9, .20); then M14, M15; number-based balance tools
    after M15 (owner split; record `owner-decision-economy-tools-split-2026-10-15.md`).
-3. Follow-ups: `loka-kgd.108.12`, `.108.13`, `loka-x6t.53`, `.54`; Book follow-ups from x6t.55
-   (Book.tsx:222 a tap on Character pushes a second Character page, as Contents does; "opens
-   Character" literal with no `LABEL.character`; native check of the ring seam at 6 o'clock); polish
-   items `loka-x6t.56`-`.62` wait for the UI polish phase.
+3. Follow-ups: `loka-kgd.108.12`, `.108.13`, `loka-x6t.53`, `.54`, `loka-x6t.66` (status icon
+   follow-ups); polish items `loka-x6t.56`-`.62` wait for the UI polish phase.
 4. Retro items awaiting owner approval: `loka-x3i0`, `loka-59uu`, `loka-z2j2`, `loka-ei7a`, `loka-mluq`,
    `loka-8zqg` (PM recommends all).
 
