@@ -69,6 +69,18 @@ test('fire 3: the first tick opens the woodstore door nobody named', () => {
   assert.equal(go(w, 'south').world.state.containers[w.body], w.roomIds[ref('room', 'woodstore')]);
 });
 
+// Breaks (loka-y6yg.17): nothing writes store_unbarred, so a door shut from inside after the fire
+// never opens again (the fire is spent); or the bar can be lifted twice.
+test('fire 3b: shut in the woodstore, lifting the bar opens the door again', () => {
+  let s = play(go(w, 'south').world, { type: 'close', direction: 'north' }).world;
+  assert.equal(door(s), 'closed');
+  assert.equal(refused(s, { type: 'open', direction: 'north' }), 'invalid_state');
+  s = play(s, { type: 'perform', action: 'lift_store_bar' }).world;
+  assert.equal(refused(s, { type: 'perform', action: 'lift_store_bar' }), 'invalid_state');
+  s = play(s, { type: 'open', direction: 'north' }).world;
+  assert.equal(door(s), 'open');
+});
+
 // Breaks: the quench recipe does not cure a showcase item (asserted before the fire could burn out).
 test('fire 4: the bucket puts both out', () => {
   w = take(w, 'smithy_bucket');
@@ -150,6 +162,7 @@ test('loader: barrier.set and co_present tag need API 1.56; to locked needs a ke
     c.manifest.requires.kernel_api.at_least = '1.55';
     delete c.reactions[ref('reaction', 'kindle')];
     delete c.reactions[ref('reaction', 'gate_lifted')];
+    delete c.reactions[ref('reaction', 'gate_shut')];
     for (const r of ['boar_gore', 'tilt_boar_gore'])
       delete c.reactions[ref('reaction', r)].on.attacker;
     delete c.statuses[ref('status', 'gored')].kind; // 1.102 (loka-x6t.64)

@@ -20,7 +20,7 @@
       "scopes": [
         "instance"
       ],
-      "meaning": "The woodstore door is unbarred from inside; nothing in this world sets it, so only fire opens the door."
+      "meaning": "The woodstore door is unbarred from inside (lift_store_bar); before that only fire opens it."
     },
     "wardle_standing": {
       "version": 1,
