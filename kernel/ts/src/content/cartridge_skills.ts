@@ -62,7 +62,7 @@ export function skills(c: Obj, checks: Checks): Diagnostic[] {
 
 // Homestead hs-11: a prerequisite never names its own skill, no ancestry grants its box, and it
 // needs API 1.101. Homestead hs-14: a shown skill's prerequisite never reads a hidden skill, and a
-// profession needs API 1.102.
+// profession or a hidden skill needs API 1.102.
 function prerequisites(c: Obj): Diagnostic[] {
   const named = Object.entries((c.skills ?? {}) as Obj).filter(([, s]) => s.prerequisite);
   const out = named
@@ -83,9 +83,9 @@ function prerequisites(c: Obj): Diagnostic[] {
   for (const [choice, a] of Object.entries((c.ancestries ?? {}) as Obj))
     if (a.skill && c.skills?.[refString(a.skill)]?.prerequisite)
       out.push(diag('SCHEMA_VIOLATION', `.cartridge.ancestries${step(choice)}.skill`));
-  const professions = Object.values((c.skills ?? {}) as Obj).some((s) => s.profession);
-  const floor = professions ? '1.102' : '1.101';
-  if ((named.length || professions) && apiCmp(c.manifest.requires.kernel_api.at_least, floor) < 0)
+  const newer = Object.values((c.skills ?? {}) as Obj).some((s) => s.profession || s.hidden);
+  const floor = newer ? '1.102' : '1.101';
+  if ((named.length || newer) && apiCmp(c.manifest.requires.kernel_api.at_least, floor) < 0)
     out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
   return out;
 }

@@ -1072,6 +1072,22 @@
     {
       "floor": "1.102",
       "below": "1.101",
+      "source": "cartridges/skills_sampler",
+      "feature": "a hidden skill",
+      "edits": [
+        [
+          "skills/pick.json",
+          ["prerequisite"],
+          { "policy_version": 1, "root": { "op": "all", "items": [] } }
+        ],
+        ["skills/pick.json", ["hidden"], true]
+      ],
+      "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
+      "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
+    },
+    {
+      "floor": "1.102",
+      "below": "1.101",
       "source": "cartridges/gift_sampler",
       "feature": "service.price 0 (a barter, row kgd.70)",
       "edits": [
