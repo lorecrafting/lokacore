@@ -255,8 +255,6 @@ defmodule Loka.Content.Reactions do
           do: d
         )
 
-  # Row 16: entry engagement cures concealment in the same move, so an entry reaction may not apply one.
-  # Settle S4-1: a plan move's plan resolves, never with npc and only with room.
   defp plan_move(rel, %{"plan" => _} = s, i, ctx) do
     reference(rel, ["apply", i], {"plan", "population"}, s, ctx.m, ctx.defs) ++
       if(s["npc"] || !s["room"],
@@ -269,6 +267,7 @@ defmodule Loka.Content.Reactions do
 
   defp plan_move(_, _, _, _), do: []
 
+  # Row 16: entry engagement cures concealment in the same move, so an entry reaction may not apply one.
   defp revealed(rel, %{"status" => %{"key" => k}}, i, %{"event" => "entity_entered_room"}, ctx) do
     case (ctx.defs["status"] || %{})[k] do
       {_, _, %{"concealment" => _}} -> [diag("OUTCOME_MISMATCH", at(rel, ["apply", i, "op"]))]
