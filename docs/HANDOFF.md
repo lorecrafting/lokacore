@@ -173,6 +173,8 @@ polish stage which needs me at the computer for a bit."
 - #406 (loka-y6yg.20 part A, Book showcase bugs) merged: a fight's closing lines (kill, death, inn return, Flee) stay on
   the ended Combat page with Back to World; any receipt that opens a fight logs on the Combat page. x6t.28 was the
   test harness (a hidden tab pauses the clock), now a playtest rule.
+- #405 merged (plans 4-7). Homestead build started (loka-y6yg.21) as two sequential slices H1 (steps 1-8) and H2
+  (9-13, sandbox, e2e) on draft branch showcase/homestead. Plan toolbox findings filed as loka-kgd.163 (triage at M14).
 
 ## Owner answers this session
 
