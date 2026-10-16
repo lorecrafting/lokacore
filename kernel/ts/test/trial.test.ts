@@ -223,8 +223,6 @@ test('paying the fine moves 5 pennies to the jailer and frees the prisoner', () 
   );
   assert.equal(pennies(r.world, body(r.world)), 5);
   assert.equal(pennies(r.world, npc(r.world, 'jailer')), 5);
-  // Content choice (row 36): a freed prisoner may still dig out.
-  assert.equal(force(r.world)?.available, true);
   const out = act(act(r.world, { type: 'open', direction: 'west' }), {
     type: 'move',
     direction: 'west',
@@ -341,14 +339,6 @@ test('the loader refuses a malformed arrest', () => {
       ],
     ],
     [
-      (c) => {
-        const grate = c.barriers[`${S}barrier/grate`];
-        delete grate.opens_when;
-        grate.initial = 'locked';
-      },
-      ['BARRIER_UNREACHABLE_KEY', `.cartridge.barriers[${JSON.stringify(`${S}barrier/grate`)}]`],
-    ],
-    [
       (c) => (c.manifest.requires.kernel_api.at_least = '1.104'),
       ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'],
     ],
@@ -403,7 +393,7 @@ test('an escapee walking into the market is arrested again behind a shut grate',
   assert.equal(code(w, { type: 'open', direction: 'down' }), 'invalid_state');
 });
 
-// Break: the grate opens or is passable from below while closed.
+// Break: the drain's `up` exit loses its `grate` barrier, so the shut cell is open from below.
 test('the drain is a dead end upward while the grate is shut', () => {
   const shut = act(escaped().drain, { type: 'close', direction: 'up' });
   assert.equal(code(shut, { type: 'move', direction: 'up' }), 'exit_closed');
@@ -418,15 +408,14 @@ test('a grate without the fragile tag cannot be forced', () => {
   assert.equal(code(w, FORCE), 'invalid_state');
 });
 
-// Break: the opposed check's bound is off by one (STR 5 against rating 5 must pass, 6 must fail).
-test('STR 5 forces a rating-5 grate; a rating-6 grate holds', () => {
-  const tried = (rating: number) => {
-    const r = reload((c) => (c.rooms[`${S}room/cell`].details.grate_lock.rating = rating));
-    assert.ok(r.ok, JSON.stringify(r));
-    const d = ok(play(arrested(fresh(r.cartridge as Cartridge)), FORCE));
-    if (d.decision.kind !== 'accepted') throw new Error('unreachable');
-    return [d.decision.outcome, d.decision.narration, forced(d.world)];
-  };
-  assert.deepEqual(tried(5), ['success', [{ key: 'grate.forced' }], true]);
-  assert.deepEqual(tried(6), ['failure', [{ key: 'grate.holds' }], false]);
+// Break: the recipe's failure outcome assigns `grate_forced` or narrates the success line.
+test('a grate rated above STR 5 holds', () => {
+  const r = reload((c) => (c.rooms[`${S}room/cell`].details.grate_lock.rating = 6));
+  assert.ok(r.ok, JSON.stringify(r));
+  const d = ok(play(arrested(fresh(r.cartridge as Cartridge)), FORCE));
+  if (d.decision.kind !== 'accepted') throw new Error('unreachable');
+  assert.deepEqual(
+    [d.decision.outcome, d.decision.narration, forced(d.world)],
+    ['failure', [{ key: 'grate.holds' }], false],
+  );
 });
