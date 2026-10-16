@@ -28,7 +28,7 @@ registerHooks({
       return {
         format: 'module',
         shortCircuit: true,
-        source: `export * from ${JSON.stringify(react)}; export const useContext = c => c._currentValue; export const useState = v => globalThis.d2Hooks.state(v); export const useRef = v => globalThis.d2Hooks.ref(v); export const useEffect = f => globalThis.d2Hooks.effect(f);`,
+        source: `export * from ${JSON.stringify(react)}; export const useContext = c => c._currentValue; export const useState = v => globalThis.d2Hooks.state(v); export const useRef = v => globalThis.d2Hooks.ref(v); export const useEffect = f => globalThis.d2Hooks.effect(f); export const useLayoutEffect = useEffect;`,
       };
     if (url === 'test:d2-native')
       return {

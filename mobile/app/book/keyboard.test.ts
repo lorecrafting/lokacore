@@ -1,3 +1,4 @@
+// size: allow 560, the Book keyboard, tooltip and status-icon cases share one set of React and native shims
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { createRequire, registerHooks } from 'node:module';
@@ -27,7 +28,7 @@ registerHooks({
       return {
         format: 'module',
         shortCircuit: true,
-        source: `export * from ${JSON.stringify(react)}; export const useContext = c => c._currentValue; export const useState = v => [typeof v === 'function' ? v() : v, () => {}]; export const useRef = v => ({ current: v }); export const useEffect = f => f();`,
+        source: `export * from ${JSON.stringify(react)}; export const useContext = c => c._currentValue; export const useState = v => [typeof v === 'function' ? v() : v, () => {}]; export const useRef = v => globalThis.keptRef ?? { current: v }; export const useEffect = f => f(); export const useLayoutEffect = f => f();`,
       };
     if (url === 'test:keyboard-native')
       return {
@@ -55,7 +56,7 @@ const { Footer } = await import('./Footer.tsx');
 const { StatusLine } = await import('./Status.tsx');
 const { BookView } = await import('./Book.tsx');
 const { CharacterPage } = await import('./sections.tsx');
-const { StatusIcons, Tooltip, ringFraction } = await import('./StatusIcon.tsx');
+const { StatusIcons, Tooltip, drainMs, ringFraction, turns } = await import('./StatusIcon.tsx');
 
 function browser(t: { after: (cleanup: () => void) => void }) {
   const originalWindow = globalThis.window;
@@ -436,9 +437,12 @@ test('status icon countdown ring: remaining share of the duration, clockwise fro
   const halves = (e: any) => {
     const [track, ...rest] = e.type(e.props).props.children;
     assert.equal(track.props.style.borderColor, color.light.dim);
+    const turn = (h: any) =>
+      parseFloat(h.type(h.props).props.children.props.style[1].transform[0].rotate);
+    const drawn = (h: any) => h.type(h.props).props.children.props.style[1].opacity === 1;
     return rest
-      .filter((h: any) => h && h.props.turn !== undefined)
-      .map((h: any) => [h.props.right ? 'right' : 'left', h.props.turn, h.props.color]);
+      .filter((h: any) => h && h.props.shown && drawn(h))
+      .map((h: any) => [h.props.right ? 'right' : 'left', turn(h), h.props.color]);
   };
   const fg = color.light.fg;
   assert.deepEqual(halves(ring(3600, 3600)), [
@@ -452,7 +456,7 @@ test('status icon countdown ring: remaining share of the duration, clockwise fro
   const [, right, left] = ring(3600, 3600).type(ring(3600, 3600).props).props.children;
   const place = (h: any) => {
     const clip = h.type(h.props);
-    return [clip.props.style.left, clip.props.children.props.style.left];
+    return [clip.props.style.left, clip.props.children.props.style[0].left];
   };
   assert.deepEqual(
     [place(right), place(left)],
@@ -469,4 +473,52 @@ test('status icon countdown ring: remaining share of the duration, clockwise fro
     [track.props.style.borderColor, right2.props.color, left2.props.color],
     [color.light.line, color.light.dim, color.light.dim],
   );
+});
+
+// Breaks: the arc tweens on a refresh (more left) or under reduced motion instead of jumping, or a
+// long gap between views (app paused) drains for the whole gap instead of at most a second, or a
+// half's turn is not clamped so a drain across 6 o'clock overshoots, or the rendered Ring ignores
+// reduced motion (book-ui.md Conditions).
+test('status icon countdown ring: drains between views, capped, jumps up and under reduced motion', () => {
+  const deg = (time: number) => 360 * ((3600 - time) / 3600);
+  assert.equal(deg(720), 288);
+  assert.equal(drainMs(deg(720), deg(732), 250, false), 250); // 288 to 286.8 over the 250 ms gap
+  assert.equal(drainMs(288, 288, 0, false), 0); // first view: no change, no tween
+  assert.equal(drainMs(deg(732), 360, 250, false), 0); // reapplied: jumps up
+  assert.equal(drainMs(deg(720), deg(732), 250, true), 0); // reduced motion: steps
+  assert.equal(drainMs(288, 200, 10_000, false), 1000); // views 10 s apart: done in a second
+  assert.equal(drainMs(288, 200, 1000, false), 1000); // exactly the cap
+  assert.equal(drainMs(288, 200, 1001, false), 1000); // one past it
+  assert.deepEqual(turns(360), { right: 0, left: 180 });
+  assert.deepEqual(turns(190), { right: 0, left: 10 });
+  assert.deepEqual(turns(180), { right: 0, left: 0 });
+  assert.deepEqual(turns(170), { right: -10, left: 0 });
+  assert.deepEqual(turns(0), { right: -180, left: 0 });
+  // Rendered: the previous view (288 degrees) came 250 ms ago, this one shows 286.8.
+  const ring = () => {
+    const [icon] = StatusIcons({
+      conditions: [{ label: 'fed', kind: 'buff', ends_at: 3600, duration: 3600 }] as any,
+      time: 732,
+      text: (k: string) => k,
+      open: () => {},
+    }).props.children[0];
+    const e = icon.type(icon.props).props.children;
+    return e.type(e.props);
+  };
+  const drains = (reduced: boolean) => {
+    const g = globalThis as any;
+    Object.assign(g, {
+      reducedMotion: reduced,
+      timings: [],
+      keptRef: { current: { deg: 288, at: performance.now() - 250 } },
+    });
+    try {
+      ring();
+      return g.timings.map((ms: number) => ms >= 250 && ms <= 1000);
+    } finally {
+      for (const k of ['reducedMotion', 'timings', 'keptRef']) delete g[k];
+    }
+  };
+  assert.deepEqual(drains(false), [true]); // tweens over the 250 ms gap (or a slow runner's more)
+  assert.deepEqual(drains(true), []); // reduced motion: the arc jumps, no tween
 });

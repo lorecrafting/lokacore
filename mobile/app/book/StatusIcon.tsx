@@ -2,10 +2,17 @@
 // graphic-only icon per condition, five then a +N disc. A tap opens Character; a hold (a hover on
 // web) shows the label and time left in the Tip's look. Locked (scene, combat, chapter page), the
 // discs are pictures, not buttons.
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { Animated, Pressable, Text, View } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
-import { useReducedMotion } from './fade.ts';
+import {
+  Easing,
+  Reanimated,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withTiming,
+} from './fade.ts';
 import { glyph } from './glyphs.ts';
 import { statusTip } from './model.ts';
 import { usePalette, type Palette } from './palette.ts';
@@ -120,15 +127,37 @@ function Icon(p: {
 const ringed = (fraction: number | undefined, locked: boolean, face: ReactNode) =>
   fraction === undefined ? face : <Ring {...{ fraction, locked }}>{face}</Ring>;
 const RING = size.statusIcon + 2 * (space.hair + size.rule);
+
+// How long the arc drains to a new value, display only (book-ui.md Conditions): the real time since
+// the last view change, capped at a second; the first view, a refresh (more left) and reduced motion
+// jump (0).
+export const drainMs = (from: number, to: number, gap: number, reduced: boolean) =>
+  reduced || to >= from ? 0 : Math.min(gap, 1000);
+// Each half's turn for an arc of `deg`: the right half covers 0-180, the left the rest.
+export const turns = (deg: number) => {
+  'worklet';
+  return { right: Math.min(deg, 180) - 180, left: Math.max(deg - 180, 0) };
+};
+
 function Ring(p: { fraction: number; locked: boolean; children: ReactNode }) {
   const c = usePalette();
   const deg = 360 * p.fraction;
+  const reduced = useReducedMotion();
+  const shown = useSharedValue(deg);
+  const last = useRef({ deg, at: 0 }); // the previous view's arc and when it came
+  // Before paint, so a jump never shows the old arc for a frame (as PageTurn.tsx).
+  useLayoutEffect(() => {
+    const at = performance.now();
+    const ms = drainMs(last.current.deg, deg, at - last.current.at, reduced);
+    last.current = { deg, at };
+    shown.value = ms ? withTiming(deg, { duration: ms, easing: Easing.linear }) : deg;
+  }, [deg, reduced, shown]);
   const [track, arc] = p.locked ? [c.line, c.dim] : [c.dim, c.fg];
   return (
     <View style={{ width: RING, height: RING, alignItems: 'center', justifyContent: 'center' }}>
       <View style={{ ...circle, borderColor: track }} />
-      {deg > 0 && <Half right turn={Math.min(deg, 180) - 180} color={arc} />}
-      {deg > 180 && <Half turn={deg - 180} color={arc} />}
+      <Half right shown={shown} color={arc} />
+      <Half shown={shown} color={arc} />
       {p.children}
     </View>
   );
@@ -141,28 +170,30 @@ const circle = {
   borderWidth: size.rule,
 } as const;
 
-// One half of the box, clipping a right half ring turned about the ring's centre.
-function Half(p: { right?: boolean; turn: number; color: string }) {
+// One half of the box, clipping a right half ring turned about the ring's centre; drawn only while
+// the shown arc reaches into it, read per frame so a re-render mid-drain keeps it.
+function Half(p: { right?: boolean; shown: { value: number }; color: string }) {
   const half = RING / 2;
+  const right = !!p.right;
+  const turn = useAnimatedStyle(() => {
+    const t = turns(p.shown.value);
+    // An empty half's ring rests on its clip edge; hide it so no antialiased seam shows there.
+    const drawn = p.shown.value > (right ? 0 : 180);
+    return { opacity: drawn ? 1 : 0, transform: [{ rotate: `${right ? t.right : t.left}deg` }] };
+  });
   return (
     <View
       style={{
         position: 'absolute',
         top: 0,
-        left: p.right ? half : 0,
+        left: right ? half : 0,
         width: half,
         height: RING,
         overflow: 'hidden',
       }}
     >
-      <View
-        style={{
-          position: 'absolute',
-          left: p.right ? -half : 0,
-          width: RING,
-          height: RING,
-          transform: [{ rotate: `${p.turn}deg` }],
-        }}
+      <Reanimated.View
+        style={[{ position: 'absolute', left: right ? -half : 0, width: RING, height: RING }, turn]}
       >
         <View
           style={{
@@ -176,7 +207,7 @@ function Half(p: { right?: boolean; turn: number; color: string }) {
             borderColor: p.color,
           }}
         />
-      </View>
+      </Reanimated.View>
     </View>
   );
 }
