@@ -1,5 +1,5 @@
 // The magic district, slice M1 (docs/showcase/magic-district.md steps 1-5; Beads loka-y6yg.35):
-// the Loft's spells cost mana and ash, lux lights the held lantern, the reading room hushes the
+// the Loft's spells cost ma and ash, lux lights the held lantern, the reading room hushes the
 // voice for 120 s, the grimoire teaches flamma and resolves the hedge-wizard's errand, whose 30
 // experience and one cha point unlock ward. The steps share one world, in order.
 import assert from 'node:assert/strict';
@@ -39,7 +39,7 @@ const chip = (w: World, key: string) => view(w).actions.find((a) => a.action_key
 const pools = (w: World) =>
   Object.fromEntries(
     (view(w).resources ?? [])
-      .filter((r) => ['mana', 'ash'].includes(r.resource.key))
+      .filter((r) => ['ma', 'ash'].includes(r.resource.key))
       .map((r) => [r.resource.key, r.current]),
   );
 const cast = (w: World, word: string) => play(w, { type: 'cast', word });
@@ -78,7 +78,7 @@ test('magic 1: up the ladder; the sign reads and the Word bar is empty', () => {
 // without ash or spends the wrong pools, the gather adds no ash, the cast leaves the held lantern
 // unlit or writes an ignite line, a cast without the lantern is refused or keeps its pools, or
 // the climb back to the loft closes the errand before flamma is known.
-test('magic 2: taught lux; it needs ash; the cast spends 2 mana and 1 ash and lights the lantern', () => {
+test('magic 2: taught lux; it needs ash; the cast spends 2 ma and 1 ash and lights the lantern', () => {
   const first = talk(w, 'hedge_wizard');
   assert.equal(first.opened, 'wizard_lux');
   w = choose(first.world, 'teach').world;
@@ -92,15 +92,15 @@ test('magic 2: taught lux; it needs ash; the cast spends 2 mana and 1 ash and li
   ]);
   assert.equal(refused(w, { type: 'cast', word: 'lux' }), 'insufficient_resource');
   w = perform(w, 'gather_ash').world;
-  assert.deepEqual(pools(w), { mana: 5, ash: 1 });
+  assert.deepEqual(pools(w), { ma: 5, ash: 1 });
   const bare = cast(w, 'lux');
-  assert.deepEqual(pools(bare.world), { mana: 3, ash: 0 });
+  assert.deepEqual(pools(bare.world), { ma: 3, ash: 0 });
   assert.equal(lit(bare.world), false);
   w = take(w, 'lantern');
   const r = cast(w, 'lux');
   assert.deepEqual(r.lines, ['narration.lux']);
   w = r.world;
-  assert.deepEqual(pools(w), { mana: 3, ash: 0 });
+  assert.deepEqual(pools(w), { ma: 3, ash: 0 });
   assert.equal(lit(w), true);
   w = go(go(w, 'down').world, 'up').world; // the loft climb closes only a met errand
   assert.equal(view(w).journal[0]?.state, 'active');
@@ -183,14 +183,14 @@ test('magic 4c: the grimoire read first; the errand resolves on the next climb t
   assert.equal(fact(v, 'ward_taught'), true);
 });
 
-// Breaks: ward does not apply warded or spend its mana, or a second cast re-announces the status.
-test('magic 5: ward applies warded and costs 1 mana; a second cast only refreshes it', () => {
+// Breaks: ward does not apply warded or spend its ma, or a second cast re-announces the status.
+test('magic 5: ward applies warded and costs 1 ma; a second cast only refreshes it', () => {
   const r = act(w, { type: 'cast', word: 'ward' });
   assert.equal(r.decision.kind, 'accepted');
   w = r.world;
   assert.ok(r.lines.includes('narration.warded.applied'));
   assert.ok(labels(w).includes('condition.warded'));
-  assert.equal(pools(w).mana, 2);
+  assert.equal(pools(w).ma, 2);
   const types = (x: typeof r) =>
     x.decision.kind === 'accepted' ? x.decision.events.map((e) => e.payload.type) : [];
   // No reaction listens on status_applied yet (the golem's, M3), so the landing emits no event.

@@ -24,13 +24,13 @@ loop gathers ash at a hearth. No room here is `exposed`; nothing reads the sky.
 
 - Capabilities: add `light` (`spell_effects_sampler/cartridge.json`); `tags`, `liquid`, `status`,
   `reaction`, `quest`, `attributes` are declared.
-- Pools (`spells_sampler/resources.json`): `mana` 0..5 start 5 gain 0 with `regen {every: 3600,
+- Pools (`spells_sampler/resources.json`): `ma` 0..5 start 5 gain 0 with `regen {every: 3600,
   by_position {standing 1, sitting 1, resting 2, sleeping 2}}` (the mv shape; one breath an hour);
   `ash` 0..5 start 0 gain 0. Attribute `cha` already exists (6); no `wis`.
 - Spells, each `target {kind: spell, word, learned}` (`spells_sampler/recipes`): `lux` (learned
-  `lux_known`; `costs [{mana, 2}, {ash, 1}]`; step `light.ignite {item: lantern}`), `flamma`
-  (learned `flamma_known`; `costs [{mana, 1}]`; policy `npc_present {npc: wight}`; step `damage
-  {npc: wight, kind: fire, amount: 8}`), `ward` (learned `ward_taught`; `costs [{mana, 1}]`;
+  `lux_known`; `costs [{ma, 2}, {ash, 1}]`; step `light.ignite {item: lantern}`), `flamma`
+  (learned `flamma_known`; `costs [{ma, 1}]`; policy `npc_present {npc: wight}`; step `damage
+  {npc: wight, kind: fire, amount: 8}`), `ward` (learned `ward_taught`; `costs [{ma, 1}]`;
   policy `all(level_compare {at_least: 2}, stat_compare {cha, at_least: 7})`; `reason:
   reason.ward` ("Needs a second level and more presence"); step `status.apply warded`). No spell
   has a `duration` (the showcase is `real_elapsed`; a timed spell is also refused in a fight).
@@ -107,10 +107,10 @@ fight (rounds at +150, +300).
 | # | Step | Expected | Matrix cells |
 |---|---|---|---|
 | 1 | Up; read `sign_magic`; the Word bar. | The text. `spell_words` is empty (nothing learned); no chip. | |
-| 2 | Talk: `teach`, then `accept` (the errand); `cast lux`; `gather_ash`; take the lantern; `cast lux`. | `lux_known` true, the errand active (Journal); the Word bar shows "lux, cast" unavailable: `insufficient_resource` (ash 0); after the gather ash 1; the cast: mana 3, ash 0, the lantern lit (its fuel ticking), the spell's line and no ignite line. A cast without the lantern held: the pools still spent, nothing lit (29b: "otherwise it writes nothing and the spell still succeeds"). | spells x reagents x light |
-| 3 | North into the reading room; `cast lux` (ash gathered first); `say` anything; wait 120; read the grimoire. | `hushed` applied on entry (120, the Conditions line); the cast and the say: `invalid_state`, the chips unavailable; after 120 the chips return. The grimoire: `topic_flamma_known`, `flamma_known` true; "flamma, cast" appears, available (mana 1); the errand resolves `done` in the same proposal. | command blocks x spells; readables x learned gate |
+| 2 | Talk: `teach`, then `accept` (the errand); `cast lux`; `gather_ash`; take the lantern; `cast lux`. | `lux_known` true, the errand active (Journal); the Word bar shows "lux, cast" unavailable: `insufficient_resource` (ash 0); after the gather ash 1; the cast: ma 3, ash 0, the lantern lit (its fuel ticking), the spell's line and no ignite line. A cast without the lantern held: the pools still spent, nothing lit (29b: "otherwise it writes nothing and the spell still succeeds"). | spells x reagents x light |
+| 3 | North into the reading room; `cast lux` (ash gathered first); `say` anything; wait 120; read the grimoire. | `hushed` applied on entry (120, the Conditions line); the cast and the say: `invalid_state`, the chips unavailable; after 120 the chips return. The grimoire: `topic_flamma_known`, `flamma_known` true; "flamma, cast" appears, available (ma 1); the errand resolves `done` in the same proposal. | command blocks x spells; readables x learned gate |
 | 4 | Back in the loft: the Word bar; Raise. | `ward_taught` true, experience 30, level 2, one `level_up` line, one point; "ward, cast" reads unavailable with reason `reason.ward` (cha 6). Raise `cha`: 7; the chip is available. The loop accepts before reading on purpose: whether a quest whose objective already holds resolves at activation is unpinned anywhere, so no step relies on it. | quests x levelling x spell gates |
-| 5 | `cast ward`. | `warded` on the caster (600), its applied line; mana 2; events `status_applied`, `action_completed`, `fact_changed`; a second cast at once: `action_completed` only (a refresh lands nothing). | spell effects x statuses |
+| 5 | `cast ward`. | `warded` on the caster (600), its applied line; ma 2; events `status_applied`, `action_completed`, `fact_changed`; a second cast at once: `action_completed` only (a refresh lands nothing). | spell effects x statuses |
 | 6 | East; down. `oil_winch` with the oilcan on the winch; Open; down with the lit lantern. | The move down: `exit_closed`. The use card "Oil the winch" lists the pair; performed: `gate_oiled` true, the oilcan's oil unchanged (`loka-kgd.78`); Open `opened`; the oilcan on the bier (not metal): `invalid_state`; the bucket as a tool on the winch: `invalid_target`. In the crypt the lit room lists the wight; the branch without the lantern lit reads the `dark_description` and lists no one. | use-on x barriers x light |
 | 7 | `cast flamma`; one round; Flee; down; `cast flamma`. | The first cast: wight 4 (8 fire at 50), the fight opens; `flamma_sparks` sets the `bier` burning (its applied line), `cues` in `crypt_stair` lists the smoke. Round 1: the wight's blow is 1 under `warded` (2 at 50; the player's unarmed blow lands nothing). Flee: one candidate (up), no RNG. Down again: the wight is passive (no disposition). The second cast: wight 0, `entity_died` with the caster's body as killer, experience 40 (level 2 still: 100 not reached), the corpse; a third cast: `invalid_state`. | spell damage x resistances x death credit; spells x fire x cues |
 | 8 | Quench: the loft bucket on the burning bier. | The use card "Quench the bier"; the fire ends, the smoke cue gone, the bucket's water unchanged; a second quench `invalid_state`. Left alone instead: the bier's `burning` runs 180 and `fire_spreads` finds no other burnable (the lantern is metal: the build tags it). | use-on x fire |
@@ -140,7 +140,7 @@ changed the fact (seam 2). Delays in logical units; no device clock.
 ## Pins the build writes
 
 - `kernel/ts/test/showcase_magic.test.ts` magic 1 to 9: `spell_words` at each stage with its
-  reason codes; the pool arithmetic (mana 5, 3, 2 after ward, 1 and 0 after the bolts; ash 0, 1, 0 and 1
+  reason codes; the pool arithmetic (ma 5, 3, 2 after ward, 1 and 0 after the bolts; ash 0, 1, 0 and 1
   after the hushed gather, never spent again); the lit and dark crypt listings; `hushed`'s `invalid_state` and its end; the errand's
   resolve on the read and the 30 experience; the wight at 4 then 0 with the caster as killer;
   the warded blow of 1; the bier's `burning` and the stair's smoke cue; the quench with water

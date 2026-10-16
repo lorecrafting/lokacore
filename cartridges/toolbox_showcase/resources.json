@@ -107,7 +107,7 @@
         }
       ]
     },
-    "mana": {
+    "ma": {
       "minimum": 0,
       "maximum": 5,
       "start": 5,
