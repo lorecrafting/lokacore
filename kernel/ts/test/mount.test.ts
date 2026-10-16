@@ -96,15 +96,19 @@ test('case 2: mounted, the horse comes along and the road costs nothing', () => 
   assert.deepEqual([moved(r.world.body), moved(horse(r.world))], [1, 1]);
 });
 
-// Breaks: a horse that is also a group member (G8) moves twice.
-test('case 2b: a ridden horse in the group moves once', () => {
-  const w = ride(
-    yard((c) => (c.world.group = { member: c.world.mount.riding })),
-    'mount',
-  );
+// Breaks: a horse that is also a group member (G8) moves twice, or the mover order (escort, horse,
+// members; mechanics.md Group primitive, Co-move) changes.
+test('case 2b: a ridden horse in the group moves once, before the other members', () => {
+  const w = yard((c) => {
+    c.world.group = { member: c.world.mount.riding };
+    c.facts[`${P}:fact/riding`].value_type.default = true;
+    // An unsaddled member whose EntityId sorts before the horse's, so EntityId order alone fails.
+    const { mount: _, ...cob } = c.npcs[HORSE];
+    c.npcs[`${P}:npc/cob`] = { ...cob, key: 'cob' };
+  });
   const ops = (send(w, { type: 'move', direction: 'north' }).decision as any).delta.ops;
-  const moved = ops.filter((o: any) => o.op === 'entity.transfer' && o.entity_id === horse(w));
-  assert.equal(moved.length, 1);
+  const moved = ops.filter((o: any) => o.op === 'entity.transfer').map((o: any) => o.entity_id);
+  assert.deepEqual(moved, [w.body, horse(w), w.entityIds[`${P}:npc/cob`]]);
 });
 
 // Breaks: the mount's terrain is not checked, or the exits list disagrees with the move.
@@ -150,7 +154,7 @@ test('case 6: riding true but the horse elsewhere or unsaddled: on foot', () => 
   assert.deepEqual(where(go(unsaddled, 'north')), ['road', 'yard', 9]);
 });
 
-// Breaks: cost_percent ignored (or the 100 default is not the default).
+// Breaks: cost_percent ignored, or a mount without it not charged the full fare (default 100).
 test('case 7: cost_percent 50 applies last and floors', () => {
   const half = (c: any) => (c.npcs[HORSE].mount.cost_percent = 50);
   assert.equal(mv(go(ride(yard(half), 'mount'), 'north')), 10);
@@ -159,6 +163,8 @@ test('case 7: cost_percent 50 applies last and floors', () => {
     delete c.world.movement.terrain;
   };
   assert.equal(mv(go(ride(yard(plain), 'mount'), 'north')), 9);
+  const unset = (c: any) => delete c.npcs[HORSE].mount.cost_percent;
+  assert.equal(mv(go(ride(yard(unset), 'mount'), 'north')), 9);
 });
 
 // Breaks: a loader check is missing, misplaced, or refuses the boundary values.
