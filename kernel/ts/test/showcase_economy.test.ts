@@ -375,10 +375,24 @@ test('economy 10: from step 7, hidden ends at hide + 3600; the beeswax lift is s
   valid(s);
 });
 
-// Breaks: the yard's hide, its purse, the watchman's sight, or the fence paying more than his 6.
+// Breaks: the yard's hide, its purse, the watchman's sight, hostility, wanted line or blow, or the
+// fence paying more than his 6.
 test('economy yard theft: lift the yard purse hidden and seen; the fence pays out 6 once', () => {
   let y = walk(fresh(WORLD), 'down', 'down');
-  assert.deepEqual(lift(y, 'yard_purse').lines, ['theft.seen']);
+  const seen = lift(y, 'yard_purse');
+  assert.deepEqual(seen.lines, ['theft.seen']);
+  const back = go(go(seen.world, 'up').world, 'down').world; // wanted: the guard's twin engages
+  const watchman = npc(back, 'watchman');
+  assert.equal(engaged(back, back.body)?.row.npc_id, watchman);
+  assert.equal(
+    describeEntity(back, back.character, watchman, 'room_line'),
+    'npc.watchman.room_wanted',
+  );
+  const round = wait(back, back.state.clock + 150).events;
+  assert.equal(
+    round.find((e) => e.type === 'attack_result' && e.attacker_id === watchman)?.hit,
+    false,
+  );
   y = play(y, { type: 'perform', action: 'yard_hide' }).world;
   assert.deepEqual(labels(y), ['condition.hidden']);
   const t = lift(y, 'yard_purse');
