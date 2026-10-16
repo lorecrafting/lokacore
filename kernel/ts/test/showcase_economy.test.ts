@@ -210,15 +210,15 @@ test('economy 5 branch: cancel before T+3600 returns both ore', () => {
 });
 
 // Breaks: the price table read other than buy[held - 1] (one held 5; four held 1), or the
-// chandler not buying her candles back.
+// chandler not buying her candles back, or the shelf moving more than one candle an hour.
 test('economy prices: one held reads 5; sold back to four, 1', () => {
   let p = walk(ordered, 'south');
   p = play(p, trade(p, 'buy', 'candle_01', 3)).world;
   assert.equal(price(p), 5);
   assert.equal(candles(p, p.body).length, 2);
-  p = play(p, trade(p, 'sell', 'candle_01', 1)).world; // the offer's id; the shop picks which
+  p = wait(p, T + HOUR).world; // one candle an hour: one held becomes two
   assert.equal(price(p), 3);
-  p = wait(p, T + HOUR).world; // the shelf refills her to three
+  p = play(p, trade(p, 'sell', 'candle_01', 1)).world; // the offer's id; the shop picks which
   assert.equal(price(p), 2);
   p = play(p, trade(p, 'sell', 'candle_01', 1)).world;
   assert.equal(candles(p, npc(p, 'chandler')).length, 4);
@@ -232,7 +232,8 @@ test('economy 8: buy the strongroom, unlock, enter, use the chest, lock behind',
   s = play(s, use(s, 'clerk_a', 'buy_strongroom', 5)).world;
   assert.equal(pennies(s), 5);
   assert.equal(fact(s, 'owns_strongroom'), true);
-  s = walk(take(s, 'strongroom_key'), 'west');
+  s = walk(take(s, 'strongroom_key'), 'west', 'north', 'north');
+  s = walk(take(s, 'ore_03'), 'south', 'south'); // no lock of its own: only the chest's get guards it
   assert.deepEqual(
     exit(s, 'south').door!.actions.map((a) => [a.action_key, a.available]),
     [['unlock', true]],
@@ -247,8 +248,10 @@ test('economy 8: buy the strongroom, unlock, enter, use the chest, lock behind',
   assert.equal(refused(disown(s), put), 'permission_denied');
   s = play(s, put).world;
   assert.equal(where(s, key_), chest);
-  assert.equal(refused(disown(s), { type: 'take', item_id: key_ }), 'permission_denied');
-  s = take(s, 'strongroom_key');
+  const ore = id(s, 'item', 'ore_03');
+  s = play(s, { type: 'put', item_id: ore, container_id: chest }).world;
+  assert.equal(refused(disown(s), { type: 'take', item_id: ore }), 'permission_denied');
+  s = take(take(s, 'ore_03'), 'strongroom_key');
   s = play(s, { type: 'close', direction: 'north' }).world;
   s = play(s, { type: 'lock', direction: 'north' }).world;
   assert.equal(door(s), 'locked');
@@ -276,7 +279,7 @@ test('economy 8 branch: without the purchase the key, the door and the room refu
   assert.equal(refused(forced, { type: 'move', direction: 'south' }), 'permission_denied');
 });
 
-// Breaks: the yard shelf's table (one held 3), its hour, its cap of 1, or its crate.
+// Breaks: the yard shelf's table (one held 3, two held 2), its hour, its cap of 1, or its crate.
 test('economy yard: the one-candle shelf sells at 3 and refills at 08:00', () => {
   let y = walk(fresh(WORLD), 'down', 'down');
   const seller = npc(y, 'yard_chandler');
@@ -291,6 +294,7 @@ test('economy yard: the one-candle shelf sells at 3 and refills at 08:00', () =>
   assert.deepEqual(held(y), ['yard_candle_02']);
   assert.equal(price(y, 'yard_chandler', 'yard_candle_01'), 3);
   y = play(y, trade(y, 'sell', 'yard_candle_01', 1, 'yard_chandler')).world;
+  assert.equal(price(y, 'yard_chandler', 'yard_candle_01'), 2);
   assert.deepEqual(held(wait(y, 32400).world), ['yard_candle_01', 'yard_candle_02']);
   valid(y);
 });
