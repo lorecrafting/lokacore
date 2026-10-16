@@ -91,3 +91,13 @@ Verdict: **APPROVE WITH NOTES** at eff67180.
 Open: finding 1, to fix in this round before merge ([WORKFLOW step 7](../WORKFLOW.md): nothing open). Method note: a JSON-only schema mutant stays green in TS, which validates against `contracts.gen.ts`; mutate both.
 
 Verdict: **APPROVE WITH NOTES** at eff671801.
+
+## Second-opinion re-check at 3f2f55e17 (fix round 2)
+
+- Scope: edcda651c and 3f2f55e17 only, against 83b38f7e0. Exact head `3f2f55e170c8c5e97c6da951ae13de4a72446b5d`; hosted CI was still running at the time of writing.
+- Finding 1 fixed: `protocol/gameview.schema.json` EntityView has `"dependentRequired": {"refusal": ["hostile"]}`, and the regenerated `kernel/ts/src/contracts.gen.ts` carries it; Elixir reads the JSON. The expected error of `entity_view_refusal_without_hostile` (`/hostile` `missing_property`) is the schema's required semantics and exact in both kernels.
+- Valid fixtures and the hostile Nell GameView still validate: kernel/ts validate and showcase_social, mix contracts_test, mobile hostile_refusal and ask are green.
+- Sweep for the rule (reverted; worktree clean): TS rule dropped, red; TS dependency renamed to `name`, red; Elixir rule dropped, red. All three fail `invalid fixtures fail with exactly the listed errors`.
+- `docs/system/book-ui.md:298` "can't afford" (`buyReason`) matches `words.ts`.
+
+Verdict: **APPROVE** at 3f2f55e17, provided ci and book-e2e are green on that head.
