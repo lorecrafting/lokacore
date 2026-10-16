@@ -431,9 +431,11 @@ test('S3-1: the settled smith keeps to the square by day and the cottages by nig
   assert.equal(at(w3 as World, 3200)[0], room(w, 'square'));
 });
 
-// Breaks: the schedule's fallback is the square (or a case holds at the default away state).
+// Breaks: either hour's fallback is the square (or a case holds at the default away state).
 test('S3-1: with no smithy the smith stays on the far road', () => {
-  const w = advance(world(), 5000).w;
+  const night = advance(world(), 2000).w;
+  assert.equal(smithAt(night), room(night, 'far_road'));
+  const w = advance(night, 3200).w;
   assert.equal(smithAt(w), room(w, 'far_road'));
   assert.equal(smithState(w), undefined);
 });
