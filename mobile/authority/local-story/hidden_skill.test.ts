@@ -134,14 +134,17 @@ test('a forged choice_ids row is save_corrupt and the file is unchanged', (t) =>
 
 // Breaks: checkRow (dialogue-save.ts) or the choose receipt check (dialogue-receipt.ts) admits a
 // row naming an id the dialogue lacks or dropping a choice that teaches no hidden skill, or a
-// resolved row whose choice_id is not among its choice_ids. Direct: receiptHistory runs only for
-// some feature sets, and here it refuses forged saves before either check.
+// resolved row whose choice_id is not among its choice_ids. Direct: in the reopen tests above,
+// receiptHistory refuses a forged save before either check runs.
 test('checkRow and the choose receipt check refuse a forged row directly', (t) => {
   const dir = mkdtempSync(join(tmpdir(), 'loka-hidden-skill-direct-'));
   t.after(() => rmSync(dir, { recursive: true, force: true }));
   const forge = (w: any, id: string, patch: object) => ({
     ...w,
-    state: { ...w.state, choices: { [id]: { ...w.state.choices[id], ...patch } } },
+    state: {
+      ...w.state,
+      choices: { ...w.state.choices, [id]: { ...w.state.choices[id], ...patch } },
+    },
   });
   const p = opened(join(dir, 'pending.db'));
   p.sql.close();
