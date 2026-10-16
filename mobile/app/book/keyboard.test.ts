@@ -55,7 +55,7 @@ const { Footer } = await import('./Footer.tsx');
 const { StatusLine } = await import('./Status.tsx');
 const { BookView } = await import('./Book.tsx');
 const { CharacterPage } = await import('./sections.tsx');
-const { StatusIcons, Tooltip } = await import('./StatusIcon.tsx');
+const { StatusIcons, Tooltip, ringFraction } = await import('./StatusIcon.tsx');
 
 function browser(t: { after: (cleanup: () => void) => void }) {
   const originalWindow = globalThis.window;
@@ -383,6 +383,8 @@ test('status icons: five then +N, named by label, time and polarity, pictures wh
     five.map(() => ['View', 'image']),
   );
   assert.equal(locked[0].props.accessibilityLabel, 'fed, 48m remaining, buff');
+  // Locked, a debuff goes dim like the Contents button: the neutral look.
+  assert.deepEqual(look(locked[1]), [c.card, c.line, c.dim]);
   const character = CharacterPage({
     view: { time: 720, conditions: five } as any,
     text,
@@ -402,4 +404,62 @@ test('status icons: five then +N, named by label, time and polarity, pictures wh
     'Scarred',
     'Warded · 90s remaining · +5 HP each 60s',
   ]);
+});
+
+// Breaks: the remaining share is not clamped to 0..1, a permanent status (or one without a duration)
+// gets a ring, the arc runs counter-clockwise or starts off 12, or an empty ring keeps an arc
+// (book-ui.md Conditions details; BOOK-UI-COMPONENTS.md, Status icon).
+test('status icon countdown ring: remaining share of the duration, clockwise from 12', () => {
+  const at = (ends_at?: number, duration?: number) =>
+    ({ label: 'fed', kind: 'buff', ends_at, duration, resource: 'mv', tick_every: 1800 }) as any;
+  const share = (ends_at?: number, duration?: number, time = 720) =>
+    ringFraction(at(ends_at, duration), time);
+  assert.equal(share(3600, 3600), 0.8);
+  assert.equal(share(4320, 3600), 1); // exactly full
+  assert.equal(share(4321, 3600), 1); // one past full, clamped
+  assert.equal(share(4000, 3600, 0), 1); // reapplied longer than the duration, clamped
+  assert.equal(share(720, 3600), 0); // exactly empty
+  assert.equal(share(719, 3600), 0); // one past empty, clamped
+  assert.equal(share(undefined, undefined), undefined); // permanent
+  assert.equal(share(3600, undefined), undefined); // no duration
+  assert.equal(share(undefined, 3600), undefined); // no end
+  // The Icon's child: a Ring (track, then halves, then the disc) or the bare disc.
+  const ring = (ends_at?: number, duration?: number) => {
+    const [icon] = StatusIcons({
+      conditions: [at(ends_at, duration)],
+      time: 720,
+      text: (k: string) => k,
+      open: () => {},
+    }).props.children[0];
+    return icon.type(icon.props).props.children;
+  };
+  const halves = (e: any) => {
+    const [track, ...rest] = e.type(e.props).props.children;
+    assert.equal(track.props.style.borderColor, color.light.dim);
+    return rest
+      .filter((h: any) => h && h.props.turn !== undefined)
+      .map((h: any) => [h.props.right ? 'right' : 'left', h.props.turn, h.props.color]);
+  };
+  const fg = color.light.fg;
+  assert.deepEqual(halves(ring(3600, 3600)), [
+    ['right', 0, fg],
+    ['left', 108, fg],
+  ]); // 288 degrees
+  assert.deepEqual(halves(ring(1620, 3600)), [['right', -90, fg]]); // a quarter: 12 to 3 o'clock
+  assert.deepEqual(halves(ring(2520, 3600)), [['right', 0, fg]]); // exactly half: no left
+  assert.deepEqual(halves(ring(720, 3600)), []); // empty: the track only
+  // Each half clips its own side of the 34 px ring box and turns about the ring's centre.
+  const [, right, left] = ring(3600, 3600).type(ring(3600, 3600).props).props.children;
+  const place = (h: any) => {
+    const clip = h.type(h.props);
+    return [clip.props.style.left, clip.props.children.props.style.left];
+  };
+  assert.deepEqual(
+    [place(right), place(left)],
+    [
+      [17, -17],
+      [0, 0],
+    ],
+  );
+  assert.equal(ring(undefined, undefined).props.look, 'buff'); // permanent: the bare disc
 });

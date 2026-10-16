@@ -2,7 +2,7 @@
 // graphic-only icon per condition, five then a +N disc. A tap opens Character; a hold (a hover on
 // web) shows the label and time left in the Tip's look. Locked (scene, combat, chapter page), the
 // discs are pictures, not buttons.
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Animated, Pressable, Text, View } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { useReducedMotion } from './fade.ts';
@@ -13,6 +13,7 @@ import { motion, radius, size, space, type } from './tokens.ts';
 
 type Say = (key: string) => string;
 type Look = 'buff' | 'debuff' | 'neutral';
+type Condition = NonNullable<GameView['conditions']>[number];
 type Props = {
   conditions: NonNullable<GameView['conditions']>;
   time: number;
@@ -21,6 +22,12 @@ type Props = {
 };
 
 const SHOWN = 5; // icons before the +N disc
+
+// The share of a timed status's duration still to run, 0 to 1, on each render; none when permanent.
+export const ringFraction = (c: Condition, time: number) =>
+  c.ends_at === undefined || c.duration === undefined
+    ? undefined
+    : Math.min(1, Math.max(0, (c.ends_at - time) / c.duration));
 
 export function StatusIcons(p: Props) {
   // The held icon's label, so the tip follows the clock and goes with the icon or the lock.
@@ -35,6 +42,7 @@ export function StatusIcons(p: Props) {
           key={`${x.label}-${i}`}
           look={x.kind ?? 'neutral'}
           name={[statusTip(x, p.time, p.text), x.kind].filter(Boolean).join(', ')}
+          fraction={ringFraction(x, p.time)}
           hold={(on) => setHeld(on ? x.label : undefined)}
           open={p.open}
         >
@@ -60,11 +68,15 @@ const looks = (c: Palette) => ({
 function Icon(p: {
   look: Look;
   name: string;
+  fraction?: number; // the countdown ring's remaining arc; absent, no ring
   hold?: (on: boolean) => void;
   open?: () => void;
   children: string;
 }) {
-  const disc = <Disc look={p.look}>{p.children}</Disc>;
+  // Locked, the disc goes dim like the Contents button (neutral: dim glyph; dim on a debuff's fg fill
+  // would not read).
+  const face = <Disc look={p.open ? p.look : 'neutral'}>{p.children}</Disc>;
+  const disc = p.fraction === undefined ? face : <Ring fraction={p.fraction}>{face}</Ring>;
   const box = {
     width: size.touch,
     height: size.touch,
@@ -97,8 +109,71 @@ function Icon(p: {
   );
 }
 
-// The disc alone, so the countdown ring (loka-x6t.65) can wrap it: size.statusIcon plus a
-// size.rule ring on each side still fits the size.touch box, so row spacing stays.
+// The countdown ring (loka-x6t.65): a dim track and the remaining arc in fg, clockwise from 12,
+// a space.hair gap round the disc and inside the size.touch box, so row spacing stays. Two clipped
+// halves turn a half ring each: the right shows 0-180 degrees, the left the rest.
+const RING = size.statusIcon + 2 * (space.hair + size.rule);
+function Ring(p: { fraction: number; children: ReactNode }) {
+  const c = usePalette();
+  const deg = 360 * p.fraction;
+  return (
+    <View style={{ width: RING, height: RING, alignItems: 'center', justifyContent: 'center' }}>
+      <View style={{ ...circle, borderColor: c.dim }} />
+      {deg > 0 && <Half right turn={Math.min(deg, 180) - 180} color={c.fg} />}
+      {deg > 180 && <Half turn={deg - 180} color={c.fg} />}
+      {p.children}
+    </View>
+  );
+}
+const circle = {
+  position: 'absolute',
+  width: RING,
+  height: RING,
+  borderRadius: RING / 2,
+  borderWidth: size.rule,
+} as const;
+
+// One half of the box, clipping a right half ring turned about the ring's centre.
+function Half(p: { right?: boolean; turn: number; color: string }) {
+  const half = RING / 2;
+  return (
+    <View
+      style={{
+        position: 'absolute',
+        top: 0,
+        left: p.right ? half : 0,
+        width: half,
+        height: RING,
+        overflow: 'hidden',
+      }}
+    >
+      <View
+        style={{
+          position: 'absolute',
+          left: p.right ? -half : 0,
+          width: RING,
+          height: RING,
+          transform: [{ rotate: `${p.turn}deg` }],
+        }}
+      >
+        <View
+          style={{
+            ...circle,
+            left: half,
+            width: half,
+            borderLeftWidth: 0,
+            borderRadius: 0,
+            borderTopRightRadius: half,
+            borderBottomRightRadius: half,
+            borderColor: p.color,
+          }}
+        />
+      </View>
+    </View>
+  );
+}
+
+// The disc alone, so the countdown ring can wrap it.
 function Disc(p: { look: Look; children: string }) {
   const l = looks(usePalette())[p.look];
   return (

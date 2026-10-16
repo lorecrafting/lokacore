@@ -5,9 +5,17 @@ import { useState } from 'react';
 import { expect, fireEvent, fn, waitFor } from 'storybook/test';
 import { StatusIcons } from '../book/StatusIcon.tsx';
 
+// A timed status lasts an hour (duration 3600), so its countdown ring shows what is left of it.
 const at = (label: string, kind?: 'buff' | 'debuff', ends_at?: number) =>
-  ({ label, kind, ends_at, resource: 'mv', tick_every: 1800 }) as never; // label is a TextKey
-const fed = at('condition.fed', 'buff', 3600);
+  ({
+    label,
+    kind,
+    ends_at,
+    duration: ends_at === undefined ? undefined : 3600,
+    resource: 'mv',
+    tick_every: 1800,
+  }) as never; // label is a TextKey
+const fed = at('condition.fed', 'buff', 3600); // 80 % left: the ring's arc runs 12 round to 10
 const poisoned = at('poisoned', 'debuff', 960);
 const rested = at('rested', undefined, 1320);
 const scarred = at('scarred', 'debuff');
@@ -151,3 +159,16 @@ export const Focused: Story = {
     await none();
   },
 };
+
+// The countdown ring (loka-x6t.65): a dim track and the fg arc of what is left, clockwise from 12,
+// no motion. Full: the whole hour left.
+export const RingFull: Story = { args: { conditions: [at('condition.fed', 'buff', 4320)] } };
+
+// 80 %: 288 degrees, 12 round to about 10 o'clock (Buff's fed).
+export const RingEighty: Story = { args: { conditions: [fed] } };
+
+// Near empty: a minute of the hour left, a sliver right of 12.
+export const RingNearEmpty: Story = { args: { conditions: [at('condition.fed', 'buff', 780)] } };
+
+// Permanent (scarred): no ring.
+export const RingPermanent: Story = { args: { conditions: [scarred] } };
