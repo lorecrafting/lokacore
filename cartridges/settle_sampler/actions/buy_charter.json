@@ -15,9 +15,19 @@
   "policy": {
     "policy_version": 1,
     "root": {
-      "op": "fact_compare",
-      "fact": "charter_sold",
-      "equals": false
+      "op": "any",
+      "items": [
+        {
+          "op": "fact_compare",
+          "fact": "owns_charter",
+          "equals": true
+        },
+        {
+          "op": "fact_compare",
+          "fact": "charter_sold",
+          "equals": false
+        }
+      ]
     }
   },
   "accessibility": "service.buy_charter"
