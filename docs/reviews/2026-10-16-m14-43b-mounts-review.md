@@ -2,7 +2,7 @@
 
 - Branch `toolbox/m14-43b`, exact head `21879924c0fb5a240c03a226ee9a234c0be65e62`, base `e31edbb8` (batch `toolbox/batch-m14`). No PR yet.
 - Governing: [mechanics.md Mounts](../system/mechanics.md#mounts-toolbox-row-43b), [cartridge.md mount declarations](../system/cartridge.md#mount-declarations), [composition](../system/architecture.md#building-mechanics-by-composition), [WORKFLOW review stance](../WORKFLOW.md). PM rulings 1 to 6 in the Beads brief.
-- Written 2026-10-16 by anthropic/claude-opus-5-5. Verdict: **CHANGES REQUIRED** (one blocker).
+- Written 2026-10-16 by anthropic/claude-opus-5-5. First-pass verdict: CHANGES REQUIRED (one blocker). Final verdict after fix round 1 at the end: APPROVE WITH NOTES.
 
 ## Must be true (written before the diff)
 
@@ -39,3 +39,13 @@ Handback claims rerun: "no new save field" holds (diffstat). The `/code-review` 
 ## Disposition
 
 Pending the fix round.
+
+## Fix round 1: head `3afabb9f4b5d9d74492d69eb031e82972ec30d9e`
+
+Scope: `kernel/ts/test/mount.test.ts` (the only code change), plus the flee path at `sequence.ts:142`. Verdict: **APPROVE WITH NOTES**. Hosted CI was still running at the time of review.
+
+- Finding 1 resolved: case 7 now deletes `cost_percent` and expects mv 9, the same as the on-foot case 1. The value is independent of the code. `?? 0` gives mv 10 (verified by reading).
+- Finding 2 resolved for horse before members: case 2b pins `[body, horse, cob]`, and cob sorts before the horse. Mutant `[escort, ...members, horse]` (`escort/shared.ts:163`) is red. Escort before horse stays unpinned, because that case needs quest and escort declarations. Accepted.
+- Finding 3: the round 1 `/code-review` result is reported.
+- Flee with a ridden hostile opponent, run once in a scratch test and deleted: the combat fixture after `attack`, with the rat given a `mount` and riding true. Flee is accepted, and the proposal composes, so the invariant deltas hold. The ops are `entity.transfer` (body), `entity.transfer` (rat), `encounter.close` and `job.cancel`. The rat ends in the rider's new room with no open encounter. The next ordinary move is accepted, the rat comes along, and no new encounter opens. No save or invariant break, so it is a known limit to document. The same holds for a ridden horse ordered to stay.
+- Open: `mechanics.md` Mounts should name both limits (PM inclination).
