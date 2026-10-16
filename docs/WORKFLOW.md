@@ -260,6 +260,8 @@ item or too much complexity. Mechanics, save, protocol or engine items leave the
 
 ## Token hygiene
 
+- At each handback and review completion the PM appends a Beads note `COST <role> <model> <tokens>` from the completion notice; the batch merge note sums them.
+- The PM cannot read the usage meter (it reaches only the owner's status line). At session start and before a fan-out of 3+ agents or a Fable run, it asks the owner for the weekly bar, or proceeds when the owner has said to. Near the cap: see the Budget line in [HANDOFF](HANDOFF.md).
 - Big outputs stay out of every agent's context, subagents' too: the PM delegates logs, diffs
   and check runs; any agent sends a check, test or push run to a scratchpad file named for the
   slice and reads only the exit status, the failing lines and the tail. Diffs a developer or

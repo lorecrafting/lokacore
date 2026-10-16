@@ -30,7 +30,7 @@ pre=$(git rev-parse HEAD)
 merge() { # <ref> <message>
   if git -c merge.conflictStyle=diff3 merge --no-ff -q "$1" -m "$2" -m "$tr" >/dev/null 2>&1; then echo "MERGED $1"; return 0; fi
   c=$(git diff --name-only --diff-filter=U)
-  # The known additive conflicts (bin/merge_resolve.py: mechanics.md tail sections, the kernel_api
+  # The known additive conflicts (bin/merge_resolve.py: mechanics.md sections, toolbox rows, loader floors, the kernel_api
   # line, generated files, docs/reviews/README.md and whitespace-only review records) are resolved; any other conflict stops the merge.
   if [ -n "$c" ] && python3 "$here/merge_resolve.py" >"${TMPDIR:-/tmp}/pm_resolve.out" 2>&1 &&
     git commit -q --no-edit >/dev/null 2>&1; then
