@@ -6,7 +6,7 @@ the next steps, the standing owner rules that the repo does not yet state, and o
 questions. Rewrite it at each stable checkpoint (a merge, a review verdict, a pushed fix) and before
 the session ends; commit and push it with the Beads export.
 
-Written 2026-10-15 UTC by Claude Code (Opus 5.5) in local session 01da56d0 (after fc1e2fd7). State at
+Written 2026-10-15 UTC by Claude Code (Opus 5.5) in local session 01da56d0 (after fc1e2fd7), at session end. State at
 writing: see "In flight" below.
 
 ## Start of a session
@@ -38,38 +38,52 @@ writing: see "In flight" below.
 
 ## Lane and next steps
 
-Mechanics toolbox (epic `loka-kgd`, [MECHANICS-TOOLBOX.md](MECHANICS-TOOLBOX.md)) is the build lane;
-Storybook polish (`loka-x6t`) stays paused. The PM decides mechanics calls itself and records them in
-Beads notes. Owner product order ([record](decisions/owner-decision-product-order-2026-10-15.md)): **no Chapter 1 yet**; finish
-all showcases (placeholders where lore is missing), then UI polish, then worldbuilding, then the
-official Chapters 1-3; temporary test cartridges or showcases are welcome any time.
+Owner order (2026-10-15, this session; records go in the next decisions PR): **showcase first** (fix
+the open showcase bugs, finish slice D, add districts for the mechanics already built), then **M14**
+(trimmed) and **M15** (trimmed), each with its showcase district, then **UI polish** over the whole
+showcase, then the measuring and balance tools (`loka-kgd.107`), then worldbuilding, then the official
+Chapters 1-3. Storybook polish (`loka-x6t`) stays paused until the polish phase. The PM decides
+mechanics calls itself and records them in Beads notes ([product order record](decisions/owner-decision-product-order-2026-10-15.md)
+is the earlier order; this session's answers refine it).
 
 Done this session (01da56d0):
-- #402 (`loka-kgd.108`, Homestead batch B) merged (merge 03f3181c, head b3da3d8a green): kernel_api 1.102
-  bump `loka-kgd.108.15` (Opus review APPROVE); Fable batch review APPROVE WITH NOTES, one fix round
-  (known nits + skill `hidden` gated at 1.102), Fable re-check APPROVE; Fable designer approved the
-  book-ui.md Conditions ring text. Slice issues, `loka-x6t.60`, branches, review branches and worktrees
-  removed. Record `docs/reviews/2026-10-15-homestead-b-batch-review.md`.
-- `loka-mytp` (Settle S3) unblocked: its blocks on `loka-kgd.108` / `.109` removed (those epics stay open
-  only for P3 follow-ups `.108.12`, `.108.13`, `loka-trex`, `loka-z4cp`).
-- Designer spawns are Fable, never Sonnet (owner 2026-10-15, quoted: "wait sonnet should never be a
-  designer, wasn't it fable designer?"); Sonnet only for a live-session picker nit.
+- #402 (`loka-kgd.108`, Homestead batch B) merged (head b3da3d8a green): kernel_api 1.102 bump
+  `loka-kgd.108.15`; Fable batch review APPROVE WITH NOTES, one fix round, Fable re-check APPROVE; Fable
+  designer approved the Conditions ring text. Slice issues, `loka-x6t.60`, branches and worktrees removed.
+- Settle: Fable briefs stored (`loka-mytp.1`-`.6`, `loka-oxgk.1`-`.2`); settle-1 `narrate` step and
+  settle-2 plan move built and reviewed; settle-3 (charter, smithy, smith; one charter per world) built,
+  reviewed APPROVE, CI green, PARKED on `toolbox/settle-3` (2e346d85) for the Settle expansion. Owner
+  tabled settlements: `loka-mytp`, `loka-oxgk` and settle-3..8 deferred. Townsfolk design (owner):
+  generated townsfolk, role-holders authored, names from an authored list (PM: pick by hash of the entity
+  id, no RNG, no save field); no brief yet.
+- #403 (`loka-mytp.1`/`.2`, narrate and plan-move engine steps, kernel_api 1.103) opened from
+  `toolbox/batch-settle`: Opus review APPROVE WITH NOTES (record `docs/reviews/2026-10-15-pr403-narrate-plan-move-review.md`,
+  cherry-picked), docs fix round done (doc and comment only, PM checked), head f262e3e0.
+- Follow-ups: `loka-kgd.159` (spawn then plan move in one cascade faults). Deferred: `loka-kgd.160`
+  chapter carry-over (rows 48-48c) until a solid Chapter 1 and a Chapter 2; `loka-kgd.161` tabled rows:
+  languages and literacy, public player writing, race objective, pet growth.
+- Retro filed: `loka-aa75`, `loka-gfgr`, `loka-9pio`, `loka-d89z`, `loka-1qa2` (await owner approval).
 
-In flight: one Fable agent drafts the Settle S3/S4 briefs from `docs/rnd/settle-design-2026-10-14.md`
-into the session scratchpad (`settle-briefs.md`); the PM stores each brief in its Beads issue before any spawn.
+In flight: none (no agent running). #403 CI (ci, book-e2e) was running on f262e3e0 at writing.
 
 Next, in order:
-1. Settle batch `toolbox/batch-settle` from main: store the Fable briefs (S3-1 charter+arrival, S3-2
-   keep+services, S3-3 trade+ledger, S4-1 band, S4-2 protect+reclaim, then the Settle showcase district;
-   owner answers in `loka-mytp` notes), kernel_api 1.103, then the usual batch close (Fable review, one
-   fix round, merge).
-2. Measuring-tools batch: recheck `loka-kgd.107` notes first; 107.1, .2, .5, .8 are already closed, so
-   what remains is about `.9` (replay diff as a PR comment) and `.20` (scheduled content graph).
-3. M14, M15; number-based balance tools after M15.
-4. Follow-ups: `loka-kgd.108.12`, `.108.13`, `loka-trex`, `loka-z4cp`, `loka-x6t.53`, `.54`, `.66`; polish
-   items `loka-x6t.56`-`.62` wait for the UI polish phase.
-5. Retro items awaiting owner approval: `loka-x3i0`, `loka-59uu`, `loka-z2j2`, `loka-ei7a`, `loka-mluq`,
-   `loka-8zqg` (PM recommends all).
+1. #403: when ci and book-e2e are green on f262e3e0 (`gh run list --commit f262e3e0...`), merge
+   (`gh pr merge 403 --merge --match-head-commit f262e3e094dea50f08d49f84c191a58c1651f702`), then
+   `bin/after_merge.sh 403 loka-mytp.1`, close `loka-mytp.2`, delete `toolbox/settle-1`, `toolbox/settle-2`
+   (local and remote) and `review-403`; KEEP `toolbox/settle-3` (parked). If after_merge removes the
+   batch-settle worktree, fine.
+2. Decisions PR (Sonnet developer, short review): records for this session's owner answers (Settle
+   tabled; generated townsfolk + name list; carry-over deferred; rows tabled; order showcase -> M14 ->
+   M15 -> UI polish); toolbox rows 48-48c and the tabled rows marked deferred; SHOWCASE.md unchanged.
+3. Showcase: fix `loka-y6yg.8`, `.9`, `.15`, `.16`, `.17`; finish slice D `loka-y6yg.4` (in progress:
+   read its notes first). Then a Fable plan for the new districts (Homestead, economy/law, magic/use-on,
+   traps if ready) per docs/SHOWCASE.md "How a batch adds a district", with AI playtest per district.
+4. M14 trimmed (trial, jail, terrain and mounts, companion remarks), M15 trimmed (death penalty, private
+   journal notes and map pins, Chronicle); then UI polish.
+5. Follow-ups: `loka-kgd.108.12`, `.108.13`, `loka-kgd.159`, `loka-trex`, `loka-z4cp`, `loka-x6t.53`,
+   `.54`, `.66`.
+6. Retro items awaiting owner approval: `loka-x3i0`, `loka-59uu`, `loka-z2j2`, `loka-ei7a`, `loka-mluq`,
+   `loka-8zqg`, and this session's five above (PM recommends all).
 
 Merge mechanics: `bin/pm_merge.sh <batch-worktree> <batch-branch> <slice-branch> <review-branch or the
 sha> "<subject>" <reviewed-sha>` (refuses a non-green sha). It stops on stacked additive conflicts in
@@ -78,7 +92,13 @@ merge by hand, keep both sides, run `elixir bin/contracts.exs`, `bin/review_inde
 push. Batch worktree: `../worktrees.noindex/batch-homestead-b`. `bin/after_merge.sh` now works with the
 owner's untracked `scripts/`.
 
-Session lessons (2026-10-15, b5fe9338, 8c186cca and fc1e2fd7):
+Session lessons (2026-10-15, b5fe9338, 8c186cca, fc1e2fd7 and 01da56d0):
+- Designer spawns are Fable, never Sonnet (owner: "wait sonnet should never be a designer, wasn't it
+  fable designer?"); Sonnet only for a live-session picker nit.
+- `/code-review` read the main checkout 5 times even with the brief line (retro `loka-aa75`); the
+  reviewer's full read covered each miss.
+- A slice that changes a protocol schema needs a review record even in a toolbox batch (retro `loka-1qa2`).
+- Blocks deps between batch slices stop `br update --status in_progress` (retro `loka-gfgr`).
 - One brief for an M engine + save + content row (hs-9) cost the developer about 650k tokens before
   review: split such rows at brief time (evidence on `loka-3jhb`).
 - A developer pushed with a stale generated file (hs-9 `state-sections.gen.json`), and a hook switch
@@ -135,6 +155,14 @@ Session lessons (2026-10-15, b5fe9338, 8c186cca and fc1e2fd7):
 - Agents must never run `git worktree prune` while another agent's worktree is in use.
 
 ## Owner answers this session
+
+- 2026-10-15 (session 01da56d0, quoted unless marked): usage "69% for weekly usage.  we're good, keep
+  going"; "lets have generated residents" + choices "Generated townsfolk (Recommended)", "Authored name
+  list (Recommended)"; "Hm lets table settlements for now i think homesteads is a good start and
+  settlements can be an expansion later" + "Land engine steps only (Recommended)"; "Can we defer chapter
+  carryover until we have a real solid chapter and then a second to carry over into?"; tabled
+  "Languages and literacy", "Player writing (public)", "Race and pet growth"; "We want to get to the
+  showcase so we can do ui polish" + "Showcase next (Recommended)"; "Lets do ui polish after m15".
 
 - 2026-10-15 (session fc1e2fd7, quoted): "Lets put teh countdown timer on the rings for the icons";
   "yes we want smooth live countdown for the cooldown timer ring"; usage: "we're good just keep going";
