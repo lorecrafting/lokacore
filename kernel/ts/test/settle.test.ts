@@ -378,8 +378,8 @@ test('S3-1: a stranger may not take from the storehouse chest; the charter opens
 
 // Breaks: buy_charter loses its charter_sold policy, or the fact_changed rule stops setting it: a
 // second character buys the town's one charter; or the policy also refuses the holder, hiding
-// already_paid. The stranger is this character with owns_charter
-// cleared, 11 pennies left (the test world has one character).
+// already_paid. The stranger is this character with owns_charter cleared, 11 pennies left (the
+// test world has one character).
 test('S3-1: once the charter is sold, a second buyer is refused', () => {
   const w = bought(world());
   const stranger = structuredClone(w) as any;
@@ -387,6 +387,7 @@ test('S3-1: once the charter is sold, a second buyer is refused', () => {
   assert.ok(held.length > 0);
   for (const k of held) delete stranger.state.facts[k];
   // The policy refusal carries no message; the holder still gets the service's own already_paid.
+  assert.equal(offer(stranger, 'buy_charter')?.available, false);
   assert.deepEqual(offer(stranger, 'buy_charter')?.reason, { code: 'invalid_state' });
   assert.equal(code(buy(stranger)), 'invalid_state');
   assert.equal(offer(w, 'buy_charter')?.reason?.message?.key, 'service.already_paid');
