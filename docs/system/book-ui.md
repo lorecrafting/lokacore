@@ -58,7 +58,10 @@ Standalone exit directions, adjacent-sight listings and redundant navigation/
 Look headings are omitted using structured outcome/TextKeys, never English matching. Under the owner's
 explicit per-room clearing direction, the World event log scopes
 to the actual room: after a confirmed accepted action changes place, clear the old-room log
-before adding genuine new movement/quest/authored consequences. Attempts, pending/refused/stale
+before adding genuine new movement/quest/authored consequences. The room shown is the one the
+committed receipt places the player in, never the exit's destination: an arrest (a wanted player
+walking in on an arresting guard) turns the World page to the cell, and its log carries the move's
+lines in receipt order (arrest line, then the reaction's charge). No card, note or banner. Attempts, pending/refused/stale
 results, rerenders, same-room NPC actions, Leave and section navigation do not clear it. Active
 save status/error UI remains accurate; NPC histories stay independently bounded. Map
 retains movement, adjacent sight and legal door actions. The World minimap/joystick sits outside
@@ -1042,7 +1045,7 @@ GameView `cues` lists the [sense cues](mechanics.md#sense-cues-sound-smell-and-h
 
 ## Aside details
 
-GameView `place.asides` and a notice's `asides` are the character's own mind noticing more ([passive skill voices](mechanics.md#passive-skill-voices-toolbox-row-fd2)). Each is one quiet line, in projected order, as one block directly after the authored description: on World before the exit warnings, on a detail before its projected item state. The skill is in the authored words, never a label, icon or colour; the line is not pressable, carries no touch link (link markup shows as plain words) and its accessible name is its text. No asides, no block: Chapter 1 declares none. The presenter never decides which aside holds.
+GameView `place.asides`, a notice's `asides` and an NPC's `asides` are quiet lines: the character's own mind noticing more ([passive skill voices](mechanics.md#passive-skill-voices-toolbox-row-fd2)) or a present person's remark ([companion remarks](mechanics.md#companion-remarks-npc-asides-toolbox-row-fd10)). Each is one Note, in projected order, as one block directly after its owner: room asides after the authored description, on World before the exit warnings, on a detail before its projected item state; on World the present people's asides, in listed then authored order, form one block right after the people, before the loose items; on an NPC's page its asides come right after its description. The skill or speaker is in the authored words, never a label, icon or colour; the line is not pressable, carries no touch link (link markup shows as plain words) and its accessible name is its text. No asides, no block. Darkness is the engine's omission: a dark room carries no `place.asides`, while a perceived NPC's asides arrive and show; the presenter never decides which aside holds.
 
 ## Lore details
 
@@ -1079,3 +1082,7 @@ GameView `storylet` names the one place action the [storylet deck](mechanics.md#
 Skills without profession keep today's acquired lines. After the xp line and before the Raise cards, each profession in first-listed order is a SectionTitle, then its listed boxes in GameView order: acquired as body text "Whittling, level 2 — qualified; <requirement>" (", level N" only when projected); locked as a Note "Carving — locked; <requirement>"; any other unacquired box as a Note "Joinery — not learned; <requirement>" (the same Note). The Book draws only listed skills: a hidden box and an empty profession draw nothing.
 
 An NPC's lesson line reads `locked` in place of `not learned` while the skill's projected `locked` is true (proposed, pending designer approval, loka-kgd.108.11).
+
+## Mount details
+
+Riding shows nowhere but the horse's saddled description variant and the mv fare; a non-road exit while mounted is the ordinary barred exit ("East: not now", no Go). No indicator, icon or status line text. Action choice labels are bare imperatives without a trailing period.

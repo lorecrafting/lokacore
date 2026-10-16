@@ -1,0 +1,382 @@
+{
+  "description": "Pinned artifact of cartridges/mount_sampler (Mounts, toolbox row 43b; cartridge.md Mount declarations): value is the compiler's output; canonical and sha256 were recomputed in Python (sorted compact JSON, SHA-256). Kept in sync with the compiler by test/loka/content_mount_test.exs and with the TS loader by kernel/ts/test/mount.test.ts.",
+  "value": {
+    "actions": {},
+    "dialogues": {
+      "mount_sampler@0.0.1:dialogue/horse_dismount": {
+        "choices": {
+          "dismount": {
+            "label": "dialogue.horse.dismount",
+            "narration": "narration.horse.dismount",
+            "sequence": [
+              {
+                "fact": {
+                  "cartridge_id": "mount_sampler",
+                  "cartridge_version": "0.0.1",
+                  "key": "riding",
+                  "kind": "fact"
+                },
+                "op": "fact.assign",
+                "value": false
+              }
+            ]
+          }
+        },
+        "key": "horse_dismount",
+        "npc": {
+          "cartridge_id": "mount_sampler",
+          "cartridge_version": "0.0.1",
+          "key": "horse",
+          "kind": "npc"
+        },
+        "policy": {
+          "policy_version": 1,
+          "root": {
+            "equals": true,
+            "fact": {
+              "cartridge_id": "mount_sampler",
+              "cartridge_version": "0.0.1",
+              "key": "riding",
+              "kind": "fact"
+            },
+            "op": "fact_compare",
+            "subject": "target"
+          }
+        },
+        "prompt": "dialogue.horse.prompt",
+        "roles": {
+          "horse": {
+            "npc": {
+              "cartridge_id": "mount_sampler",
+              "cartridge_version": "0.0.1",
+              "key": "horse",
+              "kind": "npc"
+            },
+            "role": "npc"
+          }
+        }
+      },
+      "mount_sampler@0.0.1:dialogue/horse_mount": {
+        "choices": {
+          "mount": {
+            "label": "dialogue.horse.mount",
+            "narration": "narration.horse.mount",
+            "sequence": [
+              {
+                "fact": {
+                  "cartridge_id": "mount_sampler",
+                  "cartridge_version": "0.0.1",
+                  "key": "riding",
+                  "kind": "fact"
+                },
+                "op": "fact.assign",
+                "value": true
+              }
+            ]
+          }
+        },
+        "key": "horse_mount",
+        "npc": {
+          "cartridge_id": "mount_sampler",
+          "cartridge_version": "0.0.1",
+          "key": "horse",
+          "kind": "npc"
+        },
+        "policy": {
+          "policy_version": 1,
+          "root": {
+            "equals": false,
+            "fact": {
+              "cartridge_id": "mount_sampler",
+              "cartridge_version": "0.0.1",
+              "key": "riding",
+              "kind": "fact"
+            },
+            "op": "fact_compare",
+            "subject": "target"
+          }
+        },
+        "prompt": "dialogue.horse.prompt",
+        "roles": {
+          "horse": {
+            "npc": {
+              "cartridge_id": "mount_sampler",
+              "cartridge_version": "0.0.1",
+              "key": "horse",
+              "kind": "npc"
+            },
+            "role": "npc"
+          }
+        }
+      }
+    },
+    "entry": {
+      "cartridge_id": "mount_sampler",
+      "cartridge_version": "0.0.1",
+      "key": "yard",
+      "kind": "room"
+    },
+    "facts": {
+      "mount_sampler@0.0.1:fact/riding": {
+        "key": "riding",
+        "meaning": "Whether the character is riding this mount.",
+        "per_subject": true,
+        "scopes": [
+          "player"
+        ],
+        "value_type": {
+          "default": false,
+          "type": "bool"
+        },
+        "version": 1
+      }
+    },
+    "format": "loka-cartridge-v2",
+    "lock": {
+      "capabilities": {
+        "containment": 1,
+        "description_variant": 1,
+        "dialogue": 1,
+        "fact": 1,
+        "movement": 1,
+        "policy": 1,
+        "resource": 1,
+        "schedule": 1,
+        "tags": 1
+      },
+      "format": "loka-capability-lock-v1"
+    },
+    "manifest": {
+      "api_version": "loka/v3",
+      "id": "mount_sampler",
+      "requires": {
+        "capabilities": {
+          "containment": 1,
+          "description_variant": 1,
+          "dialogue": 1,
+          "fact": 1,
+          "movement": 1,
+          "policy": 1,
+          "resource": 1,
+          "schedule": 1,
+          "tags": 1
+        },
+        "client_features": [],
+        "content_schema": 1,
+        "kernel_api": {
+          "at_least": "1.108",
+          "below": "2.0"
+        },
+        "rule_ir": 1
+      },
+      "supported_profiles": [
+        "offline_private"
+      ],
+      "title": "Mount Sampler",
+      "version": "0.0.1"
+    },
+    "npcs": {
+      "mount_sampler@0.0.1:npc/horse": {
+        "description": "npc.horse.description",
+        "description_variants": [
+          {
+            "description": "npc.horse.saddled",
+            "when": {
+              "policy_version": 1,
+              "root": {
+                "equals": true,
+                "fact": {
+                  "cartridge_id": "mount_sampler",
+                  "cartridge_version": "0.0.1",
+                  "key": "riding",
+                  "kind": "fact"
+                },
+                "op": "fact_compare",
+                "subject": "target"
+              }
+            }
+          }
+        ],
+        "key": "horse",
+        "keywords": [
+          "horse"
+        ],
+        "mount": {
+          "cost_percent": 0,
+          "terrain": [
+            "road"
+          ]
+        },
+        "room": {
+          "cartridge_id": "mount_sampler",
+          "cartridge_version": "0.0.1",
+          "key": "yard",
+          "kind": "room"
+        },
+        "room_line": "npc.horse.room",
+        "short": "npc.horse.short"
+      }
+    },
+    "policies": {},
+    "resources": {
+      "mount_sampler@0.0.1:resource/hp": {
+        "gain": 5,
+        "key": "hp",
+        "maximum": 20,
+        "minimum": 0,
+        "start": 20
+      },
+      "mount_sampler@0.0.1:resource/ma": {
+        "gain": 4,
+        "key": "ma",
+        "maximum": 100,
+        "minimum": 0,
+        "start": 100
+      },
+      "mount_sampler@0.0.1:resource/mv": {
+        "gain": 0,
+        "key": "mv",
+        "maximum": 10,
+        "minimum": 0,
+        "start": 10
+      }
+    },
+    "rooms": {
+      "mount_sampler@0.0.1:room/fen": {
+        "description": "room.fen.description",
+        "exits": {
+          "west": {
+            "to": {
+              "cartridge_id": "mount_sampler",
+              "cartridge_version": "0.0.1",
+              "key": "road",
+              "kind": "room"
+            }
+          }
+        },
+        "key": "fen",
+        "tags": [
+          "marsh"
+        ],
+        "title": "room.fen.title"
+      },
+      "mount_sampler@0.0.1:room/ford": {
+        "description": "room.ford.description",
+        "exits": {
+          "north": {
+            "to": {
+              "cartridge_id": "mount_sampler",
+              "cartridge_version": "0.0.1",
+              "key": "yard",
+              "kind": "room"
+            }
+          }
+        },
+        "key": "ford",
+        "tags": [
+          "road",
+          "marsh"
+        ],
+        "title": "room.ford.title"
+      },
+      "mount_sampler@0.0.1:room/road": {
+        "description": "room.road.description",
+        "exits": {
+          "east": {
+            "to": {
+              "cartridge_id": "mount_sampler",
+              "cartridge_version": "0.0.1",
+              "key": "fen",
+              "kind": "room"
+            }
+          },
+          "south": {
+            "to": {
+              "cartridge_id": "mount_sampler",
+              "cartridge_version": "0.0.1",
+              "key": "yard",
+              "kind": "room"
+            }
+          }
+        },
+        "key": "road",
+        "tags": [
+          "road"
+        ],
+        "title": "room.road.title"
+      },
+      "mount_sampler@0.0.1:room/yard": {
+        "description": "room.yard.description",
+        "exits": {
+          "north": {
+            "to": {
+              "cartridge_id": "mount_sampler",
+              "cartridge_version": "0.0.1",
+              "key": "road",
+              "kind": "room"
+            }
+          },
+          "south": {
+            "to": {
+              "cartridge_id": "mount_sampler",
+              "cartridge_version": "0.0.1",
+              "key": "ford",
+              "kind": "room"
+            }
+          }
+        },
+        "key": "yard",
+        "tags": [
+          "road"
+        ],
+        "title": "room.yard.title"
+      }
+    },
+    "text": {
+      "dialogue.horse.dismount": "Dismount",
+      "dialogue.horse.mount": "Mount the horse",
+      "dialogue.horse.prompt": "The horse flicks an ear at you.",
+      "narration.horse.dismount": "You slide down from the saddle.",
+      "narration.horse.mount": "You swing up into the saddle.",
+      "npc.horse.description": "A patient bay horse with a worn saddle.",
+      "npc.horse.room": "A [[horse|horse]] waits here.",
+      "npc.horse.saddled": "The bay horse stands under you, saddled.",
+      "npc.horse.short": "horse",
+      "room.fen.description": "A fen; no horse will set a hoof in it. The ground gives under every step. The road is west.",
+      "room.fen.title": "Fen",
+      "room.ford.description": "The road fords a mire on laid stones. The yard is north.",
+      "room.ford.title": "Ford",
+      "room.road.description": "A packed road north of the yard. A fen spreads east.",
+      "room.road.title": "Road",
+      "room.yard.description": "A cobbled yard. A road runs north; a ford lies south.",
+      "room.yard.title": "Yard"
+    },
+    "world": {
+      "mount": {
+        "riding": {
+          "cartridge_id": "mount_sampler",
+          "cartridge_version": "0.0.1",
+          "key": "riding",
+          "kind": "fact"
+        }
+      },
+      "movement": {
+        "cost": {
+          "amount": 2,
+          "resource": {
+            "cartridge_id": "mount_sampler",
+            "cartridge_version": "0.0.1",
+            "key": "mv",
+            "kind": "resource"
+          }
+        },
+        "terrain": {
+          "marsh": 300,
+          "road": 50
+        }
+      }
+    }
+  },
+  "canonical": "{\"actions\":{},\"dialogues\":{\"mount_sampler@0.0.1:dialogue/horse_dismount\":{\"choices\":{\"dismount\":{\"label\":\"dialogue.horse.dismount\",\"narration\":\"narration.horse.dismount\",\"sequence\":[{\"fact\":{\"cartridge_id\":\"mount_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"riding\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":false}]}},\"key\":\"horse_dismount\",\"npc\":{\"cartridge_id\":\"mount_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"horse\",\"kind\":\"npc\"},\"policy\":{\"policy_version\":1,\"root\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"mount_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"riding\",\"kind\":\"fact\"},\"op\":\"fact_compare\",\"subject\":\"target\"}},\"prompt\":\"dialogue.horse.prompt\",\"roles\":{\"horse\":{\"npc\":{\"cartridge_id\":\"mount_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"horse\",\"kind\":\"npc\"},\"role\":\"npc\"}}},\"mount_sampler@0.0.1:dialogue/horse_mount\":{\"choices\":{\"mount\":{\"label\":\"dialogue.horse.mount\",\"narration\":\"narration.horse.mount\",\"sequence\":[{\"fact\":{\"cartridge_id\":\"mount_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"riding\",\"kind\":\"fact\"},\"op\":\"fact.assign\",\"value\":true}]}},\"key\":\"horse_mount\",\"npc\":{\"cartridge_id\":\"mount_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"horse\",\"kind\":\"npc\"},\"policy\":{\"policy_version\":1,\"root\":{\"equals\":false,\"fact\":{\"cartridge_id\":\"mount_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"riding\",\"kind\":\"fact\"},\"op\":\"fact_compare\",\"subject\":\"target\"}},\"prompt\":\"dialogue.horse.prompt\",\"roles\":{\"horse\":{\"npc\":{\"cartridge_id\":\"mount_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"horse\",\"kind\":\"npc\"},\"role\":\"npc\"}}}},\"entry\":{\"cartridge_id\":\"mount_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"yard\",\"kind\":\"room\"},\"facts\":{\"mount_sampler@0.0.1:fact/riding\":{\"key\":\"riding\",\"meaning\":\"Whether the character is riding this mount.\",\"per_subject\":true,\"scopes\":[\"player\"],\"value_type\":{\"default\":false,\"type\":\"bool\"},\"version\":1}},\"format\":\"loka-cartridge-v2\",\"lock\":{\"capabilities\":{\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"fact\":1,\"movement\":1,\"policy\":1,\"resource\":1,\"schedule\":1,\"tags\":1},\"format\":\"loka-capability-lock-v1\"},\"manifest\":{\"api_version\":\"loka/v3\",\"id\":\"mount_sampler\",\"requires\":{\"capabilities\":{\"containment\":1,\"description_variant\":1,\"dialogue\":1,\"fact\":1,\"movement\":1,\"policy\":1,\"resource\":1,\"schedule\":1,\"tags\":1},\"client_features\":[],\"content_schema\":1,\"kernel_api\":{\"at_least\":\"1.108\",\"below\":\"2.0\"},\"rule_ir\":1},\"supported_profiles\":[\"offline_private\"],\"title\":\"Mount Sampler\",\"version\":\"0.0.1\"},\"npcs\":{\"mount_sampler@0.0.1:npc/horse\":{\"description\":\"npc.horse.description\",\"description_variants\":[{\"description\":\"npc.horse.saddled\",\"when\":{\"policy_version\":1,\"root\":{\"equals\":true,\"fact\":{\"cartridge_id\":\"mount_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"riding\",\"kind\":\"fact\"},\"op\":\"fact_compare\",\"subject\":\"target\"}}}],\"key\":\"horse\",\"keywords\":[\"horse\"],\"mount\":{\"cost_percent\":0,\"terrain\":[\"road\"]},\"room\":{\"cartridge_id\":\"mount_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"yard\",\"kind\":\"room\"},\"room_line\":\"npc.horse.room\",\"short\":\"npc.horse.short\"}},\"policies\":{},\"resources\":{\"mount_sampler@0.0.1:resource/hp\":{\"gain\":5,\"key\":\"hp\",\"maximum\":20,\"minimum\":0,\"start\":20},\"mount_sampler@0.0.1:resource/ma\":{\"gain\":4,\"key\":\"ma\",\"maximum\":100,\"minimum\":0,\"start\":100},\"mount_sampler@0.0.1:resource/mv\":{\"gain\":0,\"key\":\"mv\",\"maximum\":10,\"minimum\":0,\"start\":10}},\"rooms\":{\"mount_sampler@0.0.1:room/fen\":{\"description\":\"room.fen.description\",\"exits\":{\"west\":{\"to\":{\"cartridge_id\":\"mount_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"road\",\"kind\":\"room\"}}},\"key\":\"fen\",\"tags\":[\"marsh\"],\"title\":\"room.fen.title\"},\"mount_sampler@0.0.1:room/ford\":{\"description\":\"room.ford.description\",\"exits\":{\"north\":{\"to\":{\"cartridge_id\":\"mount_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"yard\",\"kind\":\"room\"}}},\"key\":\"ford\",\"tags\":[\"road\",\"marsh\"],\"title\":\"room.ford.title\"},\"mount_sampler@0.0.1:room/road\":{\"description\":\"room.road.description\",\"exits\":{\"east\":{\"to\":{\"cartridge_id\":\"mount_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"fen\",\"kind\":\"room\"}},\"south\":{\"to\":{\"cartridge_id\":\"mount_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"yard\",\"kind\":\"room\"}}},\"key\":\"road\",\"tags\":[\"road\"],\"title\":\"room.road.title\"},\"mount_sampler@0.0.1:room/yard\":{\"description\":\"room.yard.description\",\"exits\":{\"north\":{\"to\":{\"cartridge_id\":\"mount_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"road\",\"kind\":\"room\"}},\"south\":{\"to\":{\"cartridge_id\":\"mount_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"ford\",\"kind\":\"room\"}}},\"key\":\"yard\",\"tags\":[\"road\"],\"title\":\"room.yard.title\"}},\"text\":{\"dialogue.horse.dismount\":\"Dismount\",\"dialogue.horse.mount\":\"Mount the horse\",\"dialogue.horse.prompt\":\"The horse flicks an ear at you.\",\"narration.horse.dismount\":\"You slide down from the saddle.\",\"narration.horse.mount\":\"You swing up into the saddle.\",\"npc.horse.description\":\"A patient bay horse with a worn saddle.\",\"npc.horse.room\":\"A [[horse|horse]] waits here.\",\"npc.horse.saddled\":\"The bay horse stands under you, saddled.\",\"npc.horse.short\":\"horse\",\"room.fen.description\":\"A fen; no horse will set a hoof in it. The ground gives under every step. The road is west.\",\"room.fen.title\":\"Fen\",\"room.ford.description\":\"The road fords a mire on laid stones. The yard is north.\",\"room.ford.title\":\"Ford\",\"room.road.description\":\"A packed road north of the yard. A fen spreads east.\",\"room.road.title\":\"Road\",\"room.yard.description\":\"A cobbled yard. A road runs north; a ford lies south.\",\"room.yard.title\":\"Yard\"},\"world\":{\"mount\":{\"riding\":{\"cartridge_id\":\"mount_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"riding\",\"kind\":\"fact\"}},\"movement\":{\"cost\":{\"amount\":2,\"resource\":{\"cartridge_id\":\"mount_sampler\",\"cartridge_version\":\"0.0.1\",\"key\":\"mv\",\"kind\":\"resource\"}},\"terrain\":{\"marsh\":300,\"road\":50}}}}",
+  "sha256": "e78b26c9a8001d7ccb0c304f17cfca843d0ad9a7354c959e61f205b48139135e"
+}

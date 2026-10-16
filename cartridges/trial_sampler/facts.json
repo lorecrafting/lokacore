@@ -1,0 +1,38 @@
+{
+  "facts": {
+    "wanted": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "Whether the watch wants the character for a confessed crime."
+    },
+    "in_group": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "per_subject": true,
+      "meaning": "Whether this NPC is in the character's group and follows them."
+    },
+    "grate_forced": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "instance"
+      ],
+      "meaning": "Whether the cell's floor grate is forced; every arrest shuts it again."
+    }
+  }
+}

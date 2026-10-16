@@ -1,0 +1,32 @@
+{
+  "npc": "horse",
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "fact_compare",
+      "fact": "riding",
+      "equals": true,
+      "subject": "target"
+    }
+  },
+  "prompt": "dialogue.horse.prompt",
+  "roles": {
+    "horse": {
+      "role": "npc",
+      "npc": "horse"
+    }
+  },
+  "choices": {
+    "dismount": {
+      "label": "dialogue.horse.dismount",
+      "narration": "narration.horse.dismount",
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "riding",
+          "value": false
+        }
+      ]
+    }
+  }
+}

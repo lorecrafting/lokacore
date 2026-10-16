@@ -78,6 +78,7 @@ const tests: Record<string, [(v: any, arg: any) => boolean, ErrorCode]> = {
   maxLength: [(v, arg) => codePoints(v) <= arg, 'too_long'],
   minItems: [(v, arg) => v.length >= arg, 'too_few_items'],
   maxItems: [(v, arg) => v.length <= arg, 'too_many_items'],
+  uniqueItems: [(v, arg) => !arg || new Set(v).size === v.length, 'duplicate_items'],
   maxProperties: [(v, arg) => Object.keys(v).length <= arg, 'too_many_properties'],
   // ponytail: recompiles the pattern on every call; cache per contract if it shows up in profiles.
   pattern: [(v, arg) => new RegExp(arg, 'u').test(v), 'pattern_mismatch'],

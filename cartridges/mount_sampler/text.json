@@ -1,0 +1,19 @@
+{
+  "room.yard.title": "Yard",
+  "room.yard.description": "A cobbled yard. A road runs north; a ford lies south.",
+  "room.road.title": "Road",
+  "room.road.description": "A packed road north of the yard. A fen spreads east.",
+  "room.fen.title": "Fen",
+  "room.fen.description": "A fen; no horse will set a hoof in it. The ground gives under every step. The road is west.",
+  "room.ford.title": "Ford",
+  "room.ford.description": "The road fords a mire on laid stones. The yard is north.",
+  "npc.horse.short": "horse",
+  "npc.horse.room": "A [[horse|horse]] waits here.",
+  "npc.horse.description": "A patient bay horse with a worn saddle.",
+  "dialogue.horse.prompt": "The horse flicks an ear at you.",
+  "dialogue.horse.mount": "Mount the horse",
+  "dialogue.horse.dismount": "Dismount",
+  "narration.horse.mount": "You swing up into the saddle.",
+  "narration.horse.dismount": "You slide down from the saddle.",
+  "npc.horse.saddled": "The bay horse stands under you, saddled."
+}

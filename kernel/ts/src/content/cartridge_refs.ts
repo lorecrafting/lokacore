@@ -1,4 +1,4 @@
-// size: allow 350, ancestry, bell area, Study edge, barrier opens_when, ask answer roots, identity name variants, blueprints and skill prerequisites join shared reference admission
+// size: allow 355, ancestry, bell area, Study edge, barrier opens_when, ask answer roots, identity name variants, blueprints and skill prerequisites the arrest cell (row 35), NPC asides (row FD10) and mounts (row 43b) join shared reference admission
 import { water } from './cartridge_water.ts';
 import { topics } from './cartridge_topics.ts';
 import { pools } from './cartridge_pools.ts';
@@ -38,6 +38,7 @@ import { reactions } from './cartridge_reactions.ts';
 import { recipes } from './cartridge_recipes.ts';
 import { reserved } from './cartridge_position.ts';
 import { theft } from './cartridge_theft.ts';
+import { mounts } from './cartridge_mounts.ts';
 import { answerRoots, asks } from './cartridge_asks.ts';
 import { cueParts } from './cartridge_senses.ts';
 import { lockRoots, locks } from './cartridge_locks.ts';
@@ -127,17 +128,18 @@ const gateRoots = (c: Obj): [Obj, string][] =>
     ),
   );
 
-/** Toolbox row FD2: each room's and detail's aside with its path. */
+/** Toolbox row FD2: each room's and detail's aside with its path; row FD10: each NPC's. */
 export const asideParts = (c: Obj): [Obj, string][] =>
-  Object.entries((c.rooms ?? {}) as Obj).flatMap(([ref, r]) =>
-    [
+  [
+    ...Object.entries((c.rooms ?? {}) as Obj).flatMap(([ref, r]) => [
       [r, `.cartridge.rooms${step(ref)}`],
       ...Object.entries((r.details ?? {}) as Obj).map(([k, d]) => [
         d,
         `.cartridge.rooms${step(ref)}.details${step(k)}`,
       ]),
-    ].flatMap(([d, at]) => (d.asides ?? []).map((a: Obj, i: number) => [a, `${at}.asides[${i}]`])),
-  );
+    ]),
+    ...Object.entries((c.npcs ?? {}) as Obj).map(([ref, n]) => [n, `.cartridge.npcs${step(ref)}`]),
+  ].flatMap(([d, at]) => (d.asides ?? []).map((a: Obj, i: number) => [a, `${at}.asides[${i}]`]));
 
 // Policy nodes with diagnostic paths, across every definition that declares a condition.
 /** Each node of one policy tree with its path. */
@@ -277,7 +279,7 @@ export function refStage(c: Obj): Diagnostic[] {
   out.push(...recipes(c, check), ...holders(c), ...barriers(c, check.named), ...links(c));
   out.push(...quests(c, check), ...reactions(c, check), ...dialogues(c, check));
   out.push(...pools(c, named), ...death(c, named), ...combat(c, named), ...commerce(c));
-  out.push(...theft(c, named), ...asks(c, check));
+  out.push(...theft(c, named), ...mounts(c, named), ...asks(c, check));
   out.push(...derived(c, named), ...levelling(c, check));
   return out;
 }
@@ -339,12 +341,15 @@ function ancestryRefs(c: Obj, check: ReturnType<typeof checkers>, out: Diagnosti
   }
 }
 
-// Each room an NPC names, with its path: where it starts and each room of its daily schedule.
+// Each room an NPC names, with its path: its start, its daily schedule, its arrest cell (row 35).
 const npcRooms = (c: Obj): [Obj, string][] =>
-  Object.entries((c.npcs ?? {}) as Obj).flatMap(([ref, n]) => [
-    [n.room, `.cartridge.npcs${step(ref)}.room`],
-    ...Object.entries((n.daily_schedule ?? {}) as Obj).map(([h, r]): [Obj, string] => [
-      r,
-      `.cartridge.npcs${step(ref)}.daily_schedule${step(h)}`,
-    ]),
-  ]);
+  Object.entries((c.npcs ?? {}) as Obj).flatMap(([ref, n]): [Obj, string][] => {
+    const at = `.cartridge.npcs${step(ref)}`;
+    const daily = Object.entries((n.daily_schedule ?? {}) as Obj);
+    const arrest = n.disposition?.arrest;
+    return [
+      [n.room, `${at}.room`],
+      ...daily.map(([h, r]): [Obj, string] => [r, `${at}.daily_schedule${step(h)}`]),
+      ...(arrest ? [[arrest.to, `${at}.disposition.arrest.to`] as [Obj, string]] : []),
+    ];
+  });

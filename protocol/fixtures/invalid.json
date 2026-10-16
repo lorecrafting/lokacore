@@ -8316,6 +8316,26 @@
     ]
   },
   {
+    "name": "room_tags_repeated",
+    "contract": "RoomDefinition",
+    "value": {
+      "key": "fen",
+      "title": "room.fen.title",
+      "description": "room.fen.description",
+      "exits": {},
+      "tags": [
+        "marsh",
+        "marsh"
+      ]
+    },
+    "errors": [
+      {
+        "path": "/tags",
+        "code": "duplicate_items"
+      }
+    ]
+  },
+  {
     "contract": "RoomDefinition",
     "value": {},
     "errors": [
@@ -15079,10 +15099,6 @@
       }
     },
     "errors": [
-      {
-        "path": "/movement/cost",
-        "code": "missing_property"
-      },
       {
         "path": "/movement/x",
         "code": "unknown_property"
@@ -23360,73 +23376,6 @@
     ]
   },
   {
-    "name": "npc_disposition_refuse_not_text_key",
-    "contract": "NpcDefinition",
-    "value": {
-      "key": "guard",
-      "keywords": [
-        "guard"
-      ],
-      "short": "npc.guard.short",
-      "room_line": "npc.guard.room",
-      "description": "npc.guard.description",
-      "room": {
-        "cartridge_id": "c",
-        "cartridge_version": "1.0.0",
-        "kind": "room",
-        "key": "gate"
-      },
-      "disposition": {
-        "refuse": "Go away."
-      }
-    },
-    "errors": [
-      {
-        "path": "/disposition/refuse",
-        "code": "pattern_mismatch"
-      }
-    ]
-  },
-  {
-    "name": "entity_view_hostile_false",
-    "contract": "EntityView",
-    "value": {
-      "id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
-      "name": "npc.nell.short",
-      "kind": "npc",
-      "actions": [],
-      "hostile": false,
-      "refusal": "Go away."
-    },
-    "errors": [
-      {
-        "path": "/hostile",
-        "code": "not_in_enum"
-      },
-      {
-        "path": "/refusal",
-        "code": "pattern_mismatch"
-      }
-    ]
-  },
-  {
-    "name": "entity_view_refusal_without_hostile",
-    "contract": "EntityView",
-    "value": {
-      "id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
-      "name": "npc.nell.short",
-      "kind": "npc",
-      "actions": [],
-      "refusal": "npc.nell.refuse"
-    },
-    "errors": [
-      {
-        "path": "/hostile",
-        "code": "missing_property"
-      }
-    ]
-  },
-  {
     "name": "reaction_fact_adjust_amount",
     "contract": "ReactionRule",
     "value": {
@@ -30228,6 +30177,297 @@
     ]
   },
   {
+    "name": "npc_asides_empty",
+    "contract": "NpcDefinition",
+    "value": {
+      "key": "hal",
+      "keywords": [
+        "hal"
+      ],
+      "short": "npc.hal.short",
+      "room_line": "npc.hal.room",
+      "description": "npc.hal.description",
+      "room": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "yard"
+      },
+      "asides": []
+    },
+    "errors": [
+      {
+        "path": "/asides",
+        "code": "too_few_items"
+      }
+    ]
+  },
+  {
+    "name": "npc_asides_over_sixteen",
+    "contract": "NpcDefinition",
+    "value": {
+      "key": "hal",
+      "keywords": [
+        "hal"
+      ],
+      "short": "npc.hal.short",
+      "room_line": "npc.hal.room",
+      "description": "npc.hal.description",
+      "room": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "yard"
+      },
+      "asides": [
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "a"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "a"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "a"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "a"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "a"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "a"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "a"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "a"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "a"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "a"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "a"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "a"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "a"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "a"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "a"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "a"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "all",
+              "items": []
+            }
+          },
+          "text": "a"
+        }
+      ]
+    },
+    "errors": [
+      {
+        "path": "/asides",
+        "code": "too_many_items"
+      }
+    ]
+  },
+  {
+    "name": "npc_aside_shape",
+    "contract": "NpcDefinition",
+    "value": {
+      "key": "hal",
+      "keywords": [
+        "hal"
+      ],
+      "short": "npc.hal.short",
+      "room_line": "npc.hal.room",
+      "description": "npc.hal.description",
+      "room": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "yard"
+      },
+      "asides": [
+        {}
+      ]
+    },
+    "errors": [
+      {
+        "path": "/asides/0/text",
+        "code": "missing_property"
+      },
+      {
+        "path": "/asides/0/when",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "entity_view_asides_empty",
+    "contract": "EntityView",
+    "value": {
+      "id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+      "name": "npc.hal.short",
+      "kind": "npc",
+      "actions": [],
+      "asides": []
+    },
+    "errors": [
+      {
+        "path": "/asides",
+        "code": "too_few_items"
+      }
+    ]
+  },
+  {
+    "name": "entity_view_aside_bare_key",
+    "contract": "EntityView",
+    "value": {
+      "id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+      "name": "npc.hal.short",
+      "kind": "npc",
+      "actions": [],
+      "asides": [
+        "remark.hal.first"
+      ]
+    },
+    "errors": [
+      {
+        "path": "/asides/0",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
     "contract": "BlueprintDefinition",
     "value": {
       "x": 1
@@ -32323,6 +32563,462 @@
       {
         "path": "/price",
         "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "contract": "WorldSettings",
+    "value": {
+      "movement": {
+        "terrain": {
+          "lava": 50,
+          "road": 1001,
+          "marsh": -1,
+          "water": 1.5
+        }
+      }
+    },
+    "errors": [
+      {
+        "path": "/movement/terrain/lava",
+        "code": "pattern_mismatch"
+      },
+      {
+        "path": "/movement/terrain/marsh",
+        "code": "below_minimum"
+      },
+      {
+        "path": "/movement/terrain/road",
+        "code": "above_maximum"
+      },
+      {
+        "path": "/movement/terrain/water",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "name": "npc_disposition_refuse_not_text_key",
+    "contract": "NpcDefinition",
+    "value": {
+      "key": "guard",
+      "keywords": [
+        "guard"
+      ],
+      "short": "npc.guard.short",
+      "room_line": "npc.guard.room",
+      "description": "npc.guard.description",
+      "room": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "gate"
+      },
+      "disposition": {
+        "refuse": "Go away."
+      }
+    },
+    "errors": [
+      {
+        "path": "/disposition/refuse",
+        "code": "pattern_mismatch"
+      }
+    ]
+  },
+  {
+    "name": "entity_view_hostile_false",
+    "contract": "EntityView",
+    "value": {
+      "id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+      "name": "npc.nell.short",
+      "kind": "npc",
+      "actions": [],
+      "hostile": false,
+      "refusal": "Go away."
+    },
+    "errors": [
+      {
+        "path": "/hostile",
+        "code": "not_in_enum"
+      },
+      {
+        "path": "/refusal",
+        "code": "pattern_mismatch"
+      }
+    ]
+  },
+  {
+    "name": "entity_view_refusal_without_hostile",
+    "contract": "EntityView",
+    "value": {
+      "id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+      "name": "npc.nell.short",
+      "kind": "npc",
+      "actions": [],
+      "refusal": "npc.nell.refuse"
+    },
+    "errors": [
+      {
+        "path": "/hostile",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "npc_disposition_arrest_shape",
+    "contract": "NpcDefinition",
+    "value": {
+      "key": "guard",
+      "keywords": [
+        "guard"
+      ],
+      "short": "npc.guard.short",
+      "room_line": "npc.guard.room",
+      "description": "npc.guard.description",
+      "room": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "gate"
+      },
+      "disposition": {
+        "hostile": {
+          "policy_version": 1,
+          "root": {
+            "op": "all",
+            "items": []
+          }
+        },
+        "arrest": {
+          "x": 1
+        }
+      }
+    },
+    "errors": [
+      {
+        "path": "/disposition/arrest/narration",
+        "code": "missing_property"
+      },
+      {
+        "path": "/disposition/arrest/to",
+        "code": "missing_property"
+      },
+      {
+        "path": "/disposition/arrest/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "world_mount_riding_missing",
+    "contract": "WorldSettings",
+    "value": {
+      "mount": {}
+    },
+    "errors": [
+      {
+        "path": "/mount/riding",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "world_mount_extra_property",
+    "contract": "WorldSettings",
+    "value": {
+      "mount": {
+        "riding": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "fact",
+          "key": "riding"
+        },
+        "x": 1
+      }
+    },
+    "errors": [
+      {
+        "path": "/mount/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "npc_mount_terrain_missing",
+    "contract": "NpcDefinition",
+    "value": {
+      "key": "horse",
+      "keywords": [
+        "horse"
+      ],
+      "short": "npc.horse.short",
+      "room_line": "npc.horse.room",
+      "description": "npc.horse.description",
+      "room": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "yard"
+      },
+      "mount": {
+        "cost_percent": 50
+      }
+    },
+    "errors": [
+      {
+        "path": "/mount/terrain",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "npc_mount_terrain_empty",
+    "contract": "NpcDefinition",
+    "value": {
+      "key": "horse",
+      "keywords": [
+        "horse"
+      ],
+      "short": "npc.horse.short",
+      "room_line": "npc.horse.room",
+      "description": "npc.horse.description",
+      "room": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "yard"
+      },
+      "mount": {
+        "terrain": []
+      }
+    },
+    "errors": [
+      {
+        "path": "/mount/terrain",
+        "code": "too_few_items"
+      }
+    ]
+  },
+  {
+    "name": "npc_mount_terrain_over_eight",
+    "contract": "NpcDefinition",
+    "value": {
+      "key": "horse",
+      "keywords": [
+        "horse"
+      ],
+      "short": "npc.horse.short",
+      "room_line": "npc.horse.room",
+      "description": "npc.horse.description",
+      "room": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "yard"
+      },
+      "mount": {
+        "terrain": [
+          "road",
+          "marsh",
+          "air",
+          "bed",
+          "cool",
+          "warm",
+          "water",
+          "rug",
+          "sharp"
+        ]
+      }
+    },
+    "errors": [
+      {
+        "path": "/mount/terrain",
+        "code": "too_many_items"
+      }
+    ]
+  },
+  {
+    "name": "npc_mount_terrain_duplicate",
+    "contract": "NpcDefinition",
+    "value": {
+      "key": "horse",
+      "keywords": [
+        "horse"
+      ],
+      "short": "npc.horse.short",
+      "room_line": "npc.horse.room",
+      "description": "npc.horse.description",
+      "room": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "yard"
+      },
+      "mount": {
+        "terrain": [
+          "road",
+          "road"
+        ]
+      }
+    },
+    "errors": [
+      {
+        "path": "/mount/terrain",
+        "code": "duplicate_items"
+      }
+    ]
+  },
+  {
+    "name": "npc_mount_terrain_not_a_tag",
+    "contract": "NpcDefinition",
+    "value": {
+      "key": "horse",
+      "keywords": [
+        "horse"
+      ],
+      "short": "npc.horse.short",
+      "room_line": "npc.horse.room",
+      "description": "npc.horse.description",
+      "room": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "yard"
+      },
+      "mount": {
+        "terrain": [
+          "lava"
+        ]
+      }
+    },
+    "errors": [
+      {
+        "path": "/mount/terrain/0",
+        "code": "not_in_enum"
+      }
+    ]
+  },
+  {
+    "name": "npc_mount_cost_percent_negative",
+    "contract": "NpcDefinition",
+    "value": {
+      "key": "horse",
+      "keywords": [
+        "horse"
+      ],
+      "short": "npc.horse.short",
+      "room_line": "npc.horse.room",
+      "description": "npc.horse.description",
+      "room": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "yard"
+      },
+      "mount": {
+        "terrain": [
+          "road"
+        ],
+        "cost_percent": -1
+      }
+    },
+    "errors": [
+      {
+        "path": "/mount/cost_percent",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "name": "npc_mount_cost_percent_over_1000",
+    "contract": "NpcDefinition",
+    "value": {
+      "key": "horse",
+      "keywords": [
+        "horse"
+      ],
+      "short": "npc.horse.short",
+      "room_line": "npc.horse.room",
+      "description": "npc.horse.description",
+      "room": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "yard"
+      },
+      "mount": {
+        "terrain": [
+          "road"
+        ],
+        "cost_percent": 1001
+      }
+    },
+    "errors": [
+      {
+        "path": "/mount/cost_percent",
+        "code": "above_maximum"
+      }
+    ]
+  },
+  {
+    "name": "npc_mount_cost_percent_fraction",
+    "contract": "NpcDefinition",
+    "value": {
+      "key": "horse",
+      "keywords": [
+        "horse"
+      ],
+      "short": "npc.horse.short",
+      "room_line": "npc.horse.room",
+      "description": "npc.horse.description",
+      "room": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "yard"
+      },
+      "mount": {
+        "terrain": [
+          "road"
+        ],
+        "cost_percent": 1.5
+      }
+    },
+    "errors": [
+      {
+        "path": "/mount/cost_percent",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "name": "npc_mount_extra_property",
+    "contract": "NpcDefinition",
+    "value": {
+      "key": "horse",
+      "keywords": [
+        "horse"
+      ],
+      "short": "npc.horse.short",
+      "room_line": "npc.horse.room",
+      "description": "npc.horse.description",
+      "room": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "yard"
+      },
+      "mount": {
+        "terrain": [
+          "road"
+        ],
+        "x": 1
+      }
+    },
+    "errors": [
+      {
+        "path": "/mount/x",
+        "code": "unknown_property"
       }
     ]
   }

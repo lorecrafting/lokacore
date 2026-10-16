@@ -1,0 +1,10 @@
+{
+  "room.yard.title": "Yard",
+  "room.yard.description": "A packed-earth yard. A road leads north.",
+  "room.road.title": "Road",
+  "room.road.description": "A cobbled road. It runs east toward a ford.",
+  "room.ford.title": "Ford",
+  "room.ford.description": "A ford, road and mire. Stones cross the water east to a fen.",
+  "room.fen.title": "Fen",
+  "room.fen.description": "A sucking fen. The ground gives under every step."
+}

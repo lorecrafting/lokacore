@@ -4,7 +4,7 @@ import type { GameView } from '../../packages/game-view/session.ts';
 import { absent, cap, plain, why, type group, type Page as Route } from './model.ts';
 import type { Button, DetailLine, presenter } from './presenter.ts';
 import { ActionCard, Cards } from './actions.tsx';
-import { LogLines, Note } from './lines.tsx';
+import { Asides, LogLines, Note } from './lines.tsx';
 import { Control, Page, type Thing } from './pages.tsx';
 import { note, prose, usePalette, type Palette } from './palette.ts';
 import { Riddle } from './Riddle.tsx';
@@ -86,6 +86,7 @@ export function NpcPage(p: NpcProps) {
       foot={foot}
     >
       {p.npc?.description && <Text style={prose(c)}>{plain(p.text(p.npc.description))}</Text>}
+      {p.npc && 'asides' in p.npc && <Asides keys={p.npc.asides} text={p.text} />}
       {p.npc && 'carrying' in p.npc && p.npc.carrying && (
         <Text style={note(c)}>{p.text(p.npc.carrying)}</Text>
       )}

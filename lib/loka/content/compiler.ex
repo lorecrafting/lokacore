@@ -1,4 +1,4 @@
-# size: allow 357, craft consume expansion, ancestry, static map, status source, levelling settings, replenish, trail, theft, asks, speech and construction wiring join the existing compiler boundary
+# size: allow 359, craft consume expansion, ancestry, static map, status source, levelling settings, replenish, trail, theft, asks, speech, construction and mounts wiring join the existing compiler boundary
 defmodule Loka.Content.Compiler do
   @moduledoc "Validates source files and builds the CompiledCartridge (05 §3–§8, 06 §20–21)."
   alias Loka.Content.{
@@ -81,6 +81,7 @@ defmodule Loka.Content.Compiler do
       Loka.Content.Death.check(manifest, defs, located),
       Loka.Content.Combat.check(manifest, defs, located, v2),
       Loka.Content.Theft.check(manifest, defs, located, v2),
+      Loka.Content.Mounts.check(manifest, defs, located),
       Loka.Content.Asks.check(manifest, defs),
       Checks.check(manifest, if(v2, do: defs, else: %{defs | "resource" => %{}}), registry),
       Checks.rooms(manifest, defs, v2, registry),
@@ -177,6 +178,7 @@ defmodule Loka.Content.Compiler do
       |> Levelling.settings(m)
       |> Combat.settings(m)
       |> Loka.Content.Theft.settings(m)
+      |> Loka.Content.Mounts.settings(m)
       |> Checks.expand(m)
       |> Map.merge(Map.take(extra, ["alternates", "speech"]))
 
