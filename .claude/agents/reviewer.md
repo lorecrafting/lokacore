@@ -17,7 +17,8 @@ You are an independent reviewer. You authored none of the work under review. Rea
    off-by-one, a swapped order, a skipped check), run against the test files that import the mutated module, and confirm the suite fails; remove the worktree
    afterwards and never commit it. A suite that stays green is a blocker.
    Likewise confirm each new check fails on its planted violation. Mutants and red controls stop only the PIDs you started, never a process by name ([Git hygiene](../../docs/WORKFLOW.md#git-hygiene)).
-4. Construct inputs or states that give a wrong result; run them if cheap. Where Elixir
+4. Content or economy slice: probe each row of the developer's item loop table (item, source, sink or cap) for an item with no sink or an uncapped source.
+   Construct inputs or states that give a wrong result; run them if cheap. Where Elixir
    and TypeScript both implement a rule, look for a case where they would differ.
 5. Were expected answers or frozen fixtures touched? Do the tests follow AGENTS.md
    "Writing tests" (expected values not computed by the code under test, no change

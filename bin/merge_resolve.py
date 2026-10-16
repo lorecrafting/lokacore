@@ -1,14 +1,17 @@
 #!/usr/bin/env python3
 """Resolve the known additive conflicts of the merge in progress in this repo (bin/pm_merge.sh):
-- docs/system/mechanics.md: one conflict that ends the file and only adds text on both sides (two
-  appended sections) keeps both, ours first, with the leading lines both sides share kept once;
-  a shared part that ends inside a section, or a duplicate `## ` heading afterwards, refuses;
+- docs/system/mechanics.md: one conflict where both sides only add whole `## `/`### ` sections at one
+  spot keeps both, ours first, with the leading lines both sides share kept once; a shared part that
+  ends inside a section, or a duplicate heading afterwards, refuses;
+- docs/MECHANICS-TOOLBOX.md: the same for table rows (a row id on both sides refuses);
+- protocol/fixtures/loader_floors.json: both sides append whole array elements at the end: ours, then theirs';
 - kernel/ts/src/runtime/world.ts: one conflict whose sides are each one kernel_api line keeps the higher;
 - a generated file or docs/reviews/README.md takes theirs, as does a review record whose sides differ
   only in whitespace (another review record is left); then every generator reruns.
 Exit 0: all resolved and staged, not committed. Exit 1: prints the files it left; abort the merge.
 Needs merge.conflictStyle=diff3 (the base section proves an append).
   python3 bin/merge_resolve.py"""
+import json
 import os
 import re
 import subprocess
@@ -33,19 +36,65 @@ GENERATORS = [
 ]
 
 
-def tail_union(text):
+def both_insert(text):
+    """The one conflict where both sides only insert at one spot: (hunk, ours lines, theirs lines after the part they share)."""
     hunks = list(HUNK.finditer(text))
-    if len(hunks) != 1 or hunks[0].end() != len(text) or hunks[0][2]:
+    if len(hunks) != 1 or hunks[0][2]:
         return None
     h = hunks[0]
     ours, theirs = h[1].splitlines(True), h[3].splitlines(True)
-    shared = len(os.path.commonprefix([ours, theirs]))  # a section both sides appended (a cherry-pick) stays once
-    rest = "".join(theirs[shared:]).lstrip("\n")
-    if rest and not rest.startswith("## "):  # the shared part ends inside a section: the sides edit one section
+    return h, ours, theirs[len(os.path.commonprefix([ours, theirs])) :]  # a part both sides added (a cherry-pick) stays once
+
+
+def section_union(text):
+    got = both_insert(text)
+    if not got:
         return None
-    merged = text[: h.start()] + h[1].rstrip("\n") + ("\n\n" + rest if rest else "\n")
-    heads = re.findall(r"^## .*$", merged, re.M)
+    h, ours, theirs = got
+    rest = "".join(theirs).strip("\n")
+    after = text[h.end() :].lstrip("\n")
+    # each side adds whole sections: the shared part ends at a section edge and a heading (or the end) follows
+    if (rest and not rest.startswith(("## ", "### "))) or (after and not after.startswith("#")):
+        return None
+    if len(set(re.findall(r"^(#{2,3}) ", "".join(ours + theirs), re.M))) > 1:  # mixed levels: a ### section could land under the wrong ## parent
+        return None
+    merged = text[: h.start()] + h[1].rstrip("\n") + ("\n\n" + rest if rest else "") + ("\n\n" + after if after else "\n")
+    heads = re.findall(r"^#{2,3} .*$", merged, re.M)
     return merged if len(heads) == len(set(heads)) else None
+
+
+def rows_union(text):
+    got = both_insert(text)
+    if not got:
+        return None
+    h, ours, theirs = got
+    if not all(l.startswith("| ") for l in ours + theirs):  # table rows only
+        return None
+    ids = [{l.split("|")[1].strip() for l in side} for side in (ours, theirs)]
+    if ids[0] & ids[1]:  # no row id on both sides
+        return None
+    return text[: h.start()] + h[1] + "".join(theirs) + text[h.end() :]
+
+
+def elements(arr):
+    """The JSON elements of an array body, each with its leading indent."""
+    out, pos, dec = [], 0, json.JSONDecoder()
+    while pos < len(arr):
+        _, end = dec.raw_decode(arr, len(arr) - len(arr[pos:].lstrip()))
+        out.append(arr[pos:end])
+        pos = end + len(arr[end:]) - len(arr[end:].lstrip(",\n"))
+    return out
+
+
+def floors_union(_):
+    """Both sides append whole elements to the top-level array of loader_floors.json: ours, then theirs' additions."""
+    base, ours, theirs = (git("show", f":{n}:protocol/fixtures/loader_floors.json") for n in (1, 2, 3))
+    tail = "\n  ]\n}\n"
+    b, o, t = (x[: -len(tail)] for x in (base, ours, theirs))
+    if not (o.startswith(b + ",\n") and t.startswith(b + ",\n")):
+        return None
+    have = {e.strip() for e in elements(o[len(b) + 2 :])}
+    return o + "".join(",\n" + e for e in elements(t[len(b) + 2 :]) if e.strip() not in have) + tail  # an element both sides added stays once
 
 
 def higher_kernel_api(text):
@@ -57,7 +106,12 @@ def higher_kernel_api(text):
     return text[: hunks[0].start()] + keep[0] + text[hunks[0].end() :]
 
 
-RULES = {"docs/system/mechanics.md": tail_union, "kernel/ts/src/runtime/world.ts": higher_kernel_api}
+RULES = {
+    "docs/system/mechanics.md": section_union,
+    "docs/MECHANICS-TOOLBOX.md": rows_union,
+    "protocol/fixtures/loader_floors.json": floors_union,
+    "kernel/ts/src/runtime/world.ts": higher_kernel_api,
+}
 
 
 def same_but_whitespace(f):
@@ -77,7 +131,11 @@ theirs, left = [], []
 for f in conflicted:
     if f in RULES:
         with open(f) as fh:
-            merged = RULES[f](fh.read())
+            try:
+                merged = RULES[f](fh.read())
+            except (subprocess.CalledProcessError, ValueError) as e:  # a missing stage, or a side that is not the expected JSON text: modify/delete, add/add
+                print(f"{f}: {e}", file=sys.stderr)
+                merged = None
         if merged is None:
             left.append(f)
             continue
