@@ -45,9 +45,8 @@ export function standing(c: Obj): Diagnostic[] {
       if (t && (t.type !== 'int' || t.minimum === undefined || t.maximum === undefined))
         out.push(diag('FACT_TYPE_MISMATCH', `.cartridge.reactions${step(ref)}.apply[${i}].fact`));
     });
-  if (used && apiCmp(c.manifest.requires.kernel_api.at_least, '1.47') < 0)
-    out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
-  if (refuse && apiCmp(c.manifest.requires.kernel_api.at_least, '1.104') < 0)
+  const api = c.manifest.requires.kernel_api.at_least;
+  if ((used && apiCmp(api, '1.47') < 0) || (refuse && apiCmp(api, '1.104') < 0))
     out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
   return out;
 }

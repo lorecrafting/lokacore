@@ -74,13 +74,8 @@ export function NpcPage(p: NpcProps) {
   const choice =
     p.view.choice && (!p.npc || p.npc.id === p.view.choice.speaker_id) ? p.view.choice : undefined;
   const enemy = p.npc && 'hostile' in p.npc && p.npc.hostile ? p.npc : undefined;
-  // Where is the Map's control (sections.tsx); on the NPC's own page they are already here. A
-  // hostile NPC will not talk or trade: its refusal line stands in for those cards.
-  const actions = p.npc
-    ? p.g
-        .on(p.npc.id)
-        .filter((b) => b.action_key !== 'where' && !(enemy && SPOKEN.has(b.command ?? '')))
-    : [];
+  // Where is the Map's control (sections.tsx); on the NPC's own page they are already here.
+  const actions = p.npc ? p.g.on(p.npc.id).filter((b) => b.action_key !== 'where') : [];
   const cards = actions.filter((b) => b.command !== 'use_service');
   const { talk, answer, foot } = conversation(p, choice);
   const log = talk ? p.log : p.log.slice(p.since ?? 0);
@@ -96,7 +91,7 @@ export function NpcPage(p: NpcProps) {
       )}
       <LogLines lines={log} />
       {npcSkills(c, p)}
-      {enemy && (
+      {!talk && enemy && (
         <Note>{enemy.refusal ? p.text(enemy.refusal) : refused(cap(p.text(enemy.name)))}</Note>
       )}
       {!talk && !enemy && !actions.length && !log.length && <Note>Nothing to do here.</Note>}
@@ -113,8 +108,6 @@ export function NpcPage(p: NpcProps) {
     </Page>
   );
 }
-
-const SPOKEN = new Set(['talk', 'ask', 'buy', 'sell']);
 
 // Answering keeps the page in conversation even after the kernel closes it; only Leave the
 // conversation returns to the NPC's own actions (Talk, shop, services).

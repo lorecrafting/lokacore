@@ -145,7 +145,7 @@ defmodule Loka.Content.Entities do
   defp goal_texts(e), do: for({s, %{"goal" => g}} <- cases(e), do: {s ++ ["goal"], g})
 
   # Toolbox row G11: a hostile NPC's engage line and (Book hostile refusal) refuse line.
-  defp disposition_texts(%{"disposition" => d}),
+  defp disposition_texts(%{"disposition" => d}) when is_map(d),
     do: for(f <- ~w(engage refuse), is_map_key(d, f), do: {["disposition", f], d[f]})
 
   defp disposition_texts(_), do: []

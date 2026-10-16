@@ -22,8 +22,8 @@ function nell(cheat: boolean) {
   return [b.text(), b.labels()] as const;
 }
 
-// Breaks: the page ignores hostility (Talk and the shelf with its raw "invalid state" reasons
-// stay), shows the fallback over the authored line, or marks Nell hostile at standing 0; the shelf
+// Breaks: the page ignores hostility (the shelf with its raw "invalid state" reasons stays; the
+// kernel refuses Talk), shows the fallback over the authored line, or marks Nell hostile at standing 0; the shelf
 // shows raw reason codes.
 test('Nell at standing -2 shows her refusal line, no Talk or shelf; at 0 she trades', () => {
   const [shown, labels] = nell(true);
