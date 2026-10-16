@@ -40,6 +40,7 @@ defmodule Loka.ContentShowcaseTest do
         {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.55")},
         {"reactions/kindle.json", nil},
         {"reactions/gate_lifted.json", nil},
+        {"reactions/gate_shut.json", nil},
         {"statuses/gored.json", &Map.delete(&1, "kind")}
         | unfiltered
       ]
