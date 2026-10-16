@@ -45,3 +45,26 @@ PR-body claims rerun: "every new conditional goes red" is refuted by M1; "no con
 Judgments on the PR's open items: the Warden's fallback refusal conforms to the spec (no finding); `disposition()` also evaluating friendly is accepted; the size allowance 308 to 315 is accepted.
 
 Verdict: **CHANGES REQUIRED** at 5873fee3.
+
+## Fix round 1: re-check at `eff67180125697fe5d9a36edea3b8ee3fbebd68a`
+
+Scope: fixes 2effc01ca and eff671801 only, the code they touch and their direct callers (`buyReason`: `Npc.tsx:165` only).
+
+| # | Disposition | Proof |
+| --- | --- | --- |
+| 1 | Nell at 0 and +1 asserted not hostile (`showcase_social.test.ts:89-96`) | round-0 M1 (`!== 'wary'`) now red in `showcase_social.test.ts` |
+| 2 | `!talk && enemy` restored (`Npc.tsx:94`); Bess insult mid-talk pinned (`hostile_refusal.test.ts:53-67`) | mutant drops `!talk`: red in `hostile_refusal.test.ts` |
+| 3 | PM ruling "can't afford" (`words.ts` `buyReason`); full Peg row asserted | mutant drops the `insufficient_resource` entry: red |
+| 4 | `refuse` without `hostile` is SCHEMA_VIOLATION in both kernels | TS clause dropped: red in `standing.test.ts`; Elixir clause dropped: red in `content_standing_test.exs` (exit 2) |
+| 5 | `mechanics.md` floor and Book bullets, `cartridge.md` refuse rule | read: four fields, 1.104, `hostile` required |
+| 6 | `/code-review` | not rerun on the fix commits; carried as a nit |
+
+Baseline at the head: `standing`, `showcase_social`, `hostile_refusal`, `ask` and `content_standing_test` green. The Elixir `(spawn_template || ...) or (...)` is safe: `spawn_template` is `const: true` in `entity.schema.json`, so `or` never sees a non-boolean.
+
+Open items, judged:
+
+- nit: a sell the shop cannot pay still reads "(too exhausted)" (`Npc.tsx:166`, `words.ts:67`). No shipped content reaches it, so it is accepted as a known limit. loka-ozu does not record it yet; add the sell row there with the other designer wording.
+- nit: `docs/system/book-ui.md:296-298` names only "sold out", not the PM's "can't afford" ruling. A later polish pass could map the buy row back to plain `reason()` and stay within the spec.
+- Hosted CI at eff67180 was still in progress at this check.
+
+Verdict: **APPROVE WITH NOTES** at eff67180.
