@@ -38,3 +38,24 @@ Noted, not a finding: `lib/loka/content/status.ex:106` reports the status-kind f
 ## Disposition
 
 Open: nit 1 and the per-slice fix-round list above. Settled: save integrity of raze (composer, load, hydrate; mutants red in both layers), hidden-skill secrecy across view, dialogue and both loaders (mutant red), floor union with each 1.102 feature pinned alone, barter parity (mutants red in both kernels), invalid.json and service_contracts.json changes traced to the spec, economy loops bounded.
+
+## Fix re-check — `d1e1b2f2c6fb34dc811cf067501e050cee812afc`
+
+**Verdict: APPROVE.** Fix branch `toolbox/batch-b-fix` over `df7972c1` (this record cherry-picked as `465522cb`). The developer's `/code-review` ran on another checkout, so the whole code diff `df7972c1..d1e1b2f2` (13 files, +57/-42, docs/reviews excluded) was read here.
+
+- **1 fixed.** `kernel/ts/src/content/cartridge_skills.ts:86-88` floors a skill with `profession` or `hidden` at 1.102 and `lib/loka/content/skills.ex:178` is its twin; `protocol/cartridge.schema.json` and `contracts.gen.ts` say so on `SkillDefinition.hidden`; `cartridge.md:1966` and `mechanics.md:3479` name 1.102. New `loader_floors.json` case edits `cartridges/skills_sampler` (at_least 1.44, one skill with no profession, hidden or prerequisite) to add `hidden` plus an empty-`all` `prerequisite`, so it pins `hidden` alone (prerequisite stays 1.101).
+- **2 fixed.** `mechanics.md:3629` names `hiddenTarget` and `not_present`; `kernel/ts/src/commands/actions.ts:241` returns `not_present` when `hiddenTarget` (`:296`, `recipient_id` not among `visible`) before the rule.
+- **3 fixed.** `docs/showcase/combat-district.md:51` reads 1.102.
+- **4 fixed.** `kernel/ts/src/view/resources.ts:54` computes `kind` once; `...(kind && { kind })` keeps the undefined case.
+- **5 fixed.** `kernel/ts/test/status.test.ts` drops the `[none, undefined]` row. It was not a byte duplicate, but `[{ ...none, modifies: [by(0)] }, undefined]` and `[{ per_tick: 0 }, undefined]` still pin the no-kind result; no coverage lost.
+- **6 fixed.** `cartridge.md:1773` lists `gored` (toolbox_showcase) and `scar` (scars_sampler).
+- **7 fixed vs code.** `book-ui.md:989`: ring from view `ends_at`/`duration`/`time`, no gameplay clock; locked shows a line track and dim arc and keeps draining (`mobile/app/book/StatusIcon.tsx:85,123-127`). Designer approval of the wording is pending separately.
+- **8 fixed.** `kernel/ts/src/mechanics/dialogue/selection.ts:44` `teaches(d, id, p)` serves `offered` (concealed) and `openable` (hidden with prerequisite); semantics unchanged, dialogue_openable green. `view/skills.ts:86` left as is: it collects skill ids, not a predicate.
+- **9, 11 fixed.** `mechanics.md:3389` Known limits: corpse blocks raze (loka-kgd.122); shared-world open encounter in a razed room (`combat/saved.ts:80` `openValid`, `local-story/store.ts:146`), out of scope until a Realm hosts built rooms.
+- **10 fixed.** `docs/decisions/owner-decision-hidden-elites-secret-2026-10-15.md` links the hs-14 Load check.
+- **12** not re-probed; developer reports both kernels refuse a built room as escrow custody (`UNRESOLVED_REFERENCE`), no change.
+- Nit (PR body `/code-review` result): the developer's run was on the wrong checkout; this re-check stands in for it.
+
+Checks: `kernel/ts` loader_floors, dialogue_openable, status, craft, gift, validate (52 pass); Elixir loader_floors, content_craft (6 pass). Mutants (`bin/mutate.sh`, both red-narrow, tree restored): `cartridge_skills.ts` `s.profession || s.hidden` -> `s.profession` (loader_floors.test.ts red); `skills.ex` `has.("profession") or has.("hidden")` -> `has.("profession")` (`mix test --force test/loka/loader_floors_test.exs` red).
+
+Open: none.
