@@ -102,7 +102,7 @@ No combat room is `exposed`, so no weather drain lands; no door is gated; rooms 
 > hand your blows land nothing, here or anywhere. North, a boar is penned: you can hear it grunt
 > from this yard. It gores: a wound that bleeds for a while and a scar that stays, even past your
 > death. The poultice on the bench stops the bleeding; nothing takes the scar away. West, Gil keeps
-> the gate with a raider in it; shout "ware" from here and Gil hears you through the wall, and he
+> the gate with a raider in it; a warning shouted from this yard carries through the wall to him, and he
 > fights beside you once you strike. Aldous pays a bounty on the raider, but only to one who takes
 > it before the raider falls. South is a pit with two
 > goblins who fight as a pack: in a pack you choose which one you hit. Every kill earns
