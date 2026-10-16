@@ -63,4 +63,36 @@ edit d
 g merge -q c >/dev/null 2>&1 && fail 'the sides did not conflict'
 python3 "$src/bin/merge_resolve.py" >/dev/null && fail "an edit of $m or a conflict in $f was resolved"
 [ "$(git diff --name-only --diff-filter=U | tr '\n' ' ')" = "$m $f " ] || fail "$m and $f are not left unmerged"
+g merge --abort
+# Both sides add at one spot (a section, a table row, a loader floor): ours then theirs, the result valid.
+ap() { # <name> <file> <perl edit of the file for side 1> <for side 2>: merges two branches from base, expecting a conflict
+  for i in 1 2; do eval "e=\$$((i + 2))"; g checkout -q -b "$1$i" "$base"; perl -0pi -e "$e" "$2"; g commit -qam "$1$i"; done
+  if g merge -q "${1}1" >/dev/null 2>&1; then fail "$1: the sides did not conflict"; fi
+}
+unions() { # <name> <file> <expected file>: the resolver resolves and the file equals the expected one
+  python3 "$src/bin/merge_resolve.py" >/dev/null || fail "$1: not resolved"
+  cmp -s "$2" "$3" || fail "$1: $2 is not ours then theirs"
+  g merge --abort
+}
+fl=protocol/fixtures/loader_floors.json
+el() { printf ',\n    {"floor": "%s", "below": "1.100", "source": "cartridges/kitchen_sampler", "feature": "edible.applies", "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"], "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]}' "$1"; }
+export E1="$(el 1.201)" E2="$(el 1.202)"
+ap floors $fl 's/\n  \]\n\}\n\z/$ENV{E1}\n  ]\n}\n/' 's/\n  \]\n\}\n\z/$ENV{E2}\n  ]\n}\n/'
+git show "$base:$fl" | perl -0pe 's/\n  \]\n\}\n\z/$ENV{E2}$ENV{E1}\n  ]\n}\n/' > "$t/expected.json"
+unions 'two appended loader floors' $fl "$t/expected.json"
+ap sect $m 's/\n## /\n## Mid A\n\nA text\n\n## /' 's/\n## /\n## Mid B\n\nB text\n\n## /'
+git show "$base:$m" | perl -0pe 's/\n## /\n## Mid B\n\nB text\n\n## Mid A\n\nA text\n\n## /' > "$t/expected.md"
+unions 'two sections at one spot' $m "$t/expected.md"
+tb=docs/MECHANICS-TOOLBOX.md
+ap rows $tb 's/(\n\| 1 \|[^\n]*\n)/$1| ZA | M9 | row a | x | S | – | x | x | open |\n/' 's/(\n\| 1 \|[^\n]*\n)/$1| ZB | M9 | row b | x | S | – | x | x | open |\n/'
+git show "$base:$tb" | perl -0pe 's/(\n\| 1 \|[^\n]*\n)/$1| ZB | M9 | row b | x | S | – | x | x | open |\n| ZA | M9 | row a | x | S | – | x | x | open |\n/' > "$t/expected.tb"
+unions 'two table rows at one spot' $tb "$t/expected.tb"
+ap flt $fl 's/\n    \}\n  \]\n\}\n\z/\n    } \n  ]\n}\n/' 's/\n  \]\n\}\n\z/$ENV{E1}\n  ]\n}\n/'
+left 'an append against an edit of the last loader floor' $fl
+ap inner $m 's/(\n## [^\n]*\n\n)/$1## Mid A\n\nA text\n\n/' 's/(\n## [^\n]*\n\n)/$1## Mid B\n\nB text\n\n/'
+left 'two sections inside another section' $m
+ap flo $fl 's/"1\.101"/"1.301"/' 's/"1\.101"/"1.302"/'
+left 'two edits of one loader floor' $fl
+ap rowid $tb 's/(\n\| 1 \|[^\n]*\n)/$1| ZZ | M9 | row a | x | S | – | x | x | open |\n/' 's/(\n\| 1 \|[^\n]*\n)/$1| ZZ | M9 | row b | x | S | – | x | x | open |\n/'
+left 'one row id on both sides' $tb
 echo 'merge_resolve controls: ok'

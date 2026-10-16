@@ -104,11 +104,14 @@ their rules and red controls remain available for resumption.
 - `bin/orphans_red_controls.sh` checks that `bin/orphans.sh` lists a busy, old orphan and skips a child, a young, an idle, a system and a server process. `bin/worktree_setup_red_controls.sh` checks that `bin/worktree_setup.sh` clones main's `node_modules` (never a link) for a matching lockfile (without its `.cache`, replacing a leftover `node_modules.tmp`, a stale clone or an older link; a failed clone exits non-zero) and removes an older worktree's link before `npm ci` after a lockfile change.
 - `bin/prose_lint.py <cartridge dir>` (report only, never a gate; exit 0 on findings, 2 on bad input; balance N6 text health): per cartridge it prints W7 variant groups whose texts share a first word, keys with one alternate, sentence length (mean, spread) per key kind, and the Flesch-Kincaid grade. Band-phrase coverage is skipped: N6 defines no bands. Its control `bin/prose_lint_red_controls.sh` (fixture `test/fixtures/prose_lint`) is in `ci.yml`'s `lint` job.
 - `bin/merge_resolve_red_controls.sh` checks that `bin/merge_resolve.py` (the `bin/pm_merge.sh` resolver) keeps both
-  `docs/system/mechanics.md` tail sections (ours first, a section both sides appended once), the higher
-  `kernel_api` (1.10 over 1.9) and a regenerated `docs/system-graph.gen.json`, and leaves unresolved a tail
-  that repeats a `## ` heading or gives one heading two bodies, a conflict in the middle of `mechanics.md`, a review record that differs
-  beyond whitespace, an edit of the last `mechanics.md` line and a TypeScript source conflict.
+  sides' whole `## `/`### ` sections at one spot of `docs/system/mechanics.md`, both sides' table rows at one spot of
+  `docs/MECHANICS-TOOLBOX.md`, both sides' elements appended to `protocol/fixtures/loader_floors.json`, the higher
+  `kernel_api` (1.10 over 1.9) and a regenerated `docs/system-graph.gen.json`; and leaves unresolved a section
+  that repeats a `## ` heading, two sections inside another section, one row id on both sides, two edits of one
+  loader floor, an append against an edit of the last loader floor, a review record that differs
+  beyond whitespace and a TypeScript source conflict.
 - `bin/integration_red_controls.sh` runs the PM scripts in throwaway repositories with stubs.
+  It runs `bin/push_slice.sh` against a bare origin: an accepted push prints `PUSH_EXIT=0 <sha>`, a rejected one exits non-zero and prints a non-zero `PUSH_EXIT`.
   It runs `bin/sync_pr.sh` (merge `main` into a PR branch): a code conflict is refused, a review
   index conflict is regenerated, the merge is pushed, and a failed docs check blocks the push.
   It also runs `bin/after_merge.sh` (stub `gh`/`br`; bare origin): an unmerged PR, a stray file, a dirty
