@@ -26,7 +26,7 @@ const STEP: Record<string, [number, number, number]> = {
 function positions(world: World, authored: NonNullable<Cartridge['map_positions']>) {
   const at = new Map(authored.map((p) => [world.roomIds[refString(p.room)], p]));
   for (const [id, { origin }] of Object.entries(world.state.created ?? {})) {
-    if (origin.kind !== 'built') continue;
+    if (origin.kind !== 'built' || world.state.built?.[id]) continue; // a razed room leaves the map (S5)
     const site = at.get(world.roomIds[refString(origin.site)]);
     if (!site) continue;
     const [dx, dy, dz] = STEP[origin.direction];

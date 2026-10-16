@@ -286,6 +286,7 @@ The StateDelta algebra: typed operations, their mutation targets and preconditio
 - **BleedRow**: One body bleed generation, retained after removal. Active fields are required together.
   - `true`
   - `false`
+- **BuiltRow**: A built room's tombstone (Built rooms S5): razed at razed_at. A razed room keeps its created row and id but has no exits, holds nothing and counts toward no construction limit.
 - **CharacterChoice**: The once-only character identity and its complete saved attribute values.
 - **ChoiceAttempts**: Pinned wrong-answer count and authored positive limit for one conversational sitting.
 - **ContinuationId**: A pending choice/continuation (04 §5.3 'Choice/continuation resolution'), created from IdSource. Lowercase hyphenated UUID, any version.
@@ -323,6 +324,7 @@ The StateDelta algebra: typed operations, their mutation targets and preconditio
   - `bleed.transition`: Checked transition of one body bleed generation.
   - `status.transition`: Checked transition of one body status generation (toolbox row 1); the target is the body and status pair.
   - `levelling.set`: Checked write of one character's levelling row (toolbox row 4): composes only when the stored row equals expected (null when absent) and neither the experience nor any allocated count falls.
+  - `built.set`: Checked write of one built room's tombstone row (Built rooms S5): composes only when the stored row equals expected (null when absent) and entity_id is a created row of origin kind built.
   - `water.transition`
   - `expedition.transition`
   - `visit.record`
@@ -359,6 +361,7 @@ The StateDelta algebra: typed operations, their mutation targets and preconditio
   - `visit`
   - `observation`
   - `levelling`: One character's levelling row (toolbox row 4).
+  - `built`: One built room's tombstone row (Built rooms S5).
 - **ObservedNpc**: One actor’s latest committed visible observation of an exact NPC, room and logical time.
 - **QuestInstanceId**: A QuestInstance (03 §12; 06 §1), created at activation from IdSource. Lowercase hyphenated UUID, any version.
 - **RoleBinding**: One role a continuation bound when it opened (04 §5.3 'bound roles'), for example the NPC the choice is made with.
@@ -799,6 +802,7 @@ B8 typed finite paid entitlement, meal and provider-owned serving.
   - `withdraw`
   - `build`: Built rooms S2 (construction@1): raise blueprint at site's direction. blueprint is one of site.blueprints and direction one of site.directions (SCHEMA_VIOLATION invalid_value otherwise). Refused service.site_taken while a built room holds that site direction and service.construction_full at world.construction.max_total. Built rooms S3: fact with escrow (ready_after, no output) makes it a commission: the order sets fact true, moves the inputs to custody and schedules an order job; when due the job raises the room for its owner and sets fact false (refunding the inputs when the site is taken or construction full by then). Cancel (a cancel benefit naming this service) returns the inputs, never the fee.
   - `mend`: Built rooms S4 (construction@1): mend the built room at site's direction. Refused service.nothing_to_mend unless that room's blueprint ruin status is active on it; otherwise the mend cures ruin and applies the blueprint's weathering again. site and direction as build's.
+  - `raze`: Built rooms S5 (construction@1, kernel_api 1.101): raze the live built room at site's direction. Refused service.nothing_to_raze without one, permission_denied unless the actor raised it, service.occupied while an entity that cannot move (a corpse) lies in it; otherwise its statuses end, everything on its floor moves to the site and a tombstone (built row) is written. site and direction as build's.
 - **ServiceDefinition**: Exact original-provider action and conserved quote with one typed immediate benefit.
 
 ## Localized text contracts (`protocol/text.schema.json`)

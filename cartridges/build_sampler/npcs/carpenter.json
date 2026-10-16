@@ -12,6 +12,7 @@
   "services": [
     "raise_hut",
     "cancel_hut",
-    "mend_hut"
+    "mend_hut",
+    "raze_hut"
   ]
 }

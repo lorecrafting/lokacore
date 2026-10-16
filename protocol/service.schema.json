@@ -436,6 +436,34 @@
             "direction"
           ],
           "additionalProperties": false
+        },
+        {
+          "description": "Built rooms S5 (construction@1, kernel_api 1.101): raze the live built room at site's direction. Refused service.nothing_to_raze without one, permission_denied unless the actor raised it, service.occupied while an entity that cannot move (a corpse) lies in it; otherwise its statuses end, everything on its floor moves to the site and a tombstone (built row) is written. site and direction as build's.",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "raze"
+            },
+            "site": {
+              "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            },
+            "direction": {
+              "enum": [
+                "north",
+                "south",
+                "east",
+                "west",
+                "up",
+                "down"
+              ]
+            }
+          },
+          "required": [
+            "kind",
+            "site",
+            "direction"
+          ],
+          "additionalProperties": false
         }
       ],
       "description": "Closed paid entitlement, finite meal recovery, provider-owned complete liquid serving (recovery is MV only) or, toolbox row 21, a repair adding up to amount to the wielded weapon's durability fact; or, toolbox row 20b, a claim or cancel of the named commission service's timed escrow order; or, toolbox row 25, a deposit or withdraw of amount between the player's pool and the vault NPC's, mirrored in the account fact, the price being the fee; or, Built rooms S2 to S4, a build or mend of a site's room.",

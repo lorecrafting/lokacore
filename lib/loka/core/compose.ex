@@ -1,4 +1,4 @@
-# size: allow 352, typed knowledge, patrol, final birth admission, status and levelling share portable composition
+# size: allow 362, typed knowledge, patrol, final birth admission, status, levelling and built share portable composition
 defmodule Loka.Core.Compose do
   @moduledoc "Portable delta composition: changed rows only; atomic conflicts and bounded work."
   alias Loka.Core.{ComposeBleed, ComposeChoice, ComposeJob, ComposePack, ComposeStatus, Creation}
@@ -195,6 +195,14 @@ defmodule Loka.Core.Compose do
   defp apply_op(%{"op" => "levelling.set"} = op, t, ctx),
     do: Loka.Core.ComposeLevelling.set(op, read(t, ctx))
 
+  defp apply_op(%{"op" => "built.set", "entity_id" => e} = op, t, ctx),
+    do:
+      Loka.Core.ComposeBuilt.set(
+        op,
+        read(t, ctx),
+        read(%{"kind" => "entity", "entity_id" => e}, ctx)
+      )
+
   defp apply_op(%{"op" => "encounter.open"} = op, t, {state, _, _} = ctx),
     do:
       Loka.Core.ComposeEncounter.open(
@@ -285,6 +293,7 @@ defmodule Loka.Core.Compose do
   defp base(%{"kind" => "bleed", "body_id" => b}, s), do: section(s, "bleeds")[b]
   defp base(%{"kind" => "status"} = t, s), do: section(s, "statuses")[key(t)]
   defp base(%{"kind" => "levelling", "character_id" => c}, s), do: section(s, "levelling")[c]
+  defp base(%{"kind" => "built", "entity_id" => e}, s), do: section(s, "built")[e]
   defp base(%{"kind" => "encounter", "encounter_id" => e}, s), do: section(s, "encounters")[e]
   defp base(%{"kind" => "patrol", "quest_instance_id" => q}, s), do: section(s, "patrols")[q]
 

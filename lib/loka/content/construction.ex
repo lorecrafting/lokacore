@@ -5,7 +5,7 @@ defmodule Loka.Content.Construction do
   cartridge (UNRESOLVED_REFERENCE); a blueprint, its tags and description variants are owned by
   their capabilities, and its title and descriptions have catalog entries; a site or
   world.construction needs construction@1; a blueprint, a site, world.construction or (S4) a
-  `status_active` leaf with subject `room` needs kernel_api 1.99. Twin of kernel/ts/src/content/cartridge_construction.ts
+  `status_active` leaf with subject `room` needs kernel_api 1.99, (S5) a raze service 1.101. Twin of kernel/ts/src/content/cartridge_construction.ts
   (the TS loader checks blueprint parts in cartridge_refs.ts). Variant and enter-lock conditions
   join Checks.trees/1 through RoomParts.conditions/1.
   """
@@ -21,7 +21,9 @@ defmodule Loka.Content.Construction do
 
     Enum.flat_map(sites, &site(&1, m, defs)) ++
       owned_blueprints(blueprints, m, defs, text, registry) ++
-      requirements(m, defs, blueprints, sites, settings) ++ builds(m, defs, text, settings)
+      requirements(m, defs, blueprints, sites, settings) ++
+      builds(m, defs, text, settings) ++
+      razes(m, defs)
   end
 
   defp owned_blueprints(blueprints, m, defs, text, registry) do
@@ -57,6 +59,15 @@ defmodule Loka.Content.Construction do
     ) ++
       for(true <- [api(m) < [1, 101]], do: floor_diag()) ++
       refusal_texts(text, op) ++ on_site(site, s, rel, path)
+  end
+
+  # Built rooms S5: a raze service needs kernel_api 1.101 (one diagnostic however many).
+  defp razes(m, defs) do
+    raze? = &match?({_, {_, [], %{"benefit" => %{"kind" => "raze"}}}}, &1)
+
+    if Enum.any?(defs["service"] || %{}, raze?) and api(m) < [1, 101],
+      do: [floor_diag()],
+      else: []
   end
 
   # A second build in the sequence, a build outside success, off a site or without world.construction.

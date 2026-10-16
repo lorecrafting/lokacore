@@ -92,11 +92,14 @@ defmodule Loka.ContentConstructionTest do
   # Breaks (Built rooms S3): the compiler admits a claim on a build commission or a build fact that
   # is not a false-default player bool (construction.test.ts pins the TS side).
   # Breaks (Built rooms S4): the compiler admits a mend whose direction is not its site's, whose
-  # site lists no blueprint with a ruin, or whose site does not resolve (construction.test.ts too).
+  # site lists no blueprint with a ruin, or whose site does not resolve (construction.test.ts too);
+  # (S5) a raze whose direction is not its site's, whose site does not resolve, or without a
+  # refusal text.
   test "a build benefit names a direction and blueprint of its resolved site" do
     dir = Loka.ContentSource.copy(@dir)
     build = &{"services/raise_hut.json", fn s -> put_in(s, ["benefit", &1], &2) end}
     mend = &{"services/mend_hut.json", fn s -> put_in(s, ["benefit", &1], &2) end}
+    raze = &{"services/raze_hut.json", fn s -> put_in(s, ["benefit", &1], &2) end}
     # a claim needs its own refusal text; supplied so only the commission check refuses
     claim_text =
       {"text.json", &Map.merge(&1, %{"service.not_ready" => "-", "service.no_output" => "-"})}
@@ -128,7 +131,15 @@ defmodule Loka.ContentConstructionTest do
           {[mend.("site", "nowhere")],
            [{"UNRESOLVED_REFERENCE", "services/mend_hut.benefit.site"}]},
           {[{"text.json", &Map.delete(&1, "service.nothing_to_mend")}],
-           [{"UNRESOLVED_REFERENCE", "services/mend_hut"}]}
+           [{"UNRESOLVED_REFERENCE", "services/mend_hut"}]},
+          {[raze.("direction", "east")],
+           [{"SCHEMA_VIOLATION", "services/raze_hut.benefit.direction"}]},
+          {[raze.("site", "nowhere")],
+           [{"UNRESOLVED_REFERENCE", "services/raze_hut.benefit.site"}]},
+          {[{"text.json", &Map.delete(&1, "service.nothing_to_raze")}],
+           [{"UNRESOLVED_REFERENCE", "services/raze_hut"}]},
+          {[{"text.json", &Map.delete(&1, "service.occupied")}],
+           [{"UNRESOLVED_REFERENCE", "services/raze_hut"}]}
         ] do
       assert {:error, diags} = Loka.ContentSource.compile(dir, edits)
       assert pairs(diags) == expected

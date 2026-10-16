@@ -110,6 +110,7 @@ test('a site and world.construction each need construction@1', () => {
     delete c.services['build_sampler@0.0.1:service/raise_hut'];
     delete c.services['build_sampler@0.0.1:service/cancel_hut'];
     delete c.services['build_sampler@0.0.1:service/mend_hut'];
+    delete c.services['build_sampler@0.0.1:service/raze_hut'];
     delete c.npcs['build_sampler@0.0.1:npc/carpenter'].services;
   };
   const gate = (at: string) => ['UNDECLARED_CAPABILITY', at];
@@ -173,6 +174,29 @@ test('a mend benefit names a direction of its resolved site and a site blueprint
     refused((c) => delete c.text['service.nothing_to_mend']),
     ['UNRESOLVED_REFERENCE', at('.target')],
   );
+});
+
+// Breaks (Built rooms S5): the loader admits a raze whose direction is not in its site's
+// directions or whose site does not resolve, or a raze without its two refusal texts.
+test('a raze benefit names a direction of its resolved site and has its refusal texts', () => {
+  const svc = (c: Obj) => c.services['build_sampler@0.0.1:service/raze_hut'];
+  const at = (p: string) => `.cartridge.services["build_sampler@0.0.1:service/raze_hut"]${p}`;
+  assert.deepEqual(
+    refused((c) => (svc(c).benefit.direction = 'east')),
+    ['SCHEMA_VIOLATION', at('.benefit.direction')],
+  );
+  assert.deepEqual(
+    refused((c) => (svc(c).benefit.site = { ...svc(c).benefit.site, key: 'nowhere' })),
+    ['UNRESOLVED_REFERENCE', at('.benefit.site')],
+  );
+  for (const [key, path] of [
+    ['service.nothing_to_raze', '.target'],
+    ['service.occupied', '.occupied'],
+  ])
+    assert.deepEqual(
+      refused((c) => delete c.text[key]),
+      ['UNRESOLVED_REFERENCE', at(path)],
+    );
 });
 
 // Breaks (Built rooms S3): the loader admits a claim on a build commission (it has no output to

@@ -1,4 +1,4 @@
-# size: allow 351, patrol, water, bleed, status, levelling, expedition and character pairing join precondition replay
+# size: allow 356, patrol, water, bleed, status, levelling, built, expedition and character pairing join precondition replay
 defmodule Loka.Core.Invariants do
   @moduledoc "Pure portable invariants: composition, resolution and host outcomes; unknown IDs raise."
   alias Loka.Core.Compose
@@ -274,6 +274,7 @@ defmodule Loka.Core.Invariants do
   defp link(%{"op" => "bleed.transition"} = op), do: {op["expected"], op["value"]}
   defp link(%{"op" => "status.transition"} = op), do: {op["expected"], op["value"]}
   defp link(%{"op" => "levelling.set"} = op), do: {op["expected"], op["value"]}
+  defp link(%{"op" => "built.set"} = op), do: {op["expected"], op["value"]}
   defp link(%{"op" => "expedition.transition"} = op), do: {op["expected"], op["value"]}
   defp link(%{"op" => "entity.create", "identity" => i}), do: {nil, i}
   defp link(%{"op" => "entity.transfer"} = op), do: {op["source_id"], op["destination_id"]}
@@ -312,6 +313,8 @@ defmodule Loka.Core.Invariants do
 
   defp initial(%{"op" => "levelling.set", "character_id" => c}, s),
     do: get_in(s, ["levelling", c])
+
+  defp initial(%{"op" => "built.set", "entity_id" => e}, s), do: get_in(s, ["built", e])
 
   defp initial(%{"op" => "expedition.transition", "quest_instance_id" => q}, s),
     do: get_in(s, ["expeditions", q])

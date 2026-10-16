@@ -34,6 +34,8 @@ defmodule Loka.Core.ComposeTarget do
   def target(%{"op" => "levelling.set", "character_id" => c}),
     do: %{"kind" => "levelling", "character_id" => c}
 
+  def target(%{"op" => "built.set", "entity_id" => e}), do: %{"kind" => "built", "entity_id" => e}
+
   def target(%{"op" => "status.transition", "body_id" => b, "status" => s}),
     do: %{"kind" => "status", "body_id" => b, "status" => s}
 

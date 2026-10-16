@@ -1,4 +1,4 @@
-// size: allow 312, the build and mend benefits (Built rooms S2 to S4) and the barter (row kgd.70) add their gates and commission to the one transition query
+// size: allow 314, the build, mend and raze benefits (Built rooms S2 to S5) and the barter (row kgd.70) add their gates and commission to the one transition query
 // One bounded admission/transition query for exact keyed service offers and execution.
 import {
   LIMITS,
@@ -24,7 +24,7 @@ import { adjust, level, resourceRef, resourceSpec, transfer, type Levels } from 
 import { serving } from '../liquid/shared.ts';
 import { selected } from '../containment/stock.ts';
 import { giveRefused } from '../containment/shared.ts';
-import { unbuildable, unmendable } from './build.ts';
+import { unbuildable, unmendable, unrazable } from './build.ts';
 export { built, raised } from './build.ts';
 
 type Payload = Extract<CommandPayload, { type: 'use_service' }>;
@@ -48,7 +48,8 @@ export function transition(
   const benefit = service.benefit;
   const blocked =
     (benefit.kind === 'build' && unbuildable(world, benefit, p.actor_id)) ||
-    (benefit.kind === 'mend' && unmendable(world, benefit));
+    (benefit.kind === 'mend' && unmendable(world, benefit)) ||
+    (benefit.kind === 'raze' && unrazable(world, benefit, p.actor_id));
   if (blocked) return blocked;
   const commission =
     benefit.kind === 'entitlement' || benefit.kind === 'build' ? benefit : undefined;
@@ -95,6 +96,7 @@ function granted(
   }
   if (benefit.kind === 'mend') return { ops: [...ops, ...inputs] }; // cure and weathering in raised()
   if (benefit.kind === 'build') return { ops }; // the room itself is minted in raised() or built()
+  if (benefit.kind === 'raze') return { ops }; // the tombstone and moves come from raised()
   if (benefit.kind === 'repair') return repair(world, p, body, benefit, ops);
   if (benefit.kind === 'claim' || benefit.kind === 'cancel')
     return settle(world, p, body, order!, ops, steps);

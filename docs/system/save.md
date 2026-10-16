@@ -377,6 +377,18 @@ Load refuses `save_corrupt`, with no repair and no skipped row, when a built row
 Invariant `exits_resolve` ranges over the hydrated rooms: a save whose built rows did not
 hydrate leaves the site's exit unresolved, so it can never load silently.
 
+Built rooms S5 ([mechanics.md](mechanics.md#built-rooms-s5-raze-and-tombstone)): a raze saves
+a `built` row `{razed_at}` keyed by the room id (op `built.set`) next to the unchanged identity
+row, plus the moved contents' `containers` rows and the cleared status rows, in one changed-row
+transaction. Hydrate derives a razed room with no exits and, while the site's exit leads to it,
+removes that exit; a new room may then be raised at the same site and direction. The raze
+receipt uses the generic service-fee path, with no new receipt validator and no format bump.
+Load refuses `save_corrupt` when a `built` row is not a `BuiltRow`, has `razed_at` later than
+the clock, names an entity that is not a built created row, or when any `containers` row puts an
+entity inside a razed room. Cold reopen, receipt replay, a failed or lost COMMIT at the raze, the
+forged rows (file unchanged) and a raise after the raze are pinned through the real loader
+(`mobile/authority/local-story/built.test.ts`).
+
 ## Live encounter persistence (M6-A)
 
 Encounter rows and combat job binding/cancellation commit in the existing changed-row
