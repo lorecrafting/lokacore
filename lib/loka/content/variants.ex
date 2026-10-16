@@ -28,11 +28,7 @@ defmodule Loka.Content.Variants do
     furnish = furnish?([defs, settings])
 
     if (identity or voices or relative or used?(defs, settings)) and
-         api <
-           if(remarks,
-             do: [1, 107],
-             else: floor(furnish, identity, voices, relative, defs, settings)
-           ),
+         api < floor(remarks, furnish, identity, voices, relative, defs, settings),
        do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least", %{})],
        else: []
   end
@@ -40,12 +36,13 @@ defmodule Loka.Content.Variants do
   defp used?(defs, settings),
     do: Enum.any?(Entities.all(defs), &variant?/1) or leaf?(defs) or leaf?(settings)
 
-  defp floor(true, _, _, _, _, _), do: [1, 102]
-  defp floor(_, true, _, _, _, _), do: [1, 97]
-  defp floor(_, _, true, _, _, _), do: [1, 91]
-  defp floor(_, _, _, true, _, _), do: [1, 87]
+  defp floor(true, _, _, _, _, _, _), do: [1, 107]
+  defp floor(_, true, _, _, _, _, _), do: [1, 102]
+  defp floor(_, _, true, _, _, _, _), do: [1, 97]
+  defp floor(_, _, _, true, _, _, _), do: [1, 91]
+  defp floor(_, _, _, _, true, _, _), do: [1, 87]
 
-  defp floor(_, _, _, _, defs, settings),
+  defp floor(_, _, _, _, _, defs, settings),
     do: if(reader?(defs) or reader?(settings), do: [1, 53], else: [1, 46])
 
   defp variant?({kind, _, e}),
