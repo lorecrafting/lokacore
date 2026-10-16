@@ -1,0 +1,12 @@
+{
+  "provider": "reeve",
+  "currency": "pennies",
+  "action": "buy_charter",
+  "label": "service.buy_charter",
+  "narration": "service.buy_charter.used",
+  "price": 5,
+  "benefit": {
+    "kind": "entitlement",
+    "fact": "owns_charter"
+  }
+}

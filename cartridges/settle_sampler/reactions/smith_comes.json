@@ -1,0 +1,22 @@
+{
+  "on": {
+    "event": "custom_event",
+    "custom": "smithy_raised"
+  },
+  "apply": [
+    {
+      "op": "npc.move",
+      "npc": "smith",
+      "room": "square"
+    },
+    {
+      "op": "fact.assign",
+      "fact": "smith_state",
+      "value": "settled"
+    },
+    {
+      "op": "narrate",
+      "text": "settle.smith_arrives"
+    }
+  ]
+}

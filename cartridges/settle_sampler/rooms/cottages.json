@@ -1,0 +1,9 @@
+{
+  "title": "room.cottages.title",
+  "description": "room.cottages.description",
+  "exits": {
+    "east": {
+      "to": "road"
+    }
+  }
+}

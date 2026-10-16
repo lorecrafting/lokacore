@@ -1,0 +1,9 @@
+{
+  "title": "room.cellar.title",
+  "description": "room.cellar.description",
+  "exits": {
+    "north": {
+      "to": "square"
+    }
+  }
+}

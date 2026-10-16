@@ -1,0 +1,61 @@
+{
+  "keywords": [
+    "smith"
+  ],
+  "short": "npc.smith.short",
+  "room_line": "npc.smith.room",
+  "description": "npc.smith.description",
+  "room": "far_road",
+  "daily_schedule": {
+    "8": [
+      {
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "fact_compare",
+            "fact": "smith_state",
+            "equals": "settled"
+          }
+        },
+        "room": "square"
+      },
+      {
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "fact_compare",
+            "fact": "smith_state",
+            "equals": "leaving"
+          }
+        },
+        "room": "road"
+      },
+      "far_road"
+    ],
+    "20": [
+      {
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "fact_compare",
+            "fact": "smith_state",
+            "equals": "settled"
+          }
+        },
+        "room": "cottages"
+      },
+      {
+        "when": {
+          "policy_version": 1,
+          "root": {
+            "op": "fact_compare",
+            "fact": "smith_state",
+            "equals": "leaving"
+          }
+        },
+        "room": "road"
+      },
+      "far_road"
+    ]
+  }
+}

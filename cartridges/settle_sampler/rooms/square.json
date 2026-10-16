@@ -4,6 +4,28 @@
   "exits": {
     "west": {
       "to": "road"
+    },
+    "south": {
+      "to": "cellar"
+    }
+  },
+  "site": {
+    "directions": [
+      "north",
+      "east"
+    ],
+    "blueprints": [
+      "smithy",
+      "mill"
+    ]
+  },
+  "details": {
+    "stakes": {
+      "aliases": [
+        "stakes",
+        "plot"
+      ],
+      "description": "detail.stakes"
     }
   }
 }

@@ -1,0 +1,9 @@
+{
+  "title": "room.storehouse.title",
+  "description": "room.storehouse.description",
+  "exits": {
+    "north": {
+      "to": "road"
+    }
+  }
+}

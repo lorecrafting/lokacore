@@ -23,7 +23,12 @@
       "population": 1,
       "fact": 1,
       "policy": 1,
-      "reaction": 1
+      "reaction": 1,
+      "service": 1,
+      "construction": 1,
+      "action_recipe": 1,
+      "inspectable_detail": 1,
+      "attributes": 1
     },
     "client_features": []
   },
@@ -79,6 +84,9 @@
         "player_died": "combat.player_died",
         "npc_died": "combat.npc_died"
       }
+    },
+    "construction": {
+      "max_total": 2
     }
   },
   "calendar": {

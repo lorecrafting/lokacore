@@ -10,6 +10,33 @@
         "instance"
       ],
       "meaning": "The raiders have gone out to the hills."
+    },
+    "owns_charter": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The character bought the town charter from the reeve."
+    },
+    "smith_state": {
+      "version": 1,
+      "value_type": {
+        "type": "enum",
+        "values": [
+          "away",
+          "settled",
+          "leaving"
+        ],
+        "default": "away"
+      },
+      "scopes": [
+        "instance"
+      ],
+      "meaning": "Whether the smith has settled in the town."
     }
   }
 }

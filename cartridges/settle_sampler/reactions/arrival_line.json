@@ -3,6 +3,15 @@
     "event": "entity_entered_room",
     "room": "road"
   },
+  "when": {
+    "policy_version": 1,
+    "root": {
+      "op": "resource_compare",
+      "subject": "subject",
+      "resource": "mv",
+      "at_least": 0
+    }
+  },
   "apply": [
     {
       "op": "narrate",

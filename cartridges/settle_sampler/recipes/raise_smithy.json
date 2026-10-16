@@ -1,0 +1,38 @@
+{
+  "label": "actions.raise_smithy",
+  "aliases": [
+    "raise"
+  ],
+  "target": {
+    "kind": "detail",
+    "room": "square",
+    "detail": "stakes"
+  },
+  "priority": 5,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "fact_compare",
+      "fact": "owns_charter",
+      "equals": true
+    }
+  },
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "build",
+          "blueprint": "smithy",
+          "direction": "north"
+        },
+        {
+          "op": "event.emit",
+          "event": "smithy_raised"
+        }
+      ],
+      "narration": {
+        "actor": "narration.raise_smithy.success"
+      }
+    }
+  }
+}

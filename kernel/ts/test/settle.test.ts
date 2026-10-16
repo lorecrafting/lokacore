@@ -10,7 +10,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
-import { INSTALLED, loadCartridge, newWorld, step, stepElapsed } from '../src/index.ts';
+import { INSTALLED, gameView, loadCartridge, newWorld, step, stepElapsed } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { encode } from '../src/foundation/canonical.ts';
@@ -18,6 +18,11 @@ import { key } from '../src/foundation/compose.ts';
 import { engaged } from '../src/mechanics/combat/shared.ts';
 import { living } from '../src/mechanics/death/shared.ts';
 import { livingCount } from '../src/mechanics/population/refs.ts';
+import { level, resourceRef } from '../src/mechanics/resource.ts';
+import { hydrate } from '../src/runtime/created.ts';
+import { check } from '../src/runtime/invariants.ts';
+import { validate } from '../src/foundation/validate.ts';
+import { resolved } from '../src/commands/actions.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-settle-sampler-'));
 let artifact: Uint8Array;
@@ -81,7 +86,11 @@ test('S3-1: a rule says its lines in step order', () => {
 
 // Breaks: a fired (after) rule skips the step, or says it when scheduled instead of when due.
 test('S3-1: a delayed line is said by the advance that reaches its due time, not before', () => {
-  const w = world((c) => (c.reactions[RULE].after = 300));
+  // The player gate's subject leaf would read the actor's body at fire, so a fired rule drops it.
+  const w = world((c) => {
+    c.reactions[RULE].after = 300;
+    delete c.reactions[RULE].when;
+  });
   assert.equal(w.state.clock, 600);
   const moved = west(w);
   assert.ok(!lines(moved.decision as never).includes(LINE));
@@ -162,7 +171,7 @@ function attack(w: World, target_id: string) {
 const room = (w: World, key: string) => w.roomIds[`settle_sampler@0.0.1:room/${key}`]!;
 const member = (w: World, slot: number) =>
   w.state.population_slots![key({ kind: 'population_slot', plan: PLAN, slot })]!;
-const [A, B] = ['958ab551-90e6-8530-8abb-d7d3d42537a8', 'eeb7d808-89c9-81b0-8528-e5d406dee0da'];
+const [A, B] = ['83d13ad4-0f8a-8037-9f83-ecfdc02e6e5b', 'f26a01c4-9f87-837a-b166-460cadc44708'];
 
 // Breaks: the plan step moves nothing, moves in slot order (B first) instead of EntityId order,
 // emits no entered event per member, or the move ends the members' slots (population_count).
@@ -281,4 +290,190 @@ test('loader: a plan move names a known plan and a room, never an NPC', () => {
     refused((s) => delete s.room),
     ['SCHEMA_VIOLATION', `${at}.plan`],
   );
+});
+
+// Settle S3-1 (mechanics.md "Settle S3-1: the charter and the smith"): the reeve sells the
+// charter (B8), which opens the storehouse chest (G7) and the stakes' raise_smithy (S6 build);
+// the build's smithy_raised event brings the smith (FD5 move, W10 cases). Pennies start at 16.
+const S = 'settle_sampler@0.0.1:';
+let m = 0;
+const act = (w: World, payload: object) =>
+  step(
+    w,
+    {
+      id: `dddddddd-0000-4000-8000-${String(++m).padStart(12, '0')}`,
+      world_context_id: w.context,
+      payload: { actor_id: w.character, ...payload },
+    } as never,
+    m,
+  );
+const code = (r: ReturnType<typeof step>) =>
+  r.decision.kind === 'rejected' ? r.decision.error.code : r.decision.kind;
+const done = (w: World, payload: object) => {
+  const r = act(w, payload);
+  assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
+  return r;
+};
+const ent = (w: World, k: string) => w.entityIds[`${S}${k}`]!;
+const smithAt = (w: World) => w.state.containers[ent(w, 'npc/smith')];
+const smithState = (w: World) =>
+  Object.entries(w.state.facts ?? {}).find(([k]) => k.includes('"smith_state"'))?.[1];
+const pennies = (w: World) => level(w, w.body, resourceRef(w, 'pennies'));
+const buy = (w: World) =>
+  act(w, {
+    type: 'use_service',
+    provider_id: ent(w, 'npc/reeve'),
+    service: ref('service', 'buy_charter'),
+    quoted_price: 5,
+  });
+const bought = (w: World) => {
+  const r = buy(w);
+  assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
+  return r.world;
+};
+const RAISE = { type: 'perform', action: 'raise_smithy' };
+const raised = (w = world()) => done(bought(w), RAISE);
+const built = (w: World) =>
+  Object.keys(w.state.created ?? {}).filter((id) => w.state.created![id].origin.kind === 'built');
+const offer = (w: World, action: string) => {
+  let found:
+    { available: boolean; reason?: { code: string; message?: { key: string } } } | undefined;
+  JSON.stringify(gameView(w), (_, v) => (v?.action_key === action ? (found = v) : v));
+  return found;
+};
+
+// Breaks: the chest's get lock is dropped or read off the taken item: a stranger's take is
+// offered or accepted (access_sampler pins the lock order; this pins the authored lock).
+test('S3-1: a stranger may not take from the storehouse chest; the charter opens it', () => {
+  const go = (w: World, direction: string) => done(w, { type: 'move', direction }).world;
+  const take = (w: World) => act(w, { type: 'take', item_id: ent(w, 'item/old_knife') });
+  const store = (w: World) => go(go(w, 'west'), 'south');
+  const knife = (w: World) => {
+    const chest = gameView(w).entities.find((e) => e.id === ent(w, 'item/chest'))!;
+    const a = chest.contents!.find((e) => e.id === ent(w, 'item/old_knife'))!.actions;
+    const o = a.find((x) => x.action_key === 'take')!;
+    return [o.available, 'reason' in o && o.reason?.code];
+  };
+  const w = store(world());
+  assert.deepEqual(knife(w), [false, 'permission_denied']);
+  assert.equal(code(take(w)), 'permission_denied');
+  const c = store(bought(world()));
+  assert.deepEqual(knife(c), [true, false]);
+  assert.equal(code(take(c)), 'accepted');
+});
+
+// Breaks: raise_smithy loses its owns_charter policy (offered or accepted before the charter), the
+// charter costs other than 5, or the offer disagrees with admission.
+test('S3-1: raise_smithy is unavailable before the charter; the charter costs 5 of 16 pennies', () => {
+  const w = world();
+  const agrees = (x: World, r: ReturnType<typeof step>) => {
+    const resolves = Object.fromEntries(
+      Object.values(resolved(x, x.character)).map((a) => [a.key, a.command]),
+    );
+    const view = gameView(x);
+    return check('gameview_agrees_with_admission', {
+      view,
+      command: { payload: RAISE },
+      decision: r.decision,
+      resolves,
+    });
+  };
+  assert.equal(offer(w, 'raise_smithy')?.available, false);
+  assert.equal(offer(w, 'raise_smithy')?.reason?.code, 'invalid_state');
+  const r = act(w, RAISE);
+  assert.equal(code(r), 'invalid_state');
+  assert.equal(agrees(w, r), true);
+  assert.equal(offer(w, 'buy_charter')?.available, true);
+  const c = bought(w);
+  assert.equal(pennies(c), 11);
+  assert.equal(offer(c, 'raise_smithy')?.available, true);
+  assert.equal(agrees(c, act(c, RAISE)), true);
+});
+
+// Breaks: event.emit after build does not reach smith_comes, a step of it is dropped, or the line
+// is not last; the build faces another way or names another blueprint.
+test('S3-1: raising the smithy brings the smith; the square opens north to the smithy', () => {
+  const r = raised();
+  const w = r.world;
+  assert.equal(lines(r.decision as never).at(-1), 'settle.smith_arrives');
+  assert.equal(smithAt(w), room(w, 'square'));
+  assert.equal(smithState(w), 'settled');
+  assert.equal(built(w).length, 1);
+  const north = done(w, { type: 'move', direction: 'north' }).world;
+  assert.equal(gameView(north).place.title.key, 'blueprint.smithy.title');
+  assert.deepEqual(validate('GameView', gameView(w)), []);
+});
+
+// Breaks: a W10 case reads the fact wrong or the hour boundary is off by one (exact hours 20, 8).
+test('S3-1: the settled smith keeps to the square by day and the cottages by night', () => {
+  const at = (w: World, until: number) => {
+    const x = advance(w, until).w;
+    return [smithAt(x), x];
+  };
+  const w = raised().world;
+  const [a, w1] = at(w, 1999);
+  assert.equal(a, room(w, 'square'));
+  const [b, w2] = at(w1 as World, 2000);
+  assert.equal(b, room(w, 'cottages'));
+  const [c, w3] = at(w2 as World, 3199);
+  assert.equal(c, room(w, 'cottages'));
+  assert.equal(at(w3 as World, 3200)[0], room(w, 'square'));
+});
+
+// Breaks: the schedule's fallback is the square (or a case holds at the default away state).
+test('S3-1: with no smithy the smith stays on the far road', () => {
+  const w = advance(world(), 5000).w;
+  assert.equal(smithAt(w), room(w, 'far_road'));
+  assert.equal(smithState(w), undefined);
+});
+
+// Breaks: a second raise on the taken site is accepted, says the line again or moves the smith.
+test('S3-1: a second raise is refused service.site_taken and changes nothing', () => {
+  const w = raised().world;
+  assert.deepEqual(offer(w, 'raise_smithy')?.reason, {
+    code: 'invalid_state',
+    message: { key: 'service.site_taken' },
+  });
+  const r = act(w, RAISE);
+  assert.equal(code(r), 'invalid_state');
+  assert.equal(r.world, w);
+});
+
+// Breaks: reopen loses the built room or the smith's place, or replay mints another room id.
+test('S3-1: save at 1000, reopen and replay keep the smith and the built room', () => {
+  m = 0;
+  const w = advance(raised().world, 1000).w;
+  const keep = (x: World) => JSON.parse(JSON.stringify([smithAt(x), x.roomIds, x.rooms]));
+  assert.deepEqual(keep(hydrate(world(), JSON.parse(JSON.stringify(w.state)), true)!), keep(w));
+  m = 0;
+  assert.deepEqual(keep(advance(raised().world, 1000).w), keep(w));
+});
+
+// Breaks: arrival_line's when gate dropped: a raider entering the road says the player's line.
+test('S3-1: a raider entering the road says no arrival line', () => {
+  const w = world((c) => {
+    hour(c, 'spawn', 7, [{ op: 'population.spawn', plan: PLAN }]);
+    hour(c, 'out', 8, [{ op: 'npc.move', plan: PLAN, room: ref('room', 'road') }]);
+  });
+  const at7 = advance(w, 700).w;
+  const [run_id, from, until] = ['cccccccc-0000-4000-8000-000000000009' as never, 700, 800];
+  const payload = { type: 'elapsed', actor_id: w.character, run_id, from, until };
+  const id = elapsedCommandId(run_id, w.context, from, until) as never;
+  const r = stepElapsed(at7, { id, world_context_id: w.context, payload } as never, 5);
+  assert.deepEqual(
+    advance(at7, 800).entered.map(([, to]) => to),
+    [room(w, 'road')],
+  );
+  assert.deepEqual(lines(r.decision as never), []);
+});
+
+// Breaks: a long settlement drains the smith's schedule jobs differently from hourly steps (a
+// skipped hour-20 or hour-8 job, or out of order).
+test('S3-1: one wait to 08:00 day 2 leaves the smith where hourly waits do', () => {
+  const w = raised().world;
+  let hourly = w;
+  for (let t = 700; t <= 3200; t += 100) hourly = advance(hourly, t).w;
+  const once = advance(w, 3200).w;
+  const where = (x: World) => [smithAt(x), x.state.clock, smithState(x)];
+  assert.deepEqual(where(once), where(hourly));
 });

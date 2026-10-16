@@ -1141,6 +1141,14 @@
           "reactions/arrival_line.json",
           ["apply"],
           [{ "op": "fact.assign", "fact": "band_out", "value": true }]
+        ],
+        [
+          "reactions/smith_comes.json",
+          ["apply"],
+          [
+            { "op": "npc.move", "npc": "smith", "room": "square" },
+            { "op": "fact.assign", "fact": "smith_state", "value": "settled" }
+          ]
         ]
       ],
       "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
