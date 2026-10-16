@@ -1,3 +1,4 @@
+// size: allow 560, the Book keyboard, tooltip and status-icon cases share one set of React and native shims
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { createRequire, registerHooks } from 'node:module';
