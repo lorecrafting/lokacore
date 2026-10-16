@@ -104,10 +104,8 @@ export function resetLogs(s: Logs, now: GameView) {
 
 // A closing receipt's lines all end the fight on its Combat page, whatever their key (book-ui.md,
 // Closure).
-export const closing = (last: NarrationRecord): NarrationRecord => ({
-  ...last,
-  combat_lines: last.lines.map((_, i) => i),
-});
+export const closing = (last: NarrationRecord, was: GameView, now: GameView): NarrationRecord =>
+  was.combat && !now.combat ? { ...last, combat_lines: last.lines.map((_, i) => i) } : last;
 
 export const combatResult = (d: Extract<DecisionResult, { kind: 'accepted' }> | undefined) =>
   !!d &&

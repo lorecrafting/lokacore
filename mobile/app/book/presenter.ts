@@ -71,7 +71,7 @@ function background(
     return;
   }
   if (last && last.command_id !== s.narrationId)
-    narrate(s, was.combat && !now.combat ? closing(last) : last, now, away, text);
+    narrate(s, closing(last, was, now), now, away, text);
 }
 
 // A World entry: to the log, or held by the open settlement (book-ui.md, Away recap).
