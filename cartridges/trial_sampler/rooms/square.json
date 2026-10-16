@@ -4,6 +4,10 @@
   "exits": {
     "north": {
       "to": "market"
+    },
+    "east": {
+      "to": "cell",
+      "barrier": "cell_door"
     }
   }
 }

@@ -1,7 +1,8 @@
-// Toolbox row 35 (the arrest engine) on the compiled trial sampler: a guard hostile to a wanted
-// character arrests a walk-in to the cell, saying its line, instead of opening an encounter. The
-// crier sets `wanted` by dialogue; Ada, a group member, stays where the move took her. Expected
-// values are hand-counted.
+// Toolbox row 35 (the arrest engine and the trial content) on the compiled trial sampler: a guard
+// hostile to a wanted character arrests a walk-in to the cell, saying its line, instead of opening
+// an encounter; entering the cell wanted reads the charge and shuts the door, which opens only once
+// `wanted` is false. The crier sets `wanted` by dialogue; Ada, a group member, stays where the move
+// took her. Expected values are hand-counted.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
@@ -95,6 +96,16 @@ const entered = (d: { events: readonly { payload: object; position: number }[] }
   d.events.map((e) => [e.payload, e.position]);
 const body = (w: World) => bodyOf(w, w.character)!;
 const at = (w: World) => w.state.containers[body(w)];
+const exit = (w: World, direction: string) => {
+  const view = gameView(w);
+  assert.deepEqual(validate('GameView', view), []);
+  return view.exits.find((e) => e.direction === direction)!;
+};
+const code = (w: World, p: object) => {
+  const d = play(w, p).decision;
+  return d.kind === 'rejected' ? d.error.code : d.kind;
+};
+const arrested = (w: World) => north(chat(w, 'crier', 'confess')).w;
 
 // Break: hostileAt drops the arrest candidate (or keeps its no-combat bar), so nobody is arrested.
 test('a wanted walk-in is arrested to the cell', () => {
@@ -102,7 +113,8 @@ test('a wanted walk-in is arrested to the cell', () => {
   assert.equal(at(w), room(w, 'cell'));
   assert.equal(w.state.containers[npc(w, 'guard')], room(w, 'market'));
   assert.equal(engaged(w, body(w)), undefined);
-  assert.deepEqual(d.narration, [{ key: 'npc.guard.arrest' }]);
+  assert.deepEqual(d.narration, [{ key: 'npc.guard.arrest' }, { key: 'trial.charge' }]);
+  assert.equal(exit(w, 'west').door?.state, 'closed');
   assert.deepEqual(entered(d), [
     [{ type: 'entity_entered_room', entity_id: body(w), room_id: room(w, 'market') }, 1],
     [{ type: 'entity_entered_room', entity_id: body(w), room_id: room(w, 'cell') }, 2],
@@ -153,12 +165,67 @@ test('a wanted sleeper is arrested where it sleeps', () => {
   const r = ok(play(w1, { type: 'sleep' }));
   if (r.decision.kind !== 'accepted') throw new Error('unreachable');
   assert.equal(at(r.world), room(w0, 'cell'));
-  assert.deepEqual(r.decision.narration?.at(-1), { key: 'npc.guard.arrest' });
+  assert.deepEqual(r.decision.narration?.slice(-2), [
+    { key: 'npc.guard.arrest' },
+    { key: 'trial.charge' },
+  ]);
   assert.deepEqual(r.decision.events.at(-1)?.payload, {
     type: 'entity_entered_room',
     entity_id: body(w0),
     room_id: room(w0, 'cell'),
   });
+});
+
+// Breaks: the cell door is offered or opens while the prisoner is wanted (`opens_when` dropped),
+// or pleading pays, clears `wanted` or opens the door.
+test('a wanted prisoner is locked in; pleading changes nothing', () => {
+  const w = arrested(fresh());
+  assert.deepEqual(exit(w, 'west'), {
+    available: false,
+    direction: 'west',
+    door: { name: 'barrier.cell_door.short', state: 'closed', actions: [] },
+    reason: { code: 'exit_closed' },
+  });
+  assert.equal(code(w, { type: 'open', direction: 'west' }), 'invalid_state');
+  assert.equal(code(w, { type: 'move', direction: 'west' }), 'exit_closed');
+  const talked = act(w, { type: 'talk', target_id: npc(w, 'jailer') });
+  const [continuation_id] = pending(talked, talked.character)!;
+  const r = ok(play(talked, { type: 'choose', choice_id: 'plead', continuation_id }));
+  if (r.decision.kind !== 'accepted') throw new Error('unreachable');
+  assert.deepEqual(
+    r.decision.narration?.map((l) => l.key),
+    ['narration.jailer.sentence'],
+  );
+  assert.deepEqual(r.world.state.facts, w.state.facts);
+  assert.deepEqual(r.world.state.resources, w.state.resources);
+  assert.equal(exit(r.world, 'west').door?.state, 'closed');
+});
+
+// Breaks: the reaction's `when` is dropped (an innocent visitor hears the charge and is shut in),
+// or the door ignores `opens_when` the other way (closed to a visitor who is not wanted).
+test('a visitor who is not wanted walks in and out through the door', () => {
+  const opened = act(fresh(), { type: 'open', direction: 'east' });
+  const r = ok(play(opened, { type: 'move', direction: 'east' }));
+  if (r.decision.kind !== 'accepted') throw new Error('unreachable');
+  assert.equal(at(r.world), room(r.world, 'cell'));
+  assert.equal(r.decision.narration, undefined);
+  assert.equal(exit(r.world, 'west').door?.state, 'open');
+  assert.equal(at(act(r.world, { type: 'move', direction: 'west' })), room(r.world, 'square'));
+});
+
+// Break: the reaction's `barrier.set` is dropped, so a second arrest leaves the prisoner behind an
+// open door.
+test('an arrest shuts a door a visitor left open and reads the charge again', () => {
+  const visited = ['open', 'move'].reduce(
+    (w, type) => act(w, { type, direction: 'east' }),
+    fresh(),
+  );
+  const left = act(visited, { type: 'move', direction: 'west' });
+  assert.equal(exit(left, 'east').door?.state, 'open');
+  const { w, d } = north(chat(left, 'crier', 'confess'));
+  assert.equal(at(w), room(w, 'cell'));
+  assert.deepEqual(d.narration, [{ key: 'npc.guard.arrest' }, { key: 'trial.charge' }]);
+  assert.equal(exit(w, 'west').door?.state, 'closed');
 });
 
 // Break: the loader admits an arrest without hostile or beside engage, a dangling destination or
@@ -176,6 +243,24 @@ test('the loader refuses a malformed arrest', () => {
     [
       (c) => (guardOf(c).disposition.arrest.narration = 'nope'),
       ['UNRESOLVED_REFERENCE', `${npcAt}.arrest.narration`],
+    ],
+    [
+      (c) => (c.dialogues[`${S}dialogue/jailer_talk`].choices.pay.lesson_payment.amount = 0),
+      [
+        'SCHEMA_VIOLATION',
+        `.cartridge.dialogues[${JSON.stringify(`${S}dialogue/jailer_talk`)}].choices.pay.lesson_payment.amount`,
+      ],
+    ],
+    [
+      (c) => (c.dialogues[`${S}dialogue/jailer_talk`].choices.pay.lesson_payment.amount = 1),
+      'loaded',
+    ],
+    [
+      (c) => (c.reactions[`${S}reaction/charge`].apply[1].to = 'locked'),
+      [
+        'BARRIER_UNREACHABLE_KEY',
+        `.cartridge.reactions[${JSON.stringify(`${S}reaction/charge`)}].apply[1].to`,
+      ],
     ],
     [
       (c) => (c.manifest.requires.kernel_api.at_least = '1.104'),
