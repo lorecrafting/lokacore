@@ -184,6 +184,8 @@ polish stage which needs me at the computer for a bit."
   (Sonnet): no new item source for the croft seed (hint instead), fishing line no longer claims a catch, neutral
   order-open line. Book UI findings in loka-x6t.67 for the polish phase. Playtest harness could not resize to phone width.
 - Book bugs part B (loka-y6yg.20, hostile refusal, kernel_api 1.104) building; economy/law E1 (loka-y6yg.23) building.
+- #410 (loka-y6yg.31) merged. E1 of #409 approved after a fix (an unlocked yard crate was a penny faucet: now locked).
+  Hub sign reads "Four roads and a cellar stair" until the magic district adds the ladder. E2 (theft, wanted, fine) building.
 
 ## Owner answers this session
 
