@@ -205,6 +205,10 @@ polish stage which needs me at the computer for a bit."
 - M14 mounts (43b engine 1.108 + mount_sampler) approved; designer approved the mount Book text (no indicator: the
   saddled description, the mv fare and the refused exit are the only evidence). PR #412 (loka-kgd.164) opened at
   8c3c8ffd; Fable batch review running on the owner's earlier "Under 70%, go" (usage meter not readable, loka-8zqg).
+- #412 MERGED (M14 closed: loka-kgd.164-.168, .147). Batch review APPROVE WITH NOTES; the one doc fix (an arrest leaves
+  a ridden horse behind) is in. Filed loka-y6yg.32: the economy guard arrests instead of fighting. M15 batch loka-kgd.170
+  (rows 47 loka-kgd.171, G10 loka-kgd.172, FD6 loka-kgd.143); letters stay out unless the drafter shows otherwise; Fable
+  brief drafting running. E2 of #409 in Opus review.
 
 ## Owner answers this session
 
