@@ -22,6 +22,7 @@ import { visits } from '../src/mechanics/knowledge/shared.ts';
 import { positionOf } from '../src/mechanics/position/shared.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { value } from '../src/mechanics/fact.ts';
+import type { DefinitionRef } from '../src/contracts.gen.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-trial-'));
 let artifact: Uint8Array;
@@ -40,12 +41,13 @@ assert.ok(loaded.ok, JSON.stringify(loaded));
 const content = loaded.cartridge as Cartridge;
 const source = (decode(new TextDecoder().decode(artifact)) as { cartridge: any }).cartridge;
 const S = 'trial_sampler@0.0.1:';
-const ref = (kind: string, key: string) => ({
-  cartridge_id: 'trial_sampler',
-  cartridge_version: '0.0.1',
-  kind,
-  key,
-});
+const ref = (kind: string, key: string) =>
+  ({
+    cartridge_id: 'trial_sampler',
+    cartridge_version: '0.0.1',
+    kind,
+    key,
+  }) as DefinitionRef;
 // The sampler loaded with a test-local change to its compiled cartridge.
 const reload = (change: (c: any) => void) => {
   const c = structuredClone(source);
