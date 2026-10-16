@@ -105,6 +105,18 @@ test('a loss that would cross the level floor leaves experience at the threshold
   assert.equal(room(r.world, r.world.body), 'hall');
 });
 
+// Breaks: the floor clamps a partial loss to nothing, or the line is untold when the floor cuts the loss short.
+test('a loss cut short by the level floor writes the threshold and is told', () => {
+  for (const [at, to] of [
+    [32, 30],
+    [101, 100],
+  ]) {
+    const r = die(hall(at));
+    assert.deepEqual(sets(r), [[at, to]]);
+    assert.ok(narration(r).includes('death.penalty'), narration(r).join());
+  }
+});
+
 /** The raise_attribute invocation from the GameView, resolved and stepped (levelling.test.ts). */
 function raise(w: World, key: string) {
   const offered = gameView(w).actions.find((a) => a.action_key === 'raise_attribute');
