@@ -1,4 +1,4 @@
-// size: allow 353, ancestry, bell area, Study edge, barrier opens_when, ask answer roots, identity name variants, blueprints and skill prerequisites and the arrest cell (row 35) join shared reference admission
+// size: allow 354, ancestry, bell area, Study edge, barrier opens_when, ask answer roots, identity name variants, blueprints and skill prerequisites the arrest cell (row 35) and NPC asides (row FD10) join shared reference admission
 import { water } from './cartridge_water.ts';
 import { topics } from './cartridge_topics.ts';
 import { pools } from './cartridge_pools.ts';

@@ -21,19 +21,22 @@ export const dispositions = (c: Obj): [Obj, string][] =>
       ]),
   );
 
+// Row FD10: a spawned copy has no authored presence to remark from.
+const templates = (c: Obj): Diagnostic[] =>
+  Object.entries((c.npcs ?? {}) as Obj)
+    .filter(([, n]) => n.spawn_template && n.asides)
+    .map(([ref]) =>
+      diag('SCHEMA_VIOLATION', `.cartridge.npcs${step(ref)}.asides`, { error: 'invalid_value' }),
+    );
+
 export function standing(c: Obj): Diagnostic[] {
-  const out: Diagnostic[] = [];
+  const out: Diagnostic[] = templates(c);
   let used = false;
   let arrest = false;
   let refuse = false;
   for (const [ref, n] of Object.entries((c.npcs ?? {}) as Obj)) {
     const d = n.disposition;
     if (n.shop?.buy_discount?.friendly) used = true;
-    // Row FD10: a spawned copy has no authored presence to remark from.
-    if (n.spawn_template && n.asides)
-      out.push(
-        diag('SCHEMA_VIOLATION', `.cartridge.npcs${step(ref)}.asides`, { error: 'invalid_value' }),
-      );
     if (!d) continue;
     used = true;
     const at = `.cartridge.npcs${step(ref)}.disposition`;
