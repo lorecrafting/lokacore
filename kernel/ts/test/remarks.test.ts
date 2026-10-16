@@ -14,6 +14,7 @@ import { gameView, INSTALLED, loadCartridge, newWorld, step } from '../src/index
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import type { EntityId } from '../src/contracts.gen.ts';
 import { encode } from '../src/foundation/canonical.ts';
+import { key } from '../src/foundation/compose.ts';
 import { validate } from '../src/foundation/validate.ts';
 import { pending, talking } from '../src/mechanics/dialogue/shared.ts';
 
@@ -122,6 +123,30 @@ test("Hal remarks on the crypt as a member, first then again; Bram's line is ung
   ]);
   w = chat(w, 'join');
   assert.deepEqual(seen(w).npcs[1], ['hal', ['remark.hal.again']]);
+});
+
+// Breaks: the PM's dark-room ruling (loka-kgd.147): darkness drops the room's asides (FD2), never a
+// perceived NPC's, so the asides guard lost or applied to NPCs shows the room's line or hides Bram's.
+test("in a dark crypt the room's aside hides and perceived Bram's remark shows", () => {
+  const seenRef = {
+    cartridge_id: 'remarks_sampler',
+    cartridge_version: '0.0.1',
+    kind: 'fact',
+    key: 'bram_seen',
+  };
+  const dark = load((c) => {
+    c.manifest.requires.capabilities.light = c.lock.capabilities.light = 1;
+    const { per_subject: _, ...fact } = c.facts[`${C}:fact/in_group`];
+    c.facts[`${C}:fact/bram_seen`] = { ...fact, key: 'bram_seen' };
+    const crypt = c.rooms[`${C}:room/crypt`];
+    crypt.dark_description = crypt.description;
+    crypt.asides = c.npcs[`${C}:npc/bram`].asides;
+    c.npcs[`${C}:npc/bram`].perception = { discovered: seenRef };
+  });
+  assert.ok(!Array.isArray(dark), JSON.stringify(dark));
+  const w = go(fresh(dark as Cartridge), 'north', 'east');
+  const perceived = { ...w, factDefaults: { ...w.factDefaults, [key(seenRef)]: true } };
+  assert.deepEqual(seen(perceived), { npcs: [['bram', ['remark.bram.hum']]], place: undefined });
 });
 
 // Breaks: the loader stops walking NPC asides (an unknown fact or text loads and fails in play),
