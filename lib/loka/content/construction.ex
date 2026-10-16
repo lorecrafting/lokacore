@@ -61,7 +61,6 @@ defmodule Loka.Content.Construction do
       refusal_texts(text, op) ++ on_site(site, s, rel, path)
   end
 
-  # A second build in the sequence, a build outside success, off a site or without world.construction.
   # Built rooms S5: a raze service needs kernel_api 1.101 (one diagnostic however many).
   defp razes(m, defs) do
     raze? = &match?({_, {_, [], %{"benefit" => %{"kind" => "raze"}}}}, &1)
@@ -71,6 +70,7 @@ defmodule Loka.Content.Construction do
       else: []
   end
 
+  # A second build in the sequence, a build outside success, off a site or without world.construction.
   defp misplaced?(sequence, i, name, site, settings),
     do:
       Enum.any?(Enum.take(sequence, i), &(&1["op"] == "build")) or name != "success" or
