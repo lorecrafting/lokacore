@@ -98,7 +98,7 @@ Sealed holders (no exits, never entered) hold the yields: `woodpile` (8 `log`s),
 | `glade` | east `farm_yard` | detail `oak` (rating 1; `chop`); 3 `pelt`s on the frame |
 | `pond` | west `farm_yard` | detail `pond_water` (tag `water`); `rod` (tags `rod`, `wooden`) |
 | `farm_kitchen` | north `farm_yard` | **the cook**; detail `hearth` (rating 1 for `cook_stew`, 2 for `cook_feast`) |
-| `holding_croft` (sandbox) | down `holding_lane`; **site** `{directions: [north], blueprints: [hut_plain]}` | **hens** (population `hens`, `pen_sampler/populations/hens.json`: home `holding_croft`, cap 4, floor 2, `birth_when population_count hens at_least 2`); `trough`, `grain_01`; `nest` (container, `locks.put` on `owns_pen`); a second `plot` on `owns_plot`, a second `sack`; `croft_pool` (tag `water`), a second `rod`; 2 `stick`s; a second `cot`; detail `croft_hearth` |
+| `holding_croft` (sandbox) | down `holding_lane`; **site** `{directions: [north], blueprints: [hut_plain]}` | **hens** (population `hens`, `pen_sampler/populations/hens.json`: home `holding_croft`, cap 4, floor 2, `birth_when population_count hens at_least 2`); `trough`, `grain_01`; `nest` (container, `locks.put` on `owns_pen`); a second `plot` on `owns_plot` (no second sack: the cartridge has one `seed_01`, so the Holding sign tells the player to carry the yard seed up); `croft_pool` (tag `water`), a second `rod`; 2 `stick`s; a second `cot`; detail `croft_hearth` |
 
 The built huts are rooms the engine creates north of each site (`origin: built`, shared-world: one
 structure per site direction, [S2](../system/mechanics.md#built-rooms-toolbox-row-s2-foundation)).
@@ -115,7 +115,7 @@ Blueprint `hut_timbered`: `max_per_owner 1`, `variants [{when: item_present {tag
 > boards. The farmer south likes an apple and not a dead rat, and trades a knife
 > for two pelts without a penny passing. The pond east of her yard bites by the hour and the weather;
 > the cook south of the yard turns two fish into a stew for a penny, or teaches you to do it at her
-> hearth. Up the croft is the same again with hens in it.
+> hearth. Up the croft has hens, a pool that bites at any hour, and a plot where a seed from the yard sack can be sown too.
 
 ### NPCs, services, recipes, reactions
 
