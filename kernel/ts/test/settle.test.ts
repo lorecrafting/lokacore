@@ -1,3 +1,4 @@
+// size: allow 530, the Settle S3 cases share one compiled settle_sampler fixture and helpers
 // Settle S3-1 (N1) on the compiled settle sampler (mechanics.md "Settle S3-1: narrate"): the
 // `arrival_line` rule says `settle.arrival_line` when the character enters `road` (west of the
 // entry `square`). The calendar starts at 600. The 1.103 floor is loader_floors.json's
