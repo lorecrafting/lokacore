@@ -19,7 +19,6 @@ defmodule Loka.ContentMountTest do
   test "mount refusals match the TS loader" do
     dir = Loka.ContentSource.copy(@dir)
     horse = "npcs/horse.json"
-    talk = "dialogues/horse_talk.json"
 
     for {edits, expected} <- [
           {[drop("cartridge.json", ["world", "mount"])],
@@ -35,11 +34,15 @@ defmodule Loka.ContentMountTest do
                "default" => 0
              })
            ] ++
-             for(
-               k <- ["mount", "dismount"],
-               do: edit(talk, ["choices", k, "sequence", Access.at(0), "value"], 1)
-             ) ++
-             [edit(horse, ["room_line_variants", Access.at(0), "when", "root", "equals"], 1)],
+             Enum.flat_map([{"mount", 0}, {"dismount", 1}], fn {k, v} ->
+               talk = "dialogues/horse_#{k}.json"
+
+               [
+                 edit(talk, ["choices", k, "sequence", Access.at(0), "value"], 1),
+                 edit(talk, ["policy", "root", "equals"], v)
+               ]
+             end) ++
+             [edit(horse, ["description_variants", Access.at(0), "when", "root", "equals"], 1)],
            [{"SCHEMA_VIOLATION", "cartridge.world.mount.riding"}]},
           {[edit("cartridge.json", ["world", "mount", "riding"], "nope")],
            [{"UNRESOLVED_REFERENCE", "cartridge.world.mount.riding"}]},

@@ -15,5 +15,5 @@
   "dialogue.horse.dismount": "Dismount.",
   "narration.horse.mount": "You swing up into the saddle.",
   "narration.horse.dismount": "You slide down from the saddle.",
-  "npc.horse.room.saddled": "The [[horse|horse]] stands under you, saddled."
+  "npc.horse.saddled": "The bay horse stands under you, saddled."
 }

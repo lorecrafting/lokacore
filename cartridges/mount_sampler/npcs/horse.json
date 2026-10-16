@@ -1,10 +1,9 @@
 {
-  "keywords": [
-    "horse"
-  ],
+  "keywords": ["horse"],
   "short": "npc.horse.short",
   "room_line": "npc.horse.room",
-  "room_line_variants": [
+  "description": "npc.horse.description",
+  "description_variants": [
     {
       "when": {
         "policy_version": 1,
@@ -15,15 +14,12 @@
           "subject": "target"
         }
       },
-      "description": "npc.horse.room.saddled"
+      "description": "npc.horse.saddled"
     }
   ],
-  "description": "npc.horse.description",
   "room": "yard",
   "mount": {
-    "terrain": [
-      "road"
-    ],
+    "terrain": ["road"],
     "cost_percent": 0
   }
 }

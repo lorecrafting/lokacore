@@ -11,7 +11,6 @@ import { encode } from '../src/foundation/canonical.ts';
 import { validate } from '../src/foundation/validate.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { pending } from '../src/mechanics/dialogue/shared.ts';
-import { describeEntity } from '../src/mechanics/description_variant/rule.ts';
 
 const kat = JSON.parse(
   readFileSync(
@@ -205,9 +204,15 @@ test('case 8: loader refusals and the accepted edges', () => {
     [
       (c) => {
         c.facts[riding].value_type = { type: 'int', default: 0 };
-        const { choices } = c.dialogues[`${P}:dialogue/horse_talk`];
-        for (const k of ['mount', 'dismount']) choices[k].sequence[0].value = 1;
-        c.npcs[HORSE].room_line_variants[0].when.root.equals = 1;
+        for (const [k, v] of [
+          ['mount', 0],
+          ['dismount', 1],
+        ] as const) {
+          const d = c.dialogues[`${P}:dialogue/horse_${k}`];
+          d.choices[k].sequence[0].value = 1;
+          d.policy.root.equals = v;
+        }
+        c.npcs[HORSE].description_variants[0].when.root.equals = 1;
       },
       ['SCHEMA_VIOLATION', '.cartridge.world.mount.riding'],
     ],
@@ -221,20 +226,19 @@ test('case 8: loader refusals and the accepted edges', () => {
   for (const [edit, expected] of cases) assert.deepEqual(refused(edit), expected);
 });
 
-// Breaks: the saddled room line reads the viewer, not the horse, as the pair fact's subject, or
-// shows while on foot.
-test('case 9: the horse reads saddled while ridden, its name and description unchanged', () => {
+// Breaks: the saddled description reads the viewer, not the horse, as the pair fact's subject, or
+// shows on foot; or Mount and Dismount are both offered (Dismount on foot, Mount while riding).
+test('case 9: the horse page reads saddled while ridden, and offers only the choice that applies', () => {
   const seen = (w: World) => {
-    const view = gameView(w);
-    assert.deepEqual(validate('GameView', view), []);
-    const e = view.entities.find((x) => x.id === horse(w))!;
-    return [e.name, e.description, describeEntity(w, w.character, horse(w), 'room_line')];
+    const talked = gameView(act(w, { type: 'talk', target_id: horse(w) }).world);
+    assert.deepEqual(validate('GameView', talked), []);
+    const e = talked.entities.find((x) => x.id === horse(w))!;
+    const offered = talked.choice!.choices.filter((o) => o.available).map((o) => o.choice_id);
+    return [e.name, e.description, offered];
   };
-  const base = ['npc.horse.short', 'npc.horse.description', 'npc.horse.room'];
-  const saddled = [...base.slice(0, 2), 'npc.horse.room.saddled'];
   const w = yard();
-  assert.deepEqual(seen(w), base);
+  assert.deepEqual(seen(w), ['npc.horse.short', 'npc.horse.description', ['mount']]);
   const mounted = ride(w, 'mount');
-  assert.deepEqual(seen(mounted), saddled);
-  assert.deepEqual(seen(ride(mounted, 'dismount')), base);
+  assert.deepEqual(seen(mounted), ['npc.horse.short', 'npc.horse.saddled', ['dismount']]);
+  assert.deepEqual(seen(ride(mounted, 'dismount'))[1], 'npc.horse.description');
 });

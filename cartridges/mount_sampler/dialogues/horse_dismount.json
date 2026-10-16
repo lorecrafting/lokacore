@@ -3,8 +3,10 @@
   "policy": {
     "policy_version": 1,
     "root": {
-      "op": "all",
-      "items": []
+      "op": "fact_compare",
+      "fact": "riding",
+      "equals": true,
+      "subject": "target"
     }
   },
   "prompt": "dialogue.horse.prompt",
@@ -15,17 +17,6 @@
     }
   },
   "choices": {
-    "mount": {
-      "label": "dialogue.horse.mount",
-      "narration": "narration.horse.mount",
-      "sequence": [
-        {
-          "op": "fact.assign",
-          "fact": "riding",
-          "value": true
-        }
-      ]
-    },
     "dismount": {
       "label": "dialogue.horse.dismount",
       "narration": "narration.horse.dismount",
