@@ -15,7 +15,7 @@ type Say = (key: string) => string;
 type Look = 'buff' | 'debuff' | 'neutral';
 type Condition = NonNullable<GameView['conditions']>[number];
 type Props = {
-  conditions: NonNullable<GameView['conditions']>;
+  conditions: readonly Condition[];
   time: number;
   text: Say;
   open?: () => void; // absent while locked

@@ -169,6 +169,7 @@ export const RingEighty: Story = { args: { conditions: [fed] } };
 
 // Near empty: a minute of the hour left, a sliver right of 12.
 export const RingNearEmpty: Story = { args: { conditions: [at('condition.fed', 'buff', 780)] } };
+export const RingEmpty: Story = { args: { conditions: [at('condition.fed', 'buff', 720)] } };
 
 // Permanent (scarred): no ring.
 export const RingPermanent: Story = { args: { conditions: [scarred] } };
