@@ -4,7 +4,7 @@
   "room.market.title": "Market",
   "room.market.description": "Stalls and shouting. The square lies south.",
   "room.cell.title": "Cell",
-  "room.cell.description": "A cold cell in the watch house. A barred door leads west to the square.",
+  "room.cell.description": "A cold cell in the watch house. A barred door leads west to the square; an iron [grate](grate_lock) in the floor covers a drain.",
   "npc.crier.short": "the crier",
   "npc.crier.room": "The [[crier|crier]] rings a hand bell.",
   "npc.crier.description": "A loud man with a bell.",
@@ -33,5 +33,12 @@
   "dialogue.jailer.pay": "Pay the five-penny fine.",
   "dialogue.jailer.plead": "Plead that you cannot pay.",
   "narration.jailer.paid": "The jailer counts five pennies, strikes your name from the ledger and nods at the door.",
-  "narration.jailer.sentence": "The jailer shrugs. \"Then you sit until the fine is paid.\""
+  "narration.jailer.sentence": "The jailer shrugs. \"Then you sit until the fine is paid.\"",
+  "room.drain.title": "Drain",
+  "room.drain.description": "A dripping brick drain under the watch house. The grate is overhead; the drain runs west to the square.",
+  "barrier.grate.short": "the floor grate",
+  "detail.grate_lock": "An iron grate in the floor, its bars rusted thin. A strong pull might tear it loose.",
+  "actions.force_grate": "Force the grate",
+  "grate.forced": "The rusted bars give; the grate comes loose in your hands.",
+  "grate.holds": "The grate holds."
 }
