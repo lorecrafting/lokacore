@@ -325,13 +325,15 @@
       "floor": "1.58",
       "below": "1.57",
       "source": "cartridges/toolbox_showcase",
-      "feature": "a reaction's attacker filter (loka-kgd.79); the Homestead (1.101/1.102) and speech.phrases (1.98) dropped",
+      "feature": "a reaction's attacker filter (loka-kgd.79); the Homestead (1.101/1.102), speech.phrases (1.98) and disposition.refuse (1.104) dropped",
       "edits": [
         ["cartridge.json", ["speech"], null],
         ["statuses/gored.json", ["kind"], null],
         ["cartridge.json", ["world", "construction"], null],
         ["rooms/holding_lane.json", ["site"], null],
         ["npcs/carpenter.json", ["services"], null],
+        ["npcs/nell.json", ["disposition", "refuse"], null],
+        ["npcs/bess.json", ["disposition", "refuse"], null],
         ["blueprints/hut_plain.json", [], null],
         ["blueprints/hut_timbered.json", [], null],
         ["actions/raise_hut_plain.json", [], null],
@@ -1292,6 +1294,14 @@
           [{ "op": "fact.assign", "fact": "band_out", "value": true }]
         ]
       ],
+      "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
+      "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
+    },
+    {
+      "floor": "1.104",
+      "below": "1.103",
+      "source": "cartridges/toolbox_showcase",
+      "feature": "an NPC's disposition.refuse line (Book hostile refusal)",
       "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
       "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
     }

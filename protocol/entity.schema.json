@@ -561,6 +561,10 @@
             },
             "engage": {
               "$ref": "text.schema.json#/$defs/TextKey"
+            },
+            "refuse": {
+              "description": "Book hostile refusal (kernel_api at least 1.104): the line the Book shows on the NPC's page while it is hostile, naming the mood, never the cause; projected as its EntityView refusal.",
+              "$ref": "text.schema.json#/$defs/TextKey"
             }
           },
           "additionalProperties": false

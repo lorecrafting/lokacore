@@ -2,7 +2,8 @@ defmodule Loka.Content.Standing do
   @moduledoc """
   Toolbox rows 15 and G11: a reaction's fact.adjust names a bounded int fact (FACT_TYPE_MISMATCH);
   an NPC's disposition is on an authored NPC, with an engage line exactly when it is hostile and
-  has an attack (SCHEMA_VIOLATION); either, or a friendly buy_discount, needs kernel_api 1.47.
+  has an attack (SCHEMA_VIOLATION); either, or a friendly buy_discount, needs kernel_api 1.47; a
+  refuse line (Book hostile refusal) 1.104.
   Twin of kernel/ts/src/content/cartridge_standing.ts; the conditions and the engage text are
   checked with every entity's (Loka.Content.Entities). A hostile-capable NPC speaking a dialogue
   that accepts, hands over, receives or escorts (refused while hostile): HOSTILE_QUEST_SPEAKER, a
@@ -37,8 +38,9 @@ defmodule Loka.Content.Standing do
 
   defp shapes(npcs) do
     for {rel, %{"disposition" => d} = n} <- npcs,
-        n["spawn_template"] ||
-          is_map_key(d, "engage") != (is_map_key(d, "hostile") and is_map_key(n, "attack")),
+        (n["spawn_template"] ||
+           is_map_key(d, "engage") != (is_map_key(d, "hostile") and is_map_key(n, "attack"))) or
+          (is_map_key(d, "refuse") and not is_map_key(d, "hostile")),
         do: diag("SCHEMA_VIOLATION", at(rel, ["disposition"]), %{"error" => "invalid_value"})
   end
 
@@ -61,7 +63,9 @@ defmodule Loka.Content.Standing do
           is_map_key(n, "disposition") or get_in(n, ["shop", "buy_discount", "friendly"]) == true
         end)
 
-    if used and api < [1, 47],
+    refuse = Enum.any?(npcs, fn {_, n} -> is_map_key(n["disposition"] || %{}, "refuse") end)
+
+    if (used and api < [1, 47]) or (refuse and api < [1, 104]),
       do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least", %{})],
       else: []
   end
