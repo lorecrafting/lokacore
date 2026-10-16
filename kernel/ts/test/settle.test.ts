@@ -72,6 +72,13 @@ test('S3-1: entering the road says the authored line once in the move receipt', 
   assert.deepEqual(lines(west(world()).decision as never), [LINE]);
 });
 
+// Breaks: a line goes before the lines of the steps before it (unshift, not push).
+test('S3-1: a rule says its lines in step order', () => {
+  const first = { op: 'narrate', text: 'room.road.title' };
+  const w = world((c) => c.reactions[RULE].apply.unshift(first));
+  assert.deepEqual(lines(west(w).decision as never), ['room.road.title', LINE]);
+});
+
 // Breaks: a fired (after) rule skips the step, or says it when scheduled instead of when due.
 test('S3-1: a delayed line is said by the advance that reaches its due time, not before', () => {
   const w = world((c) => (c.reactions[RULE].after = 300));
