@@ -404,5 +404,5 @@ git clone -q "$O" "$R.other" && git -C "$R.other" checkout -q slice && echo 3 > 
 echo 4 > a.txt; git commit -qam diverged
 out=$(sh "$bin/push_slice.sh" "$R" slice) && bad "push_slice: a rejected push exited 0: $out"
 case "$out" in PUSH_EXIT=0*) bad "push_slice: a rejected push printed PUSH_EXIT=0";; PUSH_EXIT=*) ;; *) bad "push_slice: no PUSH_EXIT line: $out";; esac
-sh "$bin/push_slice.sh" "$R" main >/dev/null 2>&1 && bad "push_slice: pushed a branch that is not checked out in the worktree"
+out=$(sh "$bin/push_slice.sh" "$R" main 2>&1); case "$out" in *"is not the branch checked out"*) ;; *) bad "push_slice: pushed a branch that is not checked out in the worktree: $out";; esac
 exit $fail
