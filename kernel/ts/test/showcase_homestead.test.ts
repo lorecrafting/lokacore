@@ -614,6 +614,77 @@ test('homestead sandbox: grain in the trough lays eggs to the nest cap; hens bre
   valid(h);
 });
 
+// Breaks: the croft plot's put or get lock, water_croft off growing_croft, or the croft ripen and
+// wither rules off the 43200 edge.
+test('homestead sandbox: the croft plot is locked, ripens when watered early, withers when late', () => {
+  const crop = (x: World) =>
+    ['turnip_01', 'turnip_02', 'turnip_03'].filter(
+      (k) => where(x, id(x, 'item', k)) === id(x, 'item', 'croft_plot'),
+    );
+  const tenant = walk(take(yard(), 'seed_01'), 'north', 'up');
+  const sowing = {
+    type: 'put',
+    item_id: id(tenant, 'item', 'seed_01'),
+    container_id: id(tenant, 'item', 'croft_plot'),
+  };
+  assert.equal(refused(tenant, sowing), 'permission_denied');
+  const s = act(walk(sowable(28800), 'north', 'up'), sowing).world;
+  const t = s.state.clock;
+  assert.equal(statusOn(s, 'croft_plot', 'growing_croft'), true);
+  const at = (d: number) => {
+    const x = wait(s, t + d).world;
+    return wait(
+      play(x, {
+        type: 'perform',
+        action: 'water_croft',
+        target_id: id(x, 'item', 'croft_plot'),
+        item_id: id(x, 'item', 'watering_can'),
+      }).world,
+      t + DAY,
+    ).world;
+  };
+  const ripe = at(43201);
+  const [turnip] = crop(ripe);
+  assert.match(turnip!, /^turnip_0[123]$/);
+  assert.equal(where(take(ripe, turnip!), id(ripe, 'item', turnip!)), ripe.body);
+  const late = at(43200);
+  assert.deepEqual(crop(late), []);
+  assert.equal(statusOn(late, 'croft_plot', 'withered'), true);
+});
+
+// Breaks: the croft site's prices (exact 5 to raise, 2 to raze), the croft cot reaction off its
+// item_present, fish_croft not taking the second rod, or the croft hearth off Cooking 1.
+test('homestead sandbox: the croft site, cot, pool and hearth', () => {
+  let c = walk(fresh(WORLD), 'north', 'west', 'up');
+  assert.deepEqual(play(take(c, 'cot_2'), { type: 'rest' }).lines, []);
+  assert.deepEqual(play(c, { type: 'rest' }).lines, ['narration.well_rested.applied']);
+  const fishing = (x: World) => ({
+    type: 'perform',
+    action: 'fish_croft',
+    target_id: detail(x, 'croft_pool'),
+  });
+  assert.equal(refused(c, fishing(c)), 'invalid_state');
+  const rod = { ...take(c, 'rod_2'), state: { ...take(c, 'rod_2').state, rng: PASS } } as World;
+  assert.equal(act(rod, fishing(rod)).decision.kind, 'accepted');
+  // The carpenter takes the croft commission in the shop.
+  let shop = walk(fresh(WORLD), 'north', 'west', 'west');
+  shop = play(shop, hire(shop, 'raise_croft_hut', 5)).world;
+  assert.equal(pennies(shop), 5);
+  assert.equal(built(shop).length, 1);
+  const hut = built(shop)[0];
+  shop = play(shop, hire(shop, 'raze_croft_hut', 2)).world;
+  assert.equal(pennies(shop), 3);
+  assert.deepEqual(shop.state.built, { [hut!]: { razed_at: shop.state.clock } });
+  assert.deepEqual(offer(c, 'cook_stew_croft').reason, { code: 'invalid_state' });
+  const cook = walk(
+    choose(talk(walk(c, 'down', 'south', 'south'), 'cook').world, 'cooking').world,
+    'north',
+    'north',
+    'up',
+  );
+  assert.deepEqual(offer(cook, 'cook_stew_croft').reason, reason('craft.cook_stew_croft.needs'));
+});
+
 // Breaks: the nest's put lock dropped or keyed to a fact other than owns_pen.
 test('homestead sandbox: only the pen owner puts into the nest', () => {
   const stick = (x: World) => take(walk(x, 'north', 'up'), 'stick_03');
