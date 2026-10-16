@@ -6,18 +6,17 @@
 // capacity or reach check (the room is a sink).
 import type {
   CharacterId,
-  DefinitionRef,
   DeltaOp,
   DomainEvent,
   EntityId,
   EventPayload,
   ReactionRule,
 } from '../../contracts.gen.ts';
-import { key } from '../../foundation/compose.ts';
 import { refString, type World } from '../../runtime/decision.ts';
 import { engaged } from '../combat/shared.ts';
 import { living } from '../death/shared.ts';
 import { eventRooms } from '../lookups.ts';
+import { livingMembers } from '../population/refs.ts';
 import { running } from '../scene/shared.ts';
 import { moves } from '../status/shared.ts';
 
@@ -88,20 +87,10 @@ function moveNpc(
     : eventRooms(world, cause, subject);
   if (!room) return [];
   const npcs = step.plan
-    ? members(world, step.plan)
+    ? livingMembers(world, step.plan).sort()
     : [step.npc ? world.entityIds[refString(step.npc)] : subject];
   // Members are distinct NPCs, so no member reads another's transfer from ops.
   return npcs.flatMap((npc) => moveOne(world, npc, room, group, ops, holders, emit));
-}
-
-function members(world: World, plan: DefinitionRef): EntityId[] {
-  const ids: EntityId[] = [];
-  for (let slot = 1; slot <= world.populationSpecs[key(plan)]!.cap; slot++) {
-    const id =
-      world.state.population_slots?.[key({ kind: 'population_slot', plan, slot })]?.member_id;
-    if (id) ids.push(id);
-  }
-  return ids.sort();
 }
 
 function moveOne(
