@@ -1,3 +1,4 @@
+// size: allow 740, the Homestead walk (steps 1 to 13) and its croft sandbox continue one world and share its helpers
 // The showcase Homestead district walked step by step (docs/showcase/homestead-district.md,
 // guided loop steps 1 to 8). Each test continues the world the one before it left.
 import assert from 'node:assert/strict';
