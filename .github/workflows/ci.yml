@@ -97,7 +97,9 @@ jobs:
           node-version: '24.21.0'
           cache: npm
           cache-dependency-path: kernel/ts/package-lock.json
+      # shell: bash runs with -o pipefail, so a failing test is not hidden by tee's exit.
       - run: npm ci --no-audit --no-fund && npm run "test:sim:$PART" | tee "$RUNNER_TEMP/sim.log"
+        shell: bash
         working-directory: kernel/ts
         env:
           PART: ${{ matrix.part }}
