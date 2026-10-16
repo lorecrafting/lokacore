@@ -1489,6 +1489,42 @@
           "additionalProperties": false
         },
         {
+          "description": "Checked write of one built room's tombstone row (Built rooms S5): composes only when the stored row equals expected (null when absent) and entity_id is a created row of origin kind built.",
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "built.set"
+            },
+            "writer_group": {
+              "$ref": "delta.schema.json#/$defs/WriterGroup"
+            },
+            "entity_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            },
+            "expected": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "$ref": "delta.schema.json#/$defs/BuiltRow"
+                }
+              ]
+            },
+            "value": {
+              "$ref": "delta.schema.json#/$defs/BuiltRow"
+            }
+          },
+          "required": [
+            "op",
+            "writer_group",
+            "entity_id",
+            "expected",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
           "type": "object",
           "properties": {
             "op": {
@@ -2277,6 +2313,23 @@
             "character_id"
           ],
           "additionalProperties": false
+        },
+        {
+          "description": "One built room's tombstone row (Built rooms S5).",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "built"
+            },
+            "entity_id": {
+              "$ref": "identity.schema.json#/$defs/EntityId"
+            }
+          },
+          "required": [
+            "kind",
+            "entity_id"
+          ],
+          "additionalProperties": false
         }
       ],
       "examples": [
@@ -2674,6 +2727,24 @@
           "allocated": {
             "levelling_sampler@0.0.1:attribute/str": 1
           }
+        }
+      ]
+    },
+    "BuiltRow": {
+      "description": "A built room's tombstone (Built rooms S5): razed at razed_at. A razed room keeps its created row and id but has no exits, holds nothing and counts toward no construction limit.",
+      "type": "object",
+      "properties": {
+        "razed_at": {
+          "$ref": "command.schema.json#/$defs/LogicalTime"
+        }
+      },
+      "required": [
+        "razed_at"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "razed_at": 28800
         }
       ]
     }

@@ -1,4 +1,4 @@
-// size: allow 319, the closed State row sections include toolbox status and levelling rows; actorOf and admitted beside bodyOf; COMPOSES containment (row 33) and food status (hs-5)
+// size: allow 321, the closed State row sections include toolbox status, levelling and built rows; actorOf and admitted beside bodyOf; COMPOSES containment (row 33) and food status (hs-5)
 // What rule modules (mechanics/<capability>/rule.ts) see: the World they read, the typed Rule and
 // Decision contract that limits each capability to its own commands and events
 // (capability_registry.json, through contracts.gen.ts Owned), and pure helpers. The router,
@@ -51,6 +51,7 @@ import {
   type WorldContextId,
   type StatusRow,
   type LevellingRow,
+  type BuiltRow,
   type WaterOccupancy,
 } from '../contracts.gen.ts';
 import { key, type Stored } from '../foundation/compose.ts';
@@ -64,6 +65,7 @@ export type State = {
   readonly bleeds?: Readonly<Record<string, BleedRow>>;
   readonly statuses?: Readonly<Record<string, StatusRow>>; // by body/status target
   readonly levelling?: Readonly<Record<string, LevellingRow>>; // by character id
+  readonly built?: Readonly<Record<string, BuiltRow>>; // by built room (created entity) id
   readonly water?: Readonly<Record<string, WaterOccupancy>>;
   readonly liquids?: Readonly<Record<string, LiquidRow>>;
   readonly fuel?: Readonly<Record<string, FuelRow>>;

@@ -286,6 +286,7 @@ The StateDelta algebra: typed operations, their mutation targets and preconditio
 - **BleedRow**: One body bleed generation, retained after removal. Active fields are required together.
   - `true`
   - `false`
+- **BuiltRow**: A built room's tombstone (Built rooms S5): razed at razed_at. A razed room keeps its created row and id but has no exits, holds nothing and counts toward no construction limit.
 - **CharacterChoice**: The once-only character identity and its complete saved attribute values.
 - **ChoiceAttempts**: Pinned wrong-answer count and authored positive limit for one conversational sitting.
 - **ContinuationId**: A pending choice/continuation (04 §5.3 'Choice/continuation resolution'), created from IdSource. Lowercase hyphenated UUID, any version.
@@ -323,6 +324,7 @@ The StateDelta algebra: typed operations, their mutation targets and preconditio
   - `bleed.transition`: Checked transition of one body bleed generation.
   - `status.transition`: Checked transition of one body status generation (toolbox row 1); the target is the body and status pair.
   - `levelling.set`: Checked write of one character's levelling row (toolbox row 4): composes only when the stored row equals expected (null when absent) and neither the experience nor any allocated count falls.
+  - `built.set`: Checked write of one built room's tombstone row (Built rooms S5): composes only when the stored row equals expected (null when absent) and entity_id is a created row of origin kind built.
   - `water.transition`
   - `expedition.transition`
   - `visit.record`
@@ -359,6 +361,7 @@ The StateDelta algebra: typed operations, their mutation targets and preconditio
   - `visit`
   - `observation`
   - `levelling`: One character's levelling row (toolbox row 4).
+  - `built`: One built room's tombstone row (Built rooms S5).
 - **ObservedNpc**: One actor’s latest committed visible observation of an exact NPC, room and logical time.
 - **QuestInstanceId**: A QuestInstance (03 §12; 06 §1), created at activation from IdSource. Lowercase hyphenated UUID, any version.
 - **RoleBinding**: One role a continuation bound when it opened (04 §5.3 'bound roles'), for example the NPC the choice is made with.
