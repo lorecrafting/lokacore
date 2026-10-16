@@ -1,0 +1,27 @@
+{
+  "on": {
+    "event": "item_acquired",
+    "item": "grain_01"
+  },
+  "when": {
+    "policy_version": 1,
+    "root": {
+      "op": "not",
+      "item": {
+        "op": "has_item",
+        "item": "grain_01"
+      }
+    }
+  },
+  "apply": [
+    {
+      "op": "status.apply",
+      "status": "hen_fed",
+      "co_present": true
+    },
+    {
+      "op": "replenish.run",
+      "key": "spent_grain"
+    }
+  ]
+}

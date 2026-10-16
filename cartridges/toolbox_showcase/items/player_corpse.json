@@ -10,5 +10,9 @@
     "in": "template"
   },
   "mass_grams": 0,
-  "container": true
+  "container": true,
+  "immune": [
+    "growing",
+    "growing_croft"
+  ]
 }

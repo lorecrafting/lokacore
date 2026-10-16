@@ -1,0 +1,12 @@
+{
+  "provider": "cook",
+  "currency": "pennies",
+  "action": "claim",
+  "label": "service.claim",
+  "narration": "service.claim.used",
+  "price": 1,
+  "benefit": {
+    "kind": "claim",
+    "service": "stew"
+  }
+}

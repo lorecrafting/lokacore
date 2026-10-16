@@ -1,0 +1,12 @@
+{
+  "on": {
+    "event": "custom_event",
+    "custom": "bite_croft"
+  },
+  "apply": [
+    {
+      "op": "replenish.run",
+      "key": "croft_fish"
+    }
+  ]
+}

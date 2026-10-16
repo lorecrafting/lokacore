@@ -14,6 +14,7 @@ import {
   content,
   fresh,
   go,
+  homestead,
   id,
   play,
   ref,
@@ -153,6 +154,7 @@ test('loader: barrier.set and co_present tag need API 1.56; to locked needs a ke
     for (const r of ['boar_gore', 'tilt_boar_gore'])
       delete c.reactions[ref('reaction', r)].on.attacker;
     delete c.statuses[ref('status', 'gored')].kind; // 1.102 (loka-x6t.64)
+    homestead(c);
   };
   const untagged = (c: any) => {
     delete spread(c)[0].tag; // and the door named, so no tag is left

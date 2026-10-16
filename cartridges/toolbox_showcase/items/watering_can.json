@@ -1,0 +1,24 @@
+{
+  "keywords": [
+    "can"
+  ],
+  "short": "item.watering_can.short",
+  "room_line": "item.watering_can.room",
+  "description": "item.watering_can.description",
+  "mass_grams": 500,
+  "location": {
+    "in": "room",
+    "room": "farm_yard"
+  },
+  "tags": [
+    "liquid_holding"
+  ],
+  "vessel": {
+    "capacity": 4,
+    "unit_label": "liquid.units",
+    "initial": {
+      "kind": "water",
+      "quantity": 4
+    }
+  }
+}

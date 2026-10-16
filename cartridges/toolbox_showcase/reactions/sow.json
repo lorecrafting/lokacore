@@ -1,0 +1,54 @@
+{
+  "on": {
+    "event": "item_acquired",
+    "item": "seed_01"
+  },
+  "when": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": [
+        {
+          "op": "not",
+          "item": {
+            "op": "sky",
+            "season": "winter"
+          }
+        },
+        {
+          "op": "not",
+          "item": {
+            "op": "has_item",
+            "item": "seed_01"
+          }
+        }
+      ]
+    }
+  },
+  "apply": [
+    {
+      "op": "status.cure",
+      "status": "withered"
+    },
+    {
+      "op": "status.apply",
+      "status": "growing"
+    },
+    {
+      "op": "status.apply",
+      "status": "growing_croft"
+    },
+    {
+      "op": "fact.stamp",
+      "fact": "sown_at"
+    },
+    {
+      "op": "replenish.run",
+      "key": "spent_plot"
+    },
+    {
+      "op": "replenish.run",
+      "key": "spent_croft"
+    }
+  ]
+}

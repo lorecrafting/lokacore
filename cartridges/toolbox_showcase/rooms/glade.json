@@ -1,0 +1,19 @@
+{
+  "title": "room.glade.title",
+  "description": "room.glade.description",
+  "exits": {
+    "east": {
+      "to": "farm_yard"
+    }
+  },
+  "details": {
+    "oak": {
+      "aliases": [
+        "oak",
+        "tree"
+      ],
+      "description": "detail.oak",
+      "rating": 1
+    }
+  }
+}

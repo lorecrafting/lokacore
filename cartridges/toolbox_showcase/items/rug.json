@@ -1,0 +1,16 @@
+{
+  "keywords": [
+    "rug"
+  ],
+  "short": "item.rug.short",
+  "room_line": "item.rug.room",
+  "description": "item.rug.description",
+  "mass_grams": 300,
+  "location": {
+    "in": "room",
+    "room": "carpenter_shop"
+  },
+  "tags": [
+    "rug"
+  ]
+}

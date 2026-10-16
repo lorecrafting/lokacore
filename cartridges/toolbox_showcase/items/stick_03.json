@@ -1,0 +1,17 @@
+{
+  "keywords": [
+    "stick",
+    "stick_03"
+  ],
+  "short": "item.stick.short",
+  "room_line": "item.stick.room",
+  "description": "item.stick.description",
+  "mass_grams": 100,
+  "location": {
+    "in": "room",
+    "room": "holding_croft"
+  },
+  "tags": [
+    "wooden"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "items": [
+    "grain_01"
+  ],
+  "from": {
+    "in": "item",
+    "item": "trough"
+  },
+  "to": {
+    "in": "room",
+    "room": "midden"
+  },
+  "cap": 1,
+  "count": 1,
+  "every": 1000000000
+}
