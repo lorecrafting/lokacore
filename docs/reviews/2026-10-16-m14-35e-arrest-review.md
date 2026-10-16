@@ -53,3 +53,25 @@ Known limits accepted for M14:
 - A skipped arrest lets a later fighter engage. This deviates from the brief and is documented.
 
 Verdict: APPROVE WITH NOTES.
+
+## Fix round 1 (76660a69c7595f042a18da0d59b32373f8561e52)
+
+Scope: fix commit `76660a69c` only, the code it touches, and that code's direct callers.
+
+Dispositions:
+1. Finding 1 (water and encounter save): partly fixed. The move path is fixed. The Sleep caller is not (see the new finding below).
+   - `kernel/ts/src/mechanics/movement/sequence.ts:77,102` skip the arrest when the move's ops or `ventured.ops` hold a `water.transition` or `encounter.open`.
+   - Probe rerun (scratch, deleted): the same fixture with `move down` is accepted, the body stays in well_bottom, and `waterValid` is true. The new test `kernel/ts/test/water.test.ts:469` pins this.
+   - Mutant: dropping `'water.transition'` from `PINNED` turns `water.test.ts` red (body id mismatch). Restored. `water.test.ts` and `trial.test.ts` pass 17/17.
+   - The hound (`encounter.open`) has no test. A mutant that drops it would survive. It is accepted as a note: it is the same `pinned` expression, one set entry, and no planned content uses it.
+   - Note: climbing out of the water (a `water.transition` to null) also suppresses the arrest. That is safe, and the Known limits wording covers it.
+2. Finding 2 (Readers): fixed. `docs/system/mechanics.md:2352` names the arrest.
+
+New finding:
+1. **Should-fix: Sleep in a water bottom still arrests and commits a save that will not reopen.**
+   - Where: `kernel/ts/src/mechanics/position/rule.ts:39` calls `engage(...)` with `arrests` defaulted to true and has no pinned check. This is a direct caller of the guarded `engage`.
+   - Probe (scratch, deleted): the same fixture, then `move down` (body in well_bottom, `waterValid` true), then `{type: 'sleep'}`. The Sleep was accepted with the arrest narration, and `waterValid` became false. That is the round-0 failure on the second path.
+   - The doc says the arrest applies on "an ordinary move or a Sleep" (`mechanics.md:3663`). Known limits (`mechanics.md:3664`) name only the move.
+   - Fix: when the body holds a water row or an encounter, Sleep passes `arrests` false (a state check, because Sleep writes no water op), and a test covers it. Or name the Sleep save failure in Known limits and file a Beads issue, as round 0 allowed.
+
+Verdict: CHANGES REQUIRED.
