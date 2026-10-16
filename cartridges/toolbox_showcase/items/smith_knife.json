@@ -1,0 +1,13 @@
+{
+  "keywords": [
+    "knife"
+  ],
+  "short": "item.smith_knife.short",
+  "room_line": "item.smith_knife.room",
+  "description": "item.smith_knife.description",
+  "mass_grams": 150,
+  "location": {
+    "in": "room",
+    "room": "forge_back"
+  }
+}

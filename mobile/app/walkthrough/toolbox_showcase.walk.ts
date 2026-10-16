@@ -1,5 +1,7 @@
 // Homestead H2 at 390 px (`LOKA_WALK=toolbox_showcase npm run walkthrough`): the guided loop
 // (docs/showcase/homestead-district.md steps 2 to 12) in the Book; the farm step is kernel-only.
+// Law 2-law: bank, shop, hide, lift, fence, strongroom (docs/showcase/economy-law-district.md),
+// reduced: the commission waits and the seen lift with its fine are kernel-only (showcase_economy).
 import { LABEL } from '../book/labels.ts';
 import { moves, scene, settle, walk, type Screen } from './walk.ts';
 
@@ -99,6 +101,39 @@ const pondAndStew = async (screen: Screen, { tap, take, held, position }: Steps)
   await settle();
 };
 
+// Law L (docs/showcase/economy-law-district.md, Book e2e), reduced: bank, shop, hide, lift from the
+// merchant's Held list, fence, strongroom. The seen lift (wanted, fine) is a separate branch, kernel-only.
+const law = async (screen: Screen, { tap, take }: Steps) => {
+  const npc = async (who: RegExp, ...labels: RegExp[]) => {
+    await tap(who);
+    for (const l of labels) await tap(l);
+    await tap(LABEL.leave);
+  };
+  await moves(screen, 'down', 'east');
+  await npc(/^The clerk is here/, /^Deposit five pennies/);
+  await moves(screen, 'west', 'north');
+  await npc(/^The market clerk is here/, /^Withdraw five pennies/);
+  await npc(/^The chandler is here/, /^Buy a tallow candle/);
+  await moves(screen, 'south', 'west');
+  await tap('Hide');
+  await moves(screen, 'east', 'north');
+  await tap(/^The merchant is here/);
+  await take(/^The merchant's purse, open/, /^Take the merchant's purse/);
+  await moves(screen, 'south', 'west');
+  await npc(/^The fence/, /^Sell the merchant's purse/);
+  await moves(screen, 'east', 'east');
+  await npc(/^The clerk is here/, /^Buy the strongroom/);
+  await take(/^The strongroom key is here/, /^Take the strongroom key/);
+  await moves(screen, 'west');
+  await tap('Map');
+  await tap(/^Unlock the strongroom door/);
+  await tap(/^Open the strongroom door/);
+  await tap('Go south');
+  await take(/^A strongroom chest is here/, /^Put a tallow candle/);
+  await take(/^A tallow candle, open/, /^Take a tallow candle/);
+  await settle();
+};
+
 walk(
   '1-homestead',
   'Homestead: lessons, carve, build, rest, give, barter, fish, stew',
@@ -112,3 +147,11 @@ walk(
     await pondAndStew(screen, s);
   },
 );
+
+walk('2-law', 'Law: bank, shop, hide, lift, fence, strongroom', async (r) => {
+  const { screen } = r;
+  await r.app.clearState();
+  await settle();
+  await scene(screen);
+  await law(screen, steps(screen));
+});

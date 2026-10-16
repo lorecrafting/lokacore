@@ -1,0 +1,9 @@
+{
+  "title": "room.counting_house.title",
+  "description": "room.counting_house.description",
+  "exits": {
+    "west": {
+      "to": "undercroft"
+    }
+  }
+}

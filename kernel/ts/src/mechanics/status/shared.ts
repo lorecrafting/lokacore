@@ -39,8 +39,9 @@ export function currentStatus(world: World, body: EntityId, status: DefinitionRe
 }
 
 /** Every active status on `body` with its definition, in canonical definition order. */
-export function activeStatuses(world: World, body: EntityId) {
+export function activeStatuses(world: World, body: EntityId, senses = false) {
   return Object.entries(world.cartridge.statuses ?? {})
+    .filter(([, s]) => !senses || s.perception || s.concealment) // sorted per call: keep it short
     .sort(([a], [b]) => cmp(a, b))
     .flatMap(([, spec]) => {
       const status: DefinitionRef = {
@@ -206,13 +207,10 @@ export function statusResistance(world: World, body: EntityId) {
     specs.reduce((sum, s) => add(sum, s.resistances?.[entry as keyof Resistances] ?? 0), 0);
 }
 
-// Status readers 6 and 8: `body`'s active statuses, scanned only when some status declares a sense.
-function sensed(world: World, body: EntityId | undefined) {
-  const any = Object.values(world.cartridge.statuses ?? {}).some(
-    (s) => s.perception || s.concealment,
-  );
-  return any && body !== undefined ? activeStatuses(world, body).map(({ spec }) => spec) : [];
-}
+// Status readers 6 and 8: `body`'s active statuses that declare a sense (loka-y6yg.23: only those,
+// as sorting all of them ran per visibility check).
+const sensed = (world: World, body: EntityId | undefined) =>
+  body === undefined ? [] : activeStatuses(world, body, true).map(({ spec }) => spec);
 
 /** Status reader 6: whether an active status on `body` declares the sight or hearing `sense`. */
 export const perceives = (

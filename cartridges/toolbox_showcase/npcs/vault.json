@@ -1,0 +1,24 @@
+{
+  "keywords": [
+    "vault"
+  ],
+  "short": "npc.vault.short",
+  "room_line": "npc.vault.room",
+  "description": "npc.vault.description",
+  "room": "counting_house",
+  "resource_starts": {
+    "pennies": 20
+  },
+  "locks": {
+    "get": {
+      "policy_version": 1,
+      "root": {
+        "op": "not",
+        "item": {
+          "op": "all",
+          "items": []
+        }
+      }
+    }
+  }
+}

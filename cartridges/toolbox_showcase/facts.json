@@ -431,6 +431,64 @@
         "player"
       ],
       "meaning": "This character has cooked a dish at the hearth."
+    },
+    "savings": {
+      "version": 1,
+      "value_type": {
+        "type": "int",
+        "minimum": 0,
+        "maximum": 100,
+        "default": 0
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The pennies this character keeps in the Undercroft vault."
+    },
+    "owns_strongroom": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "This character has bought the Undercroft strongroom."
+    },
+    "ordered_knife": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "This character has a knife on order with the Undercroft smith."
+    },
+    "stolen": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "instance"
+      ],
+      "per_subject": true,
+      "meaning": "The item was lifted from someone; only theft sets it."
+    },
+    "wanted": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "Someone saw this character steal (a seen lift anywhere in the cartridge); the counting house's fine clears it."
     }
   }
 }
