@@ -11,6 +11,9 @@ their summaries are in [this index at `15c7d41b`](https://github.com/lorecraftin
 What each rule in force says: [owner-rules.md](../system/owner-rules.md). A new record adds one
 dated line below, newest first.
 
+- 2026-10-15 [Owner decision: showcase before M14, UI polish after M15](owner-decision-showcase-before-m14-2026-10-15.md)
+- 2026-10-15 [Owner decision: carry-over and three rows deferred](owner-decision-carry-over-deferred-2026-10-15.md)
+- 2026-10-15 [Owner decision: settlements tabled, generated townsfolk](owner-decision-settle-tabled-2026-10-15.md)
 - 2026-10-15 [Owner decision: economy tools split](owner-decision-economy-tools-split-2026-10-15.md)
 - 2026-10-15 [PM decision: Skills stays on the Character page](pm-decision-skills-on-character-2026-10-15.md)
 - 2026-10-15 [Owner decision: Inventory rename and status icons](owner-decision-inventory-and-status-icons-2026-10-15.md)
