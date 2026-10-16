@@ -23360,7 +23360,7 @@
     ]
   },
   {
-    "name": "npc_disposition_arrest_shape",
+    "name": "npc_disposition_refuse_not_text_key",
     "contract": "NpcDefinition",
     "value": {
       "key": "guard",
@@ -23377,30 +23377,52 @@
         "key": "gate"
       },
       "disposition": {
-        "hostile": {
-          "policy_version": 1,
-          "root": {
-            "op": "all",
-            "items": []
-          }
-        },
-        "arrest": {
-          "x": 1
-        }
+        "refuse": "Go away."
       }
     },
     "errors": [
       {
-        "path": "/disposition/arrest/narration",
-        "code": "missing_property"
+        "path": "/disposition/refuse",
+        "code": "pattern_mismatch"
+      }
+    ]
+  },
+  {
+    "name": "entity_view_hostile_false",
+    "contract": "EntityView",
+    "value": {
+      "id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+      "name": "npc.nell.short",
+      "kind": "npc",
+      "actions": [],
+      "hostile": false,
+      "refusal": "Go away."
+    },
+    "errors": [
+      {
+        "path": "/hostile",
+        "code": "not_in_enum"
       },
       {
-        "path": "/disposition/arrest/to",
-        "code": "missing_property"
-      },
+        "path": "/refusal",
+        "code": "pattern_mismatch"
+      }
+    ]
+  },
+  {
+    "name": "entity_view_refusal_without_hostile",
+    "contract": "EntityView",
+    "value": {
+      "id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+      "name": "npc.nell.short",
+      "kind": "npc",
+      "actions": [],
+      "refusal": "npc.nell.refuse"
+    },
+    "errors": [
       {
-        "path": "/disposition/arrest/x",
-        "code": "unknown_property"
+        "path": "/hostile",
+        "code": "missing_property"
       }
     ]
   },
@@ -32301,6 +32323,51 @@
       {
         "path": "/price",
         "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "name": "npc_disposition_arrest_shape",
+    "contract": "NpcDefinition",
+    "value": {
+      "key": "guard",
+      "keywords": [
+        "guard"
+      ],
+      "short": "npc.guard.short",
+      "room_line": "npc.guard.room",
+      "description": "npc.guard.description",
+      "room": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "gate"
+      },
+      "disposition": {
+        "hostile": {
+          "policy_version": 1,
+          "root": {
+            "op": "all",
+            "items": []
+          }
+        },
+        "arrest": {
+          "x": 1
+        }
+      }
+    },
+    "errors": [
+      {
+        "path": "/disposition/arrest/narration",
+        "code": "missing_property"
+      },
+      {
+        "path": "/disposition/arrest/to",
+        "code": "missing_property"
+      },
+      {
+        "path": "/disposition/arrest/x",
+        "code": "unknown_property"
       }
     ]
   }

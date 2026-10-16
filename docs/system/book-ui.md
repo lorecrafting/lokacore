@@ -282,7 +282,7 @@ currently no player-presence UI.
 
 **Barter offers.** A service offer with price 0 shows its authored label alone ("Knife for two pelts"), with no " — " and no parentheses, never "free"; its unavailable form is "Knife for two pelts: <reason>". The label names the inputs.
 
-**Hostile refusal.** Planned for loka-y6yg.20 part B; not yet shipped. The Book cannot tell hostility from refusal codes (`invalid_state` also
+**Hostile refusal.** The Book cannot tell hostility from refusal codes (`invalid_state` also
 means a full load or an open encounter), so the NPC EntityView carries `hostile: true` while
 the person's [disposition](mechanics.md#standing-and-disposition-toolbox-rows-15-and-g11) is
 hostile (a derived read, absent otherwise) and, when the cartridge authors
@@ -295,7 +295,7 @@ stay as offered; the foot is Leave. The authored line names the mood, never the 
 ("Nell turns her back on you.", not what the player did); hostility ending redraws the actions
 without a line. A shelf row's reason is always a word from `words.ts` `reason()` ("not now",
 "too heavy to carry"), never a code with its underscores replaced; a buy refused `not_owned`
-stays "sold out".
+stays "sold out", and one refused `insufficient_resource` reads "can't afford" (`buyReason`).
 
 ## Item details and Take/Drop
 
