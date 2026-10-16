@@ -132,12 +132,14 @@ function Live(p: { text: (key: string) => string }) {
       <button onClick={() => setTime(780)}>later</button>
       <button onClick={() => setConditions([poisoned])}>expire</button>
       <button onClick={() => setLocked(true)}>lock</button>
+      <button onClick={() => setLocked(false)}>unlock</button>
+      <button onClick={() => setConditions([fed, poisoned])}>reapply</button>
     </>
   );
 }
 export const Focused: Story = {
   render: (args) => <Live text={args.text} />,
-  play: async ({ canvas }) => {
+  play: async ({ canvas, userEvent }) => {
     const tip = (text: string) => waitFor(() => expect(canvas.getByText(text)).toBeVisible());
     const none = () => waitFor(() => expect(canvas.queryByText(/remaining$/)).toBeNull());
     const press = (name: string) => fireEvent.click(canvas.getByText(name)); // focus stays on the icon
@@ -156,6 +158,15 @@ export const Focused: Story = {
     canvas.getByRole('button', { name: /^poisoned/ }).focus();
     await tip('poisoned, 3m remaining');
     press('lock');
+    await none();
+    press('unlock'); // poisoned's button is new and unfocused: no tip
+    await none();
+    press('reapply');
+    await userEvent.hover(canvas.getByRole('button', { name: /^fed/ }));
+    await tip('fed, 47m remaining');
+    press('expire'); // fed unmounts under the pointer; no hover-out fires
+    await none();
+    press('reapply'); // fed's new icon is not hovered: no tip
     await none();
   },
 };

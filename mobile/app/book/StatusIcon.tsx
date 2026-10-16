@@ -34,6 +34,8 @@ export function StatusIcons(p: Props) {
   const [held, setHeld] = useState<string>();
   const shown = p.conditions.slice(0, SHOWN);
   const tip = p.open ? shown.find((x) => x.label === held) : undefined;
+  // An icon that unmounts (locked, expired) never blurs, so its hold is let go here.
+  if (held !== undefined && !tip) setHeld(undefined);
   const more = p.conditions.length - shown.length;
   return (
     <View style={{ flexDirection: 'row', justifyContent: 'center', columnGap: space.sm }}>
@@ -83,7 +85,14 @@ function Icon(p: {
   children: string;
 }) {
   const face = <Disc look={p.open ? p.look : 'neutral'}>{p.children}</Disc>;
-  const disc = p.fraction === undefined ? face : <Ring fraction={p.fraction}>{face}</Ring>;
+  const disc =
+    p.fraction === undefined ? (
+      face
+    ) : (
+      <Ring fraction={p.fraction} locked={!p.open}>
+        {face}
+      </Ring>
+    );
   if (!p.open)
     return (
       <View accessibilityRole="image" accessibilityLabel={p.name} style={box}>
@@ -114,14 +123,15 @@ function Icon(p: {
 // a space.hair gap round the disc and inside the size.touch box, so row spacing stays. Two clipped
 // halves turn a half ring each: the right shows 0-180 degrees, the left the rest.
 const RING = size.statusIcon + 2 * (space.hair + size.rule);
-function Ring(p: { fraction: number; children: ReactNode }) {
+function Ring(p: { fraction: number; locked: boolean; children: ReactNode }) {
   const c = usePalette();
   const deg = 360 * p.fraction;
+  const [track, arc] = p.locked ? [c.line, c.dim] : [c.dim, c.fg];
   return (
     <View style={{ width: RING, height: RING, alignItems: 'center', justifyContent: 'center' }}>
-      <View style={{ ...circle, borderColor: c.dim }} />
-      {deg > 0 && <Half right turn={Math.min(deg, 180) - 180} color={c.fg} />}
-      {deg > 180 && <Half turn={deg - 180} color={c.fg} />}
+      <View style={{ ...circle, borderColor: track }} />
+      {deg > 0 && <Half right turn={Math.min(deg, 180) - 180} color={arc} />}
+      {deg > 180 && <Half turn={deg - 180} color={arc} />}
       {p.children}
     </View>
   );
@@ -215,6 +225,7 @@ export function Tooltip({ text }: { text: string }) {
   }, [reduced, shown]);
   return (
     <Animated.View
+      aria-hidden // the icon's name already carries the text
       pointerEvents="none"
       style={{
         position: 'absolute',

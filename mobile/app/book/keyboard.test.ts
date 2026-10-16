@@ -424,12 +424,12 @@ test('status icon countdown ring: remaining share of the duration, clockwise fro
   assert.equal(share(3600, undefined), undefined); // no duration
   assert.equal(share(undefined, 3600), undefined); // no end
   // The Icon's child: a Ring (track, then halves, then the disc) or the bare disc.
-  const ring = (ends_at?: number, duration?: number) => {
+  const ring = (ends_at?: number, duration?: number, locked = false) => {
     const [icon] = StatusIcons({
       conditions: [at(ends_at, duration)],
       time: 720,
       text: (k: string) => k,
-      open: () => {},
+      open: locked ? undefined : () => {},
     }).props.children[0];
     return icon.type(icon.props).props.children;
   };
@@ -462,4 +462,11 @@ test('status icon countdown ring: remaining share of the duration, clockwise fro
     ],
   );
   assert.equal(ring(undefined, undefined).props.look, 'buff'); // permanent: the bare disc
+  // Locked: a line track and a dim arc, so the ring goes quiet with the disc.
+  const shut = ring(3600, 3600, true);
+  const [track, right2, left2] = shut.type(shut.props).props.children;
+  assert.deepEqual(
+    [track.props.style.borderColor, right2.props.color, left2.props.color],
+    [color.light.line, color.light.dim, color.light.dim],
+  );
 });
