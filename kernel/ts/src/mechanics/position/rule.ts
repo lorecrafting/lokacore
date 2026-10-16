@@ -36,8 +36,14 @@ export const decide: Rule<'position'> = (world, command, mint, steps = { n: 0 })
   // PM provisional, owner question (loka-kgd.119): only a Sleep provokes; revert this call to undo it.
   const met =
     type === 'sleep'
-      ? engage(world, actor_id, body, world.state.containers[body]!, mint, steps)
+      ? engage(world, command, body, world.state.containers[body]!, mint, steps, run.position + 1)
       : undefined;
   const narration = met?.narration.length ? met.narration : undefined;
-  return accepted(world, outcome, [...run.ops, ...(met?.ops ?? [])], events, narration);
+  return accepted(
+    world,
+    outcome,
+    [...run.ops, ...(met?.ops ?? [])],
+    [...events, ...(met?.events ?? [])],
+    narration,
+  );
 };

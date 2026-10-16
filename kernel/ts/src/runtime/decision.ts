@@ -229,6 +229,7 @@ export const COMPOSES = {
   scene: ['dialogue', 'quest'],
   reaction: ['quest', 'status', 'barrier', 'movement'], // W22 barrier_changed; FD5 npc.move's entity_entered_room
   speech: ['dialogue'], // a spoken keyword opens its dialogue (choice_opened, as talk; row G9)
+  position: ['movement'], // a sleeper's arrest moves its body (entity_entered_room, row 35)
 } as const;
 type Composed<C> = C extends keyof typeof COMPOSES
   ? Owned[(typeof COMPOSES)[C][number]]['event']

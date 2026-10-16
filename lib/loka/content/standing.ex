@@ -3,6 +3,8 @@ defmodule Loka.Content.Standing do
   Toolbox rows 15 and G11: a reaction's fact.adjust names a bounded int fact (FACT_TYPE_MISMATCH);
   an NPC's disposition is on an authored NPC, with an engage line exactly when it is hostile and
   has an attack (SCHEMA_VIOLATION); either, or a friendly buy_discount, needs kernel_api 1.47.
+  Row 35: an arrest instead of the engage line needs `hostile` and no `engage` (SCHEMA_VIOLATION),
+  a room to move the body to (UNRESOLVED_REFERENCE) and kernel_api 1.105.
   Twin of kernel/ts/src/content/cartridge_standing.ts; the conditions and the engage text are
   checked with every entity's (Loka.Content.Entities). A hostile-capable NPC speaking a dialogue
   that accepts, hands over, receives or escorts (refused while hostile): HOSTILE_QUEST_SPEAKER, a
@@ -18,7 +20,9 @@ defmodule Loka.Content.Standing do
     npcs = for {_, {rel, [], npc}} <- defs["npc"] || %{}, do: {rel, npc}
     adjusts = for {_, {rel, [], r}} <- defs["reaction"] || %{}, a <- adjusts(r), do: {rel, a}
 
-    shapes(npcs) ++ ints(adjusts, m, defs) ++ floor(m, npcs, adjusts) ++ speakers(m, defs)
+    shapes(npcs) ++
+      arrests(npcs, m, defs) ++
+      ints(adjusts, m, defs) ++ floor(m, npcs, adjusts) ++ speakers(m, defs)
   end
 
   # Not an error: a giver who turns on the player may be intended (PM ruling, loka-kgd.54).
@@ -37,9 +41,19 @@ defmodule Loka.Content.Standing do
 
   defp shapes(npcs) do
     for {rel, %{"disposition" => d} = n} <- npcs,
-        n["spawn_template"] ||
-          is_map_key(d, "engage") != (is_map_key(d, "hostile") and is_map_key(n, "attack")),
+        n["spawn_template"] || bad?(d, n),
         do: diag("SCHEMA_VIOLATION", at(rel, ["disposition"]), %{"error" => "invalid_value"})
+  end
+
+  defp bad?(%{"arrest" => _} = d, _), do: not is_map_key(d, "hostile") or is_map_key(d, "engage")
+
+  defp bad?(d, n),
+    do: is_map_key(d, "engage") != (is_map_key(d, "hostile") and is_map_key(n, "attack"))
+
+  defp arrests(npcs, m, defs) do
+    for {rel, %{"disposition" => %{"arrest" => a}}} <- npcs,
+        diag <- Refs.reference(rel, ["disposition", "arrest"], {"to", "room"}, a, m, defs),
+        do: diag
   end
 
   defp ints(adjusts, m, defs) do
@@ -61,7 +75,9 @@ defmodule Loka.Content.Standing do
           is_map_key(n, "disposition") or get_in(n, ["shop", "buy_discount", "friendly"]) == true
         end)
 
-    if used and api < [1, 47],
+    arrest = Enum.any?(npcs, fn {_, n} -> get_in(n, ["disposition", "arrest"]) != nil end)
+
+    if used and api < if(arrest, do: [1, 105], else: [1, 47]),
       do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least", %{})],
       else: []
   end

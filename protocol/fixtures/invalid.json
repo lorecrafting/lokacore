@@ -23360,6 +23360,51 @@
     ]
   },
   {
+    "name": "npc_disposition_arrest_shape",
+    "contract": "NpcDefinition",
+    "value": {
+      "key": "guard",
+      "keywords": [
+        "guard"
+      ],
+      "short": "npc.guard.short",
+      "room_line": "npc.guard.room",
+      "description": "npc.guard.description",
+      "room": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "gate"
+      },
+      "disposition": {
+        "hostile": {
+          "policy_version": 1,
+          "root": {
+            "op": "all",
+            "items": []
+          }
+        },
+        "arrest": {
+          "x": 1
+        }
+      }
+    },
+    "errors": [
+      {
+        "path": "/disposition/arrest/narration",
+        "code": "missing_property"
+      },
+      {
+        "path": "/disposition/arrest/to",
+        "code": "missing_property"
+      },
+      {
+        "path": "/disposition/arrest/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
     "name": "reaction_fact_adjust_amount",
     "contract": "ReactionRule",
     "value": {

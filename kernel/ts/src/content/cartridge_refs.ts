@@ -339,7 +339,8 @@ function ancestryRefs(c: Obj, check: ReturnType<typeof checkers>, out: Diagnosti
   }
 }
 
-// Each room an NPC names, with its path: where it starts and each room of its daily schedule.
+// Each room an NPC names, with its path: where it starts, each room of its daily schedule and
+// where it arrests to (row 35).
 const npcRooms = (c: Obj): [Obj, string][] =>
   Object.entries((c.npcs ?? {}) as Obj).flatMap(([ref, n]) => [
     [n.room, `.cartridge.npcs${step(ref)}.room`],
@@ -347,4 +348,12 @@ const npcRooms = (c: Obj): [Obj, string][] =>
       r,
       `.cartridge.npcs${step(ref)}.daily_schedule${step(h)}`,
     ]),
+    ...(n.disposition?.arrest
+      ? [
+          [n.disposition.arrest.to, `.cartridge.npcs${step(ref)}.disposition.arrest.to`] as [
+            Obj,
+            string,
+          ],
+        ]
+      : []),
   ]);

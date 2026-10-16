@@ -22,16 +22,25 @@ export const dispositions = (c: Obj): [Obj, string][] =>
 export function standing(c: Obj): Diagnostic[] {
   const out: Diagnostic[] = [];
   let used = false;
+  let arrest = false;
   for (const [ref, n] of Object.entries((c.npcs ?? {}) as Obj)) {
     const d = n.disposition;
     if (n.shop?.buy_discount?.friendly) used = true;
     if (!d) continue;
     used = true;
     const at = `.cartridge.npcs${step(ref)}.disposition`;
-    if (n.spawn_template || !!d.engage !== !!(d.hostile && n.attack))
-      out.push(diag('SCHEMA_VIOLATION', at, { error: 'invalid_value' }));
+    // Row 35: an arrest replaces the engage line, so it needs `hostile` and no `engage`.
+    const bad = d.arrest
+      ? !d.hostile || d.engage !== undefined
+      : !!d.engage !== !!(d.hostile && n.attack);
+    if (n.spawn_template || bad) out.push(diag('SCHEMA_VIOLATION', at, { error: 'invalid_value' }));
     if (d.engage !== undefined && !Object.hasOwn(c.text, d.engage))
       out.push(diag('UNRESOLVED_REFERENCE', `${at}.engage`, { target: d.engage }));
+    if (d.arrest) arrest = true;
+    if (d.arrest && !Object.hasOwn(c.text, d.arrest.narration))
+      out.push(
+        diag('UNRESOLVED_REFERENCE', `${at}.arrest.narration`, { target: d.arrest.narration }),
+      );
   }
   for (const [ref, r] of Object.entries((c.reactions ?? {}) as Obj))
     r.apply.forEach((s: Obj, i: number) => {
@@ -41,7 +50,8 @@ export function standing(c: Obj): Diagnostic[] {
       if (t && (t.type !== 'int' || t.minimum === undefined || t.maximum === undefined))
         out.push(diag('FACT_TYPE_MISMATCH', `.cartridge.reactions${step(ref)}.apply[${i}].fact`));
     });
-  if (used && apiCmp(c.manifest.requires.kernel_api.at_least, '1.47') < 0)
+  const floor = arrest ? '1.105' : '1.47';
+  if (used && apiCmp(c.manifest.requires.kernel_api.at_least, floor) < 0)
     out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
   return out;
 }

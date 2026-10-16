@@ -95,8 +95,10 @@ function routeProgress(
   const levels = 'levels' in paid ? paid.levels : {};
   const fell = fall(world, world.rooms[here], command.payload.direction, body, levels);
   // A hostile NPC engages on an ordinary move only, never a flight (toolbox row G11).
+  const position = 2 + joined.events.length + ventured.events.length;
+  // ponytail: no arrest after a fall; lift when a sampler needs it.
   const met = ordinary
-    ? engage(world, command.payload.actor_id, body, there, mint, steps)
+    ? engage(world, command, body, there, mint, steps, position, !fell)
     : undefined;
   const narration = [
     ...(fell ? [fell.narration] : []),
@@ -106,7 +108,7 @@ function routeProgress(
   ];
   return {
     ops: [...(fell?.ops ?? []), ...joined.ops, ...ventured.ops, ...(met?.ops ?? [])],
-    events: [...joined.events, ...ventured.events],
+    events: [...joined.events, ...ventured.events, ...(met?.events ?? [])],
     narration: narration.length ? narration : undefined,
   };
 }
