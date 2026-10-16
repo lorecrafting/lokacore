@@ -40,14 +40,13 @@ export const speaks = (world: World, target: EntityId | undefined) =>
 /** The ids of `d`'s choices, in key order. */
 export const choiceIds = (d: DialogueDefinition) => Object.keys(d.choices).sort(cmp) as Key[];
 
+/** Whether choice `id` of `d` teaches a skill for which `p` holds (Homestead hs-14). */
+const teaches = (d: DialogueDefinition, id: Key, p: (skill: DefinitionRef) => boolean) =>
+  !!d.choices[id]!.sequence?.some((s) => s.op === 'skill.acquire' && p(s.skill));
+
 /** `d`'s choice ids less those that teach a skill concealed from `actor` (Homestead hs-14). */
 export const offered = (world: World, actor: CharacterId, d: DialogueDefinition, steps: Steps) =>
-  choiceIds(d).filter(
-    (id) =>
-      !d.choices[id]!.sequence?.some(
-        (s) => s.op === 'skill.acquire' && concealed(world, actor, s.skill, steps),
-      ),
-  );
+  choiceIds(d).filter((id) => !teaches(d, id, (k) => concealed(world, actor, k, steps)));
 
 /**
  * Whether a saved row's `ids` are ones an opening of `d` can write: `choiceIds(d)` in order, never
@@ -62,13 +61,11 @@ export const openable = (world: World, d: DialogueDefinition, ids: unknown) =>
     choiceIds(d).filter(
       (id) =>
         ids.includes(id) ||
-        !d.choices[id]!.sequence?.some(
-          (s) =>
-            s.op === 'skill.acquire' &&
-            // as `concealed` (skills.ts): a hidden skill with no prerequisite is never left out
-            !!world.cartridge.skills?.[refString(s.skill)]?.hidden &&
-            !!world.cartridge.skills[refString(s.skill)]!.prerequisite,
-        ),
+        !teaches(d, id, (k) => {
+          // as `concealed` (skills.ts): a hidden skill with no prerequisite is never left out
+          const skill = world.cartridge.skills?.[refString(k)];
+          return !!skill?.hidden && !!skill.prerequisite;
+        }),
     ),
   );
 

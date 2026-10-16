@@ -169,13 +169,13 @@ defmodule Loka.Content.Skills do
       "key" => key
     }
 
-  # Homestead hs-11: a skill prerequisite needs API 1.101; hs-14: a profession 1.102.
+  # Homestead hs-11: a skill prerequisite needs API 1.101; hs-14: a profession or a hidden skill 1.102.
   defp prerequisite_floor(m, defs) do
     has = fn k -> Enum.any?(defs["skill"], &match?({_, {_, _, %{^k => _}}}, &1)) end
 
     floor =
       cond do
-        has.("profession") -> [1, 102]
+        has.("profession") or has.("hidden") -> [1, 102]
         has.("prerequisite") -> [1, 101]
         true -> nil
       end
