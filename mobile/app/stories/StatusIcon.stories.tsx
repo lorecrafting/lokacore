@@ -179,8 +179,8 @@ export const Focused: Story = {
   },
 };
 
-// The countdown ring (loka-x6t.65): a dim track and the fg arc of what is left, clockwise from 12,
-// no motion. Full: the whole hour left.
+// The countdown ring (loka-x6t.65): a dim track and the fg arc of what is left, clockwise from 12;
+// the arc drains smoothly between updates (reduced motion: steps). Full: the whole hour left.
 export const RingFull: Story = { args: { conditions: [at('condition.fed', 'buff', 4320)] } };
 
 // 80 %: 288 degrees, 12 round to about 10 o'clock (Buff's fed).
@@ -192,3 +192,40 @@ export const RingEmpty: Story = { args: { conditions: [at('condition.fed', 'buff
 
 // Permanent (scarred): no ring.
 export const RingPermanent: Story = { args: { conditions: [scarred] } };
+
+// Draining: a view 250 ms after the first (time 720 to 732) drains the arc from 288 to 286.8 degrees
+// over those 250 ms; the first view and a refresh (reapplied, more left) jump. Reduced motion steps
+// (fixed at load; keyboard.test.ts covers it).
+function Drain() {
+  const [time, setTime] = useState(720);
+  const [ends, setEnds] = useState(3600);
+  return (
+    <>
+      <StatusIcons conditions={[at('condition.fed', 'buff', ends)]} time={time} text={(k) => k} />
+      <button onClick={() => setTime(732)}>tick</button>
+      <button onClick={() => setEnds(4332)}>reapply</button>
+    </>
+  );
+}
+export const RingDraining: Story = {
+  render: () => <Drain />,
+  play: async ({ canvas, canvasElement }) => {
+    // The left half's turn: the arc past 6 o'clock, 108 degrees at 288.
+    const left = () => {
+      const turns = [...canvasElement.querySelectorAll<HTMLElement>('div')]
+        .map((d) => /rotate\((-?[\d.]+)deg\)/.exec(d.style.transform)?.[1])
+        .filter((t) => t !== undefined);
+      return Number(turns[1]);
+    };
+    const wait = (ms: number) => new Promise((done) => setTimeout(done, ms));
+    await waitFor(() => expect(left()).toBe(108)); // first view: no tween
+    await wait(250);
+    fireEvent.click(canvas.getByText('tick'));
+    await wait(100); // under way: neither the start nor the end yet
+    await expect(left()).toBeLessThan(108);
+    await expect(left()).toBeGreaterThan(106.85);
+    await waitFor(() => expect(left()).toBeCloseTo(106.8, 5), { timeout: 400 });
+    fireEvent.click(canvas.getByText('reapply')); // the whole hour again: 360 at once
+    await waitFor(() => expect(left()).toBe(180), { timeout: 50 });
+  },
+};

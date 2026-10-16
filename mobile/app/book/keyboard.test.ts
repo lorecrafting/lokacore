@@ -55,7 +55,7 @@ const { Footer } = await import('./Footer.tsx');
 const { StatusLine } = await import('./Status.tsx');
 const { BookView } = await import('./Book.tsx');
 const { CharacterPage } = await import('./sections.tsx');
-const { StatusIcons, Tooltip, ringFraction } = await import('./StatusIcon.tsx');
+const { StatusIcons, Tooltip, drainMs, ringFraction, turns } = await import('./StatusIcon.tsx');
 
 function browser(t: { after: (cleanup: () => void) => void }) {
   const originalWindow = globalThis.window;
@@ -436,9 +436,11 @@ test('status icon countdown ring: remaining share of the duration, clockwise fro
   const halves = (e: any) => {
     const [track, ...rest] = e.type(e.props).props.children;
     assert.equal(track.props.style.borderColor, color.light.dim);
+    const turn = (h: any) =>
+      parseFloat(h.type(h.props).props.children.props.style[1].transform[0].rotate);
     return rest
-      .filter((h: any) => h && h.props.turn !== undefined)
-      .map((h: any) => [h.props.right ? 'right' : 'left', h.props.turn, h.props.color]);
+      .filter((h: any) => h && h.props.shown)
+      .map((h: any) => [h.props.right ? 'right' : 'left', turn(h), h.props.color]);
   };
   const fg = color.light.fg;
   assert.deepEqual(halves(ring(3600, 3600)), [
@@ -452,7 +454,7 @@ test('status icon countdown ring: remaining share of the duration, clockwise fro
   const [, right, left] = ring(3600, 3600).type(ring(3600, 3600).props).props.children;
   const place = (h: any) => {
     const clip = h.type(h.props);
-    return [clip.props.style.left, clip.props.children.props.style.left];
+    return [clip.props.style.left, clip.props.children.props.style[0].left];
   };
   assert.deepEqual(
     [place(right), place(left)],
@@ -469,4 +471,24 @@ test('status icon countdown ring: remaining share of the duration, clockwise fro
     [track.props.style.borderColor, right2.props.color, left2.props.color],
     [color.light.line, color.light.dim, color.light.dim],
   );
+});
+
+// Breaks: the arc tweens on a refresh (more left) or under reduced motion instead of jumping, or a
+// long gap between views (app paused) drains for the whole gap instead of at most a second, or a
+// half's turn is not clamped so a drain across 6 o'clock overshoots (book-ui.md Conditions).
+test('status icon countdown ring: drains between views, capped, jumps up and under reduced motion', () => {
+  const deg = (time: number) => 360 * ((3600 - time) / 3600);
+  assert.equal(deg(720), 288);
+  assert.equal(drainMs(deg(720), deg(732), 250, false), 250); // 288 to 286.8 over the 250 ms gap
+  assert.equal(drainMs(288, 288, 0, false), 0); // first view: no change, no tween
+  assert.equal(drainMs(deg(732), 360, 250, false), 0); // reapplied: jumps up
+  assert.equal(drainMs(deg(720), deg(732), 250, true), 0); // reduced motion: steps
+  assert.equal(drainMs(288, 200, 10_000, false), 1000); // views 10 s apart: done in a second
+  assert.equal(drainMs(288, 200, 1000, false), 1000); // exactly the cap
+  assert.equal(drainMs(288, 200, 1001, false), 1000); // one past it
+  assert.deepEqual(turns(360), { right: 0, left: 180 });
+  assert.deepEqual(turns(190), { right: 0, left: 10 });
+  assert.deepEqual(turns(180), { right: 0, left: 0 });
+  assert.deepEqual(turns(170), { right: -10, left: 0 });
+  assert.deepEqual(turns(0), { right: -180, left: 0 });
 });
