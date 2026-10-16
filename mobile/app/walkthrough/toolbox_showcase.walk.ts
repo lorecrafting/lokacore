@@ -193,7 +193,9 @@ const magic = async (r: Walk, steps: Steps) => {
   await tap(LABEL.backToWorld);
   await moves(screen, 'down');
   await tap('flamma, cast'); // the second bolt kills the wight (magic 7)
-  // Quench is pinned in the kernel (magic 8); the Book offers no Quench here (open finding).
+  await held(/^the loft bucket/); // the bier burns 180 s: quench it at once (magic 8)
+  await tap(/^Quench/);
+  await tap(LABEL.leave);
   await moves(screen, 'up', 'west', 'west');
   await r.note('The golem yard');
   await settle();
