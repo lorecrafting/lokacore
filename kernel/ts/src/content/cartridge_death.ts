@@ -5,7 +5,7 @@ import { same } from '../foundation/compose.ts';
 import { apiCmp } from './cartridge_installed.ts';
 import type { Diagnostic } from '../contracts.gen.ts';
 
-export function death(c: Obj, named: Checks['named']): Diagnostic[] {
+export function death(c: Obj, { named, text }: Checks): Diagnostic[] {
   const out: Diagnostic[] = [];
   const d = c.world?.death;
   const bad = (at: string) => out.push(diag('SCHEMA_VIOLATION', at, { error: 'invalid_value' }));
@@ -43,13 +43,17 @@ export function death(c: Obj, named: Checks['named']): Diagnostic[] {
     if (!spec || d.restore[pool] < spec.minimum || d.restore[pool] > spec.maximum)
       bad(`.cartridge.world.death.restore.${pool}`);
   }
+  // Row 47: an experience penalty needs world.levelling and its narration in text.
+  const lost = d.penalty?.experience;
+  if (lost && !c.world.levelling) bad('.cartridge.world.death.penalty.experience');
+  if (lost) text(lost, ['narration'], '.cartridge.world.death.penalty.experience');
   return out;
 }
 
 function requirements(c: Obj): Diagnostic[] {
   const out: Diagnostic[] = [];
-  const [major, minor] = c.manifest.requires.kernel_api.at_least.split('.').map(Number);
-  if (major < 1 || (major === 1 && minor < 5))
+  const floor = c.world.death.penalty ? '1.109' : '1.5'; // row 47
+  if (apiCmp(c.manifest.requires.kernel_api.at_least, floor) < 0)
     out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
   for (const capability of ['death', 'containment', 'position'])
     if (c.lock.capabilities[capability] !== 1)

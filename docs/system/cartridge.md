@@ -682,6 +682,17 @@ The sampler's 0.0.8 release binds chapel_nave, HP10/MV100 and two corpse templat
 This is a foundation release: the first live lethal producer remains M6. Older kernels
 refuse API1.5 content; older bundled release lists refuse its unknown content pin.
 
+### Death penalty declarations
+
+[Death penalties](mechanics.md#death-penalties-toolbox-row-47) read the optional
+`world.death.penalty` (`DeathSettings.penalty`; kernel API at least **1.109**):
+`experience {percent, narration}`, percent an integer 1 to 100 and narration a TextKey, and
+`items`, `corpse` or `kept`. The compiler (`lib/loka/content/death.ex`) and the loader
+(`kernel/ts/src/content/cartridge_death.ts`) refuse an `experience` without `world.levelling`
+(SCHEMA_VIOLATION at `world.death.penalty.experience`), an unknown narration key
+(UNRESOLVED_REFERENCE at its `narration`) and an older API floor (KERNEL_API_RANGE_INVALID);
+the schema refuses the bounds and any other field. `cartridges/penalty_sampler` is the sampler.
+
 ## First encounter authoring (M6-A)
 
 `world.combat` requires combat@1, schedule@1, death@1, valid `world.death`

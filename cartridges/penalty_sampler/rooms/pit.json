@@ -1,0 +1,9 @@
+{
+  "title": "room.pit.title",
+  "description": "room.pit.description",
+  "exits": {
+    "west": {
+      "to": "hall"
+    }
+  }
+}

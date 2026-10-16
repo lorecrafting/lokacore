@@ -1,0 +1,20 @@
+{
+  "keywords": [
+    "brute"
+  ],
+  "short": "npc.brute.short",
+  "room_line": "npc.brute.room",
+  "description": "npc.brute.description",
+  "room": "yard",
+  "hp": {
+    "minimum": 0,
+    "maximum": 40,
+    "start": 40,
+    "gain": 0
+  },
+  "attack": {
+    "chance": 100,
+    "damage_min": 30,
+    "damage_max": 30
+  }
+}

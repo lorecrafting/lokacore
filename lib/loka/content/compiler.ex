@@ -78,7 +78,7 @@ defmodule Loka.Content.Compiler do
       Loka.Content.Transports.check(manifest, defs, v2),
       Water.check(manifest, defs, located, v2),
       Loka.Content.Skills.check(manifest, defs, located, if(v2, do: elem(v2, 1), else: %{})),
-      Loka.Content.Death.check(manifest, defs, located),
+      Loka.Content.Death.check(manifest, defs, located, v2),
       Loka.Content.Combat.check(manifest, defs, located, v2),
       Loka.Content.Theft.check(manifest, defs, located, v2),
       Loka.Content.Mounts.check(manifest, defs, located),

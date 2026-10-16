@@ -26,13 +26,16 @@ export function levelling(world: World, actor: CharacterId) {
 
 /**
  * The cartridge's level_up line when `ops` (a whole proposal from `world`) raise `actor`'s
- * level: the stored row against the last write's value (mechanics.md row 4).
+ * level, or its death penalty narration when they lower the experience (only a death's loss
+ * does): the stored row against the last write's value (mechanics.md rows 4 and 47).
  */
 export function levelUp(world: World, actor: CharacterId, ops: readonly DeltaOp[]): Text[] {
   const spec = world.cartridge.world?.levelling;
   const last = ops.filter((o) => o.op === 'levelling.set' && o.character_id === actor).at(-1);
   if (!spec || last?.op !== 'levelling.set') return [];
   const from = world.state.levelling?.[actor]?.experience ?? 0;
+  if (last.value.experience < from)
+    return [{ key: world.cartridge.world!.death!.penalty!.experience!.narration }];
   return reached(spec, last.value.experience) > reached(spec, from) ? [{ key: spec.level_up }] : [];
 }
 
@@ -76,4 +79,17 @@ export function grant(world: World, actor: CharacterId, amount: number, group: n
   if (!world.cartridge.world?.levelling || amount <= 0) return [];
   const row = world.state.levelling?.[actor] ?? NONE;
   return [write(world, actor, { ...row, experience: saturate(row.experience + amount) }, group)];
+}
+
+/**
+ * A death's experience loss (row 47): floor(experience * percent / 100), never below the
+ * threshold of the actor's level (0 below the first); a loss of 0 writes nothing.
+ */
+export function lose(world: World, actor: CharacterId, percent: number, group: number) {
+  const spec = world.cartridge.world?.levelling;
+  const row = world.state.levelling?.[actor] ?? NONE;
+  if (!spec) return [];
+  const floor = spec.thresholds.filter((t) => t <= row.experience).at(-1) ?? 0;
+  const experience = Math.max(floor, row.experience - Math.floor((row.experience * percent) / 100));
+  return experience === row.experience ? [] : [write(world, actor, { ...row, experience }, group)];
 }

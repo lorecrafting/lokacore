@@ -19,14 +19,28 @@ defmodule Loka.Content.Death do
 
   def npc(n, m), do: Loka.Content.Services.npc(n, m)
 
-  def check(nil, _, _), do: []
+  def check(nil, _, _, _), do: []
 
-  def check(m, defs, {_, settings}) do
+  def check(m, defs, {_, settings}, v2) do
     death = get_in(settings, ["world", "death"])
 
     templates(m, defs, death) ++
-      drops(m, defs, death) ++ if(death, do: settings(m, defs, death), else: [])
+      drops(m, defs, death) ++
+      if(death, do: settings(m, defs, death) ++ penalty(death["penalty"], settings, v2), else: [])
   end
+
+  # Toolbox row 47: an experience penalty needs world.levelling and its narration in text.
+  defp penalty(%{"experience" => lost}, settings, {_, text}) do
+    path = "cartridge.world.death.penalty.experience"
+    levelling = if get_in(settings, ["world", "levelling"]), do: [], else: [bad(path)]
+
+    levelling ++
+      if text == :unknown or is_map_key(text, lost["narration"]),
+        do: [],
+        else: [diag("UNRESOLVED_REFERENCE", path <> ".narration")]
+  end
+
+  defp penalty(_, _, _), do: []
 
   # Toolbox row 8: each drop names a distinct item its NPC holds at genesis.
   defp drops(m, defs, death) do
@@ -106,7 +120,7 @@ defmodule Loka.Content.Death do
           error <- reference("cartridge.json", ["world", "death"], {field, kind}, d, m, defs),
           do: error
 
-    requirements(m) ++ refs ++ values(m, defs, d)
+    requirements(m, d) ++ refs ++ values(m, defs, d)
   end
 
   defp values(m, defs, d) do
@@ -136,9 +150,9 @@ defmodule Loka.Content.Death do
       |> String.split(".")
       |> Enum.map(&String.to_integer/1)
 
-  defp requirements(m) do
+  defp requirements(m, d) do
     api =
-      if version(m) < [1, 5],
+      if version(m) < if(d["penalty"], do: [1, 109], else: [1, 5]),
         do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
         else: []
 
