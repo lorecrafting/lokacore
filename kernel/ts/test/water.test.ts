@@ -466,7 +466,7 @@ test('a character body in a water bottom without an occupancy row is invalid', (
 
 // Breaks: the arrest guard on a move that wrote a water row (movement/sequence.ts): the body
 // would leave the bottom while its occupancy row stays there, a save that cannot reopen.
-test('a hostile arresting NPC in a water bottom does not arrest the swimmer', () => {
+test('a hostile arresting NPC in a water bottom arrests neither the swimmer nor its sleep', () => {
   const w = learned(
     fresh((c) => {
       c.manifest.requires.kernel_api.at_least = '1.105';
@@ -483,4 +483,8 @@ test('a hostile arresting NPC in a water bottom does not arrest the swimmer', ()
   const below = green(run(w, { type: 'move', direction: 'down' }));
   assert.equal(below.state.containers[below.body], room(below, 'well_bottom'));
   assert.equal(waterValid(below), true);
+  // Breaks: the same guard on a Sleep there (position/rule.ts).
+  const slept = green(run(below, { type: 'sleep' }, 2));
+  assert.equal(slept.state.containers[slept.body], room(slept, 'well_bottom'));
+  assert.equal(waterValid(slept), true);
 });
