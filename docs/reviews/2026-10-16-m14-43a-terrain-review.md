@@ -41,3 +41,18 @@ Focused green at head: TS terrain, loader_floors, status_movement, portable_abi,
 6. Question, `protocol/room.schema.json:491`: room `tags` has no `uniqueItems`, so `["marsh","marsh"]` loads and compounds (3 mv at 300% → 9 → 27).
 
 Not findings: rounding to 0 (PM ruling 2, brief case 6); `terrain: {}`/`movement: {}` raise the floor identically in both kernels and were SCHEMA_VIOLATION before; no reader of `movement.cost` in mobile or Elixir runtime; mv loop (start 10, gain 0, sink fares only, no faucet).
+
+## Fix round 1 (head `c9a093134fbf331e079824070bab066991743fd7`)
+
+Scope: commits 234aee710, 507a21fba, c9a093134 and their direct callers. The record above is carried unchanged as 09a12d914 (same content as the review commit).
+
+- F1 resolved: `protocol/entity.schema.json` differs from before the reformat (1ad3dde71^) only in the Tag description.
+- F2 resolved: `mechanics.md` Fare bullet and `cartridge.md:1809` state the free-move and `[road, marsh]` floor cases.
+- F4 resolved: `kernel/ts/test/terrain.test.ts` validates the GameView before reading exits.
+- F6 resolved as a contract addition: `uniqueItems` in both validators (`kernel/ts/src/foundation/validate.ts:81`, `lib/loka/core/contracts.ex:110`, `lib/loka/core/contracts/schema.ex` subset), `RoomDefinition.tags` `uniqueItems: true`, new code `duplicate_items` in `error.schema.json`, `error_registry.json` (abi_validation) and `contracts.gen.ts`; `invalid.json` case `room_tags_repeated` runs in both kernels. No floor (PM: pre-production, no compat); a scan of every JSON under `cartridges/` finds no repeated `tags`. The subset limit (structural vs reference equality) is named in a ponytail comment and only string tags use it.
+- Mutant: TS `uniqueItems` check made always true; `validate.test.ts` red on `room_tags_repeated`; restored.
+- Focused green at head: TS validate, portable_abi, terrain, c6_contracts, loader_floors; Elixir contracts, registries, portable_abi, content_terrain, loader_floors (55 passed).
+- Water-edge entry (`kernel/ts/src/mechanics/movement/sequence.ts:137-141`): the D6 branch returns before `fare`, so a water-edge room pays only its `entry_cost`, never the base fare or its terrain percents. This was already true for the base fare and statuses, it matches PM ruling 4, and the GameView shares `movementPlan`. No player-visible break.
+- Open nit: the PM-ruled Known-limits line is not in `docs/system/mechanics.md:3664`. The existing "Water entry (D6 `entry_cost`) is not scaled" does not say that the room's terrain tags are ignored on a water edge.
+
+Verdict: **APPROVE WITH NOTES** at c9a09313; the one doc nit can ride the batch merge.
