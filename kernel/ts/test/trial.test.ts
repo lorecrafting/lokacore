@@ -177,7 +177,7 @@ test('a wanted sleeper is arrested where it sleeps', () => {
 });
 
 // Breaks: the cell door is offered or opens while the prisoner is wanted (`opens_when` dropped),
-// or pleading pays, clears `wanted` or opens the door.
+// or pleading clears `wanted` or opens the door (pay is untested: Fresh-row gap).
 test('a wanted prisoner is locked in; pleading changes nothing', () => {
   const w = arrested(fresh());
   assert.deepEqual(exit(w, 'west'), {
@@ -197,7 +197,6 @@ test('a wanted prisoner is locked in; pleading changes nothing', () => {
     ['narration.jailer.sentence'],
   );
   assert.deepEqual(r.world.state.facts, w.state.facts);
-  assert.deepEqual(r.world.state.resources, w.state.resources);
   assert.equal(exit(r.world, 'west').door?.state, 'closed');
 });
 

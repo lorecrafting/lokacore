@@ -32,6 +32,6 @@
   "dialogue.jailer.prompt": "The jailer taps the ledger. \"Five pennies, or you sit.\"",
   "dialogue.jailer.pay": "Pay the five-penny fine.",
   "dialogue.jailer.plead": "Plead that you cannot pay.",
-  "narration.jailer.paid": "The jailer counts five pennies, strikes your name from the ledger and unbars the door.",
+  "narration.jailer.paid": "The jailer counts five pennies, strikes your name from the ledger and nods at the door.",
   "narration.jailer.sentence": "The jailer shrugs. \"Then you sit until the fine is paid.\""
 }

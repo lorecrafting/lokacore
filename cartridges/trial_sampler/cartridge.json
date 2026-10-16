@@ -19,7 +19,8 @@
       "dialogue": 1,
       "knowledge": 1,
       "barrier": 1,
-      "reaction": 1
+      "reaction": 1,
+      "resource": 1
     },
     "client_features": []
   },
