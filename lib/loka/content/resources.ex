@@ -87,7 +87,8 @@ defmodule Loka.Content.Resources do
   source: cuts not strictly descending to a last 0, or a repeated key, is RESOURCE_SPEC_INVALID at
   the table; a band key without `band.<key>` in the catalog (unless it was rejected) or a cost
   naming no resource of this cartridge is UNRESOLVED_REFERENCE; an attribute without attributes@1
-  in `m`'s requires is UNDECLARED_CAPABILITY.
+  in `m`'s requires is UNDECLARED_CAPABILITY; `world.movement.terrain`, a `world.movement` without
+  cost, or a room tagged road or marsh below kernel_api 1.106 is KERNEL_API_RANGE_INVALID (row 43a).
   """
   @spec check(map() | nil, map(), {term(), map() | :unknown} | nil, {term(), map()}, [map()]) ::
           [map()]
@@ -96,6 +97,7 @@ defmodule Loka.Content.Resources do
 
     Enum.flat_map(tables(defs, world), &table(&1, text)) ++
       cost(m, defs, world) ++
+      terrain_floor(m, defs, world) ++
       owned(m, defs["attribute"], registry) ++
       npc_checks(m, defs)
   end
@@ -183,6 +185,27 @@ defmodule Loka.Content.Resources do
     do: Refs.reference("cartridge.json", ["world", "movement", "cost"], "resource", cost, m, defs)
 
   defp cost(_, _, _), do: []
+
+  # Row 43a: terrain costs, a movement without cost, or a road or marsh room need 1.106.
+  defp terrain_floor(m, defs, world) do
+    movement = world["movement"]
+
+    used =
+      (is_map(movement) and
+         (Map.has_key?(movement, "terrain") or not Map.has_key?(movement, "cost"))) or
+        Enum.any?(for({_, {_, [], r}} <- defs["room"] || %{}, do: r["tags"] || []), fn tags ->
+          "road" in tags or "marsh" in tags
+        end)
+
+    version =
+      m["requires"]["kernel_api"]["at_least"]
+      |> String.split(".")
+      |> Enum.map(&String.to_integer/1)
+
+    if used and version < [1, 106],
+      do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
+      else: []
+  end
 
   defp owned(m, attributes, registry) when is_map(attributes) do
     required = {m["requires"]["capabilities"], Refs.owners(registry, ["definitions"])}

@@ -1,0 +1,12 @@
+{
+  "title": "room.fen.title",
+  "description": "room.fen.description",
+  "tags": [
+    "marsh"
+  ],
+  "exits": {
+    "west": {
+      "to": "ford"
+    }
+  }
+}

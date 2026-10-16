@@ -156,11 +156,12 @@ export function fall(
 }
 
 /**
- * What a move costs `body`: the cartridge's world.movement.cost, else 1 mv where it declares the
- * pool, else nothing; undefined when the body cannot pay. Read-only, shared with the GameView's
- * exits (view/view.ts).
+ * What a move into `there` costs `body`: the cartridge's world.movement.cost, else 1 mv where it
+ * declares the pool, else nothing, scaled by statuses and then by the destination's terrain tags
+ * (row 43a); undefined when the body cannot pay. Read-only, shared with the GameView's exits
+ * (view/view.ts, via movementPlan).
  */
-export function fare(world: World, body: EntityId) {
+export function fare(world: World, body: EntityId, there: EntityId) {
   const mv = resourceRef(world, 'mv');
   const cost =
     world.cartridge.world?.movement?.cost ??
@@ -169,10 +170,15 @@ export function fare(world: World, body: EntityId) {
   if (!cost) return { ops: [] };
   // Status reader 7: each active status's cost_percent in turn, rounded down (each step saturated at the
   // int32 ceiling, so an oversized fare is refused by pay, never an overflow fault); a fare of 0 writes nothing.
-  const amount = statusMovement(world, body).reduce(
+  let amount = statusMovement(world, body).reduce(
     (a, m) => (m.cost_percent === undefined ? a : saturate(Math.floor((a * m.cost_percent) / 100))),
     mul(cost.amount, multiplier),
   );
+  // Row 43a: each destination tag's world.movement.terrain percent, in authored tag order, rounded down.
+  for (const t of world.rooms[there].tags ?? []) {
+    const pct = world.cartridge.world?.movement?.terrain?.[t];
+    if (pct !== undefined) amount = saturate(Math.floor((amount * pct) / 100));
+  }
   return amount ? pay(world, body, [{ ...cost, amount }]) : { ops: [] };
 }
 

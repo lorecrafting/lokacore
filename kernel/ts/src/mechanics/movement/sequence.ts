@@ -141,7 +141,7 @@ export function movementPlan(
   }
   if (engaged(world, body) && !escape) return 'invalid_state' as const;
   if (!standing(world, actor_id)) return 'invalid_state' as const;
-  const paid = fare(world, body);
+  const paid = fare(world, body, there);
   if (!paid) return 'insufficient_resource' as const;
   return { body, here, there, paid };
 }
