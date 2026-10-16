@@ -193,31 +193,33 @@ export const RingEmpty: Story = { args: { conditions: [at('condition.fed', 'buff
 // Permanent (scarred): no ring.
 export const RingPermanent: Story = { args: { conditions: [scarred] } };
 
+// The left half's turn (the arc past 6 o'clock), read from the page: 108 degrees at 288.
+const leftTurn = (root: HTMLElement) => () => {
+  const turns = [...root.querySelectorAll<HTMLElement>('div')]
+    .map((d) => /rotate\((-?[\d.]+)deg\)/.exec(d.style.transform)?.[1])
+    .filter((t) => t !== undefined);
+  return Number(turns[1]);
+};
+const wait = (ms: number) => new Promise((done) => setTimeout(done, ms));
+
 // Draining: a view 250 ms after the first (time 720 to 732) drains the arc from 288 to 286.8 degrees
 // over those 250 ms; the first view and a refresh (reapplied, more left) jump. Reduced motion steps
 // (fixed at load; keyboard.test.ts covers it).
-function Drain() {
-  const [time, setTime] = useState(720);
+function Drain(p: { from: number; to: number }) {
+  const [time, setTime] = useState(p.from);
   const [ends, setEnds] = useState(3600);
   return (
     <>
       <StatusIcons conditions={[at('condition.fed', 'buff', ends)]} time={time} text={(k) => k} />
-      <button onClick={() => setTime(732)}>tick</button>
+      <button onClick={() => setTime(p.to)}>tick</button>
       <button onClick={() => setEnds(4332)}>reapply</button>
     </>
   );
 }
 export const RingDraining: Story = {
-  render: () => <Drain />,
+  render: () => <Drain from={720} to={732} />,
   play: async ({ canvas, canvasElement }) => {
-    // The left half's turn: the arc past 6 o'clock, 108 degrees at 288.
-    const left = () => {
-      const turns = [...canvasElement.querySelectorAll<HTMLElement>('div')]
-        .map((d) => /rotate\((-?[\d.]+)deg\)/.exec(d.style.transform)?.[1])
-        .filter((t) => t !== undefined);
-      return Number(turns[1]);
-    };
-    const wait = (ms: number) => new Promise((done) => setTimeout(done, ms));
+    const left = leftTurn(canvasElement);
     await waitFor(() => expect(left()).toBe(108)); // first view: no tween
     await wait(250);
     fireEvent.click(canvas.getByText('tick'));
@@ -227,5 +229,20 @@ export const RingDraining: Story = {
     await waitFor(() => expect(left()).toBeCloseTo(106.8, 5), { timeout: 400 });
     fireEvent.click(canvas.getByText('reapply')); // the whole hour again: 360 at once
     await waitFor(() => expect(left()).toBe(180), { timeout: 50 });
+  },
+};
+
+// Past 6 o'clock (time 1790 to 1810, 181 to 179 degrees): the left half stays while its last
+// degree drains, then rests at 0.
+export const RingDrainingPastSix: Story = {
+  render: () => <Drain from={1790} to={1810} />,
+  play: async ({ canvas, canvasElement }) => {
+    const left = leftTurn(canvasElement);
+    await waitFor(() => expect(left()).toBeCloseTo(1, 5));
+    await wait(250);
+    fireEvent.click(canvas.getByText('tick'));
+    await wait(50);
+    await expect(left()).toBeGreaterThan(0); // still draining, not dropped
+    await waitFor(() => expect(left()).toBe(0), { timeout: 400 });
   },
 };
