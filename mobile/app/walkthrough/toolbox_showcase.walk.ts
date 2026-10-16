@@ -1,9 +1,7 @@
 // Homestead H2 at 390 px (`LOKA_WALK=toolbox_showcase npm run walkthrough`): the guided loop
 // (docs/showcase/homestead-district.md steps 2 to 12) in the Book; the farm step is kernel-only.
 import { LABEL } from '../book/labels.ts';
-import { moves, scene, settle, walk } from './walk.ts';
-
-type Screen = Parameters<typeof scene>[0];
+import { moves, scene, settle, walk, type Screen } from './walk.ts';
 
 const steps = (screen: Screen) => {
   const tap = async (label: string | RegExp) => {
