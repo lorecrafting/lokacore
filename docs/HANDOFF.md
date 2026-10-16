@@ -217,6 +217,11 @@ polish stage which needs me at the computer for a bit."
   items "corpse" or "kept"; notes are one row per character (caps 32 notes, 64 pins, 160/40 characters); pins only
   where you stand in a visited room; the Chronicle shows for every cartridge. kernel_api 1.109 (47), 1.110 (G10 notes,
   save-adjacent: review + second opinion). Rows 47 and FD6 building in parallel; G10 engine, then G10 Book.
+- Row 47 (death penalty, 1.109) approved and merged into toolbox/batch-m15 (12f1ad91). Chronicle (FD6) review asked for
+  a calendar-based day test (blocker) and the designer's look: lines in ink, milestones in body type, the empty line
+  hides when the Chronicle has a day; fix round running. G10 notes engine building (1.110). #409 hosted sim job hits
+  its 10-minute limit (the showcase sim test went from 77 s to over 240 s); a developer is finding the cause.
+  OWNER (polish): is the one-size step enough to mark a Chronicle milestone, or add a hairline?
 
 ## Owner answers this session
 
