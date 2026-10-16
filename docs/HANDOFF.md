@@ -180,6 +180,10 @@ polish stage which needs me at the computer for a bit."
   guards new containers). A player with 0 pennies cannot claim an ordered stew (known limit). Engine gaps in loka-kgd.163.
 - #408 (loka-y6yg.18, showcase fixes): the hostile Warden shuts the toll gate when the player enters (shared gate closes
   for all, like gate_lifted); the combat sign's shout gets a Book chip ("ware").
+- #408 merged. Homestead blind playtest (loka-y6yg.22) triaged: content fixes .24-.30 batched as loka-y6yg.31
+  (Sonnet): no new item source for the croft seed (hint instead), fishing line no longer claims a catch, neutral
+  order-open line. Book UI findings in loka-x6t.67 for the polish phase. Playtest harness could not resize to phone width.
+- Book bugs part B (loka-y6yg.20, hostile refusal, kernel_api 1.104) building; economy/law E1 (loka-y6yg.23) building.
 
 ## Owner answers this session
 
