@@ -11,6 +11,17 @@
       ],
       "meaning": "The raiders have gone out to the hills."
     },
+    "charter_sold": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "instance"
+      ],
+      "meaning": "The reeve has sold the town's one charter."
+    },
     "owns_charter": {
       "version": 1,
       "value_type": {

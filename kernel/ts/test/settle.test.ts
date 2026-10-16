@@ -86,7 +86,7 @@ test('S3-1: a rule says its lines in step order', () => {
 
 // Breaks: a fired (after) rule skips the step, or says it when scheduled instead of when due.
 test('S3-1: a delayed line is said by the advance that reaches its due time, not before', () => {
-  // The player gate's subject leaf would read the actor's body at fire, so a fired rule drops it.
+  // The loader refuses the player gate's subject leaf in an `after` rule (SCHEMA_VIOLATION).
   const w = world((c) => {
     c.reactions[RULE].after = 300;
     delete c.reactions[RULE].when;
@@ -371,6 +371,22 @@ test('S3-1: a stranger may not take from the storehouse chest; the charter opens
     state: { ...w.state, containers: { ...w.state.containers, [k]: w.body } },
   };
   assert.equal(code(put(carrying)), 'permission_denied');
+  // Breaks: the carry cap is dropped or raised past the chest's 20 kg: a charter holder walks off
+  // with the chest itself.
+  assert.equal(code(act(c, { type: 'take', item_id: ent(c, 'item/chest') })), 'too_heavy');
+});
+
+// Breaks: buy_charter loses its charter_sold policy, or the fact_changed rule stops setting it: a
+// second character buys the town's one charter. The stranger is this character with owns_charter
+// cleared, 11 pennies left (the test world has one character).
+test('S3-1: once the charter is sold, a second buyer is refused', () => {
+  const w = bought(world());
+  const stranger = structuredClone(w) as any;
+  for (const k of Object.keys(stranger.state.facts))
+    if (k.includes('"owns_charter"')) delete stranger.state.facts[k];
+  assert.equal(offer(stranger, 'buy_charter')?.available, false);
+  assert.equal(offer(stranger, 'buy_charter')?.reason?.code, 'invalid_state');
+  assert.equal(code(buy(stranger)), 'invalid_state');
 });
 
 // Breaks: raise_smithy loses its owns_charter policy (offered or accepted before the charter), the

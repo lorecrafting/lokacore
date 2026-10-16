@@ -87,6 +87,9 @@
     },
     "construction": {
       "max_total": 2
+    },
+    "carry": {
+      "max_grams": 10000
     }
   },
   "calendar": {

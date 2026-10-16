@@ -1,0 +1,13 @@
+{
+  "on": {
+    "event": "fact_changed",
+    "fact": "owns_charter"
+  },
+  "apply": [
+    {
+      "op": "fact.assign",
+      "fact": "charter_sold",
+      "value": true
+    }
+  ]
+}
