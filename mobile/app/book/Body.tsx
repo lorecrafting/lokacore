@@ -117,17 +117,7 @@ function sectionPage(p: BodyProps, page: Page) {
       <MapPage view={view} text={text} g={p.g} press={p.press} log={p.screen.log} world={p.world} />
     );
   if (page.kind === 'settings') return <SettingsPage startOver={p.startOver} world={p.world} />;
-  if (page.kind === 'journal')
-    return (
-      <JournalPage
-        view={view}
-        text={text}
-        world={p.world}
-        buttons={p.screen.buttons}
-        press={p.press}
-        chronicle={p.screen.chronicle}
-      />
-    );
+  if (page.kind === 'journal') return <JournalPage {...p.screen} world={p.world} press={p.press} />;
   return (
     <CarryingPage
       items={view.inventory}

@@ -12,12 +12,12 @@ import { Control, Page, SectionTitle } from './pages.tsx';
 import { LABEL } from './labels.ts';
 import type { ChronicleDay } from './chronicle.ts';
 
-export function JournalPage(
-  p: Parameters<typeof LoreDetails>[0] & {
-    world: () => void;
-    chronicle: () => readonly ChronicleDay[];
-  },
-) {
+type JournalProps = Parameters<typeof LoreDetails>[0] & {
+  world: () => void;
+  chronicle: () => readonly ChronicleDay[];
+};
+
+export function JournalPage(p: JournalProps) {
   const { view, text } = p;
   const c = usePalette();
   return (
@@ -31,15 +31,7 @@ export function JournalPage(
             <Text style={prose(c)}>
               {q.patrol.credit} of {q.patrol.required} checkpoints. {q.patrol.status}.{' '}
               {text(q.patrol.leader_name)} is at {text(q.patrol.room_title)}.{' '}
-              {q.patrol.status === 'awaiting'
-                ? `Walk ${q.patrol.direction} to join him.`
-                : q.patrol.status === 'paused'
-                  ? `Return to ${text(q.patrol.leader_name)} and choose Rejoin.`
-                  : q.patrol.status === 'failed'
-                    ? `Return to ${text(q.patrol.leader_name)} and choose Restart now.`
-                    : q.patrol.status === 'together'
-                      ? `Next: ${text(q.patrol.next_title)}.`
-                      : ''}
+              {patrolNext(q.patrol, text)}
             </Text>
           )}
           {q.expedition && (
@@ -98,6 +90,18 @@ function LoreDetails(p: {
     </>
   );
 }
+
+type Patrol = NonNullable<GameView['journal'][number]['patrol']>;
+const patrolNext = (p: Patrol, text: (t: Patrol['leader_name']) => string) =>
+  p.status === 'awaiting'
+    ? `Walk ${p.direction} to join him.`
+    : p.status === 'paused'
+      ? `Return to ${text(p.leader_name)} and choose Rejoin.`
+      : p.status === 'failed'
+        ? `Return to ${text(p.leader_name)} and choose Restart now.`
+        : p.status === 'together'
+          ? `Next: ${text(p.next_title)}.`
+          : '';
 
 /** The Chronicle (book-ui.md, Chronicle details): read once as the Journal opens, never live. */
 function Chronicle(p: { chronicle: () => readonly ChronicleDay[] }) {
