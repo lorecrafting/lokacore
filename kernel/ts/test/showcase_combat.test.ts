@@ -415,6 +415,7 @@ test('loader: the attacker filter needs API 1.58 and an authored NPC', () => {
     c.manifest.requires.kernel_api.at_least = api;
     c.reactions[ref('reaction', 'boar_gore')].on.attacker = { ...C, kind: 'npc', key };
     delete c.statuses[ref('status', 'gored')].kind; // 1.102 (loka-x6t.64)
+    for (const n of ['nell', 'bess']) delete c.npcs[ref('npc', n)].disposition.refuse; // 1.104
     delete c.speech; // phrases: 1.98
     homestead(c);
   };

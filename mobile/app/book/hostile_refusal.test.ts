@@ -1,0 +1,68 @@
+// Book hostile refusal (loka-x6t.33, docs/system/book-ui.md): a hostile NPC's page shows its
+// cartridge refusal line, or the Book's fallback, in place of Talk, Ask about and the shelf, through
+// the real authority and Book. Expected text is literal from the samplers' text.json.
+import assert from 'node:assert/strict';
+import { test } from 'node:test';
+import { compiled } from '../../authority/local-story/__tests__/compiled.ts';
+import { book, bundle } from './__tests__/polish-book.test.ts';
+import { routes } from '../stories/routes.ts';
+import { LABEL } from './labels.ts';
+
+const showcase = compiled('cartridges/toolbox_showcase');
+// Nell's page on the Low Wardle green, after calling the Reeve a cheat (standing 0 to -2) or not.
+function nell(cheat: boolean) {
+  const b = book(showcase as never);
+  b.map();
+  b.tap('Go south');
+  if (cheat) {
+    for (const c of ['The Reeve is here., open', /^Talk/, 'Call him a cheat']) b.tap(c);
+    b.tap(LABEL.leaveConversation);
+    b.tap(LABEL.leave);
+  }
+  b.tap('Nell, the baker is here., open');
+  return [b.text(), b.labels()] as const;
+}
+
+// Breaks: the page ignores hostility (the shelf with its raw "invalid state" reasons stays; the
+// kernel refuses Talk), shows the fallback over the authored line, or marks Nell hostile at standing 0; the shelf
+// shows raw reason codes.
+test('Nell at standing -2 shows her refusal line, no Talk or shelf; at 0 she trades', () => {
+  const [shown, labels] = nell(true);
+  assert.ok(shown.includes('Nell turns her back on you.'), JSON.stringify(shown));
+  assert.ok(!shown.some((l) => /invalid state|Buy \d|Nothing to do here/.test(l)));
+  assert.ok(!labels.some((l) => l.startsWith('Talk')), JSON.stringify(labels));
+  assert.ok(labels.includes(LABEL.leave));
+  const [calm, calmLabels] = nell(false);
+  assert.ok(!calm.includes('Nell turns her back on you.'));
+  // Shelf reasons come from words.ts reason(), not the raw code ("not owned").
+  assert.ok(
+    calm.includes('a cob of bread: Buy 4p; Sell 1p (you are not holding it).'),
+    JSON.stringify(calm),
+  );
+  assert.ok(calmLabels.some((l) => l.startsWith('Talk')));
+});
+
+// Breaks: an unaffordable buy shows its raw code or "too exhausted" (Peg's iron sword, 7p over 4p).
+test("a shelf row's buy reason is a word, never the code", () => {
+  const b = book(bundle('missing_child_v042_hash'));
+  for (const s of routes['npc-shop']) typeof s === 'function' ? s(b as never) : b.tap(s);
+  const row = "an iron sword: Buy 7p (can't afford); Sell 4p (you are not holding it).";
+  assert.ok(b.text().includes(row), JSON.stringify(b.text()));
+});
+
+// Breaks: a talk that turns its NPC hostile (Bess, insulted) shows the refusal Note over the open
+// conversation.
+test('an insult mid-talk keeps the conversation page, no refusal Note', () => {
+  const b = book(showcase as never);
+  for (const s of ['Go south', 'Go south']) {
+    b.map();
+    b.tap(s);
+  }
+  for (const c of [/^Bess/, /^Talk/, 'Insult the village']) b.tap(c);
+  const shown = b.text();
+  assert.ok(shown.includes('Bess scowls and turns to her next customer, as she will every time.'));
+  assert.ok(
+    !shown.includes('Bess turns to her barrel and does not look up.'),
+    JSON.stringify(shown),
+  );
+});

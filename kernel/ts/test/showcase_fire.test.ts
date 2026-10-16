@@ -167,6 +167,7 @@ test('loader: barrier.set and co_present tag need API 1.56; to locked needs a ke
     for (const r of ['boar_gore', 'tilt_boar_gore'])
       delete c.reactions[ref('reaction', r)].on.attacker;
     delete c.statuses[ref('status', 'gored')].kind; // 1.102 (loka-x6t.64)
+    for (const n of ['nell', 'bess']) delete c.npcs[ref('npc', n)].disposition.refuse; // 1.104
     delete c.speech; // phrases: 1.98
     homestead(c);
   };

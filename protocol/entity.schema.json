@@ -558,7 +558,7 @@
           }
         },
         "disposition": {
-          "description": "Toolbox row G11 (kernel_api at least 1.47): how the NPC stands toward the player, derived when read, never stored: hostile while hostile holds, else friendly while friendly holds, else wary (an NPC without it is wary). Each condition is read with the player as the actor and the NPC as the target, so subject target facts are its pair facts with the player. Hostile refuses talk and trade and, with an attack, engages a player who walks in, saying engage; friendly takes a friendly buy_discount.",
+          "description": "Toolbox row G11 (kernel_api at least 1.47): how the NPC stands toward the player, derived when read, never stored: hostile while hostile holds, else friendly while friendly holds, else wary (an NPC without it is wary). Each condition is read with the player as the actor and the NPC as the target, so subject target facts are its pair facts with the player. Hostile refuses talk and trade and, with an attack, engages a player who walks in, saying engage; friendly takes a friendly buy_discount. Toolbox row 35 (kernel_api at least 1.105): with arrest instead of engage, a hostile NPC stops a player who walks in and the body goes to arrest.to, saying arrest.narration; no encounter opens.",
           "type": "object",
           "properties": {
             "hostile": {
@@ -568,6 +568,23 @@
               "$ref": "policy.schema.json#/$defs/VersionedPolicy"
             },
             "engage": {
+              "$ref": "text.schema.json#/$defs/TextKey"
+            },
+            "arrest": {
+              "type": "object",
+              "properties": {
+                "to": {
+                  "$ref": "identity.schema.json#/$defs/DefinitionRef"
+                },
+                "narration": {
+                  "$ref": "text.schema.json#/$defs/TextKey"
+                }
+              },
+              "required": ["to", "narration"],
+              "additionalProperties": false
+            },
+            "refuse": {
+              "description": "Book hostile refusal (kernel_api at least 1.104): the line the Book shows on the NPC's page while it is hostile, naming the mood, never the cause; projected as its EntityView refusal.",
               "$ref": "text.schema.json#/$defs/TextKey"
             }
           },

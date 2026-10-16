@@ -54,6 +54,7 @@
           }
         ]
       }
-    }
+    },
+    "refuse": "npc.bess.refuse"
   }
 }

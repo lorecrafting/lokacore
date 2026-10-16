@@ -1,10 +1,25 @@
 // Toolbox row G11: an NPC's disposition toward the player, derived when read from its declared
 // conditions (NpcDefinition.disposition), never stored; read by talk (dialogue/selection.ts),
 // trade (commerce/shared.ts) and entry (movement/sequence.ts, engage below).
-import type { CharacterId, DeltaOp, EntityId, NpcDefinition, Text } from '../contracts.gen.ts';
+import type {
+  CharacterId,
+  CommandId,
+  DeltaOp,
+  EntityId,
+  NpcDefinition,
+  Text,
+} from '../contracts.gen.ts';
 import { add } from '../foundation/int.ts';
 import { cmp } from '../foundation/validate.ts';
-import { bodyOf, type Mint, type Steps, type World } from '../runtime/decision.ts';
+import {
+  bodyOf,
+  event,
+  refString,
+  type Event,
+  type Mint,
+  type Steps,
+  type World,
+} from '../runtime/decision.ts';
 import { holds } from './policy.ts';
 import { living } from './death/shared.ts';
 import { engaged, encounterId, npcRef } from './combat/shared.ts';
@@ -12,6 +27,7 @@ import { jobId } from './schedule/behavior.ts';
 import { attacked } from './crow/behavior.ts';
 import { running } from './scene/shared.ts';
 import { activeStatuses, concealed, cureOps } from './status/shared.ts';
+import { separate } from './escort/shared.ts';
 
 export type Disposition = 'hostile' | 'wary' | 'friendly';
 
@@ -32,53 +48,89 @@ export function disposition(
   return d?.friendly && holds(world, actor, d.friendly.root, ctx) ? 'friendly' : 'wary';
 }
 
+type Actor = { readonly id: CommandId; readonly payload: { readonly actor_id: CharacterId } };
+
 /**
- * The encounter a hostile NPC opens on `actor`'s body walking into `there` (`hostileAt`), as
+ * The encounter a hostile NPC opens on the actor's body walking into `there` (`hostileAt`), as
  * Attack opens one: the first round at now + the interval, no draw; the receipt says `engage`.
+ * An NPC declaring `arrest` (toolbox row 35) instead moves the body to `arrest.to`, saying its
+ * narration, with one entity_entered_room at `position`; nothing when `there` is `to` or
+ * `arrests` is false (the caller's fall).
  */
 export function engage(
   world: World,
-  actor: CharacterId,
+  command: Actor,
   body: EntityId,
   there: EntityId,
   mint: Mint,
   steps: Steps,
-): { ops: DeltaOp[]; narration: Text[] } {
-  const npc = hostileAt(world, actor, there, steps);
-  const ops = npc ? opened(world, actor, body, npc, mint, world.state.clock) : [];
-  if (!ops.length) return { ops: [], narration: [] };
-  // Row 16: a spotted entrant is caught; its concealment ends with the encounter.
-  const hiding = activeStatuses(world, body).filter(({ spec }) => spec.concealment);
+  position: number,
+  arrests = true,
+): { ops: DeltaOp[]; narration: Text[]; events: Event<'entity_entered_room'>[] } {
+  const actor = command.payload.actor_id;
+  const npc = hostileAt(world, actor, there, steps, arrests);
+  const d = npc && (world.entities[npc] as NpcDefinition).disposition!;
+  const to = d?.arrest && world.roomIds[refString(d.arrest.to)];
+  const ops = to
+    ? [arrived(body, there, to), ...separate(world, actor, 0)]
+    : npc
+      ? opened(world, actor, body, npc, mint, world.state.clock)
+      : [];
+  if (!ops.length) return { ops: [], narration: [], events: [] };
+  // Row 16: a spotted entrant is caught; its concealment ends with the encounter or the arrest.
+  const hiding = activeStatuses(world, body)
+    .filter(({ spec }) => spec.concealment)
+    .map(({ status }) => status);
   return {
-    ops: [
-      ...ops,
-      ...cureOps(
-        world,
-        body,
-        hiding.map(({ status }) => status),
-      ),
-    ],
-    narration: [{ key: (world.entities[npc!] as NpcDefinition).disposition!.engage! }],
+    ops: [...ops, ...cureOps(world, body, hiding)],
+    narration: [{ key: to ? d!.arrest!.narration : d!.engage! }],
+    events: to
+      ? [
+          event(world, command, mint, position, {
+            type: 'entity_entered_room',
+            entity_id: body,
+            room_id: to,
+          }),
+        ]
+      : [],
   };
 }
 
+const arrived = (body: EntityId, there: EntityId, to: EntityId) =>
+  ({
+    op: 'entity.transfer',
+    writer_group: 0,
+    entity_id: body,
+    source_id: there,
+    destination_id: to,
+  }) as const;
+
 /**
  * The first NPC in `there`, in EntityId order, living, unengaged, with an attack and an engage
- * line, hostile to `actor` and seeing its body (status reader 8); none in a sanctuary, during a
- * scene or without combat.
+ * line (with combat) or an arrest (row 35), hostile to `actor` and seeing its body (status
+ * reader 8); none in a sanctuary or during a scene.
  * ponytail: read before the move's own writes (the room, an expedition's faction fact), so a room- or presence-relative
  * leaf reads the room left; read after them when a sampler needs one.
  */
-function hostileAt(world: World, actor: CharacterId, there: EntityId, steps: Steps) {
-  if (!world.cartridge.world?.combat || world.rooms[there]?.sanctuary || running(world, actor))
-    return;
+function hostileAt(
+  world: World,
+  actor: CharacterId,
+  there: EntityId,
+  steps: Steps,
+  arrests: boolean,
+) {
+  if (world.rooms[there]?.sanctuary || running(world, actor)) return;
+  const combat = !!world.cartridge.world?.combat;
   const candidates = Object.keys(world.entities)
     .filter((id) => {
       const npc = world.entities[id] as NpcDefinition;
       return (
         world.state.containers[id] === there &&
-        npc.attack &&
-        npc.disposition?.engage &&
+        ((combat && npc.attack && npc.disposition?.engage) ||
+          // An arrest skipped (a fall, or `to` is this room) lets a later fighter engage.
+          (arrests &&
+            npc.disposition?.arrest &&
+            world.roomIds[refString(npc.disposition.arrest.to)] !== there)) &&
         living(world, id) &&
         !engaged(world, id as EntityId) &&
         !concealed(world, bodyOf(world, actor)!, id as EntityId) // status reader 8
