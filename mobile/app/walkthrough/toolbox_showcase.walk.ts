@@ -138,7 +138,7 @@ const law = async (screen: Screen, { tap, take }: Steps) => {
 };
 
 // Magic M2 (docs/showcase/magic-district.md steps 1 to 9), the Book e2e; ward is cast, not fought.
-const magic = async (r: Walk, { tap, take, held }: Steps) => {
+const loft = async (r: Walk, { tap, take, held }: Steps) => {
   const { screen } = r;
   const pause = (ms: number) => new Promise((done) => setTimeout(done, ms));
   const wizard = async (choice: string) => {
@@ -167,6 +167,12 @@ const magic = async (r: Walk, { tap, take, held }: Steps) => {
   await tap('Raise CHA');
   await tap(LABEL.backToWorld);
   await tap('ward, cast');
+};
+
+const magic = async (r: Walk, steps: Steps) => {
+  const { screen } = r;
+  const { tap, take, held } = steps;
+  await loft(r, steps);
   await take(/^The oilcan is here/, /^Take the oilcan/);
   await take(/^The loft bucket is here/, /^Take the loft bucket/);
   await moves(screen, 'east');

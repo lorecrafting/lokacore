@@ -248,12 +248,12 @@ test('magic 6: the oiled winch opens the crypt; the lantern shows the wight', ()
     ['actions.oil_winch', [id(w, 'item', 'gate_winch'), id(w, 'item', 'oilcan')], true],
   );
   assert.equal(use(w, 'oil_winch', 'gate_winch', 'loft_bucket').decision.kind, 'rejected');
-  const oil = w.state.liquids[id(w, 'item', 'oilcan')];
+  const oil = w.state.liquids?.[id(w, 'item', 'oilcan')];
   const r = use(w, 'oil_winch', 'gate_winch', 'oilcan');
   assert.deepEqual(r.lines, ['narration.oil_winch']);
   w = r.world;
   assert.equal(fact(w, 'gate_oiled'), true);
-  assert.deepEqual(w.state.liquids[id(w, 'item', 'oilcan')], oil);
+  assert.deepEqual(w.state.liquids?.[id(w, 'item', 'oilcan')], oil);
   w = play(w, { type: 'open', direction: 'down' }).world;
   const dark = go(
     play(w, { type: 'douse', item_id: id(w, 'item', 'lantern') }).world,
@@ -288,7 +288,7 @@ test('magic 7: flamma burns the wight to 4 and the bier; warded blow 1; the seco
   );
   const before = pool(w, 'hp');
   w = wait(w, w.state.clock + 150).world; // one round
-  assert.equal(before - pool(w, 'hp'), 1);
+  assert.equal(pool(w, 'hp'), Number(before) - 1);
   w = play(w, { type: 'flee' }).world;
   assert.equal(view(w).place.title.key, 'room.crypt_stair.title');
   assert.deepEqual(view(w).cues, SMOKE);
@@ -318,11 +318,11 @@ test('magic 8: the loft bucket quenches the bier; water unchanged; the smoke cle
     ['actions.quench', [id(w, 'item', 'bier'), id(w, 'item', 'loft_bucket')]],
   );
   assert.equal(use(w, 'quench', 'bier', 'oilcan').decision.kind, 'rejected'); // water only
-  const water = w.state.liquids[id(w, 'item', 'loft_bucket')];
+  const water = w.state.liquids?.[id(w, 'item', 'loft_bucket')];
   const r = use(w, 'quench', 'bier', 'loft_bucket');
   assert.deepEqual(r.lines, ['narration.quench']);
   w = r.world;
-  assert.deepEqual(w.state.liquids[id(w, 'item', 'loft_bucket')], water);
+  assert.deepEqual(w.state.liquids?.[id(w, 'item', 'loft_bucket')], water);
   assert.deepEqual(
     activeStatuses(w, id(w, 'item', 'bier')).map((s) => s.status.key),
     ['spent'],
