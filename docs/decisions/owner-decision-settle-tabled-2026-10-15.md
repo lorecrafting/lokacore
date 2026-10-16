@@ -8,7 +8,7 @@ Owner, 2026-10-15: "lets have generated residents"; chosen options: "Generated t
 
 ## Effect
 
-1. Settlements are an expansion for later; Homestead comes first.
+1. Settlements are an expansion for later; Homestead comes first (paraphrased).
 2. The #403 narrate and plan-move engine steps are landed; settle-3 is parked on branch `toolbox/settle-3`; the remaining `loka-mytp` children (.1 and .2 merged in #403) and `loka-oxgk` are deferred.
 3. Townsfolk are generated; role-holders are authored (paraphrased).
 4. PM ruling: a townsperson's name is picked from the authored name list by a hash of the entity id; no RNG and no save field.
