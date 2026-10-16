@@ -202,6 +202,9 @@ polish stage which needs me at the computer for a bit."
 - M14 batch head e31edbb8 holds rows 35 (trial), 36 (jail: force the grate, stay wanted, climb back in and be charged
   again), 43a (terrain) and FD10 (companion remarks, review + second opinion approved). Mounts 43b-engine (1.108) building;
   43b-content last; then the Fable batch review and one PR.
+- M14 mounts (43b engine 1.108 + mount_sampler) approved; designer approved the mount Book text (no indicator: the
+  saddled description, the mv fare and the refused exit are the only evidence). PR #412 (loka-kgd.164) opened at
+  8c3c8ffd; Fable batch review running on the owner's earlier "Under 70%, go" (usage meter not readable, loka-8zqg).
 
 ## Owner answers this session
 
