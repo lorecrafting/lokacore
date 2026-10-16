@@ -1,4 +1,4 @@
-// size: allow 623, the Built rooms S2 to S5 cases share one build_sampler fixture and helpers
+// size: allow 632, the Built rooms S2 to S5 cases share one build_sampler fixture and helpers
 // Built rooms S2 and S3 (mechanics.md Built rooms; save.md Built rooms): build_sampler's carpenter
 // takes two timber and raises the hut north of the lane 7200 s after the order, once the plot is
 // bought; the room is derived from its identity row on every hydrate, and a forged row refuses the load.
@@ -549,58 +549,38 @@ test("raze moves an NPC in the hut to the lane; a holder's contents ride along",
 test('raze is refused for a non-owner, and while a corpse lies in the hut', () => {
   n = 0;
   const w = raised(play(fresh(), buy(fresh())));
-  const lane = w.state.containers[w.body];
   const [hut] = built(w);
   const b = w.cartridge.services![`${S}:service/raze_hut`]!.benefit as never;
   const other = '00000000-0000-4000-8000-0000000000c3' as never;
   assert.equal(unrazable(w, b, w.character), undefined);
   assert.deepEqual(unrazable(w, b, other), { code: 'permission_denied' });
+  const busy = { code: 'invalid_state', message: { key: 'service.occupied' } };
+  const inHut = (id: string, row: object) => {
+    const c = structuredClone(w) as any;
+    c.state.created[id] = { id, ...row };
+    c.state.containers[id] = hut;
+    return c;
+  };
   const corpse = '00000000-0000-4000-8000-0000000000c4';
   const origin = { kind: 'death', victim_id: other, owner_id: other, event_id: other };
-  const occupied = {
-    ...w,
-    state: {
-      ...w.state,
-      created: {
-        ...w.state.created,
-        [corpse]: { id: corpse, definition: ref('item', 'timber_a'), origin },
-      },
-      containers: { ...w.state.containers, [corpse]: hut },
-    },
-  } as unknown as World;
-  assert.deepEqual(unrazable(occupied, b, w.character), {
-    code: 'invalid_state',
-    message: { key: 'service.occupied' },
-  });
+  const occupied = inHut(corpse, { definition: ref('item', 'timber_a'), origin });
+  assert.deepEqual(unrazable(occupied, b, w.character), busy);
   assert.deepEqual(unrazable(occupied, b, other), { code: 'permission_denied' });
-
   // Breaks: a living spawned NPC (a hound that chased the player in) refusing the raze, or a dead
   // one (hp 0, not a living body) moved; the seller stands in as the spawned hound.
   const hound = npc(w, 'seller');
-  const hp = key({ kind: 'resource', resource: resourceRef(w, 'hp'), entity_id: hound });
-  const spawned = (value: number) =>
-    ({
-      ...w,
-      entities: { ...w.entities, [hound]: { ...w.entities[hound], hp: true } },
-      state: {
-        ...w.state,
-        created: {
-          ...w.state.created,
-          [hound]: {
-            id: hound,
-            definition: ref('npc', 'seller'),
-            origin: { kind: 'spawned', role: 'hound' },
-          },
-        },
-        containers: { ...w.state.containers, [hound]: hut },
-        resources: { ...w.state.resources, [hp]: { value, at: w.state.clock } },
-      },
-    }) as unknown as World;
-  assert.equal(play(spawned(4), raze(w)).state.containers[hound], lane);
-  assert.deepEqual(unrazable(spawned(0), b, w.character), {
-    code: 'invalid_state',
-    message: { key: 'service.occupied' },
-  });
+  const spawned = (value: number) => {
+    const c = inHut(hound, {
+      definition: ref('npc', 'seller'),
+      origin: { kind: 'spawned', role: 'hound' },
+    });
+    c.entities[hound].hp = true;
+    c.state.resources[key({ kind: 'resource', resource: resourceRef(w, 'hp'), entity_id: hound })] =
+      { value, at: w.state.clock };
+    return c as World;
+  };
+  assert.equal(play(spawned(4), raze(w)).state.containers[hound], w.state.containers[w.body]);
+  assert.deepEqual(unrazable(spawned(0), b, w.character), busy);
 });
 
 // Breaks: the map placing a razed room (knowledge positions() not skipping the tombstone) or
