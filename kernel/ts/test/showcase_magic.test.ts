@@ -104,14 +104,16 @@ test('magic 2: taught lux; it needs ash; the cast spends 2 mana and 1 ash and li
   assert.equal(lit(w), true);
 });
 
-// Breaks: the hush is not applied on entry or ends early or late, it blocks neither the cast nor
-// the say, the grimoire does not teach flamma, the level-up line is missing or doubled, or the errand does not resolve in the read itself.
+// Breaks: the hush is not applied on entry or ends early or late, it leaves the cast, the say or
+// the shout open, the grimoire does not teach flamma, the level-up line is missing or doubled, or
+// the errand does not resolve in the read itself.
 test('magic 3: the reading room hushes for 120 s; the grimoire teaches flamma and ends the errand', () => {
   w = go(perform(w, 'gather_ash').world, 'north').world; // ash in hand: the hush, not the cost, refuses
   const entered = w.state.clock;
   assert.ok(labels(w).includes('condition.hushed'));
   assert.equal(refused(w, { type: 'cast', word: 'lux' }), 'invalid_state');
   assert.equal(refused(w, { type: 'say', word: 'hello' }), 'invalid_state');
+  assert.equal(refused(w, { type: 'shout', word: 'hello' }), 'invalid_state');
   assert.equal(words(w)?.[0]?.available, false);
   assert.equal(chip(w, 'say'), undefined); // a blocked verb offers no chip
   const still = wait(w, entered + 119).world;
