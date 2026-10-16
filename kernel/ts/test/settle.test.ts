@@ -14,6 +14,10 @@ import { INSTALLED, loadCartridge, newWorld, step, stepElapsed } from '../src/in
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { encode } from '../src/foundation/canonical.ts';
+import { key } from '../src/foundation/compose.ts';
+import { engaged } from '../src/mechanics/combat/shared.ts';
+import { living } from '../src/mechanics/death/shared.ts';
+import { livingCount } from '../src/mechanics/population/refs.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-settle-sampler-'));
 let artifact: Uint8Array;
@@ -40,14 +44,10 @@ function load(edit: (c: any) => void = () => {}) {
     INSTALLED,
   );
 }
-function world(edit?: (c: any) => void): World {
+function world(edit?: (c: any) => void, context = '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'): World {
   const r = load(edit);
   assert.ok(r.ok, JSON.stringify(r));
-  return newWorld(
-    r.cartridge as Cartridge,
-    '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never,
-    [1, 2],
-  );
+  return newWorld(r.cartridge as Cartridge, context as never, [1, 2, 3, 4]);
 }
 const lines = (d: { narration?: { key: string }[] }) => (d.narration ?? []).map((l) => l.key);
 function west(w: World) {
@@ -89,4 +89,189 @@ test('loader: a narrate text key resolves in the text catalog', () => {
     'UNRESOLVED_REFERENCE',
     `.cartridge.reactions["${RULE}"].apply[0].text`,
   ]);
+});
+
+// Settle S4-1 (N2) on the same sampler (mechanics.md "Plan move (Settle S4-1)"): `band_out` moves
+// every living member of the `raiders` plan (home square, cap 3, targets 0) to `hills` when the
+// instance fact band_out turns true. Test-only hour rules spawn the band and set the fact; the
+// calendar runs 100 units an hour from 600 (hour 6).
+const ref = (kind: string, key: string) => ({
+  cartridge_id: 'settle_sampler',
+  cartridge_version: '0.0.1',
+  kind,
+  key,
+});
+const PLAN = ref('population', 'raiders');
+const BAND = ref('fact', 'band_out');
+const MOVE = 'settle_sampler@0.0.1:reaction/band_out';
+function hour(c: any, key: string, at: number, apply: object[]) {
+  c.reactions[`settle_sampler@0.0.1:reaction/${key}`] = {
+    key,
+    on: { event: 'clock_hour' },
+    when: { policy_version: 1, root: { op: 'time_window', from: at, to: at + 1 } },
+    apply,
+  };
+}
+// Two raiders spawn at hour 7: slot 3 holds A, slot 2 holds B (this world context makes EntityId
+// order A, B, unlike slot order); band_out turns true at `out` and (with band_in,
+// a test-only plan move back to square) false at `back`.
+function band(out: number, back?: number, spawn = true, edit = (_: any) => {}) {
+  return world((c) => {
+    if (spawn)
+      hour(c, 'spawn', 7, [
+        { op: 'population.spawn', plan: PLAN },
+        { op: 'population.spawn', plan: PLAN },
+      ]);
+    hour(c, 'out', out, [{ op: 'fact.assign', fact: BAND, value: true }]);
+    edit(c);
+    if (back === undefined) return;
+    hour(c, 'back', back, [{ op: 'fact.assign', fact: BAND, value: false }]);
+    c.reactions['settle_sampler@0.0.1:reaction/band_in'] = {
+      ...c.reactions[MOVE],
+      key: 'band_in',
+      when: { policy_version: 1, root: { op: 'fact_compare', fact: BAND, equals: false } },
+      apply: [{ op: 'npc.move', plan: PLAN, room: ref('room', 'square') }],
+    };
+  }, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e12');
+}
+function advance(w: World, until: number) {
+  const [run_id, from] = ['cccccccc-0000-4000-8000-000000000005' as never, w.state.clock];
+  const payload = { type: 'elapsed', actor_id: w.character, run_id, from, until };
+  const id = elapsedCommandId(run_id, w.context, from, until) as never;
+  const r = stepElapsed(w, { id, world_context_id: w.context, payload } as never, 3);
+  assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
+  const events = (r.decision as never as { events: { payload: Record<string, any> }[] }).events;
+  const entered = events.filter((e) => e.payload.type === 'entity_entered_room');
+  const ops = r.decision.kind === 'accepted' ? r.decision.delta.ops : [];
+  return { w: r.world, ops, entered: entered.map((e) => [e.payload.entity_id, e.payload.room_id]) };
+}
+function attack(w: World, target_id: string) {
+  const id = 'bbbbbbbb-0000-4000-8000-000000000002' as never;
+  const payload = { actor_id: w.character, type: 'attack', target_id };
+  const r = step(w, { id, world_context_id: w.context, payload } as never, 4);
+  assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
+  return r.world;
+}
+const room = (w: World, key: string) => w.roomIds[`settle_sampler@0.0.1:room/${key}`]!;
+const member = (w: World, slot: number) =>
+  w.state.population_slots![key({ kind: 'population_slot', plan: PLAN, slot })]!;
+const [A, B] = ['958ab551-90e6-8530-8abb-d7d3d42537a8', 'eeb7d808-89c9-81b0-8528-e5d406dee0da'];
+
+// Breaks: the plan step moves nothing, moves in slot order (B first) instead of EntityId order,
+// emits no entered event per member, or the move ends the members' slots (population_count).
+test('S4-1: band_out moves every member to the hills in EntityId order, one event each', () => {
+  const a = advance(band(8), 700);
+  assert.deepEqual([member(a.w, 3).member_id, member(a.w, 2).member_id], [A, B]);
+  assert.deepEqual(
+    [A, B].map((e) => a.w.state.containers[e as never]),
+    [room(a.w, 'square'), room(a.w, 'square')],
+  );
+  const b = advance(a.w, 800);
+  const hills = room(b.w, 'hills');
+  assert.deepEqual(b.entered, [
+    [A, hills],
+    [B, hills],
+  ]);
+  assert.deepEqual(
+    [A, B].map((e) => b.w.state.containers[e as never]),
+    [hills, hills],
+  );
+  assert.equal(livingCount(b.w, PLAN as never), 2);
+});
+
+// Breaks: a member's second plan move in one advance (another delivery) takes that delivery's
+// writer group instead of joining its first move's (conflicting_write; writer_groups.test.ts).
+test("S4-1: two plan moves of one band in one advance share each member's writer group", () => {
+  const ROAD = 'settle_sampler@0.0.1:fact/band_road';
+  const w = advance(
+    band(8, undefined, true, (c) => {
+      c.facts[ROAD] = { ...c.facts['settle_sampler@0.0.1:fact/band_out'], key: 'band_road' };
+      const road = ref('fact', 'band_road');
+      c.reactions['settle_sampler@0.0.1:reaction/out'].apply.push({
+        op: 'fact.assign',
+        fact: road,
+        value: true,
+      });
+      c.reactions['settle_sampler@0.0.1:reaction/band_road'] = {
+        ...c.reactions[MOVE],
+        key: 'band_road',
+        on: { event: 'fact_changed', fact: road },
+        when: { policy_version: 1, root: { op: 'fact_compare', fact: road, equals: true } },
+        apply: [{ op: 'npc.move', plan: PLAN, room: ref('room', 'road') }],
+      };
+    }),
+    700,
+  ).w;
+  const b = advance(w, 800);
+  const [hills, road] = [room(w, 'hills'), room(w, 'road')];
+  assert.deepEqual(b.entered, [
+    [A, hills],
+    [B, hills],
+    [A, road],
+    [B, road],
+  ]);
+  for (const e of [A, B]) {
+    const moves = b.ops.filter((o) => o.op === 'entity.transfer' && o.entity_id === e);
+    assert.deepEqual(
+      moves.map((o: any) => o.source_id),
+      [room(w, 'square'), hills],
+    );
+    assert.equal(new Set(moves.map((o) => o.writer_group)).size, 1);
+  }
+});
+
+// Breaks: the plan step moves a dead member (its slot keeps member_id until replaced), or the
+// band_in move back to the square skips the survivor.
+test('S4-1: a slain member stays where it fell; the survivor goes out and comes back', () => {
+  let w = attack(advance(band(13, 14), 700).w, A);
+  w = advance(w, 1200).w;
+  assert.equal(living(w, A as never), false);
+  const at = w.state.containers[A as never];
+  const out = advance(w, 1300);
+  assert.deepEqual(out.entered, [[B, room(w, 'hills')]]);
+  const back = advance(out.w, 1400);
+  assert.deepEqual(back.entered, [[B, room(w, 'square')]]);
+  assert.equal(back.w.state.containers[A as never], at);
+});
+
+// Breaks: the plan step moves a member out of an open encounter, or one engaged member stops the
+// rest of the band.
+test('S4-1: an engaged member stays; the rest of the band moves', () => {
+  const w = attack(advance(band(8), 700).w, A);
+  const b = advance(w, 800);
+  assert.ok(engaged(b.w, A as never));
+  assert.deepEqual(b.entered, [[B, room(w, 'hills')]]);
+  assert.equal(b.w.state.containers[A as never], room(w, 'square'));
+});
+
+// Breaks: a plan with no living member faults or emits an event.
+test('S4-1: a plan with no member moves nothing', () => {
+  assert.deepEqual(advance(band(8, undefined, false), 800).entered, []);
+});
+
+// Breaks: the loader admits an unknown plan, a plan move that also names an NPC, or one with no
+// room (the event's room is no place for a whole band). Twin of content_settle_test.exs.
+test('loader: a plan move names a known plan and a room, never an NPC', () => {
+  const at = `.cartridge.reactions["${MOVE}"].apply[0]`;
+  const refused = (edit: (s: any) => void) => {
+    const r = load((c) => {
+      // A placed NPC (the raider is a spawn template, refused at .npc on its own).
+      const { spawn_template, ...guard } = c.npcs['settle_sampler@0.0.1:npc/raider'];
+      c.npcs['settle_sampler@0.0.1:npc/guard'] = { ...guard, key: 'guard' };
+      edit(c.reactions[MOVE].apply[0]);
+    });
+    return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
+  };
+  assert.deepEqual(
+    refused((s) => (s.plan = ref('population', 'nobody'))),
+    ['UNRESOLVED_REFERENCE', `${at}.plan`],
+  );
+  assert.deepEqual(
+    refused((s) => (s.npc = ref('npc', 'guard'))),
+    ['SCHEMA_VIOLATION', `${at}.plan`],
+  );
+  assert.deepEqual(
+    refused((s) => delete s.room),
+    ['SCHEMA_VIOLATION', `${at}.plan`],
+  );
 });

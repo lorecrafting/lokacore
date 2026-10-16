@@ -1,4 +1,4 @@
-# size: allow 325, reaction@1 rule admission keeps every step's floor and reference clause (Homestead hs-1: replenish.run and its repeat check; Settle S3-1: narrate text) in one consequence table
+# size: allow 332, reaction@1 rule admission keeps every step's floor and reference clause (Homestead hs-1: replenish.run and its repeat check; Settle S3-1: narrate text; S4-1: npc.move plan) in one consequence table
 defmodule Loka.Content.Reactions do
   @moduledoc """
   Reaction rules in a v2 source (reaction.schema.json ReactionRule; 21 §11; 06 §14), twin of
@@ -115,7 +115,7 @@ defmodule Loka.Content.Reactions do
 
   # One diagnostic per rule below its highest floor; filters: npc 1.47 (W3), attacker 1.58
   # (loka-kgd.79), target 1.87 (row 39), witness 1.95 (FD5); a co_present status.apply 1.50 (W21),
-  # with a tag 1.56 (W22), naming a room 1.65 (status reader 9).
+  # with a tag 1.56 (W22), naming a room 1.65 (status reader 9); an npc.move naming a plan 1.103 (S4-1).
   @filters %{"npc" => 47, "attacker" => 58, "target" => 87, "witness" => 95}
   defp api(r, manifest) do
     floor = rule_floor(r)
@@ -136,6 +136,7 @@ defmodule Loka.Content.Reactions do
   end
 
   defp step_floor(%{"op" => "status.apply", "room" => _}), do: 65
+  defp step_floor(%{"op" => "npc.move", "plan" => _}), do: 103
   defp step_floor(%{"tag" => _}), do: 56
   defp step_floor(%{"co_present" => _}), do: 50
   defp step_floor(s), do: Map.get(@floors, s["op"], 0)
@@ -218,16 +219,22 @@ defmodule Loka.Content.Reactions do
     do: reference(rel, ["apply", i], "room", s, ctx.m, ctx.defs)
 
   # Row FD5 (loka-kgd.22): a named NPC and room resolve, the NPC no spawn template; the step emits
-  # entity_entered_room.
+  # entity_entered_room. Settle S4-1: a plan resolves, never with npc and only with room.
   defp consequence(rel, {%{"op" => "npc.move"} = s, i}, _, ctx) do
     owned(at(rel, ["apply", i, "op"]), "entity_entered_room", ctx.events) ++
       for(
-        f <- ~w(npc room),
+        {f, kind} <- [{"npc", "npc"}, {"room", "room"}, {"plan", "population"}],
         s[f],
-        d <- reference(rel, ["apply", i], f, s, ctx.m, ctx.defs),
+        d <- reference(rel, ["apply", i], {f, kind}, s, ctx.m, ctx.defs),
         do: d
       ) ++
-      if(s["npc"], do: instance(at(rel, ["apply", i, "npc"]), s["npc"], ctx), else: [])
+      if(s["npc"], do: instance(at(rel, ["apply", i, "npc"]), s["npc"], ctx), else: []) ++
+      if(s["plan"] && (s["npc"] || !s["room"]),
+        do: [
+          diag("SCHEMA_VIOLATION", at(rel, ["apply", i, "plan"]), %{"error" => "invalid_value"})
+        ],
+        else: []
+      )
   end
 
   # Row 37a (phased world events): the plan resolves; the step emits no event.

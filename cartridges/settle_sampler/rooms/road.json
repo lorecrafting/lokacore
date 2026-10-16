@@ -4,6 +4,9 @@
   "exits": {
     "east": {
       "to": "square"
+    },
+    "north": {
+      "to": "hills"
     }
   }
 }

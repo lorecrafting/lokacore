@@ -43,7 +43,7 @@ const FLOORS: Record<string, number> = {
   narrate: 103, // Settle S3-1
 };
 
-// The definitions an item.move (row 41), population.spawn (row 37a), npc.move (row FD5) or
+// The definitions an item.move (row 41), population.spawn (row 37a), npc.move (row FD5; plan S4-1) or
 // replenish.run (Homestead hs-1) step names.
 const MOVES: Record<string, [string, string][]> = {
   'item.move': [['room', 'room']],
@@ -52,6 +52,7 @@ const MOVES: Record<string, [string, string][]> = {
   'npc.move': [
     ['npc', 'npc'],
     ['room', 'room'],
+    ['plan', 'population'], // Settle S4-1
   ],
 };
 
@@ -106,9 +107,10 @@ const apiFloor = (r: Obj): number =>
     r.on.event === 'status_applied' ? 53 : 0, // status reader 2 (row G3)
     // co_present: row W21; its tag: row W22
     ...r.apply.map((s: Obj) => (s.tag ? 56 : s.co_present ? 50 : (FLOORS[s.op] ?? 0))),
+    ...r.apply.map((s: Obj) => (s.op === 'npc.move' && s.plan ? 103 : 0)), // Settle S4-1
   );
 
-// size: allow 55, typed suppression, status, move (row FD5; hs-1 repeated run) and line (S3-1) references stay in one ordered check
+// size: allow 58, typed suppression, status, move (row FD5; hs-1 repeated run) and line (S3-1) references stay in one ordered check
 export function reactions(c: Obj, { named, typedValue, text }: Checks): Diagnostic[] {
   const out: Diagnostic[] = [];
   const [major, minor] = c.manifest.requires.kernel_api.at_least.split('.').map(Number);
@@ -151,6 +153,9 @@ export function reactions(c: Obj, { named, typedValue, text }: Checks): Diagnost
         if (s.npc && c.npcs?.[refString(s.npc)]?.spawn_template)
           // row FD5: no instance to move
           out.push(diag('SCHEMA_VIOLATION', `${at}.apply[${i}].npc`, { error: 'invalid_value' }));
+        // Settle S4-1: a plan move names no NPC and needs an authored room
+        if (s.op === 'npc.move' && s.plan && (s.npc || !s.room))
+          out.push(diag('SCHEMA_VIOLATION', `${at}.apply[${i}].plan`, { error: 'invalid_value' }));
       } else if (s.op === 'narrate') {
         text(s, ['text'], `${at}.apply[${i}]`); // Settle S3-1
       } else if (!['status.apply', 'status.cure', 'experience.grant'].includes(s.op)) {
