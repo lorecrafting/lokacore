@@ -22,6 +22,17 @@
       ],
       "per_subject": true,
       "meaning": "Whether this NPC is in the character's group and follows them."
+    },
+    "grate_forced": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "instance"
+      ],
+      "meaning": "Whether the cell's floor grate is forced; every arrest shuts it again."
     }
   }
 }

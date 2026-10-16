@@ -20,6 +20,16 @@
       "op": "barrier.set",
       "barrier": "cell_door",
       "to": "closed"
+    },
+    {
+      "op": "barrier.set",
+      "barrier": "grate",
+      "to": "closed"
+    },
+    {
+      "op": "fact.assign",
+      "fact": "grate_forced",
+      "value": false
     }
   ]
 }

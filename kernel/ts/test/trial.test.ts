@@ -21,6 +21,7 @@ import { engaged } from '../src/mechanics/combat/shared.ts';
 import { visits } from '../src/mechanics/knowledge/shared.ts';
 import { positionOf } from '../src/mechanics/position/shared.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
+import { value } from '../src/mechanics/fact.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-trial-'));
 let artifact: Uint8Array;
@@ -107,6 +108,9 @@ const code = (w: World, p: object) => {
   return d.kind === 'rejected' ? d.error.code : d.kind;
 };
 const arrested = (w: World) => north(chat(w, 'crier', 'confess')).w;
+const forced = (w: World) => value(w, w.character, ref('fact', 'grate_forced'));
+const force = (w: World) => gameView(w).actions.find((a) => a.action_key === 'force_grate');
+const FORCE = { type: 'perform', action: 'force_grate' };
 
 // Break: hostileAt drops the arrest candidate (or keeps its no-combat bar), so nobody is arrested.
 test('a wanted walk-in is arrested to the cell', () => {
@@ -217,6 +221,8 @@ test('paying the fine moves 5 pennies to the jailer and frees the prisoner', () 
   );
   assert.equal(pennies(r.world, body(r.world)), 5);
   assert.equal(pennies(r.world, npc(r.world, 'jailer')), 5);
+  // Content choice (row 36): a freed prisoner may still dig out.
+  assert.equal(force(r.world)?.available, true);
   const out = act(act(r.world, { type: 'open', direction: 'west' }), {
     type: 'move',
     direction: 'west',
@@ -333,6 +339,14 @@ test('the loader refuses a malformed arrest', () => {
       ],
     ],
     [
+      (c) => {
+        const grate = c.barriers[`${S}barrier/grate`];
+        delete grate.opens_when;
+        grate.initial = 'locked';
+      },
+      ['BARRIER_UNREACHABLE_KEY', `.cartridge.barriers[${JSON.stringify(`${S}barrier/grate`)}]`],
+    ],
+    [
       (c) => (c.manifest.requires.kernel_api.at_least = '1.104'),
       ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'],
     ],
@@ -341,4 +355,76 @@ test('the loader refuses a malformed arrest', () => {
     const r = reload(change);
     assert.deepEqual(r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path], want);
   }
+});
+
+// Row 36 (jail, content only): a broke prisoner forces the floor grate and walks out through the
+// drain still wanted. Breaks: the recipe's success assigns nothing (Open stays invalid_state), its
+// `grate_forced` guard is dropped (force offered again after it worked), or the escape clears
+// `wanted`.
+const escaped = () => {
+  const r = reload((c) => (c.resources[`${S}resource/pennies`].start = 4));
+  assert.ok(r.ok, JSON.stringify(r));
+  const w = arrested(fresh(r.cartridge as Cartridge));
+  assert.equal(code(w, { type: 'open', direction: 'down' }), 'invalid_state');
+  const f = ok(play(w, FORCE));
+  if (f.decision.kind !== 'accepted') throw new Error('unreachable');
+  assert.equal(f.decision.outcome, 'success');
+  assert.deepEqual(f.decision.narration, [{ key: 'grate.forced' }]);
+  assert.equal(forced(f.world), true);
+  assert.equal(force(f.world)?.available, false);
+  assert.equal(code(f.world, FORCE), 'invalid_state');
+  const drain = act(act(f.world, { type: 'open', direction: 'down' }), {
+    type: 'move',
+    direction: 'down',
+  });
+  assert.equal(at(drain), room(drain, 'drain'));
+  assert.equal(value(drain, drain.character, ref('fact', 'wanted')), true);
+  const out = act(drain, { type: 'move', direction: 'west' });
+  assert.equal(at(out), room(out, 'square'));
+  return { drain, out };
+};
+
+test('a broke prisoner forces the grate and leaves by the drain, still wanted', () => {
+  escaped();
+});
+
+// Breaks: the charge reaction's grate `barrier.set` is dropped (the grate stays open), or its
+// `grate_forced` reset is dropped (the grate opens at once without a force).
+test('an escapee walking into the market is arrested again behind a shut grate', () => {
+  const { w, d } = north(escaped().out);
+  assert.equal(at(w), room(w, 'cell'));
+  assert.deepEqual(d.narration, [{ key: 'npc.guard.arrest' }, { key: 'trial.charge' }]);
+  assert.equal(exit(w, 'down').door?.state, 'closed');
+  assert.equal(exit(w, 'west').door?.state, 'closed');
+  assert.equal(forced(w), false);
+  assert.equal(force(w)?.available, true);
+  assert.equal(code(w, { type: 'open', direction: 'down' }), 'invalid_state');
+});
+
+// Break: the grate opens or is passable from below while closed.
+test('the drain is a dead end upward while the grate is shut', () => {
+  const shut = act(escaped().drain, { type: 'close', direction: 'up' });
+  assert.equal(code(shut, { type: 'move', direction: 'up' }), 'exit_closed');
+});
+
+// Break: the recipe's `has_tag fragile` guard is dropped, so a grate without `fragile` is forced.
+test('a grate without the fragile tag cannot be forced', () => {
+  const r = reload((c) => (c.barriers[`${S}barrier/grate`].tags = ['metal']));
+  assert.ok(r.ok, JSON.stringify(r));
+  const w = arrested(fresh(r.cartridge as Cartridge));
+  assert.equal(force(w)?.available, false);
+  assert.equal(code(w, FORCE), 'invalid_state');
+});
+
+// Break: the opposed check's bound is off by one (STR 5 against rating 5 must pass, 6 must fail).
+test('STR 5 forces a rating-5 grate; a rating-6 grate holds', () => {
+  const tried = (rating: number) => {
+    const r = reload((c) => (c.rooms[`${S}room/cell`].details.grate_lock.rating = rating));
+    assert.ok(r.ok, JSON.stringify(r));
+    const d = ok(play(arrested(fresh(r.cartridge as Cartridge)), FORCE));
+    if (d.decision.kind !== 'accepted') throw new Error('unreachable');
+    return [d.decision.outcome, d.decision.narration, forced(d.world)];
+  };
+  assert.deepEqual(tried(5), ['success', [{ key: 'grate.forced' }], true]);
+  assert.deepEqual(tried(6), ['failure', [{ key: 'grate.holds' }], false]);
 });

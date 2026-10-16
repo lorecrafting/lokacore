@@ -20,7 +20,12 @@
       "knowledge": 1,
       "barrier": 1,
       "reaction": 1,
-      "resource": 1
+      "resource": 1,
+      "inspectable_detail": 1,
+      "tags": 1,
+      "action_recipe": 1,
+      "check": 1,
+      "attributes": 1
     },
     "client_features": []
   },

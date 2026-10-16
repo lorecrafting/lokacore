@@ -5,6 +5,19 @@
     "west": {
       "to": "square",
       "barrier": "cell_door"
+    },
+    "down": {
+      "to": "drain",
+      "barrier": "grate"
+    }
+  },
+  "details": {
+    "grate_lock": {
+      "aliases": [
+        "grate"
+      ],
+      "description": "detail.grate_lock",
+      "rating": 0
     }
   }
 }

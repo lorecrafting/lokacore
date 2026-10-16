@@ -27,4 +27,13 @@ defmodule Loka.ContentTrialTest do
       assert expected in Enum.map(diags, &{&1["code"], &1["path"]}), inspect(diags)
     end
   end
+
+  # Break (toolbox row 36): a grate with no opens_when and no key compiles locked for good.
+  test "a locked grate with no way to open it is refused" do
+    dir = Loka.ContentSource.copy("cartridges/trial_sampler")
+    shut = &(Map.delete(&1, "opens_when") |> Map.put("initial", "locked"))
+    assert {:error, diags} = Loka.ContentSource.compile(dir, [{"barriers/grate.json", shut}])
+    found = Enum.map(diags, &{&1["code"], &1["path"]})
+    assert {"BARRIER_UNREACHABLE_KEY", "barriers/grate"} in found, inspect(diags)
+  end
 end
