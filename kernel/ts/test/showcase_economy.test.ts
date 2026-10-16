@@ -7,6 +7,7 @@ import { gameView } from '../src/index.ts';
 import type { World } from '../src/runtime/decision.ts';
 import { validate } from '../src/foundation/validate.ts';
 import { key } from '../src/foundation/compose.ts';
+import { decode } from '../src/foundation/canonical.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import {
   detail,
@@ -67,6 +68,19 @@ const ores = (w: World, holder: string) =>
   [1, 2, 3, 4].map((n) => `ore_0${n}`).filter((o) => where(w, id(w, 'item', o)) === holder);
 const door = (w: World) =>
   w.state.barriers?.[key({ kind: 'barrier', barrier: R('barrier', 'strongroom_door') })];
+// The world with owns_strongroom forged false: the chest's locks, checked from inside.
+const disown = (w: World): World => ({
+  ...w,
+  state: {
+    ...w.state,
+    facts: Object.fromEntries(
+      Object.entries(w.state.facts ?? {}).map(([k, v]) => [
+        k,
+        (decode(k) as { fact: { key: string } }).fact.key === 'owns_strongroom' ? false : v,
+      ]),
+    ),
+  },
+});
 
 let w: World;
 let T: number; // the commission's clock (step 4)
@@ -229,8 +243,11 @@ test('economy 8: buy the strongroom, unlock, enter, use the chest, lock behind',
   assert.equal(where(s, s.body), room(s, 'strongroom'));
   const chest = id(s, 'item', 'strongroom_chest');
   const key_ = id(s, 'item', 'strongroom_key');
-  s = play(s, { type: 'put', item_id: key_, container_id: chest }).world;
+  const put = { type: 'put', item_id: key_, container_id: chest };
+  assert.equal(refused(disown(s), put), 'permission_denied');
+  s = play(s, put).world;
   assert.equal(where(s, key_), chest);
+  assert.equal(refused(disown(s), { type: 'take', item_id: key_ }), 'permission_denied');
   s = take(s, 'strongroom_key');
   s = play(s, { type: 'close', direction: 'north' }).world;
   s = play(s, { type: 'lock', direction: 'north' }).world;
