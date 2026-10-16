@@ -1,4 +1,4 @@
-// size: allow 552, the Undercroft walk (steps 1 to 10) and its branches continue one world and share its helpers
+// size: allow 562, the Undercroft walk (steps 1 to 10) and its branches continue one world and share its helpers
 // The showcase economy and law district walked step by step (docs/showcase/economy-law-district.md,
 // guided loop steps 1 to 10). Each numbered test continues the world the one before it left; a
 // branch starts from a saved step. Fresh world at 07:00 (25200), pennies 10.
@@ -10,6 +10,7 @@ import { validate } from '../src/foundation/validate.ts';
 import { key } from '../src/foundation/compose.ts';
 import { decode } from '../src/foundation/canonical.ts';
 import { engaged } from '../src/mechanics/combat/shared.ts';
+import { pending } from '../src/mechanics/dialogue/shared.ts';
 import { describeEntity } from '../src/mechanics/description_variant/rule.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import {
@@ -74,15 +75,16 @@ const ores = (w: World, holder: string) =>
   [1, 2, 3, 4].map((n) => `ore_0${n}`).filter((o) => where(w, id(w, 'item', o)) === holder);
 const door = (w: World) =>
   w.state.barriers?.[key({ kind: 'barrier', barrier: R('barrier', 'strongroom_door') })];
-// The world with owns_strongroom forged false: the chest's locks, checked from inside.
-const disown = (w: World): World => ({
+// The world with fact `name` forged to `value` (owns_strongroom false: the chest's locks, checked
+// from inside).
+const forge = (w: World, name: string, value: boolean): World => ({
   ...w,
   state: {
     ...w.state,
     facts: Object.fromEntries(
       Object.entries(w.state.facts ?? {}).map(([k, v]) => [
         k,
-        (decode(k) as { fact: { key: string } }).fact.key === 'owns_strongroom' ? false : v,
+        (decode(k) as { fact: { key: string } }).fact.key === name ? value : v,
       ]),
     ),
   },
@@ -351,6 +353,9 @@ test('economy 9: from step 5, a seen lift; the guard arrests on the next entry; 
     },
     { available: true, choice_id: 'work_off', label: 'dialogue.jailer.work_off' },
   ]);
+  const [continuation_id] = pending(talked.world, s.character)!;
+  const pay = { type: 'choose', choice_id: 'pay', continuation_id };
+  assert.equal(refused(talked.world, pay), 'insufficient_resource');
   const worked = choose(talked.world, 'work_off');
   assert.deepEqual(worked.lines, ['narration.jailer.work_off']);
   s = worked.world;
@@ -361,6 +366,8 @@ test('economy 9: from step 5, a seen lift; the guard arrests on the next entry; 
   assert.equal(where(s, s.body), room(s, 'market_row'));
   assert.equal(describeEntity(s, s.character, guard, 'room_line'), 'npc.guard.room');
   valid(s);
+  const re = go(walk(forge(s, 'wanted', true), 'south'), 'north').world;
+  assert.deepEqual([where(re, re.body), shut(re, 'west')], [room(re, 'cell'), 'closed']); // the open door shut again
 });
 
 // Breaks: the broke dialogue's pennies bound off by one (work-off offered with the fine in hand),
@@ -493,12 +500,15 @@ test('economy 8: buy the strongroom, unlock, enter, use the chest, lock behind',
   const chest = id(s, 'item', 'strongroom_chest');
   const key_ = id(s, 'item', 'strongroom_key');
   const put = { type: 'put', item_id: key_, container_id: chest };
-  assert.equal(refused(disown(s), put), 'permission_denied');
+  assert.equal(refused(forge(s, 'owns_strongroom', false), put), 'permission_denied');
   s = play(s, put).world;
   assert.equal(where(s, key_), chest);
   const ore = id(s, 'item', 'ore_03');
   s = play(s, { type: 'put', item_id: ore, container_id: chest }).world;
-  assert.equal(refused(disown(s), { type: 'take', item_id: ore }), 'permission_denied');
+  assert.equal(
+    refused(forge(s, 'owns_strongroom', false), { type: 'take', item_id: ore }),
+    'permission_denied',
+  );
   s = take(take(s, 'ore_03'), 'strongroom_key');
   s = play(s, { type: 'close', direction: 'north' }).world;
   s = play(s, { type: 'lock', direction: 'north' }).world;
