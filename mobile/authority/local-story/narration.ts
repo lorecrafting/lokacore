@@ -26,37 +26,36 @@ export function narration(s: Story, command_id?: string): NarrationRecord | unde
   while (true) {
     const r = latest(s, command_id, before);
     if (!r) return undefined;
-    const record = recorded(s, r, JSON.parse(r.response) as Accepted);
-    if (record) return record;
-    if (command_id) return undefined;
-    before = r.revision;
+    const d = JSON.parse(r.response) as Accepted;
+    if (!Array.isArray(d.events) || d.events.some((e) => typeof e?.payload?.type !== 'string'))
+      throw new Error('malformed JSON: invalid committed event evidence');
+    defenseEvidence(d.events);
+    const lines = d.narration ?? [];
+    const combat_lines = combatLines(s, d, lines);
+    const pickup = corpsePickup(s, r, d);
+    if (!lines.length && !pickup) {
+      if (command_id) return undefined;
+      before = r.revision;
+      continue;
+    }
+    const detail_id = pickup?.corpse_id ?? receiptDetail(s, r, d);
+    const cue = receiptBellCue(s, r, d);
+    return {
+      command_id: r.command_id,
+      lines,
+      ...(cue && { cue }),
+      ...(combat_lines.length && { combat_lines }),
+      ...(detail_id && { detail_id }),
+      ...(pickup && { pickup_name: s.world.entities[pickup.item_id].short }),
+    } as NarrationRecord;
   }
 }
 
-// One receipt's narration record, as the log routes it; none when it has no lines or pickup.
-function recorded(s: Story, r: NarrationRow, d: Accepted): NarrationRecord | undefined {
-  if (!Array.isArray(d.events) || d.events.some((e) => typeof e?.payload?.type !== 'string'))
-    throw new Error('malformed JSON: invalid committed event evidence');
-  defenseEvidence(d.events);
-  const lines = d.narration ?? [];
-  const combat_lines = combatLines(s, d, lines);
-  const pickup = corpsePickup(s, r, d);
-  if (!lines.length && !pickup) return undefined;
-  const detail_id = pickup?.corpse_id ?? receiptDetail(s, r, d);
-  const cue = receiptBellCue(s, r, d);
-  return {
-    command_id: r.command_id,
-    lines,
-    ...(cue && { cue }),
-    ...(combat_lines.length && { combat_lines }),
-    ...(detail_id && { detail_id }),
-    ...(pickup && { pickup_name: s.world.entities[pickup.item_id].short }),
-  } as NarrationRecord;
-}
-
 /**
- * The Chronicle (mechanics.md, Chronicle): every accepted receipt's narration record in revision
- * order, with its day (from the clock after it) and whether it reached a story point. Nothing stored.
+ * The Chronicle (mechanics.md, Chronicle): every accepted receipt's lines in revision order, with
+ * its day (from the clock after it) and whether it reached a story point. Nothing stored. Only the
+ * lines and their combat routing: the latest receipt's detail, cue and pickup checks read today's
+ * world and would refuse an old receipt.
  * ponytail: every response is parsed once per Journal open; a json_extract prefilter is the upgrade
  * if a long save makes it slow.
  */
@@ -71,12 +70,17 @@ export function chronicle(s: Story): ChronicleEntry[] {
     const d = JSON.parse(r.response) as Accepted;
     if (d.kind !== 'accepted') continue;
     for (const op of d.delta.ops) if (op.op === 'time.advance') clock = op.to;
-    const record = recorded(s, r, d);
+    const lines = d.narration ?? [];
+    const combat_lines = combatLines(s, d, lines);
     // Only receipts with a World line: combat-only ones belong to the combat log.
-    if (record && record.lines.length > (record.combat_lines?.length ?? 0))
+    if (lines.length > combat_lines.length)
       entries.push({
         day: Math.floor(clock / day) + 1,
-        record,
+        record: {
+          command_id: r.command_id,
+          lines,
+          ...(combat_lines.length && { combat_lines }),
+        } as NarrationRecord,
         milestone: d.events.some((e) => e.payload.type === 'story_point_reached'),
       });
   }

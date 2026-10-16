@@ -7,11 +7,10 @@ import { expeditionLine, plain, timeLeft, why } from './model.ts';
 import type { Button } from './presenter.ts';
 import { note, prose, usePalette } from './palette.ts';
 import { ActionCard } from './actions.tsx';
-import { Note } from './lines.tsx';
-import { Control, Page, SectionTitle, Tap } from './pages.tsx';
+import { AwayRecap, Note } from './lines.tsx';
+import { Control, Page, SectionTitle } from './pages.tsx';
 import { LABEL } from './labels.ts';
 import type { ChronicleDay } from './chronicle.ts';
-import { space, type } from './tokens.ts';
 
 export function JournalPage(
   p: Parameters<typeof LoreDetails>[0] & {
@@ -108,28 +107,14 @@ function Chronicle(p: { chronicle: () => readonly ChronicleDay[] }) {
     <>
       <SectionTitle>{LABEL.chronicle}</SectionTitle>
       {days.map((d, i) => (
-        <Day key={d.day} d={d} latest={i === days.length - 1} />
+        <AwayRecap
+          key={d.day}
+          heading={`${LABEL.day} ${d.day}`}
+          open={i === days.length - 1}
+          lines={d.lines}
+          ink={(line) => d.milestones.has(line)}
+        />
       ))}
     </>
-  );
-}
-
-// One day, as the away recap's block: a Tap heading, the latest day open; a milestone's line in ink.
-function Day({ d, latest }: { d: ChronicleDay; latest: boolean }) {
-  const c = usePalette();
-  const [open, setOpen] = useState(latest);
-  const heading = `${LABEL.day} ${d.day}`;
-  return (
-    <View style={{ gap: space.sm }}>
-      <Tap label={`${heading}, ${open ? 'hide' : 'show'}`} onPress={() => setOpen(!open)}>
-        <Text style={{ ...type.log, color: c.dim, ...type.italic }}>{heading}</Text>
-      </Tap>
-      {open &&
-        d.lines.map(({ line, count }, i) => (
-          <Text key={i} style={{ ...type.log, color: d.milestones.has(line) ? c.fg : c.dim }}>
-            {count > 1 ? `${line} (${count} times)` : line}
-          </Text>
-        ))}
-    </View>
   );
 }

@@ -96,17 +96,27 @@ export function LogLines({ lines }: { lines: readonly DetailLine[] }) {
 
 // The away recap (toolbox row W27): one block opening the page, collapsed to its heading; open, each
 // grouped line once with its count. The heading's name says whether a tap shows or hides them.
-export function AwayRecap({ lines }: { lines: readonly RecapLine[] }) {
+export function AwayRecap({
+  lines,
+  heading = LABEL.awayRecap,
+  open: first = false,
+  ink = () => true,
+}: {
+  lines: readonly RecapLine[];
+  heading?: string;
+  open?: boolean;
+  ink?: (line: string) => boolean; // the Chronicle: ordinary lines dim, a milestone's in ink
+}) {
   const c = usePalette();
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(first);
   return (
     <View style={{ gap: space.sm }}>
-      <Tap label={`${LABEL.awayRecap}, ${open ? 'hide' : 'show'}`} onPress={() => setOpen(!open)}>
-        <Text style={{ ...type.log, color: c.dim, ...type.italic }}>{LABEL.awayRecap}</Text>
+      <Tap label={`${heading}, ${open ? 'hide' : 'show'}`} onPress={() => setOpen(!open)}>
+        <Text style={{ ...type.log, color: c.dim, ...type.italic }}>{heading}</Text>
       </Tap>
       {open &&
         lines.map(({ line, count }, i) => (
-          <Text key={i} style={{ ...type.log, color: c.fg }}>
+          <Text key={i} style={{ ...type.log, color: ink(line) ? c.fg : c.dim }}>
             {count > 1 ? `${line} (${count} times)` : line}
           </Text>
         ))}

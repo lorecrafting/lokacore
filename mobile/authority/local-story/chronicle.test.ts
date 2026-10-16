@@ -60,7 +60,8 @@ function chronicled(...responses: object[]) {
 }
 
 // Breaks: the clock folds from the receipt before (r2 lands on day 1); rejected receipts or
-// combat-only receipts appear; the day drops its `+ 1`; another character's receipts appear.
+// combat-only receipts appear; the day drops its `+ 1`; another character's receipts appear; an old
+// receipt the latest-narration checks refuse against today's world (a riddle answer) throws.
 test('accepted receipts with World lines, each on the day of the clock after it', () => {
   assert.deepEqual(
     chronicled(
@@ -69,11 +70,13 @@ test('accepted receipts with World lines, each on the day of the clock after it'
       accepted(['B'], [], ['story_point_reached']),
       { kind: 'rejected', error: { code: 'not_here' }, narration: [{ key: 'R' }] },
       accepted(['strike'], [], ['attack_result']),
+      { ...accepted(['C']), outcome: 'riddle_wrong' },
     ),
     [
       [1, 'A', false],
       [2, 'maud.leaves', false],
       [2, 'B', true],
+      [2, 'C', false],
     ],
   );
 });
