@@ -1,0 +1,12 @@
+{
+  "provider": "smith",
+  "currency": "pennies",
+  "action": "cancel",
+  "label": "service.forge_cancel",
+  "narration": "service.forge_cancel.used",
+  "price": 1,
+  "benefit": {
+    "kind": "cancel",
+    "service": "forge_commission"
+  }
+}

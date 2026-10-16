@@ -1,0 +1,24 @@
+{
+  "provider": "smith",
+  "currency": "pennies",
+  "action": "commission",
+  "label": "service.forge_commission",
+  "narration": "service.forge_commission.used",
+  "price": 3,
+  "benefit": {
+    "kind": "entitlement",
+    "fact": "ordered_knife",
+    "escrow": {
+      "items": [
+        "ore_01",
+        "ore_02",
+        "ore_03",
+        "ore_04"
+      ],
+      "quantity": 2,
+      "custody": "forge_back",
+      "ready_after": 3600,
+      "output": "smith_knife"
+    }
+  }
+}

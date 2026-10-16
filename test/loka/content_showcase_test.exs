@@ -4,8 +4,9 @@ defmodule Loka.ContentShowcaseTest do
   use ExUnit.Case, async: true
   @kat JSON.decode!(File.read!("protocol/fixtures/toolbox_showcase_hash.json"))
 
-  # The Homestead (crafts 1.101; build, raze, item_present, profession, hidden: 1.102) dropped
-  # for the older-floor rows; protocol/fixtures/loader_floors.json case 18 drops the same.
+  # The Homestead (crafts 1.101; build, raze, item_present, profession, hidden: 1.102) and the
+  # Undercroft's banks, escrow, stock tables, shelves and locks dropped for the older-floor rows;
+  # protocol/fixtures/loader_floors.json case 18 drops the same.
   @homestead_files ~w(blueprints/hut_plain blueprints/hut_timbered actions/raise_hut_plain
                     actions/raze_hut services/raise_hut_plain services/raze_hut recipes/chop
                     recipes/saw recipes/carve_spoon recipes/raise_timbered_hut reactions/cot_rest
@@ -35,13 +36,17 @@ defmodule Loka.ContentShowcaseTest do
                     services/buy_plot services/claim services/knife_for_pelts
                     services/raise_croft_hut services/raze_croft_hut services/stew statuses/fed
                     statuses/growing statuses/growing_croft statuses/hearty statuses/hen_fed
-                    statuses/spoiling statuses/withered)
+                    statuses/spoiling statuses/withered replenish/shelf replenish/yard_shelf
+                    services/buy_strongroom services/deposit_a services/deposit_b
+                    services/forge_cancel services/forge_claim services/forge_commission
+                    services/withdraw_a services/withdraw_b)
 
   @homestead_facts ~w(cooked gifted_apple gifted_rat ordered owns_pen owns_plot regard sown_at
                       traded_knife watered_at)
 
   # the sow statuses are dropped, so are the other containers' immune pairs
-  @immune_holders ~w(hall_strongbox npc_corpse player_corpse strongbox)
+  @immune_holders ~w(crate hall_strongbox hoard_chest npc_corpse player_corpse strongbox
+                     strongroom_chest yard_crate)
 
   defp homestead_edits,
     do:
@@ -51,7 +56,14 @@ defmodule Loka.ContentShowcaseTest do
         {"npcs/carpenter.json", &Map.delete(&1, "services")},
         {"rooms/holding_croft.json", &Map.delete(&1, "site")},
         {"facts.json", &update_in(&1, ["facts"], fn f -> Map.drop(f, @homestead_facts) end)}
-      ] ++ for(i <- @immune_holders, do: {"items/#{i}.json", &Map.delete(&1, "immune")})
+      ] ++
+        for(i <- @immune_holders, do: {"items/#{i}.json", &Map.delete(&1, "immune")}) ++
+        for(n <- ~w(clerk_a clerk_b smith), do: {"npcs/#{n}.json", &Map.delete(&1, "services")}) ++
+        for(n <- ~w(chandler yard_chandler), do: {"npcs/#{n}.json", &Map.delete(&1, "shop")}) ++
+        for(
+          f <- ~w(items/hoard_chest items/strongroom_chest items/strongroom_key rooms/strongroom),
+          do: {f <> ".json", &Map.delete(&1, "locks")}
+        )
 
   defp homestead,
     do:

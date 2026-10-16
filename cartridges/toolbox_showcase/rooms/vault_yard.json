@@ -1,0 +1,9 @@
+{
+  "title": "room.vault_yard.title",
+  "description": "room.vault_yard.description",
+  "exits": {
+    "up": {
+      "to": "undercroft"
+    }
+  }
+}

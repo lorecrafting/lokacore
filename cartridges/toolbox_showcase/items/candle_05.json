@@ -1,0 +1,13 @@
+{
+  "keywords": [
+    "candle"
+  ],
+  "short": "item.candle_05.short",
+  "room_line": "item.candle_05.room",
+  "description": "item.candle_05.description",
+  "mass_grams": 100,
+  "location": {
+    "in": "item",
+    "item": "crate"
+  }
+}

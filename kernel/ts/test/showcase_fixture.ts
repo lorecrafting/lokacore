@@ -155,14 +155,24 @@ export function reload(edit: (c: any) => void) {
   return r.ok ? 'ok' : `${r.diagnostic.code} ${r.diagnostic.path}`;
 }
 
-// The Homestead (crafts 1.101; build, raze, item_present, profession, hidden: 1.102) dropped for
-// the older-floor loader rows; twin of homestead/0 in test/loka/content_showcase_test.exs.
+// The Homestead (crafts 1.101; build, raze, item_present, profession, hidden: 1.102) and the
+// Undercroft's gated parts dropped for the older-floor loader rows; twin of homestead/0 in
+// test/loka/content_showcase_test.exs.
 export function homestead(c: any) {
   delete c.world.construction;
   delete c.rooms[ref('room', 'holding_lane')].site;
   delete c.npcs[ref('npc', 'carpenter')].services;
   delete c.rooms[ref('room', 'holding_croft')].site;
-  for (const k of ['hall_strongbox', 'npc_corpse', 'player_corpse', 'strongbox'])
+  for (const k of [
+    'crate',
+    'hall_strongbox',
+    'hoard_chest',
+    'npc_corpse',
+    'player_corpse',
+    'strongbox',
+    'strongroom_chest',
+    'yard_crate',
+  ])
     delete c.items[ref('item', k)].immune; // the sow statuses are dropped
   const drop = {
     blueprints: ['blueprint/hut_plain', 'blueprint/hut_timbered'],
@@ -311,4 +321,22 @@ export function homestead(c: any) {
     for (const r of refs) delete c[table][`toolbox_showcase@0.0.1:${r}`];
   for (const s of Object.values(c.skills) as any[])
     for (const k of ['profession', 'prerequisite', 'hidden']) delete s[k];
+  // The Undercroft's banks, timed escrow, stock tables, shelves and locks.
+  for (const k of ['clerk_a', 'clerk_b', 'smith']) delete c.npcs[ref('npc', k)].services;
+  for (const k of ['chandler', 'yard_chandler']) delete c.npcs[ref('npc', k)].shop;
+  for (const k of ['hoard_chest', 'strongroom_chest', 'strongroom_key'])
+    delete c.items[ref('item', k)].locks;
+  delete c.rooms[ref('room', 'strongroom')].locks;
+  for (const k of ['shelf', 'yard_shelf']) delete c.replenish[ref('replenish', k)];
+  for (const k of [
+    'buy_strongroom',
+    'deposit_a',
+    'deposit_b',
+    'forge_cancel',
+    'forge_claim',
+    'forge_commission',
+    'withdraw_a',
+    'withdraw_b',
+  ])
+    delete c.services[ref('service', k)];
 }

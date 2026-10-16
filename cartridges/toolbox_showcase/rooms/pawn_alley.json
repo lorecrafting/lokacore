@@ -1,0 +1,9 @@
+{
+  "title": "room.pawn_alley.title",
+  "description": "room.pawn_alley.description",
+  "exits": {
+    "east": {
+      "to": "undercroft"
+    }
+  }
+}

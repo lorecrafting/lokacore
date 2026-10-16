@@ -1,0 +1,14 @@
+{
+  "keywords": [
+    "beeswax",
+    "candle"
+  ],
+  "short": "item.beeswax_candle.short",
+  "room_line": "item.beeswax_candle.room",
+  "description": "item.beeswax_candle.description",
+  "mass_grams": 100,
+  "location": {
+    "in": "npc",
+    "npc": "chandler"
+  }
+}

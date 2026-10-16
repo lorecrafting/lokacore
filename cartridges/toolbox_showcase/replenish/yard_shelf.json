@@ -1,0 +1,17 @@
+{
+  "items": [
+    "yard_candle_01",
+    "yard_candle_02"
+  ],
+  "from": {
+    "in": "item",
+    "item": "yard_crate"
+  },
+  "to": {
+    "in": "npc",
+    "npc": "yard_chandler"
+  },
+  "cap": 1,
+  "count": 1,
+  "every": 3600
+}

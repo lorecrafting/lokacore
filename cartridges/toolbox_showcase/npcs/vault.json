@@ -1,0 +1,12 @@
+{
+  "keywords": [
+    "vault"
+  ],
+  "short": "npc.vault.short",
+  "room_line": "npc.vault.room",
+  "description": "npc.vault.description",
+  "room": "counting_house",
+  "resource_starts": {
+    "pennies": 20
+  }
+}

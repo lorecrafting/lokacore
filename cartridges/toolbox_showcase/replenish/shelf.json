@@ -1,0 +1,20 @@
+{
+  "items": [
+    "candle_01",
+    "candle_02",
+    "candle_03",
+    "candle_04",
+    "candle_05"
+  ],
+  "from": {
+    "in": "item",
+    "item": "crate"
+  },
+  "to": {
+    "in": "npc",
+    "npc": "chandler"
+  },
+  "cap": 3,
+  "count": 1,
+  "every": 3600
+}
