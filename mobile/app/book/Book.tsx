@@ -222,7 +222,11 @@ function Bottom(p: BottomProps) {
           position={view.position}
           text={text}
           locked={!!view.scene || !!view.combat || !!p.screen.ended || p.page?.kind === 'chapter'}
-          openPosition={!p.page && !view.scene && position ? () => p.press(position) : undefined}
+          openPosition={
+            !p.page && !view.scene && !p.screen.ended && position
+              ? () => p.press(position)
+              : undefined
+          }
           pending={pending}
           open={() => p.open({ kind: 'contents' })}
           openCharacter={() => p.open({ kind: 'character' })}

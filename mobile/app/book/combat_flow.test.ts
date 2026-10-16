@@ -188,7 +188,7 @@ test('confirmed encounter foregrounds another page; closure keeps Combat until B
         );
       assert.equal(ended.filter((t) => t === 'Back to World').length, 1);
       assert.equal(h.footer(), false);
-      for (const shut of [CONTENTS, 'Stand', 'Flee'])
+      for (const shut of [CONTENTS, 'sitting', 'Stand', 'Flee'])
         assert.throws(() => h.tap(shut), undefined, `${ending}: ${shut}`);
       h.tap('Back to World');
       assert.equal(h.texts().includes('Combat'), false);
