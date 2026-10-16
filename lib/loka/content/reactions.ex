@@ -1,4 +1,4 @@
-# size: allow 332, reaction@1 rule admission keeps every step's floor and reference clause (Homestead hs-1: replenish.run and its repeat check; Settle S3-1: narrate text; S4-1: npc.move plan) in one consequence table
+# size: allow 340, reaction@1 rule admission keeps every step's floor and reference clause (Homestead hs-1: replenish.run and its repeat check; Settle S3-1: narrate text; S4-1: npc.move plan) in one consequence table
 defmodule Loka.Content.Reactions do
   @moduledoc """
   Reaction rules in a v2 source (reaction.schema.json ReactionRule; 21 §11; 06 §14), twin of
@@ -223,18 +223,13 @@ defmodule Loka.Content.Reactions do
   defp consequence(rel, {%{"op" => "npc.move"} = s, i}, _, ctx) do
     owned(at(rel, ["apply", i, "op"]), "entity_entered_room", ctx.events) ++
       for(
-        {f, kind} <- [{"npc", "npc"}, {"room", "room"}, {"plan", "population"}],
+        f <- ~w(npc room),
         s[f],
-        d <- reference(rel, ["apply", i], {f, kind}, s, ctx.m, ctx.defs),
+        d <- reference(rel, ["apply", i], f, s, ctx.m, ctx.defs),
         do: d
       ) ++
       if(s["npc"], do: instance(at(rel, ["apply", i, "npc"]), s["npc"], ctx), else: []) ++
-      if(s["plan"] && (s["npc"] || !s["room"]),
-        do: [
-          diag("SCHEMA_VIOLATION", at(rel, ["apply", i, "plan"]), %{"error" => "invalid_value"})
-        ],
-        else: []
-      )
+      plan_move(rel, s, i, ctx)
   end
 
   # Row 37a (phased world events): the plan resolves; the step emits no event.
@@ -261,6 +256,19 @@ defmodule Loka.Content.Reactions do
         )
 
   # Row 16: entry engagement cures concealment in the same move, so an entry reaction may not apply one.
+  # Settle S4-1: a plan move's plan resolves, never with npc and only with room.
+  defp plan_move(rel, %{"plan" => _} = s, i, ctx) do
+    reference(rel, ["apply", i], {"plan", "population"}, s, ctx.m, ctx.defs) ++
+      if(s["npc"] || !s["room"],
+        do: [
+          diag("SCHEMA_VIOLATION", at(rel, ["apply", i, "plan"]), %{"error" => "invalid_value"})
+        ],
+        else: []
+      )
+  end
+
+  defp plan_move(_, _, _, _), do: []
+
   defp revealed(rel, %{"status" => %{"key" => k}}, i, %{"event" => "entity_entered_room"}, ctx) do
     case (ctx.defs["status"] || %{})[k] do
       {_, _, %{"concealment" => _}} -> [diag("OUTCOME_MISMATCH", at(rel, ["apply", i, "op"]))]
