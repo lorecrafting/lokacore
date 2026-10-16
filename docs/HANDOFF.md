@@ -83,8 +83,9 @@ Next, in order:
    the Jev record. Not yet approved: `loka-x3i0`, `loka-59uu`, `loka-z2j2` (condition labels lowercase).
 4. A docs PR with decision records: hidden-elite secrecy (secret), "Inventory" rename, status icons
    (round, graphic-only, hold tooltip, countdown ring), Skills stays on Character until a second
-   profession (audit).
-5. Then Settle S3 `loka-mytp` / S4 `loka-oxgk` (Fable briefs), M14, M15. Polish items from the audit
+   profession (audit), economy tools split (below).
+5. Then Settle S3 `loka-mytp` / S4 `loka-oxgk` (Fable briefs); then one small measuring-tools batch (`loka-kgd.107` notes: 107.1, .2,
+   .5, .8, .9, .20); then M14, M15; the number-based balance tools after M15 (owner split, below). Polish items from the audit
    (`loka-x6t.56`-`.62`) wait for the UI polish phase.
 6. Follow-ups: `loka-kgd.108.12`, `.108.13`, `loka-x6t.53`, `.54`; Book follow-ups from x6t.55 (Book.tsx:222
    a tap on Character pushes a second Character page, as Contents does; "opens Character" literal with
@@ -151,6 +152,10 @@ Session lessons (2026-10-15, b5fe9338 and 8c186cca):
 
 ## Owner answers this session
 
+- 2026-10-15 (session fc1e2fd7, quoted): "Lets put teh countdown timer on the rings for the icons";
+  "yes we want smooth live countdown for the cooldown timer ring"; usage: "we're good just keep going";
+  economy tools: "okay lets go with your suggestion" = measuring tools early (after Settle), number-based
+  balance tools after M15, authoring tools in the worldbuilding/chapter phase (`loka-kgd.107` notes).
 - 2026-10-15 (session 8c186cca, quoted): retro "okay approve all your recs for the retro"; panes audit
   answers "1. yes 2. Yes 3. go with your recommendation" = statuses on Character in batch B; rename to
   "Inventory"; hidden elites SECRET (a hidden skill shows nothing anywhere until the player qualifies).
