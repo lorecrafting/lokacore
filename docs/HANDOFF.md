@@ -222,9 +222,13 @@ polish stage which needs me at the computer for a bit."
   hides when the Chronicle has a day; fix round running. G10 notes engine building (1.110). #409 hosted sim job hits
   its 10-minute limit (the showcase sim test went from 77 s to over 240 s); a developer is finding the cause.
   OWNER (polish): is the one-size step enough to mark a Chronicle milestone, or add a hairline?
+- OWNER 2026-10-16: notes and pins (G10) DROPPED from M15 (descoping matrix; only cut chosen). Engine developer stopped,
+  WIP discarded; loka-kgd.172 deferred. M15 is now rows 47 and FD6. Other cuts offered (skip the economy/law playtest,
+  defer its follow-ups, defer traps) were NOT chosen: those stay in plan.
 
 ## Owner answers this session
 
+- 2026-10-16 (session 93636711, AskUserQuestion, quoted): descoping matrix "Drop notes and pins (G)" (the only choice).
 - 2026-10-15 (session 93636711, AskUserQuestion choices, quoted): Book bugs x6t.27/.28/.32/.33 "Yes, fix with
   showcase (Recommended)" (now loka-y6yg.20); usage "Under 70%, go" (Fable district plan and Fable designer run).
 - 2026-10-15 (session 01da56d0, quoted unless marked): usage "69% for weekly usage.  we're good, keep
