@@ -44,55 +44,48 @@ Beads notes. Owner product order ([record](decisions/owner-decision-product-orde
 all showcases (placeholders where lore is missing), then UI polish, then worldbuilding, then the
 official Chapters 1-3; temporary test cartridges or showcases are welcome any time.
 
-Done this session (fc1e2fd7), all on batch B `toolbox/batch-homestead-b` (worktree
-`../worktrees.noindex/batch-homestead-b`, head 0bd63713, NO PR yet; each slice green on its own head):
-- `loka-x6t.64` status kind (fix round: authored debuff on gored and scar; record review-x6t-64).
-- `loka-x6t.65` engine: `ConditionView.duration` (owner: "Lets put teh countdown timer on the rings
-  for the icons"). Book half shipped inside x6t.55.
-- `loka-kgd.108.14` hidden elites secret: lesson choices hidden in dialogue, loader refuses
-  qualification/policy/label/riddle reading or teaching a hidden skill, save rows accept the narrowed
-  `choice_ids` (save change: second opinion, records `2026-10-15-kgd-108-14-*`).
-- `loka-x6t.55` part 2: status icon row (round, graphic only, placeholder glyphs, hold/focus tooltip,
-  tap opens Character, 5 then +N), countdown ring (plain React Native, no Skia), "Inventory" rename.
-  Designer and reviewer approved; no record (Book).
-- `loka-x6t.65` round B: the ring drains smoothly between game updates (owner: "yes we want smooth
-  live countdown for the cooldown timer ring"): display-only linear tween, at most 1 s, jumps on first
-  show and refresh, steps under reduced motion. Two fix rounds (a re-render dropped the arc past 6
-  o'clock; a useLayoutEffect switch broke six hand-written React test shims).
-- Earlier batch B slices (session 8c186cca): hs-13, hs-6, hs-12, hs-7, hs-8, hs-14.
-- Slice issues stay open until the batch PR merges; `loka-x6t.60` closes then too (notes).
+Done this session (fc1e2fd7):
+- On `main`: #400 (`loka-0fhi` and six more retro items, housekeeping 2026-10-15: merge_resolve unions
+  additive appends, `bin/push_slice.sh <worktree> <branch>`, developer/reviewer rules, COST notes,
+  usage check) merged; #401 (`loka-kgd.107` and others, decision records 2026-10-15: secrecy, Inventory
+  and status icons, economy tools split; Skills placement as a PM decision) merged.
+- Batch B `toolbox/batch-homestead-b` (worktree `../worktrees.noindex/batch-homestead-b`, head
+  2910c69b, NO PR yet) is COMPLETE: every slice reviewed, each green on its own head:
+  hs-13 `.108.10`, hs-6 `.108.6`, hs-12 `.108.9`, hs-7 `.108.5` + `loka-kgd.70`, hs-8 `loka-x6t.31`,
+  hs-14 `.108.11` (session 8c186cca); this session `loka-x6t.64` status kind, `loka-x6t.65` duration
+  + smooth countdown ring, `loka-kgd.108.14` hidden elites secret (save: second opinion),
+  `loka-x6t.55` part 2 status icon row + Inventory rename, hs-9 raze `loka-otn4` (save: second
+  opinion). Handbacks, rulings and COST lines are in each issue's notes.
 
-In flight: none. hs-9 is briefed (`loka-otn4` notes: full brief, PM rulings Q1-Q4) and waits only for
-the owner's usage reading (owner asked: read the usage meter before hs-9 and before the Fable batch
-review; the PM cannot read it: the meter reaches only the status line).
+In flight: none. No agent running.
 
 Next, in order:
-1. hs-9 raze (`loka-otn4`, save: second opinion) from the batch head, after the usage reading.
-2. Batch close: bump kernel_api to 1.102 for every batch B gated feature (they reuse 1.101, which
-   main already carries; move their loader_floors cases; showcase and scars `at_least` move with
-   them), merge `main` into batch B, open the draft PR, one Fable review of the batch head (usage
-   reading first), fix round including: the hs-8 nit (mechanics.md "Give pairs" says the rule does not
-   check sight; actions.ts rejects a hidden recipient); `docs/showcase/combat-district.md:51` says
-   1.48; `kernel/ts/src/view/resources.ts:59` polarity computed twice; `status.test.ts:149` duplicate
-   row; `docs/system/cartridge.md:1773`; book-ui.md:989 Conditions text does not say the locked ring
-   goes quiet; `selection.ts:62` hidden-lesson check copied three times. Then ready, CI green, merge,
-   `after_merge.sh`, close the slice issues, delete branches and worktrees (`toolbox/hs-*`,
-   `toolbox/x6t-*`, `toolbox/kgd-108-14`, `review-hs-*`, `review-x6t-64`, `review-kgd-108-14*`).
-3. Housekeeping PR (owner approved 2026-10-15: "okay approve all your recs for the retro"):
-   `loka-0fhi`, `loka-ujau`, `loka-vro5`, `loka-zgqt`, `loka-df49`, `loka-7p2w`, plus `loka-stzq` and
-   the Jev record. Not yet approved: `loka-x3i0`, `loka-59uu`, `loka-z2j2` (condition labels lowercase).
-4. A docs PR with decision records: hidden-elite secrecy (secret), "Inventory" rename, status icons
-   (round, graphic-only, hold tooltip, countdown ring), Skills stays on Character until a second
-   profession (audit), economy tools split (below).
-5. Then Settle S3 `loka-mytp` / S4 `loka-oxgk` (Fable briefs); then one small measuring-tools batch (`loka-kgd.107` notes: 107.1, .2,
-   .5, .8, .9, .20); then M14, M15; the number-based balance tools after M15 (owner split, below). Polish items from the audit
-   (`loka-x6t.56`-`.62`) wait for the UI polish phase.
-6. Follow-ups: `loka-kgd.108.12`, `.108.13`, `loka-x6t.53`, `.54`; Book follow-ups from x6t.55 (Book.tsx:222
-   a tap on Character pushes a second Character page, as Contents does; "opens Character" literal with
-   no `LABEL.character`; native check of the ring seam at 6 o'clock); older as before.
-
-Brief kit: every brief pastes the COMMON block and Realm checklist stored in the `loka-kgd.108` notes
-("BRIEF KIT").
+1. Batch close (the PM reads no usage meter: owner said 2026-10-15 "we're good just keep going"):
+   a. One Opus developer: bump kernel_api to 1.102 for every batch B gated feature (they reuse 1.101,
+      which main already carries): `world.ts`/Elixir floors, loader_floors cases, the samplers'
+      `at_least` (showcase and scars move too), hash fixtures; rerun every floor mutant of shared
+      samplers (loka-59uu lesson). Branch from the batch head, pm_merge after review.
+   b. Merge `main` into batch B (it now has #400 and #401), open the draft PR.
+   c. One Fable review of the batch head.
+   d. One fix round with the Fable findings plus these known nits: hs-8 mechanics.md "Give pairs"
+      says the rule does not check sight (actions.ts rejects a hidden recipient);
+      `docs/showcase/combat-district.md:51` says 1.48; `kernel/ts/src/view/resources.ts:59` polarity
+      computed twice; `kernel/ts/test/status.test.ts:149` duplicate row; `docs/system/cartridge.md:1773`;
+      book-ui.md:989 Conditions locked ring wording; `selection.ts:62` hidden-lesson check x3;
+      mechanics.md:3389 known limit: a corpse blocks raze for good (link `loka-kgd.122`); the
+      secrecy decision record links the hs-14 "Load check" section once it is on main.
+   e. Ready, CI green, merge, `bin/after_merge.sh`, close the slice issues and `loka-x6t.60`, delete
+      branches and worktrees (`toolbox/hs-*`, `toolbox/x6t-*`, `toolbox/kgd-108-14`, `review-hs-*`,
+      `review-x6t-64`, `review-kgd-108-14*`, `review-hs-9*`).
+2. Then Settle S3 `loka-mytp` / S4 `loka-oxgk` (Fable briefs); then one small measuring-tools batch
+   (`loka-kgd.107` notes: 107.1, .2, .5, .8, .9, .20); then M14, M15; number-based balance tools
+   after M15 (owner split; record `owner-decision-economy-tools-split-2026-10-15.md`).
+3. Follow-ups: `loka-kgd.108.12`, `.108.13`, `loka-x6t.53`, `.54`; Book follow-ups from x6t.55
+   (Book.tsx:222 a tap on Character pushes a second Character page, as Contents does; "opens
+   Character" literal with no `LABEL.character`; native check of the ring seam at 6 o'clock); polish
+   items `loka-x6t.56`-`.62` wait for the UI polish phase.
+4. Retro items awaiting owner approval: `loka-x3i0`, `loka-59uu`, `loka-z2j2`, `loka-ei7a`, `loka-mluq`,
+   `loka-8zqg` (PM recommends all).
 
 Merge mechanics: `bin/pm_merge.sh <batch-worktree> <batch-branch> <slice-branch> <review-branch or the
 sha> "<subject>" <reviewed-sha>` (refuses a non-green sha). It stops on stacked additive conflicts in
@@ -101,7 +94,14 @@ merge by hand, keep both sides, run `elixir bin/contracts.exs`, `bin/review_inde
 push. Batch worktree: `../worktrees.noindex/batch-homestead-b`. `bin/after_merge.sh` now works with the
 owner's untracked `scripts/`.
 
-Session lessons (2026-10-15, b5fe9338 and 8c186cca):
+Session lessons (2026-10-15, b5fe9338, 8c186cca and fc1e2fd7):
+- One brief for an M engine + save + content row (hs-9) cost the developer about 650k tokens before
+  review: split such rows at brief time (evidence on `loka-3jhb`).
+- A developer pushed with a stale generated file (hs-9 `state-sections.gen.json`), and a hook switch
+  broke six hand-written React test shims (x6t-65b): both turned hosted CI red after review (`loka-u58`,
+  `loka-mluq`).
+- Book UI rules: the ring drains smoothly but presentation keeps no gameplay clock (display-only tween
+  between views).
 - Content slices hid a faucet every time in batch A; with an item loop table in every brief, batch B
   found none (retro `loka-vro5`).
 - A loader_floors case was shadowed by another feature at the same floor three times (batch A craft,
@@ -181,7 +181,8 @@ Session lessons (2026-10-15, b5fe9338 and 8c186cca):
 
 - Worldbuilding, first decisions (not urgent: after showcases and UI polish): premise and pillars;
   cosmology shape; magic hardness and cost; Story vs Realm canon. (Hidden-elite secrecy: decided, secret.)
-- Approve new retro items `loka-x3i0` and `loka-59uu` (PM recommends both).
+- Approve retro items `loka-x3i0`, `loka-59uu`, `loka-z2j2`, `loka-ei7a`, `loka-mluq`, `loka-8zqg` (PM
+  recommends all; `loka-8zqg` touches the owner's status-line config).
 - Workflows/ultracode: not for routine work (PM recommendation); a bounded fan-out only, with explicit
   models, a concurrency cap, worktree isolation and a usage reading before and after.
 
