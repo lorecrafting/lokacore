@@ -11,6 +11,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
 - [Review: PR #411 Book hostile NPC refusal line, kernel_api 1.104 (loka-y6yg.20 part B, loka-x6t.33)](2026-10-16-pr411-hostile-refusal-review.md): **APPROVE**
+- [Review: batch M15 head, PR #413 (loka-kgd.170)](2026-10-16-m15-batch-review.md): **APPROVE**
 - [Review: M15 row 47 death penalty options, kernel_api 1.109 (loka-kgd.171)](2026-10-16-m15-47-penalty-review.md): **APPROVE WITH NOTES**
 - [Review: M14 row FD10 companion remarks, NPC asides, kernel_api 1.107 (loka-kgd.147)](2026-10-16-m14-fd10-asides-review.md): **APPROVE WITH NOTES**
 - [Review: M14 row 43b mounts engine, kernel_api 1.108 (loka-kgd.168)](2026-10-16-m14-43b-mounts-review.md): **APPROVE WITH NOTES**
