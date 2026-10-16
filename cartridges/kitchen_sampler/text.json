@@ -19,7 +19,7 @@
   "item.stew_plain.description": "A plain fish stew.",
   "action.eat": "Eat",
   "narration.eat_stew_plain": "You eat the stew. It warms you through.",
-  "condition.fed": "Fed",
+  "condition.fed": "fed",
   "narration.fed.applied": "You feel strong and full.",
   "narration.fed.tick": "The meal still warms you.",
   "narration.fed.expired": "The meal's strength fades.",
@@ -74,7 +74,7 @@
   "item.feast.description": "Fish three ways, laid out on a board.",
   "narration.eat_stew_hearty": "You eat the hearty stew. It warms you to the bone.",
   "narration.eat_feast": "You eat the feast. You could lift a cart.",
-  "condition.hearty": "Hearty",
+  "condition.hearty": "hearty",
   "narration.hearty.applied": "You feel strong and well fed.",
   "narration.hearty.tick": "The good meal still warms you.",
   "narration.hearty.expired": "The good meal's strength fades."

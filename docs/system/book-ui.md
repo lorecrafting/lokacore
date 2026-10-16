@@ -67,10 +67,9 @@ the scrolling body, with status beneath it, inside the existing safe area.
 A projected Read place action keeps its exact detail target and authored label and follows
 the canonical [notice-detail rules](#notice-board-details).
 
-The enabled status/resources tap opens Contents. It lists exactly **Character**, **Equipment &
-Inventory**, **Map**, **Journal**, **Settings**. There is no Menu button or extra World navigation
+The enabled status/resources tap opens Contents. It lists exactly **Character**, **Inventory**, **Map**, **Journal**, **Settings**. There is no Menu button or extra World navigation
 row. Character shows existing projected resources and position, without unrelated index links.
-Equipment & Inventory separates held items from worn slots; Journal uses projected quest text;
+Inventory separates held items from worn slots; Journal uses projected quest text;
 Settings retains Start over and its confirmation/error handling, and holds the
 [page-turn sound](../BOOK-UI-COMPONENTS.md#page-turn) on/off control. Section returns say
 **Back to World**, clear the detail stack to World, and do not pop to Character or Contents.
@@ -285,14 +284,14 @@ currently no player-presence UI.
 
 ## Item details and Take/Drop
 
-Equipment & Inventory separates Held from Worn slots, including empty slots. Held/worn item
+Inventory separates Held from Worn slots, including empty slots. Held/worn item
 taps resolve the same detail; item pages follow [detail-page order](#detail-page-order), with directly nested
 reachable contents and current legal item/container/equipment actions, plus local **Leave** back to World. The available brass lantern therefore offers Take
 and Leave; Leave sends no engine verb. Confirmed accepted `taken` returns to World and adds a
 pickup event using the original projected item name: **You pick up a brass lantern.** for this
 sampler. Under the PM's explicitly adopted Drop symmetry, confirmed accepted `dropped` also
 returns to World with the original projected name: **You drop a brass lantern.** Held items
-open their same item detail from Equipment & Inventory, with existing offered Drop/other actions
+open their same item detail from Inventory, with existing offered Drop/other actions
 and Leave, without invented Use/Equip actions, Take while held, or a custom gesture.
 These replace generic Taken/Dropped fallbacks; authored narration takes precedence and
 meaningful consequences remain. Pending, refused, stale or failed attempts announce no success.
@@ -312,7 +311,7 @@ Successful ordinary Take/Drop are the specific exceptions to item-page retention
 Take follows the corpse-detail rule above. Other same-room item actions
 retain the page and route their results to that item's local chronological history while the
 item remains projected; leaving the room or losing the item closes
-obsolete details. Equipment & Inventory item taps keep existing reachable held/worn behavior.
+obsolete details. Inventory item taps keep existing reachable held/worn behavior.
 
 Put appears as a concrete pair button using projected source/destination names and IDs.
 Each button captures its projection freshness and follows the normal GameSession invocation
@@ -773,7 +772,7 @@ pause or new store/UI framework is introduced.
 
 [D2](mechanics.md#d2-held-books-and-public-priory-selected-contract) uses
 ordinary item detail order and custody projection. World → book detail → Take
-confirms the existing return to World. Contents → Equipment & Inventory → held
+confirms the existing return to World. Contents → Inventory → held
 book detail offers explicit Read; opening that item sends no Read. For an open
 held container, tapping its projected child pushes the child's full detail onto
 the existing stack. Back to the immediate container pops locally without a command;
@@ -987,7 +986,7 @@ The player follows ordinary exits from Green through the authored corridor to Oa
 
 ## Conditions details
 
-GameView `conditions` lists every active [status](mechanics.md#status-effects-over-time-toolbox-row-1) on the body with its authored label, end, next tick and per-tick change; C5 `bleeding` keeps its own field and lines. A condition label is authored lowercase, like a position word (`poisoned`, `blessed`); the status line shows it as authored and the Character page capitalises it as it does the position. The status line shows one item per condition after the bleeding item (after the position when there is none): the label, the time remaining and the signed per-tick amount with its pool key, joined by " · " ("poisoned · 4m remaining · -1 HP each 60s"); the danger tone for a loss, the quiet tone for a gain, and the sign is always in the text, never carried by colour alone. A duration or cadence under two minutes shows in seconds ("40s"), otherwise in whole minutes ("60m"). Each item's accessible name is its text with the dots read as commas, like the time item. The Character page lists each capitalised label after the bleeding line; the Combat page lists the same status-line text after the bleeding line in its first block. The presenter reads projected state and never computes or writes an effect, tick or cure; applied, tick and expired lines come from their receipts' narration and appear once. No new control: a cure is the ordinary Eat of a held item whose `cures` lists the condition.
+GameView `conditions` lists every active [status](mechanics.md#status-effects-over-time-toolbox-row-1) on the body with its authored label, end, next tick and per-tick change; C5 `bleeding` keeps its own field and lines. A condition label is authored lowercase, like a position word (`poisoned`, `blessed`); an icon's tooltip and name show it as authored and the Character page capitalises it as it does the position. A condition's line is the label, the time remaining and the signed per-tick amount with its pool key, joined by " · " ("poisoned · 4m remaining · -1 HP each 60s"); a permanent condition has no time part, one without a tick no amount, and the sign is always in the text. A duration or cadence under two minutes shows in seconds ("40s"), otherwise in whole minutes ("60m"). The Character page lists each line, its label capitalised, after the bleeding line; the Combat page lists the same lines after the bleeding line in its first block. The status icon row shows one round icon per condition, buffs and debuffs told apart by their look, five icons then a +N disc; a tap opens Character; the Character page keeps the full list. The row sits above the status line, in condition order; a hold (a hover or keyboard focus on web) shows the label and time joined by ", " ("fed, 48m remaining"), and an icon's name adds the polarity and the action ("fed, 48m remaining, buff, opens Character"; no polarity for a neutral condition; "+1 more, opens Character" for the disc). While the status line is locked the icons are named pictures, not buttons, dim like the Contents button (the neutral look). A timed icon wears a countdown ring round its disc: a track and an arc for the share of its duration still to run ([look](../BOOK-UI-COMPONENTS.md)), clockwise from 12 o'clock, recomputed from projected time and never animated; at its end only the track shows, and a permanent condition has no ring. Icon glyphs are placeholders until loka-x6t.63. The presenter reads projected state and never computes or writes an effect, tick or cure; applied, tick and expired lines come from their receipts' narration and appear once. No new control: a cure is the ordinary Eat of a held item whose `cures` lists the condition.
 
 ## Away recap
 

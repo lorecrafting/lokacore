@@ -8,6 +8,7 @@ import wasm from 'canvaskit-wasm/bin/full/canvaskit.wasm?url';
 import chapter from '../../../protocol/fixtures/missing_child_v042_hash.json';
 import { openGame } from '../../authority/local-story/session.ts';
 import { webDb } from '../sqlite-web.ts';
+import { LABEL } from '../book/labels.ts';
 import type Book from '../book/Book.tsx';
 
 type Loaded = { Book: typeof Book; game: ReturnType<typeof openGame>; db: SQLiteDatabase };
@@ -116,7 +117,7 @@ export const PegShop: StoryObj = {
     await page.findByText(/^pennies 4 \//); // paid; pennies stay off the status line
     await tap('Back to World');
     await tap(/; opens Contents$/);
-    await tap('Equipment & Inventory, open');
+    await tap(`${LABEL.inventory}, open`);
     await page.findByLabelText('a torch, open');
   },
 };

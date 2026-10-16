@@ -20,6 +20,7 @@ const meta = {
     locked: false,
     pending: false,
     open: fn(),
+    openCharacter: fn(),
   },
 } satisfies Meta<typeof StatusLine>;
 export default meta;
@@ -125,15 +126,18 @@ export const Bleeding: Story = {
   },
 };
 
-// Breaks: durations from two minutes stop reading as minutes, a gain loses its sign, a status
-// without a tick (row 2c) shows a tick part, or a permanent one (row W8) shows a time part.
+// The status icon row above the line (Book/StatusIcon has each look); a tap opens Character, which
+// keeps the tick parts (keyboard.test.ts). Breaks: durations from two minutes stop reading as
+// minutes, or a permanent status (row W8) shows a time part.
 export const Conditions: Story = {
   args: {
     time: 60,
     conditions: [
       {
         label: 'poisoned',
+        kind: 'debuff',
         ends_at: 300,
+        duration: 300,
         next_tick_at: 120,
         resource: 'hp',
         per_tick: -1,
@@ -141,21 +145,32 @@ export const Conditions: Story = {
       },
       {
         label: 'blessed',
+        kind: 'buff',
         ends_at: 3660,
+        duration: 3600,
         next_tick_at: 660,
         resource: 'mv',
         per_tick: 5,
         tick_every: 600,
       },
-      { label: 'mighty', ends_at: 3660, next_tick_at: 3660, resource: 'mv', tick_every: 600 },
+      {
+        label: 'mighty',
+        ends_at: 3660,
+        duration: 7200,
+        next_tick_at: 3660,
+        resource: 'mv',
+        tick_every: 600,
+      },
       { label: 'scarred', resource: 'hp', tick_every: 60 },
     ] as never,
   },
-  play: async ({ canvas }) => {
-    await expect(canvas.getByText('poisoned · 4m remaining · -1 HP each 60s')).toBeVisible();
-    await expect(canvas.getByLabelText('blessed, 60m remaining, +5 MV each 10m')).toBeVisible();
-    await expect(canvas.getByText('mighty · 60m remaining')).toBeVisible();
-    await expect(canvas.getByText('scarred')).toBeVisible();
+  play: async ({ canvas, args, userEvent }) => {
+    const icon = (name: string) => canvas.getByRole('button', { name: `${name}, opens Character` });
+    await expect(icon('poisoned, 4m remaining, debuff')).toBeVisible();
+    await expect(icon('blessed, 60m remaining, buff')).toBeVisible();
+    await expect(icon('mighty, 60m remaining')).toBeVisible();
+    await userEvent.click(icon('scarred'));
+    await expect(args.openCharacter).toHaveBeenCalledTimes(1);
   },
 };
 

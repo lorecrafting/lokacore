@@ -6,6 +6,7 @@ import { elapsedHost } from '../../authority/local-story/__tests__/elapsed-host.
 import { darkMarshBundle } from '../../authority/local-story/__tests__/priory-fixture.ts';
 import type { GameSubscription } from '../../packages/game-view/session.ts';
 import { CONTENTS } from './__tests__/control.test.ts';
+import { LABEL } from './labels.ts';
 import { book, bundle, fixture, nodes, words } from './__tests__/polish-book.test.ts';
 
 // Breaks: an unconfirmed Take leaves the detail or announces success; retry loses its original
@@ -48,7 +49,7 @@ test('only confirmed pickup returns World, including a retry from another page',
     1,
   );
   h.tap(CONTENTS);
-  h.tap('Equipment & Inventory');
+  h.tap(LABEL.inventory);
   assert.ok(h.text().includes('Held'));
   h.tap('a brass lantern, open');
   const token = h.game.view().token;
@@ -70,7 +71,7 @@ test('a held item offers Give only to a present recipient and logs the confirmed
   const item = h.game.view().view.inventory[0];
   const gives = () => h.labels().filter((s) => s.startsWith('Give '));
   h.tap(CONTENTS);
-  h.tap('Equipment & Inventory');
+  h.tap(LABEL.inventory);
   h.tap('a brass lantern, open');
   assert.deepEqual(gives(), []);
   const token = h.game.view().token;
@@ -86,7 +87,7 @@ test('a held item offers Give only to a present recipient and logs the confirmed
   assert.deepEqual(gives(), []); // the recipient's page offers no Give card
   h.tap('Leave');
   h.tap(CONTENTS);
-  h.tap('Equipment & Inventory');
+  h.tap(LABEL.inventory);
   h.tap('a brass lantern, open');
   assert.deepEqual(gives(), ['Give a brass lantern to Old Bram']);
   h.tap('Give a brass lantern to Old Bram');
@@ -106,7 +107,7 @@ test('inventory Drop returns World with one named event only after confirmation'
   h.tap('A brass lantern');
   h.tap('Take a brass lantern');
   h.tap(CONTENTS);
-  h.tap('Equipment & Inventory');
+  h.tap(LABEL.inventory);
   h.tap('a brass lantern, open');
   assert.deepEqual(h.text().slice(0, 2), [
     'A brass lantern',
@@ -254,7 +255,7 @@ test('delayed Take returns once with its original item name after a conflicting 
       1,
     );
     h.tap(CONTENTS);
-    h.tap('Equipment & Inventory');
+    h.tap(LABEL.inventory);
     h.tap('a brass lantern, open');
     const turn = h.draw().find((n) => n.type.name === 'PageTurn').props.turn;
     h.clock.wall += 20;
@@ -324,7 +325,7 @@ test('actual trunk detail explains refused Take and restores its button after Re
   take('a wool cloak');
   const carrying = () => {
     h.tap(CONTENTS);
-    h.tap('Equipment & Inventory');
+    h.tap(LABEL.inventory);
   };
   carrying();
   h.tap('a wool cloak, open');
