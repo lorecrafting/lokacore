@@ -434,9 +434,12 @@ test('homestead 10: two trout by day, one per cast, then the deep is empty', () 
   valid(w);
 });
 
-// Breaks: the eel or salmon rule ignoring its window or sky, or a failing draw landing a fish.
+// Breaks: the eel, trout or salmon rule ignoring its window (06:00 edge) or sky, or a failing draw landing a fish.
 test('homestead 10 branch: eel by night, salmon on a wet day, nothing on a miss', () => {
   assert.deepEqual(landed(pond(22 * HOUR)), ['eel_01']);
+  // Day 3 (gale, no salmon): 05:59:59 is still eel, 06:00 is trout.
+  assert.deepEqual(landed(pond(2 * DAY + 6 * HOUR - 1)), ['eel_01']);
+  assert.match(landed(pond(2 * DAY + 6 * HOUR)).join(), /^trout_0[12]$/);
   const wet = landed(pond(DAY + 10 * HOUR));
   assert.equal(wet.length, 2);
   assert.ok(wet.includes('salmon_01'));
@@ -592,7 +595,10 @@ const eggs = (w: World) =>
 test('homestead sandbox: grain in the trough lays eggs to the nest cap; hens breed to four', () => {
   let h = walk(fresh(WORLD), 'north', 'west', 'up');
   assert.deepEqual(hens(h), [room(h, 'holding_croft'), room(h, 'holding_croft')]);
-  h = put(take(h, 'grain_01'), 'grain_01', 'trough').world;
+  h = take(h, 'grain_01');
+  // Taking the grain is not feeding: no eggs from grain in hand.
+  assert.equal(eggs(wait(h, h.state.clock + 14400).world), 0);
+  h = put(h, 'grain_01', 'trough').world;
   const t = h.state.clock;
   assert.equal(where(h, id(h, 'item', 'grain_01')), room(h, 'midden'));
   assert.equal(eggs(wait(h, t + 14399).world), 0);
@@ -606,4 +612,24 @@ test('homestead sandbox: grain in the trough lays eggs to the nest cap; hens bre
   h = wait(h, 3 * DAY).world;
   assert.deepEqual(hens(h), Array(4).fill(room(h, 'holding_croft')));
   valid(h);
+});
+
+// Breaks: the nest's put lock dropped or keyed to a fact other than owns_pen.
+test('homestead sandbox: only the pen owner puts into the nest', () => {
+  const stick = (x: World) => take(walk(x, 'north', 'up'), 'stick_03');
+  const tenant = stick(yard());
+  assert.equal(
+    refused(tenant, {
+      type: 'put',
+      item_id: id(tenant, 'item', 'stick_03'),
+      container_id: id(tenant, 'item', 'nest'),
+    }),
+    'permission_denied',
+  );
+  const owner = put(stick(play(yard(), farmer(yard(), 'buy_pen', 3)).world), 'stick_03', 'nest');
+  assert.equal(owner.decision.kind, 'accepted', JSON.stringify(owner.decision));
+  assert.equal(
+    where(owner.world, id(owner.world, 'item', 'stick_03')),
+    id(owner.world, 'item', 'nest'),
+  );
 });
