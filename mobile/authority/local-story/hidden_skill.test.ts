@@ -99,7 +99,7 @@ test('a talk opened without its concealed lesson reopens, pending and chosen', (
 // Breaks: a reopen admits a forged row (an id the dialogue lacks, a dropped choice that teaches
 // no hidden skill, another order, empty) or a refusal writes the file. End to end only: the
 // receipt replay (receipt-history.ts) refuses these before any row check, so `openable` itself is
-// pinned by craft.test.ts 'a saved row may lack only a lesson of a hidden skill'.
+// pinned by kernel/ts/test/dialogue_openable.test.ts.
 test('a forged choice_ids row is save_corrupt and the file is unchanged', (t) => {
   const dir = mkdtempSync(join(tmpdir(), 'loka-hidden-skill-forged-'));
   t.after(() => rmSync(dir, { recursive: true, force: true }));

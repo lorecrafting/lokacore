@@ -20,7 +20,7 @@ import { hydrate } from '../src/runtime/created.ts';
 import { check } from '../src/runtime/invariants.ts';
 import { validate } from '../src/foundation/validate.ts';
 import { resolved } from '../src/commands/actions.ts';
-import { openable, pending } from '../src/mechanics/dialogue/shared.ts';
+import { pending } from '../src/mechanics/dialogue/shared.ts';
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));
 const scratch = mkdtempSync(join(tmpdir(), 'loka-craft-sampler-'));
@@ -488,47 +488,6 @@ test('a concealed lesson is left out of the opened choices and refused', () => {
   assert.deepEqual(ids(opened(carve(secret(true)).world)), ['learn', 'leave']); // whittling 2
 });
 
-// Breaks (hs-14 save check, dialogue-save.ts and dialogue-receipt.ts): a saved row may drop a
-// choice that teaches no skill or a shown one (whittle), reorder, be empty, name an id the
-// dialogue lacks or not be a list (a TypeError, not save_corrupt), or be empty when every choice
-// is concealed; or the full row or the one less the hidden lesson is refused.
-test('a saved row may lack only a lesson of a hidden skill', () => {
-  const w = secret(true);
-  const d = w.cartridge.dialogues![`${P}dialogue/old_carver_carving`]!;
-  const [learn]: any = d.choices.learn!.sequence;
-  const whittle = {
-    ...d.choices.learn!,
-    sequence: [{ ...learn, skill: { ...learn.skill, key: 'whittling' } }],
-  };
-  const d2 = { ...d, choices: { ...d.choices, whittle } };
-  const rows = [
-    ['learn', 'leave', 'whittle'],
-    ['leave', 'whittle'],
-    ['learn', 'leave'],
-    ['learn', 'whittle'],
-    ['whittle', 'leave'],
-    ['bogus'],
-    [],
-    null,
-  ];
-  assert.deepEqual(
-    rows.map((ids) => openable(w, d2, ids)),
-    [true, true, false, false, false, false, false, false],
-  );
-  // A hidden skill with no prerequisite is never concealed (`concealed`), so its lesson stays.
-  const carving = `${P}skill/carving`;
-  const skills = {
-    ...w.cartridge.skills,
-    [carving]: { ...w.cartridge.skills![carving]!, prerequisite: undefined },
-  };
-  assert.equal(
-    openable({ ...w, cartridge: { ...w.cartridge, skills } } as any, d2, ['leave', 'whittle']),
-    false,
-  );
-  // Every choice concealed: the empty row still matches the filter, so only the length check refuses.
-  assert.equal(openable(w, { ...d, choices: { learn: d.choices.learn! } }, []), false);
-});
-
 // Breaks (hs-14 secret; twin of content_craft_test.exs): a shown skill's qualification or a
 // dialogue policy reading a hidden skill loads, a labeled talk or a riddle dialogue (its letter
 // bank shows) teaching one loads, or a hidden skill's own qualification reading one is refused.
@@ -541,34 +500,22 @@ test('loader: no shown qualification, dialogue policy, talk label or riddle reve
     hide(c);
     policy(c).root = { op: 'all', items: [{ op: 'skill_compare', skill, at_least: 1 }] };
   };
-  assert.deepEqual(loadEdited(reading((c) => c.skills[S('whittling')].qualification)), [
-    'SCHEMA_VIOLATION',
-    `.cartridge.skills["${S('whittling')}"].qualification`,
-  ]);
-  assert.deepEqual(loadEdited(reading((c) => c.dialogues[D('old_carver_carpentry')].policy)), [
-    'SCHEMA_VIOLATION',
-    `.cartridge.dialogues["${D('old_carver_carpentry')}"].policy`,
-  ]);
+  const at = (path: string) => ['SCHEMA_VIOLATION', `.cartridge.${path}`];
+  const whittling = reading((c) => c.skills[S('whittling')].qualification);
+  assert.deepEqual(loadEdited(whittling), at(`skills["${S('whittling')}"].qualification`));
+  const carpentry = reading((c) => c.dialogues[D('old_carver_carpentry')].policy);
+  assert.deepEqual(loadEdited(carpentry), at(`dialogues["${D('old_carver_carpentry')}"].policy`));
   assert.equal(loadEdited(reading((c) => c.skills[S('joinery')].qualification)), 'loaded');
-  const label = (c: any) =>
-    (c.dialogues[D('old_carver_carving')].label = 'old_carver.carving.prompt');
-  assert.deepEqual(
-    loadEdited((c) => (hide(c), label(c))),
-    ['SCHEMA_VIOLATION', `.cartridge.dialogues["${D('old_carver_carving')}"].label`],
-  );
-  assert.equal(loadEdited(label), 'loaded'); // carving shown
-  const riddle = (c: any) =>
-    (c.dialogues[D('old_carver_carving')].riddle = {
-      choice_id: 'learn',
-      answer: 'a',
-      bank: ['A'],
-      wrong: 'old_carver.carving.prompt',
-    });
-  assert.deepEqual(
-    loadEdited((c) => (hide(c), riddle(c))),
-    ['SCHEMA_VIOLATION', `.cartridge.dialogues["${D('old_carver_carving')}"].riddle`],
-  );
-  assert.equal(loadEdited(riddle), 'loaded'); // carving shown
+  const wrong = 'old_carver.carving.prompt';
+  for (const [field, value] of Object.entries({
+    label: wrong,
+    riddle: { choice_id: 'learn', answer: 'a', bank: ['A'], wrong },
+  })) {
+    const set = (c: any) => (c.dialogues[D('old_carver_carving')][field] = value);
+    const hidden = (c: any) => (hide(c), set(c));
+    assert.deepEqual(loadEdited(hidden), at(`dialogues["${D('old_carver_carving')}"].${field}`));
+    assert.equal(loadEdited(set), 'loaded'); // carving shown
+  }
 });
 
 // Breaks (hs-14; twin of content_craft_test.exs): a shown skill whose prerequisite reads a hidden
