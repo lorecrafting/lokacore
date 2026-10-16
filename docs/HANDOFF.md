@@ -192,6 +192,10 @@ polish stage which needs me at the computer for a bit."
   narrate reaction plus the jailer's dialogue (no scene; the row text says "scene"); jail is content only on the arrest
   engine; companion remarks read any present NPC (member gate in content); new tags road and marsh; a mount moves only on
   road-tagged rooms; the cell is shared-world (per-instance waits for instancing). kernel_api 1.105-1.108.
+- M14 arrest engine (row 35) approved after 2 fix rounds: an arrest is skipped when the move or a sleep would leave a
+  water row or encounter behind (that state could not be saved and reopened). Terrain costs (43a) approved; room tags must
+  be unique (new error code duplicate_items); entering a water-edge room skips the terrain fare (known limit). Tag-floor gap
+  filed loka-kgd.169. Batch branch toolbox/batch-m14 (no PR yet).
 
 ## Owner answers this session
 
