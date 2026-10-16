@@ -1,0 +1,9 @@
+{
+  "title": "room.square.title",
+  "description": "room.square.description",
+  "exits": {
+    "west": {
+      "to": "road"
+    }
+  }
+}

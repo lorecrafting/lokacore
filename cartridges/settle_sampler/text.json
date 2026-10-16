@@ -1,0 +1,7 @@
+{
+  "room.square.title": "Square",
+  "room.square.description": "An open square. A road leads west.",
+  "room.road.title": "Road",
+  "room.road.description": "A dirt road. The square is east.",
+  "settle.arrival_line": "A dog barks somewhere down the road."
+}
