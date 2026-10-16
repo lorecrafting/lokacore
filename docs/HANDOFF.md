@@ -6,7 +6,7 @@ the next steps, the standing owner rules that the repo does not yet state, and o
 questions. Rewrite it at each stable checkpoint (a merge, a review verdict, a pushed fix) and before
 the session ends; commit and push it with the Beads export.
 
-Written 2026-10-15 UTC by Claude Code (Opus 5.5) in local session fc1e2fd7 (after 8c186cca). State at
+Written 2026-10-15 UTC by Claude Code (Opus 5.5) in local session 01da56d0 (after fc1e2fd7). State at
 writing: see "In flight" below.
 
 ## Start of a session
@@ -44,48 +44,31 @@ Beads notes. Owner product order ([record](decisions/owner-decision-product-orde
 all showcases (placeholders where lore is missing), then UI polish, then worldbuilding, then the
 official Chapters 1-3; temporary test cartridges or showcases are welcome any time.
 
-Done this session (fc1e2fd7):
-- On `main`: #400 (`loka-0fhi` and six more retro items, housekeeping 2026-10-15: merge_resolve unions
-  additive appends, `bin/push_slice.sh <worktree> <branch>`, developer/reviewer rules, COST notes,
-  usage check) merged; #401 (`loka-kgd.107` and others, decision records 2026-10-15: secrecy, Inventory
-  and status icons, economy tools split; Skills placement as a PM decision) merged.
-- Batch B `toolbox/batch-homestead-b` (worktree `../worktrees.noindex/batch-homestead-b`, head
-  2910c69b, NO PR yet) is COMPLETE: every slice reviewed, each green on its own head:
-  hs-13 `.108.10`, hs-6 `.108.6`, hs-12 `.108.9`, hs-7 `.108.5` + `loka-kgd.70`, hs-8 `loka-x6t.31`,
-  hs-14 `.108.11` (session 8c186cca); this session `loka-x6t.64` status kind, `loka-x6t.65` duration
-  + smooth countdown ring, `loka-kgd.108.14` hidden elites secret (save: second opinion),
-  `loka-x6t.55` part 2 status icon row + Inventory rename, hs-9 raze `loka-otn4` (save: second
-  opinion). Handbacks, rulings and COST lines are in each issue's notes.
+Done this session (01da56d0):
+- #402 (`loka-kgd.108`, Homestead batch B) merged (merge 03f3181c, head b3da3d8a green): kernel_api 1.102
+  bump `loka-kgd.108.15` (Opus review APPROVE); Fable batch review APPROVE WITH NOTES, one fix round
+  (known nits + skill `hidden` gated at 1.102), Fable re-check APPROVE; Fable designer approved the
+  book-ui.md Conditions ring text. Slice issues, `loka-x6t.60`, branches, review branches and worktrees
+  removed. Record `docs/reviews/2026-10-15-homestead-b-batch-review.md`.
+- `loka-mytp` (Settle S3) unblocked: its blocks on `loka-kgd.108` / `.109` removed (those epics stay open
+  only for P3 follow-ups `.108.12`, `.108.13`, `loka-trex`, `loka-z4cp`).
+- Designer spawns are Fable, never Sonnet (owner 2026-10-15, quoted: "wait sonnet should never be a
+  designer, wasn't it fable designer?"); Sonnet only for a live-session picker nit.
 
-In flight: none. No agent running.
+In flight: one Fable agent drafts the Settle S3/S4 briefs from `docs/rnd/settle-design-2026-10-14.md`
+into the session scratchpad (`settle-briefs.md`); the PM stores each brief in its Beads issue before any spawn.
 
 Next, in order:
-0. Batch head 2910c69b: ci and book-e2e green (checked 2026-10-15). Recheck only if the batch moved.
-1. Batch close. Before the Fable batch review, ask the owner for the weekly bar (WORKFLOW usage
-   check, #400); the 2026-10-15 go-ahead ("we're good just keep going") covered hs-9 only.
-   a. One Opus developer: bump kernel_api to 1.102 for every batch B gated feature (they reuse 1.101,
-      which main already carries): `world.ts`/Elixir floors, loader_floors cases, the samplers'
-      `at_least` (showcase and scars move too), hash fixtures; rerun every floor mutant of shared
-      samplers (loka-59uu lesson). Branch from the batch head, pm_merge after review.
-   b. Merge `main` into batch B (it now has #400 and #401), open the draft PR.
-   c. One Fable review of the batch head.
-   d. One fix round with the Fable findings plus these known nits: hs-8 mechanics.md "Give pairs"
-      says the rule does not check sight (actions.ts rejects a hidden recipient);
-      `docs/showcase/combat-district.md:51` says 1.48; `kernel/ts/src/view/resources.ts:59` polarity
-      computed twice; `kernel/ts/test/status.test.ts:149` duplicate row; `docs/system/cartridge.md:1773`;
-      book-ui.md:989 Conditions locked ring wording; `selection.ts:62` hidden-lesson check x3;
-      mechanics.md:3389 known limit: a corpse blocks raze for good (link `loka-kgd.122`); the
-      secrecy decision record links the hs-14 "Load check" section once it is on main; S5 Known
-      limits line: a shared-world encounter left open in a razed hut (`saved.ts:80`, Realm).
-   e. Ready, CI green, merge, `bin/after_merge.sh`, close the slice issues and `loka-x6t.60`, delete
-      branches and worktrees (`toolbox/hs-*`, `toolbox/x6t-*`, `toolbox/kgd-108-14`, `review-hs-*`,
-      `review-x6t-64`, `review-kgd-108-14*`, `review-hs-9*`).
-2. Then Settle S3 `loka-mytp` / S4 `loka-oxgk` (Fable briefs); then one small measuring-tools batch
-   (`loka-kgd.107` notes: 107.1, .2, .5, .8, .9, .20); then M14, M15; number-based balance tools
-   after M15 (owner split; record `owner-decision-economy-tools-split-2026-10-15.md`).
-3. Follow-ups: `loka-kgd.108.12`, `.108.13`, `loka-x6t.53`, `.54`, `loka-x6t.66` (status icon
-   follow-ups); polish items `loka-x6t.56`-`.62` wait for the UI polish phase.
-4. Retro items awaiting owner approval: `loka-x3i0`, `loka-59uu`, `loka-z2j2`, `loka-ei7a`, `loka-mluq`,
+1. Settle batch `toolbox/batch-settle` from main: store the Fable briefs (S3-1 charter+arrival, S3-2
+   keep+services, S3-3 trade+ledger, S4-1 band, S4-2 protect+reclaim, then the Settle showcase district;
+   owner answers in `loka-mytp` notes), kernel_api 1.103, then the usual batch close (Fable review, one
+   fix round, merge).
+2. Measuring-tools batch: recheck `loka-kgd.107` notes first; 107.1, .2, .5, .8 are already closed, so
+   what remains is about `.9` (replay diff as a PR comment) and `.20` (scheduled content graph).
+3. M14, M15; number-based balance tools after M15.
+4. Follow-ups: `loka-kgd.108.12`, `.108.13`, `loka-trex`, `loka-z4cp`, `loka-x6t.53`, `.54`, `.66`; polish
+   items `loka-x6t.56`-`.62` wait for the UI polish phase.
+5. Retro items awaiting owner approval: `loka-x3i0`, `loka-59uu`, `loka-z2j2`, `loka-ei7a`, `loka-mluq`,
    `loka-8zqg` (PM recommends all).
 
 Merge mechanics: `bin/pm_merge.sh <batch-worktree> <batch-branch> <slice-branch> <review-branch or the
