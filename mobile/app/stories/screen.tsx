@@ -8,6 +8,7 @@ import chapter from '../../../protocol/fixtures/missing_child_v042_hash.json';
 import type { Game, GameView } from '../../packages/game-view/session.ts';
 import type { BookView as View_ } from '../book/Book.tsx';
 import { buttonsOf, type Page } from '../book/model.ts';
+import type { ChronicleDay } from '../book/chronicle.ts';
 import type { DetailLine, presenter } from '../book/presenter.ts';
 import { color } from '../book/tokens.ts';
 import { sayers } from '../book/words.ts';
@@ -19,6 +20,7 @@ export type Saved = {
   log: DetailLine[];
   combatLog: string[];
   details: Record<string, DetailLine[]>;
+  chronicle?: ChronicleDay[];
 };
 const table: Record<string, string> = chapter.value.text;
 type Words = Record<string, string>;
@@ -39,6 +41,7 @@ export const screenFrom = (
     log: saved.log,
     combatLog: saved.combatLog,
     detail: (id: string) => saved.details[id] ?? [],
+    chronicle: () => saved.chronicle ?? [],
     pending: false,
     catchingUp: false,
     fault: undefined,

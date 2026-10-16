@@ -125,6 +125,7 @@ function sectionPage(p: BodyProps, page: Page) {
         world={p.world}
         buttons={p.screen.buttons}
         press={p.press}
+        chronicle={p.screen.chronicle}
       />
     );
   return (

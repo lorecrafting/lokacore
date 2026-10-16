@@ -122,3 +122,44 @@ export const JournalLoreRefused: StoryObj = {
     if (canvas.queryByText('Nothing written yet.')) throw new Error('empty line above Lore');
   },
 };
+// Toolbox row FD6: the Chronicle (book-ui.md, Chronicle details) under the Journal; the latest day
+// open, earlier days collapsed, a story-point line in ink. Lines are the recap sampler's narration.
+const TICK = 'The poison burns in your veins.';
+const chronicleStory = (name: string, chronicle: object[]): StoryObj => ({
+  ...pageStory({ ...JournalView, chronicle }),
+  name,
+});
+const day1 = {
+  day: 1,
+  lines: [
+    { line: 'A dart pricks your arm. Cold spreads from the wound.', count: 1 },
+    { line: TICK, count: 11 },
+    { line: 'The poison fades from your blood.', count: 1 },
+  ],
+  milestones: new Set<string>(),
+};
+export const JournalChronicle: StoryObj = {
+  ...chronicleStory('Journal chronicle, one day', [day1]),
+  play: async ({ canvas }) => {
+    await canvas.findByRole('button', { name: 'Day 1, hide' });
+    await canvas.findByText(`${TICK} (11 times)`);
+  },
+};
+export const JournalChronicleDays: StoryObj = {
+  ...chronicleStory('Journal chronicle, two days and a milestone', [
+    day1,
+    {
+      day: 7,
+      lines: [
+        { line: 'You find the lost child.', count: 1 },
+        { line: 'The chill passes.', count: 1 },
+      ],
+      milestones: new Set(['You find the lost child.']),
+    },
+  ]),
+  play: async ({ canvas }) => {
+    await canvas.findByRole('button', { name: 'Day 1, show' });
+    await canvas.findByText('You find the lost child.');
+    if (canvas.queryByText(`${TICK} (11 times)`)) throw new Error('earlier day open');
+  },
+};

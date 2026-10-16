@@ -29,6 +29,9 @@ export const LABEL = {
   // Before a topic's authored label on an NPC's card (row FD7).
   askAbout: 'Ask about',
   lore: 'Lore',
+  // The Journal's Chronicle and its day headings (toolbox row FD6; wording pending designer).
+  chronicle: 'Chronicle',
+  day: 'Day',
   notHere: 'Not here',
   // The away recap's heading (toolbox row W27; wording pending designer, loka-x6t.14).
   awayRecap: 'While you were away',

@@ -1,5 +1,6 @@
-// The Journal page: the projected quests, then the lore (toolbox row 46). Only drawing; what a
-// tap does is passed in by Book.tsx.
+// The Journal page: the projected quests, the lore (toolbox row 46), then the Chronicle (row FD6).
+// Only drawing; what a tap does is passed in by Book.tsx.
+import { useState } from 'react';
 import { Text, View } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { expeditionLine, plain, timeLeft, why } from './model.ts';
@@ -7,10 +8,17 @@ import type { Button } from './presenter.ts';
 import { note, prose, usePalette } from './palette.ts';
 import { ActionCard } from './actions.tsx';
 import { Note } from './lines.tsx';
-import { Control, Page, SectionTitle } from './pages.tsx';
+import { Control, Page, SectionTitle, Tap } from './pages.tsx';
 import { LABEL } from './labels.ts';
+import type { ChronicleDay } from './chronicle.ts';
+import { space, type } from './tokens.ts';
 
-export function JournalPage(p: Parameters<typeof LoreDetails>[0] & { world: () => void }) {
+export function JournalPage(
+  p: Parameters<typeof LoreDetails>[0] & {
+    world: () => void;
+    chronicle: () => readonly ChronicleDay[];
+  },
+) {
   const { view, text } = p;
   const c = usePalette();
   return (
@@ -47,6 +55,7 @@ export function JournalPage(p: Parameters<typeof LoreDetails>[0] & { world: () =
         </View>
       ))}
       <LoreDetails {...p} />
+      <Chronicle chronicle={p.chronicle} />
     </Page>
   );
 }
@@ -88,5 +97,39 @@ function LoreDetails(p: {
         );
       })}
     </>
+  );
+}
+
+/** The Chronicle (book-ui.md, Chronicle details): read once as the Journal opens, never live. */
+function Chronicle(p: { chronicle: () => readonly ChronicleDay[] }) {
+  const [days] = useState(p.chronicle);
+  if (!days.length) return null;
+  return (
+    <>
+      <SectionTitle>{LABEL.chronicle}</SectionTitle>
+      {days.map((d, i) => (
+        <Day key={d.day} d={d} latest={i === days.length - 1} />
+      ))}
+    </>
+  );
+}
+
+// One day, as the away recap's block: a Tap heading, the latest day open; a milestone's line in ink.
+function Day({ d, latest }: { d: ChronicleDay; latest: boolean }) {
+  const c = usePalette();
+  const [open, setOpen] = useState(latest);
+  const heading = `${LABEL.day} ${d.day}`;
+  return (
+    <View style={{ gap: space.sm }}>
+      <Tap label={`${heading}, ${open ? 'hide' : 'show'}`} onPress={() => setOpen(!open)}>
+        <Text style={{ ...type.log, color: c.dim, ...type.italic }}>{heading}</Text>
+      </Tap>
+      {open &&
+        d.lines.map(({ line, count }, i) => (
+          <Text key={i} style={{ ...type.log, color: d.milestones.has(line) ? c.fg : c.dim }}>
+            {count > 1 ? `${line} (${count} times)` : line}
+          </Text>
+        ))}
+    </View>
   );
 }

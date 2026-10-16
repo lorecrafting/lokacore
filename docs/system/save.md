@@ -177,6 +177,8 @@ The latest committed narration is read from the receipts, never memory, so a cra
 display shows it again; no acknowledgement is stored (`narration.ts:23`;
 `start_over.test.ts` "the latest committed narration is read again on reopen, from the
 receipts").
+The Journal's [Chronicle](mechanics.md#chronicle-toolbox-row-fd6) reads the same receipts,
+never memory, and stores nothing.
 
 ## Story points
 

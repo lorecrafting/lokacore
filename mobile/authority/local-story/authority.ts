@@ -9,7 +9,7 @@ import type { World } from '../../../kernel/ts/src/runtime/decision.ts';
 import { newWorld } from '../../../kernel/ts/src/runtime/world.ts';
 import { corrupt, identityOf, load, reconcile, replace } from './store.ts';
 import type { Db, Meta } from './store.ts';
-import { narration } from './narration.ts';
+import { chronicle, narration } from './narration.ts';
 import { adopt, ids, token } from './save.ts';
 import type { Story } from './save.ts';
 import type { ElapsedStatus } from '../../packages/game-view/session.ts';
@@ -135,6 +135,7 @@ function opened(s: Story) {
     runId: () => s.meta.run_id,
     newGame: () => newGame(s),
     narration: (command_id?: string) => narration(s, command_id),
+    chronicle: () => chronicle(s),
     token: () => token(s), // the view freshness token of the world() now shown
   };
 }

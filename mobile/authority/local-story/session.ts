@@ -151,6 +151,7 @@ function sharedGame(
     },
     text: (key) => cartridge.text[key as Key],
     lastNarration: (command_id) => (pending() ? undefined : story.narration(command_id)),
+    chronicle: () => story.chronicle(),
   };
 }
 
