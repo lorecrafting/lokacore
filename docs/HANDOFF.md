@@ -199,6 +199,9 @@ polish stage which needs me at the computer for a bit."
 - M14 trial (row 35) done in the batch: arrest + charge line + jailer fine (no scene). Engine fix found on the way: a
   currency used only by dialogue payments had no starting balance (fresh.ts). Arrest wording approved by the designer.
   Companion remarks (FD10, 1.107) in review; a perceived NPC's remarks stay visible in a dark room (PM). Jail (36) building.
+- M14 batch head e31edbb8 holds rows 35 (trial), 36 (jail: force the grate, stay wanted, climb back in and be charged
+  again), 43a (terrain) and FD10 (companion remarks, review + second opinion approved). Mounts 43b-engine (1.108) building;
+  43b-content last; then the Fable batch review and one PR.
 
 ## Owner answers this session
 
