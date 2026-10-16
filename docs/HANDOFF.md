@@ -156,6 +156,8 @@ Session lessons (2026-10-15, b5fe9338, 8c186cca, fc1e2fd7 and 01da56d0):
 
 ## Owner answers this session
 
+- 2026-10-15 (session 93636711, AskUserQuestion choices, quoted): Book bugs x6t.27/.28/.32/.33 "Yes, fix with
+  showcase (Recommended)" (now loka-y6yg.20); usage "Under 70%, go" (Fable district plan and Fable designer run).
 - 2026-10-15 (session 01da56d0, quoted unless marked): usage "69% for weekly usage.  we're good, keep
   going"; "lets have generated residents" + choices "Generated townsfolk (Recommended)", "Authored name
   list (Recommended)"; "Hm lets table settlements for now i think homesteads is a good start and
