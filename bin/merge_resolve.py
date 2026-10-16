@@ -56,7 +56,7 @@ def section_union(text):
     # each side adds whole sections: the shared part ends at a section edge and a heading (or the end) follows
     if (rest and not rest.startswith(("## ", "### "))) or (after and not after.startswith("#")):
         return None
-    if len({m[1] for side in (ours, theirs) if (m := re.match(r"(#{2,3}) ", "".join(side).lstrip("\n")))}) > 1:  # a ### section beside a ## section would land under the wrong parent
+    if len(set(re.findall(r"^(#{2,3}) ", "".join(ours + theirs), re.M))) > 1:  # mixed levels: a ### section could land under the wrong ## parent
         return None
     merged = text[: h.start()] + h[1].rstrip("\n") + ("\n\n" + rest if rest else "") + ("\n\n" + after if after else "\n")
     heads = re.findall(r"^#{2,3} .*$", merged, re.M)

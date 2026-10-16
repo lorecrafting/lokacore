@@ -100,6 +100,8 @@ git show "$base:$fl" | perl -0pe 's/\n  \]\n\}\n\z/$ENV{E1}$ENV{E2}\n  ]\n}\n/' 
 unions 'a loader floor on both sides once' $fl "$t/expected.dup"
 ap lvl $m 's/\n## /\n## Mid A\n\nA text\n\n## /' 's/\n## /\n### Mid B\n\nB text\n\n## /'
 left 'a ### section beside a ## section' $m
+ap lvl2 $m 's/\n## /\n### Mid B\n\nB text\n\n## Mid A\n\nA text\n\n## /' 's/\n## /\n### Mid C\n\nC text\n\n## /'
+left 'a ### then a ## section beside a ### section' $m
 ap shape $tb 's/(\n\| 1 \|[^\n]*\n)/$1|ZA| row a\n/' 's/(\n\| 1 \|[^\n]*\n)/$1| ZB | M9 | row b | x | S | – | x | x | open |\n/'
 left 'a line that is not a table row' $tb
 echo 'merge_resolve controls: ok'
