@@ -6,8 +6,8 @@ the next steps, the standing owner rules that the repo does not yet state, and o
 questions. Rewrite it at each stable checkpoint (a merge, a review verdict, a pushed fix) and before
 the session ends; commit and push it with the Beads export.
 
-Written 2026-10-15 UTC by Claude Code (Opus 5.5) in local session 8c186cca, for an owner-requested
-clear. State at writing: see "In flight" below.
+Written 2026-10-15 UTC by Claude Code (Opus 5.5) in local session fc1e2fd7 (after 8c186cca). State at
+writing: see "In flight" below.
 
 ## Start of a session
 
@@ -44,48 +44,50 @@ Beads notes. Owner product order ([record](decisions/owner-decision-product-orde
 all showcases (placeholders where lore is missing), then UI polish, then worldbuilding, then the
 official Chapters 1-3; temporary test cartridges or showcases are welcome any time.
 
-Done this session (8c186cca):
-- On `main`: #398 (`loka-kgd.108`, Homestead batch A) merged; #399 (`loka-ikch`/`loka-kgd.108`, owner
-  decision records 2026-10-15: product order, worldbuilding decoupled, professions rulings) merged.
-- Batch B `toolbox/batch-homestead-b` (worktree `../worktrees.noindex/batch-homestead-b`, head 37a569da,
-  NO PR yet) holds six reviewed slices, each green on its own head, records in `docs/reviews/`:
-  hs-13 self-cooking (`.108.10`), hs-6 furnishing (`.108.6`), hs-12 self-build (`.108.9`), hs-7 gifting
-  and barter (`.108.5` + `loka-kgd.70`, second opinion), hs-8 Give in the Book (`loka-x6t.31`), hs-14
-  skill tree (`.108.11`; round 2 reverted by the escalation ladder). Each slice's handback, check table,
-  rulings and COST lines are in its Beads notes. Slice issues stay open until the batch PR merges.
-- 390 px screenshots of batch A sent to the owner; Fable panes audit filed as `loka-x6t.55`-`.62`;
-  status icon design settled (`loka-x6t.55` notes); own icon set later `loka-x6t.63`.
+Done this session (fc1e2fd7), all on batch B `toolbox/batch-homestead-b` (worktree
+`../worktrees.noindex/batch-homestead-b`, head 71bda8c1, NO PR yet; each slice green on its own head):
+- `loka-x6t.64` status kind (fix round: authored debuff on gored and scar; record review-x6t-64).
+- `loka-x6t.65` engine: `ConditionView.duration` (owner: "Lets put teh countdown timer on the rings
+  for the icons"). Book half shipped inside x6t.55.
+- `loka-kgd.108.14` hidden elites secret: lesson choices hidden in dialogue, loader refuses
+  qualification/policy/label/riddle reading or teaching a hidden skill, save rows accept the narrowed
+  `choice_ids` (save change: second opinion, records `2026-10-15-kgd-108-14-*`).
+- `loka-x6t.55` part 2: status icon row (round, graphic only, placeholder glyphs, hold/focus tooltip,
+  tap opens Character, 5 then +N), countdown ring (plain React Native, no Skia), "Inventory" rename.
+  Designer and reviewer approved; no record (Book).
+- Earlier batch B slices (session 8c186cca): hs-13, hs-6, hs-12, hs-7, hs-8, hs-14.
+- Slice issues stay open until the batch PR merges; `loka-x6t.60` closes then too (notes).
 
-In flight (check each first):
-1. **`loka-x6t.64`** (status `kind` buff/debuff, part 1 of `.55`): branch `toolbox/x6t-64` head 3aeeeeb2,
-   worktree `../worktrees.noindex/x6t-64`. Review APPROVE WITH NOTES (record on local branch
-   `review-x6t-64`, 2726c70d; cherry-pick it). Fix round with a fresh Opus developer: the nits and PM
-   rulings in the issue notes (author debuff on gored and scar, showcase hash). Then CI green and
-   `bin/pm_merge.sh` into batch B.
-2. Batch B CI on 37a569da: check `gh run list --commit 37a569da...`.
+In flight: none. hs-9 is briefed (`loka-otn4` notes: full brief, PM rulings Q1-Q4) and waits only for
+the owner's usage reading (owner asked: read the usage meter before hs-9 and before the Fable batch
+review; the PM cannot read it: the meter reaches only the status line).
 
 Next, in order:
-1. `loka-x6t.55` part 2 (Book): status icon row (round, graphic only, placeholder Skia glyphs, hold
-   tooltip, tap opens Character; neutral disc when no kind) + rename Contents to "Inventory". Spec text,
-   catalogue row and rename file list in `.55` notes. Designer ratifies the book-ui.md text in review.
-2. `loka-kgd.108.14` (owner secrecy ruling: hidden skills show nothing anywhere): hide a hidden skill's
-   lesson choice in dialogue (trap: all concealed -> no empty `choices`; validate GameView vs schema) and
-   loader refusal of qualification/dialogue policies reading a hidden skill. Then re-check `loka-x6t.60`.
-3. hs-9 raze (`loka-otn4`, save: second opinion) last in batch B. Read the usage meter first (loka-stzq).
-4. Batch close: bump kernel_api to 1.102 for every batch B gated feature (they reuse 1.101, which
-   main already carries; move their loader_floors cases), merge `main` into batch B, open the draft PR, one Fable review of the batch head, fix
-   round (include the hs-8 nit: mechanics.md "Give pairs" says the rule does not check sight; actions.ts
-   rejects a hidden recipient), ready, CI green, merge, `after_merge.sh`, close the slice issues, delete
-   branches and worktrees (`toolbox/hs-*`, `review-hs-*`, `review-x6t-64`).
-5. Housekeeping PR (owner approved 2026-10-15: "okay approve all your recs for the retro"):
+1. hs-9 raze (`loka-otn4`, save: second opinion) from the batch head, after the usage reading.
+2. Batch close: bump kernel_api to 1.102 for every batch B gated feature (they reuse 1.101, which
+   main already carries; move their loader_floors cases; showcase and scars `at_least` move with
+   them), merge `main` into batch B, open the draft PR, one Fable review of the batch head (usage
+   reading first), fix round including: the hs-8 nit (mechanics.md "Give pairs" says the rule does not
+   check sight; actions.ts rejects a hidden recipient); `docs/showcase/combat-district.md:51` says
+   1.48; `kernel/ts/src/view/resources.ts:59` polarity computed twice; `status.test.ts:149` duplicate
+   row; `docs/system/cartridge.md:1773`; book-ui.md:989 Conditions text does not say the locked ring
+   goes quiet; `selection.ts:62` hidden-lesson check copied three times. Then ready, CI green, merge,
+   `after_merge.sh`, close the slice issues, delete branches and worktrees (`toolbox/hs-*`,
+   `toolbox/x6t-*`, `toolbox/kgd-108-14`, `review-hs-*`, `review-x6t-64`, `review-kgd-108-14*`).
+3. Housekeeping PR (owner approved 2026-10-15: "okay approve all your recs for the retro"):
    `loka-0fhi`, `loka-ujau`, `loka-vro5`, `loka-zgqt`, `loka-df49`, `loka-7p2w`, plus `loka-stzq` and
-   the Jev record. New retro items this session (owner not yet asked): `loka-x3i0` (view tests validate
-   GameView vs schema), `loka-59uu` (floor diagnostics name the feature; shadowed floor cases x3).
-6. A docs PR with decision records: hidden-elite secrecy (secret), "Inventory" rename, status icons
-   (round, graphic-only, hold tooltip), Skills stays on Character until a second profession (audit).
-7. Then Settle S3 `loka-mytp` / S4 `loka-oxgk` (Fable briefs), M14, M15. Polish items from the audit
+   the Jev record. Not yet approved: `loka-x3i0`, `loka-59uu`, `loka-z2j2` (condition labels lowercase).
+4. A docs PR with decision records: hidden-elite secrecy (secret), "Inventory" rename, status icons
+   (round, graphic-only, hold tooltip, countdown ring), Skills stays on Character until a second
+   profession (audit).
+5. Then Settle S3 `loka-mytp` / S4 `loka-oxgk` (Fable briefs), M14, M15. Polish items from the audit
    (`loka-x6t.56`-`.62`) wait for the UI polish phase.
-8. Follow-ups: `loka-kgd.108.12`, `.108.13`, `loka-x6t.53`, `.54`; older as before.
+6. Follow-ups: `loka-kgd.108.12`, `.108.13`, `loka-x6t.53`, `.54`; Book follow-ups from x6t.55 (Book.tsx:222
+   a tap on Character pushes a second Character page, as Contents does; "opens Character" literal with
+   no `LABEL.character`; native check of the ring seam at 6 o'clock); older as before.
+
+Brief kit: every brief pastes the COMMON block and Realm checklist stored in the `loka-kgd.108` notes
+("BRIEF KIT").
 
 Merge mechanics: `bin/pm_merge.sh <batch-worktree> <batch-branch> <slice-branch> <review-branch or the
 sha> "<subject>" <reviewed-sha>` (refuses a non-green sha). It stops on stacked additive conflicts in
