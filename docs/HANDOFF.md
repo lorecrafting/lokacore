@@ -209,6 +209,9 @@ polish stage which needs me at the computer for a bit."
   a ridden horse behind) is in. Filed loka-y6yg.32: the economy guard arrests instead of fighting. M15 batch loka-kgd.170
   (rows 47 loka-kgd.171, G10 loka-kgd.172, FD6 loka-kgd.143); letters stay out unless the drafter shows otherwise; Fable
   brief drafting running. E2 of #409 in Opus review.
+- E2 review (#409) APPROVE WITH NOTES: the Book NPC page never listed an NPC's Held items, so stealing worked only in
+  tests, not in the Book. Fix round running (reuse the existing Held list; text nits; main merged in). Stuck-wanted
+  filed as loka-y6yg.33 (fix with the arrest switch loka-y6yg.32). Law playtest waits for the Held fix.
 
 ## Owner answers this session
 
