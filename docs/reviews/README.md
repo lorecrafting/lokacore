@@ -29,6 +29,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Second opinion (save): loka-kgd.108.14 hidden elites stay secret](2026-10-15-kgd-108-14-second-opinion.md): **APPROVE**
 - [Review: loka-kgd.108.14 hidden elites stay secret](2026-10-15-kgd-108-14-review.md): **APPROVE**
 - [Review: PR #393 recipe reason at kernel_api 1.100 (loka-j64e)](2026-10-15-j64e-review.md): **APPROVE WITH NOTES**
+- [Review: hs-9 Built rooms S5, raze and tombstone (loka-otn4; engine + save)](2026-10-15-hs-9-review.md): **CHANGES REQUIRED**
 - [Review: Homestead hs-8, Give in the Book (loka-x6t.31) with the hs-7 barter price note](2026-10-15-hs-8-review.md): **APPROVE WITH NOTES**
 - [Second-opinion review: Homestead hs-7 gifting and barter (loka-kgd.108.5, loka-kgd.70)](2026-10-15-hs-7-second-opinion.md): **APPROVE WITH NOTES**
 - [Review: Homestead hs-7 gifting and barter (loka-kgd.108.5, loka-kgd.70)](2026-10-15-hs-7-review.md): **APPROVE**
