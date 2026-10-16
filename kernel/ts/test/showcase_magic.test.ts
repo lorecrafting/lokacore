@@ -5,8 +5,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { gameView, newWorld } from '../src/index.ts';
-import type { Cartridge } from '../src/contracts.gen.ts';
-import type { World } from '../src/runtime/decision.ts';
+import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { validate } from '../src/foundation/validate.ts';
 import { fuelView } from '../src/mechanics/light/shared.ts';
 import {
@@ -39,8 +38,8 @@ const words = (w: World) => view(w).spell_words;
 const chip = (w: World, key: string) => view(w).actions.find((a) => a.action_key === key);
 const pools = (w: World) =>
   Object.fromEntries(
-    view(w)
-      .resources.filter((r) => ['mana', 'ash'].includes(r.resource.key))
+    (view(w).resources ?? [])
+      .filter((r) => ['mana', 'ash'].includes(r.resource.key))
       .map((r) => [r.resource.key, r.current]),
   );
 const cast = (w: World, word: string) => play(w, { type: 'cast', word });
