@@ -154,6 +154,15 @@ Session lessons (2026-10-15, b5fe9338, 8c186cca, fc1e2fd7 and 01da56d0):
 - The disk fills after about seven worktrees (2.2 GB each); remove merged worktrees first.
 - Agents must never run `git worktree prune` while another agent's worktree is in use.
 
+## Overnight decisions (session 93636711, for the owner's morning recap)
+
+Owner 2026-10-15 (quoted): "I will be sleeping now so be as autonomous as possible and make decisions on your
+own. And give me a recap of crucial decisions in the morning when i ask for it. Go all the way up to Ui
+polish stage which needs me at the computer for a bit."
+
+- #403 (loka-mytp.1/.2, narrate and plan-move engine steps) merged at 0f0603ed; settle-3 kept parked.
+- Showcase fixes y6yg.8/.9/.15/.16/.17 batched as one content PR (loka-y6yg.18); slice D needs no rebuild.
+
 ## Owner answers this session
 
 - 2026-10-15 (session 93636711, AskUserQuestion choices, quoted): Book bugs x6t.27/.28/.32/.33 "Yes, fix with
