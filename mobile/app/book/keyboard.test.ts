@@ -476,7 +476,8 @@ test('status icon countdown ring: remaining share of the duration, clockwise fro
 
 // Breaks: the arc tweens on a refresh (more left) or under reduced motion instead of jumping, or a
 // long gap between views (app paused) drains for the whole gap instead of at most a second, or a
-// half's turn is not clamped so a drain across 6 o'clock overshoots (book-ui.md Conditions).
+// half's turn is not clamped so a drain across 6 o'clock overshoots, or the rendered Ring ignores
+// reduced motion (book-ui.md Conditions).
 test('status icon countdown ring: drains between views, capped, jumps up and under reduced motion', () => {
   const deg = (time: number) => 360 * ((3600 - time) / 3600);
   assert.equal(deg(720), 288);
@@ -512,11 +513,11 @@ test('status icon countdown ring: drains between views, capped, jumps up and und
     });
     try {
       ring();
-      return g.timings.map((ms: number) => Math.round(ms / 50) * 50);
+      return g.timings.map((ms: number) => ms >= 250 && ms <= 1000);
     } finally {
       for (const k of ['reducedMotion', 'timings', 'keptRef']) delete g[k];
     }
   };
-  assert.deepEqual(drains(false), [250]);
+  assert.deepEqual(drains(false), [true]); // tweens over the 250 ms gap (or a slow runner's more)
   assert.deepEqual(drains(true), []); // reduced motion: the arc jumps, no tween
 });

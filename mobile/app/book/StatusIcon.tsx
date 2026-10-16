@@ -177,6 +177,7 @@ function Half(p: { right?: boolean; shown: { value: number }; color: string }) {
   const right = !!p.right;
   const turn = useAnimatedStyle(() => {
     const t = turns(p.shown.value);
+    // An empty half's ring rests on its clip edge; hide it so no antialiased seam shows there.
     const drawn = p.shown.value > (right ? 0 : 180);
     return { opacity: drawn ? 1 : 0, transform: [{ rotate: `${right ? t.right : t.left}deg` }] };
   });
