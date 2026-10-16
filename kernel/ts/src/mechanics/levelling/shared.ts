@@ -34,8 +34,8 @@ export function levelUp(world: World, actor: CharacterId, ops: readonly DeltaOp[
   const last = ops.filter((o) => o.op === 'levelling.set' && o.character_id === actor).at(-1);
   if (!spec || last?.op !== 'levelling.set') return [];
   const from = world.state.levelling?.[actor]?.experience ?? 0;
-  if (last.value.experience < from)
-    return [{ key: world.cartridge.world!.death!.penalty!.experience!.narration }];
+  const lost = world.cartridge.world?.death?.penalty?.experience?.narration;
+  if (last.value.experience < from) return lost ? [{ key: lost }] : [];
   return reached(spec, last.value.experience) > reached(spec, from) ? [{ key: spec.level_up }] : [];
 }
 

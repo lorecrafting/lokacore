@@ -12,6 +12,7 @@ import { encode } from '../src/foundation/canonical.ts';
 import { validate } from '../src/foundation/validate.ts';
 import { resolve } from '../src/commands/invocation.ts';
 import { hydrate } from '../src/runtime/created.ts';
+import { levelUp, lose } from '../src/mechanics/levelling/shared.ts';
 
 const kat = JSON.parse(
   readFileSync(
@@ -123,7 +124,7 @@ function raise(w: World, key: string) {
   };
   const command = resolve(w, { invocation, command_id: id() } as never);
   assert.ok(!('kind' in command), JSON.stringify(command));
-  return act(w, command.payload, offered.action_key).world;
+  return act(w, command.payload, offered.action_key);
 }
 const levelling = (w: World) => {
   const view = gameView(w);
@@ -133,9 +134,12 @@ const levelling = (w: World) => {
 
 // Breaks: the loss is not written (or /10 instead of /100), the old composer guard refuses a fall
 // (precondition_failed), the loss strips an allocated point, the line is missing, repeated or
-// told before player_died, or a cold reopen loses the lowered row.
+// told before player_died, a write that keeps experience (the raise) tells the line, or a cold
+// reopen loses the lowered row.
 test('a death at 50 lowers experience to 45 once, keeps the spent point, and survives a reopen', () => {
-  const r = die(raise(hall(50), 'str'));
+  const raised = raise(hall(50), 'str');
+  assert.ok(!narration(raised).includes('death.penalty'));
+  const r = die(raised.world);
   assert.deepEqual(sets(r), [[50, 45]]);
   assert.deepEqual(r.world.state.levelling?.[r.world.character]?.allocated, {
     [`${P}:attribute/str`]: 1,
@@ -156,12 +160,10 @@ test('a death at 50 lowers experience to 45 once, keeps the spent point, and sur
   });
 });
 
-// Breaks: the floor is skipped when the loss lands just under it (29), or the line needs the
-// loss to equal the cut rather than any fall.
-test('a loss that lands under the floor writes the threshold and tells the line', () => {
-  const r = die(hall(32));
-  assert.deepEqual(sets(r), [[32, 30]]);
-  assert.ok(narration(r).includes('death.penalty'));
+// Breaks: a fall in a cartridge with no experience penalty throws or tells an undefined key.
+test('a fall with no experience penalty declared tells nothing', () => {
+  const w = hall(50, (c) => delete penalty(c).experience);
+  assert.deepEqual(levelUp(w, w.character, lose(w, w.character, 10, 0)), []);
 });
 
 // Breaks: percent 100 empties the row past the floor, a 0 loss still writes, or a death with no
@@ -227,6 +229,23 @@ test('items kept: the body keeps the tail in the hall and the corpse in the yard
     inside: 1,
     died: corpse.died,
   });
+  // Breaks: kept also applies to an NPC victim, so the rat's tail never reaches its corpse.
+  let w = hall(0, (c) => {
+    penalty(c).items = 'kept';
+    c.items[`${P}:item/tail`].location = {
+      in: 'npc',
+      npc: {
+        cartridge_id: 'penalty_sampler',
+        cartridge_version: '0.0.1',
+        kind: 'npc',
+        key: 'rat_a',
+      },
+    };
+  });
+  w = act(w, { type: 'move', direction: 'east' }).world;
+  const r = wait(act(w, { type: 'attack', target_id: w.entityIds[`${P}:npc/rat_a`] }).world, 150);
+  const died = (r.decision as any).events.find((e: any) => e.payload.type === 'entity_died');
+  assert.equal(r.world.state.containers[w.entityIds[`${P}:item/tail`]!], died.payload.corpse_id);
 });
 
 // Breaks: the loader admits a penalty below kernel_api 1.109, an experience loss without
