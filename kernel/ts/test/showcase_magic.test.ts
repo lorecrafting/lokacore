@@ -77,7 +77,8 @@ test('magic 1: up the ladder; the sign reads and the Word bar is empty', () => {
 
 // Breaks: the wizard opens the errand before teaching lux, the errand is not accepted, lux casts
 // without ash or spends the wrong pools, the gather adds no ash, the cast leaves the held lantern
-// unlit or writes an ignite line, or a cast without the lantern is refused or keeps its pools.
+// unlit or writes an ignite line, a cast without the lantern is refused or keeps its pools, or
+// the climb back to the loft closes the errand before flamma is known.
 test('magic 2: taught lux; it needs ash; the cast spends 2 mana and 1 ash and lights the lantern', () => {
   const first = talk(w, 'hedge_wizard');
   assert.equal(first.opened, 'wizard_lux');
@@ -102,6 +103,8 @@ test('magic 2: taught lux; it needs ash; the cast spends 2 mana and 1 ash and li
   w = r.world;
   assert.deepEqual(pools(w), { mana: 3, ash: 0 });
   assert.equal(lit(w), true);
+  w = go(go(w, 'down').world, 'up').world; // the loft climb closes only a met errand
+  assert.equal(view(w).journal[0]?.state, 'active');
 });
 
 // Breaks: the hush is not applied on entry or ends early or late, it leaves the cast, the say or
