@@ -41,6 +41,11 @@
       "op": "barrier.set",
       "barrier": "toll_gate",
       "to": "closed"
+    },
+    {
+      "op": "fact.assign",
+      "fact": "warden_lets_pass",
+      "value": false
     }
   ]
 }

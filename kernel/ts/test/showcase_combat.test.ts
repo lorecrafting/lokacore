@@ -364,8 +364,8 @@ test('combat 11: the raider falls before the bounty is taken; the fight ends nor
 });
 
 // Breaks (loka-y6yg.8): Aldous's Talk card lists two Talk actions, the lesson and the bounty talk,
-// at once; or after the raider dies the bounty talk is still offered.
-test('combat 11b: Aldous offers exactly one Talk before the lesson, after it, and after the raider', () => {
+// at once (also when the raider dies before the lesson); or after the raider dies the bounty talk is still offered.
+test('combat 11b: Aldous offers exactly one Talk before the lesson, after it, and after the raider either way', () => {
   const talks = (w: World) => {
     const view = gameView(w);
     assert.deepEqual(validate('GameView', view), []);
@@ -381,6 +381,13 @@ test('combat 11b: Aldous offers exactly one Talk before the lesson, after it, an
   s = wait(s, s.state.clock + 450).world;
   assert.equal(fact(s, 'raider_slain'), true);
   assert.equal(talks(go(s, 'east').world), 1);
+  // The raider dies before the lesson: still one Talk, the lesson.
+  s = attack(
+    go(play(go(fresh(CTX), 'west').world, { type: 'shout', word: 'ware' }).world, 'west').world,
+    'raider',
+  );
+  s = go(wait(s, s.state.clock + 450).world, 'east').world;
+  assert.equal(talks(s), 1);
 });
 
 // Breaks: the tilt yard's pack plan is missing or homed elsewhere, or its Attack does not admit

@@ -3,9 +3,19 @@
   "policy": {
     "policy_version": 1,
     "root": {
-      "op": "fact_compare",
-      "fact": "raider_slain",
-      "equals": true
+      "op": "all",
+      "items": [
+        {
+          "op": "fact_compare",
+          "fact": "skill_blade",
+          "equals": true
+        },
+        {
+          "op": "fact_compare",
+          "fact": "raider_slain",
+          "equals": true
+        }
+      ]
     }
   },
   "prompt": "dialogue.aldous_yard.prompt",

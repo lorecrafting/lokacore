@@ -173,6 +173,7 @@ test('social 18b: a hostile Warden shuts the toll gate; fleeing him lands on the
   const east = go(late, 'east').world;
   assert.equal(engaged(east, east.body)?.row.npc_id, npc(east, 'warden'));
   assert.equal(gate(east), 'closed');
+  assert.equal(fact(east, 'warden_lets_pass'), false); // else a plain Open reopens it once he walks off
   const fled = play(east, { type: 'flee' }).world;
   assert.deepEqual(
     [where(fled, fled.body), engaged(fled, fled.body)],
