@@ -135,7 +135,6 @@ const conversation = (p: NpcProps, choice?: NonNullable<GameView['choice']>) => 
   return { talk, answer, foot };
 };
 
-// The skills this NPC teaches: learned or not, and whether the player qualifies now.
 // What a living NPC holds (Held, book-ui.md Item details): Take on it is the steal (row 33).
 const held = (p: NpcProps) =>
   p.npc ? things(p.view).filter((e) => 'container_id' in e && e.container_id === p.npc?.id) : [];
@@ -150,6 +149,7 @@ const about = (c: Palette, p: NpcProps) => (
   </>
 );
 
+// The skills this NPC teaches: learned or not, and whether the player qualifies now.
 export const npcSkills = (c: Palette, p: NpcProps) =>
   p.view.skills
     ?.filter(
