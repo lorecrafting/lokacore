@@ -23,7 +23,6 @@ defmodule Loka.Content.Standing do
     adjusts = for {_, {rel, [], r}} <- defs["reaction"] || %{}, a <- adjusts(r), do: {rel, a}
 
     shapes(npcs) ++
-      templates(npcs) ++
       arrests(npcs, m, defs) ++
       ints(adjusts, m, defs) ++ floor(m, npcs, adjusts) ++ speakers(m, defs)
   end
@@ -43,10 +42,11 @@ defmodule Loka.Content.Standing do
   end
 
   defp shapes(npcs) do
-    for {rel, %{"disposition" => d} = n} <- npcs,
-        n["spawn_template"] || bad?(d, n) ||
-          (is_map_key(d, "refuse") and not is_map_key(d, "hostile")),
-        do: diag("SCHEMA_VIOLATION", at(rel, ["disposition"]), %{"error" => "invalid_value"})
+    templates(npcs) ++
+      for {rel, %{"disposition" => d} = n} <- npcs,
+          n["spawn_template"] || bad?(d, n) ||
+            (is_map_key(d, "refuse") and not is_map_key(d, "hostile")),
+          do: diag("SCHEMA_VIOLATION", at(rel, ["disposition"]), %{"error" => "invalid_value"})
   end
 
   # Toolbox row FD10: a spawned copy has no authored presence to remark from.

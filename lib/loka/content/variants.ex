@@ -22,13 +22,13 @@ defmodule Loka.Content.Variants do
 
     relative = relative?(defs) or relative?(settings)
 
-    remarks = Enum.any?(for {_, {_, [], n}} <- defs["npc"] || %{}, do: is_map_key(n, "asides"))
-    voices = voice?(defs) or aside?(defs) or remarks
+    remarks = remarks?(defs)
+    voices = voice?(defs) or aside?(defs)
     identity = is_map_key(settings["world"] || %{}, "identity")
     furnish = furnish?([defs, settings])
 
     if (identity or voices or relative or used?(defs, settings)) and
-         api < floor(remarks, furnish, identity, voices, relative, defs, settings),
+         api < floor(remarks, furnish, identity, voices, relative, {defs, settings}),
        do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least", %{})],
        else: []
   end
@@ -36,13 +36,13 @@ defmodule Loka.Content.Variants do
   defp used?(defs, settings),
     do: Enum.any?(Entities.all(defs), &variant?/1) or leaf?(defs) or leaf?(settings)
 
-  defp floor(true, _, _, _, _, _, _), do: [1, 107]
-  defp floor(_, true, _, _, _, _, _), do: [1, 102]
-  defp floor(_, _, true, _, _, _, _), do: [1, 97]
-  defp floor(_, _, _, true, _, _, _), do: [1, 91]
-  defp floor(_, _, _, _, true, _, _), do: [1, 87]
+  defp floor(true, _, _, _, _, _), do: [1, 107]
+  defp floor(_, true, _, _, _, _), do: [1, 102]
+  defp floor(_, _, true, _, _, _), do: [1, 97]
+  defp floor(_, _, _, true, _, _), do: [1, 91]
+  defp floor(_, _, _, _, true, _), do: [1, 87]
 
-  defp floor(_, _, _, _, _, defs, settings),
+  defp floor(_, _, _, _, _, {defs, settings}),
     do: if(reader?(defs) or reader?(settings), do: [1, 53], else: [1, 46])
 
   defp variant?({kind, _, e}),
@@ -56,10 +56,16 @@ defmodule Loka.Content.Variants do
   defp leaf?(v) when is_tuple(v), do: leaf?(Tuple.to_list(v))
   defp leaf?(_), do: false
 
-  # Twin of TS asideParts (rooms and details; NPCs are `remarks`): never a key named so elsewhere.
+  # Twin of TS asideParts (rooms, details and, row FD10, NPCs): never a key named so elsewhere.
   defp aside?(defs),
     do:
-      Enum.any?(for({_, {_, [], r}} <- Map.get(defs, "room", %{}), do: RoomParts.asides(r) != []))
+      remarks?(defs) or
+        Enum.any?(
+          for({_, {_, [], r}} <- Map.get(defs, "room", %{}), do: RoomParts.asides(r) != [])
+        )
+
+  defp remarks?(defs),
+    do: Enum.any?(for {_, {_, [], n}} <- Map.get(defs, "npc", %{}), do: is_map_key(n, "asides"))
 
   defp furnish?(%{"op" => "item_present"}), do: true
   defp furnish?(v) when is_map(v), do: Enum.any?(Map.values(v), &furnish?/1)
