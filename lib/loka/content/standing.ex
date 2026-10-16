@@ -77,17 +77,18 @@ defmodule Loka.Content.Standing do
           is_map_key(n, "disposition") or get_in(n, ["shop", "buy_discount", "friendly"]) == true
         end)
 
-    has = fn f -> Enum.any?(npcs, fn {_, n} -> is_map_key(n["disposition"] || %{}, f) end) end
-
-    min =
-      cond do
-        has.("arrest") -> [1, 105]
-        has.("refuse") -> [1, 104]
-        true -> [1, 47]
-      end
-
-    if used and api < min,
+    if used and api < min_api(npcs),
       do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least", %{})],
       else: []
+  end
+
+  defp min_api(npcs) do
+    has = fn f -> Enum.any?(npcs, fn {_, n} -> is_map_key(n["disposition"] || %{}, f) end) end
+
+    cond do
+      has.("arrest") -> [1, 105]
+      has.("refuse") -> [1, 104]
+      true -> [1, 47]
+    end
   end
 end
