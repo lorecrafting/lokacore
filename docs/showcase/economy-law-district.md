@@ -41,6 +41,8 @@ both are built, and plan 6's slice checks it). The hub pin's exit count rises by
   [seam 6](../decisions/owner-decision-realm-seams-2026-10-13.md#the-seams) asks.
 - Replenish `shelf {items: [candle_01..05], from: crate, to: chandler, cap: 3, count: 1, every:
   3600}` (`replenish_sampler`; the crate sits in the sealed `storeroom`).
+- Items: `beeswax_candle` (one instance, id `beeswax_candle`, held by the chandler, not in the
+  shelf set) and `merchant_purse` (one instance, held by the merchant).
 - `world.levelling.kills`: none; nobody here can be killed (below).
 
 ## Rooms and map
@@ -120,7 +122,7 @@ Any day; fresh world at 07:00 day 1, pennies 10. T is the clock of the commissio
 | 7 | Alley: Sell the purse to the fence; Take it back. Market: Buy `beeswax_candle`. Alley: Sell it to the fence. Market: Sell it to the chandler; Sell her the set candle from step 3. | Pennies 5, the fence holds the purse (`stolen` stays true); the Take: `permission_denied`. The beeswax at 2: pennies 3; to the fence: `invalid_state` (clean); to the chandler at 1: pennies 4; the set candle at 1: pennies 5, she holds four set candles and the price reads 1. | fence x stolen provenance x get lock |
 | 8 | Counting house: `buy_strongroom`; Take the key; south from the undercroft: Unlock, Open, south; Put the knife in the chest; Take it; Close and Lock from inside. | Pennies 0, `owns_strongroom` true, the key held; Unlock and Open accepted, the room entered; Put and Take accepted; the door locked again behind. A fresh world without the purchase: the key `permission_denied`, the door `exit_locked`, and a forged move south with the door open is `permission_denied` (the enter lock, checked after the barrier). | property x locks x key barrier |
 | 9 | Branch from step 5 (pennies 2, not hidden): Take `merchant_purse` beside the guard; leave south and come back north; Flee; alley: Sell the purse; counting house: `pay`; north again. | Line `theft.seen`, kinds end `custom_event theft_seen` (subject the thief), `fact_changed wanted`; `wanted` true. Re-entering the market: `engage` opens an encounter (G11); his blow is chance 0; Flee leaves by south or north (two candidates). The fence pays 3 (pennies 5). `clerk_fine` opens only while wanted; `pay`: pennies 2, `wanted` false; the market again: no engage, the guard's room line is the base. | theft x wanted x disposition x fine |
-| 10 | Branch from step 7's end (pennies 5): Take `beeswax_candle` from the chandler's Held list, unhidden; alley: Sell it to the fence. | Seen (alertness 2 beats stealth 0 or 1): `wanted` true, the beeswax held with `stolen` true; the set price still reads 1 (four held; the beeswax is not in the set); the fence buys it at 2: pennies 7, the fence's pennies 1. | theft x stock prices |
+| 10 | Branch from step 7's end (pennies 5): Take `beeswax_candle` from the chandler's Held list (step 6's `hidden` may still run); alley: Sell it to the fence. | Seen either way (her alertness 2 is above stealth 1, so she sees through `hidden` and notices): `wanted` true, the beeswax held with `stolen` true; the set price still reads 1 (four held; the beeswax is not in the set); the fence buys it at 2: pennies 7, the fence's pennies 1. | theft x stock prices |
 
 Sandbox `vault_yard`: a purse to lift in the watchman's sight or from behind the barrels, a fine to
 pay for, a chest only a strongroom owner opens, and a one-candle shelf that refills from its crate
