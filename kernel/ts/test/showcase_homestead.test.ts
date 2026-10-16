@@ -93,7 +93,8 @@ test('homestead 1: west from fell_gate, the sign, the skill tree', () => {
 });
 
 // Breaks: a lesson not taught, the paid carving lesson offered before whittling 2, the hidden
-// joinery choice listed, or a forged carving choose admitted (hs-14).
+// joinery choice listed, carpentry open at woodcutting 1, or a forged carving choose admitted
+// (hs-14).
 test('homestead 2: the two free lessons; carving offered but unavailable; take the kit', () => {
   w = note(go(w, 'west')).world;
   assert.equal(here(w), room(w, 'carpenter_shop'));
@@ -108,6 +109,7 @@ test('homestead 2: the two free lessons; carving offered but unavailable; take t
   ]);
   w = note(choose(w, 'whittling')).world;
   w = note(choose(w, 'woodcutting')).world;
+  assert.deepEqual(choices(w)[0], ['carpentry', false]); // woodcutting 1, one under the gate
   const forged = note(act(w, { type: 'choose', choice_id: 'carving', continuation_id: cont(w) }));
   assert.equal(forged.decision.kind, 'rejected');
   assert.equal((forged.decision as { error: { code: string } }).error.code, 'invalid_state');
@@ -169,8 +171,8 @@ test('homestead 4: carving for 2 pennies; joinery appears', () => {
 });
 
 // Breaks: a chop yields no log or more than one, woodcutting does not grow, carpentry taught
-// before woodcutting 2, a saw consumes the wrong count or yields no timber, or a third saw with
-// no logs admitted.
+// before woodcutting 2, a saw consumes the wrong count or yields no timber, the timbered raise
+// admitted at carpentry 1, or a third saw with no logs admitted.
 test('homestead 5: chop four logs, learn carpentry, saw two timbers', () => {
   w = walk(w, 'east', 'south', 'west');
   assert.equal(here(w), room(w, 'glade'));
@@ -188,6 +190,11 @@ test('homestead 5: chop four logs, learn carpentry, saw two timbers', () => {
   for (const level of [1, 2]) {
     w = play(w, { type: 'perform', action: 'saw' }).world;
     assert.equal(tree(w).find(([k]) => k === 'carpentry')![1], level);
+    // carpentry 1, one under the raise's gate: its policy fails before the timber count
+    if (level === 1)
+      assert.deepEqual(offer(walk(w, 'east'), 'raise_timbered_hut').reason, {
+        code: 'invalid_state',
+      });
   }
   assert.equal(held(w), 0);
   assert.equal(logs.filter((l) => where(w, l) === room(w, 'woodpile')).length, 8);
@@ -196,12 +203,18 @@ test('homestead 5: chop four logs, learn carpentry, saw two timbers', () => {
 });
 
 // Breaks: the woodpile's eight logs not the chop's cap (a ninth chop admitted, or the eighth
-// refused).
+// refused), or carpentry not open at exactly woodcutting 2.
 test('homestead 5 boundary: the eighth chop yields, the ninth is refused', () => {
   let x = walk(fresh(WORLD), 'north', 'west', 'west');
   x = choose(choose(talk(x, 'carpenter').world, 'woodcutting').world, 'leave').world;
-  x = walk(take(x, 'axe'), 'east', 'south', 'west');
-  for (let i = 0; i < 8; i++) x = play(x, { type: 'perform', action: 'chop' }).world;
+  x = play(walk(take(x, 'axe'), 'east', 'south', 'west'), {
+    type: 'perform',
+    action: 'chop',
+  }).world;
+  x = talk(walk(x, 'east', 'north', 'west'), 'carpenter').world;
+  assert.deepEqual(choices(x)[0], ['carpentry', true]); // woodcutting 2: the gate exactly
+  x = walk(shut(x), 'east', 'south', 'west');
+  for (let i = 1; i < 8; i++) x = play(x, { type: 'perform', action: 'chop' }).world;
   assert.equal(where(x, id(x, 'item', 'log_08')), x.body);
   assert.equal(refused(x, { type: 'perform', action: 'chop' }), 'invalid_state');
 });
