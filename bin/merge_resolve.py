@@ -133,7 +133,7 @@ for f in conflicted:
         with open(f) as fh:
             try:
                 merged = RULES[f](fh.read())
-            except subprocess.CalledProcessError:  # a missing stage: modify/delete, add/add
+            except (subprocess.CalledProcessError, ValueError):  # a missing stage, or a side that is not the expected JSON text: modify/delete, add/add
                 merged = None
         if merged is None:
             left.append(f)
