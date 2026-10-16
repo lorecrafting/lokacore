@@ -1082,3 +1082,7 @@ GameView `storylet` names the one place action the [storylet deck](mechanics.md#
 Skills without profession keep today's acquired lines. After the xp line and before the Raise cards, each profession in first-listed order is a SectionTitle, then its listed boxes in GameView order: acquired as body text "Whittling, level 2 — qualified; <requirement>" (", level N" only when projected); locked as a Note "Carving — locked; <requirement>"; any other unacquired box as a Note "Joinery — not learned; <requirement>" (the same Note). The Book draws only listed skills: a hidden box and an empty profession draw nothing.
 
 An NPC's lesson line reads `locked` in place of `not learned` while the skill's projected `locked` is true (proposed, pending designer approval, loka-kgd.108.11).
+
+## Mount details
+
+Riding shows nowhere but the horse's saddled description variant and the mv fare; a non-road exit while mounted is the ordinary barred exit ("East: not now", no Go). No indicator, icon or status line text. Action choice labels are bare imperatives without a trailing period.

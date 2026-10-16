@@ -11,8 +11,8 @@
   "npc.horse.room": "A [[horse|horse]] waits here.",
   "npc.horse.description": "A patient bay horse with a worn saddle.",
   "dialogue.horse.prompt": "The horse flicks an ear at you.",
-  "dialogue.horse.mount": "Mount the horse.",
-  "dialogue.horse.dismount": "Dismount.",
+  "dialogue.horse.mount": "Mount the horse",
+  "dialogue.horse.dismount": "Dismount",
   "narration.horse.mount": "You swing up into the saddle.",
   "narration.horse.dismount": "You slide down from the saddle.",
   "npc.horse.saddled": "The bay horse stands under you, saddled."
