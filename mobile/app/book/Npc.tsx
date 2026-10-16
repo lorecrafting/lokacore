@@ -81,21 +81,14 @@ export function NpcPage(p: NpcProps) {
   const cards = actions.filter((b) => b.command !== 'use_service');
   const { talk, answer, foot } = conversation(p, choice);
   const log = talk ? p.log : p.log.slice(p.since ?? 0);
-  // What a living NPC holds (Held, book-ui.md Item details): Take on it is the steal (row 33).
-  const contents = p.npc
-    ? things(p.view).filter((e) => 'container_id' in e && e.container_id === p.npc?.id)
-    : [];
+  const contents = held(p);
   return (
     <Page
       title={p.npc ? cap(p.text(p.npc.name)) : 'Conversation'}
       scrollToEnd={log.length > 0}
       foot={foot}
     >
-      {p.npc?.description && <Text style={prose(c)}>{plain(p.text(p.npc.description))}</Text>}
-      {p.npc && 'asides' in p.npc && <Asides keys={p.npc.asides} text={p.text} />}
-      {p.npc && 'carrying' in p.npc && p.npc.carrying && (
-        <Text style={note(c)}>{p.text(p.npc.carrying)}</Text>
-      )}
+      {about(c, p)}
       <LogLines lines={log} />
       {npcSkills(c, p)}
       {!talk && enemy && (
@@ -143,6 +136,20 @@ const conversation = (p: NpcProps, choice?: NonNullable<GameView['choice']>) => 
 };
 
 // The skills this NPC teaches: learned or not, and whether the player qualifies now.
+// What a living NPC holds (Held, book-ui.md Item details): Take on it is the steal (row 33).
+const held = (p: NpcProps) =>
+  p.npc ? things(p.view).filter((e) => 'container_id' in e && e.container_id === p.npc?.id) : [];
+
+const about = (c: Palette, p: NpcProps) => (
+  <>
+    {p.npc?.description && <Text style={prose(c)}>{plain(p.text(p.npc.description))}</Text>}
+    {p.npc && 'asides' in p.npc && <Asides keys={p.npc.asides} text={p.text} />}
+    {p.npc && 'carrying' in p.npc && p.npc.carrying && (
+      <Text style={note(c)}>{p.text(p.npc.carrying)}</Text>
+    )}
+  </>
+);
+
 export const npcSkills = (c: Palette, p: NpcProps) =>
   p.view.skills
     ?.filter(
