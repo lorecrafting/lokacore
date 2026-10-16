@@ -100,12 +100,12 @@ export function AwayRecap({
   lines,
   heading = LABEL.awayRecap,
   open: first = false,
-  ink = () => true,
+  milestone = () => false,
 }: {
   lines: readonly RecapLine[];
   heading?: string;
   open?: boolean;
-  ink?: (line: string) => boolean; // the Chronicle: ordinary lines dim, a milestone's in ink
+  milestone?: (line: string) => boolean; // the Chronicle: a story point's line in body type
 }) {
   const c = usePalette();
   const [open, setOpen] = useState(first);
@@ -115,11 +115,18 @@ export function AwayRecap({
         <Text style={{ ...type.log, color: c.dim, ...type.italic }}>{heading}</Text>
       </Tap>
       {open &&
-        lines.map(({ line, count }, i) => (
-          <Text key={i} style={{ ...type.log, color: ink(line) ? c.fg : c.dim }}>
-            {count > 1 ? `${line} (${count} times)` : line}
-          </Text>
-        ))}
+        lines.map(({ line, count }, i) => {
+          const shown = count > 1 ? `${line} (${count} times)` : line;
+          return milestone(line) ? (
+            <Text key={i} style={prose(c)} accessibilityLabel={`${shown}, story point`}>
+              {shown}
+            </Text>
+          ) : (
+            <Text key={i} style={{ ...type.log, color: c.fg }}>
+              {shown}
+            </Text>
+          );
+        })}
     </View>
   );
 }

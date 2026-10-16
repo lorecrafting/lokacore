@@ -123,7 +123,7 @@ export const JournalLoreRefused: StoryObj = {
   },
 };
 // Toolbox row FD6: the Chronicle (book-ui.md, Chronicle details) under the Journal; the latest day
-// open, earlier days collapsed, a story-point line in ink. Lines are the recap sampler's narration.
+// open, earlier days collapsed, a story-point line in body type. Lines are the recap sampler's narration.
 const TICK = 'The poison burns in your veins.';
 const chronicleStory = (name: string, chronicle: object[]): StoryObj => ({
   ...pageStory({ ...JournalView, chronicle }),
@@ -159,7 +159,7 @@ export const JournalChronicleDays: StoryObj = {
   ]),
   play: async ({ canvas }) => {
     await canvas.findByRole('button', { name: 'Day 1, show' });
-    await canvas.findByText('You find the lost child.');
+    await canvas.findByLabelText('You find the lost child., story point');
     if (canvas.queryByText(`${TICK} (11 times)`)) throw new Error('earlier day open');
   },
 };

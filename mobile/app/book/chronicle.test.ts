@@ -5,6 +5,7 @@ import { compiled } from '../../authority/local-story/__tests__/compiled.ts';
 import { book } from './__tests__/polish-book.test.ts';
 import { CONTENTS } from './__tests__/control.test.ts';
 import { LABEL } from './labels.ts';
+import { type } from './tokens.ts';
 
 const bundle = compiled('cartridges/recap_sampler');
 const TICK = 'The poison burns in your veins.';
@@ -53,8 +54,9 @@ const after = (shown: string[], from: string, to?: string) =>
   shown.slice(shown.indexOf(from) + 1, to ? shown.indexOf(to) : undefined);
 
 // Breaks: days merge (day 7's dart counted with day 1's), out of order, or the wrong day opens;
-// a milestone is marked on another day's same line; a count or first-seen order is wrong.
-test('the Chronicle: days ascending, the latest open, each day grouped; a milestone in ink', () => {
+// a milestone is marked on another day's same line; a count or first-seen order is wrong; the
+// Journal still says Nothing written yet over a Chronicle.
+test('the Chronicle: days ascending, the latest open, each day grouped; a milestone marked', () => {
   const b = journal();
   let shown = b.text();
   assert.deepEqual(after(shown, LABEL.chronicle, 'Back to World'), [
@@ -74,16 +76,22 @@ test('the Chronicle: days ascending, the latest open, each day grouped; a milest
     'The chill passes.',
     'The poison fades from your blood.',
   ]);
-  const color = (line: string) =>
-    b.draw().find((x) => x.type === 'Text' && x.props.children === line && x.props.style.color)
-      ?.props.style.color;
-  const ink = b
-    .draw()
-    .find((x) => x.props?.accessibilityRole === 'header' && x.props.children === LABEL.chronicle)
-    .props.style.color;
-  assert.equal(color(TICK), ink); // day 7's milestone line
-  assert.notEqual(color(`${TICK} (11 times)`), ink); // day 1's ticks: no story point there
-  assert.notEqual(color(DART), ink);
+  const style = (line: string) =>
+    b.draw().find((x) => x.type === 'Text' && x.props.children === line)?.props;
+  // Day 7's milestone line in body type, named as a story point; day 1's ticks (no story point
+  // there) and the dart stay log lines.
+  assert.deepEqual(
+    [style(TICK), style(`${TICK} (11 times)`), style(DART)].map((x) => [
+      x.style.fontSize,
+      x.accessibilityLabel,
+    ]),
+    [
+      [type.body.fontSize, `${TICK}, story point`],
+      [type.log.fontSize, undefined],
+      [type.log.fontSize, undefined],
+    ],
+  );
+  assert.ok(!shown.includes('Nothing written yet.')); // a Chronicle day is something written
 });
 
 // Break: a story without narration shows an empty Chronicle heading or loses the empty-Journal note.

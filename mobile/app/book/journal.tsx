@@ -20,9 +20,12 @@ type JournalProps = Parameters<typeof LoreDetails>[0] & {
 export function JournalPage(p: JournalProps) {
   const { view, text } = p;
   const c = usePalette();
+  const [days] = useState(p.chronicle); // read once as the Journal opens, never live
   return (
     <Page title="Journal" foot={<Control label={LABEL.backToWorld} onPress={p.world} />}>
-      {view.journal.length === 0 && !view.topics?.length && <Note>Nothing written yet.</Note>}
+      {!view.journal.length && !view.topics?.length && !days.length && (
+        <Note>Nothing written yet.</Note>
+      )}
       {view.journal.map((q) => (
         <View key={`${q.quest.cartridge_id}@${q.quest.cartridge_version}:${q.quest.key}`}>
           <Text style={prose(c)}>{text(q.title)}</Text>
@@ -46,7 +49,7 @@ export function JournalPage(p: JournalProps) {
         </View>
       ))}
       <LoreDetails {...p} />
-      <Chronicle chronicle={p.chronicle} />
+      <Chronicle days={days} />
     </Page>
   );
 }
@@ -103,9 +106,8 @@ const patrolNext = (p: Patrol, text: (t: Patrol['leader_name']) => string) =>
           ? `Next: ${text(p.next_title)}.`
           : '';
 
-/** The Chronicle (book-ui.md, Chronicle details): read once as the Journal opens, never live. */
-function Chronicle(p: { chronicle: () => readonly ChronicleDay[] }) {
-  const [days] = useState(p.chronicle);
+/** The Chronicle (book-ui.md, Chronicle details). */
+function Chronicle({ days }: { days: readonly ChronicleDay[] }) {
   if (!days.length) return null;
   return (
     <>
@@ -116,7 +118,7 @@ function Chronicle(p: { chronicle: () => readonly ChronicleDay[] }) {
           heading={`${LABEL.day} ${d.day}`}
           open={i === days.length - 1}
           lines={d.lines}
-          ink={(line) => d.milestones.has(line)}
+          milestone={(line) => d.milestones.has(line)}
         />
       ))}
     </>

@@ -60,6 +60,7 @@ export function narration(s: Story, command_id?: string): NarrationRecord | unde
  * if a long save makes it slow.
  */
 export function chronicle(s: Story): ChronicleEntry[] {
+  if (s.db.isInTransactionSync()) return []; // its rows may be uncommitted (03 §15)
   const { day } = units(s.world.cartridge);
   let clock = s.fresh.state.clock;
   const entries: ChronicleEntry[] = [];
