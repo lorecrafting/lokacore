@@ -1,11 +1,12 @@
 // The NPC page: conversation, choices, skills, shop and services, with the existing book controls.
 import { Text, View } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
-import { absent, cap, plain, why, type group, type Page as Route } from './model.ts';
+import { absent, cap, plain, things, why, type group, type Page as Route } from './model.ts';
 import type { Button, DetailLine, presenter } from './presenter.ts';
 import { ActionCard, Cards } from './actions.tsx';
 import { Asides, LogLines, Note } from './lines.tsx';
 import { Control, Page, type Thing } from './pages.tsx';
+import { inside } from './Menu.tsx';
 import { note, prose, usePalette, type Palette } from './palette.ts';
 import { Riddle } from './Riddle.tsx';
 import { space } from './tokens.ts';
@@ -67,6 +68,7 @@ type NpcProps = {
   since?: number; // outside a conversation, history before this line is hidden (owner 2026-10-09)
   talking?: boolean; // the Book's latch: answered here and not yet left (Book holds it)
   talk?: (on: boolean) => void;
+  open: (id: string) => void;
 };
 
 export function NpcPage(p: NpcProps) {
@@ -79,6 +81,10 @@ export function NpcPage(p: NpcProps) {
   const cards = actions.filter((b) => b.command !== 'use_service');
   const { talk, answer, foot } = conversation(p, choice);
   const log = talk ? p.log : p.log.slice(p.since ?? 0);
+  // What a living NPC holds (Held, book-ui.md Item details): Take on it is the steal (row 33).
+  const contents = p.npc
+    ? things(p.view).filter((e) => 'container_id' in e && e.container_id === p.npc?.id)
+    : [];
   return (
     <Page
       title={p.npc ? cap(p.text(p.npc.name)) : 'Conversation'}
@@ -95,7 +101,9 @@ export function NpcPage(p: NpcProps) {
       {!talk && enemy && (
         <Note>{enemy.refusal ? p.text(enemy.refusal) : refused(cap(p.text(enemy.name)))}</Note>
       )}
-      {!talk && !enemy && !actions.length && !log.length && <Note>Nothing to do here.</Note>}
+      {!talk && !enemy && !actions.length && !log.length && !contents.length && (
+        <Note>Nothing to do here.</Note>
+      )}
       {!talk && !enemy && <ShopOptions {...p} />}
       {choice && <Choice {...p} press={answer} choice={choice} />}
       {!talk && (
@@ -106,6 +114,7 @@ export function NpcPage(p: NpcProps) {
           <ServiceOptions {...p} actions={actions} />
         </Cards>
       )}
+      {!talk && inside({ thing: p.npc, contents, text: p.text, open: p.open })}
     </Page>
   );
 }
@@ -204,6 +213,7 @@ export function NpcDetail(p: {
   talkingOn?: Route; // Body's conversation latch
   talkOn?: (page?: Route) => void;
   visit?: Route; // this opening of the page (Body's page entry)
+  open: (page: Route) => void;
 }) {
   const { view, text } = p.screen;
   const npc = view.entities.find((e) => e.id === (p.speaker ?? view.choice?.speaker_id));
@@ -220,6 +230,7 @@ export function NpcDetail(p: {
       since={p.visit && past.get(p.visit)}
       press={(b) => p.press(b, id)}
       leave={p.world}
+      open={(thing) => p.open({ kind: 'thing', id: thing })}
       talking={!!p.visit && p.talkingOn === p.visit}
       talk={(on) => {
         if (!on && p.visit) past.set(p.visit, log.length);
