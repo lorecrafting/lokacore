@@ -69,6 +69,7 @@ function mounted(initial: GameView, recovered?: ReturnType<Game['lastNarration']
         'combat.result': 'The marsh rat falls.',
         'combat.flee': 'You escape to the road.',
         'combat.death': 'You wake at the shrine.',
+        'road.crows': 'Crows lift off the road.',
       })[key],
     invoke: () => respond(),
     pending: () => pending,
@@ -129,7 +130,7 @@ function mounted(initial: GameView, recovered?: ReturnType<Game['lastNarration']
         } as never;
       listener?.({ kind: 'state', projection: projection(), status: { kind: 'ready' } });
     },
-    answer: (reply: any, next = current, line?: string) => {
+    answer: (reply: any, next = current, line?: string, ambient?: string) => {
       respond = () => {
         current = next;
         revision++;
@@ -137,7 +138,7 @@ function mounted(initial: GameView, recovered?: ReturnType<Game['lastNarration']
         if (line)
           last = {
             command_id: `commit-${revision}`,
-            lines: [{ key: line }],
+            lines: [{ key: line }, ...(ambient ? [{ key: ambient }] : [])],
             combat_lines: [0],
           } as never;
         return reply;
@@ -252,13 +253,20 @@ test('Attack opens its committed page; pending and refused Flee stay until commi
       combat: undefined,
       place: { id: 'road', title: { key: 'road.title' }, description: { key: 'road.description' } },
     });
-    h.answer(accepted('fled', 'combat.flee'), road, 'combat.flee');
+    // Break (review of #406): a pressed closure's non-combat line (here an arrival room event)
+    // lands in the World log instead of the ended Combat page (book-ui.md, Closure).
+    h.answer(accepted('fled', 'combat.flee'), road, 'combat.flee', 'road.crows');
     h.tap('Flee');
-    assert.ok(h.texts().includes('Combat') && h.texts().includes('You escape to the road.'));
+    assert.ok(h.texts().includes('Combat'));
+    assert.ok(h.texts().includes('You escape to the road. Crows lift off the road.'));
     h.tap('Back to World');
     assert.equal(h.texts().includes('Combat'), false);
     assert.ok(h.texts().includes('The road'));
     assert.equal(h.texts().includes('You escape to the road.'), false);
+    assert.equal(
+      h.texts().some((t) => t.includes('Crows')),
+      false,
+    );
     assert.equal(h.texts().includes('You strike the marsh rat.'), false);
     assert.equal(h.texts().includes("You can't do that: locked."), false);
   } finally {

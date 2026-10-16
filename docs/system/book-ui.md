@@ -466,7 +466,9 @@ only to the combat page and its retained history, never the World room event log
 the engage line, closure, death, Flee and reopening a save after any of them. Routing uses
 structured committed receipt metadata (an encounter present after the receipt that the settled
 pre-command view lacked, or gone after it), never rendered prose; ordinary room events remain
-in the World log even when delivered in the same receipt as combat. This replaces the earlier
+in the World log even when delivered in the same receipt as combat, except the closing receipt,
+whose lines all stay on the ended page (the arrival room's description after a Flee or inn
+return reads there, once). This replaces the earlier
 persistent bottom strip; see the [owner combat-page decision](../decisions/owner-decision-m6-a-combat-pane-2026-10-04.md).
 
 ## Letter-bank riddle details

@@ -3,6 +3,7 @@
 import type { Game, GameView, Reply } from '../../packages/game-view/session.ts';
 import { comings, given, replyLine } from './words.ts';
 import {
+  closing,
   combatResult,
   detailLines,
   narrationLines,
@@ -66,7 +67,9 @@ export function received(game: Game, reply: Reply, was: GameView, s: Logs, text:
   if (s.fault && combatResult(accepted)) return '';
   const repeated = retained && retained.command_id === s.narrationId;
   if (retained) s.narrationId = retained.command_id;
-  const routed = retained ? narrationLines(retained, now, text) : undefined;
+  const routed = retained
+    ? narrationLines(was.combat && !now.combat ? closing(retained) : retained, now, text)
+    : undefined;
   const taken = pickupLine(retained, text);
   // Empty routed combat narration deliberately stays out of World after escape.
   const fallback = fallbackLine(itemChanged, accepted, attempt);
