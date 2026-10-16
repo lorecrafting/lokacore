@@ -212,6 +212,11 @@ polish stage which needs me at the computer for a bit."
 - E2 review (#409) APPROVE WITH NOTES: the Book NPC page never listed an NPC's Held items, so stealing worked only in
   tests, not in the Book. Fix round running (reuse the existing Held list; text nits; main merged in). Stuck-wanted
   filed as loka-y6yg.33 (fix with the arrest switch loka-y6yg.32). Law playtest waits for the Held fix.
+- M15 briefs drafted (Fable). PM rulings: letters by job stay OUT (the 2026-10-15 record over the 2026-10-14 note;
+  OWNER: confirm); a death never costs a level, only experience above the level's threshold (OWNER FYI); item drop =
+  items "corpse" or "kept"; notes are one row per character (caps 32 notes, 64 pins, 160/40 characters); pins only
+  where you stand in a visited room; the Chronicle shows for every cartridge. kernel_api 1.109 (47), 1.110 (G10 notes,
+  save-adjacent: review + second opinion). Rows 47 and FD6 building in parallel; G10 engine, then G10 Book.
 
 ## Owner answers this session
 
