@@ -109,17 +109,12 @@ function refusals(b: Obj) {
       full: 'service.construction_full',
       ...(b.escrow && { headroom: 'service.order_open', inputs: 'service.missing_inputs' }),
     };
-  if (kind === 'mend')
+  if (kind === 'mend' || kind === 'raze')
     return {
       payment: 'service.unaffordable',
-      target: 'service.nothing_to_mend',
+      target: `service.nothing_to_${kind}`,
+      ...(kind === 'raze' && { occupied: 'service.occupied' }),
       ...(b.escrow && { inputs: 'service.missing_inputs' }),
-    };
-  if (kind === 'raze')
-    return {
-      payment: 'service.unaffordable',
-      target: 'service.nothing_to_raze',
-      occupied: 'service.occupied',
     };
   if (ordered(b))
     return {

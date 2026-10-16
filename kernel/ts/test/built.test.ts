@@ -1,3 +1,4 @@
+// size: allow 623, the Built rooms S2 to S5 cases share one build_sampler fixture and helpers
 // Built rooms S2 and S3 (mechanics.md Built rooms; save.md Built rooms): build_sampler's carpenter
 // takes two timber and raises the hut north of the lane 7200 s after the order, once the plot is
 // bought; the room is derived from its identity row on every hydrate, and a forged row refuses the load.
