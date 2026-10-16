@@ -111,8 +111,8 @@ Blueprint `hut_timbered`: `max_per_owner 1`, `variants [{when: item_present {tag
 > The Holding. The carpenter west teaches the knife, the axe and the saw, and sells a plain hut if
 > you would rather pay than learn; the stakes by this sign mark where a hut goes, and only one goes
 > there. Carve sticks till your hand is steady and she will teach you carving; fell the oak in the
-> glade twice and she will teach you the saw. Two timbers raise a hut, and a cot dropped in it makes
-> a night's rest worth more. The farmer south likes an apple and not a dead rat, and trades a knife
+> glade twice and she will teach you the saw. Two timbers raise a hut, and a rug laid in it warms the
+> boards. The farmer south likes an apple and not a dead rat, and trades a knife
 > for two pelts without a penny passing. The pond east of her yard bites by the hour and the weather;
 > the cook south of the yard turns two fish into a stew for a penny, or teaches you to do it at her
 > hearth. Up the croft is the same again with hens in it.
