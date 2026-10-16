@@ -50,7 +50,7 @@ cellars." (`combat-district.md`'s `sign_combat` text; combat 1 pins the key, not
 | Room | Exits | Holds |
 |---|---|---|
 | `sapper_stair` (sign) | up `drill_yard`, north `plate_passage`, east `lever_hall`, down `sapper_cellar` | detail `sign_traps`; detail `flagstones` (aliases `flagstones`, `plate`; `rating` 1; description variants on `plate_found` and `plate_disarmed`, `traps_sampler/rooms/antechamber.json`) |
-| `plate_passage` | south `sapper_stair`, north `chief_den` | `sapper_note` (readable, no topic: "Third, then first, then second.") |
+| `plate_passage` | south `sapper_stair`, north `chief_den` | `sapper_note` (readable, no topic: "First, then second, then third.") |
 | `lever_hall` | west `sapper_stair`, north `lever_vault` through `lever_door`, east `dial_vault` through `dial_door` | details `lever_a`, `lever_b`, `lever_c` (alias `lever`), `wheel_1`, `wheel_2`, `wheel_3` (alias `wheel`, one description variant per digit 1 to 9; `puzzles_sampler/rooms/hall.json`) |
 | `lever_vault` | south `lever_hall` through `lever_door` | `vault_slate` (readable: "Three. One. Two.") |
 | `dial_vault` | west `lever_hall` through `dial_door` | `bitters_skin` (vessel, 2 doses of `bitters`) |
@@ -93,9 +93,8 @@ equals 3, wheel_2 equals 1, wheel_3 equals 2)` (`puzzles_sampler/barriers`).
   red control: `lever_b_reset` (`on action_completed {action: pull_b}`, `when not(lever_stage
   equals 1)`, assign 0), `lever_b_step` (same trigger, `when lever_stage equals 1`, assign 2),
   `lever_c_reset` (`when not(lever_stage equals 2)`, assign 0), `lever_c_step` (`when lever_stage
-  equals 2`, assign 3). The order is C, A, B? No: the note says third, first, second, and the
-  developer names the levers so that the solving order is `lever_c`, `lever_a`, `lever_b`; the
-  reactions above are written for whichever lever is first, second and third.
+  equals 2`, assign 3). The solve order is `lever_a`, `lever_b`, `lever_c`: `pull_a`'s recipe sets
+  stage 1 and so always restarts the order.
 - Wheels: `turn_wheel_n` (alias `turn`, success `event.emit wheel`); reactions `wheel_n_turn`
   (`on action_completed {action: turn_wheel_n}`, `fact.adjust wheel_n +1`) then `wheel_n_wrap`
   (`when wheel_n equals 10`, assign 0), the wrap keyed after the turn (`puzzles_sampler/reactions`).
@@ -124,7 +123,7 @@ except where a step says so, so T is also the clock through step 6.
 | 2 | `search_floor`; `disarm_plate` once. | `plate_found` true, the flagstones' found variant. The disarm fails (disarm 0 against 1): `check_failed`, then `plate_bites`: `poisoned` applied (generation 1, `ends_at` T + 7200), its line, the Conditions line shows Poisoned and `cues` lists the smell from the player's own room; `plate_sprung` still false; hp 10. | traps x statuses; senses x traps |
 | 3 | `disarm_plate` again. | Success (disarm 1 after one use, growth `[1]`): `plate_disarmed` true, the disarmed variant; a third `disarm` is `invalid_state`. | traps x skill growth |
 | 4 | North into `plate_passage`; take and read `sapper_note`. | No status change (`plate_disarmed` true); `plate_sprung` false; the note's text. | |
-| 5 | Back south, east; `pull_a`, `pull_c` (wrong order); then `pull_c`, `pull_a`, `pull_b`; Open north; read `vault_slate`. | After `pull_a`, `pull_c`: `lever_stage` 0 and Open north `invalid_state`. After C, A, B: 3, Open north `opened`, the slate's text. Pulling `lever_c` again now resets to 0 and the open door stays open (a barrier once open stays open; row 26's known limit, named on the slate). | puzzles x barriers |
+| 5 | Back south, east; `pull_a`, `pull_c` (wrong order); Open north; then `pull_a`, `pull_b`, `pull_c`; Open north; read `vault_slate`. | `pull_a` sets 1; `pull_c` fires `lever_c_reset` (1 is not 2: assign 0), then `lever_c_step` reads 0 and does nothing: `lever_stage` 0 and Open north `invalid_state`. After A, B, C: 3, Open north `opened`, the slate's text. Pulling `lever_c` again now resets to 0 and the open door stays open (a barrier once open stays open; row 26's known limit, named on the slate). | puzzles x barriers |
 | 6 | Three turns of `wheel_1`, one of `wheel_2`, one of `wheel_3`; Open east; one more turn of `wheel_3`; Open east; take `bitters_skin`; Drink. | First Open `invalid_state`; wheels `[3, 1, 2]`, Open `opened`; the skin held; Drink ends `poisoned` with no tick (hp 10), one dose left; the Conditions line is empty. Ten turns of one wheel read 0 again (the wrap). | puzzles x barriers; cure x statuses |
 | 7 | Branch from step 1's state (undisarmed): north; north again at once; wait to the next `clock_hour`; south then north. | First entry: `poisoned` (generation 1, `ends_at` entry + 7200), `plate_sprung` true; second entry changes nothing. At the hour `plate_sprung` false; the re-entry refreshes `ends_at` to re-entry + 7200, generation still 1 (row 1: a refresh moves only the end). Left alone from the first entry: ticks at +1800, +3600, +5400 (hp 9, 8, 7), the expired line at +7200. | traps x statuses x reset |
 | 8 | From step 6: north twice to `chief_den` (disarmed plate); `shout begone`; Attack the lower-id goblin; two rounds. | The shout: `afraid` on both goblins (`ends_at` +600), nothing on the chief (immune) or the player; the goblins' room lines read an afraid variant (W6, the developer's words). Round 1: the player hits goblin A (6 to 4); A flees south before its blow. Round 2: B flees before the player strikes. Both stand in `plate_passage` (the disarmed plate is quiet: no `poisoned` row on either), the encounter is `closed`, hp 10. | fear x pack x shout |
@@ -153,7 +152,7 @@ units (7200, 600, the `clock_hour` job); no device clock.
 
 - `kernel/ts/test/showcase_traps.test.ts` traps 1 to 9 as above: the `invalid_state` before the
   search; the failed disarm's generation and `ends_at` and the `cues` entry; the success after one
-  use; `lever_stage` 0 after the wrong order and 3 after C, A, B; wheels `[3, 1, 2]` and the wrap;
+  use; `lever_stage` 0 after the wrong order and 3 after A, B, C; wheels `[3, 1, 2]` and the wrap;
   the cure with no tick; step 7's refresh (generation 1, new `ends_at`) and its tick times; both
   goblins in `plate_passage` with no status row after the shout and after the chief's death; the
   calm control; the hub sign's key unchanged (combat 1 pins the drill yard sign key).
@@ -166,8 +165,8 @@ units (7200, 600, the `clock_hour` job); no device clock.
 
 ## Blind AI playtest focus
 
-Does the player search before walking the passage, or learn by being bitten? Is the lever order
-findable without the note (it should not be)? Does "begone" read as something to shout, from the
+Does the player search before walking the passage, or learn by being bitten? Does the player find
+the note before pulling the levers? Does "begone" read as something to shout, from the
 sign alone? Does the Poisoned line say what it is and how long, in words, without a colour?
 
 ## Matrix cells this plan adds
