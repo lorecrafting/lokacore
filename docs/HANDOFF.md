@@ -38,59 +38,63 @@ writing: see "In flight" below.
 
 ## Lane and next steps
 
-Owner order (2026-10-15, this session; records go in the next decisions PR): **showcase first** (fix
-the open showcase bugs, finish slice D, add districts for the mechanics already built), then **M14**
-(trimmed) and **M15** (trimmed), each with its showcase district, then **UI polish** over the whole
-showcase, then the measuring and balance tools (`loka-kgd.107`), then worldbuilding, then the official
-Chapters 1-3. Storybook polish (`loka-x6t`) stays paused until the polish phase. The PM decides
-mechanics calls itself and records them in Beads notes ([product order record](decisions/owner-decision-product-order-2026-10-15.md)
-is the earlier order; this session's answers refine it).
+Owner order (2026-10-15, refined 2026-10-16): **showcase first**, then M14 (done), M15 (trimmed), then **UI
+polish** over the whole showcase (needs the owner at the computer), then measuring and balance tools
+(`loka-kgd.107`), worldbuilding, Chapters 1-3. Owner 2026-10-16 (paraphrased): the full showcases and
+playtests matter as the foundation for polish; at 95% weekly usage, build ALL remaining showcase work with
+Opus developers and Opus reviewers, then ONE sweeping blind Fable playtest instead of one per district;
+keep going on Opus. Notes and pins (G10) were dropped from M15.
 
-Done this session (01da56d0):
-- #402 (`loka-kgd.108`, Homestead batch B) merged (head b3da3d8a green): kernel_api 1.102 bump
-  `loka-kgd.108.15`; Fable batch review APPROVE WITH NOTES, one fix round, Fable re-check APPROVE; Fable
-  designer approved the Conditions ring text. Slice issues, `loka-x6t.60`, branches and worktrees removed.
-- Settle: Fable briefs stored (`loka-mytp.1`-`.6`, `loka-oxgk.1`-`.2`); settle-1 `narrate` step and
-  settle-2 plan move built and reviewed; settle-3 (charter, smithy, smith; one charter per world) built,
-  reviewed APPROVE, CI green, PARKED on `toolbox/settle-3` (2e346d85) for the Settle expansion. Owner
-  tabled settlements: `loka-mytp`, `loka-oxgk` and settle-3..8 deferred. Townsfolk design (owner):
-  generated townsfolk, role-holders authored, names from an authored list (PM: pick by hash of the entity
-  id, no RNG, no save field); no brief yet.
-- #403 (`loka-mytp.1`/`.2`, narrate and plan-move engine steps, kernel_api 1.103) opened from
-  `toolbox/batch-settle`: Opus review APPROVE WITH NOTES (record `docs/reviews/2026-10-15-pr403-narrate-plan-move-review.md`,
-  cherry-picked), docs fix round done (doc and comment only, PM checked), head f262e3e0.
-- Follow-ups: `loka-kgd.159` (spawn then plan move in one cascade faults). Deferred: `loka-kgd.160`
-  chapter carry-over (rows 48-48c) until a solid Chapter 1 and a Chapter 2; `loka-kgd.161` tabled rows:
-  languages and literacy, public player writing, race objective, pet growth.
-- Retro filed: `loka-aa75`, `loka-gfgr`, `loka-9pio`, `loka-d89z`, `loka-1qa2` (await owner approval).
+Done in session 93636711 (2026-10-15/16): #403-#412 merged (see "Overnight decisions" below): decisions,
+showcase plans 4-7, Book bugs, Homestead H1+H2 and its playtest fixes, economy/law (#409, plan 5), hostile
+refusal (1.104), M14 batch (#412: arrest 1.105, trial, jail, terrain 1.106, asides 1.107, mounts 1.108).
 
-In flight: none (no agent running). #403 CI (ci, book-e2e) was running on f262e3e0 at writing.
+State at writing: no agent running, no open PR of ours (only parked #372). Batch branch
+`toolbox/batch-m15` at d386b7f3 holds row 47 death penalty (1.109, reviewed, record
+`docs/reviews/2026-10-16-m15-47-penalty-review.md`) and FD6 Chronicle (reviewed, fix round done, designer
+approved); hosted CI was running on d386b7f3. No PR opened yet.
 
-Next, in order:
-1. #403: when ci and book-e2e are green on f262e3e0 (`gh run list --commit f262e3e0...`), merge
-   (`gh pr merge 403 --merge --match-head-commit f262e3e094dea50f08d49f84c191a58c1651f702`), then
-   `bin/after_merge.sh 403 loka-mytp.1`, close `loka-mytp.2`, delete `toolbox/settle-1`, `toolbox/settle-2`
-   (local and remote) and `review-403`; KEEP `toolbox/settle-3` (parked). If after_merge removes the
-   batch-settle worktree, fine.
-2. Decisions PR (Sonnet developer, short review): records for this session's owner answers (Settle
-   tabled; generated townsfolk + name list; carry-over deferred; rows tabled; order showcase -> M14 ->
-   M15 -> UI polish); toolbox rows 48-48c and the tabled rows marked deferred; SHOWCASE.md unchanged.
-3. Showcase: fix `loka-y6yg.8`, `.9`, `.15`, `.16`, `.17`; finish slice D `loka-y6yg.4` (in progress:
-   read its notes first). Then a Fable plan for the new districts (Homestead, economy/law, magic/use-on,
-   traps if ready) per docs/SHOWCASE.md "How a batch adds a district", with AI playtest per district.
-4. M14 trimmed (trial, jail, terrain and mounts, companion remarks), M15 trimmed (death penalty, private
-   journal notes and map pins, Chronicle); then UI polish.
-5. Follow-ups: `loka-kgd.108.12`, `.108.13`, `loka-kgd.159`, `loka-trex`, `loka-z4cp`, `loka-x6t.53`,
-   `.54`, `.66`.
-6. Retro items awaiting owner approval: `loka-x3i0`, `loka-59uu`, `loka-z2j2`, `loka-ei7a`, `loka-mluq`,
-   `loka-8zqg`, and this session's five above (PM recommends all).
+Next, in order (all Opus unless marked):
+1. M15 close: check CI on `toolbox/batch-m15` d386b7f3; merge origin/main into it; open the PR (Beads
+   `loka-kgd.170`); one Opus batch review on the head (second look for row 47's contract change; the owner
+   prefers Opus over Fable at this usage); fix; merge; `bin/after_merge.sh <PR> loka-kgd.170`; close
+   `loka-kgd.171`, `loka-kgd.143`.
+2. Economy/law follow-ups, one small content slice off main: the guard arrests and jails instead of
+   engaging (`loka-y6yg.32`, uses rows 35/36) and a way out of wanted for a broke player
+   (`loka-y6yg.33`). Opus review as a PR comment.
+3. Plan 6, magic and use-on district (`docs/showcase/magic-district.md`; Beads: create the build issue
+   under `loka-y6yg`). Split engine-free content into E1/E2-sized slices if the plan is big; Opus dev +
+   Opus review; hub sign adds "a ladder". Watch hosted `sim` time (see lessons).
+4. Plan 7, traps district (`docs/showcase/traps-district.md`), same process, after plan 6 merges.
+5. ONE sweeping blind Fable playtest (`loka-y6yg.34`, brief in its notes: extend it to economy/law, magic
+   and traps plus a hub regression pass). Ask the owner for the usage bar first. Triage: gameplay fixes
+   into one Opus fix slice; UI findings into `loka-x6t` for polish.
+6. Owner: slice D two-save playtest (`loka-y6yg.4`). Then UI polish with the owner.
+
+Optional, owner did not answer: file a future idea for UO-style player killing (PvP needs the Realm; graded
+crime counts; guard zones with pursuit; public criminal status) on top of rows 33/35/36.
 
 Merge mechanics: `bin/pm_merge.sh <batch-worktree> <batch-branch> <slice-branch> <review-branch or the
 sha> "<subject>" <reviewed-sha>` (refuses a non-green sha). It stops on stacked additive conflicts in
 `loader_floors.json`, `mechanics.md`, `MECHANICS-TOOLBOX.md` and the gen files (retro `loka-0fhi`):
 merge by hand, keep both sides, run `elixir bin/contracts.exs`, `bin/review_index.sh`, focused tests,
-push. Batch worktree: `../worktrees.noindex/batch-homestead-b`. `bin/after_merge.sh` now works with the
+push. Make the batch worktree with `git worktree add ../worktrees.noindex/batch-m15 origin/toolbox/batch-m15 -b toolbox/batch-m15` if absent. `bin/after_merge.sh` now works with the
 owner's untracked `scripts/`.
+
+Session lessons (2026-10-16, 93636711):
+- Showcase slices turn hosted CI red on pins outside their own tests (flows.test.ts populations,
+  view_actor.test.ts inn exit count, loader_floors): before marking ready, grep tests for the hub and
+  district counts the slice changes.
+- A content-only change can create a performance cliff: the first concealment status made every
+  visibility check sort all statuses and the hosted `sim` job (10 min) timed out; fixed in
+  `status/shared.ts`. Compare the showcase sim test time with main (77 s) when a slice adds a status.
+- Showcase mutants must edit the compiled hash fixture or recompile: tests read
+  `protocol/fixtures/toolbox_showcase_hash.json`, not the cartridge source (E2 reviewer).
+- The Book NPC page never drew an NPC's Held list (spec said it should): theft worked only in tests.
+  Playtests and Book e2e rows catch what kernel tests cannot.
+- Use `bin/br_create.sh`, never bare `br create` (it writes source_repo_path, the export check refuses).
+- Fable drafted G10 (~300k) that the owner then cut: at high usage, show the owner a descoping matrix
+  before drafting a batch.
 
 Session lessons (2026-10-15, b5fe9338, 8c186cca, fc1e2fd7 and 01da56d0):
 - Designer spawns are Fable, never Sonnet (owner: "wait sonnet should never be a designer, wasn't it
