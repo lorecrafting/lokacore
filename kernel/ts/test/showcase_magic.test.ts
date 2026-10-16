@@ -223,6 +223,7 @@ const statuses = (w: World, k: string) =>
 const types = (r: ReturnType<typeof act>) =>
   r.decision.kind === 'accepted' ? r.decision.events.map((e) => e.payload.type) : [];
 const drop = (w: World, k: string) => play(w, { type: 'drop', item_id: id(w, 'item', k) }).world;
+const why = (r: { decision: unknown }) => (r.decision as { error?: { code: string } }).error?.code;
 const use = (w: World, action: string, target: string, tool: string) =>
   act(w, {
     type: 'perform',
@@ -247,7 +248,7 @@ test('magic 6: the oiled winch opens the crypt; the lantern shows the wight', ()
     [card?.label, card?.target_ids, card?.available],
     ['actions.oil_winch', [id(w, 'item', 'gate_winch'), id(w, 'item', 'oilcan')], true],
   );
-  assert.equal(use(w, 'oil_winch', 'gate_winch', 'loft_bucket').decision.kind, 'rejected');
+  assert.equal(why(use(w, 'oil_winch', 'gate_winch', 'loft_bucket')), 'invalid_target');
   const oil = w.state.liquids?.[id(w, 'item', 'oilcan')];
   const r = use(w, 'oil_winch', 'gate_winch', 'oilcan');
   assert.deepEqual(r.lines, ['narration.oil_winch']);
@@ -268,7 +269,7 @@ test('magic 6: the oiled winch opens the crypt; the lantern shows the wight', ()
       .sort(),
     [id(w, 'item', 'bier'), npc(w, 'wight')].sort(),
   );
-  assert.equal(use(w, 'oil_winch', 'bier', 'oilcan').decision.kind, 'rejected');
+  assert.equal(why(use(w, 'oil_winch', 'bier', 'oilcan')), 'invalid_state');
 });
 
 // Breaks: flamma ignores the wight's fire resistance or its own damage, opens no fight, leaves the
@@ -317,7 +318,7 @@ test('magic 8: the loft bucket quenches the bier; water unchanged; the smoke cle
     [card?.label, card?.target_ids],
     ['actions.quench', [id(w, 'item', 'bier'), id(w, 'item', 'loft_bucket')]],
   );
-  assert.equal(use(w, 'quench', 'bier', 'oilcan').decision.kind, 'rejected'); // water only
+  assert.equal(why(use(w, 'quench', 'bier', 'oilcan')), 'invalid_target'); // water only
   const water = w.state.liquids?.[id(w, 'item', 'loft_bucket')];
   const r = use(w, 'quench', 'bier', 'loft_bucket');
   assert.deepEqual(r.lines, ['narration.quench']);
@@ -328,7 +329,7 @@ test('magic 8: the loft bucket quenches the bier; water unchanged; the smoke cle
     ['spent'],
   );
   assert.equal(cues(w), undefined);
-  assert.equal(use(w, 'quench', 'bier', 'loft_bucket').decision.kind, 'rejected');
+  assert.equal(why(use(w, 'quench', 'bier', 'loft_bucket')), 'invalid_state');
 });
 
 // Breaks: the step-8 load plus the yard's three items is too heavy, shock_on_wet fires without wet (or not at all), the stun does not cure wet and shocked,
