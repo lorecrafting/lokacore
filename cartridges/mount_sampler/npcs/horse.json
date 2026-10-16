@@ -4,6 +4,20 @@
   ],
   "short": "npc.horse.short",
   "room_line": "npc.horse.room",
+  "room_line_variants": [
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "fact_compare",
+          "fact": "riding",
+          "equals": true,
+          "subject": "target"
+        }
+      },
+      "description": "npc.horse.room.saddled"
+    }
+  ],
   "description": "npc.horse.description",
   "room": "yard",
   "mount": {

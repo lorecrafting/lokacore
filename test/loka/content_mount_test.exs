@@ -38,7 +38,9 @@ defmodule Loka.ContentMountTest do
              for(
                k <- ["mount", "dismount"],
                do: edit(talk, ["choices", k, "sequence", Access.at(0), "value"], 1)
-             ), [{"SCHEMA_VIOLATION", "cartridge.world.mount.riding"}]},
+             ) ++
+             [edit(horse, ["room_line_variants", Access.at(0), "when", "root", "equals"], 1)],
+           [{"SCHEMA_VIOLATION", "cartridge.world.mount.riding"}]},
           {[edit("cartridge.json", ["world", "mount", "riding"], "nope")],
            [{"UNRESOLVED_REFERENCE", "cartridge.world.mount.riding"}]},
           {[edit("cartridge.json", ["requires", "kernel_api", "at_least"], "1.107")],
