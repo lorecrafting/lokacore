@@ -32,4 +32,19 @@ Claims rerun: "`openable` matches `concealed`" holds (`skills.ts:38-41`: hidden 
 
 Judged, not findings: a forged row that drops a lesson the player had qualified for only hides an option and grants nothing; where replay runs, replay re-derives the row. A hub reopen copies the narrowed ids, which stay openable. The riddle and topics callers inherit `checkRow`; riddle-save compares the receipt op to the row field for field.
 
-Verdict: **APPROVE WITH NOTES** at 6e540bb7.
+Round 0 verdict at 6e540bb7: APPROVE WITH NOTES.
+
+## Fix re-check at b39793f5
+
+Scope: commits 6e540bb7...b39793f5 only, the code they touch and its direct callers.
+
+| Disposition | Proof |
+|---|---|
+| 1 fixed: direct test `hidden_skill.test.ts:138` | M5 (drop `openable` from `checkRow`, `dialogue-save.ts:117`) now red: the new test fails. M8 (drop `openable` from the receipt check, `dialogue-receipt.ts:62`) red: same test. Unmutated file: exit 0. |
+| 2 fixed: `includes` at `dialogue-save.ts:120` | M7 (drop the `includes` clause) red: the new test fails on the forged `choice_id: 'learn'` row with ids `['whittle']`. |
+
+Dispute (no `includes` on the receipt side, `dialogue-receipt.ts:62`): accepted. The receipt evidence requires `row.choice_id === p.choice_id` (`dialogue-receipt.ts:109`), so membership holds wherever `checkRow` ran on the row. `checkRow` runs before the receipt check in skills-save, riddle-save and topics-save, and in `dialogueSave` for escort and custody cartridges. The deadline callers (`deadline-save.ts:201,273`) do not run `checkRow`, but finding 2 was a nit with nothing granted beyond base, and the general gap of replay behind content gates is already loka-b60.
+
+Worktree clean after the mutants (`git status` empty).
+
+Verdict: **APPROVE** at b39793f5.
