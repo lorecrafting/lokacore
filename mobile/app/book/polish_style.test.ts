@@ -95,3 +95,63 @@ test('asides show as quiet lines after the description, in projected order', asy
   ]);
   assert.deepEqual(notice({ remaining: 2 }).slice(0, 3), ['Door', 'A door.', '~Remaining: 2']);
 });
+
+// Breaks (toolbox row FD10): a present NPC's asides are dropped, shown loud or pressable, out of
+// order, or after the loose items instead of straight after the people; on the NPC's own page,
+// dropped or moved off its description.
+test("an NPC's asides show as quiet lines after the people, before the items", async () => {
+  const { RoomPage } = await import('./pages.tsx');
+  const { NpcPage } = await import('./Npc.tsx');
+  const { Note } = await import('./lines.tsx');
+  const quiet = JSON.stringify(Note({ children: 'x' }).props.style);
+  const flow = (page: any) =>
+    nodes(page)
+      .filter((n) => n.type === 'Text' || n.type === 'Pressable')
+      .map((n) =>
+        n.type === 'Pressable'
+          ? 'TAP'
+          : (JSON.stringify(n.props.style) === quiet ? '~' : '') + words(n),
+      );
+  const npc = (name: string, asides?: object[]) => ({
+    id: name,
+    name,
+    kind: 'npc',
+    actions: [],
+    ...(asides && { asides }),
+  });
+  const r = room('A crypt.');
+  const entities = [
+    { id: 'lamp', name: 'A lamp', kind: 'item', actions: [] },
+    npc('Hal', [{ key: 'Hal mutters.' }, { key: 'Hal [shivers](cold).' }]),
+    npc('Bram', [{ key: 'Bram hums.' }]),
+    npc('Ada'),
+  ];
+  const shown = flow(RoomPage({ ...r, view: { ...r.view, entities } } as any));
+  const at = shown.indexOf('A crypt.');
+  assert.deepEqual(shown.slice(at), [
+    'A crypt.',
+    ...['Hal', 'Bram', 'Ada'].flatMap((n) => ['TAP', `${n} is here.`, n]),
+    '~Hal mutters.',
+    '~Hal shivers.',
+    '~Bram hums.',
+    ...['TAP', 'A lamp is here.', 'A lamp'],
+  ]);
+  const page = (e: object) =>
+    flow(
+      NpcPage({
+        view: { entities: [e] },
+        npc: { ...e, description: 'A hireling.' },
+        text: (key: string) => key,
+        g: { on: () => [] },
+        press: () => {},
+        log: [],
+        leave: () => {},
+        talking: true,
+      } as any),
+    );
+  assert.deepEqual(page(entities[1]).slice(1, 4), [
+    'A hireling.',
+    '~Hal mutters.',
+    '~Hal shivers.',
+  ]);
+});

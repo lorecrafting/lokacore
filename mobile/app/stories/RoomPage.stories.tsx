@@ -14,6 +14,7 @@ import RoomAtNightView from './views/room-at-night.json';
 import RoomRefusalView from './views/room-refusal.json';
 import senses from '../../../cartridges/senses_sampler/text.json';
 import voices from '../../../cartridges/voices_sampler/text.json';
+import remarks from '../../../cartridges/remarks_sampler/text.json';
 
 const meta: Meta = {
   title: 'Pages/Room',
@@ -106,6 +107,30 @@ export const Asides: StoryObj = {
     const prose = canvas.getByText(/Reeds crowd/);
     await expect(
       prose.compareDocumentPosition(aside) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+  },
+};
+
+// A companion remark (toolbox row FD10): a present NPC's aside, worded by the remarks sampler.
+// Breaks: the remark is dropped or drawn after the loose items instead of after the people.
+export const CompanionRemark: StoryObj = {
+  ...pageStory({
+    ...RoomNpcsItemsView,
+    view: {
+      ...RoomNpcsItemsView.view,
+      entities: RoomNpcsItemsView.view.entities
+        .map((e) => (e.kind === 'npc' ? { ...e, asides: [{ key: 'remark.hal.first' }] } : e))
+        .slice(0, 2),
+    },
+  }),
+  args: { words: { 'remark.hal.first': remarks['remark.hal.first'] } },
+  name: 'Companion remark',
+  play: async ({ canvas }) => {
+    const remark = await canvas.findByText(remarks['remark.hal.first']);
+    await expect(remark).toBeVisible();
+    const item = canvas.getByText(/fox drawing/);
+    await expect(
+      remark.compareDocumentPosition(item) & Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();
   },
 };
