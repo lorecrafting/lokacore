@@ -84,10 +84,8 @@ function opened(path: string, choose = false) {
   return p;
 }
 
-// Breaks: a reopen check (dialogue-save.ts checkRow on the resolved row via skills-save.ts, or the
-// choose receipt check in dialogue-receipt.ts) requires every authored choice, so the narrowed row
-// is refused. The pending case reaches neither (no wrong_limit, no custody) and pins only that the
-// receipt replay admits it; the chosen case is the red control for both.
+// Breaks: the row check (dialogue-save.ts checkRow; each case fails alone) or the choose receipt
+// check (dialogue-receipt.ts) requires every authored choice, so the narrowed row is refused.
 test('a talk opened without its concealed lesson reopens, pending and chosen', (t) => {
   const dir = mkdtempSync(join(tmpdir(), 'loka-hidden-skill-'));
   t.after(() => rmSync(dir, { recursive: true, force: true }));
