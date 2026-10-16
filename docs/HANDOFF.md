@@ -6,8 +6,8 @@ the next steps, the standing owner rules that the repo does not yet state, and o
 questions. Rewrite it at each stable checkpoint (a merge, a review verdict, a pushed fix) and before
 the session ends; commit and push it with the Beads export.
 
-Written 2026-10-15 UTC by Claude Code (Opus 5.5) in local session 01da56d0 (after fc1e2fd7), at session end. State at
-writing: see "In flight" below.
+Written 2026-10-16 UTC by Claude Code (Opus 5.5) in local session c5ed3619 (after 93636711). State at writing:
+see "In flight" under Lane and next steps.
 
 ## Start of a session
 
@@ -45,34 +45,39 @@ playtests matter as the foundation for polish; at 95% weekly usage, build ALL re
 Opus developers and Opus reviewers, then ONE sweeping blind Fable playtest instead of one per district;
 keep going on Opus. Notes and pins (G10) were dropped from M15.
 
-Done in session 93636711 (2026-10-15/16): #403-#412 merged (see "Overnight decisions" below): decisions,
-showcase plans 4-7, Book bugs, Homestead H1+H2 and its playtest fixes, economy/law (#409, plan 5), hostile
-refusal (1.104), M14 batch (#412: arrest 1.105, trial, jail, terrain 1.106, asides 1.107, mounts 1.108).
+Done in session c5ed3619 (2026-10-16): #413 (loka-kgd.170, M15 batch: death penalty 1.109 + Chronicle FD6) and
+#414 (loka-y6yg.32/.33, the law guard arrests into a cell with a jail; a broke player works off the fine) merged.
+Owner 2026-10-16 at 98% weekly usage (AskUserQuestion, quoted): "Land in-flight, stop (Recommended)": finish
+#416 and #415, then stop until the weekly reset (Wednesday 05:00 HST).
 
-State at writing: no agent running, no open PR of ours (only parked #372). Batch branch
-`toolbox/batch-m15` at d386b7f3 holds row 47 death penalty (1.109, reviewed, record
-`docs/reviews/2026-10-16-m15-47-penalty-review.md`) and FD6 Chronicle (reviewed, fix round done, designer
-approved); hosted CI was running on d386b7f3. No PR opened yet.
+In flight (update when they land):
+- #416 (loka-y6yg.37, split the hosted sim job into `sim (fresh)` and `sim (showcase)` legs; harness skips the
+  re-check on rejected steps), branch `ci/sim-split`. Opus review: blocker (tee without pipefail hid failures);
+  fix round 1 running. Merge first.
+- #415 draft (loka-y6yg.35, plan 6 magic district), branch `showcase/magic`, worktree `../worktrees.noindex/magic`.
+  M1 (steps 1-5) reviewed APPROVE WITH NOTES; M2 (steps 6-9, attic, Book e2e, M1 fixes, main merged in) building.
+  Owner asked (2026-10-16, quoted): "Please fix the mana pool thing": the Book shows the default `ma 100/100`, not
+  the district's `mana`; M2 renames the pool to `ma` if the loader allows, else a separate Book fix slice before
+  the playtest. Then one Opus review on the M2 head, mark ready, merge after #416.
 
-Next, in order (all Opus unless marked):
-1. M15 close: check CI on `toolbox/batch-m15` d386b7f3; merge origin/main into it; open the PR (Beads
-   `loka-kgd.170`); one Opus batch review on the head (second look for row 47's contract change; the owner
-   prefers Opus over Fable at this usage); fix; merge; `bin/after_merge.sh <PR> loka-kgd.170`; close
-   `loka-kgd.171`, `loka-kgd.143`.
-2. Economy/law follow-ups, one small content slice off main: the guard arrests and jails instead of
-   engaging (`loka-y6yg.32`, uses rows 35/36) and a way out of wanted for a broke player
-   (`loka-y6yg.33`). Opus review as a PR comment.
-3. Plan 6, magic and use-on district (`docs/showcase/magic-district.md`; Beads: create the build issue
-   under `loka-y6yg`). Split engine-free content into E1/E2-sized slices if the plan is big; Opus dev +
-   Opus review; hub sign adds "a ladder". Watch hosted `sim` time (see lessons).
-4. Plan 7, traps district (`docs/showcase/traps-district.md`), same process, after plan 6 merges.
-5. ONE sweeping blind Fable playtest (`loka-y6yg.34`, brief in its notes: extend it to economy/law, magic
-   and traps plus a hub regression pass). Ask the owner for the usage bar first. Triage: gameplay fixes
-   into one Opus fix slice; UI findings into `loka-x6t` for polish.
-6. Owner: slice D two-save playtest (`loka-y6yg.4`). Then UI polish with the owner.
+Next, after the reset (all Opus unless marked):
+1. Anything above not landed.
+2. Plan 7, traps district (`docs/showcase/traps-district.md`; create its build issue under `loka-y6yg`; split into
+   two slices like magic).
+3. ONE sweeping blind Fable playtest (`loka-y6yg.34`): economy/law (now with arrest and jail), magic, traps, hub
+   regression. Ask the owner for the usage bar first. Then one Opus fix slice; UI findings to `loka-x6t`.
+4. Owner: slice D two-save playtest (`loka-y6yg.4`). Then UI polish with the owner.
+Owner-approved process items (2026-10-16, "yes please those are good suggestions"): sim invariants
+`loka-kgd.173`, Book visibility check `loka-kgd.174`, scale benchmark `loka-kgd.175`; schedule them after the
+showcase, before chapter work. Polish/balance: `loka-y6yg.36` (bank pennies, then work off the jail fine free),
+`loka-x6t.69` (Word bar hides spell chips in a fight).
 
-Optional, owner did not answer: file a future idea for UO-style player killing (PvP needs the Realm; graded
-crime counts; guard zones with pursuit; public criminal status) on top of rows 33/35/36.
+Session lessons (2026-10-16, c5ed3619):
+- Hosted runners are two-speed (~280 s vs ~540 s on the same code): compare sim times only across several runs,
+  never blame one slice on one run (the PM wrongly blamed #414; the diagnosis cost ~30k).
+- `br` can stop with "WAL index recovery already failed ... database is busy": run
+  `br doctor migrate-schema recover`, then retry; `bin/after_merge.sh` reruns cleanly.
+- `git cherry-pick -q` printed a usage error and picked nothing: use plain `git cherry-pick <sha>`.
 
 Merge mechanics: `bin/pm_merge.sh <batch-worktree> <batch-branch> <slice-branch> <review-branch or the
 sha> "<subject>" <reviewed-sha>` (refuses a non-green sha). It stops on stacked additive conflicts in
@@ -232,6 +237,8 @@ polish stage which needs me at the computer for a bit."
 
 ## Owner answers this session
 
+- 2026-10-16 (session c5ed3619, quoted): usage "We are at 98% of the 20x max plan right now" + "Land in-flight, stop
+  (Recommended)"; "Please fix the mana pool thing"; leak-area improvements "yes please those are good suggestions".
 - 2026-10-16 (session 93636711, AskUserQuestion, quoted): descoping matrix "Drop notes and pins (G)" (the only choice).
 - 2026-10-15 (session 93636711, AskUserQuestion choices, quoted): Book bugs x6t.27/.28/.32/.33 "Yes, fix with
   showcase (Recommended)" (now loka-y6yg.20); usage "Under 70%, go" (Fable district plan and Fable designer run).
