@@ -1,5 +1,7 @@
 // Homestead H2 at 390 px (`LOKA_WALK=toolbox_showcase npm run walkthrough`): the guided loop
 // (docs/showcase/homestead-district.md steps 2 to 12) in the Book; the farm step is kernel-only.
+// Law 2-law: bank, shop, hide, strongroom (docs/showcase/economy-law-district.md), reduced: the
+// commission waits, the Held-list lift, the fence and the fine are kernel-only (showcase_economy).
 import { LABEL } from '../book/labels.ts';
 import { moves, scene, settle, walk, type Screen } from './walk.ts';
 
