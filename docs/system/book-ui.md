@@ -282,7 +282,7 @@ currently no player-presence UI.
 
 **Barter offers.** A service offer with price 0 shows its authored label alone ("Knife for two pelts"), with no " — " and no parentheses, never "free"; its unavailable form is "Knife for two pelts: <reason>". The label names the inputs.
 
-**Hostile refusal.** The Book cannot tell hostility from refusal codes (`invalid_state` also
+**Hostile refusal.** Planned for loka-y6yg.20 part B; not yet shipped. The Book cannot tell hostility from refusal codes (`invalid_state` also
 means a full load or an open encounter), so the NPC EntityView carries `hostile: true` while
 the person's [disposition](mechanics.md#standing-and-disposition-toolbox-rows-15-and-g11) is
 hostile (a derived read, absent otherwise) and, when the cartridge authors
@@ -451,11 +451,12 @@ routes all of its narration to the combat log, so the page opens with the engage
 first log line; the opponent block always shows, so the page is never blank. **Closure.** On
 every committed closure (opponent death, player death and inn return, successful Flee, any
 other end) the Combat page stays the shown page, as a one-reply conversation does: its opponent
-block, its log ending with the closing lines, no action cards, and one foot Control
+block without the target suffix (nothing is left to aim at), its log ending with the closing
+lines (every line of the closing receipt, whatever its key), no action cards, and one foot Control
 [**Back to World**](../BOOK-UI-COMPONENTS.md#component-catalogue) (the existing label; no
 new words). The status line stays locked as during the fight. The tap is local (no engine verb)
 and shows the World page of the room the player is now in (the inn after death, the room fled
-to) through the existing room-change flow. Time runs meanwhile; ambient and room lines go to
+to) through the existing room-change flow. Time runs meanwhile; later ambient and room lines go to
 the World log. A new encounter replaces the ended page; nothing is stored, so reopening a save
 after a closure shows the World. A pending save keeps the confirmed
 encounter and existing retry behavior; a refusal remains visible on the combat page. The UI

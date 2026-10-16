@@ -36,7 +36,7 @@ function Fight({ view, text, combat }: Pick<Screen, 'view' | 'text'> & { combat:
       {combat.active_opponents?.map((opponent) => (
         <Text key={opponent.id} style={prose(c)}>
           {text(opponent.name)}
-          {opponent.id === combat.opponent_id ? ' (your target)' : ''}
+          {opponent.id === combat.opponent_id && view.combat ? ' (your target)' : ''}
         </Text>
       ))}
     </View>

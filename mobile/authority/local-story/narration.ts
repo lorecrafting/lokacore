@@ -69,9 +69,10 @@ const latest = (s: Story, command_id: string | undefined, before: number | null)
 function combatLines(s: Story, d: Accepted, lines: NonNullable<Accepted['narration']>) {
   const root = d.delta.ops.some(
     (o) =>
-      o.writer_group === 0 &&
-      (o.op === 'encounter.open' ||
-        (o.op === 'encounter.close' && ['engaged', 'fled'].includes(d.outcome))),
+      o.op === 'encounter.open' ||
+      (o.writer_group === 0 &&
+        o.op === 'encounter.close' &&
+        ['engaged', 'fled'].includes(d.outcome)),
   );
   const keys = d.events.some((e) => e.payload.type === 'attack_result')
     ? Object.values(s.world.cartridge.world?.combat?.narration ?? {})

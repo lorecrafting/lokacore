@@ -96,9 +96,13 @@ test('committed combat line indices come from pinned keys and structured receipt
       lines: engage,
       combat_lines: [0, 1],
     });
-    // A dependent group's open (a reaction's) is not this command's encounter root.
+    // A later writer group's open (a reaction or timed job's engage) is combat too (PM, #406).
     sql.prepare('UPDATE receipt SET response = ?').run(moved(1));
-    assert.deepEqual(narration(story()), { command_id: 'round', lines: engage });
+    assert.deepEqual(narration(story()), {
+      command_id: 'round',
+      lines: engage,
+      combat_lines: [0, 1],
+    });
   } finally {
     sql.close();
     rmSync(folder, { recursive: true, force: true });

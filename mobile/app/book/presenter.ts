@@ -69,8 +69,16 @@ function background(
     s.fault = (e as Error).message;
     return;
   }
-  if (last && last.command_id !== s.narrationId) narrate(s, last, now, away, text);
+  if (last && last.command_id !== s.narrationId)
+    narrate(s, was.combat && !now.combat ? closing(last) : last, now, away, text);
 }
+
+// A closing receipt's lines all end the fight on its Combat page, whatever their key (book-ui.md,
+// Closure).
+const closing = (last: NarrationRecord): NarrationRecord => ({
+  ...last,
+  combat_lines: last.lines.map((_, i) => i),
+});
 
 // A World entry: to the log, or held by the open settlement (book-ui.md, Away recap).
 function world(s: Logs, away: Logs['away'], line: string, lines: string[]) {

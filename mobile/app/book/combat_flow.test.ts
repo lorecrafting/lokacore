@@ -37,8 +37,10 @@ test('committed opponent death narrates once through the existing subscription',
   } as never;
   for (token of ['view:2', 'view:2', 'view:3'])
     p.update({ kind: 'state', projection: { view: current, token }, status: { kind: 'ready' } });
-  assert.deepEqual(p.screen().combatLog, ['The marsh rat falls.']);
-  assert.deepEqual(p.screen().log, ['The bell rings.', 'A door creaks.']);
+  // Break (review of #406): a closing receipt's line outside the combat keys (a deer's sight
+  // close) lands in the World log, unseen on the ended Combat page (book-ui.md, Closure).
+  assert.deepEqual(p.screen().combatLog, ['The marsh rat falls. A door creaks.']);
+  assert.deepEqual(p.screen().log, ['The bell rings.']);
 });
 
 // Real Book state/effect routing over controlled committed Game projections; no native layout claim.
@@ -154,10 +156,15 @@ test('confirmed encounter foregrounds another page; closure keeps Combat until B
       h.tap(CONTENTS);
       h.tap('Settings');
       assert.ok(h.texts().includes('Settings'));
-      h.publish(view(), 'combat.hit');
+      const rat = { encounter_id: 'fight', opponent_id: 'rat', name: 'npc.rat' };
+      h.publish(
+        view({ combat: { ...rat, active_opponents: [{ id: 'rat', name: 'npc.rat' }] } }),
+        'combat.hit',
+      );
       assert.ok(h.texts().includes('Combat'));
       assert.ok(h.texts().includes('You strike the marsh rat.'));
       assert.equal(h.texts().includes('Back to World'), false); // a live encounter has no foot
+      assert.ok(h.texts().includes('a marsh rat (your target)'));
       assert.equal(h.texts().includes('Settings'), false);
       h.publish(
         view({
@@ -181,6 +188,7 @@ test('confirmed encounter foregrounds another page; closure keeps Combat until B
       );
       const ended = h.texts();
       assert.ok(ended.includes('Combat') && ended.includes('a marsh rat'), ending);
+      assert.equal(ended.includes('a marsh rat (your target)'), false); // nothing is left to aim at
       if (ending !== 'closed')
         assert.ok(
           ended.includes(
