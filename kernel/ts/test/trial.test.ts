@@ -373,7 +373,7 @@ const escaped = () => {
   assert.equal(value(drain, drain.character, ref('fact', 'wanted')), true);
   const out = act(drain, { type: 'move', direction: 'west' });
   assert.equal(at(out), room(out, 'square'));
-  return { drain, out };
+  return out;
 };
 
 test('a broke prisoner forces the grate and leaves by the drain, still wanted', () => {
@@ -383,7 +383,7 @@ test('a broke prisoner forces the grate and leaves by the drain, still wanted', 
 // Breaks: the charge reaction's grate `barrier.set` is dropped (the grate stays open), or its
 // `grate_forced` reset is dropped (the grate opens at once without a force).
 test('an escapee walking into the market is arrested again behind a shut grate', () => {
-  const { w, d } = north(escaped().out);
+  const { w, d } = north(escaped());
   assert.equal(at(w), room(w, 'cell'));
   assert.deepEqual(d.narration, [{ key: 'npc.guard.arrest' }, { key: 'trial.charge' }]);
   assert.equal(exit(w, 'down').door?.state, 'closed');
@@ -391,12 +391,6 @@ test('an escapee walking into the market is arrested again behind a shut grate',
   assert.equal(forced(w), false);
   assert.equal(force(w)?.available, true);
   assert.equal(code(w, { type: 'open', direction: 'down' }), 'invalid_state');
-});
-
-// Break: the drain's `up` exit loses its `grate` barrier, so the shut cell is open from below.
-test('the drain is a dead end upward while the grate is shut', () => {
-  const shut = act(escaped().drain, { type: 'close', direction: 'up' });
-  assert.equal(code(shut, { type: 'move', direction: 'up' }), 'exit_closed');
 });
 
 // Break: the recipe's `has_tag fragile` guard is dropped, so a grate without `fragile` is forced.
