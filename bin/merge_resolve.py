@@ -65,8 +65,10 @@ def rows_union(text):
     if not got:
         return None
     h, ours, theirs = got
+    if not all(l.startswith("| ") for l in ours + theirs):  # table rows only
+        return None
     ids = [{l.split("|")[1].strip() for l in side} for side in (ours, theirs)]
-    if not all(l.startswith("| ") for l in ours + theirs) or ids[0] & ids[1]:  # table rows only, no row id on both sides
+    if ids[0] & ids[1]:  # no row id on both sides
         return None
     return text[: h.start()] + h[1] + "".join(theirs) + text[h.end() :]
 

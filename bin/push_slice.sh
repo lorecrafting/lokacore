@@ -10,4 +10,5 @@ git push origin "$1" >"$log" 2>&1
 n=$?
 echo "PUSH_EXIT=$n $(git rev-parse "$1" 2>/dev/null)"
 echo "log: $log"
+[ $n = 0 ] || tail -n 5 "$log"
 exit $n
