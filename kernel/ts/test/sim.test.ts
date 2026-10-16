@@ -221,7 +221,15 @@ test('400 fixed showcase sequences keep every invariant and end in each district
     `showcase seeds 1 to 400${PINNED.length ? ` but ${PINNED.join(' ')}` : ''}; ${steps} steps; ends in ` +
       `${[...rooms].sort().join(' ')}; outcomes ${[...codes].sort().join(', ')}`,
   );
-  const inner = ['fell_top', 'tide_pools', 'moot_hall', 'gate_yard', 'boar_run', 'tilt_yard'];
+  const inner = [
+    'fell_top',
+    'tide_pools',
+    'moot_hall',
+    'gate_yard',
+    'boar_run',
+    'tilt_yard',
+    'carpenter_shop',
+  ];
   const verbs = ['drink', 'eat', 'read', 'sit', 'sleep', 'wear'];
   assert.deepEqual(
     [...inner.filter((r) => !rooms.has(r)), ...verbs.filter((v) => !seen.has(v))],
