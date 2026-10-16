@@ -434,12 +434,15 @@ test('homestead 10: two trout by day, one per cast, then the deep is empty', () 
   valid(w);
 });
 
-// Breaks: the eel, trout or salmon rule ignoring its window (06:00 edge) or sky, or a failing draw landing a fish.
+// Breaks: the eel, trout or salmon rule ignoring its window (06:00 and 18:00 edges) or sky, or a failing draw landing a fish.
 test('homestead 10 branch: eel by night, salmon on a wet day, nothing on a miss', () => {
   assert.deepEqual(landed(pond(22 * HOUR)), ['eel_01']);
   // Day 3 (gale, no salmon): 05:59:59 is still eel, 06:00 is trout.
   assert.deepEqual(landed(pond(2 * DAY + 6 * HOUR - 1)), ['eel_01']);
   assert.match(landed(pond(2 * DAY + 6 * HOUR)).join(), /^trout_0[12]$/);
+  // 17:59:59 is still trout, 18:00 is eel.
+  assert.match(landed(pond(2 * DAY + 18 * HOUR - 1)).join(), /^trout_0[12]$/);
+  assert.deepEqual(landed(pond(2 * DAY + 18 * HOUR)), ['eel_01']);
   const wet = landed(pond(DAY + 10 * HOUR));
   assert.equal(wet.length, 2);
   assert.ok(wet.includes('salmon_01'));
@@ -535,6 +538,11 @@ const water = (w: World) =>
     item_id: id(w, 'item', 'watering_can'),
   }).world;
 const turnip = (w: World) => where(w, id(w, 'item', 'turnip_01')) === plot(w);
+const croftTouched = (w: World) =>
+  statusOn(w, 'croft_plot', 'withered') ||
+  ['turnip_01', 'turnip_02', 'turnip_03'].some(
+    (k) => where(w, id(w, 'item', k)) === id(w, 'item', 'croft_plot'),
+  );
 
 // Breaks: the plot lock, the sow rule (status, stamp, spent seed), the description thresholds,
 // the water midpoint (43200 is late), the seed return, the cure on resowing, the winter guard,
@@ -568,11 +576,14 @@ test('homestead 13: buy the plot, sow at 08:00, water after the midpoint, harves
   const ripe = at(43201);
   assert.equal(turnip(ripe), true);
   assert.equal(statusOn(ripe, 'plot', 'withered'), false);
+  // One sow stamps both lifecycles on its holder; the other plot must stay untouched.
+  assert.equal(croftTouched(ripe), false);
   const h = take(ripe, 'turnip_01');
   assert.equal(where(h, id(h, 'item', 'turnip_01')), h.body);
   for (const late of [at(43200), wait(s, 28800 + DAY).world]) {
     assert.equal(turnip(late), false);
     assert.equal(describe(late, 'plot'), 'item.plot.withered');
+    assert.equal(croftTouched(late), false);
   }
   // The seed returns 172800 after world start (25200); resowing cures withered.
   s = wait(s, 28800 + DAY).world;
@@ -659,6 +670,11 @@ test('homestead sandbox: the croft plot is locked, ripens when watered early, wi
   const late = at(43200);
   assert.deepEqual(crop(late), []);
   assert.equal(statusOn(late, 'croft_plot', 'withered'), true);
+  // The lane plot stays untouched by the croft sow.
+  for (const x of [ripe, late]) {
+    assert.equal(statusOn(x, 'plot', 'withered'), false);
+    assert.equal(where(x, id(x, 'item', 'turnip_01')) === plot(x), false);
+  }
 });
 
 // Breaks: the croft site's prices (exact 5 to raise, 2 to raze), the croft cot reaction off its
