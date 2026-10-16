@@ -175,6 +175,11 @@ polish stage which needs me at the computer for a bit."
   test harness (a hidden tab pauses the clock), now a playtest rule.
 - #405 merged (plans 4-7). Homestead build started (loka-y6yg.21) as two sequential slices H1 (steps 1-8) and H2
   (9-13, sandbox, e2e) on draft branch showcase/homestead. Plan toolbox findings filed as loka-kgd.163 (triage at M14).
+- #407 (loka-y6yg.21, Homestead district) merged. Built huts cannot carry a reaction, so the cot rest bonus does not work
+  in a hut: the sign promises only the rug. A seed put into a box no longer sows (non-plot containers are immune; a test
+  guards new containers). A player with 0 pennies cannot claim an ordered stew (known limit). Engine gaps in loka-kgd.163.
+- #408 (loka-y6yg.18, showcase fixes): the hostile Warden shuts the toll gate when the player enters (shared gate closes
+  for all, like gate_lifted); the combat sign's shout gets a Book chip ("ware").
 
 ## Owner answers this session
 
