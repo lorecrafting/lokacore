@@ -1,6 +1,6 @@
 # Toolbox showcase
 
-`cartridges/toolbox_showcase` (the hub and the body, world and social districts of [showcase plan 1](showcase/hub-and-first-districts.md) are built, the combat district of [showcase plan 2](showcase/combat-district.md) is built, the cause-and-effect slice of [showcase plan 3](showcase/cause-and-effect.md) is built; compiled answer
+`cartridges/toolbox_showcase` (the hub and the body, world and social districts of [showcase plan 1](showcase/hub-and-first-districts.md) are built, the combat district of [showcase plan 2](showcase/combat-district.md) is built, the cause-and-effect slice of [showcase plan 3](showcase/cause-and-effect.md) is built; the Homestead, economy and law, magic and traps districts of plans [4](showcase/homestead-district.md), [5](showcase/economy-law-district.md), [6](showcase/magic-district.md) and [7](showcase/traps-district.md) are planned, to build in that order; compiled answer
 `protocol/fixtures/toolbox_showcase_hash.json`, held by `test/loka/content_showcase_test.exs`) is the composition proof for the [mechanics toolbox](MECHANICS-TOOLBOX.md):
 one playable cartridge where finished mechanics meet each other, so a pair that only works in its
 own sampler shows up here ([owner decision](decisions/owner-decision-showcase-2026-10-10.md)).
@@ -9,9 +9,11 @@ it covers Chapter 1's play families (see [Retiring Chapter 1](#retiring-chapter-
 
 ## Structure
 
-- **Hub inn**: the start room, linked to every district.
-- **One district per mechanic family**: body, world, social, combat, magic/use-on, economy/law,
-  settlement.
+- **Hub inn**: the start room, linked to every district: by its own exits while the six-way
+  compass lasts, then through a district sign room one step away, named on the hub sign
+  ([plan 4](showcase/homestead-district.md#the-hub-has-two-faces-left)).
+- **One district per mechanic family**: body, world, social, combat, Homestead, economy/law,
+  magic/use-on, traps. Settlement is tabled (owner, 2026-10-15).
 - **Each district** is a guided loop of 3 to 6 rooms that opens with a signpost readable
   explaining what to try, plus one sandbox room where the district's mechanics can be combined
   freely.
@@ -24,7 +26,7 @@ Each row is a set of mechanics that must work together in one room or loop. A ba
 district and room that shows the pair, and the pin (test or recorder) that holds it.
 
 Status `planned (plan N)` means that showcase plan ([plan 1](showcase/hub-and-first-districts.md),
-[plan 2](showcase/combat-district.md), [plan 3](showcase/cause-and-effect.md)) names the rooms and steps and the build slice is still to come; `built` means the pin walks the plan's steps; `later` means no brief covers it yet.
+[plan 2](showcase/combat-district.md), [plan 3](showcase/cause-and-effect.md), [plan 4](showcase/homestead-district.md), [plan 5](showcase/economy-law-district.md), [plan 6](showcase/magic-district.md), [plan 7](showcase/traps-district.md)) names the rooms and steps and the build slice is still to come; `built` means the pin walks the plan's steps; `later` means no brief covers it yet.
 
 | Mechanics | District | Rooms | Pin | Status |
 |---|---|---|---|---|
@@ -33,7 +35,7 @@ Status `planned (plan N)` means that showcase plan ([plan 1](showcase/hub-and-fi
 | disposition x commerce x dialogue | social | `village_green` (Nell's shop and prices, the Reeve's `help`/`wrong`, the apple), `warden_gate` (engage) | `kernel/ts/test/showcase_social.test.ts` (social 1-4) | built |
 | deadlines x schedules x away recap | social | the letter quest, Tam's day, the recap block on return | `mobile/app/book/showcase_recap.test.ts` (the block is Book-side); `showcase_social.test.ts` (social 14) for the facts | built |
 | combat x loot x levelling x death | combat | `boar_run` (an unarmed death and the corpse, then the boar's tusk and purse), the Raise after the bounty | `kernel/ts/test/showcase_combat.test.ts` (combat 4-8) | built |
-| hidden exits x senses x traps | world (hidden exits), combat (senses) | `sea_cave` night search; the boar's grunt heard from `drill_yard` | `kernel/ts/test/showcase_world.test.ts` (world 5, 7); `showcase_combat.test.ts` (combat 1, 8) | hidden exits built; senses built; traps later (after M8) |
+| hidden exits x senses x traps | world (hidden exits), combat (senses) | `sea_cave` night search; the boar's grunt heard from `drill_yard` | `kernel/ts/test/showcase_world.test.ts` (world 5, 7); `showcase_combat.test.ts` (combat 1, 8) | hidden exits built; senses built; traps planned (plan 7) |
 | quests x deadlines x hints | social | `carry_letter` from the Reeve to Wat | `showcase_social.test.ts` (social 10, 13) | built |
 | scenes x dialogue x reactions | social | Wat's `deliver`/`burn`, story point `letter_fate`, scenes `letter_read`/`letter_ash`, standing on scene end | `showcase_social.test.ts` (social 12) | built |
 | rumour x dialogue check x codex | social | `mill`, `village_green` (Tam tells Nell; `press` grants "The fire") | `showcase_social.test.ts` (social 5, 8) | built |
@@ -48,13 +50,34 @@ Status `planned (plan N)` means that showcase plan ([plan 1](showcase/hub-and-fi
 | allies x kill credit x quest | combat | `gate_yard` (Gil's blow kills the raider; the bounty resolves) | `showcase_combat.test.ts` (combat 4) | built |
 | scars x death x same-body return | combat | the boar's `gored` survives the unarmed death in `boar_run` | `showcase_combat.test.ts` (combat 6) | built |
 | bleed status x cure x attacker filter | combat | `bleeding` from the boar, the poultice; only a boar's hit wounds, never a goblin's beside the tilt boar (Beads `loka-kgd.79`) | `showcase_combat.test.ts` (combat 6, 8, tilt yard) | built |
-| say and shout x keyword dialogue x reactions | combat | `say steel` opens Aldous's answer; `shout ware` warns Gil next door | `showcase_combat.test.ts` (combat 2, 3) | built; kernel-only until the Book input (`loka-kgd.72`) |
+| say and shout x keyword dialogue x reactions | combat | `say steel` opens Aldous's answer; `shout ware` warns Gil next door | `showcase_combat.test.ts` (combat 2, 3) | built; the Book's Word bar (#391) shows a shout chip once the cartridge declares `speech.phrases` (plan 7 adds `ware` and `begone`) |
 | lesson x weapon x derived damage | combat | Aldous's lesson and sword; Raise str after level 2 | `showcase_combat.test.ts` (combat 2, 5, 8) | built |
 | disposition x resistances | social and combat | the Warden's mail (`physical` 100) against the sword | `showcase_combat.test.ts` (combat 10) | built |
 | fuse status x status_expired x schedule cases x disposition | social | `tollhouse` (the forced strongbox carries `word_travels`), `village_green` (the Warden's 13:00 walk), `warden_gate` (engage, the ledger mend) | `showcase_consequence.test.ts` (social 15-18, 21) | built |
 | rumour hops x conditional schedule x dialogue check x codex deduction | social | `shepherd_hut` (burn), `warden_gate` (Wat tells Tam), `village_green` (Tam tells Nell; `press`), `church` ("What the letter carried") | `showcase_consequence.test.ts` (social 19-20) | built |
 | fire: statuses on things x tags x reactions x use-on x cues x barriers (row W22) | body (sandbox off `the_fold`) | `smithy` (torch, kindling, bench, anvil, bucket), `woodstore` behind the burnable `store_door` | `kernel/ts/test/showcase_fire.test.ts` | built |
-| traps x statuses x combat; fear x pack x shout; use-on x fire; puzzles | combat | | | later (after M8) |
+| craft x skill growth x skill prerequisites x hidden elite | Homestead | `carpenter_shop` (two carves open the carving lesson; the hidden skill shows nothing until carving is learned) | `kernel/ts/test/showcase_homestead.test.ts` (homestead 1-4) | planned (plan 4) |
+| self-build x built rooms x services x raze | Homestead | `glade`, `carpenter_shop`, the site north of `holding_lane` | `showcase_homestead.test.ts` (homestead 5, 6, 8) | planned (plan 4) |
+| furnishing x rest x variants | Homestead | the built hut (a cot, a rug) | `showcase_homestead.test.ts` (homestead 7) | planned (plan 4) |
+| gifts x pair facts x barter | Homestead | `farm_yard` (the apple, the rat, two pelts for a knife) | `showcase_homestead.test.ts` (homestead 9) | planned (plan 4) |
+| fishing x time window x sky x replenish | Homestead | `pond` | `showcase_homestead.test.ts` (homestead 10) | planned (plan 4) |
+| escrow x cooking x status modifiers | Homestead | `farm_kitchen` (the cook's stew, the hearth) | `showcase_homestead.test.ts` (homestead 11, 12) | planned (plan 4) |
+| farming x statuses x locks x replenish | Homestead | `farm_yard` (the plot) | `showcase_homestead.test.ts` (homestead 13) | planned (plan 4) |
+| stock prices x replenish x commerce | economy/law | `market_row` (the chandler's shelf) | `kernel/ts/test/showcase_law.test.ts` (law 3, 5, 7) | planned (plan 5) |
+| escrow x timed claim x cancel | economy/law | `forge_stall` | `showcase_law.test.ts` (law 4, 5) | planned (plan 5) |
+| bank x two counters x fees | economy/law | `counting_house`, `market_row` | `showcase_law.test.ts` (law 2, 3) | planned (plan 5) |
+| property x locks x key barrier | economy/law | `strongroom` | `showcase_law.test.ts` (law 1, 2, 8) | planned (plan 5) |
+| theft x sneak x witness x wanted x disposition | economy/law | `pawn_alley` (hide), `market_row` (the purse, the guard), `counting_house` (the fine) | `showcase_law.test.ts` (law 6, 9, 10) | planned (plan 5) |
+| fence x stolen provenance x get lock | economy/law | `pawn_alley` | `showcase_law.test.ts` (law 7, red control) | planned (plan 5) |
+| spells x reagents x light x dark room | magic/use-on | `loft` (ash, the lantern), `crypt` | `kernel/ts/test/showcase_magic.test.ts` (magic 2, 6) | planned (plan 6) |
+| command blocks x spells x readables | magic/use-on | `reading_room` (hushed; the grimoire) | `showcase_magic.test.ts` (magic 3) | planned (plan 6) |
+| quests x levelling x spell gates | magic/use-on | the errand, the Raise, `ward` | `showcase_magic.test.ts` (magic 4, 5) | planned (plan 6) |
+| spell damage x resistances x death credit | magic/use-on | `crypt` (the wight) | `showcase_magic.test.ts` (magic 7) | planned (plan 6) |
+| spells x fire x use-on x cues | magic/use-on | `crypt` (the bier), `crypt_stair` (the smoke, the winch) | `showcase_magic.test.ts` (magic 6-8) | planned (plan 6) |
+| status readers x reactions x NPC statuses | magic/use-on | `golem_yard` | `showcase_magic.test.ts` (magic 9) | planned (plan 6) |
+| traps x statuses x reset x senses | traps | `sapper_stair` (search, disarm), `plate_passage` | `kernel/ts/test/showcase_traps.test.ts` (traps 1-4, 7) | planned (plan 7) |
+| puzzles x barriers x readables | traps | `lever_hall`, `lever_vault`, `dial_vault` | `showcase_traps.test.ts` (traps 5, 6) | planned (plan 7) |
+| fear x pack x shout x death | traps | `chief_den` | `showcase_traps.test.ts` (traps 8, 9) | planned (plan 7) |
 
 ## How a batch adds a district
 
@@ -108,5 +131,5 @@ Chapter-1-specific pins (end-to-end tests, hash fixtures, the E1 recorder) are r
 showcase pins. Story-independent tests and fixtures stay.
 
 Death and commerce coverage is limited to what the toolbox has rows for. Row 47 (death penalty
-options) covers XP loss and item drop, not ghost-walk death, and no row covers barter; both need a
-toolbox row before the showcase can show them.
+options) covers XP loss and item drop, not ghost-walk death, which needs a toolbox row before the
+showcase can show it. Barter is row kgd.70 (done) and [plan 4](showcase/homestead-district.md) shows it.
