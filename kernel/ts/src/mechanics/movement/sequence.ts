@@ -72,6 +72,9 @@ export function moveSequence(
   );
 }
 
+// ponytail: no arrest after a fall, nor on a move that wrote a water row or opened an encounter
+// (both pinned to the room entered; an arrest would save a world that cannot reopen).
+const PINNED = new Set(['water.transition', 'encounter.open']);
 function routeProgress(
   world: World,
   command: MoveCommand,
@@ -96,9 +99,9 @@ function routeProgress(
   const fell = fall(world, world.rooms[here], command.payload.direction, body, levels);
   // A hostile NPC engages on an ordinary move only, never a flight (toolbox row G11).
   const position = 2 + joined.events.length + ventured.events.length;
-  // ponytail: no arrest after a fall; lift when a sampler needs it.
+  const pinned = [...ops, ...ventured.ops].some((o) => PINNED.has(o.op));
   const met = ordinary
-    ? engage(world, command, body, there, mint, steps, position, !fell)
+    ? engage(world, command, body, there, mint, steps, position, !fell && !pinned)
     : undefined;
   const narration = [
     ...(fell ? [fell.narration] : []),

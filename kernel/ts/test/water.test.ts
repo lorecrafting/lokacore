@@ -463,3 +463,24 @@ test('a character body in a water bottom without an occupancy row is invalid', (
   };
   assert.equal(waterValid(moved), false);
 });
+
+// Breaks: the arrest guard on a move that wrote a water row (movement/sequence.ts): the body
+// would leave the bottom while its occupancy row stays there, a save that cannot reopen.
+test('a hostile arresting NPC in a water bottom does not arrest the swimmer', () => {
+  const w = learned(
+    fresh((c) => {
+      c.manifest.requires.kernel_api.at_least = '1.105';
+      c.npcs[`${prefix}:npc/sedge`].room = ref('room', 'well_bottom');
+      c.npcs[`${prefix}:npc/sedge`].disposition = {
+        hostile: { policy_version: 1, root: { op: 'all', items: [] } },
+        arrest: {
+          to: ref('room', 'well_shaft'),
+          narration: c.rooms[`${prefix}:room/well_shaft`].description,
+        },
+      };
+    }),
+  );
+  const below = green(run(w, { type: 'move', direction: 'down' }));
+  assert.equal(below.state.containers[below.body], room(below, 'well_bottom'));
+  assert.equal(waterValid(below), true);
+});
