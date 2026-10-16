@@ -29,7 +29,8 @@ defmodule Loka.ContentShowcaseTest do
       do: spread(&List.replace_at(&1, 1, Map.merge(%{"op" => "barrier.set", "to" => to}, by)))
 
     test "barrier.set and co_present tag need API 1.56; to locked needs a key_item", %{dir: dir} do
-      # The boars' attacker filters (1.58) and gored's kind (1.102, loka-x6t.64) dropped too.
+      # The boars' attacker filters (1.58), gored's kind (1.102, loka-x6t.64) and speech.phrases
+      # (1.98) dropped too.
       unfiltered =
         for r <- ~w(boar_gore tilt_boar_gore),
             do:
@@ -37,7 +38,8 @@ defmodule Loka.ContentShowcaseTest do
                &update_in(&1, ["on"], fn on -> Map.delete(on, "attacker") end)}
 
       at155 = [
-        {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.55")},
+        {"cartridge.json",
+         &(&1 |> put_in(["requires", "kernel_api", "at_least"], "1.55") |> Map.delete("speech"))},
         {"reactions/kindle.json", nil},
         {"reactions/gate_lifted.json", nil},
         {"reactions/gate_shut.json", nil},
@@ -108,7 +110,8 @@ defmodule Loka.ContentShowcaseTest do
 
     defp gore(dir, api, npc) do
       Loka.ContentSource.compile(dir, [
-        {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], api)},
+        {"cartridge.json",
+         &(&1 |> put_in(["requires", "kernel_api", "at_least"], api) |> Map.delete("speech"))},
         {"reactions/boar_gore.json", &put_in(&1, ["on", "attacker"], npc)},
         {"statuses/gored.json", &Map.delete(&1, "kind")}
       ])

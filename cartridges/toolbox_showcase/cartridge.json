@@ -260,5 +260,10 @@
         "fact": "raider_slain"
       }
     ]
+  },
+  "speech": {
+    "phrases": [
+      "ware"
+    ]
   }
 }

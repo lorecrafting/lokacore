@@ -134,13 +134,14 @@ test('combat 2: the lesson gives the blade and the sword; say steel; the bounty'
   w = play(w, { type: 'close_choice', continuation_id }).world;
 });
 
-// Breaks: a say reaches Gil through the wall, a shout does not, a shout carries two exits (from
+// Breaks: the Book offers no "ware" chip, a say reaches Gil through the wall, a shout does not, a shout carries two exits (from
 // the inn), or Gil's description ignores the fact.
 test('combat 3: a shout of "ware" in the yard warns Gil; a say or a shout from the inn does not', () => {
   const fromInn = play(go(w, 'east').world, { type: 'shout', word: 'ware' }).world;
   assert.notEqual(fact(fromInn, 'gil_warned'), true);
   w = play(w, { type: 'say', word: 'ware' }).world;
   assert.notEqual(fact(w, 'gil_warned'), true);
+  assert.deepEqual(gameView(w).phrases, ['ware']); // the Book's Shout chip
   w = play(w, { type: 'shout', word: 'ware' }).world;
   assert.equal(fact(w, 'gil_warned'), true);
   w = go(w, 'west').world;
@@ -413,6 +414,7 @@ test('loader: the attacker filter needs API 1.58 and an authored NPC', () => {
     c.manifest.requires.kernel_api.at_least = api;
     c.reactions[ref('reaction', 'boar_gore')].on.attacker = { ...C, kind: 'npc', key };
     delete c.statuses[ref('status', 'gored')].kind; // 1.102 (loka-x6t.64)
+    delete c.speech; // phrases: 1.98
   };
   const at = `.cartridge.reactions["${ref('reaction', 'boar_gore')}"].on.attacker`;
   assert.equal(reload(gore('1.58', 'boar')), 'ok');

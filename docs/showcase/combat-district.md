@@ -102,7 +102,7 @@ No combat room is `exposed`, so no weather drain lands; no door is gated; rooms 
 > hand your blows land nothing, here or anywhere. North, a boar is penned: you can hear it grunt
 > from this yard. It gores: a wound that bleeds for a while and a scar that stays, even past your
 > death. The poultice on the bench stops the bleeding; nothing takes the scar away. West, Gil keeps
-> the gate with a raider in it; a warning shouted from this yard carries through the wall to him, and he
+> the gate with a raider in it; a shout of "ware" from this yard carries through the wall to him, and he
 > fights beside you once you strike. Aldous pays a bounty on the raider, but only to one who takes
 > it before the raider falls. South is a pit with two
 > goblins who fight as a pack: in a pack you choose which one you hit. Every kill earns
@@ -116,7 +116,7 @@ No combat room is `exposed`, so no weather drain lands; no door is gated; rooms 
 - **Aldous** (drill-master): stays in `drill_yard`; no `attack`. Dialogues in key order, as
   Nell's: `aldous_lesson` (policy `fact_compare skill_blade false`; roles `teacher` and `sword`;
   choice `learn`: `sequence [skill.acquire blade]`, `receive {item: sword, from: teacher}`, no
-  `lesson_payment`; `leave`), then `aldous_talk` (policy `all(skill_blade true, raider_slain false)`, so Talk lists one dialogue at a time; the lesson ends "Come back when you want paid work."; `bounty`
+  `lesson_payment`; `leave`), then `aldous_talk` (policy `all(skill_blade true, raider_slain false)`, so Talk lists one dialogue at a time; the lesson ends "Keep your guard up.", which promises no work; `bounty`
   with `accept: bounty`, `leave`), then `aldous_yard` (policy `fact_compare raider_slain true`; its
   own prompt and `leave` only, so no bounty is offered once the raider is dead), and `aldous_steel` with `keyword: "steel"` (one `leave` choice; its prompt is the
   answer; Talk never lists it, [row G9](../system/mechanics.md#social-verbs-say-whisper-and-shout-toolbox-row-g9-engine-half);
@@ -243,9 +243,8 @@ against rows 6a and 6c for this cartridge.
   `test/loka/content_showcase_test.exs`).
 - `showcase_body.test.ts`'s hub pin: four exits.
 - No Book test: cues, Raise cards and condition lines are existing Book elements (cue wording and
-  the Attack choice wording are pending the designer, Beads `loka-kgd.65`, `loka-x6t.14`); say and
-  shout have no Book input yet (`loka-kgd.72`), so steps 2 and 3 are kernel-only and the recorder
-  recipe skips them.
+  the Attack choice wording are pending the designer, Beads `loka-kgd.65`, `loka-x6t.14`); the Book
+  offers "ware" as a Shout chip (`speech.phrases`; `combat 3` pins the GameView offer); the recorder recipe still skips steps 2 and 3.
 
 ## Matrix cells this plan covers
 
