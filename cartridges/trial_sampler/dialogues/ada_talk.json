@@ -1,0 +1,41 @@
+{
+  "npc": "ada",
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": []
+    }
+  },
+  "prompt": "dialogue.talk.prompt",
+  "roles": {
+    "ada": {
+      "role": "npc",
+      "npc": "ada"
+    }
+  },
+  "choices": {
+    "join": {
+      "label": "dialogue.ada.join",
+      "narration": "narration.ada.join",
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "in_group",
+          "value": true
+        }
+      ]
+    },
+    "leave": {
+      "label": "dialogue.ada.leave",
+      "narration": "narration.ada.leave",
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "in_group",
+          "value": false
+        }
+      ]
+    }
+  }
+}

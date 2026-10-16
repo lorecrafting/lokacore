@@ -1,0 +1,36 @@
+// Book arrest (toolbox row 35, docs/system/mechanics.md "Arrest and trial"): an arrest is an
+// accepted move whose place is not the exit's destination; the World page turns to the cell and
+// its log carries the move's narration, through the real authority and Book. Expected text is
+// literal from cartridges/trial_sampler/text.json.
+import assert from 'node:assert/strict';
+import { test } from 'node:test';
+import { compiled } from '../../authority/local-story/__tests__/compiled.ts';
+import { book } from './__tests__/polish-book.test.ts';
+import { LABEL } from './labels.ts';
+
+// Breaks: the move's narration is dropped with the old room's log when the place is not the
+// exit's destination, or the square's log survives onto the cell page.
+test('a wanted walk north lands on the cell page with the arrest and charge lines', () => {
+  const b = book(compiled('cartridges/trial_sampler') as never);
+  b.map();
+  b.tap('Open the barred cell door (east)');
+  b.tap('Back to World');
+  assert.ok(b.text().includes('Opened.'), JSON.stringify(b.text())); // a square line to lose
+  for (const c of ['The crier is here., open', /^Talk/, 'Confess to the theft.']) b.tap(c);
+  b.tap(LABEL.leaveConversation);
+  b.tap(LABEL.leave);
+  b.map();
+  b.tap('Go north');
+  const shown = b.text();
+  assert.equal(shown[0], 'Cell');
+  assert.ok(
+    shown.includes(
+      'The guard takes your arm at the market gate and walks you to the cell. ' +
+        'The sergeant reads the charge aloud: wanted in the square. Pay the fine or sit.',
+    ),
+    JSON.stringify(shown),
+  );
+  assert.ok(!shown.includes('Opened.'), JSON.stringify(shown));
+  b.map();
+  assert.ok(b.text().includes('The barred cell door: closed'), JSON.stringify(b.text()));
+});

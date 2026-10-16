@@ -1,4 +1,4 @@
-import type { CharacterId, CommandId, Key } from '../../contracts.gen.ts';
+import type { CharacterId, CommandId, Key, NpcDefinition } from '../../contracts.gen.ts';
 import {
   accepted,
   bodyOf,
@@ -18,7 +18,7 @@ import { lockRefused } from '../locks.ts';
 import { standing } from '../position/shared.ts';
 import { closeEncounter } from '../combat/shared.ts';
 import { settled as crowSettled } from '../crow/behavior.ts';
-import { travel } from '../escort/shared.ts';
+import { mounted, travel } from '../escort/shared.ts';
 import { entrySight } from '../population/behavior.ts';
 import { engage } from '../disposition.ts';
 import { crossable, fall, fare, passage } from './shared.ts';
@@ -72,6 +72,9 @@ export function moveSequence(
   );
 }
 
+// ponytail: no arrest after a fall, nor on a move that wrote a water row or opened an encounter
+// (both pinned to the room entered; an arrest would save a world that cannot reopen).
+const PINNED = new Set(['water.transition', 'encounter.open']);
 function routeProgress(
   world: World,
   command: MoveCommand,
@@ -95,8 +98,10 @@ function routeProgress(
   const levels = 'levels' in paid ? paid.levels : {};
   const fell = fall(world, world.rooms[here], command.payload.direction, body, levels);
   // A hostile NPC engages on an ordinary move only, never a flight (toolbox row G11).
+  const position = 2 + joined.events.length + ventured.events.length;
+  const pinned = [...ops, ...ventured.ops].some((o) => PINNED.has(o.op));
   const met = ordinary
-    ? engage(world, command.payload.actor_id, body, there, mint, steps)
+    ? engage(world, command, body, there, mint, steps, position, !fell && !pinned)
     : undefined;
   const narration = [
     ...(fell ? [fell.narration] : []),
@@ -106,7 +111,7 @@ function routeProgress(
   ];
   return {
     ops: [...(fell?.ops ?? []), ...joined.ops, ...ventured.ops, ...(met?.ops ?? [])],
-    events: [...joined.events, ...ventured.events],
+    events: [...joined.events, ...ventured.events, ...(met?.events ?? [])],
     narration: narration.length ? narration : undefined,
   };
 }
@@ -134,6 +139,10 @@ export function movementPlan(
     lockRefused(world, actor_id, world.rooms[there].locks?.enter, undefined, steps);
   if (locked) return locked;
   if (!crossable(world, body, there)) return 'invalid_state' as const;
+  const horse = mounted(world, actor_id);
+  const terrain = horse && (world.entities[horse] as NpcDefinition).mount!.terrain;
+  if (terrain && !(world.rooms[there].tags ?? []).some((t) => terrain.includes(t)))
+    return 'invalid_state' as const;
   const wet = water.edge(world, here, there, direction);
   if (wet) {
     const paid = water.admission(world, actor_id, wet.entering, steps);
@@ -141,7 +150,7 @@ export function movementPlan(
   }
   if (engaged(world, body) && !escape) return 'invalid_state' as const;
   if (!standing(world, actor_id)) return 'invalid_state' as const;
-  const paid = fare(world, body);
+  const paid = fare(world, actor_id, body, there);
   if (!paid) return 'insufficient_resource' as const;
   return { body, here, there, paid };
 }

@@ -7,6 +7,7 @@ import type {
   EntityId,
   EscortRelation,
   Key,
+  NpcDefinition,
 } from '../../contracts.gen.ts';
 import { bodyOf, refString, type ChoiceRow, type World } from '../../runtime/decision.ts';
 import { same } from '../../foundation/compose.ts';
@@ -131,8 +132,20 @@ export function member(
   return !!fact && value(world, actor, fact, npc) === true;
 }
 
-/** Move and Flee use the same source, destination, writer group and admission; the escorted NPC
- * and then the group's members in the source room (EntityId order) not ordered to stay come along. */
+/** Toolbox row 43b: the first living NPC (EntityId order) in `actor`'s body room with a mount
+ * declaration and world.mount.riding true for the pair; undefined when on foot. */
+export function mounted(world: World, actor: CharacterId) {
+  const fact = world.cartridge.world?.mount?.riding;
+  const body = bodyOf(world, actor);
+  if (!fact || !body) return undefined;
+  return npcsIn(world, [world.state.containers[body]!]).find(
+    (id) => (world.entities[id] as NpcDefinition).mount && value(world, actor, fact, id) === true,
+  );
+}
+
+/** Move and Flee use the same source, destination, writer group and admission; the escorted NPC,
+ * the ridden mount (row 43b) and then the group's members in the source room (EntityId order)
+ * not ordered to stay come along. */
 export function travel(
   world: World,
   actor: CharacterId,
@@ -140,12 +153,15 @@ export function travel(
   destination_id: EntityId,
 ): DeltaOp[] {
   const escort = following(world, actor)?.npc_id;
+  const horse = mounted(world, actor);
   const members = world.cartridge.world?.group
     ? npcsIn(world, [source_id]).filter(
-        (id) => id !== escort && member(world, actor, id) && !member(world, actor, id, 'stay'),
+        (id) => member(world, actor, id) && !member(world, actor, id, 'stay'),
       )
     : [];
-  return [...(escort ? [escort] : []), ...members].map((entity_id) => ({
+  // A set: an escort or horse that is also a member, or a horse that is the escort, moves once.
+  const movers = new Set([escort, horse, ...members].filter((id) => id !== undefined));
+  return [...movers].map((entity_id) => ({
     op: 'entity.transfer',
     writer_group: 0,
     entity_id,

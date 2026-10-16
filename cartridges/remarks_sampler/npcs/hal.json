@@ -1,0 +1,73 @@
+{
+  "keywords": [
+    "hal"
+  ],
+  "short": "npc.hal.short",
+  "room_line": "npc.hal.room",
+  "description": "npc.hal.description",
+  "room": "yard",
+  "asides": [
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": [
+            {
+              "op": "fact_compare",
+              "fact": "in_group",
+              "subject": "target",
+              "equals": true
+            },
+            {
+              "op": "has_tag",
+              "subject": "room",
+              "tag": "cool"
+            },
+            {
+              "op": "visited_count",
+              "room": "crypt",
+              "at_least": 1
+            },
+            {
+              "op": "not",
+              "item": {
+                "op": "visited_count",
+                "room": "crypt",
+                "at_least": 2
+              }
+            }
+          ]
+        }
+      },
+      "text": "remark.hal.first"
+    },
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": [
+            {
+              "op": "fact_compare",
+              "fact": "in_group",
+              "subject": "target",
+              "equals": true
+            },
+            {
+              "op": "has_tag",
+              "subject": "room",
+              "tag": "cool"
+            },
+            {
+              "op": "visited_count",
+              "room": "crypt",
+              "at_least": 2
+            }
+          ]
+        }
+      },
+      "text": "remark.hal.again"
+    }
+  ]
+}

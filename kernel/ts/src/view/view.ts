@@ -1,4 +1,4 @@
-// size: allow 315, row 33 lists an NPC's lock-admitted holdings beside container contents; word bar S2; the Book hostile refusal (loka-x6t.33)
+// size: allow 318, row 33 lists an NPC's lock-admitted holdings beside container contents; word bar S2; the Book hostile refusal (loka-x6t.33); NPC asides (row FD10)
 import { wordViews } from './spells.ts';
 import { knowledgeView } from './knowledge.ts';
 import { movementPlan } from '../mechanics/movement/sequence.ts';
@@ -170,9 +170,12 @@ function within(
                 (c) => !lockRefused(world, actor, e.locks?.get, c.id, steps),
               )
             : [];
+      // Row FD10: a present NPC's asides, read with the NPC as the target.
+      const lines = e.kind === 'npc' ? asides(world, actor, e, steps, id as EntityId) : [];
       return {
         ...viewOf(world, actor, id, e, worn ? worn(id) : actions.of(scope, id), steps),
         ...(contents.length > 0 && { contents }),
+        ...(lines.length > 0 && { asides: lines.map((key) => ({ key })) }),
       };
     });
 }

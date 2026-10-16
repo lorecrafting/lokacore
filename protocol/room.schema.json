@@ -489,10 +489,11 @@
           "$ref": "text.schema.json#/$defs/TextKey"
         },
         "tags": {
-          "description": "Its property tags (Tag; toolbox row G1), read by the has_tag policy leaf (tags@1).",
+          "description": "Its property tags (Tag; toolbox row G1), read by the has_tag policy leaf (tags@1) and the terrain fare (row 43a); unique, since a repeated tag would apply its fare percent twice.",
           "type": "array",
           "minItems": 1,
           "maxItems": 16,
+          "uniqueItems": true,
           "items": {
             "$ref": "entity.schema.json#/$defs/Tag"
           }

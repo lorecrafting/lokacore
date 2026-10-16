@@ -171,8 +171,8 @@ function atLeast(
 }
 
 // tags@1's subjects: a named definition (a constant), the target item's or the actor's room's.
-// ponytail: a repeated tag is not refused (neither kernel's validator has uniqueItems); it reads
-// the same as one. Add uniqueItems to both validators if a mechanic ever counts tags.
+// ponytail: an item's or barrier's repeated tag is not refused (only room tags carry uniqueItems,
+// since the terrain fare counts them); it reads the same as one.
 function tagsOf(
   world: World,
   actor: CharacterId,

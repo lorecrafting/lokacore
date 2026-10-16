@@ -1,0 +1,13 @@
+{
+  "title": "room.square.title",
+  "description": "room.square.description",
+  "exits": {
+    "north": {
+      "to": "market"
+    },
+    "east": {
+      "to": "cell",
+      "barrier": "cell_door"
+    }
+  }
+}
