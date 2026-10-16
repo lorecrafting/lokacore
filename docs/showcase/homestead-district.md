@@ -93,7 +93,7 @@ Sealed holders (no exits, never entered) hold the yields: `woodpile` (8 `log`s),
 | Room | Exits | Holds |
 |---|---|---|
 | `holding_lane` (sign) | east `fell_gate`, west `carpenter_shop`, south `farm_yard`, up `holding_croft`; **site** `{directions: [north], blueprints: [hut_plain, hut_timbered]}` (`craft_sampler/rooms/lane.json`) | detail `sign_homestead`; detail `plot_stakes` (rating 1; the raise recipe's target) |
-| `carpenter_shop` | east `holding_lane` | **the carpenter**; detail `saw_bench` (rating 1); `axe`; `cot` (tag `bed`, 3000 g); `rug` (tag `rug`); 2 `stick`s |
+| `carpenter_shop` | east `holding_lane` | **the carpenter**; detail `saw_bench` (rating 1); `axe`; `cot` (tag `bed`, 1500 g: the axe, cot, rug and sticks fit the 5000 g carry); `rug` (tag `rug`); 2 `stick`s |
 | `farm_yard` | north `holding_lane`, west `glade`, east `pond`, south `farm_kitchen` | **the farmer**; `plot` (container, 20000 g, `immune: [growing]`, `locks {get, put}` on `owns_plot`, description variants on `time_since sown_at` 3600 and 64800 and on `withered`; `farm_sampler/items/plot.json`); `sack` (holds `seed_01`); `watering_can` (vessel, water 4); `holding_apple`; `dead_rat` |
 | `glade` | east `farm_yard` | detail `oak` (rating 1; `chop`); 3 `pelt`s on the frame |
 | `pond` | west `farm_yard` | detail `pond_water` (tag `water`); `rod` (tags `rod`, `wooden`) |
@@ -133,13 +133,13 @@ Blueprint `hut_timbered`: `max_per_owner 1`, `variants [{when: item_present {tag
   [stick_01..04], quantity: 1, to: midden, reason: craft.carve_spoon.needs}`, `craft.yield {items:
   [spoon_01, spoon_02], from: woodpile}`; a failure consumes the stick and yields nothing); `chop`
   at `oak` (policy `all(has_item axe, skill_compare woodcutting at_least 1)`, check opposed
-  `woodcutting`, yield 4 `log`s from `woodpile`); `saw` at `saw_bench` (policy `skill_compare
+  `woodcutting`, yield 1 `log` from `woodpile`: a craft yield moves one item per perform); `saw` at `saw_bench` (policy `skill_compare
   carpentry at_least 1`, check opposed `carpentry`, consume 2 logs to `woodpile`, yield 1 `timber`
   from `timber_yard`); `raise_timbered_hut` at `plot_stakes` (policy `skill_compare carpentry
   at_least 2`, consume `timber_01`, `timber_02` quantity 2 to `timber_yard`, reason
   `craft.raise.needs`, success `build {blueprint: hut_timbered, direction: north}`).
-- Furnishing (`furnish_sampler`): reaction `cot_rest` `on {event: rested}` (no room filter: the leaf
-  reads the sleeper's room) `when item_present {tag: bed}` `apply status.apply well_rested`.
+- Furnishing (`furnish_sampler`): reaction `cot_rest` `on {event: rested, room: holding_lane}` (the
+  reaction schema requires an authored room, so it cannot name the built hut: finding 1) `when item_present {tag: bed}` `apply status.apply well_rested`.
 - **The farmer**: `room_line_variants` on `fact_compare {regard, npc: farmer}` 1 (warm) and -1
   (cold); reactions `farmer_likes_apple` `on {item_acquired, item: holding_apple}` `when
   fact_compare {gifted_apple false, npc: farmer}` `apply [fact.adjust regard +1, fact.assign
@@ -180,13 +180,13 @@ Skill levels below are the samplers' pins; the build pins the derived level afte
 | # | Step | Expected | Matrix cells |
 |---|---|---|---|
 | 1 | North from the inn, west from `fell_gate`; read `sign_homestead`; open the Character page. | The text. The skill tree lists Woodcraft (Whittling, Carving locked), Forestry (Woodcutting, Carpentry locked), Kitchen (Cooking); no other row, no other name. | skill tree view |
-| 2 | Talk to the carpenter: `whittling`, `woodcutting`; `carving` is not offered; take the axe, the two sticks, the cot, the rug. | Two `skill.acquire`; the tree reads Whittling level 1, Woodcutting level 1; the `carving` choice is absent from the opened talk (hs-14) and a forged choose is `invalid_state`. Carry: axe + cot + rug + sticks under 5000 g (the build sizes them). | skill prerequisites x dialogue |
+| 2 | Talk to the carpenter: `whittling`, `woodcutting`; `carving` is not offered; take the axe, the two sticks, the cot, the rug. | Two `skill.acquire`; the tree reads Whittling level 1, Woodcutting level 1; the `carving` choice is offered unavailable (a dialogue choice has no `hidden`; only Joinery is left out, hs-14) and a forged choose is `invalid_state`. The lesson hub reopens after each answer, Leave included; `close_choice` ends the sitting. Carry: axe + cot + rug + sticks under 5000 g (the build sizes them). | skill prerequisites x dialogue |
 | 3 | `carve_spoon` three times at the saw bench. | First: success (taught Whittling 1 meets the bench's rating 1), a stick to `midden` (minted ids decide which; the build pins it), a spoon held (likewise pinned), `uses_whittling` 1, Whittling 2 in the tree. Second: success, the other spoon held, `uses_whittling` 2, Whittling 3. Third: `invalid_state`, offer reason `craft.carve_spoon.needs` (no stick). | craft x skill growth |
-| 4 | Talk: `carving` (2 pennies). | Accepted now: pennies 8, Carving level 1 "qualified"; a second `carving` is `invalid_state`. The hidden skill's row and choice now appear (see Pins). | skill prerequisites x hidden elite |
-| 5 | South, west to the glade; `chop` twice; back to the shop; Talk: `carpentry` (2); `saw` twice. | Each chop yields 4 logs (8 held, the woodpile empty; a third chop is `invalid_state`); Woodcutting 2 after the first, 3 after the second, so `carpentry` is accepted: pennies 6. Each saw consumes 2 logs and yields a timber: 2 timbers, 4 logs; Carpentry 2 after the second saw. | craft x skill trees |
-| 6 | Lane: `raise_timbered_hut`. | Both timbers to `timber_yard`; a room north of the lane (`origin: built`, title the blueprint's), the Exits list north; `raise_hut_plain` at the carpenter now refuses `service.site_taken`; a second `raise_timbered_hut` offers reason `service.site_taken` (it comes before the spent timbers' `craft.raise.needs`) and the perform is `invalid_state` (`craft.test.ts` second raise); `max_per_owner` 1 is not reached here. Branch (fresh world, no lessons): `raise_hut_plain` for 5 builds the plain hut (pennies 5); `raise_timbered_hut` then refuses `service.site_taken`; at 4 pennies the service is `insufficient_resource`. | self-build x built rooms x services |
-| 7 | North into the hut; drop the rug; drop the cot; Rest; wait 3600. | The hut's description reads the rug variant while the rug lies there, the base line once taken; `rested` fires `cot_rest`: `well_rested` applied (its line), five ticks of mv +2 by 3600, the Conditions ring shows Well rested until then. Rest in the lane with the cot there: the same (the leaf reads the room, not the owner, hs-6's limit); rest in the hut with the cot in hand: nothing. | furnishing x rest x variants |
-| 8 | Carpenter: `raze_hut` (2). | Pennies 4; the north exit is gone, the hut's `built` row carries `razed_at`; the cot and rug, if left inside, are gone with it (the build pins where they go: finding 3); `raise_hut_plain` is offered again. Branch: raze with the player's corpse inside refuses `service.occupied`; a stranger (a second character in the test) refuses `permission_denied`. | raze x ownership |
+| 4 | Talk: `carving` (2 pennies). | Accepted now: pennies 8, Carving level 1 "qualified"; a second `carving` is `invalid_state`. The hidden skill's row now appears; its choice appears on the next talk, not in the sitting already open (see Pins). | skill prerequisites x hidden elite |
+| 5 | South, west to the glade; `chop` four times; back to the shop; Talk: `carpentry` (2); `saw` twice. | Each chop yields 1 log (4 held); Woodcutting 2 after the first, 3 after the second (the growth tops out), so `carpentry` is accepted: pennies 6. Each saw consumes 2 logs to the woodpile and yields a timber: 2 timbers, 0 logs held, all 8 in the woodpile; Carpentry 2 after the second saw; a third saw offers `craft.saw.needs`. Branch (fresh world): the eighth chop yields `log_08`, the ninth is `invalid_state` (`craft.chop.needs`). | craft x skill trees |
+| 6 | Lane: `raise_timbered_hut`. | Both timbers to `timber_yard`; a room north of the lane (`origin: built`, title the blueprint's), the Exits list north; `raise_hut_plain` at the carpenter now refuses `service.site_taken`; a second `raise_timbered_hut` offers reason `service.site_taken` (it comes before the spent timbers' `craft.raise.needs`) and the perform is `invalid_state` (`craft.test.ts` second raise); `max_per_owner` 1 is not reached here. Branch (fresh world, no lessons): `raise_hut_plain` for exactly 5 builds the plain hut (pennies 5) and a second offers `service.site_taken`; `raise_timbered_hut` there fails its carpentry policy first (plain `invalid_state`), not `site_taken`. At 4 pennies (after step 8) the service is `insufficient_resource`. | self-build x built rooms x services |
+| 7 | North into the hut; drop the rug; drop the cot; Rest; wait 3600. | The hut's description reads the rug variant while the rug lies there, the base line once taken. Rest in the hut: **blocked by finding 1** (no line, no condition). Rest in the lane with the cot on the floor (after step 8 the raze puts it there): `well_rested` applied (its line), five `status_ticked` by 3600 (one elapsed decision folds their lines into one), the Conditions ring shows Well rested until then; with the cot in hand: nothing. | furnishing x rest x variants |
+| 8 | Carpenter: `raze_hut` (2). | Pennies 4; the north exit is gone, the hut's `built` row carries `razed_at`; the cot and rug left inside move to `holding_lane`, the site (finding 3); `raise_hut_plain` is offered again. Branch: raze with the player's corpse inside refuses `service.occupied`; a stranger (a second character in the test) refuses `permission_denied`. | raze x ownership |
 | 9 | Yard: Give the apple to the farmer; Give the rat; the glade's three pelts, then `knife_for_pelts`. | Apple: `regard` 1, the warm room line; rat: 0, base line. Pelts: with one, `not_owned` / `service.missing_inputs`; with two, the knife held, two pelts in `stall`, pennies unchanged, no job; again: `invalid_state` `service.order_open`. Rat first in a fresh world: -1, the cold line. | gifts x pair facts x barter |
 | 10 | Pond at 07:00 day 1: take the rod; `fish` on the water; `fish` again at once; take the trout; wait 600; `fish`; take the trout; wait 600; `fish`. | Seed fixed so the first cast passes: a trout lands in the room (minted ids decide which; the build pins it), `spoiling` on it; the second cast is `cooldown`; the third (passing) lands the other trout (had the first stayed in the room, `cap` 1 would land nothing); the fourth (passing) lands nothing: the deep has no trout left. At 22:00 a passing cast lands the eel; on day 2 (rain) at 10:00 the salmon as well. A failing seed lands nothing. Rod in a worn sack: `invalid_state`. | fishing x time window x sky x replenish |
 | 11 | Kitchen: `stew` with one fish held; with two; claim at once; wait 300; claim; Eat. | One: `service.missing_inputs`. Two: pennies 3, both fish in `larder`, `ordered` true. Claim at +299: `service.not_ready`; at +300 the stew held; Eat: mv +10, `fed` (str 11), the Conditions ring shows Fed; str 10 again at +3600. | escrow x cooking x status modifiers |
@@ -200,10 +200,10 @@ cot, and the croft hearth for cooking what the pool gives.
 
 ## Item loops
 
-Sticks (2 per room, scrap to `midden`), spoons (2, from the woodpile; inert), logs (8, consumed by
-the saw back to the woodpile and chopped out again: a loop with a cap of 8), timbers (2, consumed
-by the raise into `timber_yard` and never returned: two raises per world unless the sandbox site is
-used), huts (max_total 2, razed for 2 pennies), fish (4, spoil to `midden`, nightly return, cap 4),
+Sticks (2 per room, scrap to `midden`), spoons (2, from the woodpile; inert), logs (8, one per chop,
+consumed by the saw back to the woodpile and chopped out again: a loop with a cap of 8), timbers
+(2, sawn out of `timber_yard` and consumed by the raise back into it: a loop bounded by the huts'
+`max_total`), huts (max_total 2, razed for 2 pennies), fish (4, spoil to `midden`, nightly return, cap 4),
 stews (3 hearty, 1 feast, 1 plain: eaten, never refilled), turnips (3, one per harvest), seed (1,
 returns every two days), apple and rat (one each), pelts (3; two leave for good), knife (1, once
 per character: the entitlement stays true), eggs (3 per laying, cap 3 in the nest), hens (cap 4,
@@ -261,16 +261,14 @@ replenish; escrow x cooking x status modifiers; farming x statuses x locks x rep
 
 ## Toolbox findings
 
-1. **Built-room reactions have no room key.** A reaction's `room` filter and a `status.apply
-   {room}` name an authored room, so nothing can fire only in the player's own hut; the cot
-   reaction reads the sleeper's room by `item_present` instead, which is also true in the lane.
-   A `room: built {site, direction}` filter, or an `owner` leaf, would close it (kin of hs-6's
-   "the leaf does not check ownership").
-2. **Taught level.** If `skill.acquire` leaves a skill at level 0 until its first use, `chop`'s
-   sampler gate (`at_least 1`) refuses a fresh woodcutter; the build then gates on the learned fact
-   and says so here. The samplers do not pin a taught, unused level.
-3. **Items in a razed room.** [S5](../system/mechanics.md#built-rooms-s5-raze-and-tombstone) does not say where
-   a razed room's floor items go; the build pins what happens to the cot and files a row if they
-   vanish (a hidden sink) rather than return to the site.
-4. **Doc drift.** `docs/MECHANICS-TOOLBOX.md` rows `.108.*` read `in progress` after #402 merged;
-   `mechanics.md` says Give is not in the Book (`loka-x6t.31` is closed).
+1. **Built-room reactions have no room key.** A reaction's `room` is required and names an
+   authored room (`protocol/reaction.schema.json`), so `cot_rest` cannot fire in a built hut at
+   all: the build authors `room: holding_lane`, and resting in the hut with the cot applies
+   nothing (pinned). An optional `room`, or a `room: built {site, direction}` filter, would close
+   it (kin of hs-6's "the leaf does not check ownership").
+2. **Taught level.** Resolved: `skill.acquire` leaves a taught, unused skill at level 1 (the tree
+   reads Whittling 1, Woodcutting 1 after step 2), so `chop`'s `at_least 1` gate holds unchanged.
+3. **Items in a razed room.** Resolved: the raze moves a razed room's floor items to the site
+   room (the cot and rug land in `holding_lane`, pinned in homestead 8); no hidden sink.
+4. **Doc drift.** Fixed in H1: `docs/MECHANICS-TOOLBOX.md` rows `.108.*` read done, and
+   `mechanics.md` no longer says Give is not in the Book (`loka-x6t.31` is closed).

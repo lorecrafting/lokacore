@@ -1,0 +1,17 @@
+{
+  "keywords": [
+    "cot"
+  ],
+  "short": "item.cot.short",
+  "room_line": "item.cot.room",
+  "description": "item.cot.description",
+  "mass_grams": 1500,
+  "location": {
+    "in": "room",
+    "room": "carpenter_shop"
+  },
+  "tags": [
+    "bed",
+    "wooden"
+  ]
+}

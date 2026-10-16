@@ -154,5 +154,47 @@
     "x": -1,
     "y": 1,
     "z": 0
+  },
+  {
+    "room": "holding_lane",
+    "x": -4,
+    "y": -1,
+    "z": 0
+  },
+  {
+    "room": "carpenter_shop",
+    "x": -5,
+    "y": -1,
+    "z": 0
+  },
+  {
+    "room": "farm_yard",
+    "x": -4,
+    "y": 0,
+    "z": 0
+  },
+  {
+    "room": "glade",
+    "x": -5,
+    "y": 0,
+    "z": 0
+  },
+  {
+    "room": "woodpile",
+    "x": -9,
+    "y": -9,
+    "z": 0
+  },
+  {
+    "room": "timber_yard",
+    "x": -8,
+    "y": -9,
+    "z": 0
+  },
+  {
+    "room": "midden",
+    "x": -7,
+    "y": -9,
+    "z": 0
   }
 ]

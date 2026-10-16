@@ -1,0 +1,59 @@
+{
+  "label": "actions.raise_timbered_hut",
+  "aliases": [
+    "raise"
+  ],
+  "target": {
+    "kind": "detail",
+    "room": "holding_lane",
+    "detail": "plot_stakes"
+  },
+  "priority": 5,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "skill_compare",
+      "skill": "carpentry",
+      "at_least": 2
+    }
+  },
+  "check": {
+    "key": "raise_timbered_hut",
+    "kind": "opposed",
+    "skill": "carpentry"
+  },
+  "craft": {
+    "consume": {
+      "items": [
+        "timber_01",
+        "timber_02"
+      ],
+      "quantity": 2,
+      "to": {
+        "in": "room",
+        "room": "timber_yard"
+      },
+      "reason": "craft.raise.needs"
+    }
+  },
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "build",
+          "blueprint": "hut_timbered",
+          "direction": "north"
+        }
+      ],
+      "narration": {
+        "actor": "narration.raise_timbered_hut.success"
+      }
+    },
+    "failure": {
+      "sequence": [],
+      "narration": {
+        "actor": "narration.raise_timbered_hut.failure"
+      }
+    }
+  }
+}

@@ -46,7 +46,9 @@
       "combat": 1,
       "sense_cue": 1,
       "speech": 1,
-      "population": 1
+      "population": 1,
+      "service": 1,
+      "construction": 1
     },
     "client_features": []
   },
@@ -259,6 +261,9 @@
         "room": "gate_yard",
         "fact": "raider_slain"
       }
-    ]
+    ],
+    "construction": {
+      "max_total": 2
+    }
   }
 }

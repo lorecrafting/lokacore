@@ -281,6 +281,39 @@
         "player"
       ],
       "meaning": "The player knows what the burnt letter carried."
+    },
+    "spoon_carved": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "instance"
+      ],
+      "meaning": "A spoon has been carved at the saw bench."
+    },
+    "wood_chopped": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "instance"
+      ],
+      "meaning": "A log has been chopped from the glade oak."
+    },
+    "timber_sawn": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "instance"
+      ],
+      "meaning": "A timber has been sawn at the saw bench."
     }
   }
 }
