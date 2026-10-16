@@ -117,7 +117,7 @@ export function checkRow(world: World, id: string, row: ChoiceRow) {
     !openable(world, d, row.choice_ids) ||
     !validAttempts(row, d) ||
     (row.status === 'resolved'
-      ? !row.choice_id || !d.choices[row.choice_id]
+      ? !row.choice_id || !d.choices[row.choice_id] || !row.choice_ids.includes(row.choice_id)
       : row.choice_id !== undefined)
   )
     invalid();

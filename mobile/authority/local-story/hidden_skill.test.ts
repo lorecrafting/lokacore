@@ -17,6 +17,8 @@ import { resolved } from '../../../kernel/ts/src/commands/actions.ts';
 import { pending } from '../../../kernel/ts/src/mechanics/dialogue/shared.ts';
 import { compiled } from './__tests__/compiled.ts';
 import { openStory } from './authority.ts';
+import { checkRow } from './dialogue-save.ts';
+import { dialogueDetail } from './dialogue-receipt.ts';
 import { coldReopen, elapsedHost } from './__tests__/elapsed-host.test.ts';
 
 // Carving (needs whittling 2) and joinery hidden; the carving talk also teaches carpentry (shown,
@@ -81,7 +83,7 @@ function opened(path: string, choose = false) {
   const [continuation_id] = pending(story.world(), fresh.character)!;
   assert.deepEqual(story.world().state.choices![continuation_id]!.choice_ids, ['whittle']);
   if (choose) go('choose', { choice_id: 'whittle', continuation_id });
-  return p;
+  return { ...p, world: story.world(), continuation_id };
 }
 
 // Breaks: the row check (dialogue-save.ts checkRow; each case fails alone) or the choose receipt
@@ -128,4 +130,46 @@ test('a forged choice_ids row is save_corrupt and the file is unchanged', (t) =>
     assert.throws(() => coldReopen(path, craft), /save_corrupt/, JSON.stringify(ids));
     assert.deepEqual(readFileSync(path), bytes);
   }
+});
+
+// Breaks: checkRow (dialogue-save.ts) or the choose receipt check (dialogue-receipt.ts) admits a
+// row naming an id the dialogue lacks or dropping a choice that teaches no hidden skill, or a
+// resolved row whose choice_id is not among its choice_ids. Direct: receiptHistory runs only for
+// some feature sets, and here it refuses forged saves before either check.
+test('checkRow and the choose receipt check refuse a forged row directly', (t) => {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-hidden-skill-direct-'));
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
+  const forge = (w: any, id: string, patch: object) => ({
+    ...w,
+    state: { ...w.state, choices: { [id]: { ...w.state.choices[id], ...patch } } },
+  });
+  const p = opened(join(dir, 'pending.db'));
+  p.sql.close();
+  const row = (w: any) => w.state.choices[p.continuation_id];
+  checkRow(p.world, p.continuation_id, row(p.world));
+  for (const choice_ids of [['bogus'], ['learn']]) {
+    const w = forge(p.world, p.continuation_id, { choice_ids });
+    assert.throws(() => checkRow(w, p.continuation_id, row(w)), /bound item/, String(choice_ids));
+  }
+  const c = opened(join(dir, 'chosen.db'), true);
+  const r = c.sql
+    .prepare('SELECT command_id, command, response FROM receipt ORDER BY revision DESC LIMIT 1')
+    .get()!;
+  c.sql.close();
+  const detail = (w: any) =>
+    dialogueDetail(
+      { world: w } as never,
+      r.command_id as string,
+      JSON.parse(String(r.command)),
+      JSON.parse(String(r.response)),
+    );
+  checkRow(c.world, c.continuation_id, row(c.world));
+  assert.ok(detail(c.world));
+  const learn = forge(c.world, c.continuation_id, { choice_id: 'learn' });
+  assert.throws(() => checkRow(learn, c.continuation_id, row(learn)), /bound item/);
+  for (const choice_ids of [['bogus'], ['learn']])
+    assert.throws(
+      () => detail(forge(c.world, c.continuation_id, { choice_ids })),
+      /dialogue answer/,
+    );
 });
