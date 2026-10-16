@@ -9,5 +9,6 @@ Owner, 2026-10-15 (AskUserQuestion): tabled "Languages and literacy", "Player wr
 ## Effect
 
 1. [Toolbox](../MECHANICS-TOOLBOX.md) rows 48, 48a, 48b and 48c (chapter carry-over) are deferred until a solid Chapter 1 and a Chapter 2 exist (`loka-kgd.160`).
-2. Tabled (paraphrased): row W16 (languages and literacy), the public part of row G10 (text other players read), and rows 44 (race objective) and 45 (pet growth). Private journal notes and map pins stay in M15 (`loka-kgd.161`).
+2. Tabled (paraphrased): row W16 (languages and literacy), row G10b (public writing, split from G10: text other players read), and rows 44 (race objective) and 45 (pet growth). Private journal notes and map pins stay in M15 (`loka-kgd.161`).
 3. Each row's status cell reads "deferred (owner 2026-10-15)" with a link to the record.
+4. Deferred rows leave M14/M15; they do not block milestone exit (PM ruling).
