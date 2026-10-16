@@ -65,6 +65,15 @@ const looks = (c: Palette) => ({
   neutral: { fill: c.card, border: c.line, ink: c.dim },
 });
 
+const box = {
+  width: size.touch,
+  height: size.touch,
+  alignItems: 'center',
+  justifyContent: 'center',
+} as const;
+
+// Locked, the disc goes dim like the Contents button (neutral: dim glyph; dim on a debuff's fg fill
+// would not read).
 function Icon(p: {
   look: Look;
   name: string;
@@ -73,16 +82,8 @@ function Icon(p: {
   open?: () => void;
   children: string;
 }) {
-  // Locked, the disc goes dim like the Contents button (neutral: dim glyph; dim on a debuff's fg fill
-  // would not read).
   const face = <Disc look={p.open ? p.look : 'neutral'}>{p.children}</Disc>;
   const disc = p.fraction === undefined ? face : <Ring fraction={p.fraction}>{face}</Ring>;
-  const box = {
-    width: size.touch,
-    height: size.touch,
-    alignItems: 'center',
-    justifyContent: 'center',
-  } as const;
   if (!p.open)
     return (
       <View accessibilityRole="image" accessibilityLabel={p.name} style={box}>
