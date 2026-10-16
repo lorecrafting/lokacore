@@ -10,7 +10,7 @@ export function services(c: Obj): Diagnostic[] {
   const [major, minor] = c.manifest.requires.kernel_api.at_least.split('.').map(Number);
   const all = Object.values((c.services ?? {}) as Obj);
   const floor = all.some(barters)
-    ? 101
+    ? 102
     : all.some((s) => banks(s.benefit))
       ? 83
       : all.some(timed)
@@ -274,7 +274,7 @@ function beds(c: Obj, check: Checks, out: Diagnostic[]) {
 const commission = (b: Obj) => b.kind === 'entitlement' || (b.kind === 'build' && !!b.fact),
   ordered = (b: Obj) => b.kind === 'claim' || b.kind === 'cancel';
 const banks = (b: Obj) => b.kind === 'deposit' || b.kind === 'withdraw';
-// Row kgd.70 (API 1.101): a free service, or an output handed over at once (no ready_after).
+// Row kgd.70 (API 1.102): a free service, or an output handed over at once (no ready_after).
 const barters = (s: Obj) =>
   s.price === 0 || (s.benefit.escrow?.output !== undefined && !s.benefit.escrow.ready_after);
 const timed = (s: Obj) => ordered(s.benefit) || s.benefit.escrow?.ready_after !== undefined;

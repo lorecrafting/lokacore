@@ -3380,7 +3380,7 @@ Beads `loka-kgd.109.3` (first half). A built room weathers into ruin and a mend 
 
 ### Built rooms S5: raze and tombstone
 
-Homestead row hs-9 (Beads `loka-otn4`). The owner pays to raze a built room; its contents move to the site and the room leaves the world. New fields sit under the 1.101 floor: service benefit `{kind: "raze", site, direction}`, the save section `built` and the op `built.set`. Save rules: [save.md, Built rooms](save.md#built-rooms).
+Homestead row hs-9 (Beads `loka-otn4`). The owner pays to raze a built room; its contents move to the site and the room leaves the world. New fields sit under the 1.102 floor: service benefit `{kind: "raze", site, direction}`, the save section `built` and the op `built.set`. Save rules: [save.md, Built rooms](save.md#built-rooms).
 
 - **Admission** (`unrazable` in `kernel/ts/src/mechanics/service/build.ts`), in order: no live built room at `site`/`direction` is `invalid_state` `service.nothing_to_raze`; an actor other than the origin's `owner` is `permission_denied`; an immovable created entity directly inside that is not a living NPC body (a corpse, a dead spawned hound) is `invalid_state` `service.occupied`; a living spawned hound or deer is transferred to the site like any NPC body. Then the service's price. The offer and the press both show these.
 - **Effect** (`razed`). Payment, the room's statuses cleared (`clearStatuses`), one `entity.transfer` to the site per entity directly in the room in EntityId order (items and living NPC bodies alike; moved items keep their owner), then `built.set` writes the tombstone `{razed_at}` at the logical clock. No fact and no job.
@@ -3476,7 +3476,7 @@ Homestead hs-11 (Beads `loka-kgd.108.8`): a skill may require another skill's le
 
 ## Skill tree view (Homestead hs-14)
 
-Homestead hs-14 (Beads `loka-kgd.108.11`): GameView projects each skill's tree state so the Book draws the Character page's skill tree. Declarations: [skill prerequisite](cartridge.md#skill-prerequisite-declarations) `hidden` and `profession` (`kernel_api` 1.101).
+Homestead hs-14 (Beads `loka-kgd.108.11`): GameView projects each skill's tree state so the Book draws the Character page's skill tree. Declarations: [skill prerequisite](cartridge.md#skill-prerequisite-declarations) `hidden` and `profession` (`kernel_api` 1.102).
 
 - **Command.** None new.
 - **Projection** (`skillViews` in `kernel/ts/src/view/skills.ts`): a SkillView gains `level` (only for a skill with `growth`; `level` in `kernel/ts/src/content/skill_level.ts`), `locked` (only for a skill with `prerequisite`: the prerequisite does not hold for the viewing actor, the same `holds` the hs-11 admission reads) and `profession` (the authored key). A skill with `hidden` is left out while it is `locked` and not acquired; once acquired it always shows. An NPC's `lessons` leave out a skill the view leaves out (`freeLessons`). Both read one predicate, `concealed` (`kernel/ts/src/mechanics/skills.ts`: hidden, not acquired, prerequisite fails). Owner ruling 2026-10-15 (Beads `loka-kgd.108.14`): a talk does not offer a choice that `skill.acquire`s a concealed skill (`offered` in `kernel/ts/src/mechanics/dialogue/selection.ts`; `opening` writes only those ids), and a dialogue that offers none is skipped like one whose policy fails (`spokenBy`, shared by talk, say, whisper and the GameView talk action), so with none left the talk is refused `invalid_state`. A cartridge whose skills declare none of `growth`, `prerequisite` and `profession` keeps its GameView bytes (`mobile/app/stories.test.ts`).
@@ -3529,12 +3529,12 @@ Homestead hs-13 (Beads `loka-kgd.108.10`): the player cooks at the kitchen heart
 
 ## Furnishing (Homestead hs-6)
 
-Homestead hs-6 (Beads `loka-kgd.108.6`): a placed item changes what a room does or says by its [tag](#property-tags-and-the-policy-leaf-set-toolbox-row-g1). Policy leaf `item_present {tag}` (`protocol/policy.schema.json`, owned by `containment@1`, `kernel_api` 1.101).
+Homestead hs-6 (Beads `loka-kgd.108.6`): a placed item changes what a room does or says by its [tag](#property-tags-and-the-policy-leaf-set-toolbox-row-g1). Policy leaf `item_present {tag}` (`protocol/policy.schema.json`, owned by `containment@1`, `kernel_api` 1.102).
 
 - **Leaf.** `item_present` holds when an item whose definition declares `tag` lies directly in the actor's room (`furnished`, `kernel/ts/src/mechanics/policy.ts:221`): an item carried, worn or inside a container in the room does not count. In a room variant the actor's room is the described room (the Book describes only the actor's room, `kernel/ts/src/view/view.ts:125`). It costs one query step plus one per container row scanned, in the room or not (as `recovery.ts`), so the budget bounds the scan; past `LIMITS.query_steps` it is false.
 - **Tags.** `bed`, `forge` and `rug` join the G1 `Tag` enum.
 - **Command.** None new: `take`, `drop`, `put`, `rest` and `perform`. A recipe whose policy fails stays offered, unavailable, with the policy refusal (`action_lists.ts`).
-- **Floor.** An `item_present` leaf anywhere in the cartridge needs `kernel_api` 1.101 (`cartridge_variants.ts`, `lib/loka/content/variants.ex`; `loader_floors.json` "an item_present leaf").
+- **Floor.** An `item_present` leaf anywhere in the cartridge needs `kernel_api` 1.102 (`cartridge_variants.ts`, `lib/loka/content/variants.ex`; `loader_floors.json` "an item_present leaf").
 - **Realm seams** (owner decision 2026-10-13, brief checklist).
   1. Actor: met; the room is `bodyOf(world, actor)`'s container.
   2. Reactions: met; `rested`'s subject is its `body_id`, and `status.apply` lands on it.
@@ -3555,11 +3555,11 @@ Homestead hs-6 (Beads `loka-kgd.108.6`): a placed item changes what a room does 
   - Reads: containers, item tags, the actor's body.
   - Writes: none new.
   - Reused: VersionedPolicy, `holds`, `rested`, `status.apply`, room `variants`, `action_recipe` policy and check, G1 tags.
-  - New: `item_present`, `furnished`, tags `bed`, `forge`, `rug`, the 1.101 floor.
+  - New: `item_present`, `furnished`, tags `bed`, `forge`, `rug`, the 1.102 floor.
 
 ## Built rooms S6: self-build
 
-Homestead hs-12 (Beads `loka-kgd.108.9`): a player raises a blueprint at a site with a recipe, as the build service does. Declarations: [recipe build steps](cartridge.md#recipe-build-step-declarations) (`kernel_api` 1.101).
+Homestead hs-12 (Beads `loka-kgd.108.9`): a player raises a blueprint at a site with a recipe, as the build service does. Declarations: [recipe build steps](cartridge.md#recipe-build-step-declarations) (`kernel_api` 1.102).
 
 - **Command.** None new: `perform` on a detail-target recipe whose success sequence holds `build {blueprint, direction}`.
 - **Admission** (`craftRefused` in `kernel/ts/src/mechanics/action_recipe/shared.ts`, which the offer in `view/action_lists.ts` and the press in `commands/actions.ts` both read): the build service's `unbuildable` (`service/build.ts`) first, for the target's room as site and the actor as owner: `service.site_taken` or `service.construction_full` (`max_total`, `max_per_owner`), each `invalid_state`; then the craft's refusal (hs-10). A taken site so shows `service.site_taken` even when the inputs are spent.
@@ -3584,12 +3584,12 @@ Homestead hs-12 (Beads `loka-kgd.108.9`): a player raises a blueprint at a site 
   - Reads: the recipe's detail target room, the blueprint caps, the built rows' origins.
   - Writes: `entity.create` (and S4 weathering) through `created`.
   - Reused: S2/S3 `unbuildable` and `created`, hs-10 craft and `craftRefused`, the recipe check and outcome.
-  - New: RecipeStep `build`, the build-step loader checks, the 1.101 floor.
+  - New: RecipeStep `build`, the build-step loader checks, the 1.102 floor.
   - Missing invariant: none.
 
 ## Barter (toolbox row kgd.70)
 
-Homestead hs-7 (Beads `loka-kgd.108.5`, `loka-kgd.70`): liked and disliked gifts move one person's trust, trust tiers open talk, and two pelts buy a knife with no coin. Gifting is content on [row 15](#standing-and-disposition-toolbox-rows-15-and-g11) and W2; barter extends an [escrow](#escrow-custody-toolbox-row-20a) commission. Declarations: [barter](cartridge.md#barter-declarations) (`kernel_api` 1.101).
+Homestead hs-7 (Beads `loka-kgd.108.5`, `loka-kgd.70`): liked and disliked gifts move one person's trust, trust tiers open talk, and two pelts buy a knife with no coin. Gifting is content on [row 15](#standing-and-disposition-toolbox-rows-15-and-g11) and W2; barter extends an [escrow](#escrow-custody-toolbox-row-20a) commission. Declarations: [barter](cartridge.md#barter-declarations) (`kernel_api` 1.102).
 
 - **Gifts (content).** Give (containment@1) emits `item_acquired` with the NPC as holder. Per NPC, one reaction per liked item (`fact.adjust trust +1`) and per disliked item (`-1`), each `when` a per-NPC flag (`gifted_<item>`, `fact_compare equals false`) that the same reaction sets true, so each item pays once: a second apple, or give, take back and give again, changes nothing. An item with no reaction (the stone) changes nothing. Trust is an int pair fact bounded -1 to 1.
 - **Tiers (content).** Trust -1, 0 and 1 select the cold, plain and warm dialogue (`fact_compare` policy) and the W6 room line. Trap 8: the tier is a line, and a gate only for dialogue.
@@ -3621,7 +3621,7 @@ Homestead hs-7 (Beads `loka-kgd.108.5`, `loka-kgd.70`): liked and disliked gifts
   - Reads: the entitlement fact, body and custody containers, pair facts through `fact_compare`.
   - Writes: `entity.transfer`, `fact.assign`, `fact.adjust`; ops, events, jobs and save rows: none new.
   - Reused: row 20a escrow, the 20b output and `service.no_output`, Give's `item_acquired`, W1 reactions, W2 pair facts, W6 room lines, the dialogue policy.
-  - New: the output transfer for an untimed escrow, the price 0 path, the loader price check, the 1.101 floor.
+  - New: the output transfer for an untimed escrow, the price 0 path, the loader price check, the 1.102 floor.
   - Missing invariant: none (`one_container_per_item` covers the transfers).
 
 ## Give pairs

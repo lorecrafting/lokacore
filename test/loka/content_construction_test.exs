@@ -106,7 +106,7 @@ defmodule Loka.ContentConstructionTest do
 
     free_build = [
       {"services/raise_hut.json", &Map.put(&1, "price", 0)},
-      {"cartridge.json", &put_in(&1, ~w(requires kernel_api at_least), "1.101")}
+      {"cartridge.json", &put_in(&1, ~w(requires kernel_api at_least), "1.102")}
     ]
 
     shed = {"blueprints/shed.json", JSON.decode!(File.read!("#{@dir}/blueprints/hut.json"))}

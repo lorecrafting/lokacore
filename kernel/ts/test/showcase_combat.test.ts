@@ -384,7 +384,7 @@ test('loader: the attacker filter needs API 1.58 and an authored NPC', () => {
   const gore = (api: string, key: string) => (c: any) => {
     c.manifest.requires.kernel_api.at_least = api;
     c.reactions[ref('reaction', 'boar_gore')].on.attacker = { ...C, kind: 'npc', key };
-    delete c.statuses[ref('status', 'gored')].kind; // 1.101 (loka-x6t.64)
+    delete c.statuses[ref('status', 'gored')].kind; // 1.102 (loka-x6t.64)
   };
   const at = `.cartridge.reactions["${ref('reaction', 'boar_gore')}"].on.attacker`;
   assert.equal(reload(gore('1.58', 'boar')), 'ok');

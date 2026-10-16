@@ -49,7 +49,7 @@ export function status(c: Obj): Diagnostic[] {
 // SR5), fear (W21), permanent (W8), the G3 fields.
 const floorOf = (all: Obj[], g3: unknown, room: boolean) =>
   all.some((s) => s.kind)
-    ? '1.101'
+    ? '1.102'
     : all.some((s) => s.pierced_by)
       ? '1.93'
       : room

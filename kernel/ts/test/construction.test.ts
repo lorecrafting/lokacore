@@ -214,7 +214,7 @@ test('a build commission cannot be claimed or free and its fact is a player bool
   assert.deepEqual(
     refused((c) => {
       sv(c, 'raise_hut').price = 0;
-      c.manifest.requires.kernel_api.at_least = '1.101';
+      c.manifest.requires.kernel_api.at_least = '1.102';
     }),
     ['SCHEMA_VIOLATION', '.cartridge.services["build_sampler@0.0.1:service/raise_hut"].price'],
   );

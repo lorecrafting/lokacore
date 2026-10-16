@@ -108,7 +108,7 @@ defmodule Loka.Content.Services do
     benefits = Enum.map(services, & &1["benefit"])
 
     cond do
-      Enum.any?(services, &barter?/1) -> [1, 101]
+      Enum.any?(services, &barter?/1) -> [1, 102]
       Enum.any?(benefits, &bank?/1) -> [1, 83]
       Enum.any?(benefits, &timed?/1) -> [1, 80]
       Enum.any?(benefits, & &1["escrow"]) -> [1, 79]
@@ -116,7 +116,7 @@ defmodule Loka.Content.Services do
     end
   end
 
-  # Row kgd.70 (API 1.101): a free service, or an output handed over at once (no ready_after).
+  # Row kgd.70 (API 1.102): a free service, or an output handed over at once (no ready_after).
   defp barter?(%{"price" => p, "benefit" => b}),
     do: p == 0 or (is_map_key(b["escrow"] || %{}, "output") and not timed?(b))
 

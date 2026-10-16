@@ -2,7 +2,7 @@
 // room_line_variants) or a status_active or npc_present leaf needs kernel_api 1.46; a status_active
 // leaf reading self or subject (status reader 1, row G3) 1.53; a resource_compare with subject or
 // at_least_percent (row 39) 1.87; a room's or detail's asides or a skill_compare leaf (row FD2)
-// 1.91; world.identity (rows W15, FD9) 1.97; an item_present leaf (Homestead hs-6) 1.101. Twin of lib/loka/content/variants.ex.
+// 1.91; world.identity (rows W15, FD9) 1.97; an item_present leaf (Homestead hs-6) 1.102. Twin of lib/loka/content/variants.ex.
 import type { Diagnostic } from '../contracts.gen.ts';
 import { asideParts, diag, nodes, type Obj } from './cartridge_refs.ts';
 import { apiCmp } from './cartridge_installed.ts';
@@ -25,7 +25,7 @@ export function variants(c: Obj): Diagnostic[] {
     leaves.some((p) => p.op === 'status_active' || p.op === 'npc_present');
   const reader = leaves.some((p) => p.op === 'status_active' && p.subject !== 'target');
   const floor = furnish
-    ? '1.101'
+    ? '1.102'
     : c.world?.identity
       ? '1.97'
       : voices

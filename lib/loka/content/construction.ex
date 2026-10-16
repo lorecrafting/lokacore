@@ -5,7 +5,7 @@ defmodule Loka.Content.Construction do
   cartridge (UNRESOLVED_REFERENCE); a blueprint, its tags and description variants are owned by
   their capabilities, and its title and descriptions have catalog entries; a site or
   world.construction needs construction@1; a blueprint, a site, world.construction or (S4) a
-  `status_active` leaf with subject `room` needs kernel_api 1.99, (S5) a raze service 1.101. Twin of kernel/ts/src/content/cartridge_construction.ts
+  `status_active` leaf with subject `room` needs kernel_api 1.99, (S5) a raze service 1.102. Twin of kernel/ts/src/content/cartridge_construction.ts
   (the TS loader checks blueprint parts in cartridge_refs.ts). Variant and enter-lock conditions
   join Checks.trees/1 through RoomParts.conditions/1.
   """
@@ -37,7 +37,7 @@ defmodule Loka.Content.Construction do
 
   # Built rooms S6: a recipe build step sits in the success outcome of a detail target whose room is a site listing its
   # blueprint and direction, at most one per sequence, with world.construction, the build refusal
-  # texts and kernel_api 1.101 (twin of builds in cartridge_construction.ts). The listed blueprint
+  # texts and kernel_api 1.102 (twin of builds in cartridge_construction.ts). The listed blueprint
   # resolves and owns construction@1 already.
   defp builds(m, defs, text, settings) do
     for {_, {rel, [], r}} <- defs["recipe"] || %{},
@@ -57,15 +57,15 @@ defmodule Loka.Content.Construction do
       true <- [misplaced?(sequence, i, name, site, settings)],
       do: diag("SCHEMA_VIOLATION", op, %{"error" => "invalid_value"})
     ) ++
-      for(true <- [api(m) < [1, 101]], do: floor_diag()) ++
+      for(true <- [api(m) < [1, 102]], do: floor_diag()) ++
       refusal_texts(text, op) ++ on_site(site, s, rel, path)
   end
 
-  # Built rooms S5: a raze service needs kernel_api 1.101 (one diagnostic however many).
+  # Built rooms S5: a raze service needs kernel_api 1.102 (one diagnostic however many).
   defp razes(m, defs) do
     raze? = &match?({_, {_, [], %{"benefit" => %{"kind" => "raze"}}}}, &1)
 
-    if Enum.any?(defs["service"] || %{}, raze?) and api(m) < [1, 101],
+    if Enum.any?(defs["service"] || %{}, raze?) and api(m) < [1, 102],
       do: [floor_diag()],
       else: []
   end

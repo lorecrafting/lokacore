@@ -169,19 +169,21 @@ defmodule Loka.Content.Skills do
       "key" => key
     }
 
-  # Homestead hs-11 and hs-14: a skill prerequisite or profession needs API 1.101.
-  defp prerequisite_floor(m, defs),
-    do:
-      if(
-        Enum.any?(
-          defs["skill"],
-          &(match?({_, {_, _, %{"prerequisite" => _}}}, &1) or
-              match?({_, {_, _, %{"profession" => _}}}, &1))
-        ) and
-          version(m) < [1, 101],
-        do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
-        else: []
-      )
+  # Homestead hs-11: a skill prerequisite needs API 1.101; hs-14: a profession 1.102.
+  defp prerequisite_floor(m, defs) do
+    has = fn k -> Enum.any?(defs["skill"], &match?({_, {_, _, %{^k => _}}}, &1)) end
+
+    floor =
+      cond do
+        has.("profession") -> [1, 102]
+        has.("prerequisite") -> [1, 101]
+        true -> nil
+      end
+
+    if floor && version(m) < floor,
+      do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
+      else: []
+  end
 
   # Toolbox rows 5 and G5: skill growth, an opposed check or a detail rating needs API 1.44.
   defp floor(m, defs) do
