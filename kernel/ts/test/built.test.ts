@@ -487,7 +487,7 @@ test('raze puts the floor in the lane, takes north away, ends weathering; a new 
   const command = { id: elapsedCommandId(run_id, w.context, from, until), payload };
   const r = stepElapsed(w, { ...command, world_context_id: w.context } as never, n);
   assert.equal(r.decision.kind, 'accepted');
-  const events = (r.decision as { events: { payload: { type: string } }[] }).events;
+  const events = (r.decision as unknown as { events: { payload: { type: string } }[] }).events;
   assert.ok(!events.some((e) => e.payload.type === 'status_expired'), JSON.stringify(events));
   assert.deepEqual(active(r.world), []);
   w = seeded(
@@ -565,7 +565,7 @@ test('raze is refused for a non-owner, and while a corpse lies in the hut', () =
       },
       containers: { ...w.state.containers, [corpse]: hut },
     },
-  } as World;
+  } as unknown as World;
   assert.deepEqual(unrazable(occupied, b, w.character), {
     code: 'invalid_state',
     message: { key: 'service.occupied' },

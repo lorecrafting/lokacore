@@ -1,4 +1,4 @@
-# size: allow 460, row 20a/20b/25 escrow orders, kgd.70 barters, bank accounts and Built rooms S2-S5 builds, mends and razes check in the same service admission pass
+# size: allow 443, row 20a/20b/25 escrow orders, kgd.70 barters, bank accounts and Built rooms S2-S5 builds, mends and razes check in the same service admission pass
 defmodule Loka.Content.Services do
   @moduledoc "Checks finite immediate service declarations and their exact provider stock."
   import Loka.Content.Source, only: [diag: 2, diag: 3, diag: 4, at: 2, ref: 3]
@@ -328,31 +328,16 @@ defmodule Loka.Content.Services do
     end ++ build_fact(build, m, defs)
   end
 
-  # Built rooms S4: a resolved site lists the direction and some blueprint with a ruin to cure.
-  defp benefit(%{"kind" => "mend", "site" => r} = mend, _, _, m, defs) do
+  # Built rooms S4, S5: a resolved site lists the direction; a mend's site has a blueprint with a ruin.
+  defp benefit(%{"kind" => k, "site" => r} = b, _, _, m, defs) when k in ~w(mend raze) do
     case Refs.resolve(r, "room", m, defs) do
       {_, _, room} ->
         site = room["site"] || %{}
         ruin? = &(resolved(&1, "blueprint", m, defs)["ruin"] != nil)
 
-        [
-          {mend["direction"] in (site["directions"] || []), ["benefit", "direction"]},
-          {Enum.any?(site["blueprints"] || [], ruin?), ["benefit", "site"]}
-        ]
-
-      _ ->
-        []
-    end
-  end
-
-  # Built rooms S5: a resolved site lists the direction.
-  defp benefit(%{"kind" => "raze", "site" => r} = raze, _, _, m, defs) do
-    case Refs.resolve(r, "room", m, defs) do
-      {_, _, room} ->
-        [
-          {raze["direction"] in ((room["site"] || %{})["directions"] || []),
-           ["benefit", "direction"]}
-        ]
+        [{b["direction"] in (site["directions"] || []), ["benefit", "direction"]}] ++
+          for true <- [k == "mend"],
+              do: {Enum.any?(site["blueprints"] || [], ruin?), ["benefit", "site"]}
 
       _ ->
         []

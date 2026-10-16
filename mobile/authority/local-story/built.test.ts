@@ -33,7 +33,7 @@ const initial = newWorld(
   '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never,
   [1, 2, 3, 4],
 );
-const releases = [{ fresh: initial, content_hash: bundle.sha256 }];
+const releases = [{ fresh: initial, content_hash: bundle.sha256 }] as const;
 const shipped = { bundle, releases };
 type Cart = typeof shipped;
 const npc = (k: string) => initial.entityIds[`build_sampler@0.0.1:npc/${k}`]!;
@@ -327,8 +327,7 @@ test('a self-built hut survives cold reopen, its replay raises no second hut, an
   p.sql.close();
 });
 
-// Built rooms S5: raze the hut with timber_c on its floor. The hut's tombstone is a `built` row;
-// the razed room keeps its ids but has no exits, and the timber lies in the lane.
+// Built rooms S5: raze the hut with timber_c on its floor; its tombstone is a `built` row.
 function razeRun(path: string, mode?: 'failed' | 'lost', cart: Cart = shipped) {
   const b = build(path, false, undefined, cart);
   const { p, story, invocation } = b;
@@ -411,10 +410,8 @@ test('a real failed or lost COMMIT at raze retries to one tombstone and the timb
   straight.p.sql.close();
 });
 
-// Breaks: load admitting a tombstone later than the clock, a tombstone on an entity that is not a
-// built room, or an entity saved inside a razed room; each refused as save_corrupt by a load check
-// (hydrate's tombstone checks, receipt recovery's history check behind them), file unchanged. The
-// per-check red controls are the kernel's forged-tombstone test.
+// Breaks: load admitting a late tombstone, one on a non-built entity, or a row inside a razed room
+// (refused by hydrate or receipt recovery; per-check red controls: kernel forged-tombstone test).
 test('a forged tombstone or a row inside a razed room is save_corrupt and the file is unchanged', (t) => {
   const dir = mkdtempSync(join(tmpdir(), 'loka-raze-forged-'));
   t.after(() => rmSync(dir, { recursive: true, force: true }));
@@ -447,8 +444,7 @@ test('a forged tombstone or a row inside a razed room is save_corrupt and the fi
   forge('inside', set, JSON.stringify(hut), 'containers', timber('c'));
 });
 
-// Built rooms S5 with a test-local build_sampler whose hut escrows one timber, so timber_b stays in
-// the pack to raise a second hut after the raze (the shipped hut takes both a and b into the yard).
+// A test-local build_sampler hut escrows one timber, so timber_b raises a second hut after the raze.
 function oneTimber(): Cart {
   const dir = mkdtempSync(join(tmpdir(), 'loka-one-timber-'));
   try {
@@ -471,7 +467,7 @@ function oneTimber(): Cart {
       [1, 2, 3, 4],
     );
     assert.deepEqual(fresh.entityIds, initial.entityIds);
-    return { bundle: b, releases: [{ fresh, content_hash: b.sha256 }] };
+    return { bundle: b, releases: [{ fresh, content_hash: b.sha256 }] as const };
   } finally {
     rmSync(dir, { recursive: true });
   }
