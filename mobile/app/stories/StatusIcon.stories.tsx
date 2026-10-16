@@ -168,6 +168,14 @@ export const Focused: Story = {
     await none();
     press('reapply'); // fed's new icon is not hovered: no tip
     await none();
+    const poisonedIcon = () => canvas.getByRole('button', { name: /^poisoned/ });
+    await userEvent.hover(canvas.getByRole('button', { name: /^fed/ }));
+    poisonedIcon().focus();
+    await tip('poisoned, 3m remaining');
+    await userEvent.unhover(canvas.getByRole('button', { name: /^fed/ })); // not poisoned's hold
+    await tip('poisoned, 3m remaining');
+    press('expire'); // poisoned moves to fed's place: a new icon, unfocused
+    await none();
   },
 };
 

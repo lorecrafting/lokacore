@@ -33,19 +33,20 @@ export function StatusIcons(p: Props) {
   // The held icon's label, so the tip follows the clock and goes with the icon or the lock.
   const [held, setHeld] = useState<string>();
   const shown = p.conditions.slice(0, SHOWN);
-  const tip = p.open ? shown.find((x) => x.label === held) : undefined;
-  // An icon that unmounts (locked, expired) never blurs, so its hold is let go here.
+  const key = (x: Condition, i: number) => `${x.label}-${i}`;
+  const tip = p.open ? shown.find((x, i) => key(x, i) === held) : undefined;
+  // An icon that unmounts (locked, expired, moved) never blurs, so its hold is let go here.
   if (held !== undefined && !tip) setHeld(undefined);
   const more = p.conditions.length - shown.length;
   return (
     <View style={{ flexDirection: 'row', justifyContent: 'center', columnGap: space.sm }}>
       {shown.map((x, i) => (
         <Icon
-          key={`${x.label}-${i}`}
+          key={key(x, i)}
           look={x.kind ?? 'neutral'}
           name={[statusTip(x, p.time, p.text), x.kind].filter(Boolean).join(', ')}
           fraction={ringFraction(x, p.time)}
-          hold={(on) => setHeld(on ? x.label : undefined)}
+          hold={(on) => setHeld((h) => (on ? key(x, i) : h === key(x, i) ? undefined : h))}
           open={p.open}
         >
           {glyph(x.label, x.kind)}
@@ -85,14 +86,7 @@ function Icon(p: {
   children: string;
 }) {
   const face = <Disc look={p.open ? p.look : 'neutral'}>{p.children}</Disc>;
-  const disc =
-    p.fraction === undefined ? (
-      face
-    ) : (
-      <Ring fraction={p.fraction} locked={!p.open}>
-        {face}
-      </Ring>
-    );
+  const disc = ringed(p.fraction, !p.open, face);
   if (!p.open)
     return (
       <View accessibilityRole="image" accessibilityLabel={p.name} style={box}>
@@ -119,9 +113,12 @@ function Icon(p: {
   );
 }
 
-// The countdown ring (loka-x6t.65): a dim track and the remaining arc in fg, clockwise from 12,
-// a space.hair gap round the disc and inside the size.touch box, so row spacing stays. Two clipped
-// halves turn a half ring each: the right shows 0-180 degrees, the left the rest.
+// The countdown ring (loka-x6t.65): a dim track and the remaining arc in fg (locked: a line track
+// and a dim arc), clockwise from 12, a space.hair gap round the disc and inside the size.touch box,
+// so row spacing stays. Two clipped halves turn a half ring each: the right shows 0-180 degrees,
+// the left the rest.
+const ringed = (fraction: number | undefined, locked: boolean, face: ReactNode) =>
+  fraction === undefined ? face : <Ring {...{ fraction, locked }}>{face}</Ring>;
 const RING = size.statusIcon + 2 * (space.hair + size.rule);
 function Ring(p: { fraction: number; locked: boolean; children: ReactNode }) {
   const c = usePalette();
