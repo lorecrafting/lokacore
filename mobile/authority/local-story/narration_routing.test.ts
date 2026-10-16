@@ -70,6 +70,15 @@ test('committed combat line indices come from pinned keys and structured receipt
       lines: [{ key: 'escape' }],
       combat_lines: [0],
     });
+    // Any other command's root close (not an engage or flee) keeps its lines in the World log.
+    sql.prepare('UPDATE receipt SET response = ?').run(
+      JSON.stringify({
+        ...decision,
+        events: [],
+        delta: { ops: [{ op: 'encounter.close', writer_group: 0 }] },
+      }),
+    );
+    assert.deepEqual(narration(story()), { command_id: 'round', lines });
     // Break (loka-x6t.32): a move that opens an encounter (a hostile engage) leaves its engage line
     // in the World log; the opening receipt's narration is all combat (book-ui.md, Opening).
     const engage = [{ key: 'fall' }, { key: 'npc.warden.engage' }];

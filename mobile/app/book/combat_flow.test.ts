@@ -157,6 +157,7 @@ test('confirmed encounter foregrounds another page; closure keeps Combat until B
       h.publish(view(), 'combat.hit');
       assert.ok(h.texts().includes('Combat'));
       assert.ok(h.texts().includes('You strike the marsh rat.'));
+      assert.equal(h.texts().includes('Back to World'), false); // a live encounter has no foot
       assert.equal(h.texts().includes('Settings'), false);
       h.publish(
         view({
