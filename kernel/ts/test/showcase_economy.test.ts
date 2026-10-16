@@ -1,6 +1,6 @@
 // The showcase economy and law district walked step by step (docs/showcase/economy-law-district.md,
-// guided loop steps 1 to 5 and 8; the theft steps come with the law slice). Each test continues the
-// world the one before it left. Fresh world at 07:00 (25200), pennies 10.
+// guided loop steps 1 to 10). Each numbered test continues the world the one before it left; a
+// branch starts from a saved step. Fresh world at 07:00 (25200), pennies 10.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { gameView } from '../src/index.ts';
@@ -8,6 +8,9 @@ import type { World } from '../src/runtime/decision.ts';
 import { validate } from '../src/foundation/validate.ts';
 import { key } from '../src/foundation/compose.ts';
 import { decode } from '../src/foundation/canonical.ts';
+import { engaged } from '../src/mechanics/combat/shared.ts';
+import { pending } from '../src/mechanics/dialogue/shared.ts';
+import { describeEntity } from '../src/mechanics/description_variant/rule.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import {
   detail,
@@ -16,11 +19,14 @@ import {
   go,
   HOUR,
   id,
+  labels,
   npc,
   play,
   pool,
   refused,
   room,
+  talk,
+  choose,
   take,
   wait,
   where,
@@ -82,9 +88,24 @@ const disown = (w: World): World => ({
   },
 });
 
+// The event kinds of an accepted command.
+const kinds = (r: ReturnType<typeof play>) =>
+  r.decision.kind === 'accepted' ? r.decision.events.map((e) => e.payload.type) : [];
+const lift = (w: World, item: string) => play(w, { type: 'take', item_id: id(w, 'item', item) });
+// The world with one NPC's attributes forged to `value`.
+const alert = (w: World, who: string, value: number): World => {
+  const e = w.entities[npc(w, who)] as { attributes: object[] };
+  const attributes = e.attributes.map((a) => ({ ...a, value }));
+  return { ...w, entities: { ...w.entities, [npc(w, who)]: { ...e, attributes } as never } };
+};
+
 let w: World;
 let T: number; // the commission's clock (step 4)
 let ordered: World; // step 4's end, the order pending
+let five: World; // step 5's end, in the market: step 9 branches here
+let H: number; // the hide's clock (step 6)
+let six: World; // step 6's end, the purse held
+let seven: World; // step 7's end: step 10 branches here
 
 // Breaks: the hub's down exit, the signpost, the six exits, or the door not locked without a key.
 test('economy 1: down, read the signpost, south is the locked door', () => {
@@ -217,6 +238,159 @@ test('economy 5 branch: cancel before T+3600 returns both ore', () => {
   assert.equal(where(c, id(c, 'item', 'smith_knife')), room(c, 'forge_back'));
   assert.equal(fact(c, 'ordered_knife'), false);
   valid(c);
+});
+
+// Breaks: the hide's place or check, the hidden status or its label, stealth practice, a bystander
+// at alertness 1 seeing through stealth 1, or the unseen lift writing more than the stolen fact.
+test('economy 6: hide in the alley, lift the merchant purse unseen', () => {
+  five = w;
+  w = walk(w, 'south', 'west');
+  H = w.state.clock;
+  const h = play(w, { type: 'perform', action: 'hide' });
+  assert.deepEqual(kinds(h), ['check_passed', 'fact_changed', 'custom_event', 'action_completed']);
+  assert.equal(fact(h.world, 'uses_stealth'), 1);
+  w = walk(h.world, 'east', 'north');
+  assert.deepEqual(labels(w), ['condition.hidden']);
+  const purse_ = id(w, 'item', 'merchant_purse');
+  // Breaks: alertness 2 not piercing stealth 1 (the chandler is why the plan sets her to 1).
+  assert.deepEqual(lift(alert(w, 'chandler', 2), 'merchant_purse').lines, ['theft.seen']);
+  const t = lift(w, 'merchant_purse');
+  assert.deepEqual(t.lines, ['theft.unseen']);
+  assert.deepEqual(kinds(t), ['item_acquired', 'fact_changed']);
+  w = t.world;
+  assert.deepEqual(
+    [where(w, purse_), fact(w, 'stolen', purse_), fact(w, 'wanted')],
+    [w.body, true, undefined],
+  );
+  assert.equal(engaged(w, w.body), undefined);
+  six = w;
+  valid(w);
+});
+
+// Breaks: the fence's stolen offer or price, his get lock, the clean beeswax sold to him, or the
+// chandler's buy-back of either candle.
+test('economy 7: sell the purse to the fence; the clean beeswax goes back to the chandler', () => {
+  w = walk(w, 'south', 'west');
+  const purse_ = id(w, 'item', 'merchant_purse');
+  w = play(w, trade(w, 'sell', 'merchant_purse', 3, 'fence')).world;
+  assert.deepEqual([pennies(w), purse(w, 'fence'), where(w, purse_)], [5, 3, npc(w, 'fence')]);
+  assert.equal(fact(w, 'stolen', purse_), true);
+  assert.equal(refused(w, { type: 'take', item_id: purse_ }), 'permission_denied');
+  w = walk(w, 'east', 'north');
+  w = play(w, trade(w, 'buy', 'beeswax_candle', 2)).world;
+  assert.equal(pennies(w), 3);
+  w = walk(w, 'south', 'west');
+  assert.equal(refused(w, trade(w, 'sell', 'beeswax_candle', 2, 'fence')), 'invalid_state');
+  w = walk(w, 'east', 'north');
+  w = play(w, trade(w, 'sell', 'beeswax_candle', 1)).world;
+  w = play(w, trade(w, 'sell', 'candle_01', 1)).world;
+  assert.equal(pennies(w), 5);
+  assert.equal(candles(w, npc(w, 'chandler')).length, 4);
+  assert.equal(price(w), 1);
+  seven = w;
+  valid(w);
+});
+
+// Breaks: the fence's get lock missing (red control: without it the purse sells twice).
+test('economy 7 control: without the fence lock the purse sells twice', () => {
+  const fence = npc(six, 'fence');
+  const e = six.entities[fence] as { locks?: object };
+  const open: World = {
+    ...six,
+    entities: { ...six.entities, [fence]: { ...e, locks: undefined } as never },
+  };
+  let r = walk(open, 'south', 'west');
+  r = play(r, trade(r, 'sell', 'merchant_purse', 3, 'fence')).world;
+  r = play(take(r, 'merchant_purse'), trade(r, 'sell', 'merchant_purse', 3, 'fence')).world;
+  assert.deepEqual([pennies(r), purse(r, 'fence')], [8, 0]);
+});
+
+// Breaks: the seen lift's line or events, the reaction setting wanted, the guard's hostility or
+// engage, his blow landing, the flee exits, the fence's price, the fine's gate, price or reset.
+test('economy 9: from step 5, a seen lift; the guard bars the door until the fine', () => {
+  let s = five;
+  assert.equal(
+    refused(s, { type: 'talk', target_id: npc(s, 'clerk_a') }),
+    'unsupported_capability',
+  );
+  const t = lift(s, 'merchant_purse');
+  assert.deepEqual(t.lines, ['theft.seen']);
+  assert.deepEqual(kinds(t).slice(-2), ['custom_event', 'fact_changed']);
+  s = t.world;
+  assert.equal(fact(s, 'wanted'), true);
+  const back = go(walk(s, 'south'), 'north');
+  assert.ok(back.lines.includes('npc.guard.engage'), JSON.stringify(back.lines));
+  s = back.world;
+  const guard = npc(s, 'guard');
+  assert.equal(engaged(s, s.body)?.row.npc_id, guard);
+  assert.equal(describeEntity(s, s.character, guard, 'room_line'), 'npc.guard.room_wanted');
+  const round = wait(s, s.state.clock + 150);
+  const blow = round.events.find((e) => e.type === 'attack_result' && e.attacker_id === guard);
+  assert.equal(blow?.hit, false);
+  s = play(round.world, { type: 'flee' }).world;
+  assert.ok([room(s, 'undercroft'), room(s, 'forge_stall')].includes(where(s, s.body)!));
+  // North is the smith's dead end: back through the guard's market until a flee lands south.
+  for (let i = 0; where(s, s.body) === room(s, 'forge_stall'); i++) {
+    assert.ok(i < 5);
+    s = play(go(s, 'south').world, { type: 'flee' }).world;
+  }
+  const poor = talk(go(s, 'east').world, 'clerk_a').world; // 2 pennies: the fine is 3
+  const [continuation_id] = pending(poor, poor.character)!;
+  const pay = { type: 'choose', choice_id: 'pay', continuation_id };
+  assert.equal(refused(poor, pay), 'insufficient_resource');
+  s = play(go(s, 'west').world, trade(s, 'sell', 'merchant_purse', 3, 'fence')).world;
+  assert.equal(pennies(s), 5);
+  s = choose(talk(walk(s, 'east', 'east'), 'clerk_a').world, 'pay').world;
+  assert.deepEqual([pennies(s), fact(s, 'wanted'), purse(s, 'clerk_a')], [2, false, 4]); // clerk A held step 2's fee
+  const market = go(walk(s, 'west'), 'north');
+  assert.ok(!market.lines.includes('npc.guard.engage'));
+  s = market.world;
+  assert.equal(engaged(s, s.body), undefined);
+  assert.equal(describeEntity(s, s.character, guard, 'room_line'), 'npc.guard.room');
+  valid(s);
+});
+
+// Breaks: hidden ending before hide + 3600 or outliving it, its tick narrating, the bystanders
+// not seeing an unhidden lift, the beeswax in the set's price, or the fence's beeswax price.
+test('economy 10: from step 7, hidden ends at hide + 3600; the beeswax lift is seen', () => {
+  assert.deepEqual(labels(wait(seven, H + HOUR - 1).world), ['condition.hidden']);
+  const r = wait(seven, H + HOUR);
+  assert.deepEqual(labels(r.world), []);
+  assert.deepEqual(
+    r.lines.filter((l) => l.startsWith('narration.hidden')),
+    ['narration.hidden.expired'],
+  );
+  const wax = id(r.world, 'item', 'beeswax_candle');
+  let s = r.world;
+  const t = lift(s, 'beeswax_candle');
+  assert.deepEqual(t.lines, ['theft.seen']);
+  s = t.world;
+  assert.deepEqual(
+    [fact(s, 'wanted'), fact(s, 'stolen', wax), where(s, wax)],
+    [true, true, s.body],
+  );
+  assert.equal(price(s), 1);
+  s = play(walk(s, 'south', 'west'), trade(s, 'sell', 'beeswax_candle', 2, 'fence')).world;
+  assert.deepEqual([pennies(s), purse(s, 'fence')], [7, 1]);
+  valid(s);
+});
+
+// Breaks: the yard's hide, its purse, the watchman's sight, or the fence paying more than his 6.
+test('economy yard theft: lift the yard purse hidden and seen; the fence pays out 6 once', () => {
+  let y = walk(fresh(WORLD), 'down', 'down');
+  assert.deepEqual(lift(y, 'yard_purse').lines, ['theft.seen']);
+  y = play(y, { type: 'perform', action: 'yard_hide' }).world;
+  assert.deepEqual(labels(y), ['condition.hidden']);
+  const t = lift(y, 'yard_purse');
+  assert.deepEqual([t.lines, fact(t.world, 'wanted')], [['theft.unseen'], undefined]);
+  y = walk(t.world, 'up', 'west');
+  y = play(y, trade(y, 'sell', 'yard_purse', 3, 'fence')).world;
+  y = walk(lift(walk(y, 'east', 'north'), 'merchant_purse').world, 'south', 'west');
+  y = play(y, trade(y, 'sell', 'merchant_purse', 3, 'fence')).world;
+  assert.deepEqual([pennies(y), purse(y, 'fence')], [16, 0]);
+  y = walk(lift(walk(y, 'east', 'north'), 'beeswax_candle').world, 'south', 'west');
+  assert.equal(refused(y, trade(y, 'sell', 'beeswax_candle', 2, 'fence')), 'insufficient_resource');
+  valid(y);
 });
 
 // Breaks: the price table read other than buy[held - 1] (one held 5; four held 1), or the

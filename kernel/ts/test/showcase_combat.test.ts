@@ -427,3 +427,29 @@ test('loader: the attacker filter needs API 1.58 and an authored NPC', () => {
   assert.equal(reload(gore('1.58', 'goblin')), `SCHEMA_VIOLATION ${at}`);
   assert.equal(reload(gore('1.58', 'wolf')), `UNRESOLVED_REFERENCE ${at}`);
 });
+
+// Breaks (plan 5's world.theft impact): an NPC's held item not listed with Take, the lift not a
+// theft, or a stolen sword returned to Aldous still refusing the lesson.
+test('combat impact: Aldous holds the sword; lifted, given back, the lesson still runs', () => {
+  let s = go(fresh(SOCIAL), 'west').world;
+  const sword = id(s, 'item', 'training_sword');
+  const aldous = npc(s, 'aldous');
+  const held = gameView(s).entities.find((e) => e.id === aldous)!.contents!;
+  assert.deepEqual(
+    held.map((h) => [h.id, h.actions.map((a) => a.action_key)]),
+    [[sword, ['take']]],
+  );
+  const lifted = play(s, { type: 'take', item_id: sword });
+  assert.deepEqual(lifted.lines, ['theft.unseen']);
+  s = lifted.world;
+  const asked = talk(s, 'aldous').world;
+  const [continuation_id] = pending(asked, asked.character)!;
+  assert.equal(
+    refused(asked, { type: 'choose', choice_id: 'learn', continuation_id }),
+    'not_owned',
+  );
+  s = play(s, { type: 'give', item_id: sword, recipient_id: aldous }).world;
+  assert.deepEqual(choose(talk(s, 'aldous').world, 'learn').lines, [
+    'narration.aldous_lesson.learn',
+  ]);
+});
