@@ -15,10 +15,11 @@ defmodule Loka.ContentMountTest do
   end
 
   # Breaks (row 43b): the compiler admits a mount without world.mount or on a spawn template, a
-  # riding fact that is no pair fact or names nothing, or world.mount below kernel_api 1.108.
+  # riding fact that is no bool pair fact or names nothing, or world.mount below kernel_api 1.108.
   test "mount refusals match the TS loader" do
     dir = Loka.ContentSource.copy(@dir)
     horse = "npcs/horse.json"
+    talk = "dialogues/horse_talk.json"
 
     for {edits, expected} <- [
           {[drop("cartridge.json", ["world", "mount"])],
@@ -26,6 +27,18 @@ defmodule Loka.ContentMountTest do
           {[edit(horse, ["spawn_template"], true)], [{"SCHEMA_VIOLATION", "npcs/horse.mount"}]},
           {[drop("facts.json", ["facts", "riding", "per_subject"])],
            [{"SCHEMA_VIOLATION", "cartridge.world.mount.riding"}]},
+          {[edit("facts.json", ["facts", "riding", "scopes"], ["instance"])],
+           [{"SCHEMA_VIOLATION", "cartridge.world.mount.riding"}]},
+          {[
+             edit("facts.json", ["facts", "riding", "value_type"], %{
+               "type" => "int",
+               "default" => 0
+             })
+           ] ++
+             for(
+               k <- ["mount", "dismount"],
+               do: edit(talk, ["choices", k, "sequence", Access.at(0), "value"], 1)
+             ), [{"SCHEMA_VIOLATION", "cartridge.world.mount.riding"}]},
           {[edit("cartridge.json", ["world", "mount", "riding"], "nope")],
            [{"UNRESOLVED_REFERENCE", "cartridge.world.mount.riding"}]},
           {[edit("cartridge.json", ["requires", "kernel_api", "at_least"], "1.107")],

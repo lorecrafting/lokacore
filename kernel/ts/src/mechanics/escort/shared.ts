@@ -156,15 +156,12 @@ export function travel(
   const horse = mounted(world, actor);
   const members = world.cartridge.world?.group
     ? npcsIn(world, [source_id]).filter(
-        (id) =>
-          id !== escort &&
-          id !== horse &&
-          member(world, actor, id) &&
-          !member(world, actor, id, 'stay'),
+        (id) => member(world, actor, id) && !member(world, actor, id, 'stay'),
       )
     : [];
-  const ridden = horse && horse !== escort ? [horse] : [];
-  return [...(escort ? [escort] : []), ...ridden, ...members].map((entity_id) => ({
+  // A set: an escort or horse that is also a member, or a horse that is the escort, moves once.
+  const movers = new Set([escort, horse, ...members].filter((id) => id !== undefined));
+  return [...movers].map((entity_id) => ({
     op: 'entity.transfer',
     writer_group: 0,
     entity_id,

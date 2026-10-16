@@ -96,6 +96,17 @@ test('case 2: mounted, the horse comes along and the road costs nothing', () => 
   assert.deepEqual([moved(r.world.body), moved(horse(r.world))], [1, 1]);
 });
 
+// Breaks: a horse that is also a group member (G8) moves twice.
+test('case 2b: a ridden horse in the group moves once', () => {
+  const w = ride(
+    yard((c) => (c.world.group = { member: c.world.mount.riding })),
+    'mount',
+  );
+  const ops = (send(w, { type: 'move', direction: 'north' }).decision as any).delta.ops;
+  const moved = ops.filter((o: any) => o.op === 'entity.transfer' && o.entity_id === horse(w));
+  assert.equal(moved.length, 1);
+});
+
 // Breaks: the mount's terrain is not checked, or the exits list disagrees with the move.
 test('case 3: mounted, the fen is refused and shown unavailable', () => {
   const w = go(ride(yard(), 'mount'), 'north');
@@ -125,13 +136,18 @@ test('case 5: mounted, the ford (road and marsh) is admitted', () => {
   assert.deepEqual(where(go(ride(yard(), 'mount'), 'south')), ['ford', 'ford', 10]);
 });
 
-// Breaks: mounted() reads the fact without checking the horse shares the body's room.
-test('case 6: riding true but the horse elsewhere: on foot', () => {
+// Breaks: mounted() reads the fact without checking the horse shares the body's room or has a mount.
+test('case 6: riding true but the horse elsewhere or unsaddled: on foot', () => {
   const w = yard((c) => {
     c.npcs[HORSE].room.key = 'fen';
     c.facts[`${P}:fact/riding`].value_type.default = true;
   });
   assert.deepEqual(where(go(w, 'north')), ['road', 'fen', 9]);
+  const unsaddled = yard((c) => {
+    delete c.npcs[HORSE].mount;
+    c.facts[`${P}:fact/riding`].value_type.default = true;
+  });
+  assert.deepEqual(where(go(unsaddled, 'north')), ['road', 'yard', 9]);
 });
 
 // Breaks: cost_percent ignored (or the 100 default is not the default).
@@ -174,6 +190,18 @@ test('case 8: loader refusals and the accepted edges', () => {
     [
       (c) => (c.npcs[HORSE].spawn_template = true),
       ['SCHEMA_VIOLATION', `.cartridge.npcs["${HORSE}"].mount`],
+    ],
+    [
+      (c) => (c.facts[riding].scopes = ['instance']),
+      ['SCHEMA_VIOLATION', '.cartridge.world.mount.riding'],
+    ],
+    [
+      (c) => {
+        c.facts[riding].value_type = { type: 'int', default: 0 };
+        const { choices } = c.dialogues[`${P}:dialogue/horse_talk`];
+        for (const k of ['mount', 'dismount']) choices[k].sequence[0].value = 1;
+      },
+      ['SCHEMA_VIOLATION', '.cartridge.world.mount.riding'],
     ],
     [() => {}, 'loaded'],
     [npc((m) => (m.cost_percent = 1000)), 'loaded'],
