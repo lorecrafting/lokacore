@@ -115,7 +115,7 @@ Blueprint `hut_timbered`: `max_per_owner 1`, `variants [{when: item_present {tag
 > boards. The farmer south likes an apple and not a dead rat, and trades a knife
 > for two pelts without a penny passing. The pond east of her yard bites by the hour and the weather;
 > the cook south of the yard turns two fish into a stew for a penny, or teaches you to do it at her
-> hearth. Up the croft is the same again with hens in it.
+> hearth. Up the croft has hens, a pool that bites at any hour, and a plot where a seed from the yard sack can be sown too.
 
 ### NPCs, services, recipes, reactions
 
