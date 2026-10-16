@@ -11,6 +11,8 @@
   },
   "services": [
     "raise_hut_plain",
-    "raze_hut"
+    "raze_hut",
+    "raise_croft_hut",
+    "raze_croft_hut"
   ]
 }

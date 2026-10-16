@@ -229,6 +229,7 @@ test('400 fixed showcase sequences keep every invariant and end in each district
     'boar_run',
     'tilt_yard',
     'carpenter_shop',
+    'holding_croft',
   ];
   const verbs = ['drink', 'eat', 'read', 'sit', 'sleep', 'wear'];
   assert.deepEqual(

@@ -1,0 +1,21 @@
+{
+  "keywords": [
+    "hen"
+  ],
+  "short": "npc.hen.short",
+  "room_line": "npc.hen.room",
+  "description": "npc.hen.description",
+  "room": "holding_croft",
+  "spawn_template": true,
+  "hp": {
+    "minimum": 0,
+    "maximum": 1,
+    "start": 1,
+    "gain": 0
+  },
+  "attack": {
+    "chance": 1,
+    "damage_min": 1,
+    "damage_max": 1
+  }
+}

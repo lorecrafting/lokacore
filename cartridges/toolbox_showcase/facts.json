@@ -314,6 +314,123 @@
         "instance"
       ],
       "meaning": "A timber has been sawn at the saw bench."
+    },
+    "regard": {
+      "version": 1,
+      "value_type": {
+        "type": "int",
+        "default": 0,
+        "minimum": -1,
+        "maximum": 1
+      },
+      "scopes": [
+        "player"
+      ],
+      "per_subject": true,
+      "meaning": "How an NPC regards the player after gifts: -1 cold, 0 plain, 1 warm."
+    },
+    "gifted_apple": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "per_subject": true,
+      "meaning": "This NPC has had the player's apple; a second gift of it does nothing."
+    },
+    "gifted_rat": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "per_subject": true,
+      "meaning": "This NPC has had the player's rat; a second gift of it does nothing."
+    },
+    "traded_knife": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The farmer has bartered the knife to this character."
+    },
+    "owns_plot": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The character bought the plots."
+    },
+    "owns_pen": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The character bought the hen pen."
+    },
+    "ordered": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The cook holds this character's stew order."
+    },
+    "sown_at": {
+      "version": 1,
+      "value_type": {
+        "type": "int",
+        "default": 0
+      },
+      "scopes": [
+        "instance"
+      ],
+      "per_subject": true,
+      "meaning": "When this plot was last sown, in logical seconds."
+    },
+    "watered_at": {
+      "version": 1,
+      "value_type": {
+        "type": "int",
+        "default": 0
+      },
+      "scopes": [
+        "instance"
+      ],
+      "per_subject": true,
+      "meaning": "When this plot was last watered, in logical seconds."
+    },
+    "cooked": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "This character has cooked a dish at the hearth."
     }
   }
 }

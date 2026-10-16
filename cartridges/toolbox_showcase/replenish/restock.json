@@ -1,0 +1,19 @@
+{
+  "items": [
+    "trout_01",
+    "trout_02",
+    "eel_01",
+    "salmon_01"
+  ],
+  "from": {
+    "in": "room",
+    "room": "midden"
+  },
+  "to": {
+    "in": "room",
+    "room": "pond_deep"
+  },
+  "cap": 4,
+  "count": 4,
+  "every": 86400
+}

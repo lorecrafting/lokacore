@@ -1,0 +1,33 @@
+{
+  "title": "room.holding_croft.title",
+  "description": "room.holding_croft.description",
+  "exits": {
+    "down": {
+      "to": "holding_lane"
+    }
+  },
+  "details": {
+    "croft_pool": {
+      "aliases": [
+        "pool",
+        "water"
+      ],
+      "description": "detail.croft_pool"
+    },
+    "croft_hearth": {
+      "aliases": [
+        "hearth"
+      ],
+      "description": "detail.croft_hearth",
+      "rating": 1
+    }
+  },
+  "site": {
+    "directions": [
+      "north"
+    ],
+    "blueprints": [
+      "hut_plain"
+    ]
+  }
+}

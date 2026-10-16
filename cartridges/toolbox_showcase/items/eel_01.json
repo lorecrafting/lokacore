@@ -1,0 +1,14 @@
+{
+  "keywords": [
+    "eel",
+    "fish"
+  ],
+  "short": "item.eel_01.short",
+  "room_line": "item.eel_01.room",
+  "description": "item.eel_01.description",
+  "mass_grams": 500,
+  "location": {
+    "in": "room",
+    "room": "pond_deep"
+  }
+}

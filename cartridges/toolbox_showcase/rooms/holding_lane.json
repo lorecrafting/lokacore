@@ -10,6 +10,9 @@
     },
     "south": {
       "to": "farm_yard"
+    },
+    "up": {
+      "to": "holding_croft"
     }
   },
   "details": {

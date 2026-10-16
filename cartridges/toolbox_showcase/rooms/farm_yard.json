@@ -7,6 +7,12 @@
     },
     "west": {
       "to": "glade"
+    },
+    "east": {
+      "to": "pond"
+    },
+    "south": {
+      "to": "farm_kitchen"
     }
   }
 }

@@ -9,11 +9,14 @@ import { pending } from '../src/mechanics/dialogue/shared.ts';
 import { unrazable } from '../src/mechanics/service/build.ts';
 import {
   act,
+  attribute,
   detail,
   choose,
+  DAY,
   fact,
   fresh,
   go,
+  HOUR,
   id,
   labels,
   npc,
@@ -29,7 +32,7 @@ import {
   where,
 } from './showcase_fixture.ts';
 
-const WORLD = '5ca5e000-0000-4000-8000-0000000004a1';
+const WORLD = '5ca5e000-0000-4000-8000-0000000004d8';
 const R = (kind: string, key: string) => ({
   cartridge_id: 'toolbox_showcase',
   cartridge_version: '0.0.1',
@@ -320,4 +323,281 @@ test('a label on carpenter_lessons is a schema violation', () => {
     reload((c) => (c.dialogues[ref('dialogue', 'carpenter_lessons')].label = 'x')),
     'SCHEMA_VIOLATION .cartridge.dialogues["toolbox_showcase@0.0.1:dialogue/carpenter_lessons"].label',
   );
+});
+
+const farmer = (w: World, service: string, quoted_price: number) => ({
+  ...hire(w, service, quoted_price),
+  provider_id: npc(w, 'farmer'),
+});
+// The order is free and the claim costs 1 (a 0 claim price is a schema violation).
+const cook = (w: World, service: string) => ({
+  ...hire(w, service, service === 'stew' ? 0 : 1),
+  provider_id: npc(w, 'cook'),
+});
+const give = (w: World, k: string) =>
+  play(w, { type: 'give', item_id: id(w, 'item', k), recipient_id: npc(w, 'farmer') }).world;
+const regard = (w: World) => fact(w, 'regard', npc(w, 'farmer'));
+const farmerText = (w: World) =>
+  gameView(w).entities.find((e) => e.id === npc(w, 'farmer'))?.description;
+// Found by trial (as fishing.test.ts): the luck draw passes with PASS and fails with FAIL.
+const PASS = [2, 2, 2, 2];
+const FAIL = [1, 1, 1, 1];
+const FISH = ['trout_01', 'trout_02', 'eel_01', 'salmon_01'];
+const cast = (w: World, rng: number[]) =>
+  act({ ...w, state: { ...w.state, rng } } as World, {
+    type: 'perform',
+    action: 'fish',
+    target_id: id(w, 'item', 'pond_water'),
+    item_id: id(w, 'item', 'rod'),
+  });
+/** The fish in room `k`, or held when `k` is 'held'. */
+const fishIn = (w: World, k: string) =>
+  FISH.filter((f) => where(w, id(w, 'item', f)) === (k === 'held' ? w.body : room(w, k)));
+const landed = (w: World) => {
+  const r = cast(w, PASS);
+  assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
+  return fishIn(r.world, 'pond');
+};
+const pond = (clock: number) =>
+  take(wait(walk(fresh(WORLD), 'north', 'west', 'south', 'east'), clock).world, 'rod');
+const statusOn = (w: World, k: string, key: string) =>
+  Object.entries(w.state.statuses ?? {}).some(([s, v]) => {
+    const t = JSON.parse(s) as { body_id: string; status: { key: string } };
+    return t.body_id === id(w, 'item', k) && t.status.key === key && v.active;
+  });
+const describe = (w: World, k: string) =>
+  gameView(w).entities.find((e) => e.id === id(w, 'item', k))?.description;
+
+// Breaks: a gift reaction firing on the wrong item or the wrong fact, regard not per NPC, the
+// warm description not read; the barter taking one pelt, paying pennies, scheduling a job, or repeating.
+test('homestead 9: gifts move regard; two pelts barter for the knife once', () => {
+  w = walk(w, 'south');
+  w = give(take(w, 'holding_apple'), 'holding_apple');
+  assert.equal(regard(w), 1);
+  assert.equal(farmerText(w), 'npc.farmer.description_warm');
+  w = give(take(w, 'dead_rat'), 'dead_rat');
+  assert.equal(regard(w), 0);
+  assert.equal(farmerText(w), 'npc.farmer.description');
+  w = walk(take(walk(w, 'west'), 'pelt_01'), 'east');
+  assert.equal(refused(w, farmer(w, 'knife_for_pelts', 0)), 'not_owned');
+  assert.deepEqual(offer(w, 'barter').reason, {
+    code: 'not_owned',
+    message: { key: 'service.missing_inputs' },
+  });
+  w = walk(take(take(walk(w, 'west'), 'pelt_02'), 'pelt_03'), 'east');
+  const jobs = Object.keys(w.state.jobs ?? {}).length;
+  w = play(w, farmer(w, 'knife_for_pelts', 0)).world;
+  assert.equal(where(w, id(w, 'item', 'knife_01')), w.body);
+  const stall = ['pelt_01', 'pelt_02', 'pelt_03'].filter(
+    (k) => where(w, id(w, 'item', k)) === room(w, 'stall'),
+  );
+  assert.equal(stall.length, 2);
+  assert.equal(pennies(w), 4);
+  assert.equal(Object.keys(w.state.jobs ?? {}).length, jobs);
+  assert.equal(refused(w, farmer(w, 'knife_for_pelts', 0)), 'invalid_state');
+  assert.deepEqual(offer(w, 'barter').reason, reason('service.order_open'));
+  valid(w);
+});
+
+// Breaks: the rat reaction adjusting by anything but -1, or the cold description not read.
+test('homestead 9 branch: the rat first leaves the farmer cold', () => {
+  let x = walk(fresh(WORLD), 'north', 'west', 'south');
+  x = give(take(x, 'dead_rat'), 'dead_rat');
+  assert.equal(regard(x), -1);
+  assert.equal(farmerText(x), 'npc.farmer.description_cold');
+});
+
+// Breaks: the bite landing nothing or two trout, the cooldown dropped, cap 1 lifted, the deep
+// refilled at once, or spoiling not applied on the catch.
+test('homestead 10: two trout by day, one per cast, then the deep is empty', () => {
+  w = take(walk(w, 'east'), 'rod');
+  assert.ok(w.state.clock % DAY < 18 * HOUR, 'still the trout window');
+  let r = cast(w, PASS);
+  w = r.world;
+  const [first] = fishIn(w, 'pond');
+  assert.match(first!, /^trout_0[12]$/);
+  assert.ok(statusOn(take(w, first!), first!, 'spoiling'));
+  assert.equal((cast(w, PASS).decision as any).error.code, 'cooldown');
+  w = wait(take(w, first!), w.state.clock + 600).world;
+  assert.equal(landed(w).length, 1);
+  w = cast(w, PASS).world;
+  w = take(w, fishIn(w, 'pond')[0]!);
+  w = wait(w, w.state.clock + 600).world;
+  assert.deepEqual(landed(w), []);
+  assert.deepEqual(fishIn(w, 'held').sort(), ['trout_01', 'trout_02']);
+  valid(w);
+});
+
+// Breaks: the eel or salmon rule ignoring its window or sky, or a failing draw landing a fish.
+test('homestead 10 branch: eel by night, salmon on a wet day, nothing on a miss', () => {
+  assert.deepEqual(landed(pond(22 * HOUR)), ['eel_01']);
+  const wet = landed(pond(DAY + 10 * HOUR));
+  assert.equal(wet.length, 2);
+  assert.ok(wet.includes('salmon_01'));
+  const miss = cast(pond(10 * HOUR), FAIL);
+  assert.deepEqual(fishIn(miss.world, 'pond'), []);
+});
+
+const eat = (w: World, k: string) => play(w, { type: 'eat', item_id: id(w, 'item', k) });
+const str = (w: World) => attribute(w, 'str');
+const cookAt = (w: World, recipe: string) => ({
+  type: 'perform',
+  action: recipe,
+  target_id: detail(w, 'hearth'),
+});
+let fed: World; // step 11 just after the stew, fed still active
+
+// Breaks: the order taking one fish, its price or escrow custody, the ready_after boundary
+// (+299 or +300), the stew not fed, or fed's str modifier or duration.
+test('homestead 11: order a stew from two fish, claim it at +300, eat it', () => {
+  w = walk(w, 'west', 'south');
+  assert.equal(refused(drop(w, 'trout_02'), cook(w, 'stew')), 'not_owned');
+  w = play(w, cook(w, 'stew')).world;
+  assert.equal(pennies(w), 4);
+  assert.deepEqual(fishIn(w, 'larder').sort(), ['trout_01', 'trout_02']);
+  assert.equal(fact(w, 'ordered'), true);
+  const t = w.state.clock;
+  assert.equal(refused(wait(w, t + 299).world, cook(w, 'claim')), 'invalid_state');
+  assert.deepEqual(offer(wait(w, t + 299).world, 'claim').reason, reason('service.not_ready'));
+  w = wait(w, t + 300).world;
+  w = play(w, cook(w, 'claim')).world;
+  assert.equal(pennies(w), 3);
+  assert.equal(where(w, id(w, 'item', 'stew_plain_01')), w.body);
+  const mv = pool(w, 'mv')!;
+  assert.equal(str(w), 10);
+  w = eat(w, 'stew_plain_01').world;
+  fed = w;
+  assert.equal(pool(w, 'mv'), Math.min(100, mv + 10));
+  assert.equal(str(w), 11);
+  assert.deepEqual(labels(w), ['condition.fed']);
+  w = wait(w, w.state.clock + 3600).world;
+  assert.equal(str(w), 10);
+  valid(w);
+});
+
+// Breaks: cook_stew needing other than two fish or no lesson, the yield or larder custody wrong,
+// hearty's +2 or its stacking with fed, cook_feast offered at Cooking 1.
+test('homestead 12: learn cooking, cook a hearty stew from two fresh fish, eat it', () => {
+  w = choose(talk(w, 'cook').world, 'cooking').world;
+  w = wait(walk(w, 'north', 'east'), 2 * DAY + 10 * HOUR).world;
+  for (let i = 0; i < 2; i += 1) {
+    const r = cast(w, PASS);
+    w = take(r.world, fishIn(r.world, 'pond')[0]!);
+    w = wait(w, w.state.clock + 600).world;
+  }
+  w = walk(w, 'west', 'south');
+  const one = drop(w, fishIn(w, 'held')[0]!);
+  assert.equal(refused(one, cookAt(one, 'cook_stew')), 'invalid_state');
+  assert.deepEqual(offer(one, 'cook_stew').reason, reason('craft.cook_stew.needs'));
+  w = play(w, cookAt(w, 'cook_stew')).world;
+  assert.equal(where(w, id(w, 'item', 'stew_hearty_01')), w.body);
+  assert.equal(fishIn(w, 'larder').length, 2);
+  assert.equal(fact(w, 'uses_cooking'), 1);
+  assert.equal(offer(w, 'cook_feast').available, false);
+  const hearty = id(w, 'item', 'stew_hearty_01');
+  w = eat(w, 'stew_hearty_01').world;
+  assert.equal(str(w), 12);
+  assert.deepEqual(labels(w), ['condition.hearty']);
+  // Branch: the same stew eaten while fed is still active.
+  const both = structuredClone(fed) as any;
+  both.state.containers[hearty] = both.body;
+  assert.equal(str(eat(both, 'stew_hearty_01').world), 13);
+  // The loop's pennies last: the 3 left buy the plot (step 13).
+  assert.equal(pennies(play(walk(w, 'north'), farmer(w, 'buy_plot', 3)).world), 0);
+  valid(w);
+});
+
+const put = (w: World, k: string, c: string) =>
+  act(w, { type: 'put', item_id: id(w, 'item', k), container_id: id(w, 'item', c) });
+const yard = () => walk(fresh(WORLD), 'north', 'west', 'south');
+/** A fresh yard at `clock` with the plot bought and the seed (and can) held. */
+const sowable = (clock: number) =>
+  wait(
+    take(take(play(yard(), farmer(yard(), 'buy_plot', 3)).world, 'seed_01'), 'watering_can'),
+    clock,
+  ).world;
+const sown = sowable(28800);
+const plot = (w: World) => id(w, 'item', 'plot');
+const water = (w: World) =>
+  play(w, {
+    type: 'perform',
+    action: 'water_plot',
+    target_id: plot(w),
+    item_id: id(w, 'item', 'watering_can'),
+  }).world;
+const turnip = (w: World) => where(w, id(w, 'item', 'turnip_01')) === plot(w);
+
+// Breaks: the plot lock, the sow rule (status, stamp, spent seed), the description thresholds,
+// the water midpoint (43200 is late), the seed return, the cure on resowing, the winter guard.
+test('homestead 13: buy the plot, sow at 08:00, water after the midpoint, harvest', () => {
+  assert.equal(
+    refused(take(yard(), 'seed_01'), {
+      type: 'put',
+      item_id: id(sown, 'item', 'seed_01'),
+      container_id: plot(sown),
+    }),
+    'permission_denied',
+  );
+  assert.equal(pennies(sown), 7);
+  let s = put(sown, 'seed_01', 'plot').world;
+  assert.equal(statusOn(s, 'plot', 'growing'), true);
+  assert.equal(fact(s, 'sown_at', plot(s)), 28800);
+  assert.equal(where(s, id(s, 'item', 'seed_01')), room(s, 'midden'));
+  assert.equal(describe(wait(s, 28800 + 3599).world, 'plot'), 'item.plot.description');
+  assert.equal(describe(wait(s, 28800 + 3600).world, 'plot'), 'item.plot.shoots');
+  assert.equal(describe(wait(s, 28800 + 64799).world, 'plot'), 'item.plot.shoots');
+  assert.equal(describe(wait(s, 28800 + 64800).world, 'plot'), 'item.plot.heavy');
+  const at = (t: number) => wait(water(wait(s, 28800 + t).world), 28800 + DAY).world;
+  const ripe = at(43201);
+  assert.equal(turnip(ripe), true);
+  assert.equal(statusOn(ripe, 'plot', 'withered'), false);
+  const h = take(ripe, 'turnip_01');
+  assert.equal(where(h, id(h, 'item', 'turnip_01')), h.body);
+  for (const late of [at(43200), wait(s, 28800 + DAY).world]) {
+    assert.equal(turnip(late), false);
+    assert.equal(describe(late, 'plot'), 'item.plot.withered');
+  }
+  // The seed returns 172800 after world start (25200); resowing cures withered.
+  s = wait(s, 28800 + DAY).world;
+  assert.equal(where(wait(s, 197999).world, id(s, 'item', 'seed_01')), room(s, 'midden'));
+  s = take(wait(s, 198000).world, 'seed_01');
+  s = put(s, 'seed_01', 'plot').world;
+  assert.deepEqual(
+    [statusOn(s, 'plot', 'withered'), statusOn(s, 'plot', 'growing')],
+    [false, true],
+  );
+  // Day 4 is winter: the seed lies in the plot and nothing grows.
+  const winter = put(sowable(3 * DAY + 28800), 'seed_01', 'plot').world;
+  assert.equal(where(winter, id(winter, 'item', 'seed_01')), plot(winter));
+  assert.equal(statusOn(winter, 'plot', 'growing'), false);
+  valid(h);
+});
+
+const hens = (w: World) =>
+  Object.entries(w.state.created ?? {})
+    .filter(([, c]) => c.definition.key === 'hen')
+    .map(([e]) => where(w, e));
+const eggs = (w: World) =>
+  [1, 2, 3, 4, 5, 6].filter((n) => where(w, id(w, 'item', `egg_0${n}`)) === id(w, 'item', 'nest'))
+    .length;
+
+// Breaks: feeding not on the trough, the spent grain kept, laying off the 14400 tick, the nest
+// cap, births above cap 4 or a hen leaving the croft, the grain return.
+test('homestead sandbox: grain in the trough lays eggs to the nest cap; hens breed to four', () => {
+  let h = walk(fresh(WORLD), 'north', 'west', 'up');
+  assert.deepEqual(hens(h), [room(h, 'holding_croft'), room(h, 'holding_croft')]);
+  h = put(take(h, 'grain_01'), 'grain_01', 'trough').world;
+  const t = h.state.clock;
+  assert.equal(where(h, id(h, 'item', 'grain_01')), room(h, 'midden'));
+  assert.equal(eggs(wait(h, t + 14399).world), 0);
+  assert.equal(eggs(wait(h, t + 14400).world), 2);
+  assert.equal(eggs(wait(h, t + 28800).world), 3);
+  assert.equal(hens(wait(h, 71999).world).length, 2);
+  assert.equal(hens(wait(h, 72000).world).length, 4);
+  // The grain returns 86400 after world start (25200).
+  assert.equal(where(wait(h, 111599).world, id(h, 'item', 'grain_01')), room(h, 'midden'));
+  assert.equal(where(wait(h, 111600).world, id(h, 'item', 'grain_01')), room(h, 'holding_croft'));
+  h = wait(h, 3 * DAY).world;
+  assert.deepEqual(hens(h), Array(4).fill(room(h, 'holding_croft')));
+  valid(h);
 });

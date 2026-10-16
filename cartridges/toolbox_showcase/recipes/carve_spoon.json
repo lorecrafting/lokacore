@@ -26,7 +26,9 @@
     "consume": {
       "items": [
         "stick_01",
-        "stick_02"
+        "stick_02",
+        "stick_03",
+        "stick_04"
       ],
       "quantity": 1,
       "to": {

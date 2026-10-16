@@ -1,0 +1,19 @@
+{
+  "title": "room.farm_kitchen.title",
+  "description": "room.farm_kitchen.description",
+  "exits": {
+    "north": {
+      "to": "farm_yard"
+    }
+  },
+  "details": {
+    "hearth": {
+      "aliases": [
+        "hearth",
+        "fire"
+      ],
+      "description": "detail.hearth",
+      "rating": 1
+    }
+  }
+}

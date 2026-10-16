@@ -1,0 +1,22 @@
+{
+  "keywords": [
+    "feast"
+  ],
+  "short": "item.feast_01.short",
+  "room_line": "item.feast_01.room",
+  "description": "item.feast_01.description",
+  "mass_grams": 500,
+  "location": {
+    "in": "room",
+    "room": "larder"
+  },
+  "edible": {
+    "resource": "mv",
+    "amount": 20,
+    "label": "action.eat",
+    "narration": "narration.eat_feast",
+    "applies": [
+      "hearty"
+    ]
+  }
+}

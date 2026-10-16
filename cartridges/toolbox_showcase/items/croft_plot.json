@@ -1,0 +1,35 @@
+{
+  "keywords": [
+    "plot"
+  ],
+  "short": "item.croft_plot.short",
+  "room_line": "item.croft_plot.room",
+  "description": "item.croft_plot.description",
+  "mass_grams": 20000,
+  "location": {
+    "in": "room",
+    "room": "holding_croft"
+  },
+  "container": true,
+  "immune": [
+    "growing"
+  ],
+  "locks": {
+    "put": {
+      "policy_version": 1,
+      "root": {
+        "op": "fact_compare",
+        "fact": "owns_plot",
+        "equals": true
+      }
+    },
+    "get": {
+      "policy_version": 1,
+      "root": {
+        "op": "fact_compare",
+        "fact": "owns_plot",
+        "equals": true
+      }
+    }
+  }
+}
