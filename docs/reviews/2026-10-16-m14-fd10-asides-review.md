@@ -3,7 +3,7 @@
 - Branch `toolbox/m14-fd10`, exact head `a5708bfc77daa885fa2877a5e8fbb95145139a9e`, base `dcd56c40` (batch `toolbox/batch-m14`). No PR yet.
 - Governing: [mechanics.md FD10](../system/mechanics.md#companion-remarks-npc-asides-toolbox-row-fd10), [FD2 Asides](../system/mechanics.md#passive-skill-voices-toolbox-row-fd2), [W6 Variants](../system/mechanics.md#entity-description-variants-toolbox-row-w6), [cartridge.md voice declarations](../system/cartridge.md#voice-declarations), [Realm seams](../decisions/owner-decision-realm-seams-2026-10-13.md), [WORKFLOW review stance](../WORKFLOW.md). PM ruling: a perceived NPC's remarks stay visible in a dark room; room asides hide.
 - Hosted CI at the head: `ci` and `book-e2e` success.
-- Written 2026-10-16 by anthropic/claude-opus-5-5. Verdict: **APPROVE WITH NOTES** (fix round: finding 1 and the nits).
+- Written 2026-10-16 by anthropic/claude-opus-5-5. First-pass verdict: approve with notes; final verdict after fix round 1 at the end.
 
 ## Must be true (written before the diff)
 
@@ -43,3 +43,16 @@ Handback claims rerun: kernel_api 1.107 confirmed (`world.ts:108`); no sibling c
 ## Questions
 
 1. Seam 1 (`view.ts:174`): today nothing tests that the asides read uses the viewer's `actor` (M5 is equivalent because only `world.character` has a body). When the Realm's admitted set gives a second character a body, does the PM want a test that views the crypt as that character, in the crypt, not joined: Hal listed with no `asides` and Bram's hum shown?
+
+## Fix round 1 re-check (head `032dd825eb5a159777dadf6428ea7469e32d1be3`)
+
+Scope: fix commit `032dd825e` and merge `25cdd330c` (batch `70aedd284`, row 35). Settled parts not reopened.
+
+1. Finding 1, fixed: `kernel/ts/test/remarks.test.ts` "in a dark crypt the room's aside hides and perceived Bram's remark shows" turns on light, makes the crypt dark and gives Bram a `perception` fact. It expects `place` undefined and Bram's `remark.bram.hum`. M6 rerun (`of.dark_description &&` dropped, `rule.ts:71`): red on this test. New M8 (guard `(of.dark_description || target) && dark(...)`, NPCs hidden in the dark): red on this test.
+2. Nit 2, fixed: the W6 Variants bullet (`mechanics.md:2203`) names FD10.
+3. Designer text: `book-ui.md:1048` and the `BOOK-UI-COMPONENTS.md` Room page cell match the engine. A dark room has no `place.asides`, and a perceived NPC's asides show.
+4. Merge: both sides touched only docs and generated files (`MECHANICS-TOOLBOX.md`, `system/mechanics.md`, `system-graph.gen.json`, `toolbox.gen.json`). There is no shared code in standing or fresh. `mix run bin/contracts.exs --check` exits 0. TS `remarks`, `trial`, `loader_floors`, `voices` and `standing`: 25 pass. Elixir `content_trial`, `content_remarks` and `system_graph`: 18 pass. Not rerun: the 8 floor mutants (1.105 to 1.107).
+5. Nit 3 (`/code-review` in the PR body) stays open until the PR exists.
+6. Hosted CI at `032dd825e`: `ci` and `book-e2e` were in progress at writing; the merge gate is their success.
+
+Verdict: **APPROVE**.
