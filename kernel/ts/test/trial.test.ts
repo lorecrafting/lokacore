@@ -223,6 +223,8 @@ test('paying the fine moves 5 pennies to the jailer and frees the prisoner', () 
   );
   assert.equal(pennies(r.world, body(r.world)), 5);
   assert.equal(pennies(r.world, npc(r.world, 'jailer')), 5);
+  // Break: the force policy also requires `wanted`, so a freed prisoner cannot force the grate.
+  assert.equal(force(r.world)?.available, true);
   const out = act(act(r.world, { type: 'open', direction: 'west' }), {
     type: 'move',
     direction: 'west',
@@ -373,7 +375,7 @@ const escaped = () => {
   assert.equal(value(drain, drain.character, ref('fact', 'wanted')), true);
   const out = act(drain, { type: 'move', direction: 'west' });
   assert.equal(at(out), room(out, 'square'));
-  return out;
+  return { drain, out };
 };
 
 test('a broke prisoner forces the grate and leaves by the drain, still wanted', () => {
@@ -383,7 +385,7 @@ test('a broke prisoner forces the grate and leaves by the drain, still wanted', 
 // Breaks: the charge reaction's grate `barrier.set` is dropped (the grate stays open), or its
 // `grate_forced` reset is dropped (the grate opens at once without a force).
 test('an escapee walking into the market is arrested again behind a shut grate', () => {
-  const { w, d } = north(escaped());
+  const { w, d } = north(escaped().out);
   assert.equal(at(w), room(w, 'cell'));
   assert.deepEqual(d.narration, [{ key: 'npc.guard.arrest' }, { key: 'trial.charge' }]);
   assert.equal(exit(w, 'down').door?.state, 'closed');
@@ -394,6 +396,16 @@ test('an escapee walking into the market is arrested again behind a shut grate',
 });
 
 // Break: the recipe's `has_tag fragile` guard is dropped, so a grate without `fragile` is forced.
+// Break: the charge reaction only fires on an arrest, so a wanted escapee climbs back to an open grate.
+test('a wanted escapee who climbs back up is charged again behind a shut grate', () => {
+  const d = ok(play(escaped().drain, { type: 'move', direction: 'up' }));
+  assert.equal(at(d.world), room(d.world, 'cell'));
+  assert.deepEqual(d.decision.narration, [{ key: 'trial.charge' }]);
+  assert.equal(exit(d.world, 'down').door?.state, 'closed');
+  assert.equal(forced(d.world), false);
+  assert.equal(force(d.world)?.available, true);
+});
+
 test('a grate without the fragile tag cannot be forced', () => {
   const r = reload((c) => (c.barriers[`${S}barrier/grate`].tags = ['metal']));
   assert.ok(r.ok, JSON.stringify(r));
