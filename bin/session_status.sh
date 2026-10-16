@@ -36,11 +36,11 @@ cancelled() { # <label> <gh run list args...>
     gh run view "$id" --json jobs --jq '.jobs[]|select(.conclusion=="cancelled")|"cancelled job: \(.name) \((.completedAt|fromdate)-(.startedAt|fromdate))s"' 2>/dev/null | sed "s|^|$l run $id: |"
   done
 }
-# The sim job's duration (limit 600 s) of the newest ci run (nothing while it runs), to catch a perf slowdown before it times out (loka-60rs).
+# Each sim job leg's duration (limit 600 s) of the newest ci run (nothing while it runs), to catch a perf slowdown before it times out (loka-60rs).
 simtime() { # <label> <gh run list args...>
   l=$1; shift
   id=$(gh run list "$@" --workflow ci.yml --limit 1 --json databaseId --jq '.[0].databaseId // empty' 2>/dev/null) || return 0
-  [ -z "$id" ] || gh run view "$id" --json jobs --jq '.jobs[]|select(.name=="sim" and (.conclusion|length)>0)|"sim job \(.conclusion) \((.completedAt|fromdate)-(.startedAt|fromdate))s"' 2>/dev/null | sed "s|^|$l: |"
+  [ -z "$id" ] || gh run view "$id" --json jobs --jq '.jobs[]|select((.name|startswith("sim")) and (.conclusion|length)>0)|"\(.name) job \(.conclusion) \((.completedAt|fromdate)-(.startedAt|fromdate))s"' 2>/dev/null | sed "s|^|$l: |"
 }
 for sha in $(gh pr list --limit 10 --json headRefOid --jq '.[].headRefOid' 2>/dev/null); do
   l="PR head $(printf %.8s "$sha")"; cancelled "$l" --commit "$sha"; simtime "$l" --commit "$sha"

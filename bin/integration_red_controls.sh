@@ -213,12 +213,12 @@ grep -qx 'ci.yml failure abcdef01 u1 (red: fix first)' out && grep -qx 'book-e2e
 CI='[{"conclusion":"","status":"in_progress","headSha":"abcdef0123","url":"u1"}]' E2E='[]' \
   HK=hk.json PATH="$tmp/gh:$tmp/stub:$PATH" capped sh bin/session_status.sh > out 2>&1 || true
 grep -qx 'ci.yml in_progress abcdef01 u1' out || bad 'session_status nightly: running run misreported'
-# Break: the sim job's duration is missing for a PR head or the nightly, another job or an unfinished sim is printed.
-J='{"jobs":[{"name":"lint","conclusion":"success","startedAt":"2026-10-15T10:00:00Z","completedAt":"2026-10-15T10:01:00Z"},{"name":"sim","conclusion":"success","startedAt":"2026-10-15T10:00:00Z","completedAt":"2026-10-15T10:07:23Z"},{"name":"sim","conclusion":"","startedAt":"2026-10-15T10:00:00Z","completedAt":"0001-01-01T00:00:00Z"}]}'
+# Break: a sim leg's duration is missing for a PR head or the nightly, another job or an unfinished sim is printed.
+J='{"jobs":[{"name":"lint","conclusion":"success","startedAt":"2026-10-15T10:00:00Z","completedAt":"2026-10-15T10:01:00Z"},{"name":"sim (fresh)","conclusion":"success","startedAt":"2026-10-15T10:00:00Z","completedAt":"2026-10-15T10:07:23Z"},{"name":"sim (showcase)","conclusion":"","startedAt":"2026-10-15T10:00:00Z","completedAt":"0001-01-01T00:00:00Z"}]}'
 CI='[{"conclusion":"success","status":"completed","headSha":"abcdef0123","url":"u1","databaseId":7}]' E2E='[]' PRS='[{"headRefOid":"1234567890ab"}]' JOBS=$J \
   HK=hk.json PATH="$tmp/gh:$tmp/stub:$PATH" capped sh bin/session_status.sh > out 2>&1 || true
-[ "$(grep -c 'sim job' out)" = 2 ] && grep -qx 'PR head 12345678: sim job success 443s' out && grep -qx 'ci.yml nightly: sim job success 443s' out \
-  || { bad 'session_status sim time: wrong lines'; grep 'sim job' out; }
+[ "$(grep -c 'sim (' out)" = 2 ] && grep -qx 'PR head 12345678: sim (fresh) job success 443s' out && grep -qx 'ci.yml nightly: sim (fresh) job success 443s' out \
+  || { bad 'session_status sim time: wrong lines'; grep 'sim (' out; }
 # --- pm_merge.sh ---------------------------------------------------------------------------
 # A batch worktree, a slice and a record branch on a bare origin (stub prepush.sh passes). Stub gh applies the real
 # --jq to $CI and $E2E, the run lists of ci.yml and book-e2e.yml (newest first). Break: a merge goes ahead while the newest

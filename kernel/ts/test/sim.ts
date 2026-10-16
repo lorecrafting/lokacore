@@ -274,13 +274,22 @@ function violated(
   return (
     CHECKED.world.find((i) => !holds(i, after)) ??
     ids.find((i) => !check(i, obs)) ??
-    (shared(after).some(
-      (w) =>
-        !check('target_candidates_ordered', { resolution: resolve(after, after.character, w) }),
-    )
-      ? 'target_candidates_ordered'
-      : undefined)
+    (ordered.has(after) ? undefined : candidatesOrdered(after))
   );
+}
+
+// target_candidates_ordered reads only the world, so a world object that passed it (a rejected
+// step returns its input world, about half of all steps) is not re-resolved.
+const ordered = new WeakSet<World>();
+function candidatesOrdered(world: World) {
+  if (
+    shared(world).some(
+      (w) =>
+        !check('target_candidates_ordered', { resolution: resolve(world, world.character, w) }),
+    )
+  )
+    return 'target_candidates_ordered';
+  ordered.add(world);
 }
 
 // An accepted step's State is the State before with its delta's composed changes and its rng,
