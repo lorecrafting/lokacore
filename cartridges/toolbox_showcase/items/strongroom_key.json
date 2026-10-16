@@ -1,0 +1,24 @@
+{
+  "keywords": [
+    "key",
+    "strongroom_key"
+  ],
+  "short": "item.strongroom_key.short",
+  "room_line": "item.strongroom_key.room",
+  "description": "item.strongroom_key.description",
+  "mass_grams": 50,
+  "location": {
+    "in": "room",
+    "room": "counting_house"
+  },
+  "locks": {
+    "get": {
+      "policy_version": 1,
+      "root": {
+        "op": "fact_compare",
+        "fact": "owns_strongroom",
+        "equals": true
+      }
+    }
+  }
+}

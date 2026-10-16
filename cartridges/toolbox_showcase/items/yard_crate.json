@@ -1,0 +1,30 @@
+{
+  "keywords": [
+    "crate"
+  ],
+  "short": "item.yard_crate.short",
+  "room_line": "item.yard_crate.room",
+  "description": "item.yard_crate.description",
+  "mass_grams": 5000,
+  "location": {
+    "in": "room",
+    "room": "vault_yard"
+  },
+  "container": true,
+  "immune": [
+    "growing",
+    "growing_croft"
+  ],
+  "locks": {
+    "get": {
+      "policy_version": 1,
+      "root": {
+        "op": "not",
+        "item": {
+          "op": "all",
+          "items": []
+        }
+      }
+    }
+  }
+}

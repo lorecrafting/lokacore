@@ -1,0 +1,53 @@
+{
+  "keywords": [
+    "guard"
+  ],
+  "short": "npc.guard.short",
+  "room_line": "npc.guard.room",
+  "description": "npc.guard.description",
+  "room": "market_row",
+  "hp": {
+    "minimum": 0,
+    "maximum": 5,
+    "start": 5,
+    "gain": 0
+  },
+  "attributes": [
+    {
+      "attribute": "alertness",
+      "value": 1
+    }
+  ],
+  "attack": {
+    "chance": 0,
+    "damage_min": 1,
+    "damage_max": 1
+  },
+  "disposition": {
+    "hostile": {
+      "policy_version": 1,
+      "root": {
+        "op": "fact_compare",
+        "fact": "wanted",
+        "equals": true
+      }
+    },
+    "engage": "npc.guard.engage"
+  },
+  "resistances": {
+    "physical": 100
+  },
+  "room_line_variants": [
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "fact_compare",
+          "fact": "wanted",
+          "equals": true
+        }
+      },
+      "description": "npc.guard.room_wanted"
+    }
+  ]
+}

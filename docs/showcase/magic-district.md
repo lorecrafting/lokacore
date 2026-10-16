@@ -17,8 +17,8 @@ loop gathers ash at a hearth. No room here is `exposed`; nothing reads the sky.
 ## Link from the hub
 
 `crossroads_inn` gains `up` to `loft`; the hub sign gains the sentence in
-[plan 4's table](homestead-district.md#the-hub-has-two-faces-left) and the "Four roads" sentence is
-checked as plan 5 says. The hub pin's exit count rises by one.
+[plan 4's table](homestead-district.md#the-hub-has-two-faces-left) and the "Four roads" sentence gains
+"a ladder": "Four roads, a ladder and a cellar stair leave this inn." The hub pin's exit count rises by one.
 
 ## Manifest changes
 

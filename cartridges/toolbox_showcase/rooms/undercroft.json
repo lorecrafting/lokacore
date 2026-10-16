@@ -1,0 +1,39 @@
+{
+  "title": "room.undercroft.title",
+  "description": "room.undercroft.description",
+  "details": {
+    "sign_law": {
+      "aliases": [
+        "sign",
+        "signpost"
+      ],
+      "description": "detail.sign_law.description",
+      "readable": {
+        "label": "actions.read_sign",
+        "text": "readable.sign_law",
+        "title": "detail.sign_law.title"
+      }
+    }
+  },
+  "exits": {
+    "up": {
+      "to": "crossroads_inn"
+    },
+    "north": {
+      "to": "market_row"
+    },
+    "east": {
+      "to": "counting_house"
+    },
+    "west": {
+      "to": "pawn_alley"
+    },
+    "south": {
+      "to": "strongroom",
+      "barrier": "strongroom_door"
+    },
+    "down": {
+      "to": "vault_yard"
+    }
+  }
+}

@@ -8,6 +8,9 @@
     },
     "cha": {
       "start": 6
+    },
+    "alertness": {
+      "start": 0
     }
   }
 }

@@ -1,0 +1,14 @@
+{
+  "provider": "clerk_b",
+  "currency": "pennies",
+  "action": "withdraw",
+  "label": "service.withdraw_b",
+  "narration": "service.withdraw_b.used",
+  "price": 1,
+  "benefit": {
+    "kind": "withdraw",
+    "account": "savings",
+    "vault": "vault",
+    "amount": 5
+  }
+}
