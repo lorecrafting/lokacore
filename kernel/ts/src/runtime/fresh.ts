@@ -144,13 +144,13 @@ function place(
   };
 }
 
-// A currency the player pays from a clock-0 row: a service, transport, wage or lesson payment.
+// A currency moved through a player's clock-0 row: a service, transport, wage or dialogue payment.
 const spent = (cartridge: Cartridge, k: string) =>
   Object.values(cartridge.services ?? {}).some((offer) => offer.currency.key === k) ||
   Object.values(cartridge.transports ?? {}).some((t) => t.currency.key === k) ||
   cartridge.world?.group?.wage?.resource.key === k ||
   Object.values(cartridge.dialogues ?? {}).some((d) =>
-    Object.values(d.choices).some((c) => c.lesson_payment?.resource.key === k),
+    Object.values(d.choices).some((c) => (c.lesson_payment ?? c.payment)?.resource.key === k),
   );
 
 // Birth resource rows by canonical target: player start values and explicitly authored NPC HP.

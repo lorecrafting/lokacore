@@ -224,17 +224,51 @@ test('paying the fine moves 5 pennies to the jailer and frees the prisoner', () 
   assert.equal(at(out), room(out, 'square'));
 });
 
-// Break: the declared `start` is not the Fresh row's value (a start of 4 still pays a fine of 5).
-test('a prisoner with fewer pennies than the fine cannot pay', () => {
-  const r = reload((c) => (c.resources[`${S}resource/pennies`].start = 4));
+// Break: Fresh births no player row for a currency a dialogue `payment` pays to the player, so
+// the payment is refused as insufficient.
+test('a jailer who pays the prisoner moves 5 pennies the other way', () => {
+  const r = reload((c) => {
+    const pay = c.dialogues[`${S}dialogue/jailer_talk`].choices.pay;
+    pay.payment = { from: pay.lesson_payment.to, resource: pay.lesson_payment.resource, amount: 5 };
+    delete pay.lesson_payment;
+    c.npcs[`${S}npc/jailer`].resource_starts.pennies = 5;
+  });
   assert.ok(r.ok, JSON.stringify(r));
-  const w = arrested(fresh(r.cartridge as Cartridge));
-  const talked = act(w, { type: 'talk', target_id: npc(w, 'jailer') });
-  const [continuation_id] = pending(talked, talked.character)!;
-  assert.equal(
-    code(talked, { type: 'choose', choice_id: 'pay', continuation_id }),
-    'insufficient_resource',
+  const w = chat(arrested(fresh(r.cartridge as Cartridge)), 'jailer', 'pay');
+  assert.equal(level(w, body(w), resourceRef(w, 'pennies')), 15);
+  assert.equal(level(w, npc(w, 'jailer'), resourceRef(w, 'pennies')), 0);
+});
+
+// Breaks: the declared `start` is not the Fresh row's value, the fine's bound is off by one, or a
+// refused payment writes anything or hides the offer instead of showing it unavailable.
+test('a prisoner with exactly the fine pays; one penny short is refused and changes nothing', () => {
+  const jailed = (start: number) => {
+    const r = reload((c) => (c.resources[`${S}resource/pennies`].start = start));
+    assert.ok(r.ok, JSON.stringify(r));
+    const w = arrested(fresh(r.cartridge as Cartridge));
+    const talked = act(w, { type: 'talk', target_id: npc(w, 'jailer') });
+    return { talked, continuation_id: pending(talked, talked.character)![0] };
+  };
+  const five = jailed(5);
+  ok(
+    play(five.talked, { type: 'choose', choice_id: 'pay', continuation_id: five.continuation_id }),
   );
+  const { talked: w, continuation_id } = jailed(4);
+  const view = gameView(w);
+  assert.deepEqual(validate('GameView', view), []);
+  assert.deepEqual(view.choice?.choices, [
+    {
+      available: false,
+      choice_id: 'pay',
+      label: 'dialogue.jailer.pay',
+      reason: { code: 'insufficient_resource' },
+    },
+    { available: true, choice_id: 'plead', label: 'dialogue.jailer.plead' },
+  ]);
+  const r = play(w, { type: 'choose', choice_id: 'pay', continuation_id });
+  assert.equal(r.decision.kind === 'rejected' && r.decision.error.code, 'insufficient_resource');
+  assert.deepEqual(r.world.state, w.state);
+  ok(play(w, { type: 'choose', choice_id: 'plead', continuation_id }));
 });
 
 // Breaks: the reaction's `when` is dropped (an innocent visitor hears the charge and is shut in),
