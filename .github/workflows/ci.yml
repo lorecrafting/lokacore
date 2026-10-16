@@ -97,10 +97,12 @@ jobs:
           node-version: '24.21.0'
           cache: npm
           cache-dependency-path: kernel/ts/package-lock.json
-      - run: npm ci --no-audit --no-fund && npm run "test:sim:$PART"
+      - run: npm ci --no-audit --no-fund && npm run "test:sim:$PART" | tee "$RUNNER_TEMP/sim.log"
         working-directory: kernel/ts
         env:
           PART: ${{ matrix.part }}
+      # A renamed showcase test would leave a leg green with no test run (only the file line passes).
+      - run: grep '^✔ ' "$RUNNER_TEMP/sim.log" | grep -qv '^✔ test/sim.test.ts '
       - if: failure()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
