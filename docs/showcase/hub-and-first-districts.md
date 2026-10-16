@@ -263,10 +263,10 @@ track climbs `up` from the green. The `hall_cupboard` exit is east of `moot_hall
 
 ### Signpost (`sign_social`, readable in `village_green`)
 
-> Low Wardle. People here remember what you do, and they talk. The Reeve has work for a stranger,
-> the Warden keeps the toll gate east, and Tam the carter reaches the green at eleven with whatever
-> he has seen. Think over what you learn at the church lectern. The moot hall, south, has a little
-> of everything behind one door.
+> Low Wardle. Folk here have long memories and short tempers; mind how you go. The Reeve has work
+> for a willing stranger. The Warden keeps the toll gate east. Tam the carter reaches the green at
+> eleven with the news of the road. The church lectern is for quiet thought. The moot hall lies
+> south.
 
 ### Facts (`standing_sampler/facts.json`, `scoped_facts_sampler`, `codex_sampler`)
 
