@@ -324,7 +324,7 @@ export function homestead(c: any) {
   // The Undercroft's banks, timed escrow, stock tables, shelves and locks.
   for (const k of ['clerk_a', 'clerk_b', 'smith']) delete c.npcs[ref('npc', k)].services;
   for (const k of ['chandler', 'yard_chandler']) delete c.npcs[ref('npc', k)].shop;
-  for (const k of ['hoard_chest', 'strongroom_chest', 'strongroom_key'])
+  for (const k of ['hoard_chest', 'strongroom_chest', 'strongroom_key', 'yard_crate'])
     delete c.items[ref('item', k)].locks;
   delete c.rooms[ref('room', 'strongroom')].locks;
   for (const k of ['shelf', 'yard_shelf']) delete c.replenish[ref('replenish', k)];

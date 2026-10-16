@@ -54,7 +54,7 @@ defmodule Loka.ContentShowcaseTest do
                   for(n <- ~w(chandler yard_chandler), do: {"npcs/" <> n, "shop"}) ++
                   for(
                     f <-
-                      ~w(items/hoard_chest items/strongroom_chest items/strongroom_key rooms/strongroom),
+                      ~w(items/hoard_chest items/strongroom_chest items/strongroom_key items/yard_crate rooms/strongroom),
                     do: {f, "locks"}
                   )
 

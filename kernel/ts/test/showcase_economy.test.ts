@@ -289,13 +289,17 @@ test('economy 8 branch: without the purchase the key, the door and the room refu
   assert.equal(refused(forced, { type: 'move', direction: 'south' }), 'permission_denied');
 });
 
-// Breaks: the yard shelf's table (one held 3, two held 2), its hour, its cap of 1, or its crate.
+// Breaks: the yard shelf's table (one held 3, two held 2), its hour, its cap of 1, its crate, or the crate's lock.
 test('economy yard: the one-candle shelf sells at 3 and refills at 08:00', () => {
   let y = walk(fresh(WORLD), 'down', 'down');
   const seller = npc(y, 'yard_chandler');
   const held = (x: World) =>
     ['yard_candle_01', 'yard_candle_02'].filter((c) => where(x, id(x, 'item', c)) === seller);
   assert.equal(price(y, 'yard_chandler', 'yard_candle_01'), 3);
+  assert.equal(
+    refused(y, { type: 'take', item_id: id(y, 'item', 'yard_candle_02') }),
+    'permission_denied',
+  );
   y = play(y, trade(y, 'buy', 'yard_candle_01', 3, 'yard_chandler')).world;
   assert.equal(pennies(y), 7);
   assert.deepEqual(held(y), []);

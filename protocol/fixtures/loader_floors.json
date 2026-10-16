@@ -467,6 +467,7 @@
         ["items/hoard_chest.json", ["locks"], null],
         ["items/strongroom_chest.json", ["locks"], null],
         ["items/strongroom_key.json", ["locks"], null],
+        ["items/yard_crate.json", ["locks"], null],
         ["rooms/strongroom.json", ["locks"], null],
         ["replenish/shelf.json", [], null],
         ["replenish/yard_shelf.json", [], null],

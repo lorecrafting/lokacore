@@ -14,5 +14,17 @@
   "immune": [
     "growing",
     "growing_croft"
-  ]
+  ],
+  "locks": {
+    "get": {
+      "policy_version": 1,
+      "root": {
+        "op": "not",
+        "item": {
+          "op": "all",
+          "items": []
+        }
+      }
+    }
+  }
 }
