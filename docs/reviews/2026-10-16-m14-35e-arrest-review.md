@@ -75,3 +75,16 @@ New finding:
    - Fix: when the body holds a water row or an encounter, Sleep passes `arrests` false (a state check, because Sleep writes no water op), and a test covers it. Or name the Sleep save failure in Known limits and file a Beads issue, as round 0 allowed.
 
 Verdict: CHANGES REQUIRED.
+
+## Fix round 2 (9a5d9c46e05b594a2e50d152c6edafea6bba522e)
+
+Scope: fix commit `9a5d9c46e` only, plus the Sleep caller it touches.
+
+Disposition of the round-1 Sleep finding: fixed.
+- `kernel/ts/src/mechanics/position/rule.ts:39` passes `free` to `engage`. `free` is false while the actor holds a water row (keyed by actor, as in `water/shared.ts:51`) or the body is in an open encounter (`combat/shared.ts:20`).
+- Probe rerun (scratch, deleted): move down, then Sleep. The Sleep is accepted with no arrest narration, the body stays in well_bottom, and `waterValid` is true.
+- Mutant: dropping the water half of `free` turns `water.test.ts` red (the renamed test fails). Restored. `water.test.ts` and `trial.test.ts` pass 17/17.
+- The Known limits sentence (`docs/system/mechanics.md:3664`) now names the Sleep case.
+- The open-encounter half has no test. A mutant that drops it would survive. Accepted as a note, as with the hound in round 1: it is a one-term guard with the same mechanism, and no planned content puts an arresting NPC beside a fight.
+
+Verdict: APPROVE WITH NOTES.

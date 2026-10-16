@@ -10,7 +10,7 @@ of closed work are deleted once their lesson is folded, and linked by permalink
 Reviews before R2 live in the [legacy repository](https://github.com/lorecrafting/lokacore-v2-legacy)
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
-- [Review: M14 row 35 engine, arrest (loka-kgd.165; kernel_api 1.105)](2026-10-16-m14-35e-arrest-review.md): **CHANGES REQUIRED**
+- [Review: M14 row 35 engine, arrest (loka-kgd.165; kernel_api 1.105)](2026-10-16-m14-35e-arrest-review.md): **APPROVE WITH NOTES**
 - [Review: x6t-64 ConditionView.kind and authored status kind (loka-x6t.64, part 1 of loka-x6t.55)](2026-10-15-x6t-64-review.md): **APPROVE**
 - [Review: word bar batch head (loka-x6t.39: S1 loka-jsqq, S2 loka-1lpq, S3 loka-a9pn)](2026-10-15-wordbar-batch-review.md): **APPROVE WITH NOTES**
 - [Review: narrate and plan move engine steps (PR #403, loka-mytp.1, loka-mytp.2)](2026-10-15-pr403-narrate-plan-move-review.md): **APPROVE WITH NOTES**
