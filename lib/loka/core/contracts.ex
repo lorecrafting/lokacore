@@ -106,6 +106,9 @@ defmodule Loka.Core.Contracts do
   defp keyword("maxLength", n, v, path, _), do: check(code_points(v) <= n, path, :too_long)
   defp keyword("minItems", n, v, path, _), do: check(length(v) >= n, path, :too_few_items)
   defp keyword("maxItems", n, v, path, _), do: check(length(v) <= n, path, :too_many_items)
+  # ponytail: Enum.uniq and the TS Set differ on 1 vs 1.0; uniqueItems guards string tags only.
+  defp keyword("uniqueItems", u, v, path, _),
+    do: check(!u or Enum.uniq(v) == v, path, :duplicate_items)
 
   defp keyword("maxProperties", n, v, path, _),
     do: check(map_size(v) <= n, path, :too_many_properties)

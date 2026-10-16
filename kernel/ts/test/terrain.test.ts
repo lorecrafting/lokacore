@@ -8,6 +8,7 @@ import { test } from 'node:test';
 import { INSTALLED, gameView, loadCartridge, newWorld, step } from '../src/index.ts';
 import { type Cartridge, type World } from '../src/runtime/decision.ts';
 import { encode } from '../src/foundation/canonical.ts';
+import { validate } from '../src/foundation/validate.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 
 const kat = JSON.parse(
@@ -81,7 +82,9 @@ test('case 1: road halves, marsh triples, the fen is refused and shown unavailab
   const r = send(w, 'east');
   assert.equal(code(r), 'insufficient_resource');
   assert.equal(mv(r.world), 6);
-  const exits = gameView(w).exits;
+  const view = gameView(w);
+  assert.deepEqual(validate('GameView', view), []);
+  const exits = view.exits;
   const east = exits.find((e) => e.direction === 'east')!;
   assert.deepEqual(
     [east.available, 'reason' in east && east.reason?.code],

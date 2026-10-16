@@ -8316,6 +8316,23 @@
     ]
   },
   {
+    "name": "room_tags_repeated",
+    "contract": "RoomDefinition",
+    "value": {
+      "key": "fen",
+      "title": "room.fen.title",
+      "description": "room.fen.description",
+      "exits": {},
+      "tags": ["marsh", "marsh"]
+    },
+    "errors": [
+      {
+        "path": "/tags",
+        "code": "duplicate_items"
+      }
+    ]
+  },
+  {
     "contract": "RoomDefinition",
     "value": {},
     "errors": [
