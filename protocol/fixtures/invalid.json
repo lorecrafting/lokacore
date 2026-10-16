@@ -23410,6 +23410,23 @@
     ]
   },
   {
+    "name": "entity_view_refusal_without_hostile",
+    "contract": "EntityView",
+    "value": {
+      "id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
+      "name": "npc.nell.short",
+      "kind": "npc",
+      "actions": [],
+      "refusal": "npc.nell.refuse"
+    },
+    "errors": [
+      {
+        "path": "/hostile",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
     "name": "reaction_fact_adjust_amount",
     "contract": "ReactionRule",
     "value": {
