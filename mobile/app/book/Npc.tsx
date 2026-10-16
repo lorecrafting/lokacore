@@ -91,7 +91,7 @@ export function NpcPage(p: NpcProps) {
       )}
       <LogLines lines={log} />
       {npcSkills(c, p)}
-      {!talk && enemy && (
+      {enemy && (
         <Note>{enemy.refusal ? p.text(enemy.refusal) : refused(cap(p.text(enemy.name)))}</Note>
       )}
       {!talk && !enemy && !actions.length && !log.length && <Note>Nothing to do here.</Note>}

@@ -4,7 +4,8 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { compiled } from '../../authority/local-story/__tests__/compiled.ts';
-import { book } from './__tests__/polish-book.test.ts';
+import { book, bundle } from './__tests__/polish-book.test.ts';
+import { routes } from '../stories/routes.ts';
 import { LABEL } from './labels.ts';
 
 const showcase = compiled('cartridges/toolbox_showcase');
@@ -39,4 +40,12 @@ test('Nell at standing -2 shows her refusal line, no Talk or shelf; at 0 she tra
     JSON.stringify(calm),
   );
   assert.ok(calmLabels.some((l) => l.startsWith('Talk')));
+});
+
+// Breaks: a buy reason other than sold out shows its raw code (Peg's iron sword, 7p over 4p).
+test("a shelf row's buy reason is a word, never the code", () => {
+  const b = book(bundle('missing_child_v042_hash'));
+  for (const s of routes['npc-shop']) typeof s === 'function' ? s(b as never) : b.tap(s);
+  const row = b.text().find((l) => l.startsWith('an iron sword: Buy 7p ('));
+  assert.ok(row && !/insufficient|_/.test(row), row);
 });
