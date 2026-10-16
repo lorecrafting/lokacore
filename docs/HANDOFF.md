@@ -68,7 +68,7 @@ showcase, before chapter work. Polish/balance: `loka-y6yg.36` (bank pennies, the
 `loka-x6t.69` (Word bar hides spell chips in a fight).
 
 Session lessons (2026-10-16, c5ed3619):
-- Retro filed (owner to approve): loka-7m2u slice size cap, loka-xvxa hard 220k handoff stop (M2 developer ~720k),
+- Retro APPROVED by the owner 2026-10-16 ("ok approve"), for the next housekeeping PR: loka-7m2u slice size cap, loka-xvxa hard 220k handoff stop (M2 developer ~720k),
   loka-8zf5 after_merge br recover retry, loka-9nd4 sim median of main runs, loka-2rfk hosted book-e2e never runs
   the showcase walks. Follow-up loka-kgd.177 (committed red control for target_candidates_ordered).
 - Hosted runners are two-speed (~280 s vs ~540 s on the same code): compare sim times only across several runs,
