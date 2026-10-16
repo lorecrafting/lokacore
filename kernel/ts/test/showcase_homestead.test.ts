@@ -578,8 +578,7 @@ test('homestead 13: buy the plot, sow at 08:00, water after the midpoint, harves
   assert.equal(describe(wait(s, 28800 + 64800).world, 'plot'), 'item.plot.heavy');
   const at = (t: number) => wait(water(wait(s, 28800 + t).world), 28800 + DAY).world;
   const ripe = at(43201);
-  const crop = turnip(ripe);
-  assert.ok(crop);
+  const crop = turnip(ripe) ?? assert.fail('no turnip ripened');
   assert.equal(statusOn(ripe, 'plot', 'withered'), false);
   // One sow stamps both lifecycles on its holder; the other plot must stay untouched.
   assert.equal(croftTouched(ripe), false);
