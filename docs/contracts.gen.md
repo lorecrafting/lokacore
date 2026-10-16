@@ -323,7 +323,7 @@ The StateDelta algebra: typed operations, their mutation targets and preconditio
   - `resource.initialize`: Initialize a newly created spawned hound's exact HP row in its birth group.
   - `bleed.transition`: Checked transition of one body bleed generation.
   - `status.transition`: Checked transition of one body status generation (toolbox row 1); the target is the body and status pair.
-  - `levelling.set`: Checked write of one character's levelling row (toolbox row 4): composes only when the stored row equals expected (null when absent) and neither the experience nor any allocated count falls.
+  - `levelling.set`: Checked write of one character's levelling row (toolbox row 4): composes only when the stored row equals expected (null when absent) and no allocated count falls; experience may fall (toolbox row 47).
   - `built.set`: Checked write of one built room's tombstone row (Built rooms S5): composes only when the stored row equals expected (null when absent) and entity_id is a created row of origin kind built.
   - `water.transition`
   - `expedition.transition`

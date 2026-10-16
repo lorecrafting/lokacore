@@ -7,6 +7,10 @@
     },
     "north": {
       "to": "forge_stall"
+    },
+    "east": {
+      "to": "cell",
+      "barrier": "cell_door"
     }
   }
 }

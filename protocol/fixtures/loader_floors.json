@@ -484,6 +484,9 @@
         ["recipes/ward.json", [], null],
         ["items/lantern.json", [], null],
         ["items/lamp_oil.json", [], null],
+        ["dialogues/jailer_broke.json", [], null],
+        ["dialogues/jailer_talk.json", [], null],
+        ["reactions/charge.json", [], null],
         ["replenish/shelf.json", [], null],
         ["replenish/yard_shelf.json", [], null],
         ["services/buy_strongroom.json", [], null],
@@ -513,7 +516,8 @@
         ["skills/joinery.json", ["prerequisite"], null],
         ["skills/joinery.json", ["hidden"], null],
         ["skills/whittling.json", ["profession"], null],
-        ["skills/woodcutting.json", ["profession"], null]
+        ["skills/woodcutting.json", ["profession"], null],
+        ["npcs/guard.json", ["disposition"], null]
       ],
       "compiler": [
         "KERNEL_API_RANGE_INVALID",
@@ -1339,6 +1343,7 @@
       "below": "1.103",
       "source": "cartridges/toolbox_showcase",
       "feature": "an NPC's disposition.refuse line (Book hostile refusal)",
+      "edits": [["npcs/guard.json", ["disposition"], null]],
       "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
       "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
     },
@@ -1347,6 +1352,14 @@
       "below": "1.104",
       "source": "cartridges/trial_sampler",
       "feature": "an NPC's disposition.arrest (toolbox row 35)",
+      "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
+      "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
+    },
+    {
+      "floor": "1.105",
+      "below": "1.104",
+      "source": "cartridges/toolbox_showcase",
+      "feature": "an NPC's disposition.arrest (the law district's guard)",
       "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
       "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
     }
@@ -1432,6 +1445,16 @@
       "below": "1.107",
       "source": "cartridges/mount_sampler",
       "feature": "a world.mount declaration (row 43b)",
+      "edits": [],
+      "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
+      "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
+    }
+,
+    {
+      "floor": "1.109",
+      "below": "1.108",
+      "source": "cartridges/penalty_sampler",
+      "feature": "a world.death.penalty (row 47)",
       "edits": [],
       "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
       "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]

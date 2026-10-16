@@ -488,7 +488,18 @@
       "scopes": [
         "player"
       ],
-      "meaning": "Someone saw this character steal (a seen lift anywhere in the cartridge); the counting house's fine clears it."
+      "meaning": "Someone saw this character steal (a seen lift anywhere in the cartridge); the jailer or the counting house's fine clears it."
+    },
+    "grate_forced": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "instance"
+      ],
+      "meaning": "Whether the market cell's floor grate is forced; every arrest shuts it again."
     },
     "lux_known": {
       "version": 1,

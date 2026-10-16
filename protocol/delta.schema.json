@@ -1453,7 +1453,7 @@
           "additionalProperties": false
         },
         {
-          "description": "Checked write of one character's levelling row (toolbox row 4): composes only when the stored row equals expected (null when absent) and neither the experience nor any allocated count falls.",
+          "description": "Checked write of one character's levelling row (toolbox row 4): composes only when the stored row equals expected (null when absent) and no allocated count falls; experience may fall (toolbox row 47).",
           "type": "object",
           "properties": {
             "op": {

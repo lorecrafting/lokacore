@@ -1830,6 +1830,37 @@
             "mv"
           ],
           "additionalProperties": false
+        },
+        "penalty": {
+          "type": "object",
+          "description": "What a player's death costs (toolbox row 47; kernel API 1.109). experience: the body loses floor(experience * percent / 100), never below the threshold of its current level, and narration is told once; it needs world.levelling. items: corpse (the default) moves what the body held into the corpse; kept leaves it on the body.",
+          "properties": {
+            "experience": {
+              "type": "object",
+              "properties": {
+                "percent": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 100
+                },
+                "narration": {
+                  "$ref": "text.schema.json#/$defs/TextKey"
+                }
+              },
+              "required": [
+                "percent",
+                "narration"
+              ],
+              "additionalProperties": false
+            },
+            "items": {
+              "enum": [
+                "corpse",
+                "kept"
+              ]
+            }
+          },
+          "additionalProperties": false
         }
       },
       "required": [

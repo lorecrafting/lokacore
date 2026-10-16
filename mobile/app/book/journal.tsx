@@ -1,21 +1,31 @@
-// The Journal page: the projected quests, then the lore (toolbox row 46). Only drawing; what a
-// tap does is passed in by Book.tsx.
+// The Journal page: the projected quests, the lore (toolbox row 46), then the Chronicle (row FD6).
+// Only drawing; what a tap does is passed in by Book.tsx.
+import { useState } from 'react';
 import { Text, View } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { expeditionLine, plain, timeLeft, why } from './model.ts';
 import type { Button } from './presenter.ts';
 import { note, prose, usePalette } from './palette.ts';
 import { ActionCard } from './actions.tsx';
-import { Note } from './lines.tsx';
+import { AwayRecap, Note } from './lines.tsx';
 import { Control, Page, SectionTitle } from './pages.tsx';
 import { LABEL } from './labels.ts';
+import type { ChronicleDay } from './chronicle.ts';
 
-export function JournalPage(p: Parameters<typeof LoreDetails>[0] & { world: () => void }) {
+type JournalProps = Parameters<typeof LoreDetails>[0] & {
+  world: () => void;
+  chronicle: () => readonly ChronicleDay[];
+};
+
+export function JournalPage(p: JournalProps) {
   const { view, text } = p;
   const c = usePalette();
+  const [days] = useState(p.chronicle); // read once as the Journal opens, never live
   return (
     <Page title="Journal" foot={<Control label={LABEL.backToWorld} onPress={p.world} />}>
-      {view.journal.length === 0 && !view.topics?.length && <Note>Nothing written yet.</Note>}
+      {!view.journal.length && !view.topics?.length && !days.length && (
+        <Note>Nothing written yet.</Note>
+      )}
       {view.journal.map((q) => (
         <View key={`${q.quest.cartridge_id}@${q.quest.cartridge_version}:${q.quest.key}`}>
           <Text style={prose(c)}>{text(q.title)}</Text>
@@ -24,15 +34,7 @@ export function JournalPage(p: Parameters<typeof LoreDetails>[0] & { world: () =
             <Text style={prose(c)}>
               {q.patrol.credit} of {q.patrol.required} checkpoints. {q.patrol.status}.{' '}
               {text(q.patrol.leader_name)} is at {text(q.patrol.room_title)}.{' '}
-              {q.patrol.status === 'awaiting'
-                ? `Walk ${q.patrol.direction} to join him.`
-                : q.patrol.status === 'paused'
-                  ? `Return to ${text(q.patrol.leader_name)} and choose Rejoin.`
-                  : q.patrol.status === 'failed'
-                    ? `Return to ${text(q.patrol.leader_name)} and choose Restart now.`
-                    : q.patrol.status === 'together'
-                      ? `Next: ${text(q.patrol.next_title)}.`
-                      : ''}
+              {patrolNext(q.patrol, text)}
             </Text>
           )}
           {q.expedition && (
@@ -47,6 +49,7 @@ export function JournalPage(p: Parameters<typeof LoreDetails>[0] & { world: () =
         </View>
       ))}
       <LoreDetails {...p} />
+      <Chronicle days={days} />
     </Page>
   );
 }
@@ -87,6 +90,37 @@ function LoreDetails(p: {
           </View>
         );
       })}
+    </>
+  );
+}
+
+type Patrol = NonNullable<GameView['journal'][number]['patrol']>;
+const patrolNext = (p: Patrol, text: (t: Patrol['leader_name']) => string) =>
+  p.status === 'awaiting'
+    ? `Walk ${p.direction} to join him.`
+    : p.status === 'paused'
+      ? `Return to ${text(p.leader_name)} and choose Rejoin.`
+      : p.status === 'failed'
+        ? `Return to ${text(p.leader_name)} and choose Restart now.`
+        : p.status === 'together'
+          ? `Next: ${text(p.next_title)}.`
+          : '';
+
+/** The Chronicle (book-ui.md, Chronicle details). */
+function Chronicle({ days }: { days: readonly ChronicleDay[] }) {
+  if (!days.length) return null;
+  return (
+    <>
+      <SectionTitle>{LABEL.chronicle}</SectionTitle>
+      {days.map((d, i) => (
+        <AwayRecap
+          key={d.day}
+          heading={`${LABEL.day} ${d.day}`}
+          open={i === days.length - 1}
+          lines={d.lines}
+          milestone={(line) => d.milestones.has(line)}
+        />
+      ))}
     </>
   );
 }
