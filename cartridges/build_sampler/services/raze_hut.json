@@ -1,0 +1,13 @@
+{
+  "provider": "carpenter",
+  "currency": "pennies",
+  "action": "raze_hut",
+  "label": "service.raze_hut",
+  "narration": "service.raze_hut.used",
+  "price": 2,
+  "benefit": {
+    "kind": "raze",
+    "site": "lane",
+    "direction": "north"
+  }
+}

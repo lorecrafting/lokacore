@@ -41,5 +41,9 @@
   "narration.ruin.expired": "The ruin is mended.",
   "service.mend_hut": "Mend the hut",
   "service.mend_hut.used": "The carpenter takes a length of timber and your coin, and puts the roof back on.",
-  "service.nothing_to_mend": "Nothing here needs mending."
+  "service.nothing_to_mend": "Nothing here needs mending.",
+  "service.raze_hut": "Raze the hut",
+  "service.raze_hut.used": "The carpenter takes your coin and pulls the hut down. Whatever was inside is set out in the lane.",
+  "service.nothing_to_raze": "There is no hut of yours here to raze.",
+  "service.occupied": "Something inside the hut cannot be moved."
 }

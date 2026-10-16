@@ -886,7 +886,19 @@
       "floor": "1.99",
       "below": "1.98",
       "source": "cartridges/build_sampler",
-      "feature": "a blueprint, a site or world.construction",
+      "feature": "a blueprint, a site or world.construction (the raze service made a mend, so the 1.101 raze floor cannot shadow this case)",
+      "edits": [
+        [
+          "services/raze_hut.json",
+          ["benefit"],
+          {
+            "kind": "mend",
+            "site": "lane",
+            "direction": "north",
+            "escrow": { "items": ["timber_a"], "quantity": 1, "custody": "yard" }
+          }
+        ]
+      ],
       "compiler": [
         "KERNEL_API_RANGE_INVALID",
         "cartridge.requires.kernel_api.at_least"
@@ -1091,6 +1103,14 @@
       "source": "cartridges/variants_sampler",
       "feature": "a status kind (loka-x6t.64)",
       "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api"],
+      "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
+    },
+    {
+      "floor": "1.101",
+      "below": "1.100",
+      "source": "cartridges/build_sampler",
+      "feature": "a raze service (Built rooms S5)",
+      "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
       "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
     }
   ]

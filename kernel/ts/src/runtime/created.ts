@@ -3,6 +3,7 @@ import { createdKind, creationValid } from '../foundation/creation.ts';
 import { key, same } from '../foundation/compose.ts';
 import type { DefinitionRef, EntityId, Key, RoomDefinition } from '../contracts.gen.ts';
 import { OPPOSITE } from '../content/cartridge_barriers.ts';
+import { validate } from '../foundation/validate.ts';
 import { refString, type Entity, type State, type World } from './decision.ts';
 
 type Identity = NonNullable<State['created']>[string];
@@ -24,7 +25,8 @@ export function movable(world: World, id: EntityId): boolean {
 }
 
 export function hydrate(world: World, state: State, loading = false): World | undefined {
-  if (!loading && state.created === world.state.created) return { ...world, state };
+  if (!loading && state.created === world.state.created && state.built === world.state.built)
+    return { ...world, state };
   const draft: Draft = {};
   for (const [id, identity] of ordered(state)) {
     if (world.state.created?.[id] && same(identity, world.state.created[id])) {
@@ -39,6 +41,9 @@ export function hydrate(world: World, state: State, loading = false): World | un
     }
     if (!derive(world, state, id, identity, draft)) return undefined;
   }
+  for (const id of Object.keys(state.built ?? {}))
+    if (!same(state.built![id], world.state.built?.[id]) && !raze(world, state, id, draft))
+      return undefined;
   if ((draft.rooms || loading) && !builtValid(world, state)) return undefined;
   const next = { ...world, state, ...draft };
   if (
@@ -73,7 +78,7 @@ function derive(world: World, state: State, id: string, identity: Identity, draf
     })
   )
     return false;
-  if (identity.origin.kind === 'built') return raise(world, id, identity, draft);
+  if (identity.origin.kind === 'built') return raise(world, state, id, identity, draft);
   const member = createdKind(identity as never) === 'npc';
   const template = member
     ? world.cartridge.npcs?.[refString(identity.definition)]
@@ -140,7 +145,7 @@ function houndValid(world: World, state: State, id: string, identity: Identity, 
 
 type Built = Extract<Identity['origin'], { kind: 'built' }>;
 // Built rooms S2: the room is the blueprint, entered from its site by the origin's direction.
-function raise(world: World, id: string, identity: Identity, draft: Draft): boolean {
+function raise(world: World, state: State, id: string, identity: Identity, draft: Draft): boolean {
   const { site, direction } = identity.origin as Built;
   const blueprint = world.cartridge.blueprints?.[refString(identity.definition)];
   const declared = world.cartridge.rooms[refString(site)]?.site;
@@ -159,22 +164,53 @@ function raise(world: World, id: string, identity: Identity, draft: Draft): bool
   draft.roomIds ??= { ...world.roomIds };
   draft.knownEntities ??= { ...world.knownEntities };
   const at = draft.rooms[siteId];
-  draft.rooms[siteId] = { ...at, exits: { ...at.exits, [direction]: { to: ref } } };
-  draft.rooms[id] = { ...blueprint, key: room, exits: { [OPPOSITE[direction]]: { to: site } } };
+  // Built rooms S5: a razed room keeps its ids (contents may still name it) but has no exits.
+  const razed = !!state.built?.[id];
+  if (!razed) draft.rooms[siteId] = { ...at, exits: { ...at.exits, [direction]: { to: ref } } };
+  draft.rooms[id] = {
+    ...blueprint,
+    key: room,
+    exits: razed ? {} : { [OPPOSITE[direction]]: { to: site } },
+  };
   draft.roomIds[refString(ref)] = id as EntityId;
   draft.knownEntities[id] = { kind: 'room' };
   return true;
 }
 
-// Over every built row of the state, not only the changed ones: one per site direction, at most
-// world.construction.max_total.
+// Built rooms S5: a room razed since world (its created row unchanged) loses its exits, and its
+// site loses the exit only while that exit still leads to it.
+function raze(world: World, state: State, id: string, draft: Draft): boolean {
+  const origin = state.created?.[id]?.origin;
+  const rooms = (draft.rooms ??= { ...world.rooms });
+  if (origin?.kind !== 'built' || !rooms[id]) return false;
+  const siteId = world.roomIds[refString(origin.site)];
+  const exits = { ...rooms[siteId].exits };
+  if (exits[origin.direction]?.to.key === rooms[id].key) delete exits[origin.direction];
+  rooms[siteId] = { ...rooms[siteId], exits };
+  rooms[id] = { ...rooms[id], exits: {} };
+  return true;
+}
+
+// Over every built row of the state, not only the changed ones: one live room per site direction,
+// at most world.construction.max_total live; each tombstone names a built room, is no later than
+// the clock, and holds nothing.
 function builtValid(world: World, state: State): boolean {
-  const sites = Object.values(state.created ?? {}).flatMap((i) =>
-    i?.origin.kind === 'built' ? [key([i.origin.site, i.origin.direction])] : [],
+  const sites = Object.entries(state.created ?? {}).flatMap(([id, i]) =>
+    i?.origin.kind === 'built' && !state.built?.[id]
+      ? [key([i.origin.site, i.origin.direction])]
+      : [],
   );
+  const razed = Object.entries(state.built ?? {});
   return (
     new Set(sites).size === sites.length &&
-    sites.length <= (world.cartridge.world?.construction?.max_total ?? 0)
+    sites.length <= (world.cartridge.world?.construction?.max_total ?? 0) &&
+    razed.every(
+      ([id, row]) =>
+        state.created?.[id]?.origin.kind === 'built' &&
+        !validate('BuiltRow', row as never).length &&
+        row.razed_at <= state.clock,
+    ) &&
+    !Object.values(state.containers).some((c) => state.built?.[c])
   );
 }
 

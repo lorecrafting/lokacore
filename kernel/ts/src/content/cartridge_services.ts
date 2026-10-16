@@ -96,7 +96,7 @@ function order(c: Obj, b: Obj, at: string, check: Checks, out: Diagnostic[]) {
     bad(out, `${at}.benefit.service`);
 }
 
-const sited = { repair, build, mend };
+const sited = { repair, build, mend, raze };
 
 // The refusal texts a service needs, by benefit.
 function refusals(b: Obj) {
@@ -114,6 +114,12 @@ function refusals(b: Obj) {
       payment: 'service.unaffordable',
       target: 'service.nothing_to_mend',
       ...(b.escrow && { inputs: 'service.missing_inputs' }),
+    };
+  if (kind === 'raze')
+    return {
+      payment: 'service.unaffordable',
+      target: 'service.nothing_to_raze',
+      occupied: 'service.occupied',
     };
   if (ordered(b))
     return {
@@ -224,6 +230,12 @@ function mend(c: Obj, b: Obj, at: string, check: Checks, out: Diagnostic[]) {
   if (!room.site?.directions.includes(b.direction)) bad(out, `${at}.benefit.direction`);
   if (!room.site?.blueprints.some((r: Obj) => c.blueprints?.[refString(r as never)]?.ruin))
     bad(out, `${at}.benefit.site`);
+}
+
+// Built rooms S5: the site lists the direction (and so some blueprint to raze).
+function raze(c: Obj, b: Obj, at: string, check: Checks, out: Diagnostic[]) {
+  const room = get(c, check, b.site, 'room', `${at}.benefit.site`);
+  if (room && !room.site?.directions.includes(b.direction)) bad(out, `${at}.benefit.direction`);
 }
 
 function stock(c: Obj, s: Obj, npc: Obj | undefined, at: string, check: Checks, out: Diagnostic[]) {

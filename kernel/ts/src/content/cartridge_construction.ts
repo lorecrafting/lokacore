@@ -1,7 +1,8 @@
 // Built rooms S1 at the cartridge trust boundary (twin of lib/loka/content/construction.ex): a
 // room's site names no direction the room has an exit in (SITE_EXIT_CONFLICT) and only blueprints
 // of this cartridge; a site or world.construction needs construction@1; a blueprint, a site or
-// world.construction, or (S4) a status_active leaf with subject room, needs kernel_api 1.99. Blueprint
+// world.construction, or (S4) a status_active leaf with subject room, needs kernel_api 1.99, (S5) a
+// raze service 1.101. Blueprint
 // text, tags, variants and the enter lock are checked with every other part (cartridge_refs.ts).
 import type { DefinitionRef, Diagnostic } from '../contracts.gen.ts';
 import { refString } from '../runtime/decision.ts';
@@ -38,6 +39,9 @@ export function construction(c: Obj): Diagnostic[] {
     !!c.world?.construction ||
     nodes(c).some(([p]) => p.op === 'status_active' && p.subject === 'room');
   if (used && apiCmp(c.manifest.requires.kernel_api.at_least, '1.99') < 0)
+    out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
+  const razes = Object.values((c.services ?? {}) as Obj).some((s) => s.benefit?.kind === 'raze');
+  if (razes && apiCmp(c.manifest.requires.kernel_api.at_least, '1.101') < 0)
     out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
   return [...out, ...builds(c)];
 }

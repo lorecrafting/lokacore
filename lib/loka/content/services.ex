@@ -1,4 +1,4 @@
-# size: allow 441, row 20a/20b/25 escrow orders, kgd.70 barters, bank accounts and Built rooms S2-S4 builds and mends check in the same service admission pass
+# size: allow 460, row 20a/20b/25 escrow orders, kgd.70 barters, bank accounts and Built rooms S2-S5 builds, mends and razes check in the same service admission pass
 defmodule Loka.Content.Services do
   @moduledoc "Checks finite immediate service declarations and their exact provider stock."
   import Loka.Content.Source, only: [diag: 2, diag: 3, diag: 4, at: 2, ref: 3]
@@ -10,7 +10,7 @@ defmodule Loka.Content.Services do
       k when k in ~w(claim cancel) -> [{"service", "service"}]
       k when k in ~w(deposit withdraw) -> [{"account", "fact"}, {"vault", "npc"}]
       "build" -> [{"blueprint", "blueprint"}, {"site", "room"}] ++ fact_field(b)
-      "mend" -> [{"site", "room"}]
+      k when k in ~w(mend raze) -> [{"site", "room"}]
       "meal" -> [{"stock", "resource"}, {"recovery", "resource"}]
       "drink" -> [{"vessel", "item"}, {"liquid", "liquid"}, {"recovery", "resource"}]
     end
@@ -156,7 +156,7 @@ defmodule Loka.Content.Services do
       unresolved(b, "blueprint", at(rel, ["benefit", "blueprint"]), m, defs) ++
         unresolved(r, "room", at(rel, ["benefit", "site"]), m, defs)
 
-  defp benefit_refs(rel, %{"kind" => "mend", "site" => r}, m, defs),
+  defp benefit_refs(rel, %{"kind" => k, "site" => r}, m, defs) when k in ~w(mend raze),
     do: unresolved(r, "room", at(rel, ["benefit", "site"]), m, defs)
 
   defp benefit_refs(_, _, _, _), do: []
@@ -270,6 +270,9 @@ defmodule Loka.Content.Services do
       ~w(service.unaffordable service.nothing_to_mend) ++
         if(b["escrow"], do: ~w(service.missing_inputs), else: [])
 
+  defp reasons(%{"kind" => "raze"}),
+    do: ~w(service.unaffordable service.nothing_to_raze service.occupied)
+
   defp reasons(_), do: ~w(service.unaffordable service.full_mv service.sold_out)
 
   defp benefit(%{"kind" => "entitlement", "fact" => r}, _, _, m, defs) do
@@ -335,6 +338,20 @@ defmodule Loka.Content.Services do
         [
           {mend["direction"] in (site["directions"] || []), ["benefit", "direction"]},
           {Enum.any?(site["blueprints"] || [], ruin?), ["benefit", "site"]}
+        ]
+
+      _ ->
+        []
+    end
+  end
+
+  # Built rooms S5: a resolved site lists the direction.
+  defp benefit(%{"kind" => "raze", "site" => r} = raze, _, _, m, defs) do
+    case Refs.resolve(r, "room", m, defs) do
+      {_, _, room} ->
+        [
+          {raze["direction"] in ((room["site"] || %{})["directions"] || []),
+           ["benefit", "direction"]}
         ]
 
       _ ->

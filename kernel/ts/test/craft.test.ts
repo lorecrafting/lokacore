@@ -612,6 +612,37 @@ test('chop, learn carpentry, saw and raise the timbered hut north of the lane', 
   assert.deepEqual(offer(w, 'raise_timbered_hut').reason, refusal('service.site_taken'));
 });
 
+// Built rooms S5: a self-built room (the build recipe step) razes as a commissioned one does; its
+// origin is the build service's, so the carpenter's raze (injected: craft_sampler sells none)
+// finds it. Breaks: the raze finder keyed on something only the build service writes.
+test('the self-built hut razes like a commissioned one', () => {
+  const plain = content.services![`${P}service/raise_hut_plain`]!;
+  const raze = { ...plain, benefit: { kind: 'raze', site: R('room', 'lane'), direction: 'north' } };
+  const carpenter = content.npcs![`${P}npc/carpenter`]!;
+  const c = {
+    ...content,
+    services: { ...content.services, [`${P}service/raze_hut`]: raze },
+    npcs: {
+      ...content.npcs,
+      [`${P}npc/carpenter`]: {
+        ...carpenter,
+        services: [...carpenter.services!, R('service', 'raze_hut')],
+      },
+    },
+  } as never as Cartridge;
+  let w = done(ready(c), 'raise_timbered_hut');
+  const [hut] = built(w);
+  const lane = w.state.containers[w.body];
+  w = ok(w, {
+    type: 'use_service',
+    provider_id: w.entityIds[`${P}npc/carpenter`],
+    service: R('service', 'raze_hut'),
+    quoted_price: plain.price,
+  });
+  assert.deepEqual(Object.keys(w.state.built ?? {}), [hut]);
+  assert.equal(w.rooms[lane].exits.north, undefined);
+});
+
 // Breaks: admission skips the build refusal (a forged raise on a taken site is accepted), or the
 // carpenter's price is not charged or charged short (4 pennies buys the hut).
 test('the carpenter first: the plain hut for 5 pennies, then the raise is refused', () => {
