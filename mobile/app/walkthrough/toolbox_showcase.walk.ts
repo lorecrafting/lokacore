@@ -125,6 +125,7 @@ const law = async (screen: Screen, { tap, take }: Steps) => {
   await tap(/^Open the strongroom door/);
   await tap('Go south');
   await take(/^A strongroom chest is here/, /^Put a tallow candle/);
+  await take(/^A tallow candle, open/, /^Take a tallow candle/);
   await settle();
 };
 
