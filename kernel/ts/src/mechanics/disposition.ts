@@ -68,10 +68,9 @@ export function engage(
   arrests = true,
 ): { ops: DeltaOp[]; narration: Text[]; events: Event<'entity_entered_room'>[] } {
   const actor = command.payload.actor_id;
-  const npc = hostileAt(world, actor, there, steps);
+  const npc = hostileAt(world, actor, there, steps, arrests);
   const d = npc && (world.entities[npc] as NpcDefinition).disposition!;
   const to = d?.arrest && world.roomIds[refString(d.arrest.to)];
-  if (to === there || (to && !arrests)) return { ops: [], narration: [], events: [] };
   const ops = to
     ? [
         {
@@ -118,7 +117,13 @@ export function engage(
  * ponytail: read before the move's own writes (the room, an expedition's faction fact), so a room- or presence-relative
  * leaf reads the room left; read after them when a sampler needs one.
  */
-function hostileAt(world: World, actor: CharacterId, there: EntityId, steps: Steps) {
+function hostileAt(
+  world: World,
+  actor: CharacterId,
+  there: EntityId,
+  steps: Steps,
+  arrests: boolean,
+) {
   if (world.rooms[there]?.sanctuary || running(world, actor)) return;
   const combat = !!world.cartridge.world?.combat;
   const candidates = Object.keys(world.entities)
@@ -126,7 +131,11 @@ function hostileAt(world: World, actor: CharacterId, there: EntityId, steps: Ste
       const npc = world.entities[id] as NpcDefinition;
       return (
         world.state.containers[id] === there &&
-        ((combat && npc.attack && npc.disposition?.engage) || npc.disposition?.arrest) &&
+        ((combat && npc.attack && npc.disposition?.engage) ||
+          // An arrest skipped (a fall, or `to` is this room) lets a later fighter engage.
+          (arrests &&
+            npc.disposition?.arrest &&
+            world.roomIds[refString(npc.disposition.arrest.to)] !== there)) &&
         living(world, id) &&
         !engaged(world, id as EntityId) &&
         !concealed(world, bodyOf(world, actor)!, id as EntityId) // status reader 8
