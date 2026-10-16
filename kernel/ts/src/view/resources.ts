@@ -52,7 +52,11 @@ export function conditionViews(world: World, body: EntityId | undefined) {
   if (!body) return {};
   const conditions = activeStatuses(world, body).map(({ spec, row }) => ({
     label: spec.label,
-    ...(row.job_id && { ends_at: row.ends_at, next_tick_at: row.next_tick_at }), // none: row W8
+    ...(row.job_id && {
+      ends_at: row.ends_at,
+      duration: spec.duration as number, // the ring denominator (loka-x6t.65)
+      next_tick_at: row.next_tick_at,
+    }), // none: row W8
     resource: spec.resource.key as Key,
     ...(spec.per_tick !== undefined && { per_tick: spec.per_tick }),
     tick_every: spec.tick_every,
