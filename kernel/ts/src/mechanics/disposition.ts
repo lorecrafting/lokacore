@@ -72,31 +72,17 @@ export function engage(
   const d = npc && (world.entities[npc] as NpcDefinition).disposition!;
   const to = d?.arrest && world.roomIds[refString(d.arrest.to)];
   const ops = to
-    ? [
-        {
-          op: 'entity.transfer',
-          writer_group: 0,
-          entity_id: body,
-          source_id: there,
-          destination_id: to,
-        } as const,
-        ...separate(world, actor, 0),
-      ]
+    ? [arrived(body, there, to), ...separate(world, actor, 0)]
     : npc
       ? opened(world, actor, body, npc, mint, world.state.clock)
       : [];
   if (!ops.length) return { ops: [], narration: [], events: [] };
   // Row 16: a spotted entrant is caught; its concealment ends with the encounter or the arrest.
-  const hiding = activeStatuses(world, body).filter(({ spec }) => spec.concealment);
+  const hiding = activeStatuses(world, body)
+    .filter(({ spec }) => spec.concealment)
+    .map(({ status }) => status);
   return {
-    ops: [
-      ...ops,
-      ...cureOps(
-        world,
-        body,
-        hiding.map(({ status }) => status),
-      ),
-    ],
+    ops: [...ops, ...cureOps(world, body, hiding)],
     narration: [{ key: to ? d!.arrest!.narration : d!.engage! }],
     events: to
       ? [
@@ -109,6 +95,15 @@ export function engage(
       : [],
   };
 }
+
+const arrived = (body: EntityId, there: EntityId, to: EntityId) =>
+  ({
+    op: 'entity.transfer',
+    writer_group: 0,
+    entity_id: body,
+    source_id: there,
+    destination_id: to,
+  }) as const;
 
 /**
  * The first NPC in `there`, in EntityId order, living, unengaged, with an attack and an engage

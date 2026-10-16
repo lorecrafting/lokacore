@@ -1,4 +1,4 @@
-// size: allow 350, ancestry, bell area, Study edge, barrier opens_when, ask answer roots, identity name variants, blueprints and skill prerequisites join shared reference admission
+// size: allow 353, ancestry, bell area, Study edge, barrier opens_when, ask answer roots, identity name variants, blueprints and skill prerequisites and the arrest cell (row 35) join shared reference admission
 import { water } from './cartridge_water.ts';
 import { topics } from './cartridge_topics.ts';
 import { pools } from './cartridge_pools.ts';
@@ -339,21 +339,15 @@ function ancestryRefs(c: Obj, check: ReturnType<typeof checkers>, out: Diagnosti
   }
 }
 
-// Each room an NPC names, with its path: where it starts, each room of its daily schedule and
-// where it arrests to (row 35).
+// Each room an NPC names, with its path: its start, its daily schedule, its arrest cell (row 35).
 const npcRooms = (c: Obj): [Obj, string][] =>
-  Object.entries((c.npcs ?? {}) as Obj).flatMap(([ref, n]) => [
-    [n.room, `.cartridge.npcs${step(ref)}.room`],
-    ...Object.entries((n.daily_schedule ?? {}) as Obj).map(([h, r]): [Obj, string] => [
-      r,
-      `.cartridge.npcs${step(ref)}.daily_schedule${step(h)}`,
-    ]),
-    ...(n.disposition?.arrest
-      ? [
-          [n.disposition.arrest.to, `.cartridge.npcs${step(ref)}.disposition.arrest.to`] as [
-            Obj,
-            string,
-          ],
-        ]
-      : []),
-  ]);
+  Object.entries((c.npcs ?? {}) as Obj).flatMap(([ref, n]): [Obj, string][] => {
+    const at = `.cartridge.npcs${step(ref)}`;
+    const daily = Object.entries((n.daily_schedule ?? {}) as Obj);
+    const arrest = n.disposition?.arrest;
+    return [
+      [n.room, `${at}.room`],
+      ...daily.map(([h, r]): [Obj, string] => [r, `${at}.daily_schedule${step(h)}`]),
+      ...(arrest ? [[arrest.to, `${at}.disposition.arrest.to`] as [Obj, string]] : []),
+    ];
+  });
