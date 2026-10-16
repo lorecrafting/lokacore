@@ -2,7 +2,7 @@
 // graphic-only icon per condition, five then a +N disc. A tap opens Character; a hold (a hover on
 // web) shows the label and time left in the Tip's look. Locked (scene, combat, chapter page), the
 // discs are pictures, not buttons.
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { Animated, Pressable, Text, View } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
 import {
@@ -145,8 +145,8 @@ function Ring(p: { fraction: number; locked: boolean; children: ReactNode }) {
   const reduced = useReducedMotion();
   const shown = useSharedValue(deg);
   const last = useRef({ deg, at: 0 }); // the previous view's arc and when it came
-  const reach = Math.max(deg, last.current.deg); // a half stays while the arc drains out of it
-  useEffect(() => {
+  // Before paint, so a jump never shows the old arc for a frame (as PageTurn.tsx).
+  useLayoutEffect(() => {
     const at = performance.now();
     const ms = drainMs(last.current.deg, deg, at - last.current.at, reduced);
     last.current = { deg, at };
@@ -156,8 +156,8 @@ function Ring(p: { fraction: number; locked: boolean; children: ReactNode }) {
   return (
     <View style={{ width: RING, height: RING, alignItems: 'center', justifyContent: 'center' }}>
       <View style={{ ...circle, borderColor: track }} />
-      {reach > 0 && <Half right shown={shown} color={arc} />}
-      {reach > 180 && <Half shown={shown} color={arc} />}
+      <Half right shown={shown} color={arc} />
+      <Half shown={shown} color={arc} />
       {p.children}
     </View>
   );
@@ -170,13 +170,15 @@ const circle = {
   borderWidth: size.rule,
 } as const;
 
-// One half of the box, clipping a right half ring turned about the ring's centre.
+// One half of the box, clipping a right half ring turned about the ring's centre; drawn only while
+// the shown arc reaches into it, read per frame so a re-render mid-drain keeps it.
 function Half(p: { right?: boolean; shown: { value: number }; color: string }) {
   const half = RING / 2;
   const right = !!p.right;
   const turn = useAnimatedStyle(() => {
     const t = turns(p.shown.value);
-    return { transform: [{ rotate: `${right ? t.right : t.left}deg` }] };
+    const drawn = p.shown.value > (right ? 0 : 180);
+    return { opacity: drawn ? 1 : 0, transform: [{ rotate: `${right ? t.right : t.left}deg` }] };
   });
   return (
     <View

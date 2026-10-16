@@ -27,7 +27,7 @@ registerHooks({
       return {
         format: 'module',
         shortCircuit: true,
-        source: `export * from ${JSON.stringify(react)}; export const useContext = c => c._currentValue; export const useState = v => [typeof v === 'function' ? v() : v, () => {}]; export const useRef = v => ({ current: v }); export const useEffect = f => f();`,
+        source: `export * from ${JSON.stringify(react)}; export const useContext = c => c._currentValue; export const useState = v => [typeof v === 'function' ? v() : v, () => {}]; export const useRef = v => globalThis.keptRef ?? { current: v }; export const useEffect = f => f(); export const useLayoutEffect = f => f();`,
       };
     if (url === 'test:keyboard-native')
       return {
@@ -438,8 +438,9 @@ test('status icon countdown ring: remaining share of the duration, clockwise fro
     assert.equal(track.props.style.borderColor, color.light.dim);
     const turn = (h: any) =>
       parseFloat(h.type(h.props).props.children.props.style[1].transform[0].rotate);
+    const drawn = (h: any) => h.type(h.props).props.children.props.style[1].opacity === 1;
     return rest
-      .filter((h: any) => h && h.props.shown)
+      .filter((h: any) => h && h.props.shown && drawn(h))
       .map((h: any) => [h.props.right ? 'right' : 'left', turn(h), h.props.color]);
   };
   const fg = color.light.fg;
@@ -491,4 +492,31 @@ test('status icon countdown ring: drains between views, capped, jumps up and und
   assert.deepEqual(turns(180), { right: 0, left: 0 });
   assert.deepEqual(turns(170), { right: -10, left: 0 });
   assert.deepEqual(turns(0), { right: -180, left: 0 });
+  // Rendered: the previous view (288 degrees) came 250 ms ago, this one shows 286.8.
+  const ring = () => {
+    const [icon] = StatusIcons({
+      conditions: [{ label: 'fed', kind: 'buff', ends_at: 3600, duration: 3600 }] as any,
+      time: 732,
+      text: (k: string) => k,
+      open: () => {},
+    }).props.children[0];
+    const e = icon.type(icon.props).props.children;
+    return e.type(e.props);
+  };
+  const drains = (reduced: boolean) => {
+    const g = globalThis as any;
+    Object.assign(g, {
+      reducedMotion: reduced,
+      timings: [],
+      keptRef: { current: { deg: 288, at: performance.now() - 250 } },
+    });
+    try {
+      ring();
+      return g.timings.map((ms: number) => Math.round(ms / 50) * 50);
+    } finally {
+      for (const k of ['reducedMotion', 'timings', 'keptRef']) delete g[k];
+    }
+  };
+  assert.deepEqual(drains(false), [250]);
+  assert.deepEqual(drains(true), []); // reduced motion: the arc jumps, no tween
 });

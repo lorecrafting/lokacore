@@ -193,12 +193,15 @@ export const RingEmpty: Story = { args: { conditions: [at('condition.fed', 'buff
 // Permanent (scarred): no ring.
 export const RingPermanent: Story = { args: { conditions: [scarred] } };
 
-// The left half's turn (the arc past 6 o'clock), read from the page: 108 degrees at 288.
+// The left half's turn (the arc past 6 o'clock), read from the page: 108 degrees at 288; NaN while
+// it is not drawn.
 const leftTurn = (root: HTMLElement) => () => {
-  const turns = [...root.querySelectorAll<HTMLElement>('div')]
-    .map((d) => /rotate\((-?[\d.]+)deg\)/.exec(d.style.transform)?.[1])
-    .filter((t) => t !== undefined);
-  return Number(turns[1]);
+  const left = [...root.querySelectorAll<HTMLElement>('div')].filter((d) =>
+    d.style.transform.includes('rotate'),
+  )[1];
+  return left?.style.opacity === '1'
+    ? Number(/rotate\((-?[\d.]+)deg\)/.exec(left.style.transform)?.[1])
+    : NaN;
 };
 const wait = (ms: number) => new Promise((done) => setTimeout(done, ms));
 
@@ -208,11 +211,13 @@ const wait = (ms: number) => new Promise((done) => setTimeout(done, ms));
 function Drain(p: { from: number; to: number }) {
   const [time, setTime] = useState(p.from);
   const [ends, setEnds] = useState(3600);
+  const [, redraw] = useState(0);
   return (
     <>
       <StatusIcons conditions={[at('condition.fed', 'buff', ends)]} time={time} text={(k) => k} />
       <button onClick={() => setTime(p.to)}>tick</button>
       <button onClick={() => setEnds(4332)}>reapply</button>
+      <button onClick={() => redraw((n) => n + 1)}>redraw</button>
     </>
   );
 }
@@ -230,16 +235,18 @@ export const RingDraining: Story = {
   },
 };
 
-// Past 6 o'clock (time 1790 to 1810, 181 to 179 degrees): the left half stays while its last
-// degree drains, then rests at 0.
+// Past 6 o'clock (time 1790 to 1810, 181 to 179 degrees, views 800 ms apart): the left half stays
+// while its last degree drains (the first 400 ms), through a re-render that changes no view, then
+// goes.
 export const RingDrainingPastSix: Story = {
   render: () => <Drain from={1790} to={1810} />,
   play: async ({ canvas, canvasElement }) => {
     const left = leftTurn(canvasElement);
     await waitFor(() => expect(left()).toBeCloseTo(1, 5));
-    await wait(250);
+    await wait(800);
     fireEvent.click(canvas.getByText('tick'));
+    fireEvent.click(canvas.getByText('redraw'));
     await waitFor(() => expect(left() < 1 && left() > 0).toBe(true)); // still draining, not dropped
-    await waitFor(() => expect(left()).toBe(0), { timeout: 1100 });
+    await waitFor(() => expect(left()).toBeNaN(), { timeout: 1100 });
   },
 };
