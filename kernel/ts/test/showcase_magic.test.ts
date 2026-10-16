@@ -239,6 +239,7 @@ const SMOKE = [{ sense: 'smell', text: 'cue.smoke', direction: 'down' }];
 test('magic 6: the oiled winch opens the crypt; the lantern shows the wight', () => {
   w = go(take(take(w, 'oilcan'), 'loft_bucket'), 'east').world;
   assert.equal(refused(w, { type: 'move', direction: 'down' }), 'exit_closed');
+  assert.equal(refused(w, { type: 'open', direction: 'down' }), 'invalid_state');
   const card = view(w)
     .inventory?.flatMap((e) => e.actions ?? [])
     .find((a) => a.action_key === 'oil_winch');
