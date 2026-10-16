@@ -9,7 +9,12 @@ import { INSTALLED, gameView, loadCartridge, newWorld, step, stepElapsed } from 
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { targetOf, value } from '../src/mechanics/fact.ts';
 import { key } from '../src/foundation/compose.ts';
-import { built as due, unbuildable, unrazable } from '../src/mechanics/service/build.ts';
+import {
+  built as due,
+  raised as raisedOps,
+  unbuildable,
+  unrazable,
+} from '../src/mechanics/service/build.ts';
 import { LIMITS } from '../src/contracts.gen.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { hydrate } from '../src/runtime/created.ts';
@@ -511,18 +516,25 @@ test('raze puts the floor in the lane, takes north away, ends weathering; a new 
 });
 
 // Breaks: an NPC or a nested item left in the razed room, or the nested item moved out of its
-// holder (only the floor's direct contents move).
+// holder (only the floor's direct contents move), or the moves not in EntityId order (the order
+// would follow key insertion, which a reopen changes).
 test("raze moves an NPC in the hut to the lane; a holder's contents ride along", () => {
   n = 0;
   let w = raised(play(fresh(), buy(fresh())));
   const lane = w.state.containers[w.body];
   const [hut] = built(w);
   const seller = npc(w, 'seller');
+  const order = [seller, item(w, 'c')].sort();
   w = seeded(w, (s) => {
-    s.containers[seller] = hut;
-    s.containers[item(w, 'c')] = hut;
+    // re-inserted against EntityId order, so the moves' order cannot come from key insertion
+    for (const e of [...order].reverse()) (delete s.containers[e], (s.containers[e] = hut));
     s.containers[item(w, 'a')] = item(w, 'c');
   });
+  const service = w.cartridge.services![`${S}:service/raze_hut`]!;
+  const moves = raisedOps(w, undefined as never, service, undefined as never).flatMap((o) =>
+    o.op === 'entity.transfer' ? [o.entity_id] : [],
+  );
+  assert.deepEqual(moves, order);
   w = play(w, raze(w));
   assert.deepEqual(
     [seller, item(w, 'c'), item(w, 'a')].map((id) => w.state.containers[id]),

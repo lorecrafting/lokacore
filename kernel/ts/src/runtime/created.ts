@@ -182,7 +182,7 @@ function raise(world: World, state: State, id: string, identity: Identity, draft
 function raze(world: World, state: State, id: string, draft: Draft): boolean {
   const origin = state.created?.[id]?.origin;
   const rooms = (draft.rooms ??= { ...world.rooms });
-  if (origin?.kind !== 'built' || !rooms[id]) return false;
+  if (origin?.kind !== 'built') return false;
   const siteId = world.roomIds[refString(origin.site)];
   const exits = { ...rooms[siteId].exits };
   if (exits[origin.direction]?.to.key === rooms[id].key) delete exits[origin.direction];
@@ -192,8 +192,8 @@ function raze(world: World, state: State, id: string, draft: Draft): boolean {
 }
 
 // Over every built row of the state, not only the changed ones: one live room per site direction,
-// at most world.construction.max_total live; each tombstone names a built room, is no later than
-// the clock, and holds nothing.
+// at most world.construction.max_total live; each tombstone is no later than the clock and holds
+// nothing (raze() in hydrate refuses one that names no built room).
 function builtValid(world: World, state: State): boolean {
   const sites = Object.entries(state.created ?? {}).flatMap(([id, i]) =>
     i?.origin.kind === 'built' && !state.built?.[id]
@@ -205,10 +205,7 @@ function builtValid(world: World, state: State): boolean {
     new Set(sites).size === sites.length &&
     sites.length <= (world.cartridge.world?.construction?.max_total ?? 0) &&
     razed.every(
-      ([id, row]) =>
-        state.created?.[id]?.origin.kind === 'built' &&
-        !validate('BuiltRow', row as never).length &&
-        row.razed_at <= state.clock,
+      ([, row]) => !validate('BuiltRow', row as never).length && row.razed_at <= state.clock,
     ) &&
     !Object.values(state.containers).some((c) => state.built?.[c])
   );
