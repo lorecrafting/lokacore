@@ -159,11 +159,26 @@ test('magic 4b: ward needs level 2 at the exact threshold', () => {
   const at = (grant: number) => {
     const c = structuredClone(content) as any;
     c.attributes[ref('attribute', 'cha')].start = 7;
-    c.reactions[ref('reaction', 'errand_reward')].apply[1].amount = grant;
+    c.reactions[ref('reaction', 'errand_reward')].apply.find(
+      (s: any) => s.op === 'experience.grant',
+    ).amount = grant;
     const v = read(taught(c));
     return words(v)?.find((s) => s.word === 'ward')?.available;
   };
   assert.deepEqual([at(29), at(30)], [false, true]);
+});
+
+// Breaks: the grimoire read before the errand is accepted leaves the errand open for good (its
+// fact_changed has already fired), so ward is never taught; or the loft entry resolves it
+// before it is accepted.
+test('magic 4c: the grimoire read first; the errand resolves on the next climb to the loft', () => {
+  let v = go(newWorld(content, CTX as never, [1, 2, 3, 4]), 'up').world;
+  v = read(choose(talk(v, 'hedge_wizard').world, 'teach').world);
+  v = choose(talk(v, 'hedge_wizard').world, 'accept').world;
+  assert.equal(view(v).journal[0]?.state, 'active');
+  v = go(go(v, 'down').world, 'up').world; // the wizard hears of it when you come back up
+  assert.equal(view(v).journal[0]?.state, 'resolved');
+  assert.equal(fact(v, 'ward_taught'), true);
 });
 
 // Breaks: ward does not apply warded or spend its mana, or a second cast re-announces the status.

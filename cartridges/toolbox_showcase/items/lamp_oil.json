@@ -1,6 +1,7 @@
 {
   "keywords": [
-    "oil"
+    "oil",
+    "flask"
   ],
   "short": "item.lamp_oil.short",
   "room_line": "item.lamp_oil.room",
