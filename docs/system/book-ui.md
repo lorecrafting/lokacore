@@ -295,7 +295,7 @@ stay as offered; the foot is Leave. The authored line names the mood, never the 
 ("Nell turns her back on you.", not what the player did); hostility ending redraws the actions
 without a line. A shelf row's reason is always a word from `words.ts` `reason()` ("not now",
 "too heavy to carry"), never a code with its underscores replaced; a buy refused `not_owned`
-stays "sold out".
+stays "sold out", and one refused `insufficient_resource` reads "can't afford" (`buyReason`).
 
 ## Item details and Take/Drop
 
