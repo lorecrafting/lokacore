@@ -48,7 +48,8 @@
       "speech": 1,
       "population": 1,
       "service": 1,
-      "construction": 1
+      "construction": 1,
+      "light": 1
     },
     "client_features": []
   },

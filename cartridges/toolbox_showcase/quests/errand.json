@@ -1,0 +1,24 @@
+{
+  "title": "quest.errand.title",
+  "objective": {
+    "evidence": "current_state",
+    "policy": {
+      "policy_version": 1,
+      "root": {
+        "op": "fact_compare",
+        "fact": "flamma_known",
+        "equals": true
+      }
+    }
+  },
+  "journal": {
+    "active": "quest.errand.active",
+    "objectives_met": "quest.errand.objectives_met",
+    "resolved": "quest.errand.resolved",
+    "failed": "quest.errand.failed",
+    "abandoned": "quest.errand.abandoned",
+    "outcomes": {
+      "done": "quest.errand.done"
+    }
+  }
+}

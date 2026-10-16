@@ -489,6 +489,39 @@
         "player"
       ],
       "meaning": "Someone saw this character steal (a seen lift anywhere in the cartridge); the counting house's fine clears it."
+    },
+    "lux_known": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The hedge-wizard taught the player the word lux."
+    },
+    "flamma_known": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The player read the word flamma in the grimoire."
+    },
+    "ward_taught": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The hedge-wizard's errand taught the player the word of warding."
     }
   }
 }

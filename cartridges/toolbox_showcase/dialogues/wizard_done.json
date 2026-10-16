@@ -1,0 +1,24 @@
+{
+  "npc": "hedge_wizard",
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "fact_compare",
+      "fact": "ward_taught",
+      "equals": true
+    }
+  },
+  "prompt": "dialogue.wizard_done.prompt",
+  "roles": {
+    "wizard": {
+      "role": "npc",
+      "npc": "hedge_wizard"
+    }
+  },
+  "choices": {
+    "leave": {
+      "label": "dialogue.wizard.leave",
+      "narration": "narration.wizard.leave"
+    }
+  }
+}

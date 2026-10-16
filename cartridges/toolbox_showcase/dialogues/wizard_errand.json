@@ -1,0 +1,39 @@
+{
+  "npc": "hedge_wizard",
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": [
+        {
+          "op": "fact_compare",
+          "fact": "lux_known",
+          "equals": true
+        },
+        {
+          "op": "fact_compare",
+          "fact": "ward_taught",
+          "equals": false
+        }
+      ]
+    }
+  },
+  "prompt": "dialogue.wizard_errand.prompt",
+  "roles": {
+    "wizard": {
+      "role": "npc",
+      "npc": "hedge_wizard"
+    }
+  },
+  "choices": {
+    "accept": {
+      "label": "dialogue.wizard_errand.accept",
+      "narration": "narration.wizard_errand.accept",
+      "accept": "errand"
+    },
+    "leave": {
+      "label": "dialogue.wizard.leave",
+      "narration": "narration.wizard.leave"
+    }
+  }
+}

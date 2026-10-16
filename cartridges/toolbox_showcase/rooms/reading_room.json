@@ -1,0 +1,9 @@
+{
+  "title": "room.reading_room.title",
+  "description": "room.reading_room.description",
+  "exits": {
+    "south": {
+      "to": "loft"
+    }
+  }
+}

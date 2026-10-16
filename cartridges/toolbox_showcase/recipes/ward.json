@@ -1,0 +1,49 @@
+{
+  "label": "spell.ward",
+  "aliases": [
+    "ward"
+  ],
+  "reason": "reason.ward",
+  "target": {
+    "kind": "spell",
+    "word": "ward",
+    "learned": "ward_taught"
+  },
+  "priority": 0,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": [
+        {
+          "op": "level_compare",
+          "at_least": 2
+        },
+        {
+          "op": "stat_compare",
+          "attribute": "cha",
+          "at_least": 7
+        }
+      ]
+    }
+  },
+  "costs": [
+    {
+      "resource": "mana",
+      "amount": 1
+    }
+  ],
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "status.apply",
+          "status": "warded"
+        }
+      ],
+      "narration": {
+        "actor": "narration.ward"
+      }
+    }
+  }
+}

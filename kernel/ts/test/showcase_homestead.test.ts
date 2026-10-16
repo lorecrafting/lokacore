@@ -501,19 +501,23 @@ test('homestead 12: learn cooking, cook a hearty stew from two fresh fish, eat i
   const one = drop(w, fishIn(w, 'held')[0]!);
   assert.equal(refused(one, cookAt(one, 'cook_stew')), 'invalid_state');
   assert.deepEqual(offer(one, 'cook_stew').reason, reason('craft.cook_stew.needs'));
+  // The lowest larder EntityId; derived, since the ids move with every item the cartridge adds.
+  const [stew] = ['stew_hearty_01', 'stew_hearty_02', 'stew_hearty_03'].sort((x, y) =>
+    id(w, 'item', x) < id(w, 'item', y) ? -1 : 1,
+  );
   w = play(w, cookAt(w, 'cook_stew')).world;
-  assert.equal(where(w, id(w, 'item', 'stew_hearty_02')), w.body); // lowest larder EntityId
+  assert.equal(where(w, id(w, 'item', stew!)), w.body);
   assert.equal(fishIn(w, 'larder').length, 2);
   assert.equal(fact(w, 'uses_cooking'), 1);
   assert.deepEqual(offer(w, 'cook_feast').reason, { code: 'invalid_state' });
-  const hearty = id(w, 'item', 'stew_hearty_02');
-  w = eat(w, 'stew_hearty_02').world;
+  const hearty = id(w, 'item', stew!);
+  w = eat(w, stew!).world;
   assert.equal(str(w), 12);
   assert.deepEqual(labels(w), ['condition.hearty']);
   // Branch: the same stew eaten while fed is still active.
   const both = structuredClone(fed) as any;
   both.state.containers[hearty] = both.body;
-  assert.equal(str(eat(both, 'stew_hearty_02').world), 13);
+  assert.equal(str(eat(both, stew!).world), 13);
   // The loop's pennies last: the 3 left buy the plot (step 13).
   assert.equal(pennies(play(walk(w, 'north'), farmer(w, 'buy_plot', 3)).world), 0);
   valid(w);

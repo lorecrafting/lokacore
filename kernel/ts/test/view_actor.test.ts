@@ -8,12 +8,12 @@ import { fresh } from './showcase_fixture.ts';
 
 const world = fresh('5ca5e000-0000-4000-8000-0000000000a5');
 
-test('the explicit world character sees the default view (the inn: 5 exits in its room file)', () => {
+test('the explicit world character sees the default view (the inn: 6 exits in its room file)', () => {
   const view = gameView(world, world.character);
   assert.deepEqual(view, gameView(world));
   assert.equal(view.actor_id, world.character);
   assert.equal(view.place.title.key, 'room.crossroads_inn.title');
-  assert.equal(view.exits.length, 5);
+  assert.equal(view.exits.length, 6);
 });
 
 test('a body-less viewer sees its own id and none of the player body', () => {

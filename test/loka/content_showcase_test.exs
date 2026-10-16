@@ -41,7 +41,8 @@ defmodule Loka.ContentShowcaseTest do
                     services/buy_strongroom services/deposit_a services/deposit_b
                     services/forge_cancel services/forge_claim services/forge_commission
                     services/withdraw_a services/withdraw_b statuses/hidden reactions/hide
-                    reactions/yard_hide dialogues/clerk_fine)
+                    reactions/yard_hide dialogues/clerk_fine recipes/lux recipes/ward
+                    items/lantern items/lamp_oil)
 
   @homestead_facts ~w(cooked gifted_apple gifted_rat ordered owns_pen owns_plot regard sown_at
                       traded_knife watered_at)
@@ -68,7 +69,11 @@ defmodule Loka.ContentShowcaseTest do
     do:
       [
         {"cartridge.json",
-         &update_in(&1, ["world"], fn w -> Map.drop(w, ~w(construction theft)) end)},
+         fn c ->
+           c
+           |> update_in(["world"], &Map.drop(&1, ~w(construction theft)))
+           |> update_in(["requires", "capabilities"], &Map.delete(&1, "light"))
+         end},
         {"rooms/holding_lane.json", &Map.delete(&1, "site")},
         {"npcs/carpenter.json", &Map.delete(&1, "services")},
         {"rooms/holding_croft.json", &Map.delete(&1, "site")},

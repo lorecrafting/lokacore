@@ -1,0 +1,19 @@
+{
+  "keywords": [
+    "oil"
+  ],
+  "short": "item.lamp_oil.short",
+  "room_line": "item.lamp_oil.room",
+  "description": "item.lamp_oil.description",
+  "mass_grams": 100,
+  "location": {
+    "in": "npc",
+    "npc": "hedge_wizard"
+  },
+  "fuel": {
+    "kind": "supply",
+    "capacity": 3600,
+    "initial": 0,
+    "unit": "flame"
+  }
+}

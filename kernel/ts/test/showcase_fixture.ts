@@ -346,4 +346,10 @@ export function homestead(c: any) {
   delete c.statuses[ref('status', 'hidden')];
   for (const k of ['hide', 'yard_hide']) delete c.reactions[ref('reaction', k)];
   delete c.dialogues[ref('dialogue', 'clerk_fine')];
+  // The magic district: the light capability (above 1.58), its lantern and lux; ward's level and
+  // stat policy.
+  delete c.manifest.requires.capabilities.light;
+  delete c.lock.capabilities.light;
+  for (const k of ['lux', 'ward']) delete c.recipes[ref('recipe', k)];
+  for (const k of ['lantern', 'lamp_oil']) delete c.items[ref('item', k)];
 }
