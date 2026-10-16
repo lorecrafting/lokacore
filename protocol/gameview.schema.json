@@ -2405,6 +2405,19 @@
         },
         "usable": {
           "type": "boolean"
+        },
+        "level": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Homestead hs-14: present only for a skill with growth; the base 1 while acquired plus each growth threshold reached."
+        },
+        "locked": {
+          "type": "boolean",
+          "description": "Homestead hs-14: present only for a skill with a prerequisite; true while the prerequisite fails for the actor."
+        },
+        "profession": {
+          "$ref": "text.schema.json#/$defs/TextKey",
+          "description": "Homestead hs-14: present only when the skill names a profession heading."
         }
       },
       "required": [
@@ -2475,7 +2488,7 @@
         },
         "price": {
           "type": "integer",
-          "minimum": 1,
+          "minimum": 0,
           "maximum": 2147483647
         },
         "benefit": {
@@ -2724,15 +2737,17 @@
       "additionalProperties": false
     },
     "ConditionView": {
-      "description": "One active body status: its authored label, end and next tick (both absent for a permanent status, row W8) and per-tick resource change (absent for a status that never ticks, row 2c).",
+      "description": "One active body status: its authored label, end, authored duration in seconds and next tick (all three absent for a permanent status, row W8; duration is present exactly when ends_at is, loka-x6t.65, and ends_at minus duration is the last application, since a reapplication refreshes ends_at to now plus duration) and per-tick resource change (absent for a status that never ticks, row 2c). kind (loka-x6t.64) is the status's authored kind; otherwise debuff when per_tick is negative, any modifies or resistances entry is negative, fear, blocks or allows is present, sight is blind, hearing is deaf or movement.cost_percent is above 100; else buff when the status has any gain (a positive per_tick, modifies or resistances entry, another sight, movement passes, a cost_percent below 100 or a concealment); absent for a status with no effect field.",
       "examples": [
         {
           "label": "condition.poisoned",
           "ends_at": 400,
+          "duration": 300,
           "next_tick_at": 160,
           "resource": "hp",
           "per_tick": -1,
-          "tick_every": 60
+          "tick_every": 60,
+          "kind": "debuff"
         }
       ],
       "type": "object",
@@ -2740,8 +2755,19 @@
         "label": {
           "$ref": "text.schema.json#/$defs/TextKey"
         },
+        "kind": {
+          "enum": [
+            "buff",
+            "debuff"
+          ]
+        },
         "ends_at": {
           "$ref": "command.schema.json#/$defs/LogicalTime"
+        },
+        "duration": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
         },
         "next_tick_at": {
           "$ref": "command.schema.json#/$defs/LogicalTime"
@@ -2765,6 +2791,14 @@
         "resource",
         "tick_every"
       ],
+      "dependentRequired": {
+        "ends_at": [
+          "duration"
+        ],
+        "duration": [
+          "ends_at"
+        ]
+      },
       "additionalProperties": false
     },
     "KnownRoomView": {

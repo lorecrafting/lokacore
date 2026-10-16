@@ -1,4 +1,4 @@
-// size: allow 312, the build and mend benefits (Built rooms S2 to S4) add their gates and commission to the one transition query
+// size: allow 314, the build, mend and raze benefits (Built rooms S2 to S5) and the barter (row kgd.70) add their gates and commission to the one transition query
 // One bounded admission/transition query for exact keyed service offers and execution.
 import {
   LIMITS,
@@ -24,7 +24,7 @@ import { adjust, level, resourceRef, resourceSpec, transfer, type Levels } from 
 import { serving } from '../liquid/shared.ts';
 import { selected } from '../containment/stock.ts';
 import { giveRefused } from '../containment/shared.ts';
-import { unbuildable, unmendable } from './build.ts';
+import { unbuildable, unmendable, unrazable } from './build.ts';
 export { built, raised } from './build.ts';
 
 type Payload = Extract<CommandPayload, { type: 'use_service' }>;
@@ -48,7 +48,8 @@ export function transition(
   const benefit = service.benefit;
   const blocked =
     (benefit.kind === 'build' && unbuildable(world, benefit, p.actor_id)) ||
-    (benefit.kind === 'mend' && unmendable(world, benefit));
+    (benefit.kind === 'mend' && unmendable(world, benefit)) ||
+    (benefit.kind === 'raze' && unrazable(world, benefit, p.actor_id));
   if (blocked) return blocked;
   const commission =
     benefit.kind === 'entitlement' || benefit.kind === 'build' ? benefit : undefined;
@@ -62,9 +63,11 @@ export function transition(
   const order: UnavailableReason | Order | undefined =
     benefit.kind === 'claim' || benefit.kind === 'cancel' ? open(world, p, benefit) : undefined;
   if (order && 'code' in order) return order;
-  const paid = ['deposit', 'withdraw'].includes(benefit.kind) // banked pays its own fee
-    ? { ops: [] }
-    : transfer(world, body, p.provider_id, service.currency, p.quoted_price);
+  // banked pays its own fee; a barter (row kgd.70, price 0) pays none
+  const paid =
+    ['deposit', 'withdraw'].includes(benefit.kind) || service.price === 0
+      ? { ops: [] }
+      : transfer(world, body, p.provider_id, service.currency, p.quoted_price);
   if (!paid) return serviceRefusal('insufficient_resource', 'service.unaffordable');
   const done = granted(world, p, body, service, order, paid, inputs.ops, steps);
   return 'code' in done ? done : { ops: done.ops, service };
@@ -93,6 +96,7 @@ function granted(
   }
   if (benefit.kind === 'mend') return { ops: [...ops, ...inputs] }; // cure and weathering in raised()
   if (benefit.kind === 'build') return { ops }; // the room itself is minted in raised() or built()
+  if (benefit.kind === 'raze') return { ops }; // the tombstone and moves come from raised()
   if (benefit.kind === 'repair') return repair(world, p, body, benefit, ops);
   if (benefit.kind === 'claim' || benefit.kind === 'cancel')
     return settle(world, p, body, order!, ops, steps);
@@ -139,17 +143,21 @@ function escrowed(
     const code = giveRefused(world, id, steps);
     if (code) return { code };
   }
-  const destination_id = world.roomIds[refString(escrow.custody)];
-  return {
-    ops: ids.map((entity_id) => ({
-      op: 'entity.transfer' as const,
-      writer_group: 0,
-      entity_id,
-      source_id: body,
-      destination_id,
-    })),
-  };
+  const custody = world.roomIds[refString(escrow.custody)];
+  const ops = ids.map((id) => move(id, body, custody));
+  // Row kgd.70: an output with no ready_after is a barter, handed over with the inputs; no job.
+  if (escrow.output && !escrow.ready_after)
+    ops.push(move(world.entityIds[refString(escrow.output)], custody, body));
+  return { ops };
 }
+
+const move = (entity_id: EntityId, source_id: EntityId, destination_id: EntityId) => ({
+  op: 'entity.transfer' as const,
+  writer_group: 0,
+  entity_id,
+  source_id,
+  destination_id,
+});
 
 /** Toolbox row 20b: the engine job a timed commission's order waits for. */
 export const orderJob = (service: DefinitionRef): DefinitionRef => ({ ...service, kind: 'order' });
@@ -216,13 +224,7 @@ function settle(
       ? selected(world, escrow.items, custody, escrow.quantity, steps)
       : [world.entityIds[refString(escrow.output!)]];
   if (typeof ids === 'string') return { code: ids };
-  const moves = ids.map((entity_id) => ({
-    op: 'entity.transfer' as const,
-    writer_group: 0,
-    entity_id,
-    source_id: custody,
-    destination_id: body,
-  }));
+  const moves = ids.map((id) => move(id, custody, body));
   const start = { ops: [...paid, ...moves], position: 0, facts: {} };
   const b = commission.benefit as Extract<ServiceDefinition['benefit'], { kind: 'entitlement' }>;
   return { ops: assigned(world, p.actor_id, start, { fact: b.fact, value: false }, 'service').ops };

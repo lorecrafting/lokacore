@@ -1576,7 +1576,7 @@ services are separate direct offers, not a first-eligible dialogue replacement.
   - No quality from a check (C3-M03 forge, later).
   - A reaction or replenish naming the custody room can still move the items (row 20a limit).
   - The output moves to the body without a carry check.
-  - Claim and cancel cost at least 1 (the service price minimum is unchanged), because a free use would need command `quoted_price` and the offer price to allow 0, a protocol change.
+  - Claim and cancel cost at least 1. The schema price minimum is 0 since the barter (row kgd.70), but the loader refuses price 0 at `.price` for every benefit except an escrowed entitlement.
 - **Opt-in.** `ready_after`, `output`, `claim` and `cancel` need `kernel_api` 1.80 (KERNEL_API_RANGE_INVALID at `requires.kernel_api.at_least`) in both kernels. A cartridge without them keeps its bytes, hash, ids, receipts and GameView. Chapter 1 declares none.
 - **Book.** No new element: two more service offers.
 - **Traps.** [Trap 1](../MECHANICS-TOOLBOX.md#traps) holds: due times are on the logical clock. One new job kind; no new save section, op, event or command.
@@ -1954,7 +1954,7 @@ If a leg or deposit becomes impossible because the original nest is absent, clos
 
 A reaction step `status.apply` applies the status at the cause's logical time to the event's subject ([reaction@1](#reaction1-kerneltssrcmechanicsreactionts) table); on an `entity_entered_room` cause that is the entering entity, which since [row G3](#statuses-on-npcs-and-things-toolbox-row-g3) may be an NPC. A holder whose `entity_died` comes after the cause in the same proposal takes no status step (Beads `loka-kgd.105`): the killing blow's `attack_result` never lands on the player's body returned by the death (`react`, `kernel/ts/src/runtime/proposal.ts`), while a reaction on `entity_died` itself still does, and a permanent status (row W8) still lands, as it survives the return. A rule applies each status at most once per holder per delivery; a later step naming the same status on the same holder is skipped (since [row G3](#statuses-on-npcs-and-things-toolbox-row-g3) one rule may burn two items). The first application opens generation 1 with `ends_at = now + duration`, `next_tick_at = now + tick_every` and one pending unbound job of kind `status` due at the earlier of the two; a later application after cure or expiry opens the next generation. An application while active refreshes `ends_at` only: it keeps the generation, the pending tick and the job. The sampler's dart corridor applies `poison` on entry and its shrine applies `blessing`.
 
-At a due job strictly before `ends_at` and not before `next_tick_at`, add `per_tick` to the resource, saturating at the pool's authored bounds (the op itself is exact; a saturated zero writes nothing), then schedule the successor job at the earlier of the next tick and the end. A job at or after `ends_at` expires the status without a tick. A successor the same advance also crosses (Beads `loka-6ztc`) runs as a sub-step of that job's one `run_job`, as a crossed schedule hour does ([schedule@1](#schedule1-behavior1-calendar1-mechanicsschedulerulets-kerneltssrcmechanicsschedulebehaviorts)): at that time, in `(due_time, job_id)` order under the first job's id and in the holder's writer group, it ticks, expires or kills as job-by-job play would (an equal-due tie with another job may order differently, as job-by-job play would use the successor's new id); the drain carries each sub-step's next tick, and the last sub-step writes the row and schedules the successor after the target (`runStatus`, `kernel/ts/src/mechanics/status/job.ts`). A refresh between sub-steps (a reaction re-applying the status) writes its new end as the row's `next_tick_at`, since the row's own tick is stale (the drain carries the true one); the next sub-step overwrites it, so job-by-job semantics hold: no tick at the old end, the new end honoured. A status applied or refreshed inside an advance may end before the advance end: the composer checks a status row's `ends_at` and `next_tick_at` against the due time of the last completed job, not the advance end, and the drain runs the status's job like any other job the advance crosses, so one long wait equals hourly steps (Beads `loka-j958`). Job rows and ids differ from job-by-job play (one job completes, no row per crossed tick). A negative tick that brings `hp` to 0 closes the body's encounter, inactivates the status and runs the ordinary death sequence with no killer; the same-body return clears every status but a [permanent](#permanent-statuses-toolbox-row-w8) one. An edible item whose `cures` lists the status ends it when eaten; such an item is edible at the pool maximum while a listed status is active, and then restores nothing. Expiry, cure and death leave the inactive generation in place and do not cancel the pending job: a due job whose row is inactive or owned by another job completes with no change. Statuses on NPCs and things follow [row G3](#statuses-on-npcs-and-things-toolbox-row-g3). A rate modifier (changing a pool's regen rate for a time) is not in this row; a buff is a positive per-tick amount.
+At a due job strictly before `ends_at` and not before `next_tick_at`, add `per_tick` to the resource, saturating at the pool's authored bounds (the op itself is exact; a saturated zero writes nothing), then schedule the successor job at the earlier of the next tick and the end. A job at or after `ends_at` expires the status without a tick. A successor the same advance also crosses (Beads `loka-6ztc`) runs as a sub-step of that job's one `run_job`, as a crossed schedule hour does ([schedule@1](#schedule1-behavior1-calendar1-mechanicsschedulerulets-kerneltssrcmechanicsschedulebehaviorts)): at that time, in `(due_time, job_id)` order under the first job's id and in the holder's writer group, it ticks, expires or kills as job-by-job play would (an equal-due tie with another job may order differently, as job-by-job play would use the successor's new id); the drain carries each sub-step's next tick, and the last sub-step writes the row and schedules the successor after the target (`runStatus`, `kernel/ts/src/mechanics/status/job.ts`). A refresh between sub-steps (a reaction re-applying the status) writes its new end as the row's `next_tick_at`, since the row's own tick is stale (the drain carries the true one); the next sub-step overwrites it, so job-by-job semantics hold: no tick at the old end, the new end honoured. A status applied or refreshed inside an advance may end before the advance end: the composer checks a status row's `ends_at` and `next_tick_at` against the due time of the last completed job, not the advance end, and the drain runs the status's job like any other job the advance crosses, so one long wait equals hourly steps (Beads `loka-j958`). Job rows and ids differ from job-by-job play (one job completes, no row per crossed tick). A negative tick that brings `hp` to 0 closes the body's encounter, inactivates the status and runs the ordinary death sequence with no killer; the same-body return clears every status but a [permanent](#permanent-statuses-toolbox-row-w8) one. An edible item whose `cures` lists the status ends it when eaten; such an item is edible at the pool maximum while a listed status is active, and then restores nothing. Expiry, cure and death leave the inactive generation in place and do not cancel the pending job: a due job whose row is inactive or owned by another job completes with no change. Statuses on NPCs and things follow [row G3](#statuses-on-npcs-and-things-toolbox-row-g3). A rate modifier (changing a pool's regen rate for a time) is not in this row. A status's icon polarity (GameView `ConditionView.kind`, loka-x6t.64) is its authored `kind` when it has one (the variants sampler's bruised and notched, the showcase's gored and the scars sampler's scar are authored debuffs); otherwise it is derived from the effect fields: debuff on any harm, buff on a gain alone (fed is a buff from its modifier alone), and no kind for a status with no effect. A timed status's `ConditionView` also carries its authored `duration` (loka-x6t.65), present exactly when `ends_at` is: a reapplication refreshes `ends_at` to now plus `duration`, so the Book's countdown ring fraction `(ends_at - time) / duration` stays in [0, 1]; a permanent status shows neither.
 
 ## Stats derived from attributes (toolbox row 2)
 
@@ -2288,7 +2288,7 @@ Nothing is stored: the stats are read at use, so a later attribute writer change
 - **Opt-in.** A permanent status needs `kernel_api` 1.48 (KERNEL_API_RANGE_INVALID). Chapter 1 declares no status, so its bytes are unchanged.
 - **Book.** The Character page's condition line already shows the label ("Scarred"). The status line and combat page show the label alone, with no time or tick part (`conditionLine`). Final wording goes to the designer (Beads `loka-x6t.14`).
 - **Sampler.** `cartridges/scars_sampler`: every hit applies `scar` (a reaction on `attack_result {hit: true}`). The player (hp 10, attack 100% for 1) attacks the wolf (hp 30, bites 100% for 4). After the first round the player is at hp 6 and scarred, and the wolf reads "a scarred wolf" (its `short_variants`). The third bite kills; the player returns to the hall at hp 10, still scarred. Eating the healer's salve (`cures: [scar]`) ends it.
-- **Composition record.** Consumers: reactions (`status.apply`), cures, the death return, the GameView and W6 variants. Reads: status rows and each status's `duration`. Writes: `status.transition` (the permanent row shape is new in both composers: exact keys, never turning timed or back while active). Events, jobs and save rows: none new. Reused: row 1's row, generations, cure path and applier; row G3 holders; row 2c's `modifies`; W6's `status_active`; `KERNEL_API_RANGE_INVALID`. New: the `"permanent"` duration, the job-less `StatusRow` shape, an optional `ConditionView` end and tick, and the return's `returning` filter. Foundation change: the `StatusRow` delta and save shape and both `status.transition` composers (`foundation/compose_status.ts`, `lib/loka/core/compose_status.ex`), held to `protocol/fixtures/status_composition.json`.
+- **Composition record.** Consumers: reactions (`status.apply`), cures, the death return, the GameView and W6 variants. Reads: status rows and each status's `duration`. Writes: `status.transition` (the permanent row shape is new in both composers: exact keys, never turning timed or back while active). Events, jobs and save rows: none new. Reused: row 1's row, generations, cure path and applier; row G3 holders; row 2c's `modifies`; W6's `status_active`; `KERNEL_API_RANGE_INVALID`. New: the `"permanent"` duration, the job-less `StatusRow` shape, an optional `ConditionView` end, duration (loka-x6t.65) and tick, and the return's `returning` filter. Foundation change: the `StatusRow` delta and save shape and both `status.transition` composers (`foundation/compose_status.ts`, `lib/loka/core/compose_status.ex`), held to `protocol/fixtures/status_composition.json`.
 
 ## Several foes with a pack plan (toolbox row 6c)
 
@@ -3378,6 +3378,19 @@ Beads `loka-kgd.109.3` (first half). A built room weathers into ruin and a mend 
 - **Sampler.** `weathering` 600 s (`per_tick -1` and `tick_every 300`, which the schema requires); `ruin` is permanent, with the text "the roof has fallen in"; reaction `ruin`; `mend_hut` costs 3 pennies and 1 timber into `yard`. At 600 s the hut reads in ruin, its exits are unchanged and the player can leave. A mend gives back the owned paragraph, and 600 s later the hut is a ruin again. A mend on a sound hut is `service.nothing_to_mend` (`kernel/ts/test/built.test.ts`). Weathering and ruin survive cold reopen, and weathering ends in ruin after a reopen (`mobile/authority/local-story/built.test.ts`).
 - **Composition record.** Consumer: `build_sampler`. Reads: blueprint `weathering`/`ruin`, the current status on the room, and the created identity's origin. Writes: `status.transition` (apply/cure) on a room holder, and `entity.transfer` of mend inputs. Reused: status@1 apply, expire and cure; reaction `status_expired`; service payment and escrow; the S2 site lookup. New: the room policy subject, the compose created-holder rule, the mend benefit, and `unmendable`/`mended`. Missing invariant: none. Named exception: none (compose names no mechanic).
 
+### Built rooms S5: raze and tombstone
+
+Homestead row hs-9 (Beads `loka-otn4`). The owner pays to raze a built room; its contents move to the site and the room leaves the world. New fields sit under the 1.102 floor: service benefit `{kind: "raze", site, direction}`, the save section `built` and the op `built.set`. Save rules: [save.md, Built rooms](save.md#built-rooms).
+
+- **Admission** (`unrazable` in `kernel/ts/src/mechanics/service/build.ts`), in order: no live built room at `site`/`direction` is `invalid_state` `service.nothing_to_raze`; an actor other than the origin's `owner` is `permission_denied`; an immovable created entity directly inside that is not a living NPC body (a corpse, a dead spawned hound) is `invalid_state` `service.occupied`; a living spawned hound or deer is transferred to the site like any NPC body. Then the service's price. The offer and the press both show these.
+- **Effect** (`razed`). Payment, the room's statuses cleared (`clearStatuses`), one `entity.transfer` to the site per entity directly in the room in EntityId order (items and living NPC bodies alike; moved items keep their owner), then `built.set` writes the tombstone `{razed_at}` at the logical clock. No fact and no job.
+- **Tombstone.** A `built` row keeps the room's identity row; hydrate (`raise` in `kernel/ts/src/runtime/created.ts`) derives no exits for it, and the site's exit is deleted only while its `to` is the razed room. A razed row no longer counts for `unbuildable`, `max_total`, `max_per_owner` or the S4 mend (`live`), and knowledge `positions()` skips it, so a new room can be raised at the same site and direction. Self-built rooms ([S6](#built-rooms-s6-self-build)) raze the same way.
+- **Gate.** The loader and compiler check that `direction` is in the site's directions (`benefit.direction`) and that `site` resolves (`benefit.site`).
+- **Known limits.** No raze by recipe, no ownership transfer, no building off a built room. A room-keyed row other than a status (fuel, liquid) on a built room is not cleared; no cartridge declares one. The raze's moves emit no `entity_entered_room`, so a reaction on an NPC entering the site does not fire for them. A corpse in the hut blocks the raze for good (`service.occupied`): a corpse is immovable and does not decay (Beads `loka-kgd.122`). In a shared world, a second character fighting in the hut at the raze would leave an open encounter row whose `room_id` is still the hut while the raze moved its body to the site; the save check that refuses such a row (`openValid`, `kernel/ts/src/mechanics/combat/saved.ts:80`) runs only on the local story's reopen (`mobile/authority/local-story/store.ts:146`), where the one character cannot fight in the hut while buying the raze in the lane. Out of scope until a Realm hosts built rooms.
+- **Sampler.** `raze_hut` costs 2 pennies; the timber on the hut floor lands in the lane and north is gone (`kernel/ts/test/built.test.ts`, `mobile/authority/local-story/built.test.ts`).
+- **Realm seams.** 1 met: `origin.owner` against `p.actor_id`. 2 and 3 not applicable: no trigger, no payout. 4 met: `razed_at` is the logical clock. 5 met: instance world state. 6 not applicable. 7 met: an owner-only act; moved items keep ownership. 8 not applicable. 9 met: a shared-world room, as S2.
+- **Composition record.** Consumer: `build_sampler` (`raze_hut`) and the `craft_sampler` self-built hut. Reads: the created identity's origin, containment of the room, created rows inside it, and the room's statuses. Writes: service payment, `status.transition` cure, `entity.transfer` of each entity inside, and `built.set`. Reused: service payment and admission, the S2 site lookup, the S4 `live` finder, statuses' clear, containment transfer, hydrate's derived exits. New: the raze benefit, the `built` section with `built.set` (on the `levelling.set` pattern; a stale `expected` or an entity that is not a built room is `precondition_failed` in both kernels, `protocol/fixtures/built_composition.json`), and `unrazable`/`razed`. Missing invariant: none; the load checks below. Named exception: none.
+
 ## Cooking (Homestead row hs-5)
 
 Homestead row hs-5 (Beads `loka-kgd.108.4`): a cook turns two caught fish into a stew over a timed commission, and the stew is a meal that leaves a buff. Declaration: an edible's `applies` ([status declarations](cartridge.md#status-declarations), `kernel_api` 1.101). Save rules: none new.
@@ -3395,7 +3408,7 @@ Homestead row hs-5 (Beads `loka-kgd.108.4`): a cook turns two caught fish into a
   6. to 9. Not applicable.
 - **Opt-in.** `applies` needs food@1, status@1 and `kernel_api` 1.101. Chapter 1 declares none.
 - **Book.** No new component: the cook's offered services, Eat, and the condition line.
-- **Known limits.** A service claim emits no `item_acquired`, so a claimed stew does not spoil until it is next acquired (dropped and taken again); no new event kind in this row (PM ruling; follow-up filed by the PM). No recipe step: the cook's commission is the cooking (the beginner tier, `stew_plain_01`; the hearth tiers and player cooking are hs-13). A status a meal both cures and applies is written once: the cure wins. A forged Eat receipt of the bare meal line, its status lines removed, is accepted (narration only). The receipt's line 0 is checked against the current release, so a receipt from an older release can fail after a key rename (pre-production: no backward save compatibility).
+- **Known limits.** A service claim emits no `item_acquired`, so a claimed stew does not spoil until it is next acquired (dropped and taken again); no new event kind in this row (PM ruling; follow-up filed by the PM). The cook's commission is the beginner tier (`stew_plain_01`); the player's own cooking at the hearth is hs-13's recipes (`cook_stew`, `cook_feast`). A status a meal both cures and applies is written once: the cure wins. A forged Eat receipt of the bare meal line, its status lines removed, is accepted (narration only). The receipt's line 0 is checked against the current release, so a receipt from an older release can fail after a key rename (pre-production: no backward save compatibility).
 - **Sampler.** `cartridges/kitchen_sampler`: the cook in the kitchen offers `stew` and `claim` (1 penny each). One fish is `service.missing_inputs`; two are taken into the larder; claim at +299 is `service.not_ready`, at +300 the stew is held. Eating it restores 10 mv and str reads 11 (`fed`) for 3600 s, then 10. A claimed stew held a day is still fresh; one dropped and taken again reads "a cold, filmed stew" and lands in the midden after 86400 s. The larder returns the spent fish to the pond every 3600 s (`kernel/ts/test/kitchen.test.ts`, `test/loka/content_food_test.exs`, `protocol/fixtures/loader_floors.json`).
 - **Composition record** ([architecture](architecture.md#building-mechanics-by-composition)).
   - Consumer: `kitchen_sampler`. Later: the Homestead batch and the showcase.
@@ -3451,7 +3464,7 @@ Homestead hs-11 (Beads `loka-kgd.108.8`): a skill may require another skill's le
 - **Opt-in.** A skill declares `prerequisite`. Chapter 1 declares none.
 - **Book.** No new component: the dialogue choice is offered unavailable until the prerequisite holds.
 - **Traps.** None met; trap 8 checked: the gate is a skill level the actor raises, not a consequence.
-- **Known limits.** Only a prerequisite naming its own skill is refused at load; a cycle in which each of two skills needs the other at some level (A needs `skill_compare` B, B needs `skill_compare` A, neither under `not`) loads and leaves both unlearnable. A cycle in which each needs the other not learned (each leaf under `not`) is a learnable either-or pair. A box's trainer fee is the dialogue's existing `lesson_payment`; hidden boxes are not in this slice.
+- **Known limits.** Only a prerequisite naming its own skill is refused at load; a cycle in which each of two skills needs the other at some level (A needs `skill_compare` B, B needs `skill_compare` A, neither under `not`) loads and leaves both unlearnable. A cycle in which each needs the other not learned (each leaf under `not`) is a learnable either-or pair. A box's trainer fee is the dialogue's existing `lesson_payment`; hidden boxes are [hs-14](#skill-tree-view-homestead-hs-14).
 - **Sampler.** `cartridges/craft_sampler`: the old carver in the workshop teaches carving (`prerequisite` whittling at least 2). After one failed carve (whittling 1) the lesson is offered unavailable and `choose` refuses `invalid_state`; after the second carve (whittling 2) it is accepted (`kernel/ts/test/craft.test.ts`, `test/loka/content_craft_test.exs`).
 - **Composition record** ([architecture](architecture.md#building-mechanics-by-composition)).
   - Consumer: `craft_sampler`. Later: Homestead profession trees.
@@ -3459,4 +3472,166 @@ Homestead hs-11 (Beads `loka-kgd.108.8`): a skill may require another skill's le
   - Writes: none new.
   - Reused: VersionedPolicy, `holds`, `skill_compare`, `skill.acquire`, the dialogue `blocked` admission, the policy reference walk.
   - New: `SkillDefinition.prerequisite`, `learnable`, the self-reference check, the 1.101 floor.
+  - Missing invariant: none.
+
+## Skill tree view (Homestead hs-14)
+
+Homestead hs-14 (Beads `loka-kgd.108.11`): GameView projects each skill's tree state so the Book draws the Character page's skill tree. Declarations: [skill prerequisite](cartridge.md#skill-prerequisite-declarations) `hidden` (with its `prerequisite`) and `profession`, each `kernel_api` 1.102.
+
+- **Command.** None new.
+- **Projection** (`skillViews` in `kernel/ts/src/view/skills.ts`): a SkillView gains `level` (only for a skill with `growth`; `level` in `kernel/ts/src/content/skill_level.ts`), `locked` (only for a skill with `prerequisite`: the prerequisite does not hold for the viewing actor, the same `holds` the hs-11 admission reads) and `profession` (the authored key). A skill with `hidden` is left out while it is `locked` and not acquired; once acquired it always shows. An NPC's `lessons` leave out a skill the view leaves out (`freeLessons`). Both read one predicate, `concealed` (`kernel/ts/src/mechanics/skills.ts`: hidden, not acquired, prerequisite fails). Owner ruling 2026-10-15 (Beads `loka-kgd.108.14`): a talk does not offer a choice that `skill.acquire`s a concealed skill (`offered` in `kernel/ts/src/mechanics/dialogue/selection.ts`; `opening` writes only those ids), and a dialogue that offers none is skipped like one whose policy fails (`spokenBy`, shared by talk, say, whisper and the GameView talk action), so with none left the talk is refused `invalid_state`. A cartridge whose skills declare none of `growth`, `prerequisite` and `profession` keeps its GameView bytes (`mobile/app/stories.test.ts`).
+- **Load check.** A `skill_compare` in the prerequisite of a skill without `hidden` naming a skill with `hidden` is SCHEMA_VIOLATION at `skills/<key>.prerequisite` (`secret` in `kernel/ts/src/content/cartridge_skills.ts`; `Loka.Content.Skills.itself/3`). So is one naming a hidden skill in a non-hidden skill's `qualification` (at `skills/<key>.qualification`) or in any dialogue `policy` (at `dialogues/<key>.policy`), and a dialogue `label` on a dialogue with a `skill.acquire` of a hidden skill (at `dialogues/<key>.label`), since a labeled talk would name it, and a `riddle` on such a dialogue (at `dialogues/<key>.riddle`), since its letter bank would spell the answer (`secret`; `Loka.Content.Skills.secret/2`). A saved open row's `choice_ids` may lack only choices that `skill.acquire` a hidden skill with a `prerequisite`, in authored order and never empty (`openable`, `kernel/ts/src/mechanics/dialogue/selection.ts`). Only `skill_compare` is checked.
+- **Effect.** None.
+- **Realm seams** (owner decision 2026-10-13, brief checklist).
+  1. Actor: met; `locked` and `hidden` are evaluated for the viewing actor.
+  2. to 5. Not applicable: no trigger, payout, clock or new scope.
+  6. Not applicable: authored text only.
+  7. to 9. Not applicable: no ownership, receipt or free text.
+- **Opt-in.** A skill declares `profession` or `hidden`. Chapter 1 declares none.
+- **Book.** [Skill tree details](book-ui.md#skill-tree-details): `Professions` in `mobile/app/book/skills.tsx`, between the xp line and the Raise cards. An NPC lesson line reads `locked` (proposed, pending designer approval).
+- **Traps.** None met; trap 8 checked: `locked` reads the hs-11 gate, a skill level the actor raises, and adds no gate.
+- **Known limits.** A choice is filtered when the conversation opens: if a hidden skill's prerequisite (a `has_item`, say) fails while the choice is pending, the choice still lists, unavailable `invalid_state`. A `fact_compare` on a hidden skill's `uses_<key>` fact is not refused at load.
+- **Sampler.** `cartridges/craft_sampler`: whittling under Woodcraft, carving under Handcraft, and joinery (Woodcraft, `prerequisite` carving at least 1). At start the Character page shows Handcraft with "Carving — locked" and Woodcraft with "Joinery — locked" and "Whittling — not learned"; once carving is learned it reads "Carving, level 1 — qualified" and Woodcraft "Joinery — not learned" and "Whittling — not learned" (`kernel/ts/test/craft.test.ts`, `test/loka/content_craft_test.exs`).
+- **Composition record** ([architecture](architecture.md#building-mechanics-by-composition)).
+  - Consumer: `craft_sampler`; talk, say, whisper and the GameView talk action (through `spokenBy`). Later: Homestead profession trees.
+  - Reads: the actor's facts through `holds` and `level`; dialogue choice sequences (`offered`).
+  - Writes: none.
+  - Reused: VersionedPolicy, `holds`, `level`, `spokenBy`, `opening`, the hs-11 policy reference walk, `SectionTitle`, `Note`.
+
+## Self-cooking (Homestead hs-13)
+
+Homestead hs-13 (Beads `loka-kgd.108.10`): the player cooks at the kitchen hearth instead of commissioning the cook. Content only; no engine change, no new `kernel_api` floor.
+
+- **Command.** None new: `talk` and `choose learn` at the cook ([skill trees](#skill-trees-homestead-hs-11)); `perform cook_stew` or `perform cook_feast` at the hearth detail ([craft](#craft-homestead-hs-10)).
+- **Admission.** The cook offers `learn` (`skill.acquire cooking`, free: the novice box, [owner decision](../decisions/owner-decision-homestead-skill-path-2026-10-15.md)) while the skill is not held. `cook_stew` requires `skill_compare cooking 1` and two of `fish_01`..`fish_05` held; `cook_feast` requires `skill_compare cooking 2` (two uses, growth `[2, 4]`) and three. A failing policy is offered unavailable `invalid_state` with no message; a fish shortage refuses `craft.cook_stew.needs` or `craft.cook_feast.needs`; a larder with no dish left refuses with no message.
+- **Effect.** The opposed check against the hearth's rating 1 passes at level 1. On every accepted perform the fish move to the larder (the hs-5 restock returns two to the pond each hour, cap five); on success the lowest-id dish (`stew_hearty_01`..`03`, `feast_01`) moves from the larder to the body. A failure ("the pot boils over") keeps the fish in the larder and yields nothing; at rating 1 a learned cook never fails, so this narration fires only on a harder hearth (tested at rating 2). Each crafted dish gets `spoiling` from its keep reaction, as the plain stew does; eating one applies `hearty` (str +2, 3600 s).
+- **Realm seams** (owner decision 2026-10-13, brief checklist), as hs-5 and hs-10.
+  1. Actor: met; craft and eat act on `bodyOf(world, actor_id)`.
+  2. Reactions: met; the keep reactions match the dish's `item_acquired`, whose holder is the body.
+  3. Credit: not applicable; nothing is killed.
+  4. Time: met; spoil and restock run on the clock as in hs-5.
+  5. Scope: met; the larder and pond are public world state; custody moves only.
+  6. Text: not applicable; authored keys only.
+  7. Ownership: met; the actor's own act moves custody; theft never.
+  8. Trust: not applicable.
+  9. Instancing: shared-world; the three hearty stews and one feast are a world-unique stock that never returns, so in a shared world the first cooks take them all.
+- **Opt-in.** Cartridge content. Chapter 1 declares none.
+- **Book.** No new component: the hearth detail link, the recipe's offered action, the cook's dialogue.
+- **Known limits.** Three hearty stews and one feast exist; eaten or spoiled dishes never return, so a fourth stew refuses. The brief's 300 s cook has no `duration`: the sampler's `time_policy` (real elapsed) refuses a recipe duration `INVALID_TIME_POLICY` (`lib/loka/content/recipes.ex:111`). The feast reuses `hearty`; `fed` and `hearty` stack (str 13 with both).
+- **Traps.** 11 (statuses only for state): `hearty` has a duration.
+- **Sampler.** `cartridges/kitchen_sampler` (`kernel/ts/test/kitchen.test.ts`).
+- **Composition record** ([architecture](architecture.md#building-mechanics-by-composition)).
+  - Consumer: `kitchen_sampler`.
+  - Reads: the actor's facts (`skill_compare`, `uses_cooking`), containers.
+  - Writes: the player fact `cooked` (a recipe needs one success step); ops, events, jobs and save rows: none new.
+  - Reused: `craft`, `skill_compare`, `skill.acquire`, the opposed check, Eat `applies`, the keep and spoil reactions, `replenish.run`.
+  - New: content only.
+
+## Furnishing (Homestead hs-6)
+
+Homestead hs-6 (Beads `loka-kgd.108.6`): a placed item changes what a room does or says by its [tag](#property-tags-and-the-policy-leaf-set-toolbox-row-g1). Policy leaf `item_present {tag}` (`protocol/policy.schema.json`, owned by `containment@1`, `kernel_api` 1.102).
+
+- **Leaf.** `item_present` holds when an item whose definition declares `tag` lies directly in the actor's room (`furnished`, `kernel/ts/src/mechanics/policy.ts:221`): an item carried, worn or inside a container in the room does not count. In a room variant the actor's room is the described room (the Book describes only the actor's room, `kernel/ts/src/view/view.ts:125`). It costs one query step plus one per container row scanned, in the room or not (as `recovery.ts`), so the budget bounds the scan; past `LIMITS.query_steps` it is false.
+- **Tags.** `bed`, `forge` and `rug` join the G1 `Tag` enum.
+- **Command.** None new: `take`, `drop`, `put`, `rest` and `perform`. A recipe whose policy fails stays offered, unavailable, with the policy refusal (`action_lists.ts`).
+- **Floor.** An `item_present` leaf anywhere in the cartridge needs `kernel_api` 1.102 (`cartridge_variants.ts`, `lib/loka/content/variants.ex`; `loader_floors.json` "an item_present leaf").
+- **Realm seams** (owner decision 2026-10-13, brief checklist).
+  1. Actor: met; the room is `bodyOf(world, actor)`'s container.
+  2. Reactions: met; `rested`'s subject is its `body_id`, and `status.apply` lands on it.
+  3. Credit: not applicable.
+  4. Time: met; `well_rested` runs in logical seconds on the elapsed path; no device clock.
+  5. Scope: met; placed items are public world state (custody); no new row.
+  6. Text: not applicable.
+  7. Ownership: met; placing changes no ownership. In an owned room the room's G7 locks govern who can place or take; the sampler hut is unowned, so anyone there can take the bed or rug.
+  8. Not applicable.
+  9. Not applicable.
+- **Traps** ([toolbox](../MECHANICS-TOOLBOX.md#traps)): 11 met, nothing new is stored; the leaf reads custody. 4 met, the rug line is an authored variant.
+- **Opt-in.** A cartridge declares the leaf. Chapter 1 declares none.
+- **Book.** No new component: Drop, Take and the room's description.
+- **Known limits.** No rate modifier: the bed's bonus is a status, not a rest-rate change. The leaf does not check ownership.
+- **Sampler.** `cartridges/furnish_sampler`: a bed, a forge and a rug lie in the yard; the hut north holds a chest and a bench. Rest in the hut with the bed dropped applies `well_rested` (+2 mv per 600 s for 3600 s); the bench's `temper` (opposed smithing) is available only with the forge in the hut; the dropped rug shows "A rug warms the boards." (`kernel/ts/test/furnish.test.ts`).
+- **Composition record** ([architecture](architecture.md#building-mechanics-by-composition)).
+  - Consumer: `furnish_sampler`. Later: Settle S1 functional furnishing.
+  - Reads: containers, item tags, the actor's body.
+  - Writes: none new.
+  - Reused: VersionedPolicy, `holds`, `rested`, `status.apply`, room `variants`, `action_recipe` policy and check, G1 tags.
+  - New: `item_present`, `furnished`, tags `bed`, `forge`, `rug`, the 1.102 floor.
+
+## Built rooms S6: self-build
+
+Homestead hs-12 (Beads `loka-kgd.108.9`): a player raises a blueprint at a site with a recipe, as the build service does. Declarations: [recipe build steps](cartridge.md#recipe-build-step-declarations) (`kernel_api` 1.102).
+
+- **Command.** None new: `perform` on a detail-target recipe whose success sequence holds `build {blueprint, direction}`.
+- **Admission** (`craftRefused` in `kernel/ts/src/mechanics/action_recipe/shared.ts`, which the offer in `view/action_lists.ts` and the press in `commands/actions.ts` both read): the build service's `unbuildable` (`service/build.ts`) first, for the target's room as site and the actor as owner: `service.site_taken` or `service.construction_full` (`max_total`, `max_per_owner`), each `invalid_state`; then the craft's refusal (hs-10). A taken site so shows `service.site_taken` even when the inputs are spent.
+- **Effect** (`step` in `kernel/ts/src/mechanics/action_recipe/rule.ts`). The step appends the build service's `created` (`service/build.ts`): `entity.create` of the blueprint with origin `{kind: "built", site, direction, owner}`, the owner the perform's `actor_id`, under the command's mint, then the blueprint's weathering (S4). The loader refuses a build step outside the success outcome; a failed check runs the failure sequence, so nothing is built while the craft's consume still runs (owner answer: a failed craft loses its inputs). No job: a recipe's `duration` is the labour.
+- **Realm seams** (owner decision 2026-10-13, brief checklist).
+  1. Actor: met; the owner is the perform's `actor_id`, never `world.character`.
+  2. Reactions: not applicable.
+  3. Credit: not applicable.
+  4. Time: met; the recipe's `duration` is logical seconds.
+  5. Scope: met; the built row is public world state, as S2.
+  6. Not applicable.
+  7. Exclusive, shared-world; the room moves by none; theft never.
+  8. Not applicable.
+  9. Shared-world; one structure per site direction (`service.site_taken`), whoever raised it.
+- **Opt-in.** A recipe declares a `build` step. Chapter 1 declares none.
+- **Book.** No new component: the recipe card is offered unavailable with the refusal text, and the new room's exit appears in the site.
+- **Traps.** None met; trap 8 checked: carpentry is a skill level the actor raises, not a consequence.
+- **Known limits.** No build job from a recipe, no mend or raze by recipe, no tool by tag. A recipe build counts against the blueprint's caps exactly as a service build; the two share one site.
+- **Sampler.** `cartridges/craft_sampler` v2 (`kernel/ts/test/craft.test.ts`, `test/loka/content_craft_test.exs`). Ancestry woodfolk grants woodcutting; the axe lies in the workshop. `chop` (glade oak, 600 s) yields a log from the sealed woodpile; after two chops the old carver teaches carpentry (`prerequisite` woodcutting at least 2); `saw` (workshop sawhorse) turns two logs back into the woodpile and yields a timber. `raise_timbered_hut` (lane plot stakes, carpentry 2) spends two timbers into the sealed yard and raises "a timbered hut" north of the lane. The carpenter's `raise_hut_plain` (5 pennies) then refuses `service.site_taken`; raised first, it leaves the recipe unavailable and a forged perform `invalid_state` with the timbers held. Reopen keeps the room id and exits; replay mints the same id.
+- **Composition record** ([architecture](architecture.md#building-mechanics-by-composition)).
+  - Consumer: `craft_sampler`. Later: Homestead self-build.
+  - Reads: the recipe's detail target room, the blueprint caps, the built rows' origins.
+  - Writes: `entity.create` (and S4 weathering) through `created`.
+  - Reused: S2/S3 `unbuildable` and `created`, hs-10 craft and `craftRefused`, the recipe check and outcome.
+  - New: RecipeStep `build`, the build-step loader checks, the 1.102 floor.
+  - Missing invariant: none.
+
+## Barter (toolbox row kgd.70)
+
+Homestead hs-7 (Beads `loka-kgd.108.5`, `loka-kgd.70`): liked and disliked gifts move one person's trust, trust tiers open talk, and two pelts buy a knife with no coin. Gifting is content on [row 15](#standing-and-disposition-toolbox-rows-15-and-g11) and W2; barter extends an [escrow](#escrow-custody-toolbox-row-20a) commission. Declarations: [barter](cartridge.md#barter-declarations) (`kernel_api` 1.102).
+
+- **Gifts (content).** Give (containment@1) emits `item_acquired` with the NPC as holder. Per NPC, one reaction per liked item (`fact.adjust trust +1`) and per disliked item (`-1`), each `when` a per-NPC flag (`gifted_<item>`, `fact_compare equals false`) that the same reaction sets true, so each item pays once: a second apple, or give, take back and give again, changes nothing. An item with no reaction (the stone) changes nothing. Trust is an int pair fact bounded -1 to 1.
+- **Tiers (content).** Trust -1, 0 and 1 select the cold, plain and warm dialogue (`fact_compare` policy) and the W6 room line. Trap 8: the tier is a line, and a gate only for dialogue.
+- **Barter.** An `escrow` may declare `output` without `ready_after`. The commission's `transition` (`kernel/ts/src/mechanics/service/shared.ts` `escrowed`) then adds one `entity.transfer` of the output from the custody room to the body after the input transfers, in the same proposal: no job, no claim. The no-output refusal (`not_found`, `service.no_output`) applies to every escrow with an `output`.
+- **Price 0.** A service with `price` 0 pays nothing: `transition` writes no payment op. The quoted price must still match (0). Only an `entitlement` with `escrow` may be free (the loader refusal below); commerce save reconciles currency only for NPCs with a shop, so a zero payment needs no save change. A buy or sell quoting 0 now passes the action schema (`quoted_price` minimum 0) and is rejected at resolve with a receipted `unsupported_capability` (`kernel/ts/src/commands/invocation.ts:121`), not refused `invalid` at identify; a retry with the same `invocation_id` replays that rejection. A shop price stays at least 1, so the quote check at `kernel/ts/src/mechanics/commerce/shared.ts:71` never matches 0.
+- **Atomicity.** One proposal: the inputs to custody, the output to the body and the entitlement fact true. A replayed invocation returns its stored receipt; a new one finds the entitlement true and refuses `invalid_state`, `service.order_open`.
+- **Writer.** service@1 writes the transfers and the fact; reaction@1 writes the gift facts.
+- **Silent.** No event beyond the service's own; no `item_acquired` for the output.
+- **Realm seams** (owner decision 2026-10-13, brief checklist). This row adds no new single-player assumption.
+  1. Actor: met; the body is the command actor's.
+  2. Reactions: met; the `item_acquired` subject is the holder NPC.
+  3. Credit: not applicable.
+  4. Time: met; no clock, no job.
+  5. Scope: met; trust and the gift flags are pair facts with the NPC as subject; the barter's entitlement is player scope.
+  6. Text: not applicable.
+  7. Ownership: met; a barter moves custody both ways by the actor's own act; theft never.
+  8. Not applicable.
+  9. Not applicable.
+- **Opt-in.** A service declares `price` 0 or an `output` without `ready_after`. Chapter 1 declares none.
+- **Book.** No change: the offer shows the existing price note; Give is not yet offered in the Book (Beads `loka-x6t.31`), so gifts are kernel-only until hs-8.
+- **Traps.** Trap 8 checked (tiers are lines, gates only in dialogue); no other applies: no new job, event, op or save row.
+- **Known limits.**
+  - The entitlement stays true after a barter, so the trade completes once per character and a retry reads `service.order_open`.
+  - A gift pays the holder but its `when` reads the flag at the farmer. An apple given to the trader sets the trader's trust and flag, not the farmer's, and the trader is paid again on each later gift that passes the farmer's flag: in a probe, apple, rat, apple to the trader gave trust 1, 0, 1. Trust stays bounded at -1..1, so this is no faucet. The apple the trader holds cannot be taken back (`not_present`), so the farmer's warm tier is then unreachable. Upgrade: a holder filter on the trigger.
+  - Carrying capacity is not checked on the output transfer.
+- **Sampler.** `cartridges/gift_sampler`: a yard (the farmer, the trader with 0 pennies, an apple, a stone, a dead rat, three pelts) and a sealed stall, the custody room holding the knife. Stone: trust 0; apple: 1, warm; a second apple: 1; then the rat: 0, plain; a rat first: -1, cold. One pelt held: `not_owned`, `service.missing_inputs`; three held: the knife is held, two pelts in the stall, one held, pennies 0 and 0, no job row; a retry: `service.order_open` (`kernel/ts/test/gift.test.ts`, `test/loka/content_gift_test.exs`, `mobile/authority/local-story/gift.test.ts` for cold reopen and replay).
+- **Composition record** ([architecture](architecture.md#building-mechanics-by-composition)).
+  - Consumer: `gift_sampler`. Later: Homestead friendship (hs-8 Book Give), S3 settlement trade.
+  - Reads: the entitlement fact, body and custody containers, pair facts through `fact_compare`.
+  - Writes: `entity.transfer`, `fact.assign`, `fact.adjust`; ops, events, jobs and save rows: none new.
+  - Reused: row 20a escrow, the 20b output and `service.no_output`, Give's `item_acquired`, W1 reactions, W2 pair facts, W6 room lines, the dialogue policy.
+  - New: the output transfer for an untimed escrow, the price 0 path, the loader price check, the 1.102 floor.
+  - Missing invariant: none (`one_container_per_item` covers the transfers).
+
+## Give pairs
+
+Homestead hs-8 (Beads `loka-x6t.31`); the Book form is in [book-ui.md](book-ui.md#item-details-and-takedrop). The GameView lists Give on a held item once per living NPC in the actor's room that the actor can see, with `target_ids [item, recipient]`, in `world.entities` order (definitions first, then entities in creation order), as it lists Put pairs: a pair is listed when the command would be accepted. The listing is `kernel/ts/src/view/item_pairs.ts`. The item admission is `giveRefused`, the recipient admission `recipient(world, id, here)` (missing or dead: `not_found`; not an NPC: `invalid_target`; elsewhere: `not_present`; at capacity: `invalid_state`), both in `kernel/ts/src/mechanics/containment/shared.ts`; `rule.ts` and the listing call the same functions. The listing also applies `visible` (`mechanics/light/shared.ts`): an NPC the actor cannot see (a dark room, concealment) gets no pair, so the view never names a hidden NPC. Command admission refuses a Give to a recipient the actor cannot see by the same `visible` (`hiddenTarget`, `kernel/ts/src/commands/actions.ts`): `not_present`, before the rule runs. A refused item, a corpse or no one present lists no pair. Step-budget exhaustion during the listing replaces the whole Give offer with one unavailable offer (`budget_exceeded`, no `target_ids`), never a prefix of the pairs, as for Put.
+
+- **Composition record** ([architecture](architecture.md#building-mechanics-by-composition)).
+  - Key `give`, command `give`, ordered targets [item, recipient] (`target_ids` to `item_id`, `recipient_id`), input none.
+  - Reads: body custody, the item's `give_allowed`, the recipient's kind, life and room, its capacity.
+  - Writes, ops, events, jobs, save rows, schema fields: none new (`target_ids` already exists on the advertised action).
+  - Reused: the Give rule, its `item_acquired`, the Put-pair projection.
+  - New: the shared `recipient` admission (moved from `rule.ts`), the Give pair listing.
   - Missing invariant: none.

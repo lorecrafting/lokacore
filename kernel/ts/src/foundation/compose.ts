@@ -1,4 +1,4 @@
-// size: allow 304, final checks order rows by code point so both kernels report the same first fault
+// size: allow 307, final checks order rows by code point so both kernels report the same first fault
 import { recordKnowledge } from './compose_knowledge.ts';
 import { cmp } from './validate.ts';
 import { choice, pendingAtLimit } from './compose_choice.ts';
@@ -6,6 +6,7 @@ import { composeLiquid } from './compose_liquid.ts';
 import { transitionBleed } from './compose_bleed.ts';
 import { transitionStatus, expiredStatus } from './compose_status.ts';
 import { setLevelling } from './compose_levelling.ts';
+import { setBuilt } from './compose_built.ts';
 import { quest, repeatPair } from './compose_quest.ts';
 import { composeFuel } from './fuel.ts';
 import { transitionPatrol } from './compose_patrol.ts';
@@ -111,6 +112,7 @@ const fault = (code: ErrorCode, t: MutationTarget): Result => ({
 export const check = (ok: boolean, value: Json): Outcome =>
   ok ? { value } : { code: 'precondition_failed' };
 const put = (row: Json | undefined, extra: Obj): Json => ({ ...((row ?? {}) as Obj), ...extra });
+// size: allow 41, one dispatch over the closed delta op union
 function apply(op: DeltaOp, row: Json | undefined, ctx: Ctx): Outcome {
   if ('continuation_id' in op)
     return choice(op, row, section(ctx.state, 'choices')[op.continuation_id]);
@@ -121,6 +123,7 @@ function apply(op: DeltaOp, row: Json | undefined, ctx: Ctx): Outcome {
   if (op.op === 'status.transition')
     return transitionStatus(op, row, ctx.state, ctx.at, ctx.overlay);
   if (op.op === 'levelling.set') return setLevelling(op, row);
+  if (op.op === 'built.set') return setBuilt(op, row, ctx);
   switch (op.op) {
     case 'visit.record':
     case 'observation.record':

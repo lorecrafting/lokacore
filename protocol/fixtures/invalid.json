@@ -20075,6 +20075,80 @@
     ]
   },
   {
+    "name": "build_step_without_direction",
+    "contract": "RecipeStep",
+    "value": {
+      "op": "build",
+      "blueprint": {
+        "cartridge_id": "craft_sampler",
+        "cartridge_version": "2.0.0",
+        "kind": "blueprint",
+        "key": "hut_timbered"
+      }
+    },
+    "errors": [
+      {
+        "path": "/direction",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "build_step_direction_not_a_direction",
+    "contract": "RecipeStep",
+    "value": {
+      "op": "build",
+      "blueprint": {
+        "cartridge_id": "craft_sampler",
+        "cartridge_version": "2.0.0",
+        "kind": "blueprint",
+        "key": "hut_timbered"
+      },
+      "direction": "northwest"
+    },
+    "errors": [
+      {
+        "path": "/direction",
+        "code": "not_in_enum"
+      }
+    ]
+  },
+  {
+    "name": "build_step_without_blueprint",
+    "contract": "RecipeStep",
+    "value": {
+      "op": "build",
+      "direction": "north"
+    },
+    "errors": [
+      {
+        "path": "/blueprint",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "build_step_with_unknown_property",
+    "contract": "RecipeStep",
+    "value": {
+      "op": "build",
+      "blueprint": {
+        "cartridge_id": "craft_sampler",
+        "cartridge_version": "2.0.0",
+        "kind": "blueprint",
+        "key": "hut_timbered"
+      },
+      "direction": "north",
+      "site": "lane"
+    },
+    "errors": [
+      {
+        "path": "/site",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
     "name": "detail_rating_not_integer",
     "contract": "InspectableDetail",
     "value": {
@@ -27625,53 +27699,6 @@
   {
     "contract": "ServiceBenefit",
     "value": {
-      "kind": "entitlement",
-      "fact": {
-        "cartridge_id": "escrow_sampler",
-        "cartridge_version": "0.0.1",
-        "kind": "fact",
-        "key": "ordered"
-      },
-      "escrow": {
-        "items": [
-          {
-            "cartridge_id": "escrow_sampler",
-            "cartridge_version": "0.0.1",
-            "kind": "item",
-            "key": "ore_a"
-          },
-          {
-            "cartridge_id": "escrow_sampler",
-            "cartridge_version": "0.0.1",
-            "kind": "item",
-            "key": "ore_b"
-          }
-        ],
-        "quantity": 2,
-        "custody": {
-          "cartridge_id": "escrow_sampler",
-          "cartridge_version": "0.0.1",
-          "kind": "room",
-          "key": "vault"
-        },
-        "output": {
-          "cartridge_id": "escrow_sampler",
-          "cartridge_version": "0.0.1",
-          "kind": "item",
-          "key": "sword"
-        }
-      }
-    },
-    "errors": [
-      {
-        "path": "/escrow/ready_after",
-        "code": "missing_property"
-      }
-    ]
-  },
-  {
-    "contract": "ServiceBenefit",
-    "value": {
       "kind": "claim"
     },
     "errors": [
@@ -29764,6 +29791,19 @@
     ]
   },
   {
+    "contract": "Policy",
+    "value": {
+      "op": "item_present",
+      "tag": "nope"
+    },
+    "errors": [
+      {
+        "path": "/tag",
+        "code": "not_in_enum"
+      }
+    ]
+  },
+  {
     "contract": "RoomDefinition",
     "value": {
       "key": "r",
@@ -31785,6 +31825,371 @@
       {
         "path": "/x",
         "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "skill_hidden_without_prerequisite",
+    "contract": "SkillDefinition",
+    "value": {
+      "key": "carving",
+      "label": "skill.carving.label",
+      "requirement": "skill.carving.requirement",
+      "qualification": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": []
+        }
+      },
+      "hidden": true
+    },
+    "errors": [
+      {
+        "path": "/prerequisite",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "skill_hidden_false",
+    "contract": "SkillDefinition",
+    "value": {
+      "key": "carving",
+      "label": "skill.carving.label",
+      "requirement": "skill.carving.requirement",
+      "qualification": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": []
+        }
+      },
+      "hidden": false,
+      "prerequisite": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": []
+        }
+      }
+    },
+    "errors": [
+      {
+        "path": "/hidden",
+        "code": "const_mismatch"
+      }
+    ]
+  },
+  {
+    "name": "skill_profession_not_text_key",
+    "contract": "SkillDefinition",
+    "value": {
+      "key": "carving",
+      "label": "skill.carving.label",
+      "requirement": "skill.carving.requirement",
+      "qualification": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": []
+        }
+      },
+      "profession": "Woodcraft"
+    },
+    "errors": [
+      {
+        "path": "/profession",
+        "code": "pattern_mismatch"
+      }
+    ]
+  },
+  {
+    "name": "skill_view_level_negative",
+    "contract": "SkillView",
+    "value": {
+      "skill": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "skill",
+        "key": "carving"
+      },
+      "label": "skill.carving.label",
+      "requirement": "skill.carving.requirement",
+      "acquired": false,
+      "qualified": true,
+      "usable": false,
+      "level": -1
+    },
+    "errors": [
+      {
+        "path": "/level",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "name": "skill_view_level_not_integer",
+    "contract": "SkillView",
+    "value": {
+      "skill": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "skill",
+        "key": "carving"
+      },
+      "label": "skill.carving.label",
+      "requirement": "skill.carving.requirement",
+      "acquired": false,
+      "qualified": true,
+      "usable": false,
+      "level": 1.5
+    },
+    "errors": [
+      {
+        "path": "/level",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "name": "skill_view_locked_not_boolean",
+    "contract": "SkillView",
+    "value": {
+      "skill": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "skill",
+        "key": "carving"
+      },
+      "label": "skill.carving.label",
+      "requirement": "skill.carving.requirement",
+      "acquired": false,
+      "qualified": true,
+      "usable": false,
+      "locked": "yes"
+    },
+    "errors": [
+      {
+        "path": "/locked",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "name": "skill_view_profession_not_text_key",
+    "contract": "SkillView",
+    "value": {
+      "skill": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "skill",
+        "key": "carving"
+      },
+      "label": "skill.carving.label",
+      "requirement": "skill.carving.requirement",
+      "acquired": false,
+      "qualified": true,
+      "usable": false,
+      "profession": "Woodcraft"
+    },
+    "errors": [
+      {
+        "path": "/profession",
+        "code": "pattern_mismatch"
+      }
+    ]
+  },
+  {
+    "contract": "ServiceDefinition",
+    "value": {
+      "action": "barter",
+      "benefit": {
+        "escrow": {
+          "custody": {
+            "cartridge_id": "gift_sampler",
+            "cartridge_version": "0.0.1",
+            "key": "stall",
+            "kind": "room"
+          },
+          "items": [
+            {
+              "cartridge_id": "gift_sampler",
+              "cartridge_version": "0.0.1",
+              "key": "pelt_01",
+              "kind": "item"
+            },
+            {
+              "cartridge_id": "gift_sampler",
+              "cartridge_version": "0.0.1",
+              "key": "pelt_02",
+              "kind": "item"
+            },
+            {
+              "cartridge_id": "gift_sampler",
+              "cartridge_version": "0.0.1",
+              "key": "pelt_03",
+              "kind": "item"
+            }
+          ],
+          "output": {
+            "cartridge_id": "gift_sampler",
+            "cartridge_version": "0.0.1",
+            "key": "knife_01",
+            "kind": "item"
+          },
+          "quantity": 2
+        },
+        "fact": {
+          "cartridge_id": "gift_sampler",
+          "cartridge_version": "0.0.1",
+          "key": "traded_knife",
+          "kind": "fact"
+        },
+        "kind": "entitlement"
+      },
+      "currency": {
+        "cartridge_id": "gift_sampler",
+        "cartridge_version": "0.0.1",
+        "key": "pennies",
+        "kind": "resource"
+      },
+      "key": "knife_for_pelts",
+      "label": "service.barter",
+      "narration": "service.barter.used",
+      "price": -1,
+      "provider": {
+        "cartridge_id": "gift_sampler",
+        "cartridge_version": "0.0.1",
+        "key": "trader",
+        "kind": "npc"
+      }
+    },
+    "errors": [
+      {
+        "path": "/price",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "contract": "ActionInput",
+    "value": {
+      "quoted_price": -1
+    },
+    "errors": [
+      {
+        "path": "/quoted_price",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "contract": "CommandPayload",
+    "value": {
+      "type": "use_service",
+      "actor_id": "3c84c3db-10df-8949-b789-1357188c8dd1",
+      "provider_id": "b6d3801e-0035-8356-806c-05805d50bed1",
+      "service": {
+        "cartridge_id": "gift_sampler",
+        "cartridge_version": "0.0.1",
+        "key": "knife_for_pelts",
+        "kind": "service"
+      },
+      "quoted_price": -1
+    },
+    "errors": [
+      {
+        "path": "/quoted_price",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "contract": "ServiceOffer",
+    "value": {
+      "service": {
+        "cartridge_id": "gift_sampler",
+        "cartridge_version": "0.0.1",
+        "key": "knife_for_pelts",
+        "kind": "service"
+      },
+      "label": "service.barter",
+      "price": -1,
+      "benefit": {
+        "escrow": {
+          "custody": {
+            "cartridge_id": "gift_sampler",
+            "cartridge_version": "0.0.1",
+            "key": "stall",
+            "kind": "room"
+          },
+          "items": [
+            {
+              "cartridge_id": "gift_sampler",
+              "cartridge_version": "0.0.1",
+              "key": "pelt_01",
+              "kind": "item"
+            },
+            {
+              "cartridge_id": "gift_sampler",
+              "cartridge_version": "0.0.1",
+              "key": "pelt_02",
+              "kind": "item"
+            },
+            {
+              "cartridge_id": "gift_sampler",
+              "cartridge_version": "0.0.1",
+              "key": "pelt_03",
+              "kind": "item"
+            }
+          ],
+          "output": {
+            "cartridge_id": "gift_sampler",
+            "cartridge_version": "0.0.1",
+            "key": "knife_01",
+            "kind": "item"
+          },
+          "quantity": 2
+        },
+        "fact": {
+          "cartridge_id": "gift_sampler",
+          "cartridge_version": "0.0.1",
+          "key": "traded_knife",
+          "kind": "fact"
+        },
+        "kind": "entitlement"
+      },
+      "action": {
+        "action_key": "barter",
+        "command": "use_service",
+        "label": "service.barter",
+        "target": {
+          "kind": "entity",
+          "scopes": [
+            "room_occupants"
+          ]
+        },
+        "input": [
+          "service",
+          "quoted_price"
+        ],
+        "target_ids": [
+          "b6d3801e-0035-8356-806c-05805d50bed1"
+        ],
+        "available": false,
+        "reason": {
+          "code": "not_owned",
+          "message": {
+            "key": "service.missing_inputs"
+          }
+        }
+      }
+    },
+    "errors": [
+      {
+        "path": "/price",
+        "code": "below_minimum"
       }
     ]
   }

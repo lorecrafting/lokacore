@@ -1,5 +1,4 @@
 import { decideHarvest } from './harvest.ts';
-import { living } from '../death/shared.ts';
 // containment@1 (capability_registry.json): take, drop and give (21 §8 Containment; 03 §23;
 // 04 §5.3 conserved transfer). An entity's one container is State.containers; an actor's
 // inventory is what its body contains, never stored. Accepted: one entity.transfer, whose
@@ -19,13 +18,12 @@ import {
   keys,
   rejected,
   type Rule,
-  values,
   type World,
 } from '../../runtime/decision.ts';
 import { check } from '../../runtime/invariants.ts';
 import { reach } from '../lookups.ts';
 import { chainRefused } from '../locks.ts';
-import { carrying, giveRefused, putRefused } from './shared.ts';
+import { carrying, giveRefused, putRefused, recipient } from './shared.ts';
 import { stolen, theftRefused } from './theft.ts';
 import { movable } from '../../runtime/created.ts';
 
@@ -89,10 +87,6 @@ export const decide: Rule<'containment'> = (world, command, mint, steps = { n: 0
   return accepted(world, 'given', move(p.recipient_id), acquired(p.recipient_id));
 };
 
-// ponytail: scans every container per call; index contents by holder when worlds grow.
-const held = (world: World, holder: string) =>
-  values(world.state.containers).filter((c) => c === holder).length;
-
 /** Registered invariants of containment (protocol/invariants.json), pure checks of a world. */
 export const invariants: Readonly<Record<string, (world: World) => boolean>> = {
   // Every item and NPC has a container, and each container is a room or a contained entity.
@@ -123,11 +117,3 @@ export const invariants: Readonly<Record<string, (world: World) => boolean>> = {
       result: { changes: [] },
     }),
 };
-
-function recipient(world: World, id: EntityId, here: EntityId) {
-  if (!has(world.entities, id) || !living(world, id)) return 'not_found' as const;
-  if (world.entities[id].kind !== 'npc') return 'invalid_target' as const;
-  if (world.state.containers[id] !== here) return 'not_present' as const;
-  if (held(world, id) >= (world.capacities[id] ?? Infinity)) return 'invalid_state' as const;
-  return undefined;
-}

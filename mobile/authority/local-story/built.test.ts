@@ -1,9 +1,10 @@
 // Built rooms S2 through real SQLite (save.md, Built rooms): the raised hut's identity row is the
 // only saved trace of the room; reopen derives the room again and a forged row is save_corrupt.
 import assert from 'node:assert/strict';
-import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
 import {
   gameView,
@@ -14,6 +15,9 @@ import {
 } from '../../../kernel/ts/src/index.ts';
 import { activeStatuses } from '../../../kernel/ts/src/mechanics/status/shared.ts';
 import { read } from '../../../kernel/ts/test/read.ts';
+import { resolved } from '../../../kernel/ts/src/commands/actions.ts';
+import { pending } from '../../../kernel/ts/src/mechanics/dialogue/shared.ts';
+import { compiled } from './__tests__/compiled.ts';
 import { openStory } from './authority.ts';
 import { coldReopen, elapsedHost } from './__tests__/elapsed-host.test.ts';
 
@@ -30,6 +34,8 @@ const initial = newWorld(
   [1, 2, 3, 4],
 );
 const releases = [{ fresh: initial, content_hash: bundle.sha256 }] as const;
+const shipped = { bundle, releases };
+type Cart = typeof shipped;
 const npc = (k: string) => initial.entityIds[`build_sampler@0.0.1:npc/${k}`]!;
 const service = (key: string) => ({
   cartridge_id: 'build_sampler',
@@ -43,10 +49,15 @@ const timber = (k: string) => initial.entityIds[`build_sampler@0.0.1:item/timber
 // Built rooms S3: buy the plot, take two timber, order the hut; with `reopen`, close and reopen
 // the save between order and completion; then elapse to the order's due time, stopping before it
 // on 'ordered', or first through a real COMMIT that fails or whose acknowledgement is lost.
-function build(path: string, reopen: boolean, mode?: 'ordered' | 'failed' | 'lost') {
-  let p = elapsedHost(path, undefined, bundle);
+function build(
+  path: string,
+  reopen: boolean,
+  mode?: 'ordered' | 'failed' | 'lost',
+  cart: Cart = shipped,
+) {
+  let p = elapsedHost(path, undefined, cart.bundle);
   const open = () => {
-    const s = openStory(p.db, releases, p.host);
+    const s = openStory(p.db, cart.releases, p.host);
     if (s.kind !== 'open') throw new Error(JSON.stringify(s));
     return s;
   };
@@ -78,10 +89,10 @@ function build(path: string, reopen: boolean, mode?: 'ordered' | 'failed' | 'los
   const from = story.world().state.clock;
   if (reopen) {
     p.sql.close();
-    p = elapsedHost(path, undefined, bundle);
+    p = elapsedHost(path, undefined, cart.bundle);
     story = open();
   }
-  if (mode === 'ordered') return { p, raise, invocation, created };
+  if (mode === 'ordered') return { p, raise, invocation, created, story };
   const evidence = { expected_run_id: story.runId(), from, until: from + 7200 };
   const rows = () => p.sql.prepare('SELECT * FROM state_row ORDER BY section, key').all();
   if (mode) {
@@ -100,7 +111,7 @@ function build(path: string, reopen: boolean, mode?: 'ordered' | 'failed' | 'los
   const r = story.elapsed(evidence);
   assert.equal(r.kind, 'saved', JSON.stringify(r));
   if (mode) assert.equal(r.kind === 'saved' && r.replay, mode === 'lost');
-  return { p, raise, invocation, created };
+  return { p, raise, invocation, created, story };
 }
 
 // Breaks: the order job's owner (actor_id) or the built identity row not saved or not hydrated
@@ -186,8 +197,8 @@ test('a pending build order forged to another owner is save_corrupt and the file
   assert.deepEqual(readFileSync(path), bytes);
 });
 
-const opened = (p: ReturnType<typeof elapsedHost>) => {
-  const s = openStory(p.db, releases, p.host);
+const opened = (p: ReturnType<typeof elapsedHost>, rel = releases) => {
+  const s = openStory(p.db, rel, p.host);
   if (s.kind !== 'open') throw new Error(JSON.stringify(s));
   return s;
 };
@@ -238,4 +249,252 @@ test('one advance across completion and the end of weathering raises the hut in 
   assert.deepEqual(held(story, hut!), ['ruin']);
   q.sql.close();
   coldReopen(path, bundle);
+});
+
+// Built rooms S6 (save.md, Built rooms): a recipe-built hut is the same identity row as a hired one.
+// Breaks: the raise's room not saved or not derived again on reopen (no hut, or the lane loses its
+// way north), or the raise's receipt replaying into a second room.
+test('a self-built hut survives cold reopen, its replay raises no second hut, and north enters it', (t) => {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-built-self-'));
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
+  const path = join(dir, 'self.db');
+  const craft = compiled('cartridges/craft_sampler');
+  const l = loadCartridge(
+    new TextEncoder().encode(`{"cartridge":${craft.canonical},"content_hash":"${craft.sha256}"}`),
+    INSTALLED,
+  );
+  if (!l.ok) throw new Error(JSON.stringify(l));
+  const fresh = newWorld(
+    l.cartridge as Cartridge,
+    '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never,
+    [1, 2, 3, 4],
+  );
+  const open = () => {
+    const p = elapsedHost(path, undefined, craft);
+    const s = openStory(p.db, [{ fresh, content_hash: craft.sha256 }], p.host);
+    if (s.kind !== 'open') throw new Error(JSON.stringify(s));
+    return { p, story: s };
+  };
+  let { p, story } = open();
+  let n = 0;
+  const go = (command: string, input: object = {}, target_ids: string[] = [], key?: string) => {
+    const set = resolved(story.world(), fresh.character);
+    const action_key = Object.keys(set).find(
+      (k) => set[k]!.command === command && (!key || set[k]!.key === key),
+    )!;
+    const i = {
+      invocation_id: `aaaaaaaa-1212-4212-8212-${String(++n).padStart(12, '0')}`,
+      actor_id: fresh.character,
+      action_key,
+      target_ids,
+      input,
+    };
+    const r = story.invoke(i);
+    assert.equal(r.kind === 'saved' && (r.decision as any).kind, 'accepted', JSON.stringify(r));
+    return i;
+  };
+  const id = (k: string) => fresh.entityIds[`craft_sampler@0.0.1:${k}`]!;
+  const chop = () => {
+    go('move', { direction: 'west' });
+    go('perform', {}, [], 'chop');
+    go('perform', {}, [], 'chop');
+    go('move', { direction: 'east' });
+  };
+  go('choose_ancestry', { ancestry: 'woodfolk' });
+  go('take', {}, [id('item/axe')]);
+  chop();
+  go('talk', {}, [id('npc/old_carver')]);
+  const [continuation_id] = pending(story.world(), fresh.character)!;
+  go('choose', { choice_id: 'learn_carpentry', continuation_id });
+  go('perform', {}, [], 'saw');
+  chop();
+  go('perform', {}, [], 'saw');
+  go('move', { direction: 'east' });
+  const raise = go('perform', {}, [], 'raise_timbered_hut');
+  const huts = () =>
+    Object.keys(story.world().state.created ?? {}).filter(
+      (k) => story.world().state.created![k]!.origin.kind === 'built',
+    );
+  const [hut] = huts();
+  p.sql.close();
+  coldReopen(path, craft);
+  ({ p, story } = open());
+  assert.deepEqual(huts(), [hut]);
+  assert.equal(story.invoke(raise).kind, 'saved');
+  assert.deepEqual(huts(), [hut]);
+  go('move', { direction: 'north' });
+  assert.equal(story.world().state.containers[story.world().body], hut);
+  p.sql.close();
+});
+
+// Built rooms S5: raze the hut with timber_c on its floor; its tombstone is a `built` row.
+function razeRun(path: string, mode?: 'failed' | 'lost', cart: Cart = shipped) {
+  const b = build(path, false, undefined, cart);
+  const { p, story, invocation } = b;
+  const ok = (i: ReturnType<typeof invocation>) => {
+    const r = story.invoke(i);
+    assert.equal(r.kind === 'saved' && (r.decision as any).kind, 'accepted', JSON.stringify(r));
+  };
+  ok(invocation('take', [timber('c')]));
+  ok(invocation('move', [], { direction: 'north' }));
+  ok(invocation('drop', [timber('c')]));
+  ok(invocation('move', [], { direction: 'south' }));
+  const raze = invocation('raze_hut', [npc('carpenter')], {
+    service: service('raze_hut'),
+    quoted_price: 2,
+  });
+  const rows = () => p.sql.prepare('SELECT * FROM state_row ORDER BY section, key').all();
+  if (mode) {
+    if (mode === 'failed')
+      p.sql.exec(
+        'PRAGMA foreign_keys=ON; CREATE TABLE parent(id PRIMARY KEY); CREATE TABLE child(id REFERENCES parent(id) DEFERRABLE INITIALLY DEFERRED)',
+      );
+    const before = rows();
+    p.fault.kind = mode;
+    p.fault.armed = true;
+    assert.deepEqual(story.invoke(raze), { kind: 'pending' });
+    p.fault.reads = false;
+    if (mode === 'failed') assert.deepEqual(rows(), before);
+  }
+  const r = story.invoke(raze);
+  assert.equal(r.kind === 'saved' && (r.decision as any).kind, 'accepted', JSON.stringify(r));
+  if (mode) assert.equal(r.kind === 'saved' && r.replay, mode === 'lost');
+  const [hut] = b.created();
+  return { ...b, raze, hut: hut!, rows };
+}
+const north = (story: ReturnType<typeof opened>) =>
+  gameView(story.world()).exits.some((e) => e.direction === 'north');
+const lane = (story: ReturnType<typeof opened>) => story.world().state.containers[timber('c')];
+
+// Breaks: the tombstone not saved or not hydrated on reopen (north back, or the hut's exits
+// derived again), the timber's move not saved, or the raze receipt's replay charging or moving twice.
+test('a razed hut stays razed through cold reopen and its receipt replays without a second raze', (t) => {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-built-raze-'));
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
+  const path = join(dir, 'raze.db');
+  const { p, raze, hut, rows } = razeRun(path);
+  const after = rows();
+  p.sql.close();
+  coldReopen(path, bundle);
+  const q = elapsedHost(path, undefined, bundle);
+  const story = opened(q);
+  assert.deepEqual(Object.keys(story.world().state.built ?? {}), [hut]);
+  assert.equal(north(story), false);
+  assert.deepEqual(story.world().rooms[hut]!.exits, {});
+  const at = lane(story);
+  assert.equal(at, story.world().roomIds['build_sampler@0.0.1:room/lane']);
+  const again = story.invoke(raze);
+  assert.equal(again.kind === 'saved' && again.replay, true, JSON.stringify(again));
+  assert.equal(lane(story), at);
+  assert.deepEqual(q.sql.prepare('SELECT * FROM state_row ORDER BY section, key').all(), after);
+  q.sql.close();
+});
+
+// Breaks: a raze through a COMMIT that fails or whose acknowledgement is lost leaving no tombstone,
+// a second charge, or half its rows (tombstone without the timber's move, or the reverse).
+test('a real failed or lost COMMIT at raze retries to one tombstone and the timber in the lane once', (t) => {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-raze-commit-'));
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
+  const straight = razeRun(join(dir, 'straight.db'));
+  const pick = (x: typeof straight) =>
+    x.p.sql
+      .prepare(
+        "SELECT section, key, value FROM state_row WHERE section IN ('built', 'containers', 'created', 'entities', 'statuses') ORDER BY section, key",
+      )
+      .all();
+  for (const kind of ['failed', 'lost'] as const) {
+    const b = razeRun(join(dir, `${kind}.db`), kind);
+    assert.deepEqual(pick(b), pick(straight));
+    b.p.sql.close();
+  }
+  straight.p.sql.close();
+});
+
+// Breaks: load admitting a late tombstone, one on a non-built entity, or a row inside a razed room
+// (refused by hydrate or receipt recovery; per-check red controls: kernel forged-tombstone test).
+test('a forged tombstone or a row inside a razed room is save_corrupt and the file is unchanged', (t) => {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-raze-forged-'));
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
+  const base = join(dir, 'base.db');
+  const { p, hut, story } = razeRun(base);
+  const clock = story.world().state.clock;
+  p.sql.close();
+  const forge = (name: string, sql: string, ...args: string[]) => {
+    const path = join(dir, `${name}.db`);
+    writeFileSync(path, readFileSync(base));
+    const h = elapsedHost(path, undefined, bundle);
+    h.sql.prepare(sql).run(...args);
+    h.sql.close();
+    const bytes = readFileSync(path);
+    assert.throws(() => coldReopen(path, bundle), /save_corrupt/, name);
+    assert.deepEqual(readFileSync(path), bytes, name);
+  };
+  coldReopen(base, bundle);
+  const copy = join(dir, 'copy.db');
+  writeFileSync(copy, readFileSync(base));
+  coldReopen(copy, bundle); // control: the copy itself opens
+  const set = 'UPDATE state_row SET value = ? WHERE section = ? AND key = ?';
+  forge('late', set, JSON.stringify({ razed_at: clock + 1 }), 'built', hut);
+  forge(
+    'not-built',
+    "INSERT INTO state_row (section, key, value) VALUES ('built', ?, ?)",
+    npc('seller'),
+    JSON.stringify({ razed_at: 0 }),
+  );
+  forge('inside', set, JSON.stringify(hut), 'containers', timber('c'));
+});
+
+// A test-local build_sampler hut escrows one timber, so timber_b raises a second hut after the raze.
+function oneTimber(): Cart {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-one-timber-'));
+  try {
+    cpSync(fileURLToPath(new URL('../../../cartridges/build_sampler', import.meta.url)), dir, {
+      recursive: true,
+    });
+    const file = join(dir, 'services/raise_hut.json');
+    const svc = JSON.parse(readFileSync(file, 'utf8'));
+    svc.benefit.escrow.quantity = 1;
+    writeFileSync(file, JSON.stringify(svc));
+    const b = compiled(dir);
+    const l = loadCartridge(
+      new TextEncoder().encode(`{"cartridge":${b.canonical},"content_hash":"${b.sha256}"}`),
+      INSTALLED,
+    );
+    if (!l.ok) throw new Error(JSON.stringify(l));
+    const fresh = newWorld(
+      l.cartridge as Cartridge,
+      '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never,
+      [1, 2, 3, 4],
+    );
+    assert.deepEqual(fresh.entityIds, initial.entityIds);
+    return { bundle: b, releases: [{ fresh, content_hash: b.sha256 }] as const };
+  } finally {
+    rmSync(dir, { recursive: true });
+  }
+}
+
+// Breaks: a second hut at the razed hut's site and direction refused on reopen (the tombstoned row
+// still counted as a room there), or reopen deriving north to the razed hut instead of the new one.
+test('a hut raised where a razed one stood survives cold reopen and north enters the new hut', (t) => {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-raze-again-'));
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
+  const path = join(dir, 'again.db');
+  const cart = oneTimber();
+  const { p, hut, story, invocation } = razeRun(path, undefined, cart);
+  const r = story.invoke(
+    invocation('raise_hut', [npc('carpenter')], { service: service('raise_hut'), quoted_price: 5 }),
+  );
+  assert.equal(r.kind === 'saved' && (r.decision as any).kind, 'accepted', JSON.stringify(r));
+  advance(story, 7200);
+  p.sql.close();
+  coldReopen(path, cart.bundle);
+  const q = elapsedHost(path, undefined, cart.bundle);
+  const s = opened(q, cart.releases);
+  const [again, ...rest] = Object.keys(s.world().state.created ?? {}).filter((k) => k !== hut);
+  assert.ok(again && !rest.length, JSON.stringify(s.world().state.created));
+  assert.deepEqual(Object.keys(s.world().state.built ?? {}), [hut]);
+  const moved = s.invoke(invocation('move', [], { direction: 'north' }));
+  assert.equal(moved.kind === 'saved' && (moved.decision as any).kind, 'accepted');
+  assert.equal(s.world().state.containers[s.world().body], again);
+  q.sql.close();
 });

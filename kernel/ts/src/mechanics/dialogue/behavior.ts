@@ -16,10 +16,10 @@ import {
   type World,
   values,
 } from '../../runtime/decision.ts';
-import { bind, choiceIds, continuationId } from './shared.ts';
+import { bind, continuationId } from './shared.ts';
 import { exchangeRoles } from './exchange.ts';
 import { questOf } from '../lookups.ts';
-import { reopens } from './selection.ts';
+import { offered, reopens } from './selection.ts';
 
 export function wrongAnswer(
   world: World,
@@ -130,7 +130,7 @@ export function opening(
       (d.riddle?.wrong_limit !== undefined || values(d.choices).some((o) => o.exchange)) && {
         quest_instance_id: questOf(world, p.actor_id, d.quest)?.[0],
       }),
-    choice_ids: choiceIds(d),
+    choice_ids: offered(world, p.actor_id, d, steps),
     ...(d.riddle?.wrong_limit !== undefined && {
       attempts: { count: 0, limit: d.riddle.wrong_limit },
     }),

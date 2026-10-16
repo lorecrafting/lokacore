@@ -6,6 +6,7 @@ import { elapsedHost } from '../../authority/local-story/__tests__/elapsed-host.
 import { darkMarshBundle } from '../../authority/local-story/__tests__/priory-fixture.ts';
 import type { GameSubscription } from '../../packages/game-view/session.ts';
 import { CONTENTS } from './__tests__/control.test.ts';
+import { LABEL } from './labels.ts';
 import { book, bundle, fixture, nodes, words } from './__tests__/polish-book.test.ts';
 
 // Breaks: an unconfirmed Take leaves the detail or announces success; retry loses its original
@@ -48,7 +49,7 @@ test('only confirmed pickup returns World, including a retry from another page',
     1,
   );
   h.tap(CONTENTS);
-  h.tap('Equipment & Inventory');
+  h.tap(LABEL.inventory);
   assert.ok(h.text().includes('Held'));
   h.tap('a brass lantern, open');
   const token = h.game.view().token;
@@ -58,37 +59,43 @@ test('only confirmed pickup returns World, including a retry from another page',
   h.sql.close();
 });
 
-// Breaks: the item-only Give returns, or the guard rejects a complete Give with a real recipient.
-test('touch omits incomplete Give but the complete item and recipient command remains valid', () => {
+// Breaks: Give is offered with no one present or on the recipient's page, the card misnames its recipient or shows twice,
+// the confirmed Give stays on the item page or logs no (or a Drop) line, or an incomplete press
+// is sent.
+test('a held item offers Give only to a present recipient and logs the confirmed gift once', () => {
   const h = book();
   h.map();
   h.tap('Go north');
   h.tap('A brass lantern');
   h.tap('Take a brass lantern');
   const item = h.game.view().view.inventory[0];
-  assert.equal(item.actions.find((a) => a.action_key === 'give')?.available, true);
-  assert.equal(
-    h.p.screen().buttons.some((b) => b.action_key === 'give'),
-    false,
-  );
+  const gives = () => h.labels().filter((s) => s.startsWith('Give '));
+  h.tap(CONTENTS);
+  h.tap(LABEL.inventory);
+  h.tap('a brass lantern, open');
+  assert.deepEqual(gives(), []);
   const token = h.game.view().token;
   const receipts = () => h.sql.prepare('SELECT count(*) AS n FROM receipt').get()!.n;
   const before = receipts();
   h.p.press({ label: 'Give', action_key: 'give', target_ids: [item.id], input: {}, token });
   assert.equal(h.game.view().token, token);
   assert.equal(receipts(), before);
+  h.tap('Leave');
   h.map();
   h.tap('Go south');
-  const npc = h.game.view().view.entities.find((e) => e.kind === 'npc')!;
-  h.p.press({
-    label: 'Give',
-    action_key: 'give',
-    target_ids: [item.id, npc.id],
-    input: {},
-    token: h.game.view().token,
-  });
+  h.tap('Old Bram is here., open');
+  assert.deepEqual(gives(), []); // the recipient's page offers no Give card
+  h.tap('Leave');
+  h.tap(CONTENTS);
+  h.tap(LABEL.inventory);
+  h.tap('a brass lantern, open');
+  assert.deepEqual(gives(), ['Give a brass lantern to Old Bram']);
+  h.tap('Give a brass lantern to Old Bram');
   assert.deepEqual(h.game.view().view.inventory, []);
-  assert.notEqual(h.game.view().token, token);
+  assert.ok(h.labels().includes('standing, change position'));
+  h.draw();
+  const line = 'You give a brass lantern to Old Bram.';
+  assert.equal(h.p.screen().log.filter((s: string) => s === line).length, 1);
   h.sql.close();
 });
 
@@ -100,7 +107,7 @@ test('inventory Drop returns World with one named event only after confirmation'
   h.tap('A brass lantern');
   h.tap('Take a brass lantern');
   h.tap(CONTENTS);
-  h.tap('Equipment & Inventory');
+  h.tap(LABEL.inventory);
   h.tap('a brass lantern, open');
   assert.deepEqual(h.text().slice(0, 2), [
     'A brass lantern',
@@ -248,7 +255,7 @@ test('delayed Take returns once with its original item name after a conflicting 
       1,
     );
     h.tap(CONTENTS);
-    h.tap('Equipment & Inventory');
+    h.tap(LABEL.inventory);
     h.tap('a brass lantern, open');
     const turn = h.draw().find((n) => n.type.name === 'PageTurn').props.turn;
     h.clock.wall += 20;
@@ -318,7 +325,7 @@ test('actual trunk detail explains refused Take and restores its button after Re
   take('a wool cloak');
   const carrying = () => {
     h.tap(CONTENTS);
-    h.tap('Equipment & Inventory');
+    h.tap(LABEL.inventory);
   };
   carrying();
   h.tap('a wool cloak, open');

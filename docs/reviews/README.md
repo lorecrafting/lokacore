@@ -10,6 +10,7 @@ of closed work are deleted once their lesson is folded, and linked by permalink
 Reviews before R2 live in the [legacy repository](https://github.com/lorecrafting/lokacore-v2-legacy)
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
+- [Review: x6t-64 ConditionView.kind and authored status kind (loka-x6t.64, part 1 of loka-x6t.55)](2026-10-15-x6t-64-review.md): **APPROVE**
 - [Review: word bar batch head (loka-x6t.39: S1 loka-jsqq, S2 loka-1lpq, S3 loka-a9pn)](2026-10-15-wordbar-batch-review.md): **APPROVE WITH NOTES**
 - [Review: mechanics batch M13 head (cross-row interactions)](2026-10-15-m13-batch-review.md): **APPROVE**
 - [Review: recognition and earned titles (loka-kgd.146, rows W15 and FD9)](2026-10-15-loka-kgd.146-w15-fd9-review.md): **APPROVE WITH NOTES**
@@ -25,13 +26,24 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: Built rooms S2, save second opinion (loka-1q3n)](2026-10-15-loka-1q3n-built-s2-save-second-opinion.md): **APPROVE WITH NOTES**
 - [Review: Built rooms S2, raise the hut (loka-1q3n)](2026-10-15-loka-1q3n-built-s2-review.md): **APPROVE**
 - [Review: word bar S2 (loka-1lpq), GameView spell_words and speech.phrases](2026-10-15-loka-1lpq-wordbar-s2-review.md): **APPROVE**
+- [Second opinion (save): loka-kgd.108.14 hidden elites stay secret](2026-10-15-kgd-108-14-second-opinion.md): **APPROVE**
+- [Review: loka-kgd.108.14 hidden elites stay secret](2026-10-15-kgd-108-14-review.md): **APPROVE**
 - [Review: PR #393 recipe reason at kernel_api 1.100 (loka-j64e)](2026-10-15-j64e-review.md): **APPROVE WITH NOTES**
+- [Second opinion: hs-9 Built rooms S5, raze and tombstone (loka-otn4; save)](2026-10-15-hs-9-second-opinion.md): **APPROVE WITH NOTES**
+- [Review: hs-9 Built rooms S5, raze and tombstone (loka-otn4; engine + save)](2026-10-15-hs-9-review.md): **APPROVE WITH NOTES**
+- [Review: Homestead hs-8, Give in the Book (loka-x6t.31) with the hs-7 barter price note](2026-10-15-hs-8-review.md): **APPROVE WITH NOTES**
+- [Second-opinion review: Homestead hs-7 gifting and barter (loka-kgd.108.5, loka-kgd.70)](2026-10-15-hs-7-second-opinion.md): **APPROVE WITH NOTES**
+- [Review: Homestead hs-7 gifting and barter (loka-kgd.108.5, loka-kgd.70)](2026-10-15-hs-7-review.md): **APPROVE**
+- [Review: Homestead hs-6 furnishing, `item_present` leaf + `furnish_sampler` (loka-kgd.108.6)](2026-10-15-hs-6-review.md): **APPROVE**
 - [Save second opinion: Homestead hs-5, the mobile Eat receipt with `applies`](2026-10-15-hs-5-second-opinion.md): **APPROVE**
 - [Review: Homestead hs-5, cooking (`edible.applies`, kitchen_sampler)](2026-10-15-hs-5-review.md): **APPROVE WITH NOTES**
+- [Review: Homestead hs-14, Book skill tree on the Character page (loka-kgd.108.11)](2026-10-15-hs-14-review.md): **APPROVE**
+- [Review: Homestead hs-12, the self-build recipe step and craft_sampler](2026-10-15-hs-12-review.md): **APPROVE**
 - [Review: skill prerequisite, engine (Homestead hs-11, loka-kgd.108.8)](2026-10-15-hs-11-review.md): **APPROVE**
 - [Review: Homestead hs-10 craft (loka-kgd.108.7)](2026-10-15-hs-10-review.md): **APPROVE**
 - [Second opinion: hs-1 replenish.run root-command join (loka-5m0u)](2026-10-15-hs-1-second-opinion.md): **APPROVE**
 - [Review: replenish.run reaction step (Homestead hs-1, loka-5m0u)](2026-10-15-hs-1-review.md): **APPROVE**
+- [Review: Homestead batch B head (PR #402, loka-kgd.108)](2026-10-15-homestead-b-batch-review.md): **APPROVE**
 - [Review: Homestead batch A head (PR #398, loka-kgd.108)](2026-10-15-homestead-a-batch-review.md): **APPROVE**
 - [Review: Built rooms batch head (loka-kgd.109; S1-S4)](2026-10-15-built-batch-review.md): **APPROVE**
 - [Review: Realm seams batch (loka-kgd.150, PR #386)](2026-10-14-realm-seams-batch-review.md): **APPROVE**

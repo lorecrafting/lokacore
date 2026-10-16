@@ -19,18 +19,19 @@ export const bleedingLine = (b: NonNullable<GameView['bleeding']>, time: number,
 const dur = (s: number) => (s >= 120 ? `${Math.round(s / 60)}m` : `${s}s`);
 // Toolbox row W24 Journal countdown (wording proposed; designer to approve).
 export const timeLeft = (remaining: number) => `Time left: ${dur(remaining)}`;
-export const conditionLine = (
-  c: NonNullable<GameView['conditions']>[number],
-  time: number,
-  text: Say,
-) =>
-  text(c.label) +
-  // A permanent status (row W8) has no end, so no time part.
-  (c.ends_at === undefined ? '' : ` · ${dur(Math.max(0, c.ends_at - time))} remaining`) +
+type Condition = NonNullable<GameView['conditions']>[number];
+// A permanent status (row W8) has no end, so no time part.
+const left = (c: Condition, time: number) =>
+  c.ends_at === undefined ? '' : `${dur(Math.max(0, c.ends_at - time))} remaining`;
+export const conditionLine = (c: Condition, time: number, text: Say) =>
+  [text(c.label), left(c, time)].filter(Boolean).join(' · ') +
   // A status that never ticks (row 2c) shows no tick part.
   (c.per_tick === undefined
     ? ''
     : ` · ${c.per_tick > 0 ? '+' : ''}${c.per_tick} ${c.resource.toUpperCase()} each ${dur(c.tick_every)}`);
+// A status icon's hold tip (book-ui.md Conditions details): label and time left, no tick part.
+export const statusTip = (c: Condition, time: number, text: Say) =>
+  [text(c.label), left(c, time)].filter(Boolean).join(', ');
 // Book UI Sense cues details (wording proposed; designer to approve): the direction key, none here.
 export const cueLine = (c: NonNullable<GameView['cues']>[number], text: Say) =>
   `${text(c.text)}${c.direction ? ` from the ${c.direction}` : ''}`;

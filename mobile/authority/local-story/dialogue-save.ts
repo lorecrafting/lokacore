@@ -3,7 +3,7 @@ import { validAttempts } from '../../../kernel/ts/src/mechanics/dialogue/behavio
 import type { EntityId } from '../../../kernel/ts/src/contracts.gen.ts';
 import { same } from '../../../kernel/ts/src/foundation/compose.ts';
 import { validate } from '../../../kernel/ts/src/foundation/validate.ts';
-import { bind, choiceIds } from '../../../kernel/ts/src/mechanics/dialogue/shared.ts';
+import { bind, openable } from '../../../kernel/ts/src/mechanics/dialogue/shared.ts';
 import { value } from '../../../kernel/ts/src/mechanics/fact.ts';
 import {
   refString,
@@ -114,10 +114,10 @@ export function checkRow(world: World, id: string, row: ChoiceRow) {
       ),
       bind(world, d),
     ) ||
-    !same(row.choice_ids, choiceIds(d)) ||
+    !openable(world, d, row.choice_ids) ||
     !validAttempts(row, d) ||
     (row.status === 'resolved'
-      ? !row.choice_id || !d.choices[row.choice_id]
+      ? !row.choice_id || !d.choices[row.choice_id] || !row.choice_ids.includes(row.choice_id)
       : row.choice_id !== undefined)
   )
     invalid();

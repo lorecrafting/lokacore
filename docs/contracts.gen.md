@@ -138,6 +138,7 @@ Action definitions, ActionInvocation, TargetSpec and TargetResolution (04 §1, �
   - `damage`: Toolbox row 29b (spell recipes only): the named NPC's instance, when alive, loses amount hp of this damage kind after its resistances (row G2), stopping at 0; a loss to 0 runs the death sequence with the caster as killer and credited character, and closes the NPC's encounter when it is the only opponent.
   - `light.ignite`: Toolbox row 29b (spell recipes only): ignite the named fuel source as the ignite verb does (light@1), when the caster holds it and the verb would admit it; otherwise nothing.
   - `resource.adjust`: Adjust a resource of the actor's body by `by`, stopping at its bounds.
+  - `build`: Built rooms S6 (kernel_api at least 1.102; detail-target recipes only, at most one per sequence, construction@1): raise blueprint at the recipe target's room (its site) toward direction for the actor, as a build service does (service.schema.json); success outcome only (the loader refuses it elsewhere). Admission refuses the perform while the build would be refused (service.site_taken, service.construction_full).
 - **RecipeTarget**: What an ActionRecipe acts on (06 §20 target; 21 §7 TargetSpec): one inspectable detail, by its room and its key in that room's details, offered only while the actor is in that room; or (toolbox row G4, kernel_api at least 1.49) a use: a tool the actor holds, used on another item on the floor of the actor's room or carried directly, both chosen by the invocation (perform item_id and target_id), the recipe keyed by the tool's properties here and the target's through its policy (has_tag and status_active, subject target), never by item ids; or (toolbox row 29a, kernel_api at least 1.98) a spell named by its word, castable by an actor only while its learned fact reads true for them; or (toolbox row FD3, kernel_api at least 1.92) a storylet, offered to an actor only when the deck draws it.
   - `detail`
   - `use`
@@ -285,6 +286,7 @@ The StateDelta algebra: typed operations, their mutation targets and preconditio
 - **BleedRow**: One body bleed generation, retained after removal. Active fields are required together.
   - `true`
   - `false`
+- **BuiltRow**: A built room's tombstone (Built rooms S5): razed at razed_at. A razed room keeps its created row and id but has no exits, holds nothing and counts toward no construction limit.
 - **CharacterChoice**: The once-only character identity and its complete saved attribute values.
 - **ChoiceAttempts**: Pinned wrong-answer count and authored positive limit for one conversational sitting.
 - **ContinuationId**: A pending choice/continuation (04 §5.3 'Choice/continuation resolution'), created from IdSource. Lowercase hyphenated UUID, any version.
@@ -322,6 +324,7 @@ The StateDelta algebra: typed operations, their mutation targets and preconditio
   - `bleed.transition`: Checked transition of one body bleed generation.
   - `status.transition`: Checked transition of one body status generation (toolbox row 1); the target is the body and status pair.
   - `levelling.set`: Checked write of one character's levelling row (toolbox row 4): composes only when the stored row equals expected (null when absent) and neither the experience nor any allocated count falls.
+  - `built.set`: Checked write of one built room's tombstone row (Built rooms S5): composes only when the stored row equals expected (null when absent) and entity_id is a created row of origin kind built.
   - `water.transition`
   - `expedition.transition`
   - `visit.record`
@@ -358,6 +361,7 @@ The StateDelta algebra: typed operations, their mutation targets and preconditio
   - `visit`
   - `observation`
   - `levelling`: One character's levelling row (toolbox row 4).
+  - `built`: One built room's tombstone row (Built rooms S5).
 - **ObservedNpc**: One actor’s latest committed visible observation of an exact NPC, room and logical time.
 - **QuestInstanceId**: A QuestInstance (03 §12; 06 §1), created at activation from IdSource. Lowercase hyphenated UUID, any version.
 - **RoleBinding**: One role a continuation bound when it opened (04 §5.3 'bound roles'), for example the NPC the choice is made with.
@@ -509,7 +513,7 @@ The portable GameView envelope and its freshness (04 §14-§16; 00 §4.10; pre-r
   - `true`: Offered and currently legal.
   - `false`: Shown but not legal now, with the typed reason (00 §4.10: greyed with the reason). Never a security boundary: the authority revalidates (ACT-09).
 - **CombatView**: The current encounter and visible opponent presented to the player.
-- **ConditionView**: One active body status: its authored label, end and next tick (both absent for a permanent status, row W8) and per-tick resource change (absent for a status that never ticks, row 2c).
+- **ConditionView**: One active body status: its authored label, end, authored duration in seconds and next tick (all three absent for a permanent status, row W8; duration is present exactly when ends_at is, loka-x6t.65, and ends_at minus duration is the last application, since a reapplication refreshes ends_at to now plus duration) and per-tick resource change (absent for a status that never ticks, row 2c). kind (loka-x6t.64) is the status's authored kind; otherwise debuff when per_tick is negative, any modifies or resistances entry is negative, fear, blocks or allows is present, sight is blind, hearing is deaf or movement.cost_percent is above 100; else buff when the status has any gain (a positive per_tick, modifies or resistances entry, another sight, movement passes, a cost_percent below 100 or a concealment); absent for a status with no effect field.
 - **ContentView**: An item inside a container of an EntityView's contents (04 §15 as amended by c1-locks): its id, short name and kind, its direct container (the EntityView's item or another item of the same contents), its state if it has a barrier, and as actions only take and, with a barrier, the container verbs admission and barrier@1 accept now. Optional description is the explicit full-description TextKey; current NPC/item projections always copy their authored definition field, including held/worn/reachable contents. Older snapshots may omit it; the format tag stays.
 - **CueView**: One sense cue reaching the actor's room (toolbox row G6): its sense, authored text and, for a cue from another room, the direction of the first exit on the shortest way to its source.
 - **DoorView**: The door (barrier@1) an exit passes through (04 §15 as amended by c1-doors; room-view need #12): its short name, its state, and the door verbs (open, close, lock, unlock) the actor may use on it now, only those admission and the barrier rule would accept, in presentation order. The place's actions never list them.
@@ -675,6 +679,7 @@ The core policy AST and its version (06 §21; 21 §3.2, §4 Policy; 14 §R3A). T
   - `skill_compare`: The actor's level in the named skill (skills@1: 1 when acquired, plus each growth threshold its use count has reached; 0 when neither) is at least at_least (toolbox row FD2). Derived on read. Needs kernel_api at least 1.91. Owned by skills@1.
   - `population_count`: The named population plan has at least at_least living members: slots 1 to cap whose row has a member_id and no replacement_due (toolbox row W12). Derived on read; reads no actor. Needs kernel_api at least 1.86. Owned by population@1.
   - `status_active`: The subject holds an active status of this definition (status@1 row; toolbox row W6). subject target: the action's target, or, in an entity's own variant (TextVariants), the entity described; false without a target or for a detail. subject self (toolbox row G3 reader 1): the actor's body. subject subject (reader 1): in a reaction's when, the event's subject, the holder a status.apply without item, npc or co_present lands on; false anywhere else. subject room (Built rooms S4, status reader 9): the actor's current room, which is the room being described in a room's or blueprint's variant. Needs kernel_api at least 1.46, 1.53 for self or subject, and 1.99 for room. Owned by status@1.
+  - `item_present`: An item carrying this property tag (Tag, toolbox row G1) lies directly in the actor's current room: on its floor, not carried and not inside a container there (Homestead hs-6, furnishing). That is the actor's room (the only room the Book describes), as status_active subject room; in a reaction's when the reaction's actor's room. One query step per container row scanned. Needs kernel_api at least 1.102. Owned by containment@1.
   - `npc_present`: The NPC of this definition is present: in the actor's current room and alive (hp above 0 when it has hp); false without a body. Presence, not posture (the player's posture is the position fact). Toolbox row W6. Needs kernel_api at least 1.46. Owned by target_resolution@1.
   - `cue_perceived`: The NPC of this definition, alive, perceives a cue of sense (toolbox row G6): an active Cue whose source is within its range of the NPC's room, through exits not hidden from the actor, read for the actor (a reaction's actor); in a reaction's condition whose cause is a recipe outcome event (check_failed: failure; check_passed or action_completed: success), only that outcome's cues, from the actor's room. False for an NPC that is dead or nowhere. Owned by sense_cue@1. Needs kernel_api at least 1.48.
   - `time_since`: Toolbox row FD1: the world clock minus the int fact's value (as fact_compare reads it, at its named NPC or item) is at least at_least; a fact never stamped holds its default. Owned by fact@1. Needs kernel_api at least 1.90.
@@ -797,6 +802,7 @@ B8 typed finite paid entitlement, meal and provider-owned serving.
   - `withdraw`
   - `build`: Built rooms S2 (construction@1): raise blueprint at site's direction. blueprint is one of site.blueprints and direction one of site.directions (SCHEMA_VIOLATION invalid_value otherwise). Refused service.site_taken while a built room holds that site direction and service.construction_full at world.construction.max_total. Built rooms S3: fact with escrow (ready_after, no output) makes it a commission: the order sets fact true, moves the inputs to custody and schedules an order job; when due the job raises the room for its owner and sets fact false (refunding the inputs when the site is taken or construction full by then). Cancel (a cancel benefit naming this service) returns the inputs, never the fee.
   - `mend`: Built rooms S4 (construction@1): mend the built room at site's direction. Refused service.nothing_to_mend unless that room's blueprint ruin status is active on it; otherwise the mend cures ruin and applies the blueprint's weathering again. site and direction as build's.
+  - `raze`: Built rooms S5 (construction@1, kernel_api 1.102): raze the live built room at site's direction. Refused service.nothing_to_raze without one, permission_denied unless the actor raised it, service.occupied while an entity that cannot move (a corpse) lies in it; otherwise its statuses end, everything on its floor moves to the site and a tombstone (built row) is written. site and direction as build's.
 - **ServiceDefinition**: Exact original-provider action and conserved quote with one typed immediate benefit.
 
 ## Localized text contracts (`protocol/text.schema.json`)

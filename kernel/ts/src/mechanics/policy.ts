@@ -13,6 +13,7 @@ import type {
   Tag,
   VersionedPolicy,
 } from '../contracts.gen.ts';
+import { LIMITS } from '../contracts.gen.ts';
 import { bodyOf, refString, type World } from '../runtime/decision.ts';
 import { barrierState, questOf } from './lookups.ts';
 import { key } from '../foundation/compose.ts';
@@ -79,10 +80,8 @@ export function holds(
       return questOf(world, actor, p.quest)?.[1].state === p.state;
     case 'time_window':
       return inWindow(world, p);
-    case 'sky': {
-      const f = (['lunar', 'weather', 'season', 'tide'] as const).find((k) => p[k] !== undefined)!;
-      return skyPhase(world.cartridge, world.context, world.state.clock, f) === p[f];
-    }
+    case 'sky':
+      return sky(world, p);
     case 'visited_count':
       return visits(world, actor, world.roomIds[refString(p.room)]!) >= p.at_least;
     case 'population_count': // row W12; reads no actor
@@ -103,6 +102,8 @@ export function holds(
       return statusActive(world, actor, p, ctx);
     case 'npc_present':
       return here(world, actor, world.entityIds[refString(p.npc)]);
+    case 'item_present':
+      return furnished(world, actor, p.tag, ctx.steps);
     case 'cue_perceived':
       return perceived(world, actor, p, ctx, holds);
     default:
@@ -208,6 +209,25 @@ function here(world: World, actor: CharacterId, id: string | undefined): boolean
   const body = bodyOf(world, actor);
   if (id === undefined || body === undefined) return false;
   return world.state.containers[id] === world.state.containers[body] && living(world, id);
+}
+
+function sky(world: World, p: Extract<Policy, { op: 'sky' }>): boolean {
+  const f = (['lunar', 'weather', 'season', 'tide'] as const).find((k) => p[k] !== undefined)!;
+  return skyPhase(world.cartridge, world.context, world.state.clock, f) === p[f];
+}
+
+// item_present (Homestead hs-6): an item with `tag` lies directly in the actor's room, the room a
+// room variant describes (placeView); one query step per container row scanned, as recovery.ts.
+function furnished(world: World, actor: CharacterId, tag: Tag, steps: { n: number }): boolean {
+  const body = bodyOf(world, actor);
+  const room = body && world.state.containers[body];
+  for (const [id, at] of Object.entries(world.state.containers)) {
+    if (++steps.n > LIMITS.query_steps) return false;
+    if (at !== room) continue;
+    const e = world.entities[id];
+    if (e?.kind === 'item' && e.tags?.includes(tag)) return true;
+  }
+  return false;
 }
 
 // `item` is inside `holder`, directly or through the items it is in (the loader and compose

@@ -1,0 +1,28 @@
+{
+  "title": "room.lane.title",
+  "description": "room.lane.description",
+  "exits": {
+    "west": {
+      "to": "workshop"
+    }
+  },
+  "site": {
+    "directions": [
+      "north"
+    ],
+    "blueprints": [
+      "hut_plain",
+      "hut_timbered"
+    ]
+  },
+  "details": {
+    "plot_stakes": {
+      "aliases": [
+        "stakes",
+        "plot"
+      ],
+      "description": "detail.plot_stakes",
+      "rating": 1
+    }
+  }
+}

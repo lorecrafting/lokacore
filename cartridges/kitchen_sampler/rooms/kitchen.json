@@ -5,5 +5,14 @@
     "north": {
       "to": "pond"
     }
+  },
+  "details": {
+    "hearth": {
+      "aliases": [
+        "hearth"
+      ],
+      "description": "detail.hearth",
+      "rating": 1
+    }
   }
 }

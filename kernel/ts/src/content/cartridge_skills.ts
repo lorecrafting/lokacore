@@ -1,7 +1,7 @@
 import { diag, step, walk, type Checks, type Obj } from './cartridge_refs.ts';
 import { refString } from '../runtime/decision.ts';
 import { apiCmp } from './cartridge_installed.ts';
-import type { Diagnostic } from '../contracts.gen.ts';
+import type { DefinitionRef, Diagnostic } from '../contracts.gen.ts';
 
 export const skillSpec = (key: string) => ({
   key: `skill_${key}`,
@@ -25,7 +25,7 @@ export function skills(c: Obj, checks: Checks): Diagnostic[] {
   const bad = (at: string) => out.push(diag('SCHEMA_VIOLATION', at, { error: 'invalid_value' }));
   for (const [ref, s] of Object.entries((c.skills ?? {}) as Obj)) {
     const at = `.cartridge.skills${step(ref)}`;
-    checks.text(s, ['label', 'requirement'], at);
+    checks.text(s, ['label', 'requirement', 'profession'], at);
     if (s.key.length > 58) bad(`${at}.key`);
     for (const capability of ['skills', 'policy', 'fact'])
       if (c.lock.capabilities[capability] !== 1)
@@ -57,17 +57,21 @@ export function skills(c: Obj, checks: Checks): Diagnostic[] {
         diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'),
       );
   }
-  return [...out, ...growth(c), ...prerequisites(c), ...durability(c, checks)];
+  return [...out, ...growth(c), ...prerequisites(c), ...secret(c), ...durability(c, checks)];
 }
 
 // Homestead hs-11: a prerequisite never names its own skill, no ancestry grants its box, and it
-// needs API 1.101.
+// needs API 1.101. Homestead hs-14: a shown skill's prerequisite never reads a hidden skill, and a
+// profession or a hidden skill needs API 1.102.
 function prerequisites(c: Obj): Diagnostic[] {
   const named = Object.entries((c.skills ?? {}) as Obj).filter(([, s]) => s.prerequisite);
   const out = named
     .filter(([ref, s]) =>
       walk(s.prerequisite.root, '').some(
-        ([p]) => p.op === 'skill_compare' && refString(p.skill) === ref,
+        ([p]) =>
+          p.op === 'skill_compare' &&
+          (refString(p.skill) === ref ||
+            (!s.hidden && c.skills?.[refString(p.skill)]?.hidden === true)),
       ),
     )
     .map(([ref]) =>
@@ -79,8 +83,33 @@ function prerequisites(c: Obj): Diagnostic[] {
   for (const [choice, a] of Object.entries((c.ancestries ?? {}) as Obj))
     if (a.skill && c.skills?.[refString(a.skill)]?.prerequisite)
       out.push(diag('SCHEMA_VIOLATION', `.cartridge.ancestries${step(choice)}.skill`));
-  if (named.length && apiCmp(c.manifest.requires.kernel_api.at_least, '1.101') < 0)
+  const newer = Object.values((c.skills ?? {}) as Obj).some((s) => s.profession || s.hidden);
+  const floor = newer ? '1.102' : '1.101';
+  if ((named.length || newer) && apiCmp(c.manifest.requires.kernel_api.at_least, floor) < 0)
     out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
+  return out;
+}
+
+// Homestead hs-14 (secret): no shown skill's qualification and no dialogue policy reads a hidden
+// skill, and no labeled talk or riddle dialogue (its letter bank shows) teaches one.
+function secret(c: Obj): Diagnostic[] {
+  const out: Diagnostic[] = [];
+  const hidden = (r: DefinitionRef) => c.skills?.[refString(r)]?.hidden === true;
+  const reads = (root: Obj) =>
+    walk(root, '').some(([p]) => p.op === 'skill_compare' && hidden(p.skill));
+  const bad = (at: string) => out.push(diag('SCHEMA_VIOLATION', at, { error: 'invalid_value' }));
+  for (const [ref, s] of Object.entries((c.skills ?? {}) as Obj))
+    if (!s.hidden && reads(s.qualification.root))
+      bad(`.cartridge.skills${step(ref)}.qualification`);
+  for (const [ref, d] of Object.entries((c.dialogues ?? {}) as Obj)) {
+    const at = `.cartridge.dialogues${step(ref)}`;
+    if (reads(d.policy.root)) bad(`${at}.policy`);
+    const teaches = Object.values(d.choices as Obj).some((o) =>
+      (o.sequence ?? []).some((q: Obj) => q.op === 'skill.acquire' && hidden(q.skill)),
+    );
+    if (d.label !== undefined && teaches) bad(`${at}.label`);
+    if (d.riddle !== undefined && teaches) bad(`${at}.riddle`);
+  }
   return out;
 }
 

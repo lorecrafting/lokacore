@@ -110,6 +110,7 @@ test('a site and world.construction each need construction@1', () => {
     delete c.services['build_sampler@0.0.1:service/raise_hut'];
     delete c.services['build_sampler@0.0.1:service/cancel_hut'];
     delete c.services['build_sampler@0.0.1:service/mend_hut'];
+    delete c.services['build_sampler@0.0.1:service/raze_hut'];
     delete c.npcs['build_sampler@0.0.1:npc/carpenter'].services;
   };
   const gate = (at: string) => ['UNDECLARED_CAPABILITY', at];
@@ -175,9 +176,33 @@ test('a mend benefit names a direction of its resolved site and a site blueprint
   );
 });
 
+// Breaks (Built rooms S5): the loader admits a raze whose direction is not in its site's
+// directions or whose site does not resolve, or a raze without its two refusal texts.
+test('a raze benefit names a direction of its resolved site and has its refusal texts', () => {
+  const svc = (c: Obj) => c.services['build_sampler@0.0.1:service/raze_hut'];
+  const at = (p: string) => `.cartridge.services["build_sampler@0.0.1:service/raze_hut"]${p}`;
+  assert.deepEqual(
+    refused((c) => (svc(c).benefit.direction = 'east')),
+    ['SCHEMA_VIOLATION', at('.benefit.direction')],
+  );
+  assert.deepEqual(
+    refused((c) => (svc(c).benefit.site = { ...svc(c).benefit.site, key: 'nowhere' })),
+    ['UNRESOLVED_REFERENCE', at('.benefit.site')],
+  );
+  for (const [key, path] of [
+    ['service.nothing_to_raze', '.target'],
+    ['service.occupied', '.occupied'],
+  ])
+    assert.deepEqual(
+      refused((c) => delete c.text[key]),
+      ['UNRESOLVED_REFERENCE', at(path)],
+    );
+});
+
 // Breaks (Built rooms S3): the loader admits a claim on a build commission (it has no output to
-// hand over; the room is raised at completion), or a build commission whose fact is not a false-default player bool.
-test('a build commission cannot be claimed and its fact is a player bool', () => {
+// hand over; the room is raised at completion), or a build commission whose fact is not a false-default player bool;
+// row kgd.70: a free build admitted (price 0 is for an entitlement barter only).
+test('a build commission cannot be claimed or free and its fact is a player bool', () => {
   const sv = (c: Obj, k: string) => c.services[`build_sampler@0.0.1:service/${k}`];
   assert.deepEqual(
     refused((c) => (sv(c, 'cancel_hut').benefit.kind = 'claim')),
@@ -185,6 +210,13 @@ test('a build commission cannot be claimed and its fact is a player bool', () =>
       'SCHEMA_VIOLATION',
       '.cartridge.services["build_sampler@0.0.1:service/cancel_hut"].benefit.service',
     ],
+  );
+  assert.deepEqual(
+    refused((c) => {
+      sv(c, 'raise_hut').price = 0;
+      c.manifest.requires.kernel_api.at_least = '1.102';
+    }),
+    ['SCHEMA_VIOLATION', '.cartridge.services["build_sampler@0.0.1:service/raise_hut"].price'],
   );
   assert.deepEqual(
     refused((c) => (c.facts['build_sampler@0.0.1:fact/hut_ordered'].value_type.default = true)),

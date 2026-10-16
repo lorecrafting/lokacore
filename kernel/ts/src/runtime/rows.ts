@@ -38,6 +38,7 @@ const SECTIONS: Readonly<
     | 'bleeds'
     | 'statuses'
     | 'levelling'
+    | 'built'
   >
 > = {
   visit: 'visited_rooms',
@@ -64,6 +65,7 @@ const SECTIONS: Readonly<
   bleed: 'bleeds',
   status: 'statuses',
   levelling: 'levelling',
+  built: 'built',
   choice: 'choices',
 };
 
@@ -82,7 +84,7 @@ export const row = (t: MutationTarget) =>
         ? key(t.plan)
         : t.kind === 'bleed'
           ? t.body_id
-          : t.kind === 'containment' || t.kind === 'entity'
+          : t.kind === 'containment' || t.kind === 'entity' || t.kind === 'built'
             ? t.entity_id
             : t.kind === 'character' || t.kind === 'levelling'
               ? t.character_id

@@ -25,7 +25,12 @@
       "attributes": 1,
       "death": 1,
       "description_variant": 1,
-      "position": 1
+      "position": 1,
+      "action_recipe": 1,
+      "check": 1,
+      "skills": 1,
+      "dialogue": 1,
+      "inspectable_detail": 1
     },
     "client_features": []
   },

@@ -9,6 +9,7 @@ import { ContinueButton } from '../book/actions.tsx';
 import { EntityLine, LogLines } from '../book/lines.tsx';
 import { Control, Page, RunningHead, SectionTitle } from '../book/pages.tsx';
 import { prose, usePalette } from '../book/palette.ts';
+import { LABEL } from '../book/labels.ts';
 
 type Quest = Pick<GameView['journal'][number], 'state' | 'journal'>;
 const say = (k: string) => k;
@@ -89,7 +90,7 @@ export const NoRunningHead: Story = {
 // Breaks: a section heading is not a header (SectionTitle loses its role).
 export const WithSectionHeadings: Story = {
   args: {
-    title: 'Equipment & Inventory',
+    title: LABEL.inventory,
     children: (
       <>
         <SectionTitle>Held</SectionTitle>

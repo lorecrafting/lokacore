@@ -1,0 +1,15 @@
+{
+  "keywords": [
+    "rug"
+  ],
+  "short": "item.rug.short",
+  "room_line": "item.rug.room",
+  "description": "item.rug.description",
+  "location": {
+    "in": "room",
+    "room": "yard"
+  },
+  "tags": [
+    "rug"
+  ]
+}

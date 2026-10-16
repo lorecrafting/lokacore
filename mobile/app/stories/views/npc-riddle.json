@@ -573,7 +573,27 @@
         "inventory"
        ]
       },
-      "input": []
+      "input": [],
+      "target_ids": [
+       "13951eb1-f988-89b1-9bf2-a9fb73caa1bc",
+       "b45f7385-6cf5-800d-b604-1dc7bab19891"
+      ]
+     },
+     {
+      "available": true,
+      "action_key": "give",
+      "label": "action.give",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "inventory"
+       ]
+      },
+      "input": [],
+      "target_ids": [
+       "13951eb1-f988-89b1-9bf2-a9fb73caa1bc",
+       "e1f06e4a-2ae6-8f75-bb0b-b0a2e8370be0"
+      ]
      }
     ]
    }

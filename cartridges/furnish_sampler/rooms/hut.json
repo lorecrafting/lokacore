@@ -1,0 +1,30 @@
+{
+  "title": "room.hut.title",
+  "description": "room.hut.description",
+  "exits": {
+    "south": {
+      "to": "yard"
+    }
+  },
+  "details": {
+    "bench": {
+      "aliases": [
+        "bench"
+      ],
+      "description": "detail.bench",
+      "rating": 1
+    }
+  },
+  "variants": [
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "item_present",
+          "tag": "rug"
+        }
+      },
+      "description": "room.hut.rug"
+    }
+  ]
+}

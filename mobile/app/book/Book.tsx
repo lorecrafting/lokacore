@@ -219,6 +219,7 @@ function Bottom(p: BottomProps) {
           openPosition={!p.page && !view.scene && position ? () => p.press(position) : undefined}
           pending={pending}
           open={() => p.open({ kind: 'contents' })}
+          openCharacter={() => p.open({ kind: 'character' })}
         />
       )}
       {p.screen.catchingUp && <Text style={{ ...type.small, color: c.dim }}>Catching up…</Text>}

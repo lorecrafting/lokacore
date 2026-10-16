@@ -325,6 +325,8 @@
       "floor": "1.58",
       "below": "1.57",
       "source": "cartridges/toolbox_showcase",
+      "feature": "a reaction's attacker filter (loka-kgd.79)",
+      "edits": [["statuses/gored.json", ["kind"], null]],
       "compiler": [
         "KERNEL_API_RANGE_INVALID",
         "cartridge.requires.kernel_api.at_least"
@@ -884,7 +886,19 @@
       "floor": "1.99",
       "below": "1.98",
       "source": "cartridges/build_sampler",
-      "feature": "a blueprint, a site or world.construction",
+      "feature": "a blueprint, a site or world.construction (the raze service made a mend, so the 1.101 raze floor cannot shadow this case)",
+      "edits": [
+        [
+          "services/raze_hut.json",
+          ["benefit"],
+          {
+            "kind": "mend",
+            "site": "lane",
+            "direction": "north",
+            "escrow": { "items": ["timber_a"], "quantity": 1, "custody": "yard" }
+          }
+        ]
+      ],
       "compiler": [
         "KERNEL_API_RANGE_INVALID",
         "cartridge.requires.kernel_api.at_least"
@@ -986,7 +1000,32 @@
       "below": "1.100",
       "source": "cartridges/craft_sampler",
       "feature": "a craft",
-      "edits": [["skills/carving.json", ["prerequisite"], null]],
+      "edits": [
+        ["skills/carving.json", ["prerequisite"], null],
+        ["skills/joinery.json", ["prerequisite"], null],
+        ["skills/whittling.json", ["profession"], null],
+        ["skills/carving.json", ["profession"], null],
+        ["skills/joinery.json", ["profession"], null],
+        ["skills/carpentry.json", ["prerequisite"], null],
+        [
+          "recipes/raise_timbered_hut.json",
+          ["outcomes", "success", "sequence"],
+          [{ "op": "fact.assign", "fact": "wood_chopped", "value": true }]
+        ]
+      ],
+      "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
+      "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
+    },
+    {
+      "floor": "1.102",
+      "below": "1.101",
+      "source": "cartridges/craft_sampler",
+      "feature": "a build step",
+      "edits": [
+        ["skills/whittling.json", ["profession"], null],
+        ["skills/carving.json", ["profession"], null],
+        ["skills/joinery.json", ["profession"], null]
+      ],
       "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
       "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
     },
@@ -1010,6 +1049,76 @@
       "below": "1.100",
       "source": "cartridges/kitchen_sampler",
       "feature": "edible.applies",
+      "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
+      "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
+    },
+    {
+      "floor": "1.102",
+      "below": "1.101",
+      "source": "cartridges/furnish_sampler",
+      "feature": "an item_present leaf",
+      "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
+      "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
+    },
+    {
+      "floor": "1.102",
+      "below": "1.101",
+      "source": "cartridges/skills_sampler",
+      "feature": "a skill profession",
+      "edits": [["skills/pick.json", ["profession"], "skill.pick.label"]],
+      "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
+      "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
+    },
+    {
+      "floor": "1.102",
+      "below": "1.101",
+      "source": "cartridges/skills_sampler",
+      "feature": "a hidden skill",
+      "edits": [
+        [
+          "skills/pick.json",
+          ["prerequisite"],
+          { "policy_version": 1, "root": { "op": "all", "items": [] } }
+        ],
+        ["skills/pick.json", ["hidden"], true]
+      ],
+      "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
+      "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
+    },
+    {
+      "floor": "1.102",
+      "below": "1.101",
+      "source": "cartridges/gift_sampler",
+      "feature": "service.price 0 (a barter, row kgd.70)",
+      "edits": [
+        ["services/knife_for_pelts.json", ["benefit", "escrow", "ready_after"], 3600],
+        ["cartridge.json", ["requires", "capabilities", "schedule"], 1]
+      ],
+      "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
+      "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
+    },
+    {
+      "floor": "1.102",
+      "below": "1.101",
+      "source": "cartridges/gift_sampler",
+      "feature": "service.benefit.escrow.output without ready_after (a barter, row kgd.70)",
+      "edits": [["services/knife_for_pelts.json", ["price"], 1]],
+      "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
+      "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
+    },
+    {
+      "floor": "1.102",
+      "below": "1.101",
+      "source": "cartridges/variants_sampler",
+      "feature": "a status kind (loka-x6t.64)",
+      "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api"],
+      "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
+    },
+    {
+      "floor": "1.102",
+      "below": "1.101",
+      "source": "cartridges/build_sampler",
+      "feature": "a raze service (Built rooms S5)",
       "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
       "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
     }

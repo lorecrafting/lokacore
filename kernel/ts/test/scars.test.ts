@@ -87,7 +87,7 @@ const bitten = (w: World) => {
   );
   return d?.kind === 'accepted' ? [d.delta.ops.length, d.narration] : d;
 };
-const SCARRED = [{ label: 'condition.scarred', resource: 'hp', tick_every: 60 }];
+const SCARRED = [{ label: 'condition.scarred', resource: 'hp', tick_every: 60, kind: 'debuff' }];
 
 // Breaks: a permanent status gets an end or an expiry job, refreshes or re-narrates on a later
 // hit, is cleared by the same-body return, is not cured by `cures`, is not seen by W6's
@@ -130,7 +130,10 @@ test('the loader refuses each unsound permanent status', () => {
   const rows: [Uint8Array, (c: any) => void, string, string][] = [
     [
       artifact,
-      (c) => (c.manifest.requires.kernel_api.at_least = '1.47'),
+      (c) => {
+        c.manifest.requires.kernel_api.at_least = '1.47';
+        delete c.statuses[SCAR].kind; // 1.102 (loka-x6t.64) would shadow the 1.48 floor
+      },
       'KERNEL_API_RANGE_INVALID',
       '.cartridge.manifest.requires.kernel_api.at_least',
     ],

@@ -1,3 +1,4 @@
+// size: allow 632, the Built rooms S2 to S5 cases share one build_sampler fixture and helpers
 // Built rooms S2 and S3 (mechanics.md Built rooms; save.md Built rooms): build_sampler's carpenter
 // takes two timber and raises the hut north of the lane 7200 s after the order, once the plot is
 // bought; the room is derived from its identity row on every hydrate, and a forged row refuses the load.
@@ -9,7 +10,12 @@ import { INSTALLED, gameView, loadCartridge, newWorld, step, stepElapsed } from 
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { targetOf, value } from '../src/mechanics/fact.ts';
 import { key } from '../src/foundation/compose.ts';
-import { built as due, unbuildable } from '../src/mechanics/service/build.ts';
+import {
+  built as due,
+  raised as raisedOps,
+  unbuildable,
+  unrazable,
+} from '../src/mechanics/service/build.ts';
 import { LIMITS } from '../src/contracts.gen.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { hydrate } from '../src/runtime/created.ts';
@@ -66,6 +72,7 @@ const buy = use('seller', 'buy_plot', 10);
 const raise = use('carpenter', 'raise_hut', 5);
 const cancel = use('carpenter', 'cancel_hut', 1);
 const mend = use('carpenter', 'mend_hut', 3);
+const raze = use('carpenter', 'raze_hut', 2);
 const pennies = (w: World) => level(w, w.body, resourceRef(w, 'pennies'));
 const take = (w: World, ...ks: string[]) =>
   ks.reduce((x, k) => play(x, { type: 'take', item_id: x.entityIds[`${S}:item/timber_${k}`] }), w);
@@ -436,4 +443,190 @@ test('mend is refused on a sound hut; on a ruin it cures it for 3 pennies and a 
   assert.equal(gameView(w).place.description.key, 'blueprint.hut.description.owned');
   w = elapse(w, w.state.clock + 1);
   assert.equal(gameView(w).place.description.key, 'blueprint.hut.description.ruin');
+});
+
+// Built rooms S5 raze (mechanics.md Built rooms, S5).
+const item = (w: World, k: string) => w.entityIds[`${S}:item/timber_${k}`]!;
+const north = (w: World, room: string) => w.rooms[room].exits.north;
+const seeded = (w: World, f: (s: any) => void) => {
+  const state = JSON.parse(JSON.stringify(w.state));
+  f(state);
+  return hydrate(fresh(), state, true)!;
+};
+// Breaks: the raze not paid, the floor's timber left in the razed room, the lane's north exit or
+// the view's north kept (hydrate not re-run on a built-only change), the hut's weathering left
+// active (its job then expiring or ruining a razed room), a second raze or a mend admitted on the
+// tombstone, or the razed row still counted against max_total 1 (no second hut).
+test('raze puts the floor in the lane, takes north away, ends weathering; a new hut can be raised', () => {
+  n = 0;
+  let w = take(raised(play(fresh(), buy(fresh()))), 'c');
+  const lane = w.state.containers[w.body];
+  const [hut] = built(w);
+  w = play(w, { type: 'move', direction: 'north' });
+  w = play(play(w, { type: 'drop', item_id: item(w, 'c') }), { type: 'move', direction: 'south' });
+  const before = pennies(w)!;
+  w = play(w, raze(w));
+  assert.equal(before - pennies(w)!, 2);
+  assert.equal(w.state.containers[item(w, 'c')], lane);
+  assert.deepEqual(w.state.built, { [hut]: { razed_at: w.state.clock } });
+  assert.equal(north(w, lane), undefined);
+  assert.ok(!gameView(w).exits.some((e) => e.direction === 'north'));
+  assert.deepEqual(send(w, { type: 'move', direction: 'north' }).decision, {
+    kind: 'rejected',
+    error: { code: 'not_found' },
+  });
+  const active = (x: World) =>
+    Object.entries(x.state.statuses ?? {}).filter(
+      ([at, r]) => r.active && JSON.parse(at).body_id === hut,
+    );
+  assert.deepEqual(active(w), []);
+  refused(w, 'invalid_state', 'service.nothing_to_raze', [raze, 3]);
+  refused(w, 'invalid_state', 'service.nothing_to_mend', [mend, 2]);
+  const run_id = `aaaaaaaa-1091-4091-8091-${String(++n).padStart(12, '0')}`;
+  const [from, until] = [w.state.clock, w.state.clock + 700];
+  const payload = { type: 'elapsed', actor_id: w.character, run_id, from, until };
+  const command = { id: elapsedCommandId(run_id, w.context, from, until), payload };
+  const r = stepElapsed(w, { ...command, world_context_id: w.context } as never, n);
+  assert.equal(r.decision.kind, 'accepted');
+  const events = (r.decision as unknown as { events: { payload: { type: string } }[] }).events;
+  assert.ok(!events.some((e) => e.payload.type === 'status_expired'), JSON.stringify(events));
+  assert.deepEqual(active(r.world), []);
+  w = seeded(
+    r.world,
+    (s) => ((s.containers[item(w, 'a')] = w.body), (s.containers[item(w, 'b')] = w.body)),
+  );
+  w = play(w, raise(w));
+  w = elapse(w, w.state.clock + 7200);
+  const again = built(w).find((id) => id !== hut)!;
+  assert.ok(again, 'a second hut is raised on the razed site');
+  w = play(w, { type: 'move', direction: 'north' });
+  assert.equal(w.state.containers[w.body], again);
+
+  // Breaks: a razed row's exits written by hydrate's raise, or the site exit taken from whichever
+  // row comes last rather than the live one (both created insertion orders reach the new hut).
+  for (const order of [
+    [hut, again],
+    [again, hut],
+  ]) {
+    const state = JSON.parse(JSON.stringify(w.state));
+    state.created = Object.fromEntries(order.map((id) => [id, state.created[id]]));
+    const loaded = hydrate(fresh(), state, true)!;
+    assert.deepEqual(north(loaded, lane)?.to, ref('room', `built_${again.replaceAll('-', '_')}`));
+    assert.deepEqual({ ...loaded.rooms[hut].exits }, {});
+  }
+});
+
+// Breaks: an NPC or a nested item left in the razed room, or the nested item moved out of its
+// holder (only the floor's direct contents move), or the moves not in EntityId order (the order
+// would follow key insertion, which a reopen changes).
+test("raze moves an NPC in the hut to the lane; a holder's contents ride along", () => {
+  n = 0;
+  let w = raised(play(fresh(), buy(fresh())));
+  const lane = w.state.containers[w.body];
+  const [hut] = built(w);
+  const seller = npc(w, 'seller');
+  const order = [seller, item(w, 'c')].sort();
+  w = seeded(w, (s) => {
+    // re-inserted against EntityId order, so the moves' order cannot come from key insertion
+    for (const e of [...order].reverse()) (delete s.containers[e], (s.containers[e] = hut));
+    s.containers[item(w, 'a')] = item(w, 'c');
+  });
+  const service = w.cartridge.services![`${S}:service/raze_hut`]!;
+  const moves = raisedOps(w, undefined as never, service, undefined as never).flatMap((o) =>
+    o.op === 'entity.transfer' ? [o.entity_id] : [],
+  );
+  assert.deepEqual(moves, order);
+  w = play(w, raze(w));
+  assert.deepEqual(
+    [seller, item(w, 'c'), item(w, 'a')].map((id) => w.state.containers[id]),
+    [lane, lane, item(w, 'c')],
+  );
+});
+
+// Breaks: another character razing the owner's room, an immovable created entity (a corpse)
+// moved or destroyed by a raze rather than refusing it, or the owner check after the occupancy
+// check (the refusal order is nothing_to_raze, permission_denied, occupied).
+test('raze is refused for a non-owner, and while a corpse lies in the hut', () => {
+  n = 0;
+  const w = raised(play(fresh(), buy(fresh())));
+  const [hut] = built(w);
+  const b = w.cartridge.services![`${S}:service/raze_hut`]!.benefit as never;
+  const other = '00000000-0000-4000-8000-0000000000c3' as never;
+  assert.equal(unrazable(w, b, w.character), undefined);
+  assert.deepEqual(unrazable(w, b, other), { code: 'permission_denied' });
+  const busy = { code: 'invalid_state', message: { key: 'service.occupied' } };
+  const inHut = (id: string, row: object) => {
+    const c = structuredClone(w) as any;
+    c.state.created[id] = { id, ...row };
+    c.state.containers[id] = hut;
+    return c;
+  };
+  const corpse = '00000000-0000-4000-8000-0000000000c4';
+  const origin = { kind: 'death', victim_id: other, owner_id: other, event_id: other };
+  const occupied = inHut(corpse, { definition: ref('item', 'timber_a'), origin });
+  assert.deepEqual(unrazable(occupied, b, w.character), busy);
+  assert.deepEqual(unrazable(occupied, b, other), { code: 'permission_denied' });
+  // Breaks: a living spawned NPC (a hound that chased the player in) refusing the raze, or a dead
+  // one (hp 0, not a living body) moved; the seller stands in as the spawned hound.
+  const hound = npc(w, 'seller');
+  const spawned = (value: number) => {
+    const c = inHut(hound, {
+      definition: ref('npc', 'seller'),
+      origin: { kind: 'spawned', role: 'hound' },
+    });
+    c.entities[hound].hp = true;
+    c.state.resources[key({ kind: 'resource', resource: resourceRef(w, 'hp'), entity_id: hound })] =
+      { value, at: w.state.clock };
+    return c as World;
+  };
+  assert.equal(play(spawned(4), raze(w)).state.containers[hound], w.state.containers[w.body]);
+  assert.deepEqual(unrazable(spawned(0), b, w.character), busy);
+});
+
+// Breaks: the map placing a razed room (knowledge positions() not skipping the tombstone) or
+// linking the lane north to it.
+test('a razed hut leaves the map', () => {
+  const mapped = sampler((c) => {
+    c.map_positions = [
+      { room: ref('room', 'lane'), x: 2, y: 5, z: 0 },
+      { room: ref('room', 'yard'), x: 9, y: 9, z: 0 },
+    ];
+    c.lock.capabilities.knowledge = 1;
+    c.manifest.requires.capabilities.knowledge = 1;
+  });
+  n = 0;
+  let w = fresh(mapped);
+  const lane = w.state.containers[w.body];
+  w = raised(play(w, buy(w)));
+  w = play(play(w, { type: 'move', direction: 'north' }), { type: 'move', direction: 'south' });
+  w = play(w, raze(w));
+  const { rooms, links } = gameView(w).map!;
+  assert.deepEqual(
+    rooms.map(({ id }) => id),
+    [lane],
+  );
+  assert.deepEqual(links, []);
+});
+
+// Breaks (Built rooms S5): hydrate admitting a tombstone later than the clock (exactly the clock
+// loads), one keyed by an entity that is not a built room, one off the BuiltRow shape, or an
+// entity left inside a razed room.
+test('a forged tombstone refuses the load', () => {
+  n = 0;
+  let w = raised(play(fresh(), buy(fresh())));
+  const [hut] = built(w);
+  w = play(w, raze(w));
+  const lane = w.state.containers[w.body];
+  for (const mutate of [
+    (s: any) => (s.built[hut].razed_at = s.clock + 1),
+    (s: any) => (s.built[lane] = s.built[hut]),
+    (s: any) => (s.built[hut].by = 'x'),
+    (s: any) => (s.containers[item(w, 'c')] = hut),
+  ]) {
+    const state = JSON.parse(JSON.stringify(w.state));
+    state.built[hut].razed_at = state.clock;
+    assert.ok(hydrate(fresh(), state, true), 'the unforged state loads');
+    mutate(state);
+    assert.equal(hydrate(fresh(), state, true), undefined, String(mutate));
+  }
 });

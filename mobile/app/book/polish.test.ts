@@ -5,6 +5,7 @@ import { test } from 'node:test';
 import { openGame } from '../../authority/local-story/session.ts';
 import { elapsedHost } from '../../authority/local-story/__tests__/elapsed-host.test.ts';
 import { CONTENTS } from './__tests__/control.test.ts';
+import { LABEL } from './labels.ts';
 import { book, bundle, nodes, words } from './__tests__/polish-book.test.ts';
 
 // Breaks: confirmed pelt Take returns to World, leaves the stale pelt child open, or restores
@@ -187,11 +188,11 @@ test('room is focused while Map retains directions and every detail returns to t
   assert.ok(h.text().includes('Beyond north: Well Lane — a brass lantern.'));
   h.tap('Back to World');
   h.tap(CONTENTS);
-  h.tap('Equipment & Inventory');
+  h.tap(LABEL.inventory);
   h.tap('Back to World');
   assert.ok(h.labels().includes('Old Bram is here., open'));
-  assert.equal(h.labels().includes('Equipment & Inventory, open'), false);
-  const sections = ['Character', 'Equipment & Inventory', 'Map', 'Journal', 'Settings'];
+  assert.equal(h.labels().includes(`${LABEL.inventory}, open`), false);
+  const sections = ['Character', LABEL.inventory, 'Map', 'Journal', 'Settings'];
   for (const section of sections) {
     h.tap(CONTENTS);
     assert.deepEqual(

@@ -481,18 +481,6 @@
        ]
       },
       "input": []
-     },
-     {
-      "available": true,
-      "action_key": "give",
-      "label": "action.give",
-      "target": {
-       "kind": "entity",
-       "scopes": [
-        "inventory"
-       ]
-      },
-      "input": []
      }
     ]
    },
@@ -506,18 +494,6 @@
       "available": true,
       "action_key": "drop",
       "label": "action.drop",
-      "target": {
-       "kind": "entity",
-       "scopes": [
-        "inventory"
-       ]
-      },
-      "input": []
-     },
-     {
-      "available": true,
-      "action_key": "give",
-      "label": "action.give",
       "target": {
        "kind": "entity",
        "scopes": [

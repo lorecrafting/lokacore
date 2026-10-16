@@ -1,0 +1,53 @@
+{
+  "facts": {
+    "trust": {
+      "version": 1,
+      "value_type": {
+        "type": "int",
+        "default": 0,
+        "minimum": -1,
+        "maximum": 1
+      },
+      "scopes": [
+        "player"
+      ],
+      "per_subject": true,
+      "meaning": "How far an NPC trusts the player: -1 cold, 0 plain, 1 warm."
+    },
+    "gifted_apple": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "per_subject": true,
+      "meaning": "This NPC has had the player's apple; a second gift of it pays nothing."
+    },
+    "gifted_rat": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "per_subject": true,
+      "meaning": "This NPC has had the player's dead rat; a second gift of it costs nothing more."
+    },
+    "traded_knife": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The trader has bartered the knife to this character."
+    }
+  }
+}

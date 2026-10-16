@@ -47,7 +47,7 @@ export async function go(screen: Screen, direction: string, room?: string) {
 
 export async function inventory(screen: Screen) {
   await screen.getByRole('button', /; opens Contents$/).tap();
-  await screen.getByRole('button', 'Equipment & Inventory, open').tap();
+  await screen.getByRole('button', `${LABEL.inventory}, open`).tap();
 }
 
 // At the Chandler: buy a torch from Peg for 3p and light it.

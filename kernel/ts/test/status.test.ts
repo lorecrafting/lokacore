@@ -13,6 +13,7 @@ import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { key } from '../src/foundation/compose.ts';
 import { encode } from '../src/foundation/canonical.ts';
+import { validate } from '../src/foundation/validate.ts';
 import { sequence } from '../src/mechanics/reaction.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 
@@ -100,25 +101,31 @@ const withPool = (w: World, pool: string, value: number): World => ({
 });
 
 // Breaks: entry applies nothing, a tick drains the wrong amount or direction, the tick at the end
-// still drains, or expiry leaves the condition on the Character page.
+// still drains, expiry leaves the condition on the Character page, or the view drops the authored
+// duration (the ring denominator, loka-x6t.65) or leaves the GameView schema.
 test('the dart corridor poisons for four ticks and then expires', () => {
   let w = fresh();
   const t0 = w.state.clock;
   assert.equal(gameView(w).conditions, undefined);
   w = play(w, { type: 'move', direction: 'east' });
+  assert.deepEqual(validate('GameView', gameView(w)), []);
   assert.deepEqual(gameView(w).conditions, [
     {
       label: 'condition.poisoned',
       ends_at: t0 + 300,
+      duration: 300,
       next_tick_at: t0 + 60,
       resource: 'hp',
       per_tick: -1,
       tick_every: 60,
+      kind: 'debuff',
     },
   ]);
   w = wait(w, 60);
   assert.equal(hp(w), 9);
   assert.equal(gameView(w).conditions![0].next_tick_at, t0 + 120);
+  // The ring denominator is the authored length, not the time left (240 s here).
+  assert.equal(gameView(w).conditions![0].duration, 300);
   w = wait(w, 240);
   assert.equal(hp(w), 6);
   assert.equal(gameView(w).conditions, undefined);
@@ -129,6 +136,55 @@ test('the dart corridor poisons for four ticks and then expires', () => {
   w = play(w, { type: 'move', direction: 'east' });
   assert.equal(gameView(w).conditions?.length, 1);
   assert.equal(hp(wait(w, 60)), 5);
+});
+
+// Breaks: ConditionView.kind (loka-x6t.64) ignores an authored kind, misses a harm signal (a
+// negative tick, modifier or resistance, fear, blocks, allows, blind, deaf, a dearer step), takes
+// an exact boundary (0, cost 100) for a gain or a harm, misses a gain signal, gives a status with
+// no effect a kind, reads only the first modifier, or leaves the GameView schema.
+test('a condition is a debuff on any harm, a buff on a gain alone, else no kind; kind wins', () => {
+  const poisoned = play(fresh(), { type: 'move', direction: 'east' });
+  const spec = poisoned.cartridge.statuses![poisonRef]!;
+  const attribute = { ...spec.resource, kind: 'attribute', key: 'str' };
+  const by = (modifier: number) => ({ attribute, modifier });
+  const none = { per_tick: undefined };
+  const rows: [object, string | undefined][] = [
+    [{ per_tick: -1 }, 'debuff'],
+    [{ per_tick: 0 }, undefined],
+    [{ per_tick: 1 }, 'buff'], // a plain gain, like fed
+    [{ per_tick: 1, modifies: [by(2), by(-1)] }, 'debuff'],
+    [{ ...none, modifies: [by(0)] }, undefined],
+    [{ ...none, modifies: [by(1)] }, 'buff'],
+    [{ per_tick: 1, fear: true }, 'debuff'],
+    [{ per_tick: 1, blocks: ['move'] }, 'debuff'],
+    [{ per_tick: 1, allows: ['look'] }, 'debuff'],
+    [{ ...none, resistances: { fire: -1 } }, 'debuff'],
+    [{ ...none, resistances: { fire: 0 } }, undefined],
+    [{ ...none, resistances: { fire: 1 } }, 'buff'],
+    [{ ...none, resistances: { fire: 1, physical: -1 } }, 'debuff'],
+    [{ per_tick: 1, perception: { sight: 'blind' } }, 'debuff'],
+    [{ per_tick: 1, perception: { hearing: 'deaf' } }, 'debuff'],
+    [{ ...none, perception: { sight: 'dark_sight' } }, 'buff'],
+    [{ per_tick: 1, movement: { cost_percent: 101 } }, 'debuff'],
+    [{ ...none, movement: { cost_percent: 100 } }, undefined],
+    [{ ...none, movement: { cost_percent: 99 } }, 'buff'],
+    [{ ...none, movement: { passes: ['water'] } }, 'buff'],
+    [{ ...none, concealment: 'hidden' }, 'buff'],
+    [{ per_tick: 1, kind: 'debuff' }, 'debuff'], // bruised and notched
+    [{ per_tick: -1, kind: 'buff' }, 'buff'],
+  ];
+  for (const [change, kind] of rows) {
+    const w = {
+      ...poisoned,
+      cartridge: {
+        ...poisoned.cartridge,
+        statuses: { ...poisoned.cartridge.statuses, [poisonRef]: { ...spec, ...change } },
+      },
+    } as World;
+    const view = gameView(w);
+    assert.deepEqual(validate('GameView', view), [], JSON.stringify(change));
+    assert.equal(view.conditions![0]!.kind, kind, JSON.stringify(change));
+  }
 });
 
 // Breaks: cures are ignored, the cured status keeps draining through its stale job, or the
@@ -173,7 +229,8 @@ test('a fatal poison tick runs the death return and clears every status', () => 
   assert.equal(gameView(w).conditions, undefined);
 });
 
-// Breaks: a re-application while active keeps the old end, or restarts the tick cadence.
+// Breaks: a re-application while active keeps the old end, restarts the tick cadence, or shows a
+// duration other than the authored one (the ring would leave [0, 1], loka-x6t.65).
 test('re-entering while poisoned extends the end and keeps the tick cadence', () => {
   let w = fresh();
   const t0 = w.state.clock;
@@ -181,7 +238,7 @@ test('re-entering while poisoned extends the end and keeps the tick cadence', ()
   w = play(w, { type: 'move', direction: 'west' });
   w = play(w, { type: 'move', direction: 'east' });
   const [c] = gameView(w).conditions!;
-  assert.deepEqual([c!.ends_at, c!.next_tick_at], [t0 + 420, t0 + 180]);
+  assert.deepEqual([c!.ends_at, c!.duration, c!.next_tick_at], [t0 + 420, 300, t0 + 180]);
   // Ticks at +180, +240, +300 and +360 take hp from 8 to 4; +420 is the end, with no tick.
   w = wait(w, 300);
   assert.equal(hp(w), 4);

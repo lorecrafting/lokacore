@@ -48,7 +48,7 @@ harder with the sword and changes nothing unarmed (chance 0 never deals the unar
 
 ## Manifest changes
 
-- `requires.kernel_api.at_least` 1.48; capabilities add `population` (the pit's pack),
+- `requires.kernel_api.at_least` 1.102; capabilities add `population` (the pit's pack),
   `sense_cue` (the boar's cue) and `speech` (say and shout). Levelling needs no capability
   (attributes@1 is declared).
 - `world.combat` adds `target_choice: true`, `allies: ["gil"]` and the narration keys `ally_hit`

@@ -1,0 +1,40 @@
+{
+  "api_version": "loka/v3",
+  "id": "furnish_sampler",
+  "version": "0.0.1",
+  "title": "Furnish Sampler",
+  "requires": {
+    "kernel_api": {
+      "at_least": "1.102",
+      "below": "2.0"
+    },
+    "content_schema": 1,
+    "rule_ir": 1,
+    "capabilities": {
+      "movement": 1,
+      "inspectable_detail": 1,
+      "containment": 1,
+      "resource": 1,
+      "position": 1,
+      "policy": 1,
+      "reaction": 1,
+      "status": 1,
+      "description_variant": 1,
+      "action_recipe": 1,
+      "check": 1,
+      "skills": 1,
+      "death": 1,
+      "tags": 1,
+      "schedule": 1
+    },
+    "client_features": []
+  },
+  "supported_profiles": [
+    "offline_private"
+  ],
+  "entry": "yard",
+  "time_policy": {
+    "profile": "real_elapsed",
+    "rate": 1
+  }
+}

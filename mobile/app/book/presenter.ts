@@ -140,17 +140,17 @@ function liveButton(game: Game, b: Button, label: Say, text: Say, generation: nu
 function pressed(game: Game, b: Button, detail: string | undefined, s: Logs, text: Say): string {
   s.returnWorld = s.recovered = false;
   pressedAway(s); // the recap opens the page after an absence and goes with the next press
-  s.returnDetail = undefined;
-  s.confirmedRead = undefined;
+  s.returnDetail = s.confirmedRead = undefined;
   if (!game.pending() && b.action_key === 'give' && b.target_ids.length !== 2) return '';
   const was = game.view().view;
-  const item = ['take', 'drop'].includes(b.action_key)
-    ? things(was).find((e) => e.id === b.target_ids[0])
-    : undefined;
+  const [item, to] = ['take', 'drop', 'give'].includes(b.action_key)
+    ? b.target_ids.map((id) => things(was).find((t) => t.id === id)?.name)
+    : [];
   s.retry ??= {
     button: { ...b, target_ids: [...b.target_ids], input: { ...b.input } },
     detail,
-    item: item && text(item.name),
+    item: item && text(item),
+    to: to && text(to),
   };
   let reply: Reply;
   try {

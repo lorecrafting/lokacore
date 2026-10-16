@@ -1,3 +1,4 @@
+# size: allow 340, skill loading keeps the hs-11 prerequisite and hs-14 secret checks beside the tree they read
 defmodule Loka.Content.Skills do
   @moduledoc "Reserved skill acquisition facts and equipment/lesson references."
   import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2]
@@ -62,8 +63,13 @@ defmodule Loka.Content.Skills do
   def check(m, defs, {_, settings}, text) do
     caps = m["requires"]["capabilities"]
 
-    Enum.flat_map(defs["skill"], &definition(&1, caps, text)) ++
-      Enum.flat_map(defs["skill"], &(growth(&1) ++ itself(m, &1))) ++
+    hidden = hidden(m, defs)
+
+    Enum.flat_map(
+      defs["skill"],
+      &(definition(&1, caps, text) ++ growth(&1) ++ itself(m, &1, hidden))
+    ) ++
+      secret(m, defs) ++
       floor(m, defs) ++
       prerequisite_floor(m, defs) ++
       equipment(m, defs) ++ dodge(m, defs, settings) ++ defense_narration(defs, settings)
@@ -72,14 +78,19 @@ defmodule Loka.Content.Skills do
   defp definition({_, {rel, _, s}}, caps, text) do
     capability(rel, caps) ++
       if(String.length(s["key"]) <= 58, do: [], else: [bad(at(rel, ["key"]))]) ++
-      for(
-        field <- ~w(label requirement),
-        text != :unknown and not is_map_key(text, s[field]),
-        do: diag("UNRESOLVED_REFERENCE", at(rel, [field]), %{"target" => s[field]})
-      )
+      texts(rel, s, text)
   end
 
   defp definition(_, _, _), do: []
+
+  defp texts(rel, s, text),
+    do:
+      for(
+        field <- ~w(label requirement profession),
+        is_map_key(s, field),
+        text != :unknown and not is_map_key(text, s[field]),
+        do: diag("UNRESOLVED_REFERENCE", at(rel, [field]), %{"target" => s[field]})
+      )
 
   # Toolbox row 5: growth thresholds strictly increase.
   defp growth({_, {rel, _, %{"growth" => g}}}) do
@@ -90,33 +101,89 @@ defmodule Loka.Content.Skills do
   defp growth(_), do: []
 
   # Homestead hs-11: a box never requires itself (its own full ref, as cartridge_skills.ts).
-  defp itself(m, {key, {rel, _, %{"prerequisite" => p}}}) do
-    me = %{
+  # Homestead hs-14: a shown box never requires a hidden one.
+  defp itself(m, {key, {rel, _, %{"prerequisite" => p} = s}}, hidden) do
+    me = ref(m, key)
+    banned = if s["hidden"] == true, do: [me], else: [me | hidden]
+
+    if Enum.any?(
+         Loka.Content.Policies.nodes(p["root"], []),
+         &(match?({%{"op" => "skill_compare", "skill" => _}, _}, &1) and
+             elem(&1, 0)["skill"] in banned)
+       ),
+       do: [bad(at(rel, ["prerequisite"]))],
+       else: []
+  end
+
+  defp itself(_, _, _), do: []
+
+  # Homestead hs-14 (secret): no shown skill's qualification and no dialogue policy reads a hidden
+  # skill, and no labeled talk or riddle dialogue teaches one (cartridge_skills.ts).
+  defp secret(m, defs) do
+    hidden? =
+      &match?({_, _, %{"hidden" => true}}, Loka.Content.Refs.resolve(&1, "skill", m, defs))
+
+    shown_qualifications(defs, hidden?) ++ dialogues(defs, hidden?)
+  end
+
+  defp shown_qualifications(defs, hidden?),
+    do:
+      for(
+        {_, {rel, _, s}} <- defs["skill"],
+        !s["hidden"],
+        reads?(s["qualification"], hidden?),
+        do: bad(at(rel, ["qualification"]))
+      )
+
+  defp dialogues(defs, hidden?),
+    do:
+      for(
+        {_, {rel, [], d}} <- defs["dialogue"] || %{},
+        {field, true} <- [
+          {"policy", reads?(d["policy"], hidden?)},
+          {"label", !!d["label"] and teaches?(d, hidden?)},
+          {"riddle", !!d["riddle"] and teaches?(d, hidden?)}
+        ],
+        do: bad(at(rel, [field]))
+      )
+
+  # Only skill_compare (in a policy) and skill.acquire (in a sequence) carry a "skill".
+  defp reads?(p, hidden?),
+    do:
+      Enum.any?(Loka.Content.Policies.nodes(p["root"], []), fn {n, _} -> hidden?.(n["skill"]) end)
+
+  defp teaches?(d, hidden?),
+    do:
+      Enum.any?(Map.values(d["choices"]), fn o ->
+        Enum.any?(o["sequence"] || [], &hidden?.(&1["skill"]))
+      end)
+
+  defp hidden(m, defs),
+    do: for({key, {_, _, %{"hidden" => true}}} <- defs["skill"], do: ref(m, key))
+
+  defp ref(m, key),
+    do: %{
       "cartridge_id" => m["id"],
       "cartridge_version" => m["version"],
       "kind" => "skill",
       "key" => key
     }
 
-    if Enum.any?(
-         Loka.Content.Policies.nodes(p["root"], []),
-         &match?({%{"op" => "skill_compare", "skill" => ^me}, _}, &1)
-       ),
-       do: [bad(at(rel, ["prerequisite"]))],
-       else: []
+  # Homestead hs-11: a skill prerequisite needs API 1.101; hs-14: a profession or a hidden skill 1.102.
+  defp prerequisite_floor(m, defs) do
+    has = fn k -> Enum.any?(defs["skill"], &match?({_, {_, _, %{^k => _}}}, &1)) end
+
+    floor =
+      cond do
+        has.("profession") or has.("hidden") -> [1, 102]
+        has.("prerequisite") -> [1, 101]
+        true -> nil
+      end
+
+    if floor && version(m) < floor,
+      do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
+      else: []
   end
-
-  defp itself(_, _), do: []
-
-  # Homestead hs-11: a skill prerequisite needs API 1.101.
-  defp prerequisite_floor(m, defs),
-    do:
-      if(
-        Enum.any?(defs["skill"], &match?({_, {_, _, %{"prerequisite" => _}}}, &1)) and
-          version(m) < [1, 101],
-        do: [diag("KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least")],
-        else: []
-      )
 
   # Toolbox rows 5 and G5: skill growth, an opposed check or a detail rating needs API 1.44.
   defp floor(m, defs) do

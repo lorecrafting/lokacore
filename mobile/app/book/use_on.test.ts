@@ -15,14 +15,14 @@ function yard() {
     b.tap(/^Take/);
   }
   b.tap(/Contents/);
-  b.tap(/Equipment/);
+  b.tap(/^Inventory/);
   b.tap(/torch/);
   b.tap(/^Drop/);
   return b;
 }
 const page = (b: ReturnType<typeof yard>, item: string) => {
   b.tap(/Contents/);
-  b.tap(/Equipment/);
+  b.tap(/^Inventory/);
   b.tap(new RegExp(item));
 };
 

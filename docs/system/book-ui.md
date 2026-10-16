@@ -67,10 +67,9 @@ the scrolling body, with status beneath it, inside the existing safe area.
 A projected Read place action keeps its exact detail target and authored label and follows
 the canonical [notice-detail rules](#notice-board-details).
 
-The enabled status/resources tap opens Contents. It lists exactly **Character**, **Equipment &
-Inventory**, **Map**, **Journal**, **Settings**. There is no Menu button or extra World navigation
+The enabled status/resources tap opens Contents. It lists exactly **Character**, **Inventory**, **Map**, **Journal**, **Settings**. There is no Menu button or extra World navigation
 row. Character shows existing projected resources and position, without unrelated index links.
-Equipment & Inventory separates held items from worn slots; Journal uses projected quest text;
+Inventory separates held items from worn slots; Journal uses projected quest text;
 Settings retains Start over and its confirmation/error handling, and holds the
 [page-turn sound](../BOOK-UI-COMPONENTS.md#page-turn) on/off control. Section returns say
 **Back to World**, clear the detail stack to World, and do not pop to Character or Contents.
@@ -281,16 +280,18 @@ and absent speakers get no invented body, inferred name suffix or substituted ro
 Player descriptions are required when real player entities/descriptions are projected; there is
 currently no player-presence UI.
 
+**Barter offers.** A service offer with price 0 shows its authored label alone ("Knife for two pelts"), with no " — " and no parentheses, never "free"; its unavailable form is "Knife for two pelts: <reason>". The label names the inputs.
+
 ## Item details and Take/Drop
 
-Equipment & Inventory separates Held from Worn slots, including empty slots. Held/worn item
+Inventory separates Held from Worn slots, including empty slots. Held/worn item
 taps resolve the same detail; item pages follow [detail-page order](#detail-page-order), with directly nested
 reachable contents and current legal item/container/equipment actions, plus local **Leave** back to World. The available brass lantern therefore offers Take
 and Leave; Leave sends no engine verb. Confirmed accepted `taken` returns to World and adds a
 pickup event using the original projected item name: **You pick up a brass lantern.** for this
 sampler. Under the PM's explicitly adopted Drop symmetry, confirmed accepted `dropped` also
 returns to World with the original projected name: **You drop a brass lantern.** Held items
-open their same item detail from Equipment & Inventory, with existing offered Drop/other actions
+open their same item detail from Inventory, with existing offered Drop/other actions
 and Leave, without invented Use/Equip actions, Take while held, or a custom gesture.
 These replace generic Taken/Dropped fallbacks; authored narration takes precedence and
 meaningful consequences remain. Pending, refused, stale or failed attempts announce no success.
@@ -310,13 +311,15 @@ Successful ordinary Take/Drop are the specific exceptions to item-page retention
 Take follows the corpse-detail rule above. Other same-room item actions
 retain the page and route their results to that item's local chronological history while the
 item remains projected; leaving the room or losing the item closes
-obsolete details. Equipment & Inventory item taps keep existing reachable held/worn behavior.
+obsolete details. Inventory item taps keep existing reachable held/worn behavior.
 
 Put appears as a concrete pair button using projected source/destination names and IDs.
 Each button captures its projection freshness and follows the normal GameSession invocation
 and confirmed receipt routing. There is no separate storage session or recipient selector.
 
 A held tool's page shows one card per use pair (G4) the GameView lists available on it, in listed order, labelled with the recipe's authored label and the target's projected name ("Quench a cart" on the bucket), never the tool's own name; the target's page shows none. Pressing it sends the listed action key with target_ids [target, tool] and no input; the page stays and the result joins its history. A pair the GameView does not list, or lists unavailable, shows no card: held pages list only available actions, the `too_heavy` note above being the one exception; the Book adds no availability rule. ([Use X on Y](mechanics.md#use-x-on-y-toolbox-row-g4))
+
+A held item's page shows one card per Give pair the GameView lists available, at Give's place among its actions, in GameView order, labelled "Give", the item's and the recipient's projected names ("Give an apple to the farmer"). Pressing it sends give with target_ids [item, recipient]. A refused pair, or no one present, shows no card and no note. A confirmed given returns to World and adds **You give an apple to the farmer.** once with the original names; authored narration takes precedence. Pending, refused or stale presses claim nothing. ([Give pairs](mechanics.md#give-pairs))
 
 Quest completion updates its journal and confirmed narration. A terminal side quest
 never implies that the whole story has ended. World shows no whole-story completion
@@ -367,12 +370,7 @@ Other-player presence requires a real projection and UI scope; no fabricated pla
 Attack/skill controls wait until GameView offers them; there are no placeholders or invented
 character data. Reading-time safety and interruption integration remains
 future work under the [reading-time decision](../decisions/owner-decision-reading-time-2026-10-03.md).
-Give needs both item and recipient targets. The current touch item-action projection supplies
-only its item target, so it must not offer or dispatch that incomplete Give. Complete offered
-Give invocations remain valid; engine mechanics are unchanged. Touch recipient selection is an
-explicit carry: implement it when a touch flow can supply a recipient from actual projected
-valid targets, with its own approved scope. The inspected unsupported-capability rejection was
-one incomplete Give; later moves were accepted. Preserve genuine errors and meaningful history
+A refusal reads as the kernel reports it: preserve genuine errors and meaningful history
 rather than hiding errors or clearing same-room history. Whisper needs a word, so the NPC page offers no Whisper card; whispering is the [Word bar](#word-bar)'s. Carries remain in the [roadmap](../ROADMAP.md). Further cosmetic polish is deferred under the [C1 UI-deferral record](../decisions/owner-decision-c1-gate-ui-deferral-2026-10-03.md).
 
 ## Combat interaction
@@ -774,7 +772,7 @@ pause or new store/UI framework is introduced.
 
 [D2](mechanics.md#d2-held-books-and-public-priory-selected-contract) uses
 ordinary item detail order and custody projection. World → book detail → Take
-confirms the existing return to World. Contents → Equipment & Inventory → held
+confirms the existing return to World. Contents → Inventory → held
 book detail offers explicit Read; opening that item sends no Read. For an open
 held container, tapping its projected child pushes the child's full detail onto
 the existing stack. Back to the immediate container pops locally without a command;
@@ -988,7 +986,7 @@ The player follows ordinary exits from Green through the authored corridor to Oa
 
 ## Conditions details
 
-GameView `conditions` lists every active [status](mechanics.md#status-effects-over-time-toolbox-row-1) on the body with its authored label, end, next tick and per-tick change; C5 `bleeding` keeps its own field and lines. A condition label is authored lowercase, like a position word (`poisoned`, `blessed`); the status line shows it as authored and the Character page capitalises it as it does the position. The status line shows one item per condition after the bleeding item (after the position when there is none): the label, the time remaining and the signed per-tick amount with its pool key, joined by " · " ("poisoned · 4m remaining · -1 HP each 60s"); the danger tone for a loss, the quiet tone for a gain, and the sign is always in the text, never carried by colour alone. A duration or cadence under two minutes shows in seconds ("40s"), otherwise in whole minutes ("60m"). Each item's accessible name is its text with the dots read as commas, like the time item. The Character page lists each capitalised label after the bleeding line; the Combat page lists the same status-line text after the bleeding line in its first block. The presenter reads projected state and never computes or writes an effect, tick or cure; applied, tick and expired lines come from their receipts' narration and appear once. No new control: a cure is the ordinary Eat of a held item whose `cures` lists the condition.
+GameView `conditions` lists every active [status](mechanics.md#status-effects-over-time-toolbox-row-1) on the body with its authored label, end, next tick and per-tick change; C5 `bleeding` keeps its own field and lines. A condition label is authored lowercase, like a position word (`poisoned`, `blessed`); an icon's tooltip and name show it as authored and the Character page capitalises it as it does the position. A condition's line is the label, the time remaining and the signed per-tick amount with its pool key, joined by " · " ("poisoned · 4m remaining · -1 HP each 60s"); a permanent condition has no time part, one without a tick no amount, and the sign is always in the text. A duration or cadence under two minutes shows in seconds ("40s"), otherwise in whole minutes ("60m"). The Character page lists each line, its label capitalised, after the bleeding line; the Combat page lists the same lines after the bleeding line in its first block. The status icon row shows one round icon per condition, buffs and debuffs told apart by their look, five icons then a +N disc; a tap opens Character; the Character page keeps the full list. The row sits above the status line, in condition order; a hold (a hover or keyboard focus on web) shows the label and time joined by ", " ("fed, 48m remaining"), and an icon's name adds the polarity and the action ("fed, 48m remaining, buff, opens Character"; no polarity for a neutral condition; "+1 more, opens Character" for the disc). While the status line is locked the icons are named pictures, not buttons, dim like the Contents button (the neutral look). A timed icon wears a countdown ring round its disc: a track and an arc for the share of its duration still to run ([look](../BOOK-UI-COMPONENTS.md)), clockwise from 12 o'clock, recomputed from projected time; between updates the arc drains linearly to its new share over the real time since the last update, at most 1 s (display only; presentation keeps no gameplay clock), and jumps without motion on first show and on a refresh; under reduced motion it steps; while locked the ring dims with its icon ([look](../BOOK-UI-COMPONENTS.md)) and still drains; at its end only the track shows, and a permanent condition has no ring. Icon glyphs are placeholders until loka-x6t.63. The presenter reads projected state and never computes or writes an effect, tick or cure; applied, tick and expired lines come from their receipts' narration and appear once. No new control: a cure is the ordinary Eat of a held item whose `cures` lists the condition.
 
 ## Away recap
 
@@ -1043,3 +1041,9 @@ writer sees it.
 ## Storylet card details
 
 GameView `storylet` names the one place action the [storylet deck](mechanics.md#storylet-deck-toolbox-row-fd3) draws for the player here this hour. The World page shows it as one Action card, its own block directly before the verb lines, never a verb line: it can be listed unavailable, and a verb line has no unavailable form. The card reads the recipe's authored label alone, never a heading, prefix ("Opportunity:"), icon or colour; unavailable, it is the `label: reason` note of the Action card row, never a disabled card. Pressing it performs the action as any place action under [live action freshness](#live-action-freshness): its result, including a failed check, is the receipt's narration in the log, and a scene it starts opens as any [scene](#chapters-scenes-and-recovery). A new room or hour redraws the page: the card may change or go, silently (no live region; it is page content as the entity lines are); a press drawn under the old pick is refused and the Book redraws, never a substituted card. Its accessible name is its label, role button. No pick, no block; at most one card. The presenter never draws or filters storylets.
+
+## Skill tree details
+
+Skills without profession keep today's acquired lines. After the xp line and before the Raise cards, each profession in first-listed order is a SectionTitle, then its listed boxes in GameView order: acquired as body text "Whittling, level 2 — qualified; <requirement>" (", level N" only when projected); locked as a Note "Carving — locked; <requirement>"; any other unacquired box as a Note "Joinery — not learned; <requirement>" (the same Note). The Book draws only listed skills: a hidden box and an empty profession draw nothing.
+
+An NPC's lesson line reads `locked` in place of `not learned` while the skill's projected `locked` is true (proposed, pending designer approval, loka-kgd.108.11).

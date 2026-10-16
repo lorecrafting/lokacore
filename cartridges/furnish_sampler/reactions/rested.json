@@ -1,0 +1,19 @@
+{
+  "on": {
+    "event": "rested",
+    "room": "hut"
+  },
+  "when": {
+    "policy_version": 1,
+    "root": {
+      "op": "item_present",
+      "tag": "bed"
+    }
+  },
+  "apply": [
+    {
+      "op": "status.apply",
+      "status": "well_rested"
+    }
+  ]
+}

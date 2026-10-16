@@ -780,9 +780,9 @@
       "path": [
         "price"
       ],
-      "name": "room numeric price 0",
+      "name": "room numeric price -1",
       "valid": false,
-      "value": 0
+      "value": -1
     },
     {
       "base": "room",
@@ -877,9 +877,9 @@
       "path": [
         "price"
       ],
-      "name": "meal numeric price 0",
+      "name": "meal numeric price -1",
       "valid": false,
-      "value": 0
+      "value": -1
     },
     {
       "base": "meal",
@@ -1034,9 +1034,9 @@
       "path": [
         "price"
       ],
-      "name": "drink numeric price 0",
+      "name": "drink numeric price -1",
       "valid": false,
-      "value": 0
+      "value": -1
     },
     {
       "base": "drink",
@@ -1091,18 +1091,18 @@
       "path": [
         "quoted_price"
       ],
-      "name": "command price 0",
+      "name": "command price -1",
       "valid": false,
-      "value": 0
+      "value": -1
     },
     {
       "base": "offer",
       "path": [
         "price"
       ],
-      "name": "offer price 0",
+      "name": "offer price -1",
       "valid": false,
-      "value": 0
+      "value": -1
     },
     {
       "base": "command",
@@ -1289,7 +1289,7 @@
       ],
       "name": "entity invalid service price",
       "valid": false,
-      "value": 0
+      "value": -1
     },
     {
       "base": "cartridge",
@@ -1338,7 +1338,7 @@
       ],
       "name": "invalid service map member",
       "valid": false,
-      "value": 0
+      "value": -1
     }
   ]
 }

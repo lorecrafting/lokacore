@@ -1,0 +1,69 @@
+{
+  "label": "actions.chop",
+  "aliases": [
+    "chop"
+  ],
+  "target": {
+    "kind": "detail",
+    "room": "glade",
+    "detail": "oak"
+  },
+  "priority": 5,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": [
+        {
+          "op": "has_item",
+          "item": "axe"
+        },
+        {
+          "op": "skill_compare",
+          "skill": "woodcutting",
+          "at_least": 1
+        }
+      ]
+    }
+  },
+  "check": {
+    "key": "chop",
+    "kind": "opposed",
+    "skill": "woodcutting"
+  },
+  "craft": {
+    "yield": {
+      "items": [
+        "log_01",
+        "log_02",
+        "log_03",
+        "log_04"
+      ],
+      "from": {
+        "in": "room",
+        "room": "woodpile"
+      }
+    }
+  },
+  "duration": 600,
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "wood_chopped",
+          "value": true
+        }
+      ],
+      "narration": {
+        "actor": "narration.chop.success"
+      }
+    },
+    "failure": {
+      "sequence": [],
+      "narration": {
+        "actor": "narration.chop.failure"
+      }
+    }
+  }
+}

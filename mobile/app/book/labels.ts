@@ -41,4 +41,6 @@ export const LABEL = {
   typeAWord: 'Type a word',
   aWord: 'A word',
   oneWord: 'One word, letters only.',
+  // The Contents section of held and worn things (owner 2026-10-15, loka-x6t.55).
+  inventory: 'Inventory',
 } as const;

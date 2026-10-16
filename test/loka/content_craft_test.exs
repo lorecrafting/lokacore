@@ -82,4 +82,111 @@ defmodule Loka.ContentCraftTest do
              "nothing"
            )
   end
+
+  # Break (hs-14; twin of the loader test in kernel/ts/test/craft.test.ts): a shown skill whose
+  # prerequisite reads a hidden skill compiles, a hidden skill reading a hidden one is refused,
+  # or an unknown profession text compiles. The floor is loader_floors.json's
+  # "a skill profession" case.
+  test "nothing shown reads or names a hidden skill; a profession resolves", %{dir: dir} do
+    edit = fn edits ->
+      case Loka.ContentSource.compile(dir, edits) do
+        {:error, diags} -> Enum.map(diags, &{&1["code"], &1["path"]})
+        {:ok, _, _} -> :ok
+      end
+    end
+
+    hide = &{"skills/#{&1}.json", fn s -> Map.put(s, "hidden", true) end}
+
+    assert edit.([hide.("carving")]) == [{"SCHEMA_VIOLATION", "skills/joinery.prerequisite"}]
+    assert edit.([hide.("carving"), hide.("joinery")]) == :ok
+
+    assert edit.([{"skills/whittling.json", &Map.put(&1, "profession", "profession.nothing")}]) ==
+             [{"UNRESOLVED_REFERENCE", "skills/whittling.profession"}]
+
+    # hs-14 secret (twin of craft.test.ts "loader: no shown qualification, ..."): a shown skill's
+    # qualification, any dialogue policy, or a talk label or riddle on a dialogue teaching a hidden skill.
+    reads = %{
+      "policy_version" => 1,
+      "root" => %{"op" => "skill_compare", "skill" => "carving", "at_least" => 1}
+    }
+
+    read = &{"#{&1}.json", fn x -> Map.put(x, &2, reads) end}
+    hidden = [hide.("carving"), hide.("joinery")]
+
+    assert edit.([read.("skills/whittling", "qualification") | hidden]) ==
+             [{"SCHEMA_VIOLATION", "skills/whittling.qualification"}]
+
+    assert edit.([read.("dialogues/old_carver_carpentry", "policy") | hidden]) ==
+             [{"SCHEMA_VIOLATION", "dialogues/old_carver_carpentry.policy"}]
+
+    assert edit.([read.("skills/joinery", "qualification") | hidden]) == :ok
+
+    label =
+      {"dialogues/old_carver_carving.json", &Map.put(&1, "label", "old_carver.carving.prompt")}
+
+    assert edit.([label | hidden]) == [{"SCHEMA_VIOLATION", "dialogues/old_carver_carving.label"}]
+    assert edit.([label]) == :ok
+
+    riddle =
+      {"dialogues/old_carver_carving.json",
+       &Map.put(&1, "riddle", %{
+         "choice_id" => "learn",
+         "answer" => "a",
+         "bank" => ["A"],
+         "wrong" => "old_carver.carving.prompt"
+       })}
+
+    assert edit.([riddle | hidden]) ==
+             [{"SCHEMA_VIOLATION", "dialogues/old_carver_carving.riddle"}]
+
+    assert edit.([riddle]) == :ok
+  end
+
+  # Break (Built rooms S6; twin of the loader test in kernel/ts/test/craft.test.ts): a build step
+  # compiles off a detail target, on a room that is no site, twice in one sequence, without
+  # world.construction or the refusal texts, or naming a blueprint or direction the site does not
+  # list. The floor is loader_floors.json's "a build step" case.
+  test "a build step needs a site detail, its listed blueprint and direction, once, on success",
+       %{dir: dir} do
+    seq = "recipes/raise_timbered_hut.outcomes.success.sequence"
+    raise = "recipes/raise_timbered_hut.json"
+
+    builds = fn edits ->
+      assert {:error, diags} = Loka.ContentSource.compile(dir, edits)
+      Enum.map(diags, &{&1["code"], &1["path"]})
+    end
+
+    step = &put_in(&1, ["outcomes", "success", "sequence", Access.at(0), &2], &3)
+
+    use =
+      &(&1
+        |> Map.drop(["check"])
+        |> Map.put("target", %{"kind" => "use", "tool" => %{"tag" => "metal"}}))
+
+    use = &(use.(&1) |> update_in(["outcomes"], fn o -> Map.delete(o, "failure") end))
+    oak = %{"kind" => "detail", "room" => "glade", "detail" => "oak"}
+    twice = &update_in(&1, ["outcomes", "success", "sequence"], fn [b] -> [b, b] end)
+
+    cases = [
+      {[{raise, use}], "SCHEMA_VIOLATION", "[0].op"},
+      {[{raise, &Map.put(&1, "target", oak)}], "SCHEMA_VIOLATION", "[0].op"},
+      {[{raise, twice}], "SCHEMA_VIOLATION", "[1].op"},
+      {[{"cartridge.json", &update_in(&1, ["world"], fn w -> Map.delete(w, "construction") end)}],
+       "SCHEMA_VIOLATION", "[0].op"},
+      {[{"text.json", &Map.delete(&1, "service.site_taken")}], "UNRESOLVED_REFERENCE", "[0].op"},
+      {[{"text.json", &Map.delete(&1, "service.construction_full")}], "UNRESOLVED_REFERENCE",
+       "[0].op"},
+      {[{"rooms/lane.json", &put_in(&1, ["site", "blueprints"], ["hut_plain"])}],
+       "SCHEMA_VIOLATION", "[0].blueprint"},
+      {[{raise, &step.(&1, "direction", "east")}], "SCHEMA_VIOLATION", "[0].direction"}
+    ]
+
+    for {edits, code, path} <- cases, do: assert({code, seq <> path} in builds.(edits))
+
+    failed =
+      &put_in(&1, ["outcomes", "failure", "sequence"], &1["outcomes"]["success"]["sequence"])
+
+    at = "recipes/raise_timbered_hut.outcomes.failure.sequence[0].op"
+    assert {"SCHEMA_VIOLATION", at} in builds.([{raise, failed}])
+  end
 end

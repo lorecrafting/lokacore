@@ -16,9 +16,11 @@ import {
   type ChoiceRow,
 } from '../../runtime/decision.ts';
 import { cmp } from '../../foundation/validate.ts';
+import { same } from '../../foundation/compose.ts';
 import { holds } from '../policy.ts';
 import { living } from '../death/shared.ts';
 import { disposition } from '../disposition.ts';
+import { concealed } from '../skills.ts';
 
 /** The dialogues whose speaker is `target`, in key order (a speaker may have several). */
 const spoken = (world: World, target: EntityId | undefined) =>
@@ -35,9 +37,42 @@ const spoken = (world: World, target: EntityId | undefined) =>
 export const speaks = (world: World, target: EntityId | undefined) =>
   spoken(world, target).length > 0;
 
+/** The ids of `d`'s choices, in key order. */
+export const choiceIds = (d: DialogueDefinition) => Object.keys(d.choices).sort(cmp) as Key[];
+
+/** Whether choice `id` of `d` teaches a skill for which `p` holds (Homestead hs-14). */
+const teaches = (d: DialogueDefinition, id: Key, p: (skill: DefinitionRef) => boolean) =>
+  !!d.choices[id]!.sequence?.some((s) => s.op === 'skill.acquire' && p(s.skill));
+
+/** `d`'s choice ids less those that teach a skill concealed from `actor` (Homestead hs-14). */
+export const offered = (world: World, actor: CharacterId, d: DialogueDefinition, steps: Steps) =>
+  choiceIds(d).filter((id) => !teaches(d, id, (k) => concealed(world, actor, k, steps)));
+
+/**
+ * Whether a saved row's `ids` are ones an opening of `d` can write: `choiceIds(d)` in order, never
+ * empty, less only choices that `skill.acquire` a hidden skill with a prerequisite (hs-14; the save
+ * checks, static because the actor has moved on since the opening).
+ */
+export const openable = (world: World, d: DialogueDefinition, ids: unknown) =>
+  Array.isArray(ids) &&
+  ids.length > 0 &&
+  same(
+    ids,
+    choiceIds(d).filter(
+      (id) =>
+        ids.includes(id) ||
+        !teaches(d, id, (k) => {
+          // as `concealed` (skills.ts): a hidden skill with no prerequisite is never left out
+          const skill = world.cartridge.skills?.[refString(k)];
+          return !!skill?.hidden && !!skill.prerequisite;
+        }),
+    ),
+  );
+
 /**
  * The dialogue `actor`'s talk to `target` opens: the first of `target`'s dialogues, in key order,
- * whose own policy holds, if any; none while `target` is hostile to `actor` (toolbox row G11).
+ * whose own policy holds and that offers a choice (hs-14), if any; none while `target` is hostile
+ * to `actor` (toolbox row G11).
  * A talk never opens a keyword dialogue; a say or whisper of `word` opens only one keyed by it
  * (speech@1, row G9). Each policy leaf it evaluates adds one to `steps` (04 §5.4).
  */
@@ -55,7 +90,8 @@ export const spokenBy = (
         (d) =>
           d.keyword === word &&
           (!selected || world.cartridge.dialogues?.[refString(selected)] === d) &&
-          holds(world, actor, d.policy.root, { target, steps }),
+          holds(world, actor, d.policy.root, { target, steps }) &&
+          offered(world, actor, d, steps).length > 0,
       );
 
 /**

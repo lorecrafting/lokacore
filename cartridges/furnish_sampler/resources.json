@@ -1,0 +1,10 @@
+{
+  "resources": {
+    "mv": {
+      "minimum": 0,
+      "maximum": 100,
+      "start": 50,
+      "gain": 0
+    }
+  }
+}
