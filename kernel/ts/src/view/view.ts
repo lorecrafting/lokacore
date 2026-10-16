@@ -1,4 +1,4 @@
-// size: allow 308, row 33 lists an NPC's lock-admitted holdings beside container contents; word bar S2
+// size: allow 315, row 33 lists an NPC's lock-admitted holdings beside container contents; word bar S2; the Book hostile refusal (loka-x6t.33)
 import { wordViews } from './spells.ts';
 import { knowledgeView } from './knowledge.ts';
 import { movementPlan } from '../mechanics/movement/sequence.ts';
