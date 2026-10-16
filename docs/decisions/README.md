@@ -12,7 +12,7 @@ What each rule in force says: [owner-rules.md](../system/owner-rules.md). A new 
 dated line below, newest first.
 
 - 2026-10-15 [Owner decision: economy tools split](owner-decision-economy-tools-split-2026-10-15.md)
-- 2026-10-15 [Owner decision: Skills stays on the Character page](owner-decision-skills-on-character-2026-10-15.md)
+- 2026-10-15 [PM decision: Skills stays on the Character page](pm-decision-skills-on-character-2026-10-15.md)
 - 2026-10-15 [Owner decision: Inventory rename and status icons](owner-decision-inventory-and-status-icons-2026-10-15.md)
 - 2026-10-15 [Owner decision: hidden elite professions are secret](owner-decision-hidden-elites-secret-2026-10-15.md)
 - 2026-10-15 [Owner decision: product order, no Chapter 1 yet](owner-decision-product-order-2026-10-15.md)
