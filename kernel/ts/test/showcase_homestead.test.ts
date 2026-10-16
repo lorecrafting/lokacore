@@ -67,7 +67,7 @@ const valid = (w: World) => (assert.deepEqual(validate('GameView', gameView(w)),
 
 let w: World;
 const seen: string[] = []; // every GameView and decision before Carving is learned (hs-14)
-const note = (r: { decision: unknown; world: World }) => {
+const note = <R extends { decision: unknown; world: World }>(r: R) => {
   seen.push(JSON.stringify(r.decision), JSON.stringify(gameView(r.world)));
   return r;
 };
