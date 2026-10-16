@@ -48,6 +48,16 @@ defmodule Loka.ContentShowcaseTest do
   @immune_holders ~w(crate hall_strongbox hoard_chest npc_corpse player_corpse strongbox
                      strongroom_chest yard_crate)
 
+  # those immune pairs; the Undercroft's bank and forge services, shop stock tables and locks
+  @dropped_keys for(i <- @immune_holders, do: {"items/" <> i, "immune"}) ++
+                  for(n <- ~w(clerk_a clerk_b smith), do: {"npcs/" <> n, "services"}) ++
+                  for(n <- ~w(chandler yard_chandler), do: {"npcs/" <> n, "shop"}) ++
+                  for(
+                    f <-
+                      ~w(items/hoard_chest items/strongroom_chest items/strongroom_key rooms/strongroom),
+                    do: {f, "locks"}
+                  )
+
   defp homestead_edits,
     do:
       [
@@ -57,13 +67,7 @@ defmodule Loka.ContentShowcaseTest do
         {"rooms/holding_croft.json", &Map.delete(&1, "site")},
         {"facts.json", &update_in(&1, ["facts"], fn f -> Map.drop(f, @homestead_facts) end)}
       ] ++
-        for(i <- @immune_holders, do: {"items/#{i}.json", &Map.delete(&1, "immune")}) ++
-        for(n <- ~w(clerk_a clerk_b smith), do: {"npcs/#{n}.json", &Map.delete(&1, "services")}) ++
-        for(n <- ~w(chandler yard_chandler), do: {"npcs/#{n}.json", &Map.delete(&1, "shop")}) ++
-        for(
-          f <- ~w(items/hoard_chest items/strongroom_chest items/strongroom_key rooms/strongroom),
-          do: {f <> ".json", &Map.delete(&1, "locks")}
-        )
+        for({f, k} <- @dropped_keys, do: {f <> ".json", fn m -> Map.delete(m, k) end})
 
   defp homestead,
     do:
