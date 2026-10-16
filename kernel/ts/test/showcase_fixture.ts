@@ -162,6 +162,8 @@ export function homestead(c: any) {
   delete c.rooms[ref('room', 'holding_lane')].site;
   delete c.npcs[ref('npc', 'carpenter')].services;
   delete c.rooms[ref('room', 'holding_croft')].site;
+  for (const k of ['hall_strongbox', 'npc_corpse', 'player_corpse', 'strongbox'])
+    delete c.items[ref('item', k)].immune; // the sow statuses are dropped
   const drop = {
     blueprints: ['blueprint/hut_plain', 'blueprint/hut_timbered'],
     actions: [

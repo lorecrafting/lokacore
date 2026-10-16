@@ -46,6 +46,10 @@ defmodule Loka.ContentShowcaseTest do
       {"rooms/holding_lane.json", &Map.delete(&1, "site")},
       {"npcs/carpenter.json", &Map.delete(&1, "services")},
       {"rooms/holding_croft.json", &Map.delete(&1, "site")},
+      {"items/hall_strongbox.json", &Map.delete(&1, "immune")},
+      {"items/npc_corpse.json", &Map.delete(&1, "immune")},
+      {"items/player_corpse.json", &Map.delete(&1, "immune")},
+      {"items/strongbox.json", &Map.delete(&1, "immune")},
       {"facts.json", &update_in(&1, ["facts"], fn f -> Map.drop(f, @homestead_facts) end)}
     ]
 
