@@ -264,6 +264,16 @@
     ],
     "construction": {
       "max_total": 2
+    },
+    "theft": {
+      "skill": "stealth",
+      "attribute": "alertness",
+      "stolen": "stolen",
+      "noticed": "theft_seen",
+      "narration": {
+        "seen": "theft.seen",
+        "unseen": "theft.unseen"
+      }
     }
   },
   "speech": {

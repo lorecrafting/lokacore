@@ -1,0 +1,17 @@
+{
+  "keywords": [
+    "smith"
+  ],
+  "short": "npc.smith.short",
+  "room_line": "npc.smith.room",
+  "description": "npc.smith.description",
+  "room": "forge_stall",
+  "resource_starts": {
+    "pennies": 0
+  },
+  "services": [
+    "forge_commission",
+    "forge_claim",
+    "forge_cancel"
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "keywords": [
+    "chandler"
+  ],
+  "short": "npc.yard_chandler.short",
+  "room_line": "npc.yard_chandler.room",
+  "description": "npc.yard_chandler.description",
+  "room": "vault_yard",
+  "resource_starts": {
+    "pennies": 5
+  },
+  "shop": {
+    "resource": "pennies",
+    "offers": [
+      {
+        "item": "yard_candle_01",
+        "buy": 3,
+        "sell": 1,
+        "stock": {
+          "items": [
+            "yard_candle_01",
+            "yard_candle_02"
+          ],
+          "buy": [
+            3,
+            2
+          ]
+        }
+      }
+    ],
+    "bought": "shop.bought",
+    "sold": "shop.sold"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "keywords": [
+    "clerk"
+  ],
+  "short": "npc.clerk_a.short",
+  "room_line": "npc.clerk_a.room",
+  "description": "npc.clerk_a.description",
+  "room": "counting_house",
+  "resource_starts": {
+    "pennies": 0
+  },
+  "services": [
+    "deposit_a",
+    "withdraw_a",
+    "buy_strongroom"
+  ]
+}

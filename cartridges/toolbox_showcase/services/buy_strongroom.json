@@ -1,0 +1,12 @@
+{
+  "provider": "clerk_a",
+  "currency": "pennies",
+  "action": "buy_strongroom",
+  "label": "service.buy_strongroom",
+  "narration": "service.buy_strongroom.used",
+  "price": 5,
+  "benefit": {
+    "kind": "entitlement",
+    "fact": "owns_strongroom"
+  }
+}

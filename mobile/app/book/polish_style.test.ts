@@ -139,7 +139,7 @@ test("an NPC's asides show as quiet lines after the people, before the items", a
   const page = (e: object) =>
     flow(
       NpcPage({
-        view: { entities: [e] },
+        view: { entities: [e], inventory: [] },
         npc: { ...e, description: 'A hireling.' },
         text: (key: string) => key,
         g: { on: () => [] },

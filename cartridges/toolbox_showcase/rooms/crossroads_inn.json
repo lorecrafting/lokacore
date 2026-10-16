@@ -13,6 +13,9 @@
     },
     "west": {
       "to": "drill_yard"
+    },
+    "down": {
+      "to": "undercroft"
     }
   },
   "details": {

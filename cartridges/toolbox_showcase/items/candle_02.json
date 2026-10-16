@@ -1,0 +1,13 @@
+{
+  "keywords": [
+    "candle"
+  ],
+  "short": "item.candle_02.short",
+  "room_line": "item.candle_02.room",
+  "description": "item.candle_02.description",
+  "mass_grams": 100,
+  "location": {
+    "in": "npc",
+    "npc": "chandler"
+  }
+}

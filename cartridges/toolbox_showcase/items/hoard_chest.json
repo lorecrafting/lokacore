@@ -1,0 +1,36 @@
+{
+  "keywords": [
+    "chest"
+  ],
+  "short": "item.hoard_chest.short",
+  "room_line": "item.hoard_chest.room",
+  "description": "item.hoard_chest.description",
+  "mass_grams": 20000,
+  "location": {
+    "in": "room",
+    "room": "vault_yard"
+  },
+  "container": true,
+  "immune": [
+    "growing",
+    "growing_croft"
+  ],
+  "locks": {
+    "get": {
+      "policy_version": 1,
+      "root": {
+        "op": "fact_compare",
+        "fact": "owns_strongroom",
+        "equals": true
+      }
+    },
+    "put": {
+      "policy_version": 1,
+      "root": {
+        "op": "fact_compare",
+        "fact": "owns_strongroom",
+        "equals": true
+      }
+    }
+  }
+}

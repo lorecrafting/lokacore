@@ -1,0 +1,49 @@
+{
+  "keywords": [
+    "fence"
+  ],
+  "short": "npc.fence.short",
+  "room_line": "npc.fence.room",
+  "description": "npc.fence.description",
+  "room": "pawn_alley",
+  "resource_starts": {
+    "pennies": 6
+  },
+  "locks": {
+    "get": {
+      "policy_version": 1,
+      "root": {
+        "op": "not",
+        "item": {
+          "op": "all",
+          "items": []
+        }
+      }
+    }
+  },
+  "shop": {
+    "resource": "pennies",
+    "offers": [
+      {
+        "item": "merchant_purse",
+        "buy": 6,
+        "sell": 3,
+        "stolen": true
+      },
+      {
+        "item": "beeswax_candle",
+        "buy": 4,
+        "sell": 2,
+        "stolen": true
+      },
+      {
+        "item": "yard_purse",
+        "buy": 6,
+        "sell": 3,
+        "stolen": true
+      }
+    ],
+    "bought": "shop.bought",
+    "sold": "shop.sold"
+  }
+}

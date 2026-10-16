@@ -232,5 +232,59 @@
     "x": -4,
     "y": -9,
     "z": 0
+  },
+  {
+    "room": "undercroft",
+    "x": 0,
+    "y": 0,
+    "z": -1
+  },
+  {
+    "room": "market_row",
+    "x": 0,
+    "y": -1,
+    "z": -1
+  },
+  {
+    "room": "forge_stall",
+    "x": 0,
+    "y": -2,
+    "z": -1
+  },
+  {
+    "room": "counting_house",
+    "x": 1,
+    "y": 0,
+    "z": -1
+  },
+  {
+    "room": "pawn_alley",
+    "x": -1,
+    "y": 0,
+    "z": -1
+  },
+  {
+    "room": "strongroom",
+    "x": 0,
+    "y": 1,
+    "z": -1
+  },
+  {
+    "room": "vault_yard",
+    "x": 0,
+    "y": 0,
+    "z": -2
+  },
+  {
+    "room": "storeroom",
+    "x": -6,
+    "y": -9,
+    "z": -1
+  },
+  {
+    "room": "forge_back",
+    "x": -5,
+    "y": -9,
+    "z": -1
   }
 ]

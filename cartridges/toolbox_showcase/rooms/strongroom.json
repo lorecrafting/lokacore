@@ -1,0 +1,20 @@
+{
+  "title": "room.strongroom.title",
+  "description": "room.strongroom.description",
+  "locks": {
+    "enter": {
+      "policy_version": 1,
+      "root": {
+        "op": "fact_compare",
+        "fact": "owns_strongroom",
+        "equals": true
+      }
+    }
+  },
+  "exits": {
+    "north": {
+      "to": "undercroft",
+      "barrier": "strongroom_door"
+    }
+  }
+}

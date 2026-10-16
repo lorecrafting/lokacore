@@ -1,0 +1,37 @@
+{
+  "npc": "clerk_a",
+  "roles": {
+    "clerk": {
+      "role": "npc",
+      "npc": "clerk_a"
+    }
+  },
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "fact_compare",
+      "fact": "wanted",
+      "equals": true
+    }
+  },
+  "prompt": "dialogue.clerk_fine.prompt",
+  "choices": {
+    "pay": {
+      "label": "dialogue.clerk_fine.pay",
+      "narration": "narration.clerk_fine.pay",
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "wanted",
+          "value": false
+        }
+      ],
+      "lesson_payment": {
+        "to": "clerk",
+        "resource": "pennies",
+        "amount": 3
+      }
+    }
+  },
+  "label": "dialogue.clerk_fine.pay"
+}

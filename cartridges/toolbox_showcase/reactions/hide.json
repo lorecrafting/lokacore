@@ -1,0 +1,12 @@
+{
+  "on": {
+    "event": "check_passed",
+    "check": "hide"
+  },
+  "apply": [
+    {
+      "op": "status.apply",
+      "status": "hidden"
+    }
+  ]
+}

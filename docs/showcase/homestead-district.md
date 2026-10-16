@@ -34,8 +34,8 @@ step from the inn on a district sign room that still has a free face:
 | Magic and use-on | [6](magic-district.md) | `crossroads_inn` gains up `loft` | "Up the ladder, the Loft: a hedge-wizard, three words that cost ash and breath, a dark crypt with something in it, and a golem that minds the weather." |
 | Traps | [7](traps-district.md) | `drill_yard` gains down `sapper_stair` | plan 7 rewrites the last sentence |
 
-"Four roads leave this inn." becomes "Four roads, a ladder and a cellar stair leave this inn."
-(plan 5 or 6, whichever builds first). If the PM would rather every district open from the inn
+"Four roads leave this inn." becomes "Four roads and a cellar stair leave this inn." in plan 5;
+plan 6 adds "a ladder" when it builds ("Four roads, a ladder and a cellar stair leave this inn."). If the PM would rather every district open from the inn
 itself, the alternative is a second hub room, which this plan does not recommend: a room with no
 mechanics in it.
 
