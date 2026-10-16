@@ -502,7 +502,7 @@ test('homestead 12: learn cooking, cook a hearty stew from two fresh fish, eat i
   assert.equal(where(w, id(w, 'item', 'stew_hearty_01')), w.body);
   assert.equal(fishIn(w, 'larder').length, 2);
   assert.equal(fact(w, 'uses_cooking'), 1);
-  assert.equal(offer(w, 'cook_feast').available, false);
+  assert.deepEqual(offer(w, 'cook_feast').reason, { code: 'invalid_state' });
   const hearty = id(w, 'item', 'stew_hearty_01');
   w = eat(w, 'stew_hearty_01').world;
   assert.equal(str(w), 12);
@@ -591,7 +591,8 @@ const eggs = (w: World) =>
     .length;
 
 // Breaks: feeding not on the trough, the spent grain kept, laying off the 14400 tick, the nest
-// cap, births above cap 4 or a hen leaving the croft, the grain return.
+// cap, births past night_target 4 (cap 4 is the loader's ceiling for it) or a hen leaving the
+// croft, the grain return.
 test('homestead sandbox: grain in the trough lays eggs to the nest cap; hens breed to four', () => {
   let h = walk(fresh(WORLD), 'north', 'west', 'up');
   assert.deepEqual(hens(h), [room(h, 'holding_croft'), room(h, 'holding_croft')]);
