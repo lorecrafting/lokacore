@@ -38,8 +38,9 @@ defmodule Loka.Content.Standing do
 
   defp shapes(npcs) do
     for {rel, %{"disposition" => d} = n} <- npcs,
-        n["spawn_template"] ||
-          is_map_key(d, "engage") != (is_map_key(d, "hostile") and is_map_key(n, "attack")),
+        (n["spawn_template"] ||
+           is_map_key(d, "engage") != (is_map_key(d, "hostile") and is_map_key(n, "attack"))) or
+          (is_map_key(d, "refuse") and not is_map_key(d, "hostile")),
         do: diag("SCHEMA_VIOLATION", at(rel, ["disposition"]), %{"error" => "invalid_value"})
   end
 

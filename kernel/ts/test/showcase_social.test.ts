@@ -86,7 +86,14 @@ test('social 2-3: help makes Nell friendly (bread 2); wrong twice makes her host
     [fact(w, 'wardle_standing'), mood(w, 'nell'), bread(w).buy.price],
     [1, 'friendly', 2],
   );
-  assert.deepEqual(nell(green()), [undefined, undefined, []]);
+  // Wary at 0 and friendly at +1: neither is hostile.
+  assert.deepEqual(
+    [nell(green()), nell(leave(w))],
+    [
+      [undefined, undefined, []],
+      [undefined, undefined, []],
+    ],
+  );
   w = say(w, 'reeve', 'wrong').world;
   assert.equal(fact(w, 'wardle_standing'), -1);
   assert.deepEqual(nell(leave(w)), [undefined, undefined, []]);

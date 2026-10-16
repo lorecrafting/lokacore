@@ -42,10 +42,27 @@ test('Nell at standing -2 shows her refusal line, no Talk or shelf; at 0 she tra
   assert.ok(calmLabels.some((l) => l.startsWith('Talk')));
 });
 
-// Breaks: a buy reason other than sold out shows its raw code (Peg's iron sword, 7p over 4p).
+// Breaks: an unaffordable buy shows its raw code or "too exhausted" (Peg's iron sword, 7p over 4p).
 test("a shelf row's buy reason is a word, never the code", () => {
   const b = book(bundle('missing_child_v042_hash'));
   for (const s of routes['npc-shop']) typeof s === 'function' ? s(b as never) : b.tap(s);
-  const row = b.text().find((l) => l.startsWith('an iron sword: Buy 7p ('));
-  assert.ok(row && !/insufficient|_/.test(row), row);
+  const row = "an iron sword: Buy 7p (can't afford); Sell 4p (you are not holding it).";
+  assert.ok(b.text().includes(row), JSON.stringify(b.text()));
+});
+
+// Breaks: a talk that turns its NPC hostile (Bess, insulted) shows the refusal Note over the open
+// conversation.
+test('an insult mid-talk keeps the conversation page, no refusal Note', () => {
+  const b = book(showcase as never);
+  for (const s of ['Go south', 'Go south']) {
+    b.map();
+    b.tap(s);
+  }
+  for (const c of [/^Bess/, /^Talk/, 'Insult the village']) b.tap(c);
+  const shown = b.text();
+  assert.ok(shown.includes('Bess scowls and turns to her next customer, as she will every time.'));
+  assert.ok(
+    !shown.includes('Bess turns to her barrel and does not look up.'),
+    JSON.stringify(shown),
+  );
 });

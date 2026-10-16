@@ -30,7 +30,11 @@ export function standing(c: Obj): Diagnostic[] {
     if (!d) continue;
     used = true;
     const at = `.cartridge.npcs${step(ref)}.disposition`;
-    if (n.spawn_template || !!d.engage !== !!(d.hostile && n.attack))
+    if (
+      n.spawn_template ||
+      !!d.engage !== !!(d.hostile && n.attack) ||
+      (d.refuse !== undefined && !d.hostile)
+    )
       out.push(diag('SCHEMA_VIOLATION', at, { error: 'invalid_value' }));
     for (const f of ['engage', 'refuse'])
       if (d[f] !== undefined && !Object.hasOwn(c.text, d[f]))

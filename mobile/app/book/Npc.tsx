@@ -11,7 +11,7 @@ import { Riddle } from './Riddle.tsx';
 import { space } from './tokens.ts';
 import { LABEL } from './labels.ts';
 import { offerLabel } from './offers.ts';
-import { reason, refused } from './words.ts';
+import { buyReason, reason, refused } from './words.ts';
 type Say = (key: string) => string;
 type Grouped = ReturnType<typeof group>;
 type Screen = ReturnType<ReturnType<typeof presenter>['screen']>;
@@ -91,7 +91,7 @@ export function NpcPage(p: NpcProps) {
       )}
       <LogLines lines={log} />
       {npcSkills(c, p)}
-      {enemy && (
+      {!talk && enemy && (
         <Note>{enemy.refusal ? p.text(enemy.refusal) : refused(cap(p.text(enemy.name)))}</Note>
       )}
       {!talk && !enemy && !actions.length && !log.length && <Note>Nothing to do here.</Note>}
@@ -162,7 +162,7 @@ function ShopOptions(p: NpcProps) {
         'shop' in p.npc &&
         p.npc.shop?.map((o) => {
           // A price row, not an action card (book-ui.md, Hostile refusal): its reasons are words.
-          const buy = o.buy.reason === 'not_owned' ? 'sold out' : reason(o.buy.reason ?? '');
+          const buy = buyReason(o.buy.reason ?? '');
           const sell = reason(o.sell.reason ?? '');
           return (
             <Text key={o.item_id} style={note(c)}>

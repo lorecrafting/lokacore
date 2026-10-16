@@ -203,7 +203,8 @@ test('no engage in a sanctuary or on a flight into a hostile room; a walk-in eng
 });
 
 // Breaks: the loader admits row 15 or G11 below 1.47, a reaction fact.adjust on a non-int fact,
-// an engage line on an NPC without an attack, a refuse line naming no text, a disposition on a
+// an engage line on an NPC without an attack, a refuse line naming no text or on an NPC that is
+// never hostile, a disposition on a
 // spawn template (its walk-in encounter has no active_ids, so the save would not reopen), or a
 // friendly discount without a friendly disposition, or one with a skill too (the schema's
 // exactlyOneRequired).
@@ -268,6 +269,16 @@ test('rows 15 and G11 need 1.47, an int fact, an engage only with an attack, a f
       },
       'UNRESOLVED_REFERENCE',
       `${guard}.disposition.refuse`,
+    ],
+    [
+      (c) => {
+        const d = c.npcs[`${S}:npc/peg`].disposition;
+        delete d.hostile;
+        d.refuse = 'npc.peg.short';
+        c.manifest.requires.kernel_api.at_least = '1.104';
+      },
+      'SCHEMA_VIOLATION',
+      `${peg}.disposition`,
     ],
   ];
   for (const [change, code, path] of rows) {

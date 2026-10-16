@@ -71,6 +71,12 @@ const REASON: Record<string, string> = {
 export const SENTENCE: Record<string, string> = { insufficient_resource: 'You are too exhausted.' };
 export const given = (item: string, to: string) => `You give ${item} to ${to}.`;
 export const reason = (code: string) => REASON[code] ?? code.replaceAll('_', ' ');
+// A shelf row's buy reason: the shop's stock is gone, or the player's purse is short.
+const BUY: Record<string, string> = {
+  not_owned: 'sold out',
+  insufficient_resource: "can't afford",
+};
+export const buyReason = (code: string) => BUY[code] ?? reason(code);
 // A hostile NPC's page when its cartridge gives no refusal line (Book hostile refusal).
 export const refused = (name: string) => `${name} will have nothing to do with you.`;
 
