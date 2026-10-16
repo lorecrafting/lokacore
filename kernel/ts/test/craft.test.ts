@@ -1,4 +1,4 @@
-// size: allow 680, the craft sampler walks (hs-10 to hs-12) and the hs-14 skill tree share one compiled cartridge and helpers
+// size: allow 750, the craft sampler walks (hs-10 to hs-12) and the hs-14 skill tree share one compiled cartridge and helpers
 // Homestead hs-10 (docs/system/mechanics.md Craft) on the compiled craft sampler: the workshop's
 // bench carries carve_spoon (opposed whittling, rating 1, growth [1]); it consumes one of
 // stick_01..02 into the sealed scrap room and yields one of spoon_01..02 from the sealed store.
@@ -18,6 +18,7 @@ import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { hydrate } from '../src/runtime/created.ts';
 import { check } from '../src/runtime/invariants.ts';
+import { validate } from '../src/foundation/validate.ts';
 import { resolved } from '../src/commands/actions.ts';
 import { pending } from '../src/mechanics/dialogue/shared.ts';
 
@@ -322,17 +323,19 @@ test('a craft whose policy fails refuses on the policy, as offered', () => {
   assert.ok(agrees(w, r));
 });
 
+const carver = (w: World) => w.entityIds[`${P}npc/old_carver`]!;
+const opened = (w: World) => ok(w, { type: 'talk', target_id: carver(w) });
+const ids = (w: World) => gameView(w).choice!.choices.map((c) => c.choice_id);
 const box = (w: World, key: string) => gameView(w).skills!.find((s) => s.skill.key === key)!;
 
 // Homestead hs-11. Breaks: the dialogue admission (dialogue/shared.ts blocked) skips the
 // prerequisite (the level-1 choose is accepted), the offer disagrees with admission (agrees
 // fails), or the conversation offers the lesson again after it is learned.
 test('carving is learned only at whittling 2, offered and admitted alike', () => {
-  const carver = (w: World) => w.entityIds[`${P}npc/old_carver`]!;
   const learned = (w: World) =>
     Object.entries(w.state.facts ?? {}).find(([k]) => k.includes('"skill_carving"'))?.[1] ?? false;
   const learn = (w0: World) => {
-    const w = ok(w0, { type: 'talk', target_id: carver(w0) });
+    const w = opened(w0);
     const [continuation_id] = pending(w, w.character)!;
     const command = { payload: { type: 'choose', choice_id: 'learn', continuation_id } };
     const offered = gameView(w).choice!.choices.find((c) => c.choice_id === 'learn')!;
@@ -417,7 +420,6 @@ test('a learned hidden skill stays in the view; a lesson for a left-out skill is
       [`${P}skill/joinery`]: { ...content.skills![`${P}skill/joinery`]!, hidden: true },
     },
   };
-  const carver = (w: World) => w.entityIds[`${P}npc/old_carver`]!;
   const seen = (w: World) => ({
     keys: gameView(w).skills!.map((s) => s.skill.key),
     lessons: gameView(w)
@@ -441,6 +443,79 @@ test('a learned hidden skill stays in the view; a lesson for a left-out skill is
   assert.equal(box(dropped, 'carving').acquired, true);
   // joinery needs carving 1, which learning gives
   assert.deepEqual(seen(dropped), shown(['carving', 'joinery', 'whittling'], ['carving']));
+});
+
+// Carving (needs whittling 2) and joinery hidden; `leave` adds a choice to carving's dialogue.
+const secret = (leave = false) => {
+  const hide = (k: string) => ({
+    [`${P}skill/${k}`]: { ...content.skills![`${P}skill/${k}`]!, hidden: true },
+  });
+  const key = `${P}dialogue/old_carver_carving`;
+  const d = content.dialogues![key]!;
+  const choices = { ...d.choices, ...(leave && { leave: { label: 'old_carver.carving.prompt' } }) };
+  const c = {
+    ...content,
+    skills: { ...content.skills, ...hide('carving'), ...hide('joinery') },
+    dialogues: { ...content.dialogues, [key]: { ...d, choices } },
+  };
+  return carve(take(take(fresh(c as never), 'stick_01'), 'stick_02')).world; // whittling 1
+};
+
+// Breaks (hs-14 secret): the carver's talk opens with no choice (choices: [], a GameView the schema
+// refuses) or is offered while every lesson is concealed, or the lesson stays concealed at
+// whittling 2. Carpentry's dialogue needs woodcutting 2 (woodcutting 1 here), so it never opens.
+test('a talk whose every lesson is concealed is refused and not offered', () => {
+  const level1 = secret();
+  const r = play(level1, { type: 'talk', target_id: carver(level1) });
+  assert.deepEqual(validate('GameView', gameView(r.world)), []);
+  assert.equal(gameView(r.world).choice, undefined);
+  assert.equal(code(r), 'invalid_state');
+  const talk = offer(level1, 'old_carver_carving')!;
+  assert.deepEqual([talk.available, talk.reason], [false, { code: 'invalid_state' }]);
+  assert.deepEqual(gameView(opened(carve(level1).world)).choice!.choices, [
+    { available: true, choice_id: 'learn', label: 'old_carver.carving.choice' },
+  ]);
+});
+
+// Breaks (hs-14 secret): the opened row lists the concealed lesson (choose admits it), or leaves it
+// out once whittling 2 holds.
+test('a concealed lesson is left out of the opened choices and refused', () => {
+  const level1 = opened(secret(true));
+  assert.deepEqual(ids(level1), ['leave']);
+  const [continuation_id] = pending(level1, level1.character)!;
+  const r = play(level1, { type: 'choose', choice_id: 'learn', continuation_id });
+  assert.equal(code(r), 'invalid_state');
+  assert.deepEqual(ids(opened(carve(secret(true)).world)), ['learn', 'leave']); // whittling 2
+});
+
+// Breaks (hs-14 secret; twin of content_craft_test.exs): a shown skill's qualification or a
+// dialogue policy reading a hidden skill loads, a labeled talk or a riddle dialogue (its letter
+// bank shows) teaching one loads, or a hidden skill's own qualification reading one is refused.
+test('loader: no shown qualification, dialogue policy, talk label or riddle reveals a hidden skill', () => {
+  const S = (k: string) => `${P}skill/${k}`;
+  const D = (k: string) => `${P}dialogue/${k}`;
+  const hide = (c: any) => ['carving', 'joinery'].forEach((k) => (c.skills[S(k)].hidden = true));
+  const reading = (policy: (c: any) => any) => (c: any) => {
+    const skill = { ...c.skills[S('carving')].prerequisite.root.skill, key: 'carving' };
+    hide(c);
+    policy(c).root = { op: 'all', items: [{ op: 'skill_compare', skill, at_least: 1 }] };
+  };
+  const at = (path: string) => ['SCHEMA_VIOLATION', `.cartridge.${path}`];
+  const whittling = reading((c) => c.skills[S('whittling')].qualification);
+  assert.deepEqual(loadEdited(whittling), at(`skills["${S('whittling')}"].qualification`));
+  const carpentry = reading((c) => c.dialogues[D('old_carver_carpentry')].policy);
+  assert.deepEqual(loadEdited(carpentry), at(`dialogues["${D('old_carver_carpentry')}"].policy`));
+  assert.equal(loadEdited(reading((c) => c.skills[S('joinery')].qualification)), 'loaded');
+  const wrong = 'old_carver.carving.prompt';
+  for (const [field, value] of Object.entries({
+    label: wrong,
+    riddle: { choice_id: 'learn', answer: 'a', bank: ['A'], wrong },
+  })) {
+    const set = (c: any) => (c.dialogues[D('old_carver_carving')][field] = value);
+    const hidden = (c: any) => (hide(c), set(c));
+    assert.deepEqual(loadEdited(hidden), at(`dialogues["${D('old_carver_carving')}"].${field}`));
+    assert.equal(loadEdited(set), 'loaded'); // carving shown
+  }
 });
 
 // Breaks (hs-14; twin of content_craft_test.exs): a shown skill whose prerequisite reads a hidden
@@ -472,11 +547,9 @@ const move = (w: World, ...dirs: string[]) =>
 const perform = (w: World, action: string, i?: number) => play(w, { type: 'perform', action }, i);
 const done = (w: World, ...actions: string[]) =>
   actions.reduce((x, action) => ok(x, { type: 'perform', action }), w);
-const carver = (w: World) => w.entityIds[`${P}npc/old_carver`]!;
-const lessons = (w: World) =>
-  gameView(ok(w, { type: 'talk', target_id: carver(w) })).choice!.choices.map((c) => c.choice_id);
+const lessons = (w: World) => ids(opened(w));
 const carpentry = (w0: World) => {
-  const w = ok(w0, { type: 'talk', target_id: carver(w0) });
+  const w = opened(w0);
   const [continuation_id] = pending(w, w.character)!;
   return ok(w, { type: 'choose', choice_id: 'learn_carpentry', continuation_id });
 };

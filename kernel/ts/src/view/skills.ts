@@ -1,4 +1,4 @@
-import { status } from '../mechanics/skills.ts';
+import { concealed, status } from '../mechanics/skills.ts';
 import { level } from '../mechanics/skill_level.ts';
 import { holds } from '../mechanics/policy.ts';
 import { refString, type World } from '../runtime/decision.ts';
@@ -39,8 +39,8 @@ export function skillViews(world: World, actor: CharacterId, steps = { n: 0 }) {
   };
 }
 
-// Homestead hs-14: level only with growth, locked only with a prerequisite, and a hidden skill is
-// left out while its prerequisite fails and it is not acquired.
+// Homestead hs-14: level only with growth, locked only with a prerequisite, and a concealed skill
+// (mechanics/skills.ts) is left out.
 function skillView(
   world: World,
   actor: CharacterId,
@@ -48,9 +48,9 @@ function skillView(
   skill: DefinitionRef,
   steps: { n: number },
 ) {
+  if (concealed(world, actor, skill, steps)) return [];
   const locked = s.prerequisite && !holds(world, actor, s.prerequisite.root, { steps });
   const st = status(world, actor, skill, steps);
-  if (s.hidden && locked && !st.acquired) return [];
   return [
     {
       skill,
@@ -77,10 +77,6 @@ function levellingView(world: World, actor: CharacterId) {
  * projection. A lesson for a skill the view leaves out (hs-14) is left out too.
  */
 export function freeLessons(world: World, npc: string, actor: CharacterId, steps = { n: 0 }) {
-  const shown = (r: DefinitionRef) => {
-    const s = world.cartridge.skills![refString(r)]!;
-    return skillView(world, actor, s, r, steps).length > 0;
-  };
   const refs = Object.values(world.cartridge.dialogues ?? {})
     .filter((d) => world.entityIds[refString(d.npc)] === npc)
     .flatMap((d) =>
@@ -90,7 +86,7 @@ export function freeLessons(world: World, npc: string, actor: CharacterId, steps
           : (o.sequence ?? []).flatMap((s) => (s.op === 'skill.acquire' ? [s.skill] : [])),
       ),
     )
-    .filter(shown);
+    .filter((r) => !concealed(world, actor, r, steps));
   return refs.length ? { lessons: refs } : {};
 }
 

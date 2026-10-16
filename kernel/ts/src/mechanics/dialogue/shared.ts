@@ -72,9 +72,6 @@ export function answerFits(bank: readonly string[], answer: string): boolean {
   return true;
 }
 
-/** The ids of `d`'s choices, in key order. */
-export const choiceIds = (d: DialogueDefinition) => Object.keys(d.choices).sort(cmp) as Key[];
-
 /**
  * Why no option of `row` can be chosen now: invalid_state when the pinned policy no longer
  * holds; then revalidate actual custody and presence (06 §43): not_present while a bound NPC is not in the actor's room, else not_owned while a
@@ -246,7 +243,17 @@ export function choiceView(
   };
 }
 
-export { speaks, spokenBy, talkRefused, talks, pending, talking, leave } from './selection.ts';
+export {
+  choiceIds,
+  openable,
+  speaks,
+  spokenBy,
+  talkRefused,
+  talks,
+  pending,
+  talking,
+  leave,
+} from './selection.ts';
 
 /** The commands that answer a pending choice: its view is the PendingChoice, never a list. */
 export const MODAL: readonly string[] = ['choose', 'close_choice'];

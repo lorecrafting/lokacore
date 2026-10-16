@@ -1,3 +1,4 @@
+# size: allow 340, skill loading keeps the hs-11 prerequisite and hs-14 secret checks beside the tree they read
 defmodule Loka.Content.Skills do
   @moduledoc "Reserved skill acquisition facts and equipment/lesson references."
   import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2]
@@ -68,6 +69,7 @@ defmodule Loka.Content.Skills do
       defs["skill"],
       &(definition(&1, caps, text) ++ growth(&1) ++ itself(m, &1, hidden))
     ) ++
+      secret(m, defs) ++
       floor(m, defs) ++
       prerequisite_floor(m, defs) ++
       equipment(m, defs) ++ dodge(m, defs, settings) ++ defense_narration(defs, settings)
@@ -114,6 +116,47 @@ defmodule Loka.Content.Skills do
   end
 
   defp itself(_, _, _), do: []
+
+  # Homestead hs-14 (secret): no shown skill's qualification and no dialogue policy reads a hidden
+  # skill, and no labeled talk or riddle dialogue teaches one (cartridge_skills.ts).
+  defp secret(m, defs) do
+    hidden? =
+      &match?({_, _, %{"hidden" => true}}, Loka.Content.Refs.resolve(&1, "skill", m, defs))
+
+    shown_qualifications(defs, hidden?) ++ dialogues(defs, hidden?)
+  end
+
+  defp shown_qualifications(defs, hidden?),
+    do:
+      for(
+        {_, {rel, _, s}} <- defs["skill"],
+        !s["hidden"],
+        reads?(s["qualification"], hidden?),
+        do: bad(at(rel, ["qualification"]))
+      )
+
+  defp dialogues(defs, hidden?),
+    do:
+      for(
+        {_, {rel, [], d}} <- defs["dialogue"] || %{},
+        {field, true} <- [
+          {"policy", reads?(d["policy"], hidden?)},
+          {"label", !!d["label"] and teaches?(d, hidden?)},
+          {"riddle", !!d["riddle"] and teaches?(d, hidden?)}
+        ],
+        do: bad(at(rel, [field]))
+      )
+
+  # Only skill_compare (in a policy) and skill.acquire (in a sequence) carry a "skill".
+  defp reads?(p, hidden?),
+    do:
+      Enum.any?(Loka.Content.Policies.nodes(p["root"], []), fn {n, _} -> hidden?.(n["skill"]) end)
+
+  defp teaches?(d, hidden?),
+    do:
+      Enum.any?(Map.values(d["choices"]), fn o ->
+        Enum.any?(o["sequence"] || [], &hidden?.(&1["skill"]))
+      end)
 
   defp hidden(m, defs),
     do: for({key, {_, _, %{"hidden" => true}}} <- defs["skill"], do: ref(m, key))

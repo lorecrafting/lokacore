@@ -1,7 +1,7 @@
 import { diag, step, walk, type Checks, type Obj } from './cartridge_refs.ts';
 import { refString } from '../runtime/decision.ts';
 import { apiCmp } from './cartridge_installed.ts';
-import type { Diagnostic } from '../contracts.gen.ts';
+import type { DefinitionRef, Diagnostic } from '../contracts.gen.ts';
 
 export const skillSpec = (key: string) => ({
   key: `skill_${key}`,
@@ -57,7 +57,7 @@ export function skills(c: Obj, checks: Checks): Diagnostic[] {
         diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'),
       );
   }
-  return [...out, ...growth(c), ...prerequisites(c), ...durability(c, checks)];
+  return [...out, ...growth(c), ...prerequisites(c), ...secret(c), ...durability(c, checks)];
 }
 
 // Homestead hs-11: a prerequisite never names its own skill, no ancestry grants its box, and it
@@ -86,6 +86,29 @@ function prerequisites(c: Obj): Diagnostic[] {
   const professions = Object.values((c.skills ?? {}) as Obj).some((s) => s.profession);
   if ((named.length || professions) && apiCmp(c.manifest.requires.kernel_api.at_least, '1.101') < 0)
     out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
+  return out;
+}
+
+// Homestead hs-14 (secret): no shown skill's qualification and no dialogue policy reads a hidden
+// skill, and no labeled talk or riddle dialogue (its letter bank shows) teaches one.
+function secret(c: Obj): Diagnostic[] {
+  const out: Diagnostic[] = [];
+  const hidden = (r: DefinitionRef) => c.skills?.[refString(r)]?.hidden === true;
+  const reads = (root: Obj) =>
+    walk(root, '').some(([p]) => p.op === 'skill_compare' && hidden(p.skill));
+  const bad = (at: string) => out.push(diag('SCHEMA_VIOLATION', at, { error: 'invalid_value' }));
+  for (const [ref, s] of Object.entries((c.skills ?? {}) as Obj))
+    if (!s.hidden && reads(s.qualification.root))
+      bad(`.cartridge.skills${step(ref)}.qualification`);
+  for (const [ref, d] of Object.entries((c.dialogues ?? {}) as Obj)) {
+    const at = `.cartridge.dialogues${step(ref)}`;
+    if (reads(d.policy.root)) bad(`${at}.policy`);
+    const teaches = Object.values(d.choices as Obj).some((o) =>
+      (o.sequence ?? []).some((q: Obj) => q.op === 'skill.acquire' && hidden(q.skill)),
+    );
+    if (d.label !== undefined && teaches) bad(`${at}.label`);
+    if (d.riddle !== undefined && teaches) bad(`${at}.riddle`);
+  }
   return out;
 }
 
