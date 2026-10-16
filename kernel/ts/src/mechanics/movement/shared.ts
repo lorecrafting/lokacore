@@ -2,6 +2,7 @@ import type {
   CharacterId,
   DefinitionRef,
   EntityId,
+  NpcDefinition,
   RoomDefinition,
   Tag,
 } from '../../contracts.gen.ts';
@@ -19,6 +20,7 @@ import { cmp } from '../../foundation/validate.ts';
 import { engaged } from '../combat/shared.ts';
 import { mul } from '../../foundation/int.ts';
 import { statusMovement } from '../status/shared.ts';
+import { mounted } from '../escort/shared.ts';
 
 /**
  * Why the exit in `direction` bars the way while its barrier (barrier@1) is closed or locked;
@@ -157,11 +159,11 @@ export function fall(
 
 /**
  * What a move into `there` costs `body`: the cartridge's world.movement.cost, else 1 mv where it
- * declares the pool, else nothing, scaled by statuses and then by the destination's terrain tags
- * (row 43a); undefined when the body cannot pay. Read-only, shared with the GameView's exits
- * (view/view.ts, via movementPlan).
+ * declares the pool, else nothing, scaled by statuses, then by the destination's terrain tags
+ * (row 43a) and last by the ridden mount's cost_percent (row 43b); undefined when the body cannot
+ * pay. Read-only, shared with the GameView's exits (view/view.ts, via movementPlan).
  */
-export function fare(world: World, body: EntityId, there: EntityId) {
+export function fare(world: World, actor: CharacterId, body: EntityId, there: EntityId) {
   const mv = resourceRef(world, 'mv');
   const cost =
     world.cartridge.world?.movement?.cost ??
@@ -179,6 +181,9 @@ export function fare(world: World, body: EntityId, there: EntityId) {
     const pct = world.cartridge.world?.movement?.terrain?.[t];
     if (pct !== undefined) amount = saturate(Math.floor((amount * pct) / 100));
   }
+  const horse = mounted(world, actor);
+  const ride = horse && (world.entities[horse] as NpcDefinition).mount!.cost_percent;
+  if (ride !== undefined) amount = saturate(Math.floor((amount * ride) / 100));
   return amount ? pay(world, body, [{ ...cost, amount }]) : { ops: [] };
 }
 

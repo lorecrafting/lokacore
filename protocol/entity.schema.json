@@ -758,6 +758,30 @@
           },
           "minItems": 1,
           "maxItems": 16
+        },
+        "mount": {
+          "description": "Toolbox row 43b (kernel_api at least 1.108; needs world.mount): this NPC can be ridden. While world.mount.riding is true for (this NPC, a character) and both share a room, the character's moves need a destination room carrying one of terrain, each move's fare is scaled by cost_percent (default 100, floored, applied last) and this NPC moves with the body. Never on a spawn template.",
+          "type": "object",
+          "properties": {
+            "terrain": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 8,
+              "uniqueItems": true,
+              "items": {
+                "$ref": "entity.schema.json#/$defs/Tag"
+              }
+            },
+            "cost_percent": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000
+            }
+          },
+          "required": [
+            "terrain"
+          ],
+          "additionalProperties": false
         }
       },
       "required": [

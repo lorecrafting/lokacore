@@ -1,0 +1,16 @@
+{
+  "facts": {
+    "riding": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "per_subject": true,
+      "meaning": "Whether the character is riding this mount."
+    }
+  }
+}

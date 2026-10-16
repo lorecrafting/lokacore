@@ -1,0 +1,15 @@
+{
+  "keywords": [
+    "horse"
+  ],
+  "short": "npc.horse.short",
+  "room_line": "npc.horse.room",
+  "description": "npc.horse.description",
+  "room": "yard",
+  "mount": {
+    "terrain": [
+      "road"
+    ],
+    "cost_percent": 0
+  }
+}

@@ -1,4 +1,4 @@
-// size: allow 354, ancestry, bell area, Study edge, barrier opens_when, ask answer roots, identity name variants, blueprints and skill prerequisites the arrest cell (row 35) and NPC asides (row FD10) join shared reference admission
+// size: allow 355, ancestry, bell area, Study edge, barrier opens_when, ask answer roots, identity name variants, blueprints and skill prerequisites the arrest cell (row 35), NPC asides (row FD10) and mounts (row 43b) join shared reference admission
 import { water } from './cartridge_water.ts';
 import { topics } from './cartridge_topics.ts';
 import { pools } from './cartridge_pools.ts';
@@ -38,6 +38,7 @@ import { reactions } from './cartridge_reactions.ts';
 import { recipes } from './cartridge_recipes.ts';
 import { reserved } from './cartridge_position.ts';
 import { theft } from './cartridge_theft.ts';
+import { mounts } from './cartridge_mounts.ts';
 import { answerRoots, asks } from './cartridge_asks.ts';
 import { cueParts } from './cartridge_senses.ts';
 import { lockRoots, locks } from './cartridge_locks.ts';
@@ -278,7 +279,7 @@ export function refStage(c: Obj): Diagnostic[] {
   out.push(...recipes(c, check), ...holders(c), ...barriers(c, check.named), ...links(c));
   out.push(...quests(c, check), ...reactions(c, check), ...dialogues(c, check));
   out.push(...pools(c, named), ...death(c, named), ...combat(c, named), ...commerce(c));
-  out.push(...theft(c, named), ...asks(c, check));
+  out.push(...theft(c, named), ...mounts(c, named), ...asks(c, check));
   out.push(...derived(c, named), ...levelling(c, check));
   return out;
 }

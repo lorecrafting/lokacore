@@ -32708,5 +32708,318 @@
         "code": "unknown_property"
       }
     ]
+  },
+  {
+    "name": "world_mount_riding_missing",
+    "contract": "WorldSettings",
+    "value": {
+      "mount": {}
+    },
+    "errors": [
+      {
+        "path": "/mount/riding",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "world_mount_extra_property",
+    "contract": "WorldSettings",
+    "value": {
+      "mount": {
+        "riding": {
+          "cartridge_id": "c",
+          "cartridge_version": "1.0.0",
+          "kind": "fact",
+          "key": "riding"
+        },
+        "x": 1
+      }
+    },
+    "errors": [
+      {
+        "path": "/mount/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "name": "npc_mount_terrain_missing",
+    "contract": "NpcDefinition",
+    "value": {
+      "key": "horse",
+      "keywords": [
+        "horse"
+      ],
+      "short": "npc.horse.short",
+      "room_line": "npc.horse.room",
+      "description": "npc.horse.description",
+      "room": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "yard"
+      },
+      "mount": {
+        "cost_percent": 50
+      }
+    },
+    "errors": [
+      {
+        "path": "/mount/terrain",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "name": "npc_mount_terrain_empty",
+    "contract": "NpcDefinition",
+    "value": {
+      "key": "horse",
+      "keywords": [
+        "horse"
+      ],
+      "short": "npc.horse.short",
+      "room_line": "npc.horse.room",
+      "description": "npc.horse.description",
+      "room": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "yard"
+      },
+      "mount": {
+        "terrain": []
+      }
+    },
+    "errors": [
+      {
+        "path": "/mount/terrain",
+        "code": "too_few_items"
+      }
+    ]
+  },
+  {
+    "name": "npc_mount_terrain_over_eight",
+    "contract": "NpcDefinition",
+    "value": {
+      "key": "horse",
+      "keywords": [
+        "horse"
+      ],
+      "short": "npc.horse.short",
+      "room_line": "npc.horse.room",
+      "description": "npc.horse.description",
+      "room": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "yard"
+      },
+      "mount": {
+        "terrain": [
+          "road",
+          "marsh",
+          "air",
+          "bed",
+          "cool",
+          "warm",
+          "water",
+          "rug",
+          "sharp"
+        ]
+      }
+    },
+    "errors": [
+      {
+        "path": "/mount/terrain",
+        "code": "too_many_items"
+      }
+    ]
+  },
+  {
+    "name": "npc_mount_terrain_duplicate",
+    "contract": "NpcDefinition",
+    "value": {
+      "key": "horse",
+      "keywords": [
+        "horse"
+      ],
+      "short": "npc.horse.short",
+      "room_line": "npc.horse.room",
+      "description": "npc.horse.description",
+      "room": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "yard"
+      },
+      "mount": {
+        "terrain": [
+          "road",
+          "road"
+        ]
+      }
+    },
+    "errors": [
+      {
+        "path": "/mount/terrain",
+        "code": "duplicate_items"
+      }
+    ]
+  },
+  {
+    "name": "npc_mount_terrain_not_a_tag",
+    "contract": "NpcDefinition",
+    "value": {
+      "key": "horse",
+      "keywords": [
+        "horse"
+      ],
+      "short": "npc.horse.short",
+      "room_line": "npc.horse.room",
+      "description": "npc.horse.description",
+      "room": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "yard"
+      },
+      "mount": {
+        "terrain": [
+          "lava"
+        ]
+      }
+    },
+    "errors": [
+      {
+        "path": "/mount/terrain/0",
+        "code": "not_in_enum"
+      }
+    ]
+  },
+  {
+    "name": "npc_mount_cost_percent_negative",
+    "contract": "NpcDefinition",
+    "value": {
+      "key": "horse",
+      "keywords": [
+        "horse"
+      ],
+      "short": "npc.horse.short",
+      "room_line": "npc.horse.room",
+      "description": "npc.horse.description",
+      "room": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "yard"
+      },
+      "mount": {
+        "terrain": [
+          "road"
+        ],
+        "cost_percent": -1
+      }
+    },
+    "errors": [
+      {
+        "path": "/mount/cost_percent",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "name": "npc_mount_cost_percent_over_1000",
+    "contract": "NpcDefinition",
+    "value": {
+      "key": "horse",
+      "keywords": [
+        "horse"
+      ],
+      "short": "npc.horse.short",
+      "room_line": "npc.horse.room",
+      "description": "npc.horse.description",
+      "room": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "yard"
+      },
+      "mount": {
+        "terrain": [
+          "road"
+        ],
+        "cost_percent": 1001
+      }
+    },
+    "errors": [
+      {
+        "path": "/mount/cost_percent",
+        "code": "above_maximum"
+      }
+    ]
+  },
+  {
+    "name": "npc_mount_cost_percent_fraction",
+    "contract": "NpcDefinition",
+    "value": {
+      "key": "horse",
+      "keywords": [
+        "horse"
+      ],
+      "short": "npc.horse.short",
+      "room_line": "npc.horse.room",
+      "description": "npc.horse.description",
+      "room": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "yard"
+      },
+      "mount": {
+        "terrain": [
+          "road"
+        ],
+        "cost_percent": 1.5
+      }
+    },
+    "errors": [
+      {
+        "path": "/mount/cost_percent",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "name": "npc_mount_extra_property",
+    "contract": "NpcDefinition",
+    "value": {
+      "key": "horse",
+      "keywords": [
+        "horse"
+      ],
+      "short": "npc.horse.short",
+      "room_line": "npc.horse.room",
+      "description": "npc.horse.description",
+      "room": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "yard"
+      },
+      "mount": {
+        "terrain": [
+          "road"
+        ],
+        "x": 1
+      }
+    },
+    "errors": [
+      {
+        "path": "/mount/x",
+        "code": "unknown_property"
+      }
+    ]
   }
 ]

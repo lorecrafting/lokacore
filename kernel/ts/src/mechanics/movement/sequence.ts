@@ -1,4 +1,4 @@
-import type { CharacterId, CommandId, Key } from '../../contracts.gen.ts';
+import type { CharacterId, CommandId, Key, NpcDefinition } from '../../contracts.gen.ts';
 import {
   accepted,
   bodyOf,
@@ -18,7 +18,7 @@ import { lockRefused } from '../locks.ts';
 import { standing } from '../position/shared.ts';
 import { closeEncounter } from '../combat/shared.ts';
 import { settled as crowSettled } from '../crow/behavior.ts';
-import { travel } from '../escort/shared.ts';
+import { mounted, travel } from '../escort/shared.ts';
 import { entrySight } from '../population/behavior.ts';
 import { engage } from '../disposition.ts';
 import { crossable, fall, fare, passage } from './shared.ts';
@@ -139,6 +139,10 @@ export function movementPlan(
     lockRefused(world, actor_id, world.rooms[there].locks?.enter, undefined, steps);
   if (locked) return locked;
   if (!crossable(world, body, there)) return 'invalid_state' as const;
+  const horse = mounted(world, actor_id);
+  const terrain = horse && (world.entities[horse] as NpcDefinition).mount!.terrain;
+  if (terrain && !(world.rooms[there].tags ?? []).some((t) => terrain.includes(t)))
+    return 'invalid_state' as const;
   const wet = water.edge(world, here, there, direction);
   if (wet) {
     const paid = water.admission(world, actor_id, wet.entering, steps);
@@ -146,7 +150,7 @@ export function movementPlan(
   }
   if (engaged(world, body) && !escape) return 'invalid_state' as const;
   if (!standing(world, actor_id)) return 'invalid_state' as const;
-  const paid = fare(world, body, there);
+  const paid = fare(world, actor_id, body, there);
   if (!paid) return 'insufficient_resource' as const;
   return { body, here, there, paid };
 }
