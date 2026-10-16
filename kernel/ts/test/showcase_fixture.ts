@@ -339,4 +339,11 @@ export function homestead(c: any) {
     'withdraw_b',
   ])
     delete c.services[ref('service', k)];
+  // The law district: theft, hide, NPC locks, stolen offers and the fine.
+  delete c.world.theft;
+  for (const k of ['fence', 'vault']) delete c.npcs[ref('npc', k)].locks;
+  delete c.npcs[ref('npc', 'fence')].shop;
+  delete c.statuses[ref('status', 'hidden')];
+  for (const k of ['hide', 'yard_hide']) delete c.reactions[ref('reaction', k)];
+  delete c.dialogues[ref('dialogue', 'clerk_fine')];
 }

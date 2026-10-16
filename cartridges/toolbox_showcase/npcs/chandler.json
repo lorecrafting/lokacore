@@ -41,5 +41,11 @@
     ],
     "bought": "shop.bought",
     "sold": "shop.sold"
-  }
+  },
+  "attributes": [
+    {
+      "attribute": "alertness",
+      "value": 1
+    }
+  ]
 }

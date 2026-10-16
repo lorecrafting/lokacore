@@ -466,6 +466,29 @@
         "player"
       ],
       "meaning": "This character has a knife on order with the Undercroft smith."
+    },
+    "stolen": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "instance"
+      ],
+      "per_subject": true,
+      "meaning": "The item was lifted from someone; only theft sets it."
+    },
+    "wanted": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "Someone in the Undercroft saw this character steal; the counting house's fine clears it."
     }
   }
 }

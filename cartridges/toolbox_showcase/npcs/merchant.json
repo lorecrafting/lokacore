@@ -1,0 +1,15 @@
+{
+  "keywords": [
+    "merchant"
+  ],
+  "short": "npc.merchant.short",
+  "room_line": "npc.merchant.room",
+  "description": "npc.merchant.description",
+  "room": "market_row",
+  "attributes": [
+    {
+      "attribute": "alertness",
+      "value": 0
+    }
+  ]
+}

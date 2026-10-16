@@ -5,5 +5,14 @@
     "east": {
       "to": "undercroft"
     }
+  },
+  "details": {
+    "barrels": {
+      "aliases": [
+        "barrels"
+      ],
+      "description": "detail.barrels",
+      "rating": 0
+    }
   }
 }

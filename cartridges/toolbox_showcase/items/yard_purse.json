@@ -1,0 +1,13 @@
+{
+  "keywords": [
+    "purse"
+  ],
+  "short": "item.yard_purse.short",
+  "room_line": "item.yard_purse.room",
+  "description": "item.yard_purse.description",
+  "location": {
+    "in": "npc",
+    "npc": "mark"
+  },
+  "mass_grams": 50
+}

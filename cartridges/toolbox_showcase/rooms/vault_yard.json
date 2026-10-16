@@ -5,5 +5,14 @@
     "up": {
       "to": "undercroft"
     }
+  },
+  "details": {
+    "yard_barrels": {
+      "aliases": [
+        "barrels"
+      ],
+      "description": "detail.yard_barrels",
+      "rating": 0
+    }
   }
 }
