@@ -16,4 +16,15 @@ defmodule Loka.ContentSettleTest do
              {"UNRESOLVED_REFERENCE", "reactions/arrival_line.apply[0].text"}
            ]
   end
+
+  # Break: the narrate check reads a rejected catalog (:unknown) as a map, so compile raises
+  # instead of reporting only the text.json error.
+  test "a rejected text catalog reports the catalog, not the narrate line", %{dir: dir} do
+    bad = {"text.json", &Map.put(&1, "settle.arrival_line", 7)}
+    assert {:error, diags} = Loka.ContentSource.compile(dir, [bad])
+
+    assert Enum.map(diags, &{&1["code"], &1["path"]}) == [
+             {"SCHEMA_VIOLATION", ~s(text["settle.arrival_line"])}
+           ]
+  end
 end
