@@ -711,11 +711,12 @@
                 "additionalProperties": false
               },
               {
-                "description": "Toolbox row FD5 (loka-kgd.22; kernel_api at least 1.95): jumps the named NPC (else the event's subject when it is an NPC) to room, else the event's room, as a schedule move does (no exit, passage or lock), and emits entity_entered_room at the cause's time. Nothing when the NPC is dead, engaged, a following escort, blocked from moving or already there, no room resolves, or the delivery's character is in a running scene.",
+                "description": "Toolbox row FD5 (loka-kgd.22; kernel_api at least 1.95): jumps the named NPC (else the event's subject when it is an NPC) to room, else the event's room, as a schedule move does (no exit, passage or lock), and emits entity_entered_room at the cause's time. Nothing when the NPC is dead, engaged, a following escort, blocked from moving or already there, no room resolves, or the delivery's character is in a running scene. Settle S4-1 (kernel_api at least 1.103): plan (never with npc; room required) moves every living member of that population plan instead, in EntityId order, each as above.",
                 "type": "object",
                 "properties": {
                   "op": { "const": "npc.move" },
                   "npc": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
+                  "plan": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
                   "room": { "$ref": "identity.schema.json#/$defs/DefinitionRef" }
                 },
                 "required": ["op"],

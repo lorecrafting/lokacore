@@ -27,4 +27,25 @@ defmodule Loka.ContentSettleTest do
              {"SCHEMA_VIOLATION", ~s(text["settle.arrival_line"])}
            ]
   end
+
+  # Break (Settle S4-1; twin of the loader test in kernel/ts/test/settle.test.ts): a plan move
+  # names an unknown plan, also names an NPC, or names no room, and compiles. The guard is a
+  # placed NPC (the raider is a spawn template, refused at .npc on its own).
+  test "a plan move names a known plan and a room, never an NPC", %{dir: dir} do
+    guard =
+      Map.delete(JSON.decode!(File.read!(Path.join(dir, "npcs/raider.json"))), "spawn_template")
+
+    at = "reactions/band_out.apply[0].plan"
+
+    refused = fn edit ->
+      step = &update_in(&1, ["apply", Access.at(0)], edit)
+      changes = [{"npcs/guard.json", guard}, {"reactions/band_out.json", step}]
+      assert {:error, diags} = Loka.ContentSource.compile(dir, changes)
+      Enum.map(diags, &{&1["code"], &1["path"]})
+    end
+
+    assert refused.(&Map.put(&1, "plan", "nobody")) == [{"UNRESOLVED_REFERENCE", at}]
+    assert refused.(&Map.put(&1, "npc", "guard")) == [{"SCHEMA_VIOLATION", at}]
+    assert refused.(&Map.delete(&1, "room")) == [{"SCHEMA_VIOLATION", at}]
+  end
 end

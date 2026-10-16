@@ -1127,6 +1127,22 @@
       "below": "1.102",
       "source": "cartridges/settle_sampler",
       "feature": "a narrate step (Settle S3-1)",
+      "edits": [["reactions/band_out.json", ["apply"], [{ "op": "npc.move", "room": "hills" }]]],
+      "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
+      "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
+    },
+    {
+      "floor": "1.103",
+      "below": "1.102",
+      "source": "cartridges/settle_sampler",
+      "feature": "an npc.move naming a plan (Settle S4-1)",
+      "edits": [
+        [
+          "reactions/arrival_line.json",
+          ["apply"],
+          [{ "op": "fact.assign", "fact": "band_out", "value": true }]
+        ]
+      ],
       "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
       "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
     }
