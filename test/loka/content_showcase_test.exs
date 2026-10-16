@@ -65,15 +65,16 @@ defmodule Loka.ContentShowcaseTest do
   # Nell and Bess's disposition.refuse lines need 1.104 (Book hostile refusal).
   defp unrefuse(n), do: update_in(n, ["disposition"], &Map.delete(&1, "refuse"))
 
+  defp homestead_manifest(c),
+    do:
+      c
+      |> update_in(["world"], &Map.drop(&1, ~w(construction theft)))
+      |> update_in(["requires", "capabilities"], &Map.delete(&1, "light"))
+
   defp homestead_edits,
     do:
       [
-        {"cartridge.json",
-         fn c ->
-           c
-           |> update_in(["world"], &Map.drop(&1, ~w(construction theft)))
-           |> update_in(["requires", "capabilities"], &Map.delete(&1, "light"))
-         end},
+        {"cartridge.json", &homestead_manifest/1},
         {"rooms/holding_lane.json", &Map.delete(&1, "site")},
         {"npcs/carpenter.json", &Map.delete(&1, "services")},
         {"rooms/holding_croft.json", &Map.delete(&1, "site")},
