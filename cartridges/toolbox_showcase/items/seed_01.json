@@ -9,5 +9,6 @@
   "location": {
     "in": "item",
     "item": "sack"
-  }
+  },
+  "give_allowed": false
 }

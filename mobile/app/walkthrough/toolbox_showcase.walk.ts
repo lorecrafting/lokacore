@@ -57,7 +57,8 @@ walk(
     await moves(screen, 'east');
     await take(/^A fishing rod is here/, /^Take a fishing rod/);
     const fish = /^An? (trout|salmon|eel) is here/;
-    for (let landed = 0, i = 0; landed < 2 && i < 12; i++) {
+    let landed = 0;
+    for (let i = 0; landed < 2 && i < 12; i++) {
       await held(/^a fishing rod/);
       await tap(/^Cast the rod/);
       await tap(LABEL.leave);
@@ -67,6 +68,7 @@ walk(
       }
       await new Promise((done) => setTimeout(done, 13_000)); // the 600 s cooldown at rate 50
     }
+    if (landed < 2) throw new Error(`landed ${landed} fish in 12 casts; the stew order needs 2`);
     // Resting in the hut applies nothing (H1 finding 1): the cot rests on the lane floor.
     await moves(screen, 'west', 'north');
     await held(/^a cot/);

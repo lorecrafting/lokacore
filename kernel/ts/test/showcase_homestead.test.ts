@@ -537,8 +537,16 @@ const water = (w: World) =>
 const turnip = (w: World) => where(w, id(w, 'item', 'turnip_01')) === plot(w);
 
 // Breaks: the plot lock, the sow rule (status, stamp, spent seed), the description thresholds,
-// the water midpoint (43200 is late), the seed return, the cure on resowing, the winter guard.
+// the water midpoint (43200 is late), the seed return, the cure on resowing, the winter guard,
+// a seed given away (sow would start the plot's clock on the farmer).
 test('homestead 13: buy the plot, sow at 08:00, water after the midpoint, harvest', () => {
+  const seed = take(yard(), 'seed_01');
+  const gift = {
+    type: 'give',
+    item_id: id(seed, 'item', 'seed_01'),
+    recipient_id: npc(seed, 'farmer'),
+  };
+  assert.equal(refused(seed, gift), 'invalid_state');
   assert.equal(
     refused(take(yard(), 'seed_01'), {
       type: 'put',
