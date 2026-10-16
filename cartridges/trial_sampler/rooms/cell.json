@@ -1,5 +1,10 @@
 {
   "title": "room.cell.title",
   "description": "room.cell.description",
-  "exits": {}
+  "exits": {
+    "west": {
+      "to": "square",
+      "barrier": "cell_door"
+    }
+  }
 }

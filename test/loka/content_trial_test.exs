@@ -6,7 +6,7 @@ defmodule Loka.ContentTrialTest do
   # exist, with a line missing from the text, or under API 1.104.
   test "an arrest needs hostile, no engage, a room, its line and API 1.105" do
     dir = Loka.ContentSource.copy("cartridges/trial_sampler")
-    assert {:ok, _, _} = Loka.ContentSource.compile(dir, [])
+    assert {:ok, _, []} = Loka.ContentSource.compile(dir, [])
     at = "npcs/guard.disposition"
     guard = "npcs/guard.json"
 

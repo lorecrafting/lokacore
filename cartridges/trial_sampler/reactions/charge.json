@@ -1,0 +1,25 @@
+{
+  "on": {
+    "event": "entity_entered_room",
+    "room": "cell"
+  },
+  "when": {
+    "policy_version": 1,
+    "root": {
+      "op": "fact_compare",
+      "fact": "wanted",
+      "equals": true
+    }
+  },
+  "apply": [
+    {
+      "op": "narrate",
+      "text": "trial.charge"
+    },
+    {
+      "op": "barrier.set",
+      "barrier": "cell_door",
+      "to": "closed"
+    }
+  ]
+}
