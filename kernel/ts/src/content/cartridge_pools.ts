@@ -4,7 +4,7 @@ import { diag, step, type Checks, type Obj } from './cartridge_refs.ts';
 
 // Each resource's bounds hold its start (RESOURCE_SPEC_INVALID), each band table (a pool's,
 // the world's) is well formed (bands), and the world's move cost names a resource of this
-// cartridge. Row 43a: terrain costs, a costless movement or a road or marsh room need 1.106.
+// cartridge. Row 43a: terrain costs or a costless movement need 1.106.
 export function pools(c: Obj, named: Checks['named']): Diagnostic[] {
   const out: Diagnostic[] = [];
   for (const [ref, s] of Object.entries((c.resources ?? {}) as Obj)) {
@@ -41,11 +41,7 @@ export function pools(c: Obj, named: Checks['named']): Diagnostic[] {
   if (cost) named(cost.resource, 'resource', '.cartridge.world.movement.cost.resource');
   const movement = c.world?.movement;
   if (
-    (movement?.terrain ||
-      (movement && !cost) ||
-      Object.values((c.rooms ?? {}) as Obj).some((r) =>
-        (r.tags ?? []).some((t: string) => t === 'road' || t === 'marsh'),
-      )) &&
+    (movement?.terrain || (movement && !cost)) &&
     apiCmp(c.manifest.requires.kernel_api.at_least, '1.106') < 0
   )
     out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));

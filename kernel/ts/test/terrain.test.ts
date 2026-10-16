@@ -154,3 +154,16 @@ test('case 7: the loader refuses an unknown tag, a bad percent and API 1.105', (
     ['KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'],
   );
 });
+
+// Breaks: a later row adds a Tag without adding it to the terrain key pattern (or the reverse), so
+// the new tag is silently refused as a terrain key.
+test('the terrain key pattern names exactly the Tag enum', () => {
+  const schema = (f: string) =>
+    JSON.parse(readFileSync(new URL(`../../../protocol/${f}`, import.meta.url), 'utf8'));
+  const world = schema('cartridge.schema.json').$defs.WorldSettings;
+  const pattern = world.properties.movement.properties.terrain.propertyNames.pattern;
+  assert.deepEqual(
+    pattern.slice(2, -2).split('|').sort(),
+    [...schema('entity.schema.json').$defs.Tag.enum].sort(),
+  );
+});
