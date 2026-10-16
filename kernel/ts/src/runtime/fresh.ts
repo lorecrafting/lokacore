@@ -1,4 +1,4 @@
-// size: allow 310, initial visible knowledge joins existing genesis before the first receipt
+// size: allow 315, initial visible knowledge joins existing genesis before the first receipt; the clock-0 currency rows share genesis
 import { record } from '../mechanics/knowledge/shared.ts';
 import { apply } from './apply.ts';
 // A fresh world from a loaded loka-cartridge-v2 artifact (03 §1, §3, §23; numeric profile,
@@ -144,6 +144,15 @@ function place(
   };
 }
 
+// A currency the player pays from a clock-0 row: a service, transport, wage or lesson payment.
+const spent = (cartridge: Cartridge, k: string) =>
+  Object.values(cartridge.services ?? {}).some((offer) => offer.currency.key === k) ||
+  Object.values(cartridge.transports ?? {}).some((t) => t.currency.key === k) ||
+  cartridge.world?.group?.wage?.resource.key === k ||
+  Object.values(cartridge.dialogues ?? {}).some((d) =>
+    Object.values(d.choices).some((c) => c.lesson_payment?.resource.key === k),
+  );
+
 // Birth resource rows by canonical target: player start values and explicitly authored NPC HP.
 function started(cartridge: Cartridge, body: EntityId, clock: number, entities: World['entities']) {
   const { id: cartridge_id, version: cartridge_version } = cartridge.manifest;
@@ -151,14 +160,7 @@ function started(cartridge: Cartridge, body: EntityId, clock: number, entities: 
     Object.values(cartridge.resources ?? {})
       .filter(
         (s) =>
-          (clock !== 0 ||
-            s.regen ||
-            Object.values(cartridge.services ?? {}).some((offer) => offer.currency.key === s.key) ||
-            Object.values(cartridge.transports ?? {}).some((t) => t.currency.key === s.key) ||
-            cartridge.world?.group?.wage?.resource.key === s.key ||
-            Object.values(cartridge.dialogues ?? {}).some((d) =>
-              Object.values(d.choices).some((c) => c.lesson_payment?.resource.key === s.key),
-            )) &&
+          (clock !== 0 || s.regen || spent(cartridge, s.key)) &&
           !Object.values(cartridge.services ?? {}).some(
             (service) => service.benefit.kind === 'meal' && service.benefit.stock.key === s.key,
           ),
