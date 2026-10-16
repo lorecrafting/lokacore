@@ -20,6 +20,7 @@ import { pending, talking } from '../src/mechanics/dialogue/shared.ts';
 import { engaged } from '../src/mechanics/combat/shared.ts';
 import { visits } from '../src/mechanics/knowledge/shared.ts';
 import { positionOf } from '../src/mechanics/position/shared.ts';
+import { level, resourceRef } from '../src/mechanics/resource.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-trial-'));
 let artifact: Uint8Array;
@@ -177,7 +178,7 @@ test('a wanted sleeper is arrested where it sleeps', () => {
 });
 
 // Breaks: the cell door is offered or opens while the prisoner is wanted (`opens_when` dropped),
-// or pleading clears `wanted` or opens the door (pay is untested: Fresh-row gap).
+// or pleading clears `wanted` or opens the door.
 test('a wanted prisoner is locked in; pleading changes nothing', () => {
   const w = arrested(fresh());
   assert.deepEqual(exit(w, 'west'), {
@@ -198,6 +199,42 @@ test('a wanted prisoner is locked in; pleading changes nothing', () => {
   );
   assert.deepEqual(r.world.state.facts, w.state.facts);
   assert.equal(exit(r.world, 'west').door?.state, 'closed');
+});
+
+// Breaks: Fresh starts no row for a currency used only by a dialogue payment (pay is refused as
+// insufficient), the payment skips the transfer, or paying leaves `wanted` set and the door shut.
+test('paying the fine moves 5 pennies to the jailer and frees the prisoner', () => {
+  const w = arrested(fresh());
+  const pennies = (v: World, who: EntityId) => level(v, who, resourceRef(v, 'pennies'));
+  assert.equal(pennies(w, body(w)), 10);
+  const talked = act(w, { type: 'talk', target_id: npc(w, 'jailer') });
+  const [continuation_id] = pending(talked, talked.character)!;
+  const r = ok(play(talked, { type: 'choose', choice_id: 'pay', continuation_id }));
+  if (r.decision.kind !== 'accepted') throw new Error('unreachable');
+  assert.deepEqual(
+    r.decision.narration?.map((l) => l.key),
+    ['narration.jailer.paid'],
+  );
+  assert.equal(pennies(r.world, body(r.world)), 5);
+  assert.equal(pennies(r.world, npc(r.world, 'jailer')), 5);
+  const out = act(act(r.world, { type: 'open', direction: 'west' }), {
+    type: 'move',
+    direction: 'west',
+  });
+  assert.equal(at(out), room(out, 'square'));
+});
+
+// Break: the declared `start` is not the Fresh row's value (a start of 4 still pays a fine of 5).
+test('a prisoner with fewer pennies than the fine cannot pay', () => {
+  const r = reload((c) => (c.resources[`${S}resource/pennies`].start = 4));
+  assert.ok(r.ok, JSON.stringify(r));
+  const w = arrested(fresh(r.cartridge as Cartridge));
+  const talked = act(w, { type: 'talk', target_id: npc(w, 'jailer') });
+  const [continuation_id] = pending(talked, talked.character)!;
+  assert.equal(
+    code(talked, { type: 'choose', choice_id: 'pay', continuation_id }),
+    'insufficient_resource',
+  );
 });
 
 // Breaks: the reaction's `when` is dropped (an innocent visitor hears the charge and is shut in),

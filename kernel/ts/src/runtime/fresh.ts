@@ -155,7 +155,10 @@ function started(cartridge: Cartridge, body: EntityId, clock: number, entities: 
             s.regen ||
             Object.values(cartridge.services ?? {}).some((offer) => offer.currency.key === s.key) ||
             Object.values(cartridge.transports ?? {}).some((t) => t.currency.key === s.key) ||
-            cartridge.world?.group?.wage?.resource.key === s.key) &&
+            cartridge.world?.group?.wage?.resource.key === s.key ||
+            Object.values(cartridge.dialogues ?? {}).some((d) =>
+              Object.values(d.choices).some((c) => c.lesson_payment?.resource.key === s.key),
+            )) &&
           !Object.values(cartridge.services ?? {}).some(
             (service) => service.benefit.kind === 'meal' && service.benefit.stock.key === s.key,
           ),
