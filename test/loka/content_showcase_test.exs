@@ -43,7 +43,8 @@ defmodule Loka.ContentShowcaseTest do
                     services/withdraw_a services/withdraw_b statuses/hidden reactions/hide
                     reactions/yard_hide dialogues/clerk_fine dialogues/jailer_broke
                     dialogues/jailer_talk reactions/charge recipes/lux recipes/ward
-                    items/lantern items/lamp_oil)
+                    recipes/flamma reactions/flamma_sparks
+                    items/lantern items/attic_lantern items/lamp_oil)
 
   @homestead_facts ~w(cooked gifted_apple gifted_rat ordered owns_pen owns_plot regard sown_at
                       traded_knife watered_at)
@@ -66,7 +67,8 @@ defmodule Loka.ContentShowcaseTest do
                     {"npcs/fence", "locks"},
                     {"npcs/vault", "locks"},
                     {"npcs/fence", "shop"},
-                    {"npcs/guard", "disposition"}
+                    {"npcs/guard", "disposition"},
+                    {"rooms/crypt", "dark_description"}
                   ]
 
   # Nell and Bess's disposition.refuse lines need 1.104 (Book hostile refusal).

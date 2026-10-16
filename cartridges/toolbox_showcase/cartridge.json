@@ -252,6 +252,14 @@
         {
           "npc": "tilt_goblin",
           "experience": 10
+        },
+        {
+          "npc": "wight",
+          "experience": 10
+        },
+        {
+          "npc": "attic_wight",
+          "experience": 10
         }
       ],
       "level_up": "levelling.level_up"

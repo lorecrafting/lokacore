@@ -1,0 +1,13 @@
+{
+  "keywords": [
+    "jar"
+  ],
+  "short": "item.spark_jar.short",
+  "room_line": "item.spark_jar.room",
+  "description": "item.spark_jar.description",
+  "mass_grams": 800,
+  "location": {
+    "in": "room",
+    "room": "golem_yard"
+  }
+}

@@ -533,6 +533,17 @@
         "player"
       ],
       "meaning": "The hedge-wizard's errand taught the player the word of warding."
+    },
+    "gate_oiled": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The player oiled the crypt gate's winch; the gate opens on it."
     }
   }
 }

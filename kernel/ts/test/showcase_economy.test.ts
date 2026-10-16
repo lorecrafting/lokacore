@@ -249,7 +249,14 @@ test('economy 6: hide in the alley, lift the merchant purse unseen', () => {
   w = walk(w, 'south', 'west');
   H = w.state.clock;
   const h = play(w, { type: 'perform', action: 'hide' });
-  assert.deepEqual(kinds(h), ['check_passed', 'fact_changed', 'custom_event', 'action_completed']);
+  // status_applied (hidden landing): recorded while a reaction listens, the magic district's shock_on_wet
+  assert.deepEqual(kinds(h), [
+    'check_passed',
+    'fact_changed',
+    'custom_event',
+    'action_completed',
+    'status_applied',
+  ]);
   assert.equal(fact(h.world, 'uses_stealth'), 1);
   w = walk(h.world, 'east', 'north');
   assert.deepEqual(labels(w), ['condition.hidden']);

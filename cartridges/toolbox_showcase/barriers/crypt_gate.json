@@ -1,0 +1,19 @@
+{
+  "keywords": [
+    "crypt_gate",
+    "gate"
+  ],
+  "short": "barrier.crypt_gate.short",
+  "initial": "closed",
+  "tags": [
+    "metal"
+  ],
+  "opens_when": {
+    "policy_version": 1,
+    "root": {
+      "op": "fact_compare",
+      "fact": "gate_oiled",
+      "equals": true
+    }
+  }
+}

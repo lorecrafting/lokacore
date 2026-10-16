@@ -350,10 +350,12 @@ export function homestead(c: any) {
     delete c.dialogues[ref('dialogue', k)];
   delete c.reactions[ref('reaction', 'charge')];
   delete c.npcs[ref('npc', 'guard')].disposition;
-  // The magic district: the light capability (above 1.58), its lantern and lux; ward's level and
-  // stat policy.
+  // The magic district: the light capability (above 1.58), its lanterns, the dark crypt and the
+  // spells (1.98) with flamma's sparks; ward's level and stat policy.
   delete c.manifest.requires.capabilities.light;
   delete c.lock.capabilities.light;
-  for (const k of ['lux', 'ward']) delete c.recipes[ref('recipe', k)];
-  for (const k of ['lantern', 'lamp_oil']) delete c.items[ref('item', k)];
+  for (const k of ['lux', 'ward', 'flamma']) delete c.recipes[ref('recipe', k)];
+  delete c.reactions[ref('reaction', 'flamma_sparks')];
+  for (const k of ['lantern', 'attic_lantern', 'lamp_oil']) delete c.items[ref('item', k)];
+  delete c.rooms[ref('room', 'crypt')].dark_description;
 }

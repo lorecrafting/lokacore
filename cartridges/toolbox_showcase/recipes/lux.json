@@ -32,6 +32,10 @@
         {
           "op": "light.ignite",
           "item": "lantern"
+        },
+        {
+          "op": "light.ignite",
+          "item": "attic_lantern"
         }
       ],
       "narration": {

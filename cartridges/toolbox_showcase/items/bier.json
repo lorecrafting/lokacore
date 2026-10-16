@@ -1,0 +1,17 @@
+{
+  "keywords": [
+    "bier"
+  ],
+  "short": "item.bier.short",
+  "room_line": "item.bier.room",
+  "description": "item.bier.description",
+  "mass_grams": 200000,
+  "location": {
+    "in": "room",
+    "room": "crypt"
+  },
+  "tags": [
+    "wooden",
+    "burnable"
+  ]
+}

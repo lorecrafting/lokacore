@@ -7,6 +7,15 @@
     },
     "north": {
       "to": "reading_room"
+    },
+    "east": {
+      "to": "crypt_stair"
+    },
+    "west": {
+      "to": "golem_yard"
+    },
+    "up": {
+      "to": "loft_attic"
     }
   },
   "details": {

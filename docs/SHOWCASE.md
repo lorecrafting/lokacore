@@ -1,6 +1,6 @@
 # Toolbox showcase
 
-`cartridges/toolbox_showcase` (the hub and the body, world and social districts of [showcase plan 1](showcase/hub-and-first-districts.md) are built, the combat district of [showcase plan 2](showcase/combat-district.md) is built, the cause-and-effect slice of [showcase plan 3](showcase/cause-and-effect.md) is built, steps 1-5 of the magic district (plan 6) are built; the Homestead, economy and law districts, the rest of the magic district and the traps district of plans [4](showcase/homestead-district.md), [5](showcase/economy-law-district.md), [6](showcase/magic-district.md) and [7](showcase/traps-district.md) are planned, to build in that order; compiled answer
+`cartridges/toolbox_showcase` (the hub and the body, world and social districts of [showcase plan 1](showcase/hub-and-first-districts.md) are built, the combat district of [showcase plan 2](showcase/combat-district.md) is built, the cause-and-effect slice of [showcase plan 3](showcase/cause-and-effect.md) is built, the magic district (plan 6) is built; the Homestead, economy and law districts and the traps district of plans [4](showcase/homestead-district.md), [5](showcase/economy-law-district.md) and [7](showcase/traps-district.md) are planned, to build in that order; compiled answer
 `protocol/fixtures/toolbox_showcase_hash.json`, held by `test/loka/content_showcase_test.exs`) is the composition proof for the [mechanics toolbox](MECHANICS-TOOLBOX.md):
 one playable cartridge where finished mechanics meet each other, so a pair that only works in its
 own sampler shows up here ([owner decision](decisions/owner-decision-showcase-2026-10-10.md)).
@@ -69,12 +69,12 @@ Status `planned (plan N)` means that showcase plan ([plan 1](showcase/hub-and-fi
 | property x locks x key barrier | economy/law | `strongroom` | `showcase_economy.test.ts` (economy 1, 2, 8, 8 branch) | built |
 | theft x sneak x witness x wanted x disposition x arrest x jail | economy/law | `pawn_alley` (hide), `market_row` (the purse, the guard's arrest), `cell` (the jailer, work-off, the grate), `counting_house` (the fine) | `showcase_economy.test.ts` (economy 6, 9, 10, yard theft) | built |
 | fence x stolen provenance x get lock | economy/law | `pawn_alley` | `showcase_economy.test.ts` (economy 7, 7 control, yard theft) | built |
-| spells x reagents x light x dark room | magic/use-on | `loft` (ash, the lantern), `crypt` | `kernel/ts/test/showcase_magic.test.ts` (magic 2, 6) | planned (plan 6) |
+| spells x reagents x light x dark room | magic/use-on | `loft` (ash, the lantern), `crypt` | `kernel/ts/test/showcase_magic.test.ts` (magic 2, 6) | built |
 | command blocks x spells x readables | magic/use-on | `reading_room` (hushed; the grimoire) | `showcase_magic.test.ts` (magic 3) | built |
 | quests x levelling x spell gates | magic/use-on | the errand, the Raise, `ward` | `showcase_magic.test.ts` (magic 4, 5) | built |
-| spell damage x resistances x death credit | magic/use-on | `crypt` (the wight) | `showcase_magic.test.ts` (magic 7) | planned (plan 6) |
-| spells x fire x use-on x cues | magic/use-on | `crypt` (the bier), `crypt_stair` (the smoke, the winch) | `showcase_magic.test.ts` (magic 6-8) | planned (plan 6) |
-| status readers x reactions x NPC statuses | magic/use-on | `golem_yard` | `showcase_magic.test.ts` (magic 9) | planned (plan 6) |
+| spell damage x resistances x death credit | magic/use-on | `crypt` (the wight) | `showcase_magic.test.ts` (magic 7) | built |
+| spells x fire x use-on x cues | magic/use-on | `crypt` (the bier), `crypt_stair` (the smoke, the winch) | `showcase_magic.test.ts` (magic 6-8) | built |
+| status readers x reactions x NPC statuses | magic/use-on | `golem_yard` | `showcase_magic.test.ts` (magic 9) | built |
 | traps x statuses x reset x senses | traps | `sapper_stair` (search, disarm), `plate_passage` | `kernel/ts/test/showcase_traps.test.ts` (traps 1-4, 7) | planned (plan 7) |
 | puzzles x barriers x readables | traps | `lever_hall`, `lever_vault`, `dial_vault` | `showcase_traps.test.ts` (traps 5, 6) | planned (plan 7) |
 | fear x pack x shout x death | traps | `chief_den` | `showcase_traps.test.ts` (traps 8, 9) | planned (plan 7) |

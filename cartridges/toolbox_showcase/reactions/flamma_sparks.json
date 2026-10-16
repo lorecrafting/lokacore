@@ -1,0 +1,14 @@
+{
+  "on": {
+    "event": "action_completed",
+    "action": "flamma"
+  },
+  "apply": [
+    {
+      "op": "status.apply",
+      "status": "burning",
+      "co_present": true,
+      "tag": "burnable"
+    }
+  ]
+}

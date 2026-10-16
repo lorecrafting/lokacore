@@ -1,0 +1,13 @@
+{
+  "title": "room.crypt_stair.title",
+  "description": "room.crypt_stair.description",
+  "exits": {
+    "west": {
+      "to": "loft"
+    },
+    "down": {
+      "to": "crypt",
+      "barrier": "crypt_gate"
+    }
+  }
+}
