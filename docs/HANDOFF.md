@@ -180,6 +180,18 @@ polish stage which needs me at the computer for a bit."
   guards new containers). A player with 0 pennies cannot claim an ordered stew (known limit). Engine gaps in loka-kgd.163.
 - #408 (loka-y6yg.18, showcase fixes): the hostile Warden shuts the toll gate when the player enters (shared gate closes
   for all, like gate_lifted); the combat sign's shout gets a Book chip ("ware").
+- #408 merged. Homestead blind playtest (loka-y6yg.22) triaged: content fixes .24-.30 batched as loka-y6yg.31
+  (Sonnet): no new item source for the croft seed (hint instead), fishing line no longer claims a catch, neutral
+  order-open line. Book UI findings in loka-x6t.67 for the polish phase. Playtest harness could not resize to phone width.
+- Book bugs part B (loka-y6yg.20, hostile refusal, kernel_api 1.104) building; economy/law E1 (loka-y6yg.23) building.
+- #410 (loka-y6yg.31) merged. E1 of #409 approved after a fix (an unlocked yard crate was a penny faucet: now locked).
+  Hub sign reads "Four roads and a cellar stair" until the magic district adds the ladder. E2 (theft, wanted, fine) building.
+- #411 (loka-y6yg.20 part B, hostile refusal, kernel_api 1.104): review + second opinion APPROVE WITH NOTES; final fix
+  round adds a schema rule (refusal needs hostile). Unaffordable buy reads "can't afford".
+- M14 batch (loka-kgd.164) briefs drafted by Fable, stored in loka-kgd.165-.168 and .147. PM rulings: the trial is a
+  narrate reaction plus the jailer's dialogue (no scene; the row text says "scene"); jail is content only on the arrest
+  engine; companion remarks read any present NPC (member gate in content); new tags road and marsh; a mount moves only on
+  road-tagged rooms; the cell is shared-world (per-instance waits for instancing). kernel_api 1.105-1.108.
 
 ## Owner answers this session
 
