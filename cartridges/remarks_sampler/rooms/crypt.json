@@ -1,0 +1,12 @@
+{
+  "title": "room.crypt.title",
+  "description": "room.crypt.description",
+  "tags": [
+    "cool"
+  ],
+  "exits": {
+    "west": {
+      "to": "road"
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "title": "room.road.title",
+  "description": "room.road.description",
+  "tags": [
+    "road"
+  ],
+  "exits": {
+    "south": {
+      "to": "yard"
+    },
+    "east": {
+      "to": "ford"
+    }
+  }
+}

@@ -184,6 +184,31 @@ polish stage which needs me at the computer for a bit."
   (Sonnet): no new item source for the croft seed (hint instead), fishing line no longer claims a catch, neutral
   order-open line. Book UI findings in loka-x6t.67 for the polish phase. Playtest harness could not resize to phone width.
 - Book bugs part B (loka-y6yg.20, hostile refusal, kernel_api 1.104) building; economy/law E1 (loka-y6yg.23) building.
+- #410 (loka-y6yg.31) merged. E1 of #409 approved after a fix (an unlocked yard crate was a penny faucet: now locked).
+  Hub sign reads "Four roads and a cellar stair" until the magic district adds the ladder. E2 (theft, wanted, fine) building.
+- #411 (loka-y6yg.20 part B, hostile refusal, kernel_api 1.104) MERGED: review + second opinion approved; the schema
+  requires hostile whenever a refusal line is present. Unaffordable buy reads "can't afford".
+- M14 batch (loka-kgd.164) briefs drafted by Fable, stored in loka-kgd.165-.168 and .147. PM rulings: the trial is a
+  narrate reaction plus the jailer's dialogue (no scene; the row text says "scene"); jail is content only on the arrest
+  engine; companion remarks read any present NPC (member gate in content); new tags road and marsh; a mount moves only on
+  road-tagged rooms; the cell is shared-world (per-instance waits for instancing). kernel_api 1.105-1.108.
+- M14 arrest engine (row 35) approved after 2 fix rounds: an arrest is skipped when the move or a sleep would leave a
+  water row or encounter behind (that state could not be saved and reopened). Terrain costs (43a) approved; room tags must
+  be unique (new error code duplicate_items); entering a water-edge room skips the terrain fare (known limit). Tag-floor gap
+  filed loka-kgd.169. Batch branch toolbox/batch-m14 (no PR yet).
+- M14 trial (row 35) done in the batch: arrest + charge line + jailer fine (no scene). Engine fix found on the way: a
+  currency used only by dialogue payments had no starting balance (fresh.ts). Arrest wording approved by the designer.
+  Companion remarks (FD10, 1.107) in review; a perceived NPC's remarks stay visible in a dark room (PM). Jail (36) building.
+- M14 batch head e31edbb8 holds rows 35 (trial), 36 (jail: force the grate, stay wanted, climb back in and be charged
+  again), 43a (terrain) and FD10 (companion remarks, review + second opinion approved). Mounts 43b-engine (1.108) building;
+  43b-content last; then the Fable batch review and one PR.
+- M14 mounts (43b engine 1.108 + mount_sampler) approved; designer approved the mount Book text (no indicator: the
+  saddled description, the mv fare and the refused exit are the only evidence). PR #412 (loka-kgd.164) opened at
+  8c3c8ffd; Fable batch review running on the owner's earlier "Under 70%, go" (usage meter not readable, loka-8zqg).
+- #412 MERGED (M14 closed: loka-kgd.164-.168, .147). Batch review APPROVE WITH NOTES; the one doc fix (an arrest leaves
+  a ridden horse behind) is in. Filed loka-y6yg.32: the economy guard arrests instead of fighting. M15 batch loka-kgd.170
+  (rows 47 loka-kgd.171, G10 loka-kgd.172, FD6 loka-kgd.143); letters stay out unless the drafter shows otherwise; Fable
+  brief drafting running. E2 of #409 in Opus review.
 
 ## Owner answers this session
 

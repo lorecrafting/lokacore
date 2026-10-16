@@ -9,6 +9,7 @@ import { assigned } from '../fact.ts';
 import { fact, positionOf, VERBS } from './shared.ts';
 import { recoveryAdjustments } from '../resource.ts';
 import { engage } from '../disposition.ts';
+import { engaged } from '../combat/shared.ts';
 
 export const decide: Rule<'position'> = (world, command, mint, steps = { n: 0 }) => {
   const { type, actor_id } = command.payload;
@@ -34,10 +35,19 @@ export const decide: Rule<'position'> = (world, command, mint, steps = { n: 0 })
         ]
       : [];
   // PM provisional, owner question (loka-kgd.119): only a Sleep provokes; revert this call to undo it.
+  // Row 35: no arrest out of a water row or an open encounter (both pinned to this room).
+  const free = !world.state.water?.[actor_id]?.room_id && !engaged(world, body);
+  const here = world.state.containers[body]!;
   const met =
     type === 'sleep'
-      ? engage(world, actor_id, body, world.state.containers[body]!, mint, steps)
+      ? engage(world, command, body, here, mint, steps, run.position + 1, free)
       : undefined;
   const narration = met?.narration.length ? met.narration : undefined;
-  return accepted(world, outcome, [...run.ops, ...(met?.ops ?? [])], events, narration);
+  return accepted(
+    world,
+    outcome,
+    [...run.ops, ...(met?.ops ?? [])],
+    [...events, ...(met?.events ?? [])],
+    narration,
+  );
 };

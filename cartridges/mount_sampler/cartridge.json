@@ -1,0 +1,44 @@
+{
+  "api_version": "loka/v3",
+  "id": "mount_sampler",
+  "version": "0.0.1",
+  "title": "Mount Sampler",
+  "requires": {
+    "kernel_api": {
+      "at_least": "1.108",
+      "below": "2.0"
+    },
+    "content_schema": 1,
+    "rule_ir": 1,
+    "capabilities": {
+      "movement": 1,
+      "containment": 1,
+      "resource": 1,
+      "fact": 1,
+      "policy": 1,
+      "dialogue": 1,
+      "tags": 1,
+      "description_variant": 1
+    },
+    "client_features": []
+  },
+  "supported_profiles": [
+    "offline_private"
+  ],
+  "entry": "yard",
+  "world": {
+    "movement": {
+      "cost": {
+        "resource": "mv",
+        "amount": 2
+      },
+      "terrain": {
+        "road": 50,
+        "marsh": 300
+      }
+    },
+    "mount": {
+      "riding": "riding"
+    }
+  }
+}

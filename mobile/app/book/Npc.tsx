@@ -4,13 +4,14 @@ import type { GameView } from '../../packages/game-view/session.ts';
 import { absent, cap, plain, why, type group, type Page as Route } from './model.ts';
 import type { Button, DetailLine, presenter } from './presenter.ts';
 import { ActionCard, Cards } from './actions.tsx';
-import { LogLines, Note } from './lines.tsx';
+import { Asides, LogLines, Note } from './lines.tsx';
 import { Control, Page, type Thing } from './pages.tsx';
 import { note, prose, usePalette, type Palette } from './palette.ts';
 import { Riddle } from './Riddle.tsx';
 import { space } from './tokens.ts';
 import { LABEL } from './labels.ts';
 import { offerLabel } from './offers.ts';
+import { buyReason, reason, refused } from './words.ts';
 type Say = (key: string) => string;
 type Grouped = ReturnType<typeof group>;
 type Screen = ReturnType<ReturnType<typeof presenter>['screen']>;
@@ -72,6 +73,7 @@ export function NpcPage(p: NpcProps) {
   const c = usePalette();
   const choice =
     p.view.choice && (!p.npc || p.npc.id === p.view.choice.speaker_id) ? p.view.choice : undefined;
+  const enemy = p.npc && 'hostile' in p.npc && p.npc.hostile ? p.npc : undefined;
   // Where is the Map's control (sections.tsx); on the NPC's own page they are already here.
   const actions = p.npc ? p.g.on(p.npc.id).filter((b) => b.action_key !== 'where') : [];
   const cards = actions.filter((b) => b.command !== 'use_service');
@@ -84,13 +86,17 @@ export function NpcPage(p: NpcProps) {
       foot={foot}
     >
       {p.npc?.description && <Text style={prose(c)}>{plain(p.text(p.npc.description))}</Text>}
+      {p.npc && 'asides' in p.npc && <Asides keys={p.npc.asides} text={p.text} />}
       {p.npc && 'carrying' in p.npc && p.npc.carrying && (
         <Text style={note(c)}>{p.text(p.npc.carrying)}</Text>
       )}
       <LogLines lines={log} />
       {npcSkills(c, p)}
-      {!talk && !actions.length && !log.length && <Note>Nothing to do here.</Note>}
-      {!talk && <ShopOptions {...p} />}
+      {!talk && enemy && (
+        <Note>{enemy.refusal ? p.text(enemy.refusal) : refused(cap(p.text(enemy.name)))}</Note>
+      )}
+      {!talk && !enemy && !actions.length && !log.length && <Note>Nothing to do here.</Note>}
+      {!talk && !enemy && <ShopOptions {...p} />}
       {choice && <Choice {...p} press={answer} choice={choice} />}
       {!talk && (
         <Cards>
@@ -155,16 +161,17 @@ function ShopOptions(p: NpcProps) {
     <>
       {p.npc &&
         'shop' in p.npc &&
-        p.npc.shop?.map((o) => (
-          <Text key={o.item_id} style={note(c)}>
-            {p.text(o.name)}: Buy {o.buy.price}p
-            {o.buy.available
-              ? ''
-              : ` (${o.buy.reason === 'not_owned' ? 'sold out' : o.buy.reason?.replaceAll('_', ' ')})`}
-            ; Sell {o.sell.price}p
-            {o.sell.available ? '' : ` (${o.sell.reason?.replaceAll('_', ' ')})`}.
-          </Text>
-        ))}
+        p.npc.shop?.map((o) => {
+          // A price row, not an action card (book-ui.md, Hostile refusal): its reasons are words.
+          const buy = buyReason(o.buy.reason ?? '');
+          const sell = reason(o.sell.reason ?? '');
+          return (
+            <Text key={o.item_id} style={note(c)}>
+              {p.text(o.name)}: Buy {o.buy.price}p{o.buy.available ? '' : ` (${buy})`}; Sell{' '}
+              {o.sell.price}p{o.sell.available ? '' : ` (${sell})`}.
+            </Text>
+          );
+        })}
     </>
   );
 }

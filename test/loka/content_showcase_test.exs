@@ -61,6 +61,9 @@ defmodule Loka.ContentShowcaseTest do
                   ) ++
                   [{"npcs/fence", "locks"}, {"npcs/vault", "locks"}, {"npcs/fence", "shop"}]
 
+  # Nell and Bess's disposition.refuse lines need 1.104 (Book hostile refusal).
+  defp unrefuse(n), do: update_in(n, ["disposition"], &Map.delete(&1, "refuse"))
+
   defp homestead_edits,
     do:
       [
@@ -124,7 +127,9 @@ defmodule Loka.ContentShowcaseTest do
         {"reactions/kindle.json", nil},
         {"reactions/gate_lifted.json", nil},
         {"reactions/gate_shut.json", nil},
-        {"statuses/gored.json", &Map.delete(&1, "kind")}
+        {"statuses/gored.json", &Map.delete(&1, "kind")},
+        {"npcs/nell.json", &unrefuse/1},
+        {"npcs/bess.json", &unrefuse/1}
         | unfiltered ++ homestead()
       ]
 
@@ -194,7 +199,9 @@ defmodule Loka.ContentShowcaseTest do
         {"cartridge.json",
          &(&1 |> put_in(["requires", "kernel_api", "at_least"], api) |> Map.delete("speech"))},
         {"reactions/boar_gore.json", &put_in(&1, ["on", "attacker"], npc)},
-        {"statuses/gored.json", &Map.delete(&1, "kind")}
+        {"statuses/gored.json", &Map.delete(&1, "kind")},
+        {"npcs/nell.json", &unrefuse/1},
+        {"npcs/bess.json", &unrefuse/1}
         | homestead()
       ])
     end

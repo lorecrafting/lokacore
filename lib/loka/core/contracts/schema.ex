@@ -13,8 +13,8 @@ defmodule Loka.Core.Contracts.Schema do
   two or more declared properties, or, as a map, no `properties` and
   `additionalProperties` as the schema of every value, with optional `propertyNames`
   (exactly `{"pattern": ...}`) and `maxProperties`; array `items` (required), `minItems`,
-  `maxItems`; string `pattern`, `minLength`, `maxLength`; integer `minimum`, `maximum`;
-  string, integer and boolean `enum`, `const`. `enum` and `const` values are scalars.
+  `maxItems`, `uniqueItems`; string `pattern`, `minLength`, `maxLength`; integer `minimum`,
+  `maximum`; string, integer and boolean `enum`, `const`. `enum` and `const` values are scalars.
   `oneOf` branches are inline objects, each with exactly one `const` property, the same
   required property in every branch with distinct values (the discriminator). `anyOf` has two
   or more branches, each a `type` or `$ref` resolving to a different one of string, integer
@@ -35,7 +35,7 @@ defmodule Loka.Core.Contracts.Schema do
   @by_type %{
     "object" =>
       ~w(type properties required requiredUnless dependentRequired exactlyOneRequired additionalProperties propertyNames maxProperties),
-    "array" => ~w(type items minItems maxItems),
+    "array" => ~w(type items minItems maxItems uniqueItems),
     "string" => ~w(type enum const pattern minLength maxLength),
     "integer" => ~w(type enum const minimum maximum),
     "boolean" => ~w(type enum const),

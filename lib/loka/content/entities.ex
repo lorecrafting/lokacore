@@ -85,16 +85,19 @@ defmodule Loka.Content.Entities do
   end
 
   # Variant and (row W10) schedule case conditions, (row G11) disposition conditions, (row G7)
-  # access locks and (row FD7) ask answer conditions.
+  # access locks, (row FD7) ask answer conditions and (row FD10) aside conditions.
   defp roots(e) do
     for(
-      {steps, %{"when" => w}} <- variants(e) ++ cases(e),
+      {steps, %{"when" => w}} <- variants(e) ++ cases(e) ++ asides(e),
       do: {steps ++ ["when", "root"], w["root"]}
     ) ++
       policies(e, "disposition", ~w(hostile friendly)) ++
       policies(e, "locks", ~w(get put)) ++
       answers(e)
   end
+
+  # Toolbox row FD10: an NPC's asides (read with the NPC as the target).
+  defp asides(e), do: for({a, i} <- Enum.with_index(e["asides"] || []), do: {["asides", i], a})
 
   # Toolbox row FD7: each ask answer's condition (read with the NPC as the target).
   defp answers(e) do
@@ -144,9 +147,16 @@ defmodule Loka.Content.Entities do
 
   defp goal_texts(e), do: for({s, %{"goal" => g}} <- cases(e), do: {s ++ ["goal"], g})
 
-  # Toolbox row G11: a hostile NPC's engage line.
-  defp disposition_texts(%{"disposition" => %{"engage" => t}}),
-    do: [{["disposition", "engage"], t}]
+  # Toolbox row G11: a hostile NPC's engage line, (Book hostile refusal) refuse line and
+  # (row 35) arrest line.
+  defp disposition_texts(%{"disposition" => d}),
+    do:
+      for(
+        p <- [["engage"], ["refuse"], ["arrest", "narration"]],
+        t = get_in(d, p),
+        t != nil,
+        do: {["disposition" | p], t}
+      )
 
   defp disposition_texts(_), do: []
 
@@ -160,6 +170,8 @@ defmodule Loka.Content.Entities do
         )
 
   defp ask_texts(_), do: []
+
+  defp aside_texts(e), do: for({s, a} <- asides(e), do: {s ++ ["text"], a["text"]})
 
   defp variant_texts(e),
     do: for({s, v} <- variants(e), do: {s ++ ["description"], v["description"]})
@@ -184,7 +196,8 @@ defmodule Loka.Content.Entities do
         readable_texts(e) ++
         goal_texts(e) ++
         disposition_texts(e) ++
-        ask_texts(e)
+        ask_texts(e) ++
+        aside_texts(e)
 
   @doc """
   CONTAINMENT_CYCLE at each item whose location leads back to it through items, and

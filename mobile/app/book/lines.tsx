@@ -133,11 +133,10 @@ export function Here(p: {
     />
   );
   return [
-    ...[npcs, items]
-      .filter((group) => group.length > 0)
-      .map((group) => (
-        <View key={group[0].kind === 'npc' ? 'npcs' : 'items'}>{group.map(line)}</View>
-      )),
+    npcs.length > 0 && <View key="npcs">{npcs.map(line)}</View>,
+    // Row FD10: the present people's asides, in listed then authored order, before the items.
+    <Asides key="asides" keys={npcs.flatMap((e) => e.asides ?? [])} text={p.text} />,
+    items.length > 0 && <View key="items">{items.map(line)}</View>,
     p.view.cues && (
       <View key="cues">
         {p.view.cues.map((cue, i) => (

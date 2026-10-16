@@ -69,7 +69,11 @@ export function worldWitnesses(
       op.to === old! + by
     );
   };
-  if (p.type === 'move' && w.movement && paid(w.movement.cost.resource, -w.movement.cost.amount))
+  if (
+    p.type === 'move' &&
+    w.movement?.cost &&
+    paid(w.movement.cost.resource, -w.movement.cost.amount)
+  )
     paths.push('/world/movement');
   const water = w.water;
   if (
