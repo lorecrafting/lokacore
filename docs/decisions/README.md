@@ -11,6 +11,10 @@ their summaries are in [this index at `15c7d41b`](https://github.com/lorecraftin
 What each rule in force says: [owner-rules.md](../system/owner-rules.md). A new record adds one
 dated line below, newest first.
 
+- 2026-10-15 [Owner decision: economy tools split](owner-decision-economy-tools-split-2026-10-15.md)
+- 2026-10-15 [PM decision: Skills stays on the Character page](pm-decision-skills-on-character-2026-10-15.md)
+- 2026-10-15 [Owner decision: Inventory rename and status icons](owner-decision-inventory-and-status-icons-2026-10-15.md)
+- 2026-10-15 [Owner decision: hidden elite professions are secret](owner-decision-hidden-elites-secret-2026-10-15.md)
 - 2026-10-15 [Owner decision: product order, no Chapter 1 yet](owner-decision-product-order-2026-10-15.md)
 - 2026-10-15 [Owner decision: worldbuilding is story and canon only](owner-decision-worldbuilding-decoupled-2026-10-15.md)
 - 2026-10-15 [Owner decision: in Homestead the skill path replaces NPC cooking and building; professions rulings added](owner-decision-homestead-skill-path-2026-10-15.md)
