@@ -399,6 +399,7 @@ test('an escapee walking into the market is arrested again behind a shut grate',
 // Break: the charge reaction only fires on an arrest, so a wanted escapee climbs back to an open grate.
 test('a wanted escapee who climbs back up is charged again behind a shut grate', () => {
   const d = ok(play(escaped().drain, { type: 'move', direction: 'up' }));
+  if (d.decision.kind !== 'accepted') throw new Error('unreachable');
   assert.equal(at(d.world), room(d.world, 'cell'));
   assert.deepEqual(d.decision.narration, [{ key: 'trial.charge' }]);
   assert.equal(exit(d.world, 'down').door?.state, 'closed');
