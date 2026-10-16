@@ -11,6 +11,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
 - [Review: PR #411 Book hostile NPC refusal line, kernel_api 1.104 (loka-y6yg.20 part B, loka-x6t.33)](2026-10-16-pr411-hostile-refusal-review.md): **APPROVE**
+- [Review: M14 row 43a, terrain movement costs (loka-kgd.167)](2026-10-16-m14-43a-terrain-review.md): **APPROVE WITH NOTES**
 - [Review: M14 row 35 engine, arrest (loka-kgd.165; kernel_api 1.105)](2026-10-16-m14-35e-arrest-review.md): **APPROVE WITH NOTES**
 - [Review: x6t-64 ConditionView.kind and authored status kind (loka-x6t.64, part 1 of loka-x6t.55)](2026-10-15-x6t-64-review.md): **APPROVE**
 - [Review: word bar batch head (loka-x6t.39: S1 loka-jsqq, S2 loka-1lpq, S3 loka-a9pn)](2026-10-15-wordbar-batch-review.md): **APPROVE WITH NOTES**

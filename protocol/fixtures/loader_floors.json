@@ -1313,5 +1313,72 @@
       "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
       "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
     }
+,
+    {
+      "floor": "1.106",
+      "below": "1.105",
+      "source": "cartridges/terrain_sampler",
+      "feature": "a world.movement.terrain table (row 43a)",
+      "edits": [
+        ["rooms/road.json", ["tags"], null],
+        ["rooms/ford.json", ["tags"], null],
+        ["rooms/fen.json", ["tags"], null]
+      ],
+      "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
+      "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
+    },
+    {
+      "floor": "1.106",
+      "below": "1.105",
+      "source": "cartridges/terrain_sampler",
+      "feature": "a room tagged road (row 43a)",
+      "edits": [
+        ["cartridge.json", ["world", "movement", "terrain"], null],
+        ["rooms/ford.json", ["tags"], null],
+        ["rooms/fen.json", ["tags"], null]
+      ],
+      "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
+      "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
+    },
+    {
+      "floor": "1.106",
+      "below": "1.105",
+      "source": "cartridges/terrain_sampler",
+      "feature": "a room tagged marsh (row 43a)",
+      "edits": [
+        ["cartridge.json", ["world", "movement", "terrain"], null],
+        ["rooms/road.json", ["tags"], null],
+        ["rooms/ford.json", ["tags"], null]
+      ],
+      "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
+      "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
+    },
+    {
+      "floor": "1.106",
+      "below": "1.105",
+      "source": "cartridges/climb_sampler",
+      "feature": "an item tagged road (row 43a)",
+      "edits": [
+        ["cartridge.json", ["requires", "capabilities", "tags"], 1],
+        ["items/rope.json", ["tags"], ["road"]]
+      ],
+      "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
+      "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
+    },
+    {
+      "floor": "1.106",
+      "below": "1.105",
+      "source": "cartridges/terrain_sampler",
+      "feature": "a world.movement without cost (row 43a)",
+      "edits": [
+        ["cartridge.json", ["world", "movement", "terrain"], null],
+        ["cartridge.json", ["world", "movement", "cost"], null],
+        ["rooms/road.json", ["tags"], null],
+        ["rooms/ford.json", ["tags"], null],
+        ["rooms/fen.json", ["tags"], null]
+      ],
+      "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
+      "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
+    }
   ]
 }

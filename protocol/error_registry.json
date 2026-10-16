@@ -200,6 +200,11 @@
     "description": "Contract validation: array longer than maxItems."
   },
   {
+    "code": "duplicate_items",
+    "category": "abi_validation",
+    "description": "Contract validation: array with a repeated item under uniqueItems."
+  },
+  {
     "code": "too_many_properties",
     "category": "abi_validation",
     "description": "Contract validation: object with more properties than maxProperties."

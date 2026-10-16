@@ -1340,7 +1340,7 @@
       ]
     },
     "WorldSettings": {
-      "description": "The cartridge's world settings (owner decision world parameters; 00 §4 and 04 §15 as amended 2026-10-02), each optional with an engine default: movement.cost, what a move costs the body (movement@1; default 1 mv when the cartridge declares mv), its resource a pool of this cartridge (UNRESOLVED_REFERENCE otherwise); bands, the condition band table of every pool without its own (resource.schema.json BandTable; default the 04 §15 table). An optional field of loka-cartridge-v2: the tag stays, and the compiler writes it only when the source authors it. In source it is cartridge.json's world, beside entry.",
+      "description": "The cartridge's world settings (owner decision world parameters; 00 §4 and 04 §15 as amended 2026-10-02), each optional with an engine default: movement.cost, what a move costs the body (movement@1; default 1 mv when the cartridge declares mv), its resource a pool of this cartridge (UNRESOLVED_REFERENCE otherwise); movement.terrain, the percent each destination room tag scales that cost by (row 43a; default none); movement without cost, or with terrain, needs kernel_api 1.106; bands, the condition band table of every pool without its own (resource.schema.json BandTable; default the 04 §15 table). An optional field of loka-cartridge-v2: the tag stays, and the compiler writes it only when the source authors it. In source it is cartridge.json's world, beside entry.",
       "type": "object",
       "properties": {
         "movement": {
@@ -1348,11 +1348,20 @@
           "properties": {
             "cost": {
               "$ref": "action.schema.json#/$defs/RecipeCost"
+            },
+            "terrain": {
+              "description": "Terrain movement costs (row 43a; docs/system/mechanics.md, Terrain movement costs): a room tag to the percent a move into a room carrying it scales the fare by, applied after status cost_percent, in the room's authored tag order, rounded down each step. The key pattern repeats the entity.schema.json Tag enum, so a Tag added there is refused here until this list follows (fail closed). Needs kernel_api 1.106.",
+              "type": "object",
+              "propertyNames": {
+                "pattern": "^(air|bed|burnable|chasm|cool|cursed|exposed|forge|fragile|liquid_holding|marsh|metal|road|rod|rug|sharp|silver|warm|water|waterproof|windproof|wooden)$"
+              },
+              "additionalProperties": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 1000
+              }
             }
           },
-          "required": [
-            "cost"
-          ],
           "additionalProperties": false
         },
         "bands": {
