@@ -167,6 +167,12 @@ polish stage which needs me at the computer for a bit."
 - Book bugs (loka-y6yg.20): Fable designer ruled combat closure keeps the Combat page with Back to World; the
   engage line goes to the combat log; a hostile NPC shows a refusal line from new cartridge text (protocol
   change, own brief with review record + second opinion, after the content batch); x6t.28 U3 ruled out.
+- #404 merged. District plans #405 (loka-y6yg.19): Homestead, economy/law, magic, traps all ready; build in that
+  order, one slice each. Hub: magic up and economy/law down from the inn, Homestead west of fell_gate, traps down from
+  drill_yard (no second hub room). Economy/law ends at "wanted" plus a paid fine (trial and jail are M14).
+- #406 (loka-y6yg.20 part A, Book showcase bugs) merged: a fight's closing lines (kill, death, inn return, Flee) stay on
+  the ended Combat page with Back to World; any receipt that opens a fight logs on the Combat page. x6t.28 was the
+  test harness (a hidden tab pauses the clock), now a playtest rule.
 
 ## Owner answers this session
 
