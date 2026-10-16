@@ -282,6 +282,21 @@ currently no player-presence UI.
 
 **Barter offers.** A service offer with price 0 shows its authored label alone ("Knife for two pelts"), with no " — " and no parentheses, never "free"; its unavailable form is "Knife for two pelts: <reason>". The label names the inputs.
 
+**Hostile refusal.** Planned for loka-y6yg.20 part B; not yet shipped. The Book cannot tell hostility from refusal codes (`invalid_state` also
+means a full load or an open encounter), so the NPC EntityView carries `hostile: true` while
+the person's [disposition](mechanics.md#standing-and-disposition-toolbox-rows-15-and-g11) is
+hostile (a derived read, absent otherwise) and, when the cartridge authors
+`disposition.refuse` (a TextKey, optional; compiler and loader admit it as `engage`), its key
+as `refusal`. While `hostile` is projected the page shows the description, then one
+[Note](../BOOK-UI-COMPONENTS.md#component-catalogue) in place of Talk: the `refusal` line, or
+without one the sentence [words](../../mobile/app/book/words.ts) owns ("<Name> will have
+nothing to do with you."). No Talk, shelf or Ask about card is drawn; services and lessons
+stay as offered; the foot is Leave. The authored line names the mood, never the cause
+("Nell turns her back on you.", not what the player did); hostility ending redraws the actions
+without a line. A shelf row's reason is always a word from `words.ts` `reason()` ("not now",
+"too heavy to carry"), never a code with its underscores replaced; a buy refused `not_owned`
+stays "sold out".
+
 ## Item details and Take/Drop
 
 Inventory separates Held from Worn slots, including empty slots. Held/worn item
@@ -409,7 +424,10 @@ catching_up, a different identified intent returns conflict while the original a
 status remain retained; a matching retry uses its original identity/context.
 A conflict, invalid or unauthorized reply logs one plain sentence, never the reply kind or a
 code in brackets; [words](../../mobile/app/book/words.ts) owns the sentences. Pending unknown
-save retries keep the existing original-attempt behavior for any subsequent press.
+save retries keep the existing original-attempt behavior for any subsequent press. A press
+refused after a catch-up gets no "what changed" sentence: the catch-up's own lines (rounds, a
+death, an expiry) already precede the refused line in order, and the refused line carries its
+reason word.
 
 ## Live combat response (M6-A)
 
@@ -427,16 +445,30 @@ room. All offered combat actions appear as a vertical dialogue-style list below 
 the same ScrollView, not a fixed strip. No unavailable or future skill actions are invented. World time continues
 while the combat page is open.
 
-Combat takes precedence over ordinary navigation until the encounter closes. Committed
-closure or opponent death returns to the World; successful Flee and player death show the
-resulting room through the existing room-change flow. A pending save keeps the confirmed
+Combat takes precedence over ordinary navigation until the encounter closes. **Opening.** The
+receipt that opens an encounter (a move's or Sleep's `engage`, Attack, a cast's fight-back)
+routes all of its narration to the combat log, so the page opens with the engage line as its
+first log line; the opponent block always shows, so the page is never blank. **Closure.** On
+every committed closure (opponent death, player death and inn return, successful Flee, any
+other end) the Combat page stays the shown page, as a one-reply conversation does: its opponent
+block without the target suffix (nothing is left to aim at), its log ending with the closing
+lines (every line of the closing receipt, whatever its key), no action cards, and one foot Control
+[**Back to World**](../BOOK-UI-COMPONENTS.md#component-catalogue) (the existing label; no
+new words). The status line stays locked as during the fight. The tap is local (no engine verb)
+and shows the World page of the room the player is now in (the inn after death, the room fled
+to) through the existing room-change flow. Time runs meanwhile; later ambient and room lines go to
+the World log. A new encounter replaces the ended page; nothing is stored, so reopening a save
+after a closure shows the World. A pending save keeps the confirmed
 encounter and existing retry behavior; a refusal remains visible on the combat page. The UI
 never presents an unconfirmed hit, death, escape or encounter end as committed. Results
 narrate once through the existing subscription and cartridge text. Combat narration belongs
 only to the combat page and its retained history, never the World room event log, including
-closure, death, Flee and reopening a save after any of them. Routing uses structured committed
-receipt metadata, never rendered prose; ordinary room events remain in the World log even
-when delivered in the same receipt as combat. This replaces the earlier
+the engage line, closure, death, Flee and reopening a save after any of them. Routing uses
+structured committed receipt metadata (an encounter present after the receipt that the settled
+pre-command view lacked, or gone after it), never rendered prose; ordinary room events remain
+in the World log even when delivered in the same receipt as combat, except the closing receipt,
+whose lines all stay on the ended page (the arrival room's description after a Flee or inn
+return reads there, once). This replaces the earlier
 persistent bottom strip; see the [owner combat-page decision](../decisions/owner-decision-m6-a-combat-pane-2026-10-04.md).
 
 ## Letter-bank riddle details

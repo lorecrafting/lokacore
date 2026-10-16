@@ -89,7 +89,10 @@ goes back to the batch as a finding, not into the showcase.
    19007 belong to the owner's `~/dev/lokacore-preview`.
 4. **Play** with the Claude in Chrome tools in a new tab, at phone width (360-390 px) first.
    Read by page text (`get_page_text`, `find`); screenshot only on a new page type or a
-   suspected visual problem.
+   suspected visual problem. Keep the Book tab visible and focused while time should pass: the
+   web clock then pulses about every 3 s (a combat round per pulse; checked in a visible
+   headless tab at 390 px). The loka-x6t.28 playtest saw time stall, then whole fights catch up
+   on one press.
 5. **Stop** the servers it started, by PID.
 6. **Report:** what the district wanted and whether it got there without the brief; gameplay
    findings with repro and severity; UI/UX findings in design-system terms with screenshot

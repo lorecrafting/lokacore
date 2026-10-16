@@ -32,6 +32,7 @@ type Say = (key: string) => string;
 
 export type { DetailLine } from './logs.ts';
 import {
+  closing,
   detailLines,
   narrationLines,
   pickupLine,
@@ -69,7 +70,8 @@ function background(
     s.fault = (e as Error).message;
     return;
   }
-  if (last && last.command_id !== s.narrationId) narrate(s, last, now, away, text);
+  if (last && last.command_id !== s.narrationId)
+    narrate(s, closing(last, was, now), now, away, text);
 }
 
 // A World entry: to the log, or held by the open settlement (book-ui.md, Away recap).
@@ -215,6 +217,7 @@ function screen(game: Game, s: Logs, label: Say, text: Say, generation: number) 
     returnWorld: s.returnWorld,
     returnDetail: s.returnDetail,
     confirmedRead: s.confirmedRead,
+    ended: s.ended,
   };
 }
 
@@ -237,6 +240,7 @@ export function presenter(game: Game) {
       if (s.recovered) generation++;
       return line;
     },
+    leaveCombat: () => (s.ended = undefined),
     startOverFailed(why?: string) {
       if (why !== undefined) s.log.push(`(start over: ${why})`);
     },
