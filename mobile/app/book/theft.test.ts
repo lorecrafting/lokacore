@@ -118,7 +118,9 @@ test('a merchant entry lists the purse it holds; the purse offers Take', (t) => 
     'A purse',
     'Leave',
   ]);
-  merchant.find((n) => n.props.accessibilityLabel === 'A purse, open').props.onPress();
+  const row = merchant.find((n) => n.props.accessibilityLabel === 'A purse, open');
+  assert.ok(row, 'Held row for the purse');
+  row.props.onPress();
   const [purse] = opened as { kind: string; id: string }[];
   assert.equal(purse?.kind, 'thing');
   const item = nodes(Item({ id: purse.id, screen, g, press: book.press, open() {}, world() {} }));

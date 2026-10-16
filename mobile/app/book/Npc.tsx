@@ -1,4 +1,4 @@
-// The NPC page: conversation, choices, skills, shop and services, with the existing book controls.
+// The NPC page: conversation, choices, skills, shop and services, what the NPC holds, with the existing book controls.
 import { Text, View } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { absent, cap, plain, things, why, type group, type Page as Route } from './model.ts';
