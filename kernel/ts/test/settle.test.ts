@@ -342,8 +342,8 @@ const offer = (w: World, action: string) => {
   return found;
 };
 
-// Breaks: the chest's get lock is dropped or read off the taken item: a stranger's take is
-// offered or accepted (access_sampler pins the lock order; this pins the authored lock).
+// Breaks: the chest's get or put lock is dropped or read off the item: a stranger's take or put
+// is offered or accepted (access_sampler pins the lock order; this pins the authored lock).
 test('S3-1: a stranger may not take from the storehouse chest; the charter opens it', () => {
   const go = (w: World, direction: string) => done(w, { type: 'move', direction }).world;
   const take = (w: World) => act(w, { type: 'take', item_id: ent(w, 'item/old_knife') });
@@ -359,7 +359,18 @@ test('S3-1: a stranger may not take from the storehouse chest; the charter opens
   assert.equal(code(take(w)), 'permission_denied');
   const c = store(bought(world()));
   assert.deepEqual(knife(c), [true, false]);
-  assert.equal(code(take(c)), 'accepted');
+  const held = take(c);
+  assert.equal(code(held), 'accepted');
+  const put = (w: World) =>
+    act(w, { type: 'put', item_id: ent(w, 'item/old_knife'), container_id: ent(w, 'item/chest') });
+  assert.equal(code(put(held.world)), 'accepted');
+  // A stranger handed the knife may not put it back (the put lock).
+  const k = ent(w, 'item/old_knife');
+  const carrying = {
+    ...w,
+    state: { ...w.state, containers: { ...w.state.containers, [k]: w.body } },
+  };
+  assert.equal(code(put(carrying)), 'permission_denied');
 });
 
 // Breaks: raise_smithy loses its owns_charter policy (offered or accepted before the charter), the
