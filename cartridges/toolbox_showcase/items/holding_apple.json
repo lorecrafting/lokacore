@@ -1,0 +1,13 @@
+{
+  "keywords": [
+    "apple"
+  ],
+  "short": "item.holding_apple.short",
+  "room_line": "item.holding_apple.room",
+  "description": "item.holding_apple.description",
+  "mass_grams": 100,
+  "location": {
+    "in": "room",
+    "room": "farm_yard"
+  }
+}

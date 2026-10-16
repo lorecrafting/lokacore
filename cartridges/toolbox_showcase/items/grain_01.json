@@ -1,0 +1,14 @@
+{
+  "keywords": [
+    "grain"
+  ],
+  "short": "item.grain_01.short",
+  "room_line": "item.grain_01.room",
+  "description": "item.grain_01.description",
+  "mass_grams": 1000,
+  "location": {
+    "in": "room",
+    "room": "holding_croft"
+  },
+  "give_allowed": false
+}

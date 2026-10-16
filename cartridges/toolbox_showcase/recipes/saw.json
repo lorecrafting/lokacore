@@ -1,0 +1,75 @@
+{
+  "label": "actions.saw",
+  "aliases": [
+    "saw"
+  ],
+  "target": {
+    "kind": "detail",
+    "room": "carpenter_shop",
+    "detail": "saw_bench"
+  },
+  "priority": 5,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "skill_compare",
+      "skill": "carpentry",
+      "at_least": 1
+    }
+  },
+  "check": {
+    "key": "saw",
+    "kind": "opposed",
+    "skill": "carpentry"
+  },
+  "craft": {
+    "consume": {
+      "items": [
+        "log_01",
+        "log_02",
+        "log_03",
+        "log_04",
+        "log_05",
+        "log_06",
+        "log_07",
+        "log_08"
+      ],
+      "quantity": 2,
+      "to": {
+        "in": "room",
+        "room": "woodpile"
+      },
+      "reason": "craft.saw.needs"
+    },
+    "yield": {
+      "items": [
+        "timber_01",
+        "timber_02"
+      ],
+      "from": {
+        "in": "room",
+        "room": "timber_yard"
+      }
+    }
+  },
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "timber_sawn",
+          "value": true
+        }
+      ],
+      "narration": {
+        "actor": "narration.saw.success"
+      }
+    },
+    "failure": {
+      "sequence": [],
+      "narration": {
+        "actor": "narration.saw.failure"
+      }
+    }
+  }
+}

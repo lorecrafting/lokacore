@@ -1,0 +1,70 @@
+{
+  "label": "actions.cook_feast",
+  "aliases": [
+    "feast"
+  ],
+  "target": {
+    "kind": "detail",
+    "room": "farm_kitchen",
+    "detail": "hearth"
+  },
+  "priority": 5,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "skill_compare",
+      "skill": "cooking",
+      "at_least": 2
+    }
+  },
+  "check": {
+    "key": "cook_feast",
+    "kind": "opposed",
+    "skill": "cooking"
+  },
+  "craft": {
+    "consume": {
+      "items": [
+        "trout_01",
+        "trout_02",
+        "eel_01",
+        "salmon_01"
+      ],
+      "quantity": 3,
+      "to": {
+        "in": "room",
+        "room": "larder"
+      },
+      "reason": "craft.cook_feast.needs"
+    },
+    "yield": {
+      "items": [
+        "feast_01"
+      ],
+      "from": {
+        "in": "room",
+        "room": "larder"
+      }
+    }
+  },
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "cooked",
+          "value": true
+        }
+      ],
+      "narration": {
+        "actor": "narration.cook_feast.success"
+      }
+    },
+    "failure": {
+      "sequence": [],
+      "narration": {
+        "actor": "narration.cook.boils_over"
+      }
+    }
+  }
+}

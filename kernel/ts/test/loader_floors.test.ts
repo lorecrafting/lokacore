@@ -50,7 +50,11 @@ test('each fixture floor: the loader accepts the floor and refuses just below it
         ...(c.edits ?? []),
         ['cartridge.json', ['requires', 'kernel_api', 'at_least'], c.floor] as const,
       ]) {
-        // An empty key path writes the whole (possibly new) file.
+        // An empty key path writes the whole (possibly new) file, or with null deletes it.
+        if (!path.length && value === null) {
+          rmSync(join(dir, file));
+          continue;
+        }
         const json = path.length ? JSON.parse(readFileSync(join(dir, file), 'utf8')) : value;
         if (path.length) set(json, path as string[], value);
         mkdirSync(dirname(join(dir, file)), { recursive: true });

@@ -1,0 +1,18 @@
+{
+  "keywords": [
+    "log",
+    "log_08"
+  ],
+  "short": "item.log.short",
+  "room_line": "item.log.room",
+  "description": "item.log.description",
+  "mass_grams": 200,
+  "location": {
+    "in": "room",
+    "room": "woodpile"
+  },
+  "tags": [
+    "wooden",
+    "burnable"
+  ]
+}

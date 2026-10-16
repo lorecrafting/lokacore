@@ -1,0 +1,17 @@
+{
+  "items": [
+    "trout_01",
+    "trout_02"
+  ],
+  "from": {
+    "in": "room",
+    "room": "pond_deep"
+  },
+  "to": {
+    "in": "room",
+    "room": "pond"
+  },
+  "cap": 1,
+  "count": 1,
+  "every": 1000000000
+}

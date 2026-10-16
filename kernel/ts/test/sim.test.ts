@@ -1,4 +1,4 @@
-// size: allow 555, the toolbox showcase pass joins the corpus run and the red controls
+// size: allow 565, the toolbox showcase pass joins the corpus run and the red controls
 // The deterministic simulation (test/sim.ts; docs/ROADMAP.md verification harness;
 // r1-acceptance-envelope §3): the committed regression seeds, then 10,000 fresh sequences in CI
 // (500 elsewhere), and 400 fixed ones on the toolbox showcase, each step keeping every
@@ -221,7 +221,16 @@ test('400 fixed showcase sequences keep every invariant and end in each district
     `showcase seeds 1 to 400${PINNED.length ? ` but ${PINNED.join(' ')}` : ''}; ${steps} steps; ends in ` +
       `${[...rooms].sort().join(' ')}; outcomes ${[...codes].sort().join(', ')}`,
   );
-  const inner = ['fell_top', 'tide_pools', 'moot_hall', 'gate_yard', 'boar_run', 'tilt_yard'];
+  const inner = [
+    'fell_top',
+    'tide_pools',
+    'moot_hall',
+    'gate_yard',
+    'boar_run',
+    'tilt_yard',
+    'carpenter_shop',
+    'holding_croft',
+  ];
   const verbs = ['drink', 'eat', 'read', 'sit', 'sleep', 'wear'];
   assert.deepEqual(
     [...inner.filter((r) => !rooms.has(r)), ...verbs.filter((v) => !seen.has(v))],

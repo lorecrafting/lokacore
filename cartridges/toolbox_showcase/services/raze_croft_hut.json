@@ -1,0 +1,13 @@
+{
+  "provider": "carpenter",
+  "currency": "pennies",
+  "action": "raze_croft_hut",
+  "label": "service.raze_croft_hut",
+  "narration": "service.raze_croft_hut.used",
+  "price": 2,
+  "benefit": {
+    "kind": "raze",
+    "site": "holding_croft",
+    "direction": "north"
+  }
+}

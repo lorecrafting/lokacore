@@ -1,0 +1,16 @@
+{
+  "items": [
+    "seed_01"
+  ],
+  "from": {
+    "in": "room",
+    "room": "midden"
+  },
+  "to": {
+    "in": "item",
+    "item": "sack"
+  },
+  "cap": 1,
+  "count": 1,
+  "every": 172800
+}

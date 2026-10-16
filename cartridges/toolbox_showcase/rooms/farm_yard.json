@@ -1,0 +1,18 @@
+{
+  "title": "room.farm_yard.title",
+  "description": "room.farm_yard.description",
+  "exits": {
+    "north": {
+      "to": "holding_lane"
+    },
+    "west": {
+      "to": "glade"
+    },
+    "east": {
+      "to": "pond"
+    },
+    "south": {
+      "to": "farm_kitchen"
+    }
+  }
+}

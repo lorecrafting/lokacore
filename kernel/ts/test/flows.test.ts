@@ -98,8 +98,8 @@ test('the worker tries a sale before a take or a talk', () => {
 // Breaks: anything nondeterministic in the run (time, Math.random, host iteration order), or the
 // CLI ignoring --seeds or --days.
 // On the showcase, where the seed's generator decides which of its many offers come first. Also
-// breaks: populations read from the wrong field, so no plan shows (its two plans each hold 2 at
-// the start: cap and day_target 2 in cartridges/toolbox_showcase/populations); or the worker never
+// breaks: populations read from the wrong field, so no plan shows (its three plans each hold 2 at
+// the start: day_target 2 in cartridges/toolbox_showcase/populations); or the worker never
 // passing the day (hours 0-24), because a refused Wait in this real-elapsed world or a repeatable
 // conversation ends or spends its run.
 test('the CLI prints the same canonical report as the same run in this process', () => {
@@ -112,7 +112,7 @@ test('the CLI prints the same canonical report as the same run in this process',
   const here = flows(artifactOf(text).cartridge, { seeds: 3, days: 1 });
   assert.equal(r.stdout, `${encode(here as unknown as Json)}\n`);
   const plan = (key: string) => `toolbox_showcase@0.0.1:population/${key}`;
-  const living = { [plan('goblins')]: 2, [plan('tilt_goblins')]: 2 };
+  const living = { [plan('goblins')]: 2, [plan('hens')]: 2, [plan('tilt_goblins')]: 2 };
   assert.deepEqual(here.populations[0], { hour: 0, living });
   assert.equal(here.coin.supply.at(-1)!.hour, 24);
 });

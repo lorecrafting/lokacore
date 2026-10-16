@@ -1,0 +1,19 @@
+{
+  "title": "room.carpenter_shop.title",
+  "description": "room.carpenter_shop.description",
+  "exits": {
+    "east": {
+      "to": "holding_lane"
+    }
+  },
+  "details": {
+    "saw_bench": {
+      "aliases": [
+        "bench",
+        "sawbench"
+      ],
+      "description": "detail.saw_bench",
+      "rating": 1
+    }
+  }
+}

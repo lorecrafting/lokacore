@@ -1,0 +1,13 @@
+{
+  "on": {
+    "event": "custom_event",
+    "custom": "watered_croft"
+  },
+  "apply": [
+    {
+      "op": "fact.stamp",
+      "fact": "watered_at",
+      "item": "croft_plot"
+    }
+  ]
+}

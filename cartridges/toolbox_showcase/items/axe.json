@@ -1,0 +1,17 @@
+{
+  "keywords": [
+    "axe"
+  ],
+  "short": "item.axe.short",
+  "room_line": "item.axe.room",
+  "description": "item.axe.description",
+  "mass_grams": 1200,
+  "location": {
+    "in": "room",
+    "room": "carpenter_shop"
+  },
+  "tags": [
+    "metal",
+    "sharp"
+  ]
+}

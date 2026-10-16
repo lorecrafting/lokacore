@@ -1,0 +1,13 @@
+{
+  "keywords": [
+    "pelt"
+  ],
+  "short": "item.pelt_01.short",
+  "room_line": "item.pelt_01.room",
+  "description": "item.pelt_01.description",
+  "mass_grams": 200,
+  "location": {
+    "in": "room",
+    "room": "glade"
+  }
+}

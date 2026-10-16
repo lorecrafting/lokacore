@@ -1,0 +1,83 @@
+{
+  "npc": "carpenter",
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": []
+    }
+  },
+  "prompt": "dialogue.carpenter_lessons.prompt",
+  "roles": {
+    "teacher": {
+      "role": "npc",
+      "npc": "carpenter"
+    }
+  },
+  "choices": {
+    "whittling": {
+      "label": "dialogue.carpenter_lessons.whittling",
+      "narration": "narration.carpenter_lessons.whittling",
+      "sequence": [
+        {
+          "op": "skill.acquire",
+          "skill": "whittling"
+        }
+      ]
+    },
+    "woodcutting": {
+      "label": "dialogue.carpenter_lessons.woodcutting",
+      "narration": "narration.carpenter_lessons.woodcutting",
+      "sequence": [
+        {
+          "op": "skill.acquire",
+          "skill": "woodcutting"
+        }
+      ]
+    },
+    "carving": {
+      "label": "dialogue.carpenter_lessons.carving",
+      "narration": "narration.carpenter_lessons.carving",
+      "sequence": [
+        {
+          "op": "skill.acquire",
+          "skill": "carving"
+        }
+      ],
+      "lesson_payment": {
+        "to": "teacher",
+        "resource": "pennies",
+        "amount": 2
+      }
+    },
+    "carpentry": {
+      "label": "dialogue.carpenter_lessons.carpentry",
+      "narration": "narration.carpenter_lessons.carpentry",
+      "sequence": [
+        {
+          "op": "skill.acquire",
+          "skill": "carpentry"
+        }
+      ],
+      "lesson_payment": {
+        "to": "teacher",
+        "resource": "pennies",
+        "amount": 2
+      }
+    },
+    "joinery": {
+      "label": "dialogue.carpenter_lessons.joinery",
+      "narration": "narration.carpenter_lessons.joinery",
+      "sequence": [
+        {
+          "op": "skill.acquire",
+          "skill": "joinery"
+        }
+      ]
+    },
+    "leave": {
+      "label": "dialogue.carpenter_lessons.leave",
+      "narration": "narration.carpenter_lessons.leave"
+    }
+  }
+}

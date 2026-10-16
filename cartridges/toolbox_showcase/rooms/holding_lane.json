@@ -1,0 +1,49 @@
+{
+  "title": "room.holding_lane.title",
+  "description": "room.holding_lane.description",
+  "exits": {
+    "east": {
+      "to": "fell_gate"
+    },
+    "west": {
+      "to": "carpenter_shop"
+    },
+    "south": {
+      "to": "farm_yard"
+    },
+    "up": {
+      "to": "holding_croft"
+    }
+  },
+  "details": {
+    "sign_homestead": {
+      "aliases": [
+        "sign",
+        "signpost"
+      ],
+      "description": "detail.sign_homestead.description",
+      "readable": {
+        "label": "actions.read_sign",
+        "text": "readable.sign_homestead",
+        "title": "detail.sign_homestead.title"
+      }
+    },
+    "plot_stakes": {
+      "aliases": [
+        "stakes",
+        "plot"
+      ],
+      "description": "detail.plot_stakes",
+      "rating": 1
+    }
+  },
+  "site": {
+    "directions": [
+      "north"
+    ],
+    "blueprints": [
+      "hut_plain",
+      "hut_timbered"
+    ]
+  }
+}

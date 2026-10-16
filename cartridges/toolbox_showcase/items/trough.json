@@ -1,0 +1,18 @@
+{
+  "keywords": [
+    "trough"
+  ],
+  "short": "item.trough.short",
+  "room_line": "item.trough.room",
+  "description": "item.trough.description",
+  "mass_grams": 20000,
+  "location": {
+    "in": "room",
+    "room": "holding_croft"
+  },
+  "container": true,
+  "immune": [
+    "growing",
+    "growing_croft"
+  ]
+}
