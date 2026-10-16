@@ -16,7 +16,10 @@
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             }
           },
-          "required": ["in", "room"],
+          "required": [
+            "in",
+            "room"
+          ],
           "additionalProperties": false
         },
         {
@@ -29,7 +32,10 @@
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             }
           },
-          "required": ["in", "npc"],
+          "required": [
+            "in",
+            "npc"
+          ],
           "additionalProperties": false
         },
         {
@@ -42,7 +48,10 @@
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             }
           },
-          "required": ["in", "item"],
+          "required": [
+            "in",
+            "item"
+          ],
           "additionalProperties": false
         },
         {
@@ -52,7 +61,9 @@
               "const": "template"
             }
           },
-          "required": ["in"],
+          "required": [
+            "in"
+          ],
           "additionalProperties": false
         }
       ],
@@ -121,7 +132,10 @@
           "$ref": "resource.schema.json#/$defs/ResourceInt"
         }
       },
-      "required": ["attribute", "modifier"],
+      "required": [
+        "attribute",
+        "modifier"
+      ],
       "additionalProperties": false,
       "examples": [
         {
@@ -270,17 +284,29 @@
             }
           },
           "requiredUnless": {
-            "put": ["get"]
+            "put": [
+              "get"
+            ]
           },
           "additionalProperties": false
         }
       },
-      "required": ["key", "keywords", "short", "room_line", "description", "location"],
+      "required": [
+        "key",
+        "keywords",
+        "short",
+        "room_line",
+        "description",
+        "location"
+      ],
       "additionalProperties": false,
       "examples": [
         {
           "key": "lantern",
-          "keywords": ["lantern", "brass_lantern"],
+          "keywords": [
+            "lantern",
+            "brass_lantern"
+          ],
           "short": "item.lantern.short",
           "room_line": "item.lantern.room",
           "description": "item.lantern.description",
@@ -297,7 +323,9 @@
         },
         {
           "key": "satchel",
-          "keywords": ["satchel"],
+          "keywords": [
+            "satchel"
+          ],
           "short": "item.satchel.short",
           "room_line": "item.satchel.room",
           "room_line_variants": [
@@ -358,19 +386,33 @@
         "windproof",
         "wooden"
       ],
-      "examples": ["burnable", "metal"]
+      "examples": [
+        "burnable",
+        "metal"
+      ]
     },
     "DamageKind": {
       "description": "A damage kind (toolbox row G2): a closed engine vocabulary shared by attack profiles and NPC resistances. A row that needs a new kind adds it here; a kind never shares a name with a Tag.",
-      "enum": ["cold", "fire", "physical", "poison"],
-      "examples": ["physical", "fire"]
+      "enum": [
+        "cold",
+        "fire",
+        "physical",
+        "poison"
+      ],
+      "examples": [
+        "physical",
+        "fire"
+      ]
     },
     "ResistancePercent": {
       "description": "A resistance percent (toolbox row G2): negative is a weakness.",
       "type": "integer",
       "minimum": -100,
       "maximum": 100,
-      "examples": [50, -50]
+      "examples": [
+        50,
+        -50
+      ]
     },
     "Resistances": {
       "description": "Toolbox row G2 (docs/system/mechanics.md damage model; kernel_api at least 1.44): an NPC's percent resistance per damage kind (DamageKind) and per material tag (Tag) of the weapon whose own attack strikes (an unarmed or NPC attack has none); negative is a weakness. An attack sums the entries for its kind and each such tag, clamps the sum to -100..100 and scales its damage by (100 - sum) / 100, rounded down. Its members are exactly the DamageKind and Tag values.",
@@ -601,7 +643,9 @@
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             }
           },
-          "required": ["discovered"],
+          "required": [
+            "discovered"
+          ],
           "additionalProperties": false
         },
         "spawn_template": {
@@ -630,7 +674,10 @@
                 "maximum": 100
               }
             },
-            "required": ["item", "chance"],
+            "required": [
+              "item",
+              "chance"
+            ],
             "additionalProperties": false
           },
           "minItems": 1,
@@ -663,7 +710,10 @@
                 "$ref": "resource.schema.json#/$defs/ResourceInt"
               }
             },
-            "required": ["attribute", "value"],
+            "required": [
+              "attribute",
+              "value"
+            ],
             "additionalProperties": false
           }
         },
@@ -678,16 +728,28 @@
               "$ref": "policy.schema.json#/$defs/VersionedPolicy"
             }
           },
-          "required": ["get"],
+          "required": [
+            "get"
+          ],
           "additionalProperties": false
         }
       },
-      "required": ["key", "keywords", "short", "room_line", "description", "room"],
+      "required": [
+        "key",
+        "keywords",
+        "short",
+        "room_line",
+        "description",
+        "room"
+      ],
       "additionalProperties": false,
       "examples": [
         {
           "key": "bram",
-          "keywords": ["bram", "ferryman"],
+          "keywords": [
+            "bram",
+            "ferryman"
+          ],
           "short": "npc.bram.short",
           "room_line": "npc.bram.room",
           "description": "npc.bram.description",
@@ -750,7 +812,9 @@
             "description": "Toolbox row W26 (kernel_api at least 1.81; mechanics.md NPCs use doors): the step moves only when a path to room exists through exits a walking NPC may cross (breadth first, direction-key order, one query step per exit); the NPC moves in one step, each locked door on the path it holds the key of is unlocked, opened, closed and locked again; no path leaves it where it is."
           }
         },
-        "required": ["room"],
+        "required": [
+          "room"
+        ],
         "additionalProperties": false
       },
       "minItems": 1,
@@ -805,7 +869,9 @@
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             }
           },
-          "required": ["effect"],
+          "required": [
+            "effect"
+          ],
           "additionalProperties": false
         },
         "kind": {
@@ -826,11 +892,18 @@
               "maximum": 10
             }
           },
-          "required": ["chance", "multiplier"],
+          "required": [
+            "chance",
+            "multiplier"
+          ],
           "additionalProperties": false
         }
       },
-      "required": ["chance", "damage_min", "damage_max"],
+      "required": [
+        "chance",
+        "damage_min",
+        "damage_max"
+      ],
       "additionalProperties": false,
       "examples": [
         {
@@ -893,7 +966,10 @@
               }
             }
           },
-          "required": ["items", "buy"],
+          "required": [
+            "items",
+            "buy"
+          ],
           "additionalProperties": false
         },
         "stolen": {
@@ -901,7 +977,11 @@
           "const": true
         }
       },
-      "required": ["item", "buy", "sell"],
+      "required": [
+        "item",
+        "buy",
+        "sell"
+      ],
       "additionalProperties": false
     },
     "Shop": {
@@ -975,12 +1055,24 @@
               "maximum": 2147483647
             }
           },
-          "required": ["numerator", "denominator", "minimum"],
-          "exactlyOneRequired": ["skill", "friendly"],
+          "required": [
+            "numerator",
+            "denominator",
+            "minimum"
+          ],
+          "exactlyOneRequired": [
+            "skill",
+            "friendly"
+          ],
           "additionalProperties": false
         }
       },
-      "required": ["resource", "offers", "bought", "sold"],
+      "required": [
+        "resource",
+        "offers",
+        "bought",
+        "sold"
+      ],
       "additionalProperties": false
     },
     "FuelRow": {
@@ -998,7 +1090,11 @@
           "type": "boolean"
         }
       },
-      "required": ["remaining", "at", "lit"],
+      "required": [
+        "remaining",
+        "at",
+        "lit"
+      ],
       "additionalProperties": false,
       "examples": [
         {
@@ -1085,7 +1181,12 @@
               "$ref": "action.schema.json#/$defs/Key"
             }
           },
-          "required": ["kind", "capacity", "initial", "unit"],
+          "required": [
+            "kind",
+            "capacity",
+            "initial",
+            "unit"
+          ],
           "additionalProperties": false
         }
       ],
@@ -1131,7 +1232,9 @@
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             }
           },
-          "required": ["ammo"],
+          "required": [
+            "ammo"
+          ],
           "additionalProperties": false,
           "description": "Toolbox row 17: the weapon shoots in an encounter's round 1, spending one of the body's ammo resource pool; it never strikes in melee."
         },
@@ -1147,12 +1250,18 @@
               "maximum": 2147483647
             }
           },
-          "required": ["fact", "wear"],
+          "required": [
+            "fact",
+            "wear"
+          ],
           "additionalProperties": false,
           "description": "Toolbox row 21: the bounded int entity fact holding this weapon's durability (its default is a new weapon's) and the amount each hit of its own attack takes off; at the fact's minimum it is broken and strikes unarmed."
         }
       },
-      "required": ["skill", "attack"],
+      "required": [
+        "skill",
+        "attack"
+      ],
       "additionalProperties": false,
       "description": "An equipped weapon's required skill and authored attack profile.",
       "examples": [
@@ -1185,7 +1294,10 @@
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         }
       },
-      "required": ["label", "text"],
+      "required": [
+        "label",
+        "text"
+      ],
       "additionalProperties": false,
       "examples": [
         {
@@ -1235,7 +1347,12 @@
           "minItems": 1
         }
       },
-      "required": ["resource", "amount", "label", "narration"],
+      "required": [
+        "resource",
+        "amount",
+        "label",
+        "narration"
+      ],
       "additionalProperties": false,
       "examples": [
         {
@@ -1286,7 +1403,12 @@
           "$ref": "text.schema.json#/$defs/TextKey"
         }
       },
-      "required": ["effect", "skill", "action", "narration"],
+      "required": [
+        "effect",
+        "skill",
+        "action",
+        "narration"
+      ],
       "additionalProperties": false
     },
     "Cue": {
@@ -1301,7 +1423,11 @@
       "type": "object",
       "properties": {
         "sense": {
-          "enum": ["sound", "smell", "heat"]
+          "enum": [
+            "sound",
+            "smell",
+            "heat"
+          ]
         },
         "text": {
           "$ref": "text.schema.json#/$defs/TextKey"
@@ -1315,7 +1441,11 @@
           "$ref": "policy.schema.json#/$defs/VersionedPolicy"
         }
       },
-      "required": ["sense", "text", "range"],
+      "required": [
+        "sense",
+        "text",
+        "range"
+      ],
       "additionalProperties": false
     },
     "Cues": {
