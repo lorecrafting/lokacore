@@ -12,6 +12,7 @@ import { pending } from '../src/mechanics/dialogue/shared.ts';
 import { engaged } from '../src/mechanics/combat/shared.ts';
 import { describeEntity } from '../src/mechanics/description_variant/rule.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
+import { validate } from '../src/foundation/validate.ts';
 import { activeStatuses, statusKey } from '../src/mechanics/status/shared.ts';
 import {
   attribute,
@@ -360,6 +361,26 @@ test('combat 11: the raider falls before the bounty is taken; the fight ends nor
   assert.deepEqual(gameView(s).journal, []);
   assert.deepEqual(levelling(s), { level: 1, experience: 10, next: 30, unspent: 0 });
   assert.equal(talk(go(s, 'east').world, 'aldous').opened, 'aldous_lesson');
+});
+
+// Breaks (loka-y6yg.8): Aldous's Talk card lists two Talk actions, the lesson and the bounty talk,
+// at once; or after the raider dies the bounty talk is still offered.
+test('combat 11b: Aldous offers exactly one Talk before the lesson, after it, and after the raider', () => {
+  const talks = (w: World) => {
+    const view = gameView(w);
+    assert.deepEqual(validate('GameView', view), []);
+    const aldous = view.entities.find((e) => e.name === 'npc.aldous.short')!;
+    return aldous.actions.filter((a) => a.label === 'action.talk' && a.available).length;
+  };
+  let s = go(fresh(CTX), 'west').world;
+  assert.equal(talks(s), 1);
+  s = choose(talk(s, 'aldous').world, 'learn').world;
+  assert.equal(talks(s), 1);
+  s = play(s, { type: 'shout', word: 'ware' }).world;
+  s = attack(go(s, 'west').world, 'raider');
+  s = wait(s, s.state.clock + 450).world;
+  assert.equal(fact(s, 'raider_slain'), true);
+  assert.equal(talks(go(s, 'east').world), 1);
 });
 
 // Breaks: the tilt yard's pack plan is missing or homed elsewhere, or its Attack does not admit

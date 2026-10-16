@@ -116,7 +116,7 @@ No combat room is `exposed`, so no weather drain lands; no door is gated; rooms 
 - **Aldous** (drill-master): stays in `drill_yard`; no `attack`. Dialogues in key order, as
   Nell's: `aldous_lesson` (policy `fact_compare skill_blade false`; roles `teacher` and `sword`;
   choice `learn`: `sequence [skill.acquire blade]`, `receive {item: sword, from: teacher}`, no
-  `lesson_payment`; `leave`), then `aldous_talk` (policy `fact_compare raider_slain false`; `bounty`
+  `lesson_payment`; `leave`), then `aldous_talk` (policy `all(skill_blade true, raider_slain false)`, so Talk lists one dialogue at a time; the lesson ends "Come back when you want paid work."; `bounty`
   with `accept: bounty`, `leave`), then `aldous_yard` (policy `fact_compare raider_slain true`; its
   own prompt and `leave` only, so no bounty is offered once the raider is dead), and `aldous_steel` with `keyword: "steel"` (one `leave` choice; its prompt is the
   answer; Talk never lists it, [row G9](../system/mechanics.md#social-verbs-say-whisper-and-shout-toolbox-row-g9-engine-half);
@@ -172,7 +172,7 @@ default) and Flee 2, so mv is below 100 from step 1 on; no step pins an mv value
 | # | Step | Expected | Matrix cells |
 |---|---|---|---|
 | 1 | West from the inn; read `sign_combat`. | The text above. GameView `cues` lists the boar's grunt with direction north; in the inn (two exits away) and in `gate_yard` none. | senses cues x combat |
-| 2 | Talk to Aldous: `learn`; wield the sword; `say steel`; Talk: `bounty`. | `skill_blade` true, the sword received and worn in `wield`; Talk now opens `aldous_talk` (the lesson's policy fails). `say steel` opens `aldous_steel` (`choice_opened`); Talk never lists it; the same say in `gate_yard` is `spoken` only. `bounty` activates the quest (Journal active). | lesson x weapon; say x dialogue keyword |
+| 2 | Talk to Aldous: `learn`; wield the sword; `say steel`; Talk: `bounty`. | `skill_blade` true, the sword received and worn in `wield`; Before the lesson Talk lists `aldous_lesson` only; after it, `aldous_talk` only (the lesson's policy fails). `say steel` opens `aldous_steel` (`choice_opened`); Talk never lists it; the same say in `gate_yard` is `spoken` only. `bounty` activates the quest (Journal active). | lesson x weapon; say x dialogue keyword |
 | 3 | `say ware`, then `shout ware`, in the yard. In a separate branch (before any yard shout), `shout ware` from the inn. | After the say `gil_warned` is false (a say reaches the actor's room only); after the shout true, and Gil's description in `gate_yard` reads the warned variant. The inn branch: still false (two exits from Gil). The fact never resets, hence the branch. | shout x reactions x variants |
 | 4 | West; Attack the raider; round 1. | Player hits 2 (raider 1); the raider hits (hp 9); Gil hits 1 and the raider dies: `entity_died` with Gil as killer and the player credited; `raider_slain` true; `bounty` resolves `done` in the same proposal; experience 10 + 20 = 30, level 2, one `level_up` line last, 1 unspent; the raider's corpse is public and empty; Talk to Aldous then opens `aldous_yard` (Leave only). (Gil's own blow emits `attack_result`; `boar_gore` does not fire: no boar here.) | allies x kill credit x quest x levelling |
 | 5 | Raise `str`. | str 11, unspent 0, no Raise offered; the sword's derived damage is 3 (2 + floor(1 x (11 - 10) / 1)). | levelling x derived damage |
