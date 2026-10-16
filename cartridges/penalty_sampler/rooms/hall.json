@@ -1,0 +1,15 @@
+{
+  "title": "room.hall.title",
+  "description": "room.hall.description",
+  "exits": {
+    "east": {
+      "to": "pit"
+    },
+    "west": {
+      "to": "den"
+    },
+    "south": {
+      "to": "yard"
+    }
+  }
+}

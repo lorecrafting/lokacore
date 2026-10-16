@@ -17,6 +17,7 @@ import { leave } from '../water/shared.ts';
 import { died as crowDied } from '../crow/behavior.ts';
 import { clearBleed } from '../bleed/shared.ts';
 import { clearStatuses } from '../status/shared.ts';
+import { lose } from '../levelling/shared.ts';
 
 type DeathEvent = DomainEvent & {
   payload: Extract<DomainEvent['payload'], { type: 'entity_died' }>;
@@ -179,6 +180,8 @@ function transferRoots(
   writer_group: number,
   kept: Set<string>,
 ): DeltaOp[] {
+  // Row 47: a kept penalty leaves the player's held items on the body; the corpse stays empty.
+  if (player && world.cartridge.world?.death?.penalty?.items === 'kept') return [];
   const ops: DeltaOp[] = [];
   const roots = Object.keys(world.entities).filter(
     (item) =>
@@ -219,6 +222,7 @@ function returnBody(world: World, fatal: Fatal): DeltaOp[] {
     source_id: room_id,
     destination_id: world.roomIds[refString(settings.shrine)],
   });
+  ops.push(...lose(world, owner_id, settings.penalty?.experience?.percent ?? 0, writer_group));
   const restored = restoredPools(world, victim_id);
   ops.push(...restored.map((op) => ({ ...op, writer_group })));
   const expected = positionOf(world, owner_id)!;

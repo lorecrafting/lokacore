@@ -33021,5 +33021,349 @@
         "code": "unknown_property"
       }
     ]
+  },
+  {
+    "contract": "DeathSettings",
+    "value": {
+      "player_corpse": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "item",
+        "key": "player_corpse"
+      },
+      "npc_corpse": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "item",
+        "key": "npc_corpse"
+      },
+      "shrine": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "hall"
+      },
+      "restore": {
+        "hp": 1,
+        "mv": 0
+      },
+      "penalty": {
+        "experience": {
+          "percent": 0,
+          "narration": "death.penalty"
+        }
+      }
+    },
+    "errors": [
+      {
+        "path": "/penalty/experience/percent",
+        "code": "below_minimum"
+      }
+    ]
+  },
+  {
+    "contract": "DeathSettings",
+    "value": {
+      "player_corpse": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "item",
+        "key": "player_corpse"
+      },
+      "npc_corpse": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "item",
+        "key": "npc_corpse"
+      },
+      "shrine": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "hall"
+      },
+      "restore": {
+        "hp": 1,
+        "mv": 0
+      },
+      "penalty": {
+        "experience": {
+          "percent": 101,
+          "narration": "death.penalty"
+        }
+      }
+    },
+    "errors": [
+      {
+        "path": "/penalty/experience/percent",
+        "code": "above_maximum"
+      }
+    ]
+  },
+  {
+    "contract": "DeathSettings",
+    "value": {
+      "player_corpse": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "item",
+        "key": "player_corpse"
+      },
+      "npc_corpse": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "item",
+        "key": "npc_corpse"
+      },
+      "shrine": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "hall"
+      },
+      "restore": {
+        "hp": 1,
+        "mv": 0
+      },
+      "penalty": {
+        "experience": {
+          "percent": 1.5,
+          "narration": "death.penalty"
+        }
+      }
+    },
+    "errors": [
+      {
+        "path": "/penalty/experience/percent",
+        "code": "invalid_type"
+      }
+    ]
+  },
+  {
+    "contract": "DeathSettings",
+    "value": {
+      "player_corpse": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "item",
+        "key": "player_corpse"
+      },
+      "npc_corpse": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "item",
+        "key": "npc_corpse"
+      },
+      "shrine": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "hall"
+      },
+      "restore": {
+        "hp": 1,
+        "mv": 0
+      },
+      "penalty": {
+        "experience": {
+          "percent": 10,
+          "narration": "Death!"
+        }
+      }
+    },
+    "errors": [
+      {
+        "path": "/penalty/experience/narration",
+        "code": "pattern_mismatch"
+      }
+    ]
+  },
+  {
+    "contract": "DeathSettings",
+    "value": {
+      "player_corpse": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "item",
+        "key": "player_corpse"
+      },
+      "npc_corpse": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "item",
+        "key": "npc_corpse"
+      },
+      "shrine": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "hall"
+      },
+      "restore": {
+        "hp": 1,
+        "mv": 0
+      },
+      "penalty": {
+        "experience": {
+          "percent": 10
+        }
+      }
+    },
+    "errors": [
+      {
+        "path": "/penalty/experience/narration",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "DeathSettings",
+    "value": {
+      "player_corpse": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "item",
+        "key": "player_corpse"
+      },
+      "npc_corpse": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "item",
+        "key": "npc_corpse"
+      },
+      "shrine": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "hall"
+      },
+      "restore": {
+        "hp": 1,
+        "mv": 0
+      },
+      "penalty": {
+        "experience": {
+          "narration": "death.penalty"
+        }
+      }
+    },
+    "errors": [
+      {
+        "path": "/penalty/experience/percent",
+        "code": "missing_property"
+      }
+    ]
+  },
+  {
+    "contract": "DeathSettings",
+    "value": {
+      "player_corpse": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "item",
+        "key": "player_corpse"
+      },
+      "npc_corpse": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "item",
+        "key": "npc_corpse"
+      },
+      "shrine": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "hall"
+      },
+      "restore": {
+        "hp": 1,
+        "mv": 0
+      },
+      "penalty": {
+        "experience": {
+          "percent": 10,
+          "narration": "death.penalty",
+          "x": 1
+        }
+      }
+    },
+    "errors": [
+      {
+        "path": "/penalty/experience/x",
+        "code": "unknown_property"
+      }
+    ]
+  },
+  {
+    "contract": "DeathSettings",
+    "value": {
+      "player_corpse": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "item",
+        "key": "player_corpse"
+      },
+      "npc_corpse": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "item",
+        "key": "npc_corpse"
+      },
+      "shrine": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "hall"
+      },
+      "restore": {
+        "hp": 1,
+        "mv": 0
+      },
+      "penalty": {
+        "items": "bag"
+      }
+    },
+    "errors": [
+      {
+        "path": "/penalty/items",
+        "code": "not_in_enum"
+      }
+    ]
+  },
+  {
+    "contract": "DeathSettings",
+    "value": {
+      "player_corpse": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "item",
+        "key": "player_corpse"
+      },
+      "npc_corpse": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "item",
+        "key": "npc_corpse"
+      },
+      "shrine": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "room",
+        "key": "hall"
+      },
+      "restore": {
+        "hp": 1,
+        "mv": 0
+      },
+      "penalty": {
+        "x": 1
+      }
+    },
+    "errors": [
+      {
+        "path": "/penalty/x",
+        "code": "unknown_property"
+      }
+    ]
   }
 ]

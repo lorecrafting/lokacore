@@ -1141,7 +1141,7 @@ A [generic quest deadline](mechanics.md#quest-deadlines-toolbox-row-w24-engine-h
 
 ## Levelling recovery
 
-[Experience and levelling](mechanics.md#experience-and-levelling-toolbox-row-4) persist the `levelling` row, keyed by its canonical target text, with the kill, reaction or Raise that wrote it, the head and the receipt, in the normal changed-row transaction before adoption and reply. Level and unspent points are derived on reopen from the row and the cartridge's thresholds; nothing else is stored. Cold reopen re-decides the accepted kill, `experience.grant` and Raise like any other receipt, and replay of a Raise returns the original receipt without spending a second point.
+[Experience and levelling](mechanics.md#experience-and-levelling-toolbox-row-4) persist the `levelling` row, keyed by its canonical target text, with the kill, reaction or Raise that wrote it, the head and the receipt, in the normal changed-row transaction before adoption and reply. Level and unspent points are derived on reopen from the row and the cartridge's thresholds; a [death penalty](mechanics.md#death-penalties-toolbox-row-47)'s loss is the same row write; nothing else is stored. Cold reopen re-decides the accepted kill, `experience.grant` and Raise like any other receipt, and replay of a Raise returns the original receipt without spending a second point.
 
 ## Entity and pair fact recovery
 

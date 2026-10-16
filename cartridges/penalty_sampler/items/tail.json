@@ -1,0 +1,13 @@
+{
+  "keywords": [
+    "tail"
+  ],
+  "short": "item.tail.short",
+  "room_line": "item.tail.room",
+  "description": "item.tail.description",
+  "location": {
+    "in": "room",
+    "room": "pit"
+  },
+  "mass_grams": 10
+}
