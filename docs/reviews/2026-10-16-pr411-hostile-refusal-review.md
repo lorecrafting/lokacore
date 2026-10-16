@@ -68,3 +68,26 @@ Open items, judged:
 - Hosted CI at eff67180 was still in progress at this check.
 
 Verdict: **APPROVE WITH NOTES** at eff67180.
+
+## Second opinion at eff671801 (fix round 1)
+
+- Exact head `eff67180125697fe5d9a36edea3b8ee3fbebd68a`; hosted `ci` and `book-e2e` success. Written 2026-10-16 by anthropic/claude-opus-5-5, an independent second reviewer; the must-be-true list was formed before reading the first record and matches items 1-8 above, plus: Realm seam 1 (view reads the viewer actor), per-player standing scope, hash fixture consistent, no save change.
+- First-record dispositions verified: 1 `mobile/app/book/Npc.tsx:94` `!talk && enemy` and the Bess route in `hostile_refusal.test.ts`; 2 Nell asserted at 0, +1, -1 and -2 (M1 below red); 3 `mobile/app/book/words.ts:77` "can't afford", full Peg row asserted; 4 `refuse` without `hostile` is SCHEMA_VIOLATION in `cartridge_standing.ts:33-38` and `standing.ex:42`; 5 `mechanics.md:2354`; 6 `/code-review medium` rerun at 2effc01ca, and eff671801 changes only two doc lines.
+- Agree (both kernels): UNRESOLVED_REFERENCE on the refuse text, 1.104 floor, refuse-needs-hostile; `loader_floors.json` 1.104 case is unshadowed (at 1.103 only `refuse` fails; the 1.58/1.57 case strips nell and bess refuse); `toolbox_showcase_hash.json` sha256 of `canonical` recomputed in Python matches; no save or proposal file changed.
+- Focused runs green: kernel/ts sleep, theft, status_readers, ask, standing, showcase_social, loader_floors, validate; mobile hostile_refusal, ask; mix content_standing, loader_floors, content_showcase.
+
+| Mutant (reverted) | Result |
+| --- | --- |
+| `view.ts:235` `=== 'hostile'` to `!== 'wary'` | red: `✖ social 2-3: help makes Nell friendly (bread 2); ...` (PR claim confirmed) |
+| `standing.ex:68` `[1, 104]` to `[1, 103]` | red: `loader_floors_test.exs` each fixture floor |
+| `standing.ex:42` refuse-needs-hostile to `false` | red: `content_standing_test.exs` rows 15 and G11 |
+| `hostile` `enum [true]` to `type boolean` (`contracts.gen.ts` and `gameview.schema.json`) | red in both kernels: `invalid fixtures fail with exactly the listed errors` (PR claim confirmed) |
+| `view.ts:237` unauthored hostile NPC projects `refusal: e.short` | red only in mobile `ask.test.ts` (guard fallback); acceptable |
+
+### Findings
+
+1. should-fix, `protocol/gameview.schema.json:494`: `refusal` is valid without `hostile`, but its description says "present with hostile". Both validators already support `dependentRequired` (`kernel/ts/src/foundation/validate.ts:142`, `lib/loka/core/contracts/schema.ex:141`; house use `action.schema.json:1091`). Failure: a refactor that moves `refusal` out of the hostile spread at `view.ts:237` projects it for a wary NPC that no test pins; GameView validation stays green and `Npc.tsx:76` drops it silently. Tightening after 1.104 ships is a contract change, so do it now: `"dependentRequired": {"refusal": ["hostile"]}` on EntityView and one `invalid.json` case.
+
+Open: finding 1, to fix in this round before merge ([WORKFLOW step 7](../WORKFLOW.md): nothing open). Method note: a JSON-only schema mutant stays green in TS, which validates against `contracts.gen.ts`; mutate both.
+
+Verdict: **APPROVE WITH NOTES** at eff671801.
