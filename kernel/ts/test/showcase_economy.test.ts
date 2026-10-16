@@ -1,4 +1,4 @@
-// size: allow 503, the Undercroft walk (steps 1 to 10) and its branches continue one world and share its helpers
+// size: allow 552, the Undercroft walk (steps 1 to 10) and its branches continue one world and share its helpers
 // The showcase economy and law district walked step by step (docs/showcase/economy-law-district.md,
 // guided loop steps 1 to 10). Each numbered test continues the world the one before it left; a
 // branch starts from a saved step. Fresh world at 07:00 (25200), pennies 10.
@@ -10,7 +10,6 @@ import { validate } from '../src/foundation/validate.ts';
 import { key } from '../src/foundation/compose.ts';
 import { decode } from '../src/foundation/canonical.ts';
 import { engaged } from '../src/mechanics/combat/shared.ts';
-import { pending } from '../src/mechanics/dialogue/shared.ts';
 import { describeEntity } from '../src/mechanics/description_variant/rule.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import {
@@ -306,9 +305,20 @@ test('economy 7 control: without the fence lock the purse sells twice', () => {
   assert.deepEqual([pennies(r), purse(r, 'fence')], [8, 0]);
 });
 
-// Breaks: the seen lift's line or events, the reaction setting wanted, the guard's hostility or
-// engage, his blow landing, the flee exits, the fence's price, the fine's gate, price or reset.
-test('economy 9: from step 5, a seen lift; the guard bars the door until the fine', () => {
+// The world with the player's pennies forged to `value`.
+const coin = (w: World, value: number): World => {
+  const at = key({ kind: 'resource', resource: resourceRef(w, 'pennies'), entity_id: w.body });
+  const resources = { ...w.state.resources, [at]: { ...w.state.resources![at]!, value } };
+  return { ...w, state: { ...w.state, resources } };
+};
+const shut = (w: World, direction: string) => exit(w, direction).door?.state;
+const jailerChoices = (w: World) => gameView(w).choice?.choices;
+let jail: World; // step 9's arrest: in the cell, 2 pennies, wanted
+
+// Breaks: the seen lift's line or events, the reaction setting wanted, the guard's arrest (an
+// encounter instead, or none, or one fired at the lift itself), the charge shutting the door, the
+// broke dialogue's gate or its work-off clearing wanted or paying a penny, or the door not opening.
+test('economy 9: from step 5, a seen lift; the guard arrests on the next entry; broke, work it off', () => {
   let s = five;
   assert.equal(
     refused(s, { type: 'talk', target_id: npc(s, 'clerk_a') }),
@@ -319,36 +329,75 @@ test('economy 9: from step 5, a seen lift; the guard bars the door until the fin
   assert.deepEqual(kinds(t).slice(-2), ['custom_event', 'fact_changed']);
   s = t.world;
   assert.equal(fact(s, 'wanted'), true);
-  const back = go(walk(s, 'south'), 'north');
-  assert.ok(back.lines.includes('npc.guard.engage'), JSON.stringify(back.lines));
-  s = back.world;
+  assert.equal(where(s, s.body), room(s, 'market_row')); // seen in his room: no arrest yet
   const guard = npc(s, 'guard');
-  assert.equal(engaged(s, s.body)?.row.npc_id, guard);
   assert.equal(describeEntity(s, s.character, guard, 'room_line'), 'npc.guard.room_wanted');
-  const round = wait(s, s.state.clock + 150);
-  const blow = round.events.find((e) => e.type === 'attack_result' && e.attacker_id === guard);
-  assert.equal(blow?.hit, false);
-  s = play(round.world, { type: 'flee' }).world;
-  assert.ok([room(s, 'undercroft'), room(s, 'forge_stall')].includes(where(s, s.body)!));
-  // North is the smith's dead end: back through the guard's market until a flee lands south.
-  for (let i = 0; where(s, s.body) === room(s, 'forge_stall'); i++) {
-    assert.ok(i < 5);
-    s = play(go(s, 'south').world, { type: 'flee' }).world;
-  }
-  const poor = talk(go(s, 'east').world, 'clerk_a').world; // 2 pennies: the fine is 3
-  const [continuation_id] = pending(poor, poor.character)!;
-  const pay = { type: 'choose', choice_id: 'pay', continuation_id };
-  assert.equal(refused(poor, pay), 'insufficient_resource');
-  s = play(go(s, 'west').world, trade(s, 'sell', 'merchant_purse', 3, 'fence')).world;
-  assert.equal(pennies(s), 5);
-  s = choose(talk(walk(s, 'east', 'east'), 'clerk_a').world, 'pay').world;
-  assert.deepEqual([pennies(s), fact(s, 'wanted'), purse(s, 'clerk_a')], [2, false, 4]); // clerk A held step 2's fee
-  const market = go(walk(s, 'west'), 'north');
-  assert.ok(!market.lines.includes('npc.guard.engage'));
-  s = market.world;
+  const back = go(walk(s, 'south'), 'north');
+  assert.deepEqual(back.lines, ['npc.guard.arrest', 'trial.charge']);
+  s = back.world;
+  assert.equal(where(s, s.body), room(s, 'cell'));
   assert.equal(engaged(s, s.body), undefined);
+  assert.deepEqual([shut(s, 'west'), shut(s, 'down')], ['closed', 'closed']);
+  assert.equal(pennies(s), 2);
+  jail = s;
+  const talked = talk(s, 'jailer');
+  assert.equal(talked.opened, 'jailer_broke');
+  assert.deepEqual(jailerChoices(talked.world), [
+    {
+      available: false,
+      choice_id: 'pay',
+      label: 'dialogue.jailer.pay',
+      reason: { code: 'insufficient_resource' },
+    },
+    { available: true, choice_id: 'work_off', label: 'dialogue.jailer.work_off' },
+  ]);
+  const worked = choose(talked.world, 'work_off');
+  assert.deepEqual(worked.lines, ['narration.jailer.work_off']);
+  s = worked.world;
+  assert.deepEqual([pennies(s), fact(s, 'wanted'), purse(s, 'jailer')], [2, false, 0]);
+  const market = go(play(s, { type: 'open', direction: 'west' }).world, 'west');
+  assert.ok(!market.lines.includes('npc.guard.arrest'));
+  s = market.world;
+  assert.equal(where(s, s.body), room(s, 'market_row'));
   assert.equal(describeEntity(s, s.character, guard, 'room_line'), 'npc.guard.room');
   valid(s);
+});
+
+// Breaks: the broke dialogue's pennies bound off by one (work-off offered with the fine in hand),
+// or paying leaves wanted set, skips the transfer or leaves the door shut.
+test('economy 9 boundary: with exactly the 3-penny fine the jailer only takes payment', () => {
+  const talked = talk(coin(jail, 3), 'jailer');
+  assert.equal(talked.opened, 'jailer_talk');
+  assert.deepEqual(jailerChoices(talked.world), [
+    { available: true, choice_id: 'pay', label: 'dialogue.jailer.pay' },
+  ]);
+  const s = choose(talked.world, 'pay').world;
+  assert.deepEqual([pennies(s), fact(s, 'wanted'), purse(s, 'jailer')], [0, false, 3]);
+  assert.equal(
+    where(go(play(s, { type: 'open', direction: 'west' }).world, 'west').world, s.body),
+    room(s, 'market_row'),
+  );
+});
+
+// Breaks: the force recipe or the grate's opens_when, the drain's way out, the escape clearing
+// wanted, the clerk's fine (gate, price, reset), or the charge not shutting the grate again on
+// the second arrest.
+test('economy 9 escape: force the grate, leave by the drain still wanted; the guard arrests again', () => {
+  const f = play(jail, { type: 'perform', action: 'force_grate' });
+  assert.deepEqual(f.lines, ['grate.forced']);
+  let s = go(play(f.world, { type: 'open', direction: 'down' }).world, 'down').world;
+  assert.equal(where(s, s.body), room(s, 'drain'));
+  s = go(s, 'south').world;
+  assert.equal(fact(s, 'wanted'), true);
+  // The counting house's fine clears it too (clerk A held step 2's fee).
+  const fined = choose(talk(coin(s, 3), 'clerk_a').world, 'pay').world;
+  assert.deepEqual([pennies(fined), fact(fined, 'wanted'), purse(fined, 'clerk_a')], [0, false, 4]);
+  s = go(s, 'west').world;
+  const again = go(s, 'north');
+  assert.deepEqual(again.lines, ['npc.guard.arrest', 'trial.charge']);
+  s = again.world;
+  assert.equal(where(s, s.body), room(s, 'cell'));
+  assert.equal(shut(s, 'down'), 'closed');
 });
 
 // Breaks: hidden ending before hide + 3600 or outliving it, its tick narrating, the bystanders

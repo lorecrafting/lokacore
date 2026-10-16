@@ -5,8 +5,9 @@ written by Fable for an Opus developer and an Opus reviewer. Base: `main` after
 [plan 4](homestead-district.md) merges ([build order](homestead-district.md#build-order-for-plans-4-to-7)).
 Only installed mechanics: rows G7 (locks), 24 (property and bank), W11 (stock prices), 20a and 20b
 (escrow, claim and cancel), 19b (replenish), 33 (theft, fence, wanted), 16 (sneak), G11
-(disposition) and the commerce already in the engine. Not built and not planned: trial and jail
-(rows 35, 36 `todo`), so "wanted" ends by content: a fine paid at the counting house. Every shape
+(disposition), 35 (arrest), 36 (jail, content only) and the commerce already in the engine.
+"Wanted" ends by content: a fine paid to the jailer or at the counting house, or work in the cell
+for a player who cannot pay; forcing the cell's grate escapes but keeps it. Every shape
 has a sampler precedent, cited per item; a step that needs engine code is a
 [toolbox finding](#toolbox-findings).
 
@@ -53,7 +54,9 @@ Sealed: `storeroom` (the crate with `candle_04`, `candle_05`), `forge_back` (esc
 | Room | Exits | Holds |
 |---|---|---|
 | `undercroft` (sign) | up `crossroads_inn`, north `market_row`, east `counting_house`, west `pawn_alley`, south `strongroom` through barrier `strongroom_door` (`initial: locked`, `key_item: strongroom_key`), down `vault_yard` | detail `sign_law` |
-| `market_row` | south `undercroft`, north `forge_stall` | **the chandler** (shop; holds `candle_01..03` and `beeswax_candle`; `alertness` 1); **the merchant** (holds `merchant_purse`; `alertness` 0); **the guard** (`alertness` 1); **clerk B** (the second counter) |
+| `market_row` | south `undercroft`, north `forge_stall`, east `cell` through `cell_door` | **the chandler** (shop; holds `candle_01..03` and `beeswax_candle`; `alertness` 1); **the merchant** (holds `merchant_purse`; `alertness` 0); **the guard** (`alertness` 1); **clerk B** (the second counter) |
+| `cell` (jail, `trial_sampler`) | west `market_row` through `cell_door` (`opens_when` wanted false), down `drain` through `grate` (tags metal, fragile; `opens_when` `grate_forced`) | **the jailer** (`pennies` 0); detail `grate_lock` (rating 0) |
+| `drain` | up `cell` through `grate`, south `counting_house` (one way) | none |
 | `forge_stall` | south `market_row` | **the smith**; `ore_01..04` on the floor |
 | `counting_house` | west `undercroft` | **clerk A**; **the vault** (an NPC with `pennies` 20 and `locks.get` that always refuses, `theft_sampler/npcs/vault.json`); `strongroom_key` (`locks.get fact_compare owns_strongroom true`) |
 | `pawn_alley` | east `undercroft` | **the fence** (`pennies` 6; `locks.get` always refuses); detail `barrels` (rating 0; recipe `hide`) |
@@ -64,8 +67,8 @@ Sealed: `storeroom` (the crate with `candle_04`, `candle_05`), `forge_back` (esc
 
 > The Undercroft. North, the market: the chandler's candles cost more as her shelf empties and
 > she restocks on the hour; the merchant beside her carries a purse and does not watch it, but the
-> guard watches him. Lift the purse in his sight and the guard will stop you at the door of this
-> market until you pay the counting house its fine; hide behind the barrels in the alley first and
+> guard watches him. Lift the purse in his sight and the guard will walk you to the cell east of
+> the market the next time you come in, until you pay the jailer or the counting house its fine; hide behind the barrels in the alley first and
 > nobody sees. The fence in the alley buys what was lifted and nothing honest, and keeps a hand on
 > what he buys. The smith north of the market takes two ore and three pennies now and hands you the
 > knife an hour later, or your ore back for a penny if you change your mind. The counting house
@@ -82,7 +85,8 @@ Sealed: `storeroom` (the crate with `candle_04`, `candle_05`), `forge_back` (esc
   not 2: she stands in step 6's market, and 2 would see through `hidden` at stealth 1).
 - **The merchant**: no shop; holds `merchant_purse`; `alertness` 0.
 - **The guard**: `attributes {alertness: 1}`; `disposition.hostile fact_compare wanted equals true`,
-  `engage` line (he bars the market door; no judgment of the player, plan 3 finding 4); `attack
+  `arrest {to: cell, narration: npc.guard.arrest}` (row 35: entering his room while wanted moves
+  the body to the cell, no encounter; seen in his room, the lift itself does not arrest); `attack
   {chance: 0, 1..1}`; `resistances {physical: 100}` (the Warden's shape: a sword hit is a hit for
   no loss, nobody here dies). `hp` 0..5.
 - **The fence** (`theft_sampler/npcs/fence.json`): offers `{item: merchant_purse, buy: 6, sell: 3,
@@ -101,6 +105,13 @@ Sealed: `storeroom` (the crate with `candle_04`, `candle_05`), `forge_back` (esc
   account `savings` into the vault; clerk A also `buy_strongroom` price 5 `{entitlement:
   owns_strongroom}` and the dialogue `clerk_fine` (policy `fact_compare wanted true`; one choice
   `pay` with `lesson_payment` 3 pennies, sequence `fact.assign wanted false`; the D1 fee shape).
+- **The jailer** and the cell (row 36, `trial_sampler`): `reactions/charge.json` on
+  `entity_entered_room` in `cell` when wanted narrates `trial.charge`, shuts `cell_door` and `grate`
+  and resets `grate_forced`; `recipes/force_grate.json` is an opposed `str` check against
+  `grate_lock`. Two dialogues, the first in key order whose policy holds opening: `jailer_broke`
+  (wanted and not `resource_compare pennies at_least 3`) offers `pay` (shown unavailable,
+  `insufficient_resource`) and `work_off` (sequence `fact.assign wanted false`, nothing paid or
+  given); `jailer_talk` (wanted) offers `pay`, 3 pennies to the jailer, `wanted` false.
 - Theft: `reactions/theft_seen.json` `on {event: custom_event, custom: theft_seen}` `apply
   fact.assign wanted true` (`theft_sampler`). The Book's Take on a living NPC's Held list is the
   steal ([row 33](../system/mechanics.md#theft-fence-and-witnessed-offense-toolbox-rows-33-and-34)).
@@ -121,7 +132,7 @@ Any day; fresh world at 07:00 day 1, pennies 10. T is the clock of the commissio
 | 6 | Alley: `hide`; then market: Take `merchant_purse` from the merchant. | `check_passed`, `hidden` on the Conditions line, `stealth` uses 1. The Take: the purse held, `stolen` true on it, line `theft.unseen`, `wanted` false, kinds `item_acquired`, `fact_changed stolen` and nothing more (`uses_stealth` is already at its cap 1, the last `growth` entry, so the Take writes nothing); the guard stays as he was. | sneak x theft x witness |
 | 7 | Alley: Sell the purse to the fence; Take it back. Market: Buy `beeswax_candle`. Alley: Sell it to the fence. Market: Sell it to the chandler; Sell her the set candle from step 3. | Pennies 5, the fence holds the purse (`stolen` stays true); the Take: `permission_denied`. The beeswax at 2: pennies 3; to the fence: `invalid_state` (clean); to the chandler at 1: pennies 4; the set candle at 1: pennies 5, she holds four set candles and the price reads 1. | fence x stolen provenance x get lock |
 | 8 | Counting house: `buy_strongroom`; Take the key; south from the undercroft: Unlock, Open, south; Put the knife in the chest; Take it; Close and Lock from inside. | Pennies 0, `owns_strongroom` true, the key held; Unlock and Open accepted, the room entered; Put and Take accepted; the door locked again behind. A fresh world without the purchase: the key `permission_denied`, the door `exit_locked`, and a forged move south with the door open is `permission_denied` (the enter lock, checked after the barrier). | property x locks x key barrier |
-| 9 | Branch from step 5 (pennies 2, not hidden): Take `merchant_purse` beside the guard; leave south and come back north; Flee; alley: Sell the purse; counting house: `pay`; north again. | Line `theft.seen`, kinds end `custom_event theft_seen` (subject the thief), `fact_changed wanted`; `wanted` true. Re-entering the market: `engage` opens an encounter (G11); his blow is chance 0; Flee leaves by south or north (two candidates). The fence pays 3 (pennies 5). `clerk_fine` opens only while wanted; `pay`: pennies 2, `wanted` false; the market again: no engage, the guard's room line is the base. | theft x wanted x disposition x fine |
+| 9 | Branch from step 5 (pennies 2, not hidden): Take `merchant_purse` beside the guard; leave south and come back north; talk to the jailer: `work_off`; Open west, west. Branches: with exactly 3 pennies, `pay`; or Force the grate, down, south, west, north. | Line `theft.seen`, kinds end `custom_event theft_seen` (subject the thief), `fact_changed wanted`; `wanted` true; no arrest while still in his room. Re-entering the market: lines `npc.guard.arrest`, `trial.charge`; the body in `cell`, no encounter, door and grate closed. At 2 pennies `jailer_broke` opens: `pay` unavailable (`insufficient_resource`), `work_off` clears `wanted`, pennies stay 2; the market again: no arrest, the guard's room line is the base. At 3, `jailer_talk` opens with `pay` only: pennies 0, the jailer 3. The escape keeps `wanted`; `clerk_fine` pays 3 to clear it; the market again arrests and shuts the grate. | theft x wanted x arrest x jail x fine |
 | 10 | Branch from step 7's end (pennies 5): Take `beeswax_candle` from the chandler's Held list after `hidden` ends (wait to step 6's hide + 3600; the hourly shelf job moves nothing, four held is over cap 3); alley: Sell it to the fence. | Seen: unhidden, the guard and the merchant witness it (the chandler, alertness 1, does not beat stealth 1, so she does not notice): `wanted` true, the beeswax held with `stolen` true; the set price still reads 1 (four held; the beeswax is not in the set); the fence buys it at 2: pennies 7, the fence's pennies 1. | theft x stock prices |
 
 Sandbox `vault_yard`: a purse to lift in the watchman's sight or from behind the barrels, a fine to
@@ -132,7 +143,8 @@ on the hour.
 
 Pennies: sources are the withdraw (what was deposited, minus fees), the fence (6 pennies, never
 refilled: two purses, or a purse and the beeswax candle, ever), and the chandler buying her candles
-back at 1; sinks are buys, four service fees, the fine, the strongroom and the commission. Candles:
+back at 1; sinks are buys, four service fees, the two fines (jailer, counting house), the
+strongroom and the commission. Work-off is not a source: it clears `wanted` and pays nothing. Candles:
 five set candles, moved by the shelf job (cap 3 on her), and one `beeswax_candle` the job never
 moves; none created. Purses: one each in the
 market and the yard. Ore: four; two leave for the knife (one knife per world: a second commission
@@ -181,12 +193,12 @@ provenance x get lock.
 
 ## Toolbox findings
 
-1. **Wanted has no engine exit** (rows 35 and 36 `todo`): the fine is a dialogue payment that
-   assigns the fact. When jail lands, the guard's engage should relocate the body instead; this
-   plan's guard is the detour until then.
+1. **Wanted's exits are content** (rows 35 and 36): the guard's arrest moves the body to the
+   cell; the fines and the work-off are dialogue choices that assign the fact. Dialogue choices
+   have no per-choice policy, so the work-off's "only when broke" gate is a second dialogue
+   ordered before the paying one (Beads loka-y6yg.33).
 2. **A hostile NPC who must not die** needs `resistances {physical: 100}` plus chance 0, as the
    Warden; there is no "cannot be attacked" flag short of removing `attack`, which also removes
-   engage. A `disposition` that engages without a fight (a stop, not a brawl) is the row to file
-   if the owner wants the guard to arrest rather than square up.
+   engage. Row 35's `arrest` is that stop: the guard now arrests and never engages.
 3. **The Book's Lock and Unlock cards** are unconfirmed in the docs (`book-ui.md` names neither);
    the e2e settles it.

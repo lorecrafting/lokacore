@@ -6,7 +6,7 @@ defmodule Loka.ContentShowcaseTest do
 
   # The Homestead (crafts 1.101; build, raze, item_present, profession, hidden: 1.102) and the
   # Undercroft's banks, escrow, stock tables, shelves and locks, and the law district's theft,
-  # hide, NPC locks, stolen offers and fine dropped for the older-floor rows;
+  # hide, NPC locks, stolen offers, fine, jail talk and arrest dropped for the older-floor rows;
   # protocol/fixtures/loader_floors.json case 18 drops the same.
   @homestead_files ~w(blueprints/hut_plain blueprints/hut_timbered actions/raise_hut_plain
                     actions/raze_hut services/raise_hut_plain services/raze_hut recipes/chop
@@ -41,7 +41,8 @@ defmodule Loka.ContentShowcaseTest do
                     services/buy_strongroom services/deposit_a services/deposit_b
                     services/forge_cancel services/forge_claim services/forge_commission
                     services/withdraw_a services/withdraw_b statuses/hidden reactions/hide
-                    reactions/yard_hide dialogues/clerk_fine)
+                    reactions/yard_hide dialogues/clerk_fine dialogues/jailer_broke
+                    dialogues/jailer_talk reactions/charge)
 
   @homestead_facts ~w(cooked gifted_apple gifted_rat ordered owns_pen owns_plot regard sown_at
                       traded_knife watered_at)
@@ -72,6 +73,8 @@ defmodule Loka.ContentShowcaseTest do
         {"rooms/holding_lane.json", &Map.delete(&1, "site")},
         {"npcs/carpenter.json", &Map.delete(&1, "services")},
         {"rooms/holding_croft.json", &Map.delete(&1, "site")},
+        # The guard's disposition.arrest needs 1.105 (toolbox row 35); hostile alone is refused.
+        {"npcs/guard.json", &Map.delete(&1, "disposition")},
         {"facts.json", &update_in(&1, ["facts"], fn f -> Map.drop(f, @homestead_facts) end)}
       ] ++
         for({f, k} <- @dropped_keys, do: {f <> ".json", fn m -> Map.delete(m, k) end})
