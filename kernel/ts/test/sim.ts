@@ -274,14 +274,18 @@ function violated(
   return (
     CHECKED.world.find((i) => !holds(i, after)) ??
     ids.find((i) => !check(i, obs)) ??
-    (shared(after).some(
-      (w) =>
-        !check('target_candidates_ordered', { resolution: resolve(after, after.character, w) }),
+    (ordered.has(after) ||
+    shared(after).every((w) =>
+      check('target_candidates_ordered', { resolution: resolve(after, after.character, w) }),
     )
-      ? 'target_candidates_ordered'
-      : undefined)
+      ? void ordered.add(after)
+      : 'target_candidates_ordered')
   );
 }
+
+// target_candidates_ordered reads only the world: a world that passed it is not re-resolved (a
+// rejected step returns its input world, about half of all steps).
+const ordered = new WeakSet<World>();
 
 // An accepted step's State is the State before with its delta's composed changes and its rng,
 // and nothing else (runtime/proposal.ts adopt); a delta that does not compose is never accepted. A simulator

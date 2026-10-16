@@ -143,7 +143,7 @@ their rules and red controls remain available for resumption.
   one verdict job, `ci-green` and `book-e2e-green` (`if: always()`): it fails if any job failed,
   was cancelled or skipped ([workflow step 7](WORKFLOW.md#loop)). The simulator (`kernel/ts/test/sim.ts`) runs its
   regression seeds everywhere and 10,000 fresh sequences only when `CI` is set (GitHub Actions
-  sets it, in its own `sim` job via `npm run test:sim`; the `kernel` job runs `test:nosim`; locally, `npm test` and `bin/check_all.sh` run 500), by
+  sets it, in its own `sim` job, two parallel legs `sim (fresh)` (`npm run test:sim:fresh`) and `sim (showcase)` (`npm run test:sim:showcase`); the `kernel` job runs `test:nosim`; locally, `npm test` and `bin/check_all.sh` run 500), by
   [owner decision](decisions/owner-decision-test-audit-2026-10-02.md)
   (r1-acceptance-envelope.md §3).
   The `e1-recorder` job runs the [E1 recorder](system/e1-certification.md) (`kernel/ts/test/e1_cases.ts`)

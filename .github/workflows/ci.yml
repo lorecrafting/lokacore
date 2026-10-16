@@ -79,10 +79,15 @@ jobs:
       - run: sh bin/graph_diff_red_controls.sh
       - run: sh bin/prose_lint_red_controls.sh
 
-  # The 10,000 fresh sequences (CI is set), in parallel with the kernel job, which skips sim.test.ts.
+  # sim.test.ts (CI is set: 10,000 fresh sequences), in parallel with the kernel job, which skips it:
+  # two legs, the fresh sequences and the showcase test, each under the timeout on a slow runner.
   sim:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        part: [fresh, showcase]
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
@@ -92,12 +97,18 @@ jobs:
           node-version: '24.21.0'
           cache: npm
           cache-dependency-path: kernel/ts/package-lock.json
-      - run: npm ci --no-audit --no-fund && npm run test:sim
+      # shell: bash runs with -o pipefail, so a failing test is not hidden by tee's exit.
+      - run: npm ci --no-audit --no-fund && npm run "test:sim:$PART" | tee "$RUNNER_TEMP/sim.log"
+        shell: bash
         working-directory: kernel/ts
+        env:
+          PART: ${{ matrix.part }}
+      # A renamed showcase test would leave a leg green with no test run (only the file line passes).
+      - run: grep '^✔ ' "$RUNNER_TEMP/sim.log" | grep -qv '^✔ test/sim.test.ts '
       - if: failure()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: game-trace-sim
+          name: game-trace-sim-${{ matrix.part }}
           path: tmp/obs/game_trace/
           if-no-files-found: ignore
 
@@ -127,7 +138,7 @@ jobs:
           echo "1c53bcd86149ee6087a08f15a5cc625873cc840e4a1769b36df89d03ff581115  $a" | sha256sum -c -
           node kernel/ts/test/e1_cases.ts "$a" "$RUNNER_TEMP/e1-recorder"
 
-  # Kernel typecheck and unit tests (sim.test.ts runs in the sim job) and the TypeScript size gates
+  # Kernel typecheck and unit tests (sim.test.ts runs in the sim jobs) and the TypeScript size gates
   # (they load typescript from kernel/ts). The chapter fixtures compile the real authored cartridge with mix.
   kernel:
     runs-on: ubuntu-latest
