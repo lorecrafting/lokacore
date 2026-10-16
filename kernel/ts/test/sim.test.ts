@@ -228,9 +228,9 @@ test('400 fixed showcase sequences keep every invariant and end in each district
     'gate_yard',
     'boar_run',
     'tilt_yard',
-    'carpenter_shop',
-    'forge_stall',
-  ]; // holding_croft (Homestead, as carpenter_shop) left the 400 ends when the Undercroft came
+    'holding_croft',
+    'counting_house',
+  ]; // one end room per district; E2's theft moved the ends (carpenter_shop, forge_stall dropped out)
   const verbs = ['drink', 'eat', 'read', 'sit', 'sleep', 'wear'];
   assert.deepEqual(
     [...inner.filter((r) => !rooms.has(r)), ...verbs.filter((v) => !seen.has(v))],
