@@ -45,25 +45,20 @@ playtests matter as the foundation for polish; at 95% weekly usage, build ALL re
 Opus developers and Opus reviewers, then ONE sweeping blind Fable playtest instead of one per district;
 keep going on Opus. Notes and pins (G10) were dropped from M15.
 
-Done in session c5ed3619 (2026-10-16): #413 (loka-kgd.170, M15 batch: death penalty 1.109 + Chronicle FD6) and
-#414 (loka-y6yg.32/.33, the law guard arrests into a cell with a jail; a broke player works off the fine) merged.
-Owner 2026-10-16 at 98% weekly usage (AskUserQuestion, quoted): "Land in-flight, stop (Recommended)": finish
-#416 and #415, then stop until the weekly reset (Wednesday 05:00 HST).
+Done in session c5ed3619 (2026-10-16): #413 (loka-kgd.170, M15 batch: death penalty 1.109 + Chronicle FD6),
+#414 (loka-y6yg.32/.33, the law guard arrests into a cell with a jail; a broke player works off the fine), #416
+(loka-y6yg.37, the hosted sim job split into `sim (fresh)` and `sim (showcase)` legs, shell: bash so tee keeps
+failures) and #415 (loka-y6yg.35, plan 6 magic district; the district pool is `ma` 0..5, so the Book shows ma 5/5)
+merged. Owner 2026-10-16 at 98% weekly usage (AskUserQuestion, quoted): "Land in-flight, stop (Recommended)".
 
-In flight (update when they land):
-- #416 (loka-y6yg.37, split the hosted sim job into `sim (fresh)` and `sim (showcase)` legs; harness skips the
-  re-check on rejected steps), branch `ci/sim-split`. Opus review: blocker (tee without pipefail hid failures);
-  fix round 1 running. Merge first.
-- #415 draft (loka-y6yg.35, plan 6 magic district), branch `showcase/magic`, worktree `../worktrees.noindex/magic`.
-  M1 (steps 1-5) reviewed APPROVE WITH NOTES; M2 (steps 6-9, attic, Book e2e, M1 fixes, main merged in) building.
-  Owner asked (2026-10-16, quoted): "Please fix the mana pool thing": the Book shows the default `ma 100/100`, not
-  the district's `mana`; M2 renames the pool to `ma` if the loader allows, else a separate Book fix slice before
-  the playtest. Then one Opus review on the M2 head, mark ready, merge after #416.
+State at writing: no agent running, no open PR of ours (only parked #372). Hosted sim legs on the #415 head:
+showcase 161 s, fresh 425 s (10-minute limit each).
 
 Next, after the reset (all Opus unless marked):
-1. Anything above not landed.
+1. Read the retro items below and loka-kgd.176 first.
 2. Plan 7, traps district (`docs/showcase/traps-district.md`; create its build issue under `loka-y6yg`; split into
-   two slices like magic).
+   THREE slices (retro loka-7m2u: at most ~2 plan steps or 3 rooms per slice; merge main before
+   briefing, not inside the brief).
 3. ONE sweeping blind Fable playtest (`loka-y6yg.34`): economy/law (now with arrest and jail), magic, traps, hub
    regression. Ask the owner for the usage bar first. Then one Opus fix slice; UI findings to `loka-x6t`.
 4. Owner: slice D two-save playtest (`loka-y6yg.4`). Then UI polish with the owner.
@@ -73,6 +68,9 @@ showcase, before chapter work. Polish/balance: `loka-y6yg.36` (bank pennies, the
 `loka-x6t.69` (Word bar hides spell chips in a fight).
 
 Session lessons (2026-10-16, c5ed3619):
+- Retro filed (owner to approve): loka-7m2u slice size cap, loka-xvxa hard 220k handoff stop (M2 developer ~720k),
+  loka-8zf5 after_merge br recover retry, loka-9nd4 sim median of main runs, loka-2rfk hosted book-e2e never runs
+  the showcase walks. Follow-up loka-kgd.177 (committed red control for target_candidates_ordered).
 - Hosted runners are two-speed (~280 s vs ~540 s on the same code): compare sim times only across several runs,
   never blame one slice on one run (the PM wrongly blamed #414; the diagnosis cost ~30k).
 - `br` can stop with "WAL index recovery already failed ... database is busy": run
