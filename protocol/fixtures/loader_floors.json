@@ -1,5 +1,5 @@
 {
-  "description": "Loader floors (Beads loka-xroj): each kernel_api floor read by both kernels. A case compiles source (with edits: [file, key path, value] set before compiling; a null value deletes the key; an empty key path writes the whole file, which may be new) at kernel_api floor: the compiler and the loader accept it; at below the compiler reports compiler and the loader (the floor artifact with at_least changed and rehashed) reports loader. Every 'kernel_api (at least) 1.N' in protocol/*.schema.json has a case (test/loka/loader_floors_test.exs). Code-only floors (sampler-level, no schema text) also have cases but no coverage check. Expected values are literals, not computed by either loader.",
+  "description": "Loader floors (Beads loka-xroj): each kernel_api floor read by both kernels. A case compiles source (with edits: [file, key path, value] set before compiling; a null value deletes the key; an empty key path writes the whole file, which may be new, or with null deletes it) at kernel_api floor: the compiler and the loader accept it; at below the compiler reports compiler and the loader (the floor artifact with at_least changed and rehashed) reports loader. Every 'kernel_api (at least) 1.N' in protocol/*.schema.json has a case (test/loka/loader_floors_test.exs). Code-only floors (sampler-level, no schema text) also have cases but no coverage check. Expected values are literals, not computed by either loader.",
   "cases": [
     {
       "floor": "1.38",
@@ -325,8 +325,34 @@
       "floor": "1.58",
       "below": "1.57",
       "source": "cartridges/toolbox_showcase",
-      "feature": "a reaction's attacker filter (loka-kgd.79)",
-      "edits": [["statuses/gored.json", ["kind"], null]],
+      "feature": "a reaction's attacker filter (loka-kgd.79); the Homestead (1.101/1.102) dropped",
+      "edits": [
+        ["statuses/gored.json", ["kind"], null],
+        ["cartridge.json", ["world", "construction"], null],
+        ["rooms/holding_lane.json", ["site"], null],
+        ["npcs/carpenter.json", ["services"], null],
+        ["blueprints/hut_plain.json", [], null],
+        ["blueprints/hut_timbered.json", [], null],
+        ["actions/raise_hut_plain.json", [], null],
+        ["actions/raze_hut.json", [], null],
+        ["services/raise_hut_plain.json", [], null],
+        ["services/raze_hut.json", [], null],
+        ["recipes/chop.json", [], null],
+        ["recipes/saw.json", [], null],
+        ["recipes/carve_spoon.json", [], null],
+        ["recipes/raise_timbered_hut.json", [], null],
+        ["reactions/cot_rest.json", [], null],
+        ["skills/carpentry.json", ["profession"], null],
+        ["skills/carpentry.json", ["prerequisite"], null],
+        ["skills/carving.json", ["profession"], null],
+        ["skills/carving.json", ["prerequisite"], null],
+        ["skills/cooking.json", ["profession"], null],
+        ["skills/joinery.json", ["profession"], null],
+        ["skills/joinery.json", ["prerequisite"], null],
+        ["skills/joinery.json", ["hidden"], null],
+        ["skills/whittling.json", ["profession"], null],
+        ["skills/woodcutting.json", ["profession"], null]
+      ],
       "compiler": [
         "KERNEL_API_RANGE_INVALID",
         "cartridge.requires.kernel_api.at_least"

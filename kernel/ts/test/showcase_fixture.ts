@@ -154,3 +154,22 @@ export function reload(edit: (c: any) => void) {
   );
   return r.ok ? 'ok' : `${r.diagnostic.code} ${r.diagnostic.path}`;
 }
+
+// The Homestead (crafts 1.101; build, raze, item_present, profession, hidden: 1.102) dropped for
+// the older-floor loader rows; twin of homestead/0 in test/loka/content_showcase_test.exs.
+export function homestead(c: any) {
+  delete c.world.construction;
+  delete c.rooms[ref('room', 'holding_lane')].site;
+  delete c.npcs[ref('npc', 'carpenter')].services;
+  const drop = {
+    blueprints: ['blueprint/hut_plain', 'blueprint/hut_timbered'],
+    actions: ['action/raise_hut_plain', 'action/raze_hut'],
+    services: ['service/raise_hut_plain', 'service/raze_hut'],
+    recipes: ['recipe/chop', 'recipe/saw', 'recipe/carve_spoon', 'recipe/raise_timbered_hut'],
+    reactions: ['reaction/cot_rest'],
+  };
+  for (const [table, refs] of Object.entries(drop))
+    for (const r of refs) delete c[table][`toolbox_showcase@0.0.1:${r}`];
+  for (const s of Object.values(c.skills) as any[])
+    for (const k of ['profession', 'prerequisite', 'hidden']) delete s[k];
+}

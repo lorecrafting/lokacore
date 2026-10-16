@@ -4,6 +4,26 @@ defmodule Loka.ContentShowcaseTest do
   use ExUnit.Case, async: true
   @kat JSON.decode!(File.read!("protocol/fixtures/toolbox_showcase_hash.json"))
 
+  # The Homestead (crafts 1.101; build, raze, item_present, profession, hidden: 1.102) dropped
+  # for the older-floor rows; protocol/fixtures/loader_floors.json case 18 drops the same.
+  defp homestead,
+    do:
+      [
+        {"cartridge.json", &update_in(&1, ["world"], fn w -> Map.delete(w, "construction") end)},
+        {"rooms/holding_lane.json", &Map.delete(&1, "site")},
+        {"npcs/carpenter.json", &Map.delete(&1, "services")}
+      ] ++
+        for(
+          f <- ~w(blueprints/hut_plain blueprints/hut_timbered actions/raise_hut_plain
+                  actions/raze_hut services/raise_hut_plain services/raze_hut recipes/chop
+                  recipes/saw recipes/carve_spoon recipes/raise_timbered_hut reactions/cot_rest),
+          do: {f <> ".json", nil}
+        ) ++
+        for(
+          s <- ~w(carpentry carving cooking joinery whittling woodcutting),
+          do: {"skills/#{s}.json", &Map.drop(&1, ~w(profession prerequisite hidden))}
+        )
+
   # Breaks: a short source reference stays unexpanded, a touch link is missing (a warning), or the
   # source drifts from the bytes the district walkthroughs run on.
   test "the showcase source compiles to its pinned answer without warnings" do
@@ -41,7 +61,7 @@ defmodule Loka.ContentShowcaseTest do
         {"reactions/kindle.json", nil},
         {"reactions/gate_lifted.json", nil},
         {"statuses/gored.json", &Map.delete(&1, "kind")}
-        | unfiltered
+        | unfiltered ++ homestead()
       ]
 
       # No tag left: the spread's tag dropped and the door named.
@@ -110,6 +130,7 @@ defmodule Loka.ContentShowcaseTest do
         {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], api)},
         {"reactions/boar_gore.json", &put_in(&1, ["on", "attacker"], npc)},
         {"statuses/gored.json", &Map.delete(&1, "kind")}
+        | homestead()
       ])
     end
 
