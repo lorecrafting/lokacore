@@ -75,12 +75,15 @@ test('each Ask about card is admitted: the answer joins the page, a grant adds i
   assert.ok(b.labels().includes(LABEL.leave) && !b.labels().includes(LABEL.leaveConversation));
 });
 
-// Breaks: an ask the GameView lists unavailable still shows its topic cards.
-test('the guard turned hostile by smugglers offers no Ask about card', () => {
+// Breaks: an ask the GameView lists unavailable still shows its topic cards, or a hostile NPC
+// with no authored refusal line shows no line (or shows it before it turns hostile).
+test('the guard turned hostile by smugglers offers no Ask about card, only the fallback line', () => {
   const b = smith();
   b.tap(`${LABEL.askAbout} The mill`);
   b.tap(LABEL.leave);
   b.tap('The guard');
+  const refusal = 'The guard will have nothing to do with you.';
+  assert.ok(!b.text().includes(refusal));
   b.tap(`${LABEL.askAbout} The smugglers`);
   const v = b.game.view().view;
   const guard = v.entities.find((e) => e.name === 'npc.guard.short')!;
@@ -89,4 +92,5 @@ test('the guard turned hostile by smugglers offers no Ask about card', () => {
     [false],
   );
   assert.deepEqual(b.text().slice(0, 1).concat(asks(b)), ['The guard']);
+  assert.ok(b.text().includes(refusal), JSON.stringify(b.text()));
 });

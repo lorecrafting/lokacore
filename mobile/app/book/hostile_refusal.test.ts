@@ -1,0 +1,42 @@
+// Book hostile refusal (loka-x6t.33, docs/system/book-ui.md): a hostile NPC's page shows its
+// cartridge refusal line, or the Book's fallback, in place of Talk, Ask about and the shelf, through
+// the real authority and Book. Expected text is literal from the samplers' text.json.
+import assert from 'node:assert/strict';
+import { test } from 'node:test';
+import { compiled } from '../../authority/local-story/__tests__/compiled.ts';
+import { book } from './__tests__/polish-book.test.ts';
+import { LABEL } from './labels.ts';
+
+const showcase = compiled('cartridges/toolbox_showcase');
+// Nell's page on the Low Wardle green, after calling the Reeve a cheat (standing 0 to -2) or not.
+function nell(cheat: boolean) {
+  const b = book(showcase as never);
+  b.map();
+  b.tap('Go south');
+  if (cheat) {
+    for (const c of ['The Reeve is here., open', /^Talk/, 'Call him a cheat']) b.tap(c);
+    b.tap(LABEL.leaveConversation);
+    b.tap(LABEL.leave);
+  }
+  b.tap('Nell, the baker is here., open');
+  return [b.text(), b.labels()] as const;
+}
+
+// Breaks: the page ignores hostility (Talk and the shelf with its raw "invalid state" reasons
+// stay), shows the fallback over the authored line, or marks Nell hostile at standing 0; the shelf
+// shows raw reason codes.
+test('Nell at standing -2 shows her refusal line, no Talk or shelf; at 0 she trades', () => {
+  const [shown, labels] = nell(true);
+  assert.ok(shown.includes('Nell turns her back on you.'), JSON.stringify(shown));
+  assert.ok(!shown.some((l) => /invalid state|Buy \d|Nothing to do here/.test(l)));
+  assert.ok(!labels.some((l) => l.startsWith('Talk')), JSON.stringify(labels));
+  assert.ok(labels.includes(LABEL.leave));
+  const [calm, calmLabels] = nell(false);
+  assert.ok(!calm.includes('Nell turns her back on you.'));
+  // Shelf reasons come from words.ts reason(), not the raw code ("not owned").
+  assert.ok(
+    calm.includes('a cob of bread: Buy 4p; Sell 1p (you are not holding it).'),
+    JSON.stringify(calm),
+  );
+  assert.ok(calmLabels.some((l) => l.startsWith('Talk')));
+});

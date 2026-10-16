@@ -13,6 +13,7 @@ import { engaged } from '../src/mechanics/combat/shared.ts';
 import { barrierState } from '../src/mechanics/lookups.ts';
 import { describeEntity } from '../src/mechanics/description_variant/rule.ts';
 import { level } from '../src/mechanics/skills.ts';
+import { validate } from '../src/foundation/validate.ts';
 import {
   choose,
   detail,
@@ -43,6 +44,12 @@ const WET = '5ca5e000-0000-4000-8000-000000000306';
 const AT_SEVEN = 7 * HOUR;
 const bread = (w: World, who = 'nell') => shelf(w, w.character, npc(w, who))![0];
 const quest = (w: World) => gameView(w).journal[0]!;
+// Nell's entity view (hostile, refusal) and the whole view's schema errors.
+function nell(w: World) {
+  const v = gameView(w);
+  const e = v.entities.find((e) => e.id === npc(w, 'nell'))!;
+  return [e.hostile, e.refusal, validate('GameView', v)];
+}
 // Intimidate's use count and level.
 function intimidate(w: World) {
   const skill = gameView(w).skills!.find((s) => s.skill.key === 'intimidate')!.skill;
@@ -65,7 +72,7 @@ test('social 1: the Low Wardle sign reads; bread from a wary Nell costs 4', () =
 // Breaks: help or wrong adjusts the wrong fact or amount, the standing does not clamp at -2, the
 // discount or the hostile refusal ignores the village standing, or the Warden never engages,
 // the gate stays open on standing -2 alone, or the player's waited-out hits kill him and lose
-// the toll gate.
+// the toll gate, or Nell's view is marked hostile (with her refusal line) at any standing but -2.
 test('social 2-3: help makes Nell friendly (bread 2); wrong twice makes her hostile and the Warden engage', () => {
   let w = green();
   w = play(w, {
@@ -79,10 +86,13 @@ test('social 2-3: help makes Nell friendly (bread 2); wrong twice makes her host
     [fact(w, 'wardle_standing'), mood(w, 'nell'), bread(w).buy.price],
     [1, 'friendly', 2],
   );
+  assert.deepEqual(nell(green()), [undefined, undefined, []]);
   w = say(w, 'reeve', 'wrong').world;
   assert.equal(fact(w, 'wardle_standing'), -1);
+  assert.deepEqual(nell(leave(w)), [undefined, undefined, []]);
   w = leave(say(w, 'reeve', 'wrong').world);
   assert.deepEqual([fact(w, 'wardle_standing'), mood(w, 'nell')], [-2, 'hostile']);
+  assert.deepEqual(nell(w), [true, 'npc.nell.refuse', []]);
   // The sell leg is offered on the held bread, so hostility is its only refusal.
   assert.deepEqual([bread(w).sell.available, bread(w).sell.reason], [false, 'invalid_state']);
   assert.equal(refused(w, { type: 'talk', target_id: npc(w, 'nell') }), 'invalid_state');

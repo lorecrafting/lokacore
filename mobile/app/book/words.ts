@@ -71,6 +71,8 @@ const REASON: Record<string, string> = {
 export const SENTENCE: Record<string, string> = { insufficient_resource: 'You are too exhausted.' };
 export const given = (item: string, to: string) => `You give ${item} to ${to}.`;
 export const reason = (code: string) => REASON[code] ?? code.replaceAll('_', ' ');
+// A hostile NPC's page when its cartridge gives no refusal line (Book hostile refusal).
+export const refused = (name: string) => `${name} will have nothing to do with you.`;
 
 type Say = (key: string) => string;
 

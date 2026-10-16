@@ -38,6 +38,7 @@ import { asides, describe, describeEntity } from '../mechanics/description_varia
 import * as movement from '../mechanics/movement/rule.ts';
 import { cueViews } from '../mechanics/senses.ts';
 import { holds } from '../mechanics/policy.ts';
+import { disposition } from '../mechanics/disposition.ts';
 import { lockRefused } from '../mechanics/locks.ts';
 import * as scene from '../mechanics/scene/shared.ts';
 import * as position from '../mechanics/position/shared.ts';
@@ -229,6 +230,12 @@ const viewOf = (
   actions,
   ...liquidView(world, id),
   ...(e.kind === 'npc' && freeLessons(world, id, actor, steps)),
+  // Book hostile refusal: the page needs hostility, which refusal codes cannot tell apart.
+  ...(e.kind === 'npc' &&
+    disposition(world, actor, id as EntityId, steps) === 'hostile' && {
+      hostile: true as const,
+      ...(e.disposition?.refuse && { refusal: e.disposition.refuse }),
+    }),
   ...(e.kind === 'npc' &&
     e.services && { services: services(world, actor, id as EntityId, steps) }),
   ...(fuelView(world, id) && { fuel: fuelView(world, id) }),

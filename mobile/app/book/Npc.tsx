@@ -11,6 +11,7 @@ import { Riddle } from './Riddle.tsx';
 import { space } from './tokens.ts';
 import { LABEL } from './labels.ts';
 import { offerLabel } from './offers.ts';
+import { reason, refused } from './words.ts';
 type Say = (key: string) => string;
 type Grouped = ReturnType<typeof group>;
 type Screen = ReturnType<ReturnType<typeof presenter>['screen']>;
@@ -72,8 +73,14 @@ export function NpcPage(p: NpcProps) {
   const c = usePalette();
   const choice =
     p.view.choice && (!p.npc || p.npc.id === p.view.choice.speaker_id) ? p.view.choice : undefined;
-  // Where is the Map's control (sections.tsx); on the NPC's own page they are already here.
-  const actions = p.npc ? p.g.on(p.npc.id).filter((b) => b.action_key !== 'where') : [];
+  const enemy = p.npc && 'hostile' in p.npc && p.npc.hostile ? p.npc : undefined;
+  // Where is the Map's control (sections.tsx); on the NPC's own page they are already here. A
+  // hostile NPC will not talk or trade: its refusal line stands in for those cards.
+  const actions = p.npc
+    ? p.g
+        .on(p.npc.id)
+        .filter((b) => b.action_key !== 'where' && !(enemy && SPOKEN.has(b.command ?? '')))
+    : [];
   const cards = actions.filter((b) => b.command !== 'use_service');
   const { talk, answer, foot } = conversation(p, choice);
   const log = talk ? p.log : p.log.slice(p.since ?? 0);
@@ -89,8 +96,11 @@ export function NpcPage(p: NpcProps) {
       )}
       <LogLines lines={log} />
       {npcSkills(c, p)}
-      {!talk && !actions.length && !log.length && <Note>Nothing to do here.</Note>}
-      {!talk && <ShopOptions {...p} />}
+      {enemy && (
+        <Note>{enemy.refusal ? p.text(enemy.refusal) : refused(cap(p.text(enemy.name)))}</Note>
+      )}
+      {!talk && !enemy && !actions.length && !log.length && <Note>Nothing to do here.</Note>}
+      {!talk && !enemy && <ShopOptions {...p} />}
       {choice && <Choice {...p} press={answer} choice={choice} />}
       {!talk && (
         <Cards>
@@ -103,6 +113,8 @@ export function NpcPage(p: NpcProps) {
     </Page>
   );
 }
+
+const SPOKEN = new Set(['talk', 'ask', 'buy', 'sell']);
 
 // Answering keeps the page in conversation even after the kernel closes it; only Leave the
 // conversation returns to the NPC's own actions (Talk, shop, services).
@@ -155,16 +167,17 @@ function ShopOptions(p: NpcProps) {
     <>
       {p.npc &&
         'shop' in p.npc &&
-        p.npc.shop?.map((o) => (
-          <Text key={o.item_id} style={note(c)}>
-            {p.text(o.name)}: Buy {o.buy.price}p
-            {o.buy.available
-              ? ''
-              : ` (${o.buy.reason === 'not_owned' ? 'sold out' : o.buy.reason?.replaceAll('_', ' ')})`}
-            ; Sell {o.sell.price}p
-            {o.sell.available ? '' : ` (${o.sell.reason?.replaceAll('_', ' ')})`}.
-          </Text>
-        ))}
+        p.npc.shop?.map((o) => {
+          // A price row, not an action card (book-ui.md, Hostile refusal): its reasons are words.
+          const buy = o.buy.reason === 'not_owned' ? 'sold out' : reason(o.buy.reason ?? '');
+          const sell = reason(o.sell.reason ?? '');
+          return (
+            <Text key={o.item_id} style={note(c)}>
+              {p.text(o.name)}: Buy {o.buy.price}p{o.buy.available ? '' : ` (${buy})`}; Sell{' '}
+              {o.sell.price}p{o.sell.available ? '' : ` (${sell})`}.
+            </Text>
+          );
+        })}
     </>
   );
 }

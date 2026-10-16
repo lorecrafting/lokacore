@@ -282,7 +282,7 @@ currently no player-presence UI.
 
 **Barter offers.** A service offer with price 0 shows its authored label alone ("Knife for two pelts"), with no " — " and no parentheses, never "free"; its unavailable form is "Knife for two pelts: <reason>". The label names the inputs.
 
-**Hostile refusal.** Planned for loka-y6yg.20 part B; not yet shipped. The Book cannot tell hostility from refusal codes (`invalid_state` also
+**Hostile refusal.** The Book cannot tell hostility from refusal codes (`invalid_state` also
 means a full load or an open encounter), so the NPC EntityView carries `hostile: true` while
 the person's [disposition](mechanics.md#standing-and-disposition-toolbox-rows-15-and-g11) is
 hostile (a derived read, absent otherwise) and, when the cartridge authors

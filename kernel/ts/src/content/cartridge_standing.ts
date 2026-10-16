@@ -2,7 +2,8 @@
 // a reaction's fact.adjust names a bounded int fact (FACT_TYPE_MISMATCH); an NPC's disposition
 // is on an authored NPC, with an engage line exactly when it is hostile and has an attack
 // (SCHEMA_VIOLATION), a text of this cartridge; either, or a friendly buy_discount, needs
-// kernel_api 1.47. Its conditions are walked with every other policy (cartridge_refs.ts nodes).
+// kernel_api 1.47, a refuse line (Book hostile refusal) 1.104. Its conditions are walked with
+// every other policy (cartridge_refs.ts nodes).
 import type { Diagnostic } from '../contracts.gen.ts';
 import { refString } from '../runtime/decision.ts';
 import { diag, step, type Obj } from './cartridge_refs.ts';
@@ -21,7 +22,8 @@ export const dispositions = (c: Obj): [Obj, string][] =>
 
 export function standing(c: Obj): Diagnostic[] {
   const out: Diagnostic[] = [];
-  let used = false;
+  let used = false,
+    refuse = false;
   for (const [ref, n] of Object.entries((c.npcs ?? {}) as Obj)) {
     const d = n.disposition;
     if (n.shop?.buy_discount?.friendly) used = true;
@@ -30,8 +32,10 @@ export function standing(c: Obj): Diagnostic[] {
     const at = `.cartridge.npcs${step(ref)}.disposition`;
     if (n.spawn_template || !!d.engage !== !!(d.hostile && n.attack))
       out.push(diag('SCHEMA_VIOLATION', at, { error: 'invalid_value' }));
-    if (d.engage !== undefined && !Object.hasOwn(c.text, d.engage))
-      out.push(diag('UNRESOLVED_REFERENCE', `${at}.engage`, { target: d.engage }));
+    for (const f of ['engage', 'refuse'])
+      if (d[f] !== undefined && !Object.hasOwn(c.text, d[f]))
+        out.push(diag('UNRESOLVED_REFERENCE', `${at}.${f}`, { target: d[f] }));
+    if (d.refuse !== undefined) refuse = true;
   }
   for (const [ref, r] of Object.entries((c.reactions ?? {}) as Obj))
     r.apply.forEach((s: Obj, i: number) => {
@@ -42,6 +46,8 @@ export function standing(c: Obj): Diagnostic[] {
         out.push(diag('FACT_TYPE_MISMATCH', `.cartridge.reactions${step(ref)}.apply[${i}].fact`));
     });
   if (used && apiCmp(c.manifest.requires.kernel_api.at_least, '1.47') < 0)
+    out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
+  if (refuse && apiCmp(c.manifest.requires.kernel_api.at_least, '1.104') < 0)
     out.push(diag('KERNEL_API_RANGE_INVALID', '.cartridge.manifest.requires.kernel_api.at_least'));
   return out;
 }

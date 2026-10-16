@@ -487,6 +487,14 @@
     },
     "EntityView": {
       "properties": {
+        "hostile": {
+          "description": "Book hostile refusal (kernel_api at least 1.104): present while this NPC's disposition toward the viewer is hostile (toolbox row G11), a derived read; absent otherwise.",
+          "enum": [true]
+        },
+        "refusal": {
+          "description": "Book hostile refusal: the NPC's authored disposition.refuse line, present with hostile when authored.",
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
         "carrying": {
           "$ref": "text.schema.json#/$defs/TextKey"
         },
