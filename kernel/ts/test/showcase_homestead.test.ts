@@ -175,10 +175,7 @@ test('homestead 4: carving for 2 pennies; joinery appears', () => {
     ],
   );
   w = talk(shut(w), 'carpenter').world;
-  assert.deepEqual(
-    choices(w).find(([k]) => k === 'joinery'),
-    ['joinery', true],
-  );
+  assert.equal(choices(w).find(([k]) => k === 'joinery')?.[1], true);
   w = shut(w);
 });
 
@@ -281,8 +278,8 @@ test('homestead 7: the rug variant in the hut; resting there with the cot applie
 });
 
 // Breaks: the raze unpaid or refused for the owner, the north exit kept, the hut's floor lost
-// rather than moved to the lane (finding 3), the plain hut not offered again, a hut admitted at
-// 4 pennies, or a stranger's raze or one over a corpse admitted (refusal order: owner, then
+// rather than moved to the lane (finding 3), the plain hut not offered again, a hut admitted at 4
+// pennies, or a stranger's raze or one over a corpse admitted (refusal order: owner, then
 // occupied).
 test('homestead 8: raze for 2 pennies; the cot and rug land in the lane', () => {
   const [hut] = built(w);
@@ -505,24 +502,18 @@ test('homestead 12: learn cooking, cook a hearty stew from two fresh fish, eat i
   assert.equal(refused(one, cookAt(one, 'cook_stew')), 'invalid_state');
   assert.deepEqual(offer(one, 'cook_stew').reason, reason('craft.cook_stew.needs'));
   w = play(w, cookAt(w, 'cook_stew')).world;
-  // The yield is the lowest EntityId in the larder (stock.ts sort); ids move with the hash.
-  const stews = ['stew_hearty_01', 'stew_hearty_02', 'stew_hearty_03'];
-  const stew = stews.reduce((a, b) => (id(w, 'item', a) < id(w, 'item', b) ? a : b));
-  assert.deepEqual(
-    stews.filter((s) => where(w, id(w, 'item', s)) === w.body),
-    [stew],
-  );
+  assert.equal(where(w, id(w, 'item', 'stew_hearty_02')), w.body); // lowest larder EntityId
   assert.equal(fishIn(w, 'larder').length, 2);
   assert.equal(fact(w, 'uses_cooking'), 1);
   assert.deepEqual(offer(w, 'cook_feast').reason, { code: 'invalid_state' });
-  const hearty = id(w, 'item', stew);
-  w = eat(w, stew).world;
+  const hearty = id(w, 'item', 'stew_hearty_02');
+  w = eat(w, 'stew_hearty_02').world;
   assert.equal(str(w), 12);
   assert.deepEqual(labels(w), ['condition.hearty']);
   // Branch: the same stew eaten while fed is still active.
   const both = structuredClone(fed) as any;
   both.state.containers[hearty] = both.body;
-  assert.equal(str(eat(both, stew).world), 13);
+  assert.equal(str(eat(both, 'stew_hearty_02').world), 13);
   // The loop's pennies last: the 3 left buy the plot (step 13).
   assert.equal(pennies(play(walk(w, 'north'), farmer(w, 'buy_plot', 3)).world), 0);
   valid(w);

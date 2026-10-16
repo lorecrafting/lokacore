@@ -1,3 +1,4 @@
+// size: allow 503, the Undercroft walk (steps 1 to 10) and its branches continue one world and share its helpers
 // The showcase economy and law district walked step by step (docs/showcase/economy-law-district.md,
 // guided loop steps 1 to 10). Each numbered test continues the world the one before it left; a
 // branch starts from a saved step. Fresh world at 07:00 (25200), pennies 10.
@@ -94,8 +95,8 @@ const kinds = (r: ReturnType<typeof play>) =>
 const lift = (w: World, item: string) => play(w, { type: 'take', item_id: id(w, 'item', item) });
 // The world with one NPC's attributes forged to `value`.
 const alert = (w: World, who: string, value: number): World => {
-  const e = w.entities[npc(w, who)] as { attributes: object[] };
-  const attributes = e.attributes.map((a) => ({ ...a, value }));
+  const e = w.entities[npc(w, who)] as any;
+  const attributes = e.attributes.map((a: object) => ({ ...a, value }));
   return { ...w, entities: { ...w.entities, [npc(w, who)]: { ...e, attributes } as never } };
 };
 
