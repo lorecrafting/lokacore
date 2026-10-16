@@ -114,6 +114,7 @@ function mounted(initial: GameView, recovered?: ReturnType<Game['lastNarration']
       .map(words);
   return {
     texts,
+    footer: () => draw().some((n) => n.type?.name === 'Footer'),
     tap: (shown: string | RegExp) => control(draw(), shown).props.onPress(),
     publish: (next: GameView, line?: string) => {
       current = next;
@@ -144,8 +145,9 @@ function mounted(initial: GameView, recovered?: ReturnType<Game['lastNarration']
   };
 }
 
-// Break: ending a foreground encounter leaves the old combat/menu page instead of the committed room.
-test('confirmed encounter foregrounds another page and closure or death restores the World', () => {
+// Breaks: a closure jumps straight to the World (its closing lines unseen), the ended page keeps
+// action cards, the footer or an open status line, or Back to World leaves the Combat page.
+test('confirmed encounter foregrounds another page; closure keeps Combat until Back to World', () => {
   for (const ending of ['closed', 'opponent_dead', 'player_dead']) {
     const h = mounted(view({ combat: undefined }));
     try {
@@ -176,6 +178,19 @@ test('confirmed encounter foregrounds another page and closure or death restores
             ? 'combat.result'
             : undefined,
       );
+      const ended = h.texts();
+      assert.ok(ended.includes('Combat') && ended.includes('a marsh rat'), ending);
+      if (ending !== 'closed')
+        assert.ok(
+          ended.includes(
+            ending === 'player_dead' ? 'You wake at the shrine.' : 'The marsh rat falls.',
+          ),
+        );
+      assert.equal(ended.filter((t) => t === 'Back to World').length, 1);
+      assert.equal(h.footer(), false);
+      for (const shut of [CONTENTS, 'Stand', 'Flee'])
+        assert.throws(() => h.tap(shut), undefined, `${ending}: ${shut}`);
+      h.tap('Back to World');
       assert.equal(h.texts().includes('Combat'), false);
       for (const text of [
         'You strike the marsh rat.',
@@ -190,7 +205,8 @@ test('confirmed encounter foregrounds another page and closure or death restores
   }
 });
 
-// Break: Attack narration stays hidden in NPC detail, or an unconfirmed/refused Flee dismisses combat.
+// Break: Attack narration stays hidden in NPC detail, an unconfirmed/refused Flee dismisses combat,
+// or a committed escape skips its closing line.
 test('Attack opens its committed page; pending and refused Flee stay until committed escape', () => {
   const attack = {
     action_key: 'attack',
@@ -229,6 +245,8 @@ test('Attack opens its committed page; pending and refused Flee stay until commi
     });
     h.answer(accepted('fled', 'combat.flee'), road, 'combat.flee');
     h.tap('Flee');
+    assert.ok(h.texts().includes('Combat') && h.texts().includes('You escape to the road.'));
+    h.tap('Back to World');
     assert.equal(h.texts().includes('Combat'), false);
     assert.ok(h.texts().includes('The road'));
     assert.equal(h.texts().includes('You escape to the road.'), false);

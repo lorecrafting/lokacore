@@ -101,6 +101,7 @@ export default function Book(p: BookProps) {
   const state = { current, restoreInvocation, setStack, setFlip, redraw };
   useUpdates(p, pr, state);
   const go = (next: Page[], dir: 1 | -1) => {
+    pr.leaveCombat(); // every turn leaves an ended Combat page (its foot is the only one shown)
     const view = pr.screen().view;
     next = pagesAfter(next, view, view);
     current.current = { stack: next, view };
@@ -159,8 +160,8 @@ export function BookView(p: ViewProps) {
     <PaletteContext value={c}>
       <SafeAreaView style={{ flex: 1, backgroundColor: c.bg }}>
         <PageTurn turn={p.flip.turn} dir={p.flip.dir} paper={c.bg}>
-          {p.screen.view.combat ? (
-            <Combat screen={p.screen} g={g} press={p.press} />
+          {p.screen.view.combat || p.screen.ended ? (
+            <Combat screen={p.screen} g={g} press={p.press} world={ctx.world} />
           ) : (
             <Body
               {...ctx}
@@ -205,7 +206,12 @@ function Bottom(p: BottomProps) {
         borderTopColor: c.line,
       }}
     >
-      {!p.page && !view.ancestry_choices && !view.scene && !view.combat && navigation(p)}
+      {!p.page &&
+        !view.ancestry_choices &&
+        !view.scene &&
+        !view.combat &&
+        !p.screen.ended &&
+        navigation(p)}
       {!view.ancestry_choices && (
         <StatusLine
           time={view.time}
@@ -215,7 +221,7 @@ function Bottom(p: BottomProps) {
           conditions={view.conditions}
           position={view.position}
           text={text}
-          locked={!!view.scene || !!view.combat || p.page?.kind === 'chapter'}
+          locked={!!view.scene || !!view.combat || !!p.screen.ended || p.page?.kind === 'chapter'}
           openPosition={!p.page && !view.scene && position ? () => p.press(position) : undefined}
           pending={pending}
           open={() => p.open({ kind: 'contents' })}

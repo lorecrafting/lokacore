@@ -215,6 +215,7 @@ function screen(game: Game, s: Logs, label: Say, text: Say, generation: number) 
     returnWorld: s.returnWorld,
     returnDetail: s.returnDetail,
     confirmedRead: s.confirmedRead,
+    ended: s.ended,
   };
 }
 
@@ -237,6 +238,7 @@ export function presenter(game: Game) {
       if (s.recovered) generation++;
       return line;
     },
+    leaveCombat: () => (s.ended = undefined),
     startOverFailed(why?: string) {
       if (why !== undefined) s.log.push(`(start over: ${why})`);
     },

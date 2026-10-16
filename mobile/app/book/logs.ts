@@ -53,6 +53,7 @@ export type Logs = {
   // An open elapsed settlement's held World entries: as the log would show them, and line by line.
   away?: { from: number; log: string[]; lines: string[] };
   recap?: string[]; // the away recap's lines, grouped when drawn
+  ended?: GameView['combat']; // a closed encounter's page, until Back to World (book-ui.md, Closure)
 };
 
 export function pickupLine(last: NarrationRecord | undefined, text: Say) {
@@ -98,6 +99,7 @@ export function resetLogs(s: Logs, now: GameView) {
     s.away = s.recap = undefined; // held and shown recap lines belong to the room left, as its log
   }
   if (now.combat && now.combat.encounter_id !== was.combat?.encounter_id) s.combatLog.length = 0;
+  if (was.combat && !now.combat) s.ended = was.combat;
 }
 
 export const combatResult = (d: Extract<DecisionResult, { kind: 'accepted' }> | undefined) =>
