@@ -8,7 +8,7 @@ import { chapter, journal } from './quest_journal.ts';
 import { lore } from '../mechanics/topics/shared.ts';
 import { services } from './services.ts';
 import { liquidView } from './liquid.ts';
-import { conditionViews, resources } from './resources.ts';
+import { bandOf, conditionViews, resources } from './resources.ts';
 import { KernelError } from '../foundation/error.ts';
 import { LIMITS } from '../contracts.gen.ts';
 import { visible, fuelView } from '../mechanics/light/shared.ts';
@@ -306,13 +306,17 @@ function equipmentViews(world: World, actor: CharacterId, actions: Lists, steps:
 
 type Fight = NonNullable<ReturnType<typeof engaged>>;
 function combatView(world: World, actor: CharacterId, fight: Fight, steps: Steps) {
-  const name = (id: EntityId) => describeEntity(world, actor, id, 'short', steps);
+  // The name always (an unseen foe is still named); the hp band word only when seen (loka-y6yg.49).
+  const seen = (id: EntityId) => ({
+    name: describeEntity(world, actor, id, 'short', steps),
+    ...(visible(world, actor, id, steps) && { band: bandOf(world, id, 'hp').band }),
+  });
   return {
     encounter_id: fight.id,
     opponent_id: fight.row.npc_id,
-    name: name(fight.row.npc_id),
+    ...seen(fight.row.npc_id),
     ...(fight.row.active_ids && {
-      active_opponents: fight.row.active_ids.map((id) => ({ id, name: name(id) })),
+      active_opponents: fight.row.active_ids.map((id) => ({ id, ...seen(id) })),
     }),
   };
 }

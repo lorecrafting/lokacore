@@ -384,6 +384,12 @@ default of 11 bands by percentage of the range, `perfect_health` at 100 down to 
 tones `normal` from 80, `warning` from 40, `danger` below (`kernel/ts/src/view/view.ts:216`, `:235`). The band is the
 first row whose cut p reaches, in integers: 100 × (current − minimum) ≥ cut × (maximum −
 minimum); maximum = minimum gives the top row (04 §15 as amended 2026-10-02).
+The `combat` opponent, and each `active_opponents` member, carries the `band` key of its `hp`
+pool by the same rule and table (`bandOf`, `kernel/ts/src/view/resources.ts`), only while the
+player sees it (light `visible`); the name is present either way and no hp number is sent
+(loka-y6yg.49). Composition record: reads the encounter row, the opponent's hp level and spec,
+the band table and `visible`; writes, events, jobs and save rows: none; no version bump (an
+optional view field, as ConditionView `duration`).
 Actions are listed highest priority first, then by key, available or with the refusal code
 (`kernel/ts/src/view/action_lists.ts:33`). Invariant `gameview_agrees_with_admission` holds this for exits and
 recipes (including standalone and board-child Notice actions), and for the door and container verbs and `wear`/`remove`, matched by the Command each

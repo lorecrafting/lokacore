@@ -5,6 +5,7 @@ import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { key } from '../src/foundation/compose.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { admission } from '../src/mechanics/combat/behavior.ts';
+import { validate } from '../src/foundation/validate.ts';
 import { ids, run, h1, h2, home, nest, fixture, wounded, begun, due } from './c4_pack_fixture.ts';
 
 // Breaks: admission scans only the day target or cap minus one and silently omits a sixth live helper.
@@ -38,6 +39,21 @@ test('attack H2 admits both exact co-present hounds with H2 as primary', () => {
   assert.deepEqual(
     gameView(begun.world).combat?.active_opponents?.map((member) => member.id),
     [h1, h2].sort(),
+  );
+});
+
+// Breaks: a pack member's band is missing, copied from the primary, or read from the wrong hound
+// (hp 0..8: h2 at 4 is the exact many_nasty_wounds cut, 400 >= 50*8; h1 untouched reads ready).
+test('each pack member shows its own hp band', () => {
+  const view = gameView(wounded(begun(fixture()), 4));
+  assert.deepEqual(validate('GameView', view), []);
+  assert.equal(view.combat?.band, 'many_nasty_wounds');
+  assert.deepEqual(
+    view.combat?.active_opponents?.map(({ id, band }) => [id, band]),
+    [
+      [h1, 'ready'],
+      [h2, 'many_nasty_wounds'],
+    ].sort(),
   );
 });
 
@@ -234,6 +250,11 @@ test('player-first selected death skips retaliation and repairs to the surviving
   const row = Object.values(result.world.state.encounters ?? {})[0]!;
   assert.deepEqual(row.active_ids, [h1]);
   assert.equal(row.npc_id, h1);
+  const view = gameView(result.world);
+  assert.deepEqual(validate('GameView', view), []);
+  assert.deepEqual(view.combat?.active_opponents, [
+    { id: h1, name: view.combat?.name, band: 'ready' },
+  ]);
   assert.equal(
     result.decision.kind === 'accepted' &&
       result.decision.events.filter((event) => event.payload.type === 'attack_result').length,

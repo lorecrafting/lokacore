@@ -207,22 +207,27 @@
    "encounter_id": "ae9e6607-5351-887f-8451-20e8822c9d9c",
    "opponent_id": "1dd992e3-2ac3-8d52-abe6-cdd0c1d4fc66",
    "name": "npc.fen_hound.short",
+   "band": "ready",
    "active_opponents": [
     {
      "id": "1dd992e3-2ac3-8d52-abe6-cdd0c1d4fc66",
-     "name": "npc.fen_hound.short"
+     "name": "npc.fen_hound.short",
+     "band": "ready"
     },
     {
      "id": "5e617e36-9453-88b2-8eba-006d8a54747b",
-     "name": "npc.fen_hound.short"
+     "name": "npc.fen_hound.short",
+     "band": "ready"
     },
     {
      "id": "c3f1e7f3-1f5e-8f0f-906f-387e9fcd61ad",
-     "name": "npc.fen_hound.short"
+     "name": "npc.fen_hound.short",
+     "band": "ready"
     },
     {
      "id": "fb97c65c-afa0-8d52-9528-de163b1baa45",
-     "name": "npc.fen_hound.short"
+     "name": "npc.fen_hound.short",
+     "band": "ready"
     }
    ]
   },
