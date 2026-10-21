@@ -40,7 +40,7 @@ import { acceptRefused, resolution } from '../quest/lifecycle.ts';
 import { cmp } from '../../foundation/validate.ts';
 import { questOf } from '../lookups.ts';
 import { choicePayment } from './payment.ts';
-import { shortfall } from '../resource.ts';
+import { unpaid } from '../resource.ts';
 
 /** The cartridge's definition the row's source names (the loader resolves every dialogue). */
 export const definition = (world: World, source: DefinitionRef): DialogueDefinition =>
@@ -187,7 +187,7 @@ function roleBlocked(
  * in the row's order, unavailable with blocked's code while it holds, else an accept with
  * acceptRefused's (choose refuses both).
  */
-// size: allow 64, exact drawn choice input shares keyed admission, mechanic eligibility and the pass-1 named lesson price
+// size: allow 55, exact drawn choice input shares keyed admission and mechanic eligibility
 export function choiceView(
   world: World,
   actor: CharacterId,
@@ -231,24 +231,18 @@ export function choiceView(
           steps,
           'choose' as Key,
         ) ?? blocked(world, row, option, steps, draw);
-      const state = draw ? { patrol: draw } : {};
+      const state = { ...(draw && { patrol: draw }), choice_id, label: option.label };
       const quest = !code && d.quest && resolution(world, actor, d.quest, choice_id, 0, steps);
       const why =
         code ??
         (typeof quest === 'string' ? quest : undefined) ??
         (option.accept && acceptRefused(world, actor, option.accept, steps));
-      // A lesson the body cannot afford names its price (pass-1 R1); a payment the NPC owes does not.
-      const lesson = why === 'insufficient_resource' && option.lesson_payment;
-      const short = lesson && shortfall(world, bodyOf(world, actor)!, [lesson]);
+      // An unaffordable lesson names its price (pass-1 R1); a payment the NPC owes does not.
+      const lesson = option.lesson_payment ? [option.lesson_payment] : [];
+      const short = unpaid(world, bodyOf(world, actor)!, why, lesson);
       return why
-        ? {
-            ...state,
-            available: false,
-            choice_id,
-            label: option.label,
-            reason: { code: why, ...(short && { message: short }) },
-          }
-        : { ...state, available: true, choice_id, label: option.label };
+        ? { ...state, available: false, reason: { code: why, ...short } }
+        : { ...state, available: true };
     }),
   };
 }

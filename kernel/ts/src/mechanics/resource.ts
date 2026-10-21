@@ -146,6 +146,12 @@ export function shortfall(
   );
 }
 
+/** `{ message }` naming the unpaid cost when `code` is insufficient_resource (pass-1 R1), else {}. */
+export function unpaid(world: World, body: EntityId, code: unknown, costs: readonly RecipeCost[]) {
+  const message = code === 'insufficient_resource' && shortfall(world, body, costs);
+  return message ? { message } : {};
+}
+
 /**
  * Exact conserved payment between two explicit, nonregenerating balance rows, from the values
  * `levels` left them in this decision (toolbox row 25 chains the deposit after the fee).

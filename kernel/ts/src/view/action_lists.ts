@@ -31,7 +31,7 @@ import * as equipment from '../mechanics/equipment/rule.ts';
 import * as position from '../mechanics/position/shared.ts';
 import { cmp } from '../foundation/validate.ts';
 import { carrying, giveRefused } from '../mechanics/containment/shared.ts';
-import { shortfall } from '../mechanics/resource.ts';
+import { unpaid } from '../mechanics/resource.ts';
 import { itemPairs } from './item_pairs.ts';
 import { theftRefused } from '../mechanics/containment/theft.ts';
 import { movable as movableItem } from '../runtime/created.ts';
@@ -174,7 +174,7 @@ function entityOffered(
 
 // `a` as listed for `actor` (on entity `id` in `scope`, if any): a door verb on an item is aimed
 // at it, with the item's scope and no input, so target_ids [id] fills target_id (commands/invocation.ts).
-// size: allow 62, exact detail harvest, the row FD7 ask, a recipe's reason (loka-j64e) and its pass-1 unpaid cost join shared action admission and projection
+// size: allow 60, exact detail harvest, the row FD7 ask and a recipe's reason (loka-j64e, pass-1 R1) join shared action admission and projection
 function advertise(
   world: World,
   actor: CharacterId,
@@ -230,11 +230,9 @@ function advertise(
         ? askRefused(world, actor, target, steps)
         : undefined));
   // The unpaid cost names itself (pass-1 R1); an authored refusal wins.
-  const short =
-    admitted === 'insufficient_resource' &&
-    shortfall(world, bodyOf(world, actor)!, a.recipe!.costs ?? []);
+  const short = unpaid(world, bodyOf(world, actor)!, admitted, a.recipe?.costs ?? []);
   return code
-    ? { available: false, ...shown, reason: refused ?? { code, ...(short && { message: short }) } }
+    ? { available: false, ...shown, reason: refused ?? { code, ...short } }
     : { available: true, ...shown };
 }
 
