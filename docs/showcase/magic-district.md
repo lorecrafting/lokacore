@@ -187,8 +187,9 @@ brief wants them; none is a pair the toolbox lacks, so no finding.
    target cannot be a barrier (G4); the `barrier.set` reaction step (W22) could replace the fact
    with a reaction on `action_completed {action: oil_winch}`: the build may use either and says
    which. Built: the fact, so the Open stays a separate step the player must take.
-4. **No applied line for an item or NPC status** (built, M2): the bier's `burning` and the golem's
-   statuses land without a narrated line; the pins read the statuses (steps 7 and 9).
+4. **No applied line for an item or NPC status** (built, M2): the bier's `burning` lands without a
+   narrated line; since `loka-kgd.176` the golem's statuses say their opt-in `observed` line when
+   the player sees the golem in the yard (row G3); the pins read the statuses (steps 7 and 9).
 
 Build notes (M2): "flamma, cast" is listed after the read but unavailable (`invalid_state`) until
 the wight is in the room (its policy is `npc_present`); ward's landing records `status_applied`

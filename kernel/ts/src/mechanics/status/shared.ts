@@ -298,8 +298,9 @@ export function statusStep(
     if (first && landing(world))
       emit({ type: 'status_applied', body_id: holder, status: step.status });
     const said = specOf(world, step.status)?.narration;
-    const label = holder === body ? said?.applied : seen(holder) ? said?.observed : undefined;
-    if (label && first) out.narration.push({ key: label });
+    const label = holder === body ? said?.applied : said?.observed;
+    // seen last: its light walk charges the reaction's query steps
+    if (first && label && (holder === body || seen(holder))) out.narration.push({ key: label });
   }
   return out;
 }
