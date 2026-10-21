@@ -67,7 +67,9 @@ Pass-1 playtest and fix batch (session a02501b4, 2026-10-21):
   - .42 Loft content: re-check APPROVED at 683c4490, but hosted CI failed loader_floors in both kernels; fix round 2
     head 2db2ceae0e330aa6b1ef0dddea200dae93f86d2f only adds a loader_floors strip (PM checked the diff; no re-review).
     Merge when hosted CI on 2db2ceae is green (pass the sha as the review arg; recompile the hash fixture on conflict).
-  - .43 law + hub content (wanted status) building; .48 item status lines building. Each then: fresh Opus reviewer
+  - .43 law + hub content: handed back at 10c1eabc (C2a and E10c not done, see notes); a fresh Opus reviewer is
+    running (its verdict arrives as a notification; if lost, spawn a fresh one from the Beads notes). .48 item status
+    lines building. Each then: fresh Opus reviewer
     (+ Opus designer for player-visible words), CI green, merge.
 - TODO, in order: .49 opponent band in GameView (protocol: record + 2nd opinion), UI2
   loka-x6t.75 (after .46), UI3 .76, UI4 .77, UI5 .78, UI6 .79 (after .49). Briefs: write from the triage + rulings record;
