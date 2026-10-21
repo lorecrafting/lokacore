@@ -23,6 +23,10 @@
   },
   "apply": [
     {
+      "op": "narrate",
+      "text": "narration.needle"
+    },
+    {
       "op": "status.apply",
       "status": "poisoned"
     },

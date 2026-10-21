@@ -13,6 +13,10 @@
   },
   "apply": [
     {
+      "op": "narrate",
+      "text": "narration.lever_bolt"
+    },
+    {
       "op": "fact.assign",
       "fact": "lever_stage",
       "value": 3

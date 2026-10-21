@@ -176,6 +176,23 @@ export function homestead(c: any) {
     delete c.items[ref('item', k)].immune; // the sow statuses are dropped
   for (const s of ['afraid', 'wet', 'shocked', 'stunned', 'warm'])
     delete c.statuses[ref('status', s)].narration.observed; // 1.110 (loka-kgd.176)
+  // The traps district's narrate lines and wheel readouts (1.103) and lever hall asides (1.91).
+  delete c.rooms[ref('room', 'lever_hall')].asides;
+  for (const r of [
+    'lever_b_step',
+    'lever_b_reset',
+    'lever_c_step',
+    'lever_c_reset',
+    'plate_springs',
+    'plate_bites',
+    'cellar_springs',
+    'cellar_bites',
+  ]) {
+    const x = c.reactions[ref('reaction', r)];
+    x.apply = x.apply.filter((op: any) => op.op !== 'narrate');
+  }
+  for (let w = 1; w <= 3; w++)
+    for (let k = 0; k <= 9; k++) delete c.reactions[ref('reaction', `wheel_${w}_x_shows_${k}`)];
   const drop = {
     blueprints: ['blueprint/hut_plain', 'blueprint/hut_timbered'],
     actions: [
