@@ -468,6 +468,12 @@ test('economy yard theft: lift the yard purse hidden and seen; the fence pays ou
   assert.deepEqual(labels(y), ['condition.hidden']);
   const t = lift(y, 'yard_purse');
   assert.deepEqual([t.lines, fact(t.world, 'wanted')], [['theft.unseen'], undefined]);
+  const mark = (w: World, f: 'room_line' | 'description') =>
+    describeEntity(w, w.character, npc(w, 'mark'), f);
+  assert.deepEqual(
+    [mark(y, 'room_line'), mark(t.world, 'room_line'), mark(t.world, 'description')],
+    ['npc.mark.room', 'npc.mark.room_robbed', 'npc.mark.description_robbed'],
+  ); // E4: the robbed mark reads empty-belted
   y = walk(t.world, 'up', 'west');
   y = play(y, trade(y, 'sell', 'yard_purse', 3, 'fence')).world;
   y = walk(lift(walk(y, 'east', 'north'), 'merchant_purse').world, 'south', 'west');
