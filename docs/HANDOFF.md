@@ -63,9 +63,10 @@ Pass-1 playtest and fix batch (session a02501b4, 2026-10-21):
 - IN FLIGHT at writing (~18:25 UTC; check each Beads id's last notes):
   - .46 named refusals: MERGED into the batch at 919f4dbc.
   - .42 Loft content: MERGED into the batch at 58f72a68.
-  - .43 law + hub content: review APPROVE WITH NOTES at 10c1eabc7b1aba0500e3a2b853ba70cb3c76290c (no record). Merge when its
-    hosted CI is green (sha as review arg; recompile the hash fixture + `elixir bin/contracts.exs` for system-graph.gen.json
-    on conflict). Nits folded into UI2 (loka-x6t.75). .48 item status lines building. Each then: fresh Opus reviewer
+  - Batch head 1516a8ab: PM fixed a batch-level red (mobile cast_death.test.ts pinned joined lines; UI1 splits records).
+  - .43 law + hub content: review APPROVE WITH NOTES at 10c1eabc; its developer is merging origin/showcase/pass1 into the
+    slice (code conflicts in text.json and showcase tests). Merge the new head when its hosted CI is green (check the
+    merge diff only). Nits folded into UI2 (loka-x6t.75). .48 item status lines building. Each then: fresh Opus reviewer
     (+ Opus designer for player-visible words), CI green, merge.
 - TODO, in order: .49 opponent band in GameView (protocol: record + 2nd opinion), UI2
   loka-x6t.75 (after .46), UI3 .76, UI4 .77, UI5 .78, UI6 .79 (after .49). Briefs: write from the triage + rulings record;
