@@ -6,7 +6,7 @@ the next steps, the standing owner rules that the repo does not yet state, and o
 questions. Rewrite it at each stable checkpoint (a merge, a review verdict, a pushed fix) and before
 the session ends; commit and push it with the Beads export.
 
-Written 2026-10-21 ~18:25 UTC by Claude Code (Opus 5.5), PM session a02501b4, mid pass-1 fix batch, for a clear.
+Written 2026-10-21 ~22:20 UTC by Claude Code (Opus 5.5), PM session 7b6568, mid pass-1 fix batch.
 State at writing: agents may still be running (see "Pass-1 fix batch" below; their handbacks land in Beads notes).
 
 ## Start of a session
@@ -60,19 +60,16 @@ Pass-1 playtest and fix batch (session a02501b4, 2026-10-21):
 - Batch branch `showcase/pass1` (worktree ../worktrees.noindex/batch-pass1, no PR yet). MERGED into it: design spec +
   rulings record docs/reviews/2026-10-21-pass1-ui-rulings.md (loka-x6t.72), .44 spell lines, .41 traps content, .45
   death receipts (record + 2nd opinion), .47 known_npcs living only, x6t.74 UI1 (World order, log lines, speech echo).
-- IN FLIGHT at writing (~18:25 UTC; check each Beads id's last notes):
-  - .46 named refusals: MERGED into the batch at 919f4dbc.
-  - .42 Loft content: MERGED into the batch at 58f72a68.
-  - Batch head 1516a8ab: PM fixed a batch-level red (mobile cast_death.test.ts pinned joined lines; UI1 splits records).
-  - .43 law + hub content: review APPROVE WITH NOTES at 10c1eabc; its developer is merging origin/showcase/pass1 into the
-    slice (code conflicts in text.json and showcase tests). Merge the new head when its hosted CI is green (check the
-    merge diff only). Nits folded into UI2 (loka-x6t.75). .48 item status lines: handed back b2cdc4df, Opus reviewer running. .49 opponent band (protocol) and UI2 loka-x6t.75 building
-    (briefs in their Beads notes). Each then: fresh Opus reviewer
-    (+ Opus designer for player-visible words), CI green, merge.
-- TODO, in order (.49 needs a review record + 2nd opinion when it hands back): UI3 loka-x6t.76, UI4 .77, UI5 .78, UI6 .79 (after .49). Briefs: write from the triage + rulings record;
-  the pass-1 COMMON block is in `loka-y6yg.43` notes. Then: batch PR to main, merge main in once, hosted CI green, merge,
-  bin/after_merge.sh; one Opus verification check at 390 px (browser-use); start the owner's preview on 19006/19007;
-  PushNotification the owner (OWNER chose "option 3, ping me when its ready").
+- STATE (session 7b6568, 2026-10-21 ~22:20 UTC; each Beads id's last notes are current):
+  - MERGED into showcase/pass1: .43 law+hub (e6db50de), .48 item status lines (b2ab160e, record 30ccf163). Batch CI watched per merge.
+  - UI2 loka-x6t.75: approved (review + Opus designer), but hosted ci RED at 6a60fd26 (4 polish tests hand-build views without
+    actions). Fix folded into UI3+UI4; UI2 merges into the batch WITH the UI3+UI4 head.
+  - UI3+UI4 loka-x6t.76+.77 batched as ONE slice, branch showcase/pass1-ui34 from the UI2 head (brief in .76 notes); building.
+  - UI5 loka-x6t.78 building (branch showcase/pass1-ui5 from e6db50de); UI6 .79 goes to the same developer once .49 merges.
+  - .49 opponent band: first review APPROVE WITH NOTES, second opinion CHANGES REQUIRED (record da7dd353, branch
+    review-pass1-band); fresh-developer fix round 1 running (brief in .49 notes). Then scoped re-check by BOTH reviewers.
+  - Then: batch PR to main, merge main in once, CI green, merge, bin/after_merge.sh; Opus re-walk of the pass-1 findings at 390 px
+    (owner OK'd a targeted re-walk instead of a second blind sweep); owner preview 19006/19007; PushNotification.
 - Merging content slices: the showcase hash fixture conflicts; recompile (`mix loka.compile cartridges/toolbox_showcase
   <out>`, split {cartridge, content_hash} into canonical + sha256, keep the description) in the batch worktree, run the
   showcase TS + Elixir tests, push. Always wait for hosted CI on the slice head before merging (two approved slices
