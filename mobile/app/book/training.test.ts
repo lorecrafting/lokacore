@@ -43,7 +43,7 @@ registerHooks({
 });
 const { SkillDetails, ItemDetails } = await import('./skills.tsx');
 const { CharacterPage } = await import('./sections.tsx');
-const { NpcDetail, npcSkills } = await import('./Npc.tsx');
+const { NpcDetail, NpcPage, npcSkills } = await import('./Npc.tsx');
 const { usePalette } = await import('./palette.ts');
 function words(element: any): string[] {
   if (Array.isArray(element)) return element.flatMap(words);
@@ -88,12 +88,12 @@ test('Character draws projected attributes and acquired qualification with autho
   assert.deepEqual(words(CharacterPage({ view, text, world: () => {} })), [
     'Character',
     'STR 9',
-    'Sword craft — unqualified; STR at least 10',
+    'Sword craft — learned, unqualified; STR at least 10',
     'Back to World',
   ]);
   assert.deepEqual(words(SkillDetails({ view, text })), [
     'STR 9',
-    'Sword craft — unqualified; STR at least 10',
+    'Sword craft — learned, unqualified; STR at least 10',
   ]);
 });
 
@@ -124,10 +124,10 @@ test('Character groups profession boxes under their title, acquired then not lea
   };
   assert.deepEqual(words(CharacterPage({ view, text, world: () => {} })), [
     'Character',
-    'swords — qualified; swords req',
+    'swords — learned',
     'Woodcraft',
-    'whittling, level 2 — qualified; whittling req',
-    'joinery — unqualified; joinery req',
+    'whittling, level 2 — learned',
+    'joinery — learned, unqualified; joinery req',
     'turning — not learned; turning req',
     'Handcraft',
     'carving — locked; carving req',
@@ -186,6 +186,29 @@ test('Character appends the signed worn affect to an attribute line', () => {
     'PER 14 (+4 worn)',
     'STR 8 (-2 worn)',
     'CON 10',
+  ]);
+});
+
+// Breaks (pass-1 UI, book-ui.md World and status entry): a count drawn as a meter ("pennies 10 /
+// 100"), or a pool (hp, ma, mv) losing its maximum or hp its band phrase.
+test('Character draws a count bare and a pool as current / maximum', () => {
+  const pool = (key: string, current: number, maximum: number) => ({
+    resource: { key },
+    current,
+    maximum,
+    band: 'ready',
+    tone: 'normal',
+  });
+  const view: any = {
+    resources: [pool('hp', 10, 10), pool('mv', 3, 9), pool('pennies', 10, 100), pool('ash', 0, 5)],
+  };
+  assert.deepEqual(words(CharacterPage({ view, text, world: () => {} })), [
+    'Character',
+    'hp  10 / 10, ready',
+    'mv  3 / 9',
+    'pennies  10',
+    'ash  0',
+    'Back to World',
   ]);
 });
 
@@ -264,6 +287,37 @@ function nodes(element: any): any[] {
     : [element, ...nodes(element.props?.children)];
 }
 // Breaks: Tobin controls route outside their NPC detail, replay duplicates success, or cold reopen loses the next lesson/confirmed line.
+// Breaks: the teach card for a learned skill drops, or keeps a price card (book-ui.md Skill tree
+// details, H3): a choice the kernel advertises unavailable draws as one `label: reason` note.
+test('an unavailable teach choice draws as label: reason with no price card', () => {
+  const view = {
+    entities: [],
+    choice: {
+      speaker_id: 'tobin',
+      continuation_id: 'c',
+      choices: [
+        {
+          choice_id: 'learn',
+          label: 'Learn swords — 2 pennies',
+          available: false,
+          reason: { code: 'unavailable', message: { key: 'You already know swords.' } },
+        },
+      ],
+    },
+  } as never;
+  const page = NpcPage({
+    view,
+    text: (k) => k,
+    g: group([]),
+    press() {},
+    log: [],
+    leave() {},
+    open() {},
+  });
+  const lines = words(page).filter((w) => w.includes('swords'));
+  assert.deepEqual(lines, ['Learn swords — 2 pennies: You already know swords.']);
+});
+
 test('Book interaction teaches swords then dodge in Tobin detail and recovers each committed result once', (t) => {
   const pin = JSON.parse(
     readFileSync(
@@ -333,12 +387,12 @@ test('Book interaction teaches swords then dodge in Tobin detail and recovers ea
   assert.ok(
     words(
       CharacterPage({ view: book.screen().view, text: book.screen().text, world: () => {} }),
-    ).includes('Swords — qualified; STR at least 10'),
+    ).includes('Swords — learned'),
   );
   assert.ok(
     words(
       CharacterPage({ view: book.screen().view, text: book.screen().text, world: () => {} }),
-    ).includes('Dodge — qualified; DEX at least 10'),
+    ).includes('Dodge — learned'),
   );
 });
 // Breaks: moving to the shared item detail component silently drops confirmed fuel or invents ignition.

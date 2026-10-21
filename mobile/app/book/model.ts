@@ -15,8 +15,9 @@ export { things, restoredItemPages } from './item-pages.ts';
 type Say = (key: string) => string;
 export const bleedingLine = (b: NonNullable<GameView['bleeding']>, time: number, text: Say) =>
   `${text(b.label)} · ${Math.max(0, b.ends_at - time)}s remaining · ${b.hp_loss} HP each ${b.tick_every}s`;
-// Book UI Conditions details: seconds under two minutes, whole minutes from there.
-const dur = (s: number) => (s >= 120 ? `${Math.round(s / 60)}m` : `${s}s`);
+// Book UI Conditions details: seconds under two minutes, whole minutes under two hours, then hours.
+const dur = (s: number) =>
+  s >= 7200 ? `${Math.round(s / 3600)}h` : s >= 120 ? `${Math.round(s / 60)}m` : `${s}s`;
 // Toolbox row W24 Journal countdown (wording proposed; designer to approve).
 export const timeLeft = (remaining: number) => `Time left: ${dur(remaining)}`;
 type Condition = NonNullable<GameView['conditions']>[number];
@@ -170,9 +171,10 @@ export type Pool = NonNullable<GameView['resources']>[number];
 // The condition pools: the status line shows these alone and bands them; pennies and any other
 // count stay off the line and show plain in Character (book-ui.md#world-and-status-entry).
 const CONDITIONS = ['hp', 'ma', 'mv'];
-export const toneOf = (r: Pool) => (CONDITIONS.includes(r.resource.key) ? r.tone : 'normal');
+export const isPool = (r: Pool) => CONDITIONS.includes(r.resource.key);
+export const toneOf = (r: Pool) => (isPool(r) ? r.tone : 'normal');
 export const pools = (rs?: readonly Pool[]) => {
-  const shown = rs?.filter((r) => CONDITIONS.includes(r.resource.key));
+  const shown = rs?.filter(isPool);
   return shown?.length ? shown : undefined;
 };
 
