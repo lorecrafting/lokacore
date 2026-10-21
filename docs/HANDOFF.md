@@ -65,8 +65,8 @@ Pass-1 playtest and fix batch (session a02501b4, 2026-10-21):
   - UI2 loka-x6t.75: approved (review + Opus designer), but hosted ci RED at 6a60fd26 (4 polish tests hand-build views without
     actions). Fix folded into UI3+UI4; UI2 merges into the batch WITH the UI3+UI4 head.
   - UI3+UI4 loka-x6t.76+.77 batched as ONE slice, branch showcase/pass1-ui34 from the UI2 head (brief in .76 notes); building.
-  - UI5 loka-x6t.78 building (branch showcase/pass1-ui5 from e6db50de); UI6 .79 goes to the same developer once .49 merges.
-  - .49 opponent band: first review APPROVE WITH NOTES, second opinion CHANGES REQUIRED (record da7dd353, branch
+  - UI5 loka-x6t.78: review CHANGES REQUIRED (e2e pennies pin); fresh developer doing UI5 fix + UI6 .79 on showcase/pass1-ui5 (brief in .78 notes).
+  - .49 opponent band: MERGED at 09eabd13 (both reviewers APPROVE after fix round 1, record 13692fb9). (old: record da7dd353, branch
     review-pass1-band); fresh-developer fix round 1 running (brief in .49 notes). Then scoped re-check by BOTH reviewers.
   - Then: batch PR to main, merge main in once, CI green, merge, bin/after_merge.sh; Opus re-walk of the pass-1 findings at 390 px
     (owner OK'd a targeted re-walk instead of a second blind sweep); owner preview 19006/19007; PushNotification.
