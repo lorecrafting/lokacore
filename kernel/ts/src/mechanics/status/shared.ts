@@ -1,7 +1,7 @@
 // status@1 (toolbox rows 1, G3): timed statuses on the player's body, an NPC or an item, one
 // generation per holder/status pair; the tick job is unbound and finds its row by job id, so a
 // stale one completes harmlessly.
-// size: allow 321, row 16 pierces sits beside its one caller so skills.ts stays out of this cycle
+// size: allow 323, row 16 pierces sits beside its one caller so skills.ts stays out of this cycle; item lines (y6yg.48)
 import type {
   DefinitionRef,
   DeltaOp,
@@ -262,7 +262,7 @@ export const moves = (world: World, npc: EntityId) => statusAllows(world, npc)('
  * holders, once per holder and status in the rule or spell, in the one writer group the holder's
  * status writes share in this advance (job.ts statusGroup). Only a first application (over no row
  * or an inactive one) is heard: it emits status_applied (status reader 2) and its applied line on
- * the actor's body, or (row G3) its opt-in observed line on an NPC in the room that `sees`; a
+ * the actor's body, or (row G3) its opt-in observed line on an NPC or item in the room that `sees`; a
  * refresh while active is silent (row W25), and a permanent status (row W8) opens with no job.
  */
 export function statusStep(
@@ -293,8 +293,10 @@ export function statusStep(
     if (first && landing(world))
       emit({ type: 'status_applied', body_id: holder, status: step.status });
     const label = specOf(world, step.status)?.narration[holder === body ? 'applied' : 'observed'];
-    const npc = world.entities[holder]?.kind === 'npc' && world.state.containers[holder] === here;
-    if (first && label && (holder === body || (npc && sees(holder))))
+    const kind = world.entities[holder]?.kind; // an NPC or (loka-y6yg.48) an item in the room
+    const seen = (kind === 'npc' || kind === 'item') && world.state.containers[holder] === here;
+    const told = kind === 'item' && out.narration.some((l) => l.key === label); // one line for a woodpile
+    if (first && label && !told && (holder === body || (seen && sees(holder))))
       out.narration.push({ key: label });
   }
   return out;

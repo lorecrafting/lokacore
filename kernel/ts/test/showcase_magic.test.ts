@@ -233,6 +233,7 @@ const statuses = (w: World, k: string) =>
   activeStatuses(w, npc(w, k))
     .map((s) => s.status.key)
     .sort();
+const bier = (w: World) => activeStatuses(w, id(w, 'item', 'bier')).map((s) => s.status.key);
 const types = (r: ReturnType<typeof act>) =>
   r.decision.kind === 'accepted' ? r.decision.events.map((e) => e.payload.type) : [];
 const status = (key: string) =>
@@ -296,8 +297,12 @@ test('magic 6: the oiled winch opens the crypt; the lantern shows the wight', ()
 // elsewhere, the returning wight re-engages, the kill credits no one or the wrong body or writes no
 // kill line, or a third bolt casts on the corpse.
 test('magic 7: flamma burns the wight to 4 and the bier; warded blow 1; the second bolt kills', () => {
+  const lantern = { type: 'douse', item_id: id(w, 'item', 'lantern') };
+  const unseen = act(play(w, lantern).world, { type: 'cast', word: 'flamma' }); // loka-y6yg.48
+  assert.deepEqual(bier(unseen.world), ['burning']);
+  assert.deepEqual(unseen.lines, ['narration.flamma']); // the bier lights unseen in the dark
   const r = act(w, { type: 'cast', word: 'flamma' });
-  assert.deepEqual(r.lines, ['narration.flamma']);
+  assert.deepEqual(r.lines, ['narration.flamma', 'narration.burning.observed']); // the seen bier
   assert.deepEqual(types(r), ['action_completed', 'status_applied']);
   w = r.world;
   assert.equal(hp(w, 'wight'), 4);
@@ -326,6 +331,25 @@ test('magic 7: flamma burns the wight to 4 and the bier; warded blow 1; the seco
   assert.deepEqual(view(w).levelling, { level: 2, experience: 40, next: 100, unspent: 0 });
   assert.equal(pools(w).ma, 0);
   assert.equal(refused(w, { type: 'cast', word: 'flamma' }), 'invalid_state');
+});
+
+// Breaks (loka-y6yg.48): the bier going out is not told in the lit crypt, told twice, or told to a
+// player who left or doused the lantern; Quench still works once the burn has ended.
+test('magic 7b: the bier going out is told only while seen; then Quench is refused', () => {
+  const out = (v: World) => {
+    const r = wait(v, v.state.clock + 180);
+    return { world: r.world, lines: r.lines.filter((k) => k.startsWith('narration.burning')) };
+  };
+  const ended = out(w);
+  assert.deepEqual(ended.lines, ['narration.burning.expired']);
+  assert.ok(!bier(ended.world).includes('burning'));
+  assert.equal(why(use(ended.world, 'quench', 'bier', 'loft_bucket')), 'invalid_state');
+  assert.deepEqual(out(go(w, 'up').world).lines, []);
+  const c = structuredClone(w.cartridge) as any;
+  delete c.statuses[ref('status', 'burning')].narration.observed; // the opt-in gates the expiry too
+  assert.deepEqual(out({ ...w, cartridge: c }).lines, []);
+  const dark = play(w, { type: 'douse', item_id: id(w, 'item', 'lantern') }).world;
+  assert.deepEqual(out(dark).lines, []);
 });
 
 // Breaks: quench is not offered for the burning bier, leaves it burning or the smoke cue on,
@@ -379,9 +403,10 @@ test('magic 9: the golem yard; wet then the jar stuns (hp 17); the jar alone sho
 });
 
 // Breaks (loka-kgd.176): an observed line told for a golem out of the room, a hidden golem, an
-// item holder or a status with no observed line (falling back to applied); the player's own line lost;
+// item or golem whose status has no observed line (falling back to applied), or none for a seen
+// item (loka-y6yg.48); the player's own line lost;
 // a spell (not only a reaction) skips the seen check.
-test('magic 9b: only a seen golem in the room gets an observed line', () => {
+test('magic 9b: only a seen golem or item in the room gets an observed line', () => {
   let y = go(go(go(w, 'up').world, 'west').world, 'west').world;
   y = take(y, 'rain_bucket');
   const golem = npc(y, 'golem');
@@ -401,11 +426,11 @@ test('magic 9b: only a seen golem in the room gets an observed line', () => {
     assert.deepEqual(statuses(r.world, 'golem'), v === hidden ? ['hidden', 'wet'] : ['wet']);
     assert.deepEqual(r.lines, []);
   }
-  const said = (holder: string, s: string) =>
+  const said = (holder: string | string[], s: string) =>
     statusStep(
       y,
       { op: 'status.apply', status: status(s) },
-      [holder as never],
+      [holder].flat() as never[],
       body(y),
       0,
       { holders: new Map(), applied: new Set() },
@@ -415,7 +440,21 @@ test('magic 9b: only a seen golem in the room gets an observed line', () => {
     ).narration;
   assert.deepEqual(said(golem, 'wet'), [{ key: 'narration.wet.applied' }]);
   assert.deepEqual(said(golem, 'chilled'), []);
-  assert.deepEqual(said(id(y, 'item', 'yard_torch'), 'wet'), []);
+  // loka-y6yg.48: a seen item in the room tells it once for a pile; not a carried or absent one.
+  const fire = [{ key: 'narration.burning.observed' }];
+  assert.deepEqual(
+    said([id(y, 'item', 'yard_torch'), id(y, 'item', 'spark_jar')], 'burning'),
+    fire,
+  );
+  assert.deepEqual(said(id(y, 'item', 'rain_bucket'), 'burning'), []);
+  assert.deepEqual(said(id(y, 'item', 'bier'), 'burning'), []);
+  assert.deepEqual(said(id(y, 'item', 'yard_torch'), 'chilled'), []);
+  const soaked = drop(y, 'rain_bucket'); // a seen golem's expiry stays silent
+  assert.deepEqual(statuses(soaked, 'golem'), ['wet']);
+  assert.deepEqual(
+    wait(soaked, soaked.state.clock + 600).lines.filter((k) => k.includes('wet')),
+    [],
+  );
   assert.deepEqual(said(body(y), 'chilled'), [{ key: 'narration.chilled.applied' }]);
   // The spell route: ward retargeted at the golem tells its line only while the golem is seen.
   const warded = (v: World) => {

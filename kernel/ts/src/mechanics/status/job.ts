@@ -7,13 +7,22 @@ import type {
   JobId,
   StatusDefinition,
   StatusRow,
+  Text,
   TextKey,
 } from '../../contracts.gen.ts';
 import { add } from '../../foundation/int.ts';
-import { accepted, actorOf, type JobRow, type Mint, type World } from '../../runtime/decision.ts';
+import {
+  accepted,
+  actorOf,
+  admitted,
+  type JobRow,
+  type Mint,
+  type World,
+} from '../../runtime/decision.ts';
 import { currentRound } from '../combat/round.ts';
 import { replenishMovers } from '../containment/job.ts';
 import { adjust, level, resourceSpec } from '../resource.ts';
+import { visible } from '../light/shared.ts';
 import { fatalTick } from './fatal.ts';
 import { expire, specOf } from './shared.ts';
 
@@ -22,7 +31,7 @@ type Active = Required<Extract<StatusRow, { active: true }>>;
 
 /**
  * A due status tick or expiry on its holder (the player's body, an NPC or an item; rows 1, G3);
- * an obsolete job completes harmlessly. Narration is the player's only. A successor the same
+ * an obsolete job completes harmlessly. Narration is the player's, or a seen item's expiry (`watched`). A successor the same
  * advance also crosses runs as a sub-step at `now` (`next`, runtime/proposal_hours.ts, loka-6ztc):
  * its job is already complete and its row's tick stale (a refresh writes the end there,
  * status/shared.ts refreshed), so the drain carries its true tick (`carried`); only the last
@@ -60,7 +69,10 @@ export function runStatus(
     return fatalTick(visit, command, ops, events, held, status, mint, say(spec.narration.tick));
   if (expired) {
     const ended = [happened(visit, command, mint, 'status_expired', body, status)];
-    return accepted(world, 'job_ran', ops, ended, say(spec.narration.expired));
+    // ponytail: an item reuses the player's own expired line (third person for burning, the only
+    // observed item status today); add an item-specific key when a second-person one reaches items.
+    const lines = player || watched(visit, body, spec) ? [{ key: spec.narration.expired }] : [];
+    return accepted(world, 'job_ran', ops, ended, lines);
   }
   // A due tick on an unreadable pool is skipped, never re-due at the same clock.
   const next_tick_at = due ? add(tick, spec.tick_every) : untick(spec, row, tick);
@@ -70,6 +82,26 @@ export function runStatus(
   const ran = accepted(world, 'job_ran', ops, events, by ? say(spec.narration.tick) : []);
   return crossed ? { ...ran, next, tick: next_tick_at } : ran;
 }
+
+/** loka-y6yg.48: an item whose status declares an observed line, seen in an admitted player's room, tells its expiry. */
+const watched = (w: World, item: EntityId, spec: StatusDefinition) =>
+  !!spec.narration.observed &&
+  w.entities[item]?.kind === 'item' &&
+  admitted(w).some(
+    ([actor, body]) =>
+      w.state.containers[item] === w.state.containers[body] && visible(w, actor, item),
+  );
+
+/** loka-y6yg.48: items going out in one advance tell each expired line once per receipt (a woodpile is one line). */
+export const unsaid = (
+  w: World,
+  job_id: JobId,
+  receipt: readonly Text[],
+  lines: readonly Text[] = [],
+) =>
+  lines.length && w.entities[statusHolder(w, job_id)?.body ?? '']?.kind === 'item'
+    ? lines.filter((l) => !receipt.some((t) => t.key === l.key))
+    : lines;
 
 /**
  * A due tick's change, saturated at the pool bounds (the op itself stays exact), and whether it
