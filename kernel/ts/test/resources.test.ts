@@ -8,6 +8,7 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { test } from 'node:test';
+import { validate } from '../src/foundation/validate.ts';
 import type { Command } from '../src/contracts.gen.ts';
 import { loadCartridge, type Cartridge, type World } from '../src/index.ts';
 import { gameView, INSTALLED, newWorld, step } from '../src/runtime/world.ts';
@@ -133,6 +134,46 @@ test('an unaffordable cost is insufficient_resource before any draw, and changes
   rejects(run(pricey, move('east')), perform('pray'), 'insufficient_resource');
 });
 
+const short = (key: string, amount: number) => ({
+  key: 'resource.short',
+  bindings: { resource: key, amount },
+});
+
+// Pass-1 R1. Breaks: the refusal not naming the unpaid cost, naming a cost the body can pay, or
+// judging each cost alone (50 ma and 51 ma are each affordable from 100, not both).
+test('an unaffordable recipe names the first cost the body cannot pay after the ones before it', () => {
+  const pray = (costs: { resource: any; amount: number }[]) =>
+    gameView(
+      run(
+        world((c) => (c.recipes[PRAY].costs = costs)),
+        move('east'),
+      ),
+    ).actions.find((a) => a.action_key === 'pray')!;
+  assert.equal(pray([{ resource: ref('ma'), amount: 100 }]).available, true); // exactly enough
+  assert.deepEqual(pray([{ resource: ref('ma'), amount: 101 }]).reason, {
+    code: 'insufficient_resource',
+    message: short('ma', 101),
+  });
+  const split = [
+    { resource: ref('mv'), amount: 1 },
+    { resource: ref('ma'), amount: 50 },
+    { resource: ref('ma'), amount: 51 },
+  ];
+  assert.deepEqual(
+    validate(
+      'GameView',
+      gameView(
+        run(
+          world((c) => (c.recipes[PRAY].costs = split)),
+          move('east'),
+        ),
+      ),
+    ),
+    [],
+  );
+  assert.deepEqual(pray(split).reason, { code: 'insufficient_resource', message: short('ma', 51) });
+});
+
 // Breaks: a move at 0 mv admitted, or a move not paying 1 mv.
 test('a move costs 1 mv and is refused at 0 mv', () => {
   const w = world();
@@ -244,7 +285,7 @@ test('the GameView shows cooldowns, unaffordable costs and exhaustion as unavail
   const poor = world((c) => (c.recipes[PRAY].costs = [{ resource: ref('ma'), amount: 101 }]));
   assert.deepEqual(pray(run(poor, move('east')))!, {
     ...pray(prayed)!,
-    reason: { code: 'insufficient_resource' },
+    reason: { code: 'insufficient_resource', message: short('ma', 101) },
   });
   const tired = run(world(), move('east'), move('west'), move('east'));
   // Sight follows passage, not fare: the unaffordable exit still shows the mill yard.

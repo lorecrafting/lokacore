@@ -9,7 +9,7 @@ import type {
 import type { Button, DetailLine } from './presenter.ts';
 import { commandOf, WORDS } from './buttons.ts';
 export { buttonsOf } from './buttons.ts';
-import { reason, SENTENCE } from './words.ts';
+import { reason, SENTENCE, short } from './words.ts';
 import { things } from './item-pages.ts';
 export { things, restoredItemPages } from './item-pages.ts';
 type Say = (key: string) => string;
@@ -144,7 +144,13 @@ type Offered =
   | NonNullable<GameView['choice']>['choices'][number]
   | NonNullable<GameView['spell_words']>[number];
 export const why = (e: Offered, text: (key: string) => string) =>
-  e.available ? '' : e.reason.message ? text(e.reason.message.key) : reason(e.reason.code);
+  e.available
+    ? ''
+    : e.reason.message?.key === 'resource.short'
+      ? short(e.reason.message.bindings ?? {})
+      : e.reason.message
+        ? text(e.reason.message.key)
+        : reason(e.reason.code);
 
 // A closed exit's log line: its reason word as the tag, then the cartridge's sentence or the frame.
 export const refused = (

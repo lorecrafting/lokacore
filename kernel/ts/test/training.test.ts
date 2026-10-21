@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
+import { validate } from '../src/foundation/validate.ts';
 import { trainingWorld, trainingRef, learned, wield } from './training_fixture.ts';
 import { attack, elapsed, command, hp, rat, ref, positioned } from './combat_fixture.ts';
 import { step, gameView, type World } from '../src/index.ts';
@@ -228,3 +229,27 @@ function carried(w: World): World {
   const item = w.entityIds[ref(w, 'item', 'sword')];
   return { ...w, state: { ...w.state, containers: { ...w.state.containers, [item]: w.body } } };
 }
+
+// Pass-1 R1. Breaks: a lesson the body cannot afford refused without naming its price, the price
+// named at exactly enough, or a payment the teacher owes named as the body's shortfall.
+test('an unaffordable lesson names its price; a payment the teacher owes does not', () => {
+  const w = talk(trainingWorld());
+  const learn = (w: World) => gameView(w).choice!.choices.find((c) => c.choice_id === 'learn')!;
+  assert.equal(learn(hpMoney(w, w.body, 4)).available, true);
+  const pennies = { resource: 'pennies', amount: 4 };
+  assert.deepEqual(validate('GameView', gameView(hpMoney(w, w.body, 3))), []);
+  assert.deepEqual(learn(hpMoney(w, w.body, 3)).reason, {
+    code: 'insufficient_resource',
+    message: { key: 'resource.short', bindings: pennies },
+  });
+  const owed = structuredClone(w.cartridge.dialogues) as any;
+  const id = Object.keys(owed).find((k) => k.endsWith('learn_swords'))!;
+  const { lesson_payment, ...option } = owed[id].choices.learn;
+  owed[id].choices.learn = {
+    ...option,
+    payment: { ...lesson_payment, from: 'teacher', amount: 999 },
+  };
+  delete owed[id].choices.learn.payment.to;
+  const debt = { ...w, cartridge: { ...w.cartridge, dialogues: owed } };
+  assert.deepEqual(learn(debt).reason, { code: 'insufficient_resource' });
+});

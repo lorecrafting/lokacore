@@ -423,6 +423,7 @@ rather than hiding errors or clearing same-room history. Whisper needs a word, s
 
 The installed first-fight interaction follows [Live combat response](#live-combat-response-m6-a).
 Functional combat pages remain separate from deferred cosmetic polish.
+An NPC a [spell](mechanics.md#spell-effects-toolbox-row-29b) kills gets no "leaves" line in the Book log (Beads `loka-y6yg.44`).
 
 ## Shared elapsed status/completion boundary
 

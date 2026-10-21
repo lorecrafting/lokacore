@@ -40,6 +40,7 @@ import { acceptRefused, resolution } from '../quest/lifecycle.ts';
 import { cmp } from '../../foundation/validate.ts';
 import { questOf } from '../lookups.ts';
 import { choicePayment } from './payment.ts';
+import { shortfall } from '../resource.ts';
 
 /** The cartridge's definition the row's source names (the loader resolves every dialogue). */
 export const definition = (world: World, source: DefinitionRef): DialogueDefinition =>
@@ -236,8 +237,17 @@ export function choiceView(
         code ??
         (typeof quest === 'string' ? quest : undefined) ??
         (option.accept && acceptRefused(world, actor, option.accept, steps));
+      // A lesson the body cannot afford names its price (pass-1 R1); a payment the NPC owes does not.
+      const lesson = why === 'insufficient_resource' && option.lesson_payment;
+      const short = lesson && shortfall(world, bodyOf(world, actor)!, [lesson]);
       return why
-        ? { ...state, available: false, choice_id, label: option.label, reason: { code: why } }
+        ? {
+            ...state,
+            available: false,
+            choice_id,
+            label: option.label,
+            reason: { code: why, ...(short && { message: short }) },
+          }
         : { ...state, available: true, choice_id, label: option.label };
     }),
   };

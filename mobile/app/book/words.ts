@@ -72,17 +72,33 @@ const REASON: Record<string, string> = {
   not_owned: 'you are not holding it',
   insufficient_resource: 'too exhausted',
   too_heavy: 'too heavy to carry',
+  over_load: 'more than you can carry',
+  cooldown: 'not yet',
 };
 // A refused move's log line that is its own sentence, not "The way north is …" (0 MV).
+// The kernel's engine key resource.short names the unpaid cost (pass-1 R1); keys show raw, as on the status line.
+export const short = (b: Record<string, unknown>) =>
+  `need ${String(b.amount)} ${String(b.resource)}`;
 export const SENTENCE: Record<string, string> = { insufficient_resource: 'You are too exhausted.' };
 export const given = (item: string, to: string) => `You give ${item} to ${to}.`;
 export const reason = (code: string) => REASON[code] ?? code.replaceAll('_', ' ');
+// An item page's refusal notes (book-ui.md, too heavy; pass-1 E8): a locked Take reads as ownership.
+export const NOTED: Record<string, string> = {
+  too_heavy: REASON.too_heavy!,
+  over_load: REASON.over_load!,
+  permission_denied: 'not yours',
+};
 // A shelf row's buy reason: the shop's stock is gone, or the player's purse is short.
 const BUY: Record<string, string> = {
   not_owned: 'sold out',
   insufficient_resource: "can't afford",
 };
 export const buyReason = (code: string) => BUY[code] ?? reason(code);
+// A shelf row's sell reason: the shop's own line (a fence's refusal of honest goods, pass-1 GE3), else the code's word.
+export const sellReason = (
+  s: { reason?: string; message?: { key: string } },
+  text: (key: string) => string,
+) => (s.message ? text(s.message.key) : reason(s.reason ?? ''));
 // A hostile NPC's page when its cartridge gives no refusal line (Book hostile refusal).
 export const refused = (name: string) => `${name} will have nothing to do with you.`;
 

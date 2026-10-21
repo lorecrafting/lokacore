@@ -11,7 +11,8 @@ import { living } from '../death/shared.ts';
 import { movable } from '../../runtime/created.ts';
 import { derived } from '../attributes/shared.ts';
 
-type Failure = 'too_heavy' | 'budget_exceeded' | 'precondition_failed' | 'containment_cycle';
+type Failure =
+  'too_heavy' | 'over_load' | 'budget_exceeded' | 'precondition_failed' | 'containment_cycle';
 type Context = {
   world: World;
   body: EntityId;
@@ -72,6 +73,14 @@ function ceiling(world: World, body: EntityId) {
   return Math.max(0, saturate(max! + derived(world, actor, table)));
 }
 
+// Over the ceiling: too_heavy when the added mass alone exceeds it, else over_load (pass-1 R3).
+const over = (load: number, added: number, max: number) =>
+  add(load, added) <= max
+    ? undefined
+    : added > max
+      ? ('too_heavy' as const)
+      : ('over_load' as const);
+
 export const load = (world: World, body: EntityId, steps: Steps) =>
   total({ world, body, steps, totals: new Map(), owned: new Map() }, body);
 
@@ -91,7 +100,7 @@ export function carrying(world: World, body: EntityId, steps: Steps = { n: 0 }) 
     if (added === 0) return;
     const load = total(context, body);
     if (typeof load === 'string') return load;
-    return add(load, added) > max ? 'too_heavy' : undefined;
+    return over(load, added, max);
   };
 }
 
@@ -265,7 +274,7 @@ export function carryingExchange(
   if (net <= 0) return;
   const load = total(context, body);
   if (typeof load === 'string') return load;
-  return add(load, net) > ceiling(world, body)! ? ('too_heavy' as const) : undefined;
+  return over(load, net, ceiling(world, body)!);
 }
 
 /** Positive acquisition within existing custody (Fill), without a second stored load. */
@@ -275,7 +284,7 @@ export function carryingAdded(world: World, body: EntityId, grams: number, steps
   if (!Number.isSafeInteger(max) || max < 0) return 'precondition_failed' as const;
   const load = total({ world, body, steps, totals: new Map(), owned: new Map() }, body);
   if (typeof load === 'string') return load;
-  return add(load, grams) > max ? ('too_heavy' as const) : undefined;
+  return over(load, grams, max);
 }
 
 function effective(world: World, id: string, grams: number): number | Failure {

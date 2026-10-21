@@ -12,7 +12,7 @@ import { Riddle } from './Riddle.tsx';
 import { space } from './tokens.ts';
 import { LABEL } from './labels.ts';
 import { offerLabel } from './offers.ts';
-import { buyReason, reason, refused } from './words.ts';
+import { buyReason, refused, sellReason } from './words.ts';
 type Say = (key: string) => string;
 type Grouped = ReturnType<typeof group>;
 type Screen = ReturnType<ReturnType<typeof presenter>['screen']>;
@@ -180,7 +180,7 @@ function ShopOptions(p: NpcProps) {
         p.npc.shop?.map((o) => {
           // A price row, not an action card (book-ui.md, Hostile refusal): its reasons are words.
           const buy = buyReason(o.buy.reason ?? '');
-          const sell = reason(o.sell.reason ?? '');
+          const sell = sellReason(o.sell, p.text);
           return (
             <Text key={o.item_id} style={note(c)}>
               {p.text(o.name)}: Buy {o.buy.price}p{o.buy.available ? '' : ` (${buy})`}; Sell{' '}

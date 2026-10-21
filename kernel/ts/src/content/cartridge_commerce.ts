@@ -37,6 +37,9 @@ export function commerce(c: Obj): Diagnostic[] {
     for (const field of ['bought', 'sold'])
       if (!Object.hasOwn(c.text, s[field]))
         out.push(diag('UNRESOLVED_REFERENCE', `${at}.${field}`));
+    // A fence names its refusal of honest goods (pass-1 GE3).
+    if (s.offers.some((o: Obj) => o.stolen) && !Object.hasOwn(c.text, 'shop.not_stolen'))
+      out.push(diag('UNRESOLVED_REFERENCE', `${at}.offers`));
   }
   return out;
 }

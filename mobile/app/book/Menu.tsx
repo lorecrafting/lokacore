@@ -6,7 +6,7 @@ import { ActionCard, Cards } from './actions.tsx';
 import { EntityLine, LogLines, Note } from './lines.tsx';
 import { Control, Page, SectionTitle, type Thing } from './pages.tsx';
 import { ItemDetails } from './skills.tsx';
-import { reason } from './words.ts';
+import { NOTED } from './words.ts';
 import { LABEL } from './labels.ts';
 type Say = (key: string) => string;
 
@@ -32,14 +32,20 @@ export function ContentsPage(p: { open: (section: Section) => void; world: () =>
 
 type Screen = ReturnType<ReturnType<typeof presenter>['screen']>;
 
-// The too-heavy notes are one block (BOOK-UI-COMPONENTS.md, Page: a run of rows of one kind).
-const tooHeavy = (thing: Thing | undefined, text: Say) => {
-  const heavy = thing?.actions.filter((a) => !a.available && a.reason.code === 'too_heavy') ?? [];
+// The refusal notes are one block (BOOK-UI-COMPONENTS.md, Page: a run of rows of one kind).
+const noted = (thing: Thing | undefined) =>
+  thing?.actions.flatMap((a) =>
+    !a.available && Object.hasOwn(NOTED, a.reason.code)
+      ? [{ ...a, word: NOTED[a.reason.code] }]
+      : [],
+  ) ?? [];
+const notes = (thing: Thing | undefined, text: Say) => {
+  const shown = noted(thing);
   return (
-    heavy.length > 0 && (
+    shown.length > 0 && (
       <View>
-        {heavy.map((a) => (
-          <ActionCard key={a.action_key} label={text(a.label)} reason={`${reason('too_heavy')}.`} />
+        {shown.map((a) => (
+          <ActionCard key={a.action_key} label={text(a.label)} reason={`${a.word}.`} />
         ))}
       </View>
     )
@@ -87,8 +93,10 @@ export function ThingPage(p: {
     >
       <ItemDetails thing={p.thing} text={p.text} />
       <LogLines lines={p.log} />
-      {tooHeavy(p.thing, p.text)}
-      {!p.actions.length && !p.contents.length && <Note>Nothing to do here.</Note>}
+      {notes(p.thing, p.text)}
+      {!p.actions.length && !p.contents.length && !noted(p.thing).length && (
+        <Note>Nothing to do here.</Note>
+      )}
       <Cards>
         {p.actions.map((b) => (
           <ActionCard key={`${b.label}:${b.target_ids.join(',')}`} b={b} press={p.press} />

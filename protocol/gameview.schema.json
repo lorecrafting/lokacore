@@ -2308,7 +2308,7 @@
           "available": true
         }
       ],
-      "description": "The current quoted price and availability of one Buy or Sell exchange, with a typed refusal reason when unavailable (B3).",
+      "description": "The current quoted price and availability of one Buy or Sell exchange, with a typed refusal reason when unavailable (B3), and the house line for it when the kernel names one: shop.not_stolen when a fence's offer refuses goods that are not stolen (pass-1 GE3; the cartridge authors the text).",
       "type": "object",
       "properties": {
         "price": {
@@ -2321,6 +2321,9 @@
         },
         "reason": {
           "$ref": "error.schema.json#/$defs/ErrorCode"
+        },
+        "message": {
+          "$ref": "text.schema.json#/$defs/Text"
         }
       },
       "required": [

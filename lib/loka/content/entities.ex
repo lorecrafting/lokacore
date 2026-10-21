@@ -142,7 +142,15 @@ defmodule Loka.Content.Entities do
 
   defp readable_texts(_), do: []
 
-  defp shop_texts(%{"shop" => s}), do: for(f <- ~w(bought sold), do: {["shop", f], s[f]})
+  # A fence names its refusal of honest goods (pass-1 GE3).
+  defp shop_texts(%{"shop" => s}),
+    do:
+      for(f <- ~w(bought sold), do: {["shop", f], s[f]}) ++
+        for(
+          true <- [Enum.any?(s["offers"], & &1["stolen"])],
+          do: {["shop", "offers"], "shop.not_stolen"}
+        )
+
   defp shop_texts(_), do: []
 
   defp goal_texts(e), do: for({s, %{"goal" => g}} <- cases(e), do: {s ++ ["goal"], g})

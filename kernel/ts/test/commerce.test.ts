@@ -100,7 +100,7 @@ test('projection and direct exchange refuse too-heavy, poor, absent and changed-
     poor = world(),
     absent = world();
   const cases: [World, number, string][] = [
-    [heavy, 3, 'too_heavy'],
+    [heavy, 3, 'over_load'],
     [
       {
         ...poor,
@@ -135,7 +135,7 @@ test('projection and direct exchange refuse too-heavy, poor, absent and changed-
   }
   assert.equal(
     gameView(heavy).entities.find((e) => e.id === peg)!.shop![0].buy.reason,
-    'too_heavy',
+    'over_load',
   );
 });
 // Breaks: Sell accepts nested/worn/unrelated goods or spends unfunded Peg pennies.

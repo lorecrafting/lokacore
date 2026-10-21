@@ -11,6 +11,8 @@ import type {
   MutationTarget,
   RecipeCost,
   ResourceRegen,
+  Text,
+  TextKey,
 } from '../contracts.gen.ts';
 import { actorOf, admitted, type World } from '../runtime/decision.ts';
 import { add, saturate } from '../foundation/int.ts';
@@ -127,6 +129,21 @@ export function pay(
     levels = paid.levels;
   }
   return { ops, levels };
+}
+
+/** The first of `costs` the entity cannot pay after the ones before it, named for the Book (pass-1 R1). */
+export function shortfall(
+  world: World,
+  entity: EntityId,
+  costs: readonly RecipeCost[],
+): Text | undefined {
+  const c = costs.find((_, i) => !pay(world, entity, costs.slice(0, i + 1)));
+  return (
+    c && {
+      key: 'resource.short' as TextKey,
+      bindings: { resource: c.resource.key as TextKey, amount: c.amount },
+    }
+  );
 }
 
 /**

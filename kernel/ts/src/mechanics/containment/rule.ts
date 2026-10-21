@@ -57,7 +57,12 @@ export const decide: Rule<'containment'> = (world, command, mint, steps = { n: 0
       ? (chainRefused(world, p.actor_id, p.item_id, 'get', steps) ??
         carrying(world, body, steps)(p.item_id))
       : theftRefused(world, p.actor_id, body, p.item_id, steps);
-    if (code === 'not_present' || code === 'permission_denied' || code === 'too_heavy')
+    if (
+      code === 'not_present' ||
+      code === 'permission_denied' ||
+      code === 'too_heavy' ||
+      code === 'over_load'
+    )
       return rejected(code);
     if (code) return { kind: 'fault', code };
     if (!reached)

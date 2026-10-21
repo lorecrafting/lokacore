@@ -31,6 +31,7 @@ import * as equipment from '../mechanics/equipment/rule.ts';
 import * as position from '../mechanics/position/shared.ts';
 import { cmp } from '../foundation/validate.ts';
 import { carrying, giveRefused } from '../mechanics/containment/shared.ts';
+import { shortfall } from '../mechanics/resource.ts';
 import { itemPairs } from './item_pairs.ts';
 import { theftRefused } from '../mechanics/containment/theft.ts';
 import { movable as movableItem } from '../runtime/created.ts';
@@ -228,8 +229,13 @@ function advertise(
       (a.command === 'ask' && target !== undefined
         ? askRefused(world, actor, target, steps)
         : undefined));
+  // The unpaid cost names itself (pass-1 R1); an authored refusal wins.
+  const short =
+    code === 'insufficient_resource' &&
+    admitted === code &&
+    shortfall(world, bodyOf(world, actor)!, a.recipe!.costs ?? []);
   return code
-    ? { available: false, ...shown, reason: refused ?? { code } }
+    ? { available: false, ...shown, reason: refused ?? { code, ...(short && { message: short }) } }
     : { available: true, ...shown };
 }
 
