@@ -395,8 +395,10 @@
  ],
  "log": [],
  "combatLog": [
-  "Your blow strikes the beast squarely. The beast sinks its teeth into you.",
-  "The beast sinks its teeth into you. The beast darts clear of your blow."
+  "Your blow strikes the beast squarely.",
+  "The beast sinks its teeth into you.",
+  "The beast sinks its teeth into you.",
+  "The beast darts clear of your blow."
  ],
  "details": {}
 }

@@ -10,11 +10,12 @@ import { LABEL } from './labels.ts';
 
 // Breaks: the move's narration is dropped with the old room's log when the place is not the
 // exit's destination, the square's log survives onto the cell page, or its two records joined on
-// one line (pass-1 UO), also when the saved narration cannot be read back and the reply's own
+// one line (pass-1 UO), or a reopen keeping only the last record, also when the saved narration cannot be read back and the reply's own
 // narration is shown.
 for (const failed of [false, true])
   test(`a wanted walk north lands on the cell page with the arrest and charge lines${failed ? ' (no read-back)' : ''}`, () => {
-    const b = book(compiled('cartridges/trial_sampler') as never);
+    const trial = compiled('cartridges/trial_sampler') as never;
+    const b = book(trial);
     b.map();
     b.tap('Open the barred cell door (east)');
     b.tap('Back to World');
@@ -36,6 +37,13 @@ for (const failed of [false, true])
       'The sergeant reads the charge aloud: wanted in the square. Pay the fine or sit.',
     );
     assert.ok(!shown.includes('Opened.'), JSON.stringify(shown));
+    const reopened = book(trial, { sql: b.sql, game: b.game } as never).text(); // both records again
+    const at = reopened.indexOf(shown[arm]);
+    assert.deepEqual(
+      reopened.slice(at, at + 2),
+      shown.slice(arm, arm + 2),
+      JSON.stringify(reopened),
+    );
     b.map();
     assert.ok(b.text().includes('The barred cell door: closed'), JSON.stringify(b.text()));
   });

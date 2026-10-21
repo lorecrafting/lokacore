@@ -53,8 +53,8 @@ export type Logs = {
   returnWorld?: boolean;
   returnDetail?: string;
   fault?: string;
-  // An open elapsed settlement's held World entries: as the log would show them, and line by line.
-  away?: { from: number; log: string[]; lines: string[] };
+  // An open elapsed settlement's held World entries, one per line.
+  away?: { from: number; log: string[] };
   recap?: string[]; // the away recap's lines, grouped when drawn
   ended?: GameView['combat']; // a closed encounter's page, until Back to World (book-ui.md, Closure)
 };

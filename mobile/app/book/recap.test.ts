@@ -151,13 +151,13 @@ test('a room change drops the held lines and the recap; staying keeps them', () 
     ({
       log: [],
       projection: { view: { place: { id: 'hall' } } },
-      away: { from: 0, log: ['a'], lines: ['a'] },
+      away: { from: 0, log: ['a'] },
       recap: ['b'],
     }) as unknown as Logs;
   const view = (id: string) => ({ place: { id } }) as GameView;
   const stay = logs();
   resetLogs(stay, view('hall'));
-  assert.deepEqual([stay.away, stay.recap], [{ from: 0, log: ['a'], lines: ['a'] }, ['b']]);
+  assert.deepEqual([stay.away, stay.recap], [{ from: 0, log: ['a'] }, ['b']]);
   const moved = logs();
   resetLogs(moved, view('garden'));
   assert.deepEqual([moved.away, moved.recap], [undefined, undefined]);
@@ -182,7 +182,7 @@ test('a settlement that ends without settling keeps its lines in the log', () =>
     log: [],
     status: { kind: 'pending' },
     projection: { view: { time: 99999, recap_after: 1 } },
-    away: { from: 0, log: ['a', 'a'], lines: ['a', 'a'] },
+    away: { from: 0, log: ['a', 'a'] },
   } as unknown as Logs;
   settle(s);
   assert.deepEqual([s.log, s.recap, s.away], [['a', 'a'], undefined, undefined]);

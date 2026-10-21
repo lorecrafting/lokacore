@@ -77,7 +77,6 @@ function background(
 // World entries: to the log, or held by the open settlement (book-ui.md, Away recap).
 function world(s: Logs, away: Logs['away'], lines: string[]) {
   (away?.log ?? s.log).push(...lines);
-  away?.lines.push(...lines);
 }
 
 // A new receipt's lines: its detail or conversation, else World (or the open settlement's lines).
