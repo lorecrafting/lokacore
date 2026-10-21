@@ -133,7 +133,7 @@ test('traps 4: north over the disarmed plate; the note reads', () => {
   assert.deepEqual(play(w, { type: 'read', target_id: detail(w, 'sapper_note') }).lines, [
     'readable.sapper_note',
   ]);
-  assert.equal(notice(w, 'sapper_note').title, 'readable.sapper_note.title');
+  assert.equal(notice(w, 'sapper_note').title, 'detail.sapper_note.title');
 });
 
 const pulls = (x: World, levers: string) =>
@@ -172,7 +172,7 @@ test('traps 5: the levers open the north door only in order A, B, C; the slate r
   assert.deepEqual(play(w, { type: 'read', target_id: detail(w, 'vault_slate') }).lines, [
     'readable.vault_slate',
   ]);
-  assert.equal(notice(w, 'vault_slate').title, 'readable.vault_slate.title');
+  assert.equal(notice(w, 'vault_slate').title, 'detail.vault_slate.title');
   w = pulls(go(w, 'south').world, 'c');
   assert.equal(fact(w, 'lever_stage'), 0);
   const inside = play(go(w, 'north').world, { type: 'close', direction: 'south' }).world;

@@ -100,6 +100,16 @@ equals 3, wheel_2 equals 1, wheel_3 equals 2)` (`puzzles_sampler/barriers`).
 - Wheels: `turn_wheel_n` (alias `turn`, success `event.emit wheel`); reactions `wheel_n_turn`
   (`on action_completed {action: turn_wheel_n}`, `fact.adjust wheel_n +1`) then `wheel_n_wrap`
   (`when wheel_n equals 10`, assign 0), the wrap keyed after the turn (`puzzles_sampler/reactions`).
+- Feedback lines (API 1.103; asides 1.91): each lever step reaction narrates first
+  `narration.lever_bolt` ("Behind the north door, a bolt slides back.") and each lever reset
+  `narration.lever_reset` ("... the bolts clatter home."); `plate_springs`, `plate_bites` and their
+  cellar twins narrate `narration.needle` ("A needle in the plate bites.") before the status. Thirty
+  readout reactions `wheel_n_x_shows_k` (`on action_completed {action: turn_wheel_n}`, `when wheel_n
+  equals k`, `narrate narration.wheel_n.k`, "The first wheel shows 3.") are keyed `x_` so they sort
+  after the turn and the wrap and read the wrapped value. `lever_hall` asides: "The north door's bolts
+  stand drawn." at `lever_stage equals 3`, "The east door's bolts stand drawn." at wheels `[3, 1, 2]`.
+  The note and the slate carry readable titles `detail.<id>.title` ("The sapper's note", "The slate")
+  and labels "Read the note", "Read the slate".
 - **The chief**: `room: chief_den`; hp 0..2 start 2 gain 0; `attack {chance 100, 1..1}`; `immune:
   [afraid]` (`npc_status_sampler/npcs/golem.json`); no disposition.
 - `den_goblin`: `spawn_template: true`, room `chief_den`, hp 0..6, `attack {chance 100, 1..1}`;

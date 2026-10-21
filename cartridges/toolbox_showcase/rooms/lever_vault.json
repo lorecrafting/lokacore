@@ -17,7 +17,7 @@
       "readable": {
         "label": "actions.read_slate",
         "text": "readable.vault_slate",
-        "title": "readable.vault_slate.title"
+        "title": "detail.vault_slate.title"
       }
     }
   }

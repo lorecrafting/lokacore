@@ -19,7 +19,7 @@
       "readable": {
         "label": "actions.read_note",
         "text": "readable.sapper_note",
-        "title": "readable.sapper_note.title"
+        "title": "detail.sapper_note.title"
       }
     }
   }
