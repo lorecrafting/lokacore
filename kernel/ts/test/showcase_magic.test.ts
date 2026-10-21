@@ -7,11 +7,12 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { gameView, newWorld } from '../src/index.ts';
-import type { Cartridge, World } from '../src/runtime/decision.ts';
+import { bodyOf, type Cartridge, type World } from '../src/runtime/decision.ts';
 import { validate } from '../src/foundation/validate.ts';
 import { fuelView } from '../src/mechanics/light/shared.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
-import { activeStatuses } from '../src/mechanics/status/shared.ts';
+import { activeStatuses, applyStatus, statusStep } from '../src/mechanics/status/shared.ts';
+import { apply } from '../src/runtime/apply.ts';
 import {
   act,
   attribute,
@@ -222,6 +223,9 @@ const statuses = (w: World, k: string) =>
     .sort();
 const types = (r: ReturnType<typeof act>) =>
   r.decision.kind === 'accepted' ? r.decision.events.map((e) => e.payload.type) : [];
+const status = (key: string) =>
+  ({ cartridge_id: 'toolbox_showcase', cartridge_version: '0.0.1', kind: 'status', key }) as never;
+const body = (w: World) => bodyOf(w, w.character)!;
 const drop = (w: World, k: string) => play(w, { type: 'drop', item_id: id(w, 'item', k) }).world;
 const why = (r: { decision: unknown }) => (r.decision as { error?: { code: string } }).error?.code;
 const use = (w: World, action: string, target: string, tool: string) =>
@@ -333,10 +337,18 @@ test('magic 8: the loft bucket quenches the bier; water unchanged; the smoke cle
 });
 
 // Breaks: the step-8 load plus the yard's three items is too heavy, shock_on_wet fires without wet (or not at all), the stun does not cure wet and shocked,
-// the stun or shock tick at the wrong rate, or warmth does not dry the golem (so the jar stuns).
+// the stun or shock tick at the wrong rate, or warmth does not dry the golem (so the jar stuns),
+// or (loka-kgd.176) a status landing on the seen golem tells no observed line.
 test('magic 9: the golem yard; wet then the jar stuns (hp 17); the jar alone shocks (19)', () => {
   let y = go(go(go(w, 'up').world, 'west').world, 'west').world; // all of step 8's load in hand
   for (const k of ['rain_bucket', 'spark_jar', 'yard_torch']) y = take(y, k);
+  const told = (w: World, k: string) => act(w, { type: 'drop', item_id: id(w, 'item', k) }).lines;
+  assert.deepEqual(told(y, 'rain_bucket'), ['narration.wet.applied']);
+  assert.deepEqual(told(drop(y, 'rain_bucket'), 'spark_jar'), [
+    'narration.shocked.applied',
+    'narration.stunned.applied',
+  ]);
+  assert.deepEqual(told(drop(y, 'rain_bucket'), 'yard_torch'), ['narration.warm.applied']);
   const wet = drop(y, 'rain_bucket');
   assert.deepEqual(statuses(wet, 'golem'), ['wet']);
   const stun = drop(wet, 'spark_jar');
@@ -348,6 +360,61 @@ test('magic 9: the golem yard; wet then the jar stuns (hp 17); the jar alone sho
   const warm = drop(drop(y, 'rain_bucket'), 'yard_torch');
   assert.deepEqual(statuses(warm, 'golem'), ['warm']);
   assert.deepEqual(statuses(drop(warm, 'spark_jar'), 'golem'), ['shocked', 'warm']);
+});
+
+// Breaks (loka-kgd.176): an observed line told for a golem out of the room, a hidden golem, an
+// item holder or a status with no observed line (falling back to applied); the player's own line lost;
+// a spell (not only a reaction) skips the seen check.
+test('magic 9b: only a seen golem in the room gets an observed line', () => {
+  let y = go(go(go(w, 'up').world, 'west').world, 'west').world;
+  y = take(y, 'rain_bucket');
+  const golem = npc(y, 'golem');
+  const off = {
+    ...y,
+    state: { ...y.state, containers: { ...y.state.containers, [golem]: id(y, 'room', 'loft') } },
+  };
+  const hidden = (
+    apply(
+      y,
+      applyStatus(y, golem, status('hidden'), 0, () => 'x'),
+      false,
+    ) as { world: World }
+  ).world;
+  for (const v of [off, hidden]) {
+    const r = act(v, { type: 'drop', item_id: id(v, 'item', 'rain_bucket') });
+    assert.deepEqual(statuses(r.world, 'golem'), v === hidden ? ['hidden', 'wet'] : ['wet']);
+    assert.deepEqual(r.lines, []);
+  }
+  const said = (holder: string, s: string) =>
+    statusStep(
+      y,
+      { op: 'status.apply', status: status(s) },
+      [holder as never],
+      body(y),
+      0,
+      { holders: new Map(), applied: new Set() },
+      () => 'x',
+      () => {},
+      () => true,
+    ).narration;
+  assert.deepEqual(said(golem, 'wet'), [{ key: 'narration.wet.applied' }]);
+  assert.deepEqual(said(golem, 'chilled'), []);
+  assert.deepEqual(said(id(y, 'item', 'yard_torch'), 'wet'), []);
+  assert.deepEqual(said(body(y), 'chilled'), [{ key: 'narration.chilled.applied' }]);
+  // The spell route: ward retargeted at the golem tells its line only while the golem is seen.
+  const warded = (v: World) => {
+    const c = structuredClone(v.cartridge) as any;
+    const ward = c.recipes[ref('recipe', 'ward')];
+    ward.costs = []; // the earlier casts spent the ma
+    ward.outcomes.success.sequence = [
+      { op: 'status.apply', status: status('wet'), npc: { ...C, kind: 'npc', key: 'golem' } },
+    ];
+    const r = act({ ...v, cartridge: c }, { type: 'cast', word: 'ward' });
+    assert.ok(statuses(r.world, 'golem').includes('wet'));
+    return r.lines.includes('narration.wet.applied');
+  };
+  assert.equal(warded(y), true);
+  assert.equal(warded(hidden), false);
 });
 
 // Breaks: the attic loses its lit roof (lists no one), its own ash, its lantern's lux step, its

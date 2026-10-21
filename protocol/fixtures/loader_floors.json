@@ -325,7 +325,7 @@
       "floor": "1.58",
       "below": "1.57",
       "source": "cartridges/toolbox_showcase",
-      "feature": "a reaction's attacker filter (loka-kgd.79); the Homestead (1.101/1.102), speech.phrases (1.98), disposition.refuse (1.104) and the Undercroft's banks, escrow, stock tables, shelves and locks, and the law district's theft, hide, NPC locks, stolen offers and fine, and the magic district's light capability, lanterns, lamp oil, dark crypt, lux, ward, flamma and its sparks dropped",
+      "feature": "a reaction's attacker filter (loka-kgd.79); the Homestead (1.101/1.102), speech.phrases (1.98), disposition.refuse (1.104) and the Undercroft's banks, escrow, stock tables, shelves and locks, and the law district's theft, hide, NPC locks, stolen offers and fine, and the magic district's light capability, lanterns, lamp oil, dark crypt, lux, ward, flamma and its sparks, and the golem's observed lines (1.110), dropped",
       "edits": [
         ["cartridge.json", ["speech"], null],
         ["statuses/gored.json", ["kind"], null],
@@ -521,7 +521,11 @@
         ["skills/joinery.json", ["hidden"], null],
         ["skills/whittling.json", ["profession"], null],
         ["skills/woodcutting.json", ["profession"], null],
-        ["npcs/guard.json", ["disposition"], null]
+        ["npcs/guard.json", ["disposition"], null],
+        ["statuses/wet.json", ["narration", "observed"], null],
+        ["statuses/shocked.json", ["narration", "observed"], null],
+        ["statuses/stunned.json", ["narration", "observed"], null],
+        ["statuses/warm.json", ["narration", "observed"], null]
       ],
       "compiler": [
         "KERNEL_API_RANGE_INVALID",
@@ -1346,8 +1350,14 @@
       "floor": "1.104",
       "below": "1.103",
       "source": "cartridges/toolbox_showcase",
-      "feature": "an NPC's disposition.refuse line (Book hostile refusal)",
-      "edits": [["npcs/guard.json", ["disposition"], null]],
+      "feature": "an NPC's disposition.refuse line (Book hostile refusal); the golem's observed lines (1.110) dropped",
+      "edits": [
+        ["npcs/guard.json", ["disposition"], null],
+        ["statuses/wet.json", ["narration", "observed"], null],
+        ["statuses/shocked.json", ["narration", "observed"], null],
+        ["statuses/stunned.json", ["narration", "observed"], null],
+        ["statuses/warm.json", ["narration", "observed"], null]
+      ],
       "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
       "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
     },
@@ -1363,7 +1373,13 @@
       "floor": "1.105",
       "below": "1.104",
       "source": "cartridges/toolbox_showcase",
-      "feature": "an NPC's disposition.arrest (the law district's guard)",
+      "feature": "an NPC's disposition.arrest (the law district's guard); the golem's observed lines (1.110) dropped",
+      "edits": [
+        ["statuses/wet.json", ["narration", "observed"], null],
+        ["statuses/shocked.json", ["narration", "observed"], null],
+        ["statuses/stunned.json", ["narration", "observed"], null],
+        ["statuses/warm.json", ["narration", "observed"], null]
+      ],
       "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
       "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
     }
@@ -1461,6 +1477,16 @@
       "feature": "a world.death.penalty (row 47)",
       "edits": [],
       "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
+      "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
+    }
+,
+    {
+      "floor": "1.110",
+      "below": "1.109",
+      "source": "cartridges/status_sampler",
+      "feature": "a status narration.observed line (row G3, loka-kgd.176)",
+      "edits": [["statuses/poison.json", ["narration", "observed"], "narration.poison.applied"]],
+      "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api"],
       "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
     }
   ]

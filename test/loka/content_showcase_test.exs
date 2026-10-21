@@ -89,7 +89,13 @@ defmodule Loka.ContentShowcaseTest do
         {"rooms/holding_croft.json", &Map.delete(&1, "site")},
         {"facts.json", &update_in(&1, ["facts"], fn f -> Map.drop(f, @homestead_facts) end)}
       ] ++
-        for({f, k} <- @dropped_keys, do: {f <> ".json", fn m -> Map.delete(m, k) end})
+        for({f, k} <- @dropped_keys, do: {f <> ".json", fn m -> Map.delete(m, k) end}) ++
+        for(
+          s <- ~w(wet shocked stunned warm),
+          do:
+            {"statuses/#{s}.json",
+             &update_in(&1, ["narration"], fn n -> Map.delete(n, "observed") end)}
+        )
 
   defp homestead,
     do:

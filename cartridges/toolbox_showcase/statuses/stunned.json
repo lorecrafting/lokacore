@@ -7,6 +7,7 @@
   "narration": {
     "applied": "narration.stunned.applied",
     "tick": "narration.stunned.tick",
-    "expired": "narration.stunned.expired"
+    "expired": "narration.stunned.expired",
+    "observed": "narration.stunned.applied"
   }
 }

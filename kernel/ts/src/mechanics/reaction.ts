@@ -42,6 +42,7 @@ import { setBarrier } from './barrier/react.ts';
 import { moved } from './containment/react.ts';
 import { replenishStep } from './containment/job.ts';
 import { witnesses } from './senses.ts';
+import { visible } from './light/shared.ts';
 import { spawn } from './population/react.ts';
 
 type On = ReactionRule['on'];
@@ -166,7 +167,8 @@ export function sequence(
       const body = bodyOf(then, actor);
       if (!body) return { kind: 'fault', code: 'precondition_failed' };
       const on = holdersOf(then, step, cause, body, dead);
-      const applying = statusStep(then, step, on, body, group, own, mint, emit);
+      const sees = (id: EntityId) => visible(then, actor, id, steps);
+      const applying = statusStep(then, step, on, body, group, own, mint, emit, sees);
       ops.push(...applying.ops);
       narration.push(...applying.narration);
     } else if (step.op === 'barrier.set') {

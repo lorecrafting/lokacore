@@ -261,9 +261,10 @@ export const moves = (world: World, npc: EntityId) => statusAllows(world, npc)('
  * A status.apply or (status reader 3) status.cure step of a reaction or (row 29b) a spell on its
  * holders, once per holder and status in the rule or spell, in the one writer group the holder's
  * status writes share in this advance (job.ts statusGroup). Only a first application (over no row
- * or an inactive one) is heard: it emits status_applied (status reader 2) and, on the player's own
- * body, its applied line; a refresh while active is silent (row W25), and a permanent status (row
- * W8) opens with no job.
+ * or an inactive one) is heard: it emits status_applied (status reader 2) and its applied line, on
+ * the actor's own body, or (loka-kgd.176) its observed line on an NPC in the actor's room that `sees`
+ * passes, when the status declares one (row G3); a
+ * refresh while active is silent (row W25), and a permanent status (row W8) opens with no job.
  */
 export function statusStep(
   world: World,
@@ -274,7 +275,13 @@ export function statusStep(
   { holders, applied }: { holders: Map<string, number>; applied: Set<string> },
   mint: Mint,
   emit: (payload: Extract<EventPayload, { type: 'status_applied' }>) => void,
+  sees: (npc: EntityId) => boolean = () => false, // light's `visible`, passed in: light imports this module
 ) {
+  const here = world.state.containers[body];
+  const seen = (holder: EntityId) =>
+    world.entities[holder]?.kind === 'npc' &&
+    world.state.containers[holder] === here &&
+    sees(holder);
   const apply = step.op === 'status.apply';
   const out = { ops: [] as DeltaOp[], narration: [] as { key: TextKey }[] };
   for (const holder of on) {
@@ -290,8 +297,9 @@ export function statusStep(
     const first = apply && ops.some((o) => o.op === 'status.transition' && !o.expected?.active);
     if (first && landing(world))
       emit({ type: 'status_applied', body_id: holder, status: step.status });
-    const label = specOf(world, step.status)?.narration.applied;
-    if (label && first && holder === body) out.narration.push({ key: label });
+    const said = specOf(world, step.status)?.narration;
+    const label = holder === body ? said?.applied : seen(holder) ? said?.observed : undefined;
+    if (label && first) out.narration.push({ key: label });
   }
   return out;
 }
