@@ -9,6 +9,7 @@ import { lore } from '../mechanics/topics/shared.ts';
 import { services } from './services.ts';
 import { liquidView } from './liquid.ts';
 import { conditionViews, resources } from './resources.ts';
+import { combatView } from './combat.ts';
 import { KernelError } from '../foundation/error.ts';
 import { LIMITS } from '../contracts.gen.ts';
 import { visible, fuelView } from '../mechanics/light/shared.ts';
@@ -302,17 +303,4 @@ function equipmentViews(world: World, actor: CharacterId, actions: Lists, steps:
       ...(items[i] && { item: items[i] }),
     }));
   });
-}
-
-type Fight = NonNullable<ReturnType<typeof engaged>>;
-function combatView(world: World, actor: CharacterId, fight: Fight, steps: Steps) {
-  const name = (id: EntityId) => describeEntity(world, actor, id, 'short', steps);
-  return {
-    encounter_id: fight.id,
-    opponent_id: fight.row.npc_id,
-    name: name(fight.row.npc_id),
-    ...(fight.row.active_ids && {
-      active_opponents: fight.row.active_ids.map((id) => ({ id, name: name(id) })),
-    }),
-  };
 }

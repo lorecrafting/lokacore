@@ -206,7 +206,8 @@
   "combat": {
    "encounter_id": "cc8c0ac8-1db8-8faa-8275-633a862a9d3a",
    "opponent_id": "58935a9a-fada-894c-978c-607047afbc25",
-   "name": "npc.cellar_rat.short"
+   "name": "npc.cellar_rat.short",
+   "band": "few_bruises"
   },
   "place": {
    "id": "2a2d32e5-e113-8dca-a989-b9f1a35c4c78",

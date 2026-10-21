@@ -5,6 +5,10 @@ import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { key } from '../src/foundation/compose.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { admission } from '../src/mechanics/combat/behavior.ts';
+import { validate } from '../src/foundation/validate.ts';
+import { refString, type World } from '../src/runtime/decision.ts';
+import type { DefinitionRef } from '../src/contracts.gen.ts';
+import { statusKey } from '../src/mechanics/status/shared.ts';
 import { ids, run, h1, h2, home, nest, fixture, wounded, begun, due } from './c4_pack_fixture.ts';
 
 // Breaks: admission scans only the day target or cap minus one and silently omits a sixth live helper.
@@ -39,6 +43,60 @@ test('attack H2 admits both exact co-present hounds with H2 as primary', () => {
     gameView(begun.world).combat?.active_opponents?.map((member) => member.id),
     [h1, h2].sort(),
   );
+});
+
+// Breaks: a pack member's band is missing, copied from the primary, or read from the wrong hound
+// (hp 0..8: h2 at 4 is the exact many_nasty_wounds cut, 400 >= 50*8; h1 untouched reads ready).
+test('each pack member shows its own hp band', () => {
+  const view = gameView(wounded(begun(fixture()), 4));
+  assert.deepEqual(validate('GameView', view), []);
+  assert.equal(view.combat?.band, 'many_nasty_wounds');
+  assert.deepEqual(
+    view.combat?.active_opponents?.map(({ id, band }) => [id, band]),
+    [
+      [h1, 'ready'],
+      [h2, 'many_nasty_wounds'],
+    ].sort(),
+  );
+});
+
+// Breaks: a member's band is gated on the primary's visibility (a hidden helper beside a seen
+// primary leaks its band), or on its own visibility only (a member a spell or status killed, still
+// on the roster until the round-end prune, shows the bottom row, dying).
+test('a hidden or dead pack member shows no band while the seen primary keeps its own', () => {
+  const w = begun(fixture());
+  const { id, version } = w.cartridge.manifest;
+  const hidden: DefinitionRef = {
+    cartridge_id: id,
+    cartridge_version: version,
+    kind: 'status',
+    key: 'hidden',
+  };
+  const concealed = {
+    ...w,
+    cartridge: {
+      ...w.cartridge,
+      statuses: { [refString(hidden)]: { key: 'hidden', concealment: 'hidden' } },
+    },
+    state: {
+      ...w.state,
+      statuses: { [statusKey(h1, hidden)]: { generation: 1, active: true } },
+    },
+  } as World;
+  const bands = (world: World) => {
+    const view = gameView(world);
+    assert.deepEqual(validate('GameView', view), []);
+    return [view.combat?.band, view.combat?.active_opponents?.map((m) => [m.id, m.band])];
+  };
+  const of = (a: unknown, b: unknown) =>
+    [
+      [h1, a],
+      [h2, b],
+    ].sort();
+  assert.deepEqual(bands(concealed), ['ready', of(undefined, 'ready')]);
+  const dead = wounded(w, 0);
+  assert.equal(Object.values(dead.state.encounters!)[0]!.active_ids?.includes(h2), true);
+  assert.deepEqual(bands(dead), [undefined, of('ready', undefined)]);
 });
 
 // Breaks: a hound already bound to another encounter is pulled into a second pack.
@@ -234,6 +292,11 @@ test('player-first selected death skips retaliation and repairs to the surviving
   const row = Object.values(result.world.state.encounters ?? {})[0]!;
   assert.deepEqual(row.active_ids, [h1]);
   assert.equal(row.npc_id, h1);
+  const view = gameView(result.world);
+  assert.deepEqual(validate('GameView', view), []);
+  assert.deepEqual(view.combat?.active_opponents, [
+    { id: h1, name: 'npc.fen_hound.short', band: 'ready' },
+  ]);
   assert.equal(
     result.decision.kind === 'accepted' &&
       result.decision.events.filter((event) => event.payload.type === 'attack_result').length,

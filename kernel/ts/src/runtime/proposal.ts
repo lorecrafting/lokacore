@@ -24,7 +24,7 @@ import { cmp } from '../foundation/validate.ts';
 import { currentRound } from '../mechanics/combat/round.ts';
 import { handoffGroup, sightHandoff } from './proposal_sight.ts';
 import { joinEarlier, joinTail, queueHour, queueScheduled, type Due } from './proposal_hours.ts';
-import { merge, statusGroup } from '../mechanics/status/job.ts';
+import { merge, statusGroup, unsaid } from '../mechanics/status/job.ts';
 import { moverGroups } from '../mechanics/containment/job.ts';
 import { anyPending as pending, parted } from '../mechanics/dialogue/selection.ts';
 import { admit, type Admitted } from './proposal_admit.ts';
@@ -291,7 +291,7 @@ function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined
     if ((p.limit = queueHour(due, job_id, ran) ?? over({ deliveries: p.deliveries })))
       return BUDGET;
     p.rng = ran.rng;
-    p.narration.push(...(ran.narration ?? []));
+    p.narration.push(...unsaid(at, job_id as JobId, p.narration, ran.narration));
     // A population partner's group, or an earlier crossed hour's.
     const fresh = groups.get(populationPairs.get(job_id) ?? job_id) ?? p.group + 1;
     const joined = statusGroup(at, job_id as JobId, current, p.holders, fresh, ran.delta.ops);

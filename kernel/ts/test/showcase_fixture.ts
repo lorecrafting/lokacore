@@ -174,8 +174,8 @@ export function homestead(c: any) {
     'yard_crate',
   ])
     delete c.items[ref('item', k)].immune; // the sow statuses are dropped
-  for (const s of ['afraid', 'wet', 'shocked', 'stunned', 'warm'])
-    delete c.statuses[ref('status', s)].narration.observed; // 1.110 (loka-kgd.176)
+  for (const s of ['afraid', 'burning', 'wet', 'shocked', 'stunned', 'warm'])
+    delete c.statuses[ref('status', s)].narration.observed; // 1.110 (loka-kgd.176, loka-y6yg.48)
   delete c.statuses[ref('status', 'wanted')].kind; // 1.102 (the law's wanted icon, E1)
   // The traps district's narrate lines and wheel readouts (1.103) and lever hall asides (1.91);
   // the Loft's errand handover line (1.103).
