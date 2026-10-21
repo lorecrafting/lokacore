@@ -718,6 +718,7 @@
   "narration.boast_bess_failed": "Bess yawns.",
   "narration.burning.applied": "You catch fire.",
   "narration.burning.expired": "The flames die.",
+  "narration.burning.observed": "The wood catches fire.",
   "narration.burning.tick": "You burn.",
   "narration.carpenter_lessons.carpentry": "The carpenter shows you how to square a log.",
   "narration.carpenter_lessons.carving": "The carpenter shows you how to follow the grain.",

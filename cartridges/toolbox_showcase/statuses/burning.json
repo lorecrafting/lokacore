@@ -7,7 +7,8 @@
   "narration": {
     "applied": "narration.burning.applied",
     "tick": "narration.burning.tick",
-    "expired": "narration.burning.expired"
+    "expired": "narration.burning.expired",
+    "observed": "narration.burning.observed"
   },
   "cues": [
     {
