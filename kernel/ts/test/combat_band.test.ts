@@ -33,6 +33,6 @@ test('an unseen opponent in the dark keeps its name and has no band', () => {
     rooms: { ...w.rooms, [cellar]: { ...w.rooms[cellar]!, dark_description: 'room.dark' } },
   };
   const view = combat(dark as World);
-  assert.equal(view.name, combat(w).name);
+  assert.equal(view.name, 'npc.cellar_rat.short');
   assert.equal(view.band, undefined);
 });

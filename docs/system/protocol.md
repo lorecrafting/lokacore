@@ -381,7 +381,7 @@ narrate count), present exactly while [scene@1](mechanics.md#scene1-mechanicssce
 or `danger`, which the presenter maps to a colour) from the table in effect: the pool's own
 `bands` (resources.json), else the cartridge's `world.bands` (cartridge.json), else the engine
 default of 11 bands by percentage of the range, `perfect_health` at 100 down to `dying` at 0,
-tones `normal` from 80, `warning` from 40, `danger` below (`kernel/ts/src/view/view.ts:216`, `:235`). The band is the
+tones `normal` from 80, `warning` from 40, `danger` below (`bandOf`, `kernel/ts/src/view/resources.ts:47`). The band is the
 first row whose cut p reaches, in integers: 100 × (current − minimum) ≥ cut × (maximum −
 minimum); maximum = minimum gives the top row (04 §15 as amended 2026-10-02).
 The `combat` opponent, and each `active_opponents` member, carries the `band` key of its `hp`

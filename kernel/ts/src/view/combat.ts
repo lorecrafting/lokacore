@@ -4,6 +4,7 @@ import type { Steps, World } from '../runtime/decision.ts';
 import { ally, engaged } from '../mechanics/combat/shared.ts';
 import { shooRefused } from '../mechanics/crow/behavior.ts';
 import { describeEntity } from '../mechanics/description_variant/rule.ts';
+import { living } from '../mechanics/death/shared.ts';
 import { visible } from '../mechanics/light/shared.ts';
 import { bandOf } from './resources.ts';
 export function combatOffered(
@@ -25,10 +26,12 @@ export function combatOffered(
 
 type Fight = NonNullable<ReturnType<typeof engaged>>;
 export function combatView(world: World, actor: CharacterId, fight: Fight, steps: Steps) {
-  // A foe is always named (even unseen); its hp band word shows only when seen (loka-y6yg.49).
+  // A foe is always named (even unseen); its hp band word shows only when seen and alive: a pack
+  // member a spell or status kills stays on the roster until the round-end prune (loka-y6yg.49).
   const foe = (id: EntityId) => ({
     name: describeEntity(world, actor, id, 'short', steps),
-    ...(visible(world, actor, id, steps) && { band: bandOf(world, id, 'hp').band }),
+    ...(visible(world, actor, id, steps) &&
+      living(world, id) && { band: bandOf(world, id, 'hp').band }),
   });
   return {
     encounter_id: fight.id,
