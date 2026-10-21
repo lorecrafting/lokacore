@@ -21,8 +21,7 @@ import { scope, type Story } from './save.ts';
 type NarrationRow = { revision: number; command_id: string; command: string; response: string };
 
 export function narration(s: Story, command_id?: string): NarrationRecord | undefined {
-  // A fence means the store could not be read to settle it (03 §15).
-  if (s.fence || s.db.isInTransactionSync()) return undefined;
+  if (s.fence || s.db.isInTransactionSync()) return undefined; // unsettled store (03 §15)
   let before: number | null = null;
   while (true) {
     const r = latest(s, command_id, before);
