@@ -60,16 +60,12 @@ Pass-1 playtest and fix batch (session a02501b4, 2026-10-21):
 - Batch branch `showcase/pass1` (worktree ../worktrees.noindex/batch-pass1, no PR yet). MERGED into it: design spec +
   rulings record docs/reviews/2026-10-21-pass1-ui-rulings.md (loka-x6t.72), .44 spell lines, .41 traps content, .45
   death receipts (record + 2nd opinion), .47 known_npcs living only, x6t.74 UI1 (World order, log lines, speech echo).
-- STATE (session 7b6568, 2026-10-21 ~22:20 UTC; each Beads id's last notes are current):
-  - MERGED into showcase/pass1: .43 law+hub (e6db50de), .48 item status lines (b2ab160e, record 30ccf163). Batch CI watched per merge.
-  - UI2 loka-x6t.75: approved (review + Opus designer), but hosted ci RED at 6a60fd26 (4 polish tests hand-build views without
-    actions). Fix folded into UI3+UI4; UI2 merges into the batch WITH the UI3+UI4 head.
-  - UI3+UI4 loka-x6t.76+.77 batched as ONE slice, branch showcase/pass1-ui34 from the UI2 head (brief in .76 notes); building.
-  - UI5 loka-x6t.78: review CHANGES REQUIRED (e2e pennies pin); fresh developer doing UI5 fix + UI6 .79 on showcase/pass1-ui5 (brief in .78 notes).
-  - .49 opponent band: MERGED at 09eabd13 (both reviewers APPROVE after fix round 1, record 13692fb9). (old: record da7dd353, branch
-    review-pass1-band); fresh-developer fix round 1 running (brief in .49 notes). Then scoped re-check by BOTH reviewers.
-  - Then: batch PR to main, merge main in once, CI green, merge, bin/after_merge.sh; Opus re-walk of the pass-1 findings at 390 px
-    (owner OK'd a targeted re-walk instead of a second blind sweep); owner preview 19006/19007; PushNotification.
+- STATE (session 7b6568, 2026-10-21 ~23:20 UTC): ALL pass-1 slices merged into showcase/pass1; main merged in; PR #422
+  (loka-y6yg.34, pass-1 fix batch) open at cff1492e, hosted CI running. Running: Opus integration review of #422 (merge
+  resolutions + cross-slice), Opus 390 px re-walk of the pass-1 findings (report -> scratchpad rewalk-pass1-report.md).
+  Then: ONE designer pass (new rule loka-dnf2) for doc nit book-ui.md:1126 "Acquired skills without a profession" + re-walk
+  wording; fixes on the batch; CI green; merge #422 (gh pr merge 422 --merge --match-head-commit <sha>); bin/after_merge.sh
+  422 loka-y6yg.34; close the slice ids; bin/preview_update.sh (owner preview 19006/19007); PushNotification the owner.
 - Merging content slices: the showcase hash fixture conflicts; recompile (`mix loka.compile cartridges/toolbox_showcase
   <out>`, split {cartridge, content_hash} into canonical + sha256, keep the description) in the batch worktree, run the
   showcase TS + Elixir tests, push. Always wait for hosted CI on the slice head before merging (two approved slices
