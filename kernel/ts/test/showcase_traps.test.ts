@@ -3,7 +3,8 @@
 // branch from step 1's world and the sandbox starts fresh. Every attack is chance 100. Disarm starts at 0 against the flagstones' rating 1 and grows by 1 per use.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { gameView } from '../src/index.ts';
+import { gameView, stepElapsed } from '../src/index.ts';
+import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { describe } from '../src/mechanics/description_variant/rule.ts';
 import { decode } from '../src/foundation/canonical.ts';
 import { validate } from '../src/foundation/validate.ts';
@@ -291,10 +292,24 @@ test('traps 7: an undisarmed plate springs, holds, rearms on the hour and refres
   assert.equal(fact(back.world, 'plate_sprung'), true);
 });
 
-// Breaks: the poison ticks on another cadence or amount, or never expires.
+// Breaks: the poison ticks on another cadence or amount, or never expires; or (loka-y6yg.48) the
+// item-expiry dedupe also folds the player's own ticks, so one long wait tells one tick, not three.
 test('traps 7: left alone, the poison ticks at +1800, +3600, +5400 and expires at +7200', () => {
   let x = go(step1, 'north').world;
   const E = x.state.clock;
+  const run_id = 'aaaaaaaa-0000-4000-8000-0000000007a7';
+  const once = stepElapsed(
+    x,
+    {
+      id: elapsedCommandId(run_id, x.context, E, E + 7200) as never,
+      world_context_id: x.context,
+      payload: { type: 'elapsed', actor_id: x.character, run_id, from: E, until: E + 7200 },
+    } as never,
+    1,
+  ).decision;
+  assert.equal(once.kind, 'accepted');
+  const said = once.kind === 'accepted' ? (once.narration ?? []).map((l) => l.key) : [];
+  assert.equal(said.filter((k) => k === 'narration.poisoned.tick').length, 3, said.join());
   const hp: (number | undefined)[] = [];
   for (const t of [1800, 3600, 5400]) {
     x = wait(x, E + t).world;
