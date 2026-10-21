@@ -73,7 +73,9 @@ Pass-1 playtest and fix batch (session a02501b4, 2026-10-21):
   <out>`, split {cartridge, content_hash} into canonical + sha256, keep the description) in the batch worktree, run the
   showcase TS + Elixir tests, push. Always wait for hosted CI on the slice head before merging (two approved slices
   were red on CI today).
-- Follow-ups filed: loka-y6yg.50-.53, loka-kgd.178/.179.
+- Follow-ups filed: loka-y6yg.50-.53, loka-kgd.178/.179. Retro 2026-10-21 (AWAITING OWNER APPROVAL): loka-8qzi (pre-push
+  stories freshness), loka-u8ey (no forks unless allowed); evidence added to loka-xvxa (dev ran to 650k) and loka-kjky (hash
+  fixture conflicts on every content merge).
 3. Owner: slice D two-save playtest (`loka-y6yg.4`). Then UI polish with the owner.
 Approved, after the showcase, before chapter work: loka-kgd.173 sim invariants, loka-kgd.174 Book visibility check,
 loka-kgd.175 scale benchmark (status sort, entity scan hot spots), loka-kgd.177 red control for
