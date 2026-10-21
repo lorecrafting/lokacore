@@ -295,7 +295,8 @@ export function statusStep(
     const label = specOf(world, step.status)?.narration[holder === body ? 'applied' : 'observed'];
     const kind = world.entities[holder]?.kind; // an NPC or (loka-y6yg.48) an item in the room
     const seen = (kind === 'npc' || kind === 'item') && world.state.containers[holder] === here;
-    if (first && label && (holder === body || (seen && sees(holder))))
+    const told = kind === 'item' && out.narration.some((l) => l.key === label); // one line for a woodpile
+    if (first && label && !told && (holder === body || (seen && sees(holder))))
       out.narration.push({ key: label });
   }
   return out;

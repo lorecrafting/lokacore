@@ -332,6 +332,9 @@ test('magic 7b: the bier going out is told only while seen; then Quench is refus
   assert.ok(!bier(ended.world).includes('burning'));
   assert.equal(why(use(ended.world, 'quench', 'bier', 'loft_bucket')), 'invalid_state');
   assert.deepEqual(out(go(w, 'up').world).lines, []);
+  const c = structuredClone(w.cartridge) as any;
+  delete c.statuses[ref('status', 'burning')].narration.observed; // the opt-in gates the expiry too
+  assert.deepEqual(out({ ...w, cartridge: c }).lines, []);
   const dark = play(w, { type: 'douse', item_id: id(w, 'item', 'lantern') }).world;
   assert.deepEqual(out(dark).lines, []);
 });
@@ -410,11 +413,11 @@ test('magic 9b: only a seen golem or item in the room gets an observed line', ()
     assert.deepEqual(statuses(r.world, 'golem'), v === hidden ? ['hidden', 'wet'] : ['wet']);
     assert.deepEqual(r.lines, []);
   }
-  const said = (holder: string, s: string) =>
+  const said = (holder: string | string[], s: string) =>
     statusStep(
       y,
       { op: 'status.apply', status: status(s) },
-      [holder as never],
+      [holder].flat() as never[],
       body(y),
       0,
       { holders: new Map(), applied: new Set() },
@@ -424,8 +427,21 @@ test('magic 9b: only a seen golem or item in the room gets an observed line', ()
     ).narration;
   assert.deepEqual(said(golem, 'wet'), [{ key: 'narration.wet.applied' }]);
   assert.deepEqual(said(golem, 'chilled'), []);
-  assert.deepEqual(said(id(y, 'item', 'yard_torch'), 'wet'), [{ key: 'narration.wet.applied' }]); // loka-y6yg.48
+  // loka-y6yg.48: a seen item in the room tells it once for a pile; not a carried or absent one.
+  const fire = [{ key: 'narration.burning.observed' }];
+  assert.deepEqual(
+    said([id(y, 'item', 'yard_torch'), id(y, 'item', 'spark_jar')], 'burning'),
+    fire,
+  );
+  assert.deepEqual(said(id(y, 'item', 'rain_bucket'), 'burning'), []);
+  assert.deepEqual(said(id(y, 'item', 'bier'), 'burning'), []);
   assert.deepEqual(said(id(y, 'item', 'yard_torch'), 'chilled'), []);
+  const soaked = drop(y, 'rain_bucket'); // a seen golem's expiry stays silent
+  assert.deepEqual(statuses(soaked, 'golem'), ['wet']);
+  assert.deepEqual(
+    wait(soaked, soaked.state.clock + 600).lines.filter((k) => k.includes('wet')),
+    [],
+  );
   assert.deepEqual(said(body(y), 'chilled'), [{ key: 'narration.chilled.applied' }]);
   // The spell route: ward retargeted at the golem tells its line only while the golem is seen.
   const warded = (v: World) => {
