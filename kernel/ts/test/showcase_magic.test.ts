@@ -9,6 +9,7 @@ import { test } from 'node:test';
 import { gameView, newWorld } from '../src/index.ts';
 import { bodyOf, type Cartridge, type World } from '../src/runtime/decision.ts';
 import { validate } from '../src/foundation/validate.ts';
+import { pending } from '../src/mechanics/dialogue/shared.ts';
 import { fuelView } from '../src/mechanics/light/shared.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { activeStatuses, applyStatus, statusStep } from '../src/mechanics/status/shared.ts';
@@ -85,7 +86,9 @@ test('magic 1: up the ladder; the sign reads and the Word bar is empty', () => {
 // Breaks: the wizard opens the errand before teaching lux, the errand is not accepted, lux casts
 // without ash or spends the wrong pools, the gather adds no ash, the cast leaves the held lantern
 // unlit or writes no lit line (or one when nothing lit), a cast without the lantern is refused or
-// keeps its pools, or the climb back to the loft closes the errand before flamma is known.
+// keeps its pools, the climb back to the loft closes the errand before flamma is known, or the
+// errand dialogue (its accept refused) still opens while the errand is active, or its hub's leave
+// is refused after the accept (M10c).
 test('magic 2: taught lux; it needs ash; the cast spends 2 ma and 1 ash and lights the lantern', () => {
   const first = talk(w, 'hedge_wizard');
   assert.equal(first.opened, 'wizard_lux');
@@ -95,6 +98,10 @@ test('magic 2: taught lux; it needs ash; the cast spends 2 ma and 1 ash and ligh
   assert.equal(second.opened, 'wizard_errand');
   w = choose(second.world, 'accept').world;
   assert.equal(view(w).journal[0]?.state, 'active');
+  const hub = choose(w, 'leave'); // the reopened hub's leave answers (a not-active policy would refuse it)
+  const [continuation_id] = pending(hub.world, w.character)!;
+  const shut = play(hub.world, { type: 'close_choice', continuation_id }).world;
+  assert.equal(talk(shut, 'hedge_wizard').opened, 'wizard_awaiting');
   assert.deepEqual(words(w), [
     { word: 'lux', available: false, reason: { code: 'insufficient_resource' } },
   ]);
@@ -116,8 +123,8 @@ test('magic 2: taught lux; it needs ash; the cast spends 2 ma and 1 ash and ligh
 });
 
 // Breaks: the hush is not applied on entry or ends early or late, it leaves the cast, the say or
-// the shout open, the grimoire does not teach flamma, the level-up line is missing or doubled, or
-// the errand does not resolve in the read itself.
+// the shout open, the grimoire does not teach flamma, flamma's refusal names no reason (M1), the
+// level-up or handover line is missing or doubled (M6), or the errand does not resolve in the read.
 test('magic 3: the reading room hushes for 120 s; the grimoire teaches flamma and ends the errand', () => {
   w = go(perform(w, 'gather_ash').world, 'north').world; // ash in hand: the hush, not the cost, refuses
   const entered = w.state.clock;
@@ -143,10 +150,11 @@ test('magic 3: the reading room hushes for 120 s; the grimoire teaches flamma an
     {
       word: 'flamma',
       available: false,
-      reason: { code: 'invalid_state' },
+      reason: { code: 'invalid_state', message: { key: 'reason.flamma' } },
     },
   );
-  assert.equal(r.lines.filter((l) => l === 'levelling.level_up').length, 1);
+  for (const line of ['levelling.level_up', 'narration.errand_reward'])
+    assert.equal(r.lines.filter((l) => l === line).length, 1, line);
   assert.equal(fact(w, 'flamma_known'), true);
   assert.equal(view(w).journal[0]?.state, 'resolved');
 });
@@ -196,7 +204,9 @@ test('magic 4c: the grimoire read first; the errand resolves on the next climb t
   v = read(choose(talk(v, 'hedge_wizard').world, 'teach').world);
   v = choose(talk(v, 'hedge_wizard').world, 'accept').world;
   assert.equal(view(v).journal[0]?.state, 'active');
-  v = go(go(v, 'down').world, 'up').world; // the wizard hears of it when you come back up
+  const up = go(go(v, 'down').world, 'up'); // the wizard hears of it when you come back up
+  assert.ok(up.lines.includes('narration.errand_reward'));
+  v = up.world;
   assert.equal(view(v).journal[0]?.state, 'resolved');
   assert.equal(fact(v, 'ward_taught'), true);
 });
@@ -241,8 +251,9 @@ const cues = (w: World) => view(go(w, 'up').world).cues;
 const SMOKE = [{ sense: 'smell', text: 'cue.smoke', direction: 'down' }];
 
 // Breaks: the gate opens unoiled, the use pair is not offered or takes the wrong tool or target,
-// the oiling spends the oil, Open fails on the oiled gate, the lit crypt hides the wight, or the
-// unlit crypt reads lit (lists the wight, misses dark_description).
+// the oiling spends the oil, oil on the lantern oils the gate (M8a), Open fails on the oiled gate,
+// the lit crypt hides the wight, or the unlit crypt reads lit (lists the wight, misses
+// dark_description).
 test('magic 6: the oiled winch opens the crypt; the lantern shows the wight', () => {
   w = go(take(take(w, 'oilcan'), 'loft_bucket'), 'east').world;
   assert.equal(refused(w, { type: 'move', direction: 'down' }), 'exit_closed');
@@ -255,6 +266,7 @@ test('magic 6: the oiled winch opens the crypt; the lantern shows the wight', ()
     ['actions.oil_winch', [id(w, 'item', 'gate_winch'), id(w, 'item', 'oilcan')], true],
   );
   assert.equal(why(use(w, 'oil_winch', 'gate_winch', 'loft_bucket')), 'invalid_target');
+  assert.equal(why(use(w, 'oil_winch', 'lantern', 'oilcan')), 'invalid_state');
   const oil = w.state.liquids?.[id(w, 'item', 'oilcan')];
   const r = use(w, 'oil_winch', 'gate_winch', 'oilcan');
   assert.deepEqual(r.lines, ['narration.oil_winch']);

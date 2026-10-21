@@ -10,9 +10,6 @@
     "room": "loft_attic"
   },
   "mass_grams": 800,
-  "tags": [
-    "metal"
-  ],
   "fuel": {
     "kind": "source",
     "capacity": 36000,
