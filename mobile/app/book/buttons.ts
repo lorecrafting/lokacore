@@ -11,6 +11,11 @@ type Say = (key: string) => string;
 type Press = Omit<Button, 'token'>;
 export const commandOf = (a: { command?: string; action_key: string }) => a.command ?? a.action_key;
 
+// Detail-page option groups (book-ui.md; pass-1 UR): act (unlisted), move, store or hand, ask.
+const RANK = ['take drop', 'put give', 'ask where use_service'];
+export const rank = (b: { command?: string; action_key: string }) =>
+  RANK.findIndex((g) => g.split(' ').includes(commandOf(b))); // unlisted: -1, first
+
 // The pending choice's available answers and its Close (06 §43: never a trap).
 function asked(v: GameView, label: Say): Press[] {
   const c = v.choice;

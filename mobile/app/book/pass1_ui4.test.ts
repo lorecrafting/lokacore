@@ -110,7 +110,7 @@ test('an item an NPC holds reads Lift after the holder Note; a box item reads Ta
 
 // Breaks: a detail page lists its options in GameView order instead of act, move, store (UR):
 // a corpse's Put into before its Take, a book's Take before its Read; or hands after asks and
-// services, or asks and services leave GameView order among themselves.
+// services or before an act, or asks and services leave GameView order among themselves.
 test('detail options: act on it, then move it, then store it', async () => {
   const v = pegView();
   const view = {
@@ -130,10 +130,10 @@ test('detail options: act on it, then move it, then store it', async () => {
   const read = book.indexOf('Read item.book');
   assert.ok(read >= 0 && book.indexOf('Take item.book') > read, JSON.stringify(book));
   const on = (action_key: string) => ({ action_key, target_ids: [ID.coin], input: {} });
-  const order = group([on('use_service'), on('ask'), on('give')] as never).on(ID.coin);
+  const order = group([on('use_service'), on('give'), on('read'), on('ask')] as never).on(ID.coin);
   assert.deepEqual(
     order.map((b) => b.action_key),
-    ['give', 'use_service', 'ask'],
+    ['read', 'give', 'use_service', 'ask'],
   );
 });
 

@@ -1,19 +1,20 @@
 // The book's page shell, the room page and their shared controls (the Contents sections:
-// sections.tsx; the thing page: Menu.tsx; the title's arriving focus: title.ts).
+// sections.tsx; the thing page: Menu.tsx; the room's action list: place.tsx; the title's arriving
+// focus: title.ts).
 // Each is only drawing; what a tap does is passed in by Book.tsx.
 import type { ReactNode } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
-import { commandOf, refusedPlace } from './buttons.ts';
-import { notVerb, plain, why, type group, type Pool } from './model.ts';
+import { plain, why, type group, type Pool } from './model.ts';
 import type { Button, DetailLine } from './presenter.ts';
 import { note, prose, usePalette, type Palette } from './palette.ts';
 import { opacity, size, space, type } from './tokens.ts';
-import { ActionCard, VerbLine } from './actions.tsx';
+import { ActionCard } from './actions.tsx';
 import { Asides, AwayRecap, Here, LogLines } from './lines.tsx';
 import type { RecapLine } from './recap.ts';
 import { useTitleFocus } from './title.ts';
 import { LABEL } from './labels.ts';
+import { placeActions } from './place.tsx';
 export { useTitleFocus };
 
 type Say = (key: string) => string;
@@ -179,38 +180,6 @@ const storylet = (view: GameView, g: Grouped, press: (b: Button) => void, text: 
   return (
     offer && !offer.available && <ActionCard label={text(offer.label)} reason={why(offer, text)} />
   );
-};
-
-// The place's own actions, then those it lists unavailable as `label: reason` notes, never dropped
-// (pass-1 R2); a notice's actions stay on its notice page; the storylet has its card.
-const placeActions = (
-  view: GameView,
-  g: Grouped,
-  press: (b: Button) => void,
-  text: Say,
-  label: Say,
-) => {
-  const notices = [
-    ...(view.notices ?? []),
-    ...(view.notice_boards ?? []).flatMap((b) => b.notices),
-  ];
-  const verb = (a: { action_key: string; target_ids?: readonly string[] }) =>
-    a.action_key !== view.storylet && !notices.some((n) => a.target_ids?.includes(n.id));
-  return [
-    ...g.place
-      .filter(verb)
-      .map((b) => <VerbLine key={`${b.label}:${b.target_ids.join(',')}`} b={b} press={press} />),
-    ...refusedPlace(view)
-      .filter((a) => !notVerb(a.action_key) && verb(a))
-      .map((a) => (
-        <ActionCard key={a.label + a.target_ids} label={label(a.label)} reason={why(a, text)} />
-      )),
-    // A shut door's way through, also here (pass-1 R4): the Map's own cards, its labels.
-    ...view.exits
-      .flatMap((e) => g.door(e.direction))
-      .filter((b) => ['open', 'unlock'].includes(commandOf(b)))
-      .map((b) => <ActionCard key={`${b.action_key}:${b.label}`} b={b} press={press} />),
-  ];
 };
 
 // One shell for every page (BOOK-UI-COMPONENTS.md, Page): the title (fixed: the room's, outside

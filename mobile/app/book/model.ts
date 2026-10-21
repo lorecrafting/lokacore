@@ -7,7 +7,7 @@ import type {
   Key,
 } from '../../packages/game-view/session.ts';
 import type { Button, DetailLine } from './presenter.ts';
-import { commandOf, WORDS } from './buttons.ts';
+import { commandOf, rank, WORDS } from './buttons.ts';
 export { buttonsOf } from './buttons.ts';
 import { message, reason, SENTENCE } from './words.ts';
 import { things } from './item-pages.ts';
@@ -132,21 +132,9 @@ export function group(all: Button[]) {
     on: (id: string) =>
       buttons
         .filter((b) => (b.detail_id ? b.detail_id === id : b.target_ids.includes(id)))
-        .sort((a, b) => (RANK[commandOf(a)] ?? 0) - (RANK[commandOf(b)] ?? 0)), // stable: GameView order within a group
+        .sort((a, b) => rank(a) - rank(b)), // stable: GameView order within a group
   };
 }
-
-// A detail page's option groups (book-ui.md, Detail-page order; pass-1 UR): act on it (unlisted),
-// move it, store or hand it, then asks and services.
-const RANK: Record<string, number> = {
-  take: 1,
-  drop: 1,
-  put: 2,
-  give: 2,
-  ask: 3,
-  where: 3,
-  use_service: 3,
-};
 export const plain = (s: string) => s.replace(/\[([^\]]*)\]\([^)]*\)/g, '$1');
 
 type Offered =

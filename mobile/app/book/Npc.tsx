@@ -82,15 +82,13 @@ export function NpcPage(p: NpcProps) {
   const { talk, answer, foot } = conversation(p, choice);
   const log = talk ? p.log : p.log.slice(p.since ?? 0);
   const contents = held(p);
-  const pennies = priced(p) ? purse(p.view) : undefined;
   return (
     <Page
       title={p.npc ? cap(p.text(p.npc.name)) : 'Conversation'}
       scrollToEnd={log.length > 0}
       foot={foot}
     >
-      {about(c, p)}
-      {!talk && pennies !== undefined && <Note>{balance(pennies)}</Note>}
+      {about(c, p, !talk)}
       <LogLines lines={log} />
       {npcSkills(c, p)}
       {!talk && enemy && (
@@ -150,13 +148,14 @@ const priced = ({ npc: n }: NpcProps) =>
 // cartridge currency in GameView if a second one appears.
 const purse = (v: GameView) => v.resources?.find((r) => r.resource.key === 'pennies')?.current;
 
-const about = (c: Palette, p: NpcProps) => (
+const about = (c: Palette, p: NpcProps, shelf: boolean) => (
   <>
     {p.npc?.description && <Text style={prose(c)}>{plain(p.text(p.npc.description))}</Text>}
     {p.npc && 'asides' in p.npc && <Asides keys={p.npc.asides} text={p.text} />}
     {p.npc && 'carrying' in p.npc && p.npc.carrying && (
       <Text style={note(c)}>{p.text(p.npc.carrying)}</Text>
     )}
+    {shelf && priced(p) && purse(p.view) !== undefined && <Note>{balance(purse(p.view)!)}</Note>}
   </>
 );
 
