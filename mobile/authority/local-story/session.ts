@@ -150,7 +150,8 @@ function sharedGame(
       };
     },
     text: (key) => cartridge.text[key as Key],
-    lastNarration: (command_id) => (pending() ? undefined : story.narration(command_id)),
+    // Rounds a press drains commit before it, so only the store's fence hides narration.
+    lastNarration: story.narration,
     chronicle: () => story.chronicle(),
   };
 }

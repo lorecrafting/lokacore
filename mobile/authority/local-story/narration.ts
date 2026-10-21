@@ -21,7 +21,8 @@ import { scope, type Story } from './save.ts';
 type NarrationRow = { revision: number; command_id: string; command: string; response: string };
 
 export function narration(s: Story, command_id?: string): NarrationRecord | undefined {
-  if (s.db.isInTransactionSync()) return undefined; // its rows may be uncommitted (03 §15)
+  // Uncommitted, or a COMMIT whose outcome is unknown: await adopted confirmation (03 §15).
+  if (s.fence || s.db.isInTransactionSync()) return undefined;
   let before: number | null = null;
   while (true) {
     const r = latest(s, command_id, before);
