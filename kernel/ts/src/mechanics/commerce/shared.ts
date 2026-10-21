@@ -77,8 +77,7 @@ export function exchange(
   if (typeof first === 'string') return first;
   const moved = first[0];
   if (moved === undefined || world.state.containers[moved] !== source) return 'not_owned' as const;
-  // A fence's offer buys only stolen goods, any other only clean ones (toolbox rows 33 and 34);
-  // not_stolen is invalid_state that the view names shop.not_stolen (pass-1 GE3).
+  // A fence buys only stolen goods, others only clean (rows 33, 34); not_stolen: pass-1 GE3.
   const theft = world.cartridge.world?.theft;
   if (
     verb === 'sell' &&

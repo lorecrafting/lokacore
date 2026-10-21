@@ -74,12 +74,8 @@ function ceiling(world: World, body: EntityId) {
 }
 
 // Over the ceiling: too_heavy when the added mass alone exceeds it, else over_load (pass-1 R3).
-const over = (load: number, added: number, max: number) =>
-  add(load, added) <= max
-    ? undefined
-    : added > max
-      ? ('too_heavy' as const)
-      : ('over_load' as const);
+const over = (load: number, added: number, max: number): Failure | undefined =>
+  add(load, added) <= max ? undefined : added > max ? 'too_heavy' : 'over_load';
 
 export const load = (world: World, body: EntityId, steps: Steps) =>
   total({ world, body, steps, totals: new Map(), owned: new Map() }, body);

@@ -27,7 +27,7 @@ import { carrying, giveRefused, putRefused, recipient } from './shared.ts';
 import { stolen, theftRefused } from './theft.ts';
 import { movable } from '../../runtime/created.ts';
 
-// size: allow 58, finite Harvest, the G7 get-lock walk and row 33 theft join the conserved-transfer decision
+// size: allow 63, finite Harvest, the G7 get-lock walk, row 33 theft and pass-1 over_load join the conserved-transfer decision
 export const decide: Rule<'containment'> = (world, command, mint, steps = { n: 0 }) => {
   const p = command.payload;
   if (p.type === 'recover_corpse') return recover(world, p, steps);

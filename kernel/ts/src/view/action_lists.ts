@@ -174,7 +174,7 @@ function entityOffered(
 
 // `a` as listed for `actor` (on entity `id` in `scope`, if any): a door verb on an item is aimed
 // at it, with the item's scope and no input, so target_ids [id] fills target_id (commands/invocation.ts).
-// size: allow 58, exact detail harvest, the row FD7 ask and a recipe's reason (loka-j64e) join shared action admission and projection
+// size: allow 62, exact detail harvest, the row FD7 ask, a recipe's reason (loka-j64e) and its pass-1 unpaid cost join shared action admission and projection
 function advertise(
   world: World,
   actor: CharacterId,

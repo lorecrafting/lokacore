@@ -1,4 +1,4 @@
-// size: allow 555, containment and carrying behavior share the same minimal custody fixture
+// size: allow 581, containment and carrying behavior share the same minimal custody fixture
 // Containment: take, drop, give, has_item, items and NPCs in the world, target resolution and
 // examine over them (R5 S4; 21 §7, §8; 03 §23; 04 §5.3). The world is built from the items
 // known answer (protocol/fixtures/containers_cartridge_items_hash.json). Ids and the state hash are
