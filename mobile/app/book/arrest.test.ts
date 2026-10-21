@@ -46,5 +46,5 @@ for (const failed of [false, true])
       JSON.stringify(reopened),
     );
     b.map();
-    assert.ok(b.text().includes('The barred cell door: closed'), JSON.stringify(b.text()));
+    assert.ok(b.text().includes('West: closed'), JSON.stringify(b.text())); // the cell door's exit card (UF2)
   });

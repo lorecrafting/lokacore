@@ -12,7 +12,7 @@ import { Riddle } from './Riddle.tsx';
 import { space } from './tokens.ts';
 import { LABEL } from './labels.ts';
 import { offerLabel } from './offers.ts';
-import { buyReason, refused, sellReason } from './words.ts';
+import { balance, buyReason, refused, sellReason } from './words.ts';
 type Say = (key: string) => string;
 type Grouped = ReturnType<typeof group>;
 type Screen = ReturnType<ReturnType<typeof presenter>['screen']>;
@@ -82,6 +82,7 @@ export function NpcPage(p: NpcProps) {
   const { talk, answer, foot } = conversation(p, choice);
   const log = talk ? p.log : p.log.slice(p.since ?? 0);
   const contents = held(p);
+  const pennies = priced(p) ? purse(p.view) : undefined;
   return (
     <Page
       title={p.npc ? cap(p.text(p.npc.name)) : 'Conversation'}
@@ -89,6 +90,7 @@ export function NpcPage(p: NpcProps) {
       foot={foot}
     >
       {about(c, p)}
+      {!talk && pennies !== undefined && <Note>{balance(pennies)}</Note>}
       <LogLines lines={log} />
       {npcSkills(c, p)}
       {!talk && enemy && (
@@ -138,6 +140,15 @@ const conversation = (p: NpcProps, choice?: NonNullable<GameView['choice']>) => 
 // What a living NPC holds (Held, book-ui.md Item details): Take on it is the steal (row 33).
 const held = (p: NpcProps) =>
   p.npc ? things(p.view).filter((e) => 'container_id' in e && e.container_id === p.npc?.id) : [];
+
+// A shelf, or a service that costs (the bank too), shows the purse beside it (pass-1 E15).
+const priced = ({ npc: n }: NpcProps) =>
+  !!n &&
+  (('shop' in n && !!n.shop?.length) ||
+    ('services' in n && !!n.services?.some((s) => s.price > 0)));
+// ponytail: GameView has no currency field, so the purse is the resource keyed 'pennies'; name a
+// cartridge currency in GameView if a second one appears.
+const purse = (v: GameView) => v.resources?.find((r) => r.resource.key === 'pennies')?.current;
 
 const about = (c: Palette, p: NpcProps) => (
   <>

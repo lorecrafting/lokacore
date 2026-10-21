@@ -102,6 +102,8 @@ export const sellReason = (
   text: (key: string) => string,
 ) => (s.message ? text(s.message.key) : reason(s.reason ?? ''));
 // A hostile NPC's page when its cartridge gives no refusal line (Book hostile refusal).
+export const holding = (name: string) => `${name} is holding it.`;
+export const balance = (pennies: number) => `You have ${pennies}p.`;
 export const refused = (name: string) => `${name} will have nothing to do with you.`;
 
 type Say = (key: string) => string;

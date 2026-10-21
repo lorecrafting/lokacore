@@ -13,13 +13,13 @@ import {
   type group,
   type Thing,
 } from './model.ts';
-import type { Button, DetailLine } from './presenter.ts';
+import type { Button } from './presenter.ts';
 import { note, prose, usePalette } from './palette.ts';
 import { DiscoveredMap } from './DiscoveredMap.tsx';
 import { levelLine, Professions, RaiseCards, SkillDetails, xpLine } from './skills.tsx';
 import { size, space, type } from './tokens.ts';
 import { ActionCard, Cards, ContinueButton } from './actions.tsx';
-import { EntityLine, LogLines, Note } from './lines.tsx';
+import { EntityLine, Note } from './lines.tsx';
 import { band, Control, Page, SectionTitle, useTitleFocus } from './pages.tsx';
 import { LABEL } from './labels.ts';
 
@@ -151,11 +151,12 @@ function Ways(p: { view: GameView; text: Say; g: Grouped; press: (b: Button) => 
         ) : (
           <ActionCard label={cap(e.direction)} reason={e.available ? undefined : why(e, p.text)} />
         )}
-        {e.door && (
-          <Text style={prose(c)}>
-            {cap(p.text(e.door.name))}: {e.door.state}
-          </Text>
-        )}
+        {e.door &&
+          why(e, p.text) !== e.door.state && ( // UF2: once, when the card says it
+            <Text style={prose(c)}>
+              {cap(p.text(e.door.name))}: {e.door.state}
+            </Text>
+          )}
         {p.g.door(e.direction).map((b) => (
           <ActionCard key={b.action_key} b={b} press={p.press} />
         ))}
@@ -179,7 +180,6 @@ export function MapPage(p: {
   text: Say;
   g: Grouped;
   press: (b: Button) => void;
-  log?: readonly DetailLine[];
   world: () => void;
 }) {
   const c = usePalette();
@@ -195,7 +195,6 @@ export function MapPage(p: {
         </>
       }
     >
-      {p.log && <LogLines lines={p.log} />}
       {p.view.map && (
         <DiscoveredMap view={p.view} text={p.text} selected={selected} select={select} />
       )}

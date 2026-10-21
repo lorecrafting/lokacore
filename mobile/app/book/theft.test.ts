@@ -125,7 +125,7 @@ test('a merchant entry lists the purse it holds; the purse offers Take', (t) => 
   assert.equal(purse?.kind, 'thing');
   const item = nodes(Item({ id: purse.id, screen, g, press: book.press, open() {}, world() {} }));
   const words = item.filter((n) => n.type === 'Text').map((n) => n.props.children);
-  assert.ok(words.includes('A purse') && words.includes('Take a purse'), JSON.stringify(words));
+  assert.deepEqual(words.slice(-3), ['A merchant is holding it.', 'Lift', 'Leave']); // pass-1 E14
   // A container (any non-NPC entry) keeps Inside.
   const box = { id: 'box', kind: 'item', name: 'box', actions: [] };
   const coin = { ...box, id: 'coin', name: 'coin' };

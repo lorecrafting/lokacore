@@ -24,7 +24,15 @@ const blocks = async (actions: unknown[], place: unknown[], more = {}) => {
     actions,
     ...more,
   };
-  const page = { view, text: (k: string) => k, log: [], g: { place }, press: () => {} };
+  const say = (k: string) => k;
+  const page = {
+    view,
+    text: say,
+    label: say,
+    log: [],
+    g: { place, door: () => [] },
+    press: () => {},
+  };
   return nodes(RoomPage({ ...page, open: () => {}, openChoice: () => {}, details: null } as any));
 };
 const lines = (drawn: any[]) =>

@@ -130,9 +130,23 @@ export function group(all: Button[]) {
     ),
     word: all.filter((b) => WORDS.includes(b.action_key)),
     on: (id: string) =>
-      buttons.filter((b) => (b.detail_id ? b.detail_id === id : b.target_ids.includes(id))),
+      buttons
+        .filter((b) => (b.detail_id ? b.detail_id === id : b.target_ids.includes(id)))
+        .sort((a, b) => (RANK[commandOf(a)] ?? 0) - (RANK[commandOf(b)] ?? 0)), // stable: GameView order within a group
   };
 }
+
+// A detail page's option groups (book-ui.md, Detail-page order; pass-1 UR): act on it (unlisted),
+// move it, store or hand it, then asks and services.
+const RANK: Record<string, number> = {
+  take: 1,
+  drop: 1,
+  put: 2,
+  give: 2,
+  ask: 3,
+  where: 3,
+  use_service: 3,
+};
 export const plain = (s: string) => s.replace(/\[([^\]]*)\]\([^)]*\)/g, '$1');
 
 type Offered =

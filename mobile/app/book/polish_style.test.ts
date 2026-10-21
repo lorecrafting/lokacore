@@ -12,7 +12,7 @@ const room = (description: string) => ({
   },
   text: (key: string) => key,
   log: [],
-  g: { place: [] },
+  g: { place: [], door: () => [] },
   press: () => {},
   open: () => {},
   openChoice: () => {},

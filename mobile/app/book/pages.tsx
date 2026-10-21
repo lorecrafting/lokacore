@@ -4,7 +4,7 @@
 import type { ReactNode } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
-import { refusedPlace } from './buttons.ts';
+import { commandOf, refusedPlace } from './buttons.ts';
 import { notVerb, plain, why, type group, type Pool } from './model.ts';
 import type { Button, DetailLine } from './presenter.ts';
 import { note, prose, usePalette, type Palette } from './palette.ts';
@@ -103,6 +103,7 @@ export function Control(p: {
 export function RoomPage(p: {
   view: GameView;
   text: Say;
+  label: Say; // the action-label resolver: refused place lines read the same word as offered ones
   log: DetailLine[];
   recap?: RecapLine[];
   g: Grouped;
@@ -114,7 +115,7 @@ export function RoomPage(p: {
 }) {
   const c = usePalette();
   const look = p.g.look;
-  const actions = placeActions(p.view, p.g, p.press, p.text); // one list, as the room's lines
+  const actions = placeActions(p.view, p.g, p.press, p.text, p.label); // one list, as the room's lines
   return (
     <Page
       title={p.text(p.view.place.title.key)}
@@ -182,7 +183,13 @@ const storylet = (view: GameView, g: Grouped, press: (b: Button) => void, text: 
 
 // The place's own actions, then those it lists unavailable as `label: reason` notes, never dropped
 // (pass-1 R2); a notice's actions stay on its notice page; the storylet has its card.
-const placeActions = (view: GameView, g: Grouped, press: (b: Button) => void, text: Say) => {
+const placeActions = (
+  view: GameView,
+  g: Grouped,
+  press: (b: Button) => void,
+  text: Say,
+  label: Say,
+) => {
   const notices = [
     ...(view.notices ?? []),
     ...(view.notice_boards ?? []).flatMap((b) => b.notices),
@@ -196,8 +203,13 @@ const placeActions = (view: GameView, g: Grouped, press: (b: Button) => void, te
     ...refusedPlace(view)
       .filter((a) => !notVerb(a.action_key) && verb(a))
       .map((a) => (
-        <ActionCard key={a.label + a.target_ids} label={text(a.label)} reason={why(a, text)} />
+        <ActionCard key={a.label + a.target_ids} label={label(a.label)} reason={why(a, text)} />
       )),
+    // A shut door's way through, also here (pass-1 R4): the Map's own cards, its labels.
+    ...view.exits
+      .flatMap((e) => g.door(e.direction))
+      .filter((b) => ['open', 'unlock'].includes(commandOf(b)))
+      .map((b) => <ActionCard key={`${b.action_key}:${b.label}`} b={b} press={press} />),
   ];
 };
 

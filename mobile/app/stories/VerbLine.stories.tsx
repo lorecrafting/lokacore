@@ -32,7 +32,14 @@ export const ThreeInARoom: Story = {
 };
 
 // Pass-1 R2: a refused place action follows the available verb lines as a `label: reason` note.
+// Breaks: a refused line becomes a button (only the available verb presses), or loses its reason.
 export const WithRefused: Story = {
+  play: async ({ canvas }) => {
+    await expect(canvas.getAllByRole('button').map((b) => b.textContent)).toEqual([
+      'Rest by the fire',
+    ]);
+    await expect(canvas.getByText('Chop wood: more than you can carry')).toBeVisible();
+  },
   render: (args) => (
     <View>
       <VerbLine b={button('Rest by the fire')} press={args.press} />
