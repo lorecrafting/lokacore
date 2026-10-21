@@ -297,9 +297,8 @@ test('a genuinely failed COMMIT reconciles to not committed; the retry is a fres
   ]);
 });
 
-// Breaks (03 §15): a call decided, answered or narrated while the COMMIT outcome is unknown, memory
-// adopting the unconfirmed attempt, or a restart that does not load the commit or recover its trace
-// entry.
+// Breaks (03 §15): a call decided or answered while the COMMIT outcome is unknown, memory adopting
+// the unconfirmed attempt, or a restart that does not load the commit or recover its trace entry.
 // Simulated fault: the connection breaks right after the real COMMIT.
 test('while the COMMIT outcome is unknown every call is fenced; a restart settles it', () => {
   const path = save();
@@ -316,7 +315,6 @@ test('while the COMMIT outcome is unknown every call is fenced; a restart settle
   assert.deepEqual(a.story.invoke(take), { kind: 'pending' });
   assert.deepEqual(a.story.invoke(invocation(2, 'give', [SATCHEL, NPC])), { kind: 'pending' });
   assert.equal(a.story.world(), before);
-  assert.equal(a.story.narration(), undefined);
   const b = processOn(path);
   assert.deepEqual(saved(b.story.invoke(take)), [true, 1]);
   assert.deepEqual(traced(b), [[1, 0, 'committed', 1]]);

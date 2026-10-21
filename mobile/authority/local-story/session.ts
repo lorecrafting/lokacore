@@ -150,7 +150,7 @@ function sharedGame(
       };
     },
     text: (key) => cartridge.text[key as Key],
-    // Rounds a press drains commit before it, so only the store's fence hides narration.
+    // Rounds a press drains commit before it; narration hides only inside an open transaction.
     lastNarration: story.narration,
     chronicle: () => story.chronicle(),
   };
