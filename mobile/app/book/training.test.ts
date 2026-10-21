@@ -286,7 +286,6 @@ function nodes(element: any): any[] {
     ? nodes(element.type(element.props))
     : [element, ...nodes(element.props?.children)];
 }
-// Breaks: Tobin controls route outside their NPC detail, replay duplicates success, or cold reopen loses the next lesson/confirmed line.
 // Breaks: the teach card for a learned skill drops, or keeps a price card (book-ui.md Skill tree
 // details, H3): a choice the kernel advertises unavailable draws as one `label: reason` note.
 test('an unavailable teach choice draws as label: reason with no price card', () => {
@@ -318,6 +317,7 @@ test('an unavailable teach choice draws as label: reason with no price card', ()
   assert.deepEqual(lines, ['Learn swords — 2 pennies: You already know swords.']);
 });
 
+// Breaks: Tobin controls route outside their NPC detail, replay duplicates success, or cold reopen loses the next lesson/confirmed line.
 test('Book interaction teaches swords then dodge in Tobin detail and recovers each committed result once', (t) => {
   const pin = JSON.parse(
     readFileSync(
