@@ -4,6 +4,7 @@
 import type { ReactNode } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
+import { refusedPlace } from './buttons.ts';
 import { notVerb, plain, why, type group, type Pool } from './model.ts';
 import type { Button, DetailLine } from './presenter.ts';
 import { note, prose, usePalette, type Palette } from './palette.ts';
@@ -184,7 +185,7 @@ const storylet = (view: GameView, g: Grouped, press: (b: Button) => void, text: 
 const placeActions = (view: GameView, g: Grouped, press: (b: Button) => void, text: Say) => {
   const notices = [
     ...(view.notices ?? []),
-    ...(view.notice_boards ?? []).flatMap((board) => board.notices),
+    ...(view.notice_boards ?? []).flatMap((b) => b.notices),
   ];
   const verb = (a: { action_key: string; target_ids?: readonly string[] }) =>
     a.action_key !== view.storylet && !notices.some((n) => a.target_ids?.includes(n.id));
@@ -192,21 +193,10 @@ const placeActions = (view: GameView, g: Grouped, press: (b: Button) => void, te
     ...g.place
       .filter(verb)
       .map((b) => <VerbLine key={`${b.label}:${b.target_ids.join(',')}`} b={b} press={press} />),
-    ...view.actions
-      .filter(
-        (a) =>
-          !a.available &&
-          !a.input.length &&
-          (a.target.kind === 'none' || a.target_ids?.length) && // as buttons.ts placeButtons
-          !notVerb(a.action_key) &&
-          verb(a),
-      )
+    ...refusedPlace(view)
+      .filter((a) => !notVerb(a.action_key) && verb(a))
       .map((a) => (
-        <ActionCard
-          key={`${a.label}:${a.target_ids?.join(',')}`}
-          label={text(a.label)}
-          reason={why(a, text)}
-        />
+        <ActionCard key={a.label + a.target_ids} label={text(a.label)} reason={why(a, text)} />
       )),
   ];
 };
