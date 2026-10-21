@@ -298,18 +298,11 @@ test('traps 7: left alone, the poison ticks at +1800, +3600, +5400 and expires a
   let x = go(step1, 'north').world;
   const E = x.state.clock;
   const run_id = 'aaaaaaaa-0000-4000-8000-0000000007a7';
-  const once = stepElapsed(
-    x,
-    {
-      id: elapsedCommandId(run_id, x.context, E, E + 7200) as never,
-      world_context_id: x.context,
-      payload: { type: 'elapsed', actor_id: x.character, run_id, from: E, until: E + 7200 },
-    } as never,
-    1,
-  ).decision;
-  assert.equal(once.kind, 'accepted');
-  const said = once.kind === 'accepted' ? (once.narration ?? []).map((l) => l.key) : [];
-  assert.equal(said.filter((k) => k === 'narration.poisoned.tick').length, 3, said.join());
+  const payload = { type: 'elapsed', actor_id: x.character, run_id, from: E, until: E + 7200 };
+  const id = elapsedCommandId(run_id, x.context, E, E + 7200);
+  const once = stepElapsed(x, { id, world_context_id: x.context, payload } as never, 1).decision;
+  const said = once.kind === 'accepted' ? once.narration?.map((l) => l.key) : undefined;
+  assert.equal(said?.filter((k) => k === 'narration.poisoned.tick').length, 3, said?.join());
   const hp: (number | undefined)[] = [];
   for (const t of [1800, 3600, 5400]) {
     x = wait(x, E + t).world;
