@@ -179,10 +179,10 @@ test('confirmed room change clears old history before adding new authored conseq
   };
   const p = presenter(g);
   p.press(north);
-  assert.deepEqual(p.screen().log, ["You can't do that: unsupported capability."]);
+  assert.deepEqual(p.screen().log, ["You can't do that: not in this book."]);
   p.press(north);
   assert.deepEqual(p.screen().log, [
-    "You can't do that: unsupported capability.",
+    "You can't do that: not in this book.",
     'The page had changed; here it is again.',
   ]);
   p.press(north);

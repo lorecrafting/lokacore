@@ -1,0 +1,127 @@
+toolbox_showcase cartridge.json: world.bands have no normal band below 100%
+toolbox_showcase reactions/attic_drench.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/attic_kindle.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/attic_spark.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/begone.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/boar_gore.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/box_forced.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/cellar_chief_fell.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/cellar_rearms.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/chief_fell.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/chilled_enter.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/chilled_fold.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/chilled_hour.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/cot_rest.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/croft_cot_rest.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/drench.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/farmer_hates_rat.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/farmer_likes_apple.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/feed.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/fire_spreads.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/flamma_sparks.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/fold_song.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/gate_shut.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/gift_apple.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/gift_ledger.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/gil_hears.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/hide.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/hush.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/kindle.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/kindle_golem.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/letter_ash_after.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/letter_late.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/letter_read_after.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/needs_enter.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/overheated_enter.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/overheated_fold.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/overheated_hour.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/parched_enter.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/parched_fold.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/parched_hour.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/plate_rearms.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/potion.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/shock_on_wet.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/soaked_enter.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/soaked_fold.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/soaked_hour.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/song.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/song_orla.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/sow.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/spark.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/take_eel_01.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/take_salmon_01.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/take_trout_01.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/take_trout_02.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/tam_hears_wat.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/tam_sees.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/tam_tells_nell.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/tam_tells_nell_ash.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/theft_seen.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/tilt_boar_gore.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/walker_church.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/walker_mill.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/walker_tollhouse.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/walker_village_green.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/walker_warden_gate.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/wanted_marked.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/wat_at_gate.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/wat_frost.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/wat_rain.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/wheel_1_turn.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/wheel_1_wrap.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/wheel_2_turn.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/wheel_2_wrap.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/wheel_3_turn.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/wheel_3_wrap.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/windburnt_enter.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/windburnt_fold.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/windburnt_hour.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/wither_croft.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/wither_plot.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/word_out.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/yard_hide.json: writes state with no narrate step and no "silent": true
+toolbox_showcase recipes/carve_spoon.json: policy refuses with no reason
+toolbox_showcase recipes/chop.json: policy refuses with no reason
+toolbox_showcase recipes/cook_feast.json: policy refuses with no reason
+toolbox_showcase recipes/cook_stew.json: policy refuses with no reason
+toolbox_showcase recipes/cook_stew_croft.json: policy refuses with no reason
+toolbox_showcase recipes/disarm_cellar.json: policy refuses with no reason
+toolbox_showcase recipes/disarm_plate.json: policy refuses with no reason
+toolbox_showcase recipes/fish.json: policy refuses with no reason
+toolbox_showcase recipes/fish_croft.json: policy refuses with no reason
+toolbox_showcase recipes/force_grate.json: policy refuses with no reason
+toolbox_showcase recipes/force_hall_cupboard.json: policy refuses with no reason
+toolbox_showcase recipes/force_iron_door.json: policy refuses with no reason
+toolbox_showcase recipes/force_strongbox.json: policy refuses with no reason
+toolbox_showcase recipes/force_tollhouse_door.json: policy refuses with no reason
+toolbox_showcase recipes/lift_store_bar.json: policy refuses with no reason
+toolbox_showcase recipes/oil_winch.json: policy refuses with no reason
+toolbox_showcase recipes/pick_hall_strongbox.json: policy refuses with no reason
+toolbox_showcase recipes/pick_strongbox.json: policy refuses with no reason
+toolbox_showcase recipes/play_fold_song.json: policy refuses with no reason
+toolbox_showcase recipes/play_song.json: policy refuses with no reason
+toolbox_showcase recipes/quench.json: policy refuses with no reason
+toolbox_showcase recipes/raise_timbered_hut.json: policy refuses with no reason
+toolbox_showcase recipes/saw.json: policy refuses with no reason
+toolbox_showcase recipes/search_cellar.json: policy refuses with no reason
+toolbox_showcase recipes/search_cleft.json: policy refuses with no reason
+toolbox_showcase recipes/search_floor.json: policy refuses with no reason
+toolbox_showcase recipes/shove_drover.json: policy refuses with no reason
+toolbox_showcase recipes/think_hall_lectern.json: policy refuses with no reason
+toolbox_showcase recipes/think_lectern.json: policy refuses with no reason
+toolbox_showcase recipes/think_letter.json: policy refuses with no reason
+toolbox_showcase recipes/water_croft.json: policy refuses with no reason
+toolbox_showcase recipes/water_plot.json: policy refuses with no reason
+toolbox_showcase resources.json: pennies bands have no normal band below 100%
+ashmere_missing_child reactions/b_lost_before_meeting.json: writes state with no narrate step and no "silent": true
+ashmere_missing_child recipes/begin_epilogue_lost_prior.json: policy refuses with no reason
+ashmere_missing_child recipes/begin_epilogue_rescued_fox.json: policy refuses with no reason
+ashmere_missing_child recipes/begin_epilogue_rescued_prior.json: policy refuses with no reason
+ashmere_missing_child recipes/begin_epilogue_stays_fox.json: policy refuses with no reason
+ashmere_missing_child recipes/begin_epilogue_stays_prior.json: policy refuses with no reason
+ashmere_missing_child recipes/ring_bell.json: policy refuses with no reason
+ashmere_missing_child recipes/seek_wisp.json: policy refuses with no reason
+ashmere_missing_child recipes/silence_bell.json: policy refuses with no reason
+ashmere_missing_child recipes/study_tracks.json: policy refuses with no reason
+ashmere_missing_child rooms/drowned_lantern.json: readable details.cellar_help has no title
+ashmere_missing_child rooms/drowned_lantern.json: readable details.lost_whistle has no title

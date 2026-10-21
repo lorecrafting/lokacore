@@ -599,6 +599,8 @@ Ruleless, run by the proposal: a ReactionRule triggers on `fact_changed` of its 
 `entity_entered_room` into its room, exact `quest_resolved {quest, outcome}`, `rested` in its
 room, or (toolbox row W1) any other registered event kind with optional filters, in rule-key order.
 Rules run one after another: each rule's `when` reads the writes of the rules and deliveries before it in the same command, and a later rule may rewrite a fact an earlier one wrote (the write joins the earlier write's writer group, `assignment` in `kernel/ts/src/mechanics/reaction.ts`, loka-j2mo), so the last write wins, deterministically by rule-key and delivery order. Archived 04 §5.3 calls repeated independent assignments a conflict; this rule governs ([difference 11](DIFFERENCES.md)).
+A rule that writes state (`status.apply`, `fact.assign`, `fact.adjust`) carries a `narrate` step, or `"silent": true` when the write is meant to pass unseen; the kernels ignore `silent`, and `mix loka.lint` ([CHECKS.md](../CHECKS.md)) reports a rule with neither.
+
 Every filter present must equal its payload field; a filter means the same field in every kind:
 
 | Trigger `on.event`                                                                                                   | Optional filters (payload field)                                                                                      | Subject (status.apply target)                  | Actor (delivery runs for) |

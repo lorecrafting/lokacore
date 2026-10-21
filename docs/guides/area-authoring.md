@@ -21,5 +21,7 @@ Rules 5, 7, 9, 10 and 12 follow owner and PM rulings on the pass-1 questions (Q4
 14. Every item has a source and a sink; a vessel that must be filled has a fill source in reach. (WIRING, M8c: the dry flask.)
 15. The top (normal) band of a resource starts below its maximum, and no description variant shadows a later one. (WIRING, UK: "normal" starts at 100%, so 99 warns; W1: tide.)
 
+Run `mix loka.lint cartridges/<id>` before review: it checks rules 4, 5, 6, 11 and 15 ([CHECKS.md](../CHECKS.md)).
+
 When a rule here can be decided by a script, it belongs in a check; see the candidate checks in the
 [pass 1 analysis](../playtests/2026-10-21-pass1/analysis.md#candidate-deterministic-checks).
