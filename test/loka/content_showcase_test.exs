@@ -89,8 +89,7 @@ defmodule Loka.ContentShowcaseTest do
         {"rooms/holding_croft.json", &Map.delete(&1, "site")},
         {"facts.json", &update_in(&1, ["facts"], fn f -> Map.drop(f, @homestead_facts) end)}
       ] ++
-        for({f, k} <- @dropped_keys, do: {f <> ".json", fn m -> Map.delete(m, k) end}) ++
-        for(s <- ~w(wet shocked stunned warm), do: unobserved(s))
+        for({f, k} <- @dropped_keys, do: {f <> ".json", fn m -> Map.delete(m, k) end})
 
   # The golem's observed lines need API 1.110 (row G3, loka-kgd.176).
   defp unobserved(status),
@@ -101,6 +100,7 @@ defmodule Loka.ContentShowcaseTest do
   defp homestead,
     do:
       homestead_edits() ++
+        Enum.map(~w(wet shocked stunned warm), &unobserved/1) ++
         for(
           f <- @homestead_files,
           do: {f <> ".json", nil}
