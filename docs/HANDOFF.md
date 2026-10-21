@@ -6,7 +6,7 @@ the next steps, the standing owner rules that the repo does not yet state, and o
 questions. Rewrite it at each stable checkpoint (a merge, a review verdict, a pushed fix) and before
 the session ends; commit and push it with the Beads export.
 
-Written 2026-10-21 ~18:10 UTC by Claude Code (Opus 5.5), PM session a02501b4, mid pass-1 fix batch, for a clear.
+Written 2026-10-21 ~18:25 UTC by Claude Code (Opus 5.5), PM session a02501b4, mid pass-1 fix batch, for a clear.
 State at writing: agents may still be running (see "Pass-1 fix batch" below; their handbacks land in Beads notes).
 
 ## Start of a session
@@ -60,11 +60,16 @@ Pass-1 playtest and fix batch (session a02501b4, 2026-10-21):
 - Batch branch `showcase/pass1` (worktree ../worktrees.noindex/batch-pass1, no PR yet). MERGED into it: design spec +
   rulings record docs/reviews/2026-10-21-pass1-ui-rulings.md (loka-x6t.72), .44 spell lines, .41 traps content, .45
   death receipts (record + 2nd opinion), .47 known_npcs living only, x6t.74 UI1 (World order, log lines, speech echo).
-- IN FLIGHT at writing (check Beads notes for the latest handback): .46 named refusals fix round 1 (fresh dev; record
-  on local branch review-pass1-refuse 9f744120 is cherry-picked by the dev; then scoped re-check by a fresh reviewer +
-  merge with that record); .42 Loft content fix round 1 (oil_winch per-player fact; then scoped re-check, merge); .43
-  law + hub content (wanted status, signs, bands) building.
-- TODO, in order: .48 item status lines (engine), .49 opponent band in GameView (protocol: record + 2nd opinion), UI2
+- IN FLIGHT at writing (~18:25 UTC; check each Beads id's last notes):
+  - .46 named refusals: APPROVED (record on local branch review-pass1-refuse 457586b2, head 5de4dc63). Merge when hosted
+    CI on 5de4dc63 is green: `bin/pm_merge.sh ../worktrees.noindex/batch-pass1 showcase/pass1 showcase/pass1-refuse
+    review-pass1-refuse "<subject>" 5de4dc63f511081a52815ecbf72cd815e8fc6111`; recompile the hash fixture on conflict.
+  - .42 Loft content: re-check APPROVED at 683c4490, but hosted CI failed loader_floors in both kernels; fix round 2
+    (last) is pushing a new head (see notes). Merge once that head's CI is green (no re-review needed for a strip-only
+    fix unless it changes content; check the diff).
+  - .43 law + hub content (wanted status) building; .48 item status lines building. Each then: fresh Opus reviewer
+    (+ Opus designer for player-visible words), CI green, merge.
+- TODO, in order: .49 opponent band in GameView (protocol: record + 2nd opinion), UI2
   loka-x6t.75 (after .46), UI3 .76, UI4 .77, UI5 .78, UI6 .79 (after .49). Briefs: write from the triage + rulings record;
   the pass-1 COMMON block is in `loka-y6yg.43` notes. Then: batch PR to main, merge main in once, hosted CI green, merge,
   bin/after_merge.sh; one Opus verification check at 390 px (browser-use); start the owner's preview on 19006/19007;
