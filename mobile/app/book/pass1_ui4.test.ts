@@ -75,20 +75,28 @@ test('an item an NPC holds reads Lift after the holder Note; a box item reads Ta
   const peg = v.entities.find((e) => e.shop)!;
   const held = (id: keyof typeof ID, holder: string) =>
     thing(id, [action('take')], { container_id: holder });
+  const [read, take] = [action('read'), action('take')];
   const no = action('take', { available: false, reason: { code: 'permission_denied' } });
   const refusedHeld = thing('book', [no], { container_id: peg.id });
   const view = {
     ...v,
     entities: [
       ...v.entities.map((e) =>
-        e.id === peg.id ? { ...e, contents: [held('purse', peg.id), refusedHeld] } : e,
+        e.id === peg.id
+          ? { ...e, contents: [{ ...held('purse', peg.id), actions: [read, take] }, refusedHeld] }
+          : e,
       ),
       thing('box', [], { contents: [held('coin', ID.box)] }),
       thing('pebble', [action('take')]),
     ],
   } as GameView;
   const purse = await page(view, ID.purse);
-  assert.deepEqual(purse.slice(-3), ['Npc.peg.short is holding it.', 'Lift', 'Leave']);
+  assert.deepEqual(purse.slice(-4), [
+    'Npc.peg.short is holding it.',
+    'Read item.purse',
+    'Lift',
+    'Leave',
+  ]);
   assert.ok((await page(view, ID.book)).includes('Lift: not yours.'));
   for (const id of ['coin', 'pebble'] as const) {
     const lines = await page(view, ID[id]);
@@ -101,7 +109,8 @@ test('an item an NPC holds reads Lift after the holder Note; a box item reads Ta
 });
 
 // Breaks: a detail page lists its options in GameView order instead of act, move, store (UR):
-// a corpse's Put into before its Take, a book's Take before its Read.
+// a corpse's Put into before its Take, a book's Take before its Read; or hands after asks and
+// services, or asks and services leave GameView order among themselves.
 test('detail options: act on it, then move it, then store it', async () => {
   const v = pegView();
   const view = {
@@ -120,6 +129,12 @@ test('detail options: act on it, then move it, then store it', async () => {
   const book = await page(view, ID.book);
   const read = book.indexOf('Read item.book');
   assert.ok(read >= 0 && book.indexOf('Take item.book') > read, JSON.stringify(book));
+  const on = (action_key: string) => ({ action_key, target_ids: [ID.coin], input: {} });
+  const order = group([on('use_service'), on('ask'), on('give')] as never).on(ID.coin);
+  assert.deepEqual(
+    order.map((b) => b.action_key),
+    ['give', 'use_service', 'ask'],
+  );
 });
 
 // Breaks: "Nothing to do here." draws beside a "not yours" note (UH3), or no longer draws on a
@@ -153,12 +168,20 @@ test('one balance Note after the description on a page with a priced offer', asy
     },
     action: { ...action('use_service'), command: 'use_service', target_ids: [peg.id] },
   });
-  const draw = (npc: object) => {
+  const draw = (npc: object, talking = false) => {
     const view = { ...v, entities: v.entities.map((e) => (e.id === peg.id ? npc : e)) } as GameView;
     const s = screenOf(view);
     const at = s.view.entities.find((e) => e.id === peg.id);
     return shown(
-      NpcPage({ ...s, npc: at, g: group(s.buttons), press() {}, leave() {}, open() {} } as never),
+      NpcPage({
+        ...s,
+        npc: at,
+        g: group(s.buttons),
+        talking,
+        press() {},
+        leave() {},
+        open() {},
+      } as never),
     );
   };
   const { shop: _shop, ...bare } = peg;
@@ -169,6 +192,7 @@ test('one balance Note after the description on a page with a priced offer', asy
     'item.torch.short: Buy 3p; Sell 1p (you are not holding it).',
   ]);
   assert.equal(shelf.filter((l) => l === 'You have 20p.').length, 1);
+  assert.ok(!draw(peg, true).includes('You have 20p.')); // a conversation hides the shelf and purse
   assert.ok(draw({ ...bare, services: [service(1)] }).includes('You have 20p.'));
   assert.ok(!draw({ ...bare, services: [service(0)] }).includes('You have 20p.'));
   assert.ok(!draw(bare).some((l) => l.startsWith('You have')));
