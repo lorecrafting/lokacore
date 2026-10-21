@@ -103,7 +103,7 @@ test('paid ferry and free Sedge lesson survive isle exploration, return and brow
 async function money(screen: Screen) {
   await screen.getByRole('button', /; opens Contents$/).tap();
   await screen.getByRole('button', 'Character, open').tap();
-  await expect(screen.getByText(/^pennies\s+18 \/ 1000$/)).toBeVisible();
+  await expect(screen.getByText(/^pennies\s+18$/)).toBeVisible();
   await screen.getByRole('button', LABEL.backToWorld).tap();
 }
 

@@ -6,40 +6,70 @@ import { BookView, color, game, nodes, view, words } from './__tests__/combat-bo
 import { group, type Page } from './model.ts';
 import { presenter } from './presenter.ts';
 
-// Breaks: Combat renders only the primary and hides actual helper presence behind identical template names.
-test('combat component shows the exact active pack and marks the current primary', () => {
-  const current = view({
-    combat: {
-      encounter_id: 'fight',
-      opponent_id: 'rat',
-      name: 'npc.rat',
-      active_opponents: [
-        { id: 'helper', name: 'npc.rat' },
-        { id: 'rat', name: 'npc.rat' },
-      ],
+const { Combat } = await import('./Combat.tsx'); // after the harness's .tsx hooks
+
+const SAY: Record<string, string> = {
+  'npc.raider': 'the raider',
+  'npc.hound': 'a fen hound',
+  'band.hurt': 'hurt',
+  'band.ready': 'ready',
+  hungry: 'hungry',
+  bleeding: 'Bleeding',
+};
+const combatLines = (combat: object, extra = {}, ended = false) => {
+  const current = view({ combat, ...extra });
+  const live = presenter({ ...game(current), text: (k) => SAY[k] ?? k }).screen();
+  const screen = ended
+    ? { ...live, view: { ...live.view, combat: undefined }, ended: live.view.combat }
+    : live;
+  const page = Combat({ screen, g: group([]), press: () => {}, world: () => {} });
+  return nodes(page)
+    .filter((n) => n.type === 'Text')
+    .map(words);
+};
+
+// Breaks: the Combat block keeps your own hunger or bleeding (read as the raider's), drops the
+// opponent's band, or shows an hp number (book-ui.md Live combat response, pass-1 C2b).
+test('a one-foe fight draws only the opponent line with its band word', () => {
+  const lines = combatLines(
+    { encounter_id: 'fight', opponent_id: 'raider', name: 'npc.raider', band: 'hurt' },
+    {
+      conditions: [{ label: 'hungry' }],
+      bleeding: { label: 'bleeding', ends_at: 300, hp_loss: 1, tick_every: 100 },
     },
-  });
-  const screen = presenter(game(current)).screen();
-  const drawn = nodes(
-    BookView({
-      palette: color.light,
-      screen,
-      stack: [],
-      flip: { turn: 0, dir: 1 },
-      go: () => {},
-      press: () => {},
-      refused: () => {},
-      startOver: () => {},
-      shell: { confirm: (f) => f(), learned: { get: () => true } as never },
-    }),
   );
-  const lines = drawn.filter((n) => n.type === 'Text').map(words);
-  assert.ok(lines.includes('a marsh rat (your target)'));
-  assert.equal(lines.filter((line) => line === 'a marsh rat').length, 2);
-  assert.ok(
-    !lines.some(
-      (line) => line.includes('helper') || (line.includes('rat') && line.includes('fight')),
-    ),
+  assert.deepEqual(
+    lines.filter((l) => /raider|hungry|Bleeding|HP|\d+ \/ \d+/.test(l)),
+    ['the raider — hurt'],
+  );
+});
+
+// Breaks: a pack repeats the primary, gives every member the primary's band, shows a band for a
+// member the player cannot see, or loses the target mark.
+test('a pack draws each member once with its own band and none for a hidden member', () => {
+  const lines = combatLines({
+    encounter_id: 'fight',
+    opponent_id: 'a',
+    name: 'npc.hound',
+    band: 'hurt',
+    active_opponents: [
+      { id: 'a', name: 'npc.hound', band: 'hurt' },
+      { id: 'b', name: 'npc.hound', band: 'ready' },
+      { id: 'c', name: 'npc.hound' },
+    ],
+  });
+  assert.deepEqual(
+    lines.filter((l) => l.includes('hound')),
+    ['a fen hound — hurt (your target)', 'a fen hound — ready', 'a fen hound'],
+  );
+});
+
+// Breaks: a closed encounter keeps the band of its last live view (a dead foe "hurt").
+test('a closed encounter draws the opponent without a band', () => {
+  const raider = { encounter_id: 'fight', opponent_id: 'raider', name: 'npc.raider', band: 'hurt' };
+  assert.deepEqual(
+    combatLines(raider, {}, true).filter((l) => l.includes('raider')),
+    ['the raider'],
   );
 });
 
