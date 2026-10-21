@@ -156,6 +156,10 @@ Session lessons (2026-10-15, b5fe9338, 8c186cca, fc1e2fd7 and 01da56d0):
 - Fable drafts briefs for new modules, contract changes (save, protocol, world graph), Realm-sensitive
   rows and new interaction patterns, one Fable run per batch; Opus or Sonnet brief rows that follow
   an existing pattern, S rows and content (owner 2026-10-14: "yes record the fable brief rule").
+- Designer models (owner 2026-10-21): Opus for design reviews and rulings that apply the system; Fable for creating
+  or evolving the design system (new tokens, components, direction). Repo docs follow in `loka-x6t.73`.
+- Browser automation (owner 2026-10-21): the global `browser-use` skill (`bu.sh`, own Chrome for Testing per agent);
+  Claude in Chrome is denied in settings.
 - Load gate: run `uptime` in its own call before each spawn; spawn only below load 8; at most 5
   agents, at most 3 running tests.
 - Budget: the weekly Claude allowance resets Wednesdays 05:00 HST; Fable draws the same pool faster.
