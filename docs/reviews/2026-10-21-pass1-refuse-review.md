@@ -40,3 +40,17 @@ Holds: 1-5.
 Throwaway worktree, focused files; all of these went red: `over` boundary `>`→`>=`, too_heavy/over_load swap, `shortfall` slice off-by-one, `unpaid` code check dropped, fence `not_stolen` branch dropped, over_load dropped from `REFUSED`, `NOTED.permission_denied` dropped, `notes()` limited to too_heavy. Baseline focused kernel, Book and Elixir runs: green.
 
 Claims rerun: "mutants red" holds. "E8 no kernel change" holds (see SHOWN.take above).
+
+## Fix round 1 (`78f9ee05..5de4dc63`)
+
+Head `5de4dc63f511081a52815ecbf72cd815e8fc6111`. My record went in as `5f91ae4da`, byte-identical to `9f744120`. **Verdict: APPROVE WITH NOTES.**
+
+1. Fixed: `trial.test.ts:272-275` pins `resource.short pennies 5`.
+2. Fixed: `npc-choice.json`, `npc-refused.json` and `npc-riddle.json` regenerated. The only change is key order (`choiceView`).
+3. Fixed: the `NOTED` literal test is deleted (`model.test.ts:249`).
+4. The shelf reason is now a lowercase fragment in both cartridges, `book-ui.md:328` states the rule, and the showcase hash was rebuilt. Focused runs are green: `trial`, `theft`, `showcase_economy`, `flows` (hash), `model`, `stories`, `content_showcase_test.exs` and `content_theft_test.exs`.
+5. `book-ui.md:351` now documents the "need <n> <key>" and "not yours" notes.
+6. F4, F6 and F10 were lost and replaced by a fresh `/code-review`. Accepted as the disposition of finding 4.
+7. Q5 (`action_lists.ts:233`): **follow-up, not now.** Neither cartridge has a talk or flee action with recipe costs, so the case is unreachable. A test would need a synthetic action, and the fix is one word (`admitted` → `code`). The PM files it as P3 with `bin/br_create.sh`.
+
+Hosted CI at `5de4dc63`: `ci` 39676670754 was still pending when this was written.
