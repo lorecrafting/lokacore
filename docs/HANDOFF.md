@@ -61,9 +61,7 @@ Pass-1 playtest and fix batch (session a02501b4, 2026-10-21):
   rulings record docs/reviews/2026-10-21-pass1-ui-rulings.md (loka-x6t.72), .44 spell lines, .41 traps content, .45
   death receipts (record + 2nd opinion), .47 known_npcs living only, x6t.74 UI1 (World order, log lines, speech echo).
 - IN FLIGHT at writing (~18:25 UTC; check each Beads id's last notes):
-  - .46 named refusals: APPROVED (record on local branch review-pass1-refuse 457586b2, head 5de4dc63). Merge when hosted
-    CI on 5de4dc63 is green: `bin/pm_merge.sh ../worktrees.noindex/batch-pass1 showcase/pass1 showcase/pass1-refuse
-    review-pass1-refuse "<subject>" 5de4dc63f511081a52815ecbf72cd815e8fc6111`; recompile the hash fixture on conflict.
+  - .46 named refusals: MERGED into the batch at 919f4dbc.
   - .42 Loft content: re-check APPROVED at 683c4490, but hosted CI failed loader_floors in both kernels; fix round 2
     head 2db2ceae0e330aa6b1ef0dddea200dae93f86d2f only adds a loader_floors strip (PM checked the diff; no re-review).
     Merge when hosted CI on 2db2ceae is green (pass the sha as the review arg; recompile the hash fixture on conflict).
