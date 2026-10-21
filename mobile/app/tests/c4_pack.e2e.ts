@@ -22,5 +22,7 @@ test('hound Attack shows admitted helpers on the Combat page', async ({ app, scr
   await expect(screen.getByText('Combat')).toBeVisible();
   await expect(screen.getByText('a fen hound (your target)')).toBeVisible();
   // One log line per admission record: three helpers, three lines.
-  await expect(screen.getByText(/Another fen hound turns to defend its pack/)).toHaveCount(3);
+  const defend = screen.getByText(/Another fen hound turns to defend its pack/);
+  await expect(defend).toHaveCount(3);
+  await expect(defend.first()).toBeVisible();
 });
