@@ -6,6 +6,10 @@
   },
   "apply": [
     {
+      "op": "narrate",
+      "text": "narration.errand_reward"
+    },
+    {
       "op": "fact.assign",
       "fact": "ward_taught",
       "value": true
