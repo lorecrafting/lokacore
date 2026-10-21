@@ -311,7 +311,7 @@ test('bell_cue is witnessed by ringing the bell in the belfry', () => {
 
 // Breaks: carry credits a refusal alone, a 12000 g load reached without an accepted take (a
 // forced transfer), a take or refusal load other than exactly 12000, or another refusal code.
-test('carry is witnessed by a take landing on 12000 g and a later too_heavy refusal', () => {
+test('carry is witnessed by a take landing on 12000 g and a later over_load refusal', () => {
   const steps = carry(),
     last = steps.length - 1,
     full = last - 3; // take apple_03, move east, move east, refused take
@@ -320,7 +320,7 @@ test('carry is witnessed by a take landing on 12000 g and a later too_heavy refu
     [p.type, p.item_id],
     ['take', steps[full]!.before.entityIds[`${ID}:item/apple_03`]],
   );
-  assert.deepEqual(steps[last]!.decision, { kind: 'rejected', error: { code: 'too_heavy' } });
+  assert.deepEqual(steps[last]!.decision, { kind: 'rejected', error: { code: 'over_load' } });
   assert.deepEqual(
     carryCredits(steps),
     steps.map((_, i) => i === last),

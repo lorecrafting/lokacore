@@ -355,7 +355,10 @@ test('economy 9: from step 5, a seen lift; the guard arrests on the next entry; 
       available: false,
       choice_id: 'pay',
       label: 'dialogue.jailer.pay',
-      reason: { code: 'insufficient_resource' },
+      reason: {
+        code: 'insufficient_resource',
+        message: { key: 'resource.short', bindings: { resource: 'pennies', amount: 3 } },
+      },
     },
     { available: true, choice_id: 'work_off', label: 'dialogue.jailer.work_off' },
   ]);

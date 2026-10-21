@@ -31,7 +31,7 @@ test('finite harvest selects the lowest real ID at equality and Drop/Take share 
   a.run({ type: 'harvest', target_id: patch });
   assert.equal(a.world().state.containers[herbs[0]], fresh.body);
   assert.equal(gameView(a.world()).notices!.find((n) => n.id === patch)!.remaining, 11);
-  a.run({ type: 'harvest', target_id: patch }, 'too_heavy');
+  a.run({ type: 'harvest', target_id: patch }, 'over_load');
   a.run({ type: 'drop', item_id: herbs[0] });
   assert.equal(gameView(a.world()).notices!.find((n) => n.id === patch)!.remaining, 12);
   a.run({ type: 'take', item_id: herbs[0] });
@@ -82,7 +82,7 @@ test('exchange final load allows reducing overload and positive-net equality, re
   for (const [herbMass, bandageMass, total, expected] of [
     [20, 10, 12020, 'accepted'],
     [10, 20, 11970, 'accepted'],
-    [10, 20, 11971, 'too_heavy'],
+    [10, 20, 11971, 'over_load'],
   ] as const) {
     const base = standing(herbs.slice(0, 3), total - 3 * herbMass);
     const entities = { ...base.entities };

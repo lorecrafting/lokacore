@@ -3,6 +3,7 @@
   "aliases": [
     "flamma"
   ],
+  "reason": "reason.flamma",
   "target": {
     "kind": "spell",
     "word": "flamma",

@@ -177,7 +177,8 @@ export function homestead(c: any) {
   for (const s of ['afraid', 'wet', 'shocked', 'stunned', 'warm'])
     delete c.statuses[ref('status', s)].narration.observed; // 1.110 (loka-kgd.176)
   delete c.statuses[ref('status', 'wanted')].kind; // 1.102 (the law's wanted icon, E1)
-  // The traps district's narrate lines and wheel readouts (1.103) and lever hall asides (1.91).
+  // The traps district's narrate lines and wheel readouts (1.103) and lever hall asides (1.91);
+  // the Loft's errand handover line (1.103).
   delete c.rooms[ref('room', 'lever_hall')].asides;
   for (const r of [
     'lever_b_step',
@@ -188,6 +189,7 @@ export function homestead(c: any) {
     'plate_bites',
     'cellar_springs',
     'cellar_bites',
+    'errand_reward',
   ]) {
     const x = c.reactions[ref('reaction', r)];
     x.apply = x.apply.filter((op: any) => op.op !== 'narrate');

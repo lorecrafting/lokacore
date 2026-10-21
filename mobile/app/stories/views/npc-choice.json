@@ -503,24 +503,24 @@
    "closable": true,
    "choices": [
     {
-     "available": true,
      "choice_id": "accept",
-     "label": "dialogue.elspeth.accept"
+     "label": "dialogue.elspeth.accept",
+     "available": true
     },
     {
-     "available": true,
      "choice_id": "directions",
-     "label": "dialogue.elspeth.directions"
+     "label": "dialogue.elspeth.directions",
+     "available": true
     },
     {
-     "available": true,
      "choice_id": "inn",
-     "label": "dialogue.elspeth.inn"
+     "label": "dialogue.elspeth.inn",
+     "available": true
     },
     {
-     "available": true,
      "choice_id": "wren",
-     "label": "dialogue.elspeth.wren"
+     "label": "dialogue.elspeth.wren",
+     "available": true
     }
    ]
   },

@@ -103,7 +103,7 @@ const SHOWN: Readonly<Record<string, readonly string[]>> = {
   ],
   perform: ['invalid_state', 'cooldown', 'insufficient_resource'],
   put: ['not_present', 'not_owned', 'invalid_state', 'exit_closed', 'exit_locked'],
-  take: ['not_present', 'too_heavy'], // reach and voluntary carrying admission
+  take: ['not_present', 'too_heavy', 'over_load'], // reach and voluntary carrying admission
 };
 
 const DOOR_VERBS = [...Object.keys(MOVES), 'knock'];

@@ -672,9 +672,9 @@
    },
    "choices": [
     {
-     "available": true,
      "choice_id": "answer",
-     "label": "dialogue.b_vesper_riddle.answer"
+     "label": "dialogue.b_vesper_riddle.answer",
+     "available": true
     }
    ]
   },
