@@ -1,7 +1,7 @@
 // status@1 (toolbox rows 1, G3): timed statuses on the player's body, an NPC or an item, one
 // generation per holder/status pair; the tick job is unbound and finds its row by job id, so a
 // stale one completes harmlessly.
-// size: allow 321, row 16 pierces sits beside its one caller so skills.ts stays out of this cycle
+// size: allow 323, row 16 pierces sits beside its one caller so skills.ts stays out of this cycle; item lines (y6yg.48)
 import type {
   DefinitionRef,
   DeltaOp,
