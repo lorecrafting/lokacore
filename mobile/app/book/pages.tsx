@@ -4,7 +4,7 @@
 import type { ReactNode } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
-import { plain, why, type group, type Pool } from './model.ts';
+import { notVerb, plain, why, type group, type Pool } from './model.ts';
 import type { Button, DetailLine } from './presenter.ts';
 import { note, prose, usePalette, type Palette } from './palette.ts';
 import { opacity, size, space, type } from './tokens.ts';
@@ -113,7 +113,7 @@ export function RoomPage(p: {
 }) {
   const c = usePalette();
   const look = p.g.look;
-  const actions = placeActions(p.view, p.g, p.press); // one list, as the room's lines
+  const actions = placeActions(p.view, p.g, p.press, p.text); // one list, as the room's lines
   return (
     <Page
       title={p.text(p.view.place.title.key)}
@@ -179,18 +179,30 @@ const storylet = (view: GameView, g: Grouped, press: (b: Button) => void, text: 
   );
 };
 
-// The place's own actions; a notice's actions stay on its notice page; the storylet has its card.
-const placeActions = (view: GameView, g: Grouped, press: (b: Button) => void) =>
-  g.place
-    .filter(
-      (b) =>
-        b.action_key !== view.storylet &&
-        ![
-          ...(view.notices ?? []),
-          ...(view.notice_boards ?? []).flatMap((board) => board.notices),
-        ].some((n) => b.target_ids.includes(n.id)),
-    )
-    .map((b) => <VerbLine key={`${b.label}:${b.target_ids.join(',')}`} b={b} press={press} />);
+// The place's own actions, then those it lists unavailable as `label: reason` notes, never dropped
+// (pass-1 R2); a notice's actions stay on its notice page; the storylet has its card.
+const placeActions = (view: GameView, g: Grouped, press: (b: Button) => void, text: Say) => {
+  const notices = [
+    ...(view.notices ?? []),
+    ...(view.notice_boards ?? []).flatMap((board) => board.notices),
+  ];
+  const verb = (a: { action_key: string; target_ids?: readonly string[] }) =>
+    a.action_key !== view.storylet && !notices.some((n) => a.target_ids?.includes(n.id));
+  return [
+    ...g.place
+      .filter(verb)
+      .map((b) => <VerbLine key={`${b.label}:${b.target_ids.join(',')}`} b={b} press={press} />),
+    ...view.actions
+      .filter((a) => !a.available && !a.input.length && !notVerb(a.action_key) && verb(a))
+      .map((a) => (
+        <ActionCard
+          key={`${a.action_key}:${a.target_ids?.join(',')}`}
+          label={text(a.label)}
+          reason={why(a, text)}
+        />
+      )),
+  ];
+};
 
 // One shell for every page (BOOK-UI-COMPONENTS.md, Page): the title (fixed: the room's, outside
 // the scroll), the blocks, and the page foot.

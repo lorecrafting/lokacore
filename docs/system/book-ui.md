@@ -27,7 +27,7 @@ description, projected interactibles, offered place actions, event log and, last
 [Word block](#word-bar), so a pressed verb's result line sits within a screen of the verb and the
 word rows never push it below the fold (pass-1 UA). A place action the GameView advertises
 unavailable draws in the verb list, after the available verb lines, in the Action card's
-unavailable form `label: reason` (`Cast the rod: not yet`; `cooldown` reads **not yet**), never
+unavailable form `label: reason` (`Fish in: not yet`; `cooldown` reads **not yet**), never
 dropped (pass-1 R2); a World page with only unavailable verbs draws no "Nothing to do here." Note.
 A closed or locked exit's door actions (Open, Unlock) draw on World as Action cards after the
 place verb lines, with the Map's labels; the Map keeps them too (pass-1 R4, owner 2026-10-21).
