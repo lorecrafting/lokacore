@@ -11,6 +11,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
 - [Pass-1 UI rulings (loka-x6t.72)](2026-10-21-pass1-ui-rulings.md)
+- [Review: pass-1 GE2, item status observed and expired lines, burning bier (loka-y6yg.48)](2026-10-21-pass1-itemstatus-review.md): **CHANGES REQUIRED**
 - [Review: pass-1 GE4, death and round receipts lost in a cast-started fight (loka-y6yg.45)](2026-10-21-pass1-death-review.md): **APPROVE**
 - [Review: PR #419 opt-in observed line for a status on a seen NPC, kernel_api 1.110 (loka-kgd.176)](2026-10-21-npc-status-observed-review.md): **APPROVE**
 - [Review: PR #411 Book hostile NPC refusal line, kernel_api 1.104 (loka-y6yg.20 part B, loka-x6t.33)](2026-10-16-pr411-hostile-refusal-review.md): **APPROVE**
