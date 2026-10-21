@@ -16,12 +16,14 @@ type Encounter = NonNullable<Screen['ended']>;
 // status line and Character (book-ui.md, Live combat response).
 function Fight({ view, text, combat }: Pick<Screen, 'view' | 'text'> & { combat: Encounter }) {
   const c = usePalette();
+  const { opponent_id: id, name, band } = combat;
   return (
     <View>
-      {(combat.active_opponents ?? [{ ...combat, id: combat.opponent_id }]).map((opponent) => (
+      {(combat.active_opponents ?? [{ id, name, band }]).map((opponent) => (
         <Text key={opponent.id} style={prose(c)}>
           {text(opponent.name)}
-          {opponent.band && ` — ${bandPhrase({ band: opponent.band }, text)}`}
+          {/* a closed encounter's band is stale (a dead foe has none) */}
+          {view.combat && opponent.band && ` — ${bandPhrase({ band: opponent.band }, text)}`}
           {combat.active_opponents && opponent.id === combat.opponent_id && view.combat
             ? ' (your target)'
             : ''}

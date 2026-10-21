@@ -16,9 +16,12 @@ const SAY: Record<string, string> = {
   hungry: 'hungry',
   bleeding: 'Bleeding',
 };
-const combatLines = (combat: object, extra = {}) => {
+const combatLines = (combat: object, extra = {}, ended = false) => {
   const current = view({ combat, ...extra });
-  const screen = presenter({ ...game(current), text: (k) => SAY[k] ?? k }).screen();
+  const live = presenter({ ...game(current), text: (k) => SAY[k] ?? k }).screen();
+  const screen = ended
+    ? { ...live, view: { ...live.view, combat: undefined }, ended: live.view.combat }
+    : live;
   const page = Combat({ screen, g: group([]), press: () => {}, world: () => {} });
   return nodes(page)
     .filter((n) => n.type === 'Text')
@@ -58,6 +61,15 @@ test('a pack draws each member once with its own band and none for a hidden memb
   assert.deepEqual(
     lines.filter((l) => l.includes('hound')),
     ['a fen hound — hurt (your target)', 'a fen hound — ready', 'a fen hound'],
+  );
+});
+
+// Breaks: a closed encounter keeps the band of its last live view (a dead foe "hurt").
+test('a closed encounter draws the opponent without a band', () => {
+  const raider = { encounter_id: 'fight', opponent_id: 'raider', name: 'npc.raider', band: 'hurt' };
+  assert.deepEqual(
+    combatLines(raider, {}, true).filter((l) => l.includes('raider')),
+    ['the raider'],
   );
 });
 
