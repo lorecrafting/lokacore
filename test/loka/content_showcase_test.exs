@@ -91,7 +91,7 @@ defmodule Loka.ContentShowcaseTest do
       ] ++
         for({f, k} <- @dropped_keys, do: {f <> ".json", fn m -> Map.delete(m, k) end})
 
-  # The golem's observed lines need API 1.110 (row G3, loka-kgd.176).
+  # The observed lines (the golem's, the burning wood's) need API 1.110 (row G3, loka-kgd.176).
   defp unobserved(status),
     do:
       {"statuses/#{status}.json",
@@ -119,7 +119,7 @@ defmodule Loka.ContentShowcaseTest do
     do:
       homestead_edits() ++
         unnarrated() ++
-        Enum.map(~w(afraid wet shocked stunned warm), &unobserved/1) ++
+        Enum.map(~w(afraid burning wet shocked stunned warm), &unobserved/1) ++
         for(
           f <- @homestead_files,
           do: {f <> ".json", nil}

@@ -325,7 +325,7 @@
       "floor": "1.58",
       "below": "1.57",
       "source": "cartridges/toolbox_showcase",
-      "feature": "a reaction's attacker filter (loka-kgd.79); the Homestead (1.101/1.102), speech.phrases (1.98), disposition.refuse (1.104) and the Undercroft's banks, escrow, stock tables, shelves and locks, and the law district's theft, hide, NPC locks, stolen offers and fine, and the magic district's light capability, lanterns, lamp oil, dark crypt, lux, ward, flamma and its sparks, the golem's observed lines (1.110), and the traps district's lever, wheel and needle lines (narrate, 1.103) and lever hall asides (1.91), dropped",
+      "feature": "a reaction's attacker filter (loka-kgd.79); the Homestead (1.101/1.102), speech.phrases (1.98), disposition.refuse (1.104) and the Undercroft's banks, escrow, stock tables, shelves and locks, and the law district's theft, hide, NPC locks, stolen offers and fine, and the magic district's light capability, lanterns, lamp oil, dark crypt, lux, ward, flamma and its sparks, the observed lines (1.110), and the traps district's lever, wheel and needle lines (narrate, 1.103) and lever hall asides (1.91), dropped",
       "edits": [
         ["cartridge.json", ["speech"], null],
         ["statuses/gored.json", ["kind"], null],
@@ -527,6 +527,7 @@
         ["statuses/stunned.json", ["narration", "observed"], null],
         ["statuses/afraid.json", ["narration", "observed"], null],
         ["statuses/warm.json", ["narration", "observed"], null],
+        ["statuses/burning.json", ["narration", "observed"], null],
         ["reactions/lever_b_step.json", ["apply"], [{"op": "fact.assign", "fact": "lever_stage", "value": 2}]],
         ["reactions/lever_b_reset.json", ["apply"], [{"op": "fact.assign", "fact": "lever_stage", "value": 0}]],
         ["reactions/lever_c_step.json", ["apply"], [{"op": "fact.assign", "fact": "lever_stage", "value": 3}]],
@@ -1390,14 +1391,15 @@
       "floor": "1.104",
       "below": "1.103",
       "source": "cartridges/toolbox_showcase",
-      "feature": "an NPC's disposition.refuse line (Book hostile refusal); the golem's observed lines (1.110) dropped",
+      "feature": "an NPC's disposition.refuse line (Book hostile refusal); the observed lines (1.110) dropped",
       "edits": [
         ["npcs/guard.json", ["disposition"], null],
         ["statuses/wet.json", ["narration", "observed"], null],
         ["statuses/shocked.json", ["narration", "observed"], null],
         ["statuses/stunned.json", ["narration", "observed"], null],
         ["statuses/afraid.json", ["narration", "observed"], null],
-        ["statuses/warm.json", ["narration", "observed"], null]
+        ["statuses/warm.json", ["narration", "observed"], null],
+        ["statuses/burning.json", ["narration", "observed"], null]
       ],
       "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
       "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
@@ -1414,13 +1416,14 @@
       "floor": "1.105",
       "below": "1.104",
       "source": "cartridges/toolbox_showcase",
-      "feature": "an NPC's disposition.arrest (the law district's guard); the golem's observed lines (1.110) dropped",
+      "feature": "an NPC's disposition.arrest (the law district's guard); the observed lines (1.110) dropped",
       "edits": [
         ["statuses/wet.json", ["narration", "observed"], null],
         ["statuses/shocked.json", ["narration", "observed"], null],
         ["statuses/stunned.json", ["narration", "observed"], null],
         ["statuses/afraid.json", ["narration", "observed"], null],
-        ["statuses/warm.json", ["narration", "observed"], null]
+        ["statuses/warm.json", ["narration", "observed"], null],
+        ["statuses/burning.json", ["narration", "observed"], null]
       ],
       "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
       "loader": ["KERNEL_API_RANGE_INVALID", ".cartridge.manifest.requires.kernel_api.at_least"]
