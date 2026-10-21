@@ -63,3 +63,5 @@ Findings:
 2. question, Realm: sight is judged for the delivery actor, while the line goes to the root receipt. The applied line has the same shape today, and R14 delivers per character; confirm when Realm reactions land.
 
 Verdict: APPROVE WITH NOTES (finding 1 is a test fix in the fix round).
+
+Fix re-check (fb01a509, scoped to `showcase_magic.test.ts` and `mechanics.md` over c73751dd): magic 9b now uses `room(y, 'loft')`; the mutant `containers[holder] === here` to `!!containers[holder]` is red-narrow (magic 9b fails; baseline 13/13 green); the Realm question is recorded as a known limit in mechanics.md status Narration. Finding 1 resolved, question 2 disposed. Verdict: APPROVE.
