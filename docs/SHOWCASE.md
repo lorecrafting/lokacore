@@ -124,6 +124,9 @@ goes back to the batch as a finding, not into the showcase.
    `showcase-playtest`; the [designer](decisions/owner-decision-designer-role-2026-10-07.md)
    turns UI findings into polish-lane Beads under `loka-x6t` and spec changes; fixes batch on
    the owner's go.
+8. **Archive:** keep the reports, the triage and a few key shots under `docs/playtests/`
+   ([pass 1](playtests/2026-10-21-pass1/README.md)); tag each row with a cause family and add
+   new authoring rules to the [area authoring checklist](guides/area-authoring.md).
 
 ## Retiring Chapter 1
 

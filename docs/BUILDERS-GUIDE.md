@@ -131,6 +131,7 @@ and fixes; the [mechanics](lessons/mechanics.md), [storage](lessons/storage.md) 
 [contract](lessons/contracts.md) lessons explain failures that apply beyond one chapter.
 Compiler and loader checks, contract fixtures and regression tests enforce reusable
 rules. A review record preserves the investigation but is not an executable guard.
+Before a district or area plan, read the [area authoring checklist](guides/area-authoring.md).
 When another story needs a missing mechanic, add it for that real consumer, amend
 the active specification and test the failure before updating this guide.
 

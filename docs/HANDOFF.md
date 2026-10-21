@@ -6,8 +6,8 @@ the next steps, the standing owner rules that the repo does not yet state, and o
 questions. Rewrite it at each stable checkpoint (a merge, a review verdict, a pushed fix) and before
 the session ends; commit and push it with the Beads export.
 
-Written 2026-10-21 UTC by Claude Code (Opus 5.5) in local session c5ed3619 (resumed after the weekly reset), at a
-clear before the Fable playtest. State at writing: no agent running, no open PR of ours (only parked #372).
+Written 2026-10-21 ~22:20 UTC by Claude Code (Opus 5.5), PM session 7b6568, mid pass-1 fix batch.
+State at writing: agents may still be running (see "Pass-1 fix batch" below; their handbacks land in Beads notes).
 
 ## Start of a session
 
@@ -52,19 +52,32 @@ kernel_api 1.110: a status's optional `narration.observed` gives an applied line
 (loka-ikch, worldbuilding drafts rescued from the main checkout), #418 (loka-y6yg.38, plan 7 traps district, three
 slices). THE SHOWCASE IS FULLY BUILT (hub, combat, social, fire, homestead, economy/law, magic, traps).
 
-Next (all Opus unless marked):
-1. ONE sweeping blind Fable playtest (`loka-y6yg.34`; its notes hold the economy/law brief: EXTEND it to the whole
-   showcase: economy/law (now with arrest, jail and work-off), magic (loft up from the inn), traps (down from the drill
-   yard) and a hub regression pass of the older districts). ASK THE OWNER FOR THE USAGE BAR FIRST (Fable). Keep the
-   blind rules (no plans, cartridge or tests before play), 390 px, its own worktree and port, timebox ~2 h.
-2. Triage: gameplay findings into ONE Opus fix slice (split if it exceeds ~2 plan steps' worth, retro loka-7m2u); UI
-   findings into `loka-x6t` for polish. Known, already filed (do not re-file): room-line variants not drawn
-   (loka-x6t.71), NPC page conditions (loka-x6t.70), Word bar hides spells in a fight (loka-x6t.69), bank-then-work-off
-   (loka-y6yg.36), sign word "mana" vs Book "ma".
+Pass-1 playtest and fix batch (session a02501b4, 2026-10-21):
+- Playtest DONE (`loka-y6yg.34`): sweeper 1 (Claude in Chrome) + sweepers A and B (browser-use, 390 px); triage of 70
+  findings in docs/playtests/2026-10-21-pass1/ (#421, loka-y6yg.40 merged: archive, analysis, docs/guides/area-authoring.md,
+  9 candidate checks AWAITING OWNER APPROVAL: see analysis.md; file each approved one via bin/br_create.sh).
+- PM rulings on triage questions: `loka-y6yg.34` notes. Owner: door Open also on World; Lift + risk note.
+- Batch branch `showcase/pass1` (worktree ../worktrees.noindex/batch-pass1, no PR yet). MERGED into it: design spec +
+  rulings record docs/reviews/2026-10-21-pass1-ui-rulings.md (loka-x6t.72), .44 spell lines, .41 traps content, .45
+  death receipts (record + 2nd opinion), .47 known_npcs living only, x6t.74 UI1 (World order, log lines, speech echo).
+- STATE (session 7b6568, 2026-10-21 ~22:20 UTC; each Beads id's last notes are current):
+  - MERGED into showcase/pass1: .43 law+hub (e6db50de), .48 item status lines (b2ab160e, record 30ccf163). Batch CI watched per merge.
+  - UI2 loka-x6t.75: approved (review + Opus designer), but hosted ci RED at 6a60fd26 (4 polish tests hand-build views without
+    actions). Fix folded into UI3+UI4; UI2 merges into the batch WITH the UI3+UI4 head.
+  - UI3+UI4 loka-x6t.76+.77 batched as ONE slice, branch showcase/pass1-ui34 from the UI2 head (brief in .76 notes); building.
+  - UI5 loka-x6t.78: review CHANGES REQUIRED (e2e pennies pin); fresh developer doing UI5 fix + UI6 .79 on showcase/pass1-ui5 (brief in .78 notes).
+  - .49 opponent band: MERGED at 09eabd13 (both reviewers APPROVE after fix round 1, record 13692fb9). (old: record da7dd353, branch
+    review-pass1-band); fresh-developer fix round 1 running (brief in .49 notes). Then scoped re-check by BOTH reviewers.
+  - Then: batch PR to main, merge main in once, CI green, merge, bin/after_merge.sh; Opus re-walk of the pass-1 findings at 390 px
+    (owner OK'd a targeted re-walk instead of a second blind sweep); owner preview 19006/19007; PushNotification.
+- Merging content slices: the showcase hash fixture conflicts; recompile (`mix loka.compile cartridges/toolbox_showcase
+  <out>`, split {cartridge, content_hash} into canonical + sha256, keep the description) in the batch worktree, run the
+  showcase TS + Elixir tests, push. Always wait for hosted CI on the slice head before merging (two approved slices
+  were red on CI today).
+- Follow-ups filed: loka-y6yg.50-.53, loka-kgd.178/.179. Retro 2026-10-21 (AWAITING OWNER APPROVAL): loka-8qzi (pre-push
+  stories freshness), loka-u8ey (no forks unless allowed); evidence added to loka-xvxa (dev ran to 650k) and loka-kjky (hash
+  fixture conflicts on every content merge).
 3. Owner: slice D two-save playtest (`loka-y6yg.4`). Then UI polish with the owner.
-- Playtest lessons (`loka-y6yg.40`, owner 2026-10-21): right after the pass-1 triage, in parallel with the fix slices,
-  archive the reports, tag cause families, draft docs/guides/area-authoring.md and file candidate checks for owner
-  approval. Must finish before any real chapter area is built.
 Approved, after the showcase, before chapter work: loka-kgd.173 sim invariants, loka-kgd.174 Book visibility check,
 loka-kgd.175 scale benchmark (status sort, entity scan hot spots), loka-kgd.177 red control for
 target_candidates_ordered; approved retro items for the next housekeeping PR: loka-7m2u, loka-xvxa, loka-8zf5,
@@ -156,6 +169,10 @@ Session lessons (2026-10-15, b5fe9338, 8c186cca, fc1e2fd7 and 01da56d0):
 - Fable drafts briefs for new modules, contract changes (save, protocol, world graph), Realm-sensitive
   rows and new interaction patterns, one Fable run per batch; Opus or Sonnet brief rows that follow
   an existing pattern, S rows and content (owner 2026-10-14: "yes record the fable brief rule").
+- Designer models (owner 2026-10-21): Opus for design reviews, rulings and maintaining the (now stable) system; Fable only for
+  a new direction (unprecedented page type or component family, owner-asked refresh, RC audit). Docs: `loka-x6t.73`.
+- Browser automation (owner 2026-10-21): the global `browser-use` skill (`bu.sh`, own Chrome for Testing per agent);
+  Claude in Chrome is denied in settings.
 - Load gate: run `uptime` in its own call before each spawn; spawn only below load 8; at most 5
   agents, at most 3 running tests.
 - Budget: the weekly Claude allowance resets Wednesdays 05:00 HST; Fable draws the same pool faster.
