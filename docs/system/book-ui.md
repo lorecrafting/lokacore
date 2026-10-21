@@ -23,7 +23,15 @@ its carries are scheduled in [ROADMAP](../ROADMAP.md#c1-carry-checkpoints).
 ## World and status entry
 
 World is one current-room page. Its centered title remains fixed above the scrolling authored
-description, projected interactibles, offered place actions and event log. The description
+description, projected interactibles, offered place actions, event log and, last, the
+[Word block](#word-bar), so a pressed verb's result line sits within a screen of the verb and the
+word rows never push it below the fold (pass-1 UA). A place action the GameView advertises
+unavailable draws in the verb list, after the available verb lines, in the Action card's
+unavailable form `label: reason` (`Cast the rod: not yet`; `cooldown` reads **not yet**), never
+dropped (pass-1 R2); a World page with only unavailable verbs draws no "Nothing to do here." Note.
+A closed or locked exit's door actions (Open, Unlock) draw on World as Action cards after the
+place verb lines, with the Map's labels; the Map keeps them too (pass-1 R4, owner 2026-10-21).
+The description
 may contain underlined touch links for projected room fixtures: scenery, fixed doors or
 exit cues, and other room-bound subjects. A fixture link stays within the authored prose,
 whether it appears mid-sentence or at the end of the last paragraph; the Book does not
@@ -61,10 +69,18 @@ to the actual room: after a confirmed accepted action changes place, clear the o
 before adding genuine new movement/quest/authored consequences. The room shown is the one the
 committed receipt places the player in, never the exit's destination: an arrest (a wanted player
 walking in on an arresting guard) turns the World page to the cell, and its log carries the move's
-lines in receipt order (arrest line, then the reaction's charge). No card, note or banner. Attempts, pending/refused/stale
+lines in receipt order (arrest line, then the reaction's charge). Each narration record of a
+receipt is its own log line, in record order; the Book never joins records into one line, and
+the `words.ts` outcome word ("Opened.") draws only for a receipt with no narration at all
+(pass-1 UO). No card, note or banner. Attempts, pending/refused/stale
 results, rerenders, same-room NPC actions, Leave and section navigation do not clear it. Active
 save status/error UI remains accurate; NPC histories stay independently bounded. Map
-retains movement, adjacent sight and legal door actions. The World minimap/joystick sits outside
+retains movement, adjacent sight and legal door actions, and draws no event log: the log lives
+on World only (pass-1 UF1). An exit's door state line ("West door: closed") draws only when no
+exit card already carries that state as its reason; the door's action cards stay (pass-1 UF2).
+A closed or locked door's Open/Unlock cards draw on World as well, in the
+[World order](#world-and-status-entry) (pass-1 R4). The
+World minimap/joystick sits outside
 the scrolling body, with status beneath it, inside the existing safe area.
 
 A projected Read place action keeps its exact detail target and authored label and follows
@@ -80,7 +96,9 @@ Settings retains Start over and its confirmation/error handling, and holds the
 Resource-band phrases come from cartridge text (`band.<key>`); projected tones map to the paper
 palette without presenter thresholds. Status shows the hp band phrase only on hp. The status line
 shows only the condition pools hp, ma and mv, with their band tones; pennies and any other count
-stay off the status line and show plain in Character (owner, polish pick mv1j35ltxddx). With a
+stay off the status line and show plain in Character (owner, polish pick mv1j35ltxddx): a
+count (pennies, ash: any resource other than the pools hp, ma and mv named above; no new field) draws its current value alone
+(`pennies 10`, `ash 0`), never `current / maximum`; a banded pool keeps `hp 10 / 10` (pass-1 UI). With a
 cartridge calendar, status shows the sky as one glyph from the confirmed solar and lunar phase
 labels (the sun by its phase while up, the moon by its phase at night, per the catalogue's
 [Status line](../BOOK-UI-COMPONENTS.md#component-catalogue)); the confirmed day, displayed time
@@ -157,7 +175,8 @@ the cartridge contains it or adjacent sight names it. Existing current-room exit
 controls retain live admission. Where labels distinguish currently visible `here`,
 `last seen` with the saved place/time, and `unknown`; a hidden co-located NPC does not
 become `here`, and a stale observation is never phrased as a current location. Each known
-NPC's Where control reads "Ask where <name> is".
+NPC's Where control reads "Ask where <name> is"; only a living known NPC has one, a dead one
+none (pass-1 UF3; the kernel leaves the dead out of `known_npcs`, GE6).
 Knock appears on the actual local door's context card and uses its exact direction and
 freshness token. It leaves that card and Map reachable after its reply.
 
@@ -185,7 +204,11 @@ shows it. A control whose shown text is its whole name (Leave, Got it, an action
 
 Detail pages show title/identity, authored description and its [asides](#aside-details), projected item state, then their
 chronological event log only when entries exist, then currently offered options in the same
-scrolling content. An empty log has no heading or placeholder. NPC, item, notice, board and
+scrolling content. Options list in one fixed order (pass-1 UR): first the verbs that act on the
+thing itself (Read, Eat, Drink, Wear, Light, Open, Talk, Attack, a recipe), then the verbs that
+move it (Take, Lift, Drop), then the verbs that store or hand it over (Put into <container>,
+Give), then asks and services; a corpse's Take from it precedes Put into it. Within a group the
+GameView's order stands. An empty log has no heading or placeholder. NPC, item, notice, board and
 combat details follow this order; World retains its [room-page order](#world-and-status-entry).
 A page's local returns (Leave, Back to World, Back to board, Back to container, Back to map,
 Close) sit in its page foot, below the scrolling content and above the status line, nearest first;
@@ -239,7 +262,10 @@ currently projected. A newer unrelated narration receipt cannot provide detail i
 
 Tapping an NPC opens full details using its actual projected name, authored description and
 actions. Description comes first. Outside a conversation the page offers the person's actions as
-cards straight after the description: Talk, shop, [Ask about](#fd7-ask-details) and service offers; the foot is Leave. It shows
+cards straight after the description: Talk, shop, [Ask about](#fd7-ask-details) and service offers; the foot is Leave. A page
+with any priced offer (a shelf, a bank, a priced service) draws one Note **You have <n>p.**
+after the description, before the shelf rows, from the projected pennies; it is the only place
+the balance is written, and "can't afford" stays a bare reason (pass-1 E15). It shows
 no past conversation log on a fresh visit to the page or after Leave the conversation (the log
 shows again inside a new conversation); lines since that visit began or that Leave are the only
 history. Answering (a `choose` press) puts that page **in conversation**, and it stays so after a one-reply
@@ -317,12 +343,14 @@ Retry retains original action/target context and appends each confirmed Take/Dro
 When Take removes an item from a corpse's Contents, the confirmed result returns to
 that corpse detail, puts the named pickup line in its local history once, and keeps
 Back to World available. The taken item appears in Carrying. An unavailable corpse
-closes its detail through the ordinary stale-route rule; no success is inferred. A living NPC's directly held items, offered under `world.theft`, list under **Held** (not Inside), as Entity lines that open the ordinary item detail with Take; a corpse or container keeps **Inside**.
+closes its detail through the ordinary stale-route rule; no success is inferred. A living NPC's directly held items, offered under `world.theft`, list under **Held** (not Inside), as Entity lines that open the ordinary item detail; there the theft card reads **Lift** (a `LABEL` word, never Take) with one Note **<Name> is holding it.** above it, so the verb and the line name the risk before the press (pass-1 E14, owner 2026-10-21); a corpse or container keeps **Inside** and Take.
 
 An item action advertised unavailable with `too_heavy` appears as a non-action note using its
-actual catalog label and **too heavy to carry**. It invokes nothing; available actions retain their
+actual catalog label and **too heavy to carry**; one refused because the load is full reads
+**more than you can carry** (kernel code `over_load`) (pass-1 R3). It invokes nothing; available actions retain their
 existing buttons. The note follows the latest GameView, including Take aliases and Contents,
-and disappears when shedding held load makes Take legal.
+and disappears when shedding held load makes Take legal. While any such note shows, the page
+draws no "Nothing to do here." Note: an unavailable action is still something to read (pass-1 UH3).
 
 
 Successful ordinary Take/Drop are the specific exceptions to item-page retention; corpse-content
@@ -451,7 +479,13 @@ while the combat page is open.
 Combat takes precedence over ordinary navigation until the encounter closes. **Opening.** The
 receipt that opens an encounter (a move's or Sleep's `engage`, Attack, a cast's fight-back)
 routes all of its narration to the combat log, so the page opens with the engage line as its
-first log line; the opponent block always shows, so the page is never blank. **Closure.** On
+first log line; the opponent block always shows, so the page is never blank. The opponent block
+leads with the opponent lines, each the name and its hp band phrase joined by " — " ("the
+raider — hurt", the cartridge's `band.<key>` words the status line uses; no number, the hp
+band stays on the locked status line; the opponent's band is a GameView field, engine slice
+loka-y6yg.49). Your own bleeding and condition lines draw nowhere on the Combat page: they stay
+on the status line and Character, so a reader never takes your hunger for the raider's
+(pass-1 C2b, as loka-x6t.15). **Closure.** On
 every committed closure (opponent death, player death and inn return, successful Flee, any
 other end) the Combat page stays the shown page, as a one-reply conversation does: its opponent
 block without the target suffix (nothing is left to aim at), its log ending with the closing
@@ -544,11 +578,12 @@ lesson, its authored price and immediate result under ordinary Talk/Choose/Leave
 with no new trainer screen or idle-wait control. The swords lesson comes first and
 the next conversation offers dodge. Already acquired teaching is unavailable and
 cannot suggest a replacement gift. Learning and qualification are described
-separately: the Character page lists each declared acquired skill and its current
-qualified/unqualified status plus the authored requirement. Unlearned status does
+separately: the Character page lists each declared acquired skill as learned and, only
+while its requirement is no longer met, its unqualified status plus the authored requirement
+([skill tree details](#skill-tree-details)). Unlearned status does
 not imply a combat benefit. Current chapter STR/DEX are shown from GameView. The
 Character page reads `attributes` and `skills` from confirmed GameView data, filters
-skills by `acquired`, and shows each authored label, requirement and current qualification.
+skills by `acquired`, and shows each authored label and, when unqualified, the requirement.
 Known attributes or acquired skills suppress the empty Character placeholder.
 
 The gifted sword and actual Peg equipment use ordinary item detail, Wear and Remove.
@@ -1021,7 +1056,7 @@ The player follows ordinary exits from Green through the authored corridor to Oa
 
 ## Conditions details
 
-GameView `conditions` lists every active [status](mechanics.md#status-effects-over-time-toolbox-row-1) on the body with its authored label, end, next tick and per-tick change; C5 `bleeding` keeps its own field and lines. A condition label is authored lowercase, like a position word (`poisoned`, `blessed`); an icon's tooltip and name show it as authored and the Character page capitalises it as it does the position. A condition's line is the label, the time remaining and the signed per-tick amount with its pool key, joined by " · " ("poisoned · 4m remaining · -1 HP each 60s"); a permanent condition has no time part, one without a tick no amount, and the sign is always in the text. A duration or cadence under two minutes shows in seconds ("40s"), otherwise in whole minutes ("60m"). The Character page lists each line, its label capitalised, after the bleeding line; the Combat page lists the same lines after the bleeding line in its first block. The status icon row shows one round icon per condition, buffs and debuffs told apart by their look, five icons then a +N disc; a tap opens Character; the Character page keeps the full list. The row sits above the status line, in condition order; a hold (a hover or keyboard focus on web) shows the label and time joined by ", " ("fed, 48m remaining"), and an icon's name adds the polarity and the action ("fed, 48m remaining, buff, opens Character"; no polarity for a neutral condition; "+1 more, opens Character" for the disc). While the status line is locked the icons are named pictures, not buttons, dim like the Contents button (the neutral look). A timed icon wears a countdown ring round its disc: a track and an arc for the share of its duration still to run ([look](../BOOK-UI-COMPONENTS.md)), clockwise from 12 o'clock, recomputed from projected time; between updates the arc drains linearly to its new share over the real time since the last update, at most 1 s (display only; presentation keeps no gameplay clock), and jumps without motion on first show and on a refresh; under reduced motion it steps; while locked the ring dims with its icon ([look](../BOOK-UI-COMPONENTS.md)) and still drains; at its end only the track shows, and a permanent condition has no ring. Icon glyphs are placeholders until loka-x6t.63. The presenter reads projected state and never computes or writes an effect, tick or cure; applied, tick and expired lines come from their receipts' narration and appear once. No new control: a cure is the ordinary Eat of a held item whose `cures` lists the condition.
+GameView `conditions` lists every active [status](mechanics.md#status-effects-over-time-toolbox-row-1) on the body with its authored label, end, next tick and per-tick change; C5 `bleeding` keeps its own field and lines. A condition label is authored lowercase, like a position word (`poisoned`, `blessed`); an icon's tooltip and name show it as authored and the Character page capitalises it as it does the position. A condition's line is the label, the time remaining and the signed per-tick amount with its pool key, joined by " · " ("poisoned · 4m remaining · -1 HP each 60s"); a permanent condition has no time part, one without a tick no amount, and the sign is always in the text. A duration or cadence under two minutes shows in seconds ("40s"), under two hours in whole minutes ("60m"), otherwise in whole hours ("12h", "24h"; never "1440m"; pass-1 UN). The Character page lists each line, its label capitalised, after the bleeding line; the Combat page draws none of them ([combat rule](#live-combat-response-m6-a)). The status icon row shows one round icon per condition, buffs and debuffs told apart by their look, five icons then a +N disc; a tap opens Character; the Character page keeps the full list. The row sits above the status line, in condition order; a hold (a hover or keyboard focus on web) shows the label and time joined by ", " ("fed, 48m remaining"), and an icon's name adds the polarity and the action ("fed, 48m remaining, buff, opens Character"; no polarity for a neutral condition; "+1 more, opens Character" for the disc). While the status line is locked the icons are named pictures, not buttons, dim like the Contents button (the neutral look). A timed icon wears a countdown ring round its disc: a track and an arc for the share of its duration still to run ([look](../BOOK-UI-COMPONENTS.md)), clockwise from 12 o'clock, recomputed from projected time; between updates the arc drains linearly to its new share over the real time since the last update, at most 1 s (display only; presentation keeps no gameplay clock), and jumps without motion on first show and on a refresh; under reduced motion it steps; while locked the ring dims with its icon ([look](../BOOK-UI-COMPONENTS.md)) and still drains; at its end only the track shows, and a permanent condition has no ring. Icon glyphs are placeholders until loka-x6t.63. The presenter reads projected state and never computes or writes an effect, tick or cure; applied, tick and expired lines come from their receipts' narration and appear once. No new control: a cure is the ordinary Eat of a held item whose `cures` lists the condition.
 
 ## Away recap
 
@@ -1062,8 +1097,8 @@ An NPC that the GameView lists an available `ask` on shows, after its other acti
 ## Word bar
 
 While the GameView offers `say`, `shout` or
-`cast` and no combat, scene or conversation is open, the World page shows a Word block after its
-action cards and before the log: the **Word** section title, then rows of
+`cast` and no combat, scene or conversation is open, the World page shows a Word block last in
+its scrolling body, after the log (pass-1 UA; [room order](#world-and-status-entry)): the **Word** section title, then rows of
 [Chips](../BOOK-UI-COMPONENTS.md), each row under a Note-look title. Say: one chip per
 cartridge phrase (GameView `phrases`). Whisper to <name>: the same phrases, one row per present
 NPC that lists an available `whisper`. Two present people with one shown name share that title; the Book does not number them. Shout: the same phrases. Cast: one chip per learned spell
@@ -1074,16 +1109,19 @@ sends that action with `{word}`. A word that opens a conversation turns to it, a
 While `say` is offered, with or without phrases, a **Type a word** Control opens one text field (named
 **A word**, up to 32 characters, no autocorrect or autocapitalize) and a **Say** Control;
 Enter or Say sends `say` with the typed word. A word that is not 1 to 32 letters is not sent and
-shows the Note **One word, letters only.** The Book never writes the typed word into the log; only its
-writer sees it.
+shows the Note **One word, letters only.** An accepted `say`, `whisper` or `shout` whose receipt
+carries no narration gets one log line from `words.ts`, the Book's own echo of what was sent:
+**You say "ware".**, **You whisper "ware" to the jailer.**, **You shout "ware".** (pass-1 R5);
+a receipt with narration draws that instead. Beyond this echo the Book never writes the typed
+word anywhere; only its writer sees it.
 
 ## Storylet card details
 
-GameView `storylet` names the one place action the [storylet deck](mechanics.md#storylet-deck-toolbox-row-fd3) draws for the player here this hour. The World page shows it as one Action card, its own block directly before the verb lines, never a verb line: it can be listed unavailable, and a verb line has no unavailable form. The card reads the recipe's authored label alone, never a heading, prefix ("Opportunity:"), icon or colour; unavailable, it is the `label: reason` note of the Action card row, never a disabled card. Pressing it performs the action as any place action under [live action freshness](#live-action-freshness): its result, including a failed check, is the receipt's narration in the log, and a scene it starts opens as any [scene](#chapters-scenes-and-recovery). A new room or hour redraws the page: the card may change or go, silently (no live region; it is page content as the entity lines are); a press drawn under the old pick is refused and the Book redraws, never a substituted card. Its accessible name is its label, role button. No pick, no block; at most one card. The presenter never draws or filters storylets.
+GameView `storylet` names the one place action the [storylet deck](mechanics.md#storylet-deck-toolbox-row-fd3) draws for the player here this hour. The World page shows it as one Action card, its own block directly before the verb lines, never among them, so the hour's one pick is told from the place's standing verbs; available or unavailable it keeps that block (pass-1 R2). The card reads the recipe's authored label alone, never a heading, prefix ("Opportunity:"), icon or colour; unavailable, it is the `label: reason` note of the Action card row, never a disabled card. Pressing it performs the action as any place action under [live action freshness](#live-action-freshness): its result, including a failed check, is the receipt's narration in the log, and a scene it starts opens as any [scene](#chapters-scenes-and-recovery). A new room or hour redraws the page: the card may change or go, silently (no live region; it is page content as the entity lines are); a press drawn under the old pick is refused and the Book redraws, never a substituted card. Its accessible name is its label, role button. No pick, no block; at most one card. The presenter never draws or filters storylets.
 
 ## Skill tree details
 
-Skills without profession keep today's acquired lines. After the xp line and before the Raise cards, each profession in first-listed order is a SectionTitle, then its listed boxes in GameView order: acquired as body text "Whittling, level 2 — qualified; <requirement>" (", level N" only when projected); locked as a Note "Carving — locked; <requirement>"; any other unacquired box as a Note "Joinery — not learned; <requirement>" (the same Note). The Book draws only listed skills: a hidden box and an empty profession draw nothing.
+Skills without profession keep today's acquired lines. After the xp line and before the Raise cards, each profession in first-listed order is a SectionTitle, then its listed boxes in GameView order: acquired as body text "Whittling, level 2 — learned" (", level N" only when projected; no requirement: a qualified learned box has nothing left to meet) or, while its projected `qualified` is false, "Whittling, level 2 — learned, unqualified; <requirement>" (pass-1 H3, with the [C1 clause](#c1-teaching-and-defense-details)); an NPC's teach card for a learned skill is the GameView's unavailable action and draws in the Action card's unavailable form `label: reason`, never dropped (pass-1 R2); locked as a Note "Carving — locked; <requirement>"; any other unacquired box as a Note "Joinery — not learned; <requirement>" (the same Note). The Book draws only listed skills: a hidden box and an empty profession draw nothing.
 
 An NPC's lesson line reads `locked` in place of `not learned` while the skill's projected `locked` is true (proposed, pending designer approval, loka-kgd.108.11).
 
