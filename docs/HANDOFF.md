@@ -6,8 +6,8 @@ the next steps, the standing owner rules that the repo does not yet state, and o
 questions. Rewrite it at each stable checkpoint (a merge, a review verdict, a pushed fix) and before
 the session ends; commit and push it with the Beads export.
 
-Written 2026-10-16 UTC by Claude Code (Opus 5.5) in local session c5ed3619 (after 93636711). State at writing:
-see "In flight" under Lane and next steps.
+Written 2026-10-21 UTC by Claude Code (Opus 5.5) in local session c5ed3619 (resumed after the weekly reset), at a
+clear before the Fable playtest. State at writing: no agent running, no open PR of ours (only parked #372).
 
 ## Start of a session
 
@@ -45,27 +45,37 @@ playtests matter as the foundation for polish; at 95% weekly usage, build ALL re
 Opus developers and Opus reviewers, then ONE sweeping blind Fable playtest instead of one per district;
 keep going on Opus. Notes and pins (G10) were dropped from M15.
 
-Done in session c5ed3619 (2026-10-16): #413 (loka-kgd.170, M15 batch: death penalty 1.109 + Chronicle FD6),
-#414 (loka-y6yg.32/.33, the law guard arrests into a cell with a jail; a broke player works off the fine), #416
-(loka-y6yg.37, the hosted sim job split into `sim (fresh)` and `sim (showcase)` legs, shell: bash so tee keeps
-failures) and #415 (loka-y6yg.35, plan 6 magic district; the district pool is `ma` 0..5, so the Book shows ma 5/5)
-merged. Owner 2026-10-16 at 98% weekly usage (AskUserQuestion, quoted): "Land in-flight, stop (Recommended)".
+Done in session c5ed3619: 2026-10-16: #413 (loka-kgd.170, M15 batch), #414 (loka-y6yg.32/.33, law arrest and jail),
+#416 (loka-y6yg.37, sim job split into two legs), #415 (loka-y6yg.35, magic district). 2026-10-21: #417 (loka-2rfk,
+hosted book-e2e job `walk` runs mobile/app/walkthrough/toolbox_showcase.walk.ts on every push), #419 (loka-kgd.176,
+kernel_api 1.110: a status's optional `narration.observed` gives an applied line when a perceived NPC gains it), #420
+(loka-ikch, worldbuilding drafts rescued from the main checkout), #418 (loka-y6yg.38, plan 7 traps district, three
+slices). THE SHOWCASE IS FULLY BUILT (hub, combat, social, fire, homestead, economy/law, magic, traps).
 
-State at writing: no agent running, no open PR of ours (only parked #372). Hosted sim legs on the #415 head:
-showcase 161 s, fresh 425 s (10-minute limit each).
+Next (all Opus unless marked):
+1. ONE sweeping blind Fable playtest (`loka-y6yg.34`; its notes hold the economy/law brief: EXTEND it to the whole
+   showcase: economy/law (now with arrest, jail and work-off), magic (loft up from the inn), traps (down from the drill
+   yard) and a hub regression pass of the older districts). ASK THE OWNER FOR THE USAGE BAR FIRST (Fable). Keep the
+   blind rules (no plans, cartridge or tests before play), 390 px, its own worktree and port, timebox ~2 h.
+2. Triage: gameplay findings into ONE Opus fix slice (split if it exceeds ~2 plan steps' worth, retro loka-7m2u); UI
+   findings into `loka-x6t` for polish. Known, already filed (do not re-file): room-line variants not drawn
+   (loka-x6t.71), NPC page conditions (loka-x6t.70), Word bar hides spells in a fight (loka-x6t.69), bank-then-work-off
+   (loka-y6yg.36), sign word "mana" vs Book "ma".
+3. Owner: slice D two-save playtest (`loka-y6yg.4`). Then UI polish with the owner.
+Approved, after the showcase, before chapter work: loka-kgd.173 sim invariants, loka-kgd.174 Book visibility check,
+loka-kgd.175 scale benchmark (status sort, entity scan hot spots), loka-kgd.177 red control for
+target_candidates_ordered; approved retro items for the next housekeeping PR: loka-7m2u, loka-xvxa, loka-8zf5,
+loka-9nd4 (loka-2rfk is done). New retro (owner to approve): loka-xmvu (BRIEF KIT as a repo file), loka-3a96 (drafters
+cite the spec clause for every Book-visible promise), loka-csf7 (walk script --grep never filters).
 
-Next, after the reset (all Opus unless marked):
-1. Read the retro items below and loka-kgd.176 first.
-2. Plan 7, traps district (`docs/showcase/traps-district.md`; create its build issue under `loka-y6yg`; split into
-   THREE slices (retro loka-7m2u: at most ~2 plan steps or 3 rooms per slice; merge main before
-   briefing, not inside the brief).
-3. ONE sweeping blind Fable playtest (`loka-y6yg.34`): economy/law (now with arrest and jail), magic, traps, hub
-   regression. Ask the owner for the usage bar first. Then one Opus fix slice; UI findings to `loka-x6t`.
-4. Owner: slice D two-save playtest (`loka-y6yg.4`). Then UI polish with the owner.
-Owner-approved process items (2026-10-16, "yes please those are good suggestions"): sim invariants
-`loka-kgd.173`, Book visibility check `loka-kgd.174`, scale benchmark `loka-kgd.175`; schedule them after the
-showcase, before chapter work. Polish/balance: `loka-y6yg.36` (bank pennies, then work off the jail fine free),
-`loka-x6t.69` (Word bar hides spell chips in a fight).
+Session lessons (2026-10-21, c5ed3619):
+- The new hosted `walk` job caught a broken walk step on its first run (a Quench step racing the wall clock at
+  rate 50). Showcase walks must not depend on anything landing inside a few real seconds.
+- Fable plans can contradict docs/system (NPC status lines): the developer's STOP point caught it; the owner chose
+  "Line now, page later (Recommended)".
+- Rebuilding toolbox_showcase_hash.json after a merge: `mix loka.compile cartridges/toolbox_showcase <out>`, then
+  split `{"cartridge":<canonical>,"content_hash":"<sha>"}` into the fixture's canonical and sha256 (loka-kjky).
+- Agents share one scratchpad and delete files: keep PM working files under a `pm_` prefix (loka-xmvu).
 
 Session lessons (2026-10-16, c5ed3619):
 - Retro APPROVED by the owner 2026-10-16 ("ok approve"), for the next housekeeping PR: loka-7m2u slice size cap, loka-xvxa hard 220k handoff stop (M2 developer ~720k),
@@ -235,6 +245,8 @@ polish stage which needs me at the computer for a bit."
 
 ## Owner answers this session
 
+- 2026-10-21 (session c5ed3619, quoted): NPC statuses "Line now, page later (Recommended)"; worldbuilding "Lets take over
+  thr worldbuilding maybe spin off a subagent to clean it up and comit" (done, #420); retro "ok approve".
 - 2026-10-16 (session c5ed3619, quoted): usage "We are at 98% of the 20x max plan right now" + "Land in-flight, stop
   (Recommended)"; "Please fix the mana pool thing"; leak-area improvements "yes please those are good suggestions".
 - 2026-10-16 (session 93636711, AskUserQuestion, quoted): descoping matrix "Drop notes and pins (G)" (the only choice).
