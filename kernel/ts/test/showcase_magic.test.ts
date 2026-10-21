@@ -24,6 +24,7 @@ import {
   id,
   labels,
   npc,
+  room,
   perform,
   play,
   pool,
@@ -371,7 +372,7 @@ test('magic 9b: only a seen golem in the room gets an observed line', () => {
   const golem = npc(y, 'golem');
   const off = {
     ...y,
-    state: { ...y.state, containers: { ...y.state.containers, [golem]: id(y, 'room', 'loft') } },
+    state: { ...y.state, containers: { ...y.state.containers, [golem]: room(y, 'loft') } },
   };
   const hidden = (
     apply(
