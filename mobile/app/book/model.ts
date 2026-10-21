@@ -168,10 +168,8 @@ export const absent = (v: GameView) =>
 export const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
 export type Pool = NonNullable<GameView['resources']>[number];
-// The condition pools: the status line shows these alone and bands them; pennies and any other
-// count stay off the line and show plain in Character (book-ui.md#world-and-status-entry).
-const CONDITIONS = ['hp', 'ma', 'mv'];
-export const isPool = (r: Pool) => CONDITIONS.includes(r.resource.key);
+// The status line's banded pools; any other count draws bare in Character (book-ui.md#world-and-status-entry).
+export const isPool = (r: Pool) => ['hp', 'ma', 'mv'].includes(r.resource.key);
 export const toneOf = (r: Pool) => (isPool(r) ? r.tone : 'normal');
 export const pools = (rs?: readonly Pool[]) => {
   const shown = rs?.filter(isPool);
