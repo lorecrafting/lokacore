@@ -1,10 +1,11 @@
 // The showcase traps district (Sappers' Stair) walked step by step (docs/showcase/traps-district.md,
-// guided loop, steps 1 to 4 and 7; slice T1). Steps 1 to 4 continue one world; step 7 branches from
-// step 1's world. Disarm starts at 0 against the flagstones' rating 1 and grows by 1 per use.
+// guided loop, steps 1 to 7; slices T1 and T2). Steps 1 to 6 continue one world; step 7 branches
+// from step 1's world. Disarm starts at 0 against the flagstones' rating 1 and grows by 1 per use.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { gameView } from '../src/index.ts';
 import { describe } from '../src/mechanics/description_variant/rule.ts';
+import { decode } from '../src/foundation/canonical.ts';
 import { validate } from '../src/foundation/validate.ts';
 import { statusKey } from '../src/mechanics/status/shared.ts';
 import type { World } from '../src/runtime/decision.ts';
@@ -19,8 +20,10 @@ import {
   id,
   labels,
   play,
+  perform,
   pool,
   refused,
+  room,
   take,
   talk,
   wait,
@@ -57,8 +60,8 @@ test('traps 1: down from the drill yard; the sign reads; disarm before a search 
   w = choose(talk(w, 'aldous').world, 'learn').world;
   w = play(w, { type: 'wear', item_id: id(w, 'item', 'training_sword') }).world;
   w = go(w, 'down').world;
-  // T1 builds only the stair and the passage: the plan's east and down exits come in T2 and T3.
-  assert.deepEqual(exits(w), ['north', 'up']);
+  // The plan's down exit comes in T3.
+  assert.deepEqual(exits(w), ['east', 'north', 'up']);
   assert.deepEqual(play(w, { type: 'read', target_id: detail(w, 'sign_traps') }).lines, [
     'readable.sign_traps',
   ]);
@@ -91,7 +94,8 @@ test('traps 2: the search finds the plate; the first disarm fails and poisons', 
 });
 
 // Breaks: the skill does not grow on use, the rating is ignored, the disarmed variant is missing,
-// or the disarm stays offered once done (policy plate_disarmed dropped).
+// the disarm stays offered once done (policy plate_disarmed dropped), or a disarmed plate still
+// offers the search (search_floor's plate_disarmed false dropped).
 test('traps 3: the second disarm succeeds; a third is invalid_state', () => {
   const r = outcome(w, 'disarm_plate');
   assert.deepEqual([r.out, r.lines], ['success', ['narration.disarm_plate.success']]);
@@ -99,6 +103,16 @@ test('traps 3: the second disarm succeeds; a third is invalid_state', () => {
   assert.equal(fact(w, 'plate_disarmed'), true);
   assert.equal(flagstones(w), 'detail.flagstones.disarmed');
   assert.equal(refused(w, { type: 'perform', action: 'disarm_plate' }), 'invalid_state');
+  // Boundary: found false, disarmed true (step 1's world is found false, disarmed false: offered).
+  const facts = Object.fromEntries(
+    Object.entries(w.state.facts!).map(([k, v]) => [
+      k,
+      (decode(k) as { fact: { key: string } }).fact.key === 'plate_found' ? false : v,
+    ]),
+  );
+  const unfound = { ...w, state: { ...w.state, facts } };
+  assert.equal(fact(unfound, 'plate_found'), false);
+  assert.equal(refused(unfound, { type: 'perform', action: 'search_floor' }), 'invalid_state');
 });
 
 // Breaks: the disarmed plate still springs (plate_springs's plate_disarmed guard dropped), or the
@@ -114,6 +128,81 @@ test('traps 4: north over the disarmed plate; the note reads', () => {
   assert.deepEqual(play(w, { type: 'read', target_id: id(w, 'item', 'sapper_note') }).lines, [
     'readable.sapper_note',
   ]);
+});
+
+const pulls = (x: World, levers: string) =>
+  [...levers].reduce((y, c) => perform(y, `pull_${c}`).world, x);
+const turns = (x: World, wheel: number, n: number) =>
+  Array.from({ length: n }).reduce<World>((y) => perform(y, `turn_wheel_${wheel}`).world, x);
+const wheels = (x: World) => [1, 2, 3].map((n) => fact(x, `wheel_${n}`) ?? 0);
+const open = (x: World, direction: string) => {
+  const r = act(x, { type: 'open', direction });
+  return r.decision.kind === 'accepted'
+    ? r.decision.outcome
+    : refused(x, { type: 'open', direction });
+};
+const at = (x: World) => x.state.containers[x.body];
+
+// Breaks: a lever's reset or step is missing or fires in the wrong key order (lever_c_reset must
+// precede lever_c_step), the door opens off stage 3, the slate reads other text, or a reset
+// recloses the door.
+test('traps 5: the levers open the north door only in order A, B, C; the slate reads', () => {
+  w = go(go(w, 'south').world, 'east').world;
+  assert.equal(at(w), room(w, 'lever_hall'));
+  assert.deepEqual(exits(w), ['east', 'north', 'west']);
+  assert.equal(fact(pulls(w, 'ab'), 'lever_stage'), 2);
+  assert.equal(fact(pulls(w, 'abb'), 'lever_stage'), 0);
+  const ac = pulls(w, 'ac');
+  assert.equal(fact(ac, 'lever_stage'), 0);
+  assert.equal(open(ac, 'north'), 'invalid_state');
+  w = pulls(w, 'abc');
+  assert.equal(fact(w, 'lever_stage'), 3);
+  assert.equal(open(w, 'north'), 'opened');
+  w = play(w, { type: 'open', direction: 'north' }).world;
+  w = go(w, 'north').world;
+  assert.equal(at(w), room(w, 'lever_vault'));
+  w = take(w, 'vault_slate');
+  assert.deepEqual(play(w, { type: 'read', target_id: id(w, 'item', 'vault_slate') }).lines, [
+    'readable.vault_slate',
+  ]);
+  w = pulls(go(w, 'south').world, 'c');
+  assert.equal(fact(w, 'lever_stage'), 0);
+  assert.equal(at(go(w, 'north').world), room(w, 'lever_vault'));
+});
+
+// Breaks: a wheel's turn or wrap is missing, wraps at another digit, or its wrap precedes its turn;
+// the door ignores a wheel or wants another digit; or the bitters do not cure.
+test('traps 6: the wheels open the east door at 3, 1, 2; the bitters cure the poison', () => {
+  for (const n of [1, 2, 3]) {
+    const nine = turns(w, n, 9);
+    assert.equal(fact(nine, `wheel_${n}`), 9);
+    assert.equal(
+      describe(nine, nine.character, nine.details[detail(nine, `wheel_${n}`)]),
+      'detail.wheel.9',
+    );
+    assert.equal(fact(turns(nine, n, 1), `wheel_${n}`), 0);
+  }
+  assert.equal(open(turns(turns(w, 1, 3), 3, 2), 'east'), 'invalid_state'); // [3, 0, 2]
+  assert.equal(open(turns(turns(w, 2, 1), 3, 2), 'east'), 'invalid_state'); // [0, 1, 2]
+  w = turns(turns(turns(w, 1, 3), 2, 1), 3, 1);
+  assert.deepEqual(wheels(w), [3, 1, 1]);
+  assert.equal(open(w, 'east'), 'invalid_state');
+  w = turns(w, 3, 1);
+  assert.deepEqual(wheels(w), [3, 1, 2]);
+  assert.equal(open(w, 'east'), 'opened');
+  w = go(play(w, { type: 'open', direction: 'east' }).world, 'east').world;
+  w = take(w, 'bitters_skin');
+  assert.ok(poisoned(w)?.ends_at, 'still poisoned before the drink');
+  assert.equal(pool(w, 'hp'), 10);
+  const skin = id(w, 'item', 'bitters_skin');
+  const r = play(w, { type: 'drink', vessel_id: skin });
+  assert.ok(!r.lines.includes('narration.poisoned.tick'), r.lines.join());
+  w = r.world;
+  assert.equal(poisoned(w)?.ends_at, undefined);
+  assert.deepEqual(labels(w), []);
+  assert.equal(pool(w, 'hp'), 10);
+  assert.equal(w.state.liquids?.[skin]?.quantity, 1);
+  validate('GameView', gameView(w));
 });
 
 // Breaks: the plate does not spring on entry, springs again while sprung (plate_sprung guard

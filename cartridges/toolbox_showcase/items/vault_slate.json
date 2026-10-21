@@ -1,0 +1,18 @@
+{
+  "keywords": [
+    "slate",
+    "vault_slate"
+  ],
+  "short": "item.vault_slate.short",
+  "room_line": "item.vault_slate.room",
+  "description": "item.vault_slate.description",
+  "location": {
+    "in": "room",
+    "room": "lever_vault"
+  },
+  "mass_grams": 400,
+  "readable": {
+    "label": "actions.read_book",
+    "text": "readable.vault_slate"
+  }
+}

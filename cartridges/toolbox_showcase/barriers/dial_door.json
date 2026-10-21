@@ -1,0 +1,31 @@
+{
+  "keywords": [
+    "dial_door",
+    "door"
+  ],
+  "short": "barrier.dial_door.short",
+  "initial": "closed",
+  "opens_when": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": [
+        {
+          "op": "fact_compare",
+          "fact": "wheel_1",
+          "equals": 3
+        },
+        {
+          "op": "fact_compare",
+          "fact": "wheel_2",
+          "equals": 1
+        },
+        {
+          "op": "fact_compare",
+          "fact": "wheel_3",
+          "equals": 2
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "title": "room.dial_vault.title",
+  "description": "room.dial_vault.description",
+  "exits": {
+    "west": {
+      "to": "lever_hall",
+      "barrier": "dial_door"
+    }
+  }
+}

@@ -577,6 +577,58 @@
         "instance"
       ],
       "meaning": "The Sappers' Stair plate is wedged for good."
+    },
+    "lever_stage": {
+      "version": 1,
+      "value_type": {
+        "type": "int",
+        "default": 0,
+        "minimum": 0,
+        "maximum": 3
+      },
+      "scopes": [
+        "instance"
+      ],
+      "meaning": "How many of the lever hall's levers A, B, C are pulled in order (traps district)."
+    },
+    "wheel_1": {
+      "version": 1,
+      "value_type": {
+        "type": "int",
+        "default": 0,
+        "minimum": 0,
+        "maximum": 10
+      },
+      "scopes": [
+        "instance"
+      ],
+      "meaning": "The digit on the lever hall's dial wheel 1; 10 is passing and wraps to 0 in the same turn."
+    },
+    "wheel_2": {
+      "version": 1,
+      "value_type": {
+        "type": "int",
+        "default": 0,
+        "minimum": 0,
+        "maximum": 10
+      },
+      "scopes": [
+        "instance"
+      ],
+      "meaning": "The digit on the lever hall's dial wheel 2; 10 is passing and wraps to 0 in the same turn."
+    },
+    "wheel_3": {
+      "version": 1,
+      "value_type": {
+        "type": "int",
+        "default": 0,
+        "minimum": 0,
+        "maximum": 10
+      },
+      "scopes": [
+        "instance"
+      ],
+      "meaning": "The digit on the lever hall's dial wheel 3; 10 is passing and wraps to 0 in the same turn."
     }
   }
 }
