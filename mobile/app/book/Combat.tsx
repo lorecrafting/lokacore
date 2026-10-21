@@ -22,11 +22,11 @@ function Fight({ view, text, combat }: Pick<Screen, 'view' | 'text'> & { combat:
       {(combat.active_opponents ?? [{ id, name, band }]).map((opponent) => (
         <Text key={opponent.id} style={prose(c)}>
           {text(opponent.name)}
-          {/* a closed encounter's band is stale (a dead foe has none) */}
-          {view.combat && opponent.band && ` — ${bandPhrase({ band: opponent.band }, text)}`}
           {combat.active_opponents && opponent.id === combat.opponent_id && view.combat
             ? ' (your target)'
             : ''}
+          {/* a closed encounter's band is stale (a dead foe has none) */}
+          {view.combat && opponent.band && ` — ${bandPhrase({ band: opponent.band }, text)}`}
         </Text>
       ))}
     </View>

@@ -69,7 +69,7 @@ const ID = {
 };
 
 // Breaks: Take keeps its name on an NPC's item, drops the holder Note or puts it after the card;
-// a refused theft still reads Take; or a box's (or the floor's) item shows Lift or the holder Note (E14).
+// a refused theft still reads Take or reads before the holder Note; or a box's (or the floor's) item shows Lift or the holder Note (E14).
 test('an item an NPC holds reads Lift after the holder Note; a box item reads Take', async () => {
   const v = pegView();
   const peg = v.entities.find((e) => e.shop)!;
@@ -97,7 +97,11 @@ test('an item an NPC holds reads Lift after the holder Note; a box item reads Ta
     'Lift',
     'Leave',
   ]);
-  assert.ok((await page(view, ID.book)).includes('Lift: not yours.'));
+  const book = await page(view, ID.book);
+  const [holder, lift] = ['Npc.peg.short is holding it.', 'Lift: not yours.'].map((l) =>
+    book.indexOf(l),
+  );
+  assert.ok(holder >= 0 && lift > holder, JSON.stringify(book)); // book-ui.md: holder Note first
   for (const id of ['coin', 'pebble'] as const) {
     const lines = await page(view, ID[id]);
     assert.ok(lines.includes(`Take item.${id}`), JSON.stringify(lines));

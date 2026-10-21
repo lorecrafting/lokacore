@@ -99,9 +99,9 @@ export function ThingPage(p: {
     >
       <ItemDetails thing={p.thing} text={p.text} />
       <LogLines lines={p.log} />
+      {p.holder && <Note>{holding(cap(p.text(p.holder)))}</Note>}
       {refusals}
       {!refusals && !p.actions.length && !p.contents.length && <Note>Nothing to do here.</Note>}
-      {p.holder && <Note>{holding(cap(p.text(p.holder)))}</Note>}
       <Cards>
         {p.actions.map((b) => (
           <ActionCard key={`${b.label}:${b.target_ids.join(',')}`} b={b} press={p.press} />

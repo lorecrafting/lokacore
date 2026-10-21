@@ -45,7 +45,7 @@ test('a one-foe fight draws only the opponent line with its band word', () => {
 });
 
 // Breaks: a pack repeats the primary, gives every member the primary's band, shows a band for a
-// member the player cannot see, or loses the target mark.
+// member the player cannot see, loses the target mark or puts it after the band (book-ui.md).
 test('a pack draws each member once with its own band and none for a hidden member', () => {
   const lines = combatLines({
     encounter_id: 'fight',
@@ -60,17 +60,29 @@ test('a pack draws each member once with its own band and none for a hidden memb
   });
   assert.deepEqual(
     lines.filter((l) => l.includes('hound')),
-    ['a fen hound — hurt (your target)', 'a fen hound — ready', 'a fen hound'],
+    ['a fen hound (your target) — hurt', 'a fen hound — ready', 'a fen hound'],
   );
 });
 
-// Breaks: a closed encounter keeps the band of its last live view (a dead foe "hurt").
-test('a closed encounter draws the opponent without a band', () => {
-  const raider = { encounter_id: 'fight', opponent_id: 'raider', name: 'npc.raider', band: 'hurt' };
+// Breaks: a closed encounter keeps the band of its last live view (a dead foe "hurt") or the
+// target mark: its opponent block is names only, so no line carries " — " (book-ui.md, Closure).
+test('a closed encounter draws its opponents by name only', () => {
+  const pack = {
+    encounter_id: 'fight',
+    opponent_id: 'a',
+    name: 'npc.hound',
+    band: 'hurt',
+    active_opponents: [
+      { id: 'a', name: 'npc.hound', band: 'hurt' },
+      { id: 'b', name: 'npc.hound', band: 'ready' },
+    ],
+  };
+  const lines = combatLines(pack, {}, true);
   assert.deepEqual(
-    combatLines(raider, {}, true).filter((l) => l.includes('raider')),
-    ['the raider'],
+    lines.filter((l) => l.includes('hound')),
+    ['a fen hound', 'a fen hound'],
   );
+  assert.ok(!lines.some((l) => l.includes(' — ')), JSON.stringify(lines));
 });
 
 // Break: a menu/detail hides escape, Flee invents directions, or controls sit outside the narrative scroll.
