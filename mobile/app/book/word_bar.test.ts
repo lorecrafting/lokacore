@@ -75,9 +75,33 @@ test('shouting help in the square alerts the watchman next door', () => {
   assert.deepEqual(facts(b), { elder_heard: true, watchman_alerted: true });
 });
 
+// Breaks (pass-1 R5): an accepted speech press with no narration leaving the page silent, echoed
+// twice, or echoed with the wrong verb, word or listener.
+test('a say, whisper or shout with no narration echoes once in ink', () => {
+  const b = book(speech as never);
+  const echoes = () => b.text().filter((t) => t.startsWith('You '));
+  for (const chip of ['hello, say', 'help, shout', 'ward, whisper to the smith']) b.tap(chip);
+  assert.deepEqual(echoes(), [
+    'You say "hello".',
+    'You shout "help".',
+    'You whisper "ward" to the smith.',
+  ]);
+});
+
+// Breaks (pass-1 UA): the World log drawn after the Word block, so a press's result sits below
+// the chip rows.
+test('the latest result shows before the Word block', () => {
+  const b = book(speech as never);
+  b.tap('hello, say');
+  const shown = b.text();
+  assert.ok(shown.indexOf('You say "hello".') >= 0, JSON.stringify(shown));
+  assert.ok(shown.indexOf('You say "hello".') < shown.indexOf(LABEL.word), JSON.stringify(shown));
+});
+
 // Breaks: a typed word not sent as a Say (or sent with the token of a view that has moved on),
-// a bad word sent to the kernel, no note on a bad word, or the typed word echoed into the page.
-test('a typed word is said like its chip, even after the view moves on, and never shown', () => {
+// a bad word sent to the kernel, no note on a bad word, or the typed word shown other than as
+// its one Say echo (pass-1 R5).
+test('a typed word is said like its chip, even after the view moves on, and echoed once', () => {
   const b = book(speech as never);
   const input = () => b.draw().find((n) => n.type === 'TextInput');
   b.tap(LABEL.typeAWord);
@@ -94,7 +118,10 @@ test('a typed word is said like its chip, even after the view moves on, and neve
   stale.props.onSubmitEditing();
   assert.ok(revision(b) > after);
   assert.ok(!b.text().includes(LABEL.oneWord));
-  assert.ok(!b.text().some((t) => t.includes('xyzzy')));
+  assert.deepEqual(
+    b.text().filter((t) => t.includes('xyzzy')),
+    ['You say "xyzzy".'],
+  );
 });
 
 // Breaks: a refused spell word hidden or pressable, its reason missing, a learned word not shown,

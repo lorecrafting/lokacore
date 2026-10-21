@@ -99,9 +99,12 @@ const UNDONE: Partial<Record<Reply['kind'], string>> = {
   unauthorized: "That isn't yours to do.",
 };
 
-// What one press answers: the narration or the outcome's words (words.ts; none: '') of an accepted
-// command, else the refusal in words. Never a raw outcome code.
-export function replyLine(r: Reply, text: Say, view: GameView, fallback?: string): string {
+// What one press answers: the narration, one line per record, or the outcome's words (words.ts;
+// none: no line) of an accepted command, else the refusal in words. Never a raw outcome code.
+export const replyLine = (r: Reply, text: Say, view: GameView, fallback?: string): string[] =>
+  [answer(r, text, view, fallback)].flat().filter(Boolean);
+
+function answer(r: Reply, text: Say, view: GameView, fallback?: string): string | string[] {
   if (r.kind === 'stale_view') return 'The page had changed; here it is again.';
   if (r.kind !== 'saved') return UNDONE[r.kind] ?? `(${r.kind}${'code' in r ? ` ${r.code}` : ''})`;
   const d = r.decision;
@@ -123,8 +126,13 @@ export function replyLine(r: Reply, text: Say, view: GameView, fallback?: string
   }
   const lines = d.narration ?? [];
   const shown = ['looked', 'moved'].includes(d.outcome) ? withoutHeading(lines, view) : lines;
-  return shown.map((t) => text(t.key)).join(' ') || (fallback ?? OUTCOME[d.outcome] ?? '');
+  const said = shown.map((t) => text(t.key)).filter(Boolean);
+  return said.length ? said : (fallback ?? OUTCOME[d.outcome] ?? '');
 }
+
+// The Book's echo of an accepted speech press whose receipt has no narration (book-ui.md, Word bar).
+export const spoken = (how: string, word: string, to?: string) =>
+  `You ${how} "${word}"${to ? ` to ${to}` : ''}.`;
 
 type Events = Extract<DecisionResult, { kind: 'accepted' }>['events'];
 const sentence = (s: string) => s.replace(/^./, (a) => a.toUpperCase());

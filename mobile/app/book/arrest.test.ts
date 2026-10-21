@@ -9,7 +9,8 @@ import { book } from './__tests__/polish-book.test.ts';
 import { LABEL } from './labels.ts';
 
 // Breaks: the move's narration is dropped with the old room's log when the place is not the
-// exit's destination, or the square's log survives onto the cell page.
+// exit's destination, the square's log survives onto the cell page, or its two records joined on
+// one line (pass-1 UO).
 test('a wanted walk north lands on the cell page with the arrest and charge lines', () => {
   const b = book(compiled('cartridges/trial_sampler') as never);
   b.map();
@@ -23,12 +24,13 @@ test('a wanted walk north lands on the cell page with the arrest and charge line
   b.tap('Go north');
   const shown = b.text();
   assert.equal(shown[0], 'Cell');
-  assert.ok(
-    shown.includes(
-      'The guard takes your arm at the market gate and walks you to the cell. ' +
-        'The sergeant reads the charge aloud: wanted in the square. Pay the fine or sit.',
-    ),
-    JSON.stringify(shown),
+  const arm = shown.indexOf(
+    'The guard takes your arm at the market gate and walks you to the cell.',
+  );
+  assert.ok(arm >= 0, JSON.stringify(shown)); // pass-1 UO: one log line per narration record
+  assert.equal(
+    shown[arm + 1],
+    'The sergeant reads the charge aloud: wanted in the square. Pay the fine or sit.',
   );
   assert.ok(!shown.includes('Opened.'), JSON.stringify(shown));
   b.map();

@@ -11,22 +11,20 @@ import type { Button } from './presenter.ts';
 import { withoutHeading } from './words.ts';
 type Say = (key: string) => string;
 
-export function narrationLines(
+// One log line per narration record, then the cue (book-ui.md, Live action freshness; pass-1 UO):
+// [World lines, combat lines].
+export const narrationLines = (
   last: NarrationRecord | undefined,
   view: GameView,
   text: Say,
   past = false,
-) {
-  return [false, true].map((combat) => {
-    const line = rendered(last, view, text, combat).join(' ');
-    const cue = !combat && last?.cue ? `${past ? 'Earlier: ' : ''}${text(last.cue.key)}` : '';
-    return [line, cue].filter(Boolean).join(' ');
-  });
-}
-
-// One receipt's World lines one by one, for the away recap's groups (toolbox row W27).
-export const worldLines = (last: NarrationRecord, view: GameView, text: Say) =>
-  [...rendered(last, view, text, false), last.cue ? text(last.cue.key) : ''].filter(Boolean);
+) => [
+  [
+    ...rendered(last, view, text, false),
+    last?.cue ? `${past ? 'Earlier: ' : ''}${text(last.cue.key)}` : '',
+  ].filter(Boolean),
+  rendered(last, view, text, true),
+];
 
 export const rendered = (
   last: NarrationRecord | undefined,
@@ -69,19 +67,20 @@ export function restoredLogs(game: Game, text: Say): Logs {
   const last = game.lastNarration();
   const { view } = game.view();
   const [narrated, combat] = narrationLines(last, view, text, true);
-  const restored = pickupLine(last, text) || narrated;
-  const log = restored && !view.choice && !last?.detail_id ? [restored] : [];
+  const pickup = pickupLine(last, text);
+  const restored = pickup ? [pickup] : narrated;
+  const log = !view.choice && !last?.detail_id ? restored : [];
   const details = new Map<string, DetailLine[]>();
-  if (restored && last?.detail_id) details.set(last.detail_id, [restored]);
-  else if (restored && view.choice)
-    details.set(view.choice.speaker_id ?? 'conversation', [restored]);
+  if (restored.length && last?.detail_id) details.set(last.detail_id, restored);
+  else if (restored.length && view.choice)
+    details.set(view.choice.speaker_id ?? 'conversation', restored);
   if (view.choice) {
     const id = view.choice.speaker_id ?? 'conversation';
     details.set(id, [...(details.get(id) ?? []), text(view.choice.prompt.key)]);
   }
   return {
     log,
-    combatLog: combat ? [combat] : [],
+    combatLog: combat,
     details,
     narrationId: last?.command_id,
     projection: game.view(),

@@ -19,11 +19,11 @@ test('Book keeps the bell scene and labels restored cue as past', () => {
     place: { title: { key: 'room.belfry.title' }, description: { key: 'room.belfry.description' } },
   } as GameView;
   assert.deepEqual(narrationLines(record, view, text), [
-    'You pull the rope. The bell carries across Ashmere.',
-    '',
+    ['You pull the rope.', 'The bell carries across Ashmere.'],
+    [],
   ]);
   assert.deepEqual(narrationLines(record, view, text, true), [
-    'You pull the rope. Earlier: The bell carries across Ashmere.',
-    '',
+    ['You pull the rope.', 'Earlier: The bell carries across Ashmere.'],
+    [],
   ]);
 });

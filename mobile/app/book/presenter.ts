@@ -38,7 +38,6 @@ import {
   pickupLine,
   resetLogs,
   restoredLogs,
-  worldLines,
   type Logs,
 } from './logs.ts';
 import { received } from './received.ts';
@@ -62,7 +61,7 @@ function background(
     now = update.projection.view;
   resetLogs(s, now);
   const away = holding(s, was, now);
-  for (const line of comings(was, now, text)) world(s, away, line, [line]);
+  world(s, away, comings(was, now, text));
   s.projection = update.projection;
   let last: ReturnType<Game['lastNarration']>;
   try {
@@ -75,24 +74,25 @@ function background(
     narrate(s, closing(last, was, now), now, away, text);
 }
 
-// A World entry: to the log, or held by the open settlement (book-ui.md, Away recap).
-function world(s: Logs, away: Logs['away'], line: string, lines: string[]) {
-  (away?.log ?? s.log).push(line);
+// World entries: to the log, or held by the open settlement (book-ui.md, Away recap).
+function world(s: Logs, away: Logs['away'], lines: string[]) {
+  (away?.log ?? s.log).push(...lines);
   away?.lines.push(...lines);
 }
 
 // A new receipt's lines: its detail or conversation, else World (or the open settlement's lines).
 function narrate(s: Logs, last: NarrationRecord, now: GameView, away: Logs['away'], text: Say) {
   const [narrated, combat] = narrationLines(last, now, text);
-  const line = pickupLine(last, text) || narrated;
-  if (combat) s.combatLog.push(combat);
+  const pickup = pickupLine(last, text);
+  const lines = pickup ? [pickup] : narrated;
+  s.combatLog.push(...combat);
   s.narrationId = last.command_id;
-  if (!line) return;
+  if (!lines.length) return;
   const to = last.detail_id
     ? detailLines(s, last.detail_id)
     : now.choice && detailLines(s, now.choice.speaker_id ?? 'conversation');
-  if (to) to.push(line);
-  else world(s, away, line, away && !last.pickup_name ? worldLines(last, now, text) : [line]);
+  if (to) to.push(...lines);
+  else world(s, away, lines);
 }
 
 const confirmed = (reply: Reply) =>
@@ -146,9 +146,12 @@ function pressed(game: Game, b: Button, detail: string | undefined, s: Logs, tex
   s.returnDetail = s.confirmedRead = undefined;
   if (!game.pending() && b.action_key === 'give' && b.target_ids.length !== 2) return '';
   const was = game.view().view;
+  const named = (id?: string) => things(was).find((t) => t.id === id)?.name;
   const [item, to] = ['take', 'drop', 'give'].includes(b.action_key)
-    ? b.target_ids.map((id) => things(was).find((t) => t.id === id)?.name)
-    : [];
+    ? b.target_ids.map(named)
+    : b.action_key === 'whisper'
+      ? [undefined, named(b.target_ids[0])] // the speech echo's listener (received.ts)
+      : [];
   s.retry ??= {
     button: { ...b, target_ids: [...b.target_ids], input: { ...b.input } },
     detail,
@@ -165,9 +168,9 @@ function pressed(game: Game, b: Button, detail: string | undefined, s: Logs, tex
     return '';
   }
   if (game.pending() && reply.kind !== 'pending' && reply.kind !== 'catching_up') {
-    const line = replyLine(reply, text, game.view().view);
-    if (line) (was.combat ? s.combatLog : detail ? detailLines(s, detail) : s.log).push(line);
-    return line;
+    const lines = replyLine(reply, text, game.view().view);
+    (was.combat ? s.combatLog : detail ? detailLines(s, detail) : s.log).push(...lines);
+    return lines.join(' ');
   }
   if (reply.kind === 'pending' || reply.kind === 'catching_up') {
     s.retry.invocation =
