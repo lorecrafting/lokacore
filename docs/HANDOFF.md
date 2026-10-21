@@ -69,8 +69,7 @@ Pass-1 playtest and fix batch (session a02501b4, 2026-10-21):
     merge diff only). Nits folded into UI2 (loka-x6t.75). .48 item status lines: handed back b2cdc4df, Opus reviewer running. .49 opponent band (protocol) and UI2 loka-x6t.75 building
     (briefs in their Beads notes). Each then: fresh Opus reviewer
     (+ Opus designer for player-visible words), CI green, merge.
-- TODO, in order: .49 opponent band in GameView (protocol: record + 2nd opinion), UI2
-  loka-x6t.75 (after .46), UI3 .76, UI4 .77, UI5 .78, UI6 .79 (after .49). Briefs: write from the triage + rulings record;
+- TODO, in order (.49 needs a review record + 2nd opinion when it hands back): UI3 loka-x6t.76, UI4 .77, UI5 .78, UI6 .79 (after .49). Briefs: write from the triage + rulings record;
   the pass-1 COMMON block is in `loka-y6yg.43` notes. Then: batch PR to main, merge main in once, hosted CI green, merge,
   bin/after_merge.sh; one Opus verification check at 390 px (browser-use); start the owner's preview on 19006/19007;
   PushNotification the owner (OWNER chose "option 3, ping me when its ready").
