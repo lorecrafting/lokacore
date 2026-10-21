@@ -67,7 +67,9 @@ export function effect<R extends Effected>(
     const lit = item && transition(world, command.payload.actor_id, 'ignite', item);
     // A second ignite of one source reads the same committed fuel row: it writes nothing.
     const again = r.ops.some((o) => o.op === 'fuel.set' && o.item_id === item);
-    return lit && typeof lit !== 'string' && !again ? { ...r, ops: [...r.ops, ...lit.ops] } : r;
+    return lit && typeof lit !== 'string' && !again
+      ? { ...r, ops: [...r.ops, ...lit.ops], lines: [...r.lines, ...lit.narration] }
+      : r;
   }
   const npc = s.npc && world.entityIds[refString(s.npc)];
   if (npc && (!living(world, npc) || slain(world, r.levels, npc))) return r;
@@ -151,8 +153,10 @@ function damage<R extends Effected>(
   };
   const died = deathSequence(prefix(world, ops), command, fatal, mint, r.rng);
   const events = died.events.map((e, i) => ({ ...e, position: r.position + 1 + i }));
+  const fell = world.cartridge.world?.combat?.narration.npc_died; // a round's kill line
   return {
     ...r,
+    lines: fell ? [...r.lines, { key: fell }] : r.lines,
     ops: [...ops, ...died.ops],
     events: [...r.events, ...events],
     position: r.position + events.length,

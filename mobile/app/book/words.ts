@@ -120,17 +120,23 @@ export function replyLine(r: Reply, text: Say, view: GameView, fallback?: string
   return shown.map((t) => text(t.key)).join(' ') || (fallback ?? OUTCOME[d.outcome] ?? '');
 }
 
+type Events = Extract<
+  Extract<Reply, { kind: 'saved' }>['decision'],
+  { kind: 'accepted' }
+>['events'];
 const sentence = (s: string) => s.replace(/^./, (a) => a.toUpperCase());
 
 // Navigation adds no duplicate heading. NPCs that leave or arrive while the player stays put
-// still have a meaningful status line. ponytail: inferred from the view; kernel schedule narration replaces it.
-export function comings(was: GameView, now: GameView, text: Say): string[] {
+// still have a meaningful status line; one that died in the decision (`events`) left a corpse and
+// the kill line told it. ponytail: inferred from the view; kernel schedule narration replaces it.
+export function comings(was: GameView, now: GameView, text: Say, events: Events = []): string[] {
   if (was.place.id !== now.place.id) return [];
+  const dead = events.flatMap(({ payload: e }) => (e.type === 'entity_died' ? [e.victim_id] : []));
   const gone = (a: GameView, b: GameView) =>
     a.entities.filter((e) => e.kind === 'npc' && !b.entities.some((f) => f.id === e.id));
   return [
     ...gone(was, now)
-      .filter((e) => e.id !== was.combat?.opponent_id)
+      .filter((e) => e.id !== was.combat?.opponent_id && !dead.includes(e.id))
       .map((e) => `${sentence(text(e.name))} leaves.`),
     ...gone(now, was).map((e) => `${sentence(text(e.name))} arrives.`),
   ];

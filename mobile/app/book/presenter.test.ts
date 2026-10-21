@@ -365,7 +365,7 @@ test('combat receipt history is once-only when completion follows an already dis
 });
 
 // Breaks: an NPC whose cartridge name starts lower case ("a crow") leaves or arrives mid-sentence.
-test('a coming or going starts its sentence with a capital', () => {
+test('a coming or going starts its sentence with a capital; a killed NPC does not leave', () => {
   const at = (...names: string[]) =>
     ({
       place: { id: 'green' },
@@ -375,6 +375,14 @@ test('a coming or going starts its sentence with a capital', () => {
     comings(at('a crow'), at('a fox'), (s) => s),
     ['A crow leaves.', 'A fox arrives.'],
   );
+  // Breaks (loka-y6yg.44): an NPC a spell killed outside a fight "leaves" after the kill line.
+  const died = (type: string) => [{ payload: { type, victim_id: 'a crow' } }] as never;
+  assert.deepEqual(
+    comings(at('a crow', 'a fox'), at('a fox'), (s) => s, died('entity_died')),
+    [],
+  );
+  const other = comings(at('a crow'), at(), (s) => s, died('status_applied'));
+  assert.deepEqual(other, ['A crow leaves.']);
 });
 
 // Breaks: the label counts from the zero-based declaration index ("Chapter zero") or a chapter past
