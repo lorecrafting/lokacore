@@ -85,8 +85,7 @@ test('magic 1: up the ladder; the sign reads and the Word bar is empty', () => {
 // Breaks: the wizard opens the errand before teaching lux, the errand is not accepted, lux casts
 // without ash or spends the wrong pools, the gather adds no ash, the cast leaves the held lantern
 // unlit or writes no lit line (or one when nothing lit), a cast without the lantern is refused or
-// keeps its pools, or
-// the climb back to the loft closes the errand before flamma is known.
+// keeps its pools, or the climb back to the loft closes the errand before flamma is known.
 test('magic 2: taught lux; it needs ash; the cast spends 2 ma and 1 ash and lights the lantern', () => {
   const first = talk(w, 'hedge_wizard');
   assert.equal(first.opened, 'wizard_lux');

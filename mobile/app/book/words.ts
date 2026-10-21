@@ -2,7 +2,13 @@
 // and what a refusal reason says. A raw code is never shown as an answer; a code with no words here
 // gets none (an outcome) or its code with spaces (a reason).
 
-import type { Failed, Game, GameView, Reply } from '../../packages/game-view/session.ts';
+import type {
+  DecisionResult,
+  Failed,
+  Game,
+  GameView,
+  Reply,
+} from '../../packages/game-view/session.ts';
 
 // A text key's words, and an action label's. ponytail: the cartridge has no text for most action
 // labels yet, so a label shows the key's last word, capitalised as the texted labels are.
@@ -120,10 +126,7 @@ export function replyLine(r: Reply, text: Say, view: GameView, fallback?: string
   return shown.map((t) => text(t.key)).join(' ') || (fallback ?? OUTCOME[d.outcome] ?? '');
 }
 
-type Events = Extract<
-  Extract<Reply, { kind: 'saved' }>['decision'],
-  { kind: 'accepted' }
->['events'];
+type Events = Extract<DecisionResult, { kind: 'accepted' }>['events'];
 const sentence = (s: string) => s.replace(/^./, (a) => a.toUpperCase());
 
 // Navigation adds no duplicate heading. NPCs that leave or arrive while the player stays put
