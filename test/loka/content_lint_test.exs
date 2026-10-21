@@ -94,8 +94,9 @@ defmodule Loka.ContentLintTest do
     assert lint(room.([variant([]), variant([@tide])])) == [shadow]
     assert lint(room.([%{"description" => "d"}, variant([@tide])])) == [shadow]
     assert lint(room.([variant([@visits, @tide]), variant([@visits])])) == []
-    any = %{"when" => %{"root" => %{"op" => "any", "items" => [@visits]}}}
-    assert lint(room.([any, variant([@visits])])) == []
+    any = %{"op" => "any", "items" => [@visits, @tide]}
+    assert lint(room.([%{"when" => %{"root" => any}}, variant([@visits])])) == []
+    assert lint(room.([%{"when" => %{"root" => any}}, variant([any, @visits])])) == [shadow]
     # pass-1 W1 (visits before tide) is order, not shadowing: neither guard contains the other.
     assert lint(room.([variant([@visits]), variant([@tide])])) == []
   end

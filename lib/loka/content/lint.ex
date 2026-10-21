@@ -71,27 +71,22 @@ defmodule Loka.Content.Lint do
 
   defp top(_), do: nil
 
-  # First match wins, so an earlier variant whose all-guard is empty, or a subset of a later
-  # one's, always wins over it. ponytail: any/not guards are not compared; a guard evaluator
-  # would be the upgrade.
+  # First match wins, so an earlier variant whose guard terms (an all-guard's items, else the
+  # guard itself) are a subset of a later one's always wins over it. ponytail: terms compare by
+  # equality, so equivalent but differently written guards pass; a guard evaluator is the upgrade.
   defp shadowed(rel, variants) do
     indexed = Enum.with_index(variants)
 
     for {a, i} <- indexed,
         {b, j} <- indexed,
         i < j,
-        covers?(conds(a), conds(b)),
+        Enum.all?(conds(a), &(&1 in conds(b))),
         do: "#{rel}: variants[#{j}] is shadowed by variants[#{i}]"
   end
 
   defp conds(%{"when" => %{"root" => %{"op" => "all", "items" => items}}}), do: items
   defp conds(%{"when" => %{"root" => root}}), do: [root]
   defp conds(_), do: []
-
-  defp covers?(earlier, later),
-    do: Enum.all?(earlier, &(&1 in later)) and not any_or_not?(earlier)
-
-  defp any_or_not?(conds), do: Enum.any?(conds, &(&1["op"] in ~w(any not)))
 
   # A dialogue without its own label is offered as the kernel's default action.talk (UH).
   defp talk(files, text) do
