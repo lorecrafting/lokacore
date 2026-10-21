@@ -123,14 +123,19 @@ jobs:
       - run: npm run walkthrough
         env:
           LOKA_WALK: toolbox_showcase
+      # The runner's home is the only local path a hosted page or log holds; a literal match never
+      # cuts into the sheet's inlined base64 screenshots the way a path pattern can.
       - if: failure()
-        name: Redact the contact sheet's paths
-        run: sed -i -E "s#$GITHUB_WORKSPACE#<checkout>#g; s#(/home/|/tmp/)[^\"< )]+#<redacted-path>#g" .walkthrough/contact-sheet.html || true
+        name: Redact walk failure diagnostics
+        run: find .walkthrough -name contact-sheet.html -o -name report.json -o -name screen.txt | xargs -r sed -i "s#$HOME#<home>#g"
       - if: failure()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: showcase-walk-failure
-          path: mobile/app/.walkthrough/contact-sheet.html
+          path: |
+            mobile/app/.walkthrough/contact-sheet.html
+            mobile/app/.walkthrough/report.json
+            mobile/app/.walkthrough/artifacts/**/failure/screen.txt
           include-hidden-files: true
           if-no-files-found: ignore
 
