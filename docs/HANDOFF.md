@@ -65,8 +65,8 @@ Pass-1 playtest and fix batch (session a02501b4, 2026-10-21):
     CI on 5de4dc63 is green: `bin/pm_merge.sh ../worktrees.noindex/batch-pass1 showcase/pass1 showcase/pass1-refuse
     review-pass1-refuse "<subject>" 5de4dc63f511081a52815ecbf72cd815e8fc6111`; recompile the hash fixture on conflict.
   - .42 Loft content: re-check APPROVED at 683c4490, but hosted CI failed loader_floors in both kernels; fix round 2
-    (last) is pushing a new head (see notes). Merge once that head's CI is green (no re-review needed for a strip-only
-    fix unless it changes content; check the diff).
+    head 2db2ceae0e330aa6b1ef0dddea200dae93f86d2f only adds a loader_floors strip (PM checked the diff; no re-review).
+    Merge when hosted CI on 2db2ceae is green (pass the sha as the review arg; recompile the hash fixture on conflict).
   - .43 law + hub content (wanted status) building; .48 item status lines building. Each then: fresh Opus reviewer
     (+ Opus designer for player-visible words), CI green, merge.
 - TODO, in order: .49 opponent band in GameView (protocol: record + 2nd opinion), UI2
