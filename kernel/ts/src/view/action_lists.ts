@@ -231,8 +231,7 @@ function advertise(
         : undefined));
   // The unpaid cost names itself (pass-1 R1); an authored refusal wins.
   const short =
-    code === 'insufficient_resource' &&
-    admitted === code &&
+    admitted === 'insufficient_resource' &&
     shortfall(world, bodyOf(world, actor)!, a.recipe!.costs ?? []);
   return code
     ? { available: false, ...shown, reason: refused ?? { code, ...(short && { message: short }) } }

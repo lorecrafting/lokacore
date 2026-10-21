@@ -33,14 +33,13 @@ export function ContentsPage(p: { open: (section: Section) => void; world: () =>
 type Screen = ReturnType<ReturnType<typeof presenter>['screen']>;
 
 // The refusal notes are one block (BOOK-UI-COMPONENTS.md, Page: a run of rows of one kind).
-const noted = (thing: Thing | undefined) =>
-  thing?.actions.flatMap((a) =>
-    !a.available && Object.hasOwn(NOTED, a.reason.code)
-      ? [{ ...a, word: NOTED[a.reason.code] }]
-      : [],
-  ) ?? [];
 const notes = (thing: Thing | undefined, text: Say) => {
-  const shown = noted(thing);
+  const shown =
+    thing?.actions.flatMap((a) =>
+      !a.available && Object.hasOwn(NOTED, a.reason.code)
+        ? [{ ...a, word: NOTED[a.reason.code] }]
+        : [],
+    ) ?? [];
   return (
     shown.length > 0 && (
       <View>
@@ -94,9 +93,7 @@ export function ThingPage(p: {
       <ItemDetails thing={p.thing} text={p.text} />
       <LogLines lines={p.log} />
       {notes(p.thing, p.text)}
-      {!p.actions.length && !p.contents.length && !noted(p.thing).length && (
-        <Note>Nothing to do here.</Note>
-      )}
+      {!p.actions.length && !p.contents.length && <Note>Nothing to do here.</Note>}
       <Cards>
         {p.actions.map((b) => (
           <ActionCard key={`${b.label}:${b.target_ids.join(',')}`} b={b} press={p.press} />

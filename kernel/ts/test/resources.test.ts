@@ -14,6 +14,8 @@ import { loadCartridge, type Cartridge, type World } from '../src/index.ts';
 import { gameView, INSTALLED, newWorld, step } from '../src/runtime/world.ts';
 import { read } from './read.ts';
 
+const why = (a: { available: boolean; reason?: unknown }) => (a.available ? undefined : a.reason);
+
 const CONTEXT = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f';
 const CHARACTER = 'bd595711-ea5f-89a5-abb0-046cd349d2f9'; // ordinal 0
 const BODY = '3d4829ad-9e43-81ef-bc10-66b1b267e157'; // ordinal 1
@@ -150,7 +152,7 @@ test('an unaffordable recipe names the first cost the body cannot pay after the 
       ),
     ).actions.find((a) => a.action_key === 'pray')!;
   assert.equal(pray([{ resource: ref('ma'), amount: 100 }]).available, true); // exactly enough
-  assert.deepEqual(pray([{ resource: ref('ma'), amount: 101 }]).reason, {
+  assert.deepEqual(why(pray([{ resource: ref('ma'), amount: 101 }])), {
     code: 'insufficient_resource',
     message: short('ma', 101),
   });
@@ -171,7 +173,7 @@ test('an unaffordable recipe names the first cost the body cannot pay after the 
     ),
     [],
   );
-  assert.deepEqual(pray(split).reason, { code: 'insufficient_resource', message: short('ma', 51) });
+  assert.deepEqual(why(pray(split)), { code: 'insufficient_resource', message: short('ma', 51) });
 });
 
 // Breaks: a move at 0 mv admitted, or a move not paying 1 mv.

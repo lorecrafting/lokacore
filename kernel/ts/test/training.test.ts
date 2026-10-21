@@ -8,6 +8,8 @@ import { status } from '../src/mechanics/skills.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { key } from '../src/foundation/compose.ts';
 
+const why = (a: { available: boolean; reason?: unknown }) => (a.available ? undefined : a.reason);
+
 const pools = (w: World) => [
   level(w, w.body, resourceRef(w, 'hp')),
   level(w, rat(w), resourceRef(w, 'hp')),
@@ -231,14 +233,14 @@ function carried(w: World): World {
 }
 
 // Pass-1 R1. Breaks: a lesson the body cannot afford refused without naming its price, the price
-// named at exactly enough, or a payment the teacher owes named as the body's shortfall.
+// named at exactly enough, a payment the teacher owes or another refusal named as the body's shortfall.
 test('an unaffordable lesson names its price; a payment the teacher owes does not', () => {
   const w = talk(trainingWorld());
   const learn = (w: World) => gameView(w).choice!.choices.find((c) => c.choice_id === 'learn')!;
   assert.equal(learn(hpMoney(w, w.body, 4)).available, true);
   const pennies = { resource: 'pennies', amount: 4 };
   assert.deepEqual(validate('GameView', gameView(hpMoney(w, w.body, 3))), []);
-  assert.deepEqual(learn(hpMoney(w, w.body, 3)).reason, {
+  assert.deepEqual(why(learn(hpMoney(w, w.body, 3))), {
     code: 'insufficient_resource',
     message: { key: 'resource.short', bindings: pennies },
   });
@@ -251,5 +253,13 @@ test('an unaffordable lesson names its price; a payment the teacher owes does no
   };
   delete owed[id].choices.learn.payment.to;
   const debt = { ...w, cartridge: { ...w.cartridge, dialogues: owed } };
-  assert.deepEqual(learn(debt).reason, { code: 'insufficient_resource' });
+  assert.deepEqual(why(learn(debt)), { code: 'insufficient_resource' });
+  // A short body refused first for a missing gift is told that, not the price.
+  const gift = w.entityIds[ref(w, 'item', 'sword')];
+  const gone = hpMoney(w, w.body, 3);
+  const given = {
+    ...gone,
+    state: { ...gone.state, containers: { ...gone.state.containers, [gift]: w.body } },
+  };
+  assert.deepEqual(why(learn(given)), { code: 'not_owned' });
 });
