@@ -121,6 +121,7 @@ defmodule Loka.ContentShowcaseTest do
       homestead_edits() ++
         unnarrated() ++
         Enum.map(~w(afraid wet shocked stunned warm), &unobserved/1) ++
+        [{"statuses/wanted.json", &Map.delete(&1, "kind")}] ++
         for(
           f <- @homestead_files,
           do: {f <> ".json", nil}
