@@ -22,7 +22,7 @@ const steps = (screen: Screen) => {
   };
   const lesson = async (...choices: string[]) => {
     await tap(/^The carpenter is here/);
-    await tap('Talk the carpenter');
+    await tap('Talk to the carpenter');
     for (const c of choices) await tap(c);
     await tap(LABEL.leaveConversation);
     await tap(LABEL.leave);
@@ -77,7 +77,7 @@ const pondAndStew = async (screen: Screen, { tap, take, held, position }: Steps)
   let landed = 0;
   for (let i = 0; landed < 2 && i < 12; i++) {
     await held(/^a fishing rod/);
-    await tap(/^Cast the rod/);
+    await tap(/^Fish in/);
     await tap(LABEL.leave);
     if (await screen.getByRole('button', fish).first().isVisible()) {
       await take(fish, /^Take an? (trout|salmon|eel)/);
