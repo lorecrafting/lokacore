@@ -29,6 +29,8 @@ word rows never push it below the fold (pass-1 UA). A place action the GameView 
 unavailable draws in the verb list, after the available verb lines, in the Action card's
 unavailable form `label: reason` (`Cast the rod: not yet`; `cooldown` reads **not yet**), never
 dropped (pass-1 R2); a World page with only unavailable verbs draws no "Nothing to do here." Note.
+A closed or locked exit's door actions (Open, Unlock) draw on World as Action cards after the
+place verb lines, with the Map's labels; the Map keeps them too (pass-1 R4, owner 2026-10-21).
 The description
 may contain underlined touch links for projected room fixtures: scenery, fixed doors or
 exit cues, and other room-bound subjects. A fixture link stays within the authored prose,
@@ -76,7 +78,8 @@ save status/error UI remains accurate; NPC histories stay independently bounded.
 retains movement, adjacent sight and legal door actions, and draws no event log: the log lives
 on World only (pass-1 UF1). An exit's door state line ("West door: closed") draws only when no
 exit card already carries that state as its reason; the door's action cards stay (pass-1 UF2).
-Door actions stay on Map only (owner question Q6 open; see the pass-1 rulings record). The
+A closed or locked door's Open/Unlock cards draw on World as well, in the
+[World order](#world-and-status-entry) (pass-1 R4). The
 World minimap/joystick sits outside
 the scrolling body, with status beneath it, inside the existing safe area.
 
@@ -340,12 +343,11 @@ Retry retains original action/target context and appends each confirmed Take/Dro
 When Take removes an item from a corpse's Contents, the confirmed result returns to
 that corpse detail, puts the named pickup line in its local history once, and keeps
 Back to World available. The taken item appears in Carrying. An unavailable corpse
-closes its detail through the ordinary stale-route rule; no success is inferred. A living NPC's directly held items, offered under `world.theft`, list under **Held** (not Inside), as Entity lines that open the ordinary item detail; there the theft card reads **Lift** (a `LABEL` word, never Take) with one Note **<Name> is holding it.** above it, so the verb and the line name the risk before the press (pass-1 E14; owner may veto the word, Q5); a corpse or container keeps **Inside** and Take.
+closes its detail through the ordinary stale-route rule; no success is inferred. A living NPC's directly held items, offered under `world.theft`, list under **Held** (not Inside), as Entity lines that open the ordinary item detail; there the theft card reads **Lift** (a `LABEL` word, never Take) with one Note **<Name> is holding it.** above it, so the verb and the line name the risk before the press (pass-1 E14, owner 2026-10-21); a corpse or container keeps **Inside** and Take.
 
 An item action advertised unavailable with `too_heavy` appears as a non-action note using its
 actual catalog label and **too heavy to carry**; one refused because the load is full reads
-**more than you can carry** once the kernel tells the two apart (`over_load`, owner question Q7;
-until then both read "too heavy to carry") (pass-1 R3). It invokes nothing; available actions retain their
+**more than you can carry** (kernel code `over_load`) (pass-1 R3). It invokes nothing; available actions retain their
 existing buttons. The note follows the latest GameView, including Take aliases and Contents,
 and disappears when shedding held load makes Take legal. While any such note shows, the page
 draws no "Nothing to do here." Note: an unavailable action is still something to read (pass-1 UH3).
