@@ -71,16 +71,12 @@ export function received(game: Game, reply: Reply, was: GameView, s: Logs, text:
   const taken = pickupLine(retained, text);
   // Empty routed combat narration deliberately stays out of World after escape.
   const fallback = fallbackLine(itemChanged, accepted, attempt);
-  const said = repeated
-    ? []
-    : taken
-      ? [taken]
-      : (routed?.[0] ?? replyLine(reply, text, now, fallback));
-  lines.push(...said);
+  const said = taken ? [taken] : (routed?.[0] ?? replyLine(reply, text, now, fallback));
+  if (!repeated) lines.push(...said);
   if (!repeated && routed) s.combatLog.push(...routed[1]);
   s.log.push(...comings(s.projection.view, now, text, accepted?.events));
   conversationLines(s, was, now, accepted, attempt.detail, text);
-  return said.join(' ');
+  return repeated ? '' : said.join(' ');
 }
 
 type Accepted = Extract<Extract<Reply, { kind: 'saved' }>['decision'], { kind: 'accepted' }>;

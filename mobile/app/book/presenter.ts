@@ -140,18 +140,23 @@ function liveButton(game: Game, b: Button, label: Say, text: Say, generation: nu
     : b;
 }
 
+// A press's item and listener names, for its fallback line (received.ts fallbackLine).
+function named(b: Button, was: GameView) {
+  const name = (id?: string) => things(was).find((t) => t.id === id)?.name;
+  return ['take', 'drop', 'give'].includes(b.action_key)
+    ? b.target_ids.map(name)
+    : b.action_key === 'whisper'
+      ? [undefined, name(b.target_ids[0])] // the speech echo's listener
+      : [];
+}
+
 function pressed(game: Game, b: Button, detail: string | undefined, s: Logs, text: Say): string {
   s.returnWorld = s.recovered = false;
   pressedAway(s); // the recap opens the page after an absence and goes with the next press
   s.returnDetail = s.confirmedRead = undefined;
   if (!game.pending() && b.action_key === 'give' && b.target_ids.length !== 2) return '';
   const was = game.view().view;
-  const named = (id?: string) => things(was).find((t) => t.id === id)?.name;
-  const [item, to] = ['take', 'drop', 'give'].includes(b.action_key)
-    ? b.target_ids.map(named)
-    : b.action_key === 'whisper'
-      ? [undefined, named(b.target_ids[0])] // the speech echo's listener (received.ts)
-      : [];
+  const [item, to] = named(b, was);
   s.retry ??= {
     button: { ...b, target_ids: [...b.target_ids], input: { ...b.input } },
     detail,
