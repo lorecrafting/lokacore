@@ -42,6 +42,8 @@ both are built, and plan 6's slice checks it). The hub pin's exit count rises by
   [seam 6](../decisions/owner-decision-realm-seams-2026-10-13.md#the-seams) asks.
 - Replenish `shelf {items: [candle_01..05], from: crate, to: chandler, cap: 3, count: 1, every:
   3600}` (`replenish_sampler`; the crate sits in the sealed `storeroom`).
+- Status `wanted` (permanent debuff, label `condition.wanted`): reactions `wanted_marked` and
+  `wanted_cleared` apply and cure it on `fact_changed` of `wanted`, so it shows exactly while wanted.
 - Items: `beeswax_candle` (one instance, id `beeswax_candle`, held by the chandler, not in the
   shelf set) and `merchant_purse` (one instance, held by the merchant).
 - `world.levelling.kills`: none; nobody here can be killed (below).
