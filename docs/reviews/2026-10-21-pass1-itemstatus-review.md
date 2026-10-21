@@ -36,3 +36,17 @@ Holds: 1, 3, 4, 5. Fails: 2 for expiry (finding 1).
 - Focused TS suites are green at head (showcase_magic, showcase_fire, npc_status, status, status_room, status_readers, status_composition, loader_floors, flows, reactions), and so is `check_ts_size.mjs`.
 - Mutants (showcase_magic, showcase_fire, npc_status), all red: M1 drop the `observed` gate in `watched` (7b); M2 drop `visible` (7b); M3 drop the same-room check (7b); M4 drop the item-kind check (9b, golem expiry); M5 drop `!told` (9b, pile).
 - Quench refusal after the burn ends: pinned by magic 7b (`invalid_state`), which agrees with the handback.
+
+## Re-check round 1 (head `83d10ceb356e7e73121e72b7ed32ad5de31e95dc`)
+
+Scoped to c2a17be86, f6919fb08 and 83d10ceb3 plus their direct callers; I skipped the content of merge 170a8a102.
+
+**Verdict: APPROVE.**
+
+- F1 fixed. `unsaid` (`kernel/ts/src/mechanics/status/job.ts:96-104`), called once from the job loop (`kernel/ts/src/runtime/proposal.ts:294`), drops an item job's line if a line with the same key is already in the receipt. The G3 sentence is rewritten. Fire 5 pins one line for bench and kindling. Mutant: without the filter, fire 5 goes red. Mutant: widen the kind check from `item` to non-NPC, and traps 7 goes red (the player's three poison ticks fold into one).
+- F3: there is a `ponytail:` comment at `job.ts:72-73`. Accepted.
+- F4: `/code-review` was rerun over e6db50de..f6919fb0. I took this from the handback and did not rerun it.
+- Ruling (a), `shared.ts:298`: not a finding. The requirement is one line per pile per step, and it holds. A later delivery, such as a spread lighting the rest of the woodpile, is a separate event, so a second "The wood catches fire." reports a real change. The brief asks only that each perceived item be narrated once.
+- Ruling (b), `job.ts:102`: acceptable. The suppressed line has the same key, so the text is identical. No showcase status reaches both the player and an item. Within one long wait, two burnouts hours apart give one line; receipt lines carry no time, so this is accepted.
+- `proposal.ts:294` holding status-specific logic: acceptable. The loop already imports `merge` and `statusGroup` from the same module, and `unsaid` returns the lines unchanged for any other job.
+- The focused TS suites are green (fire, magic, traps, npc_status, status, status_room, status_readers, flows, loader_floors), and so is `check_ts_size`.
