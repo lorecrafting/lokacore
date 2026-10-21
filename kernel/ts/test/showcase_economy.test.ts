@@ -1,4 +1,4 @@
-// size: allow 563, the Undercroft walk (steps 1 to 10) and its branches continue one world and share its helpers
+// size: allow 585, the Undercroft walk (steps 1 to 10) and its branches continue one world and share its helpers
 // The showcase economy and law district walked step by step (docs/showcase/economy-law-district.md,
 // guided loop steps 1 to 10). Each numbered test continues the world the one before it left; a
 // branch starts from a saved step. Fresh world at 07:00 (25200), pennies 10.
