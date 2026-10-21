@@ -12,6 +12,7 @@
   "narration": {
     "applied": "narration.warm.applied",
     "tick": "narration.warm.tick",
-    "expired": "narration.warm.expired"
+    "expired": "narration.warm.expired",
+    "observed": "narration.warm.applied"
   }
 }

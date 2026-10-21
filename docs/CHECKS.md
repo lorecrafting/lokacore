@@ -136,7 +136,7 @@ their rules and red controls remain available for resumption.
   `graph-diff.yml` alone runs on a pull request (never a push): it posts or updates one PR comment
   listing the System graph's node and edge changes against the base (`bin/graph_diff.py`, its
   control `bin/graph_diff_red_controls.sh` in `ci.yml`'s `lint` job); it never fails on a diff and
-  is not a merge gate. `book-e2e.yml` runs two jobs in parallel: `e2e`, the local Book browser save/reload path with tester.army e2e
+  is not a merge gate. `book-e2e.yml` runs three jobs in parallel: `walk`, the toolbox showcase's Book walk (`LOKA_WALK=toolbox_showcase npm run walkthrough` on `bin/loka dev cartridges/toolbox_showcase`, [preview command](web-preview.md); a failure uploads the contact sheet), `e2e`, the local Book browser save/reload path with tester.army e2e
   (see [preview command](web-preview.md)), and `storybook`: `npm run storybook:smoke` (every story renders, its play
   passes, axe at `test: 'error'`, every button's name starts with its shown text; one story file at a time; one run in the default light palette, [Storybook](web-preview.md#storybook)), then `npm run storybook:live` (every Live story and its click-through on the dev server), then `npm run storybook:picker` (one pick reaches the [polish queue](web-preview.md#polish-queue), a status line shows, Close batch waits for a working item); `mobile.yml` and `mobile-bundle.yml` are disabled
   in GitHub and retain only manual triggers in source for eventual resumption. Each workflow has

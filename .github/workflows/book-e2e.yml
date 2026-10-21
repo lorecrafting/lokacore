@@ -85,9 +85,63 @@ jobs:
       - run: npm run storybook:live
       - run: npm run storybook:picker
 
-  # The run's one verdict: fails unless both jobs succeeded.
+  # The toolbox showcase's Book walk at 390 px (walkthrough/toolbox_showcase.walk.ts): homestead,
+  # economy/law and magic routes on the author preview of cartridges/toolbox_showcase (web-preview.md).
+  walk:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: mobile/app
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: '24.21.0'
+          cache: npm
+          cache-dependency-path: mobile/app/package-lock.json
+      - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124
+        with:
+          otp-version: '28.4'
+          elixir-version: '1.20.4'
+          version-type: strict
+      - run: mix deps.get --check-locked
+        working-directory: .
+      # bin/loka dev compiles through `mise exec -- mix`; CI pins the tools itself, so a stub
+      # runs the command (as kernel/ts/test/author.test.ts stubs mise).
+      - run: |
+          mkdir -p "$RUNNER_TEMP/bin"
+          printf '#!/bin/sh\nshift 2\nexec "$@"\n' > "$RUNNER_TEMP/bin/mise"
+          chmod +x "$RUNNER_TEMP/bin/mise"
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+      - run: bin/loka dev cartridges/toolbox_showcase
+        working-directory: .
+      - run: npm ci --no-audit --no-fund
+      - run: npx e2e-web install chromium --with-deps
+      - run: npm run walkthrough
+        env:
+          LOKA_WALK: toolbox_showcase
+      # The runner's home is the only local path a hosted page or log holds; a literal match never
+      # cuts into the sheet's inlined base64 screenshots the way a path pattern can.
+      - if: failure()
+        name: Redact walk failure diagnostics
+        run: find .walkthrough -name contact-sheet.html -o -name report.json -o -name screen.txt | xargs -r sed -i "s#$HOME#<home>#g"
+      - if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: showcase-walk-failure
+          path: |
+            mobile/app/.walkthrough/contact-sheet.html
+            mobile/app/.walkthrough/report.json
+            mobile/app/.walkthrough/artifacts/**/failure/screen.txt
+          include-hidden-files: true
+          if-no-files-found: ignore
+
+  # The run's one verdict: fails unless every job succeeded.
   book-e2e-green:
-    needs: [e2e, storybook]
+    needs: [e2e, storybook, walk]
     if: always()
     runs-on: ubuntu-24.04
     timeout-minutes: 2

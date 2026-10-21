@@ -1,5 +1,6 @@
 // `npm run walkthrough`: plays Chapter 1 routes at a phone size under reduced motion and
-// screenshots every page for the polish contact sheet (walkthrough/sheet.cjs). Not a test suite.
+// screenshots every page for the polish contact sheet (walkthrough/sheet.cjs). Not a test suite, but
+// book-e2e.yml's walk job gates on the toolbox_showcase routes: a dead end must still fail.
 // `LOKA_WALK=<cartridge id>` plays walkthrough/<id>.walk.ts on the author preview's artifact
 // instead (compile it first: `bin/loka dev cartridges/<id>`, docs/BUILDERS-GUIDE.md#preview-an-edit).
 import { web } from '@e2e-dev/web';

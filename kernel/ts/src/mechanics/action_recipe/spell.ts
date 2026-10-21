@@ -82,7 +82,8 @@ export function effect<R extends Effected>(
     ),
   );
   const on = [s.npc ? npc : body];
-  const done = statusStep(world, s, on, body, 0, { holders: new Map(), applied }, mint, emit);
+  const sees = (id: EntityId) => visible(world, command.payload.actor_id, id);
+  const done = statusStep(world, s, on, body, 0, { holders: new Map(), applied }, mint, emit, sees);
   const lines = [...r.lines, ...done.narration];
   return { ...r, ops: [...r.ops, ...done.ops], events, position, lines };
 }
