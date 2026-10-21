@@ -246,10 +246,10 @@ test('a refusal names what is missing', () => {
     why(off('over_load') as never, (k) => k),
     'more than you can carry',
   );
-  const said = (k: string) => (k === 'shop.not_stolen' ? 'He only buys what is hot.' : k);
+  const said = (k: string) => (k === 'shop.not_stolen' ? 'he only buys what is hot' : k);
   assert.equal(
     sellReason({ reason: 'invalid_state', message: { key: 'shop.not_stolen' } }, said),
-    'He only buys what is hot.',
+    'he only buys what is hot',
   );
   assert.equal(sellReason({ reason: 'not_owned' }, said), 'you are not holding it');
 });
