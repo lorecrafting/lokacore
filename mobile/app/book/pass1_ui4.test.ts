@@ -69,22 +69,27 @@ const ID = {
 };
 
 // Breaks: Take keeps its name on an NPC's item, drops the holder Note or puts it after the card;
-// or a box's (or the floor's) item shows Lift or the holder Note (E14).
+// a refused theft still reads Take; or a box's (or the floor's) item shows Lift or the holder Note (E14).
 test('an item an NPC holds reads Lift after the holder Note; a box item reads Take', async () => {
   const v = pegView();
   const peg = v.entities.find((e) => e.shop)!;
   const held = (id: keyof typeof ID, holder: string) =>
     thing(id, [action('take')], { container_id: holder });
+  const no = action('take', { available: false, reason: { code: 'permission_denied' } });
+  const refusedHeld = thing('book', [no], { container_id: peg.id });
   const view = {
     ...v,
     entities: [
-      ...v.entities.map((e) => (e.id === peg.id ? { ...e, contents: [held('purse', peg.id)] } : e)),
+      ...v.entities.map((e) =>
+        e.id === peg.id ? { ...e, contents: [held('purse', peg.id), refusedHeld] } : e,
+      ),
       thing('box', [], { contents: [held('coin', ID.box)] }),
       thing('pebble', [action('take')]),
     ],
   } as GameView;
   const purse = await page(view, ID.purse);
   assert.deepEqual(purse.slice(-3), ['Npc.peg.short is holding it.', 'Lift', 'Leave']);
+  assert.ok((await page(view, ID.book)).includes('Lift: not yours.'));
   for (const id of ['coin', 'pebble'] as const) {
     const lines = await page(view, ID[id]);
     assert.ok(lines.includes(`Take item.${id}`), JSON.stringify(lines));
