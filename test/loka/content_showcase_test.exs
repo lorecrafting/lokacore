@@ -90,12 +90,13 @@ defmodule Loka.ContentShowcaseTest do
         {"facts.json", &update_in(&1, ["facts"], fn f -> Map.drop(f, @homestead_facts) end)}
       ] ++
         for({f, k} <- @dropped_keys, do: {f <> ".json", fn m -> Map.delete(m, k) end}) ++
-        for(
-          s <- ~w(wet shocked stunned warm),
-          do:
-            {"statuses/#{s}.json",
-             &update_in(&1, ["narration"], fn n -> Map.delete(n, "observed") end)}
-        )
+        for(s <- ~w(wet shocked stunned warm), do: unobserved(s))
+
+  # The golem's observed lines need API 1.110 (row G3, loka-kgd.176).
+  defp unobserved(status),
+    do:
+      {"statuses/#{status}.json",
+       &update_in(&1, ["narration"], fn n -> Map.delete(n, "observed") end)}
 
   defp homestead,
     do:
