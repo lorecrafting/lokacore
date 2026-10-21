@@ -109,7 +109,7 @@ test('a typed word is said like its chip, even after the view moves on, and echo
   type(b, 'two words');
   assert.equal(revision(b), before);
   assert.ok(b.text().includes(LABEL.oneWord));
-  input().props.onChangeText('xyzzy');
+  input().props.onChangeText('Xyzzy'); // said, and echoed, as the kernel folds it
   const stale = input(); // drawn before a background update, so its Say token is old
   const { view, token } = b.game.view();
   const hello = buttonsOf(view, String, String).find((x) => x.label === 'hello, say')!;
@@ -119,7 +119,7 @@ test('a typed word is said like its chip, even after the view moves on, and echo
   assert.ok(revision(b) > after);
   assert.ok(!b.text().includes(LABEL.oneWord));
   assert.deepEqual(
-    b.text().filter((t) => t.includes('xyzzy')),
+    b.text().filter((t) => /xyzzy/i.test(t)),
     ['You say "xyzzy".'],
   );
 });

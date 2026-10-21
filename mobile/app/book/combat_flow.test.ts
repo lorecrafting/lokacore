@@ -259,8 +259,10 @@ test('Attack opens its committed page; pending and refused Flee stay until commi
     h.tap('Flee');
     assert.ok(h.texts().includes('Combat'));
     const shown = h.texts();
+    const escape = shown.indexOf('You escape to the road.');
     assert.ok(
-      shown.indexOf('Crows lift off the road.') === shown.indexOf('You escape to the road.') + 1,
+      escape >= 0 && shown[escape + 1] === 'Crows lift off the road.',
+      JSON.stringify(shown),
     );
     h.tap('Back to World');
     assert.equal(h.texts().includes('Combat'), false);
