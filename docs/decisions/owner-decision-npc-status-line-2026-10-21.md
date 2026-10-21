@@ -10,7 +10,8 @@ Written 2026-10-21 in Claude Code by anthropic/claude-opus-5-5 (developer).
 - PM ruling on the same row (paraphrased): the line is opt-in. A status declares
   `narration.observed`, a line about the NPC; without it an NPC holder stays silent, as before. The
   applied line keeps speaking to the player ("The frost bites through your clothes."), so the kernel
-  never says it for an NPC; a status only an NPC ever holds (the showcase golem's) may point
-  `observed` at its applied key.
+  never says it for an NPC.
+- Developer choice, open for the PM: the showcase golem's four statuses, which only the golem
+  holds, point `observed` at their golem-phrased applied keys.
 - Items stay silent. Tick and expiry lines stay the player's own.
 - Beads: `loka-kgd.176`. Spec: [row G3](../system/mechanics.md#statuses-on-npcs-and-things-toolbox-row-g3).
