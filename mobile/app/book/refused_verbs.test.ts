@@ -54,7 +54,7 @@ test('refused place verbs follow the available verb as label: reason notes', asy
 });
 
 // Breaks: a refused action that belongs to another control (Sleep, the hold scan), takes typed input
-// (Say), is the Word block's (Shout), aims at an entity it does not name (Take), is the storylet
+// (Inscribe), is the Word block's (Shout), aims at an entity it does not name (Take), is the storylet
 // (its own block) or a notice's (its notice page) drawn as a World verb note.
 test('refused actions owned by another control draw no verb note', async () => {
   const drawn = lines(
@@ -64,7 +64,7 @@ test('refused actions owned by another control draw no verb note', async () => {
         refused('scan', 'Scan', 'invalid_state'),
         refused('shout', 'Shout', 'invalid_state'),
         { ...refused('take', 'Take', 'invalid_state'), target: { kind: 'entity' } },
-        { ...refused('say', 'Say', 'invalid_state'), input: [{ key: 'text' }] },
+        { ...refused('inscribe', 'Inscribe', 'invalid_state'), input: [{ key: 'text' }] },
         refused('beckons', 'A stranger beckons', 'invalid_state'),
         refused('tear', 'Tear the notice', 'invalid_state', { target_ids: ['n1'] }),
       ],
@@ -73,7 +73,7 @@ test('refused actions owned by another control draw no verb note', async () => {
     ),
   );
   assert.deepEqual(
-    drawn.filter((l) => /Sleep|Scan|Say|Shout|Take|Tear/.test(l)),
+    drawn.filter((l) => /Sleep|Scan|Inscribe|Shout|Take|Tear/.test(l)),
     [],
   );
   assert.equal(drawn.filter((l) => l.startsWith('A stranger beckons')).length, 1);
