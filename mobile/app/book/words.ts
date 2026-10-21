@@ -77,8 +77,10 @@ const REASON: Record<string, string> = {
 };
 // A refused move's log line that is its own sentence, not "The way north is …" (0 MV).
 // The kernel's engine key resource.short names the unpaid cost (pass-1 R1); keys show raw, as on the status line.
-export const short = (b: Record<string, unknown>) =>
-  `need ${String(b.amount)} ${String(b.resource)}`;
+export const message = (m: { key: string; bindings?: Record<string, unknown> }, text: Say) =>
+  m.key === 'resource.short'
+    ? `need ${String(m.bindings?.amount)} ${String(m.bindings?.resource)}`
+    : text(m.key);
 export const SENTENCE: Record<string, string> = { insufficient_resource: 'You are too exhausted.' };
 export const given = (item: string, to: string) => `You give ${item} to ${to}.`;
 export const reason = (code: string) => REASON[code] ?? code.replaceAll('_', ' ');
