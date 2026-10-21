@@ -18,17 +18,17 @@ The triage has 70 rows, after merges by root cause. Two dropped findings are not
 | PROMISE | Text promise not kept: a sign, description or journal says what the content does not do | 13 | 0 | 11 | 2 |
 | NONE | No authoring fault: a spec choice, a WAD ruling or taste | 9 | 0 | 0 | 9 |
 | SILENT | Silent state change: an action or reaction changes state and writes no line | 9 | 8 | 1 | 0 |
-| VERB | Verb or label composition: one word with two meanings, or a label that reads wrong | 8 | 3 | 0 | 5 |
+| VERB | Verb or label composition: one word with two meanings, or a label that reads wrong | 9 | 3 | 0 | 6 |
 | BOOK | Book presentation: layout, units or glyphs | 7 | 0 | 0 | 7 |
 | PAGE | Off the page: the offer or the result is not on the page the player looks at | 7 | 0 | 5 | 2 |
 | REFUSAL | Refusal hidden or misnamed: the offer vanishes or the reason word is wrong | 6 | 3 | 3 | 0 |
-| WIRING | Data wiring: an over-broad match, an orphan item, a band or a variant order | 6 | 4 | 0 | 2 |
+| WIRING | Data wiring: an over-broad match, an orphan item, a band or a variant order | 5 | 4 | 0 | 1 |
 | HIDDEN | Hidden state: the rule depends on a value the page never shows | 5 | 0 | 2 | 3 |
 | **Total** | | 70 | 18 | 22 | 30 |
 
 PROMISE (13 rows) is the largest, and a check cannot decide whether prose is true: only a walk that tests each promise can.
 SILENT (9 rows) is nearly all decidable by a check: a state write with no narration is visible in the data.
-M2b (the silent ignite) waits on an owner question; the magic brief chose no ignite line.
+M2b (the silent ignite) is ruled: spell effects and kills write a line (owner question Q11).
 
 ## Candidate deterministic checks
 
@@ -42,16 +42,17 @@ M2b (the silent ignite) waits on an owner question; the magic brief chose no ign
 | # | Check | Inspects | Runs where | Cost | Rows it would have caught |
 |---|---|---|---|---|---|
 | 1 | A policy that refuses the player names a `reason` | Policy definitions with a player refusal | loader | S | M1 |
-| 2 | Every kernel refusal code has a Book reason word | Kernel unavailable codes against Book words (`cooldown` has none) | kernel | S | R1, R2 |
+| 2 | Every kernel refusal code has a Book reason word | Kernel unavailable codes against the reason words in `mobile/app/book/words.ts` (`cooldown` has none) | Book test (`mobile/app/book/`) | S | R1, R2 |
 | 3 | A reaction that writes state has a `narrate` line or says it is silent | Reactions with `status.apply` or `fact.set` ops | loader | S | T1, T4 |
-| 4 | An action that commits a change yields a narration record | Every offered action in the sim; the delta against the records | sim | M | M2b, M3, M7, C2a, R5, W3 |
+| 3b | A hostile NPC has an `engage` line | NPC definitions with hostile behaviour | loader | S | C2a |
+| 4 | An action that commits a change yields a narration record | Every offered action in the sim; the delta against the records | sim | M | M2b, M3, M7, R5, W3 |
 | 5 | A readable has a title; an action verb has an `action.*` label key | Item and verb definitions against Book label keys | loader | S | T5, UH, E6a |
 | 6 | The top (normal) band starts below the maximum; no description variant shadows a later one | Band tables and description variant guards | loader | S | UK, W1 |
 | 7 | Every item has a source and a sink; a policy tag match table is pinned | Item references, fill sources, tag queries | loader + kernel snapshot | S-M | M8a, M8c |
 | 8 | Every offer reachable in a room is on the room page, a refusal shows its reason, and a state variant or readout the content defines is drawn | The walk's room pages against the kernel offer list and view | walk | M | E1, T3, R4, R6, E6b, E8, E9, M10a, M10c, UA, UO |
 | 9 | Sign promises are data, and the walk reaches each promised outcome | Each sign's declared promises, then the walk | walk | M-L | E3, E4, E6c, E10a, M2a, M5, M6, T2, W2, F1, F2 |
 
-Checks 1, 3, 5 and 6 are cheap loader lints that cover 8 rows.
+Checks 1, 3, 3b, 5 and 6 are cheap loader lints that cover 9 rows.
 Check 9 is the only rail for most PROMISE rows; the rest stay with the playtest.
 
 ## Rows
@@ -125,6 +126,6 @@ Check 9 is the only rail for most PROMISE rows; the rest stay with the playtest.
 | UO | UI-DRIFT | PAGE | walk | All records join into one line; the "Opened." fallback. |
 | UP | TASTE | NONE | playtest | The earthly-branch hour glyph. |
 | UQ | WAD | NONE | playtest | The running head above the title. |
-| UR | UI-DRIFT | WIRING | playtest | "Put the lantern in your corpse"; no detail-page order rule. |
+| UR | UI-DRIFT | VERB | playtest | "Put the lantern in your corpse"; no detail-page order rule. |
 | US | WAD | NONE | playtest | A corpse keeps Inside. |
 | UT | DUP | VERB | playtest | Shop wording gap. |
