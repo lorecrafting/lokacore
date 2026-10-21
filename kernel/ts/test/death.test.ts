@@ -103,7 +103,7 @@ test('owners recover roots through ordinary Take while corpses remain fixed and 
   assert.equal(taken.world.state.containers[bag], w.body);
   assert.equal(taken.world.state.containers[lantern], bag);
   const tooHeavy = step(taken.world, command('take', entity(w, 'item/wool_cloak')), 3).decision;
-  assert.deepEqual(tooHeavy, { kind: 'rejected', error: { code: 'too_heavy' } });
+  assert.deepEqual(tooHeavy, { kind: 'rejected', error: { code: 'over_load' } });
   const view = gameView(w).entities.find((e) => e.id === c)!;
   assert.ok(view.contents?.some((e) => e.id === bag));
   assert.ok(!view.actions.some((a) => ['take', 'drop', 'give', 'wear'].includes(a.action_key)));

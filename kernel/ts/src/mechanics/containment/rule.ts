@@ -27,6 +27,9 @@ import { carrying, giveRefused, putRefused, recipient } from './shared.ts';
 import { stolen, theftRefused } from './theft.ts';
 import { movable } from '../../runtime/created.ts';
 
+// A Take's refusals; any other code faults.
+const REFUSED: readonly string[] = ['not_present', 'permission_denied', 'too_heavy', 'over_load'];
+
 // size: allow 58, finite Harvest, the G7 get-lock walk and row 33 theft join the conserved-transfer decision
 export const decide: Rule<'containment'> = (world, command, mint, steps = { n: 0 }) => {
   const p = command.payload;
@@ -57,8 +60,7 @@ export const decide: Rule<'containment'> = (world, command, mint, steps = { n: 0
       ? (chainRefused(world, p.actor_id, p.item_id, 'get', steps) ??
         carrying(world, body, steps)(p.item_id))
       : theftRefused(world, p.actor_id, body, p.item_id, steps);
-    if (code === 'not_present' || code === 'permission_denied' || code === 'too_heavy')
-      return rejected(code);
+    if (code && REFUSED.includes(code)) return rejected(code);
     if (code) return { kind: 'fault', code };
     if (!reached)
       return stolen(world, command, mint, [body, p.item_id], move(body), acquired(body));

@@ -431,9 +431,9 @@
    },
    "choices": [
     {
-     "available": true,
      "choice_id": "answer",
-     "label": "dialogue.wisp.answer"
+     "label": "dialogue.wisp.answer",
+     "available": true
     }
    ]
   },

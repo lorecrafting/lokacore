@@ -17,7 +17,7 @@ export const decide: Rule<'commerce'> = (world, command, mint, steps) => {
       result === 'containment_cycle' ||
       result === 'precondition_failed'
       ? { kind: 'fault', code: result }
-      : rejected(result);
+      : rejected(result === 'not_stolen' ? 'invalid_state' : result);
   const moved = {
     op: 'entity.transfer',
     writer_group: 0,

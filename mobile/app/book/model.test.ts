@@ -18,6 +18,7 @@ import {
   type Pool,
   why,
 } from './model.ts';
+import { sellReason } from './words.ts';
 
 const b = (label: string, action_key: string, target_ids: string[] = [], input = {}) => ({
   label,
@@ -222,4 +223,33 @@ test('the status line shows the sky as the sun by day and the moon by its phase 
     [sky('grain_rain', 'full'), sky(undefined, 'full'), sky()],
     [undefined, undefined, undefined],
   );
+});
+
+// Pass-1 GE3. Breaks: a refusal reading its raw code or a generic word where the kernel names what
+// is missing: the unpaid cost (resource.short, an engine key no cartridge defines), a cooldown, a
+// full load, an item that is not the player's, or a fence's own line for honest goods.
+test('a refusal names what is missing', () => {
+  const off = (code: string, message?: object) => ({ available: false, reason: { code, message } });
+  const lesson = off('insufficient_resource', {
+    key: 'resource.short',
+    bindings: { resource: 'pennies', amount: 4 },
+  });
+  assert.equal(
+    why(lesson as never, (k) => k),
+    'need 4 pennies',
+  );
+  assert.equal(
+    why(off('cooldown') as never, (k) => k),
+    'not yet',
+  );
+  assert.equal(
+    why(off('over_load') as never, (k) => k),
+    'more than you can carry',
+  );
+  const said = (k: string) => (k === 'shop.not_stolen' ? 'he only buys what is hot' : k);
+  assert.equal(
+    sellReason({ reason: 'invalid_state', message: { key: 'shop.not_stolen' } }, said),
+    'he only buys what is hot',
+  );
+  assert.equal(sellReason({ reason: 'not_owned' }, said), 'you are not holding it');
 });

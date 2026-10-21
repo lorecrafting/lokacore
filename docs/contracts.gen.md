@@ -538,7 +538,7 @@ The portable GameView envelope and its freshness (04 §14-§16; 00 §4.10; pre-r
 - **ResourceView**: One of the viewer's body's resources (04 §15 as amended 2026-10-01 and 2026-10-02; 21 §4 Resource): its current value at the view's time, its maximum, its condition band key and the band's tone, which the kernel computes from the band table in effect (the pool's bands, else the cartridge's world.bands, else the 04 §15 default table); the UI never computes a threshold (00 §4.10).
 - **SceneView**: Present iff a modal scene runs: its current narrate TextKey, one-based index and narrate count.
 - **ServiceOffer**: Current exact keyed provider quote, declared capped benefit and shared availability; no reservation.
-- **ShopAction**: The current quoted price and availability of one Buy or Sell exchange, with a typed refusal reason when unavailable (B3).
+- **ShopAction**: The current quoted price and availability of one Buy or Sell exchange, with a typed refusal reason when unavailable (B3), and the house line for it when the kernel names one: shop.not_stolen when a fence's offer refuses goods that are not stolen (pass-1 GE3; the cartridge authors the text).
 - **ShopItemView**: An exact shop item identity and visible name with current Buy and Sell offers; the projection reserves no stock (B3).
 - **SightView**: What is seen through an exit whose door does not bar the way (04 §15 as amended by c1-doors; 00 §4.1 scan adjacent rooms): the destination room and its title, and the NPCs and items directly in it, NPCs first, then in DefinitionRefString order. Absent beyond a closed or locked door.
 - **SkillView**: A skill's permanent acquisition and current qualification as projected for the actor.
