@@ -15,6 +15,7 @@ import {
   refused,
   said,
   sky,
+  timeLeft,
   type Pool,
   why,
 } from './model.ts';
@@ -252,4 +253,17 @@ test('a refusal names what is missing', () => {
     'he only buys what is hot',
   );
   assert.equal(sellReason({ reason: 'not_owned' }, said), 'you are not holding it');
+});
+
+// Breaks (pass-1 UN, book-ui.md Conditions details): a day read as "1440m", or a boundary moved
+// (seconds under two minutes, whole minutes under two hours, hours from two).
+test('a duration reads in seconds, then minutes, then hours from two hours', () => {
+  const cases: [number, string][] = [
+    [119, '119s'],
+    [120, '2m'],
+    [7199, '120m'],
+    [7200, '2h'],
+    [86400, '24h'],
+  ];
+  for (const [s, want] of cases) assert.equal(timeLeft(s), `Time left: ${want}`);
 });

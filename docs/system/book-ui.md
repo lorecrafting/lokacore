@@ -98,7 +98,7 @@ palette without presenter thresholds. Status shows the hp band phrase only on hp
 shows only the condition pools hp, ma and mv, with their band tones; pennies and any other count
 stay off the status line and show plain in Character (owner, polish pick mv1j35ltxddx): a
 count (pennies, ash: any resource other than the pools hp, ma and mv named above; no new field) draws its current value alone
-(`pennies 10`, `ash 0`), never `current / maximum`; a banded pool keeps `hp 10 / 10` (pass-1 UI). With a
+(`pennies  10`, `ash  0`; two spaces after the key, like `xp  30 / 50`), never `current / maximum`; a banded pool keeps `hp  10 / 10` (pass-1 UI). With a
 cartridge calendar, status shows the sky as one glyph from the confirmed solar and lunar phase
 labels (the sun by its phase while up, the moon by its phase at night, per the catalogue's
 [Status line](../BOOK-UI-COMPONENTS.md#component-catalogue)); the confirmed day, displayed time

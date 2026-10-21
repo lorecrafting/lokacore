@@ -8,6 +8,7 @@ import {
   cap,
   conditionLine,
   plain,
+  isPool,
   toneOf,
   why,
   type group,
@@ -60,7 +61,7 @@ export function CharacterPage(
       <SkillDetails view={p.view} text={p.text} />
       {resources.map((r) => (
         <Text key={r.resource.key} style={{ ...prose(c), color: band(c, toneOf(r)) }}>
-          {`${r.resource.key}  ${r.current} / ${r.maximum}${r.resource.key === 'hp' ? `, ${bandPhrase(r, p.text)}` : ''}`}
+          {`${r.resource.key}  ${isPool(r) ? `${r.current} / ${r.maximum}` : r.current}${r.resource.key === 'hp' ? `, ${bandPhrase(r, p.text)}` : ''}`}
         </Text>
       ))}
       {levelling && <Text style={prose(c)}>{xpLine(levelling)}</Text>}
