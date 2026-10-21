@@ -6,7 +6,8 @@ import { key } from '../src/foundation/compose.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { admission } from '../src/mechanics/combat/behavior.ts';
 import { validate } from '../src/foundation/validate.ts';
-import { refString, type DefinitionRef, type World } from '../src/runtime/decision.ts';
+import { refString, type World } from '../src/runtime/decision.ts';
+import type { DefinitionRef } from '../src/contracts.gen.ts';
 import { statusKey } from '../src/mechanics/status/shared.ts';
 import { ids, run, h1, h2, home, nest, fixture, wounded, begun, due } from './c4_pack_fixture.ts';
 
@@ -65,16 +66,21 @@ test('each pack member shows its own hp band', () => {
 test('a hidden or dead pack member shows no band while the seen primary keeps its own', () => {
   const w = begun(fixture());
   const { id, version } = w.cartridge.manifest;
-  const hidden = { cartridge_id: id, cartridge_version: version, kind: 'status', key: 'hidden' };
+  const hidden: DefinitionRef = {
+    cartridge_id: id,
+    cartridge_version: version,
+    kind: 'status',
+    key: 'hidden',
+  };
   const concealed = {
     ...w,
     cartridge: {
       ...w.cartridge,
-      statuses: { [refString(hidden as DefinitionRef)]: { key: 'hidden', concealment: 'hidden' } },
+      statuses: { [refString(hidden)]: { key: 'hidden', concealment: 'hidden' } },
     },
     state: {
       ...w.state,
-      statuses: { [statusKey(h1, hidden as DefinitionRef)]: { generation: 1, active: true } },
+      statuses: { [statusKey(h1, hidden)]: { generation: 1, active: true } },
     },
   } as World;
   const bands = (world: World) => {
