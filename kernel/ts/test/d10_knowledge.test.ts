@@ -188,11 +188,9 @@ test('known_npcs keeps a remembered NPC at 1 HP and drops it at 0 HP, also after
   for (const [left, listed] of [
     [1, true],
     [0, false],
-  ] as const)
-    for (const w of [
-      at(left),
-      hydrate(fresh(), JSON.parse(JSON.stringify(at(left).state)), true)!,
-    ]) {
+  ] as const) {
+    const w0 = at(left);
+    for (const w of [w0, hydrate(fresh(), JSON.parse(JSON.stringify(w0.state)), true)!]) {
       const view = gameView(w);
       assert.deepEqual(validate('GameView', view), []);
       assert.equal(
@@ -201,4 +199,5 @@ test('known_npcs keeps a remembered NPC at 1 HP and drops it at 0 HP, also after
         `hp ${left}`,
       );
     }
+  }
 });
