@@ -1,4 +1,4 @@
-// size: allow 440, reaction@1 keeps its total trigger SUBJECT table and filters (row FD5: witness) beside the one delivery sequence (row FD1: or its delayed job; quest.activate split out for hs-1)
+// size: allow 445, reaction@1 keeps its total trigger SUBJECT table and filters (row FD5: witness) beside the one delivery sequence (row FD1: or its delayed job; quest.activate split out for hs-1)
 // reaction@1 (capability_registry.json; reaction.schema.json ReactionRule; 21 §3.4, §11; 06
 // §14; 04 §5.2): the rules an event triggers and one delivery's explicit sequence. proposal.ts
 // propose runs the FIFO queue, numbers the writer groups and counts the budgets.
@@ -130,6 +130,10 @@ type Delivery = {
   ran?: boolean;
 };
 
+// Row G3: statusStep asks light's sight last, charged to the delivery's query steps.
+const sight = (then: World, actor: CharacterId, steps: { n: number }) => (id: EntityId) =>
+  visible(then, actor, id, steps);
+
 // size: allow 60, one ordered delivery lowers fact assignments, quest effects, suppression, spawn, replenish runs and lines
 export function sequence(
   world: World,
@@ -167,10 +171,9 @@ export function sequence(
       const body = bodyOf(then, actor);
       if (!body) return { kind: 'fault', code: 'precondition_failed' };
       const on = holdersOf(then, step, cause, body, dead);
-      const sees = (id: EntityId) => visible(then, actor, id, steps);
-      const applying = statusStep(then, step, on, body, group, own, mint, emit, sees);
-      ops.push(...applying.ops);
-      narration.push(...applying.narration);
+      const r = statusStep(then, step, on, body, group, own, mint, emit, sight(then, actor, steps));
+      ops.push(...r.ops);
+      narration.push(...r.narration);
     } else if (step.op === 'barrier.set') {
       ops.push(...setBarrier(then, step, cause, about.subject, group, own, emit)); // row W22
     } else if (step.op === 'item.move' || step.op === 'npc.move') {
