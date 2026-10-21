@@ -385,6 +385,29 @@ test('a coming or going starts its sentence with a capital; a killed NPC does no
   assert.deepEqual(other, ['A crow leaves.']);
 });
 
+// Breaks (loka-y6yg.44): the reply path drops the decision events, so a spell-killed NPC "leaves".
+test('an accepted reply that kills an NPC prints no leaves line', () => {
+  const crow = { id: 'crow', name: 'Crow', kind: 'npc', actions: [] };
+  let current = { ...(VIEW as object), entities: [crow] } as GameView;
+  const p = presenter({
+    ...game(() => accepted('cast')),
+    view: () => ({ view: current, token: String(current.entities.length) }),
+    invoke: () => {
+      current = { ...(VIEW as object), entities: [] } as GameView;
+      return {
+        kind: 'saved',
+        decision: {
+          kind: 'accepted',
+          outcome: 'cast',
+          events: [{ payload: { type: 'entity_died', victim_id: 'crow' } }],
+        },
+      } as never;
+    },
+  });
+  p.press(north);
+  assert.ok(!p.screen().log.some((line) => line.includes('leaves')), p.screen().log.join('|'));
+});
+
 // Breaks: the label counts from the zero-based declaration index ("Chapter zero") or a chapter past
 // the words shows "Chapter undefined".
 test('the chapter label names the declaration index counted from one', () => {
