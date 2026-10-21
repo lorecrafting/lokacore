@@ -445,6 +445,7 @@ test('the room lists NPCs first, then every other entity as items, empty groups 
           place: { title: { key: 'Room' }, description: { key: 'A room.' } },
           exits: [],
           entities,
+          actions: [],
         },
         text: (key: string) => key,
         log: [],

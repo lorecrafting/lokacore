@@ -8,6 +8,7 @@ const room = (description: string) => ({
     place: { title: { key: 'Room' }, description: { key: description } },
     exits: [],
     entities: [],
+    actions: [],
   },
   text: (key: string) => key,
   log: [],
