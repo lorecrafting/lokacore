@@ -100,8 +100,8 @@ equals 3, wheel_2 equals 1, wheel_3 equals 2)` (`puzzles_sampler/barriers`).
 - Wheels: `turn_wheel_n` (alias `turn`, success `event.emit wheel`); reactions `wheel_n_turn`
   (`on action_completed {action: turn_wheel_n}`, `fact.adjust wheel_n +1`) then `wheel_n_wrap`
   (`when wheel_n equals 10`, assign 0), the wrap keyed after the turn (`puzzles_sampler/reactions`).
-- Feedback lines (API 1.103; asides 1.91): each lever step reaction narrates first
-  `narration.lever_bolt` ("Behind the north door, a bolt slides back.") and each lever reset
+- Feedback lines (API 1.103; asides 1.91): `lever_b_step` and `lever_c_step` narrate first
+  `narration.lever_bolt` ("Behind the north door, a bolt slides back.", `pull_a` keeps its own clank) and each reset
   `narration.lever_reset` ("... the bolts clatter home."); `plate_springs`, `plate_bites` and their
   cellar twins narrate `narration.needle` ("A needle in the plate bites.") before the status. Thirty
   readout reactions `wheel_n_x_shows_k` (`on action_completed {action: turn_wheel_n}`, `when wheel_n
