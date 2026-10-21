@@ -55,6 +55,7 @@ Keep lessons in area files; link here only when relevant to all work.
 - Before capturing or committing evidence, read [evidence lessons](docs/lessons/evidence.md).
 - Before touching `protocol/`, its fixtures or canonical encoding, read [contract lessons](docs/lessons/contracts.md).
 - For CI, hooks, skip rules or randomized tests, read [check lessons](docs/lessons/checks.md).
+- Before drafting or reviewing a district or area plan, read the [area authoring checklist](docs/guides/area-authoring.md).
 
 **All work**
 - Read documents once per agent; [exceptions](docs/decisions/owner-decision-read-once-docs-2026-10-05.md).
