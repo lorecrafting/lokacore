@@ -360,5 +360,44 @@
         }
       ]
     }
-  }
+  },
+  "asides": [
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "fact_compare",
+          "fact": "lever_stage",
+          "equals": 3
+        }
+      },
+      "text": "aside.lever_hall.levers_drawn"
+    },
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "all",
+          "items": [
+            {
+              "op": "fact_compare",
+              "fact": "wheel_1",
+              "equals": 3
+            },
+            {
+              "op": "fact_compare",
+              "fact": "wheel_2",
+              "equals": 1
+            },
+            {
+              "op": "fact_compare",
+              "fact": "wheel_3",
+              "equals": 2
+            }
+          ]
+        }
+      },
+      "text": "aside.lever_hall.dial_true"
+    }
+  ]
 }

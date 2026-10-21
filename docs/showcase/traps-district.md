@@ -68,8 +68,9 @@ equals 3, wheel_2 equals 1, wheel_3 equals 2)` (`puzzles_sampler/barriers`).
 > the same whether you find it or not. Its poison wears off in two hours, or at once with the bitters
 > locked behind the dial east. The three levers in the hall east have an order, written on a note
 > past the plate; the dial's numbers are on a slate behind the lever door. North of the plate a
-> chief keeps two goblins. Shout "begone" and the goblins run; kill the chief and they run too.
-> Down these stairs is a cellar with all of it, and the plate there is under your feet already.
+> chief keeps two goblins. Shout "begone" and the goblins break and run once you strike; kill the
+> chief and they run too. Down these stairs is a cellar with all of it, and the plate there is
+> under your feet already.
 
 ### Trap, puzzles, pack
 

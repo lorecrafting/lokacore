@@ -17,8 +17,9 @@
       ],
       "description": "detail.sapper_note",
       "readable": {
-        "label": "actions.read_book",
-        "text": "readable.sapper_note"
+        "label": "actions.read_note",
+        "text": "readable.sapper_note",
+        "title": "readable.sapper_note.title"
       }
     }
   }

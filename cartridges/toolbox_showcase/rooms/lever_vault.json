@@ -15,8 +15,9 @@
       ],
       "description": "detail.vault_slate",
       "readable": {
-        "label": "actions.read_book",
-        "text": "readable.vault_slate"
+        "label": "actions.read_slate",
+        "text": "readable.vault_slate",
+        "title": "readable.vault_slate.title"
       }
     }
   }

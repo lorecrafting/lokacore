@@ -89,6 +89,7 @@ test('traps 2: the search finds the plate; the first disarm fails and poisons', 
   const bite = outcome(w, 'disarm_plate');
   assert.equal(bite.out, 'failure');
   assert.ok(bite.lines.includes('narration.poisoned.applied'), bite.lines.join());
+  assert.ok(bite.lines.includes('narration.needle'), bite.lines.join());
   w = bite.world;
   assert.deepEqual(poisoned(w), { generation: 1, ends_at: T + 7200 });
   assert.ok(labels(w).includes('condition.poisoned'));
@@ -132,6 +133,7 @@ test('traps 4: north over the disarmed plate; the note reads', () => {
   assert.deepEqual(play(w, { type: 'read', target_id: detail(w, 'sapper_note') }).lines, [
     'readable.sapper_note',
   ]);
+  assert.equal(notice(w, 'sapper_note').title, 'readable.sapper_note.title');
 });
 
 const pulls = (x: World, levers: string) =>
@@ -146,6 +148,8 @@ const open = (x: World, direction: string) => {
     : (r.decision as unknown as { error: { code: string } }).error.code;
 };
 const at = (x: World) => x.state.containers[x.body];
+const notice = (x: World, key: string) =>
+  gameView(x).notices!.find((n) => n.id === detail(x, key))!;
 
 // Breaks: a lever's reset or step is missing or fires in the wrong key order (lever_c_reset must
 // precede lever_c_step), the door opens off stage 3, the slate reads other text, a reset
@@ -168,6 +172,7 @@ test('traps 5: the levers open the north door only in order A, B, C; the slate r
   assert.deepEqual(play(w, { type: 'read', target_id: detail(w, 'vault_slate') }).lines, [
     'readable.vault_slate',
   ]);
+  assert.equal(notice(w, 'vault_slate').title, 'readable.vault_slate.title');
   w = pulls(go(w, 'south').world, 'c');
   assert.equal(fact(w, 'lever_stage'), 0);
   const inside = play(go(w, 'north').world, { type: 'close', direction: 'south' }).world;
@@ -216,6 +221,44 @@ test('traps 6: the wheels open the east door at 3, 1, 2; the bitters cure the po
   validate('GameView', gameView(w));
 });
 
+// Breaks: a lever's step and reset narrate the same line or nothing; a hall aside shows off its
+// solved state (lever_stage 3; wheels 3, 1, 2) or ignores one wheel; a wheel names another digit,
+// or its readout runs before its wrap (it would name 10, not 0).
+test('traps 5-6 feedback: pulls and turns narrate; the hall says when a door is solved', () => {
+  let x = go(go(go(fresh(WORLD), 'west').world, 'down').world, 'east').world;
+  const said = (y: World, action: string) =>
+    perform(y, action).lines.filter((l) => l !== 'narration.lever');
+  assert.deepEqual(said(x, 'pull_b'), ['narration.lever_reset']);
+  assert.deepEqual(said(pulls(x, 'a'), 'pull_b'), ['narration.lever_bolt']);
+  assert.deepEqual(said(pulls(x, 'ab'), 'pull_c'), ['narration.lever_bolt']);
+  assert.deepEqual(said(pulls(x, 'a'), 'pull_c'), ['narration.lever_reset']);
+  const asides = (y: World) => gameView(y).place.asides?.map((a) => a.key);
+  assert.equal(asides(pulls(x, 'ab')), undefined);
+  assert.deepEqual(asides(pulls(x, 'abc')), ['aside.lever_hall.levers_drawn']);
+  for (const n of [1, 2, 3]) {
+    let y = x;
+    const read: string[] = [];
+    for (let i = 0; i < 10; i += 1) {
+      const r = perform(y, `turn_wheel_${n}`);
+      read.push(...r.lines.filter((l) => l.startsWith(`narration.wheel_${n}.`)));
+      y = r.world;
+    }
+    assert.deepEqual(
+      read,
+      [1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map((k) => `narration.wheel_${n}.${k}`),
+    );
+  }
+  for (const off of [
+    [0, 1, 2],
+    [3, 0, 2],
+    [3, 1, 1],
+  ])
+    assert.equal(asides(off.reduce((y, k, i) => turns(y, i + 1, k), x)), undefined, off.join());
+  x = turns(turns(turns(x, 1, 3), 2, 1), 3, 2);
+  assert.deepEqual(asides(x), ['aside.lever_hall.dial_true']);
+  validate('GameView', gameView(x));
+});
+
 // Breaks: the plate does not spring on entry, springs again while sprung (plate_sprung guard
 // dropped), never rearms (plate_rearms), the re-entry adds a generation instead of a refresh, or
 // a failed disarm on a sprung plate bites again (plate_bites's guard dropped).
@@ -224,6 +267,7 @@ test('traps 7: an undisarmed plate springs, holds, rearms on the hour and refres
   let x = entry.world;
   const E = x.state.clock;
   assert.ok(entry.lines.includes('narration.poisoned.applied'), entry.lines.join());
+  assert.ok(entry.lines.includes('narration.needle'), entry.lines.join());
   assert.deepEqual(poisoned(x), { generation: 1, ends_at: E + 7200 });
   assert.equal(fact(x, 'plate_sprung'), true);
   // Ten minutes on (still sprung, before the hour), so a second application would move ends_at.
@@ -389,7 +433,9 @@ test('traps 9: the chief falls to one blow; its fall frightens the pack, which t
 test('traps sandbox: the cellar plate springs, is found and disarmed, then holds', () => {
   let x = fresh(WORLD);
   assert.notEqual(fact(x, 'cellar_sprung'), true);
-  x = go(go(go(x, 'west').world, 'down').world, 'down').world;
+  const down = go(go(go(x, 'west').world, 'down').world, 'down');
+  assert.ok(down.lines.includes('narration.needle'), down.lines.join());
+  x = down.world;
   assert.equal(at(x), room(x, 'sapper_cellar'));
   assert.ok(poisoned(x)?.ends_at, 'the entry poisons');
   assert.equal(fact(x, 'cellar_sprung'), true);
@@ -409,6 +455,7 @@ test('traps sandbox: the cellar plate springs, is found and disarmed, then holds
   const miss = outcome(x, 'disarm_cellar');
   assert.deepEqual([fact(x, 'cellar_sprung'), miss.out], [false, 'failure']);
   assert.notDeepEqual(poisoned(miss.world), poisoned(x), 'the unsprung miss bites');
+  assert.ok(miss.lines.includes('narration.needle'), miss.lines.join());
   const r = outcome(miss.world, 'disarm_cellar');
   assert.equal(r.out, 'success');
   x = r.world;

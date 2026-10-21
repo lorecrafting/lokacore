@@ -97,9 +97,24 @@ defmodule Loka.ContentShowcaseTest do
       {"statuses/#{status}.json",
        &update_in(&1, ["narration"], fn n -> Map.delete(n, "observed") end)}
 
+  # The traps district's lever, wheel and needle lines need API 1.103 (narrate, apply[0] here or
+  # a whole wheel readout reaction); the lever hall's asides need 1.91.
+  @trap_lines ~w(lever_b_step lever_b_reset lever_c_step lever_c_reset plate_springs plate_bites
+                 cellar_springs cellar_bites)
+
+  defp unnarrated,
+    do:
+      [{"rooms/lever_hall.json", &Map.delete(&1, "asides")}] ++
+        for(
+          r <- @trap_lines,
+          do: {"reactions/#{r}.json", &update_in(&1, ["apply"], fn a -> tl(a) end)}
+        ) ++
+        for(w <- 1..3, k <- 0..9, do: {"reactions/wheel_#{w}_x_shows_#{k}.json", nil})
+
   defp homestead,
     do:
       homestead_edits() ++
+        unnarrated() ++
         Enum.map(~w(afraid wet shocked stunned warm), &unobserved/1) ++
         for(
           f <- @homestead_files,
