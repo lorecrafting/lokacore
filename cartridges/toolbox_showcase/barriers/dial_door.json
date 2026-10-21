@@ -8,22 +8,32 @@
   "opens_when": {
     "policy_version": 1,
     "root": {
-      "op": "all",
+      "op": "any",
       "items": [
         {
-          "op": "fact_compare",
-          "fact": "wheel_1",
-          "equals": 3
+          "op": "all",
+          "items": [
+            {
+              "op": "fact_compare",
+              "fact": "wheel_1",
+              "equals": 3
+            },
+            {
+              "op": "fact_compare",
+              "fact": "wheel_2",
+              "equals": 1
+            },
+            {
+              "op": "fact_compare",
+              "fact": "wheel_3",
+              "equals": 2
+            }
+          ]
         },
         {
-          "op": "fact_compare",
-          "fact": "wheel_2",
-          "equals": 1
-        },
-        {
-          "op": "fact_compare",
-          "fact": "wheel_3",
-          "equals": 2
+          "op": "visited_count",
+          "room": "dial_vault",
+          "at_least": 1
         }
       ]
     }

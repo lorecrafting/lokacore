@@ -139,13 +139,13 @@ const open = (x: World, direction: string) => {
   const r = act(x, { type: 'open', direction });
   return r.decision.kind === 'accepted'
     ? r.decision.outcome
-    : refused(x, { type: 'open', direction });
+    : (r.decision as unknown as { error: { code: string } }).error.code;
 };
 const at = (x: World) => x.state.containers[x.body];
 
 // Breaks: a lever's reset or step is missing or fires in the wrong key order (lever_c_reset must
-// precede lever_c_step), the door opens off stage 3, the slate reads other text, or a reset
-// recloses the door.
+// precede lever_c_step), the door opens off stage 3, the slate reads other text, a reset
+// recloses the door, or a player who shuts the door from inside is locked in.
 test('traps 5: the levers open the north door only in order A, B, C; the slate reads', () => {
   w = go(go(w, 'south').world, 'east').world;
   assert.equal(at(w), room(w, 'lever_hall'));
@@ -167,11 +167,14 @@ test('traps 5: the levers open the north door only in order A, B, C; the slate r
   ]);
   w = pulls(go(w, 'south').world, 'c');
   assert.equal(fact(w, 'lever_stage'), 0);
-  assert.equal(at(go(w, 'north').world), room(w, 'lever_vault'));
+  const inside = play(go(w, 'north').world, { type: 'close', direction: 'south' }).world;
+  assert.equal(at(inside), room(w, 'lever_vault'));
+  assert.equal(open(inside, 'south'), 'opened'); // a visitor is never shut in at stage 0
 });
 
 // Breaks: a wheel's turn or wrap is missing, wraps at another digit, or its wrap precedes its turn;
-// the door ignores a wheel or wants another digit; or the bitters do not cure.
+// the door ignores a wheel or wants another digit; a player who shuts it from inside is locked in;
+// or the bitters do not cure.
 test('traps 6: the wheels open the east door at 3, 1, 2; the bitters cure the poison', () => {
   for (const n of [1, 2, 3]) {
     const nine = turns(w, n, 9);
@@ -190,7 +193,10 @@ test('traps 6: the wheels open the east door at 3, 1, 2; the bitters cure the po
   w = turns(w, 3, 1);
   assert.deepEqual(wheels(w), [3, 1, 2]);
   assert.equal(open(w, 'east'), 'opened');
-  w = go(play(w, { type: 'open', direction: 'east' }).world, 'east').world;
+  w = go(turns(play(w, { type: 'open', direction: 'east' }).world, 1, 1), 'east').world;
+  w = play(w, { type: 'close', direction: 'west' }).world;
+  assert.equal(open(w, 'west'), 'opened'); // a visitor is never shut in off 3, 1, 2
+  w = play(w, { type: 'open', direction: 'west' }).world;
   w = take(w, 'bitters_skin');
   assert.ok(poisoned(w)?.ends_at, 'still poisoned before the drink');
   assert.equal(pool(w, 'hp'), 10);
