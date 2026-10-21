@@ -269,7 +269,10 @@ test('a prisoner with exactly the fine pays; one penny short is refused and chan
       available: false,
       choice_id: 'pay',
       label: 'dialogue.jailer.pay',
-      reason: { code: 'insufficient_resource' },
+      reason: {
+        code: 'insufficient_resource',
+        message: { key: 'resource.short', bindings: { resource: 'pennies', amount: 5 } },
+      },
     },
     { available: true, choice_id: 'plead', label: 'dialogue.jailer.plead' },
   ]);

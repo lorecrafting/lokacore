@@ -2,7 +2,13 @@
 // and what a refusal reason says. A raw code is never shown as an answer; a code with no words here
 // gets none (an outcome) or its code with spaces (a reason).
 
-import type { Failed, Game, GameView, Reply } from '../../packages/game-view/session.ts';
+import type {
+  DecisionResult,
+  Failed,
+  Game,
+  GameView,
+  Reply,
+} from '../../packages/game-view/session.ts';
 
 // A text key's words, and an action label's. ponytail: the cartridge has no text for most action
 // labels yet, so a label shows the key's last word, capitalised as the texted labels are.
@@ -66,18 +72,38 @@ const REASON: Record<string, string> = {
   not_owned: 'you are not holding it',
   insufficient_resource: 'too exhausted',
   too_heavy: 'too heavy to carry',
+  over_load: 'more than you can carry',
+  cooldown: 'not yet',
 };
 // A refused move's log line that is its own sentence, not "The way north is …" (0 MV).
+// The kernel's engine key resource.short names the unpaid cost (pass-1 R1); keys show raw, as on the status line.
+export const message = (m: { key: string; bindings?: Record<string, unknown> }, text: Say) =>
+  m.key === 'resource.short'
+    ? `need ${String(m.bindings?.amount)} ${String(m.bindings?.resource)}`
+    : text(m.key);
 export const SENTENCE: Record<string, string> = { insufficient_resource: 'You are too exhausted.' };
 export const given = (item: string, to: string) => `You give ${item} to ${to}.`;
 export const reason = (code: string) => REASON[code] ?? code.replaceAll('_', ' ');
+// An item page's refusal notes (book-ui.md, too heavy; pass-1 E8): a locked Take reads as ownership.
+export const NOTED: Record<string, string> = {
+  too_heavy: REASON.too_heavy!,
+  over_load: REASON.over_load!,
+  permission_denied: 'not yours',
+};
 // A shelf row's buy reason: the shop's stock is gone, or the player's purse is short.
 const BUY: Record<string, string> = {
   not_owned: 'sold out',
   insufficient_resource: "can't afford",
 };
 export const buyReason = (code: string) => BUY[code] ?? reason(code);
+// A shelf row's sell reason: the shop's own line (a fence's refusal of honest goods, pass-1 GE3), else the code's word.
+export const sellReason = (
+  s: { reason?: string; message?: { key: string } },
+  text: (key: string) => string,
+) => (s.message ? text(s.message.key) : reason(s.reason ?? ''));
 // A hostile NPC's page when its cartridge gives no refusal line (Book hostile refusal).
+export const holding = (name: string) => `${name} is holding it.`;
+export const balance = (pennies: number) => `You have ${pennies}p.`;
 export const refused = (name: string) => `${name} will have nothing to do with you.`;
 
 type Say = (key: string) => string;
@@ -93,9 +119,12 @@ const UNDONE: Partial<Record<Reply['kind'], string>> = {
   unauthorized: "That isn't yours to do.",
 };
 
-// What one press answers: the narration or the outcome's words (words.ts; none: '') of an accepted
-// command, else the refusal in words. Never a raw outcome code.
-export function replyLine(r: Reply, text: Say, view: GameView, fallback?: string): string {
+// What one press answers: the narration, one line per record, or the outcome's words (words.ts;
+// none: no line) of an accepted command, else the refusal in words. Never a raw outcome code.
+export const replyLine = (r: Reply, text: Say, view: GameView, fallback?: string): string[] =>
+  [answer(r, text, view, fallback)].flat().filter(Boolean);
+
+function answer(r: Reply, text: Say, view: GameView, fallback?: string): string | string[] {
   if (r.kind === 'stale_view') return 'The page had changed; here it is again.';
   if (r.kind !== 'saved') return UNDONE[r.kind] ?? `(${r.kind}${'code' in r ? ` ${r.code}` : ''})`;
   const d = r.decision;
@@ -117,20 +146,31 @@ export function replyLine(r: Reply, text: Say, view: GameView, fallback?: string
   }
   const lines = d.narration ?? [];
   const shown = ['looked', 'moved'].includes(d.outcome) ? withoutHeading(lines, view) : lines;
-  return shown.map((t) => text(t.key)).join(' ') || (fallback ?? OUTCOME[d.outcome] ?? '');
+  const said = shown.map((t) => text(t.key)).filter(Boolean);
+  return said.length ? said : (fallback ?? OUTCOME[d.outcome] ?? '');
 }
 
+// The Book's echo of an accepted speech press whose receipt has no narration (book-ui.md, Word bar),
+// the word folded as the kernel folds it; no word, no echo.
+export const spoken = (how: string, word: unknown, to?: string) =>
+  typeof word === 'string'
+    ? `You ${how} "${word.toLowerCase()}"${to ? ` to ${to}` : ''}.`
+    : undefined;
+
+type Events = Extract<DecisionResult, { kind: 'accepted' }>['events'];
 const sentence = (s: string) => s.replace(/^./, (a) => a.toUpperCase());
 
 // Navigation adds no duplicate heading. NPCs that leave or arrive while the player stays put
-// still have a meaningful status line. ponytail: inferred from the view; kernel schedule narration replaces it.
-export function comings(was: GameView, now: GameView, text: Say): string[] {
+// still have a meaningful status line; one that died in the decision (`events`) left a corpse and
+// the kill line told it. ponytail: inferred from the view; kernel schedule narration replaces it.
+export function comings(was: GameView, now: GameView, text: Say, events: Events = []): string[] {
   if (was.place.id !== now.place.id) return [];
+  const dead = events.flatMap(({ payload: e }) => (e.type === 'entity_died' ? [e.victim_id] : []));
   const gone = (a: GameView, b: GameView) =>
     a.entities.filter((e) => e.kind === 'npc' && !b.entities.some((f) => f.id === e.id));
   return [
     ...gone(was, now)
-      .filter((e) => e.id !== was.combat?.opponent_id)
+      .filter((e) => e.id !== was.combat?.opponent_id && !dead.includes(e.id))
       .map((e) => `${sentence(text(e.name))} leaves.`),
     ...gone(now, was).map((e) => `${sentence(text(e.name))} arrives.`),
   ];

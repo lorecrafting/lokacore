@@ -242,7 +242,7 @@ time through the dev panel's control (`?dev=1`, [builders guide](../BUILDERS-GUI
   width: the two free lessons (Talk cards), Take, three Carve cards, the Carving lesson, two Chop,
   the Carpentry lesson, two Saw, Raise, north into the new room, Drop the cot, Rest, the Conditions
   ring listing Well rested, Give the apple (the Give card, Beads `loka-x6t.31` closed), the barter
-  offer, Cast the rod (a use card), the stew offer and Claim, Eat, the ring listing Fed. Every verb
+  offer, Fish in (a use card), the stew offer and Claim, Eat, the ring listing Fed. Every verb
   here is a card; the day-long farm step is kernel-only in the e2e (the dev clock covers it in play).
 
 ## Blind AI playtest focus

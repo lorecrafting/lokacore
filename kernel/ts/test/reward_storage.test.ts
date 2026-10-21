@@ -82,10 +82,10 @@ test('receive shares carry boundary and leaves Close usable after whole-command 
     const r = run(w, choose(w));
     if (grams === 11900) assert.equal(r.decision.kind, 'accepted');
     else {
-      assert.deepEqual(r.decision, { kind: 'rejected', error: { code: 'too_heavy' } });
+      assert.deepEqual(r.decision, { kind: 'rejected', error: { code: 'over_load' } });
       assert.equal(r.world, w);
       assert.deepEqual((gameView(w).choice!.choices[0] as { reason: unknown }).reason, {
-        code: 'too_heavy',
+        code: 'over_load',
       });
       assert.equal(
         gameView(

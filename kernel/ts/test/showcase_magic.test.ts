@@ -9,6 +9,7 @@ import { test } from 'node:test';
 import { gameView, newWorld } from '../src/index.ts';
 import { bodyOf, type Cartridge, type World } from '../src/runtime/decision.ts';
 import { validate } from '../src/foundation/validate.ts';
+import { pending } from '../src/mechanics/dialogue/shared.ts';
 import { fuelView } from '../src/mechanics/light/shared.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { activeStatuses, applyStatus, statusStep } from '../src/mechanics/status/shared.ts';
@@ -84,8 +85,10 @@ test('magic 1: up the ladder; the sign reads and the Word bar is empty', () => {
 
 // Breaks: the wizard opens the errand before teaching lux, the errand is not accepted, lux casts
 // without ash or spends the wrong pools, the gather adds no ash, the cast leaves the held lantern
-// unlit or writes an ignite line, a cast without the lantern is refused or keeps its pools, or
-// the climb back to the loft closes the errand before flamma is known.
+// unlit or writes no lit line (or one when nothing lit), a cast without the lantern is refused or
+// keeps its pools, the climb back to the loft closes the errand before flamma is known, or the
+// errand dialogue (its accept refused) still opens while the errand is active, or its hub's leave
+// is refused after the accept (M10c).
 test('magic 2: taught lux; it needs ash; the cast spends 2 ma and 1 ash and lights the lantern', () => {
   const first = talk(w, 'hedge_wizard');
   assert.equal(first.opened, 'wizard_lux');
@@ -95,6 +98,10 @@ test('magic 2: taught lux; it needs ash; the cast spends 2 ma and 1 ash and ligh
   assert.equal(second.opened, 'wizard_errand');
   w = choose(second.world, 'accept').world;
   assert.equal(view(w).journal[0]?.state, 'active');
+  const hub = choose(w, 'leave'); // the reopened hub's leave answers (a not-active policy would refuse it)
+  const [continuation_id] = pending(hub.world, w.character)!;
+  const shut = play(hub.world, { type: 'close_choice', continuation_id }).world;
+  assert.equal(talk(shut, 'hedge_wizard').opened, 'wizard_awaiting');
   assert.deepEqual(words(w), [
     { word: 'lux', available: false, reason: { code: 'insufficient_resource' } },
   ]);
@@ -102,11 +109,12 @@ test('magic 2: taught lux; it needs ash; the cast spends 2 ma and 1 ash and ligh
   w = perform(w, 'gather_ash').world;
   assert.deepEqual(pools(w), { ma: 5, ash: 1 });
   const bare = cast(w, 'lux');
+  assert.deepEqual(bare.lines, ['narration.lux']); // nothing lit, no lit line
   assert.deepEqual(pools(bare.world), { ma: 3, ash: 0 });
   assert.equal(lit(bare.world), false);
   w = take(w, 'lantern');
   const r = cast(w, 'lux');
-  assert.deepEqual(r.lines, ['narration.lux']);
+  assert.deepEqual(r.lines, ['narration.lux', 'light.lantern_ignited']); // loka-y6yg.44 (M2b)
   w = r.world;
   assert.deepEqual(pools(w), { ma: 3, ash: 0 });
   assert.equal(lit(w), true);
@@ -115,8 +123,8 @@ test('magic 2: taught lux; it needs ash; the cast spends 2 ma and 1 ash and ligh
 });
 
 // Breaks: the hush is not applied on entry or ends early or late, it leaves the cast, the say or
-// the shout open, the grimoire does not teach flamma, the level-up line is missing or doubled, or
-// the errand does not resolve in the read itself.
+// the shout open, the grimoire does not teach flamma, flamma's refusal names no reason (M1), the
+// level-up or handover line is missing or doubled (M6), or the errand does not resolve in the read.
 test('magic 3: the reading room hushes for 120 s; the grimoire teaches flamma and ends the errand', () => {
   w = go(perform(w, 'gather_ash').world, 'north').world; // ash in hand: the hush, not the cost, refuses
   const entered = w.state.clock;
@@ -142,10 +150,11 @@ test('magic 3: the reading room hushes for 120 s; the grimoire teaches flamma an
     {
       word: 'flamma',
       available: false,
-      reason: { code: 'invalid_state' },
+      reason: { code: 'invalid_state', message: { key: 'reason.flamma' } },
     },
   );
-  assert.equal(r.lines.filter((l) => l === 'levelling.level_up').length, 1);
+  for (const line of ['levelling.level_up', 'narration.errand_reward'])
+    assert.equal(r.lines.filter((l) => l === line).length, 1, line);
   assert.equal(fact(w, 'flamma_known'), true);
   assert.equal(view(w).journal[0]?.state, 'resolved');
 });
@@ -195,7 +204,9 @@ test('magic 4c: the grimoire read first; the errand resolves on the next climb t
   v = read(choose(talk(v, 'hedge_wizard').world, 'teach').world);
   v = choose(talk(v, 'hedge_wizard').world, 'accept').world;
   assert.equal(view(v).journal[0]?.state, 'active');
-  v = go(go(v, 'down').world, 'up').world; // the wizard hears of it when you come back up
+  const up = go(go(v, 'down').world, 'up'); // the wizard hears of it when you come back up
+  assert.ok(up.lines.includes('narration.errand_reward'));
+  v = up.world;
   assert.equal(view(v).journal[0]?.state, 'resolved');
   assert.equal(fact(v, 'ward_taught'), true);
 });
@@ -222,6 +233,7 @@ const statuses = (w: World, k: string) =>
   activeStatuses(w, npc(w, k))
     .map((s) => s.status.key)
     .sort();
+const bier = (w: World) => activeStatuses(w, id(w, 'item', 'bier')).map((s) => s.status.key);
 const types = (r: ReturnType<typeof act>) =>
   r.decision.kind === 'accepted' ? r.decision.events.map((e) => e.payload.type) : [];
 const status = (key: string) =>
@@ -240,8 +252,9 @@ const cues = (w: World) => view(go(w, 'up').world).cues;
 const SMOKE = [{ sense: 'smell', text: 'cue.smoke', direction: 'down' }];
 
 // Breaks: the gate opens unoiled, the use pair is not offered or takes the wrong tool or target,
-// the oiling spends the oil, Open fails on the oiled gate, the lit crypt hides the wight, or the
-// unlit crypt reads lit (lists the wight, misses dark_description).
+// the oiling spends the oil, oil on another metal thing opens the gate (M8a), Open fails on the oiled gate,
+// the lit crypt hides the wight, or the unlit crypt reads lit (lists the wight, misses
+// dark_description).
 test('magic 6: the oiled winch opens the crypt; the lantern shows the wight', () => {
   w = go(take(take(w, 'oilcan'), 'loft_bucket'), 'east').world;
   assert.equal(refused(w, { type: 'move', direction: 'down' }), 'exit_closed');
@@ -254,11 +267,13 @@ test('magic 6: the oiled winch opens the crypt; the lantern shows the wight', ()
     ['actions.oil_winch', [id(w, 'item', 'gate_winch'), id(w, 'item', 'oilcan')], true],
   );
   assert.equal(why(use(w, 'oil_winch', 'gate_winch', 'loft_bucket')), 'invalid_target');
+  const lamp = use(w, 'oil_winch', 'lantern', 'oilcan').world; // metal, so it oils, but only the winch's row opens the gate
+  assert.equal(refused(lamp, { type: 'open', direction: 'down' }), 'invalid_state');
   const oil = w.state.liquids?.[id(w, 'item', 'oilcan')];
   const r = use(w, 'oil_winch', 'gate_winch', 'oilcan');
   assert.deepEqual(r.lines, ['narration.oil_winch']);
   w = r.world;
-  assert.equal(fact(w, 'gate_oiled'), true);
+  assert.equal(fact(w, 'gate_oiled', id(w, 'item', 'gate_winch')), true);
   assert.deepEqual(w.state.liquids?.[id(w, 'item', 'oilcan')], oil);
   w = play(w, { type: 'open', direction: 'down' }).world;
   const dark = go(
@@ -279,11 +294,15 @@ test('magic 6: the oiled winch opens the crypt; the lantern shows the wight', ()
 
 // Breaks: flamma ignores the wight's fire resistance or its own damage, opens no fight, leaves the
 // bier unburnt or the stair without smoke, ward does not halve the physical blow, Flee goes
-// elsewhere, the returning wight re-engages, the kill credits no one or the wrong body, or a
-// third bolt casts on the corpse.
+// elsewhere, the returning wight re-engages, the kill credits no one or the wrong body or writes no
+// kill line, or a third bolt casts on the corpse.
 test('magic 7: flamma burns the wight to 4 and the bier; warded blow 1; the second bolt kills', () => {
+  const lantern = { type: 'douse', item_id: id(w, 'item', 'lantern') };
+  const unseen = act(play(w, lantern).world, { type: 'cast', word: 'flamma' }); // loka-y6yg.48
+  assert.deepEqual(bier(unseen.world), ['burning']);
+  assert.deepEqual(unseen.lines, ['narration.flamma']); // the bier lights unseen in the dark
   const r = act(w, { type: 'cast', word: 'flamma' });
-  assert.deepEqual(r.lines, ['narration.flamma']);
+  assert.deepEqual(r.lines, ['narration.flamma', 'narration.burning.observed']); // the seen bier
   assert.deepEqual(types(r), ['action_completed', 'status_applied']);
   w = r.world;
   assert.equal(hp(w, 'wight'), 4);
@@ -301,6 +320,7 @@ test('magic 7: flamma burns the wight to 4 and the bier; warded blow 1; the seco
   w = go(w, 'down').world;
   assert.equal(view(w).combat, undefined);
   const kill = act(w, { type: 'cast', word: 'flamma' });
+  assert.deepEqual(kill.lines, ['narration.flamma', 'combat.npc_died']); // one kill line (M3)
   w = kill.world;
   const died =
     kill.decision.kind === 'accepted'
@@ -311,6 +331,25 @@ test('magic 7: flamma burns the wight to 4 and the bier; warded blow 1; the seco
   assert.deepEqual(view(w).levelling, { level: 2, experience: 40, next: 100, unspent: 0 });
   assert.equal(pools(w).ma, 0);
   assert.equal(refused(w, { type: 'cast', word: 'flamma' }), 'invalid_state');
+});
+
+// Breaks (loka-y6yg.48): the bier going out is not told in the lit crypt, told twice, or told to a
+// player who left or doused the lantern; Quench still works once the burn has ended.
+test('magic 7b: the bier going out is told only while seen; then Quench is refused', () => {
+  const out = (v: World) => {
+    const r = wait(v, v.state.clock + 180);
+    return { world: r.world, lines: r.lines.filter((k) => k.startsWith('narration.burning')) };
+  };
+  const ended = out(w);
+  assert.deepEqual(ended.lines, ['narration.burning.expired']);
+  assert.ok(!bier(ended.world).includes('burning'));
+  assert.equal(why(use(ended.world, 'quench', 'bier', 'loft_bucket')), 'invalid_state');
+  assert.deepEqual(out(go(w, 'up').world).lines, []);
+  const c = structuredClone(w.cartridge) as any;
+  delete c.statuses[ref('status', 'burning')].narration.observed; // the opt-in gates the expiry too
+  assert.deepEqual(out({ ...w, cartridge: c }).lines, []);
+  const dark = play(w, { type: 'douse', item_id: id(w, 'item', 'lantern') }).world;
+  assert.deepEqual(out(dark).lines, []);
 });
 
 // Breaks: quench is not offered for the burning bier, leaves it burning or the smoke cue on,
@@ -364,9 +403,10 @@ test('magic 9: the golem yard; wet then the jar stuns (hp 17); the jar alone sho
 });
 
 // Breaks (loka-kgd.176): an observed line told for a golem out of the room, a hidden golem, an
-// item holder or a status with no observed line (falling back to applied); the player's own line lost;
+// item or golem whose status has no observed line (falling back to applied), or none for a seen
+// item (loka-y6yg.48); the player's own line lost;
 // a spell (not only a reaction) skips the seen check.
-test('magic 9b: only a seen golem in the room gets an observed line', () => {
+test('magic 9b: only a seen golem or item in the room gets an observed line', () => {
   let y = go(go(go(w, 'up').world, 'west').world, 'west').world;
   y = take(y, 'rain_bucket');
   const golem = npc(y, 'golem');
@@ -386,11 +426,11 @@ test('magic 9b: only a seen golem in the room gets an observed line', () => {
     assert.deepEqual(statuses(r.world, 'golem'), v === hidden ? ['hidden', 'wet'] : ['wet']);
     assert.deepEqual(r.lines, []);
   }
-  const said = (holder: string, s: string) =>
+  const said = (holder: string | string[], s: string) =>
     statusStep(
       y,
       { op: 'status.apply', status: status(s) },
-      [holder as never],
+      [holder].flat() as never[],
       body(y),
       0,
       { holders: new Map(), applied: new Set() },
@@ -400,7 +440,21 @@ test('magic 9b: only a seen golem in the room gets an observed line', () => {
     ).narration;
   assert.deepEqual(said(golem, 'wet'), [{ key: 'narration.wet.applied' }]);
   assert.deepEqual(said(golem, 'chilled'), []);
-  assert.deepEqual(said(id(y, 'item', 'yard_torch'), 'wet'), []);
+  // loka-y6yg.48: a seen item in the room tells it once for a pile; not a carried or absent one.
+  const fire = [{ key: 'narration.burning.observed' }];
+  assert.deepEqual(
+    said([id(y, 'item', 'yard_torch'), id(y, 'item', 'spark_jar')], 'burning'),
+    fire,
+  );
+  assert.deepEqual(said(id(y, 'item', 'rain_bucket'), 'burning'), []);
+  assert.deepEqual(said(id(y, 'item', 'bier'), 'burning'), []);
+  assert.deepEqual(said(id(y, 'item', 'yard_torch'), 'chilled'), []);
+  const soaked = drop(y, 'rain_bucket'); // a seen golem's expiry stays silent
+  assert.deepEqual(statuses(soaked, 'golem'), ['wet']);
+  assert.deepEqual(
+    wait(soaked, soaked.state.clock + 600).lines.filter((k) => k.includes('wet')),
+    [],
+  );
   assert.deepEqual(said(body(y), 'chilled'), [{ key: 'narration.chilled.applied' }]);
   // The spell route: ward retargeted at the golem tells its line only while the golem is seen.
   const warded = (v: World) => {

@@ -182,7 +182,7 @@ leaf evaluated adds one query step (`mechanics/policy.ts:32`).
 
 Carrying admission shares the decision's existing query counter
 ([containment@1](mechanics.md#containment1-kerneltssrcmechanicscontainmentrulets)). A carrying
-budget failure remains an evaluation fault, distinct from gameplay refusal `too_heavy` and
+budget failure remains an evaluation fault, distinct from gameplay refusals `too_heavy` and `over_load` and
 item-count fault `capacity_exceeded`. Malformed relevant item mass faults
 `precondition_failed`, rather than silently becoming zero or a balancing refusal.
 Custody reach uses that same counter before carrying admission, and reports relevant cycles
@@ -195,7 +195,7 @@ unavailable with `budget_exceeded`, including an as-yet unestablished neutral ac
 Cached, genuinely established owned-child or zero-subtree admission remains legal after later
 exhaustion. Neutrality is checked before current load, but uncached custody/node reads remain
 charged. No second counter or unmetered scan establishes neutrality, and an unknown load never
-becomes zero or `too_heavy`.
+becomes zero, `too_heavy` or `over_load`.
 Take's reach prerequisite shares this projection counter; it cannot hang before carrying is evaluated.
 Boolean reach results are cached per item within the same projection, preserving established reach
 after later exhaustion without establishing an unknown result.
@@ -349,10 +349,16 @@ cartridge locks `position@1` (04 §15 as amended by c1-position);
 full-description TextKey, kind and the
 actions it accepts (NPCs first, then DefinitionRefString order). An offered action resolving
 to Take, including an alias and reachable contents, uses the same carrying predicate as the
-rule after its existing policy/reach checks: `too_heavy` is advertised unavailable with that
+rule after its existing policy/reach checks: `too_heavy` or `over_load` is advertised unavailable with that
 reason. `gameview_agrees_with_admission` checks that carrying refusal against the view,
 using the supplied action identity and resolved Take command for an alias; a budget fault is
-not a gameplay refusal. An item with a barrier also
+not a gameplay refusal. An offered action refused `insufficient_resource` for its recipe costs, or a
+dialogue choice whose `lesson_payment` the body cannot pay, carries `reason.message`
+`{key: "resource.short", bindings: {resource, amount}}`: the first cost the body cannot pay after
+the ones before it, by resource key (pass-1 R1). `resource.short` is an engine key the Book words
+itself, never a cartridge text key; an authored refusal message wins, and a payment the NPC owes
+names nothing. A shop row's `sell` refused by a fence for an honest item stays `invalid_state`
+and carries `message {key: "shop.not_stolen"}`, the cartridge's line (pass-1 GE3). An item with a barrier also
 carries its `state` and the container verbs admission and barrier@1's check accept now, all
 available; an item without a barrier or with an open one carries `contents` when it holds an
 item: every item inside it in reach (containment@1 custody: no closed or locked lid on the way),
@@ -375,9 +381,16 @@ narrate count), present exactly while [scene@1](mechanics.md#scene1-mechanicssce
 or `danger`, which the presenter maps to a colour) from the table in effect: the pool's own
 `bands` (resources.json), else the cartridge's `world.bands` (cartridge.json), else the engine
 default of 11 bands by percentage of the range, `perfect_health` at 100 down to `dying` at 0,
-tones `normal` from 80, `warning` from 40, `danger` below (`kernel/ts/src/view/view.ts:216`, `:235`). The band is the
+tones `normal` from 80, `warning` from 40, `danger` below (`bandOf`, `kernel/ts/src/view/resources.ts:47`). The band is the
 first row whose cut p reaches, in integers: 100 × (current − minimum) ≥ cut × (maximum −
 minimum); maximum = minimum gives the top row (04 §15 as amended 2026-10-02).
+The `combat` opponent, and each `active_opponents` member, carries the `band` key of its `hp`
+pool by the same rule and table (`bandOf`, `kernel/ts/src/view/resources.ts`), only while the
+player sees it (light `visible`) and it lives (a member a spell or status kills stays on the roster
+until the round-end prune); the name is present either way and no hp number is sent
+(loka-y6yg.49). Composition record: reads the encounter row, the opponent's hp level and spec,
+the band table, `visible` and `living`; writes, events, jobs and save rows: none; no version bump (an
+optional view field, as ConditionView `duration`).
 Actions are listed highest priority first, then by key, available or with the refusal code
 (`kernel/ts/src/view/action_lists.ts:33`). Invariant `gameview_agrees_with_admission` holds this for exits and
 recipes (including standalone and board-child Notice actions), and for the door and container verbs and `wear`/`remove`, matched by the Command each

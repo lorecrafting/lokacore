@@ -104,12 +104,18 @@ test('fire 4: the bucket puts both out', () => {
   assert.deepEqual(smoke(go(w, 'north').world), []);
 });
 
-// Breaks: each tick re-lights everything (the spread rule ignores spent), so a fire never ends.
-test('fire 5: left alone, the fire burns out', () => {
+// Breaks: each tick re-lights everything (the spread rule ignores spent), so a fire never ends;
+// or (loka-y6yg.48) bench and kindling going out in one receipt tell "The flames die." twice.
+test('fire 5: left alone, the fire burns out, told once', () => {
   let x = go(go(go(fresh(WORLD), 'north').world, 'east').world, 'south').world;
   x = take(x, 'smithy_torch');
   x = play(x, { type: 'drop', item_id: id(x, 'item', 'smithy_torch') }).world;
-  x = wait(x, x.state.clock + 900).world;
+  const out = wait(x, x.state.clock + 900);
+  x = out.world;
+  assert.deepEqual(
+    out.lines.filter((k) => k === 'narration.burning.expired'),
+    ['narration.burning.expired'],
+  );
   assert.deepEqual(
     ['bench', 'kindling'].map((k) => burning(x, k)),
     [false, false],

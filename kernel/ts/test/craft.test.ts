@@ -287,7 +287,7 @@ const heavy = (c = content) => {
 test('a craft the body cannot carry, or a protected stick, refuses with the same code offered', () => {
   let w = heavy();
   let r = carve(w);
-  assert.equal(code(r), 'too_heavy');
+  assert.equal(code(r), 'over_load');
   assert.ok(agrees(w, r));
   w = take(fresh(), 'stick_01');
   const stick = item(w, 'stick_01');

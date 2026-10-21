@@ -207,22 +207,27 @@
    "encounter_id": "cc8c0ac8-1db8-8faa-8275-633a862a9d3a",
    "opponent_id": "1dd992e3-2ac3-8d52-abe6-cdd0c1d4fc66",
    "name": "npc.fen_hound.short",
+   "band": "few_bruises",
    "active_opponents": [
     {
      "id": "1dd992e3-2ac3-8d52-abe6-cdd0c1d4fc66",
-     "name": "npc.fen_hound.short"
+     "name": "npc.fen_hound.short",
+     "band": "few_bruises"
     },
     {
      "id": "5e617e36-9453-88b2-8eba-006d8a54747b",
-     "name": "npc.fen_hound.short"
+     "name": "npc.fen_hound.short",
+     "band": "ready"
     },
     {
      "id": "c3f1e7f3-1f5e-8f0f-906f-387e9fcd61ad",
-     "name": "npc.fen_hound.short"
+     "name": "npc.fen_hound.short",
+     "band": "ready"
     },
     {
      "id": "fb97c65c-afa0-8d52-9528-de163b1baa45",
-     "name": "npc.fen_hound.short"
+     "name": "npc.fen_hound.short",
+     "band": "ready"
     }
    ]
   },
@@ -421,12 +426,21 @@
  ],
  "log": [],
  "combatLog": [
-  "Another fen hound turns to defend its pack. Another fen hound turns to defend its pack. Another fen hound turns to defend its pack.",
-  "Your blow strikes the beast squarely. The beast sinks its teeth into you. The hound tears your skin. The wound begins to bleed.",
+  "Another fen hound turns to defend its pack.",
+  "Another fen hound turns to defend its pack.",
+  "Another fen hound turns to defend its pack.",
+  "Your blow strikes the beast squarely.",
+  "The beast sinks its teeth into you.",
+  "The hound tears your skin. The wound begins to bleed.",
   "Blood seeps from the wound.",
-  "The beast sinks its teeth into you. The beast darts clear of your blow. The hound opens the wound again.",
+  "The beast sinks its teeth into you.",
+  "The beast darts clear of your blow.",
+  "The hound opens the wound again.",
   "Blood seeps from the wound.",
-  "The beast darts clear of your blow. The beast sinks its teeth into you. The hound opens the wound again. Blood seeps from the wound."
+  "The beast darts clear of your blow.",
+  "The beast sinks its teeth into you.",
+  "The hound opens the wound again.",
+  "Blood seeps from the wound."
  ],
  "details": {}
 }

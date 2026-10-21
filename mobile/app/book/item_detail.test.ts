@@ -86,7 +86,7 @@ test('retained item results appear chronologically between description and optio
     button.props.onPress();
   };
   const cloak = ['A wool cloak', 'Heavy grey wool. Rain runs off it.'];
-  assert.deepEqual(text(), [...cloak, 'Drop a wool cloak', 'Wear a wool cloak', 'Leave']);
+  assert.deepEqual(text(), [...cloak, 'Wear a wool cloak', 'Drop a wool cloak', 'Leave']); // act, then move (pass-1 UR)
   tap('Wear a wool cloak');
   assert.deepEqual(text(), [...cloak, 'You put it on.', 'Remove a wool cloak', 'Leave']);
   tap('Remove a wool cloak');
@@ -94,8 +94,8 @@ test('retained item results appear chronologically between description and optio
     ...cloak,
     'You put it on.',
     'You take it off.',
-    'Drop a wool cloak',
     'Wear a wool cloak',
+    'Drop a wool cloak',
     'Leave',
   ]);
   assert.equal(book.screen().returnWorld, false);

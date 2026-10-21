@@ -1,4 +1,4 @@
-// size: allow 555, containment and carrying behavior share the same minimal custody fixture
+// size: allow 581, containment and carrying behavior share the same minimal custody fixture
 // Containment: take, drop, give, has_item, items and NPCs in the world, target resolution and
 // examine over them (R5 S4; 21 §7, §8; 03 §23; 04 §5.3). The world is built from the items
 // known answer (protocol/fixtures/containers_cartridge_items_hash.json). Ids and the state hash are
@@ -351,10 +351,10 @@ test('nested Take fits equality and reports the same carrying refusal in the vie
       .actions.find((a) => a.action_key === 'take')!;
     assert.equal(offered.available, kind === 'accepted');
     if (kind === 'rejected') {
-      assert.deepEqual(result.decision, { kind: 'rejected', error: { code: 'too_heavy' } });
+      assert.deepEqual(result.decision, { kind: 'rejected', error: { code: 'over_load' } });
       assert.equal(result.world, w);
       assert.ok(!offered.available);
-      if (!offered.available) assert.deepEqual(offered.reason, { code: 'too_heavy' });
+      if (!offered.available) assert.deepEqual(offered.reason, { code: 'over_load' });
     }
     const resolves = Object.fromEntries(
       Object.values(resolved(w, w.character)).map((a) => [a.key, a.command]),
@@ -368,6 +368,32 @@ test('nested Take fits equality and reports the same carrying refusal in the vie
       }),
     );
   }
+});
+
+// Breaks: naming the code by the total instead of the item (pass-1 R3), > vs >= at the item's own mass,
+// or the view admission invariant not knowing over_load.
+// Satchel 1000 + enclosed oil 2000 = 3000 alone; a held 1 g lantern makes the same Take over_load.
+test('Take names too_heavy only when the item alone exceeds the ceiling, else over_load', () => {
+  const alone = (cap: number) => massed({ lantern: 1, satchel: 1000, lamp_oil: 2000 }, cap);
+  assert.equal(step(alone(3000), take(SATCHEL), 0).decision.kind, 'accepted');
+  assert.deepEqual(step(alone(2999), take(SATCHEL), 0).decision, {
+    kind: 'rejected',
+    error: { code: 'too_heavy' },
+  });
+  const loaded = forced(alone(3000), LANTERN, BODY);
+  const decision = step(loaded, take(SATCHEL), 0).decision;
+  assert.deepEqual(decision, { kind: 'rejected', error: { code: 'over_load' } });
+  // The view shows over_load: a Take listed as available would disagree with admission.
+  const view = gameView(loaded);
+  const open = {
+    ...view,
+    entities: view.entities.map((e) =>
+      e.id !== SATCHEL ? e : { ...e, actions: e.actions.map((a) => ({ ...a, available: true })) },
+    ),
+  };
+  const observation = { view, command: take(SATCHEL), decision };
+  assert.ok(check('gameview_agrees_with_admission', observation));
+  assert.equal(check('gameview_agrees_with_admission', { ...observation, view: open }), false);
 });
 
 // Breaks: charging an owned extraction twice, prohibiting forced overload, or gating escape transfers.
@@ -389,7 +415,7 @@ test('forced overload preserves owned extraction, Give and Drop while blocking p
   };
   assert.deepEqual(step(nearby, take(LANTERN), 0).decision, {
     kind: 'rejected',
-    error: { code: 'too_heavy' },
+    error: { code: 'too_heavy' }, // 1 g alone exceeds the 0 g ceiling
   });
 });
 
@@ -409,7 +435,7 @@ test('large masses and repeated definitions stay exact by item identity', () => 
     w = forced(w, EVENT, BODY);
     assert.deepEqual(step(w, take(SATCHEL), 0).decision, {
       kind: 'rejected',
-      error: { code: 'too_heavy' },
+      error: { code: 'over_load' },
     });
     assert.equal(step(w, drop(LANTERN), 0).decision.kind, 'accepted');
   }

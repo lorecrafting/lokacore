@@ -16,6 +16,10 @@
   },
   "apply": [
     {
+      "op": "narrate",
+      "text": "narration.lever_reset"
+    },
+    {
       "op": "fact.assign",
       "fact": "lever_stage",
       "value": 0

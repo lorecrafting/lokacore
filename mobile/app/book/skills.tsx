@@ -9,6 +9,10 @@ import { note, prose, usePalette } from './palette.ts';
 import { ActionCard, Cards } from './actions.tsx';
 import type { Button } from './presenter.ts';
 
+// pass-1 H3 (book-ui.md Skill tree details): a qualified learned box has nothing left to meet.
+const learned = (s: NonNullable<GameView['skills']>[number], text: (key: string) => string) =>
+  s.qualified ? 'learned' : `learned, unqualified; ${text(s.requirement)}`;
+
 export function SkillDetails(p: { view?: GameView; text: (key: string) => string }) {
   const c = usePalette();
   return (
@@ -28,7 +32,7 @@ export function SkillDetails(p: { view?: GameView; text: (key: string) => string
         ?.filter((s) => s.acquired && !s.profession)
         .map((s) => (
           <Text key={s.skill.key} style={prose(c)}>
-            {p.text(s.label)} — {s.qualified ? 'qualified' : 'unqualified'}; {p.text(s.requirement)}
+            {p.text(s.label)} — {learned(s, p.text)}
           </Text>
         ))}
     </>
@@ -49,8 +53,7 @@ export function Professions(p: { view?: GameView; text: (key: string) => string 
           s.acquired ? (
             <Text key={s.skill.key} style={prose(c)}>
               {p.text(s.label)}
-              {s.level === undefined ? '' : `, level ${s.level}`} —{' '}
-              {s.qualified ? 'qualified' : 'unqualified'}; {p.text(s.requirement)}
+              {s.level === undefined ? '' : `, level ${s.level}`} — {learned(s, p.text)}
             </Text>
           ) : (
             <Note key={s.skill.key}>

@@ -1,0 +1,12 @@
+{
+  "duration": "permanent",
+  "tick_every": 60,
+  "resource": "hp",
+  "kind": "debuff",
+  "label": "condition.wanted",
+  "narration": {
+    "applied": "narration.wanted.applied",
+    "tick": "narration.wanted.tick",
+    "expired": "narration.wanted.expired"
+  }
+}

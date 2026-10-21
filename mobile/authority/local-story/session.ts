@@ -108,19 +108,28 @@ function managedGame(
   };
   const projection = (): Projection => ({ view: gameView(story.world()), token: story.token() });
   const terminal = (reply: Reply) => reply.kind !== 'pending' && reply.kind !== 'catching_up';
+  let attempting = false;
   const attempt = (): Reply => {
-    const reply = attemptStory(story, held.invocation);
-    held.catching = reply.kind === 'catching_up';
-    if (terminal(reply)) held.invocation = undefined;
-    return reply;
+    const outer = attempting; // a listener may re-enter attempt while this one drains
+    attempting = true;
+    try {
+      const reply = attemptStory(story, held.invocation);
+      held.catching = reply.kind === 'catching_up';
+      if (terminal(reply)) held.invocation = undefined;
+      return reply;
+    } finally {
+      attempting = outer;
+    }
   };
   const pending = () => held.invocation;
+  // Held after an unsettled reply its reads may fail; rounds its own attempt drains still narrate.
+  const unsettled = () => !!held.invocation && !attempting;
   const before = (): Projection => ({
     view: gameView(story.beforeWorld()),
     token: story.beforeToken(),
   });
   const invoke = (intent: Intent) => sessionInvoke(held, story.world().character, intent, attempt);
-  const game = sharedGame(story, cartridge, projection, listeners, pending, invoke);
+  const game = sharedGame(story, cartridge, projection, listeners, pending, unsettled, invoke);
   story.onAdvance((status) => emit({ kind: 'state', projection: projection(), status }));
   return Object.assign(game, {
     newGame: story.newGame,
@@ -134,6 +143,7 @@ function sharedGame(
   projection: () => Projection,
   listeners: Set<(update: GameSubscription) => void>,
   pending: () => { invocation_id: string } | undefined,
+  unsettled: () => boolean,
   invoke: (intent: Intent) => Reply,
 ): Game {
   const run = story.runId();
@@ -150,7 +160,7 @@ function sharedGame(
       };
     },
     text: (key) => cartridge.text[key as Key],
-    lastNarration: (command_id) => (pending() ? undefined : story.narration(command_id)),
+    lastNarration: (command_id) => (unsettled() ? undefined : story.narration(command_id)),
     chronicle: () => story.chronicle(),
   };
 }

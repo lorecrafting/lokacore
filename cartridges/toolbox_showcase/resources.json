@@ -22,7 +22,7 @@
       },
       "bands": [
         {
-          "at_percent": 100,
+          "at_percent": 50,
           "key": "mv_ready",
           "tone": "normal"
         },
@@ -45,12 +45,12 @@
       "gain": 0,
       "bands": [
         {
-          "at_percent": 100,
+          "at_percent": 50,
           "key": "fed",
           "tone": "normal"
         },
         {
-          "at_percent": 50,
+          "at_percent": 25,
           "key": "peckish",
           "tone": "warning"
         },
@@ -68,12 +68,12 @@
       "gain": 0,
       "bands": [
         {
-          "at_percent": 100,
+          "at_percent": 50,
           "key": "quenched",
           "tone": "normal"
         },
         {
-          "at_percent": 50,
+          "at_percent": 25,
           "key": "dry",
           "tone": "warning"
         },

@@ -1,0 +1,20 @@
+{
+  "on": {
+    "event": "action_completed",
+    "action": "turn_wheel_2"
+  },
+  "when": {
+    "policy_version": 1,
+    "root": {
+      "op": "fact_compare",
+      "fact": "wheel_2",
+      "equals": 5
+    }
+  },
+  "apply": [
+    {
+      "op": "narrate",
+      "text": "narration.wheel_2.5"
+    }
+  ]
+}

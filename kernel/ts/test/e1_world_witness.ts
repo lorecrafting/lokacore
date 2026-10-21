@@ -35,7 +35,7 @@ export function worldWitnesses(
       p.actor_id === me &&
       carry.full &&
       decision.kind === 'rejected' &&
-      decision.error.code === 'too_heavy' &&
+      decision.error.code === 'over_load' &&
       encode(before.state as never) === encode(after.state as never) &&
       load(before, body, { n: 0 }) === w.carry.max_grams &&
       item?.kind === 'item' &&
@@ -230,7 +230,7 @@ export function carryLimit(a: CaseHost) {
   for (const item of ['apple_01', 'apple_02', 'apple_03']) take(item); // 3 x 100
   assert.equal(carried(), 12000);
   a.move('east', 'east');
-  take('fox_drawing', 'too_heavy'); // 20 g over
+  take('fox_drawing', 'over_load'); // 20 g over
   assert.equal(carried(), 12000);
   return { load: carried(), refused: 'fox_drawing' };
 }

@@ -1,11 +1,14 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
+import { validate } from '../src/foundation/validate.ts';
 import { trainingWorld, trainingRef, learned, wield } from './training_fixture.ts';
 import { attack, elapsed, command, hp, rat, ref, positioned } from './combat_fixture.ts';
 import { step, gameView, type World } from '../src/index.ts';
 import { status } from '../src/mechanics/skills.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { key } from '../src/foundation/compose.ts';
+
+const why = (a: { available: boolean; reason?: unknown }) => (a.available ? undefined : a.reason);
 
 const pools = (w: World) => [
   level(w, w.body, resourceRef(w, 'hp')),
@@ -228,3 +231,35 @@ function carried(w: World): World {
   const item = w.entityIds[ref(w, 'item', 'sword')];
   return { ...w, state: { ...w.state, containers: { ...w.state.containers, [item]: w.body } } };
 }
+
+// Pass-1 R1. Breaks: a lesson the body cannot afford refused without naming its price, the price
+// named at exactly enough, a payment the teacher owes or another refusal named as the body's shortfall.
+test('an unaffordable lesson names its price; a payment the teacher owes does not', () => {
+  const w = talk(trainingWorld());
+  const learn = (w: World) => gameView(w).choice!.choices.find((c) => c.choice_id === 'learn')!;
+  assert.equal(learn(hpMoney(w, w.body, 4)).available, true);
+  const pennies = { resource: 'pennies', amount: 4 };
+  assert.deepEqual(validate('GameView', gameView(hpMoney(w, w.body, 3))), []);
+  assert.deepEqual(why(learn(hpMoney(w, w.body, 3))), {
+    code: 'insufficient_resource',
+    message: { key: 'resource.short', bindings: pennies },
+  });
+  const owed = structuredClone(w.cartridge.dialogues) as any;
+  const id = Object.keys(owed).find((k) => k.endsWith('learn_swords'))!;
+  const { lesson_payment, ...option } = owed[id].choices.learn;
+  owed[id].choices.learn = {
+    ...option,
+    payment: { ...lesson_payment, from: 'teacher', amount: 999 },
+  };
+  delete owed[id].choices.learn.payment.to;
+  const debt = { ...w, cartridge: { ...w.cartridge, dialogues: owed } };
+  assert.deepEqual(why(learn(debt)), { code: 'insufficient_resource' });
+  // A short body refused first for a missing gift is told that, not the price.
+  const gift = w.entityIds[ref(w, 'item', 'sword')];
+  const gone = hpMoney(w, w.body, 3);
+  const given = {
+    ...gone,
+    state: { ...gone.state, containers: { ...gone.state.containers, [gift]: w.body } },
+  };
+  assert.deepEqual(why(learn(given)), { code: 'not_owned' });
+});

@@ -65,6 +65,7 @@
   "theft.seen": "You lift it, and someone sees.",
   "theft.unseen": "You lift it unseen.",
   "shop.bought": "You buy it.",
+  "shop.not_stolen": "he only buys what is hot",
   "shop.sold": "You sell it.",
   "service.deposit": "Deposit five pennies",
   "service.deposit.used": "The teller counts five pennies into the vault.",

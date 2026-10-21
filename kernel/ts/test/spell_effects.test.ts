@@ -85,21 +85,23 @@ function crypt(orb = true, c = content): World {
   return ok(play(w, { type: 'move', direction: 'east' }));
 }
 
-// Breaks: light.ignite writes no fuel.set (the crypt stays dark), or ignites a source the caster
-// does not hold.
+// Breaks: light.ignite writes no fuel.set (the crypt stays dark), ignites a source the caster
+// does not hold, or writes no lit line (or one when nothing lit; loka-y6yg.44).
 test('lux lights the dark crypt through the held orb; without the orb it stays dark', () => {
   const w = crypt();
   assert.equal(dark(w, w.character), true);
   const lit = cast(w, 'lux');
-  assert.deepEqual(lines(lit), ['narration.lux']);
+  assert.deepEqual(lines(lit), ['narration.lux', 'light.ignited']);
   assert.equal(dark(lit.world, w.character), false);
   const bare = crypt(false);
-  assert.equal(dark(ok(cast(bare, 'lux')), bare.character), true);
+  const unlit = cast(bare, 'lux');
+  assert.equal(dark(ok(unlit), bare.character), true);
+  assert.deepEqual(lines(unlit), ['narration.lux']); // nothing lit: no lit line
 });
 
 // Breaks: the bolt ignores the wight's fire resistance (8, not 4), or a fatal bolt cast in a fight
 // is refused, leaves the encounter open, or kills without the death sequence (no entity_died, the
-// caster not the killer).
+// caster not the killer), or writes no kill line (loka-y6yg.44).
 test('flamma deals fire damage after resistance; in a fight a second bolt kills the wight', () => {
   const hall = ok(play(crypt(), { type: 'move', direction: 'west' }));
   assert.equal(code(cast(hall, 'flamma')), 'invalid_state'); // npc_present: no bolt through walls
@@ -119,7 +121,20 @@ test('flamma deals fire damage after resistance; in a fight a second bolt kills 
     [(died as { killer_id: string }).killer_id, types(fatal)],
     [bodyOf(w, w.character), ['entity_died', 'action_completed']],
   );
+  assert.deepEqual(lines(fatal), ['narration.flamma', 'combat.npc_died']);
   assert.equal(code(cast(fatal.world, 'flamma')), 'invalid_state'); // a dead wight is not present
+});
+
+// Breaks: a kill in a cartridge without combat settings writes an undefined kill line or faults
+// (the kill line is combat's npc_died; loka-y6yg.44).
+test('without combat settings a fatal bolt kills and writes only the spell line', () => {
+  const c = cartridge((c) => {
+    delete c.world.combat;
+    delete c.npcs[W].attack;
+  });
+  const w = ok(cast(ok(cast(crypt(true, c), 'lux')), 'flamma'));
+  const fatal = cast(w, 'flamma');
+  assert.deepEqual([wightHp(fatal.world), lines(fatal)], [0, ['narration.flamma']]);
 });
 
 // Breaks: a spell's damage skips the target's status resistances (SR5): 4 hp, not 2.

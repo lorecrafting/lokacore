@@ -272,7 +272,7 @@ test('one 100g book fills a 11900g held load and the second Take refuses unchang
   const before = r.world().state;
   assert.deepEqual(r.raw('take', { item_id: ids['item/bell_rites'] }), {
     kind: 'rejected',
-    error: { code: 'too_heavy' },
+    error: { code: 'over_load' },
   });
   assert.deepEqual(r.world().state, before);
 });

@@ -2147,6 +2147,10 @@
         "name": {
           "$ref": "text.schema.json#/$defs/TextKey"
         },
+        "band": {
+          "$ref": "action.schema.json#/$defs/Key",
+          "description": "The opponent's hp condition band key (its pool's band table); absent while the opponent is unseen or dead."
+        },
         "active_opponents": {
           "type": "array",
           "minItems": 1,
@@ -2159,6 +2163,10 @@
               },
               "name": {
                 "$ref": "text.schema.json#/$defs/TextKey"
+              },
+              "band": {
+                "$ref": "action.schema.json#/$defs/Key",
+                "description": "This member's hp condition band key; absent while it is unseen or dead."
               }
             },
             "required": [
@@ -2180,7 +2188,8 @@
         {
           "encounter_id": "11111111-2222-4333-8444-555555555555",
           "opponent_id": "11111111-2222-4333-8444-555555555555",
-          "name": "npc.rat"
+          "name": "npc.rat",
+          "band": "few_bruises"
         }
       ],
       "description": "The current encounter and visible opponent presented to the player."
@@ -2308,7 +2317,7 @@
           "available": true
         }
       ],
-      "description": "The current quoted price and availability of one Buy or Sell exchange, with a typed refusal reason when unavailable (B3).",
+      "description": "The current quoted price and availability of one Buy or Sell exchange, with a typed refusal reason when unavailable (B3), and the house line for it when the kernel names one: shop.not_stolen when a fence's offer refuses goods that are not stolen (pass-1 GE3; the cartridge authors the text).",
       "type": "object",
       "properties": {
         "price": {
@@ -2321,6 +2330,9 @@
         },
         "reason": {
           "$ref": "error.schema.json#/$defs/ErrorCode"
+        },
+        "message": {
+          "$ref": "text.schema.json#/$defs/Text"
         }
       },
       "required": [

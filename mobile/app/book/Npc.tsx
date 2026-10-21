@@ -12,7 +12,7 @@ import { Riddle } from './Riddle.tsx';
 import { space } from './tokens.ts';
 import { LABEL } from './labels.ts';
 import { offerLabel } from './offers.ts';
-import { buyReason, reason, refused } from './words.ts';
+import { balance, buyReason, refused, sellReason } from './words.ts';
 type Say = (key: string) => string;
 type Grouped = ReturnType<typeof group>;
 type Screen = ReturnType<ReturnType<typeof presenter>['screen']>;
@@ -88,7 +88,7 @@ export function NpcPage(p: NpcProps) {
       scrollToEnd={log.length > 0}
       foot={foot}
     >
-      {about(c, p)}
+      {about(c, p, !talk)}
       <LogLines lines={log} />
       {npcSkills(c, p)}
       {!talk && enemy && (
@@ -139,13 +139,23 @@ const conversation = (p: NpcProps, choice?: NonNullable<GameView['choice']>) => 
 const held = (p: NpcProps) =>
   p.npc ? things(p.view).filter((e) => 'container_id' in e && e.container_id === p.npc?.id) : [];
 
-const about = (c: Palette, p: NpcProps) => (
+// A shelf, or a service that costs (the bank too), shows the purse beside it (pass-1 E15).
+const priced = ({ npc: n }: NpcProps) =>
+  !!n &&
+  (('shop' in n && !!n.shop?.length) ||
+    ('services' in n && !!n.services?.some((s) => s.price > 0)));
+// ponytail: GameView has no currency field, so the purse is the resource keyed 'pennies'; name a
+// cartridge currency in GameView if a second one appears.
+const purse = (v: GameView) => v.resources?.find((r) => r.resource.key === 'pennies')?.current;
+
+const about = (c: Palette, p: NpcProps, shelf: boolean) => (
   <>
     {p.npc?.description && <Text style={prose(c)}>{plain(p.text(p.npc.description))}</Text>}
     {p.npc && 'asides' in p.npc && <Asides keys={p.npc.asides} text={p.text} />}
     {p.npc && 'carrying' in p.npc && p.npc.carrying && (
       <Text style={note(c)}>{p.text(p.npc.carrying)}</Text>
     )}
+    {shelf && priced(p) && purse(p.view) !== undefined && <Note>{balance(purse(p.view)!)}</Note>}
   </>
 );
 
@@ -180,7 +190,7 @@ function ShopOptions(p: NpcProps) {
         p.npc.shop?.map((o) => {
           // A price row, not an action card (book-ui.md, Hostile refusal): its reasons are words.
           const buy = buyReason(o.buy.reason ?? '');
-          const sell = reason(o.sell.reason ?? '');
+          const sell = sellReason(o.sell, p.text);
           return (
             <Text key={o.item_id} style={note(c)}>
               {p.text(o.name)}: Buy {o.buy.price}p{o.buy.available ? '' : ` (${buy})`}; Sell{' '}

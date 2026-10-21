@@ -3,7 +3,8 @@
 // branch from step 1's world and the sandbox starts fresh. Every attack is chance 100. Disarm starts at 0 against the flagstones' rating 1 and grows by 1 per use.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { gameView } from '../src/index.ts';
+import { gameView, stepElapsed } from '../src/index.ts';
+import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { describe } from '../src/mechanics/description_variant/rule.ts';
 import { decode } from '../src/foundation/canonical.ts';
 import { validate } from '../src/foundation/validate.ts';
@@ -89,6 +90,7 @@ test('traps 2: the search finds the plate; the first disarm fails and poisons', 
   const bite = outcome(w, 'disarm_plate');
   assert.equal(bite.out, 'failure');
   assert.ok(bite.lines.includes('narration.poisoned.applied'), bite.lines.join());
+  assert.ok(bite.lines.includes('narration.needle'), bite.lines.join());
   w = bite.world;
   assert.deepEqual(poisoned(w), { generation: 1, ends_at: T + 7200 });
   assert.ok(labels(w).includes('condition.poisoned'));
@@ -132,6 +134,7 @@ test('traps 4: north over the disarmed plate; the note reads', () => {
   assert.deepEqual(play(w, { type: 'read', target_id: detail(w, 'sapper_note') }).lines, [
     'readable.sapper_note',
   ]);
+  assert.equal(notice(w, 'sapper_note').title, 'detail.sapper_note.title');
 });
 
 const pulls = (x: World, levers: string) =>
@@ -146,6 +149,8 @@ const open = (x: World, direction: string) => {
     : (r.decision as unknown as { error: { code: string } }).error.code;
 };
 const at = (x: World) => x.state.containers[x.body];
+const notice = (x: World, key: string) =>
+  gameView(x).notices!.find((n) => n.id === detail(x, key))!;
 
 // Breaks: a lever's reset or step is missing or fires in the wrong key order (lever_c_reset must
 // precede lever_c_step), the door opens off stage 3, the slate reads other text, a reset
@@ -168,6 +173,7 @@ test('traps 5: the levers open the north door only in order A, B, C; the slate r
   assert.deepEqual(play(w, { type: 'read', target_id: detail(w, 'vault_slate') }).lines, [
     'readable.vault_slate',
   ]);
+  assert.equal(notice(w, 'vault_slate').title, 'detail.vault_slate.title');
   w = pulls(go(w, 'south').world, 'c');
   assert.equal(fact(w, 'lever_stage'), 0);
   const inside = play(go(w, 'north').world, { type: 'close', direction: 'south' }).world;
@@ -216,6 +222,44 @@ test('traps 6: the wheels open the east door at 3, 1, 2; the bitters cure the po
   validate('GameView', gameView(w));
 });
 
+// Breaks: a lever's step and reset narrate the same line or nothing; a hall aside shows off its
+// solved state (lever_stage 3; wheels 3, 1, 2) or ignores one wheel; a wheel names another digit,
+// a turn names none or two, or its readout runs before its wrap (it would name 10, not 0).
+test('traps 5-6 feedback: pulls and turns narrate; the hall says when a door is solved', () => {
+  let x = go(go(go(fresh(WORLD), 'west').world, 'down').world, 'east').world;
+  const said = (y: World, action: string) =>
+    perform(y, action).lines.filter((l) => l !== 'narration.lever');
+  assert.deepEqual(said(x, 'pull_b'), ['narration.lever_reset']);
+  assert.deepEqual(said(pulls(x, 'a'), 'pull_b'), ['narration.lever_bolt']);
+  assert.deepEqual(said(pulls(x, 'ab'), 'pull_c'), ['narration.lever_bolt']);
+  assert.deepEqual(said(pulls(x, 'a'), 'pull_c'), ['narration.lever_reset']);
+  const asides = (y: World) => gameView(y).place.asides?.map((a) => a.key);
+  assert.equal(asides(pulls(x, 'ab')), undefined);
+  assert.deepEqual(asides(pulls(x, 'abc')), ['aside.lever_hall.levers_drawn']);
+  for (const n of [1, 2, 3]) {
+    let y = x;
+    const read: string[][] = [];
+    for (let i = 0; i < 10; i += 1) {
+      const r = perform(y, `turn_wheel_${n}`);
+      read.push(r.lines.filter((l) => l.startsWith(`narration.wheel_${n}.`)));
+      y = r.world;
+    }
+    assert.deepEqual(
+      read,
+      [1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map((k) => [`narration.wheel_${n}.${k}`]),
+    );
+  }
+  for (const off of [
+    [0, 1, 2],
+    [3, 0, 2],
+    [3, 1, 1],
+  ])
+    assert.equal(asides(off.reduce((y, k, i) => turns(y, i + 1, k), x)), undefined, off.join());
+  x = turns(turns(turns(x, 1, 3), 2, 1), 3, 2);
+  assert.deepEqual(asides(x), ['aside.lever_hall.dial_true']);
+  validate('GameView', gameView(x));
+});
+
 // Breaks: the plate does not spring on entry, springs again while sprung (plate_sprung guard
 // dropped), never rearms (plate_rearms), the re-entry adds a generation instead of a refresh, or
 // a failed disarm on a sprung plate bites again (plate_bites's guard dropped).
@@ -224,6 +268,7 @@ test('traps 7: an undisarmed plate springs, holds, rearms on the hour and refres
   let x = entry.world;
   const E = x.state.clock;
   assert.ok(entry.lines.includes('narration.poisoned.applied'), entry.lines.join());
+  assert.ok(entry.lines.includes('narration.needle'), entry.lines.join());
   assert.deepEqual(poisoned(x), { generation: 1, ends_at: E + 7200 });
   assert.equal(fact(x, 'plate_sprung'), true);
   // Ten minutes on (still sprung, before the hour), so a second application would move ends_at.
@@ -247,10 +292,17 @@ test('traps 7: an undisarmed plate springs, holds, rearms on the hour and refres
   assert.equal(fact(back.world, 'plate_sprung'), true);
 });
 
-// Breaks: the poison ticks on another cadence or amount, or never expires.
+// Breaks: the poison ticks on another cadence or amount, or never expires; or (loka-y6yg.48) the
+// item-expiry dedupe also folds the player's own ticks, so one long wait tells one tick, not three.
 test('traps 7: left alone, the poison ticks at +1800, +3600, +5400 and expires at +7200', () => {
   let x = go(step1, 'north').world;
   const E = x.state.clock;
+  const run_id = 'aaaaaaaa-0000-4000-8000-0000000007a7';
+  const payload = { type: 'elapsed', actor_id: x.character, run_id, from: E, until: E + 7200 };
+  const id = elapsedCommandId(run_id, x.context, E, E + 7200);
+  const once = stepElapsed(x, { id, world_context_id: x.context, payload } as never, 1).decision;
+  const said = once.kind === 'accepted' ? once.narration?.map((l) => l.key) : undefined;
+  assert.equal(said?.filter((k) => k === 'narration.poisoned.tick').length, 3, said?.join());
   const hp: (number | undefined)[] = [];
   for (const t of [1800, 3600, 5400]) {
     x = wait(x, E + t).world;
@@ -389,7 +441,9 @@ test('traps 9: the chief falls to one blow; its fall frightens the pack, which t
 test('traps sandbox: the cellar plate springs, is found and disarmed, then holds', () => {
   let x = fresh(WORLD);
   assert.notEqual(fact(x, 'cellar_sprung'), true);
-  x = go(go(go(x, 'west').world, 'down').world, 'down').world;
+  const down = go(go(go(x, 'west').world, 'down').world, 'down');
+  assert.ok(down.lines.includes('narration.needle'), down.lines.join());
+  x = down.world;
   assert.equal(at(x), room(x, 'sapper_cellar'));
   assert.ok(poisoned(x)?.ends_at, 'the entry poisons');
   assert.equal(fact(x, 'cellar_sprung'), true);
@@ -409,6 +463,7 @@ test('traps sandbox: the cellar plate springs, is found and disarmed, then holds
   const miss = outcome(x, 'disarm_cellar');
   assert.deepEqual([fact(x, 'cellar_sprung'), miss.out], [false, 'failure']);
   assert.notDeepEqual(poisoned(miss.world), poisoned(x), 'the unsprung miss bites');
+  assert.ok(miss.lines.includes('narration.needle'), miss.lines.join());
   const r = outcome(miss.world, 'disarm_cellar');
   assert.equal(r.out, 'success');
   x = r.world;

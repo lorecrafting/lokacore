@@ -2,6 +2,7 @@ import type { BandTable, EntityId, Key, ResourceView, StatusDefinition } from '.
 import { refString, type World } from '../runtime/decision.ts';
 import { level, resourceRef, resourceSpec } from '../mechanics/resource.ts';
 import { cmp } from '../foundation/validate.ts';
+import { key } from '../foundation/compose.ts';
 import { activeStatuses } from '../mechanics/status/shared.ts';
 
 // The engine default condition bands of 04 §15 (amendments 2026-10-01, 2026-10-02), highest
@@ -34,16 +35,24 @@ export function resources(world: World, body: EntityId | undefined): ResourceVie
           (service) => service.benefit.kind === 'meal' && service.benefit.stock.key === s.key,
         ),
     )
-    .map(({ key: k, bands }) => {
+    .map(({ key: k }) => {
       const resource = resourceRef(world, k);
-      const { minimum, maximum } = resourceSpec(world, body, resource);
-      const current = level(world, body, resource)!;
-      const { key: band, tone } = (bands ?? world.cartridge.world?.bands ?? BANDS).find(
-        (b) => 100 * (current - minimum) >= b.at_percent * (maximum - minimum),
-      )!;
-      return { resource, current, maximum, band, tone };
+      return { resource, ...bandOf(world, body, k) };
     })
     .sort((a, b) => cmp(refString(a.resource), refString(b.resource)));
+}
+
+// Pool `k` of `holder` (a body or an NPC, loka-y6yg.49) at the clock with the first band of its
+// table whose cut p reaches.
+export function bandOf(world: World, holder: EntityId, k: string) {
+  const resource = resourceRef(world, k);
+  const { minimum, maximum } = resourceSpec(world, holder, resource);
+  const current = level(world, holder, resource)!;
+  const bands = world.resourceSpecs[key(resource)]!.bands; // the pool's, never an NPC override's
+  const { key: band, tone } = (bands ?? world.cartridge.world?.bands ?? BANDS).find(
+    (b) => 100 * (current - minimum) >= b.at_percent * (maximum - minimum),
+  )!;
+  return { current, maximum, band, tone };
 }
 
 // Active statuses on the body (toolbox rows 1, W8), absent when none; kind is the icon polarity

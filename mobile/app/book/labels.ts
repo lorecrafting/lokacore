@@ -23,6 +23,8 @@ export const LABEL = {
   cancel: 'Cancel',
   inside: 'Inside',
   held: 'Held',
+  // Take, on an item a living NPC holds (pass-1 E14).
+  lift: 'Lift',
   worn: 'Worn',
   where: 'Where',
   askWhere: 'Ask where',

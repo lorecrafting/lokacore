@@ -68,9 +68,8 @@ test('a three-hour absence opens the page with one collapsed recap, counts by li
   assert.equal(count(b.text(), LABEL.awayRecap), 0);
 });
 
-// Breaks: the threshold check passes every settlement, so a short absence also collapses; with the
-// field authored, a receipt's lines log one by one instead of as the one entry they make without it
-// (the expected log is the same absence's with `recap_after_minutes` removed).
+// Breaks: the threshold check passes every settlement, so a short absence also collapses; the log
+// stays one line per record, as without the field (book-ui.md, Live action freshness; pass-1 UO).
 test('a two-minute absence shows no recap: its log is as without the field', () => {
   const shown = away(2 * 60 * 1000).text();
   assert.equal(count(shown, LABEL.awayRecap), 0);
@@ -79,8 +78,10 @@ test('a two-minute absence shows no recap: its log is as without the field', () 
     shown.indexOf('The poison fades from your blood.'),
   );
   assert.deepEqual(log, [
-    `${TICK} You shiver.`,
-    `${TICK} The chill passes.`,
+    TICK,
+    'You shiver.',
+    TICK,
+    'The chill passes.',
     ...Array<string>(9).fill(TICK),
   ]);
 });
@@ -129,10 +130,12 @@ test('a press in place during catch-up logs the held lines, in order, before its
   b.tap('Take a pebble');
   const shown = wait(b, 0).text();
   assert.equal(count(shown, LABEL.awayRecap), 0);
-  const log = shown.slice(shown.indexOf(`${TICK} You shiver.`));
-  assert.deepEqual(log.slice(0, 15), [
-    `${TICK} You shiver.`,
-    `${TICK} The chill passes.`,
+  const log = shown.slice(shown.indexOf('You shiver.') - 1);
+  assert.deepEqual(log.slice(0, 17), [
+    TICK,
+    'You shiver.',
+    TICK,
+    'The chill passes.',
     ...Array<string>(9).fill(TICK),
     'The poison fades from your blood.',
     'Maud leaves.',
@@ -148,13 +151,13 @@ test('a room change drops the held lines and the recap; staying keeps them', () 
     ({
       log: [],
       projection: { view: { place: { id: 'hall' } } },
-      away: { from: 0, log: ['a'], lines: ['a'] },
+      away: { from: 0, log: ['a'] },
       recap: ['b'],
     }) as unknown as Logs;
   const view = (id: string) => ({ place: { id } }) as GameView;
   const stay = logs();
   resetLogs(stay, view('hall'));
-  assert.deepEqual([stay.away, stay.recap], [{ from: 0, log: ['a'], lines: ['a'] }, ['b']]);
+  assert.deepEqual([stay.away, stay.recap], [{ from: 0, log: ['a'] }, ['b']]);
   const moved = logs();
   resetLogs(moved, view('garden'));
   assert.deepEqual([moved.away, moved.recap], [undefined, undefined]);
@@ -179,7 +182,7 @@ test('a settlement that ends without settling keeps its lines in the log', () =>
     log: [],
     status: { kind: 'pending' },
     projection: { view: { time: 99999, recap_after: 1 } },
-    away: { from: 0, log: ['a', 'a'], lines: ['a', 'a'] },
+    away: { from: 0, log: ['a', 'a'] },
   } as unknown as Logs;
   settle(s);
   assert.deepEqual([s.log, s.recap, s.away], [['a', 'a'], undefined, undefined]);
