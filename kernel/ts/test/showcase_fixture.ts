@@ -174,7 +174,7 @@ export function homestead(c: any) {
     'yard_crate',
   ])
     delete c.items[ref('item', k)].immune; // the sow statuses are dropped
-  for (const s of ['wet', 'shocked', 'stunned', 'warm'])
+  for (const s of ['afraid', 'wet', 'shocked', 'stunned', 'warm'])
     delete c.statuses[ref('status', s)].narration.observed; // 1.110 (loka-kgd.176)
   const drop = {
     blueprints: ['blueprint/hut_plain', 'blueprint/hut_timbered'],

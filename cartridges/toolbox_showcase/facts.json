@@ -629,6 +629,39 @@
         "instance"
       ],
       "meaning": "The digit on the lever hall's dial wheel 3; 10 is passing and wraps to 0 in the same turn."
+    },
+    "cellar_found": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "This character has found the pressure plate in the Sappers' Cellar."
+    },
+    "cellar_sprung": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "instance"
+      ],
+      "meaning": "The Sappers' Cellar plate has fired and is not yet re-armed."
+    },
+    "cellar_disarmed": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "instance"
+      ],
+      "meaning": "The Sappers' Cellar plate is wedged for good."
     }
   }
 }

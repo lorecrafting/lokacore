@@ -1,0 +1,9 @@
+{
+  "title": "room.chief_den.title",
+  "description": "room.chief_den.description",
+  "exits": {
+    "south": {
+      "to": "plate_passage"
+    }
+  }
+}

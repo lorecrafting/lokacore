@@ -1,13 +1,16 @@
 // The showcase traps district (Sappers' Stair) walked step by step (docs/showcase/traps-district.md,
-// guided loop, steps 1 to 7; slices T1 and T2). Steps 1 to 6 continue one world; step 7 branches
-// from step 1's world. Disarm starts at 0 against the flagstones' rating 1 and grows by 1 per use.
+// guided loop, steps 1 to 9; slices T1 to T3). Steps 1 to 6 and 8 continue one world; steps 7 and 9
+// branch from step 1's world and the sandbox starts fresh. Every attack is chance 100. Disarm starts at 0 against the flagstones' rating 1 and grows by 1 per use.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { gameView } from '../src/index.ts';
 import { describe } from '../src/mechanics/description_variant/rule.ts';
 import { decode } from '../src/foundation/canonical.ts';
 import { validate } from '../src/foundation/validate.ts';
-import { statusKey } from '../src/mechanics/status/shared.ts';
+import { engaged } from '../src/mechanics/combat/shared.ts';
+import { describeEntity } from '../src/mechanics/description_variant/rule.ts';
+import { level, resourceRef } from '../src/mechanics/resource.ts';
+import { activeStatuses, statusKey } from '../src/mechanics/status/shared.ts';
 import type { World } from '../src/runtime/decision.ts';
 import {
   act,
@@ -19,6 +22,7 @@ import {
   HOUR,
   id,
   labels,
+  npc,
   play,
   perform,
   pool,
@@ -27,6 +31,7 @@ import {
   take,
   talk,
   wait,
+  where,
 } from './showcase_fixture.ts';
 
 const WORLD = '5ca5e000-0000-4000-8000-0000000007a1';
@@ -60,8 +65,7 @@ test('traps 1: down from the drill yard; the sign reads; disarm before a search 
   w = choose(talk(w, 'aldous').world, 'learn').world;
   w = play(w, { type: 'wear', item_id: id(w, 'item', 'training_sword') }).world;
   w = go(w, 'down').world;
-  // The plan's down exit comes in T3.
-  assert.deepEqual(exits(w), ['east', 'north', 'up']);
+  assert.deepEqual(exits(w), ['down', 'east', 'north', 'up']);
   assert.deepEqual(play(w, { type: 'read', target_id: detail(w, 'sign_traps') }).lines, [
     'readable.sign_traps',
   ]);
@@ -256,4 +260,154 @@ test('traps 7: left alone, the poison ticks at +1800, +3600, +5400 and expires a
   assert.ok(end.lines.includes('narration.poisoned.expired'), end.lines.join());
   assert.equal(poisoned(end.world)?.ends_at, undefined);
   assert.equal(pool(end.world, 'hp'), 7);
+});
+
+/** The pack members spawned in `roomKey`, lower id first. */
+const goblinsIn = (x: World, roomKey: string) =>
+  Object.keys(x.state.created ?? {})
+    .filter(
+      (e) => x.state.created![e].origin.kind === 'spawned' && where(x, e) === room(x, roomKey),
+    )
+    .sort();
+const hp = (x: World, e: string) => level(x, e as never, resourceRef(x, 'hp'));
+const statuses = (x: World, e: string) => activeStatuses(x, e as never).map((s) => s.spec.key);
+const afraidEnds = (x: World, e: string) =>
+  activeStatuses(x, e as never).find((s) => s.spec.key === 'afraid')?.row.ends_at;
+/** One Attack on `target`, then a round at a time until the encounter closes; the rounds' lines. */
+function flight(x: World, target: string) {
+  const r = play(x, { type: 'attack', target_id: target });
+  const start = r.world.state.clock;
+  const r1 = wait(r.world, start + 150);
+  const r2 = wait(r1.world, start + 300);
+  return { join: r.lines, r1, r2 };
+}
+/** The pack in the den, afraid, flees south one goblin a round; no hit on the player; the
+ * plate (disarmed or not) poisons no goblin. */
+function assertFlight(x: World) {
+  const [a, b] = goblinsIn(x, 'chief_den');
+  const { join, r1, r2 } = flight(x, a!);
+  assert.deepEqual(join, ['combat.goblin_joined']);
+  assert.deepEqual(r1.lines, [
+    'combat.player_hit',
+    'combat.goblin_fled_south',
+    'combat.goblin_targeted',
+  ]);
+  assert.deepEqual([hp(r1.world, a!), goblinsIn(r1.world, 'chief_den')], [4, [b]]);
+  assert.deepEqual(r2.lines, ['combat.goblin_fled_south', 'combat.goblins_gone']);
+  assert.deepEqual(goblinsIn(r2.world, 'plate_passage'), [a, b]);
+  assert.deepEqual([statuses(r2.world, a!), statuses(r2.world, b!)], [['afraid'], ['afraid']]);
+  assert.equal(engaged(r2.world, r2.world.body), undefined);
+  assert.equal(pool(r2.world, 'hp'), 10);
+  return r2.world;
+}
+let den: World;
+let stair: World;
+
+// Breaks: the den or its pack is missing, a said begone frightens (loudness dropped), the shout
+// misses the pack (the word),
+// lands on the chief (immune dropped) or the player, the afraid span or its room line differs,
+// or the afraid goblins stand and fight (fear dropped, or the flight is off fear).
+test('traps 8: in the den the shout frightens both goblins, not the chief; they flee south', () => {
+  stair = go(go(w, 'west').world, 'west').world;
+  w = go(go(stair, 'north').world, 'north').world;
+  assert.equal(at(w), room(w, 'chief_den'));
+  den = w;
+  const [a, b] = goblinsIn(w, 'chief_den');
+  assert.ok(a && b, 'two goblins in the den');
+  assert.deepEqual(statuses(play(w, { type: 'say', word: 'begone' }).world, a!), []);
+  const s = play(w, { type: 'shout', word: 'begone' });
+  assert.deepEqual(s.lines, ['narration.afraid.applied', 'narration.afraid.applied']);
+  w = s.world;
+  const T = w.state.clock;
+  assert.deepEqual([afraidEnds(w, a), afraidEnds(w, b)], [T + 600, T + 600]);
+  assert.deepEqual([statuses(w, npc(w, 'chief')), statuses(w, w.body)], [[], []]);
+  assert.equal(describeEntity(w, w.character, a as never, 'room_line'), 'npc.goblin.room_afraid');
+  assert.equal(describeEntity(w, w.character, npc(w, 'chief'), 'room_line'), 'npc.chief.room');
+  validate('GameView', gameView(w));
+  w = assertFlight(w);
+});
+
+// Breaks: a calm pack flees too (the flight is not off fear), or the control's numbers move.
+test('traps 8 control: without the shout the pack stands; two rounds leave 8 and 2', () => {
+  const [a, b] = goblinsIn(den, 'chief_den');
+  const { r2 } = flight(den, a!);
+  assert.deepEqual([pool(r2.world, 'hp'), hp(r2.world, a!), hp(r2.world, b!)], [8, 2, 6]);
+  assert.deepEqual(goblinsIn(r2.world, 'chief_den'), [a, b]);
+});
+
+// Breaks: the chief takes more than one blow, pays other experience, or its fall frightens no
+// goblin (chief_fell's co_present dropped) or frightens the player.
+test('traps 9: the chief falls to one blow; its fall frightens the pack, which then flees', () => {
+  const k = play(den, { type: 'attack', target_id: npc(den, 'chief') });
+  const r1 = wait(k.world, k.world.state.clock + 150);
+  assert.deepEqual(r1.lines, [
+    'combat.player_hit',
+    'combat.npc_died',
+    'narration.afraid.applied',
+    'narration.afraid.applied',
+  ]);
+  const x = r1.world;
+  assert.equal(gameView(x).levelling?.experience, 10);
+  assert.equal(engaged(x, x.body), undefined);
+  const T = x.state.clock;
+  assert.deepEqual(
+    goblinsIn(x, 'chief_den').map((g) => afraidEnds(x, g)),
+    [T + 600, T + 600],
+  );
+  assert.deepEqual(statuses(x, x.body), []);
+  assertFlight(x);
+});
+
+// Breaks: the cellar's plate does not spring on entry, a re-entry while sprung or a disarmed
+// cellar plate springs again (cellar_springs's guards), search or disarm is offered out of turn, the search or disarm recipe is missing or
+// keyed to the passage plate, or the cellar's skin or pack is missing.
+test('traps sandbox: the cellar plate springs, is found and disarmed, then holds', () => {
+  let x = fresh(WORLD);
+  assert.notEqual(fact(x, 'cellar_sprung'), true);
+  x = go(go(go(x, 'west').world, 'down').world, 'down').world;
+  assert.equal(at(x), room(x, 'sapper_cellar'));
+  assert.ok(poisoned(x)?.ends_at, 'the entry poisons');
+  assert.equal(fact(x, 'cellar_sprung'), true);
+  assert.equal(goblinsIn(x, 'sapper_cellar').length, 2);
+  assert.ok(id(x, 'item', 'cellar_skin') && where(x, id(x, 'item', 'cellar_skin')) === at(x));
+  const first = poisoned(x);
+  const again = go(go(x, 'up').world, 'down');
+  assert.ok(!again.lines.some((l) => l.startsWith('narration.poisoned')), again.lines.join());
+  assert.deepEqual(poisoned(again.world), first);
+  assert.equal(refused(x, { type: 'perform', action: 'disarm_cellar' }), 'invalid_state');
+  x = perform(x, 'search_cellar').world;
+  assert.equal(refused(x, { type: 'perform', action: 'search_cellar' }), 'invalid_state');
+  assert.deepEqual([fact(x, 'cellar_found'), fact(x, 'plate_found')], [true, undefined]);
+  assert.equal(outcome(x, 'disarm_cellar').out, 'failure');
+  const r = outcome(outcome(x, 'disarm_cellar').world, 'disarm_cellar');
+  assert.equal(r.out, 'success');
+  x = r.world;
+  assert.deepEqual([fact(x, 'cellar_disarmed'), fact(x, 'plate_disarmed')], [true, undefined]);
+  const before = poisoned(x);
+  x = wait(go(x, 'up').world, Math.ceil((x.state.clock + 1) / HOUR) * HOUR).world;
+  assert.equal(fact(x, 'cellar_sprung'), false);
+  const back = go(x, 'down');
+  assert.ok(!back.lines.some((l) => l.startsWith('narration.poisoned')), back.lines.join());
+  assert.deepEqual(poisoned(back.world), before);
+});
+
+// Breaks: the cellar twins drift from the den's: the cellar chief is not immune, its fall frightens
+// no goblin (cellar_chief_fell's co_present), or an afraid cellar goblin stands (the pack's flight).
+test("traps sandbox twins: the cellar pack fears the shout and its chief's fall, and flees up", () => {
+  const x = go(stair, 'down').world;
+  const [a, b] = goblinsIn(x, 'sapper_cellar');
+  const chief = npc(x, 'cellar_chief');
+  const s = play(x, { type: 'shout', word: 'begone' }).world;
+  assert.deepEqual(
+    [statuses(s, a!), statuses(s, b!), statuses(s, chief)],
+    [['afraid'], ['afraid'], []],
+  );
+  assert.equal(describeEntity(s, s.character, a as never, 'room_line'), 'npc.goblin.room_afraid');
+  const { r1 } = flight(s, a!);
+  assert.deepEqual(goblinsIn(r1.world, 'sapper_stair'), [a]);
+  const k = play(x, { type: 'attack', target_id: chief });
+  const died = wait(k.world, k.world.state.clock + 150);
+  assert.ok(died.lines.includes('combat.npc_died'), died.lines.join());
+  const f = died.world;
+  assert.deepEqual([statuses(f, a!), statuses(f, b!)], [['afraid'], ['afraid']]);
 });

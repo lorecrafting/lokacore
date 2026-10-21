@@ -1,0 +1,34 @@
+{
+  "keywords": [
+    "goblin"
+  ],
+  "short": "npc.goblin.short",
+  "room_line": "npc.goblin.room",
+  "room_line_variants": [
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
+          "op": "status_active",
+          "subject": "target",
+          "status": "afraid"
+        }
+      },
+      "description": "npc.goblin.room_afraid"
+    }
+  ],
+  "description": "npc.goblin.description",
+  "room": "chief_den",
+  "spawn_template": true,
+  "hp": {
+    "minimum": 0,
+    "maximum": 6,
+    "start": 6,
+    "gain": 0
+  },
+  "attack": {
+    "chance": 100,
+    "damage_min": 1,
+    "damage_max": 1
+  }
+}

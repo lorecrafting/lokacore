@@ -10,6 +10,9 @@
     },
     "east": {
       "to": "lever_hall"
+    },
+    "down": {
+      "to": "sapper_cellar"
     }
   },
   "details": {

@@ -1,0 +1,29 @@
+{
+  "bundle": "cellar_goblins",
+  "home": "sapper_cellar",
+  "area": [
+    "sapper_cellar",
+    "sapper_stair"
+  ],
+  "cap": 2,
+  "day_target": 2,
+  "night_target": 2,
+  "night_start": 20,
+  "night_end": 6,
+  "replacement_delay": 8640000,
+  "wander_interval": 8640000,
+  "pack": {
+    "flight_below_percent": 25,
+    "flight_fare": 0,
+    "narration": {
+      "helper_joined": "combat.goblin_joined",
+      "enemy_fled": {
+        "down": "combat.goblin_fled_down",
+        "up": "combat.goblin_fled_up",
+        "west": "combat.goblin_fled_west"
+      },
+      "primary_changed": "combat.goblin_targeted",
+      "pack_withdrew": "combat.goblins_gone"
+    }
+  }
+}

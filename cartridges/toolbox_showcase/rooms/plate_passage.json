@@ -4,6 +4,9 @@
   "exits": {
     "south": {
       "to": "sapper_stair"
+    },
+    "north": {
+      "to": "chief_den"
     }
   },
   "details": {
