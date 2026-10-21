@@ -333,7 +333,7 @@ test('actual trunk detail explains refused Take and restores its button after Re
   h.tap('Leave');
   go('up');
   h.tap('An old trunk');
-  assert.ok(h.text().includes('Take: too heavy to carry.'));
+  assert.ok(h.text().includes('Take: more than you can carry.'));
   assert.equal(h.labels().includes('Take an old trunk'), false);
   h.tap('Leave');
   carrying();
@@ -343,7 +343,7 @@ test('actual trunk detail explains refused Take and restores its button after Re
   h.tap('Drop a wool cloak');
   h.tap('An old trunk');
   assert.equal(
-    h.text().some((s) => s.includes('too heavy to carry')),
+    h.text().some((s) => s.includes('more than you can carry')),
     false,
   );
   assert.ok(h.labels().includes('Take an old trunk'));

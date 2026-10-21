@@ -47,7 +47,12 @@
   {
     "code": "too_heavy",
     "category": "gameplay_rejection",
-    "description": "A voluntary positive-load Take would exceed the authored carrying maximum (docs/system/mechanics.md containment@1)."
+    "description": "A voluntary positive-load Take whose added mass alone exceeds the authored carrying maximum (docs/system/mechanics.md containment@1)."
+  },
+  {
+    "code": "over_load",
+    "category": "gameplay_rejection",
+    "description": "A voluntary positive-load Take that fits the carrying maximum alone but not on top of the current load (docs/system/mechanics.md containment@1)."
   },
   {
     "code": "exit_locked",

@@ -1,0 +1,24 @@
+{
+  "npc": "hedge_wizard",
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "quest_state",
+      "quest": "errand",
+      "state": "active"
+    }
+  },
+  "prompt": "dialogue.wizard_awaiting.prompt",
+  "roles": {
+    "wizard": {
+      "role": "npc",
+      "npc": "hedge_wizard"
+    }
+  },
+  "choices": {
+    "leave": {
+      "label": "dialogue.wizard.leave",
+      "narration": "narration.wizard.leave"
+    }
+  }
+}

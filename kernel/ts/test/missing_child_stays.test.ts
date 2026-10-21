@@ -241,8 +241,8 @@ test('capacity refusal preserves the pending branch and retries after ordinary D
   });
   a.custody({ [trunk]: ids.body, [ids['item/tin_whistle']]: ids['room/inn_attic'] });
   const pending = gameView(a.world()).choice!.continuation_id;
-  unavailable(a.world(), 'too_heavy');
-  a.choose('carry_message', 'too_heavy');
+  unavailable(a.world(), 'over_load');
+  a.choose('carry_message', 'over_load');
   assert.deepEqual(
     [a.flag('fen_return_branch'), a.world().state.containers[message]],
     ['unselected', ids['npc/vesper']],

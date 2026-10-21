@@ -240,7 +240,7 @@ test('Take and Buy reject filled mass above ceiling and GameView exposes exact c
   };
   assert.equal(
     (run(ground, { type: 'take', item_id: skin }).decision as any).error.code,
-    'too_heavy',
+    'over_load',
   );
   const shelf = {
     ...ground,
@@ -254,7 +254,7 @@ test('Take and Buy reject filled mass above ceiling and GameView exposes exact c
     },
   };
   const bought = run(shelf, { type: 'buy', provider_id: peg, item_id: skin, quoted_price: 4 });
-  assert.equal((bought.decision as any).error.code, 'too_heavy');
+  assert.equal((bought.decision as any).error.code, 'over_load');
   assert.equal(bought.world, shelf);
   const view = gameView(w),
     actions = view.inventory.find((e) => e.id === skin)!.actions;

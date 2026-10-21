@@ -98,9 +98,10 @@ defmodule Loka.ContentShowcaseTest do
        &update_in(&1, ["narration"], fn n -> Map.delete(n, "observed") end)}
 
   # The traps district's lever, wheel and needle lines need API 1.103 (a narrate op or
-  # a whole wheel readout reaction); the lever hall's asides need 1.91.
+  # a whole wheel readout reaction); the lever hall's asides need 1.91. The Loft's errand
+  # handover line is a narrate op too.
   @trap_lines ~w(lever_b_step lever_b_reset lever_c_step lever_c_reset plate_springs plate_bites
-                 cellar_springs cellar_bites)
+                 cellar_springs cellar_bites errand_reward)
 
   defp unnarrated,
     do:
@@ -120,6 +121,7 @@ defmodule Loka.ContentShowcaseTest do
       homestead_edits() ++
         unnarrated() ++
         Enum.map(~w(afraid burning wet shocked stunned warm), &unobserved/1) ++
+        [{"statuses/wanted.json", &Map.delete(&1, "kind")}] ++
         for(
           f <- @homestead_files,
           do: {f <> ".json", nil}

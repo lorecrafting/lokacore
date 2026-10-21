@@ -543,7 +543,8 @@
       "scopes": [
         "player"
       ],
-      "meaning": "The player oiled the crypt gate's winch; the gate opens on it."
+      "per_subject": true,
+      "meaning": "The player oiled the crypt gate's winch (a pair fact on the winch); the gate opens on it."
     },
     "plate_found": {
       "version": 1,

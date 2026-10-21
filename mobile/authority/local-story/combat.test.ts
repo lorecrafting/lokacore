@@ -194,7 +194,7 @@ test('actual lethal combat returns empty-handed and ordinary six-exit journey re
     const heavy = loaded.invoke(p.invocation('take', [cloak]));
     assert.equal(heavy.kind, 'saved');
     if (heavy.kind === 'saved')
-      assert.deepEqual(heavy.decision, { kind: 'rejected', error: { code: 'too_heavy' } });
+      assert.deepEqual(heavy.decision, { kind: 'rejected', error: { code: 'over_load' } });
     walk(['up', 'west', 'north', 'north', 'north', 'north']);
     loaded.invoke(p.invocation('drop', [bag]));
     walk(['south', 'south', 'south', 'south', 'east', 'down']);

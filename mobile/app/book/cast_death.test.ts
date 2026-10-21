@@ -43,7 +43,9 @@ test('cast-opened fight: rounds drained by a press still print every round and t
   b.tap('Flee');
   assert.deepEqual(b.p.screen().combatLog, [
     'A bolt of fire leaps from your hand.',
-    'You miss the wight. The wight claws you.',
-    'The wight claws you. You fall.',
+    'You miss the wight.',
+    'The wight claws you.',
+    'The wight claws you.',
+    'You fall.',
   ]);
 });

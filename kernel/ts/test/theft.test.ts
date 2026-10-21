@@ -11,6 +11,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
+import { validate } from '../src/foundation/validate.ts';
 import { INSTALLED, gameView, loadCartridge, newWorld, step } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { encode } from '../src/foundation/canonical.ts';
@@ -126,6 +127,18 @@ test('3. a stolen ring will not sell back to the shopkeeper; the fence buys the 
   c = go(go(play(c, { type: 'buy', ...clean, quoted_price: 8 }).w, 'east'), 'east');
   const fenced = { type: 'sell', provider_id: npc(c, 'fence'), item_id: clean.item_id };
   assert.equal(refused(c, { ...fenced, quoted_price: 3 }), 'invalid_state'); // a fence takes no clean ring
+  // Pass-1 GE3: the fence's shelf names that refusal; the honest shop's below does not.
+  const row = (w: World, who: string) =>
+    gameView(w)
+      .entities.find((e) => e.id === npc(w, who))!
+      .shop!.find((o) => o.item_id === item(w, 'ring'))!.sell;
+  assert.deepEqual(validate('GameView', gameView(c)), []);
+  assert.deepEqual(row(c, 'fence'), {
+    available: false,
+    price: 3,
+    reason: 'invalid_state',
+    message: { key: 'shop.not_stolen' },
+  });
   c = play(go(go(c, 'west'), 'west'), { type: 'sell', ...clean, quoted_price: 5 }).w;
   assert.equal(pennies(c), 7); // 10 - 8 + 5: the clean ring sells back
   let w = fresh();
@@ -135,8 +148,11 @@ test('3. a stolen ring will not sell back to the shopkeeper; the fence buys the 
   const shopkeeper = npc(w, 'shopkeeper');
   const sell = { type: 'sell', provider_id: shopkeeper, item_id: item(w, 'ring'), quoted_price: 5 };
   assert.equal(refused(w, sell), 'invalid_state');
-  const shelf = gameView(w).entities.find((e) => e.id === shopkeeper)!.shop![0]!.sell;
-  assert.deepEqual([shelf.available, shelf.reason], [false, 'invalid_state']);
+  const shelf = row(w, 'shopkeeper');
+  assert.deepEqual(
+    [shelf.available, shelf.reason, shelf.message],
+    [false, 'invalid_state', undefined],
+  );
   w = go(go(w, 'east'), 'east');
   const fence = npc(w, 'fence');
   w = play(w, { type: 'sell', provider_id: fence, item_id: item(w, 'purse'), quoted_price: 3 }).w;
@@ -264,6 +280,10 @@ test('8. loader: vault lock, reserved stolen fact, fence offers, floors, stolen 
     diagnostic((c) => delete c.npcs[F].shop.offers[0].stolen),
     ['UNRESOLVED_REFERENCE', `.cartridge.npcs["${F}"].shop`],
   );
+  assert.deepEqual(
+    diagnostic((c) => delete c.text['shop.not_stolen']),
+    ['UNRESOLVED_REFERENCE', `.cartridge.npcs["${F}"].shop.offers`],
+  ); // pass-1 GE3: a fence names its refusal of honest goods
   assert.deepEqual(
     diagnostic((c) => (c.facts[`${S}:fact/stolen`].scopes = ['player'])),
     ['FACT_SCOPE_UNSUPPORTED', '.cartridge.world.theft.stolen'],

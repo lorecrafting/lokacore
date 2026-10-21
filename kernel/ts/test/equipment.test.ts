@@ -370,14 +370,14 @@ test('worn gear counts once and Remove then Drop provides a carrying escape', ()
   w = accepted(accepted(w, 'take', LANTERN).world, 'take', CLOAK).world;
   w = accepted(w, 'wear', CLOAK).world;
   refused(w, 'drop', CLOAK, 'not_owned');
-  refused(w, 'take', KEY, 'too_heavy');
+  refused(w, 'take', KEY, 'over_load');
   const equality: World = {
     ...w,
     cartridge: { ...w.cartridge, world: { ...w.cartridge.world, carry: { max_grams: 5100 } } },
   };
   accepted(equality, 'take', KEY); // 5100 including the worn cloak exactly once
   w = accepted(w, 'remove', CLOAK).world;
-  refused(w, 'take', KEY, 'too_heavy');
+  refused(w, 'take', KEY, 'over_load');
   w = accepted(w, 'drop', CLOAK).world;
   w = accepted(w, 'take', KEY).world; // 2100, below 5000
   assert.equal(w.state.containers[KEY], BODY);

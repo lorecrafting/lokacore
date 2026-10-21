@@ -5,6 +5,7 @@ import {
   type NpcDefinition,
   type ShopItemView,
   type ShopOffer,
+  type TextKey,
 } from '../../contracts.gen.ts';
 import { bodyOf, refString, type Steps, type World } from '../../runtime/decision.ts';
 import { living } from '../death/shared.ts';
@@ -76,14 +77,14 @@ export function exchange(
   if (typeof first === 'string') return first;
   const moved = first[0];
   if (moved === undefined || world.state.containers[moved] !== source) return 'not_owned' as const;
-  // A fence's offer buys only stolen goods, any other only clean ones (toolbox rows 33 and 34).
+  // A fence buys only stolen goods, others only clean (rows 33, 34); not_stolen: pass-1 GE3.
   const theft = world.cartridge.world?.theft;
   if (
     verb === 'sell' &&
     theft &&
     (value(world, actor, theft.stolen, moved) === true) !== (offer.stolen === true)
   )
-    return 'invalid_state' as const;
+    return offer.stolen ? ('not_stolen' as const) : ('invalid_state' as const);
   const custody =
     verb === 'buy' ? carrying(world, body, steps)(moved) : giveRefused(world, moved, steps);
   if (custody) return custody;
@@ -112,7 +113,10 @@ export function shelf(
       return {
         price,
         available: typeof result !== 'string',
-        ...(typeof result === 'string' && { reason: result }),
+        ...(typeof result === 'string' && {
+          reason: result === 'not_stolen' ? 'invalid_state' : result,
+        }),
+        ...(result === 'not_stolen' && { message: { key: 'shop.not_stolen' as TextKey } }),
       };
     };
     return {

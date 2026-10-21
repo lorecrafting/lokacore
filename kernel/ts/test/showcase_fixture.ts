@@ -156,7 +156,7 @@ export function reload(edit: (c: any) => void) {
 }
 
 // The Homestead (crafts 1.101; build, raze, item_present, profession, hidden: 1.102) and the
-// Undercroft's gated parts and the golem's observed lines (1.110) dropped for the older-floor
+// Undercroft's gated parts, the wanted icon and the golem's observed lines (1.110) dropped for the older-floor
 // loader rows; twin of homestead/0 in test/loka/content_showcase_test.exs.
 export function homestead(c: any) {
   delete c.world.construction;
@@ -176,7 +176,9 @@ export function homestead(c: any) {
     delete c.items[ref('item', k)].immune; // the sow statuses are dropped
   for (const s of ['afraid', 'burning', 'wet', 'shocked', 'stunned', 'warm'])
     delete c.statuses[ref('status', s)].narration.observed; // 1.110 (loka-kgd.176, loka-y6yg.48)
-  // The traps district's narrate lines and wheel readouts (1.103) and lever hall asides (1.91).
+  delete c.statuses[ref('status', 'wanted')].kind; // 1.102 (the law's wanted icon, E1)
+  // The traps district's narrate lines and wheel readouts (1.103) and lever hall asides (1.91);
+  // the Loft's errand handover line (1.103).
   delete c.rooms[ref('room', 'lever_hall')].asides;
   for (const r of [
     'lever_b_step',
@@ -187,6 +189,7 @@ export function homestead(c: any) {
     'plate_bites',
     'cellar_springs',
     'cellar_bites',
+    'errand_reward',
   ]) {
     const x = c.reactions[ref('reaction', r)];
     x.apply = x.apply.filter((op: any) => op.op !== 'narrate');

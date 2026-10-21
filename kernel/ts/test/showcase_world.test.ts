@@ -90,12 +90,14 @@ test('world 5: at 10:00 the cleft search is unavailable and the cave shows only 
   assert.deepEqual(exits(w), ['west']);
 });
 
-// Breaks: low tide does not open the gate, or the third visit does not read the familiar line.
+// Breaks: low tide does not open the gate, the third visit does not read the familiar line, or
+// the familiar line outranks the high tide.
 test('world 6: at 12:00 the gate opens; the third visit to the shore is the familiar line', () => {
   w = wait(w, 12 * HOUR).world;
   w = play(w, { type: 'open', direction: 'west' }).world;
   w = go(w, 'west').world;
   assert.equal(place(w), 'room.shore_steps.familiar');
+  assert.equal(place(wait(w, 18 * HOUR).world), 'room.shore_steps.high_tide'); // W1: tide first
 });
 
 // Breaks: the gate closes on the tide, the search fact or tip is missing, or the map hides the link.

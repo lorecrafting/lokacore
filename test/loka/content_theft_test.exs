@@ -48,6 +48,11 @@ defmodule Loka.ContentTheftTest do
              {"UNRESOLVED_REFERENCE", "npcs/fence.shop"}
            ]
 
+    # Pass-1 GE3: a fence names its refusal of honest goods.
+    assert diags.([{"text.json", &Map.delete(&1, "shop.not_stolen")}]) == [
+             {"UNRESOLVED_REFERENCE", "npcs/fence.shop.offers"}
+           ]
+
     assert diags.([{"facts.json", &put_in(&1, ["facts", "stolen", "scopes"], ["player"])}]) ==
              [{"FACT_SCOPE_UNSUPPORTED", "cartridge.world.theft.stolen"}]
 
