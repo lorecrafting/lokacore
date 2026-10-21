@@ -100,7 +100,7 @@ defmodule Loka.ContentShowcaseTest do
   defp homestead,
     do:
       homestead_edits() ++
-        Enum.map(~w(wet shocked stunned warm), &unobserved/1) ++
+        Enum.map(~w(afraid wet shocked stunned warm), &unobserved/1) ++
         for(
           f <- @homestead_files,
           do: {f <> ".json", nil}

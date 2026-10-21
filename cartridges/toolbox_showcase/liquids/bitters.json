@@ -1,0 +1,9 @@
+{
+  "label": "liquid.bitters",
+  "unit_label": "liquid.doses",
+  "grams_per_unit": 50,
+  "drink_amount": 1,
+  "cures": [
+    "poisoned"
+  ]
+}

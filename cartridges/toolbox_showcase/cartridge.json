@@ -260,6 +260,22 @@
         {
           "npc": "attic_wight",
           "experience": 10
+        },
+        {
+          "npc": "den_goblin",
+          "experience": 10
+        },
+        {
+          "npc": "chief",
+          "experience": 10
+        },
+        {
+          "npc": "cellar_goblin",
+          "experience": 10
+        },
+        {
+          "npc": "cellar_chief",
+          "experience": 10
         }
       ],
       "level_up": "levelling.level_up"
@@ -287,7 +303,8 @@
   },
   "speech": {
     "phrases": [
-      "ware"
+      "ware",
+      "begone"
     ]
   }
 }

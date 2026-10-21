@@ -525,6 +525,7 @@
         ["statuses/wet.json", ["narration", "observed"], null],
         ["statuses/shocked.json", ["narration", "observed"], null],
         ["statuses/stunned.json", ["narration", "observed"], null],
+        ["statuses/afraid.json", ["narration", "observed"], null],
         ["statuses/warm.json", ["narration", "observed"], null]
       ],
       "compiler": [
@@ -1356,6 +1357,7 @@
         ["statuses/wet.json", ["narration", "observed"], null],
         ["statuses/shocked.json", ["narration", "observed"], null],
         ["statuses/stunned.json", ["narration", "observed"], null],
+        ["statuses/afraid.json", ["narration", "observed"], null],
         ["statuses/warm.json", ["narration", "observed"], null]
       ],
       "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],
@@ -1378,6 +1380,7 @@
         ["statuses/wet.json", ["narration", "observed"], null],
         ["statuses/shocked.json", ["narration", "observed"], null],
         ["statuses/stunned.json", ["narration", "observed"], null],
+        ["statuses/afraid.json", ["narration", "observed"], null],
         ["statuses/warm.json", ["narration", "observed"], null]
       ],
       "compiler": ["KERNEL_API_RANGE_INVALID", "cartridge.requires.kernel_api.at_least"],

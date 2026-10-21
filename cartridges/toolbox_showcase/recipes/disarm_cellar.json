@@ -1,0 +1,55 @@
+{
+  "label": "actions.disarm_cellar",
+  "aliases": [
+    "disarm"
+  ],
+  "target": {
+    "kind": "detail",
+    "room": "sapper_cellar",
+    "detail": "cellar_flags"
+  },
+  "priority": 5,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": [
+        {
+          "op": "fact_compare",
+          "fact": "cellar_found",
+          "equals": true
+        },
+        {
+          "op": "fact_compare",
+          "fact": "cellar_disarmed",
+          "equals": false
+        }
+      ]
+    }
+  },
+  "check": {
+    "key": "disarm_cellar",
+    "kind": "opposed",
+    "skill": "disarm"
+  },
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "cellar_disarmed",
+          "value": true
+        }
+      ],
+      "narration": {
+        "actor": "narration.disarm_plate.success"
+      }
+    },
+    "failure": {
+      "sequence": [],
+      "narration": {
+        "actor": "narration.disarm_plate.failure"
+      }
+    }
+  }
+}

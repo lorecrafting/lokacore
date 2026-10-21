@@ -1,0 +1,44 @@
+{
+  "label": "actions.search_floor",
+  "aliases": [
+    "search"
+  ],
+  "target": {
+    "kind": "detail",
+    "room": "sapper_stair",
+    "detail": "flagstones"
+  },
+  "priority": 10,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": [
+        {
+          "op": "fact_compare",
+          "fact": "plate_found",
+          "equals": false
+        },
+        {
+          "op": "fact_compare",
+          "fact": "plate_disarmed",
+          "equals": false
+        }
+      ]
+    }
+  },
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "plate_found",
+          "value": true
+        }
+      ],
+      "narration": {
+        "actor": "narration.search_floor"
+      }
+    }
+  }
+}

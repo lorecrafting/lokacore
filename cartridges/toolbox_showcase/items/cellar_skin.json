@@ -1,0 +1,23 @@
+{
+  "keywords": [
+    "skin",
+    "cellar_skin",
+    "bitters"
+  ],
+  "short": "item.bitters_skin.short",
+  "room_line": "item.cellar_skin.room",
+  "description": "item.bitters_skin.description",
+  "location": {
+    "in": "room",
+    "room": "sapper_cellar"
+  },
+  "mass_grams": 200,
+  "vessel": {
+    "capacity": 2,
+    "unit_label": "liquid.doses",
+    "initial": {
+      "kind": "bitters",
+      "quantity": 2
+    }
+  }
+}

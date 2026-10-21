@@ -142,7 +142,7 @@ test('combat 3: a shout of "ware" in the yard warns Gil; a say or a shout from t
   assert.notEqual(fact(fromInn, 'gil_warned'), true);
   w = play(w, { type: 'say', word: 'ware' }).world;
   assert.notEqual(fact(w, 'gil_warned'), true);
-  assert.deepEqual(gameView(w).phrases, ['ware']); // the Book's Shout chip
+  assert.deepEqual(gameView(w).phrases, ['ware', 'begone']); // the Book's Shout chip
   w = play(w, { type: 'shout', word: 'ware' }).world;
   assert.equal(fact(w, 'gil_warned'), true);
   w = go(w, 'west').world;

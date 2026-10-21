@@ -1,0 +1,13 @@
+{
+  "on": {
+    "event": "action_completed",
+    "action": "turn_wheel_1"
+  },
+  "apply": [
+    {
+      "op": "fact.adjust",
+      "fact": "wheel_1",
+      "amount": 1
+    }
+  ]
+}

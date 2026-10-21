@@ -334,5 +334,47 @@
     "x": 0,
     "y": 0,
     "z": 2
+  },
+  {
+    "room": "sapper_stair",
+    "x": -4,
+    "y": 0,
+    "z": -1
+  },
+  {
+    "room": "plate_passage",
+    "x": -4,
+    "y": -1,
+    "z": -1
+  },
+  {
+    "room": "lever_hall",
+    "x": -3,
+    "y": 0,
+    "z": -1
+  },
+  {
+    "room": "lever_vault",
+    "x": -3,
+    "y": -1,
+    "z": -1
+  },
+  {
+    "room": "dial_vault",
+    "x": -2,
+    "y": 0,
+    "z": -1
+  },
+  {
+    "room": "chief_den",
+    "x": -4,
+    "y": -2,
+    "z": -1
+  },
+  {
+    "room": "sapper_cellar",
+    "x": -4,
+    "y": 0,
+    "z": -2
   }
 ]

@@ -1,0 +1,64 @@
+{
+  "title": "room.sapper_stair.title",
+  "description": "room.sapper_stair.description",
+  "exits": {
+    "up": {
+      "to": "drill_yard"
+    },
+    "north": {
+      "to": "plate_passage"
+    },
+    "east": {
+      "to": "lever_hall"
+    },
+    "down": {
+      "to": "sapper_cellar"
+    }
+  },
+  "details": {
+    "sign_traps": {
+      "aliases": [
+        "sign",
+        "signpost"
+      ],
+      "description": "detail.sign_traps.description",
+      "readable": {
+        "label": "actions.read_sign",
+        "text": "readable.sign_traps",
+        "title": "detail.sign_traps.title"
+      }
+    },
+    "flagstones": {
+      "aliases": [
+        "flagstones",
+        "plate"
+      ],
+      "description": "detail.flagstones",
+      "rating": 1,
+      "variants": [
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "fact_compare",
+              "fact": "plate_disarmed",
+              "equals": true
+            }
+          },
+          "description": "detail.flagstones.disarmed"
+        },
+        {
+          "when": {
+            "policy_version": 1,
+            "root": {
+              "op": "fact_compare",
+              "fact": "plate_found",
+              "equals": true
+            }
+          },
+          "description": "detail.flagstones.found"
+        }
+      ]
+    }
+  }
+}

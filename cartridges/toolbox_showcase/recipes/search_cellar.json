@@ -1,0 +1,44 @@
+{
+  "label": "actions.search_cellar",
+  "aliases": [
+    "search"
+  ],
+  "target": {
+    "kind": "detail",
+    "room": "sapper_cellar",
+    "detail": "cellar_flags"
+  },
+  "priority": 10,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": [
+        {
+          "op": "fact_compare",
+          "fact": "cellar_found",
+          "equals": false
+        },
+        {
+          "op": "fact_compare",
+          "fact": "cellar_disarmed",
+          "equals": false
+        }
+      ]
+    }
+  },
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "cellar_found",
+          "value": true
+        }
+      ],
+      "narration": {
+        "actor": "narration.search_cellar"
+      }
+    }
+  }
+}

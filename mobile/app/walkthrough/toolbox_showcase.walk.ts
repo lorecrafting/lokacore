@@ -4,6 +4,9 @@
 // reduced: the commission waits and the seen lift with its fine are kernel-only (showcase_economy).
 // Magic 3-magic: lux, hush, grimoire, ward, winch, dark crypt, flamma, golem yard
 // (docs/showcase/magic-district.md); the reactions' statuses are kernel-only (showcase_magic).
+// Traps 4-traps: the shout in the chief's den and the frightened pack's flight
+// (docs/showcase/traps-district.md step 8); the plates, levers, wheels and chief are kernel-only
+// (showcase_traps).
 import { expect } from 'e2e';
 import { LABEL } from '../book/labels.ts';
 import { moves, scene, settle, walk, type Screen, type Walk } from './walk.ts';
@@ -227,4 +230,20 @@ walk('3-magic', 'Magic: lux, hush, grimoire, ward, winch, flamma, golem', async 
   await settle();
   await scene(r.screen);
   await magic(r, steps(r.screen));
+});
+
+walk('4-traps', "Traps: the shout in the chief's den; the goblins flee", async (r) => {
+  const { screen } = r;
+  await r.app.clearState();
+  await settle();
+  await scene(screen);
+  const { tap } = steps(screen);
+  await moves(screen, 'west', 'down', 'north', 'north'); // the passage plate bites on the way
+  // Afraid lasts 600 game s (~12 s of wall time at rate 50): nothing slow between shout and Attack.
+  await tap('begone, shout');
+  await tap(/^A goblin is here/);
+  await tap(/Attack/);
+  // A round is 150 game s, 3 s of wall time at rate 50.
+  await expect(screen.getByText(/A goblin flees south/).first()).toBeVisible({ timeout: 10_000 });
+  await r.note('The pack flees');
 });

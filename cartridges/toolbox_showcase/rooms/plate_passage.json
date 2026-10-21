@@ -1,0 +1,25 @@
+{
+  "title": "room.plate_passage.title",
+  "description": "room.plate_passage.description",
+  "exits": {
+    "south": {
+      "to": "sapper_stair"
+    },
+    "north": {
+      "to": "chief_den"
+    }
+  },
+  "details": {
+    "sapper_note": {
+      "aliases": [
+        "note",
+        "sapper_note"
+      ],
+      "description": "detail.sapper_note",
+      "readable": {
+        "label": "actions.read_book",
+        "text": "readable.sapper_note"
+      }
+    }
+  }
+}
