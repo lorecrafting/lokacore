@@ -62,6 +62,9 @@ Next (all Opus unless marked):
    (loka-x6t.71), NPC page conditions (loka-x6t.70), Word bar hides spells in a fight (loka-x6t.69), bank-then-work-off
    (loka-y6yg.36), sign word "mana" vs Book "ma".
 3. Owner: slice D two-save playtest (`loka-y6yg.4`). Then UI polish with the owner.
+- Playtest lessons (`loka-y6yg.40`, owner 2026-10-21): right after the pass-1 triage, in parallel with the fix slices,
+  archive the reports, tag cause families, draft docs/guides/area-authoring.md and file candidate checks for owner
+  approval. Must finish before any real chapter area is built.
 Approved, after the showcase, before chapter work: loka-kgd.173 sim invariants, loka-kgd.174 Book visibility check,
 loka-kgd.175 scale benchmark (status sort, entity scan hot spots), loka-kgd.177 red control for
 target_candidates_ordered; approved retro items for the next housekeeping PR: loka-7m2u, loka-xvxa, loka-8zf5,
