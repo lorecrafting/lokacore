@@ -65,8 +65,8 @@ Next (all Opus unless marked):
 Approved, after the showcase, before chapter work: loka-kgd.173 sim invariants, loka-kgd.174 Book visibility check,
 loka-kgd.175 scale benchmark (status sort, entity scan hot spots), loka-kgd.177 red control for
 target_candidates_ordered; approved retro items for the next housekeeping PR: loka-7m2u, loka-xvxa, loka-8zf5,
-loka-9nd4 (loka-2rfk is done). New retro (owner to approve): loka-xmvu (BRIEF KIT as a repo file), loka-3a96 (drafters
-cite the spec clause for every Book-visible promise), loka-csf7 (walk script --grep never filters).
+loka-9nd4 (loka-2rfk is done). Also approved 2026-10-21 ("ok go with your recommmendation on the retros"): loka-xmvu (BRIEF KIT as a repo file),
+loka-3a96 (drafters cite the spec clause for every Book-visible promise), loka-csf7 (walk script --grep never filters).
 
 Session lessons (2026-10-21, c5ed3619):
 - The new hosted `walk` job caught a broken walk step on its first run (a Quench step racing the wall clock at
