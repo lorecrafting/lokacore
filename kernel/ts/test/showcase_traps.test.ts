@@ -128,6 +128,7 @@ test('traps 7: an undisarmed plate springs, holds, rearms on the hour and refres
   assert.equal(fact(x, 'plate_sprung'), true);
   // Ten minutes on (still sprung, before the hour), so a second application would move ends_at.
   x = wait(go(x, 'south').world, E + 600).world;
+  assert.equal(fact(x, 'plate_sprung'), true); // the setup must leave E + 600 before the hour
   const again = go(x, 'north');
   assert.ok(!again.lines.some((l) => l.startsWith('narration.poisoned')), again.lines.join());
   assert.deepEqual(poisoned(again.world), { generation: 1, ends_at: E + 7200 });
