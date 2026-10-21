@@ -7,7 +7,7 @@ import type {
   Key,
 } from '../../packages/game-view/session.ts';
 import type { Button, DetailLine } from './presenter.ts';
-import { commandOf, WORDS } from './buttons.ts';
+import { commandOf, rank, WORDS } from './buttons.ts';
 export { buttonsOf } from './buttons.ts';
 import { message, reason, SENTENCE } from './words.ts';
 import { things } from './item-pages.ts';
@@ -105,6 +105,8 @@ const OWN = [
   'sleep',
   'raise_attribute', // the Character page's own cards
 ];
+// Not a World verb line: another page's, control's or the Word block's own action.
+export const notVerb = (key: string) => OWN.includes(key) || key === 'scan' || WORDS.includes(key);
 
 export function group(all: Button[]) {
   const buttons = all.filter((b) => !WORDS.includes(b.action_key)); // the Word block's chips are apart
@@ -125,16 +127,13 @@ export function group(all: Button[]) {
     ),
     choice: buttons.filter((b) => b.action_key === 'choose' || b.action_key === 'close_choice'),
     place: buttons.filter(
-      (b) =>
-        !b.detail_id &&
-        (!aimed(b) || b.place) &&
-        !dir(b) &&
-        !OWN.includes(b.action_key) &&
-        b.action_key !== 'scan',
+      (b) => !b.detail_id && (!aimed(b) || b.place) && !dir(b) && !notVerb(b.action_key),
     ),
     word: all.filter((b) => WORDS.includes(b.action_key)),
     on: (id: string) =>
-      buttons.filter((b) => (b.detail_id ? b.detail_id === id : b.target_ids.includes(id))),
+      buttons
+        .filter((b) => (b.detail_id ? b.detail_id === id : b.target_ids.includes(id)))
+        .sort((a, b) => rank(a) - rank(b)), // stable: GameView order within a group
   };
 }
 export const plain = (s: string) => s.replace(/\[([^\]]*)\]\([^)]*\)/g, '$1');

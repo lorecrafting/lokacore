@@ -1,5 +1,6 @@
 // The book's page shell, the room page and their shared controls (the Contents sections:
-// sections.tsx; the thing page: Menu.tsx; the title's arriving focus: title.ts).
+// sections.tsx; the thing page: Menu.tsx; the room's action list: place.tsx; the title's arriving
+// focus: title.ts).
 // Each is only drawing; what a tap does is passed in by Book.tsx.
 import type { ReactNode } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
@@ -8,11 +9,12 @@ import { plain, why, type group, type Pool } from './model.ts';
 import type { Button, DetailLine } from './presenter.ts';
 import { note, prose, usePalette, type Palette } from './palette.ts';
 import { opacity, size, space, type } from './tokens.ts';
-import { ActionCard, VerbLine } from './actions.tsx';
+import { ActionCard } from './actions.tsx';
 import { Asides, AwayRecap, Here, LogLines } from './lines.tsx';
 import type { RecapLine } from './recap.ts';
 import { useTitleFocus } from './title.ts';
 import { LABEL } from './labels.ts';
+import { placeActions } from './place.tsx';
 export { useTitleFocus };
 
 type Say = (key: string) => string;
@@ -102,6 +104,7 @@ export function Control(p: {
 export function RoomPage(p: {
   view: GameView;
   text: Say;
+  label: Say; // the action-label resolver: refused place lines read the same word as offered ones
   log: DetailLine[];
   recap?: RecapLine[];
   g: Grouped;
@@ -113,7 +116,7 @@ export function RoomPage(p: {
 }) {
   const c = usePalette();
   const look = p.g.look;
-  const actions = placeActions(p.view, p.g, p.press); // one list, as the room's lines
+  const actions = placeActions(p.view, p.g, p.press, p.text, p.label); // one list, as the room's lines
   return (
     <Page
       title={p.text(p.view.place.title.key)}
@@ -178,19 +181,6 @@ const storylet = (view: GameView, g: Grouped, press: (b: Button) => void, text: 
     offer && !offer.available && <ActionCard label={text(offer.label)} reason={why(offer, text)} />
   );
 };
-
-// The place's own actions; a notice's actions stay on its notice page; the storylet has its card.
-const placeActions = (view: GameView, g: Grouped, press: (b: Button) => void) =>
-  g.place
-    .filter(
-      (b) =>
-        b.action_key !== view.storylet &&
-        ![
-          ...(view.notices ?? []),
-          ...(view.notice_boards ?? []).flatMap((board) => board.notices),
-        ].some((n) => b.target_ids.includes(n.id)),
-    )
-    .map((b) => <VerbLine key={`${b.label}:${b.target_ids.join(',')}`} b={b} press={press} />);
 
 // One shell for every page (BOOK-UI-COMPONENTS.md, Page): the title (fixed: the room's, outside
 // the scroll), the blocks, and the page foot.

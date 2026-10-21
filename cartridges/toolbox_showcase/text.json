@@ -979,7 +979,7 @@
   "npc.farmer.description_warm": "A broad woman in a mud-brown smock. She nods to you.",
   "npc.farmer.room": "The [farmer](farmer) leans on her fork.",
   "npc.farmer.short": "the farmer",
-  "npc.fence.description": "He buys what was lifted and nothing honest, and resells it at a markup.",
+  "npc.fence.description": "He buys what was lifted and nothing honest, and resells it at a markup. He never gives it back.",
   "npc.fence.room": "A thin [fence](fence) waits in the alley's mouth, one hand on his pack.",
   "npc.fence.short": "the fence",
   "npc.gil.description": "A gatekeeper leaning on his spear.",

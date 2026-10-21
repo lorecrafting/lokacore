@@ -11,6 +11,11 @@ type Say = (key: string) => string;
 type Press = Omit<Button, 'token'>;
 export const commandOf = (a: { command?: string; action_key: string }) => a.command ?? a.action_key;
 
+// Detail-page option groups (book-ui.md; pass-1 UR): act (unlisted), move, store or hand, ask.
+const RANK = ['take drop', 'put give', 'ask where use_service'];
+export const rank = (b: { command?: string; action_key: string }) =>
+  RANK.findIndex((g) => g.split(' ').includes(commandOf(b))); // unlisted: -1, first
+
 // The pending choice's available answers and its Close (06 §43: never a trap).
 function asked(v: GameView, label: Say): Press[] {
   const c = v.choice;
@@ -167,11 +172,14 @@ function wordButtons(v: GameView, text: Say): Press[] {
   ];
 }
 
+// A place offer: no typed input, and no target or a named one; refused ones draw as World notes.
+const placeOffer = (a: GameView['actions'][number]) =>
+  !a.input.length && (a.target.kind === 'none' || !!a.target_ids?.length);
+export const refusedPlace = (v: GameView) => v.actions.filter((a) => !a.available && placeOffer(a));
+
 // The place's own actions, then a scene's Continue.
 function placeButtons(v: GameView, button: ToButton) {
-  const place = v.actions.filter(
-    (a) => a.available && !a.input.length && (a.target.kind === 'none' || a.target_ids?.length),
-  );
+  const place = v.actions.filter((a) => a.available && placeOffer(a));
   const placed: Press[] = place.map((a) => ({
     ...button(a, ''),
     ...(a.target.kind === 'entity' && { place: true as const }),

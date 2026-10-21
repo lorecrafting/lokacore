@@ -27,7 +27,7 @@ description, projected interactibles, offered place actions, event log and, last
 [Word block](#word-bar), so a pressed verb's result line sits within a screen of the verb and the
 word rows never push it below the fold (pass-1 UA). A place action the GameView advertises
 unavailable draws in the verb list, after the available verb lines, in the Action card's
-unavailable form `label: reason` (`Cast the rod: not yet`; `cooldown` reads **not yet**), never
+unavailable form `label: reason` (`Fish in: not yet`; `cooldown` reads **not yet**), never
 dropped (pass-1 R2); a World page with only unavailable verbs draws no "Nothing to do here." Note.
 A closed or locked exit's door actions (Open, Unlock) draw on World as Action cards after the
 place verb lines, with the Map's labels; the Map keeps them too (pass-1 R4, owner 2026-10-21).
@@ -76,7 +76,7 @@ the `words.ts` outcome word ("Opened.") draws only for a receipt with no narrati
 results, rerenders, same-room NPC actions, Leave and section navigation do not clear it. Active
 save status/error UI remains accurate; NPC histories stay independently bounded. Map
 retains movement, adjacent sight and legal door actions, and draws no event log: the log lives
-on World only (pass-1 UF1). An exit's door state line ("West door: closed") draws only when no
+on World only (pass-1 UF1). An exit's door state line ("The hut door: open", the cartridge's door name capitalised) draws only when no
 exit card already carries that state as its reason; the door's action cards stay (pass-1 UF2).
 A closed or locked door's Open/Unlock cards draw on World as well, in the
 [World order](#world-and-status-entry) (pass-1 R4). The
@@ -485,12 +485,12 @@ first log line; the opponent block always shows, so the page is never blank. The
 leads with the opponent lines, each the name and its hp band phrase joined by " — " ("the
 raider — hurt", the cartridge's `band.<key>` words the status line uses; no number, the hp
 band stays on the locked status line; the opponent's band is a GameView field, engine slice
-loka-y6yg.49). Your own bleeding and condition lines draw nowhere on the Combat page: they stay
+loka-y6yg.49); the target suffix follows the name, before the dash ("the raider (your target) — hurt"). Your own bleeding and condition lines draw nowhere on the Combat page: they stay
 on the status line and Character, so a reader never takes your hunger for the raider's
 (pass-1 C2b, as loka-x6t.15). **Closure.** On
 every committed closure (opponent death, player death and inn return, successful Flee, any
 other end) the Combat page stays the shown page, as a one-reply conversation does: its opponent
-block without the target suffix (nothing is left to aim at), its log ending with the closing
+block of names only, without the band phrase or the target suffix (nothing is left to aim at), its log ending with the closing
 lines (every line of the closing receipt, whatever its key), no action cards, and one foot Control
 [**Back to World**](../BOOK-UI-COMPONENTS.md#component-catalogue) (the existing label; no
 new words). The status line stays locked as during the fight. The tap is local (no engine verb)
@@ -1123,7 +1123,7 @@ GameView `storylet` names the one place action the [storylet deck](mechanics.md#
 
 ## Skill tree details
 
-Skills without profession keep today's acquired lines. After the xp line and before the Raise cards, each profession in first-listed order is a SectionTitle, then its listed boxes in GameView order: acquired as body text "Whittling, level 2 — learned" (", level N" only when projected; no requirement: a qualified learned box has nothing left to meet) or, while its projected `qualified` is false, "Whittling, level 2 — learned, unqualified; <requirement>" (pass-1 H3, with the [C1 clause](#c1-teaching-and-defense-details)); an NPC's teach card for a learned skill is the GameView's unavailable action and draws in the Action card's unavailable form `label: reason`, never dropped (pass-1 R2); locked as a Note "Carving — locked; <requirement>"; any other unacquired box as a Note "Joinery — not learned; <requirement>" (the same Note). The Book draws only listed skills: a hidden box and an empty profession draw nothing.
+Skills without a profession draw one line each: the label, then " — learned" with no requirement, or while its projected `qualified` is false " — learned, unqualified; <requirement>" (pass-1 H3). After the xp line and before the Raise cards, each profession in first-listed order is a SectionTitle, then its listed boxes in GameView order: acquired as body text "Whittling, level 2 — learned" (", level N" only when projected; no requirement: a qualified learned box has nothing left to meet) or, while its projected `qualified` is false, "Whittling, level 2 — learned, unqualified; <requirement>" (pass-1 H3, with the [C1 clause](#c1-teaching-and-defense-details)); an NPC's teach card for a learned skill is the GameView's unavailable action and draws in the Action card's unavailable form `label: reason`, never dropped (pass-1 R2); locked as a Note "Carving — locked; <requirement>"; any other unacquired box as a Note "Joinery — not learned; <requirement>" (the same Note). The Book draws only listed skills: a hidden box and an empty profession draw nothing.
 
 An NPC's lesson line reads `locked` in place of `not learned` while the skill's projected `locked` is true (proposed, pending designer approval, loka-kgd.108.11).
 

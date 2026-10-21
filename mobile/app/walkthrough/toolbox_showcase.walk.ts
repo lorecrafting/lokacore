@@ -124,7 +124,7 @@ const law = async (screen: Screen, { tap, take }: Steps) => {
   await tap('Hide');
   await moves(screen, 'east', 'north');
   await tap(/^The merchant is here/);
-  await take(/^The merchant's purse, open/, /^Take the merchant's purse/);
+  await take(/^The merchant's purse, open/, /^Lift$/);
   await moves(screen, 'south', 'west');
   await npc(/^The fence/, /^Sell the merchant's purse/);
   await moves(screen, 'east', 'east');

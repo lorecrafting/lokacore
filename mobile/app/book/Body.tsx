@@ -113,9 +113,7 @@ function sectionPage(p: BodyProps, page: Page) {
       />
     );
   if (page.kind === 'map')
-    return (
-      <MapPage view={view} text={text} g={p.g} press={p.press} log={p.screen.log} world={p.world} />
-    );
+    return <MapPage view={view} text={text} g={p.g} press={p.press} world={p.world} />;
   if (page.kind === 'settings') return <SettingsPage startOver={p.startOver} world={p.world} />;
   if (page.kind === 'journal') return <JournalPage {...p.screen} world={p.world} press={p.press} />;
   return (
@@ -136,6 +134,7 @@ function WorldPage(p: BodyProps) {
     <RoomPage
       view={view}
       text={text}
+      label={p.screen.label}
       log={log}
       recap={p.screen.recap}
       g={p.g}

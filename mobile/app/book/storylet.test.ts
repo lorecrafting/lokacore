@@ -50,6 +50,8 @@ test('an unavailable storylet is the label: reason note, not a pressable', async
     action_key: 'beckons',
     label: 'A stranger beckons',
     available: false,
+    target: { kind: 'none' },
+    input: [],
     reason: { code: 'precondition_failed', message: { key: 'Not at night.' } },
   };
   const drawn = await blocks(room([listed], [verb]));
