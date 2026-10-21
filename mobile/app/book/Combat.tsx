@@ -1,6 +1,6 @@
 // A full reading page with the offered actions following its combat history.
 import { Text, View } from 'react-native';
-import { bleedingLine, conditionLine, type group } from './model.ts';
+import { bandPhrase, type group } from './model.ts';
 import { ActionCard, Cards } from './actions.tsx';
 import { LogLines } from './lines.tsx';
 import { LABEL } from './labels.ts';
@@ -11,32 +11,20 @@ import type { presenter, Button } from './presenter.ts';
 type Screen = ReturnType<ReturnType<typeof presenter>['screen']>;
 type Encounter = NonNullable<Screen['ended']>;
 
-// The fight's state: its name, your bleeding and the opponents, one block of touching lines
-// (a run of one kind, like the mock's entity lines; BOOK-UI-COMPONENTS.md, Page).
+// The opponent lines, "name — band", one block of touching lines (a run of one kind, like the
+// mock's entity lines; BOOK-UI-COMPONENTS.md, Page). Your own bleeding and conditions stay on the
+// status line and Character (book-ui.md, Live combat response).
 function Fight({ view, text, combat }: Pick<Screen, 'view' | 'text'> & { combat: Encounter }) {
   const c = usePalette();
   return (
     <View>
-      <Text style={prose(c)}>{text(combat.name)}</Text>
-      {view.bleeding && (
-        <Text style={prose(c)}>{bleedingLine(view.bleeding, view.time, text)}</Text>
-      )}
-      {view.conditions?.map((x, i) => {
-        const line = conditionLine(x, view.time, text);
-        return (
-          <Text
-            key={`${x.label}-${i}`}
-            style={prose(c)}
-            accessibilityLabel={line.replaceAll(' · ', ', ')}
-          >
-            {line}
-          </Text>
-        );
-      })}
-      {combat.active_opponents?.map((opponent) => (
+      {(combat.active_opponents ?? [{ ...combat, id: combat.opponent_id }]).map((opponent) => (
         <Text key={opponent.id} style={prose(c)}>
           {text(opponent.name)}
-          {opponent.id === combat.opponent_id && view.combat ? ' (your target)' : ''}
+          {opponent.band && ` — ${bandPhrase({ band: opponent.band }, text)}`}
+          {combat.active_opponents && opponent.id === combat.opponent_id && view.combat
+            ? ' (your target)'
+            : ''}
         </Text>
       ))}
     </View>

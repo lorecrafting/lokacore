@@ -193,7 +193,7 @@ const MOON: Record<string, string> = {
 };
 export const sky = (solar?: string, lunar?: string) =>
   solar === 'night' ? (MOON[lunar!] ?? '☾') : SUN[solar!];
-export const bandPhrase = (r: Pool, text: (key: string) => string | undefined) => {
+export const bandPhrase = (r: Pick<Pool, 'band'>, text: (key: string) => string | undefined) => {
   const key = `band.${r.band}`;
   const phrase = text(key);
   return phrase && phrase !== key ? phrase : r.band.replaceAll('_', ' ');
