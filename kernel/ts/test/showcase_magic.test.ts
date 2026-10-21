@@ -251,7 +251,7 @@ const cues = (w: World) => view(go(w, 'up').world).cues;
 const SMOKE = [{ sense: 'smell', text: 'cue.smoke', direction: 'down' }];
 
 // Breaks: the gate opens unoiled, the use pair is not offered or takes the wrong tool or target,
-// the oiling spends the oil, oil on the lantern oils the gate (M8a), Open fails on the oiled gate,
+// the oiling spends the oil, oil on another metal thing opens the gate (M8a), Open fails on the oiled gate,
 // the lit crypt hides the wight, or the unlit crypt reads lit (lists the wight, misses
 // dark_description).
 test('magic 6: the oiled winch opens the crypt; the lantern shows the wight', () => {
@@ -266,12 +266,13 @@ test('magic 6: the oiled winch opens the crypt; the lantern shows the wight', ()
     ['actions.oil_winch', [id(w, 'item', 'gate_winch'), id(w, 'item', 'oilcan')], true],
   );
   assert.equal(why(use(w, 'oil_winch', 'gate_winch', 'loft_bucket')), 'invalid_target');
-  assert.equal(why(use(w, 'oil_winch', 'lantern', 'oilcan')), 'invalid_state');
+  const lamp = use(w, 'oil_winch', 'lantern', 'oilcan').world; // metal, so it oils, but only the winch's row opens the gate
+  assert.equal(refused(lamp, { type: 'open', direction: 'down' }), 'invalid_state');
   const oil = w.state.liquids?.[id(w, 'item', 'oilcan')];
   const r = use(w, 'oil_winch', 'gate_winch', 'oilcan');
   assert.deepEqual(r.lines, ['narration.oil_winch']);
   w = r.world;
-  assert.equal(fact(w, 'gate_oiled'), true);
+  assert.equal(fact(w, 'gate_oiled', id(w, 'item', 'gate_winch')), true);
   assert.deepEqual(w.state.liquids?.[id(w, 'item', 'oilcan')], oil);
   w = play(w, { type: 'open', direction: 'down' }).world;
   const dark = go(

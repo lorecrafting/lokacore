@@ -39,11 +39,11 @@ loop gathers ash at a hearth. No room here is `exposed`; nothing reads the sky.
   `hushed` (120, `blocks ["say", "shout", "cast"]`), `wet` (600, tick 300, mv, `modifies str -1`),
   `shocked` (120, tick 60, hp -1), `stunned` (120, tick 60, hp -3), `warm` (600, tick 300, mv,
   `modifies str +1`) (`elements_sampler/statuses`). `burning` and `spent` exist (the smithy).
-- Facts: `lux_known`, `flamma_known`, `ward_taught`, `gate_oiled` (player bool);
+- Facts: `lux_known`, `flamma_known`, `ward_taught`, `gate_oiled` (player bool, per_subject: a pair fact on `gate_winch`);
   `topic_flamma_known` for the grimoire (topics@1). Quest `errand` (`spells_sampler/quests`):
   objective `fact_compare flamma_known true`, outcome `done`.
 - `world.levelling.kills`: `wight` 10, `attic_wight` 10; no entry for the golems (0).
-- Items: `lantern` (no tags; `fuel {kind: source, capacity: 36000, initial: 36000, rate: 1}`,
+- Items: `lantern` (tag `metal`; `fuel {kind: source, capacity: 36000, initial: 36000, rate: 1}`,
   supply `lamp_oil`, which the hedge-wizard holds dry: it burns once per world, ten game hours; `spell_effects_sampler/items/orb.json`), `loft_bucket`
   (`liquid_holding`, water 4), `oilcan` (`liquid_holding`, oil 2), `gate_winch` (tag `metal`, lying
   on the stair), `bier` (tags `wooden`, `burnable`, in the crypt), `rain_bucket`, `spark_jar`,
@@ -57,7 +57,7 @@ loop gathers ash at a hearth. No room here is `exposed`; nothing reads the sky.
 |---|---|---|
 | `loft` (sign) | down `crossroads_inn`, north `reading_room`, east `crypt_stair`, west `golem_yard`, up `loft_attic` | detail `sign_magic`; **the hedge-wizard**; detail `hearth`; `lantern`; `loft_bucket`; `oilcan` |
 | `reading_room` | south `loft` | `grimoire`; reaction `hush` on entry (`ward_sampler/reactions/blessing.json`) |
-| `crypt_stair` | west `loft`, down `crypt` through barrier `crypt_gate` (`initial: closed`, `opens_when fact_compare gate_oiled true`, tags `metal`) | `gate_winch`; the smoke cue from the crypt reaches here (range 1) |
+| `crypt_stair` | west `loft`, down `crypt` through barrier `crypt_gate` (`initial: closed`, `opens_when fact_compare {fact: gate_oiled, item: gate_winch} true`, tags `metal`) | `gate_winch`; the smoke cue from the crypt reaches here (range 1) |
 | `crypt` | up `crypt_stair` through `crypt_gate` | `dark_description`; **the wight**; `bier` |
 | `golem_yard` | east `loft` | **the golem**; `rain_bucket`; `spark_jar`; `yard_torch` |
 | `loft_attic` (sandbox) | down `loft` | detail `attic_hearth`; `attic_lantern`; a second bucket, jar and torch; **the attic wight** (lit room, no gate); **a second golem**; an `attic_bier` |
@@ -99,7 +99,7 @@ loop gathers ash at a hearth. No room here is `exposed`; nothing reads the sky.
   `fire_spreads` and `quench` (tool `{tag: liquid_holding, liquid: water}` on a burning item) serve
   the crypt unchanged.
 - Use pair `oil_winch`: `target {kind: use, tool: {liquid: oil}}`, policy `has_tag {subject:
-  target, tag: metal}` (only `gate_winch` is metal in the Loft: the lanterns carry no tag), success `fact.assign gate_oiled true` (`use_sampler/recipes/oil.json`).
+  target, tag: metal}`, success `fact.assign gate_oiled true` at the recipe's target (a pair fact, so oiling the lantern or the axe writes their row and the gate reads only the winch's) (`use_sampler/recipes/oil.json`).
 
 ## Guided loop and expected outcomes
 
@@ -113,9 +113,9 @@ fight (rounds at +150, +300).
 | 3 | North into the reading room; `cast lux` (ash gathered first); `say` anything; wait 120; read the grimoire. | `hushed` applied on entry (120, the Conditions line); the cast and the say: `invalid_state`, the chips unavailable; after 120 the chips return. The grimoire: `topic_flamma_known`, `flamma_known` true; "flamma, cast" appears but is unavailable (`invalid_state`) until the wight is present (ma 1 when cast); the errand resolves `done` in the same proposal. | command blocks x spells; readables x learned gate |
 | 4 | Back in the loft: the Word bar; Raise. | `ward_taught` true, experience 30, level 2, one `level_up` line, one point; "ward, cast" reads unavailable with reason `reason.ward` (cha 6). Raise `cha`: 7; the chip is available. The loop accepts before reading on purpose: whether a quest whose objective already holds resolves at activation is unpinned anywhere, so no step relies on it. Read before accepting: the errand resolves on the next loft climb, not in the read (an accepted engine limit). | quests x levelling x spell gates |
 | 5 | `cast ward`. | `warded` on the caster (600), its applied line; ma 2; events `status_applied`, `action_completed` (no `fact_changed`); a second cast at once: `action_completed` only (a refresh lands nothing). | spell effects x statuses |
-| 6 | East; down. `oil_winch` with the oilcan on the winch; Open; down with the lit lantern. | The move down: `exit_closed`. The use card "Oil the winch" lists the pair; performed: `gate_oiled` true, the oilcan's oil unchanged (`loka-kgd.78`); Open `opened`; the oilcan on the bier or the lantern (not metal): `invalid_state`; the bucket as a tool on the winch: `invalid_target`. In the crypt the lit room lists the wight; the branch without the lantern lit reads the `dark_description` and lists no one. | use-on x barriers x light |
+| 6 | East; down. `oil_winch` with the oilcan on the winch; Open; down with the lit lantern. | The move down: `exit_closed`. The use card "Oil the winch" lists the pair; performed: `gate_oiled` true, the oilcan's oil unchanged (`loka-kgd.78`); Open `opened`; the oilcan on the lantern (metal) oils it but Open stays `invalid_state`; on the bier (not metal): `invalid_state`; the bucket as a tool on the winch: `invalid_target`. In the crypt the lit room lists the wight; the branch without the lantern lit reads the `dark_description` and lists no one. | use-on x barriers x light |
 | 7 | `cast flamma`; one round; Flee; down; `cast flamma`. | The first cast: wight 4 (8 fire at 50), the fight opens; `flamma_sparks` sets the `bier` burning (its applied line), `cues` in `crypt_stair` lists the smoke. Round 1: the wight's blow is 1 under `warded` (2 at 50; the player's unarmed blow lands nothing). Flee: one candidate (up), no RNG. Down again: the wight is passive (no disposition). The second cast: wight 0, `entity_died` with the caster's body as killer, the spell's line then the kill line (`combat.npc_died`), experience 40 (level 2 still: 100 not reached), the corpse; a third cast: `invalid_state`. | spell damage x resistances x death credit; spells x fire x cues |
-| 8 | Quench: the loft bucket on the burning bier. | The use card "Quench the bier"; the fire ends, the smoke cue gone, the bucket's water unchanged; a second quench `invalid_state`. Left alone instead: the bier's `burning` runs 180 and `fire_spreads` finds no other burnable (the lantern has no `burnable` tag). | use-on x fire |
+| 8 | Quench: the loft bucket on the burning bier. | The use card "Quench the bier"; the fire ends, the smoke cue gone, the bucket's water unchanged; a second quench `invalid_state`. Left alone instead: the bier's `burning` runs 180 and `fire_spreads` finds no other burnable (the lantern is metal: the build tags it). | use-on x fire |
 | 9 | West to the golem yard: drop the rain bucket, then the jar; wait 60. Take the bucket back and drop it; drop the torch; drop the jar. | After bucket and jar: applied lines "golem shocked", "golem stunned"; `wet` false, `shocked` false, `stunned` true (SR1 read the subject's `wet`, SR2 fired on the landing, SR3 cured both); golem hp 17 at +60. Fresh branch, jar alone: "golem shocked" only, hp 19 at +60. Bucket then torch: `warm` true, `wet` false; then the jar: `shocked` true, `stunned` false. | status readers x reactions x NPC statuses |
 
 Sandbox `loft_attic`: a second hearth, lantern and wight under a lit roof (no gate, no dark), a

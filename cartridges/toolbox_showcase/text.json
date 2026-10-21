@@ -297,7 +297,7 @@
   "dialogue.wat_letter.deliver": "Give Wat the letter",
   "dialogue.wat_letter.prompt": "Wat eyes the letter in your hand.",
   "dialogue.wizard.leave": "Leave",
-  "dialogue.wizard_awaiting.prompt": "\"The second word is in the book north. Go and read it.\"",
+  "dialogue.wizard_awaiting.prompt": "\"Bring me word once you have read the book north.\"",
   "dialogue.wizard_done.prompt": "\"You have all I can give. Go carefully.\"",
   "dialogue.wizard_errand.accept": "Fetch the second word",
   "dialogue.wizard_errand.prompt": "\"The second word is in the book north. Read it, and I will give you the third.\"",

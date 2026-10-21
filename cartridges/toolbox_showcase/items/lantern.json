@@ -10,6 +10,9 @@
     "room": "loft"
   },
   "mass_grams": 800,
+  "tags": [
+    "metal"
+  ],
   "fuel": {
     "kind": "source",
     "capacity": 36000,
