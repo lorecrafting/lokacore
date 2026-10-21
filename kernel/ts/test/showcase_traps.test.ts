@@ -336,23 +336,26 @@ test('traps 8 control: without the shout the pack stands; two rounds leave 8 and
   assert.deepEqual(goblinsIn(r2.world, 'chief_den'), [a, b]);
 });
 
-// Breaks: a pack's flight_below_percent drops (a calm goblin under a quarter of its hp stands).
-test('traps 8 wounded: a calm goblin struck to 1 of 6 hp flees, in each pack', () => {
+// Breaks: a pack's flight_below_percent drops (a calm goblin under a quarter of its hp stands)
+// or rises (a calm goblin at a third of its hp flees).
+test('traps 8 wounded: a calm goblin struck to 1 of 6 hp flees, to 2 of 6 stands, in each pack', () => {
   for (const [x, home] of [
     [den, 'chief_den'],
     [go(stair, 'down').world, 'sapper_cellar'],
   ] as const) {
     const [a, b] = goblinsIn(x, home);
     const at = key({ kind: 'resource', resource: resourceRef(x, 'hp'), entity_id: a as never });
-    const hurt = {
+    const hurt = (value: number) => ({
       ...x,
       state: {
         ...x.state,
-        resources: { ...x.state.resources, [at]: { value: 3, at: x.state.clock } },
+        resources: { ...x.state.resources, [at]: { value, at: x.state.clock } },
       },
-    };
-    assert.deepEqual([hp(hurt, a!), statuses(hurt, a!)], [3, []]);
-    assert.deepEqual(goblinsIn(flight(hurt, a!).r1.world, home), [b], home);
+    });
+    assert.deepEqual([hp(hurt(3), a!), statuses(hurt(3), a!)], [3, []]);
+    assert.deepEqual(goblinsIn(flight(hurt(3), a!).r1.world, home), [b], home);
+    const stands = flight(hurt(4), a!).r1.world;
+    assert.deepEqual([hp(stands, a!), goblinsIn(stands, home)], [2, [a, b]], home);
   }
 });
 
@@ -380,7 +383,8 @@ test('traps 9: the chief falls to one blow; its fall frightens the pack, which t
 });
 
 // Breaks: the cellar's plate does not spring on entry, a re-entry while sprung or a disarmed
-// cellar plate springs again (cellar_springs's guards), search or disarm is offered out of turn, the search or disarm recipe is missing or
+// cellar plate springs again (cellar_springs's guards), a failed disarm on the rearmed plate does
+// not bite (cellar_bites), search or disarm is offered out of turn, the search or disarm recipe is missing or
 // keyed to the passage plate, or the cellar's skin or pack is missing.
 test('traps sandbox: the cellar plate springs, is found and disarmed, then holds', () => {
   let x = fresh(WORLD);
@@ -400,7 +404,12 @@ test('traps sandbox: the cellar plate springs, is found and disarmed, then holds
   assert.equal(refused(x, { type: 'perform', action: 'search_cellar' }), 'invalid_state');
   assert.deepEqual([fact(x, 'cellar_found'), fact(x, 'plate_found')], [true, undefined]);
   assert.equal(outcome(x, 'disarm_cellar').out, 'failure');
-  const r = outcome(outcome(x, 'disarm_cellar').world, 'disarm_cellar');
+  // On the hour the plate rearms under the player; a failed disarm then bites (cellar_bites).
+  x = wait(x, Math.ceil((x.state.clock + 1) / HOUR) * HOUR).world;
+  const miss = outcome(x, 'disarm_cellar');
+  assert.deepEqual([fact(x, 'cellar_sprung'), miss.out], [false, 'failure']);
+  assert.notDeepEqual(poisoned(miss.world), poisoned(x), 'the unsprung miss bites');
+  const r = outcome(miss.world, 'disarm_cellar');
   assert.equal(r.out, 'success');
   x = r.world;
   assert.deepEqual([fact(x, 'cellar_disarmed'), fact(x, 'plate_disarmed')], [true, undefined]);

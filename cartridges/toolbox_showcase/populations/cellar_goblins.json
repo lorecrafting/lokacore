@@ -19,8 +19,7 @@
       "helper_joined": "combat.goblin_joined",
       "enemy_fled": {
         "down": "combat.goblin_fled_down",
-        "up": "combat.goblin_fled_up",
-        "west": "combat.goblin_fled_west"
+        "up": "combat.goblin_fled_up"
       },
       "primary_changed": "combat.goblin_targeted",
       "pack_withdrew": "combat.goblins_gone"

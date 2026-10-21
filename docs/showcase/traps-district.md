@@ -75,8 +75,9 @@ equals 3, wheel_2 equals 1, wheel_3 equals 2)` (`puzzles_sampler/barriers`).
 
 - Trigger `plate_springs`: `on {event: entity_entered_room, room: plate_passage}`, `when
   all(plate_sprung false, plate_disarmed false)`, `apply [status.apply poisoned, fact.assign
-  plate_sprung true]` (`traps_sampler/reactions/plate.json`; lands on the entrant, an NPC too: a
-  goblin fleeing south onto an armed plate is poisoned, [row 12](../system/mechanics.md#traps-trigger-disarm-and-reset-toolbox-row-12)).
+  plate_sprung true]` (`traps_sampler/reactions/plate.json`; lands on the entrant, an NPC too, but
+  a goblin fleeing south onto an armed plate is not poisoned (known limit: pack flight moves it by
+  `entity.transfer`, which emits no `entity_entered_room`), [row 12](../system/mechanics.md#traps-trigger-disarm-and-reset-toolbox-row-12)).
 - Reset `plate_rearms`: `on {event: clock_hour}`, `when plate_sprung true`, `apply fact.assign
   plate_sprung false` (`rearm.json`; the showcase already emits `clock_hour`).
 - Failed disarm `plate_bites`: `on {event: check_failed, check: disarm_plate}`, `when plate_sprung
