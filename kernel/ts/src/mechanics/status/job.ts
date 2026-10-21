@@ -7,6 +7,7 @@ import type {
   JobId,
   StatusDefinition,
   StatusRow,
+  Text,
   TextKey,
 } from '../../contracts.gen.ts';
 import { add } from '../../foundation/int.ts';
@@ -68,6 +69,8 @@ export function runStatus(
     return fatalTick(visit, command, ops, events, held, status, mint, say(spec.narration.tick));
   if (expired) {
     const ended = [happened(visit, command, mint, 'status_expired', body, status)];
+    // ponytail: an item reuses the player's own expired line (third person for burning, the only
+    // observed item status today); add an item-specific key when a second-person one reaches items.
     const lines = player || watched(visit, body, spec) ? [{ key: spec.narration.expired }] : [];
     return accepted(world, 'job_ran', ops, ended, lines);
   }
@@ -88,6 +91,17 @@ const watched = (w: World, item: EntityId, spec: StatusDefinition) =>
     ([actor, body]) =>
       w.state.containers[item] === w.state.containers[body] && visible(w, actor, item),
   );
+
+/** loka-y6yg.48: items going out in one advance tell each expired line once per receipt (a woodpile is one line). */
+export const unsaid = (
+  w: World,
+  job_id: JobId,
+  receipt: readonly Text[],
+  lines: readonly Text[] = [],
+) =>
+  lines.length && w.entities[statusHolder(w, job_id)?.body ?? '']?.kind === 'item'
+    ? lines.filter((l) => !receipt.some((t) => t.key === l.key))
+    : lines;
 
 /**
  * A due tick's change, saturated at the pool bounds (the op itself stays exact), and whether it
