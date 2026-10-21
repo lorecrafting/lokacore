@@ -110,6 +110,7 @@ function managedGame(
   const terminal = (reply: Reply) => reply.kind !== 'pending' && reply.kind !== 'catching_up';
   let attempting = false;
   const attempt = (): Reply => {
+    const outer = attempting; // a listener may re-enter attempt while this one drains
     attempting = true;
     try {
       const reply = attemptStory(story, held.invocation);
@@ -117,7 +118,7 @@ function managedGame(
       if (terminal(reply)) held.invocation = undefined;
       return reply;
     } finally {
-      attempting = false;
+      attempting = outer;
     }
   };
   const pending = () => held.invocation;
