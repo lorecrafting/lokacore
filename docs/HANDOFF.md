@@ -62,9 +62,7 @@ Pass-1 playtest and fix batch (session a02501b4, 2026-10-21):
   death receipts (record + 2nd opinion), .47 known_npcs living only, x6t.74 UI1 (World order, log lines, speech echo).
 - IN FLIGHT at writing (~18:25 UTC; check each Beads id's last notes):
   - .46 named refusals: MERGED into the batch at 919f4dbc.
-  - .42 Loft content: re-check APPROVED at 683c4490, but hosted CI failed loader_floors in both kernels; fix round 2
-    head 2db2ceae0e330aa6b1ef0dddea200dae93f86d2f only adds a loader_floors strip (PM checked the diff; no re-review).
-    Merge when hosted CI on 2db2ceae is green (pass the sha as the review arg; recompile the hash fixture on conflict).
+  - .42 Loft content: MERGED into the batch at 58f72a68.
   - .43 law + hub content: handed back at 10c1eabc (C2a and E10c not done, see notes); a fresh Opus reviewer is
     running (its verdict arrives as a notification; if lost, spawn a fresh one from the Beads notes). .48 item status
     lines building. Each then: fresh Opus reviewer
