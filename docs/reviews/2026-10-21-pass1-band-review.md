@@ -73,3 +73,24 @@ Holds: 1, 2, 3 and 5. Item 4 holds in the code, but no test pins the per-member 
   - per-member visibility read from the primary: green (finding 1).
 - Schema: `band` on the opponent and on each member is `$ref action.schema.json#/$defs/Key`. The member keeps `required: [id, name]` and `additionalProperties: false`. `contracts.gen.ts` matches. Elixir reads the schema at compile time (no generated twin).
 - No file under the save, delta or cartridge schemas changed.
+
+## Second opinion, re-check round 1
+
+- Same second reviewer, 2026-10-21. Re-checked head `1b4c2e6546df7d79e484da6c92fec63fc2568197`, fix commits `2b8d4091e`, `0e21fed90` and `1b4c2e654` only. The batch merge `0b9e464a7` was not reviewed.
+
+**Verdict: APPROVE** (both second-opinion items closed; no new finding).
+
+### Dispositions
+
+1. **Blocker 1, per-member gate untested: fixed.** `kernel/ts/test/c4_pack.test.ts` "a hidden or dead pack member shows no band while the seen primary keeps its own" gives member h1 a `hidden` status. It then expects h1's band to be absent and the primary h2's band to be the literal `ready`. Mutant "member visibility read from the primary" (`kernel/ts/src/view/combat.ts:33`): red.
+2. **Question 2, dead member on the roster: fixed.** `kernel/ts/src/view/combat.ts:34` now also requires `living(world, id)`. The same test sets h2's hp to 0, asserts that h2 is still in `active_ids`, and expects no band for it. Mutant "`living` check dropped": red.
+   - `living` runs only after `visible` and before `bandOf`. It adds no throw that `bandOf` did not already have, because an attacking NPC must have hp (loader).
+   - The only caller is `gameView` (`kernel/ts/src/view/view.ts:92`).
+3. **Schema and protocol text.** Only the two `band` descriptions in `protocol/gameview.schema.json` changed ("unseen or dead"), and `contracts.gen.ts` was regenerated to match. No validation keyword changed, so no fixture is needed. The `docs/system/protocol.md` paragraph matches the code. Its band-rule cite now names `bandOf`, `kernel/ts/src/view/resources.ts:47`.
+4. The name assertions in `kernel/ts/test/combat_band.test.ts:36` and `kernel/ts/test/c4_pack.test.ts:298` are now literal TextKeys.
+
+### Evidence
+
+- Focused tests (`combat_band`, `c4_pack`, `c4_pack_flight`, `combat_contracts`): exit 0.
+- `elixir bin/contracts.exs --check`: exit 0.
+- `bin/mutate.sh`: 2 of 2 red-narrow.
