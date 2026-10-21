@@ -745,7 +745,7 @@
   "narration.fell": "You slip on the drop and fall hard onto the stair below.",
   "narration.fish.bite": "You cast and wait.",
   "narration.fish.miss": "Nothing bites.",
-  "narration.flamma": "You speak flamma and a bolt of fire leaps from your hand.",
+  "narration.flamma": "You speak flamma and a bolt of fire leaps from your hand and burns the wight.",
   "narration.force_hall_cupboard.failure": "The door holds.",
   "narration.force_hall_cupboard.success": "The boards split and the door gives. The closet behind holds only dust; whatever the moot hid here went long ago.",
   "narration.force_iron_door.failure": "The iron door does not move.",

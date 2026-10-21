@@ -74,7 +74,7 @@ export function received(game: Game, reply: Reply, was: GameView, s: Logs, text:
   const line = repeated ? '' : taken || (routed?.[0] ?? replyLine(reply, text, now, fallback));
   if (line) lines.push(line);
   if (!repeated && routed?.[1]) s.combatLog.push(routed[1]);
-  s.log.push(...comings(s.projection.view, now, text));
+  s.log.push(...comings(s.projection.view, now, text, accepted?.events));
   conversationLines(s, was, now, accepted, attempt.detail, text);
   return line;
 }

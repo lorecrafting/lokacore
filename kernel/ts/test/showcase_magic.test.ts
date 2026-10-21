@@ -84,8 +84,8 @@ test('magic 1: up the ladder; the sign reads and the Word bar is empty', () => {
 
 // Breaks: the wizard opens the errand before teaching lux, the errand is not accepted, lux casts
 // without ash or spends the wrong pools, the gather adds no ash, the cast leaves the held lantern
-// unlit or writes an ignite line, a cast without the lantern is refused or keeps its pools, or
-// the climb back to the loft closes the errand before flamma is known.
+// unlit or writes no lit line (or one when nothing lit), a cast without the lantern is refused or
+// keeps its pools, or the climb back to the loft closes the errand before flamma is known.
 test('magic 2: taught lux; it needs ash; the cast spends 2 ma and 1 ash and lights the lantern', () => {
   const first = talk(w, 'hedge_wizard');
   assert.equal(first.opened, 'wizard_lux');
@@ -102,11 +102,12 @@ test('magic 2: taught lux; it needs ash; the cast spends 2 ma and 1 ash and ligh
   w = perform(w, 'gather_ash').world;
   assert.deepEqual(pools(w), { ma: 5, ash: 1 });
   const bare = cast(w, 'lux');
+  assert.deepEqual(bare.lines, ['narration.lux']); // nothing lit, no lit line
   assert.deepEqual(pools(bare.world), { ma: 3, ash: 0 });
   assert.equal(lit(bare.world), false);
   w = take(w, 'lantern');
   const r = cast(w, 'lux');
-  assert.deepEqual(r.lines, ['narration.lux']);
+  assert.deepEqual(r.lines, ['narration.lux', 'light.lantern_ignited']); // loka-y6yg.44 (M2b)
   w = r.world;
   assert.deepEqual(pools(w), { ma: 3, ash: 0 });
   assert.equal(lit(w), true);
@@ -279,8 +280,8 @@ test('magic 6: the oiled winch opens the crypt; the lantern shows the wight', ()
 
 // Breaks: flamma ignores the wight's fire resistance or its own damage, opens no fight, leaves the
 // bier unburnt or the stair without smoke, ward does not halve the physical blow, Flee goes
-// elsewhere, the returning wight re-engages, the kill credits no one or the wrong body, or a
-// third bolt casts on the corpse.
+// elsewhere, the returning wight re-engages, the kill credits no one or the wrong body or writes no
+// kill line, or a third bolt casts on the corpse.
 test('magic 7: flamma burns the wight to 4 and the bier; warded blow 1; the second bolt kills', () => {
   const r = act(w, { type: 'cast', word: 'flamma' });
   assert.deepEqual(r.lines, ['narration.flamma']);
@@ -301,6 +302,7 @@ test('magic 7: flamma burns the wight to 4 and the bier; warded blow 1; the seco
   w = go(w, 'down').world;
   assert.equal(view(w).combat, undefined);
   const kill = act(w, { type: 'cast', word: 'flamma' });
+  assert.deepEqual(kill.lines, ['narration.flamma', 'combat.npc_died']); // one kill line (M3)
   w = kill.world;
   const died =
     kill.decision.kind === 'accepted'
