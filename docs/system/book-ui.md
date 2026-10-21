@@ -482,10 +482,10 @@ Combat takes precedence over ordinary navigation until the encounter closes. **O
 receipt that opens an encounter (a move's or Sleep's `engage`, Attack, a cast's fight-back)
 routes all of its narration to the combat log, so the page opens with the engage line as its
 first log line; the opponent block always shows, so the page is never blank. The opponent block
-leads with the opponent lines, each the name and its hp band phrase joined by " — "; the target suffix follows the name, before the dash ("the raider (your target) — hurt") ("the
+leads with the opponent lines, each the name and its hp band phrase joined by " — " ("the
 raider — hurt", the cartridge's `band.<key>` words the status line uses; no number, the hp
 band stays on the locked status line; the opponent's band is a GameView field, engine slice
-loka-y6yg.49). Your own bleeding and condition lines draw nowhere on the Combat page: they stay
+loka-y6yg.49); the target suffix follows the name, before the dash ("the raider (your target) — hurt"). Your own bleeding and condition lines draw nowhere on the Combat page: they stay
 on the status line and Character, so a reader never takes your hunger for the raider's
 (pass-1 C2b, as loka-x6t.15). **Closure.** On
 every committed closure (opponent death, player death and inn return, successful Flee, any
