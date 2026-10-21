@@ -1,4 +1,4 @@
-// size: allow 566, the Undercroft walk (steps 1 to 10) and its branches continue one world and share its helpers
+// size: allow 585, the Undercroft walk (steps 1 to 10) and its branches continue one world and share its helpers
 // The showcase economy and law district walked step by step (docs/showcase/economy-law-district.md,
 // guided loop steps 1 to 10). Each numbered test continues the world the one before it left; a
 // branch starts from a saved step. Fresh world at 07:00 (25200), pennies 10.
@@ -256,7 +256,10 @@ test('economy 6: hide in the alley, lift the merchant purse unseen', () => {
   assert.deepEqual(labels(w), ['condition.hidden']);
   const purse_ = id(w, 'item', 'merchant_purse');
   // Breaks: alertness 2 not piercing stealth 1 (the chandler is why the plan sets her to 1).
-  assert.deepEqual(lift(alert(w, 'chandler', 2), 'merchant_purse').lines, ['theft.seen']);
+  assert.deepEqual(lift(alert(w, 'chandler', 2), 'merchant_purse').lines, [
+    'theft.seen',
+    'narration.wanted.applied',
+  ]);
   const t = lift(w, 'merchant_purse');
   assert.deepEqual(t.lines, ['theft.unseen']);
   assert.deepEqual(kinds(t), ['item_acquired', 'fact_changed']);
@@ -320,7 +323,8 @@ let jail: World; // step 9's arrest: in the cell, 2 pennies, wanted
 
 // Breaks: the seen lift's line or events, the reaction setting wanted, the guard's arrest (an
 // encounter instead, or none, or one fired at the lift itself), the charge shutting the door, the
-// broke dialogue's gate or its work-off clearing wanted or paying a penny, or the door not opening.
+// broke dialogue's gate or its work-off clearing wanted or paying a penny, the door not opening, or
+// the wanted status (E1) not applied with the fact, not cured with it, or not applied again.
 test('economy 9: from step 5, a seen lift; the guard arrests on the next entry; broke, work it off', () => {
   let s = five;
   assert.equal(
@@ -328,10 +332,11 @@ test('economy 9: from step 5, a seen lift; the guard arrests on the next entry; 
     'unsupported_capability',
   );
   const t = lift(s, 'merchant_purse');
-  assert.deepEqual(t.lines, ['theft.seen']);
-  assert.deepEqual(kinds(t).slice(-2), ['custom_event', 'fact_changed']);
+  assert.deepEqual(t.lines, ['theft.seen', 'narration.wanted.applied']);
+  assert.deepEqual(kinds(t).slice(-3), ['custom_event', 'fact_changed', 'status_applied']);
   s = t.world;
   assert.equal(fact(s, 'wanted'), true);
+  assert.deepEqual(labels(s), ['condition.wanted']);
   assert.equal(where(s, s.body), room(s, 'market_row')); // seen in his room: no arrest yet
   const guard = npc(s, 'guard');
   assert.equal(describeEntity(s, s.character, guard, 'room_line'), 'npc.guard.room_wanted');
@@ -364,12 +369,18 @@ test('economy 9: from step 5, a seen lift; the guard arrests on the next entry; 
   assert.deepEqual(worked.lines, ['narration.jailer.work_off']);
   s = worked.world;
   assert.deepEqual([pennies(s), fact(s, 'wanted'), purse(s, 'jailer')], [2, false, 0]);
+  assert.deepEqual(labels(s), []);
   const market = go(play(s, { type: 'open', direction: 'west' }).world, 'west');
   assert.ok(!market.lines.includes('npc.guard.arrest'));
   s = market.world;
   assert.equal(where(s, s.body), room(s, 'market_row'));
   assert.equal(describeEntity(s, s.character, guard, 'room_line'), 'npc.guard.room');
   valid(s);
+  const second = lift(s, 'beeswax_candle'); // a new crime marks the face again
+  assert.deepEqual(
+    [second.lines, labels(second.world)],
+    [['theft.seen', 'narration.wanted.applied'], ['condition.wanted']],
+  );
   const re = go(walk(forge(s, 'wanted', true), 'south'), 'north').world;
   assert.deepEqual([where(re, re.body), shut(re, 'west')], [room(re, 'cell'), 'closed']); // the open door shut again
 });
@@ -384,6 +395,7 @@ test('economy 9 boundary: with exactly the 3-penny fine the jailer only takes pa
   ]);
   const s = choose(talked.world, 'pay').world;
   assert.deepEqual([pennies(s), fact(s, 'wanted'), purse(s, 'jailer')], [0, false, 3]);
+  assert.deepEqual(labels(s), []);
   assert.equal(
     where(go(play(s, { type: 'open', direction: 'west' }).world, 'west').world, s.body),
     room(s, 'market_row'),
@@ -403,6 +415,7 @@ test('economy 9 escape: force the grate, leave by the drain still wanted; the gu
   // The counting house's fine clears it too (clerk A held step 2's fee).
   const fined = choose(talk(coin(s, 3), 'clerk_a').world, 'pay').world;
   assert.deepEqual([pennies(fined), fact(fined, 'wanted'), purse(fined, 'clerk_a')], [0, false, 4]);
+  assert.deepEqual([labels(s), labels(fined)], [['condition.wanted'], []]);
   s = go(s, 'west').world;
   const again = go(s, 'north');
   assert.deepEqual(again.lines, ['npc.guard.arrest', 'trial.charge']);
@@ -424,7 +437,7 @@ test('economy 10: from step 7, hidden ends at hide + 3600; the beeswax lift is s
   const wax = id(r.world, 'item', 'beeswax_candle');
   let s = r.world;
   const t = lift(s, 'beeswax_candle');
-  assert.deepEqual(t.lines, ['theft.seen']);
+  assert.deepEqual(t.lines, ['theft.seen', 'narration.wanted.applied']);
   s = t.world;
   assert.deepEqual(
     [fact(s, 'wanted'), fact(s, 'stolen', wax), where(s, wax)],
@@ -441,7 +454,7 @@ test('economy 10: from step 7, hidden ends at hide + 3600; the beeswax lift is s
 test('economy yard theft: lift the yard purse hidden and seen; the fence pays out 6 once', () => {
   let y = walk(fresh(WORLD), 'down', 'down');
   const seen = lift(y, 'yard_purse');
-  assert.deepEqual(seen.lines, ['theft.seen']);
+  assert.deepEqual(seen.lines, ['theft.seen', 'narration.wanted.applied']);
   const back = go(go(seen.world, 'up').world, 'down').world; // wanted: the guard's twin engages
   const watchman = npc(back, 'watchman');
   assert.equal(engaged(back, back.body)?.row.npc_id, watchman);
@@ -458,6 +471,12 @@ test('economy yard theft: lift the yard purse hidden and seen; the fence pays ou
   assert.deepEqual(labels(y), ['condition.hidden']);
   const t = lift(y, 'yard_purse');
   assert.deepEqual([t.lines, fact(t.world, 'wanted')], [['theft.unseen'], undefined]);
+  const mark = (w: World, f: 'room_line' | 'description') =>
+    describeEntity(w, w.character, npc(w, 'mark'), f);
+  assert.deepEqual(
+    [mark(y, 'room_line'), mark(t.world, 'room_line'), mark(t.world, 'description')],
+    ['npc.mark.room', 'npc.mark.room_robbed', 'npc.mark.description_robbed'],
+  ); // E4: the robbed mark reads empty-belted
   y = walk(t.world, 'up', 'west');
   y = play(y, trade(y, 'sell', 'yard_purse', 3, 'fence')).world;
   y = walk(lift(walk(y, 'east', 'north'), 'merchant_purse').world, 'south', 'west');

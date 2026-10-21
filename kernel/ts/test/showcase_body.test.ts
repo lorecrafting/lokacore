@@ -10,6 +10,7 @@ import { gameView } from '../src/index.ts';
 import type { World } from '../src/runtime/decision.ts';
 import { describeEntity } from '../src/mechanics/description_variant/rule.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
+import { key } from '../src/foundation/compose.ts';
 import {
   attribute,
   DAY,
@@ -240,4 +241,27 @@ test('sandbox: the fold chills on a frost day; the Drover moves only under might
   assert.ok(perform(x, 'shove_drover').lines.includes('narration.shove_drover.failure'));
   x = play(take(x, 'fold_cask'), { type: 'drink', vessel_id: id(x, 'item', 'fold_cask') }).world;
   assert.ok(perform(x, 'shove_drover').lines.includes('narration.shove_drover.success'));
+});
+
+// Breaks (UK): a pool's normal cut back at 100 (mv 99 or a half-fed belly showing the warning
+// tone) or its warning cut at or above the normal one. Each row: [pool, value, tone], hand-checked
+// against resources.json (normal from 50%, warning from 25%).
+test('body bands: mv, hunger and thirst read normal from half, warning just below', () => {
+  const w = fresh(BODY);
+  const tone = (pool: string, value: number) => {
+    const at = key({ kind: 'resource', resource: resourceRef(w, pool), entity_id: w.body });
+    const resources = { ...w.state.resources, [at]: { ...w.state.resources![at]!, value } };
+    const v = gameView({ ...w, state: { ...w.state, resources } });
+    return v.resources!.find((r) => r.resource.key === pool)!.tone;
+  };
+  const rows: [string, number, string][] = [
+    ['mv', 99, 'normal'],
+    ['mv', 50, 'normal'],
+    ['mv', 49, 'warning'],
+    ['hunger', 5, 'normal'],
+    ['hunger', 4, 'warning'],
+    ['thirst', 5, 'normal'],
+    ['thirst', 4, 'warning'],
+  ];
+  for (const [pool, value, want] of rows) assert.equal(tone(pool, value), want, `${pool} ${value}`);
 });

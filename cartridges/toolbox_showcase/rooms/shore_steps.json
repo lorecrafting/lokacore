@@ -42,22 +42,22 @@
       "when": {
         "policy_version": 1,
         "root": {
+          "op": "sky",
+          "tide": "high"
+        }
+      },
+      "description": "room.shore_steps.high_tide"
+    },
+    {
+      "when": {
+        "policy_version": 1,
+        "root": {
           "op": "visited_count",
           "room": "shore_steps",
           "at_least": 3
         }
       },
       "description": "room.shore_steps.familiar"
-    },
-    {
-      "when": {
-        "policy_version": 1,
-        "root": {
-          "op": "sky",
-          "tide": "high"
-        }
-      },
-      "description": "room.shore_steps.high_tide"
     },
     {
       "when": {

@@ -329,6 +329,7 @@
       "edits": [
         ["cartridge.json", ["speech"], null],
         ["statuses/gored.json", ["kind"], null],
+        ["statuses/wanted.json", ["kind"], null],
         ["cartridge.json", ["world", "construction"], null],
         ["rooms/holding_lane.json", ["site"], null],
         ["npcs/carpenter.json", ["services"], null],
