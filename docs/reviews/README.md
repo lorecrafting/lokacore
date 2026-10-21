@@ -13,6 +13,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Pass-1 UI rulings (loka-x6t.72)](2026-10-21-pass1-ui-rulings.md)
 - [Review: pass-1 GE3 named refusals (loka-y6yg.46)](2026-10-21-pass1-refuse-review.md): **APPROVE WITH NOTES**
 - [Review: pass-1 GE4, death and round receipts lost in a cast-started fight (loka-y6yg.45)](2026-10-21-pass1-death-review.md): **APPROVE**
+- [Review: pass-1 GE7 opponent hp band in GameView (loka-y6yg.49)](2026-10-21-pass1-band-review.md): **APPROVE WITH NOTES**
 - [Review: PR #419 opt-in observed line for a status on a seen NPC, kernel_api 1.110 (loka-kgd.176)](2026-10-21-npc-status-observed-review.md): **APPROVE**
 - [Review: PR #411 Book hostile NPC refusal line, kernel_api 1.104 (loka-y6yg.20 part B, loka-x6t.33)](2026-10-16-pr411-hostile-refusal-review.md): **APPROVE**
 - [Review: batch M15 head, PR #413 (loka-kgd.170)](2026-10-16-m15-batch-review.md): **APPROVE**
