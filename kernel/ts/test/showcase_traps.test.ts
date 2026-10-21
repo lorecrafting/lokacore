@@ -151,7 +151,7 @@ test('traps 7: an undisarmed plate springs, holds, rearms on the hour and refres
 test('traps 7: left alone, the poison ticks at +1800, +3600, +5400 and expires at +7200', () => {
   let x = go(step1, 'north').world;
   const E = x.state.clock;
-  const hp: number[] = [];
+  const hp: (number | undefined)[] = [];
   for (const t of [1800, 3600, 5400]) {
     x = wait(x, E + t).world;
     hp.push(pool(x, 'hp'));
