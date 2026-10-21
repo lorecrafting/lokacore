@@ -39,28 +39,28 @@ test('Where touch sends exact identity and labels here, saved last seen and unkn
   assert.equal(button.label, 'Ask where Ash is');
   assert.deepEqual(intentOf(button), { action_key: 'where', target_ids: ['ash'], input: {} });
   assert.deepEqual(group([button]).on('ash'), [button]);
-  assert.equal(
+  assert.deepEqual(
     replyLine(reply({ target_id: 'ash', status: 'here', room_id: 'landing' }), (s) => s, view),
-    'Ash: here.',
+    ['Ash: here.'],
   );
-  assert.equal(
+  assert.deepEqual(
     replyLine(
       reply({ target_id: 'ash', status: 'last_seen', room_id: 'landing', at: 100 }),
       (s) => s,
       view,
     ),
-    'Ash: last seen at Landing at 100s.',
+    ['Ash: last seen at Landing at 100s.'],
   );
-  assert.equal(
+  assert.deepEqual(
     replyLine(reply({ target_id: 'hidden', status: 'unknown' }), (s) => s, view),
-    'Their whereabouts are unknown.',
+    ['Their whereabouts are unknown.'],
   );
 });
 
 // Breaks: a conflict, invalid or unauthorized press logs its raw kind, "(conflict)", instead of
 // the owner-approved sentence (book-ui.md, Shared elapsed status).
 test('a press that changed nothing logs a plain sentence', () => {
-  const line = (kind: string) => replyLine({ kind } as Reply, (s) => s, view);
+  const line = (kind: string) => replyLine({ kind } as Reply, (s) => s, view).join(' ');
   assert.equal(line('conflict'), 'The book is still catching up; try again.');
   assert.equal(line('invalid'), "That can't be done.");
   assert.equal(line('unauthorized'), "That isn't yours to do.");

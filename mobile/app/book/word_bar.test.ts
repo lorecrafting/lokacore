@@ -11,6 +11,7 @@ import type { GameView } from '../../packages/game-view/session.ts';
 import { buttonsOf, castWords, WORDS } from './buttons.ts';
 import { intentOf } from './model.ts';
 import { LABEL } from './labels.ts';
+import { spoken } from './words.ts';
 
 const speech = compiled('cartridges/speech_sampler');
 const spells = compiled('cartridges/spells_sampler');
@@ -75,9 +76,34 @@ test('shouting help in the square alerts the watchman next door', () => {
   assert.deepEqual(facts(b), { elder_heard: true, watchman_alerted: true });
 });
 
+// Breaks (pass-1 R5): an accepted speech press with no narration leaving the page silent, echoed
+// twice, or echoed with the wrong verb, word or listener.
+test('a say, whisper or shout with no narration echoes once in ink', () => {
+  const b = book(speech as never);
+  const echoes = () => b.text().filter((t) => t.startsWith('You '));
+  for (const chip of ['hello, say', 'help, shout', 'ward, whisper to the smith']) b.tap(chip);
+  assert.deepEqual(echoes(), [
+    'You say "hello".',
+    'You shout "help".',
+    'You whisper "ward" to the smith.',
+  ]);
+  assert.equal(spoken('say', undefined), undefined); // a wordless retry falls back to OUTCOME
+});
+
+// Breaks (pass-1 UA): the World log drawn after the Word block, so a press's result sits below
+// the chip rows.
+test('the latest result shows before the Word block', () => {
+  const b = book(speech as never);
+  b.tap('hello, say');
+  const shown = b.text();
+  assert.ok(shown.indexOf('You say "hello".') >= 0, JSON.stringify(shown));
+  assert.ok(shown.indexOf('You say "hello".') < shown.indexOf(LABEL.word), JSON.stringify(shown));
+});
+
 // Breaks: a typed word not sent as a Say (or sent with the token of a view that has moved on),
-// a bad word sent to the kernel, no note on a bad word, or the typed word echoed into the page.
-test('a typed word is said like its chip, even after the view moves on, and never shown', () => {
+// a bad word sent to the kernel, no note on a bad word, or the typed word shown other than as
+// its one Say echo (pass-1 R5).
+test('a typed word is said like its chip, even after the view moves on, and echoed once', () => {
   const b = book(speech as never);
   const input = () => b.draw().find((n) => n.type === 'TextInput');
   b.tap(LABEL.typeAWord);
@@ -85,7 +111,7 @@ test('a typed word is said like its chip, even after the view moves on, and neve
   type(b, 'two words');
   assert.equal(revision(b), before);
   assert.ok(b.text().includes(LABEL.oneWord));
-  input().props.onChangeText('xyzzy');
+  input().props.onChangeText('Xyzzy'); // said, and echoed, as the kernel folds it
   const stale = input(); // drawn before a background update, so its Say token is old
   const { view, token } = b.game.view();
   const hello = buttonsOf(view, String, String).find((x) => x.label === 'hello, say')!;
@@ -94,7 +120,10 @@ test('a typed word is said like its chip, even after the view moves on, and neve
   stale.props.onSubmitEditing();
   assert.ok(revision(b) > after);
   assert.ok(!b.text().includes(LABEL.oneWord));
-  assert.ok(!b.text().some((t) => t.includes('xyzzy')));
+  assert.deepEqual(
+    b.text().filter((t) => /xyzzy/i.test(t)),
+    ['You say "xyzzy".'],
+  );
 });
 
 // Breaks: a refused spell word hidden or pressable, its reason missing, a learned word not shown,
@@ -200,4 +229,16 @@ test('a word that settles later still turns to its conversation', () => {
   a.fault.reads = false;
   b.game.pulse();
   assert.ok(b.labels().includes('Thank her'));
+});
+
+// Breaks (pass-1 R5): the echo shown beside a spoken press's own narration (the den's begone
+// shout, toolbox_showcase reactions/begone.json, frightens both goblins).
+test('a shout whose receipt narrates shows the narration, not the echo', () => {
+  const b = book(compiled('cartridges/toolbox_showcase') as never);
+  for (const d of ['west', 'down', 'north', 'north']) (b.map(), b.tap(`Go ${d}`));
+  b.tap('begone, shout');
+  const shown = b.text();
+  const cowers = 'The goblin cowers, eyeing the way out.';
+  assert.equal(shown.filter((t) => t === cowers).length, 2, JSON.stringify(shown));
+  assert.ok(!shown.some((t) => t.startsWith('You shout')), JSON.stringify(shown));
 });

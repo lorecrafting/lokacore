@@ -421,12 +421,21 @@
  ],
  "log": [],
  "combatLog": [
-  "Another fen hound turns to defend its pack. Another fen hound turns to defend its pack. Another fen hound turns to defend its pack.",
-  "Your blow strikes the beast squarely. The beast sinks its teeth into you. The hound tears your skin. The wound begins to bleed.",
+  "Another fen hound turns to defend its pack.",
+  "Another fen hound turns to defend its pack.",
+  "Another fen hound turns to defend its pack.",
+  "Your blow strikes the beast squarely.",
+  "The beast sinks its teeth into you.",
+  "The hound tears your skin. The wound begins to bleed.",
   "Blood seeps from the wound.",
-  "The beast sinks its teeth into you. The beast darts clear of your blow. The hound opens the wound again.",
+  "The beast sinks its teeth into you.",
+  "The beast darts clear of your blow.",
+  "The hound opens the wound again.",
   "Blood seeps from the wound.",
-  "The beast darts clear of your blow. The beast sinks its teeth into you. The hound opens the wound again. Blood seeps from the wound."
+  "The beast darts clear of your blow.",
+  "The beast sinks its teeth into you.",
+  "The hound opens the wound again.",
+  "Blood seeps from the wound."
  ],
  "details": {}
 }

@@ -19,7 +19,7 @@ export function grouped(lines: readonly string[]): RecapLine[] {
  */
 export function holding(s: Logs, was: GameView, now: GameView) {
   if (now.recap_after === undefined || s.retry) return undefined;
-  return (s.away ??= { from: was.time, log: [], lines: [] });
+  return (s.away ??= { from: was.time, log: [] });
 }
 
 /** Once time stops catching up: the recap if the settlement spanned the threshold, else the log. */
@@ -31,10 +31,10 @@ export function settle(s: Logs) {
   if (
     s.status.kind === 'ready' &&
     recap_after !== undefined &&
-    away.lines.length > 0 &&
+    away.log.length > 0 &&
     time - away.from >= recap_after
   )
-    s.recap = [...(s.recap ?? []), ...away.lines]; // a second absence before a press adds to it
+    s.recap = [...(s.recap ?? []), ...away.log]; // a second absence before a press adds to it
   else s.log.push(...away.log);
 }
 

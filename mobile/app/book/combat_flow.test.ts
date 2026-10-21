@@ -39,7 +39,7 @@ test('committed opponent death narrates once through the existing subscription',
     p.update({ kind: 'state', projection: { view: current, token }, status: { kind: 'ready' } });
   // Break (review of #406): a closing receipt's line outside the combat keys (a deer's sight
   // close) lands in the World log, unseen on the ended Combat page (book-ui.md, Closure).
-  assert.deepEqual(p.screen().combatLog, ['The marsh rat falls. A door creaks.']);
+  assert.deepEqual(p.screen().combatLog, ['The marsh rat falls.', 'A door creaks.']);
   assert.deepEqual(p.screen().log, ['The bell rings.']);
 });
 
@@ -258,7 +258,12 @@ test('Attack opens its committed page; pending and refused Flee stay until commi
     h.answer(accepted('fled', 'combat.flee'), road, 'combat.flee', 'road.crows');
     h.tap('Flee');
     assert.ok(h.texts().includes('Combat'));
-    assert.ok(h.texts().includes('You escape to the road. Crows lift off the road.'));
+    const shown = h.texts();
+    const escape = shown.indexOf('You escape to the road.');
+    assert.ok(
+      escape >= 0 && shown[escape + 1] === 'Crows lift off the road.',
+      JSON.stringify(shown),
+    );
     h.tap('Back to World');
     assert.equal(h.texts().includes('Combat'), false);
     assert.ok(h.texts().includes('The road'));
