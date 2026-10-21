@@ -24,3 +24,6 @@ The authoring checklist drawn from this pass is [area-authoring.md](../../guides
 | [B-22](shots/B-22-golem-yard.png) | "flamma, cast: not now" and "lux, cast: too exhausted" | M1, R1, M5 |
 | [B-27](shots/B-27-market.png) | The Word block pushes the result line down | UA |
 | [B-30](shots/B-30-fence.png) | "never lets go of what he buys" next to Buy rows | E3 |
+
+Only these shots are archived; other shot numbers in the reports were not kept.
+SHA256SUMS hashes the archived files; `shasum -a 256 -c SHA256SUMS` in this folder verifies them.

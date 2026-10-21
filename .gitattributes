@@ -1,6 +1,7 @@
 # Imported with recorded source hashes (docs/spec/IMPORT.md): never let git "fix" whitespace.
 docs/spec/** -whitespace
 docs/evidence/** -whitespace
+docs/playtests/** -whitespace
 docs/archive/spec/** -whitespace
 # Append-only lists: two branches each adding a line merge without a conflict (keep the order check in the PM's merge).
 docs/decisions/README.md merge=union

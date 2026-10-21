@@ -23,11 +23,12 @@ The triage has 70 rows, after merges by root cause. Two dropped findings are not
 | PAGE | Off the page: the offer or the result is not on the page the player looks at | 7 | 0 | 5 | 2 |
 | REFUSAL | Refusal hidden or misnamed: the offer vanishes or the reason word is wrong | 6 | 3 | 3 | 0 |
 | WIRING | Data wiring: an over-broad match, an orphan item, a band or a variant order | 6 | 4 | 0 | 2 |
-| HIDDEN | Hidden state: the rule depends on a value the page never shows | 5 | 2 | 0 | 3 |
-| **Total** | | 70 | 20 | 20 | 30 |
+| HIDDEN | Hidden state: the rule depends on a value the page never shows | 5 | 0 | 2 | 3 |
+| **Total** | | 70 | 18 | 22 | 30 |
 
 PROMISE (13 rows) is the largest, and a check cannot decide whether prose is true: only a walk that tests each promise can.
 SILENT (9 rows) is nearly all decidable by a check: a state write with no narration is visible in the data.
+M2b (the silent ignite) waits on an owner question; the magic brief chose no ignite line.
 
 ## Candidate deterministic checks
 
@@ -42,17 +43,16 @@ SILENT (9 rows) is nearly all decidable by a check: a state write with no narrat
 |---|---|---|---|---|---|
 | 1 | A policy that refuses the player names a `reason` | Policy definitions with a player refusal | loader | S | M1 |
 | 2 | Every kernel refusal code has a Book reason word | Kernel unavailable codes against Book words (`cooldown` has none) | kernel | S | R1, R2 |
-| 3 | A reaction that writes state has a `narrate` line or says it is silent | Reactions with `status.apply` or `fact.set` ops | loader | S | T1, T4, R5, W3 |
-| 4 | An action that commits a change yields a narration record | Every offered action in the sim; the delta against the records | sim | M | M2b, M3, M7, C2a, R5 |
+| 3 | A reaction that writes state has a `narrate` line or says it is silent | Reactions with `status.apply` or `fact.set` ops | loader | S | T1, T4 |
+| 4 | An action that commits a change yields a narration record | Every offered action in the sim; the delta against the records | sim | M | M2b, M3, M7, C2a, R5, W3 |
 | 5 | A readable has a title; an action verb has an `action.*` label key | Item and verb definitions against Book label keys | loader | S | T5, UH, E6a |
-| 6 | Resource bands cover 0 to 100% in order; no variant shadows a later one | Band tables and description variant guards | loader | S | UK, W1 |
+| 6 | The top (normal) band starts below the maximum; no description variant shadows a later one | Band tables and description variant guards | loader | S | UK, W1 |
 | 7 | Every item has a source and a sink; a policy tag match table is pinned | Item references, fill sources, tag queries | loader + kernel snapshot | S-M | M8a, M8c |
-| 8 | Each state that a fact or meter drives has a readout | Puzzle and law facts against tokens and readouts | loader | M | E1, T3 |
-| 9 | Every offer reachable in a room is on the room page; a refusal shows its reason | The walk's room pages against the kernel offer list | walk | M | R4, R6, E6b, E8, E9, M10a, M10c, UA, UO |
-| 10 | Sign promises are data, and the walk reaches each promised outcome | Each sign's declared promises, then the walk | walk | M-L | E3, E4, E6c, E10a, M2a, M5, M6, T2, W2, F1, F2 |
+| 8 | Every offer reachable in a room is on the room page, a refusal shows its reason, and a state variant or readout the content defines is drawn | The walk's room pages against the kernel offer list and view | walk | M | E1, T3, R4, R6, E6b, E8, E9, M10a, M10c, UA, UO |
+| 9 | Sign promises are data, and the walk reaches each promised outcome | Each sign's declared promises, then the walk | walk | M-L | E3, E4, E6c, E10a, M2a, M5, M6, T2, W2, F1, F2 |
 
-Checks 1, 3, 5 and 6 are cheap loader lints that cover 10 rows.
-Check 10 is the only rail for most PROMISE rows; the rest stay with the playtest.
+Checks 1, 3, 5 and 6 are cheap loader lints that cover 8 rows.
+Check 9 is the only rail for most PROMISE rows; the rest stay with the playtest.
 
 ## Rows
 
@@ -64,7 +64,7 @@ Check 10 is the only rail for most PROMISE rows; the rest stay with the playtest
 | R4 | WAD | PAGE | walk | Door Open is drawn only on the Map. |
 | R5 | UI-BREAK | SILENT | check | Say and Shout are accepted with no line. |
 | R6 | UI-BREAK | SILENT | walk | Death in a cast-opened fight shows no rounds and no fall. |
-| E1 | DUP | HIDDEN | check | "Wanted" is a fact with no token; the guard's line is not drawn. |
+| E1 | DUP | HIDDEN | walk | "Wanted" is a fact with no token; the guard's line is not drawn. |
 | E2 | WAD | PROMISE | playtest | The sign does not warn that the watchman bars the stair. |
 | E3 | GAMEPLAY-CONTENT | PROMISE | walk | The fence "never lets go" but resells. |
 | E4 | GAMEPLAY-CONTENT | PROMISE | walk | "For trying it all again" but the purse never refills. |
@@ -102,7 +102,7 @@ Check 10 is the only rail for most PROMISE rows; the rest stay with the playtest
 | C3b | WAD | NONE | playtest | Death does not restore hunger and thirst. |
 | T1 | GAMEPLAY-CONTENT | SILENT | check | Every lever pull logs the same line; step, reset and solve say nothing. |
 | T2 | GAMEPLAY-CONTENT | PROMISE | walk | "The goblins run"; out of combat they only cower. |
-| T3 | GAMEPLAY-CONTENT | HIDDEN | check | The dial digits have no readout. |
+| T3 | GAMEPLAY-CONTENT | HIDDEN | walk | The dial digits have no readout. |
 | T4 | GAMEPLAY-CONTENT | SILENT | check | Plate re-poisoning applies a status with no line. |
 | T5 | GAMEPLAY-CONTENT | VERB | check | A readable with no title is named "Read". |
 | F1 | WAD | PROMISE | walk | Hunger re-applies on every climb; the sign says "the climb". |

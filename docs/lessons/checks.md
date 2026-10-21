@@ -28,7 +28,7 @@ Hard-won lessons for CI, hooks, skip rules and test reliability. Current gates: 
 - A coverage witness compares resolved IDs, never display titles: a same-titled wrong room credited a ferry route. Plant that wrong-but-same-title case as the red control ([ferry room identity](https://github.com/lorecrafting/lokacore/tree/4c1bb174b603e16f425b21a7752c576939bcf1db/docs/evidence/2026-10-07-e1-ferry-room-identity)).
 - Run mutants with `bin/mutate.sh` narrow first (the test files that import the mutated module); a full-suite
   sweep only at release-candidate certification and the E3 gate ([record](../decisions/owner-decision-process-tightening-2026-10-08.md)).
-- Tag every playtest triage row with the rail that would have caught it: in pass 1, 20 of 70
-  rows (silent state writes, refusals with no reason, unlabelled verbs) were decidable by a
-  loader lint or a sim test, and 13 were sign promises that only a walk can test. Build the
-  cheap checks before the next playtest, not after ([pass 1 analysis](../playtests/2026-10-21-pass1/analysis.md)).
+- Tag every playtest triage row with the rail that would have caught it: in pass 1, 18 of 70
+  rows were decidable by a loader lint, a kernel test or a sim test, 22 by a scripted Book
+  walk, and only 30 needed a reader. Sign promises are the largest family (13 rows); a walk
+  tests 11 of them. Build the cheap checks before the next playtest, not after ([pass 1 analysis](../playtests/2026-10-21-pass1/analysis.md)).
