@@ -10,6 +10,7 @@ import {
 } from '../runtime/decision.ts';
 import { exitOf, hidden } from '../mechanics/lookups.ts';
 import { cmp } from '../foundation/validate.ts';
+import { living } from '../mechanics/death/shared.ts';
 import { refusal, resolved } from '../commands/actions.ts';
 import { describeEntity, displayedName } from '../mechanics/description_variant/rule.ts';
 
@@ -91,6 +92,7 @@ function knownNpcs(world: World, actor: CharacterId, steps: Steps) {
   return [...ids]
     .filter(
       (target_id) =>
+        living(world, target_id) && // book-ui.md Where: only a living known NPC (pass-1 UF3)
         !refusal(world, { type: 'where', actor_id: actor, target_id }, steps, 'where' as Key),
     )
     .sort(cmp)

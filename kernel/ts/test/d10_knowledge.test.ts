@@ -11,6 +11,8 @@ import { resourceRef, adjust, level } from '../src/mechanics/resource.ts';
 import { apply } from '../src/runtime/apply.ts';
 import { adopt, admit } from '../src/runtime/proposal.ts';
 import { accepted, allocator } from '../src/runtime/decision.ts';
+import { hydrate } from '../src/runtime/created.ts';
+import { validate } from '../src/foundation/validate.ts';
 
 const cartridge = read('protocol/fixtures/missing_child_v042_hash.json').value as Cartridge;
 const context = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never;
@@ -161,5 +163,41 @@ test('both real recoverable boots retain exact ambiguous IDs and independent tou
     assert.equal(examined.decision.kind, 'accepted');
     if (examined.decision.kind === 'accepted') assert.equal(examined.decision.outcome, 'examined');
     assert.equal(examined.world.state.containers[pins[item]], w.body);
+  }
+});
+
+// Break: Where lists a dead NPC (pass-1 UF3), or the living filter also drops a 1 HP one.
+test('known_npcs keeps a remembered NPC at 1 HP and drops it at 0 HP, also after reopen', () => {
+  const initial = fresh();
+  const rat = npc(initial, 'cellar_rat_1');
+  const hp = resourceRef(initial, 'hp');
+  const at = (left: number) => {
+    const set = adjust(initial, rat, hp, left - level(initial, rat, hp)!, {}).op;
+    const r = apply(initial, [set]);
+    assert.ok(!('fault' in r));
+    const observed_npcs = {
+      [key({ kind: 'observation', actor_id: initial.character, npc_id: rat })]: {
+        actor_id: initial.character,
+        npc_id: rat,
+        room_id: room(initial, 'ferry_landing'),
+        at: 64800,
+      },
+    };
+    return { ...r.world, state: { ...r.world.state, observed_npcs } } as World;
+  };
+  for (const [left, listed] of [
+    [1, true],
+    [0, false],
+  ] as const) {
+    const w0 = at(left);
+    for (const w of [w0, hydrate(fresh(), JSON.parse(JSON.stringify(w0.state)), true)!]) {
+      const view = gameView(w);
+      assert.deepEqual(validate('GameView', view), []);
+      assert.equal(
+        view.known_npcs!.some((n) => n.id === rat),
+        listed,
+        `hp ${left}`,
+      );
+    }
   }
 });
