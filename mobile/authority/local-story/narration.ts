@@ -16,12 +16,12 @@ import { scope, type Story } from './save.ts';
 /**
  * The latest committed narration in this story's receipts, shown again on reopen after a crash
  * before display (06 §43): read from storage, never memory; no acknowledgement is stored. None
- * while a transaction is open (an unknown COMMIT whose ROLLBACK failed).
+ * while a transaction is open (an unknown COMMIT whose ROLLBACK failed) or a COMMIT is fenced.
  */
 type NarrationRow = { revision: number; command_id: string; command: string; response: string };
 
 export function narration(s: Story, command_id?: string): NarrationRecord | undefined {
-  // Uncommitted, or a COMMIT whose outcome is unknown: await adopted confirmation (03 §15).
+  // A fence means the store could not be read to settle it (03 §15).
   if (s.fence || s.db.isInTransactionSync()) return undefined;
   let before: number | null = null;
   while (true) {

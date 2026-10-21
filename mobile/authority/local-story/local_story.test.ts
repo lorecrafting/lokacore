@@ -297,8 +297,9 @@ test('a genuinely failed COMMIT reconciles to not committed; the retry is a fres
   ]);
 });
 
-// Breaks (03 §15): a call decided, answered or narrated while the COMMIT outcome is unknown, memory adopting
-// the unconfirmed attempt, or a restart that does not load the commit or recover its trace entry.
+// Breaks (03 §15): a call decided, answered or narrated while the COMMIT outcome is unknown, memory
+// adopting the unconfirmed attempt, or a restart that does not load the commit or recover its trace
+// entry.
 // Simulated fault: the connection breaks right after the real COMMIT.
 test('while the COMMIT outcome is unknown every call is fenced; a restart settles it', () => {
   const path = save();
