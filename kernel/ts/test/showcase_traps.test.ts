@@ -9,6 +9,7 @@ import { decode } from '../src/foundation/canonical.ts';
 import { validate } from '../src/foundation/validate.ts';
 import { engaged } from '../src/mechanics/combat/shared.ts';
 import { describeEntity } from '../src/mechanics/description_variant/rule.ts';
+import { key } from '../src/foundation/compose.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { activeStatuses, statusKey } from '../src/mechanics/status/shared.ts';
 import type { World } from '../src/runtime/decision.ts';
@@ -333,6 +334,26 @@ test('traps 8 control: without the shout the pack stands; two rounds leave 8 and
   const { r2 } = flight(den, a!);
   assert.deepEqual([pool(r2.world, 'hp'), hp(r2.world, a!), hp(r2.world, b!)], [8, 2, 6]);
   assert.deepEqual(goblinsIn(r2.world, 'chief_den'), [a, b]);
+});
+
+// Breaks: a pack's flight_below_percent drops (a calm goblin under a quarter of its hp stands).
+test('traps 8 wounded: a calm goblin struck to 1 of 6 hp flees, in each pack', () => {
+  for (const [x, home] of [
+    [den, 'chief_den'],
+    [go(stair, 'down').world, 'sapper_cellar'],
+  ] as const) {
+    const [a, b] = goblinsIn(x, home);
+    const at = key({ kind: 'resource', resource: resourceRef(x, 'hp'), entity_id: a as never });
+    const hurt = {
+      ...x,
+      state: {
+        ...x.state,
+        resources: { ...x.state.resources, [at]: { value: 3, at: x.state.clock } },
+      },
+    };
+    assert.deepEqual([hp(hurt, a!), statuses(hurt, a!)], [3, []]);
+    assert.deepEqual(goblinsIn(flight(hurt, a!).r1.world, home), [b], home);
+  }
 });
 
 // Breaks: the chief takes more than one blow, pays other experience, or its fall frightens no
