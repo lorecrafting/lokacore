@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { step, stepElapsed } from '../src/index.ts';
+import { gameView, step, stepElapsed } from '../src/index.ts';
+import { validate } from '../src/foundation/validate.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { key } from '../src/foundation/compose.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
@@ -124,6 +125,13 @@ test('even-round helper flight still gives the player one attack on the healthy 
   assert.equal(level(result.world, h2, resourceRef(w, 'hp')), 6);
   const row = Object.values(result.world.state.encounters ?? {})[0]!;
   assert.deepEqual(row.active_ids, [h2]);
+  // Breaks (loka-y6yg.49): the fled hound stays listed in the combat view, or the survivor loses its band.
+  const view = gameView(result.world);
+  assert.deepEqual(validate('GameView', view), []);
+  assert.deepEqual(
+    view.combat?.active_opponents?.map(({ id, band }) => [id, band]),
+    [[h2, 'some_cuts']],
+  );
 });
 
 // Breaks: a wounded hound invents a destination through a missing area exit.
