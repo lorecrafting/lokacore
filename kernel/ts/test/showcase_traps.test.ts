@@ -126,19 +126,20 @@ test('traps 7: an undisarmed plate springs, holds, rearms on the hour and refres
   assert.ok(entry.lines.includes('narration.poisoned.applied'), entry.lines.join());
   assert.deepEqual(poisoned(x), { generation: 1, ends_at: E + 7200 });
   assert.equal(fact(x, 'plate_sprung'), true);
-  const again = go(go(x, 'south').world, 'north');
+  // Ten minutes on (still sprung, before the hour), so a second application would move ends_at.
+  x = wait(go(x, 'south').world, E + 600).world;
+  const again = go(x, 'north');
   assert.ok(!again.lines.some((l) => l.startsWith('narration.poisoned')), again.lines.join());
   assert.deepEqual(poisoned(again.world), { generation: 1, ends_at: E + 7200 });
 
   // While sprung, a found plate's failed disarm does not bite again.
-  let y = go(x, 'south').world;
-  y = outcome(y, 'search_floor').world;
+  const y = outcome(x, 'search_floor').world;
   const miss = outcome(y, 'disarm_plate');
   assert.equal(miss.out, 'failure');
   assert.deepEqual(poisoned(miss.world), { generation: 1, ends_at: E + 7200 });
 
   const hour = Math.ceil((E + 1) / HOUR) * HOUR;
-  x = wait(go(x, 'south').world, hour).world;
+  x = wait(x, hour).world;
   assert.equal(fact(x, 'plate_sprung'), false);
   const back = go(x, 'north');
   assert.deepEqual(poisoned(back.world), { generation: 1, ends_at: back.world.state.clock + 7200 });
