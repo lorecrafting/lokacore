@@ -124,8 +124,7 @@ test('traps 4: north over the disarmed plate; the note reads', () => {
   w = r.world;
   assert.deepEqual(poisoned(w), before);
   assert.notEqual(fact(w, 'plate_sprung'), true);
-  w = take(w, 'sapper_note');
-  assert.deepEqual(play(w, { type: 'read', target_id: id(w, 'item', 'sapper_note') }).lines, [
+  assert.deepEqual(play(w, { type: 'read', target_id: detail(w, 'sapper_note') }).lines, [
     'readable.sapper_note',
   ]);
 });
@@ -161,8 +160,7 @@ test('traps 5: the levers open the north door only in order A, B, C; the slate r
   w = play(w, { type: 'open', direction: 'north' }).world;
   w = go(w, 'north').world;
   assert.equal(at(w), room(w, 'lever_vault'));
-  w = take(w, 'vault_slate');
-  assert.deepEqual(play(w, { type: 'read', target_id: id(w, 'item', 'vault_slate') }).lines, [
+  assert.deepEqual(play(w, { type: 'read', target_id: detail(w, 'vault_slate') }).lines, [
     'readable.vault_slate',
   ]);
   w = pulls(go(w, 'south').world, 'c');
@@ -170,6 +168,8 @@ test('traps 5: the levers open the north door only in order A, B, C; the slate r
   const inside = play(go(w, 'north').world, { type: 'close', direction: 'south' }).world;
   assert.equal(at(inside), room(w, 'lever_vault'));
   assert.equal(open(inside, 'south'), 'opened'); // a visitor is never shut in at stage 0
+  // One visit is enough: shut from the hall at stage 0, the door still opens (visited at_least 1).
+  assert.equal(open(play(w, { type: 'close', direction: 'north' }).world, 'north'), 'opened');
 });
 
 // Breaks: a wheel's turn or wrap is missing, wraps at another digit, or its wrap precedes its turn;
@@ -181,7 +181,7 @@ test('traps 6: the wheels open the east door at 3, 1, 2; the bitters cure the po
     assert.equal(fact(nine, `wheel_${n}`), 9);
     assert.equal(
       describe(nine, nine.character, nine.details[detail(nine, `wheel_${n}`)]),
-      'detail.wheel.9',
+      `detail.wheel_${n}.9`,
     );
     assert.equal(fact(turns(nine, n, 1), `wheel_${n}`), 0);
   }

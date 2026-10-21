@@ -6,5 +6,18 @@
       "to": "lever_hall",
       "barrier": "lever_door"
     }
+  },
+  "details": {
+    "vault_slate": {
+      "aliases": [
+        "slate",
+        "vault_slate"
+      ],
+      "description": "detail.vault_slate",
+      "readable": {
+        "label": "actions.read_book",
+        "text": "readable.vault_slate"
+      }
+    }
   }
 }

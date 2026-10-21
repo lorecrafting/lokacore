@@ -5,5 +5,18 @@
     "south": {
       "to": "sapper_stair"
     }
+  },
+  "details": {
+    "sapper_note": {
+      "aliases": [
+        "note",
+        "sapper_note"
+      ],
+      "description": "detail.sapper_note",
+      "readable": {
+        "label": "actions.read_book",
+        "text": "readable.sapper_note"
+      }
+    }
   }
 }
