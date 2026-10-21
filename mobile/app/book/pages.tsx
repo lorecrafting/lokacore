@@ -193,10 +193,17 @@ const placeActions = (view: GameView, g: Grouped, press: (b: Button) => void, te
       .filter(verb)
       .map((b) => <VerbLine key={`${b.label}:${b.target_ids.join(',')}`} b={b} press={press} />),
     ...view.actions
-      .filter((a) => !a.available && !a.input.length && !notVerb(a.action_key) && verb(a))
+      .filter(
+        (a) =>
+          !a.available &&
+          !a.input.length &&
+          (a.target.kind === 'none' || a.target_ids?.length) && // as buttons.ts placeButtons
+          !notVerb(a.action_key) &&
+          verb(a),
+      )
       .map((a) => (
         <ActionCard
-          key={`${a.action_key}:${a.target_ids?.join(',')}`}
+          key={`${a.label}:${a.target_ids?.join(',')}`}
           label={text(a.label)}
           reason={why(a, text)}
         />

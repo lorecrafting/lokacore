@@ -32,12 +32,16 @@ const lines = (drawn: any[]) =>
     n.props?.onPress ? [`button ${words(n)}`] : n.type === 'Text' ? [words(n)] : [],
   );
 
-// Breaks: a refused verb dropped, drawn as a pressable, drawn before the available verbs, or read as
+// Breaks: a refused verb dropped, an available one also drawn as a note, drawn as a pressable, drawn before the available verbs, or read as
 // a code ("over load", "cooldown") instead of the reason word.
 test('refused place verbs follow the available verb as label: reason notes', async () => {
   const shown = lines(
     await blocks(
-      [refused('chop', 'Chop wood', 'over_load'), refused('fish', 'Cast the rod', 'cooldown')],
+      [
+        { ...refused('gaze', 'Look about', 'none'), available: true, reason: undefined },
+        refused('chop', 'Chop wood', 'over_load'),
+        refused('fish', 'Fish in', 'cooldown'),
+      ],
       [verb],
     ),
   );
@@ -45,18 +49,21 @@ test('refused place verbs follow the available verb as label: reason notes', asy
     'button Look about',
     'Look about',
     'Chop wood: more than you can carry',
-    'Cast the rod: not yet',
+    'Fish in: not yet',
   ]);
 });
 
 // Breaks: a refused action that belongs to another control (Sleep, the hold scan), takes typed input
-// (Say), is the storylet (its own block) or a notice's (its notice page) drawn as a World verb note.
+// (Say), is the Word block's (Shout), aims at an entity it does not name (Take), is the storylet
+// (its own block) or a notice's (its notice page) drawn as a World verb note.
 test('refused actions owned by another control draw no verb note', async () => {
   const drawn = lines(
     await blocks(
       [
         refused('sleep', 'Sleep', 'invalid_state'),
         refused('scan', 'Scan', 'invalid_state'),
+        refused('shout', 'Shout', 'invalid_state'),
+        { ...refused('take', 'Take', 'invalid_state'), target: { kind: 'entity' } },
         { ...refused('say', 'Say', 'invalid_state'), input: [{ key: 'text' }] },
         refused('beckons', 'A stranger beckons', 'invalid_state'),
         refused('tear', 'Tear the notice', 'invalid_state', { target_ids: ['n1'] }),
@@ -66,7 +73,7 @@ test('refused actions owned by another control draw no verb note', async () => {
     ),
   );
   assert.deepEqual(
-    drawn.filter((l) => /Sleep|Scan|Say|Tear/.test(l)),
+    drawn.filter((l) => /Sleep|Scan|Say|Shout|Take|Tear/.test(l)),
     [],
   );
   assert.equal(drawn.filter((l) => l.startsWith('A stranger beckons')).length, 1);

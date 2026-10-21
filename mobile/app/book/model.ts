@@ -104,8 +104,8 @@ const OWN = [
   'sleep',
   'raise_attribute', // the Character page's own cards
 ];
-// Not a World verb line: another page's or control's own action.
-export const notVerb = (key: string) => OWN.includes(key) || key === 'scan';
+// Not a World verb line: another page's, control's or the Word block's own action.
+export const notVerb = (key: string) => OWN.includes(key) || key === 'scan' || WORDS.includes(key);
 
 export function group(all: Button[]) {
   const buttons = all.filter((b) => !WORDS.includes(b.action_key)); // the Word block's chips are apart
