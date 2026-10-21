@@ -1,0 +1,19 @@
+{
+  "duration": 7200,
+  "tick_every": 1800,
+  "resource": "hp",
+  "per_tick": -1,
+  "label": "condition.poisoned",
+  "narration": {
+    "applied": "narration.poisoned.applied",
+    "tick": "narration.poisoned.tick",
+    "expired": "narration.poisoned.expired"
+  },
+  "cues": [
+    {
+      "sense": "smell",
+      "text": "cue.poison",
+      "range": 0
+    }
+  ]
+}

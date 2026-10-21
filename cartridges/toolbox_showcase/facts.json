@@ -544,6 +544,39 @@
         "player"
       ],
       "meaning": "The player oiled the crypt gate's winch; the gate opens on it."
+    },
+    "plate_found": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "This character has found the pressure plate under the Sappers' Stair."
+    },
+    "plate_sprung": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "instance"
+      ],
+      "meaning": "The Sappers' Stair plate has fired and is not yet re-armed."
+    },
+    "plate_disarmed": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "instance"
+      ],
+      "meaning": "The Sappers' Stair plate is wedged for good."
     }
   }
 }

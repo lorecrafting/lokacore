@@ -90,6 +90,7 @@ test('homestead 1: west from fell_gate, the sign, the skill tree', () => {
     ['carpentry', 0, true],
     ['carving', 0, true],
     ['cooking', 0, null],
+    ['disarm', 0, null],
     ['intimidate', 0, null],
     ['pick', 0, null],
     ['stealth', 0, null],

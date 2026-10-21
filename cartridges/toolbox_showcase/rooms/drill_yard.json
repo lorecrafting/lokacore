@@ -13,6 +13,9 @@
     },
     "south": {
       "to": "goblin_pit"
+    },
+    "down": {
+      "to": "sapper_stair"
     }
   },
   "details": {

@@ -1,0 +1,9 @@
+{
+  "title": "room.plate_passage.title",
+  "description": "room.plate_passage.description",
+  "exits": {
+    "south": {
+      "to": "sapper_stair"
+    }
+  }
+}
