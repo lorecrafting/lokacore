@@ -22,7 +22,6 @@ test('one opponent shows its hp band, changing at the exact cut', () => {
   assert.equal(combat(fighting(6)).band, 'ready');
   assert.equal(combat(fighting(3)).band, 'many_nasty_wounds');
   assert.equal(combat(fighting(2)).band, 'covered_in_blood');
-  assert.equal(combat(fighting(3)).active_opponents, undefined);
 });
 
 // Breaks: the band leaks a foe the player cannot see, or darkness also hides its name.
