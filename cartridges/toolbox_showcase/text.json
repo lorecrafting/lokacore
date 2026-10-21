@@ -1271,7 +1271,7 @@
   "service.withdraw_b": "Withdraw five pennies",
   "service.withdraw_b.used": "The clerk counts five pennies out of the vault.",
   "shop.bought": "You buy it.",
-  "shop.not_stolen": "He only buys what is hot.",
+  "shop.not_stolen": "he only buys what is hot",
   "shop.sold": "You sell it.",
   "skill.blade.label": "Blade",
   "skill.blade.requirement": "Aldous teaches it in the drill yard.",

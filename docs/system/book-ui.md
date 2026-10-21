@@ -325,6 +325,7 @@ stay as offered; the foot is Leave. The authored line names the mood, never the 
 without a line. A shelf row's reason is always a word from `words.ts` `reason()` ("not now",
 "too heavy to carry"), never a code with its underscores replaced; a buy refused `not_owned`
 stays "sold out", and one refused `insufficient_resource` reads "can't afford" (`buyReason`).
+A shelf reason from the cartridge is a lowercase fragment with no period.
 
 ## Item details and Take/Drop
 
@@ -347,7 +348,7 @@ closes its detail through the ordinary stale-route rule; no success is inferred.
 
 An item action advertised unavailable with `too_heavy` appears as a non-action note using its
 actual catalog label and **too heavy to carry**; one refused because the load is full reads
-**more than you can carry** (kernel code `over_load`) (pass-1 R3). It invokes nothing; available actions retain their
+**more than you can carry** (kernel code `over_load`) (pass-1 R3). `resource.short` reads "need <n> <key>"; `permission_denied` reads "not yours". It invokes nothing; available actions retain their
 existing buttons. The note follows the latest GameView, including Take aliases and Contents,
 and disappears when shedding held load makes Take legal. While any such note shows, the page
 draws no "Nothing to do here." Note: an unavailable action is still something to read (pass-1 UH3).

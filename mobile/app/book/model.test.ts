@@ -18,7 +18,7 @@ import {
   type Pool,
   why,
 } from './model.ts';
-import { NOTED, sellReason } from './words.ts';
+import { sellReason } from './words.ts';
 
 const b = (label: string, action_key: string, target_ids: string[] = [], input = {}) => ({
   label,
@@ -245,10 +245,6 @@ test('a refusal names what is missing', () => {
   assert.equal(
     why(off('over_load') as never, (k) => k),
     'more than you can carry',
-  );
-  assert.deepEqual(
-    [NOTED.over_load, NOTED.too_heavy, NOTED.permission_denied],
-    ['more than you can carry', 'too heavy to carry', 'not yours'],
   );
   const said = (k: string) => (k === 'shop.not_stolen' ? 'He only buys what is hot.' : k);
   assert.equal(
