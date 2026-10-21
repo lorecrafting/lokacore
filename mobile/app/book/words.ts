@@ -130,9 +130,12 @@ function answer(r: Reply, text: Say, view: GameView, fallback?: string): string 
   return said.length ? said : (fallback ?? OUTCOME[d.outcome] ?? '');
 }
 
-// The Book's echo of an accepted speech press whose receipt has no narration (book-ui.md, Word bar).
-export const spoken = (how: string, word: string, to?: string) =>
-  `You ${how} "${word}"${to ? ` to ${to}` : ''}.`;
+// The Book's echo of an accepted speech press whose receipt has no narration (book-ui.md, Word bar),
+// the word folded as the kernel folds it; no word, no echo.
+export const spoken = (how: string, word: unknown, to?: string) =>
+  typeof word === 'string'
+    ? `You ${how} "${word.toLowerCase()}"${to ? ` to ${to}` : ''}.`
+    : undefined;
 
 type Events = Extract<DecisionResult, { kind: 'accepted' }>['events'];
 const sentence = (s: string) => s.replace(/^./, (a) => a.toUpperCase());

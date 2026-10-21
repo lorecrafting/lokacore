@@ -11,6 +11,7 @@ import type { GameView } from '../../packages/game-view/session.ts';
 import { buttonsOf, castWords, WORDS } from './buttons.ts';
 import { intentOf } from './model.ts';
 import { LABEL } from './labels.ts';
+import { spoken } from './words.ts';
 
 const speech = compiled('cartridges/speech_sampler');
 const spells = compiled('cartridges/spells_sampler');
@@ -86,6 +87,7 @@ test('a say, whisper or shout with no narration echoes once in ink', () => {
     'You shout "help".',
     'You whisper "ward" to the smith.',
   ]);
+  assert.equal(spoken('say', undefined), undefined); // a wordless retry falls back to OUTCOME
 });
 
 // Breaks (pass-1 UA): the World log drawn after the Word block, so a press's result sits below

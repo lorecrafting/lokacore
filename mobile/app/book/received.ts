@@ -99,7 +99,7 @@ const fallbackLine = (
   accepted?.outcome === 'given'
     ? item && to && given(item, to)
     : accepted?.outcome === 'spoken'
-      ? spoken(button.action_key, (button.input as { word: string }).word.toLowerCase(), to) // as the kernel folds it
+      ? spoken(button.action_key, (button.input as { word?: unknown }).word, to)
       : itemChanged && accepted?.outcome !== 'eaten' && item
         ? `You ${accepted?.outcome === 'taken' ? 'pick up' : 'drop'} ${item}.`
         : accepted?.outcome === 'choice_closed'
