@@ -24777,6 +24777,33 @@
     ]
   },
   {
+    "contract": "StatusDefinition",
+    "value": {
+      "key": "wet",
+      "duration": 120,
+      "tick_every": 60,
+      "resource": {
+        "cartridge_id": "c",
+        "cartridge_version": "1.0.0",
+        "kind": "resource",
+        "key": "hp"
+      },
+      "label": "condition.wet",
+      "narration": {
+        "applied": "narration.wet.applied",
+        "tick": "narration.wet.tick",
+        "expired": "narration.wet.expired",
+        "observed": "The golem is wet."
+      }
+    },
+    "errors": [
+      {
+        "path": "/narration/observed",
+        "code": "pattern_mismatch"
+      }
+    ]
+  },
+  {
     "contract": "ReactionRule",
     "value": {
       "key": "k",

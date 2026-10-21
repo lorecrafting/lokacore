@@ -156,8 +156,8 @@ export function reload(edit: (c: any) => void) {
 }
 
 // The Homestead (crafts 1.101; build, raze, item_present, profession, hidden: 1.102) and the
-// Undercroft's gated parts dropped for the older-floor loader rows; twin of homestead/0 in
-// test/loka/content_showcase_test.exs.
+// Undercroft's gated parts and the golem's observed lines (1.110) dropped for the older-floor
+// loader rows; twin of homestead/0 in test/loka/content_showcase_test.exs.
 export function homestead(c: any) {
   delete c.world.construction;
   delete c.rooms[ref('room', 'holding_lane')].site;
@@ -174,6 +174,8 @@ export function homestead(c: any) {
     'yard_crate',
   ])
     delete c.items[ref('item', k)].immune; // the sow statuses are dropped
+  for (const s of ['wet', 'shocked', 'stunned', 'warm'])
+    delete c.statuses[ref('status', s)].narration.observed; // 1.110 (loka-kgd.176)
   const drop = {
     blueprints: ['blueprint/hut_plain', 'blueprint/hut_timbered'],
     actions: [

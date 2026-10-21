@@ -2826,6 +2826,10 @@
             },
             "expired": {
               "$ref": "text.schema.json#/$defs/TextKey"
+            },
+            "observed": {
+              "$ref": "text.schema.json#/$defs/TextKey",
+              "description": "Row G3 (loka-kgd.176): told when a first application lands on an NPC in the player's room that the player perceives; with none, an NPC holder is silent (kernel_api at least 1.110)."
             }
           },
           "required": [
