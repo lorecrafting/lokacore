@@ -223,7 +223,7 @@ test('traps 6: the wheels open the east door at 3, 1, 2; the bitters cure the po
 
 // Breaks: a lever's step and reset narrate the same line or nothing; a hall aside shows off its
 // solved state (lever_stage 3; wheels 3, 1, 2) or ignores one wheel; a wheel names another digit,
-// or its readout runs before its wrap (it would name 10, not 0).
+// a turn names none or two, or its readout runs before its wrap (it would name 10, not 0).
 test('traps 5-6 feedback: pulls and turns narrate; the hall says when a door is solved', () => {
   let x = go(go(go(fresh(WORLD), 'west').world, 'down').world, 'east').world;
   const said = (y: World, action: string) =>
@@ -237,15 +237,15 @@ test('traps 5-6 feedback: pulls and turns narrate; the hall says when a door is 
   assert.deepEqual(asides(pulls(x, 'abc')), ['aside.lever_hall.levers_drawn']);
   for (const n of [1, 2, 3]) {
     let y = x;
-    const read: string[] = [];
+    const read: string[][] = [];
     for (let i = 0; i < 10; i += 1) {
       const r = perform(y, `turn_wheel_${n}`);
-      read.push(...r.lines.filter((l) => l.startsWith(`narration.wheel_${n}.`)));
+      read.push(r.lines.filter((l) => l.startsWith(`narration.wheel_${n}.`)));
       y = r.world;
     }
     assert.deepEqual(
       read,
-      [1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map((k) => `narration.wheel_${n}.${k}`),
+      [1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map((k) => [`narration.wheel_${n}.${k}`]),
     );
   }
   for (const off of [
