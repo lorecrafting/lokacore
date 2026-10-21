@@ -187,7 +187,7 @@ function roleBlocked(
  * in the row's order, unavailable with blocked's code while it holds, else an accept with
  * acceptRefused's (choose refuses both).
  */
-// size: allow 55, exact drawn choice input shares keyed admission and mechanic eligibility
+// size: allow 58, exact drawn choice input shares keyed admission, mechanic eligibility and a lesson's price
 export function choiceView(
   world: World,
   actor: CharacterId,
