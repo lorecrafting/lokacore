@@ -1,4 +1,4 @@
-// The bundled chapter is the toolbox showcase (docs/decisions/README.md): its Book
+// The bundled chapter is the toolbox showcase (retired chapter: docs/decisions/owner-decision-retire-first-chapter-2026-10-21.md): its Book
 // keeps a confirmed move across reload, every move saved, and Start over back at the inn.
 import { beforeEach, test } from '@e2e-dev/web';
 import { expect } from 'e2e';

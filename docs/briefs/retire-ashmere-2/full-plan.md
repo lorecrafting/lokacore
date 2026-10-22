@@ -609,10 +609,10 @@ docs/decisions/owner-decision-chapter-one-polish-order-2026-10-07.md|H|history r
 docs/decisions/owner-decision-m12-b-notice-board-2026-10-05.md|H|history record|-|-|keep:history, excluded from the zero-hit grep (D2)|-
 docs/decisions/owner-decision-mechanics-toolbox-2026-10-08.md|H|history record|-|-|keep:history, excluded from the zero-hit grep (D2)|-
 docs/decisions/owner-decision-no-wait-opening-2026-10-05.md|H|history record|-|-|keep:history, excluded from the zero-hit grep (D2)|-
-docs/decisions/owner-decision-opening-elspeth-2026-10-05.md|H|history record|-|-|keep:history, excluded from the zero-hit grep (D2)|-
+docs/decisions/owner-decision-opening-npc-2026-10-05.md|H|history record|-|-|keep:history, excluded from the zero-hit grep (D2)|-
 docs/decisions/owner-decision-product-order-2026-10-15.md|H|history record|-|-|keep:history, excluded from the zero-hit grep (D2)|-
 docs/decisions/owner-decision-real-chapter-cast-2026-10-05.md|H|history record|-|-|keep:history, excluded from the zero-hit grep (D2)|-
-docs/decisions/owner-decision-retire-ashmere-2026-10-21.md|H|history record|-|-|keep:history, excluded from the zero-hit grep (D2)|-
+docs/decisions/owner-decision-retire-first-chapter-2026-10-21.md|H|history record|-|-|keep:history, excluded from the zero-hit grep (D2)|-
 docs/decisions/owner-decision-sampler-batch-2026-10-03.md|H|history record|-|-|keep:history, excluded from the zero-hit grep (D2)|-
 docs/decisions/owner-decision-sampler-development-look-2026-10-03.md|H|history record|-|-|keep:history, excluded from the zero-hit grep (D2)|-
 docs/decisions/owner-decision-worldbuilding-decoupled-2026-10-15.md|H|history record|-|-|keep:history, excluded from the zero-hit grep (D2)|-
@@ -634,7 +634,7 @@ docs/decisions/pm-decision-m12-a-readable-2026-10-05.md|H|history record|-|-|kee
 docs/decisions/pm-decision-mechanics-continuation-plan-2026-10-03.md|H|history record|-|-|keep:history, excluded from the zero-hit grep (D2)|-
 docs/decisions/pm-decision-q1-a-first-lead-2026-10-05.md|H|history record|-|-|keep:history, excluded from the zero-hit grep (D2)|-
 docs/decisions/pm-decision-q2-a-first-search-2026-10-05.md|H|history record|-|-|keep:history, excluded from the zero-hit grep (D2)|-
-docs/decisions/pm-decision-q2-b-wren-riddle-2026-10-05.md|H|history record|-|-|keep:history, excluded from the zero-hit grep (D2)|-
+docs/decisions/pm-decision-q2-b-riddle-2026-10-05.md|H|history record|-|-|keep:history, excluded from the zero-hit grep (D2)|-
 docs/decisions/pm-decision-q2-c-rescue-2026-10-05.md|H|history record|-|-|keep:history, excluded from the zero-hit grep (D2)|-
 docs/decisions/pm-decision-q2-c-stays-2026-10-05.md|H|history record|-|-|keep:history, excluded from the zero-hit grep (D2)|-
 docs/decisions/pm-decision-q3-bell-prior-lost-2026-10-05.md|H|history record|-|-|keep:history, excluded from the zero-hit grep (D2)|-

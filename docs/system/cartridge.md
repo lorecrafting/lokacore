@@ -27,7 +27,7 @@ source with rooms, text or an entry compiles to
 The shared app bundles the [toolbox showcase](../SHOWCASE.md), `toolbox_showcase`, as its
 chapter: the [artifact](../../protocol/fixtures/toolbox_showcase_hash.json) compiled from
 `cartridges/toolbox_showcase`, under the
-[retirement decision](../decisions/owner-decision-retire-ashmere-2026-10-21.md). The
+[retirement decision](../decisions/owner-decision-retire-first-chapter-2026-10-21.md). The
 first release will bundle the real game's chapter. The app's save has one fixed name,
 `loka-showcase.db` (the web build keeps a storage slot per save file); after a content change the
 app shows the pinned-release refusal with [explicit Start over](save.md#opening-a-story), with no
@@ -39,7 +39,7 @@ The app opens only the chapter file and offers no story picker. Missing pins fol
 
 ### Retired first chapter (E1 candidate)
 
-The chapter is deleted in [retirement](../decisions/owner-decision-retire-ashmere-2026-10-21.md)
+The chapter is deleted in [retirement](../decisions/owner-decision-retire-first-chapter-2026-10-21.md)
 phase 2; this section is its history.
 
 Until 2026-10-21 the shared app bundled the chapter at `0.0.42` (v042), titled
@@ -82,7 +82,7 @@ from Well Lane to the Drowned Lantern and Maud. Her selectable NPC detail uses t
 [Book dialogue flow](book-ui.md#npc-dialogue-and-action-details); directions remain in that
 detail's history rather than the World log. The informational replies grant no quest, fact or reward, and Leave preserves the north route. This fixed placement supersedes the
 archived Green/cottage schedule for the current opening
-([opening NPC decision](../decisions/owner-decision-opening-elspeth-2026-10-05.md)).
+([opening NPC decision](../decisions/owner-decision-opening-npc-2026-10-05.md)).
 
 Q1-A follows the [PM first-lead decision](../decisions/pm-decision-q1-a-first-lead-2026-10-05.md).
 The mother's always-eligible guide includes an explicit accept choice for **The First Lead**;
@@ -125,7 +125,7 @@ opening Talk do not. The next ordered conversation offers the letter-bank riddle
 has an informational reply. All progress uses the saved, original role identities.
 The journal stages are seek tracks → tracks found/child unfound → child met/riddle pending →
 riddle accepted/return decision pending. Q2 remains active through those stages.
-[Q2-B adoption](../decisions/pm-decision-q2-b-wren-riddle-2026-10-05.md) records this boundary.
+[Q2-B adoption](../decisions/pm-decision-q2-b-riddle-2026-10-05.md) records this boundary.
 
 API1.9 `QuestJournal.active_variants` is an optional ordered list of 1–16
 `{when: VersionedPolicy, text: TextKey}` entries. For an active quest only, the first holding
@@ -640,42 +640,6 @@ the quest (one choice, `accept`, which accepts it) and `bram` while it is active
 `carry`, `leave` with a hand-over), the fact `search_plan`, a story point with one outcome per choice, start 06:00
 (`cartridges/lantern_proof/*`; its stats and gate: [owner rules](owner-rules.md#product-and-scope)). Its known answer remains historical proof; the app bundled the
 [retired Missing Child chapter](#retired-first-chapter-e1-candidate) until 2026-10-21.
-
-### R9C synthetic interaction cartridge (E2)
-
-`cartridges/r9c_interactions` is `r9c_interactions@0.0.1`, **R9C interactions (synthetic)**,
-API1.37: the permanent, unpolished interaction corpus of the
-[E2 brief](../briefs/chapter-one/chapter-one-e2-r9c-interactions-brief-2026-10-05.md).
-It is not bundled, has its own identity and save, and does not inherit the chapter's hash
-or acceptance. Its content hash is `7d74fac7f9429475bdd7481fe7bf6b851acae2d0d6eaf1661892705391d17263`,
-with 26 rooms and 127 initial IDs; the [artifact oracle](../../protocol/fixtures/r9c_interactions_hash.json)
-and [allocation oracle](../../protocol/fixtures/r9c_interactions_ids.json) came from a
-Python generator deleted with the chapter (2026-10-21). The fixtures are not in the simulator's
-seed-picked corpus (`CARTRIDGES` in `kernel/ts/test/sim.ts`).
-
-The source is the v042 chapter's own definitions, short references and keys, cut to one
-shared topology: Ferry Landing, Well Lane, Village Green, North and East Gate, Watch Post,
-Chapel Steps and Nave, Bell Tower, Belfry, Drowned Lantern, Inn Rooms, Chandler, Well Shaft and
-Bottom, Boathouse, Fen Isle Landing, Reed Path, Reed Bank, Willow Shade, Drowned Oak, Oak
-Branches, Mire Crossing, Fox Hollow, Hound Run and Adder Nest. Reciprocal exits to removed
-rooms are dropped; the Pool route, rats, the inn rumor board, Maud's cellar quest, Chandler's debt, the wisp, topics,
-D9 village replies and scheduled villagers are absent, so `check@1` and `topics@1` are not
-locked. Sedge stands at Fen Isle Landing (the only recovery room), Wick in Chapel Nave, and the
-three apples on the Green. Two numbers deliberately differ from the chapter: the outbound
-ferry fare is 5 pennies and Maud's room costs 4.
-
-| Family | Entities |
-|---|---|
-| Identity, custody, trade | apples and fenwort (matching nouns), Peg's shop, satchel and haggle lesson, Vesper's message, Chapel door with Knock and Aldric, readable details, `where` |
-| Terminal fork | Q2 stays/rescued (Vesper, Wren, Elspeth), Q3 prior/fox (Aldric, belfry bell), bell scenes and reactions, five Green epilogues, `prologue_completed` |
-| Rest, dream, liquid, light | Maud's room, meal and ale, Inn Rooms bed and dream, waterskins and well, torch and lamp oil, dark well rooms |
-| Hound, bleed, escort, expedition | `fen_hounds`, `bleeding`, Wick's lesson and bandages, Wren's escort, Night in the Marsh from Hound Run |
-| Patrol and deer | Tobin's `watch_rounds`, `oak_deer`, `willow_deer` |
-| Crow provenance | four crow plans, `old_coin` at Well Bottom, the Oak Branches nest |
-| Skill, water, terminal consumption | Sedge's swim and herbalism, the well water route, both ferry routes, careful Harvest at Willow Shade, Wick's exchange, apples |
-
-A later mechanic change that breaks these answers updates them in the same slice
-(owner approval 2026-10-07, paraphrased).
 
 ## M1-A elapsed policy
 
@@ -1591,7 +1555,7 @@ current location. D5 is installed in the [current bundled chapter](#current-bund
 
 ## D3 western village declarations
 
-Selected under the [approved D3 brief](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/briefs/chapter-one/d3-western-ashmere-brief-2026-10-05.md),
+Selected under the [approved D3 brief](https://github.com/lorecrafting/lokacore/tree/f8513671ea7dd84d681876b2e36850129a4b0564/docs/briefs/chapter-one) (the retired chapter's D3 brief at that commit),
 with archived [chapter map/cast](../archive/spec/00a-chapter-one-content.md) §§2/4/5/8/11
 as the content basis. Boathouse south/north connects to Old Mill while retaining
 its east Ferry Landing exit and outbound ferry detail. Old Mill south/north
@@ -1616,7 +1580,7 @@ command, capability or save shape is selected.
 
 The [final D3 integration proof](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/2026-10-06-d3-final-integration/README.md)
 records the independently pinned successor and checks; the
-[provisional proof](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/2026-10-06-d3-western-ashmere/README.md) is historical.
+[provisional proof](https://github.com/lorecrafting/lokacore/tree/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence) (the retired chapter's D3 provisional evidence at that commit) is historical.
 
 <a id="d6-bottom-rooms-and-water-tuning-selected-pending-implementation"></a>
 

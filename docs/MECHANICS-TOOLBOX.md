@@ -4,7 +4,7 @@ The ranked plan for front-loading every common RPG mechanic as a generic engine 
 tiny sampler cartridge, so the owner can later assemble their own world from finished parts
 ([owner decision](decisions/owner-decision-mechanics-toolbox-2026-10-08.md)). The composition proof
 is the [toolbox showcase](SHOWCASE.md): after each approved batch Fable plans a district brief that an Opus slice builds, and the first chapter
-is deleted ([retirement](decisions/owner-decision-retire-ashmere-2026-10-21.md) phase 2;
+is deleted ([retirement](decisions/owner-decision-retire-first-chapter-2026-10-21.md) phase 2;
 [showcase decision](decisions/owner-decision-showcase-2026-10-10.md)). This page owns the ranking and each row's status; the rules of an
 installed mechanic live in [mechanics](system/mechanics.md), the sampler precedent is
 `cartridges/cellar_sampler`, and the slice process is [the workflow](WORKFLOW.md) with the
