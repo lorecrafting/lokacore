@@ -765,7 +765,7 @@ Use actual accepted causal command/event identity, scope, ordering and proposal-
 presence. All reads share the command budget; bound the finite route before work.
 Continue's leader transfer, player join/progress, pause, fatal reset and final
 quest/trust consequence each commit or roll back as one root proposal. Concurrent
-Wren follow transfers Wren once and preserves both relations' original identities;
+Child follow transfers the child once and preserves both relations' original identities;
 neither relation adds a second player transfer or steals the other's mutation target.
 No due-job chain, new player verb, global objective interpreter or per-frame writer
 is needed. Declare new typed state/transition bounds and planted invalid fixtures;
@@ -955,7 +955,7 @@ recipient identity and balance, and the owned-corpse recovery exception. A
 captured offer cannot substitute another endpoint or quote.
 
 Transport lowers positive payment through B3's existing conserved two-party
-resource transfer, then transfers the body and any eligible Wren through the
+resource transfer, then transfers the body and any eligible following child through the
 existing movement/escort consequence in one proposal/writer group. The outbound
 base quote remains 2p when an owned-corpse waiver makes the charge zero.
 Zero-fare crossings omit payment operations. Emit the normal accepted room-entry evidence
@@ -1141,7 +1141,7 @@ ActionInvocation. Descend: `action_key: "move"`, `target_ids: []`,
 `input: {direction: "down"}`; surface: same key/targets with `{direction: "up"}`.
 Trust actor/invocation/freshness fields normally. A shared read-only exact-edge
 admission serves ExitView, execution and captured-invocation proof. Descend reads
-skill/load/life/posture/encounter/MV/no-following-Wren and debits 10 MV instead of
+skill/load/life/posture/encounter/MV/no-following-child and debits 10 MV instead of
 ordinary fare. Living Up bypasses ordinary posture/fare checks and costs 0 MV.
 Both preserve body transfer and `entity_entered_room`; other exits stay ordinary.
 

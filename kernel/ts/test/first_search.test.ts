@@ -279,7 +279,7 @@ test('loader rejects missing quest references, trigger misuse and missing owners
       'UNDECLARED_CAPABILITY',
     ],
     [
-      (c: any) => (c.reactions[`${prefix}:reaction/start_search`].apply[0].quest = 'missing_child'),
+      (c: any) => (c.reactions[`${prefix}:reaction/start_search`].apply[0].quest = 'lost_lamb'),
       'SCHEMA_VIOLATION',
     ],
   ] as const) {

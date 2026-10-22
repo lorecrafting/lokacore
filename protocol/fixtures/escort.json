@@ -2006,7 +2006,7 @@
         "label": "start",
         "narration": "started",
         "escort": {
-          "npc": "wren",
+          "npc": "tamsin",
           "quest": {
             "cartridge_id": "c",
             "cartridge_version": "1.0.0",
@@ -2048,7 +2048,7 @@
         "label": "start",
         "narration": "started",
         "escort": {
-          "npc": "wren",
+          "npc": "tamsin",
           "transition": "start"
         }
       },
@@ -2066,7 +2066,7 @@
         "label": "start",
         "narration": "started",
         "escort": {
-          "npc": "wren",
+          "npc": "tamsin",
           "quest": {
             "cartridge_id": "c",
             "cartridge_version": "1.0.0",
@@ -2089,7 +2089,7 @@
         "label": "start",
         "narration": "started",
         "escort": {
-          "npc": "wren",
+          "npc": "tamsin",
           "quest": {
             "cartridge_id": "c",
             "cartridge_version": "1.0.0",
@@ -2113,7 +2113,7 @@
         "label": "start",
         "narration": "started",
         "escort": {
-          "npc": "wren",
+          "npc": "tamsin",
           "quest": {
             "cartridge_id": "c",
             "cartridge_version": "1.0.0",

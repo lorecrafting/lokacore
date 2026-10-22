@@ -1,9 +1,0 @@
-{
-  "title": "room.spire.title",
-  "description": "room.spire.description",
-  "exits": {
-    "down": {
-      "to": "belfry"
-    }
-  }
-}

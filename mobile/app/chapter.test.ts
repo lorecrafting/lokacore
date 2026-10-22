@@ -27,11 +27,11 @@ const adapt = (sql: DatabaseSync): Db => ({
   isInTransactionSync: () => sql.isTransaction,
 });
 
-// Breaks: the app bundles Ashmere or Lantern again, keys its save name by content (web keeps a
+// Breaks: the app bundles a retired chapter or Lantern again, keys its save name by content (web keeps a
 // slot per file forever), opens a save pinned to another showcase build without the refusal and
 // Start over, or opens/deletes an older save, including the Start over that deletes an unreadable
 // showcase file. Saved pins, the opening room and untouched old save bytes are the assertions.
-test('the app opens and replaces only its showcase save, preserving Lantern, sampler and Ashmere saves', () => {
+test('the app opens and replaces only its showcase save, preserving Lantern, sampler and retired-chapter saves', () => {
   const showcase = JSON.parse(
     readFileSync(
       new URL('../../protocol/fixtures/toolbox_showcase_hash.json', import.meta.url),
@@ -55,7 +55,7 @@ test('the app opens and replaces only its showcase save, preserving Lantern, sam
     },
   );
   sql.close();
-  const samplerPath = join(dir, 'loka-ashmere-sampler.db');
+  const samplerPath = join(dir, 'loka-old-sampler.db');
   const old = new DatabaseSync(samplerPath);
   openGame(
     adapt(old),
@@ -72,10 +72,10 @@ test('the app opens and replaces only its showcase save, preserving Lantern, sam
     },
   );
   old.close();
-  const ashmerePath = join(dir, 'loka-ashmere-missing-child.db');
-  writeFileSync(ashmerePath, 'retired Ashmere save'); // bytes the app must never open or delete
+  const retiredPath = join(dir, 'loka-retired-chapter.db');
+  writeFileSync(retiredPath, 'retired chapter save'); // bytes the app must never open or delete
   const checksum = () =>
-    [lanternPath, samplerPath, ashmerePath].map((path) =>
+    [lanternPath, samplerPath, retiredPath].map((path) =>
       createHash('sha256').update(readFileSync(path)).digest('hex'),
     );
   const before = checksum();

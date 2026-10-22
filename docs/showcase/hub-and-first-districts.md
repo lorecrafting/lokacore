@@ -71,7 +71,7 @@ slice A builds alone; west is reserved for the combat district (no exit yet; the
 - **Hob**, the innkeeper, stays in the inn (no schedule). `short_variants`: "Hob, asleep over the
   bar" while `time_window {from: 0, to: 6}` ([row W6](../system/mechanics.md#entity-description-variants-toolbox-row-w6);
   `variants_sampler/npcs/guard.json`).
-- **sign_hub**, a readable room detail read in place (`ashmere_missing_child/rooms/reed_path.json`
+- **sign_hub**, a readable room detail read in place (as the retired chapter's `reed_path` room
   `fox_prints`; a detail grants no topic), text:
 
   > Three roads leave this inn. North, the Fell Road: what weather, hunger and a strong drink do

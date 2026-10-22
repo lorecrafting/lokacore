@@ -404,7 +404,7 @@
             "cartridge_id": "ferrymans_lantern",
             "cartridge_version": "0.1.0",
             "kind": "npc",
-            "key": "wren"
+            "key": "tamsin"
           },
           "origin": {
             "kind": "authored"

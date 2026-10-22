@@ -15,7 +15,7 @@ import {
 } from '../../../kernel/ts/src/index.ts';
 import { encode } from '../../../kernel/ts/src/foundation/canonical.ts';
 import { ancestrySource } from '../../../kernel/ts/test/derived_fixture.ts';
-import { elapsedHost } from './__tests__/elapsed-host.test.ts';
+import { elapsedHost, receipts, sqliteHost } from './__tests__/elapsed-host.test.ts';
 import { openStory } from './authority.ts';
 
 const compiled = ancestrySource();
@@ -283,4 +283,54 @@ test('creation reconciles failed and lost real SQLite commits atomically', (t) =
       1,
     );
   }
+});
+
+// Breaks: wall time spent on the ancestry screen is credited after the choice (or across a
+// reopen), or the driver faults on the ancestry screen because the kernel refuses that elapsed.
+test('world time starts at the ancestry choice: no credit on the picker or across its reopen', (t) => {
+  const { bundle, fresh } = release(compiled);
+  const releases = [{ fresh, content_hash: bundle.sha256 }] as const;
+  const start = fresh.state.clock;
+  const dir = mkdtempSync(join(tmpdir(), 'd11-entry-'));
+  const clock = { wall: 0, mono: 0 };
+  let p = sqliteHost(join(dir, 'save.db'), clock);
+  t.after(() => {
+    p.sql.close();
+    rmSync(dir, { recursive: true });
+  });
+  const open = () => {
+    const s = openStory(p.db, releases, p.host);
+    if (s.kind !== 'open') throw new Error('save did not open');
+    return s;
+  };
+  let s = open();
+  s.pulse('resume', s.runId());
+  Object.assign(clock, { wall: 120000, mono: 120000 });
+  assert.deepEqual(s.pulse('active', s.runId()), { kind: 'ready' });
+  assert.equal(s.world().state.clock, start);
+  assert.equal(receipts(p.sql), 0);
+  // Close on the picker; reopen an hour later in a new process (monotonic restarts at 0).
+  p.sql.close();
+  Object.assign(clock, { wall: 3600000, mono: 0 });
+  p = sqliteHost(join(dir, 'save.db'), clock);
+  s = open();
+  assert.deepEqual(s.pulse('resume', s.runId()), { kind: 'ready' });
+  assert.equal(s.world().state.clock, start);
+  // Ten more minutes on the picker with no pulse: the choice's reservation must discard them.
+  Object.assign(clock, { wall: 4200000, mono: 600000 });
+  const chosen = s.invoke({
+    invocation_id: 'cccccccc-0000-4000-8000-000000000001',
+    actor_id: fresh.character,
+    action_key: 'choose_ancestry',
+    target_ids: [],
+    input: { ancestry: 'strong' },
+  } as never);
+  assert.equal(chosen.kind === 'saved' && (chosen.decision as { kind: string }).kind, 'accepted');
+  // Reopen before the first post-choice pulse: the saved anchor must be the choice, not the picker.
+  p.sql.close();
+  p = sqliteHost(join(dir, 'save.db'), clock);
+  s = open();
+  Object.assign(clock, { wall: 4260000, mono: 660000 });
+  for (let n = 0; n < 4 && s.pulse('active', s.runId()).kind !== 'ready'; n++);
+  assert.equal(s.world().state.clock, start + 60 * 50); // derived_sampler cartridge.json time_policy.rate
 });

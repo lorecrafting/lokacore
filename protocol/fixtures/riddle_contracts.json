@@ -5,7 +5,7 @@
     "value": {
       "key": "bram",
       "npc": {
-        "cartridge_id": "ashmere_ferry",
+        "cartridge_id": "ferry_sampler",
         "cartridge_version": "0.0.1",
         "kind": "npc",
         "key": "bram"
@@ -22,7 +22,7 @@
         "bram": {
           "role": "npc",
           "npc": {
-            "cartridge_id": "ashmere_ferry",
+            "cartridge_id": "ferry_sampler",
             "cartridge_version": "0.0.1",
             "kind": "npc",
             "key": "bram"
@@ -31,7 +31,7 @@
         "lantern": {
           "role": "item",
           "item": {
-            "cartridge_id": "ashmere_ferry",
+            "cartridge_id": "ferry_sampler",
             "cartridge_version": "0.0.1",
             "kind": "item",
             "key": "lantern"
@@ -73,7 +73,7 @@
     "value": {
       "key": "bram",
       "npc": {
-        "cartridge_id": "ashmere_ferry",
+        "cartridge_id": "ferry_sampler",
         "cartridge_version": "0.0.1",
         "kind": "npc",
         "key": "bram"
@@ -90,7 +90,7 @@
         "bram": {
           "role": "npc",
           "npc": {
-            "cartridge_id": "ashmere_ferry",
+            "cartridge_id": "ferry_sampler",
             "cartridge_version": "0.0.1",
             "kind": "npc",
             "key": "bram"
@@ -99,7 +99,7 @@
         "lantern": {
           "role": "item",
           "item": {
-            "cartridge_id": "ashmere_ferry",
+            "cartridge_id": "ferry_sampler",
             "cartridge_version": "0.0.1",
             "kind": "item",
             "key": "lantern"
@@ -140,7 +140,7 @@
     "value": {
       "key": "bram",
       "npc": {
-        "cartridge_id": "ashmere_ferry",
+        "cartridge_id": "ferry_sampler",
         "cartridge_version": "0.0.1",
         "kind": "npc",
         "key": "bram"
@@ -157,7 +157,7 @@
         "bram": {
           "role": "npc",
           "npc": {
-            "cartridge_id": "ashmere_ferry",
+            "cartridge_id": "ferry_sampler",
             "cartridge_version": "0.0.1",
             "kind": "npc",
             "key": "bram"
@@ -166,7 +166,7 @@
         "lantern": {
           "role": "item",
           "item": {
-            "cartridge_id": "ashmere_ferry",
+            "cartridge_id": "ferry_sampler",
             "cartridge_version": "0.0.1",
             "kind": "item",
             "key": "lantern"
@@ -207,7 +207,7 @@
     "value": {
       "key": "bram",
       "npc": {
-        "cartridge_id": "ashmere_ferry",
+        "cartridge_id": "ferry_sampler",
         "cartridge_version": "0.0.1",
         "kind": "npc",
         "key": "bram"
@@ -224,7 +224,7 @@
         "bram": {
           "role": "npc",
           "npc": {
-            "cartridge_id": "ashmere_ferry",
+            "cartridge_id": "ferry_sampler",
             "cartridge_version": "0.0.1",
             "kind": "npc",
             "key": "bram"
@@ -233,7 +233,7 @@
         "lantern": {
           "role": "item",
           "item": {
-            "cartridge_id": "ashmere_ferry",
+            "cartridge_id": "ferry_sampler",
             "cartridge_version": "0.0.1",
             "kind": "item",
             "key": "lantern"
@@ -264,7 +264,7 @@
     "value": {
       "key": "bram",
       "npc": {
-        "cartridge_id": "ashmere_ferry",
+        "cartridge_id": "ferry_sampler",
         "cartridge_version": "0.0.1",
         "kind": "npc",
         "key": "bram"
@@ -281,7 +281,7 @@
         "bram": {
           "role": "npc",
           "npc": {
-            "cartridge_id": "ashmere_ferry",
+            "cartridge_id": "ferry_sampler",
             "cartridge_version": "0.0.1",
             "kind": "npc",
             "key": "bram"
@@ -290,7 +290,7 @@
         "lantern": {
           "role": "item",
           "item": {
-            "cartridge_id": "ashmere_ferry",
+            "cartridge_id": "ferry_sampler",
             "cartridge_version": "0.0.1",
             "kind": "item",
             "key": "lantern"
@@ -331,7 +331,7 @@
     "value": {
       "key": "bram",
       "npc": {
-        "cartridge_id": "ashmere_ferry",
+        "cartridge_id": "ferry_sampler",
         "cartridge_version": "0.0.1",
         "kind": "npc",
         "key": "bram"
@@ -348,7 +348,7 @@
         "bram": {
           "role": "npc",
           "npc": {
-            "cartridge_id": "ashmere_ferry",
+            "cartridge_id": "ferry_sampler",
             "cartridge_version": "0.0.1",
             "kind": "npc",
             "key": "bram"
@@ -357,7 +357,7 @@
         "lantern": {
           "role": "item",
           "item": {
-            "cartridge_id": "ashmere_ferry",
+            "cartridge_id": "ferry_sampler",
             "cartridge_version": "0.0.1",
             "kind": "item",
             "key": "lantern"
@@ -399,7 +399,7 @@
     "value": {
       "key": "bram",
       "npc": {
-        "cartridge_id": "ashmere_ferry",
+        "cartridge_id": "ferry_sampler",
         "cartridge_version": "0.0.1",
         "kind": "npc",
         "key": "bram"
@@ -416,7 +416,7 @@
         "bram": {
           "role": "npc",
           "npc": {
-            "cartridge_id": "ashmere_ferry",
+            "cartridge_id": "ferry_sampler",
             "cartridge_version": "0.0.1",
             "kind": "npc",
             "key": "bram"
@@ -425,7 +425,7 @@
         "lantern": {
           "role": "item",
           "item": {
-            "cartridge_id": "ashmere_ferry",
+            "cartridge_id": "ferry_sampler",
             "cartridge_version": "0.0.1",
             "kind": "item",
             "key": "lantern"
@@ -467,7 +467,7 @@
     "value": {
       "key": "bram",
       "npc": {
-        "cartridge_id": "ashmere_ferry",
+        "cartridge_id": "ferry_sampler",
         "cartridge_version": "0.0.1",
         "kind": "npc",
         "key": "bram"
@@ -484,7 +484,7 @@
         "bram": {
           "role": "npc",
           "npc": {
-            "cartridge_id": "ashmere_ferry",
+            "cartridge_id": "ferry_sampler",
             "cartridge_version": "0.0.1",
             "kind": "npc",
             "key": "bram"
@@ -493,7 +493,7 @@
         "lantern": {
           "role": "item",
           "item": {
-            "cartridge_id": "ashmere_ferry",
+            "cartridge_id": "ferry_sampler",
             "cartridge_version": "0.0.1",
             "kind": "item",
             "key": "lantern"
@@ -535,7 +535,7 @@
     "value": {
       "key": "bram",
       "npc": {
-        "cartridge_id": "ashmere_ferry",
+        "cartridge_id": "ferry_sampler",
         "cartridge_version": "0.0.1",
         "kind": "npc",
         "key": "bram"
@@ -552,7 +552,7 @@
         "bram": {
           "role": "npc",
           "npc": {
-            "cartridge_id": "ashmere_ferry",
+            "cartridge_id": "ferry_sampler",
             "cartridge_version": "0.0.1",
             "kind": "npc",
             "key": "bram"
@@ -561,7 +561,7 @@
         "lantern": {
           "role": "item",
           "item": {
-            "cartridge_id": "ashmere_ferry",
+            "cartridge_id": "ferry_sampler",
             "cartridge_version": "0.0.1",
             "kind": "item",
             "key": "lantern"
@@ -603,7 +603,7 @@
     "value": {
       "key": "bram",
       "npc": {
-        "cartridge_id": "ashmere_ferry",
+        "cartridge_id": "ferry_sampler",
         "cartridge_version": "0.0.1",
         "kind": "npc",
         "key": "bram"
@@ -620,7 +620,7 @@
         "bram": {
           "role": "npc",
           "npc": {
-            "cartridge_id": "ashmere_ferry",
+            "cartridge_id": "ferry_sampler",
             "cartridge_version": "0.0.1",
             "kind": "npc",
             "key": "bram"
@@ -629,7 +629,7 @@
         "lantern": {
           "role": "item",
           "item": {
-            "cartridge_id": "ashmere_ferry",
+            "cartridge_id": "ferry_sampler",
             "cartridge_version": "0.0.1",
             "kind": "item",
             "key": "lantern"
@@ -671,7 +671,7 @@
     "value": {
       "key": "bram",
       "npc": {
-        "cartridge_id": "ashmere_ferry",
+        "cartridge_id": "ferry_sampler",
         "cartridge_version": "0.0.1",
         "kind": "npc",
         "key": "bram"
@@ -688,7 +688,7 @@
         "bram": {
           "role": "npc",
           "npc": {
-            "cartridge_id": "ashmere_ferry",
+            "cartridge_id": "ferry_sampler",
             "cartridge_version": "0.0.1",
             "kind": "npc",
             "key": "bram"
@@ -697,7 +697,7 @@
         "lantern": {
           "role": "item",
           "item": {
-            "cartridge_id": "ashmere_ferry",
+            "cartridge_id": "ferry_sampler",
             "cartridge_version": "0.0.1",
             "kind": "item",
             "key": "lantern"
@@ -739,7 +739,7 @@
     "value": {
       "key": "bram",
       "npc": {
-        "cartridge_id": "ashmere_ferry",
+        "cartridge_id": "ferry_sampler",
         "cartridge_version": "0.0.1",
         "kind": "npc",
         "key": "bram"
@@ -756,7 +756,7 @@
         "bram": {
           "role": "npc",
           "npc": {
-            "cartridge_id": "ashmere_ferry",
+            "cartridge_id": "ferry_sampler",
             "cartridge_version": "0.0.1",
             "kind": "npc",
             "key": "bram"
@@ -765,7 +765,7 @@
         "lantern": {
           "role": "item",
           "item": {
-            "cartridge_id": "ashmere_ferry",
+            "cartridge_id": "ferry_sampler",
             "cartridge_version": "0.0.1",
             "kind": "item",
             "key": "lantern"
@@ -807,7 +807,7 @@
     "value": {
       "key": "bram",
       "npc": {
-        "cartridge_id": "ashmere_ferry",
+        "cartridge_id": "ferry_sampler",
         "cartridge_version": "0.0.1",
         "kind": "npc",
         "key": "bram"
@@ -824,7 +824,7 @@
         "bram": {
           "role": "npc",
           "npc": {
-            "cartridge_id": "ashmere_ferry",
+            "cartridge_id": "ferry_sampler",
             "cartridge_version": "0.0.1",
             "kind": "npc",
             "key": "bram"
@@ -833,7 +833,7 @@
         "lantern": {
           "role": "item",
           "item": {
-            "cartridge_id": "ashmere_ferry",
+            "cartridge_id": "ferry_sampler",
             "cartridge_version": "0.0.1",
             "kind": "item",
             "key": "lantern"
@@ -865,7 +865,7 @@
     "value": {
       "key": "bram",
       "npc": {
-        "cartridge_id": "ashmere_ferry",
+        "cartridge_id": "ferry_sampler",
         "cartridge_version": "0.0.1",
         "kind": "npc",
         "key": "bram"
@@ -882,7 +882,7 @@
         "bram": {
           "role": "npc",
           "npc": {
-            "cartridge_id": "ashmere_ferry",
+            "cartridge_id": "ferry_sampler",
             "cartridge_version": "0.0.1",
             "kind": "npc",
             "key": "bram"
@@ -891,7 +891,7 @@
         "lantern": {
           "role": "item",
           "item": {
-            "cartridge_id": "ashmere_ferry",
+            "cartridge_id": "ferry_sampler",
             "cartridge_version": "0.0.1",
             "kind": "item",
             "key": "lantern"
@@ -957,7 +957,7 @@
     "value": {
       "key": "bram",
       "npc": {
-        "cartridge_id": "ashmere_ferry",
+        "cartridge_id": "ferry_sampler",
         "cartridge_version": "0.0.1",
         "kind": "npc",
         "key": "bram"
@@ -974,7 +974,7 @@
         "bram": {
           "role": "npc",
           "npc": {
-            "cartridge_id": "ashmere_ferry",
+            "cartridge_id": "ferry_sampler",
             "cartridge_version": "0.0.1",
             "kind": "npc",
             "key": "bram"
@@ -983,7 +983,7 @@
         "lantern": {
           "role": "item",
           "item": {
-            "cartridge_id": "ashmere_ferry",
+            "cartridge_id": "ferry_sampler",
             "cartridge_version": "0.0.1",
             "kind": "item",
             "key": "lantern"
@@ -1017,7 +1017,7 @@
     "value": {
       "key": "bram",
       "npc": {
-        "cartridge_id": "ashmere_ferry",
+        "cartridge_id": "ferry_sampler",
         "cartridge_version": "0.0.1",
         "kind": "npc",
         "key": "bram"
@@ -1034,7 +1034,7 @@
         "bram": {
           "role": "npc",
           "npc": {
-            "cartridge_id": "ashmere_ferry",
+            "cartridge_id": "ferry_sampler",
             "cartridge_version": "0.0.1",
             "kind": "npc",
             "key": "bram"
@@ -1043,7 +1043,7 @@
         "lantern": {
           "role": "item",
           "item": {
-            "cartridge_id": "ashmere_ferry",
+            "cartridge_id": "ferry_sampler",
             "cartridge_version": "0.0.1",
             "kind": "item",
             "key": "lantern"
@@ -1077,7 +1077,7 @@
     "value": {
       "key": "bram",
       "npc": {
-        "cartridge_id": "ashmere_ferry",
+        "cartridge_id": "ferry_sampler",
         "cartridge_version": "0.0.1",
         "kind": "npc",
         "key": "bram"
@@ -1094,7 +1094,7 @@
         "bram": {
           "role": "npc",
           "npc": {
-            "cartridge_id": "ashmere_ferry",
+            "cartridge_id": "ferry_sampler",
             "cartridge_version": "0.0.1",
             "kind": "npc",
             "key": "bram"
@@ -1103,7 +1103,7 @@
         "lantern": {
           "role": "item",
           "item": {
-            "cartridge_id": "ashmere_ferry",
+            "cartridge_id": "ferry_sampler",
             "cartridge_version": "0.0.1",
             "kind": "item",
             "key": "lantern"
@@ -1137,7 +1137,7 @@
     "value": {
       "key": "bram",
       "npc": {
-        "cartridge_id": "ashmere_ferry",
+        "cartridge_id": "ferry_sampler",
         "cartridge_version": "0.0.1",
         "kind": "npc",
         "key": "bram"
@@ -1154,7 +1154,7 @@
         "bram": {
           "role": "npc",
           "npc": {
-            "cartridge_id": "ashmere_ferry",
+            "cartridge_id": "ferry_sampler",
             "cartridge_version": "0.0.1",
             "kind": "npc",
             "key": "bram"
@@ -1163,7 +1163,7 @@
         "lantern": {
           "role": "item",
           "item": {
-            "cartridge_id": "ashmere_ferry",
+            "cartridge_id": "ferry_sampler",
             "cartridge_version": "0.0.1",
             "kind": "item",
             "key": "lantern"
@@ -1197,7 +1197,7 @@
     "value": {
       "key": "bram",
       "npc": {
-        "cartridge_id": "ashmere_ferry",
+        "cartridge_id": "ferry_sampler",
         "cartridge_version": "0.0.1",
         "kind": "npc",
         "key": "bram"
@@ -1214,7 +1214,7 @@
         "bram": {
           "role": "npc",
           "npc": {
-            "cartridge_id": "ashmere_ferry",
+            "cartridge_id": "ferry_sampler",
             "cartridge_version": "0.0.1",
             "kind": "npc",
             "key": "bram"
@@ -1223,7 +1223,7 @@
         "lantern": {
           "role": "item",
           "item": {
-            "cartridge_id": "ashmere_ferry",
+            "cartridge_id": "ferry_sampler",
             "cartridge_version": "0.0.1",
             "kind": "item",
             "key": "lantern"
@@ -1257,7 +1257,7 @@
     "value": {
       "key": "bram",
       "npc": {
-        "cartridge_id": "ashmere_ferry",
+        "cartridge_id": "ferry_sampler",
         "cartridge_version": "0.0.1",
         "kind": "npc",
         "key": "bram"
@@ -1274,7 +1274,7 @@
         "bram": {
           "role": "npc",
           "npc": {
-            "cartridge_id": "ashmere_ferry",
+            "cartridge_id": "ferry_sampler",
             "cartridge_version": "0.0.1",
             "kind": "npc",
             "key": "bram"
@@ -1283,7 +1283,7 @@
         "lantern": {
           "role": "item",
           "item": {
-            "cartridge_id": "ashmere_ferry",
+            "cartridge_id": "ferry_sampler",
             "cartridge_version": "0.0.1",
             "kind": "item",
             "key": "lantern"
@@ -1325,7 +1325,7 @@
     "value": {
       "key": "bram",
       "npc": {
-        "cartridge_id": "ashmere_ferry",
+        "cartridge_id": "ferry_sampler",
         "cartridge_version": "0.0.1",
         "kind": "npc",
         "key": "bram"
@@ -1342,7 +1342,7 @@
         "bram": {
           "role": "npc",
           "npc": {
-            "cartridge_id": "ashmere_ferry",
+            "cartridge_id": "ferry_sampler",
             "cartridge_version": "0.0.1",
             "kind": "npc",
             "key": "bram"
@@ -1351,7 +1351,7 @@
         "lantern": {
           "role": "item",
           "item": {
-            "cartridge_id": "ashmere_ferry",
+            "cartridge_id": "ferry_sampler",
             "cartridge_version": "0.0.1",
             "kind": "item",
             "key": "lantern"
@@ -1393,7 +1393,7 @@
     "value": {
       "key": "bram",
       "npc": {
-        "cartridge_id": "ashmere_ferry",
+        "cartridge_id": "ferry_sampler",
         "cartridge_version": "0.0.1",
         "kind": "npc",
         "key": "bram"
@@ -1410,7 +1410,7 @@
         "bram": {
           "role": "npc",
           "npc": {
-            "cartridge_id": "ashmere_ferry",
+            "cartridge_id": "ferry_sampler",
             "cartridge_version": "0.0.1",
             "kind": "npc",
             "key": "bram"
@@ -1419,7 +1419,7 @@
         "lantern": {
           "role": "item",
           "item": {
-            "cartridge_id": "ashmere_ferry",
+            "cartridge_id": "ferry_sampler",
             "cartridge_version": "0.0.1",
             "kind": "item",
             "key": "lantern"
@@ -1462,7 +1462,7 @@
     "value": {
       "key": "bram",
       "npc": {
-        "cartridge_id": "ashmere_ferry",
+        "cartridge_id": "ferry_sampler",
         "cartridge_version": "0.0.1",
         "kind": "npc",
         "key": "bram"
@@ -1479,7 +1479,7 @@
         "bram": {
           "role": "npc",
           "npc": {
-            "cartridge_id": "ashmere_ferry",
+            "cartridge_id": "ferry_sampler",
             "cartridge_version": "0.0.1",
             "kind": "npc",
             "key": "bram"
@@ -1488,7 +1488,7 @@
         "lantern": {
           "role": "item",
           "item": {
-            "cartridge_id": "ashmere_ferry",
+            "cartridge_id": "ferry_sampler",
             "cartridge_version": "0.0.1",
             "kind": "item",
             "key": "lantern"
@@ -1522,7 +1522,7 @@
     "value": {
       "key": "bram",
       "npc": {
-        "cartridge_id": "ashmere_ferry",
+        "cartridge_id": "ferry_sampler",
         "cartridge_version": "0.0.1",
         "kind": "npc",
         "key": "bram"
@@ -1539,7 +1539,7 @@
         "bram": {
           "role": "npc",
           "npc": {
-            "cartridge_id": "ashmere_ferry",
+            "cartridge_id": "ferry_sampler",
             "cartridge_version": "0.0.1",
             "kind": "npc",
             "key": "bram"
@@ -1548,7 +1548,7 @@
         "lantern": {
           "role": "item",
           "item": {
-            "cartridge_id": "ashmere_ferry",
+            "cartridge_id": "ferry_sampler",
             "cartridge_version": "0.0.1",
             "kind": "item",
             "key": "lantern"

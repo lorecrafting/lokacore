@@ -439,9 +439,9 @@ Resolved Q3/prior requires a committed Ring receipt whose stored command identit
 full fact references and scopes, Q3 transition, and resolved event quest/actor/cause
 match that actor's save. The receipt must assign the bell and allegiance, resolve
 that actor's Q3 instance and start the `bell_rung` scene. A failed Q2/lost additionally requires the same Ring receipt to
-fail that Q2 instance and assign lost child status; Wren's accepted meeting,
+fail that Q2 instance and assign lost child status; the child's accepted meeting,
 return selection and escort must be absent. A completed stays/rescued Q2 or an
-active Q2 after the accepted Wren meeting remains legal after Ring. A retained
+active Q2 after the accepted child meeting remains legal after Ring. A retained
 Q2/lost transition against a current non-lost Q2 row is contradictory.
 
 The Q3-F release extends this check for a silent bell. Resolved Q3/fox requires resolved
@@ -722,7 +722,7 @@ file rewriting. Existing storage-error and pin-mismatch distinctions remain.
 Failed COMMIT, unknown-not-committed, unknown-committed and lost acknowledgement
 prove all-old/all-new movement/attempt/quest/trust/head/receipt. Exact receipt retry
 moves, credits, restarts and rewards nothing twice. Reconcile lawful intermediate
-states with the later consumer, including concurrent Wren following/separation;
+states with the later consumer, including concurrent child following/separation;
 no new snapshot, periodic checkpoint, migration or receipt ledger is introduced.
 
 ## B6 discovery, sitting and ward recovery
@@ -844,7 +844,7 @@ crossings have no penny write. Reopen and reconciliation validate the original
 endpoint/route/quote/recipient, prior/result balances, corpse ownership and
 nonempty isle custody at the original accepted revision, and exact body/follower
 transfer from one source room to one destination. Later corpse retrieval, death,
-Wren separation or other payments cannot invalidate a valid prior crossing.
+Child separation or other payments cannot invalidate a valid prior crossing.
 Missing charge, charge without move, extra charge, wrong-owner waiver, forged
 recipient/endpoint, or fabricated room entry yields typed `save_corrupt` with
 in-place Start over; no repair or silent deletion.
@@ -1007,7 +1007,7 @@ current-release mismatch handling and in-place explicit Start over for corruptio
 [D5](mechanics.md#d5-dry-deep-fen-exploration-selected-contract) adds no state
 schema or new writer. Ordinary current-room custody, original Q2 message/escort
 rows and exact Read receipts remain authoritative under the new source pin.
-Reopen must retain every new location, original separated Wren at its actual
+Reopen must retain every new location, the original separated child at its actual
 location, and original message custody without granting knowledge or Q2 credit.
 A failed/uncertain movement or Read COMMIT and exact invocation replay use the
 existing receipt rules; no source-change migration or repair is selected.

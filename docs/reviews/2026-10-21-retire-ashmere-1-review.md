@@ -1,7 +1,7 @@
 # Review: Retire Ashmere 1, bundle the showcase (PR #423, loka-4hik.1)
 
 - Branch `retire/ashmere-1`, exact commit `74febe2901ec221bbd74640e191f00dbb0671f42`, base `origin/main`.
-- Governing: [owner decision: retire Ashmere](../decisions/owner-decision-retire-ashmere-2026-10-21.md), [AGENTS.md pre-production and Distribution](../../AGENTS.md#architecture-decisions-already-made-do-not-reopen-silently), [cartridge.md](../system/cartridge.md), [Writing tests](../../AGENTS.md#writing-tests-every-change-every-agent).
+- Governing: [owner decision: retire Ashmere](../decisions/owner-decision-retire-first-chapter-2026-10-21.md), [AGENTS.md pre-production and Distribution](../../AGENTS.md#architecture-decisions-already-made-do-not-reopen-silently), [cartridge.md](../system/cartridge.md), [Writing tests](../../AGENTS.md#writing-tests-every-change-every-agent).
 - Reviewer: anthropic/claude-opus-5-5, independent, authored none of the work.
 - **Verdict: CHANGES REQUIRED** (one blocker; the rest of the slice is correct).
 

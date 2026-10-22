@@ -657,7 +657,7 @@
         {
           "kind": "detail",
           "room": {
-            "cartridge_id": "ashmere_bell",
+            "cartridge_id": "recipe_sampler",
             "cartridge_version": "0.0.1",
             "kind": "room",
             "key": "belfry"
@@ -877,7 +877,7 @@
         {
           "op": "fact.assign",
           "fact": {
-            "cartridge_id": "ashmere_bell",
+            "cartridge_id": "recipe_sampler",
             "cartridge_version": "0.0.1",
             "kind": "fact",
             "key": "chapel_bell_rung"
@@ -891,7 +891,7 @@
         {
           "op": "resource.adjust",
           "resource": {
-            "cartridge_id": "ashmere_dusk",
+            "cartridge_id": "check_sampler",
             "cartridge_version": "0.0.1",
             "kind": "resource",
             "key": "hp"
@@ -1165,7 +1165,7 @@
           "target": {
             "kind": "detail",
             "room": {
-              "cartridge_id": "ashmere_bell",
+              "cartridge_id": "recipe_sampler",
               "cartridge_version": "0.0.1",
               "kind": "room",
               "key": "belfry"
@@ -1180,7 +1180,7 @@
               "item": {
                 "op": "fact_compare",
                 "fact": {
-                  "cartridge_id": "ashmere_bell",
+                  "cartridge_id": "recipe_sampler",
                   "cartridge_version": "0.0.1",
                   "kind": "fact",
                   "key": "chapel_bell_rung"
@@ -1195,7 +1195,7 @@
                 {
                   "op": "fact.assign",
                   "fact": {
-                    "cartridge_id": "ashmere_bell",
+                    "cartridge_id": "recipe_sampler",
                     "cartridge_version": "0.0.1",
                     "kind": "fact",
                     "key": "chapel_bell_rung"
@@ -1238,7 +1238,7 @@
           "target": {
             "kind": "detail",
             "room": {
-              "cartridge_id": "ashmere_bell",
+              "cartridge_id": "recipe_sampler",
               "cartridge_version": "0.0.1",
               "kind": "room",
               "key": "r"
@@ -1337,7 +1337,7 @@
           "target": {
             "kind": "detail",
             "room": {
-              "cartridge_id": "ashmere_bell",
+              "cartridge_id": "recipe_sampler",
               "cartridge_version": "0.0.1",
               "kind": "room",
               "key": "belfry"
@@ -1352,7 +1352,7 @@
               "item": {
                 "op": "fact_compare",
                 "fact": {
-                  "cartridge_id": "ashmere_bell",
+                  "cartridge_id": "recipe_sampler",
                   "cartridge_version": "0.0.1",
                   "kind": "fact",
                   "key": "chapel_bell_rung"
@@ -1367,7 +1367,7 @@
                 {
                   "op": "fact.assign",
                   "fact": {
-                    "cartridge_id": "ashmere_bell",
+                    "cartridge_id": "recipe_sampler",
                     "cartridge_version": "0.0.1",
                     "kind": "fact",
                     "key": "chapel_bell_rung"
@@ -1438,7 +1438,7 @@
             "bram": {
               "role": "npc",
               "npc": {
-                "cartridge_id": "ashmere_ferry",
+                "cartridge_id": "ferry_sampler",
                 "cartridge_version": "0.0.1",
                 "kind": "npc",
                 "key": "bram"
@@ -1447,7 +1447,7 @@
             "rope": {
               "role": "item",
               "item": {
-                "cartridge_id": "ashmere_ferry",
+                "cartridge_id": "ferry_sampler",
                 "cartridge_version": "0.0.1",
                 "kind": "item",
                 "key": "rope"
@@ -1512,7 +1512,7 @@
         {
           "role": "npc",
           "npc": {
-            "cartridge_id": "ashmere_ferry",
+            "cartridge_id": "ferry_sampler",
             "cartridge_version": "0.0.1",
             "kind": "npc",
             "key": "bram"
@@ -1679,7 +1679,7 @@
       "examples": [
         {
           "resource": {
-            "cartridge_id": "ashmere_dusk",
+            "cartridge_id": "check_sampler",
             "cartridge_version": "0.0.1",
             "kind": "resource",
             "key": "mv"

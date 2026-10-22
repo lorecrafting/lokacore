@@ -35,7 +35,7 @@ lists only what a file adds to that.
 | `capability.schema.json`, `capability_registry.json` | capability versions, the lock, residency, owned commands, definitions, events and policy ops | 05 §3, §6, §11; 09 §21 | `capability_lock_hash.json` |
 | `residency.json` | 05 §6 rows that are not capabilities | 05 §6 | each row names its own |
 | `room.schema.json` | rooms and their exits (Connection), owned by movement; details and description variants, owned by inspectable_detail and description_variant; barriers (BarrierDefinition, BarrierState), owned by barrier; a site (directions a blueprint may be built in, the blueprints allowed), owned by construction | 21 §5, §6; 05 §17, §25; 00 §4.10; 00a §2, §12 | `cartridge_rooms_hash.json`, `cartridge_details_hash.json`, `cartridge_facts_hash.json`, `cartridge_gate_hash.json` |
-| `entity.schema.json` | items and NPCs (ItemDefinition, NpcDefinition, ItemLocation), owned by containment; an NPC's daily_schedule, owned by behavior; an item's slot (SlotKey), owned by equipment; an item's explicit container eligibility, capacity and barrier (a receptacle's lid, barrier@1); ItemReadable held-item text and declared topic | 21 §5, §8, §10; 03 §23; 06 §13; 00 §4.4; 00a §5, §12 | `cartridge_items_hash.json`, `cartridge_ferry_hash.json`, `cartridge_wear_hash.json`, `cartridge_locks_hash.json`, `missing_child_v042_hash.json` |
+| `entity.schema.json` | items and NPCs (ItemDefinition, NpcDefinition, ItemLocation), owned by containment; an NPC's daily_schedule, owned by behavior; an item's slot (SlotKey), owned by equipment; an item's explicit container eligibility, capacity and barrier (a receptacle's lid, barrier@1); ItemReadable held-item text and declared topic | 21 §5, §8, §10; 03 §23; 06 §13; 00 §4.4; 00a §5, §12 | `cartridge_items_hash.json`, `cartridge_ferry_hash.json`, `cartridge_wear_hash.json`, `cartridge_locks_hash.json` |
 | `quest.schema.json` | quests (QuestDefinition and its QuestObjective evidence policy), owned by quest; the lifecycle state is policy.schema.json QuestState | 06 §1-§5, §43; 04 §5.2 | `cartridge_errand_hash.json` |
 | `dialogue.schema.json` | dialogues (DialogueDefinition: speaker, talk policy, prompt, bound roles, choices with fact.assign consequences and an optional hand-over, the quest a choice resolves), owned by dialogue; a keyword a say or whisper opens, owned by speech | 06 §17, §18, §33, §43; 04 §5.3; [row G9](../docs/system/mechanics.md#social-verbs-say-whisper-and-shout-toolbox-row-g9-engine-half) | `cartridge_ferry_hash.json`, `speech_sampler_hash.json` |
 | `scene.schema.json` | modal narration and anchored `presentation_only` Rest dream; bound Continue, choice/branch and checked final consequences | 06 §33–§37; 21 §3.6; [mechanics](../docs/system/mechanics.md#scene1-mechanicsscenerulets) | `cartridge_scene_hash.json` |
@@ -55,9 +55,9 @@ Registries are checked in `test/loka/core/registries_test.exs`.
 Current receptacle fixtures are named `containers_*hash.json`; their independently
 derived additions are in `test/loka/cartridge_containers_hash.py`. Original artifacts
 retain preproduction bytes; the current loader refuses unmarked receptacles. Current
-feature transcripts remain replayable. The retired Ashmere
-chapter's release, API, content hash, room count and allocation oracle live in
-[the retired Ashmere chapter identity](../docs/system/cartridge.md#retired-ashmere-chapter-e1-candidate).
+feature transcripts remain replayable. The retired first
+chapter's release, API, content hash and room count are recorded in
+[the retired chapter identity](../docs/system/cartridge.md#retired-first-chapter-e1-candidate).
 
 `fixtures/escort.json` pins the API1.11 relation, transition, target, dialogue effect
 and policy supplement, including both portable composers and independent preconditions

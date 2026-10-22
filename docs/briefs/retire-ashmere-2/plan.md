@@ -103,7 +103,7 @@ None of the new names is already taken. Collisions avoided: `reactions_sampler`,
   - `protocol/README.md`: fixture list.
   - `mobile/app/tests/steps.ts:1,21`: comments.
   - Comment links in the r9c tests.
-- **Append** a phase-2 line to `docs/decisions/owner-decision-retire-ashmere-2026-10-21.md`.
+- **Append** a phase-2 line to `docs/decisions/owner-decision-retire-first-chapter-2026-10-21.md`.
 - **Move** `docs/MISSING-CHILD-PLAN.md` to `docs/archive/`.
 - **Leave** reviews, archive, older decisions and worldbuilding as they are (history).
 

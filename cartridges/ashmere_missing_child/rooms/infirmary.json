@@ -1,9 +1,0 @@
-{
-  "title": "room.infirmary.title",
-  "description": "room.infirmary.description",
-  "exits": {
-    "west": {
-      "to": "cloister"
-    }
-  }
-}

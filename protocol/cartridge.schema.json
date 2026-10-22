@@ -410,9 +410,9 @@
           "format": "loka-cartridge-v1",
           "manifest": {
             "api_version": "loka/v3",
-            "id": "ashmere_hello",
+            "id": "hello_sampler",
             "version": "0.0.1",
-            "title": "Ashmere — Hello World",
+            "title": "Hello Sampler",
             "requires": {
               "kernel_api": {
                 "at_least": "1.0",
@@ -464,7 +464,7 @@
             }
           },
           "facts": {
-            "ashmere_hello@0.0.1:fact/village_arrived": {
+            "hello_sampler@0.0.1:fact/village_arrived": {
               "key": "village_arrived",
               "version": 1,
               "value_type": {
@@ -478,12 +478,12 @@
             }
           },
           "policies": {
-            "ashmere_hello@0.0.1:policy/village_arrived": {
+            "hello_sampler@0.0.1:policy/village_arrived": {
               "policy_version": 1,
               "root": {
                 "op": "fact_compare",
                 "fact": {
-                  "cartridge_id": "ashmere_hello",
+                  "cartridge_id": "hello_sampler",
                   "cartridge_version": "0.0.1",
                   "kind": "fact",
                   "key": "village_arrived"
@@ -493,7 +493,7 @@
             }
           },
           "actions": {
-            "ashmere_hello@0.0.1:action/talk": {
+            "hello_sampler@0.0.1:action/talk": {
               "key": "talk",
               "label": "actions.talk",
               "target": {
@@ -519,9 +519,9 @@
           "format": "loka-cartridge-v2",
           "manifest": {
             "api_version": "loka/v3",
-            "id": "ashmere_rooms",
+            "id": "rooms_sampler",
             "version": "0.0.1",
-            "title": "Ashmere — Rooms",
+            "title": "Rooms Sampler",
             "requires": {
               "kernel_api": {
                 "at_least": "1.0",
@@ -550,14 +550,14 @@
           "policies": {},
           "actions": {},
           "rooms": {
-            "ashmere_rooms@0.0.1:room/boathouse": {
+            "rooms_sampler@0.0.1:room/boathouse": {
               "key": "boathouse",
               "title": "room.boathouse.title",
               "description": "room.boathouse.description",
               "exits": {
                 "east": {
                   "to": {
-                    "cartridge_id": "ashmere_rooms",
+                    "cartridge_id": "rooms_sampler",
                     "cartridge_version": "0.0.1",
                     "kind": "room",
                     "key": "ferry_landing"
@@ -565,14 +565,14 @@
                 }
               }
             },
-            "ashmere_rooms@0.0.1:room/ferry_landing": {
+            "rooms_sampler@0.0.1:room/ferry_landing": {
               "key": "ferry_landing",
               "title": "room.ferry_landing.title",
               "description": "room.ferry_landing.description",
               "exits": {
                 "north": {
                   "to": {
-                    "cartridge_id": "ashmere_rooms",
+                    "cartridge_id": "rooms_sampler",
                     "cartridge_version": "0.0.1",
                     "kind": "room",
                     "key": "well_lane"
@@ -580,7 +580,7 @@
                 },
                 "west": {
                   "to": {
-                    "cartridge_id": "ashmere_rooms",
+                    "cartridge_id": "rooms_sampler",
                     "cartridge_version": "0.0.1",
                     "kind": "room",
                     "key": "boathouse"
@@ -588,14 +588,14 @@
                 }
               }
             },
-            "ashmere_rooms@0.0.1:room/well_lane": {
+            "rooms_sampler@0.0.1:room/well_lane": {
               "key": "well_lane",
               "title": "room.well_lane.title",
               "description": "room.well_lane.description",
               "exits": {
                 "south": {
                   "to": {
-                    "cartridge_id": "ashmere_rooms",
+                    "cartridge_id": "rooms_sampler",
                     "cartridge_version": "0.0.1",
                     "kind": "room",
                     "key": "ferry_landing"
@@ -605,7 +605,7 @@
             }
           },
           "entry": {
-            "cartridge_id": "ashmere_rooms",
+            "cartridge_id": "rooms_sampler",
             "cartridge_version": "0.0.1",
             "kind": "room",
             "key": "ferry_landing"
@@ -644,9 +644,9 @@
             "format": "loka-cartridge-v1",
             "manifest": {
               "api_version": "loka/v3",
-              "id": "ashmere_hello",
+              "id": "hello_sampler",
               "version": "0.0.1",
-              "title": "Ashmere — Hello World",
+              "title": "Hello Sampler",
               "requires": {
                 "kernel_api": {
                   "at_least": "1.0",
@@ -698,7 +698,7 @@
               }
             },
             "facts": {
-              "ashmere_hello@0.0.1:fact/village_arrived": {
+              "hello_sampler@0.0.1:fact/village_arrived": {
                 "key": "village_arrived",
                 "version": 1,
                 "value_type": {
@@ -712,12 +712,12 @@
               }
             },
             "policies": {
-              "ashmere_hello@0.0.1:policy/village_arrived": {
+              "hello_sampler@0.0.1:policy/village_arrived": {
                 "policy_version": 1,
                 "root": {
                   "op": "fact_compare",
                   "fact": {
-                    "cartridge_id": "ashmere_hello",
+                    "cartridge_id": "hello_sampler",
                     "cartridge_version": "0.0.1",
                     "kind": "fact",
                     "key": "village_arrived"
@@ -727,7 +727,7 @@
               }
             },
             "actions": {
-              "ashmere_hello@0.0.1:action/talk": {
+              "hello_sampler@0.0.1:action/talk": {
                 "key": "talk",
                 "label": "actions.talk",
                 "target": {
@@ -756,9 +756,9 @@
             "format": "loka-cartridge-v2",
             "manifest": {
               "api_version": "loka/v3",
-              "id": "ashmere_rooms",
+              "id": "rooms_sampler",
               "version": "0.0.1",
-              "title": "Ashmere — Rooms",
+              "title": "Rooms Sampler",
               "requires": {
                 "kernel_api": {
                   "at_least": "1.0",
@@ -787,14 +787,14 @@
             "policies": {},
             "actions": {},
             "rooms": {
-              "ashmere_rooms@0.0.1:room/boathouse": {
+              "rooms_sampler@0.0.1:room/boathouse": {
                 "key": "boathouse",
                 "title": "room.boathouse.title",
                 "description": "room.boathouse.description",
                 "exits": {
                   "east": {
                     "to": {
-                      "cartridge_id": "ashmere_rooms",
+                      "cartridge_id": "rooms_sampler",
                       "cartridge_version": "0.0.1",
                       "kind": "room",
                       "key": "ferry_landing"
@@ -802,14 +802,14 @@
                   }
                 }
               },
-              "ashmere_rooms@0.0.1:room/ferry_landing": {
+              "rooms_sampler@0.0.1:room/ferry_landing": {
                 "key": "ferry_landing",
                 "title": "room.ferry_landing.title",
                 "description": "room.ferry_landing.description",
                 "exits": {
                   "north": {
                     "to": {
-                      "cartridge_id": "ashmere_rooms",
+                      "cartridge_id": "rooms_sampler",
                       "cartridge_version": "0.0.1",
                       "kind": "room",
                       "key": "well_lane"
@@ -817,7 +817,7 @@
                   },
                   "west": {
                     "to": {
-                      "cartridge_id": "ashmere_rooms",
+                      "cartridge_id": "rooms_sampler",
                       "cartridge_version": "0.0.1",
                       "kind": "room",
                       "key": "boathouse"
@@ -825,14 +825,14 @@
                   }
                 }
               },
-              "ashmere_rooms@0.0.1:room/well_lane": {
+              "rooms_sampler@0.0.1:room/well_lane": {
                 "key": "well_lane",
                 "title": "room.well_lane.title",
                 "description": "room.well_lane.description",
                 "exits": {
                   "south": {
                     "to": {
-                      "cartridge_id": "ashmere_rooms",
+                      "cartridge_id": "rooms_sampler",
                       "cartridge_version": "0.0.1",
                       "kind": "room",
                       "key": "ferry_landing"
@@ -842,7 +842,7 @@
               }
             },
             "entry": {
-              "cartridge_id": "ashmere_rooms",
+              "cartridge_id": "rooms_sampler",
               "cartridge_version": "0.0.1",
               "kind": "room",
               "key": "ferry_landing"
@@ -909,7 +909,7 @@
           "outcomes": {
             "carry": {
               "dialogue": {
-                "cartridge_id": "ashmere_ferry",
+                "cartridge_id": "ferry_sampler",
                 "cartridge_version": "0.0.1",
                 "kind": "dialogue",
                 "key": "bram"
@@ -927,7 +927,7 @@
           "label": "ancestry.fen_born.label",
           "description": "ancestry.fen_born.description",
           "attribute": {
-            "cartridge_id": "ashmere_missing_child",
+            "cartridge_id": "village_chapter",
             "cartridge_version": "0.0.38",
             "kind": "attribute",
             "key": "per"
@@ -1258,7 +1258,7 @@
         },
         "path": {
           "type": "string",
-          "description": "Where a diagnostic applies (08 §6). A compiler path is a source followed by steps; a loader path is steps only, relative to the artifact file, and empty for the whole file, so it is empty or starts with . or [. The source is the file's path relative to the cartridge root, / separated, without its .json extension (quests/missing_child, cartridge for cartridge.json); if a segment is not [a-z0-9_]+ or the file does not end in .json, the source is instead the whole relative path as a canonical JSON string literal (loka-numeric-v1). Steps: .name for an object member whose name is [a-z0-9_]+; [\"...\"] with the name as a canonical JSON string literal for any other member; [n] for array index n (decimal, no leading zeros). Example: quests/missing_child.objectives[2].target; a diagnostic about a whole file is its source alone."
+          "description": "Where a diagnostic applies (08 §6). A compiler path is a source followed by steps; a loader path is steps only, relative to the artifact file, and empty for the whole file, so it is empty or starts with . or [. The source is the file's path relative to the cartridge root, / separated, without its .json extension (quests/lost_lamb, cartridge for cartridge.json); if a segment is not [a-z0-9_]+ or the file does not end in .json, the source is instead the whole relative path as a canonical JSON string literal (loka-numeric-v1). Steps: .name for an object member whose name is [a-z0-9_]+; [\"...\"] with the name as a canonical JSON string literal for any other member; [n] for array index n (decimal, no leading zeros). Example: quests/lost_lamb.objectives[2].target; a diagnostic about a whole file is its source alone."
         },
         "message_key": {
           "$ref": "text.schema.json#/$defs/TextKey"
@@ -1297,7 +1297,7 @@
         {
           "severity": "error",
           "code": "UNRESOLVED_REFERENCE",
-          "path": "quests/missing_child.objectives[2].target",
+          "path": "quests/lost_lamb.objectives[2].target",
           "message_key": "diagnostics.unresolved_reference",
           "data": {
             "target": "npcs/old_ferryman"
@@ -1734,7 +1734,7 @@
         {
           "title": "chapter.reeds",
           "story_point": {
-            "cartridge_id": "ashmere_chapters",
+            "cartridge_id": "chapters_sampler",
             "cartridge_version": "0.0.1",
             "kind": "story_point",
             "key": "lantern_resolved"
@@ -2220,7 +2220,7 @@
           "key": "ward",
           "label": "topic.ward",
           "fact": {
-            "cartridge_id": "ashmere_missing_child",
+            "cartridge_id": "village_chapter",
             "cartridge_version": "0.0.23",
             "kind": "fact",
             "key": "topic_ward_known"
@@ -2997,7 +2997,7 @@
       "examples": [
         {
           "room": {
-            "cartridge_id": "ashmere_missing_child",
+            "cartridge_id": "village_chapter",
             "cartridge_version": "0.0.42",
             "kind": "room",
             "key": "ferry_landing"

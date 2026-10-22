@@ -12,10 +12,14 @@ import { reproduce, retainFailure } from './e1_repro.ts';
 import { KERNEL, simulate, type Kernel } from './sim.ts';
 import { read } from './read.ts';
 
-const r9c = read('protocol/fixtures/r9c_interactions_hash.json');
-const r9cBytes = new TextEncoder().encode(
-  `{"cartridge":${r9c.canonical},"content_hash":"${r9c.sha256}"}`,
-);
+const kat = (file: string) => {
+  const k = read(`protocol/fixtures/${file}`);
+  return {
+    value: k.value,
+    bytes: new TextEncoder().encode(`{"cartridge":${k.canonical},"content_hash":"${k.sha256}"}`),
+  };
+};
+const candidate = kat('cartridge_bell_hash.json');
 const source = {
   source_sha: '1'.repeat(40),
   check_hash: '2'.repeat(64),
@@ -25,16 +29,11 @@ const source = {
 // Breaks: a slash inside a DefinitionRef map key is mistaken for another object level,
 // dropping each definition's root obligation while retaining some of its nested choices.
 test('E1 inventory retains slash-bearing definition roots', () => {
-  const uses = admitCandidate(r9cBytes).policy.uses;
+  const uses = admitCandidate(candidate.bytes).policy.uses;
   for (const [path, feature] of [
-    ['/quests/r9c_interactions@0.0.1:quest/a_night_in_the_marsh', 'authored.quest'],
-    ['/dialogues/r9c_interactions@0.0.1:dialogue/a_aldric_offer', 'authored.dialogue'],
-    ['/resources/r9c_interactions@0.0.1:resource/hp', 'authored.resource'],
-    ['/services/r9c_interactions@0.0.1:service/lantern_ale', 'authored.service'],
-    ['/transports/r9c_interactions@0.0.1:transport/fen_outbound', 'authored.transport'],
-    ['/recipes/r9c_interactions@0.0.1:recipe/begin_epilogue_lost_prior', 'authored.action_recipe'],
-    ['/populations/r9c_interactions@0.0.1:population/crow_branches', 'authored.population'],
-    ['/bleeds/r9c_interactions@0.0.1:bleed/bleeding', 'authored.bleed'],
+    ['/recipes/recipe_sampler@0.0.1:recipe/ring_bell', 'authored.action_recipe'],
+    ['/recipes/recipe_sampler@0.0.1:recipe/ring_bell/outcomes/success', 'authored.action_recipe'],
+    ['/resources/recipe_sampler@0.0.1:resource/hp', 'authored.resource'],
   ])
     assert.ok(
       uses.some((use) => use.path === path && use.feature === feature),
@@ -44,8 +43,14 @@ test('E1 inventory retains slash-bearing definition roots', () => {
 
 // Breaks: carry settings inherit scheduling gates and unknown world settings are waived.
 test('E1 world settings retain semantic gates and refuse unknown keys', () => {
-  const c = structuredClone(r9c.value);
-  c.world.death_credit = {}; // r9c authors no death credit; the gate is classified by key.
+  // The candidate authors no world settings; each key is classified by key under its locked owner.
+  const c = structuredClone(candidate.value);
+  for (const owner of ['containment', 'combat', 'death', 'water']) c.lock.capabilities[owner] = 1;
+  c.world = Object.fromEntries(
+    ['bands', 'bell_cue', 'carry', 'combat', 'death_credit', 'death', 'movement', 'water'].map(
+      (k) => [k, {}],
+    ),
+  );
   const uses = applicability(c).uses;
   for (const [key, feature, gates] of [
     ['bands', 'resource', ['TRANSACTION']],
@@ -105,12 +110,12 @@ function refused(c: unknown, expected: RegExp) {
 
 // Breaks: the report's candidate block names a row other than the selected one.
 test('E1 admits the literal candidate', () => {
-  const admitted = admitCandidate(r9cBytes);
-  assert.equal(admitted.hash, '7d74fac7f9429475bdd7481fe7bf6b851acae2d0d6eaf1661892705391d17263');
-  assert.equal(admitted.cartridge.manifest.id, 'r9c_interactions');
+  const admitted = admitCandidate(candidate.bytes);
+  assert.equal(admitted.hash, 'ec0d0dfd39aae0f63c8f6fa819d1d288619b546838ade1f0217267063cd40d1d');
+  assert.equal(admitted.cartridge.manifest.id, 'recipe_sampler');
   assert.equal(admitted.cartridge.manifest.version, '0.0.1');
   // The report names the selected row, not the chapter.
-  const { candidate } = reportOf(
+  const { candidate: report } = reportOf(
     admitted,
     source,
     {} as never,
@@ -120,28 +125,25 @@ test('E1 admits the literal candidate', () => {
     true,
     false,
   );
-  assert.equal(candidate.id, 'r9c_interactions');
+  assert.equal(report.id, 'recipe_sampler');
   assert.equal(
-    candidate.content_hash,
-    '7d74fac7f9429475bdd7481fe7bf6b851acae2d0d6eaf1661892705391d17263',
+    report.content_hash,
+    'ec0d0dfd39aae0f63c8f6fa819d1d288619b546838ade1f0217267063cd40d1d',
   );
 });
 
 // Breaks: the content hash is not compared against the selected row.
-test('E1 command refuses a changed r9c candidate', () => {
-  const c = structuredClone(r9c.value);
+test('E1 command refuses a changed candidate', () => {
+  const c = structuredClone(candidate.value);
   c.manifest.title = 'Different admitted candidate';
   refused(c, /wrong E1 candidate/);
 });
 
 // Breaks: a loader-valid id with no table row skips the comparison (`row && ...`).
-// The bell fixture passes the loader and applicability, so only the candidate check refuses it.
+// The ferry fixture passes the loader and applicability, so only the candidate check refuses it.
 test('E1 refuses an admitted cartridge with no candidate row', () => {
-  const bell = read('protocol/fixtures/cartridge_bell_hash.json');
-  const bellBytes = new TextEncoder().encode(
-    `{"cartridge":${bell.canonical},"content_hash":"${bell.sha256}"}`,
-  );
-  assert.throws(() => admitCandidate(bellBytes), /wrong E1 candidate: recipe_sampler@0\.0\.1/);
+  const ferry = kat('cartridge_ferry_hash.json');
+  assert.throws(() => admitCandidate(ferry.bytes), /wrong E1 candidate: ferry_sampler@0\.0\.1/);
 });
 
 // Breaks: the candidate table (or a row field) leaks into the policy digest, so the E1
@@ -153,7 +155,7 @@ test('E1 policy digest excludes the candidate table', () => {
 // Breaks: an admitted installed capability is silently skipped when its policy row is
 // absent. Narration is installed but has no disposition in the bounded policy.
 test('E1 command fails an unknown applicability obligation', () => {
-  const c = structuredClone(r9c.value);
+  const c = structuredClone(candidate.value);
   c.lock.capabilities.narration = 1;
   c.manifest.requires.capabilities.narration = 1;
   assert.throws(() => applicability(c), /unknown applicability: narration@1/);
@@ -169,28 +171,34 @@ test('retained repro rechecks the invariant and refuses incomplete or changed in
       throw new Error('planted failure');
     },
   };
-  const outcome = simulate(1, planted, [admitCandidate(r9cBytes)]);
+  const outcome = simulate(1, planted, [admitCandidate(candidate.bytes)]);
   // The simulator deliberately includes malformed boundary inputs; replay preserves them.
   outcome.commands[0] = { ...outcome.commands[0]!, payload: { type: 'constructor' } as never };
   const record = JSON.parse(JSON.stringify(retainFailure(outcome, source)));
-  assert.deepEqual(reproduce(record, r9cBytes, source, planted), {
+  assert.deepEqual(reproduce(record, candidate.bytes, source, planted), {
     id: 'threw',
     detail: 'Error: planted failure',
     at: 0,
   });
   const incomplete = structuredClone(record);
   delete incomplete.fault_schedule;
-  assert.throws(() => reproduce(incomplete, r9cBytes, source, planted), /incomplete E1 repro/);
-  const changed = { ...record, initial_state_hash: '0'.repeat(64) };
-  assert.throws(() => reproduce(changed, r9cBytes, source, planted), /identity mismatch/);
-  const changedCommands = structuredClone(record);
-  changedCommands.commands[0].payload.type = 'different_boundary_input';
-  assert.throws(() => reproduce(changedCommands, r9cBytes, source, planted), /identity mismatch/);
   assert.throws(
-    () => reproduce({ ...record, commands: [] }, r9cBytes, source, planted),
+    () => reproduce(incomplete, candidate.bytes, source, planted),
     /incomplete E1 repro/,
   );
-  assert.throws(() => reproduce(record, r9cBytes, source), /did not reproduce/);
+  const changed = { ...record, initial_state_hash: '0'.repeat(64) };
+  assert.throws(() => reproduce(changed, candidate.bytes, source, planted), /identity mismatch/);
+  const changedCommands = structuredClone(record);
+  changedCommands.commands[0].payload.type = 'different_boundary_input';
+  assert.throws(
+    () => reproduce(changedCommands, candidate.bytes, source, planted),
+    /identity mismatch/,
+  );
+  assert.throws(
+    () => reproduce({ ...record, commands: [] }, candidate.bytes, source, planted),
+    /incomplete E1 repro/,
+  );
+  assert.throws(() => reproduce(record, candidate.bytes, source), /did not reproduce/);
 });
 
 // Breaks: a local module the recorder runs is left out of check_hash, so editing it keeps the receipt.

@@ -1,9 +1,0 @@
-{
-  "keywords": [
-    "lid",
-    "trunk_lid"
-  ],
-  "short": "barrier.trunk_lid.short",
-  "initial": "locked",
-  "key_item": "brass_key"
-}
