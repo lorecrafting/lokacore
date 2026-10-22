@@ -80,21 +80,7 @@ const skyText = (p: StatusProps) =>
 export function StatusLine(p: StatusProps) {
   const c = usePalette();
   const t = useType();
-  const items = [
-    <Text
-      key="time"
-      style={{ ...t.small, color: c.dim }}
-      accessibilityLabel={calendarLine(p.calendar) ?? branch(p.time).label}
-    >
-      {skyText(p)}
-    </Text>,
-    p.position && <Position key="position" value={p.position} open={p.openPosition} />,
-    p.bleeding && (
-      <Text key="bleeding" numberOfLines={1} style={{ ...t.small, color: c.danger }}>
-        {bleedingLine(p.bleeding, p.time, p.text)}
-      </Text>
-    ),
-  ].filter(Boolean) as ReactElement[];
+  const items = leading(c, t, p);
   return (
     <View>
       {!!p.conditions?.length && (
@@ -123,6 +109,24 @@ export function StatusLine(p: StatusProps) {
     </View>
   );
 }
+
+// The items before the pools: the sky glyph and weather, then position and bleeding when present.
+const leading = (c: Palette, t: Type, p: StatusProps) =>
+  [
+    <Text
+      key="time"
+      style={{ ...t.small, color: c.dim }}
+      accessibilityLabel={calendarLine(p.calendar) ?? branch(p.time).label}
+    >
+      {skyText(p)}
+    </Text>,
+    p.position && <Position key="position" value={p.position} open={p.openPosition} />,
+    p.bleeding && (
+      <Text key="bleeding" numberOfLines={1} style={{ ...t.small, color: c.danger }}>
+        {bleedingLine(p.bleeding, p.time, p.text)}
+      </Text>
+    ),
+  ].filter(Boolean) as ReactElement[];
 
 // Each " · " belongs to the item after it, so the line never starts with a lone dot; position and
 // bleeding may shrink (they truncate).
@@ -155,10 +159,10 @@ function Contents(p: StatusProps) {
   );
 }
 
-// A figure space between resources and a no-break space within each, as text, not a margin: both
-// are no-break, so the pools never split
-// and the shown words lead the button's name (book-ui.md, Label in name). The resources as the status line shows them (band colours per model.ts `toneOf`; dim while
-// locked); its label is model.ts `said`.
+// The resources as the status line shows them (band colours per model.ts `toneOf`; dim while
+// locked); its label is model.ts `said`. A figure space between resources and a no-break space
+// within each, as text, not a margin: both are no-break, so the pools never split and the shown
+// words lead the button's name (book-ui.md, Label in name).
 const shown = (c: Palette, t: Type, rs: readonly Pool[], locked: boolean) =>
   rs.map((r, i) => (
     <Text key={r.resource.key} style={{ color: locked ? c.dim : band(c, toneOf(r)) }}>
