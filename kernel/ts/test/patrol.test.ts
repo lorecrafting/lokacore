@@ -196,8 +196,6 @@ test('an escort follow composes independently with leader-only Continue and one 
       continuation_id: gameView(a.world).choice!.continuation_id,
       choice_id,
     });
-    const open = gameView(a.world).choice;
-    if (open) a.run({ type: 'close_choice', continuation_id: open.continuation_id });
   };
   talk('keeper', 'accept');
   a.move('north');

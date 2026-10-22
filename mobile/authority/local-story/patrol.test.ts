@@ -144,7 +144,6 @@ test('actual cellar death separates a concurrent escort, resets patrol, and perm
   const talk = (dialogue: string, who: string, choice_id: string) => {
     a.ok(dialogue, [npc(fresh, who)]);
     a.ok('choose', [], { continuation_id: a.view().choice!.continuation_id, choice_id });
-    if (a.view().choice) a.ok('close_choice');
   };
   talk('keeper_offer', 'keeper', 'accept');
   a.move('north', 'north');

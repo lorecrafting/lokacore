@@ -70,8 +70,7 @@ defmodule Loka.ContentPatrolTest do
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, reacting(reaction("mauds_cellar")))
 
     for {file, expected, change} <- mutations do
-      changes = if file == "reactions/call.json", do: reacting(change), else: [{file, change}]
-      assert {:error, diagnostics} = Loka.ContentSource.compile(dir, changes)
+      assert {:error, diagnostics} = Loka.ContentSource.compile(dir, [{file, change}])
 
       assert Enum.any?(diagnostics, &(&1["code"] == expected)),
              inspect({file, expected, diagnostics})
