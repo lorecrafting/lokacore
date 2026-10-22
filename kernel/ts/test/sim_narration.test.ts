@@ -3,9 +3,9 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import type { Command, DecisionResult } from '../src/contracts.gen.ts';
-import { changeKey, unnarrated } from './sim_batch.ts';
+import { changeKey, SILENT, unnarrated } from './sim_batch.ts';
 
-// Breaks: a new silent key that passes, a pin kept after its key is narrated, or an unreached pin
+// Breaks: a new silent key that passes, an allowlisted one that fails, a pin kept after its key is narrated, or an unreached pin
 // that fails (fixed seeds may stop reaching a key; that is not a fix).
 test('unnarrated reports new silent keys and pins now narrated, never unreached pins', () => {
   const s = { changed: new Set(['take', 'sit', 'eat']), silent: new Set(['take', 'sit']) };
@@ -13,6 +13,12 @@ test('unnarrated reports new silent keys and pins now narrated, never unreached 
     'eat: narrated now; remove it from the baseline',
     'take: commits a change with no narration line',
   ]);
+  SILENT.take = 'a reason';
+  try {
+    assert.deepEqual(unnarrated(s, ['sit']), []);
+  } finally {
+    delete SILENT.take;
+  }
 });
 
 // Breaks: a key taken from a rejected step or an empty delta, or a recipe filed under its command type.

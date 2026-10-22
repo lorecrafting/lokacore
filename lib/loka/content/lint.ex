@@ -145,7 +145,7 @@ defmodule Loka.Content.Lint do
 
   defp refs(_, _), do: []
 
-  defp tag(kind, ids), do: for(id <- List.wrap(ids), is_binary(id), do: {kind, id})
+  defp tag(kind, ids), do: for(id <- List.wrap(ids), do: {kind, id})
 
   # A dialogue with no label of its own is offered as the kernel's default action.talk (UH);
   # a keyword dialogue (speech@1) is spoken, not offered.
