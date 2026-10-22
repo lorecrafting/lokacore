@@ -34,7 +34,7 @@
       }
     },
     {
-      "id": "two-kills-chain-in-one-decision",
+      "id": "same-group-writes-chain-in-one-proposal",
       "state": {
         "clock": 100,
         "levelling": {

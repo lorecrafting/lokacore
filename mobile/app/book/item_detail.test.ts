@@ -1,15 +1,14 @@
 // Real Item/ThingPage components and GameSession; native hosts are leaves, not layout proof.
+import { reactShim } from './__tests__/react-shim.ts';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { createRequire, registerHooks } from 'node:module';
-import { pathToFileURL } from 'node:url';
 import { test } from 'node:test';
 import { elapsedHost } from '../../authority/local-story/__tests__/elapsed-host.test.ts';
 import { group } from './model.ts';
 import { presenter } from './presenter.ts';
 
 const ts = createRequire(import.meta.url)('typescript');
-const react = pathToFileURL(createRequire(import.meta.url).resolve('react')).href;
 registerHooks({
   resolve(specifier, context, next) {
     // Components are called outside React: the palette context reads its default (light).
@@ -19,12 +18,7 @@ registerHooks({
       : next(specifier, context);
   },
   load(url, context, next) {
-    if (url === 'test:item-react')
-      return {
-        format: 'module',
-        shortCircuit: true,
-        source: `export * from ${JSON.stringify(react)}; export const useContext = c => c._currentValue;`,
-      };
+    if (url === 'test:item-react') return reactShim();
     if (url === 'test:item-native')
       return {
         format: 'module',

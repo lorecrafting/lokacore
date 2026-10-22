@@ -49,6 +49,8 @@ echo "export const N = <Text>{why(e, text)}</Text>;" >> mobile/app/book/red_cont
 echo "export const raw = { color: '#7b2d20', fontSize: 17 };" >> mobile/app/book/red_control.tsx
 # React Native's own Text, scaled twice by the system (mobile-book-text).
 echo "import { Text as T } from 'react-native';" >> mobile/app/book/red_control.tsx
+# A negative marginVertical outside Tap (mobile-book-bleed-only-tap).
+echo "export const bleed = { marginVertical: -space.md };" >> mobile/app/book/red_control.tsx
 echo "import type { World } from '../../../kernel/ts/src/index.ts';" >> mobile/packages/game-view/session.ts
 # The picker: a book/ import and a raw colour on the manager side; a third colour in the overlay.
 printf "import { color } from '../../book/tokens.ts';\nexport const raw = { border: '1px solid #7b2d20', c: color };\n" > mobile/app/.storybook/picker/red_control.tsx

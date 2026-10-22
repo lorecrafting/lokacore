@@ -1,14 +1,13 @@
 // The combat tests' Book boundary (combat.test.ts, combat_flow.test.ts): native hosts are leaves;
 // native layout and animation proof stays in Simulator.
+import { reactShim } from './react-shim.ts';
 import { readFileSync } from 'node:fs';
 import { createRequire, registerHooks } from 'node:module';
-import { pathToFileURL } from 'node:url';
 import type { Game, GameView } from '../../../packages/game-view/session.ts';
 import { fadeStub } from './fade-stub.ts';
 
 const require = createRequire(import.meta.url);
 const ts = require('typescript');
-const react = pathToFileURL(require.resolve('react')).href;
 registerHooks({
   resolve(specifier, context, next) {
     // The page curl needs Skia and Reanimated; a page_turn.e2e.ts concern, not these tests'.
@@ -25,11 +24,9 @@ registerHooks({
   },
   load(url, context, next) {
     if (url === 'test:combat-state')
-      return {
-        format: 'module',
-        shortCircuit: true,
-        source: `export * from ${JSON.stringify(react)}; export const useContext = c => c._currentValue; export const useState=v=>globalThis[Symbol.for('combat-state')](v); export const useRef=v=>useState(()=>({current:v}))[0]; export const useEffect=(f,d)=>globalThis[Symbol.for('combat-effect')](f,d); export const useLayoutEffect = useEffect;`,
-      };
+      return reactShim(
+        `({ state: globalThis[Symbol.for('combat-state')], effect: globalThis[Symbol.for('combat-effect')] })`,
+      );
     if (url === 'test:combat-hosts')
       return {
         format: 'module',

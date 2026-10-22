@@ -4,7 +4,7 @@
 // friends only, and the player starts with nothing in hand.
 import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -112,8 +112,13 @@ test('the CLI prints the same canonical report as the same run in this process',
   const here = flows(artifactOf(text).cartridge, { seeds: 3, days: 1 });
   assert.equal(r.stdout, `${encode(here as unknown as Json)}\n`);
   const plan = (key: string) => `toolbox_showcase@0.0.1:population/${key}`;
+  // Each showcase population is a non-encounter plan born by day, so it starts at its day_target
+  // (genesis, population/shared.ts); an encounter plan (`chance`) would start at 0.
+  const dir = 'cartridges/toolbox_showcase/populations';
   const living = Object.fromEntries(
-    ['cellar_goblins', 'den_goblins', 'goblins', 'hens', 'tilt_goblins'].map((k) => [plan(k), 2]),
+    readdirSync(new URL(`../../../${dir}`, import.meta.url))
+      .filter((f) => f.endsWith('.json'))
+      .map((f) => [plan(f.replace(/\.json$/, '')), read(`${dir}/${f}`).day_target]),
   );
   assert.deepEqual(here.populations[0], { hour: 0, living });
   assert.equal(here.coin.supply.at(-1)!.hour, 24);

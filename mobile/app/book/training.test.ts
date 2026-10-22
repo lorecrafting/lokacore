@@ -1,4 +1,4 @@
-import { pathToFileURL } from 'node:url';
+import { reactShim } from './__tests__/react-shim.ts';
 import { elapsedHost } from '../../authority/local-story/__tests__/elapsed-host.test.ts';
 import { openGame } from '../../authority/local-story/session.ts';
 import { presenter } from './presenter.ts';
@@ -10,7 +10,6 @@ import { test } from 'node:test';
 import { trainingPin } from '../../authority/local-story/__tests__/training-host.ts';
 const require = createRequire(import.meta.url);
 const ts = require('typescript');
-const react = pathToFileURL(require.resolve('react')).href;
 registerHooks({
   resolve(specifier, context, next) {
     if (specifier === 'react') return { url: 'test:training-react', shortCircuit: true };
@@ -19,12 +18,7 @@ registerHooks({
       : next(specifier, context);
   },
   load(url, context, next) {
-    if (url === 'test:training-react')
-      return {
-        format: 'module',
-        shortCircuit: true,
-        source: `export * from ${JSON.stringify(react)}; export const useContext = c => c._currentValue; export const useRef=v=>({current:v});`,
-      };
+    if (url === 'test:training-react') return reactShim(`({ ref: v => ({ current: v }) })`);
     if (url === 'test:training-native')
       return {
         format: 'module',

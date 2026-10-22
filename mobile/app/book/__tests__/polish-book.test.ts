@@ -1,11 +1,11 @@
 // The polish tests' Book over a real session: real book components; native hosts are leaves, so
 // this is no device/layout proof.
+import { reactShim } from './react-shim.ts';
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { createRequire, registerHooks } from 'node:module';
 import { DatabaseSync } from 'node:sqlite';
-import { pathToFileURL } from 'node:url';
 import { openGame } from '../../../authority/local-story/session.ts';
 import { elapsedHost } from '../../../authority/local-story/__tests__/elapsed-host.test.ts';
 import { control } from './control.test.ts';
@@ -13,7 +13,6 @@ import { fadeStub } from './fade-stub.ts';
 
 const require = createRequire(import.meta.url);
 const ts = require('typescript');
-const react = pathToFileURL(require.resolve('react')).href;
 registerHooks({
   resolve(specifier, context, next) {
     // The page curl needs Skia and Reanimated; a page_turn.e2e.ts concern, not these tests'.
@@ -30,11 +29,9 @@ registerHooks({
   },
   load(url, context, next) {
     if (url === 'test:book-state')
-      return {
-        format: 'module',
-        shortCircuit: true,
-        source: `export * from ${JSON.stringify(react)}; export const useContext = c => c._currentValue; export const useState = v => globalThis[Symbol.for('loka-book-test-state')](v); export const useRef = v => useState(() => ({ current: v }))[0]; export const useEffect = (f,d) => globalThis[Symbol.for('loka-book-test-effect')](f,d); export const useLayoutEffect = useEffect;`,
-      };
+      return reactShim(
+        `({ state: globalThis[Symbol.for('loka-book-test-state')], effect: globalThis[Symbol.for('loka-book-test-effect')] })`,
+      );
     if (url === 'test:native-hosts')
       return {
         format: 'module',
