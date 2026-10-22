@@ -353,7 +353,7 @@ existing buttons. The note follows the latest GameView, including Take aliases a
 and disappears when shedding held load makes Take legal. While any such note shows, the page
 draws no "Nothing to do here." Note: an unavailable action is still something to read (pass-1 UH3). The
 same holds on an NPC page: its shop price rows and service rows, available or not, keep the Note off
-(pass-2; proposed, designer to approve).
+(pass-2).
 
 
 Successful ordinary Take/Drop are the specific exceptions to item-page retention; corpse-content
@@ -373,8 +373,7 @@ A held item's page shows one card per Give pair the GameView lists available, at
 **Equipment and skills.** A weapon's or shield's page shows its projected slot, attack or block
 figures and skill requirement, read from the projection, never renderer literals or inferred
 names; a carried weapon is visibly distinct from a wielded one, and a description grants no use.
-Character lists each acquired skill as learned and, separately, its qualification
-([skill tree](#skill-tree-details)); no Dodge button, percentage bar or rank appears.
+How Character shows learned skills is the [skill tree rule](#skill-tree-details).
 
 **Fuel and light.** An item with fuel shows `Fuel <remaining> of <capacity>, lit/unlit` from the
 confirmed view; Ignite, Douse and Refuel sit in its ordinary action list, beside Remove when worn.
@@ -587,7 +586,7 @@ Proposed for [designer](../decisions/owner-decision-designer-role-2026-10-07.md)
 
 ## Worn affects details
 
-GameView `attributes` carries each attribute's current value, which already includes the [affects](mechanics.md#item-slots-and-affects-toolbox-row-3) of worn items, and `worn`, their nonzero sum (absent at zero); `worn` sums identified items only, so an [unidentified](mechanics.md#unidentified-items-toolbox-row-27) worn item moves the value but adds no note (proposed, designer to approve, Beads `loka-kgd.112`). The Character page's attribute line appends it in parentheses with its sign: "PER 14 (+4 worn)", "STR 8 (-2 worn)"; without `worn` the line is unchanged ("PER 10"). The sign is always in the text. The presenter never adds or computes an affect; Wear and Remove are the ordinary equipment actions, and a second ring is worn on the finger slot like any item.
+GameView `attributes` carries each attribute's current value, which already includes the [affects](mechanics.md#item-slots-and-affects-toolbox-row-3) of worn items, and `worn`, their nonzero sum (absent at zero); `worn` sums identified items only, so an [unidentified](mechanics.md#unidentified-items-toolbox-row-27) worn item moves the value but adds no note. The Character page's attribute line appends it in parentheses with its sign: "PER 14 (+4 worn)", "STR 8 (-2 worn)"; without `worn` the line is unchanged ("PER 10"). The sign is always in the text. The presenter never adds or computes an affect; Wear and Remove are the ordinary equipment actions, and a second ring is worn on the finger slot like any item.
 
 ## Levelling details
 
@@ -644,9 +643,9 @@ GameView `storylet` names the one place action the [storylet deck](mechanics.md#
 
 ## Skill tree details
 
-Skills without a profession draw one line each: the label, then " — learned" with no requirement, or while its projected `qualified` is false " — learned, unqualified; <requirement>" (pass-1 H3). After the xp line and before the Raise cards, each profession in first-listed order is a SectionTitle, then its listed boxes in GameView order: acquired as body text "Whittling, level 2 — learned" (", level N" only when projected; no requirement: a qualified learned box has nothing left to meet) or, while its projected `qualified` is false, "Whittling, level 2 — learned, unqualified; <requirement>" (pass-1 H3; [equipment and skills](#item-details-and-takedrop)); an NPC's teach card for a learned skill is the GameView's unavailable action and draws in the Action card's unavailable form `label: reason`, never dropped (pass-1 R2); locked as a Note "Carving — locked; <requirement>"; any other unacquired box as a Note "Joinery — not learned; <requirement>" (the same Note). The Book draws only listed skills: a hidden box and an empty profession draw nothing.
+Skills without a profession draw one line each: the label, then " — learned" with no requirement, or while its projected `qualified` is false " — learned, unqualified; <requirement>" (pass-1 H3). After the xp line and before the Raise cards, each profession in first-listed order is a SectionTitle, then its listed boxes in GameView order: acquired as body text "Whittling, level 2 — learned" (", level N" only when projected; no requirement: a qualified learned box has nothing left to meet) or, while its projected `qualified` is false, "Whittling, level 2 — learned, unqualified; <requirement>" (pass-1 H3); an NPC's teach card for a learned skill is the GameView's unavailable action and draws in the Action card's unavailable form `label: reason`, never dropped (pass-1 R2); locked as a Note "Carving — locked; <requirement>"; any other unacquired box as a Note "Joinery — not learned; <requirement>" (the same Note). The Book draws only listed skills: a hidden box and an empty profession draw nothing.
 
-An NPC's lesson line reads `locked` in place of `not learned` while the skill's projected `locked` is true (proposed, pending designer approval, loka-kgd.108.11). A learned skill's lesson line ends at "currently qualified." with no requirement while its projected `qualified` is true: nothing is left to meet (pass-2; proposed, designer to approve).
+An NPC's lesson line reads `locked` in place of `not learned` while the skill's projected `locked` is true. A learned skill's lesson line ends at "currently qualified." with no requirement while its projected `qualified` is true: nothing is left to meet (pass-2).
 
 ## Mount details
 
