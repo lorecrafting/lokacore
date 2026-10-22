@@ -25,19 +25,43 @@ def segments(command):
     yield seg
 
 
+def invoked(seg, name):
+    """(index of the `name` binary, its subcommand) or None; skips git's -C/-c values."""
+    for i, t in enumerate(seg):
+        if t.rsplit("/", 1)[-1] == name:
+            rest = iter(seg[i + 1 :])
+            for w in rest:
+                if w in ("-C", "-c"):
+                    next(rest, None)
+                elif not w.startswith("-"):
+                    return i, w
+            return i, None
+    return None
+
+
+def skips_hooks(args):
+    """An `n` in a short-flag cluster of `git commit`, before a flag that takes the rest as its value."""
+    for t in args:
+        if t[:1] == "-" and t[1:2] != "-":
+            for c in t[1:]:
+                if c == "n":
+                    return True
+                if c in "mFCcSut":  # the rest of the token is this flag's value
+                    break
+    return False
+
+
 def refusal(seg):
-    if "git" in seg:
-        rest = seg[seg.index("git") + 1 :]
-        words = [t for t in rest if not t.startswith("-")]
-        hooks_off = "--no-verify" in rest or (
-            words[:1] == ["commit"] and any(t[1:].isalpha() and "n" in t for t in rest)
-        )
-        if hooks_off and MARKER not in seg:
+    git = invoked(seg, "git")
+    if git:
+        i, sub = git
+        args = seg[i + 1 :]
+        hooks_off = "--no-verify" in args or (sub == "commit" and skips_hooks(args[args.index("commit") + 1 :]))
+        if hooks_off and MARKER not in seg[:i]:
             return f"git hooks skipped without the owner's OK. Fix the cause; with the owner's OK, prefix {MARKER}."
-    if "br" in seg:
-        words = [t for t in seg[seg.index("br") + 1 :] if not t.startswith("-")]
-        if words[:1] == ["create"]:
-            return "bare br create refused: use bin/br_create.sh (plain br create leaves a local source_repo_path)."
+    br = invoked(seg, "br")
+    if br and br[1] == "create":
+        return "bare br create refused: use bin/br_create.sh (plain br create leaves a local source_repo_path)."
     return None
 
 

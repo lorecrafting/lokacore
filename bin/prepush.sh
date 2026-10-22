@@ -24,7 +24,7 @@ run COMPILE mix compile --warnings-as-errors
 run XREF sh -c 'mix xref graph --format cycles --fail-above 0 && mix xref graph --label compile-connected --fail-above 0'
 run CREDO mix credo --strict
 run DOCS elixir bin/check_docs.exs
-# Checks keyed to what the branch changed; when the diff fails, the gated checks below run anyway.
+# Checks keyed to what the branch changed; when the diff fails, STORIES and STATE_SECTIONS run anyway.
 changed=$(git diff --name-only origin/main...HEAD 2>/dev/null) || changed=ALL
 touched() { [ "$changed" = ALL ] || printf '%s\n' "$changed" | grep -qE "$1"; }
 # Story views, saves and CSF meta indexing (#431); hosted mobile runs it too (loka-8qzi, loka-yz58).
@@ -32,7 +32,7 @@ if touched '^(mobile/app/|authority/|kernel/ts/src/|protocol/)'; then
   run STORIES sh -c 'cd mobile/app && node --test --test-reporter=dot stories.test.ts'
 fi
 # docs/state-sections.gen.json, the one generated doc contracts.exs --check does not cover (loka-u58).
-if touched '^(protocol/|kernel/ts/src/)'; then
+if touched '^(protocol/|kernel/ts/src/|docs/state-sections\.gen\.json$)'; then
   run STATE_SECTIONS sh -c 'cd kernel/ts && node --test --test-reporter=dot test/state_sections.test.ts'
 fi
 # A sampler hash change breaks the transcript known answers and the Impact story's fixture list (loka-j6qd).
