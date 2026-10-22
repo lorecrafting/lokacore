@@ -1,4 +1,3 @@
-// size: allow 525, deer same-clock behavior and counterfeit cause share the controlled journey
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { gameView, step, stepElapsed, type World } from '../src/index.ts';
