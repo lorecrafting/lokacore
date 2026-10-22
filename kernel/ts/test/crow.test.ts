@@ -1,22 +1,16 @@
 // size: allow 530, every crow transport journey shares the act/advance helpers above its tests
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { bundle, fresh, ref, entity, prefix } from './transport_fixture.ts';
-import { gameView, INSTALLED, loadCartridge, step, stepElapsed, type World } from '../src/index.ts';
+import { genesis, ref, prefix, START } from './crow_fixture.ts';
+import { gameView, step, stepElapsed, type World } from '../src/index.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { key } from '../src/foundation/compose.ts';
 import { runPopulation } from '../src/mechanics/population/shared.ts';
 import { rooted } from './combat_fixture.ts';
 
 const run = 'bbbbbbbb-0000-4000-8000-000000000008' as never;
-const coinRef = `${prefix}:item/old_coin`;
-const START = 43200;
-const initial = () =>
-  fresh((c: any) => {
-    c.entry = ref('room', 'village_green');
-    c.calendar.start = START;
-    c.items[coinRef].location = { in: 'room', room: ref('room', 'village_green') };
-  });
+const initial = () => genesis();
+const entity = (w: World, kind: string, name: string) => w.entityIds[`${prefix}:${kind}/${name}`];
 
 function act(world: World, type: 'take' | 'drop', item_id: string, ordinal: number) {
   const result = step(
@@ -77,14 +71,11 @@ test('one exact dropped coin travels through one crow to the open nest', () => {
     gameView(world).entities.find((e) => e.id === bound[0]!.member_id)?.carrying,
     'npc.crow.carrying',
   );
-  world = advance(world, START + 1500);
+  world = advance(world, START + 600);
   assert.equal(world.state.containers[coin], nest);
   assert.equal(Object.values(world.state.containers).filter((id) => id === nest).length, 1);
-  world = advance(world, START + 2400);
-  assert.equal(
-    world.state.containers[bound[0]!.member_id],
-    world.roomIds[`${prefix}:room/village_green`],
-  );
+  world = advance(world, START + 900);
+  assert.equal(world.state.containers[bound[0]!.member_id], world.roomIds[`${prefix}:room/burrow`]);
   assert.equal(
     Object.values(world.state.crows ?? {}).find((row) => row.member_id === bound[0]!.member_id)
       ?.phase,
@@ -99,21 +90,21 @@ test('a rooted crow holds its return leg and still clears its row at home', () =
   const coin = entity(world, 'item', 'old_coin');
   world = act(world, 'take', coin, 51);
   world = act(world, 'drop', coin, 52);
-  world = advance(world, START + 1500);
+  world = advance(world, START + 600);
   const crow = Object.values(world.state.crows ?? {}).find((row) => row.phase === 'return')!;
   const nestRoom = world.state.containers[crow.member_id];
-  const held = advance(rooted(world, crow.member_id), START + 2400);
+  const held = advance(rooted(world, crow.member_id), START + 900);
   const row = Object.values(held.state.crows!).find((r) => r.member_id === crow.member_id)!;
   assert.equal(held.state.containers[crow.member_id], nestRoom);
   assert.equal(row.phase, 'return');
   assert.equal(held.state.jobs![row.job_id!]!.status, 'pending');
 
-  const home = world.roomIds[`${prefix}:room/village_green`];
+  const home = world.roomIds[`${prefix}:room/burrow`];
   const carried = {
     ...held,
     state: { ...held.state, containers: { ...held.state.containers, [crow.member_id]: home } },
   };
-  const cleared = advance(carried, START + 2700);
+  const cleared = advance(carried, START + 1200);
   assert.equal(cleared.state.containers[crow.member_id], home);
   assert.equal(
     Object.values(cleared.state.crows!).find((r) => r.member_id === crow.member_id)!.phase,
@@ -147,7 +138,7 @@ test('Attack releases carried coin and pauses the crow return', () => {
   );
   assert.equal(attack.decision.kind, 'accepted', JSON.stringify(attack.decision));
   world = attack.world;
-  assert.equal(world.state.containers[coin], world.roomIds[`${prefix}:room/village_green`]);
+  assert.equal(world.state.containers[coin], world.roomIds[`${prefix}:room/burrow`]);
   assert.equal(world.state.jobs?.[oldJob]?.status, 'cancelled');
   assert.equal(
     gameView(world)
@@ -166,7 +157,7 @@ test('Attack releases carried coin and pauses the crow return', () => {
       ?.phase,
     'paused_return',
   );
-  assert.equal(world.state.containers[coin], world.roomIds[`${prefix}:room/village_green`]);
+  assert.equal(world.state.containers[coin], world.roomIds[`${prefix}:room/burrow`]);
 });
 
 // Breaks: a closed original nest admits deposit, or the now empty crow still offers Shoo.
@@ -186,7 +177,7 @@ test('closed original nest causes a dry room fallback before the next leg', () =
     },
   };
   world = advance(world, START + 300);
-  assert.equal(world.state.containers[coin], world.roomIds[`${prefix}:room/village_green`]);
+  assert.equal(world.state.containers[coin], world.roomIds[`${prefix}:room/burrow`]);
   assert.equal(
     Object.values(world.state.crows ?? {}).find((row) => row.member_id === carrier.member_id)
       ?.phase,
@@ -205,7 +196,7 @@ test('full original nest causes a conserved room fallback', () => {
   let world = initial();
   const coin = entity(world, 'item', 'old_coin');
   const nest = entity(world, 'item', 'crow_nest');
-  const filler = entity(world, 'item', 'apple_01');
+  const filler = entity(world, 'item', 'bandage');
   world = act(world, 'take', coin, 45);
   world = act(world, 'drop', coin, 46);
   world = advance(world, START + 150);
@@ -215,7 +206,7 @@ test('full original nest causes a conserved room fallback', () => {
     state: { ...world.state, containers: { ...world.state.containers, [filler]: nest } },
   };
   world = advance(world, START + 300);
-  assert.equal(world.state.containers[coin], world.roomIds[`${prefix}:room/village_green`]);
+  assert.equal(world.state.containers[coin], world.roomIds[`${prefix}:room/burrow`]);
   assert.equal(world.state.containers[filler], nest);
 });
 
@@ -224,7 +215,7 @@ test('a same-time return home suppresses the ordinary wander for that member', (
   let world = initial();
   const coin = entity(world, 'item', 'old_coin');
   world = act(world, 'take', coin, 51);
-  world = advance(world, START + 1200);
+  world = advance(world, START + 2700);
   world = act(world, 'drop', coin, 52);
   const member = Object.values(world.state.crows ?? {}).find(
     (row) => row.phase === 'acquire',
@@ -236,7 +227,7 @@ test('a same-time return home suppresses the ordinary wander for that member', (
   const control = world.state.population_plans?.[key(origin.by)]!;
   const popJob = world.state.jobs?.[control.job_id]!;
   world = advance(world, START + 3600);
-  assert.equal(world.state.containers[member], world.roomIds[`${prefix}:room/village_green`]);
+  assert.equal(world.state.containers[member], world.roomIds[`${prefix}:room/burrow`]);
   assert.equal(
     Object.values(world.state.crows ?? {}).find((row) => row.member_id === member)?.phase,
     'idle',
@@ -287,7 +278,7 @@ test('same-time stale acquire permits the ordinary crow wander', () => {
       ...world.state,
       containers: {
         ...world.state.containers,
-        [row.member_id]: world.roomIds[`${prefix}:room/village_green`],
+        [row.member_id]: world.roomIds[`${prefix}:room/burrow`],
       },
       population_plans: { ...world.state.population_plans, [key(origin.by)]: control },
       jobs: { ...world.state.jobs, [control.job_id]: popJob },
@@ -307,7 +298,7 @@ test('same-time stale acquire permits the ordinary crow wander', () => {
         (op) =>
           op.op === 'entity.transfer' &&
           op.entity_id === row.member_id &&
-          op.destination_id === world.roomIds[`${prefix}:room/well_lane`],
+          op.destination_id === world.roomIds[`${prefix}:room/den`],
       ),
       true,
     );
@@ -389,7 +380,7 @@ test('Shoo releases the exact carried coin and cancels its pending transport leg
   );
   assert.equal(shoo.decision.kind, 'accepted', JSON.stringify(shoo.decision));
   world = shoo.world;
-  assert.equal(world.state.containers[coin], world.roomIds[`${prefix}:room/village_green`]);
+  assert.equal(world.state.containers[coin], world.roomIds[`${prefix}:room/burrow`]);
   assert.equal(world.state.jobs?.[oldJob]?.status, 'cancelled');
   assert.equal(
     Object.values(world.state.crows ?? {}).find((row) => row.member_id === carrier.member_id)
@@ -408,15 +399,15 @@ test('Shoo releases the exact carried coin and cancels its pending transport leg
   assert.equal(again.decision.kind, 'rejected');
 });
 
-// Breaks: one crow returning reserves the coin globally and blocks another eligible Green crow.
-test('a second Green crow may bind a later Drop while the first returns', () => {
+// Breaks: one crow returning reserves the coin globally and blocks another eligible home crow.
+test('a second home crow may bind a later Drop while the first returns', () => {
   let world = initial();
   const coin = entity(world, 'item', 'old_coin');
   world = act(world, 'take', coin, 81);
   world = act(world, 'drop', coin, 82);
   world = advance(world, START + 300);
   const first = Object.values(world.state.crows ?? {}).find((r) => r.phase === 'leg')!;
-  assert.equal(world.state.containers[first.member_id], world.roomIds[`${prefix}:room/well_lane`]);
+  assert.equal(world.state.containers[first.member_id], world.roomIds[`${prefix}:room/den`]);
   const move = (w: World, direction: string, ordinal: number) => {
     const result = step(
       w,
@@ -430,7 +421,7 @@ test('a second Green crow may bind a later Drop while the first returns', () => 
     assert.equal(result.decision.kind, 'accepted', JSON.stringify(result.decision));
     return result.world;
   };
-  world = move(world, 'south', 83);
+  world = move(world, 'west', 83);
   const shoo = step(
     world,
     {
@@ -442,7 +433,7 @@ test('a second Green crow may bind a later Drop while the first returns', () => 
   );
   assert.equal(shoo.decision.kind, 'accepted', JSON.stringify(shoo.decision));
   world = act(shoo.world, 'take', coin, 85);
-  world = move(world, 'north', 86);
+  world = move(world, 'east', 86);
   world = act(world, 'drop', coin, 87);
   const rows = Object.values(world.state.crows ?? {});
   assert.equal(rows.find((r) => r.member_id === first.member_id)?.phase, 'return');
@@ -459,7 +450,7 @@ test('crow acquisition harmlessly completes when another transfer moved the exac
   world = act(world, 'take', coin, 201);
   world = act(world, 'drop', coin, 202);
   const job = Object.values(world.state.crows!).find((row) => row.phase === 'acquire')!.job_id!;
-  const moved = world.roomIds[`${prefix}:room/well_lane`];
+  const moved = world.roomIds[`${prefix}:room/den`];
   world = {
     ...world,
     state: { ...world.state, containers: { ...world.state.containers, [coin]: moved } },
@@ -494,7 +485,7 @@ test('Flee resumes the same surviving crow and preserves its released coin', () 
     assert.equal(result.decision.kind, 'accepted', JSON.stringify(result.decision));
     world = result.world;
   };
-  command({ type: 'move', direction: 'south' }, 93);
+  command({ type: 'move', direction: 'west' }, 93);
   command({ type: 'attack', target_id: carrier.member_id }, 94);
   assert.equal(
     Object.values(world.state.crows ?? {}).find((r) => r.member_id === carrier.member_id)?.phase,
@@ -508,19 +499,16 @@ test('Flee resumes the same surviving crow and preserves its released coin', () 
   assert.equal(resumed.generation, carrier.generation);
   assert.equal(resumed.encounter_id, null);
   assert.equal(world.state.jobs?.[resumed.job_id!]?.status, 'pending');
-  assert.equal(world.state.containers[coin], world.roomIds[`${prefix}:room/well_lane`]);
+  assert.equal(world.state.containers[coin], world.roomIds[`${prefix}:room/den`]);
   assert.equal(
     Object.values(world.state.encounters ?? {}).some((r) => r.status === 'open'),
     false,
   );
   world = advance(world, START + 450);
-  assert.equal(
-    world.state.containers[carrier.member_id],
-    world.roomIds[`${prefix}:room/village_green`],
-  );
+  assert.equal(world.state.containers[carrier.member_id], world.roomIds[`${prefix}:room/burrow`]);
   assert.equal(
     Object.values(world.state.crows ?? {}).find((r) => r.member_id === carrier.member_id)?.phase,
     'idle',
   );
-  assert.equal(world.state.containers[coin], world.roomIds[`${prefix}:room/well_lane`]);
+  assert.equal(world.state.containers[coin], world.roomIds[`${prefix}:room/den`]);
 });

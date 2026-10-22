@@ -8,8 +8,8 @@ import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { elapsed, hp } from './combat_fixture.ts';
 import { entity, genesis, prefix, ref, room } from './escort_fixture.ts';
 
-function setup() {
-  let world = genesis();
+function setup(change?: (c: any) => void) {
+  let world = genesis(change);
   let n = 0;
   const run = (payload: object, expected = 'accepted') => {
     const command = {
@@ -221,6 +221,90 @@ test('two-exit Flee carries the original follower to the drawn destination with 
   together(a.world(), 'chapel_nave');
   assert.equal(level(a.world(), a.world().body, resourceRef(a.world(), 'mv')), before - 2);
   assert.deepEqual(a.world().state.rng, [33554437, 33554434, 2, 8208]);
+  assert.equal(relation(a.world()).status, 'following');
+});
+
+// A carter's post on Village Green riding to Ferry Landing (two rooms south, no exit between), the
+// fast_travel_sampler route shape with the destination gate opened.
+function cart(c: any) {
+  for (const k of ['transport', 'inspectable_detail'])
+    c.lock.capabilities[k] = c.manifest.requires.capabilities[k] = 1;
+  c.resources[`${prefix}:resource/coins`] = {
+    key: 'coins',
+    start: 10,
+    gain: 0,
+    minimum: 0,
+    maximum: 100,
+  };
+  c.npcs[`${prefix}:npc/carter`] = {
+    key: 'carter',
+    keywords: ['carter'],
+    short: 'npc.carter.short',
+    description: 'npc.carter.description',
+    room_line: 'npc.carter.room',
+    room: ref('room', 'village_green'),
+    resource_starts: { coins: 0 },
+  };
+  for (const [key, from, to, reverse] of [
+    ['south_cart', 'village_green', 'ferry_landing', 'north_cart'],
+    ['north_cart', 'ferry_landing', 'village_green', 'south_cart'],
+  ]) {
+    c.transports ??= {};
+    c.transports[`${prefix}:transport/${key}`] = {
+      key,
+      action: key,
+      room: ref('room', from),
+      detail: 'post',
+      destination: ref('room', to),
+      reverse: ref('transport', reverse),
+      recipient: ref('npc', 'carter'),
+      currency: ref('resource', 'coins'),
+      fare: 3,
+      recovery_rooms: [ref('room', to)],
+      label: 'transport.ride',
+      narration: 'transport.ride',
+    };
+    c.actions[`${prefix}:action/${key}`] = {
+      key,
+      command: 'use_transport',
+      input: ['route', 'quoted_fare'],
+      label: 'transport.ride',
+      accessibility: 'transport.ride',
+      priority: 0,
+      policy: { policy_version: 1, root: { op: 'all', items: [] } },
+      target: { kind: 'entity', scopes: ['inspectable_details'] },
+    };
+    c.rooms[`${prefix}:room/${from}`].details = {
+      post: {
+        aliases: ['post'],
+        description: 'transport.ride',
+        transport: { route: ref('transport', key), title: 'transport.ride' },
+      },
+    };
+  }
+  Object.assign(c.text, {
+    'transport.ride': 'Ride',
+    'transport.unaffordable': 'No coins.',
+    'npc.carter.short': 'carter',
+    'npc.carter.description': 'A carter.',
+    'npc.carter.room': 'A carter waits.',
+  });
+}
+
+// Breaks: a ride moves the body but leaves the following NPC behind (the shared travel step).
+test('a following NPC rides the transport with the player', () => {
+  const a = setup(cart);
+  a.ready();
+  a.choose('rescue');
+  const w = a.world();
+  const post = Object.entries(w.details).find(([, d]) => d.transport?.route.key === 'south_cart')!;
+  a.run({
+    type: 'use_transport',
+    endpoint_id: post[0],
+    route: ref('transport', 'south_cart'),
+    quoted_fare: 3,
+  });
+  together(a.world(), 'ferry_landing');
   assert.equal(relation(a.world()).status, 'following');
 });
 
