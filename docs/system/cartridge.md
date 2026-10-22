@@ -24,7 +24,22 @@ source with rooms, text or an entry compiles to
 
 ## Current bundled chapter
 
-The shared app bundles `ashmere_missing_child@0.0.42` (v042), titled
+The shared app bundles the [toolbox showcase](../SHOWCASE.md), `toolbox_showcase`, as its
+chapter: the [artifact](../../protocol/fixtures/toolbox_showcase_hash.json) compiled from
+`cartridges/toolbox_showcase`, under the
+[retire-Ashmere decision](../decisions/owner-decision-retire-ashmere-2026-10-21.md). The
+first release will bundle the real game's chapter. The app's save has one fixed name,
+`loka-showcase.db` (the web build keeps a storage slot per save file); after a content change the
+app shows the pinned-release refusal with [explicit Start over](save.md#opening-a-story), with no
+save compatibility in pre-production.
+Earlier saves, `loka-ashmere-missing-child.db` included, stay on the device untouched and
+are never deleted.
+The app opens only the chapter file and offers no story picker. Missing pins follow
+[explicit Start over](save.md#opening-a-story), without automatic deletion or migration.
+
+### Retired Ashmere chapter (E1 candidate)
+
+Until 2026-10-21 the shared app bundled `ashmere_missing_child@0.0.42` (v042), titled
 **Ashmere — The Missing Child**, requiring kernel API1.37. Its independently derived
 content hash is `5d8b0e3a16b209733707a8450cee5a4330965092498cf1d31ab8fdae9a50fc8b`,
 with 57 rooms, 10 quests, 54 dialogues, 8 scenes, 38 locked capabilities and 211 initial IDs. The [artifact oracle](../../protocol/fixtures/missing_child_v042_hash.json),
@@ -37,7 +52,7 @@ installed; E1–E3 acceptance remains open in the [roadmap](../ROADMAP.md), incl
 chapter review and the browser/UI consistency gate. Native verification and known blur
 remain deferred under the [mobile pause](../decisions/owner-decision-web-first-mobile-pause-2026-10-05.md).
 
-The app uses its own `loka-ashmere-missing-child.db` save under the
+The app used its own `loka-ashmere-missing-child.db` save under the
 [actual chapter cutover](../decisions/owner-decision-actual-chapter-cutover-2026-10-05.md).
 The chapter retains the village and inn routes and playable Maud S1 (five rats,
 earned key/trust, upstairs storage), combat, shrine return and real-elapsed time.
@@ -84,12 +99,10 @@ Its Q2 activation consumer is [the staged first search lead below](#source-layou
 
 The chapter retains its authored calendar/status, typed bell reaction and scene composition,
 real_elapsed rate50/start64800, HP10, MV100, carrying ceiling12000, move cost1 and
-position recovery18/36 per3600 logical seconds. The current release and independent
-answers are [above](#current-bundled-chapter). Historical sampler/proof sources,
+position recovery18/36 per3600 logical seconds. Its release and independent
+answers are [above](#retired-ashmere-chapter-e1-candidate). Historical sampler/proof sources,
 release pins and [sampler evidence](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/c1-sampler/README.md) remain labeled
 with their actual release and are not bundled.
-The app opens only the chapter file and offers no story picker. Missing pins follow
-[explicit Start over](save.md#opening-a-story), without automatic deletion or migration.
 
 Q2-A — the first Missing Child search lead — consumes that report: exact `first_lead/report`
 automatically starts `missing_child` in the same receipt. Its current-state objective is the
@@ -623,8 +636,8 @@ Ferryman's Lantern": four rooms, Bram, one lantern, one quest with a `current_st
 objective and no offer, two dialogues of Bram's: `bram_offer` while the player has no instance of
 the quest (one choice, `accept`, which accepts it) and `bram` while it is active (two choices,
 `carry`, `leave` with a hand-over), the fact `search_plan`, a story point with one outcome per choice, start 06:00
-(`cartridges/lantern_proof/*`; its stats and gate: [owner rules](owner-rules.md#product-and-scope)). Its known answer remains historical proof; the app bundles the
-[current Missing Child chapter](#current-bundled-chapter).
+(`cartridges/lantern_proof/*`; its stats and gate: [owner rules](owner-rules.md#product-and-scope)). Its known answer remains historical proof; the app bundled the
+[retired Missing Child chapter](#retired-ashmere-chapter-e1-candidate) until 2026-10-21.
 
 ### R9C synthetic interaction cartridge (E2)
 
@@ -729,7 +742,7 @@ preserving the five finite rats. It removes cellar_door from both reciprocal exi
 removes the obsolete barrier/key/text. Cellar access is an ordinary free passage, so
 shrine recovery requires no equipment/key. Other barriers and owner prose remain.
 The historical0.0.8 fixture retains its original answer; the
-[current bundled chapter](#current-bundled-chapter) has its own independent oracle.
+[retired Ashmere chapter](#retired-ashmere-chapter-e1-candidate) has its own independent oracle.
 
 ## Maud’s Cellar content (M20-B2)
 
@@ -1237,7 +1250,7 @@ S1 credits retain their declared consumer. Additional installed consumers are
 [C4 pack response/flight](#c4-pack-response-and-wounded-flight),
 [D7 deer](#d7-deer-declarations), [D8 crows](#d8-crows-coin-and-reachable-nest-selected-contract)
 and [D9 bell suppression](mechanics.md#d9-village-consequences-and-prior-study-access-selected-contract).
-The [current bundled chapter](#current-bundled-chapter) owns release answers;
+The [retired Ashmere chapter](#retired-ashmere-chapter-e1-candidate) owns release answers;
 [C3's publication review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-06-c3-publication-status-review.md)
 retains its original independent source/save proof.
 
@@ -1647,7 +1660,7 @@ with authored labels and descriptions. Compiler and loader reject missing/extra 
 unknown attributes/skills/faction references, unsupported sight effects, unsafe or
 out-of-range values, absent capabilities and effects that cannot apply atomically.
 The [D11 command and changed row](mechanics.md#d11-character-choice-selected-contract)
-consume this shape; the [current identity](#current-bundled-chapter) owns release answers.
+consume this shape; the [retired Ashmere identity](#retired-ashmere-chapter-e1-candidate) owns release answers.
 
 <a id="d9-village-reaction-content-selected-pending-implementation"></a>
 
