@@ -100,7 +100,7 @@ export const routes: Record<string, Step[]> = {
     'Attack the boar',
     wait(3000),
     (b) => {
-      // The story is the bleed: fail the route if the boar's wound no longer bleeds.
+      // The story shows a bleeding condition: fail the route if none reaches the view.
       if (!JSON.stringify(b.p.screen().view).includes('condition.bleeding'))
         throw new Error('not bleeding');
     },

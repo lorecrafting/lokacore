@@ -465,7 +465,8 @@
       "kernel/ts/src/mechanics/attributes/shared.ts"
     ],
     "fixtures": [
-      "protocol/fixtures/cartridge_loader.json"
+      "protocol/fixtures/cartridge_loader.json",
+      "protocol/fixtures/derived_sampler_hash.json"
     ],
     "invariants": [
       "gameview_agrees_with_admission"
@@ -856,7 +857,8 @@
       "mobile/authority/local-story/receipt-history.ts"
     ],
     "fixtures": [
-      "protocol/fixtures/transport_contracts.json"
+      "protocol/fixtures/transport_contracts.json",
+      "protocol/fixtures/fast_travel_sampler_hash.json"
     ],
     "invariants": [
       "delta_preconditions_hold",
@@ -913,7 +915,8 @@
       "lib/loka/core/compose_bleed.ex"
     ],
     "fixtures": [
-      "protocol/fixtures/bleed_composition.json"
+      "protocol/fixtures/bleed_composition.json",
+      "protocol/fixtures/bleed_sampler_hash.json"
     ],
     "invariants": [
       "delta_preconditions_hold",

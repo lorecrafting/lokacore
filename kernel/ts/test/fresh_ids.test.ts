@@ -1,6 +1,6 @@
 // newWorld's fresh id allocation order (mechanics.md, A fresh world; numeric-profile.md, Initial
-// world ids). Breaks: a reordered or skipped mint in runtime/fresh.ts (details, NPCs, items, jobs or
-// slot holders) shifts every later id, which saves and transcripts carry. Answers are Python
+// world ids). Breaks: a reordered or skipped mint in runtime/fresh.ts (details, items or slot
+// holders) shifts every later id, which saves and transcripts carry. Answers are Python
 // hashlib over the documented order (protocol/fixtures/generate_fresh_ids.py), never the kernel's.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
@@ -25,7 +25,6 @@ for (const [fixture, expected] of Object.entries(answers))
     for (const [id, d] of Object.entries(fresh.details))
       actual[`detail/${fresh.rooms[d.room].key}/${d.key}`] = id;
     for (const [id, e] of Object.entries(fresh.entities)) actual[`${e.kind}/${e.key}`] = id;
-    for (const [id, j] of Object.entries(fresh.state.jobs ?? {})) actual[`job/${j.job.key}`] = id;
     for (const [slot, id] of Object.entries(fresh.slots)) actual[`slot/${slot}`] = id;
     assert.deepEqual(actual, expected);
   });
