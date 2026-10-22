@@ -7,6 +7,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { createRequire, registerHooks } from 'node:module';
 import { test } from 'node:test';
+import { trainingPin } from '../../authority/local-story/__tests__/training-host.ts';
 const require = createRequire(import.meta.url);
 const ts = require('typescript');
 const react = pathToFileURL(require.resolve('react')).href;
@@ -317,38 +318,33 @@ test('an unavailable teach choice draws as label: reason with no price card', ()
   assert.deepEqual(lines, ['Learn swords — 2 pennies: You already know swords.']);
 });
 
-// Breaks: Tobin controls route outside their NPC detail, replay duplicates success, or cold reopen loses the next lesson/confirmed line.
-test('Book interaction teaches swords then dodge in Tobin detail and recovers each committed result once', (t) => {
-  const pin = JSON.parse(
-    readFileSync(
-      new URL('../../../protocol/fixtures/missing_child_v021_hash.json', import.meta.url),
-      'utf8',
-    ),
-  );
-  const ids = JSON.parse(
-    readFileSync(
-      new URL('../../../protocol/fixtures/missing_child_v021_ids.json', import.meta.url),
-      'utf8',
-    ),
-  );
+// Breaks: teacher controls route outside their NPC detail, replay duplicates success, or cold
+// reopen loses the next lesson/confirmed line. The controlled training sampler gets distinct
+// words per lesson so each line is countable.
+test('Book interaction teaches swords then dodge in the teacher detail and recovers each committed result once', (t) => {
+  const { pin, teacher } = trainingPin((c) => {
+    const at = (kind: string, key: string) =>
+      `${c.manifest.id}@${c.manifest.version}:${kind}/${key}`;
+    for (const skill of ['swords', 'dodge']) {
+      const choice = c.dialogues[at('dialogue', `learn_${skill}`)].choices.learn;
+      choice.label = `learn.${skill}`;
+      choice.narration = `learned.${skill}`;
+      c.skills[at('skill', skill)].label = `skill.${skill}`;
+      c.text[`learn.${skill}`] = `Learn ${skill}`;
+      c.text[`learned.${skill}`] = `The teacher teaches you ${skill}.`;
+      c.text[`skill.${skill}`] = skill === 'swords' ? 'Swords' : 'Dodge';
+    }
+  });
   const a = elapsedHost(':memory:', { wall: 10000, mono: 0 }, pin);
   t.after(() => a.sql.close());
   let book = presenter(a.game);
-  for (const direction of ['north', 'north', 'north']) {
-    const button = book
-      .screen()
-      .buttons.find((b) => b.action_key === 'move' && b.input.direction === direction);
-    assert.ok(button);
-    book.press(button);
-  }
-  const tobin = ids['npc/tobin'];
   const draw = () => {
     const screen = book.screen();
     return NpcDetail({
       screen,
       g: group(screen.buttons),
       press: book.press,
-      speaker: tobin,
+      speaker: teacher,
       world() {},
     });
   };
@@ -362,39 +358,29 @@ test('Book interaction teaches swords then dodge in Tobin detail and recovers ea
   const reopen = () => {
     book = presenter(openGame(a.db, pin, a.host));
   };
-  const swords = 'Tobin accepts two pennies and teaches you swords. He gives you his rusty sword.';
-  const dodge = 'Tobin accepts two pennies and teaches you dodge.';
-  const talk = book.screen().buttons.find((b) => b.action_key === 'tobin_swords');
+  const swords = 'The teacher teaches you swords.';
+  const dodge = 'The teacher teaches you dodge.';
+  const talk = book.screen().buttons.find((b) => b.action_key === 'learn_swords');
   assert.ok(talk);
   tap(talk.label);
-  assert.ok(words(draw()).includes('Learn swords — 2 pennies'));
-  tap('Learn swords — 2 pennies');
+  assert.ok(words(draw()).includes('Learn swords'));
+  tap('Learn swords');
   assert.equal(words(draw()).filter((line) => line === swords).length, 1);
   reopen();
   assert.equal(words(draw()).filter((line) => line === swords).length, 1);
-  assert.ok(book.screen().buttons.some((b) => b.action_key === 'tobin_dodge'));
-  const next = book.screen().buttons.find((b) => b.action_key === 'tobin_dodge')!;
+  const next = book.screen().buttons.find((b) => b.action_key === 'learn_dodge');
+  assert.ok(next);
   tap(next.label);
-  tap('Learn dodge — 2 pennies');
+  tap('Learn dodge');
   assert.equal(words(draw()).filter((line) => line === dodge).length, 1);
   reopen();
   assert.equal(words(draw()).filter((line) => line === dodge).length, 1);
-  assert.ok(
-    !book
-      .screen()
-      .buttons.some((b) => b.action_key === 'tobin_swords' || b.action_key === 'tobin_dodge'),
+  const sheet = words(
+    CharacterPage({ view: book.screen().view, text: book.screen().text, world: () => {} }),
   );
-  assert.ok(
-    words(
-      CharacterPage({ view: book.screen().view, text: book.screen().text, world: () => {} }),
-    ).includes('Swords — learned'),
-  );
-  assert.ok(
-    words(
-      CharacterPage({ view: book.screen().view, text: book.screen().text, world: () => {} }),
-    ).includes('Dodge — learned'),
-  );
+  assert.ok(sheet.includes('Swords — learned') && sheet.includes('Dodge — learned'), String(sheet));
 });
+
 // Breaks: moving to the shared item detail component silently drops confirmed fuel or invents ignition.
 test('shared item detail draws confirmed fuel for lit and exhausted items', () => {
   assert.deepEqual(

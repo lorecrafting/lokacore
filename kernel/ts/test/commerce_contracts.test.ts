@@ -1,9 +1,19 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { validate } from '../src/foundation/validate.ts';
-import { read } from './read.ts';
-const c = read('protocol/fixtures/missing_child_v018_hash.json').value;
-const shop = c.npcs['ashmere_missing_child@0.0.18:npc/peg'].shop;
+const ref = (kind: string, key: string) => ({
+  cartridge_id: 'prices_sampler',
+  cartridge_version: '0.0.1',
+  kind,
+  key,
+});
+// Compiled-form shop with only required fields: the loop below deletes every key.
+const shop = {
+  resource: ref('resource', 'pennies'),
+  offers: [{ item: ref('item', 'fish_a'), buy: 5, sell: 1 }],
+  bought: 'shop.bought',
+  sold: 'shop.sold',
+};
 const command = {
   type: 'buy',
   actor_id: '11111111-2222-4333-8444-555555555555',
@@ -20,7 +30,7 @@ test('shop contracts reject missing fields and malformed positive prices', () =>
   ] as const) {
     assert.deepEqual(validate(name, valid), []);
     for (const field of Object.keys(valid)) {
-      const bad = { ...valid };
+      const bad: Record<string, unknown> = { ...valid };
       delete bad[field];
       assert.ok(validate(name, bad).length, `${name}.${field}`);
     }
