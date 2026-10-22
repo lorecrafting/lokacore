@@ -61,20 +61,20 @@ export function lightOnlyFixture() {
   value.manifest.requires.capabilities.calendar = 1;
   value.lock.capabilities.calendar = 1;
   value.calendar = { start: 100 };
-  value.items['ashmere_items@0.0.1:item/satchel'].container = true;
-  const lantern = value.items['ashmere_items@0.0.1:item/lantern'];
+  value.items['items_sampler@0.0.1:item/satchel'].container = true;
+  const lantern = value.items['items_sampler@0.0.1:item/lantern'];
   lantern.fuel = {
     ...c.items[named('item', 'torch')].fuel,
     capacity: 8,
     initial: 2,
     supply: {
-      cartridge_id: 'ashmere_items',
+      cartridge_id: 'items_sampler',
       cartridge_version: '0.0.1',
       kind: 'item',
       key: 'lamp_oil',
     },
   };
-  value.items['ashmere_items@0.0.1:item/lamp_oil'].fuel = {
+  value.items['items_sampler@0.0.1:item/lamp_oil'].fuel = {
     kind: 'supply',
     capacity: 6,
     initial: 6,

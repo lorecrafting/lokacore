@@ -154,7 +154,7 @@ test('E1 refuses an admitted cartridge with no candidate row', () => {
   const bellBytes = new TextEncoder().encode(
     `{"cartridge":${bell.canonical},"content_hash":"${bell.sha256}"}`,
   );
-  assert.throws(() => admitCandidate(bellBytes), /wrong E1 candidate: ashmere_bell@0\.0\.1/);
+  assert.throws(() => admitCandidate(bellBytes), /wrong E1 candidate: recipe_sampler@0\.0\.1/);
 });
 
 // Breaks: the candidate table (or a row field) leaks into the policy digest, so the E1

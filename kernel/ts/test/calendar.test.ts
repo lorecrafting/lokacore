@@ -43,8 +43,8 @@ const controlled = (c: any) => {
       ].map((phase, i) => ({ at: i * 10, phase })),
     },
   };
-  c.npcs['ashmere_ferry@0.0.1:npc/bram'].daily_schedule = {
-    '2': c.rooms['ashmere_ferry@0.0.1:room/ferry_landing'].exits.north.to,
+  c.npcs['ferry_sampler@0.0.1:npc/bram'].daily_schedule = {
+    '2': c.rooms['ferry_sampler@0.0.1:room/ferry_landing'].exits.north.to,
   };
 };
 const load = (change: (c: any) => void = () => {}) => {
@@ -130,7 +130,7 @@ test('a 30-hour calendar accepts hour 29 and a start on day two', () => {
   const loaded = load((c) => {
     c.calendar.hours_per_day = 30;
     c.calendar.start = 3000;
-    c.npcs['ashmere_ferry@0.0.1:npc/bram'].daily_schedule = {
+    c.npcs['ferry_sampler@0.0.1:npc/bram'].daily_schedule = {
       '29': c.entry,
     };
   });
@@ -242,7 +242,7 @@ test('loader refuses malformed calendar and out-of-day references', () => {
       c.calendar.units_per_hour = 101;
     },
     (c: any) => {
-      c.npcs['ashmere_ferry@0.0.1:npc/bram'].daily_schedule['10'] = c.entry;
+      c.npcs['ferry_sampler@0.0.1:npc/bram'].daily_schedule['10'] = c.entry;
     },
   ])
     assert.equal(load(mutate).ok, false);

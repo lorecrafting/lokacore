@@ -79,7 +79,7 @@ test('take, drop, give, inventory and examine read as a player expects', () => {
 // kernel's canonical encoder: input only, the expected lines are hand-written.
 test('a lookup matching 1,025 items is refused and the session goes on', () => {
   const c = structuredClone(kat.value);
-  const room = { cartridge_id: 'ashmere_items', cartridge_version: '0.0.1', kind: 'room' };
+  const room = { cartridge_id: 'items_sampler', cartridge_version: '0.0.1', kind: 'room' };
   const coin = {
     keywords: ['coin'],
     short: 'item.lantern.short',
@@ -88,7 +88,7 @@ test('a lookup matching 1,025 items is refused and the session goes on', () => {
     location: { in: 'room', room: { ...room, key: 'ferry_landing' } },
   };
   for (let i = 0; i < 1025; i++)
-    c.items[`ashmere_items@0.0.1:item/coin${i}`] = { ...coin, key: `coin${i}` };
+    c.items[`items_sampler@0.0.1:item/coin${i}`] = { ...coin, key: `coin${i}` };
   const text = encode(c);
   const coins = join(dir, 'coins.json');
   const sha = createHash('sha256').update(text).digest('hex');

@@ -30,9 +30,9 @@ const PURSE = '470b4175-5b92-89c1-bdac-645a128dc72f'; // 10
 const RIBBON = 'f34698e2-c92c-841a-b0bd-da6883e9c111'; // 11
 const BOX = '15349791-fa65-81f7-b378-bb8212b808d2'; // 12 sewing_box
 const TRUNK = 'e368b8b9-c4a5-8d0e-82a0-da17e2d59fe2'; // 13
-const L = 'ashmere_locks@0.0.1';
+const L = 'locks_sampler@0.0.1';
 const lid = (key: string) => ({
-  cartridge_id: 'ashmere_locks',
+  cartridge_id: 'locks_sampler',
   cartridge_version: '0.0.1',
   kind: 'barrier',
   key,

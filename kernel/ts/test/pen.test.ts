@@ -182,7 +182,7 @@ test('grain in the trough feeds both hens and goes to the midden in the same adv
     'permission_denied',
   );
   // fatal() names its killer by the containers sampler's id; alias it to a live hen here.
-  const killer = { 'ashmere_sampler@0.0.8:npc/cellar_rat_1': hens(body)[0]! };
+  const killer = { 'cellar_sampler@0.0.8:npc/cellar_rat_1': hens(body)[0]! };
   const died = fatal({ ...body, entityIds: { ...body.entityIds, ...killer } }).next.world;
   const corpseId = Object.keys(died.state.containers).find(
     (id) => died.state.containers[id] === room(died, 'pen') && !(id in body.state.containers),

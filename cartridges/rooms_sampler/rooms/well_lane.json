@@ -1,0 +1,14 @@
+{
+  "title": "room.well_lane.title",
+  "description": "room.well_lane.description",
+  "exits": {
+    "south": {
+      "to": {
+        "cartridge_id": "rooms_sampler",
+        "cartridge_version": "0.0.1",
+        "kind": "room",
+        "key": "ferry_landing"
+      }
+    }
+  }
+}

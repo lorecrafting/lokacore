@@ -21,9 +21,9 @@ const CHARACTER = 'bd595711-ea5f-89a5-abb0-046cd349d2f9'; // ordinal 0
 const BODY = '3d4829ad-9e43-81ef-bc10-66b1b267e157'; // ordinal 1
 const CMD = 'e5f6a7b8-c9d0-8e1f-8a2b-4c5d6e7f8a9b';
 const SEED = [1, 2, 3, 4];
-const SHOVE = 'ashmere_road@0.0.1:recipe/shove_cart';
-const PRAY = 'ashmere_road@0.0.1:recipe/pray';
-const YARD = (w: World) => w.roomIds['ashmere_road@0.0.1:room/mill_yard'];
+const SHOVE = 'resource_sampler@0.0.1:recipe/shove_cart';
+const PRAY = 'resource_sampler@0.0.1:recipe/pray';
+const YARD = (w: World) => w.roomIds['resource_sampler@0.0.1:room/mill_yard'];
 
 const sorted = (v: any): any =>
   Array.isArray(v)
@@ -52,7 +52,7 @@ const perform = (action: string) => cmd({ type: 'perform', action });
 const move = (direction: string) => cmd({ type: 'move', direction });
 const wait = (until: number) => cmd({ type: 'wait', until });
 const ref = (key: string) => ({
-  cartridge_id: 'ashmere_road',
+  cartridge_id: 'resource_sampler',
   cartridge_version: '0.0.1',
   kind: 'resource',
   key,
@@ -99,7 +99,7 @@ test('a failed threshold check still pays its cost; success runs the outcome', (
   assert.deepEqual(stored(failed.world, 'mv'), { value: 2, at: 0 });
   assert.equal(failed.world.state.rng, w.state.rng); // a threshold draws nothing
   // hp 15 (difficulty 15, at least): passes.
-  const strong = world((c) => (c.resources['ashmere_road@0.0.1:resource/hp'].start = 15));
+  const strong = world((c) => (c.resources['resource_sampler@0.0.1:resource/hp'].start = 15));
   const passed = step(strong, perform('shove_cart'), 0).decision;
   assert.equal(passed.kind === 'accepted' && passed.outcome, 'success');
 });
@@ -229,11 +229,11 @@ test('a resource.adjust step stops at the maximum; at full value it changes noth
   );
   assert.deepEqual(ops(full, perform('pray'))[0], adjust('ma', 88, 78)); // 90 - 10 + 4 at 3600 is 84, + 4 at 7200
   // hp 23 + 5 stops at 25.
-  const hurt = world((c) => (c.resources['ashmere_road@0.0.1:resource/hp'].start = 23));
+  const hurt = world((c) => (c.resources['resource_sampler@0.0.1:resource/hp'].start = 23));
   assert.deepEqual(ops(run(hurt, move('east')), perform('pray'))[1], adjust('hp', 23, 25));
   // Review N4: -10 at hp 3 stops at the minimum, 0.
   const harm = world((c) => {
-    c.resources['ashmere_road@0.0.1:resource/hp'].start = 3;
+    c.resources['resource_sampler@0.0.1:resource/hp'].start = 3;
     c.recipes[PRAY].outcomes.success.sequence[0].by = -10;
   });
   assert.deepEqual(ops(run(harm, move('east')), perform('pray'))[1], adjust('hp', 3, 0));
@@ -349,15 +349,15 @@ test('the band is the first row of 04 §15 whose cut p reaches', () => {
   ] as const;
   for (const [minimum, maximum, start, band] of rows) {
     const w = world((c) =>
-      Object.assign(c.resources['ashmere_road@0.0.1:resource/ma'], { minimum, maximum, start }),
+      Object.assign(c.resources['resource_sampler@0.0.1:resource/ma'], { minimum, maximum, start }),
     );
     assert.equal(gameView(w).resources![1].band, band, `${minimum}..${maximum} at ${start}`);
   }
 });
 
 // c1-numbers: cartridge.json world and a pool's bands (00 §4 and 04 §15 amendments 2026-10-02).
-const HP = 'ashmere_road@0.0.1:resource/hp';
-const MV = 'ashmere_road@0.0.1:resource/mv';
+const HP = 'resource_sampler@0.0.1:resource/hp';
+const MV = 'resource_sampler@0.0.1:resource/mv';
 const band = (at_percent: number, key: string, tone: string) => ({ at_percent, key, tone });
 const TIRED = [
   band(50, 'fresh', 'normal'),

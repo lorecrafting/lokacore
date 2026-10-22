@@ -5,11 +5,11 @@ defmodule Loka.ContentWearTest do
   use ExUnit.Case, async: true
 
   import Loka.ContentSource, only: [compile: 2]
-  setup_all do: %{dir: Loka.ContentSource.copy("cartridges/ashmere_wear")}
+  setup_all do: %{dir: Loka.ContentSource.copy("cartridges/wear_sampler")}
   @kat JSON.decode!(File.read!("protocol/fixtures/cartridge_wear_hash.json"))
-  @src "cartridges/ashmere_wear"
+  @src "cartridges/wear_sampler"
 
-  # ashmere_wear's source in `dir` with `files` (relative path => JSON value) written over it.
+  # wear_sampler's source in `dir` with `files` (relative path => JSON value) written over it.
 
   defp src(rel), do: JSON.decode!(File.read!(Path.join(@src, rel)))
 
@@ -25,7 +25,7 @@ defmodule Loka.ContentWearTest do
   end
 
   # Breaks: an item's slot dropped or reshaped in the artifact.
-  test "ashmere_wear compiles to its Python known answer without warnings" do
+  test "wear_sampler compiles to its Python known answer without warnings" do
     expected = ~s({"cartridge":#{@kat["canonical"]},"content_hash":"#{@kat["sha256"]}"})
     assert Loka.Content.compile(@src) == {:ok, expected, []}
   end

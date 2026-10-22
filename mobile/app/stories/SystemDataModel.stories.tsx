@@ -198,7 +198,7 @@ export const Homes: Story = {
     await userEvent.click(canvas.getByRole('button', { name: 'RoomDefinition' }));
     await userEvent.click(panel().getByText(/^Authored in cartridges \(\d+\)$/));
     await expect(
-      panel().getByRole('link', { name: 'cartridges/ashmere_rooms/rooms/boathouse.json' }),
+      panel().getByRole('link', { name: 'cartridges/rooms_sampler/rooms/boathouse.json' }),
     ).toBeVisible();
   },
 };

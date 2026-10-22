@@ -63,8 +63,8 @@ const sorted = (v: any): any =>
 function gongs(): string[] {
   const c = sorted(structuredClone(kat.value));
   const ref = (kind: string, key: string) => ({ ...c.entry, kind, key });
-  const bell = c.recipes['ashmere_bell@0.0.1:recipe/ring_bell'];
-  const tower = c.rooms['ashmere_bell@0.0.1:room/bell_tower'];
+  const bell = c.recipes['recipe_sampler@0.0.1:recipe/ring_bell'];
+  const tower = c.rooms['recipe_sampler@0.0.1:room/bell_tower'];
   tower.details = { gong: { aliases: ['gong'], description: 'detail.rope' } };
   const gong = {
     ...bell,
@@ -78,8 +78,8 @@ function gongs(): string[] {
     sequence: [{ op: 'event.emit', event: 'gong_rung' }],
   };
   gong.outcomes = { success }; // leaves the bell unrung
-  c.recipes['ashmere_bell@0.0.1:recipe/ring_gong'] = gong;
-  c.recipes['ashmere_bell@0.0.1:recipe/toll_bell'] = {
+  c.recipes['recipe_sampler@0.0.1:recipe/ring_gong'] = gong;
+  c.recipes['recipe_sampler@0.0.1:recipe/toll_bell'] = {
     ...bell,
     key: 'toll_bell',
     label: 'actions.toll_bell',
@@ -173,7 +173,7 @@ test('play shows a narration line with its key and pinned participants', () => {
   const ferry = read('protocol/fixtures/cartridge_ferry_hash.json');
   const file = join(dir, 'ferry.json');
   writeFileSync(file, `{"cartridge":${ferry.canonical},"content_hash":"${ferry.sha256}"}`);
-  const transcript = `${ROOT}cartridges/ashmere_ferry/transcripts/schedule.jsonl`;
+  const transcript = `${ROOT}cartridges/ferry_sampler/transcripts/schedule.jsonl`;
   const r = spawnSync('node', [`${ROOT}kernel/ts/play/main.ts`, file, '--replay', transcript], {
     encoding: 'utf8',
   });

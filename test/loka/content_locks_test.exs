@@ -6,11 +6,11 @@ defmodule Loka.ContentLocksTest do
   use ExUnit.Case, async: true
 
   import Loka.ContentSource, only: [compile: 2]
-  setup_all do: %{dir: Loka.ContentSource.copy("cartridges/ashmere_locks")}
+  setup_all do: %{dir: Loka.ContentSource.copy("cartridges/locks_sampler")}
   @kat JSON.decode!(File.read!("protocol/fixtures/containers_cartridge_locks_hash.json"))
-  @src "cartridges/ashmere_locks"
+  @src "cartridges/locks_sampler"
 
-  # A file of the clean ashmere_locks source, decoded.
+  # A file of the clean locks_sampler source, decoded.
   defp src(rel), do: JSON.decode!(File.read!(Path.join(@src, rel)))
   defp item(key, f), do: {"items/#{key}.json", f.(src("items/#{key}.json"))}
   defp lid(key, v), do: {"barriers/#{key}.json", Map.merge(src("barriers/#{key}.json"), v)}
@@ -31,7 +31,7 @@ defmodule Loka.ContentLocksTest do
   defp errors(other), do: other
 
   # Breaks: an item's barrier dropped, or left a short key, in the artifact (Checks.expand).
-  test "ashmere_locks compiles to its Python known answer without warnings" do
+  test "locks_sampler compiles to its Python known answer without warnings" do
     expected = ~s({"cartridge":#{@kat["canonical"]},"content_hash":"#{@kat["sha256"]}"})
     assert Loka.Content.compile(@src) == {:ok, expected, []}
   end
@@ -86,7 +86,7 @@ defmodule Loka.ContentLocksTest do
 
     assert errors(compile(dir, unknown)) == [
              d("UNRESOLVED_REFERENCE", "items/trunk.barrier", %{
-               "target" => "ashmere_locks@0.0.1:barrier/nope"
+               "target" => "locks_sampler@0.0.1:barrier/nope"
              })
            ]
   end

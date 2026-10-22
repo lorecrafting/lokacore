@@ -29,7 +29,7 @@ const IDS = [
 ];
 const SEED = [1, 2, 3, 4];
 const AFTER_ONE_DRAW = [7, 0, 1026, 12288];
-const RECIPE = 'ashmere_bell@0.0.1:recipe/ring_bell';
+const RECIPE = 'recipe_sampler@0.0.1:recipe/ring_bell';
 
 const sorted = (v: any): any =>
   Array.isArray(v)
@@ -71,7 +71,7 @@ const cmd = (payload: object): Command =>
   ({ id: CMD, world_context_id: CONTEXT, payload: { actor_id: CHARACTER, ...payload } }) as Command;
 const ring = cmd({ type: 'perform', action: 'ring_bell' });
 const ref = (kind: string, key: string) => ({
-  cartridge_id: 'ashmere_bell',
+  cartridge_id: 'recipe_sampler',
   cartridge_version: '0.0.1',
   kind,
   key,

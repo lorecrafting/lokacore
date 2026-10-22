@@ -65,25 +65,25 @@ const REACHED = [
 // Each v2 demo cartridge, and the unregistered command types (Object prototype keys among them,
 // the bug class of the regression seeds): each must turn up in the fresh sequences.
 const PICKED = [
-  'bell',
-  'chapters',
-  'details',
-  'dusk',
-  'errand',
-  'facts',
-  'ferry',
-  'gate',
-  'green',
-  'items',
-  'journal',
-  'locks',
-  'rest',
-  'road',
-  'scene',
-  'rooms',
-  'sampler',
-  'wear',
-].map((c) => `ashmere_${c}`);
+  'recipe_sampler',
+  'chapters_sampler',
+  'details_sampler',
+  'check_sampler',
+  'errand_sampler',
+  'facts_sampler',
+  'ferry_sampler',
+  'gate_sampler',
+  'green_sampler',
+  'items_sampler',
+  'journal_sampler',
+  'locks_sampler',
+  'position_sampler',
+  'resource_sampler',
+  'scene_sampler',
+  'rooms_sampler',
+  'cellar_sampler',
+  'wear_sampler',
+];
 const UNKNOWN = ['dance', 'constructor', '__proto__', 'toString', 'hasOwnProperty'];
 
 // Breaks: overlapping/omitted seeds at an odd partition boundary, or a worker's/regression's
@@ -107,9 +107,9 @@ test('two fresh ranges and regression seeds retain all sequence counts and cover
   assert.deepEqual(
     [...seen].sort(),
     [
-      '__proto__ accept_quest ashmere_bell ashmere_dusk ashmere_errand ashmere_facts',
-      'ashmere_road ashmere_scene ashmere_wear choose close close_choice dance drop give',
-      'hasOwnProperty lock look move perform remove run_job scan take talk toString wait wear',
+      '__proto__ accept_quest check_sampler choose close close_choice dance drop errand_sampler',
+      'facts_sampler give hasOwnProperty lock look move perform recipe_sampler remove',
+      'resource_sampler run_job scan scene_sampler take talk toString wait wear wear_sampler',
     ]
       .join(' ')
       .split(' '),
@@ -285,7 +285,7 @@ test('--cartridge runs every seed on that artifact and refuses a forged one', ()
     .map((l) => l.split(' ').slice(0, 2).join(' '));
   assert.deepEqual(
     named,
-    eight.map((s) => `${s} ashmere_sampler`),
+    eight.map((s) => `${s} cellar_sampler`),
     r.stdout,
   );
   const forged = cli('forged.json', '0'.repeat(64));

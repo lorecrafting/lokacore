@@ -90,7 +90,7 @@ defmodule Loka.ContentRaidTest do
   # Breaks (row FD1; twin of the time_since case in kernel/ts/test/cartridge.test.ts): a
   # time_since leaf compiles under API 1.0 in a cartridge with no world content (no v2 source).
   test "a time_since policy keeps API 1.90 without world content" do
-    dir = Loka.ContentSource.copy("cartridges/ashmere_hello")
+    dir = Loka.ContentSource.copy("cartridges/hello_sampler")
     int = %{"type" => "int", "default" => 0}
     since = %{"op" => "time_since", "fact" => "village_arrived", "at_least" => 600}
 

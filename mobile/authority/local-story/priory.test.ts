@@ -331,8 +331,8 @@ test('readable-only SQLite recovery rejects forged narration without another his
   const c = structuredClone(read('protocol/fixtures/cartridge_items_hash.json').value);
   c.manifest.requires.kernel_api.at_least = '1.24';
   c.manifest.requires.capabilities.readable = c.lock.capabilities.readable = 1;
-  c.items['ashmere_items@0.0.1:item/satchel'].container = true;
-  c.items['ashmere_items@0.0.1:item/lantern'].readable = {
+  c.items['items_sampler@0.0.1:item/satchel'].container = true;
+  c.items['items_sampler@0.0.1:item/lantern'].readable = {
     label: 'item.lantern.short',
     text: 'item.lantern.description',
   };

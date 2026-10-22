@@ -156,7 +156,7 @@ test('unknown elapsed COMMIT fences trusted and player delivery until the real r
 test('modal scene keeps Continue-only player controls while elapsed time commits', () => {
   const { o, sql, fresh, invoke } = setup(true);
   try {
-    const F = 'ashmere_scene@0.0.1';
+    const F = 'scene_sampler@0.0.1';
     for (const [action, targets, input] of [
       ['lantern', [], {}],
       ['take', [fresh.entityIds[`${F}:item/lantern`]], {}],

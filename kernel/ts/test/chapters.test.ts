@@ -1,4 +1,4 @@
-// Chapter markers through invocation, with literal answers from ashmere_chapters declarations
+// Chapter markers through invocation, with literal answers from chapters_sampler declarations
 // and triggers (mechanics.md Chapters). The story-point key carry differs from choice take_it.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
@@ -31,7 +31,7 @@ const invoke = (w: World, action_key: string, target?: string, input = {}) => {
     invocation_id: `aaaaaaaa-0000-4000-8000-${String(++n).padStart(12, '0')}`,
     actor_id: w.character,
     action_key,
-    target_ids: target ? [w.entityIds[`ashmere_chapters@0.0.1:${target}`]] : [],
+    target_ids: target ? [w.entityIds[`chapters_sampler@0.0.1:${target}`]] : [],
     input,
   };
   const id = identify('chapters-test', w.character, invocation);
@@ -81,7 +81,7 @@ test('resolved trigger choices select the highest reached chapter', () => {
           {
             type: 'story_point_reached',
             story_point: {
-              cartridge_id: 'ashmere_chapters',
+              cartridge_id: 'chapters_sampler',
               cartridge_version: '0.0.1',
               kind: 'story_point',
               key: 'lantern_resolved',
@@ -140,7 +140,7 @@ test('a cartridge without chapters preserves the view shape', () => {
 test('ambiguity counts only matching quest choices in selected outcomes', () => {
   const kat = read('protocol/fixtures/cartridge_chapters_hash.json');
   const base = JSON.parse(kat.canonical);
-  const prefix = 'ashmere_chapters@0.0.1';
+  const prefix = 'chapters_sampler@0.0.1';
   const add = (c: any, choice: string, quest = 'lantern') => {
     const bram = c.dialogues[`${prefix}:dialogue/bram`];
     c.dialogues[`${prefix}:dialogue/bram_again`] = {

@@ -196,15 +196,15 @@ defmodule Loka.SystemGraphTest do
   # Breaks: a CompiledCartridge map's files listed under another map's contract, the map dropped,
   # or a map authored as one file (`facts.json`) missed.
   test "a cartridge map's contract lists the authored files of that map" do
-    assert "cartridges/ashmere_rooms/rooms/boathouse.json" in contract("RoomDefinition")[
+    assert "cartridges/rooms_sampler/rooms/boathouse.json" in contract("RoomDefinition")[
              "authored"
            ]
 
-    refute "cartridges/ashmere_rooms/rooms/boathouse.json" in contract("ItemDefinition")[
+    refute "cartridges/rooms_sampler/rooms/boathouse.json" in contract("ItemDefinition")[
              "authored"
            ]
 
-    assert "cartridges/ashmere_facts/facts.json" in contract("FactSpec")["authored"]
+    assert "cartridges/facts_sampler/facts.json" in contract("FactSpec")["authored"]
     assert contract("StateDelta")["authored"] == nil
   end
 

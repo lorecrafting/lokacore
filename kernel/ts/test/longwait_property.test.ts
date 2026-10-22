@@ -133,7 +133,7 @@ for (const [file, bytes] of artifacts) {
   const loaded = loadCartridge(bytes, INSTALLED);
   assert.ok(loaded.ok, `${file}: ${JSON.stringify(loaded).slice(0, 300)}`);
   const c = loaded.cartridge as Cartridge;
-  // ashmere_hello is a text-only greeting with no entry room, so it has no world to advance.
+  // hello_sampler is a text-only greeting with no entry room, so it has no world to advance.
   if (!c.entry) continue;
   test(`${file}: one long wait equals hourly steps`, () => {
     let w0 = newWorld(c, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, [1, 2, 3, 4]);

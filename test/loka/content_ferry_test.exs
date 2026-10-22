@@ -7,9 +7,9 @@ defmodule Loka.ContentFerryTest do
   use ExUnit.Case, async: true
 
   import Loka.ContentSource, only: [compile: 2]
-  setup_all do: %{dir: Loka.ContentSource.copy("cartridges/ashmere_ferry")}
+  setup_all do: %{dir: Loka.ContentSource.copy("cartridges/ferry_sampler")}
   @kat JSON.decode!(File.read!("protocol/fixtures/cartridge_ferry_hash.json"))
-  @src "cartridges/ashmere_ferry"
+  @src "cartridges/ferry_sampler"
   @point "story_points/lantern_resolved.json"
   @expected ~s({"cartridge":#{@kat["canonical"]},"content_hash":"#{@kat["sha256"]}"})
 
@@ -17,7 +17,7 @@ defmodule Loka.ContentFerryTest do
 
   defp ref(key),
     do: %{
-      "cartridge_id" => "ashmere_ferry",
+      "cartridge_id" => "ferry_sampler",
       "cartridge_version" => "0.0.1",
       "kind" => "room",
       "key" => key
@@ -37,7 +37,7 @@ defmodule Loka.ContentFerryTest do
   defp schedule(s), do: %{"npcs/bram.json" => Map.put(src("npcs/bram.json"), "daily_schedule", s)}
 
   # Breaks: the calendar or a daily schedule dropped, misplaced or reshaped in the artifact.
-  test "ashmere_ferry compiles to its Python known answer without warnings" do
+  test "ferry_sampler compiles to its Python known answer without warnings" do
     assert Loka.Content.compile(@src) == {:ok, @expected, []}
   end
 
@@ -67,13 +67,13 @@ defmodule Loka.ContentFerryTest do
     unresolved = &{:error, [d("UNRESOLVED_REFERENCE", @bram <> &1, %{"target" => &2})]}
 
     assert compile(dir, bram(%{"role" => "npc", "npc" => "ada"})) ==
-             unresolved.(".npc", "ashmere_ferry@0.0.1:npc/ada")
+             unresolved.(".npc", "ferry_sampler@0.0.1:npc/ada")
 
     assert compile(dir, bram(%{"role" => "npc", "npc" => ref("ferry_landing")})) ==
-             unresolved.(".npc", "ashmere_ferry@0.0.1:room/ferry_landing")
+             unresolved.(".npc", "ferry_sampler@0.0.1:room/ferry_landing")
 
     assert compile(dir, bram(%{"role" => "item", "item" => "bram"})) ==
-             unresolved.(".item", "ashmere_ferry@0.0.1:item/bram")
+             unresolved.(".item", "ferry_sampler@0.0.1:item/bram")
   end
 
   # Breaks: a schedule naming a room the cartridge lacks compiling (run_job would crash).
@@ -82,7 +82,7 @@ defmodule Loka.ContentFerryTest do
              {:error,
               [
                 d("UNRESOLVED_REFERENCE", "npcs/bram.daily_schedule.19", %{
-                  "target" => "ashmere_ferry@0.0.1:room/shed"
+                  "target" => "ferry_sampler@0.0.1:room/shed"
                 })
               ]}
   end
@@ -195,7 +195,7 @@ defmodule Loka.ContentFerryTest do
   } do
     at = "dialogues/bram"
     unresolved = &d("UNRESOLVED_REFERENCE", at <> &1, %{"target" => &2})
-    missing = &"ashmere_ferry@0.0.1:#{&1}/missing"
+    missing = &"ferry_sampler@0.0.1:#{&1}/missing"
     m = src("cartridge.json")
 
     cases = [
@@ -209,7 +209,7 @@ defmodule Loka.ContentFerryTest do
          d
          |> put_in(~w(roles bram), %{"role" => "item", "item" => "lantern"})
          |> update_in(~w(choices leave), &Map.delete(&1, "hand_over"))
-       end), unresolved.(".npc", "ashmere_ferry@0.0.1:npc/bram")},
+       end), unresolved.(".npc", "ferry_sampler@0.0.1:npc/bram")},
       {dialogue(&put_in(&1, ~w(choices leave hand_over item), "bram")),
        unresolved.(".choices.leave.hand_over.item", "bram")},
       {dialogue(&put_in(&1, ~w(choices leave hand_over to), "lantern")),
@@ -267,7 +267,7 @@ defmodule Loka.ContentFerryTest do
     cases = [
       {&put_in(&1, ~w(choices accept accept), "missing"),
        d("UNRESOLVED_REFERENCE", at <> ".accept", %{
-         "target" => "ashmere_ferry@0.0.1:quest/missing"
+         "target" => "ferry_sampler@0.0.1:quest/missing"
        })},
       {&Map.put(&1, "quest", "lantern"), d("OUTCOME_MISMATCH", at <> ".accept", %{})},
       {fn o ->
@@ -332,7 +332,7 @@ defmodule Loka.ContentFerryTest do
       {carry.("dialogue", "missing"),
        [
          d("UNRESOLVED_REFERENCE", at <> ".outcomes.carry.dialogue", %{
-           "target" => "ashmere_ferry@0.0.1:dialogue/missing"
+           "target" => "ferry_sampler@0.0.1:dialogue/missing"
          })
        ]},
       {carry.("choice", "wave"),

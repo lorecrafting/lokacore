@@ -30,9 +30,9 @@ import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { level } from '../src/mechanics/resource.ts';
 const CONTEXT = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f';
 const BODY = '3d4829ad-9e43-81ef-bc10-66b1b267e157'; // 1
-const R = 'ashmere_rest@0.0.1';
+const R = 'position_sampler@0.0.1';
 const FACT = {
-  cartridge_id: 'ashmere_rest',
+  cartridge_id: 'position_sampler',
   cartridge_version: '0.0.1',
   kind: 'fact',
   key: 'position',
@@ -218,7 +218,7 @@ test('a cartridge alias of sit is listed and dropped with sit, with its own poli
 // Breaks: a position regeneration bonus (00 §4.2 position bonuses are LATER).
 test('no position changes regeneration: mv 1 at 0 is 19 at 3600, standing, resting or asleep', () => {
   const mv = {
-    cartridge_id: 'ashmere_rest',
+    cartridge_id: 'position_sampler',
     cartridge_version: '0.0.1',
     kind: 'resource',
     key: 'mv',
@@ -241,9 +241,9 @@ const diag = (path: string) => ({
   data: {},
   suggested_capabilities: [],
 });
-const F = 'ashmere_ferry@0.0.1';
+const F = 'ferry_sampler@0.0.1';
 const fact = (k: string) => ({
-  cartridge_id: 'ashmere_ferry',
+  cartridge_id: 'ferry_sampler',
   cartridge_version: '0.0.1',
   kind: 'fact',
   key: k,

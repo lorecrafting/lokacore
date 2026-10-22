@@ -29,8 +29,8 @@ const IDS = [
   'dc69e85d-a2c1-815e-a631-9c6b94c780d3', // 2
 ];
 const SEED = [1, 2, 3, 4];
-const RECIPE = 'ashmere_bell@0.0.1:recipe/ring_bell';
-const ROOM = 'ashmere_bell@0.0.1:room/belfry';
+const RECIPE = 'recipe_sampler@0.0.1:recipe/ring_bell';
+const ROOM = 'recipe_sampler@0.0.1:room/belfry';
 
 const sorted = (v: any): any =>
   Array.isArray(v)
@@ -64,7 +64,7 @@ const cmd = (payload: object): Command =>
   ({ id: CMD, world_context_id: CONTEXT, payload: { actor_id: CHARACTER, ...payload } }) as Command;
 const ring = (target_id?: string) => cmd({ type: 'perform', action: 'ring_bell', target_id });
 const ref = (kind: string, key: string) => ({
-  cartridge_id: 'ashmere_bell',
+  cartridge_id: 'recipe_sampler',
   cartridge_version: '0.0.1',
   kind,
   key,
@@ -133,7 +133,7 @@ test('ring bell assigns the fact, then fact_changed, then the custom event, and 
   });
   assert.equal(
     hash(w.state as never),
-    '4515fefee611442664c82e76ece4666f879a6c26bde807fcff4fb687d20c6f5e',
+    '90bdddf71fffdebf8ed249a7922da8592bfca448e5d414f0f2c06aee273f581d',
   );
   assert.equal(gameView(w).place.description.key, 'room.belfry.rung');
   assert.equal(describe(w, w.character, w.details[BELL]), 'detail.bell.rung');
@@ -263,7 +263,7 @@ test("a room's contributions shape its actions, and step admits only what they o
 // TargetSpec none admitting a target (Astra A1), or a verb whose policy fails still admitted.
 test('a cartridge action overrides the engine verb of its key, policy included', () => {
   const w = world((c) => {
-    c.actions['ashmere_bell@0.0.1:action/look'] = {
+    c.actions['recipe_sampler@0.0.1:action/look'] = {
       key: 'look',
       label: 'actions.ring_bell',
       target: { kind: 'none' },
@@ -325,13 +325,13 @@ test("a command no offered action's target or input accepts is refused like an u
       accessibility: 'actions.ring_bell',
     });
     const inventory = { kind: 'entity', scopes: ['inventory'] };
-    c.actions['ashmere_bell@0.0.1:action/inspect_inventory'] = action(
+    c.actions['recipe_sampler@0.0.1:action/inspect_inventory'] = action(
       'inspect_inventory',
       'look',
       inventory,
       [],
     );
-    c.actions['ashmere_bell@0.0.1:action/walk'] = action('walk', 'move', { kind: 'none' }, []);
+    c.actions['recipe_sampler@0.0.1:action/walk'] = action('walk', 'move', { kind: 'none' }, []);
     c.rooms[ROOM].actions = [{ op: 'replace', actions: ['inspect_inventory', 'walk'] }];
   });
   const refused = { kind: 'rejected', error: { code: 'unsupported_capability' } };
@@ -354,7 +354,7 @@ test("an entity target in the action's scope is admitted", () => {
   // The items known answer whose ferry landing offers only a look at `scope` (and take).
   const offering = (scope: string) => {
     const loaded = load((c) => {
-      c.actions['ashmere_items@0.0.1:action/inspect'] = {
+      c.actions['items_sampler@0.0.1:action/inspect'] = {
         key: 'inspect',
         label: 'item.satchel.short',
         target: { kind: 'entity', scopes: [scope] },
@@ -365,7 +365,7 @@ test("an entity target in the action's scope is admitted", () => {
         accessibility: 'item.satchel.short',
       };
       c.manifest.requires.capabilities.policy = c.lock.capabilities.policy = 1;
-      const ferry = c.rooms['ashmere_items@0.0.1:room/ferry_landing'];
+      const ferry = c.rooms['items_sampler@0.0.1:room/ferry_landing'];
       ferry.actions = [{ op: 'replace', actions: ['inspect', 'take'] }];
     }, items);
     assert.ok(loaded.ok, JSON.stringify(loaded));
@@ -395,7 +395,7 @@ test('FD1: a delayed rule on a 60 s recipe, after 30, is due at 61', () => {
     c.manifest.requires.capabilities.reaction = c.lock.capabilities.reaction = 1;
     c.recipes[RECIPE].duration = 60;
     const fact = ref('fact', 'rung_at');
-    c.facts['ashmere_bell@0.0.1:fact/rung_at'] = {
+    c.facts['recipe_sampler@0.0.1:fact/rung_at'] = {
       key: 'rung_at',
       meaning: 'When the bell was rung.',
       scopes: ['instance'],
@@ -403,7 +403,7 @@ test('FD1: a delayed rule on a 60 s recipe, after 30, is due at 61', () => {
       version: 1,
     };
     c.reactions = {
-      'ashmere_bell@0.0.1:reaction/echo': {
+      'recipe_sampler@0.0.1:reaction/echo': {
         key: 'echo',
         on: { event: 'action_completed', action: 'ring_bell' },
         after: 30,

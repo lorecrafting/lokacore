@@ -28,7 +28,7 @@ defmodule Loka.ContentRewardStorageTest do
   end
 
   defp source(dir) do
-    File.cp_r!("cartridges/ashmere_sampler", dir)
+    File.cp_r!("cartridges/cellar_sampler", dir)
     File.cp_r!("test/fixtures/reward_storage", dir)
     File.rm!(Path.join(dir, "README.md"))
     frozen_baseline(dir)

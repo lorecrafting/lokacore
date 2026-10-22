@@ -32,7 +32,7 @@ assert.ok(loaded.ok);
 const cartridge = loaded.cartridge as Cartridge;
 const fresh = () => newWorld(cartridge, CONTEXT as World['context'], SEED);
 const fact = (key: string) => ({
-  cartridge_id: 'ashmere_facts',
+  cartridge_id: 'facts_sampler',
   cartridge_version: '0.0.1',
   kind: 'fact',
   key,
@@ -80,7 +80,7 @@ test('a fresh world holds each fact default and no fact record', () => {
   const w = fresh();
   assert.deepEqual(w.state, { clock: 0, containers: { [BODY]: FERRY }, rng: SEED });
   const k = (key: string) =>
-    `{"cartridge_id":"ashmere_facts","cartridge_version":"0.0.1","key":"${key}","kind":"fact"}`;
+    `{"cartridge_id":"facts_sampler","cartridge_version":"0.0.1","key":"${key}","kind":"fact"}`;
   assert.deepEqual(w.factDefaults, {
     [k('chapel_bell_rung')]: false,
     [k('fen_tracks_found')]: false,
@@ -93,11 +93,11 @@ test('a fresh world holds each fact default and no fact record', () => {
 test('fact.assign through the delta path commits one record, at the Python state hash', () => {
   const w = rescued(fresh());
   const key =
-    '{"fact":{"cartridge_id":"ashmere_facts","cartridge_version":"0.0.1","key":"village_child_status","kind":"fact"},"kind":"fact","scope":{"kind":"instance","world_context_id":"0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f"}}';
+    '{"fact":{"cartridge_id":"facts_sampler","cartridge_version":"0.0.1","key":"village_child_status","kind":"fact"},"kind":"fact","scope":{"kind":"instance","world_context_id":"0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f"}}';
   assert.deepEqual(w.state.facts, { [key]: 'rescued' });
   assert.equal(
     hash(w.state as never),
-    '66ad4b52f39664f6631b4d1b7310bb9e51d254c9f47aaee114df8e7563c38de3',
+    '4920f54c6a217cc9621c42e39006a8e9d8b40f023aa97fa2e75f275ec5364a81',
   );
   const ops = [
     {
@@ -201,7 +201,7 @@ test('facts_typed holds for typed facts and fails on each kind of bad record', (
   }
   const w = rung(fresh());
   const facts = { ...w.cartridge.facts };
-  delete facts['ashmere_facts@0.0.1:fact/chapel_bell_rung'];
+  delete facts['facts_sampler@0.0.1:fact/chapel_bell_rung'];
   assert.equal(holds('facts_typed', { ...w, cartridge: { ...w.cartridge, facts } }), false);
 });
 
@@ -319,9 +319,9 @@ const fails = (
       suggested_capabilities: suggested,
     },
   });
-const GREEN = '.cartridge.rooms["ashmere_facts@0.0.1:room/village_green"]';
-const REED = '.cartridge.rooms["ashmere_facts@0.0.1:room/reed_path"]';
-const room = (c: any, key: string) => c.rooms[`ashmere_facts@0.0.1:room/${key}`];
+const GREEN = '.cartridge.rooms["facts_sampler@0.0.1:room/village_green"]';
+const REED = '.cartridge.rooms["facts_sampler@0.0.1:room/reed_path"]';
+const room = (c: any, key: string) => c.rooms[`facts_sampler@0.0.1:room/${key}`];
 
 // Breaks: the kernel would read a fact the cartridge does not declare, or show a raw key.
 test("a variant's unknown fact or missing text is UNRESOLVED_REFERENCE", () => {
@@ -329,13 +329,13 @@ test("a variant's unknown fact or missing text is UNRESOLVED_REFERENCE", () => {
     (c) => (room(c, 'reed_path').details.mud.variants[0].when.root.items[0].fact.key = 'nope'),
     'UNRESOLVED_REFERENCE',
     `${REED}.details.mud.variants[0].when.root.items[0].fact`,
-    { target: 'ashmere_facts@0.0.1:fact/nope' },
+    { target: 'facts_sampler@0.0.1:fact/nope' },
   );
   fails(
     (c) => (room(c, 'village_green').variants[0].when.root.items[1].fact.kind = 'item'),
     'UNRESOLVED_REFERENCE',
     `${GREEN}.variants[0].when.root.items[1].fact`,
-    { target: 'ashmere_facts@0.0.1:item/chapel_bell_rung' },
+    { target: 'facts_sampler@0.0.1:item/chapel_bell_rung' },
   );
   fails(
     (c) => delete c.text['room.village_green.worried'],
@@ -370,7 +370,7 @@ test('details, variants and their ops without their owners locked are UNDECLARED
 
 // Breaks: this kernel loads a fact it cannot read at one private-world scope.
 test('a fact of any scope other than exactly player or instance is FACT_SCOPE_UNSUPPORTED', () => {
-  const bell = 'ashmere_facts@0.0.1:fact/chapel_bell_rung';
+  const bell = 'facts_sampler@0.0.1:fact/chapel_bell_rung';
   for (const scopes of [['party'], ['realm'], ['player', 'instance']])
     fails(
       (c) => (c.facts[bell].scopes = scopes),

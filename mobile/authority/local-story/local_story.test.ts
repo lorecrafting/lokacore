@@ -22,7 +22,7 @@ import { read } from '../../../kernel/ts/test/read.ts';
 import { openStory, type Reply, type Saved } from './authority.ts';
 
 const ACTOR = 'bd595711-ea5f-89a5-abb0-046cd349d2f9';
-// ashmere_items ids (kernel/ts/test/invocation_cases.json): the satchel, the NPC, the body.
+// items_sampler ids (kernel/ts/test/invocation_cases.json): the satchel, the NPC, the body.
 const SATCHEL = 'd530207e-b845-8be5-9d53-b44b2cf5d8a1';
 const NPC = 'ff864ad5-cd56-80c8-9392-dc88bdc28fd2';
 const BODY = '3d4829ad-9e43-81ef-bc10-66b1b267e157';
@@ -223,7 +223,7 @@ test('a failed attempt and a rejection persist; their retries draw nothing', () 
 test('a fault changes nothing and gets no receipt', () => {
   const ok = world('cartridge_bell_hash.json', [1, 2, 3, 4]);
   const cartridge = structuredClone(ok.fresh.cartridge) as any;
-  cartridge.recipes['ashmere_bell@0.0.1:recipe/ring_bell'].outcomes.success.sequence[0].value =
+  cartridge.recipes['recipe_sampler@0.0.1:recipe/ring_bell'].outcomes.success.sequence[0].value =
     'yes';
   const p = processOn(save(), { ...ok, fresh: { ...ok.fresh, cartridge } });
   const before = p.story.world();
@@ -477,7 +477,7 @@ test('a save does not open inside a transaction left open', () => {
   assert.throws(() => openStory(db, installed(items), items.host), /transaction is open/);
 });
 
-// ashmere_ferry ids, IdSource and job CommandIds in Python hashlib (numeric profile): Bram
+// ferry_sampler ids, IdSource and job CommandIds in Python hashlib (numeric profile): Bram
 // (ordinal 5 under the nil CommandId), the green (3), the lantern (6, Early R7/R8 D1), his first
 // job (7, due 19:00) and the one its run_job (["loka-job-command-v1", J0, 68400]) schedules as
 // its ordinal 0 (06:00 the next day).
@@ -502,7 +502,7 @@ test('jobs survive a restart: waiting to 19:00 after it moves Bram as without it
   const b = processOn(path, ferry);
   assert.equal(
     b.one(`SELECT value FROM state_row WHERE section = 'jobs' AND key = '${J0}'`),
-    '{"due_time":68400,"job":{"cartridge_id":"ashmere_ferry","cartridge_version":"0.0.1","key":"bram","kind":"npc"},"status":"pending"}',
+    '{"due_time":68400,"job":{"cartridge_id":"ferry_sampler","cartridge_version":"0.0.1","key":"bram","kind":"npc"},"status":"pending"}',
   );
   b.story.invoke(waitUntil(2, 19 * 3600));
   const c = processOn(other, ferry);
@@ -537,7 +537,7 @@ test('a move whose reactions commit replays its events byte for byte after a res
   const a = processOn(path, green);
   const first = a.story.invoke(north) as Saved;
   const events = (first.decision as { events: { payload: { type: string } }[] }).events;
-  // ashmere_green: the move's entity_entered_room, then green_noticed's and gossip's fact_changed.
+  // green_sampler: the move's entity_entered_room, then green_noticed's and gossip's fact_changed.
   assert.deepEqual(
     events.map((e) => e.payload.type),
     ['entity_entered_room', 'fact_changed', 'fact_changed'],
@@ -556,7 +556,7 @@ test("a recipe narration's pinned participants survive a restart and replay unch
   const [path, coil, bram] = [
     save(),
     invocation(1, 'coil_rope', []),
-    'ashmere_ferry@0.0.1:npc/bram',
+    'ferry_sampler@0.0.1:npc/bram',
   ];
   const a = processOn(path, ferry);
   const first = a.story.invoke(coil) as Saved;

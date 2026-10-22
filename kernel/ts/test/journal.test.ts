@@ -24,7 +24,7 @@ const invoke = (w: World, action_key: string, target?: string, input = {}) => {
     invocation_id: `aaaaaaaa-0000-4000-8000-${String(++n).padStart(12, '0')}`,
     actor_id: w.character,
     action_key,
-    target_ids: target ? [w.entityIds[`ashmere_journal@0.0.1:${target}`]] : [],
+    target_ids: target ? [w.entityIds[`journal_sampler@0.0.1:${target}`]] : [],
     input,
   };
   const id = identify('journal-test', w.character, invocation);
@@ -103,7 +103,7 @@ test('a quest without journal keeps its existing entry shape', () => {
   assert.deepEqual(gameView(w).journal, [
     {
       quest: {
-        cartridge_id: 'ashmere_errand',
+        cartridge_id: 'errand_sampler',
         cartridge_version: '0.0.1',
         kind: 'quest',
         key: 'lantern',

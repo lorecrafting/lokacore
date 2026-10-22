@@ -7,17 +7,17 @@ defmodule Loka.ContentRestTest do
 
   @moduletag :tmp_dir
   @kat JSON.decode!(File.read!("protocol/fixtures/cartridge_rest_hash.json"))
-  @ferry "cartridges/ashmere_ferry"
+  @ferry "cartridges/ferry_sampler"
 
   # Breaks: the engine FactSpec, fact@1 or the lock wrong or missing in the artifact.
-  test "ashmere_rest compiles to its Python known answer without warnings" do
+  test "position_sampler compiles to its Python known answer without warnings" do
     expected = ~s({"cartridge":#{@kat["canonical"]},"content_hash":"#{@kat["sha256"]}"})
-    assert Loka.Content.compile("cartridges/ashmere_rest") == {:ok, expected, []}
+    assert Loka.Content.compile("cartridges/position_sampler") == {:ok, expected, []}
   end
 
   defp src(rel), do: JSON.decode!(File.read!(Path.join(@ferry, rel)))
 
-  # ashmere_ferry's source in `dir` with reaction@1 (and position@1 when `position?`) required,
+  # ferry_sampler's source in `dir` with reaction@1 (and position@1 when `position?`) required,
   # and `files` (relative path => JSON value) written over it.
   defp compile(dir, position?, files) do
     File.cp_r!(@ferry, dir)
@@ -137,7 +137,7 @@ defmodule Loka.ContentRestTest do
   }
 
   defp recovery_source(dir, change) do
-    File.cp_r!("cartridges/ashmere_rest", dir)
+    File.cp_r!("cartridges/position_sampler", dir)
     manifest = JSON.decode!(File.read!(Path.join(dir, "cartridge.json")))
 
     manifest =
@@ -160,7 +160,7 @@ defmodule Loka.ContentRestTest do
     assert {:ok, bytes, []} = recovery_source(Path.join(dir, "valid"), &{&1, &2})
     cartridge = JSON.decode!(bytes)["cartridge"]
 
-    assert cartridge["resources"]["ashmere_rest@0.0.1:resource/mv"] == %{
+    assert cartridge["resources"]["position_sampler@0.0.1:resource/mv"] == %{
              "key" => "mv",
              "minimum" => 0,
              "maximum" => 10,

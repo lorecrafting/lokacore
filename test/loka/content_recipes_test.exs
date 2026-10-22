@@ -7,10 +7,10 @@ defmodule Loka.ContentRecipesTest do
 
   @moduletag :tmp_dir
   @kat JSON.decode!(File.read!("protocol/fixtures/cartridge_bell_hash.json"))
-  @src "cartridges/ashmere_bell"
+  @src "cartridges/recipe_sampler"
   @expected ~s({"cartridge":#{@kat["canonical"]},"content_hash":"#{@kat["sha256"]}"})
 
-  # ashmere_bell's source with `files` merged over it (nil removes a file).
+  # recipe_sampler's source with `files` merged over it (nil removes a file).
   defp compile(dir, files) do
     base =
       for rel <- Path.wildcard("#{@src}/**/*.json"),
@@ -42,7 +42,7 @@ defmodule Loka.ContentRecipesTest do
 
   defp full(kind, key),
     do: %{
-      "cartridge_id" => "ashmere_bell",
+      "cartridge_id" => "recipe_sampler",
       "cartridge_version" => "0.0.1",
       "kind" => kind,
       "key" => key
@@ -50,7 +50,7 @@ defmodule Loka.ContentRecipesTest do
 
   # Breaks: the recipe dropped or reshaped, its short target room or fact references left short,
   # or the recipes map emitted under another name.
-  test "ashmere_bell compiles to its Python known answer without warnings" do
+  test "recipe_sampler compiles to its Python known answer without warnings" do
     assert Loka.Content.compile(@src) == {:ok, @expected, []}
   end
 
@@ -78,13 +78,13 @@ defmodule Loka.ContentRecipesTest do
     cases = [
       {recipe(["target", "room"], "crypt"),
        d("UNRESOLVED_REFERENCE", "recipes/ring_bell.target.room", %{
-         "target" => "ashmere_bell@0.0.1:room/crypt"
+         "target" => "recipe_sampler@0.0.1:room/crypt"
        })},
       {recipe(["target", "detail"], "gong"),
        d("UNRESOLVED_REFERENCE", "recipes/ring_bell.target.detail", %{"target" => "gong"})},
       {recipe(seq, [%{"op" => "fact.assign", "fact" => "bell_tolled", "value" => true}]),
        d("UNRESOLVED_REFERENCE", "recipes/ring_bell.outcomes.success.sequence[0].fact", %{
-         "target" => "ashmere_bell@0.0.1:fact/bell_tolled"
+         "target" => "recipe_sampler@0.0.1:fact/bell_tolled"
        })},
       {recipe(seq, [%{"op" => "fact.assign", "fact" => "chapel_bell_rung", "value" => "yes"}]),
        d("FACT_TYPE_MISMATCH", "recipes/ring_bell.outcomes.success.sequence[0].value")}

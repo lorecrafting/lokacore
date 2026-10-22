@@ -5,11 +5,11 @@ import { encode } from '../src/foundation/canonical.ts';
 import { INSTALLED, loadCartridge } from '../src/index.ts';
 import { read } from './read.ts';
 
-const prefix = 'ashmere_ferry@0.0.1:';
+const prefix = 'ferry_sampler@0.0.1:';
 const dialogue = (c: any) => c.dialogues[prefix + 'dialogue/bram'];
 const effect = (c: any) => dialogue(c).choices.carry.escort;
 const quest = {
-  cartridge_id: 'ashmere_ferry',
+  cartridge_id: 'ferry_sampler',
   cartridge_version: '0.0.1',
   kind: 'quest',
   key: 'lantern',

@@ -25,9 +25,9 @@ export const fresh = newWorld(
   [1, 2, 3, 4],
 );
 export const entity = (world: World, name: string) =>
-  world.entityIds[`ashmere_sampler@0.0.8:${name}`];
+  world.entityIds[`cellar_sampler@0.0.8:${name}`];
 export const room = (world: World, name: string) =>
-  world.roomIds[`ashmere_sampler@0.0.8:room/${name}`];
+  world.roomIds[`cellar_sampler@0.0.8:room/${name}`];
 export function controlled(): World {
   const bag = entity(fresh, 'item/trunk'),
     lantern = entity(fresh, 'item/lantern'),
@@ -60,7 +60,7 @@ export function controlled(): World {
       quests: {
         '00000000-0000-4000-8000-000000000077': {
           quest: {
-            cartridge_id: 'ashmere_sampler' as never,
+            cartridge_id: 'cellar_sampler' as never,
             cartridge_version: '0.0.8' as never,
             kind: 'quest',
             key: 'lantern',
@@ -73,7 +73,7 @@ export function controlled(): World {
         '00000000-0000-4000-8000-000000000078': {
           actor_id: fresh.character,
           source: {
-            cartridge_id: 'ashmere_sampler' as never,
+            cartridge_id: 'cellar_sampler' as never,
             cartridge_version: '0.0.8' as never,
             kind: 'dialogue',
             key: 'bram_offer',

@@ -39,7 +39,7 @@ const fresh = (birth = 64800): World => {
   const c = structuredClone(kat.value);
   c.calendar.start = birth;
   if (birth === 0)
-    c.resources['ashmere_sampler@0.0.7:resource/hp'].regen = {
+    c.resources['cellar_sampler@0.0.7:resource/hp'].regen = {
       every: 3600,
       by_position: { standing: 5, sitting: 5, resting: 10, sleeping: 10 },
     };
@@ -82,7 +82,7 @@ test('five real rats have distinct required birth rows, player HP10 and MV100', 
         start: 6,
         gain: 0,
       });
-      assert.equal(w.state.containers[id], w.roomIds['ashmere_sampler@0.0.7:room/lantern_cellar']);
+      assert.equal(w.state.containers[id], w.roomIds['cellar_sampler@0.0.7:room/lantern_cellar']);
     }
     assert.equal(level(w, w.body, hp), 10);
     assert.equal(level(w, w.body, resourceRef(w, 'mv')), 100);
@@ -140,7 +140,7 @@ test('explicit override queries refuse absent or malformed rows', () => {
 test('loader rejects invalid NPC HP and enforces API 1.4', () => {
   const change = (hp: unknown, api = '1.4') => {
     const c = structuredClone(kat.value);
-    c.npcs['ashmere_sampler@0.0.7:npc/cellar_rat_1'].hp = hp;
+    c.npcs['cellar_sampler@0.0.7:npc/cellar_rat_1'].hp = hp;
     c.manifest.requires.kernel_api.at_least = api;
     return c;
   };

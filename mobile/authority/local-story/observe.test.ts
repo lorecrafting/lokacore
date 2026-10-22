@@ -23,7 +23,7 @@ import { read } from '../../../kernel/ts/test/read.ts';
 import { openStory, type Host } from './authority.ts';
 import { observe } from './trace.ts';
 
-const G = 'ashmere_green@0.0.1';
+const G = 'green_sampler@0.0.1';
 const KERNEL = `loka-kernel@${'0123456789'.repeat(4)}`;
 const release = (() => {
   const c = structuredClone(read('protocol/fixtures/cartridge_green_hash.json').value);

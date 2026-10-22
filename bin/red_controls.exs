@@ -129,7 +129,7 @@ controls = [
    }, ~w(elixir bin/features.exs --check tmp/red-features.json),
    "#{ruleless["key"]}@#{ruleless["version"]}: missing spec"},
   {"features: a transcript added without regenerating the feature map",
-   %{"cartridges/ashmere_details/transcripts/skills.jsonl" => ""},
+   %{"cartridges/details_sampler/transcripts/skills.jsonl" => ""},
    ~w(elixir bin/features.exs --check), "docs/features.gen.md is out of date"}
 ]
 

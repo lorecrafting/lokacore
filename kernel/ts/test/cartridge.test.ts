@@ -48,7 +48,7 @@ const load = (cartridge: any) => {
 };
 const withFactType = (value_type: object) => {
   const cartridge = structuredClone(read('protocol/fixtures/cartridge_hash.json').value);
-  cartridge.facts['ashmere_hello@0.0.1:fact/village_arrived'].value_type = value_type;
+  cartridge.facts['hello_sampler@0.0.1:fact/village_arrived'].value_type = value_type;
   return load(cartridge);
 };
 
@@ -88,7 +88,7 @@ test('the loader rejects an enum fact default outside its values', () =>
     ok: false,
     diagnostic: diagnostic(
       'FACT_DEFAULT_INVALID',
-      '.cartridge.facts["ashmere_hello@0.0.1:fact/village_arrived"].value_type.default',
+      '.cartridge.facts["hello_sampler@0.0.1:fact/village_arrived"].value_type.default',
       {},
     ),
   }));
@@ -99,7 +99,7 @@ test('the loader rejects a bounded integer fact default outside its bounds', () 
     ok: false,
     diagnostic: diagnostic(
       'FACT_DEFAULT_INVALID',
-      '.cartridge.facts["ashmere_hello@0.0.1:fact/village_arrived"].value_type.default',
+      '.cartridge.facts["hello_sampler@0.0.1:fact/village_arrived"].value_type.default',
       {},
     ),
   }));
@@ -108,9 +108,9 @@ test('the loader rejects a bounded integer fact default outside its bounds', () 
 // 1.0 in a cartridge with no world content.
 test('the loader keeps API 1.90 for a time_since policy without world content', () => {
   const cartridge = structuredClone(read('protocol/fixtures/cartridge_hash.json').value);
-  const fact = cartridge.facts['ashmere_hello@0.0.1:fact/village_arrived'];
+  const fact = cartridge.facts['hello_sampler@0.0.1:fact/village_arrived'];
   fact.value_type = { type: 'int', default: 0 };
-  const policy = cartridge.policies['ashmere_hello@0.0.1:policy/village_arrived'];
+  const policy = cartridge.policies['hello_sampler@0.0.1:policy/village_arrived'];
   policy.root = { op: 'time_since', fact: policy.root.fact, at_least: 600 };
   assert.deepEqual(load(cartridge), {
     ok: false,
@@ -126,7 +126,7 @@ test('the loader keeps API 1.90 for a time_since policy without world content', 
 // impossible unwritten fact default loadable.
 test('the loader rejects an invalid v2 fact default', () => {
   const cartridge = structuredClone(read('protocol/fixtures/cartridge_facts_hash.json').value);
-  cartridge.facts['ashmere_facts@0.0.1:fact/review_default'] = {
+  cartridge.facts['facts_sampler@0.0.1:fact/review_default'] = {
     key: 'review_default',
     version: 1,
     value_type: { type: 'enum', values: ['missing'], default: 'rescued' },
@@ -137,7 +137,7 @@ test('the loader rejects an invalid v2 fact default', () => {
     ok: false,
     diagnostic: diagnostic(
       'FACT_DEFAULT_INVALID',
-      '.cartridge.facts["ashmere_facts@0.0.1:fact/review_default"].value_type.default',
+      '.cartridge.facts["facts_sampler@0.0.1:fact/review_default"].value_type.default',
       {},
     ),
   });

@@ -46,7 +46,7 @@ const outcome = (w: World, payload: object, k = 1) => {
 test('an unlock counts its key check: 32767 action leaves fit, 32768 exceed query_steps', () => {
   const unlock = (n: number, held = true) => {
     const w = world('gate', (c) => {
-      c.actions['ashmere_gate@0.0.1:action/unlock'] = {
+      c.actions['gate_sampler@0.0.1:action/unlock'] = {
         key: 'unlock',
         label: 'room.cell.title', // any key of the catalog
         accessibility: 'room.cell.title',
@@ -57,7 +57,7 @@ test('an unlock counts its key check: 32767 action leaves fit, 32768 exceed quer
         policy: all(n),
       };
     });
-    const key = w.entityIds['ashmere_gate@0.0.1:item/iron_key']!;
+    const key = w.entityIds['gate_sampler@0.0.1:item/iron_key']!;
     const containers = { ...w.state.containers, ...(held && { [key]: w.body }) };
     return outcome(
       { ...w, state: { ...w.state, containers } },
@@ -76,10 +76,10 @@ test('an accept counts its objective check: 32767 offer leaves fit, 32768 exceed
   const accept = (n: number) => {
     const w = world(
       'ferry',
-      (c) => (c.quests['ashmere_ferry@0.0.1:quest/lantern'].offer.policy = all(n)),
+      (c) => (c.quests['ferry_sampler@0.0.1:quest/lantern'].offer.policy = all(n)),
     );
     const quest = {
-      cartridge_id: 'ashmere_ferry',
+      cartridge_id: 'ferry_sampler',
       cartridge_version: '0.0.1',
       kind: 'quest',
       key: 'lantern',
@@ -96,9 +96,9 @@ test('a talk counts its policy twice: 16384 leaves fit, 16385 exceed query_steps
   const talk = (n: number) => {
     const w = world(
       'ferry',
-      (c) => (c.dialogues['ashmere_ferry@0.0.1:dialogue/bram'].policy = all(n)),
+      (c) => (c.dialogues['ferry_sampler@0.0.1:dialogue/bram'].policy = all(n)),
     );
-    return outcome(w, { type: 'talk', target_id: w.entityIds['ashmere_ferry@0.0.1:npc/bram'] });
+    return outcome(w, { type: 'talk', target_id: w.entityIds['ferry_sampler@0.0.1:npc/bram'] });
   };
   assert.equal(talk(16384), 'accepted');
   assert.equal(talk(16385), 'query_steps');
@@ -109,14 +109,14 @@ test('a talk counts its policy twice: 16384 leaves fit, 16385 exceed query_steps
 // objective is has_item lantern then n leaves, plus the pinned dialogue policy: n + 2.
 test('a choose counts policy and objective: 32766 leaves fit, 32767 exceed query_steps', () => {
   const chosen = (n: number) => {
-    const F = 'ashmere_ferry@0.0.1';
+    const F = 'ferry_sampler@0.0.1';
     let w = world('ferry', (c) => {
       const has = c.quests[`${F}:quest/lantern`].objective.policy.root;
       c.quests[`${F}:quest/lantern`].objective.policy = { ...all(n) };
       c.quests[`${F}:quest/lantern`].objective.policy.root.items.unshift(has);
     });
     const quest = {
-      cartridge_id: 'ashmere_ferry',
+      cartridge_id: 'ferry_sampler',
       cartridge_version: '0.0.1',
       kind: 'quest',
       key: 'lantern',

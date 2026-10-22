@@ -274,7 +274,7 @@ test('look <words> examines one detail, lists an ambiguity, and records failed l
   const failed = records(rel.replace('game_trace', 'diagnostics'));
   for (const f of failed) assert.deepEqual(validate('ObservationRecord', f), []);
   const room = {
-    cartridge_id: 'ashmere_details',
+    cartridge_id: 'details_sampler',
     cartridge_version: '0.0.1',
     kind: 'room',
     key: 'ferry_landing',
@@ -395,7 +395,7 @@ function sortKeys(v: any): any {
 test('the terminal shows the description variant the fresh facts select', () => {
   const facts = read('protocol/fixtures/cartridge_facts_hash.json');
   const c = facts.value;
-  c.rooms['ashmere_facts@0.0.1:room/reed_path'].details.mud.variants[0].when.root.items[0].equals =
+  c.rooms['facts_sampler@0.0.1:room/reed_path'].details.mud.variants[0].when.root.items[0].equals =
     false;
   const sorted = (v: any): any =>
     Array.isArray(v)
