@@ -10,7 +10,7 @@ import { LABEL } from './labels.ts';
 import { bundle as goblins, unpacked } from '../../authority/local-story/__tests__/goblins.ts';
 import { book, bundle, nodes, words } from './__tests__/polish-book.test.ts';
 
-// Breaks: confirmed pelt Take returns to World, leaves the stale pelt child open, or restores
+// Breaks: confirmed ear Take returns to World, leaves the stale ear child open, or restores
 // its pickup on the World log instead of the exact corpse after reopening.
 test('corpse Contents Take returns to its detail with one local pickup and Back to World', () => {
   const chapter = goblins(unpacked);
@@ -31,13 +31,13 @@ test('corpse Contents Take returns to its detail with one local pickup and Back 
     corpse = a.game.view().view.entities.find((e) => e.name === 'item.npc_corpse.short');
   }
   assert.ok(corpse);
-  const pelt = corpse.contents!.find((e) => e.name === 'item.ear.short')!;
+  const ear = corpse.contents!.find((e) => e.name === 'item.ear.short')!;
   const h = book(chapter, a);
   h.tap(h.labels().find((x) => x.includes('corpse') && x.includes('open'))!);
   h.tap(h.labels().find((x) => x.includes('goblin ear') && x.includes('open'))!);
   assert.deepEqual(
     h.stack.map((p: any) => p.id),
-    [corpse.id, pelt.id],
+    [corpse.id, ear.id],
   );
   const foot = ['Back to container', 'Leave'];
   const shown = h.labels().filter((x) => foot.includes(x));
@@ -58,7 +58,7 @@ test('corpse Contents Take returns to its detail with one local pickup and Back 
   assert.equal(h.game.pending(), true);
   assert.deepEqual(
     h.stack.map((p: any) => p.id),
-    [corpse.id, pelt.id],
+    [corpse.id, ear.id],
   );
   assert.equal(h.p.screen().detail(corpse.id).length, 0);
   a.fault.reads = false;
@@ -76,8 +76,8 @@ test('corpse Contents Take returns to its detail with one local pickup and Back 
     1,
   );
   assert.equal(h.p.screen().log.includes('You pick up a goblin ear.'), false);
-  assert.ok(h.game.view().view.inventory.some((e) => e.id === pelt.id));
-  const refused = h.game.invoke({ action_key: 'take', target_ids: [pelt.id], input: {} } as never);
+  assert.ok(h.game.view().view.inventory.some((e) => e.id === ear.id));
+  const refused = h.game.invoke({ action_key: 'take', target_ids: [ear.id], input: {} } as never);
   assert.equal(refused.kind, 'saved');
   if (refused.kind === 'saved') assert.equal(refused.decision.kind, 'rejected');
   assert.equal(
@@ -89,7 +89,7 @@ test('corpse Contents Take returns to its detail with one local pickup and Back 
   );
   h.tap('Leave');
   assert.deepEqual(h.stack, []);
-  const drop = h.game.invoke({ action_key: 'drop', target_ids: [pelt.id], input: {} } as never);
+  const drop = h.game.invoke({ action_key: 'drop', target_ids: [ear.id], input: {} } as never);
   assert.equal(drop.kind, 'saved');
   if (drop.kind === 'saved') assert.equal(drop.decision.kind, 'accepted');
   h.unmount();
@@ -109,7 +109,7 @@ test('corpse Contents Take returns to its detail with one local pickup and Back 
 
 // Breaks: a lost Take acknowledgement settles after Book remount and sends the confirmed corpse
 // pickup to World because the new presenter has no press context.
-test('remounted pending pelt Take settles on its exact corpse detail', () => {
+test('remounted pending ear Take settles on its exact corpse detail', () => {
   const chapter = goblins(unpacked);
   const a = elapsedHost(':memory:', { wall: 10000, mono: 0 }, chapter);
   const invoke = (action_key: string, target_ids: string[] = [], input = {}) => {
@@ -128,7 +128,7 @@ test('remounted pending pelt Take settles on its exact corpse detail', () => {
     corpse = a.game.view().view.entities.find((e) => e.name === 'item.npc_corpse.short');
   }
   assert.ok(corpse);
-  const pelt = corpse.contents!.find((e) => e.name === 'item.ear.short')!;
+  const ear = corpse.contents!.find((e) => e.name === 'item.ear.short')!;
   const first = book(chapter, a);
   first.tap(first.labels().find((x) => x.includes('corpse') && x.includes('open'))!);
   first.tap(first.labels().find((x) => x.includes('goblin ear') && x.includes('open'))!);
@@ -152,7 +152,7 @@ test('remounted pending pelt Take settles on its exact corpse detail', () => {
     1,
   );
   assert.equal(remounted.p.screen().log.includes('You pick up a goblin ear.'), false);
-  assert.ok(a.game.view().view.inventory.some((e) => e.id === pelt.id));
+  assert.ok(a.game.view().view.inventory.some((e) => e.id === ear.id));
   remounted.tap('Leave');
   assert.deepEqual(remounted.stack, []);
   remounted.unmount();

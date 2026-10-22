@@ -407,6 +407,8 @@ test('the running head shows the active quest objective on room and NPC pages', 
   h.tap('“I’ll deal with the rats.”');
   assert.ok(h.text().includes(head));
   h.tap('Leave');
+  h.tap('Leave');
+  assert.ok(h.text().includes('The Drowned Lantern'));
   assert.ok(h.text().includes(head));
   h.tap(CONTENTS);
   h.tap('Journal');
