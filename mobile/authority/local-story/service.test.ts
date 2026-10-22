@@ -344,10 +344,11 @@ test('real Book captured alias press and lost acknowledgement restore one origin
   assert.deepEqual(pending.screen().detail(cook), [line]);
 });
 
-// Breaks: a lawful death invalidates paid/consumed historical service evidence.
-test('same-body fatal return reopens the paid bed truth', (t) => {
+// Breaks: a lawful death invalidates paid/consumed historical service evidence. The kill is forced: the boar's attack chance is 100 and its damage 2 against 1 HP.
+test('same-body fatal return reopens the paid room, meal and ale truth', (t) => {
   const b = setup(':memory:', (c) => {
     c.resources[`${prefix}:resource/hp`].start = 1;
+    c.npcs[`${prefix}:npc/boar`].attack = { chance: 100, damage_min: 2, damage_max: 2 };
     c.npcs[`${prefix}:npc/boar`].room.key = 'farm_kitchen';
   });
   t.after(() => b.sql.close());

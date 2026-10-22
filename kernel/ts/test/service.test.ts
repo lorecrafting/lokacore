@@ -329,8 +329,8 @@ test('loaded differently named service keys project exactly the captured invocat
   }
 });
 
-// Breaks: service drops old-rate settlement, rental gates walking/unpaid Rest, or paid bed sends a detail gameplay target.
-test('old-rate elapsed settlement precedes meal and actual targetless bed Rest', () => {
+// Breaks: service drops old-rate settlement before the meal, or Rest stops switching MV to the resting rate / is accepted again while resting.
+test('old-rate elapsed settlement precedes meal; Rest switches to the resting rate and is refused again', () => {
   let w = fresh((c) => (c.resources[`${prefix}:resource/mv`].start = 5));
   const from = 0,
     until = 1800,

@@ -3,6 +3,7 @@ import { test } from 'node:test';
 import { gameView, step } from '../src/index.ts';
 import { identify, resolve } from '../src/commands/invocation.ts';
 import { key } from '../src/foundation/compose.ts';
+import { id } from '../src/foundation/id_source.ts';
 import { level } from '../src/mechanics/resource.ts';
 import { carrying } from '../src/mechanics/containment/shared.ts';
 import { transition } from '../src/mechanics/food/shared.ts';
@@ -221,4 +222,20 @@ test('created edible loot uses the same admitted terminal transfer as static foo
   assert.equal(eaten.decision.kind, 'accepted');
   assert.equal(eaten.world.state.containers[item], w.consumed);
   assert.equal(level(eaten.world, w.body, ref('resource', 'mv')), 56);
+});
+
+// Breaks: the roomless consumed holder is minted before the slot holders (shifting every slot id and
+// so every saved id), or it lands in containers, entities or capacities. Expected ids come from
+// IdSource ordinals under the nil CommandId: consumed follows the last slot holder.
+test('the consumed holder takes the ordinal after the last slot holder and is no entity', () => {
+  const w = fresh();
+  const NIL = '00000000-0000-0000-0000-000000000000';
+  const ordinal = (x: string) => {
+    for (let k = 0; k < 5000; k++) if (id(w.context, NIL, k) === x) return k;
+    throw new Error(`no ordinal for ${x}`);
+  };
+  const last = Math.max(...Object.values(w.slots).map(ordinal));
+  assert.equal(ordinal(w.consumed!), last + 1);
+  for (const m of [w.state.containers, w.entities, w.capacities])
+    assert.equal(w.consumed! in m, false);
 });
