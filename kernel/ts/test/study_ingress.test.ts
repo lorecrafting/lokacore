@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { fresh, entity, room, ref } from './transport_fixture.ts';
+import { fragment } from './fragment.ts';
 import { step, gameView, type World } from '../src/index.ts';
 import { key } from '../src/foundation/compose.ts';
 import { apply } from '../src/runtime/apply.ts';
@@ -9,6 +9,29 @@ import { admit, adopt } from '../src/runtime/proposal.ts';
 import { adjust, level, resourceRef } from '../src/mechanics/resource.ts';
 import { deathSequence } from '../src/mechanics/death/sequence.ts';
 import type { Command, CommandId, FactValue } from '../src/contracts.gen.ts';
+
+// cellar_sampler 0.0.9's frozen KAT (death, shrine chapel_nave) with an inline study west of
+// the shrine whose ingress waits on search_plan = player_led (docs/system/mechanics.md, corpse
+// ingress). The player starts in the study, so a death leaves the corpse there.
+const f = fragment('protocol/fixtures/containers_sampler_v009_hash.json');
+const { prefix, ref } = f;
+const entity = (w: World, kind: string, name: string) => w.entityIds[`${prefix}:${kind}/${name}`];
+const room = (w: World, name: string) => w.roomIds[`${prefix}:room/${name}`];
+const fresh = () =>
+  f.genesis((c) => {
+    c.rooms[`${prefix}:room/study`] = {
+      description: 'room.study.description',
+      exits: { east: { to: ref('room', 'chapel_nave') } },
+      key: 'study',
+      title: 'room.study.title',
+    };
+    c.rooms[`${prefix}:room/chapel_nave`].exits.west = {
+      to: ref('room', 'study'),
+      corpse_ingress: { fact: ref('fact', 'search_plan'), equals: 'player_led' },
+    };
+    Object.assign(c.text, { 'room.study.description': 'A study.', 'room.study.title': 'Study' });
+    c.entry = ref('room', 'study');
+  });
 
 function fox(world: World): World {
   return {
@@ -19,9 +42,9 @@ function fox(world: World): World {
         ...world.state.facts,
         [key({
           kind: 'fact',
-          fact: ref('fact', 'chapel_allegiance'),
+          fact: ref('fact', 'search_plan'),
           scope: { kind: 'player', character_id: world.character },
-        })]: 'fox' as FactValue,
+        })]: 'player_led' as FactValue,
       },
     },
   };
@@ -41,9 +64,7 @@ function move(world: World, direction: 'west' | 'east', n: number) {
 
 // Breaks: fox closure blocks egress, or a stale/empty/foreign corpse opens ordinary Study ingress.
 test('fox Study ingress rechecks actual owned nonempty corpse and never closes egress', () => {
-  const base = fresh((c) => {
-    c.entry = ref('room', 'prior_study');
-  });
+  const base = fresh();
   const keyItem = entity(base, 'item', 'brass_key');
   const atStudy: World = {
     ...base,

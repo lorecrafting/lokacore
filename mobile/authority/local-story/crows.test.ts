@@ -3,32 +3,22 @@ import { test } from 'node:test';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { bundle, ref, entity, prefix } from '../../../kernel/ts/test/transport_fixture.ts';
+import { bundle, prefix } from '../../../kernel/ts/test/crow_fixture.ts';
 import {
   INSTALLED,
   loadCartridge,
   newWorld,
   type Cartridge,
+  type World,
 } from '../../../kernel/ts/src/index.ts';
 import { encode } from '../../../kernel/ts/src/foundation/canonical.ts';
 import { openStory } from './authority.ts';
 import { elapsedHost } from './__tests__/elapsed-host.test.ts';
 
-export function setup(
-  path = ':memory:',
-  changeMore: (c: any) => void = () => {},
-  ancestry = 'fey_touched',
-) {
-  const change = (c: any) => {
-    c.entry = ref('room', 'village_green');
-    c.calendar.start = 43200;
-    c.items[`${prefix}:item/old_coin`].location = {
-      in: 'room',
-      room: ref('room', 'village_green'),
-    };
-    changeMore(c);
-  };
-  const b = bundle(change);
+const entity = (w: World, kind: string, name: string) => w.entityIds[`${prefix}:${kind}/${name}`];
+
+export function setup(path = ':memory:') {
+  const b = bundle();
   const loaded = loadCartridge(
     new TextEncoder().encode(`{"cartridge":${b.canonical},"content_hash":"${b.sha256}"}`),
     INSTALLED,
@@ -59,7 +49,6 @@ export function setup(
       assert.equal((result.decision as any).kind, 'accepted', JSON.stringify(result.decision));
     return input;
   };
-  invoke('choose_ancestry', [], { ancestry });
   const elapsed = (until: number) => {
     while (s.world().state.clock < until) {
       const from = s.world().state.clock;
@@ -106,23 +95,13 @@ test('crow acquisition survives real SQLite cold reopen and invocation replay', 
 // Breaks: a living crow outside its two-room wander pair makes a lawful outbound or return save unreopenable.
 test('crow intention, corridor flight and delivered return cold-reopen at their exact custody', (t) => {
   for (const [until, phase, room, holder] of [
-    [43200, 'acquire', 'village_green', 'village_green'],
-    [43350, 'leg', 'village_green', 'crow'],
-    [43500, 'leg', 'well_lane', 'crow'],
-    [43650, 'leg', 'ferry_landing', 'crow'],
-    [43800, 'leg', 'reed_path', 'crow'],
-    [43950, 'leg', 'reed_bank', 'crow'],
-    [44100, 'leg', 'willow_shade', 'crow'],
-    [44250, 'leg', 'drowned_oak', 'crow'],
-    [44400, 'leg', 'oak_branches', 'crow'],
-    [44550, 'return', 'oak_branches', 'nest'],
-    [44700, 'return', 'drowned_oak', 'nest'],
-    [44850, 'return', 'willow_shade', 'nest'],
-    [45000, 'return', 'reed_bank', 'nest'],
-    [45150, 'return', 'reed_path', 'nest'],
-    [45300, 'return', 'ferry_landing', 'nest'],
-    [45450, 'return', 'well_lane', 'nest'],
-    [45600, 'idle', 'village_green', 'nest'],
+    [43200, 'acquire', 'burrow', 'burrow'],
+    [43350, 'leg', 'burrow', 'crow'],
+    [43500, 'leg', 'den', 'crow'],
+    [43650, 'leg', 'path', 'crow'],
+    [43800, 'return', 'path', 'nest'],
+    [43950, 'return', 'den', 'nest'],
+    [44100, 'idle', 'burrow', 'nest'],
   ] as const) {
     const dir = mkdtempSync(join(tmpdir(), 'loka-crow-flight-'));
     t.after(() => rmSync(dir, { recursive: true }));
@@ -173,10 +152,10 @@ test('a crow killed beyond its wander pair cold-reopens at its actual corridor r
   const carrier = Object.values(a.s.world().state.crows ?? {}).find((r) => r.phase === 'leg')!;
   assert.equal(
     a.s.world().state.containers[carrier.member_id],
-    a.s.world().roomIds[`${prefix}:room/ferry_landing`],
+    a.s.world().roomIds[`${prefix}:room/path`],
   );
-  a.invoke('move', [], { direction: 'south' });
-  a.invoke('move', [], { direction: 'south' });
+  a.invoke('move', [], { direction: 'west' });
+  a.invoke('move', [], { direction: 'west' });
   a.invoke('attack', [carrier.member_id]);
   for (let i = 0; i < 20; i++) {
     const slot = Object.values(a.s.world().state.population_slots ?? {}).find(
@@ -201,7 +180,7 @@ test('a crow killed beyond its wander pair cold-reopens at its actual corridor r
 
 // Breaks: an uncertain acquisition COMMIT adopts half a transfer or retries the same job twice.
 test('real failed COMMIT and lost acknowledgement settle crow acquisition, legs and deposit', () => {
-  for (const until of [43350, 43500, 44550, 44700, 45600]) {
+  for (const until of [43350, 43500, 43800, 43950, 44100]) {
     for (const kind of ['failed', 'lost'] as const) {
       const a = setup();
       try {
@@ -234,10 +213,10 @@ test('real failed COMMIT and lost acknowledgement settle crow acquisition, legs 
         const carrier = Object.values(a.s.world().state.crows ?? {}).find(
           (r) => r.member_id === member,
         )!;
-        assert.equal(carrier.phase, until < 44550 ? 'leg' : until < 45600 ? 'return' : 'idle');
+        assert.equal(carrier.phase, until < 43800 ? 'leg' : until < 44100 ? 'return' : 'idle');
         assert.equal(
           a.s.world().state.containers[a.coin],
-          until < 44550 ? member : entity(a.s.world(), 'item', 'crow_nest'),
+          until < 43800 ? member : entity(a.s.world(), 'item', 'crow_nest'),
         );
         const rows = a.p.sql.prepare('SELECT * FROM state_row ORDER BY section,key').all();
         const replay = a.s.elapsed(evidence);
@@ -284,7 +263,7 @@ test('paused and Flee-resumed crow saves cold-reopen with exact released custody
     a.invoke('drop', [a.coin]);
     a.elapsed(43500);
     const carrier = Object.values(a.s.world().state.crows ?? {}).find((r) => r.phase === 'leg')!;
-    a.invoke('move', [], { direction: 'south' });
+    a.invoke('move', [], { direction: 'west' });
     const last =
       mode === 'shoo'
         ? a.invoke('shoo', [carrier.member_id])
@@ -293,7 +272,7 @@ test('paused and Flee-resumed crow saves cold-reopen with exact released custody
     const before = a.s.world().state;
     const row = Object.values(before.crows ?? {}).find((r) => r.member_id === carrier.member_id)!;
     assert.equal(row.phase, mode === 'attack' ? 'paused_return' : 'return');
-    assert.equal(before.containers[a.coin], a.s.world().roomIds[`${prefix}:room/well_lane`]);
+    assert.equal(before.containers[a.coin], a.s.world().roomIds[`${prefix}:room/den`]);
     assert.equal(row.generation, carrier.generation);
     a.p.sql.close();
     const q = elapsedHost(path, { wall: 10000, mono: 0 }, a.b);
