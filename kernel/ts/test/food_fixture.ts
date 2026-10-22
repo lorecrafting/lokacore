@@ -1,26 +1,34 @@
-// Controlled D4 worlds; hand-checked answers belong in tests, not this setup.
+// Controlled D4 worlds over the frozen toolbox_showcase KAT; every asserted number is set here or in the test.
 import assert from 'node:assert/strict';
-import { createHash } from 'node:crypto';
-import { read } from './read.ts';
-import { encode } from '../src/foundation/canonical.ts';
-import { loadCartridge, newWorld, INSTALLED, type Cartridge, type World } from '../src/index.ts';
-import type { DefinitionRef, Command } from '../src/contracts.gen.ts';
-export const prefix = 'ashmere_missing_child@0.0.35';
-export const ref = (kind: string, key: string): DefinitionRef => ({
-  cartridge_id: 'ashmere_missing_child' as never,
-  cartridge_version: '0.0.35' as never,
-  kind,
-  key: key as never,
-});
-export function bundle(change: (c: any) => void = () => {}) {
-  const c = structuredClone(read('protocol/fixtures/missing_child_v035_hash.json').value);
-  c.entry.key = 'orchard';
+import { fragment } from './fragment.ts';
+import type { World } from '../src/index.ts';
+import type { Command } from '../src/contracts.gen.ts';
+const f = fragment('protocol/fixtures/toolbox_showcase_hash.json');
+export const { prefix, ref } = f;
+// Three held-food stand-ins cloned from the showcase loaf; mv starts at 50 so an Eat of 6 reads 56.
+function base(c: any) {
   c.calendar.start = 0;
   c.resources[`${prefix}:resource/mv`].start = 50;
-  change(c);
-  const canonical = encode(c);
-  return { canonical, sha256: createHash('sha256').update(canonical).digest('hex') };
+  const loaf = c.items[`${prefix}:item/loaf`];
+  for (const n of [1, 2, 3])
+    c.items[`${prefix}:item/apple_0${n}`] = {
+      ...structuredClone(loaf),
+      key: `apple_0${n}`,
+      keywords: [`apple_0${n}`],
+      edible: { ...structuredClone(loaf.edible), amount: 6 },
+    };
 }
+export function bundle(change: (c: any) => void = () => {}) {
+  return f.bundle((c) => {
+    base(c);
+    change(c);
+  });
+}
+export const load = (change: (c: any) => void = () => {}) =>
+  f.load((c) => {
+    base(c);
+    change(c);
+  });
 export function onlyFood(c: any) {
   const position = c.facts[`${prefix}:fact/position`];
   for (const section of [
@@ -33,7 +41,6 @@ export function onlyFood(c: any) {
     'topics',
     'liquids',
     'services',
-    'transports',
     'populations',
     'population_bundles',
     'barriers',
@@ -43,25 +50,25 @@ export function onlyFood(c: any) {
     'actions',
     'facts',
     'npcs',
+    'replenish',
+    'statuses',
   ])
     c[section] = {};
+  delete c.alternates;
+  delete c.speech;
+  delete c.blueprints;
+  delete c.map_positions;
   c.facts = { [`${prefix}:fact/position`]: position };
-  delete c.chapters;
   c.world = { carry: { max_grams: 12000 } };
-  c.rooms = {
-    [`${prefix}:room/orchard`]: {
-      key: 'orchard',
-      title: 'room.orchard.title',
-      description: 'room.orchard.description',
-      exits: {},
-      details: c.rooms[`${prefix}:room/orchard`].details,
-    },
-  };
+  const inn = c.rooms[`${prefix}:room/crossroads_inn`];
+  delete inn.details.sign_hub.readable;
+  c.rooms = { [`${prefix}:room/crossroads_inn`]: { ...inn, exits: {} } };
   c.items = Object.fromEntries(
     Object.entries(c.items).filter(([r]) => /:item\/apple_0[123]$/.test(r)),
   );
+  for (const i of Object.values<any>(c.items)) delete i.edible.cures;
   for (const name of Object.keys(c.resources))
-    if (!['hp', 'mv', 'ma'].includes(c.resources[name].key)) delete c.resources[name];
+    if (!['hp', 'mv'].includes(c.resources[name].key)) delete c.resources[name];
   c.manifest.requires.capabilities = {
     movement: 1,
     containment: 1,
@@ -77,17 +84,10 @@ export function onlyFood(c: any) {
   c.lock.capabilities = { ...c.manifest.requires.capabilities };
 }
 export function fresh(change: (c: any) => void = () => {}): World {
-  const b = bundle(change),
-    loaded = loadCartridge(
-      new TextEncoder().encode(`{"cartridge":${b.canonical},"content_hash":"${b.sha256}"}`),
-      INSTALLED,
-    );
-  assert.ok(loaded.ok, JSON.stringify(loaded));
-  return newWorld(
-    loaded.cartridge as Cartridge,
-    '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never,
-    [1, 2, 3, 4],
-  );
+  return f.genesis((c) => {
+    base(c);
+    change(c);
+  });
 }
 export const entity = (w: World, kind: string, key: string) =>
   w.entityIds[`${prefix}:${kind}/${key}`];

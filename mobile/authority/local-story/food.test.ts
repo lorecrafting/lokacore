@@ -23,20 +23,16 @@ function disk(t: any, change = (_c: any) => {}) {
 }
 const apple = (a: ReturnType<typeof foodHost>, n = 1) => entity(a.initial, 'item', `apple_0${n}`);
 
-// Breaks: orchard identities or terminal custody reset on reopen; stale retries replay a second MV gain.
-test('real SQLite carries the same apple through storage/drop/Forage/give/Eat and later consumers', (t) => {
+// Breaks: inn identities or terminal custody reset on reopen; stale retries replay a second MV gain.
+test('real SQLite carries the same apple through storage/drop/Take/give/Eat and later consumers', (t) => {
   const { a } = disk(t, (c) => {
-    c.npcs[`${prefix}:npc/ada`].room.key = 'orchard';
-    c.items[`${prefix}:item/storage_chest`].location = { in: 'room', room: ref('room', 'orchard') };
-    c.barriers[`${prefix}:barrier/storage_chest_lid`].initial = 'open';
+    c.npcs[`${prefix}:npc/cook`].room.key = 'crossroads_inn';
+    c.items[`${prefix}:item/crate`].location = { in: 'room', room: ref('room', 'crossroads_inn') };
   });
-  const trees = Object.keys(a.initial.details).find(
-    (id) => a.initial.details[id].key === 'apple_trees',
-  )!;
   const apples = [1, 2, 3].map((n) => apple(a, n)).sort();
   const id = apples[0],
-    chest = entity(a.initial, 'item', 'storage_chest'),
-    ada = entity(a.initial, 'npc', 'ada');
+    chest = entity(a.initial, 'item', 'crate'),
+    ada = entity(a.initial, 'npc', 'cook');
   a.invoke('take', [id]);
   a.reopen();
   a.invoke('put', [id, chest]);
@@ -45,8 +41,11 @@ test('real SQLite carries the same apple through storage/drop/Forage/give/Eat an
   a.invoke('take', [id]);
   a.invoke('drop', [id]);
   a.reopen();
-  assert.equal(a.story.world().state.containers[id], a.initial.roomIds[`${prefix}:room/orchard`]);
-  a.invoke('harvest', [trees]);
+  assert.equal(
+    a.story.world().state.containers[id],
+    a.initial.roomIds[`${prefix}:room/crossroads_inn`],
+  );
+  a.invoke('take', [id]);
   a.reopen();
   assert.equal(a.story.world().state.containers[id], a.initial.body);
   const eaten = a.invoke('eat', [id]);
@@ -61,7 +60,7 @@ test('real SQLite carries the same apple through storage/drop/Forage/give/Eat an
   assert.equal(narration.detail_id, undefined);
   assert.deepEqual(
     narration.lines.map((l) => l.key),
-    ['narration.eat_apple'],
+    ['narration.eat_loaf'],
   );
   const rows = a.sql.prepare('SELECT * FROM state_row ORDER BY section,key').all();
   const replay = a.story.invoke(eaten);
@@ -73,7 +72,7 @@ test('real SQLite carries the same apple through storage/drop/Forage/give/Eat an
   a.invoke('give', [apples[1], ada]);
   a.reopen();
   assert.equal(a.story.world().state.containers[apples[1]], ada);
-  a.invoke('harvest', [trees]);
+  a.invoke('take', [apples[2]]);
   a.reopen();
   assert.equal(a.story.world().state.containers[apples[2]], a.initial.body);
   a.invoke('eat', [apples[2]]);
@@ -132,7 +131,7 @@ test('food-only cold-open refuses plausible bounded forgeries without writing by
         c = JSON.parse(row.command);
       if (mutation === 'item_id') d.item_id = apple(a, 2);
       if (mutation === 'actor') c.payload.actor_id = 'ffffffff-0000-4000-8000-000000000001';
-      if (mutation === 'narration') d.narration = [{ key: 'narration.forage_apple' }];
+      if (mutation === 'narration') d.narration = [{ key: 'narration.not_eat_loaf' }];
       if (mutation === 'ops') d.delta.ops.pop();
       a.sql
         .prepare('UPDATE receipt SET response=?,command=? WHERE invocation_id=?')
@@ -205,17 +204,15 @@ test('real failed and committed/absent uncertain COMMIT preserve atomic Eat and 
 // Breaks: a later corpse rebuild rejects earlier terminal custody or food in a corpse cannot rejoin ordinary held Eat.
 test('spent apple and another apple in a real fight corpse both reopen before a later Eat', (t) => {
   const { a } = disk(t, (c) => {
-    c.world.death.shrine = ref('room', 'orchard');
     c.world.death.restore.mv = 50;
-    c.npcs[`${prefix}:npc/cellar_rat_1`].room.key = 'orchard';
-    c.world.death_credit[0].room = ref('room', 'orchard');
-    c.npcs[`${prefix}:npc/cellar_rat_1`].attack.chance = 100;
-    c.npcs[`${prefix}:npc/cellar_rat_1`].attack.damage_min = 20;
-    c.npcs[`${prefix}:npc/cellar_rat_1`].attack.damage_max = 20;
+    c.npcs[`${prefix}:npc/boar`].room.key = 'crossroads_inn';
+    c.npcs[`${prefix}:npc/boar`].attack.chance = 100;
+    c.npcs[`${prefix}:npc/boar`].attack.damage_min = 20;
+    c.npcs[`${prefix}:npc/boar`].attack.damage_max = 20;
   });
   const spent = apple(a, 1),
     held = apple(a, 2),
-    rat = entity(a.initial, 'npc', 'cellar_rat_1');
+    rat = entity(a.initial, 'npc', 'boar');
   a.invoke('take', [spent]);
   a.invoke('eat', [spent]);
   a.invoke('take', [held]);
