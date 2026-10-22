@@ -31,7 +31,7 @@ import sys
 from pathlib import Path
 
 variant, out = sys.argv[1:]
-codes = re.findall(r'^\| \*\*([A-E]\d+) ', Path('docs/MISSING-CHILD-PLAN.md').read_text(), re.MULTILINE)
+codes = re.findall(r'^\| \*\*([A-E]\d+) ', Path('docs/archive/MISSING-CHILD-PLAN.md').read_text(), re.MULTILINE)
 rows = [{'id': f'loka-{c.lower()}', 'title': f'{c} \u2014 slice', 'dependencies': []} for c in codes]
 rows[1]['dependencies'] = [{'issue_id': rows[1]['id'], 'depends_on_id': rows[0]['id']}]
 if variant == 'audit':

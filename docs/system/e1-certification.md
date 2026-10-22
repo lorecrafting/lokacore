@@ -7,11 +7,15 @@ The E1 exact candidate proof policy, split out of [Architecture](architecture.md
 E1 implements the bounded minimum from [the E1 brief](../briefs/chapter-one/chapter-one-e1-r9-certification-brief-2026-10-05.md),
 archived [09 §1a and §20](../archive/spec/09-cartridge-lab-certification.md) and
 [14 R9](../archive/spec/14-implementation-plan.md#r9--cartridge-lab-v1).
-The private runner accepts exactly two literal candidates and refuses every other admitted
+The private runner accepts exactly one literal candidate and refuses every other admitted
 artifact, selecting the row by the admitted id and requiring its version and content hash:
-the [retired Ashmere chapter](cartridge.md#retired-ashmere-chapter-e1-candidate), once the bundled candidate,
-`ashmere_missing_child@0.0.42` (`5d8b0e3a…50fc8b`) and the [R9C](cartridge.md#r9c-synthetic-interaction-cartridge-e2) synthetic cartridge
+the [R9C](cartridge.md#r9c-synthetic-interaction-cartridge-e2) synthetic cartridge
 `r9c_interactions@0.0.1` (`7d74fac7…d17263`). The table is not part of the policy digest.
+The [retired Ashmere chapter](cartridge.md#retired-ashmere-chapter-e1-candidate)
+(`ashmere_missing_child@0.0.42`) is deleted, and with it its row, its scenario recorder, its
+cases and its disposition table (2026-10-21). E1 certification is redone for the real game's
+chapter; until then the policy, repro, obligation and witness modules stay as the generic
+harness, and the recorder rules below are the rules its new recorder follows.
 It freezes normalized artifact bytes before execution, checks the independent known answer,
 and admits those bytes through the real loader. In particular the loader owns the implicit
 position/scene → fact dependency; certification does not replace that check.
@@ -67,8 +71,8 @@ through trusted elapsed input. Reuse existing clock segmentation and invariant c
 player Wait, wall-clock sleeping, altered cartridge, hidden state writer or second mechanic
 implementation supplies a fresh-path receipt. Explicit adjusted starts remain separately
 labeled when needed for a controlled admission or fault boundary.
-The recorder (`e1_cases.ts`) records the v042 chapter only: a recording run refuses any other
-admitted candidate, r9c included, by name (exit 1) before writing anything, so r9c never yields a pass.
+The deleted v042 recorder recorded that chapter only and refused r9c by name (exit 1), so r9c
+never yielded a pass.
 Independently checked chapter routes enter the recorder as named fresh cases only with
 their literal result assertions intact; their committed steps must pass the same semantic
 replay, SQLite observation and candidate/source checks as the ending cases.
@@ -277,8 +281,7 @@ the retained receipt ops, and accepts only paths also recorded in the retained s
 as for journal variants.
 
 A negative-polarity path, or any other authored path no execution can witness, closes only
-by a reviewed disposition: a row `{path, reason, evidence, review}` in the checked-in table
-`kernel/ts/test/e1_dispositions.json`, naming an authored path, a reason (for example an
+by a reviewed disposition: a row `{path, reason, evidence, review}` in a checked-in table, naming an authored path, a reason (for example an
 unreachable or always-false guard), a pointer to the evidence and the independent review
 record. A negative-polarity guard that can fire is dispositioned from a controlled refusal
 ([PM decision](../decisions/pm-decision-e1-controlled-refusals-2026-10-07.md)): its
@@ -286,7 +289,8 @@ row adds `refusal: {case, code}`, naming a recorded case built so that every oth
 condition holds and only that guard's condition is true, and the refusal code. The recorder
 fails unless that case's final replayed step is refused with exactly that code by the dialogue
 the row's path names; attribution comes from the controlled setup, since the runtime names no
-refusing node.
+refusing node. No recorder enforces this rule today: the v042 disposition table and its check were
+deleted with that chapter.
 The recorder reports dispositioned paths separately from witnessed and pending ones;
 a disposition never adds to the witnessed set, and a row for an unknown or witnessed path
 fails the run.

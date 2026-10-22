@@ -20,14 +20,13 @@ const git = (...args: string[]) => {
   return r.stdout.trim();
 };
 
-// Every local module e1_cases.ts runs; e1.test.ts checks the import graph against it.
+// Every local module the recorder and its witnesses run; e1.test.ts checks the import graph against it.
 export const CHECK_FILES = [
   'e1.ts',
   'e1_policy.ts',
   'e1_repro.ts',
   'sim.ts',
   'read.ts',
-  'e1_case_host.ts',
   'e1_obligations.ts',
   'e1_repair.ts',
   'e1_order.ts',
@@ -35,25 +34,6 @@ export const CHECK_FILES = [
   'e1_knowledge_effects.ts',
   'e1_identity.ts',
   'e1_creatures.ts',
-  'e1_world_witness.ts',
-  'e1_debt.ts',
-  'e1_paths.ts',
-  'e1_routes.ts',
-  'e1_dialogue_circuit.ts',
-  'e1_optional_quests.ts',
-  'e1_watch_rounds.ts',
-  'e1_wisp_herbs.ts',
-  'e1_maud.ts',
-  'e1_services.ts',
-  'e1_night_marsh.ts',
-  'e1_epilogue_talks.ts',
-  'e1_rejoin.ts',
-  'e1_world.ts',
-  'e1_items.ts',
-  'e1_faults.ts',
-  'e1_refusals.ts',
-  'e1_cases.ts',
-  'e1_dispositions.json',
 ];
 
 export function source() {

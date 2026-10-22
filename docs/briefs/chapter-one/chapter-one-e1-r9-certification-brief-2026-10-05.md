@@ -4,7 +4,7 @@
 
 > **Publication note:** This is a provisional 2026-10-05 planning brief. Source heads, merge status and installed capabilities below describe the baseline inspected when drafted. Check the [current roadmap](../../ROADMAP.md) and re-pin merged dependencies before assignment; this brief does not authorize implementation or certify proof.
 
-Provisional PM brief, 2026-10-05. **Provisional until the full mechanics merge; not source GO, an adopted certification policy, a gate pass, or native certification.** Parent plan: [public chapter completion plan](../../MISSING-CHILD-PLAN.md).
+Provisional PM brief, 2026-10-05. **Provisional until the full mechanics merge; not source GO, an adopted certification policy, a gate pass, or native certification.** Parent plan: [public chapter completion plan](../../archive/MISSING-CHILD-PLAN.md).
 
 **2026-10-06 packaging assignment:** implementation begins from published
 `71c3323dee2d9265e59587957eea3e3c90f544ac` under the bounded active

@@ -1,5 +1,5 @@
 // The named routes behind the page stories (views) and live stories (checkpoints): taps as a player
-// names them (walkthrough/ashmere_missing_child.walk.ts), replayed by scenarios.ts.
+// names them, replayed by scenarios.ts.
 import type { book } from '../book/__tests__/polish-book.test.ts';
 import { refused } from '../book/model.ts';
 import { LABEL } from '../book/labels.ts';
@@ -71,7 +71,7 @@ const wait =
     (b.game as unknown as { pulse(): unknown }).pulse();
   };
 const contents = (section?: string): Step[] => [/; opens Contents$/, ...(section ? [section] : [])];
-// The riddle's tiles, one per letter (walkthrough/ashmere_missing_child.walk.ts spellOn), then Submit.
+// The riddle's tiles, one per letter, then Submit.
 const spell =
   (word: string): Step =>
   (b) => {
