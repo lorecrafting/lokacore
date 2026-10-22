@@ -351,7 +351,7 @@ test('stale generation refuses with the exact held item and world intact', () =>
 });
 
 // Breaks: mere ownership of a bandage bypasses the acquired, current DEX qualification.
-test('unlearned bandage cannot consume the held item', () => {
+test('unlearned or under-DEX bandage cannot consume the held item', () => {
   const { world, target } = fixture();
   const first = elapsed(
     command(world, 1, { type: 'attack', target_id: target }, 1).world,
@@ -377,6 +377,27 @@ test('unlearned bandage cannot consume the held item', () => {
   assert.equal(refused.decision.error.code, 'invalid_state');
   assert.equal(refused.world.state, unlearned.state);
   assert.equal(refused.world.state.containers[item], world.body);
+  // Learned but DEX 9: below the authored floor of 10, the held item is neither offered nor spent.
+  const dex = key(sampler.ref('attribute', 'dex'));
+  const clumsy = { ...ready, attributes: { ...ready.attributes, [dex]: 9 } } as World;
+  assert.equal(
+    gameView(clumsy)
+      .inventory.find((e) => e.id === item)
+      ?.actions.some((a) => a.action_key === 'bandage'),
+    false,
+  );
+  const unqualified = command(
+    clumsy,
+    9,
+    {
+      type: 'bandage',
+      item_id: item,
+      effect_generation: clumsy.state.bleeds![world.body]!.generation,
+    },
+    3,
+  );
+  assert.equal(unqualified.decision.kind, 'rejected');
+  assert.equal(unqualified.world.state, clumsy.state);
 });
 
 // Breaks: treatment reaches through another holder and spends an item outside direct custody.
