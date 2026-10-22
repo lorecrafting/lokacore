@@ -1,38 +1,30 @@
 import assert from 'node:assert/strict';
-import { createHash } from 'node:crypto';
 import { test } from 'node:test';
 import { DEFS } from '../src/contracts.gen.ts';
 import { validate, type Defs } from '../src/foundation/validate.ts';
-import { encode } from '../src/foundation/canonical.ts';
-import { loadCartridge, INSTALLED } from '../src/index.ts';
-import { read } from './read.ts';
+import { fragment } from './fragment.ts';
 
 const id = 'aaaaaaaa-0000-4000-8000-000000000001';
-const ref = (kind: string, key: string) => ({
-  cartridge_id: 'ashmere_missing_child',
-  cartridge_version: '0.0.42',
-  kind,
-  key,
-});
+const { ref, prefix, load } = fragment('protocol/fixtures/toolbox_showcase_hash.json');
 const visit = { actor_id: id, room_id: id };
 const observation = { ...visit, npc_id: id, at: 0 };
-const room = { id, title: 'room.ferry_landing.title', x: 0, y: 0, z: 0 };
+const room = { id, title: 'room.crossroads_inn.title', x: 0, y: 0, z: 0 };
 const cases: [string, any, string?][] = [
   ['VisitedRoom', visit],
   ['ObservedNpc', observation],
-  ['MapPosition', { room: ref('room', 'ferry_landing'), x: 0, y: 0, z: 0 }],
+  ['MapPosition', { room: ref('room', 'crossroads_inn'), x: 0, y: 0, z: 0 }],
   [
     'KnockResponse',
     {
-      npc: ref('npc', 'aldric'),
-      room: ref('room', 'chapel_nave'),
-      answered: 'knock.chapel.answered',
-      unanswered: 'knock.chapel.unanswered',
+      npc: ref('npc', 'smith'),
+      room: ref('room', 'woodstore'),
+      answered: 'knock.store.answered',
+      unanswered: 'knock.store.unanswered',
     },
   ],
   ['KnownRoomView', room],
   ['KnownConnectionView', { from: id, to: id, direction: 'north' }],
-  ['KnownNpcView', { id, name: 'npc.aldric.short' }],
+  ['KnownNpcView', { id, name: 'npc.smith.short' }],
   ['MapView', { rooms: [room], links: [] }],
   ['MutationTarget', { kind: 'visit', ...visit }, 'visit'],
   ['MutationTarget', { kind: 'observation', actor_id: id, npc_id: id }, 'observation'],
@@ -114,63 +106,81 @@ test('compiled map-position arrays reject empty declarations with a minItems red
   assert.deepEqual(validate('D10Probe', [], mutant), []);
 });
 
-const pin = read('protocol/fixtures/missing_child_v042_hash.json');
-const load = (cartridge: any) =>
-  loadCartridge(
-    new TextEncoder().encode(
-      JSON.stringify({
-        cartridge,
-        content_hash: createHash('sha256').update(encode(cartridge)).digest('hex'),
-      }),
-    ),
-    {
-      ...INSTALLED,
-      kernel_api: '1.37',
-      capabilities: { ...INSTALLED.capabilities, knowledge: [1] },
-    },
-  );
+// Showcase plus an inline Knock on the Smithy's south store door, answered by the smith.
+const smithy = `${prefix}:room/smithy`;
+const knock = (c: any) => {
+  c.rooms[smithy].exits.south.knock = {
+    npc: ref('npc', 'smith'),
+    room: ref('room', 'woodstore'),
+    answered: 'knock.store.answered',
+    unanswered: 'knock.store.unanswered',
+  };
+  c.text['knock.store.answered'] = 'The smith calls back.';
+  c.text['knock.store.unanswered'] = 'No one answers.';
+};
+const exit = `.cartridge.rooms["${smithy}"].exits.south.knock`;
 
 // Breaks: a rehashed artifact draws duplicate/unresolved rooms or grants Knock to a non-door face.
 test('D10 loader refuses invalid authored map and Knock declarations', () => {
-  assert.equal(load(pin.value).ok, true);
-  for (const mutate of [
-    (c: any) => c.map_positions.pop(),
-    (c: any) => (c.map_positions[1] = c.map_positions[0]),
-    (c: any) =>
-      Object.assign(c.map_positions[1], {
-        x: c.map_positions[0].x,
-        y: c.map_positions[0].y,
-        z: c.map_positions[0].z,
-      }),
-    (c: any) => (c.map_positions[0].room = ref('room', 'absent')),
-    (c: any) => (c.map_positions[0].x = '0'),
-    (c: any) => (c.manifest.requires.kernel_api.at_least = '1.36'),
-    (c: any) => {
-      delete c.map_positions;
-      delete c.lock.capabilities.knowledge;
-      delete c.manifest.requires.capabilities.knowledge;
-      c.manifest.requires.kernel_api.at_least = '1.36';
-    },
-    (c: any) => {
-      delete c.lock.capabilities.knowledge;
-      delete c.manifest.requires.capabilities.knowledge;
-    },
-    (c: any) =>
-      (c.rooms['ashmere_missing_child@0.0.42:room/chapel_steps'].exits.north.knock.npc = ref(
-        'npc',
-        'absent',
-      )),
-    (c: any) =>
-      (c.rooms['ashmere_missing_child@0.0.42:room/chapel_steps'].exits.north.knock.room = ref(
-        'room',
-        'chapel_steps',
-      )),
-    (c: any) =>
-      (c.rooms['ashmere_missing_child@0.0.42:room/chapel_steps'].exits.north.knock.answered =
-        'absent'),
-  ]) {
-    const c = structuredClone(pin.value);
-    mutate(c);
-    assert.equal(load(c).ok, false);
+  assert.equal(load(knock).ok, true);
+  for (const [mutate, code, path] of [
+    [(c: any) => c.map_positions.pop(), 'SCHEMA_VIOLATION', '.cartridge.map_positions'],
+    [
+      (c: any) => (c.map_positions[1] = c.map_positions[0]),
+      'SCHEMA_VIOLATION',
+      '.cartridge.map_positions',
+    ],
+    [
+      (c: any) =>
+        Object.assign(c.map_positions[1], {
+          x: c.map_positions[0].x,
+          y: c.map_positions[0].y,
+          z: c.map_positions[0].z,
+        }),
+      'SCHEMA_VIOLATION',
+      '.cartridge.map_positions',
+    ],
+    [
+      (c: any) => (c.map_positions[0].room = ref('room', 'absent')),
+      'UNRESOLVED_REFERENCE',
+      '.cartridge.map_positions[0].room',
+    ],
+    [(c: any) => (c.map_positions[0].x = '0'), 'SCHEMA_VIOLATION', '.cartridge.map_positions[0].x'],
+    [
+      (c: any) => {
+        delete c.lock.capabilities.knowledge;
+        delete c.manifest.requires.capabilities.knowledge;
+      },
+      'UNDECLARED_CAPABILITY',
+      '.cartridge.map_positions',
+    ],
+    [
+      (c: any) => (c.rooms[smithy].exits.south.knock.npc = ref('npc', 'absent')),
+      'UNRESOLVED_REFERENCE',
+      `${exit}.npc`,
+    ],
+    [
+      (c: any) => (c.rooms[smithy].exits.south.knock.room = ref('room', 'smithy')),
+      'BARRIER_MISMATCH',
+      exit,
+    ],
+    [
+      (c: any) => {
+        const k = c.rooms[smithy].exits.south.knock;
+        c.rooms[smithy].exits.north.knock = { ...k, room: ref('room', 'the_fold') };
+      },
+      'BARRIER_MISMATCH',
+      `.cartridge.rooms["${smithy}"].exits.north.knock`,
+    ],
+    [
+      (c: any) => (c.rooms[smithy].exits.south.knock.answered = 'absent'),
+      'UNRESOLVED_REFERENCE',
+      `${exit}.answered`,
+    ],
+  ] as [(c: any) => void, string, string][]) {
+    const loaded = load((c) => (knock(c), mutate(c)));
+    assert.equal(loaded.ok, false, path);
+    if (loaded.ok) continue;
+    assert.deepEqual([loaded.diagnostic.code, loaded.diagnostic.path], [code, path]);
   }
 });

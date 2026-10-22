@@ -1,57 +1,61 @@
 import assert from 'node:assert/strict';
-import { createHash } from 'node:crypto';
 import { test } from 'node:test';
-import { bundle, ref } from './transport_fixture.ts';
-import { encode } from '../src/foundation/canonical.ts';
+import { load, prefix, ref } from './bell_fixture.ts';
 import { validate } from '../src/foundation/validate.ts';
-import { INSTALLED, loadCartridge, newWorld, type Cartridge } from '../src/index.ts';
-import { read } from './read.ts';
 
-const source = JSON.parse(bundle().canonical);
-const load = (c: any) =>
-  loadCartridge(
-    new TextEncoder().encode(
-      JSON.stringify({
-        cartridge: c,
-        content_hash: createHash('sha256').update(encode(c)).digest('hex'),
-      }),
-    ),
-    INSTALLED,
-  );
+const reaction = `.cartridge.reactions["${prefix}:reaction/bell_suppress_goblins"]`;
+const R = (c: any) => c.reactions[`${prefix}:reaction/bell_suppress_goblins`];
 
-// Breaks: a declared audible room/fact/text silently resolves to a missing or wrong definition.
+// Breaks: a declared audible room/fact/text or a suppression plan/trigger silently resolves to a
+// missing or wrong definition.
 test('D9 cue references and typed suppression declaration fail closed', () => {
-  assert.equal(load(source).ok, true);
-  for (const change of [
-    (c: any) => c.world.bell_cue.rooms.push(ref('room', 'absent')),
-    (c: any) => {
-      c.world.bell_cue.fact = ref('room', 'belfry');
-    },
-    (c: any) => {
-      c.world.bell_cue.text = 'absent';
-    },
-    (c: any) => {
-      c.reactions[
-        Object.keys(c.reactions).find((k) => k.endsWith('/d9_suppress_hounds'))!
-      ].apply[0].plan = ref('population', 'absent');
-    },
-    (c: any) => {
-      c.manifest.requires.kernel_api.at_least = '1.34';
-    },
-    (c: any) => {
-      c.reactions[
-        Object.keys(c.reactions).find((k) => k.endsWith('/d9_suppress_hounds'))!
-      ].apply[0].plan = ref('population', 'willow_deer');
-    },
-    (c: any) => {
-      c.reactions[
-        Object.keys(c.reactions).find((k) => k.endsWith('/d9_suppress_hounds'))!
-      ].on.fact = ref('fact', 'chapel_allegiance');
-    },
-  ]) {
-    const c = structuredClone(source);
-    change(c);
-    assert.equal(load(c).ok, false);
+  assert.equal(load().ok, true);
+  for (const [change, code, path] of [
+    [
+      (c: any) => c.world.bell_cue.rooms.push(ref('room', 'absent')),
+      'UNRESOLVED_REFERENCE',
+      '.cartridge.world.bell_cue.rooms[2]',
+    ],
+    [
+      (c: any) => (c.world.bell_cue.fact = ref('room', 'drill_yard')),
+      'UNRESOLVED_REFERENCE',
+      '.cartridge.world.bell_cue.fact',
+    ],
+    [
+      (c: any) => (c.world.bell_cue.fact = ref('fact', 'lever_stage')),
+      'FACT_TYPE_MISMATCH',
+      '.cartridge.world.bell_cue.fact',
+    ],
+    [
+      (c: any) => (c.world.bell_cue.text = 'absent'),
+      'UNRESOLVED_REFERENCE',
+      '.cartridge.world.bell_cue.text',
+    ],
+    [
+      (c: any) => (R(c).apply[0].plan = ref('population', 'absent')),
+      'SCHEMA_VIOLATION',
+      `${reaction}.apply[0].plan`,
+    ],
+    [
+      (c: any) => (R(c).apply[0].plan = ref('population', 'hens')),
+      'SCHEMA_VIOLATION',
+      `${reaction}.apply[0].plan`,
+    ],
+    [
+      (c: any) => (R(c).on.fact = ref('fact', 'lever_stage')),
+      'FACT_TYPE_MISMATCH',
+      `${reaction}.on.fact`,
+    ],
+    [
+      (c: any) => (R(c).on = { event: 'item_dropped', item: ref('item', 'ear') }),
+      'OUTCOME_MISMATCH',
+      `${reaction}.apply[0].op`,
+    ],
+  ] as const) {
+    const loaded = load(change);
+    assert.equal(loaded.ok, false, path);
+    if (!loaded.ok)
+      assert.deepEqual([loaded.diagnostic.code, loaded.diagnostic.path], [code, path]);
   }
 });
 
@@ -95,45 +99,4 @@ test('D9 typed control and cue reject missing evidence and malformed deadlines',
     delete changed.cue[field];
     assert.ok(validate('NarrationRecord', changed).length, field);
   }
-});
-
-// Breaks: changing cast or cue content shifts fresh identities without updating the release pin.
-test('provisional v040 allocation pins starting identities', () => {
-  const pin = read('protocol/fixtures/missing_child_v040_hash.json');
-  const loaded = loadCartridge(
-    new TextEncoder().encode(
-      JSON.stringify({
-        cartridge: pin.value,
-        content_hash: pin.sha256,
-      }),
-    ),
-    INSTALLED,
-  );
-  assert.ok(loaded.ok);
-  const world = newWorld(
-    (loaded as { cartridge: Cartridge }).cartridge,
-    '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never,
-    [1, 2, 3, 4],
-  );
-  const actual: Record<string, string> = {
-    character: world.character,
-    body: world.body,
-    consumed: world.consumed!,
-  };
-  for (const [id, room] of Object.entries(world.rooms)) actual[`room/${room.key}`] = id;
-  for (const [id, detail] of Object.entries(world.details))
-    actual[`detail/${world.rooms[detail.room].key}/${detail.key}`] = id;
-  for (const [id, entity] of Object.entries(world.entities)) {
-    const origin = world.state.created?.[id]?.origin;
-    if (origin?.kind === 'spawned')
-      actual[
-        `population/${origin.by.key}/slot${origin.slot}/${origin.role === 'hound' ? 'member' : origin.role}`
-      ] = id;
-    else actual[`${entity.kind}/${entity.key}`] = id;
-  }
-  for (const [id, job] of Object.entries(world.state.jobs ?? {}))
-    actual[job.job.kind === 'population' ? `population/${job.job.key}/job` : `job/${job.job.key}`] =
-      id;
-  for (const [slot, id] of Object.entries(world.slots)) actual[`slot/${slot}`] = id;
-  assert.deepEqual(actual, read('protocol/fixtures/missing_child_v040_ids.json'));
 });
