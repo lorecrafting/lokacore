@@ -36,8 +36,10 @@ type Screen = ReturnType<ReturnType<typeof presenter>['screen']>;
 // The refusal notes are one block (BOOK-UI-COMPONENTS.md, Page: a run of rows of one kind).
 const notes = (thing: Thing | undefined, text: Say, held?: string) => {
   const shown =
-    thing?.actions.flatMap((a) =>
-      !a.available && Object.hasOwn(NOTED, a.reason.code)
+    thing?.actions.flatMap((a, i, all) =>
+      !a.available &&
+      Object.hasOwn(NOTED, a.reason.code) &&
+      all.findIndex((b) => b.action_key === a.action_key) === i // one note per use, however many targets
         ? [{ ...a, word: NOTED[a.reason.code] }]
         : [],
     ) ?? [];
