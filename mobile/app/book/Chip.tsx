@@ -1,6 +1,7 @@
 // A word chip (BOOK-UI-COMPONENTS.md, Chip): one word of the World page's Word block as a pill.
 import type { ReactNode } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, View } from 'react-native';
+import { Text } from './Text.tsx';
 import { LABEL } from './labels.ts';
 import { Note } from './lines.tsx';
 import { usePalette, useType } from './palette.ts';

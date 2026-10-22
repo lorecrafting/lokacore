@@ -1,7 +1,7 @@
 import type { GameView } from '../../packages/game-view/session.ts';
 import type { Page as Route } from './model.ts';
 // A resumable child of the actual bed, using the existing detail/control grammar.
-import { Text } from 'react-native';
+import { Text } from './Text.tsx';
 import type { Button, presenter } from './presenter.ts';
 import { dreamAt, dreamOwner } from './dreams.ts';
 import { ActionCard, Cards } from './actions.tsx';

@@ -1,6 +1,6 @@
 import { cap, plain } from './model.ts';
 import { Fragment } from 'react';
-import { Text } from 'react-native';
+import { Text } from './Text.tsx';
 import { SectionTitle } from './pages.tsx';
 import { Note } from './lines.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';

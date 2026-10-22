@@ -1,6 +1,7 @@
 // The Book draws GameView through its presenter; App injects the shell.
 import { useRef, useState } from 'react';
-import { SafeAreaView, Text, View } from 'react-native';
+import { SafeAreaView, View } from 'react-native';
+import { Text } from './Text.tsx';
 import type { Game } from '../../packages/game-view/session.ts';
 import { Combat } from './Combat.tsx';
 import { Footer } from './Footer.tsx';

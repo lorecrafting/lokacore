@@ -1,6 +1,7 @@
 // The offered-action controls: action card, verb line, continue button (BOOK-UI-COMPONENTS.md).
 import { Children, type ReactNode } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, View } from 'react-native';
+import { Text } from './Text.tsx';
 import { Tap } from './pages.tsx';
 import { note, prose, usePalette, useType } from './palette.ts';
 import type { Button } from './presenter.ts';

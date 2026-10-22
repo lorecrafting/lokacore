@@ -1,4 +1,5 @@
-import { Text, View } from 'react-native';
+import { View } from 'react-native';
+import { Text } from './Text.tsx';
 import { DreamPage } from './DreamPage.tsx';
 import { JournalPage } from './journal.tsx';
 // Page dispatch for the current Book view and local detail stack.

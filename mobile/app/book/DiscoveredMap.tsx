@@ -1,5 +1,6 @@
 import { useRef, useState, type ReactNode } from 'react';
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
+import { Text } from './Text.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { note, prose, usePalette, useType, type Palette, type Type } from './palette.ts';
 import { size, type } from './tokens.ts';

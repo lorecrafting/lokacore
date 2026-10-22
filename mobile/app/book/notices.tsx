@@ -1,6 +1,7 @@
 import { DreamResume } from './DreamPage.tsx';
 // Local notice routes consume only GameView metadata and its exact current action offers.
-import { Text, View } from 'react-native';
+import { View } from 'react-native';
+import { Text } from './Text.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { plain, why, type Page as Route } from './model.ts';
 import { ActionCard, Cards } from './actions.tsx';

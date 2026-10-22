@@ -1,6 +1,7 @@
 // Entity lines, the room's Here lines and log lines (BOOK-UI-COMPONENTS.md, Entity line and Log line).
 import { useState } from 'react';
-import { Text, View } from 'react-native';
+import { View } from 'react-native';
+import { Text } from './Text.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { cap, cueLine, plain } from './model.ts';
 import { LABEL } from './labels.ts';

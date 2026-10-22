@@ -1,6 +1,7 @@
 // The riddle answer: a bank of letter tiles over one local buffer (BOOK-UI-COMPONENTS.md, Letter tile).
 import { useState } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, View } from 'react-native';
+import { Text } from './Text.tsx';
 import type { Button } from './presenter.ts';
 import { ActionCard } from './actions.tsx';
 import { Control } from './pages.tsx';
