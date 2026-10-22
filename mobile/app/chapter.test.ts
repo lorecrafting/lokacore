@@ -27,8 +27,8 @@ const adapt = (sql: DatabaseSync): Db => ({
 });
 
 // Breaks: the app bundles Ashmere or Lantern again, or opens/deletes an older save for the
-// showcase, including Start over. Saved pins, the opening room and untouched old save bytes are
-// the assertions.
+// showcase, including the Start over that deletes an unreadable showcase file. Saved pins, the
+// opening room and untouched old save bytes are the assertions.
 test('the app opens and replaces only its showcase save, preserving Lantern, sampler and Ashmere saves', () => {
   const showcase = JSON.parse(
     readFileSync(
@@ -77,6 +77,8 @@ test('the app opens and replaces only its showcase save, preserving Lantern, sam
       createHash('sha256').update(readFileSync(path)).digest('hex'),
     );
   const before = checksum();
+  const showcasePath = join(dir, `loka-showcase-${showcase.sha256.slice(0, 16)}.db`);
+  writeFileSync(showcasePath, 'not a sqlite save'); // Start over must delete this file, only this
   const connections: DatabaseSync[] = [];
   let id = 0;
   const native = {
@@ -122,23 +124,15 @@ test('the app opens and replaces only its showcase save, preserving Lantern, sam
       __DEV__: false,
       performance,
     });
-    assert.ok(globals.loka_session!.game());
-    const view = globals.loka_session!.game()!.view().view;
-    assert.equal(view.place.title.key, 'room.crossroads_inn.title');
-    assert.deepEqual(
-      view.entities.map((e) => [e.kind, e.name]),
-      [
-        ['npc', 'npc.hob.short'],
-        ['item', 'item.loaf.short'],
-        ['item', 'item.waterskin.short'],
-      ],
+    assert.equal(globals.loka_session!.game(), undefined);
+    assert.equal(globals.loka_session!.failed()?.startOver, true);
+    assert.equal(globals.loka_session!.startOver(), undefined);
+    assert.equal(
+      globals.loka_session!.game()!.view().view.place.title.key,
+      'room.crossroads_inn.title',
     );
-    assert.deepEqual(view.journal, []);
     const pin = () => {
-      const database = new DatabaseSync(
-        join(dir, `loka-showcase-${showcase.sha256.slice(0, 16)}.db`),
-        { readOnly: true },
-      );
+      const database = new DatabaseSync(showcasePath, { readOnly: true });
       try {
         return JSON.parse(database.prepare('SELECT pin FROM save').get()!.pin as string);
       } finally {
