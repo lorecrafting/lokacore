@@ -10,7 +10,8 @@ import type { BookView as View_ } from '../book/Book.tsx';
 import { buttonsOf, type Page } from '../book/model.ts';
 import type { ChronicleDay } from '../book/chronicle.ts';
 import type { DetailLine, presenter } from '../book/presenter.ts';
-import { color } from '../book/tokens.ts';
+import { readingType } from '../book/reading.ts';
+import { color, reading } from '../book/tokens.ts';
 import { sayers } from '../book/words.ts';
 
 type Screen = ReturnType<ReturnType<typeof presenter>['screen']>;
@@ -69,6 +70,16 @@ const loadBook = async () => {
  * (e.g. "18:00 · dusk") is the saved view's; the toolbar palette repaints the page, not the hour.
  * The `words` Control rewords any text key; `keys` pre-fill it with the table's words. Limit:
  * already-narrated lines (log, details, combat log) are strings, not keys, so it cannot reword them. */
+// The toolbar's Reading global as the Settings row shows it; Max is Larger at the cap a large system scale reaches.
+const readingOf = (g: unknown) => {
+  const step = g === 'Standard' ? 'standard' : g === 'Large' ? 'large' : 'larger';
+  return {
+    step,
+    choose: fn(),
+    type: readingType(g === 'Max' ? reading.cap : reading[step]),
+  } as const;
+};
+
 export const pageStory = (
   saved: unknown,
   shell?: Partial<Screen>,
@@ -91,6 +102,7 @@ export const pageStory = (
           press={fn()}
           refused={fn()}
           startOver={fn()}
+          reading={readingOf(globals.reading)}
           shell={{ confirm: (go) => go(), learned: { seen: () => true, see: () => {} } }}
         />
       </View>
