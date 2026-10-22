@@ -312,7 +312,7 @@ export const accepted = <E>(
   events,
   effects: [],
   rng,
-  ...(narration && { narration }),
+  ...(narration?.length ? { narration } : {}), // an empty list is no narration (minItems 1)
 });
 
 /** Own-key test, values and entries for rule modules, which may not name Object (ts-rule-module-pure). */

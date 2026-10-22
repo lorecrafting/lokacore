@@ -57,6 +57,25 @@ test('attack H2 admits both exact co-present goblins with H2 as primary', () => 
   );
 });
 
+// Breaks: attacking the only co-present goblin commits narration [] (decision.schema.json minItems 1),
+// a receipt the phone's cold reopen then refuses as save_corrupt (loka-kgd.187).
+test('attack on the only co-present goblin opens a valid one-member encounter', () => {
+  const w = fixture();
+  const alone = { ...w, state: { ...w.state, containers: { ...w.state.containers, [h1]: nest } } };
+  const { decision, world } = step(
+    alone,
+    {
+      id: 'aaaaaaaa-0000-4000-8000-000000000001' as never,
+      world_context_id: w.context,
+      payload: { type: 'attack', actor_id: w.character, target_id: h2 },
+    },
+    1,
+  );
+  assert.equal(decision.kind, 'accepted', JSON.stringify(decision));
+  assert.deepEqual(Object.values(world.state.encounters ?? {})[0]!.active_ids, [h2]);
+  assert.deepEqual(validate('DecisionResult', decision), []);
+});
+
 // Breaks: a pack member's band is missing, copied from the primary, or read from the wrong goblin
 // (hp 0..8: h2 at 4 is the exact hurt cut, 400 >= 50*8; h1 untouched reads ready).
 test('each pack member shows its own hp band', () => {
