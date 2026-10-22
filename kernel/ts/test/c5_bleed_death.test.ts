@@ -3,6 +3,7 @@ import { test } from 'node:test';
 import { key } from '../src/foundation/compose.ts';
 import type { World } from '../src/index.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
+import { acquisition } from '../src/mechanics/skills.ts';
 import { command, elapsed, fixture, sampler } from './c5_bleed_fixture.ts';
 
 const { prefix, ref } = sampler;
@@ -50,7 +51,7 @@ function water(c: any) {
 }
 
 // Breaks: a real noncombat death returns the body with its old bleed and due job still live.
-test('authored short water expiry clears active bleed before shrine return', () => {
+test('short water expiry clears active bleed before shrine return', () => {
   const { world, target } = fixture(100, 10, water);
   const hp = resourceRef(world, 'hp');
   const attack = command(world, 1, { type: 'attack', target_id: target }, 1);
@@ -63,7 +64,7 @@ test('authored short water expiry clears active bleed before shrine return', () 
   assert.equal(fled.decision.kind, 'accepted');
   const skill = key({
     kind: 'fact',
-    fact: ref('fact', 'skill_swim'),
+    fact: acquisition(ref('skill', 'swim')),
     scope: { kind: 'player', character_id: world.character },
   });
   const near: World = {

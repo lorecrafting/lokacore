@@ -28,8 +28,6 @@
   "band.tired": "tired",
   "band.exhausted": "exhausted",
   "combat.hound_fled_west": "A hound flees west.",
-  "combat.hound_fled_north": "A hound flees north.",
-  "combat.hound_fled_south": "A hound flees south.",
   "room.den.title": "Den",
   "room.den.description": "The den. [Bones](bones) lie here.",
   "detail.den.bones": "Bones.",

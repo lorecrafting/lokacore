@@ -4,11 +4,12 @@ import { gameView } from '../src/index.ts';
 import { key } from '../src/foundation/compose.ts';
 import { refString, type World } from '../src/runtime/decision.ts';
 import { resolved } from '../src/commands/actions.ts';
+import { acquisition } from '../src/mechanics/skills.ts';
 import { command, elapsed, fixture, hp, sampler } from './c5_bleed_fixture.ts';
 
 function readyBandage(world: World) {
   const item = Object.entries(world.entities).find(([, e]) => e.kind === 'item' && e.bandage)![0];
-  const skill = sampler.ref('fact', 'skill_bandage');
+  const skill = acquisition(sampler.ref('skill', 'bandage'));
   const fact = key({
     kind: 'fact',
     fact: skill,
