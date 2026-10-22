@@ -6,7 +6,6 @@ import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { key } from '../src/foundation/compose.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import {
-  ids,
   run,
   h1,
   h2,
@@ -17,29 +16,30 @@ import {
   begun,
   due,
   seated,
+  spawned,
 } from './c4_pack_fixture.ts';
 import { rooted } from './combat_fixture.ts';
 
-// Breaks (loka-kgd.102, status reader 4): a wounded hound whose statuses bar `move` still flees.
-test('a rooted wounded hound holds its room instead of fleeing', () => {
+// Breaks (loka-kgd.102, status reader 4): a wounded goblin whose statuses bar `move` still flees.
+test('a rooted wounded goblin holds its room instead of fleeing', () => {
   const result = due(seated(begun(wounded(rooted(fixture(), h2), 1))));
   assert.equal(result.decision.kind, 'accepted', JSON.stringify(result.decision));
   assert.equal(result.world.state.containers[h2], home);
 });
 
-// Breaks: a wounded selected hound retaliates or leaves its original pelt in the old room.
-test('strictly wounded selected hound flies with its pelt before either attack', () => {
+// Breaks: a wounded selected goblin retaliates or leaves its original ear in the old room.
+test('strictly wounded selected goblin flies with its ear before either attack', () => {
   const w = fixture();
   const result = due(seated(begun(wounded(w, 1))));
   assert.equal(result.decision.kind, 'accepted', JSON.stringify(result.decision));
   assert.equal(result.world.state.containers[h2], nest);
-  assert.equal(result.world.state.containers[ids['population/fen_hounds/slot2/pelt']], h2);
+  assert.equal(result.world.state.containers[spawned(w, 2, 'pelt')], h2);
   const row = Object.values(result.world.state.encounters ?? {})[0]!;
   assert.deepEqual(row.active_ids, [h1]);
   assert.equal(row.npc_id, h1);
 });
 
-// Breaks: treating the 25% boundary as fleeing steals the selected hound's next attack.
+// Breaks: treating the 25% boundary as fleeing steals the selected goblin's next attack.
 test('HP2 of maximum8 remains and attacks at the strict 25 percent boundary', () => {
   const w = fixture();
   const result = due(seated(begun(wounded(w, 2))));
@@ -52,21 +52,9 @@ test('HP2 of maximum8 remains and attacks at the strict 25 percent boundary', ()
   );
 });
 
-// Breaks: checking flight before the player-first hit lets an injured hound retaliate instead of leaving.
-test('a player-first hit can wound the selected hound into flight before its turn', () => {
-  const w = fixture();
-  const combat = w.cartridge.world!.combat!;
-  const tuned = {
-    ...w,
-    cartridge: {
-      ...w.cartridge,
-      world: {
-        ...w.cartridge.world!,
-        combat: { ...combat, player_attack: { chance: 100, damage_min: 1, damage_max: 1 } },
-      },
-    },
-  };
-  const result = due(begun(wounded(tuned, 2)));
+// Breaks: checking flight before the player-first hit lets an injured goblin retaliate instead of leaving.
+test('a player-first hit can wound the selected goblin into flight before its turn', () => {
+  const result = due(begun(wounded(fixture(), 2)));
   assert.equal(result.decision.kind, 'accepted', JSON.stringify(result.decision));
   assert.equal(result.world.state.containers[h2], nest);
   assert.equal(
@@ -83,16 +71,8 @@ test('even-round helper flight still gives the player one attack on the healthy 
   assert.equal(first.decision.kind, 'accepted');
   const hpKey = key({ kind: 'resource', entity_id: h1, resource: resourceRef(w, 'hp') });
   const primaryHp = key({ kind: 'resource', entity_id: h2, resource: resourceRef(w, 'hp') });
-  const combat = first.world.cartridge.world!.combat!;
   const controlled = {
     ...first.world,
-    cartridge: {
-      ...first.world.cartridge,
-      world: {
-        ...first.world.cartridge.world!,
-        combat: { ...combat, player_attack: { chance: 100, damage_min: 1, damage_max: 1 } },
-      },
-    },
     state: {
       ...first.world.state,
       resources: {
@@ -125,17 +105,17 @@ test('even-round helper flight still gives the player one attack on the healthy 
   assert.equal(level(result.world, h2, resourceRef(w, 'hp')), 6);
   const row = Object.values(result.world.state.encounters ?? {})[0]!;
   assert.deepEqual(row.active_ids, [h2]);
-  // Breaks (loka-y6yg.49): the fled hound stays listed in the combat view, or the survivor loses its band.
+  // Breaks (loka-y6yg.49): the fled goblin stays listed in the combat view, or the survivor loses its band.
   const view = gameView(result.world);
   assert.deepEqual(validate('GameView', view), []);
   assert.deepEqual(
     view.combat?.active_opponents?.map(({ id, band }) => [id, band]),
-    [[h2, 'some_cuts']],
+    [[h2, 'hurt']],
   );
 });
 
-// Breaks: a wounded hound invents a destination through a missing area exit.
-test('no legal area exit keeps the wounded hound in combat', () => {
+// Breaks: a wounded goblin invents a destination through a missing area exit.
+test('no legal area exit keeps the wounded goblin in combat', () => {
   const w = fixture();
   const joined = seated(begun(wounded(w, 1)));
   const blocked = {
@@ -150,9 +130,9 @@ test('no legal area exit keeps the wounded hound in combat', () => {
 });
 
 // Breaks: same-clock population wander moves a just-fled member twice or conflicts with its custody write.
-test('both real same-deadline job orders leave the fled hound and pelt at its destination', () => {
+test('both real same-deadline job orders leave the fled goblin and ear at its destination', () => {
   for (const [n, combatFirst] of [
-    [2, true],
+    [3, true],
     [1, false],
   ] as const) {
     const original = fixture();
@@ -164,8 +144,8 @@ test('both real same-deadline job orders leave the fled hound and pelt at its de
           clock: 68395,
           containers: {
             ...original.state.containers,
-            [ids['population/fen_hounds/slot3/member']]: home,
-            [ids['population/fen_hounds/slot4/member']]: home,
+            [spawned(original, 3)]: home,
+            [spawned(original, 4)]: home,
           },
         },
       },
@@ -198,7 +178,7 @@ test('both real same-deadline job orders leave the fled hound and pelt at its de
     );
     assert.equal(result.decision.kind, 'accepted', JSON.stringify(result.decision));
     assert.equal(result.world.state.containers[h2], nest);
-    assert.equal(result.world.state.containers[ids['population/fen_hounds/slot2/pelt']], h2);
+    assert.equal(result.world.state.containers[spawned(w, 2, 'pelt')], h2);
     const slot = Object.values(result.world.state.population_slots ?? {}).find(
       (row) => row.member_id === h2,
     )!;

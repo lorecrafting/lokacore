@@ -1,4 +1,4 @@
-// Toolbox row 11 off the player's own move: a fleeing hound or deer never takes a face that
+// Toolbox row 11 off the player's own move: a fleeing goblin or deer never takes a face that
 // declares hidden_until (mechanics.md hidden passages), nor a climb face (row 30, rope and climb),
 // and the player's Flee skips a face hidden from them.
 import assert from 'node:assert/strict';
@@ -30,7 +30,7 @@ import { key as rowKey } from '../src/foundation/compose.ts';
 function hide<W extends World>(
   world: W,
   room: string,
-  direction: 'east' | 'south',
+  direction: 'north' | 'south',
   face: 'hidden' | 'climb' | 'door' = 'hidden',
 ): W {
   const [id] = Object.entries(world.cartridge.facts!).find(
@@ -55,23 +55,27 @@ function hide<W extends World>(
   return { ...world, barrierInitial, rooms: { ...world.rooms, [room]: { ...r, exits } } } as W;
 }
 
-// Breaks: a wounded hound flees through a hidden or climb face or a closed door (its only area
+// Breaks: a wounded goblin flees through a hidden or climb face or a closed door (its only area
 // exit), naming it in enemy_fled.
 const named = { hidden: 'hidden', climb: 'a climb', door: 'a closed door' };
 for (const face of ['hidden', 'climb', 'door'] as const)
-  test(`a wounded hound whose only area exit is ${named[face]} stays in combat`, () => {
-    const result = due(hide(seated(begun(wounded(fixture(), 1))), home, 'east', face));
+  test(`a wounded goblin whose only area exit is ${named[face]} stays in combat`, () => {
+    const result = due(hide(seated(begun(wounded(fixture(), 1))), home, 'north', face));
     assert.equal(result.decision.kind, 'accepted', JSON.stringify(result.decision));
     assert.equal(result.world.state.containers[h2], home);
     const row = Object.values(result.world.state.encounters ?? {})[0]!;
     assert.deepEqual(row.active_ids, [h1, h2].sort());
   });
 
-// Breaks: an engaged player's Flee draws a direction through a face hidden from them.
-test('Flee offers only the unhidden exit', () => {
-  const w = begun(fixture());
-  assert.deepEqual(escapeDirections(w, w.character), ['east', 'west']);
-  assert.deepEqual(escapeDirections(hide(w, home, 'east'), w.character), ['west']);
+// Breaks: an engaged player's Flee draws a direction through a face hidden from them. The fight is
+// in the drill yard, whose five KAT exits all lead on.
+test('Flee offers only the unhidden exits', () => {
+  const f = fixture();
+  const containers = { ...f.state.containers, [f.body]: nest, [h2]: nest };
+  const w = begun({ ...f, state: { ...f.state, containers } });
+  assert.deepEqual(escapeDirections(w, w.character), ['down', 'east', 'north', 'south', 'west']);
+  const hidden = hide(w, nest, 'north');
+  assert.deepEqual(escapeDirections(hidden, w.character), ['down', 'east', 'south', 'west']);
 });
 
 // Breaks: a sighted deer takes refuge through a hidden or climb face (its only area exit).
@@ -120,8 +124,8 @@ for (const face of ['hidden', 'climb'] as const)
     assert.equal(r.world.state.containers[deer], willow);
   });
 
-// One hour of elapsed play from `w`: the fixture's first hourly wander moves slot 1 home -> nest
-// (east), as c4_pack_elapsed.test.ts hand-checks.
+// One hour of elapsed play from `w`: the fixture's first hourly wander moves slot 1 from the goblin
+// pit to the drill yard (north, the pit's only exit in the KAT), as c4_pack_elapsed.test.ts checks.
 function hour(w: World) {
   const [from, until] = [w.state.clock, w.state.clock + 3600];
   const payload = { type: 'elapsed', actor_id: w.character, run_id: run, from, until } as const;
@@ -132,20 +136,20 @@ function hour(w: World) {
 }
 
 // Breaks: population wander crosses a hidden or climb face, or a closed door without `walks`
-// (wanderOne off npcPassage); the plain fixture is the control (the hound reaches the nest).
-test('a wandering hound crosses no hidden, climb or closed face; the plain exit it does', () => {
+// (wanderOne off npcPassage); the plain fixture is the control (the goblin reaches the drill yard).
+test('a wandering goblin crosses no hidden, climb or closed face; the plain exit it does', () => {
   assert.equal(hour(fixture()).world.state.containers[h1], nest);
   for (const face of ['hidden', 'climb', 'door'] as const)
-    assert.equal(hour(hide(fixture(), home, 'east', face)).world.state.containers[h1], home, face);
+    assert.equal(hour(hide(fixture(), home, 'north', face)).world.state.containers[h1], home, face);
 });
 
 /**
- * The fixture with its plan marked `walks` (toolbox row W26) and a door east of the run in
- * `state`, keyed to an item hound 1 holds when `held`.
+ * The fixture with its plan marked `walks` (toolbox row W26) and a door north of the pit in
+ * `state`, keyed to an item goblin 1 holds when `held`.
  */
 function walking(state: 'closed' | 'locked', held: boolean) {
-  const w = hide(fixture(), home, 'east', 'door');
-  const door = w.rooms[home]!.exits.east!.barrier!;
+  const w = hide(fixture(), home, 'north', 'door');
+  const door = w.rooms[home]!.exits.north!.barrier!;
   const [plan] = Object.keys(w.cartridge.populations!);
   const [item] = Object.entries(w.entityIds).find(([k]) => k.includes(':item/'))!;
   const [, cartridge_id, cartridge_version, k] = /^(.+)@(.+):item\/(.+)$/.exec(item)!;
@@ -176,7 +180,7 @@ function walking(state: 'closed' | 'locked', held: boolean) {
 
 // Breaks: a walking wander refused at a closed door, let through a locked one without the key, or
 // through with it but not re-locking it (four barrier_changed, locked after).
-test('a walking hound crosses a closed door, and a locked one only with its key, re-locking it', () => {
+test('a walking goblin crosses a closed door, and a locked one only with its key, re-locking it', () => {
   const changed = (r: ReturnType<typeof hour>) =>
     r.events.flatMap((e) =>
       e.payload.type === 'barrier_changed' ? [[e.payload.from, e.payload.to]] : [],

@@ -1,87 +1,66 @@
 import assert from 'node:assert/strict';
-import { createHash } from 'node:crypto';
 import { test } from 'node:test';
 import { DatabaseSync } from 'node:sqlite';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { read } from '../../../kernel/ts/test/read.ts';
 import { encode } from '../../../kernel/ts/src/foundation/canonical.ts';
-import {
-  INSTALLED,
-  gameView,
-  loadCartridge,
-  newWorld,
-  type Cartridge,
-} from '../../../kernel/ts/src/index.ts';
+import { gameView } from '../../../kernel/ts/src/index.ts';
+import { bundle, genesis, prefix, unpacked } from '../../../kernel/ts/test/c4_pack_fixture.ts';
 import { openStory } from './authority.ts';
 import { elapsedHost } from './__tests__/elapsed-host.test.ts';
 
-const pin = read('protocol/fixtures/missing_child_v030_hash.json');
-const artifact = { canonical: pin.canonical, sha256: pin.sha256 };
-const loaded = loadCartridge(
-  new TextEncoder().encode(`{"cartridge":${pin.canonical},"content_hash":"${pin.sha256}"}`),
-  INSTALLED,
-);
-assert.ok(loaded.ok, JSON.stringify(loaded));
-const fresh = newWorld(
-  loaded.cartridge as Cartridge,
-  '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never,
-  [1, 2, 3, 4],
-);
-const releases = [{ fresh, content_hash: pin.sha256 }] as const;
+// The kernel's controlled goblins, unpacked; the body starts at the inn, two moves (west, south)
+// from the pit.
+const artifact = bundle(unpacked);
+const releases = [{ fresh: genesis(unpacked), content_hash: artifact.sha256 }] as const;
 
+// The same goblins with every other job source and room removed: the pit and the yard south of it.
 function populationOnly() {
-  const c = structuredClone(pin.value);
-  const keep = (rows: Record<string, unknown>, names: string[]) =>
-    Object.fromEntries(
-      Object.entries(rows).filter(([id]) => names.some((name) => id.endsWith(`/${name}`))),
-    );
-  c.rooms = keep(c.rooms, ['hound_run', 'adder_nest']);
-  const run = Object.keys(c.rooms).find((id) => id.endsWith('/hound_run'))!;
-  c.rooms[run].exits = { east: c.rooms[run].exits.east };
-  c.items = keep(c.items, ['hound_pelt', 'hound_corpse', 'player_corpse', 'rat_corpse']);
-  c.npcs = keep(c.npcs, ['fen_hound']);
-  c.resources = keep(c.resources, ['hp', 'mv']);
-  c.skills = keep(c.skills, ['dodge']);
-  for (const section of [
-    'actions',
-    'barriers',
-    'quests',
-    'dialogues',
-    'reactions',
-    'recipes',
-    'scenes',
-    'story_points',
-    'liquids',
-    'topics',
-    'services',
-    'transports',
-  ] as const)
-    c[section] = {};
-  c.chapters = [{ title: 'chapter.missing_child' }];
-  c.entry = { ...c.entry, key: 'hound_run' };
-  c.world.death.shrine = { ...c.world.death.shrine, key: 'hound_run' };
-  delete c.world.death_credit;
-  const canonical = encode(c);
-  const sha256 = createHash('sha256').update(canonical).digest('hex');
-  const loaded = loadCartridge(
-    new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-    INSTALLED,
-  );
-  assert.ok(loaded.ok, JSON.stringify(loaded));
+  const only = (c: any) => {
+    unpacked(c);
+    const keep = (rows: Record<string, unknown>, names: string[]) =>
+      Object.fromEntries(
+        Object.entries(rows).filter(([id]) => names.some((name) => id.endsWith(`/${name}`))),
+      );
+    const rooms = ['goblin_pit', 'drill_yard'];
+    c.rooms = keep(c.rooms, rooms);
+    const yard = c.rooms[`${prefix}:room/drill_yard`];
+    yard.exits = { south: yard.exits.south };
+    c.map_positions = c.map_positions.filter((p: any) => rooms.includes(p.room.key));
+    c.items = keep(c.items, ['ear', 'npc_corpse', 'player_corpse']);
+    for (const item of Object.values(c.items) as any[]) delete item.immune;
+    c.npcs = keep(c.npcs, ['goblin']);
+    c.population_bundles = keep(c.population_bundles, ['goblins']);
+    c.resources = keep(c.resources, ['hp', 'mv']);
+    for (const section of [
+      'actions',
+      'attributes',
+      'barriers',
+      'blueprints',
+      'dialogues',
+      'liquids',
+      'quests',
+      'reactions',
+      'recipes',
+      'replenish',
+      'scenes',
+      'services',
+      'skills',
+      'statuses',
+      'story_points',
+      'topics',
+    ])
+      c[section] = {};
+    c.entry = { ...c.entry, key: 'goblin_pit' };
+    c.world.death.shrine = { ...c.world.death.shrine, key: 'goblin_pit' };
+    for (const rule of ['construction', 'death_credit', 'derived', 'levelling', 'theft'])
+      delete c.world[rule];
+  };
+  const artifact = bundle(only);
   return {
-    artifact: { canonical, sha256 },
-    releases: [
-      {
-        fresh: newWorld(
-          loaded.cartridge as Cartridge,
-          '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never,
-          [1, 2, 3, 4],
-        ),
-        content_hash: sha256,
-      },
-    ] as const,
+    artifact,
+    releases: [{ fresh: genesis(only), content_hash: artifact.sha256 }] as const,
   };
 }
 
@@ -117,8 +96,8 @@ test('population alone activates byte-preserving accepted-history refusal', (t) 
 });
 
 // Breaks: a population job writes rows the phone cannot cold-load, or lost COMMIT acknowledgement duplicates its births.
-test('one hound wander persists across real SQLite unknown-COMMIT recovery and cold reopen', (t) => {
-  const dir = mkdtempSync(join(tmpdir(), 'loka-hounds-'));
+test('one goblin wander persists across real SQLite unknown-COMMIT recovery and cold reopen', (t) => {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-goblins-'));
   t.after(() => rmSync(dir, { recursive: true }));
   const path = join(dir, 'save.db');
   const p = elapsedHost(path, { wall: 10000, mono: 0 }, artifact);
@@ -152,8 +131,8 @@ test('one hound wander persists across real SQLite unknown-COMMIT recovery and c
 });
 
 // Breaks: cold reopen loses corpse/pelt custody or treats a Take receipt without acquired evidence as pickup.
-test('a real hound kill and pelt Take cold-reopen with conserved custody and evidence', (t) => {
-  const dir = mkdtempSync(join(tmpdir(), 'loka-hound-loot-'));
+test('a real goblin kill and pelt Take cold-reopen with conserved custody and evidence', (t) => {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-goblin-loot-'));
   t.after(() => rmSync(dir, { recursive: true }));
   const path = join(dir, 'save.db');
   const p = elapsedHost(path, { wall: 10000, mono: 0 }, artifact);
@@ -173,9 +152,9 @@ test('a real hound kill and pelt Take cold-reopen with conserved custody and evi
     if (result.kind === 'saved')
       assert.equal((result.decision as { kind: string }).kind, 'accepted');
   };
-  for (const direction of ['south', 'south', 'east']) invoke('move', [], { direction });
+  for (const direction of ['west', 'south']) invoke('move', [], { direction });
   const member = gameView(story.world()).entities.find(
-    (e) => e.kind === 'npc' && e.name === 'npc.fen_hound.short',
+    (e) => e.kind === 'npc' && e.name === 'npc.goblin.short',
   )!.id;
   const pelt = Object.entries(story.world().state.created ?? {}).find(
     ([, identity]) =>
@@ -190,7 +169,7 @@ test('a real hound kill and pelt Take cold-reopen with conserved custody and evi
     assert.equal(result.kind, 'saved');
   }
   const corpse = story.world().state.containers[pelt];
-  assert.equal(story.world().state.created?.[corpse]?.definition.key, 'hound_corpse');
+  assert.equal(story.world().state.created?.[corpse]?.definition.key, 'npc_corpse');
   invoke('take', [pelt]);
   assert.equal(story.world().state.containers[pelt], story.world().body);
   const before = story.world().state;

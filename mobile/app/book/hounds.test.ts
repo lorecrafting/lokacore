@@ -1,17 +1,13 @@
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import { elapsedHost } from '../../authority/local-story/__tests__/elapsed-host.test.ts';
+import { bundle, unpacked } from '../../authority/local-story/__tests__/goblins.ts';
 import { buttonsOf, group, pagesAfter } from './model.ts';
 
-const pin = JSON.parse(
-  readFileSync(
-    new URL('../../../protocol/fixtures/missing_child_v030_hash.json', import.meta.url),
-    'utf8',
-  ),
-);
+// The kernel's controlled goblins, unpacked; the body starts at the inn, two moves from the pit.
+const artifact = bundle(unpacked);
 function preview() {
-  const a = elapsedHost(':memory:', { wall: 10000, mono: 0 }, pin);
+  const a = elapsedHost(':memory:', { wall: 10000, mono: 0 }, artifact);
   const invoke = (action_key: string, target_ids: string[] = [], input = {}) => {
     const reply = a.game.invoke({ action_key, target_ids, input } as never);
     assert.equal(reply.kind, 'saved');
@@ -30,51 +26,51 @@ function preview() {
     a.clock.mono += 3000;
     assert.equal(a.game.pulse().kind, 'ready');
   };
-  for (const direction of ['south', 'south', 'east']) invoke('move', [], { direction });
+  for (const direction of ['west', 'south']) invoke('move', [], { direction });
   return { ...a, invoke, buttons, pulse };
 }
 
-// Breaks: identical blueprint names bind Attack to the first hound, or a departed hound keeps a stale detail route.
-test('Book offers instance-bound Attack and prunes a departed hound detail', (t) => {
+// Breaks: identical blueprint names bind Attack to the first goblin, or a departed goblin keeps a stale detail route.
+test('Book offers instance-bound Attack and prunes a departed goblin detail', (t) => {
   const a = preview();
   t.after(() => a.sql.close());
   const before = a.game.view().view;
-  const hounds = before.entities.filter(
-    (e) => e.kind === 'npc' && e.name === 'npc.fen_hound.short',
-  );
-  assert.equal(hounds.length, 4);
-  assert.equal(new Set(hounds.map((e) => e.id)).size, 4);
-  for (const hound of hounds)
+  const goblins = before.entities.filter((e) => e.kind === 'npc' && e.name === 'npc.goblin.short');
+  assert.equal(goblins.length, 4);
+  assert.equal(new Set(goblins.map((e) => e.id)).size, 4);
+  for (const goblin of goblins)
     assert.deepEqual(
       a
         .buttons()
-        .on(hound.id)
+        .on(goblin.id)
         .filter((b) => b.action_key === 'attack')
         .map((b) => b.target_ids),
-      [[hound.id]],
+      [[goblin.id]],
     );
+  const here = () => a.game.view().view.entities.some((e) => e.id === goblins[0]!.id);
   for (let i = 0; i < 24; i++) a.pulse();
+  assert.equal(here(), false);
   assert.deepEqual(
-    pagesAfter([{ kind: 'thing', id: hounds[0]!.id }], before, a.game.view().view),
+    pagesAfter([{ kind: 'thing', id: goblins[0]!.id }], before, a.game.view().view),
     [],
   );
 });
 
-// Breaks: the Book loses nested Take or offers a corpse purchase after the hound's pelt transfers to its corpse.
-test('Book exposes a killed hound pelt through ordinary Contents and Carrying', (t) => {
+// Breaks: the Book loses nested Take or offers a corpse purchase after the goblin's ear transfers to its corpse.
+test('Book exposes a killed goblin ear through ordinary Contents and Carrying', (t) => {
   const a = preview();
   t.after(() => a.sql.close());
   const member = a.game
     .view()
-    .view.entities.find((e) => e.kind === 'npc' && e.name === 'npc.fen_hound.short')!.id;
+    .view.entities.find((e) => e.kind === 'npc' && e.name === 'npc.goblin.short')!.id;
   a.invoke('attack', [member]);
-  let corpse = a.game.view().view.entities.find((e) => e.name === 'item.hound_corpse.short');
+  let corpse = a.game.view().view.entities.find((e) => e.name === 'item.npc_corpse.short');
   for (let i = 0; i < 20 && !corpse; i++) {
     a.pulse();
-    corpse = a.game.view().view.entities.find((e) => e.name === 'item.hound_corpse.short');
+    corpse = a.game.view().view.entities.find((e) => e.name === 'item.npc_corpse.short');
   }
   assert.ok(corpse);
-  const pelt = corpse.contents?.find((e) => e.name === 'item.hound_pelt.short');
+  const pelt = corpse.contents?.find((e) => e.name === 'item.ear.short');
   assert.ok(pelt);
   assert.ok(
     !a

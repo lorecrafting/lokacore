@@ -3,7 +3,7 @@ import { test } from 'node:test';
 import { stepElapsed, type World } from '../src/index.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { key } from '../src/foundation/compose.ts';
-import { ids, run, fixture } from './c4_pack_fixture.ts';
+import { prefix, run, fixture } from './c4_pack_fixture.ts';
 
 const HOUR = 3600;
 const PLAN = Object.keys(fixture().state.population_plans!)[0]!;
@@ -20,8 +20,14 @@ function elapse(w: World, until: number, revision: number) {
 // Ids minted under job CommandIds differ between the two plays (loka-qi0r ruling), so ids map to
 // the authored key, or a spawned entity's slot, generation and role.
 function project(w: World, events: readonly { logical_time: number; payload: object }[]) {
-  const authored = Object.fromEntries(Object.entries(ids).map(([k, v]) => [v, k]));
+  const authored = Object.fromEntries(
+    Object.entries({ ...w.roomIds, ...w.entityIds }).map(([k, v]) => [
+      v,
+      k.slice(prefix.length + 1),
+    ]),
+  );
   const name = (v: unknown) => {
+    if (typeof v !== 'string') return v; // a decoded payload object has no prototype
     const o = w.state.created?.[v as string]?.origin;
     return (
       authored[v as string] ??
@@ -43,12 +49,15 @@ function project(w: World, events: readonly { logical_time: number; payload: obj
     pending: Object.values(w.state.jobs!)
       .flatMap((j) => (j.status === 'pending' ? [`${j.job.key}@${j.due_time}`] : []))
       .sort(),
-    events: events.map((e) => [
-      e.logical_time,
-      Object.fromEntries(
-        Object.entries(e.payload).map(([k, v]) => [k, k === 'type' ? v : name(v)]),
-      ),
-    ]),
+    // An advance announces its own clock hour once (the chapter had no hour cue); only pack events compare.
+    events: events
+      .filter((e) => (e.payload as { type: string }).type !== 'clock_hour')
+      .map((e) => [
+        e.logical_time,
+        Object.fromEntries(
+          Object.entries(e.payload).map(([k, v]) => [k, k === 'type' ? v : name(v)]),
+        ),
+      ]),
   };
 }
 
@@ -73,10 +82,10 @@ test('one elapsed advance over 25 hours or 3 days plays the pack as hour-by-hour
     assert.deepEqual(p, hourly(w, hours), `${hours} hours`);
     return p;
   });
-  // Hand-checked: from 18:00, 25 hours ends at 19:00 after 25 hourly wanders (H1 home → nest);
+  // Hand-checked: from 18:00, 25 hours ends at 19:00 after 25 hourly wanders (H1 pit → drill yard);
   // wander and night boundary (20:00) coincide at 158400.
   const day = runs[0]!;
-  assert.equal(day.rooms['population/fen_hounds/slot1/member'], 'room/adder_nest');
+  assert.equal(day.rooms['slot1/g1/true'], 'room/drill_yard');
   assert.equal(day.next_wander_due, 158400);
   assert.equal(day.plan_job_due, 158400);
 });
