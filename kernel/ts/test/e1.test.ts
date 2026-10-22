@@ -12,9 +12,9 @@ import { reproduce, retainFailure } from './e1_repro.ts';
 import { KERNEL, simulate, type Kernel } from './sim.ts';
 import { read } from './read.ts';
 
-const pin = read('protocol/fixtures/missing_child_v042_hash.json');
-const bytes = new TextEncoder().encode(
-  `{"cartridge":${pin.canonical},"content_hash":"${pin.sha256}"}`,
+const r9c = read('protocol/fixtures/r9c_interactions_hash.json');
+const r9cBytes = new TextEncoder().encode(
+  `{"cartridge":${r9c.canonical},"content_hash":"${r9c.sha256}"}`,
 );
 const source = {
   source_sha: '1'.repeat(40),
@@ -24,20 +24,17 @@ const source = {
 
 // Breaks: a slash inside a DefinitionRef map key is mistaken for another object level,
 // dropping each definition's root obligation while retaining some of its nested choices.
-test('E1 inventory retains slash-bearing v042 definition roots', () => {
-  const uses = admitCandidate(bytes).policy.uses;
+test('E1 inventory retains slash-bearing definition roots', () => {
+  const uses = admitCandidate(r9cBytes).policy.uses;
   for (const [path, feature] of [
-    ['/quests/ashmere_missing_child@0.0.42:quest/a_night_in_the_marsh', 'authored.quest'],
-    ['/dialogues/ashmere_missing_child@0.0.42:dialogue/a0_d9_aldric_fox', 'authored.dialogue'],
-    ['/resources/ashmere_missing_child@0.0.42:resource/hp', 'authored.resource'],
-    ['/services/ashmere_missing_child@0.0.42:service/lantern_ale', 'authored.service'],
-    ['/transports/ashmere_missing_child@0.0.42:transport/fen_outbound', 'authored.transport'],
-    [
-      '/recipes/ashmere_missing_child@0.0.42:recipe/begin_epilogue_lost_prior',
-      'authored.action_recipe',
-    ],
-    ['/populations/ashmere_missing_child@0.0.42:population/crow_branches', 'authored.population'],
-    ['/bleeds/ashmere_missing_child@0.0.42:bleed/bleeding', 'authored.bleed'],
+    ['/quests/r9c_interactions@0.0.1:quest/a_night_in_the_marsh', 'authored.quest'],
+    ['/dialogues/r9c_interactions@0.0.1:dialogue/a_aldric_offer', 'authored.dialogue'],
+    ['/resources/r9c_interactions@0.0.1:resource/hp', 'authored.resource'],
+    ['/services/r9c_interactions@0.0.1:service/lantern_ale', 'authored.service'],
+    ['/transports/r9c_interactions@0.0.1:transport/fen_outbound', 'authored.transport'],
+    ['/recipes/r9c_interactions@0.0.1:recipe/begin_epilogue_lost_prior', 'authored.action_recipe'],
+    ['/populations/r9c_interactions@0.0.1:population/crow_branches', 'authored.population'],
+    ['/bleeds/r9c_interactions@0.0.1:bleed/bleeding', 'authored.bleed'],
   ])
     assert.ok(
       uses.some((use) => use.path === path && use.feature === feature),
@@ -47,15 +44,16 @@ test('E1 inventory retains slash-bearing v042 definition roots', () => {
 
 // Breaks: carry settings inherit scheduling gates and unknown world settings are waived.
 test('E1 world settings retain semantic gates and refuse unknown keys', () => {
-  const c = structuredClone(pin.value);
+  const c = structuredClone(r9c.value);
+  c.world.death_credit = {}; // r9c authors no death credit; the gate is classified by key.
   const uses = applicability(c).uses;
   for (const [key, feature, gates] of [
     ['bands', 'resource', ['TRANSACTION']],
     ['bell_cue', 'fact', ['RULES']],
     ['carry', 'containment', ['TRANSACTION']],
     ['combat', 'combat', ['RULES', 'WORLD']],
-    ['death', 'death', ['RULES', 'AUTHORITY']],
     ['death_credit', 'combat', ['RULES', 'WORLD']],
+    ['death', 'death', ['RULES', 'AUTHORITY']],
     ['movement', 'movement', ['TOPOLOGY']],
     ['water', 'water', ['RULES', 'WORLD']],
   ] as const) {
@@ -105,34 +103,23 @@ function refused(c: unknown, expected: RegExp) {
   }
 }
 
-// Breaks: a simulator/default-corpus green is issued for a valid release other than the
-// explicitly frozen chapter. The changed title remains loader-valid.
-test('E1 command refuses a different admitted candidate', () => {
-  const c = structuredClone(pin.value);
-  c.manifest.title = 'Different admitted candidate';
-  refused(c, /wrong E1 candidate/);
-});
-
-const r9c = read('protocol/fixtures/r9c_interactions_hash.json');
-const r9cBytes = new TextEncoder().encode(
-  `{"cartridge":${r9c.canonical},"content_hash":"${r9c.sha256}"}`,
-);
-
-// Breaks: the second table row is unreachable, v042's normalized artifact bytes drift, or the
-// report's candidate block names a row other than the selected one.
-test('E1 admits exactly the two literal candidates', () => {
-  const v042 = admitCandidate(bytes);
-  assert.equal(v042.hash, '5d8b0e3a16b209733707a8450cee5a4330965092498cf1d31ab8fdae9a50fc8b');
-  assert.equal(
-    createHash('sha256').update(v042.artifact).digest('hex'),
-    '1c53bcd86149ee6087a08f15a5cc625873cc840e4a1769b36df89d03ff581115',
-  );
-  const second = admitCandidate(r9cBytes);
-  assert.equal(second.hash, '7d74fac7f9429475bdd7481fe7bf6b851acae2d0d6eaf1661892705391d17263');
-  assert.equal(second.cartridge.manifest.id, 'r9c_interactions');
-  assert.equal(second.cartridge.manifest.version, '0.0.1');
+// Breaks: the report's candidate block names a row other than the selected one.
+test('E1 admits the literal candidate', () => {
+  const admitted = admitCandidate(r9cBytes);
+  assert.equal(admitted.hash, '7d74fac7f9429475bdd7481fe7bf6b851acae2d0d6eaf1661892705391d17263');
+  assert.equal(admitted.cartridge.manifest.id, 'r9c_interactions');
+  assert.equal(admitted.cartridge.manifest.version, '0.0.1');
   // The report names the selected row, not the chapter.
-  const { candidate } = reportOf(second, source, {} as never, second.policy, [], {}, true, false);
+  const { candidate } = reportOf(
+    admitted,
+    source,
+    {} as never,
+    admitted.policy,
+    [],
+    {},
+    true,
+    false,
+  );
   assert.equal(candidate.id, 'r9c_interactions');
   assert.equal(
     candidate.content_hash,
@@ -140,7 +127,7 @@ test('E1 admits exactly the two literal candidates', () => {
   );
 });
 
-// Breaks: the hash is compared only for v042, or against a row other than the selected one.
+// Breaks: the content hash is not compared against the selected row.
 test('E1 command refuses a changed r9c candidate', () => {
   const c = structuredClone(r9c.value);
   c.manifest.title = 'Different admitted candidate';
@@ -164,9 +151,9 @@ test('E1 policy digest excludes the candidate table', () => {
 });
 
 // Breaks: an admitted installed capability is silently skipped when its policy row is
-// absent. Narration is installed but has no disposition in the bounded v042 policy.
+// absent. Narration is installed but has no disposition in the bounded policy.
 test('E1 command fails an unknown applicability obligation', () => {
-  const c = structuredClone(pin.value);
+  const c = structuredClone(r9c.value);
   c.lock.capabilities.narration = 1;
   c.manifest.requires.capabilities.narration = 1;
   assert.throws(() => applicability(c), /unknown applicability: narration@1/);
@@ -182,34 +169,34 @@ test('retained repro rechecks the invariant and refuses incomplete or changed in
       throw new Error('planted failure');
     },
   };
-  const outcome = simulate(1, planted, [admitCandidate(bytes)]);
+  const outcome = simulate(1, planted, [admitCandidate(r9cBytes)]);
   // The simulator deliberately includes malformed boundary inputs; replay preserves them.
   outcome.commands[0] = { ...outcome.commands[0]!, payload: { type: 'constructor' } as never };
   const record = JSON.parse(JSON.stringify(retainFailure(outcome, source)));
-  assert.deepEqual(reproduce(record, bytes, source, planted), {
+  assert.deepEqual(reproduce(record, r9cBytes, source, planted), {
     id: 'threw',
     detail: 'Error: planted failure',
     at: 0,
   });
   const incomplete = structuredClone(record);
   delete incomplete.fault_schedule;
-  assert.throws(() => reproduce(incomplete, bytes, source, planted), /incomplete E1 repro/);
+  assert.throws(() => reproduce(incomplete, r9cBytes, source, planted), /incomplete E1 repro/);
   const changed = { ...record, initial_state_hash: '0'.repeat(64) };
-  assert.throws(() => reproduce(changed, bytes, source, planted), /identity mismatch/);
+  assert.throws(() => reproduce(changed, r9cBytes, source, planted), /identity mismatch/);
   const changedCommands = structuredClone(record);
   changedCommands.commands[0].payload.type = 'different_boundary_input';
-  assert.throws(() => reproduce(changedCommands, bytes, source, planted), /identity mismatch/);
+  assert.throws(() => reproduce(changedCommands, r9cBytes, source, planted), /identity mismatch/);
   assert.throws(
-    () => reproduce({ ...record, commands: [] }, bytes, source, planted),
+    () => reproduce({ ...record, commands: [] }, r9cBytes, source, planted),
     /incomplete E1 repro/,
   );
-  assert.throws(() => reproduce(record, bytes, source), /did not reproduce/);
+  assert.throws(() => reproduce(record, r9cBytes, source), /did not reproduce/);
 });
 
 // Breaks: a local module the recorder runs is left out of check_hash, so editing it keeps the receipt.
-test('check_hash covers every local module e1_cases.ts imports', () => {
+test('check_hash covers every local module the recorder and its witnesses import', () => {
   const seen = new Set<string>(),
-    todo = ['e1_cases.ts'];
+    todo = ['e1.ts', 'e1_obligations.ts'];
   for (let f; (f = todo.pop());)
     if (!seen.has(f)) {
       seen.add(f);

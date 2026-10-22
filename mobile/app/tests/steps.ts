@@ -18,7 +18,7 @@ export async function reducedMotion(browser: Browser) {
 }
 
 // A cleared save, the ancestry picked and the opening continued, at the Ferry Landing: the
-// retired Ashmere chapter, served only by `bin/loka dev` (walkthrough/ashmere_missing_child.walk.ts).
+// retired Ashmere chapter (deleted in phase 2), served only by `bin/loka dev`.
 export async function begin(
   { app, screen }: Pick<TestFixtures, 'app' | 'screen'>,
   ancestry: string,

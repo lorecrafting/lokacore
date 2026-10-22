@@ -50,7 +50,7 @@ def main():
             return 1
         issues.append(issue)
     if complete:
-        plan = Path("docs/MISSING-CHILD-PLAN.md").read_text()
+        plan = Path("docs/archive/MISSING-CHILD-PLAN.md").read_text()
         expected = re.findall(r"^\| \*\*([A-E]\d+) ", plan, re.MULTILINE)
         actual = [re.match(r"^([A-E]\d+) — ", issue.get("title", "")) for issue in issues]
         codes = [match.group(1) for match in actual if match]

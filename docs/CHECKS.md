@@ -146,9 +146,4 @@ their rules and red controls remain available for resumption.
   sets it, in its own `sim` job, two parallel legs `sim (fresh)` (`npm run test:sim:fresh`) and `sim (showcase)` (`npm run test:sim:showcase`); the `kernel` job runs `test:nosim`; locally, `npm test` and `bin/check_all.sh` run 500), by
   [owner decision](decisions/owner-decision-test-audit-2026-10-02.md)
   (r1-acceptance-envelope.md §3).
-  The `e1-recorder` job runs the [E1 recorder](system/e1-certification.md) (`kernel/ts/test/e1_cases.ts`)
-  on the selected v042 artifact, rebuilt from `protocol/fixtures/missing_child_v042_hash.json` and sha-checked, and
-  fails on a pending obligation, a gap or a failed case (about 6 minutes). Its steps run nightly, on any push or dispatch on a
-  `toolbox/batch-*` branch (so every batch PR head runs it) and on a `full` dispatch (`gh workflow run ci.yml --ref <branch> -f full=true`);
-  on another push the job succeeds with every step skipped, so a green push run of an item branch says
-  nothing about E1 coverage. The dispatch on the exact head stays the E-gate and release-candidate proof. It is not in `bin/check_all.sh`.
+  No CI job runs an E1 recorder: the v042 chapter it recorded is deleted, and the real game's chapter has no recorder yet ([E1 certification](system/e1-certification.md)).

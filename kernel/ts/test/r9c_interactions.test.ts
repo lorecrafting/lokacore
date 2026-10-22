@@ -6,8 +6,8 @@ import { encode } from '../src/foundation/canonical.ts';
 import { read } from './read.ts';
 
 // The synthetic E2 cartridge (cartridges/r9c_interactions): its compiled bytes equal this pin
-// (test/loka/content_r9c_interactions_test.exs); its answers come from Python
-// (test/loka/cartridge_r9c_interactions_hash.py), never from either kernel.
+// (test/loka/content_r9c_interactions_test.exs); its answers came from Python
+// (a generator deleted with the chapter, 2026-10-21), never from either kernel.
 const pin = read('protocol/fixtures/r9c_interactions_hash.json');
 const load = (canonical: string) => {
   const hash = createHash('sha256').update(canonical).digest('hex');

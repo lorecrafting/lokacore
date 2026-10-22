@@ -8,11 +8,6 @@ on:
   schedule:
     - cron: '0 10 * * *'
   workflow_dispatch:
-    inputs:
-      full:
-        description: also run the e1-recorder job (about 6 minutes)
-        type: boolean
-        default: false
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -112,32 +107,6 @@ jobs:
           path: tmp/obs/game_trace/
           if-no-files-found: ignore
 
-  # E1 coverage recorder on the selected v042 artifact (docs/system/e1-certification.md):
-  # exit 2 (pending obligation or gap) or 1 (failed case) fails. The recorder needs a clean
-  # tree, so its artifact and output stay outside the checkout. Its steps run nightly, on a push
-  # to a toolbox/batch-* branch (batch PRs) and on a `full` dispatch (about 6 minutes); on another push
-  # the job succeeds with every step skipped, so ci-green needs no per-job exception.
-  e1-recorder:
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    env:
-      FULL: ${{ github.event_name == 'schedule' || startsWith(github.ref, 'refs/heads/toolbox/batch-') || inputs.full }}
-    steps:
-      - if: env.FULL == 'true'
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
-        with:
-          persist-credentials: false
-      - if: env.FULL == 'true'
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
-        with:
-          node-version: '24.21.0'
-      - if: env.FULL == 'true'
-        run: |
-          a=$RUNNER_TEMP/e1-selected-v042.json
-          python3 -c "import json,sys;f=json.load(open('protocol/fixtures/missing_child_v042_hash.json'));sys.stdout.write('{\"cartridge\":'+f['canonical']+',\"content_hash\":\"'+f['sha256']+'\"}')" > "$a"
-          echo "1c53bcd86149ee6087a08f15a5cc625873cc840e4a1769b36df89d03ff581115  $a" | sha256sum -c -
-          node kernel/ts/test/e1_cases.ts "$a" "$RUNNER_TEMP/e1-recorder"
-
   # Kernel typecheck and unit tests (sim.test.ts runs in the sim jobs) and the TypeScript size gates
   # (they load typescript from kernel/ts). The chapter fixtures compile the real authored cartridge with mix.
   kernel:
@@ -208,7 +177,7 @@ jobs:
 
   # The run's one verdict: fails unless every job succeeded.
   ci-green:
-    needs: [e1-recorder, elixir, lint, sim, kernel, mobile]
+    needs: [elixir, lint, sim, kernel, mobile]
     if: always()
     runs-on: ubuntu-24.04
     timeout-minutes: 2
