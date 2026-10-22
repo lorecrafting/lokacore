@@ -84,7 +84,7 @@ test('simulator accepts the fatal receipt of a hound fight', () => {
   );
 });
 
-// Breaks: missing population or sight world inputs make a lawful deer sight flight fail the oracle.
+// Breaks: the oracle drops population slot rows, so a lawful deer sight flight fails it.
 test('simulator accepts the receipts of a shoo_sampler sight flight', () => {
   const a = driver(fresh());
   const steps = ['south', 'south', 'west'].map((direction) => a.run({ type: 'move', direction }));
