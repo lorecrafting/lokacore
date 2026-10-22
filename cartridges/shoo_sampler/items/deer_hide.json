@@ -1,0 +1,12 @@
+{
+  "keywords": [
+    "deer_hide"
+  ],
+  "short": "item.deer_hide.short",
+  "room_line": "item.deer_hide.room",
+  "description": "item.deer_hide.description",
+  "mass_grams": 100,
+  "location": {
+    "in": "template"
+  }
+}

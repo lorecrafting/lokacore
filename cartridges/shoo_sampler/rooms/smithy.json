@@ -1,0 +1,12 @@
+{
+  "title": "room.smithy.title",
+  "description": "room.smithy.description",
+  "exits": {
+    "west": {
+      "to": "ferry_landing"
+    },
+    "east": {
+      "to": "orchard"
+    }
+  }
+}

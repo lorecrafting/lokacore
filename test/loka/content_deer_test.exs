@@ -1,17 +1,17 @@
 defmodule Loka.ContentDeerTest do
   use ExUnit.Case, async: true
-  setup_all do: %{dir: Loka.ContentSource.copy("cartridges/ashmere_missing_child")}
+  setup_all do: %{dir: Loka.ContentSource.copy("cartridges/shoo_sampler")}
 
   # Breaks: the compiler leaves local deer plan links as short strings that the loader cannot resolve.
   test "deer plan and bundle short references expand" do
-    assert {:ok, bytes, []} = Loka.Content.compile("cartridges/ashmere_missing_child")
+    assert {:ok, bytes, []} = Loka.Content.compile("cartridges/shoo_sampler")
     cartridge = JSON.decode!(bytes)["cartridge"]
-    id = "ashmere_missing_child@0.0.42:population/willow_deer"
+    id = "shoo_sampler@0.0.1:population/willow_deer"
     plan = cartridge["populations"][id]
 
     assert plan["home"] == %{
-             "cartridge_id" => "ashmere_missing_child",
-             "cartridge_version" => "0.0.42",
+             "cartridge_id" => "shoo_sampler",
+             "cartridge_version" => "0.0.1",
              "kind" => "room",
              "key" => "willow_shade"
            }
@@ -41,21 +41,22 @@ defmodule Loka.ContentDeerTest do
            )
   end
 
-  # Breaks: a hound sight plan compiles even though saved sight validation requires deer provenance.
-  test "sight cannot attach to the hound and pelt role pair", %{dir: dir} do
+  # Breaks: a sight plan compiles on a bundle without the deer/hide roles (the crow's), though saved
+  # sight validation requires deer provenance.
+  test "sight cannot attach to a bundle without the deer and hide roles", %{dir: dir} do
     sight = %{
       "delay" => 300,
       "narration" => %{
-        "east" => "combat.deer_fled_east",
-        "west" => "combat.deer_fled_west"
+        "south" => "combat.deer_fled_south",
+        "north" => "combat.deer_fled_north"
       }
     }
 
     assert {:error, ds} =
              Loka.ContentSource.compile(dir, [
-               {"populations/fen_hounds.json", &Map.put(&1, "sight", sight)}
+               {"populations/crow.json", &Map.put(&1, "sight", sight)}
              ])
 
-    assert Enum.any?(ds, &(&1["path"] == "populations/fen_hounds.sight.narration"))
+    assert Enum.any?(ds, &(&1["path"] == "populations/crow.sight.narration"))
   end
 end
