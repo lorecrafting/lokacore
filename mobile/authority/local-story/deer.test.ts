@@ -5,22 +5,20 @@ import { DatabaseSync } from 'node:sqlite';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { bundle, content, ref, shoo } from '../../../kernel/ts/test/deer_fixture.ts';
+import { bundle, content, fresh, ref, shoo } from '../../../kernel/ts/test/deer_fixture.ts';
 import { newWorld } from '../../../kernel/ts/src/index.ts';
 import { encode } from '../../../kernel/ts/src/foundation/canonical.ts';
 import { jobCommandId } from '../../../kernel/ts/src/foundation/id_source.ts';
 import { deerSave } from './deer-save.ts';
 import { openStory, type Release } from './authority.ts';
 
-const initial = () =>
-  newWorld(content, '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, [1, 2, 3, 4]);
-const releases = [{ fresh: initial(), content_hash: bundle.sha256 }] as const;
+const releases = [{ fresh: fresh(), content_hash: bundle.sha256 }] as const;
 /** A release of the shoo_sampler KAT after `change`. */
 function custom(change: (c: any) => void): Release {
   const loaded = shoo.load(change);
   assert.ok(loaded.ok, JSON.stringify(loaded));
   return {
-    fresh: newWorld(loaded.cartridge as never, initial().context, [1, 2, 3, 4]),
+    fresh: newWorld(loaded.cartridge as never, fresh().context, [1, 2, 3, 4]),
     content_hash: shoo.bundle(change).sha256,
   };
 }

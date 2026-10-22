@@ -47,7 +47,7 @@ function driver(start: World) {
   };
 }
 
-// Breaks: missing corpse/population/entity world inputs make a lawful fatal receipt fail the simulator's oracle.
+// Breaks: missing corpse or entity world inputs make a lawful fatal receipt fail the simulator's oracle.
 test('simulator accepts the fatal receipt of a hound fight', () => {
   // Every hound hits for 1 and the player, at 1 HP, always misses.
   const { world, target } = fixture(100, 1);
