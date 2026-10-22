@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState, type ReactNode } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { note, prose, usePalette, type Palette } from './palette.ts';
@@ -31,7 +31,7 @@ export function DiscoveredMap({
   return (
     <View>
       {levelBar(c, level, levels, (next) => (setLevel(next), select(null)))}
-      <ScrollView horizontal>
+      <Follow x={current?.z === level ? point(current).left - 16 : undefined}>
         <View
           style={{
             minHeight: (Math.max(0, ...rooms.map((r) => r.y)) - y) * 80 + 112,
@@ -41,9 +41,25 @@ export function DiscoveredMap({
           {map.links.map((link) => linkLine(c, link, rooms, point))}
           {rooms.map((r) => roomButton(c, r, r.id === view.place.id, text, point(r), select))}
         </View>
-      </ScrollView>
+      </Follow>
       {chosen && roomDetail(c, map, chosen, text)}
     </View>
+  );
+}
+
+// The current-room marker stays visible (book-ui.md, Map): a narrow page scrolls to it.
+function Follow(p: { x?: number; children: ReactNode }) {
+  const scroller = useRef<ScrollView>(null);
+  return (
+    <ScrollView
+      horizontal
+      ref={scroller}
+      onContentSizeChange={() =>
+        p.x !== undefined && scroller.current?.scrollTo({ x: p.x, animated: false })
+      }
+    >
+      {p.children}
+    </ScrollView>
   );
 }
 

@@ -140,7 +140,8 @@ test('detail options: act on it, then move it, then store it', async () => {
 });
 
 // Breaks: "Nothing to do here." draws beside a "not yours" note (UH3), or no longer draws on a
-// page with neither notes, actions nor contents.
+// page with neither notes, actions nor contents; or a cartridge without action label text prints the
+// refusal's raw key, "action.take: not yours." (loka-x6t.53).
 test('the empty Note only when nothing, not even a refusal, shows', async () => {
   const v = nellView();
   const refused = action('take', { available: false, reason: { code: 'permission_denied' } });
@@ -149,7 +150,7 @@ test('the empty Note only when nothing, not even a refusal, shows', async () => 
     entities: [...v.entities, thing('coin', [refused]), thing('pebble', [])],
   } as GameView;
   const coin = await page(view, ID.coin);
-  assert.ok(coin.includes('action.take: not yours.'), JSON.stringify(coin));
+  assert.ok(coin.includes('Take: not yours.'), JSON.stringify(coin));
   assert.ok(!coin.includes('Nothing to do here.'), JSON.stringify(coin));
   assert.ok((await page(view, ID.pebble)).includes('Nothing to do here.'));
 });

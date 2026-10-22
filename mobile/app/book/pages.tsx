@@ -132,7 +132,7 @@ export function RoomPage(p: {
         <Control label={LABEL.continueConversation} onPress={p.openChoice} />
       )}
       {p.details}
-      {storylet(p.view, p.g, p.press, p.text)}
+      {storylet(p.view, p.g, p.press, p.text, p.label)}
       {actions.length > 0 && <View>{actions}</View>}
       {p.log.length > 0 && <LogLines lines={p.log} />}
       {p.word}
@@ -172,13 +172,19 @@ const warnings = (c: Palette, view: GameView, text: Say) => {
 
 // The deck's pick here this hour (book-ui.md, Storylet card details): its card, or the
 // unavailable note with the action's reason.
-const storylet = (view: GameView, g: Grouped, press: (b: Button) => void, text: Say) => {
+const storylet = (
+  view: GameView,
+  g: Grouped,
+  press: (b: Button) => void,
+  text: Say,
+  label: Say,
+) => {
   if (!view.storylet) return null;
   const b = g.place.find((x) => x.action_key === view.storylet);
   if (b) return <ActionCard b={b} press={press} />;
   const offer = view.actions.find((a) => a.action_key === view.storylet);
   return (
-    offer && !offer.available && <ActionCard label={text(offer.label)} reason={why(offer, text)} />
+    offer && !offer.available && <ActionCard label={label(offer.label)} reason={why(offer, text)} />
   );
 };
 
