@@ -277,7 +277,7 @@
   "dialogue.cook_lesson.cooking": "Learn to cook",
   "dialogue.cook_lesson.prompt": "\"Want to learn the pot?\" the cook asks.",
   "dialogue.jailer.pay": "Pay the fine (3 pennies)",
-  "dialogue.jailer.prompt": "The jailer taps the ledger. \"Three pennies squares it, or you scrub the cell if your purse is empty.\"",
+  "dialogue.jailer.prompt": "The jailer taps the ledger. \"Three pennies squares it. Short of three, you scrub the cell.\"",
   "dialogue.jailer.work_off": "Work it off",
   "dialogue.nell_ash.press": "Ask what she has heard",
   "dialogue.nell_ash.prompt": "Nell keeps looking down the road to the toll gate.",
@@ -1364,5 +1364,5 @@
   "topic.parish": "The parish",
   "topic.surety": "The surety",
   "topic.walker": "Wardle walker: you have walked green, gate, tollhouse, mill and church",
-  "trial.charge": "The jailer reads the charge from his ledger: seen stealing. Pay the fine, or work it off if your purse is empty."
+  "trial.charge": "The jailer reads the charge from his ledger: seen stealing. Three pennies pays it; short of three, work it off."
 }
