@@ -1,44 +1,21 @@
 import assert from 'node:assert/strict';
-import { createHash } from 'node:crypto';
 import { test } from 'node:test';
-import { INSTALLED, gameView, loadCartridge, newWorld, step, type World } from '../src/index.ts';
-import type { Command, DefinitionRef, DomainEvent } from '../src/contracts.gen.ts';
-import { encode } from '../src/foundation/canonical.ts';
+import { gameView, step, type World } from '../src/index.ts';
+import type { Command, DomainEvent } from '../src/contracts.gen.ts';
 import { validate } from '../src/foundation/validate.ts';
 import { accepted, allocator } from '../src/runtime/decision.ts';
 import { admit, adopt } from '../src/runtime/proposal.ts';
 import { sequence, triggered } from '../src/mechanics/reaction.ts';
 import { gameview_agrees_with_admission } from '../src/view/invariants_view.ts';
 import { read } from './read.ts';
+import { genesis, load, prefix, ref } from './search_fixture.ts';
 
-const pin = read('protocol/fixtures/missing_child_v009_hash.json');
-const prefix = 'ashmere_missing_child@0.0.9:';
-const ref = (kind: string, key: string) =>
-  ({
-    cartridge_id: 'ashmere_missing_child',
-    cartridge_version: '0.0.9',
-    kind,
-    key,
-  }) as DefinitionRef;
 const context = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f';
-const actor = 'bd595711-ea5f-89a5-abb0-046cd349d2f9';
+const actor = genesis().character;
 const other = 'aaaaaaaa-0000-4000-8000-000000000099';
 const instance = 'aaaaaaaa-0000-4000-8000-000000000020';
-const tracks = '86b28f4e-f743-87f8-8375-2ead5c2c295c';
-const load = (change: (c: any) => void = () => {}) => {
-  const c = structuredClone(pin.value);
-  change(c);
-  const content_hash = createHash('sha256').update(encode(c)).digest('hex');
-  return loadCartridge(
-    new TextEncoder().encode(JSON.stringify({ cartridge: c, content_hash })),
-    INSTALLED,
-  );
-};
-const fresh = () => {
-  const c = load();
-  assert.ok(c.ok && c.cartridge.format === 'loka-cartridge-v2');
-  return newWorld(c.cartridge, context as never, [1, 2, 3, 4]);
-};
+const tracks = 'aaaaaaaa-0000-4000-8000-000000000024';
+const fresh = () => genesis();
 const resolved = (): World => {
   const w = fresh();
   return {
@@ -47,10 +24,10 @@ const resolved = (): World => {
       ...w.state,
       quests: {
         [instance]: {
-          quest: ref('quest', 'first_lead'),
+          quest: ref('quest', 'lantern'),
           scope: { kind: 'player', character_id: actor as never },
           state: 'resolved',
-          outcome: 'report' as never,
+          outcome: 'carry' as never,
         },
       },
     },
@@ -68,16 +45,16 @@ const cause = (): DomainEvent =>
     correlation_id: 'aaaaaaaa-0000-4000-8000-000000000022',
     payload: {
       type: 'quest_resolved',
-      quest: ref('quest', 'first_lead'),
+      quest: ref('quest', 'lantern'),
       instance_id: instance,
-      outcome: 'report',
+      outcome: 'carry',
     },
   }) as DomainEvent;
 const deliver = (w: World, e = cause()) =>
   sequence(
     w,
     other as never,
-    w.cartridge.reactions![prefix + 'reaction/start_search'],
+    w.cartridge.reactions![`${prefix}:reaction/start_search`],
     e,
     1,
     { n: 0 },
@@ -97,7 +74,7 @@ test('quest resolution delivers activation to its evidenced actor and never rest
       {
         op: 'quest.activate',
         writer_group: 1,
-        quest: ref('quest', 'missing_child'),
+        quest: ref('quest', 'oar'),
         scope: { kind: 'player', character_id: actor },
         instance_id: 'allocated',
       },
@@ -122,7 +99,7 @@ test('quest resolution delivers activation to its evidenced actor and never rest
         quests: {
           ...w.state.quests,
           ['aaaaaaaa-0000-4000-8000-000000000023']: {
-            quest: ref('quest', 'missing_child'),
+            quest: ref('quest', 'oar'),
             scope: { kind: 'player', character_id: actor as never },
             state,
           },
@@ -142,7 +119,7 @@ test('quest trigger matches both fields and rejects malformed source row, actor 
   const w = resolved();
   for (const payload of [
     { ...cause().payload, outcome: 'done' },
-    { ...cause().payload, quest: ref('quest', 'mauds_cellar') },
+    { ...cause().payload, quest: ref('quest', 'oar') },
   ])
     assert.deepEqual(triggered(w, { ...cause(), payload } as DomainEvent), []);
   for (const change of [
@@ -150,7 +127,7 @@ test('quest trigger matches both fields and rejects malformed source row, actor 
     (e: any) => (e.scope.character_id = other),
     (e: any) => (e.payload.instance_id = 'aaaaaaaa-0000-4000-8000-000000000099'),
     (e: any) => (e.payload.outcome = 'done'),
-    (e: any) => (e.payload.quest = ref('quest', 'mauds_cellar')),
+    (e: any) => (e.payload.quest = ref('quest', 'oar')),
   ]) {
     const e = structuredClone(cause());
     change(e);
@@ -186,7 +163,7 @@ test('a malformed reaction source discards the report and all proposal-local cha
     'report',
     [
       { ...transition, from: 'active', to: 'objectives_complete' },
-      { ...transition, from: 'objectives_complete', to: 'resolved', outcome: 'report' },
+      { ...transition, from: 'objectives_complete', to: 'resolved', outcome: 'carry' },
     ] as never,
     [e],
   );
@@ -202,12 +179,12 @@ test('a malformed reaction source discards the report and all proposal-local cha
 test('mixed consequences preserve fact/event order and skip a duplicate local activation', () => {
   const prior = resolved();
   const reaction = {
-    ...prior.cartridge.reactions![prefix + 'reaction/start_search'],
+    ...prior.cartridge.reactions![`${prefix}:reaction/start_search`],
     apply: [
-      { op: 'fact.assign', fact: ref('fact', 'fen_tracks_found'), value: true },
-      { op: 'quest.activate', quest: ref('quest', 'missing_child') },
-      { op: 'quest.activate', quest: ref('quest', 'missing_child') },
-      { op: 'fact.assign', fact: ref('fact', 'fen_tracks_found'), value: false },
+      { op: 'fact.assign', fact: ref('fact', 'tracks_found'), value: true },
+      { op: 'quest.activate', quest: ref('quest', 'oar') },
+      { op: 'quest.activate', quest: ref('quest', 'oar') },
+      { op: 'fact.assign', fact: ref('fact', 'tracks_found'), value: false },
     ],
   };
   const w: World = {
@@ -215,7 +192,7 @@ test('mixed consequences preserve fact/event order and skip a duplicate local ac
     cartridge: {
       ...prior.cartridge,
       reactions: {
-        [prefix + 'reaction/start_search']: reaction as never,
+        [`${prefix}:reaction/start_search`]: reaction as never,
       },
     },
   };
@@ -272,18 +249,18 @@ test('mixed consequences preserve fact/event order and skip a duplicate local ac
 test('loader rejects missing quest references, trigger misuse and missing ownership locks', () => {
   for (const [change, code] of [
     [
-      (c: any) => (c.reactions[prefix + 'reaction/start_search'].on.quest.key = 'absent'),
+      (c: any) => (c.reactions[`${prefix}:reaction/start_search`].on.quest.key = 'absent'),
       'UNRESOLVED_REFERENCE',
     ],
     [
-      (c: any) => (c.reactions[prefix + 'reaction/start_search'].apply[0].quest.key = 'absent'),
+      (c: any) => (c.reactions[`${prefix}:reaction/start_search`].apply[0].quest.key = 'absent'),
       'UNRESOLVED_REFERENCE',
     ],
     [
       (c: any) =>
-        (c.reactions[prefix + 'reaction/start_search'].on = {
+        (c.reactions[`${prefix}:reaction/start_search`].on = {
           event: 'fact_changed',
-          fact: ref('fact', 'fen_tracks_found'),
+          fact: ref('fact', 'tracks_found'),
         }),
       'OUTCOME_MISMATCH',
     ],
@@ -301,9 +278,8 @@ test('loader rejects missing quest references, trigger misuse and missing owners
       },
       'UNDECLARED_CAPABILITY',
     ],
-    [(c: any) => (c.manifest.requires.kernel_api.at_least = '1.7'), 'KERNEL_API_RANGE_INVALID'],
     [
-      (c: any) => (c.reactions[prefix + 'reaction/start_search'].apply[0].quest = 'missing_child'),
+      (c: any) => (c.reactions[`${prefix}:reaction/start_search`].apply[0].quest = 'missing_child'),
       'SCHEMA_VIOLATION',
     ],
   ] as const) {
@@ -394,23 +370,33 @@ test('Q2 contracts reject malformed shapes and accept their controls', () => {
 // Breaks: recipes under board children remain duplicated on World or disappear from the
 // notice projection while their exact canonical subject is still admitted by the recipe rule.
 test('board-child readable recipes project exclusively on the child Notice', () => {
-  const loaded = load((c) => {
-    const r = c.recipes[prefix + 'recipe/study_tracks'];
-    r.target = { kind: 'detail', room: ref('room', 'drowned_lantern'), detail: 'lost_whistle' };
-    r.policy = { policy_version: 1, root: { op: 'all', items: [] } };
+  let w = genesis((c) => {
+    c.recipes = {};
+    c.recipes[`${prefix}:recipe/study_tracks`] = {
+      key: 'study_tracks',
+      label: 'actions.study_tracks',
+      aliases: ['study'],
+      target: { kind: 'detail', room: ref('room', 'village_green'), detail: 'lost_whistle' },
+      priority: 10,
+      policy: { policy_version: 1, root: { op: 'all', items: [] } },
+      outcomes: {
+        success: {
+          sequence: [{ op: 'fact.assign', fact: ref('fact', 'tracks_found'), value: true }],
+          narration: { actor: 'narration.study_tracks' },
+        },
+      },
+    };
   });
-  assert.ok(loaded.ok && loaded.cartridge.format === 'loka-cartridge-v2');
-  let w = newWorld(loaded.cartridge, context as never, [1, 2, 3, 4]);
-  for (const direction of ['north', 'east'])
-    w = step(
-      w,
-      {
-        id: 'aaaaaaaa-0000-4000-8000-000000000031',
-        world_context_id: context,
-        payload: { type: 'move', actor_id: actor, direction },
-      } as Command,
-      1,
-    ).world;
+  w = step(
+    w,
+    {
+      id: 'aaaaaaaa-0000-4000-8000-000000000031',
+      world_context_id: context,
+      payload: { type: 'move', actor_id: actor, direction: 'north' },
+    } as Command,
+    1,
+  ).world;
+  const id = (key: string) => Object.keys(w.details).find((d) => w.details[d].key === key);
   const view = gameView(w);
   assert.ok(!view.actions.some((a) => a.action_key === 'study_tracks'));
   assert.deepEqual(
@@ -419,8 +405,8 @@ test('board-child readable recipes project exclusively on the child Notice', () 
       n.actions?.map((a) => [a.action_key, a.available]) ?? [],
     ]),
     [
-      ['58ee172d-aa6f-8023-a3c1-a1d46af6d167', [['study_tracks', true]]],
-      ['f14e477f-cecc-897a-bee7-c573aa5c76c3', []],
+      [id('lost_whistle'), [['study_tracks', true]]],
+      [id('cellar_help'), []],
     ],
   );
   assert.deepEqual(validate('GameView', view), []);

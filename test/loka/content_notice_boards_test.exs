@@ -1,16 +1,73 @@
 defmodule Loka.ContentNoticeBoardsTest do
   use ExUnit.Case, async: true
-  setup_all do: %{dir: Loka.ContentSource.copy("cartridges/ashmere_missing_child")}
+  setup_all do: %{dir: Loka.ContentSource.copy("cartridges/journal_sampler")}
+
+  # Twin of kernel/ts/test/search_fixture.ts: a titled tracks notice at the landing, and on the
+  # green a rumor board over two readable notices.
+  defp read(name, title \\ nil) do
+    readable = %{"label" => "actions.read_#{name}", "text" => "readable.#{name}"}
+
+    %{
+      "aliases" => [name],
+      "description" => "detail.#{name}.description",
+      "readable" => if(title, do: Map.put(readable, "title", title), else: readable)
+    }
+  end
+
+  defp source(green \\ & &1) do
+    text =
+      for name <- ~w(tracks lost_whistle cellar_help),
+          {k, v} <- [
+            {"detail.#{name}.description", "The #{name}."},
+            {"detail.#{name}.title", name},
+            {"actions.read_#{name}", "Read #{name}"},
+            {"readable.#{name}", "It reads #{name}."}
+          ],
+          into: %{
+            "detail.rumor_board.description" => "A rumor board.",
+            "detail.rumor_board.title" => "Rumors"
+          },
+          do: {k, v}
+
+    [
+      {"cartridge.json",
+       &update_in(&1, ~w(requires capabilities), fn c -> Map.put(c, "readable", 1) end)},
+      {"text.json", &Map.merge(&1, text)},
+      {"rooms/ferry_landing.json",
+       &put_in(&1, ~w(details tracks), read("tracks", "detail.tracks.title"))},
+      {"rooms/village_green.json",
+       fn room ->
+         Map.put(room, "details", %{
+           "rumor_board" => %{
+             "aliases" => ["rumor_board", "board"],
+             "description" => "detail.rumor_board.description",
+             "notice_board" => %{
+               "title" => "detail.rumor_board.title",
+               "notices" => [
+                 %{"detail" => "lost_whistle", "title" => "detail.lost_whistle.title"},
+                 %{"detail" => "cellar_help", "title" => "detail.cellar_help.title"}
+               ]
+             }
+           },
+           "lost_whistle" => read("lost_whistle"),
+           "cellar_help" => read("cellar_help")
+         })
+         |> green.()
+       end}
+    ]
+  end
 
   # Breaks: malformed same-room membership or unbound board/notice title keys compile.
   test "compiler rejects board references and missing catalog keys", %{dir: dir} do
+    assert {:ok, _, _} = Loka.ContentSource.compile(dir, source())
+
     for {name, change, suffix, target} <- [
           {"remote",
            &put_in(
              &1,
              ["details", "rumor_board", "notice_board", "notices", Access.at(0), "detail"],
-             "notice"
-           ), ".notices[0].detail", "notice"},
+             "tracks"
+           ), ".notices[0].detail", "tracks"},
           {"self",
            &put_in(
              &1,
@@ -37,14 +94,12 @@ defmodule Loka.ContentNoticeBoardsTest do
            ), ".notices[1].title", "missing.title"},
           {"readable_board",
            &put_in(&1, ["details", "rumor_board", "readable"], %{
-             "label" => "actions.read_notice",
-             "text" => "readable.notice"
+             "label" => "actions.read_tracks",
+             "text" => "readable.tracks"
            }), "", nil}
         ] do
-      assert {:error, errors} =
-               Loka.ContentSource.compile(dir, [{"rooms/drowned_lantern.json", change}])
-
-      path = "rooms/drowned_lantern.details.rumor_board.notice_board" <> suffix
+      assert {:error, errors} = Loka.ContentSource.compile(dir, source(change))
+      path = "rooms/village_green.details.rumor_board.notice_board" <> suffix
 
       assert Enum.any?(
                errors,
@@ -71,18 +126,20 @@ defmodule Loka.ContentNoticeBoardsTest do
     rooms =
       for path <- Path.wildcard(Path.join(dir, "rooms/*.json")), do: Path.relative_to(path, dir)
 
-    changes = [
-      {"cartridge.json",
-       &update_in(&1, ["requires", "capabilities"], fn c -> Map.delete(c, "readable") end)}
-      | Enum.map(rooms, &{&1, unread})
-    ]
+    changes =
+      source() ++
+        [
+          {"cartridge.json",
+           &update_in(&1, ["requires", "capabilities"], fn c -> Map.delete(c, "readable") end)}
+          | Enum.map(rooms, &{&1, unread})
+        ]
 
     assert {:error, errors} = Loka.ContentSource.compile(dir, changes)
 
     assert Enum.any?(
              errors,
              &(&1["code"] == "UNDECLARED_CAPABILITY" and
-                 &1["path"] == "rooms/drowned_lantern.details.rumor_board.notice_board")
+                 &1["path"] == "rooms/village_green.details.rumor_board.notice_board")
            )
   end
 end
