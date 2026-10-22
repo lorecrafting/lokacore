@@ -1,0 +1,14 @@
+{
+  "keywords": [
+    "bag"
+  ],
+  "short": "item.bag.short",
+  "room_line": "item.bag.room",
+  "description": "item.bag.description",
+  "mass_grams": 100,
+  "location": {
+    "in": "room",
+    "room": "shrine"
+  },
+  "container": true
+}

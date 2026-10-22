@@ -1,0 +1,12 @@
+{
+  "title": "room.path.title",
+  "description": "room.path.description",
+  "exits": {
+    "east": {
+      "to": "den"
+    },
+    "north": {
+      "to": "shrine"
+    }
+  }
+}

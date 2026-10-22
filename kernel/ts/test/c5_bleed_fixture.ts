@@ -1,21 +1,17 @@
-import { read } from './read.ts';
-import { loadCartridge, INSTALLED, newWorld, step, stepElapsed } from '../src/index.ts';
+import { fragment } from './fragment.ts';
+import { step, stepElapsed } from '../src/index.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { key } from '../src/foundation/compose.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
-import type { Cartridge, World } from '../src/runtime/decision.ts';
+import type { World } from '../src/runtime/decision.ts';
 
-// Provisional input artifact; literal HP/time answers below are independent of its compiler.
-const artifact = read('kernel/ts/test/fixtures/c5-provisional-artifact.json');
-const loaded = loadCartridge(new TextEncoder().encode(JSON.stringify(artifact)), INSTALLED);
-if (!loaded.ok) throw new Error(JSON.stringify(loaded));
-const cartridge = loaded.cartridge as Cartridge;
-const context = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never;
+// The frozen bleed_sampler KAT; literal HP/time answers in the tests are independent of it.
+export const sampler = fragment('protocol/fixtures/bleed_sampler_hash.json');
 const run = 'aaaaaaaa-0000-4000-8000-000000000010' as never;
 const id = (n: number) => `aaaaaaaa-0000-4000-8000-${String(n).padStart(12, '0')}` as never;
 
-export function fixture(chance = 100, hp = 10) {
-  const fresh = newWorld(cartridge, context, [1, 2, 3, 4]);
+export function fixture(chance = 100, hp = 10, change?: (c: any) => void) {
+  const fresh = sampler.genesis(change);
   const hounds = Object.entries(fresh.state.created ?? {}).filter(
     ([, e]) => e.origin?.kind === 'spawned' && e.origin.role === 'hound',
   );

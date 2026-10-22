@@ -1,0 +1,9 @@
+{
+  "title": "room.burrow.title",
+  "description": "room.burrow.description",
+  "exits": {
+    "west": {
+      "to": "den"
+    }
+  }
+}

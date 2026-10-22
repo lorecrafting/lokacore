@@ -1,0 +1,20 @@
+{
+  "title": "room.den.title",
+  "description": "room.den.description",
+  "exits": {
+    "west": {
+      "to": "path"
+    },
+    "east": {
+      "to": "burrow"
+    }
+  },
+  "details": {
+    "bones": {
+      "aliases": [
+        "bones"
+      ],
+      "description": "detail.den.bones"
+    }
+  }
+}

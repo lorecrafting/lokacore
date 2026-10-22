@@ -1,0 +1,11 @@
+{
+  "duration": 300,
+  "tick_every": 100,
+  "hp_loss": 1,
+  "narration": {
+    "applied": "narration.bleed.applied",
+    "refreshed": "narration.bleed.refreshed",
+    "tick": "narration.bleed.tick",
+    "expired": "narration.bleed.expired"
+  }
+}
