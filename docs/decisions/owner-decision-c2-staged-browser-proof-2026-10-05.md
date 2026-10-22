@@ -25,4 +25,4 @@ proves that same observed save opens without reset or repair; the earlier failur
 remains historical evidence. The bridge’s worker limit itself was not changed.
 Browser fatal/Restart remains the E3 gap above. C2 gameplay and reviewed source are
 unchanged; only the staging of the
-[Book UI proof](../system/book-ui.md#c2-watch-patrol-details) is amended.
+[Book UI proof](https://github.com/lorecrafting/lokacore/blob/c88762e38eb9c3747f1de0b87e6536d58424c24e/docs/system/book-ui.md#c2-watch-patrol-details) is amended.

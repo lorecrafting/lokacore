@@ -17,6 +17,6 @@ optional loss of light, never required waiting or a chapter/recovery softlock.
 
 The composition primitive and save boundary are in [protocol](../system/protocol.md#b4-fuel-composition)
 and [save](../system/save.md#b4-fuel-and-dark-recovery); Book behavior is in
-[Book](../system/book-ui.md#b4-light-details). A single typed fuel history row earns
+[Book](https://github.com/lorecrafting/lokacore/blob/c88762e38eb9c3747f1de0b87e6536d58424c24e/docs/system/book-ui.md#b4-light-details). A single typed fuel history row earns
 its existence because current resources cannot condition elapsed burn on lit
 state. Generic liquids, new dangers and broad perception ancestry remain deferred.

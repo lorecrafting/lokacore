@@ -10,7 +10,7 @@ Governing clauses: [world and status entry](../system/book-ui.md#world-and-statu
 [minimap/presentation controls](../system/book-ui.md#minimap-map-and-presentation-controls),
 [chapters, scenes and recovery](../system/book-ui.md#chapters-scenes-and-recovery),
 [shared elapsed status/completion boundary](../system/book-ui.md#shared-elapsed-statuscompletion-boundary),
-[D11 character choice](../system/book-ui.md#d11-character-choice-interaction),
+[D11 character choice](https://github.com/lorecrafting/lokacore/blob/c88762e38eb9c3747f1de0b87e6536d58424c24e/docs/system/book-ui.md#d11-character-choice-interaction),
 [Review stance](../WORKFLOW.md#review-stance).
 
 ## Must be true (written before reading the code)

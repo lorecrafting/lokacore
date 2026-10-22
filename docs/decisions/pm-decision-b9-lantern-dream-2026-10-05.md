@@ -5,7 +5,7 @@ the PM adopts [S10 mechanics](../system/mechanics.md#s10-lantern-rest-and-dream-
 [chapter declarations](../system/cartridge.md#b9-lantern-dream-declarations),
 [composition](../system/protocol.md#b9-rest-occurrence-and-dream-composition),
 [recovery](../system/save.md#b9-dream-recovery) and
-[Book nesting](../system/book-ui.md#b9-bed-and-resumable-dream-details) for the
+[Book nesting](https://github.com/lorecrafting/lokacore/blob/c88762e38eb9c3747f1de0b87e6536d58424c24e/docs/system/book-ui.md#b9-bed-and-resumable-dream-details) for the
 [B9 implementation brief](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/briefs/chapter-one/b9-inn-dream-brief-2026-10-05.md).
 This is docs-only adoption, not source GO, independent approval, play proof or
 merge/push authorization.

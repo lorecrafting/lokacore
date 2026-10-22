@@ -6,7 +6,7 @@ nighttime wait. The selected behavior is in [mechanics](../system/mechanics.md#s
 route/content in [cartridge](../system/cartridge.md#c2-watch-route-and-trust),
 [composition](../system/protocol.md#c2-patrol-composition-and-admission),
 [save recovery](../system/save.md#c2-patrol-attempt-recovery),
-[Book](../system/book-ui.md#c2-watch-patrol-details) and the
+[Book](https://github.com/lorecrafting/lokacore/blob/c88762e38eb9c3747f1de0b87e6536d58424c24e/docs/system/book-ui.md#c2-watch-patrol-details) and the
 [implementation brief](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/briefs/chapter-one/chapter-one-c2-watchmans-rounds-brief-2026-10-05.md).
 At adoption this was a selected planning contract, pending independent approval
 and source re-pin; it was not runtime proof.
