@@ -291,7 +291,6 @@ test('world time starts at the ancestry choice: no credit on the picker or acros
   const { bundle, fresh } = release(compiled);
   const releases = [{ fresh, content_hash: bundle.sha256 }] as const;
   const start = fresh.state.clock;
-  const rate = compiled.manifest.time_policy.rate as number;
   const dir = mkdtempSync(join(tmpdir(), 'd11-entry-'));
   const clock = { wall: 0, mono: 0 };
   let p = sqliteHost(join(dir, 'save.db'), clock);
@@ -333,5 +332,5 @@ test('world time starts at the ancestry choice: no credit on the picker or acros
   s = open();
   Object.assign(clock, { wall: 4260000, mono: 660000 });
   for (let n = 0; n < 4 && s.pulse('active', s.runId()).kind !== 'ready'; n++);
-  assert.equal(s.world().state.clock, start + 60 * rate);
+  assert.equal(s.world().state.clock, start + 60 * 50); // derived_sampler cartridge.json time_policy.rate
 });
