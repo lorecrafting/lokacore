@@ -1,8 +1,9 @@
 // Message fragment: the frozen errand_sampler KAT (Bram at Ferry Landing, the lantern quest, the
 // lantern on the Village Green north of it) plus an inline protected message: a courier on the
 // green holds it (give_allowed false), a receive dialogue hands it to the player and sets the
-// branch fact, and Bram's quest dialogue resolves the lantern quest by hand_over. A 1000g satchel
-// (an always-open portable container) on the green fills the inline 1000g carry ceiling exactly.
+// branch fact, and Bram's quest dialogue resolves the lantern quest by hand_over and sets delivered.
+// A 1000g satchel (an always-open portable container) on the green fills the inline 1000g carry
+// ceiling exactly.
 import { fragment } from './fragment.ts';
 
 const f = fragment('protocol/fixtures/cartridge_errand_hash.json');
@@ -55,6 +56,13 @@ export function messageSource(c: any) {
     scopes: ['player'],
     meaning: 'Whether the player carries the courier message.',
   };
+  c.facts[`${prefix}:fact/delivered`] = {
+    key: 'delivered',
+    version: 1,
+    value_type: { type: 'bool', default: false },
+    scopes: ['player'],
+    meaning: 'Bram has the courier message.',
+  };
   const lantern = c.quests[`${prefix}:quest/lantern`];
   lantern.objective.policy.root = branch('carried');
   const active = { op: 'quest_state', quest: ref('quest', 'lantern'), state: 'active' };
@@ -92,6 +100,7 @@ export function messageSource(c: any) {
           label: 'dialogue.deliver.deliver',
           narration: 'narration.deliver',
           hand_over: { item: 'message', to: 'bram' },
+          sequence: [{ op: 'fact.assign', fact: ref('fact', 'delivered'), value: true }],
         },
       },
     },
