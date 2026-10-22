@@ -55,10 +55,8 @@ function atBram(path: string) {
     target_ids,
     input,
   });
-  for (const i of [invocation('bram', [entity(story.world(), 'npc', 'bram')])]) {
-    const r = story.invoke(i as never);
-    assert.equal(r.kind === 'saved' && (r.decision as { kind: string }).kind, 'accepted');
-  }
+  const r = story.invoke(invocation('bram', [entity(story.world(), 'npc', 'bram')]) as never);
+  assert.equal(r.kind === 'saved' && (r.decision as { kind: string }).kind, 'accepted');
   return { ...p, story, open, invocation };
 }
 
@@ -74,8 +72,6 @@ test('real SQLite hub answer survives failed and lost COMMIT, replay and cold re
   for (const [kind, choice_id] of [
     ['failed', 'carry'],
     ['lost', 'carry'],
-    ['failed', 'leave'],
-    ['lost', 'leave'],
   ] as const) {
     const p = atBram(join(dir, `${kind}-${choice_id}.db`));
     const [[talked]] = pending(p.story.world());

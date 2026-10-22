@@ -33,7 +33,7 @@ const fresh = () =>
     c.entry = ref('room', 'study');
   });
 
-function fox(world: World): World {
+function playerLed(world: World): World {
   return {
     ...world,
     state: {
@@ -62,8 +62,8 @@ function move(world: World, direction: 'west' | 'east', n: number) {
   );
 }
 
-// Breaks: fox closure blocks egress, or a stale/empty/foreign corpse opens ordinary Study ingress.
-test('fox Study ingress rechecks actual owned nonempty corpse and never closes egress', () => {
+// Breaks: a player_led search plan blocks egress, or a stale/empty/foreign corpse opens ordinary Study ingress.
+test('Study ingress rechecks actual owned nonempty corpse and never closes egress', () => {
   const base = fresh();
   const keyItem = entity(base, 'item', 'brass_key');
   const atStudy: World = {
@@ -99,7 +99,7 @@ test('fox Study ingress rechecks actual owned nonempty corpse and never closes e
     1,
   );
   assert.equal(died.decision.kind, 'accepted');
-  const closed = fox(died.world);
+  const closed = playerLed(died.world);
   assert.equal(closed.state.containers[closed.body], room(closed, 'chapel_nave'));
   assert.equal(move(closed, 'west', 2).decision.kind, 'accepted');
   const inside = move(closed, 'west', 2).world;

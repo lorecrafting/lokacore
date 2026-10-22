@@ -51,24 +51,18 @@ const accepted = (r: ReturnType<typeof run>) => {
   return r.world;
 };
 const startCoins = (n: number) => (c: any) => (c.resources[`${prefix}:resource/coins`].start = n);
-// Breaks: a paid ride debits without moving, pays the wrong holder, or consumes walking MV/time.
-test('paid ride and paid return join exact conserved balances and body entry', () => {
-  let w = fresh();
+// Breaks: a ride consumes walking MV or skips the body entry event (fares and clock: fast_travel.test.ts).
+test('a ride spends no MV and enters the body into the destination', () => {
+  const w = fresh();
   const mv = gameView(w).resources!.find((r) => r.resource.key === 'mv')!.current;
-  const clock = w.state.clock;
   const outbound = ride(w);
-  w = accepted(outbound);
-  assert.deepEqual(coins(w), [7, 3]);
-  assert.equal(w.state.containers[w.body], room(w, 'south_post'));
+  const after = accepted(outbound);
+  assert.equal(after.state.containers[after.body], room(after, 'south_post'));
   assert.equal(
     outbound.decision.kind === 'accepted' && outbound.decision.events[0].payload.type,
     'entity_entered_room',
   );
-  w = accepted(ride(w, 'south_road', 2));
-  assert.deepEqual(coins(w), [4, 6]);
-  assert.equal(w.state.containers[w.body], room(w, 'north_post'));
-  assert.equal(gameView(w).resources!.find((r) => r.resource.key === 'mv')!.current, mv);
-  assert.equal(w.state.clock, clock);
+  assert.equal(gameView(after).resources!.find((r) => r.resource.key === 'mv')!.current, mv);
 });
 // Breaks: missing fare admission or endpoint/quote/client-waiver substitution allows free or remote passage.
 test('unaffordable and forged endpoint offers refuse atomically', () => {
