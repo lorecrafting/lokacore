@@ -1,4 +1,4 @@
-// A word chip (Chip's doc comment): one word of the World page's Word block as a pill.
+// A word chip: one word of the World page's Word block as a pill.
 import type { ReactNode } from 'react';
 import { Pressable, View } from 'react-native';
 import { Text } from './Text.tsx';
