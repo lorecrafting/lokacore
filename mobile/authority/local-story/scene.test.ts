@@ -66,7 +66,7 @@ function play(o: ReturnType<typeof open>) {
     const reply = o.invoke(invocation) as Saved;
     assert.equal(reply.kind, 'saved');
     assert.equal((reply.decision as { kind: string }).kind, 'accepted');
-    saved[action_key] = { invocation, reply };
+    saved[action_key!] = { invocation, reply };
   }
   return saved;
 }
