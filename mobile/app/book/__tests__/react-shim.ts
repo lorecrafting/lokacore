@@ -11,7 +11,7 @@ export const reactShim = (hooks?: string) => ({
     `export * from ${JSON.stringify(react)}; export const useContext = c => c._currentValue;` +
     (hooks
       ? ` const h = () => ${hooks}; export const useState = v => h().state(v);` +
-        ` export const useRef = v => (h().ref ? h().ref(v) : h().state({ current: v })[0]);` +
+        ` export const useRef = v => { const o = h(); return o.ref ? o.ref(v) : o.state({ current: v })[0]; };` +
         ` export const useEffect = (f, d) => h().effect(f, d); export const useLayoutEffect = useEffect;`
       : ''),
 });
