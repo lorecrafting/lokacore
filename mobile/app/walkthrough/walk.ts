@@ -44,6 +44,7 @@ type View = {
   scene?: JsonValue;
   combat?: JsonValue;
   choice?: JsonValue;
+  storylet?: string;
   notices?: { id: string }[];
   notice_boards?: { notices: { id: string }[] }[];
 };
@@ -96,7 +97,9 @@ function roomDrawn({ view, text, buttons, lines }: Live) {
   const place = view.actions.filter(
     (a) =>
       !a.input.length &&
-      (a.target.kind === 'none' || a.target_ids?.length) &&
+      // World draws the untargeted ones and those aimed at someone here (model.ts group.place).
+      (a.target.kind === 'none' || (a.target.kind === 'entity' && a.target_ids?.length)) &&
+      a.action_key !== view.storylet &&
       !OWN.split(' ').includes(a.action_key) &&
       !notices.some((n) => a.target_ids?.includes(n.id)),
   );
