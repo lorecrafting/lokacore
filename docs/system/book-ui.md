@@ -353,7 +353,7 @@ existing buttons. The note follows the latest GameView, including Take aliases a
 and disappears when shedding held load makes Take legal. While any such note shows, the page
 draws no "Nothing to do here." Note: an unavailable action is still something to read (pass-1 UH3). The
 same holds on an NPC page: its shop price rows and service rows, available or not, keep the Note off
-(pass-2).
+(pass-2; proposed, designer to approve).
 
 
 Successful ordinary Take/Drop are the specific exceptions to item-page retention; corpse-content
@@ -1127,7 +1127,7 @@ GameView `storylet` names the one place action the [storylet deck](mechanics.md#
 
 Skills without a profession draw one line each: the label, then " — learned" with no requirement, or while its projected `qualified` is false " — learned, unqualified; <requirement>" (pass-1 H3). After the xp line and before the Raise cards, each profession in first-listed order is a SectionTitle, then its listed boxes in GameView order: acquired as body text "Whittling, level 2 — learned" (", level N" only when projected; no requirement: a qualified learned box has nothing left to meet) or, while its projected `qualified` is false, "Whittling, level 2 — learned, unqualified; <requirement>" (pass-1 H3, with the [C1 clause](#c1-teaching-and-defense-details)); an NPC's teach card for a learned skill is the GameView's unavailable action and draws in the Action card's unavailable form `label: reason`, never dropped (pass-1 R2); locked as a Note "Carving — locked; <requirement>"; any other unacquired box as a Note "Joinery — not learned; <requirement>" (the same Note). The Book draws only listed skills: a hidden box and an empty profession draw nothing.
 
-An NPC's lesson line reads `locked` in place of `not learned` while the skill's projected `locked` is true (proposed, pending designer approval, loka-kgd.108.11).
+An NPC's lesson line reads `locked` in place of `not learned` while the skill's projected `locked` is true (proposed, pending designer approval, loka-kgd.108.11). A learned skill's lesson line ends at "currently qualified." with no requirement while its projected `qualified` is true: nothing is left to meet (pass-2; proposed, designer to approve).
 
 ## Mount details
 

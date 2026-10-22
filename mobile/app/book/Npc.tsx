@@ -82,7 +82,7 @@ export function NpcPage(p: NpcProps) {
   const { talk, answer, foot } = conversation(p, choice);
   const log = talk ? p.log : p.log.slice(p.since ?? 0);
   const contents = held(p);
-  // Price and service rows draw even when unavailable: something to read (pass-1 UH3).
+  // Price and service rows draw even when unavailable: something to read (pass-2, UH3 on NPC pages).
   const rows =
     p.npc &&
     (('shop' in p.npc && p.npc.shop?.length) || ('services' in p.npc && p.npc.services?.length));
