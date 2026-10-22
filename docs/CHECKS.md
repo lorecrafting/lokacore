@@ -5,7 +5,7 @@ run on the exact head is the merge gate with review ([two-lane CI](decisions/own
 Locally, pre-commit checks the staged files and developers run only the tests their diff touches;
 `bin/check_all.sh` mirrors the hosted line for an occasional full local run. `bin/prepush.sh` runs
 the static checks of hosted CI, no test suite, in about 30 s before every push and after every
-`bin/pm_merge.sh` merge. The `.githooks/pre-push` hook runs it on every push (status-only pushes under `.beads/` or `docs/HANDOFF.md` skip it); `--no-verify` needs the owner's OK.
+`bin/pm_merge.sh` merge. When the branch diff against `origin/main` touches their inputs (or cannot be read), it also runs `mobile/app/stories.test.ts` (story views and saves fresh, every story file indexes as literal CSF) and `kernel/ts/test/state_sections.test.ts`. The `.githooks/pre-push` hook runs it on every push (status-only pushes under `.beads/` or `docs/HANDOFF.md` skip it); `--no-verify` needs the owner's OK.
 The [scope audit](evidence/2026-10-06-ci-scope-audit.md) records the costs measured when lanes were selected locally.
 Mobile checks are paused by the [owner decision](decisions/owner-decision-web-first-mobile-pause-2026-10-05.md);
 their rules and red controls remain available for resumption.
@@ -101,7 +101,7 @@ their rules and red controls remain available for resumption.
   supplemental task and refuses both path classes, a missing or duplicate slice
   and a reserved ID, and checks the session-start PR drift report
   (`bin/beads_pr_drift.py`). The check needs no `br` binary.
-- `bin/orphans_red_controls.sh` checks that `bin/orphans.sh` lists a busy, old orphan and skips a child, a young, an idle, a system and a server process. `bin/worktree_setup_red_controls.sh` checks that `bin/worktree_setup.sh` clones main's `node_modules` (never a link) for a matching lockfile (without its `.cache`, replacing a leftover `node_modules.tmp`, a stale clone or an older link; a failed clone exits non-zero) and removes an older worktree's link before `npm ci` after a lockfile change.
+- `bin/orphans_red_controls.sh` checks that `bin/orphans.sh` lists a busy, old orphan and skips a child, a young, an idle, a system and a server process. `bin/worktree_setup_red_controls.sh` checks that `bin/worktree_setup.sh` clones main's `node_modules` (never a link) for a matching lockfile when main's own lockfile still matches its install marker (without its `.cache`, replacing a leftover `node_modules.tmp`, a stale clone or an older link; a failed clone exits non-zero) and removes an older worktree's link before `npm ci` after a lockfile change.
 - `mix loka.lint <cartridge dir>` (`lib/loka/content/lint.ex`, exit 1 on any finding; [pass 1 rows 1, 3, 5, 6, 7](playtests/2026-10-21-pass1/analysis.md#candidate-deterministic-checks)): a refusing recipe names a reason, a reaction that applies or cures a status or assigns, adjusts or stamps a fact narrates or is `"silent": true`, a readable has a title, a dialogue with no label or keyword has `action.talk` text, the normal band starts below 100%, every room or detail description variant has a `when` and none is shadowed by an earlier one with a subset of its guard terms, every item has a source (a non-template location, replenish, craft yield, shop shelf or stock, NPC drop, population bundle, corpse template or escrow output) and a sink (edible, craft input, shop buy-back of a shelf or stock item, escrow input or dialogue hand-over; a quest or guard that only checks the item is not one), a liquid a use recipe or drink service wants has a vessel that starts with it or a room detail that gives it, and a fuel supply a lamp burns starts above 0. `test/loka/content_lint_test.exs` runs it on the story cartridges against `test/loka/lint_baseline.txt` (loka-kgd.184 clears it) and pins which items and NPCs each target or tool tag query matches in the showcase (row 7, M8a). Row 4: the showcase sim (`kernel/ts/test/sim.test.ts`, `sim_batch.ts` `unnarrated`) fails an action key the kernel accepts with a change and no narration line, unless allowlisted in `SILENT` with a reason or pinned in `kernel/ts/test/sim_narration_baseline.txt` (loka-kgd.185 clears it). Row 2: `mobile/app/book/reasons.test.ts` gives every offer refusal code a reason word.
 - `bin/prose_lint.py <cartridge dir>` (report only, never a gate; exit 0 on findings, 2 on bad input; balance N6 text health): per cartridge it prints W7 variant groups whose texts share a first word, keys with one alternate, sentence length (mean, spread) per key kind, and the Flesch-Kincaid grade. Band-phrase coverage is skipped: N6 defines no bands. Its control `bin/prose_lint_red_controls.sh` (fixture `test/fixtures/prose_lint`) is in `ci.yml`'s `lint` job.
 - `bin/merge_resolve_red_controls.sh` checks that `bin/merge_resolve.py` (the `bin/pm_merge.sh` resolver) keeps both
@@ -128,9 +128,13 @@ their rules and red controls remain available for resumption.
   leaves a diff in the file or any tracked file, a two-field line run as a deletion or a skipped
   narrow command fails) and `bin/session_status.sh` with stub `br` (the
   housekeeping list, the missed-retro note, a failing `br` still exits 0; other worktrees, the stash
-  count and merged `review-<N>` refs are listed, the own checkout and unmerged refs are not; a red, running or missing nightly run is reported).
+  count and merged `review-<N>` refs are listed, the own checkout and unmerged refs are not; a red, running or missing nightly run is reported; the nightly sim median of five runs skips a failed leg).
+  It also runs `bin/pm_merge.sh` (a protocol schema or `kernel_api` change with no added `docs/reviews` record is refused and reset) and `bin/prepush.sh` (each gated check runs only for its inputs).
 - Claude hooks (`.claude/settings.json`): `bin/worktree_warn.sh` (Stop) only warns,
-  listing worktrees with uncommitted changes.
+  listing worktrees with uncommitted changes. PreToolUse `bin/bash_guard.py` (Bash) refuses `git ... --no-verify`
+  or `git commit -n` without the `LOKA_OWNER_OK_NO_VERIFY=1` prefix, and a bare `br create`; `bin/send_guard.py`
+  (SendMessage) refuses to resume a subagent whose newest compaction was a hook one (under 1 s).
+  `bin/integration_red_controls.sh` feeds both their refused and allowed inputs.
 - CI (`.github/workflows/`): `ci.yml` and `book-e2e.yml` run on every push to a branch other than
   `main`, nightly on `main` (10:00 UTC) and by `workflow_dispatch` (`gh workflow run <wf> --ref <branch>`),
   a superseded head's run cancelled; no pull request trigger ([two-lane CI](decisions/owner-decision-two-lane-ci-2026-10-09.md)).

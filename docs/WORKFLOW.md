@@ -84,7 +84,7 @@ Report at the end of the slice, not at every step.
    catches that break.
 3. **Build and self-review (developer).** Implement, check and self-review as
    [`developer.md`](../.claude/agents/developer.md) says, in the developer's own worktree, never the
-   main checkout. Locally only the focused tests the diff touches; hosted CI on the pushed head is
+   main checkout. Locally only the focused tests the diff touches (`npm run test:files -- <files>` in `kernel/ts` or `mobile/app`); hosted CI on the pushed head is
    the final run ([two-lane CI](decisions/owner-decision-two-lane-ci-2026-10-09.md)). A PR that adds or changes a schema also runs the
    schema mutant sweep in the [contract lessons](lessons/contracts.md) before remote publication; the provisional local lane checks generation and focused invalid cases first. Commit, then publish
    per the brief's [lane](#delivery-lanes) (description cites the `docs/system` sections and includes the `/code-review` result) and hand back the note `developer.md` specifies. The PM appends the note's `/code-review` open items to the slice's Beads notes at handback.
@@ -253,7 +253,7 @@ The PM routes each prompt. **Nit** (one place, existing tokens only: which token
 alignment, a value inside one component, a label's wording): designer on Opus. **Design** (a token
 value, a new token or component, hierarchy, typography, colour or composition, several components, a
 feel request): designer on Opus (Fable only for something without precedent). The
-owner forces either with a `fable:` or `quick:` prefix.
+owner forces the Fable designer with a `fable:` prefix.
 The owner's "Close batch", or a PM suggestion, ends the batch: with five or more nits, Opus
 skims their diffs once; `bin/polish_session.sh close` pushes and opens the PR;
 one Opus `reviewer` quick pass as PR comments; the PM merges on green hosted runs. Batches stay open liberally; close early only for a critical
@@ -276,11 +276,13 @@ item or too much complexity. Mechanics, save, protocol or engine items leave the
   ([owner decision](decisions/owner-decision-process-tightening-2026-10-08.md)).
 - A developer pushes, confirms with one `gh run list --commit <full sha>` call that `ci.yml` and
   `book-e2e.yml` started, and hands back; the PM watches CI and returns a red run as a finding;
-  developers never wait on CI.
+  developers never wait on CI. The PM waits with `bin/wait_ci.sh <sha>` in the background (one line per
+  workflow; exit 0 only when all succeeded).
 - Mutants: a full-suite sweep runs only at release-candidate certification and the E3 gate on that
   same candidate. Elsewhere: a red control on the new test, and `bin/mutate.sh` triage ("already
   caught?") run narrow first against the test files that import the mutated module, the full suite
-  only for survivors; reviewers sample 2-3 narrow mutants. Schema fixture sweeps
+  only for survivors; reviewers sample 2-3 narrow mutants. A test that reads a compiled hash fixture
+  rebuilds it per mutant: `MUTATE_REBUILD="bin/regen_hash_fixture.sh cartridges/toolbox_showcase protocol/fixtures/toolbox_showcase_hash.json"`. Schema fixture sweeps
   ([contract lessons](lessons/contracts.md)) stay: they rerun fixtures only.
 - Delegate mechanical work. At a stable publication checkpoint, update the
   roadmap, Beads and shared handoff before a fresh session; do not reset during
@@ -357,6 +359,7 @@ an expected saving; at most 5 per retro ([owner decision](decisions/owner-decisi
   and scratch worktrees in a sibling folder named `worktrees.noindex` next to the repo checkout
   (`git worktree add -b <branch> ../worktrees.noindex/<name> origin/main`): Spotlight never indexes
   a `.noindex` folder, and each indexed worktree kept `mds_stores` at 150-230% CPU for minutes.
+  `bin/new_batch.sh <branch>` makes a batch branch that way (worktree, `bin/worktree_setup.sh`, push with upstream).
   A reviewer uses a separate detached worktree (`git worktree add --detach`).
 - `.gitattributes` merges `docs/decisions/README.md` (an append-only list) with
   `merge=union`, so two branches that each add a line merge with no hand edit. GitHub's mergeability
