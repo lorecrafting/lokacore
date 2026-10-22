@@ -23,7 +23,7 @@ const held = (w: ReturnType<typeof standing>, items: readonly string[]) => ({
   },
 });
 
-// Breaks: Harvest substitutes a higher ID, mints an item, ignores Take carrying, or refills over time.
+// Breaks: Harvest substitutes a higher ID, mints an item, or ignores Take carrying.
 test('finite harvest selects the lowest real ID at equality and Drop/Take share stock', () => {
   // Pickaxe 2000 g + one 1000 g ore = the 3000 g ceiling.
   const a = driver(held(standing(), [id('item', 'pickaxe')]));

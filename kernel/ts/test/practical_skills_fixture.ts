@@ -89,6 +89,8 @@ export const practical = (stat: number, pennies: number, mv: number) => (c: any)
     c.skills[named('skill', skill)] = {
       ...c.skills[named('skill', 'mining')],
       key: skill,
+      label: `skill.${skill}.label`,
+      requirement: `skill.${skill}.requirement`,
       qualification: qualification(attribute),
     };
     c.facts[named('fact', `skill_${skill}`)] = {
@@ -134,6 +136,8 @@ export const practical = (stat: number, pennies: number, mv: number) => (c: any)
     'teacher.prompt': 'The teacher waits.',
     'teacher.choice': 'Take a lesson',
     'teacher.learned': 'You learn the skill.',
+    'skill.haggle.label': 'Haggling',
+    'skill.haggle.requirement': 'Anyone may haggle once taught.',
   });
 };
 export function practicalBundle(stat = 10, pennies = 3, mv = 5) {

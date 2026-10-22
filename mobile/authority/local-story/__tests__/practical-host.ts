@@ -13,7 +13,7 @@ import { openStory } from '../authority.ts';
 // The adit shifts every entity id, so ids come from this host's own genesis.
 const adit = (stat: number, pennies: number, mv: number) => (c: any) => {
   practical(stat, pennies, mv)(c);
-  c.rooms[`${prefix}:room/mine`].exits = { east: { to: ref('room', 'adit') } };
+  c.rooms[`${prefix}:room/mine`].exits.east = { to: ref('room', 'adit') };
   c.rooms[`${prefix}:room/adit`] = {
     key: 'adit',
     title: 'room.mine.title', // KAT text: the authority holds no display text
@@ -29,6 +29,7 @@ export function practicalHost(stat = 10, pennies = 20, path = ':memory:', mv = 1
   const change = adit(stat, pennies, mv);
   const bundle = sampler.bundle(change),
     fresh = sampler.genesis(change);
+  assert.deepEqual(fresh.entityIds, ids); // id and patch hold for every stat, pennies and mv
   const a = elapsedHost(path, { wall: 10000, mono: 0 }, bundle);
   const releases = [{ fresh, content_hash: bundle.sha256 }] as const;
   let story: Extract<ReturnType<typeof openStory>, { kind: 'open' }>;

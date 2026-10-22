@@ -38,8 +38,8 @@ test('both original 2p teachers learn below qualification, refuse low funds and 
       gameView(a.world()).skills!.find((s) => s.skill.key === skill),
       {
         skill: ref('skill', skill),
-        label: 'skill.mining.label', // the fragment's haggle copies mining's text
-        requirement: 'skill.mining.requirement',
+        label: `skill.${skill}.label`,
+        requirement: `skill.${skill}.requirement`,
         acquired: true,
         qualified: false,
         usable: false,
