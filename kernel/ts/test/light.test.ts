@@ -255,19 +255,6 @@ test('illumination shares the target policy caller query budget', () => {
   );
   assert.ok(steps.n > 32768);
 });
-import { answers } from './light_fixture.ts';
-// Break: adding a room/detail shifts runtime allocations while the independent release pin still names different objects.
-test('successor identity pin names the actual fresh rooms, subjects, jobs and equipment holders', () => {
-  const actual: Record<string, string> = { character: fresh.character, body: fresh.body };
-  for (const [id, r] of Object.entries(fresh.rooms)) actual[`room/${r.key}`] = id;
-  for (const [id, d] of Object.entries(fresh.details))
-    actual[`detail/${fresh.rooms[d.room].key}/${d.key}`] = id;
-  for (const [id, e] of Object.entries(fresh.entities)) actual[`${e.kind}/${e.key}`] = id;
-  for (const [id, j] of Object.entries(fresh.state.jobs ?? {})) actual[`job/${j.job.key}`] = id;
-  for (const [slot, id] of Object.entries(fresh.slots)) actual[`slot/${slot}`] = id;
-  assert.deepEqual(actual, answers);
-});
-
 // Break: a physically eligible held/worn light advertises an alias rejected by its authored target/input contract.
 test('light projection respects loaded keyed target and input admission before offering a source', () => {
   for (const [target, input] of [

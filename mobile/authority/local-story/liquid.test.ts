@@ -1,11 +1,9 @@
 // Real SQLite verifies liquid row provenance across lawful later custody and uncertain commits.
 import assert from 'node:assert/strict';
-import { createHash } from 'node:crypto';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
-import { encode } from '../../../kernel/ts/src/foundation/canonical.ts';
 import {
   INSTALLED,
   loadCartridge,
@@ -13,28 +11,19 @@ import {
   type Cartridge,
 } from '../../../kernel/ts/src/index.ts';
 import type { DefinitionRef } from '../../../kernel/ts/src/contracts.gen.ts';
-import { read } from '../../../kernel/ts/test/read.ts';
+import { f } from '../../../kernel/ts/test/light_fixture.ts';
+import { id, liquidBundle } from '../../../kernel/ts/test/liquid_fixture.ts';
 import { elapsedHost } from './__tests__/elapsed-host.test.ts';
 import { openStory } from './authority.ts';
 
-const production = read('protocol/fixtures/missing_child_b7_hash.json');
-const water = {
-  cartridge_id: 'ashmere_missing_child',
-  cartridge_version: production.value.manifest.version,
-  kind: 'liquid',
-  key: 'water',
-} as DefinitionRef;
+const base = liquidBundle();
+const water = f.ref('liquid', 'water') as DefinitionRef;
 const empty = { kind: null, quantity: 0 };
 const wet = (quantity: number) => ({ kind: water, quantity });
 
-function setup(bundle = production, path = ':memory:') {
+function setup(bundle = base, path = ':memory:') {
   const loaded = loadCartridge(
-    new TextEncoder().encode(
-      JSON.stringify({
-        cartridge: bundle.value,
-        content_hash: bundle.sha256,
-      }),
-    ),
+    new TextEncoder().encode(`{"cartridge":${bundle.canonical},"content_hash":"${bundle.sha256}"}`),
     INSTALLED,
   );
   assert.ok(loaded.ok, JSON.stringify(loaded));
@@ -53,8 +42,7 @@ function setup(bundle = production, path = ':memory:') {
   };
   let story = open(),
     ordinal = 0;
-  const entity = (kind: string, key: string) =>
-    fresh.entityIds[`ashmere_missing_child@0.0.22:${kind}/${key}`];
+  const entity = (kind: string, key: string) => fresh.entityIds[id(kind, key)];
   const attempt = (action_key: string, target_ids: string[] = [], input: object = {}) => ({
     invocation_id: `cccccccc-0000-4000-8000-${String(++ordinal).padStart(12, '0')}`,
     actor_id: fresh.character,
@@ -116,11 +104,11 @@ const disk = (a: ReturnType<typeof setup>) =>
   );
 
 // Breaks: reopening restores only final contents, resets shells or imposes current custody on old Fill.
-test('production empty, filled, partial Pour, empty, nested, ground and shop custody reopen exactly', (t) => {
+test('empty, filled, partial Pour, empty, nested, ground and shop custody reopen exactly', (t) => {
   const dir = mkdtempSync(join(tmpdir(), 'loka-liquid-'));
   t.after(() => rmSync(dir, { recursive: true }));
   const path = join(dir, 'save.db'),
-    a = setup(production, path);
+    a = setup(base, path);
   const [original, spare] = skins(a),
     peg = a.entity('npc', 'peg');
   a.reopen();
@@ -178,7 +166,7 @@ test('production empty, filled, partial Pour, empty, nested, ground and shop cus
   assert.deepEqual(rows(a), [empty, wet(3)]);
   const expected = a.story().world().state;
   a.sql.close();
-  const cold = setup(production, path);
+  const cold = setup(base, path);
   t.after(() => cold.sql.close());
   assert.deepEqual(cold.story().world().state, expected);
 });
@@ -288,13 +276,13 @@ test('cold open binds every liquid receipt to its historical command, source and
 test('Pour failed COMMIT and lost acknowledgement fence liquid then reconcile and replay once', () => {
   for (const kind of ['failed', 'lost'] as const) {
     const a = setup(
-      controlledBundle((value) => {
-        value.items['ashmere_missing_child@0.0.22:item/waterskin'].vessel = {
+      liquidBundle((value: any) => {
+        value.items[id('item', 'waterskin')].vessel = {
           capacity: 5,
           unit_label: 'liquid.units',
           initial: wet(5),
         };
-        value.items['ashmere_missing_child@0.0.22:item/spare_waterskin'].vessel = {
+        value.items[id('item', 'spare_waterskin')].vessel = {
           capacity: 7,
           unit_label: 'liquid.units',
           initial: wet(4),
@@ -343,21 +331,14 @@ test('Pour failed COMMIT and lost acknowledgement fence liquid then reconcile an
   }
 });
 
-function controlledBundle(change: (value: any) => void) {
-  const value = structuredClone(production.value);
-  change(value);
-  const canonical = encode(value);
-  return { value, canonical, sha256: createHash('sha256').update(canonical).digest('hex') };
-}
-
 // Breaks: death drops liquid rows or historical owner checks reject valid corpse/recovered custody.
 test('actual fatal combat cold reopens the filled shell on its corpse then ordinary recovery', (t) => {
   const dir = mkdtempSync(join(tmpdir(), 'loka-liquid-death-'));
   t.after(() => rmSync(dir, { recursive: true }));
   const a = setup(
-    controlledBundle((value) => {
-      value.resources['ashmere_missing_child@0.0.22:resource/hp'].start = 1;
-      value.npcs['ashmere_missing_child@0.0.22:npc/cellar_rat_1'].attack = {
+    liquidBundle((value: any) => {
+      value.resources[id('resource', 'hp')].start = 1;
+      value.npcs[id('npc', 'cellar_rat_1')].attack = {
         chance: 100,
         damage_min: 10,
         damage_max: 10,

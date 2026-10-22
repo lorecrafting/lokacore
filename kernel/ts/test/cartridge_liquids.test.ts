@@ -4,6 +4,8 @@ import { test } from 'node:test';
 import { loadCartridge } from '../src/content/cartridge.ts';
 import { INSTALLED } from '../src/runtime/world.ts';
 import { read } from './read.ts';
+import { f } from './light_fixture.ts';
+import { id, liquid as shopLiquid } from './liquid_fixture.ts';
 
 const ID = 'items_sampler@0.0.1';
 const ref = (kind: string, key: string) => ({
@@ -126,13 +128,14 @@ test('loader validates opted liquid metadata and accepts exact maximum mass', ()
 
 // Breaks: a configured corpse template opts into vessel rows without a creation writer.
 test('loader rejects vessel metadata on an otherwise valid corpse template', () => {
-  const c = structuredClone(read('protocol/fixtures/missing_child_b7_hash.json').value);
-  assert.ok(artifact(c).ok);
   const invalid = read('protocol/fixtures/liquid_template.json');
-  const corpse = c.items['ashmere_missing_child@0.0.22:item/player_corpse'];
-  assert.deepEqual(corpse.location, invalid.location);
-  corpse.vessel = invalid.vessel;
-  const loaded = artifact(c);
+  assert.ok(f.load(shopLiquid).ok);
+  const loaded = f.load((c) => {
+    shopLiquid(c);
+    const corpse = c.items[id('item', 'player_corpse')];
+    assert.deepEqual(corpse.location, invalid.location);
+    corpse.vessel = invalid.vessel;
+  });
   assert.ok(!loaded.ok);
   if (!loaded.ok) assert.equal(loaded.diagnostic.code, 'SCHEMA_VIOLATION');
 });
