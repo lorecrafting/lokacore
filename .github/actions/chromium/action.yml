@@ -1,0 +1,29 @@
+name: chromium
+description: >-
+  Playwright's Chromium for the Book jobs (loka-e56t). The browsers come from a cache keyed by the
+  lockfile's playwright-core version (playwright and @e2e-dev/web share it), and apt runs only when
+  a shared library is missing: the runner image has them all, and `--with-deps` once spent 11 min
+  pulling fallback fonts from a slow mirror. Run after `npm ci` in mobile/app.
+runs:
+  using: composite
+  steps:
+    - id: version
+      shell: bash
+      run: echo "playwright=$(jq -r '.packages["node_modules/playwright-core"].version' mobile/app/package-lock.json)" >> "$GITHUB_OUTPUT"
+    - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: ~/.cache/ms-playwright
+        key: ms-playwright-${{ runner.os }}-${{ runner.arch }}-${{ steps.version.outputs.playwright }}
+    # A no-op on a cache hit; fills in anything a partial cache lacks.
+    - shell: bash
+      working-directory: mobile/app
+      run: npx playwright install chromium
+    - shell: bash
+      working-directory: mobile/app
+      run: |
+        bins=$(find ~/.cache/ms-playwright -type f \( -name chrome -o -name chrome-headless-shell \))
+        [ -n "$bins" ] || { echo 'no Chromium executable under ~/.cache/ms-playwright' >&2; exit 1; }
+        missing=$(echo "$bins" | xargs ldd | grep 'not found' || true)
+        if [ -z "$missing" ]; then echo 'Chromium shared libraries present; no apt'; exit 0; fi
+        echo "$missing"
+        timeout 300 npx playwright install-deps chromium
