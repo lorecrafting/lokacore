@@ -13,6 +13,7 @@ const EXEMPT: Record<string, string> = {
   Tap: 'shown through VerbLine and the room title',
   Here: 'the room page lines, shown through the RoomPage stories',
   Tooltip: 'the status icon tip, shown through the StatusIcon Held and Focused stories',
+  'Chip:Row': 'a titled chip row, shown through the WordBar stories and Chip ReadingSize',
 };
 const EXEMPT_FILES = { 'MapDrawing.tsx': 'a drawing, shown through the map pages' };
 
@@ -47,7 +48,12 @@ test('every exported component has a story that imports it', () => {
   const missing = files.flatMap((file) =>
     [...read(`book/${file}`).matchAll(/^export (?:default )?(?:function|const) ([A-Z]\w*)/gm)]
       .map(([, name]) => name)
-      .filter((name) => !(name in EXEMPT) && !imports.includes(`${file.slice(0, -4)}:${name}`))
+      .filter(
+        (name) =>
+          !(name in EXEMPT) &&
+          !(`${file.slice(0, -4)}:${name}` in EXEMPT) &&
+          !imports.includes(`${file.slice(0, -4)}:${name}`),
+      )
       .map((name) => `${file}: ${name}`),
   );
   assert.deepEqual(missing, []);

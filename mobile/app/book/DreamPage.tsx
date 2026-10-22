@@ -1,13 +1,13 @@
 import type { GameView } from '../../packages/game-view/session.ts';
 import type { Page as Route } from './model.ts';
 // A resumable child of the actual bed, using the existing detail/control grammar.
-import { Text } from 'react-native';
+import { Text } from './Text.tsx';
 import type { Button, presenter } from './presenter.ts';
 import { dreamAt, dreamOwner } from './dreams.ts';
 import { ActionCard, Cards } from './actions.tsx';
 import { LogLines, Note } from './lines.tsx';
 import { Control, Page } from './pages.tsx';
-import { prose, usePalette } from './palette.ts';
+import { prose, usePalette, useType } from './palette.ts';
 import { LABEL } from './labels.ts';
 
 type Screen = ReturnType<ReturnType<typeof presenter>['screen']>;
@@ -18,6 +18,7 @@ export function DreamPage(p: {
   close: () => void;
 }) {
   const c = usePalette();
+  const t = useType();
   const dream = dreamAt(p.screen.view, p.id),
     owner = dreamOwner(p.id);
   if (!dream) return null;
@@ -27,9 +28,9 @@ export function DreamPage(p: {
       title={p.screen.text(dream.title)}
       foot={<Control label={LABEL.close} onPress={p.close} />}
     >
-      <Text style={prose(c)}>{p.screen.text(dream.description)}</Text>
+      <Text style={prose(c, t)}>{p.screen.text(dream.description)}</Text>
       <LogLines lines={p.screen.detail(owner)} />
-      <Text style={prose(c)}>{p.screen.text(dream.line)}</Text>
+      <Text style={prose(c, t)}>{p.screen.text(dream.line)}</Text>
       <Cards>
         {buttons.map((b) => (
           <ActionCard

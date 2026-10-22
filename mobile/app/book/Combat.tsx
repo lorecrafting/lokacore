@@ -1,11 +1,12 @@
 // A full reading page with the offered actions following its combat history.
-import { Text, View } from 'react-native';
+import { View } from 'react-native';
+import { Text } from './Text.tsx';
 import { bandPhrase, type group } from './model.ts';
 import { ActionCard, Cards } from './actions.tsx';
 import { LogLines } from './lines.tsx';
 import { LABEL } from './labels.ts';
 import { Control, Page, RunningHead } from './pages.tsx';
-import { prose, usePalette } from './palette.ts';
+import { prose, usePalette, useType } from './palette.ts';
 import type { presenter, Button } from './presenter.ts';
 
 type Screen = ReturnType<ReturnType<typeof presenter>['screen']>;
@@ -16,11 +17,12 @@ type Encounter = NonNullable<Screen['ended']>;
 // status line and Character (book-ui.md, Live combat response).
 function Fight({ view, text, combat }: Pick<Screen, 'view' | 'text'> & { combat: Encounter }) {
   const c = usePalette();
+  const t = useType();
   const { opponent_id: id, name, band } = combat;
   return (
     <View>
       {(combat.active_opponents ?? [{ id, name, band }]).map((opponent) => (
-        <Text key={opponent.id} style={prose(c)}>
+        <Text key={opponent.id} style={prose(c, t)}>
           {text(opponent.name)}
           {combat.active_opponents && opponent.id === combat.opponent_id && view.combat
             ? ' (your target)'

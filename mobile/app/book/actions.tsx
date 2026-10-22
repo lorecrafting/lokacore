@@ -1,8 +1,9 @@
 // The offered-action controls: action card, verb line, continue button (BOOK-UI-COMPONENTS.md).
 import { Children, type ReactNode } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, View } from 'react-native';
+import { Text } from './Text.tsx';
 import { Tap } from './pages.tsx';
-import { note, prose, usePalette } from './palette.ts';
+import { note, prose, usePalette, useType } from './palette.ts';
 import type { Button } from './presenter.ts';
 import { radius, size, space, type } from './tokens.ts';
 
@@ -12,8 +13,9 @@ export function ActionCard(
   p: { b: Button; press: (b: Button) => void } | { label: string; reason?: string },
 ) {
   const c = usePalette();
+  const t = useType();
   if (!('b' in p))
-    return <Text style={note(c)}>{p.reason ? `${p.label}: ${p.reason}` : p.label}</Text>;
+    return <Text style={note(c, t)}>{p.reason ? `${p.label}: ${p.reason}` : p.label}</Text>;
   const { b, press } = p;
   return (
     <Pressable
@@ -31,7 +33,7 @@ export function ActionCard(
         paddingHorizontal: space.lg,
       }}
     >
-      <Text style={prose(c)}>{b.label}</Text>
+      <Text style={prose(c, t)}>{b.label}</Text>
     </Pressable>
   );
 }
@@ -47,9 +49,10 @@ export function Cards({ children }: { children: ReactNode }) {
 // A room's offered place action (BOOK-UI-COMPONENTS.md, Verb line).
 export function VerbLine({ b, press }: { b: Button; press: (b: Button) => void }) {
   const c = usePalette();
+  const t = useType();
   return (
     <Tap label={b.label} onPress={() => press(b)}>
-      <Text style={{ ...prose(c), ...type.italic, color: c.action }}>{b.label}</Text>
+      <Text style={{ ...prose(c, t), ...type.italic, color: c.action }}>{b.label}</Text>
     </Tap>
   );
 }
@@ -57,6 +60,7 @@ export function VerbLine({ b, press }: { b: Button; press: (b: Button) => void }
 // A scene or chapter continuation (BOOK-UI-COMPONENTS.md, Continue button).
 export function ContinueButton(p: { label: string; onPress: () => void }) {
   const c = usePalette();
+  const t = useType();
   return (
     <Pressable
       accessibilityRole="button"
@@ -73,7 +77,7 @@ export function ContinueButton(p: { label: string; onPress: () => void }) {
         paddingHorizontal: space.lg,
       }}
     >
-      <Text style={{ ...type.control, color: c.bg, textAlign: 'center' }}>{p.label}</Text>
+      <Text style={{ ...t.control, color: c.bg, textAlign: 'center' }}>{p.label}</Text>
     </Pressable>
   );
 }

@@ -1,7 +1,8 @@
 // The Contents sections (Character, Ancestry, Carrying, Map, Settings; Journal: journal.tsx) and
 // the chapter and scene pages. Each is only drawing; what a tap does is passed in by Book.tsx.
 import { useState } from 'react';
-import { Text, View } from 'react-native';
+import { View } from 'react-native';
+import { Text } from './Text.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
 import {
   bandPhrase,
@@ -15,8 +16,10 @@ import {
   type Thing,
 } from './model.ts';
 import type { Button } from './presenter.ts';
-import { note, prose, usePalette } from './palette.ts';
+import { note, prose, usePalette, useType } from './palette.ts';
 import { DiscoveredMap } from './DiscoveredMap.tsx';
+import { ReadingSize } from './Chip.tsx';
+import type { Reading } from './reading.ts';
 import { levelLine, Professions, RaiseCards, SkillDetails, xpLine } from './skills.tsx';
 import { size, space, type } from './tokens.ts';
 import { ActionCard, Cards, ContinueButton } from './actions.tsx';
@@ -37,6 +40,7 @@ export function CharacterPage(
     Parameters<typeof RaiseCards>[0],
 ) {
   const c = usePalette();
+  const t = useType();
   // Real data only: the body's resources when GameView carries them; the phrase on hp only.
   const resources = p.resources ?? p.view?.resources ?? [];
   const position = p.position ?? p.view?.position;
@@ -46,25 +50,25 @@ export function CharacterPage(
   return (
     <Page title="Character" foot={home(p.world)}>
       {!known && !name && <Note>Nothing is known about you yet.</Note>}
-      {name && <Text style={prose(c)}>{p.text(name)}</Text>}
-      {position && <Text style={prose(c)}>{cap(position)}</Text>}
+      {name && <Text style={prose(c, t)}>{p.text(name)}</Text>}
+      {position && <Text style={prose(c, t)}>{cap(position)}</Text>}
       {p.view?.ancestry && (
-        <Text style={prose(c)}>{cap(p.view.ancestry.replaceAll('_', '-'))}</Text>
+        <Text style={prose(c, t)}>{cap(p.view.ancestry.replaceAll('_', '-'))}</Text>
       )}
-      {levelling && <Text style={prose(c)}>{levelLine(levelling)}</Text>}
-      {p.view?.bleeding && <Text style={prose(c)}>{p.text(p.view.bleeding.label)}</Text>}
+      {levelling && <Text style={prose(c, t)}>{levelLine(levelling)}</Text>}
+      {p.view?.bleeding && <Text style={prose(c, t)}>{p.text(p.view.bleeding.label)}</Text>}
       {p.view?.conditions?.map((x, i) => (
-        <Text key={`${x.label}-${i}`} style={prose(c)}>
+        <Text key={`${x.label}-${i}`} style={prose(c, t)}>
           {cap(conditionLine(x, p.view!.time, p.text))}
         </Text>
       ))}
       <SkillDetails view={p.view} text={p.text} />
       {resources.map((r) => (
-        <Text key={r.resource.key} style={{ ...prose(c), color: band(c, toneOf(r)) }}>
+        <Text key={r.resource.key} style={{ ...prose(c, t), color: band(c, toneOf(r)) }}>
           {`${r.resource.key}  ${isPool(r) ? `${r.current} / ${r.maximum}` : r.current}${r.resource.key === 'hp' ? `, ${bandPhrase(r, p.text)}` : ''}`}
         </Text>
       ))}
-      {levelling && <Text style={prose(c)}>{xpLine(levelling)}</Text>}
+      {levelling && <Text style={prose(c, t)}>{xpLine(levelling)}</Text>}
       <Professions view={p.view} text={p.text} />
       <RaiseCards {...p} />
     </Page>
@@ -79,9 +83,10 @@ export function AncestryPage(p: {
   press: (b: Button) => void;
 }) {
   const c = usePalette();
+  const t = useType();
   return (
     <Page title="Choose your ancestry">
-      <Text style={prose(c)}>Choose once before your story begins.</Text>
+      <Text style={prose(c, t)}>Choose once before your story begins.</Text>
       {p.view.ancestry_choices?.map((choice) => {
         const button = p.buttons.find(
           (b) =>
@@ -90,7 +95,7 @@ export function AncestryPage(p: {
         );
         return (
           <View key={choice.key} style={{ gap: space.sm }}>
-            <Text style={prose(c)}>{p.text(choice.description)}</Text>
+            <Text style={prose(c, t)}>{p.text(choice.description)}</Text>
             {button && <ActionCard b={button} press={p.press} />}
           </View>
         );
@@ -108,6 +113,7 @@ export function CarryingPage(p: {
   world: () => void;
 }) {
   const c = usePalette();
+  const t = useType();
   return (
     <Page title={LABEL.inventory} foot={home(p.world)}>
       <SectionTitle>{LABEL.held}</SectionTitle>
@@ -125,7 +131,7 @@ export function CarryingPage(p: {
           <View>
             {p.equipment!.map(({ slot, item }, i) => (
               <View key={`${slot}-${i}`}>
-                <Text style={note(c)}>{cap(slot.replaceAll('_', ' '))}</Text>
+                <Text style={note(c, t)}>{cap(slot.replaceAll('_', ' '))}</Text>
                 {item ? (
                   <EntityLine name={p.text(item.name)} onPress={() => p.open(item.id)} />
                 ) : (
@@ -143,6 +149,7 @@ export function CarryingPage(p: {
 // Each exit's own controls, kept separate from movement; sight is read-only cartridge prose.
 function Ways(p: { view: GameView; text: Say; g: Grouped; press: (b: Button) => void }) {
   const c = usePalette();
+  const t = useType();
   return p.view.exits.map((e) => {
     const move = p.g.exits.find((x) => x.direction === e.direction)?.button;
     return (
@@ -154,7 +161,7 @@ function Ways(p: { view: GameView; text: Say; g: Grouped; press: (b: Button) => 
         )}
         {e.door &&
           why(e, p.text) !== e.door.state && ( // UF2: once, when the card says it
-            <Text style={prose(c)}>
+            <Text style={prose(c, t)}>
               {cap(p.text(e.door.name))}: {e.door.state}
             </Text>
           )}
@@ -162,7 +169,7 @@ function Ways(p: { view: GameView; text: Say; g: Grouped; press: (b: Button) => 
           <ActionCard key={b.action_key} b={b} press={p.press} />
         ))}
         {e.sight && (
-          <Text style={note(c)}>
+          <Text style={note(c, t)}>
             {`Beyond ${e.direction}: ${p.text(e.sight.title)}${
               e.sight.entities.length
                 ? ` — ${e.sight.entities.map((x) => p.text(x.name)).join(', ')}`
@@ -184,6 +191,7 @@ export function MapPage(p: {
   world: () => void;
 }) {
   const c = usePalette();
+  const t = useType();
   const [selected, select] = useState<string | null>(null);
   const chosen = p.view.map?.rooms.some((r) => r.id === selected);
   return (
@@ -199,7 +207,7 @@ export function MapPage(p: {
       {p.view.map && (
         <DiscoveredMap view={p.view} text={p.text} selected={selected} select={select} />
       )}
-      <Text style={prose(c)}>Current place: {p.text(p.view.place.title.key)}</Text>
+      <Text style={prose(c, t)}>Current place: {p.text(p.view.place.title.key)}</Text>
       {p.view.exits.length === 0 && <Note>No way out is known.</Note>}
       <Ways
         {...p}
@@ -230,10 +238,11 @@ const where = (p: { view: GameView; g: Grouped; press: (b: Button) => void }) =>
   </>
 );
 
-// `startOver` asks first: it destroys the save (the shell's confirm). Nothing else lives here yet.
-export function SettingsPage(p: { startOver: () => void; world: () => void }) {
+// The Reading size first; `startOver` asks first: it destroys the save (the shell's confirm).
+export function SettingsPage(p: { startOver: () => void; world: () => void; reading?: Reading }) {
   return (
     <Page title="Settings" foot={home(p.world)}>
+      {p.reading && <ReadingSize {...p.reading} />}
       <Control label={LABEL.startOver} onPress={p.startOver} />
     </Page>
   );
@@ -278,9 +287,10 @@ export function ScenePage(p: {
   press: (b: Button) => void;
 }) {
   const c = usePalette();
+  const t = useType();
   return (
     <Page>
-      <Text {...useTitleFocus()} style={prose(c)}>
+      <Text {...useTitleFocus()} style={prose(c, t)}>
         {plain(p.text(p.scene.line))}
       </Text>
       {p.next && <ContinueButton label={p.next.label} onPress={() => p.press(p.next!)} />}

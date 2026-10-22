@@ -1,22 +1,24 @@
 // The riddle answer: a bank of letter tiles over one local buffer (BOOK-UI-COMPONENTS.md, Letter tile).
 import { useState } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, View } from 'react-native';
+import { Text } from './Text.tsx';
 import type { Button } from './presenter.ts';
 import { ActionCard } from './actions.tsx';
 import { Control } from './pages.tsx';
-import { prose, usePalette } from './palette.ts';
+import { prose, usePalette, useType } from './palette.ts';
 import { opacity, radius, size, space, type } from './tokens.ts';
 import { LABEL } from './labels.ts';
 
 // Tile indices preserve multiplicity; only the bounded submitted word crosses the session boundary.
 export function Riddle(p: { bank: readonly string[]; button: Button; press: (b: Button) => void }) {
   const c = usePalette();
+  const t = useType();
   const [selected, setSelected] = useState<number[]>([]);
   const answer = selected.map((i) => p.bank[i]).join('');
   return (
     // the answer, the bank and the controls, as the mock's `.word`, `.bankl` and `.rrow`
     <View style={{ gap: space.block }}>
-      <Text style={prose(c)}>{answer || 'Choose letters to answer.'}</Text>
+      <Text style={prose(c, t)}>{answer || 'Choose letters to answer.'}</Text>
       <View
         style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: space.sm }}
       >

@@ -147,7 +147,8 @@ test('actual Book Item Eat returns World once on normal and uncertain settlement
       const cold = draw();
       assert.ok(!cold.props.stack.some((p) => ['thing', 'carrying'].includes(p.kind)));
       if (cold.props.stack.some((p) => p.kind === 'chapter')) {
-        const chapter = BookView(cold.props).props.children.props.children[0].props.children;
+        const chapter = BookView(cold.props).props.children.props.children.props.children[0].props
+          .children;
         chapter.props.chapterDone();
       }
       assert.deepEqual(draw().props.stack, []);

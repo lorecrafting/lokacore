@@ -1,5 +1,6 @@
 // The NPC page: conversation, choices, skills, shop and services, what the NPC holds, with the existing book controls.
-import { Text, View } from 'react-native';
+import { View } from 'react-native';
+import { Text } from './Text.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { absent, cap, plain, things, why, type group, type Page as Route } from './model.ts';
 import type { Button, DetailLine, presenter } from './presenter.ts';
@@ -7,7 +8,7 @@ import { ActionCard, Cards } from './actions.tsx';
 import { Asides, LogLines, Note } from './lines.tsx';
 import { Control, Page, type Thing } from './pages.tsx';
 import { inside } from './Menu.tsx';
-import { note, prose, usePalette, type Palette } from './palette.ts';
+import { note, prose, usePalette, useType, type Palette, type Type } from './palette.ts';
 import { Riddle } from './Riddle.tsx';
 import { space } from './tokens.ts';
 import { LABEL } from './labels.ts';
@@ -27,17 +28,18 @@ function Choice(p: {
   press: (b: Button) => void;
 }) {
   const c = usePalette();
+  const t = useType();
   const answer = (id: string) =>
     p.g.choice.find((b) => (b.input as { choice_id?: string }).choice_id === id);
   return (
     <View style={{ gap: space.sm }}>
       {p.choice.riddle?.attempts && (
-        <Text style={note(c)}>
+        <Text style={note(c, t)}>
           {p.choice.riddle.attempts.count} / {p.choice.riddle.attempts.limit} wrong answers this
           sitting.
         </Text>
       )}
-      {absent(p.view) !== '' && <Text style={note(c)}>{absent(p.view)}</Text>}
+      {absent(p.view) !== '' && <Text style={note(c, t)}>{absent(p.view)}</Text>}
       {p.choice.choices.map((o) => {
         const b = answer(o.choice_id);
         const riddle = p.choice.riddle;
@@ -72,7 +74,7 @@ type NpcProps = {
 };
 
 export function NpcPage(p: NpcProps) {
-  const c = usePalette();
+  const [c, t] = [usePalette(), useType()];
   const choice =
     p.view.choice && (!p.npc || p.npc.id === p.view.choice.speaker_id) ? p.view.choice : undefined;
   const enemy = p.npc && 'hostile' in p.npc && p.npc.hostile ? p.npc : undefined;
@@ -88,9 +90,9 @@ export function NpcPage(p: NpcProps) {
       scrollToEnd={log.length > 0}
       foot={foot}
     >
-      {about(c, p, !talk)}
+      {about(c, t, p, !talk)}
       <LogLines lines={log} />
-      {npcSkills(c, p)}
+      {npcSkills(c, t, p)}
       {!talk && enemy && (
         <Note>{enemy.refusal ? p.text(enemy.refusal) : refused(cap(p.text(enemy.name)))}</Note>
       )}
@@ -152,19 +154,19 @@ const priced = ({ npc: n }: NpcProps) =>
 // cartridge currency in GameView if a second one appears.
 const purse = (v: GameView) => v.resources?.find((r) => r.resource.key === 'pennies')?.current;
 
-const about = (c: Palette, p: NpcProps, shelf: boolean) => (
+const about = (c: Palette, t: Type, p: NpcProps, shelf: boolean) => (
   <>
-    {p.npc?.description && <Text style={prose(c)}>{plain(p.text(p.npc.description))}</Text>}
+    {p.npc?.description && <Text style={prose(c, t)}>{plain(p.text(p.npc.description))}</Text>}
     {p.npc && 'asides' in p.npc && <Asides keys={p.npc.asides} text={p.text} />}
     {p.npc && 'carrying' in p.npc && p.npc.carrying && (
-      <Text style={note(c)}>{p.text(p.npc.carrying)}</Text>
+      <Text style={note(c, t)}>{p.text(p.npc.carrying)}</Text>
     )}
     {shelf && priced(p) && purse(p.view) !== undefined && <Note>{balance(purse(p.view)!)}</Note>}
   </>
 );
 
 // The skills this NPC teaches: learned or not, and whether the player qualifies now.
-export const npcSkills = (c: Palette, p: NpcProps) =>
+export const npcSkills = (c: Palette, t: Type, p: NpcProps) =>
   p.view.skills
     ?.filter(
       (s) =>
@@ -179,7 +181,7 @@ export const npcSkills = (c: Palette, p: NpcProps) =>
         ),
     )
     .map((s) => (
-      <Text key={s.skill.key} style={note(c)}>
+      <Text key={s.skill.key} style={note(c, t)}>
         {p.text(s.label)}: {s.acquired ? 'learned' : s.locked ? 'locked' : 'not learned'}; currently{' '}
         {s.qualified ? 'qualified' : 'unqualified'}.
         {/* a learned, qualified skill asks nothing more (pass-1 H3) */}
@@ -189,6 +191,7 @@ export const npcSkills = (c: Palette, p: NpcProps) =>
 
 function ShopOptions(p: NpcProps) {
   const c = usePalette();
+  const t = useType();
   return (
     <>
       {p.npc &&
@@ -198,7 +201,7 @@ function ShopOptions(p: NpcProps) {
           const buy = buyReason(o.buy.reason ?? '');
           const sell = sellReason(o.sell, p.text);
           return (
-            <Text key={o.item_id} style={note(c)}>
+            <Text key={o.item_id} style={note(c, t)}>
               {p.text(o.name)}: Buy {o.buy.price}p{o.buy.available ? '' : ` (${buy})`}; Sell{' '}
               {o.sell.price}p{o.sell.available ? '' : ` (${sell})`}.
             </Text>

@@ -2,7 +2,8 @@
 // 1/ZOOM at rest, so it is crisp both ways. You are the dot; each compass exit is a path out to
 // an open ring, or a stub ending in a red tick when closed; up and down are stair nodes that fade
 // in with the zoom. Real data only: the current room and its exits.
-import { Animated, Text, View } from 'react-native';
+import { Animated, View } from 'react-native';
+import { Text } from './Text.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { ANGLE, STAIR, ZOOM as U } from './joystick.ts';
 import { usePalette } from './palette.ts';

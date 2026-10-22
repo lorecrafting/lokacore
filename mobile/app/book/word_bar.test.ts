@@ -28,6 +28,7 @@ const revision = (b: Book) => b.sql.prepare('SELECT revision FROM head').get()!.
 const type = (b: Book, word: string) => {
   const input = b.draw().find((n) => n.type === 'TextInput');
   assert.ok(input, 'no word input');
+  assert.equal(input.props.allowFontScaling, false, 'the word input scales twice'); // reading.ts sizes it
   input.props.onChangeText(word);
   b.draw()
     .find((n) => n.type === 'TextInput')

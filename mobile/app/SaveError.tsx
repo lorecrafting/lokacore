@@ -1,8 +1,9 @@
 // The screen for a save that does not open (OFF-07; 10 §32; docs/system/book-ui.md, Chapters, scenes and recovery).
-import { SafeAreaView, Text } from 'react-native';
+import { SafeAreaView } from 'react-native';
 import { Control, Page } from './book/pages.tsx';
+import { Text } from './book/Text.tsx';
 import { note, PaletteContext, useFocusRing } from './book/palette.ts';
-import { color } from './book/tokens.ts';
+import { color, type } from './book/tokens.ts';
 import { detail } from './book/words.ts';
 import type { Failed } from '../packages/game-view/session.ts';
 import { LABEL } from './book/labels.ts';
@@ -23,7 +24,7 @@ export function SaveError({ failed, startOver }: { failed: Failed; startOver: ()
     <PaletteContext value={paper}>
       <SafeAreaView style={{ flex: 1, backgroundColor: paper.bg }}>
         <Page centred title={PLAIN[failed.kind!] ?? 'The game cannot go on yet.'}>
-          {why ? <Text style={note(paper)}>{why}</Text> : null}
+          {why ? <Text style={note(paper, type)}>{why}</Text> : null}
           {failed.startOver && <Control label={LABEL.startOver} onPress={startOver} />}
         </Page>
       </SafeAreaView>

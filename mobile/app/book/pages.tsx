@@ -3,11 +3,13 @@
 // focus: title.ts).
 // Each is only drawing; what a tap does is passed in by Book.tsx.
 import type { ReactNode } from 'react';
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
+import { Text } from './Text.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { plain, why, type group, type Pool } from './model.ts';
 import type { Button, DetailLine } from './presenter.ts';
-import { note, prose, usePalette, type Palette } from './palette.ts';
+import { tapBleed } from './reading.ts';
+import { note, prose, usePalette, useType, type Palette, type Type } from './palette.ts';
 import { opacity, size, space, type } from './tokens.ts';
 import { ActionCard } from './actions.tsx';
 import { Asides, AwayRecap, Here, LogLines } from './lines.tsx';
@@ -31,7 +33,8 @@ export function Tap(p: {
   children: ReactNode;
   shrink?: boolean; // may give up width in a row (the status position truncates)
 }) {
-  const bleed = { paddingVertical: space.md, marginVertical: -space.md }; // hit area, no shown space
+  const b = tapBleed(useType().body.lineHeight);
+  const bleed = { paddingVertical: b, marginVertical: -b }; // hit area, no shown space
   const shrink = p.shrink ? { flexShrink: 1, minWidth: 0 } : {};
   return (
     <Pressable
@@ -49,6 +52,7 @@ export function Tap(p: {
 // ponytail: the first unfinished quest in journal order; several at once await a GameView answer.
 export function RunningHead({ view, text }: { view: GameView; text: Say }) {
   const c = usePalette();
+  const t = useType();
   const quest = view.journal.find(
     (q) => (q.state === 'active' || q.state === 'objectives_complete') && q.journal,
   );
@@ -56,7 +60,7 @@ export function RunningHead({ view, text }: { view: GameView; text: Say }) {
   return (
     <Text
       style={{
-        ...type.runningHead,
+        ...t.runningHead,
         color: c.dim,
         paddingHorizontal: space.page,
         paddingTop: space.page,
@@ -77,6 +81,7 @@ export function Control(p: {
 }) {
   const { label, onPress, disabled, onInk } = p;
   const c = usePalette();
+  const t = useType();
   return (
     <Pressable
       accessibilityRole="button"
@@ -92,9 +97,7 @@ export function Control(p: {
         opacity: disabled ? opacity.disabled : 1,
       }}
     >
-      <Text style={{ ...type.control, color: disabled ? c.dim : onInk ? c.bg : c.fg }}>
-        {label}
-      </Text>
+      <Text style={{ ...t.control, color: disabled ? c.dim : onInk ? c.bg : c.fg }}>{label}</Text>
     </Pressable>
   );
 }
@@ -115,6 +118,7 @@ export function RoomPage(p: {
   word?: ReactNode; // the Word block, last: after the room's actions and the log (pass-1 UA)
 }) {
   const c = usePalette();
+  const t = useType();
   const look = p.g.look;
   const actions = placeActions(p.view, p.g, p.press, p.text, p.label); // one list, as the room's lines
   return (
@@ -124,9 +128,9 @@ export function RoomPage(p: {
       onTitlePress={look && (() => p.press(look))}
     >
       {p.recap && <AwayRecap lines={p.recap} />}
-      {paragraphs(c, p.text(p.view.place.description.key))}
+      {paragraphs(c, t, p.text(p.view.place.description.key))}
       <Asides keys={p.view.place.asides} text={p.text} />
-      {warnings(c, p.view, p.text)}
+      {warnings(c, t, p.view, p.text)}
       <Here view={p.view} text={p.text} open={p.open} />
       {p.view.choice && !p.view.entities.some((e) => e.id === p.view.choice!.speaker_id) && (
         <Control label={LABEL.continueConversation} onPress={p.openChoice} />
@@ -141,13 +145,13 @@ export function RoomPage(p: {
 }
 
 // The room prose as one block; a blank line in the authored text is a paragraph break.
-const paragraphs = (c: Palette, description: string) => (
+const paragraphs = (c: Palette, t: Type, description: string) => (
   <View style={{ gap: space.lg }}>
     {plain(description)
       .trim()
       .split(/\s*\n\s*\n\s*/)
       .map((paragraph, i) => (
-        <Text key={i} style={prose(c)}>
+        <Text key={i} style={prose(c, t)}>
           {paragraph}
         </Text>
       ))}
@@ -155,13 +159,13 @@ const paragraphs = (c: Palette, description: string) => (
 );
 
 // The exit warnings are one block of notes.
-const warnings = (c: Palette, view: GameView, text: Say) => {
+const warnings = (c: Palette, t: Type, view: GameView, text: Say) => {
   const shown = view.exits.filter((e) => e.warning);
   return (
     shown.length > 0 && (
       <View>
         {shown.map((e) => (
-          <Text key={e.direction} style={note(c)}>
+          <Text key={e.direction} style={note(c, t)}>
             {text(e.warning!)}
           </Text>
         ))}
@@ -263,8 +267,10 @@ export function PageFoot({ children }: { children: ReactNode }) {
     <View
       style={{
         flexDirection: 'row',
+        flexWrap: 'wrap', // a large Reading size takes a second row, never truncates
         justifyContent: 'center',
         columnGap: space.lg,
+        rowGap: space.sm,
         paddingTop: space.md,
         paddingHorizontal: space.xl,
         paddingBottom: space.xl,

@@ -4,12 +4,12 @@ import { useState, type ReactNode } from 'react';
 import { TextInput, View } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { castWords } from './buttons.ts';
-import { Chip } from './Chip.tsx';
+import { Chip, Row } from './Chip.tsx';
 import { LABEL } from './labels.ts';
 import { Note } from './lines.tsx';
 import { why } from './model.ts';
 import { Control, SectionTitle } from './pages.tsx';
-import { prose, usePalette } from './palette.ts';
+import { prose, usePalette, useType } from './palette.ts';
 import type { Button } from './presenter.ts';
 import { size, space } from './tokens.ts';
 
@@ -63,22 +63,9 @@ const chip = (b: Button, p: { pending: boolean; press: (b: Button) => void }) =>
   />
 );
 
-function Row(p: { title: string; children: ReactNode[]; reasons?: string[] }) {
-  if (!p.children.length) return null;
-  return (
-    <View style={{ gap: space.sm }}>
-      <Note>{p.title}</Note>
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space.sm }}>{p.children}</View>
-      {(p.reasons ?? []).map((r) => (
-        <Note key={r}>{r}</Note>
-      ))}
-    </View>
-  );
-}
-
 // The keyboard: a typed word goes as the keyboard's Say with that word; only its writer sees it.
 function Typed(p: { base: Button; pending: boolean; press: (b: Button) => void }) {
-  const c = usePalette();
+  const [c, t] = [usePalette(), useType()];
   const [typing, setTyping] = useState(false);
   const [draft, setDraft] = useState('');
   const [wrong, setWrong] = useState(false);
@@ -86,8 +73,7 @@ function Typed(p: { base: Button; pending: boolean; press: (b: Button) => void }
     if (p.pending) return;
     if (!WORD.test(draft)) return setWrong(true);
     p.press({ ...p.base, label: LABEL.say, input: { word: draft } });
-    setDraft('');
-    setWrong(false);
+    (setDraft(''), setWrong(false));
   };
   const row = (control: ReactNode) => <View style={{ flexDirection: 'row' }}>{control}</View>;
   if (!typing) return row(<Control label={LABEL.typeAWord} onPress={() => setTyping(true)} />);
@@ -96,15 +82,16 @@ function Typed(p: { base: Button; pending: boolean; press: (b: Button) => void }
       <TextInput
         accessibilityLabel={LABEL.aWord}
         autoFocus
+        allowFontScaling={false}
         value={draft}
-        onChangeText={(t) => (setDraft(t), setWrong(false))}
+        onChangeText={(s) => (setDraft(s), setWrong(false))}
         onSubmitEditing={send}
         maxLength={32}
         autoCorrect={false}
         autoCapitalize="none"
         spellCheck={false}
         style={{
-          ...prose(c),
+          ...prose(c, t),
           backgroundColor: c.bg,
           minHeight: size.touch,
           paddingHorizontal: space.lg,

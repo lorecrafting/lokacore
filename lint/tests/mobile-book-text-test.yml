@@ -1,0 +1,8 @@
+id: mobile-book-text
+valid:
+  - "import { Text } from './Text.tsx';"
+  - "import { View, Pressable } from 'react-native';"
+invalid:
+  - "import { Text } from 'react-native';"
+  - "import { TextInput, View } from 'react-native';"
+  - "import { Text as T } from 'react-native';"

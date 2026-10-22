@@ -2,7 +2,8 @@
 // maths: joystick.ts). Press to zoom, drag toward a path to light it, release to walk, drag back
 // to the middle to cancel; a tap opens the Map page. RN Animated and PanResponder only.
 import { useEffect, useRef, useState } from 'react';
-import { AccessibilityInfo, Animated, PanResponder, Text, View } from 'react-native';
+import { AccessibilityInfo, Animated, PanResponder, View } from 'react-native';
+import { Text } from './Text.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { gesture, sideOf, SPOT, type Ui } from './joystick.ts';
 import { MapDrawing } from './MapDrawing.tsx';

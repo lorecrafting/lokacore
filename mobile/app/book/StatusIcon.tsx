@@ -3,7 +3,8 @@
 // web) shows the label and time left in the Tip's look. Locked (scene, combat, chapter page), the
 // discs are pictures, not buttons.
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
-import { Animated, Pressable, Text, View } from 'react-native';
+import { Animated, Pressable, View } from 'react-native';
+import { Text } from './Text.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
 import {
   Easing,

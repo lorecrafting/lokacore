@@ -1,6 +1,7 @@
 // The status line under the footer (BOOK-UI-COMPONENTS.md, Status line).
 import type { ReactElement } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, View } from 'react-native';
+import { Text } from './Text.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { bleedingLine, branch, pools, said, sky, toneOf, type Pool } from './model.ts';
 import { band, Tap } from './pages.tsx';

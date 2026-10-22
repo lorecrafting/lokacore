@@ -1,4 +1,5 @@
-import { Text, View } from 'react-native';
+import { View } from 'react-native';
+import { Text } from './Text.tsx';
 import { DreamPage } from './DreamPage.tsx';
 import { JournalPage } from './journal.tsx';
 // Page dispatch for the current Book view and local detail stack.
@@ -10,9 +11,10 @@ import { NoticeEntries, NoticePage } from './notices.tsx';
 import { VerbLine } from './actions.tsx';
 import { WordBar } from './WordBar.tsx';
 import { RoomPage, RunningHead } from './pages.tsx';
-import { note, usePalette } from './palette.ts';
+import { note, usePalette, useType } from './palette.ts';
 import { space } from './tokens.ts';
 import { chapterLabel } from './words.ts';
+import type { Reading } from './reading.ts';
 import {
   AncestryPage,
   CarryingPage,
@@ -34,12 +36,14 @@ type BodyProps = {
   chapterDone: () => void;
   world: () => void;
   back: () => void;
+  reading?: Reading;
 };
 // The NPC page (this visit, by identity) in conversation; BookView holds it outside PageTurn's remount.
 type Talk = { talkingOn?: Page; talkOn: (page?: Page) => void };
 
 export function Body(p: BodyProps & Talk) {
   const c = usePalette();
+  const t = useType();
   const water = p.screen.view.water;
   const surface = water && p.g.exits.find((e) => e.direction === 'up')?.button;
   return (
@@ -47,7 +51,7 @@ export function Body(p: BodyProps & Talk) {
       {p.page?.kind !== 'journal' && <RunningHead view={p.screen.view} text={p.screen.text} />}
       {water && (
         <View style={{ paddingHorizontal: space.page }}>
-          <Text style={note(c)}>{water.remaining_seconds} seconds to surface</Text>
+          <Text style={note(c, t)}>{water.remaining_seconds} seconds to surface</Text>
           {surface && <VerbLine b={surface} press={p.press} />}
         </View>
       )}
@@ -114,7 +118,8 @@ function sectionPage(p: BodyProps, page: Page) {
     );
   if (page.kind === 'map')
     return <MapPage view={view} text={text} g={p.g} press={p.press} world={p.world} />;
-  if (page.kind === 'settings') return <SettingsPage startOver={p.startOver} world={p.world} />;
+  if (page.kind === 'settings')
+    return <SettingsPage startOver={p.startOver} world={p.world} reading={p.reading} />;
   if (page.kind === 'journal') return <JournalPage {...p.screen} world={p.world} press={p.press} />;
   return (
     <CarryingPage

@@ -8,7 +8,7 @@ import type { GameView } from '../../packages/game-view/session.ts';
 import { ContinueButton } from '../book/actions.tsx';
 import { EntityLine, LogLines } from '../book/lines.tsx';
 import { Control, Page, RunningHead, SectionTitle } from '../book/pages.tsx';
-import { prose, usePalette } from '../book/palette.ts';
+import { prose, usePalette, useType } from '../book/palette.ts';
 import { LABEL } from '../book/labels.ts';
 
 type Quest = Pick<GameView['journal'][number], 'state' | 'journal'>;
@@ -26,8 +26,9 @@ function Framed(p: ComponentProps<typeof Page> & { journal?: Quest[] }) {
 
 function Prose({ lines }: { lines: number }) {
   const c = usePalette();
+  const t = useType();
   return Array.from({ length: lines }, (_, i) => (
-    <Text key={i} style={prose(c)}>
+    <Text key={i} style={prose(c, t)}>
       {`Line ${i + 1} of the long description.`}
     </Text>
   ));
