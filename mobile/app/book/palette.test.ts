@@ -51,6 +51,20 @@ test('every text role is at least 4.5:1 on bg and card in every palette', () => 
         assert.ok(contrast(p[role], p[paper]) >= 4.5, `${name}.${role} on ${paper}`);
 });
 
+// Breaks (loka-x6t.86): danger drawn in the action's ink, so what is barred reads as pressable
+// (docs/BOOK-UI-COMPONENTS.md#design-tokens: distinct hues in every palette).
+test('danger and action are distinct hues in every palette', () => {
+  const hue = (hex: string) => {
+    const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+    return (Math.atan2(Math.sqrt(3) * (g! - b!), 2 * r! - g! - b!) * 180) / Math.PI;
+  };
+  assert.equal(Math.round(hue('#00ff00')), 120);
+  for (const [name, p] of Object.entries(color)) {
+    const apart = Math.abs(hue(p.danger) - hue(p.action)) % 360;
+    assert.ok(Math.min(apart, 360 - apart) >= 20, name);
+  }
+});
+
 // Drives useShownPalette as a component would be: render, then run changed effects; frames and the
 // clock are in the test's hands.
 function mount(curve?: (t: number) => number) {

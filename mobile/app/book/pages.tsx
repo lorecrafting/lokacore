@@ -254,7 +254,7 @@ export function Page(p: {
         contentContainerStyle={{
           padding: space.page,
           ...(p.fixedTitle && { paddingTop: space.xs }), // the title's own space.md below it, then this: 12 to the description
-          gap: space.block,
+          gap: space.xl,
           ...(p.centred && { flexGrow: 1, justifyContent: 'center' }),
         }}
         onContentSizeChange={() => p.scrollToEnd && scroll?.scrollToEnd({ animated: false })}
@@ -275,10 +275,9 @@ function Title(p: { title: string; fixed?: boolean; onPress?: () => void }) {
       accessibilityRole="header"
       style={{
         color: usePalette().fg,
+        ...useType().pageTitle,
         // a scrolling title is a block: the page's gap alone is its space below
-        ...(p.fixed
-          ? { ...type.roomTitle, textAlign: 'center', paddingBottom: space.md }
-          : type.pageTitle),
+        ...(p.fixed && { paddingBottom: space.md }),
       }}
     >
       {p.title}
@@ -329,7 +328,7 @@ export function PageFoot({ children }: { children: ReactNode }) {
  */
 export function SectionTitle({ children }: { children: ReactNode }) {
   return (
-    <Text accessibilityRole="header" style={{ color: usePalette().fg, ...type.sectionTitle }}>
+    <Text accessibilityRole="header" style={{ color: usePalette().fg, ...useType().sectionTitle }}>
       {children}
     </Text>
   );

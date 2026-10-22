@@ -237,6 +237,7 @@ type BottomProps = {
 
 function Bottom(p: BottomProps) {
   const c = usePalette();
+  const t = useType();
   const { view, text, pending, fault, ended } = p.screen;
   // A tap on the position line acts only on the open World page.
   const position = !p.page && !view.scene && !ended && nextPosition(view.position, p.g.position);
@@ -268,7 +269,7 @@ function Bottom(p: BottomProps) {
           openCharacter={() => p.open({ kind: 'character' })}
         />
       )}
-      {p.screen.catchingUp && <Text style={{ ...type.small, color: c.dim }}>Catching up…</Text>}
+      {p.screen.catchingUp && <Text style={{ ...t.small, color: c.dim }}>Catching up…</Text>}
       {fault && <Fault fault={fault} startOver={p.startOver} />}
     </View>
   );
@@ -299,7 +300,7 @@ function Fault(p: { fault: string; startOver: () => void }) {
   const c = usePalette();
   return (
     <View style={{ alignItems: 'center' }}>
-      <Text style={{ ...type.small, color: c.dim }}>{p.fault}</Text>
+      <Text style={{ ...useType().small, color: c.dim }}>{p.fault}</Text>
       <Control label={LABEL.startOver} onPress={p.startOver} />
     </View>
   );

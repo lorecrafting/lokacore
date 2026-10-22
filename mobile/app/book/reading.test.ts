@@ -11,9 +11,10 @@ const lines = (f: number) => {
   return { body: [t.body.fontSize, t.body.lineHeight], log: [t.log.fontSize, t.log.lineHeight] };
 };
 
-// Breaks: a step or the cap off its value, a size left unrounded, a fixed role scaled, a line
-// height added to a role without one, or the bleed not clamped at a line taller than a touch target.
-test('each step scales the reading roles, the system scale stops at the cap, the rest stays fixed', () => {
+// Breaks: a step or the cap off its value, a size left unrounded, a role left fixed (loka-x6t.86:
+// every role scales, titles and small included), a modifier given a size, or the bleed not clamped
+// at a line taller than a touch target.
+test('each step scales every text role, the system scale stops at the cap, modifiers pass through', () => {
   const max = readingFactor('larger', 2);
   const steps = [
     readingFactor('standard', 1),
@@ -27,25 +28,38 @@ test('each step scales the reading roles, the system scale stops at the cap, the
     { body: [23, 36], log: [22, 34] },
     { body: [27, 42], log: [26, 39] },
   ]);
-  assert.deepEqual(
-    steps.map((f) => readingType(f).control),
-    [14, 16, 18, 21].map((fontSize) => ({ ...type.control, fontSize })),
-  );
+  const sized = (role: 'control' | 'pageTitle' | 'small') =>
+    steps.map((f) => [readingType(f)[role].fontSize, readingType(f)[role].lineHeight]);
+  assert.deepEqual(sized('control'), [
+    [14, 20],
+    [16, 23],
+    [18, 26],
+    [21, 30],
+  ]);
+  assert.deepEqual(sized('pageTitle'), [
+    [26, 30],
+    [30, 35],
+    [34, 39],
+    [39, 45],
+  ]);
+  assert.deepEqual(sized('small'), [
+    [13, 19],
+    [15, 22],
+    [17, 25],
+    [20, 29],
+  ]);
+  assert.equal(readingType(max).control.fontFamily, type.control.fontFamily);
   assert.deepEqual(
     steps.map((f) => tapBleed(readingType(f).body.lineHeight)),
     [8, 6, 4, 1],
   );
   assert.equal(tapBleed(48), 0);
   const big = readingType(max);
-  assert.deepEqual([big.small.fontSize, big.small.lineHeight], [13, 19]);
   assert.deepEqual(
-    [big.speaker, big.tag, big.runningHead].map((r) => r.fontSize),
-    [26, 20, 18],
+    [big.speaker, big.tag, big.runningHead, big.tile].map((r) => r.fontSize),
+    [26, 20, 18, 35],
   );
-  assert.deepEqual(
-    [big.tile, big.pageTitle, big.roomTitle],
-    [type.tile, type.pageTitle, type.roomTitle],
-  );
+  assert.deepEqual([big.named, big.italic], [type.named, type.italic]);
 });
 
 // Breaks: a stored value that is not a step, or a store that throws, reaches the Book; a failed
@@ -113,5 +127,12 @@ test('Settings chooses the Reading size: saved, shown inverted, and the pages gr
   assert.ok(drawn().every((n) => n.type !== 'Text' || n.props.allowFontScaling === false));
   h.tap('Back to World');
   assert.ok(body() > 0); // body 28 x 1.5
+  // loka-x6t.86: the title and the status line scale too (pageTitle 26/30, small 13/19 x 1.5); the
+  // room's title is left-aligned like every page's
+  const sized = (n: any) =>
+    n.type === 'Text' && [n.props.style?.fontSize, n.props.style?.lineHeight];
+  const title = drawn().find((n) => String(sized(n)) === '39,45');
+  assert.equal(title.props.style.textAlign, undefined);
+  assert.ok(drawn().some((n) => String(sized(n)) === '20,29'));
   assert.ok(drawn().some((n) => n.type === 'Pressable' && n.props.style?.paddingVertical === 1));
 });

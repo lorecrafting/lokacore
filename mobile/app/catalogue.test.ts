@@ -85,7 +85,8 @@ test('every exported component has a story that imports it', () => {
 });
 
 // Breaks: a token no component reads (a dead value the catalogue still describes). Palette roles and
-// fonts are read through usePalette and `type`, so the groups checked are the named-value ones.
+// fonts are read through usePalette and `type`, so the groups checked are the named-value ones. Type
+// roles are read at the Reading size, through useType() (`const t = useType()`; loka-x6t.86).
 const NO_BOOK_CONSUMER: Record<string, string> = {
   'space.hair': 'read only by dev chrome (the picker overlay, the System dashboard)',
   'size.speechBar': 'the Log line row: waits until the log projects a speaker',
@@ -104,7 +105,9 @@ test('every token has a consumer outside tokens.ts', async () => {
       .filter(
         (name) =>
           !(name in NO_BOOK_CONSUMER) &&
-          !new RegExp(`\\b${name.replace('.', '\\.')}\\b`).test(code),
+          !new RegExp(
+            `${g === 'type' ? '(\\btype|\\bt|useType\\(\\))' : `\\b${g}`}\\.${name.split('.')[1]}\\b`,
+          ).test(code),
       ),
   );
   assert.deepEqual(dead, []);

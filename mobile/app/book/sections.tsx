@@ -288,6 +288,7 @@ export function SettingsPage(p: { startOver: () => void; world: () => void; read
  */
 export function ChapterPage(p: { label: string; title: string; done: () => void }) {
   const c = usePalette();
+  const t = useType();
   return (
     <Page centred>
       <View style={{ alignItems: 'center', gap: space.sm }}>
@@ -298,8 +299,8 @@ export function ChapterPage(p: { label: string; title: string; done: () => void 
           {...useTitleFocus()}
           style={{ alignItems: 'center', gap: space.sm }}
         >
-          <Text style={[type.chapterLabel, { color: c.dim, textAlign: 'center' }]}>{p.label}</Text>
-          <Text style={[type.chapterTitle, { color: c.fg, textAlign: 'center' }]}>{p.title}</Text>
+          <Text style={[t.chapterLabel, { color: c.dim, textAlign: 'center' }]}>{p.label}</Text>
+          <Text style={[t.chapterTitle, { color: c.fg, textAlign: 'center' }]}>{p.title}</Text>
         </View>
         <View
           style={{

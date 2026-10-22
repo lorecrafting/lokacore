@@ -42,7 +42,7 @@ export function WordBar(p: {
   const whispered = [...new Set(of('whisper').map((b) => b.target_ids[0]))];
   const name = (id: string) => p.text(p.view.entities.find((e) => e.id === id)!.name);
   return (
-    <View style={{ gap: space.block }}>
+    <View style={{ gap: space.xl }}>
       <SectionTitle>{LABEL.word}</SectionTitle>
       <Row title={LABEL.say}>{chips(of('say'))}</Row>
       {whispered.map((id) => (
