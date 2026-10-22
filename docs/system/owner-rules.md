@@ -29,7 +29,7 @@ and not repeated here.
 
 - Detail pages follow the [canonical Book order](book-ui.md#detail-page-order), with no empty event-log heading or placeholder ([record](../decisions/owner-decision-detail-page-order-2026-10-05.md)).
 
-- Active development targets the real Missing Child chapter; Old Bram is outside its active cast and Q1 must be designed from the actual Ashmere roles, cast and rooms ([cast decision](../decisions/owner-decision-real-chapter-cast-2026-10-05.md), [cutover](../decisions/owner-decision-actual-chapter-cutover-2026-10-05.md)).
+- Ashmere is retired: the app bundles only the toolbox showcase, and the real game is rebuilt from zero after UI polish ([record](../decisions/owner-decision-retire-ashmere-2026-10-21.md)).
 
 - The opening chapter has no required idle waits for tides, night, next day or a returning NPC; any required opening NPC stays reachable, the mire has an always-passable non-swim route, and time may still drive deadlines and ambience ([record](../decisions/owner-decision-no-wait-opening-2026-10-05.md)).
 

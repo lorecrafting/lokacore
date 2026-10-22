@@ -26,9 +26,16 @@ const adapt = (sql: DatabaseSync): Db => ({
   isInTransactionSync: () => sql.isTransaction,
 });
 
-// Breaks: the app bundles Lantern again or opens/deletes the Lantern file for the chapter,
-// including Start over. Saved pins/title and untouched old save bytes are the assertions.
-test('the app opens and replaces only its chapter save, preserving existing Lantern and sampler saves', () => {
+// Breaks: the app bundles Ashmere or Lantern again, or opens/deletes an older save for the
+// showcase, including Start over. Saved pins, the opening room and untouched old save bytes are
+// the assertions.
+test('the app opens and replaces only its showcase save, preserving Lantern, sampler and Ashmere saves', () => {
+  const showcase = JSON.parse(
+    readFileSync(
+      new URL('../../protocol/fixtures/toolbox_showcase_hash.json', import.meta.url),
+      'utf8',
+    ),
+  ) as { sha256: string };
   const dir = mkdtempSync(join(tmpdir(), 'loka-app-chapter-'));
   const lanternPath = join(dir, 'loka-lantern.db');
   const sql = new DatabaseSync(lanternPath);
@@ -63,8 +70,25 @@ test('the app opens and replaces only its chapter save, preserving existing Lant
     },
   );
   old.close();
+  const ashmerePath = join(dir, 'loka-ashmere-missing-child.db');
+  const ashmere = new DatabaseSync(ashmerePath);
+  openGame(
+    adapt(ashmere),
+    JSON.parse(
+      readFileSync(
+        new URL('../../protocol/fixtures/missing_child_v042_hash.json', import.meta.url),
+        'utf8',
+      ),
+    ),
+    {
+      kernel_version: `loka-kernel@${'0'.repeat(40)}`,
+      newId: randomUUID,
+      time: { wall: () => 10000, monotonic: () => 0 },
+    },
+  );
+  ashmere.close();
   const checksum = () =>
-    [lanternPath, samplerPath].map((path) =>
+    [lanternPath, samplerPath, ashmerePath].map((path) =>
       createHash('sha256').update(readFileSync(path)).digest('hex'),
     );
   const before = checksum();
@@ -115,33 +139,31 @@ test('the app opens and replaces only its chapter save, preserving existing Lant
     });
     assert.ok(globals.loka_session!.game());
     const view = globals.loka_session!.game()!.view().view;
-    assert.equal(view.chapter?.title, 'chapter.missing_child');
-    assert.equal(
-      globals.loka_session!.game()!.text('chapter.missing_child'),
-      'The Missing Child — in progress',
-    );
+    assert.equal(view.place.title.key, 'room.crossroads_inn.title');
     assert.deepEqual(
       view.entities.map((e) => [e.kind, e.name]),
-      [['npc', 'npc.elspeth.short']],
+      [
+        ['npc', 'npc.hob.short'],
+        ['item', 'item.loaf.short'],
+        ['item', 'item.waterskin.short'],
+      ],
     );
     assert.deepEqual(view.journal, []);
     const pin = () => {
-      const database = new DatabaseSync(join(dir, 'loka-ashmere-missing-child.db'), {
-        readOnly: true,
-      });
+      const database = new DatabaseSync(
+        join(dir, `loka-showcase-${showcase.sha256.slice(0, 16)}.db`),
+        { readOnly: true },
+      );
       try {
         return JSON.parse(database.prepare('SELECT pin FROM save').get()!.pin as string);
       } finally {
         database.close();
       }
     };
-    assert.equal(pin().cartridge_id, 'ashmere_missing_child');
-    assert.equal(
-      pin().content_hash,
-      '5d8b0e3a16b209733707a8450cee5a4330965092498cf1d31ab8fdae9a50fc8b',
-    );
+    assert.equal(pin().cartridge_id, 'toolbox_showcase');
+    assert.equal(pin().content_hash, showcase.sha256);
     assert.equal(globals.loka_session!.startOver(), undefined);
-    assert.equal(pin().cartridge_id, 'ashmere_missing_child');
+    assert.equal(pin().cartridge_id, 'toolbox_showcase');
     assert.deepEqual(checksum(), before);
   } finally {
     connections.at(-1)?.close();

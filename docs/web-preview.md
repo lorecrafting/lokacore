@@ -25,11 +25,11 @@ migration promise.
 
 In a slice worktree, `bin/worktree_setup.sh` replaces `npm ci`: it clones the main checkout's
 `node_modules` (APFS copy-on-write, a few seconds). Not a symlink: Metro then resolves `expo`
-outside its watched folders and serves the SQLite worker at a broken URL, a blank page. To check a sampler room at 390 px there without touching the owner's preview (each walk serves
+outside its watched folders and serves the SQLite worker at a broken URL, a blank page. To check a showcase room at 390 px there without touching the owner's preview (each walk serves
 the Book on a free port and screenshots every page into `mobile/app/.walkthrough/contact-sheet.html`):
 
 ```sh
-mise exec -- bin/loka dev cartridges/ashmere_sampler && cd mobile/app && LOKA_WALK=ashmere_sampler mise exec -- npm run walkthrough
+mise exec -- bin/loka dev cartridges/toolbox_showcase && cd mobile/app && LOKA_WALK=toolbox_showcase mise exec -- npm run walkthrough
 ```
 
 `expo-sqlite` 57.0.3's browser worker needs an asynchronous first open before synchronous
@@ -50,7 +50,7 @@ Its pretest also runs the controlled worker deadline check governed by
 [delayed/silent-worker red controls and browser proof](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/2026-10-06-web-sqlite-sync-deadline/README.md).
 
 The default `e2e run` is headless. To watch the configured browser live and save a video,
-run `mise exec -- npm run test:e2e -- tests/book.e2e.ts --headed --video`.
+run `mise exec -- npm run test:e2e -- tests/showcase.e2e.ts --headed --video`.
 The runner also accepts `--video retain-on-failure` to keep recordings only for failed tests
 ([official e2e debugging guide](https://e2e.tester.army/docs/debugging)). The deterministic suite needs no model. Exploratory tests that use agent actions require an already authorized provider or subscription, or a local model. The official e2e overview describes the distinction between exact steps and model-driven agent steps.
 
