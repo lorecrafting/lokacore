@@ -2,10 +2,11 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import type { Command } from '../src/contracts.gen.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
-import { step, stepElapsed, type World } from '../src/index.ts';
+import { gameView, step, stepElapsed, type World } from '../src/index.ts';
 import { checked, KERNEL } from './sim.ts';
 import { fixture } from './c5_bleed_fixture.ts';
 import { fresh } from './deer_fixture.ts';
+import { herbs, standing, wick } from './infirmary_fixture.ts';
 
 const id = (n: number) => `aaaaaaaa-0000-4000-8000-${String(n).padStart(12, '0')}` as never;
 
@@ -100,4 +101,39 @@ test('simulator accepts the receipts of a shoo_sampler sight flight', () => {
       checked({ ...KERNEL, step: () => s.result }, s.before, s.command, s.revision).failure,
       undefined,
     );
+});
+
+// Breaks: the oracle keeps a retired quest row instead of deleting it, so a lawful repeat accept
+// of the harvest_sampler exchange fails it; a retained row must still be adopt_mismatch.
+test('simulator accepts a repeat exchange accept and refuses a retained retired row', () => {
+  const b = driver(standing(herbs));
+  const talk = () => b.run({ type: 'talk', target_id: wick });
+  const choose = (choice_id: string) =>
+    b.run({
+      type: 'choose',
+      choice_id,
+      continuation_id: gameView(b.world()).choice!.continuation_id,
+    });
+  talk();
+  choose('accept');
+  talk();
+  choose('exchange');
+  talk();
+  const repeated = choose('accept');
+  const oracle = (result: typeof repeated.result) =>
+    checked({ ...KERNEL, step: () => result }, repeated.before, repeated.command, repeated.revision)
+      .failure?.id;
+  assert.equal(oracle(repeated.result), undefined);
+  const decision = repeated.result.decision;
+  assert.ok(decision.kind === 'accepted');
+  const retired = decision.delta.ops.find((o) => o.op === 'quest.retire');
+  assert.ok(retired);
+  const quests = b.world().state.quests!;
+  assert.equal(Object.hasOwn(quests, retired.instance_id), false);
+  const kept = repeated.before.state.quests![retired.instance_id];
+  const world = {
+    ...b.world(),
+    state: { ...b.world().state, quests: { ...quests, [retired.instance_id]: kept } },
+  };
+  assert.equal(oracle({ ...repeated.result, world }), 'adopt_mismatch');
 });
