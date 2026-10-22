@@ -1,4 +1,4 @@
-// StatusLine: the one centred line under the footer (StatusLine's doc comment).
+// StatusLine: the centred status line under the footer (StatusLine's doc comment).
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { View } from 'react-native';
 import { expect, fn } from 'storybook/test';
