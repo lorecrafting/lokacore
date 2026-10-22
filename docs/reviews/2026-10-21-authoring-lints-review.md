@@ -23,7 +23,7 @@ Holds: 1, 4 and 5. 2 holds in part (findings 2 and 3). 3 holds, but see finding 
   - `reasons.test.ts` with `presenter.test.ts`: 15 passed.
   - `elixir bin/contracts.exs --check`: exit 0.
 - Mutants, all killed:
-  - M1: drop the `silent` test.
+  - M1: drop the `silent` guard (`lint.ex:35-41`).
   - M2: band `< 100` to `<= 100`.
   - M3: shadow `i < j` to `i != j`.
   - M4: drop the 3b arrest guard.
@@ -43,7 +43,7 @@ Holds: 1, 4 and 5. 2 holds in part (findings 2 and 3). 3 holds, but see finding 
 ## Findings
 
 1. **should-fix**: `protocol/reaction.schema.json:507-510`. `silent` is called "Author-time only", but the compiler copies it into the artifact, where the probe found `cartridge.reactions[...].silent`. Every other new optional artifact field has a kernel_api floor (cartridge.md:1784-1792); this one has none.
-   - Failure scenario: loka-kgd.184 marks reactions silent. A kernel built before this schema then rejects the showcase with SCHEMA_VIOLATION, not KERNEL_API_RANGE_INVALID.
+   - Failure scenario: loka-kgd.184 marks reactions silent. A kernel built before this schema then rejects the showcase with UNKNOWN_FIELD at `.cartridge.reactions.<key>.silent`, not KERNEL_API_RANGE_INVALID: at the base, `ReactionRule` has `additionalProperties: false`, and `kernel/ts/src/content/cartridge.ts:114-119` validates the artifact against it. The mark also changes `cartridge_hash`.
    - Fix: strip `silent` in the compiler, which keeps ruling (a) and the hash; or add a floor, which overturns ruling (a) and needs the PM. COST XS.
 2. **should-fix**: `lib/loka/content/lint.ex:10` and `docs/system/mechanics.md:602`. `@writes` misses two ops:
    - `fact.stamp`, which is in row 3's "fact.set" class. water_croft and water_plot escape.
