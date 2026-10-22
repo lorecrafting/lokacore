@@ -13,9 +13,8 @@ const r = (kind: string, key: string) => f.ref(kind, key);
 export function patrolSource(c: any) {
   c.lock.capabilities.patrol = 1;
   c.manifest.requires.capabilities.patrol = 1;
-  // A composed source may already sit above the patrol floor (escort is 1.37).
-  if (Number(c.manifest.requires.kernel_api.at_least.split('.')[1]) < 22)
-    c.manifest.requires.kernel_api.at_least = '1.22';
+  // A composed source runs after this and may raise the floor (escort is 1.37).
+  c.manifest.requires.kernel_api.at_least = '1.22';
   // At 1.22 corpse templates and lidded items must be containers (as in escort_fixture.ts).
   for (const k of ['player_corpse', 'rat_corpse', 'storage_chest', 'trunk'])
     c.items[`${prefix}:item/${k}`].container = true;

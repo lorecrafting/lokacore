@@ -13,7 +13,6 @@ import { test } from 'node:test';
 import { gameView, INSTALLED, loadCartridge, newWorld, step } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { encode } from '../src/foundation/canonical.ts';
-import { read } from './read.ts';
 import { fragment } from './fragment.ts';
 import * as patrol from './patrol_fixture.ts';
 

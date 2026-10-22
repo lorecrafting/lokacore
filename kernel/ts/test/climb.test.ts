@@ -12,7 +12,6 @@ import { INSTALLED, loadCartridge, newWorld, step } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
-import { read } from './read.ts';
 import * as patrol from './patrol_fixture.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-climb-sampler-'));

@@ -1,7 +1,7 @@
 defmodule Loka.PatrolSource do
   @moduledoc """
   The cellar sampler plus an inline patrol: Tobin walks a finite route from a new watch post east of North Gate through a new east gate east of Village Green.
-  Call `copy/0` from `setup_all`; the copy is removed after the module.
+  Call `copy/0` from `setup_all` or a test; the copy is removed when that scope exits.
   """
 
   def copy do

@@ -37,8 +37,8 @@ const ref = (kind: string, key: string) => ({
   kind,
   key,
 });
-function load(change: (c: any) => void = () => {}, from: any = source) {
-  const c = structuredClone(from);
+function load(change: (c: any) => void = () => {}) {
+  const c = structuredClone(source);
   change(c);
   const canonical = encode(c);
   const sha256 = createHash('sha256').update(canonical).digest('hex');
