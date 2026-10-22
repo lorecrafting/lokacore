@@ -120,13 +120,11 @@ function Stair({ exit, on }: { exit: Exit; on: boolean }) {
 }
 
 /**
- * The footer minimap's drawing: you are the dot; each exit a path to an open ring, or a stub with a `danger` tick when closed; up and down are stair nodes that fade in with the zoom.
- *
- * Use: Footer only.
- *
- * Rules: a drawing, exempt from space tokens; real data only (the current room and its exits).
- *
- * Story: Footer.stories.tsx
+ * The footer minimap's drawing: you are the dot; each exit a path to an open ring, or a stub with
+ * a `danger` tick when closed; stair nodes fade in with the zoom.
+ * - Use: Footer only.
+ * - Rules: a drawing, exempt from space tokens; real data only (the current room and its exits).
+ * - Story: Footer.stories.tsx
  */
 export function MapDrawing(p: {
   exits: readonly Exit[];

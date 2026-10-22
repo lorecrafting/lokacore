@@ -10,14 +10,12 @@ import { opacity, radius, size, space } from './tokens.ts';
 
 /**
  * One word of the World page's Word block as a pill (book-ui.md, Word bar).
- *
- * Use: Word block words; a radio row setting (Reading size).
- *
- * Rules: a row wraps, never truncates. Name: the word, then how it is spoken (`ward, say`, `ward, whisper to the elder`, `ward, shout`, `ward, cast`).
- *
- * States: available; unavailable (no onPress: not pressable, its reason a `word, cast: reason` line under the row, as the Action card's); pending (not pressable, busy); chosen (a defined `chosen`: role radio, filled in ink when checked).
- *
- * Story: Chip.stories.tsx
+ * - Use: Word block words; a radio row setting (Reading size).
+ * - Rules: a row wraps, never truncates. Name: the word, then how it is spoken (`ward, say`,
+ *   `ward, whisper to the elder`). Unavailable: not pressable, its reason a `word, cast: reason`
+ *   Note under the row (the Action card's form); chosen: role radio, checked.
+ * - States: available; unavailable; pending; chosen.
+ * - Story: Chip.stories.tsx
  */
 export function Chip(p: {
   word: string;
@@ -58,11 +56,9 @@ export function Chip(p: {
 }
 
 /**
- * A titled row of chips, centred and wrapping, its reasons as lines under it.
- *
- * Use: each Word block row (Say, Whisper to <name>, Shout, Cast); titles in the Note's look.
- *
- * Story: WordBar.stories.tsx
+ * A titled row of chips, centred and wrapping, its reasons as Notes under it.
+ * - Use: each Word block row (Say, Whisper to <name>, Shout, Cast).
+ * - Story: WordBar.stories.tsx
  */
 export function Row(p: { title: string; children: ReactNode[]; reasons?: string[] }) {
   if (!p.children.length) return null;
@@ -89,10 +85,8 @@ const stepWord = {
 };
 /**
  * The Reading size setting: one radio Chip per step.
- *
- * Use: Settings, first.
- *
- * Story: Chip.stories.tsx
+ * - Use: Settings, first.
+ * - Story: Chip.stories.tsx
  */
 export const ReadingSize = (p: Reading) => (
   <View accessibilityRole="radiogroup" accessibilityLabel={LABEL.readingSize}>

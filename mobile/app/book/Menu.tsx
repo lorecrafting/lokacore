@@ -21,10 +21,8 @@ const SECTIONS: [Section, string][] = [
 ];
 /**
  * The Contents: one Entity line per section.
- *
- * Use: the status line's Contents button.
- *
- * Story: SectionPages.stories.tsx
+ * - Use: the status line's Contents button.
+ * - Story: SectionPages.stories.tsx
  */
 export function ContentsPage(p: { open: (section: Section) => void; world: () => void }) {
   return (
@@ -84,15 +82,12 @@ export const inside = (p: {
   );
 
 /**
- * An item's detail in the detail-page order (book-ui.md, Item details and take/drop): projected state as Notes and Entity lines, options as Action cards.
- *
- * Use: Item only.
- *
- * Rules: a refused action reads the same word as an offered one.
- *
- * States: plain; container with Inside; fuel; too heavy; held by a person.
- *
- * Story: ItemPage.stories.tsx
+ * An item's detail in the detail-page order: projected state as Notes and Entity lines, options
+ * as Action cards (book-ui.md, Item details and take/drop).
+ * - Use: Item only.
+ * - Rules: a refused action reads the same word as an offered one.
+ * - States: plain; container with Inside; fuel; too heavy; held by a person.
+ * - Story: ItemPage.stories.tsx
  */
 export function ThingPage(p: {
   thing?: Thing;
@@ -135,10 +130,8 @@ export function ThingPage(p: {
 
 /**
  * The item route: finds the thing and its holder, then draws ThingPage.
- *
- * Use: an item detail route.
- *
- * Story: ItemPage.stories.tsx
+ * - Use: an item detail route.
+ * - Story: ItemPage.stories.tsx
  */
 export function Item(p: {
   id: string;

@@ -37,14 +37,11 @@ function Fight({ view, text, combat }: Pick<Screen, 'view' | 'text'> & { combat:
 
 /**
  * The combat foreground (book-ui.md, Live combat response).
- *
- * Use: while a fight is on.
- *
- * Rules: opponent lines (name, band phrase; none of your own condition lines) as one block of touching lines, then the isolated log, then the response cards; no PageFoot.
- *
- * States: one foe; pack; bleeding.
- *
- * Story: CombatPage.stories.tsx
+ * - Use: while a fight is on.
+ * - Rules: opponent lines (name, band phrase; none of your own condition lines) as one block of
+ *   touching lines, then the isolated log, then the response cards; no PageFoot.
+ * - States: one foe; pack; bleeding.
+ * - Story: CombatPage.stories.tsx
  */
 export function Combat(p: {
   screen: ReturnType<ReturnType<typeof presenter>['screen']>;

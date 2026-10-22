@@ -6,43 +6,50 @@ import { test } from 'node:test';
 
 const app = new URL('./', import.meta.url);
 const read = (path: string) => readFileSync(new URL(path, app), 'utf8');
-const stories = readdirSync(new URL('stories/', app)).filter((f) => f.endsWith('.stories.tsx'));
+const stories = readdirSync(new URL('stories/', app)).filter((f) => f.endsWith('.tsx'));
 
 // Not drawn on their own: each with its reason.
 const EXEMPT: Record<string, string> = {
-  Tap: 'shown through VerbLine and the room title',
-  Here: 'the room page lines, shown through the RoomPage stories',
-  Tooltip: 'the status icon tip, shown through the StatusIcon Held and Focused stories',
-  'Chip:Row': 'a titled chip row, shown through the WordBar stories and Chip ReadingSize',
+  'book/Text.tsx:Text': 'every line of every story',
+  'book/pages.tsx:Tap': 'shown through VerbLine and the room title',
+  'book/lines.tsx:Here': 'the room page lines, shown through the RoomPage stories',
+  'book/StatusIcon.tsx:Tooltip':
+    'the status icon tip, shown through the StatusIcon Held and Focused stories',
+  'book/Chip.tsx:Row': 'a titled chip row, shown through the WordBar stories and Chip ReadingSize',
+  'book/MapDrawing.tsx:MapDrawing': 'a drawing, shown through the map pages',
 };
-const EXEMPT_FILES = { 'MapDrawing.tsx': 'a drawing, shown through the map pages' };
 
-// Every exported component, `book/<file>:<name>`, with the source before its export.
+// Every exported component, with its doc comment: a function, const or `{ X as Name }` export of a
+// capitalised name. Any other capitalised export form is listed so the scan cannot silently miss one.
 const files = [
   ...readdirSync(new URL('book/', app))
     .filter((f) => f.endsWith('.tsx'))
     .map((f) => `book/${f}`),
   'SaveError.tsx',
 ];
+const EXPORT = /^export (?:(?:default )?(?:function|const) ([A-Z]\w*)|\{ \w+ as ([A-Z]\w*) \})/gm;
+const KNOWN =
+  /^export (?:(?:default )?(?:function|const|type|interface)\b|\{ \w+ as [A-Z]\w* \}|\{ [a-z])/;
+const unknownExports: string[] = [];
 const exported = files.flatMap((file) => {
   const src = read(file);
-  return [...src.matchAll(/^export (?:default )?(?:function|const) ([A-Z]\w*)/gm)].map((m) => ({
+  for (const [line] of src.matchAll(/^export .*/gm))
+    if (!KNOWN.test(line)) unknownExports.push(`${file}: ${line}`);
+  return [...src.matchAll(EXPORT)].map((m) => ({
     file,
-    name: m[1],
+    name: m[1] ?? m[2]!,
     doc: /\/\*\*((?:(?!\*\/)[^])*)\*\/\s*$/.exec(src.slice(0, m.index))?.[1] ?? '',
   }));
 });
+const story = ({ doc }: { doc: string }) => /^ \* - Story: (\w+)\.stories\.tsx$/m.exec(doc)?.[1];
 
-// Breaks: a component loses its doc comment (or a private helper's JSDoc sits between), its `Use:`,
-// or names a story file that does not exist.
+// Breaks: a component loses its doc comment (or a private helper's JSDoc sits between), its
+// `- Use:`, names a story file that does not exist, or is exported in a form the scan cannot see.
 test('every exported component has a doc comment with Use: and an existing Story:', () => {
   const bad = exported
-    .filter(({ doc }) => {
-      const story = /\* Story: (\w+\.stories\.tsx)$/m.exec(doc)?.[1];
-      return !/\* Use: /.test(doc) || !story || !stories.includes(story);
-    })
+    .filter((c) => !/^ \* - Use: /m.test(c.doc) || !stories.includes(`${story(c)}.stories.tsx`))
     .map(({ file, name }) => `${file}: ${name}`);
-  assert.deepEqual(bad, []);
+  assert.deepEqual([...bad, ...unknownExports], []);
 });
 
 // Breaks: the catalogue index drops, duplicates or misfiles a component, or its Story column
@@ -50,43 +57,27 @@ test('every exported component has a doc comment with Use: and an existing Story
 test('the catalogue index lists each exported component once, with its file and story', () => {
   const md = read('../../docs/BOOK-UI-COMPONENTS.md');
   const index = md.slice(md.indexOf('## Component catalogue'), md.indexOf('## Page turn'));
-  const rows = [
-    ...index.matchAll(/^\| `(\w+)` \| \[[^\]]+\]\(\.\.\/mobile\/app\/([\w/.]+)\) \| (\w+) \|$/gm),
-  ];
+  const rows = [...index.matchAll(/^\| `(\w+)` \| `([\w/.]+)` \| (\w+) \|$/gm)];
   assert.deepEqual(
-    rows.map(([, name, file, story]) => `${file}:${name}:${story}`).sort(),
-    exported
-      .map(({ file, name, doc }) => `${file}:${name}:${/\* Story: (\w+)\./m.exec(doc)?.[1]}`)
-      .sort(),
+    rows.map(([, name, file, s]) => `${file}:${name}:${s}`).sort(),
+    exported.map((c) => `${c.file}:${c.name}:${story(c)}`).sort(),
   );
 });
 
 // A story or a story helper (stories/screen.tsx) imports it, named or as the default.
 test('every exported component has a story that imports it', () => {
-  const sources = readdirSync(new URL('stories/', app)).filter((f) => f.endsWith('.tsx'));
-  const imports = sources.flatMap((story) =>
+  const imports = stories.flatMap((s) =>
     [
-      ...read(`stories/${story}`).matchAll(
-        /import\s+(?:type\s+)?(?:\{([^}]*)\}|(\w+))\s+from\s+'\.\.\/book\/(\w+)\.tsx'/g,
+      ...read(`stories/${s}`).matchAll(
+        /import\s+(?:type\s+)?(?:\{([^}]*)\}|(\w+))\s+from\s+'\.\.\/((?:book\/)?\w+\.tsx)'/g,
       ),
     ].flatMap(([, names, fallback, file]) =>
       (names ?? fallback!).split(',').map((n) => `${file}:${n.trim().split(/\s+as\s+/)[0]}`),
     ),
   );
-  const files = readdirSync(new URL('book/', app)).filter(
-    (f) => f.endsWith('.tsx') && !(f in EXEMPT_FILES),
-  );
-  const missing = files.flatMap((file) =>
-    [...read(`book/${file}`).matchAll(/^export (?:default )?(?:function|const) ([A-Z]\w*)/gm)]
-      .map(([, name]) => name)
-      .filter(
-        (name) =>
-          !(name in EXEMPT) &&
-          !(`${file.slice(0, -4)}:${name}` in EXEMPT) &&
-          !imports.includes(`${file.slice(0, -4)}:${name}`),
-      )
-      .map((name) => `${file}: ${name}`),
-  );
+  const missing = exported
+    .map(({ file, name }) => `${file}:${name}`)
+    .filter((key) => !(key in EXEMPT) && !imports.includes(key));
   assert.deepEqual(missing, []);
 });
 

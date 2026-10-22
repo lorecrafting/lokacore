@@ -19,7 +19,7 @@ For every agent writing `mobile/app/book/` or its stories ([audit](reviews/2026-
 ## Where each fact lives
 
 - **Values** (colours, type, space, size, radius, opacity, motion, sound): [`tokens.ts`](../mobile/app/book/tokens.ts) and nowhere else; the [Tokens story](../mobile/app/stories/Tokens.stories.tsx) renders it live.
-- **Use, rules and states** of every component: its doc comment, on the export in `mobile/app/book/` ([index](#component-catalogue)). Cross-component guidance and the token roles: this page.
+- **Use, rules and states** of every component: its doc comment, on the export in `mobile/app/book/` (and `SaveError.tsx`; [index](#component-catalogue)). Cross-component guidance and the token roles: this page.
 - **Interaction** (what shows when, what a tap does, returns, freshness): [Book UI](system/book-ui.md). It names no token, colour or size.
 - **Working examples:** `npm run storybook` in `mobile/app` ([how](web-preview.md#storybook)); the `Story:` file a doc comment names, one story per state. A story carries no rule beyond a one-line link to its component.
 - **References:** the two mocks in [docs/design](design/README.md); the owner's rulings in [decisions](decisions/README.md).
@@ -123,74 +123,77 @@ off, consolidated; the [Tokens story](../mobile/app/stories/Tokens.stories.tsx) 
 ## Component catalogue
 
 Each exported Book component carries its spec in a doc comment on its export: a one-line form,
-then `Use:` (when it is the right piece), `Rules:` (only what the code cannot show: never wraps,
-the screen-reader name, its consumers), `States:` (one story per state) and `Story:` (its primary
-story file). `Use:` and `Story:` are required; `Rules:` and `States:` appear when they say
-something. Behaviour stays in [Book UI](system/book-ui.md), which a comment links and never
-copies. This index has one line per export; [`catalogue.test.ts`](../mobile/app/catalogue.test.ts)
-fails when a comment or a line is missing or the two disagree. A new mechanic reuses one of
-these; a new component needs a real consumer, its comment and its line here in the same slice.
+then bullets `- Use:` (when it is the right piece), `- Rules:` (only what the code cannot show:
+never wraps, the screen-reader name, its consumers), `- States:` (one story per state) and
+`- Story:` (its story file). `Use:` and `Story:` are required; `Rules:` and `States:` appear when
+they say something; the comment wraps at 100 columns and restates no style the code sets.
+Behaviour stays in [Book UI](system/book-ui.md), which a comment links and never copies. Storybook
+renders the comment on the Docs page of the story whose meta names the component. This index has
+one line per export, the file under `mobile/app/`; [`catalogue.test.ts`](../mobile/app/catalogue.test.ts)
+fails when a comment or a line is missing or the two disagree. A new mechanic reuses one of these;
+a new component needs a real consumer, its comment and its line here in the same slice.
 
 | Component | File | Story |
 |---|---|---|
-| `Body` | [book/Body.tsx](../mobile/app/book/Body.tsx) | RoomPage |
-| `Book` | [book/Book.tsx](../mobile/app/book/Book.tsx) | Live |
-| `BookView` | [book/Book.tsx](../mobile/app/book/Book.tsx) | RecoveryPages |
-| `Chip` | [book/Chip.tsx](../mobile/app/book/Chip.tsx) | Chip |
-| `Row` | [book/Chip.tsx](../mobile/app/book/Chip.tsx) | WordBar |
-| `ReadingSize` | [book/Chip.tsx](../mobile/app/book/Chip.tsx) | Chip |
-| `Combat` | [book/Combat.tsx](../mobile/app/book/Combat.tsx) | CombatPage |
-| `DiscoveredMap` | [book/DiscoveredMap.tsx](../mobile/app/book/DiscoveredMap.tsx) | MapPage |
-| `DreamPage` | [book/DreamPage.tsx](../mobile/app/book/DreamPage.tsx) | ChapterPages |
-| `DreamResume` | [book/DreamPage.tsx](../mobile/app/book/DreamPage.tsx) | NoticePage |
-| `Footer` | [book/Footer.tsx](../mobile/app/book/Footer.tsx) | Footer |
-| `Tip` | [book/Footer.tsx](../mobile/app/book/Footer.tsx) | Tip |
-| `MapDrawing` | [book/MapDrawing.tsx](../mobile/app/book/MapDrawing.tsx) | Footer |
-| `ContentsPage` | [book/Menu.tsx](../mobile/app/book/Menu.tsx) | SectionPages |
-| `ThingPage` | [book/Menu.tsx](../mobile/app/book/Menu.tsx) | ItemPage |
-| `Item` | [book/Menu.tsx](../mobile/app/book/Menu.tsx) | ItemPage |
-| `NightSky` | [book/NightSky.tsx](../mobile/app/book/NightSky.tsx) | NightSky |
-| `NpcPage` | [book/Npc.tsx](../mobile/app/book/Npc.tsx) | NpcPage |
-| `NpcDetail` | [book/Npc.tsx](../mobile/app/book/Npc.tsx) | NpcPage |
-| `PageTurn` | [book/PageTurn.tsx](../mobile/app/book/PageTurn.tsx) | PageTurn |
-| `Riddle` | [book/Riddle.tsx](../mobile/app/book/Riddle.tsx) | Riddle |
-| `LetterTile` | [book/Riddle.tsx](../mobile/app/book/Riddle.tsx) | LetterTile |
-| `StatusLine` | [book/Status.tsx](../mobile/app/book/Status.tsx) | StatusLine |
-| `StatusIcons` | [book/StatusIcon.tsx](../mobile/app/book/StatusIcon.tsx) | StatusIcon |
-| `Tooltip` | [book/StatusIcon.tsx](../mobile/app/book/StatusIcon.tsx) | StatusIcon |
-| `WordBar` | [book/WordBar.tsx](../mobile/app/book/WordBar.tsx) | WordBar |
-| `ActionCard` | [book/actions.tsx](../mobile/app/book/actions.tsx) | ActionCard |
-| `Cards` | [book/actions.tsx](../mobile/app/book/actions.tsx) | ActionCard |
-| `VerbLine` | [book/actions.tsx](../mobile/app/book/actions.tsx) | VerbLine |
-| `ContinueButton` | [book/actions.tsx](../mobile/app/book/actions.tsx) | ContinueButton |
-| `JournalPage` | [book/journal.tsx](../mobile/app/book/journal.tsx) | SectionPages |
-| `EntityLine` | [book/lines.tsx](../mobile/app/book/lines.tsx) | EntityLine |
-| `Note` | [book/lines.tsx](../mobile/app/book/lines.tsx) | Note |
-| `Asides` | [book/lines.tsx](../mobile/app/book/lines.tsx) | RoomPage |
-| `LogLines` | [book/lines.tsx](../mobile/app/book/lines.tsx) | LogLines |
-| `AwayRecap` | [book/lines.tsx](../mobile/app/book/lines.tsx) | AwayRecap |
-| `Here` | [book/lines.tsx](../mobile/app/book/lines.tsx) | RoomPage |
-| `NoticeEntries` | [book/notices.tsx](../mobile/app/book/notices.tsx) | RoomPage |
-| `NoticePage` | [book/notices.tsx](../mobile/app/book/notices.tsx) | NoticePage |
-| `Tap` | [book/pages.tsx](../mobile/app/book/pages.tsx) | VerbLine |
-| `RunningHead` | [book/pages.tsx](../mobile/app/book/pages.tsx) | Page |
-| `Control` | [book/pages.tsx](../mobile/app/book/pages.tsx) | Control |
-| `RoomPage` | [book/pages.tsx](../mobile/app/book/pages.tsx) | RoomPage |
-| `Page` | [book/pages.tsx](../mobile/app/book/pages.tsx) | Page |
-| `PageFoot` | [book/pages.tsx](../mobile/app/book/pages.tsx) | PageFoot |
-| `SectionTitle` | [book/pages.tsx](../mobile/app/book/pages.tsx) | Page |
-| `CharacterPage` | [book/sections.tsx](../mobile/app/book/sections.tsx) | SectionPages |
-| `AncestryPage` | [book/sections.tsx](../mobile/app/book/sections.tsx) | SectionPages |
-| `CarryingPage` | [book/sections.tsx](../mobile/app/book/sections.tsx) | SectionPages |
-| `MapPage` | [book/sections.tsx](../mobile/app/book/sections.tsx) | MapPage |
-| `SettingsPage` | [book/sections.tsx](../mobile/app/book/sections.tsx) | SectionPages |
-| `ChapterPage` | [book/sections.tsx](../mobile/app/book/sections.tsx) | ChapterPages |
-| `ScenePage` | [book/sections.tsx](../mobile/app/book/sections.tsx) | ChapterPages |
-| `SkillDetails` | [book/skills.tsx](../mobile/app/book/skills.tsx) | SectionPages |
-| `Professions` | [book/skills.tsx](../mobile/app/book/skills.tsx) | SectionPages |
-| `RaiseCards` | [book/skills.tsx](../mobile/app/book/skills.tsx) | SectionPages |
-| `ItemDetails` | [book/skills.tsx](../mobile/app/book/skills.tsx) | ItemPage |
-| `SaveError` | [SaveError.tsx](../mobile/app/SaveError.tsx) | RecoveryPages |
+| `Body` | `book/Body.tsx` | RoomPage |
+| `Book` | `book/Book.tsx` | Live |
+| `BookView` | `book/Book.tsx` | RecoveryPages |
+| `Chip` | `book/Chip.tsx` | Chip |
+| `Row` | `book/Chip.tsx` | WordBar |
+| `ReadingSize` | `book/Chip.tsx` | Chip |
+| `Combat` | `book/Combat.tsx` | CombatPage |
+| `DiscoveredMap` | `book/DiscoveredMap.tsx` | MapPage |
+| `DreamPage` | `book/DreamPage.tsx` | ChapterPages |
+| `DreamResume` | `book/DreamPage.tsx` | NoticePage |
+| `Footer` | `book/Footer.tsx` | Footer |
+| `Tip` | `book/Footer.tsx` | Tip |
+| `MapDrawing` | `book/MapDrawing.tsx` | Footer |
+| `ContentsPage` | `book/Menu.tsx` | SectionPages |
+| `ThingPage` | `book/Menu.tsx` | ItemPage |
+| `Item` | `book/Menu.tsx` | ItemPage |
+| `NightSky` | `book/NightSky.tsx` | NightSky |
+| `NpcPage` | `book/Npc.tsx` | NpcPage |
+| `NpcDetail` | `book/Npc.tsx` | NpcPage |
+| `PageTurn` | `book/PageTurn.tsx` | PageTurn |
+| `Riddle` | `book/Riddle.tsx` | Riddle |
+| `LetterTile` | `book/Riddle.tsx` | LetterTile |
+| `StatusLine` | `book/Status.tsx` | StatusLine |
+| `StatusIcons` | `book/StatusIcon.tsx` | StatusIcon |
+| `Tooltip` | `book/StatusIcon.tsx` | StatusIcon |
+| `WordBar` | `book/WordBar.tsx` | WordBar |
+| `ActionCard` | `book/actions.tsx` | ActionCard |
+| `Cards` | `book/actions.tsx` | ActionCard |
+| `VerbLine` | `book/actions.tsx` | VerbLine |
+| `ContinueButton` | `book/actions.tsx` | ContinueButton |
+| `JournalPage` | `book/journal.tsx` | SectionPages |
+| `EntityLine` | `book/lines.tsx` | EntityLine |
+| `Note` | `book/lines.tsx` | Note |
+| `Asides` | `book/lines.tsx` | RoomPage |
+| `LogLines` | `book/lines.tsx` | LogLines |
+| `AwayRecap` | `book/lines.tsx` | AwayRecap |
+| `Here` | `book/lines.tsx` | RoomPage |
+| `NoticeEntries` | `book/notices.tsx` | RoomPage |
+| `NoticePage` | `book/notices.tsx` | NoticePage |
+| `Text` | `book/Text.tsx` | Note |
+| `Tap` | `book/pages.tsx` | VerbLine |
+| `RunningHead` | `book/pages.tsx` | Page |
+| `Control` | `book/pages.tsx` | Control |
+| `RoomPage` | `book/pages.tsx` | RoomPage |
+| `Page` | `book/pages.tsx` | Page |
+| `PageFoot` | `book/pages.tsx` | PageFoot |
+| `SectionTitle` | `book/pages.tsx` | Page |
+| `CharacterPage` | `book/sections.tsx` | SectionPages |
+| `AncestryPage` | `book/sections.tsx` | SectionPages |
+| `CarryingPage` | `book/sections.tsx` | SectionPages |
+| `MapPage` | `book/sections.tsx` | MapPage |
+| `SettingsPage` | `book/sections.tsx` | SectionPages |
+| `ChapterPage` | `book/sections.tsx` | ChapterPages |
+| `ScenePage` | `book/sections.tsx` | ChapterPages |
+| `SkillDetails` | `book/skills.tsx` | SectionPages |
+| `Professions` | `book/skills.tsx` | SectionPages |
+| `RaiseCards` | `book/skills.tsx` | SectionPages |
+| `ItemDetails` | `book/skills.tsx` | ItemPage |
+| `SaveError` | `SaveError.tsx` | RecoveryPages |
 
 **Fixture link** (no component until a projection consumer): inline in prose; ink colour with a
 dotted underline at the platform's thickness (solid where the platform has no dotted line; no

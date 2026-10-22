@@ -15,10 +15,8 @@ const learned = (s: NonNullable<GameView['skills']>[number], text: (key: string)
 
 /**
  * The Character page's topics, attributes and skills.
- *
- * Use: CharacterPage only.
- *
- * Story: SectionPages.stories.tsx
+ * - Use: CharacterPage only.
+ * - Story: SectionPages.stories.tsx
  */
 export function SkillDetails(p: { view?: GameView; text: (key: string) => string }) {
   const c = usePalette();
@@ -48,11 +46,10 @@ export function SkillDetails(p: { view?: GameView; text: (key: string) => string
 }
 
 /**
- * Each profession in first-listed order, its acquired boxes as body text, its unacquired boxes as a Note (book-ui.md, Skill tree details).
- *
- * Use: CharacterPage only.
- *
- * Story: SectionPages.stories.tsx
+ * Each profession in first-listed order, acquired boxes as body text, unacquired as a Note
+ * (book-ui.md, Skill tree details).
+ * - Use: CharacterPage only.
+ * - Story: SectionPages.stories.tsx
  */
 export function Professions(p: { view?: GameView; text: (key: string) => string }) {
   const c = usePalette();
@@ -88,13 +85,11 @@ export const xpLine = (l: Levelling) =>
   `xp  ${l.experience}${l.next === undefined ? '' : ` / ${l.next}`}`;
 
 /**
- * The Raise cards, one per authored attribute, the Character page's last block (book-ui.md, Levelling details).
- *
- * Use: while raise_attribute is offered.
- *
- * Rules: a pending save shows on the status line.
- *
- * Story: SectionPages.stories.tsx
+ * The Raise cards, one per authored attribute, the Character page's last block (book-ui.md,
+ * Levelling details).
+ * - Use: while raise_attribute is offered.
+ * - Rules: a pending save shows on the status line.
+ * - Story: SectionPages.stories.tsx
  */
 export function RaiseCards(p: { buttons?: Button[]; press?: (b: Button) => void }) {
   return (
@@ -110,10 +105,8 @@ export function RaiseCards(p: { buttons?: Button[]; press?: (b: Button) => void 
 
 /**
  * An item's projected stats on its detail page.
- *
- * Use: ThingPage only.
- *
- * Story: ItemPage.stories.tsx
+ * - Use: ThingPage only.
+ * - Story: ItemPage.stories.tsx
  */
 export function ItemDetails(p: { thing?: Thing; text: (key: string) => string }) {
   const c = usePalette();

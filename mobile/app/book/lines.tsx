@@ -12,15 +12,12 @@ import { note, prose, usePalette, useType } from './palette.ts';
 import { radius, size, space, type } from './tokens.ts';
 
 /**
- * A MUD line that opens a detail: the name in `type.named`, then `rest` verbatim, a carried-item note below.
- *
- * Use: every row that opens a detail: people and items here, held and worn items, Inside, notices, boards, Contents entries.
- *
- * Rules: the whole line is the touch target, its hit area Tap's bleed, so a run of lines touches at the body pitch. Name: the shown text in order (name, rest, note), then ", open".
- *
- * States: none.
- *
- * Story: EntityLine.stories.tsx
+ * A MUD line that opens a detail: the name, then `rest` verbatim, a carried-item note below.
+ * - Use: every row that opens a detail: people and items here, held and worn, Inside, notices,
+ *   Contents entries.
+ * - Rules: the whole line is the touch target, its hit area Tap's bleed, so a run of lines
+ *   touches at the body pitch. Name: the shown text in order, then ", open".
+ * - Story: EntityLine.stories.tsx
  */
 export function EntityLine(p: { name: string; rest?: string; note?: string; onPress: () => void }) {
   const c = usePalette();
@@ -45,28 +42,21 @@ export function EntityLine(p: { name: string; rest?: string; note?: string; onPr
 }
 
 /**
- * A page line that is not pressable and carries no action, `dim` body, one string.
- *
- * Use: an aside, a sense cue, every empty state ("Nothing to do here."), a page's "save not confirmed", a priced page's balance, a held item's holder; never a Text the page styles.
- *
- * Rules: an empty-state Note never shares a page with an unavailable action line (that line is the state).
- *
- * States: empty state; save not confirmed; balance; holder.
- *
- * Story: Note.stories.tsx
+ * A dim body line that is not pressable and carries no action.
+ * - Use: an aside, a sense cue, every empty state ("Nothing to do here."), a page's "save not
+ *   confirmed", a priced page's balance, a held item's holder; never a Text the page styles.
+ * - Rules: an empty-state Note never shares a page with an unavailable action line.
+ * - Story: Note.stories.tsx
  */
 export function Note({ children }: { children: string }) {
   return <Text style={note(usePalette(), useType())}>{children}</Text>;
 }
 
 /**
- * The character's passive voices as one block of Notes, links shown as plain words (book-ui.md, Aside details).
- *
- * Use: the room page and people's asides.
- *
- * Rules: no asides, no block.
- *
- * Story: RoomPage.stories.tsx
+ * The character's passive voices as one block of Notes, links as plain words (book-ui.md, Aside
+ * details).
+ * - Use: the room page and people's asides; no asides, no block.
+ * - Story: RoomPage.stories.tsx
  */
 export function Asides({
   keys = [],
@@ -86,14 +76,13 @@ export function Asides({
 
 /**
  * The log: one Text per narration record, never records joined.
- *
- * Use: room, detail and combat logs; one block, no lines no block.
- *
- * Rules: narration and the Book's speech echo in ink; a system line `dim` italic; a refused line starts with its reason tag, always the reason word even when the sentence repeats it. The tag is its own Text beside the sentence in a row, never nested, since native draws no border on nested Text. A speech line (speaker bar) waits until the log projects a speaker.
- *
- * States: narration; system; refused.
- *
- * Story: LogLines.stories.tsx
+ * - Use: room, detail and combat logs; no lines, no block.
+ * - Rules: narration and the Book's speech echo in ink; a system line dim italic; a refused line
+ *   leads with its reason tag, always the reason word even when the sentence repeats it. The tag
+ *   is its own Text in a row beside the sentence, never nested (native draws no border on nested
+ *   Text). A speech line (speaker bar) waits until the log projects a speaker.
+ * - States: narration; system; refused.
+ * - Story: LogLines.stories.tsx
  */
 export function LogLines({ lines }: { lines: readonly DetailLine[] }) {
   const c = usePalette();
@@ -138,14 +127,12 @@ export function LogLines({ lines }: { lines: readonly DetailLine[] }) {
 
 /**
  * The World page's first block after an absence (book-ui.md, Away recap).
- *
- * Use: the World page; the Chronicle's day headings (`heading` "Day N").
- *
- * Rules: a Tap heading like a system log line, named with ", show" or ", hide"; open, one line per group, " (N times)" after a repeat. `milestone` lines are body type, named "<line>, story point".
- *
- * States: collapsed; open; milestone.
- *
- * Story: AwayRecap.stories.tsx
+ * - Use: the World page; the Chronicle's day headings (`heading` "Day N").
+ * - Rules: a Tap heading like a system log line, named with ", show" or ", hide"; open, one line
+ *   per group, " (N times)" after a repeat; `milestone` lines named "<line>, story point".
+ *   Wording pending the designer (loka-x6t.14).
+ * - States: collapsed; open; milestone.
+ * - Story: AwayRecap.stories.tsx
  */
 export function AwayRecap({
   lines,
@@ -184,11 +171,10 @@ export function AwayRecap({
 }
 
 /**
- * The room's people, then its items, then its sense cues; no headings, an empty group omitted (book-ui.md, World and status entry; Sense cues details).
- *
- * Use: RoomPage only.
- *
- * Story: RoomPage.stories.tsx
+ * The room's people, then items, then sense cues; no headings, an empty group omitted
+ * (book-ui.md, World and status entry).
+ * - Use: RoomPage only.
+ * - Story: RoomPage.stories.tsx
  */
 export function Here(p: {
   view: GameView;

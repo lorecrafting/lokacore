@@ -1,4 +1,4 @@
-// size: allow 310, each exported component's doc comment (BOOK-UI-COMPONENTS.md, Component catalogue)
+// size: allow 310, the exported components' doc comments (BOOK-UI-COMPONENTS.md, Component catalogue)
 // The Book draws GameView through its presenter; App injects the shell.
 import { useRef, useState } from 'react';
 import { SafeAreaView, View } from 'react-native';
@@ -107,10 +107,8 @@ const firstPages = (s: ReturnType<Presenter['screen']>): Page[] => [
 
 /**
  * The Book: draws GameView through its presenter; App injects the shell.
- *
- * Use: the app root.
- *
- * Story: Live.stories.tsx
+ * - Use: the app root.
+ * - Story: Live.stories.tsx
  */
 export default function Book(p: BookProps) {
   const [pr] = useState(() => presenter(p.game));
@@ -176,15 +174,13 @@ type ViewProps = {
 };
 
 /**
- * The Book's frame: page turn, body, footer, status icons and status line, and the fault, pending and catching-up states.
- *
- * Use: Book, and the stories' screen helper.
- *
- * Rules: recovery pages are the Page's centred variant with Notes and Controls (book-ui.md, Chapters, scenes and recovery).
- *
- * States: fault; pending; catching up.
- *
- * Story: RecoveryPages.stories.tsx
+ * The Book's frame: page turn, body, footer, status icons and status line, and the fault, pending
+ * and catching-up states.
+ * - Use: Book, and the stories' screen helper.
+ * - Rules: recovery pages are the Page's centred variant with Notes and Controls (book-ui.md,
+ *   Chapters, scenes and recovery).
+ * - States: fault; pending; catching up.
+ * - Story: RecoveryPages.stories.tsx
  */
 export function BookView(p: ViewProps) {
   const c = p.palette;

@@ -1,4 +1,4 @@
-// size: allow 356, each exported component's doc comment (BOOK-UI-COMPONENTS.md, Component catalogue)
+// size: allow 340, the exported components' doc comments (BOOK-UI-COMPONENTS.md, Component catalogue)
 // The book's page shell, the room page and their shared controls (the Contents sections:
 // sections.tsx; the thing page: Menu.tsx; the room's action list: place.tsx; the title's arriving
 // focus: title.ts).
@@ -29,13 +29,10 @@ export const band = (c: Palette, tone: Pool['tone']): string =>
   ({ normal: c.fg, warning: c.warning, danger: c.danger })[tone];
 
 /**
- * A text pressable whose hit area bleeds onto the paper around it.
- *
- * Use: entity lines, verb lines, the room title, the status position; the only component that bleeds.
- *
- * Rules: the bleed reaches the touch minimum without moving the text (BOOK-UI-COMPONENTS.md, Where each fact lives).
- *
- * Story: VerbLine.stories.tsx
+ * A text pressable whose hit area bleeds onto the paper around it; the only component that bleeds
+ * (BOOK-UI-COMPONENTS.md, Where each fact lives).
+ * - Use: entity lines, verb lines, the room title, the status position.
+ * - Story: VerbLine.stories.tsx
  */
 export function Tap(p: {
   label: string;
@@ -61,14 +58,11 @@ export function Tap(p: {
 // ponytail: the first unfinished quest in journal order; several at once await a GameView answer.
 /**
  * The current quest's projected journal text, above every page but Journal.
- *
- * Use: Body only.
- *
- * Rules: the first quest in journal order that is active or objectives_complete and has journal text; none when no quest qualifies. Not pressable; wraps, never cuts authored words.
- *
- * States: one line; long (wraps); none.
- *
- * Story: Page.stories.tsx
+ * - Use: Body only.
+ * - Rules: the first quest in journal order that is active or objectives_complete and has journal
+ *   text; none when no quest qualifies. Not pressable; wraps, never cuts authored words.
+ * - States: one line; long; none.
+ * - Story: Page.stories.tsx
  */
 export function RunningHead({ view, text }: { view: GameView; text: Say }) {
   const c = usePalette();
@@ -92,15 +86,12 @@ export function RunningHead({ view, text }: { view: GameView; text: Say }) {
 }
 
 /**
- * Local navigation that is not an offered action (Leave, Back to ..., Close, Resume dream, Got it, Start over, Backspace, Clear).
- *
- * Use: PageFoot returns and local buttons.
- *
- * Rules: at least `size.touch` both ways, with horizontal padding so two side by side never run together. Start over is a Control wherever it appears: its confirmation carries the weight, never `action` or `danger`. `onInk` sets the label in `bg` on an ink fill.
- *
- * States: enabled; disabled.
- *
- * Story: Control.stories.tsx
+ * Local navigation that is not an offered action (Leave, Back to ..., Close, Got it, Start over).
+ * - Use: PageFoot returns and local buttons.
+ * - Rules: Start over is a Control wherever it appears: its confirmation carries the weight, never
+ *   `action` or `danger`. `onInk` sets the label in `bg` on an ink fill.
+ * - States: enabled; disabled.
+ * - Story: Control.stories.tsx
  */
 export function Control(p: {
   label: (typeof LABEL)[keyof typeof LABEL];
@@ -132,15 +123,12 @@ export function Control(p: {
 }
 
 /**
- * The place: fixed title, prose, asides, exit warnings, entity lines, sense cues, the storylet card, verb lines, door cards, the log, then the Word block (book-ui.md, World and status entry).
- *
- * Use: the World page.
- *
- * Rules: the title is the Look tap, named `<title>, look`; a new paragraph at every blank line of the authored text.
- *
- * States: title tappable or plain; asides; sense cues.
- *
- * Story: RoomPage.stories.tsx
+ * The place: fixed title, prose, asides, exit warnings, entity lines, sense cues, the storylet
+ * card, verb lines, door cards, the log, then the Word block (book-ui.md, World and status entry).
+ * - Use: the World page.
+ * - Rules: the title is the Look tap, named `<title>, look`; a new paragraph at every blank line
+ *   of the authored text.
+ * - Story: RoomPage.stories.tsx
  */
 export function RoomPage(p: {
   view: GameView;
@@ -231,15 +219,13 @@ const storylet = (
 };
 
 /**
- * One shell for every page: the title, the blocks `space.block` apart, and the PageFoot.
- *
- * Use: every page.
- *
- * Rules: a run of rows of one kind is one block; a heading is its own block. The title is the page header with the arriving focus; without one, the first block takes the focus. Variants: scrolling title; the room's fixed title (centred, outside the scroll, the only pressable title); no title; centred (a page with no game behind it). A page that grows at the end scrolls to its end.
- *
- * States: scrolling title; fixed title; no title; centred.
- *
- * Story: Page.stories.tsx
+ * One shell for every page: the title, the blocks, and the PageFoot.
+ * - Use: every page.
+ * - Rules: a run of rows of one kind is one block; a heading is its own block. The title is the
+ *   page header with the arriving focus; without one, the first block takes it. The room's fixed
+ *   title is the only pressable title. A page that grows at the end scrolls to its end.
+ * - States: scrolling title; fixed title; no title; centred (no game behind it).
+ * - Story: Page.stories.tsx
  */
 export function Page(p: {
   title?: string;
@@ -308,15 +294,11 @@ function Title(p: { title: string; fixed?: boolean; onPress?: () => void }) {
 }
 
 /**
- * The page's local returns, nearest first: Controls centred in a row under a hairline.
- *
- * Use: every page with a return; outside the scroll, above the status line.
- *
- * Rules: wraps onto a second row when the Reading size needs it.
- *
- * States: one return; two (nested item).
- *
- * Story: PageFoot.stories.tsx
+ * The page's local returns, nearest first: Controls centred under a hairline.
+ * - Use: every page with a return; outside the scroll, above the status line.
+ * - Rules: wraps onto a second row when the Reading size needs it.
+ * - States: one return; two (nested item).
+ * - Story: PageFoot.stories.tsx
  */
 export function PageFoot({ children }: { children: ReactNode }) {
   const c = usePalette();
@@ -342,10 +324,8 @@ export function PageFoot({ children }: { children: ReactNode }) {
 
 /**
  * A heading inside a page (Inside, Held, Worn, Where, profession titles).
- *
- * Use: any section heading; never a styled Text.
- *
- * Story: Page.stories.tsx
+ * - Use: any section heading; never a styled Text.
+ * - Story: Page.stories.tsx
  */
 export function SectionTitle({ children }: { children: ReactNode }) {
   return (

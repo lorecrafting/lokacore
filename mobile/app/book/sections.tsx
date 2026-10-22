@@ -1,4 +1,4 @@
-// size: allow 360, each exported component's doc comment (BOOK-UI-COMPONENTS.md, Component catalogue)
+// size: allow 340, the exported components' doc comments (BOOK-UI-COMPONENTS.md, Component catalogue)
 // The Contents sections (Character, Ancestry, Carrying, Map, Settings; Journal: journal.tsx) and
 // the chapter and scene pages. Each is only drawing; what a tap does is passed in by Book.tsx.
 import { useState } from 'react';
@@ -37,11 +37,10 @@ type Grouped = ReturnType<typeof group>;
 const knownSkill = (s: { acquired: boolean; profession?: string }) => s.acquired || !!s.profession;
 
 /**
- * The Character section: attributes, skills, professions, then the Raise cards (book-ui.md, Skill tree details).
- *
- * Use: Contents, and the status pools when only pennies show.
- *
- * Story: SectionPages.stories.tsx
+ * The Character section: attributes, skills, professions, then the Raise cards (book-ui.md,
+ * Skill tree details).
+ * - Use: Contents, and the status pools when only pennies show.
+ * - Story: SectionPages.stories.tsx
  */
 export function CharacterPage(
   p: { view?: GameView; text: Say; world: () => void } & Pick<GameView, 'resources' | 'position'> &
@@ -85,12 +84,9 @@ export function CharacterPage(
 
 /**
  * The ancestry picker.
- *
- * Use: Contents, before an ancestry is chosen.
- *
- * Rules: its pending save is a Note, not the status line's.
- *
- * Story: SectionPages.stories.tsx
+ * - Use: Contents, before an ancestry is chosen.
+ * - Rules: its pending save is a Note, not the status line's.
+ * - Story: SectionPages.stories.tsx
  */
 export function AncestryPage(p: {
   view: GameView;
@@ -124,12 +120,9 @@ export function AncestryPage(p: {
 
 /**
  * The Carrying section: Held and Worn items as Entity lines.
- *
- * Use: Contents.
- *
- * Rules: an empty Worn slot is a Note; its slot label lends the item line its bleed.
- *
- * Story: SectionPages.stories.tsx
+ * - Use: Contents.
+ * - Rules: an empty Worn slot is a Note; its slot label lends the item line its bleed.
+ * - Story: SectionPages.stories.tsx
  */
 export function CarryingPage(p: {
   items: readonly Thing[];
@@ -210,14 +203,10 @@ function Ways(p: { view: GameView; text: Say; g: Grouped; press: (b: Button) => 
 
 /**
  * The full map and Where (book-ui.md, Minimap, map and presentation controls).
- *
- * Use: Contents, and a tap on the minimap.
- *
- * Rules: reuses the room's exit controls and lists the place's targetless actions.
- *
- * States: discovered, two levels; barred exits; Where.
- *
- * Story: MapPage.stories.tsx
+ * - Use: Contents, and a tap on the minimap.
+ * - Rules: reuses the room's exit controls and lists the place's targetless actions.
+ * - States: discovered, two levels; barred exits; Where.
+ * - Story: MapPage.stories.tsx
  */
 export function MapPage(p: {
   view: GameView;
@@ -276,12 +265,9 @@ const where = (p: { view: GameView; g: Grouped; press: (b: Button) => void }) =>
 
 /**
  * Settings: the Reading size first, then Start over.
- *
- * Use: Contents.
- *
- * Rules: `startOver` asks first: it destroys the save (the shell's confirm).
- *
- * Story: SectionPages.stories.tsx
+ * - Use: Contents.
+ * - Rules: `startOver` asks first: it destroys the save (10 §31; the shell's confirm).
+ * - Story: SectionPages.stories.tsx
  */
 export function SettingsPage(p: { startOver: () => void; world: () => void; reading?: Reading }) {
   return (
@@ -294,14 +280,10 @@ export function SettingsPage(p: { startOver: () => void; world: () => void; read
 
 /**
  * The chapter title page: label, title and rule centred, then Continue.
- *
- * Use: a chapter's title page.
- *
- * Rules: label and title are one header node named by its visible text in order ("Chapter one <title>"), with the arriving focus. Nothing but Continue is pressable.
- *
- * States: shown.
- *
- * Story: ChapterPages.stories.tsx
+ * - Use: a chapter's title page.
+ * - Rules: label and title are one header node named by its visible text in order ("Chapter one
+ *   <title>"), with the arriving focus. Nothing but Continue is pressable.
+ * - Story: ChapterPages.stories.tsx
  */
 export function ChapterPage(p: { label: string; title: string; done: () => void }) {
   const c = usePalette();
@@ -336,10 +318,8 @@ export function ChapterPage(p: { label: string; title: string; done: () => void 
 
 /**
  * A modal scene: its text, then Continue (book-ui.md, Chapters, scenes and recovery).
- *
- * Use: while a scene holds the foreground.
- *
- * Story: ChapterPages.stories.tsx
+ * - Use: while a scene holds the foreground.
+ * - Story: ChapterPages.stories.tsx
  */
 export function ScenePage(p: {
   scene: NonNullable<GameView['scene']>;

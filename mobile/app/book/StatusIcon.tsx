@@ -38,15 +38,15 @@ export const ringFraction = (c: Condition, time: number) =>
     : Math.min(1, Math.max(0, (c.ends_at - time) / c.duration));
 
 /**
- * The status icon row above the status line: one round, graphic-only icon per condition, five then a +N disc (book-ui.md, Conditions details).
- *
- * Use: above the status line.
- *
- * Rules: a tap opens Character; a hold, hover or keyboard focus shows a Tooltip. A timed icon's ring drains linearly between updates over at most 1 s, jumps on first show and on a refresh (reduced motion: steps).
- *
- * States: buff; debuff; neutral; permanent; overflow; held; focused; locked (pictures, not pressable); countdown ring full, near empty, draining.
- *
- * Story: StatusIcon.stories.tsx
+ * The status icon row above the status line: one round, graphic-only icon per condition, five
+ * then a +N disc (book-ui.md, Conditions details).
+ * - Use: above the status line.
+ * - Rules: a tap opens Character; a hold, hover or keyboard focus shows a Tooltip. A timed icon's
+ *   ring drains linearly between updates over at most 1 s, jumps on first show and on a refresh
+ *   (reduced motion: steps); a permanent icon has none.
+ * - States: buff; debuff; neutral; permanent; overflow; held; focused; locked (pictures, not
+ *   pressable); ring full, near empty, draining.
+ * - Story: StatusIcon.stories.tsx
  */
 export function StatusIcons(p: Props) {
   // The held icon's label, so the tip follows the clock and goes with the icon or the lock.
@@ -249,12 +249,9 @@ function Disc(p: { look: Look; children: string }) {
 
 /**
  * The Tip's bubble without Got it, over the icon row.
- *
- * Use: StatusIcons only.
- *
- * Rules: fades in (cut under reduced motion); never takes a touch.
- *
- * Story: StatusIcon.stories.tsx
+ * - Use: StatusIcons only.
+ * - Rules: fades in (cut under reduced motion); never takes a touch.
+ * - Story: StatusIcon.stories.tsx
  */
 export function Tooltip({ text }: { text: string }) {
   const c = usePalette();

@@ -76,14 +76,11 @@ const starViews = field.map((s, i) => (
 
 /**
  * Faint fixed stars and, on average every 9 s, one shooting star over the whole Book.
- *
- * Use: while the shown palette is `dark`.
- *
- * Rules: decoration, never information; takes no touch, focus or screen-reader node. The star field is a drawing (36 points, 1 to 2 px, the same sky every night).
- *
- * States: night; reduced motion (stars only).
- *
- * Story: NightSky.stories.tsx
+ * - Use: while the shown palette is `dark`.
+ * - Rules: decoration, never information; takes no touch, focus or screen-reader node. The star
+ *   field is a drawing: the same sky every night.
+ * - States: night; reduced motion (stars only).
+ * - Story: NightSky.stories.tsx
  */
 export function NightSky() {
   const reduced = useReducedMotion();

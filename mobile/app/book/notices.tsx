@@ -98,11 +98,10 @@ function NoticeLink(p: Props & { notice: Notice }) {
 }
 
 /**
- * A room's notices and boards: an Entity line when Read is offered, else the Action card's unavailable form.
- *
- * Use: the room page.
- *
- * Story: RoomPage.stories.tsx
+ * A room's notices and boards: an Entity line when Read is offered, else the Action card's
+ * unavailable form.
+ * - Use: the room page.
+ * - Story: RoomPage.stories.tsx
  */
 export function NoticeEntries(p: Props) {
   const { notice_boards: boards = [], notices = [] } = p.screen.view;
@@ -139,14 +138,10 @@ const fresh = (description: string) => (line: DetailLine, i: number, all: readon
 
 /**
  * A notice or board detail in the detail-page order (book-ui.md, Notice board details).
- *
- * Use: a notice route.
- *
- * Rules: a read whose text is the description, or a body already shown, adds nothing.
- *
- * States: notice with Read; dream available; dream acknowledged.
- *
- * Story: NoticePage.stories.tsx
+ * - Use: a notice route.
+ * - Rules: a read whose text is the description, or a body already shown, adds nothing.
+ * - States: notice with Read; dream available; dream acknowledged.
+ * - Story: NoticePage.stories.tsx
  */
 export function NoticePage(
   p: Props & { page: Extract<Route, { id: string }>; world: () => void; back: () => void },

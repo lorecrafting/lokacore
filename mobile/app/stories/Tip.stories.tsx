@@ -1,4 +1,4 @@
-// Tip: the footer's first-run tip (Footer's doc comment).
+// Tip: the footer's first-run tip (Tip's doc comment).
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { expect, fn } from 'storybook/test';
 import { Tip } from '../book/Footer.tsx';

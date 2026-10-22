@@ -42,11 +42,9 @@ type BodyProps = {
 type Talk = { talkingOn?: Page; talkOn: (page?: Page) => void };
 
 /**
- * The page under the running head: picks the page for the current route and local detail stack.
- *
- * Use: BookView only.
- *
- * Story: RoomPage.stories.tsx
+ * The page under the running head: picks the page for the current route and detail stack.
+ * - Use: BookView only.
+ * - Story: RoomPage.stories.tsx
  */
 export function Body(p: BodyProps & Talk) {
   const c = usePalette();
