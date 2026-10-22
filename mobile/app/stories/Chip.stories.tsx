@@ -1,7 +1,8 @@
 // Chip: one word of the World page's Word block (BOOK-UI-COMPONENTS.md, Chip).
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { expect, fn } from 'storybook/test';
-import { Chip } from '../book/Chip.tsx';
+import { Chip, ReadingSize } from '../book/Chip.tsx';
+import { type } from '../book/tokens.ts';
 
 const meta = {
   title: 'Book/Chip',
@@ -48,5 +49,16 @@ export const Chosen: Story = {
       'aria-checked',
       'true',
     );
+  },
+};
+
+// The Settings Reading size row: three radio steps, one checked; a press chooses.
+const choose = fn();
+export const ReadingSizeRow: Story = {
+  render: () => <ReadingSize step="large" choose={choose} type={type} />,
+  play: async ({ canvas, userEvent }) => {
+    await expect(canvas.getAllByRole('radio', { checked: true })).toHaveLength(1);
+    await userEvent.click(canvas.getByRole('radio', { name: 'Larger' }));
+    await expect(choose).toHaveBeenCalledWith('larger');
   },
 };

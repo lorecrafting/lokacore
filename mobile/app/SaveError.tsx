@@ -1,6 +1,7 @@
 // The screen for a save that does not open (OFF-07; 10 §32; docs/system/book-ui.md, Chapters, scenes and recovery).
-import { SafeAreaView, Text } from 'react-native';
+import { SafeAreaView } from 'react-native';
 import { Control, Page } from './book/pages.tsx';
+import { Text } from './book/Text.tsx';
 import { note, PaletteContext, useFocusRing } from './book/palette.ts';
 import { color, type } from './book/tokens.ts';
 import { detail } from './book/words.ts';

@@ -13,6 +13,7 @@ const EXEMPT: Record<string, string> = {
   Tap: 'shown through VerbLine and the room title',
   Here: 'the room page lines, shown through the RoomPage stories',
   Tooltip: 'the status icon tip, shown through the StatusIcon Held and Focused stories',
+  Row: 'a titled chip row, shown through the WordBar stories and Chip ReadingSize',
 };
 const EXEMPT_FILES = { 'MapDrawing.tsx': 'a drawing, shown through the map pages' };
 
