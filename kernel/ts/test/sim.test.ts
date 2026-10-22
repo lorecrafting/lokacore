@@ -1,4 +1,4 @@
-// size: allow 565, the toolbox showcase pass joins the corpus run and the red controls
+// size: allow 571, the toolbox showcase pass joins the corpus run and the red controls
 // The deterministic simulation (test/sim.ts; docs/ROADMAP.md verification harness;
 // r1-acceptance-envelope §3): the committed regression seeds, then 10,000 fresh sequences in CI
 // (500 elsewhere), and 400 fixed ones on the toolbox showcase, each step keeping every
@@ -6,7 +6,7 @@
 // planted in this process that the simulator must catch and shrink.
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { existsSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { after, test } from 'node:test';
@@ -32,7 +32,7 @@ import {
   type Kernel,
 } from './sim.ts';
 import { read } from './read.ts';
-import { fresh } from './sim_batch.ts';
+import { fresh, unnarrated } from './sim_batch.ts';
 import { ROOT } from '../play/obs.ts';
 
 const SEEDS: { generator: number; seeds: { seed: number; type: string }[] } = read(
@@ -215,7 +215,7 @@ const PINNED: number[] = [];
 // answers), waits across days (real_elapsed refuses wait; the generator builds no elapsed).
 test('400 fixed showcase sequences keep every invariant and end in each district', async (t) => {
   const pass = { cartridge: SHOWCASE, skip: PINNED };
-  const { count, steps, codes, seen, rooms } = await fresh(1, 400, [], pass);
+  const { count, steps, codes, seen, rooms, changed, silent } = await fresh(1, 400, [], pass);
   assert.equal(count, 400 - PINNED.length, 'a worker omitted sequences');
   t.diagnostic(
     `showcase seeds 1 to 400${PINNED.length ? ` but ${PINNED.join(' ')}` : ''}; ${steps} steps; ends in ` +
@@ -236,6 +236,13 @@ test('400 fixed showcase sequences keep every invariant and end in each district
     [...inner.filter((r) => !rooms.has(r)), ...verbs.filter((v) => !seen.has(v))],
     [],
   );
+  // Pass-1 check 4: a committed change the Book shows without a narration line (sim_batch.ts SILENT).
+  const pinned = readFileSync(new URL('sim_narration_baseline.txt', import.meta.url), 'utf8')
+    .split('\n')
+    .filter((l) => l && !l.startsWith('#'));
+  assert.ok(pinned.length <= 12, 'sim_narration_baseline.txt grew past its cap of 12');
+  assert.deepEqual(unnarrated({ changed, silent }, pinned), []);
+  assert.ok(changed.has('eat') && changed.has('take'), 'no change recorded');
   const showcase = [cartridgeFile(ROOT + SHOWCASE)];
   for (const seed of PINNED)
     assert.equal(simulate(seed, KERNEL, showcase).failure?.id, 'gameview_agrees_with_admission');

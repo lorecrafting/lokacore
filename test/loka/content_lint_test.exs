@@ -1,5 +1,5 @@
 defmodule Loka.ContentLintTest do
-  # Author-time lints (Loka.Content.Lint; pass-1 analysis rows 1, 3, 5 and 6). Each check has
+  # Author-time lints (Loka.Content.Lint; pass-1 analysis rows 1, 3, 5, 6 and 7). Each check has
   # one invalid fragment, from the pass-1 offender where one existed, and the valid form beside it.
   use ExUnit.Case, async: true
 
@@ -111,12 +111,137 @@ defmodule Loka.ContentLintTest do
     assert lint(room.([variant([@visits]), variant([@tide])])) == []
   end
 
+  # Breaks: a fill source the lint stops reading (vessel, room detail, fuel above 0), or a want it
+  # drops (use recipe, drink service, lamp). M8c: the dry flask a lantern burns.
+  test "check 7: a wanted liquid or a burned fuel supply has something that fills it (M8c)" do
+    fills = &Enum.filter(lint(&1), fn l -> l =~ ~r/ (want|burn) it;/ end)
+    lamp = %{"items/lantern.json" => %{"fuel" => %{"kind" => "source", "supply" => "lamp_oil"}}}
+    flask = &%{"items/lamp_oil.json" => %{"fuel" => %{"kind" => "supply", "initial" => &1}}}
+
+    assert fills.(Map.merge(lamp, flask.(0))) ==
+             ["items/lamp_oil.json: lantern burn it; it starts empty and nothing fills it"]
+
+    assert fills.(Map.merge(lamp, flask.(1))) == []
+
+    want = %{
+      "recipes/oil_winch.json" => %{"target" => %{"tool" => %{"liquid" => "oil"}}},
+      "services/s.json" => %{
+        "benefit" => %{"kind" => "drink", "liquid" => "oil", "vessel" => "cask"}
+      }
+    }
+
+    dry = [
+      "liquids/oil.json: cask, oil_winch want it; no vessel starts with it and no detail gives it"
+    ]
+
+    assert fills.(want) == dry
+
+    can =
+      &%{
+        "items/oilcan.json" => %{"vessel" => %{"initial" => %{"kind" => "oil", "quantity" => &1}}}
+      }
+
+    assert fills.(Map.merge(want, can.(0))) == dry
+    assert fills.(Map.merge(want, can.(2))) == []
+    well = %{"details" => %{"well" => %{"liquid_source" => "oil"}}}
+    assert fills.(Map.put(want, "rooms/r.json", well)) == []
+  end
+
+  # Breaks: a source or sink field the lint stops reading, or an id named elsewhere (a guard, a
+  # quest that only checks it) counted as one.
+  test "check 7: every item has a source and a sink, read by field" do
+    ear = %{"items/ear.json" => %{"location" => %{"in" => "template"}, "edible" => %{}}}
+    assert lint(ear) == ["items/ear.json: nothing puts it in play"]
+    shop = &%{"shop" => %{"offers" => [&1]}}
+
+    for {rel, v} <- [
+          {"replenish/r.json", %{"items" => ["ear"]}},
+          {"recipes/r.json", %{"craft" => %{"yield" => %{"items" => ["ear"]}}}},
+          {"npcs/n.json", %{"drops" => [%{"item" => "ear", "chance" => 1}]}},
+          {"npcs/n.json", shop.(%{"item" => "ear", "buy" => 1})},
+          {"npcs/n.json", shop.(%{"item" => "x", "stock" => %{"items" => ["ear"]}})},
+          {"population_bundles/b.json", %{"item" => "ear"}},
+          {"population_bundles/b.json", %{"corpse" => "ear"}},
+          {"cartridge.json", %{"world" => %{"death" => %{"npc_corpse" => "ear"}}}},
+          {"cartridge.json", %{"world" => %{"death" => %{"player_corpse" => "ear"}}}},
+          {"services/s.json", %{"benefit" => %{"escrow" => %{"output" => "ear"}}}}
+        ],
+        do: assert(lint(Map.put(ear, rel, v)) == [], rel)
+
+    flask = %{"items/lamp_oil.json" => %{"location" => %{"in" => "npc"}}}
+    dry = ["items/lamp_oil.json: nothing takes it out of play"]
+    assert lint(flask) == dry
+    has = %{"op" => "has_item", "item" => "lamp_oil"}
+
+    for {rel, v} <- [
+          {"items/lamp_oil.json", %{"location" => %{"in" => "npc"}, "edible" => %{}}},
+          {"recipes/r.json", %{"craft" => %{"consume" => %{"items" => ["lamp_oil"]}}}},
+          {"npcs/n.json", shop.(%{"item" => "x", "stock" => %{"items" => ["lamp_oil"]}})},
+          {"services/s.json", %{"benefit" => %{"escrow" => %{"items" => ["lamp_oil"]}}}},
+          {"dialogues/d.json",
+           %{"label" => "d", "choices" => %{"give" => %{"hand_over" => %{"item" => "lamp_oil"}}}}},
+          {"npcs/n.json", shop.(%{"item" => "lamp_oil", "buy" => 2, "sell" => 1})}
+        ],
+        do: assert(lint(Map.put(flask, rel, v)) == [], rel)
+
+    # Holding it for a quest or a recipe guard checks the item; neither takes it out of play.
+    quest = %{"objective" => %{"policy" => %{"root" => has}}}
+    guard = %{"policy" => %{"root" => has}, "reason" => "reason.r"}
+    assert lint(Map.merge(flask, %{"recipes/r.json" => guard, "quests/q.json" => quest})) == dry
+
+    assert lint(%{"items/ear.json" => %{"location" => %{"in" => "template"}}}) ==
+             [
+               "items/ear.json: nothing puts it in play",
+               "items/ear.json: nothing takes it out of play"
+             ]
+  end
+
+  # Row 7 (M8a): a target or tool tag query matches every item and NPC carrying the tag, wherever it
+  # is, so oiling the winch's metal also took the attic lantern. Breaks: a new holder of a queried
+  # tag, or a new tag query, enters unreviewed.
+  test "toolbox_showcase target and tool tag queries match exactly the pinned items and NPCs" do
+    {files, _} = Loka.Content.Source.load("cartridges/toolbox_showcase")
+
+    holders = fn tag ->
+      for {rel, _, %{"tags" => tags}} <- files,
+          String.starts_with?(rel, ["items/", "npcs/"]) and tag in tags,
+          do: Path.rootname(rel)
+    end
+
+    matches =
+      for {rel, _, %{} = r} <- files,
+          String.starts_with?(rel, ["recipes/", "reactions/"]),
+          tag <- List.wrap(get_in(r, ["target", "tool", "tag"])) ++ queried(r),
+          into: %{},
+          do: {"#{rel} #{tag}", Enum.sort(holders.(tag))}
+
+    metal = ~w(anvil attic_lantern axe gate_winch lantern training_sword)
+    holding = ~w(items/loft_bucket items/oilcan items/smithy_bucket items/watering_can)
+
+    assert matches == %{
+             "recipes/fish.json rod" => ["items/rod", "items/rod_2"],
+             "recipes/fish.json water" => ["items/pond_water"],
+             "recipes/oil_winch.json metal" => Enum.map(metal, &"items/#{&1}"),
+             "recipes/quench.json liquid_holding" => holding,
+             "recipes/water_croft.json liquid_holding" => holding,
+             "recipes/water_plot.json liquid_holding" => holding
+           }
+  end
+
+  defp queried(%{} = m) do
+    own = if m["op"] == "has_tag" and m["subject"] == "target", do: [m["tag"]], else: []
+    own ++ Enum.flat_map(Map.values(m), &queried/1)
+  end
+
+  defp queried(l) when is_list(l), do: Enum.flat_map(l, &queried/1)
+  defp queried(_), do: []
+
   # Story cartridges only (ruling b): toolbox_showcase, the one story cartridge since Ashmere's
   # retirement (loka-4hik). Out: every *_sampler (samplers break rules on purpose),
   # r9c_interactions (synthetic), lantern_proof and the ashmere_* cartridges. Findings over the
   # slice's timebox are pinned in lint_baseline.txt until loka-kgd.184 clears them: a new finding
   # fails, and so does a baseline grown past its cap.
-  @baseline_cap 119
+  @baseline_cap 204
   @baseline File.read!("test/loka/lint_baseline.txt")
             |> String.split("\n", trim: true)
             |> Enum.reject(&String.starts_with?(&1, "#"))

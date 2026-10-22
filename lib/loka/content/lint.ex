@@ -1,6 +1,6 @@
 defmodule Loka.Content.Lint do
   @moduledoc """
-  Author-time lints for a story cartridge's source (pass-1 analysis rows 1, 3, 5 and 6;
+  Author-time lints for a story cartridge's source (pass-1 analysis rows 1, 3, 5, 6 and 7, with fill sources;
   docs/CHECKS.md). Each finding is one line naming the file and key. The loader never runs
   these: a sampler may break them on purpose.
   """
@@ -31,6 +31,8 @@ defmodule Loka.Content.Lint do
     |> Enum.sort()
     |> Enum.flat_map(fn {rel, v} -> file(Path.split(rel), rel, v) end)
     |> Kernel.++(talk(files, text))
+    |> Kernel.++(items(files))
+    |> Kernel.++(fills(files))
   end
 
   defp file(["recipes", _], rel, %{"policy" => %{"root" => root}} = r)
@@ -95,6 +97,97 @@ defmodule Loka.Content.Lint do
   defp conds(%{"when" => %{"root" => root}}), do: [root]
   # No guard always wins; the missing `when` itself is reported.
   defp conds(_), do: []
+
+  # Row 7 (M8c): an item nothing places, stocks, drops or yields never enters play; one nothing
+  # eats, consumes, buys back, takes in escrow or asks for never leaves it. Read by field: an id
+  # named elsewhere (a guard, a key) is neither.
+  defp items(files) do
+    refs = Enum.flat_map(files, fn {rel, v} -> refs(Path.split(rel), v) end)
+
+    for {"items/" <> name, _} <- Enum.sort(files),
+        id = Path.rootname(name),
+        {kind, text} <- [source: "nothing puts it in play", sink: "nothing takes it out of play"],
+        {kind, id} not in refs,
+        do: "items/#{name}: #{text}"
+  end
+
+  defp refs(["items", name], i) do
+    id = Path.rootname(name)
+    in_play = i["location"]["in"] != "template"
+    for {kind, true} <- [source: in_play, sink: is_map_key(i, "edible")], do: {kind, id}
+  end
+
+  defp refs(["replenish", _], r), do: tag(:source, r["items"])
+
+  defp refs(["recipes", _], %{"craft" => c}),
+    do: tag(:source, c["yield"]["items"]) ++ tag(:sink, c["consume"]["items"])
+
+  defp refs(["npcs", _], n) do
+    offers = get_in(n, ["shop", "offers"]) || []
+    drops = for d <- n["drops"] || [], do: d["item"]
+
+    # Every offer sells (ShopOffer.sell is required), and the kernel buys back any stocked instance.
+    stock = Enum.flat_map(offers, &[&1["item"] | &1["stock"]["items"] || []])
+    tag(:source, drops ++ stock) ++ tag(:sink, stock)
+  end
+
+  defp refs(["population_bundles", _], b), do: tag(:source, [b["item"], b["corpse"]])
+
+  defp refs(["cartridge.json"], %{"world" => %{"death" => d}}),
+    do: tag(:source, [d["player_corpse"], d["npc_corpse"]])
+
+  defp refs(["services", _], %{"benefit" => %{"escrow" => e}}),
+    do: tag(:sink, e["items"]) ++ tag(:source, [e["output"]])
+
+  defp refs(["dialogues", _], d),
+    do: tag(:sink, for({_, %{"hand_over" => h}} <- d["choices"] || %{}, do: h["item"]))
+
+  defp refs(_, _), do: []
+
+  defp tag(kind, ids), do: for(id <- List.wrap(ids), do: {kind, id})
+
+  # Row 7 fill sources (M8c): a liquid a use or drink service wants needs a vessel that starts
+  # with it or a room detail that gives it; a fuel supply a lamp burns only ever drains, so it
+  # must start above 0.
+  defp fills(files) do
+    have = MapSet.new(scan(files, &filled/2))
+
+    for {want, users} <-
+          Enum.sort(Enum.group_by(scan(files, &wants/2), &elem(&1, 0), &elem(&1, 1))),
+        want not in have,
+        do: fill_line(want, users |> Enum.uniq() |> Enum.sort() |> Enum.join(", "))
+  end
+
+  defp scan(files, fun), do: Enum.flat_map(files, fn {rel, v} -> fun.(Path.split(rel), v) end)
+
+  defp fill_line({:liquid, id}, users),
+    do: "liquids/#{id}.json: #{users} want it; no vessel starts with it and no detail gives it"
+
+  defp fill_line({:fuel, id}, users),
+    do: "items/#{id}.json: #{users} burn it; it starts empty and nothing fills it"
+
+  defp filled(["items", _], %{"vessel" => %{"initial" => %{"kind" => k, "quantity" => q}}})
+       when q > 0,
+       do: [{:liquid, k}]
+
+  defp filled(["items", name], %{"fuel" => %{"kind" => "supply", "initial" => n}}) when n > 0,
+    do: [{:fuel, Path.rootname(name)}]
+
+  defp filled(["rooms", _], r),
+    do: for({_, %{"liquid_source" => k}} <- r["details"] || %{}, do: {:liquid, k})
+
+  defp filled(_, _), do: []
+
+  defp wants(["recipes", name], %{"target" => %{"tool" => %{"liquid" => l}}}),
+    do: [{{:liquid, l}, Path.rootname(name)}]
+
+  defp wants(["services", _], %{"benefit" => %{"kind" => "drink", "liquid" => l, "vessel" => v}}),
+    do: [{{:liquid, l}, v}]
+
+  defp wants(["items", name], %{"fuel" => %{"kind" => "source", "supply" => s}}),
+    do: [{{:fuel, s}, Path.rootname(name)}]
+
+  defp wants(_, _), do: []
 
   # A dialogue with no label of its own is offered as the kernel's default action.talk (UH);
   # a keyword dialogue (speech@1) is spoken, not offered.
