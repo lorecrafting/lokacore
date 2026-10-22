@@ -57,7 +57,8 @@ defmodule Loka.ContentWaterTest do
   end
 
   # Breaks: water short references are not expanded, or authoring accepts a missing skill, a
-  # zero duration, no water capability, a bottom whose Up leaves the route, or a barred Up.
+  # zero duration, no water capability, a bottom whose Up leaves the route, or a barred Up (each
+  # refusal must be a water diagnostic, not an unrelated one).
   test "water source expands its route and refuses malformed authoring" do
     dir = Loka.ContentSource.copy("cartridges/cellar_sampler")
     assert {:ok, bytes, _} = Loka.ContentSource.compile(dir, source(%{}))
@@ -77,7 +78,10 @@ defmodule Loka.ContentWaterTest do
           {"rooms/well_bottom.json", bottom(%{"to" => "village_green"})},
           {"rooms/well_bottom.json", bottom(%{"to" => "well_lane", "barrier" => "trunk_lid"})}
         ] do
-      assert {:error, _} = Loka.ContentSource.compile(dir, source(%{path => change})), path
+      assert {:error, diagnostics} = Loka.ContentSource.compile(dir, source(%{path => change}))
+
+      assert Enum.any?(diagnostics, &String.starts_with?(&1["path"], "cartridge.world.water")),
+             path
     end
   end
 end
