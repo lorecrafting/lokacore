@@ -5,18 +5,35 @@ import { test } from 'node:test';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { bundle, entity, genesis, prefix, ref } from '../../../kernel/ts/test/transport_fixture.ts';
-import { gameView } from '../../../kernel/ts/src/index.ts';
+import { fragment } from '../../../kernel/ts/test/fragment.ts';
+import { gameView, type World } from '../../../kernel/ts/src/index.ts';
 import { elapsedHost } from './__tests__/elapsed-host.test.ts';
 import { openStory } from './authority.ts';
 
+// ferry_sampler's frozen KAT with Bram's dialogue made a hub (no quest, story point, policy gate
+// or lantern role) and a second speaker, Ivy, at the landing with a one-choice copy of it.
+const f = fragment('protocol/fixtures/cartridge_ferry_hash.json');
+const entity = (w: World, kind: string, name: string) => w.entityIds[`${f.prefix}:${kind}/${name}`];
 const configure = (c: any) => {
-  c.entry = ref('room', 'ferry_landing');
-  c.npcs[`${prefix}:npc/ada`].room = ref('room', 'ferry_landing'); // a second speaker at hand
+  const bram = c.dialogues[`${f.prefix}:dialogue/bram`];
+  delete bram.quest;
+  delete c.story_points;
+  bram.policy = { policy_version: 1, root: { op: 'all', items: [] } };
+  bram.roles = { bram: bram.roles.bram };
+  delete bram.choices.leave.hand_over;
+  const { daily_schedule, ...ivy } = c.npcs[`${f.prefix}:npc/bram`];
+  c.npcs[`${f.prefix}:npc/ivy`] = { ...ivy, key: 'ivy', keywords: ['ivy'] };
+  c.dialogues[`${f.prefix}:dialogue/ivy`] = {
+    ...bram,
+    key: 'ivy',
+    npc: f.ref('npc', 'ivy'),
+    roles: { ivy: { role: 'npc', npc: f.ref('npc', 'ivy') } },
+    choices: { carry: bram.choices.carry },
+  };
 };
-const release = { bundle: bundle(configure), fresh: genesis(configure) };
+const release = { bundle: f.bundle(configure), fresh: f.genesis(configure) };
 
-function atElspeth(path: string) {
+function atBram(path: string) {
   const p = elapsedHost(path, { wall: 10000, mono: 0 }, release.bundle);
   const host = { kernel_version: p.host.kernel_version, newId: p.host.newId };
   const open = () => {
@@ -38,17 +55,12 @@ function atElspeth(path: string) {
     target_ids,
     input,
   });
-  for (const i of [
-    invocation('choose_ancestry', [], { ancestry: 'road_born' }),
-    invocation('elspeth', [entity(story.world(), 'npc', 'elspeth')]),
-  ]) {
-    const r = story.invoke(i as never);
-    assert.equal(r.kind === 'saved' && (r.decision as { kind: string }).kind, 'accepted');
-  }
+  const r = story.invoke(invocation('bram', [entity(story.world(), 'npc', 'bram')]) as never);
+  assert.equal(r.kind === 'saved' && (r.decision as { kind: string }).kind, 'accepted');
   return { ...p, story, open, invocation };
 }
 
-const pending = (w: ReturnType<ReturnType<typeof atElspeth>['story']['world']>) =>
+const pending = (w: ReturnType<ReturnType<typeof atBram>['story']['world']>) =>
   Object.entries(w.state.choices ?? {}).filter(([, c]) => c.status === 'pending');
 
 // Breaks: a failed or acknowledgement-lost hub answer COMMIT leaves the answer half-applied (the
@@ -58,12 +70,10 @@ test('real SQLite hub answer survives failed and lost COMMIT, replay and cold re
   const dir = mkdtempSync(join(tmpdir(), 'loka-hub-'));
   t.after(() => rmSync(dir, { recursive: true }));
   for (const [kind, choice_id] of [
-    ['failed', 'directions'],
-    ['lost', 'directions'],
-    ['failed', 'accept'],
-    ['lost', 'accept'],
+    ['failed', 'carry'],
+    ['lost', 'carry'],
   ] as const) {
-    const p = atElspeth(join(dir, `${kind}-${choice_id}.db`));
+    const p = atBram(join(dir, `${kind}-${choice_id}.db`));
     const [[talked]] = pending(p.story.world());
     const answer = p.invocation('choose', [], { continuation_id: talked, choice_id });
     if (kind === 'failed')
@@ -104,7 +114,7 @@ test('real SQLite hub answer survives failed and lost COMMIT, replay and cold re
       const r = reopened.invoke(i as never);
       assert.equal(r.kind === 'saved' && (r.decision as { kind: string }).kind, 'accepted', kind);
     };
-    send('choose', { continuation_id: opened.continuation_id, choice_id: 'inn' });
+    send('choose', { continuation_id: opened.continuation_id, choice_id: 'carry' });
     send('close_choice', { continuation_id: pending(reopened.world())[0]![0] });
     assert.equal(gameView(reopened.world()).choice, undefined, kind);
   }
@@ -116,7 +126,7 @@ test('real SQLite hub answer survives failed and lost COMMIT, replay and cold re
 test('real SQLite: walking away or talking to another speaker ends the open hub; reopen agrees', (t) => {
   const dir = mkdtempSync(join(tmpdir(), 'loka-hub-leave-'));
   t.after(() => rmSync(dir, { recursive: true }));
-  const away = atElspeth(join(dir, 'away.db'));
+  const away = atBram(join(dir, 'away.db'));
   const [[hub]] = pending(away.story.world());
   assert.equal(
     away.story.invoke(away.invocation('move', [], { direction: 'north' }) as never).kind,
@@ -125,22 +135,21 @@ test('real SQLite: walking away or talking to another speaker ends the open hub;
   assert.equal(away.story.world().state.choices![hub]!.status, 'closed');
   assert.deepEqual(pending(away.open().world()), []);
 
-  const other = atElspeth(join(dir, 'other.db'));
+  const other = atBram(join(dir, 'other.db'));
   const [[open]] = pending(other.story.world());
-  const adaId = entity(other.story.world(), 'npc', 'ada');
+  const ivyId = entity(other.story.world(), 'npc', 'ivy');
   const offered = (w: ReturnType<typeof other.story.world>, id: string, key: string) =>
     gameView(w)
       .entities.find((e) => e.id === id)!
       .actions.find((a) => a.action_key === key)!;
-  // GameView agrees with the rule: Ada's talk is offered, Elspeth's own stays refused.
-  assert.equal(offered(other.story.world(), adaId, 'ada').available, true);
+  // GameView agrees with the rule: Ivy's talk is offered, Bram's own stays refused.
+  assert.equal(offered(other.story.world(), ivyId, 'ivy').available, true);
   assert.equal(
-    offered(other.story.world(), entity(other.story.world(), 'npc', 'elspeth'), 'elspeth')
-      .available,
+    offered(other.story.world(), entity(other.story.world(), 'npc', 'bram'), 'bram').available,
     false,
   );
-  const ada = other.invocation('ada', [adaId]);
-  const r = other.story.invoke(ada as never);
+  const ivy = other.invocation('ivy', [ivyId]);
+  const r = other.story.invoke(ivy as never);
   assert.equal(r.kind === 'saved' && (r.decision as { kind: string }).kind, 'accepted');
   const ops = (r as any).decision.delta.ops.map((o: any) => [o.op, o.continuation_id === open]);
   assert.deepEqual(ops, [
@@ -149,5 +158,5 @@ test('real SQLite: walking away or talking to another speaker ends the open hub;
   ]);
   const reopened = other.open().world();
   assert.equal(reopened.state.choices![open]!.status, 'closed');
-  assert.equal(gameView(reopened).choice?.speaker_id, entity(reopened, 'npc', 'ada'));
+  assert.equal(gameView(reopened).choice?.speaker_id, entity(reopened, 'npc', 'ivy'));
 });

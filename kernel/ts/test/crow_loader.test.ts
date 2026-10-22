@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { bundle, prefix } from './transport_fixture.ts';
+import { bundle, prefix } from './crow_fixture.ts';
 import { INSTALLED, loadCartridge } from '../src/index.ts';
 const coinRef = `${prefix}:item/old_coin`;
 
@@ -11,7 +11,11 @@ test('crow allowlist rejects containers, wearable and protected item definitions
     { give_allowed: false },
     { slot: 'cloak' },
   ]) {
-    const b = bundle((c: any) => Object.assign(c.items[coinRef], patch));
+    const b = bundle((c: any) => {
+      // A slot needs the equipment capability, or the loader stops before the scavenge rule.
+      c.lock.capabilities.equipment = c.manifest.requires.capabilities.equipment = 1;
+      Object.assign(c.items[coinRef], patch);
+    });
     const loaded = loadCartridge(
       new TextEncoder().encode(`{"cartridge":${b.canonical},"content_hash":"${b.sha256}"}`),
       INSTALLED,
@@ -26,7 +30,7 @@ test('crow allowlist rejects containers, wearable and protected item definitions
 // Breaks: a one-way authored transport corridor loads and strands a crow on its return.
 test('loader refuses a crow corridor without its reciprocal return edge', () => {
   const b = bundle((c: any) => {
-    delete c.rooms[`${prefix}:room/well_lane`].exits.south;
+    delete c.rooms[`${prefix}:room/path`].exits.east;
   });
   const loaded = loadCartridge(
     new TextEncoder().encode(`{"cartridge":${b.canonical},"content_hash":"${b.sha256}"}`),
