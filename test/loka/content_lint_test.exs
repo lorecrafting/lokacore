@@ -91,6 +91,16 @@ defmodule Loka.ContentLintTest do
 
     fixed = [%{"at_percent" => 50, "tone" => "normal"} | tl(old)]
     assert lint(%{"resources.json" => %{"resources" => %{"mv" => %{"bands" => fixed}}}}) == []
+    # A later normal cut does not help: 99% draws the first cut below 100, here a warning.
+    late = [
+      hd(old),
+      %{"at_percent" => 60, "tone" => "warning"},
+      %{"at_percent" => 30, "tone" => "normal"}
+    ]
+
+    assert lint(%{"resources.json" => %{"resources" => %{"mv" => %{"bands" => late}}}}) ==
+             ["resources.json: mv bands have no normal band below 100%"]
+
     assert lint(%{"resources.json" => %{"resources" => %{"hp" => %{}}}}) == []
   end
 

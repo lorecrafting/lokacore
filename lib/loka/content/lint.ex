@@ -74,7 +74,7 @@ defmodule Loka.Content.Lint do
   # The kernel draws the first band whose cut the percentage reaches, so a lone normal cut at 100
   # shows any value below the maximum in the next band's colour (pass-1 UK).
   defp top([_ | _] = bands) do
-    if Enum.any?(bands, &(&1["tone"] == "normal" and &1["at_percent"] < 100)),
+    if match?(%{"tone" => "normal"}, Enum.find(bands, &(&1["at_percent"] < 100))),
       do: nil,
       else: "have no normal band below 100%"
   end
