@@ -24,7 +24,6 @@ import { statusKey } from '../src/mechanics/status/shared.ts';
 import { sight } from '../src/mechanics/movement/rule.ts';
 import { visible } from '../src/mechanics/light/shared.ts';
 import { key } from '../src/foundation/compose.ts';
-import { fresh as wispWorld, ref as wispRef } from './wisp_fixture.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-ward-sampler-'));
 let artifact: Uint8Array;
@@ -273,30 +272,38 @@ test('blind darkens every room; a dark_sight status sees in the dark, unless als
   );
 });
 
-// Breaks: blindness read only through dark(), so a discovered NPC (the wisp, by its perception
-// fact) or a self-luminous detail (the marsh glow) stays seen by a blind player.
+// Breaks: blindness read only through dark(), so a discovered NPC (its perception fact true) or a
+// self-luminous detail stays seen by a blind player. Both are added to the den here (ward_sampler
+// has neither).
 test('a blind player sees neither a discovered NPC nor a glowing detail', () => {
-  const w0 = wispWorld();
-  const marsh = w0.roomIds['ashmere_missing_child@0.0.23:room/marsh_light']!;
-  const wisp = w0.entityIds['ashmere_missing_child@0.0.23:npc/wisp']!;
-  const glow = Object.keys(w0.details).find(
-    (d) => w0.details[d].key === 'glow' && w0.details[d].room === marsh,
-  )!;
-  const blind = wispRef('status', 'blind');
-  const statuses = { [refString(blind)]: { key: 'blind', perception: { sight: 'blind' } } };
-  const at = (blinded: boolean) =>
-    ({
-      ...w0,
-      factDefaults: { ...w0.factDefaults, [key(wispRef('fact', 'fen_wisp_discovered'))]: true },
-      cartridge: { ...w0.cartridge, statuses: { ...w0.cartridge.statuses, ...statuses } },
-      state: {
-        ...w0.state,
-        containers: { ...w0.state.containers, [w0.body]: marsh, [wisp]: marsh },
-        statuses: blinded ? { [statusKey(w0.body, blind)]: { generation: 1, active: true } } : {},
+  const found = { ...C, kind: 'fact', key: 'troll_found' } as never;
+  const glow = 'ffffffff-5454-4545-8545-000000000001';
+  const at = (c: Cartridge) => {
+    const fact = { key: 'troll_found', version: 1, scopes: ['player'] },
+      value_type = { type: 'bool', default: true };
+    const w = blessed({
+        ...c,
+        facts: { ...c.facts, [refString(found)]: { ...fact, value_type } },
+      } as never),
+      t = troll(w);
+    return {
+      ...w,
+      entities: { ...w.entities, [t]: { ...w.entities[t], perception: { discovered: found } } },
+      details: {
+        ...w.details,
+        [glow]: {
+          key: 'glow',
+          room: w.state.containers[w.body],
+          perception: { self_luminous: true },
+        },
       },
-    }) as World;
+    } as never as World;
+  };
   assert.deepEqual(
-    [false, true].map((b) => [wisp, glow].map((id) => visible(at(b), w0.character, id))),
+    [content, as('warded', { perception: { sight: 'blind' } })].map((c) => {
+      const w = at(c);
+      return [troll(w), glow].map((id) => visible(w, w.character, id));
+    }),
     [
       [true, true],
       [false, false],
