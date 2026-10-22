@@ -103,7 +103,9 @@ export async function fresh(
 /** A step's action key (a recipe's key, else the command type) when it commits a change. */
 export function changeKey(command: Command, d: DecisionResult): string | undefined {
   const p = command.payload as { type: string; action?: string };
-  return d.kind === 'accepted' && d.delta.ops.length ? (p.action ?? p.type) : undefined;
+  // A recipe key is prefixed, so a recipe named like a pinned verb never hides behind that pin.
+  const key = p.action ? `${p.type}:${p.action}` : p.type;
+  return d.kind === 'accepted' && d.delta.ops.length ? key : undefined;
 }
 
 // Action keys meant to commit a change with no narration line, each with its reason (pass-1 check 4).

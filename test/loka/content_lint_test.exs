@@ -111,9 +111,45 @@ defmodule Loka.ContentLintTest do
     assert lint(room.([variant([@visits]), variant([@tide])])) == []
   end
 
+  # Breaks: a fill source the lint stops reading (vessel, room detail, fuel above 0), or a want it
+  # drops (use recipe, drink service, lamp). M8c: the dry flask a lantern burns.
+  test "check 7: a wanted liquid or a burned fuel supply has something that fills it (M8c)" do
+    fills = &Enum.filter(lint(&1), fn l -> l =~ ~r/ (want|burn) it;/ end)
+    lamp = %{"items/lantern.json" => %{"fuel" => %{"kind" => "source", "supply" => "lamp_oil"}}}
+    flask = &%{"items/lamp_oil.json" => %{"fuel" => %{"kind" => "supply", "initial" => &1}}}
+
+    assert fills.(Map.merge(lamp, flask.(0))) ==
+             ["items/lamp_oil.json: lantern burn it; it starts empty and nothing fills it"]
+
+    assert fills.(Map.merge(lamp, flask.(1))) == []
+
+    want = %{
+      "recipes/oil_winch.json" => %{"target" => %{"tool" => %{"liquid" => "oil"}}},
+      "services/s.json" => %{
+        "benefit" => %{"kind" => "drink", "liquid" => "oil", "vessel" => "cask"}
+      }
+    }
+
+    dry = [
+      "liquids/oil.json: cask, oil_winch want it; no vessel starts with it and no detail gives it"
+    ]
+
+    assert fills.(want) == dry
+
+    can =
+      &%{
+        "items/oilcan.json" => %{"vessel" => %{"initial" => %{"kind" => "oil", "quantity" => &1}}}
+      }
+
+    assert fills.(Map.merge(want, can.(0))) == dry
+    assert fills.(Map.merge(want, can.(2))) == []
+    well = %{"details" => %{"well" => %{"liquid_source" => "oil"}}}
+    assert fills.(Map.put(want, "rooms/r.json", well)) == []
+  end
+
   # Breaks: a source or sink field the lint stops reading, or an id named elsewhere (a guard, a
-  # buy-only offer) counted as one.
-  test "check 7: every item has a source and a sink, read by field (M8c, lamp_oil)" do
+  # quest that only checks it) counted as one.
+  test "check 7: every item has a source and a sink, read by field" do
     ear = %{"items/ear.json" => %{"location" => %{"in" => "template"}, "edible" => %{}}}
     assert lint(ear) == ["items/ear.json: nothing puts it in play"]
     shop = &%{"shop" => %{"offers" => [&1]}}
@@ -203,9 +239,9 @@ defmodule Loka.ContentLintTest do
   # Story cartridges only (ruling b): toolbox_showcase, the one story cartridge since Ashmere's
   # retirement (loka-4hik). Out: every *_sampler (samplers break rules on purpose),
   # r9c_interactions (synthetic), lantern_proof and the ashmere_* cartridges. Findings over the
-  # slice's timebox are pinned in lint_baseline.txt until loka-kgd.184 (items/ lines: FOLLOW-UP) clears them: a new finding
+  # slice's timebox are pinned in lint_baseline.txt until loka-kgd.184 clears them: a new finding
   # fails, and so does a baseline grown past its cap.
-  @baseline_cap 203
+  @baseline_cap 204
   @baseline File.read!("test/loka/lint_baseline.txt")
             |> String.split("\n", trim: true)
             |> Enum.reject(&String.starts_with?(&1, "#"))

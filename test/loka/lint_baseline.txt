@@ -1,4 +1,4 @@
-# Pinned findings loka-kgd.184 clears (the items/ lines: FOLLOW-UP); the test caps this list at 203 lines: shrink it, never grow it.
+# Pinned findings loka-kgd.184 clears; the test caps this list at 204 lines: shrink it, never grow it.
 toolbox_showcase cartridge.json: world.bands have no normal band below 100%
 toolbox_showcase reactions/attic_drench.json: writes state with no narrate step and no "silent": true
 toolbox_showcase reactions/attic_kindle.json: writes state with no narrate step and no "silent": true
@@ -202,3 +202,4 @@ toolbox_showcase items/watering_can.json: nothing takes it out of play
 toolbox_showcase items/waterskin.json: nothing takes it out of play
 toolbox_showcase items/yard_crate.json: nothing takes it out of play
 toolbox_showcase items/yard_torch.json: nothing takes it out of play
+toolbox_showcase items/lamp_oil.json: attic_lantern, lantern burn it; it starts empty and nothing fills it

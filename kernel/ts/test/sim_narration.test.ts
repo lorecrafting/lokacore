@@ -21,12 +21,17 @@ test('unnarrated reports new silent keys and pins now narrated, never unreached 
   }
 });
 
-// Breaks: a key taken from a rejected step or an empty delta, or a recipe filed under its command type.
-test('changeKey names an accepted change by its recipe key, else its command type', () => {
+// Breaks: a key taken from a rejected step or an empty delta, or a recipe filed under its command type or
+// under a verb's key (a recipe named take would hide behind the take pin).
+test('changeKey names an accepted change by its command type, and a recipe by type and key', () => {
   const cmd = (payload: object) => ({ payload }) as unknown as Command;
   const ok = (n: number) =>
     ({ kind: 'accepted', delta: { ops: Array(n).fill({}) } }) as unknown as DecisionResult;
-  assert.equal(changeKey(cmd({ type: 'use', action: 'oil_winch' }), ok(1)), 'oil_winch');
+  assert.equal(
+    changeKey(cmd({ type: 'perform', action: 'oil_winch' }), ok(1)),
+    'perform:oil_winch',
+  );
+  assert.equal(changeKey(cmd({ type: 'perform', action: 'take' }), ok(1)), 'perform:take');
   assert.equal(changeKey(cmd({ type: 'take' }), ok(1)), 'take');
   assert.equal(changeKey(cmd({ type: 'take' }), ok(0)), undefined);
   assert.equal(
