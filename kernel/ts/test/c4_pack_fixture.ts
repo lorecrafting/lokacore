@@ -25,6 +25,7 @@ function base(c: any, start = 64800, wander_interval = 3600) {
     },
   };
   c.npcs[`${prefix}:npc/goblin`].hp = { minimum: 0, maximum: 8, start: 8, gain: 0 };
+  c.npcs[`${prefix}:npc/goblin`].attack = { chance: 100, damage_min: 1, damage_max: 1 };
   const combat = c.world.combat;
   combat.interval = 5;
   combat.player_attack = { chance: 100, damage_min: 1, damage_max: 1 };

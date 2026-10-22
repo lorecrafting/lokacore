@@ -1,4 +1,4 @@
-// Toolbox row 11 off the player's own move: a fleeing hound or deer never takes a face that
+// Toolbox row 11 off the player's own move: a fleeing goblin or deer never takes a face that
 // declares hidden_until (mechanics.md hidden passages), nor a climb face (row 30, rope and climb),
 // and the player's Flee skips a face hidden from them.
 import assert from 'node:assert/strict';
@@ -55,11 +55,11 @@ function hide<W extends World>(
   return { ...world, barrierInitial, rooms: { ...world.rooms, [room]: { ...r, exits } } } as W;
 }
 
-// Breaks: a wounded hound flees through a hidden or climb face or a closed door (its only area
+// Breaks: a wounded goblin flees through a hidden or climb face or a closed door (its only area
 // exit), naming it in enemy_fled.
 const named = { hidden: 'hidden', climb: 'a climb', door: 'a closed door' };
 for (const face of ['hidden', 'climb', 'door'] as const)
-  test(`a wounded hound whose only area exit is ${named[face]} stays in combat`, () => {
+  test(`a wounded goblin whose only area exit is ${named[face]} stays in combat`, () => {
     const result = due(hide(seated(begun(wounded(fixture(), 1))), home, 'north', face));
     assert.equal(result.decision.kind, 'accepted', JSON.stringify(result.decision));
     assert.equal(result.world.state.containers[h2], home);
@@ -67,11 +67,15 @@ for (const face of ['hidden', 'climb', 'door'] as const)
     assert.deepEqual(row.active_ids, [h1, h2].sort());
   });
 
-// Breaks: an engaged player's Flee draws a direction through a face hidden from them.
-test('Flee offers only the unhidden exit', () => {
-  const w = begun(fixture());
-  assert.deepEqual(escapeDirections(w, w.character), ['north']);
-  assert.deepEqual(escapeDirections(hide(w, home, 'north'), w.character), []);
+// Breaks: an engaged player's Flee draws a direction through a face hidden from them. The fight is
+// in the drill yard, whose five KAT exits all lead on.
+test('Flee offers only the unhidden exits', () => {
+  const f = fixture();
+  const containers = { ...f.state.containers, [f.body]: nest, [h2]: nest };
+  const w = begun({ ...f, state: { ...f.state, containers } });
+  assert.deepEqual(escapeDirections(w, w.character), ['down', 'east', 'north', 'south', 'west']);
+  const hidden = hide(w, nest, 'north');
+  assert.deepEqual(escapeDirections(hidden, w.character), ['down', 'east', 'south', 'west']);
 });
 
 // Breaks: a sighted deer takes refuge through a hidden or climb face (its only area exit).
@@ -132,8 +136,8 @@ function hour(w: World) {
 }
 
 // Breaks: population wander crosses a hidden or climb face, or a closed door without `walks`
-// (wanderOne off npcPassage); the plain fixture is the control (the hound reaches the nest).
-test('a wandering hound crosses no hidden, climb or closed face; the plain exit it does', () => {
+// (wanderOne off npcPassage); the plain fixture is the control (the goblin reaches the drill yard).
+test('a wandering goblin crosses no hidden, climb or closed face; the plain exit it does', () => {
   assert.equal(hour(fixture()).world.state.containers[h1], nest);
   for (const face of ['hidden', 'climb', 'door'] as const)
     assert.equal(hour(hide(fixture(), home, 'north', face)).world.state.containers[h1], home, face);
@@ -141,7 +145,7 @@ test('a wandering hound crosses no hidden, climb or closed face; the plain exit 
 
 /**
  * The fixture with its plan marked `walks` (toolbox row W26) and a door north of the pit in
- * `state`, keyed to an item hound 1 holds when `held`.
+ * `state`, keyed to an item goblin 1 holds when `held`.
  */
 function walking(state: 'closed' | 'locked', held: boolean) {
   const w = hide(fixture(), home, 'north', 'door');
@@ -176,7 +180,7 @@ function walking(state: 'closed' | 'locked', held: boolean) {
 
 // Breaks: a walking wander refused at a closed door, let through a locked one without the key, or
 // through with it but not re-locking it (four barrier_changed, locked after).
-test('a walking hound crosses a closed door, and a locked one only with its key, re-locking it', () => {
+test('a walking goblin crosses a closed door, and a locked one only with its key, re-locking it', () => {
   const changed = (r: ReturnType<typeof hour>) =>
     r.events.flatMap((e) =>
       e.payload.type === 'barrier_changed' ? [[e.payload.from, e.payload.to]] : [],
