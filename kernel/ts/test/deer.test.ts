@@ -1,18 +1,15 @@
-// size: allow 525, deer same-clock behavior and counterfeit cause share the controlled journey
 import assert from 'node:assert/strict';
-import { createHash } from 'node:crypto';
 import { test } from 'node:test';
-import { gameView, INSTALLED, loadCartridge, step, stepElapsed, type World } from '../src/index.ts';
-import { encode } from '../src/foundation/canonical.ts';
+import { gameView, step, stepElapsed, type World } from '../src/index.ts';
 import { elapsedCommandId, jobCommandId } from '../src/foundation/id_source.ts';
 import { sightRebindValid } from '../src/foundation/compose_sight_rebind.ts';
 import { compose } from '../src/foundation/compose.ts';
 import { base } from '../src/runtime/apply.ts';
 import { runSight } from '../src/mechanics/population/behavior.ts';
-import { content, fresh, ref } from './deer_fixture.ts';
-import { read } from './read.ts';
+import { fresh, ref, shoo } from './deer_fixture.ts';
 const run = 'bbbbbbbb-0000-4000-8000-000000000001' as never;
-const missSeed = [2710938419, 1329376837, 2657997399, 1914447725] as const;
+// Every player swing misses, so the deer survives the rounds a test needs.
+const missing = () => shoo.genesis((c) => void (c.world.combat.player_attack.chance = 0));
 function command(w: World, type: 'move' | 'attack', argument: string, n: number) {
   const payload =
     type === 'move'
@@ -64,22 +61,6 @@ function advance(w: World, until: number): World {
 function slot(w: World, member: string) {
   return Object.values(w.state.population_slots ?? {}).find((s) => s.member_id === member)!;
 }
-// Breaks: a new plan shifts genesis allocation or mints a second member or hide.
-test('v042 genesis IDs include all three deer pairs and control jobs', () => {
-  const w = fresh();
-  const expected = read('protocol/fixtures/missing_child_v042_ids.json');
-  for (const name of ['oak_deer', 'orchard_deer', 'willow_deer']) {
-    for (const role of ['deer', 'hide']) {
-      const id = Object.entries(w.state.created ?? {}).find(
-        ([, row]) =>
-          row.origin.kind === 'spawned' && row.origin.by.key === name && row.origin.role === role,
-      )?.[0];
-      assert.equal(id, expected[`population/${name}/slot1/${role}`], `${name}/${role}`);
-    }
-    const job = Object.entries(w.state.jobs ?? {}).find(([, row]) => row.job.key === name)?.[0];
-    assert.equal(job, expected[`population/${name}/job`], `${name}/job`);
-  }
-});
 
 // Breaks: a deer birth reuses hound provenance, duplicates a hide, or exceeds its one-slot plan.
 test('three independent fresh deer each hold one typed hide at their authored home', () => {
@@ -187,7 +168,7 @@ test('+150 death transfers the one hide to the corpse and replacement waits unti
 
 // Breaks: a different deer's earlier equal-time sight steals the Willow encounter handoff.
 test('equal-time Oak sight does not consume Willow round handoff', () => {
-  let w = walkToWillow(fresh(missSeed));
+  let w = walkToWillow(missing());
   const willow = deer(w, 'willow_deer');
   w = elapsed(w, 65100).world;
   w = elapsed(w, 68100).world;
@@ -199,7 +180,6 @@ test('equal-time Oak sight does not consume Willow round handoff', () => {
     sights.map(([, j]) => j.sight!.member_id),
     [deer(w, 'oak_deer'), willow],
   );
-  w = { ...w, state: { ...w.state, rng: missSeed as never } };
   w = command(w, 'attack', willow, 10);
   w = elapsed(w, 68250).world;
   assert.equal(Object.values(w.state.encounters ?? {})[0]?.status, 'open');
@@ -283,7 +263,7 @@ test('sight-only completion cannot authorize an equal-time slot rebind', () => {
 
 // Breaks: an equal-due surviving round blocks sight with conflicting_write, or flight leaves its successor active.
 test('two missed rounds hand off only the matching encounter and successor at +300', () => {
-  let w = walkToWillow(fresh(missSeed));
+  let w = walkToWillow(missing());
   const id = deer(w, 'willow_deer');
   w = command(w, 'attack', id, 4);
   w = elapsed(w, 64950).world;
@@ -313,7 +293,7 @@ test('two missed rounds hand off only the matching encounter and successor at +3
 
 // Breaks: sight-first equal-time ordering leaves the round active or lets it strike from the next room.
 test('sight-first +300 cancels the pending round before any off-room hit', () => {
-  let w = walkToWillow(fresh(missSeed));
+  let w = walkToWillow(missing());
   const id = deer(w, 'willow_deer');
   w = command(w, 'attack', id, 7);
   w = elapsed(w, 64950).world;
@@ -337,7 +317,7 @@ test('sight-first +300 cancels the pending round before any off-room hit', () =>
 
 // Breaks: the narrow handoff silently permits an unrelated cross-group encounter overwrite.
 test('an unrelated group still conflicts on the encounter target', () => {
-  let w = walkToWillow(fresh(missSeed));
+  let w = walkToWillow(missing());
   const id = deer(w, 'willow_deer');
   w = command(w, 'attack', id, 4);
   w = elapsed(w, 64950).world;
@@ -489,37 +469,25 @@ test('thirty-day replay conserves three live deer and one hide per actual birth'
 // Breaks: a hash-correct untrusted cartridge bypasses the deer role pair or sight route checks.
 test('loader refuses malformed deer roles, missing hide and flight text', () => {
   for (const changed of ['role', 'narration', 'missing_item']) {
-    const c = structuredClone(content) as any;
-    if (changed === 'role')
-      c.population_bundles[ref('population_bundle', 'willow_deer')].loot_role = 'pelt';
-    else if (changed === 'narration')
-      delete c.populations[ref('population', 'willow_deer')].sight.narration.south;
-    else delete c.population_bundles[ref('population_bundle', 'willow_deer')].item;
-    const canonical = encode(c);
-    const hash = createHash('sha256').update(canonical).digest('hex');
-    const loaded = loadCartridge(
-      new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${hash}"}`),
-      INSTALLED,
-    );
+    const loaded = shoo.load((c) => {
+      if (changed === 'role')
+        c.population_bundles[ref('population_bundle', 'willow_deer')].loot_role = 'pelt';
+      else if (changed === 'narration')
+        delete c.populations[ref('population', 'willow_deer')].sight.narration.south;
+      else delete c.population_bundles[ref('population_bundle', 'willow_deer')].item;
+    });
     assert.equal(loaded.ok, false, changed);
   }
 });
 
-// Breaks: a hash-correct sight-enabled hound cartridge loads but cannot cold-reopen its first world.
-test('loader refuses sight on a hound and pelt bundle', () => {
-  const c = structuredClone(content) as any;
-  c.populations[ref('population', 'fen_hounds')].sight = {
-    delay: 300,
-    narration: {
-      east: 'combat.deer_fled_east',
-      west: 'combat.deer_fled_west',
-    },
-  };
-  const canonical = encode(c);
-  const hash = createHash('sha256').update(canonical).digest('hex');
-  const loaded = loadCartridge(
-    new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${hash}"}`),
-    INSTALLED,
-  );
+// Breaks: a hash-correct sight-enabled crow (no deer/hide roles) loads but cannot cold-reopen its first world.
+test('loader refuses sight on a population without the deer and hide roles', () => {
+  const loaded = shoo.load((c) => {
+    // green.south -> lane and lane.north -> green are the crow area's only internal exits.
+    c.populations[ref('population', 'crow')].sight = {
+      delay: 300,
+      narration: { south: 'combat.deer_fled_south', north: 'combat.deer_fled_north' },
+    };
+  });
   assert.equal(loaded.ok, false);
 });

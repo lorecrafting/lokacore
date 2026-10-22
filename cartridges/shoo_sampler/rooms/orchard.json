@@ -1,0 +1,9 @@
+{
+  "title": "room.orchard.title",
+  "description": "room.orchard.description",
+  "exits": {
+    "west": {
+      "to": "smithy"
+    }
+  }
+}

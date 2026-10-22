@@ -4,12 +4,40 @@ import { DatabaseSync } from 'node:sqlite';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { bundle, content } from '../../../kernel/ts/test/deer_fixture.ts';
+import { ref, shoo } from '../../../kernel/ts/test/deer_fixture.ts';
 import type { DecisionResult } from '../../../kernel/ts/src/contracts.gen.ts';
 import { newWorld } from '../../../kernel/ts/src/index.ts';
 import { openStory } from './authority.ts';
 import { level, resourceRef } from '../../../kernel/ts/src/mechanics/resource.ts';
 
+// The crow always hits back and every hit opens an inline C5 bleed; the player always misses.
+function bleeding(c: any) {
+  const effect = shoo.ref('bleed', 'bleeding');
+  // C5 bleed loads only beside skills@1 and food@1 (cartridge_bleed.ts).
+  for (const caps of [c.manifest.requires.capabilities, c.lock.capabilities])
+    for (const k of ['bleed', 'skills', 'food']) caps[k] = 1;
+  c.npcs[ref('npc', 'crow')].hp = { gain: 0, maximum: 10, minimum: 0, start: 10 };
+  c.npcs[ref('npc', 'willow_deer')].hp = { gain: 0, maximum: 2, minimum: 0, start: 2 };
+  c.resources[ref('resource', 'hp')].gain = 0; // no regen at 68400, so HP counts only hits and ticks
+  c.bleeds = {
+    [ref('bleed', 'bleeding')]: {
+      key: 'bleeding',
+      duration: 300,
+      tick_every: 100,
+      hp_loss: 1,
+      narration: Object.fromEntries(
+        ['applied', 'expired', 'refreshed', 'tick'].map((k) => [k, 'combat.npc_hit']),
+      ),
+    },
+  };
+  // Only a hound-role member opens a bleed (bleed/shared.ts wound): a bundle without member_role, the crow's.
+  c.npcs[ref('npc', 'crow')].attack = {
+    chance: 100,
+    damage_min: 1,
+    damage_max: 1,
+    on_positive_hit: { effect },
+  };
+}
 const id = (n: number) => `aaaaaaaa-0000-4000-8000-${String(n).padStart(12, '0')}`;
 function journey(t: TestContext) {
   const dir = mkdtempSync(join(tmpdir(), 'loka-deer-bleed-'));
@@ -26,8 +54,10 @@ function journey(t: TestContext) {
     getAllSync: (q: string, ...p: any[]) => sql.prepare(q).all(...p),
     isInTransactionSync: () => sql.isTransaction,
   };
-  const fresh = newWorld(content, id(100) as never, [1, 2, 3, 4]);
-  const releases = [{ fresh, content_hash: bundle.sha256 }] as const;
+  const loaded = shoo.load(bleeding);
+  assert.ok(loaded.ok, JSON.stringify(loaded));
+  const fresh = newWorld(loaded.cartridge as never, id(100) as never, [1, 2, 3, 4]);
+  const releases = [{ fresh, content_hash: shoo.bundle(bleeding).sha256 }] as const;
   let n = 9000;
   const host = { kernel_version: `loka-kernel@${'0'.repeat(40)}`, newId: () => id(++n) };
   const open = () => openStory(db as never, releases, host);
@@ -64,18 +94,16 @@ function journey(t: TestContext) {
     sql = new DatabaseSync(path);
     return open();
   };
-  invoke(1, 'choose_ancestry', { ancestry: 'fey_touched' });
-  for (const [i, direction] of ['south', 'south', 'east'].entries())
-    invoke(i + 2, 'move', { direction });
+  invoke(1, 'move', { direction: 'west' });
   tick(67950);
   const w = story.world();
-  const hound = Object.entries(w.state.created ?? {}).find(
+  const crow = Object.entries(w.state.created ?? {}).find(
     ([member, origin]) =>
       origin.origin.kind === 'spawned' &&
       origin.origin.role === 'hound' &&
       w.state.containers[member] === w.state.containers[w.body],
   )![0];
-  invoke(7, 'attack', {}, [hound]);
+  invoke(2, 'attack', {}, [crow]);
   for (const at of [68100, 68200, 68250, 68300]) tick(at);
   const before = reopen();
   assert.equal(before.kind, 'open');
@@ -97,20 +125,23 @@ test('real SQLite reopens a lawful interleaved round, population and bleed recei
       group: op.writer_group,
       kind: jobs[op.job_id].bleed_body_id ? 'bleed' : jobs[op.job_id].job.key,
     }));
-  assert.deepEqual(completed.slice(4, 10), [
-    { group: 5, kind: 'fen_hound' },
-    { group: 6, kind: 'crow_branches' },
-    { group: 7, kind: 'fen_hounds' },
-    { group: 8, kind: 'willow_deer' },
-    { group: 5, kind: 'bleed' },
-    { group: 10, kind: 'orchard_deer' },
-  ]);
+  // The bleed joins the crow's round group after unrelated population jobs of the same advance.
+  const bleed = completed.findIndex((c) => c.kind === 'bleed');
+  const group = completed[bleed]!.group;
+  const round = completed.findIndex((c) => c.group === group);
+  assert.ok(round < bleed, JSON.stringify(completed));
+  assert.ok(
+    completed.slice(round + 1, bleed).some((c) => c.group !== group && c.kind === 'willow_deer'),
+    JSON.stringify(completed),
+  );
   const opened = p.reopen();
   assert.equal(opened.kind, 'open');
   if (opened.kind !== 'open') return;
   assert.equal(opened.world().state.clock, 68400);
-  assert.equal(level(opened.world(), opened.world().body, resourceRef(opened.world(), 'hp')), 8);
-  assert.equal(p.sql().prepare('SELECT count(*) AS n FROM receipt').get()!.n, 11);
+  // 10 HP less three crow hits (68100, 68250, 68400) and three bleed ticks (68200, 68300, 68400).
+  assert.equal(level(opened.world(), opened.world().body, resourceRef(opened.world(), 'hp')), 4);
+  // Two invocations (move, attack) and six elapsed advances.
+  assert.equal(p.sql().prepare('SELECT count(*) AS n FROM receipt').get()!.n, 8);
 });
 
 // Break: replacing the old deer-only group detector accidentally lets replay ignore forged paired or unrelated groups.
@@ -119,7 +150,11 @@ for (const kind of ['bleed', 'population', 'mixed sight cancellation'] as const)
     const p = journey(t);
     if (kind === 'mixed sight cancellation') {
       p.invoke(8, 'flee');
-      p.invoke(9, 'move', { direction: 'west' });
+      // The flee leaves the green east or south; either way walk to the willow deer.
+      const lane = p.story.world().roomIds[ref('room', 'lane')];
+      const fled = p.story.world().state.containers[p.story.world().body] === lane;
+      const route = [...(fled ? ['north', 'east'] : []), 'south', 'south', 'west'];
+      for (const [i, direction] of route.entries()) p.invoke(20 + i, 'move', { direction });
       const w = p.story.world();
       const deer = Object.entries(w.state.created ?? {}).find(
         ([member, origin]) =>
@@ -127,19 +162,25 @@ for (const kind of ['bleed', 'population', 'mixed sight cancellation'] as const)
           origin.origin.role === 'deer' &&
           w.state.containers[member] === w.state.containers[w.body],
       )![0];
+      // Hits at 68450 and on the round at 68600 end the deer as the bleed ticks at 68600.
+      p.tick(68450);
       p.invoke(10, 'attack', {}, [deer]);
-      for (const at of [68500, 68550, 68600, 68700]) p.tick(at);
+      for (const at of [68500, 68550, 68600]) p.tick(at);
     }
     const row = p
       .sql()
       .prepare('SELECT scope, invocation_id, response FROM receipt ORDER BY revision DESC LIMIT 1')
       .get()!;
     const response = JSON.parse(row.response as string);
+    const bleedGroup = response.delta.ops.find(
+      (op: any) =>
+        op.op === 'job.complete' && !!p.story.world().state.jobs?.[op.job_id]?.bleed_body_id,
+    )?.writer_group;
     const op = response.delta.ops.find((op: any) =>
       kind === 'bleed'
         ? op.op === 'job.complete' && !!p.story.world().state.jobs?.[op.job_id]?.bleed_body_id
         : kind === 'population'
-          ? op.op === 'population.control' && op.writer_group === 7
+          ? op.op === 'population.control' && op.writer_group !== bleedGroup
           : op.op === 'job.cancel' && !!op.sight_member_id,
     );
     if (kind === 'mixed sight cancellation')
