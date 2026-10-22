@@ -66,7 +66,6 @@ const hall = [go('south', 'south')];
 export const routes: Record<string, Step[]> = {
   'room-first': [],
   'room-npcs-items': [go('south')],
-  'room-notices': [],
   'room-long-log': [
     'A loaf is here., open',
     'Take a loaf',
