@@ -112,6 +112,24 @@ test('C6 route and shelter survive cold reopen at every step', (t) => {
   assert.equal(view().journal.find((q) => q.quest.key === 'night_walk')?.state, 'resolved');
 });
 
+// Breaks: Attack on a pack of one saves a receipt with narration [], which cold reopen refuses as
+// save_corrupt (loka-kgd.187).
+test('attacking the sampler lone hound survives a cold reopen', (t) => {
+  const { bundle } = fixture();
+  const dir = mkdtempSync(join(tmpdir(), 'loka-c6-lone-'));
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
+  const a = started(join(dir, 'save.db'), { wall: 10000, mono: 0 }, bundle);
+  t.after(() => a.sql.close());
+  const hound = a.game
+    .view()
+    .view.entities.find((e) => e.actions.some((x) => x.action_key === 'attack'))!;
+  const reply = a.game.invoke({ action_key: 'attack', target_ids: [hound.id], input: {} } as never);
+  assert.equal(reply.kind, 'saved', JSON.stringify(reply));
+  a.sql.close();
+  a.sql.open();
+  assert.equal(openGame(a.db, bundle, a.host).view().view.combat?.opponent_id, hound.id);
+});
+
 // Breaks: receipt replay accepts a forged shelter flag at Start, a foreign command actor,
 // or a shelter command that silently replaces the current attempt identity.
 test('cold reopen refuses forged expedition transitions without changing saved rows', (t) => {
