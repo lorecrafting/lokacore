@@ -94,7 +94,7 @@ This is planning applicability, not a release certificate or a frozen engine reg
 
 | Feature | Capability | First need | Phase | Evidence |
 |---|---|---|---|---|
-| quest.escort | `quest@1` | chapter_one | R7 | Q2 Wren and S3 patrol require escort now; not deferred to chapter two. Gates: QUEST. |
+| quest.escort | `quest@1` | chapter_one | R7 | Q2 child escort and S3 patrol require escort now; not deferred to chapter two. Gates: QUEST. |
 | quest.survive | `quest@1` | chapter_one | R7 | S27 survival and S3 patrol. Gates: QUEST, WORLD. |
 | scene.overlay | `scene@1` | chapter_one | R7 | Dream overlay; not a spatial InstancePlan. Gates: SCENE. |
 | service.immediate | `service@1` | chapter_one | R8 | Ferry fare/transport and immediate inn services. Gates: TRANSACTION, TOPOLOGY. |

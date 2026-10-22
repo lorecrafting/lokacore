@@ -363,7 +363,7 @@
       "gates": [
         "QUEST"
       ],
-      "reason": "Q2 Wren and S3 patrol require escort now; not deferred to chapter two."
+      "reason": "Q2 child escort and S3 patrol require escort now; not deferred to chapter two."
     },
     {
       "id": "quest.survive",

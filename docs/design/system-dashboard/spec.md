@@ -54,7 +54,7 @@ Phase: **P1** first PR, **P2** second, **P3** later.
 | Shareable link | Storybook global `node` (`&globals=node:delta.StateDelta`); "Copy link" button | P1 |
 | Keyboard navigation | `/` focus search, arrows move between results, Enter opens, Esc clears focus | P1 |
 | Breadcrumbs / history | Browser history per selection (pushState on `node` global); breadcrumb from layer › owner › node | P1 breadcrumb, P2 history |
-| Example values from real cartridges | Schema `examples` (P1); values from `cartridges/ashmere_*` and `protocol/fixtures` indexed by definition kind (P2) | P1 / P2 |
+| Example values from real cartridges | Schema `examples` (P1); values from `cartridges/*_sampler` and `protocol/fixtures` indexed by definition kind (P2) | P1 / P2 |
 | Links to spec section and source file:line | Generator emits both per node | P1 |
 | Diff vs main inside the page | Cut: needs git in the browser; the CI comment covers it | — |
 

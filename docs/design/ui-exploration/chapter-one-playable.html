@@ -390,7 +390,7 @@ code{font:.82em ui-monospace,Menlo,monospace; background:var(--panel); padding:1
 </style>
 
 <div class="wrap">
-  <h1>The Fox of Ashmere, chapter one</h1>
+  <h1>The Fox of Millbrook, chapter one</h1>
   <p class="lede">A mock playable of the first release, set in the room view. Fifty-seven places, sixteen people, ten quests and two endings, from <code>docs/spec/00a</code>. It is a playtest of feel, not the engine: the rules are a small table interpreter in the page. Your place is kept in this browser; <b>Restart</b> begins again from the title page.</p>
   <div class="grid">
     <div class="stage">
@@ -426,17 +426,17 @@ code{font:.82em ui-monospace,Menlo,monospace; background:var(--panel); padding:1
   </div>
 </div>
 <script>
-/* ---------- chapter one of The Fox of Ashmere, as tables ----------
+/* ---------- chapter one of The Fox of Millbrook, as tables ----------
    From docs/spec/00a-chapter-one-content.md. Prose is placeholder, as it is in the spec; structure follows it.
    Conditions are small predicates over the state; effects are op lists that engine.js applies. */
-const AREAS={ash:'Ashmere',fen:'The Fen',isle:'Fen Isle',pri:'Thornwick Priory'};
+const AREAS={ash:'Millbrook',fen:'The Fen',isle:'Fen Isle',pri:'Thornwick Priory'};
 const DIRS={n:'North',e:'East',s:'South',w:'West',u:'Up',d:'Down'};
 const F=(s,k)=>s.f[k];
 const has=(s,k)=>s.inv.some(i=>i.k===k)||Object.values(s.eq).some(i=>i&&i.k===k);
 const qst=(s,k)=>s.q[k]?.st;
 
 const ROOMS={
-/* ---- Ashmere ---- */
+/* ---- Millbrook ---- */
 ferry_landing:{n:'Ferry Landing',a:'ash',z:0,xy:[0,2],tg:'outdoor dock',x:{n:'well_lane',w:'boathouse',s:'reed_path'},
   d:'Reeds crowd a slick wooden landing, and the river slides past it the color of strong tea. A {post|mooring post} leans into the current with a {notice|notice} nailed to it. {tide|Tide marks} stripe the pilings.',
   v:[[s=>F(s,'village.child_status')==='rescued','Someone has tied a red ribbon to the mooring post.'],[s=>F(s,'village.child_status')==='lost','A lantern burns at the end of the landing, and no one has put it out.']],
@@ -494,7 +494,7 @@ lantern_cellar:{n:'Lantern Cellar',a:'ash',z:-1,xy:[1,1],tg:'indoor dark',x:{u:'
   d:'{casks|Ale casks} lie on their sides in cradles. The floor is gritty, and the air tastes of old beer. {holes|Rat holes} gnaw the base of every wall.',
   det:{casks:{n:'ale casks',al:'casks cask ale',d:'The last cask on the west wall is empty and sits oddly, as if it has been moved and moved back.',do:['search']},holes:{n:'rat holes',al:'holes hole',d:'Fresh gnawing, and a draft coming out of one.'}}},
 village_green:{n:'Village Green',a:'ash',z:0,xy:[0,0],tg:'outdoor',x:{n:'north_gate',s:'well_lane',w:'smithy',e:'east_gate'},
-  d:'An {elm|old elm} shades a patch of trodden grass at the heart of Ashmere. The {stocks|stocks} stand empty, and a {cross|market cross} of weathered stone marks the middle.',
+  d:'An {elm|old elm} shades a patch of trodden grass at the heart of Millbrook. The {stocks|stocks} stand empty, and a {cross|market cross} of weathered stone marks the middle.',
   v:[[s=>!F(s,'village.arrived'),'Villagers stand in knots, talking low, and go quiet when they see a stranger.'],[s=>F(s,'village.child_status')==='rescued','Bunting has gone up between the elm and the cross.'],[s=>F(s,'village.child_status')==='lost','A small coat hangs on the market cross, and people walk wide of it.']],
   det:{elm:{n:'old elm',al:'elm tree',d:'Its roots have lifted the turf. A strip of red cloth is tied to a low branch, faded to pink.'},stocks:{n:'stocks',al:'stocks',d:'Nobody has been put in them for years. Somebody still oils the hinges.'},
     cross:{n:'market cross',al:'cross market',d:'Weathered to a stump. A fox is cut into the base, older than the cross above it.',on:[['topic','fox']]}}},
@@ -507,12 +507,12 @@ orchard:{n:'The Orchard',a:'ash',z:0,xy:[-2,0],tg:'outdoor',x:{e:'smithy'},
 east_gate:{n:'East Gate',a:'ash',z:0,xy:[1,0],tg:'outdoor',x:{w:'village_green',e:[null,'road']},
   d:'The east gate stands open on nothing: past it the King’s Road runs down into a sheet of brown {flood|floodwater} and does not come out. {sign|A sign} is nailed to the gatepost.',
   det:{flood:{n:'floodwater',al:'flood water floodwater road',d:'Brown water to the horizon, and the tops of hedges standing out of it in lines.'},sign:{n:'road sign',al:'sign',do:['read'],read:'road'}}},
-north_gate:{n:'North Gate',a:'ash',z:0,xy:[0,-1],tg:'outdoor',x:{s:'village_green',n:['chapel_steps','gate'],w:'elspeth_cottage',e:'watch_post'},
+north_gate:{n:'North Gate',a:'ash',z:0,xy:[0,-1],tg:'outdoor',x:{s:'village_green',n:['chapel_steps','gate'],w:'marta_cottage',e:'watch_post'},
   d:'{gate|The north gate} is oak banded with iron, set in the village wall. North, a track climbs to the priory; west, a cottage door stands ajar; east is the watch post.',
   det:{gate:{n:'north gate',al:'gate',d:s=>gateShut(s)?'Barred for the night. Tobin keeps the key, and Tobin keeps the rules.':'Open by day. It closes at six in the evening, and not for anyone.',on:[['topic','gate']]}}},
-elspeth_cottage:{n:'Elspeth’s Cottage',a:'ash',z:0,xy:[-1,-1],tg:'indoor',x:{e:'north_gate'},
-  d:'One room, kept tidy by someone who could not sit still. {cot|Wren’s cot} is made, and a small coat hangs on the peg. The {hearth|hearth} is banked.',
-  det:{cot:{n:'Wren’s cot',al:'cot bed',d:'A wooden fox is tucked under the blanket, its nose worn pale with holding.',on:[['topic','fox']]},hearth:{n:'hearth',al:'hearth fire',d:'Banked, not out. She is keeping it for someone.'}}},
+marta_cottage:{n:'Marta’s Cottage',a:'ash',z:0,xy:[-1,-1],tg:'indoor',x:{e:'north_gate'},
+  d:'One room, kept tidy by someone who could not sit still. {cot|Robin’s cot} is made, and a small coat hangs on the peg. The {hearth|hearth} is banked.',
+  det:{cot:{n:'Robin’s cot',al:'cot bed',d:'A wooden fox is tucked under the blanket, its nose worn pale with holding.',on:[['topic','fox']]},hearth:{n:'hearth',al:'hearth fire',d:'Banked, not out. She is keeping it for someone.'}}},
 watch_post:{n:'Watch Post',a:'ash',z:0,xy:[1,-1],tg:'indoor',x:{w:'north_gate',e:['watch_cell','cell'],u:'gate_tower'},
   d:'A guardroom with a {bench|bench}, a {horn|horn} on a nail and {roster|a duty roster} chalked on a board.',
   det:{bench:{n:'bench',al:'bench',d:'Worn to the shape of one man sitting.'},horn:{n:'horn',al:'horn',d:'A cow’s horn with a brass mouthpiece. For fire, flood, or the dead walking. Tobin says it has only ever been blown for the first two.'},
@@ -559,7 +559,7 @@ marsh_light:{n:'Marsh Light',a:'fen',z:0,xy:[1,5],tg:'outdoor fen dark',x:{n:'ho
   d:'The ground here is more water than land. {herb|Ghostcap} glows faintly on rotting stumps, and mist lies in the hollows.',
   det:{herb:{n:'ghostcap',al:'ghostcap mushroom herb',d:'A little mushroom with a light in it, the green of a cat’s eye.',do:['gather'],herb:'ghostcap'}}},
 old_causeway:{n:'Old Causeway',a:'fen',z:0,xy:[1,6],tg:'outdoor fen',x:{n:'marsh_light',e:'tide_flats'},
-  d:'A line of old {stones|stones} runs out into the marsh, set by someone long before Ashmere. One bears {fox|a carved fox}, worn nearly smooth.',
+  d:'A line of old {stones|stones} runs out into the marsh, set by someone long before Millbrook. One bears {fox|a carved fox}, worn nearly smooth.',
   det:{stones:{n:'stones',al:'stones causeway',d:'Each one knee-high and square, and each one sunk a little further than the last.'},fox:{n:'carved fox',al:'fox carving',d:'Under the fox, a line of letters worn past reading, and a sign like a bell turned upside down.',on:[['topic','ward']]}}},
 tide_flats:{n:'Tide Flats',a:'fen',z:0,xy:[2,6],tg:'outdoor fen water tide',x:{w:'old_causeway'},
   d:'Wide grey flats, ribbed by the water. {shells|Shells} crunch underfoot.',
@@ -614,7 +614,7 @@ belfry:{n:'The Belfry',a:'pri',z:2,xy:[0,-3],tg:'indoor',x:{d:'bell_tower',u:'sp
   d:'{bell|The bell} hangs in a cage of oak beams, black-green and bigger than a cart. {rope|The rope} is locked to a cleat with an iron hasp.',
   det:{bell:{n:'the bell',al:'bell',d:'Cast with a line of letters round the lip: I CALL THE WATER HOME. Nobody reads it anymore.',on:[['topic','bell']]},rope:{n:'bell rope',al:'rope hasp',d:s=>F(s,'chapel.bell_rung')?'The rope hangs still. It has done what it was for.':'Thick as your wrist, and locked to the cleat. The prior has the key.',do:['ring']}}},
 spire:{n:'The Spire',a:'pri',z:3,xy:[0,-3],tg:'outdoor view',x:{d:'belfry'},
-  d:'A ledge under the spire’s cap, loud with rooks. All of Ashmere lies below you: {view|the green, the landing, and the reed path running into the fen}.',
+  d:'A ledge under the spire’s cap, loud with rooks. All of Millbrook lies below you: {view|the green, the landing, and the reed path running into the fen}.',
   det:{view:{n:'view',al:'view village',d:s=>`On the green: ${npcsIn(s,'village_green')||'no one'}. At the landing: ${npcsIn(s,'ferry_landing')||'no one'}. The fen goes grey to the edge of the world.`}}},
 cloister:{n:'Cloister',a:'pri',z:0,xy:[0,-4],tg:'outdoor',x:{s:'chapel_nave',w:'scriptorium',e:'infirmary',n:[null,'prigate']},
   d:'A square of {beds|herb beds} with a covered walk around them. {sundial|A sundial} stands in the middle. A gate in the north wall is locked.',
@@ -645,7 +645,7 @@ const GATES={
 
 /* items; w is weight in pounds, p the price in pence */
 const ITEMS={
-  lantern:{n:'a brass lantern',al:'lantern brass lamp',slot:'light',w:3,p:10,burn:480,d:'Dented brass with a horn window, oil sloshing inside. WREN is scratched on the base in a child’s capitals.'},
+  lantern:{n:'a brass lantern',al:'lantern brass lamp',slot:'light',w:3,p:10,burn:480,d:'Dented brass with a horn window, oil sloshing inside. ROBIN is scratched on the base in a child’s capitals.'},
   torch:{n:'a torch',al:'torch',slot:'light',w:1,p:3,burn:120,d:'Pitch-soaked rag on a stick. Two hours of smoky light.'},
   lamp_oil:{n:'a flask of lamp oil',al:'oil flask',w:1,p:2,d:'A stoppered flask of lamp oil, enough to fill a lantern.'},
   waterskin:{n:'a waterskin',al:'waterskin skin water',w:1,p:4,sips:4,d:'A goat-hide waterskin.'},
@@ -673,7 +673,7 @@ const ITEMS={
   breeches:{n:'mud-stiff breeches',al:'breeches',slot:'legs',w:1,p:1,d:'They were brown once. They are still brown.'},
   belt:{n:'a rope belt',al:'belt rope',slot:'waist',w:.5,p:0,d:'Knotted twice.'},
   fox_charm:{n:'a fox charm',al:'charm fox tooth',slot:'neck',w:.1,p:25,rare:1,d:'A fox’s tooth bound in silver wire on a thong. It is warm, as if someone has only just taken it off.'},
-  wrens_boot:{n:'Wren’s boot',al:'boot wren',w:1,p:0,quest:1,fl:'<b>A child’s boot</b> lies half-sunk in the mud.',d:'A child’s boot, laced with red wool, full of fen water.'},
+  robins_boot:{n:'Robin’s boot',al:'boot robin',w:1,p:0,quest:1,fl:'<b>A child’s boot</b> lies half-sunk in the mud.',d:'A child’s boot, laced with red wool, full of fen water.'},
   tithe_ledger:{n:'the tithe ledger',al:'ledger tithe',w:2,p:0,quest:1,read:'tithe',d:'A clasped account book, stamped with the chandler’s mark.'},
   vespers_message:{n:'Vesper’s message',al:'message bark vesper',w:.1,p:0,quest:1,read:'message',d:'A strip of birch bark, bitten rather than written.'},
   bell_rope_key:{n:'the bell-rope key',al:'key bell rope',w:.2,p:0,quest:1,d:'An iron key on a loop of cord, for the hasp on the bell rope.'},
@@ -688,11 +688,11 @@ const ITEMS={
   hide:{n:'a deer hide',al:'hide',w:4,p:3,d:'A deer hide, still soft.'},
 };
 const SLOTS=[['light','used as light'],['head','worn on head'],['neck','worn around neck'],['body','worn on body'],['cloak','worn about body'],['arms','worn on arms'],['hands','worn on hands'],['finger','worn on finger'],['finger2','worn on finger'],['waist','worn about waist'],['legs','worn on legs'],['feet','worn on feet'],['wield','wielded'],['off','worn as shield']];
-const FLOOR0={elspeth_cottage:['lantern'],reed_bank:['wrens_boot'],well_bottom:['old_coin'],scriptorium:['ward_of_the_fen','bell_rites'],infirmary:['bandage'],tide_flats:['fox_charm']};
+const FLOOR0={marta_cottage:['lantern'],reed_bank:['robins_boot'],well_bottom:['old_coin'],scriptorium:['ward_of_the_fen','bell_rites'],infirmary:['bandage'],tide_flats:['fox_charm']};
 
 /* readables: a page of their own */
 const READ={
-  notice:{e:'A notice',t:'Ferry',p:s=>['CROSSINGS TO FEN ISLE by daylight only. Two pence. Knock at the boathouse. — B.',...(qst(s,'missing')!=='resolved'?['Below it, newer, in a shakier hand: LOST, a girl of seven, WREN, Elspeth’s daughter. Brown coat, one red ribbon. Any word to the ferryman.']:[])]},
+  notice:{e:'A notice',t:'Ferry',p:s=>['CROSSINGS TO FEN ISLE by daylight only. Two pence. Knock at the boathouse. — B.',...(qst(s,'missing')!=='resolved'?['Below it, newer, in a shakier hand: LOST, a girl of seven, ROBIN, Marta’s daughter. Brown coat, one red ribbon. Any word to the ferryman.']:[])]},
   hob:{e:'A ledger',t:'Hob’s Ledger',p:['Barley in, flour out, in a careful hand, week on week.','The last page: “Sold the east field to the Crown. They say the road will pay for it.” After that, nothing, for three weeks.'],on:[['topic','ledger']]},
   sale:{e:'A sign',t:'For Sale',p:['FOR SALE BY THE CROWN. This cottage, with loft. Five hundred pence. Apply to Josse, moneylender, Harrowgate.','Someone has added in chalk: “when the road is dry”.']},
   prices:{e:'A price board',t:'Peg Harrow, Chandler',p:['Torch 3 · Lamp oil 2 · Waterskin 4 · Bandage 2 · Knife 8 · Shield 15 · Sword 40 · Cap 6 · Jerkin 12 · Boots 6 · Cloak 8 · Gloves 4 · Leggings 6.','Herbs and hides bought. NO CREDIT, this means you Hob.'],on:[['topic','prices']]},
@@ -706,7 +706,7 @@ const READ={
 };
 function rumors(s){
   const st=F(s,'village.child_status'),al=F(s,'chapel.allegiance'),r=[];
-  if(st==='missing') r.push('“Elspeth’s girl went after the fox. Mark my words, the fox has her.”','“Tobin won’t go past the reeds. Says the hounds are thick this year.”');
+  if(st==='missing') r.push('“Marta’s girl went after the fox. Mark my words, the fox has her.”','“Tobin won’t go past the reeds. Says the hounds are thick this year.”');
   if(st==='rescued') r.push('“The child’s home! Came up the lane holding a stranger’s hand, bold as brass.”');
   if(st==='lost') r.push('“They rang the bell and the water came up, and the girl never came home.”');
   if(al==='prior') r.push('“Bell rang at dusk. Water’s up past the reed path. The prior says it will go down.”');
@@ -722,11 +722,11 @@ const NPCS={
     d:'A ferryman with rope-scarred hands and a coat that has never been dry.',
     line:(s,r)=>r==='boathouse'?'<b>Old Bram</b> is asleep here in the bottom of the ferry.':r==='drowned_lantern'?'<b>Old Bram</b> sits here by the hearth, watching the door.'
       :{thankful:'<b>Old Bram</b> the ferryman is here, whistling at the water.',grieving:'<b>Old Bram</b> stands here looking out at the fen, not moving.'}[s.prof.bram]||'<b>Old Bram</b> the ferryman stands here, one boot on the ferry.'},
-  elspeth:{n:'Elspeth',al:'elspeth mother woman',sched:{searching:[[6,21,'village_green'],[21,6,'elspeth_cottage']],relieved:[[7,12,'orchard'],[12,18,'elspeth_cottage'],[18,21,'village_green'],[21,7,'elspeth_cottage']],grieving:[[0,24,'elspeth_cottage']]},
+  marta:{n:'Marta',al:'marta mother woman',sched:{searching:[[6,21,'village_green'],[21,6,'marta_cottage']],relieved:[[7,12,'orchard'],[12,18,'marta_cottage'],[18,21,'village_green'],[21,7,'marta_cottage']],grieving:[[0,24,'marta_cottage']]},
     d:'A thin woman in a shawl, her hands never still. She has not slept.',
-    line:(s,r)=>({relieved:'<b>Elspeth</b> is here, and keeps looking round to be sure of something.',grieving:'<b>Elspeth</b> sits here by the cold cot.'}[s.prof.elspeth])||(r==='village_green'?'<b>Elspeth</b> is here, asking everyone who passes the same question.':'<b>Elspeth</b> is here, standing, because she cannot sit.')},
-  wren:{n:'Wren',al:'wren girl child',d:'A girl of seven in a brown coat, one red ribbon in her hair and one boot missing. She looks at you as if deciding something.',
-    line:s=>({escorted:'<b>Wren</b> is here, holding on to your coat.',home:'<b>Wren</b> is here, being very good and very bored.'}[s.prof.wren])||'<b>Wren</b> is here, curled in the grass, one boot missing.'},
+    line:(s,r)=>({relieved:'<b>Marta</b> is here, and keeps looking round to be sure of something.',grieving:'<b>Marta</b> sits here by the cold cot.'}[s.prof.marta])||(r==='village_green'?'<b>Marta</b> is here, asking everyone who passes the same question.':'<b>Marta</b> is here, standing, because she cannot sit.')},
+  robin:{n:'Robin',al:'robin girl child',d:'A girl of seven in a brown coat, one red ribbon in her hair and one boot missing. She looks at you as if deciding something.',
+    line:s=>({escorted:'<b>Robin</b> is here, holding on to your coat.',home:'<b>Robin</b> is here, being very good and very bored.'}[s.prof.robin])||'<b>Robin</b> is here, curled in the grass, one boot missing.'},
   aldric:{n:'Prior Aldric',al:'aldric prior priest',sched:[[6,17,'prior_study'],[17,19,'belfry'],[19,6,'prior_study']],
     d:'A tall man in black, with a scholar’s stoop and a soldier’s hands. He looks at you as though you were a sum he had nearly finished.',
     line:(s,r)=>s.prof.aldric==='cold'?'<b>Prior Aldric</b> is here, and does not look up.':r==='belfry'?'<b>Prior Aldric</b> stands here with one hand on the bell rope.':'<b>Prior Aldric</b> sits here at his desk, writing.'},
@@ -737,12 +737,12 @@ const NPCS={
   gareth:{n:'Gareth',al:'gareth smith',sched:[[8,18,'smithy'],[18,22,'drowned_lantern'],[22,8,'smithy']],
     d:'A big quiet man with burn scars up both forearms and nothing to hit.',line:(s,r)=>r==='smithy'?'<b>Gareth</b> the smith is here, sitting on his cold anvil.':'<b>Gareth</b> the smith is here with a mug he has not touched.'},
   tobin:{n:'Tobin',al:'tobin watchman guard',train:['swords','dodge'],
-    d:'The whole of the Ashmere watch: grey, stubborn, and armed with a boar spear older than he is.',
+    d:'The whole of the Millbrook watch: grey, stubborn, and armed with a boar spear older than he is.',
     line:(s,r)=>s.follow==='tobin'?'<b>Tobin</b> walks here beside you, spear on his shoulder.':r==='watch_post'?'<b>Tobin</b> the watchman is here on his bench.':'<b>Tobin</b> the watchman is here on his rounds.'},
   hob:{n:'Hob',al:'hob miller',sched:[[6,18,'old_mill'],[18,6,'mill_loft']],
     d:'The miller, white with flour, grey under it. He flinches at the sound of the stair.',line:(s,r)=>r==='old_mill'?'<b>Hob</b> the miller is here, sweeping the same bit of floor.':'<b>Hob</b> is here in the dark, awake.'},
-  ada:{n:'Goodwife Ada',al:'ada goodwife',sched:[[7,17,'orchard'],[17,7,'elspeth_cottage']],
-    d:'Elspeth’s neighbor, round and red-handed, with an apron full of apples.',line:(s,r)=>r==='orchard'?'<b>Goodwife Ada</b> is here among the trees.':'<b>Goodwife Ada</b> is here, keeping Elspeth company.'},
+  ada:{n:'Goodwife Ada',al:'ada goodwife',sched:[[7,17,'orchard'],[17,7,'marta_cottage']],
+    d:'Marta’s neighbor, round and red-handed, with an apron full of apples.',line:(s,r)=>r==='orchard'?'<b>Goodwife Ada</b> is here among the trees.':'<b>Goodwife Ada</b> is here, keeping Marta company.'},
   sedge:{n:'Mother Sedge',al:'sedge mother witch',sched:[[6,20,'herb_garden'],[20,6,'isle_hut']],train:['herbalism','swim'],
     d:'Old, bent, and much stronger than she looks. Her eyes are the brown of peat water.',
     line:(s,r)=>s.prof.sedge==='hostile'?'<b>Mother Sedge</b> is here, and turns her back on you.':r==='herb_garden'?'<b>Mother Sedge</b> is here on her knees in the beds.':'<b>Mother Sedge</b> is here by her fire.'},
@@ -794,23 +794,23 @@ const SHOPS={
 /* quests: objectives are predicates over the state; outcomes are effect lists */
 const QUESTS={
   ferry:{t:'The Ferryman’s Favor',main:1,xp:50,seq:1,res:'auto',
-    obj:[{t:'go up the lane to the village green',done:(s,q)=>s.vt.village_green>=q.t0},{t:'find Elspeth and learn the child’s name',done:s=>F(s,'tells_name')}],
-    out:{done:{fx:[['fact','village.arrived',true],['trust','bram',2],['topic','wren']]}}},
-  missing:{t:'The Missing Child',main:1,xp:150,res:'turn_in',tin:['elspeth','bram'],act:s=>F(s,'village.arrived'),
-    obj:[{t:'learn the child’s name',done:s=>F(s,'village.arrived')},{t:'look for signs of Wren in the fen',done:s=>F(s,'fen.tracks_found')},
-      {t:'cross the mire to the south',done:s=>F(s,'q2.crossed')},{t:'find Wren',done:s=>F(s,'q2.reached')},{t:'answer the fox',done:s=>F(s,'vesper.riddle')},
-      {t:s=>F(s,'q2.branch')==='carry'?'take the fox’s message from her den':F(s,'q2.branch')==='escort'?'walk Wren home to her mother’s cottage':'bring Wren home, or carry the fox’s message',done:s=>F(s,'q2.branch')==='escort'?s.prof.wren==='home':F(s,'q2.branch')==='carry'&&has(s,'vespers_message')}],
-    turn:{rescued:'“Wren is home, and safe.”',stays:'“Wren is with the fox. She sent you this.”'},
+    obj:[{t:'go up the lane to the village green',done:(s,q)=>s.vt.village_green>=q.t0},{t:'find Marta and learn the child’s name',done:s=>F(s,'tells_name')}],
+    out:{done:{fx:[['fact','village.arrived',true],['trust','bram',2],['topic','robin']]}}},
+  missing:{t:'The Missing Child',main:1,xp:150,res:'turn_in',tin:['marta','bram'],act:s=>F(s,'village.arrived'),
+    obj:[{t:'learn the child’s name',done:s=>F(s,'village.arrived')},{t:'look for signs of Robin in the fen',done:s=>F(s,'fen.tracks_found')},
+      {t:'cross the mire to the south',done:s=>F(s,'q2.crossed')},{t:'find Robin',done:s=>F(s,'q2.reached')},{t:'answer the fox',done:s=>F(s,'vesper.riddle')},
+      {t:s=>F(s,'q2.branch')==='carry'?'take the fox’s message from her den':F(s,'q2.branch')==='escort'?'walk Robin home to her mother’s cottage':'bring Robin home, or carry the fox’s message',done:s=>F(s,'q2.branch')==='escort'?s.prof.robin==='home':F(s,'q2.branch')==='carry'&&has(s,'vespers_message')}],
+    turn:{rescued:'“Robin is home, and safe.”',stays:'“Robin is with the fox. She sent you this.”'},
     pick:s=>F(s,'q2.branch')==='escort'?'rescued':'stays',
     fail:s=>F(s,'chapel.bell_rung')&&!F(s,'q2.reached')?'lost':null,
-    out:{rescued:{fx:[['fact','village.child_status','rescued'],['prof','elspeth','relieved'],['prof','bram','thankful'],['trust','bram',10],['trust','elspeth',10],['follow',null]],card:['The Missing Child','Wren Comes Home']},
-      stays:{fx:[['fact','village.child_status','rescued'],['prof','wren','with_fox'],['trust','vesper',10],['rep',-3],['topic','ward'],['take','vespers_message']],card:['The Missing Child','The Fox’s Messenger']},
-      lost:{fx:[['fact','village.child_status','lost'],['prof','elspeth','grieving'],['prof','bram','grieving']],card:['The Missing Child','The Water Rises']}}},
-  bell:{t:'The Bell of Ashmere',main:1,xp:150,res:'choice',
+    out:{rescued:{fx:[['fact','village.child_status','rescued'],['prof','marta','relieved'],['prof','bram','thankful'],['trust','bram',10],['trust','marta',10],['follow',null]],card:['The Missing Child','Robin Comes Home']},
+      stays:{fx:[['fact','village.child_status','rescued'],['prof','robin','with_fox'],['trust','vesper',10],['rep',-3],['topic','ward'],['take','vespers_message']],card:['The Missing Child','The Fox’s Messenger']},
+      lost:{fx:[['fact','village.child_status','lost'],['prof','marta','grieving'],['prof','bram','grieving']],card:['The Missing Child','The Water Rises']}}},
+  bell:{t:'The Bell of Millbrook',main:1,xp:150,res:'choice',
     obj:[{t:'hear what the prior wants',done:s=>F(s,'asks_to_ring')},{t:'climb to the belfry',done:(s,q)=>s.vt.belfry>=q.t0},{t:'ring the bell at dusk, or refuse the prior',done:s=>!!F(s,'bell.choice')}],
     pick:s=>F(s,'bell.choice'),
-    out:{prior:{fx:[['fact','chapel.allegiance','prior'],['prof','vesper','bound'],['prof','sedge','hostile'],['rep',4]],scene:'bell_rung',card:['The Bell of Ashmere','The Bell Is Rung']},
-      fox:{fx:[['fact','chapel.allegiance','fox'],['prof','aldric','cold'],['fact','aldric.cold',true],['rep',-4]],scene:'bell_silenced',card:['The Bell of Ashmere','The Bell Is Silent']}}},
+    out:{prior:{fx:[['fact','chapel.allegiance','prior'],['prof','vesper','bound'],['prof','sedge','hostile'],['rep',4]],scene:'bell_rung',card:['The Bell of Millbrook','The Bell Is Rung']},
+      fox:{fx:[['fact','chapel.allegiance','fox'],['prof','aldric','cold'],['fact','aldric.cold',true],['rep',-4]],scene:'bell_silenced',card:['The Bell of Millbrook','The Bell Is Silent']}}},
   cellar:{t:'Maud’s Cellar',xp:60,res:'turn_in',tin:['maud'],turn:{done:'“Your cellar is clear.”'},
     obj:[{t:s=>`clear the rats from the Lantern cellar (${Math.min(5,s.kills.cellar||0)}/5)`,done:s=>(s.kills.cellar||0)>=5}],
     out:{done:{fx:[['fact','inn.cellar_cleared',true],['trust','maud',5],['coin',8],['fact','inn.free_room',true]]}}},
@@ -843,24 +843,24 @@ const DEADLINE=(2-1)*1440+18*60;   /* day two, 18:00 */
    Choice fields: l label, when, why ([kind,text]), say (their reply), fx, go (next node), end (closes). */
 const DLG={
   bram:{
-    greet:s=>({thankful:'“There she is. Well. There you are.”',grieving:'“…”'}[s.prof.bram])||(qst(s,'ferry')==='active'?'“Up the lane to the green. Elspeth will be there. She hasn’t sat down since last night.”':qst(s,'missing')==='active'?'“Any sign of her?”':'“You’ll be wanting the ferry. Or you’ll be wanting something else.”'),
-    ch:[{l:'“Something else. What’s wrong here?”',when:s=>!s.q.ferry,go:'offer',say:['“A child’s gone into the fen. Wren, Elspeth’s girl. Seven years old.”','“I can’t leave the ferry, and the village won’t go past the reeds. Go up to the green and find her mother. Tell her someone’s come who’ll look.”'],fx:[['topic','wren']]},
+    greet:s=>({thankful:'“There she is. Well. There you are.”',grieving:'“…”'}[s.prof.bram])||(qst(s,'ferry')==='active'?'“Up the lane to the green. Marta will be there. She hasn’t sat down since last night.”':qst(s,'missing')==='active'?'“Any sign of her?”':'“You’ll be wanting the ferry. Or you’ll be wanting something else.”'),
+    ch:[{l:'“Something else. What’s wrong here?”',when:s=>!s.q.ferry,go:'offer',say:['“A child’s gone into the fen. Robin, Marta’s girl. Seven years old.”','“I can’t leave the ferry, and the village won’t go past the reeds. Go up to the green and find her mother. Tell her someone’s come who’ll look.”'],fx:[['topic','robin']]},
       {l:'“Row me across to the isle.”',say:'“From the boathouse, by daylight. Two pence, and mind your feet.”'},
       {l:'“Do you have anything for the trip?”',when:s=>(s.trust.bram||0)>=10&&!has(s,'ferry_token')&&!F(s,'token.given'),say:'“Take this. You’ll not pay on my ferry again.”',fx:[['give','ferry_token'],['fact','token.given',true]]}],
     nodes:{offer:[{l:'“I’ll go up to her.”',say:'“Good. Up the lane, north. And whatever she says, don’t tell her the fen is safe.”',fx:[['start','ferry']]},{l:'“It’s not my business.”',say:'“No. It never is.”'}]},
-    top:{ferry:'“She crosses by daylight and not after. Two pence, or a token if I like you.”',wren:'“Knows every reed by name. That’s what worries me.”',
+    top:{ferry:'“She crosses by daylight and not after. Two pence, or a token if I like you.”',robin:'“Knows every reed by name. That’s what worries me.”',
       fox:'“There’s a fox in the fen, older than the church. I’ve seen her. She’s never done me harm, which is more than I can say for the church.”',
       bell:'“When the bell rings at dusk, the water rises. You won’t hear the prior say so.”',hounds:'“Keep a light after dark, and keep moving. They don’t like either.”',
       ward:'“My gran said the fox walks the water’s edge so we don’t have to. Gran said a lot of things.”',fen:'“Low water, you can walk it. High water, you swim it or you don’t go. The tide turns every three hours.”'}},
-  elspeth:{
-    greet:s=>({relieved:'“You. Come here, let me look at you.”',grieving:'“Go away. Please.”'}[s.prof.elspeth])||(F(s,'tells_name')?'“Have you found her? Have you found anything?”':'“Are you from the ferry? Have you seen a girl? Seven, brown coat, one red ribbon —”'),
-    ch:[{l:'“Bram sent me. Who am I looking for?”',when:s=>qst(s,'ferry')==='active'&&!F(s,'tells_name'),say:['“Wren. Her name is Wren.”','“She went out after the fox. She talks about it all the time, the fox in the reeds. I told her it was a story.”','“She won’t come out for strangers. But take her lantern from the cottage, by the north gate. She’ll come to that light. She knows it.”'],fx:[['fact','tells_name',true],['topic','fox']]},
+  marta:{
+    greet:s=>({relieved:'“You. Come here, let me look at you.”',grieving:'“Go away. Please.”'}[s.prof.marta])||(F(s,'tells_name')?'“Have you found her? Have you found anything?”':'“Are you from the ferry? Have you seen a girl? Seven, brown coat, one red ribbon —”'),
+    ch:[{l:'“Bram sent me. Who am I looking for?”',when:s=>qst(s,'ferry')==='active'&&!F(s,'tells_name'),say:['“Robin. Her name is Robin.”','“She went out after the fox. She talks about it all the time, the fox in the reeds. I told her it was a story.”','“She won’t come out for strangers. But take her lantern from the cottage, by the north gate. She’ll come to that light. She knows it.”'],fx:[['fact','tells_name',true],['topic','fox']]},
       {l:'“Where would she go?”',when:s=>F(s,'tells_name')&&qst(s,'missing')==='active',say:'“South. Always south, past the reeds, to where she says the fox lives. She showed me once on the ferry. A hollow, past the mire.”',fx:[['topic','fen']]}],
-    top:{wren:s=>s.prof.elspeth==='relieved'?'“She’s asleep. She’s been asleep since she came home. I keep going in to look.”':'“She’s brave. She’s so brave, and she doesn’t know anything.”',
-      fox:'“Every child in Ashmere is told about the fox. Most of them don’t go looking.”',bell:'“If they ring that bell with her out there —”',home:'“Home is here. Tell her that.”'}},
-  wren:{
-    greet:s=>s.prof.wren==='home'?'“I’m not allowed out. Did you see her? Did you see Vesper?”':s.prof.wren==='escorted'?'“Is it far? It isn’t far. I know the way, really.”':'“You have my lantern. Did Mam send you?”',
-    ch:[{l:'“Come on. I’ll take you home.”',when:s=>F(s,'q2.branch')==='escort'&&s.prof.wren==='with_fox',say:'“All right. Don’t let go.”',fx:[['prof','wren','escorted'],['follow','wren']],end:1}],
+    top:{robin:s=>s.prof.marta==='relieved'?'“She’s asleep. She’s been asleep since she came home. I keep going in to look.”':'“She’s brave. She’s so brave, and she doesn’t know anything.”',
+      fox:'“Every child in Millbrook is told about the fox. Most of them don’t go looking.”',bell:'“If they ring that bell with her out there —”',home:'“Home is here. Tell her that.”'}},
+  robin:{
+    greet:s=>s.prof.robin==='home'?'“I’m not allowed out. Did you see her? Did you see Vesper?”':s.prof.robin==='escorted'?'“Is it far? It isn’t far. I know the way, really.”':'“You have my lantern. Did Mam send you?”',
+    ch:[{l:'“Come on. I’ll take you home.”',when:s=>F(s,'q2.branch')==='escort'&&s.prof.robin==='with_fox',say:'“All right. Don’t let go.”',fx:[['prof','robin','escorted'],['follow','robin']],end:1}],
     top:{fox:'“Her name is Vesper. She walks along the water so it doesn’t come up. She told me. Not with words.”',home:'“Mam will be cross. Mam will be so cross.”',bell:'“Vesper doesn’t like the bell. When it rings she has to lie down.”',ward:'“It’s like a fence, but made of walking.”'}},
   aldric:{
     greet:s=>s.prof.aldric==='cold'?'“We have nothing to say to one another.”':s.room==='belfry'?'“Dusk. Good. You came.”':'“A stranger at Thornwick. Sit, if you can find a chair.”',
@@ -870,55 +870,55 @@ const DLG={
         say:s=>F(s,'aldric.free_word')?'“The marsh light answered you? Then you have earned it. Listen. Say it with the back of the throat.”':'“Ten pence for the chapel roof. Listen. Say it with the back of the throat.”',fx:[['word','light'],['pay_word']]}],
     nodes:{ring:[{l:'“I’ll ring it.”',say:'“Take the key. Dusk, and not before. I will be there.”',fx:[['start','bell'],['fact','asks_to_ring',true],['give','bell_rope_key']]},{l:'“Let me think about it.”',say:'“Think quickly. Dusk comes every day.”',fx:[['start','bell'],['fact','asks_to_ring',true],['give','bell_rope_key']]}]},
     top:{bell:'“Cast in the old priory’s last year. It has one note, and that note is a command.”',ward:'“A heathen word for a heathen trick.”',fox:'“A beast that has learned to be worshipped.”',
-      fen:'“Drained, the fen would feed Harrowgate. The Crown has asked, twice.”',wren:'“The child is in God’s hands. And the fen’s, I am afraid.”',ledger:'“If Peg Harrow has sent her ledger, give it here.”'}},
+      fen:'“Drained, the fen would feed Harrowgate. The Crown has asked, twice.”',robin:'“The child is in God’s hands. And the fen’s, I am afraid.”',ledger:'“If Peg Harrow has sent her ledger, give it here.”'}},
   maud:{
     greet:s=>F(s,'inn.cellar_cleared')?'“My hero of the cellar. What’ll it be?”':'“Eat, drink, or sleep. Pick one and pay for it.”',
     ch:[{l:'“You look like you have a problem.”',when:s=>!s.q.cellar,go:'rats',say:'“Rats. In my cellar, in my ale. I’ve a key and no stomach for it.”',fx:[['topic','cellar']]}],
     nodes:{rats:[{l:'“Give me the key.”',say:'“Five of them at least. Kill what you find and I’ll pay.”',fx:[['start','cellar'],['give','cellar_key']]},{l:'“Not today.”',say:'“Nor any day, it seems.”'}]},
     top:{rumors:s=>rumors(s).map(r=>r).slice(0,2).join(' '),room:'“Three pence a night, bed and blanket. Upstairs.”',cellar:'“Down behind the bar. Mind the step and mind the rats.”',
-      wren:'“Poor mite. Elspeth’s been up all night on the green.”',bell:'“My man went into the water the night they last rang it. I don’t go up that hill.”',fox:'“Leave the fox alone and the fox leaves you alone. That’s all anybody needs to know.”'}},
+      robin:'“Poor mite. Marta’s been up all night on the green.”',bell:'“My man went into the water the night they last rang it. I don’t go up that hill.”',fox:'“Leave the fox alone and the fox leaves you alone. That’s all anybody needs to know.”'}},
   peg:{
     greet:s=>'“Buying or selling? Or owing? Everybody’s owing.”',
     ch:[{l:'“You look busy.”',when:s=>!s.q.debt&&DAYT(s)<DEADLINE,go:'debt',say:'“Busy owing. That’s the priory’s tithe ledger. It should have gone up the hill a month ago.”',fx:[['topic','ledger']]}],
     nodes:{debt:[{l:'“I’ll take it up.”',say:'“Before dusk tomorrow, or the prior sends the bishop. Here.”',fx:[['start','debt'],['give','tithe_ledger']]},{l:'“Take it yourself.”',say:'“I would, if I could shut the shop without starving.”'}]},
-    top:{ledger:'“Three months of nothing. Tell him the road is shut. Tell him nicely.”',prices:'“Prices are on the board. Haggling’s extra.”',wren:'“I gave that child a sugar mouse on Tuesday. On Tuesday.”',fox:'“Bad for trade, foxes. Good for stories. Stories don’t pay.”'}},
-  gareth:{greet:()=>'“Nothing to mend. No iron. No work.”',top:{wren:'“She used to sit on the bench and watch me. I’d let her work the bellows.”',fox:'“Never seen it. Seen its prints, on the landing, some mornings.”',hounds:'“Big this year. Bigger than last.”'}},
+    top:{ledger:'“Three months of nothing. Tell him the road is shut. Tell him nicely.”',prices:'“Prices are on the board. Haggling’s extra.”',robin:'“I gave that child a sugar mouse on Tuesday. On Tuesday.”',fox:'“Bad for trade, foxes. Good for stories. Stories don’t pay.”'}},
+  gareth:{greet:()=>'“Nothing to mend. No iron. No work.”',top:{robin:'“She used to sit on the bench and watch me. I’d let her work the bellows.”',fox:'“Never seen it. Seen its prints, on the landing, some mornings.”',hounds:'“Big this year. Bigger than last.”'}},
   tobin:{
     greet:s=>s.follow==='tobin'?'“Keep up. Eyes on the dark.”':'“If you’re trouble, go and be it somewhere else.”',
     ch:[{l:'“I’m going into the fen.”',when:s=>qst(s,'missing')==='active'&&!has(s,'rusty_sword')&&!F(s,'tobin.sword'),say:'“Then take this. It’s rusty, and so am I, and we’ve both done all right.”',fx:[['give','rusty_sword'],['fact','tobin.sword',true],['topic','hounds']]},
       {l:'“Want company on your rounds?”',when:s=>!s.q.rounds&&(H(s)>=18||H(s)<6)&&!F(s,'watch.gate_trusts_player'),go:'rounds',say:'“Company? It’s not a stroll. Gate, post, green, east gate. Something always comes up the flooded road.”',fx:[['topic','rounds']]}],
     nodes:{rounds:[{l:'“Lead on.”',say:'“After you. I’ll be right behind.”',fx:[['start','rounds'],['follow','tobin'],['patrol']],end:1},{l:'“Maybe another night.”',say:'“There’s always another night. That’s the trouble.”'}]},
-    top:{rounds:'“Gate, post, green, east gate, and back. Every night. Forty years.”',gate:'“Shut at six. Opens at six. Not for the prior, not for the king.”',hounds:'“They come up the flooded road at night, bold as bailiffs. Keep your back to a wall.”',wren:'“I won’t go past the reeds. I’m the whole watch. If I drown, who shuts the gate?”'}},
-  hob:{greet:()=>'“Is it you? No. No, of course not.”',top:{ledger:'“I sold the field. I had to. Don’t look at me like that.”',wren:'“The girl? She used to bring me apples.”',fox:'“There are worse things in the fen than foxes. There are worse things in the mill.”'}},
-  ada:{greet:()=>'“Apple? Take an apple. Everyone’s too sad to eat.”',ch:[{l:'“Thank you.”',when:s=>!F(s,'ada.apple'),say:'“Go on. There’s plenty.”',fx:[['give','apple'],['fact','ada.apple',true]],end:1}],top:{wren:'“I had her yesterday morning, and then I didn’t.”',fox:'“My mother left bread out for it. I leave bread out for it.”'}},
+    top:{rounds:'“Gate, post, green, east gate, and back. Every night. Forty years.”',gate:'“Shut at six. Opens at six. Not for the prior, not for the king.”',hounds:'“They come up the flooded road at night, bold as bailiffs. Keep your back to a wall.”',robin:'“I won’t go past the reeds. I’m the whole watch. If I drown, who shuts the gate?”'}},
+  hob:{greet:()=>'“Is it you? No. No, of course not.”',top:{ledger:'“I sold the field. I had to. Don’t look at me like that.”',robin:'“The girl? She used to bring me apples.”',fox:'“There are worse things in the fen than foxes. There are worse things in the mill.”'}},
+  ada:{greet:()=>'“Apple? Take an apple. Everyone’s too sad to eat.”',ch:[{l:'“Thank you.”',when:s=>!F(s,'ada.apple'),say:'“Go on. There’s plenty.”',fx:[['give','apple'],['fact','ada.apple',true]],end:1}],top:{robin:'“I had her yesterday morning, and then I didn’t.”',fox:'“My mother left bread out for it. I leave bread out for it.”'}},
   sedge:{
     greet:s=>({warm:'“The one who sat out the night. Come in, come in.”',hostile:'“The bell-ringer’s friend. Get off my island.”'}[s.prof.sedge])||'“Buying? No. I don’t sell. Asking? Ask, then.”',
     top:{fox:'“Vesper. Say her name properly, you’re on her water.”',ward:'“She walks the edge and the water stays back. There. Now you know as much as the priory.”',herbs:'“Fenwort for wounds, lily for sleep, ghostcap for seeing what isn’t there. Rue for priors.”',
       bell:s=>s.prof.sedge==='hostile'?'“You know what the bell did.”':'“Every ring of it, she has to lie down. Too many rings and she won’t get up.”',charm:'“A tooth of hers, in silver. Lost on the flats a long time ago. The tide gives things back, sometimes.”'}},
   wick:{greet:()=>'“Hurt? Sit. Not hurt? Then I have work for you.”',
     ch:[{l:'“What work?”',when:s=>!s.q.herbs||(qst(s,'herbs')==='resolved'&&DAY(s)>(s.q.herbs.day||0)),say:'“Fenwort. It grows in the willow shade, south of the reed bank. Three sprigs, and I’ll give you bandages for them.”',fx:[['start','herbs'],['topic','herbs']]}],
-    top:{herbs:'“Fenwort, from the willow shade. Pale leaves. Don’t eat it.”',bandages:'“Clean, tight, and quick. I can teach you, if you’ve a few pence for the chapel.”',wren:'“If they find her, bring her here first.”',bell:'“The prior rings it. I patch up what comes after.”'}},
+    top:{herbs:'“Fenwort, from the willow shade. Pale leaves. Don’t eat it.”',bandages:'“Clean, tight, and quick. I can teach you, if you’ve a few pence for the chapel.”',robin:'“If they find her, bring her here first.”',bell:'“The prior rings it. I patch up what comes after.”'}},
   ash:{greet:()=>'“Oh! Sorry. Were you looking for the prior? Everyone is always looking for the prior.”',top:{bell:'“Brother Wick says it used to be rung for weddings. Now it’s only for the fen.”',fox:'“I’m not supposed to draw foxes.”',ward:'“There’s a book on it on my desk. I’m not supposed to read that either.”'}},
   hale:{greet:()=>'“Mind the leeks.”',top:{bell:'“It makes the ground shake. The worms come up. I don’t like it.”',fox:'“I saw it once, from the spire. It was walking on the water.”',herbs:'“Rue’s for poison. Try it on the prior.”'}},
   vesper:{greet:s=>s.prof.vesper==='bound'?'The fox does not lift her head. Her eyes are dim.':'The fox looks at you. You hear her without hearing.',
-    top:{ward:'“I walk the edge. The water remembers where the edge is. That is all a ward is.”',bell:'“It calls the water home, and I am in the way.”',wren:s=>s.prof.wren==='with_fox'?'“She is warm. She is learning the reeds.”':'“She came to me because I was the only one who would listen.”',riddle:'“You have answered me already.”'}},
+    top:{ward:'“I walk the edge. The water remembers where the edge is. That is all a ward is.”',bell:'“It calls the water home, and I am in the way.”',robin:s=>s.prof.robin==='with_fox'?'“She is warm. She is learning the reeds.”':'“She came to me because I was the only one who would listen.”',riddle:'“You have answered me already.”'}},
   wisp:{greet:()=>'The light brightens, dims, brightens.',top:{riddle:'The light flickers, amused.',ward:'The light moves along the water’s edge, and back.'}},
 };
-const SHRUG={bram:'“Couldn’t say.”',elspeth:'“I don’t know. I don’t know anything.”',wren:'“That’s boring.”',aldric:'“A question for another day.”',maud:'“Ask someone who cares.”',peg:'“Not my line.”',gareth:'He shrugs.',tobin:'“Not my business.”',hob:'He looks at the floor.',ada:'“Couldn’t tell you, love.”',sedge:'“Pah.”',wick:'“I’m sure I don’t know.”',ash:'“I could look it up?”',hale:'“Dunno.”',vesper:'The fox says nothing.',wisp:'The light says nothing.'};
-const TOPICS={wren:'Wren',fox:'the fox',bell:'the bell',ward:'the ward',ferry:'the ferry',rumors:'rumors',room:'a room',cellar:'the cellar',ledger:'the ledger',prices:'prices',rounds:'the rounds',gate:'the gate',hounds:'the hounds',herbs:'herbs',bandages:'bandages',riddle:'the riddle',home:'home',fen:'the fen',charm:'the charm'};
+const SHRUG={bram:'“Couldn’t say.”',marta:'“I don’t know. I don’t know anything.”',robin:'“That’s boring.”',aldric:'“A question for another day.”',maud:'“Ask someone who cares.”',peg:'“Not my line.”',gareth:'He shrugs.',tobin:'“Not my business.”',hob:'He looks at the floor.',ada:'“Couldn’t tell you, love.”',sedge:'“Pah.”',wick:'“I’m sure I don’t know.”',ash:'“I could look it up?”',hale:'“Dunno.”',vesper:'The fox says nothing.',wisp:'The light says nothing.'};
+const TOPICS={robin:'Robin',fox:'the fox',bell:'the bell',ward:'the ward',ferry:'the ferry',rumors:'rumors',room:'a room',cellar:'the cellar',ledger:'the ledger',prices:'prices',rounds:'the rounds',gate:'the gate',hounds:'the hounds',herbs:'herbs',bandages:'bandages',riddle:'the riddle',home:'home',fen:'the fen',charm:'the charm'};
 
 /* scenes: steps of beats, a riddle, a choice. p paragraphs; riddle {who, ask, a, bank, ok, no, tries}; pick [{l,sub,fx}] */
 const SCENES={
-  title:{eye:'The Fox of Ashmere',t:'Chapter One: The Missing Child',steps:[
+  title:{eye:'The Fox of Millbrook',t:'Chapter One: The Missing Child',steps:[
     {p:['You come down the river road at first light, with the fen on one side and the water on the other, and a ferry landing ahead where an old man is waiting for no one.','Before you step onto the boards: who are you?'],
      pick:Object.entries(ANC).map(([k,a])=>({l:a.n[0].toUpperCase()+a.n.slice(1),sub:a.sub,fx:[['anc',k]]}))}],card:['Chapter the First','The Missing Child']},
   rescue:{eye:'The hollow',t:'The Fox and the Child',steps:[
-    {p:s=>[lightSrc(s)?.k==='lantern'?'The lantern’s light goes into the hollow ahead of you. Something in the grass lifts its head: a girl, one boot on, blinking. “That’s my lantern,” she says.':'In the dark you hear her before you find her: small breathing, and a sniff. Your hand finds a coat, a shoulder, a face. “You’re not Mam,” says Wren.',
-      'Then the brambles part and a fox steps into the hollow, larger than any fox should be, with a small light in her eyes that is not a reflection. Wren puts a hand on her back as if she has done it a hundred times.']},
+    {p:s=>[lightSrc(s)?.k==='lantern'?'The lantern’s light goes into the hollow ahead of you. Something in the grass lifts its head: a girl, one boot on, blinking. “That’s my lantern,” she says.':'In the dark you hear her before you find her: small breathing, and a sniff. Your hand finds a coat, a shoulder, a face. “You’re not Mam,” says Robin.',
+      'Then the brambles part and a fox steps into the hollow, larger than any fox should be, with a small light in her eyes that is not a reflection. Robin puts a hand on her back as if she has done it a hundred times.']},
     {riddle:{who:'Vesper',ask:'“I am carried and I am not a child. I have a heart of fire and a house of brass. I am hung at the door so the lost can come home. What am I?”',a:'lantern',bank:'lanternfox',ok:'“Yes,” says the fox. “And so are you, tonight.”',no:'The fox’s ears go back. “No.”',fx:[['fact','vesper.riddle',true],['topic','riddle'],['topic','ward']]}},
     {p:['“The bell will ring,” says Vesper, “and when it rings I must lie down, and the water will not stay where I put it. The child is safest where the water cannot reach her. Or she is safest with her mother. I do not know which. You decide.”'],
-     pick:[{l:'Take Wren home',sub:'She walks back with you, across the mire and up the lane, to her mother.',fx:[['fact','q2.branch','escort'],['prof','wren','escorted'],['follow','wren'],['topic','home']]},
-       {l:'Leave her with the fox',sub:'Wren stays in the hollow. Vesper leaves a message for her mother in the den below.',fx:[['fact','q2.branch','carry'],['put','vespers_message','fox_den_deep']]}]}]},
+     pick:[{l:'Take Robin home',sub:'She walks back with you, across the mire and up the lane, to her mother.',fx:[['fact','q2.branch','escort'],['prof','robin','escorted'],['follow','robin'],['topic','home']]},
+       {l:'Leave her with the fox',sub:'Robin stays in the hollow. Vesper leaves a message for her mother in the den below.',fx:[['fact','q2.branch','carry'],['put','vespers_message','fox_den_deep']]}]}]},
   bell_rung:{eye:'Dusk',t:'The Bell Is Rung',steps:[{p:['You haul on the rope and the bell swings and speaks, once, a note so low you feel it in your teeth before you hear it.','Out over the fen, the water answers. It rises the way bread rises, all at once and everywhere, and the reed path goes under, and the mire goes under.','Somewhere south, in a hollow, a fox lies down and does not get up.']}]},
   bell_silenced:{eye:'Dusk',t:'The Bell Is Silent',steps:[{p:['You take your hand off the rope. The prior looks at you for a long time.','“Then the fen keeps its fox,” he says, “and I keep my key. Go. I will not ring it tonight. I will not forget who stopped me.”']}]},
   dream:{eye:'Asleep at the Lantern',t:'A Dream of the Fen',steps:[{p:['You dream of water, and of walking on it.','A fox walks ahead of you along the edge of the fen, and where she walks the water stops, like a dog told to stay. She looks back once to see if you are following.'],
@@ -927,8 +927,8 @@ const SCENES={
     {p:['The light comes close enough to touch and does not warm you. It flickers, and you understand that it is asking you something, the way you understand weather.']},
     {riddle:{who:'The marsh light',ask:'I come twice a day and never stay. I fill the fen and empty it. The ferryman waits on me. What am I?',a:'tide',bank:'tidewater',tries:3,ok:'The light flares white, once, and drifts off along the water’s edge. Where it passes, the water is very still.',no:'The light dims.',fail:[['until','wisp.gone',720],['fact','wisp.seen',false],['sys','The marsh light goes out. It will not come back tonight.']],fx:[['fact','fen.wisp_answered',true]]}}]},
   dawn:{eye:'The end of chapter one',enter:[['dawn']],t:'Dawn on the Green',steps:[{p:s=>{const st=F(s,'village.child_status'),al=F(s,'chapel.allegiance');
-    return [st==='lost'?'Dawn comes up grey over a village that has not slept. The water stands in the lane. On the green, someone has hung a small coat on the market cross.':'Dawn comes up gold over Ashmere. On the green, people stand about in the cold, not quite ready to go home.',
-      st==='lost'?'Elspeth sits on the step of her cottage with the lantern in her lap, unlit.':F(s,'q2.branch')==='carry'?'Elspeth holds a strip of bitten bark and reads it over and over, though there are no letters on it. When she looks up, she is almost smiling.':'Wren sits on the cross with her boots on, both of them, eating an apple, and pretending not to be looked at.',
+    return [st==='lost'?'Dawn comes up grey over a village that has not slept. The water stands in the lane. On the green, someone has hung a small coat on the market cross.':'Dawn comes up gold over Millbrook. On the green, people stand about in the cold, not quite ready to go home.',
+      st==='lost'?'Marta sits on the step of her cottage with the lantern in her lap, unlit.':F(s,'q2.branch')==='carry'?'Marta holds a strip of bitten bark and reads it over and over, though there are no letters on it. When she looks up, she is almost smiling.':'Robin sits on the cross with her boots on, both of them, eating an apple, and pretending not to be looked at.',
       al==='prior'?'Up the hill the bell hangs still. The fen is wider this morning than it was, and quiet, and nothing walks the edge of it.':'Up the hill the bell hangs still, and the prior’s door is shut. Out in the reeds, if you look for it, a fox is walking the edge of the water.']},
     pick:[{l:'Close the book',sub:'Chapter two, The Barrow King, will start from what you chose.',fx:[['fact','chapter.done',true]]}]}],card:['The End','of Chapter One']},
   death:{eye:'You have died',t:'The Page Goes Dark',steps:[{p:s=>['The world goes grey, and then white, and then it is morning somewhere else.',`You wake by ${ROOMS[s.shrine].n.toLowerCase()==='isle shrine'?'the shrine on Fen Isle':'the altar at Thornwick'}, cold and whole. What you were carrying lies where you fell.`]}]},
@@ -961,7 +961,7 @@ function newState(){
   const s={t:7*60,room:'ferry_landing',seen:['ferry_landing'],vt:{ferry_landing:420},anc:null,lvl:1,xp:0,pos:'standing',pennies:20,
     st:{STR:10,DEX:10,CON:10,INT:10,SPI:10,PER:10},sk:{swords:10,dodge:10,bandage:5,swim:20,herbalism:5,haggle:5},
     inv:[],eq:{},floor:{},f:{'village.child_status':'missing','chapel.allegiance':'unknown'},q:{},topics:['ferry'],trust:{},rep:0,
-    prof:{bram:'worried',elspeth:'searching',wren:'with_fox',aldric:'welcoming',sedge:'wary',vesper:'guarded'},
+    prof:{bram:'worried',marta:'searching',robin:'with_fox',aldric:'welcoming',sedge:'wary',vesper:'guarded'},
     mobs:[],fight:null,follow:null,hunger:0,thirst:0,bleed:0,wet:0,drunk:0,words:[],shrine:'chapel_nave',corpse:null,kills:{},nid:1,fxq:[],
     moon:false,wx:null,glow:0,felt:{},nodes:{},haggle:{},wimpy:0,rent:0,hide:false};
   for(const k of ['coat','breeches','belt']) s.eq[ITEMS[k].slot]=mk(s,k);
@@ -986,7 +986,7 @@ function light(s,r=s.room){
 function npcRoom(s,k){
   if(s.follow===k) return s.room;
   const h=H(s),N=NPCS[k];
-  if(k==='wren') return F(s,'village.child_status')==='lost'?null:{home:'elspeth_cottage',with_fox:'fox_hollow'}[s.prof.wren]||null;
+  if(k==='robin') return F(s,'village.child_status')==='lost'?null:{home:'marta_cottage',with_fox:'fox_hollow'}[s.prof.robin]||null;
   if(k==='tobin') return h>=6&&h<18?'watch_post':PATROL[(h+6)%4];
   if(k==='vesper'&&s.prof.vesper==='bound') return 'fox_den_deep';
   if(k==='wisp'&&(F(s,'wisp.gone')>s.t||!F(s,'wisp.seen')&&!F(s,'fen.wisp_answered'))) return null;
@@ -1000,7 +1000,7 @@ function itemShown(s,i,r){return !(i.k==='fox_charm'&&r==='tide_flats'&&!tideLow
 function ents(s){
   const r=s.room,L=light(s),o=[];
   if(L){
-    for(const k in NPCS) if(npcRoom(s,k)===r&&!(k==='wren'&&r==='fox_hollow'&&!F(s,'q2.reached'))) o.push(k);
+    for(const k in NPCS) if(npcRoom(s,k)===r&&!(k==='robin'&&r==='fox_hollow'&&!F(s,'q2.reached'))) o.push(k);
     for(const m of mobsIn(s,r)) o.push(m.id);
   } else o.push(...mobsIn(s,r).filter(m=>m.fighting).map(m=>m.id));
   if(L||s.felt[r]) o.push(...(s.floor[r]||[]).filter(i=>itemShown(s,i,r)).map(i=>i.id));
@@ -1067,11 +1067,11 @@ function move(s,d,silent){
     const ok=chance(p); learn(s,'swim',o,ok);
     s.wet=s.t+120; const tl=lightSrc(s); if(tl?.k==='torch'){ drop1(s,tl); o.push(txt('Your torch hisses out in the water.')); }
     if(!ok){ s.hp=Math.max(1,s.hp-4); s.mv=Math.max(0,s.mv-6); o.push(txt('The water takes you and turns you round and gives you back where you started, coughing.')); o.push(...pass(s,10)); return {msgs:o,hurt:1}; }
-    o.push(txt(s.follow==='wren'?'You swim across with Wren clinging to your back, both of you gasping at the cold.':'You swim across, the cold like a hand on your chest.'));
+    o.push(txt(s.follow==='robin'?'You swim across with Robin clinging to your back, both of you gasping at the cold.':'You swim across, the cold like a hand on your chest.'));
   }
   s.hide=false; s.mv-=cost; const from=s.room; s.room=e.to; s.vt[e.to]=s.t;
   if(!s.seen.includes(e.to)){s.seen.push(e.to); gain(s,3,o);}
-  if(s.follow&&!silent) o.push(txt({wren:'Wren trots after you.',tobin:'Tobin follows, spear on his shoulder.'}[s.follow]));
+  if(s.follow&&!silent) o.push(txt({robin:'Robin trots after you.',tobin:'Tobin follows, spear on his shoulder.'}[s.follow]));
   o.push(...pass(s,cost*10));
   o.push(...arrive(s,from));
   return {msgs:o,moved:true,look:true};
@@ -1079,12 +1079,12 @@ function move(s,d,silent){
 function arrive(s,from){
   const o=[],r=s.room,Q2=qst(s,'missing')==='active';
   if(r==='fox_hollow'&&Q2) s.f['q2.crossed']=true;
-  if(r==='fox_hollow'&&!F(s,'q2.reached')&&s.prof.wren==='with_fox'&&F(s,'village.child_status')==='missing'){
+  if(r==='fox_hollow'&&!F(s,'q2.reached')&&s.prof.robin==='with_fox'&&F(s,'village.child_status')==='missing'){
     if(Q2&&lightSrc(s)?.k==='lantern'){ s.f['q2.reached']=true; s.fxq.push({scene:'rescue'}); }
     else if(!light(s)) o.push(sys('Something breathes in the grass, close by, and holds its breath when you move.'));
-    else o.push(sys(Q2?'The grass is pressed flat and still warm. Whoever sleeps here is hiding from you. Elspeth said she would come to a light she knew.':'The grass is pressed flat and still warm. Someone small is hiding here, and will not come out for a stranger.'));
+    else o.push(sys(Q2?'The grass is pressed flat and still warm. Whoever sleeps here is hiding from you. Marta said she would come to a light she knew.':'The grass is pressed flat and still warm. Someone small is hiding here, and will not come out for a stranger.'));
   }
-  if(s.follow==='wren'&&r==='elspeth_cottage'){ s.prof.wren='home'; s.follow=null; o.push(txt('Wren lets go of your coat and climbs into her cot, boots and all. “Tell Mam,” she says. “She’ll be on the green.”')); }
+  if(s.follow==='robin'&&r==='marta_cottage'){ s.prof.robin='home'; s.follow=null; o.push(txt('Robin lets go of your coat and climbs into her cot, boots and all. “Tell Mam,” she says. “She’ll be on the green.”')); }
   if(s.follow==='tobin'){ const i=PATROL.findIndex(p=>!s.f['patrol.'+p]); if(PATROL[i]===r){ s.f['patrol.'+r]=true;
       if(r==='east_gate'){ o.push(txt('Tobin stops. “There. On the road.” Two shapes come up out of the floodwater, shaking themselves, and they are not dogs.'));
         for(let j=0;j<2;j++){const m={id:'m'+s.nid++,k:'hound',room:r,home:'hound_run',pop:0,hp:MOBS.hound.hp,patrol:1,fighting:true}; s.mobs.push(m);} s.fight=s.mobs.at(-1).id; } } }
@@ -1111,7 +1111,7 @@ function pass(s,min){
     burn(s,step,o); s.t+=step; min-=step;
     if(s.t%60===0) hourly(s,o);
     const now=new Set(Object.keys(NPCS).filter(k=>npcRoom(s,k)===s.room));
-    if(light(s)) for(const k in NPCS){ if(k==='wren'&&!F(s,'q2.reached')) continue; if(before.has(k)&&!now.has(k)) o.push(txt(`${NPCS[k].n} leaves.`)); if(!before.has(k)&&now.has(k)) o.push(txt(`${NPCS[k].n} arrives.`)); }
+    if(light(s)) for(const k in NPCS){ if(k==='robin'&&!F(s,'q2.reached')) continue; if(before.has(k)&&!now.has(k)) o.push(txt(`${NPCS[k].n} leaves.`)); if(!before.has(k)&&now.has(k)) o.push(txt(`${NPCS[k].n} arrives.`)); }
     if(s.fight) break;
   }
   return o;
@@ -1271,7 +1271,7 @@ function flee(s,wimpy){
 }
 function die(s,o){
   s.corpse={room:s.room,items:s.inv}; s.inv=[]; s.fight=null; s.bleed=0; s.hide=false;
-  if(s.follow==='wren') s.prof.wren='with_fox'; s.follow=null;
+  if(s.follow==='robin') s.prof.robin='with_fox'; s.follow=null;
   for(const m of s.mobs) m.fighting=false;
   s.room=s.shrine; s.vt[s.room]=s.t; s.hp=Math.ceil(maxHP(s)/2); s.mv=Math.ceil(maxMV(s)/2); s.pos='standing';
   if(qst(s,'night')==='active') delete s.q.night;
@@ -1349,7 +1349,7 @@ function act(s,id,key){
     case 'consider': { const r=(MOBS[m.k].lvl-s.lvl); return {msgs:[txt(r<=-2?'An easy kill.':r<=0?'A fair fight.':r===1?'Risky. You might lose.':'Walk away. It will kill you.')]}; }
     case 'flee': return {msgs:flee(s)};
     case 'take': { const fl=s.floor[s.room]; fl.splice(fl.indexOf(i),1); if(stacks(i.k)) addTo(s.inv,s,i.k,i.n); else s.inv.push(i);
-      o.push(txt(`You take ${itemName(i,s)}.`)); if(i.k==='wrens_boot') o.push(txt('It is small enough to fit in your hand.'),...apply(s,[['topic','wren']]));
+      o.push(txt(`You take ${itemName(i,s)}.`)); if(i.k==='robins_boot') o.push(txt('It is small enough to fit in your hand.'),...apply(s,[['topic','robin']]));
       return {msgs:o,took:[itemName(i,s).replace(/^(a|an|the) /,'')]}; }
     case 'drop': { const fl=s.floor[s.room]=s.floor[s.room]||[]; if(i.n>1){ i.n--; addTo(fl,s,i.k); } else { drop1(s,i); if(stacks(i.k)) addTo(fl,s,i.k); else fl.push(i); }
       return {msgs:[txt(`You put down ${ITEMS[i.k].n}.`)],look:true}; }
@@ -1367,7 +1367,7 @@ function act(s,id,key){
     case 'bandage': { takeK(s,'bandage'); const ok=chance(40+s.sk.bandage); const hp=ok?6+Math.floor(s.sk.bandage/5):2; s.hp=Math.min(maxHP(s),s.hp+hp); s.bleed=0; learn(s,'bandage',o,ok);
       return {msgs:[txt(ok?'You bind the wound tight. The bleeding stops.':'You bind it badly, but the bleeding stops.'),...o]}; }
     case 'feel': { s.felt[s.room]=true; const o2=pass(s,10);
-      if(s.room==='fox_hollow'&&!F(s,'q2.reached')&&qst(s,'missing')==='active'&&s.prof.wren==='with_fox'){ const ok=chance(s.st.PER*4+10); if(ok){ s.f['q2.reached']=true; s.fxq.push({scene:'rescue'}); return {msgs:o2}; } return {msgs:[txt('You feel through the wet grass. Something shifts away from your hand, and is still.'),...o2]}; }
+      if(s.room==='fox_hollow'&&!F(s,'q2.reached')&&qst(s,'missing')==='active'&&s.prof.robin==='with_fox'){ const ok=chance(s.st.PER*4+10); if(ok){ s.f['q2.reached']=true; s.fxq.push({scene:'rescue'}); return {msgs:o2}; } return {msgs:[txt('You feel through the wet grass. Something shifts away from your hand, and is still.'),...o2]}; }
       const it=(s.floor[s.room]||[]).filter(x=>itemShown(s,x,s.room)); return {msgs:[txt(it.length?`You feel along the ground. Your hands find ${it.map(x=>itemName(x,s)).join(', ')}.`:'You feel around. Wet stone, cold air, nothing else.'),...o2],look:!!it.length}; }
     case 'watch': { const o2=pass(s,30); if(chance(s.st.PER*4+20)){ s.f['wisp.seen']=true; return {msgs:[txt('You stand very still in the dark. After a long time, out over the water, a light kindles, pale as foxfire, and comes toward you without seeming to move.'),...o2],look:true}; }
       return {msgs:[txt('You watch the dark until your eyes ache. Nothing. Or something, just at the edge, gone when you look.'),...o2]}; }
@@ -1405,7 +1405,7 @@ function dlgChoices(s,npc,node){
 }
 function chooseDlg(s,npc,node,id){
   const o=[];
-  if(id.startsWith('tin:')){ const k=id.slice(4),Q=QUESTS[k],p=Q.pick?Q.pick(s):'done'; resolveQ(s,k,p,o); o.unshift(say(NPCS[npc].n,{rescued:'“Oh. Oh, you did. You did.”',stays:'She reads it, though there is nothing written, and sits down very slowly. “Warm,” she says. “She is warm.”',on_time:'“On time, and Peg Harrow’s ledger at that. There is hope for Ashmere yet. Here.”',late:'“Late. Of course it is late.”',done:'“Good. Thank you.”'}[p]||'“Thank you.”')); return {msgs:o,node:null}; }
+  if(id.startsWith('tin:')){ const k=id.slice(4),Q=QUESTS[k],p=Q.pick?Q.pick(s):'done'; resolveQ(s,k,p,o); o.unshift(say(NPCS[npc].n,{rescued:'“Oh. Oh, you did. You did.”',stays:'She reads it, though there is nothing written, and sits down very slowly. “Warm,” she says. “She is warm.”',on_time:'“On time, and Peg Harrow’s ledger at that. There is hope for Millbrook yet. Here.”',late:'“Late. Of course it is late.”',done:'“Good. Thank you.”'}[p]||'“Thank you.”')); return {msgs:o,node:null}; }
   const c=dlgChoices(s,npc,node).find(x=>x.id===id); if(!c) return {msgs:[],node};
   if(c.why) return {msgs:[bad(c.why[0],c.why[1])],node};
   const said=typeof c.say==='function'?c.say(s):c.say; for(const t of [].concat(said||[])) o.push(say(NPCS[npc].n,t));
@@ -1843,12 +1843,12 @@ class Room{
     const pages={i:'inv',inv:'inv',inventory:'inv',eq:'inv',equipment:'inv',score:'char',sc:'char',skills:'char',stats:'char',quests:'journal',journal:'journal',j:'journal',map:'map',contents:'contents',settings:'settings'};
     if(pages[w[0]]&&w.length===1) return {page:pages[w[0]]};
     if(w[0]==='time') return {msgs:[sys(`It is ${clock(s)} on day ${DAY(s)}. ${tideLow(s)?'Low':'High'} water until ${clockH(tideTurn(s))}.`)]};
-    if(w[0]==='help') return {msgs:[sys('Move: n e s w u d. Look: look, x post. Things: take, drop, wear, wield, light, douse, eat, drink, fill, read, refill. People: talk bram; in a conversation type a number or “ask wren”. Fight: kill rat, flee, consider hound, bandage. Time: wait, rest, sleep, stand, search, time. Shops: list, buy torch, sell pelt. Pages: i, score, journal, map. Two alike? Use 2.boot.')]};
+    if(w[0]==='help') return {msgs:[sys('Move: n e s w u d. Look: look, x post. Things: take, drop, wear, wield, light, douse, eat, drink, fill, read, refill. People: talk bram; in a conversation type a number or “ask robin”. Fight: kill rat, flee, consider hound, bandage. Time: wait, rest, sleep, stand, search, time. Shops: list, buy torch, sell pelt. Pages: i, score, journal, map. Two alike? Use 2.boot.')]};
     if(w[0]==='say'&&w[1]==='light') return {id:'here',key:'word'};
     const here={wait:'wait',z:'wait',search:'search',feel:'feel',flee:'flee',watch:'watch',bandage:'bandage'};
     if(here[w[0]]&&w.length===1) return {id:'here',key:here[w[0]]};
     if(POS[w[0]]&&w.length===1){ const p=POS[w[0]]; if(s.pos===p&&['rest','sleep','meditate'].includes(w[0])) return {id:'here',key:w[0]}; return {pos:w[0]}; }
-    if(w[0]==='ask') return {msgs:[sys('Talk to them first, then ask: talk bram, then ask wren.')]};
+    if(w[0]==='ask') return {msgs:[sys('Talk to them first, then ask: talk bram, then ask robin.')]};
     const shopper=ents(s).find(id=>NPCS[id]?.shop);
     if(['list','buy','sell','haggle'].includes(w[0])){ if(!shopper) return {msgs:[bad('No shop','There is nobody here selling anything.')]};
       const sid=NPCS[shopper].shop,why=shopShut(s,sid); if(why) return {msgs:[bad(why[0],why[1])]};
@@ -2713,10 +2713,10 @@ const see_=(s,...rs)=>rs.forEach(r=>{ if(!s.seen.includes(r)) s.seen.push(r); })
 const PRESETS={
   start:()=>{},
   dark:s=>{ s.room='well_shaft'; give_(s,'lantern','light'); see_(s,'well_lane','well_shaft'); },
-  lantern:s=>{ done_(s,'ferry'); on_(s,'missing'); Object.assign(s.f,{'village.arrived':true,tells_name:true}); s.topics.push('wren','fox','fen'); give_(s,'lantern','light'); s.t=10*60; see_(s,'well_lane','village_green','north_gate','elspeth_cottage'); },
+  lantern:s=>{ done_(s,'ferry'); on_(s,'missing'); Object.assign(s.f,{'village.arrived':true,tells_name:true}); s.topics.push('robin','fox','fen'); give_(s,'lantern','light'); s.t=10*60; see_(s,'well_lane','village_green','north_gate','marta_cottage'); },
   night:s=>{ PRESETS.lantern(s); s.room='village_green'; s.t=21*60; s.eq.light.lit=true; },
   hollow:s=>{ PRESETS.lantern(s); s.f['fen.tracks_found']=true; s.room='mire_crossing'; s.t=13*60; s.eq.light.lit=true; give_(s,'rusty_sword','wield'); see_(s,'reed_path','reed_bank','mire_crossing'); },
-  bell:s=>{ PRESETS.lantern(s); done_(s,'missing','rescued'); Object.assign(s.f,{'village.child_status':'rescued','fen.tracks_found':true,asks_to_ring:true}); s.prof.wren='home'; s.prof.elspeth='relieved'; s.prof.bram='thankful';
+  bell:s=>{ PRESETS.lantern(s); done_(s,'missing','rescued'); Object.assign(s.f,{'village.child_status':'rescued','fen.tracks_found':true,asks_to_ring:true}); s.prof.robin='home'; s.prof.marta='relieved'; s.prof.bram='thankful';
     on_(s,'bell'); give_(s,'bell_rope_key'); s.room='bell_tower'; s.t=17*60+10; s.eq.light.lit=true; see_(s,'chapel_steps','chapel_nave','bell_tower'); },
   cellar:s=>{ PRESETS.lantern(s); on_(s,'cellar'); give_(s,'cellar_key'); give_(s,'rusty_sword','wield'); s.room='lantern_cellar'; s.eq.light.lit=true; see_(s,'drowned_lantern','lantern_cellar'); s.mobs.forEach(m=>{ if(m.room==='lantern_cellar') m.fighting=false; }); },
   fennight:s=>{ PRESETS.lantern(s); give_(s,'rusty_sword','wield'); s.room='reed_bank'; s.t=19*60+50; s.eq.light.lit=true; see_(s,'reed_path','reed_bank','hound_run'); },
@@ -2742,12 +2742,12 @@ const PREVIEW={
   faint:r=>{at(r,'start'); r.hurt(); r.render();}, sleep:r=>{at(r,'start'); r.s.pos='sleeping'; r.render();},
   invisible:r=>at(r,'cellar',{room:'mill_loft'}), seam:r=>at(r,'lantern',{room:'reed_path'},()=>r.openSeam()), letter:r=>{at(r,'start'); r.letter='peek'; r.render();},
   seal:r=>{at(r,'lantern'); r.sealed=false; r.open({kind:'journal'}); r.render();},
-  travel:r=>at(r,'lantern',{room:'elspeth_cottage'},()=>r.travel('ferry_landing')),
+  travel:r=>at(r,'lantern',{room:'marta_cottage'},()=>r.travel('ferry_landing')),
   inkmap:r=>{at(r,'lantern'); r.inked=new Set(['ferry_landing']); r.open({kind:'map'}); r.render();},
   fogmap:r=>sky(r,'fog'), stormmap:r=>sky(r,'storm'),
   runhead:r=>at(r,'lantern'), thumb:r=>at(r,'lantern',{},()=>r.tabs()),
-  manicule:r=>at(r,'lantern',{},()=>{r.jseen=''; r.addEv([sys('Quest updated · look for signs of Wren in the fen')]); r.render();}),
-  pocket:r=>at(r,'start',{room:'elspeth_cottage'},()=>{const id=r.s.floor.elspeth_cottage?.[0]?.id; if(!id) return; r.open({kind:'ent',id}); r.render(); setTimeout(()=>r.run({id,key:'take'}),900);}),
+  manicule:r=>at(r,'lantern',{},()=>{r.jseen=''; r.addEv([sys('Quest updated · look for signs of Robin in the fen')]); r.render();}),
+  pocket:r=>at(r,'start',{room:'marta_cottage'},()=>{const id=r.s.floor.marta_cottage?.[0]?.id; if(!id) return; r.open({kind:'ent',id}); r.render(); setTimeout(()=>r.run({id,key:'take'}),900);}),
   levelup:r=>at(r,'start',{},()=>{r.q.push({card:{k:'You have grown',t:'The Second Level',sub:'hp 62 → 74',lvl:1}}); r.next();}),
   strike:r=>at(r,'start',{},()=>{r.hurt(); r.render();}),
   chapter:r=>at(r,'start',{},()=>{r.q.push({card:{k:'Chapter the First',t:'The Missing Child'}}); r.next();}),

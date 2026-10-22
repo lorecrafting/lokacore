@@ -11,8 +11,8 @@ The private runner accepts exactly one literal candidate and refuses every other
 artifact, selecting the row by the admitted id and requiring its version and content hash:
 the [R9C](cartridge.md#r9c-synthetic-interaction-cartridge-e2) synthetic cartridge
 `r9c_interactions@0.0.1` (`7d74fac7…d17263`). The table is not part of the policy digest.
-The [retired Ashmere chapter](cartridge.md#retired-ashmere-chapter-e1-candidate)
-(`ashmere_missing_child@0.0.42`) is deleted, and with it its row, its scenario recorder, its
+The [retired first chapter](cartridge.md#retired-first-chapter-e1-candidate)
+(v042) is deleted, and with it its row, its scenario recorder, its
 cases and its disposition table (2026-10-21). E1 certification is redone for the real game's
 chapter; until then the policy, repro, obligation and witness modules stay as the generic
 harness, and the recorder rules below are the rules its new recorder follows.

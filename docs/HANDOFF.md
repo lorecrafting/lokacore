@@ -293,7 +293,7 @@ polish stage which needs me at the computer for a bit."
   only a beginner tier; SWG-style skill trees for many professions ("yes SWO skilltrees sounds good"),
   several hidden elite professions; "GO with all your recs" on: skill tree screen in batch B, a failed
   craft loses its inputs, a skill box costs a trainer coin fee with XP never spent.
-- Worldbuilding (`loka-ikch`): our own cosmology and lore from the ground up; it replaces the Ashmere
+- Worldbuilding (`loka-ikch`): our own cosmology and lore from the ground up; it replaces the retired chapter's
   setting (new content uses generic names); a Jedi-like order of cosmic wardens is one hidden elite;
   folder `docs/worldbuilding/`, loose notes in `notes/`; the game opens with "In the beginning of this
   great eon..."; worldbuilding is story and canon only, mechanics and balance live apart (future GDD).

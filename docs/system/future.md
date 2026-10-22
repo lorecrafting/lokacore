@@ -45,7 +45,7 @@ Worldbuilding subproject (Beads loka-ikch): the [stub tree](../worldbuilding/REA
 ## Authoring and certification
 
 - Cartridge Lab [14 §R9](../archive/spec/14-implementation-plan.md#r9--cartridge-lab-v1), the synthetic
-  conformance cartridge [§R9C](../archive/spec/14-implementation-plan.md#r9c--synthetic-v3-conformance-cartridge),
+  conformance cartridge (its [14](../archive/spec/14-implementation-plan.md) section),
   Builder API [§R11](../archive/spec/14-implementation-plan.md#r11--builder-api-v1-and-script-surface-generalization);
   specs [08](../archive/spec/08-builder-api-ai-factory.md), [09](../archive/spec/09-cartridge-lab-certification.md).
 - E1 starts with the bounded [exact candidate proof policy](e1-certification.md#e1-exact-candidate-proof-policy)
