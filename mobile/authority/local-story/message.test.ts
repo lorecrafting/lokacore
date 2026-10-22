@@ -1,4 +1,3 @@
-// size: allow 460, message receipt, custody, corruption and COMMIT recovery share one real SQLite journey
 // Protected message saves over the message fragment (kernel/ts/test/message_fixture.ts): a courier on
 // the green hands the player a sealed message (receive, branch carried) and Bram's lantern-quest
 // dialogue takes it (hand_over, delivered). Expected texts and roles are authored there.
