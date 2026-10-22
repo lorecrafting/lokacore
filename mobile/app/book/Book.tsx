@@ -17,7 +17,22 @@ import {
   type Page,
 } from './model.ts';
 import { usePaletteCurve } from './fade.ts';
-import { PaletteContext, paletteOf, useBookPalette, usePalette, type Palette } from './palette.ts';
+import {
+  PaletteContext,
+  paletteOf,
+  TypeContext,
+  useBookPalette,
+  usePalette,
+  useType,
+  type Palette,
+} from './palette.ts';
+import {
+  readingFactor,
+  readingType,
+  type Reading,
+  type ReadingStep,
+  type ReadingStore,
+} from './reading.ts';
 import { color, size, space, type } from './tokens.ts';
 import { Control } from './pages.tsx';
 import { presenter, type Button, type DetailLine } from './presenter.ts';
@@ -34,6 +49,7 @@ export type Shell = {
   learned: Hint;
   recovered?: (healthy: boolean) => void;
   subscribed?: (on: boolean) => void; // whether the Book sees every update (the away recap waits)
+  reading?: ReadingStore & { fontScale: () => number }; // and the system font scale
 };
 
 // Actions retain valid detail pages; leaving a room closes them. A pending retry keeps its
@@ -94,10 +110,9 @@ export default function Book(p: BookProps) {
   const [, redraw] = useState(0);
   const [talkingOn, talkOn] = useState<Page>();
   const screen = pr.screen();
-  const { view } = screen;
   const restoreInvocation = useRef(p.game.pendingInvocation());
-  const current = useRef({ stack, view });
-  current.current = { stack, view };
+  const current = useRef({ stack, view: screen.view });
+  current.current = { stack, view: screen.view };
   const state = { current, restoreInvocation, setStack, setFlip, redraw };
   useUpdates(p, pr, state);
   const go = (next: Page[], dir: 1 | -1) => {
@@ -113,7 +128,7 @@ export default function Book(p: BookProps) {
   const startOver = () => p.shell.confirm(() => (pr.startOverFailed(p.startOver()), go([], 1)));
   return (
     <BookView
-      palette={useBookPalette(paletteOf(view.calendar_status?.solar), usePaletteCurve())}
+      palette={useBookPalette(paletteOf(screen.view.calendar_status?.solar), usePaletteCurve())}
       screen={screen}
       stack={stack}
       flip={flip}
@@ -124,8 +139,16 @@ export default function Book(p: BookProps) {
       shell={p.shell}
       talkingOn={talkingOn}
       talkOn={talkOn}
+      reading={useReading(p.shell)}
     />
   );
+}
+
+// The Reading size the player chose on Settings, scaled by the system font scale.
+function useReading(shell: Shell): Reading {
+  const [step, setStep] = useState(() => shell.reading?.get() ?? 'standard');
+  const choose = (s: ReadingStep) => (setStep(s), shell.reading?.set(s));
+  return { step, choose, type: readingType(readingFactor(step, shell.reading?.fontScale() ?? 1)) };
 }
 
 type ViewProps = {
@@ -140,10 +163,12 @@ type ViewProps = {
   shell: Shell;
   talkingOn?: Page; // Body's conversation latch (Body.tsx), held above PageTurn's remount
   talkOn?: (page?: Page) => void;
+  reading?: Reading; // none: the Storybook's Reading global (the TypeContext above)
 };
 
 export function BookView(p: ViewProps) {
   const c = p.palette;
+  const shown = useType();
   const g = group(p.screen.buttons);
   const page = p.stack.at(-1);
   const open = (page: Page) => p.go([...p.stack, page], 1);
@@ -158,23 +183,25 @@ export function BookView(p: ViewProps) {
   };
   return (
     <PaletteContext value={c}>
-      <SafeAreaView style={{ flex: 1, backgroundColor: c.bg }}>
-        <PageTurn turn={p.flip.turn} dir={p.flip.dir} paper={c.bg}>
-          {p.screen.view.combat || p.screen.ended ? (
-            <Combat screen={p.screen} g={g} press={p.press} world={ctx.world} />
-          ) : (
-            <Body
-              {...ctx}
-              page={page}
-              talkingOn={p.talkingOn}
-              talkOn={p.talkOn ?? (() => {})}
-              chapterDone={() => p.go(p.stack.slice(0, -1), 1)}
-            />
-          )}
-        </PageTurn>
-        <Bottom {...ctx} page={page} />
-        {c.bg === color.dark.bg && <NightSky />}
-      </SafeAreaView>
+      <TypeContext value={p.reading?.type ?? shown}>
+        <SafeAreaView style={{ flex: 1, backgroundColor: c.bg }}>
+          <PageTurn turn={p.flip.turn} dir={p.flip.dir} paper={c.bg}>
+            {p.screen.view.combat || p.screen.ended ? (
+              <Combat screen={p.screen} g={g} press={p.press} world={ctx.world} />
+            ) : (
+              <Body
+                {...ctx}
+                page={page}
+                talkingOn={p.talkingOn}
+                talkOn={p.talkOn ?? (() => {})}
+                chapterDone={() => p.go(p.stack.slice(0, -1), 1)}
+              />
+            )}
+          </PageTurn>
+          <Bottom {...ctx} page={page} />
+          {c.bg === color.dark.bg && <NightSky />}
+        </SafeAreaView>
+      </TypeContext>
     </PaletteContext>
   );
 }

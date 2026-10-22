@@ -1,7 +1,8 @@
 import type { Preview } from '@storybook/react-native-web-vite';
 import { View } from 'react-native';
-import { PaletteContext, useFocusRing } from '../book/palette.ts';
-import { color } from '../book/tokens.ts';
+import { PaletteContext, TypeContext, useFocusRing } from '../book/palette.ts';
+import { readingType } from '../book/reading.ts';
+import { color, reading } from '../book/tokens.ts';
 import './picker/overlay.ts'; // the Loka picker's hover/pin layer (manager side: picker/manager.tsx)
 
 const device = (
@@ -15,6 +16,14 @@ const device = (
   type,
 });
 
+// The Reading size the stories render at; Max is the cap a large system font scale reaches.
+const readings = {
+  Standard: reading.standard,
+  Large: reading.large,
+  Larger: reading.larger,
+  Max: reading.cap,
+};
+
 const preview: Preview = {
   globalTypes: {
     palette: {
@@ -26,11 +35,24 @@ const preview: Preview = {
         dynamicTitle: true,
       },
     },
+    reading: {
+      description: 'Reading size (book-ui.md, World and status entry)',
+      toolbar: {
+        title: 'Reading',
+        icon: 'paragraph',
+        items: Object.keys(readings),
+        dynamicTitle: true,
+      },
+    },
     // System/Data model's selection and layer filter, so a URL can carry them (no toolbar).
     node: { description: 'System/Data model: the selected contract' },
     layer: { description: 'System/Data model: the layer filter' },
   },
-  initialGlobals: { palette: 'light', viewport: { value: 'iphone11', isRotated: false } },
+  initialGlobals: {
+    palette: 'light',
+    reading: 'Standard',
+    viewport: { value: 'iphone11', isRotated: false },
+  },
   parameters: {
     layout: 'fullscreen',
     options: {
@@ -111,10 +133,12 @@ const preview: Preview = {
       useFocusRing(title === 'Live' || title === 'Pages/Recovery' ? undefined : c);
       return (
         <PaletteContext.Provider value={c}>
-          {/* The page's paper, so axe measures contrast against the real background. */}
-          <View style={{ backgroundColor: c.bg, minHeight: '100vh' as never, flex: 1 }}>
-            <Story />
-          </View>
+          <TypeContext value={readingType(readings[globals.reading as keyof typeof readings] ?? 1)}>
+            {/* The page's paper, so axe measures contrast against the real background. */}
+            <View style={{ backgroundColor: c.bg, minHeight: '100vh' as never, flex: 1 }}>
+              <Story />
+            </View>
+          </TypeContext>
         </PaletteContext.Provider>
       );
     },

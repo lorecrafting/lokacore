@@ -1,8 +1,8 @@
 import { useRef, useState, type ReactNode } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import type { GameView } from '../../packages/game-view/session.ts';
-import { note, prose, usePalette, type Palette } from './palette.ts';
-import { size } from './tokens.ts';
+import { note, prose, usePalette, useType, type Palette, type Type } from './palette.ts';
+import { size, type } from './tokens.ts';
 
 type Props = { view: GameView; text: (key: string) => string };
 // The chosen room is the Map page's: its foot offers Back to map while one is open.
@@ -15,6 +15,7 @@ export function DiscoveredMap({
   select,
 }: Props & { selected: string | null; select: (id: string | null) => void }) {
   const c = usePalette();
+  const t = useType();
   const map = view.map!;
   const current = map.rooms.find((r) => r.id === view.place.id);
   const [level, setLevel] = useState(current?.z ?? 0);
@@ -30,7 +31,7 @@ export function DiscoveredMap({
   const chosen = map.rooms.find((r) => r.id === selected);
   return (
     <View>
-      {levelBar(c, level, levels, (next) => (setLevel(next), select(null)))}
+      {levelBar(c, t, level, levels, (next) => (setLevel(next), select(null)))}
       <Follow x={current?.z === level ? point(current).left - 16 : undefined}>
         <View
           style={{
@@ -42,7 +43,7 @@ export function DiscoveredMap({
           {rooms.map((r) => roomButton(c, r, r.id === view.place.id, text, point(r), select))}
         </View>
       </Follow>
-      {chosen && roomDetail(c, map, chosen, text)}
+      {chosen && roomDetail(c, t, map, chosen, text)}
     </View>
   );
 }
@@ -63,7 +64,13 @@ function Follow(p: { x?: number; children: ReactNode }) {
   );
 }
 
-function levelBar(c: Palette, level: number, levels: number[], step: (next: number) => void) {
+function levelBar(
+  c: Palette,
+  t: Type,
+  level: number,
+  levels: number[],
+  step: (next: number) => void,
+) {
   const index = levels.indexOf(level);
   return (
     <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
@@ -74,11 +81,11 @@ function levelBar(c: Palette, level: number, levels: number[], step: (next: numb
         disabled={index <= 0}
         onPress={() => step(levels[index - 1])}
       >
-        <Text aria-hidden style={prose(c)}>
+        <Text aria-hidden style={prose(c, t)}>
           ←
         </Text>
       </Pressable>
-      <Text style={prose(c)}>Level {level}</Text>
+      <Text style={prose(c, t)}>Level {level}</Text>
       <Pressable
         accessibilityRole="button"
         style={{ minHeight: size.touch, minWidth: size.touch }}
@@ -86,7 +93,7 @@ function levelBar(c: Palette, level: number, levels: number[], step: (next: numb
         disabled={index >= levels.length - 1}
         onPress={() => step(levels[index + 1])}
       >
-        <Text aria-hidden style={prose(c)}>
+        <Text aria-hidden style={prose(c, t)}>
           →
         </Text>
       </Pressable>
@@ -123,14 +130,14 @@ function linkLine(
   );
 }
 
-function roomDetail(c: Palette, map: Drawn, chosen: Room, text: Props['text']) {
+function roomDetail(c: Palette, t: Type, map: Drawn, chosen: Room, text: Props['text']) {
   return (
     <View>
-      <Text style={prose(c)}>{text(chosen.title)}</Text>
+      <Text style={prose(c, t)}>{text(chosen.title)}</Text>
       {map.links
         .filter((l) => l.from === chosen.id)
         .map((l) => (
-          <Text key={l.direction} style={note(c)}>
+          <Text key={l.direction} style={note(c, t)}>
             {l.direction}: {text(map.rooms.find((r) => r.id === l.to)!.title)}
           </Text>
         ))}
@@ -163,7 +170,7 @@ function roomButton(
         borderColor: c.fg,
       }}
     >
-      <Text style={note(c)}>
+      <Text style={note(c, type)}>
         {here && <Text aria-hidden>● </Text>}
         {text(r.title)}
       </Text>

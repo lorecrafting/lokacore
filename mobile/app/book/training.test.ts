@@ -45,7 +45,7 @@ registerHooks({
 const { SkillDetails, ItemDetails } = await import('./skills.tsx');
 const { CharacterPage } = await import('./sections.tsx');
 const { NpcDetail, NpcPage, npcSkills } = await import('./Npc.tsx');
-const { usePalette } = await import('./palette.ts');
+const { usePalette, useType } = await import('./palette.ts');
 function words(element: any): string[] {
   if (Array.isArray(element)) return element.flatMap(words);
   if (!element || typeof element !== 'object') return [];
@@ -145,7 +145,9 @@ test('Character groups profession boxes under their title, acquired then not lea
   ]);
   const npc = { lessons: view.skills.map((s: any) => s.skill) };
   assert.deepEqual(
-    words(npcSkills(usePalette(), { view, npc, text } as any)).map((w) => w.split(';')[0]),
+    words(npcSkills(usePalette(), useType(), { view, npc, text } as any)).map(
+      (w) => w.split(';')[0],
+    ),
     [
       'swords: learned',
       'whittling: learned',

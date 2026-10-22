@@ -64,6 +64,10 @@ export const nightSky = { star: '#fffff5' };
 // Bundled family names (OFL files in ./fonts), loaded by App.tsx `fonts` through expo-font.
 export const font = { head: 'IMFellEnglish', body: 'EBGaramond', caps: 'IMFellEnglishSC' };
 
+// Reading size steps (docs/system/book-ui.md#world-and-status-entry): body, log, speaker, control,
+// tag and runningHead scale by min(step x the system font scale, cap); every other role is fixed.
+export const reading = { standard: 1, large: 1.15, larger: 1.3, cap: 1.5 };
+
 // Text styles without colour; a component adds a colour from the palette.
 export const type = {
   body: { fontFamily: font.body, fontSize: 18, lineHeight: 28 }, // prose, entity lines, actions

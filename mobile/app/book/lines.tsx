@@ -7,31 +7,36 @@ import { LABEL } from './labels.ts';
 import type { DetailLine } from './logs.ts';
 import type { RecapLine } from './recap.ts';
 import { Tap } from './pages.tsx';
-import { note, prose, usePalette } from './palette.ts';
+import { note, prose, usePalette, useType } from './palette.ts';
 import { radius, size, space, type } from './tokens.ts';
 
 // A row that opens a detail: the name, then `rest` (verbatim, its own spacing), a note below.
 // Without `rest` the name is the line's one Text. Its accessible name is that shown text, then ", open".
 export function EntityLine(p: { name: string; rest?: string; note?: string; onPress: () => void }) {
   const c = usePalette();
+  const t = useType();
   return (
     <Tap label={`${p.name}${p.rest ?? ''}${p.note ? ` ${p.note}` : ''}, open`} onPress={p.onPress}>
       {p.rest ? (
-        <Text style={prose(c)}>
+        <Text style={prose(c, t)}>
           <Text style={type.named}>{p.name}</Text>
           {p.rest}
         </Text>
       ) : (
-        <Text style={{ ...prose(c), ...type.named }}>{p.name}</Text>
+        <Text style={{ ...prose(c, t), ...type.named }}>{p.name}</Text>
       )}
-      {p.note ? <Text style={note(c)}>{p.note}</Text> : null /* '' is no bare string on native */}
+      {
+        p.note ? (
+          <Text style={note(c, t)}>{p.note}</Text>
+        ) : null /* '' is no bare string on native */
+      }
     </Tap>
   );
 }
 
 // A dim body note: an empty state, "save not confirmed" (BOOK-UI-COMPONENTS.md, Note).
 export function Note({ children }: { children: string }) {
-  return <Text style={note(usePalette())}>{children}</Text>;
+  return <Text style={note(usePalette(), useType())}>{children}</Text>;
 }
 
 // The character's passive voices (book-ui.md, Aside details): one Note per line, one block, links
@@ -57,17 +62,18 @@ export function Asides({
 // The lines are one block of the page, `space.sm` apart; no lines, no block.
 export function LogLines({ lines }: { lines: readonly DetailLine[] }) {
   const c = usePalette();
+  const t = useType();
   if (!lines.length) return null;
   return (
     // The walk tells log lines from refusal notes by this id (walkthrough/walk.ts live).
     <View testID="log-lines" style={{ gap: space.sm }}>
       {lines.map((line, i) =>
         typeof line === 'string' ? (
-          <Text key={i} style={{ ...type.log, color: c.fg }}>
+          <Text key={i} style={{ ...t.log, color: c.fg }}>
             {line}
           </Text>
         ) : 'event' in line ? (
-          <Text key={i} style={{ ...type.log, color: c.dim, ...type.italic }}>
+          <Text key={i} style={{ ...t.log, color: c.dim, ...type.italic }}>
             {line.text}
           </Text>
         ) : (
@@ -77,7 +83,7 @@ export function LogLines({ lines }: { lines: readonly DetailLine[] }) {
           >
             <Text
               style={{
-                ...type.tag,
+                ...t.tag,
                 color: c.danger,
                 borderColor: c.danger,
                 borderWidth: size.rule,
@@ -87,7 +93,7 @@ export function LogLines({ lines }: { lines: readonly DetailLine[] }) {
             >
               {line.reason}
             </Text>
-            <Text style={{ ...type.log, color: c.fg, flex: 1 }}>{line.text}</Text>
+            <Text style={{ ...t.log, color: c.fg, flex: 1 }}>{line.text}</Text>
           </View>
         ),
       )}
@@ -109,21 +115,22 @@ export function AwayRecap({
   milestone?: (line: string) => boolean; // the Chronicle: a story point's line in body type
 }) {
   const c = usePalette();
+  const t = useType();
   const [open, setOpen] = useState(first);
   return (
     <View style={{ gap: space.sm }}>
       <Tap label={`${heading}, ${open ? 'hide' : 'show'}`} onPress={() => setOpen(!open)}>
-        <Text style={{ ...type.log, color: c.dim, ...type.italic }}>{heading}</Text>
+        <Text style={{ ...t.log, color: c.dim, ...type.italic }}>{heading}</Text>
       </Tap>
       {open &&
         lines.map(({ line, count }, i) => {
           const shown = count > 1 ? `${line} (${count} times)` : line;
           return milestone(line) ? (
-            <Text key={i} style={prose(c)} accessibilityLabel={`${shown}, story point`}>
+            <Text key={i} style={prose(c, t)} accessibilityLabel={`${shown}, story point`}>
               {shown}
             </Text>
           ) : (
-            <Text key={i} style={{ ...type.log, color: c.fg }}>
+            <Text key={i} style={{ ...t.log, color: c.fg }}>
               {shown}
             </Text>
           );

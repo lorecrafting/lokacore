@@ -6,8 +6,12 @@ export type Palette = typeof color.light;
 export const PaletteContext = createContext<Palette>(color.light);
 export const usePalette = () => useContext(PaletteContext);
 
-export const prose = (c: Palette) => ({ ...type.body, color: c.fg });
-export const note = (c: Palette) => ({ ...type.body, color: c.dim });
+// The reading text roles at the Book's Reading size (reading.ts); every component reads them here.
+export type Type = typeof type;
+export const TypeContext = createContext<Type>(type);
+export const useType = () => useContext(TypeContext);
+export const prose = (c: Palette, t: Type) => ({ ...t.body, color: c.fg });
+export const note = (c: Palette, t: Type) => ({ ...t.body, color: c.dim });
 
 // The confirmed GameView solar phase's palette (docs/system/book-ui.md#world-and-status-entry):
 // the Book reads the cartridge's phase name and computes no hours. Confirmed: the Book passes

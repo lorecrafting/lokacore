@@ -7,7 +7,7 @@ import { ActionCard, Cards } from './actions.tsx';
 import { Asides, EntityLine, LogLines } from './lines.tsx';
 import { Control, Page } from './pages.tsx';
 import type { Button, presenter } from './presenter.ts';
-import { note, prose, usePalette, type Palette } from './palette.ts';
+import { note, prose, usePalette, useType, type Palette, type Type } from './palette.ts';
 import { LABEL } from './labels.ts';
 import type { DetailLine } from './logs.ts';
 
@@ -116,11 +116,11 @@ export function NoticeEntries(p: Props) {
 }
 
 // A ferry notice's fare, or its waiver.
-const fare = (c: Palette, t: NonNullable<Notice['transport']>) => (
-  <Text style={note(c)}>
-    {t.waived
+const fare = (c: Palette, t: Type, f: NonNullable<Notice['transport']>) => (
+  <Text style={note(c, t)}>
+    {f.waived
       ? 'Free passage to recover your belongings on the isle.'
-      : `Fare: ${t.charge === 0 ? 'free' : `${t.charge}p`}.`}
+      : `Fare: ${f.charge === 0 ? 'free' : `${f.charge}p`}.`}
   </Text>
 );
 
@@ -133,6 +133,7 @@ export function NoticePage(
   p: Props & { page: Extract<Route, { id: string }>; world: () => void; back: () => void },
 ) {
   const c = usePalette();
+  const t = useType();
   const board =
     p.page.kind === 'board'
       ? p.screen.view.notice_boards?.find((b) => b.id === p.page.id)
@@ -142,11 +143,11 @@ export function NoticePage(
   const description = plain(p.screen.text(detail.description));
   return (
     <Page title={p.screen.text(detail.title)} foot={foot(p, !!board, detail.id)}>
-      <Text style={prose(c)}>{description}</Text>
+      <Text style={prose(c, t)}>{description}</Text>
       <Asides keys={'asides' in detail ? detail.asides : undefined} text={p.screen.text} />
-      {'remaining' in detail && <Text style={note(c)}>Remaining: {detail.remaining}</Text>}
+      {'remaining' in detail && <Text style={note(c, t)}>Remaining: {detail.remaining}</Text>}
       <LogLines lines={p.screen.detail(detail.id).filter(fresh(description))} />
-      {'transport' in detail && detail.transport && fare(c, detail.transport)}
+      {'transport' in detail && detail.transport && fare(c, t, detail.transport)}
       {!!board?.notices.length && (
         <View>
           {board.notices.map((n) => (

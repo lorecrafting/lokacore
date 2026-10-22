@@ -104,6 +104,7 @@ test('the app opens and replaces only its showcase save, preserving Lantern, sam
     './sqlite-web.ts': { webDb },
     './book/Book.tsx': {},
     './book/model.ts': { hint: () => ({}) },
+    './book/reading.ts': { readingSize: () => ({}) },
     './book/labels.ts': { LABEL },
     './SaveError': {},
   };
@@ -288,6 +289,7 @@ function appHost() {
     './sqlite-web.ts': { webDb },
     './book/Book.tsx': { default: 'Book' },
     './book/model.ts': { hint: () => ({}) },
+    './book/reading.ts': { readingSize: () => ({}) },
     './book/labels.ts': { LABEL },
     './SaveError': {},
   };

@@ -3,7 +3,7 @@
 // (SQLite, fonts, Alert, the key-value store) and injects them; the logic is in
 // authority/local-story/session.ts, the drawing in book/ and SaveError.tsx.
 import { useEffect, useRef, useState } from 'react';
-import { Alert, AppState, Button, Platform, TextInput, View } from 'react-native';
+import { Alert, AppState, Button, PixelRatio, Platform, TextInput, View } from 'react-native';
 import { getRandomValues, randomUUID } from 'expo-crypto';
 import { useFonts } from 'expo-font';
 import {
@@ -18,6 +18,7 @@ import type { Db } from '../authority/local-story/store.ts';
 import { webDb } from './sqlite-web.ts';
 import Book, { type Shell } from './book/Book.tsx';
 import { hint } from './book/model.ts';
+import { readingSize } from './book/reading.ts';
 import { LABEL } from './book/labels.ts';
 import chapter from '../../protocol/fixtures/toolbox_showcase_hash.json';
 import { SaveError } from './SaveError';
@@ -88,8 +89,8 @@ const createSession = (open: () => Db) =>
 let session = g.loka_session;
 if (Platform.OS !== 'web') session ??= createSession(() => (db = openDatabaseSync(NAME)));
 
-// Start over destroys the save, so the player confirms it first (10 §31). The hints live here, not
-// in the book, so a fresh book keeps what the player has already seen.
+// Start over destroys the save, so the player confirms it first (10 §31). The hints and the Reading
+// size live here, not in the book, so a fresh book keeps what the player has already seen and chose.
 const shell: Shell = {
   confirm: (go) => {
     if (Platform.OS === 'web') {
@@ -101,6 +102,7 @@ const shell: Shell = {
       ]);
   },
   learned: hint(Storage, 'hint.learned'),
+  reading: { ...readingSize(Storage, 'reading.size'), fontScale: () => PixelRatio.getFontScale() },
 };
 
 type Clock = {
