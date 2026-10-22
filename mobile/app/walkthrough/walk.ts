@@ -2,7 +2,7 @@
 // for its control, screenshots the page and logs the step for the contact sheet (sheet.cjs). A
 // missing control ends the route with a "Dead end" page. Routes: <cartridge>.walk.ts.
 import { test, type Browser } from '@e2e-dev/web';
-import { expect, type TestFixtures } from 'e2e';
+import { expect, type JsonValue, type TestFixtures } from 'e2e';
 // @ts-expect-error the app has no Node types; the e2e runner is Node
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { go } from '../tests/steps.ts';
@@ -27,6 +27,126 @@ const top = () => {
     buttons: shown('[role="button"]').map((b) => b.getAttribute('aria-label')),
   };
 };
+
+type Offer = {
+  action_key: string;
+  command?: string;
+  available: boolean;
+  label: string;
+  input: JsonValue[];
+  target: { kind: string };
+  target_ids?: string[];
+  reason?: { code: string };
+};
+type View = {
+  actions: Offer[];
+  exits: { direction: string; door?: { state: string; actions: Offer[] } }[];
+  scene?: JsonValue;
+  combat?: JsonValue;
+  choice?: JsonValue;
+  storylet?: string;
+  notices?: { id: string }[];
+  notice_boards?: { notices: { id: string }[] }[];
+};
+type Live = {
+  view: View;
+  text: Record<string, string>;
+  buttons: string[];
+  lines: string[];
+  notes: string[];
+};
+
+// In the page, in one turn: the live GameView the Book draws (App.tsx keeps the session on
+// globalThis), its offer labels' texts, and the top page's visible button names and text lines;
+// notes are the lines outside the event log (lines.tsx LogLines).
+const live = (): Live => {
+  const shown = (selector: string) =>
+    [...document.querySelectorAll(selector)].filter(
+      (e) => e.checkVisibility() && !e.closest('[aria-hidden="true"]'),
+    );
+  const game = (
+    globalThis as unknown as {
+      loka_session: { game(): { view(): { view: View }; text(key: string): string | undefined } };
+    }
+  ).loka_session.game();
+  const { view } = game.view();
+  const keys = [...view.actions, ...view.exits.flatMap((e) => e.door?.actions ?? [])];
+  const lines = shown('*').filter((e) =>
+    [...e.childNodes].some((n) => n.nodeType === 3 && n.textContent?.trim()),
+  );
+  return {
+    view,
+    text: Object.fromEntries(keys.map((a) => [a.label, game.text(a.label) ?? ''])),
+    buttons: shown('[role="button"]').map((b) => b.getAttribute('aria-label') ?? ''),
+    lines: lines.map((e) => e.textContent ?? ''),
+    notes: lines
+      .filter((e) => !e.closest('[data-testid="log-lines"]'))
+      .map((e) => e.textContent ?? ''),
+  };
+};
+
+// Drawn by its own control, not a World verb (book-ui.md): the Word block, position, the title's
+// Look, a scene's Continue, a choice, Flee, the Character page's Raise, Scan.
+const OWN =
+  'say whisper shout cast look flee choose close_choice continue stand sit rest sleep raise_attribute scan';
+const KEY = /\b[a-z][a-z0-9_]+\.[a-z][a-z0-9_]+/;
+
+// The offers World draws as place cards (model.ts group.place).
+const placeOffers = (view: View) => {
+  const notices = [
+    ...(view.notices ?? []),
+    ...(view.notice_boards ?? []).flatMap((b) => b.notices),
+  ];
+  return view.actions.filter(
+    (a) =>
+      !a.input.length &&
+      // The untargeted ones and those aimed at someone here.
+      (a.target.kind === 'none' || (a.target.kind === 'entity' && a.target_ids?.length)) &&
+      a.action_key !== view.storylet &&
+      !OWN.split(' ').includes(a.action_key) &&
+      !notices.some((n) => a.target_ids?.includes(n.id)),
+  );
+};
+
+// The room page against its GameView (pass-1 check 8; book-ui.md World and status entry): each
+// available place offer is a control with its label, each refused one a `label: reason` note
+// with a reason word, a shut door's Open or Unlock is a card, and no text is a raw key.
+function roomDrawn({ view, text, buttons, lines, notes }: Live) {
+  if (view.scene || view.combat || view.choice) return { problems: [], seen: 'not World' };
+  // An untexted label shows its key's last word (words.ts sayers).
+  const label = (a: Offer) =>
+    (text[a.label] || a.label.split('.').at(-1)!.replaceAll('_', ' ')).toLowerCase();
+  const place = placeOffers(view);
+  const offered = place.filter((a) => a.available);
+  const refused = place.filter((a) => !a.available);
+  const doors = view.exits.flatMap(({ door, direction }) =>
+    (door && door.state !== 'open' ? door.actions : [])
+      .filter((a) => a.available && ['open', 'unlock'].includes(a.command ?? a.action_key))
+      .map((a) => ({ a, dir: direction })),
+  );
+  const named = buttons.map((b) => b.toLowerCase());
+  const problems = [
+    ...offered.filter((a) => !named.includes(label(a))).map((a) => `no control "${label(a)}"`),
+    ...refused.flatMap((a) => {
+      const line = notes.find((l) => l.toLowerCase().startsWith(`${label(a)}: `));
+      const why = line?.slice(label(a).length + 2) ?? '';
+      return why && why !== a.reason?.code && !/_|\w\.\w/.test(why)
+        ? []
+        : [`refusal "${line ?? label(a)}" for ${a.reason?.code}`];
+    }),
+    // A door card reads `label door (direction)` (buttons.ts doorButtons).
+    ...doors
+      .filter(
+        ({ a, dir }) => !named.some((n) => n.startsWith(`${label(a)} `) && n.endsWith(` (${dir})`)),
+      )
+      .map(({ a, dir }) => `no door card "${label(a)} (${dir})"`),
+    ...[...buttons, ...lines].filter((s) => KEY.test(s)).map((s) => `raw key in "${s}"`),
+  ];
+  return {
+    problems,
+    seen: `${offered.length} offered, ${refused.length} refused, ${doors.length} door`,
+  };
+}
 
 // A route's screen: before every tap it waits for the control, lets the reduced-motion fade
 // (motion.fade, 160 ms) settle, screenshots the page and logs the step to .walkthrough/steps.
@@ -95,11 +215,22 @@ function recorder(route: string, title: string, { app, screen, browser }: Fixtur
   };
   const walked = narrated(screen, browser, note);
   const spell = spellOn(walked, browser);
+  // After an arrival: the room page against the GameView it drew. A tick can move the view past
+  // the drawn page, so a mismatch is re-read a few times (by count, no deadline) before it fails.
+  const room = async () => {
+    for (let read = 1; ; read++) {
+      await settle();
+      const { problems, seen } = roomDrawn(await browser.evaluate(live));
+      if (!problems.length) return console.log(`walk room: ${seen}`);
+      if (read === 4) throw new Error(`walk room page: ${problems.join('; ')}`);
+    }
+  };
   return {
     app,
     spell,
     screen: walked,
     note,
+    room,
   };
 }
 
