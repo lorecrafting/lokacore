@@ -1,40 +1,37 @@
 defmodule Loka.ContentPrioryTest do
   use ExUnit.Case, async: true
-  @moduletag :tmp_dir
+
+  @dir "cartridges/codex_sampler"
+  @kat JSON.decode!(File.read!("protocol/fixtures/codex_sampler_hash.json"))
+
+  # Breaks: an item-readable or topic short ref left a string, or a book reshaped in the
+  # artifact (protocol/fixtures/codex_sampler_hash.json, pinned compiler output).
+  test "codex_sampler compiles to its pinned artifact without warnings" do
+    expected = ~s({"cartridge":#{@kat["canonical"]},"content_hash":"#{@kat["sha256"]}"})
+    assert Loka.Content.compile(@dir) == {:ok, expected, []}
+  end
 
   # Break: item-readable short refs, its text or API floor bypass the compiler boundary.
-  test "book authoring rejects malformed metadata and undeclared topic references", %{
-    tmp_dir: dir
-  } do
-    File.cp_r!("cartridges/ashmere_missing_child", dir)
+  test "book authoring rejects malformed metadata and undeclared topic references" do
+    dir = Loka.ContentSource.copy(@dir)
+    fact = %{"cartridge_id" => "codex_sampler", "cartridge_version" => "0.0.1"}
+    fact = Map.merge(fact, %{"kind" => "fact", "key" => "topic_mill_known"})
 
     for {rel, keys, value, code} <- [
-          {"items/ward_of_the_fen.json", ["readable", "topic"], "missing",
-           "UNRESOLVED_REFERENCE"},
-          {"items/ward_of_the_fen.json", ["readable", "topic"],
-           %{
-             "cartridge_id" => "ashmere_missing_child",
-             "cartridge_version" => "0.0.39",
-             "kind" => "fact",
-             "key" => "topic_ward_known"
-           }, "UNRESOLVED_REFERENCE"},
-          {"items/ward_of_the_fen.json", ["readable", "label"], "missing",
-           "UNRESOLVED_REFERENCE"},
-          {"items/ward_of_the_fen.json", ["readable", "text"], "missing", "UNRESOLVED_REFERENCE"},
-          {"items/ward_of_the_fen.json", ["readable"], %{"label" => "actions.read_book"},
+          {"items/mill_ledger.json", ["readable", "topic"], "missing", "UNRESOLVED_REFERENCE"},
+          {"items/mill_ledger.json", ["readable", "topic"], fact, "UNRESOLVED_REFERENCE"},
+          {"items/mill_ledger.json", ["readable", "label"], "missing", "UNRESOLVED_REFERENCE"},
+          {"items/mill_ledger.json", ["readable", "text"], "missing", "UNRESOLVED_REFERENCE"},
+          {"items/mill_ledger.json", ["readable"], %{"label" => "actions.read_book"},
            "SCHEMA_VIOLATION"},
-          {"items/ward_of_the_fen.json", ["readable"], %{"text" => "readable.ward_of_the_fen"},
+          {"items/mill_ledger.json", ["readable"], %{"text" => "readable.mill_ledger"},
            "SCHEMA_VIOLATION"},
           {"cartridge.json", ["requires", "kernel_api", "at_least"], "1.23",
            "KERNEL_API_RANGE_INVALID"}
         ] do
-      path = Path.join(dir, rel)
-      original = File.read!(path)
-      changed = put_in(JSON.decode!(original), Enum.map(keys, &Access.key!/1), value)
-      File.write!(path, JSON.encode!(changed))
-      assert {:error, errors} = Loka.Content.compile(dir)
-      assert Enum.any?(errors, &(&1["code"] == code)), inspect(errors)
-      File.write!(path, original)
+      change = &put_in(&1, Enum.map(keys, fn k -> Access.key!(k) end), value)
+      assert {:error, errors} = Loka.ContentSource.compile(dir, [{rel, change}])
+      assert Enum.any?(errors, &(&1["code"] == code)), inspect({rel, keys, errors})
     end
   end
 end
