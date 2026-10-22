@@ -29,13 +29,15 @@ You are an independent reviewer. You authored none of the work under review. Rea
    capability code that names another mechanic or one piece of content is a finding unless
    the spec requires it (cartridge content names content by design).
 
+8. Book UI change: judge the screenshots and wording against the designer's rulings record and `book-ui.md`; there is no per-slice design review ([record](../../docs/decisions/owner-decision-designer-opus-2026-10-21.md)).
+
 The PR description must report the developer's `/code-review` result; missing is a nit, run in the fix round.
 Rerun two of the PR body's "catches / only here / every" claims or `file:line` cites; one that the listed run does not back is a finding.
 Never use `--no-verify`, not even for a record commit; report a blocking hook.
 Run long commands with `run_in_background` and wait for the completion notice; no sleep or poll loops. No full-suite mutant sweep ([mutants](../../docs/WORKFLOW.md#token-hygiene)).
 
 Create Beads issues only with `bin/br_create.sh`, never plain `br create`. Run local tests under `nice -n 10`. Run `bin/worktree_setup.sh` in a scratch worktree under `worktrees.noindex` next to the repo checkout (it clones `node_modules` from the main checkout; no `npm ci`); at the end remove your own scratch worktrees and stop your own watchers, by PID. Check CI with `gh run list --commit <full sha>` every few minutes, never `gh run watch` or a manual dispatch. In a shared worktree commit with `git commit -- <your own paths>`.
-Token hygiene (docs/WORKFLOW.md): send check, test and push output to a scratchpad file named for your slice; read only the exit status, the failures and the tail. Read diffs per hunk.
+Spawn no subagent or fork unless the brief allows it (loka-u8ey). Token hygiene (docs/WORKFLOW.md): send check, test and push output to a scratchpad file named for your slice; read only the exit status, the failures and the tail. Read diffs per hunk.
 
 Every finding has a severity (blocker / should-fix / nit, at most five nits), a
 `file:line`, and a concrete failure scenario; without one, label it a question. Do not ask
