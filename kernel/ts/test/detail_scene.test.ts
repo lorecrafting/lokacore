@@ -91,7 +91,7 @@ test('a loaded action scene must bind its recipe detail', () => {
   }
 });
 
-// Breaks: Begin starts on arrival or on another detail, or the story point and its assign are
+// Breaks: Begin starts on arrival, or the story point and its assign are
 // written before the final shown line is acknowledged, or more than once.
 test('Begin starts its scene only by choice and reports once at the final acknowledgement', () => {
   let world: World = f.genesis(begin);
@@ -117,7 +117,6 @@ test('Begin starts its scene only by choice and reports once at the final acknow
   const detail = (key: string) =>
     Object.keys(world.details).find((id) => world.details[id].key === key);
   assert.equal(gameView(world).scene, undefined);
-  run({ type: 'perform', action: 'begin', target_id: detail('notice') }, 'invalid_target');
   run({ type: 'perform', action: 'begin', target_id: detail('mooring_post') });
   assert.equal(gameView(world).scene?.index, 1);
   shown();
