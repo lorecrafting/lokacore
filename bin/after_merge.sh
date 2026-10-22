@@ -13,9 +13,19 @@
 # A checkout whose copy of this script is behind origin/main fast-forwards and re-runs the new copy.
 # A rerun after a failed Beads commit works: br close is skipped for an issue already closed.
 # An export dirtied again after the commit (a concurrent br write) gets its own Beads commit before the push.
+# br sync and br close that fail with a stale WAL index or a busy database run once more after
+# `br doctor migrate-schema recover` (loka-8zf5); any other br failure stops the script.
 set -u
 GH=${GH:-gh}
 die() { echo "after_merge: $*" >&2; exit 1; }
+br1() {
+  err=$(br "$@" 2>&1 > /dev/null) && return 0
+  case $err in
+    *'WAL index'* | *'database is busy'*) echo "after_merge: br $1: $err; recover and retry once" >&2
+      br doctor migrate-schema recover > /dev/null && br "$@" > /dev/null ;;
+    *) echo "$err" >&2; return 1 ;;
+  esac
+}
 [ $# -ge 2 ] && [ $# -le 3 ] || { echo "usage: $0 <PR> <beads-id> [ROADMAP commit subject]" >&2; exit 2; }
 pr=$1 id=$2 subject=${3-} j=.beads/issues.jsonl
 cd "$(git rev-parse --show-toplevel)" || exit 2
@@ -62,10 +72,10 @@ if ! git pull -q --ff-only origin main; then
   die 'pull failed (export restored)'
 fi
 [ ! -f "$tmp/export" ] || cp "$tmp/export" $j
-br sync --flush-only > /dev/null || die 'br sync --flush-only failed'
+br1 sync --flush-only || die 'br sync --flush-only failed'
 # A rerun after a failed Beads commit finds the issue closed already.
 [ "$(br show "$id" --json | python3 -c 'import json,sys; print(json.load(sys.stdin)[0]["status"])')" = closed ] \
-  || br close "$id" --reason "Merged #$pr" > /dev/null || die "br close $id failed"
+  || br1 close "$id" --reason "Merged #$pr" || die "br close $id failed"
 [ -z "$wt" ] || git worktree remove "$wt" || die "worktree for $branch not removed (uncommitted work?)"
 ! git rev-parse -q --verify "refs/heads/$branch" > /dev/null || git branch -q -d "$branch" || die "$branch is not merged; not deleted"
 [ -z "$review" ] || git update-ref -d "refs/heads/review-$pr" "$review" || die "review-$pr moved or not deleted"
