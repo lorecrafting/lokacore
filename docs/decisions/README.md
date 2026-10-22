@@ -12,6 +12,7 @@ What each rule in force says: [owner-rules.md](../system/owner-rules.md). A new 
 dated line below, newest first.
 
 - 2026-10-22 [Owner decision: component specs live with the components](owner-decision-component-docs-in-code-2026-10-22.md)
+- 2026-10-21 [Owner decision: designer on Opus, one design pass per UI batch](owner-decision-designer-opus-2026-10-21.md)
 - 2026-10-21 [Owner decision: retire Ashmere, the app bundles the showcase](owner-decision-retire-first-chapter-2026-10-21.md)
 - 2026-10-21 [Owner decision: a status on a seen NPC says a line](owner-decision-npc-status-line-2026-10-21.md)
 - 2026-10-15 [Owner decision: showcase before M14, UI polish after M15](owner-decision-showcase-before-m14-2026-10-15.md)
@@ -40,7 +41,6 @@ dated line below, newest first.
 - 2026-10-09 [Owner decision: Storybook MCP addon, Tidewave toolbar and the Chrome extension for agents](owner-decision-storybook-mcp-2026-10-09.md)
 - 2026-10-09 [Owner decision: the designer writes polish batch 5's style code](owner-decision-designer-writes-batch5-style-2026-10-09.md)
 - 2026-10-08 [Owner decision: pre-production merge gate (pre-push and review; hosted CI nightly)](owner-decision-preproduction-gate-2026-10-08.md)
-- 2026-10-08 [Owner decision: designer on Fable for the polish phase](owner-decision-designer-fable-2026-10-08.md)
 - 2026-10-08 [Owner decision: mechanics toolbox before the owner's own world](owner-decision-mechanics-toolbox-2026-10-08.md)
 - 2026-10-08 [Owner decision: process tightening (self-review, mutants, retro)](owner-decision-process-tightening-2026-10-08.md)
 - 2026-10-08 [Owner decision: agent models and tooling](owner-decision-agent-tooling-2026-10-08.md)

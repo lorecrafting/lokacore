@@ -10,7 +10,7 @@ main session plus the subagents in [`.claude/agents/`](../.claude/agents/develop
 | PM | the main session | the owner's choice | plan, slices, briefs, owner contact, merges |
 | Developer | [`developer`](../.claude/agents/developer.md) subagent, one per slice | Claude: per the [routing table](#work-routing). | code, checks, self-review, opening the PR, fixes |
 | Reviewer | [`reviewer`](../.claude/agents/reviewer.md) subagent, fresh per slice | Claude: `opus`; Fable for one review per mechanics batch on its final head and the E-gate closures (E1: see the fix re-check row). | independent review, review record |
-| Designer | [`designer`](../.claude/agents/designer.md) subagent, fresh per review | Claude: Opus; Fable for the polish phase ([owner decision](decisions/owner-decision-designer-fable-2026-10-08.md)) | Book UI design system and spec text, UI brief input, design review ([owner decision](decisions/owner-decision-designer-role-2026-10-07.md)) |
+| Designer | [`designer`](../.claude/agents/designer.md) subagent, fresh per review | Claude: Opus, which also maintains the stable design system; Fable only for a new page type or component family without precedent, an owner-requested visual refresh, or a milestone or RC design audit ([owner decision](decisions/owner-decision-designer-opus-2026-10-21.md)) | Book UI design system and spec text, UI brief input, design review ([owner decision](decisions/owner-decision-designer-role-2026-10-07.md)) |
 
 **Models** ([owner decision](decisions/owner-decision-claude-only-auto-merge-2026-10-07.md)):
 Claude Code runs every role. A slice is reviewed once, with a narrow fix check, by a
@@ -24,7 +24,7 @@ other cross-vendor reviews are retired. Every `Agent` spawn names its `model`<a 
 | Brief drafting | Opus or Sonnet for a row that follows an existing pattern, an S row or content (owner, 2026-10-14) | Fable drafts the brief for a new module, a contract change (save, protocol, world graph), a Realm-sensitive row or a new interaction pattern: one Fable run per batch |
 | Slice implementation, tests, fix rounds | `developer`, Opus; Sonnet only for a bounded content or docs edit ([routing record](decisions/owner-decision-two-lane-ci-2026-10-09.md), superseding [Sonnet developers](archive/decisions/owner-decision-sonnet-developers-2026-09-30.md)) | — |
 | Independent review, fix re-check | fresh `reviewer`, Opus, for every item, infra and polish PR | one Fable review per mechanics batch, on the final batch head ([routing record](decisions/owner-decision-two-lane-ci-2026-10-09.md)); E2 and E3 gate closure: Fable; E1 closure: an Opus reviewer and a Fable second opinion ([record](decisions/owner-decision-e1-closure-reviewers-2026-10-07.md)), Fable audit at release-candidate certification ([record](decisions/owner-decision-chapter-one-polish-order-2026-10-07.md)) |
-| Book UI design check or review | `designer`, Fable in the polish phase ([record](decisions/owner-decision-designer-fable-2026-10-08.md)), plus a fresh `reviewer`: a quick correctness pass for a pure UI polish batch (it also checks the designer's spec and token text); in a [live polish session](#live-polish-session) the owner's approval is the design review, and a picker nit goes to a Sonnet designer | mechanics, save, protocol or kernel in the diff: the normal `reviewer` review |
+| Book UI design check or review | `designer`, Opus: up front only for a new page type or component family; otherwise ONE pass per UI batch (all screenshots, wording and spec text, as single writer). Per slice no design review: the developer builds from the designer's rulings record and [Book UI](system/book-ui.md), and the fresh `reviewer` also checks screenshots and wording against the rulings and the designer's spec and token text. In a [live polish session](#live-polish-session) the owner's approval is the design review, and a picker nit goes to a Sonnet designer | Fable: a new direction (see the Designer row); mechanics, save, protocol or kernel in the diff: the normal `reviewer` review ([record](decisions/owner-decision-designer-opus-2026-10-21.md)) |
 
 The PM also sets each spawn's `effort`: low for a Sonnet nit, high for a reviewer or Fable design
 work, the default otherwise ([two-lane CI record](decisions/owner-decision-two-lane-ci-2026-10-09.md)).
@@ -64,8 +64,9 @@ Report at the end of the slice, not at every step.
    `docs/system` sections (the clause for each behavior; an archived plan for new work), files in and out of scope, acceptance (which checks and fixtures must
    pass, which red controls to add, mutation cases, literal expected values), the relevant `docs/lessons/` file, and anything the owner
    decided, and a scope trigger (what makes the developer stop and ask, for example an unplanned
-   protocol change with new behavior). The PM splits plan rows sized L into two briefs, and a brief holds one M-size toolbox item (or its engine and Book halves) per developer run, never a batch of three (loka-kgd.11 needed four runs); an M engine row that adds both a new schema field and a sampler also gets two briefs, engine then content (loka-3jhb); every brief states the
-   handoff threshold up front ([Claude Code specifics](#token-hygiene)). Obsolete development fixtures may be updated under the
+   protocol change with new behavior). The PM splits plan rows sized L into two briefs, and a brief holds one M-size toolbox item (or its engine and Book halves) per developer run, never a batch of three (loka-kgd.11 needed four runs); an M engine row that adds both a new schema field and a sampler also gets two briefs, engine then content (loka-3jhb); a showcase slice holds at most about 2 plan steps or 3 rooms, and the PM merges `main` into the batch before briefing (loka-7m2u); every brief states the
+   handoff threshold up front ([Claude Code specifics](#token-hygiene)) and links the [brief kit](briefs/brief-kit.md) instead of copying it.
+   The drafter of a plan or brief cites, for each acceptance row, the engine `file:line` that makes it possible (the long-wait rule names its delivery kind) and, for each Book-visible promise, the `docs/system` clause that allows it (loka-d89z, loka-3a96). Obsolete development fixtures may be updated under the
    [forward-development decision](decisions/owner-decision-forward-development-2026-10-05.md).
    Store the brief durably when it is drafted, one home per kind, and before the spawn (the PM checks the Beads notes first; a developer lost to a limit left its brief only in a scratchpad, loka-ydy): a slice brief and its design input
    live in that slice's Beads issue notes (`br update <id> --append-notes`); `docs/briefs/` holds only
@@ -127,7 +128,7 @@ Report at the end of the slice, not at every step.
    APPROVE or APPROVE WITH NOTES with nothing open on the exact pushed head, and `ci.yml` and
    `book-e2e.yml` are green on that head (every push runs them; `--match-head-commit <sha>`;
    [two-lane CI](decisions/owner-decision-two-lane-ci-2026-10-09.md)). A job cancelled at its timeout is red,
-   a superseded run is not: `bin/session_status.sh` lists cancelled jobs (name, seconds) of the open PR heads and the nightly runs, so compare each with its `timeout-minutes`. An E-gate closure or the
+   a superseded run is not: `bin/session_status.sh` lists cancelled jobs (name, seconds) of the open PR heads and the nightly runs, so compare each with its `timeout-minutes`. Judge a sim time against the median of the last 5 `main` runs of that leg, never one run (runners are two-speed: 280 s and 540 s on the same code, loka-9nd4). An E-gate closure or the
    release candidate also needs [E1 certification](system/e1-certification.md#e1-exact-candidate-proof-policy)
    of the real game's chapter; no E1 recorder runs in CI until that chapter has one. Merge `main` into the
    branch once before marking the PR ready. A red nightly on `main` is the next session's first job.
@@ -170,6 +171,7 @@ the usual brief and review record. `docs/ROADMAP.md` remains the published statu
 and completion count, briefs own scope, reviews own findings, and this workflow
 owns merge gates. Beads holds short current status, links and dependencies only.
 At review approval the PM collapses a row's notes to a two-line current state (head, record, open follow-ups); the history stays in the review record.
+A batch's run order lives in a `batch-order` label and a notes line, never `br dep add`: a blocked issue cannot be marked `in_progress`, so the owner's PROG view would miss it (loka-gfgr).
 Active issues carry one `stage:` label (building, review, fixing, recheck, integrated, gate), which the PM moves at each step; status stays `in_progress` until the reviewed merge to `main`.
 Keep one PM writer across worktrees/clones; `br` run from any worktree uses the integration
 checkout's database and JSONL, so commit tracker changes from that checkout, not a slice branch.
@@ -198,7 +200,7 @@ The brief names the lane. Sequential or dependent slices share one draft branch 
 
 Batch pushes and PRs ([owner preference](decisions/owner-decision-skip-ci-on-drafts-2026-10-07.md)):
 one push per wave, not per small change. Collect tracker, process and docs changes into one
-housekeeping PR per session, or into the next real PR.
+housekeeping PR per session, or into the next real PR. Briefs of parallel contract rows assign each row's `kernel_api` version up front, so merge conflicts stay one line (loka-btpd).
 
 Provisional local lane: one integration owner for local `main`; source branches, plans and reviews
 each in their own worktree; the owner's checkout and remote `main` stay untouched. Record each
@@ -231,7 +233,7 @@ complete, including stale actions, misleading pending/refused results, wrong log
 placement and dead-end returns. The Chapter 1 E3 browser walk handles the larger
 cross-page visual consistency pass; it does not defer broken interaction flows
 ([owner decision](decisions/owner-decision-book-ui-as-you-build-2026-10-05.md)).
-A slice that changes what the player sees consults the [designer](decisions/owner-decision-designer-role-2026-10-07.md) for its brief, its Book UI spec text and its review.
+A slice that changes what the player sees is briefed with the [designer](decisions/owner-decision-designer-role-2026-10-07.md)'s rulings record; the designer writes its Book UI spec text and reviews its screenshots and wording once per UI batch (routing table).
 
 In the [polish lane](decisions/owner-decision-chapter-one-polish-order-2026-10-07.md) the developer
 uses existing tokens and components only, and tells the PM when an owner item needs a new one.
@@ -245,13 +247,14 @@ The [owner's fast polish loop](decisions/owner-decision-live-polish-session-2026
 `bin/polish_session.sh start` serves a session branch to the owner's Storybook. The designer writes
 style code, tokens and the component doc comment in that worktree, applies each picker prompt at once and
 commits each accepted tweak; the owner's approval in the session is the design review.
+Bring `main` in with `bin/polish_session.sh update`, never a manual merge: it restarts Storybook when stories change.
 The picker's queue and status files: [Polish queue](web-preview.md#polish-queue).
 The PM routes each prompt. **Nit** (one place, existing tokens only: which token a style uses,
 alignment, a value inside one component, a label's wording): designer on Sonnet. **Design** (a token
 value, a new token or component, hierarchy, typography, colour or composition, several components, a
-feel request): designer on Fable. Sonnet hands a nit that needs a token or rule change to Fable; the
+feel request): designer on Opus (Fable only for something without precedent). Sonnet hands a nit that needs a token or rule change to Opus; the
 owner forces either with a `fable:` or `quick:` prefix.
-The owner's "Close batch", or a PM suggestion, ends the batch: with five or more Sonnet nits, Fable
+The owner's "Close batch", or a PM suggestion, ends the batch: with five or more Sonnet nits, Opus
 skims their diffs once; `bin/polish_session.sh close` pushes and opens the PR;
 one Opus `reviewer` quick pass as PR comments; the PM merges on green hosted runs. Batches stay open liberally; close early only for a critical
 item or too much complexity. Mechanics, save, protocol or engine items leave the session as Beads issues.
@@ -287,7 +290,9 @@ item or too much complexity. Mechanics, save, protocol or engine items leave the
 - PM state file: labeled "AS OF PR #N"; cite every PR as #N (Beads id, short description); one "Open objectives" line; owner words only verbatim
   or marked "(paraphrased)"; keep `file:line` pointers and exact errors; drop spent exploration.
 - A subagent compacted by the built-in compaction may be resumed. The 2026-10-14 duplicate-id 400
-  came from the `fast-jev-compaction` plugin, now off (loka-bwfo).
+  came from the `fast-jev-compaction` plugin, now off (loka-bwfo). A design note ends its agent: the build is a fresh spawn with the approved note (loka-2ti3).
+- No agent spawns subagents or forks unless its brief allows them (a triage analyst forked four and spent 500k of a 150k budget, loka-u8ey).
+- When weekly usage is above about 80%, the PM shows the owner the remaining-work matrix before a Fable batch draft (loka-wdkt).
 - A second opinion on a slice runs on the head after the main review's fix round, never in parallel
   on a head the main review already failed (one full review saved per blocker round).
 - Start a new slice agent with a self-contained brief and no inherited chat
@@ -370,7 +375,7 @@ an expected saving; at most 5 per retro ([owner decision](decisions/owner-decisi
   the record in a separate worktree; the PM cherry-picks that review-only
   commit onto the preserved slice branch, merges it into local `main`, then
   removes the reviewer worktree. A provisional source merge may precede this.
-- A new worktree has no `deps/`, `_build/` or `node_modules`: run [`bin/worktree_setup.sh`](../bin/worktree_setup.sh) there once, then `npm ci` only on a lockfile change.
+- A new worktree has no `deps/`, `_build/` or `node_modules`: run [`bin/worktree_setup.sh`](../bin/worktree_setup.sh) there once, then `npm ci` only on a lockfile change. Never symlink `_build`, `deps` or `node_modules` from another checkout: it compiled into main's `_build` (loka-ail1).
 - CI failure: rerun the job once. An identical second failure is not a flake. A failure in code
   the diff does not touch means check for a stale base (update the branch from `main` with a merge, never a rebase
   or force-push) before anything else.

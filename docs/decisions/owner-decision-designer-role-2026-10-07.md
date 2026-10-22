@@ -27,7 +27,7 @@ Owner's words (paraphrased):
   director.
 - Model: Opus.
 
-The model line is superseded for the polish phase by [designer on Fable](owner-decision-designer-fable-2026-10-08.md).
+The model line and the per-slice design review are superseded by [designer on Opus, one pass per UI batch](owner-decision-designer-opus-2026-10-21.md).
 
 ## Effect
 
