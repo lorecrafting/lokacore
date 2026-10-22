@@ -27,7 +27,7 @@ test('every intermediate checkpoint and both ended branches cold-open and replay
         cursor: 0,
         quest: null,
       });
-      a.invoke('rent_lantern_room', { service: ref('service', 'lantern_room'), quoted_price: 3 }, [
+      a.invoke('rent_room', { service: ref('service', 'bed_room'), quoted_price: 3 }, [
         entity(a.initial, 'npc', 'maud'),
       ]);
       a.reopen();
@@ -59,7 +59,7 @@ test('every intermediate checkpoint and both ended branches cold-open and replay
         if (index === 4)
           assert.equal(
             a.story.narration()!.detail_id,
-            'dream:41f5d4b9-8494-82cd-b350-2650f8a9efd4',
+            `dream:${Object.keys(a.initial.details).find((id) => a.initial.details[id].key === 'bed')}`,
           );
       }
       assert.equal(a.sql.prepare('SELECT count(*) AS n FROM report').get()!.n, 0);
@@ -70,18 +70,18 @@ test('every intermediate checkpoint and both ended branches cold-open and replay
     }
   }
   // loka-x6t.5: an open conversation no longer defers the dream; Continue leaves it first, and
-  // the cold reopen agrees (Peg moved beside the bed so walking up does not end it).
+  // the cold reopen agrees (Bram moved beside the bed so walking up does not end it).
   const deferred = dreamHost(join(dir, 'deferred.db'), (c) => {
-    c.npcs[`${prefix}:npc/peg`].room = ref('room', 'inn_rooms');
+    const bram = c.npcs[`${prefix}:npc/bram`];
+    bram.room = ref('room', 'inn_rooms');
+    delete bram.daily_schedule;
   });
   try {
-    deferred.invoke(
-      'rent_lantern_room',
-      { service: ref('service', 'lantern_room'), quoted_price: 3 },
-      [entity(deferred.initial, 'npc', 'maud')],
-    );
+    deferred.invoke('rent_room', { service: ref('service', 'bed_room'), quoted_price: 3 }, [
+      entity(deferred.initial, 'npc', 'maud'),
+    ]);
     deferred.invoke('move', { direction: 'up' });
-    deferred.invoke('a_peg_debt', {}, [entity(deferred.initial, 'npc', 'peg')]);
+    deferred.invoke('bram', {}, [entity(deferred.initial, 'npc', 'bram')]);
     const ordinary = gameView(deferred.story.world()).choice!.continuation_id;
     deferred.invoke('rest');
     deferred.reopen();
@@ -170,11 +170,9 @@ test('Rest, choice opening, branch selection and final ack settle uncertain COMM
       const a = dreamHost();
       try {
         if (index === 0) {
-          a.invoke(
-            'rent_lantern_room',
-            { service: ref('service', 'lantern_room'), quoted_price: 3 },
-            [entity(a.initial, 'npc', 'maud')],
-          );
+          a.invoke('rent_room', { service: ref('service', 'bed_room'), quoted_price: 3 }, [
+            entity(a.initial, 'npc', 'maud'),
+          ]);
           a.invoke('move', { direction: 'up' });
         } else {
           a.start();
@@ -237,9 +235,56 @@ test('Rest, choice opening, branch selection and final ack settle uncertain COMM
 
 // Breaks: a dormant dream choice blocks ordinary elapsed, death/corpse recovery resets it, or its retained same-body binding cannot resume.
 test('real elapsed and fatal return preserve the dormant choice until the actor lawfully reaches its actual bed', (t) => {
+  // Inline: a rat that always bites in a cellar below the landing, a one-hp player, and mv that
+  // regains 36 an hour at rest, so 1800 s of rest takes mv from 50 to 68.
   const a = dreamHost(':memory:', (c) => {
+    c.manifest.requires.capabilities.combat = 1;
+    c.lock.capabilities.combat = 1;
     c.resources[`${prefix}:resource/hp`].start = 1;
-    c.npcs[`${prefix}:npc/cellar_rat_1`].attack.chance = 100;
+    c.manifest.time_policy = { profile: 'real_elapsed', rate: 50 };
+    // real_elapsed refuses the KAT's turn-timed coil_rope recipe; this test never coils.
+    c.recipes = {};
+    c.resources[`${prefix}:resource/mv`].regen = {
+      every: 3600,
+      by_position: { standing: 18, sitting: 18, resting: 36, sleeping: 36 },
+    };
+    const narration = Object.fromEntries(
+      ['player_hit', 'player_miss', 'npc_hit', 'npc_miss', 'player_died', 'npc_died'].map((k) => [
+        k,
+        `combat.${k}`,
+      ]),
+    );
+    c.world.combat = {
+      player_attack: { chance: 75, damage_min: 1, damage_max: 2 },
+      interval: 150,
+      sleep_multiplier: 2,
+      flee_multiplier: 2,
+      narration,
+    };
+    c.rooms[`${prefix}:room/ferry_landing`].exits.down = { to: ref('room', 'cellar') };
+    c.rooms[`${prefix}:room/cellar`] = {
+      key: 'cellar',
+      title: 'room.cellar.title',
+      description: 'room.cellar.description',
+      exits: { up: { to: ref('room', 'ferry_landing') } },
+    };
+    c.npcs[`${prefix}:npc/rat`] = {
+      key: 'rat',
+      keywords: ['rat'],
+      short: 'npc.rat.short',
+      room_line: 'npc.rat.room',
+      description: 'npc.rat.description',
+      room: ref('room', 'cellar'),
+      hp: { minimum: 0, maximum: 6, start: 6, gain: 0 },
+      attack: { chance: 100, damage_min: 1, damage_max: 1 },
+    };
+    Object.assign(c.text, Object.fromEntries(Object.values(narration).map((k) => [k, 'Combat.'])), {
+      'room.cellar.title': 'Cellar',
+      'room.cellar.description': 'A damp cellar.',
+      'npc.rat.short': 'a rat',
+      'npc.rat.room': 'A [[rat|rat]] noses about.',
+      'npc.rat.description': 'A rat.',
+    });
   });
   t.after(() => a.sql.close());
   a.start();
@@ -262,7 +307,7 @@ test('real elapsed and fatal return preserve the dormant choice until the actor 
   a.invoke('stand');
   a.invoke('move', { direction: 'down' });
   a.invoke('move', { direction: 'down' });
-  a.invoke('attack', {}, [entity(a.initial, 'npc', 'cellar_rat_1')]);
+  a.invoke('attack', {}, [entity(a.initial, 'npc', 'rat')]);
   for (
     let n = 0;
     n < 6 && Object.values(a.story.world().state.encounters ?? {}).some((e) => e.status === 'open');
@@ -277,12 +322,11 @@ test('real elapsed and fatal return preserve the dormant choice until the actor 
   a.reopen();
   const w = a.story.world();
   assert.equal(w.body, a.initial.body);
-  assert.equal(w.state.containers[w.body], a.initial.roomIds[`${prefix}:room/chapel_nave`]);
+  assert.equal(w.state.containers[w.body], a.initial.roomIds[`${prefix}:room/village_green`]);
   assert.ok(Object.values(w.entities).some((e) => e.kind === 'item' && e.key === 'player_corpse'));
   assert.deepEqual(w.state.choices, row);
   assert.deepEqual(phase(w), { slept: true, seen: false, cursor: 4, quest: 'active' });
-  for (const direction of ['south', 'south', 'south', 'south', 'east', 'up'])
-    a.invoke('move', { direction });
+  for (const direction of ['south', 'up']) a.invoke('move', { direction });
   assert.equal(a.dream().available, true);
   a.choose('wake');
   a.next();
@@ -293,4 +337,110 @@ test('real elapsed and fatal return preserve the dormant choice until the actor 
     cursor: -1,
     quest: 'resolved',
   });
+});
+
+// Breaks (loka-x6t.5 save re-check): riddle-save not counting the dream's Continue that left an
+// open riddle (riddle-save.ts talk/continue branch), so a reachable save (wrong once, walk away,
+// Rest, Continue) cold-opens as save_corrupt.
+test('real SQLite: a riddle left by the dream Continue reopens closed at count one', (t) => {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-dream-riddle-'));
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
+  // Inline: a sphinx on the landing asks a bounded riddle (answer tide, three tries).
+  const a = dreamHost(join(dir, 'riddle.db'), (c) => {
+    c.quests[`${prefix}:quest/tide`] = {
+      key: 'tide',
+      title: 'npc.sphinx.short',
+      objective: {
+        evidence: 'current_state',
+        policy: { policy_version: 1, root: { op: 'all', items: [] } },
+      },
+      journal: Object.fromEntries(
+        ['active', 'objectives_met', 'resolved', 'failed', 'abandoned'].map((k) => [
+          k,
+          'npc.sphinx.short',
+        ]),
+      ),
+    };
+    c.npcs[`${prefix}:npc/sphinx`] = {
+      key: 'sphinx',
+      keywords: ['sphinx'],
+      short: 'npc.sphinx.short',
+      description: 'npc.sphinx.description',
+      room_line: 'npc.sphinx.room',
+      room: ref('room', 'ferry_landing'),
+    };
+    c.dialogues[`${prefix}:dialogue/sphinx_offer`] = {
+      key: 'sphinx_offer',
+      npc: ref('npc', 'sphinx'),
+      prompt: 'dialogue.riddle.prompt',
+      policy: { policy_version: 1, root: { op: 'all', items: [] } },
+      roles: { sphinx: { role: 'npc', npc: ref('npc', 'sphinx') } },
+      choices: {
+        accept: {
+          label: 'dialogue.riddle.answer',
+          narration: 'narration.riddle.answer',
+          accept: ref('quest', 'tide'),
+          sequence: [],
+        },
+      },
+    };
+    c.dialogues[`${prefix}:dialogue/riddle`] = {
+      key: 'riddle',
+      npc: ref('npc', 'sphinx'),
+      quest: ref('quest', 'tide'),
+      prompt: 'dialogue.riddle.prompt',
+      // The riddle opens only once the offer bound quest tide, so its attempts have a quest.
+      policy: {
+        policy_version: 1,
+        root: { op: 'quest_state', quest: ref('quest', 'tide'), state: 'active' },
+      },
+      roles: { sphinx: { role: 'npc', npc: ref('npc', 'sphinx') } },
+      choices: {
+        answer: {
+          label: 'dialogue.riddle.answer',
+          narration: 'narration.riddle.answer',
+          sequence: [],
+        },
+      },
+      riddle: {
+        choice_id: 'answer',
+        answer: 'tide',
+        bank: ['T', 'I', 'D', 'E'],
+        wrong: 'narration.riddle.wrong',
+        wrong_limit: 3,
+      },
+    };
+    Object.assign(c.text, {
+      'npc.sphinx.short': 'a sphinx',
+      'npc.sphinx.description': 'A sphinx.',
+      'npc.sphinx.room': 'A sphinx is here.',
+      'dialogue.riddle.prompt': 'What comes in twice a day?',
+      'dialogue.riddle.answer': 'Answer',
+      'narration.riddle.answer': 'The sphinx nods.',
+      'narration.riddle.wrong': 'The sphinx shakes its head.',
+    });
+  });
+  t.after(() => a.sql.close());
+  const choices = () => a.story.world().state.choices!;
+  a.invoke('rent_room', { service: ref('service', 'bed_room'), quoted_price: 3 }, [
+    entity(a.initial, 'npc', 'maud'),
+  ]);
+  const sphinx = entity(a.initial, 'npc', 'sphinx');
+  a.invoke('sphinx_offer', {}, [sphinx]);
+  a.invoke('choose', {
+    choice_id: 'accept',
+    continuation_id: gameView(a.story.world()).choice!.continuation_id,
+  });
+  a.invoke('riddle', {}, [sphinx]);
+  const id = gameView(a.story.world()).choice!.continuation_id;
+  a.invoke('choose', { choice_id: 'answer', answer: 'EDIT', continuation_id: id });
+  a.invoke('move', { direction: 'up' });
+  a.invoke('rest');
+  assert.equal(choices()[id]!.status, 'pending');
+  a.next();
+  a.reopen();
+  assert.deepEqual(
+    [choices()[id]!.status, choices()[id]!.attempts],
+    ['closed', { count: 1, limit: 3 }],
+  );
 });

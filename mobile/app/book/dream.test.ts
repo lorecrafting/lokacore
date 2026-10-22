@@ -5,7 +5,10 @@ import { createRequire, registerHooks } from 'node:module';
 import { pathToFileURL } from 'node:url';
 import { test } from 'node:test';
 import { elapsedHost, receipts } from '../../authority/local-story/__tests__/elapsed-host.test.ts';
-import { dreamBundle as bundle } from '../../authority/local-story/__tests__/dream-host.test.ts';
+import {
+  dreamBundle as bundle,
+  dreamBed as bed,
+} from '../../authority/local-story/__tests__/dream-host.test.ts';
 import { control } from './__tests__/control.test.ts';
 import { fadeStub } from './__tests__/fade-stub.ts';
 
@@ -138,25 +141,18 @@ test('live first Rest, nested Close/Resume, captured branches, final ack and col
   t.after(() => a.sql.close());
   const ui = render(a.game);
   ui.draw();
-  ui.tap('Continue');
-  ui.tap('Widow Maud');
+  ui.tap('Maud');
   ui.tap('Rent room — 3p');
   ui.tap('Leave');
   ui.walk('up');
   ui.tap('Bed');
   ui.tap('Rest');
   assert.deepEqual(ui.stack(), [
-    { kind: 'notice', id: '41f5d4b9-8494-82cd-b350-2650f8a9efd4' },
-    { kind: 'dream', id: '41f5d4b9-8494-82cd-b350-2650f8a9efd4' },
+    { kind: 'notice', id: bed },
+    { kind: 'dream', id: bed },
   ]);
   assert.ok(ui.text().includes('The Fen Dream'));
-  assert.ok(
-    ui
-      .text()
-      .includes(
-        'The Lantern falls quiet around you. Beyond the window, mist gathers over dark water.',
-      ),
-  );
+  assert.ok(ui.text().includes('The room falls quiet around you.'));
   const before = receipts(a.sql);
   assert.equal(
     ui
@@ -176,14 +172,13 @@ test('live first Rest, nested Close/Resume, captured branches, final ack and col
   assert.ok(ui.labels().includes('Wake'));
   const cold = render(openGame(a.db, b, a.host));
   cold.draw();
-  cold.tap('Continue');
   assert.deepEqual(cold.stack(), []);
   assert.ok(!cold.labels().includes('Follow the fox'));
   assert.ok(!cold.text().includes('The fox waits at a fork in the reeds.'));
-  assert.ok(!cold.text().includes('A red fox steps onto the track. It looks back once, waiting.'));
+  assert.ok(!cold.text().includes('A red fox steps onto the track.'));
   cold.tap('Bed');
   cold.tap('Resume dream');
-  assert.ok(cold.text().includes('A red fox steps onto the track. It looks back once, waiting.'));
+  assert.ok(cold.text().includes('A red fox steps onto the track.'));
   assert.deepEqual(
     cold
       .presenter()
@@ -193,21 +188,13 @@ test('live first Rest, nested Close/Resume, captured branches, final ack and col
     ['dream_choose', 'dream_choose'],
   );
   cold.tap('Wake');
+  assert.ok(cold.text().includes('You turn toward the window and wake.'));
   assert.ok(
-    cold
-      .text()
-      .includes(
-        'You turn toward the warmth of the Lantern. The fox slips between the reeds as the window brightens.',
-      ),
-  );
-  assert.ok(
-    !cold.game
-      .view()
-      .view.journal.some((q) => q.state === 'resolved' && q.quest.key === 'a_room_at_the_lantern'),
+    !cold.game.view().view.journal.some((q) => q.state === 'resolved' && q.quest.key === 'a_room'),
   );
   cold.tap('Acknowledge');
   assert.equal(
-    cold.game.view().view.journal.find((q) => q.quest.key === 'a_room_at_the_lantern')!.state,
+    cold.game.view().view.journal.find((q) => q.quest.key === 'a_room')!.state,
     'resolved',
   );
   assert.equal(cold.stack().at(-1).kind, 'notice');
@@ -223,8 +210,7 @@ test('uncertain paid Rest remount opens the first dream only when the original C
   t.after(() => a.sql.close());
   const ui = render(a.game);
   ui.draw();
-  ui.tap('Continue');
-  ui.tap('Widow Maud');
+  ui.tap('Maud');
   ui.tap('Rent room — 3p');
   ui.tap('Leave');
   ui.walk('up');
@@ -238,15 +224,14 @@ test('uncertain paid Rest remount opens the first dream only when the original C
   a.fault.reads = false;
   const cold = render(a.game);
   cold.draw();
-  cold.tap('Continue');
   assert.deepEqual(cold.stack(), []);
   assert.ok(!cold.text().includes('The Fen Dream'));
   a.game.pulse('drain');
   cold.draw();
   assert.equal(a.game.pending(), false);
   assert.deepEqual(cold.stack(), [
-    { kind: 'notice', id: '41f5d4b9-8494-82cd-b350-2650f8a9efd4' },
-    { kind: 'dream', id: '41f5d4b9-8494-82cd-b350-2650f8a9efd4' },
+    { kind: 'notice', id: bed },
+    { kind: 'dream', id: bed },
   ]);
   assert.equal(receipts(a.sql), 3);
   assert.ok(cold.text().includes('The Fen Dream'));
