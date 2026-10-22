@@ -32,17 +32,12 @@ export function ids(c: any): Record<string, string> {
     'character',
     'body',
     ...rooms.map(([, r]) => `room/${r.key}`),
-    ...rooms.flatMap(([, r]) =>
-      Object.keys(r.details ?? {})
-        .sort()
-        .map((d) => `detail/${r.key}/${d}`),
-    ),
+    ...rooms.flatMap(([, r]) => Object.keys(r.details ?? {}).map((d) => `detail/${r.key}/${d}`)),
     ...sorted(c.npcs).map((n) => `npc/${n.key}`),
-    ...sorted(c.items)
-      .filter((i) => i.location.in !== 'template')
-      .map((i) => `item/${i.key}`),
+    ...sorted(c.items).map((i) => `item/${i.key}`),
   ];
-  // ponytail: no schedule jobs or slots (codex_sampler has neither); add them in genesis order if a test needs them.
+  // ponytail: canonical JSON gives detail keys sorted; no template items, schedule jobs or slots (codex_sampler
+  // has none); add them in genesis order if a test needs them.
   return Object.fromEntries(
     labels.map((label, ordinal) => {
       const domain = ['loka-id-v1', CONTEXT, '00000000-0000-0000-0000-000000000000', ordinal];
