@@ -328,10 +328,15 @@ defmodule Loka.Content.Compiler do
 
     case authored_key(rel, steps, value) ++
            validated(rel, steps, "Key", key) ++ body(rel, steps, contract, keyed) do
-      [] -> {:ok, {rel, steps, keyed}}
+      [] -> {:ok, {rel, steps, author_only(contract, keyed)}}
       diags -> {:error, diags}
     end
   end
+
+  # A reaction's silent mark is for mix loka.lint only: the compiled cartridge never carries it,
+  # so marking a rule changes neither its hash nor the kernel_api it needs.
+  defp author_only("ReactionRule", rule), do: Map.delete(rule, "silent")
+  defp author_only(_, value), do: value
 
   # Discard only key errors already reported against Key; definitions may narrow it.
   defp body(rel, steps, contract, value) do

@@ -7,7 +7,7 @@ defmodule Loka.Content.Lint do
 
   alias Loka.Content.Source
 
-  @writes ~w(status.apply fact.assign fact.adjust)
+  @writes ~w(status.apply status.cure fact.assign fact.adjust fact.stamp)
   @always %{"op" => "all", "items" => []}
 
   @doc "The findings for the source directory `dir`."
@@ -40,9 +40,14 @@ defmodule Loka.Content.Lint do
       else: []
   end
 
-  defp file(["npcs", _], rel, %{"disposition" => %{"hostile" => _} = d, "attack" => _})
-       when not is_map_key(d, "engage") and not is_map_key(d, "arrest"),
-       do: ["#{rel}: hostile with an attack but no disposition.engage line"]
+  # An attack profile makes an NPC one a fight can open with (combat@1 Attack, C2a: raider).
+  defp file(["npcs", _], rel, %{"attack" => _} = npc) do
+    d = npc["disposition"] || %{}
+
+    if is_map_key(d, "engage") or is_map_key(d, "arrest"),
+      do: [],
+      else: ["#{rel}: has an attack but no disposition.engage or arrest line"]
+  end
 
   defp file(["rooms", _], rel, room) do
     titles =
@@ -82,15 +87,18 @@ defmodule Loka.Content.Lint do
   defp shadowed(rel, variants) do
     indexed = Enum.with_index(variants)
 
-    for {a, i} <- indexed,
-        {b, j} <- indexed,
-        i < j,
-        Enum.all?(conds(a), &(&1 in conds(b))),
-        do: "#{rel}: variants[#{j}] is shadowed by variants[#{i}]"
+    for({v, i} <- indexed, !is_map_key(v, "when"), do: "#{rel}: variants[#{i}] has no when") ++
+      for {a, i} <- indexed,
+          {b, j} <- indexed,
+          i < j,
+          Enum.all?(conds(a), &(&1 in conds(b))),
+          do: "#{rel}: variants[#{j}] is shadowed by variants[#{i}]"
   end
 
   defp conds(%{"when" => %{"root" => %{"op" => "all", "items" => items}}}), do: items
   defp conds(%{"when" => %{"root" => root}}), do: [root]
+  # No guard always wins; the missing `when` itself is reported.
+  defp conds(_), do: []
 
   # A dialogue with no label of its own is offered as the kernel's default action.talk (UH);
   # a keyword dialogue (speech@1) is spoken, not offered.

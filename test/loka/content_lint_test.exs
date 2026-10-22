@@ -34,19 +34,26 @@ defmodule Loka.ContentLintTest do
     assert lint(%{"reactions/a.json" => %{"apply" => [%{"op" => "fact.adjust"}]}}) ==
              [~s(reactions/a.json: writes state with no narrate step and no "silent": true)]
 
+    # status.cure says nothing by spec, and fact.stamp is a fact write (warmth_dries, water_croft).
+    for op <- ~w(status.cure fact.stamp) do
+      assert lint(%{"reactions/w.json" => %{"apply" => [%{"op" => op}]}}) ==
+               [~s(reactions/w.json: writes state with no narrate step and no "silent": true)]
+    end
+
     assert lint(%{"reactions/p.json" => %{"apply" => apply ++ [%{"op" => "narrate"}]}}) == []
     assert lint(%{"reactions/p.json" => %{"apply" => apply, "silent" => true}}) == []
     assert lint(%{"reactions/q.json" => %{"apply" => [%{"op" => "quest.fail"}]}}) == []
   end
 
-  test "check 3b: a hostile NPC with an attack has an engage line (C2a)" do
+  test "check 3b: an NPC with an attack has an engage or arrest line (C2a, raider)" do
+    raider = "npcs/raider.json: has an attack but no disposition.engage or arrest line"
+    # The C2a shape: an attack and no disposition; Attack opens the fight with no line.
+    assert lint(%{"npcs/raider.json" => %{"attack" => %{}}}) == [raider]
     d = %{"hostile" => @refuses}
+    assert lint(%{"npcs/raider.json" => %{"disposition" => d, "attack" => %{}}}) == [raider]
 
-    assert lint(%{"npcs/wight.json" => %{"disposition" => d, "attack" => %{}}}) ==
-             ["npcs/wight.json: hostile with an attack but no disposition.engage line"]
-
-    engage = Map.put(d, "engage", "npc.wight.engage")
-    assert lint(%{"npcs/wight.json" => %{"disposition" => engage, "attack" => %{}}}) == []
+    engage = Map.put(d, "engage", "npc.raider.engage")
+    assert lint(%{"npcs/raider.json" => %{"disposition" => engage, "attack" => %{}}}) == []
     arrest = Map.put(d, "arrest", %{"to" => "cell"})
     assert lint(%{"npcs/guard.json" => %{"disposition" => arrest, "attack" => %{}}}) == []
     # A hostile shopkeeper refuses trade and never fights (bess).
@@ -102,24 +109,37 @@ defmodule Loka.ContentLintTest do
     assert lint(%{"rooms/shore_steps.json" => detail}) ==
              ["rooms/shore_steps.json details.post: variants[1] is shadowed by variants[0]"]
 
+    assert lint(room.([%{"description" => "d"}, variant([@tide])])) ==
+             ["rooms/shore_steps.json: variants[0] has no when", shadow]
+
     # pass-1 W1 (visits before tide) is order, not shadowing: neither guard contains the other.
     assert lint(room.([variant([@visits]), variant([@tide])])) == []
   end
 
   # Story cartridges only (ruling b): toolbox_showcase, the one story cartridge since Ashmere's
   # retirement (loka-4hik). Out: every *_sampler (samplers break rules on purpose),
-  # r9c_interactions (synthetic), lantern_proof and the ashmere_* cartridges. The findings over the slice's
-  # timebox are pinned in lint_baseline.txt until loka-kgd.184 clears them: a new finding fails.
-  @baseline File.read!("test/loka/lint_baseline.txt") |> String.split("\n", trim: true)
-  for cartridge <- ~w(toolbox_showcase) do
-    test "#{cartridge} has no lint finding beyond the pinned baseline" do
-      prefix = unquote(cartridge) <> " "
+  # r9c_interactions (synthetic), lantern_proof and the ashmere_* cartridges. Findings over the
+  # slice's timebox are pinned in lint_baseline.txt until loka-kgd.184 clears them: a new finding
+  # fails, and so does a baseline grown past its cap.
+  @baseline_cap 132
+  @baseline File.read!("test/loka/lint_baseline.txt")
+            |> String.split("\n", trim: true)
+            |> Enum.reject(&String.starts_with?(&1, "#"))
+  test "toolbox_showcase has no lint finding beyond the pinned baseline" do
+    known = for l <- @baseline, do: String.trim_leading(l, "toolbox_showcase ")
+    assert length(known) <= @baseline_cap
+    assert Loka.Content.lint("cartridges/toolbox_showcase") == known
+  end
 
-      known =
-        for l <- @baseline, String.starts_with?(l, prefix), do: String.trim_leading(l, prefix)
-
-      assert Loka.Content.lint("cartridges/#{unquote(cartridge)}") == known
-    end
+  @tag :tmp_dir
+  test "the compiler drops a reaction's silent mark: same artifact bytes, no silent key", %{
+    tmp_dir: dir
+  } do
+    File.cp_r!("cartridges/toolbox_showcase", dir)
+    {:ok, plain, _} = Loka.Content.compile(dir)
+    rule = Path.join(dir, "reactions/attic_drench.json")
+    File.write!(rule, Jason.encode!(Map.put(Jason.decode!(File.read!(rule)), "silent", true)))
+    assert {:ok, ^plain, _} = Loka.Content.compile(dir)
   end
 
   test "a reaction's silent mark is true or absent (reaction.schema.json ReactionRule)" do

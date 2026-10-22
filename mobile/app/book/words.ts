@@ -74,12 +74,11 @@ const REASON: Record<string, string> = {
   too_heavy: 'too heavy to carry',
   over_load: 'more than you can carry',
   cooldown: 'not yet',
-  // Proposed for designer approval (pass-1 row 2).
   permission_denied: 'not allowed',
   invalid_target: 'not with that',
   quest_requirement: 'not part of your task yet',
   unsupported_capability: 'not in this book',
-  budget_exceeded: 'too much at once',
+  budget_exceeded: 'more than the book can follow',
 };
 // A refused move's log line that is its own sentence, not "The way north is …" (0 MV).
 // The kernel's engine key resource.short names the unpaid cost (pass-1 R1); keys show raw, as on the status line.

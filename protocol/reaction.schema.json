@@ -505,7 +505,7 @@
           "$ref": "policy.schema.json#/$defs/VersionedPolicy"
         },
         "silent": {
-          "description": "Author-time only (mix loka.lint, pass-1 row 3): the rule writes state without a narrate step on purpose. The kernels ignore it.",
+          "description": "Author-time only (mix loka.lint, pass-1 row 3): the rule writes state without a narrate step on purpose. The compiler drops it, so a compiled cartridge never carries it.",
           "const": true
         },
         "after": {

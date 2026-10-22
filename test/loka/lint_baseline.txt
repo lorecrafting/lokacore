@@ -1,4 +1,18 @@
+# Pinned findings loka-kgd.184 clears; the test caps this list at 132 lines: shrink it, never grow it.
 toolbox_showcase cartridge.json: world.bands have no normal band below 100%
+toolbox_showcase npcs/attic_wight.json: has an attack but no disposition.engage or arrest line
+toolbox_showcase npcs/boar.json: has an attack but no disposition.engage or arrest line
+toolbox_showcase npcs/cellar_chief.json: has an attack but no disposition.engage or arrest line
+toolbox_showcase npcs/cellar_goblin.json: has an attack but no disposition.engage or arrest line
+toolbox_showcase npcs/chief.json: has an attack but no disposition.engage or arrest line
+toolbox_showcase npcs/den_goblin.json: has an attack but no disposition.engage or arrest line
+toolbox_showcase npcs/gil.json: has an attack but no disposition.engage or arrest line
+toolbox_showcase npcs/goblin.json: has an attack but no disposition.engage or arrest line
+toolbox_showcase npcs/hen.json: has an attack but no disposition.engage or arrest line
+toolbox_showcase npcs/raider.json: has an attack but no disposition.engage or arrest line
+toolbox_showcase npcs/tilt_boar.json: has an attack but no disposition.engage or arrest line
+toolbox_showcase npcs/tilt_goblin.json: has an attack but no disposition.engage or arrest line
+toolbox_showcase npcs/wight.json: has an attack but no disposition.engage or arrest line
 toolbox_showcase reactions/attic_drench.json: writes state with no narrate step and no "silent": true
 toolbox_showcase reactions/attic_kindle.json: writes state with no narrate step and no "silent": true
 toolbox_showcase reactions/attic_spark.json: writes state with no narrate step and no "silent": true
@@ -63,10 +77,14 @@ toolbox_showcase reactions/walker_mill.json: writes state with no narrate step a
 toolbox_showcase reactions/walker_tollhouse.json: writes state with no narrate step and no "silent": true
 toolbox_showcase reactions/walker_village_green.json: writes state with no narrate step and no "silent": true
 toolbox_showcase reactions/walker_warden_gate.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/wanted_cleared.json: writes state with no narrate step and no "silent": true
 toolbox_showcase reactions/wanted_marked.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/warmth_dries.json: writes state with no narrate step and no "silent": true
 toolbox_showcase reactions/wat_at_gate.json: writes state with no narrate step and no "silent": true
 toolbox_showcase reactions/wat_frost.json: writes state with no narrate step and no "silent": true
 toolbox_showcase reactions/wat_rain.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/water_croft.json: writes state with no narrate step and no "silent": true
+toolbox_showcase reactions/water_plot.json: writes state with no narrate step and no "silent": true
 toolbox_showcase reactions/wheel_1_turn.json: writes state with no narrate step and no "silent": true
 toolbox_showcase reactions/wheel_1_wrap.json: writes state with no narrate step and no "silent": true
 toolbox_showcase reactions/wheel_2_turn.json: writes state with no narrate step and no "silent": true
