@@ -1,9 +1,0 @@
-{
-  "title": "room.watch_cell.title",
-  "description": "room.watch_cell.description",
-  "exits": {
-    "west": {
-      "to": "watch_post"
-    }
-  }
-}

@@ -21,7 +21,7 @@ lists only what a file adds to that.
 | `policy.schema.json` | the policy AST | 06 §21; 21 §3.2, §4; 14 §R3A | |
 | `fact.schema.json` | FactSpec, scoped facts | 03 §7, §13; 21 §3.9, §4 | |
 | `resource.schema.json` | ResourceSpec: bounded integer resources, the default HP/MA/MV pools, legacy hourly and opted position recovery | 21 §4; 00 §4 | `composition.json`, `cartridge_road_hash.json`, `resource_recovery.json` |
-| `service.schema.json` | Immediate paid room entitlement, finite meal and provider-owned liquid serving; projected exact keyed quote | [B8 composition](../docs/system/protocol.md#b8-immediate-service-composition) | `service_contracts.json`, `build_sampler_hash.json` |
+| `service.schema.json` | Immediate paid room entitlement, finite meal and provider-owned liquid serving; projected exact keyed quote | [B8 composition](../docs/system/protocol.md#b8-immediate-service-composition) | `service_contracts.json`, `toolbox_showcase_hash.json` |
 | [`liquid.schema.json`](liquid.schema.json) | finite liquid contents and authored mass/serving metadata | [B7 composition](../docs/system/protocol.md#b7-liquid-composition) | `liquid_contracts.json`, `liquid_template.json` |
 | [`transport.schema.json`](transport.schema.json) | paired ferry boarding endpoints, conserved fare and actor-owned corpse recovery | [D1 mechanics](../docs/system/protocol.md#d1-ferry-transport-composition) | `transport_contracts.json` |
 | [`water.schema.json`](water.schema.json) | bounded underwater occupancy contracts | [D6 mechanics](../docs/system/protocol.md#d6-water-movement-and-corpse-selection) | `water_contracts.json`, `water_composition.json` |
@@ -41,7 +41,7 @@ lists only what a file adds to that.
 | `scene.schema.json` | modal narration and anchored `presentation_only` Rest dream; bound Continue, choice/branch and checked final consequences | 06 §33–§37; 21 §3.6; [mechanics](../docs/system/mechanics.md#scene1-mechanicsscenerulets) | `cartridge_scene_hash.json` |
 | `reaction.schema.json` | reaction rules (ReactionRule: trigger, when, fact.assign and restricted quest.activate consequences), owned by reaction | 21 §3.4, §11; 06 §14; 04 §5.2-§5.4 | `cartridge_green_hash.json` |
 | `manifest.schema.json` | cartridge, deployment, campaign manifests | 05 §3, §20, §22; 07 §15; 01 A5 | |
-| `cartridge.schema.json` | compiled cartridge (v1, and v2 with rooms, entry and text; its Calendar, owned by calendar), artifact file and byte cap, diagnostics; blueprints (BlueprintDefinition) and world.construction, owned by construction | 05 §8, §11, §18, §20; 08 §6; 14 §R4, §R5; 21 §4 | `cartridge_hash.json` (v1), `cartridge_rooms_hash.json` (v2), `cartridge_ferry_hash.json` (calendar), `cartridge_lantern_hash.json` (the pre-release proof cartridge), `cartridge_loader.json` (loader corpus, TypeScript), `build_sampler_hash.json` (construction) |
+| `cartridge.schema.json` | compiled cartridge (v1, and v2 with rooms, entry and text; its Calendar, owned by calendar), artifact file and byte cap, diagnostics; blueprints (BlueprintDefinition) and world.construction, owned by construction | 05 §8, §11, §18, §20; 08 §6; 14 §R4, §R5; 21 §4 | `cartridge_hash.json` (v1), `cartridge_rooms_hash.json` (v2), `cartridge_ferry_hash.json` (calendar), `cartridge_lantern_hash.json` (the pre-release proof cartridge), `cartridge_loader.json` (loader corpus, TypeScript), `build_sampler_hash.json` (construction), `harvest_sampler_hash.json` (harvest exchange), `derived_sampler_hash.json` (ancestries, attributes, derived tables) |
 | `feature.schema.json`, `feature_registry.json` | R3B feature envelopes | 14 §R3B | |
 | **Host, platform, verification** | | | |
 | `account.schema.json` | account/run binding, story point reports, admission | 23 §2-§7, §11; 03 §25-§27 | |
@@ -55,7 +55,9 @@ Registries are checked in `test/loka/core/registries_test.exs`.
 Current receptacle fixtures are named `containers_*hash.json`; their independently
 derived additions are in `test/loka/cartridge_containers_hash.py`. Original artifacts
 retain preproduction bytes; the current loader refuses unmarked receptacles. Current
-feature transcripts remain replayable.
+feature transcripts remain replayable. The retired first
+chapter's release, API, content hash and room count are recorded in
+[the retired chapter identity](../docs/system/cartridge.md#retired-first-chapter-e1-candidate).
 
 `fixtures/escort.json` pins the API1.11 relation, transition, target, dialogue effect
 and policy supplement, including both portable composers and independent preconditions

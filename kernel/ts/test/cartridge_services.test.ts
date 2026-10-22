@@ -101,8 +101,7 @@ test('loader refuses service bindings that cannot produce exact immediate outcom
     [
       'unpaid entitlement writer',
       (c) => {
-        const d = Object.values(c.dialogues)[0] as any;
-        d.choices[Object.keys(d.choices)[0]].sequence = [
+        c.dialogues[`${prefix}:dialogue/aldous_lesson`].choices.learn.sequence = [
           { op: 'fact.assign', fact: ref('fact', 'bed_paid'), value: true },
         ];
       },

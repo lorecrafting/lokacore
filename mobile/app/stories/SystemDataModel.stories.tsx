@@ -165,6 +165,8 @@ export const Impact: Story = {
       'cartridge_lantern_hash.json',
       'cartridge_loader.json',
       'build_sampler_hash.json',
+      'harvest_sampler_hash.json',
+      'derived_sampler_hash.json',
     ]);
   },
 };

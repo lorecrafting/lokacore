@@ -253,7 +253,7 @@ defmodule Loka.ContentDreamsTest do
       {[{scene, &put_in(&1, ["on_end", "assign", Access.at(0), "value"], false)}],
        {"OUTCOME_MISMATCH", "scenes/fen_dream.on_end.assign[0]"}},
       {[{scene, &put_in(&1, ["on_end", "assign", Access.at(0), "fact"], "slept_paid")}],
-       {"OUTCOME_MISMATCH", "scenes/fen_dream.on.rest.quest"}},
+       {"OUTCOME_MISMATCH", "scenes/fen_dream.on_end.assign[0]"}},
       {[
          {"dialogues/maud_talk.json",
           &put_in(&1, ["choices", "chat", "sequence"], [
