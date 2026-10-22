@@ -49,6 +49,10 @@ defmodule Loka.Content do
     end
   end
 
+  @doc "The author-time lint findings for a story cartridge source (Loka.Content.Lint)."
+  @spec lint(Path.t()) :: [String.t()]
+  defdelegate lint(dir), to: Loka.Content.Lint, as: :run
+
   # Checked values encode: NESTING_TOO_DEEP guards the only limit they can reach.
   defp artifact(cartridge) do
     {:ok, bytes} = Canonical.encode(cartridge)

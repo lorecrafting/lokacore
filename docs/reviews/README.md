@@ -16,6 +16,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: pass-1 GE4, death and round receipts lost in a cast-started fight (loka-y6yg.45)](2026-10-21-pass1-death-review.md): **APPROVE**
 - [Review: pass-1 GE7 opponent hp band in GameView (loka-y6yg.49)](2026-10-21-pass1-band-review.md): **APPROVE**
 - [Review: PR #419 opt-in observed line for a status on a seen NPC, kernel_api 1.110 (loka-kgd.176)](2026-10-21-npc-status-observed-review.md): **APPROVE**
+- [Review: authoring checks A, cartridge lints (loka-kgd.180)](2026-10-21-authoring-lints-review.md): **APPROVE**
 - [Review: PR #411 Book hostile NPC refusal line, kernel_api 1.104 (loka-y6yg.20 part B, loka-x6t.33)](2026-10-16-pr411-hostile-refusal-review.md): **APPROVE**
 - [Review: batch M15 head, PR #413 (loka-kgd.170)](2026-10-16-m15-batch-review.md): **APPROVE**
 - [Review: M15 row 47 death penalty options, kernel_api 1.109 (loka-kgd.171)](2026-10-16-m15-47-penalty-review.md): **APPROVE WITH NOTES**
