@@ -1,37 +1,35 @@
-// Real SQLite helper: original authored teachers and finite patch, controlled initial values.
+// Real SQLite helper: the practical-skills fragment plus an adit east of the mine (a move spends 1 mv).
 import assert from 'node:assert/strict';
-import { practicalBundle, ids } from '../../../../kernel/ts/test/practical_skills_fixture.ts';
 import {
-  loadCartridge,
-  INSTALLED,
-  newWorld,
-  gameView,
-  type Cartridge,
-} from '../../../../kernel/ts/src/index.ts';
+  sampler,
+  practical,
+  prefix,
+  ref,
+} from '../../../../kernel/ts/test/practical_skills_fixture.ts';
+import { gameView } from '../../../../kernel/ts/src/index.ts';
+import { decode } from '../../../../kernel/ts/src/foundation/canonical.ts';
 import { elapsedHost } from './elapsed-host.test.ts';
 import { openStory } from '../authority.ts';
-export { ids };
-export function practicalHost(
-  room = 'isle_hut',
-  stat = 10,
-  pennies = 20,
-  path = ':memory:',
-  mv = 100,
-) {
-  const bundle = practicalBundle(stat, room, pennies, mv);
+// The adit shifts every entity id, so ids come from this host's own genesis.
+const adit = (stat: number, pennies: number, mv: number) => (c: any) => {
+  practical(stat, pennies, mv)(c);
+  c.rooms[`${prefix}:room/mine`].exits = { east: { to: ref('room', 'adit') } };
+  c.rooms[`${prefix}:room/adit`] = {
+    key: 'adit',
+    title: 'room.mine.title', // KAT text: the authority holds no display text
+    description: 'item.stick.description',
+    exits: { west: { to: ref('room', 'mine') } },
+  };
+};
+const genesis = sampler.genesis(adit(10, 20, 100)),
+  ids = genesis.entityIds;
+export const patch = Object.keys(genesis.details)[0]!; // the seam, the only detail
+export const id = (kind: string, k: string) => ids[`${prefix}:${kind}/${k}`]!;
+export function practicalHost(stat = 10, pennies = 20, path = ':memory:', mv = 100) {
+  const change = adit(stat, pennies, mv);
+  const bundle = sampler.bundle(change),
+    fresh = sampler.genesis(change);
   const a = elapsedHost(path, { wall: 10000, mono: 0 }, bundle);
-  const loaded = loadCartridge(
-    new TextEncoder().encode(
-      JSON.stringify({ cartridge: bundle.value, content_hash: bundle.sha256 }),
-    ),
-    INSTALLED,
-  );
-  assert.ok(loaded.ok, JSON.stringify(loaded));
-  const fresh = newWorld(
-    loaded.cartridge as Cartridge,
-    '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never,
-    [1, 2, 3, 4],
-  );
   const releases = [{ fresh, content_hash: bundle.sha256 }] as const;
   let story: Extract<ReturnType<typeof openStory>, { kind: 'open' }>;
   const reopen = () => {
@@ -57,30 +55,21 @@ export function practicalHost(
       assert.equal((reply.decision as any).kind, 'accepted', JSON.stringify(reply));
     return i;
   };
-  const learn = (teacher = 'sedge', skill = 'herbalism') => {
-    invoke(`${teacher}_${skill}`, [ids[`npc/${teacher}`]]);
+  const learn = (teacher = 'miner', skill = 'mining') => {
+    invoke(`${teacher}_${skill}`, [id('npc', teacher)]);
     return invocation('choose', [], {
       continuation_id: gameView(story.world()).choice!.continuation_id,
       choice_id: 'learn',
     });
   };
-  const toPatch = () => {
-    invoke('move', [], { direction: 'west' });
-    const transport = gameView(story.world()).notices!.find((n) => n.transport)!.transport!;
-    invoke(transport.action.action_key, [...transport.action.target_ids!], {
-      route: transport.route,
-      quoted_fare: transport.fare,
-    });
-    for (const direction of ['east', 'south', 'south', 'west']) invoke('move', [], { direction });
-  };
   return {
     ...a,
     fresh,
+    text: (decode(bundle.canonical) as any).text as Record<string, string>,
     releases,
     invocation,
     invoke,
     learn,
-    toPatch,
     reopen,
     story: () => story,
     world: () => story.world(),
