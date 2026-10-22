@@ -7,9 +7,11 @@ import { fragment } from './fragment.ts';
 
 const sampler = fragment('protocol/fixtures/expedition_sampler_hash.json');
 const id = (n: number) => `aaaaaaaa-0000-4000-8000-${String(n).padStart(12, '0')}` as never;
-function setup(hour = 18) {
-  const fresh = sampler.genesis();
-  let world: World = { ...fresh, state: { ...fresh.state, clock: hour * 3600 } };
+function setup(hour = 18, change?: (c: any) => void) {
+  let world: World = sampler.genesis((c) => {
+    c.calendar.start = hour * 3600;
+    change?.(c);
+  });
   let ordinal = 1;
   const command = (payload: object) => {
     const result = step(
@@ -124,4 +126,33 @@ test('shelter is offered after route[2] even when an earlier edge enters shelter
     refused(early, w.character, 'shelter', shelter, quest_instance_id, attempt_id, c);
   assert.equal(offer(3), undefined);
   assert.equal(offer(1), 'invalid_state');
+  // Back in shelter_room after route[3]: a command quoting cursor 3 does not reopen shelter.
+  a.command({ type: 'move', direction: 'north' });
+  a.command({ type: 'move', direction: 'south' });
+  assert.equal(a.attempt()?.cursor, 4);
+  assert.equal(
+    refused(a.world(), w.character, 'shelter', shelter, quest_instance_id, attempt_id, 3),
+    'invalid_state',
+  );
+});
+
+// Breaks: an entry into route[cursor].to from a room other than route[cursor].from earns credit.
+test('entering the next edge target from another footprint room earns no credit', () => {
+  const a = setup(18, (c) => {
+    c.rooms['expedition_sampler@0.0.1:room/hollow'].exits.east = {
+      to: sampler.ref('room', 'ford'),
+    };
+  });
+  a.command({ type: 'expedition', detail_id: a.detail('cairn'), transition: 'start' });
+  for (const move of [
+    { type: 'flee' },
+    ...['west', 'south', 'north', 'south', 'east'].map((direction) => ({
+      type: 'move',
+      direction,
+    })),
+  ])
+    assert.equal(a.command(move).kind, 'accepted', JSON.stringify(move));
+  // route[4] is glade to ford; this entry into ford came from hollow.
+  assert.equal(a.attempt()?.cursor, 4);
+  assert.equal(a.attempt()?.status, 'active');
 });

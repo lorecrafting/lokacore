@@ -62,7 +62,7 @@ function source(cleared = false) {
 }
 
 // Breaks: cleared hounds or daylight block the expedition, or the C6 consequence underflows its authored floor.
-test('actual source starts a cleared pack at noon and resolves once at the faction floor', () => {
+test('sampler starts a cleared pack at noon and resolves once at the faction floor', () => {
   const a = source(true);
   assert.equal(
     a.command({ type: 'expedition', detail_id: a.detail('cairn'), transition: 'start' }).kind,
@@ -92,7 +92,7 @@ test('actual source starts a cleared pack at noon and resolves once at the facti
 });
 
 // Breaks: a captured shelter action bypasses current attempt/cursor binding, or an alias invokes another stage.
-test('actual source shelter offer executes once and stale or mismatched invocations refuse atomically', () => {
+test('sampler shelter offer executes once and stale or mismatched invocations refuse atomically', () => {
   const a = source(true);
   assert.equal(
     a.command({ type: 'expedition', detail_id: a.detail('cairn'), transition: 'start' }).kind,
