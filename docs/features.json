@@ -296,8 +296,7 @@
     "fixtures": [
       "protocol/fixtures/composition.json",
       "protocol/fixtures/cartridge_gate_hash.json",
-      "protocol/fixtures/cartridge_locks_hash.json",
-      "protocol/fixtures/missing_child_v042_hash.json"
+      "protocol/fixtures/cartridge_locks_hash.json"
     ],
     "invariants": [
       "delta_preconditions_hold",
@@ -348,8 +347,7 @@
       "kernel/ts/src/mechanics/schedule/rule.ts"
     ],
     "fixtures": [
-      "protocol/fixtures/cartridge_ferry_hash.json",
-      "protocol/fixtures/missing_child_v042_hash.json"
+      "protocol/fixtures/cartridge_ferry_hash.json"
     ],
     "invariants": [
       "delta_preconditions_hold",
@@ -617,7 +615,7 @@
       "ItemReadable"
     ],
     "fixtures": [
-      "protocol/fixtures/missing_child_v042_hash.json"
+      "protocol/fixtures/toolbox_showcase_hash.json"
     ],
     "invariants": [
       "gameview_agrees_with_admission"
@@ -659,7 +657,7 @@
       "mobile/authority/local-story/commerce-save.ts"
     ],
     "fixtures": [
-      "protocol/fixtures/missing_child_v042_hash.json"
+      "protocol/fixtures/toolbox_showcase_hash.json"
     ],
     "invariants": [
       "delta_preconditions_hold",
@@ -700,7 +698,7 @@
       "kernel/ts/src/mechanics/combat/round.ts"
     ],
     "fixtures": [
-      "protocol/fixtures/missing_child_v042_hash.json"
+      "protocol/fixtures/toolbox_showcase_hash.json"
     ],
     "invariants": [
       "facts_typed"
@@ -757,8 +755,7 @@
     "fixtures": [
       "protocol/fixtures/population_composition.json",
       "protocol/fixtures/population_suppression.json",
-      "protocol/fixtures/missing_child_v042_hash.json",
-      "protocol/fixtures/missing_child_v042_ids.json",
+      "protocol/fixtures/shoo_sampler_hash.json",
       "protocol/fixtures/crow_composition.json"
     ],
     "invariants": [
@@ -780,7 +777,7 @@
     ],
     "fixtures": [
       "protocol/fixtures/wisp_contracts.json",
-      "protocol/fixtures/missing_child_v042_hash.json"
+      "protocol/fixtures/toolbox_showcase_hash.json"
     ],
     "invariants": [
       "facts_typed"
@@ -807,7 +804,7 @@
     ],
     "fixtures": [
       "protocol/fixtures/liquid_composition.json",
-      "protocol/fixtures/missing_child_v042_hash.json"
+      "protocol/fixtures/toolbox_showcase_hash.json"
     ],
     "invariants": [
       "liquid_rows_valid",
@@ -833,8 +830,7 @@
       "mobile/authority/local-story/receipt-history.ts"
     ],
     "fixtures": [
-      "protocol/fixtures/missing_child_v042_hash.json",
-      "protocol/fixtures/missing_child_v042_ids.json"
+      "protocol/fixtures/toolbox_showcase_hash.json"
     ],
     "invariants": [
       "delta_preconditions_hold",
@@ -890,8 +886,7 @@
     "fixtures": [
       "protocol/fixtures/food_composition.json",
       "protocol/fixtures/food_contracts.json",
-      "protocol/fixtures/missing_child_v042_hash.json",
-      "protocol/fixtures/missing_child_v042_ids.json"
+      "protocol/fixtures/toolbox_showcase_hash.json"
     ],
     "invariants": [
       "delta_preconditions_hold",
@@ -1009,7 +1004,7 @@
       "mobile/authority/local-story/expedition-receipt.ts"
     ],
     "fixtures": [
-      "protocol/fixtures/missing_child_v042_hash.json"
+      "protocol/fixtures/expedition_sampler_hash.json"
     ],
     "invariants": [
       "delta_preconditions_hold",
@@ -1041,8 +1036,7 @@
       "mobile/authority/local-story/knowledge-save.ts"
     ],
     "fixtures": [
-      "protocol/fixtures/missing_child_v042_hash.json",
-      "protocol/fixtures/missing_child_v042_ids.json",
+      "protocol/fixtures/toolbox_showcase_hash.json",
       "protocol/fixtures/knowledge_composition.json"
     ],
     "invariants": [

@@ -99,6 +99,11 @@ export const routes: Record<string, Step[]> = {
     'The boar is here., open',
     'Attack the boar',
     wait(3000),
+    (b) => {
+      // The story is the bleed: fail the route if the boar's wound no longer bleeds.
+      if (!JSON.stringify(b.p.screen().view).includes('condition.bleeding'))
+        throw new Error('not bleeding');
+    },
   ],
   'map-two-levels': [go('up'), (b) => b.map()],
   'map-barred': [...hall, (b) => b.map()],

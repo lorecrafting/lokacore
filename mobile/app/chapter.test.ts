@@ -168,7 +168,7 @@ test('the app opens and replaces only its showcase save, preserving Lantern, sam
 });
 
 // Breaks: the new chapter silently opens an old exact pin or deletes it before explicit Start over.
-test('an older cartridge save is refused intact until explicit Start over', (t) => {
+test('a save from a different cartridge is refused intact until explicit Start over', (t) => {
   const dir = mkdtempSync(join(tmpdir(), 'loka-chapter-pin-'));
   t.after(() => rmSync(dir, { recursive: true, force: true }));
   const path = join(dir, 'chapter.db');

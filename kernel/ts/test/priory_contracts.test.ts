@@ -26,6 +26,7 @@ test('item writing, topic refs, text and unique player Boolean mappings fail clo
         default: 0,
       }),
     (c: any) => (c.topics[`${prefix}:topic/mill`].fact = ref('fact', 'topic_missing_cart_known')),
+    (c: any) => (c.topics[`${prefix}:topic/mill`].fact = ref('topic', 'mill')),
     (c: any) => (c.manifest.requires.kernel_api.at_least = '1.23'),
     (c: any) => {
       delete c.manifest.requires.capabilities.readable;
