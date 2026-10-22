@@ -64,7 +64,7 @@ Session 7b6568 (2026-10-21), all merged to main:
   - loka-4hik.30: about 30 universal checks with no content yet. Restore them when the showcase or the real game
     authors that content.
   - loka-kgd.186: test gaps that predate the deletion.
-  - loka-kgd.187 (P1): attacking a sole pack member returns narration [] and the save reopens as save_corrupt.
+  - loka-kgd.187 FIXED in #427 (accepted() omits empty narration; review record 2026-10-22). Follow-up loka-kgd.191: validate DecisionResult on commit, not only on reopen.
   - loka-kgd.188: the cellar_sampler KAT fails raw genesis.
   - Loka-0w4 is reopened: a developer /code-review left the main checkout detached.
 - Owner 2026-10-21: Sonnet builds purely mechanical slices; Opus builds judgement and save slices and does every
