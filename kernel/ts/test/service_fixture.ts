@@ -1,48 +1,119 @@
-import assert from 'node:assert/strict';
-import { createHash } from 'node:crypto';
-import { encode } from '../src/foundation/canonical.ts';
+// Controlled service worlds over the frozen toolbox_showcase KAT. The meal, drink and room services,
+// their stock, vessel and fact are inline: no frozen KAT carries those kinds, and every asserted
+// number (price, amount, balance, stock) is set here, never read from showcase content.
+import { fragment } from './fragment.ts';
 import { level } from '../src/mechanics/resource.ts';
 import { key } from '../src/foundation/compose.ts';
-import {
-  INSTALLED,
-  loadCartridge,
-  newWorld,
-  step,
-  type Cartridge,
-  type World,
-} from '../src/index.ts';
-import type { Command, DefinitionRef } from '../src/contracts.gen.ts';
-import { read } from './read.ts';
+import { step, type World } from '../src/index.ts';
+import type { Command } from '../src/contracts.gen.ts';
 
-export const pin = read('protocol/fixtures/missing_child_v025_hash.json');
-export const prefix = 'ashmere_missing_child@0.0.25';
-export const ref = (kind: string, name: string): DefinitionRef => ({
-  cartridge_id: 'ashmere_missing_child' as never,
-  cartridge_version: '0.0.25' as never,
-  kind: kind as never,
-  key: name as never,
-});
-export function bundle(change: (c: any) => void = () => {}) {
-  const c = structuredClone(pin.value);
-  c.entry.key = 'drowned_lantern';
+const f = fragment('protocol/fixtures/toolbox_showcase_hash.json');
+export const { prefix, ref } = f;
+const rk = (kind: string, name: string) => `${prefix}:${kind}/${name}`;
+function base(c: any) {
+  c.entry = ref('room', 'farm_kitchen');
   c.calendar.start = 0;
-  c.resources[`${prefix}:resource/mv`].start = 50;
-  change(c);
-  const canonical = encode(c);
-  return { canonical, sha256: createHash('sha256').update(canonical).digest('hex') };
+  c.resources[rk('resource', 'mv')].start = 50;
+  c.resources[rk('resource', 'pennies')].start = 20;
+  c.resources[rk('resource', 'meal_stock')] = {
+    gain: 0,
+    key: 'meal_stock',
+    maximum: 4,
+    minimum: 0,
+    start: 0,
+  };
+  c.facts[rk('fact', 'bed_paid')] = {
+    key: 'bed_paid',
+    meaning: 'The player paid the cook for the bed.',
+    scopes: ['player'],
+    value_type: { default: false, type: 'bool' },
+    version: 1,
+  };
+  c.text['service.full_mv'] = 'Your MV is full.';
+  c.text['service.sold_out'] = 'Sold out.';
+  const cask = structuredClone(c.items[rk('item', 'cask')]);
+  c.items[rk('item', 'kitchen_cask')] = {
+    ...cask,
+    key: 'kitchen_cask',
+    keywords: ['kitchen_cask'],
+    location: { in: 'npc', npc: ref('npc', 'cook') },
+    vessel: {
+      capacity: 4,
+      initial: { kind: ref('liquid', 'draught'), quantity: 4 },
+      unit_label: 'liquid.doses',
+    },
+  };
+  const cook = c.npcs[rk('npc', 'cook')];
+  cook.resource_starts = { pennies: 10, meal_stock: 4 };
+  const open = { policy_version: 1, root: { op: 'all', items: [] } };
+  const services: [string, string, object][] = [
+    [
+      'kitchen_meal',
+      'eat_kitchen_meal',
+      {
+        benefit: {
+          amount: 12,
+          debit: 1,
+          kind: 'meal',
+          recovery: ref('resource', 'mv'),
+          stock: ref('resource', 'meal_stock'),
+        },
+        price: 2,
+      },
+    ],
+    [
+      'kitchen_ale',
+      'drink_kitchen_ale',
+      {
+        benefit: {
+          amount: 4,
+          kind: 'drink',
+          liquid: ref('liquid', 'draught'),
+          recovery: ref('resource', 'mv'),
+          vessel: ref('item', 'kitchen_cask'),
+        },
+        price: 1,
+      },
+    ],
+    [
+      'kitchen_room',
+      'rent_kitchen_room',
+      { benefit: { fact: ref('fact', 'bed_paid'), kind: 'entitlement' }, price: 3 },
+    ],
+  ];
+  for (const [name, action, rest] of services) {
+    c.text[`service.${name}`] = name;
+    c.text[`service.${name}.used`] = `${name} used`;
+    c.actions[rk('action', action)] = {
+      accessibility: `service.${name}`,
+      command: 'use_service',
+      input: ['service', 'quoted_price'],
+      key: action,
+      label: `service.${name}`,
+      policy: open,
+      priority: 0,
+      target: { kind: 'entity', scopes: ['room_occupants'] },
+    };
+    c.services[rk('service', name)] = {
+      action,
+      currency: ref('resource', 'pennies'),
+      key: name,
+      label: `service.${name}`,
+      narration: `service.${name}.used`,
+      provider: ref('npc', 'cook'),
+      ...rest,
+    };
+    cook.services.push(ref('service', name));
+  }
 }
+const with_base = (change: (c: any) => void) => (c: any) => {
+  base(c);
+  change(c);
+};
+export const bundle = (change: (c: any) => void = () => {}) => f.bundle(with_base(change));
+export const load = (change: (c: any) => void = () => {}) => f.load(with_base(change));
 export function fresh(change: (c: any) => void = () => {}) {
-  const b = bundle(change),
-    loaded = loadCartridge(
-      new TextEncoder().encode(`{"cartridge":${b.canonical},"content_hash":"${b.sha256}"}`),
-      INSTALLED,
-    );
-  assert.ok(loaded.ok, JSON.stringify(loaded));
-  const world = newWorld(
-    loaded.cartridge as Cartridge,
-    '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never,
-    [1, 2, 3, 4],
-  );
+  const world = f.genesis(with_base(change));
   return { ...world, state: world.state as any };
 }
 export const entity = (w: World, kind: string, name: string) =>
@@ -50,13 +121,13 @@ export const entity = (w: World, kind: string, name: string) =>
 export const resourceKey = (w: World, holder: string, name: string) =>
   key({ kind: 'resource', resource: ref('resource', name), entity_id: holder });
 export const amounts = (w: World) =>
-  [w.body, entity(w, 'npc', 'maud')].map(
+  [w.body, entity(w, 'npc', 'cook')].map(
     (id) => w.state.resources![resourceKey(w, id, 'pennies')].value,
   );
 export const mv = (w: World) => level(w, w.body, ref('resource', 'mv'))!;
 export const stock = (w: World) =>
-  w.state.resources![resourceKey(w, entity(w, 'npc', 'maud'), 'lantern_meals')].value;
-export const ale = (w: World) => w.state.liquids![entity(w, 'item', 'lantern_ale_cask')];
+  w.state.resources![resourceKey(w, entity(w, 'npc', 'cook'), 'meal_stock')].value;
+export const ale = (w: World) => w.state.liquids![entity(w, 'item', 'kitchen_cask')];
 export function run(w: World, name: string, ordinal = 1, change: object = {}) {
   const s = w.cartridge.services![`${prefix}:service/${name}`];
   return step(
@@ -67,7 +138,7 @@ export function run(w: World, name: string, ordinal = 1, change: object = {}) {
       payload: {
         type: 'use_service',
         actor_id: w.character,
-        provider_id: entity(w, 'npc', 'maud'),
+        provider_id: entity(w, 'npc', 'cook'),
         service: ref('service', name),
         quoted_price: s.price,
         ...change,
