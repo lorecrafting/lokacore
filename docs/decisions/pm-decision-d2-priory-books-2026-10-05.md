@@ -17,7 +17,7 @@ Read under commanded-actor held/open-container reach narrates and grants exactly
 its declared Ward or Bell topic once; ordinary notices retain no-topic Read.
 Reuse B6's Ward Boolean, typed grant lowering and public Aldric consumer; add only
 Bell membership and visible label. Take/Examine/render never teach; reread remains
-available. The [Book flow](../system/book-ui.md#d2-held-book-details) preserves exact
+available. The [Book flow](https://github.com/lorecrafting/lokacore/blob/c88762e38eb9c3747f1de0b87e6536d58424c24e/docs/system/book-ui.md#d2-held-book-details) preserves exact
 nested item identity, explicit Read and local Back with confirmed receipt history.
 
 Ash/Hale retain separate identities and existing schedule machinery. Owner content

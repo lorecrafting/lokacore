@@ -17,7 +17,7 @@ resource benefit in B7; B8 must adopt its later benefit in its own slice.
 
 The [typed operation](../system/protocol.md#b7-liquid-composition),
 [receipt-backed recovery](../system/save.md#b7-liquid-recovery) and
-[Book boundary](../system/book-ui.md#b7-water-details) are part of this adoption.
+[Book boundary](https://github.com/lorecrafting/lokacore/blob/c88762e38eb9c3747f1de0b87e6536d58424c24e/docs/system/book-ui.md#b7-water-details) are part of this adoption.
 One per-item row and exact replacement operation are necessary because item
 custody and current resources cannot express vessel kind/capacity; they do not
 justify a fluids framework. B4 fuel remains its own time-bearing representation.

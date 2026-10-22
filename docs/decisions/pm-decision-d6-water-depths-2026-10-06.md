@@ -12,7 +12,7 @@ Active amendments: [mechanics](../system/mechanics.md#d6-water-depths-and-owned-
 [cartridge](../system/cartridge.md#d6-bottom-rooms-and-water-tuning-selected-pending-implementation),
 [protocol](../system/protocol.md#d6-water-movement-and-corpse-selection),
 [save](../system/save.md#d6-water-and-owned-corpse-recovery),
-[Book](../system/book-ui.md#d6-water-exits-and-chapel-recovery), and the
+[Book](https://github.com/lorecrafting/lokacore/blob/c88762e38eb9c3747f1de0b87e6536d58424c24e/docs/system/book-ui.md#d6-water-exits-and-chapel-recovery), and the
 [D6 brief](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/briefs/chapter-one/d6-water-depths-brief-2026-10-05.md).
 These clauses select behavior; the [scoped independent review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-06-d6-water-depths-selected-review.md#scoped-d6-r1-fix-recheck--approve) approves the corrected selected contract, not installed source or publication.
 

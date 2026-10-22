@@ -25,7 +25,7 @@ mutually exclusive branch/terminal evidence and cold-open consistency. These req
 one typed escort relation and effect, not a party/AI/pathfinding framework or Boolean
 follower fact. Governing clauses: [chapter](../system/cartridge.md#q2-c-rescue-return),
 [mechanics](../system/mechanics.md#escort1), [protocol](../system/protocol.md#typed-escort-relation),
-[save](../system/save.md#escort-and-alternate-return-recovery), [Book](../system/book-ui.md#escort-details).
+[save](../system/save.md#escort-and-alternate-return-recovery), [Book](https://github.com/lorecrafting/lokacore/blob/c88762e38eb9c3747f1de0b87e6536d58424c24e/docs/system/book-ui.md#escort-details).
 
 Verify actual Move and Flee, fatal combat separation, reciprocal return/Rejoin, both
 terminals, literal bound IDs, Book/SQLite rollback/reopen/unknown-COMMIT and malformed

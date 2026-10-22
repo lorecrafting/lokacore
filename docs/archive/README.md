@@ -18,3 +18,5 @@ each file stays because something current still cites it. The current system is 
   archived 2026-10-21; the Beads export check and the chapter-one briefs read it.
 
 Everything else archived on 2026-10-07 is at [the last commit that held it](https://github.com/lorecrafting/lokacore/tree/f8513671ea7dd84d681876b2e36850129a4b0564/docs/archive).
+
+The per-chapter detail sections of `docs/system/book-ui.md`, removed on 2026-10-22, are at [the last commit that held them](https://github.com/lorecrafting/lokacore/blob/c88762e38eb9c3747f1de0b87e6536d58424c24e/docs/system/book-ui.md).
