@@ -1,127 +1,119 @@
 defmodule Loka.ContentRiddleTest do
   use ExUnit.Case, async: true
-  setup_all do: %{dir: Loka.ContentSource.copy("cartridges/scene_sampler")}
+  @moduletag :tmp_dir
 
-  # Twin of kernel/ts/test/riddle_fixture.ts: a sphinx beside Bram asks a bounded riddle of the
-  # lantern quest.
-  @riddle %{
-    "npc" => "sphinx",
-    "prompt" => "dialogue.riddle.prompt",
-    "quest" => "lantern",
-    "policy" => %{
-      "policy_version" => 1,
-      "root" => %{"op" => "quest_state", "quest" => "lantern", "state" => "active"}
-    },
-    "roles" => %{
-      "sphinx" => %{"role" => "npc", "npc" => "sphinx"},
-      "bram" => %{"role" => "npc", "npc" => "bram"}
-    },
-    "choices" => %{
-      "answer" => %{
-        "label" => "dialogue.riddle.answer",
-        "narration" => "narration.riddle.answer",
-        "sequence" => [%{"op" => "fact.assign", "fact" => "riddle_solved", "value" => true}]
-      }
-    },
-    "riddle" => %{
-      "choice_id" => "answer",
-      "answer" => "tide",
-      "bank" => ["T", "I", "D", "E"],
-      "wrong" => "narration.riddle.wrong",
-      "wrong_limit" => 3
-    }
-  }
-
-  defp source(riddle, extra \\ []) do
-    [
-      {"cartridge.json", &put_in(&1, ~w(requires kernel_api at_least), "1.21")},
-      {"npcs/sphinx.json",
-       %{
-         "keywords" => ["sphinx"],
-         "short" => "npc.sphinx.short",
-         "description" => "npc.sphinx.description",
-         "room_line" => "npc.sphinx.room",
-         "room" => "ferry_landing"
-       }},
-      {"facts.json",
-       &put_in(&1, ~w(facts riddle_solved), %{
-         "version" => 1,
-         "value_type" => %{"type" => "bool", "default" => false},
-         "scopes" => ["player"],
-         "meaning" => "The sphinx riddle was answered."
-       })},
-      {"text.json",
-       &Map.merge(&1, %{
-         "npc.sphinx.short" => "a sphinx",
-         "npc.sphinx.description" => "A sphinx.",
-         "npc.sphinx.room" => "A sphinx is here.",
-         "dialogue.riddle.prompt" => "What comes in twice a day?",
-         "dialogue.riddle.answer" => "Answer",
-         "narration.riddle.answer" => "The sphinx nods.",
-         "narration.riddle.wrong" => "The sphinx shakes its head."
-       })},
-      {"dialogues/riddle.json", riddle} | extra
-    ]
+  defp update(dir, rel, fun) do
+    path = Path.join(dir, rel)
+    File.write!(path, JSON.encode!(fun.(JSON.decode!(File.read!(path)))))
   end
 
-  defp diagnostics({:error, diags}), do: diags
-  defp diagnostics({:ok, _, _}), do: []
+  defp source(dir) do
+    File.cp_r!("cartridges/ferry_sampler", dir)
+    update(dir, "cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.9"))
 
-  # Breaks: a bounded sitting without a quest, or with no allowed wrong answer, compiles.
-  test "a bounded riddle needs a quest and a positive wrong limit", %{dir: dir} do
-    assert {:ok, _, _} = Loka.ContentSource.compile(dir, source(@riddle))
+    update(
+      dir,
+      "dialogues/bram.json",
+      &Map.put(&1, "riddle", %{
+        "choice_id" => "carry",
+        "answer" => "lantern",
+        "bank" => ~w(R N A O L T E N S),
+        "wrong" => "narration.bram.leave"
+      })
+    )
 
-    for {riddle, code, path} <- [
-          {Map.delete(@riddle, "quest"), "OUTCOME_MISMATCH",
-           "dialogues/riddle.riddle.wrong_limit"},
-          {put_in(@riddle, ~w(riddle wrong_limit), 0), "SCHEMA_VIOLATION", nil}
+    update(
+      dir,
+      "quests/lantern.json",
+      &Map.put(&1, "journal", %{
+        "active" => "quest.lantern.title",
+        "objectives_met" => "quest.lantern.title",
+        "resolved" => "quest.lantern.title",
+        "failed" => "quest.lantern.title",
+        "abandoned" => "quest.lantern.title",
+        "active_variants" => [
+          %{
+            "when" => %{
+              "policy_version" => 1,
+              "root" => %{
+                "op" => "fact_compare",
+                "fact" => "search_plan",
+                "equals" => "player_led"
+              }
+            },
+            "text" => "narration.bram.carry"
+          }
+        ]
+      })
+    )
+  end
+
+  # Breaks: short references in active journal policies remain unexpanded or riddle data is discarded.
+  test "API1.9 source preserves riddles and expands journal policies", %{tmp_dir: dir} do
+    source(dir)
+    assert {:ok, bytes, []} = Loka.Content.compile(dir)
+    c = JSON.decode!(bytes)["cartridge"]
+
+    assert c["dialogues"]["ferry_sampler@0.0.1:dialogue/bram"]["riddle"]["bank"] ==
+             ~w(R N A O L T E N S)
+
+    [v] = c["quests"]["ferry_sampler@0.0.1:quest/lantern"]["journal"]["active_variants"]
+
+    assert v["when"]["root"]["fact"] == %{
+             "cartridge_id" => "ferry_sampler",
+             "cartridge_version" => "0.0.1",
+             "kind" => "fact",
+             "key" => "search_plan"
+           }
+  end
+
+  # Breaks: missing choices/text/typed policy refs, insufficient repeated tiles or old API declarations compile.
+  test "authoring rejects invalid riddles and journal variants", %{tmp_dir: dir} do
+    source(dir)
+
+    for {rel, steps, value, code} <- [
+          {"dialogues/bram.json", ["riddle", "choice_id"], "missing", "UNRESOLVED_REFERENCE"},
+          {"dialogues/bram.json", ["riddle", "wrong"], "missing", "UNRESOLVED_REFERENCE"},
+          {"dialogues/bram.json", ["riddle", "bank"], ~w(R N A O L T E S), "OUTCOME_MISMATCH"},
+          {"dialogues/bram.json", ["riddle", "answer"], "Lantern", "SCHEMA_VIOLATION"},
+          {"quests/lantern.json", ["journal", "active_variants", 0, "text"], "missing",
+           "UNRESOLVED_REFERENCE"},
+          {"quests/lantern.json", ["journal", "active_variants", 0, "when", "root", "fact"],
+           "missing", "UNRESOLVED_REFERENCE"},
+          {"quests/lantern.json", ["journal", "active_variants", 0, "when", "root", "equals"],
+           true, "FACT_TYPE_MISMATCH"},
+          {"quests/lantern.json", ["journal", "active_variants", 0, "when", "policy_version"], 2,
+           "SCHEMA_VIOLATION"}
         ] do
-      diags = diagnostics(Loka.ContentSource.compile(dir, source(riddle)))
+      path = Path.join(dir, rel)
+      original = File.read!(path)
 
-      assert Enum.any?(diags, &(&1["code"] == code and (path == nil or &1["path"] == path))),
-             inspect(diags)
+      access =
+        Enum.map(steps, fn
+          n when is_integer(n) -> Access.at(n)
+          k -> Access.key(k)
+        end)
+
+      update(dir, rel, &put_in(&1, access, value))
+      assert {:error, diagnostics} = Loka.Content.compile(dir)
+      assert Enum.any?(diagnostics, &(&1["code"] == code)), inspect({steps, diagnostics})
+      File.write!(path, original)
     end
   end
 
-  # Breaks (loka-x6t.5 save re-check, twin of kernel/ts/test/riddle.test.ts): a reopening hub answer
-  # directly assigning a bounded riddle's answer fact (riddle-save proves it by one receipt)
-  # compiles; or the check flags an unbounded riddle's fact or any other fact.
-  test "a reopening dialogue rejects a direct assignment of a bounded riddle answer fact", %{
-    dir: dir
-  } do
-    at = "dialogues/chat.choices.ask.sequence[0].op"
+  # Breaks: either optional feature independently bypasses API1.9 gating.
+  test "each API1.9 feature requires its declared minimum", %{tmp_dir: dir} do
+    for feature <- ["riddle", "active_variants"] do
+      sub = Path.join(dir, feature)
+      source(sub)
+      update(sub, "cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.8"))
 
-    unbounded =
-      @riddle |> Map.delete("quest") |> Map.update!("riddle", &Map.delete(&1, "wrong_limit"))
+      if feature == "riddle",
+        do: update(sub, "quests/lantern.json", &Map.delete(&1, "journal")),
+        else: update(sub, "dialogues/bram.json", &Map.delete(&1, "riddle"))
 
-    for {fact, riddle, flagged} <- [
-          {"riddle_solved", @riddle, true},
-          {"riddle_solved", unbounded, false},
-          {"bell_heard", @riddle, false}
-        ] do
-      # No quest, no riddle, two choices: Bram's chat reopens after each answer.
-      chat = %{
-        "npc" => "bram",
-        "prompt" => "dialogue.bram.prompt",
-        "policy" => @riddle["policy"],
-        "roles" => %{"bram" => %{"role" => "npc", "npc" => "bram"}},
-        "choices" => %{
-          "ask" => %{
-            "label" => "dialogue.bram.carry",
-            "narration" => "narration.bram.carry",
-            "sequence" => [%{"op" => "fact.assign", "fact" => fact, "value" => true}]
-          },
-          "bye" => %{"label" => "dialogue.bram.leave", "narration" => "narration.bram.leave"}
-        }
-      }
-
-      result = Loka.ContentSource.compile(dir, source(riddle, [{"dialogues/chat.json", chat}]))
-      diags = diagnostics(result)
-
-      assert Enum.any?(diags, &(&1["code"] == "OUTCOME_MISMATCH" and &1["path"] == at)) == flagged,
-             "#{fact}: #{inspect(diags)}"
-
-      if !flagged, do: assert({:ok, _, _} = result)
+      assert {:error, diagnostics} = Loka.Content.compile(sub)
+      assert Enum.any?(diagnostics, &(&1["code"] == "KERNEL_API_RANGE_INVALID"))
     end
   end
 end
