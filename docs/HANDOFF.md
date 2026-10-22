@@ -6,8 +6,8 @@ the next steps, the standing owner rules that the repo does not yet state, and o
 questions. Rewrite it at each stable checkpoint (a merge, a review verdict, a pushed fix) and before
 the session ends; commit and push it with the Beads export.
 
-Written 2026-10-21 ~22:20 UTC by Claude Code (Opus 5.5), PM session 7b6568, mid pass-1 fix batch.
-State at writing: agents may still be running (see "Pass-1 fix batch" below; their handbacks land in Beads notes).
+Written 2026-10-22 ~05:30 UTC by Claude Code (Opus 5.5), PM session 7b6568, at the end of the retired-chapter deletion.
+State at writing: main is green; the owner preview serves main 04948aff on 19006/19007; one 390 px verification agent may still be running (its report goes to loka-4hik.2 notes).
 
 ## Start of a session
 
@@ -52,27 +52,25 @@ kernel_api 1.110: a status's optional `narration.observed` gives an applied line
 (loka-ikch, worldbuilding drafts rescued from the main checkout), #418 (loka-y6yg.38, plan 7 traps district, three
 slices). THE SHOWCASE IS FULLY BUILT (hub, combat, social, fire, homestead, economy/law, magic, traps).
 
-Pass-1 playtest and fix batch (session a02501b4, 2026-10-21):
-- Playtest DONE (`loka-y6yg.34`): sweeper 1 (Claude in Chrome) + sweepers A and B (browser-use, 390 px); triage of 70
-  findings in docs/playtests/2026-10-21-pass1/ (#421, loka-y6yg.40 merged: archive, analysis, docs/guides/area-authoring.md,
-  9 candidate checks AWAITING OWNER APPROVAL: see analysis.md; file each approved one via bin/br_create.sh).
-- PM rulings on triage questions: `loka-y6yg.34` notes. Owner: door Open also on World; Lift + risk note.
-- Batch branch `showcase/pass1` (worktree ../worktrees.noindex/batch-pass1, no PR yet). MERGED into it: design spec +
-  rulings record docs/reviews/2026-10-21-pass1-ui-rulings.md (loka-x6t.72), .44 spell lines, .41 traps content, .45
-  death receipts (record + 2nd opinion), .47 known_npcs living only, x6t.74 UI1 (World order, log lines, speech echo).
-- STATE (session 7b6568, 2026-10-21 ~23:20 UTC): ALL pass-1 slices merged into showcase/pass1; main merged in; PR #422
-  (loka-y6yg.34, pass-1 fix batch) open at cff1492e, hosted CI running. Running: Opus integration review of #422 (merge
-  resolutions + cross-slice), Opus 390 px re-walk of the pass-1 findings (report -> scratchpad rewalk-pass1-report.md).
-  Then: ONE designer pass (new rule loka-dnf2) for doc nit book-ui.md:1126 "Acquired skills without a profession" + re-walk
-  wording; fixes on the batch; CI green; merge #422 (gh pr merge 422 --merge --match-head-commit <sha>); bin/after_merge.sh
-  422 loka-y6yg.34; close the slice ids; bin/preview_update.sh (owner preview 19006/19007); PushNotification the owner.
-- Merging content slices: the showcase hash fixture conflicts; recompile (`mix loka.compile cartridges/toolbox_showcase
-  <out>`, split {cartridge, content_hash} into canonical + sha256, keep the description) in the batch worktree, run the
-  showcase TS + Elixir tests, push. Always wait for hosted CI on the slice head before merging (two approved slices
-  were red on CI today).
-- Follow-ups filed: loka-y6yg.50-.53, loka-kgd.178/.179. Retro 2026-10-21 (AWAITING OWNER APPROVAL): loka-8qzi (pre-push
-  stories freshness), loka-u8ey (no forks unless allowed); evidence added to loka-xvxa (dev ran to 650k) and loka-kjky (hash
-  fixture conflicts on every content merge).
+Session 7b6568 (2026-10-21), all merged to main:
+- #422 pass-1 fix batch (loka-y6yg.34), #423 showcase becomes the app default (loka-4hik.1), #424 pass-2 fixes from the
+  390 px re-walk (loka-y6yg.58), #425 authoring checks A, B1 and B2 (loka-kgd.180-182; group C deferred to loka-kgd.183).
+- #426 (loka-4hik.2) THE RETIRED CHAPTER IS FULLY DELETED. Owner (AskUserQuestion, quoted): "Fully gone now". The chapter, its renamed
+  copy, its frozen fixtures and the bell/finale save code are gone. 22 slices were each CI-green and reviewed in waves; M1 and
+  Z have review records. Plan: the phase-2 brief README under docs/briefs/, linked from the 2026-10-21 retire decision in docs/decisions/ (D1-D3, the acceptance sweep, one exemption:
+  docs/spec/conformance/contract-links.json). The universal tests now run on the showcase, renamed samplers
+  (rename.sed) or in-test fragments (kernel/ts/test/fragment.ts). New samplers: bleed, expedition, shoo.
+- Follow-ups from the deletion:
+  - loka-4hik.30: about 30 universal checks with no content yet. Restore them when the showcase or the real game
+    authors that content.
+  - loka-kgd.186: test gaps that predate the deletion.
+  - loka-kgd.187 (P1): attacking a sole pack member returns narration [] and the save reopens as save_corrupt.
+  - loka-kgd.188: the cellar_sampler KAT fails raw genesis.
+  - Loka-0w4 is reopened: a developer /code-review left the main checkout detached.
+- Owner 2026-10-21: Sonnet builds purely mechanical slices; Opus builds judgement and save slices and does every
+  review (memory sonnet-mechanical-slices). Designer once per batch (loka-dnf2).
+- One full blind playtest so far (pass 1) plus one targeted re-walk. The owner accepted the recommendation of a 390 px
+  smoke check now and a full blind sweep after UI polish.
 3. Owner: slice D two-save playtest (`loka-y6yg.4`). Then UI polish with the owner.
 Approved, after the showcase, before chapter work: loka-kgd.173 sim invariants, loka-kgd.174 Book visibility check,
 loka-kgd.175 scale benchmark (status sort, entity scan hot spots), loka-kgd.177 red control for
