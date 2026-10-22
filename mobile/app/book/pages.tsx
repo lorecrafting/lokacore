@@ -1,4 +1,4 @@
-// size: allow 340, the exported components' doc comments (BOOK-UI-COMPONENTS.md, Component catalogue)
+// size: allow 350, the exported components' doc comments (BOOK-UI-COMPONENTS.md, Component catalogue)
 // The book's page shell, the room page and their shared controls (the Contents sections:
 // sections.tsx; the thing page: Menu.tsx; the room's action list: place.tsx; the title's arriving
 // focus: title.ts).

@@ -1,4 +1,4 @@
-// size: allow 310, the exported components' doc comments (BOOK-UI-COMPONENTS.md, Component catalogue)
+// size: allow 320, the exported components' doc comments (BOOK-UI-COMPONENTS.md, Component catalogue)
 // The Book draws GameView through its presenter; App injects the shell.
 import { useRef, useState } from 'react';
 import { SafeAreaView, View } from 'react-native';

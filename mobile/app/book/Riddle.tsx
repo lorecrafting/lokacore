@@ -1,4 +1,4 @@
-// The riddle answer: a bank of letter tiles over one local buffer (LetterTile's doc comment).
+// The riddle answer: a bank of letter tiles over one local buffer.
 import { useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { Text } from './Text.tsx';

@@ -29,7 +29,7 @@ const files = [
 ];
 const EXPORT = /^export (?:(?:default )?(?:function|const) ([A-Z]\w*)|\{ \w+ as ([A-Z]\w*) \})/gm;
 const KNOWN =
-  /^export (?:(?:default )?(?:function|const|type|interface)\b|\{ \w+ as [A-Z]\w* \}|\{ [a-z])/;
+  /^export (?:(?:default )?(?:function|const|type|interface)\b|\{ \w+ as [A-Z]\w* \}|\{ [a-z]\w* \})/;
 const unknownExports: string[] = [];
 const exported = files.flatMap((file) => {
   const src = read(file);
@@ -56,7 +56,9 @@ test('every exported component has a doc comment with Use: and an existing Story
 // disagrees with the doc comment.
 test('the catalogue index lists each exported component once, with its file and story', () => {
   const md = read('../../docs/BOOK-UI-COMPONENTS.md');
-  const index = md.slice(md.indexOf('## Component catalogue'), md.indexOf('## Page turn'));
+  const [start, end] = [md.indexOf('## Component catalogue'), md.indexOf('## Page turn')];
+  assert.ok(start >= 0 && end > start, 'the index sits between its heading and Page turn');
+  const index = md.slice(start, end);
   const rows = [...index.matchAll(/^\| `(\w+)` \| `([\w/.]+)` \| (\w+) \|$/gm)];
   assert.deepEqual(
     rows.map(([, name, file, s]) => `${file}:${name}:${s}`).sort(),

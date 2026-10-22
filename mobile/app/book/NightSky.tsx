@@ -1,7 +1,4 @@
-// The night sky over the page (NightSky's doc comment): the Chapter 1 mock's moonlit
-// page, a still field of faint stars and, now and then, one shooting star streaking down-left.
-// Over everything, taking no touch or focus, like PageTurn's leaving leaf. Reduced motion keeps the
-// stars and skips the shooting star. RN Animated only (Footer's precedent), so node tests load it.
+// The night sky over the page. RN Animated only (Footer's precedent), so node tests load it.
 import { useEffect, useState } from 'react';
 import { Animated, Easing, View } from 'react-native';
 import { useReducedMotion } from './fade.ts';

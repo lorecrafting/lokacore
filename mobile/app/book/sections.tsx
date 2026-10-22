@@ -1,4 +1,4 @@
-// size: allow 340, the exported components' doc comments (BOOK-UI-COMPONENTS.md, Component catalogue)
+// size: allow 350, the exported components' doc comments (BOOK-UI-COMPONENTS.md, Component catalogue)
 // The Contents sections (Character, Ancestry, Carrying, Map, Settings; Journal: journal.tsx) and
 // the chapter and scene pages. Each is only drawing; what a tap does is passed in by Book.tsx.
 import { useState } from 'react';
@@ -282,7 +282,8 @@ export function SettingsPage(p: { startOver: () => void; world: () => void; read
  * The chapter title page: label, title and rule centred, then Continue.
  * - Use: a chapter's title page.
  * - Rules: label and title are one header node named by its visible text in order ("Chapter one
- *   <title>"), with the arriving focus. Nothing but Continue is pressable.
+ *   <title>"), with the arriving focus. Nothing but Continue is pressable. The mock's `.chapter`
+ *   without its fleuron, subtitle and auto-dismiss.
  * - Story: ChapterPages.stories.tsx
  */
 export function ChapterPage(p: { label: string; title: string; done: () => void }) {

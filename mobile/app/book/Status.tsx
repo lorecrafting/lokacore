@@ -1,4 +1,4 @@
-// The status line under the footer (StatusLine's doc comment).
+// The status line under the footer.
 import type { ReactElement } from 'react';
 import { Pressable, View } from 'react-native';
 import { Text } from './Text.tsx';
@@ -66,7 +66,7 @@ const skyText = (p: StatusProps) =>
  * - Use: under the footer on every page.
  * - Rules: never wraps: too wide, position and bleeding end in an ellipsis, the longer giving up
  *   more; the glyph and pools never shrink. Pools are separated by an en space as text, never a
- *   margin, so the shown words lead the button's name. The sky glyphs are glyphs.ts `sky`: ink is
+ *   margin, so the shown words lead the button's name. The sky glyphs are model.ts `sky`: ink is
  *   the moon's dark side, waxing lit on the right; the glyph's name is the time in words (`day 3,
  *   18:05, dusk, waxing crescent moon`). Position and pools are controls named by the
  *   label-in-name rule.

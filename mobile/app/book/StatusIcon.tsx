@@ -1,7 +1,4 @@
-// The status icon row above the status line (StatusIcons' doc comment): one round,
-// graphic-only icon per condition, five then a +N disc. A tap opens Character; a hold (a hover on
-// web) shows the label and time left in the Tip's look. Locked (scene, combat, chapter page), the
-// discs are pictures, not buttons.
+// The status icon row above the status line.
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { Animated, Pressable, View } from 'react-native';
 import { Text } from './Text.tsx';
