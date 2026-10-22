@@ -285,7 +285,7 @@ defmodule Loka.ContentRefusalsTest do
   test "two topics may not share one fact", %{codex_sampler: dir} do
     assert {"DUPLICATE_DEFINITION", "topics/mill_copy.fact"} in codes(dir, [
              {"topics/mill_copy.json",
-              File.read!(Path.join(dir, "topics/mill.json")) |> Jason.decode!()}
+              File.read!(Path.join(dir, "topics/mill.json")) |> JSON.decode!()}
            ])
   end
 end
