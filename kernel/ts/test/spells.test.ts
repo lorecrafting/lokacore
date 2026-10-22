@@ -15,6 +15,7 @@ import { bodyOf, type Cartridge, type World } from '../src/runtime/decision.ts';
 import { identify, resolve } from '../src/commands/invocation.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { level } from '../src/mechanics/resource.ts';
+import { fresh as cellar } from './combat_fixture.ts';
 
 function compiled(dir: string): Uint8Array {
   const scratch = mkdtempSync(join(tmpdir(), 'loka-spells-sampler-'));
@@ -89,16 +90,9 @@ function fresh(): World {
   return newWorld(content, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e55' as never, [1, 2, 3, 4]);
 }
 
-// Breaks: cast is offered in a cartridge without spells: Chapter 1's GameView gains it.
-test('cast is not offered in Chapter 1, which has no spells', () => {
-  const chapter = loadCartridge(compiled('ashmere_missing_child'), INSTALLED);
-  assert.ok(chapter.ok);
-  const w = newWorld(
-    chapter.cartridge as Cartridge,
-    '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never,
-    [1],
-  );
-  const view = gameView(ok(play(w, { type: 'choose_ancestry', ancestry: 'fen_born' })));
+// Breaks: cast is offered in a cartridge without spells: the containers cellar sampler's GameView gains it.
+test('cast is not offered in the containers cellar sampler, which has no spells', () => {
+  const view = gameView(cellar);
   assert.ok(view.actions.some((a) => a.action_key === 'look'));
   assert.ok(!view.actions.some((a) => a.action_key === 'cast'));
 });

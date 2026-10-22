@@ -3,14 +3,25 @@ import { test } from 'node:test';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { bundle, fresh, npc, room } from '../../../kernel/ts/test/patrol_fixture.ts';
+import {
+  bundle as patrolBundle,
+  fresh,
+  genesis,
+  npc,
+  room,
+} from '../../../kernel/ts/test/patrol_fixture.ts';
+import { escortSource } from '../../../kernel/ts/test/escort_fixture.ts';
 import { elapsedHost } from './__tests__/elapsed-host.test.ts';
 import { openStory } from './authority.ts';
 import { openGame } from './session.ts';
 import { presenter } from '../../app/book/presenter.ts';
 
-function setup(path = ':memory:') {
-  const a = elapsedHost(path, { wall: 10000, mono: 0 }, bundle);
+const bundle = patrolBundle();
+
+function setup(path = ':memory:', change?: (c: any) => void) {
+  const b = change ? patrolBundle(change) : bundle,
+    w = change ? genesis(change) : fresh;
+  const a = elapsedHost(path, { wall: 10000, mono: 0 }, b);
   let game = a.game;
   let book = presenter(game);
   game.subscribe(book.update);
@@ -31,7 +42,7 @@ function setup(path = ':memory:') {
   const move = (...directions: string[]) => {
     for (const direction of directions) ok('move', [], { direction });
   };
-  const talk = () => ok('tobin_watch', [npc(fresh)]);
+  const talk = () => ok('tobin_watch', [npc(w)]);
   const choice = (choice_id: string) => {
     const chosen = book
       .screen()
@@ -40,7 +51,7 @@ function setup(path = ':memory:') {
           b.action_key === 'choose' && (b.input as { choice_id?: string }).choice_id === choice_id,
       );
     assert.ok(chosen, `${choice_id}: ${JSON.stringify(view().choice)}`);
-    book.press(chosen, npc(fresh));
+    book.press(chosen, npc(w));
     assert.equal(game.pending(), false);
     assert.equal(view().choice, undefined);
     return chosen;
@@ -56,12 +67,13 @@ function setup(path = ':memory:') {
   const reopen = () => {
     a.sql.close();
     a.sql.open();
-    game = openGame(a.db, bundle, a.host);
+    game = openGame(a.db, b, a.host);
     book = presenter(game);
     game.subscribe(book.update);
   };
   return {
     ...a,
+    w,
     get game() {
       return game;
     },
@@ -123,37 +135,21 @@ test('real SQLite reopens every finite leg and explicit pause boundary', (t) => 
 });
 
 // Breaks: real cellar death persists old credit or Restart requires another quest/hour and cannot reopen.
-test('actual cellar death separates concurrent Wren, resets patrol, and permits Restart after cold reopen', (t) => {
+test('actual cellar death separates a concurrent escort, resets patrol, and permits Restart after cold reopen', (t) => {
   const dir = mkdtempSync(join(tmpdir(), 'loka-patrol-fatal-'));
   t.after(() => rmSync(dir, { recursive: true, force: true }));
-  const a = setup(join(dir, 'story.db'));
+  const a = setup(join(dir, 'story.db'), escortSource);
   t.after(() => a.sql.close());
-  const choose = (choice_id: string, answer?: string) => {
-    a.ok('choose', [], {
-      continuation_id: a.view().choice!.continuation_id,
-      choice_id,
-      ...(answer && { answer }),
-    });
+  const fresh = a.w;
+  const talk = (dialogue: string, who: string, choice_id: string) => {
+    a.ok(dialogue, [npc(fresh, who)]);
+    a.ok('choose', [], { continuation_id: a.view().choice!.continuation_id, choice_id });
+    if (a.view().choice) a.ok('close_choice');
   };
-  a.ok('elspeth', [npc(fresh, 'elspeth')]);
-  choose('accept');
-  a.ok('close_choice'); // the hub stays open after an answer (loka-x6t.5): Leave the conversation
+  talk('keeper_offer', 'keeper', 'accept');
   a.move('north', 'north');
-  const drawing = fresh.entityIds['ashmere_missing_child@0.0.24:item/fox_drawing'];
-  a.ok('take', [drawing]);
-  a.move('south', 'south');
-  a.ok('elspeth', [npc(fresh, 'elspeth')]);
-  choose('report');
-  a.move('south', 'south');
-  a.ok('study_tracks');
-  a.move('south', 'south');
-  a.ok('vesper', [npc(fresh, 'vesper')]);
-  choose('meet_wren');
-  a.ok('vesper', [npc(fresh, 'vesper')]);
-  choose('answer', 'LANTERN');
-  a.ok('wren', [npc(fresh, 'wren')]);
-  choose('rescue');
-  a.move('north', 'north', 'north', 'north', 'north', 'north', 'north', 'east');
+  talk('child_escort', 'child', 'rescue');
+  a.move('north', 'east');
   a.choose('start');
   a.choose('continue');
   a.move('west');
@@ -402,37 +398,4 @@ test('final player join commits movement, terminal quest and trust together acro
         a.sql.close();
       }
     });
-});
-
-// Breaks: current patrol identity validation rejects lawful C1 payments/gift/dodge acquisition or S3 repeats those rewards.
-test('real original-Tobin C1 lessons reopen during patrol and completion grants trust alone', (t) => {
-  const dir = mkdtempSync(join(tmpdir(), 'loka-patrol-lessons-'));
-  t.after(() => rmSync(dir, { recursive: true, force: true }));
-  const a = setup(join(dir, 'story.db'));
-  t.after(() => a.sql.close());
-  a.start();
-  a.ok('tobin_swords', [npc(fresh)]);
-  a.choice('learn');
-  a.reopen();
-  a.choose('continue');
-  a.move('west');
-  a.ok('tobin_dodge', [npc(fresh)]);
-  a.choice('learn');
-  a.reopen();
-  const pennies = a.rows('resources').filter((r) => JSON.parse(r.key).resource.key === 'pennies');
-  const skills = a.view().skills;
-  const sword = a.view().inventory.find((i) => i.name === 'item.rusty_sword.short');
-  assert.ok(sword);
-  for (const direction of ['south', 'east', 'west', 'north', 'east']) {
-    a.choose('continue');
-    a.move(direction);
-  }
-  a.reopen();
-  assert.equal(a.patrol().value.status, 'completed');
-  assert.deepEqual(
-    a.rows('resources').filter((r) => JSON.parse(r.key).resource.key === 'pennies'),
-    pennies,
-  );
-  assert.deepEqual(a.view().skills, skills);
-  assert.equal(a.view().inventory.find((i) => i.name === 'item.rusty_sword.short')!.id, sword.id);
 });

@@ -14,6 +14,8 @@ import { gameView, INSTALLED, loadCartridge, newWorld, step } from '../src/index
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { read } from './read.ts';
+import { fragment } from './fragment.ts';
+import * as patrol from './patrol_fixture.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-hidden-sampler-'));
 let artifact: Uint8Array;
@@ -115,29 +117,29 @@ test('the loader refuses each unsound hidden_until declaration', () => {
 // Breaks: the loader admits a patrol leg or expedition edge over a hidden face, so the leader walks
 // it or the quest journal names its direction (twin of content_hidden_passage_test.exs).
 test('the loader refuses a patrol or expedition route over a hidden face', () => {
-  const source = read('protocol/fixtures/missing_child_v041_hash.json').value;
-  const A = 'ashmere_missing_child@0.0.41';
-  const hide = (room: string, fact: string) => (c: any) => {
-    c.manifest.requires.kernel_api.at_least = '1.45';
-    const to = c.rooms[`${A}:room/${room}`].exits.west.to;
-    c.rooms[`${A}:room/${room}`].exits.west.hidden_until = {
+  const expedition = fragment('protocol/fixtures/expedition_sampler_hash.json');
+  // Hide the west face out of `room` until `fact`; the patrol source rises to the 1.45 face floor.
+  const hide = (prefix: string, room: string, fact: string) => (c: any) => {
+    if (prefix === patrol.prefix) c.manifest.requires.kernel_api.at_least = '1.45';
+    const to = c.rooms[`${prefix}:room/${room}`].exits.west.to;
+    c.rooms[`${prefix}:room/${room}`].exits.west.hidden_until = {
       fact: { ...to, kind: 'fact', key: fact },
       equals: true,
     };
   };
-  for (const [room, fact, path] of [
-    [
-      'watch_post',
-      'watch_gate_trusts_player',
-      `.cartridge.quests["${A}:quest/watch_rounds"].patrol.route[0]`,
-    ],
-    [
-      'hound_run',
-      'fen_night_survived',
-      `.cartridge.quests["${A}:quest/a_night_in_the_marsh"].expedition.route[0]`,
-    ],
-  ])
-    assert.deepEqual(refusal(source, hide(room!, fact!)), ['OUTCOME_MISMATCH', path], path);
+  const refused = (r: ReturnType<typeof patrol.load>) =>
+    r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
+  const P = patrol.prefix,
+    E = expedition.source.manifest;
+  assert.deepEqual(refused(patrol.load(hide(P, 'watch_post', 'watch_gate_trusts_player'))), [
+    'OUTCOME_MISMATCH',
+    `.cartridge.quests["${P}:quest/watch_rounds"].patrol.route[0]`,
+  ]);
+  const X = `${E.id}@${E.version}`;
+  assert.deepEqual(refused(expedition.load(hide(X, 'trailhead', 'night_survived'))), [
+    'OUTCOME_MISMATCH',
+    `.cartridge.quests["${X}:quest/night_walk"].expedition.route[0]`,
+  ]);
 });
 
 function refusal(source: object, change: (c: any) => void) {

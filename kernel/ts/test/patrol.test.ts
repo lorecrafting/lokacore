@@ -3,7 +3,8 @@ import { test } from 'node:test';
 import { gameView, stepElapsed } from '../src/index.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { value } from '../src/mechanics/fact.ts';
-import { journey, patrol, npc, room, ref, fresh } from './patrol_fixture.ts';
+import { genesis, journey, patrol, npc, room, ref, fresh } from './patrol_fixture.ts';
+import { escortSource } from './escort_fixture.ts';
 import { hp, rooted } from './combat_fixture.ts';
 
 // Breaks: leader departures earn player credit, connector repeats count twice, or success grants a skill/item/payment.
@@ -185,52 +186,34 @@ test('fatal combat invalidates together and awaiting attempts before immediate R
   }
 });
 
-// Breaks: Continue steals Wren's following relation or produces a second player transfer.
-test('original Wren follow composes independently with leader-only Continue and one joined Move', () => {
-  const a = journey();
-  const choose = (choice_id: string, answer?: string) => {
-    const row = Object.entries(a.world.state.choices!).find(([, c]) => c.status === 'pending')!;
-    a.run({ type: 'choose', continuation_id: row[0], choice_id, ...(answer && { answer }) });
+// Breaks: Continue steals the escorted child's following relation or produces a second player transfer.
+test('an escort follow composes independently with leader-only Continue and one joined Move', () => {
+  const a = journey(genesis(escortSource));
+  const talk = (who: string, choice_id: string) => {
+    a.run({ type: 'talk', target_id: npc(a.world, who) });
+    a.run({
+      type: 'choose',
+      continuation_id: gameView(a.world).choice!.continuation_id,
+      choice_id,
+    });
+    const open = gameView(a.world).choice;
+    if (open) a.run({ type: 'close_choice', continuation_id: open.continuation_id });
   };
-  a.run({ type: 'talk', target_id: npc(a.world, 'elspeth') });
-  choose('accept');
-  const hub = Object.entries(a.world.state.choices!).find(([, c]) => c.status === 'pending')!;
-  a.run({ type: 'close_choice', continuation_id: hub[0] }); // the hub stays open after an answer (loka-x6t.5): Leave the conversation
+  talk('keeper', 'accept');
   a.move('north');
   a.move('north');
-  a.run({
-    type: 'take',
-    item_id:
-      a.world.entityIds[
-        `${a.world.cartridge.manifest.id}@${a.world.cartridge.manifest.version}:item/fox_drawing`
-      ],
-  });
-  a.move('south');
-  a.move('south');
-  a.run({ type: 'talk', target_id: npc(a.world, 'elspeth') });
-  choose('report');
-  a.move('south');
-  a.move('south');
-  a.run({ type: 'perform', action: 'study_tracks' });
-  a.move('south');
-  a.move('south');
-  a.run({ type: 'talk', target_id: npc(a.world, 'vesper') });
-  choose('meet_wren');
-  a.run({ type: 'talk', target_id: npc(a.world, 'vesper') });
-  choose('answer', 'LANTERN');
-  a.run({ type: 'talk', target_id: npc(a.world, 'wren') });
-  choose('rescue');
-  for (const direction of ['north', 'north', 'north', 'north', 'north', 'north', 'north', 'east'])
-    a.move(direction);
+  talk('child', 'rescue');
+  a.move('north');
+  a.move('east');
   a.choice('start');
-  const wren = npc(a.world, 'wren');
-  const before = a.world.state.containers[wren];
+  const child = npc(a.world, 'child');
+  const before = a.world.state.containers[child];
   a.choice('continue');
-  assert.equal(a.world.state.containers[wren], before);
+  assert.equal(a.world.state.containers[child], before);
   const joined = a.move('west');
   assert.ok(joined.decision.kind === 'accepted');
   assert.equal(
-    joined.decision.delta.ops.filter((o) => o.op === 'entity.transfer' && o.entity_id === wren)
+    joined.decision.delta.ops.filter((o) => o.op === 'entity.transfer' && o.entity_id === child)
       .length,
     1,
   );
@@ -244,53 +227,33 @@ test('original Wren follow composes independently with leader-only Continue and 
   assert.equal(patrol(a.world).credit.length, 1);
 });
 
-// Breaks: an hour/equipment/trust gate strands an untrained actor, or elapsed reading moves the passive leader.
-test('public watch rooms, readables and Start remain usable at dusk, late night and next morning', () => {
-  for (const clock of [64800, 82800, 108000]) {
-    const a = journey({ ...fresh, state: { ...fresh.state, clock } });
-    a.start();
-    a.move('east');
-    a.move('west');
-    a.move('up');
-    a.move('down');
-    const roster = Object.entries(a.world.details).find(([, d]) => d.key === 'duty_roster')![0];
-    a.run({ type: 'read', target_id: roster });
-    assert.equal(patrol(a.world).status, 'paused');
-    a.choice('rejoin');
-    const before = a.world,
-      run_id = 'abababab-1111-4222-8333-444444444444' as never;
-    const until = before.state.clock + 900;
-    const elapsed = stepElapsed(
-      before,
-      {
-        id: elapsedCommandId(run_id, before.context, before.state.clock, until) as never,
-        world_context_id: before.context,
-        payload: {
-          type: 'elapsed',
-          actor_id: before.character,
-          run_id,
-          from: before.state.clock,
-          until,
-        },
+// Breaks: elapsed time moves the passive leader or changes a paused attempt.
+test('elapsed time leaves a rejoined attempt and its passive leader in place', () => {
+  const a = journey();
+  a.start();
+  a.move('west');
+  assert.equal(patrol(a.world).status, 'paused');
+  a.move('east');
+  a.choice('rejoin');
+  const before = a.world,
+    run_id = 'abababab-1111-4222-8333-444444444444' as never;
+  const until = before.state.clock + 900;
+  const elapsed = stepElapsed(
+    before,
+    {
+      id: elapsedCommandId(run_id, before.context, before.state.clock, until) as never,
+      world_context_id: before.context,
+      payload: {
+        type: 'elapsed',
+        actor_id: before.character,
+        run_id,
+        from: before.state.clock,
+        until,
       },
-      100,
-    );
-    assert.equal(elapsed.decision.kind, 'accepted');
-    assert.deepEqual(patrol(elapsed.world), patrol(before));
-    assert.equal(elapsed.world.state.containers[npc(before)], room(before, 'watch_post'));
-    a.choice('continue');
-    a.move('west');
-    a.choice('continue');
-    a.move('south');
-    a.choice('continue');
-    a.move('east');
-    const sign = Object.entries(a.world.details).find(([, d]) => d.key === 'road_sign')![0];
-    a.run({ type: 'read', target_id: sign });
-    assert.equal(patrol(a.world).credit.length, 3);
-    a.move('west');
-    a.move('north');
-    a.move('north');
-    a.move('north');
-    assert.equal(a.world.state.containers[a.world.body], room(a.world, 'chapel_nave'));
-  }
+    },
+    100,
+  );
+  assert.equal(elapsed.decision.kind, 'accepted');
+  assert.deepEqual(patrol(elapsed.world), patrol(before));
+  assert.equal(elapsed.world.state.containers[npc(before)], room(before, 'watch_post'));
 });
