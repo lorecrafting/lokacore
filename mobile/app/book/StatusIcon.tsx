@@ -236,6 +236,7 @@ function Disc(p: { look: Look; children: string }) {
         justifyContent: 'center',
       }}
     >
+      {/* Fixed size, not useType(): the glyph sits in a fixed 28 px disc, and icons keep their size. */}
       <Text aria-hidden style={{ ...type.label, color: l.ink }}>
         {p.children}
       </Text>

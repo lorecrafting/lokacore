@@ -1,8 +1,8 @@
 // StatusLine: the centred status line under the footer (StatusLine's doc comment).
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { View } from 'react-native';
-import { expect, fn } from 'storybook/test';
-import { size } from '../book/tokens.ts';
+import { expect, fn, within } from 'storybook/test';
+import { size, space } from '../book/tokens.ts';
 import type { Pool } from '../book/model.ts';
 import { StatusLine } from '../book/Status.tsx';
 
@@ -204,10 +204,12 @@ export const Locked: Story = {
 
 export const Pending: Story = { args: { pending: true } };
 
-// The narrowest phone with everything on the line: the pools take line two, whole (loka-x6t.86).
-// Breaks: the row loses flexWrap (the pools stay on line one and the rest is cut).
+// The narrowest phone at the Max Reading size with everything on the line: the pools take line
+// two, whole, and position and bleeding truncate on line one (loka-x6t.86).
+// Breaks: the row loses flexWrap (the pools stay on line one and the rest is cut); position or
+// bleeding loses its one line (shrink or numberOfLines gone, so it wraps instead of truncating).
 export const Narrow: Story = {
-  globals: { viewport: { value: 'galaxyS25', isRotated: false } },
+  globals: { viewport: { value: 'galaxyS25', isRotated: false }, reading: 'Max' },
   args: {
     calendar: { day: 3, hour: 23, subdivision: 0, solar: 'night', lunar: 'full' },
     position: 'sleeping' as never,
@@ -221,10 +223,69 @@ export const Narrow: Story = {
       canvasElement.getBoundingClientRect().right,
     );
     await expect(position.getBoundingClientRect().height).toBe(size.touch); // one line
+    const word = within(position).getByText('sleeping');
+    await expect(word.scrollWidth).toBeGreaterThan(word.clientWidth); // cut short by the ellipsis
     // on line two: both boxes bleed, so compare tops (one row: equal; wrapped: about a line lower)
     await expect(stats.getBoundingClientRect().top).toBeGreaterThan(
       position.getBoundingClientRect().top + size.touch / 2,
     );
+  },
+};
+
+// The status line's text as laid out, one string per line: a text node below the position
+// button's box is on line two.
+const lines = (root: HTMLElement, position: HTMLElement) => {
+  const split = position.getBoundingClientRect().bottom;
+  const out: string[][] = [[], []];
+  const walk = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  for (let n = walk.nextNode(); n; n = walk.nextNode()) {
+    const range = document.createRange();
+    range.selectNodeContents(n);
+    const r = range.getBoundingClientRect();
+    if (n.textContent) out[r.top + r.height / 2 > split ? 1 : 0]!.push(n.textContent);
+  }
+  return out.map((l) => l.join(' ').replace(/\s+/g, ' ').trim()).filter(Boolean);
+};
+// At 390 px, inside the page's margins: 358 px wide.
+const rainy: Story = {
+  globals: { viewport: { value: 'iphone13', isRotated: false } },
+  decorators: [
+    (Story) => (
+      <View style={{ paddingHorizontal: space.xl }}>
+        <Story />
+      </View>
+    ),
+  ],
+  args: {
+    calendar: { day: 1, hour: 0, subdivision: 0, solar: 'night', lunar: 'full', weather: 'rain' },
+    position: 'standing' as never,
+    openPosition: fn(),
+    resources: [pool('hp', 10, 10), pool('ma', 5, 5), pool('mv', 100, 100)],
+  },
+};
+
+// Breaks: the line wraps (or the gap grows) while one line still fits at 390 px.
+export const OneLineLarger: Story = {
+  ...rainy,
+  globals: { ...rainy.globals, reading: 'Larger' },
+  play: async ({ canvas, canvasElement }) => {
+    const position = canvas.getByRole('button', { name: 'standing, change position' });
+    await expect(lines(canvasElement, position)).toEqual([
+      '○ rain · standing hp 10/10 ma 5/5 mv 100/100',
+    ]);
+  },
+};
+
+// Breaks: a dot before hp (it would start line two), the pools split, or the break falls elsewhere.
+export const WrapsAtMax: Story = {
+  ...rainy,
+  globals: { ...rainy.globals, reading: 'Max' },
+  play: async ({ canvas, canvasElement }) => {
+    const position = canvas.getByRole('button', { name: 'standing, change position' });
+    await expect(lines(canvasElement, position)).toEqual([
+      '○ rain · standing',
+      'hp 10/10 ma 5/5 mv 100/100',
+    ]);
   },
 };
 

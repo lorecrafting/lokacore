@@ -234,8 +234,8 @@ test('the chapter title page leaves only Continue', () => {
   const [navigation, status] = bottom.type(bottom.props).props.children;
   assert.equal(navigation, false);
   assert.equal(status.props.locked, true);
-  // past the (absent) icon row: the row, then its two wrap units (line one; the dot and the button)
-  const button = StatusLine(status.props).props.children[1].props.children[1].props.children[1];
+  // past the (absent) icon row: the row, then its two wrap units (line one; the button)
+  const button = StatusLine(status.props).props.children[1].props.children[1];
   const contents = button.type(button.props);
   const colours = (e: any): string[] =>
     !e || typeof e !== 'object'
@@ -263,7 +263,7 @@ test('status shows hp, ma and mv only; Character bands those only, never pennies
     pending: false,
     open: () => {},
   } as any);
-  const button = status.props.children[1].props.children[1].props.children[1];
+  const button = status.props.children[1].props.children[1];
   const contents = button.type(button.props);
   const text = (e: any): string =>
     e && typeof e === 'object' ? [e.props.children].flat().map(text).join('') : String(e ?? '');

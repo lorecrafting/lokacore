@@ -34,7 +34,7 @@ const statusRow = {
   justifyContent: 'center',
   alignItems: 'center',
   flexWrap: 'wrap',
-  columnGap: space.sm,
+  columnGap: space.xl,
 } as const;
 const group = { flexDirection: 'row', alignItems: 'center', columnGap: space.sm } as const;
 const shrink = { flexShrink: 1, minWidth: 0 } as const;
@@ -68,7 +68,8 @@ const skyText = (p: StatusProps) =>
  * - Rules: at most two lines, nothing dropped: too wide, the pools take the second line whole
  *   (the only break falls before hp); still too wide, position and bleeding end in an ellipsis,
  *   the longer giving up more. The glyph and pools never shrink. The pools are one unbreakable
- *   run: no-break spaces as text, never a margin, so the shown words lead the button's name.
+ *   run: no-break spaces as text, never a margin, so the shown words lead the button's name. A
+ *   gap, not a dot, sets the pools apart.
  *   Every role scales with the Reading size. The sky glyphs are model.ts `sky`: ink is
  *   the moon's dark side, waxing lit on the right; the glyph's name is the time in words (`day 3,
  *   18:05, dusk, waxing crescent moon`). Position and pools are controls named by the
@@ -92,16 +93,11 @@ export function StatusLine(p: StatusProps) {
         />
       )}
       <View style={statusRow}>
-        {/* Two wrap units, so the only break falls before the pools; their dot goes with them. */}
+        {/* Two wrap units, so the only break falls before the pools. */}
         <View style={{ ...group, ...shrink }}>
           {items.map((item, i) => (i ? joined(c, t, item) : item))}
         </View>
-        <View style={group}>
-          <Text aria-hidden style={{ ...t.small, color: c.dim }}>
-            ·
-          </Text>
-          <Contents {...p} resources={pools(p.resources)} />
-        </View>
+        <Contents {...p} resources={pools(p.resources)} />
       </View>
       <View style={{ alignItems: 'center' }}>
         {p.pending && <Text style={{ ...t.small, color: c.dim }}>save not confirmed</Text>}
