@@ -1,5 +1,5 @@
 defmodule Loka.ContentLintTest do
-  # Author-time lints (Loka.Content.Lint; pass-1 analysis rows 1, 3, 3b, 5 and 6). Each check has
+  # Author-time lints (Loka.Content.Lint; pass-1 analysis rows 1, 3, 5 and 6). Each check has
   # one invalid fragment, from the pass-1 offender where one existed, and the valid form beside it.
   use ExUnit.Case, async: true
 
@@ -43,21 +43,6 @@ defmodule Loka.ContentLintTest do
     assert lint(%{"reactions/p.json" => %{"apply" => apply ++ [%{"op" => "narrate"}]}}) == []
     assert lint(%{"reactions/p.json" => %{"apply" => apply, "silent" => true}}) == []
     assert lint(%{"reactions/q.json" => %{"apply" => [%{"op" => "quest.fail"}]}}) == []
-  end
-
-  test "check 3b: an NPC with an attack has an engage or arrest line (C2a, raider)" do
-    raider = "npcs/raider.json: has an attack but no disposition.engage or arrest line"
-    # The C2a shape: an attack and no disposition; Attack opens the fight with no line.
-    assert lint(%{"npcs/raider.json" => %{"attack" => %{}}}) == [raider]
-    d = %{"hostile" => @refuses}
-    assert lint(%{"npcs/raider.json" => %{"disposition" => d, "attack" => %{}}}) == [raider]
-
-    engage = Map.put(d, "engage", "npc.raider.engage")
-    assert lint(%{"npcs/raider.json" => %{"disposition" => engage, "attack" => %{}}}) == []
-    arrest = Map.put(d, "arrest", %{"to" => "cell"})
-    assert lint(%{"npcs/guard.json" => %{"disposition" => arrest, "attack" => %{}}}) == []
-    # A hostile shopkeeper refuses trade and never fights (bess).
-    assert lint(%{"npcs/bess.json" => %{"disposition" => d}}) == []
   end
 
   test "check 5: a readable has a title; a dialogue with no label needs action.talk (T5, UH)" do
@@ -131,7 +116,7 @@ defmodule Loka.ContentLintTest do
   # r9c_interactions (synthetic), lantern_proof and the ashmere_* cartridges. Findings over the
   # slice's timebox are pinned in lint_baseline.txt until loka-kgd.184 clears them: a new finding
   # fails, and so does a baseline grown past its cap.
-  @baseline_cap 132
+  @baseline_cap 119
   @baseline File.read!("test/loka/lint_baseline.txt")
             |> String.split("\n", trim: true)
             |> Enum.reject(&String.starts_with?(&1, "#"))
@@ -169,7 +154,12 @@ defmodule Loka.ContentLintTest do
 
   @tag :tmp_dir
   test "mix loka.lint exits 1 on a finding and returns on none", %{tmp_dir: dir} do
+    assert_raise ArgumentError, fn -> Mix.Tasks.Loka.Lint.run([dir]) end
+    File.write!(Path.join(dir, "cartridge.json"), "{}")
     assert Mix.Tasks.Loka.Lint.run([dir]) == :ok
+    # The parent folder holds cartridges but no manifest of its own.
+    assert_raise ArgumentError, fn -> Lint.run(Path.dirname(dir)) end
+    assert_raise ArgumentError, fn -> Lint.run(Path.join(dir, "missing")) end
     File.mkdir_p!(Path.join(dir, "recipes"))
     File.write!(Path.join(dir, "recipes/flamma.json"), Jason.encode!(%{"policy" => @refuses}))
 

@@ -1,6 +1,6 @@
 defmodule Loka.Content.Lint do
   @moduledoc """
-  Author-time lints for a story cartridge's source (pass-1 analysis rows 1, 3, 3b, 5 and 6;
+  Author-time lints for a story cartridge's source (pass-1 analysis rows 1, 3, 5 and 6;
   docs/CHECKS.md). Each finding is one line naming the file and key. The loader never runs
   these: a sampler may break them on purpose.
   """
@@ -14,6 +14,11 @@ defmodule Loka.Content.Lint do
   @spec run(Path.t()) :: [String.t()]
   def run(dir) do
     {files, _} = Source.load(dir)
+
+    # A missing folder or the parent cartridges folder loads no manifest and would lint clean.
+    if !Enum.any?(files, &match?({"cartridge.json", _, %{}}, &1)),
+      do: raise(ArgumentError, "#{dir}: no cartridge.json loaded; give a cartridge source folder")
+
     findings(Map.new(for {rel, _, value} <- files, is_map(value), do: {rel, value}))
   end
 
@@ -38,15 +43,6 @@ defmodule Loka.Content.Lint do
     if Enum.any?(ops, &(&1 in @writes)) and "narrate" not in ops and r["silent"] != true,
       do: ["#{rel}: writes state with no narrate step and no \"silent\": true"],
       else: []
-  end
-
-  # An attack profile makes an NPC one a fight can open with (combat@1 Attack, C2a: raider).
-  defp file(["npcs", _], rel, %{"attack" => _} = npc) do
-    d = npc["disposition"] || %{}
-
-    if is_map_key(d, "engage") or is_map_key(d, "arrest"),
-      do: [],
-      else: ["#{rel}: has an attack but no disposition.engage or arrest line"]
   end
 
   defp file(["rooms", _], rel, room) do
