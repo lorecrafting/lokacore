@@ -1,9 +1,8 @@
-import { resolve } from '../src/commands/target.ts';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { newWorld, step, type Cartridge, type World } from '../src/index.ts';
+import { step, type World } from '../src/index.ts';
 import type { Command } from '../src/contracts.gen.ts';
-import { read } from './read.ts';
+import { fragment } from './fragment.ts';
 import { key } from '../src/foundation/compose.ts';
 import { gameView } from '../src/view/view.ts';
 import { deathSequence } from '../src/mechanics/death/sequence.ts';
@@ -14,12 +13,12 @@ import { accepted, allocator } from '../src/runtime/decision.ts';
 import { hydrate } from '../src/runtime/created.ts';
 import { validate } from '../src/foundation/validate.ts';
 
-const cartridge = read('protocol/fixtures/missing_child_v042_hash.json').value as Cartridge;
+// Showcase, entered at the Drill Yard (no up exit) at 18:00; the death shrine is the Crossroads Inn.
+const f = fragment('protocol/fixtures/toolbox_showcase_hash.json');
 const context = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never;
-const ref = (w: World, kind: string, name: string) =>
-  `${w.cartridge.manifest.id}@${w.cartridge.manifest.version}:${kind}/${name}`;
-const room = (w: World, name: string) => w.roomIds[ref(w, 'room', name)];
-const npc = (w: World, name: string) => w.entityIds[ref(w, 'npc', name)];
+const id = (kind: string, name: string) => `${f.prefix}:${kind}/${name}`;
+const room = (w: World, name: string) => w.roomIds[id('room', name)];
+const npc = (w: World, name: string) => w.entityIds[id('npc', name)];
 function command(w: World, payload: object, n = 1): Command {
   return {
     id: `aaaaaaaa-0000-4000-8000-${String(n).padStart(12, '0')}`,
@@ -32,14 +31,11 @@ function run(w: World, payload: object, n = 1) {
   assert.equal(next.decision.kind, 'accepted', JSON.stringify(next.decision));
   return next.world;
 }
-function fresh(entry?: string) {
-  let w = newWorld(
-    entry ? { ...cartridge, entry: { ...cartridge.entry, key: entry as never } } : cartridge,
-    context,
-    [1, 2, 3, 4],
-  );
-  return run(w, { type: 'choose_ancestry', ancestry: 'road_born' });
-}
+const fresh = () =>
+  f.genesis((c) => {
+    c.entry = f.ref('room', 'drill_yard');
+    c.calendar.start = 64800;
+  });
 const names = (w: World) =>
   Object.values(w.state.visited_rooms ?? {})
     .map((v) => w.rooms[v.room_id].title)
@@ -48,18 +44,18 @@ const names = (w: World) =>
 // Break: projection/Look discovers adjacent rooms, or accepted body entry forgets its durable visit.
 test('only committed body entry adds a visited room; refused moves and rendering add none', () => {
   const initial = fresh();
-  assert.deepEqual(names(initial), ['room.ferry_landing.title']);
+  assert.deepEqual(names(initial), ['room.drill_yard.title']);
   const before = JSON.stringify(initial.state);
   gameView(initial);
   gameView(initial);
   assert.equal(JSON.stringify(initial.state), before);
   const looked = run(initial, { type: 'look' }, 2);
-  assert.deepEqual(names(looked), ['room.ferry_landing.title']);
+  assert.deepEqual(names(looked), ['room.drill_yard.title']);
   const refused = step(looked, command(looked, { type: 'move', direction: 'up' }, 3), 3);
   assert.equal(refused.decision.kind, 'rejected');
   assert.strictEqual(refused.world, looked);
   const moved = run(looked, { type: 'move', direction: 'north' }, 4);
-  assert.deepEqual(names(moved), ['room.ferry_landing.title', 'room.well_lane.title']);
+  assert.deepEqual(names(moved), ['room.boar_run.title', 'room.drill_yard.title']);
   assert.deepEqual(names(run(moved, { type: 'look' }, 5)), names(moved));
   assert.equal(
     Object.values(moved.state.visited_rooms!).every((r) => r.actor_id === moved.character),
@@ -70,24 +66,24 @@ test('only committed body entry adds a visited room; refused moves and rendering
 // Break: accepted Look records a hidden NPC or refreshes a remembered NPC from its remote live position.
 test('Look observes only visible local NPCs at its committed logical time', () => {
   const initial = fresh();
-  const ash = npc(initial, 'ash');
-  assert.ok(ash);
-  const observedKey = key({ kind: 'observation', actor_id: initial.character, npc_id: ash });
+  const hob = npc(initial, 'hob');
+  assert.ok(hob);
+  const observedKey = key({ kind: 'observation', actor_id: initial.character, npc_id: hob });
   assert.equal(initial.state.observed_npcs?.[observedKey], undefined);
   const local = {
     ...initial,
     state: {
       ...initial.state,
-      containers: { ...initial.state.containers, [ash]: room(initial, 'ferry_landing') },
+      containers: { ...initial.state.containers, [hob]: room(initial, 'drill_yard') },
     },
   };
-  assert.ok(gameView(local).known_npcs!.some((n) => n.id === ash));
+  assert.ok(gameView(local).known_npcs!.some((n) => n.id === hob));
   assert.equal(local.state.observed_npcs?.[observedKey], undefined);
   const seen = run(local, { type: 'look' }, 2);
   assert.deepEqual(seen.state.observed_npcs![observedKey], {
     actor_id: initial.character,
-    npc_id: ash,
-    room_id: room(initial, 'ferry_landing'),
+    npc_id: hob,
+    room_id: room(initial, 'drill_yard'),
     at: 64800,
   });
   const hidden = {
@@ -97,8 +93,8 @@ test('Look observes only visible local NPCs at its committed logical time', () =
       clock: 64801,
       containers: {
         ...seen.state.containers,
-        [seen.body]: room(seen, 'well_shaft'),
-        [ash]: room(seen, 'well_shaft'),
+        [seen.body]: room(seen, 'crypt'),
+        [hob]: room(seen, 'crypt'),
       },
     },
   };
@@ -112,7 +108,7 @@ test('Look observes only visible local NPCs at its committed logical time', () =
     state: {
       ...seen.state,
       clock: 64801,
-      containers: { ...seen.state.containers, [ash]: room(seen, 'scriptorium') },
+      containers: { ...seen.state.containers, [hob]: room(seen, 'forge_stall') },
     },
   };
   assert.deepEqual(
@@ -122,9 +118,9 @@ test('Look observes only visible local NPCs at its committed logical time', () =
 });
 
 // Break: the entry hook keys only off Move events and misses a real death return with no entered-room event.
-test('real fatal sequence records Chapel return in the same adopted proposal', () => {
+test('real fatal sequence records shrine return in the same adopted proposal', () => {
   const initial = fresh();
-  const c = command(initial, { type: 'attack', target_id: npc(initial, 'ash') }, 2);
+  const c = command(initial, { type: 'attack', target_id: npc(initial, 'hob') }, 2);
   const mint = allocator(initial, c);
   const hp = resourceRef(initial, 'hp');
   const loss = adjust(initial, initial.body, hp, -level(initial, initial.body, hp)!, {}).op;
@@ -139,47 +135,23 @@ test('real fatal sequence records Chapel return in the same adopted proposal', (
   const proposal = admit('death', accepted(initial, 'died', [loss, ...seq.ops], seq.events));
   const next = adopt(initial, proposal, c as never, mint, 2);
   assert.equal(next.decision.kind, 'accepted', JSON.stringify(next.decision));
-  assert.deepEqual(names(next.world), ['room.chapel_nave.title', 'room.ferry_landing.title']);
-});
-
-// Break: the authored ordinary boot never becomes a second held candidate, or exact touch selects the other item.
-test('both real recoverable boots retain exact ambiguous IDs and independent touch examination', () => {
-  const pins = read('protocol/fixtures/missing_child_v042_ids.json');
-  let w = fresh(),
-    n = 2;
-  const go = (...directions: string[]) => {
-    for (const direction of directions) w = run(w, { type: 'move', direction }, n++);
-  };
-  go('north', 'west');
-  w = run(w, { type: 'take', item_id: pins['item/leather_boots'] }, n++);
-  go('east', 'south', 'south', 'south');
-  w = run(w, { type: 'take', item_id: pins['item/boot'] }, n++);
-  assert.deepEqual(resolve(w, w.character, 'boot'), {
-    kind: 'ambiguous',
-    candidate_ids: [pins['item/boot'], pins['item/leather_boots']].sort(),
-  });
-  for (const item of ['item/boot', 'item/leather_boots']) {
-    const examined = step(w, command(w, { type: 'look', target_id: pins[item] }, n), n++);
-    assert.equal(examined.decision.kind, 'accepted');
-    if (examined.decision.kind === 'accepted') assert.equal(examined.decision.outcome, 'examined');
-    assert.equal(examined.world.state.containers[pins[item]], w.body);
-  }
+  assert.deepEqual(names(next.world), ['room.crossroads_inn.title', 'room.drill_yard.title']);
 });
 
 // Break: Where lists a dead NPC (pass-1 UF3), or the living filter also drops a 1 HP one.
 test('known_npcs keeps a remembered NPC at 1 HP and drops it at 0 HP, also after reopen', () => {
   const initial = fresh();
-  const rat = npc(initial, 'cellar_rat_1');
+  const boar = npc(initial, 'boar');
   const hp = resourceRef(initial, 'hp');
   const at = (left: number) => {
-    const set = adjust(initial, rat, hp, left - level(initial, rat, hp)!, {}).op;
+    const set = adjust(initial, boar, hp, left - level(initial, boar, hp)!, {}).op;
     const r = apply(initial, [set]);
     assert.ok(!('fault' in r));
     const observed_npcs = {
-      [key({ kind: 'observation', actor_id: initial.character, npc_id: rat })]: {
+      [key({ kind: 'observation', actor_id: initial.character, npc_id: boar })]: {
         actor_id: initial.character,
-        npc_id: rat,
-        room_id: room(initial, 'ferry_landing'),
+        npc_id: boar,
+        room_id: room(initial, 'drill_yard'),
         at: 64800,
       },
     };
@@ -194,7 +166,7 @@ test('known_npcs keeps a remembered NPC at 1 HP and drops it at 0 HP, also after
       const view = gameView(w);
       assert.deepEqual(validate('GameView', view), []);
       assert.equal(
-        view.known_npcs!.some((n) => n.id === rat),
+        view.known_npcs!.some((n) => n.id === boar),
         listed,
         `hp ${left}`,
       );

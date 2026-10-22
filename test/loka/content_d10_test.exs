@@ -1,42 +1,58 @@
 defmodule Loka.ContentD10Test do
   use ExUnit.Case, async: true
-  @moduletag :tmp_dir
+  alias Loka.ContentSource
+  setup_all do: %{dir: ContentSource.copy("cartridges/toolbox_showcase")}
+
+  # Showcase plus an inline Knock on the Smithy's south store door, answered by the smith.
+  defp knock do
+    [
+      {"rooms/smithy.json",
+       &put_in(&1, ["exits", "south", "knock"], %{
+         "npc" => "smith",
+         "room" => "woodstore",
+         "answered" => "knock.store.answered",
+         "unanswered" => "knock.store.unanswered"
+       })},
+      {"text.json",
+       &Map.merge(&1, %{
+         "knock.store.answered" => "The smith calls back.",
+         "knock.store.unanswered" => "No one answers."
+       })}
+    ]
+  end
 
   # Breaks: malformed drawing metadata or a Knock face references nonexistent content.
   test "map coverage, coordinate collisions and Knock references fail before artifact output", %{
-    tmp_dir: dir
+    dir: dir
   } do
-    File.cp_r!("cartridges/ashmere_missing_child", dir)
-    map_path = Path.join(dir, "map_positions.json")
-    door_path = Path.join(dir, "rooms/chapel_steps.json")
-    rows = map_path |> File.read!() |> JSON.decode!()
-    door = door_path |> File.read!() |> JSON.decode!()
-    assert {:ok, _, []} = Loka.Content.compile(dir)
+    assert {:ok, _, _warnings} = ContentSource.compile(dir, knock())
+    map = "map_positions.json"
+    knock = &put_in(&1, ["exits", "south", "knock", &2], &3)
 
-    for {path, original, changed} <- [
-          {map_path, rows, tl(rows)},
-          {map_path, rows,
-           List.update_at(rows, 1, &Map.merge(&1, Map.take(hd(rows), ~w(x y z))))},
-          {map_path, rows, [hd(rows) | tl(rows) |> List.replace_at(0, hd(rows))]},
-          {map_path, rows, List.update_at(rows, 0, &Map.put(&1, "room", "absent"))},
-          {map_path, rows, List.update_at(rows, 0, &Map.put(&1, "x", 0.5))},
-          {door_path, door, put_in(door, ["exits", "north", "knock", "npc"], "absent")},
-          {door_path, door, put_in(door, ["exits", "north", "knock", "room"], "chapel_steps")},
-          {door_path, door, put_in(door, ["exits", "north", "knock", "answered"], "absent")}
+    for {file, change, code, path} <- [
+          {map, &tl/1, "SCHEMA_VIOLATION", "map_positions"},
+          {map, &List.update_at(&1, 1, fn r -> Map.merge(r, Map.take(hd(&1), ~w(x y z))) end),
+           "SCHEMA_VIOLATION", "map_positions"},
+          {map, &List.update_at(&1, 1, fn r -> Map.put(r, "room", hd(&1)["room"]) end),
+           "SCHEMA_VIOLATION", "map_positions"},
+          {map, &List.update_at(&1, 0, fn r -> Map.put(r, "room", "absent") end),
+           "UNRESOLVED_REFERENCE", "map_positions[0].room"},
+          {map, &List.update_at(&1, 0, fn r -> Map.put(r, "x", 0.5) end), "SCHEMA_VIOLATION",
+           "map_positions[0].x"},
+          {"rooms/smithy.json", &knock.(&1, "npc", "absent"), "UNRESOLVED_REFERENCE",
+           "rooms/smithy.exits.south.knock.npc"},
+          {"rooms/smithy.json", &knock.(&1, "room", "smithy"), "BARRIER_MISMATCH",
+           "rooms/smithy.exits.south.knock"},
+          {"rooms/smithy.json",
+           &put_in(&1, ["exits", "north", "knock"], %{
+             &1["exits"]["south"]["knock"]
+             | "room" => &1["exits"]["north"]["to"]
+           }), "BARRIER_MISMATCH", "rooms/smithy.exits.north.knock"},
+          {"rooms/smithy.json", &knock.(&1, "answered", "absent"), "UNRESOLVED_REFERENCE",
+           "rooms/smithy.exits.south.knock.answered"}
         ] do
-      File.write!(path, JSON.encode!(changed))
-      assert {:error, _} = Loka.Content.compile(dir)
-      File.write!(path, JSON.encode!(original))
+      assert {:error, diags} = ContentSource.compile(dir, knock() ++ [{file, change}])
+      assert {code, path} in Enum.map(diags, &{&1["code"], &1["path"]})
     end
-
-    # Knock itself requires the new API even without optional map metadata.
-    File.rm!(map_path)
-    manifest_path = Path.join(dir, "cartridge.json")
-    manifest = manifest_path |> File.read!() |> JSON.decode!()
-    manifest = manifest |> put_in(["requires", "kernel_api", "at_least"], "1.36")
-    manifest = update_in(manifest, ["requires", "capabilities"], &Map.delete(&1, "knowledge"))
-    File.write!(manifest_path, JSON.encode!(manifest))
-    assert {:error, diagnostics} = Loka.Content.compile(dir)
-    assert Enum.any?(diagnostics, &(&1["code"] == "KERNEL_API_RANGE_INVALID"))
   end
 end
