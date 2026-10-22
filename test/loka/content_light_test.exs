@@ -4,7 +4,7 @@ defmodule Loka.ContentLightTest do
   @src "cartridges/toolbox_showcase"
   defp source(path), do: JSON.decode!(File.read!(Path.join(@src, path)))
 
-  # Break: compiled fuel drops or retunes authored metadata, the short supply stays short, or a
+  # Break: compiled fuel drops or retunes the source file fields, the short supply stays short, or a
   # dark description loses its text. Deleted: the chapter's torch tuning and Well Lane stair pins.
   test "authored lantern fuel and crypt darkness compile as authored", %{dir: dir} do
     assert {:ok, bytes, []} = Loka.ContentSource.compile(dir, [])
@@ -22,6 +22,7 @@ defmodule Loka.ContentLightTest do
 
     dark = source("rooms/crypt.json")["dark_description"]
     assert c["rooms"]["#{id}@#{version}:room/crypt"]["dark_description"] == dark
+    assert is_binary(c["text"][dark])
     assert c["text"][dark] == source("text.json")[dark]
   end
 
