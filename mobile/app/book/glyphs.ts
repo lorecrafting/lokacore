@@ -1,4 +1,4 @@
-// Placeholder status icon glyphs (BOOK-UI-COMPONENTS.md, Status icon) until the own icon set
+// Placeholder status icon glyphs (StatusIcons' doc comment) until the own icon set
 // (loka-x6t.63): one character per condition label TextKey, else one by polarity.
 // ponytail: text characters, not drawings; the icon set replaces this map.
 const byLabel: Record<string, string> = { 'condition.fed': '◡' };

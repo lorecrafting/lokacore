@@ -14,6 +14,7 @@ import ContentsView from './views/contents.json';
 import SettingsView from './views/settings.json';
 
 const meta: Meta = {
+  tags: ['!autodocs'],
   title: 'Pages/Sections',
   component: JournalPage,
   subcomponents: {

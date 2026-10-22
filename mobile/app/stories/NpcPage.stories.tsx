@@ -8,7 +8,12 @@ import NpcShopView from './views/npc-shop.json';
 import NpcServicesView from './views/npc-services.json';
 import NpcClosedView from './views/npc-closed.json';
 
-const meta: Meta = { title: 'Pages/NPC', component: NpcPage, subcomponents: { NpcDetail } };
+const meta: Meta = {
+  title: 'Pages/NPC',
+  component: NpcPage,
+  subcomponents: { NpcDetail },
+  tags: ['!autodocs'],
+};
 export default meta;
 
 export const Choice: StoryObj = {

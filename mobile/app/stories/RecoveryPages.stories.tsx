@@ -6,7 +6,7 @@ import { SaveError } from '../SaveError.tsx';
 import { pageStory } from './screen.tsx';
 import firstRoom from './views/room-first.json';
 
-const meta: Meta = { title: 'Pages/Recovery', component: SaveError };
+const meta: Meta = { title: 'Pages/Recovery', component: SaveError, tags: ['!autodocs'] };
 export default meta;
 const failed = (
   kind: 'unsupported_save_format' | 'save_corrupt' | 'pinned_release_missing',

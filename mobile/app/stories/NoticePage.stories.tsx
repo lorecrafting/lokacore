@@ -6,6 +6,7 @@ import { pageStory } from './screen.tsx';
 import NoticeReadView from './views/notice-read.json';
 
 const meta: Meta = {
+  tags: ['!autodocs'],
   title: 'Pages/Notices',
   component: NoticePage,
 };

@@ -175,7 +175,7 @@ export const pools = (rs?: readonly Pool[]) => {
   return shown?.length ? shown : undefined;
 };
 
-// The sky as one glyph (BOOK-UI-COMPONENTS.md, Status line): the sun by its phase while it is up,
+// The sky as one glyph (StatusLine draws it): the sun by its phase while it is up,
 // the moon by its phase at night; undefined for any other phase, so the earthly branch shows.
 // ☀ carries U+FE0E so no platform draws it as an emoji. Ink is the dark side of the moon: ○ full,
 // ● new; ☽ ◐ wax lit on the right, ◑ ☾ wane lit on the left.

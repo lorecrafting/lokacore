@@ -25,6 +25,7 @@ const readings = {
 };
 
 const preview: Preview = {
+  tags: ['autodocs'], // each component's doc comment on its Docs page (BOOK-UI-COMPONENTS.md, Component catalogue)
   globalTypes: {
     palette: {
       description: 'Book palette (tokens.ts color)',

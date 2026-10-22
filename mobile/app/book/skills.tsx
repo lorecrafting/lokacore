@@ -13,6 +13,11 @@ import type { Button } from './presenter.ts';
 const learned = (s: NonNullable<GameView['skills']>[number], text: (key: string) => string) =>
   s.qualified ? 'learned' : `learned, unqualified; ${text(s.requirement)}`;
 
+/**
+ * The Character page's topics, attributes and skills.
+ * - Use: CharacterPage only.
+ * - Story: SectionPages.stories.tsx
+ */
 export function SkillDetails(p: { view?: GameView; text: (key: string) => string }) {
   const c = usePalette();
   const t = useType();
@@ -40,8 +45,12 @@ export function SkillDetails(p: { view?: GameView; text: (key: string) => string
   );
 }
 
-// Homestead hs-14 (book-ui.md Skill tree details): each profession in first-listed order, then its
-// acquired boxes as body text and its unacquired boxes as a Note (locked or not learned).
+/**
+ * Each profession in first-listed order, acquired boxes as body text, unacquired as a Note
+ * (book-ui.md, Skill tree details).
+ * - Use: CharacterPage only.
+ * - Story: SectionPages.stories.tsx
+ */
 export function Professions(p: { view?: GameView; text: (key: string) => string }) {
   const c = usePalette();
   const t = useType();
@@ -75,8 +84,13 @@ export const levelLine = (l: Levelling) => `Level ${l.level}${points(l.unspent)}
 export const xpLine = (l: Levelling) =>
   `xp  ${l.experience}${l.next === undefined ? '' : ` / ${l.next}`}`;
 
-/** The Raise cards, the Character page's last block, while raise_attribute is offered; a pending
- * save shows on the status line (Book.tsx), as on every page but the ancestry picker. */
+/**
+ * The Raise cards, one per authored attribute, the Character page's last block (book-ui.md,
+ * Levelling details).
+ * - Use: while raise_attribute is offered.
+ * - Rules: a pending save shows on the status line.
+ * - Story: SectionPages.stories.tsx
+ */
 export function RaiseCards(p: { buttons?: Button[]; press?: (b: Button) => void }) {
   return (
     <Cards>
@@ -89,6 +103,11 @@ export function RaiseCards(p: { buttons?: Button[]; press?: (b: Button) => void 
   );
 }
 
+/**
+ * An item's projected stats on its detail page.
+ * - Use: ThingPage only.
+ * - Story: ItemPage.stories.tsx
+ */
 export function ItemDetails(p: { thing?: Thing; text: (key: string) => string }) {
   const c = usePalette();
   const t = useType();

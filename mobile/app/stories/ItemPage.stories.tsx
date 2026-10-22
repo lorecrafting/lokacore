@@ -9,6 +9,7 @@ import ItemContainerView from './views/item-container.json';
 import ItemFuelView from './views/item-fuel.json';
 
 const meta: Meta = {
+  tags: ['!autodocs'],
   title: 'Pages/Item',
   component: Item,
   subcomponents: { ThingPage, ItemDetails },

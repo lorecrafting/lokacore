@@ -1,4 +1,4 @@
-// ContinueButton: a scene or chapter continuation (BOOK-UI-COMPONENTS.md, Continue button).
+// ContinueButton: a scene or chapter continuation (ContinueButton's doc comment).
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { expect, fn } from 'storybook/test';
 import { ContinueButton } from '../book/actions.tsx';

@@ -1,3 +1,4 @@
+// size: allow 350, the exported components' doc comments (BOOK-UI-COMPONENTS.md, Component catalogue)
 // The book's page shell, the room page and their shared controls (the Contents sections:
 // sections.tsx; the thing page: Menu.tsx; the room's action list: place.tsx; the title's arriving
 // focus: title.ts).
@@ -27,6 +28,12 @@ export type { Thing } from './model.ts';
 export const band = (c: Palette, tone: Pool['tone']): string =>
   ({ normal: c.fg, warning: c.warning, danger: c.danger })[tone];
 
+/**
+ * A text pressable whose hit area bleeds onto the paper around it; the only component that bleeds
+ * (BOOK-UI-COMPONENTS.md, Where each fact lives).
+ * - Use: entity lines, verb lines, the room title, the status position.
+ * - Story: VerbLine.stories.tsx
+ */
 export function Tap(p: {
   label: string;
   onPress: () => void;
@@ -48,8 +55,15 @@ export function Tap(p: {
   );
 }
 
-// The running head: the current quest's projected journal text (BOOK-UI-COMPONENTS.md, Page).
 // ponytail: the first unfinished quest in journal order; several at once await a GameView answer.
+/**
+ * The current quest's projected journal text, above every page but Journal.
+ * - Use: Body only.
+ * - Rules: the first quest in journal order that is active or objectives_complete and has journal
+ *   text; none when no quest qualifies. Not pressable; wraps, never cuts authored words.
+ * - States: one line; long; none.
+ * - Story: Page.stories.tsx
+ */
 export function RunningHead({ view, text }: { view: GameView; text: Say }) {
   const c = usePalette();
   const t = useType();
@@ -71,8 +85,14 @@ export function RunningHead({ view, text }: { view: GameView; text: Say }) {
   );
 }
 
-// Local navigation that is not an offered action (BOOK-UI-COMPONENTS.md, Control).
-// `onInk`: the label in `bg`, for a Control on an `fg` fill (the tip's Got it).
+/**
+ * Local navigation that is not an offered action (Leave, Back to ..., Close, Got it, Start over).
+ * - Use: PageFoot returns and local buttons.
+ * - Rules: Start over is a Control wherever it appears: its confirmation carries the weight, never
+ *   `action` or `danger`. `onInk` sets the label in `bg` on an ink fill.
+ * - States: enabled; disabled.
+ * - Story: Control.stories.tsx
+ */
 export function Control(p: {
   label: (typeof LABEL)[keyof typeof LABEL];
   onPress: () => void;
@@ -102,8 +122,14 @@ export function Control(p: {
   );
 }
 
-// The place: its title (a tap looks), description, who and what is here, its own actions (an
-// offered quest among them) and the log. NPCs open full details, as items do.
+/**
+ * The place: fixed title, prose, asides, exit warnings, entity lines, sense cues, the storylet
+ * card, verb lines, door cards, the log, then the Word block (book-ui.md, World and status entry).
+ * - Use: the World page.
+ * - Rules: the title is the Look tap, named `<title>, look`; a new paragraph at every blank line
+ *   of the authored text.
+ * - Story: RoomPage.stories.tsx
+ */
 export function RoomPage(p: {
   view: GameView;
   text: Say;
@@ -192,8 +218,15 @@ const storylet = (
   );
 };
 
-// One shell for every page (BOOK-UI-COMPONENTS.md, Page): the title (fixed: the room's, outside
-// the scroll), the blocks, and the page foot.
+/**
+ * One shell for every page: the title, the blocks, and the PageFoot.
+ * - Use: every page.
+ * - Rules: a run of rows of one kind is one block; a heading is its own block. The title is the
+ *   page header with the arriving focus; without one, the first block takes it. The room's fixed
+ *   title is the only pressable title. A page that grows at the end scrolls to its end.
+ * - States: scrolling title; fixed title; no title; centred (no game behind it).
+ * - Story: Page.stories.tsx
+ */
 export function Page(p: {
   title?: string;
   fixedTitle?: boolean;
@@ -260,7 +293,13 @@ function Title(p: { title: string; fixed?: boolean; onPress?: () => void }) {
   );
 }
 
-// The page's local returns, nearest first (BOOK-UI-COMPONENTS.md, PageFoot).
+/**
+ * The page's local returns, nearest first: Controls centred under a hairline.
+ * - Use: every page with a return; outside the scroll, above the status line.
+ * - Rules: wraps onto a second row when the Reading size needs it.
+ * - States: one return; two (nested item).
+ * - Story: PageFoot.stories.tsx
+ */
 export function PageFoot({ children }: { children: ReactNode }) {
   const c = usePalette();
   return (
@@ -283,7 +322,11 @@ export function PageFoot({ children }: { children: ReactNode }) {
   );
 }
 
-// A heading inside a page (Inside, Held, Worn, Where).
+/**
+ * A heading inside a page (Inside, Held, Worn, Where, profession titles).
+ * - Use: any section heading; never a styled Text.
+ * - Story: Page.stories.tsx
+ */
 export function SectionTitle({ children }: { children: ReactNode }) {
   return (
     <Text accessibilityRole="header" style={{ color: usePalette().fg, ...type.sectionTitle }}>

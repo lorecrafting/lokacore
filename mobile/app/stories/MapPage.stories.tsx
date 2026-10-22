@@ -7,7 +7,12 @@ import MapTwoLevelsView from './views/map-two-levels.json';
 import MapBarredView from './views/map-barred.json';
 import MapWhereView from './views/map-where.json';
 
-const meta: Meta = { title: 'Pages/Map', component: MapPage, subcomponents: { DiscoveredMap } };
+const meta: Meta = {
+  title: 'Pages/Map',
+  component: MapPage,
+  subcomponents: { DiscoveredMap },
+  tags: ['!autodocs'],
+};
 export default meta;
 
 export const DiscoveredTwoLevels: StoryObj = {

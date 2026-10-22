@@ -37,7 +37,7 @@ export const rendered = (
     view,
   ).map((line) => liquidLine(line, text));
 
-// A refused line (a barred exit) leads with its reason tag (BOOK-UI-COMPONENTS.md, Log line).
+// A refused line (a barred exit) leads with its reason tag (LogLines's doc comment).
 export type DetailLine =
   string | { text: string; event: true } | { kind: 'refused'; reason: string; text: string };
 export type Logs = {

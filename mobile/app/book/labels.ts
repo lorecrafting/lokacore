@@ -1,4 +1,4 @@
-// The Book's own control and section words (docs/BOOK-UI-COMPONENTS.md, Control and Page rows):
+// The Book's own control and section words (Control's and Page's doc comments):
 // the same in every cartridge, so not text keys, and not kernel codes (words.ts). Components, e2e
 // tests, the walkthrough and story routes all name a control through this table; it imports
 // nothing, so the e2e runner can load it. lint/rules/mobile-book-labels.yml lists these words too.

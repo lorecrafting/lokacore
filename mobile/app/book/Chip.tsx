@@ -1,4 +1,4 @@
-// A word chip (BOOK-UI-COMPONENTS.md, Chip): one word of the World page's Word block as a pill.
+// A word chip: one word of the World page's Word block as a pill.
 import type { ReactNode } from 'react';
 import { Pressable, View } from 'react-native';
 import { Text } from './Text.tsx';
@@ -8,8 +8,15 @@ import { usePalette, useType } from './palette.ts';
 import { steps, type Reading } from './reading.ts';
 import { opacity, radius, size, space } from './tokens.ts';
 
-// No onPress is the unavailable form (its reason is a line under the row); pending is pressed.
-// A defined chosen makes it one of a radio row (a setting), filled in ink when chosen.
+/**
+ * One word of the World page's Word block as a pill (book-ui.md, Word bar).
+ * - Use: Word block words; a radio row setting (Reading size).
+ * - Rules: a row wraps, never truncates. Name: the word, then how it is spoken (`ward, say`,
+ *   `ward, whisper to the elder`). Unavailable: not pressable, its reason a `word, cast: reason`
+ *   Note under the row (the Action card's form); chosen: role radio, checked.
+ * - States: available; unavailable; pending; chosen.
+ * - Story: Chip.stories.tsx
+ */
 export function Chip(p: {
   word: string;
   label: string;
@@ -48,7 +55,11 @@ export function Chip(p: {
   );
 }
 
-// A titled row of chips, centred and wrapping (never truncated); reasons are lines under it.
+/**
+ * A titled row of chips, centred and wrapping, its reasons as Notes under it.
+ * - Use: each Word block row (Say, Whisper to <name>, Shout, Cast).
+ * - Story: WordBar.stories.tsx
+ */
 export function Row(p: { title: string; children: ReactNode[]; reasons?: string[] }) {
   if (!p.children.length) return null;
   return (
@@ -72,6 +83,11 @@ const stepWord = {
   large: LABEL.readingLarge,
   larger: LABEL.readingLarger,
 };
+/**
+ * The Reading size setting: one radio Chip per step.
+ * - Use: Settings, first.
+ * - Story: Chip.stories.tsx
+ */
 export const ReadingSize = (p: Reading) => (
   <View accessibilityRole="radiogroup" accessibilityLabel={LABEL.readingSize}>
     <Row title={LABEL.readingSize}>

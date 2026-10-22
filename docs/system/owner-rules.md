@@ -11,6 +11,7 @@ and not repeated here.
 - Chapter 1 proof order: E1 coverage complete, E2, UI polish phase, release-candidate certification, then E3 ([record](../decisions/owner-decision-chapter-one-polish-order-2026-10-07.md)).
 
 - Book design foundation: the Chapter 1 mock's base look with only the page curl (one Skia shader for web and phone) and paper sound; day and night follow in-game time (no override for now) ([record](../decisions/owner-decision-design-foundation-2026-10-07.md)).
+- Each Book component's spec is a doc comment on its export, the catalogue an index of them, both kept in step by `catalogue.test.ts` ([record](../decisions/owner-decision-component-docs-in-code-2026-10-22.md)).
 
 - Beads may include concrete, evidence-linked audit follow-up tasks alongside all 33 Chapter 1 slices; the PM owns tracker writes and reviewed merges own closure ([record](../decisions/owner-decision-beads-audit-followups-2026-10-06.md)).
 

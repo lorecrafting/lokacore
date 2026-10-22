@@ -1,4 +1,4 @@
-// PageFoot: the page's local returns, nearest first (BOOK-UI-COMPONENTS.md, PageFoot).
+// PageFoot: the page's local returns, nearest first (PageFoot's doc comment).
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { expect, fn } from 'storybook/test';
 import { Control, PageFoot } from '../book/pages.tsx';

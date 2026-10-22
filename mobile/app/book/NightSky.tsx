@@ -1,7 +1,4 @@
-// The night sky over the page (BOOK-UI-COMPONENTS.md, Night sky): the Chapter 1 mock's moonlit
-// page, a still field of faint stars and, now and then, one shooting star streaking down-left.
-// Over everything, taking no touch or focus, like PageTurn's leaving leaf. Reduced motion keeps the
-// stars and skips the shooting star. RN Animated only (Footer's precedent), so node tests load it.
+// The night sky over the page. RN Animated only (Footer's precedent), so node tests load it.
 import { useEffect, useState } from 'react';
 import { Animated, Easing, View } from 'react-native';
 import { useReducedMotion } from './fade.ts';
@@ -74,6 +71,14 @@ const starViews = field.map((s, i) => (
   />
 ));
 
+/**
+ * Faint fixed stars and, on average every 9 s, one shooting star over the whole Book.
+ * - Use: while the shown palette is `dark`.
+ * - Rules: decoration, never information; takes no touch, focus or screen-reader node. The star
+ *   field is a drawing: the same sky every night.
+ * - States: night; reduced motion (stars only).
+ * - Story: NightSky.stories.tsx
+ */
 export function NightSky() {
   const reduced = useReducedMotion();
   const [box, setBox] = useState({ width: 0, height: 0 });

@@ -1,4 +1,4 @@
-// Control: local navigation that is not an offered action (BOOK-UI-COMPONENTS.md, Control).
+// Control: local navigation that is not an offered action (Control's doc comment).
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { expect, fn } from 'storybook/test';
 import { Control } from '../book/pages.tsx';

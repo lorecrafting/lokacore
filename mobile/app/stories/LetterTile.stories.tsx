@@ -1,4 +1,4 @@
-// LetterTile: one riddle letter (BOOK-UI-COMPONENTS.md, Letter tile); the bank is Riddle.stories.
+// LetterTile: one riddle letter (LetterTile's doc comment); the bank is Riddle.stories.
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { expect, fn } from 'storybook/test';
 import { LetterTile } from '../book/Riddle.tsx';

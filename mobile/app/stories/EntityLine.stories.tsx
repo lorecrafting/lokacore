@@ -1,4 +1,4 @@
-// EntityLine: a row that opens a detail (BOOK-UI-COMPONENTS.md, Entity line).
+// EntityLine: a row that opens a detail (EntityLine's doc comment).
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { View } from 'react-native';
 import { expect, fn } from 'storybook/test';

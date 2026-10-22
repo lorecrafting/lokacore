@@ -16,6 +16,7 @@ import voices from '../../../cartridges/voices_sampler/text.json';
 import remarks from '../../../cartridges/remarks_sampler/text.json';
 
 const meta: Meta = {
+  tags: ['!autodocs'],
   title: 'Pages/Room',
   component: RoomPage,
   subcomponents: { Body, NoticeEntries, Asides: AsideLines },

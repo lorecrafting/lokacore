@@ -1,4 +1,4 @@
-// The status line under the footer (BOOK-UI-COMPONENTS.md, Status line).
+// The status line under the footer.
 import type { ReactElement } from 'react';
 import { Pressable, View } from 'react-native';
 import { Text } from './Text.tsx';
@@ -60,6 +60,20 @@ const skyText = (p: StatusProps) =>
     .filter(Boolean)
     .join(' ');
 
+/**
+ * One centred line: the sky glyph and weather, position and bleeding, then hp, ma and mv
+ * (book-ui.md, World and status entry).
+ * - Use: under the footer on every page.
+ * - Rules: never wraps: too wide, position and bleeding end in an ellipsis, the longer giving up
+ *   more; the glyph and pools never shrink. Pools are separated by an en space as text, never a
+ *   margin, so the shown words lead the button's name. The sky glyphs are model.ts `sky`: ink is
+ *   the moon's dark side, waxing lit on the right; the glyph's name is the time in words (`day 3,
+ *   18:05, dusk, waxing crescent moon`). Position and pools are controls named by the
+ *   label-in-name rule.
+ * - States: enabled; weather; locked (not pressable); pending ("save not confirmed" under the
+ *   line); resource tones normal, warning, danger; only pennies (the button says `character`).
+ * - Story: StatusLine.stories.tsx
+ */
 export function StatusLine(p: StatusProps) {
   const c = usePalette();
   const items = [

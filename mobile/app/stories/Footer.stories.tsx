@@ -1,4 +1,4 @@
-// Footer: the map joystick between two hairline rules (BOOK-UI-COMPONENTS.md, Footer).
+// Footer: the map joystick between two hairline rules (Footer's doc comment).
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { expect, fireEvent, fn, waitFor } from 'storybook/test';
 import { Footer } from '../book/Footer.tsx';

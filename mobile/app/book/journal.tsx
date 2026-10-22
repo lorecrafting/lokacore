@@ -18,6 +18,14 @@ type JournalProps = Parameters<typeof LoreDetails>[0] & {
   chronicle: () => readonly ChronicleDay[];
 };
 
+/**
+ * The Journal: projected quests, the lore, then the Chronicle (book-ui.md, Chronicle details).
+ * - Use: the Contents Journal section; it shows no running head (it lists the same text).
+ * - Rules: Chronicle days are AwayRecap headings "Day N", the latest day open; its look is approved
+ *   by the designer (loka-kgd.143).
+ * - States: one day; two days, earlier collapsed, a milestone.
+ * - Story: SectionPages.stories.tsx
+ */
 export function JournalPage(p: JournalProps) {
   const { view, text } = p;
   const c = usePalette();

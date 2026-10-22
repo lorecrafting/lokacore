@@ -54,7 +54,7 @@ export const ChapterToSettings: StoryObj<typeof meta> = {
   // Continue curls forward to Settings, the arriving page live at once; Start over curls back. A
   // turn with no curl (no picture in time) fails the canvas wait.
   play: async ({ canvas, canvasElement, userEvent }) => {
-    // PageTurn prepares the page's picture before the turn (BOOK-UI-COMPONENTS.md, Input): wait for
+    // PageTurn prepares the page's picture before the turn (BOOK-UI-COMPONENTS.md#page-turn, Input): wait for
     // its own warm-up, as a click during it shares the decoder and misses motion.quick under load.
     await waitFor(() => expect(decodes.length).toBeGreaterThan(0), { timeout: 3000 });
     await Promise.allSettled(decodes);

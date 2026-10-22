@@ -1,5 +1,5 @@
 // StatusIcons: the round, graphic-only condition icons above the status line
-// (BOOK-UI-COMPONENTS.md, Status icon). Time 720 in every story.
+// (StatusIcons' doc comment). Time 720 in every story.
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { useState } from 'react';
 import { expect, fireEvent, fn, waitFor } from 'storybook/test';

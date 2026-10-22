@@ -1,4 +1,4 @@
-// LogLines: the event log and detail history (BOOK-UI-COMPONENTS.md, Log line).
+// LogLines: the event log and detail history (LogLines's doc comment).
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { expect } from 'storybook/test';
 import { LogLines } from '../book/lines.tsx';

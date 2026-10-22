@@ -41,6 +41,11 @@ type BodyProps = {
 // The NPC page (this visit, by identity) in conversation; BookView holds it outside PageTurn's remount.
 type Talk = { talkingOn?: Page; talkOn: (page?: Page) => void };
 
+/**
+ * The page under the running head: picks the page for the current route and detail stack.
+ * - Use: BookView only.
+ * - Story: RoomPage.stories.tsx
+ */
 export function Body(p: BodyProps & Talk) {
   const c = usePalette();
   const t = useType();

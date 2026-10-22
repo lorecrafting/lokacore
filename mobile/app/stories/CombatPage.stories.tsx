@@ -6,7 +6,7 @@ import CombatOneFoeView from './views/combat-one-foe.json';
 import CombatPackView from './views/combat-pack.json';
 import CombatBleedingView from './views/combat-bleeding.json';
 
-const meta: Meta = { title: 'Pages/Combat', component: Combat };
+const meta: Meta = { title: 'Pages/Combat', component: Combat, tags: ['!autodocs'] };
 export default meta;
 
 export const OneFoe: StoryObj = {

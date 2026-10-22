@@ -8,6 +8,7 @@ import { pageStory } from './screen.tsx';
 import SceneView from './views/scene.json';
 
 const meta: Meta = {
+  tags: ['!autodocs'],
   title: 'Pages/Chapter and scene',
   component: ChapterPage,
   subcomponents: { ScenePage },

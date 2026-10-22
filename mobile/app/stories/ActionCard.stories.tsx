@@ -1,4 +1,4 @@
-// ActionCard: a detail page's offered action or dialogue choice (BOOK-UI-COMPONENTS.md, Action card).
+// ActionCard: a detail page's offered action or dialogue choice (ActionCard's doc comment).
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import type { ComponentProps, ReactElement } from 'react';
 import { expect, fn } from 'storybook/test';

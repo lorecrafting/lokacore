@@ -44,7 +44,16 @@ const keys: Record<string, string> = {
 };
 
 // ponytail: react-native-web's announceForAccessibility is a no-op; a web build needs a live region.
-// A walk keeps the action/context from `at` (drag start); the presenter revalidates its token.
+/**
+ * The map joystick between two hairline rules (book-ui.md, Minimap, map and presentation
+ * controls).
+ * - Use: under every page.
+ * - Rules: press to zoom, drag toward a path to light it, release to walk, drag back to the middle
+ *   to cancel; a tap opens the Map page. A walk keeps the action and context from the drag start;
+ *   the presenter revalidates its token.
+ * - States: at rest; held.
+ * - Story: Footer.stories.tsx
+ */
 export function Footer(p: Props) {
   const c = usePalette();
   const [lit, setLit] = useState<string | null>(null);
@@ -140,7 +149,11 @@ function responder(
   return PanResponder.create(gesture({ ...u, zoom: to, knob: (x, y) => setKnob({ x, y }) }));
 }
 
-// The first-run tip: an `fg` bubble, its words in `bg`, Got it right-aligned inside it.
+/**
+ * The first-run tip: an ink bubble with Got it.
+ * - Use: first run only.
+ * - Story: Tip.stories.tsx
+ */
 export function Tip({ dismiss }: { dismiss: () => void }) {
   const c = usePalette();
   return (

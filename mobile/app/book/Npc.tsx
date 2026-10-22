@@ -73,6 +73,15 @@ type NpcProps = {
   open: (id: string) => void;
 };
 
+/**
+ * A person's detail and conversation in the detail-page order (book-ui.md, NPC dialogue and
+ * action details).
+ * - Use: an NPC route.
+ * - Rules: choices and services as Action cards, the conversation log, Controls in the PageFoot.
+ *   Outside a conversation, earlier history is hidden.
+ * - States: choice; shop; services; closed conversation.
+ * - Story: NpcPage.stories.tsx
+ */
 export function NpcPage(p: NpcProps) {
   const [c, t] = [usePalette(), useType()];
   const choice =
@@ -230,6 +239,11 @@ function ServiceOptions(p: NpcProps & { actions: Button[] }) {
 // Per page visit: how many history lines came before it or before its last Leave the conversation.
 const past = new WeakMap<object, number>();
 
+/**
+ * The NPC route: gathers the person's offers and history, then draws NpcPage.
+ * - Use: Body only.
+ * - Story: NpcPage.stories.tsx
+ */
 export function NpcDetail(p: {
   screen: Screen;
   g: ReturnType<typeof group>;

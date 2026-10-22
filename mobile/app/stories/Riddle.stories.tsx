@@ -1,4 +1,4 @@
-// Riddle: the letter bank over one local answer buffer (BOOK-UI-COMPONENTS.md, Letter tile).
+// Riddle: the letter bank over one local answer buffer (LetterTile's doc comment).
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { expect, fn } from 'storybook/test';
 import { Riddle } from '../book/Riddle.tsx';

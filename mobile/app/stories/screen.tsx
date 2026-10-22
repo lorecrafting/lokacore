@@ -80,6 +80,8 @@ const readingOf = (g: unknown) => {
   } as const;
 };
 
+// Page stories carry `tags: ['!autodocs']` inline (the CSF indexer reads only a literal array): a Docs
+// page would mount every page's BookView at once.
 export const pageStory = (
   saved: unknown,
   shell?: Partial<Screen>,
