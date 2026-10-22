@@ -6,35 +6,32 @@ defmodule Loka.PatrolSource do
 
   def copy do
     dir = Loka.ContentSource.copy("cartridges/cellar_sampler")
-    put = fn rel, value -> File.write!(Path.join(dir, rel), JSON.encode!(value)) end
-    edit = fn rel, f -> put.(rel, f.(JSON.decode!(File.read!(Path.join(dir, rel))))) end
+    rooms(dir)
+    patrol(dir)
+    dir
+  end
 
-    choice = fn transition ->
-      %{
-        "label" => "watch.#{transition}",
-        "narration" => "watch.#{transition}",
-        "patrol" => %{"npc" => "leader", "quest" => "watch_rounds", "transition" => transition}
-      }
-    end
-
-    edit.("cartridge.json", fn c ->
+  defp rooms(dir) do
+    edit(dir, "cartridge.json", fn c ->
       c
       |> put_in(["requires", "kernel_api", "at_least"], "1.22")
       |> put_in(["requires", "capabilities", "patrol"], 1)
     end)
 
-    edit.("rooms/north_gate.json", &put_in(&1, ["exits", "east"], %{"to" => "watch_post"}))
-    edit.("rooms/village_green.json", &put_in(&1, ["exits", "east"], %{"to" => "east_gate"}))
+    edit(dir, "rooms/north_gate.json", &put_in(&1, ["exits", "east"], %{"to" => "watch_post"}))
+    edit(dir, "rooms/village_green.json", &put_in(&1, ["exits", "east"], %{"to" => "east_gate"}))
 
     for {key, back} <- [{"watch_post", "north_gate"}, {"east_gate", "village_green"}] do
-      put.("rooms/#{key}.json", %{
+      put(dir, "rooms/#{key}.json", %{
         "title" => "room.#{key}.title",
         "description" => "room.#{key}.description",
         "exits" => %{"west" => %{"to" => back}}
       })
     end
+  end
 
-    put.("npcs/tobin.json", %{
+  defp patrol(dir) do
+    put(dir, "npcs/tobin.json", %{
       "keywords" => ["tobin"],
       "short" => "npc.tobin.short",
       "room_line" => "npc.tobin.room",
@@ -42,7 +39,7 @@ defmodule Loka.PatrolSource do
       "room" => "watch_post"
     })
 
-    edit.("facts.json", fn f ->
+    edit(dir, "facts.json", fn f ->
       put_in(f, ["facts", "watch_gate_trusts_player"], %{
         "version" => 1,
         "value_type" => %{"type" => "bool", "default" => false},
@@ -51,7 +48,7 @@ defmodule Loka.PatrolSource do
       })
     end)
 
-    put.("quests/watch_rounds.json", %{
+    put(dir, "quests/watch_rounds.json", %{
       "title" => "quest.watch_rounds.title",
       "objective" => %{"evidence" => "patrol"},
       "patrol" => %{
@@ -67,17 +64,21 @@ defmodule Loka.PatrolSource do
         Map.new(~w(active objectives_met resolved failed abandoned), &{&1, "watch.completed"})
     })
 
-    put.("dialogues/tobin_watch.json", %{
+    dialogue(dir)
+  end
+
+  defp dialogue(dir) do
+    put(dir, "dialogues/tobin_watch.json", %{
       "npc" => "tobin",
       "roles" => %{"leader" => %{"role" => "npc", "npc" => "tobin"}},
       "policy" => %{"policy_version" => 1, "root" => %{"op" => "all", "items" => []}},
       "prompt" => "watch.prompt",
       "label" => "watch.talk",
       "choices" => %{
-        "start" => Map.put(choice.("start"), "accept", "watch_rounds"),
-        "continue" => choice.("continue"),
-        "rejoin" => choice.("rejoin"),
-        "restart" => choice.("restart")
+        "start" => Map.put(choice("start"), "accept", "watch_rounds"),
+        "continue" => choice("continue"),
+        "rejoin" => choice("rejoin"),
+        "restart" => choice("restart")
       }
     })
 
@@ -88,7 +89,17 @@ defmodule Loka.PatrolSource do
          room.east_gate.title room.east_gate.description)
 
     text = Map.put(Map.new(keys, &{&1, &1}), "npc.tobin.room", "[Tobin] keeps watch here.")
-    edit.("text.json", &Map.merge(&1, text))
-    dir
+    edit(dir, "text.json", &Map.merge(&1, text))
   end
+
+  defp choice(transition) do
+    %{
+      "label" => "watch.#{transition}",
+      "narration" => "watch.#{transition}",
+      "patrol" => %{"npc" => "leader", "quest" => "watch_rounds", "transition" => transition}
+    }
+  end
+
+  defp put(dir, rel, value), do: File.write!(Path.join(dir, rel), JSON.encode!(value))
+  defp edit(dir, rel, f), do: put(dir, rel, f.(JSON.decode!(File.read!(Path.join(dir, rel)))))
 end
