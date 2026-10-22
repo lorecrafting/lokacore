@@ -64,7 +64,8 @@ test('a ride spends no MV and enters the body into the destination', () => {
   );
   assert.equal(gameView(after).resources!.find((r) => r.resource.key === 'mv')!.current, mv);
 });
-// Breaks: missing fare admission or endpoint/quote/client-waiver substitution allows free or remote passage.
+// Breaks: missing fare admission, standing check or endpoint/quote/client-waiver substitution allows
+// free, seated or remote passage.
 test('unaffordable and forged endpoint offers refuse atomically', () => {
   const w = fresh(startCoins(1));
   const notice = gameView(w).notices!.find((n) => n.transport)!;
@@ -78,6 +79,10 @@ test('unaffordable and forged endpoint offers refuse atomically', () => {
     assert.equal(r.decision.kind, 'rejected');
     assert.equal(r.world, funded);
   }
+  const lying = accepted(run(fresh(armed), { type: 'rest' }));
+  const seated = ride(lying, 'north_road', 2);
+  assert.equal(seated.decision.kind, 'rejected', 'a resting rider must stand first');
+  assert.equal(seated.world, lying);
   assert.equal(
     identify('transport-test', funded.character, {
       invocation_id: 'dddddddd-0000-4000-8000-000000000001',
