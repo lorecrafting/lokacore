@@ -10,6 +10,7 @@ of closed work are deleted once their lesson is folded, and linked by permalink
 Reviews before R2 live in the [legacy repository](https://github.com/lorecrafting/lokacore-v2-legacy)
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
+- [Review: pack of one Attack narration (loka-kgd.187, PR #427)](2026-10-22-pack-sole-narration-review.md): **APPROVE WITH NOTES**
 - [Review: Retire Ashmere 2 Z, final deletion (loka-4hik.29)](2026-10-21-retire-ashmere-2-z-review.md): **APPROVE WITH NOTES**
 - [Review: Retire Ashmere 2, M1 delete bell/finale save code (loka-4hik.9)](2026-10-21-retire-ashmere-2-m1-review.md): **APPROVE WITH NOTES**
 - [Review: Retire Ashmere 1, bundle the showcase (PR #423, loka-4hik.1)](2026-10-21-retire-ashmere-1-review.md): **APPROVE WITH NOTES**
