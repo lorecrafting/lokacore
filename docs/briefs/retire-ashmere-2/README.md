@@ -24,6 +24,7 @@ L2, the move to a frozen fixture, is cancelled.
   - `package-lock.json`
 
   Contract fixtures and schema examples that use Ashmere ids are rewritten through the sed map in Z, so they are not exempt.
+- **D2 exemption (PM, after Z).** `docs/spec/conformance/contract-links.json` keeps one "Ashmere content policy" label at line 34. The conformance fixtures are frozen and byte-pinned (`docs/spec/README.md:3`, `docs/spec/IMPORT.md:214`, `docs/spec/conformance/README.md:11`), so the sweep's expected result is exactly that one file.
 - **D3.** L3 keeps `wisp_fixture.ts`, `priory_fixture.ts` and `c5-provisional-artifact.json`. M6a, M6b and M2b retarget them and then delete them.
 - **Review.** Each slice self-reviews and needs green hosted CI before the PM merges it into `retire/ashmere-2`. One reviewer pass runs per wave on the batch head. M1, which deletes save code, gets its own review and record. Z gets its own review.
 
