@@ -140,17 +140,18 @@ defmodule Loka.ContentLintTest do
     for {rel, v} <- [
           {"items/lamp_oil.json", %{"location" => %{"in" => "npc"}, "edible" => %{}}},
           {"recipes/r.json", %{"craft" => %{"consume" => %{"items" => ["lamp_oil"]}}}},
-          {"npcs/n.json", shop.(%{"item" => "lamp_oil", "buy" => 2, "sell" => 1})},
+          {"npcs/n.json", shop.(%{"item" => "x", "stock" => %{"items" => ["lamp_oil"]}})},
           {"services/s.json", %{"benefit" => %{"escrow" => %{"items" => ["lamp_oil"]}}}},
           {"dialogues/d.json",
            %{"label" => "d", "choices" => %{"give" => %{"hand_over" => %{"item" => "lamp_oil"}}}}},
-          {"quests/q.json", %{"objective" => %{"policy" => %{"root" => has}}}}
+          {"npcs/n.json", shop.(%{"item" => "lamp_oil", "buy" => 2, "sell" => 1})}
         ],
         do: assert(lint(Map.put(flask, rel, v)) == [], rel)
 
+    # Holding it for a quest or a recipe guard checks the item; neither takes it out of play.
+    quest = %{"objective" => %{"policy" => %{"root" => has}}}
     guard = %{"policy" => %{"root" => has}, "reason" => "reason.r"}
-    buy_only = shop.(%{"item" => "lamp_oil", "buy" => 2})
-    assert lint(Map.merge(flask, %{"recipes/r.json" => guard, "npcs/n.json" => buy_only})) == dry
+    assert lint(Map.merge(flask, %{"recipes/r.json" => guard, "quests/q.json" => quest})) == dry
 
     assert lint(%{"items/ear.json" => %{"location" => %{"in" => "template"}}}) ==
              [
@@ -204,7 +205,7 @@ defmodule Loka.ContentLintTest do
   # r9c_interactions (synthetic), lantern_proof and the ashmere_* cartridges. Findings over the
   # slice's timebox are pinned in lint_baseline.txt until loka-kgd.184 (items/ lines: FOLLOW-UP) clears them: a new finding
   # fails, and so does a baseline grown past its cap.
-  @baseline_cap 208
+  @baseline_cap 203
   @baseline File.read!("test/loka/lint_baseline.txt")
             |> String.split("\n", trim: true)
             |> Enum.reject(&String.starts_with?(&1, "#"))

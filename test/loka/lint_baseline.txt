@@ -1,4 +1,4 @@
-# Pinned findings loka-kgd.184 clears (the items/ lines: FOLLOW-UP); the test caps this list at 208 lines: shrink it, never grow it.
+# Pinned findings loka-kgd.184 clears (the items/ lines: FOLLOW-UP); the test caps this list at 203 lines: shrink it, never grow it.
 toolbox_showcase cartridge.json: world.bands have no normal band below 100%
 toolbox_showcase reactions/attic_drench.json: writes state with no narrate step and no "silent": true
 toolbox_showcase reactions/attic_kindle.json: writes state with no narrate step and no "silent": true
@@ -128,10 +128,6 @@ toolbox_showcase items/axe.json: nothing takes it out of play
 toolbox_showcase items/bench.json: nothing takes it out of play
 toolbox_showcase items/bier.json: nothing takes it out of play
 toolbox_showcase items/bitters_skin.json: nothing takes it out of play
-toolbox_showcase items/candle_02.json: nothing takes it out of play
-toolbox_showcase items/candle_03.json: nothing takes it out of play
-toolbox_showcase items/candle_04.json: nothing takes it out of play
-toolbox_showcase items/candle_05.json: nothing takes it out of play
 toolbox_showcase items/cask.json: nothing takes it out of play
 toolbox_showcase items/cellar_skin.json: nothing takes it out of play
 toolbox_showcase items/cloak.json: nothing takes it out of play
@@ -204,6 +200,5 @@ toolbox_showcase items/turnip_03.json: nothing takes it out of play
 toolbox_showcase items/tusk.json: nothing takes it out of play
 toolbox_showcase items/watering_can.json: nothing takes it out of play
 toolbox_showcase items/waterskin.json: nothing takes it out of play
-toolbox_showcase items/yard_candle_02.json: nothing takes it out of play
 toolbox_showcase items/yard_crate.json: nothing takes it out of play
 toolbox_showcase items/yard_torch.json: nothing takes it out of play

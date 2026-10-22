@@ -124,8 +124,10 @@ defmodule Loka.Content.Lint do
   defp refs(["npcs", _], n) do
     offers = get_in(n, ["shop", "offers"]) || []
     drops = for d <- n["drops"] || [], do: d["item"]
+
+    # Every offer sells (ShopOffer.sell is required), and the kernel buys back any stocked instance.
     stock = Enum.flat_map(offers, &[&1["item"] | &1["stock"]["items"] || []])
-    tag(:source, drops ++ stock) ++ tag(:sink, for(%{"sell" => _} = o <- offers, do: o["item"]))
+    tag(:source, drops ++ stock) ++ tag(:sink, stock)
   end
 
   defp refs(["population_bundles", _], b), do: tag(:source, [b["item"], b["corpse"]])
@@ -138,10 +140,6 @@ defmodule Loka.Content.Lint do
 
   defp refs(["dialogues", _], d),
     do: tag(:sink, for({_, %{"hand_over" => h}} <- d["choices"] || %{}, do: h["item"]))
-
-  # ponytail: only an objective whose root names the item; a nested has_item is the upgrade.
-  defp refs(["quests", _], q),
-    do: tag(:sink, [get_in(q, ["objective", "policy", "root", "item"])])
 
   defp refs(_, _), do: []
 
