@@ -2,8 +2,8 @@
 
 These are the active system contracts (audited claim by claim at `87a1246`; later mechanic
 clauses cite their governing records). A quoted name cites a test. The
-[current bundled chapter](cartridge.md#current-bundled-chapter) owns the current release
-identity. [DIFFERENCES.md](DIFFERENCES.md) records remaining differences for the owner.
+[current bundled chapter](cartridge.md#current-bundled-chapter) names the bundled release; the
+[retired Ashmere chapter](cartridge.md#retired-ashmere-chapter-e1-candidate) keeps its release identity. [DIFFERENCES.md](DIFFERENCES.md) records remaining differences for the owner.
 History (the specification packet, ADRs, decisions and reviews) remains in its dated
 records and [docs/archive/](../archive/README.md).
 

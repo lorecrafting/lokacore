@@ -84,7 +84,7 @@ export const VesperRiddle: StoryObj = {
   loaders: at('vesper-riddle'),
   play: async ({ canvasElement }) => {
     const { page, tap } = await opened(canvasElement);
-    // the riddle's tiles, one per letter, then Submit (walkthrough/chapter1.walk.ts spellOn)
+    // the riddle's tiles, one per letter, then Submit (walkthrough/ashmere_missing_child.walk.ts spellOn)
     const spell = async (word: string) => {
       const tiles = (await page.findAllByLabelText(/^., tile \d+$/)).map((t) => t.ariaLabel ?? '');
       for (const letter of word) {

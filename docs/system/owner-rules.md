@@ -29,13 +29,13 @@ and not repeated here.
 
 - Detail pages follow the [canonical Book order](book-ui.md#detail-page-order), with no empty event-log heading or placeholder ([record](../decisions/owner-decision-detail-page-order-2026-10-05.md)).
 
-- Active development targets the real Missing Child chapter; Old Bram is outside its active cast and Q1 must be designed from the actual Ashmere roles, cast and rooms ([cast decision](../decisions/owner-decision-real-chapter-cast-2026-10-05.md), [cutover](../decisions/owner-decision-actual-chapter-cutover-2026-10-05.md)).
+- Ashmere is retired: the app bundles only the toolbox showcase, and the real game is rebuilt from zero after UI polish ([record](../decisions/owner-decision-retire-ashmere-2026-10-21.md)).
 
 - The opening chapter has no required idle waits for tides, night, next day or a returning NPC; any required opening NPC stays reachable, the mire has an always-passable non-swim route, and time may still drive deadlines and ambience ([record](../decisions/owner-decision-no-wait-opening-2026-10-05.md)).
 
 - After each chapter, close the deterministic browser route/UI walk, exploratory E2E pass, visible headed run or video, isolated polish fixes and reruns, and exact-head independent review before calling that chapter closed ([record](../decisions/owner-decision-chapter-closure-e2e-loop-2026-10-05.md)).
 
-- Chapters 2 and 3 are out of release scope; Chapter 1 is a frozen regression fixture until the [toolbox showcase](../SHOWCASE.md) covers its play families, and the showcase grows one Fable-planned, Opus-built district per toolbox batch ([record](../decisions/owner-decision-showcase-2026-10-10.md)).
+- Chapters 2 and 3 are out of release scope; Chapter 1 (Ashmere) is [retired](../decisions/owner-decision-retire-ashmere-2026-10-21.md) and no longer bundled; its fixtures and the tests that load them stay until phase 2 (`loka-4hik.2`) moves or drops them, and the showcase grows one Fable-planned, Opus-built district per toolbox batch ([record](../decisions/owner-decision-showcase-2026-10-10.md)).
 
 - One shared game difficulty; no selectable difficulty modes or separate hard/ironman death policies
   ([record](../decisions/owner-decision-single-difficulty-2026-10-03.md)).

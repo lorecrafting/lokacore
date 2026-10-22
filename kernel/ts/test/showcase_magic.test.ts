@@ -87,8 +87,8 @@ test('magic 1: up the ladder; the sign reads and the Word bar is empty', () => {
 // without ash or spends the wrong pools, the gather adds no ash, the cast leaves the held lantern
 // unlit or writes no lit line (or one when nothing lit), a cast without the lantern is refused or
 // keeps its pools, the climb back to the loft closes the errand before flamma is known, or the
-// errand dialogue (its accept refused) still opens while the errand is active, or its hub's leave
-// is refused after the accept (M10c).
+// errand dialogue (its accept refused) still opens while the errand is active, or the accept
+// reopens the errand's page with "Fetch the second word: not now" (M10c).
 test('magic 2: taught lux; it needs ash; the cast spends 2 ma and 1 ash and lights the lantern', () => {
   const first = talk(w, 'hedge_wizard');
   assert.equal(first.opened, 'wizard_lux');
@@ -98,12 +98,18 @@ test('magic 2: taught lux; it needs ash; the cast spends 2 ma and 1 ash and ligh
   assert.equal(second.opened, 'wizard_errand');
   w = choose(second.world, 'accept').world;
   assert.equal(view(w).journal[0]?.state, 'active');
-  const hub = choose(w, 'leave'); // the reopened hub's leave answers (a not-active policy would refuse it)
-  const [continuation_id] = pending(hub.world, w.character)!;
-  const shut = play(hub.world, { type: 'close_choice', continuation_id }).world;
-  assert.equal(talk(shut, 'hedge_wizard').opened, 'wizard_awaiting');
+  // the accept is the offer's one answer: the conversation ends, no hub reopens on a refused accept
+  assert.equal(pending(w, w.character), undefined);
+  assert.equal(talk(w, 'hedge_wizard').opened, 'wizard_awaiting');
   assert.deepEqual(words(w), [
-    { word: 'lux', available: false, reason: { code: 'insufficient_resource' } },
+    {
+      word: 'lux',
+      available: false,
+      reason: {
+        code: 'insufficient_resource',
+        message: { key: 'resource.short', bindings: { amount: 1, resource: 'ash' } },
+      },
+    },
   ]);
   assert.equal(refused(w, { type: 'cast', word: 'lux' }), 'insufficient_resource');
   w = perform(w, 'gather_ash').world;
@@ -196,19 +202,21 @@ test('magic 4b: ward needs level 2 at the exact threshold', () => {
   assert.deepEqual([at(29), at(30)], [false, true]);
 });
 
-// Breaks: the grimoire read before the errand is accepted leaves the errand open for good (its
-// fact_changed has already fired), so ward is never taught; or the loft entry resolves it
-// before it is accepted.
-test('magic 4c: the grimoire read first; the errand resolves on the next climb to the loft', () => {
+// Breaks: the grimoire read before the errand is accepted leaves the wizard asking for a word the
+// Journal says is read (the waiting line has no flamma_known gate), or the report choice does not
+// resolve the errand.
+test('magic 4c: the grimoire read first; the wizard takes the word and the errand resolves', () => {
   let v = go(newWorld(content, CTX as never, [1, 2, 3, 4]), 'up').world;
   v = read(choose(talk(v, 'hedge_wizard').world, 'teach').world);
   v = choose(talk(v, 'hedge_wizard').world, 'accept').world;
   assert.equal(view(v).journal[0]?.state, 'active');
-  const up = go(go(v, 'down').world, 'up'); // the wizard hears of it when you come back up
-  assert.ok(up.lines.includes('narration.errand_reward'));
-  v = up.world;
-  assert.equal(view(v).journal[0]?.state, 'resolved');
-  assert.equal(fact(v, 'ward_taught'), true);
+  assert.equal(pending(v, v.character), undefined); // the accept ended the conversation (M10c)
+  const again = talk(v, 'hedge_wizard');
+  assert.equal(again.opened, 'wizard_awaiting_report'); // not the waiting line
+  const done = choose(again.world, 'done');
+  assert.ok(done.lines.includes('narration.errand_reward'));
+  assert.equal(view(done.world).journal[0]?.state, 'resolved');
+  assert.equal(fact(done.world, 'ward_taught'), true);
 });
 
 // Breaks: ward does not apply warded or spend its ma, or a second cast re-announces the status.

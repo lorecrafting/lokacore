@@ -94,7 +94,7 @@ export function NpcPage(p: NpcProps) {
       {!talk && enemy && (
         <Note>{enemy.refusal ? p.text(enemy.refusal) : refused(cap(p.text(enemy.name)))}</Note>
       )}
-      {!talk && !enemy && !actions.length && !log.length && !contents.length && (
+      {!talk && !enemy && !actions.length && !listed(p) && !log.length && !contents.length && (
         <Note>Nothing to do here.</Note>
       )}
       {!talk && !enemy && <ShopOptions {...p} />}
@@ -139,6 +139,10 @@ const conversation = (p: NpcProps, choice?: NonNullable<GameView['choice']>) => 
 const held = (p: NpcProps) =>
   p.npc ? things(p.view).filter((e) => 'container_id' in e && e.container_id === p.npc?.id) : [];
 
+// Price and service rows draw even when unavailable: something to read (pass-2, UH3 on NPC pages).
+const listed = ({ npc: n }: NpcProps) =>
+  !!n && (('shop' in n && !!n.shop?.length) || ('services' in n && !!n.services?.length));
+
 // A shelf, or a service that costs (the bank too), shows the purse beside it (pass-1 E15).
 const priced = ({ npc: n }: NpcProps) =>
   !!n &&
@@ -177,7 +181,9 @@ export const npcSkills = (c: Palette, p: NpcProps) =>
     .map((s) => (
       <Text key={s.skill.key} style={note(c)}>
         {p.text(s.label)}: {s.acquired ? 'learned' : s.locked ? 'locked' : 'not learned'}; currently{' '}
-        {s.qualified ? 'qualified' : 'unqualified'}. {p.text(s.requirement)}
+        {s.qualified ? 'qualified' : 'unqualified'}.
+        {/* a learned, qualified skill asks nothing more (pass-1 H3) */}
+        {s.acquired && s.qualified ? '' : ` ${p.text(s.requirement)}`}
       </Text>
     ));
 

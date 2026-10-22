@@ -9,7 +9,7 @@ archived [09 §1a and §20](../archive/spec/09-cartridge-lab-certification.md) a
 [14 R9](../archive/spec/14-implementation-plan.md#r9--cartridge-lab-v1).
 The private runner accepts exactly two literal candidates and refuses every other admitted
 artifact, selecting the row by the admitted id and requiring its version and content hash:
-the [current bundled candidate](cartridge.md#current-bundled-chapter)
+the [retired Ashmere chapter](cartridge.md#retired-ashmere-chapter-e1-candidate), once the bundled candidate,
 `ashmere_missing_child@0.0.42` (`5d8b0e3a…50fc8b`) and the [R9C](cartridge.md#r9c-synthetic-interaction-cartridge-e2) synthetic cartridge
 `r9c_interactions@0.0.1` (`7d74fac7…d17263`). The table is not part of the policy digest.
 It freezes normalized artifact bytes before execution, checks the independent known answer,
