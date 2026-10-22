@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { readFileSync } from 'node:fs';
 import { elapsedHost } from '../../authority/local-story/__tests__/elapsed-host.test.ts';
-import { darkMarshBundle } from '../../authority/local-story/__tests__/priory-fixture.ts';
+import { glowBundle } from '../../authority/local-story/__tests__/priory-fixture.ts';
 import type { GameSubscription } from '../../packages/game-view/session.ts';
 import { CONTENTS } from './__tests__/control.test.ts';
 import { LABEL } from './labels.ts';
@@ -355,15 +355,13 @@ test('actual trunk detail explains refused Take and restores its button after Re
 
 // Break: a targetless recipe exists only in a self-luminous Notice, so the World detail has no control.
 test('self-luminous Notice invokes its projected targetless recipe and retains the result', () => {
-  const h = book(darkMarshBundle());
+  const h = book(glowBundle());
   try {
-    assert.ok(h.labels().includes('Marsh glow, open'));
-    h.tap('Marsh glow');
-    assert.ok(h.text().includes('You follow the glow and find a wisp waiting above the reeds.'));
-    assert.equal(
-      h.p.screen().log.includes('You follow the glow and find a wisp waiting above the reeds.'),
-      false,
-    );
+    assert.ok(h.labels().includes('Glow, open'));
+    h.tap('Glow');
+    h.tap('Search');
+    assert.ok(h.text().includes('You search.')); // narration.search
+    assert.equal(h.p.screen().log.includes('You search.'), false);
     assert.ok(h.labels().includes('Leave'));
   } finally {
     h.unmount();
@@ -397,18 +395,20 @@ test('a notice page shows its description once and every other read line', async
 // Breaks: the running head is missing on the room or NPC page after a quest is accepted, or shows
 // before any quest is active, or repeats on the Journal page (BOOK-UI-COMPONENTS.md, Page).
 test('the running head shows the active quest objective on room and NPC pages', () => {
-  const head = 'Look for a sign of Wren on Village Green.'; // quest.first_lead.active
-  const h = book(bundle('missing_child_v042_hash'));
-  h.tap('Fen-born');
-  if (h.labels().includes('Continue')) h.tap('Continue');
+  const head = 'Clear the five rats from the Lantern cellar.'; // quest.mauds_cellar.active
+  const h = book();
+  h.map();
+  h.tap('Go north');
+  h.map();
+  h.tap('Go east');
   assert.equal(h.text().includes(head), false);
-  h.tap('Elspeth');
-  h.tap('Talk to Elspeth');
-  h.tap('Will you look around the Green for a sign of Wren?');
+  h.tap('Widow Maud');
+  h.tap('Talk to Widow Maud');
+  h.tap('“I’ll deal with the rats.”');
   assert.ok(h.text().includes(head));
-  h.tap('Leave the conversation');
   h.tap('Leave');
-  assert.ok(h.text().includes('Ferry Landing'));
+  h.tap('Leave');
+  assert.ok(h.text().includes('The Drowned Lantern'));
   assert.ok(h.text().includes(head));
   h.tap(CONTENTS);
   h.tap('Journal');

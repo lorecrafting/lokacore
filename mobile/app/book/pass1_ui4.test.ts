@@ -2,25 +2,23 @@
 // on an item an NPC holds (E14), no empty Note beside a refusal (UH3), the purse beside a price (E15).
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { readFileSync } from 'node:fs';
 import type { Game, GameView } from '../../packages/game-view/session.ts';
+import { compiled } from '../../authority/local-story/__tests__/compiled.ts';
 import { validate } from '../../authority/local-story/__tests__/validate.ts';
 import { elapsedHost } from '../../authority/local-story/__tests__/elapsed-host.test.ts';
 import { nodes, words } from './__tests__/polish-book.test.ts';
 import { group } from './model.ts';
 import { presenter } from './presenter.ts';
 
-const pin = JSON.parse(
-  readFileSync(
-    new URL('../../../protocol/fixtures/missing_child_v018_hash.json', import.meta.url),
-    'utf8',
-  ),
-);
-// Peg's shop in missing_child, the player holding 20 pennies (a real, schema-valid view).
-const pegView = () => {
-  const a = elapsedHost(':memory:', { wall: 10000, mono: 0 }, pin);
-  a.game.invoke({ action_key: 'move', target_ids: [], input: { direction: 'north' } } as never);
-  a.game.invoke({ action_key: 'move', target_ids: [], input: { direction: 'west' } } as never);
+// Nell's shop on the showcase's village green, the player holding 10 pennies (resources.json start;
+// a real, schema-valid view).
+const nellView = () => {
+  const a = elapsedHost(
+    ':memory:',
+    { wall: 10000, mono: 0 },
+    compiled('cartridges/toolbox_showcase') as never,
+  );
+  a.game.invoke({ action_key: 'move', target_ids: [], input: { direction: 'south' } } as never);
   return a.game.view().view;
 };
 const screenOf = (view: GameView) => {
@@ -71,19 +69,19 @@ const ID = {
 // Breaks: Take keeps its name on an NPC's item, drops the holder Note or puts it after the card;
 // a refused theft still reads Take or reads before the holder Note; or a box's (or the floor's) item shows Lift or the holder Note (E14).
 test('an item an NPC holds reads Lift after the holder Note; a box item reads Take', async () => {
-  const v = pegView();
-  const peg = v.entities.find((e) => e.shop)!;
+  const v = nellView();
+  const nell = v.entities.find((e) => e.shop)!;
   const held = (id: keyof typeof ID, holder: string) =>
     thing(id, [action('take')], { container_id: holder });
   const [read, take] = [action('read'), action('take')];
   const no = action('take', { available: false, reason: { code: 'permission_denied' } });
-  const refusedHeld = thing('book', [no], { container_id: peg.id });
+  const refusedHeld = thing('book', [no], { container_id: nell.id });
   const view = {
     ...v,
     entities: [
       ...v.entities.map((e) =>
-        e.id === peg.id
-          ? { ...e, contents: [{ ...held('purse', peg.id), actions: [read, take] }, refusedHeld] }
+        e.id === nell.id
+          ? { ...e, contents: [{ ...held('purse', nell.id), actions: [read, take] }, refusedHeld] }
           : e,
       ),
       thing('box', [], { contents: [held('coin', ID.box)] }),
@@ -92,13 +90,13 @@ test('an item an NPC holds reads Lift after the holder Note; a box item reads Ta
   } as GameView;
   const purse = await page(view, ID.purse);
   assert.deepEqual(purse.slice(-4), [
-    'Npc.peg.short is holding it.',
+    'Npc.nell.short is holding it.',
     'Read item.purse',
     'Lift',
     'Leave',
   ]);
   const book = await page(view, ID.book);
-  const [holder, lift] = ['Npc.peg.short is holding it.', 'Lift: not yours.'].map((l) =>
+  const [holder, lift] = ['Npc.nell.short is holding it.', 'Lift: not yours.'].map((l) =>
     book.indexOf(l),
   );
   assert.ok(holder >= 0 && lift > holder, JSON.stringify(book)); // book-ui.md: holder Note first
@@ -116,7 +114,7 @@ test('an item an NPC holds reads Lift after the holder Note; a box item reads Ta
 // a corpse's Put into before its Take, a book's Take before its Read; or hands after asks and
 // services or before an act, or asks and services leave GameView order among themselves.
 test('detail options: act on it, then move it, then store it', async () => {
-  const v = pegView();
+  const v = nellView();
   const view = {
     ...v,
     entities: [
@@ -144,7 +142,7 @@ test('detail options: act on it, then move it, then store it', async () => {
 // Breaks: "Nothing to do here." draws beside a "not yours" note (UH3), or no longer draws on a
 // page with neither notes, actions nor contents.
 test('the empty Note only when nothing, not even a refusal, shows', async () => {
-  const v = pegView();
+  const v = nellView();
   const refused = action('take', { available: false, reason: { code: 'permission_denied' } });
   const view = {
     ...v,
@@ -160,8 +158,8 @@ test('the empty Note only when nothing, not even a refusal, shows', async () => 
 // sits after the shelf rows, repeats, or shows beside a free service or no offer at all (E15).
 test('one balance Note after the description on a page with a priced offer', async () => {
   const { NpcPage } = await import('./Npc.tsx');
-  const v = pegView();
-  const peg = v.entities.find((e) => e.shop)!;
+  const v = nellView();
+  const nell = v.entities.find((e) => e.shop)!;
   const service = (price: number) => ({
     service: { ...v.resources![0]!.resource, kind: 'service', key: 'fee' },
     label: 'service.fee',
@@ -170,12 +168,15 @@ test('one balance Note after the description on a page with a priced offer', asy
       kind: 'entitlement',
       fact: { ...v.resources![0]!.resource, kind: 'fact', key: 'paid' },
     },
-    action: { ...action('use_service'), command: 'use_service', target_ids: [peg.id] },
+    action: { ...action('use_service'), command: 'use_service', target_ids: [nell.id] },
   });
   const draw = (npc: object, talking = false) => {
-    const view = { ...v, entities: v.entities.map((e) => (e.id === peg.id ? npc : e)) } as GameView;
+    const view = {
+      ...v,
+      entities: v.entities.map((e) => (e.id === nell.id ? npc : e)),
+    } as GameView;
     const s = screenOf(view);
-    const at = s.view.entities.find((e) => e.id === peg.id);
+    const at = s.view.entities.find((e) => e.id === nell.id);
     return shown(
       NpcPage({
         ...s,
@@ -188,16 +189,16 @@ test('one balance Note after the description on a page with a priced offer', asy
       } as never),
     );
   };
-  const { shop: _shop, ...bare } = peg;
-  const shelf = draw(peg);
+  const { shop: _shop, ...bare } = nell;
+  const shelf = draw(nell);
   assert.deepEqual(shelf.slice(1, 4), [
-    'npc.peg.description',
-    'You have 20p.',
-    'item.torch.short: Buy 3p; Sell 1p (you are not holding it).',
+    'npc.nell.description',
+    'You have 10p.',
+    'item.bread.short: Buy 4p; Sell 1p (you are not holding it).',
   ]);
-  assert.equal(shelf.filter((l) => l === 'You have 20p.').length, 1);
-  assert.ok(!draw(peg, true).includes('You have 20p.')); // a conversation hides the shelf and purse
-  assert.ok(draw({ ...bare, services: [service(1)] }).includes('You have 20p.'));
-  assert.ok(!draw({ ...bare, services: [service(0)] }).includes('You have 20p.'));
+  assert.equal(shelf.filter((l) => l === 'You have 10p.').length, 1);
+  assert.ok(!draw(nell, true).includes('You have 10p.')); // a conversation hides the shelf and purse
+  assert.ok(draw({ ...bare, services: [service(1)] }).includes('You have 10p.'));
+  assert.ok(!draw({ ...bare, services: [service(0)] }).includes('You have 10p.'));
   assert.ok(!draw(bare).some((l) => l.startsWith('You have')));
 });
