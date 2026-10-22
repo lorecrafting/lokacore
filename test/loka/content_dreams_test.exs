@@ -189,7 +189,10 @@ defmodule Loka.ContentDreamsTest do
       end)
     )
 
-    write.("text.json", Map.merge(read.("text.json"), Map.new(@text, &{&1, &1})))
+    # The room description and Maud's room line carry their touch links, so the source compiles clean.
+    links = %{"room.inn_rooms.description" => "A [bed](bed).", "npc.maud.room" => "[Maud] waits."}
+    text = Map.new(@text, &{&1, &1}) |> Map.merge(links)
+    write.("text.json", Map.merge(read.("text.json"), text))
     %{dir: dir}
   end
 
@@ -197,7 +200,7 @@ defmodule Loka.ContentDreamsTest do
   test "Rest dream source expands its current bindings and rejects impossible declarations", %{
     dir: dir
   } do
-    assert {:ok, bytes, _} = Loka.ContentSource.compile(dir, [])
+    assert {:ok, bytes, []} = Loka.ContentSource.compile(dir, [])
     c = JSON.decode!(bytes)["cartridge"]
     s = c["scenes"]["sleep_sampler@0.0.1:scene/fen_dream"]
 
@@ -215,44 +218,56 @@ defmodule Loka.ContentDreamsTest do
     scene = "scenes/fen_dream.json"
 
     cases = [
-      [
-        {"cartridge.json",
-         &update_in(&1, ["requires", "capabilities"], fn x -> Map.delete(x, "death") end)}
-      ],
-      [{scene, &put_in(&1, ["on", "rest", "room"], "camp")}],
-      [{scene, &put_in(&1, ["on", "rest", "detail"], "other")}],
-      [{scene, &put_in(&1, ["on", "rest", "entitlement"], "dream_seen")}],
-      [{"facts.json", &put_in(&1, ["facts", "slept_paid", "scopes"], ["instance"])}],
-      [{"facts.json", &put_in(&1, ["facts", "slept_paid", "value_type", "default"], true)}],
-      [{scene, &put_in(&1, ["steps", Access.at(0)], %{"type" => "branch"})}],
-      [
-        {scene,
-         &put_in(&1, ["steps", Access.at(3), "choices", Access.at(1), "choice_id"], "follow_fox")}
-      ],
-      [
-        {scene,
-         &put_in(&1, ["steps", Access.at(3), "choices", Access.at(1), "text"], "missing.line")}
-      ],
-      [
-        {"quests/other.json", @dream["quests/a_room.json"]},
-        {scene, &put_in(&1, ["on_end", "quest"], "other")}
-      ],
-      [
-        {"quests/a_room.json", &put_in(&1, ["objective", "policy", "root", "fact"], "slept_paid")}
-      ],
-      [{scene, &put_in(&1, ["on_end", "assign", Access.at(0), "value"], false)}],
-      [{scene, &put_in(&1, ["on_end", "assign", Access.at(0), "fact"], "slept_paid")}],
-      [
-        {"dialogues/maud_talk.json",
-         &put_in(&1, ["choices", "chat", "sequence"], [
-           %{"op" => "fact.assign", "fact" => "dream_seen", "value" => true}
-         ])}
-      ],
-      [{"dialogues/maud_talk.json", &put_in(&1, ["choices", "chat", "accept"], "a_room")}]
+      {[
+         {"cartridge.json",
+          &update_in(&1, ["requires", "capabilities"], fn x -> Map.delete(x, "death") end)}
+       ], {"OUTCOME_MISMATCH", "cartridge.requires.capabilities.death"}},
+      {[{scene, &put_in(&1, ["on", "rest", "room"], "camp")}],
+       {"OUTCOME_MISMATCH", "scenes/fen_dream.on.rest"}},
+      {[{scene, &put_in(&1, ["on", "rest", "detail"], "other")}],
+       {"OUTCOME_MISMATCH", "scenes/fen_dream.on.rest"}},
+      {[{scene, &put_in(&1, ["on", "rest", "entitlement"], "dream_seen")}],
+       {"OUTCOME_MISMATCH", "scenes/fen_dream.on.rest"}},
+      {[{"facts.json", &put_in(&1, ["facts", "slept_paid", "scopes"], ["instance"])}],
+       {"OUTCOME_MISMATCH", "scenes/fen_dream.on.rest"}},
+      {[{"facts.json", &put_in(&1, ["facts", "slept_paid", "value_type", "default"], true)}],
+       {"OUTCOME_MISMATCH", "scenes/fen_dream.on.rest"}},
+      {[{scene, &put_in(&1, ["steps", Access.at(0)], %{"type" => "branch"})}],
+       {"OUTCOME_MISMATCH", "scenes/fen_dream.steps"}},
+      {[
+         {scene,
+          &put_in(&1, ["steps", Access.at(3), "choices", Access.at(1), "choice_id"], "follow_fox")}
+       ], {"OUTCOME_MISMATCH", "scenes/fen_dream.steps[3].choices"}},
+      {[
+         {scene,
+          &put_in(&1, ["steps", Access.at(3), "choices", Access.at(1), "text"], "missing.line")}
+       ], {"UNRESOLVED_REFERENCE", "scenes/fen_dream.steps[3].choices[1].text"}},
+      {[
+         {"quests/other.json", @dream["quests/a_room.json"]},
+         {scene, &put_in(&1, ["on_end", "quest"], "other")}
+       ], {"OUTCOME_MISMATCH", "scenes/fen_dream.on_end"}},
+      {[
+         {"quests/a_room.json",
+          &put_in(&1, ["objective", "policy", "root", "fact"], "slept_paid")}
+       ], {"OUTCOME_MISMATCH", "scenes/fen_dream.on.rest.quest"}},
+      {[{scene, &put_in(&1, ["on_end", "assign", Access.at(0), "value"], false)}],
+       {"OUTCOME_MISMATCH", "scenes/fen_dream.on_end.assign[0]"}},
+      {[{scene, &put_in(&1, ["on_end", "assign", Access.at(0), "fact"], "slept_paid")}],
+       {"OUTCOME_MISMATCH", "scenes/fen_dream.on.rest.quest"}},
+      {[
+         {"dialogues/maud_talk.json",
+          &put_in(&1, ["choices", "chat", "sequence"], [
+            %{"op" => "fact.assign", "fact" => "dream_seen", "value" => true}
+          ])}
+       ], {"RESERVED_FACT", "dialogues/maud_talk.choices.chat.sequence[0].fact"}},
+      {[{"dialogues/maud_talk.json", &put_in(&1, ["choices", "chat", "accept"], "a_room")}],
+       {"OUTCOME_MISMATCH", "scenes/fen_dream.on.rest"}}
     ]
 
-    for changes <- cases do
-      assert {:error, _} = Loka.ContentSource.compile(dir, changes), inspect(hd(changes))
+    # Each case names the diagnostic its change must raise, at the field it breaks.
+    for {changes, want} <- cases do
+      assert {:error, d} = Loka.ContentSource.compile(dir, changes), inspect(hd(changes))
+      assert want in Enum.map(d, &{&1["code"], &1["path"]}), inspect(hd(changes))
     end
   end
 
