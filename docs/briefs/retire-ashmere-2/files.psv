@@ -1,0 +1,381 @@
+kernel/ts/test/attributes.test.ts|R|stat/resource_compare reads wrong value|resource_sampler|S1
+kernel/ts/test/author.test.ts|R|bin/loka dev drops last good artifact on failed compile|rooms_sampler|S1
+kernel/ts/test/barriers.test.ts|R|illegal barrier transition / key reach / loader barrier refs|gate_sampler|S1
+kernel/ts/test/budget_record.test.ts|R|budget_exceeded not one valid diagnostics record|green_sampler|S1
+kernel/ts/test/cartridge.test.ts|R|loader accepts bad fact defaults, byte cap, known-answer hash|facts_sampler, hello_sampler (cartridge_hash.json conformance)|S1
+kernel/ts/test/cartridge_escort.test.ts|R|loader accepts unresolved escort bindings|ferry_sampler|S1
+kernel/ts/test/cartridge_items.test.ts|R|loader accepts bad item/NPC/carrying refs|items_sampler|S1
+kernel/ts/test/cartridge_riddle.test.ts|R|loader accepts bad riddle/journal refs, API1.9 floor|ferry_sampler|S1
+kernel/ts/test/cartridge_rooms.test.ts|R|loader accepts bad room/detail/text refs|rooms_sampler, details_sampler|S1
+kernel/ts/test/chapters.test.ts|R|chapter marker selects wrong chapter|chapters_sampler|S1
+kernel/ts/test/checks.test.ts|R|luck check boundary, wait, time_window, clock overflow|recipe_sampler, check_sampler|S1
+kernel/ts/test/content_graph.test.ts|R|reach report wrong (id string only)|hello_sampler (text)|S1
+kernel/ts/test/dialogue.test.ts|R|talk/choose/close and dialogue loader checks|ferry_sampler|S1
+kernel/ts/test/elapsed.test.ts|R|trusted elapsed boundary, elapsed loader|ferry_sampler|S1
+kernel/ts/test/equipment.test.ts|R|slot holders, wear/remove, worn custody|wear_sampler, items_sampler|S1
+kernel/ts/test/exit_admission.test.ts|R|exit availability ignores movement action policy|ferry_sampler (via ferry_probe)|S1
+kernel/ts/test/facts.test.ts|R|fact.assign, conditions, variants, facts_typed|facts_sampler|S1
+kernel/ts/test/ferry_probe.ts|R|helper|ferry_sampler|S1
+kernel/ts/test/invocation.test.ts|R|P1 identity/outcome adapter|recipe_sampler, check_sampler, items_sampler|S1
+kernel/ts/test/invocation_cases.json|R|known answers data|recipe_sampler, check_sampler, items_sampler|S1
+kernel/ts/test/journal.test.ts|R|journal text selection|errand_sampler, journal_sampler|S1
+kernel/ts/test/keyed_admission.test.ts|R|admission matches another action than invoked|ferry_sampler (via ferry_probe)|S1
+kernel/ts/test/locks.test.ts|R|item barrier verbs, reach through lids, loader key reach|locks_sampler|S1
+kernel/ts/test/longwait_property.test.ts|R|long wait != hourly (comment names hello only)|hello_sampler (comment)|S1
+kernel/ts/test/play.test.ts|R|loka play CLI, trace replay, redaction|rooms_sampler, details_sampler, facts_sampler|S1
+kernel/ts/test/play_gate.test.ts|R|CLI doors/brief mode|gate_sampler|S1
+kernel/ts/test/play_items.test.ts|R|CLI items, 1025-match lookup refusal|items_sampler|S1
+kernel/ts/test/play_recipes.test.ts|R|CLI recipes, wait, status line|recipe_sampler, check_sampler, ferry_sampler, resource_sampler|S1
+kernel/ts/test/position.test.ts|R|position@1, RESERVED_FACT|position_sampler, ferry_sampler|S1
+kernel/ts/test/quest_delivery.test.ts|R|quest delivery FIFO/budget|errand_sampler|S1
+kernel/ts/test/quest_dialogue.test.ts|R|accept activates quest, loader accept checks|ferry_sampler|S1
+kernel/ts/test/quests.test.ts|R|quest@1 lifecycle, loader quest checks|errand_sampler|S1
+kernel/ts/test/reactions.test.ts|R|reaction delivery order, budgets|green_sampler|S1
+kernel/ts/test/recipes.test.ts|R|ActionSet algebra, recipe execution|recipe_sampler, items_sampler|S1
+kernel/ts/test/recipes_loader.test.ts|R|loader on recipes, v1 policies|recipe_sampler, check_sampler, hello_sampler, resource_sampler|S1
+kernel/ts/test/resources.test.ts|R|costs, thresholds, regen, mv|resource_sampler, rooms_sampler|S1
+kernel/ts/test/rule_steps.test.ts|R|rule query_steps counted wrong|ferry_sampler, gate_sampler|S1
+kernel/ts/test/scene.test.ts|R|modal scene Continue/start|scene_sampler|S1
+kernel/ts/test/schedule.test.ts|R|job drain order, run_job refusal, calendar loader|ferry_sampler|S1
+kernel/ts/test/sim.test.ts|R|simulator invariants over corpus (names sampler ids)|all renamed samplers|S1
+kernel/ts/test/sim.ts|R|helper (containers_cartridge_ prefix)|renamed samplers|S1
+kernel/ts/test/sim_seeds.json|R|regression seeds data|errand/ferry/green/resource samplers|S1
+kernel/ts/test/target.test.ts|R|target resolution table, 1024 cap|details_sampler|S1
+kernel/ts/test/target_present.test.ts|R|target_present, talk path codes|ferry_sampler|S1
+kernel/ts/test/world.test.ts|R|IdSource, move/look, movement invariants|rooms_sampler|S1
+kernel/ts/test/variants.test.ts|R|variant text, npc_present (comment/id only)|variants_sampler (+ items text)|S1
+kernel/ts/test/combat_fixture.ts|R|helper, frozen v0.0.9|cellar_sampler (frozen containers_sampler_v009)|S1
+kernel/ts/test/combat.test.ts|R|M4 combat rounds, Flee, credit|cellar_sampler frozen v009|S1
+kernel/ts/test/combat_actions.test.ts|R|encounter ActionSet filtering|cellar_sampler frozen v009|S1
+kernel/ts/test/combat_band.test.ts|R|hp band cut|cellar_sampler frozen v009|S1
+kernel/ts/test/combat_credit.test.ts|R|counterfeit credit attribution|cellar_sampler frozen v009|S1
+kernel/ts/test/combat_content.test.ts|R|combat loader contracts|cellar_sampler frozen v008|S1
+kernel/ts/test/combat_flee.test.ts|R|Flee exit selection, fare, budget|cellar_sampler frozen v009|S1
+kernel/ts/test/climb_flee.test.ts|R|Flee over climb face without item|cellar_sampler frozen v009|S1
+kernel/ts/test/death_fixture.ts|R|helper, frozen v0.0.8|cellar_sampler frozen v008|S1
+kernel/ts/test/death.test.ts|R|fatal sequence custody/return|cellar_sampler frozen v008|S1
+kernel/ts/test/death_content.test.ts|R|corpse loader contracts|cellar_sampler frozen v008|S1
+kernel/ts/test/pen.test.ts|R|hs-4 animals (killer id from death fixture)|pen_sampler + cellar_sampler id|S1
+kernel/ts/test/npc_hp.test.ts|R|NPC HP rows, loader API 1.4|cellar_sampler frozen v007|S1
+kernel/ts/test/targets.test.ts|R|target choice, allies (combat_fixture import)|targets_sampler + cellar_sampler|S1
+kernel/ts/test/reward_storage_fixture.ts|R|helper|cellar_sampler (containers_reward_storage)|S1
+kernel/ts/test/reward_storage.test.ts|R|reward clamp, receive custody|cellar_sampler|S1
+kernel/ts/test/reward_storage_content.test.ts|R|reward loader|cellar_sampler|S1
+kernel/ts/test/put.test.ts|R|Put pair|cellar_sampler|S1
+kernel/ts/test/container_history.test.ts|R|historical artifacts keep canonical answers (drop missing_child_v001/v002 rows)|cellar_sampler frozen v006-v010|S1
+kernel/ts/test/calendar.test.ts|R|calendar/schedule/window; delete the v015 test at :175 (covered by calendar.test.ts:69 displayed subdivisions)|ferry_sampler|S1
+kernel/ts/test/readable.test.ts|K|Read target/refusal/budget; scene part rename, v003 part retarget|scene_sampler + codex_sampler (readable)|S3b
+kernel/ts/test/readable_play.test.ts|K|terminal Read resolves authored aliases|codex_sampler|S3b
+kernel/ts/test/cartridge_liquids.test.ts|K|loader accepts bad liquid metadata / vessel on corpse template|items_sampler + r9c_interactions|S3c
+kernel/ts/test/c4_pack_fixture.ts|K|helper|r9c_interactions|S2a
+kernel/ts/test/c4_pack.test.ts|K|pack admission/rotation/hp bands|r9c_interactions|S2a
+kernel/ts/test/c4_pack_elapsed.test.ts|K|one elapsed advance != hourly play for pack|r9c_interactions|S2a
+kernel/ts/test/c4_pack_flight.test.ts|K|wounded flight boundary, job order|r9c_interactions|S2a
+kernel/ts/test/c4_schema_contracts.test.ts|K|pack/roster schema bounds|r9c_interactions (or fixture-free literals)|S2a
+kernel/ts/test/c5_bleed_fixture.ts|K|helper (kernel/ts/test/fixtures/c5-provisional-artifact.json)|r9c_interactions; delete the provisional artifact|S2a
+kernel/ts/test/c5_bleed_early_expiry.test.ts|K|bleed early expiry|r9c_interactions|S2a
+kernel/ts/test/c5_bleed.test.ts|K|bleed apply/refresh/cure/expiry|r9c_interactions|S2a
+kernel/ts/test/c5_bleed_death.test.ts|K|water expiry clears bleed before return|r9c_interactions|S2a
+kernel/ts/test/deer_fixture.ts|K|helper|r9c_interactions|S2a
+kernel/ts/test/deer.test.ts|K|deer sight/flight/slot handoff; drop "v042 genesis IDs" pin|r9c_interactions|S2a
+kernel/ts/test/deer_contracts.test.ts|K|deer wire guards|r9c_interactions|S2a
+kernel/ts/test/hidden_passage_npc.test.ts|K|fleeing NPC takes hidden/climb face|r9c_interactions|S2a
+kernel/ts/test/writer_groups.test.ts|K|writer-group joins in one advance|r9c_interactions|S2a
+kernel/ts/test/hounds.test.ts|K|hound area loader, wander, pelt slots; drop genesis pin|r9c_interactions|S2a
+kernel/ts/test/sim_mechanics.test.ts|K|simulator accepts legal chapter receipts (marsh start, bleed, exchange)|r9c_interactions|S2a
+kernel/ts/test/transport_fixture.ts|K|helper compiles the chapter source live|cartridges/r9c_interactions|S2b
+kernel/ts/test/water_fixture.ts|K|helper|r9c_interactions|S2b
+kernel/ts/test/patrol_fixture.ts|K|helper (v024)|r9c_interactions|S2b
+kernel/ts/test/crow.test.ts|K|crow custody/legs/fallback|r9c_interactions|S2b
+kernel/ts/test/crow_loader.test.ts|K|crow allowlist/corridor loader|r9c_interactions|S2b
+kernel/ts/test/d9_content.test.ts|D|five terminal pairs project distinct cast prompts (story prose)|-|S2b
+kernel/ts/test/d9_contracts.test.ts|K|cue/suppression contracts; drop v040 allocation pin|r9c_interactions|S2b
+kernel/ts/test/d9_suppression.test.ts|K|bell suppression deadline/resume jobs|r9c_interactions|S2b
+kernel/ts/test/d10_contracts.test.ts|K|map/Knock contracts and loader|r9c_interactions|S2b
+kernel/ts/test/d10_knowledge.test.ts|K|visited rooms, known_npcs, reopen|r9c_interactions|S2b
+kernel/ts/test/c6_contracts.test.ts|K|expedition contracts/loader; drop C6 allocation pin|r9c_interactions|S2b
+kernel/ts/test/c6_expedition.test.ts|K|expedition stage order, Restart|r9c_interactions|S2b
+kernel/ts/test/c6_source_acceptance.test.ts|K|expedition shelter/detour on compiled source|r9c_interactions|S2b
+kernel/ts/test/escort.test.ts|K|escort follow/Flee/Rejoin binding|r9c_interactions|S2b
+kernel/ts/test/patrol.test.ts|K|patrol checkpoints, Rejoin, Restart|r9c_interactions|S2b
+kernel/ts/test/patrol_content.test.ts|K|patrol loader|r9c_interactions|S2b
+kernel/ts/test/transport.test.ts|K|fare/refusal/recovery/free lesson|r9c_interactions|S2b
+kernel/ts/test/water.test.ts|K|water admission, drowning deadline, recovery|r9c_interactions|S2b
+kernel/ts/test/water_content.test.ts|K|water loader|r9c_interactions|S2b
+kernel/ts/test/study_ingress.test.ts|K|Study ingress rechecks corpse|r9c_interactions|S2b
+kernel/ts/test/western_ashmere.test.ts|D|Western Ashmere route/Hob schedule (rooms dropped from r9c); schedule boundaries covered by schedule.test.ts:102|-|S2b
+kernel/ts/test/climb.test.ts|K|one test: loader refuses patrol route over climb face|climb_sampler + r9c_interactions|S2b
+kernel/ts/test/hidden_passage.test.ts|K|one test: loader refuses patrol/expedition over hidden face|hidden_sampler + r9c_interactions|S2b
+kernel/ts/test/doors.test.ts|K|test g: walks below API 1.81 on a population plan|doors_sampler + r9c_interactions|S2b
+kernel/ts/test/spells.test.ts|K|one test: cast not offered in a cartridge without spells|spells_sampler + r9c_interactions|S2b
+kernel/ts/test/food_fixture.ts|K|helper|r9c_interactions|S3a
+kernel/ts/test/food.test.ts|K|apple stock conservation, Eat refusals; drop v035 ID pin|r9c_interactions|S3a
+kernel/ts/test/homes.test.ts|D|Gareth/Ada homes and child-enum prose (story); job day boundaries covered by schedule.test.ts:102|-|S3a
+kernel/ts/test/cartridge_food.test.ts|K|loader accepts impossible held food|r9c_interactions|S3a
+kernel/ts/test/dream_fixture.ts|K|helper|r9c_interactions|S3a
+kernel/ts/test/dream.test.ts|K|paid Rest dream checkpoint/branches; drop S2/Bell story case|r9c_interactions|S3a
+kernel/ts/test/cartridge_dreams.test.ts|K|loader refuses impossible Rest bindings|r9c_interactions|S3a
+kernel/ts/test/service_fixture.ts|K|helper|r9c_interactions|S3a
+kernel/ts/test/service.test.ts|K|service quote/rollback/settlement|r9c_interactions|S3a
+kernel/ts/test/cartridge_services.test.ts|K|loader refuses unproducible service bindings|r9c_interactions|S3a
+kernel/ts/test/infirmary_fixture.ts|K|helper|r9c_interactions|S3a
+kernel/ts/test/infirmary.test.ts|K|harvest/exchange conservation and caps|r9c_interactions|S3a
+kernel/ts/test/infirmary_contracts.test.ts|K|exchange/harvest contracts and loader|r9c_interactions|S3a
+kernel/ts/test/practical_skills_fixture.ts|K|helper|r9c_interactions|S3a
+kernel/ts/test/practical_skills.test.ts|K|careful harvest/discount quote floors|r9c_interactions|S3a
+kernel/ts/test/practical_skills_contracts.test.ts|K|method field bounds|r9c_interactions|S3a
+kernel/ts/test/light_fixture.ts|K|helper (v021 + items)|r9c_interactions|S3c
+kernel/ts/test/light.test.ts|K|burn intervals, refuel conservation, darkness; drop successor ID pin|r9c_interactions|S3c
+kernel/ts/test/light_contracts.test.ts|K|light contracts, API1.19 floor|r9c_interactions|S3c
+kernel/ts/test/d10_presentation.test.ts|K|Where/Map/Knock from saved observation|r9c_interactions|S3c
+kernel/ts/test/liquid.test.ts|K|Fill/Pour/Drink conservation, mass ceiling|r9c_interactions|S3c
+kernel/ts/test/training_fixture.ts|K|helper (v021 + combat_fixture)|r9c_interactions|S3c
+kernel/ts/test/training.test.ts|K|lesson payment/qualification/defence draws|r9c_interactions|S3c
+kernel/ts/test/training_contracts.test.ts|K|skill/training contracts and loader|r9c_interactions (+cellar_sampler)|S3c
+kernel/ts/test/character_choice.test.ts|K|ancestry choice receipt, attribute effects|r9c_interactions|S3c
+kernel/ts/test/character_contracts.test.ts|K|character creation wire contracts|r9c_interactions|S3c
+kernel/ts/test/commerce.test.ts|K|keep only "loader independently rejects malformed shop stock and funding" (TS loader layer); delete the 3 buy/sell cases (covered by prices.test.ts:91 stale quote, showcase_economy.test.ts:149 and :278 buy/sell)|r9c_interactions|S3c
+kernel/ts/test/commerce_contracts.test.ts|K|shop contract malformed prices|r9c_interactions (fixture swap only)|S3c
+kernel/ts/test/chandlers_contracts.test.ts|K|deadline/payment contract fields|r9c_interactions (fixture swap only)|S3c
+kernel/ts/test/chandlers_debt.test.ts|D|Chandler's Debt story timings (quest dropped from r9c); deadline fail/complete covered by quest_deadline.test.ts:95 and :128|-|S3c
+kernel/ts/test/first_search.test.ts|K|quest activation delivery, trigger matching, reaction source rollback|r9c_interactions|S3b
+kernel/ts/test/notice_boards.test.ts|K|board loader/projection|r9c_interactions or identity_sampler (boards)|S3b
+kernel/ts/test/wren_riddle.test.ts|K|riddle retry on bound row, participant leaves disables Choose|r9c_interactions (vesper riddle)|S3b
+kernel/ts/test/wisp_fixture.ts|D|helper of wisp (not in r9c)|-|S3b
+kernel/ts/test/wisp.test.ts|D|Wisp S4 riddle story; riddle retry/participants covered by wren_riddle.test.ts:137 and :193 (K)|-|S3b
+kernel/ts/test/cartridge_wisp.test.ts|K|reopening dialogue rejects direct assign of once-proven fact; drop wisp-specific cases|r9c_interactions (vesper riddle)|S3b
+kernel/ts/test/status_readers.test.ts|R|ward sampler readers; the wisp test at :278 (blind hides discovered NPC and glowing detail) has no target: keep only if ward_sampler gains nothing new, else delete (see no-target list)|ward_sampler|S3b
+kernel/ts/test/priory_fixture.ts|D|helper (Priory books; topics dropped from r9c)|-|S3b
+kernel/ts/test/priory.test.ts|D|Priory route/novice schedule story; Read grants once covered by codex.test.ts:64|-|S3b
+kernel/ts/test/priory_contracts.test.ts|K|item writing/topic refs/unique mappings fail closed|codex_sampler|S3b
+kernel/ts/test/missing_child_stays.test.ts|K|quest item received once, custody rules, corpse keeps it|r9c_interactions (vesper_message)|S3b
+kernel/ts/test/missing_child_bell.test.ts|K|Ring/Silence admission and terminal (bell-save production)|r9c_interactions|S3b
+kernel/ts/test/missing_child_finale.test.ts|K|scene must bind Begin detail; endings need Begin+ack|r9c_interactions|S3b
+kernel/ts/test/missing_child.test.ts|D|v042 release pins (simulator seeds + allocation oracle); simulator invariants covered by sim.test.ts:182|-|S3b
+kernel/ts/test/e1.test.ts|K|E1 command refuses wrong candidate/policy/repro|r9c_interactions + toolbox_showcase candidates|S5
+kernel/ts/test/e1.ts|K|E1 runner|unchanged|S5
+kernel/ts/test/e1_policy.ts|K|candidate table: drop ashmere_missing_child row|r9c_interactions|S5
+kernel/ts/test/e1_repro.ts|K|repro|unchanged|S5
+kernel/ts/test/e1_barrier.test.ts|K|barrier.set witness (already showcase)|toolbox_showcase|S5
+kernel/ts/test/e1_obligations.ts|K|generic witnesses (split out v042 route parts from e1_creatures.ts)|unchanged|S5
+kernel/ts/test/e1_barrier.ts|K|witness module|unchanged|S5
+kernel/ts/test/e1_order.ts|K|witness module|unchanged|S5
+kernel/ts/test/e1_repair.ts|K|witness module|unchanged|S5
+kernel/ts/test/e1_identity.ts|K|witness module|unchanged|S5
+kernel/ts/test/e1_knowledge_effects.ts|K|witness module|unchanged|S5
+kernel/ts/test/e1_creatures.ts|K|witness module; delete its fixed v042 route|unchanged|S5
+kernel/ts/test/e1_obligations.test.ts|D|witness cases on v042 Maud/ferry/stay; retarget only if PM keeps E1 cases (see risks)|-|S5
+kernel/ts/test/e1_case_host.ts|D|fixed v042 SQLite proof host|-|S5
+kernel/ts/test/e1_cases.ts|D|v042 case runner|-|S5
+kernel/ts/test/e1_cases.test.ts|D|v042 case bindings|-|S5
+kernel/ts/test/e1_dispositions.json|D|v042 disposition table|-|S5
+kernel/ts/test/e1_creatures.test.ts|D|v042 creature witnesses|-|S5
+kernel/ts/test/e1_debt.ts|D|v042 route|-|S5
+kernel/ts/test/e1_debt.test.ts|D|v042 route|-|S5
+kernel/ts/test/e1_dialogue_circuit.ts|D|v042 route|-|S5
+kernel/ts/test/e1_dialogue_circuit.test.ts|D|v042 route|-|S5
+kernel/ts/test/e1_epilogue_talks.ts|D|v042 route|-|S5
+kernel/ts/test/e1_epilogue_talks.test.ts|D|v042 route|-|S5
+kernel/ts/test/e1_faults.ts|D|v042 storage anchors|-|S5
+kernel/ts/test/e1_identity.test.ts|D|v042 witnesses|-|S5
+kernel/ts/test/e1_items.ts|D|v042 route|-|S5
+kernel/ts/test/e1_items.test.ts|D|v042 route|-|S5
+kernel/ts/test/e1_journal.test.ts|D|v042 route|-|S5
+kernel/ts/test/e1_knowledge_effects.test.ts|D|v042 route|-|S5
+kernel/ts/test/e1_maud.ts|D|v042 route|-|S5
+kernel/ts/test/e1_maud.test.ts|D|v042 route|-|S5
+kernel/ts/test/e1_night_marsh.ts|D|v042 route|-|S5
+kernel/ts/test/e1_night_marsh.test.ts|D|v042 route|-|S5
+kernel/ts/test/e1_optional_quests.ts|D|v042 route|-|S5
+kernel/ts/test/e1_optional_quests.test.ts|D|v042 route|-|S5
+kernel/ts/test/e1_paths.ts|D|v042 route|-|S5
+kernel/ts/test/e1_refusals.ts|D|v042 route|-|S5
+kernel/ts/test/e1_rejoin.ts|D|v042 route|-|S5
+kernel/ts/test/e1_rejoin.test.ts|D|v042 route|-|S5
+kernel/ts/test/e1_routes.ts|D|v042 route|-|S5
+kernel/ts/test/e1_routes.test.ts|D|v042 route|-|S5
+kernel/ts/test/e1_services.ts|D|v042 route|-|S5
+kernel/ts/test/e1_services.test.ts|D|v042 route|-|S5
+kernel/ts/test/e1_watch_rounds.ts|D|v042 route|-|S5
+kernel/ts/test/e1_watch_rounds.test.ts|D|v042 route|-|S5
+kernel/ts/test/e1_wisp_herbs.ts|D|v042 route|-|S5
+kernel/ts/test/e1_wisp_herbs.test.ts|D|v042 route|-|S5
+kernel/ts/test/e1_world.ts|D|v042 idle-world model|-|S5
+kernel/ts/test/e1_world_witness.ts|D|v042 world witnesses|-|S5
+kernel/ts/test/e1_world_witness.test.ts|D|v042 world witnesses|-|S5
+kernel/ts/test/transcripts.test.ts|R|transcripts replay; drop missing_child_* glob|renamed samplers + S6 transcripts|S8
+mobile/authority/local-story/__tests__/elapsed-host.test.ts|R|helper elapsedBundle|ferry_sampler|S1
+mobile/authority/local-story/carrying-reach.test.ts|R|saved custody cycle faults before carrying|items_sampler|S1
+mobile/authority/local-story/chapters.test.ts|R|derived chapter after reopen|chapters_sampler|S1
+mobile/authority/local-story/elapsed.test.ts|R|elapsed receipts/fencing|scene_sampler|S1
+mobile/authority/local-story/equipment.test.ts|R|worn item after reopen|wear_sampler|S1
+mobile/authority/local-story/faults.test.ts|R|every fault leaves prior/next revision|details_sampler, check_sampler|S1
+mobile/authority/local-story/journal.test.ts|R|journal projection after reopen|journal_sampler|S1
+mobile/authority/local-story/keyed.test.ts|R|invoke passes action_key|ferry_sampler|S1
+mobile/authority/local-story/lineage.test.ts|R|lineage seed/context pinned|recipe_sampler, check_sampler|S1
+mobile/authority/local-story/local_story.test.ts|R|restart, receipts, COMMIT faults, kill, trace, jobs|recipe/ferry/green/items samplers|S1
+mobile/authority/local-story/observe.test.ts|R|budget fault observation sink|green_sampler|S1
+mobile/authority/local-story/position.test.ts|R|position after reopen|position_sampler|S1
+mobile/authority/local-story/recovery.test.ts|R|leftover transaction, corrupt save, trace cap|items_sampler|S1
+mobile/authority/local-story/resource-recovery.test.ts|R|opted rows/Rest receipts|position_sampler, cellar_sampler|S1
+mobile/authority/local-story/saves.test.ts|R|save identity/pin/corrupt|recipe_sampler, check_sampler, items_sampler|S1
+mobile/authority/local-story/scene.test.ts|R|scene line two reopen|scene_sampler|S1
+mobile/authority/local-story/session.test.ts|R|Start over lost ack|items_sampler|S1
+mobile/authority/local-story/smoke.test.ts|R|smoke controller restart/pending|items_sampler|S1
+mobile/authority/local-story/start_over.test.ts|R|Start over over corrupt report|ferry_sampler|S1
+mobile/authority/local-story/story_points.test.ts|R|story point capture/delivery|ferry_sampler|S1
+mobile/authority/local-story/combat.test.ts|R|combat receipts reopen/FULL/unknown COMMIT|cellar_sampler frozen v009|S1
+mobile/authority/local-story/combat_schedule.test.ts|R|departure vs due round reopen|cellar_sampler frozen v009|S1
+mobile/authority/local-story/death.test.ts|R|corpse reopen atomic|cellar_sampler frozen v007|S1
+mobile/authority/local-story/npc-hp.test.ts|R|NPC HP adoption atomic|cellar_sampler frozen v007|S1
+mobile/authority/local-story/__tests__/reward-host.test.ts|R|helper|cellar_sampler|S1
+mobile/authority/local-story/reward_storage.test.ts|R|reward atomic under rollback|cellar_sampler|S1
+mobile/authority/local-story/sampler.test.ts|D|sampler content walk; scene line-two reopen covered by scene.test.ts:96 (m), journal by journal.test.ts:46 (m)|-|S1
+mobile/authority/local-story/mauds_cellar.test.ts|D|five kills -> reward duplicated by reward_storage.test.ts:27 (m)|-|S1
+mobile/authority/local-story/mauds_cellar_book.test.ts|D|Maud story-ended claim (story)|-|S1
+mobile/authority/local-story/c4_pack.test.ts|K|pack/flight reopen, failed COMMIT|r9c_interactions|S2a
+mobile/authority/local-story/c5_bleed.test.ts|K|bleed ticks through SQLite, COMMIT faults|r9c_interactions|S2a
+mobile/authority/local-story/deer.test.ts|K|deer receipts, forged sight, COMMIT faults|r9c_interactions|S2a
+mobile/authority/local-story/deer_bleed_recovery.test.ts|K|interleaved round/population/bleed receipt|r9c_interactions|S2a
+mobile/authority/local-story/hounds.test.ts|K|population accepted-history refusal, wander unknown COMMIT|r9c_interactions|S2a
+mobile/authority/local-story/c6_expedition.test.ts|K|expedition saves, forged transitions, failed/lost COMMIT|r9c_interactions|S2b
+mobile/authority/local-story/crows.test.ts|K|crow receipts, forged occurrence, COMMIT faults|r9c_interactions|S2b
+mobile/authority/local-story/d9.test.ts|K|bell cue reopen, uncertain COMMIT|r9c_interactions|S2b
+mobile/authority/local-story/d10_knowledge.test.ts|K|knowledge rows forged/failed/lost|r9c_interactions|S2b
+mobile/authority/local-story/dialogue_hub.test.ts|K|hub answer failed/lost COMMIT|r9c_interactions|S2b
+mobile/authority/local-story/patrol.test.ts|K|patrol receipts, forged rows, COMMIT faults|r9c_interactions|S2b
+mobile/authority/local-story/transport.test.ts|K|ferry receipts, forged custody, COMMIT faults|r9c_interactions|S2b
+mobile/authority/local-story/water.test.ts|K|water receipts, deadline settle, COMMIT faults|r9c_interactions|S2b
+mobile/authority/local-story/water_chapter.test.ts|D|bought torch through drowning: covered by water.test.ts:133 and :370 (m), light.test.ts:80 (m)|-|S2b
+mobile/authority/local-story/western_ashmere.test.ts|D|Western Ashmere route (rooms dropped)|-|S2b
+mobile/authority/local-story/wren_escort.test.ts|K|escort save corruption, Rejoin reopen|r9c_interactions|S2b
+mobile/authority/local-story/head_rollback.test.ts|K|head clock behind newest receipt refuses|toolbox_showcase|S2b
+mobile/authority/local-story/__tests__/food-host.ts|K|helper|r9c_interactions|S3a
+mobile/authority/local-story/food.test.ts|K|Eat receipts, forgeries, COMMIT faults|r9c_interactions|S3a
+mobile/authority/local-story/__tests__/dream-host.test.ts|K|helper|r9c_interactions|S3a
+mobile/authority/local-story/dream.test.ts|K|dream checkpoints reopen, forged receipts, COMMIT|r9c_interactions|S3a
+mobile/authority/local-story/service.test.ts|K|service receipts/forgeries/COMMIT|r9c_interactions|S3a
+mobile/authority/local-story/infirmary.test.ts|K|exchange receipts/COMMIT/corruption|r9c_interactions|S3a
+mobile/authority/local-story/__tests__/practical-host.ts|K|helper|r9c_interactions|S3a
+mobile/authority/local-story/practical_skills.test.ts|K|skills-save receipts/COMMIT|r9c_interactions|S3a
+mobile/authority/local-story/light.test.ts|K|fuel receipts/COMMIT/forged refills|r9c_interactions|S3c
+mobile/authority/local-story/light_book.test.ts|K|Book binds Refuel supply, Douse when worn|r9c_interactions|S3c
+mobile/authority/local-story/liquid.test.ts|K|liquid-save provenance, COMMIT|r9c_interactions|S3c
+mobile/authority/local-story/training.test.ts|K|lesson receipts/forged/COMMIT|r9c_interactions|S3c
+mobile/authority/local-story/character_choice.test.ts|K|creation receipt, forged ancestry, COMMIT|r9c_interactions|S3c
+mobile/authority/local-story/commerce.test.ts|D|shop receipts: cold reopen two_shops.test.ts:152, forged receipt :169, failed COMMIT prices.test.ts:59 (all m)|-|S3c
+mobile/authority/local-story/__tests__/chandlers-setup.test.ts|D|helper (Chandler's Debt dropped)|-|S3c
+mobile/authority/local-story/chandlers_debt.test.ts|D|deadline receipts: quest_deadline.test.ts:100, :119 failed/lost COMMIT, :153 forged row (m)|-|S3c
+mobile/authority/local-story/chandlers_debt_forged.test.ts|D|forged deadline receipts: quest_deadline.test.ts:153 (m)|-|S3c
+mobile/authority/local-story/chandlers_debt_rows.test.ts|D|forged rows: quest_deadline.test.ts:153 (m)|-|S3c
+mobile/authority/local-story/chandlers_debt_turnin.test.ts|D|forged turn-in: quest_deadline.test.ts:153 (m)|-|S3c
+mobile/authority/local-story/__tests__/bell-setup.test.ts|K|helper|r9c_interactions|S3b
+mobile/authority/local-story/bell.test.ts|K|bell-save forged/lost receipts (Ashmere-keyed production code)|r9c_interactions|S3b
+mobile/authority/local-story/bell_receipts.test.ts|K|bell COMMIT uncertainty/forgeries|r9c_interactions|S3b
+mobile/authority/local-story/quest_started_at.test.ts|K|started_at must be past LogicalTime|r9c_interactions (via bell-setup)|S3b
+mobile/authority/local-story/finale.test.ts|K|finale-save reopen at every line|r9c_interactions|S3b
+mobile/authority/local-story/vesper_message.test.ts|K|message receipts/custody/COMMIT; drop v010->v012 migration test|r9c_interactions|S3b
+mobile/authority/local-story/wren_riddle.test.ts|K|riddle-save receipts/COMMIT|r9c_interactions|S3b
+mobile/authority/local-story/wisp.test.ts|D|wisp riddle saves: wren_riddle.test.ts:189 forged evidence, :341 failed/lost COMMIT (m, K)|-|S3b
+mobile/authority/local-story/missing_child.test.ts|D|Q1 story flows; reward atomicity covered by reward_storage.test.ts:27 and :85 (m)|-|S3b
+mobile/authority/local-story/__tests__/priory-fixture.ts|K|helper|codex_sampler|S3b
+mobile/authority/local-story/priory.test.ts|K|topics-save Read receipts, forgeries, COMMIT|codex_sampler|S3b
+mobile/authority/local-story/readable_alias_book.test.ts|K|aliased Read place offer survives redraw|codex_sampler|S3b
+mobile/app/book/__tests__/polish-book.test.ts|R|helper default fixture|cellar_sampler|S1
+mobile/app/book/item_detail.test.ts|R|item results order|cellar_sampler|S1
+mobile/app/book/live_actions.test.ts|R|captured controls across pulses|cellar_sampler, ferry_sampler|S1
+mobile/app/book/model.test.ts|R|buttons model|items_sampler|S1
+mobile/app/book/touch.test.ts|R|Lantern by touch (ferry text)|lantern_proof, ferry_sampler|S1
+mobile/app/book/reward_storage.test.ts|R|Put pair/freshness|cellar_sampler|S1
+mobile/app/book/hounds.test.ts|K|instance-bound Attack, pelt Contents|r9c_interactions|S2a
+mobile/app/book/dream.test.ts|K|Book dream routing over uncertain COMMIT|r9c_interactions|S3a
+mobile/app/book/food.test.ts|K|Book Eat returns World once|r9c_interactions|S3a
+mobile/app/book/infirmary.test.ts|K|Book patch controls exact targets|r9c_interactions|S3a
+mobile/app/book/liquid.test.ts|K|Book liquid pairs/freshness|r9c_interactions|S3c
+mobile/app/book/practical_skills.test.ts|K|Book teacher detail offer|r9c_interactions|S3a
+mobile/app/book/training.test.ts|K|Character page attributes/qualifications|toolbox_showcase|S3b
+mobile/app/book/riddle.test.ts|K|NPC tile riddle controls|r9c_interactions|S3b
+mobile/app/book/readable.test.ts|K|Book Read receipts/recovery|codex_sampler|S3b
+mobile/app/book/notice_board.test.ts|D|board/Study/Elspeth routes (story); Read covered by readable.test.ts (book)|-|S3b
+mobile/app/book/priory.test.ts|K|nested book Item Read restore|codex_sampler|S3b
+mobile/app/book/shop.test.ts|K|shop detail binds item/merchant/quote|toolbox_showcase|S3b
+mobile/app/book/pass1_ui4.test.ts|K|item page option order, Lift, purse note|toolbox_showcase|S3b
+mobile/app/book/polish.test.ts|K|polish picks (corpse Take, map focus, retry)|toolbox_showcase|S3b
+mobile/app/book/polish_detail.test.ts|K|pickup/Give/Drop returns; locks+sampler parts rename|toolbox_showcase + locks_sampler + cellar_sampler|S3b
+mobile/app/book/hostile_refusal.test.ts|K|one test on v042 (buy reason is a word)|toolbox_showcase|S3b
+mobile/app/chapter.test.ts|K|app shell opens showcase save, refuses old pinned save, pause/resume|toolbox_showcase (old-save case via a changed showcase bundle)|S3b
+mobile/app/walkthrough/ashmere_missing_child.walk.ts|D|retired chapter contact-sheet route|-|S8
+mobile/app/walkthrough/ashmere_sampler.walk.ts|D|sampler precedent route (owner playtests showcase)|-|S8
+mobile/app/tests/steps.ts|R|comment only|-|S8
+test/loka/content_test.exs|R|one diagnostic per code; mix loka.compile|hello_sampler|S1
+test/loka/content_attributes_test.exs|R|attributes compile/refusals|hello_sampler, resource_sampler|S1
+test/loka/content_raid_test.exs|R|API floors|hello_sampler|S1
+test/loka/content_rooms_test.exs|R|rooms/details/facts compiler refusals + KATs|rooms/details/facts samplers|S1
+test/loka/content_recipes_test.exs|R|recipe compiler refusals + KAT|recipe_sampler|S1
+test/loka/content_dusk_test.exs|R|check/failure outcome refusals + KAT|check_sampler|S1
+test/loka/content_road_test.exs|R|resources compiler + KAT|resource_sampler|S1
+test/loka/content_rest_test.exs|R|position fact, recovery compiler + KAT|position_sampler, ferry_sampler|S1
+test/loka/content_gate_test.exs|R|barrier compiler + KAT|gate_sampler|S1
+test/loka/content_locks_test.exs|R|item barrier compiler + KAT|locks_sampler|S1
+test/loka/content_items_test.exs|R|item/carrying compiler + KAT|items_sampler|S1
+test/loka/content_variants_test.exs|R|variants compiler|items_sampler|S1
+test/loka/content_wear_test.exs|R|slot compiler + KAT|wear_sampler|S1
+test/loka/content_errand_test.exs|R|quest compiler + KAT|errand_sampler|S1
+test/loka/content_journal_test.exs|R|journal compiler + KAT|journal_sampler|S1
+test/loka/content_ferry_test.exs|R|schedule/dialogue/story point/elapsed compiler + KAT|ferry_sampler|S1
+test/loka/content_escort_test.exs|R|escort compiler|ferry_sampler|S1
+test/loka/content_riddle_test.exs|R|riddle compiler|ferry_sampler|S1
+test/loka/content_calendar_test.exs|R|calendar compiler|ferry_sampler|S1
+test/loka/content_green_test.exs|R|reaction compiler + KAT|green_sampler|S1
+test/loka/content_scenes_test.exs|R|scene compiler + KAT|scene_sampler|S1
+test/loka/content_chapters_test.exs|R|chapters compiler + KAT|chapters_sampler|S1
+test/loka/content_sampler_test.exs|R|sampler KAT, NPC HP compiler|cellar_sampler|S1
+test/loka/content_death_test.exs|R|corpse compiler|cellar_sampler|S1
+test/loka/content_reward_storage_test.exs|R|reward compiler + KAT|cellar_sampler|S1
+test/loka/cartridge_cross_kernel_test.exs|R|compiled artifacts identical in TS|renamed samplers|S1
+test/loka/system_graph_test.exs|R|cartridge map lists authored files|facts_sampler, rooms_sampler|S1
+test/loka/cartridge_chapters_hash.py|R|KAT generator|chapters_sampler|S1
+test/loka/cartridge_containers_hash.py|R|KAT generator|items/locks/cellar samplers|S1
+test/loka/cartridge_journal_hash.py|R|KAT generator|journal_sampler|S1
+test/loka/cartridge_sampler_hash.py|R|KAT generator|cellar_sampler|S1
+test/loka/cartridge_scene_hash.py|R|KAT generator|scene_sampler|S1
+test/loka/cartridge_reward_storage_hash.py|R|KAT generator|cellar_sampler|S1
+test/fixtures/reward_storage/README.md|R|path text|cellar_sampler|S1
+test/loka/content_liquids_test.exs|K|liquid compiler refusals (items part rename; chapter part)|items_sampler + r9c_interactions|S4
+test/loka/content_bleed_test.exs|K|bleed/bandage declaration bounds|r9c_interactions|S4
+test/loka/content_deer_test.exs|K|deer plan/bundle refusals|r9c_interactions|S4
+test/loka/content_expedition_test.exs|K|expedition edge refusal|r9c_interactions|S4
+test/loka/content_food_test.exs|K|held-food refusals|r9c_interactions|S4
+test/loka/content_light_test.exs|K|fuel/dark text refusals, API1.19|r9c_interactions|S4
+test/loka/content_patrol_test.exs|K|patrol route/ownership refusals|r9c_interactions|S4
+test/loka/content_practical_skills_test.exs|K|careful/discount refusals|r9c_interactions|S4
+test/loka/content_training_test.exs|K|training refusals|r9c_interactions|S4
+test/loka/content_transports_test.exs|K|ferry/free lesson refusals|r9c_interactions|S4
+test/loka/content_water_test.exs|K|water route refusals (pool_bottom -> well_bottom only)|r9c_interactions|S4
+test/loka/content_d10_test.exs|K|map/Knock refusals before artifact|r9c_interactions|S4
+test/loka/content_d9_test.exs|K|cue/suppression refusals|r9c_interactions|S4
+test/loka/content_first_search_test.exs|K|quest reaction refs/owners|r9c_interactions|S4
+test/loka/content_climb_test.exs|K|one test: patrol over climb face refused|climb_sampler + r9c_interactions|S4
+test/loka/content_hidden_passage_test.exs|K|one test: patrol/expedition over hidden face refused|hidden_sampler + r9c_interactions|S4
+test/loka/content_services_test.exs|K|service funding/provider refusals (maud_offer dropped: adapt)|r9c_interactions|S4
+test/loka/content_dreams_test.exs|K|Rest dream refusals (dream_annex dropped: use inn_rooms/dream_of_the_fen)|r9c_interactions|S4
+test/loka/content_standing_test.exs|K|standing API floor, hostile speaker warns (guard dropped: use another NPC)|r9c_interactions|S4
+test/loka/content_wisp_test.exs|K|riddle source refusals, once-proven fact assign|r9c_interactions (vesper riddle)|S4
+test/loka/content_notice_boards_test.exs|K|board refs/catalog refusals|identity_sampler (boards)|S4
+test/loka/content_priory_test.exs|K|book metadata/topic refusals|codex_sampler|S4
+test/loka/content_missing_child_test.exs|K|KAT test D; 10 refusal tests (ancestry, scene detail, shop, exchange, hound area, deer hide, crow corridor/roles, wander, flight) move to r9c base|r9c_interactions|S4
+test/loka/cartridge_missing_child_hash.py|D|KAT generator of retired chapter|-|S4
+test/loka/cartridge_missing_child_v015_hash.py|D|KAT generator of retired chapter|-|S4
+test/loka/cartridge_missing_child_v016_hash.py|D|KAT generator of retired chapter|-|S4
+test/loka/cartridge_missing_child_v017_hash.py|D|KAT generator of retired chapter|-|S4
+test/loka/cartridge_missing_child_v026_hash.py|D|KAT generator of retired chapter|-|S4
+test/loka/cartridge_missing_child_v027_hash.py|D|KAT generator of retired chapter|-|S4
+test/loka/cartridge_r9c_interactions_hash.py|D|reads v042; freeze r9c fixture (PM choice, see risks)|-|S8
+bin/red_controls.exs|R|features red control path ashmere_details/transcripts/skills.jsonl|details_sampler path|S1
+.github/workflows/ci.yml|D|e1-recorder job builds v042 artifact (line 137)|retarget recorder to r9c or delete job|S5
+kernel/ts/test/containment.test.ts|R|take/drop/give custody, containment invariants|items_sampler|S1
+kernel/ts/test/deep_fen.test.ts|D|D5 deep-fen route (fox_den_deep dropped). Authority-layer COMMIT reconcile covered by mobile local_story.test.ts:241 and :270; lookalike substitution by missing_child_stays (K)|-|S2b
+kernel/ts/test/fixtures/c5-provisional-artifact.json|D|frozen provisional chapter artifact|-|S2a
+kernel/ts/test/r9c_custody_terminal.test.ts|R|comment links to deleted focused tests only|update links|S8
+mobile/authority/local-story/r9c_creatures_transport.test.ts|R|comment links only|update links|S8
+mobile/authority/local-story/r9c_custody_terminal.test.ts|R|comment links only|update links|S8
