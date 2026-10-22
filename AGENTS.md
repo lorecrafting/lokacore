@@ -43,8 +43,9 @@ commit `997a7a8` (`docs/rewrite-v3/`, `r1-spike/`).
   rates, odds, maximums, default stats, calendar lengths, thresholds). Never add a world value
   as an engine or presenter literal; [World parameters](docs/world-parameters.md) lists the
   ones still to move. Safety budgets and protocol constants stay in the engine.
-- **Distribution (PREP-03):** the first release bundles its chapter in the app;
-  downloadable story content waits for a pre-launch store-policy review.
+- **Distribution (PREP-03):** the first release will bundle the real game's chapter in the app;
+  until then the app bundles the toolbox showcase. Downloadable story content waits for a
+  pre-launch store-policy review.
 
 ## Hard-won lessons
 

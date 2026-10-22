@@ -1,7 +1,7 @@
-// Book routes the browser tests share: a new game, a walk by the map, the lit torch and a reopen.
+// Book routes the browser tests and walks share: reduced motion, a new Ashmere game and a walk by
+// the map.
 import type { Browser } from '@e2e-dev/web';
 import { expect, type TestFixtures } from 'e2e';
-import { LABEL } from '../book/labels.ts';
 
 export type Screen = TestFixtures['screen'];
 
@@ -17,17 +17,8 @@ export async function reducedMotion(browser: Browser) {
   });
 }
 
-// A cleared save, the ancestry picked and the opening continued, at the Ferry Landing.
-// Until the leaving page's cross-fade is over: it stays in the DOM (inert, hidden from the screen
-// reader) for motion.fade, and text both pages show would match twice.
-export async function settled(browser: Browser) {
-  await browser.evaluate(async () => {
-    for (let i = 0; i < 120 && document.querySelector('[inert]'); i++)
-      await new Promise(requestAnimationFrame);
-    return null; // evaluate returns JSON
-  });
-}
-
+// A cleared save, the ancestry picked and the opening continued, at the Ferry Landing: the
+// retired Ashmere chapter, served only by `bin/loka dev` (walkthrough/ashmere_missing_child.walk.ts).
 export async function begin(
   { app, screen }: Pick<TestFixtures, 'app' | 'screen'>,
   ancestry: string,
@@ -43,25 +34,4 @@ export async function go(screen: Screen, direction: string, room?: string) {
   await screen.getByRole('button', 'Map').tap();
   await screen.getByRole('button', `Go ${direction}`).tap();
   if (room) await expect(screen.getByRole('button', `${room}, look`)).toBeVisible();
-}
-
-export async function inventory(screen: Screen) {
-  await screen.getByRole('button', /; opens Contents$/).tap();
-  await screen.getByRole('button', `${LABEL.inventory}, open`).tap();
-}
-
-// At the Chandler: buy a torch from Peg for 3p and light it.
-export async function litTorch(screen: Screen) {
-  await screen.getByRole('button', /^Peg Harrow is here\./).tap();
-  await screen.getByRole('button', 'Buy a torch — 3p').tap();
-  await screen.getByRole('button', LABEL.leave).tap();
-  await inventory(screen);
-  await screen.getByRole('button', 'a torch, open').tap();
-  await screen.getByRole('button', 'Ignite a torch').tap();
-  await screen.getByRole('button', LABEL.leave).tap();
-}
-
-export async function reopen({ app, screen }: Pick<TestFixtures, 'app' | 'screen'>) {
-  await app.restart();
-  await screen.getByRole('button', 'Continue').tap();
 }

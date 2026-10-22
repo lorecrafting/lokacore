@@ -37,7 +37,7 @@ test('only LOKA_DEV_CARTRIDGE points the app at the dev artifact', () => {
         '-e',
         `const { resolver } = require('./metro.config.js');
          const context = { originModulePath: require('path').resolve('App.tsx'), resolveRequest: () => 'pinned' };
-         const name = '../../protocol/fixtures/missing_child_v042_hash.json';
+         const name = '../../protocol/fixtures/toolbox_showcase_hash.json';
          process.stdout.write(JSON.stringify(resolver.resolveRequest?.(context, name, 'web') ?? 'pinned'));`,
       ],
       { cwd: import.meta.dirname, encoding: 'utf8', env: { PATH: process.env.PATH, ...env } },

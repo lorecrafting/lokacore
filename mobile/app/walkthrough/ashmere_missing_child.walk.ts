@@ -1,4 +1,6 @@
-// Chapter 1 routes for the polish contact sheet (`npm run walkthrough`, walkthrough.config.ts).
+// Chapter 1 routes of the retired Ashmere chapter for the polish contact sheet
+// (`bin/loka dev cartridges/ashmere_missing_child`, then
+// `LOKA_WALK=ashmere_missing_child npm run walkthrough`; walkthrough.config.ts).
 // Each route follows an E1 recorder recipe in kernel/ts/test, translated by hand from its action
 // keys to the Book's button labels.
 import { begin } from '../tests/steps.ts';
@@ -89,7 +91,7 @@ walk('2-chandlers-debt', "Side quest: the Chandler's debt, on time", async (r) =
   await talk(screen, 'Prior Aldric', 'Give Aldric Peg’s ledger before the deadline.');
 });
 
-// e1_optional_quests.ts lanternDream('follow_fox'); tests/book.e2e.ts plays the Wake branch.
+// e1_optional_quests.ts lanternDream('follow_fox').
 walk('3-lantern-dream', 'Side quest: a room at the Lantern, follow the fox', async (r) => {
   const { screen } = r;
   await begin({ app: r.app, screen }, 'Road-born');

@@ -24,7 +24,7 @@ This is a route through the installed system, not a second specification. The
 
 The [glossary](system/glossary.md) distinguishes a blueprint from a live entity. A compiled
 cartridge is an immutable release; changing source and recompiling creates a different content
-hash. The [current bundled chapter](system/cartridge.md#current-bundled-chapter) owns its
+hash. The [retired Ashmere chapter](system/cartridge.md#retired-ashmere-chapter-e1-candidate) owns its
 release and oracle identity. Existing saves remain pinned to the release that created
 them ([save model](system/save.md)).
 

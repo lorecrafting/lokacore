@@ -1,6 +1,7 @@
-// `npm run walkthrough`: plays Chapter 1 routes at a phone size under reduced motion and
-// screenshots every page for the polish contact sheet (walkthrough/sheet.cjs). Not a test suite, but
-// book-e2e.yml's walk job gates on the toolbox_showcase routes: a dead end must still fail.
+// `npm run walkthrough`: plays the bundled toolbox showcase's routes at a phone size under reduced
+// motion and screenshots every page for the polish contact sheet (walkthrough/sheet.cjs). Not a test
+// suite, but book-e2e.yml's walk job gates on the toolbox_showcase routes: a dead end must still
+// fail.
 // `LOKA_WALK=<cartridge id>` plays walkthrough/<id>.walk.ts on the author preview's artifact
 // instead (compile it first: `bin/loka dev cartridges/<id>`, docs/BUILDERS-GUIDE.md#preview-an-edit).
 import { web } from '@e2e-dev/web';
@@ -30,7 +31,7 @@ if (cartridge) {
 }
 
 export default {
-  tests: [`walkthrough/${cartridge ?? 'chapter1'}.walk.ts`],
+  tests: [`walkthrough/${cartridge ?? 'toolbox_showcase'}.walk.ts`],
   output: '.walkthrough',
   timeout: 480_000,
   trace: 'off',
