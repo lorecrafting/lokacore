@@ -1,0 +1,35 @@
+{
+  "npc": "hedge_wizard",
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": [
+        {
+          "op": "quest_state",
+          "quest": "errand",
+          "state": "active"
+        },
+        {
+          "op": "fact_compare",
+          "fact": "flamma_known",
+          "equals": true
+        }
+      ]
+    }
+  },
+  "prompt": "dialogue.wizard_awaiting_report.prompt",
+  "roles": {
+    "wizard": {
+      "role": "npc",
+      "npc": "hedge_wizard"
+    }
+  },
+  "choices": {
+    "done": {
+      "label": "dialogue.wizard_awaiting_report.done",
+      "narration": "narration.wizard_awaiting_report.done"
+    }
+  },
+  "quest": "errand"
+}
