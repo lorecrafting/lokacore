@@ -12,8 +12,9 @@ Written 2026-10-21 in Claude Code by anthropic/claude-opus-5-5 (developer).
   through the same import ([current bundled chapter](../system/cartridge.md#current-bundled-chapter)).
   Its save is keyed by the artifact's hash, so the showcase build starts fresh on each content
   change (pre-production); earlier saves, `loka-ashmere-missing-child.db` included, stay untouched
-  and are never deleted. Browser tests that only checked Ashmere story content are deleted; the
-  Book and save checks move onto the showcase.
+  and are never deleted. Browser tests bound to Ashmere rooms are deleted, including their checks of a
+  resumed dream choice, a timed reopen under a faked clock and standalone reads; the move over
+  reload, Start over and bounded-memory checks move onto the showcase.
 - Later phases (epic `loka-4hik`) delete the Ashmere sources, fixtures and the tests that load them
   explicitly. Until then they stay, with the E1 recorder that certified the
   [retired chapter](../system/cartridge.md#retired-ashmere-chapter-e1-candidate).

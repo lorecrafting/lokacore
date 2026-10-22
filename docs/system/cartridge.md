@@ -635,8 +635,8 @@ Ferryman's Lantern": four rooms, Bram, one lantern, one quest with a `current_st
 objective and no offer, two dialogues of Bram's: `bram_offer` while the player has no instance of
 the quest (one choice, `accept`, which accepts it) and `bram` while it is active (two choices,
 `carry`, `leave` with a hand-over), the fact `search_plan`, a story point with one outcome per choice, start 06:00
-(`cartridges/lantern_proof/*`; its stats and gate: [owner rules](owner-rules.md#product-and-scope)). Its known answer remains historical proof; the app bundles the
-[current Missing Child chapter](#current-bundled-chapter).
+(`cartridges/lantern_proof/*`; its stats and gate: [owner rules](owner-rules.md#product-and-scope)). Its known answer remains historical proof; the app bundled the
+[retired Missing Child chapter](#retired-ashmere-chapter-e1-candidate) until 2026-10-21.
 
 ### R9C synthetic interaction cartridge (E2)
 
@@ -741,7 +741,7 @@ preserving the five finite rats. It removes cellar_door from both reciprocal exi
 removes the obsolete barrier/key/text. Cellar access is an ordinary free passage, so
 shrine recovery requires no equipment/key. Other barriers and owner prose remain.
 The historical0.0.8 fixture retains its original answer; the
-[current bundled chapter](#current-bundled-chapter) has its own independent oracle.
+[retired Ashmere chapter](#retired-ashmere-chapter-e1-candidate) has its own independent oracle.
 
 ## Maud’s Cellar content (M20-B2)
 
@@ -1249,7 +1249,7 @@ S1 credits retain their declared consumer. Additional installed consumers are
 [C4 pack response/flight](#c4-pack-response-and-wounded-flight),
 [D7 deer](#d7-deer-declarations), [D8 crows](#d8-crows-coin-and-reachable-nest-selected-contract)
 and [D9 bell suppression](mechanics.md#d9-village-consequences-and-prior-study-access-selected-contract).
-The [current bundled chapter](#current-bundled-chapter) owns release answers;
+The [retired Ashmere chapter](#retired-ashmere-chapter-e1-candidate) owns release answers;
 [C3's publication review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-06-c3-publication-status-review.md)
 retains its original independent source/save proof.
 
@@ -1659,7 +1659,7 @@ with authored labels and descriptions. Compiler and loader reject missing/extra 
 unknown attributes/skills/faction references, unsupported sight effects, unsafe or
 out-of-range values, absent capabilities and effects that cannot apply atomically.
 The [D11 command and changed row](mechanics.md#d11-character-choice-selected-contract)
-consume this shape; the [current identity](#current-bundled-chapter) owns release answers.
+consume this shape; the [retired Ashmere identity](#retired-ashmere-chapter-e1-candidate) owns release answers.
 
 <a id="d9-village-reaction-content-selected-pending-implementation"></a>
 

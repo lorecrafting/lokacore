@@ -2,7 +2,7 @@
 // This checks the real App -> localSession -> SQLite path, without rendering a phone UI.
 import assert from 'node:assert/strict';
 import { createHash, randomUUID } from 'node:crypto';
-import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -71,22 +71,7 @@ test('the app opens and replaces only its showcase save, preserving Lantern, sam
   );
   old.close();
   const ashmerePath = join(dir, 'loka-ashmere-missing-child.db');
-  const ashmere = new DatabaseSync(ashmerePath);
-  openGame(
-    adapt(ashmere),
-    JSON.parse(
-      readFileSync(
-        new URL('../../protocol/fixtures/missing_child_v042_hash.json', import.meta.url),
-        'utf8',
-      ),
-    ),
-    {
-      kernel_version: `loka-kernel@${'0'.repeat(40)}`,
-      newId: randomUUID,
-      time: { wall: () => 10000, monotonic: () => 0 },
-    },
-  );
-  ashmere.close();
+  writeFileSync(ashmerePath, 'retired Ashmere save'); // bytes the app must never open or delete
   const checksum = () =>
     [lanternPath, samplerPath, ashmerePath].map((path) =>
       createHash('sha256').update(readFileSync(path)).digest('hex'),

@@ -55,9 +55,9 @@ Registries are checked in `test/loka/core/registries_test.exs`.
 Current receptacle fixtures are named `containers_*hash.json`; their independently
 derived additions are in `test/loka/cartridge_containers_hash.py`. Original artifacts
 retain preproduction bytes; the current loader refuses unmarked receptacles. Current
-feature transcripts remain replayable. The bundled
+feature transcripts remain replayable. The retired Ashmere
 chapter's release, API, content hash, room count and allocation oracle live in
-[the current chapter identity](../docs/system/cartridge.md#current-bundled-chapter).
+[the retired Ashmere chapter identity](../docs/system/cartridge.md#retired-ashmere-chapter-e1-candidate).
 
 `fixtures/escort.json` pins the API1.11 relation, transition, target, dialogue effect
 and policy supplement, including both portable composers and independent preconditions

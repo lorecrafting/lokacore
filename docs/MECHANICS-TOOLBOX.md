@@ -23,8 +23,7 @@ Done when all four hold (Beads `loka-va9`, `loka-51b`):
    [cartridge](system/cartridge.md#current-bundled-chapter) are unchanged for real saves.
 3. **Dev-only clock advance:** a development control, outside the player's Book, that moves the
    elapsed-time input forward by a chosen amount so timed mechanics (jobs, windows, decay) can be
-   checked without waiting. Today only the e2e tests fake the clock (`mobile/app/tests/*.e2e.ts`
-   override `Date.now`); the player [fixed-time rule](decisions/owner-decision-fixed-time-2026-10-03.md) stays.
+   checked without waiting. No test fakes the browser clock since the Ashmere e2e tests were retired; the player [fixed-time rule](decisions/owner-decision-fixed-time-2026-10-03.md) stays.
 4. The browser walkthrough (`mobile/app`: `npm run walkthrough`) and the headless simulator
    (`kernel/ts/test/sim.ts`) each run on a sampler cartridge, proven once on `ashmere_sampler`.
    Done (batch M1): `LOKA_WALK=<id>` and `--cartridge <artifact>`
