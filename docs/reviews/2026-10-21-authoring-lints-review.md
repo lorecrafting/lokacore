@@ -60,3 +60,26 @@ Holds: 1, 4 and 5. 2 holds in part (findings 2 and 3). 3 holds, but see finding 
    - `budget_exceeded: 'too much at once'` suggests the player asked too much. Optional replacement: `'more than the book can follow'`.
    - The other four words read correctly in both frames.
 7. **nit**: the handback reports `/code-review b1ae4806..4a920385`. That range misses `1f6daf9e` and `4cf222db`; run it over `b1ae4806..4cf222db` in the fix round.
+
+## Re-check round 1 (head `32581ff6521c4ff43f41d3b8c558954992353c5a`)
+
+Fix commits `bfc43c1a`, `9a2ee165` and `32581ff6`.
+
+**Verdict: CHANGES REQUIRED** (two should-fix).
+
+Dispositions:
+1. Verified. `compiler.ex:331` drops `silent` from ReactionRule only. A source copy with `silent: true` compiles to the same artifact bytes (the new test). Mutant M6, removing the strip line, is killed.
+2. Verified. `lint.ex:10` covers both new ops, `mechanics.md:602` is updated, and the four new baseline lines are pinned.
+3. **Not resolved (new should-fix R1-A below).**
+4. Verified. A variant with no `when` gives a finding. Mutant M8, dropping that finding, is killed.
+5. Verified. The baseline header names loka-kgd.184, and the cap of 132 equals the current line count.
+6. Verified. The comment is dropped, and `budget_exceeded` reads 'more than the book can follow'.
+7. Accepted. The `/code-review` range ends at `bfc43c1a`. This re-check covers the two later commits with mutants M6 and M7.
+- `9a2ee165` is correct. `Enum.find(... < 100)` matches `bandOf` (`kernel/ts/src/view/resources.ts:52`), which takes the first cut reached. Mutant M7, restoring `any?`, is killed.
+
+Focused run: `content_lint_test.exs` 10 passed, with mutants M6, M7 and M8 each 9/10. The worktree is clean afterwards.
+
+Findings:
+- **R1-A should-fix**: `lib/loka/content/lint.ex:43-50` and the 13 `npcs/*` lines in `test/loka/lint_baseline.txt`. The widened check 3b asks an NPC that has an attack but is not hostile for an engage line, and the loader forbids that line. `Loka.Content.Standing` and `cartridge_standing.ts:44-46` require `engage` exactly when the NPC is hostile and has an attack. Probe: adding `disposition.engage` to `raider` clears the lint finding, and then `mix loka.compile` fails with SCHEMA_VIOLATION `invalid_value` at `npcs/raider.disposition`. loka-kgd.184 can clear these 13 lines only by making hen, gil, boar and the rest hostile, which makes them attack on entry, or by removing their attacks. The original hostile-with-attack shape is already a compiler error, so check 3b catches nothing either way. Fix: delete check 3b and its 13 baseline lines (cap 119), and record C2a as a non-lint row. A player's Attack on an NPC that is not hostile opens with no line, so C2a needs a Book or kernel opening line or a content ruling. COST XS.
+- **R1-B should-fix** (deferred item `lint.ex:16`, ruled now): `run/1` ignores the diagnostics from `Source.load`, and `lint` returns `[]` for a missing folder and for the parent `cartridges` folder (probe: `{0, 0}`). Today the baseline equality test catches this. Once loka-kgd.184 empties the baseline, a move or rename of `cartridges/toolbox_showcase` (loka-4hik is in progress) turns the test into `[] == []`, and the CI gate passes with no signal. Fix: `run/1` raises unless `cartridge.json` was loaded. COST XS.
+- Deferred and agreed: `:59` blueprint variants (outside the rows), `:36` malformed source (it crashes loudly; it does not pass quietly), and `:10` other ops (outside row 3).
