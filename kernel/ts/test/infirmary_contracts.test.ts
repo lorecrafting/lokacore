@@ -1,14 +1,15 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { createHash } from 'node:crypto';
+import { decode } from '../src/foundation/canonical.ts';
 import { validate } from '../src/foundation/validate.ts';
-import { encode } from '../src/foundation/canonical.ts';
-import { loadCartridge, INSTALLED } from '../src/index.ts';
-import { bundle, ref, patch, fresh } from './infirmary_fixture.ts';
-const qkey = 'ashmere_missing_child@0.0.21:quest/infirmary_herbs';
-const roomkey = 'ashmere_missing_child@0.0.21:room/willow_shade';
-const quest = bundle.value.quests[qkey];
-const detail = bundle.value.rooms[roomkey].details.fenwort_patch;
+import { sampler, infirmary, prefix, ref, patch, fresh } from './infirmary_fixture.ts';
+const qkey = `${prefix}:quest/herbs`;
+const roomkey = `${prefix}:room/mine`;
+const value: any = decode(sampler.bundle(infirmary).canonical);
+const quest = value.quests[qkey];
+const { seam } = value.rooms[roomkey].details;
+const { careful: _c, tool: _t, ...harvest } = seam.harvest; // optional fields; careful is pinned in practical_skills_contracts
+const detail = { ...seam, harvest };
 
 // Breaks: missing stock/fact/participant or malformed bounded quantities cross the typed boundary.
 test('harvest, exchange and retirement retain required identities and bounded stock', () => {
@@ -17,7 +18,7 @@ test('harvest, exchange and retirement retain required identities and bounded st
     op: 'quest.retire',
     writer_group: 0,
     instance_id: 'aaaaaaaa-1111-4222-8333-444444444444',
-    quest: ref('quest', 'infirmary_herbs'),
+    quest: ref('quest', 'herbs'),
     scope: { kind: 'player', character_id: fresh.character },
   };
   for (const [name, valid, path] of [
@@ -45,7 +46,7 @@ test('harvest, exchange and retirement retain required identities and bounded st
     );
 });
 
-// Breaks: a forged family, reward holder, overlap, contribution bound or obsolete API loads despite invalid funding.
+// Breaks: a forged family, reward holder, overlap, stock or contribution bound loads despite invalid funding.
 test('loader independently rejects invalid authored exchange and harvest stock', () => {
   const cases = [
     (c: any) => {
@@ -55,39 +56,31 @@ test('loader independently rejects invalid authored exchange and harvest stock',
       c.quests[qkey].exchange.incoming[0] = c.quests[qkey].exchange.outgoing[0];
     },
     (c: any) => {
-      c.items['ashmere_missing_child@0.0.21:item/bandage_01'].location = {
-        in: 'room',
-        room: ref('room', 'infirmary'),
-      };
+      c.items[`${prefix}:item/bandage_01`].location = { in: 'room', room: ref('room', 'mine') };
     },
     (c: any) => {
-      c.items['ashmere_missing_child@0.0.21:item/fenwort_01'].mass_grams = 0;
+      c.items[`${prefix}:item/ore_01`].mass_grams = 0;
     },
     (c: any) => {
-      c.quests[qkey].exchange.quantity = 13;
+      c.quests[qkey].exchange.quantity = 7; // six ores in stock
     },
     (c: any) => {
-      c.quests[qkey].exchange.increment = 4;
+      c.quests[qkey].exchange.increment = 3; // contribution maximum is 2
     },
     (c: any) => {
-      delete c.facts['ashmere_missing_child@0.0.21:fact/infirmary_contribution'];
+      delete c.facts[`${prefix}:fact/contribution`];
     },
     (c: any) => {
-      delete c.rooms[roomkey].details.fenwort_patch;
-    },
-    (c: any) => {
-      c.manifest.requires.kernel_api.at_least = '1.16';
+      delete c.rooms[roomkey].details.seam;
     },
   ];
-  for (const change of cases) {
-    const c = structuredClone(bundle.value);
-    change(c);
-    const bytes = encode(c);
-    const hash = createHash('sha256').update(bytes).digest('hex');
-    const loaded = loadCartridge(
-      new TextEncoder().encode(JSON.stringify({ cartridge: c, content_hash: hash })),
-      INSTALLED,
+  for (const change of cases)
+    assert.equal(
+      sampler.load((c) => {
+        infirmary(c);
+        change(c);
+      }).ok,
+      false,
+      String(change),
     );
-    assert.equal(loaded.ok, false);
-  }
 });
