@@ -18,6 +18,7 @@ const room = (actions: unknown[], place: unknown[]) => ({
     storylet: 'beckons',
   },
   text: (key: string) => key,
+  label: (key: string) => (key === 'action.beckons' ? 'A stranger beckons' : key),
   log: [],
   g: { place },
   press: () => {},
@@ -44,11 +45,11 @@ test('the offered storylet is one Action card after the details, before the verb
 });
 
 // Breaks: an unavailable pick dropped, drawn as a disabled card, or without its reason; an
-// available pick with no Button drawn as an unavailable note.
+// available pick with no Button drawn as an unavailable note; its label read as a raw key (loka-x6t.53).
 test('an unavailable storylet is the label: reason note, not a pressable', async () => {
   const listed = {
     action_key: 'beckons',
-    label: 'A stranger beckons',
+    label: 'action.beckons',
     available: false,
     target: { kind: 'none' },
     input: [],
