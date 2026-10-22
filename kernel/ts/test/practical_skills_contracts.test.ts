@@ -4,7 +4,7 @@ import { createHash } from 'node:crypto';
 import { encode } from '../src/foundation/canonical.ts';
 import { loadCartridge, INSTALLED } from '../src/index.ts';
 import { validate } from '../src/foundation/validate.ts';
-import { practicalBundle, ref } from './practical_skills_fixture.ts';
+import { practicalBundle, ref, prefix } from './practical_skills_fixture.ts';
 const source = practicalBundle().value;
 const load = (c: any) =>
   loadCartridge(
@@ -16,9 +16,8 @@ const load = (c: any) =>
     ),
     INSTALLED,
   );
-const patch = (c: any) =>
-  c.rooms['ashmere_missing_child@0.0.30:room/willow_shade'].details.fenwort_patch;
-const shop = (c: any) => c.npcs['ashmere_missing_child@0.0.30:npc/peg'].shop;
+const patch = (c: any) => c.rooms[`${prefix}:room/mine`].details.seam;
+const shop = (c: any) => c.npcs[`${prefix}:npc/smith`].shop;
 // Breaks: malformed careful method, optional metadata, or unsafe tuning crosses closed wire/content validation.
 test('method is literal and optional declarations enforce every new field and numeric boundary', () => {
   const payload = {
@@ -46,7 +45,7 @@ test('method is literal and optional declarations enforce every new field and nu
   const mutants = [
     (c: any) => (patch(c).harvest.careful.count = 1),
     (c: any) => (patch(c).harvest.careful.count = 65),
-    (c: any) => (patch(c).harvest.careful.count = 13),
+    (c: any) => (patch(c).harvest.careful.count = 4), // three ores in stock
     (c: any) => (patch(c).harvest.careful.skill = ref('skill', 'absent')),
     (c: any) => (patch(c).harvest.careful.narration = 'absent'),
     (c: any) => (patch(c).harvest.careful.action = 'harvest'),
@@ -55,7 +54,7 @@ test('method is literal and optional declarations enforce every new field and nu
     (c: any) => (shop(c).buy_discount.skill = ref('skill', 'absent')),
     (c: any) => (shop(c).buy_discount.extra = true),
     (c: any) => (shop(c).buy_discount.numerator = 11),
-    (c: any) => (shop(c).buy_discount.minimum = 3),
+    (c: any) => (shop(c).buy_discount.minimum = 2), // above the 1p buy
     (c: any) => {
       shop(c).offers[0].buy = 2147483647;
       shop(c).buy_discount.numerator = shop(c).buy_discount.denominator = 2147483647;

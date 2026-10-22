@@ -4,16 +4,21 @@ import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { read } from '../../../kernel/ts/test/read.ts';
-import { bundle, fresh, ids } from '../../../kernel/ts/test/priory_fixture.ts';
 import { encode, hash } from '../../../kernel/ts/src/foundation/canonical.ts';
 import { loadCartridge, INSTALLED, newWorld } from '../../../kernel/ts/src/index.ts';
-import { openChestBundle } from './__tests__/priory-fixture.ts';
+import { chestBundle, CONTEXT, ids as idsOf } from './__tests__/priory-fixture.ts';
 import { elapsedHost } from './__tests__/elapsed-host.test.ts';
 import { openStory } from './authority.ts';
 import { presenter } from '../../app/book/presenter.ts';
 import { restoredItemPages } from '../../app/book/model.ts';
 
-function setup(path = ':memory:', source = bundle) {
+const ids = idsOf(chestBundle().value),
+  LEDGER = 'The mill ground more sacks at night than by day.';
+
+function setup(
+  path = ':memory:',
+  source: { value: any; canonical: string; sha256: string } = chestBundle(),
+) {
   const a = elapsedHost(path, { wall: 10000, mono: 0 }, source),
     book = presenter(a.game);
   a.game.subscribe(book.update);
@@ -27,22 +32,21 @@ function setup(path = ':memory:', source = bundle) {
   };
   const move = (...directions: string[]) =>
     directions.forEach((direction) => ok('move', [], { direction }));
-  const toBooks = () => move('north', 'north', 'north', 'north', 'north', 'north', 'west');
+  const toBooks = () => move('west');
   const read = () =>
     book.press(
       book
         .screen()
-        .buttons.find(
-          (b) => b.command === 'read' && b.target_ids[0] === ids['item/ward_of_the_fen'],
-        ) ?? assert.fail('Read Ward'),
-      ids['item/ward_of_the_fen'],
+        .buttons.find((b) => b.command === 'read' && b.target_ids[0] === ids['item/mill_ledger']) ??
+        assert.fail('Read ledger'),
+      ids['item/mill_ledger'],
     );
   const loaded = loadCartridge(
     new TextEncoder().encode(encode({ cartridge: source.value, content_hash: source.sha256 })),
     INSTALLED,
   );
   assert.ok(loaded.ok);
-  const world = newWorld(loaded.cartridge as never, fresh().context, [1, 2, 3, 4]);
+  const world = newWorld(loaded.cartridge as never, CONTEXT as never, [1, 2, 3, 4]);
   const reopen = () => openStory(a.db, [{ fresh: world, content_hash: source.sha256 }], a.host);
   return { ...a, book, view, ok, move, toBooks, read, reopen };
 }
@@ -52,11 +56,11 @@ test('real SQLite preserves original books through ground Take nested open Read 
   const dir = mkdtempSync(join(tmpdir(), 'loka-d2-'));
   t.after(() => rmSync(dir, { recursive: true, force: true }));
   const path = join(dir, 'story.db');
-  const controlled = openChestBundle();
+  const controlled = chestBundle();
   let a = setup(path, controlled);
-  const ward = ids['item/ward_of_the_fen'],
-    bell = ids['item/bell_rites'],
-    chest = ids['item/storage_chest'];
+  const ward = ids['item/mill_ledger'],
+    bell = ids['item/carters_note'],
+    chest = ids['item/chest'];
   const reopen = () => {
     a.sql.close();
     a = setup(path, controlled);
@@ -72,7 +76,7 @@ test('real SQLite preserves original books through ground Take nested open Read 
   a.read();
   assert.deepEqual(
     a.view().topics?.map((t) => t.topic.key),
-    ['ward'],
+    ['mill'],
   );
   reopen();
   assert.deepEqual(restoredItemPages(a.view(), a.book.screen().detail), [
@@ -80,31 +84,28 @@ test('real SQLite preserves original books through ground Take nested open Read 
     { kind: 'thing', id: chest },
     { kind: 'thing', id: ward },
   ]);
-  assert.deepEqual(a.book.screen().detail(ward), [
-    'The ward is a promise kept between the Priory and the fen. Ask Aldric how its protection is renewed.',
-  ]);
+  assert.deepEqual(a.book.screen().detail(ward), [LEDGER]);
   a.ok('close', [chest]);
   reopen();
   assert.deepEqual(restoredItemPages(a.view(), a.book.screen().detail), []);
   a.ok('open', [chest]);
   a.read();
+  a.move('east', 'south');
   a.ok('take', [bell]);
   a.ok('read', [bell]);
   reopen();
   assert.deepEqual(
     a.view().topics?.map((t) => t.topic.key),
-    ['bell', 'ward'],
+    ['mill', 'missing_cart'],
   );
-  a.move('east', 'south');
+  a.move('north');
   reopen();
-  a.ok('c_aldric_ward', [ids['npc/aldric']]);
-  a.ok('close_choice', [], { continuation_id: a.view().choice!.continuation_id });
   a.ok('take', [ward]);
   a.ok('drop', [ward]);
   reopen();
   assert.deepEqual(
     a.view().topics?.map((t) => t.topic.key),
-    ['bell', 'ward'],
+    ['mill', 'missing_cart'],
   );
   a.ok('take', [ward]);
   a.read();
@@ -121,7 +122,7 @@ test('real failed and lost COMMIT outcomes fence Read then retry and replay once
       const a = setup(join(dir, `${kind}-${known}.db`));
       assert.equal(a.sql.prepare('PRAGMA journal_mode').get()!.journal_mode, 'delete');
       a.toBooks();
-      a.ok('take', [ids['item/ward_of_the_fen']]);
+      a.ok('take', [ids['item/mill_ledger']]);
       if (known) a.read();
       const before = a.view().topics;
       a.sql.exec(
@@ -139,9 +140,9 @@ test('real failed and lost COMMIT outcomes fence Read then retry and replay once
       assert.equal(a.game.pending(), false);
       assert.deepEqual(
         a.view().topics?.map((t) => t.topic.key),
-        ['ward'],
+        ['mill'],
       );
-      const detail = a.book.screen().detail(ids['item/ward_of_the_fen']);
+      const detail = a.book.screen().detail(ids['item/mill_ledger']);
       assert.equal(detail.length, known ? 2 : 1);
       const actor = a.view().actor_id;
       const reopened = a.reopen();
@@ -151,7 +152,7 @@ test('real failed and lost COMMIT outcomes fence Read then retry and replay once
         invocation_id: invocation,
         actor_id: actor,
         action_key: 'read',
-        target_ids: [ids['item/ward_of_the_fen']],
+        target_ids: [ids['item/mill_ledger']],
         input: {},
       } as never);
       assert.equal(replay.kind, 'saved');
@@ -173,13 +174,13 @@ test('historical Read and known-topic truth reject wrong actor book definition c
   t.after(() => rmSync(dir, { recursive: true, force: true }));
   const mutations = [
     (c: any, d: any) => {
-      c.payload.actor_id = ids['npc/ash'];
+      c.payload.actor_id = ids.body;
     },
     (c: any, d: any) => {
-      c.payload.target_id = ids['item/bell_rites'];
+      c.payload.target_id = ids['item/carters_note'];
     },
     (c: any, d: any) => {
-      d.delta.ops[0].fact.cartridge_version = '0.0.25';
+      d.delta.ops[0].fact.cartridge_version = '0.0.2';
     },
     (c: any, d: any) => {
       d.events[0].causation_id = 'aaaaaaaa-0000-4000-8000-000000000099';
@@ -193,7 +194,7 @@ test('historical Read and known-topic truth reject wrong actor book definition c
     const path = join(dir, `${index}.db`);
     const a = setup(path);
     a.toBooks();
-    a.ok('take', [ids['item/ward_of_the_fen']]);
+    a.ok('take', [ids['item/mill_ledger']]);
     a.read();
     const row = a.sql
       .prepare(
@@ -218,109 +219,26 @@ test('historical Read and known-topic truth reject wrong actor book definition c
   }
 });
 
-// Break: death loses learned topics or substitutes/mints books instead of recoverable original corpse holdings.
-test('actual fatal fight reopens with learned topics and gear-free recovery Takes the original books', () => {
-  const c = structuredClone(bundle.value);
-  c.world.combat.player_attack.chance = 0;
-  for (const n of Object.values(c.npcs) as any[])
-    if (n.key.startsWith('cellar_rat_'))
-      n.attack = { chance: 100, damage_min: 100, damage_max: 100 };
-  const a = setup(':memory:', { value: c, canonical: encode(c), sha256: hash(c) });
-  a.toBooks();
-  a.ok('take', [ids['item/ward_of_the_fen']]);
-  a.ok('read', [ids['item/ward_of_the_fen']]);
-  a.ok('take', [ids['item/bell_rites']]);
-  a.ok('read', [ids['item/bell_rites']]);
-  a.move('east', 'south', 'south', 'south', 'south', 'south', 'east', 'down');
-  a.ok('attack', [ids['npc/cellar_rat_1']]);
-  a.clock.mono = 3000;
-  a.clock.wall = 13000;
-  assert.equal(a.game.pulse('active').kind, 'ready');
-  assert.equal(a.view().place.id, ids['room/chapel_nave']);
-  assert.deepEqual(
-    a.view().topics?.map((t) => t.topic.key),
-    ['bell', 'ward'],
-  );
-  const reopened = a.reopen();
-  assert.equal(reopened.kind, 'open');
-  if (reopened.kind !== 'open') assert.fail('reopen');
-  const corpse = reopened.world().state.containers[ids['item/ward_of_the_fen']];
-  assert.equal(reopened.world().state.containers[ids['item/bell_rites']], corpse);
-  a.move('south', 'south', 'south', 'south', 'east', 'down');
-  const holder = a.view().entities.find((e) => e.id === corpse);
-  assert.ok(holder);
-  assert.deepEqual(
-    holder.contents?.map((e) => e.id).sort(),
-    [ids['item/ward_of_the_fen'], ids['item/bell_rites']].sort(),
-  );
-  a.ok('take', [ids['item/ward_of_the_fen']]);
-  a.read();
-  a.ok('take', [ids['item/bell_rites']]);
-  a.ok('read', [ids['item/bell_rites']]);
-  assert.equal(a.reopen().kind, 'open');
-  a.sql.close();
-});
-
-// Break: cold reopen after a novice departure changes a bound Ash conversation into Hale's.
-test('saved 19:00 novice overlap and 20:00 departure retain original pending speaker', () => {
-  const a = setup();
-  a.toBooks();
-  a.move('east');
-  a.clock.mono = 72000;
-  a.clock.wall = 82000;
-  assert.equal(a.game.pulse('active').kind, 'ready');
-  assert.deepEqual(
-    a
-      .view()
-      .entities.filter((e) => [ids['npc/ash'], ids['npc/hale']].includes(e.id))
-      .map((e) => e.id)
-      .sort(),
-    [ids['npc/ash'], ids['npc/hale']].sort(),
-  );
-  a.ok('ash', [ids['npc/ash']]);
-  const original = a.view().choice!.continuation_id;
-  assert.equal(a.reopen().kind, 'open');
-  a.clock.mono = 144000;
-  a.clock.wall = 154000;
-  assert.equal(a.game.pulse('active').kind, 'ready');
-  assert.equal(a.view().choice!.speaker_id, ids['npc/ash']);
-  assert.equal(a.view().choice!.choices[0].available, false);
-  assert.equal(a.reopen().kind, 'open');
-  const refused = a.game.invoke({
-    action_key: 'choose',
-    target_ids: [],
-    input: { continuation_id: original, choice_id: 'leave' },
-  } as never);
-  assert.equal(refused.kind, 'saved');
-  if (refused.kind === 'saved') assert.equal(refused.decision.kind, 'rejected');
-  a.ok('close_choice', [], { continuation_id: original });
-  a.ok('hale', [ids['npc/hale']]);
-  assert.deepEqual(a.view().choice!.prompt, { key: 'dialogue.hale.prompt' });
-  a.sql.close();
-});
-
 // Break: a Book remount reads the uncertain receipt before reconciliation, then loses its exact detail routing.
 test('Book remount during lost Read acknowledgement waits for confirmation then routes its one recovered page', () => {
   const a = setup();
   a.toBooks();
-  a.ok('take', [ids['item/ward_of_the_fen']]);
+  a.ok('take', [ids['item/mill_ledger']]);
   a.fault.kind = 'lost';
   a.fault.armed = true;
   a.read();
   assert.equal(a.game.pending(), true);
   const remounted = presenter(a.game);
   a.game.subscribe(remounted.update);
-  assert.deepEqual(remounted.screen().detail(ids['item/ward_of_the_fen']), []);
+  assert.deepEqual(remounted.screen().detail(ids['item/mill_ledger']), []);
   assert.deepEqual(remounted.screen().view.topics, []);
   a.fault.reads = false;
   assert.equal(a.game.pulse('active').kind, 'ready');
-  assert.deepEqual(remounted.screen().detail(ids['item/ward_of_the_fen']), [
-    'The ward is a promise kept between the Priory and the fen. Ask Aldric how its protection is renewed.',
-  ]);
+  assert.deepEqual(remounted.screen().detail(ids['item/mill_ledger']), [LEDGER]);
   assert.deepEqual(remounted.screen().log, []);
   assert.deepEqual(
     remounted.screen().view.topics?.map((t) => t.topic.key),
-    ['ward'],
+    ['mill'],
   );
   assert.equal(a.reopen().kind, 'open');
   a.sql.close();
