@@ -6,26 +6,55 @@ the next steps, the standing owner rules that the repo does not yet state, and o
 questions. Rewrite it at each stable checkpoint (a merge, a review verdict, a pushed fix) and before
 the session ends; commit and push it with the Beads export.
 
-Written 2026-10-22 ~05:30 UTC by Claude Code (Opus 5.5), PM session 7b6568, at the end of the retired-chapter deletion.
-State at writing: main is green; the owner preview serves main 04948aff on 19006/19007; one 390 px verification agent may still be running (its report goes to loka-4hik.2 notes).
+Written 2026-10-22 ~18:30 UTC by Claude Code (Opus 5.5), PM session 016V3u, AS OF PR #432, before the owner's macOS
+update and reboot (owner 2026-10-22, quoted: "please bring this to a good stopping point so i can upgrade, then we will
+resume this session after the reboot").
+Open objectives: finish loka-x6t.86 (type and ink before polish), then loka-e56t (CI browser install), then the owner's
+live Storybook polish batch.
 
 ## Live polish session (OPEN since 2026-10-22, owner at Storybook)
 
 The owner reactivated Storybook polish (2026-10-22, quoted): "i am going to do the ui polish on the storybook thing ...
-PLease set things up so that its easy for me to do my ui polish there". The polish lane is no longer paused.
-- Session: `polish/session-2026-10-21` in ~/dev/lokacore-session, from main ce9f6df2. Storybook at
-  http://localhost:6006 (195 entries). The web preview is on 19006. No story or Storybook file names the retired chapter;
-  stories run on showcase routes (mobile/app/stories/routes.ts). Dream and Ancestry pages have synthetic stories.
-- Loop (WORKFLOW "Live polish session", web-preview.md "Polish queue"): the owner presses P, picks, writes and sends.
-  Lines land in ~/dev/lokacore-session/.polish/picks.jsonl. The PM watches that file (a Monitor on new lines), answers
-  through `bin/polish_status.sh` (working / done / log / suggest), and routes each pick to a designer in the session
-  worktree, which commits each accepted tweak.
-- Models (owner 2026-10-21, newer than WORKFLOW's Sonnet-nit line): an Opus designer for nits and design. Fable only
-  for a new design direction; never Sonnet for a designer.
-- Mechanics, save, protocol or engine items leave the session as Beads issues. Polish findings already filed:
-  loka-x6t.81 (390 px check).
-- On the owner's "Close batch": `bin/polish_session.sh close`, then one Opus reviewer quick pass, a green hosted CI,
-  merge, and `bin/after_merge.sh`.
+PLease set things up so that its easy for me to do my ui polish there".
+- Session: `polish/session-2026-10-21` in ~/dev/lokacore-session; it holds no commits yet and was fast-forwarded to
+  main after #432. No pick has arrived yet.
+- After the reboot: `bin/polish_session.sh start` (reuses the open session and serves the owner's Storybook on 6006),
+  then confirm 6006 and the web preview on 19006 answer; restart the preview per docs/web-preview.md if not. Use
+  `bin/polish_session.sh update` (not a manual merge) to bring main in: it restarts Storybook when stories change.
+- Loop (WORKFLOW "Live polish session", web-preview.md "Polish queue"): picks land in
+  ~/dev/lokacore-session/.polish/picks.jsonl; the PM watches it with a Monitor (`tail -F -n 0`, re-armed every 30 min),
+  answers through `bin/polish_status.sh`, and routes each pick to one Opus designer in the session worktree, which commits
+  each accepted tweak. Fable only when the owner asks for a new direction; never Sonnet for a designer.
+- Mechanics, save, protocol or engine picks leave as Beads issues (`bin/br_create.sh`) with a panel log line.
+- "Close batch": `bin/polish_session.sh close`, one Opus reviewer quick pass as PR comments, green hosted CI, merge with
+  `--match-head-commit`, `bin/after_merge.sh`, `bin/preview_update.sh` (it refuses while a session is served).
+
+## Done this session (pre-polish foundation, all merged)
+
+- #428 (loka-x6t.81 part, loka-x6t.53): signpost text once, map scrolls to the current room at 390 px, refusal notes use
+  action labels (Menu.tsx, pages.tsx). loka-x6t.81 stays open: signpost wording, Word bar height, DiscoveredMap.tsx:56
+  re-scroll, notices.tsx `fresh` collapses identical lines.
+- #429 (loka-x6t.82): retired-chapter sections out of docs/system/book-ui.md, general rules kept; catalogue page rows.
+- #430 (loka-x6t.42): Reading size setting (x1, x1.15, x1.3, cap 1.5), Storybook `reading` toolbar, lint rule
+  lint/rules/mobile-book-text.yml.
+- #431 (loka-x6t.83): component specs live in JSDoc on each component (Use/Rules/States/Story), BOOK-UI-COMPONENTS.md is
+  guidance plus an index, enforced by mobile/app/catalogue.test.ts. Owner (paraphrased): consolidate design files; specs
+  live with components; make it enforceable. Fable designed it. Follow-up loka-x6t.85 (story metas lack `component:`).
+- #432 (loka-x6t.87): showcase calendar solar phases; the Book shows dawn/day/dusk/night; no CJK hour glyph.
+- Fable broad audit loka-x6t.84 (ranked findings in its notes). Owner calls 2026-10-22: titles and the status line scale
+  with Reading size (supersedes the morning's "titles fixed"); distinct danger ink; one `type.pageTitle` 26 px left.
+
+## In flight at the reboot
+
+- loka-x6t.86 (type and ink): Opus developer stopped for the reboot. Head 551f4d82 on `feat/type-ink-before-polish`
+  is committed only in its local worktree (named type-ink), not pushed: the pre-push size check failed
+  (`mobile/app/book/Status.tsx:80: function StatusLine, 46 lines, limit 40`). Type check and focused tests pass.
+  Left: cut StatusLine to 40 lines, run the mutants, push, open the PR, then one Opus reviewer, CI, merge,
+  `bin/polish_session.sh update`. The Fable ruling and acceptance literals are in the issue notes.
+- loka-e56t (P1): book-e2e jobs time out in the Playwright browser install (three times on 2026-10-22). Owner chose: after
+  the audit. Plan: cache the browser directory, bound the apt step, raise the storybook job timeout. e2e-web (tester.army)
+  uses the same Playwright 1.63.0 Chromium, so swapping installers alone does not help; browser-use is not a CI test driver.
+- Open owner item: the time of day shows only in the status line's accessible label; a visible clock needs a spec change.
 
 ## Start of a session
 

@@ -611,6 +611,7 @@
    "day": 1,
    "hour": 7,
    "subdivision": 0,
+   "solar": "day",
    "lunar": "new",
    "weather": "heat",
    "season": "spring",
