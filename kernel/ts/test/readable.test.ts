@@ -1,14 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import {
-  INSTALLED,
-  loadCartridge,
-  newWorld,
-  gameView,
-  step,
-  type Cartridge,
-  type World,
-} from '../src/index.ts';
+import { gameView, step, newWorld, type Cartridge, type World } from '../src/index.ts';
 import type { Command, EntityId, Key } from '../src/contracts.gen.ts';
 import { key } from '../src/foundation/compose.ts';
 import { hash } from '../src/foundation/canonical.ts';
@@ -17,17 +9,15 @@ import { resolve as target } from '../src/commands/target.ts';
 import { identify, resolve } from '../src/commands/invocation.ts';
 import { check } from '../src/runtime/invariants.ts';
 import { read } from './read.ts';
+import { fragment } from './fragment.ts';
+import { codex, DESK_NOTE, notices, PLAQUE } from './codex_fixture.ts';
 
 const context = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as World['context'];
-const pin = read('protocol/fixtures/missing_child_v003_hash.json');
-const loaded = loadCartridge(
-  new TextEncoder().encode(`{"cartridge":${pin.canonical},"content_hash":"${pin.sha256}"}`),
-  INSTALLED,
-);
-assert.ok(loaded.ok, JSON.stringify(loaded));
-const fresh = () => newWorld(loaded.cartridge as Cartridge, context, [1, 2, 3, 4]);
-const notice = 'e368b8b9-c4a5-8d0e-82a0-da17e2d59fe2' as EntityId;
-const board = '15349791-fa65-81f7-b378-bb8212b808d2' as EntityId;
+const fresh = () => codex.genesis(notices);
+const at = (w: World, k: string) =>
+  Object.keys(w.details).find((id) => w.details[id].key === k) as EntityId;
+const plaque = at(fresh(), 'plaque');
+const desk = at(fresh(), 'desk');
 const command = (w: World, payload: object): Command =>
   ({
     id: 'aaaaaaaa-0000-4000-8000-000000000001',
@@ -42,13 +32,8 @@ test('Read selects authored writing with exact empty consequences at a fixed hor
   const initial = fresh();
   let w = { ...initial, state: { ...initial.state, clock: 68350 } };
   for (const [id, key, body, alias] of [
-    [
-      notice,
-      'readable.notice',
-      'Keep the landing clear. Tie boats to the mooring post.',
-      'landing notice',
-    ],
-    [board, 'readable.rumor_board', 'Lost a tin whistle? Ask at the Drowned Lantern.', 'board'],
+    [plaque, 'readable.plaque', PLAQUE, 'hall plaque'],
+    [desk, 'readable.desk', DESK_NOTE, 'desk'],
   ]) {
     assert.deepEqual(target(w, w.character, alias), { kind: 'unique', target_id: id });
     const before = hash(w.state as never);
@@ -64,11 +49,7 @@ test('Read selects authored writing with exact empty consequences at a fixed hor
     });
     assert.equal(w.cartridge.text[key], body);
     assert.equal(hash(result.world.state as never), before);
-    if (id === notice)
-      w = turn(turn(w, { type: 'move', direction: 'north' }).world, {
-        type: 'move',
-        direction: 'east',
-      }).world;
+    if (id === plaque) w = turn(w, { type: 'move', direction: 'west' }).world;
   }
 });
 
@@ -84,17 +65,17 @@ test('Read refuses wrong targets and remote readable details with distinct codes
       kind: 'rejected',
       error: { code: 'invalid_target' },
     });
-  const { readable: _, ...ordinary } = w.details[notice];
+  const { readable: _, ...ordinary } = w.details[plaque];
   assert.deepEqual(
-    readAt({ ...w, details: { ...w.details, [notice]: ordinary } }, notice).decision,
+    readAt({ ...w, details: { ...w.details, [plaque]: ordinary } }, plaque).decision,
     { kind: 'rejected', error: { code: 'invalid_target' } },
   );
-  const north = turn(w, { type: 'move', direction: 'north' }).world;
-  assert.deepEqual(readAt(north, notice).decision, {
+  const study = turn(w, { type: 'move', direction: 'west' }).world;
+  assert.deepEqual(readAt(study, plaque).decision, {
     kind: 'rejected',
     error: { code: 'not_present' },
   });
-  assert.deepEqual(readAt(w, board).decision, { kind: 'rejected', error: { code: 'not_present' } });
+  assert.deepEqual(readAt(w, desk).decision, { kind: 'rejected', error: { code: 'not_present' } });
 });
 
 // Breaks: invocation maps Read to item_id, or view/command agreement ignores the exact detail.
@@ -104,10 +85,10 @@ test('a projected Read resolves its exact target and the invariant detects a sub
   const action = view.actions.find((a) => a.action_key === 'read')!;
   assert.deepEqual(action, {
     action_key: 'read',
-    label: 'actions.read_notice',
+    label: 'actions.read_plaque',
     target: { kind: 'entity', scopes: ['inspectable_details'] },
     input: [],
-    target_ids: [notice],
+    target_ids: [plaque],
     available: true,
   });
   const id = identify('read-test', w.character, {
@@ -120,7 +101,7 @@ test('a projected Read resolves its exact target and the invariant detects a sub
   assert.equal(id.kind, 'identified');
   if (id.kind !== 'identified') return;
   const cmd = resolve(w, id) as Command;
-  assert.deepEqual(cmd.payload, { type: 'read', actor_id: w.character, target_id: notice });
+  assert.deepEqual(cmd.payload, { type: 'read', actor_id: w.character, target_id: plaque });
   const observation = {
     view,
     command: cmd,
@@ -136,14 +117,14 @@ test('a projected Read resolves its exact target and the invariant detects a sub
       ...observation,
       view: {
         ...view,
-        actions: view.actions.map((a) => (a === action ? { ...a, target_ids: [board] } : a)),
+        actions: view.actions.map((a) => (a === action ? { ...a, target_ids: [desk] } : a)),
       },
     }),
     false,
   );
 });
 
-// Breaks: projection bypasses room subtraction or Read bypasses combat/scene restrictions.
+// Breaks: projection bypasses room subtraction or Read bypasses them.
 test('composed action restrictions remove Read and raw commands cannot bypass them', () => {
   const w = fresh(),
     here = w.state.containers[w.body];
@@ -155,7 +136,7 @@ test('composed action restrictions remove Read and raw commands cannot bypass th
     },
   };
   assert.ok(!gameView(subtracted).actions.some((a) => a.action_key === 'read'));
-  assert.deepEqual(readAt(subtracted, notice).decision, {
+  assert.deepEqual(readAt(subtracted, plaque).decision, {
     kind: 'rejected',
     error: { code: 'unsupported_capability' },
   });
@@ -170,18 +151,40 @@ test('composed action restrictions remove Read and raw commands cannot bypass th
     },
   };
   assert.ok(!gameView(narrowed).actions.some((a) => a.action_key === 'read'));
-  assert.deepEqual(readAt(narrowed, notice).decision, {
+  assert.deepEqual(readAt(narrowed, plaque).decision, {
     kind: 'rejected',
     error: { code: 'unsupported_capability' },
   });
-  let fighting = w;
+});
+
+// Breaks: Read stays offered or admitted while the player is engaged in combat.
+test('combat removes Read and a raw Read during a fight is refused', () => {
+  const cellar = fragment('protocol/fixtures/containers_cartridge_sampler_hash.json');
+  let fighting = cellar.genesis((c) => {
+    c.rooms[`${cellar.prefix}:room/lantern_cellar`].details = {
+      shelf_note: {
+        aliases: ['note'],
+        description: 'detail.shelf_note',
+        readable: { label: 'actions.read_note', text: 'readable.shelf_note' },
+      },
+    };
+    for (const caps of [c.manifest.requires.capabilities, c.lock.capabilities])
+      Object.assign(caps, { inspectable_detail: 1, readable: 1 });
+    Object.assign(c.text, {
+      'detail.shelf_note': 'A note pinned to a shelf.',
+      'actions.read_note': 'Read the note',
+      'readable.shelf_note': 'Mind the rats.',
+    });
+  });
   for (const direction of ['north', 'east', 'down'])
     fighting = turn(fighting, { type: 'move', direction }).world;
+  const note = at(fighting, 'shelf_note');
+  assert.ok(gameView(fighting).actions.some((a) => a.action_key === 'read'));
   const rat = Object.entries(fighting.entities).find(([, e]) => e.key === 'cellar_rat_1')![0];
   fighting = turn(fighting, { type: 'attack', target_id: rat }).world;
   assert.ok(gameView(fighting).combat);
   assert.ok(!gameView(fighting).actions.some((a) => a.action_key === 'read'));
-  assert.deepEqual(readAt(fighting, notice).decision, {
+  assert.deepEqual(readAt(fighting, note).decision, {
     kind: 'rejected',
     error: { code: 'invalid_state' },
   });
@@ -231,12 +234,12 @@ test('Read projection fails closed at query and concrete-target budgets', () => 
   const w = fresh();
   for (const [count, room] of [
     [1025, w.state.containers[w.body]],
-    [32769, '953a909b-3a29-8c5c-9e3f-4105b9a47c4b' as EntityId],
+    [32769, w.details[desk].room],
   ] as const) {
     const details = Object.fromEntries(
       Array.from({ length: count }, (_, n) => [
         `aaaaaaaa-0000-4000-8000-${String(n).padStart(12, '0')}`,
-        { ...w.details[notice], room },
+        { ...w.details[plaque], room },
       ]),
     );
     assert.throws(() => gameView({ ...w, details }), { message: 'budget_exceeded' });
