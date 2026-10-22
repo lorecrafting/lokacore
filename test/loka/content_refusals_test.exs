@@ -95,16 +95,17 @@ defmodule Loka.ContentRefusalsTest do
            ])
   end
 
-  # Breaks: duplicate or foreign shop stock, or an unfunded shop, compiles.
-  test "shop refuses duplicate offers, foreign stock and absent funding", %{prices_sampler: dir} do
+  # Breaks: a duplicate offer, an offer whose item does not lead its stock, or an unfunded shop compiles.
+  test "shop refuses duplicate offers, an offer item that does not lead its stock, and absent funding",
+       %{prices_sampler: dir} do
     shop = "npcs/fishmonger.json"
     dup = &put_in(&1, ["shop", "offers"], &1["shop"]["offers"] ++ [hd(&1["shop"]["offers"])])
-    foreign = &put_in(&1, ["shop", "offers", Access.at(0), "item"], "basket")
+    misled = &put_in(&1, ["shop", "offers", Access.at(0), "item"], "basket")
 
     assert {"DUPLICATE_DEFINITION", "npcs/fishmonger.shop"} in codes(dir, [{shop, dup}])
 
     assert {"SCHEMA_VIOLATION", "npcs/fishmonger.shop.offers[0].stock"} in codes(dir, [
-             {shop, foreign}
+             {shop, misled}
            ])
 
     assert {"RESOURCE_SPEC_INVALID", "npcs/fishmonger.shop"} in codes(dir, [
