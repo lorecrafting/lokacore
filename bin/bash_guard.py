@@ -56,7 +56,7 @@ def refusal(seg):
     if git:
         i, sub = git
         args = seg[i + 1 :]
-        hooks_off = "--no-verify" in args or (sub == "commit" and skips_hooks(args[args.index("commit") + 1 :]))
+        hooks_off = "--no-verify" in args or (sub == "commit" and skips_hooks(args))
         if hooks_off and MARKER not in seg[:i]:
             return f"git hooks skipped without the owner's OK. Fix the cause; with the owner's OK, prefix {MARKER}."
     br = invoked(seg, "br")
