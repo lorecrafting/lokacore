@@ -203,19 +203,22 @@ test('magic 4b: ward needs level 2 at the exact threshold', () => {
   assert.deepEqual([at(29), at(30)], [false, true]);
 });
 
-// Breaks: the grimoire read before the errand is accepted leaves the errand open for good (its
-// fact_changed has already fired), so ward is never taught; or the loft entry resolves it
-// before it is accepted.
-test('magic 4c: the grimoire read first; the errand resolves on the next climb to the loft', () => {
+// Breaks: the grimoire read before the errand is accepted leaves the wizard asking for a word the
+// Journal says is read (the waiting line has no flamma_known gate), or the report choice does not
+// resolve the errand.
+test('magic 4c: the grimoire read first; the wizard takes the word and the errand resolves', () => {
   let v = go(newWorld(content, CTX as never, [1, 2, 3, 4]), 'up').world;
   v = read(choose(talk(v, 'hedge_wizard').world, 'teach').world);
   v = choose(talk(v, 'hedge_wizard').world, 'accept').world;
   assert.equal(view(v).journal[0]?.state, 'active');
-  const up = go(go(v, 'down').world, 'up'); // the wizard hears of it when you come back up
-  assert.ok(up.lines.includes('narration.errand_reward'));
-  v = up.world;
-  assert.equal(view(v).journal[0]?.state, 'resolved');
-  assert.equal(fact(v, 'ward_taught'), true);
+  const [continuation_id] = pending(v, v.character)!; // the accepted hub is still open: close it
+  v = play(v, { type: 'close_choice', continuation_id }).world;
+  const again = talk(v, 'hedge_wizard');
+  assert.equal(again.opened, 'wizard_awaiting_report'); // not the waiting line
+  const done = choose(again.world, 'done');
+  assert.ok(done.lines.includes('narration.errand_reward'));
+  assert.equal(view(done.world).journal[0]?.state, 'resolved');
+  assert.equal(fact(done.world, 'ward_taught'), true);
 });
 
 // Breaks: ward does not apply warded or spend its ma, or a second cast re-announces the status.

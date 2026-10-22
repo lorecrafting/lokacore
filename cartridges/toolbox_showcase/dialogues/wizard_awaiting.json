@@ -3,9 +3,19 @@
   "policy": {
     "policy_version": 1,
     "root": {
-      "op": "quest_state",
-      "quest": "errand",
-      "state": "active"
+      "op": "all",
+      "items": [
+        {
+          "op": "quest_state",
+          "quest": "errand",
+          "state": "active"
+        },
+        {
+          "op": "fact_compare",
+          "fact": "flamma_known",
+          "equals": false
+        }
+      ]
     }
   },
   "prompt": "dialogue.wizard_awaiting.prompt",
