@@ -46,8 +46,7 @@ Create Beads issues only with `bin/br_create.sh`, never plain `br create`. Creat
 
 **Session mode** ([live polish session](../../docs/WORKFLOW.md#live-polish-session)): in the session
 worktree you may edit style code, tokens and the component doc comment, and you commit each accepted tweak;
-never mechanics, save, protocol or engine code (those go back to the PM as Beads items). You may run
-on Sonnet for a nit; then hand anything needing a token or rule change back for an Opus designer.
+never mechanics, save, protocol or engine code (those go back to the PM as Beads items). You run on Opus, never Sonnet.
 
 Return under 250 words, rules-shaped: the job done, paths with `file:line`, findings with
 severity, spec text written (path and section), proposed checks, open questions. No narrative.

@@ -26,8 +26,8 @@ handoff); [building mechanics by composition](../system/architecture.md#building
 - Content: hand back an item loop table (item: source -> sink or cap); no hidden faucet.
 - Mutants: mutate every new conditional in your diff. The check table pastes the failing line from
   each mutant run (every new check, both kernels, -> the test that fails when it is removed).
-- Self-review: `cd <slice worktree> && /code-review medium origin/main...HEAD` in one call (the
-  brief's base if not `origin/main`). Name the range; a review that lists files outside the slice
+- Self-review: `/code-review medium <branch-name>` (the slice branch, e.g. `feat/x`); never with no
+  target (a `cd` does not change a skill's target). Name the range; a review that lists files outside the slice
   is void.
 - Push: `bin/push_slice.sh <slice worktree> <branch>`; read its `PUSH_EXIT=<n> <sha>` line. Confirm
   `ci.yml` and `book-e2e.yml` started with one `gh run list --commit <full sha>`; never wait on CI.
@@ -37,7 +37,7 @@ handoff); [building mechanics by composition](../system/architecture.md#building
 
 ## Handback
 
-Under 200 words: head sha; check table; `/code-review medium` result (range named); Realm answers;
+Under 250 words: head sha; check table; `/code-review medium` result (range named); Realm answers;
 open questions (the PM rules on them as follow-ups); COST (your token count).
 
 ## Realm checklist

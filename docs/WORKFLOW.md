@@ -24,9 +24,9 @@ other cross-vendor reviews are retired. Every `Agent` spawn names its `model`<a 
 | Brief drafting | Opus or Sonnet for a row that follows an existing pattern, an S row or content (owner, 2026-10-14) | Fable drafts the brief for a new module, a contract change (save, protocol, world graph), a Realm-sensitive row or a new interaction pattern: one Fable run per batch |
 | Slice implementation, tests, fix rounds | `developer`, Opus; Sonnet only for a bounded content or docs edit ([routing record](decisions/owner-decision-two-lane-ci-2026-10-09.md), superseding [Sonnet developers](archive/decisions/owner-decision-sonnet-developers-2026-09-30.md)) | — |
 | Independent review, fix re-check | fresh `reviewer`, Opus, for every item, infra and polish PR | one Fable review per mechanics batch, on the final batch head ([routing record](decisions/owner-decision-two-lane-ci-2026-10-09.md)); E2 and E3 gate closure: Fable; E1 closure: an Opus reviewer and a Fable second opinion ([record](decisions/owner-decision-e1-closure-reviewers-2026-10-07.md)), Fable audit at release-candidate certification ([record](decisions/owner-decision-chapter-one-polish-order-2026-10-07.md)) |
-| Book UI design check or review | `designer`, Opus: up front only for a new page type or component family; otherwise ONE pass per UI batch (all screenshots, wording and spec text, as single writer). Per slice no design review: the developer builds from the designer's rulings record and [Book UI](system/book-ui.md), and the fresh `reviewer` also checks screenshots and wording against the rulings and the designer's spec and token text. In a [live polish session](#live-polish-session) the owner's approval is the design review, and a picker nit goes to a Sonnet designer | Fable: a new direction (see the Designer row); mechanics, save, protocol or kernel in the diff: the normal `reviewer` review ([record](decisions/owner-decision-designer-opus-2026-10-21.md)) |
+| Book UI design check or review | `designer`, Opus: up front only for a new page type or component family; otherwise ONE pass per UI batch (all screenshots, wording and spec text, as single writer). Per slice no design review: the developer builds from the designer's rulings record and [Book UI](system/book-ui.md), and the fresh `reviewer` also checks screenshots and wording against the rulings and the designer's spec and token text. In a [live polish session](#live-polish-session) the owner's approval is the design review, and a picker nit goes to the Opus designer | Fable: a new direction (see the Designer row); mechanics, save, protocol or kernel in the diff: the normal `reviewer` review ([record](decisions/owner-decision-designer-opus-2026-10-21.md)) |
 
-The PM also sets each spawn's `effort`: low for a Sonnet nit, high for a reviewer or Fable design
+The PM also sets each spawn's `effort`: high for a reviewer or Fable design
 work, the default otherwise ([two-lane CI record](decisions/owner-decision-two-lane-ci-2026-10-09.md)).
 An authored brief narrows exploration but never makes save, receipt or protocol work
 mechanical. A brief pastes `ast-grep outline` signatures of the files the developer must touch, not whole files ([owner decision](decisions/owner-decision-agent-tooling-2026-10-08.md)). Run independent agents in the background and in parallel (one message,
@@ -250,11 +250,11 @@ commits each accepted tweak; the owner's approval in the session is the design r
 Bring `main` in with `bin/polish_session.sh update`, never a manual merge: it restarts Storybook when stories change.
 The picker's queue and status files: [Polish queue](web-preview.md#polish-queue).
 The PM routes each prompt. **Nit** (one place, existing tokens only: which token a style uses,
-alignment, a value inside one component, a label's wording): designer on Sonnet. **Design** (a token
+alignment, a value inside one component, a label's wording): designer on Opus. **Design** (a token
 value, a new token or component, hierarchy, typography, colour or composition, several components, a
-feel request): designer on Opus (Fable only for something without precedent). Sonnet hands a nit that needs a token or rule change to Opus; the
+feel request): designer on Opus (Fable only for something without precedent). The
 owner forces either with a `fable:` or `quick:` prefix.
-The owner's "Close batch", or a PM suggestion, ends the batch: with five or more Sonnet nits, Opus
+The owner's "Close batch", or a PM suggestion, ends the batch: with five or more nits, Opus
 skims their diffs once; `bin/polish_session.sh close` pushes and opens the PR;
 one Opus `reviewer` quick pass as PR comments; the PM merges on green hosted runs. Batches stay open liberally; close early only for a critical
 item or too much complexity. Mechanics, save, protocol or engine items leave the session as Beads issues.
@@ -262,7 +262,7 @@ item or too much complexity. Mechanics, save, protocol or engine items leave the
 ## Token hygiene
 
 - At each handback and review completion the PM appends a Beads note `COST <role> <model> <tokens>` from the completion notice; the batch merge note sums them.
-- The PM cannot read the usage meter (it reaches only the owner's status line). At session start and before a fan-out of 3+ agents or a Fable run, it asks the owner for the weekly bar, or proceeds when the owner has said to. Near the cap: see the Budget line in [HANDOFF](HANDOFF.md).
+- At session start and before a fan-out of 3+ agents or a Fable run, it reads `~/.claude/usage-cache.json` (`five_hour` and `seven_day` `used_percentage`, `resets_at`, `written_at`; the owner's status line writes it) instead of asking the owner; the numbers are stale when `written_at` is old (loka-8zqg). Near the cap: see the Budget line in [HANDOFF](HANDOFF.md).
 - Big outputs stay out of every agent's context, subagents' too: the PM delegates logs, diffs
   and check runs; any agent sends a check, test or push run to a scratchpad file named for the
   slice and reads only the exit status, the failing lines and the tail. Diffs a developer or
