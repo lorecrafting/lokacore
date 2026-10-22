@@ -48,7 +48,7 @@ test('Book offers instance-bound Attack and prunes a departed goblin detail', (t
       [[goblin.id]],
     );
   const here = () => a.game.view().view.entities.some((e) => e.id === goblins[0]!.id);
-  for (let i = 0; i < 24 && here(); i++) a.pulse();
+  for (let i = 0; i < 24; i++) a.pulse();
   assert.equal(here(), false);
   assert.deepEqual(
     pagesAfter([{ kind: 'thing', id: goblins[0]!.id }], before, a.game.view().view),
