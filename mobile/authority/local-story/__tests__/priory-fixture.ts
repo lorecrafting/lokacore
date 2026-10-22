@@ -53,10 +53,14 @@ export function ids(c: any): Record<string, string> {
   );
 }
 
-// polish_detail.test.ts (slice M6c's row) still reads the v027 marsh.
-export function darkMarshBundle() {
-  return fragment('protocol/fixtures/missing_child_v027_hash.json').bundle((c) => {
-    c.entry.key = 'marsh_light';
-    c.calendar.start = 0;
+// bleed_sampler's den made dark, its search target glowing: the only way to its `search` recipe is
+// the self-luminous Notice (light@1).
+export function glowBundle() {
+  return fragment('protocol/fixtures/bleed_sampler_hash.json').bundle((c) => {
+    c.manifest.requires.capabilities.light = c.lock.capabilities.light = 1;
+    const den = c.rooms['bleed_sampler@0.0.1:room/den'];
+    den.dark_description = 'room.den.dark';
+    den.details.bones.perception = { self_luminous: true, title: 'detail.den.glow' };
+    Object.assign(c.text, { 'room.den.dark': 'Dark', 'detail.den.glow': 'Glow' });
   });
 }

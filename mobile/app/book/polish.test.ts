@@ -2,37 +2,39 @@
 // Real book components and session; native hosts are leaves, so this is no device/layout proof.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
+import { compiled } from '../../authority/local-story/__tests__/compiled.ts';
 import { openGame } from '../../authority/local-story/session.ts';
 import { elapsedHost } from '../../authority/local-story/__tests__/elapsed-host.test.ts';
 import { CONTENTS } from './__tests__/control.test.ts';
 import { LABEL } from './labels.ts';
+import { bundle as goblins, unpacked } from '../../authority/local-story/__tests__/goblins.ts';
 import { book, bundle, nodes, words } from './__tests__/polish-book.test.ts';
 
 // Breaks: confirmed pelt Take returns to World, leaves the stale pelt child open, or restores
 // its pickup on the World log instead of the exact corpse after reopening.
 test('corpse Contents Take returns to its detail with one local pickup and Back to World', () => {
-  const chapter = bundle('missing_child_v030_hash');
+  const chapter = goblins(unpacked);
   const a = elapsedHost(':memory:', { wall: 10000, mono: 0 }, chapter);
   const invoke = (action_key: string, target_ids: string[] = [], input = {}) => {
     const reply = a.game.invoke({ action_key, target_ids, input } as never);
     assert.equal(reply.kind, 'saved');
     if (reply.kind === 'saved') assert.equal(reply.decision.kind, 'accepted');
   };
-  for (const direction of ['south', 'south', 'east']) invoke('move', [], { direction });
-  const member = a.game.view().view.entities.find((e) => e.name === 'npc.fen_hound.short')!;
+  for (const direction of ['west', 'south']) invoke('move', [], { direction });
+  const member = a.game.view().view.entities.find((e) => e.name === 'npc.goblin.short')!;
   invoke('attack', [member.id]);
-  let corpse = a.game.view().view.entities.find((e) => e.name === 'item.hound_corpse.short');
+  let corpse = a.game.view().view.entities.find((e) => e.name === 'item.npc_corpse.short');
   for (let i = 0; i < 20 && !corpse; i++) {
     a.clock.wall += 3000;
     a.clock.mono += 3000;
     assert.equal(a.game.pulse().kind, 'ready');
-    corpse = a.game.view().view.entities.find((e) => e.name === 'item.hound_corpse.short');
+    corpse = a.game.view().view.entities.find((e) => e.name === 'item.npc_corpse.short');
   }
   assert.ok(corpse);
-  const pelt = corpse.contents!.find((e) => e.name === 'item.hound_pelt.short')!;
+  const pelt = corpse.contents!.find((e) => e.name === 'item.ear.short')!;
   const h = book(chapter, a);
-  h.tap(h.labels().find((x) => x.includes('hound corpse') && x.includes('open'))!);
-  h.tap(h.labels().find((x) => x.includes('hound pelt') && x.includes('open'))!);
+  h.tap(h.labels().find((x) => x.includes('corpse') && x.includes('open'))!);
+  h.tap(h.labels().find((x) => x.includes('goblin ear') && x.includes('open'))!);
   assert.deepEqual(
     h.stack.map((p: any) => p.id),
     [corpse.id, pelt.id],
@@ -45,7 +47,7 @@ test('corpse Contents Take returns to its detail with one local pickup and Back 
     h.stack.map((p: any) => p.id),
     [corpse.id],
   );
-  h.tap(h.labels().find((x) => x.includes('hound pelt') && x.includes('open'))!);
+  h.tap(h.labels().find((x) => x.includes('goblin ear') && x.includes('open'))!);
   assert.ok(
     h.labels().some((x) => x.startsWith('Take')),
     JSON.stringify(h.labels()),
@@ -70,10 +72,10 @@ test('corpse Contents Take returns to its detail with one local pickup and Back 
     h.p
       .screen()
       .detail(corpse.id)
-      .filter((x: string) => x === 'You pick up a hound pelt.').length,
+      .filter((x: string) => x === 'You pick up a goblin ear.').length,
     1,
   );
-  assert.equal(h.p.screen().log.includes('You pick up a hound pelt.'), false);
+  assert.equal(h.p.screen().log.includes('You pick up a goblin ear.'), false);
   assert.ok(h.game.view().view.inventory.some((e) => e.id === pelt.id));
   const refused = h.game.invoke({ action_key: 'take', target_ids: [pelt.id], input: {} } as never);
   assert.equal(refused.kind, 'saved');
@@ -82,7 +84,7 @@ test('corpse Contents Take returns to its detail with one local pickup and Back 
     h.p
       .screen()
       .detail(corpse.id)
-      .filter((x: string) => x === 'You pick up a hound pelt.').length,
+      .filter((x: string) => x === 'You pick up a goblin ear.').length,
     1,
   );
   h.tap('Leave');
@@ -92,13 +94,13 @@ test('corpse Contents Take returns to its detail with one local pickup and Back 
   if (drop.kind === 'saved') assert.equal(drop.decision.kind, 'accepted');
   h.unmount();
   const reopened = book(chapter, { ...a, game: openGame(a.db, chapter, a.host) });
-  assert.equal(reopened.p.screen().log.includes('You pick up a hound pelt.'), false);
-  reopened.tap(reopened.labels().find((x) => x.includes('hound corpse') && x.includes('open'))!);
+  assert.equal(reopened.p.screen().log.includes('You pick up a goblin ear.'), false);
+  reopened.tap(reopened.labels().find((x) => x.includes('corpse') && x.includes('open'))!);
   assert.equal(
     reopened.p
       .screen()
       .detail(corpse.id)
-      .filter((x: string) => x === 'You pick up a hound pelt.').length,
+      .filter((x: string) => x === 'You pick up a goblin ear.').length,
     1,
   );
   reopened.unmount();
@@ -108,28 +110,28 @@ test('corpse Contents Take returns to its detail with one local pickup and Back 
 // Breaks: a lost Take acknowledgement settles after Book remount and sends the confirmed corpse
 // pickup to World because the new presenter has no press context.
 test('remounted pending pelt Take settles on its exact corpse detail', () => {
-  const chapter = bundle('missing_child_v030_hash');
+  const chapter = goblins(unpacked);
   const a = elapsedHost(':memory:', { wall: 10000, mono: 0 }, chapter);
   const invoke = (action_key: string, target_ids: string[] = [], input = {}) => {
     const reply = a.game.invoke({ action_key, target_ids, input } as never);
     assert.equal(reply.kind, 'saved');
     if (reply.kind === 'saved') assert.equal(reply.decision.kind, 'accepted');
   };
-  for (const direction of ['south', 'south', 'east']) invoke('move', [], { direction });
-  const member = a.game.view().view.entities.find((e) => e.name === 'npc.fen_hound.short')!;
+  for (const direction of ['west', 'south']) invoke('move', [], { direction });
+  const member = a.game.view().view.entities.find((e) => e.name === 'npc.goblin.short')!;
   invoke('attack', [member.id]);
-  let corpse = a.game.view().view.entities.find((e) => e.name === 'item.hound_corpse.short');
+  let corpse = a.game.view().view.entities.find((e) => e.name === 'item.npc_corpse.short');
   for (let i = 0; i < 20 && !corpse; i++) {
     a.clock.wall += 3000;
     a.clock.mono += 3000;
     assert.equal(a.game.pulse().kind, 'ready');
-    corpse = a.game.view().view.entities.find((e) => e.name === 'item.hound_corpse.short');
+    corpse = a.game.view().view.entities.find((e) => e.name === 'item.npc_corpse.short');
   }
   assert.ok(corpse);
-  const pelt = corpse.contents!.find((e) => e.name === 'item.hound_pelt.short')!;
+  const pelt = corpse.contents!.find((e) => e.name === 'item.ear.short')!;
   const first = book(chapter, a);
-  first.tap(first.labels().find((x) => x.includes('hound corpse') && x.includes('open'))!);
-  first.tap(first.labels().find((x) => x.includes('hound pelt') && x.includes('open'))!);
+  first.tap(first.labels().find((x) => x.includes('corpse') && x.includes('open'))!);
+  first.tap(first.labels().find((x) => x.includes('goblin ear') && x.includes('open'))!);
   a.fault.kind = 'lost';
   a.fault.armed = true;
   first.tap(first.labels().find((x) => x.startsWith('Take'))!);
@@ -146,10 +148,10 @@ test('remounted pending pelt Take settles on its exact corpse detail', () => {
     remounted.p
       .screen()
       .detail(corpse.id)
-      .filter((x: string) => x === 'You pick up a hound pelt.').length,
+      .filter((x: string) => x === 'You pick up a goblin ear.').length,
     1,
   );
-  assert.equal(remounted.p.screen().log.includes('You pick up a hound pelt.'), false);
+  assert.equal(remounted.p.screen().log.includes('You pick up a goblin ear.'), false);
   assert.ok(a.game.view().view.inventory.some((e) => e.id === pelt.id));
   remounted.tap('Leave');
   assert.deepEqual(remounted.stack, []);
@@ -414,22 +416,22 @@ test('an NPC choice retried from the world keeps its result in the original deta
 // Breaks: a lost ancestry COMMIT acknowledgement hides every choice and the pending line, or a
 // later press sends its own choice instead of retrying the original attempt.
 test('pending ancestry keeps its choices pressable and a later press retries the original', () => {
-  const chapter = bundle('missing_child_v042_hash');
-  const a = elapsedHost(':memory:', { wall: 10000, mono: 0 }, chapter);
-  const h = book(chapter, a);
-  const choices = ['Fen-born', 'Fey-touched', 'Hill-folk', 'Road-born'];
+  const derived = compiled('cartridges/derived_sampler');
+  const a = elapsedHost(':memory:', { wall: 10000, mono: 0 }, derived as never);
+  const h = book(derived as never, a);
+  const choices = ['Hardy', 'Nimble', 'Strong'];
   assert.deepEqual(h.labels(), choices);
   a.fault.kind = 'lost';
   a.fault.armed = true;
-  h.tap('Fen-born');
+  h.tap('Strong');
   assert.equal(h.game.pending(), true);
   assert.deepEqual(h.labels(), choices);
   assert.ok(h.text().includes('save not confirmed'));
   a.fault.reads = false;
-  h.tap('Road-born');
+  h.tap('Hardy');
   assert.equal(h.game.pending(), false);
   assert.equal(h.game.view().view.ancestry_choices, undefined);
-  assert.equal(h.game.view().view.ancestry, 'fen_born');
+  assert.equal(h.game.view().view.ancestry, 'strong');
   assert.equal(a.sql.prepare('SELECT count(*) AS n FROM receipt').get()!.n, 1);
 });
 
@@ -464,12 +466,12 @@ test('the room lists NPCs first, then every other entity as items, empty groups 
       .map((n) => [n.props.children].flat().map((c: any) => c.props.name));
   const room = [
     entity('satchel', 'item'),
-    entity('ash', 'npc'),
+    entity('nell', 'npc'),
     entity('lamp', 'item'),
-    entity('wren', 'npc'),
+    entity('tam', 'npc'),
   ];
   assert.deepEqual(groups(room), [
-    ['Ash', 'Wren'],
+    ['Nell', 'Tam'],
     ['Satchel', 'Lamp'],
   ]);
   assert.deepEqual(groups([entity('lamp', 'item')]), [['Lamp']]);
@@ -477,12 +479,10 @@ test('the room lists NPCs first, then every other entity as items, empty groups 
 
 // Breaks: the Map foot loses Back to map or its clear, or Back to World leaves a page on the stack.
 test('a chosen map place adds Back to map before Back to World', () => {
-  const h = book(bundle('missing_child_v042_hash'));
-  h.tap('Road-born');
-  h.tap('Continue');
+  const h = book(compiled('cartridges/toolbox_showcase') as never);
   h.map();
   const returns = () => h.labels().filter((x) => x.startsWith('Back to'));
-  h.tap('Ferry Landing, current place');
+  h.tap('Crossroads Inn, current place');
   assert.deepEqual(returns(), ['Back to map', 'Back to World']);
   h.tap('Back to map');
   assert.deepEqual(returns(), ['Back to World']);
@@ -506,9 +506,9 @@ test('opening a page turns forward and Back to World turns back', () => {
 });
 
 // Breaks: the Book ignores the confirmed solar phase, or a component reads a fixed palette instead
-// of the one the Book provides. Chapter 1 opens at 18:00, its `dusk` cut.
+// of the one the Book provides. bleed_sampler opens at dusk, its `dusk` cut.
 test('a dusk GameView draws the Book in the dusk palette', () => {
-  const h = book(bundle('missing_child_v030_hash'));
+  const h = book(bundle('bleed_sampler_hash'));
   assert.equal(h.game.view().view.calendar_status?.solar, 'dusk');
   const drawn = h.draw();
   assert.equal(drawn.find((n) => n.type === 'SafeAreaView').props.style.backgroundColor, '#2c2846');
