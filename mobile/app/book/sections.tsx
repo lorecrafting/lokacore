@@ -1,3 +1,4 @@
+// size: allow 360, each exported component's doc comment (BOOK-UI-COMPONENTS.md, Component catalogue)
 // The Contents sections (Character, Ancestry, Carrying, Map, Settings; Journal: journal.tsx) and
 // the chapter and scene pages. Each is only drawing; what a tap does is passed in by Book.tsx.
 import { useState } from 'react';

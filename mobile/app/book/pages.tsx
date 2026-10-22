@@ -1,3 +1,4 @@
+// size: allow 356, each exported component's doc comment (BOOK-UI-COMPONENTS.md, Component catalogue)
 // The book's page shell, the room page and their shared controls (the Contents sections:
 // sections.tsx; the thing page: Menu.tsx; the room's action list: place.tsx; the title's arriving
 // focus: title.ts).
@@ -32,7 +33,7 @@ export const band = (c: Palette, tone: Pool['tone']): string =>
  *
  * Use: entity lines, verb lines, the room title, the status position; the only component that bleeds.
  *
- * Rules: the bleed reaches the touch minimum without moving the text (BOOK-UI-COMPONENTS.md, Grammar).
+ * Rules: the bleed reaches the touch minimum without moving the text (BOOK-UI-COMPONENTS.md, Where each fact lives).
  *
  * Story: VerbLine.stories.tsx
  */
