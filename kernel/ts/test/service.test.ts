@@ -273,6 +273,16 @@ test('service refusal rolls back every row and respects exact provider, quote an
     quoted_price: 2,
   } as const;
   assert.deepEqual(transition(w, p, { n: LIMITS.query_steps }), { code: 'budget_exceeded' });
+  // The pure transition, called past the command-level presence check, names its own refusals.
+  const gone = fresh();
+  gone.state.containers[entity(gone, 'npc', 'cook')] = gone.roomIds[`${prefix}:room/farm_yard`];
+  assert.deepEqual(transition(gone, p), { code: 'not_present' });
+  const dry = fresh();
+  dry.state.resources![resourceKey(dry, entity(dry, 'npc', 'cook'), 'meal_stock')].value = 0;
+  assert.deepEqual(transition(dry, p), {
+    code: 'insufficient_resource',
+    message: { key: 'service.sold_out' },
+  });
 });
 
 // Breaks: view uses command==key filtering or bypasses the authored alias's target/input/policy contract.

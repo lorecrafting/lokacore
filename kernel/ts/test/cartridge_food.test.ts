@@ -22,6 +22,12 @@ test('loader rejects impossible held-food declarations while retaining capped fo
       'SCHEMA_VIOLATION',
       'edible',
     ],
+    [
+      'no standing regen',
+      (c) => (mv(c).regen.by_position.standing = 0),
+      'SCHEMA_VIOLATION',
+      'edible',
+    ],
     ['container', (c) => (apple(c).container = true), 'SCHEMA_VIOLATION', 'edible'],
     ['equipment', (c) => (apple(c).slot = 'hand'), 'SCHEMA_VIOLATION', '.slot'],
     [
