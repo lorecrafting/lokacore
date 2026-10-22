@@ -4,8 +4,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { compiled } from '../../authority/local-story/__tests__/compiled.ts';
-import { book, bundle } from './__tests__/polish-book.test.ts';
-import { routes } from '../stories/routes.ts';
+import { book } from './__tests__/polish-book.test.ts';
 import { LABEL } from './labels.ts';
 
 const showcase = compiled('cartridges/toolbox_showcase');
@@ -42,11 +41,14 @@ test('Nell at standing -2 shows her refusal line, no Talk or shelf; at 0 she tra
   assert.ok(calmLabels.some((l) => l.startsWith('Talk')));
 });
 
-// Breaks: an unaffordable buy shows its raw code or "too exhausted" (Peg's iron sword, 7p over 4p).
+// Breaks: a refused buy shows its raw code ("invalid state"), not a word (Nell's one cob of bread, bought).
 test("a shelf row's buy reason is a word, never the code", () => {
-  const b = book(bundle('missing_child_v042_hash'));
-  for (const s of routes['npc-shop']) typeof s === 'function' ? s(b as never) : b.tap(s);
-  const row = "an iron sword: Buy 7p (can't afford); Sell 4p (you are not holding it).";
+  const b = book(showcase as never);
+  b.map();
+  b.tap('Go south');
+  b.tap('Nell, the baker is here., open');
+  b.tap('Buy a cob of bread — 4p');
+  const row = 'a cob of bread: Buy 4p (sold out); Sell 1p.';
   assert.ok(b.text().includes(row), JSON.stringify(b.text()));
 });
 

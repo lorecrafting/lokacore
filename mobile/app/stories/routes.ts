@@ -12,56 +12,12 @@ const go =
   (b) => {
     for (const d of directions) (b.map(), b.tap(`Go ${d}`));
   };
-const talk = (npc: string, ...choices: string[]): Step[] => [
-  `${npc} is here.`,
-  ...choices.flatMap((c) => [`Talk to ${npc}`, c, LABEL.leaveConversation]),
-  LABEL.leave,
-];
-// The n-th of several controls that start alike (four hounds).
+// The n-th of several controls that start alike (two goblins).
 const nth =
   (shown: string, n = 0): Step =>
   (b) =>
     b.tap(b.labels().filter((l) => l.startsWith(shown))[n]!);
 
-const fen = ['Fen-born', 'Continue'];
-const road = ['Road-born', 'Continue'];
-const ask = 'Will you look around the Green for a sign of Wren?';
-const search: Step[] = [
-  ...fen,
-  ...talk('Elspeth', ask),
-  go('north', 'north'),
-  'A fox drawing is here.',
-  'Take a fox drawing',
-  go('south', 'south'),
-  ...talk('Elspeth', 'I found this drawing on the Green.'),
-  go('south', 'south'),
-  'Tracks, open',
-  'Study tracks',
-  LABEL.leave,
-];
-
-const vesper = [
-  ...search,
-  go('south', 'south'),
-  ...talk('Vesper', '“Wren, your mother is looking for you.”'),
-  'Vesper is here.',
-  'Talk to Vesper',
-];
-const wisp = [
-  ...road,
-  go('south', 'south', 'south', 'east'),
-  'Marsh glow, open',
-  LABEL.leave,
-  'Wisp is here.',
-  'Speak to Wisp Wisp',
-  'Accept the riddle',
-  LABEL.leaveConversation,
-  LABEL.leave,
-  'Wisp is here.',
-  'Ask Wisp again Wisp',
-];
-const hounds = [...road, go('south', 'south', 'east')];
-const attack = [...hounds, nth('A fen hound is here.'), 'Attack a fen hound'];
 // Real time passes: the elapsed clocks advance and the game catches up (a pulse).
 const wait =
   (ms: number): Step =>
@@ -71,53 +27,29 @@ const wait =
     (b.game as unknown as { pulse(): unknown }).pulse();
   };
 const contents = (section?: string): Step[] => [/; opens Contents$/, ...(section ? [section] : [])];
-// The riddle's tiles, one per letter, then Submit.
-const spell =
-  (word: string): Step =>
-  (b) => {
-    const tiles = b.labels().filter((l) => /^., tile \d+$/.test(l));
-    for (const letter of word) {
-      const tile = tiles.find((t) => t.startsWith(`${letter},`));
-      if (!tile) throw new Error(`no ${letter} tile left for ${word}`);
-      tiles.splice(tiles.indexOf(tile), 1);
-      b.tap(tile);
-    }
-    b.tap(LABEL.submit);
-  };
-// A scene: Continue until its pages end.
-const scene: Step = (b) => {
-  while (b.labels().includes('Continue')) b.tap('Continue');
-};
-const inn = [...road, go('north', 'east')];
-const bed = [
-  ...inn,
-  'Widow Maud is here.',
-  'Rent room — 3p',
+// The Reeve's talk (Low Wardle Green): the letter errand begins.
+const reeve = ['The Reeve is here., open', 'Talk to the Reeve'];
+const errand = [
+  go('south'),
+  ...reeve,
+  'Take the letter to Wat',
+  LABEL.leaveConversation,
   LABEL.leave,
-  go('up'),
-  'Bed, open',
-  'Rest',
 ];
-const dream: Step[] = [...bed, scene];
-const chapel = [...road, go('north', 'north', 'north', 'north', 'north')];
-// Peg's shop at 6p: the iron sword (7p) is a note, the torch (2p) still a Buy.
-const peg = [
-  ...road,
-  go('north', 'west'),
-  'Peg Harrow is here.',
-  'Buy a waterskin — 3p',
-  'Buy a spare waterskin — 3p',
-  'Buy a small satchel — 4p',
-  'Buy a wooden shield — 3p',
-  'Buy a flask of lamp oil — 1p',
+// The letter taken from the green and carried north and east to Wat's hut.
+const hut = [
+  ...errand,
+  'A sealed letter is here., open',
+  'Take a sealed letter',
+  go('north', 'north', 'north', 'east'),
+  'Wat, the shepherd is here., open',
 ];
-// Chapel Steps with the chapel door shut from the map: the way north is barred.
-const shut = [
-  ...road,
-  go('north', 'north', 'north', 'north'),
-  (b: Harness) => b.map(),
-  'Close the chapel door (north)',
-];
+// Nell the baker, on the green.
+const nell = [go('south'), 'Nell, the baker is here., open'];
+// The Goblin Pit: two goblins, so the fight is a pack.
+const goblins = [go('west', 'south'), nth('A goblin is here.')];
+// A seed sack too heavy to lift, with a turnip seed inside (Farm Yard).
+const sack = [go('north', 'west', 'south'), 'A seed sack is here., open'];
 // A drag toward a closed exit (Footer's own refusal line; the harness does not expand Footer).
 const drag: Step = (b) => {
   const footer = b.draw().find((n) => n.type.name === 'Footer').props;
@@ -128,101 +60,71 @@ const drag: Step = (b) => {
     ),
   );
 };
-// Peg's torch and satchel bought, the torch put in the satchel (Contents > Carrying).
-const satchel = [
-  ...road,
-  go('north', 'west'),
-  'Peg Harrow is here.',
-  'Buy a torch — 2p',
-  'Buy a small satchel — 4p',
-  LABEL.leave,
-  ...contents(LABEL.inventory),
-  'a torch, open',
-];
-// The lone crow in the Oak Branches; the deer at the Drowned Oak below it.
-const oak = [...road, go('north', 'north', 'south', 'south', 'south', 'south', 'west', 'south')];
-const deer = [...oak, 'A deer is here.', 'Attack a deer', wait(3000)];
-// Wren's boot at the Reed Bank, taken, then dropped and taken again: World log lines, no move.
-const boot = ['Wren’s boot is here., open', 'Take Wren’s boot'];
-const again = [...contents(LABEL.inventory), 'Wren’s boot, open', 'Drop Wren’s boot', ...boot];
-// The one-opponent fight (no pack roster, contracts CombatView): a cellar rat, two rounds in.
-const rat = [...inn, go('down'), nth('A cellar rat is here.'), 'Attack a cellar rat'];
-const bell = [
-  ...search,
-  go(...Array(7).fill('north')),
-  ...talk('Prior Aldric', '“I’ll ring the bell.”'),
-  go('up', 'up'),
-  'Chapel bell, open',
-  'Ring bell',
-];
+// The Moot Hall has two closed exits (east and west).
+const hall = [go('south', 'south')];
 
 export const routes: Record<string, Step[]> = {
-  'room-first': fen,
-  'room-npcs-items': [...fen, ...talk('Elspeth', ask), go('north', 'north')],
-  'room-notices': inn,
-  'room-long-log': [...search, ...boot, ...again, ...again, ...again],
-  'room-refusal': [...shut, LABEL.backToWorld, drag],
-  'room-at-night': [...fen, wait(180_000), 'Ferry Landing, look'],
-  'npc-choice': [...fen, 'Elspeth is here.', 'Talk to Elspeth'],
-  'npc-riddle': vesper,
-  'npc-shop': peg,
-  'npc-services': [...inn, 'Widow Maud is here.'],
-  'npc-refused': [...wisp, spell('EDIT')],
-  'npc-closed': [...search, go('north', 'north'), 'Elspeth is here.'],
-  'notice-board': [...inn, 'Notice board, open'],
-  'notice-read': [...fen, 'Landing notice, open'],
-  'item-plain': [...fen, ...talk('Elspeth', ask), go('north', 'north'), 'A fox drawing is here.'],
-  'item-fuel': satchel,
-  'item-container': [
-    ...satchel,
-    'Put a torch in a small satchel',
-    LABEL.backToContainer,
-    'a small satchel, open',
-  ],
-  'notice-bed-resume': [...dream, LABEL.close],
-  'item-too-heavy': [
-    ...inn,
-    go('up'),
-    'A storage chest is here.',
-    'Take a storage chest',
-    go('up'),
-    'An old trunk is here.',
-  ],
-  'combat-one-foe': [...rat, wait(3000), wait(3000)],
-  'combat-pack': [...hounds, nth('Old bones')],
-  'combat-bleeding': [...attack, wait(3000), wait(3000), wait(3000)],
-  'map-two-levels': [...chapel, go('up', 'up'), (b) => b.map()],
-  'map-barred': shut,
-  'map-where': [...shut, 'Ask where Elspeth is'],
-  dream: dream,
-  journal: [...search, ...contents('Journal')],
-  'carrying-empty': [...fen, ...contents(LABEL.inventory)],
-  'carrying-held': [
-    ...fen,
-    ...talk('Elspeth', ask),
-    go('north', 'north'),
-    'A fox drawing is here.',
-    'Take a fox drawing',
+  'room-first': [],
+  'room-npcs-items': [go('south')],
+  'room-long-log': [
+    'A loaf is here., open',
+    'Take a loaf',
     ...contents(LABEL.inventory),
+    'a loaf, open',
+    'Drop a loaf',
+    'A loaf is here., open',
+    'Take a loaf',
   ],
-  'character-unknown': [...fen, ...contents('Character')],
-  // ponytail: one skill (Fen-born swim) and one topic (the Wisp's ward); Sedge's lessons need the night marsh.
-  'character-full': [...fen, ...wisp.slice(road.length), spell('TIDE'), ...contents('Character')],
-  scene: bell,
-  contents: [...fen, ...contents()],
-  'chapter-title': ['Fen-born'],
-  ancestry: [],
-  settings: [...fen, ...contents('Settings')],
+  'room-refusal': [...hall, drag],
+  'room-at-night': [wait(180_000), 'Crossroads Inn, look'],
+  'npc-choice': [go('south'), ...reeve],
+  'npc-shop': [...nell],
+  'npc-services': [go('down', 'north', 'north'), 'The smith is here., open'],
+  'npc-closed': [go('north', 'north', 'east'), 'Wat, the shepherd is here., open'],
+  'notice-read': ['The inn signpost, open'],
+  'item-plain': ['A waterskin is here., open'],
+  'item-fuel': [go('up'), 'The lantern is here., open'],
+  'item-container': [
+    ...sack,
+    'A turnip seed, open',
+    'Take a turnip seed',
+    'A seed sack is here., open',
+    'Put a turnip seed in a seed sack',
+  ],
+  'item-too-heavy': [...sack],
+  'combat-one-foe': [go('west', 'north'), 'The boar is here., open', 'Attack the boar'],
+  'combat-pack': [...goblins, 'Attack a goblin'],
+  'combat-bleeding': [
+    go('west', 'north'),
+    'The boar is here., open',
+    'Attack the boar',
+    wait(3000),
+  ],
+  'map-two-levels': [go('up'), (b) => b.map()],
+  'map-barred': [...hall, (b) => b.map()],
+  'map-where': [...hall, (b) => b.map(), 'Ask where Bess, the alewife is'],
+  journal: [...errand, ...contents('Journal')],
+  'carrying-empty': [...contents(LABEL.inventory)],
+  'carrying-held': ['A loaf is here., open', 'Take a loaf', ...contents(LABEL.inventory)],
+  'character-unknown': [...contents('Character')],
+  'character-full': [
+    go('west'),
+    'Aldous is here., open',
+    'Talk to Aldous',
+    'Learn the blade',
+    ...contents('Character'),
+  ],
+  scene: [...hut, 'Talk to Wat, the shepherd', 'Give Wat the letter'],
+  contents: [...contents()],
+  settings: [...contents('Settings')],
 };
 
 export const checkpoints: Record<string, Step[]> = {
-  'first-room': fen,
-  'elspeth-asked': [...fen, 'Elspeth is here.', 'Talk to Elspeth', ask],
-  'vesper-riddle': vesper,
-  'peg-shop': peg,
-  'maud-paid-bed': [...inn, 'Widow Maud is here.', 'Rent room — 3p', LABEL.leave],
-  'hound-combat': hounds,
-  'chapel-map': [...chapel, go('up', 'up')],
-  'corpse-contents': deer,
-  'night-green': [...fen, wait(180_000)],
+  green: [go('south')],
+  'reeve-asked': [go('south'), ...reeve],
+  'nell-shop': [...nell],
+  'goblin-combat': [...goblins],
+  'loft-map': [go('up'), (b) => b.map()],
+  'sack-contents': [...sack],
+  'night-inn': [wait(180_000)],
 };
