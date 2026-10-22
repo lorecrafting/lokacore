@@ -76,7 +76,7 @@ export const routes: Record<string, Step[]> = {
     'Take a loaf',
   ],
   'room-refusal': [...hall, drag],
-  'room-at-night': [wait(180_000), 'Crossroads Inn, look'],
+  'room-at-night': [wait(1_008_000), 'Crossroads Inn, look'],
   'npc-choice': [go('south'), ...reeve],
   'npc-shop': [...nell],
   'npc-services': [go('down', 'north', 'north'), 'The smith is here., open'],
@@ -131,5 +131,5 @@ export const checkpoints: Record<string, Step[]> = {
   'goblin-combat': [...goblins],
   'loft-map': [go('up'), (b) => b.map()],
   'sack-contents': [...sack],
-  'night-inn': [wait(180_000)],
+  'night-inn': [wait(1_008_000)],
 };

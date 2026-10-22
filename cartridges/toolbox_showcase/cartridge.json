@@ -73,6 +73,24 @@
     "units_per_hour": 3600,
     "hours_per_day": 24,
     "subdivisions_per_hour": 4,
+    "solar": [
+      {
+        "at": 18000,
+        "phase": "dawn"
+      },
+      {
+        "at": 25200,
+        "phase": "day"
+      },
+      {
+        "at": 64800,
+        "phase": "dusk"
+      },
+      {
+        "at": 72000,
+        "phase": "night"
+      }
+    ],
     "weather": [
       {
         "phase": "clear",

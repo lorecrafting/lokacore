@@ -570,11 +570,12 @@
    "ware",
    "begone"
   ],
-  "time": 34200,
+  "time": 75600,
   "calendar_status": {
    "day": 1,
-   "hour": 9,
-   "subdivision": 2,
+   "hour": 21,
+   "subdivision": 0,
+   "solar": "night",
    "lunar": "new",
    "weather": "heat",
    "season": "spring",
