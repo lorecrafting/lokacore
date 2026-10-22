@@ -8,15 +8,8 @@ import { uses as dialogueUses } from '../src/content/cartridge_dialogues.ts';
 import { uses as reactionUses } from '../src/content/cartridge_reactions.ts';
 import { VERBS } from '../src/commands/verbs.ts';
 
-// The only admitted E1 candidates; outside POLICY_HASH (docs/system/e1-certification.md).
+// The only admitted E1 candidate; outside POLICY_HASH (docs/system/e1-certification.md).
 const CANDIDATES = [
-  {
-    id: 'ashmere_missing_child',
-    version: '0.0.42',
-    content_hash: '5d8b0e3a16b209733707a8450cee5a4330965092498cf1d31ab8fdae9a50fc8b',
-    source: 'cartridges/ashmere_missing_child',
-    content_test: 'test/loka/content_missing_child_test.exs',
-  },
   {
     id: 'r9c_interactions',
     version: '0.0.1',

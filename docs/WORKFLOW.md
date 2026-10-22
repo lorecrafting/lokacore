@@ -128,10 +128,8 @@ Report at the end of the slice, not at every step.
    `book-e2e.yml` are green on that head (every push runs them; `--match-head-commit <sha>`;
    [two-lane CI](decisions/owner-decision-two-lane-ci-2026-10-09.md)). A job cancelled at its timeout is red,
    a superseded run is not: `bin/session_status.sh` lists cancelled jobs (name, seconds) of the open PR heads and the nightly runs, so compare each with its `timeout-minutes`. An E-gate closure or the
-   release candidate also needs a green `gh workflow run ci.yml --ref <branch> -f full=true` on the
-   exact head, so the E1 recorder ran ([E1 certification](system/e1-certification.md#e1-exact-candidate-proof-policy));
-   that dispatch cancels the head's push run of `ci.yml` (same concurrency group), so the dispatch
-   run is the verdict. Merge `main` into the
+   release candidate also needs [E1 certification](system/e1-certification.md#e1-exact-candidate-proof-policy)
+   of the real game's chapter; no E1 recorder runs in CI until that chapter has one. Merge `main` into the
    branch once before marking the PR ready. A red nightly on `main` is the next session's first job.
    After the last of several close merges, run
    `bin/sync_pr.sh <branch>` once for every open PR (merges `origin/main`, regenerates the review index on a conflict there, docs check, push); then check `docs/decisions/README.md` order (newest first) by hand, as it is only union-merged.

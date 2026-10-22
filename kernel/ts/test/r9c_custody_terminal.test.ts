@@ -103,7 +103,7 @@ function player() {
 
 // Breaks (shared; see the linked focused tests): a candidate list out of code-point order or a
 // touch moving the wrong apple (play.test.ts:248, target.test.ts:87); a lesson or quote not
-// charged as authored (practical_skills.test.ts:123, commerce.test.ts:79/:97); a Put past capacity
+// charged as authored (practical_skills.test.ts:123); a Put past capacity
 // or a dropped identity (put.test.ts:17, containment.test.ts:457); Wick binding other IDs
 // (infirmary.test.ts:19 lowest-ID harvest, :108 stale exact custody); Knock writing state (d10_knowledge.test.ts); Where reading the
 // live room (knowledge_composition.test.ts:7).
@@ -190,7 +190,7 @@ test('family 1: identity, custody and trade on r9c keep every ID and literal', (
   assert.deepEqual([p.fact('infirmary_contribution'), p.fact('priory_fen_axis')], [1, -1]);
 });
 
-// The legal v042 route (e1_paths.ts search, childReturn rescued, bell up to the belfry).
+// The legal v042 route (search, childReturn rescued, bell up to the belfry).
 function belfry() {
   const p = player();
   p.run('elspeth', [npc('elspeth')]);

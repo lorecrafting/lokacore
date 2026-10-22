@@ -194,7 +194,7 @@ test('family 1 commits and reopens every custody, trade, door and knowledge step
   a.sql.close();
 });
 
-// The legal v042 route to the belfry (e1_paths.ts search, childReturn rescued, bell).
+// The legal v042 route to the belfry (search, childReturn rescued, bell).
 function belfry(path: string) {
   const a = save(path);
   a.run('choose_ancestry', [], { ancestry: 'fen_born' });

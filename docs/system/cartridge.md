@@ -39,6 +39,9 @@ The app opens only the chapter file and offers no story picker. Missing pins fol
 
 ### Retired Ashmere chapter (E1 candidate)
 
+The chapter is deleted in [retirement](../decisions/owner-decision-retire-ashmere-2026-10-21.md)
+phase 2; this section is its history.
+
 Until 2026-10-21 the shared app bundled `ashmere_missing_child@0.0.42` (v042), titled
 **Ashmere — The Missing Child**, requiring kernel API1.37. Its independently derived
 content hash is `5d8b0e3a16b209733707a8450cee5a4330965092498cf1d31ab8fdae9a50fc8b`,
@@ -647,8 +650,8 @@ API1.37: the permanent, unpolished interaction corpus of the
 It is not bundled, has its own identity and save, and does not inherit the chapter's hash
 or acceptance. Its content hash is `7d74fac7f9429475bdd7481fe7bf6b851acae2d0d6eaf1661892705391d17263`,
 with 26 rooms and 127 initial IDs; the [artifact oracle](../../protocol/fixtures/r9c_interactions_hash.json)
-and [allocation oracle](../../protocol/fixtures/r9c_interactions_ids.json) come from
-`test/loka/cartridge_r9c_interactions_hash.py`. The fixtures are not in the simulator's
+and [allocation oracle](../../protocol/fixtures/r9c_interactions_ids.json) came from a
+Python generator deleted with the chapter (2026-10-21). The fixtures are not in the simulator's
 seed-picked corpus (`CARTRIDGES` in `kernel/ts/test/sim.ts`).
 
 The source is the v042 chapter's own definitions, short references and keys, cut to one

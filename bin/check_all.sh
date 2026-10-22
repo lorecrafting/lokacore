@@ -1,6 +1,6 @@
 #!/bin/sh
 # The full check line (docs/CHECKS.md) for a local run that mirrors hosted CI, minus `mix hex.audit`
-# (needs the network), the 10,000-sequence simulator and the e1-recorder job. Hosted CI on the pushed
+# (needs the network), and the 10,000-sequence simulator. Hosted CI on the pushed
 # head is the gate (docs/decisions/owner-decision-two-lane-ci-2026-10-09.md); on the owner's M1 run
 # only focused checks. Toolchain from mise.toml. --no-ts remains available for a focused Elixir run.
 set -e

@@ -1,5 +1,5 @@
 defmodule Loka.ContentR9cInteractionsTest do
-  # The synthetic E2 cartridge; its answer is written by test/loka/cartridge_r9c_interactions_hash.py.
+  # The synthetic E2 cartridge; its answer was written by a Python generator deleted with the chapter (2026-10-21).
   use ExUnit.Case, async: true
   @kat JSON.decode!(File.read!("protocol/fixtures/r9c_interactions_hash.json"))
 

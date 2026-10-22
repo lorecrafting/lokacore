@@ -115,7 +115,7 @@ shared GameView. Consult the
 [mechanics](system/mechanics.md) for exact behavior.
 
 The chapter already uses combat and same-body death/return; its remaining story and
-mechanics work is tracked in the [completion plan](MISSING-CHILD-PLAN.md). Current
+mechanics work is tracked in the [completion plan](archive/MISSING-CHILD-PLAN.md). Current
 quests have one objective, evidenced by
 a current-state policy or a post-activation item-acquired event. Dialogues have bounded
 choices rather than an arbitrary dialogue graph, and scenes
