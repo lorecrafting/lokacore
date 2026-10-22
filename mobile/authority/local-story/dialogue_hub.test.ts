@@ -11,7 +11,7 @@ import { elapsedHost } from './__tests__/elapsed-host.test.ts';
 import { openStory } from './authority.ts';
 
 // ferry_sampler's frozen KAT with Bram's dialogue made a hub (no quest, story point, policy gate
-// or lantern role) and a second speaker, Wren, at the landing with a one-choice copy of it.
+// or lantern role) and a second speaker, Ivy, at the landing with a one-choice copy of it.
 const f = fragment('protocol/fixtures/cartridge_ferry_hash.json');
 const entity = (w: World, kind: string, name: string) => w.entityIds[`${f.prefix}:${kind}/${name}`];
 const configure = (c: any) => {
@@ -21,13 +21,13 @@ const configure = (c: any) => {
   bram.policy = { policy_version: 1, root: { op: 'all', items: [] } };
   bram.roles = { bram: bram.roles.bram };
   delete bram.choices.leave.hand_over;
-  const { daily_schedule, ...wren } = c.npcs[`${f.prefix}:npc/bram`];
-  c.npcs[`${f.prefix}:npc/wren`] = { ...wren, key: 'wren', keywords: ['wren'] };
-  c.dialogues[`${f.prefix}:dialogue/wren`] = {
+  const { daily_schedule, ...ivy } = c.npcs[`${f.prefix}:npc/bram`];
+  c.npcs[`${f.prefix}:npc/ivy`] = { ...ivy, key: 'ivy', keywords: ['ivy'] };
+  c.dialogues[`${f.prefix}:dialogue/ivy`] = {
     ...bram,
-    key: 'wren',
-    npc: f.ref('npc', 'wren'),
-    roles: { wren: { role: 'npc', npc: f.ref('npc', 'wren') } },
+    key: 'ivy',
+    npc: f.ref('npc', 'ivy'),
+    roles: { ivy: { role: 'npc', npc: f.ref('npc', 'ivy') } },
     choices: { carry: bram.choices.carry },
   };
 };
@@ -141,19 +141,19 @@ test('real SQLite: walking away or talking to another speaker ends the open hub;
 
   const other = atBram(join(dir, 'other.db'));
   const [[open]] = pending(other.story.world());
-  const wrenId = entity(other.story.world(), 'npc', 'wren');
+  const ivyId = entity(other.story.world(), 'npc', 'ivy');
   const offered = (w: ReturnType<typeof other.story.world>, id: string, key: string) =>
     gameView(w)
       .entities.find((e) => e.id === id)!
       .actions.find((a) => a.action_key === key)!;
-  // GameView agrees with the rule: Wren's talk is offered, Bram's own stays refused.
-  assert.equal(offered(other.story.world(), wrenId, 'wren').available, true);
+  // GameView agrees with the rule: Ivy's talk is offered, Bram's own stays refused.
+  assert.equal(offered(other.story.world(), ivyId, 'ivy').available, true);
   assert.equal(
     offered(other.story.world(), entity(other.story.world(), 'npc', 'bram'), 'bram').available,
     false,
   );
-  const wren = other.invocation('wren', [wrenId]);
-  const r = other.story.invoke(wren as never);
+  const ivy = other.invocation('ivy', [ivyId]);
+  const r = other.story.invoke(ivy as never);
   assert.equal(r.kind === 'saved' && (r.decision as { kind: string }).kind, 'accepted');
   const ops = (r as any).decision.delta.ops.map((o: any) => [o.op, o.continuation_id === open]);
   assert.deepEqual(ops, [
@@ -162,5 +162,5 @@ test('real SQLite: walking away or talking to another speaker ends the open hub;
   ]);
   const reopened = other.open().world();
   assert.equal(reopened.state.choices![open]!.status, 'closed');
-  assert.equal(gameView(reopened).choice?.speaker_id, entity(reopened, 'npc', 'wren'));
+  assert.equal(gameView(reopened).choice?.speaker_id, entity(reopened, 'npc', 'ivy'));
 });
