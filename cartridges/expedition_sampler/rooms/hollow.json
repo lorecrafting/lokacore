@@ -1,0 +1,18 @@
+{
+  "title": "room.hollow.title",
+  "description": "room.hollow.description",
+  "exits": {
+    "north": {
+      "to": "glade"
+    }
+  },
+  "details": {
+    "lean_to": {
+      "aliases": [
+        "lean_to",
+        "shelter"
+      ],
+      "description": "detail.hollow.lean_to"
+    }
+  }
+}
