@@ -80,12 +80,12 @@ The same compiled cartridge runs headless and in a scripted browser walk, so a s
 ```sh
 mise exec -- mix loka.compile cartridges/ashmere_sampler /tmp/sampler.json
 node kernel/ts/test/sim.ts --cartridge /tmp/sampler.json 1 2 3   # every seed on that cartridge
-cd mobile/app && LOKA_WALK=ashmere_sampler mise exec -- npm run walkthrough   # after bin/loka dev
+cd mobile/app && LOKA_WALK=build_sampler mise exec -- npm run walkthrough   # after bin/loka dev cartridges/build_sampler
 ```
 
 The walk plays `mobile/app/walkthrough/<id>.walk.ts` on the author preview's artifact and writes
 the contact sheet to `mobile/app/.walkthrough/contact-sheet.html`; without `LOKA_WALK` it plays
-Chapter 1 on the pinned chapter.
+the toolbox showcase.
 
 ## Authoring paths and examples
 
