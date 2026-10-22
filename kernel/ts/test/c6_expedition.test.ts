@@ -1,51 +1,15 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import {
-  loadCartridge,
-  INSTALLED,
-  newWorld,
-  step,
-  gameView,
-  type Cartridge,
-  type World,
-} from '../src/index.ts';
+import { step, gameView, type World } from '../src/index.ts';
 import { value } from '../src/mechanics/fact.ts';
 import { refused } from '../src/mechanics/expedition/shared.ts';
-import { read } from './read.ts';
+import { fragment } from './fragment.ts';
 
-const artifact = read('protocol/fixtures/missing_child_v041_hash.json');
-const loaded = loadCartridge(
-  new TextEncoder().encode(
-    JSON.stringify({ cartridge: artifact.value, content_hash: artifact.sha256 }),
-  ),
-  INSTALLED,
-);
-if (!loaded.ok) throw Error(JSON.stringify(loaded));
-const cartridge = loaded.cartridge as Cartridge;
+const sampler = fragment('protocol/fixtures/expedition_sampler_hash.json');
 const id = (n: number) => `aaaaaaaa-0000-4000-8000-${String(n).padStart(12, '0')}` as never;
-const context = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never;
 function setup(hour = 18) {
-  const initial = newWorld(cartridge, context, [1, 2, 3, 4]);
-  const selected = step(
-    initial,
-    {
-      id: id(999),
-      world_context_id: context,
-      payload: { type: 'choose_ancestry', actor_id: initial.character, ancestry: 'road_born' },
-    } as never,
-    1,
-  );
-  assert.equal(selected.decision.kind, 'accepted');
-  const fresh = selected.world;
-  const room = Object.entries(fresh.rooms).find(([, r]) => r.key === 'hound_run')![0];
-  let world: World = {
-    ...fresh,
-    state: {
-      ...fresh.state,
-      clock: hour * 3600,
-      containers: { ...fresh.state.containers, [fresh.body]: room as never },
-    },
-  };
+  const fresh = sampler.genesis();
+  let world: World = { ...fresh, state: { ...fresh.state, clock: hour * 3600 } };
   let ordinal = 1;
   const command = (payload: object) => {
     const result = step(
@@ -78,14 +42,11 @@ test('five ordered post-start entries alone resolve S27 and lower faction once',
       `${JSON.stringify(payload)}: ${JSON.stringify(decision)}`,
     );
   };
-  accepted({ type: 'expedition', detail_id: a.detail('gnawed_bones'), transition: 'start' });
+  accepted({ type: 'expedition', detail_id: a.detail('cairn'), transition: 'start' });
   assert.equal(a.attempt()?.cursor, 0);
   assert.ok(a.view().combat);
+  // The trailhead's one exit makes Flee travel route[0].
   accepted({ type: 'flee' });
-  if (a.view().place.title.key === 'room.adder_nest.title')
-    accepted({ type: 'move', direction: 'west' });
-  if (a.view().place.title.key === 'room.hound_run.title')
-    accepted({ type: 'move', direction: 'west' });
   assert.equal(a.attempt()?.cursor, 1);
   for (const [direction, cursor] of [
     ['west', 2],
@@ -97,10 +58,7 @@ test('five ordered post-start entries alone resolve S27 and lower faction once',
     assert.equal(a.attempt()?.cursor, cursor);
   }
   assert.equal(a.attempt()?.status, 'completed');
-  assert.equal(
-    a.view().journal.find((q) => q.quest.key === 'a_night_in_the_marsh')?.state,
-    'resolved',
-  );
+  assert.equal(a.view().journal.find((q) => q.quest.key === 'night_walk')?.state, 'resolved');
   const spec = Object.values(a.world().cartridge.quests ?? {}).find(
     (q) => q.expedition,
   )!.expedition!;
@@ -114,27 +72,23 @@ test('departure fails only the attempt and Restart immediately binds a new ident
   const a = setup(23);
   const start = a.command({
     type: 'expedition',
-    detail_id: a.detail('gnawed_bones'),
+    detail_id: a.detail('cairn'),
     transition: 'start',
   });
   assert.equal(start.kind, 'accepted');
   const first = a.attempt()!.attempt_id;
   assert.equal(a.command({ type: 'flee' }).kind, 'accepted');
-  if (a.view().place.title.key === 'room.adder_nest.title')
-    assert.equal(a.command({ type: 'move', direction: 'west' }).kind, 'accepted');
-  if (a.view().place.title.key === 'room.hound_run.title')
-    assert.equal(a.command({ type: 'move', direction: 'west' }).kind, 'accepted');
   assert.equal(a.attempt()?.cursor, 1);
   assert.equal(a.command({ type: 'move', direction: 'north' }).kind, 'accepted');
   assert.equal(a.attempt()?.status, 'failed');
   assert.equal(a.attempt()?.cursor, 0);
-  // Use ordinary exits to regain Hound Run; no clock or hound replacement gate applies.
+  // Use ordinary exits to regain the trailhead; no clock or hound replacement gate applies.
   assert.equal(a.command({ type: 'move', direction: 'south' }).kind, 'accepted');
   assert.equal(a.command({ type: 'move', direction: 'east' }).kind, 'accepted');
   const prior = a.attempt()!;
   const restart = a.command({
     type: 'expedition',
-    detail_id: a.detail('gnawed_bones'),
+    detail_id: a.detail('cairn'),
     transition: 'restart',
     quest_instance_id: prior.quest_instance_id,
     attempt_id: first,
@@ -148,10 +102,8 @@ test('departure fails only the attempt and Restart immediately binds a new ident
 // Breaks: the shelter cursor is the first route edge into shelter_room, not route[2] the loaders pin.
 test('shelter is offered after route[2] even when an earlier edge enters shelter_room', () => {
   const a = setup(18);
-  a.command({ type: 'expedition', detail_id: a.detail('gnawed_bones'), transition: 'start' });
+  a.command({ type: 'expedition', detail_id: a.detail('cairn'), transition: 'start' });
   a.command({ type: 'flee' });
-  for (const title of ['room.adder_nest.title', 'room.hound_run.title'])
-    if (a.view().place.title.key === title) a.command({ type: 'move', direction: 'west' });
   a.command({ type: 'move', direction: 'west' });
   a.command({ type: 'move', direction: 'south' });
   const { quest_instance_id, attempt_id, cursor } = a.attempt()!;
@@ -167,7 +119,7 @@ test('shelter is offered after route[2] even when an earlier edge enters shelter
       quests: { ...w.cartridge.quests, [key]: { ...quest, expedition: { ...spec, route } } },
     },
   } as World;
-  const shelter = a.detail('marsh_shelter');
+  const shelter = a.detail('lean_to');
   const offer = (c: number) =>
     refused(early, w.character, 'shelter', shelter, quest_instance_id, attempt_id, c);
   assert.equal(offer(3), undefined);

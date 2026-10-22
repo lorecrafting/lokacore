@@ -1,0 +1,12 @@
+{
+  "title": "room.glade.title",
+  "description": "room.glade.description",
+  "exits": {
+    "east": {
+      "to": "ford"
+    },
+    "south": {
+      "to": "hollow"
+    }
+  }
+}

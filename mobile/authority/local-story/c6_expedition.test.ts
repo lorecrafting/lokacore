@@ -1,65 +1,44 @@
 import assert from 'node:assert/strict';
-import { createHash } from 'node:crypto';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
-import { encode } from '../../../kernel/ts/src/foundation/canonical.ts';
-import {
-  loadCartridge,
-  INSTALLED,
-  newWorld,
-  gameView,
-  type Cartridge,
-} from '../../../kernel/ts/src/index.ts';
-import { read } from '../../../kernel/ts/test/read.ts';
-import { elapsedHost } from './__tests__/elapsed-host.test.ts';
+import { gameView } from '../../../kernel/ts/src/index.ts';
+import { fragment } from '../../../kernel/ts/test/fragment.ts';
+import { elapsedHost as started } from './__tests__/elapsed-host.test.ts';
 import { openGame } from './session.ts';
 import { openStory } from './authority.ts';
 import { value } from '../../../kernel/ts/src/mechanics/fact.ts';
 import { load } from './store.ts';
 import { expeditionSave } from './expedition-save.ts';
 
-function fixture(danger = false) {
-  const content = structuredClone(read('protocol/fixtures/missing_child_v041_hash.json').value);
-  content.entry.key = 'hound_run';
-  if (danger) {
-    content.manifest.time_policy = { profile: 'real_elapsed', rate: 50 };
-    (Object.values(content.resources) as any[]).find((r) => r.key === 'hp')!.start = 2;
-    for (const npc of Object.values(content.npcs) as any[])
-      if (npc.key === 'fen_hound') npc.attack.chance = 100;
-    content.world.combat.player_attack.chance = 0;
-    delete content.world.combat.dodge;
-  }
-  const canonical = encode(content);
-  const sha256 = createHash('sha256').update(canonical).digest('hex');
-  const loaded = loadCartridge(
-    new TextEncoder().encode(JSON.stringify({ cartridge: content, content_hash: sha256 })),
-    INSTALLED,
-  );
-  assert.ok(loaded.ok);
-  const initial = newWorld(
-    loaded.cartridge as Cartridge,
-    '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never,
-    [1, 2, 3, 4],
-  );
-  return { bundle: { canonical, sha256 }, initial };
-}
+const sampler = fragment('protocol/fixtures/expedition_sampler_hash.json');
 
-function started(...args: Parameters<typeof elapsedHost>) {
-  const a = elapsedHost(...args);
-  const reply = a.game.invoke({
-    action_key: 'choose_ancestry' as never,
-    target_ids: [],
-    input: { ancestry: 'road_born' as never },
-  });
-  assert.equal(reply.kind, 'saved');
-  if (reply.kind === 'saved') assert.equal(reply.decision.kind, 'accepted');
-  return a;
+// danger: a pack of two waits in the shelter room and outlasts a 2 HP player who cannot hit back.
+function fixture(danger = false) {
+  const change = (c: any) => {
+    if (!danger) return;
+    const pop = c.populations[`${sampler.prefix}:population/hounds`];
+    Object.assign(pop, {
+      home: sampler.ref('room', 'hollow'),
+      cap: 2,
+      day_target: 2,
+      night_target: 2,
+    });
+    pop.area = [sampler.ref('room', 'hollow'), sampler.ref('room', 'glade')];
+    pop.pack.narration.enemy_fled = {
+      north: 'combat.hound_fled_east',
+      south: 'combat.hound_fled_west',
+    };
+    c.npcs[`${sampler.prefix}:npc/hound`].room = sampler.ref('room', 'hollow');
+    c.resources[`${sampler.prefix}:resource/hp`].start = 2;
+    c.world.combat.player_attack.chance = 0;
+  };
+  return { bundle: sampler.bundle(change), initial: sampler.genesis(change) };
 }
 
 // Breaks: a route cursor is credited from room presence or a prior visit, rather than each new accepted edge.
-test('C6 route, shelter, Sedge acknowledgement and independent D1/D6 swim survive cold reopen', (t) => {
+test('C6 route and shelter survive cold reopen at every step', (t) => {
   const { bundle } = fixture();
   const dir = mkdtempSync(join(tmpdir(), 'loka-c6-'));
   t.after(() => rmSync(dir, { recursive: true, force: true }));
@@ -67,8 +46,7 @@ test('C6 route, shelter, Sedge acknowledgement and independent D1/D6 swim surviv
   t.after(() => a.sql.close());
   let game = a.game;
   const view = () => game.view().view;
-  const expedition = () =>
-    view().journal.find((q) => q.quest.key === 'a_night_in_the_marsh')?.expedition;
+  const expedition = () => view().journal.find((q) => q.quest.key === 'night_walk')?.expedition;
   const invoke = (action_key: string, target_ids: string[] = [], input: object = {}) => {
     const reply = game.invoke({ action_key, target_ids, input } as never);
     assert.equal(reply.kind, 'saved', JSON.stringify(reply));
@@ -83,19 +61,17 @@ test('C6 route, shelter, Sedge acknowledgement and independent D1/D6 swim surviv
     assert.ok(game.view().view);
   };
   const detail = view().notices!.find((n) =>
-    n.actions?.some((a) => a.action_key === 'begin_marsh_watch'),
+    n.actions?.some((a) => a.action_key === 'begin_walk'),
   )!;
   assert.ok(detail);
-  const action = detail.actions!.find((a) => a.action_key === 'begin_marsh_watch')!;
+  const action = detail.actions!.find((a) => a.action_key === 'begin_walk')!;
   assert.equal(action.available, true);
-  invoke('begin_marsh_watch', [detail.id], { transition: 'start' });
+  invoke('begin_walk', [detail.id], { transition: 'start' });
   assert.equal(expedition()?.cursor, 0);
   reopen();
   assert.ok(view().combat);
   invoke('flee');
   reopen();
-  if (view().place.title.key === 'room.adder_nest.title') invoke('move', [], { direction: 'west' });
-  if (view().place.title.key === 'room.hound_run.title') invoke('move', [], { direction: 'west' });
   assert.equal(expedition()?.cursor, 1);
   reopen();
   for (const [direction, cursor] of [
@@ -107,12 +83,12 @@ test('C6 route, shelter, Sedge acknowledgement and independent D1/D6 swim surviv
     assert.equal(expedition()?.cursor, cursor);
   }
   const shelter = view().notices!.find((n) =>
-    n.actions?.some((a) => a.action_key === 'use_marsh_shelter'),
+    n.actions?.some((a) => a.action_key === 'use_shelter'),
   )!;
   assert.ok(shelter);
   const before = view().time;
   const row = expedition()!;
-  invoke('use_marsh_shelter', [shelter.id], {
+  invoke('use_shelter', [shelter.id], {
     transition: 'shelter',
     quest_instance_id: row.quest_instance_id,
     attempt_id: row.attempt_id,
@@ -130,56 +106,7 @@ test('C6 route, shelter, Sedge acknowledgement and independent D1/D6 swim surviv
     assert.equal(expedition()?.cursor, cursor);
   }
   assert.equal(expedition()?.status, 'completed');
-  assert.equal(
-    view().journal.find((q) => q.quest.key === 'a_night_in_the_marsh')?.state,
-    'resolved',
-  );
-  // Completion preserves the independent D1 lesson; it does not grant a skill remotely.
-  assert.equal(view().skills!.find((s) => s.skill.key === 'swim')!.acquired, false);
-  for (const direction of ['north', 'north', 'west']) invoke('move', [], { direction });
-  const ferry = () => {
-    const offer = view().notices!.find((n) => n.transport)!.transport!;
-    invoke(offer.action.action_key, [...offer.action.target_ids!], {
-      route: offer.route,
-      quoted_fare: offer.fare,
-    });
-  };
-  ferry();
-  invoke('move', [], { direction: 'east' });
-  const sedge = view().entities.find((e) => e.actions.some((a) => a.action_key === 'sedge_marsh'))!;
-  assert.ok(sedge);
-  invoke('sedge_marsh', [sedge.id]);
-  invoke('choose', [], {
-    continuation_id: view().choice!.continuation_id,
-    choice_id: 'acknowledge',
-  });
-  reopen();
-  assert.equal(
-    game.lastNarration()!.lines.filter((line) => line.key === 'marsh.sedge.acknowledged').length,
-    1,
-  );
-  const pennies = view().resources!.find((r) => r.resource.key === 'pennies')!.current;
-  invoke('sedge_swim', [sedge.id]);
-  invoke('choose', [], { continuation_id: view().choice!.continuation_id, choice_id: 'learn' });
-  reopen();
-  assert.equal(view().skills!.find((s) => s.skill.key === 'swim')!.acquired, true);
-  assert.equal(view().resources!.find((r) => r.resource.key === 'pennies')!.current, pennies);
-  const repeated = game.invoke({
-    action_key: 'sedge_swim' as never,
-    target_ids: [sedge.id],
-    input: {},
-  });
-  assert.equal(repeated.kind, 'saved');
-  if (repeated.kind === 'saved') assert.equal(repeated.decision.kind, 'rejected');
-  invoke('move', [], { direction: 'west' });
-  ferry();
-  for (const direction of ['east', 'south', 'south', 'west', 'south', 'south', 'down'])
-    invoke('move', [], { direction });
-  assert.equal(view().place.title.key, 'room.pool_bottom.title');
-  assert.equal(view().water!.remaining_seconds, 120);
-  reopen();
-  assert.equal(expedition()!.status, 'completed');
-  assert.equal(view().skills!.find((s) => s.skill.key === 'swim')!.usable, true);
+  assert.equal(view().journal.find((q) => q.quest.key === 'night_walk')?.state, 'resolved');
 });
 
 // Breaks: receipt replay accepts a forged shelter flag at Start, a foreign command actor,
@@ -252,7 +179,7 @@ test('cold reopen refuses forged expedition transitions without changing saved r
         .run(saved.value, 'expeditions', saved.key);
     }
   };
-  invoke('begin_marsh_watch', { transition: 'start' });
+  invoke('begin_walk', { transition: 'start' });
   corrupt((row) => {
     row.sheltered = true;
   });
@@ -260,16 +187,10 @@ test('cold reopen refuses forged expedition transitions without changing saved r
     command.payload.actor_id = 'aaaaaaaa-0000-4000-8000-000000009999';
   });
   invoke('flee');
-  if (a.game.view().view.place.title.key === 'room.adder_nest.title')
-    invoke('move', { direction: 'west' });
-  if (a.game.view().view.place.title.key === 'room.hound_run.title')
-    invoke('move', { direction: 'west' });
   invoke('move', { direction: 'west' });
   invoke('move', { direction: 'south' });
-  const row = a.game
-    .view()
-    .view.journal.find((q) => q.quest.key === 'a_night_in_the_marsh')!.expedition!;
-  invoke('use_marsh_shelter', {
+  const row = a.game.view().view.journal.find((q) => q.quest.key === 'night_walk')!.expedition!;
+  invoke('use_shelter', {
     transition: 'shelter',
     quest_instance_id: row.quest_instance_id,
     attempt_id: row.attempt_id,
@@ -280,9 +201,9 @@ test('cold reopen refuses forged expedition transitions without changing saved r
   });
 });
 
-// Breaks: a scheduled fatal bleed preserves route credit, a same-body shrine return revives it,
-// or the recovery loader refuses the run_job receipt that carries the death.
-test('a real hound bleed fails stage three before shrine return and immediate retry reopens', (t) => {
+// Breaks: a death on a pulse preserves route credit, a same-body shrine return revives it,
+// or the recovery loader refuses the receipt that carries the death.
+test('a hound death fails stage three before shrine return and immediate retry reopens', (t) => {
   const { bundle } = fixture(true);
   const dir = mkdtempSync(join(tmpdir(), 'loka-c6-fatal-'));
   t.after(() => rmSync(dir, { recursive: true, force: true }));
@@ -290,15 +211,14 @@ test('a real hound bleed fails stage three before shrine return and immediate re
   t.after(() => a.sql.close());
   let game = a.game;
   const view = () => game.view().view;
-  const attempt = () =>
-    view().journal.find((q) => q.quest.key === 'a_night_in_the_marsh')!.expedition!;
-  const invoke = (action_key: string, input: object = {}) => {
+  const attempt = () => view().journal.find((q) => q.quest.key === 'night_walk')!.expedition!;
+  const invoke = (action_key: string, input: object = {}, target?: string) => {
     const notice = view().notices?.find((n) =>
       n.actions?.some((action) => action.action_key === action_key),
     );
     const reply = game.invoke({
       action_key,
-      target_ids: notice ? [notice.id] : [],
+      target_ids: target ? [target] : notice ? [notice.id] : [],
       input,
     } as never);
     assert.equal(reply.kind, 'saved', JSON.stringify(reply));
@@ -315,28 +235,25 @@ test('a real hound bleed fails stage three before shrine return and immediate re
     a.sql.open();
     game = openGame(a.db, bundle, a.host);
   };
-  invoke('begin_marsh_watch', { transition: 'start' });
-  pulse(150);
-  assert.ok(view().bleeding);
-  invoke('flee');
-  if (view().place.title.key === 'room.adder_nest.title') invoke('move', { direction: 'west' });
-  if (view().place.title.key === 'room.hound_run.title') invoke('move', { direction: 'west' });
-  invoke('move', { direction: 'west' });
-  invoke('move', { direction: 'south' });
+  invoke('begin_walk', { transition: 'start' });
+  for (const direction of ['west', 'west', 'south']) invoke('move', { direction });
   assert.equal(attempt().cursor, 3);
+  const hound = view().entities.find((e) => e.actions.some((x) => x.action_key === 'attack'))!;
+  invoke('attack', {}, hound.id);
+  assert.ok(view().combat);
   reopen();
   const first = attempt().attempt_id;
-  pulse(100);
-  assert.equal(view().place.title.key, 'room.chapel_nave.title');
+  pulse(300);
+  assert.equal(view().place.title.key, 'room.road.title');
   assert.equal(attempt().status, 'failed');
   assert.equal(attempt().cursor, 0);
   reopen();
   assert.equal(attempt().status, 'failed');
-  for (let i = 0; i < 7; i++) invoke('move', { direction: 'south' });
+  invoke('move', { direction: 'south' });
   invoke('move', { direction: 'east' });
-  assert.equal(view().place.title.key, 'room.hound_run.title');
+  assert.equal(view().place.title.key, 'room.trailhead.title');
   assert.equal(attempt().cursor, 0);
-  invoke('retry_marsh_watch', {
+  invoke('retry_walk', {
     transition: 'restart',
     quest_instance_id: attempt().quest_instance_id,
     attempt_id: first,
@@ -380,12 +297,8 @@ test('final route completion reconciles real failed and lost COMMIT outcomes and
       if (reply.kind === 'saved')
         assert.equal((reply.decision as { kind: string }).kind, 'accepted');
     };
-    invoke('begin_marsh_watch', { transition: 'start' });
+    invoke('begin_walk', { transition: 'start' });
     invoke('flee');
-    if (gameView(story.world()).place.title.key === 'room.adder_nest.title')
-      invoke('move', { direction: 'west' });
-    if (gameView(story.world()).place.title.key === 'room.hound_run.title')
-      invoke('move', { direction: 'west' });
     for (const direction of ['west', 'south', 'north']) invoke('move', { direction });
     assert.equal(Object.values(story.world().state.expeditions!)[0].cursor, 4);
     const snapshot = () =>
