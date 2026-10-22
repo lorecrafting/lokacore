@@ -103,7 +103,7 @@
         {
           "key": "bram",
           "npc": {
-            "cartridge_id": "ashmere_ferry",
+            "cartridge_id": "ferry_sampler",
             "cartridge_version": "0.0.1",
             "kind": "npc",
             "key": "bram"
@@ -120,7 +120,7 @@
             "bram": {
               "role": "npc",
               "npc": {
-                "cartridge_id": "ashmere_ferry",
+                "cartridge_id": "ferry_sampler",
                 "cartridge_version": "0.0.1",
                 "kind": "npc",
                 "key": "bram"
@@ -129,7 +129,7 @@
             "lantern": {
               "role": "item",
               "item": {
-                "cartridge_id": "ashmere_ferry",
+                "cartridge_id": "ferry_sampler",
                 "cartridge_version": "0.0.1",
                 "kind": "item",
                 "key": "lantern"
@@ -189,7 +189,7 @@
         {
           "role": "item",
           "item": {
-            "cartridge_id": "ashmere_ferry",
+            "cartridge_id": "ferry_sampler",
             "cartridge_version": "0.0.1",
             "kind": "item",
             "key": "lantern"
@@ -447,7 +447,7 @@
             {
               "op": "fact.assign",
               "fact": {
-                "cartridge_id": "ashmere_ferry",
+                "cartridge_id": "ferry_sampler",
                 "cartridge_version": "0.0.1",
                 "kind": "fact",
                 "key": "search_plan"
@@ -460,7 +460,7 @@
           "label": "quest.lantern.accept",
           "narration": "dialogue.bram.offer.narration",
           "accept": {
-            "cartridge_id": "ashmere_ferry",
+            "cartridge_id": "ferry_sampler",
             "cartridge_version": "0.0.1",
             "kind": "quest",
             "key": "lantern"

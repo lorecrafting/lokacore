@@ -7,7 +7,7 @@
       "on": {
         "event": "quest_resolved",
         "quest": {
-          "cartridge_id": "ashmere_missing_child",
+          "cartridge_id": "village_chapter",
           "cartridge_version": "0.0.9",
           "kind": "quest",
           "key": "first_lead"
@@ -18,10 +18,10 @@
         {
           "op": "quest.activate",
           "quest": {
-            "cartridge_id": "ashmere_missing_child",
+            "cartridge_id": "village_chapter",
             "cartridge_version": "0.0.9",
             "kind": "quest",
-            "key": "missing_child"
+            "key": "lost_lamb"
           }
         }
       ]
@@ -56,7 +56,7 @@
       "key": "start_search",
       "on": {
         "quest": {
-          "cartridge_id": "ashmere_missing_child",
+          "cartridge_id": "village_chapter",
           "cartridge_version": "0.0.9",
           "kind": "quest",
           "key": "first_lead"
@@ -67,10 +67,10 @@
         {
           "op": "quest.activate",
           "quest": {
-            "cartridge_id": "ashmere_missing_child",
+            "cartridge_id": "village_chapter",
             "cartridge_version": "0.0.9",
             "kind": "quest",
-            "key": "missing_child"
+            "key": "lost_lamb"
           }
         }
       ]
@@ -90,10 +90,10 @@
         {
           "op": "quest.activate",
           "quest": {
-            "cartridge_id": "ashmere_missing_child",
+            "cartridge_id": "village_chapter",
             "cartridge_version": "0.0.9",
             "kind": "quest",
-            "key": "missing_child"
+            "key": "lost_lamb"
           }
         }
       ]
@@ -108,7 +108,7 @@
       "on": {
         "event": "quest_resolved",
         "quest": {
-          "cartridge_id": "ashmere_missing_child",
+          "cartridge_id": "village_chapter",
           "cartridge_version": "0.0.9",
           "kind": "quest",
           "key": "first_lead"
@@ -118,10 +118,10 @@
         {
           "op": "quest.activate",
           "quest": {
-            "cartridge_id": "ashmere_missing_child",
+            "cartridge_id": "village_chapter",
             "cartridge_version": "0.0.9",
             "kind": "quest",
-            "key": "missing_child"
+            "key": "lost_lamb"
           }
         }
       ]
@@ -136,7 +136,7 @@
       "on": {
         "event": "quest_resolved",
         "quest": {
-          "cartridge_id": "ashmere_missing_child",
+          "cartridge_id": "village_chapter",
           "cartridge_version": "0.0.9",
           "kind": "quest",
           "key": "first_lead"
@@ -146,10 +146,10 @@
       "apply": [
         {
           "quest": {
-            "cartridge_id": "ashmere_missing_child",
+            "cartridge_id": "village_chapter",
             "cartridge_version": "0.0.9",
             "kind": "quest",
-            "key": "missing_child"
+            "key": "lost_lamb"
           }
         }
       ]
@@ -164,7 +164,7 @@
       "on": {
         "event": "quest_resolved",
         "quest": {
-          "cartridge_id": "ashmere_missing_child",
+          "cartridge_id": "village_chapter",
           "cartridge_version": "0.0.9",
           "kind": "quest",
           "key": "first_lead"
@@ -187,7 +187,7 @@
       "on": {
         "event": "quest_activated",
         "quest": {
-          "cartridge_id": "ashmere_missing_child",
+          "cartridge_id": "village_chapter",
           "cartridge_version": "0.0.9",
           "kind": "quest",
           "key": "first_lead"
@@ -198,10 +198,10 @@
         {
           "op": "quest.activate",
           "quest": {
-            "cartridge_id": "ashmere_missing_child",
+            "cartridge_id": "village_chapter",
             "cartridge_version": "0.0.9",
             "kind": "quest",
-            "key": "missing_child"
+            "key": "lost_lamb"
           }
         }
       ]
@@ -216,7 +216,7 @@
       "on": {
         "event": "quest_resolved",
         "quest": {
-          "cartridge_id": "ashmere_missing_child",
+          "cartridge_id": "village_chapter",
           "cartridge_version": "0.0.9",
           "kind": "quest",
           "key": "first_lead"
@@ -227,10 +227,10 @@
         {
           "op": "quest.activate",
           "quest": {
-            "cartridge_id": "ashmere_missing_child",
+            "cartridge_id": "village_chapter",
             "cartridge_version": "0.0.9",
             "kind": "quest",
-            "key": "missing_child"
+            "key": "lost_lamb"
           }
         }
       ]
@@ -245,7 +245,7 @@
       "on": {
         "event": "quest_resolved",
         "quest": {
-          "cartridge_id": "ashmere_missing_child",
+          "cartridge_id": "village_chapter",
           "cartridge_version": "0.0.9",
           "kind": "quest",
           "key": "first_lead"
@@ -256,10 +256,10 @@
         {
           "op": "quest.activate",
           "quest": {
-            "cartridge_id": "ashmere_missing_child",
+            "cartridge_id": "village_chapter",
             "cartridge_version": "0.0.9",
             "kind": "quest",
-            "key": "missing_child"
+            "key": "lost_lamb"
           }
         }
       ]
@@ -280,10 +280,10 @@
         {
           "op": "quest.activate",
           "quest": {
-            "cartridge_id": "ashmere_missing_child",
+            "cartridge_id": "village_chapter",
             "cartridge_version": "0.0.9",
             "kind": "quest",
-            "key": "missing_child"
+            "key": "lost_lamb"
           }
         }
       ]
@@ -298,7 +298,7 @@
       "on": {
         "event": "quest_resolved",
         "quest": {
-          "cartridge_id": "ashmere_missing_child",
+          "cartridge_id": "village_chapter",
           "cartridge_version": "0.0.9",
           "kind": "quest",
           "key": "first_lead"
@@ -308,7 +308,7 @@
       "apply": [
         {
           "op": "quest.activate",
-          "quest": "missing_child"
+          "quest": "lost_lamb"
         }
       ]
     },
@@ -322,7 +322,7 @@
       "on": {
         "event": "quest_resolved",
         "quest": {
-          "cartridge_id": "ashmere_missing_child",
+          "cartridge_id": "village_chapter",
           "cartridge_version": "0.0.9",
           "kind": "quest",
           "key": "first_lead"
@@ -333,10 +333,10 @@
         {
           "op": "quest.start",
           "quest": {
-            "cartridge_id": "ashmere_missing_child",
+            "cartridge_id": "village_chapter",
             "cartridge_version": "0.0.9",
             "kind": "quest",
-            "key": "missing_child"
+            "key": "lost_lamb"
           }
         }
       ]
@@ -351,7 +351,7 @@
       "on": {
         "event": "quest_resolved",
         "quest": {
-          "cartridge_id": "ashmere_missing_child",
+          "cartridge_id": "village_chapter",
           "cartridge_version": "0.0.9",
           "kind": "quest",
           "key": "first_lead"
@@ -363,10 +363,10 @@
         {
           "op": "quest.activate",
           "quest": {
-            "cartridge_id": "ashmere_missing_child",
+            "cartridge_id": "village_chapter",
             "cartridge_version": "0.0.9",
             "kind": "quest",
-            "key": "missing_child"
+            "key": "lost_lamb"
           }
         }
       ]
@@ -381,7 +381,7 @@
       "on": {
         "event": "quest_resolved",
         "quest": {
-          "cartridge_id": "ashmere_missing_child",
+          "cartridge_id": "village_chapter",
           "cartridge_version": "0.0.9",
           "kind": "quest",
           "key": "first_lead"
@@ -392,10 +392,10 @@
         {
           "op": "quest.activate",
           "quest": {
-            "cartridge_id": "ashmere_missing_child",
+            "cartridge_id": "village_chapter",
             "cartridge_version": "0.0.9",
             "kind": "quest",
-            "key": "missing_child"
+            "key": "lost_lamb"
           },
           "extra": true
         }

@@ -171,19 +171,6 @@ test('solar and lunar cuts include their start and wrap at their cycle', () => {
     assert.equal(status(c, '', time)?.lunar, lunar);
 });
 
-// Breaks: the bundled chapter day/time or phase pin drifts from its authored release.
-test('chapter time renders the hand-checked evening and following days', () => {
-  const c = read('protocol/fixtures/missing_child_v015_hash.json').value as Cartridge;
-  for (const [time, day, hour, subdivision, solar, lunar] of [
-    [64800, 1, 18, 0, 'dusk', 'new'],
-    [86399, 1, 23, 59, 'night', 'new'],
-    [86400, 2, 0, 0, 'night', 'new'],
-    [151200, 2, 18, 0, 'dusk', 'new'],
-    [237600, 3, 18, 0, 'dusk', 'new'],
-  ] as const)
-    assert.deepEqual(status(c, '', time), { day, hour, subdivision, solar, lunar });
-});
-
 // Breaks: an authored legacy gain interval still uses the fixed hourly boundary.
 test('legacy resource gain uses its authored interval; opted fractional recovery keeps its own', () => {
   const spec = {

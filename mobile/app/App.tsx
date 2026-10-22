@@ -35,9 +35,9 @@ export const fonts = {
 // deletes the file (expo refuses to delete an open database).
 // deleteDatabaseSync removes the main file only; SQLite discards a -journal left beside the new,
 // empty file rather than replaying it, so nothing else needs deleting.
-// The bundled chapter is the toolbox showcase (owner-decision-retire-ashmere-2026-10-21). One fixed
+// The bundled chapter is the toolbox showcase (docs/decisions/README.md). One fixed
 // save name: web keeps a storage slot per file, so after a content change the pinned-release
-// refusal offers Start over; earlier saves (loka-ashmere-missing-child.db) stay untouched.
+// refusal offers Start over; earlier chapters' saves stay untouched.
 // ponytail: no story picker until the approved release needs one.
 // The author preview (metro.config.js) keeps one save per edited cartridge's hash: an edit starts
 // fresh without re-pinning the release save or meeting pinned_release_missing, and nothing is

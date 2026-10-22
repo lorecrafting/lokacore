@@ -4,7 +4,7 @@
       "contract": "ItemEdible",
       "value": {
         "resource": {
-          "cartridge_id": "ashmere_missing_child",
+          "cartridge_id": "village_chapter",
           "cartridge_version": "0.0.29",
           "kind": "resource",
           "key": "mv"
@@ -39,7 +39,7 @@
         "location": {
           "in": "room",
           "room": {
-            "cartridge_id": "ashmere_missing_child",
+            "cartridge_id": "village_chapter",
             "cartridge_version": "0.0.29",
             "kind": "room",
             "key": "orchard"
@@ -47,7 +47,7 @@
         },
         "edible": {
           "resource": {
-            "cartridge_id": "ashmere_missing_child",
+            "cartridge_id": "village_chapter",
             "cartridge_version": "0.0.29",
             "kind": "resource",
             "key": "mv"

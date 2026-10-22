@@ -5,13 +5,13 @@
       "value": {
         "key": "lantern_room",
         "provider": {
-          "cartridge_id": "ashmere_missing_child",
+          "cartridge_id": "village_chapter",
           "cartridge_version": "0.0.25",
           "kind": "npc",
           "key": "maud"
         },
         "currency": {
-          "cartridge_id": "ashmere_missing_child",
+          "cartridge_id": "village_chapter",
           "cartridge_version": "0.0.25",
           "kind": "resource",
           "key": "pennies"
@@ -23,7 +23,7 @@
         "benefit": {
           "kind": "entitlement",
           "fact": {
-            "cartridge_id": "ashmere_missing_child",
+            "cartridge_id": "village_chapter",
             "cartridge_version": "0.0.25",
             "kind": "fact",
             "key": "lantern_bed_paid"
@@ -36,13 +36,13 @@
       "value": {
         "key": "lantern_meal",
         "provider": {
-          "cartridge_id": "ashmere_missing_child",
+          "cartridge_id": "village_chapter",
           "cartridge_version": "0.0.25",
           "kind": "npc",
           "key": "maud"
         },
         "currency": {
-          "cartridge_id": "ashmere_missing_child",
+          "cartridge_id": "village_chapter",
           "cartridge_version": "0.0.25",
           "kind": "resource",
           "key": "pennies"
@@ -54,14 +54,14 @@
         "benefit": {
           "kind": "meal",
           "stock": {
-            "cartridge_id": "ashmere_missing_child",
+            "cartridge_id": "village_chapter",
             "cartridge_version": "0.0.25",
             "kind": "resource",
             "key": "lantern_meals"
           },
           "debit": 1,
           "recovery": {
-            "cartridge_id": "ashmere_missing_child",
+            "cartridge_id": "village_chapter",
             "cartridge_version": "0.0.25",
             "kind": "resource",
             "key": "mv"
@@ -75,13 +75,13 @@
       "value": {
         "key": "lantern_ale",
         "provider": {
-          "cartridge_id": "ashmere_missing_child",
+          "cartridge_id": "village_chapter",
           "cartridge_version": "0.0.25",
           "kind": "npc",
           "key": "maud"
         },
         "currency": {
-          "cartridge_id": "ashmere_missing_child",
+          "cartridge_id": "village_chapter",
           "cartridge_version": "0.0.25",
           "kind": "resource",
           "key": "pennies"
@@ -93,19 +93,19 @@
         "benefit": {
           "kind": "drink",
           "vessel": {
-            "cartridge_id": "ashmere_missing_child",
+            "cartridge_id": "village_chapter",
             "cartridge_version": "0.0.25",
             "kind": "item",
             "key": "lantern_ale_cask"
           },
           "liquid": {
-            "cartridge_id": "ashmere_missing_child",
+            "cartridge_id": "village_chapter",
             "cartridge_version": "0.0.25",
             "kind": "liquid",
             "key": "ale"
           },
           "recovery": {
-            "cartridge_id": "ashmere_missing_child",
+            "cartridge_id": "village_chapter",
             "cartridge_version": "0.0.25",
             "kind": "resource",
             "key": "mv"
@@ -121,7 +121,7 @@
         "actor_id": "aaaaaaaa-0000-4000-8000-000000000001",
         "provider_id": "bbbbbbbb-0000-4000-8000-000000000001",
         "service": {
-          "cartridge_id": "ashmere_missing_child",
+          "cartridge_id": "village_chapter",
           "cartridge_version": "0.0.25",
           "kind": "service",
           "key": "lantern_room"
@@ -137,7 +137,7 @@
       "contract": "ServiceOffer",
       "value": {
         "service": {
-          "cartridge_id": "ashmere_missing_child",
+          "cartridge_id": "village_chapter",
           "cartridge_version": "0.0.25",
           "kind": "service",
           "key": "lantern_room"
@@ -147,7 +147,7 @@
         "benefit": {
           "kind": "entitlement",
           "fact": {
-            "cartridge_id": "ashmere_missing_child",
+            "cartridge_id": "village_chapter",
             "cartridge_version": "0.0.25",
             "kind": "fact",
             "key": "lantern_bed_paid"
@@ -187,7 +187,7 @@
         "room_line": "npc.maud.room",
         "description": "npc.maud.description",
         "room": {
-          "cartridge_id": "ashmere_missing_child",
+          "cartridge_id": "village_chapter",
           "cartridge_version": "0.0.25",
           "kind": "room",
           "key": "drowned_lantern"
@@ -198,19 +198,19 @@
         },
         "services": [
           {
-            "cartridge_id": "ashmere_missing_child",
+            "cartridge_id": "village_chapter",
             "cartridge_version": "0.0.25",
             "kind": "service",
             "key": "lantern_room"
           },
           {
-            "cartridge_id": "ashmere_missing_child",
+            "cartridge_id": "village_chapter",
             "cartridge_version": "0.0.25",
             "kind": "service",
             "key": "lantern_meal"
           },
           {
-            "cartridge_id": "ashmere_missing_child",
+            "cartridge_id": "village_chapter",
             "cartridge_version": "0.0.25",
             "kind": "service",
             "key": "lantern_ale"
@@ -227,7 +227,7 @@
         "description": "detail.bed.free",
         "bed": {
           "entitlement": {
-            "cartridge_id": "ashmere_missing_child",
+            "cartridge_id": "village_chapter",
             "cartridge_version": "0.0.25",
             "kind": "fact",
             "key": "lantern_bed_paid"
@@ -242,7 +242,7 @@
               "root": {
                 "op": "fact_compare",
                 "fact": {
-                  "cartridge_id": "ashmere_missing_child",
+                  "cartridge_id": "village_chapter",
                   "cartridge_version": "0.0.25",
                   "kind": "fact",
                   "key": "lantern_bed_paid"
@@ -267,7 +267,7 @@
       "contract": "ActionInput",
       "value": {
         "service": {
-          "cartridge_id": "ashmere_missing_child",
+          "cartridge_id": "village_chapter",
           "cartridge_version": "0.0.25",
           "kind": "service",
           "key": "lantern_room"
@@ -276,7 +276,7 @@
     },
     "cartridge": {
       "contract": "CompiledCartridge",
-      "value_fixture": "protocol/fixtures/missing_child_v025_hash.json"
+      "value_fixture": "protocol/fixtures/build_sampler_hash.json"
     },
     "entity": {
       "contract": "EntityView",
@@ -288,7 +288,7 @@
         "services": [
           {
             "service": {
-              "cartridge_id": "ashmere_missing_child",
+              "cartridge_id": "village_chapter",
               "cartridge_version": "0.0.25",
               "kind": "service",
               "key": "lantern_room"
@@ -298,7 +298,7 @@
             "benefit": {
               "kind": "entitlement",
               "fact": {
-                "cartridge_id": "ashmere_missing_child",
+                "cartridge_id": "village_chapter",
                 "cartridge_version": "0.0.25",
                 "kind": "fact",
                 "key": "lantern_bed_paid"
@@ -1206,55 +1206,55 @@
       "valid": false,
       "value": [
         {
-          "cartridge_id": "ashmere_missing_child",
+          "cartridge_id": "village_chapter",
           "cartridge_version": "0.0.25",
           "kind": "service",
           "key": "lantern_room"
         },
         {
-          "cartridge_id": "ashmere_missing_child",
+          "cartridge_id": "village_chapter",
           "cartridge_version": "0.0.25",
           "kind": "service",
           "key": "lantern_room"
         },
         {
-          "cartridge_id": "ashmere_missing_child",
+          "cartridge_id": "village_chapter",
           "cartridge_version": "0.0.25",
           "kind": "service",
           "key": "lantern_room"
         },
         {
-          "cartridge_id": "ashmere_missing_child",
+          "cartridge_id": "village_chapter",
           "cartridge_version": "0.0.25",
           "kind": "service",
           "key": "lantern_room"
         },
         {
-          "cartridge_id": "ashmere_missing_child",
+          "cartridge_id": "village_chapter",
           "cartridge_version": "0.0.25",
           "kind": "service",
           "key": "lantern_room"
         },
         {
-          "cartridge_id": "ashmere_missing_child",
+          "cartridge_id": "village_chapter",
           "cartridge_version": "0.0.25",
           "kind": "service",
           "key": "lantern_room"
         },
         {
-          "cartridge_id": "ashmere_missing_child",
+          "cartridge_id": "village_chapter",
           "cartridge_version": "0.0.25",
           "kind": "service",
           "key": "lantern_room"
         },
         {
-          "cartridge_id": "ashmere_missing_child",
+          "cartridge_id": "village_chapter",
           "cartridge_version": "0.0.25",
           "kind": "service",
           "key": "lantern_room"
         },
         {
-          "cartridge_id": "ashmere_missing_child",
+          "cartridge_id": "village_chapter",
           "cartridge_version": "0.0.25",
           "kind": "service",
           "key": "lantern_room"
@@ -1302,13 +1302,13 @@
         "bad": {
           "key": "lantern_room",
           "provider": {
-            "cartridge_id": "ashmere_missing_child",
+            "cartridge_id": "village_chapter",
             "cartridge_version": "0.0.25",
             "kind": "npc",
             "key": "maud"
           },
           "currency": {
-            "cartridge_id": "ashmere_missing_child",
+            "cartridge_id": "village_chapter",
             "cartridge_version": "0.0.25",
             "kind": "resource",
             "key": "pennies"
@@ -1320,7 +1320,7 @@
           "benefit": {
             "kind": "entitlement",
             "fact": {
-              "cartridge_id": "ashmere_missing_child",
+              "cartridge_id": "village_chapter",
               "cartridge_version": "0.0.25",
               "kind": "fact",
               "key": "lantern_bed_paid"
@@ -1333,7 +1333,7 @@
       "base": "cartridge",
       "path": [
         "services",
-        "ashmere_missing_child@0.0.25:service/lantern_room",
+        "build_sampler@0.0.1:service/buy_plot",
         "price"
       ],
       "name": "invalid service map member",

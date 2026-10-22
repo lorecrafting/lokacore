@@ -205,7 +205,7 @@
           "key": "bell_rung",
           "on": {
             "story_point": {
-              "cartridge_id": "ashmere_scene",
+              "cartridge_id": "scene_sampler",
               "cartridge_version": "0.0.1",
               "kind": "story_point",
               "key": "lantern_resolved"

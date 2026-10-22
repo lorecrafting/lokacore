@@ -352,7 +352,7 @@
       "target": {
         "kind": "detail",
         "room": {
-          "cartridge_id": "ashmere_bell",
+          "cartridge_id": "recipe_sampler",
           "cartridge_version": "0.0.1",
           "kind": "room",
           "key": "belfry"
@@ -367,7 +367,7 @@
           "item": {
             "op": "fact_compare",
             "fact": {
-              "cartridge_id": "ashmere_bell",
+              "cartridge_id": "recipe_sampler",
               "cartridge_version": "0.0.1",
               "kind": "fact",
               "key": "chapel_bell_rung"
@@ -382,7 +382,7 @@
             {
               "op": "fact.assign",
               "fact": {
-                "cartridge_id": "ashmere_bell",
+                "cartridge_id": "recipe_sampler",
                 "cartridge_version": "0.0.1",
                 "kind": "fact",
                 "key": "chapel_bell_rung"
@@ -421,7 +421,7 @@
       "target": {
         "kind": "detail",
         "room": {
-          "cartridge_id": "ashmere_bell",
+          "cartridge_id": "recipe_sampler",
           "cartridge_version": "0.0.1",
           "kind": "room",
           "key": "belfry"
@@ -436,7 +436,7 @@
           "item": {
             "op": "fact_compare",
             "fact": {
-              "cartridge_id": "ashmere_bell",
+              "cartridge_id": "recipe_sampler",
               "cartridge_version": "0.0.1",
               "kind": "fact",
               "key": "chapel_bell_rung"
@@ -451,7 +451,7 @@
             {
               "op": "fact.assign",
               "fact": {
-                "cartridge_id": "ashmere_bell",
+                "cartridge_id": "recipe_sampler",
                 "cartridge_version": "0.0.1",
                 "kind": "fact",
                 "key": "chapel_bell_rung"
@@ -572,7 +572,7 @@
       "target": {
         "kind": "detail",
         "room": {
-          "cartridge_id": "ashmere_bell",
+          "cartridge_id": "recipe_sampler",
           "cartridge_version": "0.0.1",
           "kind": "room",
           "key": "belfry"
@@ -587,7 +587,7 @@
           "item": {
             "op": "fact_compare",
             "fact": {
-              "cartridge_id": "ashmere_bell",
+              "cartridge_id": "recipe_sampler",
               "cartridge_version": "0.0.1",
               "kind": "fact",
               "key": "chapel_bell_rung"
@@ -602,7 +602,7 @@
             {
               "op": "fact.assign",
               "fact": {
-                "cartridge_id": "ashmere_bell",
+                "cartridge_id": "recipe_sampler",
                 "cartridge_version": "0.0.1",
                 "kind": "fact",
                 "key": "chapel_bell_rung"
@@ -641,7 +641,7 @@
       "target": {
         "kind": "detail",
         "room": {
-          "cartridge_id": "ashmere_bell",
+          "cartridge_id": "recipe_sampler",
           "cartridge_version": "0.0.1",
           "kind": "room",
           "key": "belfry"
@@ -656,7 +656,7 @@
           "item": {
             "op": "fact_compare",
             "fact": {
-              "cartridge_id": "ashmere_bell",
+              "cartridge_id": "recipe_sampler",
               "cartridge_version": "0.0.1",
               "kind": "fact",
               "key": "chapel_bell_rung"
@@ -671,7 +671,7 @@
             {
               "op": "fact.assign",
               "fact": {
-                "cartridge_id": "ashmere_bell",
+                "cartridge_id": "recipe_sampler",
                 "cartridge_version": "0.0.1",
                 "kind": "fact",
                 "key": "chapel_bell_rung"
@@ -720,7 +720,7 @@
       "target": {
         "kind": "detail",
         "room": {
-          "cartridge_id": "ashmere_bell",
+          "cartridge_id": "recipe_sampler",
           "cartridge_version": "0.0.1",
           "kind": "room",
           "key": "belfry"
@@ -735,7 +735,7 @@
           "item": {
             "op": "fact_compare",
             "fact": {
-              "cartridge_id": "ashmere_bell",
+              "cartridge_id": "recipe_sampler",
               "cartridge_version": "0.0.1",
               "kind": "fact",
               "key": "chapel_bell_rung"
@@ -750,7 +750,7 @@
             {
               "op": "fact.assign",
               "fact": {
-                "cartridge_id": "ashmere_bell",
+                "cartridge_id": "recipe_sampler",
                 "cartridge_version": "0.0.1",
                 "kind": "fact",
                 "key": "chapel_bell_rung"
@@ -3313,7 +3313,7 @@
     "value": {
       "api_version": "loka/v3",
       "cartridge": {
-        "cartridge_id": "ashmere_1_the_missing_child",
+        "cartridge_id": "village_chapter",
         "cartridge_version": "1.0.0",
         "cartridge_hash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcde"
       },
@@ -3337,7 +3337,7 @@
   {
     "contract": "CartridgeRelease",
     "value": {
-      "cartridge_id": "ashmere_1_the_missing_child",
+      "cartridge_id": "village_chapter",
       "cartridge_version": "1.0.0",
       "cartridge_hash": "0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF"
     },
@@ -3351,7 +3351,7 @@
   {
     "contract": "CartridgeRelease",
     "value": {
-      "cartridge_id": "ashmere_1_the_missing_child",
+      "cartridge_id": "village_chapter",
       "cartridge_version": "1.0.0",
       "cartridge_hash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0"
     },
@@ -6751,7 +6751,7 @@
     "value": {
       "format": "loka-cartridge-v1",
       "facts": {
-        "ashmere_hello@0.0.1:policy/village_arrived": {
+        "hello_sampler@0.0.1:policy/village_arrived": {
           "key": "village_arrived",
           "version": 1,
           "value_type": {
@@ -6765,12 +6765,12 @@
         }
       },
       "policies": {
-        "ashmere_hello@0.0.1:fact/village_arrived": {
+        "hello_sampler@0.0.1:fact/village_arrived": {
           "policy_version": 1,
           "root": {
             "op": "fact_compare",
             "fact": {
-              "cartridge_id": "ashmere_hello",
+              "cartridge_id": "hello_sampler",
               "cartridge_version": "0.0.1",
               "kind": "fact",
               "key": "village_arrived"
@@ -6780,7 +6780,7 @@
         }
       },
       "actions": {
-        "ashmere_hello@0.0.1:talk": {
+        "hello_sampler@0.0.1:talk": {
           "key": "talk",
           "label": "actions.talk",
           "target": {
@@ -6804,11 +6804,11 @@
     },
     "errors": [
       {
-        "path": "/actions/ashmere_hello@0.0.1:talk",
+        "path": "/actions/hello_sampler@0.0.1:talk",
         "code": "pattern_mismatch"
       },
       {
-        "path": "/facts/ashmere_hello@0.0.1:policy~1village_arrived",
+        "path": "/facts/hello_sampler@0.0.1:policy~1village_arrived",
         "code": "pattern_mismatch"
       },
       {
@@ -6820,7 +6820,7 @@
         "code": "missing_property"
       },
       {
-        "path": "/policies/ashmere_hello@0.0.1:fact~1village_arrived",
+        "path": "/policies/hello_sampler@0.0.1:fact~1village_arrived",
         "code": "pattern_mismatch"
       }
     ]
@@ -6896,7 +6896,7 @@
     "value": {
       "severity": "info",
       "code": "QUEST_TARGET_UNREACHABLE",
-      "path": "quests/missing_child.objectives[2].target",
+      "path": "quests/lost_lamb.objectives[2].target",
       "message_key": "diagnostics.quest_target_unreachable",
       "data": {
         "reachable": false
@@ -11380,7 +11380,7 @@
       "target": {
         "kind": "detail",
         "room": {
-          "cartridge_id": "ashmere_bell",
+          "cartridge_id": "recipe_sampler",
           "cartridge_version": "0.0.1",
           "kind": "room",
           "key": "belfry"
@@ -11395,7 +11395,7 @@
           "item": {
             "op": "fact_compare",
             "fact": {
-              "cartridge_id": "ashmere_bell",
+              "cartridge_id": "recipe_sampler",
               "cartridge_version": "0.0.1",
               "kind": "fact",
               "key": "chapel_bell_rung"
@@ -11410,7 +11410,7 @@
             {
               "op": "fact.assign",
               "fact": {
-                "cartridge_id": "ashmere_bell",
+                "cartridge_id": "recipe_sampler",
                 "cartridge_version": "0.0.1",
                 "kind": "fact",
                 "key": "chapel_bell_rung"
@@ -11459,7 +11459,7 @@
       "target": {
         "kind": "detail",
         "room": {
-          "cartridge_id": "ashmere_bell",
+          "cartridge_id": "recipe_sampler",
           "cartridge_version": "0.0.1",
           "kind": "room",
           "key": "belfry"
@@ -11474,7 +11474,7 @@
           "item": {
             "op": "fact_compare",
             "fact": {
-              "cartridge_id": "ashmere_bell",
+              "cartridge_id": "recipe_sampler",
               "cartridge_version": "0.0.1",
               "kind": "fact",
               "key": "chapel_bell_rung"
@@ -11489,7 +11489,7 @@
             {
               "op": "fact.assign",
               "fact": {
-                "cartridge_id": "ashmere_bell",
+                "cartridge_id": "recipe_sampler",
                 "cartridge_version": "0.0.1",
                 "kind": "fact",
                 "key": "chapel_bell_rung"
@@ -11539,7 +11539,7 @@
       "target": {
         "kind": "detail",
         "room": {
-          "cartridge_id": "ashmere_bell",
+          "cartridge_id": "recipe_sampler",
           "cartridge_version": "0.0.1",
           "kind": "room",
           "key": "belfry"
@@ -11554,7 +11554,7 @@
           "item": {
             "op": "fact_compare",
             "fact": {
-              "cartridge_id": "ashmere_bell",
+              "cartridge_id": "recipe_sampler",
               "cartridge_version": "0.0.1",
               "kind": "fact",
               "key": "chapel_bell_rung"
@@ -11569,7 +11569,7 @@
             {
               "op": "fact.assign",
               "fact": {
-                "cartridge_id": "ashmere_bell",
+                "cartridge_id": "recipe_sampler",
                 "cartridge_version": "0.0.1",
                 "kind": "fact",
                 "key": "chapel_bell_rung"
@@ -11619,7 +11619,7 @@
       "target": {
         "kind": "detail",
         "room": {
-          "cartridge_id": "ashmere_bell",
+          "cartridge_id": "recipe_sampler",
           "cartridge_version": "0.0.1",
           "kind": "room",
           "key": "belfry"
@@ -11634,7 +11634,7 @@
           "item": {
             "op": "fact_compare",
             "fact": {
-              "cartridge_id": "ashmere_bell",
+              "cartridge_id": "recipe_sampler",
               "cartridge_version": "0.0.1",
               "kind": "fact",
               "key": "chapel_bell_rung"
@@ -11649,7 +11649,7 @@
             {
               "op": "fact.assign",
               "fact": {
-                "cartridge_id": "ashmere_bell",
+                "cartridge_id": "recipe_sampler",
                 "cartridge_version": "0.0.1",
                 "kind": "fact",
                 "key": "chapel_bell_rung"
@@ -11698,7 +11698,7 @@
       "target": {
         "kind": "detail",
         "room": {
-          "cartridge_id": "ashmere_bell",
+          "cartridge_id": "recipe_sampler",
           "cartridge_version": "0.0.1",
           "kind": "room",
           "key": "belfry"
@@ -11713,7 +11713,7 @@
           "item": {
             "op": "fact_compare",
             "fact": {
-              "cartridge_id": "ashmere_bell",
+              "cartridge_id": "recipe_sampler",
               "cartridge_version": "0.0.1",
               "kind": "fact",
               "key": "chapel_bell_rung"
@@ -11728,7 +11728,7 @@
             {
               "op": "fact.assign",
               "fact": {
-                "cartridge_id": "ashmere_bell",
+                "cartridge_id": "recipe_sampler",
                 "cartridge_version": "0.0.1",
                 "kind": "fact",
                 "key": "chapel_bell_rung"
@@ -11781,7 +11781,7 @@
       "target": {
         "kind": "detail",
         "room": {
-          "cartridge_id": "ashmere_bell",
+          "cartridge_id": "recipe_sampler",
           "cartridge_version": "0.0.1",
           "kind": "room",
           "key": "belfry"
@@ -11796,7 +11796,7 @@
           "item": {
             "op": "fact_compare",
             "fact": {
-              "cartridge_id": "ashmere_bell",
+              "cartridge_id": "recipe_sampler",
               "cartridge_version": "0.0.1",
               "kind": "fact",
               "key": "chapel_bell_rung"
@@ -11811,7 +11811,7 @@
             {
               "op": "fact.assign",
               "fact": {
-                "cartridge_id": "ashmere_bell",
+                "cartridge_id": "recipe_sampler",
                 "cartridge_version": "0.0.1",
                 "kind": "fact",
                 "key": "chapel_bell_rung"
@@ -11993,7 +11993,7 @@
     "value": {
       "type": "check_passed",
       "check": {
-        "cartridge_id": "ashmere_dusk",
+        "cartridge_id": "check_sampler",
         "cartridge_version": "0.0.1",
         "kind": "check",
         "key": "pick_lock"
@@ -12029,7 +12029,7 @@
     "value": {
       "type": "check_failed",
       "check": {
-        "cartridge_id": "ashmere_dusk",
+        "cartridge_id": "check_sampler",
         "cartridge_version": "0.0.1",
         "kind": "check",
         "key": "pick_lock"
@@ -15993,9 +15993,9 @@
       "format": "loka-cartridge-v2",
       "manifest": {
         "api_version": "loka/v3",
-        "id": "ashmere_chapters",
+        "id": "chapters_sampler",
         "version": "0.0.1",
-        "title": "Ashmere — Ferry",
+        "title": "Ferry Sampler",
         "requires": {
           "kernel_api": {
             "at_least": "1.0",
@@ -16043,7 +16043,7 @@
         }
       },
       "facts": {
-        "ashmere_chapters@0.0.1:fact/search_plan": {
+        "chapters_sampler@0.0.1:fact/search_plan": {
           "version": 1,
           "value_type": {
             "type": "enum",
@@ -16064,7 +16064,7 @@
       "policies": {},
       "actions": {},
       "entry": {
-        "cartridge_id": "ashmere_chapters",
+        "cartridge_id": "chapters_sampler",
         "cartridge_version": "0.0.1",
         "kind": "room",
         "key": "ferry_landing"
@@ -16182,7 +16182,7 @@
     "value": {
       "on": {
         "story_point": {
-          "cartridge_id": "ashmere_scene",
+          "cartridge_id": "scene_sampler",
           "cartridge_version": "0.0.1",
           "kind": "story_point",
           "key": "lantern_resolved"
@@ -16259,7 +16259,7 @@
       "key": "bell_rung",
       "on": {
         "story_point": {
-          "cartridge_id": "ashmere_scene",
+          "cartridge_id": "scene_sampler",
           "cartridge_version": "0.0.1",
           "kind": "story_point",
           "key": "lantern_resolved"
@@ -16301,7 +16301,7 @@
       "key": "bell_rung",
       "on": {
         "story_point": {
-          "cartridge_id": "ashmere_scene",
+          "cartridge_id": "scene_sampler",
           "cartridge_version": "0.0.1",
           "kind": "story_point",
           "key": "lantern_resolved"
@@ -16361,17 +16361,17 @@
       "key": "bell_rung",
       "on": {
         "story_point": {
-          "cartridge_id": "ashmere_scene",
+          "cartridge_id": "scene_sampler",
           "cartridge_version": "0.0.1",
           "kind": "story_point",
           "key": "lantern_resolved"
         },
         "outcome": "carry",
         "quest": {
-          "cartridge_id": "ashmere_scene",
+          "cartridge_id": "scene_sampler",
           "cartridge_version": "0.0.1",
           "kind": "quest",
-          "key": "bell_of_ashmere"
+          "key": "ring_the_bell"
         }
       },
       "control": "modal",
@@ -16410,7 +16410,7 @@
       "key": "bell_rung",
       "on": {
         "story_point": {
-          "cartridge_id": "ashmere_scene",
+          "cartridge_id": "scene_sampler",
           "cartridge_version": "0.0.1",
           "kind": "story_point",
           "key": "lantern_resolved"
@@ -16452,7 +16452,7 @@
       "key": "bell_rung",
       "on": {
         "story_point": {
-          "cartridge_id": "ashmere_scene",
+          "cartridge_id": "scene_sampler",
           "cartridge_version": "0.0.1",
           "kind": "story_point",
           "key": "lantern_resolved"
@@ -16496,7 +16496,7 @@
       "key": "bell_rung",
       "on": {
         "story_point": {
-          "cartridge_id": "ashmere_scene",
+          "cartridge_id": "scene_sampler",
           "cartridge_version": "0.0.1",
           "kind": "story_point",
           "key": "lantern_resolved"
@@ -16540,7 +16540,7 @@
       "key": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
       "on": {
         "story_point": {
-          "cartridge_id": "ashmere_scene",
+          "cartridge_id": "scene_sampler",
           "cartridge_version": "0.0.1",
           "kind": "story_point",
           "key": "lantern_resolved"
@@ -16583,7 +16583,7 @@
       "key": "_bad",
       "on": {
         "story_point": {
-          "cartridge_id": "ashmere_scene",
+          "cartridge_id": "scene_sampler",
           "cartridge_version": "0.0.1",
           "kind": "story_point",
           "key": "lantern_resolved"
@@ -16626,7 +16626,7 @@
       "key": "",
       "on": {
         "story_point": {
-          "cartridge_id": "ashmere_scene",
+          "cartridge_id": "scene_sampler",
           "cartridge_version": "0.0.1",
           "kind": "story_point",
           "key": "lantern_resolved"
@@ -16669,7 +16669,7 @@
       "key": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
       "on": {
         "story_point": {
-          "cartridge_id": "ashmere_scene",
+          "cartridge_id": "scene_sampler",
           "cartridge_version": "0.0.1",
           "kind": "story_point",
           "key": "lantern_resolved"
@@ -16712,7 +16712,7 @@
       "key": "bell_rung",
       "on": {
         "story_point": {
-          "cartridge_id": "ashmere_scene",
+          "cartridge_id": "scene_sampler",
           "cartridge_version": "0.0.1",
           "kind": "story_point",
           "key": "lantern_resolved"
@@ -16891,7 +16891,7 @@
     "value": {
       "type": "scene_ended",
       "scene": {
-        "cartridge_id": "ashmere_scene",
+        "cartridge_id": "scene_sampler",
         "cartridge_version": "0.0.1",
         "kind": "scene",
         "key": "bell_rung"
@@ -16925,7 +16925,7 @@
     "contract": "SceneView",
     "value": {
       "scene": {
-        "cartridge_id": "ashmere_scene",
+        "cartridge_id": "scene_sampler",
         "cartridge_version": "0.0.1",
         "kind": "scene",
         "key": "bell_rung"
@@ -16945,7 +16945,7 @@
     "contract": "SceneView",
     "value": {
       "scene": {
-        "cartridge_id": "ashmere_scene",
+        "cartridge_id": "scene_sampler",
         "cartridge_version": "0.0.1",
         "kind": "scene",
         "key": "bell_rung"
@@ -16965,7 +16965,7 @@
     "contract": "SceneView",
     "value": {
       "scene": {
-        "cartridge_id": "ashmere_scene",
+        "cartridge_id": "scene_sampler",
         "cartridge_version": "0.0.1",
         "kind": "scene",
         "key": "bell_rung"
@@ -16985,7 +16985,7 @@
     "contract": "SceneView",
     "value": {
       "scene": {
-        "cartridge_id": "ashmere_scene",
+        "cartridge_id": "scene_sampler",
         "cartridge_version": "0.0.1",
         "kind": "scene",
         "key": "bell_rung"
@@ -17006,7 +17006,7 @@
     "contract": "SceneView",
     "value": {
       "scene": {
-        "cartridge_id": "ashmere_scene",
+        "cartridge_id": "scene_sampler",
         "cartridge_version": "0.0.1",
         "kind": "scene",
         "key": "bell_rung"
@@ -17027,7 +17027,7 @@
     "contract": "SceneView",
     "value": {
       "scene": {
-        "cartridge_id": "ashmere_scene",
+        "cartridge_id": "scene_sampler",
         "cartridge_version": "0.0.1",
         "kind": "scene",
         "key": "bell_rung"
@@ -17051,9 +17051,9 @@
       "format": "loka-cartridge-v2",
       "manifest": {
         "api_version": "loka/v3",
-        "id": "ashmere_scene",
+        "id": "scene_sampler",
         "version": "0.0.1",
-        "title": "Ashmere — Ferry",
+        "title": "Ferry Sampler",
         "requires": {
           "kernel_api": {
             "at_least": "1.0",
@@ -17105,7 +17105,7 @@
         }
       },
       "facts": {
-        "ashmere_scene@0.0.1:fact/search_plan": {
+        "scene_sampler@0.0.1:fact/search_plan": {
           "version": 1,
           "value_type": {
             "type": "enum",
@@ -17122,7 +17122,7 @@
           "meaning": "Whether the player carries the lantern along the bank or leaves it with Bram's search party (pre-release-proof.md).",
           "key": "search_plan"
         },
-        "ashmere_scene@0.0.1:fact/scene_bell_rung": {
+        "scene_sampler@0.0.1:fact/scene_bell_rung": {
           "key": "scene_bell_rung",
           "version": 1,
           "value_type": {
@@ -17136,7 +17136,7 @@
           ],
           "meaning": "Scene bell_rung's line (scene@1): 0 not started, 1..n shown, -1 ended; only scene@1 writes it."
         },
-        "ashmere_scene@0.0.1:fact/bell_heard": {
+        "scene_sampler@0.0.1:fact/bell_heard": {
           "key": "bell_heard",
           "version": 1,
           "value_type": {
@@ -17152,13 +17152,13 @@
       "policies": {},
       "actions": {},
       "rooms": {
-        "ashmere_scene@0.0.1:room/ferry_landing": {
+        "scene_sampler@0.0.1:room/ferry_landing": {
           "title": "room.ferry_landing.title",
           "description": "room.ferry_landing.description",
           "exits": {
             "north": {
               "to": {
-                "cartridge_id": "ashmere_scene",
+                "cartridge_id": "scene_sampler",
                 "cartridge_version": "0.0.1",
                 "kind": "room",
                 "key": "village_green"
@@ -17176,13 +17176,13 @@
           },
           "key": "ferry_landing"
         },
-        "ashmere_scene@0.0.1:room/village_green": {
+        "scene_sampler@0.0.1:room/village_green": {
           "title": "room.village_green.title",
           "description": "room.village_green.description",
           "exits": {
             "south": {
               "to": {
-                "cartridge_id": "ashmere_scene",
+                "cartridge_id": "scene_sampler",
                 "cartridge_version": "0.0.1",
                 "kind": "room",
                 "key": "ferry_landing"
@@ -17193,7 +17193,7 @@
         }
       },
       "npcs": {
-        "ashmere_scene@0.0.1:npc/bram": {
+        "scene_sampler@0.0.1:npc/bram": {
           "keywords": [
             "bram",
             "ferryman"
@@ -17202,20 +17202,20 @@
           "room_line": "npc.bram.room",
           "description": "npc.bram.description",
           "room": {
-            "cartridge_id": "ashmere_scene",
+            "cartridge_id": "scene_sampler",
             "cartridge_version": "0.0.1",
             "kind": "room",
             "key": "ferry_landing"
           },
           "daily_schedule": {
             "6": {
-              "cartridge_id": "ashmere_scene",
+              "cartridge_id": "scene_sampler",
               "cartridge_version": "0.0.1",
               "kind": "room",
               "key": "ferry_landing"
             },
             "19": {
-              "cartridge_id": "ashmere_scene",
+              "cartridge_id": "scene_sampler",
               "cartridge_version": "0.0.1",
               "kind": "room",
               "key": "village_green"
@@ -17225,7 +17225,7 @@
         }
       },
       "recipes": {
-        "ashmere_scene@0.0.1:recipe/coil_rope": {
+        "scene_sampler@0.0.1:recipe/coil_rope": {
           "label": "actions.coil_rope",
           "aliases": [
             "coil"
@@ -17233,7 +17233,7 @@
           "target": {
             "kind": "detail",
             "room": {
-              "cartridge_id": "ashmere_scene",
+              "cartridge_id": "scene_sampler",
               "cartridge_version": "0.0.1",
               "kind": "room",
               "key": "ferry_landing"
@@ -17266,7 +17266,7 @@
                   "bram": {
                     "role": "npc",
                     "npc": {
-                      "cartridge_id": "ashmere_scene",
+                      "cartridge_id": "scene_sampler",
                       "cartridge_version": "0.0.1",
                       "kind": "npc",
                       "key": "bram"
@@ -17280,21 +17280,21 @@
         }
       },
       "resources": {
-        "ashmere_scene@0.0.1:resource/hp": {
+        "scene_sampler@0.0.1:resource/hp": {
           "minimum": 0,
           "maximum": 20,
           "start": 20,
           "gain": 5,
           "key": "hp"
         },
-        "ashmere_scene@0.0.1:resource/ma": {
+        "scene_sampler@0.0.1:resource/ma": {
           "minimum": 0,
           "maximum": 100,
           "start": 100,
           "gain": 4,
           "key": "ma"
         },
-        "ashmere_scene@0.0.1:resource/mv": {
+        "scene_sampler@0.0.1:resource/mv": {
           "minimum": 0,
           "maximum": 82,
           "start": 82,
@@ -17303,7 +17303,7 @@
         }
       },
       "entry": {
-        "cartridge_id": "ashmere_scene",
+        "cartridge_id": "scene_sampler",
         "cartridge_version": "0.0.1",
         "kind": "room",
         "key": "ferry_landing"
@@ -17338,7 +17338,7 @@
         "start": 21600
       },
       "items": {
-        "ashmere_scene@0.0.1:item/lantern": {
+        "scene_sampler@0.0.1:item/lantern": {
           "keywords": [
             "lantern",
             "brass_lantern"
@@ -17349,7 +17349,7 @@
           "location": {
             "in": "room",
             "room": {
-              "cartridge_id": "ashmere_scene",
+              "cartridge_id": "scene_sampler",
               "cartridge_version": "0.0.1",
               "kind": "room",
               "key": "ferry_landing"
@@ -17359,7 +17359,7 @@
         }
       },
       "quests": {
-        "ashmere_scene@0.0.1:quest/lantern": {
+        "scene_sampler@0.0.1:quest/lantern": {
           "title": "quest.lantern.title",
           "offer": {
             "label": "quest.lantern.accept",
@@ -17378,7 +17378,7 @@
               "root": {
                 "op": "has_item",
                 "item": {
-                  "cartridge_id": "ashmere_scene",
+                  "cartridge_id": "scene_sampler",
                   "cartridge_version": "0.0.1",
                   "kind": "item",
                   "key": "lantern"
@@ -17390,9 +17390,9 @@
         }
       },
       "dialogues": {
-        "ashmere_scene@0.0.1:dialogue/bram": {
+        "scene_sampler@0.0.1:dialogue/bram": {
           "npc": {
-            "cartridge_id": "ashmere_scene",
+            "cartridge_id": "scene_sampler",
             "cartridge_version": "0.0.1",
             "kind": "npc",
             "key": "bram"
@@ -17402,7 +17402,7 @@
             "root": {
               "op": "quest_state",
               "quest": {
-                "cartridge_id": "ashmere_scene",
+                "cartridge_id": "scene_sampler",
                 "cartridge_version": "0.0.1",
                 "kind": "quest",
                 "key": "lantern"
@@ -17415,7 +17415,7 @@
             "bram": {
               "role": "npc",
               "npc": {
-                "cartridge_id": "ashmere_scene",
+                "cartridge_id": "scene_sampler",
                 "cartridge_version": "0.0.1",
                 "kind": "npc",
                 "key": "bram"
@@ -17424,7 +17424,7 @@
             "lantern": {
               "role": "item",
               "item": {
-                "cartridge_id": "ashmere_scene",
+                "cartridge_id": "scene_sampler",
                 "cartridge_version": "0.0.1",
                 "kind": "item",
                 "key": "lantern"
@@ -17432,7 +17432,7 @@
             }
           },
           "quest": {
-            "cartridge_id": "ashmere_scene",
+            "cartridge_id": "scene_sampler",
             "cartridge_version": "0.0.1",
             "kind": "quest",
             "key": "lantern"
@@ -17445,7 +17445,7 @@
                 {
                   "op": "fact.assign",
                   "fact": {
-                    "cartridge_id": "ashmere_scene",
+                    "cartridge_id": "scene_sampler",
                     "cartridge_version": "0.0.1",
                     "kind": "fact",
                     "key": "search_plan"
@@ -17461,7 +17461,7 @@
                 {
                   "op": "fact.assign",
                   "fact": {
-                    "cartridge_id": "ashmere_scene",
+                    "cartridge_id": "scene_sampler",
                     "cartridge_version": "0.0.1",
                     "kind": "fact",
                     "key": "search_plan"
@@ -17479,12 +17479,12 @@
         }
       },
       "story_points": {
-        "ashmere_scene@0.0.1:story_point/lantern_resolved": {
+        "scene_sampler@0.0.1:story_point/lantern_resolved": {
           "key": "lantern_resolved",
           "outcomes": {
             "carry": {
               "dialogue": {
-                "cartridge_id": "ashmere_scene",
+                "cartridge_id": "scene_sampler",
                 "cartridge_version": "0.0.1",
                 "kind": "dialogue",
                 "key": "bram"
@@ -17493,7 +17493,7 @@
             },
             "leave": {
               "dialogue": {
-                "cartridge_id": "ashmere_scene",
+                "cartridge_id": "scene_sampler",
                 "cartridge_version": "0.0.1",
                 "kind": "dialogue",
                 "key": "bram"
@@ -17508,7 +17508,7 @@
           "key": "bell_rung",
           "on": {
             "story_point": {
-              "cartridge_id": "ashmere_scene",
+              "cartridge_id": "scene_sampler",
               "cartridge_version": "0.0.1",
               "kind": "story_point",
               "key": "lantern_resolved"
@@ -17539,12 +17539,12 @@
         }
       },
       "reactions": {
-        "ashmere_scene@0.0.1:reaction/bell_after": {
+        "scene_sampler@0.0.1:reaction/bell_after": {
           "key": "bell_after",
           "on": {
             "event": "fact_changed",
             "fact": {
-              "cartridge_id": "ashmere_scene",
+              "cartridge_id": "scene_sampler",
               "cartridge_version": "0.0.1",
               "kind": "fact",
               "key": "scene_bell_rung"
@@ -17555,7 +17555,7 @@
             "root": {
               "op": "fact_compare",
               "fact": {
-                "cartridge_id": "ashmere_scene",
+                "cartridge_id": "scene_sampler",
                 "cartridge_version": "0.0.1",
                 "kind": "fact",
                 "key": "scene_bell_rung"
@@ -17567,7 +17567,7 @@
             {
               "op": "fact.assign",
               "fact": {
-                "cartridge_id": "ashmere_scene",
+                "cartridge_id": "scene_sampler",
                 "cartridge_version": "0.0.1",
                 "kind": "fact",
                 "key": "bell_heard"
@@ -22604,7 +22604,7 @@
       "entities": [
         {
           "id": "d4e5f6a7-b8c9-8d0e-9f1a-3b4c5d6e7f8a",
-          "name": "npc.wren.name",
+          "name": "npc.tamsin.name",
           "kind": "npc",
           "actions": [
             {
@@ -31381,7 +31381,7 @@
       "target": {
         "kind": "detail",
         "room": {
-          "cartridge_id": "ashmere_bell",
+          "cartridge_id": "recipe_sampler",
           "cartridge_version": "0.0.1",
           "kind": "room",
           "key": "belfry"
@@ -31396,7 +31396,7 @@
           "item": {
             "op": "fact_compare",
             "fact": {
-              "cartridge_id": "ashmere_bell",
+              "cartridge_id": "recipe_sampler",
               "cartridge_version": "0.0.1",
               "kind": "fact",
               "key": "chapel_bell_rung"
@@ -31411,7 +31411,7 @@
             {
               "op": "fact.assign",
               "fact": {
-                "cartridge_id": "ashmere_bell",
+                "cartridge_id": "recipe_sampler",
                 "cartridge_version": "0.0.1",
                 "kind": "fact",
                 "key": "chapel_bell_rung"

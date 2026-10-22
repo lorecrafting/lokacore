@@ -181,9 +181,9 @@
       "examples": [
         {
           "api_version": "loka/v3",
-          "id": "ashmere_1_the_missing_child",
+          "id": "village_chapter",
           "version": "1.0.0",
-          "title": "The Fox of Ashmere — Chapter One: The Missing Child",
+          "title": "The Fox of Chapters Sampler: The Missing Child",
           "requires": {
             "kernel_api": {
               "at_least": "1.0",
@@ -231,7 +231,7 @@
       "additionalProperties": false,
       "examples": [
         {
-          "cartridge_id": "ashmere_1_the_missing_child",
+          "cartridge_id": "village_chapter",
           "cartridge_version": "1.0.0",
           "cartridge_hash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
         }
@@ -265,7 +265,7 @@
         {
           "api_version": "loka/v3",
           "cartridge": {
-            "cartridge_id": "ashmere_1_the_missing_child",
+            "cartridge_id": "village_chapter",
             "cartridge_version": "1.0.0",
             "cartridge_hash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
           },
@@ -281,7 +281,7 @@
         {
           "api_version": "loka/v3",
           "cartridge": {
-            "cartridge_id": "ashmere_1_the_missing_child",
+            "cartridge_id": "village_chapter",
             "cartridge_version": "1.0.0",
             "cartridge_hash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
           },
@@ -297,7 +297,7 @@
         {
           "api_version": "loka/v3",
           "cartridge": {
-            "cartridge_id": "ashmere_1_the_missing_child",
+            "cartridge_id": "village_chapter",
             "cartridge_version": "1.0.0",
             "cartridge_hash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
           },
@@ -317,7 +317,7 @@
       "type": "string",
       "pattern": "^[a-z][a-z0-9_]{0,63}$",
       "examples": [
-        "the_fox_of_ashmere"
+        "the_fox"
       ]
     },
     "CampaignManifest": {
@@ -351,11 +351,11 @@
       "examples": [
         {
           "api_version": "loka/v3",
-          "id": "the_fox_of_ashmere",
+          "id": "the_fox",
           "version": "1.0.0",
           "cartridges": [
             {
-              "cartridge_id": "ashmere_1_the_missing_child",
+              "cartridge_id": "village_chapter",
               "cartridge_version": "1.0.0",
               "cartridge_hash": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
             }

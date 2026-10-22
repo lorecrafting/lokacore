@@ -104,7 +104,7 @@
       "examples": [
         {
           "to": {
-            "cartridge_id": "ashmere_rooms",
+            "cartridge_id": "rooms_sampler",
             "cartridge_version": "0.0.1",
             "kind": "room",
             "key": "village_green"
@@ -112,13 +112,13 @@
         },
         {
           "to": {
-            "cartridge_id": "ashmere_gate",
+            "cartridge_id": "gate_sampler",
             "cartridge_version": "0.0.1",
             "kind": "room",
             "key": "cell_passage"
           },
           "barrier": {
-            "cartridge_id": "ashmere_gate",
+            "cartridge_id": "gate_sampler",
             "cartridge_version": "0.0.1",
             "kind": "barrier",
             "key": "cell_door"
@@ -386,7 +386,7 @@
                 "root": {
                   "op": "fact_compare",
                   "fact": {
-                    "cartridge_id": "ashmere_facts",
+                    "cartridge_id": "facts_sampler",
                     "cartridge_version": "0.0.1",
                     "kind": "fact",
                     "key": "chapel_bell_rung"
@@ -564,7 +564,7 @@
           "exits": {
             "north": {
               "to": {
-                "cartridge_id": "ashmere_rooms",
+                "cartridge_id": "rooms_sampler",
                 "cartridge_version": "0.0.1",
                 "kind": "room",
                 "key": "village_green"
@@ -607,7 +607,7 @@
                   "item": {
                     "op": "fact_compare",
                     "fact": {
-                      "cartridge_id": "ashmere_facts",
+                      "cartridge_id": "facts_sampler",
                       "cartridge_version": "0.0.1",
                       "kind": "fact",
                       "key": "chapel_bell_rung"
@@ -694,7 +694,7 @@
             "root": {
               "op": "fact_compare",
               "fact": {
-                "cartridge_id": "ashmere_facts",
+                "cartridge_id": "facts_sampler",
                 "cartridge_version": "0.0.1",
                 "kind": "fact",
                 "key": "chapel_bell_rung"
@@ -774,7 +774,7 @@
           "short": "barrier.cell_door",
           "initial": "locked",
           "key_item": {
-            "cartridge_id": "ashmere_gate",
+            "cartridge_id": "gate_sampler",
             "cartridge_version": "0.0.1",
             "kind": "item",
             "key": "iron_key"
@@ -816,13 +816,13 @@
       "examples": [
         {
           "npc": {
-            "cartridge_id": "ashmere_missing_child",
+            "cartridge_id": "village_chapter",
             "cartridge_version": "0.0.42",
             "kind": "npc",
             "key": "aldric"
           },
           "room": {
-            "cartridge_id": "ashmere_missing_child",
+            "cartridge_id": "village_chapter",
             "cartridge_version": "0.0.42",
             "kind": "room",
             "key": "chapel_nave"

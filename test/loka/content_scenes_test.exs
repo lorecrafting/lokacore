@@ -92,7 +92,7 @@ defmodule Loka.ContentScenesTest do
            %{"error" => "unknown_variant"}},
           {update_in(s, ["on"], &Map.delete(&1, "story_point")), ".on", "SCHEMA_VIOLATION",
            %{"error" => "exclusive_properties"}},
-          {put_in(s, ["on", "quest"], "bell_of_ashmere"), ".on", "SCHEMA_VIOLATION",
+          {put_in(s, ["on", "quest"], "ring_the_bell"), ".on", "SCHEMA_VIOLATION",
            %{"error" => "exclusive_properties"}},
           {put_in(s, ["on", "story_point"], "nope"), ".on.story_point", "UNRESOLVED_REFERENCE",
            %{"target" => "scene_sampler@0.0.1:story_point/nope"}},
