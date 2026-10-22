@@ -13,56 +13,44 @@ import {
   standing,
   driver,
   ref,
+  prefix,
 } from './infirmary_fixture.ts';
+const held = (w: ReturnType<typeof standing>, items: readonly string[]) => ({
+  ...w,
+  state: {
+    ...w.state,
+    containers: { ...w.state.containers, ...Object.fromEntries(items.map((i) => [i, w.body])) },
+  },
+});
 
-// Breaks: Harvest substitutes a higher ID, mints a sprig, ignores Take carrying, or refills over time.
+// Breaks: Harvest substitutes a higher ID, mints an item, ignores Take carrying, or refills over time.
 test('finite harvest selects the lowest real ID at equality and Drop/Take share stock', () => {
-  const a = driver({
-    ...standing([], 11980),
-    state: {
-      ...standing([], 11980).state,
-      containers: {
-        ...standing([], 11980).state.containers,
-        [fresh.body]: id('room', 'willow_shade'),
-      },
-    },
-  });
-  assert.equal(gameView(a.world()).notices!.find((n) => n.id === patch)!.remaining, 12);
+  // Pickaxe 2000 g + one 1000 g ore = the 3000 g ceiling.
+  const a = driver(held(standing(), [id('item', 'pickaxe')]));
+  assert.equal(gameView(a.world()).notices!.find((n) => n.id === patch)!.remaining, 6);
   a.run({ type: 'harvest', target_id: patch });
   assert.equal(a.world().state.containers[herbs[0]], fresh.body);
-  assert.equal(gameView(a.world()).notices!.find((n) => n.id === patch)!.remaining, 11);
+  assert.equal(gameView(a.world()).notices!.find((n) => n.id === patch)!.remaining, 5);
   a.run({ type: 'harvest', target_id: patch }, 'over_load');
   a.run({ type: 'drop', item_id: herbs[0] });
-  assert.equal(gameView(a.world()).notices!.find((n) => n.id === patch)!.remaining, 12);
+  assert.equal(gameView(a.world()).notices!.find((n) => n.id === patch)!.remaining, 6);
   a.run({ type: 'take', item_id: herbs[0] });
-  a.replace({
-    ...a.world(),
-    state: {
-      ...a.world().state,
-      containers: {
-        ...a.world().state.containers,
-        ...Object.fromEntries(herbs.map((h) => [h, fresh.body])),
-      },
-    },
-  });
+  a.replace(held(a.world(), herbs));
   a.run({ type: 'harvest', target_id: patch }, 'not_found');
   assert.deepEqual(a.world().state.rng, [1, 2, 3, 4]);
 });
 
 // Breaks: multi-item turn-in omits outgoing custody, replaces stock, or reacceptance resets its contribution.
-test('four immediate explicit exchanges conserve all twelve herbs/bandages and cap only S9 gain', () => {
+test('three two-item exchanges conserve all six ores/bandages and cap only the contribution', () => {
   const a = driver(standing(herbs));
   const occurrences = new Set<string>();
   for (const [axis, gain] of [
     [1, 1],
     [2, 2],
-    [3, 3],
-    [3, 3],
+    [2, 2],
   ]) {
     a.accept();
-    const qs = Object.entries(a.world().state.quests!).filter(
-      ([, q]) => q.quest.key === 'infirmary_herbs',
-    );
+    const qs = Object.entries(a.world().state.quests!).filter(([, q]) => q.quest.key === 'herbs');
     assert.equal(qs.length, 1);
     assert.equal(occurrences.has(qs[0][0]), false);
     occurrences.add(qs[0][0]);
@@ -74,17 +62,16 @@ test('four immediate explicit exchanges conserve all twelve herbs/bandages and c
   a.talk();
   const view = gameView(a.world());
   assert.equal(view.choice!.choices[0].available, false);
-  assert.equal(a.world().state.clock, 64800);
 });
 
 // Breaks: final carrying counts only incoming rewards, or omits a positive-net ceiling check.
 test('exchange final load allows reducing overload and positive-net equality, refuses one gram over', () => {
   for (const [herbMass, bandageMass, total, expected] of [
-    [20, 10, 12020, 'accepted'],
-    [10, 20, 11970, 'accepted'],
-    [10, 20, 11971, 'over_load'],
+    [20, 10, 3040, 'accepted'], // net -20 g: allowed while still over the 3000 g ceiling
+    [10, 20, 2980, 'accepted'], // net +20 g: final load 3000 g
+    [10, 20, 2981, 'over_load'],
   ] as const) {
-    const base = standing(herbs.slice(0, 3), total - 3 * herbMass);
+    const base = standing(herbs.slice(0, 2), total - 2 * herbMass);
     const entities = { ...base.entities };
     herbs.forEach((h) => {
       entities[h] = { ...entities[h], mass_grams: herbMass } as never;
@@ -115,7 +102,7 @@ test('bound turn-in refuses stale exact custody and older occurrence without eff
     ...prior,
     state: {
       ...prior.state,
-      containers: { ...prior.state.containers, [herbs[0]]: id('room', 'infirmary') },
+      containers: { ...prior.state.containers, [herbs[0]]: id('room', 'mine') },
     },
   });
   a.run({ type: 'choose', continuation_id: cid, choice_id: 'exchange' }, 'not_owned');
@@ -142,7 +129,7 @@ test('bound turn-in refuses stale exact custody and older occurrence without eff
 });
 
 // Breaks: the cap uses global standing, spends saturated allowance, or resets allowance after unrelated loss.
-test('global saturation spends no allowance and unrelated loss never refunds S9 contribution', () => {
+test('global saturation spends no allowance and unrelated loss never refunds the contribution', () => {
   const fact = (k: string) =>
     key({
       kind: 'fact',
@@ -152,7 +139,7 @@ test('global saturation spends no allowance and unrelated loss never refunds S9 
   const start = standing(herbs);
   const saturated = driver({
     ...start,
-    state: { ...start.state, facts: { [fact('priory_fen_axis')]: 10 } },
+    state: { ...start.state, facts: { [fact('axis')]: 10 } },
   });
   saturated.accept();
   saturated.exchange();
@@ -161,23 +148,23 @@ test('global saturation spends no allowance and unrelated loss never refunds S9 
     ...start,
     state: {
       ...start.state,
-      facts: { [fact('priory_fen_axis')]: 1, [fact('infirmary_contribution')]: 3 },
+      facts: { [fact('axis')]: 1, [fact('contribution')]: 2 },
     },
   });
   capped.accept();
   capped.exchange();
-  assert.deepEqual([capped.axis(), capped.contribution()], [1, 3]);
+  assert.deepEqual([capped.axis(), capped.contribution()], [1, 2]);
 });
 
-// Breaks: B5 re-resolves Wick from a changed definition map instead of preserving the accepted and continuation-bound participant.
-test('exchange retains original Wick bindings after definition mapping drift', () => {
-  const a = driver(standing(herbs.slice(0, 3)));
+// Breaks: B5 re-resolves the npc from a changed definition map instead of preserving the accepted and continuation-bound participant.
+test('exchange retains the original npc binding after definition mapping drift', () => {
+  const a = driver(standing(herbs.slice(0, 2)));
   a.accept();
   a.talk();
   const w = a.world();
   a.replace({
     ...w,
-    entityIds: { ...w.entityIds, 'ashmere_missing_child@0.0.21:npc/wick': id('room', 'cloister') },
+    entityIds: { ...w.entityIds, [`${prefix}:npc/healer`]: id('room', 'mine') },
   });
   a.choose('exchange');
   assert.equal(a.world().state.containers[herbs[0]], wick);
