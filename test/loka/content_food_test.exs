@@ -16,6 +16,8 @@ defmodule Loka.ContentFoodTest do
       {file, &Map.put(&1, "slot", "hand"), ["items/loaf.slot"]},
       {file, &put_in(&1, ["edible", "narration"], "missing.line"),
        ["items/loaf.edible.narration"]},
+      {"resources.json", &put_in(&1, ["resources", "mv", "regen", "by_position", "standing"], 0),
+       ["items/loaf.edible"]},
       {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.26"),
        ["cartridge.requires.kernel_api.at_least"]},
       {"cartridge.json",
