@@ -2,11 +2,11 @@
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { NoticePage } from '../book/notices.tsx';
 import { DreamResume } from '../book/DreamPage.tsx';
-import { pageStory, pageTags } from './screen.tsx';
+import { pageStory } from './screen.tsx';
 import NoticeReadView from './views/notice-read.json';
 
 const meta: Meta = {
-  tags: pageTags,
+  tags: ['!autodocs'],
   title: 'Pages/Notices',
   component: NoticePage,
 };

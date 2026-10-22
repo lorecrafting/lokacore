@@ -80,9 +80,8 @@ const readingOf = (g: unknown) => {
   } as const;
 };
 
-// Every page story mounts a BookView (its Footer listens to window keydown): no Docs page mounting them all.
-export const pageTags = ['!autodocs'];
-
+// Page stories carry `tags: ['!autodocs']` inline (the CSF indexer reads only a literal array): a Docs
+// page would mount every page's BookView at once.
 export const pageStory = (
   saved: unknown,
   shell?: Partial<Screen>,

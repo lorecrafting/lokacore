@@ -2,14 +2,14 @@
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { Item, ThingPage } from '../book/Menu.tsx';
 import { ItemDetails } from '../book/skills.tsx';
-import { pageStory, pageTags } from './screen.tsx';
+import { pageStory } from './screen.tsx';
 import ItemPlainView from './views/item-plain.json';
 import ItemTooHeavyView from './views/item-too-heavy.json';
 import ItemContainerView from './views/item-container.json';
 import ItemFuelView from './views/item-fuel.json';
 
 const meta: Meta = {
-  tags: pageTags,
+  tags: ['!autodocs'],
   title: 'Pages/Item',
   component: Item,
   subcomponents: { ThingPage, ItemDetails },
