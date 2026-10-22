@@ -9,6 +9,24 @@ the session ends; commit and push it with the Beads export.
 Written 2026-10-22 ~05:30 UTC by Claude Code (Opus 5.5), PM session 7b6568, at the end of the retired-chapter deletion.
 State at writing: main is green; the owner preview serves main 04948aff on 19006/19007; one 390 px verification agent may still be running (its report goes to loka-4hik.2 notes).
 
+## Live polish session (OPEN since 2026-10-22, owner at Storybook)
+
+The owner reactivated Storybook polish (2026-10-22, quoted): "i am going to do the ui polish on the storybook thing ...
+PLease set things up so that its easy for me to do my ui polish there". The polish lane is no longer paused.
+- Session: `polish/session-2026-10-21` in ~/dev/lokacore-session, from main ce9f6df2. Storybook at
+  http://localhost:6006 (195 entries). The web preview is on 19006. No story or Storybook file names the retired chapter;
+  stories run on showcase routes (mobile/app/stories/routes.ts). Dream and Ancestry pages have synthetic stories.
+- Loop (WORKFLOW "Live polish session", web-preview.md "Polish queue"): the owner presses P, picks, writes and sends.
+  Lines land in ~/dev/lokacore-session/.polish/picks.jsonl. The PM watches that file (a Monitor on new lines), answers
+  through `bin/polish_status.sh` (working / done / log / suggest), and routes each pick to a designer in the session
+  worktree, which commits each accepted tweak.
+- Models (owner 2026-10-21, newer than WORKFLOW's Sonnet-nit line): an Opus designer for nits and design. Fable only
+  for a new design direction; never Sonnet for a designer.
+- Mechanics, save, protocol or engine items leave the session as Beads issues. Polish findings already filed:
+  loka-x6t.81 (390 px check).
+- On the owner's "Close batch": `bin/polish_session.sh close`, then one Opus reviewer quick pass, a green hosted CI,
+  merge, and `bin/after_merge.sh`.
+
 ## Start of a session
 
 1. Tools: `mise install` (pins in `mise.toml`), `br` 0.7.4 ([BEADS.md](BEADS.md)), `gh`
