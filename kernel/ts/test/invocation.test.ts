@@ -72,7 +72,7 @@ test('fault, rejection and failed attempt stay distinct; only the attempt change
   const ok = world('cartridge_bell_hash.json');
   const bell = (change: (recipe: any) => void): World => {
     const cartridge = structuredClone(ok.cartridge) as any;
-    change(cartridge.recipes['ashmere_bell@0.0.1:recipe/ring_bell']);
+    change(cartridge.recipes['recipe_sampler@0.0.1:recipe/ring_bell']);
     return { ...ok, cartridge };
   };
   const bad = bell((r) => (r.outcomes.success.sequence[0].value = 'yes'));

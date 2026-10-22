@@ -61,7 +61,7 @@ test('reopen recomputes possession text and retains earned text after the oar is
         invocation_id: host.newId(),
         action_key,
         actor_id: fresh.character,
-        target_ids: target ? [fresh.entityIds[`ashmere_journal@0.0.1:item/${target}`]] : [],
+        target_ids: target ? [fresh.entityIds[`journal_sampler@0.0.1:item/${target}`]] : [],
         input: {},
       };
       const r = o.invoke(invocation) as Saved;

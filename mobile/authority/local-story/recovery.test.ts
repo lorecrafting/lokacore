@@ -16,7 +16,7 @@ import { read } from '../../../kernel/ts/test/read.ts';
 import { openStory, type Saved } from './authority.ts';
 
 const ACTOR = 'bd595711-ea5f-89a5-abb0-046cd349d2f9';
-// ashmere_items ids (kernel/ts/test/invocation_cases.json): the satchel and the NPC.
+// items_sampler ids (kernel/ts/test/invocation_cases.json): the satchel and the NPC.
 const SATCHEL = 'd530207e-b845-8be5-9d53-b44b2cf5d8a1';
 const NPC = 'ff864ad5-cd56-80c8-9392-dc88bdc28fd2';
 const kat = read('protocol/fixtures/containers_cartridge_items_hash.json');

@@ -31,7 +31,7 @@ them ([save model](system/save.md)).
 ## Make and try a cartridge
 
 Start from a small development cartridge such as
-[`ashmere_bell`](../cartridges/ashmere_bell/) for a composed action or
+[`recipe_sampler`](../cartridges/recipe_sampler/) for a composed action or
 [`ashmere_missing_child`](../cartridges/ashmere_missing_child/) for a connected chapter. Copy its
 source into a new cartridge directory before changing it, including its `cartridge.json`
 manifest and `text.json` catalog. Give your new cartridge its own ID and version. Keep
@@ -40,14 +40,14 @@ references within that cartridge; the compiler resolves short keys by their expe
 From the repository root, with the pinned toolchain installed:
 
 ```sh
-mise exec -- mix loka.compile cartridges/ashmere_bell /tmp/ashmere-bell.json
+mise exec -- mix loka.compile cartridges/recipe_sampler /tmp/ashmere-bell.json
 mise exec -- bin/loka play /tmp/ashmere-bell.json
 ```
 
 The terminal player also accepts a script or a replay transcript:
 
 ```sh
-mise exec -- bin/loka play /tmp/ashmere-bell.json --replay cartridges/ashmere_bell/transcripts/action_recipe.jsonl
+mise exec -- bin/loka play /tmp/ashmere-bell.json --replay cartridges/recipe_sampler/transcripts/action_recipe.jsonl
 ```
 
 Use the transcript for the cartridge you compiled; see its `transcripts/` directory. A
@@ -63,7 +63,7 @@ terminal, start the preview once (from `mobile/app`, `npm run author`; it serves
 http://localhost:19006):
 
 ```sh
-mise exec -- bin/loka dev cartridges/ashmere_sampler --watch
+mise exec -- bin/loka dev cartridges/cellar_sampler --watch
 ```
 
 Each save of a source file recompiles it; the page reloads with the edit in a few seconds.
@@ -78,7 +78,7 @@ The same compiled cartridge runs headless and in a scripted browser walk, so a s
 ([toolbox](MECHANICS-TOOLBOX.md)) is checked without a fixture of its own:
 
 ```sh
-mise exec -- mix loka.compile cartridges/ashmere_sampler /tmp/sampler.json
+mise exec -- mix loka.compile cartridges/cellar_sampler /tmp/sampler.json
 node kernel/ts/test/sim.ts --cartridge /tmp/sampler.json 1 2 3   # every seed on that cartridge
 cd mobile/app && LOKA_WALK=ashmere_sampler mise exec -- npm run walkthrough   # after bin/loka dev
 ```
@@ -91,13 +91,13 @@ Chapter 1 on the pinned chapter.
 
 | You want to make… | Source and working example | Engine behavior and limit |
 |---|---|---|
-| A place with exits or examinable details | `rooms/<key>.json`; [Bell cartridge rooms](../cartridges/ashmere_bell/rooms/) | [Movement and inspection](system/mechanics.md#movement1-kerneltssrcmechanicsmovementrulets); exits and targets must resolve. |
+| A place with exits or examinable details | `rooms/<key>.json`; [Bell cartridge rooms](../cartridges/recipe_sampler/rooms/) | [Movement and inspection](system/mechanics.md#movement1-kerneltssrcmechanicsmovementrulets); exits and targets must resolve. |
 | An item, container, key or piece of equipment | `items/<key>.json`; [Missing Child items](../cartridges/ashmere_missing_child/items/) | [Containment](system/mechanics.md#containment1-kerneltssrcmechanicscontainmentrulets), [barriers](system/mechanics.md#barrier1-kerneltssrcmechanicsbarrierrulets), [equipment](system/mechanics.md#equipment1-kerneltssrcmechanicsequipmentrulets) and carrying settings apply. |
 | An NPC blueprint with HP | `npcs/<key>.json`; [one cellar rat](../cartridges/ashmere_missing_child/npcs/cellar_rat_1.json) | Its room and text are authored. HP is per entity; [resource rules](system/mechanics.md#resource1-kerneltssrcmechanicsresourcets) govern changes. A schedule is optional. An ordinary NPC definition creates one placement at fresh-world birth; a definition marked `spawn_template` supplies a population/death template and is not placed directly. |
 | A fact or condition | `facts.json`, `policies/<key>.json`; [Missing Child facts](../cartridges/ashmere_missing_child/facts.json) | Typed facts and pure policies drive eligibility; see [policy and fact](system/mechanics.md#target_resolution1-policy1-fact1). |
-| A player action | `recipes/<key>.json`; [ring the bell](../cartridges/ashmere_bell/recipes/ring_bell.json) | A target, policy and success/failure sequences compose registered outcomes; see [recipes](system/mechanics.md#action_recipe1-mechanicsaction_reciperulets49). No arbitrary script runs. |
+| A player action | `recipes/<key>.json`; [ring the bell](../cartridges/recipe_sampler/recipes/ring_bell.json) | A target, policy and success/failure sequences compose registered outcomes; see [recipes](system/mechanics.md#action_recipe1-mechanicsaction_reciperulets49). No arbitrary script runs. |
 | A quest and conversations | `quests/<key>.json`, `dialogues/<key>.json`; [first lead](../cartridges/ashmere_missing_child/quests/first_lead.json), [Elspeth's dialogue](../cartridges/ashmere_missing_child/dialogues/elspeth.json) | A choice can accept or resolve the quest; [quest](system/mechanics.md#quest1-mechanicsquestrulets-kerneltssrcmechanicsquestlifecyclets) and [dialogue](system/mechanics.md#dialogue1-mechanicsdialoguerulets-kerneltssrcmechanicsdialoguesharedts) document the supported objective and choice forms. |
-| A consequence or story presentation | `reactions/<key>.json`, `story_points/<key>.json`, `scenes/<key>.json`; [bell scene](../cartridges/ashmere_scene/scenes/bell_rung.json) | [Reactions](system/mechanics.md#reaction1-kerneltssrcmechanicsreactionts), [chapters](system/mechanics.md#chapters-kerneltssrcviewviewts) and [scenes](system/mechanics.md#scene1-mechanicsscenerulets) have bounded, typed triggers and steps. |
+| A consequence or story presentation | `reactions/<key>.json`, `story_points/<key>.json`, `scenes/<key>.json`; [bell scene](../cartridges/scene_sampler/scenes/bell_rung.json) | [Reactions](system/mechanics.md#reaction1-kerneltssrcmechanicsreactionts), [chapters](system/mechanics.md#chapters-kerneltssrcviewviewts) and [scenes](system/mechanics.md#scene1-mechanicsscenerulets) have bounded, typed triggers and steps. |
 
 Put player-facing words in `text.json` and reference their keys from blueprints and story
 definitions ([text rules](system/cartridge.md#text)). Put tunable costs, resource bounds and

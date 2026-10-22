@@ -21,9 +21,9 @@ import { read } from './read.ts';
 
 const CONTEXT = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f';
 const CMD = 'e5f6a7b8-c9d0-8e1f-8a2b-4c5d6e7f8a9b';
-const E = 'ashmere_errand@0.0.1';
+const E = 'errand_sampler@0.0.1';
 const ref = (kind: string, key: string) =>
-  ({ cartridge_id: 'ashmere_errand', cartridge_version: '0.0.1', kind, key }) as DefinitionRef;
+  ({ cartridge_id: 'errand_sampler', cartridge_version: '0.0.1', kind, key }) as DefinitionRef;
 const QUEST = ref('quest', 'lantern');
 const STRICT = { evidence: 'post_activation_event', item_acquired: ref('item', 'lantern') };
 

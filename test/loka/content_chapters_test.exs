@@ -3,15 +3,15 @@ defmodule Loka.ContentChaptersTest do
   # follow DiagnosticCode; the compiled answer is independently written by Python.
   use ExUnit.Case, async: true
   import Loka.ContentSource, only: [compile: 2]
-  setup_all do: %{dir: Loka.ContentSource.copy("cartridges/ashmere_chapters")}
-  @src "cartridges/ashmere_chapters"
+  setup_all do: %{dir: Loka.ContentSource.copy("cartridges/chapters_sampler")}
+  @src "cartridges/chapters_sampler"
   @kat JSON.decode!(File.read!("protocol/fixtures/cartridge_chapters_hash.json"))
   @expected ~s({"cartridge":#{@kat["canonical"]},"content_hash":"#{@kat["sha256"]}"})
   defp src(rel), do: JSON.decode!(File.read!(Path.join(@src, rel)))
 
   defp ref(kind, key),
     do: %{
-      "cartridge_id" => "ashmere_chapters",
+      "cartridge_id" => "chapters_sampler",
       "cartridge_version" => "0.0.1",
       "kind" => kind,
       "key" => key
@@ -67,7 +67,7 @@ defmodule Loka.ContentChaptersTest do
 
     for {i, field, value, code, data} <- [
           {1, "story_point", "nope", "UNRESOLVED_REFERENCE",
-           %{"target" => "ashmere_chapters@0.0.1:story_point/nope"}},
+           %{"target" => "chapters_sampler@0.0.1:story_point/nope"}},
           {2, "outcome", "stay", "UNRESOLVED_REFERENCE", %{"target" => "stay"}},
           {0, "story_point", "lantern_resolved", "UNKNOWN_FIELD", %{}},
           {0, "outcome", "carry", "UNKNOWN_FIELD", %{}},

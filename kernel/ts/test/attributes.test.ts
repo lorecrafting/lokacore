@@ -17,7 +17,7 @@ import { read } from './read.ts';
 const CONTEXT = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f';
 const CHARACTER = 'bd595711-ea5f-89a5-abb0-046cd349d2f9' as CharacterId; // ordinal 0
 const BODY = '3d4829ad-9e43-81ef-bc10-66b1b267e157'; // ordinal 1
-const AT = 'ashmere_road@0.0.1:';
+const AT = 'resource_sampler@0.0.1:';
 const STATS = { str: 14, dex: 12, con: 13, int: 10, spi: 9, per: 11 };
 
 const sorted = (v: any): any =>
@@ -31,7 +31,7 @@ const sorted = (v: any): any =>
       ? v.map(sorted)
       : v;
 const ref = (kind: string, key: string) => ({
-  cartridge_id: 'ashmere_road',
+  cartridge_id: 'resource_sampler',
   cartridge_version: '0.0.1',
   kind,
   key,

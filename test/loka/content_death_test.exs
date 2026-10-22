@@ -4,7 +4,7 @@ defmodule Loka.ContentDeathTest do
   # Breaks: source-only short refs or unsupported template custody survive into a broken artifact.
   @tag :tmp_dir
   test "corpse source validates the same content boundaries as the loader", %{tmp_dir: dir} do
-    File.cp_r!("cartridges/ashmere_sampler", dir)
+    File.cp_r!("cartridges/cellar_sampler", dir)
     manifest_path = Path.join(dir, "cartridge.json")
     item_path = Path.join(dir, "items/player_corpse.json")
     child_path = Path.join(dir, "items/lantern.json")

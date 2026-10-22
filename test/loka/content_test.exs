@@ -84,7 +84,7 @@ defmodule Loka.ContentTest do
 
   # Break: wrong key mapping, key order, hash input or artifact framing.
   test "the hello subset source compiles to the Python known answer" do
-    assert Loka.Content.compile("cartridges/ashmere_hello") == {:ok, @hello_artifact, []}
+    assert Loka.Content.compile("cartridges/hello_sampler") == {:ok, @hello_artifact, []}
   end
 
   describe "one diagnostic per code" do
@@ -393,10 +393,10 @@ defmodule Loka.ContentTest do
     test "ARTIFACT_TOO_LARGE above the cap, never at it" do
       size = byte_size(@hello_artifact)
 
-      assert Loka.Content.compile("cartridges/ashmere_hello", max_bytes: size) ==
+      assert Loka.Content.compile("cartridges/hello_sampler", max_bytes: size) ==
                {:ok, @hello_artifact, []}
 
-      assert Loka.Content.compile("cartridges/ashmere_hello", max_bytes: size - 1) ==
+      assert Loka.Content.compile("cartridges/hello_sampler", max_bytes: size - 1) ==
                {:error, [d("ARTIFACT_TOO_LARGE", "", %{"bytes" => size, "maximum" => size - 1})]}
     end
   end
@@ -409,7 +409,7 @@ defmodule Loka.ContentTest do
   # Break: the task writes other bytes than compile/2 returns, or writes on error.
   test "mix loka.compile writes the artifact, and nothing on error", %{tmp_dir: tmp} do
     out = Path.join(tmp, "hello.json")
-    Mix.Tasks.Loka.Compile.run(["cartridges/ashmere_hello", out])
+    Mix.Tasks.Loka.Compile.run(["cartridges/hello_sampler", out])
     assert File.read!(out) == @hello_artifact
 
     bad = source(Path.join(tmp, "bad"), %{"cartridge.json" => nil})

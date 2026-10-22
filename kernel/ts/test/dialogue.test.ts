@@ -22,9 +22,9 @@ import { resourceRef } from '../src/mechanics/resource.ts';
 import { read } from './read.ts';
 
 const CONTEXT = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f';
-const F = 'ashmere_ferry@0.0.1';
+const F = 'ferry_sampler@0.0.1';
 const ref = (kind: string, key: string) =>
-  ({ cartridge_id: 'ashmere_ferry', cartridge_version: '0.0.1', kind, key }) as DefinitionRef;
+  ({ cartridge_id: 'ferry_sampler', cartridge_version: '0.0.1', kind, key }) as DefinitionRef;
 // Fresh-world ids under the nil CommandId: ordinal 0 the actor, 1 its body, 3 the green, 5 Bram,
 // 6 the lantern.
 const ACTOR = 'bd595711-ea5f-89a5-abb0-046cd349d2f9';

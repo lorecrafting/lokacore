@@ -17,7 +17,7 @@ import { line } from '../play/obs.ts';
 import { decide } from '../play/run.ts';
 import { read } from './read.ts';
 
-const G = 'ashmere_green@0.0.1';
+const G = 'green_sampler@0.0.1';
 const CID = 'e5f6a7b8-c9d0-8e1f-8a2b-4c5d6e7f8a9b';
 const HASH = 'fe17f082e3f22187e008b34491af5ed1b053fdc4615058ce47011ee0180d84f2';
 const KERNEL = `loka-kernel@${'0123456789'.repeat(4)}`;

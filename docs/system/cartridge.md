@@ -611,17 +611,17 @@ model strips them to prose until details are tappable (`mobile/app/book/model.ts
 
 ## Development cartridges
 
-`cartridges/ashmere_scene` exercises [modal scenes](mechanics.md#scene1-mechanicsscenerulets):
+`cartridges/scene_sampler` exercises [modal scenes](mechanics.md#scene1-mechanicsscenerulets):
 three narrate lines start on `lantern_resolved/carry`; a fact_changed reaction hears
 that the scene ended. Its source uses short story-point and fact references, and has
 an independent known answer; existing cartridges remain unchanged.
 
-`cartridges/ashmere_chapters` exercises [Chapters](mechanics.md#chapters-kerneltssrcviewviewts):
+`cartridges/chapters_sampler` exercises [Chapters](mechanics.md#chapters-kerneltssrcviewviewts):
 opening Landing, Dusk after either lantern story-point outcome, and Reeds after `carry`,
 whose trigger choice is `take_it` (the other choice is `leave_it`). This independent source
 has its own identity and frozen known answer; all preexisting cartridges remain unchanged.
 
-`cartridges/ashmere_journal` exercises [quest journal selection](mechanics.md#quest1-mechanicsquestrulets-kerneltssrcmechanicsquestlifecyclets):
+`cartridges/journal_sampler` exercises [quest journal selection](mechanics.md#quest1-mechanicsquestrulets-kerneltssrcmechanicsquestlifecyclets):
 the Lantern's current possession changes its active text, while the oar's post-activation
 acquisition keeps its earned text after drop; terminal states select an outcome text or their
 stage's fallback. These are historical development proofs, not a retained-release or save

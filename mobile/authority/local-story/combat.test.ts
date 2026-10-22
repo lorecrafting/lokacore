@@ -141,7 +141,7 @@ test('actual lethal combat returns empty-handed and ordinary six-exit journey re
       { value: 7, at: 64800 },
     );
     const plan = {
-      cartridge_id: 'ashmere_sampler',
+      cartridge_id: 'cellar_sampler',
       cartridge_version: '0.0.9',
       kind: 'fact',
       key: 'search_plan',

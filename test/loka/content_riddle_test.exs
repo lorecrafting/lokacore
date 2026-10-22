@@ -8,7 +8,7 @@ defmodule Loka.ContentRiddleTest do
   end
 
   defp source(dir) do
-    File.cp_r!("cartridges/ashmere_ferry", dir)
+    File.cp_r!("cartridges/ferry_sampler", dir)
     update(dir, "cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.9"))
 
     update(
@@ -54,13 +54,13 @@ defmodule Loka.ContentRiddleTest do
     assert {:ok, bytes, []} = Loka.Content.compile(dir)
     c = JSON.decode!(bytes)["cartridge"]
 
-    assert c["dialogues"]["ashmere_ferry@0.0.1:dialogue/bram"]["riddle"]["bank"] ==
+    assert c["dialogues"]["ferry_sampler@0.0.1:dialogue/bram"]["riddle"]["bank"] ==
              ~w(R N A O L T E N S)
 
-    [v] = c["quests"]["ashmere_ferry@0.0.1:quest/lantern"]["journal"]["active_variants"]
+    [v] = c["quests"]["ferry_sampler@0.0.1:quest/lantern"]["journal"]["active_variants"]
 
     assert v["when"]["root"]["fact"] == %{
-             "cartridge_id" => "ashmere_ferry",
+             "cartridge_id" => "ferry_sampler",
              "cartridge_version" => "0.0.1",
              "kind" => "fact",
              "key" => "search_plan"

@@ -65,7 +65,7 @@ const mutant = (f: (c: any) => void) => {
   f(c);
   return c;
 };
-const FL = 'ashmere_rooms@0.0.1:room/ferry_landing';
+const FL = 'rooms_sampler@0.0.1:room/ferry_landing';
 
 test('the v2 known answer loads with its fixture hash', () => {
   const result = loadCartridge(
@@ -78,12 +78,12 @@ test('the v2 known answer loads with its fixture hash', () => {
 
 // Breaks: the loader trusts compiled references (an exit to nowhere reaches the rules).
 test('an exit or entry naming no room of this cartridge is UNRESOLVED_REFERENCE', () => {
-  const to = { cartridge_id: 'ashmere_rooms', cartridge_version: '0.0.1', kind: 'room', key: 'x' };
+  const to = { cartridge_id: 'rooms_sampler', cartridge_version: '0.0.1', kind: 'room', key: 'x' };
   fails(
     mutant((c) => (c.rooms[FL].exits.north.to = to)),
     'UNRESOLVED_REFERENCE',
     `.cartridge.rooms["${FL}"].exits.north.to`,
-    { target: 'ashmere_rooms@0.0.1:room/x' },
+    { target: 'rooms_sampler@0.0.1:room/x' },
   );
   fails(
     mutant((c) => (c.entry = { ...c.entry, cartridge_id: 'other' })),
@@ -95,7 +95,7 @@ test('an exit or entry naming no room of this cartridge is UNRESOLVED_REFERENCE'
     mutant((c) => (c.entry = { ...c.entry, kind: 'fact' })),
     'UNRESOLVED_REFERENCE',
     '.cartridge.entry',
-    { target: 'ashmere_rooms@0.0.1:fact/ferry_landing' },
+    { target: 'rooms_sampler@0.0.1:fact/ferry_landing' },
   );
 });
 
@@ -116,7 +116,7 @@ test('rooms without movement in the lock are UNDECLARED_CAPABILITY', () =>
       delete c.lock.capabilities.movement;
     }),
     'UNDECLARED_CAPABILITY',
-    '.cartridge.rooms["ashmere_rooms@0.0.1:room/boathouse"]',
+    '.cartridge.rooms["rooms_sampler@0.0.1:room/boathouse"]',
     { capability: 'movement' },
     ['movement@1'],
   ));
@@ -145,7 +145,7 @@ test('an action text key missing from the catalog is UNRESOLVED_REFERENCE', () =
     mutant((c) => {
       c.manifest.requires.capabilities.policy = 1;
       c.lock.capabilities.policy = 1;
-      c.actions['ashmere_rooms@0.0.1:action/go'] = {
+      c.actions['rooms_sampler@0.0.1:action/go'] = {
         key: 'go',
         label: 'room.boathouse.title',
         target: { kind: 'none' },
@@ -157,13 +157,13 @@ test('an action text key missing from the catalog is UNRESOLVED_REFERENCE', () =
       };
     }),
     'UNRESOLVED_REFERENCE',
-    '.cartridge.actions["ashmere_rooms@0.0.1:action/go"].accessibility',
+    '.cartridge.actions["rooms_sampler@0.0.1:action/go"].accessibility',
     { target: 'actions.go.a11y' },
   ));
 
 // R5 S2 details (room.schema.json InspectableDetail), from cartridge_details_hash.json.
 const details = read('protocol/fixtures/cartridge_details_hash.json');
-const DFL = 'ashmere_details@0.0.1:room/ferry_landing';
+const DFL = 'details_sampler@0.0.1:room/ferry_landing';
 const withDetails = (f: (c: any) => void) => {
   const c = structuredClone(details.value);
   f(c);

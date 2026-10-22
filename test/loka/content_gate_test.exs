@@ -7,9 +7,9 @@ defmodule Loka.ContentGateTest do
   use ExUnit.Case, async: true
 
   import Loka.ContentSource, only: [compile: 2]
-  setup_all do: %{dir: Loka.ContentSource.copy("cartridges/ashmere_gate")}
+  setup_all do: %{dir: Loka.ContentSource.copy("cartridges/gate_sampler")}
   @kat JSON.decode!(File.read!("protocol/fixtures/cartridge_gate_hash.json"))
-  @src "cartridges/ashmere_gate"
+  @src "cartridges/gate_sampler"
   @expected ~s({"cartridge":#{@kat["canonical"]},"content_hash":"#{@kat["sha256"]}"})
 
   defp src(rel), do: JSON.decode!(File.read!(Path.join(@src, rel)))
@@ -17,7 +17,7 @@ defmodule Loka.ContentGateTest do
 
   defp ref(kind, key),
     do: %{
-      "cartridge_id" => "ashmere_gate",
+      "cartridge_id" => "gate_sampler",
       "cartridge_version" => "0.0.1",
       "kind" => kind,
       "key" => key
@@ -37,7 +37,7 @@ defmodule Loka.ContentGateTest do
   defp variant, do: ["details", "oak_door", "variants", Access.at(0), "when", "root", "barrier"]
 
   # Breaks: a barrier, an exit's barrier, a key_item or a barrier_state dropped or reshaped.
-  test "ashmere_gate compiles to its Python known answer without warnings" do
+  test "gate_sampler compiles to its Python known answer without warnings" do
     assert Loka.Content.compile(@src) == {:ok, @expected, []}
   end
 
@@ -66,14 +66,14 @@ defmodule Loka.ContentGateTest do
     {:ok, a, _touch_link_warning} =
       compile(dir, edit("rooms/gatehouse.json", ["details", "key_item"], sill))
 
-    room = JSON.decode!(a)["cartridge"]["rooms"]["ashmere_gate@0.0.1:room/gatehouse"]
+    room = JSON.decode!(a)["cartridge"]["rooms"]["gate_sampler@0.0.1:room/gatehouse"]
     assert get_in(room, variant()) == ref("barrier", "oak_door")
   end
 
   # Breaks: an exit, key_item or barrier_state naming what the cartridge lacks compiles (the
   # loader rejects it).
   test "an unknown barrier or key item is UNRESOLVED_REFERENCE", %{dir: dir} do
-    trapdoor = %{"target" => "ashmere_gate@0.0.1:barrier/trapdoor"}
+    trapdoor = %{"target" => "gate_sampler@0.0.1:barrier/trapdoor"}
     courtyard = edit("rooms/courtyard.json", ["exits", "south", "barrier"], "trapdoor")
     gatehouse = put_in(src("rooms/gatehouse.json"), ["exits", "north", "barrier"], "trapdoor")
 
@@ -94,7 +94,7 @@ defmodule Loka.ContentGateTest do
              {:error,
               [
                 d("UNRESOLVED_REFERENCE", "barriers/cell_door.key_item", %{
-                  "target" => "ashmere_gate@0.0.1:room/cell"
+                  "target" => "gate_sampler@0.0.1:room/cell"
                 })
               ]}
 
@@ -197,7 +197,7 @@ defmodule Loka.ContentGateTest do
   end
 
   # Review #50 A1. Breaks: a locked door whose key lies only behind it (or that has no key)
-  # compiling into a cartridge no one can finish. ashmere_gate itself is the passing case: the
+  # compiling into a cartridge no one can finish. gate_sampler itself is the passing case: the
   # iron key lies past the oak door, which starts closed, not locked.
   test "a locked barrier whose key is out of reach is BARRIER_UNREACHABLE_KEY", %{dir: dir} do
     behind = edit("items/iron_key.json", ["location", "room"], "cell")

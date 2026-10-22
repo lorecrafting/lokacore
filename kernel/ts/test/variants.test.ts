@@ -132,7 +132,7 @@ test('the shove at the guard is offered only while the guard is in the taproom a
 });
 
 // Breaks: the loader's kernel_api floor misses a new variant list or leaf, or wrongly refuses an
-// item's room_line_variants, which predate row W6 (ashmere_items declares one at 1.0).
+// item's room_line_variants, which predate row W6 (items_sampler declares one at 1.0).
 test('row W6 fields and leaves need kernel_api 1.46; an item room-line variant does not', () => {
   const v = [{ when: { policy_version: 1, root: { op: 'target_present' } }, description: 't' }];
   const leaf = (op: object) => ({ policies: { p: { root: op } } });

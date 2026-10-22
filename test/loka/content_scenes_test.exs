@@ -2,7 +2,7 @@ defmodule Loka.ContentScenesTest do
   # scene@1 source contract and independent hash; literal diagnostics follow cartridge.md.
   use ExUnit.Case, async: true
   @moduletag :tmp_dir
-  @src "cartridges/ashmere_scene"
+  @src "cartridges/scene_sampler"
   @kat JSON.decode!(File.read!("protocol/fixtures/cartridge_scene_hash.json"))
   @expected ~s({"cartridge":#{@kat["canonical"]},"content_hash":"#{@kat["sha256"]}"})
   defp src(rel), do: JSON.decode!(File.read!(Path.join(@src, rel)))
@@ -37,7 +37,7 @@ defmodule Loka.ContentScenesTest do
 
     full =
       put_in(s, ["on", "story_point"], %{
-        "cartridge_id" => "ashmere_scene",
+        "cartridge_id" => "scene_sampler",
         "cartridge_version" => "0.0.1",
         "kind" => "story_point",
         "key" => "lantern_resolved"
@@ -65,7 +65,7 @@ defmodule Loka.ContentScenesTest do
           assert {:ok, artifact, []} = Loka.Content.compile(source)
           compiled = JSON.decode!(artifact)
           assert :ok = Loka.Core.Contracts.validate("CartridgeArtifact", compiled)
-          spec = compiled["cartridge"]["facts"]["ashmere_scene@0.0.1:fact/scene_#{key}"]
+          spec = compiled["cartridge"]["facts"]["scene_sampler@0.0.1:fact/scene_#{key}"]
 
           assert spec["key"] == "scene_" <> key
 
@@ -95,7 +95,7 @@ defmodule Loka.ContentScenesTest do
           {put_in(s, ["on", "quest"], "bell_of_ashmere"), ".on", "SCHEMA_VIOLATION",
            %{"error" => "exclusive_properties"}},
           {put_in(s, ["on", "story_point"], "nope"), ".on.story_point", "UNRESOLVED_REFERENCE",
-           %{"target" => "ashmere_scene@0.0.1:story_point/nope"}},
+           %{"target" => "scene_sampler@0.0.1:story_point/nope"}},
           {put_in(s, ["on", "outcome"], "stay"), ".on.outcome", "UNRESOLVED_REFERENCE",
            %{"target" => "stay"}},
           {put_in(s, ["steps", Access.at(1), "text"], "scene.missing"), ".steps[1].text",
@@ -119,7 +119,7 @@ defmodule Loka.ContentScenesTest do
   # Breaks: engine fact reservation misses any authored definition or consequence write site.
   test "content can read but cannot define or assign a scene fact", %{tmp_dir: dir} do
     f = src("facts.json")
-    spec = @kat["value"]["facts"]["ashmere_scene@0.0.1:fact/scene_bell_rung"] |> Map.delete("key")
+    spec = @kat["value"]["facts"]["scene_sampler@0.0.1:fact/scene_bell_rung"] |> Map.delete("key")
 
     assert compile(dir, %{"facts.json" => put_in(f, ["facts", "scene_bell_rung"], spec)}) ==
              {:error, [d("RESERVED_FACT", "facts.facts.scene_bell_rung")]}

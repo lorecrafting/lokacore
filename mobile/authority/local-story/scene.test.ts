@@ -60,7 +60,7 @@ function play(o: ReturnType<typeof open>) {
       invocation_id: host.newId(),
       action_key,
       actor_id: fresh.character,
-      target_ids: target ? [fresh.entityIds[`ashmere_scene@0.0.1:${target}`]] : [],
+      target_ids: target ? [fresh.entityIds[`scene_sampler@0.0.1:${target}`]] : [],
       input,
     };
     const reply = o.invoke(invocation) as Saved;
@@ -113,7 +113,7 @@ test('line two survives reopen and triggering receipt retry without duplicate ef
     const reopened = open(sql);
     assert.deepEqual(gameView(reopened.world()).scene, {
       scene: {
-        cartridge_id: 'ashmere_scene',
+        cartridge_id: 'scene_sampler',
         cartridge_version: '0.0.1',
         kind: 'scene',
         key: 'bell_rung',

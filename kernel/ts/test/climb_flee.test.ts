@@ -12,7 +12,7 @@ test('Flee through a climb face without its item falls and loses HP', () => {
   const here = room(w, 'lantern_cellar');
   const ref = (name: string) =>
     ({
-      cartridge_id: 'ashmere_sampler',
+      cartridge_id: 'cellar_sampler',
       cartridge_version: '0.0.9',
       kind: 'room',
       key: name,

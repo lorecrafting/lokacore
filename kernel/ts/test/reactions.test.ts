@@ -20,9 +20,9 @@ import { read } from './read.ts';
 
 const CONTEXT = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f';
 const CMD = 'e5f6a7b8-c9d0-8e1f-8a2b-4c5d6e7f8a9b';
-const G = 'ashmere_green@0.0.1';
+const G = 'green_sampler@0.0.1';
 const ref = (kind: string, key: string) =>
-  ({ cartridge_id: 'ashmere_green', cartridge_version: '0.0.1', kind, key }) as DefinitionRef;
+  ({ cartridge_id: 'green_sampler', cartridge_version: '0.0.1', kind, key }) as DefinitionRef;
 // Fresh-world ids under the nil CommandId: ordinal 1 the body, 3 the landing, 4 the green, 5
 // Bram, 6 Maud, 7 Bram's first job, 8 Maud's; the run_job CommandIds of those jobs at 19:00 and
 // 20:00.

@@ -7,7 +7,7 @@ import { encode } from '../src/foundation/canonical.ts';
 
 // Breaks: the artifact boundary admits invalid templates that fresh/hydration cannot place safely.
 test('corpse content requires templates, valid shrine/restoration and its capability/API contract', () => {
-  const player = 'ashmere_sampler@0.0.8:item/player_corpse';
+  const player = 'cellar_sampler@0.0.8:item/player_corpse';
   for (const [name, mutate, code] of [
     [
       'noncontainer',
@@ -69,7 +69,7 @@ test('corpse content requires templates, valid shrine/restoration and its capabi
     [
       'authored child in template',
       (c: any) => {
-        c.items['ashmere_sampler@0.0.8:item/lantern'].location = {
+        c.items['cellar_sampler@0.0.8:item/lantern'].location = {
           in: 'item',
           item: c.world.death.player_corpse,
         };
@@ -93,8 +93,8 @@ test('corpse content requires templates, valid shrine/restoration and its capabi
     [
       'barrier',
       (c: any) => {
-        c.items[player].barrier = c.items['ashmere_sampler@0.0.8:item/trunk'].barrier;
-        delete c.items['ashmere_sampler@0.0.8:item/trunk'].barrier;
+        c.items[player].barrier = c.items['cellar_sampler@0.0.8:item/trunk'].barrier;
+        delete c.items['cellar_sampler@0.0.8:item/trunk'].barrier;
       },
       'SCHEMA_VIOLATION',
     ],
@@ -115,7 +115,7 @@ test('corpse content requires templates, valid shrine/restoration and its capabi
     [
       'missing restoration pool',
       (c: any) => {
-        delete c.resources['ashmere_sampler@0.0.8:resource/mv'];
+        delete c.resources['cellar_sampler@0.0.8:resource/mv'];
         delete c.world.movement;
       },
       'SCHEMA_VIOLATION',

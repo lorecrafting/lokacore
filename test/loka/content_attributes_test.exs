@@ -6,11 +6,11 @@ defmodule Loka.ContentAttributesTest do
   use ExUnit.Case, async: true
 
   @moduletag :tmp_dir
-  @src "cartridges/ashmere_road"
-  @pray "ashmere_road@0.0.1:recipe/pray"
+  @src "cartridges/resource_sampler"
+  @pray "resource_sampler@0.0.1:recipe/pray"
   @stats %{"str" => 14, "dex" => 12, "con" => 13, "int" => 10, "spi" => 9, "per" => 11}
 
-  # ashmere_road with `attributes` (nil: no attributes.json), attributes@1 locked when `lock`,
+  # resource_sampler with `attributes` (nil: no attributes.json), attributes@1 locked when `lock`,
   # and pray's policy root `root`.
   defp compile(
          dir,
@@ -37,7 +37,7 @@ defmodule Loka.ContentAttributesTest do
 
   defp ref(kind, key),
     do: %{
-      "cartridge_id" => "ashmere_road",
+      "cartridge_id" => "resource_sampler",
       "cartridge_version" => "0.0.1",
       "kind" => kind,
       "key" => key
@@ -67,12 +67,12 @@ defmodule Loka.ContentAttributesTest do
     a = JSON.decode!(a)["cartridge"]
 
     assert a["attributes"] == %{
-             "ashmere_road@0.0.1:attribute/con" => %{"key" => "con", "start" => 13},
-             "ashmere_road@0.0.1:attribute/dex" => %{"key" => "dex", "start" => 12},
-             "ashmere_road@0.0.1:attribute/int" => %{"key" => "int", "start" => 10},
-             "ashmere_road@0.0.1:attribute/per" => %{"key" => "per", "start" => 11},
-             "ashmere_road@0.0.1:attribute/spi" => %{"key" => "spi", "start" => 9},
-             "ashmere_road@0.0.1:attribute/str" => %{"key" => "str", "start" => 14}
+             "resource_sampler@0.0.1:attribute/con" => %{"key" => "con", "start" => 13},
+             "resource_sampler@0.0.1:attribute/dex" => %{"key" => "dex", "start" => 12},
+             "resource_sampler@0.0.1:attribute/int" => %{"key" => "int", "start" => 10},
+             "resource_sampler@0.0.1:attribute/per" => %{"key" => "per", "start" => 11},
+             "resource_sampler@0.0.1:attribute/spi" => %{"key" => "spi", "start" => 9},
+             "resource_sampler@0.0.1:attribute/str" => %{"key" => "str", "start" => 14}
            }
 
     assert a["recipes"][@pray]["policy"]["root"]["items"] == [
@@ -93,7 +93,9 @@ defmodule Loka.ContentAttributesTest do
       &d("UNDECLARED_CAPABILITY", &1, %{"capability" => "attributes"}, ["attributes@1"])
 
     unresolved =
-      &d("UNRESOLVED_REFERENCE", "#{root}.#{&1}", %{"target" => "ashmere_road@0.0.1:#{&1}/#{&2}"})
+      &d("UNRESOLVED_REFERENCE", "#{root}.#{&1}", %{
+        "target" => "resource_sampler@0.0.1:#{&1}/#{&2}"
+      })
 
     cases = [
       pool_unlocked: {pool("mv", 2), false, nil, [undeclared.("#{root}.op")]},
@@ -130,14 +132,14 @@ defmodule Loka.ContentAttributesTest do
   # Breaks: a v1 source's resource_compare resolved against the default pools, which only a v2
   # artifact carries, so the compiler writes an artifact the loader rejects (refStage, any format).
   test "a v1 cartridge's resource_compare names no pool", %{tmp_dir: dir} do
-    hello = "cartridges/ashmere_hello"
+    hello = "cartridges/hello_sampler"
     File.cp_r!(hello, dir)
     m = JSON.decode!(File.read!(Path.join(hello, "cartridge.json")))
     m = put_in(m, ["requires", "capabilities", "attributes"], 1)
     File.write!(Path.join(dir, "cartridge.json"), JSON.encode!(m))
     policy = %{"policy_version" => 1, "root" => pool("hp", 1)}
     File.write!(Path.join(dir, "policies/village_arrived.json"), JSON.encode!(policy))
-    target = %{"target" => "ashmere_hello@0.0.1:resource/hp"}
+    target = %{"target" => "hello_sampler@0.0.1:resource/hp"}
     path = "policies/village_arrived.root.resource"
     assert Loka.Content.compile(dir) == {:error, [d("UNRESOLVED_REFERENCE", path, target)]}
   end

@@ -172,7 +172,7 @@ if (process.env.LOKA_CARRY_REACH_PROBE) {
   test('a closed ancestor refuses reach before the hidden cycle', () => {
     const w = savedCycle();
     const lid = {
-      cartridge_id: 'ashmere_items',
+      cartridge_id: 'items_sampler',
       cartridge_version: '0.0.1',
       kind: 'barrier',
       key: 'lid',

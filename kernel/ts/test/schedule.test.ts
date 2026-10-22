@@ -22,9 +22,9 @@ import { read } from './read.ts';
 
 const CONTEXT = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f';
 const CMD = 'e5f6a7b8-c9d0-8e1f-8a2b-4c5d6e7f8a9b';
-const F = 'ashmere_ferry@0.0.1';
+const F = 'ferry_sampler@0.0.1';
 const ref = (kind: string, key: string) =>
-  ({ cartridge_id: 'ashmere_ferry', cartridge_version: '0.0.1', kind, key }) as DefinitionRef;
+  ({ cartridge_id: 'ferry_sampler', cartridge_version: '0.0.1', kind, key }) as DefinitionRef;
 const BRAM = ref('npc', 'bram');
 // Fresh-world ids under the nil CommandId: ordinal 2 the landing, 3 the green, 4 the mooring
 // post, 5 Bram, 6 his first job.

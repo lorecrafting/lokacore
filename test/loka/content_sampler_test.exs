@@ -7,13 +7,13 @@ defmodule Loka.ContentSamplerTest do
   # Breaks: missing/reshaped rooms, keys, capabilities, quest/point/scene pairing or approved text.
   test "the approved sampler compiles to its independent answer without warnings" do
     expected = ~s({"cartridge":#{@kat["canonical"]},"content_hash":"#{@kat["sha256"]}"})
-    assert Loka.Content.compile("cartridges/ashmere_sampler") == {:ok, expected, []}
+    assert Loka.Content.compile("cartridges/cellar_sampler") == {:ok, expected, []}
   end
 
   # Breaks: NPC HP cross-field bounds/schema validation drifts from the portable loader.
   @tag :tmp_dir
   test "NPC HP authoring rejects invalid overrides and an old API", %{tmp_dir: dir} do
-    File.cp_r!("cartridges/ashmere_sampler", dir)
+    File.cp_r!("cartridges/cellar_sampler", dir)
     path = Path.join(dir, "npcs/cellar_rat_1.json")
     npc = JSON.decode!(File.read!(path))
     fixture = JSON.decode!(File.read!("protocol/fixtures/entity_resource.json"))

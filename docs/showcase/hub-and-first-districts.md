@@ -314,7 +314,7 @@ track climbs `up` from the green. The `hall_cupboard` exit is east of `moot_hall
 - **Wat** (slice A's NPC): dialogue `wat_letter` with `quest: carry_letter`, roles `wat` and
   `letter`, policy `quest_state {quest: carry_letter, state: objectives_complete}`; choices
   `deliver` (`hand_over {item: letter, to: wat}`) and `burn` (narration only)
-  (`ashmere_scene/dialogues/bram.json`). No checked choice here (row 14 forbids one in a quest
+  (`scene_sampler/dialogues/bram.json`). No checked choice here (row 14 forbids one in a quest
   dialogue).
 - **Bess** (sandbox): shop as Nell's; disposition as Nell's; dialogue `bess_talk` (no quest):
   `praise` (+1 standing), `insult` (-2 standing), `boast` (`check` cha rating 1: passes),
@@ -353,10 +353,10 @@ track climbs `up` from the green. The `hall_cupboard` exit is east of `moot_hall
   met time); `outcomes`
   keyed `deliver`, `burn` and `late` (a dialogue resolves with the choice id as the outcome).
 - Story point `letter_fate`: outcomes `deliver` {`wat_letter`, `deliver`} and `burn`
-  {`wat_letter`, `burn`} (`ashmere_scene/story_points`).
+  {`wat_letter`, `burn`} (`scene_sampler/story_points`).
 - Scenes (modal, two `narrate` steps, `await_ack`, `end`): `letter_read` on `{story_point:
-  letter_fate, outcome: deliver}`, `letter_ash` on `burn` (`ashmere_scene/scenes/bell_rung.json`).
-- Scene-end reactions (`ashmere_scene/reactions/bell_after.json`): on `fact_changed
+  letter_fate, outcome: deliver}`, `letter_ash` on `burn` (`scene_sampler/scenes/bell_rung.json`).
+- Scene-end reactions (`scene_sampler/reactions/bell_after.json`): on `fact_changed
   scene_letter_read` equals -1 `apply fact.adjust wardle_standing +1`; on `scene_letter_ash`
   equals -1 `apply fact.adjust wardle_standing -2`.
 - Deadline: `on {quest_failed, quest: carry_letter, outcome: late}` `apply fact.assign letter_late

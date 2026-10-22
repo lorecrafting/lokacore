@@ -17,9 +17,9 @@ import { read } from './read.ts';
 
 const CONTEXT = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f';
 const CMD = 'e5f6a7b8-c9d0-8e1f-8a2b-4c5d6e7f8a9b';
-const G = 'ashmere_gate@0.0.1';
+const G = 'gate_sampler@0.0.1';
 const OAK = {
-  cartridge_id: 'ashmere_gate',
+  cartridge_id: 'gate_sampler',
   cartridge_version: '0.0.1',
   kind: 'barrier',
   key: 'oak_door',

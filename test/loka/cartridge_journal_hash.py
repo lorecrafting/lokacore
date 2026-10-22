@@ -4,14 +4,14 @@ import hashlib
 import json
 from pathlib import Path
 
-ID, V = 'ashmere_journal', '0.0.1'
+ID, V = 'journal_sampler', '0.0.1'
 
 def renamed(v):
     if isinstance(v, dict):
-        return {k.replace('ashmere_ferry@', ID + '@'): renamed(x) for k, x in v.items()}
+        return {k.replace('ferry_sampler@', ID + '@'): renamed(x) for k, x in v.items()}
     if isinstance(v, list):
         return [renamed(x) for x in v]
-    return ID if v == 'ashmere_ferry' else v
+    return ID if v == 'ferry_sampler' else v
 
 def ref(kind, key):
     return {'cartridge_id': ID, 'cartridge_version': V, 'kind': kind, 'key': key}
@@ -20,7 +20,7 @@ def k(kind, key):
     return f'{ID}@{V}:{kind}/{key}'
 
 value = renamed(json.loads(Path('protocol/fixtures/cartridge_ferry_hash.json').read_text())['value'])
-value['manifest']['title'] = 'Ashmere — Journal'
+value['manifest']['title'] = 'Journal Sampler'
 del value['recipes']
 value['quests'][k('quest', 'lantern')]['journal'] = {
     'active': 'quest.lantern.find', 'objectives_met': 'quest.lantern.return',
@@ -38,11 +38,11 @@ value['items'][k('item', 'oar')] = {
     'key': 'oar', 'keywords': ['oar'], 'short': 'item.oar.short', 'room_line': 'item.oar.room',
     'description': 'item.oar.description', 'location': {'in': 'room', 'room': ref('room', 'ferry_landing')},
 }
-value['text'] = json.loads(Path('cartridges/ashmere_journal/text.json').read_text())
+value['text'] = json.loads(Path('cartridges/journal_sampler/text.json').read_text())
 canonical = json.dumps(value, sort_keys=True, separators=(',', ':'), ensure_ascii=False)
 sha = hashlib.sha256(canonical.encode()).hexdigest()
 Path('protocol/fixtures/cartridge_journal_hash.json').write_text(json.dumps({
-    'description': 'Independent Python known answer for ashmere_journal: frozen ferry artifact renamed, recipe removed, hand-written Lantern stage/outcome journal plus event-earned oar quest and landing item. Catalog copied verbatim from source. c1-journal; mechanics.md quest@1; quest.schema.json QuestJournal. No kernel supplies expected values.',
+    'description': 'Independent Python known answer for journal_sampler: frozen ferry artifact renamed, recipe removed, hand-written Lantern stage/outcome journal plus event-earned oar quest and landing item. Catalog copied verbatim from source. c1-journal; mechanics.md quest@1; quest.schema.json QuestJournal. No kernel supplies expected values.',
     'value': value, 'canonical': canonical, 'sha256': sha,
 }, indent=2, ensure_ascii=False) + '\n')
 print(sha)
