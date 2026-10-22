@@ -3,7 +3,7 @@
 Under [autonomous mechanics delegation](owner-decision-autonomous-mechanics-2026-10-03.md),
 the PM adopts [D5 mechanics](../system/mechanics.md#d5-dry-deep-fen-exploration-selected-contract),
 [route/detail authoring](../system/cartridge.md#d5-deep-fen-route-and-details),
-[Book](../system/book-ui.md#d5-deep-fen-detail-pages),
+[Book](https://github.com/lorecrafting/lokacore/blob/c88762e38eb9c3747f1de0b87e6536d58424c24e/docs/system/book-ui.md#d5-deep-fen-detail-pages),
 [save](../system/save.md#d5-route-and-read-recovery) and the
 [implementation brief](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/briefs/chapter-one/d5-deep-fen-brief-2026-10-05.md).
 This is docs-only planning; implementation, independent plan approval and player

@@ -5,7 +5,7 @@
 - Brief: `br show loka-v9q` note "BRIEF pre-polish code fixes" plus PM rulings (loka-b60 deferred;
   loka-jk0 narrow). Issues loka-374, loka-w2e, loka-b19, loka-w4b, loka-bem, loka-soq D3, loka-nnu, loka-jk0.
 - Governing: [book-ui recovery](../system/book-ui.md#chapters-scenes-and-recovery),
-  [D11](../system/book-ui.md#d11-character-choice-interaction),
+  [D11](https://github.com/lorecrafting/lokacore/blob/c88762e38eb9c3747f1de0b87e6536d58424c24e/docs/system/book-ui.md#d11-character-choice-interaction),
   [numeric profile](../spec/conformance/numeric-profile.md) Encoding, [cartridge.md](../system/cartridge.md) night
   window (`[20,6)` wrapping), [save.md](../system/save.md) "The save file"; AGENTS.md "Writing tests".
 - Verdict: **APPROVE WITH NOTES**

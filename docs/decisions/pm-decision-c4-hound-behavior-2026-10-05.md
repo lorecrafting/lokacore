@@ -5,7 +5,7 @@ the PM selects [C4 behavior](../system/mechanics.md#c4-hound-response-pack-assis
 [pack/flight parameters](../system/cartridge.md#c4-pack-response-and-wounded-flight),
 [composition](../system/protocol.md#c4-pack-encounter-and-flight-composition),
 [save](../system/save.md#c4-pack-and-flight-recovery),
-[Book](../system/book-ui.md#c4-pack-response-and-enemy-flight-details) and the
+[Book](https://github.com/lorecrafting/lokacore/blob/c88762e38eb9c3747f1de0b87e6536d58424c24e/docs/system/book-ui.md#c4-pack-response-and-enemy-flight-details) and the
 [implementation brief](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/briefs/chapter-one/chapter-one-c4-hound-behavior-brief-2026-10-05.md).
 This is PM planning adoption, not independent approval, source GO or proof.
 
