@@ -26,6 +26,8 @@ const wait =
     b.clock.mono += ms;
     (b.game as unknown as { pulse(): unknown }).pulse();
   };
+// 07:00 + 14 h at the showcase's 50 logical s per real s: 21:00, night (its solar cut at 20:00).
+const night = wait(1_008_000);
 const contents = (section?: string): Step[] => [/; opens Contents$/, ...(section ? [section] : [])];
 // The Reeve's talk (Low Wardle Green): the letter errand begins.
 const reeve = ['The Reeve is here., open', 'Talk to the Reeve'];
@@ -76,7 +78,7 @@ export const routes: Record<string, Step[]> = {
     'Take a loaf',
   ],
   'room-refusal': [...hall, drag],
-  'room-at-night': [wait(1_008_000), 'Crossroads Inn, look'],
+  'room-at-night': [night, 'Crossroads Inn, look'],
   'npc-choice': [go('south'), ...reeve],
   'npc-shop': [...nell],
   'npc-services': [go('down', 'north', 'north'), 'The smith is here., open'],
@@ -131,5 +133,5 @@ export const checkpoints: Record<string, Step[]> = {
   'goblin-combat': [...goblins],
   'loft-map': [go('up'), (b) => b.map()],
   'sack-contents': [...sack],
-  'night-inn': [wait(1_008_000)],
+  'night-inn': [night],
 };
