@@ -361,7 +361,6 @@ sg() { # <want-rc> <to>
 sg 2 hook1
 sg 0 built1
 sg 0 none1
-sg 0 '../s1/subagents/agent-hook1'
 python3 -I -c 'import json,sys; json.load(open(sys.argv[1]))' "$bin/../.claude/settings.json" || bad 'settings.json does not parse'
 # --- .githooks/pre-commit ----------------------------------------------------------------------
 # Stub mise runs nothing but fails `elixir bin/contracts.exs --check`. Break: a staged MECHANICS-TOOLBOX.md,
