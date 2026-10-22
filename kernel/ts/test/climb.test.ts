@@ -12,7 +12,7 @@ import { INSTALLED, loadCartridge, newWorld, step } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
-import { read } from './read.ts';
+import * as patrol from './patrol_fixture.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-climb-sampler-'));
 let artifact: Uint8Array;
@@ -129,20 +129,18 @@ test('the loader refuses each unsound climb declaration', () => {
 // Breaks: the loader admits a patrol leg over a climb face, so the leader walks it (twin of
 // content_climb_test.exs).
 test('the loader refuses a patrol route over a climb face', () => {
-  const source = read('protocol/fixtures/missing_child_v041_hash.json').value;
-  const A = 'ashmere_missing_child@0.0.41';
-  const climb = (c: any) => {
+  const P = patrol.prefix;
+  const r = patrol.load((c: any) => {
     c.manifest.requires.kernel_api.at_least = '1.45';
-    const exit = c.rooms[`${A}:room/watch_post`].exits.west;
-    exit.climb = {
-      item: { ...exit.to, kind: 'item', key: 'brass_key' },
+    c.rooms[`${P}:room/watch_post`].exits.west.climb = {
+      item: patrol.ref(patrol.fresh, 'item', 'brass_key'),
       damage: 1,
-      fell: 'action.bandage',
+      fell: 'watch.prompt',
     };
-  };
-  assert.deepEqual(refusal(source, climb), [
+  });
+  assert.deepEqual(r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path], [
     'OUTCOME_MISMATCH',
-    `.cartridge.quests["${A}:quest/watch_rounds"].patrol.route[0]`,
+    `.cartridge.quests["${P}:quest/watch_rounds"].patrol.route[0]`,
   ]);
 });
 
