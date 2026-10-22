@@ -55,7 +55,7 @@ function Palettes() {
 function Type() {
   const c = usePalette();
   return (
-    <View style={{ padding: space.page, gap: space.block }}>
+    <View style={{ padding: space.page, gap: space.xl }}>
       {Object.entries(type).map(([name, style]) => (
         <View key={name}>
           <Text style={{ ...('fontFamily' in style ? {} : type.body), ...style, color: c.fg }}>

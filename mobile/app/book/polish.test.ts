@@ -512,6 +512,6 @@ test('a dusk GameView draws the Book in the dusk palette', () => {
   assert.equal(h.game.view().view.calendar_status?.solar, 'dusk');
   const drawn = h.draw();
   assert.equal(drawn.find((n) => n.type === 'SafeAreaView').props.style.backgroundColor, '#2c2846');
-  const title = drawn.find((n) => n.type === 'Text' && n.props.style?.fontSize === 22); // the room title
+  const title = drawn.find((n) => n.type === 'Text' && n.props.style?.fontSize === 26); // the room title
   assert.equal(title.props.style.color, '#e8e2ec');
 });

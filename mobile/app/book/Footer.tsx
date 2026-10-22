@@ -10,8 +10,8 @@ import { MapDrawing } from './MapDrawing.tsx';
 import { refused, why, type Hint } from './model.ts';
 import type { DetailLine } from './presenter.ts';
 import { Control } from './pages.tsx';
-import { usePalette, type Palette } from './palette.ts';
-import { motion, radius, size, space, type } from './tokens.ts';
+import { usePalette, useType, type Palette } from './palette.ts';
+import { motion, radius, size, space } from './tokens.ts';
 import { LABEL } from './labels.ts';
 
 type Props = {
@@ -167,7 +167,7 @@ export function Tip({ dismiss }: { dismiss: () => void }) {
         marginHorizontal: space.page,
       }}
     >
-      <Text style={{ ...type.small, color: c.bg }}>
+      <Text style={{ ...useType().small, color: c.bg }}>
         Hold the map and drag toward a path to walk; tap it to open the map.
       </Text>
       <View style={{ alignItems: 'flex-end' }}>
@@ -181,11 +181,12 @@ export function Tip({ dismiss }: { dismiss: () => void }) {
 // opposite the drag (joystick.ts `sideOf`, placed by `SPOT`).
 function Said({ text, side }: { text: string; side: keyof typeof SPOT }) {
   const c = usePalette();
+  const t = useType();
   return (
     text !== '' && (
       <Text
         pointerEvents="none"
-        style={{ ...type.small, position: 'absolute', ...SPOT[side], color: c.fg }}
+        style={{ ...t.small, position: 'absolute', ...SPOT[side], color: c.fg }}
       >
         {text}
       </Text>

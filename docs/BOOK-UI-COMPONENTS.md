@@ -23,7 +23,7 @@ For every agent writing `mobile/app/book/` or its stories ([audit](reviews/2026-
 - **Interaction** (what shows when, what a tap does, returns, freshness): [Book UI](system/book-ui.md). It names no token, colour or size.
 - **Working examples:** `npm run storybook` in `mobile/app` ([how](web-preview.md#storybook)); the `Story:` file a doc comment names, one story per state. A story carries no rule beyond a one-line link to its component.
 - **References:** the two mocks in [docs/design](design/README.md); the owner's rulings in [decisions](decisions/README.md).
-- Every pressable's box is at least `size.touch` in both axes. A text pressable (`Tap`: entity lines, verb lines, the room title, the status position) takes no visible height for it: its box is `minHeight: size.touch` with a vertical padding of its bleed (below) and an equal negative margin, so the shown line keeps the page rhythm and the hit area bleeds onto the paper around it. The bleed is a target only where nothing paints over it: whatever renders later (the next line in a run, the scroll area under the fixed title, the row under the status position, the block under a Worn item or the water Surface line) takes the overlap. A Tap's guaranteed target is its shown box plus its uncovered bleed: a body line inside a run its scaled `type.body.lineHeight` (28 px at Standard), a line with one covered side that plus one bleed (36 px at Standard: a run's end, a Worn item, the Surface line, the status position), the room title 40 px, the full `size.touch` where the paper around it is free; never under WCAG 2.5.8's 24 px. A non-pressable line touching a Tap (a Worn slot label) lends it the bleed: a tap there opens the nearest line. Cards, tiles and Controls (`size.card`, `size.touch` with their own padding) keep their height visible; only `Tap` bleeds. Every text role reads at 4.5:1 on `bg` and `card` in all four palettes. Every control's accessible name follows the [label-in-name rule](system/book-ui.md#minimap-map-and-presentation-controls): its shown text first, then its suffix.
+- Every pressable's box is at least `size.touch` in both axes. A text pressable (`Tap`: entity lines, verb lines, the room title, the status position) takes no visible height for it: its box is `minHeight: size.touch` with a vertical padding of its bleed (below) and an equal negative margin, so the shown line keeps the page rhythm and the hit area bleeds onto the paper around it. The bleed is a target only where nothing paints over it: whatever renders later (the next line in a run, the scroll area under the fixed title, the row under the status position, the block under a Worn item or the water Surface line) takes the overlap. A Tap's guaranteed target is its shown box plus its uncovered bleed: a body line inside a run its scaled `type.body.lineHeight` (28 px at Standard), a line with one covered side that plus one bleed (36 px at Standard: a run's end, a Worn item, the Surface line, the status position), the room title 46 px (pageTitle 30 + its 8 below + one 8 bleed), the full `size.touch` where the paper around it is free; never under WCAG 2.5.8's 24 px. A non-pressable line touching a Tap (a Worn slot label) lends it the bleed: a tap there opens the nearest line. Cards, tiles and Controls (`size.card`, `size.touch` with their own padding) keep their height visible; only `Tap` bleeds. Every text role reads at 4.5:1 on `bg` and `card` in all four palettes. Every control's accessible name follows the [label-in-name rule](system/book-ui.md#minimap-map-and-presentation-controls): its shown text first, then its suffix.
 - A change lands in one place: a value in tokens, a component rule in its doc comment, a cross-component rule here, a behaviour in Book UI; code and its story follow in the same slice.
 
 ## Grammar
@@ -79,8 +79,10 @@ off, consolidated; the [Tokens story](../mobile/app/stories/Tokens.stories.tsx) 
   `dark` (the mock's moonlit `.ph.moon` page, the lamp's amber as `action`, under the
   [Night sky](#component-catalogue)). The mock's twilight is a sky gradient over the page; a flat
   palette keeps its hue, never a brown or grey stand-in. Roles: `bg`, `fg` (ink), `dim`, `line`, `card`, `action`, `danger`,
-  `warning`. Use roles, never a hex value. `action` marks what can be pressed; `danger` and
-  `warning` are the projected bands, barred ways and refusal tags, never decoration. The text
+  `warning`. Use roles, never a hex value. `action` marks what can be pressed; `danger` marks
+  what is barred. They are distinct hues in every palette (plum/rose against oxblood/amber), each
+  >=4.5:1 on `bg` and `card`. Every `type` role has a lineHeight and scales with the Reading
+  size; `space` is 2/4/6/8/12/16/24. The text
   roles (`fg`, `dim`, `action`, `danger`, `warning`) are each at least 4.5:1 on `bg` and on
   `card` in every palette; `line` is a hairline, not text. Which palette shows follows the
   in-game solar phase, per the [day and night rule](system/book-ui.md#world-and-status-entry):
@@ -91,9 +93,9 @@ off, consolidated; the [Tokens story](../mobile/app/stories/Tokens.stories.tsx) 
   IM Fell English SC (bundled) for small-caps controls, section titles,
   status labels, tags, speakers and the running head. Use a named style
   from `type`; do not set a font size, line height or letter spacing in a component. The
-  [Reading size](system/book-ui.md#world-and-status-entry) scales `body`, `log`, `speaker`,
-  `control`, `tag` and `runningHead` (font size and line height each rounded): read them through
-  `useType()`. Every other role is fixed; every Book `Text` sets `allowFontScaling={false}`.
+  [Reading size](system/book-ui.md#world-and-status-entry) scales every role with a size (font
+  size and line height each rounded): read them through `useType()`. Every Book `Text` sets
+  `allowFontScaling={false}`.
 - **Space, size, radius.** Margins, gaps and padding come from `space`; touch, card, rule
   and minimap sizes from `size`; corners from `radius`. `Tap`'s vertical bleed is
   max(0, (`size.touch` − the scaled `type.body.lineHeight`) / 2): `space.md` at Standard, 6, 4

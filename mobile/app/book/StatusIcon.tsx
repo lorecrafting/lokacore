@@ -13,7 +13,7 @@ import {
 } from './fade.ts';
 import { glyph } from './glyphs.ts';
 import { statusTip } from './model.ts';
-import { usePalette, type Palette } from './palette.ts';
+import { usePalette, useType, type Palette } from './palette.ts';
 import { motion, radius, size, space, type } from './tokens.ts';
 
 type Say = (key: string) => string;
@@ -236,6 +236,7 @@ function Disc(p: { look: Look; children: string }) {
         justifyContent: 'center',
       }}
     >
+      {/* Fixed size, not useType(): the glyph sits in a fixed 28 px disc, and icons keep their size. */}
       <Text aria-hidden style={{ ...type.label, color: l.ink }}>
         {p.children}
       </Text>
@@ -284,7 +285,7 @@ export function Tooltip({ text }: { text: string }) {
           paddingHorizontal: space.lg,
         }}
       >
-        <Text style={{ ...type.small, color: c.bg }}>{text}</Text>
+        <Text style={{ ...useType().small, color: c.bg }}>{text}</Text>
       </View>
     </Animated.View>
   );

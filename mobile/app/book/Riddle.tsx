@@ -6,7 +6,7 @@ import type { Button } from './presenter.ts';
 import { ActionCard } from './actions.tsx';
 import { Control } from './pages.tsx';
 import { prose, usePalette, useType } from './palette.ts';
-import { opacity, radius, size, space, type } from './tokens.ts';
+import { opacity, radius, size, space } from './tokens.ts';
 import { LABEL } from './labels.ts';
 
 /**
@@ -24,7 +24,7 @@ export function Riddle(p: { bank: readonly string[]; button: Button; press: (b: 
   const answer = selected.map((i) => p.bank[i]).join('');
   return (
     // the answer, the bank and the controls, as the mock's `.word`, `.bankl` and `.rrow`
-    <View style={{ gap: space.block }}>
+    <View style={{ gap: space.xl }}>
       <Text style={prose(c, t)}>{answer || 'Choose letters to answer.'}</Text>
       <View
         style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: space.sm }}
@@ -90,7 +90,7 @@ export function LetterTile(p: {
         opacity: p.used ? opacity.disabled : 1,
       }}
     >
-      <Text style={{ ...type.tile, color: c.fg }}>{p.letter}</Text>
+      <Text style={{ ...useType().tile, color: c.fg }}>{p.letter}</Text>
     </Pressable>
   );
 }

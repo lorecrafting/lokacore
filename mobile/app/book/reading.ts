@@ -1,5 +1,5 @@
-// The Reading size (docs/system/book-ui.md#world-and-status-entry): the reading roles scaled by
-// min(step x the system font scale, cap), the other type roles fixed; components read useType().
+// The Reading size (docs/system/book-ui.md#world-and-status-entry): every type role scaled by
+// min(step x the system font scale, cap); components read useType().
 import type { Type } from './palette.ts';
 import { reading, size, type } from './tokens.ts';
 
@@ -31,19 +31,15 @@ export function readingSize(store: Store, key: string) {
 export type Reading = { step: ReadingStep; choose: (step: ReadingStep) => void; type: Type };
 export const readingFactor = (step: ReadingStep, fontScale: number) =>
   Math.min(reading[step] * fontScale, reading.cap);
-const scale = <S extends { fontSize: number; lineHeight?: number }>(s: S, f: number): S => ({
+const scale = <S extends { fontSize: number; lineHeight: number }>(s: S, f: number): S => ({
   ...s,
   fontSize: Math.round(s.fontSize * f),
-  ...(s.lineHeight ? { lineHeight: Math.round(s.lineHeight * f) } : {}),
+  lineHeight: Math.round(s.lineHeight * f),
 });
-export const readingType = (f: number): Type => ({
-  ...type,
-  body: scale(type.body, f),
-  log: scale(type.log, f),
-  speaker: scale(type.speaker, f),
-  control: scale(type.control, f),
-  tag: scale(type.tag, f),
-  runningHead: scale(type.runningHead, f),
-});
+// Every role scales; the modifiers (named, italic) carry no size and pass through.
+export const readingType = (f: number): Type =>
+  Object.fromEntries(
+    Object.entries(type).map(([k, s]) => [k, 'fontSize' in s ? scale(s, f) : s]),
+  ) as Type;
 // A Tap's vertical bleed: a reading line grown to a touch-sized target (BOOK-UI-COMPONENTS.md).
 export const tapBleed = (lineHeight: number) => Math.max(0, (size.touch - lineHeight) / 2);

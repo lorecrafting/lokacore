@@ -20,7 +20,7 @@ and their text is at [the last commit that held them](https://github.com/lorecra
 
 ## World and status entry
 
-World is one current-room page. Its centered title remains fixed above the scrolling authored
+World is one current-room page. Its left-aligned title remains fixed above the scrolling authored
 description, projected interactibles, offered place actions, event log and, last, the
 [Word block](#word-bar), so a pressed verb's result line sits within a screen of the verb and the
 word rows never push it below the fold (pass-1 UA). A place action the GameView advertises
@@ -93,10 +93,12 @@ Settings retains Start over and its confirmation/error handling, and holds the
 
 Settings opens with the **Reading size**: Standard, Large or Larger, one chosen, kept on the
 device (not in the save) and Standard until changed. It scales the reading text (prose, entity
-and action lines, the log, speakers, Controls, tags and the running head) by the step (×1,
-×1.15, ×1.3) times the device's text size, never above ×1.5; titles, letter tiles, small text,
-status labels and icons, and the map stay fixed, and the device's text size reaches the Book
-only through this factor. Rows that no longer fit wrap, never truncate.
+and action lines, the log, speakers, Controls, tags, the running head, titles, letter tiles,
+small text and status labels) by the step (×1, ×1.15, ×1.3) times the device's text size, never
+above ×1.5; icons and the map stay fixed, and the device's text size reaches the Book only
+through this factor. Rows that no longer fit wrap, never truncate. Every text role scales with
+the Reading size, titles and the status line included; the status line may take a second line,
+the pools never split.
 
 Resource-band phrases come from cartridge text (`band.<key>`); projected tones map to the paper
 palette without presenter thresholds. Status shows the hp band phrase only on hp. The status line

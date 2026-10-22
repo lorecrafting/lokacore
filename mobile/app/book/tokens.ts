@@ -10,7 +10,7 @@ const light = {
   line: '#d0c7b0', // hairline rules, card borders, the speech bar
   card: '#e4decd', // action cards and letter tiles
   action: '#7b2d20', // what can be tapped to act
-  danger: '#7b2d20', // the danger band, barred ways, refusal tags
+  danger: '#6b2160', // the danger band, barred ways, refusal tags: plum against the oxblood action
   warning: '#845512', // the warning band
 };
 
@@ -41,7 +41,7 @@ const dawn: typeof light = {
   line: '#b9aeb6',
   card: '#d5ccd3',
   action: '#7b2d20',
-  danger: '#7b2d20',
+  danger: '#6b2160',
   warning: '#6f4a10',
 };
 
@@ -52,7 +52,7 @@ const dusk: typeof light = {
   line: '#474263',
   card: '#363253',
   action: '#f0b462',
-  danger: '#f2a07f',
+  danger: '#f4a8b8',
   warning: '#e68f50',
 };
 
@@ -64,8 +64,8 @@ export const nightSky = { star: '#fffff5' };
 // Bundled family names (OFL files in ./fonts), loaded by App.tsx `fonts` through expo-font.
 export const font = { head: 'IMFellEnglish', body: 'EBGaramond', caps: 'IMFellEnglishSC' };
 
-// Reading size steps (docs/system/book-ui.md#world-and-status-entry): body, log, speaker, control,
-// tag and runningHead scale by min(step x the system font scale, cap); every other role is fixed.
+// Reading size steps (docs/system/book-ui.md#world-and-status-entry): every type role scales by
+// min(step x the system font scale, cap).
 export const reading = { standard: 1, large: 1.15, larger: 1.3, cap: 1.5 };
 
 // Text styles without colour; a component adds a colour from the palette.
@@ -78,17 +78,16 @@ export const type = {
     lineHeight: 19,
     fontVariant: ['oldstyle-nums' as const],
   }, // status line, the tip
-  roomTitle: { fontFamily: font.head, fontSize: 22, lineHeight: 24 }, // the room's fixed Look title
-  pageTitle: { fontFamily: font.head, fontSize: 31, lineHeight: 33 }, // every page, Combat's included
+  pageTitle: { fontFamily: font.head, fontSize: 26, lineHeight: 30 }, // every page, the room's and Combat's included
   sectionTitle: { fontFamily: font.caps, fontSize: 23, lineHeight: 25, letterSpacing: 0.5 }, // Inside, Held, Worn; the mock's h2
-  runningHead: { fontFamily: font.caps, fontSize: 12, letterSpacing: 1.7 }, // the quest objective
-  control: { fontFamily: font.caps, fontSize: 14, letterSpacing: 1.1 }, // Back, Back to World, Got it, Start over
-  tag: { fontFamily: font.caps, fontSize: 13, letterSpacing: 0.7 }, // a refusal's reason tag
-  label: { fontFamily: font.caps, fontSize: 11, letterSpacing: 0.7 }, // every resource key in the status
-  speaker: { fontFamily: font.caps, fontSize: 17, letterSpacing: 0.5 }, // a speech line's name
-  tile: { fontFamily: font.head, fontSize: 23 }, // a riddle letter on a touch-sized card
-  chapterLabel: { fontFamily: font.caps, fontSize: 13, letterSpacing: 2.6 }, // the chapter card's "Chapter one" (the mock's `.chapter small`)
-  chapterTitle: { fontFamily: font.head, fontSize: 38, lineHeight: 40 }, // the chapter card's title (the mock's `.chapter b`): 38 above the mock's scaled 33 so it steps above pageTitle
+  runningHead: { fontFamily: font.caps, fontSize: 12, lineHeight: 16, letterSpacing: 1.7 }, // the quest objective
+  control: { fontFamily: font.caps, fontSize: 14, lineHeight: 20, letterSpacing: 1.1 }, // Back, Back to World, Got it, Start over
+  tag: { fontFamily: font.caps, fontSize: 13, lineHeight: 18, letterSpacing: 0.7 }, // a refusal's reason tag
+  label: { fontFamily: font.caps, fontSize: 11, lineHeight: 16, letterSpacing: 0.7 }, // every resource key in the status
+  speaker: { fontFamily: font.caps, fontSize: 17, lineHeight: 24, letterSpacing: 0.5 }, // a speech line's name
+  tile: { fontFamily: font.head, fontSize: 23, lineHeight: 28 }, // a riddle letter on a touch-sized card
+  chapterLabel: { fontFamily: font.caps, fontSize: 13, lineHeight: 20, letterSpacing: 2.6 }, // the chapter card's "Chapter one" (the mock's `.chapter small`)
+  chapterTitle: { fontFamily: font.head, fontSize: 38, lineHeight: 40 }, // the chapter card's title (the mock's `.chapter b`): 38, a step above pageTitle (26)
   // Modifiers over another style: an entity line's name; a verb line and a system log line.
   named: {
     fontWeight: '500' as const,
@@ -104,8 +103,7 @@ export const space = {
   sm: 6, // between action cards, status items
   md: 8,
   lg: 12, // speech indent, card side padding
-  block: 14, // between blocks on a detail page
-  xl: 16,
+  xl: 16, // between blocks on a page
   page: 24, // page margins
 };
 
