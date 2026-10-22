@@ -300,8 +300,7 @@ freshness token captured when drawn; scenes and queued chapters retain precedenc
 
 Several present NPCs that share a name are each their own detail and action target, bound to
 their exact EntityId, never the first definition match. Departure or death prunes the route; a
-different generation never inherits an old invocation. A killed creature's corpse is an ordinary
-detail with Contents and Take.
+different generation never inherits an old invocation.
 
 Descriptions use the explicit optional EntityView/ContentView `description` TextKey under the
 [projection amendment](../decisions/pm-decision-description-projection-2026-10-03.md). Current
@@ -600,7 +599,7 @@ When GameView carries actor_name, the Character page's first line is its authore
 
 ## Sense cues details
 
-GameView `cues` lists the [sense cues](mechanics.md#sense-cues-sound-smell-and-heat-toolbox-row-g6) reaching the player's room, nearest first. The World page shows one quiet line per cue, in that order, as one block after the room's entity lines: the authored text, then " from the " and the direction key when the cue comes from another room ("Hammering from the east"), the text alone when it comes from this room ("Heat beats out from the forge."). Two cues with the same text and direction are two lines. The sense is in the authored words, never an icon or a colour alone; the line is not pressable and its accessible name is its text. No cues, no block. The presenter never walks exits or decides what reaches the player (proposed wording, pending designer approval, loka-kgd.65).
+GameView `cues` lists the [sense cues](mechanics.md#sense-cues-sound-smell-and-heat-toolbox-row-g6) reaching the player's room, nearest first. The World page shows one quiet line per cue, in that order, as one block after the room's entity lines: the authored text, then " from the " and the direction key when the cue comes from another room ("Hammering from the east"), the text alone when it comes from this room ("Heat beats out from the forge."). Two cues with the same text and direction are two lines. The sense is in the authored words, never an icon or a colour alone; the line is not pressable and its accessible name is its text. No cues, no block. The presenter never walks exits or decides what reaches the player.
 
 ## Aside details
 
