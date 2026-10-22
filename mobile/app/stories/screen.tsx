@@ -80,6 +80,9 @@ const readingOf = (g: unknown) => {
   } as const;
 };
 
+// Every page story mounts a BookView (its Footer listens to window keydown): no Docs page mounting them all.
+export const pageTags = ['!autodocs'];
+
 export const pageStory = (
   saved: unknown,
   shell?: Partial<Screen>,

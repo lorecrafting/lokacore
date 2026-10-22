@@ -2,12 +2,17 @@
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { DiscoveredMap } from '../book/DiscoveredMap.tsx';
 import { MapPage } from '../book/sections.tsx';
-import { pageStory } from './screen.tsx';
+import { pageStory, pageTags } from './screen.tsx';
 import MapTwoLevelsView from './views/map-two-levels.json';
 import MapBarredView from './views/map-barred.json';
 import MapWhereView from './views/map-where.json';
 
-const meta: Meta = { title: 'Pages/Map', component: MapPage, subcomponents: { DiscoveredMap } };
+const meta: Meta = {
+  title: 'Pages/Map',
+  component: MapPage,
+  subcomponents: { DiscoveredMap },
+  tags: pageTags,
+};
 export default meta;
 
 export const DiscoveredTwoLevels: StoryObj = {

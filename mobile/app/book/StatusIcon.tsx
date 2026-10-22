@@ -38,9 +38,8 @@ export const ringFraction = (c: Condition, time: number) =>
  * The status icon row above the status line: one round, graphic-only icon per condition, five
  * then a +N disc (book-ui.md, Conditions details).
  * - Use: above the status line.
- * - Rules: a tap opens Character; a hold, hover or keyboard focus shows a Tooltip. A timed icon's
- *   ring drains linearly between updates over at most 1 s, jumps on first show and on a refresh
- *   (reduced motion: steps); a permanent icon has none.
+ * - Rules: a tap opens Character; a hold, hover or keyboard focus shows a Tooltip. The countdown
+ *   ring's motion is the Conditions details rule, not restated here.
  * - States: buff; debuff; neutral; permanent; overflow; held; focused; locked (pictures, not
  *   pressable); ring full, near empty, draining.
  * - Story: StatusIcon.stories.tsx

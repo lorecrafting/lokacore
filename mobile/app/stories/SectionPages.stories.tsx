@@ -4,7 +4,7 @@ import { ContentsPage } from '../book/Menu.tsx';
 import { Professions, RaiseCards, SkillDetails } from '../book/skills.tsx';
 import { AncestryPage, CarryingPage, CharacterPage, SettingsPage } from '../book/sections.tsx';
 import { JournalPage } from '../book/journal.tsx';
-import { pageStory } from './screen.tsx';
+import { pageStory, pageTags } from './screen.tsx';
 import JournalView from './views/journal.json';
 import CarryingEmptyView from './views/carrying-empty.json';
 import CarryingHeldView from './views/carrying-held.json';
@@ -14,6 +14,7 @@ import ContentsView from './views/contents.json';
 import SettingsView from './views/settings.json';
 
 const meta: Meta = {
+  tags: pageTags,
   title: 'Pages/Sections',
   component: JournalPage,
   subcomponents: {

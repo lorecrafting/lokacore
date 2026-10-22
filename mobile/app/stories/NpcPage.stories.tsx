@@ -2,13 +2,18 @@
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { expect } from 'storybook/test';
 import { NpcDetail, NpcPage } from '../book/Npc.tsx';
-import { pageStory } from './screen.tsx';
+import { pageStory, pageTags } from './screen.tsx';
 import NpcChoiceView from './views/npc-choice.json';
 import NpcShopView from './views/npc-shop.json';
 import NpcServicesView from './views/npc-services.json';
 import NpcClosedView from './views/npc-closed.json';
 
-const meta: Meta = { title: 'Pages/NPC', component: NpcPage, subcomponents: { NpcDetail } };
+const meta: Meta = {
+  title: 'Pages/NPC',
+  component: NpcPage,
+  subcomponents: { NpcDetail },
+  tags: pageTags,
+};
 export default meta;
 
 export const Choice: StoryObj = {

@@ -4,10 +4,11 @@ import { expect, fn } from 'storybook/test';
 import { ChapterPage, ScenePage } from '../book/sections.tsx';
 import { DreamPage } from '../book/DreamPage.tsx';
 import { chapterLabel } from '../book/words.ts';
-import { pageStory } from './screen.tsx';
+import { pageStory, pageTags } from './screen.tsx';
 import SceneView from './views/scene.json';
 
 const meta: Meta = {
+  tags: pageTags,
   title: 'Pages/Chapter and scene',
   component: ChapterPage,
   subcomponents: { ScenePage },

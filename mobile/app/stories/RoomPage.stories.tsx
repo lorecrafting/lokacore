@@ -5,7 +5,7 @@ import { Body } from '../book/Body.tsx';
 import { Asides as AsideLines } from '../book/lines.tsx';
 import { NoticeEntries } from '../book/notices.tsx';
 import { RoomPage } from '../book/pages.tsx';
-import { pageStory } from './screen.tsx';
+import { pageStory, pageTags } from './screen.tsx';
 import RoomFirstView from './views/room-first.json';
 import RoomNpcsItemsView from './views/room-npcs-items.json';
 import RoomLongLogView from './views/room-long-log.json';
@@ -16,6 +16,7 @@ import voices from '../../../cartridges/voices_sampler/text.json';
 import remarks from '../../../cartridges/remarks_sampler/text.json';
 
 const meta: Meta = {
+  tags: pageTags,
   title: 'Pages/Room',
   component: RoomPage,
   subcomponents: { Body, NoticeEntries, Asides: AsideLines },

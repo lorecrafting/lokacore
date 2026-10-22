@@ -29,12 +29,13 @@ const files = [
 ];
 const EXPORT = /^export (?:(?:default )?(?:function|const) ([A-Z]\w*)|\{ \w+ as ([A-Z]\w*) \})/gm;
 const KNOWN =
-  /^export (?:(?:default )?(?:function|const|type|interface)\b|\{ \w+ as [A-Z]\w* \}|\{ [a-z]\w* \})/;
+  /^export (?:(?:default )?function \w+|(?:default )?const \w+ =|(?:type|interface)\b|\{ \w+ as [A-Z]\w* \}|\{ [a-z]\w* \})/;
+const MULTI = /^export (?:default )?const .*, [A-Z]\w* =/; // `export const A = …, B = …`
 const unknownExports: string[] = [];
 const exported = files.flatMap((file) => {
   const src = read(file);
   for (const [line] of src.matchAll(/^export .*/gm))
-    if (!KNOWN.test(line)) unknownExports.push(`${file}: ${line}`);
+    if (!KNOWN.test(line) || MULTI.test(line)) unknownExports.push(`${file}: ${line}`);
   return [...src.matchAll(EXPORT)].map((m) => ({
     file,
     name: m[1] ?? m[2]!,
