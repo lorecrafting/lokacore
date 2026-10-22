@@ -39,3 +39,14 @@ export const Pending: Story = {
     await expect(args.onPress).not.toHaveBeenCalled();
   },
 };
+
+// A step of the Settings Reading size row: a radio, inverted while chosen.
+export const Chosen: Story = {
+  args: { word: 'Large', label: 'Large', chosen: true },
+  play: async ({ canvas }) => {
+    await expect(canvas.getByRole('radio', { name: 'Large' })).toHaveAttribute(
+      'aria-checked',
+      'true',
+    );
+  },
+};

@@ -93,6 +93,13 @@ Settings retains Start over and its confirmation/error handling, and holds the
 [page-turn sound](../BOOK-UI-COMPONENTS.md#page-turn) on/off control. Section returns say
 **Back to World**, clear the detail stack to World, and do not pop to Character or Contents.
 
+Settings opens with the **Reading size**: Standard, Large or Larger, one chosen, kept on the
+device (not in the save) and Standard until changed. It scales the reading text (prose, entity
+and action lines, the log, speakers, Controls, tags and the running head) by the step (×1,
+×1.15, ×1.3) times the device's text size, never above ×1.5; titles, letter tiles, small text,
+status labels and icons, and the map stay fixed, and the device's text size reaches the Book
+only through this factor. Rows that no longer fit wrap, never truncate.
+
 Resource-band phrases come from cartridge text (`band.<key>`); projected tones map to the paper
 palette without presenter thresholds. Status shows the hp band phrase only on hp. The status line
 shows only the condition pools hp, ma and mv, with their band tones; pennies and any other count
