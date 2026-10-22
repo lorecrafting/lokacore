@@ -7,7 +7,6 @@ import { expect, type JsonValue, type TestFixtures } from 'e2e';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { go } from '../tests/steps.ts';
 import { LABEL } from '../book/labels.ts';
-import { type } from '../book/tokens.ts';
 
 type Fixtures = Pick<TestFixtures, 'app' | 'screen'> & { browser: Browser };
 export type Screen = Fixtures['screen'];
@@ -59,8 +58,8 @@ type Live = {
 
 // In the page, in one turn: the live GameView the Book draws (App.tsx keeps the session on
 // globalThis), its offer labels' texts, and the top page's visible button names and text lines;
-// notes are the lines not in the event log's type size (tokens.ts type.log).
-const live = (logSize: number): Live => {
+// notes are the lines outside the event log (lines.tsx LogLines).
+const live = (): Live => {
   const shown = (selector: string) =>
     [...document.querySelectorAll(selector)].filter(
       (e) => e.checkVisibility() && !e.closest('[aria-hidden="true"]'),
@@ -81,7 +80,7 @@ const live = (logSize: number): Live => {
     buttons: shown('[role="button"]').map((b) => b.getAttribute('aria-label') ?? ''),
     lines: lines.map((e) => e.textContent ?? ''),
     notes: lines
-      .filter((e) => getComputedStyle(e).fontSize !== `${logSize}px`)
+      .filter((e) => !e.closest('[data-testid="log-lines"]'))
       .map((e) => e.textContent ?? ''),
   };
 };
@@ -221,7 +220,7 @@ function recorder(route: string, title: string, { app, screen, browser }: Fixtur
   const room = async () => {
     for (let read = 1; ; read++) {
       await settle();
-      const { problems, seen } = roomDrawn(await browser.evaluate(live, type.log.fontSize));
+      const { problems, seen } = roomDrawn(await browser.evaluate(live));
       if (!problems.length) return console.log(`walk room: ${seen}`);
       if (read === 4) throw new Error(`walk room page: ${problems.join('; ')}`);
     }
