@@ -5,9 +5,9 @@ import { loadCartridge } from '../src/content/cartridge.ts';
 import { INSTALLED } from '../src/runtime/world.ts';
 import { read } from './read.ts';
 
-const ID = 'ashmere_items@0.0.1';
+const ID = 'items_sampler@0.0.1';
 const ref = (kind: string, key: string) => ({
-  cartridge_id: 'ashmere_items',
+  cartridge_id: 'items_sampler',
   cartridge_version: '0.0.1',
   kind,
   key,

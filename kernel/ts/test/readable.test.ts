@@ -208,7 +208,7 @@ test('a running scene suppresses Read even with readable content present', () =>
     factDefaults: {
       ...w.factDefaults,
       [key({
-        cartridge_id: 'ashmere_scene',
+        cartridge_id: 'scene_sampler',
         cartridge_version: '0.0.1',
         kind: 'fact',
         key: 'scene_bell_rung',

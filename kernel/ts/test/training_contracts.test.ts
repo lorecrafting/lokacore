@@ -5,7 +5,7 @@ import { loadCartridge, INSTALLED } from '../src/index.ts';
 import { trainingBundle, productionBundle, bundleOf } from './training_fixture.ts';
 const c = JSON.parse(trainingBundle().canonical);
 const ref = (kind: string, key: string) => ({
-  cartridge_id: 'ashmere_sampler',
+  cartridge_id: 'cellar_sampler',
   cartridge_version: '0.0.9',
   kind,
   key,
@@ -82,7 +82,7 @@ test('new typed contracts require independent fields and reject boundary values'
         lesson_payment: { ...choice.lesson_payment, amount },
       }).length,
     );
-  const item = c.items['ashmere_sampler@0.0.9:item/shield'];
+  const item = c.items['cellar_sampler@0.0.9:item/shield'];
   for (const block_chance of [-1, 101, 1.5])
     assert.ok(validate('ItemDefinition', { ...item, block_chance }).length);
   const p = {
@@ -101,30 +101,30 @@ test('new typed contracts require independent fields and reject boundary values'
 test('skill loader owns reserved acquisition, qualifications, teacher funding and real equipment shapes', () => {
   assert.ok(load(c).ok);
   const mutants: ((c: any) => void)[] = [
-    (c) => delete c.facts['ashmere_sampler@0.0.9:fact/skill_swords'],
-    (c) => (c.facts['ashmere_sampler@0.0.9:fact/skill_swords'].value_type.default = true),
+    (c) => delete c.facts['cellar_sampler@0.0.9:fact/skill_swords'],
+    (c) => (c.facts['cellar_sampler@0.0.9:fact/skill_swords'].value_type.default = true),
     (c) =>
-      (c.skills['ashmere_sampler@0.0.9:skill/swords'].qualification.root.attribute = ref(
+      (c.skills['cellar_sampler@0.0.9:skill/swords'].qualification.root.attribute = ref(
         'attribute',
         'missing',
       )),
-    (c) => (c.items['ashmere_sampler@0.0.9:item/sword'].slot = 'off_hand'),
-    (c) => (c.items['ashmere_sampler@0.0.9:item/shield'].slot = 'wield'),
-    (c) => (c.items['ashmere_sampler@0.0.9:item/sword'].weapon.attack.damage_min = 4),
-    (c) => (c.items['ashmere_sampler@0.0.9:item/sword'].weapon.skill = ref('skill', 'missing')),
+    (c) => (c.items['cellar_sampler@0.0.9:item/sword'].slot = 'off_hand'),
+    (c) => (c.items['cellar_sampler@0.0.9:item/shield'].slot = 'wield'),
+    (c) => (c.items['cellar_sampler@0.0.9:item/sword'].weapon.attack.damage_min = 4),
+    (c) => (c.items['cellar_sampler@0.0.9:item/sword'].weapon.skill = ref('skill', 'missing')),
     (c) => delete c.world.combat.narration.block,
-    (c) => delete c.npcs['ashmere_sampler@0.0.9:npc/teacher'].resource_starts,
+    (c) => delete c.npcs['cellar_sampler@0.0.9:npc/teacher'].resource_starts,
     (c) => {
-      const lesson = c.dialogues['ashmere_sampler@0.0.9:dialogue/learn_swords'];
+      const lesson = c.dialogues['cellar_sampler@0.0.9:dialogue/learn_swords'];
       delete lesson.choices.learn.lesson_payment;
       lesson.roles = {};
     },
     (c) =>
-      (c.dialogues['ashmere_sampler@0.0.9:dialogue/learn_swords'].choices.learn.sequence = [
+      (c.dialogues['cellar_sampler@0.0.9:dialogue/learn_swords'].choices.learn.sequence = [
         { op: 'fact.assign', fact: ref('fact', 'skill_swords'), value: true },
       ]),
     (c) => {
-      const learn = c.dialogues['ashmere_sampler@0.0.9:dialogue/learn_swords'].choices.learn;
+      const learn = c.dialogues['cellar_sampler@0.0.9:dialogue/learn_swords'].choices.learn;
       learn.sequence = [...learn.sequence, ...learn.sequence];
     },
   ];

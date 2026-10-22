@@ -3,7 +3,7 @@ defmodule Loka.ContentLiquidsTest do
   @moduletag :tmp_dir
 
   defp source(dir) do
-    File.cp_r!("cartridges/ashmere_items", dir)
+    File.cp_r!("cartridges/items_sampler", dir)
 
     update(dir, "cartridge.json", fn m ->
       m
@@ -58,22 +58,22 @@ defmodule Loka.ContentLiquidsTest do
     c = JSON.decode!(bytes)["cartridge"]
 
     ref = %{
-      "cartridge_id" => "ashmere_items",
+      "cartridge_id" => "items_sampler",
       "cartridge_version" => "0.0.1",
       "kind" => "liquid",
       "key" => "water"
     }
 
-    assert c["items"]["ashmere_items@0.0.1:item/lantern"]["vessel"]["initial"] == %{
+    assert c["items"]["items_sampler@0.0.1:item/lantern"]["vessel"]["initial"] == %{
              "kind" => ref,
              "quantity" => 2
            }
 
-    assert c["rooms"]["ashmere_items@0.0.1:room/ferry_landing"]["details"]["mooring_post"][
+    assert c["rooms"]["items_sampler@0.0.1:room/ferry_landing"]["details"]["mooring_post"][
              "liquid_source"
            ] == ref
 
-    assert c["liquids"]["ashmere_items@0.0.1:liquid/water"]["grams_per_unit"] == 250
+    assert c["liquids"]["items_sampler@0.0.1:liquid/water"]["grams_per_unit"] == 250
     update(dir, "items/lantern.json", &put_in(&1, ["vessel", "initial", "kind"], ref))
 
     update(
@@ -98,7 +98,7 @@ defmodule Loka.ContentLiquidsTest do
     )
 
     assert {:ok, _, []} = Loka.Content.compile(dir)
-    assert {:ok, old, []} = Loka.Content.compile("cartridges/ashmere_items")
+    assert {:ok, old, []} = Loka.Content.compile("cartridges/items_sampler")
     refute Map.has_key?(JSON.decode!(old)["cartridge"], "liquids")
   end
 
