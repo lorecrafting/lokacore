@@ -315,6 +315,8 @@ polish stage which needs me at the computer for a bit."
 - 2026-10-22 (quoted): "go ahead" on the PM plan: build loka-kgd.191 (save path; review + second opinion) and
   loka-59uu after the gate batch merges; an Opus designer drafts rulings for loka-p2ey, loka-z2j2, loka-x6t.85 (owner
   answers in the polish session; nothing changes in the Book until then).
+- 2026-10-22 (quoted): "okay go with all your recommendations" on the drafts: loka-p2ey yes, loka-z2j2 yes (Bleeding exempt),
+  loka-x6t.85 option A. One batch after the gate batch: Sonnet for the two label sweeps, Opus for the specs page.
 
 - 2026-10-21 (session c5ed3619, quoted): NPC statuses "Line now, page later (Recommended)"; worldbuilding "Lets take over
   thr worldbuilding maybe spin off a subagent to clean it up and comit" (done, #420); retro "ok approve".
