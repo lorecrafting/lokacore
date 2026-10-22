@@ -16,7 +16,8 @@ const unbounded = (c: any) => {
 const solved = (w: World) => value(w, w.character, ref('fact', 'riddle_solved'));
 
 // Breaks: a malformed answer counts, a wrong answer is not counted, the limit does not close the
-// sitting (or closes the quest), or a new sitting keeps the old count or spends time.
+// sitting (or closes the quest), a new sitting keeps the old count or spends time, or the
+// correct answer does not resolve the quest exactly once.
 test('only bank-valid wrong answers count and the third closes only the sitting with immediate reset', () => {
   const r = runner();
   r.start();
@@ -36,6 +37,10 @@ test('only bank-valid wrong answers count and the third closes only the sitting 
   assert.notEqual(r.view().choice!.continuation_id, opened);
   assert.deepEqual(r.view().choice!.riddle!.attempts, { count: 0, limit: 3 });
   assert.equal(r.view().time, clock);
+  r.run({ type: 'take', item_id: entity(r.world(), 'item', 'lantern') });
+  const correct = r.choose('answer', 'TIDE');
+  assert.equal(correct.events.filter((e) => e.payload.type === 'quest_resolved').length, 1);
+  assert.equal(r.view().journal.find((q) => q.quest.key === 'lantern')!.state, 'resolved');
 });
 
 // Breaks: comparison/assignment is missing, wrong answers consume the continuation, or banks allow
