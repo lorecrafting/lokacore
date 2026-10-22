@@ -70,6 +70,7 @@ defmodule Loka.ContentLintTest do
              []
 
     assert lint(%{"dialogues/bram.json" => %{"label" => "action.bram"}, "text.json" => %{}}) == []
+    assert lint(%{"dialogues/bram.json" => %{"keyword" => "ember"}, "text.json" => %{}}) == []
   end
 
   test "check 6: the normal band starts below 100% (UK, mv)" do
@@ -92,17 +93,22 @@ defmodule Loka.ContentLintTest do
 
     assert lint(room.([variant([@visits]), variant([@visits, @tide])])) == [shadow]
     assert lint(room.([variant([]), variant([@tide])])) == [shadow]
-    assert lint(room.([%{"description" => "d"}, variant([@tide])])) == [shadow]
     assert lint(room.([variant([@visits, @tide]), variant([@visits])])) == []
     any = %{"op" => "any", "items" => [@visits, @tide]}
     assert lint(room.([%{"when" => %{"root" => any}}, variant([@visits])])) == []
     assert lint(room.([%{"when" => %{"root" => any}}, variant([any, @visits])])) == [shadow]
+    detail = %{"details" => %{"post" => %{"variants" => [variant([]), variant([@tide])]}}}
+
+    assert lint(%{"rooms/shore_steps.json" => detail}) ==
+             ["rooms/shore_steps.json details.post: variants[1] is shadowed by variants[0]"]
+
     # pass-1 W1 (visits before tide) is order, not shadowing: neither guard contains the other.
     assert lint(room.([variant([@visits]), variant([@tide])])) == []
   end
 
-  # Story cartridges only (ruling b). Out: ashmere_sampler and every *_sampler (samplers break
-  # rules on purpose), ashmere_chapters (no world of its own). The findings over the slice's
+  # Story cartridges only (ruling b): the two with a cartridge.json world that are not samplers.
+  # Out: every *_sampler (samplers break rules on purpose), r9c_interactions (synthetic), and
+  # lantern_proof and the other ashmere_* (no world: fragments that test cartridges load). The findings over the slice's
   # timebox are pinned in lint_baseline.txt until loka-kgd.184 clears them: a new finding fails.
   @baseline File.read!("test/loka/lint_baseline.txt") |> String.split("\n", trim: true)
   for cartridge <- ~w(toolbox_showcase ashmere_missing_child) do

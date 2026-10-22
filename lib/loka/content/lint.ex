@@ -50,7 +50,12 @@ defmodule Loka.Content.Lint do
           !is_map_key(r, "title"),
           do: "#{rel}: readable details.#{key} has no title"
 
-    titles ++ shadowed(rel, room["variants"] || [])
+    details =
+      for {key, d} <- Enum.sort(room["details"] || %{}),
+          f <- shadowed("#{rel} details.#{key}", d["variants"] || []),
+          do: f
+
+    titles ++ shadowed(rel, room["variants"] || []) ++ details
   end
 
   defp file(["resources.json"], rel, %{"resources" => rs}),
@@ -86,13 +91,14 @@ defmodule Loka.Content.Lint do
 
   defp conds(%{"when" => %{"root" => %{"op" => "all", "items" => items}}}), do: items
   defp conds(%{"when" => %{"root" => root}}), do: [root]
-  defp conds(_), do: []
 
-  # A dialogue without its own label is offered as the kernel's default action.talk (UH).
+  # A dialogue with no label of its own is offered as the kernel's default action.talk (UH);
+  # a keyword dialogue (speech@1) is spoken, not offered.
   defp talk(files, text) do
     bare? =
       Enum.any?(files, fn {rel, d} ->
-        String.starts_with?(rel, "dialogues/") and !is_map_key(d, "label")
+        String.starts_with?(rel, "dialogues/") and !is_map_key(d, "label") and
+          !is_map_key(d, "keyword")
       end)
 
     if bare? and text["action.talk"] in [nil, ""],
