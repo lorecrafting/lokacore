@@ -7,7 +7,7 @@ import { book, bundle } from '../book/__tests__/polish-book.test.ts';
 import { openGame } from '../../authority/local-story/session.ts';
 import { routes, checkpoints, type Harness } from './routes.ts';
 
-const cartridge = bundle('missing_child_v042_hash');
+const cartridge = bundle('toolbox_showcase_hash');
 // Counted v4-shaped ids: the same route writes the same rows.
 export const seeded = () => {
   let n = 0;

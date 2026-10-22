@@ -1,5 +1,5 @@
 // Page: one shell for every page (BOOK-UI-COMPONENTS.md, Page); RunningHead above it, as Body.tsx
-// draws it. Journal texts are Chapter 1's own (protocol/fixtures/missing_child_v042_hash.json).
+// draws it. Journal texts are the showcase's own (protocol/fixtures/toolbox_showcase_hash.json).
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import type { ComponentProps } from 'react';
 import { Text, View } from 'react-native';
@@ -58,12 +58,12 @@ export const WithRunningHead: Story = {
       { state: 'resolved', journal: 'quest.bell.prior' },
       {
         state: 'active',
-        journal: 'Climb from Chapel Nave through Bell Tower to the Belfry and ring the bell.',
+        journal: 'Take the Reeve’s letter to Wat on the fell.',
       },
     ] as Quest[],
   },
   play: async ({ canvas }) => {
-    await expect(canvas.getByText(/^Climb from Chapel Nave/)).toBeVisible();
+    await expect(canvas.getByText(/^Take the Reeve/)).toBeVisible();
     await expect(canvas.getByRole('heading', { name: 'Settings' })).toBeVisible();
   },
 };
@@ -74,7 +74,7 @@ export const LongRunningHead: Story = {
       {
         state: 'objectives_complete',
         journal:
-          'Carry Peg’s ledger directly to Aldric at the Chapel Nave before the third day at six. Payment is due only by the second day at six.',
+          'Carry the Reeve’s letter directly to Wat at his hut on the fell before the third day at six. Payment is due only by the second day at six.',
       },
     ] as Quest[],
   },

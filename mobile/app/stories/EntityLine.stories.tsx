@@ -66,7 +66,7 @@ export const Run: Story = {
   render: (args) => (
     <View>
       <EntityLine name="Bram the ferryman" rest=" is here." onPress={fn()} />
-      <EntityLine name="Elspeth" rest=" is here." onPress={args.onPress} />
+      <EntityLine name="Nell" rest=" is here." onPress={args.onPress} />
       <EntityLine name="A brass lantern" rest=" lies here." note="It is unlit." onPress={fn()} />
     </View>
   ),

@@ -25,8 +25,8 @@ export default meta;
 
 export const FirstRoom: StoryObj = {
   ...pageStory(RoomFirstView, undefined, [
-    'room.ferry_landing.title',
-    'room.ferry_landing.description',
+    'room.crossroads_inn.title',
+    'room.crossroads_inn.description',
   ]),
   name: 'First room',
   // At launch no title takes focus, so no ring before keyboard use (BOOK-UI-COMPONENTS.md Focus).
@@ -37,10 +37,10 @@ export const FirstRoom: StoryObj = {
 export const Reworded: StoryObj = {
   ...pageStory(RoomFirstView),
   name: 'Reworded',
-  args: { words: { 'room.ferry_landing.description': 'A reworded landing, set in the panel.' } },
+  args: { words: { 'room.crossroads_inn.description': 'A reworded inn, set in the panel.' } },
   play: async ({ canvas }) => {
-    await expect(await canvas.findByText('A reworded landing, set in the panel.')).toBeVisible();
-    await expect(canvas.queryByText(/Reeds crowd/)).toBeNull();
+    await expect(await canvas.findByText('A reworded inn, set in the panel.')).toBeVisible();
+    await expect(canvas.queryByText(/A low inn/)).toBeNull();
   },
 };
 export const NpcsAndItems: StoryObj = { ...pageStory(RoomNpcsItemsView), name: 'NPCs and items' };
@@ -104,7 +104,7 @@ export const Asides: StoryObj = {
   play: async ({ canvas }) => {
     const aside = await canvas.findByText(voices['aside.hall.lore']);
     await expect(aside).toBeVisible();
-    const prose = canvas.getByText(/Reeds crowd/);
+    const prose = canvas.getByText(/A low inn/);
     await expect(
       prose.compareDocumentPosition(aside) & Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();
@@ -120,7 +120,7 @@ export const CompanionRemark: StoryObj = {
       ...RoomNpcsItemsView.view,
       entities: RoomNpcsItemsView.view.entities
         .map((e) => (e.kind === 'npc' ? { ...e, asides: [{ key: 'remark.hal.first' }] } : e))
-        .slice(0, 2),
+        .slice(0, 3),
     },
   }),
   args: { words: { 'remark.hal.first': remarks['remark.hal.first'] } },
@@ -128,7 +128,7 @@ export const CompanionRemark: StoryObj = {
   play: async ({ canvas }) => {
     const remark = await canvas.findByText(remarks['remark.hal.first']);
     await expect(remark).toBeVisible();
-    const item = canvas.getByText(/fox drawing/);
+    const item = canvas.getByText(/apple/);
     await expect(
       remark.compareDocumentPosition(item) & Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();

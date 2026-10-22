@@ -4,228 +4,362 @@
   "map": {
    "rooms": [
     {
-     "id": "0f5f2329-bcff-82f4-948a-3d22a75fb068",
-     "title": "room.chandler.title",
-     "x": -2,
-     "y": -2,
-     "z": 0
-    },
-    {
-     "id": "4ab97506-6638-89ed-92ba-1dd9267d590b",
-     "title": "room.well_lane.title",
-     "x": 0,
-     "y": -2,
-     "z": 0
-    },
-    {
-     "id": "58ee172d-aa6f-8023-a3c1-a1d46af6d167",
-     "title": "room.ferry_landing.title",
+     "id": "470b4175-5b92-89c1-bdac-645a128dc72f",
+     "title": "room.crossroads_inn.title",
      "x": 0,
      "y": 0,
+     "z": 0
+    },
+    {
+     "id": "58cfbca8-0448-8e2e-af98-49d0a71d1a04",
+     "title": "room.farm_yard.title",
+     "x": -4,
+     "y": 0,
+     "z": 0
+    },
+    {
+     "id": "71697171-efcc-8028-9a88-60b32e4a73ad",
+     "title": "room.holding_lane.title",
+     "x": -4,
+     "y": -1,
+     "z": 0
+    },
+    {
+     "id": "f14e477f-cecc-897a-bee7-c573aa5c76c3",
+     "title": "room.fell_gate.title",
+     "x": 0,
+     "y": -1,
      "z": 0
     }
    ],
    "links": [
     {
-     "from": "0f5f2329-bcff-82f4-948a-3d22a75fb068",
-     "to": "4ab97506-6638-89ed-92ba-1dd9267d590b",
+     "from": "470b4175-5b92-89c1-bdac-645a128dc72f",
+     "to": "f14e477f-cecc-897a-bee7-c573aa5c76c3",
+     "direction": "north"
+    },
+    {
+     "from": "58cfbca8-0448-8e2e-af98-49d0a71d1a04",
+     "to": "71697171-efcc-8028-9a88-60b32e4a73ad",
+     "direction": "north"
+    },
+    {
+     "from": "71697171-efcc-8028-9a88-60b32e4a73ad",
+     "to": "f14e477f-cecc-897a-bee7-c573aa5c76c3",
      "direction": "east"
     },
     {
-     "from": "4ab97506-6638-89ed-92ba-1dd9267d590b",
-     "to": "58ee172d-aa6f-8023-a3c1-a1d46af6d167",
+     "from": "71697171-efcc-8028-9a88-60b32e4a73ad",
+     "to": "58cfbca8-0448-8e2e-af98-49d0a71d1a04",
      "direction": "south"
     },
     {
-     "from": "4ab97506-6638-89ed-92ba-1dd9267d590b",
-     "to": "0f5f2329-bcff-82f4-948a-3d22a75fb068",
-     "direction": "west"
+     "from": "f14e477f-cecc-897a-bee7-c573aa5c76c3",
+     "to": "470b4175-5b92-89c1-bdac-645a128dc72f",
+     "direction": "south"
     },
     {
-     "from": "58ee172d-aa6f-8023-a3c1-a1d46af6d167",
-     "to": "4ab97506-6638-89ed-92ba-1dd9267d590b",
-     "direction": "north"
+     "from": "f14e477f-cecc-897a-bee7-c573aa5c76c3",
+     "to": "71697171-efcc-8028-9a88-60b32e4a73ad",
+     "direction": "west"
     }
    ]
   },
   "known_npcs": [
    {
-    "id": "bea306fb-2b58-847c-a4e0-045f9d13b739",
-    "name": "npc.peg.short"
+    "id": "00a60498-0ca6-8137-8172-7101d3767e0c",
+    "name": "npc.farmer.short"
    },
    {
-    "id": "ee88876f-e173-89bf-b354-fa9b2ddb3f0b",
-    "name": "npc.elspeth.short"
+    "id": "84fd3cbf-5a89-8680-bea7-cf44e790ff8c",
+    "name": "npc.hob.short"
    }
   ],
+  "levelling": {
+   "level": 1,
+   "experience": 0,
+   "next": 30,
+   "unspent": 0
+  },
   "skills": [
    {
     "skill": {
-     "cartridge_id": "ashmere_missing_child",
-     "cartridge_version": "0.0.42",
+     "cartridge_id": "toolbox_showcase",
+     "cartridge_version": "0.0.1",
      "kind": "skill",
-     "key": "bandage"
+     "key": "blade"
     },
-    "label": "skill.bandage.label",
-    "requirement": "skill.bandage.requirement",
+    "label": "skill.blade.label",
+    "requirement": "skill.blade.requirement",
     "acquired": false,
     "qualified": true,
     "usable": false
    },
    {
     "skill": {
-     "cartridge_id": "ashmere_missing_child",
-     "cartridge_version": "0.0.42",
+     "cartridge_id": "toolbox_showcase",
+     "cartridge_version": "0.0.1",
      "kind": "skill",
-     "key": "dodge"
+     "key": "carpentry"
     },
-    "label": "skill.dodge.label",
-    "requirement": "skill.dodge.requirement",
+    "label": "skill.carpentry.label",
+    "requirement": "skill.carpentry.requirement",
     "acquired": false,
     "qualified": true,
-    "usable": false
+    "usable": false,
+    "level": 0,
+    "locked": true,
+    "profession": "profession.forestry"
    },
    {
     "skill": {
-     "cartridge_id": "ashmere_missing_child",
-     "cartridge_version": "0.0.42",
+     "cartridge_id": "toolbox_showcase",
+     "cartridge_version": "0.0.1",
      "kind": "skill",
-     "key": "haggle"
+     "key": "carving"
     },
-    "label": "skill.haggle.label",
-    "requirement": "skill.haggle.requirement",
-    "acquired": true,
+    "label": "skill.carving.label",
+    "requirement": "skill.carving.requirement",
+    "acquired": false,
     "qualified": true,
-    "usable": true
+    "usable": false,
+    "level": 0,
+    "locked": true,
+    "profession": "profession.woodcraft"
    },
    {
     "skill": {
-     "cartridge_id": "ashmere_missing_child",
-     "cartridge_version": "0.0.42",
+     "cartridge_id": "toolbox_showcase",
+     "cartridge_version": "0.0.1",
      "kind": "skill",
-     "key": "herbalism"
+     "key": "cooking"
     },
-    "label": "skill.herbalism.label",
-    "requirement": "skill.herbalism.requirement",
+    "label": "skill.cooking.label",
+    "requirement": "skill.cooking.requirement",
     "acquired": false,
     "qualified": true,
-    "usable": false
+    "usable": false,
+    "level": 0,
+    "profession": "profession.kitchen"
    },
    {
     "skill": {
-     "cartridge_id": "ashmere_missing_child",
-     "cartridge_version": "0.0.42",
+     "cartridge_id": "toolbox_showcase",
+     "cartridge_version": "0.0.1",
      "kind": "skill",
-     "key": "swim"
+     "key": "disarm"
     },
-    "label": "skill.swim.label",
-    "requirement": "skill.swim.requirement",
+    "label": "skill.disarm.label",
+    "requirement": "skill.disarm.requirement",
     "acquired": false,
     "qualified": true,
-    "usable": false
+    "usable": false,
+    "level": 0
    },
    {
     "skill": {
-     "cartridge_id": "ashmere_missing_child",
-     "cartridge_version": "0.0.42",
+     "cartridge_id": "toolbox_showcase",
+     "cartridge_version": "0.0.1",
      "kind": "skill",
-     "key": "swords"
+     "key": "intimidate"
     },
-    "label": "skill.swords.label",
-    "requirement": "skill.swords.requirement",
+    "label": "skill.intimidate.label",
+    "requirement": "skill.intimidate.requirement",
     "acquired": false,
     "qualified": true,
-    "usable": false
+    "usable": false,
+    "level": 0
+   },
+   {
+    "skill": {
+     "cartridge_id": "toolbox_showcase",
+     "cartridge_version": "0.0.1",
+     "kind": "skill",
+     "key": "pick"
+    },
+    "label": "skill.pick.label",
+    "requirement": "skill.pick.requirement",
+    "acquired": false,
+    "qualified": true,
+    "usable": false,
+    "level": 0
+   },
+   {
+    "skill": {
+     "cartridge_id": "toolbox_showcase",
+     "cartridge_version": "0.0.1",
+     "kind": "skill",
+     "key": "stealth"
+    },
+    "label": "skill.stealth.label",
+    "requirement": "skill.stealth.requirement",
+    "acquired": false,
+    "qualified": true,
+    "usable": false,
+    "level": 0
+   },
+   {
+    "skill": {
+     "cartridge_id": "toolbox_showcase",
+     "cartridge_version": "0.0.1",
+     "kind": "skill",
+     "key": "whittling"
+    },
+    "label": "skill.whittling.label",
+    "requirement": "skill.whittling.requirement",
+    "acquired": false,
+    "qualified": true,
+    "usable": false,
+    "level": 0,
+    "profession": "profession.woodcraft"
+   },
+   {
+    "skill": {
+     "cartridge_id": "toolbox_showcase",
+     "cartridge_version": "0.0.1",
+     "kind": "skill",
+     "key": "woodcutting"
+    },
+    "label": "skill.woodcutting.label",
+    "requirement": "skill.woodcutting.requirement",
+    "acquired": false,
+    "qualified": true,
+    "usable": false,
+    "level": 0,
+    "profession": "profession.forestry"
    }
   ],
   "attributes": [
    {
     "attribute": {
-     "cartridge_id": "ashmere_missing_child",
-     "cartridge_version": "0.0.42",
+     "cartridge_id": "toolbox_showcase",
+     "cartridge_version": "0.0.1",
      "kind": "attribute",
-     "key": "con"
+     "key": "alertness"
     },
-    "value": 10
+    "value": 0
    },
    {
     "attribute": {
-     "cartridge_id": "ashmere_missing_child",
-     "cartridge_version": "0.0.42",
+     "cartridge_id": "toolbox_showcase",
+     "cartridge_version": "0.0.1",
+     "kind": "attribute",
+     "key": "cha"
+    },
+    "value": 6
+   },
+   {
+    "attribute": {
+     "cartridge_id": "toolbox_showcase",
+     "cartridge_version": "0.0.1",
      "kind": "attribute",
      "key": "dex"
     },
-    "value": 11
-   },
-   {
-    "attribute": {
-     "cartridge_id": "ashmere_missing_child",
-     "cartridge_version": "0.0.42",
-     "kind": "attribute",
-     "key": "int"
-    },
     "value": 10
    },
    {
     "attribute": {
-     "cartridge_id": "ashmere_missing_child",
-     "cartridge_version": "0.0.42",
-     "kind": "attribute",
-     "key": "per"
-    },
-    "value": 5
-   },
-   {
-    "attribute": {
-     "cartridge_id": "ashmere_missing_child",
-     "cartridge_version": "0.0.42",
-     "kind": "attribute",
-     "key": "spi"
-    },
-    "value": 10
-   },
-   {
-    "attribute": {
-     "cartridge_id": "ashmere_missing_child",
-     "cartridge_version": "0.0.42",
+     "cartridge_id": "toolbox_showcase",
+     "cartridge_version": "0.0.1",
      "kind": "attribute",
      "key": "str"
     },
     "value": 10
    }
   ],
-  "ancestry": "road_born",
   "topics": [],
   "place": {
-   "id": "0f5f2329-bcff-82f4-948a-3d22a75fb068",
+   "id": "58cfbca8-0448-8e2e-af98-49d0a71d1a04",
    "title": {
-    "key": "room.chandler.title"
+    "key": "room.farm_yard.title"
    },
    "description": {
-    "key": "room.chandler.description"
+    "key": "room.farm_yard.description"
    }
   },
   "exits": [
    {
     "available": true,
-    "direction": "down",
+    "direction": "east",
     "sight": {
-     "room": "d530207e-b845-8be5-9d53-b44b2cf5d8a1",
-     "title": "room.chandler_storeroom.title",
+     "room": "7d88a524-5246-885e-a937-f6be4219ad48",
+     "title": "room.pond.title",
+     "entities": [
+      {
+       "id": "0b3ebcd4-4cc4-8913-aeb9-7e9def688005",
+       "name": "item.pond_water.short",
+       "kind": "item"
+      },
+      {
+       "id": "bc13b805-57dc-8d94-86db-65d89f134ad4",
+       "name": "item.rod.short",
+       "kind": "item"
+      }
+     ]
+    }
+   },
+   {
+    "available": true,
+    "direction": "north",
+    "sight": {
+     "room": "71697171-efcc-8028-9a88-60b32e4a73ad",
+     "title": "room.holding_lane.title",
      "entities": []
     }
    },
    {
     "available": true,
-    "direction": "east",
+    "direction": "south",
     "sight": {
-     "room": "4ab97506-6638-89ed-92ba-1dd9267d590b",
-     "title": "room.well_lane.title",
-     "entities": []
+     "room": "b0711280-2a6c-8b4e-844c-3e902e0c2184",
+     "title": "room.farm_kitchen.title",
+     "entities": [
+      {
+       "id": "6c939a35-4efc-8a5c-8bc7-00f4c42bdfc2",
+       "name": "npc.cook.short",
+       "kind": "npc"
+      }
+     ]
+    }
+   },
+   {
+    "available": true,
+    "direction": "west",
+    "sight": {
+     "room": "2603d738-5a68-83d2-93fe-8e50819f9741",
+     "title": "room.glade.title",
+     "entities": [
+      {
+       "id": "8cc7de14-8a90-8e87-86ec-1c743f77e9ee",
+       "name": "item.pelt_01.short",
+       "kind": "item"
+      },
+      {
+       "id": "5bf18294-67a8-81c3-b59c-296b88fad837",
+       "name": "item.pelt_02.short",
+       "kind": "item"
+      },
+      {
+       "id": "a43af65e-41c7-895b-ac08-3360dac98cc2",
+       "name": "item.pelt_03.short",
+       "kind": "item"
+      }
+     ]
     }
    }
   ],
   "actions": [
+   {
+    "available": true,
+    "action_key": "cast",
+    "label": "action.cast",
+    "target": {
+     "kind": "none"
+    },
+    "input": [
+     "word"
+    ]
+   },
    {
     "available": true,
     "action_key": "look",
@@ -257,12 +391,34 @@
    },
    {
     "available": true,
+    "action_key": "say",
+    "label": "action.say",
+    "target": {
+     "kind": "none"
+    },
+    "input": [
+     "word"
+    ]
+   },
+   {
+    "available": true,
     "action_key": "scan",
     "label": "action.scan",
     "target": {
      "kind": "none"
     },
     "input": []
+   },
+   {
+    "available": true,
+    "action_key": "shout",
+    "label": "action.shout",
+    "target": {
+     "kind": "none"
+    },
+    "input": [
+     "word"
+    ]
    },
    {
     "available": true,
@@ -285,138 +441,188 @@
   ],
   "entities": [
    {
-    "id": "bea306fb-2b58-847c-a4e0-045f9d13b739",
-    "name": "npc.peg.short",
-    "description": "npc.peg.description",
+    "id": "00a60498-0ca6-8137-8172-7101d3767e0c",
+    "name": "npc.farmer.short",
+    "description": "npc.farmer.description",
     "kind": "npc",
     "actions": [
      {
       "available": true,
-      "action_key": "a_peg_debt",
-      "label": "action.talk",
+      "action_key": "whisper",
+      "label": "action.whisper",
       "target": {
        "kind": "entity",
        "scopes": [
         "room_occupants"
        ]
       },
-      "input": []
-     },
-     {
-      "available": false,
-      "action_key": "peg_haggle",
-      "label": "peg.haggle.choice",
-      "target": {
-       "kind": "entity",
-       "scopes": [
-        "room_occupants"
-       ]
-      },
-      "input": [],
-      "reason": {
-       "code": "invalid_state"
-      }
+      "input": [
+       "word"
+      ]
      }
     ],
-    "shop": [
+    "services": [
      {
-      "item_id": "b8ae5599-3dd8-86ef-968d-8c22d9b3fe56",
-      "name": "item.torch.short",
-      "buy": {
-       "price": 2,
-       "available": false,
-       "reason": "not_owned"
+      "service": {
+       "cartridge_id": "toolbox_showcase",
+       "cartridge_version": "0.0.1",
+       "key": "knife_for_pelts",
+       "kind": "service"
       },
-      "sell": {
-       "price": 1,
+      "label": "service.knife_for_pelts",
+      "price": 0,
+      "benefit": {
+       "escrow": {
+        "custody": {
+         "cartridge_id": "toolbox_showcase",
+         "cartridge_version": "0.0.1",
+         "key": "stall",
+         "kind": "room"
+        },
+        "items": [
+         {
+          "cartridge_id": "toolbox_showcase",
+          "cartridge_version": "0.0.1",
+          "key": "pelt_01",
+          "kind": "item"
+         },
+         {
+          "cartridge_id": "toolbox_showcase",
+          "cartridge_version": "0.0.1",
+          "key": "pelt_02",
+          "kind": "item"
+         },
+         {
+          "cartridge_id": "toolbox_showcase",
+          "cartridge_version": "0.0.1",
+          "key": "pelt_03",
+          "kind": "item"
+         }
+        ],
+        "output": {
+         "cartridge_id": "toolbox_showcase",
+         "cartridge_version": "0.0.1",
+         "key": "knife_01",
+         "kind": "item"
+        },
+        "quantity": 2
+       },
+       "fact": {
+        "cartridge_id": "toolbox_showcase",
+        "cartridge_version": "0.0.1",
+        "key": "traded_knife",
+        "kind": "fact"
+       },
+       "kind": "entitlement"
+      },
+      "action": {
+       "action_key": "barter",
+       "command": "use_service",
+       "label": "service.knife_for_pelts",
+       "target": {
+        "kind": "entity",
+        "scopes": [
+         "room_occupants"
+        ]
+       },
+       "input": [
+        "service",
+        "quoted_price"
+       ],
+       "target_ids": [
+        "00a60498-0ca6-8137-8172-7101d3767e0c"
+       ],
        "available": false,
-       "reason": "not_owned"
+       "reason": {
+        "code": "not_owned",
+        "message": {
+         "key": "service.missing_inputs"
+        }
+       }
       }
      },
      {
-      "item_id": "619363b4-697f-8e0d-ae4a-5208a285a460",
-      "name": "item.lamp_oil.short",
-      "buy": {
-       "price": 1,
-       "available": true
+      "service": {
+       "cartridge_id": "toolbox_showcase",
+       "cartridge_version": "0.0.1",
+       "key": "buy_plot",
+       "kind": "service"
       },
-      "sell": {
-       "price": 1,
-       "available": false,
-       "reason": "not_owned"
+      "label": "service.buy_plot",
+      "price": 3,
+      "benefit": {
+       "fact": {
+        "cartridge_id": "toolbox_showcase",
+        "cartridge_version": "0.0.1",
+        "key": "owns_plot",
+        "kind": "fact"
+       },
+       "kind": "entitlement"
+      },
+      "action": {
+       "action_key": "buy_plot",
+       "command": "use_service",
+       "label": "service.buy_plot",
+       "target": {
+        "kind": "entity",
+        "scopes": [
+         "room_occupants"
+        ]
+       },
+       "input": [
+        "service",
+        "quoted_price"
+       ],
+       "target_ids": [
+        "00a60498-0ca6-8137-8172-7101d3767e0c"
+       ],
+       "available": true
       }
      },
      {
-      "item_id": "c02e04c1-54a8-850e-ac17-20b61b7c9630",
-      "name": "item.waterskin.short",
-      "buy": {
-       "price": 3,
-       "available": true
+      "service": {
+       "cartridge_id": "toolbox_showcase",
+       "cartridge_version": "0.0.1",
+       "key": "buy_pen",
+       "kind": "service"
       },
-      "sell": {
-       "price": 2,
-       "available": false,
-       "reason": "not_owned"
-      }
-     },
-     {
-      "item_id": "48a8dc05-4012-86d8-9d24-e68f2d7317ac",
-      "name": "item.satchel.short",
-      "buy": {
-       "price": 4,
-       "available": false,
-       "reason": "not_owned"
+      "label": "service.buy_pen",
+      "price": 3,
+      "benefit": {
+       "fact": {
+        "cartridge_id": "toolbox_showcase",
+        "cartridge_version": "0.0.1",
+        "key": "owns_pen",
+        "kind": "fact"
+       },
+       "kind": "entitlement"
       },
-      "sell": {
-       "price": 2,
+      "action": {
+       "action_key": "buy_pen",
+       "command": "use_service",
+       "label": "service.buy_pen",
+       "target": {
+        "kind": "entity",
+        "scopes": [
+         "room_occupants"
+        ]
+       },
+       "input": [
+        "service",
+        "quoted_price"
+       ],
+       "target_ids": [
+        "00a60498-0ca6-8137-8172-7101d3767e0c"
+       ],
        "available": true
-      }
-     },
-     {
-      "item_id": "63441f36-3a9b-8b10-9acd-43f4b5e634c7",
-      "name": "item.iron_sword.short",
-      "buy": {
-       "price": 7,
-       "available": true
-      },
-      "sell": {
-       "price": 4,
-       "available": false,
-       "reason": "not_owned"
-      }
-     },
-     {
-      "item_id": "ab0ecc27-da55-8e79-a207-6e4cb55436c9",
-      "name": "item.wooden_shield.short",
-      "buy": {
-       "price": 3,
-       "available": true
-      },
-      "sell": {
-       "price": 2,
-       "available": false,
-       "reason": "not_owned"
-      }
-     },
-     {
-      "item_id": "30c00822-6fb5-833d-a05e-7787134bea59",
-      "name": "item.spare_waterskin.short",
-      "buy": {
-       "price": 3,
-       "available": true
-      },
-      "sell": {
-       "price": 2,
-       "available": false,
-       "reason": "not_owned"
       }
      }
     ]
    },
    {
-    "id": "8cbac3ab-b59e-823a-90ae-6f7935e3b763",
-    "name": "item.leather_boots.short",
-    "description": "item.leather_boots.description",
+    "id": "b525e0c4-feac-80dd-9498-43e0c4164e5f",
+    "name": "item.dead_rat.short",
+    "description": "item.dead_rat.description",
     "kind": "item",
     "actions": [
      {
@@ -432,51 +638,78 @@
       "input": []
      }
     ]
-   }
-  ],
-  "inventory": [
+   },
    {
-    "id": "48a8dc05-4012-86d8-9d24-e68f2d7317ac",
-    "name": "item.satchel.short",
-    "description": "item.satchel.description",
+    "id": "17ebdbed-759e-8d08-9ef8-f9742608718a",
+    "name": "item.holding_apple.short",
+    "description": "item.holding_apple.description",
     "kind": "item",
     "actions": [
      {
       "available": true,
-      "action_key": "drop",
-      "label": "action.drop",
+      "action_key": "take",
+      "label": "action.take",
       "target": {
        "kind": "entity",
        "scopes": [
-        "inventory"
+        "room_contents"
        ]
       },
       "input": []
-     },
+     }
+    ]
+   },
+   {
+    "id": "bbcf44ff-8b4a-8113-88d7-fdf1821b0432",
+    "name": "item.plot.short",
+    "description": "item.plot.description",
+    "kind": "item",
+    "actions": [
      {
-      "available": true,
-      "action_key": "give",
-      "label": "action.give",
+      "available": false,
+      "action_key": "take",
+      "label": "action.take",
       "target": {
        "kind": "entity",
        "scopes": [
-        "inventory"
+        "room_contents"
        ]
       },
       "input": [],
-      "target_ids": [
-       "48a8dc05-4012-86d8-9d24-e68f2d7317ac",
-       "bea306fb-2b58-847c-a4e0-045f9d13b739"
-      ]
+      "reason": {
+       "code": "permission_denied"
+      }
+     }
+    ]
+   },
+   {
+    "id": "331fb134-17eb-866f-a2fa-57583b9ac017",
+    "name": "item.sack.short",
+    "description": "item.sack.description",
+    "kind": "item",
+    "actions": [
+     {
+      "available": false,
+      "action_key": "take",
+      "label": "action.take",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "room_contents"
+       ]
+      },
+      "input": [],
+      "reason": {
+       "code": "too_heavy"
+      }
      }
     ],
     "contents": [
      {
-      "id": "b8ae5599-3dd8-86ef-968d-8c22d9b3fe56",
-      "name": "item.torch.short",
-      "description": "item.torch.description",
+      "id": "ec6a2b0d-b917-8425-8cac-63c888eed0aa",
+      "name": "item.seed_01.short",
+      "description": "item.seed_01.description",
       "kind": "item",
-      "slot": "light",
       "actions": [
        {
         "available": true,
@@ -491,25 +724,56 @@
         "input": []
        }
       ],
-      "fuel": {
-       "remaining": 7200,
-       "capacity": 7200,
-       "lit": false
-      },
-      "container_id": "48a8dc05-4012-86d8-9d24-e68f2d7317ac"
+      "container_id": "331fb134-17eb-866f-a2fa-57583b9ac017"
      }
     ]
+   },
+   {
+    "id": "c9efb5ea-df51-8e53-a6fb-53b0fabfb73a",
+    "name": "item.watering_can.short",
+    "description": "item.watering_can.description",
+    "kind": "item",
+    "actions": [
+     {
+      "available": true,
+      "action_key": "take",
+      "label": "action.take",
+      "target": {
+       "kind": "entity",
+       "scopes": [
+        "room_contents"
+       ]
+      },
+      "input": []
+     }
+    ],
+    "liquid": {
+     "kind": {
+      "cartridge_id": "toolbox_showcase",
+      "cartridge_version": "0.0.1",
+      "key": "water",
+      "kind": "liquid"
+     },
+     "quantity": 4,
+     "capacity": 4,
+     "unit_label": "liquid.units",
+     "label": "liquid.water"
+    }
    }
   ],
+  "inventory": [],
   "equipment": [
+   {
+    "slot": "body"
+   },
    {
     "slot": "cloak"
    },
    {
-    "slot": "light"
+    "slot": "head"
    },
    {
-    "slot": "off_hand"
+    "slot": "neck"
    },
    {
     "slot": "wield"
@@ -517,23 +781,38 @@
   ],
   "position": "standing",
   "journal": [],
-  "chapter": {
-   "index": 0,
-   "title": "chapter.missing_child"
-  },
-  "time": 64800,
+  "phrases": [
+   "ware",
+   "begone"
+  ],
+  "time": 25200,
   "calendar_status": {
    "day": 1,
-   "hour": 18,
+   "hour": 7,
    "subdivision": 0,
-   "solar": "dusk",
-   "lunar": "new"
+   "lunar": "new",
+   "weather": "heat",
+   "season": "spring",
+   "tide": "high"
   },
+  "recap_after": 90000,
   "resources": [
    {
     "resource": {
-     "cartridge_id": "ashmere_missing_child",
-     "cartridge_version": "0.0.42",
+     "cartridge_id": "toolbox_showcase",
+     "cartridge_version": "0.0.1",
+     "kind": "resource",
+     "key": "ash"
+    },
+    "current": 0,
+    "maximum": 5,
+    "band": "dying",
+    "tone": "danger"
+   },
+   {
+    "resource": {
+     "cartridge_id": "toolbox_showcase",
+     "cartridge_version": "0.0.1",
      "kind": "resource",
      "key": "hp"
     },
@@ -544,55 +823,79 @@
    },
    {
     "resource": {
-     "cartridge_id": "ashmere_missing_child",
-     "cartridge_version": "0.0.42",
+     "cartridge_id": "toolbox_showcase",
+     "cartridge_version": "0.0.1",
+     "kind": "resource",
+     "key": "hunger"
+    },
+    "current": 10,
+    "maximum": 10,
+    "band": "fed",
+    "tone": "normal"
+   },
+   {
+    "resource": {
+     "cartridge_id": "toolbox_showcase",
+     "cartridge_version": "0.0.1",
      "kind": "resource",
      "key": "ma"
     },
-    "current": 100,
-    "maximum": 100,
+    "current": 5,
+    "maximum": 5,
     "band": "ready",
     "tone": "normal"
    },
    {
     "resource": {
-     "cartridge_id": "ashmere_missing_child",
-     "cartridge_version": "0.0.42",
+     "cartridge_id": "toolbox_showcase",
+     "cartridge_version": "0.0.1",
      "kind": "resource",
      "key": "mv"
     },
-    "current": 98,
+    "current": 97,
     "maximum": 100,
-    "band": "steady",
+    "band": "mv_ready",
     "tone": "normal"
    },
    {
     "resource": {
-     "cartridge_id": "ashmere_missing_child",
-     "cartridge_version": "0.0.42",
+     "cartridge_id": "toolbox_showcase",
+     "cartridge_version": "0.0.1",
      "kind": "resource",
      "key": "pennies"
     },
-    "current": 14,
-    "maximum": 1000,
-    "band": "dying",
+    "current": 10,
+    "maximum": 100,
+    "band": "purse_empty",
     "tone": "danger"
+   },
+   {
+    "resource": {
+     "cartridge_id": "toolbox_showcase",
+     "cartridge_version": "0.0.1",
+     "kind": "resource",
+     "key": "thirst"
+    },
+    "current": 10,
+    "maximum": 10,
+    "band": "quenched",
+    "tone": "normal"
    }
   ]
  },
  "stack": [
   {
-   "kind": "contents"
-  },
-  {
-   "kind": "carrying"
-  },
-  {
    "kind": "thing",
-   "id": "48a8dc05-4012-86d8-9d24-e68f2d7317ac"
+   "id": "331fb134-17eb-866f-a2fa-57583b9ac017"
   }
  ],
- "log": [],
+ "log": [
+  "You pick up a turnip seed."
+ ],
  "combatLog": [],
- "details": {}
+ "details": {
+  "331fb134-17eb-866f-a2fa-57583b9ac017": [
+   "Stored."
+  ]
+ }
 }

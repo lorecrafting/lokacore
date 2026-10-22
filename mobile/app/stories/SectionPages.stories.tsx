@@ -2,7 +2,7 @@
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { ContentsPage } from '../book/Menu.tsx';
 import { Professions, RaiseCards, SkillDetails } from '../book/skills.tsx';
-import { AncestryPage, CarryingPage, CharacterPage, SettingsPage } from '../book/sections.tsx';
+import { CarryingPage, CharacterPage, SettingsPage } from '../book/sections.tsx';
 import { JournalPage } from '../book/journal.tsx';
 import { pageStory } from './screen.tsx';
 import JournalView from './views/journal.json';
@@ -12,7 +12,6 @@ import CharacterUnknownView from './views/character-unknown.json';
 import CharacterFullView from './views/character-full.json';
 import ContentsView from './views/contents.json';
 import SettingsView from './views/settings.json';
-import AncestryView from './views/ancestry.json';
 
 const meta: Meta = {
   title: 'Pages/Sections',
@@ -25,7 +24,6 @@ const meta: Meta = {
     RaiseCards,
     ContentsPage,
     SettingsPage,
-    AncestryPage,
   },
 };
 export default meta;
@@ -57,7 +55,6 @@ export const CharacterPointsToSpend: StoryObj = {
 };
 export const Contents: StoryObj = { ...pageStory(ContentsView), name: 'Contents' };
 export const Settings: StoryObj = { ...pageStory(SettingsView), name: 'Settings' };
-export const Ancestry: StoryObj = { ...pageStory(AncestryView), name: 'Ancestry' };
 // Toolbox row 46: the codex sampler's lore (kernel/ts/test/codex.test.ts) on the Journal page, its
 // words given here because Chapter 1 authors no deduction. Away from the study the card is refused.
 const lore = {
