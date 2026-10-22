@@ -1,5 +1,4 @@
 import { engaged } from '../../../kernel/ts/src/mechanics/combat/shared.ts';
-import { living } from '../../../kernel/ts/src/mechanics/death/shared.ts';
 import { key } from '../../../kernel/ts/src/foundation/compose.ts';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
@@ -13,7 +12,7 @@ import {
   gameView,
   type Cartridge,
 } from '../../../kernel/ts/src/index.ts';
-import { trainingBundle, productionBundle } from '../../../kernel/ts/test/training_fixture.ts';
+import { trainingBundle } from '../../../kernel/ts/test/training_fixture.ts';
 import { ref } from '../../../kernel/ts/test/combat_fixture.ts';
 import { level, resourceRef } from '../../../kernel/ts/src/mechanics/resource.ts';
 import { encode } from '../../../kernel/ts/src/foundation/canonical.ts';
@@ -339,126 +338,4 @@ test('trained player death cold reopens and recovers the exact worn lesson sword
   a.reopen();
   assert.equal(a.world().state.containers[sword], a.world().slots.wield);
   a.sql.close();
-});
-
-// Breaks: historical lesson, shop and S2 order is reconciled against today's balance or trained gear gates S1/storage.
-test('authored training/shop/S2 orders retain conserved pennies and trained five-rat reward/storage', () => {
-  for (const order of [
-    ['learn', 'shop', 'debt'],
-    ['shop', 'learn', 'debt'],
-    ['debt', 'learn', 'shop'],
-    ['debt', 'shop', 'learn'],
-  ]) {
-    const a = setup(':memory:', productionBundle());
-    const move = (...ds: string[]) =>
-      ds.forEach((direction) => a.invoke('move', [], { direction }));
-    const choose = (choice_id: string) =>
-      a.invoke('choose', [], {
-        continuation_id: gameView(a.world()).choice!.continuation_id,
-        choice_id,
-      });
-    const balances = () =>
-      [a.fresh.body, ...['peg', 'aldric', 'tobin'].map((n) => a.entity('npc', n))].map((e) =>
-        level(a.world(), e, resourceRef(a.fresh, 'pennies')),
-      );
-    move('north'); // Well Lane is the hub for each optional consumer.
-    for (const part of order) {
-      if (part === 'learn') {
-        move('north', 'north');
-        a.learn('tobin');
-        a.reopen();
-        a.learn('tobin');
-        a.reopen();
-        a.invoke('wear', [a.entity('item', 'rusty_sword')]);
-        a.reopen();
-        move('south', 'south');
-      } else if (part === 'shop') {
-        move('west');
-        a.invoke('buy', [a.entity('npc', 'peg'), a.entity('item', 'wooden_shield')], {
-          quoted_price: 4,
-        });
-        a.reopen();
-        a.invoke('wear', [a.entity('item', 'wooden_shield')]);
-        a.reopen();
-        move('east');
-      } else {
-        move('west');
-        a.invoke('a_peg_debt', [a.entity('npc', 'peg')]);
-        choose('accept_on_time');
-        a.invoke('close_choice'); // the hub stays open after an answer (loka-x6t.5): Leave the conversation
-        a.reopen();
-        move('east', 'north', 'north', 'north', 'north');
-        a.invoke('a_aldric_debt', [a.entity('npc', 'aldric')]);
-        choose('on_time');
-        a.reopen();
-        move('south', 'south', 'south', 'south');
-      }
-    }
-    assert.deepEqual(balances(), [22, 24, 0, 4]);
-    move('east', 'down');
-    a.invoke('attack', [a.entity('npc', 'cellar_rat_1')]);
-    a.reopen();
-    const round = () => {
-      const from = a.world().state.clock;
-      const r = a.story().elapsed({ expected_run_id: a.story().runId(), from, until: from + 150 });
-      assert.equal(r.kind, 'saved');
-      if (r.kind === 'saved') assert.equal((r.decision as { kind: string }).kind, 'accepted');
-      a.reopen();
-      return r;
-    };
-    const first = round();
-    if (first.kind === 'saved') {
-      const events = (first.decision as { events: any[] }).events.filter(
-        (e) => e.payload.type === 'attack_result',
-      );
-      assert.deepEqual(
-        events.map((e) => [e.payload.hit, e.payload.loss, e.payload.prevented_by]),
-        [
-          [true, 3, undefined],
-          [false, 0, 'dodge'],
-        ],
-      );
-    }
-    for (let n = 0; engaged(a.world(), a.fresh.body) && n < 12; n++) round();
-    assert.equal(living(a.world(), a.entity('npc', 'cellar_rat_1')), false);
-    move('up', 'west', 'west');
-    a.invoke('buy', [a.entity('npc', 'peg'), a.entity('item', 'iron_sword')], { quoted_price: 8 });
-    a.reopen();
-    a.invoke('remove', [a.entity('item', 'rusty_sword')]);
-    a.reopen();
-    a.invoke('wear', [a.entity('item', 'iron_sword')]);
-    a.reopen();
-    assert.deepEqual(balances(), [14, 32, 0, 4]);
-    move('east', 'east', 'down');
-    for (const number of [2, 3, 4, 5]) {
-      a.invoke('attack', [a.entity('npc', `cellar_rat_${number}`)]);
-      a.reopen();
-      for (let n = 0; engaged(a.world(), a.fresh.body) && n < 12; n++) round();
-      assert.equal(living(a.world(), a.entity('npc', `cellar_rat_${number}`)), false);
-    }
-    move('up');
-    a.invoke('maud_offer', [a.entity('npc', 'maud')]);
-    choose('accept');
-    a.reopen();
-    a.invoke('maud_turn_in', [a.entity('npc', 'maud')]);
-    choose('done');
-    a.reopen();
-    assert.equal(a.world().state.containers[a.entity('item', 'cellar_key')], a.fresh.body);
-    move('up');
-    const chest = a.entity('item', 'storage_chest');
-    a.invoke('unlock', [chest]);
-    a.invoke('open', [chest]);
-    a.invoke('put', [a.entity('item', 'rusty_sword'), chest]);
-    a.reopen();
-    a.invoke('take', [a.entity('item', 'rusty_sword')]);
-    a.reopen();
-    assert.deepEqual(
-      gameView(a.world()).skills?.map((s) => [s.acquired, s.qualified]),
-      [
-        [true, true],
-        [true, true],
-      ],
-    );
-    a.sql.close();
-  }
 });

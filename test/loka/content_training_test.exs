@@ -1,61 +1,114 @@
 defmodule Loka.ContentTrainingTest do
   use ExUnit.Case, async: true
-  @moduletag :tmp_dir
-  @source "cartridges/ashmere_missing_child"
+  setup_all do: %{dir: Loka.ContentSource.copy("cartridges/toolbox_showcase")}
+
+  # The showcase blade skill gated on str, and combat dodging with the blade skill.
+  defp trained do
+    [
+      {"skills/blade.json",
+       &put_in(&1, ["qualification", "root"], %{
+         "op" => "stat_compare",
+         "attribute" => "str",
+         "at_least" => 10
+       })},
+      {"cartridge.json",
+       fn c ->
+         c
+         |> put_in(["world", "combat", "dodge"], %{"skill" => "blade", "chance" => 50})
+         |> put_in(["world", "combat", "narration", "dodge"], "combat.npc_miss")
+       end}
+    ]
+  end
 
   # Breaks: new short references remain short, so the compiler emits an unloadable training consumer.
-  test "skills, lessons and equipment expand their real source references" do
-    {:ok, bytes, _} = Loka.Content.compile(@source)
+  test "skills, lessons and equipment expand their real source references", %{dir: dir} do
+    {:ok, bytes, _} = Loka.ContentSource.compile(dir, trained())
     c = JSON.decode!(bytes)["cartridge"]
-    prefix = "#{c["manifest"]["id"]}@#{c["manifest"]["version"]}"
+    prefix = "toolbox_showcase@#{c["manifest"]["version"]}"
 
     ref = fn kind, key ->
       %{
-        "cartridge_id" => c["manifest"]["id"],
+        "cartridge_id" => "toolbox_showcase",
         "cartridge_version" => c["manifest"]["version"],
         "kind" => kind,
         "key" => key
       }
     end
 
-    assert c["skills"][prefix <> ":skill/swords"]["qualification"]["root"]["attribute"] ==
+    assert c["skills"][prefix <> ":skill/blade"]["qualification"]["root"]["attribute"] ==
              ref.("attribute", "str")
 
-    assert c["items"][prefix <> ":item/rusty_sword"]["weapon"]["skill"] == ref.("skill", "swords")
-    choice = c["dialogues"][prefix <> ":dialogue/tobin_swords"]["choices"]["learn"]
-    assert choice["sequence"] == [%{"op" => "skill.acquire", "skill" => ref.("skill", "swords")}]
+    assert c["items"][prefix <> ":item/training_sword"]["weapon"]["skill"] ==
+             ref.("skill", "blade")
+
+    choice = c["dialogues"][prefix <> ":dialogue/carpenter_lessons"]["choices"]["carving"]
+    assert choice["sequence"] == [%{"op" => "skill.acquire", "skill" => ref.("skill", "carving")}]
     assert choice["lesson_payment"]["resource"] == ref.("resource", "pennies")
-    assert c["world"]["combat"]["dodge"]["skill"] == ref.("skill", "dodge")
+    assert c["world"]["combat"]["dodge"]["skill"] == ref.("skill", "blade")
   end
 
-  # Breaks: content can counterfeit acquisition or author teaching with no funds/fee or invalid combat custody.
+  # Breaks: content can counterfeit acquisition, author teaching with no funds or a doubled
+  # lesson, dodge without its narration, or a weapon or qualification the kernel cannot bind.
   test "training rejects counterfeit writes, missing qualification/funding and wrong slots", %{
-    tmp_dir: dir
+    dir: dir
   } do
-    File.cp_r!(@source, dir)
+    carving =
+      &{"dialogues/carpenter_lessons.json",
+       fn d -> update_in(d, ["choices", "carving", "sequence"], &1) end}
 
-    for {path, change} <- [
-          {"dialogues/tobin_swords.json",
-           &put_in(&1, ["choices", "learn", "sequence"], [
-             %{"op" => "fact.assign", "fact" => "skill_swords", "value" => true}
-           ])},
-          {"scenes/epilogue_lost_prior.json",
-           &update_in(&1, ["on_end", "assign"], fn [first | rest] ->
-             [Map.merge(first, %{"fact" => "skill_swords", "value" => true}) | rest]
-           end)},
-          {"cartridge.json",
-           &update_in(&1, ["world", "combat", "narration"], fn n -> Map.delete(n, "block") end)},
-          {"npcs/tobin.json", &Map.delete(&1, "resource_starts")},
-          {"items/rusty_sword.json", &Map.put(&1, "slot", "off_hand")},
-          {"skills/swords.json", &put_in(&1, ["qualification", "root", "attribute"], "missing")},
-          {"dialogues/tobin_swords.json",
-           &update_in(&1, ["choices", "learn", "sequence"], fn s -> s ++ s end)}
+    # letter_fate gains a scene-resolved outcome so the scene's on_end write is otherwise valid.
+    on_end = fn fact ->
+      [
+        {"story_points/letter_fate.json",
+         &put_in(&1, ["outcomes", "read"], %{"scene" => "letter_read"})},
+        {"scenes/letter_read.json",
+         &Map.put(&1, "on_end", %{
+           "story_point" => "letter_fate",
+           "outcome" => "read",
+           "assign" => [%{"fact" => fact, "value" => true}]
+         })}
+      ]
+    end
+
+    # Baseline: the same scene write of an ordinary fact compiles.
+    assert {:ok, _, _} = Loka.ContentSource.compile(dir, on_end.("stair_found"))
+
+    assert {:error,
+            [%{"code" => "RESERVED_FACT", "path" => "scenes/letter_read.on_end.assign[0].fact"}]} =
+             Loka.ContentSource.compile(dir, on_end.("skill_blade"))
+
+    assert {:ok, _, _} = Loka.ContentSource.compile(dir, [])
+
+    for {edits, expected} <- [
+          {[
+             carving.(fn _ ->
+               [%{"op" => "fact.assign", "fact" => "skill_carving", "value" => true}]
+             end)
+           ], {"RESERVED_FACT", "dialogues/carpenter_lessons.choices.carving.sequence[0].fact"}},
+          {[carving.(&(&1 ++ &1))],
+           {"SCHEMA_VIOLATION", "dialogues/carpenter_lessons.choices.carving.lesson_payment"}},
+          {[{"npcs/carpenter.json", &Map.delete(&1, "resource_starts")}],
+           {"SCHEMA_VIOLATION", "dialogues/carpenter_lessons.choices.carving.lesson_payment"}},
+          {[
+             {"cartridge.json",
+              fn c ->
+                c
+                |> put_in(["world", "combat", "dodge"], %{"skill" => "blade", "chance" => 50})
+              end}
+           ], {"SCHEMA_VIOLATION", "cartridge.world.combat.narration.dodge"}},
+          {[{"items/training_sword.json", &Map.put(&1, "slot", "off_hand")}],
+           {"SCHEMA_VIOLATION", "items/training_sword.weapon"}},
+          {[
+             {"skills/blade.json",
+              &put_in(&1, ["qualification", "root"], %{
+                "op" => "stat_compare",
+                "attribute" => "missing",
+                "at_least" => 10
+              })}
+           ], {"UNRESOLVED_REFERENCE", "skills/blade.qualification.root.attribute"}}
         ] do
-      original = @source |> Path.join(path) |> File.read!() |> JSON.decode!()
-      target = Path.join(dir, path)
-      File.write!(target, JSON.encode!(change.(original)))
-      assert {:error, _} = Loka.Content.compile(dir)
-      File.write!(target, JSON.encode!(original))
+      assert {:error, diags} = Loka.ContentSource.compile(dir, edits)
+      assert expected in Enum.map(diags, &{&1["code"], &1["path"]}), inspect(diags)
     end
   end
 end

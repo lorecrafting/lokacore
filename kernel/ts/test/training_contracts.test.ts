@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { validate } from '../src/foundation/validate.ts';
 import { loadCartridge, INSTALLED } from '../src/index.ts';
-import { trainingBundle, productionBundle, bundleOf } from './training_fixture.ts';
+import { trainingBundle, bundleOf } from './training_fixture.ts';
 const c = JSON.parse(trainingBundle().canonical);
 const ref = (kind: string, key: string) => ({
   cartridge_id: 'cellar_sampler',
@@ -133,16 +133,34 @@ test('skill loader owns reserved acquisition, qualifications, teacher funding an
     mutate(m);
     assert.equal(load(m).ok, false);
   }
-  const chapter = JSON.parse(productionBundle().canonical);
-  const prefix = `${chapter.manifest.id}@${chapter.manifest.version}`;
-  chapter.scenes[`${prefix}:scene/epilogue_lost_prior`].on_end.assign[0] = {
-    fact: {
-      cartridge_id: chapter.manifest.id,
-      cartridge_version: chapter.manifest.version,
-      kind: 'fact',
-      key: 'skill_swords',
-    },
-    value: true,
-  };
-  assert.equal(load(chapter).ok, false);
+  // A scene ending that writes the reserved skill fact counterfeits acquisition (the scenes arm of
+  // the reserved-writer walk); the same ending writing an ordinary fact loads.
+  for (const [fact, code] of [
+    ['rat_1_killed', undefined],
+    ['skill_swords', 'RESERVED_FACT'],
+  ] as const) {
+    const m = structuredClone(c);
+    const P = 'cellar_sampler@0.0.9';
+    m.story_points[`${P}:story_point/lantern_resolved`].outcomes.kept = {
+      scene: ref('scene', 'lantern_kept'),
+    };
+    m.facts[`${P}:fact/story_point_lantern_resolved`] = {
+      key: 'story_point_lantern_resolved',
+      version: 1,
+      value_type: {
+        type: 'enum',
+        values: ['unreached', 'carry', 'kept', 'leave'],
+        default: 'unreached',
+      },
+      scopes: ['player'],
+      meaning: "Story point lantern_resolved's reached outcome (scene@1): only scene@1 writes it.",
+    };
+    m.scenes[`${P}:scene/lantern_kept`].on_end = {
+      story_point: ref('story_point', 'lantern_resolved'),
+      outcome: 'kept',
+      assign: [{ fact: ref('fact', fact), value: true }],
+    };
+    const r = load(m);
+    assert.equal(r.ok ? undefined : r.diagnostic.code, code, fact);
+  }
 });
