@@ -39,6 +39,7 @@ test('only bank-valid wrong answers count and the third closes only the sitting 
   assert.equal(r.view().time, clock);
   r.run({ type: 'take', item_id: entity(r.world(), 'item', 'lantern') });
   const correct = r.choose('answer', 'TIDE');
+  assert.ok(correct.kind === 'accepted');
   assert.equal(correct.events.filter((e) => e.payload.type === 'quest_resolved').length, 1);
   assert.equal(r.view().journal.find((q) => q.quest.key === 'lantern')!.state, 'resolved');
 });
