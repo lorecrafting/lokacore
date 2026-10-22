@@ -289,7 +289,8 @@ row adds `refusal: {case, code}`, naming a recorded case built so that every oth
 condition holds and only that guard's condition is true, and the refusal code. The recorder
 fails unless that case's final replayed step is refused with exactly that code by the dialogue
 the row's path names; attribution comes from the controlled setup, since the runtime names no
-refusing node.
+refusing node. No recorder enforces this rule today: the v042 disposition table and its check were
+deleted with that chapter.
 The recorder reports dispositioned paths separately from witnessed and pending ones;
 a disposition never adds to the witnessed set, and a row for an unknown or witnessed path
 fails the run.
