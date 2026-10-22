@@ -82,10 +82,6 @@ export function NpcPage(p: NpcProps) {
   const { talk, answer, foot } = conversation(p, choice);
   const log = talk ? p.log : p.log.slice(p.since ?? 0);
   const contents = held(p);
-  // Price and service rows draw even when unavailable: something to read (pass-2, UH3 on NPC pages).
-  const rows =
-    p.npc &&
-    (('shop' in p.npc && p.npc.shop?.length) || ('services' in p.npc && p.npc.services?.length));
   return (
     <Page
       title={p.npc ? cap(p.text(p.npc.name)) : 'Conversation'}
@@ -98,7 +94,7 @@ export function NpcPage(p: NpcProps) {
       {!talk && enemy && (
         <Note>{enemy.refusal ? p.text(enemy.refusal) : refused(cap(p.text(enemy.name)))}</Note>
       )}
-      {!talk && !enemy && !actions.length && !rows && !log.length && !contents.length && (
+      {!talk && !enemy && !actions.length && !listed(p) && !log.length && !contents.length && (
         <Note>Nothing to do here.</Note>
       )}
       {!talk && !enemy && <ShopOptions {...p} />}
@@ -142,6 +138,10 @@ const conversation = (p: NpcProps, choice?: NonNullable<GameView['choice']>) => 
 // What a living NPC holds (Held, book-ui.md Item details): Take on it is the steal (row 33).
 const held = (p: NpcProps) =>
   p.npc ? things(p.view).filter((e) => 'container_id' in e && e.container_id === p.npc?.id) : [];
+
+// Price and service rows draw even when unavailable: something to read (pass-2, UH3 on NPC pages).
+const listed = ({ npc: n }: NpcProps) =>
+  !!n && (('shop' in n && !!n.shop?.length) || ('services' in n && !!n.services?.length));
 
 // A shelf, or a service that costs (the bank too), shows the purse beside it (pass-1 E15).
 const priced = ({ npc: n }: NpcProps) =>
