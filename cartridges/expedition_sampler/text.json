@@ -51,5 +51,7 @@
   "walk.journal.failed": "Journal failed.",
   "walk.action.start": "Walk action start.",
   "walk.action.restart": "Walk action restart.",
-  "walk.action.shelter": "Walk action shelter."
+  "walk.action.shelter": "Walk action shelter.",
+  "combat.hound_fled_north": "A hound flees north.",
+  "combat.hound_fled_south": "A hound flees south."
 }

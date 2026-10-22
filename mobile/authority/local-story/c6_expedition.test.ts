@@ -27,9 +27,12 @@ function fixture(danger = false) {
     });
     pop.area = [sampler.ref('room', 'hollow'), sampler.ref('room', 'glade')];
     pop.pack.narration.enemy_fled = {
-      north: 'combat.hound_fled_east',
-      south: 'combat.hound_fled_west',
+      north: 'combat.hound_fled_north',
+      south: 'combat.hound_fled_south',
     };
+    // Each flight key names the exit the hound takes.
+    for (const [direction, key] of Object.entries(pop.pack.narration.enemy_fled))
+      assert.equal(c.text[key as string], `A hound flees ${direction}.`);
     c.npcs[`${sampler.prefix}:npc/hound`].room = sampler.ref('room', 'hollow');
     c.resources[`${sampler.prefix}:resource/hp`].start = 2;
     c.world.combat.player_attack.chance = 0;
