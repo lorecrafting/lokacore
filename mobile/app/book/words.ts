@@ -89,6 +89,7 @@ export const NOTED: Record<string, string> = {
   too_heavy: REASON.too_heavy!,
   over_load: REASON.over_load!,
   permission_denied: 'not yours',
+  cooldown: REASON.cooldown!, // a held tool resting between uses (pass-2 R2)
 };
 // A shelf row's buy reason: the shop's stock is gone, or the player's purse is short.
 const BUY: Record<string, string> = {

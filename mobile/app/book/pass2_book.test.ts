@@ -1,10 +1,11 @@
 // Pass-2 Book rows on the showcase (re-walk of pass 1; R1's spell chip is pinned in word_bar.test.ts):
-// a learned teach line asks nothing more (H3), and an NPC page with price rows draws no empty Note
-// (UH3 on NPC pages).
+// a learned teach line asks nothing more (H3), an NPC page with price rows draws no empty Note
+// (UH3 on NPC pages), and a resting rod notes its use (R2).
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { compiled } from '../../authority/local-story/__tests__/compiled.ts';
 import { book } from './__tests__/polish-book.test.ts';
+import { LABEL } from './labels.ts';
 
 const showcase = () => book(compiled('cartridges/toolbox_showcase') as never);
 const go = (b: ReturnType<typeof showcase>, ...ds: string[]) =>
@@ -60,4 +61,20 @@ test('price rows keep the empty Note off an NPC page', (t) => {
     },
   ]);
   assert.ok(!b.text().includes('Nothing to do here.'), JSON.stringify(b.text()));
+});
+
+// Breaks: the rod's page drops its use once the rod rests between casts (R2), so the player
+// cannot tell the rod still fishes.
+test('a resting rod keeps its use as a note', (t) => {
+  const b = showcase();
+  t.after(() => b.sql.close());
+  go(b, 'north', 'west', 'south', 'east');
+  b.tap('A fishing rod is here.');
+  b.tap('Take a fishing rod');
+  const rod = () => (b.tap(/opens Contents$/), b.tap(LABEL.inventory), b.tap('a fishing rod'));
+  rod();
+  b.tap('Fish in');
+  rod();
+  const shown = b.text();
+  assert.ok(shown.includes('Fish in: not yet.'), JSON.stringify(shown));
 });

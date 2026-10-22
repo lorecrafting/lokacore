@@ -87,8 +87,8 @@ test('magic 1: up the ladder; the sign reads and the Word bar is empty', () => {
 // without ash or spends the wrong pools, the gather adds no ash, the cast leaves the held lantern
 // unlit or writes no lit line (or one when nothing lit), a cast without the lantern is refused or
 // keeps its pools, the climb back to the loft closes the errand before flamma is known, or the
-// errand dialogue (its accept refused) still opens while the errand is active, or its hub's leave
-// is refused after the accept (M10c).
+// errand dialogue (its accept refused) still opens while the errand is active, or the accept
+// reopens the errand's page with "Fetch the second word: not now" (M10c).
 test('magic 2: taught lux; it needs ash; the cast spends 2 ma and 1 ash and lights the lantern', () => {
   const first = talk(w, 'hedge_wizard');
   assert.equal(first.opened, 'wizard_lux');
@@ -98,10 +98,9 @@ test('magic 2: taught lux; it needs ash; the cast spends 2 ma and 1 ash and ligh
   assert.equal(second.opened, 'wizard_errand');
   w = choose(second.world, 'accept').world;
   assert.equal(view(w).journal[0]?.state, 'active');
-  const hub = choose(w, 'leave'); // the reopened hub's leave answers (a not-active policy would refuse it)
-  const [continuation_id] = pending(hub.world, w.character)!;
-  const shut = play(hub.world, { type: 'close_choice', continuation_id }).world;
-  assert.equal(talk(shut, 'hedge_wizard').opened, 'wizard_awaiting');
+  // the accept is the offer's one answer: the conversation ends, no hub reopens on a refused accept
+  assert.equal(pending(w, w.character), undefined);
+  assert.equal(talk(w, 'hedge_wizard').opened, 'wizard_awaiting');
   assert.deepEqual(words(w), [
     {
       word: 'lux',
@@ -211,8 +210,7 @@ test('magic 4c: the grimoire read first; the wizard takes the word and the erran
   v = read(choose(talk(v, 'hedge_wizard').world, 'teach').world);
   v = choose(talk(v, 'hedge_wizard').world, 'accept').world;
   assert.equal(view(v).journal[0]?.state, 'active');
-  const [continuation_id] = pending(v, v.character)!; // the accepted hub is still open: close it
-  v = play(v, { type: 'close_choice', continuation_id }).world;
+  assert.equal(pending(v, v.character), undefined); // the accept ended the conversation (M10c)
   const again = talk(v, 'hedge_wizard');
   assert.equal(again.opened, 'wizard_awaiting_report'); // not the waiting line
   const done = choose(again.world, 'done');
