@@ -306,6 +306,13 @@ polish stage which needs me at the computer for a bit."
 
 ## Owner answers this session
 
+- 2026-10-22 after the reboot (quoted): "no need to have the web preview we will do everything in storybook for now";
+  "how about the retro items, can you work on all of them, any other beads random one offs or cleanups we can batch and
+  do before ui polish? im not ready to look at it". This approves loka-x3i0, -59uu, -z2j2, -ei7a, -mluq, -8zqg (8zqg
+  edits the owner's status-line config outside the repo: separate tiny change, name the file to the owner). Batches:
+  CI (e56t+ei7a), docs/workflow retro, scripts, checks/tests, then the pre-push/hook gate changes alone and last.
+  Deferred from the cleanup run: loka-kgd.191 (save path), loka-05rv, loka-g53x, loka-2bt2, loka-nwsv.
+
 - 2026-10-21 (session c5ed3619, quoted): NPC statuses "Line now, page later (Recommended)"; worldbuilding "Lets take over
   thr worldbuilding maybe spin off a subagent to clean it up and comit" (done, #420); retro "ok approve".
 - 2026-10-16 (session c5ed3619, quoted): usage "We are at 98% of the 20x max plan right now" + "Land in-flight, stop
@@ -350,8 +357,6 @@ polish stage which needs me at the computer for a bit."
 
 - Worldbuilding, first decisions (not urgent: after showcases and UI polish): premise and pillars;
   cosmology shape; magic hardness and cost; Story vs Realm canon. (Hidden-elite secrecy: decided, secret.)
-- Approve retro items `loka-x3i0`, `loka-59uu`, `loka-z2j2`, `loka-ei7a`, `loka-mluq`, `loka-8zqg` (PM
-  recommends all; `loka-8zqg` touches the owner's status-line config).
 - Workflows/ultracode: not for routine work (PM recommendation); a bounded fan-out only, with explicit
   models, a concurrency cap, worktree isolation and a usage reading before and after.
 
