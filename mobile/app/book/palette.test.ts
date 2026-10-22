@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { registerHooks } from 'node:module';
 import { test } from 'node:test';
+import { reactShim } from './__tests__/react-shim.ts';
 import { color } from './tokens.ts';
 
 // palette.ts's hooks outside React: one component, its state slots and effects run by hand.
@@ -11,17 +12,7 @@ registerHooks({
       ? { url: 'test:palette-react', shortCircuit: true }
       : next(s, c),
   load: (url, c, next) =>
-    url === 'test:palette-react'
-      ? {
-          format: 'module',
-          shortCircuit: true,
-          source: `export const createContext = v => ({ _currentValue: v });
-export const useContext = c => c._currentValue;
-export const useState = v => globalThis.hook.state(v);
-export const useRef = v => globalThis.hook.state({ current: v })[0];
-export const useEffect = (f, deps) => globalThis.hook.effect(f, deps);`,
-        }
-      : next(url, c),
+    url === 'test:palette-react' ? reactShim('globalThis.hook') : next(url, c),
 });
 const { contrast, paletteOf, useShownPalette } = await import('./palette.ts');
 

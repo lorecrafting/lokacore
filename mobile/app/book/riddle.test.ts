@@ -1,9 +1,9 @@
 // Controlled React leaves exercise the real NPC tile controls; this is not native layout proof.
+import { reactShim } from './__tests__/react-shim.ts';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { readFileSync } from 'node:fs';
 import { createRequire, registerHooks } from 'node:module';
-import { pathToFileURL } from 'node:url';
 import { elapsedHost } from '../../authority/local-story/__tests__/elapsed-host.test.ts';
 import { presenter } from './presenter.ts';
 import { group } from './model.ts';
@@ -15,7 +15,6 @@ import {
 } from '../../authority/local-story/__tests__/riddle-fixture.ts';
 const require = createRequire(import.meta.url),
   ts = require('typescript');
-const react = pathToFileURL(require.resolve('react')).href;
 registerHooks({
   resolve(specifier, context, next) {
     if (specifier === 'react') return { url: 'test:riddle-react', shortCircuit: true };
@@ -24,11 +23,9 @@ registerHooks({
   },
   load(url, context, next) {
     if (url === 'test:riddle-react')
-      return {
-        format: 'module',
-        shortCircuit: true,
-        source: `export * from ${JSON.stringify(react)}; export const useContext = c => c._currentValue; export const useState=v=>globalThis[Symbol.for('riddle-state')](v); export const useRef=v=>({current:v});`,
-      };
+      return reactShim(
+        `({ state: globalThis[Symbol.for('riddle-state')], ref: v => ({ current: v }) })`,
+      );
     if (url === 'test:riddle-native')
       return {
         format: 'module',

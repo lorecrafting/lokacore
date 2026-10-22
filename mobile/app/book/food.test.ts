@@ -1,8 +1,8 @@
+import { reactShim } from './__tests__/react-shim.ts';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { createRequire, registerHooks } from 'node:module';
 import { test } from 'node:test';
-import { pathToFileURL } from 'node:url';
 import { elapsedHost } from '../../authority/local-story/__tests__/elapsed-host.test.ts';
 import { group, pagesAfter, restoredItemPages } from './model.ts';
 import { presenter } from './presenter.ts';
@@ -14,7 +14,6 @@ import { tmpdir } from 'node:os';
 import { fadeStub } from './__tests__/fade-stub.ts';
 const require = createRequire(import.meta.url);
 const ts = require('typescript');
-const react = pathToFileURL(require.resolve('react')).href;
 registerHooks({
   resolve(s, c, next) {
     // The page curl needs Skia and Reanimated; a page_turn.e2e.ts concern, not these tests'.
@@ -28,12 +27,7 @@ registerHooks({
     return s === 'react-native' ? { url: 'test:d4-native', shortCircuit: true } : next(s, c);
   },
   load(url, c, next) {
-    if (url === 'test:d4-react')
-      return {
-        format: 'module',
-        shortCircuit: true,
-        source: `export * from ${JSON.stringify(react)}; export const useContext = c => c._currentValue; export const useState = v => globalThis.d4Hooks.state(v); export const useRef = v => globalThis.d4Hooks.ref(v); export const useEffect = f => globalThis.d4Hooks.effect(f); export const useLayoutEffect = useEffect;`,
-      };
+    if (url === 'test:d4-react') return reactShim(`globalThis.d4Hooks`);
     if (url === 'test:d4-native')
       return {
         format: 'module',

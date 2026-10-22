@@ -1,15 +1,14 @@
 // size: allow 560, the Book keyboard, tooltip and status-icon cases share one set of React and native shims
+import { reactShim } from './__tests__/react-shim.ts';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { createRequire, registerHooks } from 'node:module';
 import { test } from 'node:test';
-import { pathToFileURL } from 'node:url';
 import { fadeStub } from './__tests__/fade-stub.ts';
 import type { DetailLine } from './presenter.ts';
 
 const require = createRequire(import.meta.url);
 const ts = require('typescript');
-const react = pathToFileURL(require.resolve('react')).href;
 registerHooks({
   resolve(specifier, context, next) {
     // The page curl needs Skia and Reanimated; a page_turn.e2e.ts concern, not these tests'.
@@ -25,11 +24,9 @@ registerHooks({
   },
   load(url, context, next) {
     if (url === 'test:keyboard-react')
-      return {
-        format: 'module',
-        shortCircuit: true,
-        source: `export * from ${JSON.stringify(react)}; export const useContext = c => c._currentValue; export const useState = v => [typeof v === 'function' ? v() : v, () => {}]; export const useRef = v => globalThis.keptRef ?? { current: v }; export const useEffect = f => f(); export const useLayoutEffect = f => f();`,
-      };
+      return reactShim(
+        `({ state: v => [typeof v === 'function' ? v() : v, () => {}], ref: v => globalThis.keptRef ?? { current: v }, effect: f => f() })`,
+      );
     if (url === 'test:keyboard-native')
       return {
         format: 'module',

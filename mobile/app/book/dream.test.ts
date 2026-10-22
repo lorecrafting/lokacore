@@ -1,8 +1,8 @@
 // Actual Book routing over real SQLite; native leaves stand in for layout, never device evidence.
+import { reactShim } from './__tests__/react-shim.ts';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { createRequire, registerHooks } from 'node:module';
-import { pathToFileURL } from 'node:url';
 import { test } from 'node:test';
 import { elapsedHost, receipts } from '../../authority/local-story/__tests__/elapsed-host.test.ts';
 import {
@@ -13,8 +13,7 @@ import { control } from './__tests__/control.test.ts';
 import { fadeStub } from './__tests__/fade-stub.ts';
 
 const require = createRequire(import.meta.url),
-  ts = require('typescript'),
-  react = pathToFileURL(require.resolve('react')).href;
+  ts = require('typescript');
 registerHooks({
   resolve(specifier, context, next) {
     // The page curl needs Skia and Reanimated; a page_turn.e2e.ts concern, not these tests'.
@@ -31,11 +30,9 @@ registerHooks({
   },
   load(url, context, next) {
     if (url === 'test:dream-state')
-      return {
-        format: 'module',
-        shortCircuit: true,
-        source: `export * from ${JSON.stringify(react)}; export const useContext = c => c._currentValue; export const useState=v=>globalThis[Symbol.for('dream-state')](v); export const useRef=v=>useState(()=>({current:v}))[0]; export const useEffect=(f,d)=>globalThis[Symbol.for('dream-effect')](f,d); export const useLayoutEffect = useEffect;`,
-      };
+      return reactShim(
+        `({ state: globalThis[Symbol.for('dream-state')], effect: globalThis[Symbol.for('dream-effect')] })`,
+      );
     if (url === 'test:dream-native')
       return {
         format: 'module',
