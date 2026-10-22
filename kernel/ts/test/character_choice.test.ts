@@ -13,48 +13,12 @@ import { sight } from '../src/mechanics/movement/rule.ts';
 import { holds } from '../src/mechanics/policy.ts';
 import { status } from '../src/mechanics/skills.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
-import { artifact } from './derived_fixture.ts';
+import { ancestrySource as source } from './derived_fixture.ts';
 
 const ref = (kind: string, name: string) =>
   ({ cartridge_id: 'derived_sampler', cartridge_version: '0.0.1', kind, key: name }) as never;
 const named = (kind: string, name: string) => `derived_sampler@0.0.1:${kind}/${name}`;
 
-/** The sampler with strong inheriting skill swim and standing -2, and hardy seeing in the dark. */
-function source() {
-  const c = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
-  for (const cap of ['skills', 'light'])
-    // light@1 gates dark_sight
-    c.manifest.requires.capabilities[cap] = c.lock.capabilities[cap] = 1;
-  c.skills = {
-    [named('skill', 'swim')]: {
-      key: 'swim',
-      label: 'ancestry.strong.label',
-      requirement: 'ancestry.strong.label',
-      qualification: {
-        policy_version: 1,
-        root: { op: 'stat_compare', attribute: ref('attribute', 'str'), at_least: 100 },
-      },
-    },
-  };
-  c.facts[named('fact', 'skill_swim')] = {
-    key: 'skill_swim',
-    version: 1,
-    value_type: { type: 'bool', default: false },
-    scopes: ['player'],
-    meaning: "Skill swim's acquisition (skills@1): only skills@1 writes it.",
-  };
-  c.facts[named('fact', 'standing')] = {
-    key: 'standing',
-    version: 1,
-    value_type: { type: 'int', default: 0 },
-    scopes: ['player'],
-    meaning: 'Controlled faction standing.',
-  };
-  c.ancestries.strong.skill = ref('skill', 'swim');
-  c.ancestries.strong.faction = { fact: ref('fact', 'standing'), value: -2 };
-  c.ancestries.hardy.dark_sight = true;
-  return c;
-}
 const load = (c: object) => {
   const canonical = encode(c as never);
   const hash = createHash('sha256').update(canonical).digest('hex');

@@ -56,25 +56,26 @@ defmodule Loka.ContentTrainingTest do
       &{"dialogues/carpenter_lessons.json",
        fn d -> update_in(d, ["choices", "carving", "sequence"], &1) end}
 
+    # letter_fate gains a scene-resolved outcome so the scene's on_end write is otherwise valid.
     on_end = fn fact ->
-      {"scenes/letter_read.json",
-       &Map.put(&1, "on_end", %{
-         "story_point" => "letter_fate",
-         "outcome" => "deliver",
-         "assign" => [%{"fact" => fact, "value" => true}]
-       })}
+      [
+        {"story_points/letter_fate.json",
+         &put_in(&1, ["outcomes", "read"], %{"scene" => "letter_read"})},
+        {"scenes/letter_read.json",
+         &Map.put(&1, "on_end", %{
+           "story_point" => "letter_fate",
+           "outcome" => "read",
+           "assign" => [%{"fact" => fact, "value" => true}]
+         })}
+      ]
     end
 
-    reserved = fn edits ->
-      {:error, diags} = Loka.ContentSource.compile(dir, edits)
-      Enum.filter(diags, &(&1["code"] == "RESERVED_FACT"))
-    end
+    # Baseline: the same scene write of an ordinary fact compiles.
+    assert {:ok, _, _} = Loka.ContentSource.compile(dir, on_end.("stair_found"))
 
-    # Baseline: the same scene write of an ordinary fact is not reserved.
-    assert reserved.([on_end.("stair_found")]) == []
-
-    assert [%{"path" => "scenes/letter_read.on_end.assign[0].fact"}] =
-             reserved.([on_end.("skill_blade")])
+    assert {:error,
+            [%{"code" => "RESERVED_FACT", "path" => "scenes/letter_read.on_end.assign[0].fact"}]} =
+             Loka.ContentSource.compile(dir, on_end.("skill_blade"))
 
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, [])
 

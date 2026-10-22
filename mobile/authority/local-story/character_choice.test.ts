@@ -1,13 +1,11 @@
-// Ancestry choice through real SQLite on the derived sampler (toolbox row 2), with strong
-// inheriting skill swim and standing -2 inline so every creation effect is saved.
+// Ancestry choice through real SQLite on the derived sampler (toolbox row 2) with the kernel
+// tests' ancestry edits (strong inherits skill swim and standing -2), so every creation effect is saved.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import {
   loadCartridge,
   newWorld,
@@ -16,56 +14,12 @@ import {
   type Cartridge,
 } from '../../../kernel/ts/src/index.ts';
 import { encode } from '../../../kernel/ts/src/foundation/canonical.ts';
+import { ancestrySource } from '../../../kernel/ts/test/derived_fixture.ts';
 import { elapsedHost } from './__tests__/elapsed-host.test.ts';
 import { openStory } from './authority.ts';
 
-const scratch = mkdtempSync(join(tmpdir(), 'loka-choice-'));
-let compiled: any;
-try {
-  const file = join(scratch, 'artifact.json');
-  execFileSync('mix', ['loka.compile', 'cartridges/derived_sampler', file], {
-    cwd: fileURLToPath(new URL('../../../', import.meta.url)),
-    stdio: 'pipe',
-  });
-  compiled = JSON.parse(readFileSync(file, 'utf8')).cartridge;
-} finally {
-  rmSync(scratch, { recursive: true });
-}
-const ref = (kind: string, key: string) => ({
-  cartridge_id: 'derived_sampler',
-  cartridge_version: '0.0.1',
-  kind,
-  key,
-});
+const compiled = ancestrySource();
 const named = (kind: string, key: string) => `derived_sampler@0.0.1:${kind}/${key}`;
-compiled.manifest.requires.capabilities.skills = compiled.lock.capabilities.skills = 1;
-compiled.skills = {
-  [named('skill', 'swim')]: {
-    key: 'swim',
-    label: 'ancestry.strong.label',
-    requirement: 'ancestry.strong.label',
-    qualification: {
-      policy_version: 1,
-      root: { op: 'stat_compare', attribute: ref('attribute', 'str'), at_least: 100 },
-    },
-  },
-};
-compiled.facts[named('fact', 'skill_swim')] = {
-  key: 'skill_swim',
-  version: 1,
-  value_type: { type: 'bool', default: false },
-  scopes: ['player'],
-  meaning: "Skill swim's acquisition (skills@1): only skills@1 writes it.",
-};
-compiled.facts[named('fact', 'standing')] = {
-  key: 'standing',
-  version: 1,
-  value_type: { type: 'int', default: 0 },
-  scopes: ['player'],
-  meaning: 'Controlled faction standing.',
-};
-compiled.ancestries.strong.skill = ref('skill', 'swim');
-compiled.ancestries.strong.faction = { fact: ref('fact', 'standing'), value: -2 };
 
 function release(content: object) {
   const canonical = encode(content as never);
