@@ -11,14 +11,12 @@ import sys
 try:
     hook = json.load(sys.stdin)
     to = hook["tool_input"]["to"]
-    if not to.isalnum():
-        sys.exit(0)
     projects = os.path.dirname(hook["transcript_path"])
     [path] = glob.glob(os.path.join(glob.escape(projects), "*", "subagents", f"agent-{to}.jsonl"))
     with open(path) as f:
         last = [line for line in f if '"subtype":"compact_boundary"' in line][-1]
     ms = json.loads(last)["compactMetadata"]["durationMs"]
-except (Exception, SystemExit):
+except Exception:
     sys.exit(0)
 if ms < 1000:
     print(

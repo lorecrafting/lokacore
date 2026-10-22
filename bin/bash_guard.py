@@ -30,7 +30,7 @@ def refusal(seg):
         rest = seg[seg.index("git") + 1 :]
         words = [t for t in rest if not t.startswith("-")]
         hooks_off = "--no-verify" in rest or (
-            words[:1] == ["commit"] and any(t[1:].isalpha() and "n" in t for t in rest if t[:2] != "--")
+            words[:1] == ["commit"] and any(t[1:].isalpha() and "n" in t for t in rest)
         )
         if hooks_off and MARKER not in seg:
             return f"git hooks skipped without the owner's OK. Fix the cause; with the owner's OK, prefix {MARKER}."
