@@ -9,7 +9,7 @@ import { entity, genesis, load, prefix, ref, runner } from './riddle_fixture.ts'
 
 // An unbounded riddle: no wrong_limit and no quest, so the answer is offered at once.
 const unbounded = (c: any) => {
-  const d = c.dialogues['scene_sampler@0.0.1:dialogue/riddle'];
+  const d = c.dialogues[`${prefix}:dialogue/riddle`];
   delete d.riddle.wrong_limit;
   delete d.quest;
 };
@@ -84,7 +84,7 @@ test('either original participant leaving or dying disables Choose while Close s
       const w = r.world(),
         id = entity(w, 'npc', role),
         here = w.state.containers[w.body]!,
-        other = w.roomIds['scene_sampler@0.0.1:room/village_green']!;
+        other = w.roomIds[`${prefix}:room/village_green`]!;
       const resource = key({ kind: 'resource', resource: ref('resource', 'hp'), entity_id: id });
       const hp = { minimum: 0, maximum: 10, start: 10, gain: 0 };
       if (failure === 'dead')

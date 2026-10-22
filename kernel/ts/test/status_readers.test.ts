@@ -23,7 +23,6 @@ import { ALWAYS } from '../src/mechanics/policy.ts';
 import { statusKey } from '../src/mechanics/status/shared.ts';
 import { sight } from '../src/mechanics/movement/rule.ts';
 import { visible } from '../src/mechanics/light/shared.ts';
-import { key } from '../src/foundation/compose.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-ward-sampler-'));
 let artifact: Uint8Array;
