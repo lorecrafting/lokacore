@@ -21,8 +21,9 @@ stop_port() { p=$(listener "$1"); [ -z "$p" ] || { kill $p 2> /dev/null || true;
 serve() { # <port> <dir> <command...>: start in <dir>, wait until it listens
   port=$1 log=${TMPDIR:-/tmp}/loka-serve-$1.log
   # Own session (setsid), no terminal, stdin closed: the caller's exit or a task runner killing
-  # its process group never takes the server down. Stopped later by its listening PID.
-  (cd "$2" && shift 2 && nohup perl -MPOSIX -e 'POSIX::setsid(); exec @ARGV' mise exec -- "$@" > "$log" 2>&1 < /dev/null &)
+  # its process group never takes the server down. Stopped later by its listening PID. The
+  # redirects sit on the subshell and it execs, so no shell keeps the caller's stdout (loka-wxu).
+  (cd "$2" || exit 1; shift 2; exec nohup perl -MPOSIX -e 'POSIX::setsid(); exec @ARGV' mise exec -- "$@") > "$log" 2>&1 < /dev/null &
   wait_port "$port" up "$log"
 }
 serve_storybook() { serve "$SB_PORT" "$1/mobile/app" npm run storybook -- -p "$SB_PORT"; }

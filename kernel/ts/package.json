@@ -9,6 +9,7 @@
   "scripts": {
     "typecheck": "tsc && tsc -p test && tsc -p play",
     "test": "node --test --test-reporter=${TEST_REPORTER:-spec} \"test/**/*.test.ts\"",
+    "test:files": "sh ../../bin/test_files.sh",
     "test:nosim": "node --test --test-reporter=${TEST_REPORTER:-spec} $(find test -name '*.test.ts' ! -name sim.test.ts)",
     "test:sim": "node --test --test-reporter=${TEST_REPORTER:-spec} test/sim.test.ts",
     "test:sim:fresh": "node --test --test-reporter=${TEST_REPORTER:-spec} --test-skip-pattern=showcase test/sim.test.ts",

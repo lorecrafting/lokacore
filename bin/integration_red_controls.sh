@@ -63,7 +63,16 @@ done
 # to the export. Break: the local export write is lost in the pull, the issue is not closed, the
 # worktree or refs survive, nothing is pushed, or a refusal still changes something.
 printf '#!/bin/sh\necho "$PR_STATE pr"\n' > "$tmp/brstub/gh"
-printf '#!/bin/sh\necho "$*" >> "$BR_LOG"\ncase $1 in close) echo "closed $2" >> .beads/issues.jsonl ;; show) echo "[{\\"status\\":\\"${ISSUE_STATUS:-open}\\"}]" ;; esac\n' > "$tmp/brstub/br"
+cat > "$tmp/brstub/br" <<'SH'
+#!/bin/sh
+echo "$*" >> "$BR_LOG"
+case $1 in
+  close) [ -z "${BR_FAIL-}" ] || { echo 'some other error' >&2; exit 1; }
+    if [ -n "${BR_BUSY-}" ] && [ ! -e "$BR_BUSY" ]; then : > "$BR_BUSY"; echo 'Database error: database is busy' >&2; exit 1; fi
+    echo "closed $2" >> .beads/issues.jsonl ;;
+  show) echo "[{\"status\":\"${ISSUE_STATUS:-open}\"}]" ;;
+esac
+SH
 chmod +x "$tmp/brstub/gh"
 am() { # <case> <want-rc> [subject]
   rc=0; BR_LOG=$R.br PR_STATE=${PR_STATE-MERGED} PATH="$tmp/brstub:$PATH" capped sh "$bin/after_merge.sh" 7 loka-a ${3+"$3"} > "$R.out" 2>&1 || rc=$?
@@ -121,6 +130,11 @@ git fetch -q origin; [ "$rc" = 0 ] && grep -qx 'close loka-a --reason Merged #7'
 # Break: a rerun (the failed first run already closed the issue) dies at br close, or closes it again.
 amk; export ISSUE_STATUS=closed; am rerun-closed 0; unset ISSUE_STATUS; git fetch -q origin
 { [ "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)" ] && ! grep -q '^close' "$R.br"; } || bad 'after_merge rerun-closed: br close called, or main not pushed'
+# Break: a busy database at br close stops the run, or is retried without recover, or more than once (loka-8zf5).
+amk; export BR_BUSY=$R.busy; am busy-db 0; unset BR_BUSY
+[ "$(grep -E '^(close|doctor)' "$R.br" | cut -d' ' -f1 | tr '\n' ' ')" = 'close doctor close ' ] && grep -q 'closed loka-a' .beads/issues.jsonl \
+  || { bad 'after_merge busy-db: not recover then one retry'; cat "$R.br"; }
+amk; export BR_FAIL=1; am other-br-error 1; unset BR_FAIL; ! grep -q '^doctor' "$R.br" || bad 'after_merge other-br-error: recovered on an unknown error'
 # Break: a br write that dirties the export after the commit (stand-in post-commit hook) is left
 # uncommitted or unpushed.
 amk; printf '#!/bin/sh\n[ -e "%s" ] || { : > "%s"; echo concurrent >> .beads/issues.jsonl; }\n' "$R.once" "$R.once" > .git/hooks/post-commit; chmod +x .git/hooks/post-commit
@@ -161,6 +175,14 @@ printf 'a.txt\ty=1\ty=2\n' > m.tsv
 printf 'a.txt\ty=1\ty=3\n' >> m.tsv
 rc=0; capped sh "$bin/mutate.sh" m.tsv "echo z > a.orig" > out 2>&1 || rc=$?
 [ "$rc" = 1 ] && [ "$(grep -c 'RESTORE-FAIL' out)" = 1 ] || { bad "mutate tracked-diff: exit $rc, want 1 and one RESTORE-FAIL (the mutant that drifted)"; cat out; }
+# Break: MUTATE_REBUILD is not run after the apply (tests that read the derived b.txt pass), a failed
+# rebuild is not red, or it is not run after the restore (b.txt keeps the mutant: RESTORE-FAIL).
+mt; cp a.txt b.txt; git init -q; git add a.txt b.txt; git commit -qm a
+printf 'a.txt\tx=1\tx=2\na.txt\ty=1\ty=9\n' > m.tsv
+rc=0; MUTATE_REBUILD='! grep -q y=9 a.txt && cp a.txt b.txt' capped sh "$bin/mutate.sh" m.tsv "grep -q '^x=1$' b.txt" > out 2>&1 || rc=$?
+[ "$rc" = 0 ] && [ "$(cut -f1 out | tr '\n' ,)" = 'red-full,red-rebuild,' ] && cmp -s a.txt b.txt || { bad "mutate rebuild: exit $rc, want 0, red-full then red-rebuild"; cat out; }
+printf 'a.txt\tx=1\tx=2\n' > m.tsv; rc=0; MUTATE_REBUILD=false capped sh "$bin/mutate.sh" m.tsv true > out 2>&1 || rc=$?
+[ "$rc" = 1 ] && grep -q '^red-rebuild RESTORE-FAIL' out || { bad "mutate rebuild-after-restore fails: exit $rc, want 1 and RESTORE-FAIL"; cat out; }
 # --- session_status.sh ----------------------------------------------------------------------
 # A repo whose origin/main last merge is 2026-10-08T12:00Z; stub br prints $HK, stub gh fails.
 # Break: a missing/failing br fails the session start; the retro note fires when a housekeeping
@@ -358,6 +380,12 @@ run preview_update.sh '' during-session 1; [ "$(pid $sbp)" = "$sb" ] || bad 'pre
 echo u1 > a.txt; git add a.txt; git commit -qm plain; git push -q origin main
 run polish_session.sh update update-plain 0
 [ "$(pid $sbp)" = "$sb" ] && [ "$(git -C "$S" rev-parse HEAD)" = "$(git rev-parse HEAD)" ] || bad 'polish_session update-plain: restarted, or session not at origin/main'
+# Break: update leaves Storybook on old node_modules after a lockfile-only change (loka-nxg2).
+echo 3 > mobile/app/package-lock.json; git commit -qam lock2; git push -q origin main; : > "$R.mise"
+run polish_session.sh update update-lockfile 0
+[ "$(pid $sbp)" != "$sb" ] && [ "$(grep 'npm ci' "$R.mise")" = "$S/mobile/app npm ci --no-audit --no-fund" ] \
+  || { bad 'polish_session update-lockfile: no npm ci in the session mobile/app, or Storybook not restarted'; cat "$R.mise"; }
+sb=$(pid $sbp)
 echo s > mobile/app/x.stories.tsx; git add mobile/app/x.stories.tsx; git commit -qm story; git push -q origin main
 run polish_session.sh update update-story 0
 [ "$(pid $sbp)" != "$sb" ] && [ "$(cwd $sbp)" = "$S/mobile/app" ] && [ -f "$S/mobile/app/x.stories.tsx" ] || bad 'polish_session update-story: Storybook not restarted from the session'
@@ -372,10 +400,13 @@ run polish_session.sh update update-diverged 0
 kill "$(pid $sbp)"; i=0; while [ -n "$(pid $sbp)" ] && [ $i -lt 20 ]; do sleep 0.5; i=$((i + 1)); done
 echo s > mobile/app/w.stories.tsx; git add mobile/app/w.stories.tsx; git commit -qm unserved; git push -q origin main
 run polish_session.sh update update-unserved 0; [ -z "$(pid $sbp)" ] || bad 'polish_session update-unserved: started a Storybook for an unserved session'
-run polish_session.sh start reserve 0
+# Break: a shell left by serve holds the caller's stdout, so a caller reading a pipe hangs until the server exits (loka-wxu).
+rc=0; capped sh -c 'sh "$1" start 2>&1 | cat > "$2"' _ "$R/bin/polish_session.sh" "$R.out" || rc=$?
+[ "$rc" = 0 ] || { bad "polish_session start through a pipe: exit $rc, want 0 (142: the pipe stayed open)"; cat "$R.out"; }
 sb=$(pid $sbp)
-# The preview moves with main (as preview_update would), so close's own refresh restarts nothing but Storybook.
+# The preview moves with main and its npm ci (as preview_update would; update-lockfile changed the lockfile), so close's own refresh restarts nothing but Storybook.
 git -C "$P" fetch -q origin main; git -C "$P" checkout -q --detach origin/main
+mkdir -p "$P/mobile/app/node_modules"; cksum < "$P/mobile/app/package-lock.json" > "$P/mobile/app/node_modules/.loka-lock-cksum"
 touch "$S/new-token.ts"; run polish_session.sh close untracked 1; [ "$(pid $sbp)" = "$sb" ] && [ ! -s "$R.gh" ] || bad 'polish_session untracked: changed something'
 git -C "$S" add new-token.ts; git -C "$S" commit -qm tweak
 touch "$P/x"; run polish_session.sh close dirty-preview 1; rm "$P/x"
@@ -393,6 +424,61 @@ echo 3 > a.txt; git add a.txt; git commit -qm moved; git push -q origin main
 run preview_update.sh '' no-expo 0; [ -z "$(pid $ep)" ] || bad 'preview_update no-expo: started Expo that was not running'
 kill "$decoy" 2> /dev/null || bad 'a stop by name killed the decoy on $dp'
 fi
+
+# --- regen_hash_fixture.sh -------------------------------------------------------------------------
+# A stub artifact whose canonical holds a float written 1.50 and non-ASCII text. Break: the canonical is
+# re-encoded instead of copied as bytes (1.50 becomes 1.5), the description is dropped, a hash that is not
+# the canonical's sha256 or a fixture with other keys (a sampler's `value`) is written over.
+mkdir "$tmp/rh"; cd "$tmp/rh"; canon='{"n":1.50,"s":"Grüße"}'
+sha=$(printf %s "$canon" | shasum -a 256 | cut -d' ' -f1)
+rh() { # <case> <want-rc> <hash>
+  printf '{"cartridge":%s,"content_hash":"%s"}' "$canon" "$3" > art; cp fix fix.before
+  rc=0; LOKA_COMPILED=art capped sh "$bin/regen_hash_fixture.sh" . fix > out 2>&1 || rc=$?
+  [ "$rc" = "$2" ] || { bad "regen_hash_fixture $1: exit $rc, want $2"; cat out; }
+  [ "$2" = 0 ] || cmp -s fix fix.before || bad "regen_hash_fixture $1: refused but changed the fixture"
+}
+printf '{\n  "description": "d",\n  "canonical": "old",\n  "sha256": "0"\n}\n' > fix; rh ok 0 "$sha"
+[ "$(cat fix)" = "$(printf '{\n  "description": "d",\n  "canonical": "%s",\n  "sha256": "%s"\n}' "$(printf %s "$canon" | sed 's/"/\\"/g')" "$sha")" ] \
+  || { bad 'regen_hash_fixture ok: fixture not description + canonical bytes + sha256'; cat fix; }
+rh wrong-hash 1 "$(printf %s "$sha" | tr 0-9a-f 1-9a-f0)"
+printf '{\n  "description": "d",\n  "canonical": "old",\n  "sha256": "0",\n  "value": 1\n}\n' > fix; rh value-key 1 "$sha"
+
+# --- test_files.sh ---------------------------------------------------------------------------------
+# Stub node logs its args. Break: no file, or a glob that matched nothing, reaches node --test (which
+# then runs the whole suite), or a named file does not.
+mkdir -p "$tmp/tf/bin"; cd "$tmp/tf"; : > a.test.ts; printf '#!/bin/sh\necho "$*" >> "$TF_LOG"\n' > bin/node; chmod +x bin/node
+tf() { # <case> <want-rc> [files]
+  c=$1 w=$2; shift 2; : > log
+  rc=0; TEST_REPORTER=spec TF_LOG=$tmp/tf/log PATH="$tmp/tf/bin:$PATH" capped sh "$bin/test_files.sh" "$@" > out 2>&1 || rc=$?
+  [ "$rc" = "$w" ] || { bad "test_files $c: exit $rc, want $w"; cat out; }
+}
+tf none 2; [ ! -s log ] || bad 'test_files none: node ran'
+tf unmatched 2 a.test.ts 'test/*.nomatch.ts'; [ ! -s log ] || bad 'test_files unmatched: node ran'
+tf one 0 a.test.ts; [ "$(cat log)" = '--test --test-reporter=spec a.test.ts' ] || { bad 'test_files one: wrong node args'; cat log; }
+
+# --- wait_ci.sh --------------------------------------------------------------------------------
+# Stub gh answers from a list, one line set per call; stub sleep returns at once. Break: the wait ends
+# before ci or book-e2e exists (the others done first), or while a run is still in progress.
+mkdir "$tmp/wc"; printf '#!/bin/sh\nn=$(($(cat "$WC_N" 2>/dev/null || echo 0) + 1)); echo $n > "$WC_N"; sed -n "${n}p" "$WC_RUNS" | tr "|" "\\n"\n' > "$tmp/wc/gh"
+printf '#!/bin/sh\n' > "$tmp/wc/sleep"; chmod +x "$tmp/wc/gh" "$tmp/wc/sleep"
+printf '%s\n' 'book-e2e:completed:success|graph-diff:completed:success' 'graph-diff:completed:success|ci:completed:success' 'ci:completed:success|book-e2e:in_progress:' \
+  'ci:completed:success|book-e2e:completed:success|graph-diff:completed:success' > "$tmp/wc/runs"
+rc=0; WC_N=$tmp/wc/n WC_RUNS=$tmp/wc/runs PATH="$tmp/wc:$PATH" capped sh "$bin/wait_ci.sh" abc > "$tmp/wc/out" 2>&1 || rc=$?
+[ "$rc" = 0 ] && [ "$(cat "$tmp/wc/n")" = 4 ] || { bad "wait_ci: exit $rc after $(cat "$tmp/wc/n") polls, want 0 after 4"; cat "$tmp/wc/out"; }
+
+# --- new_batch.sh --------------------------------------------------------------------------------
+# A main checkout cloned from a bare origin; stub worktree_setup.sh records the worktree it set up.
+# Break: the worktree is not under worktrees.noindex next to the main checkout, setup skips it, or
+# the branch is not pushed with upstream.
+O=$(mktemp -d); git init -q --bare -b main "$O"; R=$(cd "$(mktemp -d)" && pwd -P); mkdir "$R/main"; cd "$R/main"
+git clone -q "$O" . 2> /dev/null; git checkout -qb main; mkdir bin; cp "$bin/new_batch.sh" bin/
+printf '#!/bin/sh
+cd "$(dirname "$0")/.." && pwd -P > "$NB_LOG"
+' > bin/worktree_setup.sh; chmod +x bin/worktree_setup.sh
+git add . && git commit -qm base && git push -q origin main
+wt=$R/worktrees.noindex/feat-x; rc=0; NB_LOG=$R/setup capped sh bin/new_batch.sh feat/x > "$R/out" 2>&1 || rc=$?
+[ "$rc" = 0 ] && [ "$(cat "$R/setup" 2> /dev/null)" = "$wt" ] && [ "$(git -C "$wt" rev-parse --abbrev-ref '@{u}')" = origin/feat/x ] \
+  && [ "$(git ls-remote origin feat/x | cut -f1)" = "$(git -C "$wt" rev-parse HEAD)" ] || { bad "new_batch: exit $rc, worktree, setup or upstream wrong"; cat "$R/out"; }
 
 # --- push_slice.sh ----------------------------------------------------------------------------
 # Break: the printed status is a pipe's (tail) instead of git push's, so a rejected push reads as green.

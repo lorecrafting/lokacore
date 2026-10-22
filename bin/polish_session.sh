@@ -5,7 +5,7 @@
 #          only on a lockfile change, the owner's Storybook served from it. Twice: no harm.
 #          A pushed (closed) session is refused (also by update) until its PR merges and after_merge removes it.
 #   update: fetch and merge origin/main into the session worktree (a fast-forward when it holds no commits); when the pull adds or renames
-#          a *.stories.tsx or *.mdx file, restart the session's Storybook (its index goes stale).
+#          a *.stories.tsx or *.mdx file or changes a package-lock.json, npm ci and restart the session's Storybook.
 #   close: refuses uncommitted or untracked files; pushes (hosted CI runs on the head), opens the PR
 #          (or reuses the open one), then serves the preview checkout again (bin/preview_update.sh).
 set -eu
@@ -50,11 +50,11 @@ update)
   # A session that holds tweak commits cannot fast-forward: merge, as bin/sync_pr.sh does for a PR branch.
   git -C "$wt" merge -q --no-edit origin/main || { git -C "$wt" merge --abort 2> /dev/null || true; die "merge of origin/main failed (conflict or uncommitted work in the way); nothing restarted"; }
   new=$(git -C "$wt" diff -M --name-only --diff-filter=AR "$old" HEAD | grep -E '\.(stories\.tsx|mdx)$' || true)
-  if [ -n "$new" ] && [ "$(served_from "$SB_PORT")" = "$wt/mobile/app" ]; then
+  if { [ -n "$new" ] || stale "$wt"; } && [ "$(served_from "$SB_PORT")" = "$wt/mobile/app" ]; then
     npm_ci "$wt"
     stop_port "$SB_PORT"
     serve_storybook "$wt"
-    echo "$me: updated; Storybook restarted for new story or MDX files"
+    echo "$me: updated; Storybook restarted for new story, MDX or lockfile changes"
   else
     echo "$me: updated; Storybook left running"
   fi
