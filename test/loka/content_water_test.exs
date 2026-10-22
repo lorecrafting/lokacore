@@ -80,7 +80,10 @@ defmodule Loka.ContentWaterTest do
         ] do
       assert {:error, diagnostics} = Loka.ContentSource.compile(dir, source(%{path => change}))
 
-      assert Enum.any?(diagnostics, &String.starts_with?(&1["path"], "cartridge.world.water")),
+      assert Enum.any?(
+               diagnostics,
+               &String.starts_with?(&1["path"] || "", "cartridge.world.water")
+             ),
              path
     end
   end
