@@ -352,7 +352,7 @@ to Take, including an alias and reachable contents, uses the same carrying predi
 rule after its existing policy/reach checks: `too_heavy` or `over_load` is advertised unavailable with that
 reason. `gameview_agrees_with_admission` checks that carrying refusal against the view,
 using the supplied action identity and resolved Take command for an alias; a budget fault is
-not a gameplay refusal. An offered action refused `insufficient_resource` for its recipe costs, or a
+not a gameplay refusal. An offered action or a `spell_words` entry refused `insufficient_resource` for its recipe costs (pass-2 R1), or a
 dialogue choice whose `lesson_payment` the body cannot pay, carries `reason.message`
 `{key: "resource.short", bindings: {resource, amount}}`: the first cost the body cannot pay after
 the ones before it, by resource key (pass-1 R1). `resource.short` is an engine key the Book words

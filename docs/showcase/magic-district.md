@@ -78,11 +78,10 @@ loop gathers ash at a hearth. No room here is `exposed`; nothing reads the sky.
 
 - **The hedge-wizard**: stays; dialogues: `wizard_lux` (policy `fact_compare
   lux_known false`; choice `teach`: `fact.assign lux_known true`); `wizard_errand` (policy
-  `fact_compare ward_taught false`; `accept: errand`; `leave`); `wizard_done` (policy
+  `fact_compare ward_taught false`; one choice, `accept: errand`, so the accept ends the conversation and no hub reopens on "Fetch the second word: not now" (pass-2 M10c; Leave the conversation is the Book's close, and a dialogue choice has no close narration, so declining no longer reads "The hedge-wizard goes back to her hearth.": accepted loss)); `wizard_done` (policy
   `ward_taught true`; `leave`); `wizard_awaiting` (policy `quest_state {errand, active}` and
   `flamma_known false`; `leave`) and `wizard_awaiting_report` (the same with `flamma_known true`;
-  choice `done` resolves the errand, for a grimoire read before the accept; its key sorts before `wizard_errand` (`wizard_awaiting_report` < `wizard_errand`), so a talk while the errand runs opens it; a
-  `not active` clause on `wizard_errand` would refuse the reopened hub's `leave`). Reactions `errand_done` `on fact_changed flamma_known` `when quest_state {errand,
+  choice `done` resolves the errand, for a grimoire read before the accept; its key sorts before `wizard_errand` (`wizard_awaiting_report` < `wizard_errand`), so a talk while the errand runs opens it). Reactions `errand_done` `on fact_changed flamma_known` `when quest_state {errand,
   active}` `apply quest.resolve {errand, done}`; `errand_reward` `on quest_resolved {errand, done}`
   `apply [narrate narration.errand_reward, fact.assign ward_taught true, experience.grant 30]` (`spells_sampler/reactions/apprentice_reward.json`;
   30 is the showcase's first level threshold).
