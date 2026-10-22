@@ -14,9 +14,9 @@ import { gameView, INSTALLED, newWorld, step } from '../src/runtime/world.ts';
 import { read } from './read.ts';
 
 const CONTEXT = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f';
-const F = 'ashmere_ferry@0.0.1';
+const F = 'ferry_sampler@0.0.1';
 const ref = (kind: string, key: string) =>
-  ({ cartridge_id: 'ashmere_ferry', cartridge_version: '0.0.1', kind, key }) as DefinitionRef;
+  ({ cartridge_id: 'ferry_sampler', cartridge_version: '0.0.1', kind, key }) as DefinitionRef;
 const ALWAYS = { policy_version: 1, root: { op: 'all', items: [] } };
 const O = `.cartridge.dialogues["${F}:dialogue/bram_offer"].choices.accept`;
 const load = (f: (c: any) => void = () => {}) => {

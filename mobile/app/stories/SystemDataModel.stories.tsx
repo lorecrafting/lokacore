@@ -165,6 +165,8 @@ export const Impact: Story = {
       'cartridge_lantern_hash.json',
       'cartridge_loader.json',
       'build_sampler_hash.json',
+      'harvest_sampler_hash.json',
+      'derived_sampler_hash.json',
     ]);
   },
 };
@@ -198,7 +200,7 @@ export const Homes: Story = {
     await userEvent.click(canvas.getByRole('button', { name: 'RoomDefinition' }));
     await userEvent.click(panel().getByText(/^Authored in cartridges \(\d+\)$/));
     await expect(
-      panel().getByRole('link', { name: 'cartridges/ashmere_rooms/rooms/boathouse.json' }),
+      panel().getByRole('link', { name: 'cartridges/rooms_sampler/rooms/boathouse.json' }),
     ).toBeVisible();
   },
 };

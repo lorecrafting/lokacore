@@ -5,7 +5,7 @@ import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { openDatabaseAsync, type SQLiteDatabase } from 'expo-sqlite';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 import wasm from 'canvaskit-wasm/bin/full/canvaskit.wasm?url';
-import chapter from '../../../protocol/fixtures/missing_child_v042_hash.json';
+import chapter from '../../../protocol/fixtures/toolbox_showcase_hash.json';
 import { openGame } from '../../authority/local-story/session.ts';
 import { webDb } from '../sqlite-web.ts';
 import { LABEL } from '../book/labels.ts';
@@ -56,90 +56,63 @@ export default meta;
 const sql = import.meta.glob<string>('./live/*.sql', { query: '?raw', import: 'default' });
 const at = (name: string) => [async () => live(await sql[`./live/${name}.sql`]!())()];
 
-// A click-through's page; a restored Book opens on its chapter page first.
-const opened = async (canvas: HTMLElement) => {
+// A click-through's helpers.
+const opened = (canvas: HTMLElement) => {
   const page = within(canvas);
   const tap = async (label: string | RegExp) => userEvent.click(await page.findByLabelText(label));
-  await tap('Continue');
   return { page, tap };
 };
 
-export const FirstRoom: StoryObj = {
-  name: 'First room',
-  loaders: at('first-room'),
+export const ReeveErrand: StoryObj = {
+  name: 'Reeve errand',
+  loaders: at('green'),
   play: async ({ canvasElement }) => {
-    const { page, tap } = await opened(canvasElement);
-    await tap(/^Elspeth is here\./);
-    await tap('Talk to Elspeth');
-    await tap('Will you look around the Green for a sign of Wren?');
+    const { page, tap } = opened(canvasElement);
+    await tap('The Reeve is here., open');
+    await tap('Talk to the Reeve');
+    await tap('Take the letter to Wat');
     await page.findByText('Journal updated'); // the real kernel answered: the quest began
     await tap('Leave the conversation');
     await tap('Leave');
-    await page.findByText('Look for a sign of Wren on Village Green.'); // the running head
+    await page.findByText("Take the Reeve's letter to Wat on the fell."); // the running head
   },
 };
-export const ElspethAsked: StoryObj = { name: 'Elspeth asked', loaders: at('elspeth-asked') };
-export const VesperRiddle: StoryObj = {
-  name: 'Vesper riddle',
-  loaders: at('vesper-riddle'),
+export const ReeveAsked: StoryObj = { name: 'Reeve asked', loaders: at('reeve-asked') };
+export const NellShop: StoryObj = {
+  name: 'Nell shop',
+  loaders: at('nell-shop'),
   play: async ({ canvasElement }) => {
-    const { page, tap } = await opened(canvasElement);
-    // the riddle's tiles, one per letter, then Submit (walkthrough/ashmere_missing_child.walk.ts spellOn)
-    const spell = async (word: string) => {
-      const tiles = (await page.findAllByLabelText(/^., tile \d+$/)).map((t) => t.ariaLabel ?? '');
-      for (const letter of word) {
-        const i = tiles.findIndex((t) => t[0] === letter);
-        if (i < 0) throw new Error(`no ${letter} tile left for ${word}`);
-        await tap(tiles.splice(i, 1)[0]!);
-      }
-      await tap('Submit');
-    };
-    await tap(/^Vesper is here\./);
-    await spell('RAN');
-    await page.findByText(/Try the letters again/); // a wrong word is the riddle's own answer
-    await tap(/^L, tile/);
-    await tap('Clear');
-    await spell('LANTERN');
-    await waitFor(() => expect(page.queryByLabelText('Submit')).toBeNull());
-  },
-};
-export const PegShop: StoryObj = {
-  name: 'Peg shop',
-  loaders: at('peg-shop'),
-  play: async ({ canvasElement }) => {
-    const { page, tap } = await opened(canvasElement);
-    await tap(/^Peg Harrow is here\./);
-    await tap('Buy a torch — 2p');
-    await page.findByText(/^an iron sword: Buy 7p \(/); // 7p over 4p: a note, not a Buy
+    const { page, tap } = opened(canvasElement);
+    await tap('Nell, the baker is here., open'); // a checkpoint restores the save, not the open page
+    await tap('Buy a cob of bread — 4p');
+    await page.findByText('You buy it.');
     await tap('Leave');
     await tap(/; opens Contents$/);
     await tap('Character, open');
-    await page.findByText(/^pennies\s+4$/); // paid; pennies stay off the status line
+    await page.findByText(/^pennies\s+6$/); // paid; pennies stay off the status line
     await tap('Back to World');
     await tap(/; opens Contents$/);
     await tap(`${LABEL.inventory}, open`);
-    await page.findByLabelText('a torch, open');
+    await page.findByLabelText('a cob of bread, open');
   },
 };
-export const MaudPaidBed: StoryObj = { name: 'Maud paid bed', loaders: at('maud-paid-bed') };
-export const CorpseContents: StoryObj = {
-  name: 'Corpse contents',
-  loaders: at('corpse-contents'),
+export const SackContents: StoryObj = {
+  name: 'Sack contents',
+  loaders: at('sack-contents'),
   play: async ({ canvasElement }) => {
-    const { page, tap } = await opened(canvasElement);
-    await tap(/^A deer corpse is here\./);
+    const { page, tap } = opened(canvasElement);
+    await tap('A seed sack is here., open');
     // the page a turn brings takes focus at its title (pages.tsx titleFocus), for screen readers
     await waitFor(() => expect(document.activeElement?.getAttribute('role')).toBe('heading'));
-    await tap('A deer hide, open'); // its Inside row
-    await tap('Take a deer hide');
-    // book-ui.md (Take from a corpse): back on the corpse, its pickup line, Leave still offered
-    await page.findByText('You pick up a deer hide.');
-    await page.findByLabelText('Put a deer hide in a deer corpse');
-    // the held hide's own page offers Drop; the corpse's does not
-    await waitFor(() => expect(page.queryByLabelText('Drop a deer hide')).toBeNull());
+    await tap('A turnip seed, open'); // its Inside row
+    await tap('Take a turnip seed');
+    // book-ui.md (Take from a container): the pickup line shows, then the sack reopens with Put and Leave
+    await page.findByText('You pick up a turnip seed.');
+    await tap('A seed sack is here., open');
+    await page.findByLabelText('Put a turnip seed in a seed sack');
     await page.findByLabelText('Leave');
   },
 };
-export const HoundCombat: StoryObj = { name: 'Hound combat', loaders: at('hound-combat') };
-export const ChapelMap: StoryObj = { name: 'Chapel map', loaders: at('chapel-map') };
-export const NightGreen: StoryObj = { name: 'Night green', loaders: at('night-green') };
+export const GoblinCombat: StoryObj = { name: 'Goblin combat', loaders: at('goblin-combat') };
+export const LoftMap: StoryObj = { name: 'Loft map', loaders: at('loft-map') };
+export const NightInn: StoryObj = { name: 'Night inn', loaders: at('night-inn') };

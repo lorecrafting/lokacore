@@ -1,3 +1,5 @@
+Code.require_file("test/fixtures/patrol_source.exs")
+
 defmodule Loka.ContentHiddenPassageTest do
   use ExUnit.Case, async: true
   setup_all do: %{dir: Loka.ContentSource.copy("cartridges/hidden_sampler")}
@@ -42,15 +44,17 @@ defmodule Loka.ContentHiddenPassageTest do
   # Breaks: a patrol leg or expedition edge over a hidden face compiles, so the NPC walks it or the
   # quest journal names it (twin of the loader rows in kernel/ts/test/hidden_passage.test.ts).
   test "a patrol or expedition route over a hidden face is refused" do
-    dir = Loka.ContentSource.copy("cartridges/ashmere_missing_child")
     api = {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.45")}
     hide = &put_in(&1, ["exits", "west", "hidden_until"], %{"fact" => &2, "equals" => true})
+    patrol = {Loka.PatrolSource.copy(), [api]}
+    # The expedition sampler is already above 1.45.
+    expedition = {Loka.ContentSource.copy("cartridges/expedition_sampler"), []}
 
-    for {room, fact, path} <- [
-          {"watch_post", "watch_gate_trusts_player", "quests/watch_rounds.patrol.route"},
-          {"hound_run", "fen_night_survived", "quests/a_night_in_the_marsh.expedition.route"}
+    for {{dir, floor}, room, fact, path} <- [
+          {patrol, "watch_post", "watch_gate_trusts_player", "quests/watch_rounds.patrol.route"},
+          {expedition, "trailhead", "night_survived", "quests/night_walk.expedition.route"}
         ] do
-      changes = [api, {"rooms/#{room}.json", &hide.(&1, fact)}]
+      changes = floor ++ [{"rooms/#{room}.json", &hide.(&1, fact)}]
       assert {:error, diags} = Loka.ContentSource.compile(dir, changes)
       assert [{"OUTCOME_MISMATCH", path}] == Enum.map(diags, &{&1["code"], &1["path"]})
     end

@@ -275,7 +275,7 @@ const DESC={
 };
 const TOPICS={
   ferry:['the ferry','“She crosses at slack water. Two pence, or a favor.”'],
-  wren:['Wren','“Seven years old and knows every reed by name. That’s what worries me.”'],
+  robin:['Robin','“Seven years old and knows every reed by name. That’s what worries me.”'],
   lantern:['the lantern','“Brass, dented, older than me. It has never gone out in a fen wind.”'],
   search:['the search',null],
 };
@@ -285,7 +285,7 @@ const clock=h=>String(h).padStart(2,'0')+':00';
 /* ---------- the model (stands in for the engine's GameView) ---------- */
 function initState(p){
   const s={room:'landing',hour:6,lantern:'shelter',lit:false,quest:'none',plan:null,topics:['ferry'],seen:['landing'],felt:false};
-  if(p==='shelter'||p==='choose'){Object.assign(s,{quest:'active',topics:['ferry','wren','lantern'],seen:['landing','green','reed','shelter']});}
+  if(p==='shelter'||p==='choose'){Object.assign(s,{quest:'active',topics:['ferry','robin','lantern'],seen:['landing','green','reed','shelter']});}
   if(p==='shelter') s.room='shelter';
   if(p==='choose') s.lantern='player';
   return s;
@@ -456,12 +456,12 @@ class Phone{
     const L=[say('You',c.label)];
     switch(id){
       case 'favor': u.dlg.node='offer';
-        L.push(say('Bram','“Wren. Elspeth’s girl. She went into the fen last night and hasn’t come out.”'),say('Bram','“We search at dusk, and we need light. Mine is up at the shelter. Bring it down. Then tell me whether you are coming with us.”'));
-        ['wren','lantern'].forEach(t=>s.topics.includes(t)||s.topics.push(t)); L.push(sys('New topics · Wren · the lantern')); break;
+        L.push(say('Bram','“Robin. Marta’s girl. She went into the fen last night and hasn’t come out.”'),say('Bram','“We search at dusk, and we need light. Mine is up at the shelter. Bring it down. Then tell me whether you are coming with us.”'));
+        ['robin','lantern'].forEach(t=>s.topics.includes(t)||s.topics.push(t)); L.push(sys('New topics · Robin · the lantern')); break;
       case 'accept': u.dlg.node=null; s.quest='active';
         L.push(say('Bram',s.lantern==='player'?'“You’ve got it already? Then you’re quicker than me.”':'“East past the green, where the reeds start. Mind the mud.”'),sys('Quest · The Ferryman’s Lantern · Bring Bram the lantern.')); break;
       case 'decline': u.dlg.node=null; s.quest='declined'; L.push(say('Bram','“Then don’t stand in my light.”')); break;
-      case 'row': L.push(say('Bram','“Not with Wren still out there. Ask me tomorrow.”')); break;
+      case 'row': L.push(say('Bram','“Not with Robin still out there. Ask me tomorrow.”')); break;
       case 'decide': this.dsay(L); u.scene={phase:'choose'}; this.mark('scene'); return this.render();
       case 'bye': u.dlg=null; this.emit('',[txt(bramAt(s)==='landing'?'Bram nods and turns back to the water.':'Bram nods and goes back to watching the track.')]); return this.render();
     }
@@ -498,7 +498,7 @@ class Phone{
     if(DIRW[w[0]]&&w.length===1) return {move:DIRW[w[0]]};
     if(['l','look'].includes(w[0])&&w.length===1) return {id:'here',key:'look'};
     if(['i','inv','inventory'].includes(w[0])) return {msgs:[txt(s.lantern==='player'?`You carry a brass lantern${s.lit?', lit':''}.`:'Your hands are empty.')]};
-    if(w[0]==='help') return {msgs:[sys('Try: look · n e s w · take lantern · light lantern · talk bram · x post · wait · i. In a conversation, type a number or “ask wren”.')]};
+    if(w[0]==='help') return {msgs:[sys('Try: look · n e s w · take lantern · light lantern · talk bram · x post · wait · i. In a conversation, type a number or “ask robin”.')]};
     let verb=['l','look'].includes(w[0])?'examine':VERBS[w[0]];
     if(!verb) return {msgs:[bad('Unknown',`I don’t know the word “${esc(w[0])}”. Type help.`)]};
     if(verb==='wait'||verb==='feel') return {id:'here',key:verb};
@@ -742,12 +742,12 @@ class Room{
     const L=[say('You',c.label)];
     switch(id){
       case 'favor': u.dlg.node='offer';
-        L.push(say('Bram','“Wren. Elspeth’s girl. She went into the fen last night and hasn’t come out.”'),say('Bram','“We search at dusk, and we need light. Mine is up at the shelter. Bring it down. Then tell me whether you are coming with us.”'));
-        ['wren','lantern'].forEach(t=>s.topics.includes(t)||s.topics.push(t)); L.push(sys('New topics · Wren · the lantern')); break;
+        L.push(say('Bram','“Robin. Marta’s girl. She went into the fen last night and hasn’t come out.”'),say('Bram','“We search at dusk, and we need light. Mine is up at the shelter. Bring it down. Then tell me whether you are coming with us.”'));
+        ['robin','lantern'].forEach(t=>s.topics.includes(t)||s.topics.push(t)); L.push(sys('New topics · Robin · the lantern')); break;
       case 'accept': u.dlg.node=null; s.quest='active';
         L.push(say('Bram',s.lantern==='player'?'“You’ve got it already? Then you’re quicker than me.”':'“East past the green, where the reeds start. Mind the mud.”'),sys('Quest · The Ferryman’s Lantern · Bring Bram the lantern.')); break;
       case 'decline': u.dlg.node=null; s.quest='declined'; L.push(say('Bram','“Then don’t stand in my light.”')); break;
-      case 'row': L.push(say('Bram','“Not with Wren still out there. Ask me tomorrow.”')); break;
+      case 'row': L.push(say('Bram','“Not with Robin still out there. Ask me tomorrow.”')); break;
       case 'decide': this.dsay(L); u.scene={phase:'choose'}; u.flip='fwd'; return this.render();
       case 'bye': u.dlg=null; this.dsay([say('You',c.label)]); this.addEv([txt(bramAt(s)==='landing'?'Bram nods and turns back to the water.':'Bram nods and goes back to watching the track.')]); this.home(); return this.render();
     }
@@ -907,7 +907,7 @@ class Room{
         const row=(k,label,n)=>`<li><button data-a="page" data-v="${k}"><span>${label}</span><span class="fill"></span><span class="n">${n}</span></button></li>`;
         return `<p class="eyebrow">The book</p><h3>Contents</h3><ul class="toc">${row('map','Map',s.seen.length+' places')}${row('inv','Carrying',carry+(carry===1?' item':' items'))}${row('eq','Equipment',worn+' in use')}${row('char','Character',this.hurt?'hurt':'hale')}${row('journal','Journal',q)}${row('settings','Settings','')}</ul>`;
       }
-      case 'map': return `<button class="eyebrow link" data-a="page" data-v="contents">Contents ›</button><h3>Ashmere</h3><div class="bigmap" style="display:flex;justify-content:center">${this.tinyMap(260,150,36)}</div><p class="sys">You are at ${ROOMS[s.room].name}. North is up.</p>`;
+      case 'map': return `<button class="eyebrow link" data-a="page" data-v="contents">Contents ›</button><h3>Millbrook</h3><div class="bigmap" style="display:flex;justify-content:center">${this.tinyMap(260,150,36)}</div><p class="sys">You are at ${ROOMS[s.room].name}. North is up.</p>`;
       case 'inv': {
         const w=s.lantern==='player'?3:0;
         return `<p class="eyebrow">You are carrying</p><h3>Carrying</h3>${s.lantern==='player'?`<ul class="ents"><li><button data-a="ent" data-v="lantern">a <b>brass lantern</b>${s.lit?' (lit)':''}</button></li></ul>`:'<p class="sys">Nothing but the clothes you stand in.</p>'}

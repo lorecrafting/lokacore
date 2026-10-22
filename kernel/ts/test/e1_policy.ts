@@ -8,21 +8,14 @@ import { uses as dialogueUses } from '../src/content/cartridge_dialogues.ts';
 import { uses as reactionUses } from '../src/content/cartridge_reactions.ts';
 import { VERBS } from '../src/commands/verbs.ts';
 
-// The only admitted E1 candidates; outside POLICY_HASH (docs/system/e1-certification.md).
+// The only admitted E1 candidate; outside POLICY_HASH (docs/system/e1-certification.md).
 const CANDIDATES = [
   {
-    id: 'ashmere_missing_child',
-    version: '0.0.42',
-    content_hash: '5d8b0e3a16b209733707a8450cee5a4330965092498cf1d31ab8fdae9a50fc8b',
-    source: 'cartridges/ashmere_missing_child',
-    content_test: 'test/loka/content_missing_child_test.exs',
-  },
-  {
-    id: 'r9c_interactions',
+    id: 'recipe_sampler',
     version: '0.0.1',
-    content_hash: '7d74fac7f9429475bdd7481fe7bf6b851acae2d0d6eaf1661892705391d17263',
-    source: 'cartridges/r9c_interactions',
-    content_test: 'test/loka/content_r9c_interactions_test.exs',
+    content_hash: 'ec0d0dfd39aae0f63c8f6fa819d1d288619b546838ade1f0217267063cd40d1d',
+    source: 'cartridges/recipe_sampler',
+    content_test: 'test/loka/content_recipes_test.exs',
   },
 ] as const;
 export const sha256 = (bytes: string | Uint8Array) =>

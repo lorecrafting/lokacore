@@ -5,7 +5,7 @@ import { INSTALLED, loadCartridge } from '../src/index.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { read } from './read.ts';
 
-const prefix = 'ashmere_ferry@0.0.1:';
+const prefix = 'ferry_sampler@0.0.1:';
 const dialogue = (c: any) => c.dialogues[prefix + 'dialogue/bram'];
 const quest = (c: any) => c.quests[prefix + 'quest/lantern'];
 const variant = (c: any) => quest(c).journal.active_variants[0];
@@ -31,7 +31,7 @@ function load(change: (c: any) => void = () => {}, installed = INSTALLED) {
           root: {
             op: 'fact_compare',
             fact: {
-              cartridge_id: 'ashmere_ferry',
+              cartridge_id: 'ferry_sampler',
               cartridge_version: '0.0.1',
               kind: 'fact',
               key: 'search_plan',

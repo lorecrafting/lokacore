@@ -1,40 +1,15 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import {
-  gameView,
-  INSTALLED,
-  loadCartridge,
-  newWorld,
-  step,
-  type Cartridge,
-  type World,
-} from '../src/index.ts';
-import type { Command, DefinitionRef } from '../src/contracts.gen.ts';
+import { gameView, step, type World } from '../src/index.ts';
+import type { Command } from '../src/contracts.gen.ts';
 import { targetOf, value } from '../src/mechanics/fact.ts';
 import { key } from '../src/foundation/compose.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { elapsed, hp } from './combat_fixture.ts';
-import { read } from './read.ts';
+import { entity, genesis, prefix, ref, room } from './escort_fixture.ts';
 
-const bundle = read('protocol/fixtures/missing_child_v012_hash.json');
-const ids = read('protocol/fixtures/missing_child_v012_ids.json');
-const loaded = loadCartridge(
-  new TextEncoder().encode(
-    JSON.stringify({ cartridge: bundle.value, content_hash: bundle.sha256 }),
-  ),
-  INSTALLED,
-);
-assert.ok(loaded.ok, JSON.stringify(loaded));
-const cartridge = loaded.cartridge as Cartridge;
-const ref = (kind: string, name: string) =>
-  ({
-    cartridge_id: 'ashmere_missing_child',
-    cartridge_version: '0.0.12',
-    kind,
-    key: name,
-  }) as DefinitionRef;
-function setup() {
-  let world = newWorld(cartridge, '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, [1, 2, 3, 4]);
+function setup(change?: (c: any) => void) {
+  let world = genesis(change);
   let n = 0;
   const run = (payload: object, expected = 'accepted') => {
     const command = {
@@ -65,25 +40,16 @@ function setup() {
       },
       expected,
     );
-  const talk = (name: string) => run({ type: 'talk', target_id: ids[`npc/${name}`] });
+  const talk = (name: string) => run({ type: 'talk', target_id: entity(world, 'npc', name) });
   const flag = (name: string) => value(world, world.character, ref('fact', name));
+  // The quest-active gate: accept Homeward at Ferry Landing, walk to Village Green, meet the child.
   const ready = () => {
-    talk('elspeth');
+    talk('keeper');
     choose('accept');
-    run({ type: 'close_choice', continuation_id: gameView(world).choice!.continuation_id }); // the hub stays open after an answer (loka-x6t.5): Leave the conversation
+    const open = gameView(world).choice;
+    if (open) run({ type: 'close_choice', continuation_id: open.continuation_id });
     move('north', 'north');
-    run({ type: 'take', item_id: ids['item/fox_drawing'] });
-    move('south', 'south');
-    talk('elspeth');
-    choose('report');
-    move('south', 'south');
-    run({ type: 'perform', action: 'study_tracks' });
-    move('south', 'south');
-    talk('vesper');
-    choose('meet_wren');
-    talk('vesper');
-    choose('answer', 'accepted', 'lantern');
-    talk('wren');
+    talk('child');
   };
   return {
     run,
@@ -99,18 +65,51 @@ function setup() {
   };
 }
 const relation = (w: World) => w.state.escorts![w.character];
-const together = (w: World, room: string) =>
+const child = (w: World) => entity(w, 'npc', 'child');
+const together = (w: World, name: string) =>
   assert.deepEqual(
-    [w.state.containers[ids.body], w.state.containers[ids['npc/wren']]],
-    [ids[`room/${room}`], ids[`room/${room}`]],
+    [w.state.containers[w.body], w.state.containers[child(w)]],
+    [room(w, name), room(w, name)],
   );
-const quest = (w: World) =>
-  Object.values(w.state.quests!).find((q) => q.quest.key === 'missing_child')!;
+const homeward = (w: World) =>
+  Object.entries(w.state.quests!).find(([, q]) => q.quest.key === 'homeward')!;
+const quest = (w: World) => homeward(w)[1];
+// Lantern Cellar from Village Green, where the escort starts.
+const toCellar = ['south', 'east', 'down'];
+function fallInCellar(a: ReturnType<typeof setup>) {
+  a.move(...toCellar);
+  a.set(hp(a.world(), a.world().body, 1));
+  a.run({ type: 'attack', target_id: entity(a.world(), 'npc', 'cellar_rat_1') });
+  const fatal = elapsed(a.world(), a.world().state.clock + 150, 100);
+  assert.equal(fatal.decision.kind, 'accepted', JSON.stringify(fatal.decision));
+  a.set(fatal.world);
+}
+// The chapel shrine back down to the Lantern Cellar.
+const shrineToCellar = ['south', 'south', 'south', 'south', 'east', 'down'];
+const forgeChild = (w: World, continuation: string) => {
+  const row = w.state.choices![continuation];
+  return {
+    ...w,
+    state: {
+      ...w.state,
+      choices: {
+        ...w.state.choices,
+        [continuation]: {
+          ...row,
+          roles: row.roles.map((r) =>
+            r.role === 'child' ? { ...r, entity_id: entity(w, 'npc', 'stranger') } : r,
+          ),
+        },
+      },
+    },
+  } as World;
+};
 
 // Breaks: start loses the original binding, shared Move omits the follower, or completed escorts continue following.
-test('rescue binds the original Wren, follows each Move, and finishes beside Elspeth', () => {
+test('rescue binds the original child, follows each Move, and finishes beside the keeper', () => {
   const a = setup();
   a.ready();
+  const continuation = gameView(a.world()).choice!.continuation_id;
   const start = a.choose('rescue');
   assert.equal(start.kind, 'accepted');
   if (start.kind !== 'accepted') return;
@@ -118,26 +117,23 @@ test('rescue binds the original Wren, follows each Move, and finishes beside Els
     start.delta.ops.map((op) => op.op),
     ['fact.assign', 'escort.transition', 'choice.resolve'],
   );
-  // Independent Python SHA-256: command 20 ordinal 0 opens the choice; command 10 ordinal 2 activates Q2 after its two root events; command 3 leaves Elspeth's hub.
-  assert.deepEqual(relation(a.world()), {
+  const w = a.world();
+  assert.deepEqual(relation(w), {
     kind: 'escort',
-    actor_id: 'bd595711-ea5f-89a5-abb0-046cd349d2f9',
-    body_id: '3d4829ad-9e43-81ef-bc10-66b1b267e157',
-    npc_id: 'b3b7a7a6-b9e6-8d9c-82a2-c9cc728e3462',
-    quest_instance_id: '0ac84234-4782-8ee2-9859-0b3a874e3592',
-    continuation_id: 'ec640c6a-0cab-8c9f-a70d-e8804b95d91f',
+    actor_id: w.character,
+    body_id: w.body,
+    npc_id: child(w),
+    quest_instance_id: homeward(w)[0],
+    continuation_id: continuation,
     choice_id: 'rescue',
     status: 'following',
   });
-  assert.deepEqual(
-    [a.flag('fen_return_branch'), a.flag('village_child_status'), quest(a.world()).state],
-    ['rescue', 'missing', 'active'],
-  );
-  assert.equal(a.world().state.containers[ids['item/vesper_message']], ids['npc/vesper']);
-  a.run({ type: 'move', direction: 'south' }, 'not_found');
-  together(a.world(), 'fox_hollow');
-  for (const destination of ['mire_crossing', 'reed_bank', 'reed_path', 'ferry_landing']) {
-    const moved = a.run({ type: 'move', direction: 'north' });
+  assert.deepEqual([a.flag('homeward_started'), quest(w).state], [true, 'active']);
+  assert.equal(w.state.containers[entity(w, 'npc', 'stranger')], room(w, 'village_green'));
+  a.run({ type: 'move', direction: 'west' }, 'not_found');
+  together(a.world(), 'village_green');
+  for (const destination of ['well_lane', 'ferry_landing']) {
+    const moved = a.run({ type: 'move', direction: 'south' });
     assert.equal(moved.kind, 'accepted');
     if (moved.kind !== 'accepted') return;
     assert.deepEqual(
@@ -145,36 +141,31 @@ test('rescue binds the original Wren, follows each Move, and finishes beside Els
         .filter((op) => op.op === 'entity.transfer')
         .map((op) => [op.entity_id, op.destination_id]),
       [
-        [ids.body, ids[`room/${destination}`]],
-        [ids['npc/wren'], ids[`room/${destination}`]],
+        [w.body, room(w, destination)],
+        [child(w), room(w, destination)],
       ],
     );
     together(a.world(), destination);
   }
   assert.equal(quest(a.world()).state, 'active');
-  a.talk('elspeth');
-  const terminal = a.choose('rescued');
+  a.talk('keeper');
+  const terminal = a.choose('home');
   assert.equal(terminal.kind, 'accepted');
   if (terminal.kind !== 'accepted') return;
   assert.deepEqual(
     terminal.delta.ops.map((op) => op.op),
-    ['fact.assign', 'escort.transition', 'quest.transition', 'quest.transition', 'choice.resolve'],
+    ['escort.transition', 'quest.transition', 'quest.transition', 'choice.resolve'],
   );
   assert.deepEqual(
-    [
-      relation(a.world()).status,
-      quest(a.world()).state,
-      quest(a.world()).outcome,
-      a.flag('village_child_status'),
-    ],
-    ['completed', 'resolved', 'rescued', 'rescued'],
+    [relation(a.world()).status, quest(a.world()).state, quest(a.world()).outcome],
+    ['completed', 'resolved', 'home'],
   );
   a.move('north');
-  assert.equal(a.world().state.containers[ids['npc/wren']], ids['room/ferry_landing']);
+  assert.equal(a.world().state.containers[child(w)], room(w, 'ferry_landing'));
 });
 
-// Toolbox row G8. Breaks: the group walk does not skip the escorted NPC, so Wren, also a member,
-// is transferred twice and the Move faults.
+// Toolbox row G8. Breaks: the group walk does not skip the escorted NPC, so the child, also a
+// member, is transferred twice and the Move faults.
 test('an escorted NPC who is also a group member moves once', () => {
   const a = setup();
   a.ready();
@@ -182,7 +173,7 @@ test('an escorted NPC who is also a group member moves once', () => {
   const w = a.world();
   const member = ref('fact', 'in_group');
   const c = structuredClone(w.cartridge) as any;
-  c.facts[`ashmere_missing_child@0.0.12:fact/in_group`] = {
+  c.facts[`${prefix}:fact/in_group`] = {
     ...member,
     version: 1,
     value_type: { type: 'bool', default: false },
@@ -192,13 +183,13 @@ test('an escorted NPC who is also a group member moves once', () => {
   };
   c.world.group = { member };
   const grouped = { ...w, cartridge: c } as World;
-  const at = key(targetOf(grouped, w.character, member, ids['npc/wren']));
+  const at = key(targetOf(grouped, w.character, member, child(w)));
   a.set({ ...grouped, state: { ...w.state, facts: { ...w.state.facts, [at]: true } } });
-  const moved = a.run({ type: 'move', direction: 'north' });
+  const moved = a.run({ type: 'move', direction: 'south' });
   assert.deepEqual(
     moved.kind === 'accepted' &&
       moved.delta.ops.filter((op) => op.op === 'entity.transfer').map((op) => op.entity_id),
-    [ids.body, ids['npc/wren']],
+    [w.body, child(w)],
   );
 });
 
@@ -207,16 +198,17 @@ test('two-exit Flee carries the original follower to the drawn destination with 
   const a = setup();
   a.ready();
   a.choose('rescue');
-  a.move('north', 'north', 'north', 'north', 'north', 'east', 'down');
-  a.run({ type: 'attack', target_id: ids['npc/cellar_rat_1'] });
+  a.move(...toCellar);
+  a.run({ type: 'attack', target_id: entity(a.world(), 'npc', 'cellar_rat_1') });
   const w = a.world();
+  const cellar = room(w, 'lantern_cellar');
   a.set({
     ...w,
     state: { ...w.state, rng: [1, 33554432, 3, 4] },
     rooms: {
       ...w.rooms,
-      [ids['room/lantern_cellar']]: {
-        ...w.rooms[ids['room/lantern_cellar']],
+      [cellar]: {
+        ...w.rooms[cellar],
         exits: {
           west: { to: ref('room', 'chapel_nave') },
           north: { to: ref('room', 'drowned_lantern') },
@@ -232,70 +224,129 @@ test('two-exit Flee carries the original follower to the drawn destination with 
   assert.equal(relation(a.world()).status, 'following');
 });
 
+// A carter's post on Village Green riding to Ferry Landing (two rooms south, no exit between), the
+// fast_travel_sampler route shape with the destination gate opened.
+function cart(c: any) {
+  for (const k of ['transport', 'inspectable_detail'])
+    c.lock.capabilities[k] = c.manifest.requires.capabilities[k] = 1;
+  c.resources[`${prefix}:resource/coins`] = {
+    key: 'coins',
+    start: 10,
+    gain: 0,
+    minimum: 0,
+    maximum: 100,
+  };
+  c.npcs[`${prefix}:npc/carter`] = {
+    key: 'carter',
+    keywords: ['carter'],
+    short: 'npc.carter.short',
+    description: 'npc.carter.description',
+    room_line: 'npc.carter.room',
+    room: ref('room', 'village_green'),
+    resource_starts: { coins: 0 },
+  };
+  for (const [key, from, to, reverse] of [
+    ['south_cart', 'village_green', 'ferry_landing', 'north_cart'],
+    ['north_cart', 'ferry_landing', 'village_green', 'south_cart'],
+  ]) {
+    c.transports ??= {};
+    c.transports[`${prefix}:transport/${key}`] = {
+      key,
+      action: key,
+      room: ref('room', from),
+      detail: 'post',
+      destination: ref('room', to),
+      reverse: ref('transport', reverse),
+      recipient: ref('npc', 'carter'),
+      currency: ref('resource', 'coins'),
+      fare: 3,
+      recovery_rooms: [ref('room', to)],
+      label: 'transport.ride',
+      narration: 'transport.ride',
+    };
+    c.actions[`${prefix}:action/${key}`] = {
+      key,
+      command: 'use_transport',
+      input: ['route', 'quoted_fare'],
+      label: 'transport.ride',
+      accessibility: 'transport.ride',
+      priority: 0,
+      policy: { policy_version: 1, root: { op: 'all', items: [] } },
+      target: { kind: 'entity', scopes: ['inspectable_details'] },
+    };
+    c.rooms[`${prefix}:room/${from}`].details = {
+      post: {
+        aliases: ['post'],
+        description: 'transport.ride',
+        transport: { route: ref('transport', key), title: 'transport.ride' },
+      },
+    };
+  }
+  Object.assign(c.text, {
+    'transport.ride': 'Ride',
+    'transport.unaffordable': 'No coins.',
+    'npc.carter.short': 'carter',
+    'npc.carter.description': 'A carter.',
+    'npc.carter.room': 'A carter waits.',
+  });
+}
+
+// Breaks: a ride moves the body but leaves the following NPC behind (the shared travel step).
+test('a following NPC rides the transport with the player', () => {
+  const a = setup(cart);
+  a.ready();
+  a.choose('rescue');
+  const w = a.world();
+  const post = Object.entries(w.details).find(([, d]) => d.transport?.route.key === 'south_cart')!;
+  a.run({
+    type: 'use_transport',
+    endpoint_id: post[0],
+    route: ref('transport', 'south_cart'),
+    quoted_fare: 3,
+  });
+  together(a.world(), 'ferry_landing');
+  assert.equal(relation(a.world()).status, 'following');
+});
+
 // Breaks: fatal player death fails to separate the follower, or walking back resumes following without explicit Rejoin.
-test('real fatal combat leaves Wren behind and only a bound explicit Rejoin resumes travel', () => {
+test('real fatal combat leaves the child behind and only a bound explicit Rejoin resumes travel', () => {
   const a = setup();
   a.ready();
   a.choose('rescue');
-  a.move('north', 'north', 'north', 'north', 'north', 'east', 'down');
-  a.set(hp(a.world(), a.world().body, 1));
-  a.run({ type: 'attack', target_id: ids['npc/cellar_rat_1'] });
-  const fatal = elapsed(a.world(), a.world().state.clock + 150, 100);
-  assert.equal(fatal.decision.kind, 'accepted', JSON.stringify(fatal.decision));
-  a.set(fatal.world);
+  fallInCellar(a);
+  const w = a.world();
   assert.deepEqual(
-    [
-      a.world().state.containers[ids.body],
-      a.world().state.containers[ids['npc/wren']],
-      relation(a.world()).status,
-    ],
-    [ids['room/chapel_nave'], ids['room/lantern_cellar'], 'separated'],
+    [w.state.containers[w.body], w.state.containers[child(w)], relation(w).status],
+    [room(w, 'chapel_nave'), room(w, 'lantern_cellar'), 'separated'],
   );
-  a.move('south', 'south', 'south', 'south', 'east', 'down');
+  a.move(...shrineToCellar);
   together(a.world(), 'lantern_cellar');
   assert.equal(relation(a.world()).status, 'separated');
   a.move('up');
-  assert.equal(a.world().state.containers[ids['npc/wren']], ids['room/lantern_cellar']);
+  assert.equal(a.world().state.containers[child(w)], room(w, 'lantern_cellar'));
   a.move('down');
-  a.talk('wren');
+  a.talk('child');
   const before = relation(a.world());
   a.choose('rejoin');
   assert.deepEqual(relation(a.world()), { ...before, status: 'following' });
   a.move('up');
   together(a.world(), 'drowned_lantern');
   a.move('west', 'south');
-  a.talk('elspeth');
-  a.choose('rescued');
+  a.talk('keeper');
+  a.choose('home');
   assert.equal(relation(a.world()).status, 'completed');
 });
 
 // Breaks: a forged pending start substitutes a different co-located NPC of the same kind.
-test('an escort choice cannot bind Vesper in place of the authored Wren', () => {
+test('an escort choice cannot bind the stranger in place of the authored child', () => {
   const a = setup();
   a.ready();
-  const w = a.world(),
-    continuation = gameView(w).choice!.continuation_id;
-  const row = w.state.choices![continuation];
-  a.set({
-    ...w,
-    state: {
-      ...w.state,
-      choices: {
-        ...w.state.choices,
-        [continuation]: {
-          ...row,
-          roles: row.roles.map((r) =>
-            r.role === 'wren' ? { ...r, entity_id: ids['npc/vesper'] } : r,
-          ),
-        },
-      },
-    },
-  });
+  a.set(forgeChild(a.world(), gameView(a.world()).choice!.continuation_id));
   const option = gameView(a.world()).choice!.choices[0];
   assert.deepEqual('reason' in option && option.reason, { code: 'invalid_state' });
   a.choose('rescue', 'invalid_state');
   assert.equal(a.world().state.escorts?.[a.world().character], undefined);
-  assert.equal(a.flag('fen_return_branch'), 'unselected');
+  assert.equal(a.flag('homeward_started'), false);
 });
 
 // Breaks: Rejoin trusts a surviving relation after its retained original choice no longer binds the same NPC.
@@ -303,32 +354,10 @@ test('Rejoin refuses a relation whose original accepted choice names a different
   const a = setup();
   a.ready();
   a.choose('rescue');
-  a.move('north', 'north', 'north', 'north', 'north', 'east', 'down');
-  a.set(hp(a.world(), a.world().body, 1));
-  a.run({ type: 'attack', target_id: ids['npc/cellar_rat_1'] });
-  const fatal = elapsed(a.world(), a.world().state.clock + 150, 100);
-  assert.equal(fatal.decision.kind, 'accepted');
-  a.set(fatal.world);
-  a.move('south', 'south', 'south', 'south', 'east', 'down');
-  a.talk('wren');
-  const w = a.world(),
-    original = relation(w).continuation_id,
-    row = w.state.choices![original];
-  a.set({
-    ...w,
-    state: {
-      ...w.state,
-      choices: {
-        ...w.state.choices,
-        [original]: {
-          ...row,
-          roles: row.roles.map((r) =>
-            r.role === 'wren' ? { ...r, entity_id: ids['npc/vesper'] } : r,
-          ),
-        },
-      },
-    },
-  });
+  fallInCellar(a);
+  a.move(...shrineToCellar);
+  a.talk('child');
+  a.set(forgeChild(a.world(), relation(a.world()).continuation_id));
   const option = gameView(a.world()).choice!.choices[0];
   assert.deepEqual('reason' in option && option.reason, { code: 'invalid_state' });
   a.choose('rejoin', 'invalid_state');

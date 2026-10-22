@@ -1,10 +1,10 @@
 // Page stories (storybook-plan-2026-10-08.md C): a generated view (stories/views, scenarios.ts) drawn
-// by the real BookView, its buttons from the real buttonsOf and its words from Chapter 1's text table.
+// by the real BookView, its buttons from the real buttonsOf and its words from the showcase's text table.
 import type { StoryObj } from '@storybook/react-native-web-vite';
 import { View } from 'react-native';
 import { fn } from 'storybook/test';
 import wasm from 'canvaskit-wasm/bin/full/canvaskit.wasm?url';
-import chapter from '../../../protocol/fixtures/missing_child_v042_hash.json';
+import showcase from '../../../protocol/fixtures/toolbox_showcase_hash.json';
 import type { Game, GameView } from '../../packages/game-view/session.ts';
 import type { BookView as View_ } from '../book/Book.tsx';
 import { buttonsOf, type Page } from '../book/model.ts';
@@ -22,7 +22,7 @@ export type Saved = {
   details: Record<string, DetailLine[]>;
   chronicle?: ChronicleDay[];
 };
-const table: Record<string, string> = chapter.value.text;
+const table: Record<string, string> = JSON.parse(showcase.canonical).text;
 type Words = Record<string, string>;
 
 /** The presenter's screen for a saved view; `shell` sets a shell state (pending, a fault), `words`

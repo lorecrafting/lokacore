@@ -72,15 +72,18 @@ const levelled = (w: World, experience: number): World => ({
 });
 
 /** The sampler's artifact after `change`, as the loader's verdict: 'loaded' or [code, path]. */
-function verdict(change: (c: Record<string, any>) => void) {
+function reload(change: (c: Record<string, any>) => void) {
   const c = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
   change(c);
   const canonical = encode(c);
   const sha256 = createHash('sha256').update(canonical).digest('hex');
-  const r = loadCartridge(
+  return loadCartridge(
     new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
     INSTALLED,
   );
+}
+function verdict(change: (c: Record<string, any>) => void) {
+  const r = reload(change);
   return r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path];
 }
 
@@ -89,18 +92,21 @@ function fresh(): World {
   return newWorld(content, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e55' as never, [1, 2, 3, 4]);
 }
 
-// Breaks: cast is offered in a cartridge without spells: Chapter 1's GameView gains it.
-test('cast is not offered in Chapter 1, which has no spells', () => {
-  const chapter = loadCartridge(compiled('ashmere_missing_child'), INSTALLED);
-  assert.ok(chapter.ok);
-  const w = newWorld(
-    chapter.cartridge as Cartridge,
-    '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never,
-    [1],
-  );
-  const view = gameView(ok(play(w, { type: 'choose_ancestry', ancestry: 'fen_born' })));
-  assert.ok(view.actions.some((a) => a.action_key === 'look'));
-  assert.ok(!view.actions.some((a) => a.action_key === 'cast'));
+// Breaks: cast is offered in a cartridge without spells: the spells sampler minus its spell
+// recipes still offers it.
+test('cast is not offered once the spells sampler loses its spell recipes', () => {
+  const r = reload((c) => {
+    c.recipes = Object.fromEntries(
+      Object.entries(c.recipes).filter(([, v]: [string, any]) => v.target.kind !== 'spell'),
+    );
+  });
+  assert.ok(r.ok, JSON.stringify(!r.ok && r.diagnostic));
+  const cast = (c: Cartridge) =>
+    gameView(newWorld(c, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e55' as never, [1])).actions.some(
+      (a) => a.action_key === 'cast',
+    );
+  assert.equal(cast(content), true);
+  assert.equal(cast(r.cartridge as Cartridge), false);
 });
 
 // Breaks: cast is not offered or its offered invocation (word input, any case) does not reach the

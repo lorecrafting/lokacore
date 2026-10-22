@@ -123,6 +123,7 @@ test('Knock selects actual local responder and produces no writes', () => {
         ...fresh.rooms[landing],
         exits: {
           ...fresh.rooms[landing].exits,
+          south: { to: ref('room', 'well_lane') },
           north: {
             to: ref('room', 'well_lane'),
             barrier,

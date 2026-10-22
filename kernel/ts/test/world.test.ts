@@ -61,9 +61,9 @@ test('a fresh world mints IdSource ids and puts the player in the entry room', (
   assert.equal(w.character, CHARACTER);
   assert.deepEqual(w.state, { clock: 0, containers: { [BODY]: FERRY }, rng: SEED });
   assert.deepEqual(w.roomIds, {
-    'ashmere_rooms@0.0.1:room/boathouse': BOATHOUSE,
-    'ashmere_rooms@0.0.1:room/ferry_landing': FERRY,
-    'ashmere_rooms@0.0.1:room/well_lane': WELL,
+    'rooms_sampler@0.0.1:room/boathouse': BOATHOUSE,
+    'rooms_sampler@0.0.1:room/ferry_landing': FERRY,
+    'rooms_sampler@0.0.1:room/well_lane': WELL,
   });
   assert.deepEqual(gameView(w), {
     actor_id: CHARACTER,
@@ -104,7 +104,7 @@ test('a fresh world mints IdSource ids and puts the player in the entry room', (
     resources: [
       {
         resource: {
-          cartridge_id: 'ashmere_rooms',
+          cartridge_id: 'rooms_sampler',
           cartridge_version: '0.0.1',
           kind: 'resource',
           key: 'hp',
@@ -116,7 +116,7 @@ test('a fresh world mints IdSource ids and puts the player in the entry room', (
       },
       {
         resource: {
-          cartridge_id: 'ashmere_rooms',
+          cartridge_id: 'rooms_sampler',
           cartridge_version: '0.0.1',
           kind: 'resource',
           key: 'ma',
@@ -128,7 +128,7 @@ test('a fresh world mints IdSource ids and puts the player in the entry room', (
       },
       {
         resource: {
-          cartridge_id: 'ashmere_rooms',
+          cartridge_id: 'rooms_sampler',
           cartridge_version: '0.0.1',
           kind: 'resource',
           key: 'mv',
@@ -173,7 +173,7 @@ test('a body out of mv waits an hour and moves again', () => {
 // Breaks: a wrong destination, a missing or wrong delta, a missing event, or state not adopted.
 // The rooms cartridge has the default pools (R5 S6b), so the move pays 1 mv at time 0.
 const MV = {
-  cartridge_id: 'ashmere_rooms',
+  cartridge_id: 'rooms_sampler',
   cartridge_version: '0.0.1',
   kind: 'resource',
   key: 'mv',

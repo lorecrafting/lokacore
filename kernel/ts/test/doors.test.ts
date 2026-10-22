@@ -15,7 +15,7 @@ import { INSTALLED, loadCartridge, newWorld, step } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { barrierState } from '../src/mechanics/lookups.ts';
-import { read } from './read.ts';
+import { fragment } from './fragment.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-doors-'));
 let artifact: Uint8Array;
@@ -37,8 +37,8 @@ const ref = (kind: string, key: string) => ({
   kind,
   key,
 });
-function load(change: (c: any) => void = () => {}, from: any = source) {
-  const c = structuredClone(from);
+function load(change: (c: any) => void = () => {}) {
+  const c = structuredClone(source);
   change(c);
   const canonical = encode(c);
   const sha256 = createHash('sha256').update(canonical).digest('hex');
@@ -198,19 +198,21 @@ test('f. without walks the thief jumps into the locked hut', () => {
 });
 
 // Breaks: the loader's 1.81 floor for walks is missing or 1.80 (twin of content_doors_test.exs):
-// walks on a schedule case here, and on a population plan of the pinned Chapter 1 artifact (1.25).
+// walks on a schedule case here, and on the expedition sampler's population plan lowered to 1.80.
 test('g. walks on a case or a plan below kernel_api 1.81 does not load', () => {
-  const chapter = read('protocol/fixtures/missing_child_v029_hash.json').value;
-  const [plan] = Object.keys(chapter.populations);
-  const walking = structuredClone(chapter);
-  walking.populations[plan!].walks = true;
+  const expedition = fragment('protocol/fixtures/expedition_sampler_hash.json');
+  const { id, version } = expedition.source.manifest;
+  const at180 = (c: any) => (c.manifest.requires.kernel_api.at_least = '1.80');
   for (const r of [
-    load((c) => (c.manifest.requires.kernel_api.at_least = '1.80')),
-    load(() => {}, walking),
+    load(at180),
+    expedition.load((c) => {
+      at180(c);
+      c.populations[`${id}@${version}:population/hounds`].walks = true;
+    }),
   ])
     assert.deepEqual(r.ok ? 'loaded' : [r.diagnostic.code, r.diagnostic.path], [
       'KERNEL_API_RANGE_INVALID',
       '.cartridge.manifest.requires.kernel_api.at_least',
     ]);
-  assert.ok(load(() => {}, chapter).ok);
+  assert.ok(expedition.load(at180).ok);
 });

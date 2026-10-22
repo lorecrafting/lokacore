@@ -17,8 +17,6 @@ test('historical artifacts retain their canonical answers and refuse unmarked re
     'sampler_v010',
     'cartridge_sampler',
     'reward_storage',
-    'missing_child_v001',
-    'missing_child_v002',
   ]) {
     const pin = read(`protocol/fixtures/${name}_hash.json`);
     assert.equal(encode(pin.value), pin.canonical, name);

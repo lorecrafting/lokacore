@@ -7,7 +7,7 @@ defmodule Loka.ContentCalendarTest do
 
   # Breaks: the compiler emits a calendar whose period or schedule cannot be consumed safely.
   test "compiler rejects malformed authored periods and out-of-day schedules", %{tmp_dir: dir} do
-    File.cp_r!("cartridges/ashmere_ferry", dir)
+    File.cp_r!("cartridges/ferry_sampler", dir)
     File.rm!(Path.join(dir, "story_points/lantern_resolved.json"))
     manifest = Path.join(dir, "cartridge.json")
 
@@ -38,7 +38,7 @@ defmodule Loka.ContentCalendarTest do
 
   # Breaks: a fixed 24-hour compiler cap rejects a valid authored late-hour policy.
   test "compiler admits hour 29 but rejects hour 30 in a 30-hour day", %{tmp_dir: dir} do
-    File.cp_r!("cartridges/ashmere_ferry", dir)
+    File.cp_r!("cartridges/ferry_sampler", dir)
     File.rm!(Path.join(dir, "story_points/lantern_resolved.json"))
     manifest = Path.join(dir, "cartridge.json")
 

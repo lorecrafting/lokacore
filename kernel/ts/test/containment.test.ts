@@ -550,7 +550,7 @@ test('a Take alias advertises too_heavy and cannot evade the view admission inva
     ...base,
     cartridge: {
       ...base.cartridge,
-      actions: { ...base.cartridge.actions, 'ashmere_items@0.0.1:action/lift': alias as never },
+      actions: { ...base.cartridge.actions, 'items_sampler@0.0.1:action/lift': alias as never },
     },
   };
   const command = take(SATCHEL);

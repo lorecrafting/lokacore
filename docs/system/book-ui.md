@@ -528,7 +528,7 @@ and typed save-corrupt handling remain in force.
 
 ## Message return details
 
-Confirmed Vesper and Elspeth return lines appear once in their original NPC detail
+Confirmed Vesper and the mother return lines appear once in their original NPC detail
 history, after description and before options, including cold reopen. Pending, refused
 and stale replies never print success. Existing live freshness preserves an unchanged
 choice across elapsed-only redraws; changed custody, continuation, room or speaker
@@ -538,10 +538,10 @@ quest/status truth, without a new UI mode.
 
 ## Escort details
 
-Wren's escort and Rejoin choices and Elspeth's rescued turn-in use ordinary NPC details,
+The child's escort and Rejoin choices and the mother's rescued turn-in use ordinary NPC details,
 current shared availability and freshness. Confirmed lines appear once under their own
 original speaker after description and before options, including receipt recovery on reopen.
-Pending/refused/stale replies never narrate success. Journal and Green/Elspeth variants read
+Pending/refused/stale replies never narrate success. Journal and Green and mother variants read
 committed following/separated/rescued/stays state; there is no new UI mode.
 
 <a id="selected-s2-book-behavior-pending-implementation"></a>
@@ -935,7 +935,7 @@ Use existing receipt selection and log lifetime; no new transcript/table or
 persistent page route is introduced.
 
 Refresh/reopen renders truthful cottage/cot and Green variants without moving
-Elspeth or Wren. Scheduled absence never becomes a required wait. Browser proof
+the mother or the child. Scheduled absence never becomes a required wait. Browser proof
 traverses all three additions, meets Gareth/Ada on controlled schedule states,
 Forages, stores/retrieves, Eats, exhausts stock and refreshes after each boundary.
 Use an isolated current-build browser save under the web-first policy; Node and
@@ -950,11 +950,11 @@ appears in its detail history, and local Back returns to World. Examine/Read
 never claims message custody, topic learning or child return credit. Landscape
 text describes dry footing and natural den light, without a bottom, far Scan,
 fishing, drift or nest action that the actual projection cannot offer. The
-original separated Wren exposes ordinary Talk/Rejoin in the den without gear.
+original separated child exposes ordinary Talk/Rejoin in the den without gear.
 
 ## D3 mill, cottage and Hob details
 
-The [D3 declarations](cartridge.md#d3-western-ashmere-declarations) use existing
+The [D3 declarations](cartridge.md#d3-western-village-declarations) use existing
 World exits, adjacent sight, NPC details and [standalone notice flow](#notice-board-details).
 Hob's ledger and the For-sale sign have noun headings; entry invokes the exact
 captured Read offer. Confirmed bodies belong only to their respective detail
@@ -1016,7 +1016,7 @@ ordinary Move with truthful fare; Study east remains offered when otherwise
 movable. Direct commands and captured taps use the same current admission.
 Show the actual reachable corpse and its contents through ordinary physical
 pages/Take; never advertise D6 Chapel `recover_corpse` for a Study corpse.
-Public Aldric/S2, Sedge lessons, Wren return and existing corpse routes remain
+Public Aldric/S2, Sedge lessons, the child's return and existing corpse routes remain
 available. A retained bell or death line is presented from confirmed receipts,
 not an optimistic display callback.
 

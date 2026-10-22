@@ -66,7 +66,7 @@ test('reopen derives Reeds from the saved trigger choice, equal to headless play
         invocation_id: host.newId(),
         action_key,
         actor_id: fresh.character,
-        target_ids: target ? [fresh.entityIds[`ashmere_chapters@0.0.1:${target}`]] : [],
+        target_ids: target ? [fresh.entityIds[`chapters_sampler@0.0.1:${target}`]] : [],
         input,
       };
       const r = o.invoke(invocation) as Saved;

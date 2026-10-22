@@ -1,82 +1,52 @@
-// Real authored source is compiled independently of provisional release fixtures.
-import assert from 'node:assert/strict';
-import { execFileSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
-import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { encode } from '../src/foundation/canonical.ts';
+// fast_travel_sampler's frozen KAT (docs/system/mechanics.md fast travel, toolbox row 32).
 import { key } from '../src/foundation/compose.ts';
-import {
-  INSTALLED,
-  loadCartridge,
-  newWorld,
-  step,
-  type Cartridge,
-  type World,
-} from '../src/index.ts';
-import type { DefinitionRef } from '../src/contracts.gen.ts';
-const scratch = mkdtempSync(join(tmpdir(), 'loka-transport-source-'));
-let source: any;
-try {
-  execFileSync(
-    'mix',
-    ['loka.compile', 'cartridges/ashmere_missing_child', join(scratch, 'artifact.json')],
-    { cwd: fileURLToPath(new URL('../../../', import.meta.url)), stdio: 'pipe' },
-  );
-  source = JSON.parse(readFileSync(join(scratch, 'artifact.json'), 'utf8')).cartridge;
-} finally {
-  rmSync(scratch, { recursive: true });
-}
-export const prefix = `${source.manifest.id}@${source.manifest.version}`;
-export const ref = (kind: string, key: string): DefinitionRef => ({
-  cartridge_id: source.manifest.id,
-  cartridge_version: source.manifest.version,
-  kind: kind as never,
-  key: key as never,
-});
-export function bundle(change: (c: any) => void = () => {}) {
-  const c = structuredClone(source);
-  c.entry = ref('room', 'boathouse');
-  c.calendar.start = 0;
-  c.resources[`${prefix}:resource/pennies`].start = 3;
-  change(c);
-  const canonical = encode(c);
-  return { canonical, sha256: createHash('sha256').update(canonical).digest('hex') };
-}
-// A release starts here; authority tests must commit ancestry through invoke.
-export function genesis(change: (c: any) => void = () => {}) {
-  const b = bundle(change),
-    loaded = loadCartridge(
-      new TextEncoder().encode(`{"cartridge":${b.canonical},"content_hash":"${b.sha256}"}`),
-      INSTALLED,
-    );
-  assert.ok(loaded.ok, JSON.stringify(loaded));
-  return newWorld(
-    loaded.cartridge as Cartridge,
-    '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never,
-    [1, 2, 3, 4],
-  );
-}
-export function fresh(change: (c: any) => void = () => {}) {
-  const world = genesis(change);
-  const selected = step(
-    world,
-    {
-      id: '11111111-2222-4333-8444-555555555555' as never,
-      world_context_id: world.context,
-      payload: {
-        type: 'choose_ancestry',
-        actor_id: world.character,
-        ancestry: 'fey_touched' as never,
-      },
+import type { World } from '../src/index.ts';
+import { fragment } from './fragment.ts';
+
+const f = fragment('protocol/fixtures/fast_travel_sampler_hash.json');
+export const { prefix, ref, bundle, genesis } = f;
+
+// bleed_sampler's frozen combat and death blocks (corpses, position fact)
+// grafted on, shrine south_post: recovery corpses need them.
+const bleed = fragment('protocol/fixtures/bleed_sampler_hash.json');
+const from = (kind: string, name: string) =>
+  bleed.source[`${kind}s`][`${bleed.prefix}:${kind}/${name}`];
+export const armed = (c: any) => {
+  for (const k of ['combat', 'death', 'fact', 'position'])
+    c.lock.capabilities[k] = c.manifest.requires.capabilities[k] = 1;
+  c.world = {
+    combat: bleed.source.world.combat,
+    death: {
+      npc_corpse: ref('item', 'npc_corpse'),
+      player_corpse: ref('item', 'player_corpse'),
+      restore: { hp: 10, mv: 82 },
+      shrine: ref('room', 'south_post'),
     },
-    1,
-  );
-  assert.equal(selected.decision.kind, 'accepted');
-  return selected.world;
-}
+  };
+  c.facts = { [`${prefix}:fact/position`]: from('fact', 'position') };
+  c.items = {
+    [`${prefix}:item/npc_corpse`]: from('item', 'npc_corpse'),
+    [`${prefix}:item/player_corpse`]: from('item', 'player_corpse'),
+  };
+  for (const [k, v] of Object.entries(bleed.source.text))
+    if (/^(combat\.|item\.(npc|player)_corpse|npc\.hound)/.test(k)) c.text[k] = v;
+};
+// bleed_sampler's hound, without its bleed hit, at north_post: an encounter at the boarding detail.
+export const hound = (c: any) => {
+  armed(c);
+  const { attack, spawn_template, ...npc } = from('npc', 'hound');
+  const { on_positive_hit, ...hit } = attack;
+  c.npcs[`${prefix}:npc/hound`] = { ...npc, attack: hit, room: ref('room', 'north_post') };
+};
+
+// Rides are offered only after the destination was visited; transport tests open that gate.
+export const open = (c: any) => {
+  for (const a of ['ride_south', 'ride_north'])
+    c.actions[`${prefix}:action/${a}`].policy = {
+      policy_version: 1,
+      root: { op: 'all', items: [] },
+    };
+};
 export const entity = (w: World, kind: string, name: string) =>
   w.entityIds[`${prefix}:${kind}/${name}`];
 export const room = (w: World, name: string) => w.roomIds[`${prefix}:room/${name}`];
@@ -84,10 +54,11 @@ export const endpoint = (w: World, route: string) =>
   Object.entries(w.details).find(
     ([, d]) => d.transport?.route.key === route,
   )![0] as keyof World['details'];
-export const pennies = (w: World) =>
-  [w.body, entity(w, 'npc', 'sedge')].map(
+// [player body, carter]
+export const coins = (w: World) =>
+  [w.body, entity(w, 'npc', 'carter')].map(
     (id) =>
       w.state.resources![
-        key({ kind: 'resource', entity_id: id, resource: ref('resource', 'pennies') })
+        key({ kind: 'resource', entity_id: id, resource: ref('resource', 'coins') })
       ].value,
   );

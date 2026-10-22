@@ -46,7 +46,7 @@ const fails = (
       suggested_capabilities: suggested,
     },
   });
-const RECIPE = 'ashmere_bell@0.0.1:recipe/ring_bell';
+const RECIPE = 'recipe_sampler@0.0.1:recipe/ring_bell';
 const AT = `.cartridge.recipes["${RECIPE}"]`;
 const recipe = (c: any) => c.recipes[RECIPE];
 const success = (c: any) => recipe(c).outcomes.success;
@@ -58,13 +58,13 @@ test("a recipe's unknown target, fact or text is UNRESOLVED_REFERENCE", () => {
     target: 'gong',
   });
   fails((c) => (recipe(c).target.room.key = 'crypt'), 'UNRESOLVED_REFERENCE', `${AT}.target.room`, {
-    target: 'ashmere_bell@0.0.1:room/crypt',
+    target: 'recipe_sampler@0.0.1:room/crypt',
   });
   fails(
     (c) => (success(c).sequence[0].fact.key = 'bell_tolled'),
     'UNRESOLVED_REFERENCE',
     `${AT}.outcomes.success.sequence[0].fact`,
-    { target: 'ashmere_bell@0.0.1:fact/bell_tolled' },
+    { target: 'recipe_sampler@0.0.1:fact/bell_tolled' },
   );
   fails((c) => delete c.text['actions.ring_bell'], 'UNRESOLVED_REFERENCE', `${AT}.label`, {
     target: 'actions.ring_bell',
@@ -84,16 +84,16 @@ test("a recipe with an action's or a registered command's key is DUPLICATE_DEFIN
   const renamed = (key: string) => (c: any) => {
     const r = { ...recipe(c), key };
     delete c.recipes[RECIPE];
-    c.recipes[`ashmere_bell@0.0.1:recipe/${key}`] = r;
+    c.recipes[`recipe_sampler@0.0.1:recipe/${key}`] = r;
   };
   fails(
     renamed('look'),
     'DUPLICATE_DEFINITION',
-    '.cartridge.recipes["ashmere_bell@0.0.1:recipe/look"]',
+    '.cartridge.recipes["recipe_sampler@0.0.1:recipe/look"]',
   );
   fails(
     (c) =>
-      (c.actions['ashmere_bell@0.0.1:action/ring_bell'] = {
+      (c.actions['recipe_sampler@0.0.1:action/ring_bell'] = {
         key: 'ring_bell',
         label: 'actions.ring_bell',
         target: { kind: 'none' },
@@ -110,12 +110,12 @@ test("a recipe with an action's or a registered command's key is DUPLICATE_DEFIN
 
 // Breaks: a room contribution naming no action loads (a typo silently changes nothing).
 test("a room's contribution naming no verb, action or recipe is UNRESOLVED_REFERENCE", () => {
-  const room = (c: any) => c.rooms['ashmere_bell@0.0.1:room/belfry'];
+  const room = (c: any) => c.rooms['recipe_sampler@0.0.1:room/belfry'];
   const ops = [{ op: 'subtract', actions: ['take', 'ring_bell', 'ring_gong'] }];
   fails(
     (c) => (room(c).actions = ops),
     'UNRESOLVED_REFERENCE',
-    '.cartridge.rooms["ashmere_bell@0.0.1:room/belfry"].actions[0].actions[2]',
+    '.cartridge.rooms["recipe_sampler@0.0.1:room/belfry"].actions[0].actions[2]',
     { target: 'ring_gong' },
   );
 });
@@ -138,8 +138,8 @@ test('a recipe and its steps without their owners locked are UNDECLARED_CAPABILI
 // S3 review N1. Breaks: a v1 artifact whose action policy compares an undeclared fact loads,
 // then throws at decision time now that action policies are evaluated.
 test("a v1 action policy's undeclared fact is UNRESOLVED_REFERENCE", () => {
-  const talk = 'ashmere_hello@0.0.1:action/talk';
-  const fact = { cartridge_id: 'ashmere_hello', cartridge_version: '0.0.1', kind: 'fact' };
+  const talk = 'hello_sampler@0.0.1:action/talk';
+  const fact = { cartridge_id: 'hello_sampler', cartridge_version: '0.0.1', kind: 'fact' };
   fails(
     (c) =>
       (c.actions[talk].policy.root = {
@@ -149,7 +149,7 @@ test("a v1 action policy's undeclared fact is UNRESOLVED_REFERENCE", () => {
       }),
     'UNRESOLVED_REFERENCE',
     `.cartridge.actions["${talk}"].policy.root.fact`,
-    { target: 'ashmere_hello@0.0.1:fact/nope' },
+    { target: 'hello_sampler@0.0.1:fact/nope' },
     [],
     'cartridge_hash.json',
   );
@@ -188,7 +188,7 @@ test("a failure outcome's references and owners, and the check's, are checked", 
     and((c) => (recipe(c).outcomes.failure.sequence[0].fact.key = 'bell_cracked')),
     'UNRESOLVED_REFERENCE',
     `${AT}.outcomes.failure.sequence[0].fact`,
-    { target: 'ashmere_bell@0.0.1:fact/bell_cracked' },
+    { target: 'recipe_sampler@0.0.1:fact/bell_cracked' },
   );
   fails(
     and((c) => (recipe(c).outcomes.failure.narration.actor = 'narration.cracked')),
@@ -233,9 +233,9 @@ test('time_window needs schedule@1 and a non-empty window', () => {
 // type installs although the compiler rejects its source (FACT_TYPE_MISMATCH), so a failed check
 // faults at play time instead.
 test("a recipe's or a policy's fact value outside its FactSpec is FACT_TYPE_MISMATCH", () => {
-  const PICK = 'ashmere_dusk@0.0.1:recipe/pick_lock';
+  const PICK = 'check_sampler@0.0.1:recipe/pick_lock';
   const gate = {
-    cartridge_id: 'ashmere_dusk',
+    cartridge_id: 'check_sampler',
     cartridge_version: '0.0.1',
     kind: 'fact',
     key: 'crypt_gate_open',
@@ -261,7 +261,7 @@ test("a recipe's or a policy's fact value outside its FactSpec is FACT_TYPE_MISM
 // Review S2. Breaks: two recipes' checks with one key load, so one check DefinitionRef names two
 // checks and a check_passed objective completes on either.
 test("two recipes' checks with one key are DUPLICATE_DEFINITION", () => {
-  const toll = 'ashmere_bell@0.0.1:recipe/toll_bell';
+  const toll = 'recipe_sampler@0.0.1:recipe/toll_bell';
   fails(
     and((c) => (c.recipes[toll] = { ...structuredClone(recipe(c)), key: 'toll_bell' })),
     'DUPLICATE_DEFINITION',
@@ -273,10 +273,10 @@ test("two recipes' checks with one key are DUPLICATE_DEFINITION", () => {
 // does not exist, or regenerate outside a spec's bounds, because the loader let it in (each
 // matched by a compiler test in test/loka/content_road_test.exs).
 const ROAD = 'cartridge_road_hash.json';
-const HP = 'ashmere_road@0.0.1:resource/hp';
-const SHOVE = `.cartridge.recipes["ashmere_road@0.0.1:recipe/shove_cart"]`;
-const PRAY = `.cartridge.recipes["ashmere_road@0.0.1:recipe/pray"]`;
-const road = (c: any, key: string) => c.recipes[`ashmere_road@0.0.1:recipe/${key}`];
+const HP = 'resource_sampler@0.0.1:resource/hp';
+const SHOVE = `.cartridge.recipes["resource_sampler@0.0.1:recipe/shove_cart"]`;
+const PRAY = `.cartridge.recipes["resource_sampler@0.0.1:recipe/pray"]`;
+const road = (c: any, key: string) => c.recipes[`resource_sampler@0.0.1:recipe/${key}`];
 const road_fails = (f: (c: any) => void, code: string, path: string, data = {}, s: string[] = []) =>
   fails(f, code, path, data, s, ROAD);
 
@@ -290,7 +290,7 @@ test('a resource spec whose bounds do not hold its start is RESOURCE_SPEC_INVALI
 });
 
 test("a cost's, threshold's or resource.adjust's unknown resource is UNRESOLVED_REFERENCE", () => {
-  const target = { target: 'ashmere_road@0.0.1:resource/sp' };
+  const target = { target: 'resource_sampler@0.0.1:resource/sp' };
   road_fails(
     (c) => (road(c, 'shove_cart').costs[0].resource.key = 'sp'),
     'UNRESOLVED_REFERENCE',

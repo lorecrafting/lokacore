@@ -83,6 +83,21 @@ defmodule Loka.ContentCraftTest do
            )
   end
 
+  # Homestead hs-11 (twin of craft_raze.test.ts). Break: an ancestry grants at birth a skill whose
+  # prerequisite was never met (woodfolk's woodcutting takes one here).
+  test "an ancestry never grants a skill with a prerequisite", %{dir: dir} do
+    prerequisite = %{"policy_version" => 1, "root" => %{"op" => "all", "items" => []}}
+
+    assert {:error, diags} =
+             Loka.ContentSource.compile(dir, [
+               {"skills/woodcutting.json", &Map.put(&1, "prerequisite", prerequisite)}
+             ])
+
+    assert Enum.map(diags, &{&1["code"], &1["path"]}) == [
+             {"SCHEMA_VIOLATION", "cartridge.ancestries.woodfolk.skill"}
+           ]
+  end
+
   # Break (hs-14; twin of the loader test in kernel/ts/test/craft.test.ts): a shown skill whose
   # prerequisite reads a hidden skill compiles, a hidden skill reading a hidden one is refused,
   # or an unknown profession text compiles. The floor is loader_floors.json's

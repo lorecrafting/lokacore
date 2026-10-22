@@ -135,12 +135,12 @@
         {
           "ancestry": "fen_born",
           "attributes": {
-            "ashmere_missing_child@0.0.38:attribute/con": 10,
-            "ashmere_missing_child@0.0.38:attribute/dex": 10,
-            "ashmere_missing_child@0.0.38:attribute/int": 10,
-            "ashmere_missing_child@0.0.38:attribute/per": 6,
-            "ashmere_missing_child@0.0.38:attribute/spi": 10,
-            "ashmere_missing_child@0.0.38:attribute/str": 10
+            "village_chapter@0.0.38:attribute/con": 10,
+            "village_chapter@0.0.38:attribute/dex": 10,
+            "village_chapter@0.0.38:attribute/int": 10,
+            "village_chapter@0.0.38:attribute/per": 6,
+            "village_chapter@0.0.38:attribute/spi": 10,
+            "village_chapter@0.0.38:attribute/str": 10
           }
         }
       ],
@@ -1786,7 +1786,7 @@
           "op": "resource.adjust",
           "writer_group": 0,
           "resource": {
-            "cartridge_id": "ashmere_dusk",
+            "cartridge_id": "check_sampler",
             "cartridge_version": "0.0.1",
             "kind": "resource",
             "key": "mv"
@@ -1814,7 +1814,7 @@
           "op": "barrier.transition",
           "writer_group": 0,
           "barrier": {
-            "cartridge_id": "ashmere_gate",
+            "cartridge_id": "gate_sampler",
             "cartridge_version": "0.0.1",
             "kind": "barrier",
             "key": "cell_door"
@@ -2368,7 +2368,7 @@
         {
           "kind": "resource",
           "resource": {
-            "cartridge_id": "ashmere_dusk",
+            "cartridge_id": "check_sampler",
             "cartridge_version": "0.0.1",
             "kind": "resource",
             "key": "mv"
@@ -2383,7 +2383,7 @@
         {
           "kind": "barrier",
           "barrier": {
-            "cartridge_id": "ashmere_gate",
+            "cartridge_id": "gate_sampler",
             "cartridge_version": "0.0.1",
             "kind": "barrier",
             "key": "cell_door"

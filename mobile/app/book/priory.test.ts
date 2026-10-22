@@ -6,7 +6,11 @@ import { pathToFileURL } from 'node:url';
 import { elapsedHost } from '../../authority/local-story/__tests__/elapsed-host.test.ts';
 import { group, pagesAfter, restoredItemPages } from './model.ts';
 import { presenter } from './presenter.ts';
-import { ids, openChestBundle } from '../../authority/local-story/__tests__/priory-fixture.ts';
+import {
+  bundle,
+  chest as lidded,
+  ids as idsOf,
+} from '../../authority/local-story/__tests__/priory-fixture.ts';
 import { fadeStub } from './__tests__/fade-stub.ts';
 const require = createRequire(import.meta.url);
 const ts = require('typescript');
@@ -47,6 +51,18 @@ registerHooks({
     };
   },
 });
+// The codex chest bundle with a chapter page, so a mounted Book opens on it.
+const source = () =>
+  bundle((c) => {
+    lidded()(c);
+    c.chapters = [{ title: 'chapter.codex' }];
+    c.text['chapter.codex'] = 'The codex';
+    // Look (the room title tap) belongs to description_variant.
+    c.manifest.requires.capabilities.description_variant = 1;
+    c.lock.capabilities.description_variant = 1;
+  });
+const ids = idsOf(source().value);
+const LEDGER = 'The mill ground more sacks at night than by day.';
 const { Item } = await import('./Menu.tsx');
 const { default: Book, BookView } = await import('./Book.tsx');
 function nodes(e: any): any[] {
@@ -57,23 +73,13 @@ function nodes(e: any): any[] {
 
 // Break: opening a held child auto-reads, explicit Read loses its exact history, or Back leaves the parent.
 test('actual nested book Item opens locally and Read stays between description and options with local Back', (t) => {
-  const ward = ids['item/ward_of_the_fen'],
-    chest = ids['item/storage_chest'];
-  const a = elapsedHost(':memory:', { wall: 10000, mono: 0 }, openChestBundle());
+  const ward = ids['item/mill_ledger'],
+    chest = ids['item/chest'];
+  const a = elapsedHost(':memory:', { wall: 10000, mono: 0 }, source());
   t.after(() => a.sql.close());
   const p = presenter(a.game);
   a.game.subscribe(p.update);
-  for (const label of [
-    'Go north',
-    'Go north',
-    'Go north',
-    'Go north',
-    'Go north',
-    'Go north',
-    'Go west',
-    'Take The Ward of the Fen',
-    'Take a storage chest',
-  ])
+  for (const label of ['Go west', 'Take a mill ledger', 'Take a chest'])
     p.press(p.screen().buttons.find((b) => b.label === label) ?? assert.fail(label));
   const put = p
     .screen()
@@ -99,34 +105,25 @@ test('actual nested book Item opens locally and Read stays between description a
     );
   const before = a.sql.prepare('SELECT count(*) AS n FROM receipt').get()!.n;
   draw(chest)
-    .find(
-      (n) => n.type === 'Pressable' && n.props.accessibilityLabel === 'The Ward of the Fen, open',
-    )!
+    .find((n) => n.type === 'Pressable' && n.props.accessibilityLabel === 'A mill ledger, open')!
     .props.onPress();
   assert.deepEqual(stack.at(-1), { kind: 'thing', id: ward });
   assert.equal(a.sql.prepare('SELECT count(*) AS n FROM receipt').get()!.n, before);
   assert.deepEqual(p.screen().view.topics, []);
   const read = draw(ward).find(
-    (n) => n.type === 'Pressable' && n.props.accessibilityLabel === 'Read The Ward of the Fen',
+    (n) => n.type === 'Pressable' && n.props.accessibilityLabel === 'Read a mill ledger',
   );
   assert.ok(read);
   read.props.onPress();
   assert.deepEqual(
     p.screen().view.topics?.map((t) => t.label),
-    ['topic.ward'],
+    ['topic.mill'],
   );
-  assert.deepEqual(p.screen().detail(ward), [
-    'Stored.',
-    'The ward is a promise kept between the Priory and the fen. Ask Aldric how its protection is renewed.',
-  ]);
+  assert.deepEqual(p.screen().detail(ward), ['Stored.', LEDGER]);
   const texts = draw(ward)
     .filter((n) => n.type === 'Text')
     .map((n) => n.props.children);
-  assert.ok(
-    texts.indexOf(
-      'The ward is a promise kept between the Priory and the fen. Ask Aldric how its protection is renewed.',
-    ) < texts.indexOf('Read The Ward of the Fen'),
-  );
+  assert.ok(texts.indexOf(LEDGER) < texts.indexOf('Read a mill ledger'));
   assert.equal(p.screen().returnWorld, false);
   const latest = a.sql.prepare('SELECT count(*) AS n FROM receipt').get()!.n;
   draw(ward)
@@ -152,25 +149,17 @@ test('actual nested book Item opens locally and Read stays between description a
 
 // Break: pulse settlement or a World title retry after mounting hides the confirmed original book route.
 for (const settlement of ['pulse', 'title press'])
-  test(`Book restores Ward or Bell once through ${settlement} after remount during uncertain Read`, (t) => {
-    for (const key of ['ward_of_the_fen', 'bell_rites']) {
-      const a = elapsedHost(':memory:', { wall: 10000, mono: 0 }, openChestBundle());
+  test(`Book restores a ledger or note once through ${settlement} after remount during uncertain Read`, (t) => {
+    for (const key of ['mill_ledger', 'carters_note']) {
+      const a = elapsedHost(':memory:', { wall: 10000, mono: 0 }, source());
       t.after(() => a.sql.close());
       const p = presenter(a.game);
       a.game.subscribe(p.update);
       const book = ids[`item/${key}`],
-        chest = ids['item/storage_chest'];
-      for (const label of [
-        'Go north',
-        'Go north',
-        'Go north',
-        'Go north',
-        'Go north',
-        'Go north',
-        'Go west',
-        `Take ${key === 'bell_rites' ? 'Bell Rites' : 'The Ward of the Fen'}`,
-        'Take a storage chest',
-      ])
+        chest = ids['item/chest'];
+      for (const label of key === 'carters_note'
+        ? ['Go south', "Take a carter's note", 'Go north', 'Go west', 'Take a chest']
+        : ['Go west', 'Take a mill ledger', 'Take a chest'])
         p.press(p.screen().buttons.find((b) => b.label === label) ?? assert.fail(label));
       p.press(
         p
@@ -228,9 +217,7 @@ for (const settlement of ['pulse', 'title press'])
         a.fault.reads = false;
         const world = BookView(draw().props).props.children.props.children[0].props.children;
         nodes(world)
-          .find(
-            (n) => n.type === 'Pressable' && n.props.accessibilityLabel === 'Scriptorium, look',
-          )!
+          .find((n) => n.type === 'Pressable' && n.props.accessibilityLabel === 'Study, look')!
           .props.onPress();
         assert.equal(a.game.pending(), false);
       } else {

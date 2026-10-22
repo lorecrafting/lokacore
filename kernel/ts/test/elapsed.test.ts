@@ -19,7 +19,7 @@ import {
 import { read } from './read.ts';
 const CONTEXT = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as WorldContextId;
 const RUN = '6f6f6f6f-1111-4222-8333-444444444444' as StoryRunId;
-const F = 'ashmere_ferry@0.0.1';
+const F = 'ferry_sampler@0.0.1';
 function source() {
   const c = structuredClone(read('protocol/fixtures/cartridge_ferry_hash.json').value);
   c.manifest.time_policy = { profile: 'real_elapsed', rate: 50 };

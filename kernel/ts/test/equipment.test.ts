@@ -37,7 +37,7 @@ const ID = [
 ];
 const [BODY, KEY, LANTERN, CAP, HAT, CLOAK] = [ID[1], ID[5], ID[6], ID[7], ID[8], ID[9]];
 const [BRAM, HEAD] = [ID[4], ID[12]];
-const W = 'ashmere_wear@0.0.1';
+const W = 'wear_sampler@0.0.1';
 
 // The fixture's artifact, or its value changed by `f` and re-hashed over its canonical encoding.
 const world = (fixture: string, f?: (c: any) => void): World => {
@@ -138,7 +138,7 @@ test('a cartridge with equipment@1 but no slot keeps its ids and fresh state', (
     world('containers_cartridge_items_hash.json'),
     world('containers_cartridge_items_hash.json', lock),
   ];
-  const I = 'ashmere_items@0.0.1';
+  const I = 'items_sampler@0.0.1';
   assert.deepEqual([after.character, after.body], [ID[0], ID[1]]);
   assert.deepEqual(plain(after.roomIds), {
     [`${I}:room/ferry_landing`]: ID[2],
@@ -180,7 +180,7 @@ test('wear and remove by invocation, with their refusals', () => {
   refused(w, 'remove', CLOAK, 'not_owned'); // in the room
   const cloaked = accepted(accepted(w, 'take', CLOAK).world, 'wear', CLOAK).world;
   const item = {
-    cartridge_id: 'ashmere_wear',
+    cartridge_id: 'wear_sampler',
     cartridge_version: '0.0.1',
     kind: 'item',
     key: 'leather_cap',

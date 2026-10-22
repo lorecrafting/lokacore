@@ -250,9 +250,8 @@ How a leaf is named, dispatched and checked by both kernels: [the policy leaf se
 
 | Fact | Kind | Realm audience |
 | --- | --- | --- |
-| `ashmere_missing_child`: `inn_cellar_cleared` | once-per-world content (the cellar quest is done) | instance |
-| `ashmere_missing_child`: `village.child_status` | once-per-world content (the search for Wren) | instance |
-| `ashmere_missing_child`: `priory.tithe_delivered` | once-per-world content (the tithe ledger) | instance |
+| `cellar_sampler`: `inn_cellar_cleared` | once-per-world content (the cellar quest is done) | instance |
+| `facts_sampler`: `village.child_status` | once-per-world content (the search for the child) | instance |
 | `toolbox_showcase`: `wardle_standing` | world state (a faction's standing) | instance |
 | `toolbox_showcase`: `store_unbarred`, `knows_fire`, `knows_ash` | world state (a door; what an NPC has heard, per NPC) | instance |
 | `toolbox_showcase`: `warden_knows`, `letter_burnt` | world state read by an NPC schedule case ([W10](#conditional-schedules-toolbox-row-w10)) | instance |
@@ -1231,7 +1230,7 @@ attempt, rather than terminally failing and reopening generic quests. Immediate
 standing, living co-located Restart replaces the attempt identity, clears credit and sets together
 at Tobin's current cursor; the cyclic walk needs at most one circuit for four new
 checkpoints. Old-attempt commands/events cannot resume or credit it. Failed-state
-walking/revival grants no credit. Existing Wren death separation composes independently.
+walking/revival grants no credit. Existing child death separation composes independently.
 
 The fourth distinct qualifying checkpoint atomically marks completed, resolves S3
 as `completed` and assigns its reserved player trust fact true, with committed
@@ -1423,7 +1422,7 @@ The first chapter ferry is an unattended rope ferry operated from an inspectable
 boarding detail at the Boathouse and Fen Isle Landing. A successful outbound
 crossing moves the living standing actor body from Boathouse to Fen Isle Landing
 once, charges **2 pennies** to Mother Sedge's declared balance, and carries a
-valid co-present following Wren at no extra charge. The return moves body and
+valid co-present following the child at no extra charge. The return moves body and
 eligible follower from Fen Isle Landing to Boathouse for **0 pennies**. This is a
 transport action, not an ordinary compass exit or a B8 `service@1` benefit:
 that published command requires a co-located living NPC and its closed benefit
@@ -1431,7 +1430,7 @@ union has no movement case. The transport admission binds the exact endpoint,
 destination, quoted fare and declared recipient. It reuses B3's exact two-party
 resource transfer for the positive fare and the existing movement/escort transfer
 consequences in one writer group. No MV charge or time jump is added; normal
-authority elapsed preflight still applies. Crossing is not Elspeth rescue credit.
+authority elapsed preflight still applies. Crossing is not rescue credit.
 
 The outbound fare is waived only when the actor owns an actual nonempty corpse
 on the isle. Its current room custody and contained roots, including nested
@@ -1707,9 +1706,9 @@ The orchard detail reuses B5 Harvest over three actual authored item identities.
 Stock is their direct orchard custody, including lawful Drop/Take; no stock row,
 resource node, random roll, regrowth job or seasonal availability gate is added.
 Gareth and Ada use ordinary schedules and flavor dialogue, with no repair service
-or required waiting. Elspeth remains at Ferry Landing. Cottage and Green variants
-read the exact committed child enum; they do not move or create Wren, complete
-an escort, write a child outcome or claim that Wren is in the cottage.
+or required waiting. The mother remains at Ferry Landing. Cottage and Green variants
+read the exact committed child enum; they do not move or create the child, complete
+an escort, write a child outcome or claim that the child is in the cottage.
 
 D4 is the first held-food consumer. B8 supplies resource recovery semantics;
 `food@1` owns the installed `eat
@@ -1755,10 +1754,10 @@ including the shallow fox den; none declares `dark_description`. No swim, tide,
 light, time, topic, bell, faction or quest gate applies. The existing B4 dark-room
 rules and B6 glow exception remain unchanged elsewhere.
 
-A following original Wren travels on these ordinary edges. Fatal player death
-leaves that same Wren separated in the actual death room; the gear-free shrine
-route must expose ordinary Talk/Rejoin there, then permit the existing Elspeth
-rescue. A reachable owned corpse alone does not prove a reachable Wren: darkness
+A following original child travels on these ordinary edges. Fatal player death
+leaves that same child separated in the actual death room; the gear-free shrine
+route must expose ordinary Talk/Rejoin there, then permit the existing
+rescue. A reachable owned corpse alone does not prove a reachable child: darkness
 would conceal the ordinary NPC even though B4 reveals the corpse. No new NPC
 visibility exception, escort teleport, replacement or schedule is selected.
 
@@ -1766,7 +1765,7 @@ The ward stone is a fixed ordinary readable detail: Read narrates its authored
 inscription only and Examine describes the stone. Neither grants a Ward/Bell
 topic, Q2 credit, branch choice, relationship or item. The original protected
 `vesper_message` remains the sole Q2 message with its existing custody, transfer
-and Elspeth admission. No D5 operation changes Q2 facts or evidence. Landscape
+and mother admission. No D5 operation changes Q2 facts or evidence. Landscape
 prose adds no far Scan, fish interaction, crow holder, drift or bottom-room access.
 
 <a id="d6-water-depths-and-owned-corpse-recovery-selected-pending-implementation"></a>
@@ -1778,7 +1777,7 @@ selects optional `well_bottom` and `pool_bottom` below Well Shaft and the dry
 Black Pool bank. Rescue/bell stays dry and open all hours. Sedge's free D1 lesson
 provides acquired swim before S27. Descending requires currently usable learned
 swim, load≤6000g with nested/worn mass counted once, living/standing/out of
-encounter and MV≥10. Refuse a bound following Wren without moving or separating
+encounter and MV≥10. Refuse a bound following child without moving or separating
 either actor. D1 retains vacuous skill qualification; no CON/DEX gate,
 roll, percentage, tide or new lesson. Entry debits 10 MV instead of ordinary fare.
 Living actors below surface for 0 MV regardless of current skill/load/MV/posture/
@@ -1815,7 +1814,7 @@ isle return. No general remote Take or replacement-gear system.
 **Selected D9 contract.** The five valid terminal pairs are
 `rescued/prior`, `rescued/fox`, `stays/prior`, `stays/fox` and `lost/prior`.
 `lost/fox` remains invalid. Child and bell quest owners alone write their
-terminal facts. Elspeth, Maud, the Green, Aldric, Vesper and Sedge read
+terminal facts. The mother, Maud, the Green, Aldric, Vesper and Sedge read
 those committed facts for distinct authored responses; reading or rendering
 never changes them, reopens an ending or pays a reward. A missing child or
 unknown allegiance retains truthful search/base text.
@@ -2849,7 +2848,7 @@ Homestead row hs-4 (Beads `loka-kgd.108.2`): hens in an owned pen; fill the trou
 - **Cannot act.** While the actor's position is `sleeping`, the final [ActionSet](protocol.md#actionset-and-admission) keeps only the position verbs (every change between positions stays legal; Sleep again is the rule's `invalid_state`), look, wait and move (which [movement@1](#movement1-kerneltssrcmechanicsmovementrulets) refuses short of standing, water's captured free Up aside), plus the modal answers (dialogue `choose` and `close_choice`, a scene's `continue`), beside status reader 4's allow lists (`permits`, `kernel/ts/src/mechanics/status/permits.ts`, read by the ActionSet and the refusal). Every other command a sleeper sends is `invalid_state`, as in a fight. In an open encounter both filters apply, so a sleeper is offered Stand and Look only.
 - **Never skips time.** Sleep advances no clock: only Wait and elapsed delivery pass time, as before. Recovery at the sleeping rate is [W1](#position1-kerneltssrcrulespositionts)'s, unchanged.
 - **Provokes.** An accepted Sleep runs [G11](#standing-and-disposition-toolbox-rows-15-and-g11)'s entry engagement (`engage`, `kernel/ts/src/mechanics/disposition.ts`) on the sleeper's room in the same proposal: the first living, unengaged, hostile NPC with an `attack` and an `engage` line opens the encounter exactly as walking in does (first round at now + the interval, no draw, its engage line narrated; never in a sanctuary or a scene). Its ops share the position change's one writer group. Rest and Sit do not provoke. The first round then reaches the sleeper through the existing nonstanding skip, the multiplier and the wake. This is the PM's provisional answer to an owner question (Beads `loka-kgd.119`): it is one call in `kernel/ts/src/mechanics/position/rule.ts`, named by one test.
-- **Dream.** None new. Sleep emits no `rested`, so a Rest-anchored [B9](#s10-lantern-rest-and-dream-b9-selected-contract) Dream (Ashmere's inn dream) never starts on Sleep. A dream earned elsewhere is an authored `rested` reaction that applies a permanent [status](#status-effects-over-time-toolbox-row-1) whose applied line is the dream.
+- **Dream.** None new. Sleep emits no `rested`, so a Rest-anchored [B9](#s10-lantern-rest-and-dream-b9-selected-contract) Dream (the retired chapter's inn dream) never starts on Sleep. A dream earned elsewhere is an authored `rested` reaction that applies a permanent [status](#status-effects-over-time-toolbox-row-1) whose applied line is the dream.
 - **Known limits.** An NPC that walks in on a sleeper does not engage (G11's limit; aggression is C4's). NPCs have no sleep state (row 29b). A `presentation_only` Dream needs a paid-bed entitlement (a service's benefit, `lib/loka/content/dreams.ex`, B9), so a dream earned by a kill is authored as a `rested` reaction applying a permanent status (its applied line the dream, its label a lasting condition), not a Dream scene; a reaction's `quest.activate` compiles only under `quest_resolved` ([Cartridge](cartridge.md)). `meditating` is LATER.
 - **Opt-in.** No field and no floor: the rules apply to every cartridge locking position (pre-production). Chapter 1 declares no engage NPC, so a Sleep there provokes nothing. Installed kernel 1.76.
 - **Book.** No new element and no [Book UI](book-ui.md) change: while asleep the page offers fewer verbs, from the ActionSet.

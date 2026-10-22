@@ -1,0 +1,36 @@
+{
+  "bundle": "crow",
+  "home": "green",
+  "area": [
+    "green",
+    "lane"
+  ],
+  "cap": 1,
+  "day_target": 1,
+  "night_target": 1,
+  "night_start": 20,
+  "night_end": 6,
+  "wander_interval": 3600,
+  "replacement_delay": 86400,
+  "scavenge": {
+    "items": [
+      "old_coin"
+    ],
+    "drop_rooms": [
+      "green"
+    ],
+    "nest": "crow_nest",
+    "corridor": [
+      "green",
+      "lane"
+    ],
+    "interval": 150,
+    "narration": {
+      "carrying": "narration.crow_carrying",
+      "acquired": "narration.crow_acquired",
+      "delivered": "narration.crow_delivered",
+      "fallback": "narration.crow_fallback",
+      "shoo": "narration.crow_shoo"
+    }
+  }
+}

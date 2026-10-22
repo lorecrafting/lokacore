@@ -27,24 +27,26 @@ source with rooms, text or an entry compiles to
 The shared app bundles the [toolbox showcase](../SHOWCASE.md), `toolbox_showcase`, as its
 chapter: the [artifact](../../protocol/fixtures/toolbox_showcase_hash.json) compiled from
 `cartridges/toolbox_showcase`, under the
-[retire-Ashmere decision](../decisions/owner-decision-retire-ashmere-2026-10-21.md). The
+[retirement decision](../decisions/owner-decision-retire-first-chapter-2026-10-21.md). The
 first release will bundle the real game's chapter. The app's save has one fixed name,
 `loka-showcase.db` (the web build keeps a storage slot per save file); after a content change the
 app shows the pinned-release refusal with [explicit Start over](save.md#opening-a-story), with no
 save compatibility in pre-production.
-Earlier saves, `loka-ashmere-missing-child.db` included, stay on the device untouched and
+Earlier saves, the retired chapter's save included, stay on the device untouched and
 are never deleted.
 The app opens only the chapter file and offers no story picker. Missing pins follow
 [explicit Start over](save.md#opening-a-story), without automatic deletion or migration.
 
-### Retired Ashmere chapter (E1 candidate)
+### Retired first chapter (E1 candidate)
 
-Until 2026-10-21 the shared app bundled `ashmere_missing_child@0.0.42` (v042), titled
-**Ashmere — The Missing Child**, requiring kernel API1.37. Its independently derived
+The chapter is deleted in [retirement](../decisions/owner-decision-retire-first-chapter-2026-10-21.md)
+phase 2; this section is its history.
+
+Until 2026-10-21 the shared app bundled the chapter at `0.0.42` (v042), titled
+**The Missing Child**, requiring kernel API1.37. Its independently derived
 content hash is `5d8b0e3a16b209733707a8450cee5a4330965092498cf1d31ab8fdae9a50fc8b`,
-with 57 rooms, 10 quests, 54 dialogues, 8 scenes, 38 locked capabilities and 211 initial IDs. The [artifact oracle](../../protocol/fixtures/missing_child_v042_hash.json),
-[allocation oracle](../../protocol/fixtures/missing_child_v042_ids.json) and
-[independent derivation review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-06-d10-primary-source-review.md) establish those answers.
+with 57 rooms, 10 quests, 54 dialogues, 8 scenes, 38 locked capabilities and 211 initial IDs. Its artifact and allocation oracles left with the chapter; the
+[independent derivation review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-06-d10-primary-source-review.md) establishes those answers.
 D10 is published in [PR #263](https://github.com/lorecrafting/lokacore/pull/263), with
 [source review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-06-d10-primary-source-review.md) and
 [save/protocol review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-06-d10-save-protocol-review.md). A–D source is
@@ -52,7 +54,7 @@ installed; E1–E3 acceptance remains open in the [roadmap](../ROADMAP.md), incl
 chapter review and the browser/UI consistency gate. Native verification and known blur
 remain deferred under the [mobile pause](../decisions/owner-decision-web-first-mobile-pause-2026-10-05.md).
 
-The app used its own `loka-ashmere-missing-child.db` save under the
+The app used its own chapter save under the
 [actual chapter cutover](../decisions/owner-decision-actual-chapter-cutover-2026-10-05.md).
 The chapter retains the village and inn routes and playable Maud S1 (five rats,
 earned key/trust, upstairs storage), combat, shrine return and real-elapsed time.
@@ -74,56 +76,56 @@ unbuilt rooms remain deferred ([FEN-02 decision](../decisions/pm-decision-fen02-
 The [real chapter cast decision](../decisions/owner-decision-real-chapter-cast-2026-10-05.md)
 keeps Old Bram outside the active cast.
 
-Elspeth, Wren's mother, stands at Ferry Landing at every hour. Her opening conversation
-introduces Wren and directs newcomers north through Well Lane to Village Green, or east
+The child's mother stands at Ferry Landing at every hour. Her opening conversation
+introduces the child and directs newcomers north through Well Lane to Village Green, or east
 from Well Lane to the Drowned Lantern and Maud. Her selectable NPC detail uses the existing
 [Book dialogue flow](book-ui.md#npc-dialogue-and-action-details); directions remain in that
 detail's history rather than the World log. The informational replies grant no quest, fact or reward, and Leave preserves the north route. This fixed placement supersedes the
-archived Elspeth Green/cottage schedule for the current opening
-([opening NPC decision](../decisions/owner-decision-opening-elspeth-2026-10-05.md)).
+archived Green/cottage schedule for the current opening
+([opening NPC decision](../decisions/owner-decision-opening-npc-2026-10-05.md)).
 
 Q1-A follows the [PM first-lead decision](../decisions/pm-decision-q1-a-first-lead-2026-10-05.md).
-Elspeth's always-eligible guide includes an explicit accept choice for **The First Lead**;
+The mother's always-eligible guide includes an explicit accept choice for **The First Lead**;
 only acceptance starts Q1. A unique 20g `fox_drawing` lies at Village Green by the elm,
 using ordinary item detail with authored identity/description, Take and Leave under
 [detail-page order](book-ui.md#detail-page-order). Its `current_state`/`has_item` objective
 shows the active journal until held, then the ready text. Taking it before acceptance starts
 nothing; acceptance while holding it is ready immediately. Dropping removes readiness,
-and retaking restores it. The separate `a_elspeth_report` dialogue sorts before the guide
+and retaking restores it. The separate report dialogue sorts before the guide
 and is eligible only with Q1 active and the drawing held. Reporting resolves Q1 once,
-retains the drawing, and says it could be Wren's, suggesting reeds south of the landing
+retains the drawing, and says it could be the child's, suggesting reeds south of the landing
 without proof of his route. The guide remains available before and after report; Maud's
 S1 offer and turn-in remain independently usable in every Q1 state. No hour or wait gates
-apply. This village clue neither moves nor duplicates Wren's archived boot or tracks.
+apply. This village clue neither moves nor duplicates the child's archived boot or tracks.
 Its Q2 activation consumer is [the staged first search lead below](#source-layout).
 
 The chapter retains its authored calendar/status, typed bell reaction and scene composition,
 real_elapsed rate50/start64800, HP10, MV100, carrying ceiling12000, move cost1 and
 position recovery18/36 per3600 logical seconds. Its release and independent
-answers are [above](#retired-ashmere-chapter-e1-candidate). Historical sampler/proof sources,
+answers are [above](#retired-first-chapter-e1-candidate). Historical sampler/proof sources,
 release pins and [sampler evidence](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/c1-sampler/README.md) remain labeled
 with their actual release and are not bundled.
 
 Q2-A — the first Missing Child search lead — consumes that report: exact `first_lead/report`
-automatically starts `missing_child` in the same receipt. Its current-state objective is the
+automatically starts the search quest in the same receipt. Its current-state objective is the
 player fact `fen.tracks_found`, default false. Only **Study tracks** at Reed Bank assigns it,
 with Q2 active and the fact false; arrival, examine and Read never grant credit. Study has no
 check, cost, duration or cooldown. The journal directs the player to Reed Bank, then toward
-Fox Hollow and explicitly says Wren remains unfound. The quest remains **active**; this staged
+Fox Hollow and explicitly says the child remains unfound. The quest remains **active**; this staged
 objective adds no objectives-complete transition, turn-in, rescue or reward. The all-hours
 Mire/Hollow route remains unchanged. See [Q2-A adoption](../decisions/pm-decision-q2-a-first-search-2026-10-05.md).
 
-Q2-B places Wren and Vesper at Fox Hollow at every hour, without attack profiles or
+Q2-B places the child and Vesper at Fox Hollow at every hour, without attack profiles or
 light/PER requirements. Descriptive visits before Q2 activation or Study grant no progress.
 The first eligible Vesper conversation requires active Q2 and studied tracks; accepting
-`meet_wren` binds both living NPCs and assigns player fact `fen.wren_met`. Arrival, Look and
+the meeting binds both living NPCs and assigns the player's met fact. Arrival, Look and
 opening Talk do not. The next ordered conversation offers the letter-bank riddle: answer
 `lantern`, bank `R N A O L T E N S`. Only its correct choice assigns player fact
-`fen.vesper_riddle_answered`. The subsequent conversation offers the message return below, and Wren
+`fen.vesper_riddle_answered`. The subsequent conversation offers the message return below, and the child
 has an informational reply. All progress uses the saved, original role identities.
-The journal stages are seek tracks → tracks found/Wren unfound → Wren met/riddle pending →
+The journal stages are seek tracks → tracks found/child unfound → child met/riddle pending →
 riddle accepted/return decision pending. Q2 remains active through those stages.
-[Q2-B adoption](../decisions/pm-decision-q2-b-wren-riddle-2026-10-05.md) records this boundary.
+[Q2-B adoption](../decisions/pm-decision-q2-b-riddle-2026-10-05.md) records this boundary.
 
 API1.9 `QuestJournal.active_variants` is an optional ordered list of 1–16
 `{when: VersionedPolicy, text: TextKey}` entries. For an active quest only, the first holding
@@ -611,25 +613,25 @@ model strips them to prose until details are tappable (`mobile/app/book/model.ts
 
 ## Development cartridges
 
-`cartridges/ashmere_scene` exercises [modal scenes](mechanics.md#scene1-mechanicsscenerulets):
+`cartridges/scene_sampler` exercises [modal scenes](mechanics.md#scene1-mechanicsscenerulets):
 three narrate lines start on `lantern_resolved/carry`; a fact_changed reaction hears
 that the scene ended. Its source uses short story-point and fact references, and has
 an independent known answer; existing cartridges remain unchanged.
 
-`cartridges/ashmere_chapters` exercises [Chapters](mechanics.md#chapters-kerneltssrcviewviewts):
+`cartridges/chapters_sampler` exercises [Chapters](mechanics.md#chapters-kerneltssrcviewviewts):
 opening Landing, Dusk after either lantern story-point outcome, and Reeds after `carry`,
 whose trigger choice is `take_it` (the other choice is `leave_it`). This independent source
 has its own identity and frozen known answer; all preexisting cartridges remain unchanged.
 
-`cartridges/ashmere_journal` exercises [quest journal selection](mechanics.md#quest1-mechanicsquestrulets-kerneltssrcmechanicsquestlifecyclets):
+`cartridges/journal_sampler` exercises [quest journal selection](mechanics.md#quest1-mechanicsquestrulets-kerneltssrcmechanicsquestlifecyclets):
 the Lantern's current possession changes its active text, while the oar's post-activation
 acquisition keeps its earned text after drop; terminal states select an outcome text or their
 stage's fallback. These are historical development proofs, not a retained-release or save
 migration requirement. Current bundled content and forward-development policy are in the
 [current chapter](#current-bundled-chapter) and [owner decision](../decisions/owner-decision-forward-development-2026-10-05.md); preserve saved bytes and exact mismatch refusal.
 
-`cartridges/ashmere_{hello,rooms,details,facts,items,bell,dusk,road,gate,errand,ferry,green}`
-each exercise one slice; most carry replayable transcripts
+The slice samplers (`cartridges/{hello,rooms,details,facts,items,gate,errand,ferry,green}_sampler`
+and others) each exercise one slice; most carry replayable transcripts
 (`cartridges/<name>/transcripts/<capability>.jsonl`, replayed by
 `kernel/ts/test/transcripts.test.ts`). `cartridges/lantern_proof` is the R6P proof, "The
 Ferryman's Lantern": four rooms, Bram, one lantern, one quest with a `current_state`
@@ -637,43 +639,7 @@ objective and no offer, two dialogues of Bram's: `bram_offer` while the player h
 the quest (one choice, `accept`, which accepts it) and `bram` while it is active (two choices,
 `carry`, `leave` with a hand-over), the fact `search_plan`, a story point with one outcome per choice, start 06:00
 (`cartridges/lantern_proof/*`; its stats and gate: [owner rules](owner-rules.md#product-and-scope)). Its known answer remains historical proof; the app bundled the
-[retired Missing Child chapter](#retired-ashmere-chapter-e1-candidate) until 2026-10-21.
-
-### R9C synthetic interaction cartridge (E2)
-
-`cartridges/r9c_interactions` is `r9c_interactions@0.0.1`, **R9C interactions (synthetic)**,
-API1.37: the permanent, unpolished interaction corpus of the
-[E2 brief](../briefs/chapter-one/chapter-one-e2-r9c-interactions-brief-2026-10-05.md).
-It is not bundled, has its own identity and save, and does not inherit the chapter's hash
-or acceptance. Its content hash is `7d74fac7f9429475bdd7481fe7bf6b851acae2d0d6eaf1661892705391d17263`,
-with 26 rooms and 127 initial IDs; the [artifact oracle](../../protocol/fixtures/r9c_interactions_hash.json)
-and [allocation oracle](../../protocol/fixtures/r9c_interactions_ids.json) come from
-`test/loka/cartridge_r9c_interactions_hash.py`. The fixtures are not in the simulator's
-seed-picked corpus (`CARTRIDGES` in `kernel/ts/test/sim.ts`).
-
-The source is the v042 chapter's own definitions, short references and keys, cut to one
-shared topology: Ferry Landing, Well Lane, Village Green, North and East Gate, Watch Post,
-Chapel Steps and Nave, Bell Tower, Belfry, Drowned Lantern, Inn Rooms, Chandler, Well Shaft and
-Bottom, Boathouse, Fen Isle Landing, Reed Path, Reed Bank, Willow Shade, Drowned Oak, Oak
-Branches, Mire Crossing, Fox Hollow, Hound Run and Adder Nest. Reciprocal exits to removed
-rooms are dropped; the Pool route, rats, the inn rumor board, Maud's cellar quest, Chandler's debt, the wisp, topics,
-D9 village replies and scheduled villagers are absent, so `check@1` and `topics@1` are not
-locked. Sedge stands at Fen Isle Landing (the only recovery room), Wick in Chapel Nave, and the
-three apples on the Green. Two numbers deliberately differ from the chapter: the outbound
-ferry fare is 5 pennies and Maud's room costs 4.
-
-| Family | Entities |
-|---|---|
-| Identity, custody, trade | apples and fenwort (matching nouns), Peg's shop, satchel and haggle lesson, Vesper's message, Chapel door with Knock and Aldric, readable details, `where` |
-| Terminal fork | Q2 stays/rescued (Vesper, Wren, Elspeth), Q3 prior/fox (Aldric, belfry bell), bell scenes and reactions, five Green epilogues, `prologue_completed` |
-| Rest, dream, liquid, light | Maud's room, meal and ale, Inn Rooms bed and dream, waterskins and well, torch and lamp oil, dark well rooms |
-| Hound, bleed, escort, expedition | `fen_hounds`, `bleeding`, Wick's lesson and bandages, Wren's escort, Night in the Marsh from Hound Run |
-| Patrol and deer | Tobin's `watch_rounds`, `oak_deer`, `willow_deer` |
-| Crow provenance | four crow plans, `old_coin` at Well Bottom, the Oak Branches nest |
-| Skill, water, terminal consumption | Sedge's swim and herbalism, the well water route, both ferry routes, careful Harvest at Willow Shade, Wick's exchange, apples |
-
-A later mechanic change that breaks these answers updates them in the same slice
-(owner approval 2026-10-07, paraphrased).
+[retired Missing Child chapter](#retired-first-chapter-e1-candidate) until 2026-10-21.
 
 ## M1-A elapsed policy
 
@@ -742,7 +708,7 @@ preserving the five finite rats. It removes cellar_door from both reciprocal exi
 removes the obsolete barrier/key/text. Cellar access is an ordinary free passage, so
 shrine recovery requires no equipment/key. Other barriers and owner prose remain.
 The historical0.0.8 fixture retains its original answer; the
-[retired Ashmere chapter](#retired-ashmere-chapter-e1-candidate) has its own independent oracle.
+[retired first chapter](#retired-first-chapter-e1-candidate) has its own independent oracle.
 
 ## Maud’s Cellar content (M20-B2)
 
@@ -782,26 +748,26 @@ The [M20-B2 evidence](https://github.com/lorecrafting/lokacore/blob/f8513671ea7d
 
 [The adopted return plan](../decisions/pm-decision-q2-c-stays-2026-10-05.md) completes
 the message path; [rescue below](#q2-c-rescue-return) adds its complete alternative. After the accepted
-riddle, active Q2 offers carrying Vesper's original message to Elspeth while Wren
+riddle, active Q2 offers carrying Vesper's original message to the mother while the child
 stays. The message starts directly with Vesper; it cannot be Taken or Read there.
-The branch choice binds living, co-located Vesper/Wren and the original item, requires
+The branch choice binds living, co-located Vesper, the child and the original item, requires
 player fact `fen.return_branch=unselected` and instance `village.child_status=missing`,
 and atomically receives that same item and assigns branch `stays`. Capacity refusal
 leaves custody, branch and pending continuation unchanged. Q2 stays active.
 
 The bounded player branch has values unselected/stays/rescue, default unselected. The instance
-status has missing/rescued/stays/lost, default missing. Only the Elspeth turn-in writes
+status has missing/rescued/stays/lost, default missing. Only the mother's turn-in writes
 status in this release. The message's authored `give_allowed: false` prevents ordinary
 Give of it or a container holding it; ordinary Drop/Take, legal Put/Take and corpse
 recovery retain the original identity.
 
-The ordered Elspeth turn-in requires active actor-owned Q2, branch stays, status missing,
-the original message directly in the actor body and the bound living Elspeth present.
-Acceptance hands that item to Elspeth, resolves Q2 outcome stays and assigns status stays
+The mother's ordered turn-in requires active actor-owned Q2, branch stays, status missing,
+the original message directly in the actor body and the bound living mother present.
+Acceptance hands that item to the mother, resolves Q2 outcome stays and assigns status stays
 in one proposal. Arrival, nested custody and historical possession never resolve Q2.
 The retained branch row binds the original item and participants; terminal binding must
 agree with it. Active journal text requests delivery or recovery without claiming direct
-custody; the resolved text says Wren stays and his mother received the message. Elspeth's
+custody; the resolved text says the child stays and his mother received the message. The mother's
 response and Village Green's description derive from committed status. Lost and dawn
 scenes remain deferred. Q1, Maud S1 and the
 reciprocal all-hours fen route remain usable.
@@ -809,21 +775,21 @@ reciprocal all-hours fen route remain usable.
 ## Q2-C rescue return
 
 [Rescue adoption](../decisions/pm-decision-q2-c-rescue-2026-10-05.md) adds the complete
-alternative to the stays path. After active Q2 and the accepted riddle, Wren's ordered
-conversation offers escorting the original Wren to Elspeth. It binds Wren and Vesper,
+alternative to the stays path. After active Q2 and the accepted riddle, the child's ordered
+conversation offers escorting the original child to the mother. It binds the child and Vesper,
 requires unselected branch/missing status, and atomically assigns player branch rescue
 and starts the typed escort. It binds no message item; that original item stays with
 Vesper throughout rescue. A stale stays choice cannot overwrite the selected branch.
 The player-scoped branch enum becomes unselected/stays/rescue.
 
-Wren follows accepted Move and Flee on the real reciprocal all-hours route. Player death
-leaves Wren in the death room and separates the escort; ordinary travel back and an
-explicit co-located Wren Rejoin conversation resume the same relation. Return alone
-does not resume it. The rescued Elspeth turn-in requires active Q2, rescue branch, missing
-status and original living Wren following beside living Elspeth and player. It completes
-the relation, resolves Q2 as rescued and assigns status rescued in one proposal. Wren
-remains physically beside Elspeth after later player movement. Arrival alone cannot finish.
-The journal distinguishes following/separated/completed; Green and Elspeth read committed
+The child follows accepted Move and Flee on the real reciprocal all-hours route. Player death
+leaves the child in the death room and separates the escort; ordinary travel back and an
+explicit co-located child Rejoin conversation resume the same relation. Return alone
+does not resume it. The rescued turn-in to the mother requires active Q2, rescue branch, missing
+status and original living child following beside the living mother and player. It completes
+the relation, resolves Q2 as rescued and assigns status rescued in one proposal. The child
+remains physically beside the mother after later player movement. Arrival alone cannot finish.
+The journal distinguishes following/separated/completed; Green and the mother read committed
 rescued/stays truth. Both terminal guides retain directions; Q1 and Maud remain independent.
 Bell-first loss and the prior allegiance are specified by the Q3 adoption below.
 
@@ -835,9 +801,9 @@ actor-owned bell quest after active Q2 with studied tracks, or either completed 
 return. Only Ring on the Belfry bell detail with active Q3 and an eligible Q2 writes
 the bell and prior allegiance. Its fact-change reaction resolves Q3/prior; another
 guarded reaction fails still-active Q2/lost and writes instance child status lost only
-when the accepted Wren meeting is absent. Ring after that meeting preserves active Q2
+when the accepted child meeting is absent. Ring after that meeting preserves active Q2
 and either return. Rescued and stays remain terminal. The Q3 resolution starts one
-three-line bell scene; Ring emits no story point. Lost has honest journal, Elspeth and
+three-line bell scene; Ring emits no story point. Lost has honest journal, the mother and
 Green text. The fox choice is specified separately below; no finale is present yet.
 
 ## Q3-F fox and silent bell
@@ -1036,10 +1002,7 @@ this cartridge; no engine or Book fenwort count/faction literal is permitted.
 
 ## B4 well and fuel
 
-B4 introduced `ashmere_missing_child@0.0.21`, API1.19:
-[independent payload](../../protocol/fixtures/missing_child_v021_hash.json),
-[94-ID answer](../../protocol/fixtures/missing_child_v021_ids.json),
-[derivation](../../protocol/fixtures/generate_missing_child_v021.py).
+B4 introduced the chapter at `0.0.21`, API1.19; its oracle files left with the chapter.
 B4 is reviewed; its successor pins are retained as frozen answers.
 
 The [light mechanic](mechanics.md#b4-light-and-darkness-selected-contract)
@@ -1106,7 +1069,7 @@ their existing representation; B4's fuel rows are not liquid vessels.
 ## C2 watch route and trust
 
 [C2](mechanics.md#s3-finite-watch-patrol-c2-selected-contract)
-adds four Ashmere rooms with reciprocal, all-hours exits: North Gate east ↔
+adds four village rooms with reciprocal, all-hours exits: North Gate east ↔
 Watch Post west; Watch Post east ↔ Watch Cell west; Watch Post up ↔ Gate Tower
 down; Village Green east ↔ East Gate west. The cell is vacant with an open,
 unlocked door: no missing-key producer. Gate Tower uses existing adjacent sight;
@@ -1250,7 +1213,7 @@ S1 credits retain their declared consumer. Additional installed consumers are
 [C4 pack response/flight](#c4-pack-response-and-wounded-flight),
 [D7 deer](#d7-deer-declarations), [D8 crows](#d8-crows-coin-and-reachable-nest-selected-contract)
 and [D9 bell suppression](mechanics.md#d9-village-consequences-and-prior-study-access-selected-contract).
-The [retired Ashmere chapter](#retired-ashmere-chapter-e1-candidate) owns release answers;
+The [retired first chapter](#retired-first-chapter-e1-candidate) owns release answers;
 [C3's publication review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-06-c3-publication-status-review.md)
 retains its original independent source/save proof.
 
@@ -1292,7 +1255,7 @@ Fen Isle Landing east/west connects to Isle Hut and south/north to Isle Shrine;
 Isle Hut east/west connects to Herb Garden and up/down to Hut Loft. The
 Boathouse–Fen Isle Landing crossing is declared only as the two boarding-detail
 transport endpoints, never as a free compass exit. The Boathouse–Old Mill edge
-is opened by [D3](#d3-western-ashmere-declarations). Isle Shrine is descriptive sanctuary/foreshadow;
+is opened by [D3](#d3-western-village-declarations). Isle Shrine is descriptive sanctuary/foreshadow;
 `chapel_nave` remains the actual death shrine.
 
 The cartridge declares an unattended rope ferry, outbound **2p**, return **0p**,
@@ -1517,12 +1480,12 @@ uses these three public reciprocal additions from archived
 |---|---|
 | Village Green / west | Smithy / east |
 | Smithy / west | Orchard / east |
-| North Gate / west | Elspeth Cottage / east |
+| North Gate / west | Mother's Cottage / east |
 
 Forge/anvil/tools, apple trees/beehive and cot/hearth are inspectable details.
 The forge is cold; no repair, honey, property, seasonal system or extra quest is
 advertised. Cottage adds no lantern: B4's actual torch/oil source remains the
-only adopted light supply. Elspeth's Q1/Q2 conversations stay at Ferry Landing.
+only adopted light supply. The mother's Q1/Q2 conversations stay at Ferry Landing.
 Gareth follows smithy 08–18, Drowned Lantern 18–22, smithy 22–08; Ada follows
 orchard 07–17 and cottage 17–07. At the current 64800 dusk start, initialize
 Gareth at Drowned Lantern and Ada at the cottage, then use existing next-hour
@@ -1548,13 +1511,13 @@ published C3/D1 in the [D4 integration evidence](https://github.com/lorecrafting
 
 Cottage room/cot and Green use missing/rescued/stays/lost descriptions, preserving
 Green's installed terminal variants. Missing means the search is unfinished;
-rescued acknowledges return to Elspeth at the landing; stays acknowledges the
+rescued acknowledges return to the mother at the landing; stays acknowledges the
 living child's choice with Vesper and delivered message; lost acknowledges grief.
 Cot prose never asserts current bodily presence. Q2/A1 alone own outcome/location:
-rescued Wren remains at Ferry Landing, stays Wren remains at Fox Hollow, and lost
+a rescued child remains at Ferry Landing, a staying child remains at Fox Hollow, and lost
 neither deletes nor relocates the original Fox Hollow actor. Missing can include
 following/separated escort intermediates anywhere on the route. Do not teleport
-Wren on cottage arrival or turn an unfinished escort into a returned child.
+the child on cottage arrival or turn an unfinished escort into a returned child.
 
 ## D5 Deep Fen route and details
 
@@ -1575,14 +1538,14 @@ New keys are `oak_branches`, `oak_crown`, `black_pool`, `fox_den_deep`,
 that footing explicit. The shallow den admits natural light at all hours and has
 no dark metadata. This deliberately supersedes archived 00a §§2/5/8/11 darkness,
 Vesper relocation, duplicate readable message, stone topic, far Scan, crow nest
-and next-day water-drift candidates for D5. Wren/Vesper retain their original
-instances and installed locations except for existing legal Wren escort travel.
+and next-day water-drift candidates for D5. The child/Vesper retain their original
+instances and installed locations except for existing legal child escort travel.
 
 Author one `ward_stone` room detail with aliases `stone`, `ward`, `ward_stone`
 (the existing target normalization resolves player words `ward stone` to that
 last key), a noun title, description and ordinary readable label/text/title. Its fixed
 inscription describes the worn carving without asserting who holds the message,
-which return was selected or what Wren has done. Use the installed Fox Hollow
+which return was selected or what the child has done. Use the installed Fox Hollow
 readable detail shape, not an item-readable/topic extension or conditional page.
 Other landscape details are descriptive and advertise only projected actions.
 Do not add a bottom exit, room placeholder, underwater loot, fishing operation,
@@ -1590,9 +1553,9 @@ crow container, new item, schedule or knowledge mapping. D6 owns bottom rooms,
 D8 the real nest and item recovery. Preserve ordinary Drop custody at the actual
 current location. D5 is installed in the [current bundled chapter](#current-bundled-chapter).
 
-## D3 Western Ashmere declarations
+## D3 western village declarations
 
-Selected under the [approved D3 brief](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/briefs/chapter-one/d3-western-ashmere-brief-2026-10-05.md),
+Selected under the [approved D3 brief](https://github.com/lorecrafting/lokacore/tree/f8513671ea7dd84d681876b2e36850129a4b0564/docs/briefs/chapter-one) (the retired chapter's D3 brief at that commit),
 with archived [chapter map/cast](../archive/spec/00a-chapter-one-content.md) §§2/4/5/8/11
 as the content basis. Boathouse south/north connects to Old Mill while retaining
 its east Ferry Landing exit and outbound ferry detail. Old Mill south/north
@@ -1617,7 +1580,7 @@ command, capability or save shape is selected.
 
 The [final D3 integration proof](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/2026-10-06-d3-final-integration/README.md)
 records the independently pinned successor and checks; the
-[provisional proof](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/2026-10-06-d3-western-ashmere/README.md) is historical.
+[provisional proof](https://github.com/lorecrafting/lokacore/tree/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence) (the retired chapter's D3 provisional evidence at that commit) is historical.
 
 <a id="d6-bottom-rooms-and-water-tuning-selected-pending-implementation"></a>
 
@@ -1628,7 +1591,7 @@ Reciprocal exits:
 Only bottoms have water occupancy. Both are dark under B4 with known Up; ordinary
 loot needs B4 light. Well Bottom owns one actual old coin and carved initials;
 Pool Bottom owns one actual sunken chest containing one silver ring. No extra
-sunken lantern, wet-fuel system, swim lesson, Wren route, fish or tide.
+sunken lantern, wet-fuel system, swim lesson, the child's route, fish or tide.
 
 Selected world values: entry maximum 6000g, entry 10 MV, surface 0 MV and submersion
 duration 6000 logical seconds, **120 real seconds** at current real-elapsed rate 50.
@@ -1660,7 +1623,7 @@ with authored labels and descriptions. Compiler and loader reject missing/extra 
 unknown attributes/skills/faction references, unsupported sight effects, unsafe or
 out-of-range values, absent capabilities and effects that cannot apply atomically.
 The [D11 command and changed row](mechanics.md#d11-character-choice-selected-contract)
-consume this shape; the [retired Ashmere identity](#retired-ashmere-chapter-e1-candidate) owns release answers.
+consume this shape; the [retired first chapter identity](#retired-first-chapter-e1-candidate) owns release answers.
 
 <a id="d9-village-reaction-content-selected-pending-implementation"></a>
 
@@ -1668,7 +1631,7 @@ consume this shape; the [retired Ashmere identity](#retired-ashmere-chapter-e1-c
 
 The five valid child/allegiance pairs and the Study rule are defined in
 [mechanics](mechanics.md#d9-village-consequences-and-prior-study-access-selected-contract).
-Author distinct child responses for Elspeth, five truthful Maud rumor
+Author distinct child responses for the mother, five truthful Maud rumor
 variants and Green descriptions, prior/fox Aldric and Vesper responses, and
 bell-dependent Sedge flavor. Keep Aldric's S2 ledger service in the public Nave. Explicit labelled dialogue bindings keep the ledger handoff and Maud's cellar offer/turn-in independently selectable alongside terminal reaction profiles. Old Bram remains outside the real cast under the [D9 clarification](../decisions/pm-decision-d9-real-cast-2026-10-06.md).
 The Study remains the existing reciprocal Nave-west/Study-east edge; no new
@@ -1676,7 +1639,7 @@ door/barrier definition or key is authored. Only its west ingress gets the
 conditional fox policy. No new room, NPC, token relationship fact or synthetic
 ferryman instance is needed.
 
-The audible area is the existing **25 Ashmere rooms and ten public Priory
+The audible area is the existing **25 village rooms and ten public Priory
 rooms**, excluding Fen and isle rooms. Bell Read, immediate narration and cast
 responses must not claim audible sound in those excluded rooms. Author the area as explicit chapter
 room references with loader validation; a room's ordinary descriptive tags do
@@ -1764,7 +1727,7 @@ in the Nave. The public
 chapel remains reachable by opening a closed door. This differs from the archive's
 keyed Watch Cell candidate: the current Watch Cell is expressly open and optional, so
 D10 does not add Tobin-key or jail access machinery. The D9 Study restriction is an
-exact-edge predicate, not a barrier or Knock target. Wren's one boot is an actual
+exact-edge predicate, not a barrier or Knock target. The child's one boot is an actual
 recoverable Reed Bank item. Add ordinary `leather_boots` as a recoverable item in
 Chandler, with no sale or armor modifier in this slice. Both carry the `boot` keyword
 and can be held together for real resolver ambiguity; touch selects an exact item ID.

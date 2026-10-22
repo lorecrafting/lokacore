@@ -78,3 +78,44 @@ export const hpView = (w: World) => {
   const { current, maximum } = gameView(w).resources!.find((r) => r.resource.key === 'hp')!;
   return [current, maximum];
 };
+
+const ancestryRef = (kind: string, name: string) =>
+  ({ cartridge_id: 'derived_sampler', cartridge_version: '0.0.1', kind, key: name }) as never;
+const ancestryNamed = (kind: string, name: string) => `derived_sampler@0.0.1:${kind}/${name}`;
+
+/** The sampler with strong inheriting skill swim and standing -2, and hardy seeing in the dark. */
+export function ancestrySource() {
+  const c = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
+  for (const cap of ['skills', 'light'])
+    // light@1 gates dark_sight
+    c.manifest.requires.capabilities[cap] = c.lock.capabilities[cap] = 1;
+  c.skills = {
+    [ancestryNamed('skill', 'swim')]: {
+      key: 'swim',
+      label: 'ancestry.strong.label',
+      requirement: 'ancestry.strong.label',
+      qualification: {
+        policy_version: 1,
+        root: { op: 'stat_compare', attribute: ancestryRef('attribute', 'str'), at_least: 100 },
+      },
+    },
+  };
+  c.facts[ancestryNamed('fact', 'skill_swim')] = {
+    key: 'skill_swim',
+    version: 1,
+    value_type: { type: 'bool', default: false },
+    scopes: ['player'],
+    meaning: "Skill swim's acquisition (skills@1): only skills@1 writes it.",
+  };
+  c.facts[ancestryNamed('fact', 'standing')] = {
+    key: 'standing',
+    version: 1,
+    value_type: { type: 'int', default: 0 },
+    scopes: ['player'],
+    meaning: 'Controlled faction standing.',
+  };
+  c.ancestries.strong.skill = ancestryRef('skill', 'swim');
+  c.ancestries.strong.faction = { fact: ancestryRef('fact', 'standing'), value: -2 };
+  c.ancestries.hardy.dark_sight = true;
+  return c;
+}

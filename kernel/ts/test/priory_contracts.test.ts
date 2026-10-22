@@ -1,66 +1,39 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { loadCartridge, INSTALLED, newWorld, gameView, step } from '../src/index.ts';
-import { encode, hash } from '../src/foundation/canonical.ts';
+import { gameView, step, type World } from '../src/index.ts';
 import { validate } from '../src/foundation/validate.ts';
 import { identify, resolve } from '../src/commands/invocation.ts';
-import { key } from '../src/foundation/compose.ts';
-import { bundle, ref, ids, fresh } from './priory_fixture.ts';
+import { value } from '../src/mechanics/fact.ts';
+import { chest, codex } from './codex_fixture.ts';
+
+const { prefix, ref } = codex;
+const ledger = `${prefix}:item/mill_ledger`;
 
 // Break: malformed readable metadata or undeclared, wrong-kind, non-Boolean/shared knowledge is accepted.
 test('item writing, topic refs, text and unique player Boolean mappings fail closed', () => {
+  assert.ok(codex.load().ok);
   for (const mutate of [
-    (c: any) => {
-      c.items['ashmere_missing_child@0.0.27:item/ward_of_the_fen'].readable.topic = ref(
-        'topic',
-        'missing',
-      );
-    },
-    (c: any) => {
-      c.items['ashmere_missing_child@0.0.27:item/ward_of_the_fen'].readable.topic = ref(
-        'fact',
-        'topic_ward_known',
-      );
-    },
-    (c: any) => {
-      c.items['ashmere_missing_child@0.0.27:item/ward_of_the_fen'].readable.text = 'missing';
-    },
-    (c: any) => {
-      c.items['ashmere_missing_child@0.0.27:item/ward_of_the_fen'].readable.label = 'missing';
-    },
-    (c: any) => {
-      delete c.items['ashmere_missing_child@0.0.27:item/ward_of_the_fen'].mass_grams;
-    },
-    (c: any) => {
-      c.facts['ashmere_missing_child@0.0.27:fact/topic_bell_known'].scopes = ['instance'];
-    },
-    (c: any) => {
-      c.facts['ashmere_missing_child@0.0.27:fact/topic_bell_known'].value_type = {
+    (c: any) => (c.items[ledger].readable.topic = ref('topic', 'missing')),
+    (c: any) => (c.items[ledger].readable.topic = ref('fact', 'topic_mill_known')),
+    (c: any) => (c.items[ledger].readable.text = 'missing'),
+    (c: any) => (c.items[ledger].readable.label = 'missing'),
+    (c: any) => (c.facts[`${prefix}:fact/topic_mill_known`].scopes = ['instance']),
+    (c: any) =>
+      (c.facts[`${prefix}:fact/topic_mill_known`].value_type = {
         type: 'int',
         minimum: 0,
         maximum: 1,
         default: 0,
-      };
-    },
-    (c: any) => {
-      c.topics['ashmere_missing_child@0.0.27:topic/bell'].fact = ref('fact', 'topic_ward_known');
-    },
-    (c: any) => {
-      c.manifest.requires.kernel_api.at_least = '1.23';
-    },
+      }),
+    (c: any) => (c.topics[`${prefix}:topic/mill`].fact = ref('fact', 'topic_missing_cart_known')),
+    (c: any) => (c.topics[`${prefix}:topic/mill`].fact = ref('topic', 'mill')),
+    (c: any) => (c.manifest.requires.kernel_api.at_least = '1.23'),
     (c: any) => {
       delete c.manifest.requires.capabilities.readable;
       delete c.lock.capabilities.readable;
     },
-  ]) {
-    const c = structuredClone(bundle.value);
-    mutate(c);
-    const result = loadCartridge(
-      new TextEncoder().encode(encode({ cartridge: c, content_hash: hash(c) })),
-      INSTALLED,
-    );
-    assert.equal(result.ok, false);
-  }
+  ])
+    assert.equal(codex.load(mutate).ok, false, String(mutate));
   for (const invalid of [
     null,
     [],
@@ -81,36 +54,26 @@ test('item writing, topic refs, text and unique player Boolean mappings fail clo
 
 // Break: a loaded Read alias loses its command/target binding or rejects an open held child.
 test('loaded consult alias projects the Read command and resolves the exact nested book invocation', () => {
-  const c = structuredClone(bundle.value);
-  c.actions['ashmere_missing_child@0.0.27:action/consult'] = {
-    key: 'consult',
-    command: 'read',
-    label: 'actions.read_book',
-    accessibility: 'actions.read_book',
-    target: { kind: 'entity', scopes: ['inventory'] },
-    input: [],
-    policy: { policy_version: 1, root: { op: 'all', items: [] } },
-    priority: 1,
-  };
-  const loaded = loadCartridge(
-    new TextEncoder().encode(encode({ cartridge: c, content_hash: hash(c) })),
-    INSTALLED,
-  );
-  assert.ok(loaded.ok, JSON.stringify(loaded));
-  const base = newWorld(loaded.cartridge as never, fresh().context, [1, 2, 3, 4]),
-    box = ids['item/storage_chest'],
-    book = ids['item/ward_of_the_fen'];
-  const entity = base.entities[box];
-  assert.equal(entity.kind, 'item');
-  if (entity.kind !== 'item') return;
+  const base = codex.genesis((c) => {
+    c.actions[`${prefix}:action/consult`] = {
+      key: 'consult',
+      command: 'read',
+      label: 'actions.read_book',
+      accessibility: 'actions.read_book',
+      target: { kind: 'entity', scopes: ['inventory'] },
+      input: [],
+      policy: { policy_version: 1, root: { op: 'all', items: [] } },
+      priority: 1,
+    };
+    chest()(c);
+    c.items[ledger].location = { in: 'item', item: ref('item', 'chest') };
+  });
+  const box = base.entityIds[`${prefix}:item/chest`],
+    book = base.entityIds[ledger];
   const w = {
     ...base,
-    state: {
-      ...base.state,
-      containers: { ...base.state.containers, [box]: base.body, [book]: box },
-      barriers: { [key({ kind: 'barrier', barrier: entity.barrier! })]: 'open' },
-    },
-  } as any;
+    state: { ...base.state, containers: { ...base.state.containers, [box]: base.body } },
+  };
   const offer = gameView(w)
     .inventory.find((e) => e.id === box)!
     .contents!.find((e) => e.id === book)!
@@ -135,5 +98,47 @@ test('loaded consult alias projects the Read command and resolves the exact nest
   });
   const d = step(w, command as never, 1, 'consult' as never).decision;
   assert.equal(d.kind, 'accepted');
-  if (d.kind === 'accepted') assert.deepEqual(d.narration, [{ key: 'readable.ward_of_the_fen' }]);
+  if (d.kind === 'accepted') assert.deepEqual(d.narration, [{ key: 'readable.mill_ledger' }]);
+});
+
+let n = 0;
+const act = (w: World, payload: object) => {
+  n += 1;
+  const id = `aaaaaaaa-0000-4000-8000-${String(n).padStart(12, '0')}`;
+  const r = step(
+    w,
+    { id, world_context_id: w.context, payload: { actor_id: w.character, ...payload } } as never,
+    n,
+  );
+  assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
+  return r;
+};
+const walk = (w: World, ...dirs: string[]) =>
+  dirs.reduce((at, direction) => act(at, { type: 'move', direction }).world, w);
+const readBook = (w: World, k: string) => {
+  const id = w.entityIds[`${prefix}:item/${k}`];
+  return act(act(w, { type: 'take', item_id: id }).world, { type: 'read', target_id: id });
+};
+const knows = (w: World, topic: string) =>
+  value(w, w.character, ref('fact', `topic_${topic}_known`));
+
+// Break (topics/shared.ts grant): Read of a topic already known, by an earlier Read or by a
+// recipe grant, assigns its fact again instead of leaving the world unchanged.
+test('reading a book whose topic is already known writes nothing, after a Read or a recipe grant', () => {
+  const noted = readBook(walk(codex.genesis(), 'south'), 'carters_note');
+  assert.equal(knows(noted.world, 'missing_cart'), true);
+  const note = noted.world.entityIds[`${prefix}:item/carters_note`];
+  const reread = act(noted.world, { type: 'read', target_id: note }).decision;
+  assert.equal(reread.kind, 'accepted');
+  if (reread.kind === 'accepted') assert.deepEqual(reread.delta.ops, []);
+  const study = walk(noted.world, 'north', 'west');
+  const desk = Object.keys(study.details).find((id) => study.details[id].key === 'desk');
+  const tracked = act(study, { type: 'perform', action: 'follow_tracks', target_id: desk }).world;
+  assert.equal(knows(tracked, 'mill'), true);
+  const ledgerRead = readBook(tracked, 'mill_ledger').decision;
+  assert.equal(ledgerRead.kind, 'accepted');
+  if (ledgerRead.kind === 'accepted') {
+    assert.deepEqual(ledgerRead.narration, [{ key: 'readable.mill_ledger' }]);
+    assert.deepEqual(ledgerRead.delta.ops, []);
+  }
 });

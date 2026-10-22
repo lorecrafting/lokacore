@@ -1,14 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import {
-  INSTALLED,
-  loadCartridge,
-  newWorld,
-  step,
-  gameView,
-  type Cartridge,
-  type World,
-} from '../src/index.ts';
+import { step, gameView, type World } from '../src/index.ts';
 import type { CommandPayload, EntityId, LiquidRow } from '../src/contracts.gen.ts';
 import { key } from '../src/foundation/compose.ts';
 import { resolved } from '../src/commands/actions.ts';
@@ -16,21 +8,9 @@ import { identify, resolve } from '../src/commands/invocation.ts';
 import { liquidActions } from '../src/view/liquid.ts';
 import { transition } from '../src/mechanics/liquid/shared.ts';
 import { gameview_agrees_with_admission } from '../src/view/invariants_view.ts';
-import { read } from './read.ts';
-const pin = read('protocol/fixtures/missing_child_b7_hash.json');
-const answers = read('protocol/fixtures/missing_child_b7_ids.json');
-const loaded = loadCartridge(
-  new TextEncoder().encode(JSON.stringify({ cartridge: pin.value, content_hash: pin.sha256 })),
-  INSTALLED,
-);
-assert.ok(loaded.ok, JSON.stringify(loaded));
-const fresh = newWorld(
-  loaded.cartridge as Cartridge,
-  '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never,
-  [1, 2, 3, 4],
-);
-const prefix = `ashmere_missing_child@${fresh.cartridge.manifest.version}`;
-const id = (kind: string, name: string) => fresh.entityIds[`${prefix}:${kind}/${name}`];
+import { id as lid, liquidFresh } from './liquid_fixture.ts';
+const fresh = liquidFresh();
+const id = (kind: string, name: string) => fresh.entityIds[lid(kind, name)];
 const skin = id('item', 'waterskin'),
   spare = id('item', 'spare_waterskin'),
   peg = id('npc', 'peg'),
@@ -95,8 +75,6 @@ test('two real shop offers cost eight pennies and retain two empty shell identit
     },
   };
   assert.notEqual(skin, spare);
-  assert.equal(skin, answers['item/waterskin']);
-  assert.equal(spare, answers['item/spare_waterskin']);
   for (const item of [skin, spare]) {
     const next = run(world, { type: 'buy', provider_id: peg, item_id: item, quoted_price: 4 });
     assert.equal(next.decision.kind, 'accepted', JSON.stringify(next.decision));
@@ -175,7 +153,7 @@ function massWorld(load: number): World {
     ...w,
     cartridge: {
       ...w.cartridge,
-      liquids: { [`${prefix}:liquid/water`]: { ...water, grams_per_unit: 2 } },
+      liquids: { [lid('liquid', 'water')]: { ...water, grams_per_unit: 2 } },
     },
     entities: {
       ...w.entities,
@@ -290,7 +268,7 @@ test('authored larger servings refuse a partial last drink and exhausted Pour ke
     ...w,
     cartridge: {
       ...w.cartridge,
-      liquids: { [`${prefix}:liquid/water`]: { ...water, drink_amount: 2 } },
+      liquids: { [lid('liquid', 'water')]: { ...water, drink_amount: 2 } },
     },
     liquidSpecs: {
       ...w.liquidSpecs,
@@ -328,7 +306,7 @@ test('authored larger servings refuse a partial last drink and exhausted Pour ke
       ...tuned.cartridge,
       liquids: {
         ...tuned.cartridge.liquids,
-        [`${prefix}:liquid/oil`]: { ...water, key: 'oil' as never },
+        [lid('liquid', 'oil')]: { ...water, key: 'oil' as never },
       },
     },
     liquidSpecs: { ...tuned.liquidSpecs, [spare]: { capacity: 7, kinds: [waterRef, oilRef] } },
@@ -483,8 +461,11 @@ test('an offered liquid action under a foreign actor or the nil CommandId agrees
 // loka-th7x. Breaks: the envelope exemptions run before Step's pre-choice refusal, so a nil-id
 // liquid command in a world awaiting its ancestry expects permission_denied, not invalid_state.
 test('before the ancestry choice a nil-id liquid command agrees only with invalid_state', () => {
-  const pre = read('protocol/fixtures/missing_child_v042_hash.json').value as Cartridge;
-  const w = newWorld(pre, '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, [1, 2, 3, 4]);
+  // Any declared ancestry table gates the unchosen character (needsAncestry); attributes owns
+  // the choose_ancestry verb the view then offers.
+  const c = fresh.cartridge;
+  const lock = { ...c.lock, capabilities: { ...c.lock.capabilities, attributes: 1 } };
+  const w = { ...owned(4, 0), cartridge: { ...c, lock, ancestries: {} } } as World;
   const command = {
     id: '00000000-0000-0000-0000-000000000000',
     world_context_id: w.context,

@@ -109,6 +109,22 @@ test('with the pickaxe held the seam yields each lump once, then is empty', () =
   assert.equal(offer(w).reason?.code, 'not_found');
 });
 
+// Breaks: the target guards of harvest(): a target that is no harvest detail is not refused
+// (invalid_target), or a seam in another room than the body's is mined from afar (not_present).
+test('harvest refuses a non-seam target and a seam in another room, keeping the ore', () => {
+  const w = held();
+  const room = w.state.containers[w.body];
+  const item_ = item(w, 'stick');
+  assert.equal(code(play(w, { type: 'harvest', target_id: item_ })), 'invalid_target');
+  const away = {
+    ...w,
+    state: { ...w.state, containers: { ...w.state.containers, [w.body]: item_ } },
+  };
+  const r = mine(away as World);
+  assert.equal(code(r), 'not_present');
+  assert.deepEqual(ore(r.world), [room, room]);
+});
+
 // Breaks: careful harvest skips the gate (the mutant `!method && detail.harvest.tool`), or its
 // offer shows another code; the positive control shows the gate, not the skill, refused.
 test('careful harvest of the gated seam is refused without the tool, accepted with it', () => {

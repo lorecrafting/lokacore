@@ -1,51 +1,27 @@
 import assert from 'node:assert/strict';
-import { createHash } from 'node:crypto';
 import { test } from 'node:test';
-import {
-  INSTALLED,
-  gameView,
-  loadCartridge,
-  newWorld,
-  step,
-  stepElapsed,
-  type Cartridge,
-  type World,
-} from '../src/index.ts';
+import { gameView, step, stepElapsed, type World } from '../src/index.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
-import { encode } from '../src/foundation/canonical.ts';
 import { key } from '../src/foundation/compose.ts';
 import { hydrate } from '../src/runtime/created.ts';
-import { read } from './read.ts';
+import { genesis, load, prefix, ref, shrine, spawned, unpacked } from './c4_pack_fixture.ts';
 
-const pin = read('protocol/fixtures/missing_child_v030_hash.json');
-const ids = read('protocol/fixtures/missing_child_v030_ids.json');
-const loaded = loadCartridge(
-  new TextEncoder().encode(`{"cartridge":${pin.canonical},"content_hash":"${pin.sha256}"}`),
-  INSTALLED,
-);
-assert.ok(loaded.ok, JSON.stringify(loaded));
-const context = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never;
+// The controlled goblins (cap 6, day 4, night 20-6, hourly wander, one-day replacement) as a plain
+// population: no pack block (c4_pack*.test.ts covers packs), 150-second combat rounds. The body
+// starts at the inn, two moves (west, south) from the pit.
+const fresh = () => genesis(unpacked);
+const plan = `.cartridge.populations["${prefix}:population/goblins"]`;
 const run_id = 'bbbbbbbb-0000-4000-8000-000000000001' as never;
-const fresh = () => newWorld(loaded.cartridge as Cartridge, context, [1, 2, 3, 4]);
 
 // Breaks: the installed loader accepts a forged one-way population area after its content hash is re-pinned.
-test('loader refuses a one-way hound area with a valid hash', () => {
-  const c = structuredClone(pin.value);
-  const room = c.rooms['ashmere_missing_child@0.0.30:room/adder_nest'];
-  room.exits.north = room.exits.west;
-  delete room.exits.west;
-  const canonical = encode(c);
-  const sha256 = createHash('sha256').update(canonical).digest('hex');
-  const result = loadCartridge(
-    new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-    INSTALLED,
-  );
+test('loader refuses a one-way goblin area with a valid hash', () => {
+  const result = load((c) => {
+    const room = c.rooms[`${prefix}:room/drill_yard`];
+    room.exits.up = room.exits.south;
+    delete room.exits.south;
+  });
   assert.equal(result.ok, false);
-  if (!result.ok)
-    assert.equal(
-      result.diagnostic.path,
-      '.cartridge.populations["ashmere_missing_child@0.0.30:population/fen_hounds"].area',
-    );
+  if (!result.ok) assert.equal(result.diagnostic.path, `${plan}.area`);
 });
 
 // Breaks: a plan whose wander interval exceeds its replacement delay, or whose night window does
@@ -56,20 +32,11 @@ for (const [name, change] of [
   ['an empty night window', { night_start: 5, night_end: 5 }],
 ] as const)
   test(`loader refuses ${name} with a valid hash`, () => {
-    const c = structuredClone(pin.value);
-    Object.assign(c.populations['ashmere_missing_child@0.0.30:population/fen_hounds'], change);
-    const canonical = encode(c);
-    const sha256 = createHash('sha256').update(canonical).digest('hex');
-    const result = loadCartridge(
-      new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
-      INSTALLED,
+    const result = load((c) =>
+      Object.assign(c.populations[`${prefix}:population/goblins`], change),
     );
     assert.equal(result.ok, false);
-    if (!result.ok)
-      assert.equal(
-        result.diagnostic.path,
-        '.cartridge.populations["ashmere_missing_child@0.0.30:population/fen_hounds"].wander_interval',
-      );
+    if (!result.ok) assert.equal(result.diagnostic.path, `${plan}.wander_interval`);
   });
 const hounds = (w: World) =>
   Object.entries(w.state.created ?? {}).filter(
@@ -124,31 +91,22 @@ function command(w: World, type: 'move' | 'attack', argument: string, n: number)
   return result.world;
 }
 
-// Breaks: new rooms or hound creation shift the deterministic genesis IDs or mint a pelt without its hound.
-test('the integrated chapter has the independent genesis identities and one held pelt per hound', () => {
+// Breaks: genesis mints a pelt without its goblin, in the wrong slot, or outside the goblin's hands.
+test('genesis has four goblins in their slots, each holding its own pelt, and six slots', () => {
   const w = fresh();
-  assert.equal(w.character, ids.character);
-  assert.equal(w.body, ids.body);
-  for (const name of ['hound_run', 'adder_nest'])
-    assert.equal(w.roomIds[`ashmere_missing_child@0.0.30:room/${name}`], ids[`room/${name}`]);
   assert.equal(hounds(w).length, 4);
   assert.equal(pelts(w).length, 4);
   assert.equal(Object.keys(w.state.population_slots ?? {}).length, 6);
   for (let slot = 1; slot <= 4; slot++) {
-    const member = ids[`population/fen_hounds/slot${slot}/member`];
-    const pelt = ids[`population/fen_hounds/slot${slot}/pelt`];
-    assert.equal((w.state.created?.[member]?.origin as any).slot, slot);
+    const member = spawned(w, slot);
+    const pelt = spawned(w, slot, 'pelt');
     assert.equal((w.state.created?.[pelt]?.origin as any).member_id, member);
     assert.equal(w.state.containers[pelt], member);
   }
-  assert.equal(
-    w.state.population_plans?.[Object.keys(w.state.population_plans)[0]!]?.job_id,
-    ids['population/fen_hounds/job'],
-  );
 });
 
 // Breaks: an hourly plan job loses a slot, exceeds its cap, or leaves night births out at dawn.
-test('hourly wander and night boundary keep four then six bounded living hounds', () => {
+test('hourly wander and night boundary keep four then six bounded living goblins', () => {
   let w = fresh();
   const before = hounds(w).map(([id]) => w.state.containers[id]);
   w = advance(w, 68400);
@@ -183,25 +141,16 @@ test('thirty days of segmented elapsed time retain six members and one plan succ
 });
 
 // Breaks: equal-time population and fatal combat deliveries conflict, move the engaged victim, or lose its pelt in either real job-ID order.
-test('combat-first and population-first boundaries conserve the same fatal hound slot and pelt', () => {
-  const member = ids['population/fen_hounds/slot1/member'];
-  const pelt = ids['population/fen_hounds/slot1/pelt'];
-  const hp = key({
-    kind: 'resource',
-    entity_id: member,
-    resource: {
-      cartridge_id: 'ashmere_missing_child',
-      cartridge_version: '0.0.30',
-      kind: 'resource',
-      key: 'hp',
-    },
-  });
+test('combat-first and population-first boundaries conserve the same fatal goblin slot and pelt', () => {
+  const member = spawned(fresh(), 1);
+  const pelt = spawned(fresh(), 1, 'pelt');
+  const hp = key({ kind: 'resource', entity_id: member, resource: ref('resource', 'hp') });
   for (const [n, combatFirst] of [
-    [11, true],
-    [7, false],
+    [3, true],
+    [5, false],
   ] as const) {
     let w = elapsed(fresh(), 68250);
-    for (const [i, direction] of ['south', 'south', 'east'].entries())
+    for (const [i, direction] of ['west', 'south'].entries())
       w = command(w, 'move', direction, i + 1);
     w = {
       ...w,
@@ -209,21 +158,12 @@ test('combat-first and population-first boundaries conserve the same fatal hound
         ...w.state,
         resources: { ...w.state.resources, [hp]: { value: 1, at: 68250 } },
       },
-      cartridge: {
-        ...w.cartridge,
-        world: {
-          ...w.cartridge.world!,
-          combat: {
-            ...w.cartridge.world!.combat!,
-            player_attack: { chance: 100, damage_min: 1, damage_max: 1 },
-          },
-        },
-      },
     };
     w = command(w, 'attack', member, n);
     const due = Object.entries(w.state.jobs ?? {})
       .filter(([, row]) => row.status === 'pending' && row.due_time === 68400)
-      .map(([id, row]) => [id, row.job.kind] as const);
+      .map(([id, row]) => [id, row.job.kind] as const)
+      .filter(([, kind]) => kind === 'npc' || kind === 'population');
     assert.equal(due.length, 2);
     const fight = due.find(([, kind]) => kind === 'npc')![0];
     const population = due.find(([, kind]) => kind === 'population')![0];
@@ -249,21 +189,21 @@ test('combat-first and population-first boundaries conserve the same fatal hound
   }
 });
 
-// Breaks: a deliberate hound kill yields generic rat loot or replenishes before the one-day delay.
-test('deliberate attack leaves the same pelt in a hound corpse and delays replacement', () => {
+// Breaks: a deliberate goblin kill yields generic loot or replenishes before the one-day delay.
+test('deliberate attack leaves the same pelt in a goblin corpse and delays replacement', () => {
   let w = fresh();
-  for (const [i, direction] of ['south', 'south', 'east'].entries())
+  for (const [i, direction] of ['west', 'south'].entries())
     w = command(w, 'move', direction, i + 1);
   const member = hounds(w).find(
     ([id]) => w.state.containers[id] === w.state.containers[w.body],
   )![0];
   const pelt = pelts(w).find(([, i]) => (i.origin as any).member_id === member)![0];
   assert.ok(gameView(w).entities.some((e) => e.id === member));
-  w = command(w, 'attack', member, 4);
+  w = command(w, 'attack', member, 3);
   for (let i = 0; i < 20 && w.state.containers[pelt] === member; i++)
     w = elapsed(w, w.state.clock + 150);
   const corpse = w.state.containers[pelt];
-  assert.equal(w.state.created?.[corpse]?.definition.key, 'hound_corpse');
+  assert.equal(w.state.created?.[corpse]?.definition.key, 'npc_corpse');
   assert.equal(w.state.containers[corpse], w.state.containers[member]);
   const pickup = step(
     w,
@@ -302,37 +242,18 @@ test('deliberate attack leaves the same pelt in a hound corpse and delays replac
 // night-only cap even though the replacement delay has elapsed.
 test('a due extra-slot death waits for night before its next generation', () => {
   let w = advance(fresh(), 108000);
-  for (const [i, direction] of ['south', 'south', 'east'].entries())
+  for (const [i, direction] of ['west', 'south'].entries())
     w = command(w, 'move', direction, i + 1);
   const slotKey = Object.keys(w.state.population_slots ?? {}).find(
     (k) => JSON.parse(k).slot === 5,
   )!;
   const member = w.state.population_slots![slotKey]!.member_id!;
-  const hp = key({
-    kind: 'resource',
-    entity_id: member,
-    resource: {
-      cartridge_id: 'ashmere_missing_child',
-      cartridge_version: '0.0.30',
-      kind: 'resource',
-      key: 'hp',
-    },
-  });
+  const hp = key({ kind: 'resource', entity_id: member, resource: ref('resource', 'hp') });
   w = {
     ...w,
     state: { ...w.state, resources: { ...w.state.resources, [hp]: { value: 1, at: 108000 } } },
-    cartridge: {
-      ...w.cartridge,
-      world: {
-        ...w.cartridge.world!,
-        combat: {
-          ...w.cartridge.world!.combat!,
-          player_attack: { chance: 100, damage_min: 1, damage_max: 1 },
-        },
-      },
-    },
   };
-  w = command(w, 'attack', member, 4);
+  w = command(w, 'attack', member, 3);
   w = elapsed(w, 108150);
   assert.deepEqual(w.state.population_slots![slotKey], {
     generation: 1,
@@ -346,25 +267,16 @@ test('a due extra-slot death waits for night before its next generation', () => 
   assert.notEqual(w.state.population_slots![slotKey]!.member_id, member);
 });
 
-// Breaks: a lethal hound reply marks its living slot dead or strands the player's same body outside the shrine.
-test('a lethal hound reply returns the same body and keeps the surviving hound', () => {
+// Breaks: a lethal goblin reply marks its living slot dead or strands the player's same body outside the shrine.
+test('a lethal goblin reply returns the same body and keeps the surviving goblin', () => {
   let w = fresh();
-  for (const [i, direction] of ['south', 'south', 'east'].entries())
+  for (const [i, direction] of ['west', 'south'].entries())
     w = command(w, 'move', direction, i + 1);
   const member = hounds(w).find(
     ([id]) => w.state.containers[id] === w.state.containers[w.body],
   )![0];
   const body = w.body;
-  const hpTarget = key({
-    kind: 'resource',
-    entity_id: body,
-    resource: {
-      cartridge_id: 'ashmere_missing_child',
-      cartridge_version: '0.0.30',
-      kind: 'resource',
-      key: 'hp',
-    },
-  });
+  const hpTarget = key({ kind: 'resource', entity_id: body, resource: ref('resource', 'hp') });
   w = {
     ...w,
     state: {
@@ -372,19 +284,11 @@ test('a lethal hound reply returns the same body and keeps the surviving hound',
       resources: { ...w.state.resources, [hpTarget]: { value: 1, at: w.state.clock } },
     },
   };
-  w = command(w, 'attack', member, 4);
-  for (
-    let i = 0;
-    i < 20 &&
-    w.state.containers[body] !== w.roomIds['ashmere_missing_child@0.0.30:room/chapel_nave'];
-    i++
-  )
+  w = command(w, 'attack', member, 3);
+  for (let i = 0; i < 20 && w.state.containers[body] !== shrine; i++)
     w = elapsed(w, w.state.clock + 150);
   assert.equal(w.body, body);
-  assert.equal(
-    w.state.containers[body],
-    w.roomIds['ashmere_missing_child@0.0.30:room/chapel_nave'],
-  );
+  assert.equal(w.state.containers[body], shrine);
   assert.equal(live(w).length, 4);
   assert.equal(
     w.state.containers[pelts(w).find(([, i]) => (i.origin as any).member_id === member)![0]],

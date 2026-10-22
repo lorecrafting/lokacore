@@ -11,7 +11,7 @@ This is PM planning adoption, not independent approval, source GO or proof.
 
 C4: hounds respond to deliberate player aggression, assist their admitted pack and
 flee when wounded. Resolve the earlier provisional brief's night-auto-aggression
-recommendation in favor of this smallest [current-plan](../MISSING-CHILD-PLAN.md)
+recommendation in favor of this smallest [current-plan](../archive/MISSING-CHILD-PLAN.md)
 consumer. Explicitly defer the [archived population row](../archive/spec/00a-chapter-one-content.md#populations)'s
 aggressive20–6 clause. C3 still owns its bounded day/night population and wandering;
 C4 does not duplicate spawning, add hostile room entry or invent safe-mode flags.

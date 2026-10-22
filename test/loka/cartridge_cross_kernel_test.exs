@@ -9,7 +9,7 @@ defmodule Loka.CartridgeCrossKernelTest do
 
   @moduletag :tmp_dir
   @peer "kernel/ts/test/cartridge_peer.ts"
-  @hello "cartridges/ashmere_hello"
+  @hello "cartridges/hello_sampler"
   @kat JSON.decode!(File.read!("protocol/fixtures/cartridge_hash.json"))
   @installed %{
     "kernel_api" => "1.0",
@@ -47,7 +47,7 @@ defmodule Loka.CartridgeCrossKernelTest do
 
   defp fact(key),
     do: %{
-      "cartridge_id" => "ashmere_hello",
+      "cartridge_id" => "hello_sampler",
       "cartridge_version" => "0.0.1",
       "kind" => "fact",
       "key" => key
@@ -109,10 +109,10 @@ defmodule Loka.CartridgeCrossKernelTest do
     })
   end
 
-  # ashmere_road with a world move cost on a short ref, the cartridge's and mv's own condition
+  # resource_sampler with a world move cost on a short ref, the cartridge's and mv's own condition
   # bands and their band.<key> text (c1-numbers; cartridge.schema.json WorldSettings).
   defp numbered(dir) do
-    road = "cartridges/ashmere_road"
+    road = "cartridges/resource_sampler"
     dir = Path.join(dir, "numbered")
     File.cp_r!(road, dir)
     src = &JSON.decode!(File.read!(Path.join(road, &1)))
@@ -135,10 +135,10 @@ defmodule Loka.CartridgeCrossKernelTest do
     dir
   end
 
-  # ashmere_road with six attributes, attributes@1 and pray gated on both leaves, short refs
+  # resource_sampler with six attributes, attributes@1 and pray gated on both leaves, short refs
   # (c1-attributes; cartridge.schema.json AttributeSpec, policy.schema.json Policy).
   defp attributed(dir) do
-    road = "cartridges/ashmere_road"
+    road = "cartridges/resource_sampler"
     dir = Path.join(dir, "attributed")
     File.cp_r!(road, dir)
     src = &JSON.decode!(File.read!(Path.join(road, &1)))
@@ -175,11 +175,11 @@ defmodule Loka.CartridgeCrossKernelTest do
             {"rich", rich(tmp)},
             {"numbered", numbered(tmp)},
             {"attributed", attributed(tmp)},
-            {"wear", "cartridges/ashmere_wear"},
-            {"locks", "cartridges/ashmere_locks"},
-            {"rest", "cartridges/ashmere_rest"},
-            {"journal", "cartridges/ashmere_journal"},
-            {"sampler", "cartridges/ashmere_sampler"}
+            {"wear", "cartridges/wear_sampler"},
+            {"locks", "cartridges/locks_sampler"},
+            {"rest", "cartridges/position_sampler"},
+            {"journal", "cartridges/journal_sampler"},
+            {"sampler", "cartridges/cellar_sampler"}
           ] do
         out = Path.join(tmp, "#{name}.artifact.json")
         compile(src, out)

@@ -1,0 +1,17 @@
+{
+  "title": "room.trailhead.title",
+  "description": "room.trailhead.description",
+  "exits": {
+    "west": {
+      "to": "ford"
+    }
+  },
+  "details": {
+    "cairn": {
+      "aliases": [
+        "cairn"
+      ],
+      "description": "detail.trailhead.cairn"
+    }
+  }
+}

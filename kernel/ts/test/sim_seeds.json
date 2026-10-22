@@ -9,7 +9,7 @@
     {
       "seed": 35225,
       "type": "toString",
-      "found": "step threw on a command type that is an Object prototype key (toString), from a drained start (generator 1 seed 1; generator 2, with ashmere_errand, seed 98; generator 3, with ashmere_ferry, seed 1; generator 4, with ashmere_green, seed 1)"
+      "found": "step threw on a command type that is an Object prototype key (toString), from a drained start (generator 1 seed 1; generator 2, with errand_sampler, seed 98; generator 3, with ferry_sampler, seed 1; generator 4, with green_sampler, seed 1)"
     },
     {
       "seed": 1791136864905,
@@ -19,7 +19,7 @@
     {
       "seed": 310,
       "type": "perform",
-      "found": "coverage, not a bug: about 2% of fresh sequences reach the cooldown refusal (ashmere_road, pray at the wayside shrine twice within its 3600 s cooldown), and fresh seeds 1791523923424 to 1791523923923 reached none, so this seed keeps 'cooldown' in REACHED deterministic (generator 17)"
+      "found": "coverage, not a bug: about 2% of fresh sequences reach the cooldown refusal (resource_sampler, pray at the wayside shrine twice within its 3600 s cooldown), and fresh seeds 1791523923424 to 1791523923923 reached none, so this seed keeps 'cooldown' in REACHED deterministic (generator 17)"
     }
   ]
 }

@@ -46,7 +46,7 @@ test('one fatal sequence preserves custody and returns the same body with exact 
   );
   assert.equal(w.state.containers[entity(w, 'item/tin_whistle')], entity(w, 'npc/bram'));
   assert.equal(w.entityIds, before.entityIds);
-  assert.equal(w.entityIds['ashmere_sampler@0.0.8:item/player_corpse'], undefined);
+  assert.equal(w.entityIds['cellar_sampler@0.0.8:item/player_corpse'], undefined);
   assert.deepEqual(
     sequence.events.map((e) => e.payload.type),
     ['entity_died'],
@@ -143,7 +143,7 @@ test('HP-zero NPC retains identity but leaves living projection and admission', 
         [key({
           kind: 'barrier',
           barrier: {
-            cartridge_id: 'ashmere_sampler',
+            cartridge_id: 'cellar_sampler',
             cartridge_version: '0.0.8',
             kind: 'barrier',
             key: 'cellar_door',

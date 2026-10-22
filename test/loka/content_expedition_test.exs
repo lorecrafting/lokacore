@@ -1,39 +1,25 @@
 defmodule Loka.ContentExpeditionTest do
   use ExUnit.Case, async: true
 
-  # Breaks: the new expedition short refs remain strings, so source compiles but the loader refuses it.
-  test "expedition references expand without changing the five authored edges" do
-    assert {:ok, bytes, []} = Loka.Content.compile("cartridges/ashmere_missing_child")
-    c = JSON.decode!(bytes)["cartridge"]
-    q = Enum.find(Map.values(c["quests"]), &(&1["key"] == "a_night_in_the_marsh"))
-    e = q["expedition"]
-    assert e["start_room"]["kind"] == "room"
-    assert e["survived_fact"]["kind"] == "fact"
-    assert e["hound_population"]["kind"] == "population"
+  @dir "cartridges/expedition_sampler"
+  @kat JSON.decode!(File.read!("protocol/fixtures/expedition_sampler_hash.json"))
 
-    assert Enum.map(e["route"], &{&1["from"]["key"], &1["direction"], &1["to"]["key"]}) == [
-             {"hound_run", "west", "reed_bank"},
-             {"reed_bank", "west", "willow_shade"},
-             {"willow_shade", "south", "drowned_oak"},
-             {"drowned_oak", "north", "willow_shade"},
-             {"willow_shade", "east", "reed_bank"}
-           ]
+  # Breaks: an expedition short ref left a string or an authored edge reshaped in the artifact
+  # (protocol/fixtures/expedition_sampler_hash.json, pinned compiler output).
+  test "expedition_sampler compiles to its pinned artifact without warnings" do
+    expected = ~s({"cartridge":#{@kat["canonical"]},"content_hash":"#{@kat["sha256"]}"})
+    assert Loka.Content.compile(@dir) == {:ok, expected, []}
   end
 
   # Breaks: a declared route accepts a direction that cannot perform its claimed physical transfer.
-  @tag :tmp_dir
-  test "a nonexistent physical edge is refused at the expedition declaration", %{tmp_dir: dir} do
-    File.cp_r!("cartridges/ashmere_missing_child", dir)
-    path = Path.join(dir, "quests/a_night_in_the_marsh.json")
-    source = path |> File.read!() |> JSON.decode!()
-    changed = put_in(source, ["expedition", "route", Access.at(0), "direction"], "north")
-    File.write!(path, JSON.encode!(changed))
-    assert {:error, diagnostics} = Loka.Content.compile(dir)
+  test "a nonexistent physical edge is refused at the expedition declaration" do
+    dir = Loka.ContentSource.copy(@dir)
+    north = &put_in(&1, ["expedition", "route", Access.at(0), "direction"], "north")
+    assert {:error, diags} = Loka.ContentSource.compile(dir, [{"quests/night_walk.json", north}])
 
-    assert Enum.any?(
-             diagnostics,
-             &(&1["code"] == "OUTCOME_MISMATCH" and
-                 &1["path"] == "quests/a_night_in_the_marsh.expedition.route")
+    assert {"OUTCOME_MISMATCH", "quests/night_walk.expedition.route"} in Enum.map(
+             diags,
+             &{&1["code"], &1["path"]}
            )
   end
 end

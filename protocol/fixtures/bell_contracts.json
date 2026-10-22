@@ -7,7 +7,7 @@
       "on": {
         "event": "fact_changed",
         "fact": {
-          "cartridge_id": "ashmere_missing_child",
+          "cartridge_id": "village_chapter",
           "cartridge_version": "0.0.13",
           "kind": "fact",
           "key": "chapel_bell_rung"
@@ -17,10 +17,10 @@
         {
           "op": "quest.resolve",
           "quest": {
-            "cartridge_id": "ashmere_missing_child",
+            "cartridge_id": "village_chapter",
             "cartridge_version": "0.0.13",
             "kind": "quest",
-            "key": "bell_of_ashmere"
+            "key": "ring_the_bell"
           },
           "outcome": "prior"
         }
@@ -36,7 +36,7 @@
       "on": {
         "event": "fact_changed",
         "fact": {
-          "cartridge_id": "ashmere_missing_child",
+          "cartridge_id": "village_chapter",
           "cartridge_version": "0.0.13",
           "kind": "fact",
           "key": "chapel_bell_rung"
@@ -46,10 +46,10 @@
         {
           "op": "quest.fail",
           "quest": {
-            "cartridge_id": "ashmere_missing_child",
+            "cartridge_id": "village_chapter",
             "cartridge_version": "0.0.13",
             "kind": "quest",
-            "key": "missing_child"
+            "key": "lost_lamb"
           },
           "outcome": "lost"
         }
@@ -64,10 +64,10 @@
       "key": "bell_rung",
       "on": {
         "quest": {
-          "cartridge_id": "ashmere_missing_child",
+          "cartridge_id": "village_chapter",
           "cartridge_version": "0.0.13",
           "kind": "quest",
-          "key": "bell_of_ashmere"
+          "key": "ring_the_bell"
         },
         "outcome": "prior"
       },
@@ -95,7 +95,7 @@
       "on": {
         "event": "fact_changed",
         "fact": {
-          "cartridge_id": "ashmere_missing_child",
+          "cartridge_id": "village_chapter",
           "cartridge_version": "0.0.13",
           "kind": "fact",
           "key": "chapel_bell_rung"
@@ -105,10 +105,10 @@
         {
           "op": "quest.resolve",
           "quest": {
-            "cartridge_id": "ashmere_missing_child",
+            "cartridge_id": "village_chapter",
             "cartridge_version": "0.0.13",
             "kind": "quest",
-            "key": "bell_of_ashmere"
+            "key": "ring_the_bell"
           }
         }
       ]
@@ -123,7 +123,7 @@
       "on": {
         "event": "fact_changed",
         "fact": {
-          "cartridge_id": "ashmere_missing_child",
+          "cartridge_id": "village_chapter",
           "cartridge_version": "0.0.13",
           "kind": "fact",
           "key": "chapel_bell_rung"
@@ -145,10 +145,10 @@
       "key": "bell_rung",
       "on": {
         "quest": {
-          "cartridge_id": "ashmere_missing_child",
+          "cartridge_id": "village_chapter",
           "cartridge_version": "0.0.13",
           "kind": "quest",
-          "key": "bell_of_ashmere"
+          "key": "ring_the_bell"
         }
       },
       "control": "modal",
@@ -175,7 +175,7 @@
       "on": {
         "event": "fact_changed",
         "fact": {
-          "cartridge_id": "ashmere_missing_child",
+          "cartridge_id": "village_chapter",
           "cartridge_version": "0.0.13",
           "kind": "fact",
           "key": "chapel_bell_rung"
@@ -184,10 +184,10 @@
       "apply": [
         {
           "quest": {
-            "cartridge_id": "ashmere_missing_child",
+            "cartridge_id": "village_chapter",
             "cartridge_version": "0.0.13",
             "kind": "quest",
-            "key": "bell_of_ashmere"
+            "key": "ring_the_bell"
           },
           "outcome": "prior"
         }
@@ -203,7 +203,7 @@
       "on": {
         "event": "fact_changed",
         "fact": {
-          "cartridge_id": "ashmere_missing_child",
+          "cartridge_id": "village_chapter",
           "cartridge_version": "0.0.13",
           "kind": "fact",
           "key": "chapel_bell_rung"
@@ -226,7 +226,7 @@
       "on": {
         "event": "fact_changed",
         "fact": {
-          "cartridge_id": "ashmere_missing_child",
+          "cartridge_id": "village_chapter",
           "cartridge_version": "0.0.13",
           "kind": "fact",
           "key": "chapel_bell_rung"
@@ -235,10 +235,10 @@
       "apply": [
         {
           "quest": {
-            "cartridge_id": "ashmere_missing_child",
+            "cartridge_id": "village_chapter",
             "cartridge_version": "0.0.13",
             "kind": "quest",
-            "key": "missing_child"
+            "key": "lost_lamb"
           },
           "outcome": "lost"
         }
@@ -254,7 +254,7 @@
       "on": {
         "event": "fact_changed",
         "fact": {
-          "cartridge_id": "ashmere_missing_child",
+          "cartridge_id": "village_chapter",
           "cartridge_version": "0.0.13",
           "kind": "fact",
           "key": "chapel_bell_rung"
@@ -264,10 +264,10 @@
         {
           "op": "quest.fail",
           "quest": {
-            "cartridge_id": "ashmere_missing_child",
+            "cartridge_id": "village_chapter",
             "cartridge_version": "0.0.13",
             "kind": "quest",
-            "key": "missing_child"
+            "key": "lost_lamb"
           }
         }
       ]
@@ -282,7 +282,7 @@
       "on": {
         "event": "fact_changed",
         "fact": {
-          "cartridge_id": "ashmere_missing_child",
+          "cartridge_id": "village_chapter",
           "cartridge_version": "0.0.13",
           "kind": "fact",
           "key": "chapel_bell_rung"
@@ -292,10 +292,10 @@
         {
           "op": "quest.resolve",
           "quest": {
-            "cartridge_id": "ashmere_missing_child",
+            "cartridge_id": "village_chapter",
             "cartridge_version": "0.0.13",
             "kind": "quest",
-            "key": "bell_of_ashmere"
+            "key": "ring_the_bell"
           },
           "outcome": "bad outcome"
         }
@@ -311,7 +311,7 @@
       "on": {
         "event": "fact_changed",
         "fact": {
-          "cartridge_id": "ashmere_missing_child",
+          "cartridge_id": "village_chapter",
           "cartridge_version": "0.0.13",
           "kind": "fact",
           "key": "chapel_bell_rung"
@@ -322,7 +322,7 @@
           "op": "quest.fail",
           "quest": {
             "kind": "quest",
-            "key": "missing_child"
+            "key": "lost_lamb"
           },
           "outcome": "lost"
         }
@@ -390,7 +390,7 @@
       "key": "bell_rung",
       "on": {
         "story_point": {
-          "cartridge_id": "ashmere_scene",
+          "cartridge_id": "scene_sampler",
           "cartridge_version": "0.0.1",
           "kind": "story_point",
           "key": "lantern_resolved"
@@ -444,14 +444,14 @@
       "key": "bell_rung",
       "on": {
         "quest": {
-          "cartridge_id": "ashmere_missing_child",
+          "cartridge_id": "village_chapter",
           "cartridge_version": "0.0.13",
           "kind": "quest",
-          "key": "bell_of_ashmere"
+          "key": "ring_the_bell"
         },
         "outcome": "prior",
         "story_point": {
-          "cartridge_id": "ashmere_scene",
+          "cartridge_id": "scene_sampler",
           "cartridge_version": "0.0.1",
           "kind": "story_point",
           "key": "lantern_resolved"

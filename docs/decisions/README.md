@@ -11,7 +11,7 @@ their summaries are in [this index at `15c7d41b`](https://github.com/lorecraftin
 What each rule in force says: [owner-rules.md](../system/owner-rules.md). A new record adds one
 dated line below, newest first.
 
-- 2026-10-21 [Owner decision: retire Ashmere, the app bundles the showcase](owner-decision-retire-ashmere-2026-10-21.md)
+- 2026-10-21 [Owner decision: retire Ashmere, the app bundles the showcase](owner-decision-retire-first-chapter-2026-10-21.md)
 - 2026-10-21 [Owner decision: a status on a seen NPC says a line](owner-decision-npc-status-line-2026-10-21.md)
 - 2026-10-15 [Owner decision: showcase before M14, UI polish after M15](owner-decision-showcase-before-m14-2026-10-15.md)
 - 2026-10-15 [Owner decision: carry-over and three rows deferred](owner-decision-carry-over-deferred-2026-10-15.md)
@@ -80,7 +80,7 @@ dated line below, newest first.
 - 2026-10-05 [PM adoption: Q3 bell-first prior and lost](pm-decision-q3-bell-prior-lost-2026-10-05.md)
 - 2026-10-05 [Q2-C: complete message return before rescue](pm-decision-q2-c-stays-2026-10-05.md)
 - 2026-10-05 [Q2-C rescue: original Wren escort to Elspeth](pm-decision-q2-c-rescue-2026-10-05.md)
-- 2026-10-05 [PM decision: Q2-B — Wren encounter and letter-bank riddle](pm-decision-q2-b-wren-riddle-2026-10-05.md)
+- 2026-10-05 [PM decision: Q2-B — Wren encounter and letter-bank riddle](pm-decision-q2-b-riddle-2026-10-05.md)
 - 2026-10-05 [PM decision: Q2-A — first Missing Child search lead](pm-decision-q2-a-first-search-2026-10-05.md)
 - 2026-10-05 [PM decision: Q1-A — Elspeth’s first lead](pm-decision-q1-a-first-lead-2026-10-05.md)
 - 2026-10-05 [PM adoption: M12-A first readable details](pm-decision-m12-a-readable-2026-10-05.md)
@@ -108,7 +108,7 @@ dated line below, newest first.
 - 2026-10-05 [Owner decision: retain review knowledge for future mechanics](owner-decision-review-knowledge-trail-2026-10-05.md)
 - 2026-10-05 [Owner decision: real Missing Child cast](owner-decision-real-chapter-cast-2026-10-05.md)
 - 2026-10-05 [Reuse documents already read in the current agent context](owner-decision-read-once-docs-2026-10-05.md)
-- 2026-10-05 [Owner direction and PM selection: opening Elspeth](owner-decision-opening-elspeth-2026-10-05.md)
+- 2026-10-05 [Owner direction and PM selection: opening Elspeth](owner-decision-opening-npc-2026-10-05.md)
 - 2026-10-05 [Owner decision: no waiting in the opening chapter](owner-decision-no-wait-opening-2026-10-05.md)
 - 2026-10-05 [M12-B: nested notice board](owner-decision-m12-b-notice-board-2026-10-05.md)
 - 2026-10-05 [Owner decision: fast provisional local integration](owner-decision-local-provisional-integration-2026-10-05.md)

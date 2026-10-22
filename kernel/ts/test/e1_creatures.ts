@@ -1,84 +1,8 @@
-// Fixed v042 creature route; corpse, loot and shrine answers from cartridges/ashmere_missing_child/{population_bundles,cartridge}.json.
-import assert from 'node:assert/strict';
+// E1 creature witnesses (docs/system/e1-certification.md).
 import type { DecisionResult, DefinitionRef } from '../src/contracts.gen.ts';
 import type { World } from '../src/index.ts';
-import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { key, same } from '../src/foundation/compose.ts';
 import { refString } from '../src/runtime/decision.ts';
-import type { CaseHost } from './e1_case_host.ts';
-
-export function creatures(a: CaseHost) {
-  const world = () => a.story.world(),
-    created = () => Object.entries(world().state.created ?? {}),
-    here = () => world().state.containers[world().body];
-  const member = (plan: string) =>
-    created().find(
-      ([id, c]) =>
-        c.definition.kind === 'npc' &&
-        c.origin.kind === 'spawned' &&
-        c.origin.by.key === plan &&
-        world().state.containers[id] === here(),
-    )![0];
-  const corpse = (victim: string) =>
-    created().find(([, c]) => c.origin.kind === 'death' && c.origin.victim_id === victim);
-  const fight = (id: string) => {
-    a.invoke('attack', [id]);
-    for (let round = 0; round < 40 && a.view().combat; round++) a.elapsed(3_000);
-  };
-  const hunt = (plan: string, kind: string) => {
-    const id = member(plan);
-    fight(id);
-    assert.equal(corpse(id)?.[1].definition.key, kind, `${plan} member must leave its corpse`);
-    return id;
-  };
-  const loot = (victim: string) =>
-    created().find(
-      ([, c]) =>
-        c.definition.kind === 'item' &&
-        c.origin.kind === 'spawned' &&
-        c.origin.member_id === victim,
-    )![0];
-  const take = (item: string) => {
-    a.invoke('take', [item]);
-    assert.equal(world().state.containers[item], world().body);
-  };
-
-  a.invoke('choose_ancestry', [], { ancestry: 'road_born' });
-  a.move('north', 'north');
-  hunt('crow_green_1', 'crow_corpse');
-  hunt('crow_green_2', 'crow_corpse');
-  a.move('south', 'south', 'south', 'south', 'west', 'south');
-  hunt('oak_deer', 'deer_corpse');
-  hunt('crow_oak', 'crow_corpse');
-  a.move('up');
-  hunt('crow_branches', 'crow_corpse');
-  a.move('down', 'north');
-  hunt('willow_deer', 'deer_corpse');
-  a.move('east', 'north', 'north', 'north', 'north', 'west', 'west');
-  const hide = loot(hunt('orchard_deer', 'deer_corpse'));
-  take(hide);
-  a.move('east', 'east', 'south', 'south', 'south', 'south', 'east');
-  const hound = member('fen_hounds'),
-    pelt = loot(hound);
-  fight(hound);
-  // The pack kills the player first: shrine return with the authored restore.
-  assert.equal(a.view().place.title.key, 'room.chapel_nave.title');
-  assert.equal(level(world(), world().body, resourceRef(world(), 'hp')), 10);
-  assert.equal(corpse(hound), undefined);
-  a.move('south', 'south', 'south', 'south', 'south', 'south', 'south', 'east');
-  fight(hound);
-  assert.equal(world().state.containers[pelt], corpse(hound)![0]);
-  a.move('south', 'south', 'south', 'south', 'south', 'south', 'south', 'east');
-  take(pelt);
-  take(hide); // recovered from the player's own corpse
-  a.reopen();
-  assert.equal(world().state.containers[hide], world().body);
-  assert.equal(world().state.containers[pelt], world().body);
-  const corpses: Record<string, number> = {};
-  for (const [, c] of created())
-    if (c.origin.kind === 'death') corpses[c.definition.key] = (corpses[c.definition.key] ?? 0) + 1;
-  return corpses;
-}
 
 // ponytail: spawned-member deaths, their corpse/loot, created-source bleeds and suppress reactions only.
 export function creatureWitnesses(before: World, after: World, decision: DecisionResult): string[] {

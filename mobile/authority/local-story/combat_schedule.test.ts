@@ -23,7 +23,7 @@ test('scheduled opponent departure reopens and reconciles before a harmless due 
   content.calendar.start = 3550;
   content.npcs[ref(fresh, 'npc', 'cellar_rat_1')].daily_schedule = {
     '1': {
-      cartridge_id: 'ashmere_sampler',
+      cartridge_id: 'cellar_sampler',
       cartridge_version: '0.0.9',
       kind: 'room',
       key: 'drowned_lantern',

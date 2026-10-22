@@ -7,6 +7,12 @@ import { pathToFileURL } from 'node:url';
 import { elapsedHost } from '../../authority/local-story/__tests__/elapsed-host.test.ts';
 import { presenter } from './presenter.ts';
 import { group } from './model.ts';
+import {
+  bundle,
+  entity,
+  genesis,
+  prefix,
+} from '../../authority/local-story/__tests__/riddle-fixture.ts';
 const require = createRequire(import.meta.url),
   ts = require('typescript');
 const react = pathToFileURL(require.resolve('react')).href;
@@ -45,56 +51,38 @@ registerHooks({
   },
 });
 const { NpcPage } = await import('./Npc.tsx');
-const bundle = JSON.parse(
-  readFileSync(
-    new URL('../../../protocol/fixtures/missing_child_v010_hash.json', import.meta.url),
-    'utf8',
-  ),
-);
-const ids = JSON.parse(
-  readFileSync(
-    new URL('../../../protocol/fixtures/missing_child_v010_ids.json', import.meta.url),
-    'utf8',
-  ),
-);
 const words = (e: any): string =>
   Array.isArray(e)
     ? e.map(words).join('')
     : typeof e === 'string'
       ? e
       : words(e?.props?.children ?? []);
+// The riddle fragment's texts (kernel/ts/test/riddle_fixture.ts); the bank gains a second E so two
+// tiles share a letter.
+const wrong = 'The sphinx shakes its head.',
+  right = 'The sphinx nods.',
+  prompt = 'What comes in twice a day?';
 
 // Breaks: bank order/multiplicity, editing, input transmission or detail chronology regresses.
 test('NPC detail tiles edit a bounded word and submit retry/correct results after history', (t) => {
-  const a = elapsedHost(':memory:', { wall: 10000, mono: 0 }, bundle);
+  const b = bundle((c) => {
+    c.dialogues[`${prefix}:dialogue/riddle`].riddle.bank = ['T', 'E', 'I', 'D', 'E'];
+  });
+  const sphinx = entity(genesis(), 'npc', 'sphinx');
+  const a = elapsedHost(':memory:', { wall: 10000, mono: 0 }, b);
   t.after(() => a.sql.close());
   const book = presenter(a.game);
   a.game.subscribe(book.update);
-  const go = (action: string, target: string[] = [], input: object = {}) => {
-    const reply = a.game.invoke({ action_key: action, target_ids: target, input } as never);
+  const go = (action: string, target: string[] = []) => {
+    const reply = a.game.invoke({ action_key: action, target_ids: target, input: {} } as never);
     assert.equal(reply.kind, 'saved');
     if (reply.kind === 'saved') assert.equal(reply.decision.kind, 'accepted');
   };
-  const choose = (choice_id: string) =>
-    go('choose', [], { choice_id, continuation_id: a.game.view().view.choice!.continuation_id });
-  const move = (...directions: string[]) =>
-    directions.forEach((direction) => go('move', [], { direction }));
-  go('elspeth', [ids['npc/elspeth']]);
-  choose('accept');
-  go('close_choice'); // the hub stays open after an answer (loka-x6t.5): Leave the conversation
-  move('north', 'north');
-  go('take', [ids['item/fox_drawing']]);
-  move('south', 'south');
-  go('a_elspeth_report', [ids['npc/elspeth']]);
-  choose('report');
-  move('south', 'south');
-  go('study_tracks');
-  move('south', 'south');
-  go('a_vesper_meeting', [ids['npc/vesper']]);
-  choose('meet_wren');
+  go('lantern');
+  go('take', [entity(genesis(), 'item', 'lantern')]);
   // Presenter records the actual pending prompt using its normal Talk button.
-  const talk = book.screen().buttons.find((b) => b.action_key === 'b_vesper_riddle')!;
-  book.press(talk, ids['npc/vesper']);
+  const talk = book.screen().buttons.find((b) => b.action_key === 'riddle')!;
+  book.press(talk, sphinx);
   const states = new Map<string, any[]>();
   let key = '',
     slot = 0;
@@ -125,11 +113,11 @@ test('NPC detail tiles edit a bounded word and submit retry/correct results afte
     return nodes(
       NpcPage({
         view: s.view,
-        npc: s.view.entities.find((e) => e.id === ids['npc/vesper']),
+        npc: s.view.entities.find((e) => e.id === sphinx),
         text: s.text,
         g: group(s.buttons),
-        press: (b) => book.press(b, ids['npc/vesper']),
-        log: s.detail(ids['npc/vesper']),
+        press: (b) => book.press(b, sphinx),
+        log: s.detail(sphinx),
         leave: () => {},
       }),
     );
@@ -151,64 +139,32 @@ test('NPC detail tiles edit a bounded word and submit retry/correct results afte
     draw().find((n) => n.type === 'Pressable' && n.props.accessibilityLabel === label)!.props
       .disabled;
   const initial = text();
-  assert.ok(
-    initial.indexOf(bundle.value.text['npc.vesper.description']) <
-      initial.indexOf(bundle.value.text['dialogue.b_vesper_riddle.prompt']),
-  );
-  assert.ok(
-    initial.indexOf(bundle.value.text['dialogue.b_vesper_riddle.prompt']) <
-      initial.indexOf('Choose letters to answer.'),
-  );
+  assert.ok(initial.indexOf('A sphinx.') < initial.indexOf(prompt));
+  assert.ok(initial.indexOf(prompt) < initial.indexOf('Choose letters to answer.'));
   assert.deepEqual(
     labels().filter((s) => /^., tile \d+$/.test(s)),
-    [
-      'R, tile 1',
-      'N, tile 2',
-      'A, tile 3',
-      'O, tile 4',
-      'L, tile 5',
-      'T, tile 6',
-      'E, tile 7',
-      'N, tile 8',
-      'S, tile 9',
-    ],
+    ['T, tile 1', 'E, tile 2', 'I, tile 3', 'D, tile 4', 'E, tile 5'],
   );
   assert.ok(!labels().includes('Submit'));
-  tap('N, tile 2');
-  tap('N, tile 8');
-  assert.ok(text().includes('NN'));
+  tap('E, tile 2');
+  tap('E, tile 5');
+  assert.ok(text().includes('EE'));
   // A used tile keeps its place, disabled; a second pick of it does not add a letter.
-  assert.equal(used('N, tile 2'), true);
-  tap('N, tile 2');
-  assert.ok(!text().includes('NNN'));
+  assert.equal(used('E, tile 2'), true);
+  tap('E, tile 2');
+  assert.ok(!text().includes('EEE'));
   tap('Backspace');
-  assert.ok(text().includes('N'));
-  assert.equal(used('N, tile 8'), false);
+  assert.ok(text().includes('E'));
+  assert.equal(used('E, tile 5'), false);
   tap('Clear');
   assert.ok(!labels().includes('Submit'));
-  for (const label of ['S, tile 9', 'T, tile 6', 'O, tile 4', 'N, tile 2', 'E, tile 7']) tap(label);
+  for (const label of ['E, tile 2', 'D, tile 4', 'I, tile 3', 'T, tile 1']) tap(label);
   tap('Submit');
-  assert.ok(text().includes(bundle.value.text['narration.vesper_wrong']));
-  assert.ok(!book.screen().log.includes(bundle.value.text['narration.vesper_wrong']));
-  assert.ok(
-    text().indexOf(bundle.value.text['narration.vesper_wrong']) <
-      text().indexOf('Choose letters to answer.'),
-  );
-  for (const label of [
-    'L, tile 5',
-    'A, tile 3',
-    'N, tile 2',
-    'T, tile 6',
-    'E, tile 7',
-    'R, tile 1',
-    'N, tile 8',
-  ])
-    tap(label);
+  assert.ok(text().includes(wrong));
+  assert.ok(!book.screen().log.includes(wrong));
+  assert.ok(text().indexOf(wrong) < text().indexOf('Choose letters to answer.'));
+  for (const label of ['T, tile 1', 'I, tile 3', 'D, tile 4', 'E, tile 5']) tap(label);
   tap('Submit');
-  assert.ok(text().includes(bundle.value.text['narration.b_vesper_riddle']));
+  assert.ok(text().includes(right));
   assert.ok(!labels().some((s) => /^., tile \d+$/.test(s)));
-  assert.equal(
-    a.game.view().view.journal.find((q) => q.quest.key === 'missing_child')!.state,
-    'active',
-  );
 });

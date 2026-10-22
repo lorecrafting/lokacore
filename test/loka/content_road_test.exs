@@ -8,10 +8,10 @@ defmodule Loka.ContentRoadTest do
 
   @moduletag :tmp_dir
   @kat JSON.decode!(File.read!("protocol/fixtures/cartridge_road_hash.json"))
-  @src "cartridges/ashmere_road"
+  @src "cartridges/resource_sampler"
   @expected ~s({"cartridge":#{@kat["canonical"]},"content_hash":"#{@kat["sha256"]}"})
 
-  # ashmere_road's source with `files` merged over it (nil removes a file).
+  # resource_sampler's source with `files` merged over it (nil removes a file).
   defp compile(dir, files) do
     base =
       for rel <- Path.wildcard("#{@src}/**/*.json"),
@@ -34,7 +34,7 @@ defmodule Loka.ContentRoadTest do
 
   defp ref(kind, key),
     do: %{
-      "cartridge_id" => "ashmere_road",
+      "cartridge_id" => "resource_sampler",
       "cartridge_version" => "0.0.1",
       "kind" => kind,
       "key" => key
@@ -53,7 +53,7 @@ defmodule Loka.ContentRoadTest do
 
   # Breaks: a default pool, an override, resource@1, a cost, threshold, cooldown or
   # resource.adjust step dropped or reshaped.
-  test "ashmere_road compiles to its Python known answer without warnings" do
+  test "resource_sampler compiles to its Python known answer without warnings" do
     assert Loka.Content.compile(@src) == {:ok, @expected, []}
   end
 
@@ -81,7 +81,10 @@ defmodule Loka.ContentRoadTest do
     heap = %{"aliases" => ["heap"], "description" => "detail.cart"}
     files = edit("rooms/mill_yard.json", ["details", "resource"], heap)
     {:ok, a, _touch_link_warning} = compile(dir, files)
-    cart = JSON.decode!(a)["cartridge"]["rooms"]["ashmere_road@0.0.1:room/mill_yard"]["details"]
+
+    cart =
+      JSON.decode!(a)["cartridge"]["rooms"]["resource_sampler@0.0.1:room/mill_yard"]["details"]
+
     assert cart["cart"]["variants"] |> hd() |> get_in(["when", "root", "fact", "kind"]) == "fact"
   end
 
@@ -92,13 +95,13 @@ defmodule Loka.ContentRoadTest do
     assert plain["lock"]["capabilities"]["resource"] == 1
     assert plain["manifest"]["requires"]["capabilities"]["resource"] == 1
 
-    assert plain["resources"]["ashmere_road@0.0.1:resource/hp"] ==
+    assert plain["resources"]["resource_sampler@0.0.1:resource/hp"] ==
              %{"key" => "hp", "minimum" => 0, "maximum" => 20, "start" => 20, "gain" => 5}
 
     coins = %{"minimum" => 0, "maximum" => 50, "start" => 3, "gain" => 0}
     rich = artifact(compile(Path.join(dir, "b"), resources(%{"coins" => coins})))
 
-    assert rich["resources"]["ashmere_road@0.0.1:resource/coins"] ==
+    assert rich["resources"]["resource_sampler@0.0.1:resource/coins"] ==
              Map.put(coins, "key", "coins")
 
     assert map_size(rich["resources"]) == 4
@@ -128,7 +131,7 @@ defmodule Loka.ContentRoadTest do
   # Breaks: a recipe naming a resource the cartridge lacks compiles (the loader rejects it).
   test "a cost's, threshold's or resource.adjust's unknown resource is UNRESOLVED_REFERENCE",
        %{tmp_dir: dir} do
-    target = %{"target" => "ashmere_road@0.0.1:resource/sp"}
+    target = %{"target" => "resource_sampler@0.0.1:resource/sp"}
 
     assert compile(
              Path.join(dir, "a"),
@@ -172,7 +175,7 @@ defmodule Loka.ContentRoadTest do
     ]
   }
 
-  # ashmere_road with cartridge.json's `world`, mv's `bands` and the band.<key> text of @tired.
+  # resource_sampler with cartridge.json's `world`, mv's `bands` and the band.<key> text of @tired.
   defp numbered(world, bands) do
     text = Map.merge(src("text.json"), Map.new(~w(fresh tired winded), &{"band." <> &1, &1}))
     pools = put_in(src("resources.json"), ["resources", "mv", "bands"], bands)
@@ -189,7 +192,7 @@ defmodule Loka.ContentRoadTest do
   test "world and a pool's bands compile; the short cost resource expands", %{tmp_dir: dir} do
     a = artifact(compile(dir, numbered(@world, @tired)))
     assert a["world"] == put_in(@world, ["movement", "cost", "resource"], ref("resource", "mv"))
-    assert a["resources"]["ashmere_road@0.0.1:resource/mv"]["bands"] == @tired
+    assert a["resources"]["resource_sampler@0.0.1:resource/mv"]["bands"] == @tired
   end
 
   # Breaks: a table rule (sorted, last cut 0, unique key), the band text or the cost's pool
@@ -213,7 +216,7 @@ defmodule Loka.ContentRoadTest do
       pool:
         {cost.("resource", "stamina"), @tired,
          d(u, "cartridge.world.movement.cost.resource", %{
-           "target" => "ashmere_road@0.0.1:resource/stamina"
+           "target" => "resource_sampler@0.0.1:resource/stamina"
          })},
       zero:
         {cost.("amount", 0), @tired,

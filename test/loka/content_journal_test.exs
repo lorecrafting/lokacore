@@ -4,8 +4,8 @@ defmodule Loka.ContentJournalTest do
   use ExUnit.Case, async: true
 
   import Loka.ContentSource, only: [compile: 2]
-  setup_all do: %{dir: Loka.ContentSource.copy("cartridges/ashmere_journal")}
-  @src "cartridges/ashmere_journal"
+  setup_all do: %{dir: Loka.ContentSource.copy("cartridges/journal_sampler")}
+  @src "cartridges/journal_sampler"
   @kat JSON.decode!(File.read!("protocol/fixtures/cartridge_journal_hash.json"))
   @expected ~s({"cartridge":#{@kat["canonical"]},"content_hash":"#{@kat["sha256"]}"})
 

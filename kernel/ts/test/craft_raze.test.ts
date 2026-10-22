@@ -1,7 +1,9 @@
 // Built rooms S5 (mechanics.md Built rooms): a self-built room (craft_sampler's raise step, hs-12)
-// razes as a commissioned one does. Its own file: craft.test.ts is at its size cap.
+// razes as a commissioned one does, and its ancestry grant loader floor. Its own file: craft.test.ts
+// is at its size cap.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -10,6 +12,7 @@ import { test } from 'node:test';
 import { INSTALLED, loadCartridge, newWorld, step } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { pending } from '../src/mechanics/dialogue/shared.ts';
+import { encode } from '../src/foundation/canonical.ts';
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));
 const scratch = mkdtempSync(join(tmpdir(), 'loka-craft-raze-'));
@@ -81,4 +84,25 @@ test('the self-built hut razes like a commissioned one', () => {
   });
   assert.deepEqual(Object.keys(w.state.built ?? {}), [hut]);
   assert.equal(w.rooms[lane].exits.north, undefined);
+});
+
+// Homestead hs-11 (twin of content_craft_test.exs). Breaks: an ancestry grants at birth a skill
+// whose prerequisite was never met (woodfolk's woodcutting takes one here).
+test('loader: an ancestry never grants a skill with a prerequisite', () => {
+  const c = JSON.parse(new TextDecoder().decode(artifact)).cartridge;
+  c.skills[`${P}skill/woodcutting`].prerequisite = {
+    policy_version: 1,
+    root: { op: 'all', items: [] },
+  };
+  const canonical = encode(c);
+  const sha256 = createHash('sha256').update(canonical).digest('hex');
+  const r = loadCartridge(
+    new TextEncoder().encode(`{"cartridge":${canonical},"content_hash":"${sha256}"}`),
+    INSTALLED,
+  );
+  assert.equal(r.ok, false);
+  assert.deepEqual(
+    [r.diagnostic.code, r.diagnostic.path],
+    ['SCHEMA_VIOLATION', `.cartridge.ancestries.woodfolk.skill`],
+  );
 });

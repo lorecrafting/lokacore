@@ -49,10 +49,10 @@ const fails = (
       suggested_capabilities: suggested,
     },
   });
-const ID = 'ashmere_items@0.0.1';
+const ID = 'items_sampler@0.0.1';
 const item = (key: string) => `.cartridge.items["${ID}:item/${key}"]`;
 const ref = (kind: string, key: string) => ({
-  cartridge_id: 'ashmere_items',
+  cartridge_id: 'items_sampler',
   cartridge_version: '0.0.1',
   kind,
   key,

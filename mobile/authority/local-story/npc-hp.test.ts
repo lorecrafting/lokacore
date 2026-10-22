@@ -40,8 +40,8 @@ const fresh = newWorld(
 );
 const releases = [{ fresh, content_hash: kat.sha256 }] as const;
 const hp = resourceRef(fresh, 'hp');
-const rat = fresh.entityIds['ashmere_sampler@0.0.7:npc/cellar_rat_1'];
-const rat2 = fresh.entityIds['ashmere_sampler@0.0.7:npc/cellar_rat_2'];
+const rat = fresh.entityIds['cellar_sampler@0.0.7:npc/cellar_rat_1'];
+const rat2 = fresh.entityIds['cellar_sampler@0.0.7:npc/cellar_rat_2'];
 const target = key({ kind: 'resource', resource: hp, entity_id: rat });
 const disk = (p: ReturnType<typeof elapsedHost>) => ({
   rows: p.sql.prepare('SELECT section,key,value FROM state_row ORDER BY section,key').all(),

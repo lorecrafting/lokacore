@@ -69,9 +69,9 @@ defmodule Loka.ContentRoomsTest do
   end
 
   # Breaks if the v2 payload drops or renames a field, or keys rooms wrongly.
-  test "ashmere_rooms compiles to the Python known answer" do
+  test "rooms_sampler compiles to the Python known answer" do
     expected = ~s({"cartridge":#{@kat["canonical"]},"content_hash":"#{@kat["sha256"]}"})
-    assert Loka.Content.compile("cartridges/ashmere_rooms") == {:ok, expected, []}
+    assert Loka.Content.compile("cartridges/rooms_sampler") == {:ok, expected, []}
   end
 
   test "a two-room source compiles to v2 with its entry and text", %{tmp_dir: dir} do
@@ -102,7 +102,7 @@ defmodule Loka.ContentRoomsTest do
               ]}
   end
 
-  # Short references (owner decision 2026-09-25); ashmere_details' known answer covers the
+  # Short references (owner decision 2026-09-25); details_sampler' known answer covers the
   # resolved case. Break: a short exit or entry is expanded to another kind or not checked.
   test "a short exit or entry naming no room is UNRESOLVED_REFERENCE", %{tmp_dir: dir} do
     files = %{
@@ -203,7 +203,7 @@ defmodule Loka.ContentRoomsTest do
   end
 
   # R5 S2. Breaks: details dropped or reshaped in the artifact.
-  test "ashmere_details compiles to its Python known answer" do
+  test "details_sampler compiles to its Python known answer" do
     expected =
       ~s({"cartridge":#{@details_kat["canonical"]},"content_hash":"#{@details_kat["sha256"]}"})
 
@@ -217,7 +217,7 @@ defmodule Loka.ContentRoomsTest do
       warn("rooms/well_lane.description", "well")
     ]
 
-    assert Loka.Content.compile("cartridges/ashmere_details") == {:ok, expected, warnings}
+    assert Loka.Content.compile("cartridges/details_sampler") == {:ok, expected, warnings}
   end
 
   defp detail(aliases, text \\ "r.d"), do: %{"aliases" => aliases, "description" => text}
@@ -304,7 +304,7 @@ defmodule Loka.ContentRoomsTest do
 
   # R5 S3. Breaks: variants dropped or reshaped, facts not keyed, or a short fact reference in a
   # room's or detail's variant left short (owner decision 2026-09-25; the loader would reject it).
-  test "ashmere_facts compiles to its Python known answer" do
+  test "facts_sampler compiles to its Python known answer" do
     expected =
       ~s({"cartridge":#{@facts_kat["canonical"]},"content_hash":"#{@facts_kat["sha256"]}"})
 
@@ -313,7 +313,7 @@ defmodule Loka.ContentRoomsTest do
       warn("rooms/reed_path.variants[0].description", "mud")
     ]
 
-    assert Loka.Content.compile("cartridges/ashmere_facts") == {:ok, expected, warnings}
+    assert Loka.Content.compile("cartridges/facts_sampler") == {:ok, expected, warnings}
   end
 
   defp variant(root, text \\ "r.d"),

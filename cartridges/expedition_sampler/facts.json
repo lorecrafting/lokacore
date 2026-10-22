@@ -1,0 +1,28 @@
+{
+  "facts": {
+    "night_survived": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The player survived the night expedition."
+    },
+    "wild_standing": {
+      "version": 1,
+      "value_type": {
+        "type": "int",
+        "minimum": -10,
+        "maximum": 10,
+        "default": 0
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "Standing with the wild; the expedition lowers it by one."
+    }
+  }
+}

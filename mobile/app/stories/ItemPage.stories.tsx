@@ -16,10 +16,7 @@ const meta: Meta = {
 export default meta;
 
 export const Plain: StoryObj = {
-  ...pageStory(ItemPlainView, undefined, [
-    'item.fox_drawing.short',
-    'item.fox_drawing.description',
-  ]),
+  ...pageStory(ItemPlainView, undefined, ['item.waterskin.short', 'item.waterskin.description']),
   name: 'Plain',
 };
 export const ContainerWithInside: StoryObj = {

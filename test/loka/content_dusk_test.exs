@@ -7,9 +7,9 @@ defmodule Loka.ContentDuskTest do
   use ExUnit.Case, async: true
 
   import Loka.ContentSource, only: [compile: 2]
-  setup_all do: %{dir: Loka.ContentSource.copy("cartridges/ashmere_dusk")}
+  setup_all do: %{dir: Loka.ContentSource.copy("cartridges/check_sampler")}
   @kat JSON.decode!(File.read!("protocol/fixtures/cartridge_dusk_hash.json"))
-  @src "cartridges/ashmere_dusk"
+  @src "cartridges/check_sampler"
   @expected ~s({"cartridge":#{@kat["canonical"]},"content_hash":"#{@kat["sha256"]}"})
 
   defp src(rel), do: JSON.decode!(File.read!(Path.join(@src, rel)))
@@ -35,7 +35,7 @@ defmodule Loka.ContentDuskTest do
 
   # Breaks: the check, a failure outcome, a duration or a time_window node dropped or reshaped,
   # or a failure step's short fact reference left short.
-  test "ashmere_dusk compiles to its Python known answer without warnings", %{dir: dir} do
+  test "check_sampler compiles to its Python known answer without warnings", %{dir: dir} do
     assert Loka.Content.compile(@src) == {:ok, @expected, []}
     # A failure step's short fact reference expands like a success step's.
     step = %{"op" => "fact.assign", "fact" => "crypt_gate_open", "value" => false}
@@ -44,7 +44,7 @@ defmodule Loka.ContentDuskTest do
       compile(dir, pick(["outcomes", "failure", "sequence"], fn _ -> [step] end))
 
     [failure] =
-      JSON.decode!(artifact)["cartridge"]["recipes"]["ashmere_dusk@0.0.1:recipe/pick_lock"][
+      JSON.decode!(artifact)["cartridge"]["recipes"]["check_sampler@0.0.1:recipe/pick_lock"][
         "outcomes"
       ]["failure"]["sequence"]
 
@@ -74,7 +74,7 @@ defmodule Loka.ContentDuskTest do
                   "UNRESOLVED_REFERENCE",
                   "recipes/pick_lock.outcomes.failure.sequence[0].fact",
                   %{
-                    "target" => "ashmere_dusk@0.0.1:fact/gate_rusted"
+                    "target" => "check_sampler@0.0.1:fact/gate_rusted"
                   }
                 )
               ]}

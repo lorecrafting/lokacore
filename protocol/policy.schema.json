@@ -655,7 +655,7 @@
         {
           "op": "barrier_state",
           "barrier": {
-            "cartridge_id": "ashmere_gate",
+            "cartridge_id": "gate_sampler",
             "cartridge_version": "0.0.1",
             "kind": "barrier",
             "key": "cell_door"
@@ -665,7 +665,7 @@
         {
           "op": "stat_compare",
           "attribute": {
-            "cartridge_id": "ashmere_road",
+            "cartridge_id": "resource_sampler",
             "cartridge_version": "0.0.1",
             "kind": "attribute",
             "key": "str"
@@ -677,7 +677,7 @@
           "item": {
             "op": "resource_compare",
             "resource": {
-              "cartridge_id": "ashmere_road",
+              "cartridge_id": "resource_sampler",
               "cartridge_version": "0.0.1",
               "kind": "resource",
               "key": "mv"

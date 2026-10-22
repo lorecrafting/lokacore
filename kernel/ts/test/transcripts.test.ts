@@ -17,7 +17,7 @@ import { decideReplay, header, start } from '../play/run.ts';
 const kats = [
   'protocol/fixtures/cartridge_*hash.json',
   'protocol/fixtures/containers_*hash.json',
-  'protocol/fixtures/missing_child_*hash.json',
+  'protocol/fixtures/toolbox_showcase_hash.json',
   'protocol/fixtures/*_sampler_hash.json', // samplers kept outside the simulator's catalog
 ].flatMap((p) => globSync(p, { cwd: ROOT }).map((rel) => readFileSync(ROOT + rel, 'utf8')));
 const transcripts = globSync('cartridges/*/transcripts/*.jsonl', { cwd: ROOT });
@@ -31,7 +31,7 @@ test('every example transcript replays and exercises its capability', () => {
     const kat = kats
       .filter((text) => text.includes(pin))
       .map((text) => JSON.parse(text))
-      .find((k) => k.value.manifest.id === cartridge && k.sha256 === pin);
+      .find((k) => JSON.parse(k.canonical).manifest.id === cartridge && k.sha256 === pin);
     assert.ok(kat, `${rel}: no known answer for ${cartridge}`);
     const loaded = loadCartridge(
       Buffer.from(`{"cartridge":${kat.canonical},"content_hash":"${kat.sha256}"}`),

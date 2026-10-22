@@ -5,9 +5,9 @@ defmodule Loka.ContentItemsTest do
   use ExUnit.Case, async: true
 
   import Loka.ContentSource, only: [compile: 2]
-  setup_all do: %{dir: Loka.ContentSource.copy("cartridges/ashmere_items")}
+  setup_all do: %{dir: Loka.ContentSource.copy("cartridges/items_sampler")}
   @kat JSON.decode!(File.read!("protocol/fixtures/containers_cartridge_items_hash.json"))
-  @src "cartridges/ashmere_items"
+  @src "cartridges/items_sampler"
 
   defp src(rel), do: JSON.decode!(File.read!(Path.join(@src, rel)))
   defp text(changes), do: Map.merge(src("text.json"), changes)
@@ -28,7 +28,7 @@ defmodule Loka.ContentItemsTest do
 
   defp full(kind, key),
     do: %{
-      "cartridge_id" => "ashmere_items",
+      "cartridge_id" => "items_sampler",
       "cartridge_version" => "0.0.1",
       "kind" => kind,
       "key" => key
@@ -36,7 +36,7 @@ defmodule Loka.ContentItemsTest do
 
   # Breaks: items or NPCs dropped or reshaped, short location, room or has_item references left
   # short, or a warning where every text links what it must.
-  test "ashmere_items compiles to its Python known answer without warnings" do
+  test "items_sampler compiles to its Python known answer without warnings" do
     expected = ~s({"cartridge":#{@kat["canonical"]},"content_hash":"#{@kat["sha256"]}"})
     assert Loka.Content.compile(@src) == {:ok, expected, []}
   end
@@ -101,10 +101,10 @@ defmodule Loka.ContentItemsTest do
              {:error,
               [
                 d("UNRESOLVED_REFERENCE", "items/lamp_oil.location.npc", %{
-                  "target" => "ashmere_items@0.0.1:npc/satchel"
+                  "target" => "items_sampler@0.0.1:npc/satchel"
                 }),
                 d("UNRESOLVED_REFERENCE", "npcs/bram.room", %{
-                  "target" => "ashmere_items@0.0.1:room/river"
+                  "target" => "items_sampler@0.0.1:room/river"
                 })
               ]}
   end

@@ -20,6 +20,8 @@ import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { units } from '../src/mechanics/calendar.ts';
+import * as patrol from './patrol_fixture.ts';
+import * as water from './water_fixture.ts';
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));
 
@@ -35,6 +37,17 @@ try {
   for (const f of readdirSync(scratch).sort()) artifacts.set(f, readFileSync(join(scratch, f)));
 } finally {
   rmSync(scratch, { recursive: true });
+}
+// Water and patrol live only in test fragments (no stock cartridge carries them).
+for (const [name, fx] of [
+  ['water_fragment', water],
+  ['patrol_fragment', patrol],
+] as const) {
+  const b = fx.bundle();
+  artifacts.set(
+    name,
+    new TextEncoder().encode(`{"cartridge":${b.canonical},"content_hash":"${b.sha256}"}`),
+  );
 }
 
 let seq = 0;
@@ -133,7 +146,7 @@ for (const [file, bytes] of artifacts) {
   const loaded = loadCartridge(bytes, INSTALLED);
   assert.ok(loaded.ok, `${file}: ${JSON.stringify(loaded).slice(0, 300)}`);
   const c = loaded.cartridge as Cartridge;
-  // ashmere_hello is a text-only greeting with no entry room, so it has no world to advance.
+  // hello_sampler is a text-only greeting with no entry room, so it has no world to advance.
   if (!c.entry) continue;
   test(`${file}: one long wait equals hourly steps`, () => {
     let w0 = newWorld(c, '3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, [1, 2, 3, 4]);

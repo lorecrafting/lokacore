@@ -15,9 +15,9 @@ import { validate } from '../src/foundation/validate.ts';
 
 const equal = (actual: unknown, expected: unknown) =>
   assert.deepEqual(actual === undefined ? undefined : JSON.parse(JSON.stringify(actual)), expected);
-const R = 'ashmere_scene@0.0.1';
+const R = 'scene_sampler@0.0.1';
 const ref = (kind: string, key: string) => ({
-  cartridge_id: 'ashmere_scene',
+  cartridge_id: 'scene_sampler',
   cartridge_version: '0.0.1',
   kind,
   key,

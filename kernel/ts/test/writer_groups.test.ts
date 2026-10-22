@@ -11,7 +11,7 @@ import { applyStatus } from '../src/mechanics/status/shared.ts';
 import { step, stepElapsed } from '../src/index.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { command, elapsed, fixture, hp } from './c5_bleed_fixture.ts';
-import { fresh, ref } from './deer_fixture.ts';
+import { ref, shoo } from './deer_fixture.ts';
 import { value } from '../src/mechanics/fact.ts';
 import { sightHandoffValid } from '../src/foundation/compose_sight.ts';
 import { sightHandoffHolds } from '../src/runtime/invariants_sight.ts';
@@ -118,7 +118,17 @@ test('a sight flight between two status or fact-row joins commits as step-by-ste
       } as never,
       n,
     ).world;
-  const at = walk(walk(walk(fresh(), 1, 'south'), 2, 'south'), 3, 'west');
+  // An int fact the counting reaction below adjusts.
+  const counter = shoo.genesis((c) => {
+    c.facts[ref('fact', 'ticks')] = {
+      key: 'ticks',
+      meaning: 'Status ticks seen.',
+      scopes: ['player'],
+      value_type: { type: 'int', minimum: -100, maximum: 100, default: 0 },
+      version: 1,
+    };
+  });
+  const at = walk(walk(walk(counter, 1, 'south'), 2, 'south'), 3, 'west');
   assert.equal(at.state.clock, 64800);
   const wait = (w: World, until: number) => {
     const run = 'bbbbbbbb-0000-4000-8000-000000000001';
@@ -136,12 +146,12 @@ test('a sight flight between two status or fact-row joins commits as step-by-ste
     cartridge_id: at.cartridge.manifest.id,
     cartridge_version: at.cartridge.manifest.version,
     kind: 'fact',
-    key: 'maud_trust',
+    key: 'ticks',
   } as never;
   const item = Object.keys(at.entities).find((e) => at.entities[e]!.kind === 'item')!;
   // Poison on the body ticks at 65050 and chill (on the body, or on an item) at 65200, each next
   // one after the wait; the deer's sight flight is due at 65100. With `counted`, a reaction adds 1
-  // to the player's maud_trust on each tick.
+  // to the player's ticks fact on each tick.
   for (const [chilled, counted] of [
     [at.body, false],
     [item, true],

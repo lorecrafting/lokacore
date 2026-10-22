@@ -1,0 +1,15 @@
+{
+  "title": "room.ford.title",
+  "description": "room.ford.description",
+  "exits": {
+    "east": {
+      "to": "trailhead"
+    },
+    "west": {
+      "to": "glade"
+    },
+    "north": {
+      "to": "road"
+    }
+  }
+}

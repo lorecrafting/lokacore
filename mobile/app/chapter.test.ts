@@ -9,6 +9,7 @@ import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import { test } from 'node:test';
 import { runInNewContext } from 'node:vm';
+import { compiled } from '../authority/local-story/__tests__/compiled.ts';
 import { checkpoint, elapsedHost } from '../authority/local-story/__tests__/elapsed-host.test.ts';
 import { localSession, openGame } from '../authority/local-story/session.ts';
 import type { Db } from '../authority/local-story/store.ts';
@@ -26,11 +27,11 @@ const adapt = (sql: DatabaseSync): Db => ({
   isInTransactionSync: () => sql.isTransaction,
 });
 
-// Breaks: the app bundles Ashmere or Lantern again, keys its save name by content (web keeps a
+// Breaks: the app bundles a retired chapter or Lantern again, keys its save name by content (web keeps a
 // slot per file forever), opens a save pinned to another showcase build without the refusal and
 // Start over, or opens/deletes an older save, including the Start over that deletes an unreadable
 // showcase file. Saved pins, the opening room and untouched old save bytes are the assertions.
-test('the app opens and replaces only its showcase save, preserving Lantern, sampler and Ashmere saves', () => {
+test('the app opens and replaces only its showcase save, preserving Lantern, sampler and retired-chapter saves', () => {
   const showcase = JSON.parse(
     readFileSync(
       new URL('../../protocol/fixtures/toolbox_showcase_hash.json', import.meta.url),
@@ -54,7 +55,7 @@ test('the app opens and replaces only its showcase save, preserving Lantern, sam
     },
   );
   sql.close();
-  const samplerPath = join(dir, 'loka-ashmere-sampler.db');
+  const samplerPath = join(dir, 'loka-old-sampler.db');
   const old = new DatabaseSync(samplerPath);
   openGame(
     adapt(old),
@@ -71,10 +72,10 @@ test('the app opens and replaces only its showcase save, preserving Lantern, sam
     },
   );
   old.close();
-  const ashmerePath = join(dir, 'loka-ashmere-missing-child.db');
-  writeFileSync(ashmerePath, 'retired Ashmere save'); // bytes the app must never open or delete
+  const retiredPath = join(dir, 'loka-retired-chapter.db');
+  writeFileSync(retiredPath, 'retired chapter save'); // bytes the app must never open or delete
   const checksum = () =>
-    [lanternPath, samplerPath, ashmerePath].map((path) =>
+    [lanternPath, samplerPath, retiredPath].map((path) =>
       createHash('sha256').update(readFileSync(path)).digest('hex'),
     );
   const before = checksum();
@@ -106,12 +107,12 @@ test('the app opens and replaces only its showcase save, preserving Lantern, sam
     './book/labels.ts': { LABEL },
     './SaveError': {},
   };
-  const compiled = ts.transpileModule(readFileSync(new URL('App.tsx', import.meta.url), 'utf8'), {
+  const js = ts.transpileModule(readFileSync(new URL('App.tsx', import.meta.url), 'utf8'), {
     compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.React },
   }).outputText;
   const run = () => {
     const globals: { loka_session?: ReturnType<typeof localSession> } = {};
-    runInNewContext(compiled, {
+    runInNewContext(js, {
       exports: {},
       require: (name: string) => {
         if (name.endsWith('.json'))
@@ -167,19 +168,19 @@ test('the app opens and replaces only its showcase save, preserving Lantern, sam
 });
 
 // Breaks: the new chapter silently opens an old exact pin or deletes it before explicit Start over.
-test('the 0.0.9 chapter save is refused intact until explicit Start over', (t) => {
+test('a save from a different cartridge is refused intact until explicit Start over', (t) => {
   const dir = mkdtempSync(join(tmpdir(), 'loka-chapter-pin-'));
   t.after(() => rmSync(dir, { recursive: true, force: true }));
   const path = join(dir, 'chapter.db');
   const prior = JSON.parse(
     readFileSync(
-      new URL('../../protocol/fixtures/missing_child_v009_hash.json', import.meta.url),
+      new URL('../../protocol/fixtures/cartridge_dusk_hash.json', import.meta.url),
       'utf8',
     ),
   );
   const current = JSON.parse(
     readFileSync(
-      new URL('../../protocol/fixtures/missing_child_v016_hash.json', import.meta.url),
+      new URL('../../protocol/fixtures/toolbox_showcase_hash.json', import.meta.url),
       'utf8',
     ),
   );
@@ -222,12 +223,7 @@ test('the 0.0.9 chapter save is refused intact until explicit Start over', (t) =
 // The actual App module receives controlled platform clocks/events and real rollback-journal SQLite.
 // Native scheduling is controlled input; assertions concern confirmed worlds/checkpoints, not calls.
 function appHost() {
-  const chapter = JSON.parse(
-    readFileSync(
-      new URL('../../protocol/fixtures/missing_child_v016_hash.json', import.meta.url),
-      'utf8',
-    ),
-  );
+  const chapter = compiled('cartridges/toolbox_showcase');
   const a = elapsedHost(':memory:', { wall: 10000, mono: 0 }, chapter);
   const state: any[] = [],
     effects = new Map<number, { deps: unknown[]; cleanup?: () => void }>();
@@ -297,10 +293,10 @@ function appHost() {
   };
   const globals: { loka_session?: ReturnType<typeof localSession> } = {},
     exports: any = {};
-  const compiled = ts.transpileModule(readFileSync(new URL('App.tsx', import.meta.url), 'utf8'), {
+  const js = ts.transpileModule(readFileSync(new URL('App.tsx', import.meta.url), 'utf8'), {
     compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX },
   }).outputText;
-  runInNewContext(compiled, {
+  runInNewContext(js, {
     exports,
     globalThis: globals,
     process: { env: { EXPO_PUBLIC_KERNEL_COMMIT: '0'.repeat(40) } },
@@ -328,6 +324,7 @@ function appHost() {
     effects.clear();
   };
   draw();
+  book.props.shell.subscribed(true); // the showcase has an authored recap: the clock waits for the Book
   return {
     ...a,
     get game() {
@@ -369,14 +366,14 @@ test('actual App pause and resume preserve 9ms plus 11ms as exactly one logical 
     h.clock.wall = 10009;
     h.clock.mono = 9;
     h.change('background');
-    assert.deepEqual(checkpoint(h.sql), { wall_ms: 10009, remainder: 450, target: 64800 });
+    assert.deepEqual(checkpoint(h.sql), { wall_ms: 10009, remainder: 450, target: 25200 });
     h.clock.wall = 10020;
     h.change('background');
     h.change('active');
-    assert.equal(h.game.view().view.time, 64801);
-    assert.deepEqual(checkpoint(h.sql), { wall_ms: 10020, remainder: 0, target: 64801 });
+    assert.equal(h.game.view().view.time, 25201);
+    assert.deepEqual(checkpoint(h.sql), { wall_ms: 10020, remainder: 0, target: 25201 });
     h.change('active');
-    assert.deepEqual(checkpoint(h.sql), { wall_ms: 10020, remainder: 0, target: 64801 });
+    assert.deepEqual(checkpoint(h.sql), { wall_ms: 10020, remainder: 0, target: 25201 });
   } finally {
     h.close();
   }
@@ -396,7 +393,7 @@ test('actual App stops unknown storage wakeups and resumes after confirmed user 
     h.clock.wall = 10021;
     h.clock.mono = 21;
     for (let n = 0; n < 3; n++) h.next();
-    assert.deepEqual(checkpoint(h.sql), { wall_ms: 10001, remainder: 50, target: 64800 });
+    assert.deepEqual(checkpoint(h.sql), { wall_ms: 10001, remainder: 50, target: 25200 });
     h.fault.reads = true;
     h.change('background');
     h.clock.wall = 11021;
@@ -404,17 +401,17 @@ test('actual App stops unknown storage wakeups and resumes after confirmed user 
     h.fault.reads = false;
     h.clock.wall = 12021;
     for (let n = 0; n < 3; n++) h.next();
-    assert.deepEqual(checkpoint(h.sql), { wall_ms: 10001, remainder: 50, target: 64800 });
-    assert.equal(h.game.view().view.time, 64800);
+    assert.deepEqual(checkpoint(h.sql), { wall_ms: 10001, remainder: 50, target: 25200 });
+    assert.equal(h.game.view().view.time, 25200);
     const reply = h.game.invoke({ action_key: 'look' as never, target_ids: [], input: {} });
     assert.equal(reply.kind, 'saved');
-    assert.equal(h.game.view().view.time, 64901);
+    assert.equal(h.game.view().view.time, 25301);
     h.shell.recovered(true); // The real Shell callback injected into Book, after confirmed retry.
     h.clock.wall = 12041;
     h.clock.mono = 41;
     h.next();
-    assert.equal(h.game.view().view.time, 64902);
-    assert.deepEqual(checkpoint(h.sql), { wall_ms: 12041, remainder: 50, target: 64902 });
+    assert.equal(h.game.view().view.time, 25302);
+    assert.deepEqual(checkpoint(h.sql), { wall_ms: 12041, remainder: 50, target: 25302 });
     h.fault.armed = true;
     h.clock.wall = 12042;
     h.clock.mono = 42;
@@ -428,7 +425,7 @@ test('actual App stops unknown storage wakeups and resumes after confirmed user 
     h.clock.wall = 12062;
     h.clock.mono = 62;
     for (let n = 0; n < 3; n++) h.next();
-    assert.deepEqual(checkpoint(h.sql), { wall_ms: 12042, remainder: 100, target: 64902 });
+    assert.deepEqual(checkpoint(h.sql), { wall_ms: 12042, remainder: 100, target: 25302 });
     assert.equal(h.game.pendingInvocation(), held);
   } finally {
     h.close();
@@ -445,7 +442,7 @@ test('old App wakeups cannot mutate the same remounted Game or a replacement sav
     h.clock.wall = 10020;
     h.clock.mono = 20;
     departed();
-    assert.deepEqual(checkpoint(h.sql), { wall_ms: 10000, remainder: 0, target: 64800 });
+    assert.deepEqual(checkpoint(h.sql), { wall_ms: 10000, remainder: 0, target: 25200 });
     const oldRun = h.sql.prepare('SELECT run_id FROM save').get()!.run_id;
     const oldWake = h.callback()!;
     h.startOver();
@@ -454,8 +451,8 @@ test('old App wakeups cannot mutate the same remounted Game or a replacement sav
     h.clock.wall = 11020;
     h.clock.mono = 1020;
     oldWake();
-    assert.equal(h.game.view().view.time, 64800);
-    assert.deepEqual(checkpoint(h.sql), { wall_ms: 10020, remainder: 0, target: 64800 });
+    assert.equal(h.game.view().view.time, 25200);
+    assert.deepEqual(checkpoint(h.sql), { wall_ms: 10020, remainder: 0, target: 25200 });
     assert.equal(h.sql.prepare('SELECT count(*) AS n FROM receipt').get()!.n, 0);
   } finally {
     h.close();

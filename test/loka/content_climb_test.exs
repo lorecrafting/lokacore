@@ -1,3 +1,5 @@
+Code.require_file("test/fixtures/patrol_source.exs")
+
 defmodule Loka.ContentClimbTest do
   use ExUnit.Case, async: true
   setup_all do: %{dir: Loka.ContentSource.copy("cartridges/climb_sampler")}
@@ -34,9 +36,9 @@ defmodule Loka.ContentClimbTest do
   # Breaks: a patrol leg over a climb face compiles, so the leader walks it (twin of the loader
   # row in kernel/ts/test/climb.test.ts).
   test "a patrol route over a climb face is refused" do
-    dir = Loka.ContentSource.copy("cartridges/ashmere_missing_child")
+    dir = Loka.PatrolSource.copy()
     api = {"cartridge.json", &put_in(&1, ["requires", "kernel_api", "at_least"], "1.45")}
-    climb = %{"item" => "brass_key", "damage" => 1, "fell" => "action.bandage"}
+    climb = %{"item" => "brass_key", "damage" => 1, "fell" => "watch.prompt"}
     face = {"rooms/watch_post.json", &put_in(&1, ["exits", "west", "climb"], climb)}
 
     assert {:error, diags} = Loka.ContentSource.compile(dir, [api, face])

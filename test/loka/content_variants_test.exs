@@ -10,10 +10,10 @@ defmodule Loka.ContentVariantsTest do
   ]
 
   # Breaks (toolbox row W6): the compiler accepts a new entity variant list or leaf below
-  # kernel_api 1.46, refuses an item's room_line_variants (older than the row; ashmere_items
+  # kernel_api 1.46, refuses an item's room_line_variants (older than the row; items_sampler
   # declares one at 1.0), or leaves an NPC variant's short reference unexpanded.
   test "row W6 fields and leaves need 1.46; an item room-line variant does not" do
-    dir = Loka.ContentSource.copy("cartridges/ashmere_items")
+    dir = Loka.ContentSource.copy("cartridges/items_sampler")
     api = &{"cartridge.json", fn m -> put_in(m, ["requires", "kernel_api", "at_least"], &1) end}
     assert {:ok, _, _} = Loka.ContentSource.compile(dir, [api.("1.45")])
     leaf = fn op -> &put_in(&1, ["room_line_variants", Access.at(0), "when", "root"], op) end

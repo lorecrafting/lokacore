@@ -928,7 +928,7 @@
       "examples": [
         {
           "room": {
-            "cartridge_id": "ashmere_details",
+            "cartridge_id": "details_sampler",
             "cartridge_version": "0.0.1",
             "kind": "room",
             "key": "ferry_landing"
@@ -945,7 +945,7 @@
         },
         {
           "room": {
-            "cartridge_id": "ashmere_details",
+            "cartridge_id": "details_sampler",
             "cartridge_version": "0.0.1",
             "kind": "room",
             "key": "well_lane"
@@ -1450,7 +1450,7 @@
           "data": {
             "severity": "error",
             "code": "UNRESOLVED_REFERENCE",
-            "path": "quests/missing_child.objectives[2].target",
+            "path": "quests/lost_lamb.objectives[2].target",
             "message_key": "diagnostics.unresolved_reference",
             "data": {
               "target": "npcs/old_ferryman"
@@ -1528,7 +1528,7 @@
           },
           "data": {
             "room": {
-              "cartridge_id": "ashmere_details",
+              "cartridge_id": "details_sampler",
               "cartridge_version": "0.0.1",
               "kind": "room",
               "key": "ferry_landing"

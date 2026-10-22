@@ -1,6 +1,5 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { readFileSync } from 'node:fs';
 import { cartridge } from './combat_fixture.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { loadCartridge, INSTALLED, newWorld, type Cartridge, type World } from '../src/index.ts';
@@ -141,19 +140,6 @@ export function trainingBundle(stat = 10, chance = 0, start = 0) {
 export function bundleOf(c: any) {
   const canonical = encode(c);
   return { canonical, sha256: createHash('sha256').update(canonical).digest('hex') };
-}
-export function productionBundle() {
-  if (!process.env.C1_ARTIFACT) {
-    const fixture = JSON.parse(
-      readFileSync(
-        new URL('../../../protocol/fixtures/missing_child_v021_hash.json', import.meta.url),
-        'utf8',
-      ),
-    );
-    return { canonical: fixture.canonical, sha256: fixture.sha256 };
-  }
-  const artifact = JSON.parse(readFileSync(process.env.C1_ARTIFACT, 'utf8'));
-  return { canonical: encode(artifact.cartridge), sha256: artifact.content_hash };
 }
 export function trainingWorld(stat = 10, chance = 0): World {
   const b = trainingBundle(stat, chance);

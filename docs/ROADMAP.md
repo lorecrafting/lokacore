@@ -4,7 +4,7 @@ Planning, not spec: document 14 (with [pre-release-proof.md](archive/spec/pre-re
 sets the gates; this page is the current slice plan, run per [the delivery workflow](WORKFLOW.md).
 Slice counts and estimates are the PM's planning, not owner decisions.
 
-The [Missing Child completion plan](MISSING-CHILD-PLAN.md) ([#192](https://github.com/lorecrafting/lokacore/pull/192))
+The [Missing Child completion plan](archive/MISSING-CHILD-PLAN.md) ([#192](https://github.com/lorecrafting/lokacore/pull/192))
 maps 33 PRs through the remaining player outcomes; the [slice briefs](briefs/chapter-one/README.md)
 give candidate assignment detail; [Beads Rust](WORKFLOW.md#beads-rust) mirrors the slices, and this
 roadmap remains the published completion record. The [actual chapter cutover](decisions/owner-decision-actual-chapter-cutover-2026-10-05.md)
@@ -15,8 +15,8 @@ excludes Old Bram; required routes follow the [no-wait rule](decisions/owner-dec
 
 After the foundation phase, work follows the ranked [mechanics toolbox](MECHANICS-TOOLBOX.md)
 ([owner decision](decisions/owner-decision-mechanics-toolbox-2026-10-08.md)). The official Chapters 1-3 come after the showcases, UI polish and worldbuilding
-([record](decisions/owner-decision-product-order-2026-10-15.md)); the current Chapter 1 is a frozen regression fixture until the [toolbox showcase](SHOWCASE.md), the
-composition proof that grows one district per batch, covers its play families
+([record](decisions/owner-decision-product-order-2026-10-15.md)); the first chapter is deleted ([retirement](decisions/owner-decision-retire-first-chapter-2026-10-21.md) phase 2), and the [toolbox showcase](SHOWCASE.md), the
+composition proof that grows one district per batch, replaces it
 ([owner decision](decisions/owner-decision-showcase-2026-10-10.md)).
 
 ## Slices
@@ -32,12 +32,12 @@ composition proof that grows one district per batch, covers its play families
 
 **32 of 33** proposed slices are complete: A1–A3, B1–B9, C1–C6, D1–D12, E1 ([#288](https://github.com/lorecrafting/lokacore/pull/288)) and E2.
 The latest chapter source publication is [#263](https://github.com/lorecrafting/lokacore/pull/263),
-D10 Map/Where/Knock; the [retired Ashmere chapter](system/cartridge.md#retired-ashmere-chapter-e1-candidate)
-owns the release/API/hash/ID pins. **Ashmere is retired ([record](decisions/owner-decision-retire-ashmere-2026-10-21.md)): the app bundles the [toolbox showcase](SHOWCASE.md) until the real game is rebuilt from zero after UI polish.** **E3 and release-candidate certification are not planned: Chapter 1 is [frozen as a mechanics sample](decisions/owner-decision-mechanics-toolbox-2026-10-08.md).** E2, the R9C interaction proof, closed with S5 ([#321](https://github.com/lorecrafting/lokacore/pull/321)); its slices, proofs and carries are in the [E2 gate checklist](briefs/chapter-one/chapter-one-e2-gate-checklist-2026-10-08.md).
+D10 Map/Where/Knock; the [retired first chapter](system/cartridge.md#retired-first-chapter-e1-candidate)
+owns the release/API/hash/ID pins. **The first chapter is retired ([record](decisions/owner-decision-retire-first-chapter-2026-10-21.md)): the app bundles the [toolbox showcase](SHOWCASE.md) until the real game is rebuilt from zero after UI polish.** **E3 and release-candidate certification are not planned: the first chapter is deleted ([retirement](decisions/owner-decision-retire-first-chapter-2026-10-21.md) phase 2).** E2, the synthetic interaction proof, closed with S5 ([#321](https://github.com/lorecrafting/lokacore/pull/321)); its slices, proofs and carries are in the [E2 gate checklist](briefs/chapter-one/chapter-one-e2-gate-checklist-2026-10-08.md).
 The [original order](decisions/owner-decision-chapter-one-polish-order-2026-10-07.md) (E1, E2,
 polish, release-candidate certification, E3) now ends after the polish phase.
 The polish phase's [Storybook plan](briefs/polish/storybook-plan-2026-10-08.md) is adopted; the owner answered its decisions G1-G5 with the recommendations (2026-10-08). Designer input for batches 1 and 2: [design input](briefs/polish/design-input-batches-1-2-2026-10-08.md). Batch 3: [design input](briefs/polish/design-input-batch-3-2026-10-09.md). Batch 4: [design input](briefs/polish/design-input-batch-4-2026-10-09.md). Batch 6: [design input](briefs/polish/design-input-batch-6-2026-10-09.md). Owner polish loka-n5l (Tap bleed): [design input](briefs/polish/design-input-n5l-2026-10-09.md).
-The [completion plan](MISSING-CHILD-PLAN.md) and [proof briefs](briefs/chapter-one/README.md#e-proof-and-closure)
+The [completion plan](archive/MISSING-CHILD-PLAN.md) and [proof briefs](briefs/chapter-one/README.md#e-proof-and-closure)
 define the remaining acceptance. Supporting loader dependency closure merged in
 [#264](https://github.com/lorecrafting/lokacore/pull/264); save recovery fixes merged in
 [#265](https://github.com/lorecrafting/lokacore/pull/265). Neither closes E1 certification.

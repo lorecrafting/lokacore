@@ -6,7 +6,17 @@ import { LIMITS } from '../src/contracts.gen.ts';
 import type { Key } from '../src/contracts.gen.ts';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { fresh, route, ref, sceneRef, phase, mv, command, entity } from './dream_fixture.ts';
+import {
+  fresh,
+  route,
+  ref,
+  sceneRef,
+  phase,
+  mv,
+  command,
+  entity,
+  prefix,
+} from './dream_fixture.ts';
 import { step, gameView } from '../src/index.ts';
 import { assigned } from '../src/mechanics/fact.ts';
 import { identify, resolve } from '../src/commands/invocation.ts';
@@ -46,8 +56,8 @@ test('only a new actual paid Rest starts one checkpoint without giving its end c
   assert.deepEqual(phase(a.world), started);
   const unpaid = fresh((c) => {
     c.entry.key = 'inn_rooms';
-    c.npcs['ashmere_missing_child@0.0.28:npc/maud'].room = ref('room', 'inn_rooms');
-    c.resources['ashmere_missing_child@0.0.28:resource/mv'].start = 50;
+    c.npcs[`${prefix}:npc/maud`].room = ref('room', 'inn_rooms');
+    c.resources[`${prefix}:resource/mv`].start = 50;
   });
   const rested = step(unpaid, command(unpaid, 1, { type: 'rest' }), 1, 'rest' as Key);
   assert.equal(rested.decision.kind, 'accepted');
@@ -57,11 +67,11 @@ test('only a new actual paid Rest starts one checkpoint without giving its end c
     command(rested.world, 2, {
       type: 'use_service',
       provider_id: entity(rested.world, 'npc', 'maud'),
-      service: ref('service', 'lantern_room'),
+      service: ref('service', 'bed_room'),
       quoted_price: 3,
     }),
     2,
-    'rent_lantern_room' as Key,
+    'rent_room' as Key,
   );
   assert.equal(paid.decision.kind, 'accepted');
   assert.deepEqual(phase(paid.world), before);
@@ -178,8 +188,7 @@ test('both exact branches keep World usable and award memory only after shown fi
     assert.ok(ended.decision.kind === 'accepted');
     assert.equal(ended.decision.narration![0].key, finalLine);
     assert.equal(
-      Object.values(a.world.state.quests!).find((q) => q.quest.key === 'a_room_at_the_lantern')!
-        .outcome,
+      Object.values(a.world.state.quests!).find((q) => q.quest.key === 'a_room')!.outcome,
       'acknowledged',
     );
     const resolvedQuest = ended.decision.events.find((e) => e.payload.type === 'quest_resolved')!;
@@ -200,10 +209,11 @@ test('both exact branches keep World usable and award memory only after shown fi
 test('first credit and the dream Continue leave an open conversation first', () => {
   const a = route(
     fresh((c) => {
-      c.npcs['ashmere_missing_child@0.0.28:npc/peg'].room = ref('room', 'inn_rooms');
+      c.npcs[`${prefix}:npc/bram`].room = ref('room', 'inn_rooms');
+      delete c.npcs[`${prefix}:npc/bram`].daily_schedule;
     }),
   );
-  a.invoke({ type: 'talk', target_id: entity(a.world, 'npc', 'peg') });
+  a.invoke({ type: 'talk', target_id: entity(a.world, 'npc', 'bram') });
   const ordinary = gameView(a.world).choice!;
   assert.ok(ordinary);
   a.invoke({ type: 'rest' });
@@ -219,74 +229,6 @@ test('first credit and the dream Continue leave an open conversation first', () 
   assert.equal(gameView(a.world).choice, undefined);
 });
 
-// Breaks: scene-owned pending rows hijack real S2 dialogue/handoff or prevent the ordinary Bell modal scene from taking foreground.
-test('a dormant dream choice survives the actual S2 message handoff and the Bell modal scene', () => {
-  const a = route(
-    fresh((c) => {
-      c.calendar.start = 64800;
-    }),
-  );
-  a.invoke({ type: 'rest' });
-  for (const line of [1, 2, 3]) a.invoke({ type: 'continue', scene: sceneRef, line }, 'dream_next');
-  const retained = a.world.state.choices;
-  const move = (...directions: string[]) =>
-    directions.forEach((direction) => a.invoke({ type: 'move', direction }));
-  const talk = (name: string) =>
-    a.invoke({ type: 'talk', target_id: entity(a.world, 'npc', name) });
-  const choose = (choice_id: string, answer?: string) =>
-    a.invoke({
-      type: 'choose',
-      continuation_id: gameView(a.world).choice!.continuation_id,
-      choice_id,
-      ...(answer && { answer }),
-    });
-  a.invoke({ type: 'stand' });
-  move('down', 'west', 'south');
-  talk('elspeth');
-  choose('accept');
-  a.invoke(
-    { type: 'close_choice', continuation_id: gameView(a.world).choice!.continuation_id },
-    'close_choice',
-  ); // the hub stays open after an answer (loka-x6t.5): Leave the conversation
-  move('north', 'north');
-  a.invoke({ type: 'take', item_id: entity(a.world, 'item', 'fox_drawing') });
-  move('south', 'south');
-  talk('elspeth');
-  choose('report');
-  move('south', 'south');
-  a.invoke({ type: 'perform', action: 'study_tracks' });
-  move('south', 'south');
-  talk('vesper');
-  choose('meet_wren');
-  talk('vesper');
-  choose('answer', 'LANTERN');
-  talk('vesper');
-  choose('carry_message');
-  move('north', 'north', 'north', 'north');
-  talk('elspeth');
-  choose('stays');
-  assert.equal(
-    a.world.state.containers[entity(a.world, 'item', 'vesper_message')],
-    entity(a.world, 'npc', 'elspeth'),
-  );
-  assert.deepEqual(phase(a.world), { slept: true, seen: false, cursor: 4, quest: 'active' });
-  move('north', 'north', 'north', 'north', 'north');
-  talk('aldric');
-  choose('accept');
-  move('up', 'up');
-  a.invoke({ type: 'perform', action: 'ring_bell' });
-  assert.equal(gameView(a.world).scene!.scene.key, 'bell_rung');
-  while (gameView(a.world).scene) {
-    const d = gameView(a.world).scene!;
-    a.invoke({ type: 'continue', scene: d.scene, line: d.index }, 'continue');
-  }
-  for (const [id, row] of Object.entries(retained ?? {}))
-    assert.deepEqual(a.world.state.choices![id], row);
-  assert.deepEqual(phase(a.world), { slept: true, seen: false, cursor: 4, quest: 'active' });
-  move('down', 'down', 'south', 'south', 'south', 'south', 'east', 'up');
-  assert.equal(dream(a.world).available, true);
-});
-
 // Breaks: stale/wrong scene-owned draw or binding resolves a retained branch, or keyed view admission ignores the authored alias policy/shared budget.
 test('captured scene choices and exact keyed availability reject foreign and stale draws without changing any truth', () => {
   const a = route(fresh());
@@ -297,7 +239,7 @@ test('captured scene choices and exact keyed availability reject foreign and sta
     o = c.choices[0];
   for (const input of [
     { ...o.dream, body_id: entity(a.world, 'npc', 'maud') },
-    { ...o.dream, room_id: a.world.roomIds['ashmere_missing_child@0.0.28:room/village_green'] },
+    { ...o.dream, room_id: a.world.roomIds[`${prefix}:room/village_green`] },
     { ...o.dream, expected_revision: o.dream!.expected_revision + 1 },
     { ...o.dream, scene: ref('scene', 'bell_rung') },
     undefined,
@@ -319,7 +261,7 @@ test('captured scene choices and exact keyed availability reject foreign and sta
   const blocked = route(
     fresh((c) => {
       for (const k of ['dream_next', 'dream_choose'])
-        c.actions[`ashmere_missing_child@0.0.28:action/${k}`].policy.root = {
+        c.actions[`${prefix}:action/${k}`].policy.root = {
           op: 'fact_compare',
           fact: ref('fact', 'dream_seen'),
           equals: true,
@@ -373,7 +315,7 @@ test('a Rest occurrence cannot credit a nonliving body', () => {
 // Breaks: a paid-up renter with no pennies left reads "unaffordable" instead of "already paid" (audit A6).
 test('a second Rent at zero pennies refuses as already paid, not unaffordable', () => {
   const w = fresh((c) => {
-    c.resources[`ashmere_missing_child@0.0.28:resource/pennies`].start = 3;
+    c.resources[`${prefix}:resource/pennies`].start = 3;
   });
   const rent = (at: typeof w, n: number) =>
     step(
@@ -381,11 +323,11 @@ test('a second Rent at zero pennies refuses as already paid, not unaffordable', 
       command(at, n, {
         type: 'use_service',
         provider_id: entity(at, 'npc', 'maud'),
-        service: ref('service', 'lantern_room'),
+        service: ref('service', 'bed_room'),
         quoted_price: 3,
       }),
       n,
-      'rent_lantern_room' as Key,
+      'rent_room' as Key,
     );
   const paid = rent(w, 1);
   assert.equal(paid.decision.kind, 'accepted');

@@ -277,8 +277,8 @@ test('a light-only cartridge reopens lawful refill history and rejects a bounded
   const supplied = lightOnlyFixture(),
     p = setup(':memory:', supplied);
   try {
-    const source = supplied.fresh.entityIds['ashmere_items@0.0.1:item/lantern'];
-    const supply = supplied.fresh.entityIds['ashmere_items@0.0.1:item/lamp_oil'];
+    const source = supplied.fresh.entityIds['items_sampler@0.0.1:item/lantern'];
+    const supply = supplied.fresh.entityIds['items_sampler@0.0.1:item/lamp_oil'];
     p.invoke('take', [supply]);
     p.move('north');
     p.invoke('take', [source]);

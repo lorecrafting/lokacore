@@ -6,7 +6,7 @@ The owner asked on 2026-10-06:
 
 Pilot `beads_rust` (`br`) on a small Missing Child subset while Chapter 1 source
 work continues. Keep the [roadmap](../ROADMAP.md),
-[completion plan](../MISSING-CHILD-PLAN.md), briefs, independent review records
+[completion plan](../archive/MISSING-CHILD-PLAN.md), briefs, independent review records
 and Git merge history as durable evidence. Beads mirrors operational status and
 dependencies, with links to those records; it does not replace them or alter
 source review/CI gates. The PM is the single tracker writer, whether the PM is

@@ -42,7 +42,7 @@ const open = (sql: DatabaseSync) => {
   return o;
 };
 function play(o: ReturnType<typeof open>) {
-  let carry: { invocation: any; reply: Saved } | undefined;
+  const saved: Record<string, { invocation: any; reply: Saved }> = {};
   for (const [action_key, target] of [
     ['lantern', undefined],
     ['take', 'item/lantern'],
@@ -60,15 +60,15 @@ function play(o: ReturnType<typeof open>) {
       invocation_id: host.newId(),
       action_key,
       actor_id: fresh.character,
-      target_ids: target ? [fresh.entityIds[`ashmere_scene@0.0.1:${target}`]] : [],
+      target_ids: target ? [fresh.entityIds[`scene_sampler@0.0.1:${target}`]] : [],
       input,
     };
     const reply = o.invoke(invocation) as Saved;
     assert.equal(reply.kind, 'saved');
     assert.equal((reply.decision as { kind: string }).kind, 'accepted');
-    if (action_key === 'choose') carry = { invocation, reply };
+    saved[action_key!] = { invocation, reply };
   }
-  return carry!;
+  return saved;
 }
 function replay(sql: DatabaseSync) {
   let world = fresh;
@@ -93,13 +93,15 @@ function replay(sql: DatabaseSync) {
 }
 // Breaks: scene fact row lost/reset on reopen, replay starts/advances it again, or receipt retry
 // issues the trigger anew. Assert literal persisted line before comparing actual command replay.
+// Breaks (PR 314 review, mutant M4): a replayed exact Continue skips its stored receipt
+// (invocation.ts:57) and is decided again instead of returning that receipt.
 test('line two survives reopen and triggering receipt retry without duplicate effects', () => {
   const dir = mkdtempSync(join(tmpdir(), 'loka-scene-'));
   const path = join(dir, 'save.db');
   let sql = new DatabaseSync(path);
   try {
     const o = open(sql);
-    const carry = play(o);
+    const saved = play(o);
     const expected = replay(sql);
     const facts = sql
       .prepare("SELECT value FROM state_row WHERE section='facts' ORDER BY key")
@@ -113,7 +115,7 @@ test('line two survives reopen and triggering receipt retry without duplicate ef
     const reopened = open(sql);
     assert.deepEqual(gameView(reopened.world()).scene, {
       scene: {
-        cartridge_id: 'ashmere_scene',
+        cartridge_id: 'scene_sampler',
         cartridge_version: '0.0.1',
         kind: 'scene',
         key: 'bell_rung',
@@ -123,10 +125,11 @@ test('line two survives reopen and triggering receipt retry without duplicate ef
       count: 3,
     });
     assert.equal(hash(reopened.world().state as never), hash(expected.state as never));
-    assert.deepEqual(
-      reopened.invoke(carry.invocation),
-      JSON.parse(JSON.stringify({ ...carry.reply, replay: true })),
-    );
+    for (const { invocation, reply } of [saved.choose!, saved.continue!])
+      assert.deepEqual(
+        reopened.invoke(invocation),
+        JSON.parse(JSON.stringify({ ...reply, replay: true })),
+      );
     assert.equal(hash(reopened.world().state as never), hash(expected.state as never));
     assert.equal(sql.prepare('SELECT revision FROM head').get()!.revision, revision);
     assert.equal(sql.prepare('SELECT count(*) AS n FROM trace').get()!.n, traceCount);

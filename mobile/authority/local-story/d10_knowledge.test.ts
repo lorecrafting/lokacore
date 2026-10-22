@@ -1,21 +1,30 @@
-import { newWorld, type Cartridge } from '../../../kernel/ts/src/index.ts';
 import { openStory } from './authority.ts';
 import assert from 'node:assert/strict';
-import { createHash } from 'node:crypto';
 import { mkdtempSync, rmSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
 import { encode } from '../../../kernel/ts/src/foundation/canonical.ts';
-import { read } from '../../../kernel/ts/test/read.ts';
+import { fragment } from '../../../kernel/ts/test/fragment.ts';
 import { elapsedHost } from './__tests__/elapsed-host.test.ts';
 import { openGame } from './session.ts';
 
-function bundle(entry?: string) {
-  const c = structuredClone(read('protocol/fixtures/missing_child_v042_hash.json').value);
-  if (entry) c.entry.key = entry;
-  const canonical = encode(c);
-  return { canonical, sha256: createHash('sha256').update(canonical).digest('hex') };
+// Showcase plus an inline Knock on the Smithy's open south store door (answered by the smith).
+const f = fragment('protocol/fixtures/toolbox_showcase_hash.json');
+const smithy = `${f.prefix}:room/smithy`;
+function knockable(c: any) {
+  c.entry = f.ref('room', 'the_fold');
+  c.rooms[smithy].exits.south.knock = {
+    npc: f.ref('npc', 'smith'),
+    room: f.ref('room', 'woodstore'),
+    answered: 'knock.store.answered',
+    unanswered: 'knock.store.unanswered',
+  };
+  c.text['knock.store.answered'] = 'The smith calls back.';
+  c.text['knock.store.unanswered'] = 'No one answers.';
+  const door = c.barriers[`${f.prefix}:barrier/store_door`];
+  door.initial = 'open';
+  delete door.opens_when;
 }
 const invoke = (
   game: ReturnType<typeof openGame>,
@@ -38,7 +47,7 @@ const names = (game: ReturnType<typeof openGame>): string[] =>
 test('D10 real SQLite keeps each entry/Look and shared door commit across cold reopen and retry', (t) => {
   const dir = mkdtempSync(join(tmpdir(), 'loka-d10-'));
   t.after(() => rmSync(dir, { recursive: true, force: true }));
-  const a = elapsedHost(join(dir, 'save.db'), { wall: 10000, mono: 0 }, bundle());
+  const a = elapsedHost(join(dir, 'save.db'), { wall: 10000, mono: 0 }, f.bundle(knockable));
   t.after(() => a.sql.close());
   let game = a.game;
   const reopen = () => {
@@ -47,28 +56,22 @@ test('D10 real SQLite keeps each entry/Look and shared door commit across cold r
     game = openGame(a.db, a.bundle, a.host);
     assert.ok(game.view().view);
   };
-  invoke(game, 'choose_ancestry', { ancestry: 'road_born' });
   reopen();
-  assert.deepEqual(names(game), ['room.ferry_landing.title']);
+  assert.deepEqual(names(game), ['room.the_fold.title']);
   invoke(game, 'look');
   reopen();
-  assert.deepEqual(names(game), ['room.ferry_landing.title']);
+  assert.deepEqual(names(game), ['room.the_fold.title']);
   const before = game.view().token;
-  invoke(game, 'move', { direction: 'north' });
+  invoke(game, 'move', { direction: 'south' });
   reopen();
-  assert.deepEqual(names(game), ['room.ferry_landing.title', 'room.well_lane.title']);
+  assert.deepEqual(names(game), ['room.smithy.title', 'room.the_fold.title']);
   const stale = game.invoke({
     action_key: 'move',
     target_ids: [],
-    input: { direction: 'north' },
+    input: { direction: 'south' },
     view_freshness_token: before,
   } as never);
   assert.equal(stale.kind, 'stale_view');
-  for (const direction of ['north', 'north', 'north']) {
-    invoke(game, 'move', { direction });
-    reopen();
-  }
-  assert.ok(names(game).includes('room.chapel_steps.title'));
   const rows = () =>
     a.sql
       .prepare(
@@ -76,29 +79,29 @@ test('D10 real SQLite keeps each entry/Look and shared door commit across cold r
       )
       .all();
   const knowledge = rows();
-  invoke(game, 'knock', { direction: 'north' });
+  invoke(game, 'knock', { direction: 'south' });
   reopen();
   assert.deepEqual(rows(), knowledge);
-  invoke(game, 'close', { direction: 'north' });
+  invoke(game, 'close', { direction: 'south' });
   reopen();
   const blocked = game.invoke({
     action_key: 'move',
     target_ids: [],
-    input: { direction: 'north' },
+    input: { direction: 'south' },
   } as never);
   assert.equal(blocked.kind, 'saved');
   if (blocked.kind === 'saved') assert.equal(blocked.decision.kind, 'rejected');
-  assert.equal(names(game).includes('room.chapel_nave.title'), false);
-  invoke(game, 'open', { direction: 'north' });
+  assert.equal(names(game).includes('room.woodstore.title'), false);
+  invoke(game, 'open', { direction: 'south' });
   reopen();
-  invoke(game, 'move', { direction: 'north' });
+  invoke(game, 'move', { direction: 'south' });
   reopen();
-  assert.ok(names(game).includes('room.chapel_nave.title'));
+  assert.ok(names(game).includes('room.woodstore.title'));
   const observations = a.sql
     .prepare("SELECT value FROM state_row WHERE section='observed_npcs'")
     .all()
     .map((r) => JSON.parse(r.value as string));
-  assert.ok(observations.some((r) => r.at === 64800));
+  assert.ok(observations.some((r) => r.at === 25200));
 });
 
 // Break: corrupted knowledge is silently repaired or untyped, rather than refusing without changing save bytes.
@@ -113,8 +116,8 @@ test('D10 malformed and forged knowledge rows refuse in place without deleting s
     const dir = mkdtempSync(join(tmpdir(), 'loka-d10-corrupt-'));
     t.after(() => rmSync(dir, { recursive: true, force: true }));
     const path = join(dir, 'save.db');
-    const a = elapsedHost(path, { wall: 10000, mono: 0 }, bundle('chapel_nave'));
-    invoke(a.game, 'choose_ancestry', { ancestry: 'road_born' });
+    const a = elapsedHost(path, { wall: 10000, mono: 0 }, f.bundle());
+    invoke(a.game, 'look');
     if (kind === 'missing_current')
       a.sql.exec("DELETE FROM state_row WHERE section='visited_rooms'");
     if (kind === 'wrong_actor')
@@ -138,12 +141,7 @@ test('D10 malformed and forged knowledge rows refuse in place without deleting s
         .prepare("SELECT key,value FROM state_row WHERE section='visited_rooms' LIMIT 1")
         .get()!;
       const row = JSON.parse(existing.value as string);
-      const fresh = newWorld(
-        read('protocol/fixtures/missing_child_v042_hash.json').value as Cartridge,
-        '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never,
-        [1, 2, 3, 4],
-      );
-      row.room_id = fresh.roomIds['ashmere_missing_child@0.0.42:room/scriptorium'];
+      row.room_id = f.genesis().roomIds[`${f.prefix}:room/forge_stall`];
       a.sql
         .prepare("INSERT INTO state_row VALUES ('visited_rooms',?,?)")
         .run(
@@ -169,16 +167,12 @@ test('D10 malformed and forged knowledge rows refuse in place without deleting s
 test('D10 failed and lost COMMIT keep whole knowledge and replay one accepted entry', (t) => {
   const dir = mkdtempSync(join(tmpdir(), 'loka-d10-fault-'));
   t.after(() => rmSync(dir, { recursive: true, force: true }));
-  const b = bundle();
-  const fresh = newWorld(
-    read('protocol/fixtures/missing_child_v042_hash.json').value as Cartridge,
-    '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never,
-    [1, 2, 3, 4],
-  );
+  const b = f.bundle();
+  const fresh = f.genesis();
   const releases = [{ fresh, content_hash: b.sha256 }] as const;
   for (const kind of ['failed', 'lost'] as const) {
     const a = elapsedHost(join(dir, kind + '.db'), { wall: 10000, mono: 0 }, b);
-    invoke(a.game, 'choose_ancestry', { ancestry: 'road_born' });
+    invoke(a.game, 'look');
     let opened = openStory(a.db, releases, a.host);
     assert.equal(opened.kind, 'open');
     if (opened.kind !== 'open') throw new Error('open required');
@@ -231,57 +225,4 @@ test('D10 failed and lost COMMIT keep whole knowledge and replay one accepted en
     assert.equal(snapshot(), complete);
     a.sql.close();
   }
-});
-
-// Break: the shared entry owner omits ferry or water transfers and the due drowning return.
-test('D10 ferry, water entry/surface and due drowning return discover once and reopen at each intermediate', (t) => {
-  const dir = mkdtempSync(join(tmpdir(), 'loka-d10-route-'));
-  t.after(() => rmSync(dir, { recursive: true, force: true }));
-  const a = elapsedHost(join(dir, 'save.db'), { wall: 10000, mono: 0 }, bundle());
-  t.after(() => a.sql.close());
-  let game = a.game;
-  const reopen = () => {
-    a.sql.close();
-    a.sql.open();
-    game = openGame(a.db, a.bundle, a.host);
-  };
-  const act = (key: string, input: object = {}, ids: string[] = []) => {
-    invoke(game, key, input, ids);
-    reopen();
-  };
-  act('choose_ancestry', { ancestry: 'road_born' });
-  act('move', { direction: 'west' });
-  const cross = () => {
-    const f = game.view().view.notices!.find((n) => n.transport)!.transport!;
-    act(f.action.action_key, { route: f.route, quoted_fare: f.fare }, [...f.action.target_ids!]);
-  };
-  cross();
-  assert.ok(names(game).includes('room.fen_isle_landing.title'));
-  act('move', { direction: 'east' });
-  const sedge = game.view().view.entities.find((e) => e.name === 'npc.sedge.short')!;
-  act('sedge_swim', {}, [sedge.id]);
-  act('choose', { continuation_id: game.view().view.choice!.continuation_id, choice_id: 'learn' });
-  act('move', { direction: 'west' });
-  cross();
-  for (const direction of ['east', 'north', 'down', 'down']) act('move', { direction });
-  assert.ok(names(game).includes('room.well_bottom.title'));
-  act('move', { direction: 'up' });
-  assert.equal(game.view().view.place.title.key, 'room.well_shaft.title');
-  act('move', { direction: 'down' });
-  const before = names(game);
-  a.clock.wall += 120001;
-  a.clock.mono += 120001;
-  // Open the actual authority so the test drives the same elapsed writer as the session.
-  const fresh = newWorld(
-    read('protocol/fixtures/missing_child_v042_hash.json').value as Cartridge,
-    '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never,
-    [1, 2, 3, 4],
-  );
-  const story = openStory(a.db, [{ fresh, content_hash: a.bundle.sha256 }], a.host);
-  assert.equal(story.kind, 'open');
-  if (story.kind !== 'open') throw new Error('open required');
-  story.pulse('active', story.runId());
-  reopen();
-  assert.equal(game.view().view.place.title.key, 'room.chapel_nave.title');
-  assert.deepEqual(names(game), [...before, 'room.chapel_nave.title'].sort());
 });

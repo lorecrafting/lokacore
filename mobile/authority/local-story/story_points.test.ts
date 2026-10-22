@@ -46,7 +46,7 @@ const undeclared = (() => {
 const ACTOR = 'bd595711-ea5f-89a5-abb0-046cd349d2f9';
 const BRAM = 'ff864ad5-cd56-80c8-9392-dc88bdc28fd2';
 const LANTERN = '6a70d262-b6ea-8b64-9809-ec7f79d1521e';
-const HASH = '7a7381f7e810bb6bf3ab15c83429da497db0011d50b7f447a7329fab4f59ba5f'; // the fixture's
+const HASH = '976226a0ecee855ccbcf861d8a60c53ba158b36115284347dab4972411dc170c'; // the fixture's
 const [A, B, C] = ['a', 'b', 'c'].map((x) => `${x.repeat(8)}-1111-4222-8333-444444444444`);
 /** The n-th id a test's allocator hands out. */
 const id = (n: number) => `aaaaaaaa-0000-4000-8000-${String(n).padStart(12, '0')}`;
@@ -119,7 +119,7 @@ const count = (p: ReturnType<typeof processOn>, t: string) =>
 const sha256 = (text: string) => createHash('sha256').update(text).digest('hex');
 /** The canonical StoryPointReport of leave chosen at revision 4 in run `run`, report `report`. */
 const payload = (report: string, run: string) =>
-  `{"observed_revision":4,"outcome":"leave","release":{"cartridge_hash":"${HASH}","cartridge_id":"ashmere_ferry","cartridge_version":"0.0.1"},"report_id":"${report}","run_id":"${run}","story_point":"lantern_resolved"}`;
+  `{"observed_revision":4,"outcome":"leave","release":{"cartridge_hash":"${HASH}","cartridge_id":"ferry_sampler","cartridge_version":"0.0.1"},"report_id":"${report}","run_id":"${run}","story_point":"lantern_resolved"}`;
 
 /** The fake platform: one acceptance per report id, its `result`; `lose` drops the next reply. */
 function platform(result = 'accepted') {
@@ -220,7 +220,7 @@ test('a story point whose report is malformed is not committed', () => {
 // the landing (FERRY, rooms in ref order), search_plan party_led, Bram's job J0 (local_story.test.ts),
 // the resolved quest (ordinal 0 of the accept's CommandId), the body's resources at their starts
 // and the clock and RNG unchanged.
-const F = '{"cartridge_id":"ashmere_ferry","cartridge_version":"0.0.1"';
+const F = '{"cartridge_id":"ferry_sampler","cartridge_version":"0.0.1"';
 const [BODY, FERRY] = [
   '3d4829ad-9e43-81ef-bc10-66b1b267e157',
   '1a7c3699-2844-8a55-b29f-eac079c7bf50',

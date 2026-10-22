@@ -1,0 +1,68 @@
+{
+  "title": "quest.night_walk.title",
+  "objective": {
+    "evidence": "expedition"
+  },
+  "expedition": {
+    "start_room": "trailhead",
+    "start_detail": "cairn",
+    "shelter_room": "hollow",
+    "shelter_detail": "lean_to",
+    "route": [
+      {
+        "from": "trailhead",
+        "direction": "west",
+        "to": "ford"
+      },
+      {
+        "from": "ford",
+        "direction": "west",
+        "to": "glade"
+      },
+      {
+        "from": "glade",
+        "direction": "south",
+        "to": "hollow"
+      },
+      {
+        "from": "hollow",
+        "direction": "north",
+        "to": "glade"
+      },
+      {
+        "from": "glade",
+        "direction": "east",
+        "to": "ford"
+      }
+    ],
+    "footprint": [
+      "trailhead",
+      "ford",
+      "glade",
+      "hollow"
+    ],
+    "survived_fact": "night_survived",
+    "faction": "wild_standing",
+    "faction_delta": -1,
+    "hound_population": "hounds",
+    "narration": {
+      "start": "walk.start",
+      "restart": "walk.restart",
+      "shelter": "walk.shelter",
+      "failed": "walk.failed",
+      "completed": "walk.completed"
+    },
+    "actions": {
+      "start": "begin_walk",
+      "restart": "retry_walk",
+      "shelter": "use_shelter"
+    }
+  },
+  "journal": {
+    "active": "walk.journal.active",
+    "objectives_met": "walk.journal.completed",
+    "resolved": "walk.journal.completed",
+    "failed": "walk.journal.failed",
+    "abandoned": "walk.journal.failed"
+  }
+}

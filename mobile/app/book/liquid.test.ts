@@ -1,18 +1,16 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { readFileSync } from 'node:fs';
-import { createHash } from 'node:crypto';
 import type { Game } from '../../packages/game-view/session.ts';
 import { elapsedHost } from '../../authority/local-story/__tests__/elapsed-host.test.ts';
 import { openGame } from '../../authority/local-story/session.ts';
+import {
+  id,
+  liquidBundle,
+  water,
+} from '../../authority/local-story/__tests__/liquid-bundle.test.ts';
 import { presenter } from './presenter.ts';
 import { buttonsOf, actionContext, group, pagesAfter, intentOf, things } from './model.ts';
-const pin = JSON.parse(
-  readFileSync(
-    new URL('../../../protocol/fixtures/missing_child_b7_hash.json', import.meta.url),
-    'utf8',
-  ),
-);
+const pin = liquidBundle();
 function invoke(game: Game, action_key: string, target_ids: string[] = [], input: object = {}) {
   const reply = game.invoke({ action_key, target_ids, input } as never);
   assert.equal(reply.kind, 'saved', JSON.stringify(reply));
@@ -107,22 +105,13 @@ test('Book restores liquid narration on the exact saved source detail after SQLi
 });
 
 const aliases = { fill: 'draw_water', pour: 'decant', drink: 'sip' } as const;
-const sorted = (v: any): any =>
-  Array.isArray(v)
-    ? v.map(sorted)
-    : v && typeof v === 'object'
-      ? Object.fromEntries(
-          Object.keys(v)
-            .sort()
-            .map((k) => [k, sorted(v[k])]),
-        )
-      : v;
 function aliasBundle(type = 'fill', variant = 'allowed') {
-  const c = structuredClone(pin.value),
-    prefix = 'ashmere_missing_child@0.0.22';
+  return liquidBundle((c) => alias(c, type, variant));
+}
+function alias(c: any, type: string, variant: string) {
   c.entry = { ...c.entry, key: 'chandler' };
   for (const [command, key] of Object.entries(aliases))
-    c.actions[`${prefix}:action/${key}`] = {
+    c.actions[id('action', key)] = {
       key,
       command,
       label: `action.${command}`,
@@ -135,28 +124,19 @@ function aliasBundle(type = 'fill', variant = 'allowed') {
       input: [],
       policy: { policy_version: 1, root: { op: 'all', items: [] } },
     };
-  const action = c.actions[`${prefix}:action/${aliases[type as keyof typeof aliases]}`];
+  const action = c.actions[id('action', aliases[type as keyof typeof aliases])];
   if (variant === 'target') action.target = { kind: 'none' };
   if (variant === 'input') action.input = ['direction'];
   if (variant === 'policy') action.policy.root = { op: 'not', item: { op: 'all', items: [] } };
-  c.rooms[`${prefix}:room/well_lane`].actions = [
-    { op: 'replace', actions: Object.values(aliases) },
-  ];
+  c.rooms[id('room', 'well_lane')].actions = [{ op: 'replace', actions: Object.values(aliases) }];
   for (const [item, quantity] of [
     ['waterskin', 3],
     ['spare_waterskin', 2],
   ] as const)
-    c.items[`${prefix}:item/${item}`].vessel.initial = {
-      kind: {
-        cartridge_id: 'ashmere_missing_child',
-        cartridge_version: '0.0.22',
-        kind: 'liquid',
-        key: 'water',
-      },
+    c.items[id('item', item)].vessel.initial = {
+      kind: water,
       quantity,
     };
-  const canonical = JSON.stringify(sorted(c));
-  return { canonical, sha256: createHash('sha256').update(canonical).digest('hex') };
 }
 // Breaks: a loaded authored liquid key loses projection, exact invocation, source ownership or live committed quantity.
 test('loaded liquid aliases reach exact Book presses and matching target/input/policy refusal', () => {

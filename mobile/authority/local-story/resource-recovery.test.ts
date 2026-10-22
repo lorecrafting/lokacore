@@ -23,7 +23,7 @@ const recoveryBundle = () => {
   c.manifest.requires.kernel_api.at_least = '1.2';
   c.calendar = { start: 64800 };
   for (const caps of [c.manifest.requires.capabilities, c.lock.capabilities]) caps.calendar = 1;
-  Object.assign(c.resources['ashmere_rest@0.0.1:resource/mv'], {
+  Object.assign(c.resources['position_sampler@0.0.1:resource/mv'], {
     maximum: 10,
     start: 0,
     regen: { every: 10, by_position: { standing: 2, sitting: 2, resting: 4, sleeping: 4 } },

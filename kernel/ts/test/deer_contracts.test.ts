@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { validate } from '../src/foundation/validate.ts';
-import { content, fresh, ref } from './deer_fixture.ts';
+import { content, fresh, ref, shoo } from './deer_fixture.ts';
 
 const id = '11111111-2222-4333-8444-555555555555';
 const plan = content.populations![ref('population', 'willow_deer')];
@@ -23,12 +23,7 @@ const schedule = {
   op: 'job.schedule',
   writer_group: 0,
   job_id: id,
-  job: {
-    cartridge_id: 'ashmere_missing_child',
-    cartridge_version: '0.0.40',
-    kind: 'population',
-    key: 'willow_deer',
-  },
+  job: shoo.ref('population', 'willow_deer'),
   due_time: 65100,
   sight: {
     member_id: deer.member_id,

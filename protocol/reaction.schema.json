@@ -784,7 +784,7 @@
           "on": {
             "event": "fact_changed",
             "fact": {
-              "cartridge_id": "ashmere_green",
+              "cartridge_id": "green_sampler",
               "cartridge_version": "0.0.1",
               "kind": "fact",
               "key": "green_busy"
@@ -795,7 +795,7 @@
             "root": {
               "op": "fact_compare",
               "fact": {
-                "cartridge_id": "ashmere_green",
+                "cartridge_id": "green_sampler",
                 "cartridge_version": "0.0.1",
                 "kind": "fact",
                 "key": "green_busy"
@@ -807,7 +807,7 @@
             {
               "op": "fact.assign",
               "fact": {
-                "cartridge_id": "ashmere_green",
+                "cartridge_id": "green_sampler",
                 "cartridge_version": "0.0.1",
                 "kind": "fact",
                 "key": "gossip_spread"
@@ -821,7 +821,7 @@
           "on": {
             "event": "quest_resolved",
             "quest": {
-              "cartridge_id": "ashmere_missing_child",
+              "cartridge_id": "village_chapter",
               "cartridge_version": "0.0.9",
               "kind": "quest",
               "key": "first_lead"
@@ -832,10 +832,10 @@
             {
               "op": "quest.activate",
               "quest": {
-                "cartridge_id": "ashmere_missing_child",
+                "cartridge_id": "village_chapter",
                 "cartridge_version": "0.0.9",
                 "kind": "quest",
-                "key": "missing_child"
+                "key": "lost_lamb"
               }
             }
           ]

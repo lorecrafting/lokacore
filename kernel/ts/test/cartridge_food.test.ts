@@ -1,51 +1,64 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { loadCartridge, INSTALLED } from '../src/index.ts';
-import { bundle, prefix, ref } from './food_fixture.ts';
+import { load, prefix, ref } from './food_fixture.ts';
+const apple = (c: any) => c.items[`${prefix}:item/apple_01`];
+const mv = (c: any) => c.resources[`${prefix}:resource/mv`];
 // Breaks: an edible binds unknown/non-recovery resources, conflicting holder features or an uninstalled food contract.
 test('loader rejects impossible held-food declarations while retaining capped food', () => {
-  const cases: [string, (c: any) => void][] = [
-    ['zero', (c) => (c.items[`${prefix}:item/apple_01`].edible.amount = 0)],
+  const cases: [string, (c: any) => void, string, string][] = [
+    ['zero', (c) => (apple(c).edible.amount = 0), 'SCHEMA_VIOLATION', 'edible.amount'],
     [
       'unknown',
-      (c) => (c.items[`${prefix}:item/apple_01`].edible.resource = ref('resource', 'absent')),
+      (c) => (apple(c).edible.resource = ref('resource', 'absent')),
+      'SCHEMA_VIOLATION',
+      'edible',
     ],
     [
       'HP',
       (c) => {
-        c.items[`${prefix}:item/apple_01`].edible.resource = ref('resource', 'hp');
-        c.resources[`${prefix}:resource/hp`].regen = c.resources[`${prefix}:resource/mv`].regen;
+        apple(c).edible.resource = ref('resource', 'hp');
+        c.resources[`${prefix}:resource/hp`].regen = mv(c).regen;
       },
+      'SCHEMA_VIOLATION',
+      'edible',
     ],
-    ['container', (c) => (c.items[`${prefix}:item/apple_01`].container = true)],
-    ['equipment', (c) => (c.items[`${prefix}:item/apple_01`].slot = 'hand')],
-    ['missing text', (c) => (c.items[`${prefix}:item/apple_01`].edible.narration = 'missing.line')],
-    ['old API', (c) => (c.manifest.requires.kernel_api.at_least = '1.26')],
+    [
+      'no standing regen',
+      (c) => (mv(c).regen.by_position.standing = 0),
+      'SCHEMA_VIOLATION',
+      'edible',
+    ],
+    ['container', (c) => (apple(c).container = true), 'SCHEMA_VIOLATION', 'edible'],
+    ['equipment', (c) => (apple(c).slot = 'hand'), 'SCHEMA_VIOLATION', '.slot'],
+    [
+      'missing text',
+      (c) => (apple(c).edible.narration = 'missing.line'),
+      'UNRESOLVED_REFERENCE',
+      'edible.narration',
+    ],
+    [
+      'old API',
+      (c) => (c.manifest.requires.kernel_api.at_least = '1.26'),
+      'KERNEL_API_RANGE_INVALID',
+      'kernel_api.at_least',
+    ],
     [
       'undeclared',
       (c) => {
         delete c.lock.capabilities.food;
         delete c.manifest.requires.capabilities.food;
       },
+      'UNDECLARED_CAPABILITY',
+      'edible',
     ],
   ];
-  for (const [name, change] of cases) {
-    const b = bundle(change);
-    assert.equal(
-      loadCartridge(
-        new TextEncoder().encode(`{"cartridge":${b.canonical},"content_hash":"${b.sha256}"}`),
-        INSTALLED,
-      ).ok,
-      false,
-      name,
-    );
+  for (const [name, change, code, path] of cases) {
+    const r = load(change);
+    assert.equal(r.ok, false, name);
+    if (!r.ok) {
+      assert.equal(r.diagnostic.code, code, name);
+      assert.ok(r.diagnostic.path.endsWith(path), `${name}: ${r.diagnostic.path}`);
+    }
   }
-  const b = bundle();
-  assert.equal(
-    loadCartridge(
-      new TextEncoder().encode(`{"cartridge":${b.canonical},"content_hash":"${b.sha256}"}`),
-      INSTALLED,
-    ).ok,
-    true,
-  );
+  assert.equal(load().ok, true);
 });

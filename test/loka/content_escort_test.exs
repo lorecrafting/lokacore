@@ -8,7 +8,7 @@ defmodule Loka.ContentEscortTest do
   end
 
   defp source(dir) do
-    File.cp_r!("cartridges/ashmere_ferry", dir)
+    File.cp_r!("cartridges/ferry_sampler", dir)
     File.rm!(Path.join(dir, "story_points/lantern_resolved.json"))
     File.cp!(Path.join(dir, "quests/lantern.json"), Path.join(dir, "quests/other.json"))
 
@@ -45,10 +45,10 @@ defmodule Loka.ContentEscortTest do
       end)
 
       assert {:ok, bytes, []} = Loka.Content.compile(dir)
-      d = JSON.decode!(bytes)["cartridge"]["dialogues"]["ashmere_ferry@0.0.1:dialogue/bram"]
+      d = JSON.decode!(bytes)["cartridge"]["dialogues"]["ferry_sampler@0.0.1:dialogue/bram"]
 
       assert d["choices"]["carry"]["escort"]["quest"] == %{
-               "cartridge_id" => "ashmere_ferry",
+               "cartridge_id" => "ferry_sampler",
                "cartridge_version" => "0.0.1",
                "kind" => "quest",
                "key" => "lantern"
@@ -66,7 +66,7 @@ defmodule Loka.ContentEscortTest do
     )
 
     assert {:ok, bytes, []} = Loka.Content.compile(dir)
-    d = JSON.decode!(bytes)["cartridge"]["dialogues"]["ashmere_ferry@0.0.1:dialogue/bram"]
+    d = JSON.decode!(bytes)["cartridge"]["dialogues"]["ferry_sampler@0.0.1:dialogue/bram"]
     assert d["policy"]["root"]["quest"]["key"] == "lantern"
   end
 

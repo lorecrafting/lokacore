@@ -30,7 +30,7 @@ const JOBS = {
   [JOB]: {
     due_time: 86400,
     job: {
-      cartridge_id: 'ashmere_dusk',
+      cartridge_id: 'check_sampler',
       cartridge_version: '0.0.1',
       key: 'bram_to_green',
       kind: 'schedule',
@@ -105,7 +105,7 @@ function startOver(path: string) {
   c.sql.close();
   const d = processOn(path, { releases: LATER });
   const cartridge = d.story.world().cartridge.manifest.id;
-  assert.deepEqual([d.opened.kind, pinned(d), cartridge], ['open', BELL, 'ashmere_bell']);
+  assert.deepEqual([d.opened.kind, pinned(d), cartridge], ['open', BELL, 'recipe_sampler']);
 }
 const pick = (n: number) => ({
   invocation_id: `00000000-0000-4000-8000-00000000000${n}`,
@@ -124,7 +124,7 @@ const stored = (p: ReturnType<typeof processOn>) =>
 const IDENTITY = 'SELECT format, lineage_id, run_id, parent, seed, pin FROM save';
 // The pin of a dusk save: the fixture's manifest, lock and hash; no profile version is exposed.
 const PIN = encode({
-  cartridge_id: 'ashmere_dusk',
+  cartridge_id: 'check_sampler',
   cartridge_version: '0.0.1',
   content_hash: kat.sha256,
   capability_lock: JSON.parse(kat.canonical).lock,
@@ -144,7 +144,7 @@ const identity = (lineage: number) => [
 // The fresh world and the state after one pick (clock 600, RNG AFTER), hand-written canonical
 // JSON: the body in the landing (cartridge_dusk_hash.json entry room) and the job.
 const BODY = `"containers":{"3d4829ad-9e43-81ef-bc10-66b1b267e157":"1a7c3699-2844-8a55-b29f-eac079c7bf50"}`;
-const job = `"jobs":{"${JOB}":{"due_time":86400,"job":{"cartridge_id":"ashmere_dusk","cartridge_version":"0.0.1","key":"bram_to_green","kind":"schedule"},"status":"pending"}}`;
+const job = `"jobs":{"${JOB}":{"due_time":86400,"job":{"cartridge_id":"check_sampler","cartridge_version":"0.0.1","key":"bram_to_green","kind":"schedule"},"status":"pending"}}`;
 const FRESH = `{"clock":0,${BODY},${job},"rng":[${SEED}]}`;
 const PICKED = `{"clock":600,${BODY},${job},"rng":[${AFTER}]}`;
 const state = (p: { story: { world: () => { state: unknown } } }) =>
@@ -317,9 +317,9 @@ test('an app update reopens a save on its pinned release; new games pin the newe
   const entry = JSON.parse(b.one('SELECT record FROM trace ORDER BY rowid DESC LIMIT 1') as string);
   assert.equal(entry.ids.content_hash, kat.sha256);
   assert.deepEqual(b.story.newGame(), { kind: 'replaced' });
-  assert.deepEqual([pinned(b), b.story.world().cartridge.manifest.id], [BELL, 'ashmere_bell']);
+  assert.deepEqual([pinned(b), b.story.world().cartridge.manifest.id], [BELL, 'recipe_sampler']);
   const c = processOn(save(), { newId: ids(), releases: [bell, dusk] });
-  assert.deepEqual([pinned(c), c.story.world().cartridge.manifest.id], [BELL, 'ashmere_bell']);
+  assert.deepEqual([pinned(c), c.story.world().cartridge.manifest.id], [BELL, 'recipe_sampler']);
 });
 
 // Breaks (OFF-07): a head that does not parse replaced by the fresh world or opened at all; a

@@ -6,9 +6,9 @@ defmodule Loka.ContentErrandTest do
   use ExUnit.Case, async: true
 
   import Loka.ContentSource, only: [compile: 2]
-  setup_all do: %{dir: Loka.ContentSource.copy("cartridges/ashmere_errand")}
+  setup_all do: %{dir: Loka.ContentSource.copy("cartridges/errand_sampler")}
   @kat JSON.decode!(File.read!("protocol/fixtures/cartridge_errand_hash.json"))
-  @src "cartridges/ashmere_errand"
+  @src "cartridges/errand_sampler"
   @expected ~s({"cartridge":#{@kat["canonical"]},"content_hash":"#{@kat["sha256"]}"})
 
   defp src(rel), do: JSON.decode!(File.read!(Path.join(@src, rel)))
@@ -16,7 +16,7 @@ defmodule Loka.ContentErrandTest do
 
   defp ref(kind, key),
     do: %{
-      "cartridge_id" => "ashmere_errand",
+      "cartridge_id" => "errand_sampler",
       "cartridge_version" => "0.0.1",
       "kind" => kind,
       "key" => key
@@ -37,7 +37,7 @@ defmodule Loka.ContentErrandTest do
   @strict %{"evidence" => "post_activation_event", "item_acquired" => "lantern"}
 
   # Breaks: a quest, its objective or a quest_state dropped or reshaped.
-  test "ashmere_errand compiles to its Python known answer without warnings" do
+  test "errand_sampler compiles to its Python known answer without warnings" do
     assert Loka.Content.compile(@src) == {:ok, @expected, []}
   end
 
@@ -61,20 +61,20 @@ defmodule Loka.ContentErrandTest do
 
     {:ok, short, []} = compile(dir, strict.("lantern"))
     assert compile(dir, strict.(ref("item", "lantern"))) == {:ok, short, []}
-    quest = JSON.decode!(short)["cartridge"]["quests"]["ashmere_errand@0.0.1:quest/lantern"]
+    quest = JSON.decode!(short)["cartridge"]["quests"]["errand_sampler@0.0.1:quest/lantern"]
     assert quest["objective"]["item_acquired"] == ref("item", "lantern")
   end
 
   # Breaks: a quest_state, objective item or quest text naming what the cartridge lacks compiles
   # (the loader rejects it).
   test "an unknown quest, item or text is UNRESOLVED_REFERENCE", %{dir: dir} do
-    oil = %{"target" => "ashmere_errand@0.0.1:item/oil"}
+    oil = %{"target" => "errand_sampler@0.0.1:item/oil"}
 
     assert compile(dir, edit("rooms/ferry_landing.json", variant(), "missing")) ==
              {:error,
               [
                 d("UNRESOLVED_REFERENCE", "rooms/ferry_landing.variants[0].when.root.quest", %{
-                  "target" => "ashmere_errand@0.0.1:quest/missing"
+                  "target" => "errand_sampler@0.0.1:quest/missing"
                 })
               ]}
 

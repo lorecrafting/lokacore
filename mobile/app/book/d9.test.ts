@@ -12,18 +12,18 @@ test('Book keeps the bell scene and labels restored cue as past', () => {
   } as NarrationRecord;
   const words: Record<string, string> = {
     'narration.ring_bell': 'You pull the rope.',
-    'narration.bell_cue': 'The bell carries across Ashmere.',
+    'narration.bell_cue': 'The bell carries over the yard.',
   };
   const text = (key: string) => words[key] ?? key;
   const view = {
     place: { title: { key: 'room.belfry.title' }, description: { key: 'room.belfry.description' } },
   } as GameView;
   assert.deepEqual(narrationLines(record, view, text), [
-    ['You pull the rope.', 'The bell carries across Ashmere.'],
+    ['You pull the rope.', 'The bell carries over the yard.'],
     [],
   ]);
   assert.deepEqual(narrationLines(record, view, text, true), [
-    ['You pull the rope.', 'Earlier: The bell carries across Ashmere.'],
+    ['You pull the rope.', 'Earlier: The bell carries over the yard.'],
     [],
   ]);
 });

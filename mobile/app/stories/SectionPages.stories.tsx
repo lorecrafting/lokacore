@@ -12,7 +12,6 @@ import CharacterUnknownView from './views/character-unknown.json';
 import CharacterFullView from './views/character-full.json';
 import ContentsView from './views/contents.json';
 import SettingsView from './views/settings.json';
-import AncestryView from './views/ancestry.json';
 
 const meta: Meta = {
   title: 'Pages/Sections',
@@ -25,7 +24,6 @@ const meta: Meta = {
     RaiseCards,
     ContentsPage,
     SettingsPage,
-    AncestryPage,
   },
 };
 export default meta;
@@ -57,7 +55,6 @@ export const CharacterPointsToSpend: StoryObj = {
 };
 export const Contents: StoryObj = { ...pageStory(ContentsView), name: 'Contents' };
 export const Settings: StoryObj = { ...pageStory(SettingsView), name: 'Settings' };
-export const Ancestry: StoryObj = { ...pageStory(AncestryView), name: 'Ancestry' };
 // Toolbox row 46: the codex sampler's lore (kernel/ts/test/codex.test.ts) on the Journal page, its
 // words given here because Chapter 1 authors no deduction. Away from the study the card is refused.
 const lore = {
@@ -162,4 +159,27 @@ export const JournalChronicleDays: StoryObj = {
     await canvas.findByLabelText('You find the lost child., story point');
     if (canvas.queryByText(`${TICK} (11 times)`)) throw new Error('earlier day open');
   },
+};
+
+// The showcase authors no ancestry, so the page takes a synthetic view and one choose button.
+// Breaks: a choice shows no button, or the button is not matched to its ancestry.
+export const Ancestry: StoryObj = {
+  name: 'Ancestry',
+  render: () => (
+    <AncestryPage
+      view={
+        { ancestry_choices: [{ key: 'hill', description: 'Hill folk, steady on stone.' }] } as never
+      }
+      text={(k) => k}
+      buttons={[
+        {
+          action_key: 'choose_ancestry',
+          label: 'Choose hill',
+          input: { ancestry: 'hill' },
+        } as never,
+      ]}
+      pending={false}
+      press={() => {}}
+    />
+  ),
 };

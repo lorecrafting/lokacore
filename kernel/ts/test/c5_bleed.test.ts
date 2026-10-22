@@ -4,16 +4,12 @@ import { gameView } from '../src/index.ts';
 import { key } from '../src/foundation/compose.ts';
 import { refString, type World } from '../src/runtime/decision.ts';
 import { resolved } from '../src/commands/actions.ts';
-import { command, elapsed, fixture, hp } from './c5_bleed_fixture.ts';
+import { acquisition } from '../src/mechanics/skills.ts';
+import { command, elapsed, fixture, hp, sampler } from './c5_bleed_fixture.ts';
 
 function readyBandage(world: World) {
   const item = Object.entries(world.entities).find(([, e]) => e.kind === 'item' && e.bandage)![0];
-  const skill = {
-    cartridge_id: 'ashmere_missing_child',
-    cartridge_version: '0.0.35',
-    kind: 'fact',
-    key: 'skill_bandage',
-  };
+  const skill = acquisition(sampler.ref('skill', 'bandage'));
   const fact = key({
     kind: 'fact',
     fact: skill,
@@ -222,8 +218,8 @@ test('Flee and re-engagement pair the exact same-due round and bleed tick', () =
   assert.deepEqual([...orders].sort(), ['bleed_first', 'round_first']);
 });
 
-// Breaks: a fatal bleed tick leaves an active job that kills the Chapel-returned body again.
-test('fatal tick closes bleed before same-body Chapel return', () => {
+// Breaks: a fatal bleed tick leaves an active job that kills the shrine-returned body again.
+test('fatal tick closes bleed before same-body shrine return', () => {
   const { world, target } = fixture(100, 2);
   const first = elapsed(
     command(world, 1, { type: 'attack', target_id: target }, 1).world,
@@ -324,8 +320,8 @@ test('an authored recipe remains excluded while the hound fight offers Bandage',
   const first = command(world, 1, { type: 'attack', target_id: target }, 1);
   const fight = elapsed(first.world, 64950, 2).world;
   const { ready } = readyBandage(fight);
-  assert.ok(Object.values(ready.cartridge.recipes ?? {}).some((r) => r.key === 'study_tracks'));
-  assert.equal(resolved(ready, ready.character).study_tracks, undefined);
+  assert.ok(Object.values(ready.cartridge.recipes ?? {}).some((r) => r.key === 'search'));
+  assert.equal(resolved(ready, ready.character).search, undefined);
   assert.ok(Object.values(resolved(ready, ready.character)).some((a) => a.command === 'bandage'));
 });
 
@@ -354,8 +350,8 @@ test('stale generation refuses with the exact held item and world intact', () =>
   assert.equal(stale.world.state.containers[item], world.body);
 });
 
-// Breaks: mere ownership of a bandage bypasses Wick's acquired, current DEX qualification.
-test('unlearned bandage cannot consume the held item', () => {
+// Breaks: mere ownership of a bandage bypasses the acquired, current DEX qualification.
+test('unlearned or under-DEX bandage cannot consume the held item', () => {
   const { world, target } = fixture();
   const first = elapsed(
     command(world, 1, { type: 'attack', target_id: target }, 1).world,
@@ -381,6 +377,27 @@ test('unlearned bandage cannot consume the held item', () => {
   assert.equal(refused.decision.error.code, 'invalid_state');
   assert.equal(refused.world.state, unlearned.state);
   assert.equal(refused.world.state.containers[item], world.body);
+  // Learned but DEX 9: below the authored floor of 10, the held item is neither offered nor spent.
+  const dex = key(sampler.ref('attribute', 'dex'));
+  const clumsy = { ...ready, attributes: { ...ready.attributes, [dex]: 9 } } as World;
+  assert.equal(
+    gameView(clumsy)
+      .inventory.find((e) => e.id === item)
+      ?.actions.some((a) => a.action_key === 'bandage'),
+    false,
+  );
+  const unqualified = command(
+    clumsy,
+    9,
+    {
+      type: 'bandage',
+      item_id: item,
+      effect_generation: clumsy.state.bleeds![world.body]!.generation,
+    },
+    3,
+  );
+  assert.equal(unqualified.decision.kind, 'rejected');
+  assert.equal(unqualified.world.state, clumsy.state);
 });
 
 // Breaks: treatment reaches through another holder and spends an item outside direct custody.

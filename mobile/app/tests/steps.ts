@@ -1,5 +1,4 @@
-// Book routes the browser tests and walks share: reduced motion, a new Ashmere game and a walk by
-// the map.
+// Book routes the browser tests and walks share: reduced motion and a walk by the map.
 import type { Browser } from '@e2e-dev/web';
 import { expect, type TestFixtures } from 'e2e';
 
@@ -15,18 +14,6 @@ export async function reducedMotion(browser: Browser) {
         ? ({ ...media(q), matches: true } as MediaQueryList)
         : media(q);
   });
-}
-
-// A cleared save, the ancestry picked and the opening continued, at the Ferry Landing: the
-// retired Ashmere chapter, served only by `bin/loka dev` (walkthrough/ashmere_missing_child.walk.ts).
-export async function begin(
-  { app, screen }: Pick<TestFixtures, 'app' | 'screen'>,
-  ancestry: string,
-) {
-  await app.clearState();
-  await screen.getByRole('button', ancestry).tap();
-  await screen.getByRole('button', 'Continue').tap();
-  await expect(screen.getByRole('button', 'Ferry Landing, look')).toBeVisible();
 }
 
 // One step by the Map page; with a room, the step must arrive there.

@@ -71,7 +71,7 @@
         {
           "in": "room",
           "room": {
-            "cartridge_id": "ashmere_items",
+            "cartridge_id": "items_sampler",
             "cartridge_version": "0.0.1",
             "kind": "room",
             "key": "ferry_landing"
@@ -80,7 +80,7 @@
         {
           "in": "item",
           "item": {
-            "cartridge_id": "ashmere_items",
+            "cartridge_id": "items_sampler",
             "cartridge_version": "0.0.1",
             "kind": "item",
             "key": "satchel"
@@ -313,7 +313,7 @@
           "location": {
             "in": "room",
             "room": {
-              "cartridge_id": "ashmere_items",
+              "cartridge_id": "items_sampler",
               "cartridge_version": "0.0.1",
               "kind": "room",
               "key": "ferry_landing"
@@ -335,7 +335,7 @@
                 "root": {
                   "op": "has_item",
                   "item": {
-                    "cartridge_id": "ashmere_items",
+                    "cartridge_id": "items_sampler",
                     "cartridge_version": "0.0.1",
                     "kind": "item",
                     "key": "lantern"
@@ -349,7 +349,7 @@
           "location": {
             "in": "npc",
             "npc": {
-              "cartridge_id": "ashmere_items",
+              "cartridge_id": "items_sampler",
               "cartridge_version": "0.0.1",
               "kind": "npc",
               "key": "bram"
@@ -804,7 +804,7 @@
           "room_line": "npc.bram.room",
           "description": "npc.bram.description",
           "room": {
-            "cartridge_id": "ashmere_items",
+            "cartridge_id": "items_sampler",
             "cartridge_version": "0.0.1",
             "kind": "room",
             "key": "ferry_landing"
@@ -968,7 +968,7 @@
       "examples": [
         {
           "item": {
-            "cartridge_id": "ashmere_missing_child",
+            "cartridge_id": "village_chapter",
             "cartridge_version": "0.0.18",
             "kind": "item",
             "key": "torch"
@@ -1038,7 +1038,7 @@
       "examples": [
         {
           "resource": {
-            "cartridge_id": "ashmere_missing_child",
+            "cartridge_id": "village_chapter",
             "cartridge_version": "0.0.18",
             "kind": "resource",
             "key": "pennies"
@@ -1046,7 +1046,7 @@
           "offers": [
             {
               "item": {
-                "cartridge_id": "ashmere_missing_child",
+                "cartridge_id": "village_chapter",
                 "cartridge_version": "0.0.18",
                 "kind": "item",
                 "key": "torch"
@@ -1354,7 +1354,7 @@
           "label": "actions.read_book",
           "text": "readable.ward_of_the_fen",
           "topic": {
-            "cartridge_id": "ashmere_missing_child",
+            "cartridge_id": "village_chapter",
             "cartridge_version": "0.0.26",
             "kind": "topic",
             "key": "ward"
@@ -1407,7 +1407,7 @@
       "examples": [
         {
           "resource": {
-            "cartridge_id": "ashmere_missing_child",
+            "cartridge_id": "village_chapter",
             "cartridge_version": "0.0.29",
             "kind": "resource",
             "key": "mv"
@@ -1423,13 +1423,13 @@
       "examples": [
         {
           "effect": {
-            "cartridge_id": "ashmere_missing_child",
+            "cartridge_id": "village_chapter",
             "cartridge_version": "0.0.35",
             "kind": "bleed",
             "key": "bleeding"
           },
           "skill": {
-            "cartridge_id": "ashmere_missing_child",
+            "cartridge_id": "village_chapter",
             "cartridge_version": "0.0.35",
             "kind": "skill",
             "key": "bandage"
