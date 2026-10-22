@@ -57,6 +57,7 @@ registerHooks({
   },
 });
 const { default: Book } = await import('../Book.tsx');
+type Shell = Parameters<typeof Book>[0]['shell'];
 export const bundle = (name = 'containers_cartridge_sampler_hash') =>
   JSON.parse(
     readFileSync(new URL(`../../../../protocol/fixtures/${name}.json`, import.meta.url), 'utf8'),
@@ -100,6 +101,7 @@ export function book(
   existing?: ReturnType<typeof elapsedHost>,
   newId: () => string = randomUUID,
   subscribed?: (on: boolean) => void,
+  reading?: Shell['reading'],
 ) {
   const sql = existing?.sql ?? new DatabaseSync(':memory:');
   const clock = existing?.clock ?? { wall: 10000, mono: 0 };
@@ -167,7 +169,12 @@ export function book(
       Book({
         game,
         startOver: () => undefined,
-        shell: { confirm: (f) => f(), learned: { seen: () => true, see: () => {} }, subscribed },
+        shell: {
+          confirm: (f) => f(),
+          learned: { seen: () => true, see: () => {} },
+          subscribed,
+          reading,
+        },
       }),
     );
     for (const effect of queued.splice(0)) effect();
