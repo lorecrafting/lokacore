@@ -5,6 +5,7 @@ import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { step, stepElapsed, type World } from '../src/index.ts';
 import { checked, KERNEL } from './sim.ts';
 import { fixture } from './c5_bleed_fixture.ts';
+import { fresh } from './deer_fixture.ts';
 
 const id = (n: number) => `aaaaaaaa-0000-4000-8000-${String(n).padStart(12, '0')}` as never;
 
@@ -81,4 +82,22 @@ test('simulator accepts the fatal receipt of a hound fight', () => {
       ?.id,
     'adopt_mismatch',
   );
+});
+
+// Breaks: missing population or sight world inputs make a lawful deer sight flight fail the oracle.
+test('simulator accepts the receipts of a shoo_sampler sight flight', () => {
+  const a = driver(fresh());
+  const steps = ['south', 'south', 'west'].map((direction) => a.run({ type: 'move', direction }));
+  // Entering the willow at 64800 schedules the sight for 64800 + delay 300.
+  const flight = a.tick(65100);
+  assert.ok(
+    flight.result.decision.kind === 'accepted' &&
+      flight.result.decision.delta.ops.some((o) => o.op === 'population.slot'),
+    'the sight flight must write the population slot',
+  );
+  for (const s of [...steps, flight])
+    assert.equal(
+      checked({ ...KERNEL, step: () => s.result }, s.before, s.command, s.revision).failure,
+      undefined,
+    );
 });
