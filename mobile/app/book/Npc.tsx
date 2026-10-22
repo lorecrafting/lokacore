@@ -82,6 +82,10 @@ export function NpcPage(p: NpcProps) {
   const { talk, answer, foot } = conversation(p, choice);
   const log = talk ? p.log : p.log.slice(p.since ?? 0);
   const contents = held(p);
+  // Price and service rows draw even when unavailable: something to read (pass-1 UH3).
+  const rows =
+    p.npc &&
+    (('shop' in p.npc && p.npc.shop?.length) || ('services' in p.npc && p.npc.services?.length));
   return (
     <Page
       title={p.npc ? cap(p.text(p.npc.name)) : 'Conversation'}
@@ -94,7 +98,7 @@ export function NpcPage(p: NpcProps) {
       {!talk && enemy && (
         <Note>{enemy.refusal ? p.text(enemy.refusal) : refused(cap(p.text(enemy.name)))}</Note>
       )}
-      {!talk && !enemy && !actions.length && !log.length && !contents.length && (
+      {!talk && !enemy && !actions.length && !rows && !log.length && !contents.length && (
         <Note>Nothing to do here.</Note>
       )}
       {!talk && !enemy && <ShopOptions {...p} />}
@@ -177,7 +181,9 @@ export const npcSkills = (c: Palette, p: NpcProps) =>
     .map((s) => (
       <Text key={s.skill.key} style={note(c)}>
         {p.text(s.label)}: {s.acquired ? 'learned' : s.locked ? 'locked' : 'not learned'}; currently{' '}
-        {s.qualified ? 'qualified' : 'unqualified'}. {p.text(s.requirement)}
+        {s.qualified ? 'qualified' : 'unqualified'}.
+        {/* a learned, qualified skill asks nothing more (pass-1 H3) */}
+        {s.acquired && s.qualified ? '' : ` ${p.text(s.requirement)}`}
       </Text>
     ));
 

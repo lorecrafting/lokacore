@@ -131,7 +131,7 @@ test('a typed word is said like its chip, even after the view moves on, and echo
 test('spell words: refused ones carry their reason; lux casts once ash is gathered', () => {
   const b = book(spells as never);
   const castRow = (t: string[]) => t.slice(t.indexOf(LABEL.cast), t.indexOf(LABEL.cast) + 3);
-  assert.deepEqual(castRow(b.text()), [LABEL.cast, 'lux', 'lux, cast: too exhausted']);
+  assert.deepEqual(castRow(b.text()), [LABEL.cast, 'lux', 'lux, cast: need 1 ash']);
   const v = b.game.view().view;
   assert.deepEqual(
     castWords({ ...v, actions: v.actions.filter((x) => x.action_key !== 'cast') }),

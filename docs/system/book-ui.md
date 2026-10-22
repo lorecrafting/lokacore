@@ -351,7 +351,9 @@ actual catalog label and **too heavy to carry**; one refused because the load is
 **more than you can carry** (kernel code `over_load`) (pass-1 R3). `resource.short` reads "need <n> <key>"; `permission_denied` reads "not yours". It invokes nothing; available actions retain their
 existing buttons. The note follows the latest GameView, including Take aliases and Contents,
 and disappears when shedding held load makes Take legal. While any such note shows, the page
-draws no "Nothing to do here." Note: an unavailable action is still something to read (pass-1 UH3).
+draws no "Nothing to do here." Note: an unavailable action is still something to read (pass-1 UH3). The
+same holds on an NPC page: its shop price rows and service rows, available or not, keep the Note off
+(pass-2).
 
 
 Successful ordinary Take/Drop are the specific exceptions to item-page retention; corpse-content

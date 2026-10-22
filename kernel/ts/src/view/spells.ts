@@ -5,6 +5,7 @@
 import type { CharacterId, Key, SpellWord, Word } from '../contracts.gen.ts';
 import { admission, refusalReason, resolved } from '../commands/actions.ts';
 import { value as factValue } from '../mechanics/fact.ts';
+import { unpaid } from '../mechanics/resource.ts';
 import { bodyOf, type Steps, type World } from '../runtime/decision.ts';
 
 export function wordViews(world: World, actor: CharacterId, steps: Steps) {
@@ -25,7 +26,10 @@ function spellWords(world: World, actor: CharacterId, steps: Steps): SpellWord[]
     const admitted = body ? admission(world, r, actor, body) : 'not_found';
     const reason =
       refusalReason(world, cast, steps, 'cast' as Key, set) ??
-      (typeof admitted === 'string' ? { code: admitted } : undefined);
+      // the unpaid cost names itself, as on action lists (pass-2 R1)
+      (typeof admitted === 'string'
+        ? { code: admitted, ...(body && unpaid(world, body, admitted, r.costs ?? [])) }
+        : undefined);
     return [reason ? { word, available: false, reason } : { word, available: true }];
   });
 }

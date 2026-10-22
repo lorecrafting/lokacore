@@ -103,7 +103,14 @@ test('magic 2: taught lux; it needs ash; the cast spends 2 ma and 1 ash and ligh
   const shut = play(hub.world, { type: 'close_choice', continuation_id }).world;
   assert.equal(talk(shut, 'hedge_wizard').opened, 'wizard_awaiting');
   assert.deepEqual(words(w), [
-    { word: 'lux', available: false, reason: { code: 'insufficient_resource' } },
+    {
+      word: 'lux',
+      available: false,
+      reason: {
+        code: 'insufficient_resource',
+        message: { key: 'resource.short', bindings: { amount: 1, resource: 'ash' } },
+      },
+    },
   ]);
   assert.equal(refused(w, { type: 'cast', word: 'lux' }), 'insufficient_resource');
   w = perform(w, 'gather_ash').world;
