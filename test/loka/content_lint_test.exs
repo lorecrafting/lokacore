@@ -106,12 +106,12 @@ defmodule Loka.ContentLintTest do
     assert lint(room.([variant([@visits]), variant([@tide])])) == []
   end
 
-  # Story cartridges only (ruling b): the two with a cartridge.json world that are not samplers.
-  # Out: every *_sampler (samplers break rules on purpose), r9c_interactions (synthetic), and
-  # lantern_proof and the other ashmere_* (no world: fragments that test cartridges load). The findings over the slice's
+  # Story cartridges only (ruling b): toolbox_showcase, the one story cartridge since Ashmere's
+  # retirement (loka-4hik). Out: every *_sampler (samplers break rules on purpose),
+  # r9c_interactions (synthetic), lantern_proof and the ashmere_* cartridges. The findings over the slice's
   # timebox are pinned in lint_baseline.txt until loka-kgd.184 clears them: a new finding fails.
   @baseline File.read!("test/loka/lint_baseline.txt") |> String.split("\n", trim: true)
-  for cartridge <- ~w(toolbox_showcase ashmere_missing_child) do
+  for cartridge <- ~w(toolbox_showcase) do
     test "#{cartridge} has no lint finding beyond the pinned baseline" do
       prefix = unquote(cartridge) <> " "
 

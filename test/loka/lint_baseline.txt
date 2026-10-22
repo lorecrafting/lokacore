@@ -113,15 +113,3 @@ toolbox_showcase recipes/think_letter.json: policy refuses with no reason
 toolbox_showcase recipes/water_croft.json: policy refuses with no reason
 toolbox_showcase recipes/water_plot.json: policy refuses with no reason
 toolbox_showcase resources.json: pennies bands have no normal band below 100%
-ashmere_missing_child reactions/b_lost_before_meeting.json: writes state with no narrate step and no "silent": true
-ashmere_missing_child recipes/begin_epilogue_lost_prior.json: policy refuses with no reason
-ashmere_missing_child recipes/begin_epilogue_rescued_fox.json: policy refuses with no reason
-ashmere_missing_child recipes/begin_epilogue_rescued_prior.json: policy refuses with no reason
-ashmere_missing_child recipes/begin_epilogue_stays_fox.json: policy refuses with no reason
-ashmere_missing_child recipes/begin_epilogue_stays_prior.json: policy refuses with no reason
-ashmere_missing_child recipes/ring_bell.json: policy refuses with no reason
-ashmere_missing_child recipes/seek_wisp.json: policy refuses with no reason
-ashmere_missing_child recipes/silence_bell.json: policy refuses with no reason
-ashmere_missing_child recipes/study_tracks.json: policy refuses with no reason
-ashmere_missing_child rooms/drowned_lantern.json: readable details.cellar_help has no title
-ashmere_missing_child rooms/drowned_lantern.json: readable details.lost_whistle has no title
