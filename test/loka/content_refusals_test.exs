@@ -113,9 +113,10 @@ defmodule Loka.ContentRefusalsTest do
   end
 
   # Breaks: malformed funded exchange families or contribution tuning compile.
-  test "exchange refuses an item on both sides, excess quantity and an oversized increment", %{
-    harvest_sampler: dir
-  } do
+  test "exchange refuses an item on both sides, excess quantity and an oversized increment",
+       %{
+         harvest_sampler: dir
+       } do
     exchange =
       [
         {"cartridge.json", &put_in(&1, ["requires", "capabilities", "quest"], 1)},
@@ -280,8 +281,8 @@ defmodule Loka.ContentRefusalsTest do
     end
   end
 
-  # Breaks: two topic files with one id compile and the later silently wins.
-  test "a duplicated topic id is refused", %{codex_sampler: dir} do
+  # Breaks: two topics on one fact compile, so one learned topic lights two Codex entries.
+  test "two topics may not share one fact", %{codex_sampler: dir} do
     assert {"DUPLICATE_DEFINITION", "topics/mill_copy.fact"} in codes(dir, [
              {"topics/mill_copy.json",
               File.read!(Path.join(dir, "topics/mill.json")) |> Jason.decode!()}
