@@ -183,6 +183,9 @@ rc=0; MUTATE_REBUILD='! grep -q y=9 a.txt && cp a.txt b.txt' capped sh "$bin/mut
 [ "$rc" = 0 ] && [ "$(cut -f1 out | tr '\n' ,)" = 'red-full,red-rebuild,' ] && cmp -s a.txt b.txt || { bad "mutate rebuild: exit $rc, want 0, red-full then red-rebuild"; cat out; }
 printf 'a.txt\tx=1\tx=2\n' > m.tsv; rc=0; MUTATE_REBUILD=false capped sh "$bin/mutate.sh" m.tsv true > out 2>&1 || rc=$?
 [ "$rc" = 1 ] && grep -q '^red-rebuild RESTORE-FAIL' out || { bad "mutate rebuild-after-restore fails: exit $rc, want 1 and RESTORE-FAIL"; cat out; }
+# Break: a sweep stopped mid-mutant restores the source but leaves b.txt built from the mutant.
+printf 'a.txt\tx=1\tx=2\tkill $PPID\n' > m.tsv; rc=0; MUTATE_REBUILD='cp a.txt b.txt' capped sh "$bin/mutate.sh" m.tsv true > out 2>&1 || rc=$?
+[ "$rc" = 130 ] && grep -q '^x=1$' b.txt || { bad "mutate interrupted: exit $rc, want 130 and b.txt rebuilt from the restored a.txt"; cat out; }
 # --- session_status.sh ----------------------------------------------------------------------
 # A repo whose origin/main last merge is 2026-10-08T12:00Z; stub br prints $HK, stub gh fails.
 # Break: a missing/failing br fails the session start; the retro note fires when a housekeeping
@@ -445,7 +448,7 @@ printf '{\n  "description": "d",\n  "canonical": "old",\n  "sha256": "0",\n  "va
 
 # --- test_files.sh ---------------------------------------------------------------------------------
 # Stub node logs its args. Break: no file, or a glob that matched nothing, reaches node --test (which
-# then runs the whole suite), or a named file does not.
+# then runs the whole suite), or a named file or a node flag does not.
 mkdir -p "$tmp/tf/bin"; cd "$tmp/tf"; : > a.test.ts; printf '#!/bin/sh\necho "$*" >> "$TF_LOG"\n' > bin/node; chmod +x bin/node
 tf() { # <case> <want-rc> [files]
   c=$1 w=$2; shift 2; : > log
@@ -454,17 +457,21 @@ tf() { # <case> <want-rc> [files]
 }
 tf none 2; [ ! -s log ] || bad 'test_files none: node ran'
 tf unmatched 2 a.test.ts 'test/*.nomatch.ts'; [ ! -s log ] || bad 'test_files unmatched: node ran'
-tf one 0 a.test.ts; [ "$(cat log)" = '--test --test-reporter=spec a.test.ts' ] || { bad 'test_files one: wrong node args'; cat log; }
+tf one 0 --test-name-pattern=x a.test.ts; [ "$(cat log)" = '--test --test-reporter=spec --test-name-pattern=x a.test.ts' ] || { bad 'test_files one: wrong node args'; cat log; }
 
 # --- wait_ci.sh --------------------------------------------------------------------------------
 # Stub gh answers from a list, one line set per call; stub sleep returns at once. Break: the wait ends
-# before ci or book-e2e exists (the others done first), or while a run is still in progress.
-mkdir "$tmp/wc"; printf '#!/bin/sh\nn=$(($(cat "$WC_N" 2>/dev/null || echo 0) + 1)); echo $n > "$WC_N"; sed -n "${n}p" "$WC_RUNS" | tr "|" "\\n"\n' > "$tmp/wc/gh"
+# before ci or book-e2e exists (the others done first), or while a run is still in progress; a
+# timeout with neither present passes. The stub repeats its last line once the list runs out.
+mkdir "$tmp/wc"; printf '#!/bin/sh\nn=$(($(cat "$WC_N" 2>/dev/null || echo 0) + 1)); echo $n > "$WC_N"; sed -n -e "${n}{p;q;}" -e "\\$p" "$WC_RUNS" | tr "|" "\\n"\n' > "$tmp/wc/gh"
 printf '#!/bin/sh\n' > "$tmp/wc/sleep"; chmod +x "$tmp/wc/gh" "$tmp/wc/sleep"
 printf '%s\n' 'book-e2e:completed:success|graph-diff:completed:success' 'graph-diff:completed:success|ci:completed:success' 'ci:completed:success|book-e2e:in_progress:' \
   'ci:completed:success|book-e2e:completed:success|graph-diff:completed:success' > "$tmp/wc/runs"
 rc=0; WC_N=$tmp/wc/n WC_RUNS=$tmp/wc/runs PATH="$tmp/wc:$PATH" capped sh "$bin/wait_ci.sh" abc > "$tmp/wc/out" 2>&1 || rc=$?
 [ "$rc" = 0 ] && [ "$(cat "$tmp/wc/n")" = 4 ] || { bad "wait_ci: exit $rc after $(cat "$tmp/wc/n") polls, want 0 after 4"; cat "$tmp/wc/out"; }
+echo 'graph-diff:completed:success' > "$tmp/wc/runs"; rm "$tmp/wc/n"; rc=0
+WC_N=$tmp/wc/n WC_RUNS=$tmp/wc/runs PATH="$tmp/wc:$PATH" capped sh "$bin/wait_ci.sh" abc > "$tmp/wc/out" 2>&1 || rc=$?
+[ "$rc" = 1 ] && [ "$(cat "$tmp/wc/n")" = 40 ] || { bad "wait_ci timeout: exit $rc after $(cat "$tmp/wc/n") polls, want 1 after 40"; cat "$tmp/wc/out"; }
 
 # --- new_batch.sh --------------------------------------------------------------------------------
 # A main checkout cloned from a bare origin; stub worktree_setup.sh records the worktree it set up.

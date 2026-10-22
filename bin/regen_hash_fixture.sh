@@ -3,7 +3,7 @@
 # (loka-kjky): mix loka.compile, then the artifact's canonical bytes and content hash go into the
 # fixture; the description is kept. Refuses a fixture of any other shape (sampler fixtures also
 # carry `value`) and an artifact whose hash is not the sha256 of its canonical bytes.
-#   bin/regen_hash_fixture.sh <cartridge dir> <fixture>
+#   bin/regen_hash_fixture.sh <cartridge dir> <fixture>   (from the repo root, where mix.exs is)
 # LOKA_COMPILED=<artifact> skips the compile (tests).
 set -eu
 [ $# = 2 ] || { echo "usage: $0 <cartridge dir> <fixture>" >&2; exit 2; }

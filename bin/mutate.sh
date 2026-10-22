@@ -15,7 +15,7 @@ set -u
 list=$1 full=$2 rebuild=${MUTATE_REBUILD-}
 tmp=$(mktemp -d)
 cur=
-trap '[ -z "$cur" ] || cp "$tmp/orig" "$cur"; rm -rf "$tmp"' EXIT
+trap '[ -z "$cur" ] || { cp "$tmp/orig" "$cur"; [ -z "$rebuild" ] || sh -c "$rebuild" > /dev/null 2>&1 < /dev/null; }; rm -rf "$tmp"' EXIT
 trap 'exit 130' INT TERM
 rc=0
 tab=$(printf '\t')

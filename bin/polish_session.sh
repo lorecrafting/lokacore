@@ -5,7 +5,7 @@
 #          only on a lockfile change, the owner's Storybook served from it. Twice: no harm.
 #          A pushed (closed) session is refused (also by update) until its PR merges and after_merge removes it.
 #   update: fetch and merge origin/main into the session worktree (a fast-forward when it holds no commits); when the pull adds or renames
-#          a *.stories.tsx or *.mdx file or changes a package-lock.json, npm ci and restart the session's Storybook.
+#          a *.stories.tsx or *.mdx file or changes a package-lock.json, npm ci and restart the session's Storybook if it is served.
 #   close: refuses uncommitted or untracked files; pushes (hosted CI runs on the head), opens the PR
 #          (or reuses the open one), then serves the preview checkout again (bin/preview_update.sh).
 set -eu
