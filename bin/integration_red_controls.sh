@@ -267,9 +267,10 @@ SH
 chmod +x "$tmp/pmgh/gh"
 pm() { # <case> <want-rc> <want-output>
   O=$(mktemp -d); git init -q --bare -b main "$O"; R=$(mktemp -d); cd "$R"; git clone -q "$O" . 2>/dev/null
-  git checkout -qb batch; mkdir bin node_modules; cp "$bin/pm_merge.sh" bin/; printf '#!/bin/sh\nexit 0\n' > bin/prepush.sh; echo base > a
-  git add . && git commit -qm base && git push -q origin batch
   sf=${SLICE_FILE:-s} rf=${REC_FILE:-r}; mkdir -p "$(dirname "$sf")" "$(dirname "$rf")"
+  git checkout -qb batch; mkdir bin node_modules; cp "$bin/pm_merge.sh" bin/; printf '#!/bin/sh\nexit 0\n' > bin/prepush.sh; echo base > a
+  [ -z "${REC_IN_BASE-}" ] || echo old > "$rf" # the record branch updates an existing record
+  git add . && git commit -qm base && git push -q origin batch
   git checkout -qb slice; echo "${SLICE_TEXT:-s}" > "$sf"; git add . && git commit -qm slice && git push -q origin slice
   git checkout -q batch; git checkout -qb rec; echo r > "$rf"; git add . && git commit -qm rec && git push -q origin rec; git checkout -q batch
   pre=$(git rev-parse HEAD); rc=0; EXPECT_SHA=$(git rev-parse origin/slice) PATH="$tmp/pmgh:$PATH" capped sh bin/pm_merge.sh "$R" batch slice rec subj "$(git rev-parse origin/slice)" > "$R.out" 2>&1 || rc=$?
@@ -286,6 +287,7 @@ CI='[{"conclusion":""}]' E2E=$ok pm ci-running 2 'ci.yml on .* is still running'
 CI=$ok E2E=$ok SLICE_FILE=protocol/x.schema.json pm schema-no-record 1 'NO REVIEW RECORD'
 CI=$ok E2E=$ok SLICE_FILE=kernel/ts/src/runtime/world.ts SLICE_TEXT="  kernel_api: '1.2'," pm kernel-api-no-record 1 'NO REVIEW RECORD'
 CI=$ok E2E=$ok SLICE_FILE=protocol/x.schema.json REC_FILE=docs/reviews/x-review.md pm schema-record 0 '^PUSHED batch'
+CI=$ok E2E=$ok SLICE_FILE=protocol/x.schema.json REC_FILE=docs/reviews/x-review.md REC_IN_BASE=1 pm schema-record-updated 0 '^PUSHED batch'
 # --- prepush.sh ----------------------------------------------------------------------------
 # A repo whose stub mise logs each check and fails them when STUB_RC=1; origin/main is the base commit.
 # Break: two runs share log files, so one reports the other's output (the first log must still read "run-a" after
@@ -311,6 +313,8 @@ git update-ref refs/remotes/origin/main HEAD; mkdir -p mobile/app kernel/ts/src;
 grep -q '^STORIES_' "$R.e" && ! grep -q '^STATE_SECTIONS_' "$R.e" || bad 'prepush: a mobile/app change did not run only the story check'
 echo x > kernel/ts/src/x; git add . && git commit -qm src; pp f
 grep -q '^STORIES_' "$R.f" && grep -q '^STATE_SECTIONS_' "$R.f" || bad 'prepush: a kernel/ts/src change did not run the story and state-sections checks'
+git update-ref refs/remotes/origin/main HEAD; mkdir -p docs; echo x > docs/state-sections.gen.json; git add . && git commit -qm gen; pp h
+grep -q '^STATE_SECTIONS_' "$R.h" && ! grep -q '^STORIES_' "$R.h" || bad 'prepush: an edit of docs/state-sections.gen.json did not run only the state-sections check'
 git update-ref -d refs/remotes/origin/main; pp g
 grep -q '^STORIES_' "$R.g" && grep -q '^STATE_SECTIONS_' "$R.g" && ! grep -q '^TRANSCRIPTS_' "$R.g" || bad 'prepush: an unreadable branch diff skipped the gated checks or ran the transcripts'
 # --- check_impact_fixtures.sh ----------------------------------------------------------------
@@ -345,7 +349,12 @@ bg 2 'echo a
 git commit --no-verify -m "two
 lines"'
 bg 2 'br -q create "x"'
+bg 2 'git -C ../wt commit -n -m x'
+bg 2 '/usr/bin/git push --no-verify'
+bg 2 'git push --no-verify LOKA_OWNER_OK_NO_VERIFY=1'
 bg 0 'LOKA_OWNER_OK_NO_VERIFY=1 git push --no-verify'
+bg 0 'git commit -m done kernel'
+bg 0 'git commit -uno -m x'
 bg 0 'git commit -m "refuse --no-verify; br create"'
 bg 0 'grep -n -- --no-verify f && git push -n'
 bg 0 'bin/br_create.sh -t x && br list --status open'
@@ -361,7 +370,12 @@ sg() { # <want-rc> <to>
 sg 2 hook1
 sg 0 built1
 sg 0 none1
-python3 -I -c 'import json,sys; json.load(open(sys.argv[1]))' "$bin/../.claude/settings.json" || bad 'settings.json does not parse'
+# A guard script missing from the session's checkout lets the call through (python's own exit 2 would block it).
+python3 -I -c 'import json,sys
+for e in json.load(open(sys.argv[1]))["hooks"]["PreToolUse"]:
+    [print(h["command"]) for h in e["hooks"] if "_guard.py" in h["command"]]' "$bin/../.claude/settings.json" > "$tmp/guards" || bad 'settings.json does not parse'
+[ "$(wc -l < "$tmp/guards")" -eq 2 ] || bad 'settings.json: want the bash and send guards'
+while IFS= read -r c; do echo '{}' | CLAUDE_PROJECT_DIR="$tmp/none" sh -c "$c" 2> /dev/null || bad "guard hook blocks when its script is missing: $c"; done < "$tmp/guards"
 # --- .githooks/pre-commit ----------------------------------------------------------------------
 # Stub mise runs nothing but fails `elixir bin/contracts.exs --check`. Break: a staged MECHANICS-TOOLBOX.md,
 # CHECKS.md, system/mechanics.md or protocol/ file commits though the generated JSON is stale, or an unrelated file pays for the check.

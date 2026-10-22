@@ -27,7 +27,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 -I \"$CLAUDE_PROJECT_DIR\"/bin/bash_guard.py",
+            "command": "[ ! -f \"$CLAUDE_PROJECT_DIR\"/bin/bash_guard.py ] || python3 -I \"$CLAUDE_PROJECT_DIR\"/bin/bash_guard.py",
             "timeout": 10
           }
         ]
@@ -37,7 +37,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 -I \"$CLAUDE_PROJECT_DIR\"/bin/send_guard.py",
+            "command": "[ ! -f \"$CLAUDE_PROJECT_DIR\"/bin/send_guard.py ] || python3 -I \"$CLAUDE_PROJECT_DIR\"/bin/send_guard.py",
             "timeout": 10
           }
         ]

@@ -4,7 +4,7 @@ The active checks run in hosted CI on every push to a branch, nightly on `main` 
 run on the exact head is the merge gate with review ([two-lane CI](decisions/owner-decision-two-lane-ci-2026-10-09.md)).
 Locally, pre-commit checks the staged files and developers run only the tests their diff touches;
 `bin/check_all.sh` mirrors the hosted line for an occasional full local run. `bin/prepush.sh` runs
-the static checks of hosted CI, no test suite, in about 30 s before every push and after every
+the static checks of hosted CI, in about 30 s (about 40 s with the stories test) before every push and after every
 `bin/pm_merge.sh` merge. When the branch diff against `origin/main` touches their inputs (or cannot be read), it also runs `mobile/app/stories.test.ts` (story views and saves fresh, every story file indexes as literal CSF) and `kernel/ts/test/state_sections.test.ts`. The `.githooks/pre-push` hook runs it on every push (status-only pushes under `.beads/` or `docs/HANDOFF.md` skip it); `--no-verify` needs the owner's OK.
 The [scope audit](evidence/2026-10-06-ci-scope-audit.md) records the costs measured when lanes were selected locally.
 Mobile checks are paused by the [owner decision](decisions/owner-decision-web-first-mobile-pause-2026-10-05.md);
@@ -129,7 +129,7 @@ their rules and red controls remain available for resumption.
   narrow command fails) and `bin/session_status.sh` with stub `br` (the
   housekeeping list, the missed-retro note, a failing `br` still exits 0; other worktrees, the stash
   count and merged `review-<N>` refs are listed, the own checkout and unmerged refs are not; a red, running or missing nightly run is reported; the nightly sim median of five runs skips a failed leg).
-  It also runs `bin/pm_merge.sh` (a protocol schema or `kernel_api` change with no added `docs/reviews` record is refused and reset) and `bin/prepush.sh` (each gated check runs only for its inputs).
+  It also runs `bin/pm_merge.sh` (a protocol schema or `kernel_api` change with no added or updated `docs/reviews` record is refused and reset) and `bin/prepush.sh` (each gated check runs only for its inputs).
 - Claude hooks (`.claude/settings.json`): `bin/worktree_warn.sh` (Stop) only warns,
   listing worktrees with uncommitted changes. PreToolUse `bin/bash_guard.py` (Bash) refuses `git ... --no-verify`
   or `git commit -n` without the `LOKA_OWNER_OK_NO_VERIFY=1` prefix, and a bare `br create`; `bin/send_guard.py`

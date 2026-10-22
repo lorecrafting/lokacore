@@ -12,7 +12,7 @@ try:
     hook = json.load(sys.stdin)
     to = hook["tool_input"]["to"]
     projects = os.path.dirname(hook["transcript_path"])
-    [path] = glob.glob(os.path.join(glob.escape(projects), "*", "subagents", f"agent-{to}.jsonl"))
+    path = max(glob.glob(os.path.join(glob.escape(projects), "*", "subagents", f"agent-{to}.jsonl")), key=os.path.getmtime)
     with open(path) as f:
         last = [line for line in f if '"subtype":"compact_boundary"' in line][-1]
     ms = json.loads(last)["compactMetadata"]["durationMs"]
