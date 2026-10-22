@@ -253,8 +253,15 @@
     {
       "floor": "1.47",
       "below": "1.46",
-      "source": "cartridges/standing_sampler",
+      "source": "cartridges/journal_sampler",
       "feature": "an NPC disposition (standing)",
+      "edits": [
+        [
+          "npcs/bram.json",
+          ["disposition"],
+          { "friendly": { "policy_version": 1, "root": { "op": "all", "items": [] } } }
+        ]
+      ],
       "compiler": [
         "KERNEL_API_RANGE_INVALID",
         "cartridge.requires.kernel_api.at_least"
