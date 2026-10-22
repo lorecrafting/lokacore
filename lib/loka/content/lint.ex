@@ -150,22 +150,21 @@ defmodule Loka.Content.Lint do
   # with it or a room detail that gives it; a fuel supply a lamp burns only ever drains, so it
   # must start above 0.
   defp fills(files) do
-    have = MapSet.new(Enum.flat_map(files, fn {rel, v} -> filled(Path.split(rel), v) end))
-    wants = Enum.flat_map(files, fn {rel, v} -> wants(Path.split(rel), v) end)
+    have = MapSet.new(scan(files, &filled/2))
 
-    for {{kind, id}, users} <- Enum.group_by(wants, &elem(&1, 0), &elem(&1, 1)) |> Enum.sort(),
-        {kind, id} not in have do
-      users = users |> Enum.uniq() |> Enum.sort() |> Enum.join(", ")
-
-      case kind do
-        :liquid ->
-          "liquids/#{id}.json: #{users} want it; no vessel starts with it and no detail gives it"
-
-        :fuel ->
-          "items/#{id}.json: #{users} burn it; it starts empty and nothing fills it"
-      end
-    end
+    for {want, users} <-
+          Enum.sort(Enum.group_by(scan(files, &wants/2), &elem(&1, 0), &elem(&1, 1))),
+        want not in have,
+        do: fill_line(want, users |> Enum.uniq() |> Enum.sort() |> Enum.join(", "))
   end
+
+  defp scan(files, fun), do: Enum.flat_map(files, fn {rel, v} -> fun.(Path.split(rel), v) end)
+
+  defp fill_line({:liquid, id}, users),
+    do: "liquids/#{id}.json: #{users} want it; no vessel starts with it and no detail gives it"
+
+  defp fill_line({:fuel, id}, users),
+    do: "items/#{id}.json: #{users} burn it; it starts empty and nothing fills it"
 
   defp filled(["items", _], %{"vessel" => %{"initial" => %{"kind" => k, "quantity" => q}}})
        when q > 0,
