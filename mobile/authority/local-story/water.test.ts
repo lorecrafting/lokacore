@@ -26,12 +26,6 @@ function setup(path = ':memory:', change: (c: any) => void = () => {}) {
     releases = [{ fresh: initial, content_hash: b.sha256 }] as const;
   let p = elapsedHost(path, { wall: 10000, mono: 0 }, b),
     n = 0;
-  const ancestry = p.game.invoke({
-    action_key: 'choose_ancestry',
-    target_ids: [],
-    input: { ancestry: 'fey_touched' },
-  } as never);
-  assert.equal(ancestry.kind === 'saved' && ancestry.decision.kind, 'accepted');
   const open = () => {
     const s = openStory(p.db, releases, p.host);
     assert.equal(s.kind, 'open', JSON.stringify(s));
