@@ -504,6 +504,10 @@
         "when": {
           "$ref": "policy.schema.json#/$defs/VersionedPolicy"
         },
+        "silent": {
+          "description": "Author-time only (mix loka.lint, pass-1 row 3): the rule writes state without a narrate step on purpose. The compiler drops it, so a compiled cartridge never carries it.",
+          "const": true
+        },
         "after": {
           "description": "Toolbox row FD1 (kernel_api at least 1.90): the steps run this many logical seconds after delivery, as a reaction job for the delivery's actor, when `when` holds at both times; due no earlier than 1 s after the proposal's clock.",
           "type": "integer",

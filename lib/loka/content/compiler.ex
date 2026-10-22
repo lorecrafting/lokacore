@@ -1,4 +1,4 @@
-# size: allow 359, craft consume expansion, ancestry, static map, status source, levelling settings, replenish, trail, theft, asks, speech, construction and mounts wiring join the existing compiler boundary
+# size: allow 360, a reaction's lint-only silent mark stripped on compile, craft consume expansion, ancestry, static map, status source, levelling settings, replenish, trail, theft, asks, speech, construction and mounts wiring join the existing compiler boundary
 defmodule Loka.Content.Compiler do
   @moduledoc "Validates source files and builds the CompiledCartridge (05 §3–§8, 06 §20–21)."
   alias Loka.Content.{
@@ -328,6 +328,7 @@ defmodule Loka.Content.Compiler do
 
     case authored_key(rel, steps, value) ++
            validated(rel, steps, "Key", key) ++ body(rel, steps, contract, keyed) do
+      [] when contract == "ReactionRule" -> {:ok, {rel, steps, Map.delete(keyed, "silent")}}
       [] -> {:ok, {rel, steps, keyed}}
       diags -> {:error, diags}
     end

@@ -59,7 +59,8 @@ export function LogLines({ lines }: { lines: readonly DetailLine[] }) {
   const c = usePalette();
   if (!lines.length) return null;
   return (
-    <View style={{ gap: space.sm }}>
+    // The walk tells log lines from refusal notes by this id (walkthrough/walk.ts live).
+    <View testID="log-lines" style={{ gap: space.sm }}>
       {lines.map((line, i) =>
         typeof line === 'string' ? (
           <Text key={i} style={{ ...type.log, color: c.fg }}>
