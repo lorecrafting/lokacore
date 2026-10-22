@@ -1,64 +1,53 @@
 defmodule Loka.ContentLightTest do
   use ExUnit.Case, async: true
-  setup_all do: %{dir: Loka.ContentSource.copy("cartridges/ashmere_missing_child")}
-  @src "cartridges/ashmere_missing_child"
+  setup_all do: %{dir: Loka.ContentSource.copy("cartridges/toolbox_showcase")}
+  @src "cartridges/toolbox_showcase"
   defp source(path), do: JSON.decode!(File.read!(Path.join(@src, path)))
 
-  # Break: the real chapter drops bounded torch/oil metadata, short supply expansion or the public stair.
-  test "authored torch and well consumer compile with independent light tuning" do
-    assert {:ok, bytes, []} = Loka.Content.compile(@src)
+  # Break: compiled fuel drops or retunes the source file fields, the short supply stays short, or a
+  # dark description loses its text. Deleted: the chapter's torch tuning and Well Lane stair pins.
+  test "authored lantern fuel and crypt darkness compile as authored", %{dir: dir} do
+    assert {:ok, bytes, []} = Loka.ContentSource.compile(dir, [])
     c = JSON.decode!(bytes)["cartridge"]
-    prefix = "#{c["manifest"]["id"]}@#{c["manifest"]["version"]}"
-    torch = c["items"][prefix <> ":item/torch"]["fuel"]
+    %{"id" => id, "version" => version} = source("cartridge.json")
+    fuel = source("items/lantern.json")["fuel"]
 
-    assert Map.take(torch, ~w(kind capacity initial rate unit)) == %{
-             "kind" => "source",
-             "capacity" => 7200,
-             "initial" => 7200,
-             "rate" => 1,
-             "unit" => "oil"
-           }
+    assert c["items"]["#{id}@#{version}:item/lantern"]["fuel"] ==
+             Map.put(fuel, "supply", %{
+               "cartridge_id" => id,
+               "cartridge_version" => version,
+               "kind" => "item",
+               "key" => fuel["supply"]
+             })
 
-    assert torch["supply"] == %{
-             "cartridge_id" => "ashmere_missing_child",
-             "cartridge_version" => c["manifest"]["version"],
-             "kind" => "item",
-             "key" => "lamp_oil"
-           }
-
-    assert c["items"][prefix <> ":item/lamp_oil"]["fuel"] == %{
-             "kind" => "supply",
-             "capacity" => 7200,
-             "initial" => 7200,
-             "unit" => "oil"
-           }
-
-    assert c["rooms"][prefix <> ":room/well_lane"]["exits"]["down"]["to"]["key"] == "well_shaft"
-    assert c["rooms"][prefix <> ":room/well_shaft"]["exits"]["up"]["to"]["key"] == "well_lane"
-
-    assert c["text"][c["rooms"][prefix <> ":room/well_shaft"]["dark_description"]] ==
-             "Darkness fills the shaft. The stair up leads back to Well Lane."
+    dark = source("rooms/crypt.json")["dark_description"]
+    assert c["rooms"]["#{id}@#{version}:room/crypt"]["dark_description"] == dark
+    assert is_binary(c["text"][dark])
+    assert c["text"][dark] == source("text.json")[dark]
   end
 
   # Break: an overfilled or incompatible fuel definition compiles into an impossible fresh save.
   test "impossible fuel metadata and unresolved dark text refuse", %{dir: dir} do
     for {_case, replacements} <- [
           {"overfilled",
-           %{"items/torch.json" => put_in(source("items/torch.json"), ["fuel", "initial"], 7201)}},
+           %{
+             "items/lantern.json" =>
+               put_in(source("items/lantern.json"), ["fuel", "initial"], 36001)
+           }},
           {"wrong_supply",
            %{
-             "items/torch.json" =>
-               put_in(source("items/torch.json"), ["fuel", "supply"], "waterskin")
+             "items/lantern.json" =>
+               put_in(source("items/lantern.json"), ["fuel", "supply"], "waterskin")
            }},
           {"different_unit",
            %{
              "items/lamp_oil.json" =>
-               put_in(source("items/lamp_oil.json"), ["fuel", "unit"], "water")
+               put_in(source("items/lamp_oil.json"), ["fuel", "unit"], "oil")
            }},
           {"dark_text",
            %{
-             "rooms/well_shaft.json" =>
-               put_in(source("rooms/well_shaft.json"), ["dark_description"], "missing.dark")
+             "rooms/crypt.json" =>
+               put_in(source("rooms/crypt.json"), ["dark_description"], "missing.dark")
            }}
         ] do
       assert {:error, diagnostics} = Loka.ContentSource.compile(dir, replacements)
@@ -73,11 +62,11 @@ defmodule Loka.ContentLightTest do
     }
 
     for {name, fields} <- [
-          {"fuel", %{"fuel" => source("items/torch.json")["fuel"]}},
-          {"darkness", %{"dark_description" => "room.well_shaft.dark"}},
+          {"fuel", %{"fuel" => source("items/lantern.json")["fuel"]}},
+          {"darkness", %{"dark_description" => "room.crypt.dark"}},
           {"unused", %{}}
         ] do
-      # Controlled source declarations keep this check independent of later chapter consumers.
+      # Controlled source declarations keep this check independent of the showcase consumers.
       result = Loka.Content.Requires.features(manifest, [{name, [], fields}])
 
       if name == "unused" do
