@@ -1,10 +1,17 @@
 // Real authority fixture for B9, with operation-based faults supplied by elapsedHost.
 import assert from 'node:assert/strict';
-import { bundle, fresh, entity, ref } from '../../../../kernel/ts/test/dream_fixture.ts';
+import { bundle, fresh, entity, ref, prefix } from '../../../../kernel/ts/test/dream_fixture.ts';
 import { gameView } from '../../../../kernel/ts/src/index.ts';
 import { openStory } from '../authority.ts';
 import { elapsedHost } from './elapsed-host.test.ts';
 export { bundle as dreamBundle } from '../../../../kernel/ts/test/dream_fixture.ts';
+
+// The dream pages are keyed by the paid bed's detail id.
+const w0 = fresh();
+export const dreamBed = Object.keys(w0.details).find(
+  (id) =>
+    w0.details[id].key === 'bed' && w0.details[id].room === w0.roomIds[`${prefix}:room/inn_rooms`],
+);
 
 export function dreamHost(path = ':memory:', change: (c: any) => void = () => {}) {
   const b = bundle(change),
@@ -65,7 +72,7 @@ export function dreamHost(path = ':memory:', change: (c: any) => void = () => {}
       story = open();
     },
     start() {
-      invoke('rent_lantern_room', { service: ref('service', 'lantern_room'), quoted_price: 3 }, [
+      invoke('rent_room', { service: ref('service', 'bed_room'), quoted_price: 3 }, [
         entity(initial, 'npc', 'maud'),
       ]);
       invoke('move', { direction: 'up' });
