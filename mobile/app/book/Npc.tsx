@@ -182,7 +182,7 @@ export const npcSkills = (c: Palette, p: NpcProps) =>
       <Text key={s.skill.key} style={note(c)}>
         {p.text(s.label)}: {s.acquired ? 'learned' : s.locked ? 'locked' : 'not learned'}; currently{' '}
         {s.qualified ? 'qualified' : 'unqualified'}.
-        {/* a learned, qualified skill asks nothing more (pass-1 H3) */}
+        {/* a learned, qualified skill asks nothing more (pass-2 R3) */}
         {s.acquired && s.qualified ? '' : ` ${p.text(s.requirement)}`}
       </Text>
     ));

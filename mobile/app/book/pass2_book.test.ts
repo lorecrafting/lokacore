@@ -1,5 +1,5 @@
 // Pass-2 Book rows on the showcase (re-walk of pass 1; R1's spell chip is pinned in word_bar.test.ts):
-// a learned teach line asks nothing more (H3), an NPC page with price rows draws no empty Note
+// a learned teach line asks nothing more (R3), an NPC page with price rows draws no empty Note
 // (UH3 on NPC pages), and a resting rod notes its use (R2).
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
@@ -11,7 +11,7 @@ const showcase = () => book(compiled('cartridges/toolbox_showcase') as never);
 const go = (b: ReturnType<typeof showcase>, ...ds: string[]) =>
   ds.forEach((d) => (b.map(), b.tap(`Go ${d}`)));
 
-// Breaks: a learned, qualified skill still repeats how to learn it (H3), or an unlearned one stops.
+// Breaks: a learned, qualified skill still repeats how to learn it (R3), or an unlearned one stops.
 test('a learned teach line drops its requirement', (t) => {
   const b = showcase();
   t.after(() => b.sql.close());
