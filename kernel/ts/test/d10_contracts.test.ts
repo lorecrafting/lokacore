@@ -126,7 +126,7 @@ test('D10 loader refuses invalid authored map and Knock declarations', () => {
   for (const [mutate, code, path] of [
     [(c: any) => c.map_positions.pop(), 'SCHEMA_VIOLATION', '.cartridge.map_positions'],
     [
-      (c: any) => (c.map_positions[1] = c.map_positions[0]),
+      (c: any) => (c.map_positions[1].room = c.map_positions[0].room),
       'SCHEMA_VIOLATION',
       '.cartridge.map_positions',
     ],

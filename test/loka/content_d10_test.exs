@@ -33,8 +33,8 @@ defmodule Loka.ContentD10Test do
           {map, &tl/1, "SCHEMA_VIOLATION", "map_positions"},
           {map, &List.update_at(&1, 1, fn r -> Map.merge(r, Map.take(hd(&1), ~w(x y z))) end),
            "SCHEMA_VIOLATION", "map_positions"},
-          {map, &[hd(&1) | tl(&1) |> List.replace_at(0, hd(&1))], "SCHEMA_VIOLATION",
-           "map_positions"},
+          {map, &List.update_at(&1, 1, fn r -> Map.put(r, "room", hd(&1)["room"]) end),
+           "SCHEMA_VIOLATION", "map_positions"},
           {map, &List.update_at(&1, 0, fn r -> Map.put(r, "room", "absent") end),
            "UNRESOLVED_REFERENCE", "map_positions[0].room"},
           {map, &List.update_at(&1, 0, fn r -> Map.put(r, "x", 0.5) end), "SCHEMA_VIOLATION",
@@ -43,6 +43,11 @@ defmodule Loka.ContentD10Test do
            "rooms/smithy.exits.south.knock.npc"},
           {"rooms/smithy.json", &knock.(&1, "room", "smithy"), "BARRIER_MISMATCH",
            "rooms/smithy.exits.south.knock"},
+          {"rooms/smithy.json",
+           &put_in(&1, ["exits", "north", "knock"], %{
+             &1["exits"]["south"]["knock"]
+             | "room" => &1["exits"]["north"]["to"]
+           }), "BARRIER_MISMATCH", "rooms/smithy.exits.north.knock"},
           {"rooms/smithy.json", &knock.(&1, "answered", "absent"), "UNRESOLVED_REFERENCE",
            "rooms/smithy.exits.south.knock.answered"}
         ] do
