@@ -106,14 +106,16 @@ export function StatusLine(p: StatusProps) {
         />
       )}
       <View style={statusRow}>
-        {/* Two wrap units, so the only break falls before the pools; the dot before them stays on line one. */}
+        {/* Two wrap units, so the only break falls before the pools; their dot goes with them. */}
         <View style={{ ...group, ...shrink }}>
           {items.map((item, i) => (i ? joined(c, t, item) : item))}
+        </View>
+        <View style={group}>
           <Text aria-hidden style={{ ...t.small, color: c.dim }}>
             ·
           </Text>
+          <Contents {...p} resources={pools(p.resources)} />
         </View>
-        <Contents {...p} resources={pools(p.resources)} />
       </View>
       <View style={{ alignItems: 'center' }}>
         {p.pending && <Text style={{ ...t.small, color: c.dim }}>save not confirmed</Text>}
@@ -153,13 +155,14 @@ function Contents(p: StatusProps) {
   );
 }
 
-// A no-break space between resources and within each, as text, not a margin: the pools never split
+// A figure space between resources and a no-break space within each, as text, not a margin: both
+// are no-break, so the pools never split
 // and the shown words lead the button's name (book-ui.md, Label in name). The resources as the status line shows them (band colours per model.ts `toneOf`; dim while
 // locked); its label is model.ts `said`.
 const shown = (c: Palette, t: Type, rs: readonly Pool[], locked: boolean) =>
   rs.map((r, i) => (
     <Text key={r.resource.key} style={{ color: locked ? c.dim : band(c, toneOf(r)) }}>
-      {i ? '\u00a0' : ''}
+      {i ? '\u2007' : ''}
       <Text style={t.label}>{r.resource.key}</Text>
       {`\u00a0${r.current}/${r.maximum}`}
     </Text>

@@ -35,7 +35,7 @@ import {
   type ReadingStep,
   type ReadingStore,
 } from './reading.ts';
-import { color, size, space, type } from './tokens.ts';
+import { color, size, space } from './tokens.ts';
 import { Control } from './pages.tsx';
 import { presenter, type Button, type DetailLine } from './presenter.ts';
 import { restoredNoticePages } from './notices.tsx';

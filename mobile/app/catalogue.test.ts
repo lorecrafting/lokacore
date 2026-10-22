@@ -97,7 +97,10 @@ test('every token has a consumer outside tokens.ts', async () => {
   const book = readdirSync(new URL('book/', app)).filter(
     (f) => /\.tsx?$/.test(f) && f !== 'tokens.ts' && !f.endsWith('.test.ts'),
   );
-  const code = [...book.map((f) => `book/${f}`), 'App.tsx', 'SaveError.tsx'].map(read).join('\n');
+  const files = [...book.map((f) => `book/${f}`), 'App.tsx', 'SaveError.tsx'].map(read);
+  // `t.` counts as a type read only where `t` is the Reading-size type (useType() or a Type parameter).
+  const typed = files.filter((f) => /useType\(\)|\bt: Type\b/.test(f)).join('\n');
+  const code = files.join('\n');
   const groups = ['type', 'space', 'size', 'radius', 'opacity', 'motion', 'sound', 'nightSky'];
   const dead = groups.flatMap((g) =>
     Object.keys(tokens[g])
@@ -105,9 +108,8 @@ test('every token has a consumer outside tokens.ts', async () => {
       .filter(
         (name) =>
           !(name in NO_BOOK_CONSUMER) &&
-          !new RegExp(
-            `${g === 'type' ? '(\\btype|\\bt|useType\\(\\))' : `\\b${g}`}\\.${name.split('.')[1]}\\b`,
-          ).test(code),
+          !new RegExp(`(\\b${g}|useType\\(\\))\\.${name.split('.')[1]}\\b`).test(code) &&
+          !(g === 'type' && new RegExp(`\\bt\\.${name.split('.')[1]}\\b`).test(typed)),
       ),
   );
   assert.deepEqual(dead, []);

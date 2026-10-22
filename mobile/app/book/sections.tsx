@@ -22,7 +22,7 @@ import { DiscoveredMap } from './DiscoveredMap.tsx';
 import { ReadingSize } from './Chip.tsx';
 import type { Reading } from './reading.ts';
 import { levelLine, Professions, RaiseCards, SkillDetails, xpLine } from './skills.tsx';
-import { size, space, type } from './tokens.ts';
+import { size, space } from './tokens.ts';
 import { ActionCard, Cards, ContinueButton } from './actions.tsx';
 import { EntityLine, Note } from './lines.tsx';
 import { band, Control, Page, SectionTitle, useTitleFocus } from './pages.tsx';

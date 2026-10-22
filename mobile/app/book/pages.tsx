@@ -11,7 +11,7 @@ import { plain, why, type group, type Pool } from './model.ts';
 import type { Button, DetailLine } from './presenter.ts';
 import { tapBleed } from './reading.ts';
 import { note, prose, usePalette, useType, type Palette, type Type } from './palette.ts';
-import { opacity, size, space, type } from './tokens.ts';
+import { opacity, size, space } from './tokens.ts';
 import { ActionCard } from './actions.tsx';
 import { Asides, AwayRecap, Here, LogLines } from './lines.tsx';
 import type { RecapLine } from './recap.ts';
@@ -223,7 +223,8 @@ const storylet = (
  * - Use: every page.
  * - Rules: a run of rows of one kind is one block; a heading is its own block. The title is the
  *   page header with the arriving focus; without one, the first block takes it. The room's fixed
- *   title is the only pressable title. A page that grows at the end scrolls to its end.
+ *   title is the only pressable title. The title is `pageTitle`, left-aligned on every page and
+ *   scaled with the Reading size. A page that grows at the end scrolls to its end.
  * - States: scrolling title; fixed title; no title; centred (no game behind it).
  * - Story: Page.stories.tsx
  */

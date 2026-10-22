@@ -11,7 +11,7 @@ import { refused, why, type Hint } from './model.ts';
 import type { DetailLine } from './presenter.ts';
 import { Control } from './pages.tsx';
 import { usePalette, useType, type Palette } from './palette.ts';
-import { motion, radius, size, space, type } from './tokens.ts';
+import { motion, radius, size, space } from './tokens.ts';
 import { LABEL } from './labels.ts';
 
 type Props = {

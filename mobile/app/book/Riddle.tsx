@@ -6,7 +6,7 @@ import type { Button } from './presenter.ts';
 import { ActionCard } from './actions.tsx';
 import { Control } from './pages.tsx';
 import { prose, usePalette, useType } from './palette.ts';
-import { opacity, radius, size, space, type } from './tokens.ts';
+import { opacity, radius, size, space } from './tokens.ts';
 import { LABEL } from './labels.ts';
 
 /**

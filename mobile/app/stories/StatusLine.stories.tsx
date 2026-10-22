@@ -204,7 +204,8 @@ export const Locked: Story = {
 
 export const Pending: Story = { args: { pending: true } };
 
-// The narrowest phone with everything on the line: one line, the pools whole, the rest cut.
+// The narrowest phone with everything on the line: the pools take line two, whole (loka-x6t.86).
+// Breaks: the row loses flexWrap (the pools stay on line one and the rest is cut).
 export const Narrow: Story = {
   globals: { viewport: { value: 'galaxyS25', isRotated: false } },
   args: {
@@ -220,6 +221,10 @@ export const Narrow: Story = {
       canvasElement.getBoundingClientRect().right,
     );
     await expect(position.getBoundingClientRect().height).toBe(size.touch); // one line
+    // on line two: both boxes bleed, so compare tops (one row: equal; wrapped: about a line lower)
+    await expect(stats.getBoundingClientRect().top).toBeGreaterThan(
+      position.getBoundingClientRect().top + size.touch / 2,
+    );
   },
 };
 
