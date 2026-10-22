@@ -9,6 +9,7 @@ import { Control, Page } from './pages.tsx';
 import type { Button, presenter } from './presenter.ts';
 import { note, prose, usePalette, type Palette } from './palette.ts';
 import { LABEL } from './labels.ts';
+import type { DetailLine } from './logs.ts';
 
 type Screen = ReturnType<ReturnType<typeof presenter>['screen']>;
 type Notice = NonNullable<GameView['notices']>[number];
@@ -123,6 +124,11 @@ const fare = (c: Palette, t: NonNullable<Notice['transport']>) => (
   </Text>
 );
 
+// A read whose text is the description (the well), or a body already shown (each entry reads
+// again), adds nothing the page does not show.
+const fresh = (description: string) => (line: DetailLine, i: number, all: readonly DetailLine[]) =>
+  typeof line !== 'string' || (plain(line) !== description && all.indexOf(line) === i);
+
 export function NoticePage(
   p: Props & { page: Extract<Route, { id: string }>; world: () => void; back: () => void },
 ) {
@@ -139,16 +145,7 @@ export function NoticePage(
       <Text style={prose(c)}>{description}</Text>
       <Asides keys={'asides' in detail ? detail.asides : undefined} text={p.screen.text} />
       {'remaining' in detail && <Text style={note(c)}>Remaining: {detail.remaining}</Text>}
-      {/* A read whose text is the description (the well), or a body already shown (each entry
-          reads again), adds nothing the page does not show. */}
-      <LogLines
-        lines={p.screen
-          .detail(detail.id)
-          .filter(
-            (line, i, all) =>
-              typeof line !== 'string' || (plain(line) !== description && all.indexOf(line) === i),
-          )}
-      />
+      <LogLines lines={p.screen.detail(detail.id).filter(fresh(description))} />
       {'transport' in detail && detail.transport && fare(c, detail.transport)}
       {!!board?.notices.length && (
         <View>
