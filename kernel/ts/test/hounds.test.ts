@@ -4,16 +4,12 @@ import { gameView, step, stepElapsed, type World } from '../src/index.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { key } from '../src/foundation/compose.ts';
 import { hydrate } from '../src/runtime/created.ts';
-import { genesis, load, prefix, ref, shrine, spawned } from './c4_pack_fixture.ts';
+import { genesis, load, prefix, ref, shrine, spawned, unpacked } from './c4_pack_fixture.ts';
 
 // The controlled goblins (cap 6, day 4, night 20-6, hourly wander, one-day replacement) as a plain
 // population: no pack block (c4_pack*.test.ts covers packs), 150-second combat rounds. The body
 // starts at the inn, two moves (west, south) from the pit.
-const fresh = () =>
-  genesis((c) => {
-    delete c.populations[`${prefix}:population/goblins`].pack;
-    c.world.combat.interval = 150;
-  });
+const fresh = () => genesis(unpacked);
 const plan = `.cartridge.populations["${prefix}:population/goblins"]`;
 const run_id = 'bbbbbbbb-0000-4000-8000-000000000001' as never;
 

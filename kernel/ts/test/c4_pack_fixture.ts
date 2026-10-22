@@ -31,10 +31,23 @@ function base(c: any, start = 64800, wander_interval = 3600) {
   delete combat.allies;
 }
 
+/** The controlled goblins as a plain population: no pack block, 150-second combat rounds. */
+export const unpacked = (c: any) => {
+  delete c.populations[`${prefix}:population/goblins`].pack;
+  c.world.combat.interval = 150;
+};
+
 /** The controlled world, optionally changed further (an inline area, bundle roles). */
 export const genesis = (change: (c: any) => void = () => {}, start?: number, wander?: number) =>
   f.genesis((c) => {
     base(c, start, wander);
+    change(c);
+  });
+
+/** The controlled cartridge, changed further, encoded with its content hash (a host artifact). */
+export const bundle = (change: (c: any) => void = () => {}) =>
+  f.bundle((c) => {
+    base(c);
     change(c);
   });
 
