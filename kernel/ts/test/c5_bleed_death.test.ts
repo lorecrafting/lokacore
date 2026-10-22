@@ -1,116 +1,84 @@
 import assert from 'node:assert/strict';
-import { createHash } from 'node:crypto';
 import { test } from 'node:test';
-import { encode } from '../src/foundation/canonical.ts';
 import { key } from '../src/foundation/compose.ts';
-import { elapsedCommandId } from '../src/foundation/id_source.ts';
-import { INSTALLED, loadCartridge, newWorld, step, stepElapsed, type World } from '../src/index.ts';
-import { acquisition } from '../src/mechanics/skills.ts';
+import type { World } from '../src/index.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
-import { refString, type Cartridge } from '../src/runtime/decision.ts';
-import { read } from './read.ts';
+import { acquisition } from '../src/mechanics/skills.ts';
+import { command, elapsed, fixture, sampler } from './c5_bleed_fixture.ts';
 
-const run = 'aaaaaaaa-0000-4000-8000-000000000010' as never;
-const id = (n: number) => `aaaaaaaa-0000-4000-8000-${String(n).padStart(12, '0')}` as never;
-function command(world: World, n: number, payload: object) {
-  return step(
-    world,
-    {
-      id: id(n),
-      world_context_id: world.context,
-      payload: { ...payload, actor_id: world.character },
-    } as never,
-    n,
-  );
-}
-function elapsed(world: World, until: number, n: number) {
-  return stepElapsed(
-    world,
-    {
-      id: elapsedCommandId(run, world.context, world.state.clock, until) as never,
-      world_context_id: world.context,
-      payload: {
-        type: 'elapsed',
-        actor_id: world.character,
-        run_id: run,
-        from: world.state.clock,
-        until,
-      },
-    },
-    n,
-  );
+const { prefix, ref } = sampler;
+
+// Inline water route: a swim skill, a surface and a dark bottom whose 50-unit breath ends at 65000.
+function water(c: any) {
+  for (const cap of ['water', 'light']) {
+    c.lock.capabilities[cap] = 1;
+    c.manifest.requires.capabilities[cap] = 1;
+  }
+  const room = (key: string, exits: object, dark = false) => {
+    c.rooms[`${prefix}:room/${key}`] = {
+      key,
+      title: 'room.burrow.title',
+      description: 'room.burrow.description',
+      ...(dark ? { dark_description: 'room.burrow.description' } : {}),
+      exits,
+    };
+  };
+  room('pool', { down: { to: ref('room', 'pool_bottom') } });
+  room('pool_bottom', { up: { to: ref('room', 'pool') } }, true);
+  c.skills[`${prefix}:skill/swim`] = {
+    key: 'swim',
+    label: 'skill.bandage.label',
+    requirement: 'skill.bandage.requirement',
+    qualification: { policy_version: 1, root: { op: 'all', items: [] } },
+  };
+  c.facts[`${prefix}:fact/skill_swim`] = {
+    key: 'skill_swim',
+    version: 1,
+    value_type: { type: 'bool', default: false },
+    scopes: ['player'],
+    meaning: "Skill swim's acquisition (skills@1): only skills@1 writes it.",
+  };
+  c.world.carry = { max_grams: 20000 };
+  c.world.water = {
+    skill: ref('skill', 'swim'),
+    maximum_grams: 6000,
+    entry_cost: 10,
+    duration: 50,
+    warning: 'narration.bleed.tick',
+    drowned: 'narration.bleed.tick',
+    routes: [{ surface: ref('room', 'pool'), bottom: ref('room', 'pool_bottom') }],
+  };
 }
 
 // Breaks: a real noncombat death returns the body with its old bleed and due job still live.
-test('authored short water expiry clears active bleed before Chapel return', () => {
-  const content = JSON.parse(read('protocol/fixtures/missing_child_v037_hash.json').canonical);
-  content.world.water.duration = 50;
-  const canonical = encode(content);
-  const hash = createHash('sha256').update(canonical).digest('hex');
-  const loaded = loadCartridge(
-    new TextEncoder().encode(JSON.stringify({ cartridge: content, content_hash: hash })),
-    INSTALLED,
-  );
-  assert.ok(loaded.ok, JSON.stringify(loaded));
-  const fresh = newWorld(loaded.cartridge as Cartridge, id(100), [1, 2, 3, 4]);
-  const target = Object.entries(fresh.state.created ?? {}).find(
-    ([, e]) => e.origin.kind === 'spawned' && e.origin.role === 'hound',
-  )![0];
-  const entities = { ...fresh.entities } as Record<string, any>;
-  for (const [member, e] of Object.entries(fresh.state.created ?? {}))
-    if (e.origin.kind === 'spawned' && e.origin.role === 'hound')
-      entities[member] = {
-        ...entities[member],
-        attack: { ...entities[member].attack, chance: 100 },
-      };
-  const hp = resourceRef(fresh, 'hp');
-  const world: World = {
-    ...fresh,
-    entities,
-    cartridge: {
-      ...fresh.cartridge,
-      world: {
-        ...fresh.cartridge.world!,
-        combat: {
-          ...fresh.cartridge.world!.combat!,
-          player_attack: { chance: 0, damage_min: 1, damage_max: 1 },
-          dodge: undefined,
-        },
-      },
-    },
-    state: {
-      ...fresh.state,
-      containers: { ...fresh.state.containers, [fresh.body]: fresh.state.containers[target] },
-      resources: {
-        ...fresh.state.resources,
-        [key({ kind: 'resource', entity_id: fresh.body, resource: hp })]: { value: 10, at: 64800 },
-      },
-    },
-  };
-  const attack = command(world, 1, { type: 'attack', target_id: target });
+test('short water expiry clears active bleed before shrine return', () => {
+  const { world, target } = fixture(100, 10, water);
+  const hp = resourceRef(world, 'hp');
+  const attack = command(world, 1, { type: 'attack', target_id: target }, 1);
   assert.equal(attack.decision.kind, 'accepted');
   const wound = elapsed(attack.world, 64950, 2);
   assert.equal(wound.decision.kind, 'accepted', JSON.stringify(wound.decision));
   const bleed = wound.world.state.bleeds![world.body]!;
   assert.ok(bleed.active);
-  const fled = command(wound.world, 3, { type: 'flee' });
+  const fled = command(wound.world, 3, { type: 'flee' }, 3);
   assert.equal(fled.decision.kind, 'accepted');
-  const well = fled.world.roomIds[refString({ ...content.entry, key: 'well_shaft' })];
-  const skill = acquisition(content.world.water.skill);
-  const scoped = key({
+  const skill = key({
     kind: 'fact',
-    fact: skill,
+    fact: acquisition(ref('skill', 'swim')),
     scope: { kind: 'player', character_id: world.character },
   });
   const near: World = {
     ...fled.world,
     state: {
       ...fled.world.state,
-      containers: { ...fled.world.state.containers, [world.body]: well },
-      facts: { ...fled.world.state.facts, [scoped]: true },
+      containers: {
+        ...fled.world.state.containers,
+        [world.body]: world.roomIds[`${prefix}:room/pool`],
+      },
+      facts: { ...fled.world.state.facts, [skill]: true },
     },
   };
-  const entered = command(near, 4, { type: 'move', direction: 'down' });
+  const entered = command(near, 4, { type: 'move', direction: 'down' }, 4);
   assert.equal(entered.decision.kind, 'accepted', JSON.stringify(entered.decision));
   assert.equal(entered.world.state.water![world.character].deadline, 65000);
   const died = elapsed(entered.world, 65000, 5);
@@ -118,10 +86,7 @@ test('authored short water expiry clears active bleed before Chapel return', () 
   assert.equal(died.world.state.bleeds![world.body]!.active, false);
   assert.equal(died.world.state.jobs![bleed.job_id!].status, 'cancelled');
   assert.equal(level(died.world, world.body, hp), 10);
-  assert.equal(
-    died.world.state.containers[world.body],
-    died.world.roomIds[refString({ ...content.entry, key: 'chapel_nave' })],
-  );
+  assert.equal(died.world.state.containers[world.body], world.roomIds[`${prefix}:room/shrine`]);
   const later = elapsed(died.world, 65050, 6);
   assert.equal(later.decision.kind, 'accepted');
   assert.equal(level(later.world, world.body, hp), 10);

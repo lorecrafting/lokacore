@@ -1,0 +1,33 @@
+{
+  "label": "actions.search",
+  "aliases": [
+    "search"
+  ],
+  "target": {
+    "kind": "detail",
+    "room": "den",
+    "detail": "bones"
+  },
+  "priority": 5,
+  "policy": {
+    "policy_version": 1,
+    "root": {
+      "op": "all",
+      "items": []
+    }
+  },
+  "outcomes": {
+    "success": {
+      "sequence": [
+        {
+          "op": "fact.assign",
+          "fact": "searched",
+          "value": true
+        }
+      ],
+      "narration": {
+        "actor": "narration.search"
+      }
+    }
+  }
+}

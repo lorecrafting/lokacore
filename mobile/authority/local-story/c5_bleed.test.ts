@@ -1,50 +1,28 @@
 import assert from 'node:assert/strict';
-import { createHash } from 'node:crypto';
 import { DatabaseSync } from 'node:sqlite';
 import { copyFileSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
-import { encode } from '../../../kernel/ts/src/foundation/canonical.ts';
 import { key } from '../../../kernel/ts/src/foundation/compose.ts';
-import {
-  gameView,
-  loadCartridge,
-  INSTALLED,
-  newWorld,
-  type Cartridge,
-} from '../../../kernel/ts/src/index.ts';
+import { gameView } from '../../../kernel/ts/src/index.ts';
 import { resourceRef } from '../../../kernel/ts/src/mechanics/resource.ts';
 import { refString, type World } from '../../../kernel/ts/src/runtime/decision.ts';
-import { read } from '../../../kernel/ts/test/read.ts';
+import { fixture, sampler } from '../../../kernel/ts/test/c5_bleed_fixture.ts';
 import { elapsedHost } from './__tests__/elapsed-host.test.ts';
 import { openStory } from './authority.ts';
 import type { Db } from './store.ts';
 import { bleedingLine, buttonsOf, group } from '../../app/book/model.ts';
 
 function managedBleedBundle() {
-  const content = structuredClone(
-    read('kernel/ts/test/fixtures/c5-provisional-artifact.json').cartridge,
-  );
-  content.entry.key = 'hound_run';
-  content.manifest.time_policy = { profile: 'real_elapsed', rate: 50 };
-  for (const npc of Object.values(content.npcs) as any[])
-    if (npc.key === 'fen_hound') npc.attack.chance = 100;
-  content.world.combat.player_attack.chance = 0;
-  delete content.world.combat.dodge;
-  const canonical = encode(content),
-    sha256 = createHash('sha256').update(canonical).digest('hex');
-  const bundle = { canonical, sha256 };
-  const loaded = loadCartridge(
-    new TextEncoder().encode(JSON.stringify({ cartridge: content, content_hash: sha256 })),
-    INSTALLED,
-  );
-  if (!loaded.ok) throw new Error(JSON.stringify(loaded));
-  const initial = newWorld(
-    loaded.cartridge as Cartridge,
-    '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never,
-    [1, 2, 3, 4],
-  );
+  const change = (c: any) => {
+    for (const npc of Object.values(c.npcs) as any[])
+      if (npc.key === 'hound') npc.attack.chance = 100;
+    c.world.combat.player_attack.chance = 0;
+    delete c.world.combat.dodge;
+  };
+  const bundle = sampler.bundle(change);
+  const initial = sampler.genesis(change);
   const target = Object.entries(initial.state.created ?? {}).find(
     ([id, e]) =>
       e.origin.kind === 'spawned' &&
@@ -209,59 +187,65 @@ test('refreshed early expiry replays and ticks after two real SQLite cold opens'
 // Breaks: failed or uncertain tick/cure COMMIT leaks half of HP, wound, job or item custody;
 // an idempotent retry spends the bandage twice.
 test('active tick and exact cure reconcile real SQLite COMMIT faults and replay once', (t) => {
-  const artifact = read('kernel/ts/test/fixtures/c5-provisional-artifact.json');
-  const loaded = loadCartridge(new TextEncoder().encode(JSON.stringify(artifact)), INSTALLED);
-  if (!loaded.ok) throw new Error(JSON.stringify(loaded));
-  const base = newWorld(
-    loaded.cartridge as Cartridge,
-    '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never,
-    [1, 2, 3, 4],
-  );
-  const target = Object.entries(base.state.created ?? {}).find(
-    ([, e]) => e.origin.kind === 'spawned' && e.origin.role === 'hound',
-  )![0];
-  const item = base.entityIds['ashmere_missing_child@0.0.35:item/bandage_01'];
-  const wick = base.entityIds['ashmere_missing_child@0.0.35:npc/wick'];
-  const entities = { ...base.entities } as Record<string, any>;
-  for (const [id, e] of Object.entries(base.state.created ?? {}))
-    if (e.origin.kind === 'spawned' && e.origin.role === 'hound')
-      entities[id] = { ...entities[id], attack: { ...entities[id].attack, chance: 100 } };
-  const combat = base.cartridge.world!.combat!;
-  const fresh: World = {
-    ...base,
-    entities,
-    cartridge: {
-      ...base.cartridge,
-      world: {
-        ...base.cartridge.world!,
-        combat: {
-          ...combat,
-          player_attack: { chance: 0, damage_min: 1, damage_max: 1 },
-          dodge: undefined,
+  // Inline teacher: skills-save accepts a skill fact only from a committed skill.acquire choice.
+  const { prefix, ref } = sampler;
+  const teach = (c: any) => {
+    c.lock.capabilities.dialogue = 1;
+    c.manifest.requires.capabilities.dialogue = 1;
+    c.npcs[`${prefix}:npc/teacher`] = {
+      key: 'teacher',
+      keywords: ['teacher'],
+      short: 'npc.hound.short',
+      description: 'npc.hound.description',
+      room_line: 'npc.hound.room',
+      room: ref('room', 'den'),
+    };
+    c.dialogues = {
+      ...c.dialogues,
+      [`${prefix}:dialogue/teach_bandage`]: {
+        key: 'teach_bandage',
+        npc: ref('npc', 'teacher'),
+        label: 'narration.bandaged',
+        prompt: 'narration.bandaged',
+        roles: { teacher: { role: 'npc', npc: ref('npc', 'teacher') } },
+        policy: {
+          policy_version: 1,
+          root: { op: 'fact_compare', fact: ref('fact', 'skill_bandage'), equals: false },
+        },
+        choices: {
+          learn: {
+            label: 'narration.bandaged',
+            narration: 'narration.bandaged',
+            sequence: [{ op: 'skill.acquire', skill: ref('skill', 'bandage') }],
+          },
         },
       },
-    },
+    };
+  };
+  const { world: base } = fixture(100, 10, teach);
+  const target = Object.entries(base.state.created ?? {}).find(
+    ([id, e]) =>
+      e.origin.kind === 'spawned' &&
+      e.origin.role === 'hound' &&
+      base.state.containers[id] === base.state.containers[base.body],
+  )![0];
+  const item = base.entityIds[`${prefix}:item/bandage`];
+  const teacher = base.entityIds[`${prefix}:npc/teacher`];
+  const fresh: World = {
+    ...base,
     state: {
       ...base.state,
       containers: {
         ...base.state.containers,
-        [base.body]: base.state.containers[target],
         [item]: base.body,
-        [wick]: base.state.containers[target],
-      },
-      resources: {
-        ...base.state.resources,
-        [key({ kind: 'resource', entity_id: base.body, resource: resourceRef(base, 'hp') })]: {
-          value: 10,
-          at: 64800,
-        },
+        [teacher]: base.state.containers[target],
       },
     },
   };
   const dir = mkdtempSync(join(tmpdir(), 'loka-c5-cure-'));
   t.after(() => rmSync(dir, { recursive: true }));
   const path = join(dir, 'save.db');
-  const releases = [{ fresh, content_hash: artifact.content_hash }] as const;
+  const releases = [{ fresh, content_hash: sampler.bundle(teach).sha256 }] as const;
   const host = {
     kernel_version: `loka-kernel@${'0'.repeat(40)}`,
     newId: (() => {
@@ -328,7 +312,7 @@ test('active tick and exact cure reconcile real SQLite COMMIT faults and replay 
     target_ids,
     input,
   });
-  assert.equal(a.story.invoke(invoke(1, 'wick_bandage', [wick])).kind, 'saved');
+  assert.equal(a.story.invoke(invoke(1, 'teach_bandage', [teacher])).kind, 'saved');
   const choice = gameView(a.story.world()).choice!;
   assert.equal(
     a.story.invoke(
