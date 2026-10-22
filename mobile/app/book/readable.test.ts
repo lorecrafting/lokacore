@@ -1,24 +1,34 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { mkdtempSync, rmSync, readFileSync } from 'node:fs';
+import { mkdtempSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { elapsedHost, receipts } from '../../authority/local-story/__tests__/elapsed-host.test.ts';
 import { localSession } from '../../authority/local-story/session.ts';
 import { group, intentOf } from './model.ts';
 import { presenter } from './presenter.ts';
+import {
+  bundle as codexBundle,
+  DESK_NOTE,
+  ids,
+  notices,
+  PLAQUE,
+} from '../../authority/local-story/__tests__/priory-fixture.ts';
 
-const bundle = JSON.parse(
-  readFileSync(
-    new URL('../../../protocol/fixtures/missing_child_v004_hash.json', import.meta.url),
-    'utf8',
-  ),
-);
-// Independent Python IdSource literals for the harness context and Missing Child release.
-const notice = '251e7a71-b5ad-8d22-858b-533e52cc5415';
-const board = 'e368b8b9-c4a5-8d0e-82a0-da17e2d59fe2';
-const noticeBody = 'Keep the landing clear. Tie boats to the mooring post.';
-const boardBody = 'Lost a tin whistle? Ask at the Drowned Lantern.';
+const bundle = codexBundle(notices);
+const id = ids(bundle.value);
+const notice = id['detail/hall/plaque'];
+const board = id['detail/study/desk'];
+const noticeBody = PLAQUE;
+const boardBody = DESK_NOTE;
+// Real elapsed time at 50 game seconds per wall second from 64800 (inline, no calendar in codex).
+const timed = codexBundle((c) => {
+  notices(c);
+  c.calendar = { start: 64800 };
+  c.manifest.time_policy = { profile: 'real_elapsed', rate: 50 };
+  c.manifest.requires.capabilities.calendar = 1;
+  c.lock.capabilities.calendar = 1;
+});
 
 function preview(path = ':memory:', bundled = bundle) {
   const a = elapsedHost(path, { wall: 10000, mono: 0 }, bundled);
@@ -40,8 +50,8 @@ test('production Read targets retain confirmed detail messages without changing 
   const a = preview();
   t.after(() => a.sql.close());
   for (const [label, target, body] of [
-    ['Read the notice', notice, noticeBody],
-    ['Read Lost tin whistle', board, boardBody],
+    ['Read the plaque', notice, noticeBody],
+    ['Read the desk note', board, boardBody],
   ]) {
     const before = a.state();
     for (let repetition = 0; repetition < 2; repetition++) {
@@ -73,7 +83,7 @@ test('production Read targets retain confirmed detail messages without changing 
       assert.equal(a.book.screen().log.includes(body), false);
       assert.deepEqual(a.state(), before);
     }
-    if (target === notice) a.tap('Go north', 'Go east');
+    if (target === notice) a.tap('Go west');
   }
 });
 
@@ -88,7 +98,7 @@ test('uncertain Read recovers its one receipt and narration, then reads again af
   const before = a.state();
   const pin = a.sql.prepare('SELECT pin FROM save').get()!.pin;
   assert.equal(JSON.parse(pin as string).content_hash, bundle.sha256);
-  const control = a.button('Read the notice');
+  const control = a.button('Read the plaque');
   const token = control.token;
   a.fault.kind = 'lost';
   a.fault.armed = true;
@@ -119,8 +129,8 @@ test('uncertain Read recovers its one receipt and narration, then reads again af
   assert.deepEqual(a.state(), before);
   assert.deepEqual(a.book.screen().detail(notice), [noticeBody]);
   assert.deepEqual(a.book.screen().log, []);
-  assert.deepEqual(a.button('Read the notice').target_ids, [notice]);
-  a.tap('Read the notice');
+  assert.deepEqual(a.button('Read the plaque').target_ids, [notice]);
+  a.tap('Read the plaque');
   assert.deepEqual(a.book.screen().detail(notice), [noticeBody, noticeBody]);
   assert.deepEqual(a.book.screen().log, []);
   assert.equal(receipts(a.sql), 2);
@@ -132,9 +142,9 @@ test('uncertain Read recovers its one receipt and narration, then reads again af
 test('stale and refused Read retain their target and never narrate an unread body', (t) => {
   const a = preview();
   t.after(() => a.sql.close());
-  const stale = a.button('Read the notice');
+  const stale = a.button('Read the plaque');
   const captured = intentOf(stale);
-  a.tap('Go north', 'Go east');
+  a.tap('Go west');
   const before = a.state();
   const count = receipts(a.sql);
   a.book.press(stale);
@@ -142,7 +152,7 @@ test('stale and refused Read retain their target and never narrate an unread bod
   assert.deepEqual(intentOf(stale), captured);
   assert.equal(a.book.screen().log.at(-1), 'The page had changed; here it is again.');
   a.book.press({
-    ...a.button('Read Lost tin whistle'),
+    ...a.button('Read the desk note'),
     target_ids: [notice],
   });
   assert.equal(receipts(a.sql), count + 1);
@@ -159,13 +169,13 @@ test('stale and refused Read retain their target and never narrate an unread bod
 // Breaks: a real elapsed pulse strands a held Read, reading adds its own duration,
 // or dropping the captured token bypasses authority freshness checks.
 test('held Read survives the authored 68350 to 68400 pulse with authority freshness intact', (t) => {
-  const a = preview();
+  const a = preview(':memory:', timed);
   t.after(() => a.sql.close());
   a.clock.wall += 71000;
   a.clock.mono += 71000;
   assert.equal(a.game.pulse().kind, 'ready');
   assert.equal(a.game.view().view.time, 68350);
-  const control = a.button('Read the notice');
+  const control = a.button('Read the plaque');
   const token = control.token;
   const count = receipts(a.sql);
   a.clock.wall += 1000;
@@ -196,7 +206,7 @@ test('cold reopen refuses a committed Read whose stored target is malformed', (t
   ] as const) {
     const path = join(dir, name + '.db');
     const a = preview(path);
-    a.tap('Read the notice');
+    a.tap('Read the plaque');
     a.sql.prepare('UPDATE receipt SET command = ?').run(JSON.stringify(command));
     a.sql.close();
     assert.throws(
@@ -209,19 +219,17 @@ test('cold reopen refuses a committed Read whose stored target is malformed', (t
 // Break: invalid stored command JSON escapes typed corruption/Start over, or handling it
 // silently replaces an unavailable older pin instead of preserving it until explicit reset.
 test('invalid Read JSON offers in-place Start over and leaves older pins explicitly refused', (t) => {
-  const older = JSON.parse(
-    readFileSync(
-      new URL('../../../protocol/fixtures/missing_child_v003_hash.json', import.meta.url),
-      'utf8',
-    ),
-  );
+  const older = codexBundle((c) => {
+    notices(c);
+    c.text['readable.desk'] = 'An older note.';
+  });
   for (const [bundled, refusal] of [
     [bundle, 'save_corrupt'],
     [older, 'pinned_release_missing'],
   ]) {
     const a = preview(':memory:', bundled);
     t.after(() => a.sql.close());
-    a.tap('Read the notice');
+    a.tap('Read the plaque');
     a.sql.prepare('UPDATE receipt SET command = ?').run('{broken');
     a.sql.exec("CREATE TABLE retained(marker TEXT); INSERT INTO retained VALUES ('keep')");
     const pin = a.sql.prepare('SELECT pin FROM save').get()!.pin;
@@ -241,7 +249,7 @@ test('invalid Read JSON offers in-place Start over and leaves older pins explici
     assert.equal(a.sql.prepare('SELECT marker FROM retained').get()!.marker, 'keep');
     assert.equal(
       JSON.parse(a.sql.prepare('SELECT pin FROM save').get()!.pin as string).content_hash,
-      'e8ea74aa3fc1cf9f26ae2349c4a4d2a99d54d69a636c24745f03670ddf2eb43f',
+      bundle.sha256,
     );
   }
 });
