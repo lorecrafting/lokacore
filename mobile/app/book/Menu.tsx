@@ -34,7 +34,7 @@ export function ContentsPage(p: { open: (section: Section) => void; world: () =>
 type Screen = ReturnType<ReturnType<typeof presenter>['screen']>;
 
 // The refusal notes are one block (BOOK-UI-COMPONENTS.md, Page: a run of rows of one kind).
-const notes = (thing: Thing | undefined, text: Say, held?: string) => {
+const notes = (thing: Thing | undefined, label: Say, held?: string) => {
   const shown =
     thing?.actions.flatMap((a, i, all) =>
       !a.available &&
@@ -49,7 +49,7 @@ const notes = (thing: Thing | undefined, text: Say, held?: string) => {
         {shown.map((a) => (
           <ActionCard
             key={a.action_key}
-            label={held && commandOf(a) === 'take' ? LABEL.lift : text(a.label)} // E14, refused too
+            label={held && commandOf(a) === 'take' ? LABEL.lift : label(a.label)} // E14, refused too
             reason={`${a.word}.`}
           />
         ))}
@@ -80,6 +80,7 @@ export function ThingPage(p: {
   thing?: Thing;
   holder?: string; // a living NPC holding it (pass-1 E14)
   text: Say;
+  label: Say; // a refused action reads the same word as an offered one
   actions: Button[];
   log: DetailLine[];
   press: (b: Button) => void;
@@ -88,7 +89,7 @@ export function ThingPage(p: {
   leave: () => void;
   back?: () => void;
 }) {
-  const refusals = notes(p.thing, p.text, p.holder);
+  const refusals = notes(p.thing, p.label, p.holder);
   return (
     <Page
       title={p.thing ? cap(p.text(p.thing.name)) : 'Item'}
@@ -132,6 +133,7 @@ export function Item(p: {
       thing={thing}
       holder={held}
       text={p.screen.text}
+      label={p.screen.label}
       actions={p.g
         .on(p.id)
         .map((b) => (held && commandOf(b) === 'take' ? { ...b, label: LABEL.lift } : b))}

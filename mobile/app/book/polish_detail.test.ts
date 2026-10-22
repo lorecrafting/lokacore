@@ -370,8 +370,9 @@ test('self-luminous Notice invokes its projected targetless recipe and retains t
 });
 
 // Breaks: a readable whose read text is its own description (Chapter 1's well) shows that
-// sentence twice on its page, or a different read line is dropped with it.
-test('a notice page shows its description once and every other read line', async () => {
+// sentence twice on its page, or a different read line is dropped with it, or a body read again
+// (each entry reads, so Map Read then opening the signpost) shows twice (loka-x6t.81).
+test('a notice page shows its description once and every other read line once', async () => {
   const { NoticePage } = await import('./notices.tsx');
   const well = 'A rope and bucket hang over clear, cold well water.';
   const shown = nodes(
@@ -379,7 +380,7 @@ test('a notice page shows its description once and every other read line', async
       screen: {
         view: { notices: [{ id: 'well', title: 'The well', description: well }] },
         text: (key: string) => key,
-        detail: () => [well, 'You read it twice.'],
+        detail: () => [well, 'You read it twice.', 'You read it twice.'],
       },
       page: { kind: 'notice', id: 'well' },
       open: () => {},
