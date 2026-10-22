@@ -148,3 +148,41 @@ export function run(w: World, name: string, ordinal = 1, change: object = {}) {
     s.action,
   );
 }
+// A world whose only history-bearing content is the room-rental service: no liquids, vessels, quests,
+// exchanges or patrols, so the service guard alone must refuse an unearned entitlement.
+export function onlyService(c: any) {
+  const keep = (o: any, names: string[]) =>
+    Object.fromEntries(Object.entries<any>(o).filter(([, v]) => names.includes(v.key)));
+  for (const section of [
+    'quests',
+    'reactions',
+    'dialogues',
+    'story_points',
+    'scenes',
+    'skills',
+    'topics',
+    'liquids',
+    'populations',
+    'population_bundles',
+    'barriers',
+    'attributes',
+    'recipes',
+    'policies',
+    'replenish',
+    'statuses',
+    'items',
+  ])
+    c[section] = {};
+  for (const section of ['alternates', 'speech', 'blueprints', 'map_positions']) delete c[section];
+  c.world = { carry: { max_grams: 12000 } };
+  c.facts = keep(c.facts, ['position', 'bed_paid']);
+  c.actions = keep(c.actions, ['rent_kitchen_room']);
+  c.services = keep(c.services, ['kitchen_room']);
+  c.resources = keep(c.resources, ['hp', 'mv', 'pennies']);
+  const cook = c.npcs[rk('npc', 'cook')];
+  cook.services = [ref('service', 'kitchen_room')];
+  cook.resource_starts = { pennies: 10 };
+  c.npcs = { [rk('npc', 'cook')]: cook };
+  const kitchen = c.rooms[rk('room', 'farm_kitchen')];
+  c.rooms = { [rk('room', 'farm_kitchen')]: { ...kitchen, exits: {} } };
+}

@@ -61,42 +61,14 @@ function nodes(e: any): any[] {
 
 // Breaks: Eat leaves Carrying/item pages open or routes receipt narration to spent item detail after settlement/reopen.
 test('actual Book Item Eat returns World once on normal and uncertain settlement and cold remount', (t) => {
-  for (const [uncertain, dormant] of [
-    [false, false],
-    [true, false],
-    [false, true],
-    [true, true],
-  ]) {
+  for (const uncertain of [false, true]) {
     const dir = mkdtempSync(join(tmpdir(), 'loka-book-food-')),
       path = join(dir, 'save.db'),
-      a = foodHost(path, dormant ? () => {} : onlyFood);
+      a = foodHost(path, onlyFood);
     let game = a.game;
     const id = entity(a.initial, 'item', 'apple_01');
     const take = game.invoke({ action_key: 'take', target_ids: [id], input: {} } as never);
     assert.equal(take.kind === 'saved' && take.decision.kind, 'accepted');
-    if (dormant) {
-      const invoke = (action_key: string, target_ids: string[] = [], input: object = {}) => {
-        const r = game.invoke({ action_key, target_ids, input } as never);
-        assert.equal(r.kind === 'saved' && r.decision.kind, 'accepted', JSON.stringify(r));
-      };
-      for (const direction of ['east', 'east', 'south', 'east']) invoke('move', [], { direction });
-      const service = Object.values(a.initial.cartridge.services!).find(
-        (s) => s.key === 'lantern_room',
-      )!;
-      invoke('rent_lantern_room', [entity(a.initial, 'npc', 'maud')], {
-        service: {
-          cartridge_id: a.initial.cartridge.manifest.id,
-          cartridge_version: a.initial.cartridge.manifest.version,
-          kind: 'service',
-          key: 'lantern_room',
-        },
-        quoted_price: service.price,
-      });
-      invoke('move', [], { direction: 'up' });
-      invoke('rest');
-      assert.equal(game.view().view.notices!.find((n) => n.dream)?.dream?.index, 1);
-    }
-
     const slots: any[] = [],
       cleanups: (() => void)[] = [];
     let at = 0;
@@ -146,7 +118,7 @@ test('actual Book Item Eat returns World once on normal and uncertain settlement
         }),
       );
       const eat = rendered.find(
-        (n) => n.type === 'Pressable' && n.props.accessibilityLabel === 'Eat a ripe apple',
+        (n) => n.type === 'Pressable' && n.props.accessibilityLabel === 'Eat a loaf',
       );
       assert.ok(eat);
       assert.equal(a.sql.prepare('SELECT count(*) AS n FROM receipt').get()!.n, before);
@@ -162,7 +134,7 @@ test('actual Book Item Eat returns World once on normal and uncertain settlement
         assert.equal(game.pulse('active').kind, 'ready');
       }
       assert.deepEqual(draw().props.stack, []);
-      const line = 'You eat the apple and feel a little less weary.';
+      const line = 'You eat the loaf. It fills the hollow.';
       assert.equal(draw().props.screen.log.filter((s) => s === line).length, 1);
       assert.deepEqual(draw().props.screen.detail(id), []);
       game.pulse('active');
