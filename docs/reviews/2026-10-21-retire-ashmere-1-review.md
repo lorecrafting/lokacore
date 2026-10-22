@@ -57,3 +57,25 @@
 4. **nit**, `docs/system/owner-rules.md:38`.
    - **The problem:** "Chapter 1 is a frozen regression fixture until the toolbox showcase covers its play families" now reads against the new retire rule.
    - **Fix:** link the two rules or reword one.
+
+## Second opinion (save risk), commit `1a9c0961abd972b6623aa7cc80d1efd788953603`
+
+- Reviewer: anthropic/claude-opus-5-5, fresh, authored none of the work; findings formed before reading the record above.
+- Scope: save naming, open/refuse/Start over, web storage, release guard, author-preview names ([storage lessons](../lessons/storage.md), [save.md opening a story](../system/save.md#opening-a-story)).
+- **Verdict: CHANGES REQUIRED** (one blocker, web only).
+
+### Checks run
+
+- `chapter.test.ts` and `metro.test.ts` at the head: 7 pass.
+- Mutant S1, release name `slice(0, 15)` (`mobile/app/App.tsx:49`): killed at `chapter.test.ts:32`.
+- Mutant S2, release name uses the author-preview prefix `loka-dev-`: killed.
+- Kept: release guard `App.tsx:46`; `loka-dev-` and `loka-showcase-` cannot collide (distinct prefixes); the name is 34 bytes, under the VFS 512-byte path limit (`expo-sqlite/web/wa-sqlite/AccessHandlePoolVFS.js:9,385`); characters are hex and `-`, as the author preview already uses.
+- The old file is kept and that is stated (`docs/system/cartridge.md:32-35`).
+
+### Findings
+
+1. **blocker**, `mobile/app/App.tsx:49` with `:207-215` (source-read in expo-sqlite 57.0.3, not reproduced in a browser).
+   - The web save uses wa-sqlite `AccessHandlePoolVFS`: a fixed pool of 6 OPFS handles per origin (`AccessHandlePoolVFS.js:25`, capacity added only when it is 0, `:233-234`; `worker.ts` never calls `addCapacity`). Each database file keeps one handle for good; a rollback journal (`SQLITE_OPEN_MAIN_JOURNAL`, `:20`) needs one more during every write. A full pool gives `cannot create file` → `SQLITE_CANTOPEN` (`:79-86`).
+   - Scenario: the owner's origin `localhost:19006` (also `npm run author`, `preview-server.cjs:8`) already holds `ExpoSQLiteStorage` (hints), `loka-ashmere-missing-child.db` and any `loka-dev-*`. Each showcase content merge adds a `loka-showcase-*` file that nothing removes. After about three merges the new save cannot be created or journalled; `useWebSession`'s catch builds a session that throws; the error is not `corrupt()` (`mobile/authority/local-story/store.ts:185`) and has no `newGame`, so `startOver` is false (`session.ts:262-270`). The Book shows a save error with no way out; the only recovery, clearing site data, deletes every save the slice promises to keep.
+   - Question for the PM (trade-off against the brief's premise): a fixed web name (for example `loka-showcase.db`) uses one handle; a content change then meets `pinned_release_missing`, which offers Start over and keeps the file (`authority.ts:97-98`, [save.md](../system/save.md#opening-a-story) row `pinned_release_missing`), the path `cartridge.md:36` and `web-preview.md:15-16` already describe. Native has no pool limit.
+2. **nit**, `docs/web-preview.md:15-16` and `docs/system/cartridge.md:36-37`. Both say a changed chapter pin meets explicit Start over; with hash-keyed names a reload silently opens a fresh game (old file kept, unreachable from the UI). Scenario: the owner reloads mid-game after a merge and expects the refusal screen, gets a new game. Reword or drop with finding 1's decision.
