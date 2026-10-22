@@ -1,4 +1,4 @@
-// Note: a dim body line that is not pressable (BOOK-UI-COMPONENTS.md, Note).
+// Note: a dim body line that is not pressable (Note's doc comment).
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { Note } from '../book/lines.tsx';
 

@@ -159,7 +159,7 @@ test('combat page lists offered controls vertically below history in one scroll'
   );
 });
 
-// Breaks: Combat drops the running head (BOOK-UI-COMPONENTS.md, Page), or a Journal page left on the
+// Breaks: Combat drops the running head (Page's doc comment), or a Journal page left on the
 // stack under the fight hides it.
 test('combat shows the running head, even over a Journal page', () => {
   const head = 'Find the lantern.';

@@ -9,22 +9,22 @@ a claim that every existing page has finished visual polish.
 
 For every agent writing `mobile/app/book/` or its stories ([audit](reviews/2026-10-09-ui-architecture-audit.md)); [where each fact lives](#where-each-fact-lives) says where values, looks and behaviour go.
 
-1. Build from the [catalogue](#component-catalogue); a new component needs a real consumer and its row in the same slice.
-2. A state the catalogue lists is a prop on that row's component, never a sibling the page draws: an unavailable action is `<ActionCard label reason />`, a page's empty state or "save not confirmed" is a `Note`.
+1. Build from the [catalogue](#component-catalogue); a new component needs a real consumer and its doc comment and index line in the same slice.
+2. A state a component's doc comment lists is a prop on that component, never a sibling the page draws: an unavailable action is `<ActionCard label reason />`, a page's empty state or "save not confirmed" is a `Note`.
 3. Control, section and dialog words come from `LABEL` ([`labels.ts`](../mobile/app/book/labels.ts)) in components, tests, the walkthrough and story routes; authored words come from the cartridge through the presenter, never from the Book.
 4. Every style value is a token: a palette role or a `type`, `space`, `size`, `radius` or `opacity` entry (weight, italic and underline included); no raw number, colour, font or percentage.
-5. A story renders the real component, one per catalogue state, draws nothing by hand, and asserts any behaviour that matters (a tap, a refusal) in `play`.
+5. A story renders the real component, one per state its doc comment lists, draws nothing by hand, and asserts any behaviour that matters (a tap, a refusal) in `play`.
 6. `ast-grep scan` (the `mobile-book-*` rules) and `catalogue.test.ts` pass before handoff; a new rule has a red control.
 
 ## Where each fact lives
 
 - **Values** (colours, type, space, size, radius, opacity, motion, sound): [`tokens.ts`](../mobile/app/book/tokens.ts) and nowhere else; the [Tokens story](../mobile/app/stories/Tokens.stories.tsx) renders it live.
-- **Look and states** of every component, and the token roles: this page, one row per component.
+- **Use, rules and states** of every component: its doc comment, on the export in `mobile/app/book/` ([index](#component-catalogue)). Cross-component guidance and the token roles: this page.
 - **Interaction** (what shows when, what a tap does, returns, freshness): [Book UI](system/book-ui.md). It names no token, colour or size.
-- **Working examples:** `npm run storybook` in `mobile/app` ([how](web-preview.md#storybook)); one `stories/<Row>.stories.tsx` per row, one story per state. A story carries no rule beyond a one-line link to its row.
+- **Working examples:** `npm run storybook` in `mobile/app` ([how](web-preview.md#storybook)); the `Story:` file a doc comment names, one story per state. A story carries no rule beyond a one-line link to its component.
 - **References:** the two mocks in [docs/design](design/README.md); the owner's rulings in [decisions](decisions/README.md).
 - Every pressable's box is at least `size.touch` in both axes. A text pressable (`Tap`: entity lines, verb lines, the room title, the status position) takes no visible height for it: its box is `minHeight: size.touch` with a vertical padding of its bleed (below) and an equal negative margin, so the shown line keeps the page rhythm and the hit area bleeds onto the paper around it. The bleed is a target only where nothing paints over it: whatever renders later (the next line in a run, the scroll area under the fixed title, the row under the status position, the block under a Worn item or the water Surface line) takes the overlap. A Tap's guaranteed target is its shown box plus its uncovered bleed: a body line inside a run its scaled `type.body.lineHeight` (28 px at Standard), a line with one covered side that plus one bleed (36 px at Standard: a run's end, a Worn item, the Surface line, the status position), the room title 40 px, the full `size.touch` where the paper around it is free; never under WCAG 2.5.8's 24 px. A non-pressable line touching a Tap (a Worn slot label) lends it the bleed: a tap there opens the nearest line. Cards, tiles and Controls (`size.card`, `size.touch` with their own padding) keep their height visible; only `Tap` bleeds. Every text role reads at 4.5:1 on `bg` and `card` in all four palettes. Every control's accessible name follows the [label-in-name rule](system/book-ui.md#minimap-map-and-presentation-controls): its shown text first, then its suffix.
-- A change lands in one place: a value in tokens, a rule here, a behaviour in Book UI; code and its story follow in the same slice.
+- A change lands in one place: a value in tokens, a component rule in its doc comment, a cross-component rule here, a behaviour in Book UI; code and its story follow in the same slice.
 
 ## Grammar
 
@@ -122,46 +122,84 @@ off, consolidated; the [Tokens story](../mobile/app/stories/Tokens.stories.tsx) 
 
 ## Component catalogue
 
-Each component lists its form, states, rules and story. A new mechanic reuses one of
-these; a new component needs a real consumer and its entry here in the same slice.
-"Story" names its story file; "Polish" names what the polish phase changes.
+Each exported Book component carries its spec in a doc comment on its export: a one-line form,
+then `Use:` (when it is the right piece), `Rules:` (only what the code cannot show: never wraps,
+the screen-reader name, its consumers), `States:` (one story per state) and `Story:` (its primary
+story file). `Use:` and `Story:` are required; `Rules:` and `States:` appear when they say
+something. Behaviour stays in [Book UI](system/book-ui.md), which a comment links and never
+copies. This index has one line per export; [`catalogue.test.ts`](../mobile/app/catalogue.test.ts)
+fails when a comment or a line is missing or the two disagree. A new mechanic reuses one of
+these; a new component needs a real consumer, its comment and its line here in the same slice.
 
-| Component | Form and rules | States | Story |
-|---|---|---|---|
-| Page | One shell for every page: `space.page` margin, blocks `space.block` apart (a run of rows of one kind is one block: entity lines, a room's exit warnings and its sense cues touching, log lines and cards `space.sm` apart, the mock's `.ents`, `.ev` and `.toc`; a heading is its own block; Combat's opponent lines (name — band phrase; none of your own condition lines) are one block of touching lines ([rule](system/book-ui.md#live-combat-response-m6-a)), then the log, then the cards); `type.pageTitle` header in `fg` with the arriving focus (a page without a title gives its first block the focus); a section heading (Inside, Held, Worn, Where, the Character page's [profession titles](system/book-ui.md#skill-tree-details)) is `SectionTitle`, `type.sectionTitle` `fg`, a header. The Room's title is the fixed variant: `type.roomTitle`, centred, `space.xl` above, `space.md` plus `space.xs` (title padding, scroll top padding) to the first block, outside the scroll; only it is pressable (the Look tap). A page that grows at the end (dialogue) scrolls to its end. A page with no game behind it (the save error) is the centred variant: its blocks sit in the vertical middle of the paper. The running head is its own row below. | scrolling title, fixed title, no title, centred | `stories/Page.stories.tsx` |
-| Running head | Drawn by the body above the Page, not by the Page: above every page, World, details, sections, scene, chapter title and combat included, except Journal (which lists the same text): the projected journal text (no presenter copy) of the first quest in journal order that is `active` or `objectives_complete` and has journal text; none when no quest qualifies. `type.runningHead` (scaled by the [Reading size](#design-tokens)) `dim`, not pressable, wrapping rather than cutting authored words. | one line; long (wraps); none | `stories/Page.stories.tsx` |
-| PageFoot | The page's local returns, Controls centred in a row `space.lg` apart (wrapping onto a second row `space.sm` below when the Reading size needs it) under a `line` hairline, `space.md` above, `space.xl` beside and below; outside the scroll, above the status line. | one return; two (nested item) | `stories/PageFoot.stories.tsx` |
-| Room page | The Page's fixed title (the Look tap, per the [room rule](system/book-ui.md#world-and-status-entry); named `<title>, look`); then the prose in `type.body` as one block, a new paragraph at every blank line of the authored text, paragraphs `space.lg` apart (the mock's `.prose p`); its [asides](system/book-ui.md#aside-details) as one block of Notes; its exit warnings as one block of notes, entity lines, the people's asides as one block of Notes, its [sense cues](system/book-ui.md#sense-cues-details) as one block of Notes, the drawn [storylet's](system/book-ui.md#storylet-card-details) Action card as its own block, verb lines (available, then unavailable), a closed or locked exit's door Action cards ([rule](system/book-ui.md#world-and-status-entry)), the log and, last, the [Word block](system/book-ui.md#word-bar). | title tappable or plain; asides; sense cues | `stories/RoomPage.stories.tsx` |
-| Notice page | A notice or board detail in the [detail-page order](system/book-ui.md#detail-page-order), built from the Page, Entity line, Log line and Action card ([rules](system/book-ui.md#notice-board-details)). | notice with Read; dream available; dream acknowledged | `stories/NoticePage.stories.tsx` |
-| NPC page | A person's detail and conversation in the detail-page order ([rules](system/book-ui.md#npc-dialogue-and-action-details)): choices and services as Action cards, the conversation log, its Controls in the PageFoot. | choice; shop; services; closed conversation | `stories/NpcPage.stories.tsx` |
-| Item page | An item's detail in the detail-page order ([rules](system/book-ui.md#item-details-and-takedrop)): projected state (fuel, contents) as Notes and Entity lines, options as Action cards. | plain; container with Inside; fuel; too heavy | `stories/ItemPage.stories.tsx` |
-| Map page | The full map and Where ([rules](system/book-ui.md#minimap-map-and-presentation-controls)), drawn with the Footer's minimap roles. | discovered, two levels; barred exits; Where | `stories/MapPage.stories.tsx` |
-| Combat page | The combat foreground ([rules](system/book-ui.md#live-combat-response-m6-a)): opponent lines, the isolated log, then the response cards; no PageFoot. | one foe; pack; bleeding | `stories/CombatPage.stories.tsx` |
-| Recovery pages | The save-error, fault, pending and catching-up pages ([rules](system/book-ui.md#chapters-scenes-and-recovery)): the Page's centred variant with Notes and Controls (Start over). | save error (release, format, corrupt, locked); fault; pending; catching up | `stories/RecoveryPages.stories.tsx` |
-| Fixture link | Inline in prose; ink colour with a dotted underline at the platform's thickness (solid where the platform has no dotted line; no thickness token, since no platform's `Text` sets one). | linked, or plain prose when no detail is projected | none until a projection consumer |
-| Entity line | MUD line: the name in `type.named` (weight 500 with a dotted underline; solid where the platform has none), then the rest ("is here."). The whole line is the touch target; its visible height is the text's own (`type.body` line, then the note), the 44 px hit area is `Tap`'s bleed, so consecutive lines touch at the body line pitch and the Page's `space.block` alone separates a run from a paragraph. A carried-item note follows in `dim`. Also every list row that opens a detail: held and worn items, Inside, notices, boards, Contents entries. Its name is the shown text in order (name, rest, note) then ", open", on every row. | none | `stories/EntityLine.stories.tsx` |
-| Note | A page line that is not pressable and carries no action: `type.body` in `dim`, one string. An aside and a sense cue are each a Note. Every empty state ("Nothing to do here.", "You are carrying nothing.", an empty Worn slot) and a page's "save not confirmed" (Ancestry) is a Note, never a `Text` the page styles; an empty-state Note never shares a page with an unavailable action line (that line is the state). A priced page's balance (**You have 10p.**) and a held item's holder (**The jailer is holding it.**) are Notes ([rules](system/book-ui.md#npc-dialogue-and-action-details)). The status line's own pending word is on its row. | empty state; save not confirmed; balance; holder | `stories/Note.stories.tsx` |
-| Verb line | A room's offered place action: `type.body` with `type.italic` in `action`, in the room's list after the entity lines. | available; unavailable: the Action card's unavailable form (`ActionCard label reason`, `Chop wood: too heavy to carry`), after the available lines, never dropped | `stories/VerbLine.stories.tsx` |
-| Action card | A detail page's offered action or dialogue choice, the World page's one drawn [storylet](system/book-ui.md#storylet-card-details), and the Character page's `Raise STR`-style cards, one per authored attribute while `raise_attribute` is offered ([levelling details](system/book-ui.md#levelling-details)) (never an accent text link): `card` fill, `size.rule` `line` border, `radius.card`, minimum height `size.card`, label `type.body` `fg`, `space.md` vertical and `space.lg` horizontal padding. The card carries no outer margin: cards stack in one list `space.sm` apart (the list's `gap`), and that list is one block of its page, so a card never adds to the page's block gap. | available; unavailable (no Button): `ActionCard label reason`, a non-action line in the Note's look reading `label: reason` (a service's price and benefit stay inside the label's parentheses: `Room (4p; up to +20 MV, capped): no pennies`), or the label alone when no reason is projected, per the [detail rules](system/book-ui.md#notice-board-details); never a disabled card, never a note the page draws | `stories/ActionCard.stories.tsx` |
-| Continue button | A scene or chapter continuation: `fg` fill, `bg` label in `type.control` centred, `radius.card`, minimum height `size.card`, `space.md` vertical and `space.lg` horizontal padding (the card's), so the label never touches the fill's edge when the button is not stretched. | available | `stories/ContinueButton.stories.tsx` |
-| Chapter card | The chapter title page's one block, centred on the paper (the Page's centred variant): the chapter label ("Chapter one", a presenter word from the chapter index) in `type.chapterLabel` `dim`, the title in `type.chapterTitle` `fg`; label and title together are the page header, one accessible node named by its visible text in order ("Chapter one <title>"), with the arriving focus; then a `dim` rule `size.chapterRule` wide and `size.rule` high; label, title and rule `space.sm` apart, the rule `space.sm` further; the mock's `.chapter` without its fleuron, subtitle and auto-dismiss. The Continue button follows as the next block, centred, not stretched. Nothing on it is pressable but Continue. | shown | `stories/ChapterPages.stories.tsx` |
-| Control | Local navigation that is not an offered action (Leave, Leave the conversation, Back to World, Back to board, Back to container, Back to map, Close, Resume dream, Continue conversation, Got it, Start over, Backspace, Clear): `type.control` in `fg`, at least `size.touch` both ways, `space.md` horizontal padding, so two Controls side by side (Backspace, Clear) never run together. Start over is a Control wherever it appears (Settings, a fault, the save-error screen): its confirmation carries the weight, never `action` or `danger`. | enabled; disabled: `dim` at `opacity.disabled` | `stories/Control.stories.tsx` |
-| Log line | `type.log`, one `Text` per line, one line per narration record (never records joined into one). Narration in ink; the Book's own speech echo (`You say "ware".`) in ink like narration; a system line (Journal updated, a detail note) in `dim` italic; a refused line starts with a reason tag (`type.tag`, `danger`, `size.rule` border, `radius.tag`, `space.xs` horizontal padding): always the reason word, even when the cartridge sentence beside it repeats it (the tag is the scannable kind, the sentence the authored words; the mock's `.why`). The tag is its own `Text` beside the sentence's `Text` in one row (`space.xs` apart, baseline-aligned, the sentence wrapping beside the tag), never nested inside it, so iOS and Android draw its border too. A speech line (a `size.speechBar` `line` bar, `space.lg` indent, the speaker in `type.speaker`) waits until the log projects a speaker. | none | `stories/LogLines.stories.tsx` |
-| Away recap | The World page's first block after an absence ([rule](system/book-ui.md#away-recap)): a `Tap` heading (`LABEL.awayRecap`) in `type.log` `dim` italic, like a system log line, named with ", show" or ", hide"; open, one `type.log` `fg` line per group, `space.sm` apart, a count " (N times)" after a line seen more than once. Props: `heading` (default `LABEL.awayRecap`; the Chronicle's "Day N"), `open` (starts open), `milestone` (a line in `type.body` `fg`, `prose(c)`, its accessible name "<line>, story point"). Wording pending designer (`loka-x6t.14`). | collapsed; open; milestone | `stories/AwayRecap.stories.tsx` |
-| Chronicle | The Journal's last section ([rule](system/book-ui.md#chronicle-details)): a `SectionTitle` (`LABEL.chronicle`), then per day a `Tap` heading "Day N" (`LABEL.day`) in `type.log` `dim` italic, named with ", show" or ", hide", the latest day open; open, one line per group with " (N times)" after a repeat: `type.log` `fg` for ordinary lines, the Away recap's milestone state (`type.body` `fg`, named "<line>, story point") for a milestone's. Approved by the designer (`loka-kgd.143`). | one day; two days, earlier collapsed, a milestone | `stories/SectionPages.stories.tsx` |
-| Footer | Two `line` hairlines `size.footerRule` wide flanking the minimap (`size.minimap` at rest, zoom per [minimap rules](system/book-ui.md#minimap-map-and-presentation-controls)), `motion.quick`. The footer block sits under a `line` hairline; `space.sm` between rule, map and rule. The minimap's geometry is a drawing, its colours are roles: a path and its ring in `dim`, the lit path and its ring in `fg`, your dot in `action` (the mock's `.mm-cur`), a barred way (stub, tick, stair node) in `danger`; so at night the exits stay quieter than you. | at rest, held | `stories/Footer.stories.tsx` |
-| Tip | First-run tip: an `fg` bubble (`radius.card`, `space.md`/`space.lg` padding, centred, within `space.page` of each edge) with `bg` text in `type.small` and a Got it Control drawn on ink (label `bg`). | shown | `stories/Tip.stories.tsx` |
-| Status line | One centred line in `type.small` `dim`, never wrapping, items joined by " · " (groups `space.sm` apart, each " · " belonging to the item after it): the sky glyph, position and bleeding, then the pools; conditions show in the Status icon row above it ([rule](system/book-ui.md#conditions-details)). The sky glyph is the sun by solar phase while it is up (`dawn` ☼, `day` ☀, `dusk` ☉) and the moon by lunar phase at `night` (`new` ●, `waxing_crescent` ☽, `first_quarter` and `waxing_gibbous` ◐, `full` ○, `waning_gibbous` and `last_quarter` ◑, `waning_crescent` ☾; no lunar phase ☾): ink is the moon's dark side, waxing lit on the right. Any other phase, or no calendar, shows the earthly branch. The glyph's accessible label is the time in words (`day 3, 18:05, dusk, waxing crescent moon`); day and hour are not shown. With an authored weather table the day's weather follows the glyph as a word in the same item (`○ rain`) and the label adds weather, season and tide (`..., full moon, rain, autumn, high tide`). Only hp, ma and mv show, separated by an en space (U+2002, the mock's `&ensp;`) as text, never a margin, so the shown words lead the button's name unchanged; pennies and any other count stay off the line ([status rule](system/book-ui.md#world-and-status-entry)); resource keys in `type.label`; band colours per the same rule. Too wide, the position and bleeding items end in an ellipsis, the longer giving up more (their labels stay whole); the glyph and the pools never shrink. Position and pools are controls; their names follow the [label-in-name rule](system/book-ui.md#minimap-map-and-presentation-controls) (`standing, change position`; `hp 30/30 ma 10/10 mv 60/60; hp normal; opens Contents`). | enabled; weather; locked (scene, combat, chapter title page): `dim`, not pressable, the Contents button included; pending: "save not confirmed" centred under the line in the line's own `type.small` `dim` (the status line draws it; a page's pending word is a Note); resource tones: `normal` in `fg`, `warning`, `danger`; only pennies: the button says `character`; narrow (360 px with bleeding) | `stories/StatusLine.stories.tsx` |
-| Status icon | A round disc `size.statusIcon` wide in a `size.touch` box, `space.sm` apart, its glyph in `type.label`: a buff `card` fill, `line` border, `fg` glyph; a debuff `fg` fill, `bg` glyph, `danger` border; neutral `card`, `line`, `dim` glyph; the +N disc neutral. A timed icon's countdown ring sits `space.hair` outside the disc, `size.rule` wide: a `dim` track and an `fg` arc of the remaining share of its duration, clockwise from 12; the arc drains linearly between updates over at most 1 s, jumps on first show and on a refresh (reduced motion: steps); empty, the track only; a permanent icon has none. A hold, hover or keyboard focus shows a tooltip in the Tip's look ([rule](system/book-ui.md#conditions-details)). | buff; debuff; neutral; permanent; overflow; held (tooltip); focused (tooltip follows the clock, goes with its icon or the lock); locked: named pictures, not pressable, the neutral look; ring: `line` track, `dim` arc; countdown ring full, 80 %, near empty, permanent (none), draining | `stories/StatusIcon.stories.tsx` |
-| Letter tile | `card` fill, `line` border, `radius.card`, `size.touch` square, `type.tile`; the bank wraps centred with `space.sm` gaps (the mock's `.bankl`) and a used tile keeps its place; the answer line, the bank and its Controls and Submit card sit `space.block` apart as one block of the NPC page. Name: the letter, then its place (`N, tile 2`). | free; used: `opacity.disabled`, not pressable | `stories/LetterTile.stories.tsx`; the bank: `stories/Riddle.stories.tsx` |
-| Chip | One word of the World page's [Word block](system/book-ui.md#word-bar) as a pill: `card` fill, `line` border at `size.rule`, `radius.chip`, minimum `size.touch` on both axes, `space.lg` horizontal padding, the word in `type.control` `fg`; a row wraps with `space.sm` gaps (the Letter tile bank). Name: the word, then how it is spoken (`ward, say`, `ward, whisper to the elder`, `ward, shout`, `ward, cast`). Row titles (Say, Whisper to <name>, Shout, Cast) are in the Note's look. | available; unavailable: `opacity.disabled`, label `dim`, not pressable, its reason a `word, cast: reason` line in the Note's look under the row (as the Action card's unavailable form); pending: not pressable, `busy`; chosen (the Settings Reading size row, a radio group): `fg` fill, the word in `bg`, role radio, checked; its siblings role radio, unchecked | `stories/Chip.stories.tsx` |
-| Text field | The Word block's one typed word: type.body fg on bg, line border at size.rule, minHeight size.touch, space.lg horizontal padding; focused on open. Name: A word. | empty; invalid: the Note under it | `stories/WordBar.stories.tsx` |
-| Page turn | See [Page turn](#page-turn). | turning, settled | `stories/PageTurn.stories.tsx` |
-| Night sky | Over the whole Book while the shown palette is `dark` (the `night` phase; it appears as the dusk cross-fade ends and goes with the dawn cut), taking no touch, focus or screen-reader node, like the page turn's leaving leaf: a fixed scatter of faint `nightSky.star` points (a drawing: 36, 1 to 2 px, opacity .2 to .65, the same sky every night) and, on average every 9 s, one shooting star, a `nightSky.star` streak falling down-left over `motion.meteor` and fading out (the mock's `.moon` meteor). Decoration, never information: nothing in the game reads from it. | night; reduced motion: the stars only, no shooting star | `stories/NightSky.stories.tsx`; over a page: `stories/RoomPage.stories.tsx` At night, palette `dark` |
+| Component | File | Story |
+|---|---|---|
+| `Body` | [book/Body.tsx](../mobile/app/book/Body.tsx) | RoomPage |
+| `Book` | [book/Book.tsx](../mobile/app/book/Book.tsx) | Live |
+| `BookView` | [book/Book.tsx](../mobile/app/book/Book.tsx) | RecoveryPages |
+| `Chip` | [book/Chip.tsx](../mobile/app/book/Chip.tsx) | Chip |
+| `Row` | [book/Chip.tsx](../mobile/app/book/Chip.tsx) | WordBar |
+| `ReadingSize` | [book/Chip.tsx](../mobile/app/book/Chip.tsx) | Chip |
+| `Combat` | [book/Combat.tsx](../mobile/app/book/Combat.tsx) | CombatPage |
+| `DiscoveredMap` | [book/DiscoveredMap.tsx](../mobile/app/book/DiscoveredMap.tsx) | MapPage |
+| `DreamPage` | [book/DreamPage.tsx](../mobile/app/book/DreamPage.tsx) | ChapterPages |
+| `DreamResume` | [book/DreamPage.tsx](../mobile/app/book/DreamPage.tsx) | NoticePage |
+| `Footer` | [book/Footer.tsx](../mobile/app/book/Footer.tsx) | Footer |
+| `Tip` | [book/Footer.tsx](../mobile/app/book/Footer.tsx) | Tip |
+| `MapDrawing` | [book/MapDrawing.tsx](../mobile/app/book/MapDrawing.tsx) | Footer |
+| `ContentsPage` | [book/Menu.tsx](../mobile/app/book/Menu.tsx) | SectionPages |
+| `ThingPage` | [book/Menu.tsx](../mobile/app/book/Menu.tsx) | ItemPage |
+| `Item` | [book/Menu.tsx](../mobile/app/book/Menu.tsx) | ItemPage |
+| `NightSky` | [book/NightSky.tsx](../mobile/app/book/NightSky.tsx) | NightSky |
+| `NpcPage` | [book/Npc.tsx](../mobile/app/book/Npc.tsx) | NpcPage |
+| `NpcDetail` | [book/Npc.tsx](../mobile/app/book/Npc.tsx) | NpcPage |
+| `PageTurn` | [book/PageTurn.tsx](../mobile/app/book/PageTurn.tsx) | PageTurn |
+| `Riddle` | [book/Riddle.tsx](../mobile/app/book/Riddle.tsx) | Riddle |
+| `LetterTile` | [book/Riddle.tsx](../mobile/app/book/Riddle.tsx) | LetterTile |
+| `StatusLine` | [book/Status.tsx](../mobile/app/book/Status.tsx) | StatusLine |
+| `StatusIcons` | [book/StatusIcon.tsx](../mobile/app/book/StatusIcon.tsx) | StatusIcon |
+| `Tooltip` | [book/StatusIcon.tsx](../mobile/app/book/StatusIcon.tsx) | StatusIcon |
+| `WordBar` | [book/WordBar.tsx](../mobile/app/book/WordBar.tsx) | WordBar |
+| `ActionCard` | [book/actions.tsx](../mobile/app/book/actions.tsx) | ActionCard |
+| `Cards` | [book/actions.tsx](../mobile/app/book/actions.tsx) | ActionCard |
+| `VerbLine` | [book/actions.tsx](../mobile/app/book/actions.tsx) | VerbLine |
+| `ContinueButton` | [book/actions.tsx](../mobile/app/book/actions.tsx) | ContinueButton |
+| `JournalPage` | [book/journal.tsx](../mobile/app/book/journal.tsx) | SectionPages |
+| `EntityLine` | [book/lines.tsx](../mobile/app/book/lines.tsx) | EntityLine |
+| `Note` | [book/lines.tsx](../mobile/app/book/lines.tsx) | Note |
+| `Asides` | [book/lines.tsx](../mobile/app/book/lines.tsx) | RoomPage |
+| `LogLines` | [book/lines.tsx](../mobile/app/book/lines.tsx) | LogLines |
+| `AwayRecap` | [book/lines.tsx](../mobile/app/book/lines.tsx) | AwayRecap |
+| `Here` | [book/lines.tsx](../mobile/app/book/lines.tsx) | RoomPage |
+| `NoticeEntries` | [book/notices.tsx](../mobile/app/book/notices.tsx) | RoomPage |
+| `NoticePage` | [book/notices.tsx](../mobile/app/book/notices.tsx) | NoticePage |
+| `Tap` | [book/pages.tsx](../mobile/app/book/pages.tsx) | VerbLine |
+| `RunningHead` | [book/pages.tsx](../mobile/app/book/pages.tsx) | Page |
+| `Control` | [book/pages.tsx](../mobile/app/book/pages.tsx) | Control |
+| `RoomPage` | [book/pages.tsx](../mobile/app/book/pages.tsx) | RoomPage |
+| `Page` | [book/pages.tsx](../mobile/app/book/pages.tsx) | Page |
+| `PageFoot` | [book/pages.tsx](../mobile/app/book/pages.tsx) | PageFoot |
+| `SectionTitle` | [book/pages.tsx](../mobile/app/book/pages.tsx) | Page |
+| `CharacterPage` | [book/sections.tsx](../mobile/app/book/sections.tsx) | SectionPages |
+| `AncestryPage` | [book/sections.tsx](../mobile/app/book/sections.tsx) | SectionPages |
+| `CarryingPage` | [book/sections.tsx](../mobile/app/book/sections.tsx) | SectionPages |
+| `MapPage` | [book/sections.tsx](../mobile/app/book/sections.tsx) | MapPage |
+| `SettingsPage` | [book/sections.tsx](../mobile/app/book/sections.tsx) | SectionPages |
+| `ChapterPage` | [book/sections.tsx](../mobile/app/book/sections.tsx) | ChapterPages |
+| `ScenePage` | [book/sections.tsx](../mobile/app/book/sections.tsx) | ChapterPages |
+| `SkillDetails` | [book/skills.tsx](../mobile/app/book/skills.tsx) | SectionPages |
+| `Professions` | [book/skills.tsx](../mobile/app/book/skills.tsx) | SectionPages |
+| `RaiseCards` | [book/skills.tsx](../mobile/app/book/skills.tsx) | SectionPages |
+| `ItemDetails` | [book/skills.tsx](../mobile/app/book/skills.tsx) | ItemPage |
+| `SaveError` | [SaveError.tsx](../mobile/app/SaveError.tsx) | RecoveryPages |
+
+**Fixture link** (no component until a projection consumer): inline in prose; ink colour with a
+dotted underline at the platform's thickness (solid where the platform has no dotted line; no
+thickness token, since no platform's `Text` sets one); linked, or plain prose when no detail is
+projected.
 
 Not adopted from the mock (no live consumer): the text drawer and its command chips, topic
 chips and scene pick cards. The mock's shop price rows are not adopted either: the live shop row
-(`Npc.tsx` ShopOptions) is a plain `dim` `type.body` line until a row here replaces it.
+(`Npc.tsx` ShopOptions) is a plain `dim` `type.body` line until a component here replaces it.
 
 ## Page turn
 

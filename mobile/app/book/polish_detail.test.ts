@@ -394,7 +394,7 @@ test('a notice page shows its description once and every other read line once', 
 });
 
 // Breaks: the running head is missing on the room or NPC page after a quest is accepted, or shows
-// before any quest is active, or repeats on the Journal page (BOOK-UI-COMPONENTS.md, Page).
+// before any quest is active, or repeats on the Journal page (Page's doc comment).
 test('the running head shows the active quest objective on room and NPC pages', () => {
   const head = 'Clear the five rats from the Lantern cellar.'; // quest.mauds_cellar.active
   const h = book();

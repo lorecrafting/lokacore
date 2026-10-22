@@ -1,4 +1,4 @@
-// The status icon row above the status line (BOOK-UI-COMPONENTS.md, Status icon): one round,
+// The status icon row above the status line (StatusIcons' doc comment): one round,
 // graphic-only icon per condition, five then a +N disc. A tap opens Character; a hold (a hover on
 // web) shows the label and time left in the Tip's look. Locked (scene, combat, chapter page), the
 // discs are pictures, not buttons.
@@ -37,6 +37,17 @@ export const ringFraction = (c: Condition, time: number) =>
     ? undefined
     : Math.min(1, Math.max(0, (c.ends_at - time) / c.duration));
 
+/**
+ * The status icon row above the status line: one round, graphic-only icon per condition, five then a +N disc (book-ui.md, Conditions details).
+ *
+ * Use: above the status line.
+ *
+ * Rules: a tap opens Character; a hold, hover or keyboard focus shows a Tooltip. A timed icon's ring drains linearly between updates over at most 1 s, jumps on first show and on a refresh (reduced motion: steps).
+ *
+ * States: buff; debuff; neutral; permanent; overflow; held; focused; locked (pictures, not pressable); countdown ring full, near empty, draining.
+ *
+ * Story: StatusIcon.stories.tsx
+ */
 export function StatusIcons(p: Props) {
   // The held icon's label, so the tip follows the clock and goes with the icon or the lock.
   const [held, setHeld] = useState<string>();
@@ -236,8 +247,15 @@ function Disc(p: { look: Look; children: string }) {
   );
 }
 
-// The Tip's bubble (Footer.tsx Tip) without Got it, over the row; it fades in, cut under reduced
-// motion, and never takes a touch.
+/**
+ * The Tip's bubble without Got it, over the icon row.
+ *
+ * Use: StatusIcons only.
+ *
+ * Rules: fades in (cut under reduced motion); never takes a touch.
+ *
+ * Story: StatusIcon.stories.tsx
+ */
 export function Tooltip({ text }: { text: string }) {
   const c = usePalette();
   const reduced = useReducedMotion();

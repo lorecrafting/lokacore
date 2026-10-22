@@ -19,6 +19,13 @@ const SECTIONS: [Section, string][] = [
   ['journal', 'Journal'],
   ['settings', 'Settings'],
 ];
+/**
+ * The Contents: one Entity line per section.
+ *
+ * Use: the status line's Contents button.
+ *
+ * Story: SectionPages.stories.tsx
+ */
 export function ContentsPage(p: { open: (section: Section) => void; world: () => void }) {
   return (
     <Page title="Contents" foot={<Control label={LABEL.backToWorld} onPress={p.world} />}>
@@ -33,7 +40,7 @@ export function ContentsPage(p: { open: (section: Section) => void; world: () =>
 
 type Screen = ReturnType<ReturnType<typeof presenter>['screen']>;
 
-// The refusal notes are one block (BOOK-UI-COMPONENTS.md, Page: a run of rows of one kind).
+// The refusal notes are one block (Page's doc comment: a run of rows of one kind).
 const notes = (thing: Thing | undefined, label: Say, held?: string) => {
   const shown =
     thing?.actions.flatMap((a, i, all) =>
@@ -76,6 +83,17 @@ export const inside = (p: {
     </>
   );
 
+/**
+ * An item's detail in the detail-page order (book-ui.md, Item details and take/drop): projected state as Notes and Entity lines, options as Action cards.
+ *
+ * Use: Item only.
+ *
+ * Rules: a refused action reads the same word as an offered one.
+ *
+ * States: plain; container with Inside; fuel; too heavy; held by a person.
+ *
+ * Story: ItemPage.stories.tsx
+ */
 export function ThingPage(p: {
   thing?: Thing;
   holder?: string; // a living NPC holding it (pass-1 E14)
@@ -115,6 +133,13 @@ export function ThingPage(p: {
   );
 }
 
+/**
+ * The item route: finds the thing and its holder, then draws ThingPage.
+ *
+ * Use: an item detail route.
+ *
+ * Story: ItemPage.stories.tsx
+ */
 export function Item(p: {
   id: string;
   screen: Screen;

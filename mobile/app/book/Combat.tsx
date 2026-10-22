@@ -13,7 +13,7 @@ type Screen = ReturnType<ReturnType<typeof presenter>['screen']>;
 type Encounter = NonNullable<Screen['ended']>;
 
 // The opponent lines, "name — band", one block of touching lines (a run of one kind, like the
-// mock's entity lines; BOOK-UI-COMPONENTS.md, Page). Your own bleeding and conditions stay on the
+// mock's entity lines; Page's doc comment). Your own bleeding and conditions stay on the
 // status line and Character (book-ui.md, Live combat response).
 function Fight({ view, text, combat }: Pick<Screen, 'view' | 'text'> & { combat: Encounter }) {
   const c = usePalette();
@@ -35,6 +35,17 @@ function Fight({ view, text, combat }: Pick<Screen, 'view' | 'text'> & { combat:
   );
 }
 
+/**
+ * The combat foreground (book-ui.md, Live combat response).
+ *
+ * Use: while a fight is on.
+ *
+ * Rules: opponent lines (name, band phrase; none of your own condition lines) as one block of touching lines, then the isolated log, then the response cards; no PageFoot.
+ *
+ * States: one foe; pack; bleeding.
+ *
+ * Story: CombatPage.stories.tsx
+ */
 export function Combat(p: {
   screen: ReturnType<ReturnType<typeof presenter>['screen']>;
   g: ReturnType<typeof group>;

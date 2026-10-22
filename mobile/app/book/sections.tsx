@@ -35,6 +35,13 @@ type Grouped = ReturnType<typeof group>;
 // A profession box is drawn even unacquired (book-ui.md Skill tree details), so it counts as known.
 const knownSkill = (s: { acquired: boolean; profession?: string }) => s.acquired || !!s.profession;
 
+/**
+ * The Character section: attributes, skills, professions, then the Raise cards (book-ui.md, Skill tree details).
+ *
+ * Use: Contents, and the status pools when only pennies show.
+ *
+ * Story: SectionPages.stories.tsx
+ */
 export function CharacterPage(
   p: { view?: GameView; text: Say; world: () => void } & Pick<GameView, 'resources' | 'position'> &
     Parameters<typeof RaiseCards>[0],
@@ -75,6 +82,15 @@ export function CharacterPage(
   );
 }
 
+/**
+ * The ancestry picker.
+ *
+ * Use: Contents, before an ancestry is chosen.
+ *
+ * Rules: its pending save is a Note, not the status line's.
+ *
+ * Story: SectionPages.stories.tsx
+ */
 export function AncestryPage(p: {
   view: GameView;
   text: Say;
@@ -105,6 +121,15 @@ export function AncestryPage(p: {
   );
 }
 
+/**
+ * The Carrying section: Held and Worn items as Entity lines.
+ *
+ * Use: Contents.
+ *
+ * Rules: an empty Worn slot is a Note; its slot label lends the item line its bleed.
+ *
+ * Story: SectionPages.stories.tsx
+ */
 export function CarryingPage(p: {
   items: readonly Thing[];
   equipment?: GameView['equipment'];
@@ -182,7 +207,17 @@ function Ways(p: { view: GameView; text: Say; g: Grouped; press: (b: Button) => 
   });
 }
 
-// Map reuses the room's exit controls and lists the place's targetless actions.
+/**
+ * The full map and Where (book-ui.md, Minimap, map and presentation controls).
+ *
+ * Use: Contents, and a tap on the minimap.
+ *
+ * Rules: reuses the room's exit controls and lists the place's targetless actions.
+ *
+ * States: discovered, two levels; barred exits; Where.
+ *
+ * Story: MapPage.stories.tsx
+ */
 export function MapPage(p: {
   view: GameView;
   text: Say;
@@ -238,7 +273,15 @@ const where = (p: { view: GameView; g: Grouped; press: (b: Button) => void }) =>
   </>
 );
 
-// The Reading size first; `startOver` asks first: it destroys the save (the shell's confirm).
+/**
+ * Settings: the Reading size first, then Start over.
+ *
+ * Use: Contents.
+ *
+ * Rules: `startOver` asks first: it destroys the save (the shell's confirm).
+ *
+ * Story: SectionPages.stories.tsx
+ */
 export function SettingsPage(p: { startOver: () => void; world: () => void; reading?: Reading }) {
   return (
     <Page title="Settings" foot={home(p.world)}>
@@ -248,7 +291,17 @@ export function SettingsPage(p: { startOver: () => void; world: () => void; read
   );
 }
 
-// The chapter card (BOOK-UI-COMPONENTS.md, Chapter card): label, title (the page header), rule.
+/**
+ * The chapter title page: label, title and rule centred, then Continue.
+ *
+ * Use: a chapter's title page.
+ *
+ * Rules: label and title are one header node named by its visible text in order ("Chapter one <title>"), with the arriving focus. Nothing but Continue is pressable.
+ *
+ * States: shown.
+ *
+ * Story: ChapterPages.stories.tsx
+ */
 export function ChapterPage(p: { label: string; title: string; done: () => void }) {
   const c = usePalette();
   return (
@@ -280,6 +333,13 @@ export function ChapterPage(p: { label: string; title: string; done: () => void 
   );
 }
 
+/**
+ * A modal scene: its text, then Continue (book-ui.md, Chapters, scenes and recovery).
+ *
+ * Use: while a scene holds the foreground.
+ *
+ * Story: ChapterPages.stories.tsx
+ */
 export function ScenePage(p: {
   scene: NonNullable<GameView['scene']>;
   text: Say;

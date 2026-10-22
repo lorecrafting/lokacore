@@ -1,4 +1,4 @@
-// AwayRecap: the World page's grouped lines after an absence (BOOK-UI-COMPONENTS.md, Away recap).
+// AwayRecap: the World page's grouped lines after an absence (AwayRecap's doc comment).
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { expect } from 'storybook/test';
 import { LABEL } from '../book/labels.ts';

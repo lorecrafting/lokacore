@@ -1,4 +1,4 @@
-// The riddle answer: a bank of letter tiles over one local buffer (BOOK-UI-COMPONENTS.md, Letter tile).
+// The riddle answer: a bank of letter tiles over one local buffer (LetterTile's doc comment).
 import { useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { Text } from './Text.tsx';
@@ -9,7 +9,15 @@ import { prose, usePalette, useType } from './palette.ts';
 import { opacity, radius, size, space, type } from './tokens.ts';
 import { LABEL } from './labels.ts';
 
-// Tile indices preserve multiplicity; only the bounded submitted word crosses the session boundary.
+/**
+ * The riddle answer: a bank of Letter tiles over one local buffer, with Backspace, Clear and Submit.
+ *
+ * Use: an NPC page offering a riddle.
+ *
+ * Rules: the answer line, the bank and its Controls and Submit card are one block. Only the bounded submitted word crosses the session boundary.
+ *
+ * Story: Riddle.stories.tsx
+ */
 export function Riddle(p: { bank: readonly string[]; button: Button; press: (b: Button) => void }) {
   const c = usePalette();
   const t = useType();
@@ -51,7 +59,17 @@ export function Riddle(p: { bank: readonly string[]; button: Button; press: (b: 
   );
 }
 
-// A used tile keeps its place in the bank (no reflow), disabled.
+/**
+ * One letter of the riddle bank.
+ *
+ * Use: Riddle only.
+ *
+ * Rules: a used tile keeps its place (no reflow). Name: the letter, then its place (`N, tile 2`).
+ *
+ * States: free; used (not pressable).
+ *
+ * Story: LetterTile.stories.tsx
+ */
 export function LetterTile(p: {
   letter: string;
   used: boolean;

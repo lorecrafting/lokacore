@@ -11,6 +11,7 @@ their summaries are in [this index at `15c7d41b`](https://github.com/lorecraftin
 What each rule in force says: [owner-rules.md](../system/owner-rules.md). A new record adds one
 dated line below, newest first.
 
+- 2026-10-22 [Owner decision: component specs live with the components](owner-decision-component-docs-in-code-2026-10-22.md)
 - 2026-10-21 [Owner decision: retire Ashmere, the app bundles the showcase](owner-decision-retire-first-chapter-2026-10-21.md)
 - 2026-10-21 [Owner decision: a status on a seen NPC says a line](owner-decision-npc-status-line-2026-10-21.md)
 - 2026-10-15 [Owner decision: showcase before M14, UI polish after M15](owner-decision-showcase-before-m14-2026-10-15.md)

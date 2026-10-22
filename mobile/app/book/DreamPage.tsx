@@ -11,6 +11,15 @@ import { prose, usePalette, useType } from './palette.ts';
 import { LABEL } from './labels.ts';
 
 type Screen = ReturnType<ReturnType<typeof presenter>['screen']>;
+/**
+ * A resumable bed dream as an anchored detail page of the bed (book-ui.md, Chapters, scenes and recovery).
+ *
+ * Use: the dream route.
+ *
+ * Rules: Close returns to the bed; ordinary World access stays.
+ *
+ * Story: ChapterPages.stories.tsx
+ */
 export function DreamPage(p: {
   screen: Screen;
   id: string;
@@ -44,6 +53,15 @@ export function DreamPage(p: {
   );
 }
 
+/**
+ * The bed notice's Resume dream Control, or the Note "Dream acknowledged.".
+ *
+ * Use: a bed notice's detail.
+ *
+ * States: dream available; dream acknowledged.
+ *
+ * Story: NoticePage.stories.tsx
+ */
 export function DreamResume(p: {
   detail: NonNullable<GameView['notices']>[number];
   open: (page: Route) => void;

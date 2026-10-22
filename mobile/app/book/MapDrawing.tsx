@@ -62,7 +62,7 @@ function Path({ exit, on }: { exit: Exit; on: boolean }) {
   const v = [Math.sin(a), -Math.cos(a)];
   const at = (n: number) => [v[0] * n, v[1] * n];
   const w = on ? 1.8 : 0.9;
-  // Colour roles (BOOK-UI-COMPONENTS.md, Footer): a path at rest in `dim`, the lit one in `fg`,
+  // Colour roles (Footer's doc comment): a path at rest in `dim`, the lit one in `fg`,
   // a barred way in `danger`, your dot in `action`; so at night the exits no longer read as a "+".
   const ink = on ? c.fg : c.dim;
   if (exit.available)
@@ -119,6 +119,15 @@ function Stair({ exit, on }: { exit: Exit; on: boolean }) {
   );
 }
 
+/**
+ * The footer minimap's drawing: you are the dot; each exit a path to an open ring, or a stub with a `danger` tick when closed; up and down are stair nodes that fade in with the zoom.
+ *
+ * Use: Footer only.
+ *
+ * Rules: a drawing, exempt from space tokens; real data only (the current room and its exits).
+ *
+ * Story: Footer.stories.tsx
+ */
 export function MapDrawing(p: {
   exits: readonly Exit[];
   lit: string | null;

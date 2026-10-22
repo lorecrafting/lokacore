@@ -1,4 +1,4 @@
-// Chip: one word of the World page's Word block (BOOK-UI-COMPONENTS.md, Chip).
+// Chip: one word of the World page's Word block (Chip's doc comment).
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { expect, fn } from 'storybook/test';
 import { Chip, ReadingSize } from '../book/Chip.tsx';

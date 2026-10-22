@@ -9,6 +9,17 @@ type Props = { view: GameView; text: (key: string) => string };
 // The chosen room is the Map page's: its foot offers Back to map while one is open.
 type Drawn = NonNullable<GameView['map']>;
 type Room = Drawn['rooms'][number];
+/**
+ * The Map page's drawing of discovered rooms.
+ *
+ * Use: the Map page.
+ *
+ * Rules: its geometry is a drawing, exempt from space tokens; colours are the minimap's roles. The chosen room makes the foot offer Back to map.
+ *
+ * States: one level; two levels; barred exits.
+ *
+ * Story: MapPage.stories.tsx
+ */
 export function DiscoveredMap({
   view,
   text,

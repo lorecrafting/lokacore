@@ -72,7 +72,7 @@ headers (and a secure context: `localhost`, not a LAN address), so the smoke ski
 port, runs every Live story and its click-through headless, then a sidebar switch (one database
 open after it) and a second tab on the same origin (Storybook's sqlite keeps no saves), and stops it (about 50 s warm,
 85 s on a first run, so `book-e2e.yml` runs it, never the M1).
-What each component looks like and does: [the component catalogue](BOOK-UI-COMPONENTS.md).
+What each component is for and its states: its doc comment, shown on its story's Docs page ([index](BOOK-UI-COMPONENTS.md#component-catalogue)).
 The `System/` pages (Overview, Data model, Save, Capabilities) draw `docs/system-graph.gen.json`, which
 `elixir bin/contracts.exs` writes ([design](design/system-dashboard/spec.md)); a Data model link carries
 its selection as `&globals=node:<Contract>` (bare contract names: Storybook drops a URL global with a `.`).

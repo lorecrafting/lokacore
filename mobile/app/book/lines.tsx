@@ -1,4 +1,4 @@
-// Entity lines, the room's Here lines and log lines (BOOK-UI-COMPONENTS.md, Entity line and Log line).
+// Entity lines, the room's Here lines and log lines (EntityLine and LogLines doc comments).
 import { useState } from 'react';
 import { View } from 'react-native';
 import { Text } from './Text.tsx';
@@ -11,8 +11,17 @@ import { Tap } from './pages.tsx';
 import { note, prose, usePalette, useType } from './palette.ts';
 import { radius, size, space, type } from './tokens.ts';
 
-// A row that opens a detail: the name, then `rest` (verbatim, its own spacing), a note below.
-// Without `rest` the name is the line's one Text. Its accessible name is that shown text, then ", open".
+/**
+ * A MUD line that opens a detail: the name in `type.named`, then `rest` verbatim, a carried-item note below.
+ *
+ * Use: every row that opens a detail: people and items here, held and worn items, Inside, notices, boards, Contents entries.
+ *
+ * Rules: the whole line is the touch target, its hit area Tap's bleed, so a run of lines touches at the body pitch. Name: the shown text in order (name, rest, note), then ", open".
+ *
+ * States: none.
+ *
+ * Story: EntityLine.stories.tsx
+ */
 export function EntityLine(p: { name: string; rest?: string; note?: string; onPress: () => void }) {
   const c = usePalette();
   const t = useType();
@@ -35,13 +44,30 @@ export function EntityLine(p: { name: string; rest?: string; note?: string; onPr
   );
 }
 
-// A dim body note: an empty state, "save not confirmed" (BOOK-UI-COMPONENTS.md, Note).
+/**
+ * A page line that is not pressable and carries no action, `dim` body, one string.
+ *
+ * Use: an aside, a sense cue, every empty state ("Nothing to do here."), a page's "save not confirmed", a priced page's balance, a held item's holder; never a Text the page styles.
+ *
+ * Rules: an empty-state Note never shares a page with an unavailable action line (that line is the state).
+ *
+ * States: empty state; save not confirmed; balance; holder.
+ *
+ * Story: Note.stories.tsx
+ */
 export function Note({ children }: { children: string }) {
   return <Text style={note(usePalette(), useType())}>{children}</Text>;
 }
 
-// The character's passive voices (book-ui.md, Aside details): one Note per line, one block, links
-// shown as plain words; no asides, no block.
+/**
+ * The character's passive voices as one block of Notes, links shown as plain words (book-ui.md, Aside details).
+ *
+ * Use: the room page and people's asides.
+ *
+ * Rules: no asides, no block.
+ *
+ * Story: RoomPage.stories.tsx
+ */
 export function Asides({
   keys = [],
   text,
@@ -58,9 +84,17 @@ export function Asides({
   ) : null;
 }
 
-// One Text per line: narration in ink, a system line dim italic, a refused line after its tag. The
-// tag is its own Text beside the sentence in a row, since native draws no border on nested Text.
-// The lines are one block of the page, `space.sm` apart; no lines, no block.
+/**
+ * The log: one Text per narration record, never records joined.
+ *
+ * Use: room, detail and combat logs; one block, no lines no block.
+ *
+ * Rules: narration and the Book's speech echo in ink; a system line `dim` italic; a refused line starts with its reason tag, always the reason word even when the sentence repeats it. The tag is its own Text beside the sentence in a row, never nested, since native draws no border on nested Text. A speech line (speaker bar) waits until the log projects a speaker.
+ *
+ * States: narration; system; refused.
+ *
+ * Story: LogLines.stories.tsx
+ */
 export function LogLines({ lines }: { lines: readonly DetailLine[] }) {
   const c = usePalette();
   const t = useType();
@@ -102,8 +136,17 @@ export function LogLines({ lines }: { lines: readonly DetailLine[] }) {
   );
 }
 
-// The away recap (toolbox row W27): one block opening the page, collapsed to its heading; open, each
-// grouped line once with its count. The heading's name says whether a tap shows or hides them.
+/**
+ * The World page's first block after an absence (book-ui.md, Away recap).
+ *
+ * Use: the World page; the Chronicle's day headings (`heading` "Day N").
+ *
+ * Rules: a Tap heading like a system log line, named with ", show" or ", hide"; open, one line per group, " (N times)" after a repeat. `milestone` lines are body type, named "<line>, story point".
+ *
+ * States: collapsed; open; milestone.
+ *
+ * Story: AwayRecap.stories.tsx
+ */
 export function AwayRecap({
   lines,
   heading = LABEL.awayRecap,
@@ -140,8 +183,13 @@ export function AwayRecap({
   );
 }
 
-// NPCs, then every other entity as the room's items; no headings, an empty group omitted
-// (book-ui.md, World and status entry); then the sense cues (book-ui.md, Sense cues details).
+/**
+ * The room's people, then its items, then its sense cues; no headings, an empty group omitted (book-ui.md, World and status entry; Sense cues details).
+ *
+ * Use: RoomPage only.
+ *
+ * Story: RoomPage.stories.tsx
+ */
 export function Here(p: {
   view: GameView;
   text: (key: string) => string;

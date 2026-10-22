@@ -58,6 +58,17 @@ type Props = { turn: number; dir: 1 | -1; paper: string; children: ReactNode };
 type Size = { width: number; height: number };
 type SetLeaving = Dispatch<SetStateAction<Leaving | undefined>>;
 
+/**
+ * The Book's page turn (BOOK-UI-COMPONENTS.md, Page turn).
+ *
+ * Use: BookView only, around the page.
+ *
+ * Rules: the arriving page is live from the first frame; the leaving page takes no touch, keyboard or screen-reader focus.
+ *
+ * States: turning; settled; reduced motion (cross-fade).
+ *
+ * Story: PageTurn.stories.tsx
+ */
 export function PageTurn(p: Props) {
   const reduced = useReducedMotion();
   const [size, setSize] = useState<Size>({ width: 0, height: 0 });

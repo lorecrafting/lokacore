@@ -34,7 +34,7 @@ const meta = {
   title: 'Live',
   // checkpoints: stories/routes.ts, written by npm run stories:views
   // isolation headers (SharedArrayBuffer for the sqlite worker) are not served by a static build
-  tags: ['!test'],
+  tags: ['!test', '!autodocs'], // a Docs page would mount every live game at once
   // runs after the loaders; its cleanup when the story is left or remounted closes this story's database
   beforeEach:
     ({ loaded }) =>

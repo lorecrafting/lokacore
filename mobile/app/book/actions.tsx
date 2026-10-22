@@ -7,8 +7,17 @@ import { note, prose, usePalette, useType } from './palette.ts';
 import type { Button } from './presenter.ts';
 import { radius, size, space, type } from './tokens.ts';
 
-// A detail page's offered action or dialogue choice (BOOK-UI-COMPONENTS.md, Action card). With no
-// Button it is the unavailable form: a non-action note, the label then its real reason.
+/**
+ * An offered action as a card.
+ *
+ * Use: a detail page's offered action or dialogue choice, the World page's one drawn storylet, the Character page's Raise cards; never an accent text link.
+ *
+ * Rules: no outer margin; cards stack in `Cards`. With no Button it is the unavailable form, a line in the Note's look reading `label: reason` (a service's price and benefit stay inside the label's parentheses), or the label alone when no reason is projected (book-ui.md, Notice board details). Never a disabled card, never a note the page draws.
+ *
+ * States: available; unavailable.
+ *
+ * Story: ActionCard.stories.tsx
+ */
 export function ActionCard(
   p: { b: Button; press: (b: Button) => void } | { label: string; reason?: string },
 ) {
@@ -38,15 +47,32 @@ export function ActionCard(
   );
 }
 
-// A list of action cards: one block of its page, the cards `space.sm` apart (no card margin);
-// nothing when the list is empty, so it adds no block gap.
+/**
+ * A list of Action cards, one block of its page.
+ *
+ * Use: every stack of Action cards.
+ *
+ * Rules: draws nothing when empty, so an empty list adds no block gap.
+ *
+ * Story: ActionCard.stories.tsx
+ */
 export function Cards({ children }: { children: ReactNode }) {
   return Children.toArray(children).length ? (
     <View style={{ gap: space.sm }}>{children}</View>
   ) : null;
 }
 
-// A room's offered place action (BOOK-UI-COMPONENTS.md, Verb line).
+/**
+ * A room's offered place action as an italic `action` line.
+ *
+ * Use: the room's list, after the entity lines.
+ *
+ * Rules: an unavailable one is `ActionCard label reason` (`Chop wood: too heavy to carry`) after the available lines, never dropped.
+ *
+ * States: available; unavailable (as the Action card).
+ *
+ * Story: VerbLine.stories.tsx
+ */
 export function VerbLine({ b, press }: { b: Button; press: (b: Button) => void }) {
   const c = usePalette();
   const t = useType();
@@ -57,7 +83,17 @@ export function VerbLine({ b, press }: { b: Button; press: (b: Button) => void }
   );
 }
 
-// A scene or chapter continuation (BOOK-UI-COMPONENTS.md, Continue button).
+/**
+ * An ink-filled scene or chapter continuation.
+ *
+ * Use: a scene or chapter page's Continue.
+ *
+ * Rules: keeps the card's padding, so the label never touches the fill's edge when not stretched.
+ *
+ * States: available.
+ *
+ * Story: ContinueButton.stories.tsx
+ */
 export function ContinueButton(p: { label: string; onPress: () => void }) {
   const c = usePalette();
   const t = useType();

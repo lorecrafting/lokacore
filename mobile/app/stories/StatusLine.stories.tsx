@@ -1,4 +1,4 @@
-// StatusLine: the one centred line under the footer (BOOK-UI-COMPONENTS.md, Status line).
+// StatusLine: the one centred line under the footer (StatusLine's doc comment).
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { View } from 'react-native';
 import { expect, fn } from 'storybook/test';
@@ -68,7 +68,7 @@ export const Weather: Story = {
   },
 };
 
-// Every sky glyph the catalogue names (BOOK-UI-COMPONENTS.md, Status line): the sun by its phase,
+// Every sky glyph model.ts `sky` draws: the sun by its phase,
 // the moon by its phase at night, the earthly branch for a phase the Book does not know.
 const skies: [string, string?][] = [
   ['dawn'],

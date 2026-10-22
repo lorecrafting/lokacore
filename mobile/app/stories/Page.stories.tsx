@@ -1,4 +1,4 @@
-// Page: one shell for every page (BOOK-UI-COMPONENTS.md, Page); RunningHead above it, as Body.tsx
+// Page: one shell for every page (Page's doc comment); RunningHead above it, as Body.tsx
 // draws it. Journal texts are the showcase's own (protocol/fixtures/toolbox_showcase_hash.json).
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import type { ComponentProps } from 'react';

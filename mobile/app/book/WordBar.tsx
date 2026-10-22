@@ -16,6 +16,17 @@ import { size, space } from './tokens.ts';
 const WORD = /^[a-zA-Z]{1,32}$/; // the kernel's own check (kernel/ts/src/mechanics/speech/shared.ts)
 const wordOf = (b: Button) => (b.input as { word?: string }).word;
 
+/**
+ * The World page's Word block: say, whisper, shout and cast chip rows, and a typed Say word only its writer sees (book-ui.md, Word bar).
+ *
+ * Use: the room page's last block.
+ *
+ * Rules: the text field is focused on open and named "A word"; an invalid word is a Note under it.
+ *
+ * States: rows; text field empty; invalid.
+ *
+ * Story: WordBar.stories.tsx
+ */
 export function WordBar(p: {
   view: GameView;
   chips: Button[];

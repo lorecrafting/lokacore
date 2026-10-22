@@ -205,7 +205,7 @@ test('Book captures movement keys only on an active World page', (t) => {
 
 // Breaks: the chapter title page offers Back to World or an enabled Contents beside its Continue, or
 // the locked Contents still shows its tappable colours (docs/system/book-ui.md, Chapters, scenes
-// and recovery; BOOK-UI-COMPONENTS.md, Status line).
+// and recovery; StatusLine's doc comment).
 test('the chapter title page leaves only Continue', () => {
   const book = BookView({
     palette: color.light,
@@ -324,7 +324,7 @@ test('the status line shows the weather in words and names season and tide', () 
 // Breaks: a sixth icon where the +N disc belongs (or the disc at five), a name losing its polarity or
 // giving a permanent status a time, the glyph not falling back by polarity, a locked icon still a
 // button, or the Character page dropping a condition's time, tick or sign
-// (book-ui.md Conditions details; BOOK-UI-COMPONENTS.md, Status icon).
+// (book-ui.md Conditions details; StatusIcons' doc comment).
 test('status icons: five then +N, named by label, time and polarity, pictures while locked', () => {
   const at = (label: string, kind?: string, ends_at?: number, per_tick?: number) =>
     ({ label, kind, ends_at, per_tick, resource: 'hp', tick_every: 60 }) as any;
@@ -409,7 +409,7 @@ test('status icons: five then +N, named by label, time and polarity, pictures wh
 
 // Breaks: the remaining share is not clamped to 0..1, a permanent status (or one without a duration)
 // gets a ring, the arc runs counter-clockwise or starts off 12, or an empty ring keeps an arc
-// (book-ui.md Conditions details; BOOK-UI-COMPONENTS.md, Status icon).
+// (book-ui.md Conditions details; StatusIcons' doc comment).
 test('status icon countdown ring: remaining share of the duration, clockwise from 12', () => {
   const at = (ends_at?: number, duration?: number) =>
     ({ label: 'fed', kind: 'buff', ends_at, duration, resource: 'mv', tick_every: 1800 }) as any;

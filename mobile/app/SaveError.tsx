@@ -15,7 +15,17 @@ const PLAIN: Record<string, string> = {
     'The save was made by a newer version of the app. Update the app to go on.',
 };
 
-/** `startOver` asks first: it destroys the save (10 §31; the shell's confirm). */
+/**
+ * The screen for a save that does not open (book-ui.md, Chapters, scenes and recovery).
+ *
+ * Use: App, when the save fails to open; no GameView behind it.
+ *
+ * Rules: the Page's centred variant; `startOver` asks first: it destroys the save (the shell's confirm).
+ *
+ * States: release; format; corrupt; locked.
+ *
+ * Story: RecoveryPages.stories.tsx
+ */
 export function SaveError({ failed, startOver }: { failed: Failed; startOver: () => void }) {
   const paper = color.light; // no GameView here, so no solar phase
   useFocusRing(paper); // outside the Book, so its ring is not installed

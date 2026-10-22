@@ -1,5 +1,5 @@
-// E1 (storybook-plan-2026-10-08.md): every catalogue Story file exists, and every exported Book UI
-// component is imported by some story.
+// E1 (storybook-plan-2026-10-08.md): every exported Book UI component carries its doc comment, has
+// its catalogue index line, and is imported by some story.
 import assert from 'node:assert/strict';
 import { readdirSync, readFileSync } from 'node:fs';
 import { test } from 'node:test';
@@ -17,17 +17,48 @@ const EXEMPT: Record<string, string> = {
 };
 const EXEMPT_FILES = { 'MapDrawing.tsx': 'a drawing, shown through the map pages' };
 
-test('every catalogue Story file exists', () => {
-  const rows = read('../../docs/BOOK-UI-COMPONENTS.md')
-    .split('\n')
-    .filter((line) => line.startsWith('| '));
-  const missing = rows.flatMap((row) => {
-    const story = row.split('|').at(-2)!;
-    return [...story.matchAll(/`stories\/(\w+)\.stories\.tsx`/g)]
-      .filter(([, name]) => !stories.includes(`${name}.stories.tsx`))
-      .map(([file]) => `${row.split('|')[1].trim()}: ${file}`);
-  });
-  assert.deepEqual(missing, []);
+// Every exported component, `book/<file>:<name>`, with the source before its export.
+const files = [
+  ...readdirSync(new URL('book/', app))
+    .filter((f) => f.endsWith('.tsx'))
+    .map((f) => `book/${f}`),
+  'SaveError.tsx',
+];
+const exported = files.flatMap((file) => {
+  const src = read(file);
+  return [...src.matchAll(/^export (?:default )?(?:function|const) ([A-Z]\w*)/gm)].map((m) => ({
+    file,
+    name: m[1],
+    doc: /\/\*\*((?:(?!\*\/)[^])*)\*\/\s*$/.exec(src.slice(0, m.index))?.[1] ?? '',
+  }));
+});
+
+// Breaks: a component loses its doc comment (or a private helper's JSDoc sits between), its `Use:`,
+// or names a story file that does not exist.
+test('every exported component has a doc comment with Use: and an existing Story:', () => {
+  const bad = exported
+    .filter(({ doc }) => {
+      const story = /\* Story: (\w+\.stories\.tsx)$/m.exec(doc)?.[1];
+      return !/\* Use: /.test(doc) || !story || !stories.includes(story);
+    })
+    .map(({ file, name }) => `${file}: ${name}`);
+  assert.deepEqual(bad, []);
+});
+
+// Breaks: the catalogue index drops, duplicates or misfiles a component, or its Story column
+// disagrees with the doc comment.
+test('the catalogue index lists each exported component once, with its file and story', () => {
+  const md = read('../../docs/BOOK-UI-COMPONENTS.md');
+  const index = md.slice(md.indexOf('## Component catalogue'), md.indexOf('## Page turn'));
+  const rows = [
+    ...index.matchAll(/^\| `(\w+)` \| \[[^\]]+\]\(\.\.\/mobile\/app\/([\w/.]+)\) \| (\w+) \|$/gm),
+  ];
+  assert.deepEqual(
+    rows.map(([, name, file, story]) => `${file}:${name}:${story}`).sort(),
+    exported
+      .map(({ file, name, doc }) => `${file}:${name}:${/\* Story: (\w+)\./m.exec(doc)?.[1]}`)
+      .sort(),
+  );
 });
 
 // A story or a story helper (stories/screen.tsx) imports it, named or as the default.
