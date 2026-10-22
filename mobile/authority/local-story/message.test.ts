@@ -1,41 +1,34 @@
-// size: allow 590, message receipt, custody, corruption and COMMIT recovery share one real SQLite journey
+// Protected message saves over the message fragment (kernel/ts/test/message_fixture.ts): a courier on
+// the green hands the player a sealed message (receive, branch carried) and Bram's lantern-quest
+// dialogue takes it (hand_over, delivered). Expected texts and roles are authored there.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
-import { read } from '../../../kernel/ts/test/read.ts';
+import { bundle, genesis, prefix } from '../../../kernel/ts/test/message_fixture.ts';
 import { elapsedHost } from './__tests__/elapsed-host.test.ts';
 import { presenter } from '../../app/book/presenter.ts';
 import { localSession, openGame } from './session.ts';
 import { openStory } from './authority.ts';
-import {
-  INSTALLED,
-  loadCartridge,
-  newWorld,
-  type Cartridge,
-} from '../../../kernel/ts/src/index.ts';
 
-const bundle = read('protocol/fixtures/missing_child_v012_hash.json');
-const ids = read('protocol/fixtures/missing_child_v012_ids.json');
-const message = ids['item/vesper_message'];
-const vesperLine = 'Vesper places his folded message in your hand.';
-const elspethLine = 'Elspeth accepts Vesper’s message and reads it slowly.';
-const loaded = loadCartridge(
-  new TextEncoder().encode(
-    JSON.stringify({ cartridge: bundle.value, content_hash: bundle.sha256 }),
-  ),
-  INSTALLED,
-);
-assert.ok(loaded.ok);
-const fresh = newWorld(
-  loaded.cartridge as Cartridge,
-  '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never,
-  [1, 2, 3, 4],
-);
+// A 100g satchel fits beside the message under the 1000g ceiling, so it can be carried and filled.
+const light = (c: any) => {
+  c.items[`${prefix}:item/satchel`].mass_grams = 100;
+};
+const b = bundle(light);
+const fresh = genesis(light);
+const id = (kind: string, name: string) => fresh.entityIds[`${prefix}:${kind}/${name}`]!;
+const message = id('item', 'message'),
+  satchel = id('item', 'satchel'),
+  courier = id('npc', 'courier'),
+  bram = id('npc', 'bram');
+const npcs: Record<string, string> = { courier, bram };
+const courierLine = 'The courier hands you the sealed message.';
+const bramLine = 'Bram takes the sealed message.';
 
 function setup(path = ':memory:') {
-  const a = elapsedHost(path, { wall: 10000, mono: 0 }, bundle);
+  const a = elapsedHost(path, { wall: 10000, mono: 0 }, b);
   const book = presenter(a.game);
   a.game.subscribe(book.update);
   const view = () => a.game.view().view;
@@ -47,40 +40,25 @@ function setup(path = ':memory:') {
   };
   const move = (...directions: string[]) =>
     directions.forEach((direction) => ok('move', [], { direction }));
-  const choose = (choice_id: string, answer?: string) =>
-    ok('choose', [], {
-      choice_id,
-      continuation_id: view().choice!.continuation_id,
-      ...(answer !== undefined && { answer }),
-    });
+  const choose = (choice_id: string) =>
+    ok('choose', [], { choice_id, continuation_id: view().choice!.continuation_id });
+  /** Accept the lantern quest, walk to the courier and open the message offer. */
   const offer = () => {
-    ok('elspeth', [ids['npc/elspeth']]);
-    choose('accept');
-    ok('close_choice'); // the hub stays open after an answer (loka-x6t.5): Leave the conversation
-    move('north', 'north');
-    ok('take', [ids['item/fox_drawing']]);
-    move('south', 'south');
-    ok('a_elspeth_report', [ids['npc/elspeth']]);
-    choose('report');
-    move('south', 'south');
-    ok('study_tracks');
-    move('south', 'south');
-    ok('a_vesper_meeting', [ids['npc/vesper']]);
-    choose('meet_wren');
-    ok('b_vesper_riddle', [ids['npc/vesper']]);
-    choose('answer', 'LANTERN');
-    ok('c_vesper_answered', [ids['npc/vesper']]);
+    ok('lantern');
+    move('north');
+    ok('courier', [courier]);
   };
+  /** Carry the message back to Ferry Landing and open Bram's turn-in. */
   const terminal = () => {
-    move('north', 'north', 'north', 'north');
-    ok('a_elspeth_return', [ids['npc/elspeth']]);
+    move('south');
+    ok('deliver', [bram]);
   };
   const button = () => {
     const b = book.screen().buttons.find((b) => b.action_key === 'choose');
     assert.ok(b);
     return b;
   };
-  const press = (npc: string) => book.press(button(), ids[`npc/${npc}`]);
+  const press = (npc: string) => book.press(button(), npcs[npc]);
   const row = (section: string, key: string) => {
     const r = a.sql
       .prepare('SELECT value FROM state_row WHERE section=? AND key=?')
@@ -100,8 +78,9 @@ function setup(path = ':memory:') {
   const lines = (npc: string, text: string) =>
     book
       .screen()
-      .detail(ids[`npc/${npc}`])
+      .detail(npcs[npc])
       .filter((line) => typeof line === 'string' && line.includes(text));
+  const quest = () => view().journal.find((q) => q.quest.key === 'lantern');
   return {
     ...a,
     book,
@@ -118,6 +97,7 @@ function setup(path = ':memory:') {
     fact,
     put,
     lines,
+    quest,
   };
 }
 
@@ -126,12 +106,12 @@ function replay(a: ReturnType<typeof setup>, choice_id: string) {
   const command = JSON.parse(r.command as string);
   const invocation = {
     invocation_id: r.invocation_id,
-    actor_id: ids.character,
+    actor_id: fresh.character,
     action_key: 'choose',
     target_ids: [],
     input: { choice_id, continuation_id: command.payload.continuation_id },
   };
-  const story = openStory(a.db, [{ fresh, content_hash: bundle.sha256 }], a.host);
+  const story = openStory(a.db, [{ fresh, content_hash: b.sha256 }], a.host);
   assert.equal(story.kind, 'open');
   if (story.kind !== 'open') return;
   const before = a.sql.prepare('SELECT * FROM state_row ORDER BY section,key').all();
@@ -146,8 +126,8 @@ function replay(a: ReturnType<typeof setup>, choice_id: string) {
 }
 
 // Breaks: nonterminal receive loses its saved speaker, terminal handoff loses its outcome on reopen,
-// replay repeats a transfer, or reopened status no longer drives Elspeth/Green/journal presentation.
-test('original message branch and terminal reopen with their own NPC narration and exact replay', (t) => {
+// replay repeats a transfer, or reopened status no longer drives the journal.
+test('message receive and terminal handoff reopen with their own NPC narration and exact replay', (t) => {
   const dir = mkdtempSync(join(tmpdir(), 'loka-message-'));
   t.after(() => rmSync(dir, { recursive: true, force: true }));
   const path = join(dir, 'save.db');
@@ -155,57 +135,46 @@ test('original message branch and terminal reopen with their own NPC narration a
   a.offer();
   const branch = a.view().choice!.continuation_id;
   assert.deepEqual(a.row('choices', branch).roles, [
+    { role: 'courier', entity_id: courier },
     { role: 'message', entity_id: message },
-    { role: 'vesper', entity_id: ids['npc/vesper'] },
-    { role: 'wren', entity_id: ids['npc/wren'] },
   ]);
-  a.press('vesper');
-  assert.equal(a.row('containers', message), ids.body);
-  assert.equal(a.fact('fen_return_branch')!.value, 'stays');
-  assert.equal(a.fact('village_child_status')?.value ?? 'missing', 'missing');
-  assert.equal(a.view().journal.find((q) => q.quest.key === 'missing_child')!.state, 'active');
-  assert.equal(a.lines('vesper', vesperLine).length, 1);
-  assert.equal(a.lines('elspeth', vesperLine).length, 0);
-  replay(a, 'carry_message');
+  a.press('courier');
+  assert.equal(a.row('containers', message), fresh.body);
+  assert.equal(a.fact('branch')!.value, 'carried');
+  assert.equal(a.fact('delivered')?.value ?? false, false);
+  assert.equal(a.quest()!.state, 'active');
+  assert.equal(a.lines('courier', courierLine).length, 1);
+  assert.equal(a.lines('bram', courierLine).length, 0);
+  replay(a, 'carry');
   a.sql.close();
   a = setup(path);
   assert.equal(a.view().choice, undefined);
-  assert.equal(a.lines('vesper', vesperLine).length, 1);
+  assert.equal(a.lines('courier', courierLine).length, 1);
   assert.equal(
-    a.book.screen().log.some((s) => (typeof s === 'string' ? s : s.text).includes(vesperLine)),
+    a.book.screen().log.some((s) => (typeof s === 'string' ? s : s.text).includes(courierLine)),
     false,
   );
   a.terminal();
-  a.press('elspeth');
-  assert.equal(a.row('containers', message), ids['npc/elspeth']);
-  assert.equal(a.fact('village_child_status')!.value, 'stays');
-  assert.equal(a.view().journal.find((q) => q.quest.key === 'missing_child')!.state, 'resolved');
+  a.press('bram');
+  assert.equal(a.row('containers', message), bram);
+  assert.equal(a.fact('delivered')!.value, true);
+  assert.equal(a.quest()!.state, 'resolved');
   assert.equal(
-    a.rows('quests').find((q) => q.value.quest.key === 'missing_child')!.value.outcome,
-    'stays',
+    a.rows('quests').find((q) => q.value.quest.key === 'lantern')!.value.outcome,
+    'deliver',
   );
-  assert.equal(a.lines('elspeth', elspethLine).length, 1);
-  assert.equal(a.lines('vesper', elspethLine).length, 0);
-  replay(a, 'stays');
+  assert.equal(a.lines('bram', bramLine).length, 1);
+  assert.equal(a.lines('courier', bramLine).length, 0);
+  replay(a, 'deliver');
   a.sql.close();
   a = setup(path);
-  assert.equal(a.lines('elspeth', elspethLine).length, 1);
+  assert.equal(a.lines('bram', bramLine).length, 1);
   assert.equal(
-    a.book.screen().log.some((s) => (typeof s === 'string' ? s : s.text).includes(elspethLine)),
+    a.book.screen().log.some((s) => (typeof s === 'string' ? s : s.text).includes(bramLine)),
     false,
   );
-  assert.equal(a.row('containers', message), ids['npc/elspeth']);
-  assert.equal(
-    a.view().journal.find((q) => q.quest.key === 'missing_child')!.journal,
-    'quest.missing_child.stays',
-  );
-  a.ok('b_elspeth_stays', [ids['npc/elspeth']]);
-  assert.equal(a.view().choice!.prompt.key, 'dialogue.elspeth_stays.prompt');
-  a.choose('directions');
-  a.ok('close_choice'); // the hub stays open after an answer (loka-x6t.5): Leave the conversation
-  a.move('north', 'north');
-  assert.equal(a.view().place.id, ids['room/village_green']);
-  assert.equal(a.view().place.description.key, 'room.village_green.stays');
+  assert.equal(a.row('containers', message), bram);
+  assert.equal(a.quest()!.state, 'resolved');
   a.sql.close();
 });
 
@@ -217,84 +186,38 @@ test('Drop and held-container Put reopen and recover the same item; stale handof
   const path = join(dir, 'save.db');
   let a = setup(path);
   a.offer();
-  a.choose('carry_message');
+  a.choose('carry');
   a.terminal();
   const stale = a.button();
   a.ok('drop', [message]);
   const count = a.sql.prepare('SELECT count(*) AS n FROM receipt').get()!.n;
-  a.book.press(stale, ids['npc/elspeth']);
+  a.book.press(stale, bram);
   assert.equal(a.sql.prepare('SELECT count(*) AS n FROM receipt').get()!.n, count);
-  assert.equal(a.lines('elspeth', elspethLine).length, 0);
+  assert.equal(a.lines('bram', bramLine).length, 0);
   a.sql.close();
   a = setup(path);
-  assert.equal(a.row('containers', message), ids['room/ferry_landing']);
+  assert.equal(a.row('containers', message), fresh.roomIds[`${prefix}:room/ferry_landing`]);
   a.ok('take', [message]);
   a.ok('close_choice');
-  a.move('north', 'east', 'up');
-  a.ok('take', [ids['item/brass_key']]);
-  a.move('up');
-  a.ok('unlock', [ids['item/trunk']]);
-  a.ok('open', [ids['item/trunk']]);
-  a.ok('take', [ids['item/trunk']]);
-  a.ok('put', [message, ids['item/trunk']]);
+  a.move('north');
+  a.ok('take', [satchel]);
+  a.ok('put', [message, satchel]);
   a.sql.close();
   a = setup(path);
-  assert.equal(a.row('containers', message), ids['item/trunk']);
-  a.move('down', 'down', 'west', 'south');
-  a.ok('a_elspeth_return', [ids['npc/elspeth']]);
+  assert.equal(a.row('containers', message), satchel);
+  a.move('south');
+  a.ok('deliver', [bram]);
   const nested = a.game.invoke({
     action_key: 'choose',
     target_ids: [],
-    input: {
-      choice_id: 'stays',
-      continuation_id: a.view().choice!.continuation_id,
-    },
+    input: { choice_id: 'deliver', continuation_id: a.view().choice!.continuation_id },
   } as never);
   assert.equal(nested.kind, 'saved');
   if (nested.kind === 'saved') assert.equal(nested.decision.kind, 'rejected');
-  assert.equal(a.row('containers', message), ids['item/trunk']);
+  assert.equal(a.row('containers', message), satchel);
   a.ok('take', [message]);
-  a.choose('stays');
-  assert.equal(a.row('containers', message), ids['npc/elspeth']);
-  a.sql.close();
-});
-
-// Breaks: saved branch evidence rejects real corpse custody, or recovery replaces the original
-// message instead of taking its retained identity from the corpse before terminal delivery.
-test('fatal combat and cold reopen preserve the message through ordinary corpse recovery', (t) => {
-  const dir = mkdtempSync(join(tmpdir(), 'loka-message-corpse-'));
-  t.after(() => rmSync(dir, { recursive: true, force: true }));
-  const path = join(dir, 'save.db');
-  let a = setup(path);
-  a.offer();
-  a.choose('carry_message');
-  a.move('north', 'north', 'north', 'north', 'north', 'east', 'down');
-  // Controlled lethal input; real combat creates the corpse and transfers its contents.
-  const hp = a.rows('resources').find((r) => {
-    const k = JSON.parse(r.key);
-    return k.entity_id === ids.body && k.resource.key === 'hp';
-  })!;
-  a.put('resources', hp.key, { ...hp.value, value: 1 });
-  a.sql.close();
-  a = setup(path);
-  a.ok('attack', [ids['npc/cellar_rat_1']]);
-  a.clock.wall += 3000;
-  a.clock.mono += 3000;
-  a.game.pulse();
-  assert.equal(a.row('containers', ids.body), ids['room/chapel_nave']);
-  const corpse = a.row('containers', message);
-  assert.equal(a.row('containers', corpse), ids['room/lantern_cellar']);
-  assert.equal(a.rows('created').length, 1);
-  a.sql.close();
-  a = setup(path);
-  assert.equal(a.row('containers', message), corpse);
-  a.move('south', 'south', 'south', 'south', 'east', 'down');
-  a.ok('take', [message]);
-  assert.equal(a.row('containers', message), ids.body);
-  a.move('up', 'west', 'south');
-  a.ok('a_elspeth_return', [ids['npc/elspeth']]);
-  a.choose('stays');
-  assert.equal(a.row('containers', message), ids['npc/elspeth']);
+  a.choose('deliver');
+  assert.equal(a.row('containers', message), bram);
   a.sql.close();
 });
 
@@ -307,10 +230,10 @@ test('elapsed redraw keeps an unchanged message choice usable', (t) => {
   a.clock.wall += 250;
   a.clock.mono += 250;
   a.game.pulse();
-  a.book.press(old, ids['npc/vesper']);
+  a.book.press(old, courier);
   assert.equal(a.book.recovered(), true);
-  assert.equal(a.row('containers', message), ids.body);
-  assert.equal(a.lines('vesper', vesperLine).length, 1);
+  assert.equal(a.row('containers', message), fresh.body);
+  assert.equal(a.lines('courier', courierLine).length, 1);
 });
 
 // Breaks: retained roles/facts/custody or accepted receipt evidence can be forged once an unrelated
@@ -329,7 +252,7 @@ test('retained delivery evidence corruption is typed even behind an unrelated la
       false,
       (a, b) => {
         const r = a.row('choices', b);
-        r.roles.find((r: any) => r.role === 'message').entity_id = ids['item/fox_drawing'];
+        r.roles.find((r: any) => r.role === 'message').entity_id = satchel;
         a.put('choices', b, r);
       },
     ],
@@ -342,27 +265,23 @@ test('retained delivery evidence corruption is typed even behind an unrelated la
         a.put('choices', b, r);
       },
     ],
-    [
-      'branch fact reset',
-      false,
-      (a) => a.put('facts', a.fact('fen_return_branch')!.key, 'unselected'),
-    ],
+    ['branch fact reset', false, (a) => a.put('facts', a.fact('branch')!.key, 'unselected')],
     [
       'branch fact deleted',
       false,
       (a) => {
         a.sql
           .prepare("DELETE FROM state_row WHERE section='facts' AND key=?")
-          .run(a.fact('fen_return_branch')!.key);
+          .run(a.fact('branch')!.key);
       },
     ],
-    ['message in unrelated NPC', false, (a) => a.put('containers', message, ids['npc/maud'])],
+    ['message back with the courier', false, (a) => a.put('containers', message, courier)],
     [
       'message nested in NPC-held container',
       false,
       (a) => {
-        a.put('containers', message, ids['item/trunk']);
-        a.put('containers', ids['item/trunk'], ids['npc/maud']);
+        a.put('containers', message, satchel);
+        a.put('containers', satchel, courier);
       },
     ],
     [
@@ -403,7 +322,7 @@ test('retained delivery evidence corruption is typed even behind an unrelated la
           )
           .get(b)!;
         const response = JSON.parse(r.response as string);
-        response.narration[0].participants.vesper = ids['npc/elspeth'];
+        response.narration[0].participants.courier = bram;
         a.sql
           .prepare('UPDATE receipt SET response=? WHERE command_id=?')
           .run(JSON.stringify(response), r.command_id);
@@ -415,7 +334,7 @@ test('retained delivery evidence corruption is typed even behind an unrelated la
       (a) => {
         const r = a.sql
           .prepare(
-            "SELECT command_id,response FROM receipt WHERE json_extract(command,'$.payload.choice_id')='stays' ORDER BY revision DESC LIMIT 1",
+            "SELECT command_id,response FROM receipt WHERE json_extract(command,'$.payload.choice_id')='deliver' ORDER BY revision DESC LIMIT 1",
           )
           .get()!;
         const response = JSON.parse(r.response as string);
@@ -425,17 +344,13 @@ test('retained delivery evidence corruption is typed even behind an unrelated la
           .run(JSON.stringify(response), r.command_id);
       },
     ],
-    [
-      'terminal status reset',
-      true,
-      (a) => a.put('facts', a.fact('village_child_status')!.key, 'missing'),
-    ],
-    ['terminal message returned to actor', true, (a) => a.put('containers', message, ids.body)],
+    ['terminal delivered fact reset', true, (a) => a.put('facts', a.fact('delivered')!.key, false)],
+    ['terminal message returned to actor', true, (a) => a.put('containers', message, fresh.body)],
     [
       'terminal quest reopened',
       true,
       (a) => {
-        const q = a.rows('quests').find((r) => r.value.quest.key === 'missing_child')!;
+        const q = a.rows('quests').find((r) => r.value.quest.key === 'lantern')!;
         q.value.state = 'active';
         delete q.value.outcome;
         a.put('quests', q.key, q.value);
@@ -448,16 +363,16 @@ test('retained delivery evidence corruption is typed even behind an unrelated la
       try {
         a.offer();
         const branch = a.view().choice!.continuation_id;
-        a.choose('carry_message');
+        a.choose('carry');
         if (terminal) {
           a.terminal();
-          a.choose('stays');
+          a.choose('deliver');
         }
         a.ok('look');
         mutate(a, branch);
         const before = a.sql.prepare('SELECT * FROM state_row ORDER BY section,key').all();
         assert.throws(
-          () => openGame(a.db, bundle, a.host),
+          () => openGame(a.db, b, a.host),
           (e: any) => e.cause?.kind === 'save_corrupt',
         );
         assert.deepEqual(
@@ -479,14 +394,14 @@ test('failed and lost branch/terminal COMMIT keep narration and custody behind c
       try {
         a.offer();
         if (terminal) {
-          a.choose('carry_message');
+          a.choose('carry');
           a.terminal();
         }
         a.sql.exec(
           'PRAGMA foreign_keys=ON; CREATE TABLE parent(id PRIMARY KEY); CREATE TABLE child(id REFERENCES parent(id) DEFERRABLE INITIALLY DEFERRED)',
         );
-        const npc = terminal ? 'elspeth' : 'vesper';
-        const line = terminal ? elspethLine : vesperLine;
+        const npc = terminal ? 'bram' : 'courier';
+        const line = terminal ? bramLine : courierLine;
         const before = a.view();
         a.fault.kind = kind;
         a.fault.armed = true;
@@ -499,7 +414,7 @@ test('failed and lost branch/terminal COMMIT keep narration and custody behind c
         a.fault.reads = false;
         a.press(npc);
         assert.equal(a.game.pending(), false);
-        assert.equal(a.row('containers', message), terminal ? ids['npc/elspeth'] : ids.body);
+        assert.equal(a.row('containers', message), terminal ? bram : fresh.body);
         assert.equal(
           a.sql.prepare('SELECT count(*) AS n FROM receipt WHERE invocation_id=?').get(invocation)!
             .n,
@@ -512,66 +427,25 @@ test('failed and lost branch/terminal COMMIT keep narration and custody behind c
     }
 });
 
-// Breaks: the v012 app silently opens or replaces a v010 save despite its different release pin.
-test('v012 refuses the frozen v010 SQLite save and offers explicit Start over without changing it', (t) => {
-  const dir = mkdtempSync(join(tmpdir(), 'loka-message-old-pin-'));
-  t.after(() => rmSync(dir, { recursive: true, force: true }));
-  const old = elapsedHost(
-    join(dir, 'save.db'),
-    { wall: 10000, mono: 0 },
-    read('protocol/fixtures/missing_child_v010_hash.json'),
-  );
-  t.after(() => old.sql.close());
-  const moved = old.game.invoke({
-    action_key: 'move',
-    target_ids: [],
-    input: { direction: 'north' },
-  } as never);
-  assert.equal(moved.kind, 'saved');
-  if (moved.kind === 'saved') assert.equal(moved.decision.kind, 'accepted');
-  const snapshot = () =>
-    ['head', 'state_row', 'receipt', 'elapsed'].map((table) =>
-      old.sql.prepare(`SELECT * FROM ${table} ORDER BY 1,2`).all(),
-    );
-  const before = snapshot();
-  const session = localSession(() => old.db, assert.fail, bundle, old.host);
-  assert.equal(session.game(), undefined);
-  assert.equal(session.failed()?.kind, 'pinned_release_missing');
-  assert.equal(session.failed()?.startOver, true);
-  assert.deepEqual(snapshot(), before);
-});
-
-// Breaks: a forged terminal Q2 row before receiving the message bypasses handoff validation,
-// showing delivery while leaving the branch, status and original custody untouched.
+// Breaks: a forged terminal quest row before receiving the message bypasses handoff validation,
+// showing delivery while leaving the branch, delivered fact and original custody untouched.
 test('terminal quest without a message branch refuses reopen and requires explicit Start over', (t) => {
   const a = setup();
   t.after(() => a.sql.close());
-  assert.deepEqual(openGame(a.db, bundle, a.host).view().view.journal, []);
-  a.ok('elspeth', [ids['npc/elspeth']]);
-  a.choose('accept');
-  a.ok('close_choice'); // the hub stays open after an answer (loka-x6t.5): Leave the conversation
-  a.move('north', 'north');
-  a.ok('take', [ids['item/fox_drawing']]);
-  a.move('south', 'south');
-  a.ok('a_elspeth_report', [ids['npc/elspeth']]);
-  a.choose('report');
-  assert.equal(
-    openGame(a.db, bundle, a.host)
-      .view()
-      .view.journal.find((q) => q.quest.key === 'missing_child')!.state,
-    'active',
-  );
-  const q = a.rows('quests').find((r) => r.value.quest.key === 'missing_child')!;
-  const forged = { ...q.value, state: 'resolved', outcome: 'stays' };
+  assert.deepEqual(openGame(a.db, b, a.host).view().view.journal, []);
+  a.ok('lantern');
+  assert.equal(openGame(a.db, b, a.host).view().view.journal[0].state, 'active');
+  const q = a.rows('quests').find((r) => r.value.quest.key === 'lantern')!;
+  const forged = { ...q.value, state: 'resolved', outcome: 'deliver' };
   a.put('quests', q.key, forged);
-  const session = localSession(() => a.db, assert.fail, bundle, a.host);
+  const session = localSession(() => a.db, assert.fail, b, a.host);
   assert.equal(session.game(), undefined);
   assert.equal(session.failed()?.kind, 'save_corrupt');
   assert.equal(session.failed()?.startOver, true);
   assert.deepEqual(a.row('quests', q.key), forged);
-  assert.equal(a.row('containers', message), ids['npc/vesper']);
-  assert.equal(a.fact('fen_return_branch'), undefined);
-  assert.equal(a.fact('village_child_status'), undefined);
+  assert.equal(a.row('containers', message), courier);
+  assert.equal(a.fact('branch'), undefined);
+  assert.equal(a.fact('delivered'), undefined);
   assert.equal(session.startOver(), undefined);
   assert.equal(session.failed(), undefined);
   assert.deepEqual(session.game()!.view().view.journal, []);

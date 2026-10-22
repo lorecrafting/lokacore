@@ -1,44 +1,26 @@
 import assert from 'node:assert/strict';
-import { createHash } from 'node:crypto';
 import { test } from 'node:test';
-import { INSTALLED, loadCartridge, newWorld, gameView, step, type World } from '../src/index.ts';
-import { encode } from '../src/foundation/canonical.ts';
+import { gameView, step, type World } from '../src/index.ts';
 import { validate } from '../src/foundation/validate.ts';
 import type { Command } from '../src/contracts.gen.ts';
 import { read } from './read.ts';
+import { genesis, load, prefix } from './search_fixture.ts';
 
-const pin = read('protocol/fixtures/missing_child_v004_hash.json');
-const prefix = 'ashmere_missing_child@0.0.4:room/';
-const load = (change: (c: any) => void = () => {}) => {
-  const c = structuredClone(pin.value);
-  change(c);
-  const canonical = encode(c),
-    content_hash = createHash('sha256').update(canonical).digest('hex');
-  return loadCartridge(
-    new TextEncoder().encode(JSON.stringify({ cartridge: c, content_hash })),
-    INSTALLED,
-  );
-};
-const fresh = () => {
-  const result = load();
-  assert.ok(result.ok);
-  assert.ok(result.cartridge.format === 'loka-cartridge-v2');
-  return newWorld(result.cartridge, '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f' as never, [1, 2, 3, 4]);
-};
-const whistle = 'e368b8b9-c4a5-8d0e-82a0-da17e2d59fe2',
-  cellar = '15349791-fa65-81f7-b378-bb8212b808d2';
-const turn = (w: World, payload: object) =>
-  step(
+const green = `${prefix}:room/village_green`;
+const detail = (w: World, key: string) =>
+  Object.keys(w.details).find((id) => w.details[id].key === key)!;
+const inn = () => {
+  const w = genesis();
+  return step(
     w,
     {
       id: 'aaaaaaaa-0000-4000-8000-000000000001',
       world_context_id: w.context,
-      payload: { actor_id: w.character, ...payload },
+      payload: { actor_id: w.character, type: 'move', direction: 'north' },
     } as Command,
     1,
   ).world;
-const inn = () =>
-  turn(turn(fresh(), { type: 'move', direction: 'north' }), { type: 'move', direction: 'east' });
+};
 
 // Breaks: the portable wire/source validator admits missing or unbounded board metadata.
 test('notice metadata uses the shared valid and invalid schema controls', () => {
@@ -51,9 +33,9 @@ test('loader rejects invalid board membership, title references and readable own
   for (const [name, change, suffix, target] of [
     [
       'remote',
-      (d: any) => (d.rumor_board.notice_board.notices[0].detail = 'notice'),
+      (d: any) => (d.rumor_board.notice_board.notices[0].detail = 'tracks'),
       '.notices[0].detail',
-      'notice',
+      'tracks',
     ],
     [
       'self',
@@ -83,17 +65,17 @@ test('loader rejects invalid board membership, title references and readable own
     [
       'board readable',
       (d: any) =>
-        (d.rumor_board.readable = { label: 'actions.read_notice', text: 'readable.notice' }),
+        (d.rumor_board.readable = { label: 'actions.read_tracks', text: 'readable.tracks' }),
       '',
       undefined,
     ],
   ] as const) {
-    const result = load((c) => change(c.rooms[prefix + 'drowned_lantern'].details));
+    const result = load((c) => change(c.rooms[green].details));
     assert.ok(!result.ok, name);
     assert.equal(result.diagnostic.code, 'UNRESOLVED_REFERENCE', name);
     assert.equal(
       result.diagnostic.path,
-      `.cartridge.rooms["${prefix}drowned_lantern"].details.rumor_board.notice_board${suffix}`,
+      `.cartridge.rooms["${green}"].details.rumor_board.notice_board${suffix}`,
       name,
     );
     assert.deepEqual(result.diagnostic.data, target === undefined ? {} : { target }, name);
@@ -111,19 +93,21 @@ test('loader rejects invalid board membership, title references and readable own
 // Breaks: projection exposes notice bodies, wrong sibling IDs, remote boards or base descriptions
 // after policies select variants; Read aliases/unavailable offers must stay canonical.
 test('board projection keeps bounded identities and selected descriptions separate from Read eligibility', () => {
-  const initial = fresh();
+  const initial = genesis();
   assert.deepEqual(gameView(initial).notices, [
     {
-      id: '251e7a71-b5ad-8d22-858b-533e52cc5415',
-      title: 'detail.notice.title',
-      description: 'detail.notice.description',
+      id: detail(initial, 'tracks'),
+      title: 'detail.tracks.title',
+      description: 'detail.tracks.description',
     },
   ]);
   assert.equal(gameView(initial).notice_boards, undefined);
-  const w = inn();
+  const w = inn(),
+    board = detail(w, 'rumor_board'),
+    whistle = detail(w, 'lost_whistle');
   assert.deepEqual(gameView(w).notice_boards, [
     {
-      id: 'd7e286c7-c344-8eef-8aa6-94a781d448bd',
+      id: board,
       title: 'detail.rumor_board.title',
       description: 'detail.rumor_board.description',
       notices: [
@@ -133,7 +117,7 @@ test('board projection keeps bounded identities and selected descriptions separa
           description: 'detail.lost_whistle.description',
         },
         {
-          id: cellar,
+          id: detail(w, 'cellar_help'),
           title: 'detail.cellar_help.title',
           description: 'detail.cellar_help.description',
         },
@@ -141,7 +125,6 @@ test('board projection keeps bounded identities and selected descriptions separa
     },
   ]);
   assert.equal(gameView(w).notices, undefined);
-  const board = 'd7e286c7-c344-8eef-8aa6-94a781d448bd';
   const changed = {
     ...w,
     details: {
