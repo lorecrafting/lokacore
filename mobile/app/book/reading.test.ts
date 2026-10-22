@@ -39,6 +39,10 @@ test('each step scales the reading roles, the system scale stops at the cap, the
   const big = readingType(max);
   assert.deepEqual([big.small.fontSize, big.small.lineHeight], [13, 19]);
   assert.deepEqual(
+    [big.speaker, big.tag, big.runningHead].map((r) => r.fontSize),
+    [26, 20, 18],
+  );
+  assert.deepEqual(
     [big.tile, big.pageTitle, big.roomTitle],
     [type.tile, type.pageTitle, type.roomTitle],
   );
@@ -105,6 +109,8 @@ test('Settings chooses the Reading size: saved, shown inverted, and the pages gr
   h.tap('Larger');
   assert.deepEqual(saved, ['larger']);
   assert.equal(nodes(chips()[2].props.children)[0].props.style.fontSize, 21); // 1.3 x 1.2 caps at 1.5
+  // the system never scales a Book line again
+  assert.ok(drawn().every((n) => n.type !== 'Text' || n.props.allowFontScaling === false));
   h.tap('Back to World');
   assert.ok(body() > 0); // body 28 x 1.5
   assert.ok(drawn().some((n) => n.type === 'Pressable' && n.props.style?.paddingVertical === 1));
