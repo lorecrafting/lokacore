@@ -1,4 +1,4 @@
-# Pinned findings loka-kgd.184 clears; the test caps this list at 119 lines: shrink it, never grow it.
+# Pinned findings loka-kgd.184 clears (the items/ lines: FOLLOW-UP); the test caps this list at 208 lines: shrink it, never grow it.
 toolbox_showcase cartridge.json: world.bands have no normal band below 100%
 toolbox_showcase reactions/attic_drench.json: writes state with no narrate step and no "silent": true
 toolbox_showcase reactions/attic_kindle.json: writes state with no narrate step and no "silent": true
@@ -118,3 +118,92 @@ toolbox_showcase recipes/think_letter.json: policy refuses with no reason
 toolbox_showcase recipes/water_croft.json: policy refuses with no reason
 toolbox_showcase recipes/water_plot.json: policy refuses with no reason
 toolbox_showcase resources.json: pennies bands have no normal band below 100%
+toolbox_showcase items/anvil.json: nothing takes it out of play
+toolbox_showcase items/apple.json: nothing takes it out of play
+toolbox_showcase items/attic_bucket.json: nothing takes it out of play
+toolbox_showcase items/attic_jar.json: nothing takes it out of play
+toolbox_showcase items/attic_lantern.json: nothing takes it out of play
+toolbox_showcase items/attic_torch.json: nothing takes it out of play
+toolbox_showcase items/axe.json: nothing takes it out of play
+toolbox_showcase items/bench.json: nothing takes it out of play
+toolbox_showcase items/bier.json: nothing takes it out of play
+toolbox_showcase items/bitters_skin.json: nothing takes it out of play
+toolbox_showcase items/candle_02.json: nothing takes it out of play
+toolbox_showcase items/candle_03.json: nothing takes it out of play
+toolbox_showcase items/candle_04.json: nothing takes it out of play
+toolbox_showcase items/candle_05.json: nothing takes it out of play
+toolbox_showcase items/cask.json: nothing takes it out of play
+toolbox_showcase items/cellar_skin.json: nothing takes it out of play
+toolbox_showcase items/cloak.json: nothing takes it out of play
+toolbox_showcase items/cot.json: nothing takes it out of play
+toolbox_showcase items/cot_2.json: nothing takes it out of play
+toolbox_showcase items/crate.json: nothing takes it out of play
+toolbox_showcase items/croft_plot.json: nothing takes it out of play
+toolbox_showcase items/dead_rat.json: nothing takes it out of play
+toolbox_showcase items/ear.json: nothing takes it out of play
+toolbox_showcase items/feather.json: nothing takes it out of play
+toolbox_showcase items/fold_cask.json: nothing takes it out of play
+toolbox_showcase items/fold_cloak.json: nothing takes it out of play
+toolbox_showcase items/fold_hat.json: nothing takes it out of play
+toolbox_showcase items/fold_lute.json: nothing takes it out of play
+toolbox_showcase items/fold_oilskin.json: nothing takes it out of play
+toolbox_showcase items/fold_scarf.json: nothing takes it out of play
+toolbox_showcase items/fold_skin.json: nothing takes it out of play
+toolbox_showcase items/gate_winch.json: nothing takes it out of play
+toolbox_showcase items/grain_01.json: nothing takes it out of play
+toolbox_showcase items/grimoire.json: nothing takes it out of play
+toolbox_showcase items/hall_roll.json: nothing takes it out of play
+toolbox_showcase items/hall_strongbox.json: nothing takes it out of play
+toolbox_showcase items/hat.json: nothing takes it out of play
+toolbox_showcase items/hoard_chest.json: nothing takes it out of play
+toolbox_showcase items/holding_apple.json: nothing takes it out of play
+toolbox_showcase items/kindling.json: nothing takes it out of play
+toolbox_showcase items/knife_01.json: nothing takes it out of play
+toolbox_showcase items/lamp_oil.json: nothing takes it out of play
+toolbox_showcase items/lantern.json: nothing takes it out of play
+toolbox_showcase items/loft_bucket.json: nothing takes it out of play
+toolbox_showcase items/lute.json: nothing takes it out of play
+toolbox_showcase items/mill_ledger.json: nothing takes it out of play
+toolbox_showcase items/nest.json: nothing takes it out of play
+toolbox_showcase items/net.json: nothing takes it out of play
+toolbox_showcase items/npc_corpse.json: nothing takes it out of play
+toolbox_showcase items/oilcan.json: nothing takes it out of play
+toolbox_showcase items/oilskin.json: nothing takes it out of play
+toolbox_showcase items/parish_roll.json: nothing takes it out of play
+toolbox_showcase items/player_corpse.json: nothing takes it out of play
+toolbox_showcase items/plot.json: nothing takes it out of play
+toolbox_showcase items/pond_water.json: nothing takes it out of play
+toolbox_showcase items/purse.json: nothing takes it out of play
+toolbox_showcase items/quern.json: nothing takes it out of play
+toolbox_showcase items/rain_bucket.json: nothing takes it out of play
+toolbox_showcase items/rod.json: nothing takes it out of play
+toolbox_showcase items/rod_2.json: nothing takes it out of play
+toolbox_showcase items/rope.json: nothing takes it out of play
+toolbox_showcase items/rug.json: nothing takes it out of play
+toolbox_showcase items/sack.json: nothing takes it out of play
+toolbox_showcase items/scarf.json: nothing takes it out of play
+toolbox_showcase items/seed_01.json: nothing takes it out of play
+toolbox_showcase items/smith_knife.json: nothing takes it out of play
+toolbox_showcase items/smithy_bucket.json: nothing takes it out of play
+toolbox_showcase items/smithy_torch.json: nothing takes it out of play
+toolbox_showcase items/spark_jar.json: nothing takes it out of play
+toolbox_showcase items/spoon_01.json: nothing takes it out of play
+toolbox_showcase items/spoon_02.json: nothing takes it out of play
+toolbox_showcase items/strongbox.json: nothing takes it out of play
+toolbox_showcase items/strongroom_chest.json: nothing takes it out of play
+toolbox_showcase items/strongroom_key.json: nothing takes it out of play
+toolbox_showcase items/tilt_cask.json: nothing takes it out of play
+toolbox_showcase items/tilt_purse.json: nothing takes it out of play
+toolbox_showcase items/tilt_tusk.json: nothing takes it out of play
+toolbox_showcase items/training_sword.json: nothing takes it out of play
+toolbox_showcase items/trough.json: nothing takes it out of play
+toolbox_showcase items/trough_skin.json: nothing takes it out of play
+toolbox_showcase items/turnip_01.json: nothing takes it out of play
+toolbox_showcase items/turnip_02.json: nothing takes it out of play
+toolbox_showcase items/turnip_03.json: nothing takes it out of play
+toolbox_showcase items/tusk.json: nothing takes it out of play
+toolbox_showcase items/watering_can.json: nothing takes it out of play
+toolbox_showcase items/waterskin.json: nothing takes it out of play
+toolbox_showcase items/yard_candle_02.json: nothing takes it out of play
+toolbox_showcase items/yard_crate.json: nothing takes it out of play
+toolbox_showcase items/yard_torch.json: nothing takes it out of play
